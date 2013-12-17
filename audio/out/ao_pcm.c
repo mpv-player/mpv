@@ -34,7 +34,7 @@
 #include "audio/format.h"
 #include "audio/reorder_ch.h"
 #include "ao.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #ifdef __MINGW32__
 // for GetFileType to detect pipes

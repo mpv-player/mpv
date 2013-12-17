@@ -29,7 +29,7 @@
 #include <dvdnav/dvdnav.h>
 
 #include "options/options.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "input/input.h"
 #include "options/m_option.h"
 #include "osdep/timer.h"

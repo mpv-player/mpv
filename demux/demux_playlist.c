@@ -15,10 +15,10 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "options/options.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/playlist.h"
+#include "common/msg.h"
+#include "common/playlist.h"
 #include "options/path.h"
 #include "stream/stream.h"
 #include "demux.h"

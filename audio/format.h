@@ -26,7 +26,7 @@
 #include <stdbool.h>
 #include <sys/types.h>
 #include "config.h"
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 
 #if BYTE_ORDER == BIG_ENDIAN
 #define AF_SELECT_LE_BE(LE, BE) BE

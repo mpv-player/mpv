@@ -5,7 +5,7 @@
 
 #include <sndio.h>
 #include "audio_in.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 int ai_sndio_setup(audio_in_t *ai)
 {

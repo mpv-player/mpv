@@ -25,9 +25,9 @@
 #include "config.h"
 
 #include "talloc.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/av_common.h"
-#include "mpvcore/bstr.h"
+#include "common/msg.h"
+#include "common/av_common.h"
+#include "bstr/bstr.h"
 #include "sd.h"
 
 #if LIBAVCODEC_VERSION_MICRO >= 100

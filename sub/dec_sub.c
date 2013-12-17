@@ -27,8 +27,8 @@
 #include "sd.h"
 #include "dec_sub.h"
 #include "options/options.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/charset_conv.h"
+#include "common/msg.h"
+#include "misc/charset_conv.h"
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;

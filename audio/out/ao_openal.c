@@ -35,7 +35,7 @@
 #include <AL/alext.h>
 #endif
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #include "ao.h"
 #include "audio/format.h"

@@ -26,7 +26,7 @@
 #include "talloc.h"
 
 #include "config.h"
-#include "mpvcore/mpv_global.h"
+#include "common/global.h"
 #include "osdep/getch2.h"
 #include "osdep/io.h"
 
@@ -34,7 +34,7 @@
 #include <signal.h>
 #endif
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 bool mp_msg_stdout_in_use = 0;
 

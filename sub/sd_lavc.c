@@ -22,8 +22,8 @@
 #include <libavutil/common.h>
 
 #include "talloc.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/av_common.h"
+#include "common/msg.h"
+#include "common/av_common.h"
 #include "options/options.h"
 #include "video/mp_image.h"
 #include "sd.h"

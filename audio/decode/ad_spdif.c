@@ -26,8 +26,8 @@
 #include <libavutil/opt.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/av_common.h"
+#include "common/msg.h"
+#include "common/av_common.h"
 #include "options/options.h"
 #include "ad.h"
 

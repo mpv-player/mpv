@@ -29,11 +29,11 @@
 #include "talloc.h"
 
 #include "config.h"
-#include "mpvcore/av_common.h"
-#include "mpvcore/codecs.h"
-#include "mpvcore/mp_msg.h"
+#include "common/av_common.h"
+#include "common/codecs.h"
+#include "common/msg.h"
 #include "options/options.h"
-#include "mpvcore/av_opts.h"
+#include "common/av_opts.h"
 
 #include "ad.h"
 #include "audio/fmt-conversion.h"

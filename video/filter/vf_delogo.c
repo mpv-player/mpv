@@ -28,8 +28,8 @@
 #include <errno.h>
 #include <math.h>
 
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/cpudetect.h"
+#include "common/msg.h"
+#include "common/cpudetect.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"

@@ -20,8 +20,8 @@
 #include <libavcodec/version.h>
 #include <libavcodec/vda.h>
 
-#include "mpvcore/av_common.h"
-#include "mpvcore/mp_msg.h"
+#include "common/av_common.h"
+#include "common/msg.h"
 #include "video/mp_image.h"
 #include "video/decode/lavc.h"
 #include "config.h"

@@ -22,13 +22,13 @@
 
 #include "config.h"
 #include "options/options.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "stream.h"
 #include "options/m_option.h"
 
 #include "cookies.h"
 
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 #include "talloc.h"
 
 static int open_f(stream_t *stream, int mode);

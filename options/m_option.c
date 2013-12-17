@@ -36,8 +36,8 @@
 #include <libavutil/avstring.h>
 
 #include "talloc.h"
-#include "mpvcore/mp_common.h"
-#include "mpvcore/mp_msg.h"
+#include "common/common.h"
+#include "common/msg.h"
 #include "m_option.h"
 #include "m_config.h"
 

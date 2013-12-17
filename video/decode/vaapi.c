@@ -28,8 +28,8 @@
 #include <X11/Xlib.h>
 
 #include "lavc.h"
-#include "mpvcore/mp_common.h"
-#include "mpvcore/av_common.h"
+#include "common/common.h"
+#include "common/av_common.h"
 #include "video/fmt-conversion.h"
 #include "video/vaapi.h"
 #include "video/mp_image_pool.h"

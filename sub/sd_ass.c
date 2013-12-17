@@ -26,8 +26,8 @@
 #include "talloc.h"
 
 #include "options/options.h"
-#include "mpvcore/mp_common.h"
-#include "mpvcore/mp_msg.h"
+#include "common/common.h"
+#include "common/msg.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "dec_sub.h"

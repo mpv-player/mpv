@@ -36,7 +36,7 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "mpvcore/cpudetect.h"
+#include "common/cpudetect.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"

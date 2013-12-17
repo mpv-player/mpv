@@ -29,7 +29,7 @@
 #include <inttypes.h>
 #include <math.h>
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "af.h"
 
 #define L   	2      // Storage for filter taps

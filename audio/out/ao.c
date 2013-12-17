@@ -29,8 +29,8 @@
 
 #include "options/options.h"
 #include "options/m_config.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/mpv_global.h"
+#include "common/msg.h"
+#include "common/global.h"
 
 extern const struct ao_driver audio_out_oss;
 extern const struct ao_driver audio_out_coreaudio;

@@ -39,7 +39,7 @@
 #include "osdep/io.h"
 #include "dvbin.h"
 #include "dvb_tune.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 
 

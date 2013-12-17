@@ -25,7 +25,7 @@
 
 #include "talloc.h"
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "video/mp_image.h"
 
 #include "mp_image_pool.h"

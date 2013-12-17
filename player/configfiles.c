@@ -31,11 +31,11 @@
 
 #include "osdep/io.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/path.h"
 #include "options/m_config.h"
 #include "options/parse_configfile.h"
-#include "mpvcore/playlist.h"
+#include "common/playlist.h"
 #include "options/options.h"
 #include "options/m_property.h"
 

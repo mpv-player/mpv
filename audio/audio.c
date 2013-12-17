@@ -20,7 +20,7 @@
 #include <libavutil/mem.h>
 
 #include "talloc.h"
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "audio.h"
 
 static void update_redundant_info(struct mp_audio *mpa)

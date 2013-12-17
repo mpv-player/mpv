@@ -19,7 +19,7 @@
 #include <quvi/quvi.h>
 
 #include "talloc.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
 #include "resolve.h"
 

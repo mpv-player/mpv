@@ -27,7 +27,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "af.h"
 
 #define FR 0

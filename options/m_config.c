@@ -32,7 +32,7 @@
 
 #include "m_config.h"
 #include "options/m_option.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 static const union m_option_value default_value;
 

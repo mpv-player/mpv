@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "cdd.h"
 
 /*******************************************************************************************************************

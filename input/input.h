@@ -20,7 +20,7 @@
 #define MPLAYER_INPUT_H
 
 #include <stdbool.h>
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 #include "options/m_option.h"
 
 // All command IDs

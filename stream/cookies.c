@@ -35,7 +35,7 @@
 
 #include "options/options.h"
 #include "cookies.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #define MAX_COOKIES 20
 

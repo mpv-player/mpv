@@ -32,12 +32,12 @@
 
 #include "talloc.h"
 #include "config.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
-#include "mpvcore/bstr.h"
-#include "mpvcore/av_opts.h"
-#include "mpvcore/av_common.h"
-#include "mpvcore/codecs.h"
+#include "bstr/bstr.h"
+#include "common/av_opts.h"
+#include "common/av_common.h"
+#include "common/codecs.h"
 
 #include "compat/mpbswap.h"
 #include "video/fmt-conversion.h"

@@ -18,8 +18,8 @@
 #include <assert.h>
 
 #include "vaapi.h"
-#include "mpvcore/mp_common.h"
-#include "mpvcore/mp_msg.h"
+#include "common/common.h"
+#include "common/msg.h"
 #include "mp_image.h"
 #include "img_format.h"
 #include "mp_image_pool.h"

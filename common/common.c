@@ -19,8 +19,8 @@
 #include <libavutil/common.h>
 
 #include "talloc.h"
-#include "mpvcore/bstr.h"
-#include "mpvcore/mp_common.h"
+#include "bstr/bstr.h"
+#include "common/common.h"
 
 #define appendf(ptr, ...) \
     do {(*(ptr)) = talloc_asprintf_append_buffer(*(ptr), __VA_ARGS__);} while(0)

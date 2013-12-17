@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "input.h"
 #include "lirc.h"
 

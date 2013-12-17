@@ -26,12 +26,12 @@
 #include "osdep/io.h"
 #include "osdep/timer.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
 #include "options/m_property.h"
-#include "mpvcore/mp_common.h"
-#include "mpvcore/encode.h"
-#include "mpvcore/playlist.h"
+#include "common/common.h"
+#include "common/encode.h"
+#include "common/playlist.h"
 #include "input/input.h"
 
 #include "audio/out/ao.h"

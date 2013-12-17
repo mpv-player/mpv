@@ -24,12 +24,12 @@
 
 #include "sws_utils.h"
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "video/mp_image.h"
 #include "video/img_format.h"
 #include "fmt-conversion.h"
 #include "csputils.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "video/filter/vf.h"
 
 //global sws_flags from the command line

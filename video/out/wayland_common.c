@@ -31,9 +31,9 @@
 #include <linux/input.h>
 
 #include "config.h"
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 #include "options/options.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "libavutil/common.h"
 #include "talloc.h"
 

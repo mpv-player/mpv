@@ -57,7 +57,7 @@ known issues:
 #if HAVE_LIBV4L2
 #include <libv4l2.h>
 #endif
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "video/img_fourcc.h"
 #include "audio/format.h"
 #include "tv.h"

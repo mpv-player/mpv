@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "config.h"
 #include "playlist.h"
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "talloc.h"
 #include "options/path.h"
 

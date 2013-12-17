@@ -36,10 +36,10 @@
 
 #include "config.h"
 #include "options/options.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/av_opts.h"
-#include "mpvcore/av_common.h"
-#include "mpvcore/bstr.h"
+#include "common/msg.h"
+#include "common/av_opts.h"
+#include "common/av_common.h"
+#include "bstr/bstr.h"
 
 #include "stream/stream.h"
 #include "demux.h"

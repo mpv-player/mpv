@@ -37,7 +37,7 @@
 #endif
 
 #include "talloc.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "stream/stream.h"
 #include "options/path.h"
 

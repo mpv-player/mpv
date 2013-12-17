@@ -39,7 +39,7 @@
 #include "audio/format.h"
 #include "ao.h"
 #include "audio/reorder_ch.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "osdep/timer.h"
 #include "options/m_option.h"
 

@@ -23,7 +23,7 @@
 
 #include <libavutil/common.h>
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 
 #include "stream/stream.h"
 
@@ -31,7 +31,7 @@
 
 #include "talloc.h"
 #include "options/options.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "osd.h"
 #include "dec_sub.h"
 #include "img_convert.h"

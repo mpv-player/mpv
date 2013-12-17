@@ -25,7 +25,7 @@
 #include "config.h"
 
 #include "ad.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #include <mpg123.h>
 

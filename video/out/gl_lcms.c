@@ -27,9 +27,9 @@
 #include "config.h"
 
 #include "stream/stream.h"
-#include "mpvcore/mp_common.h"
-#include "mpvcore/bstr.h"
-#include "mpvcore/mp_msg.h"
+#include "common/common.h"
+#include "bstr/bstr.h"
+#include "common/msg.h"
 #include "options/m_option.h"
 #include "options/path.h"
 

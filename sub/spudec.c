@@ -40,11 +40,11 @@
 #include <libavutil/intreadwrite.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #include "spudec.h"
 #include "osd.h"
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "video/csputils.h"
 
 typedef struct spu_packet_t packet_t;

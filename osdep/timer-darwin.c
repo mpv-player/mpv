@@ -24,7 +24,7 @@
 #include <mach/mach_time.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "timer.h"
 
 static double timebase_ratio;

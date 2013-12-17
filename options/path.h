@@ -22,7 +22,7 @@
 #define MPLAYER_PATH_H
 
 #include <stdbool.h>
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 
 
 // Search for the input filename in several paths. These include user and global

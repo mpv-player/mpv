@@ -31,13 +31,13 @@
 #include "talloc.h"
 
 #include "player/core.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "demux/demux.h"
 #include "options/path.h"
-#include "mpvcore/bstr.h"
-#include "mpvcore/mp_common.h"
-#include "mpvcore/playlist.h"
-#include "mpvcore/playlist_parser.h"
+#include "bstr/bstr.h"
+#include "common/common.h"
+#include "common/playlist.h"
+#include "common/playlist_parser.h"
 #include "stream/stream.h"
 
 struct find_entry {

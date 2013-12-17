@@ -20,8 +20,8 @@
 #include <libavutil/common.h>
 #include <libavcodec/avcodec.h>
 
-#include "mpvcore/mp_common.h"
-#include "mpvcore/mp_msg.h"
+#include "common/common.h"
+#include "common/msg.h"
 #include "demux/packet.h"
 #include "av_common.h"
 #include "codecs.h"

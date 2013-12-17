@@ -28,7 +28,7 @@
 #include "osdep/io.h"
 
 #include "parse_configfile.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "m_option.h"
 #include "m_config.h"
 

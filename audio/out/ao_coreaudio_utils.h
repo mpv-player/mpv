@@ -22,7 +22,7 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <inttypes.h>
 #include <stdbool.h>
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "audio/out/ao.h"
 
 #define CA_CFSTR_ENCODING kCFStringEncodingASCII

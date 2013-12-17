@@ -7,13 +7,13 @@
 
 #include "talloc.h"
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "options/m_property.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/m_option.h"
 #include "input/input.h"
 #include "options/path.h"
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 #include "osdep/timer.h"
 #include "sub/osd.h"
 #include "core.h"

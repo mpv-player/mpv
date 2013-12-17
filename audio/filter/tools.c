@@ -19,7 +19,7 @@
 #include <math.h>
 #include <string.h>
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "af.h"
 
 /* Convert to gain value from dB. Returns AF_OK if of and AF_ERROR if

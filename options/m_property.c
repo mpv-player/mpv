@@ -32,8 +32,8 @@
 #include "talloc.h"
 #include "m_option.h"
 #include "m_property.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/mp_common.h"
+#include "common/msg.h"
+#include "common/common.h"
 
 const struct m_option_type m_option_type_dummy = {
     .name = "Unknown",

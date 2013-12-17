@@ -23,7 +23,7 @@
 #include "config.h"
 
 #include "audio_in.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include <string.h>
 #include <errno.h>
 

@@ -24,7 +24,7 @@
 #include "config.h"
 #include "audio/out/ao.h"
 #include "audio/filter/af.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "talloc.h"
 #include "mixer.h"
 

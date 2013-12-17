@@ -44,7 +44,7 @@
 
 #include "osdep/io.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #include "stream.h"
 #include "pvr.h"

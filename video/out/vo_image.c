@@ -25,11 +25,11 @@
 #include <libswscale/swscale.h>
 
 #include "config.h"
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 #include "osdep/io.h"
 #include "options/path.h"
 #include "talloc.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
 #include "video/vfcap.h"

@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "libavutil/avutil.h"
 #include <libavutil/pixdesc.h>
 #include "video/img_format.h"

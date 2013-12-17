@@ -31,14 +31,14 @@
 #include "compat/libav.h"
 #include "config.h"
 #include "options/options.h"
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "audio/format.h"
 #include "audio/fmt-conversion.h"
 #include "talloc.h"
 #include "ao.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
-#include "mpvcore/encode_lavc.h"
+#include "common/encode_lavc.h"
 
 struct priv {
     uint8_t *buffer;

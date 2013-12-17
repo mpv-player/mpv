@@ -31,10 +31,10 @@
 
 #include "config.h"
 #include "options/m_option.h"
-#include "mpvcore/m_config.h"
+#include "common/m_config.h"
 #include "audio/format.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/mp_ring.h"
+#include "common/msg.h"
+#include "common/mp_ring.h"
 #include "ao.h"
 
 #ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE

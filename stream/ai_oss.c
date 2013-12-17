@@ -39,7 +39,7 @@
 #include "osdep/io.h"
 
 #include "audio_in.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 int ai_oss_set_samplerate(audio_in_t *ai)
 {

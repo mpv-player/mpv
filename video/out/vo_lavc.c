@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "compat/libav.h"
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "options/options.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
@@ -31,7 +31,7 @@
 #include "talloc.h"
 #include "vo.h"
 
-#include "mpvcore/encode_lavc.h"
+#include "common/encode_lavc.h"
 
 #include "sub/osd.h"
 

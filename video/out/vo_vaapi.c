@@ -29,7 +29,7 @@
 #include <va/va_x11.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "video/out/vo.h"
 #include "video/memcpy_pic.h"
 #include "sub/osd.h"

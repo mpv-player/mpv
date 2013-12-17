@@ -3,7 +3,7 @@
 
 #include "config.h"
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "vf.h"
 
 struct vf_lw_opts;

@@ -41,8 +41,8 @@
 
 #include <unistd.h>
 
-#include "mpvcore/mp_common.h"
-#include "mpvcore/bstr.h"
+#include "common/common.h"
+#include "bstr/bstr.h"
 #include "input/input.h"
 #include "input/keycodes.h"
 #include "getch2.h"

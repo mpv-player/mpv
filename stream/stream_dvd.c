@@ -27,7 +27,7 @@
 
 #include "config.h"
 #include "talloc.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #include <libgen.h>
 #include <errno.h>

@@ -32,8 +32,8 @@
 #include <libavutil/avstring.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/mp_common.h"
+#include "common/msg.h"
+#include "common/common.h"
 #include "options/options.h"
 #include "stream/stream.h"
 #include "demux/demux.h"

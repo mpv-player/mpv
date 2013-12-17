@@ -28,8 +28,8 @@
 #include "config.h"
 #include "options/m_option.h"
 #include "audio/format.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/mp_ring.h"
+#include "common/msg.h"
+#include "misc/ring.h"
 #include "ao.h"
 
 struct priv {

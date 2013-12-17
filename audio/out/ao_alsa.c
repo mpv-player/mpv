@@ -38,7 +38,7 @@
 #include "config.h"
 #include "options/options.h"
 #include "options/m_option.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API

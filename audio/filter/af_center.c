@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "af.h"
 
 // Data for specific instances of this filter

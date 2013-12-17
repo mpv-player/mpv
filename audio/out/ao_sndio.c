@@ -23,7 +23,7 @@
 #include <sndio.h>
 
 #include "options/m_option.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #include "audio/format.h"
 #include "ao.h"

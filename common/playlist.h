@@ -19,7 +19,7 @@
 #define MPLAYER_PLAYLIST_H
 
 #include <stdbool.h>
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 
 struct playlist_param {
     bstr name, value;

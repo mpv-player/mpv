@@ -2,7 +2,7 @@
 #define MP_CHARSET_CONV_H
 
 #include <stdbool.h>
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 
 enum {
     MP_ICONV_VERBOSE = 1,       // print errors instead of failing silently

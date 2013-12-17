@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "chmap.h"
 
 // Names taken from libavutil/channel_layout.c (Not accessible by API.)

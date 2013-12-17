@@ -39,7 +39,7 @@
 #include "af.h"
 
 #include "options/m_option.h"
-#include "mpvcore/av_opts.h"
+#include "common/av_opts.h"
 
 #define IS_LIBAV_FORK (LIBAVFILTER_VERSION_MICRO < 100)
 

@@ -29,14 +29,14 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #include "ao.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
 #include "options/m_option.h"
 
-#include "mpvcore/mp_ring.h"
+#include "misc/ring.h"
 
 #include <jack/jack.h>
 

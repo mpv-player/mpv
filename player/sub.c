@@ -25,9 +25,9 @@
 #include "config.h"
 #include "talloc.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 
 #include "stream/stream.h"
 #include "sub/dec_sub.h"

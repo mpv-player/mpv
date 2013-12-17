@@ -25,7 +25,7 @@
 
 #include "config.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #if HAVE_ENCA
 #include <enca.h>

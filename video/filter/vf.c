@@ -26,7 +26,7 @@
 
 #include "config.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/m_option.h"
 #include "options/m_config.h"
 

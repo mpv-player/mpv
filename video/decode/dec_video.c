@@ -24,14 +24,14 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #include "osdep/timer.h"
 
 #include "stream/stream.h"
 #include "demux/packet.h"
 
-#include "mpvcore/codecs.h"
+#include "common/codecs.h"
 
 #include "video/out/vo.h"
 #include "video/csputils.h"

@@ -52,7 +52,7 @@
 #include "video/sws_utils.h"
 #include "video/fmt-conversion.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
 #include "osdep/timer.h"
 

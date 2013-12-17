@@ -40,7 +40,7 @@
 #include "playlist_parser.h"
 #include "stream/stream.h"
 #include "demux/demux.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/path.h"
 
 

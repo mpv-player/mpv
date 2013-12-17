@@ -33,7 +33,7 @@
 #include "input/input.h"
 #include "input/keycodes.h"
 #include "input/input.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
 
 #include "osdep/timer.h"

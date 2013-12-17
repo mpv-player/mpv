@@ -25,10 +25,10 @@
 #include "config.h"
 #include "talloc.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
-#include "mpvcore/mp_common.h"
-#include "mpvcore/encode.h"
+#include "common/common.h"
+#include "common/encode.h"
 #include "options/m_property.h"
 
 #include "audio/out/ao.h"

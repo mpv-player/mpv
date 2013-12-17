@@ -20,8 +20,8 @@
 
 #include "core.h"
 
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/mp_common.h"
+#include "common/msg.h"
+#include "common/common.h"
 #include "input/input.h"
 
 #include "stream/stream_dvdnav.h"

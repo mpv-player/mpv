@@ -30,7 +30,7 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/path.h"
 #include "ass_mp.h"
 #include "osd.h"

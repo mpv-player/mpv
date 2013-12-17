@@ -54,9 +54,9 @@
 #error "config.h broken or no resampler found"
 #endif
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/m_option.h"
-#include "mpvcore/av_opts.h"
+#include "common/av_opts.h"
 #include "audio/filter/af.h"
 #include "audio/fmt-conversion.h"
 #include "audio/reorder_ch.h"

@@ -41,7 +41,7 @@
 
 #include "osdep/io.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "stream_dvd_common.h"
 
 const char * const dvd_audio_stream_types[8] = { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };

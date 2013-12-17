@@ -21,7 +21,7 @@
 #include <inttypes.h>
 #include <assert.h>
 
-#include "mpvcore/bstr.h"
+#include "bstr/bstr.h"
 #include "sd.h"
 
 /*

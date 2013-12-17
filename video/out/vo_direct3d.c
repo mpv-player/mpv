@@ -37,7 +37,7 @@
 #include "video/mp_image.h"
 #include "video/img_format.h"
 #include "video/memcpy_pic.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "w32_common.h"
 #include "libavutil/common.h"
 #include "sub/osd.h"

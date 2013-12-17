@@ -40,8 +40,8 @@
 #include "audio/format.h"
 #include "osdep/timer.h"
 #include "options/m_option.h"
-#include "mpvcore/mp_ring.h"
-#include "mpvcore/mp_msg.h"
+#include "misc/ring.h"
+#include "common/msg.h"
 #include "audio/out/ao_coreaudio_properties.h"
 #include "audio/out/ao_coreaudio_utils.h"
 

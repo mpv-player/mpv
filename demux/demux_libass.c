@@ -22,8 +22,8 @@
 #include <ass/ass_types.h>
 
 #include "options/options.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/charset_conv.h"
+#include "common/msg.h"
+#include "misc/charset_conv.h"
 #include "stream/stream.h"
 #include "demux.h"
 

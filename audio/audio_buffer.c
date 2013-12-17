@@ -19,7 +19,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 
 #include "audio_buffer.h"
 #include "audio.h"

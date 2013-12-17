@@ -37,7 +37,7 @@
 #include "config.h"
 #include "video/vdpau.h"
 #include "video/hwdec.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
 #include "talloc.h"
 #include "vo.h"

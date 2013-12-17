@@ -22,9 +22,9 @@
 #include <quvi.h>
 
 #include "talloc.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
-#include "mpvcore/playlist.h"
+#include "common/playlist.h"
 #include "resolve.h"
 
 static bool mp_quvi_ok(quvi_t q)

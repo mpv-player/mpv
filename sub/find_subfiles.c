@@ -6,10 +6,10 @@
 
 #include "osdep/io.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
 #include "options/path.h"
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "sub/find_subfiles.h"
 
 static const char *sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",

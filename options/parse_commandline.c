@@ -25,11 +25,11 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "m_option.h"
 #include "m_config.h"
-#include "mpvcore/playlist.h"
-#include "mpvcore/playlist_parser.h"
+#include "common/playlist.h"
+#include "common/playlist_parser.h"
 #include "parse_commandline.h"
 
 #define GLOBAL 0

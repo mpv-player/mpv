@@ -26,7 +26,7 @@
 
 #include <libavutil/intreadwrite.h>
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "stream.h"
 //=================== VideoCD ==========================
 

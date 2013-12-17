@@ -162,22 +162,22 @@ def build(ctx):
         ( "audio/out/ao_sndio.c",                "sndio" ),
         ( "audio/out/ao_wasapi.c",               "wasapi" ),
 
+        ## Bstr
+        ( "bstr/bstr.c" ),
+
         ## Core
-        ( "mpvcore/asxparser.c" ),
-        ( "mpvcore/av_common.c" ),
-        ( "mpvcore/av_log.c" ),
-        ( "mpvcore/av_opts.c" ),
-        ( "mpvcore/bstr.c" ),
-        ( "mpvcore/charset_conv.c" ),
-        ( "mpvcore/codecs.c" ),
-        ( "mpvcore/cpudetect.c" ),
-        ( "mpvcore/encode_lavc.c",               "encoding" ),
-        ( "mpvcore/mp_common.c" ),
-        ( "mpvcore/mp_msg.c" ),
-        ( "mpvcore/mp_ring.c" ),
-        ( "mpvcore/playlist.c" ),
-        ( "mpvcore/playlist_parser.c" ),
-        ( "mpvcore/version.c" ),
+        ( "common/asxparser.c" ),
+        ( "common/av_common.c" ),
+        ( "common/av_log.c" ),
+        ( "common/av_opts.c" ),
+        ( "common/codecs.c" ),
+        ( "common/cpudetect.c" ),
+        ( "common/encode_lavc.c",                "encoding" ),
+        ( "common/common.c" ),
+        ( "common/msg.c" ),
+        ( "common/playlist.c" ),
+        ( "common/playlist_parser.c" ),
+        ( "common/version.c" ),
 
         ## Demuxers
         ( "demux/codec_tags.c" ),
@@ -198,6 +198,10 @@ def build(ctx):
         ( "input/input.c" ),
         ( "input/joystick.c",                    "joystick" ),
         ( "input/lirc.c",                        "lirc" ),
+
+        ## Misc
+        ( "misc/ring.c" ),
+        ( "misc/charset_conv.c" ),
 
         ## Options
         ( "options/m_config.c" ),

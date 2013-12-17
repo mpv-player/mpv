@@ -36,7 +36,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 
 #include "af.h"
 #include "options/m_option.h"

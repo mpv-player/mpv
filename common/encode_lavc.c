@@ -23,7 +23,7 @@
 #include <libavutil/avutil.h>
 
 #include "encode_lavc.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "video/vfcap.h"
 #include "options/options.h"
 #include "osdep/timer.h"

@@ -26,11 +26,11 @@
 #include "config.h"
 #include "talloc.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 #include "options/m_property.h"
-#include "mpvcore/encode.h"
+#include "common/encode.h"
 
 #include "osdep/getch2.h"
 #include "osdep/timer.h"

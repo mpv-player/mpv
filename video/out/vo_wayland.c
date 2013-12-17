@@ -33,7 +33,7 @@
 #include "sub/osd.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "video/sws_utils.h"
 
 #include "wayland_common.h"

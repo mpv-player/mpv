@@ -23,7 +23,7 @@
 #include <libsmbclient.h>
 #include <unistd.h>
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "stream.h"
 #include "options/m_option.h"
 

@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ntddcdrm.h>
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 typedef struct mp_vcd_priv_st mp_vcd_priv_t;
 

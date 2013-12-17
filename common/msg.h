@@ -135,7 +135,7 @@ int mp_msg_test(int mod, int lev);
 bool mp_msg_test_log(struct mp_log *log, int lev);
 
 #include "config.h"
-#include "mpvcore/mp_common.h"
+#include "common/common.h"
 
 // Note: using mp_msg_log or the MP_ERR/... macros is preferred.
 void mp_msg_va(int mod, int lev, const char *format, va_list va);

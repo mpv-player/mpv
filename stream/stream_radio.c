@@ -43,7 +43,7 @@
 
 #include "stream.h"
 #include "options/m_option.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "stream_radio.h"
 
 #include "osdep/io.h"

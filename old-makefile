@@ -95,7 +95,7 @@ SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
                                    video/out/pnm_loader.c
 
 SOURCES-$(ENCODING)             += video/out/vo_lavc.c audio/out/ao_lavc.c \
-                                   mpvcore/encode_lavc.c
+                                   common/encode_lavc.c
 
 SOURCES-$(GL_WIN32)             += video/out/w32_common.c video/out/gl_w32.c
 SOURCES-$(GL_X11)               += video/out/x11_common.c video/out/gl_x11.c
@@ -180,6 +180,18 @@ SOURCES = audio/audio.c \
           audio/out/ao.c \
           audio/out/ao_null.c \
           audio/out/ao_pcm.c \
+          bstr/bstr.c \
+          common/asxparser.c \
+          common/av_common.c \
+          common/av_log.c \
+          common/av_opts.c \
+          common/codecs.c \
+          common/cpudetect.c \
+          common/common.c \
+          common/msg.c \
+          common/playlist.c \
+          common/playlist_parser.c \
+          common/version.c \
           demux/codec_tags.c \
           demux/demux.c \
           demux/demux_edl.c \
@@ -193,20 +205,8 @@ SOURCES = audio/audio.c \
           demux/ebml.c \
           demux/mf.c \
           input/input.c \
-          mpvcore/asxparser.c \
-          mpvcore/av_common.c \
-          mpvcore/av_log.c \
-          mpvcore/av_opts.c \
-          mpvcore/bstr.c \
-          mpvcore/charset_conv.c \
-          mpvcore/codecs.c \
-          mpvcore/cpudetect.c \
-          mpvcore/mp_common.c \
-          mpvcore/mp_msg.c \
-          mpvcore/mp_ring.c \
-          mpvcore/playlist.c \
-          mpvcore/playlist_parser.c \
-          mpvcore/version.c \
+          misc/charset_conv.c \
+          misc/ring.c \
           options/m_config.c \
           options/m_option.c \
           options/m_property.c \

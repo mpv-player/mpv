@@ -35,7 +35,7 @@
 #include "ebml.h"
 #include "stream/stream.h"
 #include "compat/mpbswap.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #ifndef SIZE_MAX
 #define SIZE_MAX ((size_t)-1)

@@ -29,7 +29,7 @@
 #include "audio/format.h"
 #include "audio/chmap.h"
 #include "audio/audio.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 struct af_instance;
 

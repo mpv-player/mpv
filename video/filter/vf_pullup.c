@@ -21,8 +21,8 @@
 #include <string.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/cpudetect.h"
+#include "common/msg.h"
+#include "common/cpudetect.h"
 #include "options/m_option.h"
 
 #include "video/img_format.h"

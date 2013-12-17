@@ -42,7 +42,7 @@
 
 #include "input/keycodes.h"
 #include "input/input.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "input/input.h"
 
 /* caca stuff */

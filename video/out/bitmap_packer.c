@@ -26,8 +26,8 @@
 
 #include "talloc.h"
 #include "bitmap_packer.h"
-#include "mpvcore/mp_msg.h"
-#include "mpvcore/mp_common.h"
+#include "common/msg.h"
+#include "common/common.h"
 #include "sub/dec_sub.h"
 #include "video/memcpy_pic.h"
 

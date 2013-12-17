@@ -48,7 +48,7 @@
 
 #include "cdd.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 typedef struct {
     cdrom_drive_t *cd;

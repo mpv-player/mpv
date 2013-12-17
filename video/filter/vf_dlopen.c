@@ -22,7 +22,7 @@
 #include <assert.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"

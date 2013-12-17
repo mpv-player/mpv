@@ -25,7 +25,7 @@
 #include <libswscale/swscale.h>
 
 #include "config.h"
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 #include "options/options.h"
 
 #include "video/img_format.h"
