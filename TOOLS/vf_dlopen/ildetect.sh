@@ -16,6 +16,7 @@ esac
 : ${ILDETECT_DRY_RUN:=}
 : ${ILDETECT_QUIET:=}
 : ${ILDETECT_RUN_INTERLACED_ONLY:=}
+: ${ILDETECT_FORCE_RUN:=}
 : ${MAKE:=make}
 
 # exit status:
@@ -76,7 +77,12 @@ case "$out" in
         exit 2
         ;;
     *"probably: "*)
-        exit 8
+        [ -n "$ILDETECT_FORCE_RUN" ] || exit 8
+        [ -n "$ILDETECT_DRY_RUN" ] || \
+            $ILDETECT_MPV "$@" -vf-pre yadif
+        r=$?
+        [ $r -eq 0 ] || exit $(($r | 16))
+        exit 0
         ;;
     *)
         exit 16
