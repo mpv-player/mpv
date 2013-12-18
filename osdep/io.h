@@ -26,6 +26,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 // This is in POSIX.1-2008, but support outside of Linux is scarce.
 #ifndef O_CLOEXEC
 #define O_CLOEXEC 0

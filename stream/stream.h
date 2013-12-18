@@ -30,10 +30,6 @@
 
 #include "bstr/bstr.h"
 
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-
 enum streamtype {
     STREAMTYPE_GENERIC = 0,
     STREAMTYPE_FILE,
