@@ -211,9 +211,12 @@ static int init(struct dec_audio *da, const char *decoder)
     lavc_context->codec_id = lavc_codec->id;
 
     if (opts->downmix) {
-        lavc_context->request_channels = mpopts->audio_output_channels.num;
         lavc_context->request_channel_layout =
             mp_chmap_to_lavc(&mpopts->audio_output_channels);
+        // Compatibility for Libav 9
+        av_opt_set_int(lavc_context, "request_channels",
+                       mpopts->audio_output_channels.num,
+                       AV_OPT_SEARCH_CHILDREN);
     }
 
     // Always try to set - option only exists for AC3 at the moment
