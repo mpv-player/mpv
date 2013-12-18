@@ -27,9 +27,6 @@ struct mp_log;
 // defined in mplayer.c
 extern int verbose;
 
-/* No-op macro to mark translated strings in the sources */
-#define _(x) x
-
 // verbosity elevel:
 
 /* Only messages level MSGL_FATAL-MSGL_STATUS should be translated,

@@ -63,6 +63,8 @@
 
 #endif
 
+#define _(x) (x)
+
 typedef struct radio_channels_s {
     int index;     ///< channel index in channels list
     float freq;    ///< frequency in MHz

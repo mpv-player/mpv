@@ -52,7 +52,7 @@
 
 #define WAKEUP_PERIOD 0.5
 
-static const char av_desync_help_text[] = _(
+static const char av_desync_help_text[] =
 "\n\n"
 "           *************************************************\n"
 "           **** Audio/Video desynchronisation detected! ****\n"
@@ -73,7 +73,7 @@ static const char av_desync_help_text[] = _(
 "- Try to find out whether audio or video is causing this by experimenting\n"
 "  with --no-video and --no-audio.\n"
 "- If you swiched audio or video tracks, try seeking to force synchronization.\n"
-"If none of this helps you, file a bug report.\n\n");
+"If none of this helps you, file a bug report.\n\n";
 
 
 void pause_player(struct MPContext *mpctx)

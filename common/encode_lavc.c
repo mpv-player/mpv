@@ -609,7 +609,7 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
 
         if (ctx->vc->capabilities & CODEC_CAP_EXPERIMENTAL) {
             stream->codec->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
-            mp_msg(MSGT_ENCODE, MSGL_WARN, _(
+            mp_msg(MSGT_ENCODE, MSGL_WARN,
                        "\n\n"
                        "           ********************************************\n"
                        "           **** Experimental VIDEO codec selected! ****\n"
@@ -625,7 +625,7 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
                        "     Bear with it.\n"
                        "- Crashes.\n"
                        "     Happens. Try varying options to work around.\n"
-                       "If none of this helps you, try another codec in place of %s.\n\n"),
+                       "If none of this helps you, try another codec in place of %s.\n\n",
                    ctx->vc->name);
         }
 
@@ -645,7 +645,7 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
 
         if (ctx->ac->capabilities & CODEC_CAP_EXPERIMENTAL) {
             stream->codec->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
-            mp_msg(MSGT_ENCODE, MSGL_WARN, _(
+            mp_msg(MSGT_ENCODE, MSGL_WARN,
                        "\n\n"
                        "           ********************************************\n"
                        "           **** Experimental AUDIO codec selected! ****\n"
@@ -661,7 +661,7 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
                        "     Bear with it.\n"
                        "- Crashes.\n"
                        "     Happens. Try varying options to work around.\n"
-                       "If none of this helps you, try another codec in place of %s.\n\n"),
+                       "If none of this helps you, try another codec in place of %s.\n\n",
                    ctx->ac->name);
         }
         ret = avcodec_open2(stream->codec, ctx->ac, &ctx->aoptions);

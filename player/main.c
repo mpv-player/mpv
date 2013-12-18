@@ -80,7 +80,7 @@
 #include <windows.h>
 #endif
 
-const char mp_help_text[] = _(
+const char mp_help_text[] =
 "Usage:   mpv [options] [url|path/]filename\n"
 "\n"
 "Basic options:\n"
@@ -92,7 +92,7 @@ const char mp_help_text[] = _(
 " --playlist=<file> specify playlist file\n"
 "\n"
 " --list-options    list all mpv options\n"
-"\n");
+"\n";
 
 void mp_print_version(int always)
 {
