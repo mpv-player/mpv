@@ -342,9 +342,10 @@ static int vf_open(vf_instance_t *vf)
 
 static bool is_single_video_only(const AVFilterPad *pads)
 {
-    if (!pads)
+    int count = avfilter_pad_count(pads);
+    if (count != 1)
         return false;
-    return pads[0].name && pads[0].type == AVMEDIA_TYPE_VIDEO && !pads[1].name;
+    return avfilter_pad_get_type(pads, 0) == AVMEDIA_TYPE_VIDEO;
 }
 
 // Does it have exactly one video input and one video output?
