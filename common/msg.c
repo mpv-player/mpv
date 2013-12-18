@@ -25,14 +25,14 @@
 
 #include "talloc.h"
 
-#include "config.h"
 #include "common/global.h"
 #include "osdep/terminal.h"
 #include "osdep/io.h"
 
 #include "common/msg.h"
 
-bool mp_msg_stdout_in_use = 0;
+/* maximum message length of mp_msg */
+#define MSGSIZE_MAX 6144
 
 struct mp_log_root {
     /* This should, at some point, contain all mp_msg related state, instead
@@ -53,20 +53,19 @@ struct mp_log {
 static bool initialized;
 static struct mp_log *legacy_logs[MSGT_MAX];
 
-/* maximum message length of mp_msg */
-#define MSGSIZE_MAX 6144
-
+bool mp_msg_stdout_in_use;
 int mp_msg_levels[MSGT_MAX]; // verbose level of this module. initialized to -2
 int mp_msg_level_all = MSGL_STATUS;
-int verbose = 0;
+int verbose;
 bool mp_msg_mute;
 int mp_msg_color = 1;
-int mp_msg_module = 0;
-int mp_msg_cancolor = 0;
+int mp_msg_module;
+int mp_msg_cancolor;
 
-static int mp_msg_docolor(void) {
-	return mp_msg_cancolor && mp_msg_color;
-}
+// indicate if last line printed ended with \n or \r
+static int header = 1;
+// indicates if last line printed was a status line
+static int statusline;
 
 static void mp_msg_do_init(void){
     int i;
@@ -95,12 +94,16 @@ bool mp_msg_test_log(struct mp_log *log, int lev)
     return mp_msg_test(log->legacy_mod, lev);
 }
 
+static int mp_msg_docolor(void)
+{
+    return mp_msg_cancolor && mp_msg_color;
+}
+
 static void set_msg_color(FILE* stream, int lev)
 {
     static const int v_colors[10] = {9, 1, 3, 3, -1, -1, 2, 8, 8, 8};
-    int c = v_colors[lev];
     if (mp_msg_docolor())
-        terminal_set_foreground_color(stream, c);
+        terminal_set_foreground_color(stream, v_colors[lev]);
 }
 
 static void mp_msg_log_va(struct mp_log *log, int lev, const char *format,
@@ -109,14 +112,13 @@ static void mp_msg_log_va(struct mp_log *log, int lev, const char *format,
     char tmp[MSGSIZE_MAX];
     FILE *stream =
         (mp_msg_stdout_in_use || (lev == MSGL_STATUS)) ? stderr : stdout;
-    static int header = 1;
-    // indicates if last line printed was a status line
-    static int statusline;
 
-    if (!mp_msg_test_log(log, lev)) return; // do not display
+    if (!mp_msg_test_log(log, lev))
+        return; // do not display
+
     vsnprintf(tmp, MSGSIZE_MAX, format, va);
-    tmp[MSGSIZE_MAX-2] = '\n';
-    tmp[MSGSIZE_MAX-1] = 0;
+    tmp[MSGSIZE_MAX - 2] = '\n';
+    tmp[MSGSIZE_MAX - 1] = 0;
 
     /* A status line is normally intended to be overwritten by the next
      * status line, and does not end with a '\n'. If we're printing a normal
@@ -135,7 +137,7 @@ static void mp_msg_log_va(struct mp_log *log, int lev, const char *format,
     }
 
     size_t len = strlen(tmp);
-    header = len && (tmp[len-1] == '\n' || tmp[len-1] == '\r');
+    header = len && (tmp[len - 1] == '\n' || tmp[len - 1] == '\r');
 
     fprintf(stream, "%s", tmp);
 
