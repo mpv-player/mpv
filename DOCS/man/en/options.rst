@@ -1345,7 +1345,9 @@ OPTIONS
     Control verbosity directly for each module. The ``all`` module changes the
     verbosity of all the modules not explicitly specified on the command line.
 
-    See ``--msglevel=help`` for a list of all modules.
+    Run mpv with ``--msglevel=all=trace`` to see all messages mpv outputs. You
+    can use the module names printed in the output (prefixed to each line in
+    ``[...]``) to limit the output to interesting modules.
 
     .. note::
 
@@ -1356,17 +1358,19 @@ OPTIONS
 
     Available levels:
 
-    :-1: complete silence
-    :0:  fatal messages only
-    :1:  error messages
-    :2:  warning messages
-    :3:  short hints
-    :4:  informational messages
-    :5:  status messages (default)
-    :6:  verbose messages
-    :7:  debug level 2
-    :8:  debug level 3
-    :9:  debug level 4
+    :no:        complete silence
+    :fatal:     fatal messages only
+    :error:     error messages
+    :warn:      warning messages
+    :info:      informational messages
+    :status:    status messages (default)
+    :v:         verbose messages
+    :debug:     debug messages
+    :trace:     very noisy debug messages
+
+    One special case is the ``identify`` module name. This is silenced by
+    default, and can be set to ``trace`` level to enable the remains of the
+    code once enabled with the ``-identify`` option.
 
 ``--msgmodule``
     Prepend module name in front of each console message.

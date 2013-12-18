@@ -338,6 +338,7 @@ static int mpv_main(int argc, char *argv[])
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);
+    mp_msg_update_msglevels(mpctx->global);
 
     mp_print_version(false);
 
@@ -353,6 +354,8 @@ static int mpv_main(int argc, char *argv[])
             exit_player(mpctx, EXIT_ERROR);
         }
     }
+
+    mp_msg_update_msglevels(mpctx->global);
 
     if (handle_help_options(mpctx))
         exit_player(mpctx, EXIT_NONE);

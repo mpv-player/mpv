@@ -48,7 +48,7 @@ extern const m_option_type_t m_option_type_string_list;
 extern const m_option_type_t m_option_type_time;
 extern const m_option_type_t m_option_type_rel_time;
 extern const m_option_type_t m_option_type_choice;
-
+extern const m_option_type_t m_option_type_msglevels;
 extern const m_option_type_t m_option_type_print;
 extern const m_option_type_t m_option_type_print_func;
 extern const m_option_type_t m_option_type_print_func_param;

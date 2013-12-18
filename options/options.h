@@ -44,6 +44,8 @@ typedef struct mp_vo_opts {
 } mp_vo_opts;
 
 typedef struct MPOpts {
+    char *msglevels;
+
     char **reset_options;
     char **lua_files;
     int lua_load_osc;

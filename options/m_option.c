@@ -1332,6 +1332,47 @@ const m_option_type_t m_option_type_subconfig_struct = {
     .parse = parse_subconf,
 };
 
+#undef VAL
+#define VAL(x) (*(char **)(x))
+
+static int parse_msglevels(const m_option_t *opt, struct bstr name,
+                           struct bstr param, void *dst)
+{
+    if (param.start == NULL)
+        return M_OPT_MISSING_PARAM;
+
+    bstr s = param;
+    while (1) {
+        int res = mp_msg_split_msglevel(&s, &(bstr){0}, &(int){0});
+        if (res == 0)
+            break;
+        if (res < 0) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                   "Invalid syntax: %.*s\n", BSTR_P(s));
+            return M_OPT_INVALID;
+        }
+    }
+
+    if (dst) {
+        talloc_free(VAL(dst));
+        VAL(dst) = bstrdup0(NULL, param);
+    }
+
+    return 1;
+}
+
+const m_option_type_t m_option_type_msglevels = {
+    .name = "Output verbosity levels",
+    .size  = sizeof(char *),
+    .flags = M_OPT_TYPE_DYNAMIC,
+    .parse = parse_msglevels,
+    .print = print_str,
+    .copy  = copy_str,
+    .free  = free_str,
+};
+
+#undef VAL
+
 static int parse_color(const m_option_t *opt, struct bstr name,
                         struct bstr param, void *dst)
 {
