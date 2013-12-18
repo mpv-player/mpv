@@ -481,6 +481,8 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 
 int m_option_required_params(const m_option_t *opt);
 
+extern const char m_option_path_separator;
+
 // Cause a compilation warning if typeof(expr) != type.
 // Should be used with pointer types only.
 #define MP_EXPECT_TYPE(type, expr) (0 ? (type)0 : (expr))
@@ -494,12 +496,6 @@ int m_option_required_params(const m_option_t *opt);
 
 
 #define OPTION_LIST_SEPARATOR ','
-
-#if HAVE_DOS_PATHS
-#define OPTION_PATH_SEPARATOR ';'
-#else
-#define OPTION_PATH_SEPARATOR ':'
-#endif
 
 #define OPTDEF_STR(s)     .defval = (void *)&(char * const){s}
 #define OPTDEF_INT(i)     .defval = (void *)&(const int){i}
@@ -547,7 +543,7 @@ int m_option_required_params(const m_option_t *opt);
 
 #define OPT_PATHLIST(...)                                                \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list, \
-                .priv = (void *)&(const char){OPTION_PATH_SEPARATOR})
+                .priv = (void *)&m_option_path_separator)
 
 #define OPT_INT(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_int)

@@ -41,6 +41,14 @@
 #include "m_option.h"
 #include "m_config.h"
 
+#if HAVE_DOS_PATHS
+#define OPTION_PATH_SEPARATOR ';'
+#else
+#define OPTION_PATH_SEPARATOR ':'
+#endif
+
+const char m_option_path_separator = OPTION_PATH_SEPARATOR;
+
 char *m_option_strerror(int code)
 {
     switch (code) {
