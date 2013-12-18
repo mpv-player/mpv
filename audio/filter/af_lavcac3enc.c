@@ -32,7 +32,7 @@
 #include <libavutil/common.h>
 #include <libavutil/mem.h>
 
-#include "config.h"
+#include "common/common.h"
 #include "af.h"
 #include "audio/audio_buffer.h"
 #include "audio/fmt-conversion.h"

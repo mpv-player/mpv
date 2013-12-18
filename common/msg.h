@@ -21,6 +21,10 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#include "compat/compiler.h"
 
 struct mp_log;
 
@@ -130,9 +134,6 @@ extern int verbose;
 
 int mp_msg_test(int mod, int lev);
 bool mp_msg_test_log(struct mp_log *log, int lev);
-
-#include "config.h"
-#include "common/common.h"
 
 // Note: using mp_msg_log or the MP_ERR/... macros is preferred.
 void mp_msg_va(int mod, int lev, const char *format, va_list va);

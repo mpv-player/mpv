@@ -23,6 +23,7 @@
 
 #include "talloc.h"
 
+#include "common/common.h"
 #include "img_convert.h"
 #include "osd.h"
 #include "video/img_format.h"

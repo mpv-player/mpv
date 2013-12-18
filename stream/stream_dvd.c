@@ -27,6 +27,7 @@
 
 #include "config.h"
 #include "talloc.h"
+#include "common/common.h"
 #include "common/msg.h"
 
 #include <libgen.h>

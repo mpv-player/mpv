@@ -5,8 +5,6 @@
 
 #include <libavcodec/avcodec.h>
 
-#include "config.h"
-
 #include "demux/stheader.h"
 #include "video/mp_image.h"
 #include "video/hwdec.h"

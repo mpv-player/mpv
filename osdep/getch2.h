@@ -26,8 +26,6 @@
 
 #include <stdbool.h>
 
-#include "config.h"
-
 /* Screen size. Initialized by load_termcap() and get_screen_size() */
 extern int screen_width;
 extern int screen_height;

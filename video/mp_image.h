@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include "common/common.h"
 #include "common/msg.h"
 #include "csputils.h"
 #include "video/img_format.h"

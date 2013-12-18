@@ -22,6 +22,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "common/common.h"
+
 #include "options/m_option.h"
 #include "options/m_config.h"
 

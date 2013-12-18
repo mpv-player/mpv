@@ -22,6 +22,8 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/opt.h>
 
+#include "config.h"
+
 #include "sws_utils.h"
 
 #include "common/common.h"

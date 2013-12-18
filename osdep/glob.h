@@ -20,7 +20,6 @@
 #define MPLAYER_GLOB_H
 
 #include <sys/types.h>
-#include "config.h"
 
 typedef struct {
   size_t gl_pathc;

@@ -16,9 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "common/msg.h"
-#include "libavutil/avutil.h"
 #include <libavutil/pixdesc.h>
+#include <libavutil/avutil.h>
+
+#include "config.h"
+#include "common/msg.h"
 #include "video/img_format.h"
 #include "fmt-conversion.h"
 

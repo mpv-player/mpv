@@ -25,7 +25,7 @@
 
 #include <stdbool.h>
 #include <sys/types.h>
-#include "config.h"
+
 #include "bstr/bstr.h"
 
 #if BYTE_ORDER == BIG_ENDIAN

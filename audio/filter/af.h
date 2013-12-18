@@ -23,8 +23,6 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
-#include "config.h"
-
 #include "options/options.h"
 #include "audio/format.h"
 #include "audio/chmap.h"

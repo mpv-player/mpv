@@ -19,7 +19,6 @@
 #ifndef MPLAYER_STREAM_H
 #define MPLAYER_STREAM_H
 
-#include "config.h"
 #include "common/msg.h"
 #include <stdbool.h>
 #include <stdio.h>
