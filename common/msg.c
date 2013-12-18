@@ -124,10 +124,7 @@ static void mp_msg_log_va(struct mp_log *log, int lev, const char *format,
 
     set_msg_color(stream, lev);
     if (header) {
-        if (mp_msg_module) {
-            fprintf(stream, "%9s", log->verbose_prefix);
-            fprintf(stream, ": ");
-        } else if (lev >= MSGL_V || verbose) {
+        if (lev >= MSGL_V || verbose || mp_msg_module) {
             fprintf(stream, "[%s] ", log->verbose_prefix);
         } else if (log->prefix) {
             fprintf(stream, "[%s] ", log->prefix);
