@@ -25,6 +25,7 @@
 #define MPLAYER_GETCH2_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* Screen size. Initialized by load_termcap() and get_screen_size() */
 extern int screen_width;
@@ -33,11 +34,18 @@ extern int screen_height;
 /* Termcap code to erase to end of line */
 extern char * erase_to_end_of_line;
 
+/* Global initialization for terminal output. */
+int terminal_init(void);
+
+/* Return whether the process has been backgrounded. */
+bool terminal_in_background(void);
+
+/* Set ANSI text foreground color. c is [-1, 7], where 0-7 are colors, and
+ * -1 means reset to default. stream is either stdout or stderr. */
+void terminal_set_foreground_color(FILE *stream, int c);
+
 /* Get screen-size using IOCTL call. */
 void get_screen_size(void);
-
-/* Load key definitions from the TERMCAP database. 'termtype' can be NULL */
-int load_termcap(char *termtype);
 
 /* Initialize getch2 */
 void getch2_enable(void);

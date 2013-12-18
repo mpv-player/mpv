@@ -264,7 +264,7 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
     SetErrorMode(0x8003);
 #endif
 
-    load_termcap(NULL); // load key-codes
+    terminal_init();
 
     mp_time_init();
 }

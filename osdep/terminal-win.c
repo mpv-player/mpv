@@ -28,9 +28,24 @@
 #include <stdint.h>
 #include <string.h>
 #include <windows.h>
+#include <io.h>
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "terminal.h"
+
+#define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
+#define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
+static short stdoutAttrs = 0;
+static const unsigned char ansi2win32[8] = {
+    0,
+    FOREGROUND_RED,
+    FOREGROUND_GREEN,
+    FOREGROUND_GREEN | FOREGROUND_RED,
+    FOREGROUND_BLUE,
+    FOREGROUND_BLUE  | FOREGROUND_RED,
+    FOREGROUND_BLUE  | FOREGROUND_GREEN,
+    FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
+};
 
 int mp_input_slave_cmd_func(int fd, char *dest, int size)
 {
@@ -62,11 +77,6 @@ void get_screen_size(void)
         screen_width = cinfo.dwMaximumWindowSize.X;
         screen_height = cinfo.dwMaximumWindowSize.Y;
     }
-}
-
-int load_termcap(char *termtype)
-{
-    return 0;
 }
 
 static HANDLE in;
@@ -191,4 +201,32 @@ void getch2_disable(void)
     if (!getch2_status)
         return;                // already disabled / never enabled
     getch2_status = 0;
+}
+
+bool terminal_in_background(void)
+{
+    return false;
+}
+
+void terminal_set_foreground_color(FILE *stream, int c)
+{
+    HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
+    if (c < 0 || c >= 8) { // reset or invalid
+        SetConsoleTextAttribute(wstream, stdoutAttrs);
+    } else {
+        SetConsoleTextAttribute(wstream, ansi2win32[c] | FOREGROUND_INTENSITY);
+    }
+}
+
+int terminal_init(void)
+{
+    CONSOLE_SCREEN_BUFFER_INFO cinfo;
+    DWORD cmode = 0;
+    GetConsoleMode(hSTDOUT, &cmode);
+    cmode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
+    SetConsoleMode(hSTDOUT, cmode);
+    SetConsoleMode(hSTDERR, cmode);
+    GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
+    stdoutAttrs = cinfo.wAttributes;
+    return 0;
 }

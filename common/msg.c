@@ -30,10 +30,6 @@
 #include "osdep/terminal.h"
 #include "osdep/io.h"
 
-#ifndef __MINGW32__
-#include <signal.h>
-#endif
-
 #include "common/msg.h"
 
 bool mp_msg_stdout_in_use = 0;
@@ -60,27 +56,6 @@ static struct mp_log *legacy_logs[MSGT_MAX];
 /* maximum message length of mp_msg */
 #define MSGSIZE_MAX 6144
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <io.h>
-#define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
-#define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
-static short stdoutAttrs = 0;
-static const unsigned char ansi2win32[10] = {
-    0,
-    FOREGROUND_RED,
-    FOREGROUND_GREEN,
-    FOREGROUND_GREEN | FOREGROUND_RED,
-    FOREGROUND_BLUE,
-    FOREGROUND_BLUE  | FOREGROUND_RED,
-    FOREGROUND_BLUE  | FOREGROUND_GREEN,
-    FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
-    FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
-    FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED
-};
-#endif
-
 int mp_msg_levels[MSGT_MAX]; // verbose level of this module. initialized to -2
 int mp_msg_level_all = MSGL_STATUS;
 int verbose = 0;
@@ -93,16 +68,6 @@ static int mp_msg_docolor(void) {
 }
 
 static void mp_msg_do_init(void){
-#ifdef _WIN32
-    CONSOLE_SCREEN_BUFFER_INFO cinfo;
-    DWORD cmode = 0;
-    GetConsoleMode(hSTDOUT, &cmode);
-    cmode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
-    SetConsoleMode(hSTDOUT, cmode);
-    SetConsoleMode(hSTDERR, cmode);
-    GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
-    stdoutAttrs = cinfo.wAttributes;
-#endif
     int i;
     char *env = getenv("MPV_VERBOSE");
     if (env)
@@ -114,13 +79,11 @@ static void mp_msg_do_init(void){
 
 int mp_msg_test(int mod, int lev)
 {
-#ifndef __MINGW32__
     if (lev == MSGL_STATUS) {
         // skip status line output if stderr is a tty but in background
-        if (isatty(2) && tcgetpgrp(2) != getpgrp())
+        if (terminal_in_background())
             return false;
     }
-#endif
     return lev <= (mp_msg_levels[mod] == -2 ? mp_msg_level_all + verbose : mp_msg_levels[mod]);
 }
 
@@ -133,54 +96,8 @@ static void set_msg_color(FILE* stream, int lev)
 {
     static const int v_colors[10] = {9, 1, 3, 3, -1, -1, 2, 8, 8, 8};
     int c = v_colors[lev];
-#ifdef MP_ANNOY_ME
-    /* that's only a silly color test */
-    {
-        int c;
-        static int flag = 1;
-        if (flag)
-            for(c = 0; c < 24; c++)
-                printf("\033[%d;3%dm***  COLOR TEST %d  ***\n", c>7, c&7, c);
-        flag = 0;
-    }
-#endif
     if (mp_msg_docolor())
-    {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-        HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
-        if (c == -1)
-            c = 7;
-        SetConsoleTextAttribute(wstream, ansi2win32[c] | FOREGROUND_INTENSITY);
-#else
-        if (c == -1) {
-            fprintf(stream, "\033[0m");
-        } else {
-            fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
-        }
-#endif
-    }
-}
-
-static void print_msg_module(FILE* stream, struct mp_log *log)
-{
-    int mod = log->legacy_mod;
-    int c2 = (mod + 1) % 15 + 1;
-
-#ifdef _WIN32
-    HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
-    if (mp_msg_docolor())
-        SetConsoleTextAttribute(wstream, ansi2win32[c2&7] | FOREGROUND_INTENSITY);
-    fprintf(stream, "%9s", log->verbose_prefix);
-    if (mp_msg_docolor())
-        SetConsoleTextAttribute(wstream, stdoutAttrs);
-#else
-    if (mp_msg_docolor())
-        fprintf(stream, "\033[%d;3%dm", c2 >> 3, c2 & 7);
-    fprintf(stream, "%9s", log->verbose_prefix);
-    if (mp_msg_docolor())
-        fprintf(stream, "\033[0;37m");
-#endif
-    fprintf(stream, ": ");
+        terminal_set_foreground_color(stream, c);
 }
 
 static void mp_msg_log_va(struct mp_log *log, int lev, const char *format,
@@ -208,8 +125,8 @@ static void mp_msg_log_va(struct mp_log *log, int lev, const char *format,
     set_msg_color(stream, lev);
     if (header) {
         if (mp_msg_module) {
-            print_msg_module(stream, log);
-            set_msg_color(stream, lev);
+            fprintf(stream, "%9s", log->verbose_prefix);
+            fprintf(stream, ": ");
         } else if (lev >= MSGL_V || verbose) {
             fprintf(stream, "[%s] ", log->verbose_prefix);
         } else if (log->prefix) {
@@ -223,14 +140,7 @@ static void mp_msg_log_va(struct mp_log *log, int lev, const char *format,
     fprintf(stream, "%s", tmp);
 
     if (mp_msg_docolor())
-    {
-#ifdef _WIN32
-        HANDLE *wstream = lev <= MSGL_WARN ? hSTDERR : hSTDOUT;
-        SetConsoleTextAttribute(wstream, stdoutAttrs);
-#else
-        fprintf(stream, "\033[0m");
-#endif
-    }
+        terminal_set_foreground_color(stream, -1);
     fflush(stream);
 }
 

@@ -227,7 +227,7 @@ static void termcap_add_extra_f_keys(void) {
 
 #endif
 
-int load_termcap(char *termtype){
+static int load_termcap(char *termtype){
 #if HAVE_TERMINFO || HAVE_TERMCAP
 
 #if HAVE_TERMINFO
@@ -577,4 +577,24 @@ void getch2_disable(void){
     do_deactivate_getch2();
 
     getch2_enabled = 0;
+}
+
+bool terminal_in_background(void)
+{
+    return isatty(2) && tcgetpgrp(2) != getpgrp();
+}
+
+void terminal_set_foreground_color(FILE *stream, int c)
+{
+    if (c == -1) {
+        fprintf(stream, "\033[0m");
+    } else {
+        fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
+    }
+}
+
+int terminal_init(void)
+{
+    load_termcap(NULL);
+    return 0;
 }
