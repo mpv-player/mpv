@@ -59,6 +59,7 @@ static struct mp_log *legacy_logs[MSGT_MAX];
 int mp_msg_levels[MSGT_MAX]; // verbose level of this module. initialized to -2
 int mp_msg_level_all = MSGL_STATUS;
 int verbose = 0;
+bool mp_msg_mute;
 int mp_msg_color = 1;
 int mp_msg_module = 0;
 int mp_msg_cancolor = 0;
@@ -79,6 +80,8 @@ static void mp_msg_do_init(void){
 
 int mp_msg_test(int mod, int lev)
 {
+    if (mp_msg_mute)
+        return false;
     if (lev == MSGL_STATUS) {
         // skip status line output if stderr is a tty but in background
         if (terminal_in_background())

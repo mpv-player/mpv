@@ -265,8 +265,6 @@ err_out:
     return ret;
 }
 
-extern int mp_msg_levels[];
-
 /* Parse some command line options early before main parsing.
  * --no-config prevents reading configuration files (otherwise done before
  * command line parsing), and --really-quiet suppresses messages printed
@@ -275,8 +273,7 @@ extern int mp_msg_levels[];
 void m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
 {
     // Hack to shut up parser error messages
-    int msg_lvl_backup = mp_msg_levels[MSGT_CFGPARSER];
-    mp_msg_levels[MSGT_CFGPARSER] = -11;
+    mp_msg_mute = true;
 
     struct parse_state p = {config, argc, argv};
     while (split_opt_silent(&p) == 0) {
@@ -290,5 +287,5 @@ void m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
         }
     }
 
-    mp_msg_levels[MSGT_CFGPARSER] = msg_lvl_backup;
+    mp_msg_mute = false;
 }

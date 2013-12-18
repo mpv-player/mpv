@@ -28,8 +28,8 @@
 
 struct mp_log;
 
-// defined in mplayer.c
 extern int verbose;
+extern bool mp_msg_mute;
 
 // verbosity elevel:
 
