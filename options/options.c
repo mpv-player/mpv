@@ -68,7 +68,7 @@ static int print_version_opt(const m_option_t *opt, const char *name,
                              const char *param)
 {
     mp_print_version(true);
-    exit(0);
+    return M_OPT_EXIT;
 }
 
 #if HAVE_RADIO
