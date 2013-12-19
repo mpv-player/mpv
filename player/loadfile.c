@@ -26,8 +26,8 @@
 #include "config.h"
 #include "talloc.h"
 
-#include "osdep/getch2.h"
 #include "osdep/io.h"
+#include "osdep/terminal.h"
 #include "osdep/timer.h"
 
 #include "common/msg.h"

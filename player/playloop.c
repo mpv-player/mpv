@@ -33,6 +33,7 @@
 #include "common/playlist.h"
 #include "input/input.h"
 
+#include "osdep/terminal.h"
 #include "osdep/timer.h"
 
 #include "audio/mixer.h"
@@ -1310,6 +1311,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_force_window(mpctx, false);
 
     execute_queued_seek(mpctx);
+
+    getch2_poll();
 }
 
 // Waiting for the slave master to send us a new file to play.
@@ -1339,5 +1342,6 @@ void idle_loop(struct MPContext *mpctx)
             run_command(mpctx, cmd);
         mp_cmd_free(cmd);
         mp_flush_events(mpctx);
+        getch2_poll();
     }
 }

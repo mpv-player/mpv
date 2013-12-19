@@ -27,7 +27,7 @@
 
 #include "config.h"
 #include "common/global.h"
-#include "osdep/getch2.h"
+#include "osdep/terminal.h"
 #include "osdep/io.h"
 
 #ifndef __MINGW32__

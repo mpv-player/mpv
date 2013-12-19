@@ -45,7 +45,7 @@
 #include "bstr/bstr.h"
 #include "input/input.h"
 #include "input/keycodes.h"
-#include "getch2.h"
+#include "terminal.h"
 
 #if HAVE_TERMIOS
 static volatile struct termios tio_orig;

@@ -36,7 +36,6 @@
 #include <libavutil/common.h>
 
 #include "osdep/io.h"
-#include "osdep/getch2.h"
 
 #include "input.h"
 #include "keycodes.h"
@@ -1859,12 +1858,6 @@ static void read_events(struct input_ctx *ictx, int time)
     }
 }
 
-static void read_all_events(struct input_ctx *ictx, int time)
-{
-    getch2_poll();
-    read_events(ictx, time);
-}
-
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 {
     input_lock(ictx);
@@ -1919,7 +1912,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
 
     if (ictx->cmd_queue.first)
         time = 0;
-    read_all_events(ictx, time);
+    read_events(ictx, time);
     struct cmd_queue *queue = &ictx->cmd_queue;
     if (!queue->first) {
         struct mp_cmd *repeated = check_autorepeat(ictx);
@@ -2529,7 +2522,7 @@ int mp_input_check_interrupt(struct input_ctx *ictx, int time)
     input_lock(ictx);
     bool res = test_abort(ictx);
     if (!res) {
-        read_all_events(ictx, time);
+        read_events(ictx, time);
         res = test_abort(ictx);
     }
     input_unlock(ictx);

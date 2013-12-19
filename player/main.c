@@ -28,8 +28,8 @@
 #include "talloc.h"
 
 #include "osdep/io.h"
-#include "osdep/getch2.h"
 #include "osdep/priority.h"
+#include "osdep/terminal.h"
 #include "osdep/timer.h"
 
 #include "common/av_log.h"

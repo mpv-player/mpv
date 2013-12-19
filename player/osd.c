@@ -32,7 +32,7 @@
 #include "options/m_property.h"
 #include "common/encode.h"
 
-#include "osdep/getch2.h"
+#include "osdep/terminal.h"
 #include "osdep/timer.h"
 
 #include "demux/demux.h"

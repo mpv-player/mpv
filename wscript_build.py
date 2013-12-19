@@ -91,8 +91,8 @@ def build(ctx):
         target = "ebml_defs.c")
 
     getch2_c = {
-        'win32':  'osdep/getch2-win.c',
-    }.get(ctx.env.DEST_OS, "osdep/getch2.c")
+        'win32':  'osdep/terminal-win.c',
+    }.get(ctx.env.DEST_OS, "osdep/terminal-unix.c")
 
     timer_c = {
         'win32':  'osdep/timer-win2.c',

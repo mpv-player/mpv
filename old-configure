@@ -876,7 +876,7 @@ fi
 
 extra_cflags="-I. -D_GNU_SOURCE $extra_cflags"
 _timer=timer-linux.c
-_getch=getch2.c
+_getch=terminal-unix.c
 
 if freebsd || openbsd ; then
   extra_ldflags="$extra_ldflags -L/usr/local/lib"
@@ -908,7 +908,7 @@ if win32 ; then
 fi
 
 if mingw32 ; then
-  _getch=getch2-win.c
+  _getch=terminal-win.c
   extra_cflags="$extra_cflags -D__USE_MINGW_ANSI_STDIO=1"
   # Hack for missing BYTE_ORDER declarations in <sys/types.h>.
   # (For some reason, they are in <sys/param.h>, but we don't bother switching
