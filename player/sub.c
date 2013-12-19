@@ -107,8 +107,7 @@ void update_subtitles(struct MPContext *mpctx)
             if (!demux_has_packet(sh_stream))
                 break;
             if (subpts_s > curpts_s) {
-                mp_msg(MSGT_CPLAYER, MSGL_DBG2,
-                       "Sub early: c_pts=%5.3f s_pts=%5.3f\n",
+                MP_DBG(mpctx, "Sub early: c_pts=%5.3f s_pts=%5.3f\n",
                        curpts_s, subpts_s);
                 // Libass handled subs can be fed to it in advance
                 if (!sub_accept_packets_in_advance(dec_sub))
@@ -118,9 +117,8 @@ void update_subtitles(struct MPContext *mpctx)
                     break;
             }
             struct demux_packet *pkt = demux_read_packet(sh_stream);
-            mp_msg(MSGT_CPLAYER, MSGL_V, "Sub: c_pts=%5.3f s_pts=%5.3f "
-                   "duration=%5.3f len=%d\n", curpts_s, pkt->pts, pkt->duration,
-                   pkt->len);
+            MP_DBG(mpctx, "Sub: c_pts=%5.3f s_pts=%5.3f duration=%5.3f len=%d\n",
+                   curpts_s, pkt->pts, pkt->duration, pkt->len);
             sub_decode(dec_sub, pkt);
             talloc_free(pkt);
         }

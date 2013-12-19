@@ -1146,8 +1146,7 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_ERROR;
 
         if (prog.aid < 0 && prog.vid < 0) {
-            mp_msg(MSGT_CPLAYER, MSGL_ERR,
-                   "Selected program contains no audio or video streams!\n");
+            MP_ERR(mpctx, "Selected program contains no audio or video streams!\n");
             return M_PROPERTY_ERROR;
         }
         mp_switch_track(mpctx, STREAM_VIDEO,
@@ -2594,9 +2593,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             s.inc = cmd->args[1].v.d * cmd->scale;
         char *property = cmd->args[0].v.s;
         if (cmd->repeated && !check_property_autorepeat(property, mpctx)) {
-            mp_msg(MSGT_CPLAYER, MSGL_V,
-                   "Dropping command '%.*s' from auto-repeated key.\n",
-                   BSTR_P(cmd->original));
+            MP_VERBOSE(mpctx, "Dropping command '%.*s' from auto-repeated key.\n",
+                       BSTR_P(cmd->original));
             break;
         }
         int r = mp_property_do(property, M_PROPERTY_SWITCH, &s, mpctx);
@@ -2670,15 +2668,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_GET_STRING,
                                &tmp, mpctx);
         if (r <= 0) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                   "Failed to get value of property '%s'.\n",
-                   cmd->args[0].v.s);
-            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_ERROR=%s\n",
-                   property_error_string(r));
+            MP_WARN(mpctx, "Failed to get value of property '%s'.\n",
+                    cmd->args[0].v.s);
+            MP_INFO(mpctx, "ANS_ERROR=%s\n", property_error_string(r));
             break;
         }
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_%s=%s\n",
-               cmd->args[0].v.s, tmp);
+        MP_INFO(mpctx, "ANS_%s=%s\n", cmd->args[0].v.s, tmp);
         talloc_free(tmp);
         break;
     }
@@ -2767,7 +2762,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_PRINT_TEXT: {
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "%s\n", cmd->args[0].v.s);
+        MP_INFO(mpctx, "%s\n", cmd->args[0].v.s);
         break;
     }
 
@@ -2809,8 +2804,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 mp_set_playlist_entry(mpctx, e ? e : mpctx->playlist->first);
             }
         } else {
-            mp_msg(MSGT_CPLAYER, MSGL_ERR,
-                    "\nUnable to load playlist %s.\n", filename);
+            MP_ERR(mpctx, "Unable to load playlist %s.\n", filename);
         }
         break;
     }
@@ -3073,8 +3067,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_VO_CMDLINE:
         if (mpctx->video_out) {
             char *s = cmd->args[0].v.s;
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "Setting vo cmd line to '%s'.\n",
-                   s);
+            MP_INFO(mpctx, "Setting vo cmd line to '%s'.\n", s);
             if (vo_control(mpctx->video_out, VOCTRL_SET_COMMAND_LINE, s) > 0) {
                 set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration, "vo='%s'", s);
             } else {
@@ -3125,8 +3118,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     default:
-        mp_msg(MSGT_CPLAYER, MSGL_V,
-               "Received unknown cmd %s\n", cmd->name);
+        MP_VERBOSE(mpctx, "Received unknown cmd %s\n", cmd->name);
     }
 
     if (cmd->flags & MP_PAUSING)

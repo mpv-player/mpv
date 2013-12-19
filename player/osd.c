@@ -72,14 +72,13 @@ void write_status_line(struct MPContext *mpctx, const char *line)
 {
     struct MPOpts *opts = mpctx->opts;
     if (opts->slave_mode) {
-        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s\n", line);
+        MP_MSG(mpctx, MSGL_STATUS, "%s\n", line);
     } else if (erase_to_end_of_line) {
-        mp_msg(MSGT_STATUSLINE, MSGL_STATUS,
-               "%s%s\r", line, erase_to_end_of_line);
+        MP_MSG(mpctx, MSGL_STATUS, "%s%s\r", line, erase_to_end_of_line);
     } else {
         int pos = strlen(line);
         int width = get_term_width() - pos;
-        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s%*s\r", line, width, "");
+        MP_MSG(mpctx, MSGL_STATUS, "%s%*s\r", line, width, "");
     }
 }
 
@@ -486,7 +485,7 @@ void update_osd_msg(struct MPContext *mpctx)
                 mpctx->terminal_osd_text = talloc_strdup(mpctx, msg->msg);
                 // Multi-line message => clear what will be the second line
                 write_status_line(mpctx, "");
-                mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s%s\n", opts->term_osd_esc,
+                MP_MSG(mpctx, MSGL_STATUS, "%s%s\n", opts->term_osd_esc,
                        mpctx->terminal_osd_text);
                 print_status(mpctx);
             }
@@ -513,6 +512,6 @@ void update_osd_msg(struct MPContext *mpctx)
     // Clear the term osd line
     if (opts->term_osd && mpctx->terminal_osd_text[0]) {
         mpctx->terminal_osd_text[0] = '\0';
-        mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s\n", opts->term_osd_esc);
+        MP_MSG(mpctx, MSGL_STATUS, "%s\n", opts->term_osd_esc);
     }
 }

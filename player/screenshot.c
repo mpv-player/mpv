@@ -78,7 +78,7 @@ static void screenshot_msg(screenshot_ctx *ctx, int status, const char *msg,
     s = talloc_vasprintf(NULL, msg, ap);
     va_end(ap);
 
-    mp_msg(MSGT_CPLAYER, status == SMSG_ERR ? MSGL_ERR : MSGL_INFO, "%s\n", s);
+    MP_MSG(ctx->mpctx, status == SMSG_ERR ? MSGL_ERR : MSGL_INFO, "%s\n", s);
     if (ctx->osd) {
         set_osd_msg(ctx->mpctx, OSD_MSG_TEXT, 1, ctx->mpctx->opts->osd_duration,
                      "%s", s);

@@ -95,9 +95,9 @@ static int mp_cpcall(lua_State *L, lua_CFunction fn, int args)
 
 static void report_error(lua_State *L)
 {
+    struct MPContext *mpctx = get_mpctx(L);
     const char *err = lua_tostring(L, -1);
-    mp_msg(MSGT_CPLAYER, MSGL_WARN, "[lua] Error: %s\n",
-           err ? err : "[unknown]");
+    MP_WARN(mpctx, "Error: %s\n", err ? err : "[unknown]");
     lua_pop(L, 1);
 }
 
@@ -354,8 +354,8 @@ void mp_lua_script_dispatch(struct MPContext *mpctx, char *script_name,
 {
     struct script_ctx *ctx = find_script(mpctx->lua_ctx, script_name);
     if (!ctx) {
-        mp_msg(MSGT_CPLAYER, MSGL_V,
-               "Can't find script '%s' when handling input.\n", script_name);
+        MP_VERBOSE(mpctx, "Can't find script '%s' when handling input.\n",
+                   script_name);
         return;
     }
     lua_State *L = ctx->state;

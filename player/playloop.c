@@ -1017,7 +1017,7 @@ void run_playloop(struct MPContext *mpctx)
                 }
             }
 
-            mp_msg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
+            MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
             if (mpctx->d_video->vfilter && mpctx->d_video->vfilter->initialized < 0)
             {
                 MP_FATAL(mpctx, "\nFATAL: Could not initialize video filters "
@@ -1059,7 +1059,7 @@ void run_playloop(struct MPContext *mpctx)
         mpctx->time_frame -= get_relative_time(mpctx);
         if (full_audio_buffers && !mpctx->restart_playback) {
             buffered_audio = ao_get_delay(mpctx->ao);
-            mp_msg(MSGT_AVSYNC, MSGL_DBG2, "delay=%f\n", buffered_audio);
+            MP_TRACE(mpctx, "audio delay=%f\n", buffered_audio);
 
             if (opts->autosync) {
                 /* Smooth reported playback position from AO by averaging

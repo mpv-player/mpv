@@ -210,7 +210,7 @@ static bool handle_help_options(struct MPContext *mpctx)
 #if HAVE_X11
     if (opts->vo.fstype_list && strcmp(opts->vo.fstype_list[0], "help") == 0) {
         fstype_help();
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+        MP_INFO(mpctx, "\n");
         opt_exit = 1;
     }
 #endif
@@ -379,7 +379,7 @@ static int mpv_main(int argc, char *argv[])
     if (opts->encode_output.file && *opts->encode_output.file) {
         mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output);
         if(!mpctx->encode_lavc_ctx) {
-            mp_msg(MSGT_VO, MSGL_INFO, "Encoding initialization failed.");
+            MP_INFO(mpctx, "Encoding initialization failed.");
             exit_player(mpctx, EXIT_ERROR);
         }
         m_config_set_option0(mpctx->mconfig, "vo", "lavc");

@@ -89,9 +89,9 @@ static void reconfig_video(struct MPContext *mpctx,
 
     struct mp_image_params p = d_video->vfilter->output_params;
     const struct vo_driver *info = mpctx->video_out->driver;
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s\n",
-           info->name, p.w, p.h, p.d_w, p.d_h, vo_format_name(p.imgfmt));
-    mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Description: %s\n", info->description);
+    MP_INFO(mpctx, "VO: [%s] %dx%d => %dx%d %s\n",
+            info->name, p.w, p.h, p.d_w, p.d_h, vo_format_name(p.imgfmt));
+    MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
     int r = vo_reconfig(mpctx->video_out, &p, 0);
     if (r < 0)
