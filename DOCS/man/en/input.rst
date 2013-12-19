@@ -445,8 +445,7 @@ Input Commands that are Possibly Subject to Change
 
 Undocumented commands: ``tv_start_scan``, ``tv_step_channel``, ``tv_step_norm``,
 ``tv_step_chanlist``, ``tv_set_channel``, ``tv_last_channel``, ``tv_set_freq``,
-``tv_step_freq``, ``tv_set_norm``, ``dvb_set_channel``, ``radio_step_channel``,
-``radio_set_channel``, ``radio_set_freq``, ``radio_step_freq`` (all of these
+``tv_step_freq``, ``tv_set_norm``, ``dvb_set_channel`` (all of these
 should be replaced by properties), ``stop`` (questionable use), ``get_property``
 (?), ``vo_cmdline`` (experimental).
 

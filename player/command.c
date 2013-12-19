@@ -57,7 +57,6 @@
 #include "audio/decode/dec_audio.h"
 #include "options/path.h"
 #include "stream/tv.h"
-#include "stream/stream_radio.h"
 #include "stream/pvr.h"
 #if HAVE_DVBIN
 #include "stream/dvbin.h"
@@ -2867,44 +2866,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 (msg_osd ? OSD_SEEK_INFO_TEXT : 0) |
                 (bar_osd ? OSD_SEEK_INFO_BAR : 0);
         break;
-
-#if HAVE_RADIO
-    case MP_CMD_RADIO_STEP_CHANNEL:
-        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO) {
-            int v = cmd->args[0].v.i;
-            if (v > 0)
-                radio_step_channel(mpctx->stream, RADIO_CHANNEL_HIGHER);
-            else
-                radio_step_channel(mpctx->stream, RADIO_CHANNEL_LOWER);
-            if (radio_get_channel_name(mpctx->stream)) {
-                set_osd_msg(mpctx, OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
-                             "Channel: %s",
-                             radio_get_channel_name(mpctx->stream));
-            }
-        }
-        break;
-
-    case MP_CMD_RADIO_SET_CHANNEL:
-        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO) {
-            radio_set_channel(mpctx->stream, cmd->args[0].v.s);
-            if (radio_get_channel_name(mpctx->stream)) {
-                set_osd_msg(mpctx, OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
-                             "Channel: %s",
-                             radio_get_channel_name(mpctx->stream));
-            }
-        }
-        break;
-
-    case MP_CMD_RADIO_SET_FREQ:
-        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO)
-            radio_set_freq(mpctx->stream, cmd->args[0].v.f);
-        break;
-
-    case MP_CMD_RADIO_STEP_FREQ:
-        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO)
-            radio_step_freq(mpctx->stream, cmd->args[0].v.f);
-        break;
-#endif
 
 #if HAVE_TV
     case MP_CMD_TV_START_SCAN:
