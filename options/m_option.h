@@ -23,7 +23,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "config.h"
 #include "bstr/bstr.h"
 #include "audio/chmap.h"
 
