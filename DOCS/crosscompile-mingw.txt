@@ -22,7 +22,7 @@ Example with MXE
 # or more!
 
 cd /opt
-git clone https://github.com/mxe/mxe
+git clone https://github.com/mxe/mxe mingw
 cd mingw
 
 # Edit the MXE target, so that MinGW-w64 for 32 bit targets is built.
