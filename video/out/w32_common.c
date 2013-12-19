@@ -279,19 +279,24 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
     }
 
-    if (mouse_button && vo->opts->enable_mouse_movements) {
-        int x = GET_X_LPARAM(lParam);
-        int y = GET_Y_LPARAM(lParam);
+    if (mouse_button) {
         mouse_button |= mod_state(vo);
-        if (mouse_button == (MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN) &&
-            !vo->opts->fullscreen && !mp_input_test_dragging(vo->input_ctx, x, y))
-        {
-            // Window dragging hack
-            ReleaseCapture();
-            SendMessage(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-            return 0;
-        }
         mp_input_put_key(vo->input_ctx, mouse_button);
+
+        if (vo->opts->enable_mouse_movements) {
+            int x = GET_X_LPARAM(lParam);
+            int y = GET_Y_LPARAM(lParam);
+
+            if (mouse_button == (MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN) &&
+                !vo->opts->fullscreen &&
+                !mp_input_test_dragging(vo->input_ctx, x, y))
+            {
+                // Window dragging hack
+                ReleaseCapture();
+                SendMessage(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+                return 0;
+            }
+        }
     }
 
     return DefWindowProcW(hWnd, message, wParam, lParam);
@@ -609,7 +614,7 @@ int vo_w32_init(struct vo *vo)
 
     WNDCLASSEXW wcex = {
         .cbSize = sizeof wcex,
-        .style = CS_OWNDC | CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW,
+        .style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW,
         .lpfnWndProc = WndProc,
         .hInstance = hInstance,
         .hIcon = mplayerIcon,
