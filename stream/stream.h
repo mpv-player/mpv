@@ -67,8 +67,6 @@ enum streamtype {
 #define STREAM_ERROR 0
 #define STREAM_OK    1
 
-#define MAX_STREAM_PROTOCOLS 20
-
 enum stream_ctrl {
     STREAM_CTRL_GET_TIME_LENGTH = 1,
     STREAM_CTRL_SEEK_TO_CHAPTER,
