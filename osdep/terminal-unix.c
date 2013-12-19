@@ -554,6 +554,7 @@ void getch2_enable(void){
     setsigaction(SIGQUIT, quit_request_sighandler, SA_RESETHAND, false);
     setsigaction(SIGTERM, quit_request_sighandler, SA_RESETHAND, false);
     setsigaction(SIGTTIN, SIG_IGN, 0, true);
+    setsigaction(SIGTTOU, SIG_IGN, 0, true);
 
     do_activate_getch2();
 
@@ -571,6 +572,7 @@ void getch2_disable(void){
     setsigaction(SIGQUIT, SIG_DFL, 0, false);
     setsigaction(SIGTERM, SIG_DFL, 0, false);
     setsigaction(SIGTTIN, SIG_DFL, 0, false);
+    setsigaction(SIGTTOU, SIG_DFL, 0, false);
 
     do_deactivate_getch2();
 

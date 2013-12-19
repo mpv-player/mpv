@@ -103,13 +103,6 @@ static void mp_msg_do_init(void){
     GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
     stdoutAttrs = cinfo.wAttributes;
 #endif
-#ifndef __MINGW32__
-    struct sigaction sa;
-    sa.sa_handler = SIG_IGN;
-    sa.sa_flags = 0;
-    sigemptyset(&sa.sa_mask);
-    sigaction(SIGTTOU, &sa, NULL); // just write to stdout if you have to
-#endif
     int i;
     char *env = getenv("MPV_VERBOSE");
     if (env)
