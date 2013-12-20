@@ -378,6 +378,28 @@ static int script_send_command(lua_State *L)
     return 0;
 }
 
+static int script_send_commandv(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    int num = lua_gettop(L);
+    bstr args[50];
+    if (num > MP_ARRAY_SIZE(args))
+        luaL_error(L, "too many arguments");
+    for (int n = 1; n <= num; n++) {
+        size_t len;
+        const char *s = lua_tolstring(L, n, &len);
+        if (!s)
+            luaL_error(L, "argument %d is not a string", n);
+        args[n - 1] = (bstr){(char *)s, len};
+    }
+    mp_cmd_t *cmd = mp_input_parse_cmd_bstrv(ctx->log, 0, num, args, "<lua>");
+    if (!cmd)
+        luaL_error(L, "error parsing command");
+    mp_input_queue_cmd(ctx->mpctx->input, cmd);
+
+    return 0;
+}
+
 static int script_property_list(lua_State *L)
 {
     const struct m_option *props = mp_get_property_list();
@@ -625,6 +647,7 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(log),
     FN_ENTRY(find_config_file),
     FN_ENTRY(send_command),
+    FN_ENTRY(send_commandv),
     FN_ENTRY(property_list),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),

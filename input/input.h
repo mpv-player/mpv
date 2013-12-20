@@ -136,6 +136,7 @@ enum mp_input_section_flags {
 };
 
 struct input_ctx;
+struct mp_log;
 
 struct mp_cmd_arg {
     const struct m_option *type;
@@ -227,6 +228,18 @@ struct mp_cmd *mp_input_get_cmd(struct input_ctx *ictx, int time,
 // The location parameter is for error messages.
 struct mp_cmd *mp_input_parse_cmd(struct input_ctx *ictx, bstr str,
                                   const char *location);
+
+// Similar to mp_input_parse_cmd(), but takes a list of strings instead.
+// Also, def_flags contains initial command flags (see mp_cmd_flags; the default
+// as used by mp_input_parse_cmd is MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES).
+// Keep in mind that these functions (naturally) don't take multiple commands,
+// i.e. a ";" argument does not start a new command.
+// The _strv version is limitted to MP_CMD_MAX_ARGS argv array items.
+struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
+                                       char **argv, const char *location);
+struct mp_cmd *mp_input_parse_cmd_bstrv(struct mp_log *log, int def_flags,
+                                        int argc, bstr *argv,
+                                        const char *location);
 
 // After getting a command from mp_input_get_cmd you need to free it using this
 // function

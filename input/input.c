@@ -871,16 +871,6 @@ static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
     return true;
 }
 
-static bool eat_token(bstr *str, const char *tok)
-{
-    bstr rest, token;
-    if (read_token(*str, &rest, &token) && bstrcmp0(token, tok) == 0) {
-        *str = rest;
-        return true;
-    }
-    return false;
-}
-
 static bool read_escaped_string(void *talloc_ctx, bstr *str, bstr *literal)
 {
     bstr t = *str;
@@ -906,6 +896,60 @@ error:
     return false;
 }
 
+// Somewhat awkward; the main purpose is supporting both strings and
+// pre-split string arrays as input.
+struct parse_ctx {
+    struct mp_log *log;
+    const char *loc;
+    void *tmp;
+    bool array_input; // false: use start/str, true: use num_strs/strs
+    bstr start, str;
+    bstr *strs;
+    int num_strs;
+};
+
+static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
+{
+    *out = (bstr){0};
+    if (ctx->array_input) {
+        if (!ctx->num_strs)
+            return 0;
+        *out = ctx->strs[0];
+        ctx->strs++;
+        ctx->num_strs--;
+        return 1;
+    } else {
+        ctx->str = bstr_lstrip(ctx->str);
+        bstr start = ctx->str;
+        if (bstr_eatstart0(&ctx->str, "\"")) {
+            if (!read_escaped_string(ctx->tmp, &ctx->str, out)) {
+                MP_ERR(ctx, "Broken string escapes: ...>%.*s<.\n", BSTR_P(start));
+                return -1;
+            }
+            if (!bstr_eatstart0(&ctx->str, "\"")) {
+                MP_ERR(ctx, "Unterminated quotes: ...>%.*s<.\n", BSTR_P(start));
+                return -1;
+            }
+            return 1;
+        }
+        return read_token(ctx->str, &ctx->str, out) ? 1 : 0;
+    }
+}
+
+static bstr pctx_get_trailing(struct parse_ctx *ctx)
+{
+    if (ctx->array_input) {
+        if (ctx->num_strs == 0)
+            return (bstr){0};
+        return ctx->strs[0]; // mentioning the first trailing arg is enough?
+    } else {
+        bstr dummy;
+        if (!read_token(ctx->str, &dummy, &dummy))
+            return (bstr){0};
+        return ctx->str;
+    }
+}
+
 struct flag {
     const char *name;
     unsigned int remove, add;
@@ -924,35 +968,40 @@ static const struct flag cmd_flags[] = {
     {0}
 };
 
-// If dest is non-NULL when calling this function, append the command to the
-// list formed by dest->queue_next, otherwise just set *dest = new_cmd;
-static struct mp_cmd *parse_cmd(struct input_ctx *ictx, bstr *pstr, const char *loc)
+static struct mp_cmd *parse_cmd(struct parse_ctx *ctx, int def_flags)
 {
-    int def_flags = MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES;
     struct mp_cmd *cmd = NULL;
-    bstr str = *pstr;
-    bstr start = str;
-    void *tmp = talloc_new(NULL);
+    int r;
 
-    str = bstr_lstrip(str);
-    for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
-        bstr old = bstr0(entry->old);
-        bool silent = bstr_eatstart0(&old, "!");
-        if (bstrcasecmp(bstr_splice(str, 0, old.len), old) == 0) {
-            if (!silent) {
-                MP_WARN(ictx, "Warning: command '%.*s' is deprecated, replaced "
-                        "with '%s' at %s.\n", BSTR_P(old), entry->new, loc);
+    if (!ctx->array_input) {
+        ctx->str = bstr_lstrip(ctx->str);
+        for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
+            bstr old = bstr0(entry->old);
+            bool silent = bstr_eatstart0(&old, "!");
+            if (bstrcasecmp(bstr_splice(ctx->str, 0, old.len), old) == 0) {
+                if (!silent) {
+                    MP_WARN(ctx, "Warning: command '%.*s' is deprecated, "
+                            "replaced with '%s' at %s.\n",
+                            BSTR_P(old), entry->new, ctx->loc);
+                }
+                bstr s = bstr_cut(ctx->str, old.len);
+                ctx->str = bstr0(talloc_asprintf(ctx->tmp, "%s%.*s", entry->new,
+                                                 BSTR_P(s)));
+                ctx->start = ctx->str;
+                break;
             }
-            bstr s = bstr_cut(str, old.len);
-            str = bstr0(talloc_asprintf(tmp, "%s%.*s", entry->new, BSTR_P(s)));
-            start = str;
-            break;
         }
     }
 
+    bstr cur_token;
+    if (pctx_read_token(ctx, &cur_token) < 0)
+        goto error;
+
     while (1) {
         for (int n = 0; cmd_flags[n].name; n++) {
-            if (eat_token(&str, cmd_flags[n].name)) {
+            if (bstr_equals0(cur_token, cmd_flags[n].name)) {
+                if (pctx_read_token(ctx, &cur_token) < 0)
+                    goto error;
                 def_flags &= ~cmd_flags[n].remove;
                 def_flags |= cmd_flags[n].add;
                 goto cont;
@@ -962,21 +1011,20 @@ static struct mp_cmd *parse_cmd(struct input_ctx *ictx, bstr *pstr, const char *
     cont: ;
     }
 
-    bstr cmd_name;
-    if (!read_token(str, &str, &cmd_name)) {
-        MP_ERR(ictx, "Command name missing.\n");
+    if (cur_token.len == 0) {
+        MP_ERR(ctx, "Command name missing.\n");
         goto error;
     }
     const struct mp_cmd_def *cmd_def = NULL;
     for (int n = 0; mp_cmds[n].name; n++) {
-        if (bstr_equals0(cmd_name, mp_cmds[n].name)) {
+        if (bstr_equals0(cur_token, mp_cmds[n].name)) {
             cmd_def = &mp_cmds[n];
             break;
         }
     }
 
     if (!cmd_def) {
-        MP_ERR(ictx, "Command '%.*s' not found.\n", BSTR_P(cmd_name));
+        MP_ERR(ctx, "Command '%.*s' not found.\n", BSTR_P(cur_token));
         goto error;
     }
 
@@ -998,26 +1046,12 @@ static struct mp_cmd *parse_cmd(struct input_ctx *ictx, bstr *pstr, const char *
         if (!opt->type)
             break;
 
-        str = bstr_lstrip(str);
-        bstr arg = {0};
-        bool got_token = false;
-        if (bstr_eatstart0(&str, "\"")) {
-            if (!read_escaped_string(tmp, &str, &arg)) {
-                MP_ERR(ictx, "Command %s: argument %d has broken string escapes.\n",
-                       cmd->name, i + 1);
-                goto error;
-            }
-            if (!bstr_eatstart0(&str, "\"")) {
-                MP_ERR(ictx, "Command %s: argument %d is unterminated.\n",
-                       cmd->name, i + 1);
-                goto error;
-            }
-            got_token = true;
-        } else {
-            got_token = read_token(str, &str, &arg);
+        r = pctx_read_token(ctx, &cur_token);
+        if (r < 0) {
+            MP_ERR(ctx, "Command %s: error in argument %d.\n", cmd->name, i + 1);
+            goto error;
         }
-
-        if (!got_token) {
+        if (r < 1) {
             if (is_vararg)
                 continue;
             // Skip optional arguments
@@ -1028,7 +1062,7 @@ static struct mp_cmd *parse_cmd(struct input_ctx *ictx, bstr *pstr, const char *
                 cmd->nargs++;
                 continue;
             }
-            MP_ERR(ictx, "Command %s requires more than %d arguments.\n",
+            MP_ERR(ctx, "Command %s: more than %d arguments required.\n",
                    cmd->name, cmd->nargs);
             goto error;
         }
@@ -1036,9 +1070,9 @@ static struct mp_cmd *parse_cmd(struct input_ctx *ictx, bstr *pstr, const char *
         struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
         cmdarg->type = opt;
         cmd->nargs++;
-        int r = m_option_parse(opt, bstr0(cmd->name), arg, &cmdarg->v);
+        r = m_option_parse(opt, bstr0(cmd->name), cur_token, &cmdarg->v);
         if (r < 0) {
-            MP_ERR(ictx, "Command %s: argument %d can't be parsed: %s.\n",
+            MP_ERR(ctx, "Command %s: argument %d can't be parsed: %s.\n",
                    cmd->name, i + 1, m_option_strerror(r));
             goto error;
         }
@@ -1046,33 +1080,46 @@ static struct mp_cmd *parse_cmd(struct input_ctx *ictx, bstr *pstr, const char *
             talloc_steal(cmd, cmdarg->v.s);
     }
 
-    bstr dummy;
-    if (read_token(str, &dummy, &dummy)) {
-        MP_ERR(ictx, "Command %s has trailing unused arguments: '%.*s'.\n",
-               cmd->name, BSTR_P(str));
+    bstr left = pctx_get_trailing(ctx);
+    if (left.len) {
+        MP_ERR(ctx, "Command %s has trailing unused arguments: '%.*s'.\n",
+               cmd->name, BSTR_P(left));
         // Better make it fatal to make it clear something is wrong.
         goto error;
     }
 
-    bstr orig = (bstr) {start.start, str.start - start.start};
-    cmd->original = bstrdup(cmd, bstr_strip(orig));
+    if (!ctx->array_input) {
+        bstr orig = {ctx->start.start, ctx->str.start - ctx->start.start};
+        cmd->original = bstrdup(cmd, bstr_strip(orig));
+    }
 
-    *pstr = str;
-
-    talloc_free(tmp);
     return cmd;
 
 error:
-    MP_ERR(ictx, "Command was defined at %s.\n", loc);
+    MP_ERR(ctx, "Command was defined at %s.\n", ctx->loc);
     talloc_free(cmd);
-    talloc_free(tmp);
     return NULL;
+}
+
+static struct mp_cmd *parse_cmd_str(struct mp_log *log, bstr *str, const char *loc)
+{
+    struct parse_ctx ctx = {
+        .log = log,
+        .loc = loc,
+        .tmp = talloc_new(NULL),
+        .str = *str,
+        .start = *str,
+    };
+    struct mp_cmd *res = parse_cmd(&ctx, MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES);
+    talloc_free(ctx.tmp);
+    *str = ctx.str;
+    return res;
 }
 
 mp_cmd_t *mp_input_parse_cmd(struct input_ctx *ictx, bstr str, const char *loc)
 {
     bstr original = str;
-    struct mp_cmd *cmd = parse_cmd(ictx, &str, loc);
+    struct mp_cmd *cmd = parse_cmd_str(ictx->log, &str, loc);
     if (!cmd)
         return NULL;
 
@@ -1097,7 +1144,7 @@ mp_cmd_t *mp_input_parse_cmd(struct input_ctx *ictx, bstr str, const char *loc)
             p_prev = &cmd->queue_next;
             cmd = list;
         }
-        struct mp_cmd *sub = parse_cmd(ictx, &str, loc);
+        struct mp_cmd *sub = parse_cmd_str(ictx->log, &str, loc);
         if (!sub) {
             talloc_free(cmd);
             return NULL;
@@ -1108,6 +1155,38 @@ mp_cmd_t *mp_input_parse_cmd(struct input_ctx *ictx, bstr str, const char *loc)
     }
 
     return cmd;
+}
+
+struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
+                                       char **argv, const char *location)
+{
+    bstr args[MP_CMD_MAX_ARGS];
+    int num = 0;
+    for (; argv[num]; num++) {
+        if (num > MP_CMD_MAX_ARGS) {
+            mp_err(log, "%s: too many arguments.\n", location);
+            return NULL;
+        }
+        args[num] = bstr0(argv[num]);
+    }
+    return mp_input_parse_cmd_bstrv(log, def_flags, num, args, location);
+}
+
+struct mp_cmd *mp_input_parse_cmd_bstrv(struct mp_log *log, int def_flags,
+                                        int argc, bstr *argv,
+                                        const char *location)
+{
+    struct parse_ctx ctx = {
+        .log = log,
+        .loc = location,
+        .tmp = talloc_new(NULL),
+        .array_input = true,
+        .strs = argv,
+        .num_strs = argc,
+    };
+    struct mp_cmd *res = parse_cmd(&ctx, def_flags);
+    talloc_free(ctx.tmp);
+    return res;
 }
 
 #define MP_CMD_MAX_SIZE 4096
