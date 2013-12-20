@@ -147,13 +147,14 @@ static void set_msg_color(FILE* stream, int lev)
 
 void mp_msg_log_va(struct mp_log *log, int lev, const char *format, va_list va)
 {
-    char tmp[MSGSIZE_MAX];
-    FILE *stream =
-        (mp_msg_stdout_in_use || (lev == MSGL_STATUS)) ? stderr : stdout;
-
     if (!mp_msg_test_log(log, lev))
         return; // do not display
 
+    pthread_mutex_lock(&mp_msg_lock);
+
+    FILE *stream = (mp_msg_stdout_in_use || lev == MSGL_STATUS) ? stderr : stdout;
+
+    char tmp[MSGSIZE_MAX];
     vsnprintf(tmp, MSGSIZE_MAX, format, va);
     tmp[MSGSIZE_MAX - 2] = '\n';
     tmp[MSGSIZE_MAX - 1] = 0;
@@ -182,6 +183,8 @@ void mp_msg_log_va(struct mp_log *log, int lev, const char *format, va_list va)
     if (mp_msg_docolor())
         terminal_set_foreground_color(stream, -1);
     fflush(stream);
+
+    pthread_mutex_unlock(&mp_msg_lock);
 }
 
 void mp_msg_va(int mod, int lev, const char *format, va_list va)
