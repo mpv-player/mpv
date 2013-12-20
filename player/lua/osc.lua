@@ -312,7 +312,7 @@ function set_track(type, next)
         new_track_mpv = tracks_osc[type][new_track_osc].id
     end
 
-    mp.send_command("no-osd set " .. type .. " " .. new_track_mpv)
+    mp.send_commandv("set", type, new_track_mpv)
 
         if (new_track_osc == 0) then
         show_message(nicetypes[type] .. " Track: none")
@@ -755,13 +755,13 @@ function osc_init()
 
     -- playlist prev
     local eventresponder = {}
-    eventresponder.mouse_btn0_up = function () mp.send_command("playlist_prev weak") end
+    eventresponder.mouse_btn0_up = function () mp.send_commandv("playlist_prev", "weak") end
     eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.property_get("playlist"), 3) end
     register_button(posX - pos_offsetX, titlerowY, 7, 12, 12, osc_styles.vidtitle, "◀", eventresponder, metainfo)
 
     -- playlist next
     local eventresponder = {}
-    eventresponder.mouse_btn0_up = function () mp.send_command("playlist_next weak") end
+    eventresponder.mouse_btn0_up = function () mp.send_commandv("playlist_next", "weak") end
     eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.property_get("playlist"), 3) end
     register_button(posX + pos_offsetX, titlerowY, 9, 12, 12, osc_styles.vidtitle, "▶", eventresponder, metainfo)
 
@@ -781,7 +781,7 @@ function osc_init()
         end
     end
     local eventresponder = {}
-    eventresponder.mouse_btn0_up = function () mp.send_command("no-osd cycle pause") end
+    eventresponder.mouse_btn0_up = function () mp.send_commandv("cycle", "pause") end
     register_button(posX, bigbuttonrowY, 5, 40, 40, osc_styles.bigButtons, contentF, eventresponder, nil)
 
     --skipback
@@ -789,16 +789,16 @@ function osc_init()
     metainfo.softrepeat = true
 
     local eventresponder = {}
-    eventresponder.mouse_btn0_down = function () mp.send_command("no-osd seek -5 relative keyframes") end
-    eventresponder["shift+mouse_btn0_down"] = function () mp.send_command("no-osd frame_back_step") end
-    eventresponder.mouse_btn2_down = function () mp.send_command("no-osd seek -30 relative keyframes") end
+    eventresponder.mouse_btn0_down = function () mp.send_commandv("seek", -5, "relative", "keyframes") end
+    eventresponder["shift+mouse_btn0_down"] = function () mp.send_commandv("frame_back_step") end
+    eventresponder.mouse_btn2_down = function () mp.send_commandv("seek", -30, "relative", "keyframes") end
     register_button(posX - bigbuttondistance, bigbuttonrowY, 5, 40, 40, osc_styles.bigButtons, "\238\128\132", eventresponder, metainfo)
 
     --skipfrwd
     local eventresponder = {}
-    eventresponder.mouse_btn0_down = function () mp.send_command("no-osd seek 10 relative keyframes") end
-    eventresponder["shift+mouse_btn0_down"] = function () mp.send_command("no-osd frame_step") end
-    eventresponder.mouse_btn2_down = function () mp.send_command("no-osd seek 60 relative keyframes") end
+    eventresponder.mouse_btn0_down = function () mp.send_commandv("seek", 10, "relative", "keyframes") end
+    eventresponder["shift+mouse_btn0_down"] = function () mp.send_commandv("frame_step") end
+    eventresponder.mouse_btn2_down = function () mp.send_commandv("seek", 60, "relative", "keyframes") end
     register_button(posX + bigbuttondistance, bigbuttonrowY, 5, 40, 40, osc_styles.bigButtons, "\238\128\133", eventresponder, metainfo)
 
     --chapters
@@ -808,13 +808,13 @@ function osc_init()
 
     --prev
     local eventresponder = {}
-    eventresponder.mouse_btn0_up = function () mp.send_command("osd-msg add chapter -1") end
+    eventresponder.mouse_btn0_up = function () mp.send_commandv("osd-msg", "add", "chapter", -1) end
     eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.property_get("chapter-list"), 3) end
     register_button(posX - (bigbuttondistance * 2), bigbuttonrowY, 5, 40, 40, osc_styles.bigButtons, "\238\132\132", eventresponder, metainfo)
 
     --next
     local eventresponder = {}
-    eventresponder.mouse_btn0_up = function () mp.send_command("osd-msg add chapter 1") end
+    eventresponder.mouse_btn0_up = function () mp.send_commandv("osd-msg", "add", "chapter", 1) end
     eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.property_get("chapter-list"), 3) end
     register_button(posX + (bigbuttondistance * 2), bigbuttonrowY, 5, 40, 40, osc_styles.bigButtons, "\238\132\133", eventresponder, metainfo)
 
@@ -857,8 +857,8 @@ function osc_init()
             ass:append("\238\132\134" .. osc_styles.smallButtonsLlabel .. " " .. aid)
         end
 
-        eventresponder.mouse_btn0_up = function () mp.send_command("osd-msg add audio 1") end
-        eventresponder.mouse_btn2_up = function () mp.send_command("osd-msg add audio -1")  end
+        eventresponder.mouse_btn0_up = function () mp.send_commandv("osd-msg", "add", "audio", 1) end
+        eventresponder.mouse_btn2_up = function () mp.send_commandv("osd-msg", "add", "audio", -1)  end
     end
 
     register_button(posX - pos_offsetX, bigbuttonrowY, 1, 70, 18, osc_styles.smallButtonsL, contentF, eventresponder, metainfo)
@@ -894,8 +894,8 @@ function osc_init()
             ass:append("\238\132\135" .. osc_styles.smallButtonsLlabel .. " " .. sid)
         end
 
-        eventresponder.mouse_btn0_up = function () mp.send_command("osd-msg add sub 1") end
-        eventresponder.mouse_btn2_up = function () mp.send_command("osd-msg add sub -1")  end
+        eventresponder.mouse_btn0_up = function () mp.send_commandv("osd-msg", "add", "sub", 1) end
+        eventresponder.mouse_btn2_up = function () mp.send_commandv("osd-msg", "add", "sub", -1)  end
     end
     register_button(posX - pos_offsetX, bigbuttonrowY, 7, 70, 18, osc_styles.smallButtonsL, contentF, eventresponder, metainfo)
 
@@ -909,7 +909,7 @@ function osc_init()
         end
     end
     local eventresponder = {}
-    eventresponder.mouse_btn0_up = function () mp.send_command("no-osd cycle fullscreen") end
+    eventresponder.mouse_btn0_up = function () mp.send_commandv("cycle", "fullscreen") end
     register_button(posX+pos_offsetX, bigbuttonrowY, 6, 25, 25, osc_styles.smallButtonsR, contentF, eventresponder, nil)
 
 
@@ -967,7 +967,7 @@ function osc_init()
         local seek_to = get_slider_value(element)
         -- ignore identical seeks
         if not(state.last_seek == seek_to) then
-            mp.send_command(string.format("no-osd seek %f absolute-percent keyframes", seek_to))
+            mp.send_commandv("seek", seek_to, "absolute-percent", "keyframes")
             state.last_seek = seek_to
         end
     end
