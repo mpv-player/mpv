@@ -155,7 +155,8 @@ void mp_msg_log_va(struct mp_log *log, int lev, const char *format, va_list va)
     FILE *stream = (mp_msg_stdout_in_use || lev == MSGL_STATUS) ? stderr : stdout;
 
     char tmp[MSGSIZE_MAX];
-    vsnprintf(tmp, MSGSIZE_MAX, format, va);
+    if (vsnprintf(tmp, MSGSIZE_MAX, format, va) < 0)
+        snprintf(tmp, MSGSIZE_MAX, "[fprintf error]\n");
     tmp[MSGSIZE_MAX - 2] = '\n';
     tmp[MSGSIZE_MAX - 1] = 0;
 
