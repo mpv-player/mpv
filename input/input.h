@@ -236,7 +236,7 @@ struct mp_cmd *mp_input_parse_cmd(struct input_ctx *ictx, bstr str,
 // i.e. a ";" argument does not start a new command.
 // The _strv version is limitted to MP_CMD_MAX_ARGS argv array items.
 struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
-                                       char **argv, const char *location);
+                                       const char **argv, const char *location);
 struct mp_cmd *mp_input_parse_cmd_bstrv(struct mp_log *log, int def_flags,
                                         int argc, bstr *argv,
                                         const char *location);

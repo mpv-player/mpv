@@ -1158,7 +1158,7 @@ mp_cmd_t *mp_input_parse_cmd(struct input_ctx *ictx, bstr str, const char *loc)
 }
 
 struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
-                                       char **argv, const char *location)
+                                       const char **argv, const char *location)
 {
     bstr args[MP_CMD_MAX_ARGS];
     int num = 0;
