@@ -176,6 +176,42 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         case WM_CLOSE:
             mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             break;
+        case WM_DROPFILES: {
+            HDROP hDrop = (HDROP)wParam;
+            UINT nfiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
+
+            for (UINT i; i < nfiles; i++) {
+                UINT len = DragQueryFileW(hDrop, i, NULL, 0);
+                wchar_t *buf = talloc_array(NULL, wchar_t, len + 1);
+
+                if (DragQueryFileW(hDrop, i, buf, len + 1) == len) {
+                    char *fname = mp_to_utf8(NULL, buf);
+
+                    const char *cmd[] = {
+                        "raw",
+                        "loadfile",
+                        fname,
+                        /* Start playing the dropped files right away */
+                        (i == 0) ? "replace" : "append"
+                    };
+
+                    MP_VERBOSE(vo, "win32: received dropped file: %s\n", fname);
+                    mp_cmd_t *cmdt = mp_input_parse_cmd_strv(vo->log,
+                                                             MP_ON_OSD_AUTO,
+                                                             cmd, "<win32>");
+                    mp_input_queue_cmd(vo->input_ctx, cmdt);
+
+                    talloc_free(fname);
+                } else {
+                    MP_ERR(vo, "win32: error getting dropped file name\n");
+                }
+
+                talloc_free(buf);
+            }
+
+            DragFinish(hDrop);
+            return 0;
+        }
         case WM_SYSCOMMAND:
             switch (wParam) {
             case SC_SCREENSAVE:
@@ -650,6 +686,8 @@ int vo_w32_init(struct vo *vo)
         MP_ERR(vo, "win32: unable to create window!\n");
         return 0;
     }
+
+    DragAcceptFiles(w32->window, TRUE);
 
     w32->tracking   = FALSE;
     w32->trackEvent = (TRACKMOUSEEVENT){
