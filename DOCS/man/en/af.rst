@@ -422,7 +422,7 @@ Available filters are:
             Would delay front left and right by 10.5ms, the two rear channels
             and the subwoofer by 0ms and the center channel by 7ms.
 
-``export[=mmapped_file[:nsamples]]``
+``export=mmapped_file:nsamples]``
     Exports the incoming signal to other processes using memory mapping
     (``mmap()``). Memory mapped areas contain a header::
 
@@ -434,7 +434,7 @@ Available filters are:
     The rest is payload (non-interleaved) 16-bit data.
 
     ``<mmapped_file>``
-        File to map data to (default: ``~/.mpv/mpv-af_export``).
+        File to map data to (required)
     ``<nsamples>``
         number of samples per channel (default: 512).
 

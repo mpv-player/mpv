@@ -213,11 +213,10 @@ static int af_open( struct af_instance* af )
   af->filter  = filter;
   af_export_t *priv = af->priv;
 
-  if (!priv->filename || !priv->filename[0])
-      priv->filename = mp_find_user_config_file(SHARED_FILE);
-
-  if (!priv->filename || !priv->filename[0])
+  if (!priv->filename || !priv->filename[0]) {
+      MP_FATAL(af, "no export filename given");
       return AF_ERROR;
+  }
 
   return AF_OK;
 }
