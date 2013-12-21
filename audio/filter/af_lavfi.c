@@ -195,6 +195,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
             mp_chmap_from_channels(&out_cm, l_out->channels);
         mp_audio_set_channels(out, &out_cm);
 
+        if (!mp_audio_config_valid(out))
+            return AF_ERROR;
+
         p->timebase_out = l_out->time_base;
 
         // Blatantly incorrect; we don't know what the filters do.

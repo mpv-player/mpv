@@ -137,7 +137,10 @@ static int setup_format(struct dec_audio *da)
 
     // Note: invalid parameters are rejected by dec_audio.c
 
-    mp_audio_set_format(&da->decoded, af_from_avformat(lavc_context->sample_fmt));
+    int fmt = lavc_context->sample_fmt;
+    mp_audio_set_format(&da->decoded, af_from_avformat(fmt));
+    if (!da->decoded.format)
+        MP_FATAL(da, "unsupported lavc format %s", av_get_sample_fmt_name(fmt));
 
     da->decoded.rate = lavc_context->sample_rate;
     if (!da->decoded.rate && sh_audio->wf) {

@@ -16,7 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */ 
 
-#include "common/msg.h"
 #include <libavutil/avutil.h>
 #include <libavutil/samplefmt.h>
 #include "format.h"
@@ -43,24 +42,18 @@ static const struct {
 
 enum AVSampleFormat af_to_avformat(int fmt)
 {
-    int i;
-    for (i = 0; audio_conversion_map[i].fmt; i++)
+    for (int i = 0; audio_conversion_map[i].fmt; i++) {
         if (audio_conversion_map[i].fmt == fmt)
-            break;
-    return audio_conversion_map[i].sample_fmt;
+            return audio_conversion_map[i].sample_fmt;
+    }
+    return 0;
 }
 
 int af_from_avformat(enum AVSampleFormat sample_fmt)
 {
-    int i;
-    for (i = 0; audio_conversion_map[i].fmt; i++)
+    for (int i = 0; audio_conversion_map[i].fmt; i++) {
         if (audio_conversion_map[i].sample_fmt == sample_fmt)
-            break;
-    int fmt = audio_conversion_map[i].fmt;
-    if (!fmt) {
-        const char *fmtname = av_get_sample_fmt_name(sample_fmt);
-        mp_msg(MSGT_GLOBAL, MSGL_ERR, "Unsupported AVSampleFormat %s (%d)\n",
-               fmtname ? fmtname : "INVALID", sample_fmt);
+            return audio_conversion_map[i].fmt;
     }
-    return fmt;
+    return 0;
 }
