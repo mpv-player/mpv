@@ -697,7 +697,9 @@ end:
     return found;
 }
 
-static HRESULT enumerate_with_state(char *header, int status, int with_id) {
+static HRESULT enumerate_with_state(struct mp_log *log, char *header,
+                                    int status, int with_id)
+{
     HRESULT hr;
     IMMDeviceEnumerator *pEnumerator = NULL;
     IMMDeviceCollection *pDevices = NULL;
@@ -724,7 +726,7 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
     int count;
     IMMDeviceCollection_GetCount(pDevices, &count);
     if (count > 0) {
-        mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: %s\n", header);
+        mp_info(log, "%s\n", header);
     }
 
     for (int i = 0; i < count; i++) {
@@ -739,11 +741,9 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
             mark = " (default)";
 
         if (with_id) {
-            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: Device #%d: %s, ID: %s%s\n",
-                i, name, id, mark);
+            mp_info(log, "Device #%d: %s, ID: %s%s\n", i, name, id, mark);
         } else {
-            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: %s, ID: %s%s\n",
-                name, id, mark);
+            mp_info(log, "%s, ID: %s%s\n", name, id, mark);
         }
 
         free(name);
@@ -763,24 +763,27 @@ exit_label:
     return hr;
 }
 
-static int enumerate_devices(void) {
+static int enumerate_devices(struct mp_log *log)
+{
     HRESULT hr;
     CoInitialize(NULL);
 
-    hr = enumerate_with_state("Active devices:", DEVICE_STATE_ACTIVE, 1);
+    hr = enumerate_with_state(log, "Active devices:", DEVICE_STATE_ACTIVE, 1);
     EXIT_ON_ERROR(hr);
-    hr = enumerate_with_state("Unplugged devices:", DEVICE_STATE_UNPLUGGED, 0);
+    hr = enumerate_with_state(log, "Unplugged devices:", DEVICE_STATE_UNPLUGGED, 0);
     EXIT_ON_ERROR(hr);
     CoUninitialize();
     return 0;
 exit_label:
-    mp_msg(MSGT_AO, MSGL_ERR, "Error enumerating devices: HRESULT %08"PRIx32" \"%s\"\n",
-        (uint32_t)hr, explain_err(hr));
+    mp_err(log, "Error enumerating devices: HRESULT %08"PRIx32" \"%s\"\n",
+           (uint32_t)hr, explain_err(hr));
     CoUninitialize();
     return 1;
 }
 
-static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
+static HRESULT find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
+                                    char *search)
+{
     HRESULT hr;
     IMMDeviceEnumerator *pEnumerator = NULL;
     IMMDeviceCollection *pDevices = NULL;
@@ -810,16 +813,16 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
         IMMDeviceCollection_GetCount(pDevices, &count);
 
         if (devno >= count) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: no device #%d!\n", devno);
+            MP_ERR(ao, "no device #%d!\n", devno);
         } else {
-            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device #%d\n", devno);
+            MP_VERBOSE(ao, "finding device #%d\n", devno);
             hr = IMMDeviceCollection_Item(pDevices, devno, &pTempDevice);
             EXIT_ON_ERROR(hr);
 
             hr = IMMDevice_GetId(pTempDevice, &deviceID);
             EXIT_ON_ERROR(hr);
 
-            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: found device #%d\n", devno);
+            MP_VERBOSE(ao, "found device #%d\n", devno);
         }
     } else {
         hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
@@ -830,7 +833,7 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
         int count;
         IMMDeviceCollection_GetCount(pDevices, &count);
 
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device %s\n", devid);
+        MP_VERBOSE(ao, "finding device %s\n", devid);
 
         IMMDevice *prevDevice = NULL;
 
@@ -848,14 +851,14 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
                 if (deviceID) {
                     char *name;
                     if (!search_err) {
-                        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: multiple matching devices found!\n");
+                        MP_ERR(ao, "multiple matching devices found!\n");
                         name = get_device_name(prevDevice);
-                        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: %s\n", name);
+                        MP_ERR(ao, "%s\n", name);
                         free(name);
                         search_err = 1;
                     }
                     name = get_device_name(pTempDevice);
-                    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: %s\n", name);
+                    MP_ERR(ao, "%s\n", name);
                     free(name);
                 }
                 hr = IMMDevice_GetId(pTempDevice, &deviceID);
@@ -867,7 +870,7 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
         }
 
         if (deviceID == NULL) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not find device %s!\n", devid);
+            MP_ERR(ao, "could not find device %s!\n", devid);
         }
     }
 
@@ -877,12 +880,12 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
     if (deviceID == NULL || search_err) {
         hr = E_NOTFOUND;
     } else {
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: loading device %S\n", deviceID);
+        MP_VERBOSE(ao, "loading device %S\n", deviceID);
 
         hr = IMMDeviceEnumerator_GetDevice(pEnumerator, deviceID, ppDevice);
 
         if (FAILED(hr)) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not load requested device!\n");
+            MP_ERR(ao, "could not load requested device!\n");
         }
     }
 
@@ -893,14 +896,15 @@ exit_label:
     return hr;
 }
 
-static int validate_device(const m_option_t *opt, struct bstr name,
-                           struct bstr param) {
+static int validate_device(struct mp_log *log, const m_option_t *opt,
+                           struct bstr name, struct bstr param)
+{
     if (bstr_equals0(param, "help")) {
-        enumerate_devices();
+        enumerate_devices(log);
         return M_OPT_EXIT;
     }
 
-    mp_msg(MSGT_AO, MSGL_DBG2, "ao-wasapi: validating device=%s\n", param.start);
+    mp_dbg(log, "validating device=%s\n", param.start);
 
     char *end;
     int devno = (int) strtol(param.start, &end, 10);
@@ -909,8 +913,7 @@ static int validate_device(const m_option_t *opt, struct bstr name,
     if ((end == (void*)param.start || *end) && devno < 0)
         ret = M_OPT_OUT_OF_RANGE;
 
-    mp_msg(MSGT_AO, MSGL_DBG2, "ao-wasapi: device=%s %svalid\n",
-           param.start, ret == 1 ? "" : "not ");
+    mp_dbg(log, "device=%s %svalid\n", param.start, ret == 1 ? "" : "not ");
     return ret;
 }
 
@@ -935,7 +938,7 @@ static int thread_init(struct ao *ao)
         MP_VERBOSE(ao, "default device ID: %s\n", id);
         free(id);
     } else {
-        hr = find_and_load_device(&state->pDevice, state->opt_device);
+        hr = find_and_load_device(ao, &state->pDevice, state->opt_device);
     }
     EXIT_ON_ERROR(hr);
 
@@ -1210,7 +1213,7 @@ static int init(struct ao *ao)
     fill_VistaBlob(state);
 
     if (state->opt_list) {
-        enumerate_devices();
+        enumerate_devices(state->log);
     }
 
     if (state->opt_exclusive) {

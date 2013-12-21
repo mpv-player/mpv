@@ -65,20 +65,20 @@ static const struct format_map format_maps[] = {
     {AF_FORMAT_UNKNOWN,     0}
 };
 
-static bool check_pa_ret(int ret)
+static bool check_pa_ret(struct mp_log *log, int ret)
 {
     if (ret < 0) {
-        mp_msg(MSGT_AO, MSGL_ERR, "[ao/portaudio] %s\n",
-               Pa_GetErrorText(ret));
+        mp_err(log, "%s\n", Pa_GetErrorText(ret));
         if (ret == paUnanticipatedHostError) {
             const PaHostErrorInfo* hosterr = Pa_GetLastHostErrorInfo();
-            mp_msg(MSGT_AO, MSGL_ERR, "[ao/portaudio] Host error: %s\n",
-                   hosterr->errorText);
+            mp_err(log, "Host error: %s\n", hosterr->errorText);
         }
         return false;
     }
     return true;
 }
+
+#define CHECK_PA_RET(ret) check_pa_ret(ao->log, (ret))
 
 static int seconds_to_bytes(struct ao *ao, double seconds)
 {
@@ -93,23 +93,23 @@ static int to_int(const char *s, int return_on_error)
     return (s[0] && !endptr[0]) ? res : return_on_error;
 }
 
-static int find_device(const char *name)
+static int find_device(struct mp_log *log, const char *name)
 {
     int found = paNoDevice;
     if (!name)
         return found;
     int help = strcmp(name, "help") == 0;
     int count = Pa_GetDeviceCount();
-    check_pa_ret(count);
+    check_pa_ret(log, count);
     int index = to_int(name, -1);
     if (help)
-        mp_msg(MSGT_AO, MSGL_INFO, "PortAudio devices:\n");
+        mp_info(log, "PortAudio devices:\n");
     for (int n = 0; n < count; n++) {
         const PaDeviceInfo* info = Pa_GetDeviceInfo(n);
         if (help) {
             if (info->maxOutputChannels < 1)
                 continue;
-            mp_msg(MSGT_AO, MSGL_INFO, "  %d '%s', %d channels, latency: %.2f "
+            mp_info(log, "  %d '%s', %d channels, latency: %.2f "
                    "ms, sample rate: %.0f\n", n, info->name,
                    info->maxOutputChannels,
                    info->defaultHighOutputLatency * 1000,
@@ -121,21 +121,20 @@ static int find_device(const char *name)
         }
     }
     if (found == paNoDevice && !help)
-        mp_msg(MSGT_AO, MSGL_WARN, "[ao/portaudio] Device '%s' not found!\n",
-               name);
+        mp_warn(log, "Device '%s' not found!\n", name);
     return found;
 }
 
-static int validate_device_opt(const m_option_t *opt, struct bstr name,
-                               struct bstr param)
+static int validate_device_opt(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param)
 {
     // Note: we do not check whether the device actually exist, because this
     //       might break elaborate configs with several AOs trying several
     //       devices. We do it merely for making "help" special.
     if (bstr_equals0(param, "help")) {
-        if (!check_pa_ret(Pa_Initialize()))
+        if (!check_pa_ret(log, Pa_Initialize()))
             return M_OPT_EXIT;
-        find_device("help");
+        find_device(log, "help");
         Pa_Terminate();
         return M_OPT_EXIT - 1;
     }
@@ -205,9 +204,9 @@ static void uninit(struct ao *ao, bool cut_audio)
 
             pthread_mutex_unlock(&priv->ring_mutex);
 
-            check_pa_ret(Pa_StopStream(priv->stream));
+            CHECK_PA_RET(Pa_StopStream(priv->stream));
         }
-        check_pa_ret(Pa_CloseStream(priv->stream));
+        CHECK_PA_RET(Pa_CloseStream(priv->stream));
     }
 
     pthread_mutex_destroy(&priv->ring_mutex);
@@ -218,14 +217,14 @@ static int init(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
-    if (!check_pa_ret(Pa_Initialize()))
+    if (!CHECK_PA_RET(Pa_Initialize()))
         return -1;
 
     pthread_mutex_init(&priv->ring_mutex, NULL);
 
     int pa_device = Pa_GetDefaultOutputDevice();
     if (priv->cfg_device && priv->cfg_device[0])
-        pa_device = find_device(priv->cfg_device);
+        pa_device = find_device(ao->log, priv->cfg_device);
     if (pa_device == paNoDevice)
         goto error_exit;
 
@@ -264,9 +263,9 @@ static int init(struct ao *ao)
     priv->framelen = ao->channels.num * (af_fmt2bits(ao->format) / 8);
     ao->bps = ao->samplerate * priv->framelen;
 
-    if (!check_pa_ret(Pa_IsFormatSupported(NULL, &sp, ao->samplerate)))
+    if (!CHECK_PA_RET(Pa_IsFormatSupported(NULL, &sp, ao->samplerate)))
         goto error_exit;
-    if (!check_pa_ret(Pa_OpenStream(&priv->stream, NULL, &sp, ao->samplerate,
+    if (!CHECK_PA_RET(Pa_OpenStream(&priv->stream, NULL, &sp, ao->samplerate,
                                     paFramesPerBufferUnspecified, paNoFlag,
                                     stream_callback, ao)))
         goto error_exit;
@@ -293,7 +292,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     pthread_mutex_unlock(&priv->ring_mutex);
 
     if (Pa_IsStreamStopped(priv->stream) == 1)
-        check_pa_ret(Pa_StartStream(priv->stream));
+        CHECK_PA_RET(Pa_StartStream(priv->stream));
 
     return write_len / ao->sstride;
 }
@@ -333,7 +332,7 @@ static void reset(struct ao *ao)
     struct priv *priv = ao->priv;
 
     if (Pa_IsStreamStopped(priv->stream) != 1)
-        check_pa_ret(Pa_AbortStream(priv->stream));
+        CHECK_PA_RET(Pa_AbortStream(priv->stream));
 
     pthread_mutex_lock(&priv->ring_mutex);
 
@@ -349,7 +348,7 @@ static void pause(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
-    check_pa_ret(Pa_AbortStream(priv->stream));
+    CHECK_PA_RET(Pa_AbortStream(priv->stream));
 
     double stream_time = Pa_GetStreamTime(priv->stream);
 
@@ -368,7 +367,7 @@ static void resume(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
-    check_pa_ret(Pa_StartStream(priv->stream));
+    CHECK_PA_RET(Pa_StartStream(priv->stream));
 }
 
 #define OPT_BASE_STRUCT struct priv

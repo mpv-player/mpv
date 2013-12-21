@@ -160,8 +160,8 @@ struct m_opt_choice_alternatives {
 };
 
 // For OPT_STRING_VALIDATE(). Behaves like m_option_type.parse().
-typedef int (*m_opt_string_validate_fn)(const m_option_t *opt, struct bstr name,
-                                        struct bstr param);
+typedef int (*m_opt_string_validate_fn)(struct mp_log *log, const m_option_t *opt,
+                                        struct bstr name, struct bstr param);
 
 // m_option.priv points to this if M_OPT_TYPE_USE_SUBSTRUCT is used
 struct m_sub_options {

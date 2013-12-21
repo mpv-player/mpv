@@ -298,8 +298,8 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .alpha_mode = 2,
 };
 
-static int validate_scaler_opt(const m_option_t *opt, struct bstr name,
-                               struct bstr param);
+static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
@@ -2219,15 +2219,15 @@ bool gl_video_get_equalizer(struct gl_video *p, const char *name, int *val)
     return mp_csp_equalizer_get(&p->video_eq, name, val) >= 0;
 }
 
-static int validate_scaler_opt(const m_option_t *opt, struct bstr name,
-                               struct bstr param)
+static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param)
 {
     if (bstr_equals0(param, "help")) {
-        mp_msg(MSGT_VO, MSGL_INFO, "Available scalers:\n");
+        mp_info(log, "Available scalers:\n");
         for (const char **filter = fixed_scale_filters; *filter; filter++)
-            mp_msg(MSGT_VO, MSGL_INFO, "    %s\n", *filter);
+            mp_info(log, "    %s\n", *filter);
         for (int n = 0; mp_filter_kernels[n].name; n++)
-            mp_msg(MSGT_VO, MSGL_INFO, "    %s\n", mp_filter_kernels[n].name);
+            mp_info(log, "    %s\n", mp_filter_kernels[n].name);
         return M_OPT_EXIT - 1;
     }
     char s[20];

@@ -58,8 +58,8 @@ static bool parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
     return true;
 }
 
-static int validate_3dlut_size_opt(const m_option_t *opt, struct bstr name,
-                                   struct bstr param)
+static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
+                                   struct bstr name, struct bstr param)
 {
     int p1, p2, p3;
     char s[20];

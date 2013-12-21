@@ -908,14 +908,14 @@ int mpgl_find_backend(const char *name)
     return -2;
 }
 
-int mpgl_validate_backend_opt(const struct m_option *opt, struct bstr name,
-                              struct bstr param)
+int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
+                              struct bstr name, struct bstr param)
 {
     if (bstr_equals0(param, "help")) {
-        mp_msg(MSGT_VO, MSGL_INFO, "OpenGL windowing backends:\n");
-        mp_msg(MSGT_VO, MSGL_INFO, "    auto (autodetect)\n");
+        mp_info(log, "OpenGL windowing backends:\n");
+        mp_info(log, "    auto (autodetect)\n");
         for (const struct backend *entry = backends; entry->name; entry++)
-            mp_msg(MSGT_VO, MSGL_INFO, "    %s\n", entry->name);
+            mp_info(log, "    %s\n", entry->name);
         return M_OPT_EXIT - 1;
     }
     char s[20];

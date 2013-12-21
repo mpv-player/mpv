@@ -79,18 +79,18 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
-static int validate_device_opt(const m_option_t *opt, struct bstr name,
-                               struct bstr param)
+static int validate_device_opt(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param)
 {
     if (bstr_equals0(param, "help")) {
         if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE) {
-            mp_msg(MSGT_AO, MSGL_FATAL, "Device listing not supported.\n");
+            mp_fatal(log, "Device listing not supported.\n");
             return M_OPT_EXIT;
         }
         const char *list = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
-        mp_msg(MSGT_AO, MSGL_INFO, "OpenAL devices:\n");
+        mp_info(log, "OpenAL devices:\n");
         while (list && *list) {
-            mp_msg(MSGT_AO, MSGL_INFO, "  '%s'\n", list);
+            mp_info(log, "  '%s'\n", list);
             list = list + strlen(list) + 1;
         }
         return M_OPT_EXIT - 1;

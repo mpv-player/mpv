@@ -801,7 +801,7 @@ static int parse_str(struct mp_log *log, const m_option_t *opt,
 
     m_opt_string_validate_fn validate = opt->priv;
     if (validate) {
-        r = validate(opt, name, param);
+        r = validate(log, opt, name, param);
         if (r < 0)
             goto exit;
     }
