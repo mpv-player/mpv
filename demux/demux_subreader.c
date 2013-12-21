@@ -90,6 +90,7 @@ typedef struct sub_data {
 
 // Parameter struct for the format-specific readline functions
 struct readline_args {
+    struct mp_log *log;
     int utf16;
     struct MPOpts *opts;
 
@@ -319,14 +320,15 @@ static const char *sub_readtext(const char *source, char **dest) {
     else return NULL;  // last text field
 }
 
-static subtitle *set_multiline_text(subtitle *current, const char *text, int start)
+static subtitle *set_multiline_text(struct readline_args *arg, subtitle *current,
+                                    const char *text, int start)
 {
     int i = start;
     while ((text = sub_readtext(text, current->text + i))) {
         if (current->text[i] == ERR) return ERR;
         i++;
         if (i >= SUB_MAX_TEXT) {
-            mp_msg(MSGT_SUBREADER, MSGL_WARN, "Too many lines in a subtitle\n");
+            MP_WARN(arg, "Too many lines in a subtitle\n");
             current->lines = i;
             return current;
         }
@@ -351,7 +353,7 @@ static subtitle *sub_read_line_microdvd(stream_t *st,subtitle *current,
 		      "{%ld}{%ld}%[^\r\n]",
 		      &(current->start), &(current->end), line2) < 3));
 
-    return set_multiline_text(current, line2, 0);
+    return set_multiline_text(args, current, line2, 0);
 }
 
 static subtitle *sub_read_line_mpl2(stream_t *st,subtitle *current,
@@ -369,7 +371,7 @@ static subtitle *sub_read_line_mpl2(stream_t *st,subtitle *current,
     current->start *= 10;
     current->end *= 10;
 
-    return set_multiline_text(current, line2, 0);
+    return set_multiline_text(args, current, line2, 0);
 }
 
 static subtitle *sub_read_line_subrip(stream_t* st, subtitle *current,
@@ -521,7 +523,7 @@ static subtitle *sub_read_line_vplayer(stream_t *st,subtitle *current,
 		   ++p;
 		}
 		if (p==NULL) {
-		    printf("SUB: Skipping incorrect subtitle line!\n");
+		    printf("Skipping incorrect subtitle line!\n");
 		    continue;
 		}
                 */
@@ -532,7 +534,7 @@ static subtitle *sub_read_line_vplayer(stream_t *st,subtitle *current,
 
 		if (*p!='|') {
 			//
-                        return set_multiline_text(current, p, 0);
+                        return set_multiline_text(args, current, p, 0);
 		}
 	}
 	return current;
@@ -581,7 +583,7 @@ static subtitle *sub_read_line_rt(stream_t *st,subtitle *current,
 	next = strstr(line,"<clear/>");
 	if(next && strlen(next)>8){
 	  next+=8;
-          return set_multiline_text(current, next, 0);
+          return set_multiline_text(args, current, next, 0);
 	}
     }
     return current;
@@ -770,7 +772,7 @@ retry:
     if (!stream_read_line (st, line, LINE_LEN, utf16))
 	return current;
 
-    if (set_multiline_text(current, line, 1) == ERR)
+    if (set_multiline_text(args, current, line, 1) == ERR)
         return ERR;
 
     if (!strlen(current->text[0]) && !strlen(current->text[1]))
@@ -806,7 +808,7 @@ retry:
 
     current->text[0]=""; // just to be sure that string is clear
 
-    if (set_multiline_text(current, line, 0) == ERR)
+    if (set_multiline_text(args, current, line, 0) == ERR)
         return ERR;
 
     if (!strlen(current->text[0]) && current->lines <= 1)
@@ -1061,7 +1063,17 @@ static int sub_autodetect (stream_t* st, int *uses_time, int utf16) {
     return SUB_INVALID;  // too many bad lines
 }
 
-static void adjust_subs_time(subtitle* sub, float subtime, float fps,
+struct subreader {
+    subtitle * (*read)(stream_t *st, subtitle *dest,
+                       struct readline_args *args);
+    void       (*post)(subtitle *dest);
+    const char *name;
+    const char *codec_name;
+    struct readline_args args;
+};
+
+static void adjust_subs_time(struct subreader *srp, subtitle* sub,
+                             float subtime, float fps,
                              float sub_fps, int block,
                              int sub_num, int sub_uses_time) {
 	int n,m;
@@ -1091,20 +1103,11 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps,
 		sub = nextsub;
 		m = 0;
 	}
-	if (n) mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: Adjusted %d subtitle(s).\n", n);
+	if (n) MP_VERBOSE(&srp->args, "Adjusted %d subtitle(s).\n", n);
 }
 
-struct subreader {
-    subtitle * (*read)(stream_t *st, subtitle *dest,
-                       struct readline_args *args);
-    void       (*post)(subtitle *dest);
-    const char *name;
-    const char *codec_name;
-    struct readline_args args;
-};
-
 static bool subreader_autodetect(stream_t *fd, struct MPOpts *opts,
-                                 struct subreader *out)
+                                 struct mp_log *log, struct subreader *out)
 {
     static const struct subreader sr[]=
     {
@@ -1135,14 +1138,15 @@ static bool subreader_autodetect(stream_t *fd, struct MPOpts *opts,
     utf16--;
 
     if (sub_format==SUB_INVALID) {
-        mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: Could not determine file format\n");
+        mp_verbose(log, "Could not determine file format\n");
         return false;
     }
     srp=sr+sub_format;
-    mp_msg(MSGT_SUBREADER, MSGL_V, "SUB: Detected subtitle file format: %s\n", srp->name);
+    mp_verbose(log, "Detected subtitle file format: %s\n", srp->name);
 
     *out = *srp;
     out->args = (struct readline_args) {
+        .log = log,
         .utf16 = utf16,
         .opts = opts,
         .sub_slacktime = 20000, //20 sec
@@ -1233,8 +1237,8 @@ static sub_data* sub_read_file(stream_t *fd, struct subreader *srp)
 
     free(alloced_sub);
 
-//    printf ("SUB: Subtitle format %s time.\n", uses_time?"uses":"doesn't use");
-    mp_msg(MSGT_SUBREADER, MSGL_V,"SUB: Read %i subtitles, %i bad line(s).\n",
+//    printf ("Subtitle format %s time.\n", uses_time?"uses":"doesn't use");
+    MP_VERBOSE(&srp->args, "Read %i subtitles, %i bad line(s).\n",
            sub_num, sub_errs);
 
     if(sub_num<=0){
@@ -1242,7 +1246,7 @@ static sub_data* sub_read_file(stream_t *fd, struct subreader *srp)
 	return NULL;
     }
 
-    adjust_subs_time(first, 6.0, fps, opts->sub_fps, 1, sub_num, args.uses_time);/*~6 secs AST*/
+    adjust_subs_time(srp, first, 6.0, fps, opts->sub_fps, 1, sub_num, args.uses_time);/*~6 secs AST*/
     return_sub = first;
 
     if (return_sub == NULL) return NULL;
@@ -1334,7 +1338,7 @@ static int d_open_file(struct demuxer *demuxer, enum demux_check check)
     struct stream *ps = read_probe_stream(demuxer->stream, PROBE_SIZE);
 
     struct subreader sr;
-    bool res = subreader_autodetect(ps, demuxer->opts, &sr);
+    bool res = subreader_autodetect(ps, demuxer->opts, demuxer->log, &sr);
 
     free_stream(ps);
 

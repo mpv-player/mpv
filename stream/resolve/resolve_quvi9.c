@@ -22,38 +22,43 @@
 #include <quvi.h>
 
 #include "talloc.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "options/options.h"
 #include "common/playlist.h"
 #include "resolve.h"
 
-static bool mp_quvi_ok(quvi_t q)
+static bool mp_quvi_ok(quvi_t q, struct mp_log *log)
 {
     if (!quvi_ok(q)) {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "[quvi] %s\n", quvi_errmsg(q));
+        mp_err(log, "%s\n", quvi_errmsg(q));
         return false;
     }
     return true;
 }
 
-struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
+struct mp_resolve_result *mp_resolve_quvi(const char *url,
+                                          struct mpv_global *global)
 {
+    struct mp_log *log = mp_log_new(NULL, global->log, "quvi");
+    struct MPOpts *opts = global->opts;
     int mode = QUVI_SUPPORTS_MODE_OFFLINE;
 
     quvi_t q = quvi_new();
     if (!quvi_ok(q)) {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "[quvi] %s\n", quvi_errmsg(q));
+        mp_err(log, "%s\n", quvi_errmsg(q));
 
         quvi_free(q);
+        talloc_free(log);
         return NULL;
     }
 
     struct mp_resolve_result *res = talloc_zero(NULL, struct mp_resolve_result);
 
     if (quvi_supports(q, url, mode, QUVI_SUPPORTS_TYPE_PLAYLIST)) {
-        mp_msg(MSGT_OPEN, MSGL_INFO, "[quvi] Checking playlist...\n");
+        mp_info(log, "Checking playlist...\n");
         quvi_playlist_t qp = quvi_playlist_new(q, url);
-        if (mp_quvi_ok(q)) {
+        if (mp_quvi_ok(q, log)) {
             res->playlist = talloc_zero(res, struct playlist);
             while (quvi_playlist_media_next(qp)) {
                 char *entry = NULL;
@@ -66,9 +71,9 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
     }
 
     if (quvi_supports(q, url, mode, QUVI_SUPPORTS_TYPE_MEDIA)) {
-        mp_msg(MSGT_OPEN, MSGL_INFO, "[quvi] Checking URL...\n");
+        mp_info(log, "Checking URL...\n");
         quvi_media_t media = quvi_media_new(q, url);
-        if (mp_quvi_ok(q)) {
+        if (mp_quvi_ok(q, log)) {
             char *format = opts->quvi_format ? opts->quvi_format : "best";
             bool use_default = strcmp(format, "default") == 0;
             if (!use_default)
@@ -107,9 +112,9 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
     }
 
     if (quvi_supports(q, url, mode, QUVI_SUPPORTS_TYPE_SUBTITLE)) {
-        mp_msg(MSGT_OPEN, MSGL_INFO, "[quvi] Getting subtitles...\n");
+        mp_info(log, "Getting subtitles...\n");
         quvi_subtitle_t qsub = quvi_subtitle_new(q, url);
-        if (mp_quvi_ok(q)) {
+        if (mp_quvi_ok(q, log)) {
             while (1) {
                 quvi_subtitle_type_t qst = quvi_subtitle_type_next(qsub);
                 if (!qst)
@@ -124,7 +129,7 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
                     // Let quvi convert the subtitle to SRT.
                     quvi_subtitle_export_t qse =
                         quvi_subtitle_export_new(qsl, "srt");
-                    if (mp_quvi_ok(q)) {
+                    if (mp_quvi_ok(q, log)) {
                         const char *subdata = quvi_subtitle_export_data(qse);
                         struct mp_resolve_sub *sub = talloc_ptrtype(res, sub);
                         *sub = (struct mp_resolve_sub) {
@@ -142,6 +147,7 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
     }
 
     quvi_free(q);
+    talloc_free(log);
 
     if (!res->url && (!res->playlist || !res->playlist->first)) {
         talloc_free(res);

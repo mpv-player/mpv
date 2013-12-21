@@ -49,7 +49,7 @@ const char * const dvd_audio_stream_channels[6] = { "mono", "stereo", "unknown",
 
 int dvd_speed=0; /* 0 => don't touch speed */
 
-void dvd_set_speed(char *device, unsigned speed)
+void dvd_set_speed(stream_t *stream, char *device, unsigned speed)
 {
 #if defined(__linux__) && defined(SG_IO) && defined(GPCMD_SET_STREAMING)
   int fd;
@@ -69,13 +69,13 @@ void dvd_set_speed(char *device, unsigned speed)
     return;
   case -1: /* restore default value */
     if (dvd_speed == 0) return; /* we haven't touched the speed setting */
-    mp_msg(MSGT_OPEN, MSGL_INFO, "Restoring DVD speed... ");
+    MP_INFO(stream, "Restoring DVD speed... ");
     break;
   default: /* limit to <speed> KB/s */
     // speed < 100 is multiple of DVD single speed (1350KB/s)
     if (speed < 100)
       speed *= 1350;
-    mp_msg(MSGT_OPEN, MSGL_INFO, "Limiting DVD speed to %dKB/s... ", speed);
+    MP_INFO(stream, "Limiting DVD speed to %dKB/s... ", speed);
     break;
   }
 
@@ -108,14 +108,14 @@ void dvd_set_speed(char *device, unsigned speed)
 
   fd = open(device, O_RDWR | O_NONBLOCK | O_CLOEXEC);
   if (fd == -1) {
-    mp_msg(MSGT_OPEN, MSGL_INFO, "Couldn't open DVD device for writing, changing DVD speed needs write access.\n");
+    MP_INFO(stream, "Couldn't open DVD device for writing, changing DVD speed needs write access.\n");
     return;
   }
 
   if (ioctl(fd, SG_IO, &sghdr) < 0)
-    mp_msg(MSGT_OPEN, MSGL_INFO, "failed\n");
+    MP_INFO(stream, "failed\n");
   else
-    mp_msg(MSGT_OPEN, MSGL_INFO, "successful\n");
+    MP_INFO(stream, "successful\n");
 
   close(fd);
 #endif

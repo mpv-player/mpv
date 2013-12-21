@@ -142,13 +142,12 @@ static int control(struct af_instance *af, int cmd, void *arg)
         // bs2b have srate limits, try to resample if needed
         if (af->data->rate > BS2B_MAXSRATE || af->data->rate < BS2B_MINSRATE) {
             af->data->rate = BS2B_DEFAULT_SRATE;
-            mp_msg(MSGT_AFILTER, MSGL_WARN,
-                   "[bs2b] Requested sample rate %d Hz is out of bounds [%d..%d] Hz.\n"
+            MP_WARN(af, "[bs2b] Requested sample rate %d Hz is out of bounds [%d..%d] Hz.\n"
                    "[bs2b] Trying to resample to %d Hz.\n",
                    af->data->rate, BS2B_MINSRATE, BS2B_MAXSRATE, BS2B_DEFAULT_SRATE);
         }
         bs2b_set_srate(s->filter, (long)af->data->rate);
-        mp_msg(MSGT_AFILTER, MSGL_V, "[bs2b] using format %s\n",
+        MP_VERBOSE(af, "[bs2b] using format %s\n",
                af_fmt_to_str(af->data->format));
 
         return af_test_output(af,(struct mp_audio*)arg);

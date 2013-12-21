@@ -42,7 +42,7 @@ static bool supports_format(const char *format)
 
 static int init(struct sd *sd)
 {
-    void *spudec = spudec_new_scaled(sd->sub_video_w, sd->sub_video_h,
+    void *spudec = spudec_new_scaled(sd->log, sd->sub_video_w, sd->sub_video_h,
                                      sd->extradata, sd->extradata_len);
     if (!spudec)
         return -1;

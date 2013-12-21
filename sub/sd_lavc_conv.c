@@ -110,8 +110,7 @@ static int init(struct sd *sd)
     return 0;
 
  error:
-    mp_msg(MSGT_SUBREADER, MSGL_ERR,
-           "Could not open libavcodec subtitle converter\n");
+    MP_FATAL(sd, "Could not open libavcodec subtitle converter\n");
     av_free(avctx);
     talloc_free(priv);
     return -1;
@@ -243,7 +242,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 
     if (sd->codec && strcmp(sd->codec, "webvtt-webm") == 0) {
         if (parse_webvtt(&pkt, &parsed_pkt) < 0) {
-            mp_msg(MSGT_OSD, MSGL_ERR, "Error parsing subtitle\n");
+            MP_ERR(sd, "Error parsing subtitle\n");
             goto done;
         }
         pkt = parsed_pkt;
@@ -251,7 +250,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 
     ret = avcodec_decode_subtitle2(avctx, &sub, &got_sub, &pkt);
     if (ret < 0) {
-        mp_msg(MSGT_OSD, MSGL_ERR, "Error decoding subtitle\n");
+        MP_ERR(sd, "Error decoding subtitle\n");
     } else if (got_sub) {
         for (int i = 0; i < sub.num_rects; i++) {
             char *ass_line = sub.rects[i]->ass;

@@ -147,6 +147,7 @@ typedef struct MPContext {
     struct mpv_global *global;
     struct MPOpts *opts;
     struct mp_log *log;
+    struct mp_log *statusline;
     struct m_config *mconfig;
     struct input_ctx *input;
     struct osd_state *osd;
@@ -313,6 +314,7 @@ typedef struct MPContext {
      */
     struct ass_renderer *ass_renderer;
     struct ass_library *ass_library;
+    struct mp_log *ass_log;
 
     int last_dvb_step;
 
@@ -347,17 +349,12 @@ void clear_audio_decode_buffers(struct MPContext *mpctx);
 
 // configfiles.c
 bool mp_parse_cfgfiles(struct MPContext *mpctx);
-char *mp_get_playback_resume_config_filename(const char *fname,
-                                             struct MPOpts *opts);
-void mp_load_per_protocol_config(struct m_config *conf, const char * const file);
-void mp_load_per_extension_config(struct m_config *conf, const char * const file);
-void mp_load_per_output_config(struct m_config *conf, char *cfg, char *out);
-void mp_load_per_file_config(struct m_config *conf, const char * const file,
-                             bool search_file_dir);
-void mp_load_playback_resume(struct m_config *conf, const char *file);
+void mp_load_auto_profiles(struct MPContext *mpctx);
+void mp_load_per_file_config(struct MPContext *mpctx);
+void mp_load_playback_resume(struct MPContext *mpctx, const char *file);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
-struct playlist_entry *mp_resume_playlist(struct playlist *playlist,
-                                          struct MPOpts *opts);
+struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
+                                                struct playlist *playlist);
 
 // dvdnav.c
 void mp_nav_init(struct MPContext *mpctx);
@@ -386,7 +383,7 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 
 // main.c
-void mp_print_version(int always);
+void mp_print_version(struct mp_log *log, int always);
 
 // misc.c
 double get_start_time(struct MPContext *mpctx);

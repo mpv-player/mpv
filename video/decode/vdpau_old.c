@@ -34,6 +34,7 @@
 #include "video/decode/dec_video.h"
 
 struct priv {
+    struct mp_log              *log;
     struct mp_vdpau_ctx        *mpvdp;
     struct vdp_functions       *vdp;
     VdpDevice                   vdp_device;
@@ -96,8 +97,8 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx, int max_refs)
         break;
     case IMGFMT_VDPAU_H264:
         vdp_decoder_profile = VDP_DECODER_PROFILE_H264_HIGH;
-        mp_msg(MSGT_VO, MSGL_V, "[vdpau] Creating H264 hardware decoder "
-               "for %d reference frames.\n", max_refs);
+        MP_VERBOSE(p, "Creating H264 hardware decoder "
+                   "for %d reference frames.\n", max_refs);
         break;
     case IMGFMT_VDPAU_WMV3:
         vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_MAIN;
@@ -109,13 +110,13 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx, int max_refs)
         vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG4_PART2_ASP;
         break;
     default:
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unknown image format!\n");
+        MP_ERR(p, "Unknown image format!\n");
         goto fail;
     }
     vdp_st = vdp->decoder_create(p->vdp_device, vdp_decoder_profile,
                                  p->vid_width, p->vid_height, max_refs,
                                  &p->decoder);
-    CHECK_ST_WARNING("Failed creating VDPAU decoder");
+    CHECK_VDP_WARNING(p, "Failed creating VDPAU decoder");
     if (vdp_st != VDP_STATUS_OK)
         goto fail;
     p->decoder_max_refs = max_refs;
@@ -152,7 +153,7 @@ static void draw_slice_hwdec(struct AVCodecContext *s,
                                  (void *)&rndr->info,
                                  rndr->bitstream_buffers_used,
                                  rndr->bitstream_buffers);
-    CHECK_ST_WARNING("Failed VDPAU decoder rendering");
+    CHECK_VDP_WARNING(p, "Failed VDPAU decoder rendering");
 }
 
 static void release_surface(void *ptr)
@@ -222,6 +223,7 @@ static int init(struct lavc_ctx *ctx)
 {
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
+        .log = mp_log_new(p, ctx->log, "vdpau"),
         .mpvdp = ctx->hwdec_info->vdpau_ctx,
     };
     ctx->hwdec_priv = p;

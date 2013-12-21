@@ -58,7 +58,6 @@ static void reset(struct vf_instance *vf)
     struct pullup_context *c;
     vf->priv->ctx = c = pullup_alloc_context();
     vf->priv->fakecount = 1;
-    c->verbose = verbose>0;
     c->junk_left = vf->priv->junk_left;
     c->junk_right = vf->priv->junk_right;
     c->junk_top = vf->priv->junk_top;
@@ -112,7 +111,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 	if (1) {
 		b = pullup_get_buffer(c, 2);
 		if (!b) {
-			mp_msg(MSGT_VFILTER,MSGL_ERR,"Could not get buffer from pullup!\n");
+			MP_ERR(vf, "Could not get buffer from pullup!\n");
 			f = pullup_get_frame(c);
 			pullup_release_frame(f);
 			goto skip;

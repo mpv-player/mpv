@@ -72,13 +72,13 @@ void write_status_line(struct MPContext *mpctx, const char *line)
 {
     struct MPOpts *opts = mpctx->opts;
     if (opts->slave_mode) {
-        MP_MSG(mpctx, MSGL_STATUS, "%s\n", line);
+        mp_msg(mpctx->statusline, MSGL_STATUS, "%s\n", line);
     } else if (erase_to_end_of_line) {
-        MP_MSG(mpctx, MSGL_STATUS, "%s%s\r", line, erase_to_end_of_line);
+        mp_msg(mpctx->statusline, MSGL_STATUS, "%s%s\r", line, erase_to_end_of_line);
     } else {
         int pos = strlen(line);
         int width = get_term_width() - pos;
-        MP_MSG(mpctx, MSGL_STATUS, "%s%*s\r", line, width, "");
+        mp_msg(mpctx->statusline, MSGL_STATUS, "%s%*s\r", line, width, "");
     }
 }
 

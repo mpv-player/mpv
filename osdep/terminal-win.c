@@ -28,11 +28,30 @@
 #include <stdint.h>
 #include <string.h>
 #include <windows.h>
+#include <io.h>
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "terminal.h"
 
-int mp_input_slave_cmd_func(int fd, char *dest, int size)
+int screen_width = 80;
+int screen_height = 24;
+char *erase_to_end_of_line = NULL;
+
+#define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
+#define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
+static short stdoutAttrs = 0;
+static const unsigned char ansi2win32[8] = {
+    0,
+    FOREGROUND_RED,
+    FOREGROUND_GREEN,
+    FOREGROUND_GREEN | FOREGROUND_RED,
+    FOREGROUND_BLUE,
+    FOREGROUND_BLUE  | FOREGROUND_RED,
+    FOREGROUND_BLUE  | FOREGROUND_GREEN,
+    FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
+};
+
+static int mp_input_slave_cmd_func(void *ctx, int fd, char *dest, int size)
 {
     DWORD retval;
     HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
@@ -51,9 +70,10 @@ int mp_input_slave_cmd_func(int fd, char *dest, int size)
     return MP_INPUT_NOTHING;
 }
 
-int screen_width = 80;
-int screen_height = 24;
-char *erase_to_end_of_line = NULL;
+void terminal_setup_stdin_cmd_input(struct input_ctx *ictx)
+{
+    mp_input_add_fd(ictx, 0, 0, mp_input_slave_cmd_func, NULL, NULL, NULL);
+}
 
 void get_screen_size(void)
 {
@@ -62,11 +82,6 @@ void get_screen_size(void)
         screen_width = cinfo.dwMaximumWindowSize.X;
         screen_height = cinfo.dwMaximumWindowSize.Y;
     }
-}
-
-int load_termcap(char *termtype)
-{
-    return 0;
 }
 
 static HANDLE in;
@@ -162,12 +177,24 @@ static int getch2_internal(void)
     return -1;
 }
 
-bool getch2(struct input_ctx *ctx)
+static bool getch2(struct input_ctx *ctx)
 {
     int r = getch2_internal();
     if (r >= 0)
         mp_input_put_key(ctx, r);
     return true;
+}
+
+static int read_keys(void *ctx, int fd)
+{
+    if (getch2(ctx))
+        return MP_INPUT_NOTHING;
+    return MP_INPUT_DEAD;
+}
+
+void terminal_setup_getch(struct input_ctx *ictx)
+{
+    mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
 }
 
 void getch2_poll(void)
@@ -191,4 +218,32 @@ void getch2_disable(void)
     if (!getch2_status)
         return;                // already disabled / never enabled
     getch2_status = 0;
+}
+
+bool terminal_in_background(void)
+{
+    return false;
+}
+
+void terminal_set_foreground_color(FILE *stream, int c)
+{
+    HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
+    if (c < 0 || c >= 8) { // reset or invalid
+        SetConsoleTextAttribute(wstream, stdoutAttrs);
+    } else {
+        SetConsoleTextAttribute(wstream, ansi2win32[c] | FOREGROUND_INTENSITY);
+    }
+}
+
+int terminal_init(void)
+{
+    CONSOLE_SCREEN_BUFFER_INFO cinfo;
+    DWORD cmode = 0;
+    GetConsoleMode(hSTDOUT, &cmode);
+    cmode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
+    SetConsoleMode(hSTDOUT, cmode);
+    SetConsoleMode(hSTDERR, cmode);
+    GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
+    stdoutAttrs = cinfo.wAttributes;
+    return 0;
 }

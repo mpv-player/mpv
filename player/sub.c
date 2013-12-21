@@ -185,7 +185,7 @@ void reinit_subs(struct MPContext *mpctx)
 
     if (!sh->sub->dec_sub) {
         assert(!mpctx->d_sub);
-        sh->sub->dec_sub = sub_create(opts);
+        sh->sub->dec_sub = sub_create(mpctx->global);
     }
 
     assert(!mpctx->d_sub || sh->sub->dec_sub == mpctx->d_sub);

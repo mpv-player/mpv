@@ -18,6 +18,7 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
+#include <libavutil/log.h>
 #include <libavcodec/avcodec.h>
 
 #include "common/common.h"
@@ -122,7 +123,7 @@ void mp_set_avcodec_threads(AVCodecContext *avctx, int threads)
     if (threads == 0) {
         threads = default_thread_count();
         if (threads < 1) {
-            mp_msg(MSGT_GLOBAL, MSGL_WARN, "Could not determine "
+            av_log(avctx, AV_LOG_WARNING, "Could not determine "
                    "thread count to use, defaulting to 1.\n");
             threads = 1;
         }

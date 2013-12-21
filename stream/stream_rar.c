@@ -97,7 +97,7 @@ static int rar_entry_open(stream_t *stream, int mode)
     mp_url_unescape_inplace(base);
 
     struct stream *rar =
-        stream_create(base, STREAM_READ | STREAM_NO_FILTERS, stream->opts);
+        stream_create(base, STREAM_READ | STREAM_NO_FILTERS, stream->global);
     if (!rar)
         return STREAM_ERROR;
 
@@ -126,7 +126,7 @@ static int rar_entry_open(stream_t *stream, int mode)
     };
     file->current_chunk = &dummy;
     file->s = rar; // transfer ownership
-    file->opts = stream->opts;
+    file->global = stream->global;
     RarSeek(file, 0);
 
     stream->priv = file;

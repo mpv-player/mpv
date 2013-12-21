@@ -198,7 +198,7 @@ static int SkipFile(struct stream *s, int *count, rar_file_t ***file,
 
     rar_file_t *current = NULL;
     if (method != 0x30) {
-        mp_msg(MSGT_STREAM, MSGL_WARN, "Ignoring compressed file %s (method=0x%2.2x)\n", name, method);
+        MP_WARN(s, "Ignoring compressed file %s (method=0x%2.2x)\n", name, method);
         goto exit;
     }
 
@@ -386,7 +386,7 @@ int RarParse(struct stream *s, int *count, rar_file_t ***file)
         if (!volume_mrl)
             goto done;
 
-        vol = stream_create(volume_mrl, STREAM_READ | STREAM_NO_FILTERS, s->opts);
+        vol = stream_create(volume_mrl, STREAM_READ | STREAM_NO_FILTERS, s->global);
 
         if (!vol)
             goto done;
@@ -423,7 +423,7 @@ int  RarSeek(rar_file_t *file, uint64_t position)
             free_stream(file->s);
         file->s = stream_create(file->current_chunk->mrl,
                                 STREAM_READ | STREAM_NO_FILTERS,
-                                file->opts);
+                                file->global);
     }
     return file->s ? stream_seek(file->s, offset) : 0;
 }

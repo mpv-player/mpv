@@ -471,19 +471,19 @@ bool mp_chmap_from_str(struct mp_chmap *dst, bstr src)
     return true;
 }
 
-void mp_chmap_print_help(int msgt, int msgl)
+void mp_chmap_print_help(struct mp_log *log)
 {
-    mp_msg(msgt, msgl, "Speakers:\n");
+    mp_info(log, "Speakers:\n");
     for (int n = 0; n < MP_SPEAKER_ID_COUNT; n++) {
         if (speaker_names[n][0])
-            mp_msg(msgt, msgl, "    %-16s (%s)\n",
-                   speaker_names[n][0], speaker_names[n][1]);
+            mp_info(log, "    %-16s (%s)\n",
+                    speaker_names[n][0], speaker_names[n][1]);
     }
-    mp_msg(msgt, msgl, "Standard layouts:\n");
+    mp_info(log, "Standard layouts:\n");
     for (int n = 0; std_layout_names[n][0]; n++) {
-        mp_msg(msgt, msgl, "    %-16s (%s)\n",
-               std_layout_names[n][0], std_layout_names[n][1]);
+        mp_info(log, "    %-16s (%s)\n",
+                 std_layout_names[n][0], std_layout_names[n][1]);
     }
     for (int n = 0; n < MP_NUM_CHANNELS; n++)
-        mp_msg(msgt, msgl, "    unknown%d\n", n);
+        mp_info(log, "    unknown%d\n", n);
 }

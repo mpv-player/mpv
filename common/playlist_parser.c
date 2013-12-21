@@ -40,6 +40,7 @@
 #include "playlist_parser.h"
 #include "stream/stream.h"
 #include "demux/demux.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "options/path.h"
 
@@ -54,6 +55,7 @@ typedef struct play_tree_parser {
   int buffer_size , buffer_end;
   int keep;
   struct playlist *pl;
+  struct mp_log *log;
 } play_tree_parser_t;
 
 static void
@@ -178,7 +180,7 @@ static bool parse_asx(play_tree_parser_t* p) {
   int comments = 0,get_line = 1;
   char* line = NULL;
 
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying asx...\n");
+  MP_VERBOSE(p, "Trying asx...\n");
 
   while(1) {
     if(get_line) {
@@ -191,8 +193,8 @@ static bool parse_asx(play_tree_parser_t* p) {
     }
     if(!comments) {
       if(line[0] != '<') {
-	mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"First char isn't '<' but '%c'\n",line[0]);
-	mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Buffer = [%s]\n",p->buffer);
+	MP_DBG(p, "First char isn't '<' but '%c'\n",line[0]);
+	MP_TRACE(p, "Buffer = [%s]\n",p->buffer);
 	return false;
       } else if(strncmp(line,"<!--",4) == 0) { // Comments
 	comments = 1;
@@ -225,15 +227,15 @@ static bool parse_asx(play_tree_parser_t* p) {
     }
   }
 
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected asx format\n");
+  MP_VERBOSE(p, "Detected asx format\n");
 
   // We have an asx : load it in memory and parse
 
   while((line = play_tree_parser_get_line(p)) != NULL)
     /* NOTHING */;
 
- mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Parsing asx file: [%s]\n",p->buffer);
- return asx_parse(p->buffer,p->pl);
+ MP_TRACE(p, "Parsing asx file: [%s]\n",p->buffer);
+ return asx_parse(p->buffer,p->pl,p->log);
 }
 
 static bool parse_smil(play_tree_parser_t* p) {
@@ -242,7 +244,7 @@ static bool parse_smil(play_tree_parser_t* p) {
   int is_rmsmil = 0;
   unsigned int npkt, ttlpkt;
 
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying smil playlist...\n");
+  MP_VERBOSE(p, "Trying smil playlist...\n");
 
   // Check if smil
   while((line = play_tree_parser_get_line(p)) != NULL) {
@@ -261,18 +263,18 @@ static bool parse_smil(play_tree_parser_t* p) {
   }
 
   if (!line) return NULL;
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected smil playlist format\n");
+  MP_VERBOSE(p, "Detected smil playlist format\n");
   play_tree_parser_stop_keeping(p);
 
   if (strncasecmp(line,"(smil-document",14)==0) {
-    mp_msg(MSGT_PLAYTREE,MSGL_V,"Special smil-over-realrtsp playlist header\n");
+    MP_VERBOSE(p, "Special smil-over-realrtsp playlist header\n");
     is_rmsmil = 1;
     if (sscanf(line, "(smil-document (ver 1.0)(npkt %u)(ttlpkt %u", &npkt, &ttlpkt) != 2) {
-      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"smil-over-realrtsp: header parsing failure, assuming single packet.\n");
+      MP_WARN(p, "smil-over-realrtsp: header parsing failure, assuming single packet.\n");
       npkt = ttlpkt = 1;
     }
     if (ttlpkt == 0 || npkt > ttlpkt) {
-      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"smil-over-realrtsp: bad packet counters (npkk = %u, ttlpkt = %u), assuming single packet.\n",
+      MP_WARN(p, "smil-over-realrtsp: bad packet counters (npkk = %u, ttlpkt = %u), assuming single packet.\n",
         npkt, ttlpkt);
       npkt = ttlpkt = 1;
     }
@@ -294,13 +296,13 @@ static bool parse_smil(play_tree_parser_t* p) {
 
       line = strdup(src_line);
       if(!(src_line = play_tree_parser_get_line(p))) {
-        mp_msg(MSGT_PLAYTREE,MSGL_WARN,"smil-over-realrtsp: can't get line from packet %u/%u.\n", npkt, ttlpkt);
+        MP_WARN(p, "smil-over-realrtsp: can't get line from packet %u/%u.\n", npkt, ttlpkt);
         break;
       }
       strstrip(src_line);
       // Skip header, packet starts after "
       if(!(payload = strchr(src_line,'\"'))) {
-        mp_msg(MSGT_PLAYTREE,MSGL_WARN,"smil-over-realrtsp: can't find start of packet, using complete line.\n");
+        MP_WARN(p, "smil-over-realrtsp: can't find start of packet, using complete line.\n");
         payload = src_line;
       } else
         payload++;
@@ -336,17 +338,17 @@ static bool parse_smil(play_tree_parser_t* p) {
       if (pos != NULL) {
         entrymode=0;
         if (pos[4] != '"' && pos[4] != '\'') {
-          mp_msg(MSGT_PLAYTREE,MSGL_V,"Unknown delimiter %c in source line %s\n", pos[4], line);
+          MP_VERBOSE(p, "Unknown delimiter %c in source line %s\n", pos[4], line);
           break;
         }
         s_start=pos+5;
         s_end=strchr(s_start,pos[4]);
         if (s_end == NULL) {
-          mp_msg(MSGT_PLAYTREE,MSGL_V,"Error parsing this source line %s\n",line);
+          MP_VERBOSE(p, "Error parsing this source line %s\n",line);
           break;
         }
         if (s_end-s_start> 511) {
-          mp_msg(MSGT_PLAYTREE,MSGL_V,"Cannot store such a large source %s\n",line);
+          MP_VERBOSE(p, "Cannot store such a large source %s\n",line);
           break;
         }
         strncpy(source,s_start,s_end-s_start);
@@ -365,7 +367,7 @@ static bool parse_smil(play_tree_parser_t* p) {
 static bool parse_textplain(play_tree_parser_t* p) {
   char* line;
 
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying plaintext playlist...\n");
+  MP_VERBOSE(p, "Trying plaintext playlist...\n");
   play_tree_parser_stop_keeping(p);
 
   while((line = play_tree_parser_get_line(p)) != NULL) {
@@ -386,7 +388,7 @@ static bool parse_textplain(play_tree_parser_t* p) {
  *            will be NULL on failure.
  * \return decoded length in bytes
  */
-static int decode_nsc_base64(char *in, char **buf) {
+static int decode_nsc_base64(struct mp_log *log, char *in, char **buf) {
   int i, j, n;
   if (in[0] != '0' || in[1] != '2')
     goto err_out;
@@ -406,7 +408,7 @@ static int decode_nsc_base64(char *in, char **buf) {
       else if (c[j] == '{') c[j] = 62;
       else if (c[j] == '}') c[j] = 63;
       else {
-        mp_msg(MSGT_PLAYTREE, MSGL_ERR, "Invalid character %c (0x%02"PRIx8")\n", c[j], c[j]);
+        mp_err(log, "Invalid character %c (0x%02"PRIx8")\n", c[j], c[j]);
         goto err_out;
       }
     }
@@ -438,7 +440,7 @@ static bool parse_nsc(play_tree_parser_t* p) {
   char *line, *addr = NULL, *url, *unicast_url = NULL;
   int port = 0;
 
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying nsc playlist...\n");
+  MP_VERBOSE(p, "Trying nsc playlist...\n");
   while((line = play_tree_parser_get_line(p)) != NULL) {
     strstrip(line);
     if(!line[0]) // Ignore empties
@@ -448,22 +450,22 @@ static bool parse_nsc(play_tree_parser_t* p) {
     else
       return false;
   }
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected nsc playlist format\n");
+  MP_VERBOSE(p, "Detected nsc playlist format\n");
   play_tree_parser_stop_keeping(p);
   while ((line = play_tree_parser_get_line(p)) != NULL) {
     strstrip(line);
     if (!line[0])
       continue;
     if (strncasecmp(line, "Unicast URL=", 12) == 0) {
-      int len = decode_nsc_base64(&line[12], &unicast_url);
+      int len = decode_nsc_base64(p->log, &line[12], &unicast_url);
       if (len <= 0)
-        mp_msg(MSGT_PLAYTREE, MSGL_WARN, "[nsc] Unsupported Unicast URL encoding\n");
+        MP_WARN(p, "[nsc] Unsupported Unicast URL encoding\n");
       else
         utf16_to_ascii(unicast_url, len);
     } else if (strncasecmp(line, "IP Address=", 11) == 0) {
-      int len = decode_nsc_base64(&line[11], &addr);
+      int len = decode_nsc_base64(p->log, &line[11], &addr);
       if (len <= 0)
-        mp_msg(MSGT_PLAYTREE, MSGL_WARN, "[nsc] Unsupported IP Address encoding\n");
+        MP_WARN(p, "[nsc] Unsupported IP Address encoding\n");
       else
         utf16_to_ascii(addr, len);
     } else if (strncasecmp(line, "IP Port=", 8) == 0) {
@@ -490,29 +492,31 @@ err_out:
   return success;
 }
 
-static struct playlist *do_parse(struct stream* stream, bool forced);
+static struct playlist *do_parse(struct stream* stream, bool forced,
+                                 struct mp_log *log, struct mpv_global *global);
 
-struct playlist *playlist_parse_file(const char *file, struct MPOpts *opts)
+struct playlist *playlist_parse_file(const char *file, struct mpv_global *global)
 {
-  stream_t *stream = stream_open(file, opts);
+  struct mp_log *log = mp_log_new(NULL, global->log, "!playlist_parser");
+  struct playlist *ret = NULL;
+  stream_t *stream = stream_open(file, global);
   if(!stream) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,
-             "Error while opening playlist file %s: %s\n",
+      mp_err(log, "Error while opening playlist file %s: %s\n",
              file, strerror(errno));
-    return false;
+    goto done;
   }
 
-  mp_msg(MSGT_PLAYTREE, MSGL_V,
-         "Parsing playlist file %s...\n", file);
+  mp_verbose(log, "Parsing playlist file %s...\n", file);
 
-  struct playlist *ret = do_parse(stream, true);
+  ret = do_parse(stream, true, log, global);
   free_stream(stream);
 
   if (ret)
     playlist_add_base_path(ret, mp_dirname(file));
 
+done:
+  talloc_free(log);
   return ret;
-
 }
 
 typedef bool (*parser_fn)(play_tree_parser_t *);
@@ -524,16 +528,18 @@ static const parser_fn pl_parsers[] = {
 };
 
 
-static struct playlist *do_parse(struct stream* stream, bool forced)
+static struct playlist *do_parse(struct stream* stream, bool forced,
+                                 struct mp_log *log, struct mpv_global *global)
 {
   play_tree_parser_t p = {
       .stream = stream,
       .pl = talloc_zero(NULL, struct playlist),
       .keep = 1,
+      .log = log,
   };
 
   bool success = false;
-  struct demuxer *pl_demux = demux_open(stream, "playlist", NULL, stream->opts);
+  struct demuxer *pl_demux = demux_open(stream, "playlist", NULL, global);
   if (pl_demux && pl_demux->playlist) {
     playlist_transfer_entries(p.pl, pl_demux->playlist);
     success = true;
@@ -552,15 +558,15 @@ static struct playlist *do_parse(struct stream* stream, bool forced)
   }
 
   if(success)
-    mp_msg(MSGT_PLAYTREE,MSGL_V,"Playlist successfully parsed\n");
+    mp_verbose(log, "Playlist successfully parsed\n");
   else {
-    mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_ERR:MSGL_V),"Error while parsing playlist\n");
+    mp_msg(log,((forced==1)?MSGL_ERR:MSGL_V),"Error while parsing playlist\n");
     talloc_free(p.pl);
     p.pl = NULL;
   }
 
   if (p.pl && !p.pl->first)
-    mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_WARN:MSGL_V),"Warning: empty playlist\n");
+    mp_msg(log, ((forced==1)?MSGL_WARN:MSGL_V),"Warning: empty playlist\n");
 
   return p.pl;
 }

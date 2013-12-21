@@ -260,7 +260,7 @@ static const char *log_level[] = {
     [MSGL_WARN] = "warn",
     [MSGL_INFO] = "info",
     [MSGL_V] = "verbose",
-    [MSGL_DBG2] = "debug",
+    [MSGL_DEBUG] = "debug",
 };
 
 static int script_log(lua_State *L)
@@ -287,18 +287,19 @@ static int script_log(lua_State *L)
         const char *s = lua_tostring(L, -1);
         if (s == NULL)
             return luaL_error(L, "Invalid argument");
-        mp_msg_log(ctx->log, msgl, "%s%s", s, i > 0 ? " " : "");
+        mp_msg(ctx->log, msgl, "%s%s", s, i > 0 ? " " : "");
         lua_pop(L, 1);  // args... tostring
     }
-    mp_msg_log(ctx->log, msgl, "\n");
+    mp_msg(ctx->log, msgl, "\n");
 
     return 0;
 }
 
 static int script_find_config_file(lua_State *L)
 {
+    struct MPContext *mpctx = get_mpctx(L);
     const char *s = luaL_checkstring(L, 1);
-    char *path = mp_find_user_config_file(s);
+    char *path = mp_find_user_config_file(NULL, mpctx->global, s);
     if (path) {
         lua_pushstring(L, path);
     } else {
@@ -414,14 +415,13 @@ static int script_property_list(lua_State *L)
 
 static int script_property_string(lua_State *L)
 {
-    const struct m_option *props = mp_get_property_list();
     struct MPContext *mpctx = get_mpctx(L);
     const char *name = luaL_checkstring(L, 1);
     int type = lua_tointeger(L, lua_upvalueindex(1))
                ? M_PROPERTY_PRINT : M_PROPERTY_GET_STRING;
 
     char *result = NULL;
-    if (m_property_do(props, name, type, &result, mpctx) >= 0 && result) {
+    if (mp_property_do(name, type, &result, mpctx) >= 0 && result) {
         lua_pushstring(L, result);
         talloc_free(result);
         return 1;

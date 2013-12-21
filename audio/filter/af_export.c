@@ -95,20 +95,20 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Allocate new buffers (as one continuous block)
     s->buf[0] = calloc(s->sz*af->data->nch, af->data->bps);
     if(NULL == s->buf[0])
-      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Out of memory\n");
+      MP_FATAL(af, "[export] Out of memory\n");
     for(i = 1; i < af->data->nch; i++)
       s->buf[i] = (uint8_t *)s->buf[0] + i*s->sz*af->data->bps;
 
     if (!s->filename) {
-        mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] No filename set.\n");
+        MP_FATAL(af, "[export] No filename set.\n");
         return AF_ERROR;
     }
 
     // Init memory mapping
     s->fd = open(s->filename, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0640);
-    mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Exporting to file: %s\n", s->filename);
+    MP_INFO(af, "[export] Exporting to file: %s\n", s->filename);
     if(s->fd < 0) {
-      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Could not open/create file: %s\n",
+      MP_FATAL(af, "[export] Could not open/create file: %s\n",
 	     s->filename);
       return AF_ERROR;
     }
@@ -125,8 +125,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // mmap size
     s->mmap_area = mmap(0, mapsize, PROT_READ|PROT_WRITE,MAP_SHARED, s->fd, 0);
     if(s->mmap_area == NULL)
-      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Could not mmap file %s\n", s->filename);
-    mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Memory mapped to file: %s (%p)\n",
+      MP_FATAL(af, "[export] Could not mmap file %s\n", s->filename);
+    MP_INFO(af, "[export] Memory mapped to file: %s (%p)\n",
 	   s->filename, s->mmap_area);
 
     // Initialize header
@@ -213,11 +213,10 @@ static int af_open( struct af_instance* af )
   af->filter  = filter;
   af_export_t *priv = af->priv;
 
-  if (!priv->filename || !priv->filename[0])
-      priv->filename = mp_find_user_config_file(SHARED_FILE);
-
-  if (!priv->filename || !priv->filename[0])
+  if (!priv->filename || !priv->filename[0]) {
+      MP_FATAL(af, "no export filename given");
       return AF_ERROR;
+  }
 
   return AF_OK;
 }

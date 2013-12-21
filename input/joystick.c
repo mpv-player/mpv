@@ -43,21 +43,36 @@
 
 #include <linux/joystick.h>
 
-int axis[256];
-int btns = 0;
+static int mp_input_joystick_read(void *ctx, int fd);
 
-int mp_input_joystick_init(char* dev) {
+struct ctx {
+    struct mp_log *log;
+    int axis[256];
+    int btns;
+};
+
+static int close_js(void *ctx, int fd)
+{
+  talloc_free(ctx);
+  return 0;
+}
+
+int mp_input_joystick_init(struct input_ctx *ictx, struct mp_log *log, char *dev)
+{
   int fd,l=0;
   int initialized = 0;
   struct js_event ev;
 
-  mp_msg(MSGT_INPUT,MSGL_V,"Opening joystick device %s\n",dev ? dev : JS_DEV);
+  mp_verbose(log, "Opening joystick device %s\n",dev ? dev : JS_DEV);
 
   fd = open( dev ? dev : JS_DEV , O_RDONLY | O_NONBLOCK );
   if(fd < 0) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Can't open joystick device %s: %s\n",dev ? dev : JS_DEV,strerror(errno));
+    mp_err(log, "Can't open joystick device %s: %s\n",dev ? dev : JS_DEV,strerror(errno));
     return -1;
   }
+
+  struct ctx *ctx = talloc_ptrtype(NULL, ctx);
+  *ctx = (struct ctx) {.log = log};
 
   while(! initialized) {
     l = 0;
@@ -70,27 +85,30 @@ int mp_input_joystick_init(char* dev) {
 	  initialized = 1;
 	  break;
 	}
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading joystick device: %s\n",strerror(errno));
+	MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
 	close(fd);
+        talloc_free(ctx);
 	return -1;
       }
       l += r;
     }
     if((unsigned int)l < sizeof(struct js_event)) {
       if(l > 0)
-	mp_msg(MSGT_INPUT,MSGL_WARN,"Joystick: We lose %d bytes of data\n",l);
+	MP_WARN(ctx, "Joystick: We lose %d bytes of data\n",l);
       break;
     }
     if(ev.type == JS_EVENT_BUTTON)
-      btns |= (ev.value << ev.number);
+      ctx->btns |= (ev.value << ev.number);
     if(ev.type == JS_EVENT_AXIS)
-      axis[ev.number] = ev.value;
+      ctx->axis[ev.number] = ev.value;
   }
 
+  mp_input_add_fd(ictx, fd, 1, NULL, mp_input_joystick_read, close_js, ctx);
   return fd;
 }
 
-int mp_input_joystick_read(void *ctx, int fd) {
+static int mp_input_joystick_read(void *pctx, int fd) {
+  struct ctx *ctx = pctx;
   struct js_event ev;
   int l=0;
 
@@ -102,9 +120,9 @@ int mp_input_joystick_read(void *ctx, int fd) {
       else if(errno == EAGAIN)
 	return MP_INPUT_NOTHING;
       if( r < 0)
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading joystick device: %s\n",strerror(errno));
+	MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
       else
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading joystick device: %s\n","EOF");
+	MP_ERR(ctx, "Error while reading joystick device: %s\n","EOF");
       return MP_INPUT_DEAD;
     }
     l += r;
@@ -112,49 +130,49 @@ int mp_input_joystick_read(void *ctx, int fd) {
 
   if((unsigned int)l < sizeof(struct js_event)) {
     if(l > 0)
-      mp_msg(MSGT_INPUT,MSGL_WARN,"Joystick: We lose %d bytes of data\n",l);
+      MP_WARN(ctx, "Joystick: We lose %d bytes of data\n",l);
     return MP_INPUT_NOTHING;
   }
 
   if(ev.type & JS_EVENT_INIT) {
-    mp_msg(MSGT_INPUT,MSGL_WARN,"Joystick: warning init event, we have lost sync with driver.\n");
+    MP_WARN(ctx, "Joystick: warning init event, we have lost sync with driver.\n");
     ev.type &= ~JS_EVENT_INIT;
     if(ev.type == JS_EVENT_BUTTON) {
-      int s = (btns >> ev.number) & 1;
+      int s = (ctx->btns >> ev.number) & 1;
       if(s == ev.value) // State is the same : ignore
 	return MP_INPUT_NOTHING;
     }
     if(ev.type == JS_EVENT_AXIS) {
-      if( ( axis[ev.number] == 1 && ev.value > JOY_AXIS_DELTA) ||
-	  (axis[ev.number] == -1 && ev.value < -JOY_AXIS_DELTA) ||
-	  (axis[ev.number] == 0 && ev.value >= -JOY_AXIS_DELTA && ev.value <= JOY_AXIS_DELTA)
+      if( ( ctx->axis[ev.number] == 1 && ev.value > JOY_AXIS_DELTA) ||
+	  (ctx->axis[ev.number] == -1 && ev.value < -JOY_AXIS_DELTA) ||
+	  (ctx->axis[ev.number] == 0 && ev.value >= -JOY_AXIS_DELTA && ev.value <= JOY_AXIS_DELTA)
 	  ) // State is the same : ignore
 	return MP_INPUT_NOTHING;
     }
   }
 
   if(ev.type & JS_EVENT_BUTTON) {
-    btns &= ~(1 << ev.number);
-    btns |= (ev.value << ev.number);
+    ctx->btns &= ~(1 << ev.number);
+    ctx->btns |= (ev.value << ev.number);
     if(ev.value == 1)
       return (MP_JOY_BTN0 + ev.number) | MP_KEY_STATE_DOWN;
     else
       return (MP_JOY_BTN0 + ev.number) | MP_KEY_STATE_UP;
   } else if(ev.type & JS_EVENT_AXIS) {
-    if(ev.value < -JOY_AXIS_DELTA && axis[ev.number] != -1) {
-      axis[ev.number] = -1;
+    if(ev.value < -JOY_AXIS_DELTA && ctx->axis[ev.number] != -1) {
+      ctx->axis[ev.number] = -1;
       return (MP_JOY_AXIS0_MINUS+(2*ev.number)) | MP_KEY_STATE_DOWN;
-    } else if(ev.value > JOY_AXIS_DELTA && axis[ev.number] != 1) {
-      axis[ev.number] = 1;
+    } else if(ev.value > JOY_AXIS_DELTA && ctx->axis[ev.number] != 1) {
+      ctx->axis[ev.number] = 1;
       return (MP_JOY_AXIS0_PLUS+(2*ev.number)) | MP_KEY_STATE_DOWN;
-    } else if(ev.value <= JOY_AXIS_DELTA && ev.value >= -JOY_AXIS_DELTA && axis[ev.number] != 0) {
-      int r = axis[ev.number] == 1 ? MP_JOY_AXIS0_PLUS+(2*ev.number) : MP_JOY_AXIS0_MINUS+(2*ev.number);
-      axis[ev.number] = 0;
+    } else if(ev.value <= JOY_AXIS_DELTA && ev.value >= -JOY_AXIS_DELTA && ctx->axis[ev.number] != 0) {
+      int r = ctx->axis[ev.number] == 1 ? MP_JOY_AXIS0_PLUS+(2*ev.number) : MP_JOY_AXIS0_MINUS+(2*ev.number);
+      ctx->axis[ev.number] = 0;
       return r | MP_KEY_STATE_UP;
     } else
       return MP_INPUT_NOTHING;
   } else {
-    mp_msg(MSGT_INPUT,MSGL_WARN,"Joystick warning unknown event type %d\n",ev.type);
+    MP_WARN(ctx, "Joystick warning unknown event type %d\n",ev.type);
     return MP_INPUT_ERROR;
   }
 

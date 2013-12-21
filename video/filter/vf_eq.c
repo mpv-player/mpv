@@ -58,6 +58,7 @@ typedef struct eq2_param_t {
 } eq2_param_t;
 
 typedef struct vf_priv_s {
+  struct mp_log *log;
   eq2_param_t param[3];
 
   double        contrast;
@@ -313,7 +314,7 @@ void check_values (eq2_param_t *par)
 static
 void print_values (vf_eq2_t *eq2)
 {
-  mp_msg (MSGT_VFILTER, MSGL_V, "vf_eq2: c=%.2f b=%.2f g=%.4f s=%.2f \n",
+  MP_VERBOSE(eq2, "vf_eq2: c=%.2f b=%.2f g=%.4f s=%.2f \n",
     eq2->contrast, eq2->brightness, eq2->gamma, eq2->saturation
   );
 }
@@ -470,6 +471,7 @@ int vf_open(vf_instance_t *vf)
 
   vf->priv = malloc (sizeof (vf_eq2_t));
   eq2 = vf->priv;
+  eq2->log = vf->log;
 
   for (i = 0; i < 3; i++) {
     eq2->buf[i] = NULL;

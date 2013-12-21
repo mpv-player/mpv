@@ -275,8 +275,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         int nch = data->nch;
         int use_int = 0;
 
-        mp_msg(MSGT_AFILTER, MSGL_V,
-               "[scaletempo] %.3f speed * %.3f scale_nominal = %.3f\n",
+        MP_VERBOSE(af, "[scaletempo] %.3f speed * %.3f scale_nominal = %.3f\n",
                s->speed, s->scale_nominal, s->scale);
 
         mp_audio_force_interleaved_format(data);
@@ -318,7 +317,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             s->buf_overlap      = realloc(s->buf_overlap, s->bytes_overlap);
             s->table_blend      = realloc(s->table_blend, s->bytes_overlap * 4);
             if (!s->buf_overlap || !s->table_blend) {
-                mp_msg(MSGT_AFILTER, MSGL_FATAL, "[scaletempo] Out of memory\n");
+                MP_FATAL(af, "[scaletempo] Out of memory\n");
                 return AF_ERROR;
             }
             memset(s->buf_overlap, 0, s->bytes_overlap);
@@ -355,7 +354,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 s->table_window = realloc(s->table_window,
                                           s->bytes_overlap * 2 - nch * bps * 2);
                 if (!s->buf_pre_corr || !s->table_window) {
-                    mp_msg(MSGT_AFILTER, MSGL_FATAL, "[scaletempo] Out of memory\n");
+                    MP_FATAL(af, "[scaletempo] Out of memory\n");
                     return AF_ERROR;
                 }
                 memset((char *)s->buf_pre_corr + s->bytes_overlap * 2, 0,
@@ -372,8 +371,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 s->table_window = realloc(s->table_window,
                                           s->bytes_overlap - nch * bps);
                 if (!s->buf_pre_corr || !s->table_window) {
-                    mp_msg(MSGT_AFILTER, MSGL_FATAL,
-                           "[scaletempo] Out of memory\n");
+                    MP_FATAL(af, "[scaletempo] Out of memory\n");
                     return AF_ERROR;
                 }
                 float *pw = s->table_window;
@@ -393,14 +391,14 @@ static int control(struct af_instance *af, int cmd, void *arg)
                          * bps * nch;
         s->buf_queue = realloc(s->buf_queue, s->bytes_queue + UNROLL_PADDING);
         if (!s->buf_queue) {
-            mp_msg(MSGT_AFILTER, MSGL_FATAL, "[scaletempo] Out of memory\n");
+            MP_FATAL(af, "[scaletempo] Out of memory\n");
             return AF_ERROR;
         }
 
         s->bytes_queued = 0;
         s->bytes_to_slide = 0;
 
-        mp_msg(MSGT_AFILTER, MSGL_DBG2, "[scaletempo] "
+        MP_DBG(af, "[scaletempo] "
                "%.2f stride_in, %i stride_out, %i standing, "
                "%i overlap, %i search, %i queue, %s mode\n",
                s->frames_stride_scaled,

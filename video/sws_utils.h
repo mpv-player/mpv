@@ -25,6 +25,8 @@ void mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
                             float gblur);
 
 struct mp_sws_context {
+    // Can be set for verbose error printing.
+    struct mp_log *log;
     // User configuration. These can be changed freely, at any time.
     // mp_sws_scale() will handle the changes transparently.
     int flags;

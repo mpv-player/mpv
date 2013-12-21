@@ -135,8 +135,11 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vc->lastframeipts = MP_NOPTS_VALUE;
     vc->lastencodedipts = MP_NOPTS_VALUE;
 
-    if (pix_fmt == AV_PIX_FMT_NONE)
-        goto error;  /* imgfmt2pixfmt already prints something */
+    if (pix_fmt == AV_PIX_FMT_NONE) {
+        MP_FATAL(vo, "Format %s not supported by lavc.\n",
+                 mp_imgfmt_to_name(format));
+        goto error;
+    }
 
     vc->stream = encode_lavc_alloc_stream(vo->encode_lavc_ctx,
                                           AVMEDIA_TYPE_VIDEO);

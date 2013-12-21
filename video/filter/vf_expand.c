@@ -148,7 +148,7 @@ static int vf_open(vf_instance_t *vf){
     vf->config=config;
     vf->query_format=query_format;
     vf->filter=filter;
-    mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d, aspect: %f, round: %d\n",
+    MP_INFO(vf, "Expand: %d x %d, %d ; %d, aspect: %f, round: %d\n",
     vf->priv->cfg_exp_w,
     vf->priv->cfg_exp_h,
     vf->priv->cfg_exp_x,

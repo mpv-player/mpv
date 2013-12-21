@@ -34,6 +34,7 @@
 #define OUTBUF_SIZE 65536
 
 struct spdifContext {
+    struct mp_log   *log;
     AVFormatContext *lavf_ctx;
     int              iec61937_packet_size;
     int              out_buffer_len;
@@ -48,7 +49,7 @@ static int write_packet(void *p, uint8_t *buf, int buf_size)
 
     int buffer_left = ctx->out_buffer_size - ctx->out_buffer_len;
     if (buf_size > buffer_left) {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "spdif packet too large.\n");
+        MP_ERR(ctx, "spdif packet too large.\n");
         buf_size = buffer_left;
     }
 
@@ -76,6 +77,7 @@ static int init(struct dec_audio *da, const char *decoder)
 {
     struct spdifContext *spdif_ctx = talloc_zero(NULL, struct spdifContext);
     da->priv = spdif_ctx;
+    spdif_ctx->log = da->log;
 
     AVFormatContext *lavf_ctx  = avformat_alloc_context();
     if (!lavf_ctx)
@@ -166,8 +168,7 @@ static int init(struct dec_audio *da, const char *decoder)
     da->decoded.rate = samplerate;
 
     if (avformat_write_header(lavf_ctx, &format_opts) < 0) {
-        mp_msg(MSGT_DECAUDIO, MSGL_FATAL,
-               "libavformat spdif initialization failed.\n");
+        MP_FATAL(da, "libavformat spdif initialization failed.\n");
         av_dict_free(&format_opts);
         goto fail;
     }
@@ -204,7 +205,7 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt, NULL);
     pkt.pts = pkt.dts = 0;
-    mp_msg(MSGT_DECAUDIO, MSGL_V, "spdif packet, size=%d\n", pkt.size);
+    MP_VERBOSE(da, "spdif packet, size=%d\n", pkt.size);
     if (mpkt->pts != MP_NOPTS_VALUE) {
         da->pts        = mpkt->pts;
         da->pts_offset = 0;

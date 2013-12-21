@@ -21,7 +21,7 @@ int ai_sndio_setup(audio_in_t *ai)
     par.appbufsz = ai->req_samplerate;	/* 1 sec */
 
    if (!sio_setpar(ai->sndio.hdl, &par) || !sio_getpar(ai->sndio.hdl, &par)) {
-	mp_msg(MSGT_TV, MSGL_ERR, "could not configure sndio audio");
+	MP_ERR(ai, "could not configure sndio audio");
 	return -1;
     }
 
@@ -39,7 +39,7 @@ int ai_sndio_init(audio_in_t *ai)
     int err;
 
     if ((ai->sndio.hdl = sio_open(ai->sndio.device, SIO_REC, 0)) == NULL) {
-	mp_msg(MSGT_TV, MSGL_ERR, "could not open sndio audio");
+	MP_ERR(ai, "could not open sndio audio");
 	return -1;
     }
 

@@ -28,151 +28,62 @@
 
 struct mp_log;
 
-// defined in mplayer.c
-extern int verbose;
+// A mp_log instance that never outputs anything.
+extern struct mp_log *const mp_null_log;
 
-// verbosity elevel:
-
-/* Only messages level MSGL_FATAL-MSGL_STATUS should be translated,
- * messages level MSGL_V and above should not be translated. */
-
-#define MSGL_FATAL 0  // will exit/abort
-#define MSGL_ERR 1    // continues
-#define MSGL_WARN 2   // only warning
-#define MSGL_HINT 3   // short help message
-#define MSGL_INFO 4   // -quiet
-#define MSGL_STATUS 5 // v=0
-#define MSGL_V 6      // v=1
-#define MSGL_DBG2 7   // v=2
-#define MSGL_DBG3 8   // v=3
-#define MSGL_DBG4 9   // v=4
-#define MSGL_DBG5 10  // v=5
-
-#define MSGL_FIXME 1  // for conversions from printf where the appropriate MSGL is not known; set equal to ERR for obtrusiveness
-#define MSGT_FIXME 0  // for conversions from printf where the appropriate MSGT is not known; set equal to GLOBAL for obtrusiveness
-
-// code/module:
-
-#define MSGT_GLOBAL 0        // common player stuff errors
-#define MSGT_CPLAYER 1       // console player (mplayer.c)
-
-#define MSGT_VO 3	       // libvo
-#define MSGT_AO 4	       // libao
-
-#define MSGT_DEMUXER 5    // demuxer.c (general stuff)
-#define MSGT_DS 6         // demux stream (add/read packet etc)
-#define MSGT_DEMUX 7      // fileformat-specific stuff (demux_*.c)
-#define MSGT_HEADER 8     // fileformat-specific header (*header.c)
-
-#define MSGT_AVSYNC 9     // mplayer.c timer stuff
-#define MSGT_AUTOQ 10     // mplayer.c auto-quality stuff
-
-#define MSGT_CFGPARSER 11 // cfgparser.c
-
-#define MSGT_DECAUDIO 12  // av decoder
-#define MSGT_DECVIDEO 13
-
-#define MSGT_SEEK 14	// seeking code
-#define MSGT_WIN32 15	// win32 dll stuff
-#define MSGT_OPEN 16	// open.c (stream opening)
-#define MSGT_DVD 17	// open.c (DVD init/read/seek)
-
-#define MSGT_PARSEES 18	// parse_es.c (mpeg stream parser)
-#define MSGT_LIRC 19	// lirc_mp.c and input lirc driver
-
-#define MSGT_STREAM 20  // stream.c
-#define MSGT_CACHE 21 	// cache2.c
-
-#define MSGT_ENCODE 22 // now encode_lavc.c
-
-#define MSGT_XACODEC 23	// XAnim codecs
-
-#define MSGT_TV 24	// TV input subsystem
-
-#define MSGT_OSDEP 25	// OS-dependent parts
-
-#define MSGT_SPUDEC 26	// spudec.c
-
-#define MSGT_PLAYTREE 27    // Playtree handeling (playtree.c, playtreeparser.c)
-
-#define MSGT_INPUT 28
-
-#define MSGT_VFILTER 29
-
-#define MSGT_OSD 30
-
-#define MSGT_NETWORK 31
-
-#define MSGT_CPUDETECT 32
-
-#define MSGT_CODECCFG 33
-
-#define MSGT_SWS 34
-
-#define MSGT_VOBSUB 35
-#define MSGT_SUBREADER 36
-
-#define MSGT_AFILTER 37  // Audio filter messages
-
-#define MSGT_NETST 38 // Netstream
-
-#define MSGT_MUXER 39 // muxer layer
-
-#define MSGT_IDENTIFY 41  // -identify output
-
-#define MSGT_RADIO 42
-
-#define MSGT_ASS 43 // libass messages
-
-#define MSGT_LOADER 44 // dll loader messages
-
-#define MSGT_STATUSLINE 45 // playback/encoding status line
-
-#define MSGT_TELETEXT 46       // Teletext decoder
-
-#define MSGT_MAX 47
-
-int mp_msg_test(int mod, int lev);
-bool mp_msg_test_log(struct mp_log *log, int lev);
-
-// Note: using mp_msg_log or the MP_ERR/... macros is preferred.
-void mp_msg_va(int mod, int lev, const char *format, va_list va);
-void mp_msg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
+// Verbosity levels.
+enum {
+    MSGL_FATAL,     // will exit/abort (note: msg.c doesn't exit or abort)
+    MSGL_ERR,       // continues
+    MSGL_WARN,      // only warning
+    MSGL_INFO,      // -quiet
+    MSGL_STATUS,    // exclusively for the playback status line
+    MSGL_V,         // -v
+    MSGL_DEBUG,     // -v -v
+    MSGL_TRACE,     // -v -v -v
+    MSGL_SMODE,     // old slave mode (-identify)
+};
 
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
                           const char *name);
 
-void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
+void mp_msg(struct mp_log *log, int lev, const char *format, ...)
     PRINTF_ATTRIBUTE(3, 4);
+void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va);
+
+bool mp_msg_test(struct mp_log *log, int lev);
+
+// Convenience macros.
+#define mp_fatal(log, ...)      mp_msg(log, MSGL_FATAL, __VA_ARGS__)
+#define mp_err(log, ...)        mp_msg(log, MSGL_ERR, __VA_ARGS__)
+#define mp_warn(log, ...)       mp_msg(log, MSGL_WARN, __VA_ARGS__)
+#define mp_info(log, ...)       mp_msg(log, MSGL_INFO, __VA_ARGS__)
+#define mp_verbose(log, ...)    mp_msg(log, MSGL_V, __VA_ARGS__)
+#define mp_dbg(log, ...)        mp_msg(log, MSGL_DEBUG, __VA_ARGS__)
+#define mp_trace(log, ...)      mp_msg(log, MSGL_TRACE, __VA_ARGS__)
 
 // Convenience macros, typically called with a pointer to a context struct
 // as first argument, which has a "struct mp_log log;" member.
 
-#define MP_MSG(obj, lev, ...)   mp_msg_log((obj)->log, lev, __VA_ARGS__)
-#define MP_MSGT(obj, lev, ...)  mp_msgt_log((obj)->log, lev, __VA_ARGS__)
+#define MP_MSG(obj, lev, ...)   mp_msg((obj)->log, lev, __VA_ARGS__)
 
 #define MP_FATAL(obj, ...)      MP_MSG(obj, MSGL_FATAL, __VA_ARGS__)
 #define MP_ERR(obj, ...)        MP_MSG(obj, MSGL_ERR, __VA_ARGS__)
 #define MP_WARN(obj, ...)       MP_MSG(obj, MSGL_WARN, __VA_ARGS__)
 #define MP_INFO(obj, ...)       MP_MSG(obj, MSGL_INFO, __VA_ARGS__)
 #define MP_VERBOSE(obj, ...)    MP_MSG(obj, MSGL_V, __VA_ARGS__)
-#define MP_DBG(obj, ...)        MP_MSG(obj, MSGL_DBG2, __VA_ARGS__)
-#define MP_TRACE(obj, ...)      MP_MSG(obj, MSGL_DBG5, __VA_ARGS__)
-
-#define mp_fatal(log, ...)      mp_msg_log(log, MSGL_FATAL, __VA_ARGS__)
-#define mp_err(log, ...)        mp_msg_log(log, MSGL_ERR, __VA_ARGS__)
-#define mp_warn(log, ...)       mp_msg_log(log, MSGL_WARN, __VA_ARGS__)
-#define mp_info(log, ...)       mp_msg_log(log, MSGL_INFO, __VA_ARGS__)
-#define mp_verbose(log, ...)    mp_msg_log(log, MSGL_V, __VA_ARGS__)
-#define mp_dbg(log, ...)        mp_msg_log(log, MSGL_DBG2, __VA_ARGS__)
-#define mp_trace(log, ...)      mp_msg_log(log, MSGL_DBG5, __VA_ARGS__)
+#define MP_DBG(obj, ...)        MP_MSG(obj, MSGL_DEBUG, __VA_ARGS__)
+#define MP_TRACE(obj, ...)      MP_MSG(obj, MSGL_TRACE, __VA_ARGS__)
+#define MP_SMODE(obj, ...)      MP_MSG(obj, MSGL_SMODE, __VA_ARGS__)
 
 struct mpv_global;
 void mp_msg_init(struct mpv_global *global);
 void mp_msg_uninit(struct mpv_global *global);
+void mp_msg_update_msglevels(struct mpv_global *global);
+void mp_msg_mute(struct mpv_global *global, bool mute);
+void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr);
 
-struct mpv_global *mp_log_get_global(struct mp_log *log);
-
-extern bool mp_msg_stdout_in_use;
+struct bstr;
+int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level);
 
 #endif /* MPLAYER_MP_MSG_H */

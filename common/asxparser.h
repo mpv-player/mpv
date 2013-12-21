@@ -22,6 +22,7 @@
 #include <stdbool.h>
 
 struct playlist;
-bool asx_parse(char* buffer, struct playlist *pl);
+struct mp_log;
+bool asx_parse(char* buffer, struct playlist *pl, struct mp_log *log);
 
 #endif /* MPLAYER_ASXPARSER_H */

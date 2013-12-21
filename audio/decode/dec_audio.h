@@ -27,7 +27,9 @@ struct mp_audio_buffer;
 struct mp_decoder_list;
 
 struct dec_audio {
+    struct mp_log *log;
     struct MPOpts *opts;
+    struct mpv_global *global;
     const struct ad_functions *ad_driver;
     struct sh_stream *header;
     struct mp_audio_buffer *decode_buffer;

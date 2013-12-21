@@ -107,7 +107,7 @@ static int open_f(stream_t *stream, int mode)
     else if (mode == STREAM_WRITE)
         m |= O_RDWR | O_CREAT | O_TRUNC;
     else {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "[file] Unknown open mode %d\n", mode);
+        MP_ERR(stream, "Unknown open mode %d\n", mode);
         return STREAM_UNSUPPORTED;
     }
 
@@ -123,13 +123,13 @@ static int open_f(stream_t *stream, int mode)
 
     if (!strcmp(filename, "-")) {
         if (mode == STREAM_READ) {
-            mp_msg(MSGT_OPEN, MSGL_INFO, "Reading from stdin...\n");
+            MP_INFO(stream, "Reading from stdin...\n");
             fd = 0;
 #if HAVE_SETMODE
             setmode(fileno(stdin), O_BINARY);
 #endif
         } else {
-            mp_msg(MSGT_OPEN, MSGL_INFO, "Writing to stdout\n");
+            MP_INFO(stream, "Writing to stdout\n");
             fd = 1;
 #if HAVE_SETMODE
             setmode(fileno(stdout), O_BINARY);
@@ -144,14 +144,14 @@ static int open_f(stream_t *stream, int mode)
 #endif
         fd = open(filename, m | O_BINARY, openmode);
         if (fd < 0) {
-            mp_msg(MSGT_OPEN, MSGL_ERR, "Cannot open file '%s': %s\n",
+            MP_ERR(stream, "Cannot open file '%s': %s\n",
                     filename, strerror(errno));
             return STREAM_ERROR;
         }
 #ifndef __MINGW32__
         struct stat st;
         if (fstat(fd, &st) == 0 && S_ISDIR(st.st_mode)) {
-            mp_msg(MSGT_OPEN, MSGL_ERR, "File is a directory: '%s'\n",
+            MP_ERR(stream, "File is a directory: '%s'\n",
                     filename);
             close(fd);
             return STREAM_ERROR;
@@ -175,7 +175,7 @@ static int open_f(stream_t *stream, int mode)
         stream->end_pos = len;
     }
 
-    mp_msg(MSGT_OPEN, MSGL_V, "[file] File size is %" PRId64 " bytes\n", len);
+    MP_VERBOSE(stream, "File size is %" PRId64 " bytes\n", len);
 
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;

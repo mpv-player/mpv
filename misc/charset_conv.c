@@ -86,7 +86,7 @@ bool mp_charset_requires_guess(const char *user_cp)
 }
 
 #if HAVE_ENCA
-static const char *enca_guess(bstr buf, const char *language)
+static const char *enca_guess(struct mp_log *log, bstr buf, const char *language)
 {
     if (!language || !language[0])
         language = "__"; // neutral language
@@ -102,14 +102,14 @@ static const char *enca_guess(bstr buf, const char *language)
             detected_cp = tmp;
         enca_analyser_free(analyser);
     } else {
-        mp_msg(MSGT_SUBREADER, MSGL_ERR, "ENCA doesn't know language '%s'\n",
+        mp_err(log, "ENCA doesn't know language '%s'\n",
                language);
         size_t langcnt;
         const char **languages = enca_get_languages(&langcnt);
-        mp_msg(MSGT_SUBREADER, MSGL_ERR, "ENCA supported languages:");
+        mp_err(log, "ENCA supported languages:");
         for (int i = 0; i < langcnt; i++)
-            mp_msg(MSGT_SUBREADER, MSGL_ERR, " %s", languages[i]);
-        mp_msg(MSGT_SUBREADER, MSGL_ERR, "\n");
+            mp_err(log, " %s", languages[i]);
+        mp_err(log, "\n");
         free(languages);
     }
 
@@ -118,10 +118,11 @@ static const char *enca_guess(bstr buf, const char *language)
 #endif
 
 #if HAVE_LIBGUESS
-static const char *libguess_guess(bstr buf, const char *language)
+static const char *libguess_guess(struct mp_log *log, bstr buf,
+                                  const char *language)
 {
     if (!language || !language[0] || strcmp(language, "help") == 0) {
-        mp_msg(MSGT_SUBREADER, MSGL_ERR, "libguess needs a language: "
+        mp_err(log, "libguess needs a language: "
                "japanese taiwanese chinese korean russian arabic turkish "
                "greek hebrew polish baltic\n");
         return NULL;
@@ -136,7 +137,8 @@ static const char *libguess_guess(bstr buf, const char *language)
 // If user_cp doesn't refer to any known auto-detection (for example because
 // it's a real iconv codepage), user_cp is returned without even looking at
 // the buf data.
-const char *mp_charset_guess(bstr buf, const char *user_cp, int flags)
+const char *mp_charset_guess(struct mp_log *log, bstr buf, const char *user_cp,
+                             int flags)
 {
     if (!mp_charset_requires_guess(user_cp))
         return user_cp;
@@ -159,11 +161,11 @@ const char *mp_charset_guess(bstr buf, const char *user_cp, int flags)
 
 #if HAVE_ENCA
     if (bstrcasecmp0(type, "enca") == 0)
-        res = enca_guess(buf, lang);
+        res = enca_guess(log, buf, lang);
 #endif
 #if HAVE_LIBGUESS
     if (bstrcasecmp0(type, "guess") == 0)
-        res = libguess_guess(buf, lang);
+        res = libguess_guess(log, buf, lang);
 #endif
     if (bstrcasecmp0(type, "utf8") == 0 || bstrcasecmp0(type, "utf-8") == 0) {
         if (!fallback)
@@ -171,12 +173,11 @@ const char *mp_charset_guess(bstr buf, const char *user_cp, int flags)
     }
 
     if (res) {
-        mp_msg(MSGT_SUBREADER, MSGL_DBG2, "%.*s detected charset: '%s'\n",
+        mp_dbg(log, "%.*s detected charset: '%s'\n",
                BSTR_P(type), res);
     } else {
         res = fallback;
-        mp_msg(MSGT_SUBREADER, MSGL_DBG2,
-               "Detection with %.*s failed: fallback to %s\n",
+        mp_dbg(log, "Detection with %.*s failed: fallback to %s\n",
                BSTR_P(type), res && res[0] ? res : "broken UTF-8/Latin1");
     }
 
@@ -194,9 +195,11 @@ const char *mp_charset_guess(bstr buf, const char *user_cp, int flags)
 //  user_cp: iconv codepage, special value, NULL
 //  flags: same as mp_iconv_to_utf8()
 //  returns: same as mp_iconv_to_utf8()
-bstr mp_charset_guess_and_conv_to_utf8(bstr buf, const char *user_cp, int flags)
+bstr mp_charset_guess_and_conv_to_utf8(struct mp_log *log, bstr buf,
+                                       const char *user_cp, int flags)
 {
-    return mp_iconv_to_utf8(buf, mp_charset_guess(buf, user_cp, flags), flags);
+    return mp_iconv_to_utf8(log, buf, mp_charset_guess(log, buf, user_cp, flags),
+                            flags);
 }
 
 // Use iconv to convert buf to UTF-8.
@@ -210,7 +213,7 @@ bstr mp_charset_guess_and_conv_to_utf8(bstr buf, const char *user_cp, int flags)
 //  cp: iconv codepage (or NULL)
 //  flags: combination of MP_ICONV_* flags
 //  returns: buf (no conversion), .start==NULL (error), or allocated buffer
-bstr mp_iconv_to_utf8(bstr buf, const char *cp, int flags)
+bstr mp_iconv_to_utf8(struct mp_log *log, bstr buf, const char *cp, int flags)
 {
 #if HAVE_ICONV
     if (!cp || !cp[0] || mp_charset_is_utf8(cp))
@@ -225,8 +228,7 @@ bstr mp_iconv_to_utf8(bstr buf, const char *cp, int flags)
     iconv_t icdsc;
     if ((icdsc = iconv_open("UTF-8", cp)) == (iconv_t) (-1)) {
         if (flags & MP_ICONV_VERBOSE)
-            mp_msg(MSGT_SUBREADER, MSGL_ERR,
-                   "Error opening iconv with codepage '%s'\n", cp);
+            mp_err(log, "Error opening iconv with codepage '%s'\n", cp);
         goto failure;
     }
 
@@ -265,8 +267,7 @@ bstr mp_iconv_to_utf8(bstr buf, const char *cp, int flags)
                         break;
                 }
                 if (flags & MP_ICONV_VERBOSE) {
-                    mp_msg(MSGT_SUBREADER, MSGL_ERR,
-                           "Error recoding text with codepage '%s'\n", cp);
+                    mp_err(log, "Error recoding text with codepage '%s'\n", cp);
                 }
                 talloc_free(outbuf);
                 iconv_close(icdsc);

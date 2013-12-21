@@ -188,10 +188,10 @@ static bool try_open(struct MPContext *mpctx, char *filename)
         || bstrcasecmp(bstr0(mpctx->demuxer->filename), bfilename) == 0)
         return false;
 
-    struct stream *s = stream_open(filename, mpctx->opts);
+    struct stream *s = stream_open(filename, mpctx->global);
     if (!s)
         return false;
-    struct demuxer *d = demux_open(s, NULL, NULL, mpctx->opts);
+    struct demuxer *d = demux_open(s, NULL, NULL, mpctx->global);
     // Since .bin files are raw PCM data with no headers, we have to explicitly
     // open them. Also, try to avoid to open files that are most likely not .bin
     // files, as that would only play noise. Checking the file extension is
@@ -199,14 +199,14 @@ static bool try_open(struct MPContext *mpctx, char *filename)
     // TODO: maybe also could check if the .bin file is a multiple of the Audio
     //       CD sector size (2352 bytes)
     if (!d && bstr_case_endswith(bfilename, bstr0(".bin"))) {
-        mp_msg(MSGT_CPLAYER, MSGL_WARN, "CUE: Opening as BIN file!\n");
-        d = demux_open(s, "rawaudio", NULL, mpctx->opts);
+        MP_WARN(mpctx, "CUE: Opening as BIN file!\n");
+        d = demux_open(s, "rawaudio", NULL, mpctx->global);
     }
     if (d) {
         add_source(mpctx, d);
         return true;
     }
-    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Could not open source '%s'!\n", filename);
+    MP_ERR(mpctx, "Could not open source '%s'!\n", filename);
     free_stream(s);
     return false;
 }
@@ -220,8 +220,7 @@ static bool open_source(struct MPContext *mpctx, struct bstr filename)
 
     struct bstr base_filename = bstr0(mp_basename(bstrdup0(ctx, filename)));
     if (!base_filename.len) {
-        mp_msg(MSGT_CPLAYER, MSGL_WARN,
-               "CUE: Invalid audio filename in .cue file!\n");
+        MP_WARN(mpctx, "CUE: Invalid audio filename in .cue file!\n");
     } else {
         char *fullname = mp_path_join(ctx, dirname, base_filename);
         if (try_open(mpctx, fullname)) {
@@ -246,7 +245,7 @@ static bool open_source(struct MPContext *mpctx, struct bstr filename)
         char *dename0 = de->d_name;
         struct bstr dename = bstr0(dename0);
         if (bstr_case_startswith(dename, cuefile)) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN, "CUE: No useful audio filename "
+            MP_WARN(mpctx, "CUE: No useful audio filename "
                     "in .cue file found, trying with '%s' instead!\n",
                     dename0);
             if (try_open(mpctx, mp_path_join(ctx, dirname, dename))) {
@@ -260,7 +259,7 @@ static bool open_source(struct MPContext *mpctx, struct bstr filename)
 out:
     talloc_free(ctx);
     if (!res)
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "CUE: Could not open audio file!\n");
+        MP_ERR(mpctx, "CUE: Could not open audio file!\n");
     return res;
 }
 
@@ -297,7 +296,7 @@ void build_cue_timeline(struct MPContext *mpctx)
         struct bstr param;
         switch (read_cmd(&data, &param)) {
         case CUE_ERROR:
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "CUE: error parsing input file!\n");
+            MP_ERR(mpctx, "CUE: error parsing input file!\n");
             goto out;
         case CUE_TRACK: {
             track_count++;
@@ -328,7 +327,7 @@ void build_cue_timeline(struct MPContext *mpctx)
     }
 
     if (track_count == 0) {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "CUE: no tracks found!\n");
+        MP_ERR(mpctx, "CUE: no tracks found!\n");
         goto out;
     }
 
@@ -380,8 +379,7 @@ void build_cue_timeline(struct MPContext *mpctx)
             duration -= tracks[i].start;
         }
         if (duration < 0) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                   "CUE: Can't get duration of source file!\n");
+            MP_WARN(mpctx, "CUE: Can't get duration of source file!\n");
             // xxx: do something more reasonable
             duration = 0.0;
         }

@@ -130,19 +130,19 @@ static bool recreate_graph(struct vf_instance *vf, int width, int height,
         vf->priv->lw_recreate_cb(vf);
 
     if (bstr0(p->cfg_graph).len == 0) {
-        mp_msg(MSGT_VFILTER, MSGL_FATAL, "lavfi: no filter graph set\n");
+        MP_FATAL(vf, "lavfi: no filter graph set\n");
         return false;
     }
 
     destroy_graph(vf);
-    mp_msg(MSGT_VFILTER, MSGL_V, "lavfi: create graph: '%s'\n", p->cfg_graph);
+    MP_VERBOSE(vf, "lavfi: create graph: '%s'\n", p->cfg_graph);
 
     AVFilterGraph *graph = avfilter_graph_alloc();
     if (!graph)
         goto error;
 
     if (parse_avopts(graph, p->cfg_avopts) < 0) {
-        mp_msg(MSGT_VFILTER, MSGL_FATAL, "lavfi: could not set opts: '%s'\n",
+        MP_FATAL(vf, "lavfi: could not set opts: '%s'\n",
                p->cfg_avopts);
         goto error;
     }
@@ -214,7 +214,7 @@ static bool recreate_graph(struct vf_instance *vf, int width, int height,
     return true;
 
 error:
-    mp_msg(MSGT_VFILTER, MSGL_FATAL, "Can't configure libavfilter graph.\n");
+    MP_FATAL(vf, "Can't configure libavfilter graph.\n");
     avfilter_graph_free(&graph);
     talloc_free(tmp);
     return false;
@@ -355,18 +355,16 @@ static bool is_usable(const AVFilter *filter)
            is_single_video_only(filter->outputs);
 }
 
-static void print_help(void)
+static void print_help(struct mp_log *log)
 {
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "List of libavfilter filters:\n");
+    mp_info(log, "List of libavfilter filters:\n");
     for (const AVFilter *filter = avfilter_next(NULL); filter;
          filter = avfilter_next(filter))
     {
-        if (is_usable(filter)) {
-            mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %-16s %s\n",
-                   filter->name, filter->description);
-        }
+        if (is_usable(filter))
+            mp_info(log, " %-16s %s\n", filter->name, filter->description);
     }
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n"
+    mp_info(log, "\n"
         "This lists video->video filters only. Refer to\n"
         "\n"
         " https://ffmpeg.org/ffmpeg-filters.html\n"
@@ -444,7 +442,7 @@ int vf_lw_set_graph(struct vf_instance *vf, struct vf_lw_opts *lavfi_opts,
         lavfi_opts = (struct vf_lw_opts *)vf_lw_conf.defaults;
     if (!lavfi_opts->enable || !have_filter(filter))
         return -1;
-    mp_msg(MSGT_VFILTER, MSGL_V, "Using libavfilter for '%s'\n", vf->info->name);
+    MP_VERBOSE(vf, "Using libavfilter for '%s'\n", vf->info->name);
     void *old_priv = vf->priv;
     struct vf_priv_s *p = talloc(vf, struct vf_priv_s);
     vf->priv = p;

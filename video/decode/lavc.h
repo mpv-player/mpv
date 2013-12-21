@@ -21,6 +21,7 @@ enum hwdec_type {
 };
 
 typedef struct lavc_ctx {
+    struct mp_log *log;
     struct MPOpts *opts;
     AVCodecContext *avctx;
     AVFrame *pic;

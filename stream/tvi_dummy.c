@@ -24,7 +24,7 @@
 #include "video/img_fourcc.h"
 #include "tv.h"
 
-static tvi_handle_t *tvi_init_dummy(tv_param_t* tv_param);
+static tvi_handle_t *tvi_init_dummy(struct mp_log *log, tv_param_t* tv_param);
 /* information about this file */
 const tvi_info_t tvi_info_dummy = {
 	tvi_init_dummy,
@@ -43,9 +43,9 @@ typedef struct priv {
 #include "tvi_def.h"
 
 /* handler creator - entry point ! */
-static tvi_handle_t *tvi_init_dummy(tv_param_t* tv_param)
+static tvi_handle_t *tvi_init_dummy(struct mp_log *log, tv_param_t* tv_param)
 {
-    return tv_new_handle(sizeof(priv_t), &functions);
+    return tv_new_handle(sizeof(priv_t), log, &functions);
 }
 
 /* initialisation */

@@ -24,6 +24,6 @@
 #ifndef MPLAYER_COOKIES_H
 #define MPLAYER_COOKIES_H
 
-char *cookies_lavf(void);
+char *cookies_lavf(struct mp_log *log);
 
 #endif /* MPLAYER_COOKIES_H */

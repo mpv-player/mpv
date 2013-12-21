@@ -105,7 +105,7 @@ static void recreate_video_filters(struct MPContext *mpctx)
     assert(d_video);
 
     vf_destroy(d_video->vfilter);
-    d_video->vfilter = vf_new(opts);
+    d_video->vfilter = vf_new(mpctx->global);
     d_video->vfilter->hwdec = &d_video->hwdec_info;
 
     vf_append_filter_list(d_video->vfilter, opts->vf_settings);
@@ -164,6 +164,8 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     struct dec_video *d_video = talloc_zero(NULL, struct dec_video);
     mpctx->d_video = d_video;
+    d_video->global = mpctx->global;
+    d_video->log = mp_log_new(d_video, mpctx->log, "!vd");
     d_video->opts = mpctx->opts;
     d_video->header = sh;
     d_video->fps = sh->video->fps;

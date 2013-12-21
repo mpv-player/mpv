@@ -37,6 +37,7 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
 {
     const char *user_cp = demuxer->opts->sub_cp;
     struct stream *s = demuxer->stream;
+    struct mp_log *log = demuxer->log;
     // Older versions of libass will behave strange if renderer and track
     // library handles mismatch, so make sure everything uses a global handle.
     ASS_Library *lib = demuxer->params ? demuxer->params->ass_library : NULL;
@@ -56,7 +57,7 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
         memcpy(tmp, buf.start, buf.len);
         buf.start = tmp;
         buf.start[buf.len] = '\0';
-        bstr cbuf = mp_charset_guess_and_conv_to_utf8(buf, user_cp,
+        bstr cbuf = mp_charset_guess_and_conv_to_utf8(log, buf, user_cp,
                                                       MP_ICONV_ALLOW_CUTOFF);
         if (cbuf.start == NULL)
             cbuf = buf;
@@ -73,11 +74,11 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
 
     bstr buf = stream_read_complete(s, NULL, 100000000);
     if (!buf.start) {
-        mp_msg(MSGT_ASS, MSGL_ERR, "Refusing to load subtitle file "
+        MP_ERR(demuxer, "Refusing to load subtitle file "
                 "larger than 100 MB: %s\n", demuxer->filename);
         return -1;
     }
-    bstr cbuf = mp_charset_guess_and_conv_to_utf8(buf, user_cp,
+    bstr cbuf = mp_charset_guess_and_conv_to_utf8(log, buf, user_cp,
                                                   MP_ICONV_VERBOSE);
     if (cbuf.start == NULL)
         cbuf = buf;

@@ -29,6 +29,7 @@
 #include "video/hwdec.h"
 
 struct priv {
+    struct mp_log *log;
     struct mp_vaapi_ctx *ctx;
     VADisplay *display;
     GLuint gl_texture;
@@ -42,7 +43,7 @@ static void destroy_texture(struct gl_hwdec *hw)
 
     if (p->vaglx_surface) {
         status = vaDestroySurfaceGLX(p->display, p->vaglx_surface);
-        check_va_status(status, "vaDestroySurfaceGLX()");
+        CHECK_VA_STATUS(p, "vaDestroySurfaceGLX()");
         p->vaglx_surface = NULL;
     }
 
@@ -65,10 +66,11 @@ static int create(struct gl_hwdec *hw)
         return -1;
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
+    p->log = hw->log;
     p->display = vaGetDisplayGLX(hw->mpgl->vo->x11->display);
     if (!p->display)
         return -1;
-    p->ctx = va_initialize(p->display);
+    p->ctx = va_initialize(p->display, p->log);
     if (!p->ctx) {
         vaTerminate(p->display);
         return -1;
@@ -98,7 +100,7 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
 
     status = vaCreateSurfaceGLX(p->display, GL_TEXTURE_2D,
                                 p->gl_texture, &p->vaglx_surface);
-    return check_va_status(status, "vaCreateSurfaceGLX()") ? 0 : -1;
+    return CHECK_VA_STATUS(p, "vaCreateSurfaceGLX()") ? 0 : -1;
 }
 
 static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
@@ -113,7 +115,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     status = vaCopySurfaceGLX(p->display, p->vaglx_surface,
                               va_surface_id_in_mp_image(hw_image),
                               va_get_colorspace_flag(hw_image->colorspace));
-    if (!check_va_status(status, "vaCopySurfaceGLX()"))
+    if (!CHECK_VA_STATUS(p, "vaCopySurfaceGLX()"))
         return -1;
 
     out_textures[0] = p->gl_texture;

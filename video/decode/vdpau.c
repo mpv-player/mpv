@@ -30,6 +30,7 @@
 #include "video/hwdec.h"
 
 struct priv {
+    struct mp_log              *log;
     struct mp_vdpau_ctx        *mpvdp;
     struct vdp_functions       *vdp;
     VdpDevice                   vdp_device;
@@ -110,7 +111,7 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx)
 
     const struct hwdec_profile_entry *pe = hwdec_find_profile(ctx, profiles);
     if (!pe) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unsupported codec or profile.\n");
+        MP_ERR(p, "Unsupported codec or profile.\n");
         goto fail;
     }
 
@@ -119,14 +120,13 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx)
     vdp_st = vdp->decoder_query_capabilities(p->vdp_device, pe->hw_profile,
                                              &supported, &maxl, &maxm,
                                              &maxw, &maxh);
-    CHECK_ST_WARNING("Querying VDPAU decoder capabilities");
+    CHECK_VDP_WARNING(p, "Querying VDPAU decoder capabilities");
     if (!supported) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "[vdpau] Codec or profile not supported by hardware.\n");
+        MP_ERR(p, "Codec or profile not supported by hardware.\n");
         goto fail;
     }
     if (p->vid_width > maxw || p->vid_height > maxh) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Video too large.\n");
+        MP_ERR(p, "Video too large.\n");
         goto fail;
     }
 
@@ -135,7 +135,7 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx)
     vdp_st = vdp->decoder_create(p->vdp_device, pe->hw_profile,
                                  p->vid_width, p->vid_height, maxrefs,
                                  &p->context.decoder);
-    CHECK_ST_WARNING("Failed creating VDPAU decoder");
+    CHECK_VDP_WARNING(p, "Failed creating VDPAU decoder");
     if (vdp_st != VDP_STATUS_OK)
         goto fail;
     return true;
@@ -189,6 +189,7 @@ static int init(struct lavc_ctx *ctx)
 {
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
+        .log = mp_log_new(p, ctx->log, "vdpau"),
         .mpvdp = ctx->hwdec_info->vdpau_ctx,
     };
     ctx->hwdec_priv = p;

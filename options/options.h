@@ -44,6 +44,12 @@ typedef struct mp_vo_opts {
 } mp_vo_opts;
 
 typedef struct MPOpts {
+    char *msglevels;
+    int verbose;
+    int msg_identify;
+    int msg_color;
+    int msg_module;
+
     char **reset_options;
     char **lua_files;
     int lua_load_osc;
@@ -252,6 +258,7 @@ typedef struct MPOpts {
         char *in_file;
         int use_joystick;
         int use_lirc;
+        char *lirc_configfile;
         int use_lircc;
         int use_alt_gr;
         int use_ar;

@@ -71,8 +71,7 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
 	     !(flags & MP_IMGFIELD_TOP_FIRST)) ||
 	    (state == 1 &&
 	     flags & MP_IMGFIELD_TOP_FIRST)) {
-		mp_msg(MSGT_VFILTER, MSGL_WARN,
-		       "softpulldown: Unexpected field flags: state=%d top_field_first=%d repeat_first_field=%d\n",
+		MP_WARN(vf, "softpulldown: Unexpected field flags: state=%d top_field_first=%d repeat_first_field=%d\n",
 		       state,
 		       (flags & MP_IMGFIELD_TOP_FIRST) != 0,
 		       (flags & MP_IMGFIELD_REPEAT_FIRST) != 0);
@@ -128,7 +127,7 @@ static int control(vf_instance_t *vf, int request, void *data)
 
 static void uninit(struct vf_instance *vf)
 {
-	mp_msg(MSGT_VFILTER, MSGL_INFO, "softpulldown: %lld frames in, %lld frames out\n", vf->priv->in, vf->priv->out);
+	MP_INFO(vf, "softpulldown: %lld frames in, %lld frames out\n", vf->priv->in, vf->priv->out);
 	free(vf->priv);
 }
 

@@ -130,7 +130,7 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     struct mp_log *log = mp_log_new(NULL, global->log, "ao");
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &ao_obj_list, bstr0(name))) {
-        mp_msg_log(log, MSGL_ERR, "Audio output %s not found!\n", name);
+        mp_msg(log, MSGL_ERR, "Audio output %s not found!\n", name);
         talloc_free(log);
         return NULL;
     };
@@ -149,7 +149,7 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     };
     if (ao->driver->encode != !!ao->encode_lavc_ctx)
         goto error;
-    struct m_config *config = m_config_from_obj_desc(ao, &desc);
+    struct m_config *config = m_config_from_obj_desc(ao, ao->log, &desc);
     if (m_config_apply_defaults(config, name, global->opts->ao_defs) < 0)
         goto error;
     if (m_config_set_obj_params(config, args) < 0)
@@ -176,33 +176,37 @@ struct ao *ao_init_best(struct mpv_global *global,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels)
 {
+    struct mp_log *log = mp_log_new(NULL, global->log, "ao");
+    struct ao *ao = NULL;
     struct m_obj_settings *ao_list = global->opts->audio_driver_list;
     if (ao_list && ao_list[0].name) {
         for (int n = 0; ao_list[n].name; n++) {
             if (strlen(ao_list[n].name) == 0)
                 goto autoprobe;
-            mp_msg(MSGT_AO, MSGL_V, "Trying preferred audio driver '%s'\n",
-                    ao_list[n].name);
-            struct ao *ao = ao_create(false, global, input_ctx, encode_lavc_ctx,
-                                      samplerate, format, channels,
-                                      ao_list[n].name, ao_list[n].attribs);
+            mp_verbose(log, "Trying preferred audio driver '%s'\n",
+                       ao_list[n].name);
+            ao = ao_create(false, global, input_ctx, encode_lavc_ctx,
+                           samplerate, format, channels,
+                           ao_list[n].name, ao_list[n].attribs);
             if (ao)
-                return ao;
-            mp_msg(MSGT_AO, MSGL_WARN, "Failed to initialize audio driver '%s'\n",
+                goto done;
+            mp_warn(log, "Failed to initialize audio driver '%s'\n",
                     ao_list[n].name);
         }
-        return NULL;
+        goto done;
     }
 autoprobe:
     // now try the rest...
     for (int i = 0; audio_out_drivers[i]; i++) {
-        struct ao *ao = ao_create(true, global, input_ctx, encode_lavc_ctx,
-                                  samplerate, format, channels,
-                                  (char *)audio_out_drivers[i]->name, NULL);
+        ao = ao_create(true, global, input_ctx, encode_lavc_ctx,
+                       samplerate, format, channels,
+                       (char *)audio_out_drivers[i]->name, NULL);
         if (ao)
-            return ao;
+            goto done;
     }
-    return NULL;
+done:
+    talloc_free(log);
+    return ao;
 }
 
 void ao_uninit(struct ao *ao, bool cut_audio)

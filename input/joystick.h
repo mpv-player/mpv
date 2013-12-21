@@ -19,8 +19,8 @@
 #ifndef MPLAYER_JOYSTICK_H
 #define MPLAYER_JOYSTICK_H
 
-int mp_input_joystick_init(char* dev);
-
-int mp_input_joystick_read(void *ctx, int fd);
+struct input_ctx;
+struct mp_log;
+int mp_input_joystick_init(struct input_ctx *ictx, struct mp_log *log, char *dev);
 
 #endif /* MPLAYER_JOYSTICK_H */

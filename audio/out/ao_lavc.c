@@ -69,6 +69,11 @@ static void select_format(struct ao *ao, AVCodec *codec)
          ++sampleformat)
     {
         int fmt = af_from_avformat(*sampleformat);
+        if (!fmt) {
+            MP_WARN(ao, "unsupported lavc format %s",
+                    av_get_sample_fmt_name(*sampleformat));
+            continue;
+        }
         int score = af_format_conversion_score(fmt, ao->format);
         if (score > best_score) {
             best_score = score;

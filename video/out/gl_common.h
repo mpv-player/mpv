@@ -157,8 +157,8 @@ bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
 int mpgl_find_backend(const char *name);
 
 struct m_option;
-int mpgl_validate_backend_opt(const struct m_option *opt, struct bstr name,
-                              struct bstr param);
+int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
+                              struct bstr name, struct bstr param);
 
 void mpgl_set_backend_cocoa(MPGLContext *ctx);
 void mpgl_set_backend_w32(MPGLContext *ctx);

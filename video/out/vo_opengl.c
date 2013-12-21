@@ -274,7 +274,8 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
         const struct gl_priv *vodef = p->vo->driver->priv_defaults;
         const struct gl_video_opts *def =
             vodef ? vodef->renderer_opts : gl_video_conf.defaults;
-        cfg = m_config_new(NULL, sizeof(*opts), def, gl_video_conf.opts);
+        cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), def,
+                           gl_video_conf.opts);
         opts = cfg->optstruct;
         r = m_config_parse_suboptions(cfg, "opengl", args);
     }
@@ -397,7 +398,7 @@ static int preinit(struct vo *vo)
     gl_video_set_options(p->renderer, p->renderer_opts);
 
     if (p->icc_opts->profile) {
-        struct lut3d *lut3d = mp_load_icc(p->icc_opts, vo->log);
+        struct lut3d *lut3d = mp_load_icc(p->icc_opts, vo->log, vo->global);
         if (!lut3d)
             goto err_out;
         gl_video_set_lut3d(p->renderer, lut3d);

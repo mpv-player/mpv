@@ -94,13 +94,13 @@ const char mp_help_text[] =
 " --list-options    list all mpv options\n"
 "\n";
 
-void mp_print_version(int always)
+void mp_print_version(struct mp_log *log, int always)
 {
     int v = always ? MSGL_INFO : MSGL_V;
-    mp_msg(MSGT_CPLAYER, v,
+    mp_msg(log, v,
            "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
-    print_libav_versions(v);
-    mp_msg(MSGT_CPLAYER, v, "\n");
+    print_libav_versions(log, v);
+    mp_msg(log, v, "\n");
 }
 
 static MP_NORETURN void exit_player(struct MPContext *mpctx,
@@ -140,6 +140,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 #endif
 
     getch2_disable();
+    uninit_libav(mpctx->global);
 
     if (how != EXIT_NONE) {
         const char *reason;
@@ -194,22 +195,23 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
+    struct mp_log *log = mpctx->log;
     int opt_exit = 0;
     if (opts->audio_decoders && strcmp(opts->audio_decoders, "help") == 0) {
         struct mp_decoder_list *list = audio_decoder_list();
-        mp_print_decoders(MSGT_CPLAYER, MSGL_INFO, "Audio decoders:", list);
+        mp_print_decoders(log, MSGL_INFO, "Audio decoders:", list);
         talloc_free(list);
         opt_exit = 1;
     }
     if (opts->video_decoders && strcmp(opts->video_decoders, "help") == 0) {
         struct mp_decoder_list *list = video_decoder_list();
-        mp_print_decoders(MSGT_CPLAYER, MSGL_INFO, "Video decoders:", list);
+        mp_print_decoders(log, MSGL_INFO, "Video decoders:", list);
         talloc_free(list);
         opt_exit = 1;
     }
 #if HAVE_X11
     if (opts->vo.fstype_list && strcmp(opts->vo.fstype_list[0], "help") == 0) {
-        fstype_help();
+        fstype_help(log);
         MP_INFO(mpctx, "\n");
         opt_exit = 1;
     }
@@ -217,16 +219,16 @@ static bool handle_help_options(struct MPContext *mpctx)
     if ((opts->demuxer_name && strcmp(opts->demuxer_name, "help") == 0) ||
         (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name, "help") == 0) ||
         (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name, "help") == 0)) {
-        demuxer_help();
+        demuxer_help(log);
         MP_INFO(mpctx, "\n");
         opt_exit = 1;
     }
     if (opts->list_properties) {
-        property_print_help();
+        property_print_help(log);
         opt_exit = 1;
     }
 #if HAVE_ENCODING
-    if (encode_lavc_showhelp(mpctx->opts))
+    if (encode_lavc_showhelp(log, &opts->encode_output))
         opt_exit = 1;
 #endif
     return opt_exit;
@@ -264,36 +266,15 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
     SetErrorMode(0x8003);
 #endif
 
-    load_termcap(NULL); // load key-codes
+    terminal_init();
 
     mp_time_init();
 }
 
-static int read_keys(void *ctx, int fd)
+static int cfg_include(void *ctx, char *filename, int flags)
 {
-    if (getch2(ctx))
-        return MP_INPUT_NOTHING;
-    return MP_INPUT_DEAD;
-}
-
-static void init_input(struct MPContext *mpctx)
-{
-    mpctx->input = mp_input_init(mpctx->global);
-    if (mpctx->opts->slave_mode)
-        mp_input_add_cmd_fd(mpctx->input, 0, USE_FD0_CMD_SELECT, MP_INPUT_SLAVE_CMD_FUNC, NULL);
-    else if (mpctx->opts->consolecontrols)
-        mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->input);
-    // Set the libstream interrupt callback
-    stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
-
-#if HAVE_COCOA
-    cocoa_set_input_context(mpctx->input);
-#endif
-}
-
-static int cfg_include(struct m_config *conf, char *filename, int flags)
-{
-    return m_config_parse_config_file(conf, filename, flags);
+    struct MPContext *mpctx = ctx;
+    return m_config_parse_config_file(mpctx->mconfig, filename, flags);
 }
 
 static int mpv_main(int argc, char *argv[])
@@ -312,40 +293,47 @@ static int mpv_main(int argc, char *argv[])
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
     };
 
+    mpctx->global = talloc_zero(mpctx, struct mpv_global);
+
+    // Nothing must call mp_msg*() and related before this
+    mp_msg_init(mpctx->global);
+    mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
+    mpctx->statusline = mp_log_new(mpctx, mpctx->log, "!statusline");
+
     // Create the config context and register the options
-    mpctx->mconfig = m_config_new(mpctx, sizeof(struct MPOpts),
+    mpctx->mconfig = m_config_new(mpctx, mpctx->log, sizeof(struct MPOpts),
                                   &mp_default_opts, mp_opts);
     mpctx->opts = mpctx->mconfig->optstruct;
     mpctx->mconfig->includefunc = cfg_include;
+    mpctx->mconfig->includefunc_ctx = mpctx;
     mpctx->mconfig->use_profiles = true;
     mpctx->mconfig->is_toplevel = true;
 
     struct MPOpts *opts = mpctx->opts;
-
-
-    mpctx->global = talloc_zero(mpctx, struct mpv_global);
     mpctx->global->opts = opts;
 
-    // Nothing must call mp_msg() before this
-    mp_msg_init(mpctx->global);
-    mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
+    char *verbose_env = getenv("MPV_VERBOSE");
+    if (verbose_env)
+        opts->verbose = atoi(verbose_env);
+    mp_msg_update_msglevels(mpctx->global);
 
-    init_libav();
+    init_libav(mpctx->global);
     GetCpuCaps(&gCpuCaps);
     screenshot_init(mpctx);
-    mpctx->mixer = mixer_init(mpctx, opts);
+    mpctx->mixer = mixer_init(mpctx, mpctx->global);
     command_init(mpctx);
 
     // Preparse the command line
-    m_config_preparse_command_line(mpctx->mconfig, argc, argv);
+    m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argc, argv);
+    mp_msg_update_msglevels(mpctx->global);
 
-    mp_print_version(false);
+    mp_print_version(mpctx->log, false);
 
     if (!mp_parse_cfgfiles(mpctx))
         exit_player(mpctx, EXIT_ERROR);
 
     int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
-                                           argc, argv);
+                                           mpctx->global, argc, argv);
     if (r < 0) {
         if (r <= M_OPT_EXIT) {
             exit_player(mpctx, EXIT_NONE);
@@ -353,6 +341,8 @@ static int mpv_main(int argc, char *argv[])
             exit_player(mpctx, EXIT_ERROR);
         }
     }
+
+    mp_msg_update_msglevels(mpctx->global);
 
     if (handle_help_options(mpctx))
         exit_player(mpctx, EXIT_NONE);
@@ -364,7 +354,7 @@ static int mpv_main(int argc, char *argv[])
     MP_VERBOSE(mpctx, "\n");
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
-        mp_print_version(true);
+        mp_print_version(mpctx->log, true);
         MP_INFO(mpctx, "%s", mp_help_text);
         exit_player(mpctx, EXIT_NONE);
     }
@@ -373,11 +363,16 @@ static int mpv_main(int argc, char *argv[])
     set_priority();
 #endif
 
-    init_input(mpctx);
+    mpctx->input = mp_input_init(mpctx->global);
+    stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+#if HAVE_COCOA
+    cocoa_set_input_context(mpctx->input);
+#endif
 
 #if HAVE_ENCODING
     if (opts->encode_output.file && *opts->encode_output.file) {
-        mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output);
+        mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output,
+                                                  mpctx->global);
         if(!mpctx->encode_lavc_ctx) {
             MP_INFO(mpctx, "Encoding initialization failed.");
             exit_player(mpctx, EXIT_ERROR);
@@ -391,17 +386,23 @@ static int mpv_main(int argc, char *argv[])
     }
 #endif
 
+    if (mpctx->opts->slave_mode)
+        terminal_setup_stdin_cmd_input(mpctx->input);
+    else if (mpctx->opts->consolecontrols)
+        terminal_setup_getch(mpctx->input);
+
     if (opts->consolecontrols)
         getch2_enable();
 
 #if HAVE_LIBASS
-    mpctx->ass_library = mp_ass_init(opts);
+    mpctx->ass_log = mp_log_new(mpctx, mpctx->global->log, "!libass");
+    mpctx->ass_library = mp_ass_init(mpctx->global, mpctx->ass_log);
 #else
     MP_WARN(mpctx, "Compiled without libass.\n");
     MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
 #endif
 
-    mpctx->osd = osd_create(opts);
+    mpctx->osd = osd_create(mpctx->global);
 
     if (opts->force_vo) {
         opts->fixed_vo = 1;
@@ -428,7 +429,7 @@ static int mpv_main(int argc, char *argv[])
     if (opts->merge_files)
         merge_playlist_files(mpctx->playlist);
 
-    mpctx->playlist->current = mp_resume_playlist(mpctx->playlist, opts);
+    mpctx->playlist->current = mp_check_playlist_resume(mpctx, mpctx->playlist);
     if (!mpctx->playlist->current)
         mpctx->playlist->current = mpctx->playlist->first;
 

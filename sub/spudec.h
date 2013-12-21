@@ -23,11 +23,12 @@
 
 struct sub_bitmaps;
 struct mp_osd_res;
+struct mp_log;
 
 void spudec_heartbeat(void *this, unsigned int pts100);
 void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pts100);
 void spudec_get_indexed(void *this, struct mp_osd_res *dim, double xstretch, double ystretch, struct sub_bitmaps *res);
-void *spudec_new_scaled(unsigned int frame_width, unsigned int frame_height, uint8_t *extradata, int extradata_len);
+void *spudec_new_scaled(struct mp_log *log, unsigned int frame_width, unsigned int frame_height, uint8_t *extradata, int extradata_len);
 void spudec_free(void *this);
 void spudec_reset(void *this);	// called after seek
 int spudec_visible(void *this); // check if spu is visible

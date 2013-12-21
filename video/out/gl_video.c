@@ -298,8 +298,8 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .alpha_mode = 2,
 };
 
-static int validate_scaler_opt(const m_option_t *opt, struct bstr name,
-                               struct bstr param);
+static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
@@ -691,9 +691,9 @@ static GLuint create_shader(struct gl_video *p, GLenum type, const char *header,
     GLint log_length;
     gl->GetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
 
-    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DBG2) : MSGL_ERR;
+    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DEBUG) : MSGL_ERR;
     const char *typestr = type == GL_VERTEX_SHADER ? "vertex" : "fragment";
-    if (mp_msg_test_log(p->log, pri)) {
+    if (mp_msg_test(p->log, pri)) {
         MP_MSG(p, pri, "%s shader source:\n", typestr);
         mp_log_source(p->log, pri, full_source);
     }
@@ -727,8 +727,8 @@ static void link_shader(struct gl_video *p, GLuint program)
     GLint log_length;
     gl->GetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
 
-    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DBG2) : MSGL_ERR;
-    if (mp_msg_test_log(p->log, pri)) {
+    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DEBUG) : MSGL_ERR;
+    if (mp_msg_test(p->log, pri)) {
         GLchar *logstr = talloc_zero_size(NULL, log_length + 1);
         gl->GetProgramInfoLog(program, log_length, NULL, logstr);
         MP_MSG(p, pri, "shader link log (status=%d): %s\n", status, logstr);
@@ -2219,15 +2219,15 @@ bool gl_video_get_equalizer(struct gl_video *p, const char *name, int *val)
     return mp_csp_equalizer_get(&p->video_eq, name, val) >= 0;
 }
 
-static int validate_scaler_opt(const m_option_t *opt, struct bstr name,
-                               struct bstr param)
+static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param)
 {
     if (bstr_equals0(param, "help")) {
-        mp_msg(MSGT_VO, MSGL_INFO, "Available scalers:\n");
+        mp_info(log, "Available scalers:\n");
         for (const char **filter = fixed_scale_filters; *filter; filter++)
-            mp_msg(MSGT_VO, MSGL_INFO, "    %s\n", *filter);
+            mp_info(log, "    %s\n", *filter);
         for (int n = 0; mp_filter_kernels[n].name; n++)
-            mp_msg(MSGT_VO, MSGL_INFO, "    %s\n", mp_filter_kernels[n].name);
+            mp_info(log, "    %s\n", mp_filter_kernels[n].name);
         return M_OPT_EXIT - 1;
     }
     char s[20];

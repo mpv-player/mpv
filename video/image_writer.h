@@ -16,7 +16,7 @@
  */
 
 struct mp_image;
-struct mp_csp_details;
+struct mp_log;
 
 struct image_writer_opts {
     char *format;
@@ -48,7 +48,7 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts);
  *       can be used to store snapshots of anamorphic video.
  */
 int write_image(struct mp_image *image, const struct image_writer_opts *opts,
-                const char *filename);
+                const char *filename, struct mp_log *log);
 
 // Debugging helper.
-void dump_png(struct mp_image *image, const char *filename);
+void dump_png(struct mp_image *image, const char *filename, struct mp_log *log);

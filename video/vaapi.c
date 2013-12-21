@@ -24,13 +24,10 @@
 #include "img_format.h"
 #include "mp_image_pool.h"
 
-#define VA_VERBOSE(...) mp_msg(MSGT_VO, MSGL_V, "[vaapi] "  __VA_ARGS__)
-#define VA_ERROR(...) mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] "  __VA_ARGS__)
-
-bool check_va_status(VAStatus status, const char *msg)
+bool check_va_status(struct mp_log *log, VAStatus status, const char *msg)
 {
     if (status != VA_STATUS_SUCCESS) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] %s: %s\n", msg, vaErrorStr(status));
+        mp_err(log, "%s: %s\n", msg, vaErrorStr(status));
         return false;
     }
     return true;
@@ -96,30 +93,32 @@ static void va_get_formats(struct mp_vaapi_ctx *ctx)
     int num = vaMaxNumImageFormats(ctx->display);
     VAImageFormat entries[num];
     VAStatus status = vaQueryImageFormats(ctx->display, entries, &num);
-    if (!check_va_status(status, "vaQueryImageFormats()"))
+    if (!CHECK_VA_STATUS(ctx, "vaQueryImageFormats()"))
         return;
     struct va_image_formats *formats = talloc_ptrtype(ctx, formats);
     formats->entries = talloc_array(formats, VAImageFormat, num);
     formats->num = num;
-    VA_VERBOSE("%d image formats available:\n", num);
+    MP_VERBOSE(ctx, "%d image formats available:\n", num);
     for (int i = 0; i < num; i++) {
         formats->entries[i] = entries[i];
-        VA_VERBOSE("  %s\n", VA_STR_FOURCC(entries[i].fourcc));
+        MP_VERBOSE(ctx, "  %s\n", VA_STR_FOURCC(entries[i].fourcc));
     }
     ctx->image_formats = formats;
 }
 
-struct mp_vaapi_ctx *va_initialize(VADisplay *display)
+struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog)
 {
+    struct mp_log *log = mp_log_new(NULL, plog, "/vaapi");
     int major_version, minor_version;
     int status = vaInitialize(display, &major_version, &minor_version);
-    if (!check_va_status(status, "vaInitialize()"))
-        return NULL;
+    if (!check_va_status(log, status, "vaInitialize()"))
+        goto error;
 
-    VA_VERBOSE("VA API version %d.%d\n", major_version, minor_version);
+    mp_verbose(log, "VA API version %d.%d\n", major_version, minor_version);
 
     struct mp_vaapi_ctx *res = talloc_ptrtype(NULL, res);
     *res = (struct mp_vaapi_ctx) {
+        .log = talloc_steal(res, log),
         .display = display,
     };
 
@@ -129,8 +128,9 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display)
     return res;
 
 error:
-    if (res->display)
+    if (res && res->display)
         vaTerminate(res->display);
+    talloc_free(log);
     talloc_free(res);
     return NULL;
 }
@@ -161,6 +161,8 @@ VAImageFormat *va_image_format_from_imgfmt(const struct va_image_formats *format
 static void va_surface_destroy(struct va_surface *surface);
 
 struct va_surface_pool {
+    struct mp_log *log;
+    struct mp_vaapi_ctx *ctx;
     VADisplay display;
     int rt_format;
     int num_surfaces, lru_counter;
@@ -168,6 +170,7 @@ struct va_surface_pool {
 };
 
 typedef struct va_surface_priv {
+    struct mp_vaapi_ctx *ctx;
     VADisplay display;
     VAImage image;       // used for software decoding case
     bool is_derived;     // is image derived by vaDeriveImage()?
@@ -176,11 +179,13 @@ typedef struct va_surface_priv {
     int  order;          // for LRU allocation
 } va_surface_priv_t;
 
-struct va_surface_pool *va_surface_pool_alloc(VADisplay display, int rt_format)
+struct va_surface_pool * va_surface_pool_alloc(struct mp_vaapi_ctx *ctx, int rt_format)
 {
     struct va_surface_pool *pool = talloc_ptrtype(NULL, pool);
     *pool = (struct va_surface_pool) {
-        .display = display,
+        .ctx = ctx,
+        .log = ctx->log,
+        .display = ctx->display,
         .rt_format = rt_format
     };
     return pool;
@@ -252,7 +257,7 @@ static struct va_surface *va_surface_alloc(struct va_surface_pool *pool,
     VASurfaceID id = VA_INVALID_ID;
     VAStatus status;
     status = vaCreateSurfaces(pool->display, w, h, pool->rt_format, 1, &id);
-    if (!check_va_status(status, "vaCreateSurfaces()"))
+    if (!CHECK_VA_STATUS(pool, "vaCreateSurfaces()"))
         return NULL;
 
     struct va_surface *surface = talloc_ptrtype(NULL, surface);
@@ -265,17 +270,16 @@ static struct va_surface *va_surface_alloc(struct va_surface_pool *pool,
     surface->h = h;
     surface->rt_format = pool->rt_format;
     surface->p = talloc_zero(surface, va_surface_priv_t);
+    surface->p->ctx = pool->ctx;
     surface->p->display = pool->display;
     surface->p->image.image_id = surface->p->image.buf = VA_INVALID_ID;
     return surface;
 }
 
 struct mp_image *va_surface_pool_get_wrapped(struct va_surface_pool *pool,
-                                             const struct va_image_formats *formats,
                                              int imgfmt, int w, int h)
 {
-    return va_surface_wrap(va_surface_pool_get_by_imgfmt(pool, formats, imgfmt,
-                                                         w, h));
+    return va_surface_wrap(va_surface_pool_get_by_imgfmt(pool, imgfmt, w, h));
 }
 
 int va_surface_pool_rt_format(const struct va_surface_pool *pool)
@@ -346,7 +350,7 @@ static VAImage *va_surface_image_alloc(struct va_surface *surface,
         if (p->image.format.fourcc == format->fourcc &&
                 p->image.width == surface->w && p->image.height == surface->h) {
             p->is_derived = true;
-            VA_VERBOSE("Using vaDeriveImage()\n");
+            MP_VERBOSE(p->ctx, "Using vaDeriveImage()\n");
         } else {
             vaDestroyImage(p->display, p->image.image_id);
             status = VA_STATUS_ERROR_OPERATION_FAILED;
@@ -356,7 +360,7 @@ static VAImage *va_surface_image_alloc(struct va_surface *surface,
         p->image.image_id = VA_INVALID_ID;
         status = vaCreateImage(p->display, format, surface->w, surface->h,
                                &p->image);
-        if (!check_va_status(status, "vaCreateImage()")) {
+        if (!CHECK_VA_STATUS(p->ctx, "vaCreateImage()")) {
             p->image.image_id = VA_INVALID_ID;
             return NULL;
         }
@@ -367,12 +371,12 @@ static VAImage *va_surface_image_alloc(struct va_surface *surface,
 
 
 struct va_surface *va_surface_pool_get_by_imgfmt(struct va_surface_pool *pool,
-                                                 const struct va_image_formats *formats,
                                                  int imgfmt, int w, int h)
 {
     if (imgfmt == IMGFMT_VAAPI)
         return va_surface_pool_get(pool, w, h);
-    VAImageFormat *format = va_image_format_from_imgfmt(formats, imgfmt);
+    VAImageFormat *format =
+        va_image_format_from_imgfmt(pool->ctx->image_formats, imgfmt);
     if (!format)
         return NULL;
     // WTF: no mapping from VAImageFormat -> VA_RT_FORMAT_
@@ -420,14 +424,14 @@ VASurfaceID va_surface_id(const struct va_surface *surface)
     return surface ? surface->id : VA_INVALID_ID;
 }
 
-bool va_image_map(VADisplay display, VAImage *image, struct mp_image *mpi)
+bool va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi)
 {
     int imgfmt = va_fourcc_to_imgfmt(image->format.fourcc);
     if (imgfmt == IMGFMT_NONE)
         return false;
     void *data = NULL;
-    const VAStatus status = vaMapBuffer(display, image->buf, &data);
-    if (!check_va_status(status, "vaMapBuffer()"))
+    const VAStatus status = vaMapBuffer(ctx->display, image->buf, &data);
+    if (!CHECK_VA_STATUS(ctx, "vaMapBuffer()"))
         return false;
 
     *mpi = (struct mp_image) {0};
@@ -447,10 +451,10 @@ bool va_image_map(VADisplay display, VAImage *image, struct mp_image *mpi)
     return true;
 }
 
-bool va_image_unmap(VADisplay display, VAImage *image)
+bool va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image)
 {
-    const VAStatus status = vaUnmapBuffer(display, image->buf);
-    return check_va_status(status, "vaUnmapBuffer()");
+    const VAStatus status = vaUnmapBuffer(ctx->display, image->buf);
+    return CHECK_VA_STATUS(ctx, "vaUnmapBuffer()");
 }
 
 bool va_surface_upload(struct va_surface *surface, struct mp_image *mpi)
@@ -463,17 +467,17 @@ bool va_surface_upload(struct va_surface *surface, struct mp_image *mpi)
         return false;
 
     struct mp_image img;
-    if (!va_image_map(p->display, &p->image, &img))
+    if (!va_image_map(p->ctx, &p->image, &img))
         return false;
     mp_image_copy(&img, mpi);
-    va_image_unmap(p->display, &p->image);
+    va_image_unmap(p->ctx, &p->image);
 
     if (!p->is_derived) {
         VAStatus status = vaPutImage2(p->display, surface->id,
                                       p->image.image_id,
                                       0, 0, mpi->w, mpi->h,
                                       0, 0, mpi->w, mpi->h);
-        if (!check_va_status(status, "vaPutImage()"))
+        if (!CHECK_VA_STATUS(p->ctx, "vaPutImage()"))
             return false;
     }
 
@@ -504,12 +508,12 @@ static struct mp_image *try_download(struct va_surface *surface,
 
     struct mp_image *dst = NULL;
     struct mp_image tmp;
-    if (va_image_map(surface->p->display, image, &tmp)) {
+    if (va_image_map(surface->p->ctx, image, &tmp)) {
         assert(tmp.imgfmt == imgfmt);
         dst = pool ? mp_image_pool_get(pool, imgfmt, tmp.w, tmp.h)
                     : mp_image_alloc(imgfmt, tmp.w, tmp.h);
         mp_image_copy(dst, &tmp);
-        va_image_unmap(surface->p->display, image);
+        va_image_unmap(surface->p->ctx, image);
     }
     return dst;
 }
@@ -518,11 +522,11 @@ static struct mp_image *try_download(struct va_surface *surface,
 // Note: unlike va_surface_upload(), this will attempt to (re)create the
 //       VAImage stored with the va_surface.
 struct mp_image *va_surface_download(struct va_surface *surface,
-                                     const struct va_image_formats *formats,
                                      struct mp_image_pool *pool)
 {
+    struct mp_vaapi_ctx *ctx = surface->p->ctx;
     VAStatus status = vaSyncSurface(surface->p->display, surface->id);
-    if (!check_va_status(status, "vaSyncSurface()"))
+    if (!CHECK_VA_STATUS(ctx, "vaSyncSurface()"))
         return NULL;
 
     VAImage *image = &surface->p->image;
@@ -533,14 +537,14 @@ struct mp_image *va_surface_download(struct va_surface *surface,
     }
 
     // We have no clue which format will work, so try them all.
-    for (int i = 0; i < formats->num; i++) {
-        VAImageFormat *format = &formats->entries[i];
+    for (int i = 0; i < ctx->image_formats->num; i++) {
+        VAImageFormat *format = &ctx->image_formats->entries[i];
         struct mp_image *mpi = try_download(surface, format, pool);
         if (mpi)
             return mpi;
     }
 
-    VA_ERROR("failed to get surface data.\n");
+    MP_ERR(ctx, "failed to get surface data.\n");
     return NULL;
 }
 

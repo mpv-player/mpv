@@ -31,6 +31,7 @@
 
 #include "talloc.h"
 #include "options/options.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "osd.h"
 #include "dec_sub.h"
@@ -79,11 +80,13 @@ static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
         && a.display_par == b.display_par;
 }
 
-struct osd_state *osd_create(struct MPOpts *opts)
+struct osd_state *osd_create(struct mpv_global *global)
 {
     struct osd_state *osd = talloc_zero(NULL, struct osd_state);
     *osd = (struct osd_state) {
-        .opts = opts,
+        .opts = global->opts,
+        .global = global,
+        .log = mp_log_new(osd, global->log, "osd"),
         .osd_text = talloc_strdup(osd, ""),
         .sub_text = talloc_strdup(osd, ""),
         .progbar_type = -1,
@@ -246,8 +249,7 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
             if (formats[imgs.format]) {
                 cb(cb_ctx, &imgs);
             } else {
-                mp_msg(MSGT_OSD, MSGL_ERR,
-                       "Can't render OSD part %d (format %d).\n",
+                MP_ERR(osd, "Can't render OSD part %d (format %d).\n",
                        obj->type, imgs.format);
             }
         }

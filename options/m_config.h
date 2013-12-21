@@ -34,6 +34,7 @@ struct m_option_type;
 struct m_sub_options;
 struct m_obj_desc;
 struct m_obj_settings;
+struct mp_log;
 
 // Config option
 struct m_config_option {
@@ -48,6 +49,8 @@ struct m_config_option {
 // Config object
 /** \ingroup Config */
 typedef struct m_config {
+    struct mp_log *log;
+
     // Registered options.
     struct m_config_option *opts; // all options, even suboptions
     int num_opts;
@@ -61,7 +64,8 @@ typedef struct m_config {
 
     bool use_profiles;
     bool is_toplevel;
-    int (*includefunc)(struct m_config *conf, char *filename, int flags);
+    int (*includefunc)(void *ctx, char *filename, int flags);
+    void *includefunc_ctx;
 
     void *optstruct; // struct mpopts or other
 } m_config_t;
@@ -76,14 +80,15 @@ typedef struct m_config {
 //           and a corresponding option switch or sub-option field.
 //  suboptinit: if not NULL, initialize the suboption string (used for presets)
 // Note that the m_config object will keep pointers to defaults and options.
-struct m_config *m_config_new(void *talloc_ctx, size_t size,
-                              const void *defaults,
+struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
+                              size_t size, const void *defaults,
                               const struct m_option *options);
 
-struct m_config *m_config_from_obj_desc(void *talloc_ctx,
+struct m_config *m_config_from_obj_desc(void *talloc_ctx, struct mp_log *log,
                                         struct m_obj_desc *desc);
 
 struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
+                                                struct mp_log *log,
                                                 struct m_obj_desc *desc);
 
 int m_config_set_obj_params(struct m_config *conf, char **args);

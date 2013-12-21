@@ -21,13 +21,14 @@
 
 struct MPContext;
 struct mp_cmd;
+struct mp_log;
 
 void command_init(struct MPContext *mpctx);
 void command_uninit(struct MPContext *mpctx);
 
 void run_command(struct MPContext *mpctx, struct mp_cmd *cmd);
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str);
-void property_print_help(void);
+void property_print_help(struct mp_log *log);
 int mp_property_do(const char* name, int action, void* val,
                    struct MPContext *mpctx);
 

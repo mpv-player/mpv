@@ -87,14 +87,14 @@ int video_set_colors(struct dec_video *d_video, const char *item, int value)
     data.item = item;
     data.value = value;
 
-    mp_msg(MSGT_DECVIDEO, MSGL_V, "set video colors %s=%d \n", item, value);
+    MP_VERBOSE(d_video, "set video colors %s=%d \n", item, value);
     if (d_video->vfilter) {
         int ret = video_vf_vo_control(d_video, VFCTRL_SET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE)
             return 1;
     }
-    mp_msg(MSGT_DECVIDEO, MSGL_V, "Video attribute '%s' is not supported by selected vo.\n",
-           item);
+    MP_VERBOSE(d_video, "Video attribute '%s' is not supported by selected vo.\n",
+               item);
     return 0;
 }
 
@@ -104,7 +104,7 @@ int video_get_colors(struct dec_video *d_video, const char *item, int *value)
 
     data.item = item;
 
-    mp_msg(MSGT_DECVIDEO, MSGL_V, "get video colors %s \n", item);
+    MP_VERBOSE(d_video, "get video colors %s \n", item);
     if (d_video->vfilter) {
         int ret = video_vf_vo_control(d_video, VFCTRL_GET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE) {
@@ -119,7 +119,7 @@ void video_uninit(struct dec_video *d_video)
 {
     mp_image_unrefp(&d_video->waiting_decoded_mpi);
     if (d_video->vd_driver) {
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "Uninit video.\n");
+        MP_VERBOSE(d_video, "Uninit video.\n");
         d_video->vd_driver->uninit(d_video);
     }
     talloc_free(d_video->priv);
@@ -130,7 +130,7 @@ void video_uninit(struct dec_video *d_video)
 static int init_video_codec(struct dec_video *d_video, const char *decoder)
 {
     if (!d_video->vd_driver->init(d_video, decoder)) {
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "Video decoder init failed.\n");
+        MP_VERBOSE(d_video, "Video decoder init failed.\n");
         return 0;
     }
     return 1;
@@ -172,22 +172,22 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
     struct mp_decoder_list *list =
         mp_select_video_decoders(d_video->header->codec, video_decoders);
 
-    mp_print_decoders(MSGT_DECVIDEO, MSGL_V, "Codec list:", list);
+    mp_print_decoders(d_video->log, MSGL_V, "Codec list:", list);
 
     for (int n = 0; n < list->num_entries; n++) {
         struct mp_decoder_entry *sel = &list->entries[n];
         const struct vd_functions *driver = find_driver(sel->family);
         if (!driver)
             continue;
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "Opening video decoder %s:%s\n",
-                sel->family, sel->decoder);
+        MP_VERBOSE(d_video, "Opening video decoder %s:%s\n",
+                   sel->family, sel->decoder);
         d_video->vd_driver = driver;
         if (init_video_codec(d_video, sel->decoder)) {
             decoder = sel;
             break;
         }
         d_video->vd_driver = NULL;
-        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Video decoder init failed for "
+        MP_WARN(d_video, "Video decoder init failed for "
                 "%s:%s\n", sel->family, sel->decoder);
     }
 
@@ -195,11 +195,10 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
         d_video->decoder_desc =
             talloc_asprintf(d_video, "%s [%s:%s]", decoder->desc, decoder->family,
                             decoder->decoder);
-        mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Selected video codec: %s\n",
-               d_video->decoder_desc);
+        MP_INFO(d_video, "Selected video codec: %s\n",
+                d_video->decoder_desc);
     } else {
-        mp_msg(MSGT_DECVIDEO, MSGL_ERR,
-               "Failed to initialize a video decoder for codec '%s'.\n",
+        MP_ERR(d_video, "Failed to initialize a video decoder for codec '%s'.\n",
                d_video->header->codec ? d_video->header->codec : "<unknown>");
     }
 
@@ -216,7 +215,7 @@ static void add_pts_to_sort(struct dec_video *d_video, double pts)
             d_video->num_buffered_pts = delay;
         if (d_video->num_buffered_pts ==
             sizeof(d_video->buffered_pts) / sizeof(double))
-            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Too many buffered pts\n");
+            MP_ERR(d_video, "Too many buffered pts\n");
         else {
             int i, j;
             for (i = 0; i < d_video->num_buffered_pts; i++)
@@ -244,8 +243,7 @@ static double retrieve_sorted_pts(struct dec_video *d_video, double codec_pts)
         d_video->num_buffered_pts--;
         sorted_pts = d_video->buffered_pts[d_video->num_buffered_pts];
     } else {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR,
-                "No pts value from demuxer to use for frame!\n");
+        MP_ERR(d_video, "No pts value from demuxer to use for frame!\n");
         sorted_pts = MP_NOPTS_VALUE;
     }
 
@@ -277,9 +275,8 @@ static double retrieve_sorted_pts(struct dec_video *d_video, double codec_pts)
         }
         if (probcount1 >= probcount2 * 1.5 + 2) {
             d_video->pts_assoc_mode = 3 - d_video->pts_assoc_mode;
-            mp_msg(MSGT_DECVIDEO, MSGL_WARN,
-                   "Switching to pts association mode %d.\n",
-                   d_video->pts_assoc_mode);
+            MP_WARN(d_video, "Switching to pts association mode %d.\n",
+                    d_video->pts_assoc_mode);
         }
     }
     return d_video->pts_assoc_mode == 1 ? codec_pts : sorted_pts;
@@ -347,7 +344,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
 
     if (!opts->correct_pts || pts == MP_NOPTS_VALUE) {
         if (opts->correct_pts)
-            mp_msg(MSGT_DECVIDEO, MSGL_WARN, "No video PTS! Making something up.\n");
+            MP_WARN(d_video, "No video PTS! Making something up.\n");
 
         double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
         double base = d_video->last_packet_pdts;
@@ -359,8 +356,8 @@ struct mp_image *video_decode(struct dec_video *d_video,
     }
 
     if (d_video->decoded_pts != MP_NOPTS_VALUE && pts <= d_video->decoded_pts) {
-        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Non-monotonic video pts: %f <= %f\n",
-               pts, d_video->decoded_pts);
+        MP_WARN(d_video, "Non-monotonic video pts: %f <= %f\n",
+                pts, d_video->decoded_pts);
     }
 
     if (d_video->has_broken_packet_pts < 0)
@@ -380,13 +377,12 @@ int video_reconfig_filters(struct dec_video *d_video,
     struct mp_image_params p = *params;
     struct sh_video *sh = d_video->header->video;
 
-    mp_msg(MSGT_DECVIDEO, MSGL_V,
-           "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",
-           p.w, p.h, sh->fps, sh->i_bps * 0.008,
-           sh->i_bps / 1000.0);
+    MP_VERBOSE(d_video, "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",
+               p.w, p.h, sh->fps, sh->i_bps * 0.008,
+               sh->i_bps / 1000.0);
 
-    mp_msg(MSGT_DECVIDEO, MSGL_V, "VDec: vo config request - %d x %d (%s)\n",
-           p.w, p.h, vo_format_name(p.imgfmt));
+    MP_VERBOSE(d_video, "VDec: vo config request - %d x %d (%s)\n",
+               p.w, p.h, vo_format_name(p.imgfmt));
 
     float decoder_aspect = p.d_w / (float)p.d_h;
     if (d_video->initial_decoder_aspect == 0)
@@ -410,9 +406,9 @@ int video_reconfig_filters(struct dec_video *d_video,
         vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, force_aspect);
 
     if (abs(p.d_w - p.w) >= 4 || abs(p.d_h - p.h) >= 4) {
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Aspect ratio is %.2f:1 - "
-                "scaling to correct movie aspect.\n", sh->aspect);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n", sh->aspect);
+        MP_VERBOSE(d_video, "Aspect ratio is %.2f:1 - "
+                   "scaling to correct movie aspect.\n", sh->aspect);
+        MP_SMODE(d_video, "ID_VIDEO_ASPECT=%1.4f\n", sh->aspect);
     } else {
         p.d_w = p.w;
         p.d_h = p.h;
@@ -430,11 +426,11 @@ int video_reconfig_filters(struct dec_video *d_video,
     mp_image_params_guess_csp(&p);
 
     // Time to config libvo!
-    mp_msg(MSGT_CPLAYER, MSGL_V, "VO Config (%dx%d->%dx%d,0x%X)\n",
-           p.w, p.h, p.d_w, p.d_h, p.imgfmt);
+    MP_VERBOSE(d_video, "VO Config (%dx%d->%dx%d,0x%X)\n",
+               p.w, p.h, p.d_w, p.d_h, p.imgfmt);
 
     if (vf_reconfig(d_video->vfilter, &p) < 0) {
-        mp_msg(MSGT_CPLAYER, MSGL_WARN, "FATAL: Cannot initialize video driver.\n");
+        MP_WARN(d_video, "FATAL: Cannot initialize video driver.\n");
         return -1;
     }
 

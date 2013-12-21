@@ -219,25 +219,6 @@ static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
     }
 }
 
-static int x11_errorhandler(Display *display, XErrorEvent *event)
-{
-    char msg[60];
-
-    XGetErrorText(display, event->error_code, (char *) &msg, sizeof(msg));
-
-    mp_msg(MSGT_VO, MSGL_ERR, "X11 error: %s\n", msg);
-
-    mp_msg(MSGT_VO, MSGL_V,
-           "Type: %x, display: %p, resourceid: %lx, serial: %lx\n",
-           event->type, event->display, event->resourceid, event->serial);
-    mp_msg(MSGT_VO, MSGL_V,
-           "Error code: %x, request code: %x, minor code: %x\n",
-           event->error_code, event->request_code, event->minor_code);
-
-//    abort();
-    return 0;
-}
-
 struct fstype {
     int type;
     const char *sym;
@@ -256,16 +237,13 @@ static const struct fstype fstypes[] = {
     {0},
 };
 
-void fstype_help(void)
+void fstype_help(struct mp_log *log)
 {
-    mp_msg(MSGT_VO, MSGL_INFO, "Available fullscreen layer change modes:\n");
-    for (int n = 0; fstypes[n].sym; n++) {
-        mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", fstypes[n].sym,
-               fstypes[n].help);
-    }
-    mp_msg(MSGT_VO, MSGL_INFO,
-           "You can also negate the settings with simply putting '-' in the beginning");
-    mp_msg(MSGT_VO, MSGL_INFO, "\n");
+    mp_info(log, "Available fullscreen layer change modes:\n");
+    for (int n = 0; fstypes[n].sym; n++)
+        mp_info(log, "    %-15s %s\n", fstypes[n].sym, fstypes[n].help);
+    mp_info(log,
+            "You can also negate the settings with simply putting '-' in the beginning\n");
 }
 
 static void fstype_dump(struct vo_x11_state *x11)
@@ -476,8 +454,6 @@ int vo_x11_init(struct vo *vo)
         .fs_layer = WIN_LAYER_ABOVE_DOCK,
     };
     vo->x11 = x11;
-
-    XSetErrorHandler(x11_errorhandler);
 
     dispName = XDisplayName(NULL);
 
@@ -710,7 +686,6 @@ void vo_x11_uninit(struct vo *vo)
     MP_VERBOSE(x11, "uninit ...\n");
     if (x11->xim)
         XCloseIM(x11->xim);
-    XSetErrorHandler(NULL);
     XCloseDisplay(x11->display);
 
     talloc_free(x11);

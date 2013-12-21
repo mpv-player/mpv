@@ -41,6 +41,7 @@
 #include <ass/ass_types.h>
 
 struct MPOpts;
+struct mpv_global;
 struct mp_osd_res;
 struct osd_style_opts;
 
@@ -54,8 +55,9 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts);
 struct MPOpts;
 void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
                       struct mp_osd_res *dim);
-void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts);
-ASS_Library *mp_ass_init(struct MPOpts *opts);
+void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
+                            struct mpv_global *global, struct mp_log *log);
+ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log);
 
 struct sub_bitmap;
 struct sub_bitmaps;

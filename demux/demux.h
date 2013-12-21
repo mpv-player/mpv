@@ -194,6 +194,8 @@ typedef struct demuxer {
 
     void *priv;   // demuxer-specific internal data
     struct MPOpts *opts;
+    struct mpv_global *global;
+    struct mp_log *log, *glog;
     struct demuxer_params *params;
 } demuxer_t;
 
@@ -227,7 +229,8 @@ bool demux_stream_eof(struct sh_stream *sh);
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
 struct demuxer *demux_open(struct stream *stream, char *force_format,
-                           struct demuxer_params *params, struct MPOpts *opts);
+                           struct demuxer_params *params,
+                           struct mpv_global *global);
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, int flags);
@@ -247,7 +250,7 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           bool selected);
 void demuxer_enable_autoselect(struct demuxer *demuxer);
 
-void demuxer_help(void);
+void demuxer_help(struct mp_log *log);
 
 int demuxer_add_attachment(struct demuxer *demuxer, struct bstr name,
                            struct bstr type, struct bstr data);

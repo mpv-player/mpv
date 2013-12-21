@@ -20,11 +20,12 @@
 #include "options/path.h"
 #include "osdep/path.h"
 
-char *mp_get_macosx_bundled_path(const char *file)
+char *mp_get_macosx_bundled_path(void *talloc_ctx, struct mpv_global *global,
+                                 const char *filename)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSString *path = [[NSBundle mainBundle] resourcePath];
-    char *rv = mp_path_join(NULL, bstr0([path UTF8String]), bstr0(file));
+    char *rv = mp_path_join(talloc_ctx, bstr0([path UTF8String]), bstr0(file));
     [pool release];
     return rv;
 }

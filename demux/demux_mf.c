@@ -68,7 +68,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
     if (!stream) {
         char *filename = mf->names[mf->curr_frame];
         if (filename)
-            stream = stream_open(filename, demuxer->opts);
+            stream = stream_open(filename, demuxer->global);
     }
 
     if (stream) {
@@ -158,11 +158,9 @@ static const char *probe_format(mf_t *mf, enum demux_check check)
     }
     if (check == DEMUX_CHECK_REQUEST) {
         if (!mf_type) {
-            mp_msg(MSGT_DEMUX, MSGL_ERR,
-                   "[demux_mf] file type was not set! (try --mf-type=ext)\n");
+            MP_ERR(mf, "file type was not set! (try --mf-type=ext)\n");
         } else {
-            mp_msg(MSGT_DEMUX, MSGL_ERR,
-                   "[demux_mf] --mf-type set to an unknown codec!\n");
+            MP_ERR(mf, "--mf-type set to an unknown codec!\n");
         }
     }
     return NULL;
@@ -175,9 +173,9 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
 
     if (strncmp(demuxer->stream->url, "mf://", 5) == 0 &&
         demuxer->stream->type == STREAMTYPE_MF)
-        mf = open_mf_pattern(demuxer, demuxer->stream->url + 5);
+        mf = open_mf_pattern(demuxer, demuxer->log, demuxer->stream->url + 5);
     else {
-        mf = open_mf_single(demuxer, demuxer->stream->url);
+        mf = open_mf_single(demuxer, demuxer->log, demuxer->stream->url);
         int bog = 0;
         MP_TARRAY_APPEND(mf, mf->streams, bog, demuxer->stream);
     }

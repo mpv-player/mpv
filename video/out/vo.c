@@ -150,7 +150,7 @@ static struct vo *vo_create(struct mpv_global *global,
     struct mp_log *log = mp_log_new(NULL, global->log, "vo");
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &vo_obj_list, bstr0(name))) {
-        mp_msg_log(log, MSGL_ERR, "Video output %s not found!\n", name);
+        mp_msg(log, MSGL_ERR, "Video output %s not found!\n", name);
         talloc_free(log);
         return NULL;
     };
@@ -160,6 +160,7 @@ static struct vo *vo_create(struct mpv_global *global,
         .log = mp_log_new(vo, log, name),
         .driver = desc.p,
         .opts = &global->opts->vo,
+        .global = global,
         .encode_lavc_ctx = encode_lavc_ctx,
         .input_ctx = input_ctx,
         .event_fd = -1,
@@ -170,7 +171,7 @@ static struct vo *vo_create(struct mpv_global *global,
     };
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
-    struct m_config *config = m_config_from_obj_desc(vo, &desc);
+    struct m_config *config = m_config_from_obj_desc(vo, vo->log, &desc);
     if (m_config_apply_defaults(config, name, vo->opts->vo_defs) < 0)
         goto error;
     if (m_config_set_obj_params(config, args) < 0)
@@ -433,8 +434,8 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     if (vo->config_ok)
         vo->params = talloc_memdup(vo, &p2, sizeof(p2));
     if (vo->registered_fd == -1 && vo->event_fd != -1 && vo->config_ok) {
-        mp_input_add_key_fd(vo->input_ctx, vo->event_fd, 1, event_fd_callback,
-                            NULL, vo);
+        mp_input_add_fd(vo->input_ctx, vo->event_fd, 1, NULL, event_fd_callback,
+                        NULL, vo);
         vo->registered_fd = vo->event_fd;
     }
     vo->frame_loaded = false;

@@ -154,6 +154,8 @@ struct osd_state {
     void *highlight_priv;
 
     struct MPOpts *opts;
+    struct mpv_global *global;
+    struct mp_log *log;
 
     // Internal to sub.c
     struct mp_draw_sub_cache *draw_cache;
@@ -202,7 +204,7 @@ struct osd_style_opts {
 
 extern const struct m_sub_options osd_style_conf;
 
-struct osd_state *osd_create(struct MPOpts *opts);
+struct osd_state *osd_create(struct mpv_global *global);
 void osd_set_text(struct osd_state *osd, const char *text);
 void osd_set_sub(struct osd_state *osd, const char *text);
 void osd_changed(struct osd_state *osd, int new_value);

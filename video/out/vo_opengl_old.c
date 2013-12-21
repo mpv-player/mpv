@@ -1035,7 +1035,7 @@ static int loadGPUProgram(struct vo *vo, GL *gl, GLenum target, char *prog)
                gl->GetString(GL_PROGRAM_ERROR_STRING), &prog[err]);
         return 0;
     }
-    if (!gl->GetProgramivARB || !mp_msg_test(MSGT_VO, MSGL_DBG2))
+    if (!gl->GetProgramivARB)
         return 1;
     MP_VERBOSE(vo, "Program statistics:\n");
     for (i = 0; progstats[i].name; i++) {

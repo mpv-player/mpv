@@ -167,6 +167,7 @@ struct mp_sws_context *mp_sws_alloc(void *talloc_ctx)
 {
     struct mp_sws_context *ctx = talloc_ptrtype(talloc_ctx, ctx);
     *ctx = (struct mp_sws_context) {
+        .log = mp_null_log,
         .flags = SWS_BILINEAR,
         .contrast = 1 << 16,    // 1.0 in 16.16 fixed point
         .saturation = 1 << 16,
@@ -207,12 +208,18 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         return -1;
 
     enum AVPixelFormat s_fmt = imgfmt2pixfmt(src->imgfmt);
-    if (s_fmt == AV_PIX_FMT_NONE || sws_isSupportedInput(s_fmt) < 1)
+    if (s_fmt == AV_PIX_FMT_NONE || sws_isSupportedInput(s_fmt) < 1) {
+        MP_ERR(ctx, "Input image format %s not supported by libswscale.\n",
+               mp_imgfmt_to_name(src->imgfmt));
         return -1;
+    }
 
     enum AVPixelFormat d_fmt = imgfmt2pixfmt(dst->imgfmt);
-    if (d_fmt == AV_PIX_FMT_NONE || sws_isSupportedOutput(d_fmt) < 1)
+    if (d_fmt == AV_PIX_FMT_NONE || sws_isSupportedOutput(d_fmt) < 1) {
+        MP_ERR(ctx, "Output image format %s not supported by libswscale.\n",
+               mp_imgfmt_to_name(dst->imgfmt));
         return -1;
+    }
 
     int s_csp = mp_csp_to_sws_colorspace(src->colorspace);
     int s_range = src->colorlevels == MP_CSP_LEVELS_PC;
@@ -283,7 +290,7 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
 
     int r = mp_sws_reinit(ctx);
     if (r < 0) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR, "libswscale initialization failed.\n");
+        MP_ERR(ctx, "libswscale initialization failed.\n");
         return r;
     }
 

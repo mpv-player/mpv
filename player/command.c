@@ -2040,7 +2040,7 @@ const struct m_option *mp_get_property_list(void)
 int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
-    return m_property_do(mp_properties, name, action, val, ctx);
+    return m_property_do(ctx->log, mp_properties, name, action, val, ctx);
 }
 
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
@@ -2048,9 +2048,9 @@ char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
     return m_properties_expand_string(mp_properties, str, mpctx);
 }
 
-void property_print_help(void)
+void property_print_help(struct mp_log *log)
 {
-    m_properties_print_help_list(mp_properties);
+    m_properties_print_help_list(log, mp_properties);
 }
 
 
@@ -2294,7 +2294,8 @@ static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
     struct m_obj_settings *new_chain = NULL;
     m_option_copy(co->opt, &new_chain, co->data);
 
-    int r = m_option_parse(co->opt, bstr0(optname), bstr0(arg), &new_chain);
+    int r = m_option_parse(mpctx->log, co->opt, bstr0(optname), bstr0(arg),
+                           &new_chain);
     if (r >= 0)
         r = set_filters(mpctx, mediatype, new_chain);
 
@@ -2791,7 +2792,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_LOADLIST: {
         char *filename = cmd->args[0].v.s;
         bool append = cmd->args[1].v.i;
-        struct playlist *pl = playlist_parse_file(filename, opts);
+        struct playlist *pl = playlist_parse_file(filename, mpctx->global);
         if (pl) {
             if (!append)
                 playlist_clear(mpctx->playlist);
@@ -2800,7 +2801,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
             if (!append && mpctx->playlist->first) {
                 struct playlist_entry *e =
-                    mp_resume_playlist(mpctx->playlist, opts);
+                    mp_check_playlist_resume(mpctx, mpctx->playlist);
                 mp_set_playlist_entry(mpctx, e ? e : mpctx->playlist->first);
             }
         } else {

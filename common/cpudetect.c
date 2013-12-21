@@ -25,15 +25,8 @@
 
 #include "config.h"
 #include "common/cpudetect.h"
-#include "common/msg.h"
 
 CpuCaps gCpuCaps;
-
-static void dump_flag(const char *name, bool val)
-{
-    mp_msg(MSGT_CPUDETECT, MSGL_V, "CPU: %s: %s\n", name,
-           val ? "enabled" : "disabled");
-}
 
 void GetCpuCaps(CpuCaps *c)
 {
@@ -47,10 +40,4 @@ void GetCpuCaps(CpuCaps *c)
     c->hasSSE3 = (flags & AV_CPU_FLAG_SSE3) && !(flags & AV_CPU_FLAG_SSE3SLOW);
     c->hasSSSE3 = flags & AV_CPU_FLAG_SSSE3;
 #endif
-    dump_flag("MMX", c->hasMMX);
-    dump_flag("MMX2", c->hasMMX2);
-    dump_flag("SSE", c->hasSSE);
-    dump_flag("SSE2", c->hasSSE2);
-    dump_flag("SSE3", c->hasSSE3);
-    dump_flag("SSSE3", c->hasSSSE3);
 }

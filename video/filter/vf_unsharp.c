@@ -131,13 +131,10 @@ static int config( struct vf_instance *vf,
 
     int z, stepsX, stepsY;
     FilterParam *fp;
-    char *effect;
 
     // allocate buffers
 
     fp = &vf->priv->lumaParam;
-    effect = fp->amount == 0 ? "don't touch" : fp->amount < 0 ? "blur" : "sharpen";
-    mp_msg( MSGT_VFILTER, MSGL_INFO, "unsharp: %dx%d:%0.2f (%s luma) \n", fp->msizeX, fp->msizeY, fp->amount, effect );
     memset( fp->SC, 0, sizeof( fp->SC ) );
     stepsX = fp->msizeX/2;
     stepsY = fp->msizeY/2;
@@ -145,8 +142,6 @@ static int config( struct vf_instance *vf,
 	fp->SC[z] = av_malloc(sizeof(*(fp->SC[z])) * (width+2*stepsX));
 
     fp = &vf->priv->chromaParam;
-    effect = fp->amount == 0 ? "don't touch" : fp->amount < 0 ? "blur" : "sharpen";
-    mp_msg( MSGT_VFILTER, MSGL_INFO, "unsharp: %dx%d:%0.2f (%s chroma)\n", fp->msizeX, fp->msizeY, fp->amount, effect );
     memset( fp->SC, 0, sizeof( fp->SC ) );
     stepsX = fp->msizeX/2;
     stepsY = fp->msizeY/2;

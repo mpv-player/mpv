@@ -5,6 +5,7 @@
 #include "demux/packet.h"
 
 struct sd {
+    struct mp_log *log;
     struct MPOpts *opts;
 
     const struct sd_functions *driver;

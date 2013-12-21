@@ -9,20 +9,18 @@
 
 #include "common/msg.h"
 
-#define CHECK_ST_ERROR(message) \
+#define CHECK_VDP_ERROR(ctx, message) \
     do { \
         if (vdp_st != VDP_STATUS_OK) { \
-            mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] %s: %s\n", \
-                   message, vdp->get_error_string(vdp_st)); \
+            MP_ERR(ctx, "%s: %s\n", message, vdp->get_error_string(vdp_st)); \
             return -1; \
         } \
     } while (0)
 
-#define CHECK_ST_WARNING(message) \
+#define CHECK_VDP_WARNING(ctx, message) \
     do { \
         if (vdp_st != VDP_STATUS_OK) \
-            mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] %s: %s\n", \
-                   message, vdp->get_error_string(vdp_st)); \
+            MP_WARN(ctx, "%s: %s\n", message, vdp->get_error_string(vdp_st)); \
     } while (0)
 
 struct vdp_functions {

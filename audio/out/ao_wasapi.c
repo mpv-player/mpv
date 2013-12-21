@@ -72,6 +72,7 @@ union WAVEFMT {
 };
 
 typedef struct wasapi_state {
+    struct mp_log *log;
     HANDLE threadLoop;
 
     /* Init phase */
@@ -99,9 +100,6 @@ typedef struct wasapi_state {
     HANDLE hGetvol, hSetvol, hDoneVol;
     DWORD vol_hw_support, status;
     float audio_volume;
-
-    /* Prints, for in case line buffers are disabled */
-    CRITICAL_SECTION print_lock;
 
     /* Buffers */
     struct mp_ring *ringbuff;
@@ -296,8 +294,8 @@ static int set_ao_format(struct wasapi_state *state,
         wformat.Format.wBitsPerSample, wformat.SubFormat.Data1 == 3);
 
     if (wformat.SubFormat.Data1 != 1 && wformat.SubFormat.Data1 != 3) {
-        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: unknown SubFormat %"PRIu32"\n",
-            (uint32_t)wformat.SubFormat.Data1);
+        MP_ERR(ao, "unknown SubFormat %"PRIu32"\n",
+               (uint32_t)wformat.SubFormat.Data1);
         return 0;
     }
 
@@ -323,10 +321,8 @@ static int try_format(struct wasapi_state *state,
 
     int af_format = format_set_bits(ao->format, bits, bits == 32);
 
-    EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: trying %dch %s @ %dhz\n",
-           channels.num, af_fmt_to_str(af_format), samplerate);
-    LeaveCriticalSection(&state->print_lock);
+    MP_VERBOSE(ao, "trying %dch %s @ %dhz\n",
+               channels.num, af_fmt_to_str(af_format), samplerate);
 
     union WAVEFMT u;
     u.extensible = &wformat;
@@ -349,20 +345,16 @@ static int try_format(struct wasapi_state *state,
 
     if (hr == S_FALSE) {
         if (set_ao_format(state, ao, wformat)) {
-            EnterCriticalSection(&state->print_lock);
-            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: accepted as %dch %s @ %dhz\n",
-                ao->channels.num, af_fmt_to_str(ao->format), ao->samplerate);
-            LeaveCriticalSection(&state->print_lock);
+            MP_VERBOSE(ao, "accepted as %dch %s @ %dhz\n",
+                       ao->channels.num, af_fmt_to_str(ao->format), ao->samplerate);
 
             return 1;
         }
     } if (hr == S_OK || (!state->opt_exclusive && hr == AUDCLNT_E_UNSUPPORTED_FORMAT)) {
         // AUDCLNT_E_UNSUPPORTED_FORMAT here means "works in shared, doesn't in exclusive"
         if (set_ao_format(state, ao, wformat)) {
-            EnterCriticalSection(&state->print_lock);
-            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: %dch %s @ %dhz accepted\n",
-                   ao->channels.num, af_fmt_to_str(af_format), samplerate);
-            LeaveCriticalSection(&state->print_lock);
+            MP_VERBOSE(ao, "%dch %s @ %dhz accepted\n",
+                       ao->channels.num, af_fmt_to_str(af_format), samplerate);
             return 1;
         }
     }
@@ -416,10 +408,8 @@ static int try_passthrough(struct wasapi_state *state,
     union WAVEFMT u;
     u.extensible = &wformat;
 
-    EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: trying passthrough for %s...\n",
-           af_fmt_to_str((ao->format&~AF_FORMAT_END_MASK) | AF_FORMAT_LE));
-    LeaveCriticalSection(&state->print_lock);
+    MP_VERBOSE(ao, "trying passthrough for %s...\n",
+               af_fmt_to_str((ao->format&~AF_FORMAT_END_MASK) | AF_FORMAT_LE));
 
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 state->share_mode,
@@ -440,12 +430,10 @@ static int find_formats(struct ao *const ao)
         if (try_passthrough(state, ao))
             return 0;
 
-        EnterCriticalSection(&state->print_lock);
-        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: couldn't use passthrough!");
+        MP_ERR(ao, "couldn't use passthrough!");
         if (!state->opt_exclusive)
-            mp_msg(MSGT_AO, MSGL_ERR, " (try exclusive mode)");
-        mp_msg(MSGT_AO, MSGL_ERR, "\n");
-        LeaveCriticalSection(&state->print_lock);
+            MP_ERR(ao, " (try exclusive mode)");
+        MP_ERR(ao, "\n");
         return -1;
     }
 
@@ -464,9 +452,7 @@ static int find_formats(struct ao *const ao)
             return 0;
         }
 
-        EnterCriticalSection(&state->print_lock);
-        mp_msg(MSGT_AO, MSGL_WARN, "ao-wasapi: couldn't use default mix format!\n");
-        LeaveCriticalSection(&state->print_lock);
+        MP_WARN(ao, "couldn't use default mix format!\n");
     }
 
     /* Exclusive mode, we have to guess. */
@@ -537,9 +523,7 @@ static int find_formats(struct ao *const ao)
             bits = start_bits;
             mp_chmap_from_channels(&ao->channels, 2);
         } else {
-            EnterCriticalSection(&state->print_lock);
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: couldn't find acceptable audio format!\n");
-            LeaveCriticalSection(&state->print_lock);
+            MP_ERR(ao, "couldn't find acceptable audio format!\n");
             return -1;
         }
     }
@@ -566,12 +550,8 @@ reinit:
                                  NULL);
     /* something about buffer sizes on Win7, fixme might loop forever */
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
-        EnterCriticalSection(&state->print_lock);
-        mp_msg(
-            MSGT_AO, MSGL_V,
-            "ao-wasapi: IAudioClient::Initialize negotiation failed with %s, used %lld * 100ns\n",
-            explain_err(hr), state->defaultRequestedDuration);
-        LeaveCriticalSection(&state->print_lock);
+        MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s, used %lld * 100ns\n",
+                   explain_err(hr), state->defaultRequestedDuration);
         if (offset > 10.0)
             goto exit_label;                /* is 10 enough to break out of the loop?*/
         IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
@@ -603,18 +583,12 @@ reinit:
                                state->bufferFrameCount;
     state->hTask =
         state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio", &state->taskIndex);
-    EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_V,
-           "ao-wasapi: fix_format OK, using %lld byte buffer block size!\n",
-           (long long) state->buffer_block_size);
-    LeaveCriticalSection(&state->print_lock);
+    MP_VERBOSE(state, "fix_format OK, using %lld byte buffer block size!\n",
+               (long long) state->buffer_block_size);
     return 0;
 exit_label:
-    EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_ERR,
-           "ao-wasapi: fix_format fails with %s, failed to determine buffer block size!\n",
+    MP_ERR(state, "fix_format fails with %s, failed to determine buffer block size!\n",
            explain_err(hr));
-    LeaveCriticalSection(&state->print_lock);
     SetEvent(state->fatal_error);
     return 1;
 }
@@ -723,7 +697,9 @@ end:
     return found;
 }
 
-static HRESULT enumerate_with_state(char *header, int status, int with_id) {
+static HRESULT enumerate_with_state(struct mp_log *log, char *header,
+                                    int status, int with_id)
+{
     HRESULT hr;
     IMMDeviceEnumerator *pEnumerator = NULL;
     IMMDeviceCollection *pDevices = NULL;
@@ -750,7 +726,7 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
     int count;
     IMMDeviceCollection_GetCount(pDevices, &count);
     if (count > 0) {
-        mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: %s\n", header);
+        mp_info(log, "%s\n", header);
     }
 
     for (int i = 0; i < count; i++) {
@@ -765,11 +741,9 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
             mark = " (default)";
 
         if (with_id) {
-            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: Device #%d: %s, ID: %s%s\n",
-                i, name, id, mark);
+            mp_info(log, "Device #%d: %s, ID: %s%s\n", i, name, id, mark);
         } else {
-            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: %s, ID: %s%s\n",
-                name, id, mark);
+            mp_info(log, "%s, ID: %s%s\n", name, id, mark);
         }
 
         free(name);
@@ -789,24 +763,27 @@ exit_label:
     return hr;
 }
 
-static int enumerate_devices(void) {
+static int enumerate_devices(struct mp_log *log)
+{
     HRESULT hr;
     CoInitialize(NULL);
 
-    hr = enumerate_with_state("Active devices:", DEVICE_STATE_ACTIVE, 1);
+    hr = enumerate_with_state(log, "Active devices:", DEVICE_STATE_ACTIVE, 1);
     EXIT_ON_ERROR(hr);
-    hr = enumerate_with_state("Unplugged devices:", DEVICE_STATE_UNPLUGGED, 0);
+    hr = enumerate_with_state(log, "Unplugged devices:", DEVICE_STATE_UNPLUGGED, 0);
     EXIT_ON_ERROR(hr);
     CoUninitialize();
     return 0;
 exit_label:
-    mp_msg(MSGT_AO, MSGL_ERR, "Error enumerating devices: HRESULT %08"PRIx32" \"%s\"\n",
-        (uint32_t)hr, explain_err(hr));
+    mp_err(log, "Error enumerating devices: HRESULT %08"PRIx32" \"%s\"\n",
+           (uint32_t)hr, explain_err(hr));
     CoUninitialize();
     return 1;
 }
 
-static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
+static HRESULT find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
+                                    char *search)
+{
     HRESULT hr;
     IMMDeviceEnumerator *pEnumerator = NULL;
     IMMDeviceCollection *pDevices = NULL;
@@ -836,16 +813,16 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
         IMMDeviceCollection_GetCount(pDevices, &count);
 
         if (devno >= count) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: no device #%d!\n", devno);
+            MP_ERR(ao, "no device #%d!\n", devno);
         } else {
-            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device #%d\n", devno);
+            MP_VERBOSE(ao, "finding device #%d\n", devno);
             hr = IMMDeviceCollection_Item(pDevices, devno, &pTempDevice);
             EXIT_ON_ERROR(hr);
 
             hr = IMMDevice_GetId(pTempDevice, &deviceID);
             EXIT_ON_ERROR(hr);
 
-            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: found device #%d\n", devno);
+            MP_VERBOSE(ao, "found device #%d\n", devno);
         }
     } else {
         hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
@@ -856,7 +833,7 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
         int count;
         IMMDeviceCollection_GetCount(pDevices, &count);
 
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device %s\n", devid);
+        MP_VERBOSE(ao, "finding device %s\n", devid);
 
         IMMDevice *prevDevice = NULL;
 
@@ -874,14 +851,14 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
                 if (deviceID) {
                     char *name;
                     if (!search_err) {
-                        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: multiple matching devices found!\n");
+                        MP_ERR(ao, "multiple matching devices found!\n");
                         name = get_device_name(prevDevice);
-                        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: %s\n", name);
+                        MP_ERR(ao, "%s\n", name);
                         free(name);
                         search_err = 1;
                     }
                     name = get_device_name(pTempDevice);
-                    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: %s\n", name);
+                    MP_ERR(ao, "%s\n", name);
                     free(name);
                 }
                 hr = IMMDevice_GetId(pTempDevice, &deviceID);
@@ -893,7 +870,7 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
         }
 
         if (deviceID == NULL) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not find device %s!\n", devid);
+            MP_ERR(ao, "could not find device %s!\n", devid);
         }
     }
 
@@ -903,12 +880,12 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
     if (deviceID == NULL || search_err) {
         hr = E_NOTFOUND;
     } else {
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: loading device %S\n", deviceID);
+        MP_VERBOSE(ao, "loading device %S\n", deviceID);
 
         hr = IMMDeviceEnumerator_GetDevice(pEnumerator, deviceID, ppDevice);
 
         if (FAILED(hr)) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not load requested device!\n");
+            MP_ERR(ao, "could not load requested device!\n");
         }
     }
 
@@ -919,14 +896,15 @@ exit_label:
     return hr;
 }
 
-static int validate_device(const m_option_t *opt, struct bstr name,
-                           struct bstr param) {
+static int validate_device(struct mp_log *log, const m_option_t *opt,
+                           struct bstr name, struct bstr param)
+{
     if (bstr_equals0(param, "help")) {
-        enumerate_devices();
+        enumerate_devices(log);
         return M_OPT_EXIT;
     }
 
-    mp_msg(MSGT_AO, MSGL_DBG2, "ao-wasapi: validating device=%s\n", param.start);
+    mp_dbg(log, "validating device=%s\n", param.start);
 
     char *end;
     int devno = (int) strtol(param.start, &end, 10);
@@ -935,8 +913,7 @@ static int validate_device(const m_option_t *opt, struct bstr name,
     if ((end == (void*)param.start || *end) && devno < 0)
         ret = M_OPT_OUT_OF_RANGE;
 
-    mp_msg(MSGT_AO, MSGL_DBG2, "ao-wasapi: device=%s %svalid\n",
-           param.start, ret == 1 ? "" : "not ");
+    mp_dbg(log, "device=%s %svalid\n", param.start, ret == 1 ? "" : "not ");
     return ret;
 }
 
@@ -958,15 +935,15 @@ static int thread_init(struct ao *ao)
         SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
 
         char *id = get_device_id(state->pDevice);
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: default device ID: %s\n", id);
+        MP_VERBOSE(ao, "default device ID: %s\n", id);
         free(id);
     } else {
-        hr = find_and_load_device(&state->pDevice, state->opt_device);
+        hr = find_and_load_device(ao, &state->pDevice, state->opt_device);
     }
     EXIT_ON_ERROR(hr);
 
     char *name = get_device_name(state->pDevice);
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: device loaded: %s\n", name);
+    MP_VERBOSE(ao, "device loaded: %s\n", name);
     free(name);
 
     hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
@@ -984,9 +961,7 @@ static int thread_init(struct ao *ao)
     if (state->init_ret)
         goto exit_label;
     if (!fix_format(state)) { /* now that we're sure what format to use */
-        EnterCriticalSection(&state->print_lock);
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: thread_init OK!\n");
-        LeaveCriticalSection(&state->print_lock);
+        MP_VERBOSE(ao, "thread_init OK!\n");
         SetEvent(state->init_done);
         return state->init_ret;
     }
@@ -1046,9 +1021,7 @@ static void thread_feed(wasapi_state *state,int force_feed)
     EXIT_ON_ERROR(hr);
     return;
 exit_label:
-    EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_feed fails with %"PRIx32"!\n", (uint32_t)hr);
-    LeaveCriticalSection(&state->print_lock);
+    MP_ERR(state, "thread_feed fails with %"PRIx32"!\n", (uint32_t)hr);
     return;
 }
 
@@ -1124,9 +1097,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
     HANDLE playcontrol[] =
         {state->hUninit, state->hPause, state->hReset, state->hGetvol,
          state->hSetvol, state->hPlay, state->hFeed, NULL};
-    EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: Entering dispatch loop!\n");
-    LeaveCriticalSection(&state->print_lock);
+    MP_VERBOSE(ao, "Entering dispatch loop!\n");
     while (1) { /* watch events, poll at least every 2 seconds */
         waitstatus = WaitForMultipleObjects(7, playcontrol, FALSE, 2000);
         switch (waitstatus) {
@@ -1216,7 +1187,7 @@ static int setup_buffers(struct wasapi_state *state)
 
 static void uninit(struct ao *ao, bool block)
 {
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: uninit!\n");
+    MP_VERBOSE(ao, "uninit!\n");
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     state->immed = !block;
     SetEvent(state->hUninit);
@@ -1226,23 +1197,23 @@ static void uninit(struct ao *ao, bool block)
     if (state->VistaBlob.hAvrt)
         FreeLibrary(state->VistaBlob.hAvrt);
     closehandles(ao);
-    DeleteCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: uninit END!\n");
+    MP_VERBOSE(ao, "uninit END!\n");
 }
 
 static int init(struct ao *ao)
 {
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: init!\n");
+    MP_VERBOSE(ao, "init!\n");
     ao->format = af_fmt_from_planar(ao->format);
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_waveext(&sel);
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    state->log = ao->log;
     fill_VistaBlob(state);
 
     if (state->opt_list) {
-        enumerate_devices();
+        enumerate_devices(state->log);
     }
 
     if (state->opt_exclusive) {
@@ -1261,7 +1232,6 @@ static int init(struct ao *ao)
     state->hUninit = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->fatal_error = CreateEventW(NULL, TRUE, FALSE, NULL);
     state->hFeed = CreateEvent(NULL, FALSE, FALSE, NULL); /* for wasapi event mode */
-    InitializeCriticalSection(&state->print_lock);
     if (!state->init_done || !state->fatal_error || !state->hPlay ||
         !state->hPause || !state->hFeed || !state->hReset || !state->hGetvol ||
         !state->hSetvol || !state->hDoneVol)
@@ -1274,18 +1244,18 @@ static int init(struct ao *ao)
     state->threadLoop = (HANDLE)CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
     if (!state->threadLoop) {
         /* failed to init thread */
-        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: fail to create thread!\n");
+        MP_ERR(ao, "fail to create thread!\n");
         return -1;
     }
     WaitForSingleObject(state->init_done, INFINITE); /* wait on init complete */
     if (state->init_ret) {
         if (!ao->probing) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_init failed!\n");
+            MP_ERR(ao, "thread_init failed!\n");
         }
     } else {
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: Init Done!\n");
+        MP_VERBOSE(ao, "Init Done!\n");
         if (setup_buffers(state))
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: buffer setup failed!\n");
+            MP_ERR(ao, "buffer setup failed!\n");
     }
     return state->init_ret;
 }

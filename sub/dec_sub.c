@@ -27,6 +27,7 @@
 #include "sd.h"
 #include "dec_sub.h"
 #include "options/options.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "misc/charset_conv.h"
 
@@ -56,6 +57,7 @@ static const struct sd_functions *sd_list[] = {
 #define MAX_NUM_SD 3
 
 struct dec_sub {
+    struct mp_log *log;
     struct MPOpts *opts;
     struct sd init_sd;
 
@@ -71,10 +73,11 @@ struct packet_list {
     int num_packets;
 };
 
-struct dec_sub *sub_create(struct MPOpts *opts)
+struct dec_sub *sub_create(struct mpv_global *global)
 {
     struct dec_sub *sub = talloc_zero(NULL, struct dec_sub);
-    sub->opts = opts;
+    sub->log = mp_log_new(sub, global->log, "sub");
+    sub->opts = global->opts;
     return sub;
 }
 
@@ -133,13 +136,13 @@ void sub_set_ass_renderer(struct dec_sub *sub, struct ass_library *ass_library,
 
 static void print_chain(struct dec_sub *sub)
 {
-    mp_msg(MSGT_OSD, MSGL_V, "Subtitle filter chain: ");
+    MP_VERBOSE(sub, "Subtitle filter chain: ");
     for (int n = 0; n < sub->num_sd; n++) {
         struct sd *sd = sub->sd[n];
-        mp_msg(MSGT_OSD, MSGL_V, "%s%s (%s)", n > 0 ? " -> " : "",
+        MP_VERBOSE(sub, "%s%s (%s)", n > 0 ? " -> " : "",
                sd->driver->name, sd->codec);
     }
-    mp_msg(MSGT_OSD, MSGL_V, "\n");
+    MP_VERBOSE(sub, "\n");
 }
 
 static int sub_init_decoder(struct dec_sub *sub, struct sd *sd)
@@ -155,6 +158,7 @@ static int sub_init_decoder(struct dec_sub *sub, struct sd *sd)
     if (!sd->driver)
         return -1;
 
+    sd->log = mp_log_new(sd, sub->log, sd->driver->name);
     if (sd->driver->init(sd) < 0)
         return -1;
 
@@ -198,7 +202,7 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
     }
 
     sub_uninit(sub);
-    mp_msg(MSGT_OSD, MSGL_ERR, "Could not find subtitle decoder for format '%s'.\n",
+    MP_ERR(sub, "Could not find subtitle decoder for format '%s'.\n",
            sh->codec ? sh->codec : "<unknown>");
 }
 
@@ -223,12 +227,13 @@ static void decode_chain(struct sd **sd, int num_sd, struct demux_packet *packet
     }
 }
 
-static struct demux_packet *recode_packet(struct demux_packet *in,
+static struct demux_packet *recode_packet(struct mp_log *log,
+                                          struct demux_packet *in,
                                           const char *charset)
 {
     struct demux_packet *pkt = NULL;
     bstr in_buf = {in->buffer, in->len};
-    bstr conv = mp_iconv_to_utf8(in_buf, charset, MP_ICONV_VERBOSE);
+    bstr conv = mp_iconv_to_utf8(log, in_buf, charset, MP_ICONV_VERBOSE);
     if (conv.start && conv.start != in_buf.start) {
         pkt = talloc_ptrtype(NULL, pkt);
         talloc_steal(pkt, conv.start);
@@ -249,7 +254,7 @@ static void decode_chain_recode(struct dec_sub *sub, struct sd **sd, int num_sd,
     if (num_sd > 0) {
         struct demux_packet *recoded = NULL;
         if (sub->charset)
-            recoded = recode_packet(packet, sub->charset);
+            recoded = recode_packet(sub->log, packet, sub->charset);
         decode_chain(sd, num_sd, recoded ? recoded : packet);
         talloc_free(recoded);
     }
@@ -260,7 +265,8 @@ void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
     decode_chain_recode(sub, sub->sd, sub->num_sd, packet);
 }
 
-static const char *guess_sub_cp(struct packet_list *subs, const char *usercp)
+static const char *guess_sub_cp(struct mp_log *log, struct packet_list *subs,
+                                const char *usercp)
 {
     if (!mp_charset_requires_guess(usercp))
         return usercp;
@@ -286,7 +292,7 @@ static const char *guess_sub_cp(struct packet_list *subs, const char *usercp)
         memcpy(text.start + text.len + pkt->len, sep, sep_len);
         text.len += pkt->len + sep_len;
     }
-    const char *guess = mp_charset_guess(text, usercp, 0);
+    const char *guess = mp_charset_guess(log, text, usercp, 0);
     talloc_free(text.start);
     return guess;
 }
@@ -405,10 +411,10 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
     }
 
     if (opts->sub_cp && !sh->sub->is_utf8)
-        sub->charset = guess_sub_cp(subs, opts->sub_cp);
+        sub->charset = guess_sub_cp(sub->log, subs, opts->sub_cp);
 
     if (sub->charset && sub->charset[0] && !mp_charset_is_utf8(sub->charset))
-        mp_msg(MSGT_OSD, MSGL_INFO, "Using subtitle charset: %s\n", sub->charset);
+        MP_INFO(sub, "Using subtitle charset: %s\n", sub->charset);
 
     double sub_speed = 1.0;
 
@@ -537,7 +543,7 @@ void sd_conv_add_packet(struct sd *sd, void *data, int data_len, double pts,
     return;
 
 out_of_space:
-    mp_msg(MSGT_OSD, MSGL_ERR, "Subtitle too big.\n");
+    MP_ERR(sd, "Subtitle too big.\n");
 }
 
 struct demux_packet *sd_conv_def_get_converted(struct sd *sd)

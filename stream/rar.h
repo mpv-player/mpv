@@ -44,7 +44,7 @@ typedef struct {
     uint64_t         real_size;  /* Gathered size */
 
     // When actually reading the data
-    struct MPOpts *opts;
+    struct mpv_global *global;
     uint64_t i_pos;
     stream_t *s;
     rar_file_chunk_t *current_chunk;

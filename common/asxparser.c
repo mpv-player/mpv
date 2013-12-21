@@ -45,6 +45,7 @@ struct ASX_Parser_t {
   char* last_body;
   int deep;
   struct playlist *pl;
+  struct mp_log *log;
 };
 
 ASX_Parser_t *asx_parser_new(struct playlist *pl);
@@ -105,8 +106,8 @@ asx_get_attrib(const char* attrib,char** attribs) {
   return NULL;
 }
 
-#define asx_warning_attrib_required(p,e,a) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : element %s don't have the required attribute %s",p->line,e,a)
-#define asx_warning_body_parse_error(p,e) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : error while parsing %s body",p->line,e)
+#define asx_warning_attrib_required(p,e,a) MP_WARN(parser, "At line %d : element %s don't have the required attribute %s",p->line,e,a)
+#define asx_warning_body_parse_error(p,e) MP_WARN(parser, "At line %d : error while parsing %s body",p->line,e)
 
 ASX_Parser_t *asx_parser_new(struct playlist *pl)
 {
@@ -142,7 +143,7 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
     if(ptr3 == NULL) break;
     for(ptr2 = ptr3-1; strchr(SPACE,*ptr2) != NULL; ptr2--) {
       if (ptr2 == ptr1) {
-        mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : this should never append, back to attribute begin while skipping end space",parser->line);
+        MP_ERR(parser, "At line %d : this should never append, back to attribute begin while skipping end space",parser->line);
         break;
       }
     }
@@ -153,13 +154,13 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
     ptr1 = strchr(ptr3,'"');
     if(ptr1 == NULL || ptr1[1] == '\0') ptr1 = strchr(ptr3,'\'');
     if(ptr1 == NULL || ptr1[1] == '\0') {
-      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : can't find attribute %s value",parser->line,attrib);
+      MP_WARN(parser, "At line %d : can't find attribute %s value",parser->line,attrib);
       free(attrib);
       break;
     }
     ptr2 = strchr(ptr1+1,ptr1[0]);
     if (ptr2 == NULL) {
-      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : value of attribute %s isn't finished",parser->line,attrib);
+      MP_WARN(parser, "At line %d : value of attribute %s isn't finished",parser->line,attrib);
       free(attrib);
       break;
     }
@@ -198,7 +199,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
   int quotes = 0;
 
   if(_buffer == NULL || _element == NULL || _body == NULL || _attribs == NULL) {
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : asx_get_element called with invalid value",parser->line);
+    MP_ERR(parser, "At line %d : asx_get_element called with invalid value",parser->line);
     return -1;
   }
 
@@ -254,7 +255,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
       }
       //ptr1 = strstr(ptr1,"-->");
       if(!ptr1) {
-        mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : unfinished comment",parser->line);
+        MP_ERR(parser, "At line %d : unfinished comment",parser->line);
         return -1;
       }
     } else {
@@ -265,7 +266,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
   // Is this space skip very useful ??
   for(ptr1++; strchr(SPACE,ptr1[0]) != NULL; ptr1++) { // Skip space
     if(ptr1[0] == '\0') {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing element start",parser->line);
+      MP_ERR(parser, "At line %d : EOB reached while parsing element start",parser->line);
       return -1;
     }
     if(ptr1[0] == '\n') parser->line++;
@@ -273,7 +274,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 
   for(ptr2 = ptr1; strchr(LETTER,*ptr2) != NULL;ptr2++) { // Go to end of name
     if(*ptr2 == '\0'){
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing element start",parser->line);
+      MP_ERR(parser, "At line %d : EOB reached while parsing element start",parser->line);
       return -1;
     }
     if(ptr2[0] == '\n') parser->line++;
@@ -285,7 +286,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 
   for( ; strchr(SPACE,*ptr2) != NULL; ptr2++) { // Skip space
     if(ptr2[0] == '\0') {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing element start",parser->line);
+      MP_ERR(parser, "At line %d : EOB reached while parsing element start",parser->line);
       free(element);
       return -1;
     }
@@ -302,7 +303,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
     if(ptr3[0] == '\n') parser->line++;
   }
   if(ptr3[0] == '\0' || ptr3[1] == '\0') { // End of file
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing element start",parser->line);
+    MP_ERR(parser, "At line %d : EOB reached while parsing element start",parser->line);
     free(element);
     return -1;
   }
@@ -318,7 +319,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
     ptr3++;
     for( ; strchr(SPACE,*ptr3) != NULL; ptr3++) { // Skip space on body begin
       if(*ptr3 == '\0') {
-        mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing %s element body",parser->line,element);
+        MP_ERR(parser, "At line %d : EOB reached while parsing %s element body",parser->line,element);
         free(element);
         free(attribs);
         return -1;
@@ -346,7 +347,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
         continue;
       }
       if(ptr4 == NULL || ptr4[1] == '\0') {
-        mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing %s element body",parser->line,element);
+        MP_ERR(parser, "At line %d : EOB reached while parsing %s element body",parser->line,element);
         free(element);
         free(attribs);
         return -1;
@@ -392,7 +393,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
     n_attrib = asx_parse_attribs(parser,attribs,_attribs);
     free(attribs);
     if(n_attrib < 0) {
-      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : error while parsing element %s attributes",parser->line,element);
+      MP_WARN(parser, "At line %d : error while parsing element %s attributes",parser->line,element);
       free(element);
       free(body);
       return -1;
@@ -441,7 +442,7 @@ asx_parse_ref(ASX_Parser_t* parser, char** attribs) {
 
   playlist_add_file(parser->pl, href);
 
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Adding file %s to element entry\n",href);
+  MP_VERBOSE(parser, "Adding file %s to element entry\n",href);
 
   free(href);
 
@@ -458,10 +459,10 @@ static void asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs
     asx_warning_attrib_required(parser,"ENTRYREF" ,"HREF" );
     return;
   }
-  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Recursive playlist %s\n", href);
+  MP_ERR(parser, "Recursive playlist %s\n", href);
   playlist_add_file(parser->pl, href);
   free(href);
-  //mp_msg(MSGT_PLAYTREE,MSGL_INFO,"Need to implement entryref\n");
+  //MP_INFO(parser, "Need to implement entryref\n");
 }
 
 static void asx_parse_entry(ASX_Parser_t* parser,char* buffer,char** _attribs) {
@@ -478,9 +479,9 @@ static void asx_parse_entry(ASX_Parser_t* parser,char* buffer,char** _attribs) {
     }
     if(strcasecmp(element,"REF") == 0) {
       asx_parse_ref(parser,attribs);
-      mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to entry\n",element);
+      MP_DBG(parser, "Adding element %s to entry\n",element);
     } else
-      mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Ignoring element %s\n",element);
+      MP_DBG(parser, "Ignoring element %s\n",element);
     free(body);
     asx_free_attribs(attribs);
   }
@@ -493,7 +494,7 @@ static void asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) 
   int r;
 
   asx_get_attrib("COUNT",_attribs);
-  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Ignoring repeated playlist entries\n");
+  MP_ERR(parser, "Ignoring repeated playlist entries\n");
 
   while(buffer && buffer[0] != '\0') {
     r = asx_get_element(parser,&buffer,&element,&body,&attribs);
@@ -510,7 +511,7 @@ static void asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) 
      } else if(strcasecmp(element,"REPEAT") == 0) {
        asx_parse_repeat(parser,body,attribs);
      } else
-       mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Ignoring element %s\n",element);
+       MP_DBG(parser, "Ignoring element %s\n",element);
      free(body);
      asx_free_attribs(attribs);
   }
@@ -518,35 +519,36 @@ static void asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) 
 }
 
 
-bool asx_parse(char* buffer, struct playlist *pl)
+bool asx_parse(char* buffer, struct playlist *pl, struct mp_log *log)
 {
   char *element,*asx_body,**asx_attribs,*body = NULL, **attribs;
   int r;
   ASX_Parser_t* parser = asx_parser_new(pl);
+  parser->log = log;
 
   parser->line = 1;
   parser->deep = 0;
 
    r = asx_get_element(parser,&buffer,&element,&asx_body,&asx_attribs);
   if(r < 0) {
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : Syntax error ???",parser->line);
+    MP_ERR(parser, "At line %d : Syntax error ???",parser->line);
     asx_parser_free(parser);
     return false;
   } else if(r == 0) { // No contents
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"empty asx element");
+    MP_ERR(parser, "empty asx element");
     asx_parser_free(parser);
     return false;
   }
 
   if(strcasecmp(element,"ASX") != 0) {
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"first element isn't ASX, it's %s\n",element);
+    MP_ERR(parser, "first element isn't ASX, it's %s\n",element);
     asx_free_attribs(asx_attribs);
     asx_parser_free(parser);
     return false;
   }
 
   if(!asx_body) {
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"ASX element is empty");
+    MP_ERR(parser, "ASX element is empty");
     asx_free_attribs(asx_attribs);
     asx_parser_free(parser);
     return false;
@@ -569,7 +571,7 @@ bool asx_parse(char* buffer, struct playlist *pl)
      } else if(strcasecmp(element,"REPEAT") == 0) {
        asx_parse_repeat(parser,body,attribs);
      } else
-       mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Ignoring element %s\n",element);
+       MP_DBG(parser, "Ignoring element %s\n",element);
      free(body);
      asx_free_attribs(attribs);
   }

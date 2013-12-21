@@ -38,7 +38,13 @@
 
 #if HAVE_LCMS2
 
+#include <pthread.h>
 #include <lcms2.h>
+
+// lcms2 only provides a global error handler function, so we have to do this.
+// Not setting a lcms2 error handler will suppress any error messages.
+static pthread_mutex_t lcms2_dumb_crap_lock = PTHREAD_MUTEX_INITIALIZER;
+static struct mp_log *lcms2_dumb_crap;
 
 static bool parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
 {
@@ -52,8 +58,8 @@ static bool parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
     return true;
 }
 
-static int validate_3dlut_size_opt(const m_option_t *opt, struct bstr name,
-                                   struct bstr param)
+static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
+                                   struct bstr name, struct bstr param)
 {
     int p1, p2, p3;
     char s[20];
@@ -77,22 +83,19 @@ const struct m_sub_options mp_icc_conf = {
     },
 };
 
-// lcms2 only provides a global error handler function, so we have to do this.
-// Not setting a lcms2 error handler will suppress any error messages.
-static struct mp_log *lcms2_dumb_crap;
-
 static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
                                 const char *msg)
 {
     if (lcms2_dumb_crap)
-        mp_msg_log(lcms2_dumb_crap, MSGL_ERR, "lcms2: %s\n", msg);
+        mp_msg(lcms2_dumb_crap, MSGL_ERR, "lcms2: %s\n", msg);
 }
 
-static struct bstr load_file(void *talloc_ctx, const char *filename)
+static struct bstr load_file(void *talloc_ctx, const char *filename,
+                             struct mpv_global *global)
 {
     struct bstr res = {0};
-    char *fname = mp_get_user_path(NULL, filename);
-    stream_t *s = stream_open(fname, NULL);
+    char *fname = mp_get_user_path(NULL, global, filename);
+    stream_t *s = stream_open(fname, global);
     if (s) {
         res = stream_read_complete(s, talloc_ctx, 1000000000);
         free_stream(s);
@@ -103,7 +106,8 @@ static struct bstr load_file(void *talloc_ctx, const char *filename)
 
 #define LUT3D_CACHE_HEADER "mpv 3dlut cache 1.0\n"
 
-struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
+struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
+                          struct mpv_global *global)
 {
     int s_r, s_g, s_b;
     if (!parse_3dlut_size(opts->size_str, &s_r, &s_g, &s_b))
@@ -114,9 +118,11 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
 
     void *tmp = talloc_new(NULL);
     uint16_t *output = talloc_array(tmp, uint16_t, s_r * s_g * s_b * 3);
+    struct lut3d *lut = NULL;
+    bool locked = false;
 
-    mp_msg_log(log, MSGL_INFO, "Opening ICC profile '%s'\n", opts->profile);
-    struct bstr iccdata = load_file(tmp, opts->profile);
+    mp_msg(log, MSGL_INFO, "Opening ICC profile '%s'\n", opts->profile);
+    struct bstr iccdata = load_file(tmp, opts->profile, global);
     if (!iccdata.len)
         goto error_exit;
 
@@ -125,9 +131,9 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
 
     // check cache
     if (opts->cache) {
-        mp_msg_log(log, MSGL_INFO, "Opening 3D LUT cache in file '%s'.\n",
+        mp_msg(log, MSGL_INFO, "Opening 3D LUT cache in file '%s'.\n",
                    opts->cache);
-        struct bstr cachedata = load_file(tmp, opts->cache);
+        struct bstr cachedata = load_file(tmp, opts->cache, global);
         if (bstr_eatstart(&cachedata, bstr0(LUT3D_CACHE_HEADER))
             && bstr_eatstart(&cachedata, bstr0(cache_info))
             && bstr_eatstart(&cachedata, iccdata)
@@ -136,10 +142,12 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
             memcpy(output, cachedata.start, cachedata.len);
             goto done;
         } else {
-            mp_msg_log(log, MSGL_WARN, "3D LUT cache invalid!\n");
+            mp_msg(log, MSGL_WARN, "3D LUT cache invalid!\n");
         }
     }
 
+    locked = true;
+    pthread_mutex_lock(&lcms2_dumb_crap_lock);
     lcms2_dumb_crap = log;
     cmsSetLogErrorHandler(lcms2_error_handler);
 
@@ -196,23 +204,25 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
 
 done: ;
 
-    struct lut3d *lut = talloc_ptrtype(NULL, lut);
+    lut = talloc_ptrtype(NULL, lut);
     *lut = (struct lut3d) {
         .data = talloc_steal(lut, output),
         .size = {s_r, s_g, s_b},
     };
 
-    lcms2_dumb_crap = NULL;
-    cmsSetLogErrorHandler(NULL);
+error_exit:
+
+    if (locked) {
+        lcms2_dumb_crap = NULL;
+        cmsSetLogErrorHandler(NULL);
+        pthread_mutex_unlock(&lcms2_dumb_crap_lock);
+    }
+
+    if (!lut)
+        mp_msg(log, MSGL_FATAL, "Error loading ICC profile.\n");
+
     talloc_free(tmp);
     return lut;
-
-error_exit:
-    mp_msg_log(log, MSGL_FATAL, "Error loading ICC profile.\n");
-    lcms2_dumb_crap = NULL;
-    cmsSetLogErrorHandler(NULL);
-    talloc_free(tmp);
-    return NULL;
 }
 
 #else /* HAVE_LCMS2 */
@@ -223,9 +233,10 @@ const struct m_sub_options mp_icc_conf = {
     .defaults = &(const struct mp_icc_opts) {0},
 };
 
-struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
+struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
+                          struct mpv_global *global)
 {
-    mp_msg_log(log, MSGL_FATAL, "LCMS2 support not compiled.\n");
+    mp_msg(log, MSGL_FATAL, "LCMS2 support not compiled.\n");
     return NULL;
 }
 

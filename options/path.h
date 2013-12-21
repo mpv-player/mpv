@@ -24,22 +24,27 @@
 #include <stdbool.h>
 #include "bstr/bstr.h"
 
+struct mpv_global;
 
 // Search for the input filename in several paths. These include user and global
 // config locations by default. Some platforms may implement additional platform
 // related lookups (i.e.: OSX inside an application bundle).
-char *mp_find_config_file(const char *filename);
+char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
+                          const char *filename);
 
 // Search for the input filename in the global configuration location.
-char *mp_find_global_config_file(const char *filename);
+char *mp_find_global_config_file(void *talloc_ctx, struct mpv_global *global,
+                                 const char *filename);
 
 // Search for the input filename in the user configuration location.
-char *mp_find_user_config_file(const char *filename);
+char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
+                               const char *filename);
 
 // Normally returns a talloc_strdup'ed copy of the path, except for special
 // paths starting with '~'. Used to allow the user explicitly reference a
 // file from the user's home or mpv config directory.
-char *mp_get_user_path(void *talloc_ctx, const char *path);
+char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
+                       const char *path);
 
 // Return pointer to filename part of path
 
@@ -70,6 +75,6 @@ bool mp_path_isdir(const char *path);
 
 bool mp_is_url(bstr path);
 
-void mp_mk_config_dir(char *subdir);
+void mp_mk_config_dir(struct mpv_global *global, char *subdir);
 
 #endif /* MPLAYER_PATH_H */

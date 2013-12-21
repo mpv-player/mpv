@@ -227,7 +227,7 @@ static void termcap_add_extra_f_keys(void) {
 
 #endif
 
-int load_termcap(char *termtype){
+static int load_termcap(char *termtype){
 #if HAVE_TERMINFO || HAVE_TERMCAP
 
 #if HAVE_TERMINFO
@@ -358,7 +358,7 @@ static void walk_buf(unsigned int count) {
         getch2_pos = 0;
 }
 
-bool getch2(struct input_ctx *input_ctx)
+static bool getch2(struct input_ctx *input_ctx)
 {
     int retval = read(0, &getch2_buf[getch2_pos], BUF_LEN - getch2_len - getch2_pos);
     /* Return false on EOF to stop running select() on the FD, as it'd
@@ -435,6 +435,18 @@ bool getch2(struct input_ctx *input_ctx)
     }
 
     return true;
+}
+
+static int read_keys(void *ctx, int fd)
+{
+    if (getch2(ctx))
+        return MP_INPUT_NOTHING;
+    return MP_INPUT_DEAD;
+}
+
+void terminal_setup_getch(struct input_ctx *ictx)
+{
+    mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
 }
 
 static volatile int getch2_active  = 0;
@@ -577,4 +589,29 @@ void getch2_disable(void){
     do_deactivate_getch2();
 
     getch2_enabled = 0;
+}
+
+bool terminal_in_background(void)
+{
+    return isatty(2) && tcgetpgrp(2) != getpgrp();
+}
+
+void terminal_set_foreground_color(FILE *stream, int c)
+{
+    if (c == -1) {
+        fprintf(stream, "\033[0m");
+    } else {
+        fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
+    }
+}
+
+void terminal_setup_stdin_cmd_input(struct input_ctx *ictx)
+{
+    mp_input_add_fd(ictx, 0, 1, input_default_read_cmd, NULL, NULL, NULL);
+}
+
+int terminal_init(void)
+{
+    load_termcap(NULL);
+    return 0;
 }

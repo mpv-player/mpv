@@ -19,12 +19,9 @@
 #ifndef MPLAYER_LIRC_H
 #define MPLAYER_LIRC_H
 
-int
-mp_input_lirc_init(void);
-
-int
-mp_input_lirc_read(int fd,char* dest, int s);
-
-int mp_input_lirc_close(int fd);
+struct input_ctx;
+struct mp_log;
+int mp_input_lirc_init(struct input_ctx *ictx, struct mp_log *log,
+                       char *lirc_configfile);
 
 #endif /* MPLAYER_LIRC_H */

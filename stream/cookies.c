@@ -92,40 +92,40 @@ static int parse_line(char **ptr, char *cols[6])
 }
 
 /* Loads a file into RAM */
-static char *load_file(const char *filename, int64_t * length)
+static char *load_file(struct mp_log *log, const char *filename, int64_t * length)
 {
     int fd;
     char *buffer = NULL;
 
-    mp_msg(MSGT_NETWORK, MSGL_V, "Loading cookie file: %s\n", filename);
+    mp_verbose(log, "Loading cookie file: %s\n", filename);
 
     fd = open(filename, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
-	mp_msg(MSGT_NETWORK, MSGL_V, "Could not open");
+	mp_verbose(log, "Could not open");
 	goto err_out;
     }
 
     *length = lseek(fd, 0, SEEK_END);
 
     if (*length < 0) {
-	mp_msg(MSGT_NETWORK, MSGL_V, "Could not find EOF");
+	mp_verbose(log, "Could not find EOF");
 	goto err_out;
     }
 
     if (*length > SIZE_MAX - 1) {
-	mp_msg(MSGT_NETWORK, MSGL_V, "File too big, could not malloc.");
+	mp_verbose(log, "File too big, could not malloc.");
 	goto err_out;
     }
 
     lseek(fd, 0, SEEK_SET);
 
     if (!(buffer = malloc(*length + 1))) {
-	mp_msg(MSGT_NETWORK, MSGL_V, "Could not malloc.");
+	mp_verbose(log, "Could not malloc.");
 	goto err_out;
     }
 
     if (read(fd, buffer, *length) != *length) {
-	mp_msg(MSGT_NETWORK, MSGL_V, "Read is behaving funny.");
+	mp_verbose(log, "Read is behaving funny.");
 	goto err_out;
     }
     close(fd);
@@ -140,14 +140,15 @@ err_out:
 }
 
 /* Loads a cookies.txt file into a linked list. */
-static struct cookie_list_type *load_cookies_from(const char *filename,
+static struct cookie_list_type *load_cookies_from(struct mp_log *log,
+                                                  const char *filename,
 						  struct cookie_list_type
 						  *list)
 {
     char *ptr, *file;
     int64_t length;
 
-    ptr = file = load_file(filename, &length);
+    ptr = file = load_file(log, filename, &length);
     if (!ptr)
 	return list;
 
@@ -169,22 +170,13 @@ static struct cookie_list_type *load_cookies_from(const char *filename,
     return list;
 }
 
-/* Attempt to load cookies.txt. Returns a pointer to the linked list contain the cookies. */
-static struct cookie_list_type *load_cookies(void)
-{
-    if (cookies_file)
-	return load_cookies_from(cookies_file, NULL);
-
-    return NULL;
-}
-
 // Return a cookies string as expected by lavf (libavformat/http.c). The format
 // is like a Set-Cookie header (http://curl.haxx.se/rfc/cookie_spec.html),
 // separated by newlines.
-char *cookies_lavf(void)
+char *cookies_lavf(struct mp_log *log)
 {
-    if (!cookie_list)
-        cookie_list = load_cookies();
+    if (!cookie_list && cookies_file)
+        cookie_list = load_cookies_from(log, cookies_file, NULL);
 
     struct cookie_list_type *list = cookie_list;
     char *res = talloc_strdup(NULL, "");

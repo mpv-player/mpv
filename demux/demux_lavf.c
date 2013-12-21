@@ -121,8 +121,7 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
 
     ret = stream_read(stream, buf, size);
 
-    mp_msg(MSGT_HEADER, MSGL_DBG2,
-           "%d=mp_read(%p, %p, %d), pos: %"PRId64", eof:%d\n",
+    MP_DBG(demuxer, "%d=mp_read(%p, %p, %d), pos: %"PRId64", eof:%d\n",
            ret, stream, buf, size, stream_tell(stream), stream->eof);
     return ret;
 }
@@ -132,7 +131,7 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     struct demuxer *demuxer = opaque;
     struct stream *stream = demuxer->stream;
     int64_t current_pos;
-    mp_msg(MSGT_HEADER, MSGL_DBG2, "mp_seek(%p, %"PRId64", %d)\n",
+    MP_DBG(demuxer, "mp_seek(%p, %"PRId64", %d)\n",
            stream, pos, whence);
     if (whence == SEEK_CUR)
         pos += stream_tell(stream);
@@ -171,12 +170,12 @@ static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
     return ret;
 }
 
-static void list_formats(void)
+static void list_formats(struct demuxer *demuxer)
 {
-    mp_msg(MSGT_DEMUX, MSGL_INFO, "Available lavf input formats:\n");
+    MP_INFO(demuxer, "Available lavf input formats:\n");
     AVInputFormat *fmt = NULL;
     while ((fmt = av_iformat_next(fmt)))
-        mp_msg(MSGT_DEMUX, MSGL_INFO, "%15s : %s\n", fmt->name, fmt->long_name);
+        MP_INFO(demuxer, "%15s : %s\n", fmt->name, fmt->long_name);
 }
 
 static char *remove_prefix(char *s, const char **prefixes)
@@ -206,7 +205,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     priv->filename = s->url;
     if (!priv->filename) {
         priv->filename = "mp:unknown";
-        mp_msg(MSGT_DEMUX, MSGL_WARN, "Stream url is not set!\n");
+        MP_WARN(demuxer, "Stream url is not set!\n");
     }
 
     priv->filename = remove_prefix(priv->filename, prefixes);
@@ -216,8 +215,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         // always require filename in the form "format:filename"
         char *sep = strchr(priv->filename, ':');
         if (!sep) {
-            mp_msg(MSGT_DEMUX, MSGL_FATAL,
-                   "Must specify filename in 'format:filename' form\n");
+            MP_FATAL(demuxer, "Must specify filename in 'format:filename' form\n");
             return -1;
         }
         avdevice_format = talloc_strndup(priv, priv->filename,
@@ -244,15 +242,15 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         format = avdevice_format;
     if (format) {
         if (strcmp(format, "help") == 0) {
-            list_formats();
+            list_formats(demuxer);
             return -1;
         }
         priv->avif = av_find_input_format(format);
         if (!priv->avif) {
-            mp_msg(MSGT_DEMUX, MSGL_FATAL, "Unknown lavf format %s\n", format);
+            MP_FATAL(demuxer, "Unknown lavf format %s\n", format);
             return -1;
         }
-        mp_msg(MSGT_DEMUX, MSGL_INFO, "Forced lavf %s demuxer\n",
+        MP_INFO(demuxer, "Forced lavf %s demuxer\n",
                priv->avif->long_name);
         goto success;
     }
@@ -284,7 +282,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         priv->avif = av_probe_input_format2(&avpd, avpd.buf_size > 0, &score);
 
         if (priv->avif) {
-            mp_msg(MSGT_HEADER, MSGL_V, "Found '%s' at score=%d size=%d.\n",
+            MP_VERBOSE(demuxer, "Found '%s' at score=%d size=%d.\n",
                    priv->avif->name, score, avpd.buf_size);
 
             if (score >= min_probe)
@@ -305,7 +303,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     if (priv->avif && !format) {
         for (int n = 0; format_blacklist[n]; n++) {
             if (strcmp(format_blacklist[n], priv->avif->name) == 0) {
-                mp_msg(MSGT_HEADER, MSGL_V, "Format blacklisted.\n");
+                MP_VERBOSE(demuxer, "Format blacklisted.\n");
                 priv->avif = NULL;
                 break;
             }
@@ -313,8 +311,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     }
 
     if (!priv->avif) {
-        mp_msg(MSGT_HEADER, MSGL_V,
-               "No format found, try lowering probescore or forcing the format.\n");
+        MP_VERBOSE(demuxer, "No format found, try lowering probescore or forcing the format.\n");
         return -1;
     }
 
@@ -444,7 +441,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
         // This also applies to vfw-muxed mkv, but we can't detect these easily.
         sh_video->avi_dts = matches_avinputformat_name(priv, "avi");
 
-        mp_msg(MSGT_DEMUX, MSGL_DBG2, "aspect= %d*%d/(%d*%d)\n",
+        MP_DBG(demuxer, "aspect= %d*%d/(%d*%d)\n",
                codec->width, codec->sample_aspect_ratio.num,
                codec->height, codec->sample_aspect_ratio.den);
         break;
@@ -542,8 +539,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (lavfdopts->probesize) {
         if (av_opt_set_int(avfc, "probesize", lavfdopts->probesize, 0) < 0)
-            mp_msg(MSGT_HEADER, MSGL_ERR,
-                   "demux_lavf, couldn't set option probesize to %u\n",
+            MP_ERR(demuxer, "demux_lavf, couldn't set option probesize to %u\n",
                    lavfdopts->probesize);
     }
 
@@ -554,14 +550,13 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (analyze_duration > 0) {
         if (av_opt_set_int(avfc, "analyzeduration",
                            analyze_duration * AV_TIME_BASE, 0) < 0)
-            mp_msg(MSGT_HEADER, MSGL_ERR, "demux_lavf, couldn't set option "
+            MP_ERR(demuxer, "demux_lavf, couldn't set option "
                    "analyzeduration to %f\n", analyze_duration);
     }
 
     if (lavfdopts->avopt) {
         if (parse_avopts(avfc, lavfdopts->avopt) < 0) {
-            mp_msg(MSGT_HEADER, MSGL_ERR,
-                   "Your options /%s/ look like gibberish to me pal\n",
+            MP_ERR(demuxer, "Your options /%s/ look like gibberish to me pal\n",
                    lavfdopts->avopt);
             return -1;
         }
@@ -601,27 +596,25 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     }
 
     if (avformat_open_input(&avfc, priv->filename, priv->avif, &dopts) < 0) {
-        mp_msg(MSGT_HEADER, MSGL_ERR,
-               "LAVF_header: avformat_open_input() failed\n");
+        MP_ERR(demuxer, "LAVF_header: avformat_open_input() failed\n");
         av_dict_free(&dopts);
         return -1;
     }
 
     t = NULL;
     while ((t = av_dict_get(dopts, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        mp_msg(MSGT_OPEN, MSGL_V, "[lavf] Could not set demux option %s=%s\n",
+        MP_VERBOSE(demuxer, "[lavf] Could not set demux option %s=%s\n",
                t->key, t->value);
     }
     av_dict_free(&dopts);
 
     priv->avfc = avfc;
     if (avformat_find_stream_info(avfc, NULL) < 0) {
-        mp_msg(MSGT_HEADER, MSGL_ERR,
-               "LAVF_header: av_find_stream_info() failed\n");
+        MP_ERR(demuxer, "LAVF_header: av_find_stream_info() failed\n");
         return -1;
     }
 
-    mp_msg(MSGT_HEADER, MSGL_V, "demux_lavf: avformat_find_stream_info() "
+    MP_VERBOSE(demuxer, "demux_lavf: avformat_find_stream_info() "
            "finished after %"PRId64" bytes.\n", stream_tell(demuxer->stream));
 
     for (i = 0; i < avfc->nb_chapters; i++) {
@@ -658,13 +651,13 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         for (p = 0; p < avfc->nb_programs; p++) {
             AVProgram *program = avfc->programs[p];
             t = av_dict_get(program->metadata, "title", NULL, 0);
-            mp_msg(MSGT_HEADER, MSGL_INFO, "LAVF: Program %d %s\n",
+            MP_INFO(demuxer, "LAVF: Program %d %s\n",
                    program->id, t ? t->value : "");
-            mp_msg(MSGT_IDENTIFY, MSGL_V, "PROGRAM_ID=%d\n", program->id);
+            MP_VERBOSE(demuxer, "PROGRAM_ID=%d\n", program->id);
         }
     }
 
-    mp_msg(MSGT_HEADER, MSGL_V, "LAVF: build %d\n", LIBAVFORMAT_BUILD);
+    MP_VERBOSE(demuxer, "LAVF: build %d\n", LIBAVFORMAT_BUILD);
 
     demuxer->ts_resets_possible = priv->avif->flags & AVFMT_TS_DISCONT;
 
@@ -680,7 +673,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
 {
     lavf_priv_t *priv = demux->priv;
     demux_packet_t *dp;
-    mp_msg(MSGT_DEMUX, MSGL_DBG2, "demux_lavf_fill_buffer()\n");
+    MP_DBG(demux, "demux_lavf_fill_buffer()\n");
 
     AVPacket *pkt = talloc(NULL, AVPacket);
     if (av_read_frame(priv->avfc, pkt) < 0) {
@@ -737,7 +730,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     lavf_priv_t *priv = demuxer->priv;
     int avsflags = 0;
-    mp_msg(MSGT_DEMUX, MSGL_DBG2, "demux_seek_lavf(%p, %f, %d)\n",
+    MP_DBG(demuxer, "demux_seek_lavf(%p, %f, %d)\n",
            demuxer, rel_seek_secs, flags);
 
     if (flags & SEEK_ABSOLUTE)

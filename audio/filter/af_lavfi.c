@@ -82,19 +82,19 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     int r;
 
     if (bstr0(p->cfg_graph).len == 0) {
-        mp_msg(MSGT_AFILTER, MSGL_FATAL, "lavfi: no filter graph set\n");
+        MP_FATAL(af, "lavfi: no filter graph set\n");
         return false;
     }
 
     destroy_graph(af);
-    mp_msg(MSGT_AFILTER, MSGL_V, "lavfi: create graph: '%s'\n", p->cfg_graph);
+    MP_VERBOSE(af, "lavfi: create graph: '%s'\n", p->cfg_graph);
 
     AVFilterGraph *graph = avfilter_graph_alloc();
     if (!graph)
         goto error;
 
     if (parse_avopts(graph, p->cfg_avopts) < 0) {
-        mp_msg(MSGT_VFILTER, MSGL_FATAL, "lavfi: could not set opts: '%s'\n",
+        MP_FATAL(af, "lavfi: could not set opts: '%s'\n",
                p->cfg_avopts);
         goto error;
     }
@@ -158,7 +158,7 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     return true;
 
 error:
-    mp_msg(MSGT_AFILTER, MSGL_FATAL, "Can't configure libavfilter graph.\n");
+    MP_FATAL(af, "Can't configure libavfilter graph.\n");
     avfilter_graph_free(&graph);
     talloc_free(tmp);
     return false;
@@ -194,6 +194,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (!out_cm.num || out_cm.num != l_out->channels)
             mp_chmap_from_channels(&out_cm, l_out->channels);
         mp_audio_set_channels(out, &out_cm);
+
+        if (!mp_audio_config_valid(out))
+            return AF_ERROR;
 
         p->timebase_out = l_out->time_base;
 

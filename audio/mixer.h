@@ -28,12 +28,12 @@ enum {
     SOFTVOL_AUTO = 2,
 };
 
-struct MPOpts;
+struct mpv_global;
 struct ao;
 struct af_stream;
 struct mixer;
 
-struct mixer *mixer_init(void *talloc_ctx, struct MPOpts *opts);
+struct mixer *mixer_init(void *talloc_ctx, struct mpv_global *global);
 void mixer_reinit_audio(struct mixer *mixer, struct ao *ao, struct af_stream *af);
 void mixer_uninit_audio(struct mixer *mixer);
 bool mixer_audio_initialized(struct mixer *mixer);

@@ -37,7 +37,8 @@ struct mp_decoder_list *mp_select_decoders(struct mp_decoder_list *all,
                                            const char *codec,
                                            const char *selection);
 
-void mp_print_decoders(int msgt, int msgl, const char *header,
+struct mp_log;
+void mp_print_decoders(struct mp_log *log, int msgl, const char *header,
                        struct mp_decoder_list *list);
 
 #endif

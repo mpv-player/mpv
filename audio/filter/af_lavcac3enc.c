@@ -103,7 +103,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         mp_audio_buffer_reinit(s->pending, in);
 
-        mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
+        MP_DBG(af, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
                in->nch, in->rate, af->mul, s->in_samples);
 
         int bit_rate = s->bit_rate ? s->bit_rate : default_bit_rate[in->nch];
@@ -121,12 +121,12 @@ static int control(struct af_instance *af, int cmd, void *arg)
             s->lavc_actx->bit_rate = bit_rate;
 
             if (avcodec_open2(s->lavc_actx, s->lavc_acodec, NULL) < 0) {
-                mp_msg(MSGT_AFILTER, MSGL_ERR, "Couldn't open codec %s, br=%d.\n", "ac3", bit_rate);
+                MP_ERR(af, "Couldn't open codec %s, br=%d.\n", "ac3", bit_rate);
                 return AF_ERROR;
             }
         }
         if (s->lavc_actx->frame_size != AC3_FRAME_SIZE) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "lavcac3enc: unexpected ac3 "
+            MP_ERR(af, "lavcac3enc: unexpected ac3 "
                    "encoder frame size %d\n", s->lavc_actx->frame_size);
             return AF_ERROR;
         }
@@ -187,7 +187,7 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
 
         AVFrame *frame = avcodec_alloc_frame();
         if (!frame) {
-            mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
+            MP_FATAL(af, "[libaf] Could not allocate memory \n");
             return -1;
         }
         frame->nb_samples = s->in_samples;
@@ -201,7 +201,7 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
         int ok;
         ret = avcodec_encode_audio2(s->lavc_actx, &s->pkt, frame, &ok);
         if (ret < 0 || !ok) {
-            mp_msg(MSGT_AFILTER, MSGL_FATAL, "[lavac3enc] Encode failed.\n");
+            MP_FATAL(af, "[lavac3enc] Encode failed.\n");
             return -1;
         }
 
@@ -209,7 +209,7 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
 
         mp_audio_buffer_skip(s->pending, consumed_pending);
 
-        mp_msg(MSGT_AFILTER, MSGL_DBG2, "avcodec_encode_audio got %d, pending %d.\n",
+        MP_DBG(af, "avcodec_encode_audio got %d, pending %d.\n",
                s->pkt.size, mp_audio_buffer_samples(s->pending));
 
         int frame_size = s->pkt.size;
@@ -257,13 +257,13 @@ static int af_open(struct af_instance* af){
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
     if (!s->lavc_acodec) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't find encoder for codec %s.\n", "ac3");
+        MP_ERR(af, "Audio LAVC, couldn't find encoder for codec %s.\n", "ac3");
         return AF_ERROR;
     }
 
     s->lavc_actx = avcodec_alloc_context3(s->lavc_acodec);
     if (!s->lavc_actx) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't allocate context!\n");
+        MP_ERR(af, "Audio LAVC, couldn't allocate context!\n");
         return AF_ERROR;
     }
     const enum AVSampleFormat *fmts = s->lavc_acodec->sample_fmts;
@@ -275,11 +275,11 @@ static int af_open(struct af_instance* af){
         }
     }
     if (!s->in_sampleformat) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, encoder doesn't "
+        MP_ERR(af, "Audio LAVC, encoder doesn't "
                "support expected sample formats!\n");
         return AF_ERROR;
     }
-    mp_msg(MSGT_AFILTER, MSGL_V, "[af_lavcac3enc]: in sample format: %s\n",
+    MP_VERBOSE(af, "[af_lavcac3enc]: in sample format: %s\n",
            af_fmt_to_str(s->in_sampleformat));
 
     av_init_packet(&s->pkt);
@@ -293,7 +293,7 @@ static int af_open(struct af_instance* af){
                 break;
         }
         if (i >= 19) {
-            mp_msg(MSGT_AFILTER, MSGL_WARN, "af_lavcac3enc unable set unsupported "
+            MP_WARN(af, "af_lavcac3enc unable set unsupported "
                     "bitrate %d, use default bitrate (check manpage to see "
                     "supported bitrates).\n", s->cfg_bit_rate);
             s->cfg_bit_rate = 0;
