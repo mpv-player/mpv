@@ -2202,7 +2202,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
     void *tmp = talloc_new(NULL);
     stream_t *s = NULL;
 
-    file = mp_get_user_path(tmp, file);
+    file = mp_get_user_path(tmp, ictx->global, file);
     if (!mp_path_exists(file)) {
         MP_MSG(ictx, warn ? MSGL_ERR : MSGL_V,
                "Input config file %s not found.\n", file);
@@ -2418,7 +2418,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         config_ok = parse_config_file(ictx, input_conf->config_file, true);
     if (!config_ok && global->opts->load_config) {
         // Try global conf dir
-        char *file = mp_find_config_file("input.conf");
+        char *file = mp_find_config_file(NULL, global, "input.conf");
         config_ok = file && parse_config_file(ictx, file, false);
         talloc_free(file);
     }

@@ -297,8 +297,9 @@ static int script_log(lua_State *L)
 
 static int script_find_config_file(lua_State *L)
 {
+    struct MPContext *mpctx = get_mpctx(L);
     const char *s = luaL_checkstring(L, 1);
-    char *path = mp_find_user_config_file(s);
+    char *path = mp_find_user_config_file(NULL, mpctx->global, s);
     if (path) {
         lua_pushstring(L, path);
     } else {

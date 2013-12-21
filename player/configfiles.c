@@ -55,8 +55,8 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
         return true;
     if (!m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf", 0) < 0)
         return false;
-    mp_mk_config_dir(NULL);
-    if ((conffile = mp_find_user_config_file("config")) == NULL)
+    mp_mk_config_dir(mpctx->global, NULL);
+    if (!(conffile = mp_find_user_config_file(NULL, mpctx->global, "config")))
         MP_ERR(mpctx, "mp_find_user_config_file(\"config\") problem\n");
     else {
         int fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY | O_CLOEXEC, 0666);
@@ -78,9 +78,10 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
 
 #define PROFILE_CFG_PROTOCOL "protocol."
 
-void mp_load_per_protocol_config(m_config_t *conf, const char * const file)
+static void mp_load_per_protocol_config(struct MPContext *mpctx)
 {
     char *str;
+    const char *file = mpctx->filename;
     char protocol[strlen(PROFILE_CFG_PROTOCOL) + strlen(file) + 1];
     m_profile_t *p;
 
@@ -93,19 +94,19 @@ void mp_load_per_protocol_config(m_config_t *conf, const char * const file)
 
     sprintf(protocol, "%s%s", PROFILE_CFG_PROTOCOL, file);
     protocol[strlen(PROFILE_CFG_PROTOCOL) + strlen(file) - strlen(str)] = '\0';
-    p = m_config_get_profile0(conf, protocol);
+    p = m_config_get_profile0(mpctx->mconfig, protocol);
     if (p) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO,
-                "Loading protocol-related profile '%s'\n", protocol);
-        m_config_set_profile(conf, p, FILE_LOCAL_FLAGS);
+        MP_INFO(mpctx, "Loading protocol-related profile '%s'\n", protocol);
+        m_config_set_profile(mpctx->mconfig, p, FILE_LOCAL_FLAGS);
     }
 }
 
 #define PROFILE_CFG_EXTENSION "extension."
 
-void mp_load_per_extension_config(m_config_t *conf, const char * const file)
+static void mp_load_per_extension_config(struct MPContext *mpctx)
 {
     char *str;
+    const char *file = mpctx->filename;
     char extension[strlen(PROFILE_CFG_EXTENSION) + 8];
     m_profile_t *p;
 
@@ -116,15 +117,14 @@ void mp_load_per_extension_config(m_config_t *conf, const char * const file)
 
     sprintf(extension, PROFILE_CFG_EXTENSION);
     strncat(extension, ++str, 7);
-    p = m_config_get_profile0(conf, extension);
+    p = m_config_get_profile0(mpctx->mconfig, extension);
     if (p) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO,
-                "Loading extension-related profile '%s'\n", extension);
-        m_config_set_profile(conf, p, FILE_LOCAL_FLAGS);
+        MP_INFO(mpctx, "Loading extension-related profile '%s'\n", extension);
+        m_config_set_profile(mpctx->mconfig, p, FILE_LOCAL_FLAGS);
     }
 }
 
-void mp_load_per_output_config(m_config_t *conf, char *cfg, char *out)
+static void mp_load_per_output_config(struct MPContext *mpctx, char *cfg, char *out)
 {
     char profile[strlen(cfg) + strlen(out) + 1];
     m_profile_t *p;
@@ -133,54 +133,68 @@ void mp_load_per_output_config(m_config_t *conf, char *cfg, char *out)
         return;
 
     sprintf(profile, "%s%s", cfg, out);
-    p = m_config_get_profile0(conf, profile);
+    p = m_config_get_profile0(mpctx->mconfig, profile);
     if (p) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO,
-                "Loading extension-related profile '%s'\n", profile);
-        m_config_set_profile(conf, p, FILE_LOCAL_FLAGS);
+        MP_INFO(mpctx, "Loading extension-related profile '%s'\n", profile);
+        m_config_set_profile(mpctx->mconfig, p, FILE_LOCAL_FLAGS);
     }
+}
+
+void mp_load_auto_profiles(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+
+    mp_load_per_protocol_config(mpctx);
+    mp_load_per_extension_config(mpctx);
+    mp_load_per_file_config(mpctx);
+
+    if (opts->vo.video_driver_list)
+        mp_load_per_output_config(mpctx, "vo.", opts->vo.video_driver_list[0].name);
+    if (opts->audio_driver_list)
+        mp_load_per_output_config(mpctx, "ao.", opts->audio_driver_list[0].name);
 }
 
 /**
  * Tries to load a config file (in file local mode)
  * @return 0 if file was not found, 1 otherwise
  */
-static int try_load_config(m_config_t *conf, const char *file, int flags)
+static int try_load_config(struct MPContext *mpctx, const char *file, int flags)
 {
     if (!mp_path_exists(file))
         return 0;
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "Loading config '%s'\n", file);
-    m_config_parse_config_file(conf, file, flags);
+    MP_INFO(mpctx, "Loading config '%s'\n", file);
+    m_config_parse_config_file(mpctx->mconfig, file, flags);
     return 1;
 }
 
-void mp_load_per_file_config(m_config_t *conf, const char * const file,
-                             bool search_file_dir)
+void mp_load_per_file_config(struct MPContext *mpctx)
 {
+    struct MPOpts *opts = mpctx->opts;
     char *confpath;
     char cfg[MP_PATH_MAX];
     const char *name;
+    const char *file = mpctx->filename;
 
     if (strlen(file) > MP_PATH_MAX - 14) {
-        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Filename is too long, "
+        MP_WARN(mpctx, "Filename is too long, "
                "can not load file or directory specific config files\n");
         return;
     }
     sprintf(cfg, "%s.conf", file);
 
     name = mp_basename(cfg);
-    if (search_file_dir) {
+    if (opts->use_filedir_conf) {
         char dircfg[MP_PATH_MAX];
         strcpy(dircfg, cfg);
         strcpy(dircfg + (name - cfg), "mpv.conf");
-        try_load_config(conf, dircfg, FILE_LOCAL_FLAGS);
+        try_load_config(mpctx, dircfg, FILE_LOCAL_FLAGS);
 
-        if (try_load_config(conf, cfg, FILE_LOCAL_FLAGS))
+        if (try_load_config(mpctx, cfg, FILE_LOCAL_FLAGS))
             return;
     }
 
-    if ((confpath = mp_find_user_config_file(name)) != NULL) {
-        try_load_config(conf, confpath, FILE_LOCAL_FLAGS);
+    if ((confpath = mp_find_user_config_file(NULL, mpctx->global, name))) {
+        try_load_config(mpctx, confpath, FILE_LOCAL_FLAGS);
 
         talloc_free(confpath);
     }
@@ -188,8 +202,8 @@ void mp_load_per_file_config(m_config_t *conf, const char * const file,
 
 #define MP_WATCH_LATER_CONF "watch_later"
 
-char *mp_get_playback_resume_config_filename(const char *fname,
-                                             struct MPOpts *opts)
+static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
+                                                    const char *fname)
 {
     char *res = NULL;
     void *tmp = talloc_new(NULL);
@@ -218,7 +232,7 @@ char *mp_get_playback_resume_config_filename(const char *fname,
 
     conf = talloc_asprintf(tmp, "%s/%s", MP_WATCH_LATER_CONF, conf);
 
-    res = mp_find_user_config_file(conf);
+    res = mp_find_user_config_file(NULL, global, conf);
 
 exit:
     talloc_free(tmp);
@@ -284,10 +298,10 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     if (pos == MP_NOPTS_VALUE)
         goto exit;
 
-    mp_mk_config_dir(MP_WATCH_LATER_CONF);
+    mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
 
-    char *conffile = mp_get_playback_resume_config_filename(mpctx->filename,
-                                                            mpctx->opts);
+    char *conffile = mp_get_playback_resume_config_filename(mpctx->global,
+                                                            mpctx->filename);
     talloc_steal(tmp, conffile);
     if (!conffile)
         goto exit;
@@ -318,15 +332,15 @@ exit:
     talloc_free(tmp);
 }
 
-void mp_load_playback_resume(m_config_t *conf, const char *file)
+void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
 {
-    char *fname = mp_get_playback_resume_config_filename(file, conf->optstruct);
+    char *fname = mp_get_playback_resume_config_filename(mpctx->global, file);
     if (fname && mp_path_exists(fname)) {
         // Never apply the saved start position to following files
-        m_config_backup_opt(conf, "start");
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Resuming playback. This behavior can "
+        m_config_backup_opt(mpctx->mconfig, "start");
+        MP_INFO(mpctx, "Resuming playback. This behavior can "
                "be disabled with --no-resume-playback.\n");
-        try_load_config(conf, fname, M_SETOPT_PRESERVE_CMDLINE);
+        try_load_config(mpctx, fname, M_SETOPT_PRESERVE_CMDLINE);
         unlink(fname);
     }
     talloc_free(fname);
@@ -337,13 +351,14 @@ void mp_load_playback_resume(m_config_t *conf, const char *file)
 // resume file for them, this is simpler, and also has the nice property
 // that appending to a playlist doesn't interfere with resuming (especially
 // if the playlist comes from the command line).
-struct playlist_entry *mp_resume_playlist(struct playlist *playlist,
-                                          struct MPOpts *opts)
+struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
+                                                struct playlist *playlist)
 {
-    if (!opts->position_resume)
+    if (!mpctx->opts->position_resume)
         return NULL;
     for (struct playlist_entry *e = playlist->first; e; e = e->next) {
-        char *conf = mp_get_playback_resume_config_filename(e->filename, opts);
+        char *conf = mp_get_playback_resume_config_filename(mpctx->global,
+                                                            e->filename);
         bool exists = conf && mp_path_exists(conf);
         talloc_free(conf);
         if (exists)

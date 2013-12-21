@@ -423,7 +423,7 @@ static int mpv_main(int argc, char *argv[])
     if (opts->merge_files)
         merge_playlist_files(mpctx->playlist);
 
-    mpctx->playlist->current = mp_resume_playlist(mpctx->playlist, opts);
+    mpctx->playlist->current = mp_check_playlist_resume(mpctx, mpctx->playlist);
     if (!mpctx->playlist->current)
         mpctx->playlist->current = mpctx->playlist->first;
 

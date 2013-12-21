@@ -1001,19 +1001,10 @@ static void play_current_file(struct MPContext *mpctx)
         }
     }
 
-    mp_load_per_protocol_config(mpctx->mconfig, mpctx->filename);
-    mp_load_per_extension_config(mpctx->mconfig, mpctx->filename);
-    mp_load_per_file_config(mpctx->mconfig, mpctx->filename, opts->use_filedir_conf);
-
-    if (opts->vo.video_driver_list)
-        mp_load_per_output_config(mpctx->mconfig, "vo.",
-                                  opts->vo.video_driver_list[0].name);
-    if (opts->audio_driver_list)
-        mp_load_per_output_config(mpctx->mconfig, "ao.",
-                                  opts->audio_driver_list[0].name);
+    mp_load_auto_profiles(mpctx);
 
     if (opts->position_resume)
-        mp_load_playback_resume(mpctx->mconfig, mpctx->filename);
+        mp_load_playback_resume(mpctx, mpctx->filename);
 
     load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
                           mpctx->playlist->current->num_params);

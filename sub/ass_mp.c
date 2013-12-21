@@ -153,20 +153,18 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
                             struct mpv_global *global, struct mp_log *log)
 {
-    char *default_font = mp_find_user_config_file("subfont.ttf");
-    char *config       = mp_find_config_file("fonts.conf");
+    void *tmp = talloc_new(NULL);
+    char *default_font = mp_find_user_config_file(tmp, global, "subfont.ttf");
+    char *config       = mp_find_config_file(tmp, global, "fonts.conf");
 
-    if (default_font && !mp_path_exists(default_font)) {
-        talloc_free(default_font);
+    if (default_font && !mp_path_exists(default_font))
         default_font = NULL;
-    }
 
-    mp_msg(MSGT_ASS, MSGL_V, "Setting up fonts...\n");
+    mp_verbose(log, "Setting up fonts...\n");
     ass_set_fonts(priv, default_font, opts->font, 1, config, 1);
-    mp_msg(MSGT_ASS, MSGL_V, "Done.\n");
+    mp_verbose(log, "Done.\n");
 
-    talloc_free(default_font);
-    talloc_free(config);
+    talloc_free(tmp);
 }
 
 void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
@@ -228,7 +226,7 @@ static void message_callback(int level, const char *format, va_list va, void *ct
 
 ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log)
 {
-    char *path = mp_find_user_config_file("fonts");
+    char *path = mp_find_user_config_file(NULL, global, "fonts");
     ASS_Library *priv = ass_library_init();
     if (!priv)
         abort();

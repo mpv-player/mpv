@@ -94,7 +94,7 @@ static struct bstr load_file(void *talloc_ctx, const char *filename,
                              struct mpv_global *global)
 {
     struct bstr res = {0};
-    char *fname = mp_get_user_path(NULL, filename);
+    char *fname = mp_get_user_path(NULL, global, filename);
     stream_t *s = stream_open(fname, global);
     if (s) {
         res = stream_read_complete(s, talloc_ctx, 1000000000);

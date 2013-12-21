@@ -237,7 +237,7 @@ struct subfn *find_text_subtitles(struct mpv_global *global, const char *fname)
     }
 
     // Load subtitles in ~/.mpv/sub limiting sub fuzziness
-    char *mp_subdir = mp_find_user_config_file("sub/");
+    char *mp_subdir = mp_find_user_config_file(NULL, global, "sub/");
     if (mp_subdir)
         append_dir_subtitles(global, &slist, &n, bstr0(mp_subdir), fname, 1);
     talloc_free(mp_subdir);

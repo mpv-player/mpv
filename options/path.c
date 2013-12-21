@@ -33,13 +33,14 @@
 #include <unistd.h>
 #include <errno.h>
 #include "config.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "options/path.h"
 #include "talloc.h"
 #include "osdep/io.h"
 #include "osdep/path.h"
 
-typedef char *(*lookup_fun)(const char *);
+typedef char *(*lookup_fun)(void *tctx, struct mpv_global *global, const char *);
 static const lookup_fun config_lookup_functions[] = {
     mp_find_user_config_file,
 #if HAVE_COCOA
@@ -49,10 +50,11 @@ static const lookup_fun config_lookup_functions[] = {
     NULL
 };
 
-char *mp_find_config_file(const char *filename)
+char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
+                          const char *filename)
 {
     for (int i = 0; config_lookup_functions[i] != NULL; i++) {
-        char *path = config_lookup_functions[i](filename);
+        char *path = config_lookup_functions[i](talloc_ctx, global, filename);
         if (!path) continue;
 
         if (mp_path_exists(path))
@@ -63,7 +65,8 @@ char *mp_find_config_file(const char *filename)
     return NULL;
 }
 
-char *mp_find_user_config_file(const char *filename)
+char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
+                               const char *filename)
 {
     char *homedir = getenv("MPV_HOME");
     char *configdir = NULL;
@@ -71,7 +74,7 @@ char *mp_find_user_config_file(const char *filename)
 
     if (!homedir) {
 #ifdef _WIN32
-        result = mp_get_win_config_path(filename);
+        result = talloc_steal(talloc_ctx, mp_get_win_config_path(filename));
 #endif
         homedir = getenv("HOME");
         configdir = ".mpv";
@@ -79,25 +82,27 @@ char *mp_find_user_config_file(const char *filename)
 
     if (!result && homedir) {
         char *temp = mp_path_join(NULL, bstr0(homedir), bstr0(configdir));
-        result = mp_path_join(NULL, bstr0(temp), bstr0(filename));
+        result = mp_path_join(talloc_ctx, bstr0(temp), bstr0(filename));
         talloc_free(temp);
     }
 
-    mp_msg(MSGT_GLOBAL, MSGL_V, "mp_find_user_config_file('%s') -> '%s'\n",
-           filename ? filename : "(NULL)", result ? result : "(NULL)");
+    MP_VERBOSE(global, "mp_find_user_config_file('%s') -> '%s'\n",
+               filename ? filename : "(NULL)", result ? result : "(NULL)");
     return result;
 }
 
-char *mp_find_global_config_file(const char *filename)
+char *mp_find_global_config_file(void *talloc_ctx, struct mpv_global *global,
+                                 const char *filename)
 {
     if (filename) {
-        return mp_path_join(NULL, bstr0(MPLAYER_CONFDIR), bstr0(filename));
+        return mp_path_join(talloc_ctx, bstr0(MPLAYER_CONFDIR), bstr0(filename));
     } else {
-        return talloc_strdup(NULL, MPLAYER_CONFDIR);
+        return talloc_strdup(talloc_ctx, MPLAYER_CONFDIR);
     }
 }
 
-char *mp_get_user_path(void *talloc_ctx, const char *path)
+char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
+                       const char *path)
 {
     if (!path)
         return NULL;
@@ -108,10 +113,11 @@ char *mp_get_user_path(void *talloc_ctx, const char *path)
         if (bstr_split_tok(bpath, "/", &prefix, &rest)) {
             const char *rest0 = rest.start; // ok in this case
             char *res = NULL;
-            if (bstr_equals0(prefix, "~"))
-                res = talloc_steal(talloc_ctx, mp_find_user_config_file(rest0));
-            if (bstr_equals0(prefix, ""))
+            if (bstr_equals0(prefix, "~")) {
+                res = mp_find_user_config_file(talloc_ctx, global, rest0);
+            } else if (bstr_equals0(prefix, "")) {
                 res = mp_path_join(talloc_ctx, bstr0(getenv("HOME")), rest);
+            }
             if (res)
                 return res;
         }
@@ -225,10 +231,10 @@ bool mp_is_url(bstr path)
     return true;
 }
 
-void mp_mk_config_dir(char *subdir)
+void mp_mk_config_dir(struct mpv_global *global, char *subdir)
 {
     void *tmp = talloc_new(NULL);
-    char *confdir = talloc_steal(tmp, mp_find_user_config_file(""));
+    char *confdir = mp_find_user_config_file(tmp, global, "");
     if (confdir) {
         if (subdir)
             confdir = mp_path_join(tmp, bstr0(confdir), bstr0(subdir));

@@ -740,9 +740,6 @@ dvb_config_t *dvb_get_config(stream_t *stream)
 			continue;
 		}
 
-// rebase hack
-#define mp_find_user_config_file(a,b,c) mp_find_user_config_file(c)
-#define mp_find_global_config_file(a, b, c) mp_find_global_config_file(c)
         void *talloc_ctx = talloc_new(NULL);
         conf_file = mp_find_user_config_file(talloc_ctx, global, "channels.conf");
         switch(type) {
