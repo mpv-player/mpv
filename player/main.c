@@ -327,7 +327,7 @@ static int mpv_main(int argc, char *argv[])
         exit_player(mpctx, EXIT_ERROR);
 
     int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
-                                           argc, argv);
+                                           mpctx->global, argc, argv);
     if (r < 0) {
         if (r <= M_OPT_EXIT) {
             exit_player(mpctx, EXIT_NONE);

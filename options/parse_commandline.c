@@ -104,14 +104,14 @@ static bool split_opt(struct parse_state *p)
         return r == 0;
     p->error = true;
 
-    mp_msg(MSGT_CFGPARSER, MSGL_FATAL,
-            "Error parsing commandline option %.*s: %s\n",
-            BSTR_P(p->arg), m_option_strerror(r));
+    MP_FATAL(p->config, "Error parsing commandline option %.*s: %s\n",
+             BSTR_P(p->arg), m_option_strerror(r));
     return false;
 }
 
 // returns M_OPT_... error code
 int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
+                                   struct mpv_global *global,
                                    int argc, char **argv)
 {
     struct MPOpts *opts = config->optstruct;
@@ -138,9 +138,8 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 goto err_out;
             }
             if (r < 0) {
-                mp_msg(MSGT_CFGPARSER, MSGL_FATAL,
-                        "Setting commandline option --%.*s=%.*s failed.\n",
-                        BSTR_P(p.arg), BSTR_P(p.param));
+                MP_FATAL(config, "Setting commandline option --%.*s=%.*s failed.\n",
+                         BSTR_P(p.arg), BSTR_P(p.param));
                 goto err_out;
             }
 
@@ -148,8 +147,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
 
             if (!bstrcmp0(p.arg, "{")) {
                 if (mode != GLOBAL) {
-                    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                           "'--{' can not be nested.\n");
+                    MP_ERR(config, "'--{' can not be nested.\n");
                     goto err_out;
                 }
                 mode = LOCAL;
@@ -160,8 +158,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
 
             if (!bstrcmp0(p.arg, "}")) {
                 if (mode != LOCAL) {
-                    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                           "Too many closing '--}'.\n");
+                    MP_ERR(config, "Too many closing '--}'.\n");
                     goto err_out;
                 }
                 if (local_params_count) {
@@ -172,7 +169,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                     struct playlist_entry *cur
                         = local_start ? local_start->next : files->first;
                     if (!cur)
-                        mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Ignored options!\n");
+                        MP_WARN(config, "Ignored options!\n");
                     while (cur) {
                         playlist_entry_add_params(cur, local_params,
                                                 local_params_count);
@@ -192,8 +189,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 struct playlist *pl = playlist_parse_file(param0, opts);
                 talloc_free(param0);
                 if (!pl) {
-                    mp_msg(MSGT_CFGPARSER, MSGL_FATAL,
-                            "Error reading playlist '%.*s'", BSTR_P(p.param));
+                    MP_FATAL(config, "Error reading playlist '%.*s'", BSTR_P(p.param));
                     goto err_out;
                 }
                 playlist_transfer_entries(files, pl);
@@ -233,8 +229,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                             playlist_add_file(files, f);
                         }
                     } else
-                        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                                "Invalid play entry %s\n", file0);
+                        MP_ERR(config, "Invalid play entry %s\n", file0);
 
                 } else // dvd:// or dvd://x entry
                     playlist_add_file(files, file0);
@@ -252,8 +247,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
         goto err_out;
 
     if (mode != GLOBAL) {
-        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                "Missing closing --} on command line.\n");
+        MP_ERR(config, "Missing closing --} on command line.\n");
         goto err_out;
     }
 
