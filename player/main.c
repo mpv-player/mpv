@@ -333,7 +333,7 @@ static int mpv_main(int argc, char *argv[])
     init_libav();
     GetCpuCaps(&gCpuCaps);
     screenshot_init(mpctx);
-    mpctx->mixer = mixer_init(mpctx, opts);
+    mpctx->mixer = mixer_init(mpctx, mpctx->global);
     command_init(mpctx);
 
     // Preparse the command line

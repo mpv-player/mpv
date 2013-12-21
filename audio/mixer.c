@@ -24,11 +24,13 @@
 #include "config.h"
 #include "audio/out/ao.h"
 #include "audio/filter/af.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "talloc.h"
 #include "mixer.h"
 
 struct mixer {
+    struct mp_log *log;
     struct MPOpts *opts;
     struct ao *ao;
     struct af_stream *af;
@@ -47,11 +49,12 @@ struct mixer {
     float balance;
 };
 
-struct mixer *mixer_init(void *talloc_ctx, struct MPOpts *opts)
+struct mixer *mixer_init(void *talloc_ctx, struct mpv_global *global)
 {
     struct mixer *mixer = talloc_ptrtype(talloc_ctx, mixer);
     *mixer = (struct mixer) {
-        .opts = opts,
+        .log = mp_log_new(mixer, global->log, "mixer"),
+        .opts = global->opts,
         .vol_l = 100,
         .vol_r = 100,
         .driver = "",
@@ -113,17 +116,15 @@ static void setvolume_internal(struct mixer *mixer, float l, float r)
     struct ao_control_vol vol = {.left = l, .right = r};
     if (!mixer->softvol) {
         if (ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
-            mp_msg(MSGT_GLOBAL, MSGL_ERR,
-                    "[Mixer] Failed to change audio output volume.\n");
+            MP_ERR(mixer, "Failed to change audio output volume.\n");
         return;
     }
     float gain = (l + r) / 2.0 / 100.0 * mixer->opts->softvol_max / 100.0;
     if (!af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)) {
-        mp_msg(MSGT_GLOBAL, MSGL_V, "[Mixer] Inserting volume filter.\n");
+        MP_VERBOSE(mixer, "Inserting volume filter.\n");
         if (!(af_add(mixer->af, "volume", NULL)
               && af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)))
-            mp_msg(MSGT_GLOBAL, MSGL_ERR,
-                    "[Mixer] No volume control available.\n");
+            MP_ERR(mixer, "No volume control available.\n");
     }
 }
 
@@ -223,8 +224,7 @@ void mixer_setbalance(struct mixer *mixer, float val)
         return;
 
     if (!(af_pan_balance = af_add(mixer->af, "pan", NULL))) {
-        mp_msg(MSGT_GLOBAL, MSGL_ERR,
-                "[Mixer] No balance control available.\n");
+        MP_ERR(mixer, "No balance control available.\n");
         return;
     }
 
@@ -264,8 +264,7 @@ static void probe_softvol(struct mixer *mixer)
         ao_control_vol_t vol;
         if (ao_control(mixer->ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK) {
             mixer->softvol = true;
-            mp_msg(MSGT_GLOBAL, MSGL_WARN,
-                    "[mixer] Hardware volume control unavailable.\n");
+            MP_WARN(mixer, "Hardware volume control unavailable.\n");
         }
     }
 
