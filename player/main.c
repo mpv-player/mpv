@@ -140,6 +140,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 #endif
 
     getch2_disable();
+    uninit_libav(mpctx->global);
 
     if (how != EXIT_NONE) {
         const char *reason;
@@ -310,8 +311,7 @@ static int mpv_main(int argc, char *argv[])
     struct MPOpts *opts = mpctx->opts;
     mpctx->global->opts = opts;
 
-
-    init_libav();
+    init_libav(mpctx->global);
     GetCpuCaps(&gCpuCaps);
     screenshot_init(mpctx);
     mpctx->mixer = mixer_init(mpctx, mpctx->global);
