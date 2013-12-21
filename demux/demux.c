@@ -519,6 +519,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .opts = global->opts,
         .global = global,
         .log = mp_log_new(demuxer, log, desc->name),
+        .glog = log,
         .filename = talloc_strdup(demuxer, stream->url),
         .metadata = talloc_zero(demuxer, struct mp_tags),
     };
@@ -603,8 +604,11 @@ struct demuxer *demux_open(struct stream *stream, char *force_format,
             const struct demuxer_desc *desc = demuxer_list[n];
             if (!check_desc || desc == check_desc) {
                 demuxer = open_given_type(global, log, desc, stream, params, level);
-                if (demuxer)
+                if (demuxer) {
+                    talloc_steal(demuxer, log);
+                    log = NULL;
                     goto done;
+                }
             }
         }
     }
@@ -736,16 +740,15 @@ int demux_info_print(demuxer_t *demuxer)
     if (!info || !info->num_keys)
         return 0;
 
-    MP_INFO(demuxer, "Clip info:\n");
+    mp_info(demuxer->glog, "Clip info:\n");
     for (n = 0; n < info->num_keys; n++) {
-        MP_INFO(demuxer, " %s: %s\n", info->keys[n],
+        mp_info(demuxer->glog, " %s: %s\n", info->keys[n], info->values[n]);
+        mp_msg(demuxer->glog, MSGL_SMODE, "ID_CLIP_INFO_NAME%d=%s\n", n,
+               info->keys[n]);
+        mp_msg(demuxer->glog, MSGL_SMODE, "ID_CLIP_INFO_VALUE%d=%s\n", n,
                info->values[n]);
-        MP_SMODE(demuxer, "ID_CLIP_INFO_NAME%d=%s\n", n,
-                 info->keys[n]);
-        MP_SMODE(demuxer, "ID_CLIP_INFO_VALUE%d=%s\n", n,
-                 info->values[n]);
     }
-    MP_SMODE(demuxer, "ID_CLIP_INFO_N=%d\n", n);
+    mp_msg(demuxer->glog, MSGL_SMODE, "ID_CLIP_INFO_N=%d\n", n);
 
     return 0;
 }
