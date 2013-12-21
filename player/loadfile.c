@@ -220,30 +220,30 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     if (!iid)
         return;
     int id = t->user_tid;
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_%s_ID=%d\n", iid, id);
+    MP_SMODE(mpctx, "ID_%s_ID=%d\n", iid, id);
     if (t->title)
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_%s_%d_NAME=%s\n", iid, id, t->title);
+        MP_SMODE(mpctx, "ID_%s_%d_NAME=%s\n", iid, id, t->title);
     if (t->lang)
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_%s_%d_LANG=%s\n", iid, id, t->lang);
+        MP_SMODE(mpctx, "ID_%s_%d_LANG=%s\n", iid, id, t->lang);
 }
 
 static void print_file_properties(struct MPContext *mpctx)
 {
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILENAME=%s\n", mpctx->filename);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO,
+    MP_SMODE(mpctx, "ID_FILENAME=%s\n", mpctx->filename);
+    MP_SMODE(mpctx,
            "ID_LENGTH=%.2f\n", get_time_length(mpctx));
     int chapter_count = get_chapter_count(mpctx);
     if (chapter_count >= 0) {
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTERS=%d\n", chapter_count);
+        MP_SMODE(mpctx, "ID_CHAPTERS=%d\n", chapter_count);
         for (int i = 0; i < chapter_count; i++) {
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_ID=%d\n", i);
+            MP_SMODE(mpctx, "ID_CHAPTER_ID=%d\n", i);
             // print in milliseconds
             double time = chapter_start_time(mpctx, i) * 1000.0;
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_START=%"PRId64"\n",
+            MP_SMODE(mpctx, "ID_CHAPTER_%d_START=%"PRId64"\n",
                    i, (int64_t)(time < 0 ? -1 : time));
             char *name = chapter_name(mpctx, i);
             if (name) {
-                mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_NAME=%s\n", i,
+                MP_SMODE(mpctx, "ID_CHAPTER_%d_NAME=%s\n", i,
                        name);
                 talloc_free(name);
             }

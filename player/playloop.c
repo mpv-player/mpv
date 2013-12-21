@@ -105,7 +105,7 @@ void pause_player(struct MPContext *mpctx)
         print_status(mpctx);
 
     if (!mpctx->opts->quiet)
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
+        MP_SMODE(mpctx, "ID_PAUSED\n");
 }
 
 void unpause_player(struct MPContext *mpctx)
