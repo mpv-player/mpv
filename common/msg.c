@@ -63,10 +63,6 @@ struct mp_log {
 // Protects some (not all) state in mp_log_root
 static pthread_mutex_t mp_msg_lock = PTHREAD_MUTEX_INITIALIZER;
 
-// should not exist
-static bool initialized;
-static struct mp_log *legacy_logs[MSGT_MAX];
-
 bool mp_msg_stdout_in_use;
 int verbose;
 bool mp_msg_mute;
@@ -188,79 +184,6 @@ void mp_msg_log_va(struct mp_log *log, int lev, const char *format, va_list va)
     pthread_mutex_unlock(&mp_msg_lock);
 }
 
-void mp_msg_va(int mod, int lev, const char *format, va_list va)
-{
-    assert(initialized);
-    assert(mod >= 0 && mod < MSGT_MAX);
-    mp_msg_log_va(legacy_logs[mod], lev, format, va);
-}
-
-void mp_msg(int mod, int lev, const char *format, ...)
-{
-    va_list va;
-    va_start(va, format);
-    mp_msg_va(mod, lev, format, va);
-    va_end(va);
-}
-
-int mp_msg_test(int mod, int lev)
-{
-    assert(initialized);
-    assert(mod >= 0 && mod < MSGT_MAX);
-    return mp_msg_test_log(legacy_logs[mod], lev);
-}
-
-// legacy names
-static const char *module_text[MSGT_MAX] = {
-    "global",
-    "cplayer",
-    "gplayer",
-    "vo",
-    "ao",
-    "demuxer",
-    "ds",
-    "demux",
-    "header",
-    "avsync",
-    "autoq",
-    "cfgparser",
-    "decaudio",
-    "decvideo",
-    "seek",
-    "win32",
-    "open",
-    "dvd",
-    "parsees",
-    "lirc",
-    "stream",
-    "cache",
-    "mencoder",
-    "xacodec",
-    "tv",
-    "osdep",
-    "spudec",
-    "playtree",
-    "input",
-    "vf",
-    "osd",
-    "network",
-    "cpudetect",
-    "codeccfg",
-    "sws",
-    "vobsub",
-    "subreader",
-    "af",
-    "netst",
-    "muxer",
-    "osdmenu",
-    "identify",
-    "radio",
-    "ass",
-    "loader",
-    "statusline",
-    "teletext",
-};
-
 // Create a new log context, which uses talloc_ctx as talloc parent, and parent
 // as logical parent.
 // The name is the prefix put before the output. It's usually prefixed by the
@@ -298,7 +221,6 @@ struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
 
 void mp_msg_init(struct mpv_global *global)
 {
-    assert(!initialized);
     assert(!global->log);
 
     struct mp_log_root *root = talloc_zero(NULL, struct mp_log_root);
@@ -307,15 +229,10 @@ void mp_msg_init(struct mpv_global *global)
 
     struct mp_log dummy = { .root = root };
     struct mp_log *log = mp_log_new(root, &dummy, "");
-    for (int n = 0; n < MSGT_MAX; n++) {
-        char name[80];
-        snprintf(name, sizeof(name), "!%s", module_text[n]);
-        legacy_logs[n] = mp_log_new(root, log, name);
-    }
+
     mp_msg_do_init();
 
     global->log = log;
-    initialized = true;
 }
 
 struct mpv_global *mp_log_get_global(struct mp_log *log)
@@ -338,7 +255,6 @@ void mp_msg_uninit(struct mpv_global *global)
 {
     talloc_free(global->log->root);
     global->log = NULL;
-    initialized = false;
 }
 
 void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
