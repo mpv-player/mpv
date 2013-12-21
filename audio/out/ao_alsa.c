@@ -80,25 +80,6 @@ struct priv {
 static float get_delay(struct ao *ao);
 static void uninit(struct ao *ao, bool immed);
 
-static void alsa_error_handler(const char *file, int line, const char *function,
-                               int err, const char *format, ...)
-{
-    char tmp[0xc00];
-    va_list va;
-
-    va_start(va, format);
-    vsnprintf(tmp, sizeof tmp, format, va);
-    va_end(va);
-
-    if (err) {
-        mp_msg(MSGT_AO, MSGL_ERR, "alsa-lib: %s:%i:(%s) %s: %s\n",
-               file, line, function, tmp, snd_strerror(err));
-    } else {
-        mp_msg(MSGT_AO, MSGL_ERR, "alsa-lib: %s:%i:(%s) %s\n",
-               file, line, function, tmp);
-    }
-}
-
 /* to set/get/query special features/parameters */
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
@@ -401,7 +382,6 @@ static int init(struct ao *ao)
     p->can_pause = 1;
 
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
-    snd_lib_error_set_handler(alsa_error_handler);
 
     int open_mode = p->cfg_block ? 0 : SND_PCM_NONBLOCK;
     //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
@@ -573,7 +553,6 @@ static void uninit(struct ao *ao, bool immed)
 
 alsa_error:
     p->alsa = NULL;
-    snd_lib_error_set_handler(NULL);
 }
 
 static void audio_pause(struct ao *ao)
