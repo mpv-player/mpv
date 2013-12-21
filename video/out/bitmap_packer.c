@@ -21,12 +21,12 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include <libavutil/common.h>
 
 #include "talloc.h"
 #include "bitmap_packer.h"
-#include "common/msg.h"
 #include "common/common.h"
 #include "sub/dec_sub.h"
 #include "video/memcpy_pic.h"
@@ -141,7 +141,7 @@ int packer_pack(struct bitmap_packer *packer)
         if (in[i].x <= packer->padding || in[i].y <= packer->padding)
             in[i] = (struct pos){0, 0};
         if (in[i].x < 0 || in [i].x > 65535 || in[i].y < 0 || in[i].y > 65535) {
-            mp_msg(MSGT_VO, MSGL_FATAL, "Invalid OSD / subtitle bitmap size\n");
+            fprintf(stderr, "Invalid OSD / subtitle bitmap size\n");
             abort();
         }
         xmax = FFMAX(xmax, in[i].x);
