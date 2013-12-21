@@ -114,7 +114,7 @@ static void flip_page(struct vo *vo)
         filename = mp_path_join(t, bstr0(p->outdir), bstr0(filename));
 
     MP_INFO(vo, "Saving %s\n", filename);
-    write_image(p->current, p->opts, filename);
+    write_image(p->current, p->opts, filename, vo->log);
 
     talloc_free(t);
     mp_image_unrefp(&p->current);

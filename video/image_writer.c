@@ -74,6 +74,7 @@ const struct m_sub_options image_writer_conf = {
 };
 
 struct image_writer_ctx {
+    struct mp_log *log;
     const struct image_writer_opts *opts;
     const struct img_writer *writer;
 };
@@ -113,8 +114,7 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
 
     if (avcodec_open2(avctx, codec, NULL) < 0) {
      print_open_fail:
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Could not open libavcodec encoder"
-               " for saving images\n");
+        MP_ERR(ctx, "Could not open libavcodec encoder for saving images\n");
         goto error_exit;
     }
 
@@ -256,7 +256,7 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts)
 }
 
 int write_image(struct mp_image *image, const struct image_writer_opts *opts,
-                const char *filename)
+                const char *filename, struct mp_log *log)
 {
     struct mp_image *allocated_image = NULL;
     struct image_writer_opts defs = image_writer_opts_defaults;
@@ -268,7 +268,7 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
         opts = &defs;
 
     const struct img_writer *writer = get_writer(opts);
-    struct image_writer_ctx ctx = { opts, writer };
+    struct image_writer_ctx ctx = { log, opts, writer };
     int destfmt = IMGFMT_RGB24;
 
     if (writer->pixfmts) {
@@ -296,14 +296,12 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
     FILE *fp = fopen(filename, "wb");
     int success = 0;
     if (fp == NULL) {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR,
-               "Error opening '%s' for writing!\n", filename);
+        mp_err(log, "Error opening '%s' for writing!\n", filename);
     } else {
         success = writer->write(&ctx, image, fp);
         success = !fclose(fp) && success;
         if (!success)
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Error writing file '%s'!\n",
-                   filename);
+            mp_err(log, "Error writing file '%s'!\n", filename);
     }
 
     talloc_free(allocated_image);
@@ -311,9 +309,9 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
     return success;
 }
 
-void dump_png(struct mp_image *image, const char *filename)
+void dump_png(struct mp_image *image, const char *filename, struct mp_log *log)
 {
     struct image_writer_opts opts = image_writer_opts_defaults;
     opts.format = "png";
-    write_image(image, &opts, filename);
+    write_image(image, &opts, filename, log);
 }

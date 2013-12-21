@@ -301,7 +301,7 @@ static void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
     char *filename = gen_fname(ctx, image_writer_file_ext(opts));
     if (filename) {
         screenshot_msg(ctx, SMSG_OK, "Screenshot: '%s'", filename);
-        if (!write_image(image, opts, filename))
+        if (!write_image(image, opts, filename, mpctx->log))
             screenshot_msg(ctx, SMSG_ERR, "Error writing screenshot!");
         talloc_free(filename);
     }
@@ -354,7 +354,7 @@ void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
         goto end;
     }
     screenshot_msg(ctx, SMSG_OK, "Screenshot: '%s'", filename);
-    if (!write_image(image, &opts, filename))
+    if (!write_image(image, &opts, filename, mpctx->log))
         screenshot_msg(ctx, SMSG_ERR, "Error writing screenshot!");
     talloc_free(image);
 
