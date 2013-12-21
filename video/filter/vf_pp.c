@@ -133,10 +133,10 @@ static int vf_open(vf_instance_t *vf){
     return 1;
 }
 
-static void print_help(void)
+static void print_help(struct mp_log *log)
 {
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", pp_help);
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO,
+    mp_info(log, "%s", pp_help);
+    mp_info(log,
            "Don't forget to quote the filter list, e.g.: '--vf=pp=[tn:64:128:256]'\n\n");
 }
 

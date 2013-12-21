@@ -39,7 +39,7 @@ typedef struct vf_info {
     int priv_size;
     const void *priv_defaults;
     const struct m_option *options;
-    void (*print_help)(void);
+    void (*print_help)(struct mp_log *log);
 } vf_info_t;
 
 typedef struct vf_instance {

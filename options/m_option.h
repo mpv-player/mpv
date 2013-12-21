@@ -114,7 +114,7 @@ struct m_obj_desc {
     // Don't list entry with "help"
     bool hidden;
     // Callback to print custom help if "help" is passed
-    void (*print_help)(void);
+    void (*print_help)(struct mp_log *log);
     // Set by m_obj_list_find(). If the requested name is an old alias, this
     // is set to the old name (while the name field uses the new name).
     const char *replaced_name;

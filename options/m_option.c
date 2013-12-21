@@ -2142,7 +2142,7 @@ static int m_obj_parse_sub_config(struct mp_log *log, struct bstr opt_name,
 print_help: ;
     if (config) {
         if (desc->print_help)
-            desc->print_help();
+            desc->print_help(log);
         m_config_print_option_list(config);
     } else {
         mp_warn(log, "Option %.*s doesn't exist.\n",

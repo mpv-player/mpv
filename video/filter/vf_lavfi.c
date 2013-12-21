@@ -355,18 +355,16 @@ static bool is_usable(const AVFilter *filter)
            is_single_video_only(filter->outputs);
 }
 
-static void print_help(void)
+static void print_help(struct mp_log *log)
 {
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "List of libavfilter filters:\n");
+    mp_info(log, "List of libavfilter filters:\n");
     for (const AVFilter *filter = avfilter_next(NULL); filter;
          filter = avfilter_next(filter))
     {
-        if (is_usable(filter)) {
-            mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %-16s %s\n",
-                   filter->name, filter->description);
-        }
+        if (is_usable(filter))
+            mp_info(log, " %-16s %s\n", filter->name, filter->description);
     }
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n"
+    mp_info(log, "\n"
         "This lists video->video filters only. Refer to\n"
         "\n"
         " https://ffmpeg.org/ffmpeg-filters.html\n"
