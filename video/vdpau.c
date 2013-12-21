@@ -161,7 +161,7 @@ struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx, int fmt,
         if (!e->in_use && e->surface != VDP_INVALID_HANDLE) {
             if (e->fmt != fmt || e->chroma != chroma || e->w != w || e->h != h) {
                 vdp_st = vdp->video_surface_destroy(e->surface);
-                CHECK_ST_WARNING("Error when calling vdp_video_surface_destroy");
+                CHECK_VDP_WARNING(ctx, "Error when calling vdp_video_surface_destroy");
                 e->surface = VDP_INVALID_HANDLE;
             }
         }
@@ -191,7 +191,7 @@ struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx, int fmt,
             } else {
                 vdp_st = vdp->video_surface_create(ctx->vdp_device, chroma,
                                                    w, h, &e->surface);
-                CHECK_ST_WARNING("Error when calling vdp_video_surface_create");
+                CHECK_VDP_WARNING(ctx, "Error when calling vdp_video_surface_create");
             }
             return create_ref(e);
         }
@@ -232,13 +232,13 @@ void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx)
         assert(!ctx->video_surfaces[i].in_use);
         if (ctx->video_surfaces[i].surface != VDP_INVALID_HANDLE) {
             vdp_st = vdp->video_surface_destroy(ctx->video_surfaces[i].surface);
-            CHECK_ST_WARNING("Error when calling vdp_video_surface_destroy");
+            CHECK_VDP_WARNING(ctx, "Error when calling vdp_video_surface_destroy");
         }
     }
 
     if (ctx->vdp_device != VDP_INVALID_HANDLE) {
         vdp_st = vdp->device_destroy(ctx->vdp_device);
-        CHECK_ST_WARNING("Error when calling vdp_device_destroy");
+        CHECK_VDP_WARNING(ctx, "Error when calling vdp_device_destroy");
     }
 
     talloc_free(ctx);

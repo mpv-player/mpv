@@ -31,6 +31,7 @@
 static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params);
 
 struct priv {
+    struct mp_log *log;
     struct mp_vdpau_ctx *ctx;
     uint64_t preemption_counter;
     struct mp_image_params image_params;
@@ -86,12 +87,12 @@ static void destroy_objects(struct gl_hwdec *hw)
 
     if (p->vdp_surface != VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_destroy(p->vdp_surface);
-        CHECK_ST_WARNING("Error when calling vdp_output_surface_destroy");
+        CHECK_VDP_WARNING(p, "Error when calling vdp_output_surface_destroy");
     }
 
     if (p->video_mixer != VDP_INVALID_HANDLE) {
         vdp_st = vdp->video_mixer_destroy(p->video_mixer);
-        CHECK_ST_WARNING("Error when calling vdp_video_mixer_destroy");
+        CHECK_VDP_WARNING(p, "Error when calling vdp_video_mixer_destroy");
     }
 
     glCheckError(gl, hw->log, "Before uninitializing OpenGL interop");
@@ -126,6 +127,7 @@ static int create(struct gl_hwdec *hw)
         return -1;
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
+    p->log = hw->log;
     p->ctx = mp_vdpau_create_device_x11(hw->log, hw->mpgl->vo->x11);
     if (!p->ctx)
         return -1;
@@ -168,7 +170,7 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
                                      VDP_NUM_MIXER_PARAMETER,
                                      parameters, parameter_values,
                                      &p->video_mixer);
-    CHECK_ST_ERROR("Error when calling vdp_video_mixer_create");
+    CHECK_VDP_ERROR(p, "Error when calling vdp_video_mixer_create");
 
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
     cparams.colorspace.levels_in = params->colorlevels;
@@ -180,12 +182,12 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
     VdpVideoMixerAttribute csc_attr = VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX;
     vdp_st = vdp->video_mixer_set_attribute_values(p->video_mixer, 1, &csc_attr,
                                                    &(const void *){matrix});
-    CHECK_ST_WARNING("Error when setting vdpau colorspace conversion matrix");
+    CHECK_VDP_WARNING(p, "Error when setting vdpau colorspace conversion matrix");
 
     vdp_st = vdp->output_surface_create(p->ctx->vdp_device,
                                         VDP_RGBA_FORMAT_B8G8R8A8,
                                         params->w, params->h, &p->vdp_surface);
-    CHECK_ST_ERROR("Error when calling vdp_output_surface_create");
+    CHECK_VDP_ERROR(p, "Error when calling vdp_output_surface_create");
 
     gl->GenTextures(1, &p->gl_texture);
     gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
@@ -231,7 +233,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
                                      0, NULL, video_surface, 0, NULL,
                                      video_rect, p->vdp_surface,
                                      NULL, NULL, 0, NULL);
-    CHECK_ST_ERROR("Error when calling vdp_video_mixer_render");
+    CHECK_VDP_ERROR(p, "Error when calling vdp_video_mixer_render");
 
     gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
     out_textures[0] = p->gl_texture;
