@@ -233,7 +233,7 @@ static struct demux_packet *recode_packet(struct mp_log *log,
 {
     struct demux_packet *pkt = NULL;
     bstr in_buf = {in->buffer, in->len};
-    bstr conv = mp_iconv_to_utf8(in_buf, charset, MP_ICONV_VERBOSE);
+    bstr conv = mp_iconv_to_utf8(log, in_buf, charset, MP_ICONV_VERBOSE);
     if (conv.start && conv.start != in_buf.start) {
         pkt = talloc_ptrtype(NULL, pkt);
         talloc_steal(pkt, conv.start);
@@ -292,7 +292,7 @@ static const char *guess_sub_cp(struct mp_log *log, struct packet_list *subs,
         memcpy(text.start + text.len + pkt->len, sep, sep_len);
         text.len += pkt->len + sep_len;
     }
-    const char *guess = mp_charset_guess(text, usercp, 0);
+    const char *guess = mp_charset_guess(log, text, usercp, 0);
     talloc_free(text.start);
     return guess;
 }
