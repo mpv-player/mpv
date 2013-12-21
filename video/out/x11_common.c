@@ -219,25 +219,6 @@ static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
     }
 }
 
-static int x11_errorhandler(Display *display, XErrorEvent *event)
-{
-    char msg[60];
-
-    XGetErrorText(display, event->error_code, (char *) &msg, sizeof(msg));
-
-    mp_msg(MSGT_VO, MSGL_ERR, "X11 error: %s\n", msg);
-
-    mp_msg(MSGT_VO, MSGL_V,
-           "Type: %x, display: %p, resourceid: %lx, serial: %lx\n",
-           event->type, event->display, event->resourceid, event->serial);
-    mp_msg(MSGT_VO, MSGL_V,
-           "Error code: %x, request code: %x, minor code: %x\n",
-           event->error_code, event->request_code, event->minor_code);
-
-//    abort();
-    return 0;
-}
-
 struct fstype {
     int type;
     const char *sym;
@@ -477,8 +458,6 @@ int vo_x11_init(struct vo *vo)
     };
     vo->x11 = x11;
 
-    XSetErrorHandler(x11_errorhandler);
-
     dispName = XDisplayName(NULL);
 
     MP_VERBOSE(x11, "X11 opening display: %s\n", dispName);
@@ -710,7 +689,6 @@ void vo_x11_uninit(struct vo *vo)
     MP_VERBOSE(x11, "uninit ...\n");
     if (x11->xim)
         XCloseIM(x11->xim);
-    XSetErrorHandler(NULL);
     XCloseDisplay(x11->display);
 
     talloc_free(x11);
