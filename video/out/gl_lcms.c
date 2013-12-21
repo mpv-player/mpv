@@ -87,7 +87,7 @@ static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
                                 const char *msg)
 {
     if (lcms2_dumb_crap)
-        mp_msg_log(lcms2_dumb_crap, MSGL_ERR, "lcms2: %s\n", msg);
+        mp_msg(lcms2_dumb_crap, MSGL_ERR, "lcms2: %s\n", msg);
 }
 
 static struct bstr load_file(void *talloc_ctx, const char *filename,
@@ -121,7 +121,7 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
     struct lut3d *lut = NULL;
     bool locked = false;
 
-    mp_msg_log(log, MSGL_INFO, "Opening ICC profile '%s'\n", opts->profile);
+    mp_msg(log, MSGL_INFO, "Opening ICC profile '%s'\n", opts->profile);
     struct bstr iccdata = load_file(tmp, opts->profile, global);
     if (!iccdata.len)
         goto error_exit;
@@ -131,7 +131,7 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
 
     // check cache
     if (opts->cache) {
-        mp_msg_log(log, MSGL_INFO, "Opening 3D LUT cache in file '%s'.\n",
+        mp_msg(log, MSGL_INFO, "Opening 3D LUT cache in file '%s'.\n",
                    opts->cache);
         struct bstr cachedata = load_file(tmp, opts->cache, global);
         if (bstr_eatstart(&cachedata, bstr0(LUT3D_CACHE_HEADER))
@@ -142,7 +142,7 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
             memcpy(output, cachedata.start, cachedata.len);
             goto done;
         } else {
-            mp_msg_log(log, MSGL_WARN, "3D LUT cache invalid!\n");
+            mp_msg(log, MSGL_WARN, "3D LUT cache invalid!\n");
         }
     }
 
@@ -219,7 +219,7 @@ error_exit:
     }
 
     if (!lut)
-        mp_msg_log(log, MSGL_FATAL, "Error loading ICC profile.\n");
+        mp_msg(log, MSGL_FATAL, "Error loading ICC profile.\n");
 
     talloc_free(tmp);
     return lut;
@@ -236,7 +236,7 @@ const struct m_sub_options mp_icc_conf = {
 struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
                           struct mpv_global *global)
 {
-    mp_msg_log(log, MSGL_FATAL, "LCMS2 support not compiled.\n");
+    mp_msg(log, MSGL_FATAL, "LCMS2 support not compiled.\n");
     return NULL;
 }
 

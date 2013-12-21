@@ -219,9 +219,9 @@ static void message_callback(int level, const char *format, va_list va, void *ct
     if (!log)
         return;
     level = map_ass_level[level];
-    mp_msg_log_va(log, level, format, va);
+    mp_msg_va(log, level, format, va);
     // libass messages lack trailing \n
-    mp_msg_log(log, level, "\n");
+    mp_msg(log, level, "\n");
 }
 
 ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log)

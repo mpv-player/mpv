@@ -287,10 +287,10 @@ static int script_log(lua_State *L)
         const char *s = lua_tostring(L, -1);
         if (s == NULL)
             return luaL_error(L, "Invalid argument");
-        mp_msg_log(ctx->log, msgl, "%s%s", s, i > 0 ? " " : "");
+        mp_msg(ctx->log, msgl, "%s%s", s, i > 0 ? " " : "");
         lua_pop(L, 1);  // args... tostring
     }
-    mp_msg_log(ctx->log, msgl, "\n");
+    mp_msg(ctx->log, msgl, "\n");
 
     return 0;
 }

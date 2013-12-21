@@ -118,7 +118,7 @@ int ai_alsa_setup(audio_in_t *ai)
 	return -1;
     }
 
-    if (mp_msg_test_log(ai->log, MSGL_V)) {
+    if (mp_msg_test(ai->log, MSGL_V)) {
 	snd_pcm_dump(ai->alsa.handle, ai->alsa.log);
     }
 
@@ -181,7 +181,7 @@ int ai_alsa_xrun(audio_in_t *ai)
 	timersub(&now, &tstamp, &diff);
 	MP_ERR(ai, "ALSA xrun!!! (at least %.3f ms long)\n",
 	       diff.tv_sec * 1000 + diff.tv_usec / 1000.0);
-	if (mp_msg_test_log(ai->log, MSGL_V)) {
+	if (mp_msg_test(ai->log, MSGL_V)) {
 	    MP_ERR(ai, "ALSA Status:\n");
 	    snd_pcm_status_dump(status, ai->alsa.log);
 	}

@@ -57,7 +57,7 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
     if (code == noErr) return true;
 
     char *error_string = fourcc_repr(NULL, code);
-    mp_msg_log(ao->log, level, "%s (%s)\n", message, error_string);
+    mp_msg(ao->log, level, "%s (%s)\n", message, error_string);
     talloc_free(error_string);
 
     return false;

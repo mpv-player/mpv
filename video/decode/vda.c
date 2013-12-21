@@ -78,12 +78,12 @@ static void print_vda_error(struct mp_log *log, int lev, char *message,
 {
     for (int n = 0; vda_errors[n].code < 0; n++)
         if (vda_errors[n].code == error_code) {
-            mp_msg_log(log, lev, "%s: %s (%d)\n",
+            mp_msg(log, lev, "%s: %s (%d)\n",
                        message, vda_errors[n].reason, error_code);
             return;
         }
 
-    mp_msg_log(log, lev, "%s: %d\n", message, error_code);
+    mp_msg(log, lev, "%s: %d\n", message, error_code);
 }
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,

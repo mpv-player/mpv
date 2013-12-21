@@ -1464,7 +1464,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
     mp_cmd_t *ret = mp_input_parse_cmd(ictx, bstr0(cmd->cmd), cmd->location);
     if (ret) {
         ret->input_section = cmd->owner->section;
-        if (mp_msg_test_log(ictx->log, MSGL_DEBUG)) {
+        if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
             char *keyname = get_key_combo_name(keys, n);
             MP_DBG(ictx, "key '%s' -> '%s' in '%s'\n",
                    keyname, cmd->cmd, ret->input_section);
@@ -1578,7 +1578,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
     if (unmod >= 32 && unmod < MP_KEY_BASE)
         code &= ~MP_KEY_MODIFIER_SHIFT;
 
-    if (mp_msg_test_log(ictx->log, MSGL_DEBUG)) {
+    if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
         int noflags = code & ~(MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
         char *key = get_key_name(noflags, NULL);
         MP_DBG(ictx, "key code=%#x '%s'%s%s\n",

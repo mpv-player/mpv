@@ -52,25 +52,25 @@ enum {
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
                           const char *name);
 
-void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
+void mp_msg(struct mp_log *log, int lev, const char *format, ...)
     PRINTF_ATTRIBUTE(3, 4);
-void mp_msg_log_va(struct mp_log *log, int lev, const char *format, va_list va);
+void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va);
 
-bool mp_msg_test_log(struct mp_log *log, int lev);
+bool mp_msg_test(struct mp_log *log, int lev);
 
 // Convenience macros.
-#define mp_fatal(log, ...)      mp_msg_log(log, MSGL_FATAL, __VA_ARGS__)
-#define mp_err(log, ...)        mp_msg_log(log, MSGL_ERR, __VA_ARGS__)
-#define mp_warn(log, ...)       mp_msg_log(log, MSGL_WARN, __VA_ARGS__)
-#define mp_info(log, ...)       mp_msg_log(log, MSGL_INFO, __VA_ARGS__)
-#define mp_verbose(log, ...)    mp_msg_log(log, MSGL_V, __VA_ARGS__)
-#define mp_dbg(log, ...)        mp_msg_log(log, MSGL_DEBUG, __VA_ARGS__)
-#define mp_trace(log, ...)      mp_msg_log(log, MSGL_TRACE, __VA_ARGS__)
+#define mp_fatal(log, ...)      mp_msg(log, MSGL_FATAL, __VA_ARGS__)
+#define mp_err(log, ...)        mp_msg(log, MSGL_ERR, __VA_ARGS__)
+#define mp_warn(log, ...)       mp_msg(log, MSGL_WARN, __VA_ARGS__)
+#define mp_info(log, ...)       mp_msg(log, MSGL_INFO, __VA_ARGS__)
+#define mp_verbose(log, ...)    mp_msg(log, MSGL_V, __VA_ARGS__)
+#define mp_dbg(log, ...)        mp_msg(log, MSGL_DEBUG, __VA_ARGS__)
+#define mp_trace(log, ...)      mp_msg(log, MSGL_TRACE, __VA_ARGS__)
 
 // Convenience macros, typically called with a pointer to a context struct
 // as first argument, which has a "struct mp_log log;" member.
 
-#define MP_MSG(obj, lev, ...)   mp_msg_log((obj)->log, lev, __VA_ARGS__)
+#define MP_MSG(obj, lev, ...)   mp_msg((obj)->log, lev, __VA_ARGS__)
 
 #define MP_FATAL(obj, ...)      MP_MSG(obj, MSGL_FATAL, __VA_ARGS__)
 #define MP_ERR(obj, ...)        MP_MSG(obj, MSGL_ERR, __VA_ARGS__)

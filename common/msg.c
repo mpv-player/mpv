@@ -115,7 +115,7 @@ static void update_loglevel(struct mp_log *log)
 }
 
 // Return whether the message at this verbosity level would be actually printed.
-bool mp_msg_test_log(struct mp_log *log, int lev)
+bool mp_msg_test(struct mp_log *log, int lev)
 {
     if (mp_msg_mute || !log->root)
         return false;
@@ -142,9 +142,9 @@ static void set_msg_color(FILE* stream, int lev)
         terminal_set_foreground_color(stream, v_colors[lev]);
 }
 
-void mp_msg_log_va(struct mp_log *log, int lev, const char *format, va_list va)
+void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 {
-    if (!mp_msg_test_log(log, lev))
+    if (!mp_msg_test(log, lev))
         return; // do not display
 
     pthread_mutex_lock(&mp_msg_lock);
@@ -258,11 +258,11 @@ void mp_msg_uninit(struct mpv_global *global)
     global->log = NULL;
 }
 
-void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
+void mp_msg(struct mp_log *log, int lev, const char *format, ...)
 {
     va_list va;
     va_start(va, format);
-    mp_msg_log_va(log, lev, format, va);
+    mp_msg_va(log, lev, format, va);
     va_end(va);
 }
 

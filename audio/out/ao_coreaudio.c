@@ -271,7 +271,7 @@ static int init(struct ao *ao)
         selected_device = p->opt_device_id;
     }
 
-    if (mp_msg_test_log(ao->log, MSGL_V)) {
+    if (mp_msg_test(ao->log, MSGL_V)) {
         char *name;
         err = CA_GET_STR(selected_device, kAudioObjectPropertyName, &name);
         CHECK_CA_ERROR("could not get selected audio device name");

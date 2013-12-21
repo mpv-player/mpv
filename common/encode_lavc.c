@@ -1046,7 +1046,7 @@ void encode_lavc_fail(struct encode_lavc_context *ctx, const char *format, ...)
 {
     va_list va;
     va_start(va, format);
-    mp_msg_log_va(ctx->log, MSGL_ERR, format, va);
+    mp_msg_va(ctx->log, MSGL_ERR, format, va);
     if (ctx->failed)
         return;
     ctx->failed = true;

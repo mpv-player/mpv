@@ -67,8 +67,8 @@ void glCheckError(GL *gl, struct mp_log *log, const char *info)
         GLenum error = gl->GetError();
         if (error == GL_NO_ERROR)
             break;
-        mp_msg_log(log, MSGL_ERR, "%s: OpenGL error %s.\n", info,
-                   gl_error_to_string(error));
+        mp_msg(log, MSGL_ERR, "%s: OpenGL error %s.\n", info,
+               gl_error_to_string(error));
     }
 }
 
@@ -123,9 +123,9 @@ static void list_features(int set, struct mp_log *log, int msgl, bool invert)
 {
     for (const struct feature *f = &features[0]; f->id; f++) {
         if (invert == !(f->id & set))
-            mp_msg_log(log, msgl, " [%s]", f->name);
+            mp_msg(log, msgl, " [%s]", f->name);
     }
-    mp_msg_log(log, msgl, "\n");
+    mp_msg(log, msgl, "\n");
 }
 
 // This guesses if the current GL context is a suspected software renderer.
@@ -506,12 +506,12 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     const char *version = gl->GetString(GL_VERSION);
     sscanf(version, "%d.%d", &major, &minor);
     gl->version = MPGL_VER(major, minor);
-    mp_msg_log(log, MSGL_V, "Detected OpenGL %d.%d.\n", major, minor);
+    mp_msg(log, MSGL_V, "Detected OpenGL %d.%d.\n", major, minor);
 
-    mp_msg_log(log, MSGL_V, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
-    mp_msg_log(log, MSGL_V, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
-    mp_msg_log(log, MSGL_V, "GL_VERSION='%s'\n",  gl->GetString(GL_VERSION));
-    mp_msg_log(log, MSGL_V, "GL_SHADING_LANGUAGE_VERSION='%s'\n",
+    mp_msg(log, MSGL_V, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
+    mp_msg(log, MSGL_V, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
+    mp_msg(log, MSGL_V, "GL_VERSION='%s'\n",  gl->GetString(GL_VERSION));
+    mp_msg(log, MSGL_V, "GL_SHADING_LANGUAGE_VERSION='%s'\n",
                             gl->GetString(GL_SHADING_LANGUAGE_VERSION));
 
     // Note: This code doesn't handle CONTEXT_FORWARD_COMPATIBLE_BIT_ARB
@@ -548,9 +548,9 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     }
 
     if (has_legacy)
-        mp_msg_log(log, MSGL_V, "OpenGL legacy compat. found.\n");
-    mp_msg_log(log, MSGL_DEBUG, "Combined OpenGL extensions string:\n%s\n",
-               gl->extensions);
+        mp_msg(log, MSGL_V, "OpenGL legacy compat. found.\n");
+    mp_msg(log, MSGL_DEBUG, "Combined OpenGL extensions string:\n%s\n",
+           gl->extensions);
 
     for (int n = 0; n < sizeof(gl_functions) / sizeof(gl_functions[0]); n++) {
         struct gl_functions *section = &gl_functions[n];
@@ -594,11 +594,11 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
             if (!ptr) {
                 all_loaded = false;
                 if (!section->partial_ok) {
-                    mp_msg_log(log, MSGL_V, "Required function '%s' not "
-                               "found for %s/%d.%d.\n", fn->funcnames[0],
-                               section->extension ? section->extension : "native",
-                               MPGL_VER_GET_MAJOR(section->ver_core),
-                               MPGL_VER_GET_MINOR(section->ver_core));
+                    mp_msg(log, MSGL_V, "Required function '%s' not "
+                           "found for %s/%d.%d.\n", fn->funcnames[0],
+                           section->extension ? section->extension : "native",
+                           MPGL_VER_GET_MAJOR(section->ver_core),
+                           MPGL_VER_GET_MINOR(section->ver_core));
                     break;
                 }
             }
@@ -632,7 +632,7 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     if (!is_software_gl(gl))
         gl->mpgl_caps |= MPGL_CAP_NO_SW;
 
-    mp_msg_log(log, MSGL_V, "Detected OpenGL features:");
+    mp_msg(log, MSGL_V, "Detected OpenGL features:");
     list_features(gl->mpgl_caps, log, MSGL_V, false);
 }
 
@@ -1031,7 +1031,7 @@ void mp_log_source(struct mp_log *log, int lev, const char *src)
         const char *next = end + 1;
         if (!end)
             next = end = src + strlen(src);
-        mp_msg_log(log, lev, "[%3d] %.*s\n", line, (int)(end - src), src);
+        mp_msg(log, lev, "[%3d] %.*s\n", line, (int)(end - src), src);
         line++;
         src = next;
     }

@@ -134,12 +134,12 @@ static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
 
     struct mp_log *log = get_av_log(ptr);
 
-    if (mp_msg_test_log(log, mp_level)) {
+    if (mp_msg_test(log, mp_level)) {
         if (log_print_prefix)
-            mp_msg_log(log, mp_level, "%s: ", avc ? avc->item_name(ptr) : "?");
+            mp_msg(log, mp_level, "%s: ", avc ? avc->item_name(ptr) : "?");
         log_print_prefix = fmt[strlen(fmt) - 1] == '\n';
 
-        mp_msg_log_va(log, mp_level, fmt, vl);
+        mp_msg_va(log, mp_level, fmt, vl);
     }
 
     pthread_mutex_unlock(&log_lock);
@@ -184,16 +184,16 @@ void uninit_libav(struct mpv_global *global)
 static void print_version(struct mp_log *log, int v, char *name,
                           unsigned buildv, unsigned runv)
 {
-    mp_msg_log(log, v, "   %-15s %d.%d.%d", name, V(buildv));
+    mp_msg(log, v, "   %-15s %d.%d.%d", name, V(buildv));
     if (buildv != runv)
-        mp_msg_log(log, v, " (runtime %d.%d.%d)", V(runv));
-    mp_msg_log(log, v, "\n");
+        mp_msg(log, v, " (runtime %d.%d.%d)", V(runv));
+    mp_msg(log, v, "\n");
 }
 #undef V
 
 void print_libav_versions(struct mp_log *log, int v)
 {
-    mp_msg_log(log, v, "%s library versions:\n", LIB_PREFIX);
+    mp_msg(log, v, "%s library versions:\n", LIB_PREFIX);
 
     print_version(log, v, "libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version());
     print_version(log, v, "libavcodec",    LIBAVCODEC_VERSION_INT,    avcodec_version());

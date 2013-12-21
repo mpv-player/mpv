@@ -97,10 +97,10 @@ const char mp_help_text[] =
 void mp_print_version(struct mp_log *log, int always)
 {
     int v = always ? MSGL_INFO : MSGL_V;
-    mp_msg_log(log, v,
+    mp_msg(log, v,
            "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
     print_libav_versions(log, v);
-    mp_msg_log(log, v, "\n");
+    mp_msg(log, v, "\n");
 }
 
 static MP_NORETURN void exit_player(struct MPContext *mpctx,

@@ -811,7 +811,7 @@ static int open_s(stream_t *stream, int mode)
       return STREAM_UNSUPPORTED;
     }
     tt_srpt = vmg_file->tt_srpt;
-    if (mp_msg_test_log(stream->log, MSGL_SMODE))
+    if (mp_msg_test(stream->log, MSGL_SMODE))
     {
       int title_no; ///< title number
       MP_SMODE(stream, "ID_DVD_TITLES=%d\n", tt_srpt->nr_of_srpts);
@@ -821,7 +821,7 @@ static int open_s(stream_t *stream, int mode)
         MP_SMODE(stream, "ID_DVD_TITLE_%d_ANGLES=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_angles);
       }
     }
-    if (mp_msg_test_log(stream->log, MSGL_SMODE))
+    if (mp_msg_test(stream->log, MSGL_SMODE))
     {
       char volid[32];
       unsigned char discid [16]; ///< disk ID, a 128 bit MD5 sum

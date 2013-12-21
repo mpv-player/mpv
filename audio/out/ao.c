@@ -130,7 +130,7 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     struct mp_log *log = mp_log_new(NULL, global->log, "ao");
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &ao_obj_list, bstr0(name))) {
-        mp_msg_log(log, MSGL_ERR, "Audio output %s not found!\n", name);
+        mp_msg(log, MSGL_ERR, "Audio output %s not found!\n", name);
         talloc_free(log);
         return NULL;
     };

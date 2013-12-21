@@ -560,13 +560,13 @@ static struct playlist *do_parse(struct stream* stream, bool forced,
   if(success)
     mp_verbose(log, "Playlist successfully parsed\n");
   else {
-    mp_msg_log(log,((forced==1)?MSGL_ERR:MSGL_V),"Error while parsing playlist\n");
+    mp_msg(log,((forced==1)?MSGL_ERR:MSGL_V),"Error while parsing playlist\n");
     talloc_free(p.pl);
     p.pl = NULL;
   }
 
   if (p.pl && !p.pl->first)
-    mp_msg_log(log, ((forced==1)?MSGL_WARN:MSGL_V),"Warning: empty playlist\n");
+    mp_msg(log, ((forced==1)?MSGL_WARN:MSGL_V),"Warning: empty playlist\n");
 
   return p.pl;
 }
