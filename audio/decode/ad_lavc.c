@@ -144,7 +144,7 @@ static int setup_format(struct dec_audio *da)
         // If not set, try container samplerate.
         // (Maybe this can't happen, and it's an artifact from the past.)
         da->decoded.rate = sh_audio->wf->nSamplesPerSec;
-        mp_msg(MSGT_DECAUDIO, MSGL_WARN, "ad_lavc: using container rate.\n");
+        MP_WARN(da, "using container rate.\n");
     }
 
     struct mp_chmap lavc_chmap;
@@ -198,8 +198,7 @@ static int init(struct dec_audio *da, const char *decoder)
 
     lavc_codec = avcodec_find_decoder_by_name(decoder);
     if (!lavc_codec) {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-                "Cannot find codec '%s' in libavcodec...\n", decoder);
+        MP_ERR(da, "Cannot find codec '%s' in libavcodec...\n", decoder);
         uninit(da);
         return 0;
     }
@@ -225,8 +224,7 @@ static int init(struct dec_audio *da, const char *decoder)
 
     if (opts->avopt) {
         if (parse_avopts(lavc_context, opts->avopt) < 0) {
-            mp_msg(MSGT_DECVIDEO, MSGL_ERR,
-                   "ad_lavc: setting AVOptions '%s' failed.\n", opts->avopt);
+            MP_ERR(da, "setting AVOptions '%s' failed.\n", opts->avopt);
             uninit(da);
             return 0;
         }
@@ -257,24 +255,22 @@ static int init(struct dec_audio *da, const char *decoder)
 
     /* open it */
     if (avcodec_open2(lavc_context, lavc_codec, NULL) < 0) {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Could not open codec.\n");
+        MP_ERR(da, "Could not open codec.\n");
         uninit(da);
         return 0;
     }
-    mp_msg(MSGT_DECAUDIO, MSGL_V, "INFO: libavcodec \"%s\" init OK!\n",
+    MP_VERBOSE(da, "INFO: libavcodec \"%s\" init OK!\n",
            lavc_codec->name);
 
     // Decode at least 1 sample:  (to get header filled)
     for (int tries = 1; ; tries++) {
         int x = decode_new_packet(da);
         if (x >= 0 && ctx->frame.samples > 0) {
-            mp_msg(MSGT_DECAUDIO, MSGL_V,
-                   "Initial decode succeeded after %d packets.\n", tries);
+            MP_VERBOSE(da, "Initial decode succeeded after %d packets.\n", tries);
             break;
         }
         if (tries >= 50) {
-            mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-                   "ad_lavc: initial decode failed\n");
+            MP_ERR(da, "initial decode failed\n");
             uninit(da);
             return 0;
         }
@@ -296,7 +292,7 @@ static void uninit(struct dec_audio *da)
 
     if (lavc_context) {
         if (avcodec_close(lavc_context) < 0)
-            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
+            MP_ERR(da, "Could not close codec.\n");
         av_freep(&lavc_context->extradata);
         av_freep(&lavc_context);
     }
@@ -361,7 +357,7 @@ static int decode_new_packet(struct dec_audio *da)
             return 0;
     }
     if (ret < 0) {
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "lavc_audio: error\n");
+        MP_VERBOSE(da, "lavc_audio: error\n");
         return -1;
     }
     if (!got_frame)
@@ -381,7 +377,7 @@ static int decode_new_packet(struct dec_audio *da)
         da->pts_offset = 0;
     }
 
-    mp_msg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d samples\n", in_len,
+    MP_DBG(da, "Decoded %d -> %d samples\n", in_len,
            priv->frame.samples);
     return 0;
 }

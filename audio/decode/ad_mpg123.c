@@ -115,10 +115,10 @@ static int preinit(struct dec_audio *da)
 
   bad_end:
     if (!con->handle)
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 preinit error: %s\n",
+        MP_ERR(da, "mpg123 preinit error: %s\n",
                mpg123_plain_strerror(err));
     else
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 preinit error: %s\n",
+        MP_ERR(da, "mpg123 preinit error: %s\n",
                mpg123_strerror(con->handle));
 
     uninit(da);
@@ -156,8 +156,7 @@ static int set_format(struct dec_audio *da)
         int af = mpg123_format_to_af(encoding);
         if (!af) {
             /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */
-            mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-                   "Bad encoding from mpg123: %i.\n", encoding);
+            MP_ERR(da, "Bad encoding from mpg123: %i.\n", encoding);
             return MPG123_ERR;
         }
         mp_audio_set_format(&da->decoded, af);
@@ -236,9 +235,9 @@ static int init(struct dec_audio *da, const char *decoder)
 
 fail:
     if (ret == MPG123_NEED_MORE) {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Could not find mp3 stream.\n");
+        MP_ERR(da, "Could not find mp3 stream.\n");
     } else {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 init error: %s\n",
+        MP_ERR(da, "mpg123 init error: %s\n",
                mpg123_strerror(con->handle));
     }
 
@@ -337,7 +336,7 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
     return 0;
 
 mpg123_fail:
-    mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 decoding error: %s\n",
+    MP_ERR(da, "mpg123 decoding error: %s\n",
            mpg123_strerror(con->handle));
     return -1;
 }
@@ -351,8 +350,7 @@ static int control(struct dec_audio *da, int cmd, void *arg)
         mpg123_close(con->handle);
 
         if (mpg123_open_feed(con->handle) != MPG123_OK) {
-            mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-                   "mpg123 failed to reopen stream: %s\n",
+            MP_ERR(da, "mpg123 failed to reopen stream: %s\n",
                    mpg123_strerror(con->handle));
             return CONTROL_FALSE;
         }

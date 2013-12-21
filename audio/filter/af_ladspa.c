@@ -137,7 +137,8 @@ struct af_info af_info_ladspa = {
  *          configuration. Else, it returns AF_ERROR.
  */
 
-static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
+static int af_ladspa_parse_plugin(struct af_instance *af) {
+    af_ladspa_t *setup = af->priv;
     int p, i;
     const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
     LADSPA_PortDescriptor d;
@@ -217,30 +218,30 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
     }
 
     if (setup->ninputs == 0) {
-        mp_msg(MSGT_AFILTER, MSGL_WARN, "%s: %s\n", setup->myname,
+        MP_WARN(af, "%s: %s\n", setup->myname,
                                                 _("WARNING! This LADSPA plugin has no audio inputs.\n  The incoming audio signal will be lost."));
     } else if (setup->ninputs == 1) {
-        mp_msg(MSGT_AFILTER, MSGL_V, "%s: this is a mono effect\n", setup->myname);
+        MP_VERBOSE(af, "%s: this is a mono effect\n", setup->myname);
     } else if (setup->ninputs == 2) {
-        mp_msg(MSGT_AFILTER, MSGL_V, "%s: this is a stereo effect\n", setup->myname);
+        MP_VERBOSE(af, "%s: this is a stereo effect\n", setup->myname);
     } else {
-        mp_msg(MSGT_AFILTER, MSGL_V, "%s: this is a %i-channel effect, "
+        MP_VERBOSE(af, "%s: this is a %i-channel effect, "
                "support is experimental\n", setup->myname, setup->ninputs);
     }
 
     if (setup->noutputs == 0) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
+        MP_ERR(af, "%s: %s\n", setup->myname,
                                                 _("This LADSPA plugin has no audio outputs."));
         return AF_ERROR;
     }
 
     if (setup->noutputs != setup->ninputs ) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
+        MP_ERR(af, "%s: %s\n", setup->myname,
                                                 _("The number of audio inputs and audio outputs of the LADSPA plugin differ."));
         return AF_ERROR;
     }
 
-    mp_msg(MSGT_AFILTER, MSGL_V, "%s: this plugin has %d input control(s)\n",
+    MP_VERBOSE(af, "%s: this plugin has %d input control(s)\n",
                                         setup->myname, setup->ninputcontrols);
 
     /* Print list of controls and its range of values it accepts */
@@ -248,18 +249,18 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
     for (i=0; i<setup->ninputcontrols; i++) {
         p = setup->inputcontrolsmap[i];
         hint = pdes->PortRangeHints[p];
-        mp_msg(MSGT_AFILTER, MSGL_V, "  --- %d %s [", i, pdes->PortNames[p]);
+        MP_VERBOSE(af, "  --- %d %s [", i, pdes->PortNames[p]);
 
         if (LADSPA_IS_HINT_BOUNDED_BELOW(hint.HintDescriptor)) {
-            mp_msg(MSGT_AFILTER, MSGL_V, "%0.2f , ", hint.LowerBound);
+            MP_VERBOSE(af, "%0.2f , ", hint.LowerBound);
         } else {
-            mp_msg(MSGT_AFILTER, MSGL_V, "... , ");
+            MP_VERBOSE(af, "... , ");
         }
 
         if (LADSPA_IS_HINT_BOUNDED_ABOVE(hint.HintDescriptor)) {
-            mp_msg(MSGT_AFILTER, MSGL_V, "%0.2f]\n", hint.UpperBound);
+            MP_VERBOSE(af, "%0.2f]\n", hint.UpperBound);
         } else {
-            mp_msg(MSGT_AFILTER, MSGL_V, "...]\n");
+            MP_VERBOSE(af, "...]\n");
         }
 
     }
@@ -305,9 +306,9 @@ static void* mydlopen(const char *filename, int flag) {
     /* For Windows there's only absolute path support.
      * If you have a Windows machine, feel free to fix this.
      * (path separator, shared objects extension, et cetera). */
-        mp_msg(MSGT_AFILTER, MSGL_V, "\ton windows, only absolute pathnames "
+        MP_VERBOSE(af, "\ton windows, only absolute pathnames "
                 "are supported\n");
-        mp_msg(MSGT_AFILTER, MSGL_V, "\ttrying %s\n", filename);
+        MP_VERBOSE(af, "\ttrying %s\n", filename);
         return dlopen(filename, flag);
 #endif
 
@@ -348,7 +349,6 @@ static void* mydlopen(const char *filename, int flag) {
                 }
             strcpy(buf+needslash+(end-start), filename);
 
-            mp_msg(MSGT_AFILTER, MSGL_V, "\ttrying %s\n", buf);
             result=dlopen(buf, flag);
 
             free(buf);
@@ -362,7 +362,6 @@ static void* mydlopen(const char *filename, int flag) {
     } /* end if there's a ladspapath */
 
     /* last resort, just open it again, so the dlerror() message is correct */
-    mp_msg(MSGT_AFILTER, MSGL_V, "\ttrying %s\n", filename);
     return dlopen(filename,flag);
 }
 
@@ -383,24 +382,25 @@ static void* mydlopen(const char *filename, int flag) {
  * \return  Either AF_ERROR or AF_OK, depending on the success of the operation.
  */
 
-static int af_ladspa_load_plugin(af_ladspa_t *setup) {
+static int af_ladspa_load_plugin(struct af_instance *af) {
+    af_ladspa_t *setup = af->priv;
     const LADSPA_Descriptor *ladspa_descriptor;
     LADSPA_Descriptor_Function descriptor_function;
     int i;
 
     /* load library */
-    mp_msg(MSGT_AFILTER, MSGL_V, "%s: loading ladspa plugin library %s\n",
+    MP_VERBOSE(af, "%s: loading ladspa plugin library %s\n",
                                                 setup->myname, setup->file);
 
     setup->libhandle = mydlopen(setup->file, RTLD_NOW);
 
     if (!setup->libhandle) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s %s\n\t%s\n", setup->myname,
+        MP_ERR(af, "%s: %s %s\n\t%s\n", setup->myname,
                     _("failed to load"), setup->file, dlerror() );
         return AF_ERROR;
     }
 
-    mp_msg(MSGT_AFILTER, MSGL_V, "%s: library found.\n", setup->myname);
+    MP_VERBOSE(af, "%s: library found.\n", setup->myname);
 
     /* find descriptor function */
     dlerror();
@@ -408,7 +408,7 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
                                                         "ladspa_descriptor");
 
     if (!descriptor_function) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n\t%s\n", setup->myname,
+        MP_ERR(af, "%s: %s\n\t%s\n", setup->myname,
                                 _("Couldn't find ladspa_descriptor() function in the specified library file."), dlerror());
         return AF_ERROR;
     }
@@ -416,33 +416,33 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
     /* if label == help, list all labels in library and exit */
 
     if (strcmp(setup->label, "help") == 0) {
-        mp_msg(MSGT_AFILTER, MSGL_INFO, "%s: %s %s:\n", setup->myname,
+        MP_INFO(af, "%s: %s %s:\n", setup->myname,
                 _("available labels in"), setup->file);
         for (i=0; ; i++) {
             ladspa_descriptor = descriptor_function(i);
             if (ladspa_descriptor == NULL) {
                 return AF_ERROR;
             }
-            mp_msg(MSGT_AFILTER, MSGL_INFO, "  %-16s - %s (%lu)\n",
+            MP_INFO(af, "  %-16s - %s (%lu)\n",
                     ladspa_descriptor->Label,
                     ladspa_descriptor->Name,
                     ladspa_descriptor->UniqueID);
         }
     }
 
-    mp_msg(MSGT_AFILTER, MSGL_V, "%s: looking for label\n", setup->myname);
+    MP_VERBOSE(af, "%s: looking for label\n", setup->myname);
 
     /* find label in library */
     for (i=0; ; i++) {
         ladspa_descriptor = descriptor_function(i);
         if (ladspa_descriptor == NULL) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
+            MP_ERR(af, "%s: %s\n", setup->myname,
                                             _("Couldn't find label in plugin library."));
             return AF_ERROR;
         }
         if (strcmp(ladspa_descriptor->Label, setup->label) == 0) {
             setup->plugin_descriptor = ladspa_descriptor;
-            mp_msg(MSGT_AFILTER, MSGL_V, "%s: %s found\n", setup->myname,
+            MP_VERBOSE(af, "%s: %s found\n", setup->myname,
                                                                 setup->label);
             return AF_OK;
         }
@@ -463,7 +463,6 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
  */
 
 static int af_ladspa_malloc_failed(char *myname) {
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s", myname, "Memory allocation failed.\n");
     return AF_ERROR;
 }
 
@@ -489,7 +488,7 @@ static int control(struct af_instance *af, int cmd, void *arg) {
 
     switch(cmd) {
     case AF_CONTROL_REINIT:
-        mp_msg(MSGT_AFILTER, MSGL_V, "%s: (re)init\n", setup->myname);
+        MP_VERBOSE(af, "%s: (re)init\n", setup->myname);
 
         if (!arg) return AF_ERROR;
 
@@ -520,7 +519,7 @@ static void uninit(struct af_instance *af) {
         const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
 
         if (setup->myname) {
-            mp_msg(MSGT_AFILTER, MSGL_V, "%s: cleaning up\n", setup->myname);
+            MP_VERBOSE(af, "%s: cleaning up\n", setup->myname);
             free(setup->myname);
         }
 
@@ -589,7 +588,7 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags) {
          */
 
         if (setup->nch != 0) {
-            mp_msg(MSGT_AFILTER, MSGL_DBG3, "%s: bufsize change; free old buffer\n",
+            MP_TRACE(af, "%s: bufsize change; free old buffer\n",
                                                                 setup->myname);
 
             if(setup->inbufs) {
@@ -610,7 +609,7 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags) {
         setup->inbufs = calloc(nch, sizeof(float*));
         setup->outbufs = calloc(nch, sizeof(float*));
 
-        mp_msg(MSGT_AFILTER, MSGL_DBG3, "%s: bufsize = %d\n",
+        MP_TRACE(af, "%s: bufsize = %d\n",
                                         setup->myname, setup->bufsize);
 
         for(i=0; i<nch; i++) {
@@ -752,13 +751,13 @@ static int af_open(struct af_instance *af) {
         return af_ladspa_malloc_failed((char*)af_info_ladspa.name);
 
     if (!setup->file || !setup->file[0]) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
+        MP_ERR(af, "%s: %s\n", setup->myname,
                                             _("No library file specified."));
         uninit(af);
         return AF_ERROR;
     }
     if (!setup->label || !setup->label[0]) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
+        MP_ERR(af, "%s: %s\n", setup->myname,
                                             _("No filter label specified."));
         uninit(af);
         return AF_ERROR;
@@ -773,11 +772,11 @@ static int af_open(struct af_instance *af) {
 
     /* load plugin :) */
 
-    if ( af_ladspa_load_plugin(setup) != AF_OK )
+    if ( af_ladspa_load_plugin(af) != AF_OK )
         return AF_ERROR;
 
     /* see what inputs, outputs and controls this plugin has */
-    if ( af_ladspa_parse_plugin(setup) != AF_OK )
+    if ( af_ladspa_parse_plugin(af) != AF_OK )
         return AF_ERROR;
 
     /* ninputcontrols is set by now, read control values from arg */
@@ -786,14 +785,14 @@ static int af_open(struct af_instance *af) {
     char *line = setup->controls;
     for (int i = 0; i < setup->ninputcontrols; i++) {
         if (!line || (i != 0 && *line != ',')) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
+            MP_ERR(af, "%s: %s\n", setup->myname,
                                     _("Not enough controls specified on the command line."));
             return AF_ERROR;
         }
         if (i != 0)
             line++;
         if (sscanf(line, "%f", &val) != 1) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
+            MP_ERR(af, "%s: %s\n", setup->myname,
                                     _("Not enough controls specified on the command line."));
             return AF_ERROR;
         }
@@ -801,16 +800,16 @@ static int af_open(struct af_instance *af) {
         line = strchr(line, ',');
     }
 
-    mp_msg(MSGT_AFILTER, MSGL_V, "%s: input controls: ", setup->myname);
+    MP_VERBOSE(af, "%s: input controls: ", setup->myname);
     for (int i = 0; i < setup->ninputcontrols; i++) {
-        mp_msg(MSGT_AFILTER, MSGL_V, "%0.4f ",
+        MP_VERBOSE(af, "%0.4f ",
                         setup->inputcontrols[setup->inputcontrolsmap[i]]);
     }
-    mp_msg(MSGT_AFILTER, MSGL_V, "\n");
+    MP_VERBOSE(af, "\n");
 
     /* check boundaries of inputcontrols */
 
-    mp_msg(MSGT_AFILTER, MSGL_V, "%s: checking boundaries of input controls\n",
+    MP_VERBOSE(af, "%s: checking boundaries of input controls\n",
                                                             setup->myname);
     for (int i = 0; i < setup->ninputcontrols; i++) {
         int p = setup->inputcontrolsmap[i];
@@ -820,18 +819,18 @@ static int af_open(struct af_instance *af) {
 
         if (LADSPA_IS_HINT_BOUNDED_BELOW(hint.HintDescriptor) &&
                 val < hint.LowerBound) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: Input control #%d is below lower boundary of %0.4f.\n",
+            MP_ERR(af, "%s: Input control #%d is below lower boundary of %0.4f.\n",
                                         setup->myname, i, hint.LowerBound);
             return AF_ERROR;
         }
         if (LADSPA_IS_HINT_BOUNDED_ABOVE(hint.HintDescriptor) &&
                 val > hint.UpperBound) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: Input control #%d is above upper boundary of %0.4f.\n",
+            MP_ERR(af, "%s: Input control #%d is above upper boundary of %0.4f.\n",
                                         setup->myname, i, hint.UpperBound);
             return AF_ERROR;
         }
     }
-    mp_msg(MSGT_AFILTER, MSGL_V, "%s: all controls have sane values\n",
+    MP_VERBOSE(af, "%s: all controls have sane values\n",
                                                             setup->myname);
 
     /* All is well! */

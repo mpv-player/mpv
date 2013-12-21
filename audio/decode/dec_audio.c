@@ -68,7 +68,7 @@ static const struct ad_functions * const ad_drivers[] = {
 static bool reinit_audio_buffer(struct dec_audio *da)
 {
     if (!mp_audio_config_valid(&da->decoded)) {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder did not specify audio "
+        MP_ERR(da, "Audio decoder did not specify audio "
                "format, or requested an unsupported configuration!\n");
         return false;
     }
@@ -80,7 +80,7 @@ static bool reinit_audio_buffer(struct dec_audio *da)
 static void uninit_decoder(struct dec_audio *d_audio)
 {
     if (d_audio->ad_driver) {
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "Uninit audio decoder.\n");
+        MP_VERBOSE(d_audio, "Uninit audio decoder.\n");
         d_audio->ad_driver->uninit(d_audio);
     }
     d_audio->ad_driver = NULL;
@@ -91,7 +91,7 @@ static void uninit_decoder(struct dec_audio *d_audio)
 static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
 {
     if (!d_audio->ad_driver->init(d_audio, decoder)) {
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "Audio decoder init failed.\n");
+        MP_VERBOSE(d_audio, "Audio decoder init failed.\n");
         d_audio->ad_driver = NULL;
         uninit_decoder(d_audio);
         return 0;
@@ -148,14 +148,14 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
         const struct ad_functions *driver = find_driver(sel->family);
         if (!driver)
             continue;
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "Opening audio decoder %s:%s\n",
-                sel->family, sel->decoder);
+        MP_VERBOSE(d_audio, "Opening audio decoder %s:%s\n",
+                   sel->family, sel->decoder);
         d_audio->ad_driver = driver;
         if (init_audio_codec(d_audio, sel->decoder)) {
             decoder = sel;
             break;
         }
-        mp_msg(MSGT_DECAUDIO, MSGL_WARN, "Audio decoder init failed for "
+        MP_WARN(d_audio, "Audio decoder init failed for "
                 "%s:%s\n", sel->family, sel->decoder);
     }
 
@@ -163,19 +163,16 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
         d_audio->decoder_desc =
             talloc_asprintf(d_audio, "%s [%s:%s]", decoder->desc, decoder->family,
                             decoder->decoder);
-        mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Selected audio codec: %s\n",
-               d_audio->decoder_desc);
-        mp_msg(MSGT_DECAUDIO, MSGL_V,
-               "AUDIO: %d Hz, %d ch, %s\n",
-               d_audio->decoded.rate, d_audio->decoded.channels.num,
-               af_fmt_to_str(d_audio->decoded.format));
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
-               d_audio->i_bps * 8, d_audio->decoded.rate,
-               d_audio->decoded.channels.num);
+        MP_INFO(d_audio, "Selected audio codec: %s\n",
+                d_audio->decoder_desc);
+        MP_VERBOSE(d_audio, "AUDIO: %d Hz, %d ch, %s\n",
+                   d_audio->decoded.rate, d_audio->decoded.channels.num,
+                   af_fmt_to_str(d_audio->decoded.format));
+        MP_SMODE(d_audio, "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
+                 d_audio->i_bps * 8, d_audio->decoded.rate,
+                 d_audio->decoded.channels.num);
     } else {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-               "Failed to initialize an audio decoder for codec '%s'.\n",
+        MP_ERR(d_audio, "Failed to initialize an audio decoder for codec '%s'.\n",
                d_audio->header->codec ? d_audio->header->codec : "<unknown>");
     }
 
@@ -188,7 +185,7 @@ void audio_uninit(struct dec_audio *d_audio)
     if (!d_audio)
         return;
     if (d_audio->afilter) {
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "Uninit audio filters...\n");
+        MP_VERBOSE(d_audio, "Uninit audio filters...\n");
         af_destroy(d_audio->afilter);
         d_audio->afilter = NULL;
     }
@@ -203,7 +200,7 @@ int audio_init_filters(struct dec_audio *d_audio, int in_samplerate,
                        int *out_format)
 {
     if (!d_audio->afilter)
-        d_audio->afilter = af_new(d_audio->opts);
+        d_audio->afilter = af_new(d_audio->global);
     struct af_stream *afs = d_audio->afilter;
 
     // input format: same as codec's output format:
@@ -218,8 +215,7 @@ int audio_init_filters(struct dec_audio *d_audio, int in_samplerate,
 
     char *s_from = mp_audio_config_to_str(&afs->input);
     char *s_to = mp_audio_config_to_str(&afs->output);
-    mp_msg(MSGT_DECAUDIO, MSGL_V,
-            "Building audio filter chain for %s -> %s...\n", s_from, s_to);
+    MP_VERBOSE(d_audio, "Building audio filter chain for %s -> %s...\n", s_from, s_to);
     talloc_free(s_from);
     talloc_free(s_to);
 

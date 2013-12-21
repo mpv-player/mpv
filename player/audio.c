@@ -114,6 +114,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->initialized_flags |= INITIALIZED_ACODEC;
         assert(!mpctx->d_audio);
         mpctx->d_audio = talloc_zero(NULL, struct dec_audio);
+        mpctx->d_audio->log = mp_log_new(mpctx->d_audio, mpctx->log, "!ad");
+        mpctx->d_audio->global = mpctx->global;
         mpctx->d_audio->opts = opts;
         mpctx->d_audio->header = sh;
         if (!audio_init_best_codec(mpctx->d_audio, opts->audio_decoders))

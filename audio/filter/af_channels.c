@@ -41,7 +41,8 @@ typedef struct af_channels_s{
 }af_channels_t;
 
 // Local function for copying data
-static void copy(void* in, void* out, int ins, int inos,int outs, int outos, int len, int bps)
+static void copy(struct af_instance *af, void* in, void* out,
+                 int ins, int inos,int outs, int outos, int len, int bps)
 {
   switch(bps){
   case 1:{
@@ -112,24 +113,25 @@ static void copy(void* in, void* out, int ins, int inos,int outs, int outos, int
     break;
   }
   default:
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] Unsupported number of bytes/sample: %i"
+    MP_ERR(af, "Unsupported number of bytes/sample: %i"
 	   " please report this error on the MPlayer mailing list. \n",bps);
   }
 }
 
 // Make sure the routes are sane
-static int check_routes(af_channels_t* s, int nin, int nout)
+static int check_routes(struct af_instance *af, int nin, int nout)
 {
+  af_channels_t* s = af->priv;
   int i;
   if((s->nr < 1) || (s->nr > AF_NCH)){
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] The number of routing pairs must be"
+    MP_ERR(af, "[channels] The number of routing pairs must be"
 	   " between 1 and %i. Current value is %i\n",AF_NCH,s->nr);
     return AF_ERROR;
   }
 
   for(i=0;i<s->nr;i++){
     if((s->route[i][FR] >= nin) || (s->route[i][TO] >= nout)){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] Invalid routing in pair nr. %i.\n", i);
+      MP_ERR(af, "[channels] Invalid routing in pair nr. %i.\n", i);
       return AF_ERROR;
     }
   }
@@ -174,7 +176,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     af->data->rate   = ((struct mp_audio*)arg)->rate;
     mp_audio_force_interleaved_format((struct mp_audio*)arg);
     mp_audio_set_format(af->data, ((struct mp_audio*)arg)->format);
-    return check_routes(s,((struct mp_audio*)arg)->nch,af->data->nch);
+    return check_routes(af,((struct mp_audio*)arg)->nch,af->data->nch);
   }
   return AF_UNKNOWN;
 }
@@ -192,9 +194,9 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
   // Reset unused channels
   memset(l->planes[0],0,mp_audio_psize(c) / c->nch * l->nch);
 
-  if(AF_OK == check_routes(s,c->nch,l->nch))
+  if(AF_OK == check_routes(af,c->nch,l->nch))
     for(i=0;i<s->nr;i++)
-      copy(c->planes[0],l->planes[0],c->nch,s->route[i][FR],
+      copy(af, c->planes[0],l->planes[0],c->nch,s->route[i][FR],
 	   l->nch,s->route[i][TO],mp_audio_psize(c),c->bps);
 
   // Set output data
@@ -218,12 +220,11 @@ static int af_open(struct af_instance* af){
         do {
             int n = 0;
             if (ch >= AF_NCH) {
-                mp_msg(MSGT_AFILTER, MSGL_FATAL,
-                       "[channels] Can't have more than %d routes.\n", AF_NCH);
+                MP_FATAL(af, "[channels] Can't have more than %d routes.\n", AF_NCH);
                 return AF_ERROR;
             }
             sscanf(cp, "%i-%i%n" ,&s->route[ch][FR], &s->route[ch][TO], &n);
-            mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Routing from channel %i to"
+            MP_VERBOSE(af, "[channels] Routing from channel %i to"
                 " channel %i\n",s->route[ch][FR],s->route[ch][TO]);
             cp = &cp[n];
             ch++;

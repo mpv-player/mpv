@@ -107,7 +107,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       s->K--;
 
     if(s->K != KM)
-      mp_msg(MSGT_AFILTER, MSGL_INFO, "[equalizer] Limiting the number of filters to"
+      MP_INFO(af, "[equalizer] Limiting the number of filters to"
 	     " %i due to low sample rate.\n",s->K);
 
     // Generate filter taps

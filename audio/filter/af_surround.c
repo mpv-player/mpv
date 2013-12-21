@@ -94,7 +94,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     struct mp_audio *in = arg;
     float fc;
     if (!mp_chmap_is_stereo(&in->channels)) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "[surround] Only stereo input is supported.\n");
+        MP_ERR(af, "[surround] Only stereo input is supported.\n");
         return AF_DETACH;
     }
 
@@ -105,7 +105,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Surround filer coefficients
     fc = 2.0 * 7000.0/(float)af->data->rate;
     if (-1 == af_filter_design_fir(L, s->w, &fc, LP|HAMMING, 0)){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[surround] Unable to design low-pass filter.\n");
+      MP_ERR(af, "[surround] Unable to design low-pass filter.\n");
       return AF_ERROR;
     }
 
@@ -116,7 +116,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     s->dl = calloc(LD,af->data->bps);
     s->dr = calloc(LD,af->data->bps);
     if((NULL == s->dl) || (NULL == s->dr))
-      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[delay] Out of memory\n");
+      MP_FATAL(af, "[delay] Out of memory\n");
 
     // Initialize delay queue index
     if(AF_OK != af_from_ms(1, &s->d, &s->wi, af->data->rate, 0.0, 1000.0))

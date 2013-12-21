@@ -30,6 +30,7 @@
 #include "common/msg.h"
 
 struct af_instance;
+struct mpv_global;
 
 // Number of channels
 #define AF_NCH MP_NUM_CHANNELS
@@ -57,6 +58,7 @@ struct af_info {
 // Linked list of audio filters
 struct af_instance {
     const struct af_info *info;
+    struct mp_log *log;
     int (*control)(struct af_instance *af, int cmd, void *arg);
     void (*uninit)(struct af_instance *af);
     /* flags is a bit mask of AF_FILTER_FLAG_* values
@@ -86,6 +88,7 @@ struct af_stream {
     struct mp_audio output;
     struct mp_audio filter_output;
 
+    struct mp_log *log;
     struct MPOpts *opts;
 };
 
@@ -120,7 +123,7 @@ typedef struct af_control_ext_s {
     int ch;     // Chanel number
 } af_control_ext_t;
 
-struct af_stream *af_new(struct MPOpts *opts);
+struct af_stream *af_new(struct mpv_global *global);
 void af_destroy(struct af_stream *s);
 int af_init(struct af_stream *s);
 void af_uninit(struct af_stream *s);

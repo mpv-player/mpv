@@ -168,8 +168,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     av_opt_set_double(s->avrctx, "cutoff",          s->ctx.cutoff, 0);
 
     if (parse_avopts(s->avrctx, s->avopts) < 0) {
-        mp_msg(MSGT_VFILTER, MSGL_FATAL,
-                "af_lavrresample: could not set opts: '%s'\n", s->avopts);
+        MP_FATAL(af, "af_lavrresample: could not set opts: '%s'\n", s->avopts);
         return AF_ERROR;
     }
 
@@ -222,7 +221,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     if (avresample_open(s->avrctx) < 0 ||
         avresample_open(s->avrctx_out) < 0)
     {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "[lavrresample] Cannot open "
+        MP_ERR(af, "[lavrresample] Cannot open "
                 "Libavresample Context. \n");
         return AF_ERROR;
     }
@@ -398,7 +397,7 @@ static int af_open(struct af_instance *af)
     if (s->avrctx && s->avrctx_out) {
         return AF_OK;
     } else {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "[lavrresample] Cannot initialize "
+        MP_ERR(af, "[lavrresample] Cannot initialize "
                "Libavresample Context. \n");
         uninit(af);
         return AF_ERROR;

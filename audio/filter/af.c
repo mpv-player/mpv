@@ -23,6 +23,7 @@
 #include <assert.h>
 
 #include "common/common.h"
+#include "common/global.h"
 
 #include "options/m_option.h"
 #include "options/m_config.h"
@@ -179,8 +180,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
 {
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &af_obj_list, bstr0(name))) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR,
-                "Couldn't find audio filter '%s'.\n", name);
+        MP_ERR(s, "Couldn't find audio filter '%s'.\n", name);
         return NULL;
     }
     const struct af_info *info = desc.p;
@@ -189,20 +189,21 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
     if (info->flags & AF_FLAGS_NOT_REENTRANT) {
         for (struct af_instance *cur = s->first; cur; cur = cur->next) {
             if (cur->info == info) {
-                mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] There can only be one "
+                MP_ERR(s, "There can only be one "
                        "instance of the filter '%s' in each stream\n", name);
                 return NULL;
             }
         }
     }
 
-    mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Adding filter %s \n", name);
+    MP_VERBOSE(s, "Adding filter %s \n", name);
 
     struct af_instance *af = talloc_zero(NULL, struct af_instance);
     *af = (struct af_instance) {
         .info = info,
         .mul = 1,
         .data = talloc_zero(af, struct mp_audio),
+        .log = mp_log_new(af, s->log, name),
     };
     struct m_config *config = m_config_from_obj_desc(af, &desc);
     if (m_config_apply_defaults(config, name, s->opts->af_defs) < 0)
@@ -218,8 +219,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
     return af;
 
 error:
-    mp_msg(MSGT_AFILTER, MSGL_ERR,
-           "[libaf] Couldn't create or open audio filter '%s'\n", name);
+    MP_ERR(s, "Couldn't create or open audio filter '%s'\n", name);
     talloc_free(af);
     return NULL;
 }
@@ -280,8 +280,7 @@ static void af_remove(struct af_stream *s, struct af_instance *af)
         return;
 
     // Print friendly message
-    mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Removing filter %s \n",
-           af->info->name);
+    MP_VERBOSE(s, "Removing filter %s \n", af->info->name);
 
     // Detach pointers
     af->prev->next = af->next;
@@ -306,26 +305,26 @@ repeat:
 static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
                                   int msg_level)
 {
-    mp_msg(MSGT_AFILTER, msg_level, "Audio filter chain:\n");
+    MP_MSG(s, msg_level, "Audio filter chain:\n");
 
     struct af_instance *af = s->first;
     while (af) {
-        mp_msg(MSGT_AFILTER, msg_level, "  [%s] ", af->info->name);
+        MP_MSG(s, msg_level, "  [%s] ", af->info->name);
         if (af->data) {
             char *info = mp_audio_config_to_str(af->data);
-            mp_msg(MSGT_AFILTER, msg_level, "%s", info);
+            MP_MSG(s, msg_level, "%s", info);
             talloc_free(info);
         }
         if (af == at)
-            mp_msg(MSGT_AFILTER, msg_level, " <-");
-        mp_msg(MSGT_AFILTER, msg_level, "\n");
+            MP_MSG(s, msg_level, " <-");
+        MP_MSG(s, msg_level, "\n");
 
         af = af->next;
     }
 
-    mp_msg(MSGT_AFILTER, msg_level, "  [ao] ");
+    MP_MSG(s, msg_level, "  [ao] ");
     char *info = mp_audio_config_to_str(&s->output);
-    mp_msg(MSGT_AFILTER, msg_level, "%s\n", info);
+    MP_MSG(s, msg_level, "%s\n", info);
     talloc_free(info);
 }
 
@@ -555,8 +554,8 @@ static int af_reinit(struct af_stream *s)
             break;
         }
         default:
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Reinitialization did not "
-                   "work, audio filter '%s' returned error code %i\n",
+            MP_ERR(s, "Reinitialization did not work, "
+                   "audio filter '%s' returned error code %i\n",
                    af->info->name, rv);
             af_print_filter_chain(s, af, MSGL_ERR);
             return AF_ERROR;
@@ -573,8 +572,7 @@ static int af_reinit(struct af_stream *s)
     return af_config_equals(&s->output, &s->filter_output) ? AF_OK : AF_ERROR;
 
 negotiate_error:
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to convert audio input "
-           "format to output format.\n");
+    MP_ERR(s, "Unable to convert audio input format to output format.\n");
     af_print_filter_chain(s, af, MSGL_ERR);
     return AF_ERROR;
 }
@@ -586,7 +584,7 @@ void af_uninit(struct af_stream *s)
         af_remove(s, s->first->next);
 }
 
-struct af_stream *af_new(struct MPOpts *opts)
+struct af_stream *af_new(struct mpv_global *global)
 {
     struct af_stream *s = talloc_zero(NULL, struct af_stream);
     static struct af_info in = { .name = "in" };
@@ -611,7 +609,8 @@ struct af_stream *af_new(struct MPOpts *opts)
     };
     s->first->next = s->last;
     s->last->prev = s->first;
-    s->opts = opts;
+    s->opts = global->opts;
+    s->log = mp_log_new(s, global->log, "!af");
     return s;
 }
 
@@ -654,7 +653,7 @@ int af_init(struct af_stream *s)
 
     if (af_reinit(s) != AF_OK) {
         // Something is stuffed audio out will not work
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "Could not create audio filter chain.\n");
+        MP_ERR(s, "Could not create audio filter chain.\n");
         af_uninit(s);
         return -1;
     }

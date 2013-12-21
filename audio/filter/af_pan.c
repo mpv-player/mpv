@@ -80,7 +80,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     // Sanity check
     if(((int*)arg)[0] <= 0 || ((int*)arg)[0] > AF_NCH){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[pan] The number of output channels must be"
+      MP_ERR(af, "[pan] The number of output channels must be"
             " between 1 and %i. Current value is %i\n",AF_NCH,((int*)arg)[0]);
       return AF_ERROR;
     }
@@ -161,7 +161,7 @@ static int af_open(struct af_instance* af){
     j = 0; k = 0;
     while(k < AF_NCH){
         sscanf(cp, "%f%n" , &s->level[j][k], &n);
-        mp_msg(MSGT_AFILTER, MSGL_V, "[pan] Pan level from channel %i to"
+        MP_VERBOSE(af, "[pan] Pan level from channel %i to"
                 " channel %i = %f\n",k,j,s->level[j][k]);
         cp =&cp[n];
         j++;
