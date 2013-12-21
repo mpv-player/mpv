@@ -24,11 +24,11 @@
 #include "video/vaapi.h"
 #include "video/hwdec.h"
 
-static inline bool is_success(VAStatus status, const char *msg)
+static bool check_error(struct vf_instance *vf, VAStatus status, const char *msg)
 {
     if (status == VA_STATUS_SUCCESS)
         return true;
-    mp_msg(MSGT_VFILTER, MSGL_ERR, "[vavpp] %s: %s\n", msg, vaErrorStr(status));
+    MP_ERR(vf, "%s: %s\n", msg, vaErrorStr(status));
     return false;
 }
 
@@ -78,8 +78,9 @@ static inline void realloc_refs(struct surface_refs *refs, int num)
     refs->num_required = num;
 }
 
-static bool update_pipeline(struct vf_priv_s *p, bool deint)
+static bool update_pipeline(struct vf_instance *vf, bool deint)
 {
+    struct vf_priv_s *p = vf->priv;
     VABufferID *filters = p->buffers;
     int num_filters = p->num_buffers;
     if (p->deint_type && !deint) {
@@ -101,7 +102,7 @@ static bool update_pipeline(struct vf_priv_s *p, bool deint)
     caps.num_output_color_standards = VAProcColorStandardCount;
     VAStatus status = vaQueryVideoProcPipelineCaps(p->display, p->context,
                                                    filters, num_filters, &caps);
-    if (!is_success(status, "vaQueryVideoProcPipelineCaps()"))
+    if (!check_error(vf, status, "vaQueryVideoProcPipelineCaps()"))
         return false;
     p->pipe.filters = filters;
     p->pipe.num_filters = num_filters;
@@ -120,9 +121,10 @@ static inline int get_deint_field(struct vf_priv_s *p, int i,
     return !!(mpi->fields & MP_IMGFIELD_TOP_FIRST) ^ i ? VA_TOP_FIELD : VA_BOTTOM_FIELD;
 }
 
-static struct mp_image *render(struct vf_priv_s *p, struct va_surface *in,
+static struct mp_image *render(struct vf_instance *vf, struct va_surface *in,
                                unsigned int flags)
 {
+    struct vf_priv_s *p = vf->priv;
     if (!p->pipe.filters || !in)
         return NULL;
     struct va_surface *out = va_surface_pool_get(p->pool, in->w, in->h);
@@ -132,7 +134,7 @@ static struct mp_image *render(struct vf_priv_s *p, struct va_surface *in,
     int state = 0;
     do { // not a loop, just for break
         VAStatus status = vaBeginPicture(p->display, p->context, out->id);
-        if (!is_success(status, "vaBeginPicture()"))
+        if (!check_error(vf, status, "vaBeginPicture()"))
             break;
         state |= Begun;
         VABufferID buffer = VA_INVALID_ID;
@@ -140,10 +142,10 @@ static struct mp_image *render(struct vf_priv_s *p, struct va_surface *in,
         status = vaCreateBuffer(p->display, p->context,
                                 VAProcPipelineParameterBufferType,
                                 sizeof(*param), 1, NULL, &buffer);
-        if (!is_success(status, "vaCreateBuffer()"))
+        if (!check_error(vf, status, "vaCreateBuffer()"))
             break;
         status = vaMapBuffer(p->display, buffer, (void**)&param);
-        if (!is_success(status, "vaMapBuffer()"))
+        if (!check_error(vf, status, "vaMapBuffer()"))
             break;
         param->surface = in->id;
         param->surface_region = NULL;
@@ -158,7 +160,7 @@ static struct mp_image *render(struct vf_priv_s *p, struct va_surface *in,
         param->num_forward_references = p->pipe.forward.num_required;
         param->num_backward_references = p->pipe.backward.num_required;
         status = vaRenderPicture(p->display, p->context, &buffer, 1);
-        if (!is_success(status, "vaRenderPicture()"))
+        if (!check_error(vf, status, "vaRenderPicture()"))
             break;
         state |= Rendered;
     } while (false);
@@ -171,16 +173,17 @@ static struct mp_image *render(struct vf_priv_s *p, struct va_surface *in,
 }
 
 // return value: the number of created images
-static int process(struct vf_priv_s *p, struct mp_image *in,
+static int process(struct vf_instance *vf, struct mp_image *in,
                    struct mp_image **out1, struct mp_image **out2)
 {
+    struct vf_priv_s *p = vf->priv;
     const bool deint = p->do_deint && p->deint_type > 0;
-    if (!update_pipeline(p, deint) || !p->pipe.filters) // no filtering
+    if (!update_pipeline(vf, deint) || !p->pipe.filters) // no filtering
         return 0;
     struct va_surface *surface = va_surface_in_mp_image(in);
     const unsigned int csp = va_get_colorspace_flag(p->params.colorspace);
     const unsigned int field = get_deint_field(p, 0, in);
-    *out1 = render(p, surface, field | csp);
+    *out1 = render(vf, surface, field | csp);
     if (!*out1) // cannot render
         return 0;
     mp_image_copy_attributes(*out1, in);
@@ -189,7 +192,7 @@ static int process(struct vf_priv_s *p, struct mp_image *in,
     const double add = (in->pts - p->prev_pts)*0.5;
     if (p->prev_pts == MP_NOPTS_VALUE || add <= 0.0 || add > 0.5) // no pts, skip it
         return 1;
-    *out2 = render(p, surface, get_deint_field(p, 1, in) | csp);
+    *out2 = render(vf, surface, get_deint_field(p, 1, in) | csp);
     if (!*out2) // cannot render
         return 1;
     mp_image_copy_attributes(*out2, in);
@@ -197,10 +200,11 @@ static int process(struct vf_priv_s *p, struct mp_image *in,
     return 2;
 }
 
-static struct mp_image *upload(struct vf_priv_s *p, struct mp_image *in)
+static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
 {
+    struct vf_priv_s *p = vf->priv;
     struct va_surface *surface =
-        va_surface_pool_get_by_imgfmt(p->pool, p->va->image_formats, in->imgfmt, in->w, in->h);
+        va_surface_pool_get_by_imgfmt(p->pool, in->imgfmt, in->w, in->h);
     if (!surface)
         surface = va_surface_pool_get(p->pool, in->w, in->h); // dummy
     else
@@ -217,17 +221,17 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *in)
     const int rt_format = surface ? surface->rt_format : VA_RT_FORMAT_YUV420;
     if (!p->pool || va_surface_pool_rt_format(p->pool) != rt_format) {
         va_surface_pool_release(p->pool);
-        p->pool = va_surface_pool_alloc(p->display, rt_format);
+        p->pool = va_surface_pool_alloc(p->va, rt_format);
     }
     if (!surface) {
-        struct mp_image *tmp = upload(p, in);
+        struct mp_image *tmp = upload(vf, in);
         talloc_free(in);
         in = tmp;
     }
 
     struct mp_image *out1, *out2;
     const double pts = in->pts;
-    const int num = process(p, in, &out1, &out2);
+    const int num = process(vf, in, &out1, &out2);
     if (!num)
         vf_add_output_frame(vf, in);
     else {
@@ -289,45 +293,48 @@ static int control(struct vf_instance *vf, int request, void* data)
     }
 }
 
-static int va_query_filter_caps(struct vf_priv_s *p, VAProcFilterType type,
+static int va_query_filter_caps(struct vf_instance *vf, VAProcFilterType type,
                                 void *caps, unsigned int count)
 {
+    struct vf_priv_s *p = vf->priv;
     VAStatus status = vaQueryVideoProcFilterCaps(p->display, p->context, type,
                                                  caps, &count);
-    return is_success(status, "vaQueryVideoProcFilterCaps()") ? count : 0;
+    return check_error(vf, status, "vaQueryVideoProcFilterCaps()") ? count : 0;
 }
 
-static VABufferID va_create_filter_buffer(struct vf_priv_s *p, int bytes,
+static VABufferID va_create_filter_buffer(struct vf_instance *vf, int bytes,
                                           int num, void *data)
 {
+    struct vf_priv_s *p = vf->priv;
     VABufferID buffer;
     VAStatus status = vaCreateBuffer(p->display, p->context,
                                      VAProcFilterParameterBufferType,
                                      bytes, num, data, &buffer);
-    return is_success(status, "vaCreateBuffer()") ? buffer : VA_INVALID_ID;
+    return check_error(vf, status, "vaCreateBuffer()") ? buffer : VA_INVALID_ID;
 }
 
-static bool initialize(struct vf_priv_s *p)
+static bool initialize(struct vf_instance *vf)
 {
+    struct vf_priv_s *p = vf->priv;
     VAStatus status;
 
     VAConfigID config;
     status = vaCreateConfig(p->display, VAProfileNone, VAEntrypointVideoProc,
                             NULL, 0, &config);
-    if (!is_success(status, "vaCreateConfig()")) // no entrypoint for video porc
+    if (!check_error(vf, status, "vaCreateConfig()")) // no entrypoint for video porc
         return false;
     p->config = config;
 
     VAContextID context;
     status = vaCreateContext(p->display, p->config, 0, 0, 0, NULL, 0, &context);
-    if (!is_success(status, "vaCreateContext()"))
+    if (!check_error(vf, status, "vaCreateContext()"))
         return false;
     p->context = context;
 
     VAProcFilterType filters[VAProcFilterCount];
     int num_filters = VAProcFilterCount;
     status = vaQueryVideoProcFilters(p->display, p->context, filters, &num_filters);
-    if (!is_success(status, "vaQueryVideoProcFilters()"))
+    if (!check_error(vf, status, "vaQueryVideoProcFilters()"))
         return false;
 
     VABufferID buffers[VAProcFilterCount];
@@ -338,7 +345,7 @@ static bool initialize(struct vf_priv_s *p)
             if (!p->deint_type)
                 continue;
             VAProcFilterCapDeinterlacing caps[VAProcDeinterlacingCount];
-            int num = va_query_filter_caps(p, VAProcFilterDeinterlacing, caps,
+            int num = va_query_filter_caps(vf, VAProcFilterDeinterlacing, caps,
                                            VAProcDeinterlacingCount);
             if (!num)
                 continue;
@@ -350,7 +357,7 @@ static bool initialize(struct vf_priv_s *p)
                 param.type = VAProcFilterDeinterlacing;
                 param.algorithm = algorithm;
                 buffers[VAProcFilterDeinterlacing] =
-                    va_create_filter_buffer(p, sizeof(param), 1, &param);
+                    va_create_filter_buffer(vf, sizeof(param), 1, &param);
             }
         } // check other filters
     }
@@ -378,7 +385,7 @@ static int vf_open(vf_instance_t *vf)
     if (!p->va || !p->va->display)
         return false;
     p->display = p->va->display;
-    if (initialize(p))
+    if (initialize(vf))
         return true;
     uninit(vf);
     return false;

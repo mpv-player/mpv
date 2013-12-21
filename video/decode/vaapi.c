@@ -55,6 +55,7 @@
 #define MAX_SURFACES (MAX_DECODER_SURFACES + ADDTIONAL_SURFACES)
 
 struct priv {
+    struct mp_log *log;
     struct mp_vaapi_ctx *ctx;
     VADisplay display;
     Display *x11_display;
@@ -166,7 +167,7 @@ static bool preallocate_surfaces(struct lavc_ctx *ctx, int num)
 {
     struct priv *p = ctx->hwdec_priv;
     if (!va_surface_pool_reserve(p->pool, num, p->w, p->h)) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Could not allocate surfaces.\n");
+        MP_ERR(p, "Could not allocate surfaces.\n");
         return false;
     }
     for (int i = 0; i < num; i++) {
@@ -218,57 +219,55 @@ static int create_decoder(struct lavc_ctx *ctx)
 
     const struct hwdec_profile_entry *pe = hwdec_find_profile(ctx, profiles);
     if (!pe) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Unsupported codec or profile.\n");
+        MP_ERR(p, "Unsupported codec or profile.\n");
         goto error;
     }
 
     int num_profiles = vaMaxNumProfiles(p->display);
     VAProfile *va_profiles = talloc_zero_array(tmp, VAProfile, num_profiles);
     status = vaQueryConfigProfiles(p->display, va_profiles, &num_profiles);
-    if (!check_va_status(status, "vaQueryConfigProfiles()"))
+    if (!CHECK_VA_STATUS(p, "vaQueryConfigProfiles()"))
         goto error;
-    mp_msg(MSGT_VO, MSGL_DBG2, "[vaapi] %d profiles available:\n", num_profiles);
+    MP_DBG(p, "%d profiles available:\n", num_profiles);
     for (int i = 0; i < num_profiles; i++)
-        mp_msg(MSGT_VO, MSGL_DBG2, "  %s\n", str_va_profile(va_profiles[i]));
+        MP_DBG(p, "  %s\n", str_va_profile(va_profiles[i]));
 
     VAProfile va_profile = pe->hw_profile;
     if (!has_profile(va_profiles, num_profiles, va_profile)) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "[vaapi] Decoder profile '%s' not available.\n",
+        MP_ERR(p, "Decoder profile '%s' not available.\n",
                str_va_profile(va_profile));
         goto error;
     }
 
-    mp_msg(MSGT_VO, MSGL_V, "[vaapi] Using profile '%s'.\n",
-           str_va_profile(va_profile));
+    MP_VERBOSE(p, "Using profile '%s'.\n", str_va_profile(va_profile));
 
     int num_surfaces = hwdec_get_max_refs(ctx);
     if (!is_direct_mapping(p->display)) {
-        mp_msg(MSGT_VO, MSGL_V, "[vaapi] No direct mapping.\n");
+        MP_VERBOSE(p, "No direct mapping.\n");
         // Note: not sure why it has to be *=2 rather than +=1.
         num_surfaces *= 2;
     }
     num_surfaces = MPMIN(num_surfaces, MAX_DECODER_SURFACES) + ADDTIONAL_SURFACES;
 
     if (num_surfaces > MAX_SURFACES) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Internal error: too many surfaces.\n");
+        MP_ERR(p, "Internal error: too many surfaces.\n");
         goto error;
     }
 
     if (!preallocate_surfaces(ctx, num_surfaces)) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Could not allocate surfaces.\n");
+        MP_ERR(p, "Could not allocate surfaces.\n");
         goto error;
     }
 
     int num_ep = vaMaxNumEntrypoints(p->display);
     VAEntrypoint *ep = talloc_zero_array(tmp, VAEntrypoint, num_ep);
     status = vaQueryConfigEntrypoints(p->display, va_profile, ep, &num_ep);
-    if (!check_va_status(status, "vaQueryConfigEntrypoints()"))
+    if (!CHECK_VA_STATUS(p, "vaQueryConfigEntrypoints()"))
         goto error;
 
     int entrypoint = find_entrypoint(p->format, ep, num_ep);
     if (entrypoint < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Could not find VA entrypoint.\n");
+        MP_ERR(p, "Could not find VA entrypoint.\n");
         goto error;
     }
 
@@ -277,23 +276,23 @@ static int create_decoder(struct lavc_ctx *ctx)
     };
     status = vaGetConfigAttributes(p->display, va_profile, entrypoint,
                                    &attrib, 1);
-    if (!check_va_status(status, "vaGetConfigAttributes()"))
+    if (!CHECK_VA_STATUS(p, "vaGetConfigAttributes()"))
         goto error;
     if ((attrib.value & p->rt_format) == 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Chroma format not supported.\n");
+        MP_ERR(p, "Chroma format not supported.\n");
         goto error;
     }
 
     status = vaCreateConfig(p->display, va_profile, entrypoint, &attrib, 1,
                             &p->va_context->config_id);
-    if (!check_va_status(status, "vaCreateConfig()"))
+    if (!CHECK_VA_STATUS(p, "vaCreateConfig()"))
         goto error;
 
     status = vaCreateContext(p->display, p->va_context->config_id,
                              p->w, p->h, VA_PROGRESSIVE,
                              p->surfaces, num_surfaces,
                              &p->va_context->context_id);
-    if (!check_va_status(status, "vaCreateContext()"))
+    if (!CHECK_VA_STATUS(p, "vaCreateContext()"))
         goto error;
 
     res = 0;
@@ -328,7 +327,7 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
         }
         va_surface_release(s);
     }
-    mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Insufficient number of surfaces.\n");
+    MP_ERR(p, "Insufficient number of surfaces.\n");
     return NULL;
 }
 
@@ -353,7 +352,7 @@ static bool create_va_dummy_ctx(struct priv *p)
     VADisplay *display = vaGetDisplay(p->x11_display);
     if (!display)
         goto destroy_ctx;
-    p->ctx = va_initialize(display);
+    p->ctx = va_initialize(display, p->log);
     if (!p->ctx) {
         vaTerminate(display);
         goto destroy_ctx;
@@ -385,6 +384,7 @@ static int init_with_vactx(struct lavc_ctx *ctx, struct mp_vaapi_ctx *vactx)
 {
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
+        .log = mp_log_new(p, ctx->log, "vaapi"),
         .ctx = vactx,
         .va_context = &p->va_context_storage,
         .rt_format = VA_RT_FORMAT_YUV420
@@ -398,7 +398,7 @@ static int init_with_vactx(struct lavc_ctx *ctx, struct mp_vaapi_ctx *vactx)
     }
 
     p->display = p->ctx->display;
-    p->pool = va_surface_pool_alloc(p->display, p->rt_format);
+    p->pool = va_surface_pool_alloc(p->ctx, p->rt_format);
     p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
 
     p->va_context->display = p->display;
@@ -432,7 +432,7 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
 static int probe_copy(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                       const char *decoder)
 {
-    struct priv dummy = {0};
+    struct priv dummy = {mp_null_log};
     if (!create_va_dummy_ctx(&dummy))
         return HWDEC_ERR_NO_CTX;
     destroy_va_dummy_ctx(&dummy);
@@ -452,12 +452,10 @@ static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
 
     struct va_surface *surface = va_surface_in_mp_image(img);
     if (surface) {
-        struct mp_image *simg =
-            va_surface_download(surface, p->ctx->image_formats, p->sw_pool);
+        struct mp_image *simg = va_surface_download(surface, p->sw_pool);
         if (simg) {
             if (!p->printed_readback_warning) {
-                mp_msg(MSGT_VO, MSGL_WARN, "[vaapi] Using GPU readback. This "
-                       "is usually inefficient.\n");
+                MP_WARN(p, "Using GPU readback. This is usually inefficient.\n");
                 p->printed_readback_warning = true;
             }
             talloc_free(img);
