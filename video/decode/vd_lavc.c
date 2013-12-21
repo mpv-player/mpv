@@ -127,7 +127,7 @@ static bool hwdec_codec_allowed(struct dec_video *vd, const char *codec)
     return false;
 }
 
-static enum AVDiscard str2AVDiscard(char *str)
+static enum AVDiscard str2AVDiscard(struct dec_video *vd, char *str)
 {
     if (!str)                               return AVDISCARD_DEFAULT;
     if (strcasecmp(str, "none"   ) == 0)    return AVDISCARD_NONE;
@@ -136,7 +136,7 @@ static enum AVDiscard str2AVDiscard(char *str)
     if (strcasecmp(str, "bidir"  ) == 0)    return AVDISCARD_BIDIR;
     if (strcasecmp(str, "nonkey" ) == 0)    return AVDISCARD_NONKEY;
     if (strcasecmp(str, "all"    ) == 0)    return AVDISCARD_ALL;
-    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Unknown discard value %s\n", str);
+    MP_ERR(vd, "Unknown discard value %s\n", str);
     return AVDISCARD_DEFAULT;
 }
 
@@ -218,8 +218,8 @@ static bool probe_hwdec(struct dec_video *vd, bool autoprobe, enum hwdec_type ap
 {
     struct vd_lavc_hwdec *hwdec = find_hwcodec(api);
     if (!hwdec) {
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "Requested hardware decoder not "
-                "compiled.\n");
+        MP_VERBOSE(vd, "Requested hardware decoder not "
+                   "compiled.\n");
         return false;
     }
     const char *hw_decoder = NULL;
@@ -229,10 +229,10 @@ static bool probe_hwdec(struct dec_video *vd, bool autoprobe, enum hwdec_type ap
         *use_decoder = hw_decoder;
         return true;
     } else if (r == HWDEC_ERR_NO_CODEC) {
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "Hardware decoder '%s' not found in "
-                "libavcodec.\n", hw_decoder ? hw_decoder : decoder);
+        MP_VERBOSE(vd, "Hardware decoder '%s' not found in "
+                   "libavcodec.\n", hw_decoder ? hw_decoder : decoder);
     } else if (r == HWDEC_ERR_NO_CTX && !autoprobe) {
-        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "VO does not support requested "
+        MP_WARN(vd, "VO does not support requested "
                 "hardware decoder.\n");
     }
     return false;
@@ -243,11 +243,12 @@ static int init(struct dec_video *vd, const char *decoder)
 {
     vd_ffmpeg_ctx *ctx;
     ctx = vd->priv = talloc_zero(NULL, vd_ffmpeg_ctx);
+    ctx->log = vd->log;
     ctx->opts = vd->opts;
     ctx->non_dr1_pool = talloc_steal(ctx, mp_image_pool_new(16));
 
     if (bstr_endswith0(bstr0(decoder), "_vdpau")) {
-        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "VDPAU decoder '%s' was requested. "
+        MP_WARN(vd, "VDPAU decoder '%s' was requested. "
                 "This way of enabling hardware\ndecoding is not supported "
                 "anymore. Use --hwdec=vdpau instead.\nThe --hwdec-codec=... "
                 "option can be used to restrict which codecs are\nenabled, "
@@ -272,24 +273,24 @@ static int init(struct dec_video *vd, const char *decoder)
                         &hwdec, &hw_decoder);
         }
     } else {
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "Not trying to use hardware decoding: "
-                "codec %s is blacklisted by user.\n", decoder);
+        MP_VERBOSE(vd, "Not trying to use hardware decoding: "
+                   "codec %s is blacklisted by user.\n", decoder);
     }
 
     if (hwdec) {
         ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
         if (hw_decoder)
             decoder = hw_decoder;
-        mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Trying to use hardware decoding.\n");
+        MP_INFO(vd, "Trying to use hardware decoding.\n");
     } else if (vd->opts->hwdec_api != HWDEC_NONE) {
-        mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Using software decoding.\n");
+        MP_INFO(vd, "Using software decoding.\n");
     }
 
     init_avctx(vd, decoder, hwdec);
     if (!ctx->avctx) {
         if (ctx->software_fallback_decoder) {
-            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Error initializing hardware "
-                    "decoding, falling back to software decoding.\n");
+            MP_ERR(vd, "Error initializing hardware decoding, "
+                   "falling back to software decoding.\n");
             decoder = ctx->software_fallback_decoder;
             ctx->software_fallback_decoder = NULL;
             init_avctx(vd, decoder, NULL);
@@ -420,14 +421,13 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->flags |= lavc_param->bitexact;
 
     avctx->flags2 |= lavc_param->fast;
-    avctx->skip_loop_filter = str2AVDiscard(lavc_param->skip_loop_filter_str);
-    avctx->skip_idct = str2AVDiscard(lavc_param->skip_idct_str);
-    avctx->skip_frame = str2AVDiscard(lavc_param->skip_frame_str);
+    avctx->skip_loop_filter = str2AVDiscard(vd, lavc_param->skip_loop_filter_str);
+    avctx->skip_idct = str2AVDiscard(vd, lavc_param->skip_idct_str);
+    avctx->skip_frame = str2AVDiscard(vd, lavc_param->skip_frame_str);
 
     if (lavc_param->avopt) {
         if (parse_avopts(avctx, lavc_param->avopt) < 0) {
-            mp_msg(MSGT_DECVIDEO, MSGL_ERR,
-                   "Your options /%s/ look like gibberish to me pal\n",
+            MP_ERR(vd, "Your options /%s/ look like gibberish to me pal\n",
                    lavc_param->avopt);
             uninit_avctx(vd);
             return;
@@ -448,6 +448,9 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     if (mp_rawvideo) {
         avctx->pix_fmt = imgfmt2pixfmt(sh->format);
         avctx->codec_tag = 0;
+        if (avctx->pix_fmt == AV_PIX_FMT_NONE && sh->format)
+            MP_ERR(vd, "Image format %s not supported by lavc.\n",
+                   mp_imgfmt_to_name(sh->format));
     }
 
     if (sh->lav_headers)
@@ -455,7 +458,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 
     /* open it */
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0) {
-        mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Could not open codec.\n");
+        MP_ERR(vd, "Could not open codec.\n");
         uninit_avctx(vd);
         return;
     }
@@ -468,7 +471,7 @@ static void uninit_avctx(struct dec_video *vd)
 
     if (avctx) {
         if (avctx->codec && avcodec_close(avctx) < 0)
-            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
+            MP_ERR(vd, "Could not close codec.\n");
 
         av_freep(&avctx->extradata);
         av_freep(&avctx->slice_offset);
@@ -508,6 +511,9 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
     if (pix_fmt != ctx->pix_fmt) {
         ctx->pix_fmt = pix_fmt;
         ctx->best_csp = pixfmt2imgfmt(pix_fmt);
+        if (!ctx->best_csp)
+            MP_ERR(vd, "lavc pixel format %s not supported.\n",
+                   av_get_pix_fmt_name(pix_fmt));
     }
 
     int d_w, d_h;
@@ -532,10 +538,10 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     struct dec_video *vd = avctx->opaque;
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-    mp_msg(MSGT_DECVIDEO, MSGL_V, "Pixel formats supported by decoder:");
+    MP_VERBOSE(vd, "Pixel formats supported by decoder:");
     for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++)
-        mp_msg(MSGT_DECVIDEO, MSGL_V, " %s", av_get_pix_fmt_name(fmt[i]));
-    mp_msg(MSGT_DECVIDEO, MSGL_V, "\n");
+        MP_VERBOSE(vd, " %s", av_get_pix_fmt_name(fmt[i]));
+    MP_VERBOSE(vd, "\n");
 
     assert(ctx->hwdec);
 
@@ -732,7 +738,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 
     ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
     if (ret < 0) {
-        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Error while decoding frame!\n");
+        MP_WARN(vd, "Error while decoding frame!\n");
         return -1;
     }
 
@@ -762,7 +768,7 @@ static int force_fallback(struct dec_video *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     if (ctx->software_fallback_decoder) {
         uninit_avctx(vd);
-        mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Error using hardware "
+        MP_ERR(vd, "Error using hardware "
                 "decoding, falling back to software decoding.\n");
         const char *decoder = ctx->software_fallback_decoder;
         ctx->software_fallback_decoder = NULL;
