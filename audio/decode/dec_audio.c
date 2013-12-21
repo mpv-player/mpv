@@ -141,7 +141,7 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
     struct mp_decoder_list *list =
         audio_select_decoders(d_audio->header->codec, audio_decoders);
 
-    mp_print_decoders(MSGT_DECAUDIO, MSGL_V, "Codec list:", list);
+    mp_print_decoders(d_audio->log, MSGL_V, "Codec list:", list);
 
     for (int n = 0; n < list->num_entries; n++) {
         struct mp_decoder_entry *sel = &list->entries[n];

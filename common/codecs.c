@@ -131,17 +131,17 @@ struct mp_decoder_list *mp_select_decoders(struct mp_decoder_list *all,
     return list;
 }
 
-void mp_print_decoders(int msgt, int msgl, const char *header,
+void mp_print_decoders(struct mp_log *log, int msgl, const char *header,
                        struct mp_decoder_list *list)
 {
-    mp_msg(msgt, msgl, "%s\n", header);
+    mp_msg_log(log, msgl, "%s\n", header);
     for (int n = 0; n < list->num_entries; n++) {
         struct mp_decoder_entry *entry = &list->entries[n];
-        mp_msg(msgt, msgl, "    %s:%s", entry->family, entry->decoder);
+        mp_msg_log(log, msgl, "    %s:%s", entry->family, entry->decoder);
         if (strcmp(entry->decoder, entry->codec) != 0)
-            mp_msg(msgt, msgl, " (%s)", entry->codec);
-        mp_msg(msgt, msgl, " - %s\n", entry->desc);
+            mp_msg_log(log, msgl, " (%s)", entry->codec);
+        mp_msg_log(log, msgl, " - %s\n", entry->desc);
     }
     if (list->num_entries == 0)
-        mp_msg(msgt, msgl, "    (no decoders)\n");
+        mp_msg_log(log, msgl, "    (no decoders)\n");
 }

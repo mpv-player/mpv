@@ -172,7 +172,7 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
     struct mp_decoder_list *list =
         mp_select_video_decoders(d_video->header->codec, video_decoders);
 
-    mp_print_decoders(MSGT_DECVIDEO, MSGL_V, "Codec list:", list);
+    mp_print_decoders(d_video->log, MSGL_V, "Codec list:", list);
 
     for (int n = 0; n < list->num_entries; n++) {
         struct mp_decoder_entry *sel = &list->entries[n];
