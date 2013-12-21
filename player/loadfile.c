@@ -693,7 +693,7 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
         if (stream_control(mpctx->stream, STREAM_CTRL_GET_BASE_FILENAME,
                            &stream_filename) > 0)
             base_filename = talloc_steal(tmp, stream_filename);
-        struct subfn *list = find_text_subtitles(mpctx->opts, base_filename);
+        struct subfn *list = find_text_subtitles(mpctx->global, base_filename);
         talloc_steal(tmp, list);
         for (int i = 0; list && list[i].fname; i++) {
             char *filename = list[i].fname;

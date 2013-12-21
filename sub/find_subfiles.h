@@ -19,14 +19,13 @@
 #ifndef MPLAYER_FIND_SUBFILES_H
 #define MPLAYER_FIND_SUBFILES_H
 
-struct MPOpts;
-
 struct subfn {
     int priority;
     char *fname;
     char *lang;
 };
 
-struct subfn *find_text_subtitles(struct MPOpts *opts, const char *fname);
+struct mpv_global;
+struct subfn *find_text_subtitles(struct mpv_global *global, const char *fname);
 
 #endif /* MPLAYER_FINDFILES_H */
