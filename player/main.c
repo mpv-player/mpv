@@ -228,7 +228,7 @@ static bool handle_help_options(struct MPContext *mpctx)
         opt_exit = 1;
     }
 #if HAVE_ENCODING
-    if (encode_lavc_showhelp(mpctx->opts))
+    if (encode_lavc_showhelp(log, &opts->encode_output))
         opt_exit = 1;
 #endif
     return opt_exit;
@@ -365,7 +365,8 @@ static int mpv_main(int argc, char *argv[])
 
 #if HAVE_ENCODING
     if (opts->encode_output.file && *opts->encode_output.file) {
-        mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output);
+        mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output,
+                                                  mpctx->global);
         if(!mpctx->encode_lavc_ctx) {
             MP_INFO(mpctx, "Encoding initialization failed.");
             exit_player(mpctx, EXIT_ERROR);
