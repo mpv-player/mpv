@@ -133,7 +133,7 @@ static struct demuxer *open_file(char *filename, struct MPContext *mpctx)
         d = demux_open(s, NULL, NULL, opts);
     }
     if (!d) {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "EDL: Could not open source file '%s'.\n",
+        MP_ERR(mpctx, "EDL: Could not open source file '%s'.\n",
                filename);
         free_stream(s);
     }
@@ -197,8 +197,7 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
 
         double len = source_get_length(source);
         if (len <= 0) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                   "EDL: source file '%s' has unknown duration.\n",
+            MP_WARN(mpctx, "EDL: source file '%s' has unknown duration.\n",
                    part->filename);
         }
 
@@ -210,7 +209,7 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
         if (len > 0) {
             double partlen = part->offset + part->length;
             if (partlen > len) {
-                mp_msg(MSGT_CPLAYER, MSGL_WARN,  "EDL: entry %d uses %f "
+                MP_WARN(mpctx, "EDL: entry %d uses %f "
                        "seconds, but file has only %f seconds.\n",
                        n, partlen, len);
             }
@@ -263,7 +262,7 @@ void build_mpv_edl_timeline(struct MPContext *mpctx)
 {
     struct tl_parts *parts = parse_edl(mpctx->demuxer->file_contents);
     if (!parts) {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "Error in EDL.\n");
+        MP_ERR(mpctx, "Error in EDL.\n");
         return;
     }
     // Source is .edl and not edl:// => don't allow arbitrary paths

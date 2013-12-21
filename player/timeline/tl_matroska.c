@@ -194,7 +194,7 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
              * either matches or isn't specified. */
             if (!memcmp(uid->segment, m->uid.segment, 16) &&
                 (!uid->edition || uid->edition == m->uid.edition)) {
-                mp_msg(MSGT_CPLAYER, MSGL_INFO, "Match for source %d: %s\n",
+                MP_INFO(mpctx, "Match for source %d: %s\n",
                        i, d->filename);
 
                 for (int j = 0; j < m->num_ordered_chapters; j++) {
@@ -258,10 +258,10 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
     char **filenames = NULL;
     if (*num_sources > 1) {
         char *main_filename = mpctx->demuxer->filename;
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "This file references data from "
+        MP_INFO(mpctx, "This file references data from "
                "other sources.\n");
         if (opts->ordered_chapters_files && opts->ordered_chapters_files[0]) {
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "Loading references from '%s'.\n",
+            MP_INFO(mpctx, "Loading references from '%s'.\n",
                    opts->ordered_chapters_files);
             struct playlist *pl =
                 playlist_parse_file(opts->ordered_chapters_files, opts);
@@ -269,10 +269,10 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
             for (struct playlist_entry *e = pl->first; e; e = e->next)
                 MP_TARRAY_APPEND(tmp, filenames, num_filenames, e->filename);
         } else if (mpctx->demuxer->stream->uncached_type != STREAMTYPE_FILE) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN, "Playback source is not a "
+            MP_WARN(mpctx, "Playback source is not a "
                    "normal disk file. Will not search for related files.\n");
         } else {
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "Will scan other files in the "
+            MP_INFO(mpctx, "Will scan other files in the "
                    "same directory to find referenced sources.\n");
             filenames = find_files(main_filename, ".mkv");
             num_filenames = MP_TALLOC_ELEMS(filenames);
@@ -288,14 +288,14 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         for (int i = 0; i < num_filenames; i++) {
             if (!missing(*sources, *num_sources))
                 break;
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "Checking file %s\n", filenames[i]);
+            MP_INFO(mpctx, "Checking file %s\n", filenames[i]);
             check_file(mpctx, sources, num_sources, uids, filenames[i], 0);
         }
     /* Loop while we have new sources to look for. */
     } while (old_source_count != *num_sources);
 
     if (missing(*sources, *num_sources)) {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "Failed to find ordered chapter part!\n"
+        MP_ERR(mpctx, "Failed to find ordered chapter part!\n"
                "There will be parts MISSING from the video!\n");
         int j = 1;
         for (int i = 1; i < *num_sources; i++)
@@ -313,7 +313,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
     return *num_sources;
 }
 
-static int64_t add_timeline_part(struct MPOpts *opts,
+static int64_t add_timeline_part(struct MPContext *mpctx,
                                  struct demuxer *source,
                                  struct timeline_part **timeline,
                                  int *part_count,
@@ -331,7 +331,7 @@ static int64_t add_timeline_part(struct MPOpts *opts,
      * we don't want to try seeking over a one frame gap. */
     int64_t join_diff = start - *last_end_time;
     if (*part_count == 0
-        || FFABS(join_diff) > opts->chapter_merge_threshold * 1e6
+        || FFABS(join_diff) > mpctx->opts->chapter_merge_threshold * 1e6
         || source != (*timeline)[*part_count - 1].source) {
         struct timeline_part new = {
             .start = *starttime / 1e9,
@@ -342,7 +342,7 @@ static int64_t add_timeline_part(struct MPOpts *opts,
     } else if (*part_count > 0 && join_diff) {
         /* Chapter was merged at an inexact boundary;
          * adjust timestamps to match. */
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Merging timeline part %d with "
+        MP_VERBOSE(mpctx, "Merging timeline part %d with "
                "offset %g ms.\n", *part_count, join_diff / 1e6);
         *starttime += join_diff;
         return join_diff;
@@ -351,7 +351,8 @@ static int64_t add_timeline_part(struct MPOpts *opts,
     return 0;
 }
 
-static void account_missing_time(uint64_t *total_time,
+static void account_missing_time(struct MPContext *mpctx,
+                                 uint64_t *total_time,
                                  uint64_t new_time,
                                  const char *message)
 {
@@ -359,12 +360,11 @@ static void account_missing_time(uint64_t *total_time,
         return;
 
     *total_time += new_time;
-    mp_msg(MSGT_CPLAYER, MSGL_HINT,
-           "missing %"PRIu64" nanoseconds: %s\n",
+    MP_INFO(mpctx, "missing %"PRIu64" nanoseconds: %s\n",
            new_time, message);
 }
 
-static void build_timeline_loop(struct MPOpts *opts,
+static void build_timeline_loop(struct MPContext *mpctx,
                                 struct demuxer **sources,
                                 int num_sources,
                                 int current_source,
@@ -432,7 +432,7 @@ static void build_timeline_loop(struct MPOpts *opts,
                  * nothing we can get from it. Instead, mark the entire chapter
                  * as missing and make the chapter length 0. */
                 if (source_full_length <= c->start) {
-                    account_missing_time(missing_time, chapter_length,
+                    account_missing_time(mpctx, missing_time, chapter_length,
                             "referenced segment ends before the requested start time");
                     chapter_length = 0;
                     goto found;
@@ -444,12 +444,12 @@ static void build_timeline_loop(struct MPOpts *opts,
                  * we actually have to avoid playing off the end of the file
                  * and not switching to the next source. */
                 if (source_length < chapter_length) {
-                    account_missing_time(missing_time, chapter_length - source_length,
+                    account_missing_time(mpctx, missing_time, chapter_length - source_length,
                             "referenced segment ends before the requested end time");
                     chapter_length = source_length;
                 }
 
-                join_diff = add_timeline_part(opts, linked_source, timeline, part_count,
+                join_diff = add_timeline_part(mpctx, linked_source, timeline, part_count,
                                               c->start, last_end_time, starttime);
 
                 /* If we merged two chapters into a single part due to them
@@ -467,7 +467,7 @@ static void build_timeline_loop(struct MPOpts *opts,
              * timeline parts for each of its chapters, but not add them as
              * chapters. */
             } else {
-                build_timeline_loop(opts, sources, num_sources, j, starttime,
+                build_timeline_loop(mpctx, sources, num_sources, j, starttime,
                                     missing_time, last_end_time, timeline,
                                     chapters, part_count, c->start, c->end);
                 /* The loop call has added time as needed (we can't add it here
@@ -481,7 +481,7 @@ static void build_timeline_loop(struct MPOpts *opts,
         }
 
         /* We're missing a part of the chapter, so add it to the accounting. */
-        account_missing_time(missing_time, chapter_length,
+        account_missing_time(mpctx, missing_time, chapter_length,
                 "the source for a chapter could not be found");
         /* We don't have the source, but don't leave a gap in the timeline for
          * the source. */
@@ -498,7 +498,7 @@ static void build_timeline_loop(struct MPOpts *opts,
 
     /* If we stopped before the limit, add up the missing time. */
     if (local_starttime < limit)
-        account_missing_time(missing_time, limit - local_starttime,
+        account_missing_time(mpctx, missing_time, limit - local_starttime,
                 "nested ordered chapter segment is shorter than the requested end time");
 }
 
@@ -507,12 +507,12 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
 
     if (!opts->ordered_chapters) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "File uses ordered chapters, but "
+        MP_INFO(mpctx, "File uses ordered chapters, but "
                "you have disabled support for them. Ignoring.\n");
         return;
     }
 
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "File uses ordered chapters, will build "
+    MP_INFO(mpctx, "File uses ordered chapters, will build "
            "edit timeline.\n");
 
     struct demuxer *demuxer = mpctx->demuxer;
@@ -558,7 +558,7 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     uint64_t missing_time = 0;
     uint64_t last_end_time = 0;
     int part_count = 0;
-    build_timeline_loop(opts, sources, num_sources, 0, &starttime,
+    build_timeline_loop(mpctx, sources, num_sources, 0, &starttime,
                         &missing_time, &last_end_time, &timeline,
                         chapters, &part_count, 0, 0);
 
@@ -579,7 +579,7 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
      * users really notice less than a millisecond missing, maybe this can be
      * revisited. */
     if (missing_time >= 1e6)
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "There are %.3f seconds missing "
+        MP_ERR(mpctx, "There are %.3f seconds missing "
                "from the timeline!\n", missing_time / 1e9);
     talloc_free(mpctx->sources);
     mpctx->sources = sources;
