@@ -38,7 +38,13 @@
 
 #if HAVE_LCMS2
 
+#include <pthread.h>
 #include <lcms2.h>
+
+// lcms2 only provides a global error handler function, so we have to do this.
+// Not setting a lcms2 error handler will suppress any error messages.
+static pthread_mutex_t lcms2_dumb_crap_lock = PTHREAD_MUTEX_INITIALIZER;
+static struct mp_log *lcms2_dumb_crap;
 
 static bool parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
 {
@@ -77,10 +83,6 @@ const struct m_sub_options mp_icc_conf = {
     },
 };
 
-// lcms2 only provides a global error handler function, so we have to do this.
-// Not setting a lcms2 error handler will suppress any error messages.
-static struct mp_log *lcms2_dumb_crap;
-
 static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
                                 const char *msg)
 {
@@ -115,6 +117,8 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
 
     void *tmp = talloc_new(NULL);
     uint16_t *output = talloc_array(tmp, uint16_t, s_r * s_g * s_b * 3);
+    struct lut3d *lut = NULL;
+    bool locked = false;
 
     mp_msg_log(log, MSGL_INFO, "Opening ICC profile '%s'\n", opts->profile);
     struct bstr iccdata = load_file(tmp, opts->profile);
@@ -141,6 +145,8 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
         }
     }
 
+    locked = true;
+    pthread_mutex_lock(&lcms2_dumb_crap_lock);
     lcms2_dumb_crap = log;
     cmsSetLogErrorHandler(lcms2_error_handler);
 
@@ -197,23 +203,25 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
 
 done: ;
 
-    struct lut3d *lut = talloc_ptrtype(NULL, lut);
+    lut = talloc_ptrtype(NULL, lut);
     *lut = (struct lut3d) {
         .data = talloc_steal(lut, output),
         .size = {s_r, s_g, s_b},
     };
 
-    lcms2_dumb_crap = NULL;
-    cmsSetLogErrorHandler(NULL);
+error_exit:
+
+    if (locked) {
+        lcms2_dumb_crap = NULL;
+        cmsSetLogErrorHandler(NULL);
+        pthread_mutex_unlock(&lcms2_dumb_crap_lock);
+    }
+
+    if (!lut)
+        mp_msg_log(log, MSGL_FATAL, "Error loading ICC profile.\n");
+
     talloc_free(tmp);
     return lut;
-
-error_exit:
-    mp_msg_log(log, MSGL_FATAL, "Error loading ICC profile.\n");
-    lcms2_dumb_crap = NULL;
-    cmsSetLogErrorHandler(NULL);
-    talloc_free(tmp);
-    return NULL;
 }
 
 #else /* HAVE_LCMS2 */
