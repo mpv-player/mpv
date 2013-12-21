@@ -298,6 +298,7 @@ static int mpv_main(int argc, char *argv[])
     // Nothing must call mp_msg*() and related before this
     mp_msg_init(mpctx->global);
     mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
+    mpctx->statusline = mp_log_new(mpctx, mpctx->log, "!statusline");
 
     // Create the config context and register the options
     mpctx->mconfig = m_config_new(mpctx, mpctx->log, sizeof(struct MPOpts),
