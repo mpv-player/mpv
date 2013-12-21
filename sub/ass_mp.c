@@ -209,8 +209,8 @@ static int map_ass_level[] = {
     MSGL_V,
     MSGL_V,
     MSGL_V,             // 5 application recommended level
-    MSGL_DBG2,
-    MSGL_DBG3,          // 7 "verbose DEBUG"
+    MSGL_DEBUG,
+    MSGL_TRACE,         // 7 "verbose DEBUG"
 };
 
 static void message_callback(int level, const char *format, va_list va, void *ctx)

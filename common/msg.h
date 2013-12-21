@@ -37,18 +37,17 @@ extern int mp_smode; // slave mode compatibility glue
 extern struct mp_log *const mp_null_log;
 
 // Verbosity levels.
-#define MSGL_FATAL 0  // will exit/abort (note: msg.c doesn't exit or abort)
-#define MSGL_ERR 1    // continues
-#define MSGL_WARN 2   // only warning
-#define MSGL_HINT 3   // (to be phased out)
-#define MSGL_INFO 4   // -quiet
-#define MSGL_STATUS 5 // exclusively for the playback status line
-#define MSGL_V 6      // -v
-#define MSGL_DBG2 7   // -v -v
-#define MSGL_DBG3 8   // ...
-#define MSGL_DBG4 9   // ....
-#define MSGL_DBG5 10  // .....
-#define MSGL_SMODE 11 // old slave mode (-identify)
+enum {
+    MSGL_FATAL,     // will exit/abort (note: msg.c doesn't exit or abort)
+    MSGL_ERR,       // continues
+    MSGL_WARN,      // only warning
+    MSGL_INFO,      // -quiet
+    MSGL_STATUS,    // exclusively for the playback status line
+    MSGL_V,         // -v
+    MSGL_DEBUG,     // -v -v
+    MSGL_TRACE,     // -v -v -v
+    MSGL_SMODE,     // old slave mode (-identify)
+};
 
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
                           const char *name);
@@ -58,6 +57,15 @@ void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
 void mp_msg_log_va(struct mp_log *log, int lev, const char *format, va_list va);
 
 bool mp_msg_test_log(struct mp_log *log, int lev);
+
+// Convenience macros.
+#define mp_fatal(log, ...)      mp_msg_log(log, MSGL_FATAL, __VA_ARGS__)
+#define mp_err(log, ...)        mp_msg_log(log, MSGL_ERR, __VA_ARGS__)
+#define mp_warn(log, ...)       mp_msg_log(log, MSGL_WARN, __VA_ARGS__)
+#define mp_info(log, ...)       mp_msg_log(log, MSGL_INFO, __VA_ARGS__)
+#define mp_verbose(log, ...)    mp_msg_log(log, MSGL_V, __VA_ARGS__)
+#define mp_dbg(log, ...)        mp_msg_log(log, MSGL_DEBUG, __VA_ARGS__)
+#define mp_trace(log, ...)      mp_msg_log(log, MSGL_TRACE, __VA_ARGS__)
 
 // Convenience macros, typically called with a pointer to a context struct
 // as first argument, which has a "struct mp_log log;" member.
@@ -69,17 +77,9 @@ bool mp_msg_test_log(struct mp_log *log, int lev);
 #define MP_WARN(obj, ...)       MP_MSG(obj, MSGL_WARN, __VA_ARGS__)
 #define MP_INFO(obj, ...)       MP_MSG(obj, MSGL_INFO, __VA_ARGS__)
 #define MP_VERBOSE(obj, ...)    MP_MSG(obj, MSGL_V, __VA_ARGS__)
-#define MP_DBG(obj, ...)        MP_MSG(obj, MSGL_DBG2, __VA_ARGS__)
-#define MP_TRACE(obj, ...)      MP_MSG(obj, MSGL_DBG5, __VA_ARGS__)
+#define MP_DBG(obj, ...)        MP_MSG(obj, MSGL_DEBUG, __VA_ARGS__)
+#define MP_TRACE(obj, ...)      MP_MSG(obj, MSGL_TRACE, __VA_ARGS__)
 #define MP_SMODE(obj, ...)      MP_MSG(obj, MSGL_SMODE, __VA_ARGS__)
-
-#define mp_fatal(log, ...)      mp_msg_log(log, MSGL_FATAL, __VA_ARGS__)
-#define mp_err(log, ...)        mp_msg_log(log, MSGL_ERR, __VA_ARGS__)
-#define mp_warn(log, ...)       mp_msg_log(log, MSGL_WARN, __VA_ARGS__)
-#define mp_info(log, ...)       mp_msg_log(log, MSGL_INFO, __VA_ARGS__)
-#define mp_verbose(log, ...)    mp_msg_log(log, MSGL_V, __VA_ARGS__)
-#define mp_dbg(log, ...)        mp_msg_log(log, MSGL_DBG2, __VA_ARGS__)
-#define mp_trace(log, ...)      mp_msg_log(log, MSGL_DBG5, __VA_ARGS__)
 
 struct mpv_global;
 void mp_msg_init(struct mpv_global *global);

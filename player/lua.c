@@ -260,7 +260,7 @@ static const char *log_level[] = {
     [MSGL_WARN] = "warn",
     [MSGL_INFO] = "info",
     [MSGL_V] = "verbose",
-    [MSGL_DBG2] = "debug",
+    [MSGL_DEBUG] = "debug",
 };
 
 static int script_log(lua_State *L)

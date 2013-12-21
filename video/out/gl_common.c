@@ -549,7 +549,7 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
 
     if (has_legacy)
         mp_msg_log(log, MSGL_V, "OpenGL legacy compat. found.\n");
-    mp_msg_log(log, MSGL_DBG2, "Combined OpenGL extensions string:\n%s\n",
+    mp_msg_log(log, MSGL_DEBUG, "Combined OpenGL extensions string:\n%s\n",
                gl->extensions);
 
     for (int n = 0; n < sizeof(gl_functions) / sizeof(gl_functions[0]); n++) {

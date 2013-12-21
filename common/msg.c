@@ -114,6 +114,7 @@ static void update_loglevel(struct mp_log *log)
     pthread_mutex_unlock(&mp_msg_lock);
 }
 
+// Return whether the message at this verbosity level would be actually printed.
 bool mp_msg_test_log(struct mp_log *log, int lev)
 {
     if (mp_msg_mute || !log->root)
@@ -136,7 +137,7 @@ static int mp_msg_docolor(void)
 
 static void set_msg_color(FILE* stream, int lev)
 {
-    static const int v_colors[] = {9, 1, 3, 3, -1, -1, 2, 8, 8, 8, 9};
+    static const int v_colors[] = {9, 1, 3, -1, -1, 2, 8, 8, -1};
     if (mp_msg_docolor())
         terminal_set_foreground_color(stream, v_colors[lev]);
 }
@@ -272,8 +273,8 @@ static const char *level_names[] = {
     [MSGL_INFO]         = "info",
     [MSGL_STATUS]       = "status",
     [MSGL_V]            = "v",
-    [MSGL_DBG2]         = "debug",
-    [MSGL_DBG5]         = "trace",
+    [MSGL_DEBUG]        = "debug",
+    [MSGL_TRACE]        = "trace",
 };
 
 int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level)

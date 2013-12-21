@@ -691,7 +691,7 @@ static GLuint create_shader(struct gl_video *p, GLenum type, const char *header,
     GLint log_length;
     gl->GetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
 
-    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DBG2) : MSGL_ERR;
+    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DEBUG) : MSGL_ERR;
     const char *typestr = type == GL_VERTEX_SHADER ? "vertex" : "fragment";
     if (mp_msg_test_log(p->log, pri)) {
         MP_MSG(p, pri, "%s shader source:\n", typestr);
@@ -727,7 +727,7 @@ static void link_shader(struct gl_video *p, GLuint program)
     GLint log_length;
     gl->GetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
 
-    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DBG2) : MSGL_ERR;
+    int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DEBUG) : MSGL_ERR;
     if (mp_msg_test_log(p->log, pri)) {
         GLchar *logstr = talloc_zero_size(NULL, log_length + 1);
         gl->GetProgramInfoLog(program, log_length, NULL, logstr);

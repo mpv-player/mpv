@@ -698,7 +698,7 @@ int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
                       void *target, const struct ebml_elem_desc *desc)
 {
     ctx->has_errors = false;
-    int msglevel = ctx->no_error_messages ? MSGL_DBG2 : MSGL_WARN;
+    int msglevel = ctx->no_error_messages ? MSGL_DEBUG : MSGL_WARN;
     uint64_t length = ebml_read_length(s, &ctx->bytes_read);
     if (s->eof) {
         MP_MSG(ctx, msglevel, "Unexpected end of file "
