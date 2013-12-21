@@ -161,14 +161,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 {
     enum AVPixelFormat fmt = imgfmt2pixfmt(mpfmt);
     const AVPixFmtDescriptor *pd = av_pix_fmt_desc_get(fmt);
-    if (!pd || fmt == AV_PIX_FMT_NONE) {
-        const char *name = mp_imgfmt_to_name(mpfmt);
-        if (name) {
-            mp_msg(MSGT_DECVIDEO, MSGL_V,
-                   "libavutil does not know image format '%s'\n", name);
-        }
+    if (!pd || fmt == AV_PIX_FMT_NONE)
         return (struct mp_imgfmt_desc) {0};
-    }
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
