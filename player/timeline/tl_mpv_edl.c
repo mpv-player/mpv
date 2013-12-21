@@ -130,7 +130,7 @@ static struct demuxer *open_file(char *filename, struct MPContext *mpctx)
                                     opts->stream_cache_def_size,
                                     opts->stream_cache_min_percent,
                                     opts->stream_cache_seek_min_percent);
-        d = demux_open(s, NULL, NULL, opts);
+        d = demux_open(s, NULL, NULL, mpctx->global);
     }
     if (!d) {
         MP_ERR(mpctx, "EDL: Could not open source file '%s'.\n",

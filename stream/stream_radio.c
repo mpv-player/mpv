@@ -574,7 +574,7 @@ static int init_audio(radio_priv_t *priv)
         tmp[0] = ',';
 #endif
 
-    if(audio_in_init(&priv->audio_in, is_oss?AUDIO_IN_OSS:AUDIO_IN_ALSA)<0){
+    if(audio_in_init(&priv->audio_in, mp_null_log, is_oss?AUDIO_IN_OSS:AUDIO_IN_ALSA)<0){
         mp_msg(MSGT_RADIO, MSGL_ERR, "[radio] audio_in_init failed.\n");
     }
 

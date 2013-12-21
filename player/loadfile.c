@@ -735,7 +735,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
         .ass_library = mpctx->ass_library, // demux_libass requires it
     };
     struct demuxer *demuxer =
-        demux_open(stream, demuxer_name, &params, mpctx->opts);
+        demux_open(stream, demuxer_name, &params, mpctx->global);
     if (!demuxer) {
         free_stream(stream);
         goto err_out;
@@ -1083,7 +1083,8 @@ goto_reopen_demuxer: ;
 
     mpctx->audio_delay = opts->audio_delay;
 
-    mpctx->demuxer = demux_open(mpctx->stream, opts->demuxer_name, NULL, opts);
+    mpctx->demuxer = demux_open(mpctx->stream, opts->demuxer_name, NULL,
+                                mpctx->global);
     mpctx->master_demuxer = mpctx->demuxer;
     if (!mpctx->demuxer) {
         MP_ERR(mpctx, "Failed to recognize file format.\n");

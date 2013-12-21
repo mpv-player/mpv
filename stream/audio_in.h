@@ -25,6 +25,8 @@
 
 #include "config.h"
 
+struct mp_log;
+
 #if HAVE_ALSA
 #include <alsa/asoundlib.h>
 
@@ -58,6 +60,7 @@ typedef struct {
 
 typedef struct
 {
+    struct mp_log *log;
     int type;
     int setup;
 
@@ -83,7 +86,7 @@ typedef struct
 #endif
 } audio_in_t;
 
-int audio_in_init(audio_in_t *ai, int type);
+int audio_in_init(audio_in_t *ai, struct mp_log *log, int type);
 int audio_in_setup(audio_in_t *ai);
 int audio_in_set_device(audio_in_t *ai, char *device);
 int audio_in_set_samplerate(audio_in_t *ai, int rate);

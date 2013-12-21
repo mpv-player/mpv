@@ -272,17 +272,16 @@ int ebml_read_skip(stream_t *s, uint64_t *length)
 /*
  * Skip to (probable) next cluster (MATROSKA_ID_CLUSTER) element start position.
  */
-int ebml_resync_cluster(stream_t *s)
+int ebml_resync_cluster(struct mp_log *log, stream_t *s)
 {
     int64_t pos = stream_tell(s);
     uint32_t last_4_bytes = 0;
-    mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Corrupt file detected. "
+    mp_err(log, "Corrupt file detected. "
            "Trying to resync starting from position %"PRId64"...\n", pos);
     while (!s->eof) {
         // Assumes MATROSKA_ID_CLUSTER is 4 bytes, with no 0 bytes.
         if (last_4_bytes == MATROSKA_ID_CLUSTER) {
-            mp_msg(MSGT_DEMUX, MSGL_ERR,
-                   "[mkv] Cluster found at %"PRId64".\n", pos - 4);
+            mp_err(log, "Cluster found at %"PRId64".\n", pos - 4);
             stream_seek(s, pos - 4);
             return 0;
         }
@@ -295,7 +294,8 @@ int ebml_resync_cluster(stream_t *s)
 /*
  * Skip the current element, or on error, call ebml_resync_cluster().
  */
-int ebml_read_skip_or_resync_cluster(stream_t *s, uint64_t *length)
+int ebml_read_skip_or_resync_cluster(struct mp_log *log, stream_t *s,
+                                     uint64_t *length)
 {
     uint64_t len;
     int l;
@@ -319,7 +319,7 @@ int ebml_read_skip_or_resync_cluster(stream_t *s, uint64_t *length)
     return 0;
 
 resync:
-    return ebml_resync_cluster(s) < 0 ? -1 : 1;
+    return ebml_resync_cluster(log, s) < 0 ? -1 : 1;
 }
 
 /*
@@ -455,8 +455,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
 {
     assert(type->type == EBML_TYPE_SUBELEMENTS);
     assert(level < 8);
-    mp_msg(MSGT_DEMUX, MSGL_DBG2, "%.*s[mkv] Parsing element %s\n",
-           level, "       ", type->name);
+    MP_DBG(ctx, "%.*sParsing element %s\n", level, "       ", type->name);
 
     char *s = target;
     uint8_t *end = data + size;
@@ -469,8 +468,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         if (len > end - p)
             goto past_end_error;
         if (len < 0) {
-            mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] Error parsing subelement "
-                   "id\n");
+            MP_DBG(ctx, "Error parsing subelement id\n");
             goto other_error;
         }
         p += len;
@@ -478,8 +476,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         if (len > end - p)
             goto past_end_error;
         if (len < 0) {
-            mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] Error parsing subelement "
-                   "length\n");
+            MP_DBG(ctx, "Error parsing subelement length\n");
             goto other_error;
         }
         p += len;
@@ -495,7 +492,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         if (length > end - p) {
             if (field_idx >= 0 && type->fields[field_idx].desc->type
                 != EBML_TYPE_SUBELEMENTS) {
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] Subelement content goes "
+                MP_DBG(ctx, "Subelement content goes "
                        "past end of containing element\n");
                 goto other_error;
             }
@@ -508,7 +505,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         continue;
 
     past_end_error:
-        mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] Subelement headers go "
+        MP_DBG(ctx, "Subelement headers go "
                "past end of containing element\n");
     other_error:
         ctx->has_errors = true;
@@ -564,7 +561,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         if (length > end - data) {
             // Try to parse what is possible from inside this partial element
             length = end - data;
-            mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] Next subelement content goes "
+            MP_DBG(ctx, "Next subelement content goes "
                    "past end of containing element, will be truncated\n");
         }
         int field_idx = -1;
@@ -575,14 +572,14 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             }
         if (field_idx < 0) {
             if (id == 0xec)
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "%.*s[mkv] Ignoring Void element "
+                MP_DBG(ctx, "%.*sIgnoring Void element "
                        "size: %"PRIu64"\n", level+1, "        ", length);
             else if (id == 0xbf)
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "%.*s[mkv] Ignoring CRC-32 "
+                MP_DBG(ctx, "%.*sIgnoring CRC-32 "
                        "element size: %"PRIu64"\n", level+1, "        ",
                        length);
             else
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] Ignoring unrecognized "
+                MP_DBG(ctx, "Ignoring unrecognized "
                        "subelement. ID: %x size: %"PRIu64"\n", id, length);
             data += length;
             continue;
@@ -593,26 +590,26 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         int *countptr = (int *) (s + fd->count_offset);
         if (*countptr >= num_elems[field_idx]) {
             // Shouldn't happen with on any sane file without bugs
-            mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Too many subelems?\n");
+            MP_ERR(ctx, "Too many subelems?\n");
             ctx->has_errors = true;
             data += length;
             continue;
         }
         if (*countptr > 0 && !multiple) {
-            mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] Another subelement of type "
+            MP_DBG(ctx, "Another subelement of type "
                    "%x %s (size: %"PRIu64"). Only one allowed. Ignoring.\n",
                    id, ed->name, length);
             ctx->has_errors = true;
             data += length;
             continue;
         }
-        mp_msg(MSGT_DEMUX, MSGL_DBG2, "%.*s[mkv] Parsing %x %s size: %"PRIu64
+        MP_DBG(ctx, "%.*sParsing %x %s size: %"PRIu64
                " value: ", level+1, "        ", id, ed->name, length);
 
         char *fieldptr = s + fd->offset;
         switch (ed->type) {
         case EBML_TYPE_SUBELEMENTS:
-            mp_msg(MSGT_DEMUX, MSGL_DBG2, "subelements\n");
+            MP_DBG(ctx, "subelements\n");
             char *subelptr;
             if (multiple) {
                 char *array_start = (char *) *(generic_struct **) fieldptr;
@@ -631,36 +628,36 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                 subelptr = (fieldtype *) fieldptr
             GETPTR(uintptr, uint64_t);
             if (length < 1 || length > 8) {
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "uint invalid length %"PRIu64
+                MP_DBG(ctx, "uint invalid length %"PRIu64
                        "\n", length);
                 goto error;
             }
             *uintptr = ebml_parse_uint(data, length);
-            mp_msg(MSGT_DEMUX, MSGL_DBG2, "uint %"PRIu64"\n", *uintptr);
+            MP_DBG(ctx, "uint %"PRIu64"\n", *uintptr);
             break;
 
         case EBML_TYPE_SINT:;
             int64_t *sintptr;
             GETPTR(sintptr, int64_t);
             if (length < 1 || length > 8) {
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "sint invalid length %"PRIu64
+                MP_DBG(ctx, "sint invalid length %"PRIu64
                        "\n", length);
                 goto error;
             }
             *sintptr = ebml_parse_sint(data, length);
-            mp_msg(MSGT_DEMUX, MSGL_DBG2, "sint %"PRId64"\n", *sintptr);
+            MP_DBG(ctx, "sint %"PRId64"\n", *sintptr);
             break;
 
         case EBML_TYPE_FLOAT:;
             double *floatptr;
             GETPTR(floatptr, double);
             if (length != 4 && length != 8) {
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "float invalid length %"PRIu64
+                MP_DBG(ctx, "float invalid length %"PRIu64
                        "\n", length);
                 goto error;
             }
             *floatptr = ebml_parse_float(data, length);
-            mp_msg(MSGT_DEMUX, MSGL_DBG2, "float %f\n", *floatptr);
+            MP_DBG(ctx, "float %f\n", *floatptr);
             break;
 
         case EBML_TYPE_STR:
@@ -670,10 +667,10 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             strptr->start = data;
             strptr->len = length;
             if (ed->type == EBML_TYPE_STR)
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "string \"%.*s\"\n",
+                MP_DBG(ctx, "string \"%.*s\"\n",
                        BSTR_P(*strptr));
             else
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "binary %zd bytes\n",
+                MP_DBG(ctx, "binary %zd bytes\n",
                        strptr->len);
             break;
 
@@ -682,10 +679,10 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             GETPTR(idptr, uint32_t);
             *idptr = ebml_parse_id(data, &len);
             if (len != length) {
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "ebml_id broken value\n");
+                MP_DBG(ctx, "ebml_id broken value\n");
                 goto error;
             }
-            mp_msg(MSGT_DEMUX, MSGL_DBG2, "ebml_id %x\n", (unsigned)*idptr);
+            MP_DBG(ctx, "ebml_id %x\n", (unsigned)*idptr);
             break;
         default:
             abort();
@@ -704,24 +701,21 @@ int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
     int msglevel = ctx->no_error_messages ? MSGL_DBG2 : MSGL_WARN;
     uint64_t length = ebml_read_length(s, &ctx->bytes_read);
     if (s->eof) {
-        mp_msg(MSGT_DEMUX, msglevel, "[mkv] Unexpected end of file "
+        MP_MSG(ctx, msglevel, "Unexpected end of file "
                    "- partial or corrupt file?\n");
         return -1;
     }
     if (length > 1000000000) {
-        mp_msg(MSGT_DEMUX, msglevel, "[mkv] Refusing to read element over "
-               "100 MB in size\n");
+        MP_MSG(ctx, msglevel, "Refusing to read element over 100 MB in size\n");
         return -1;
     }
     ctx->talloc_ctx = talloc_size(NULL, length + 8);
     int read_len = stream_read(s, ctx->talloc_ctx, length);
     ctx->bytes_read += read_len;
     if (read_len < length)
-        mp_msg(MSGT_DEMUX, msglevel, "[mkv] Unexpected end of file "
-               "- partial or corrupt file?\n");
+        MP_MSG(ctx, msglevel, "Unexpected end of file - partial or corrupt file?\n");
     ebml_parse_element(ctx, target, ctx->talloc_ctx, read_len, desc, 0);
     if (ctx->has_errors)
-        mp_msg(MSGT_DEMUX, msglevel, "[mkv] Error parsing element %s\n",
-               desc->name);
+        MP_MSG(ctx, msglevel, "Error parsing element %s\n", desc->name);
     return 0;
 }

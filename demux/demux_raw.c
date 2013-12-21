@@ -120,7 +120,7 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
         return -1;
 
     if (!width || !height) {
-        mp_msg(MSGT_DEMUX, MSGL_ERR, "rawvideo: width or height not specified!\n");
+        MP_ERR(demuxer, "rawvideo: width or height not specified!\n");
         return -1;
     }
 
@@ -166,8 +166,7 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
             break;
         }
         if (!bpp) {
-            mp_msg(MSGT_DEMUX, MSGL_ERR,
-                   "rawvideo: img size not specified and unknown format!\n");
+            MP_ERR(demuxer, "rawvideo: img size not specified and unknown format!\n");
             return -1;
         }
         imgsize = width * height * bpp / 8;

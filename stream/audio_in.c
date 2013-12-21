@@ -28,10 +28,11 @@
 #include <errno.h>
 
 // sanitizes ai structure before calling other functions
-int audio_in_init(audio_in_t *ai, int type)
+int audio_in_init(audio_in_t *ai, struct mp_log *log, int type)
 {
     ai->type = type;
     ai->setup = 0;
+    ai->log = log;
 
     ai->channels = -1;
     ai->samplerate = -1;
@@ -247,16 +248,16 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 	ret = snd_pcm_readi(ai->alsa.handle, buffer, ai->alsa.chunk_size);
 	if (ret != ai->alsa.chunk_size) {
 	    if (ret < 0) {
-		mp_msg(MSGT_TV, MSGL_ERR, "\nError reading audio: %s\n", snd_strerror(ret));
+		MP_ERR(ai, "\nError reading audio: %s\n", snd_strerror(ret));
 		if (ret == -EPIPE) {
 		    if (ai_alsa_xrun(ai) == 0) {
-			mp_msg(MSGT_TV, MSGL_ERR, "Recovered from cross-run, some frames may be left out!\n");
+			MP_ERR(ai, "Recovered from cross-run, some frames may be left out!\n");
 		    } else {
-			mp_msg(MSGT_TV, MSGL_ERR, "Fatal error, cannot recover!\n");
+			MP_ERR(ai, "Fatal error, cannot recover!\n");
 		    }
 		}
 	    } else {
-		mp_msg(MSGT_TV, MSGL_ERR, "\nNot enough audio samples!\n");
+		MP_ERR(ai, "\nNot enough audio samples!\n");
 	    }
 	    return -1;
 	}
@@ -267,10 +268,10 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 	ret = read(ai->oss.audio_fd, buffer, ai->blocksize);
        if (ret != ai->blocksize) {
            if (ret < 0) {
-               mp_msg(MSGT_TV, MSGL_ERR, "\nError reading audio: %s\n", strerror(errno));
+               MP_ERR(ai, "\nError reading audio: %s\n", strerror(errno));
 
            } else {
-               mp_msg(MSGT_TV, MSGL_ERR, "\nNot enough audio samples!\n");
+               MP_ERR(ai, "\nNot enough audio samples!\n");
            }
            return -1;
        }
@@ -281,9 +282,9 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
        ret = sio_read(ai->sndio.hdl, buffer, ai->blocksize);
 	if (ret != ai->blocksize) {
 	    if (ret < 0) {
-		mp_msg(MSGT_TV, MSGL_ERR, "\nError reading audio: %s\n", strerror(errno));
+		MP_ERR(ai, "\nError reading audio: %s\n", strerror(errno));
 	    } else {
-		mp_msg(MSGT_TV, MSGL_ERR, "\nNot enough audio samples!\n");
+		MP_ERR(ai, "\nNot enough audio samples!\n");
 	    }
 	    return -1;
 	}

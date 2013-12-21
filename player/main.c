@@ -219,7 +219,7 @@ static bool handle_help_options(struct MPContext *mpctx)
     if ((opts->demuxer_name && strcmp(opts->demuxer_name, "help") == 0) ||
         (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name, "help") == 0) ||
         (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name, "help") == 0)) {
-        demuxer_help();
+        demuxer_help(log);
         MP_INFO(mpctx, "\n");
         opt_exit = 1;
     }

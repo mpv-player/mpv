@@ -19,10 +19,13 @@
 #ifndef MPLAYER_MF_H
 #define MPLAYER_MF_H
 
+struct mp_log;
+
 extern double mf_fps;
 extern char * mf_type;
 
 typedef struct mf {
+    struct mp_log *log;
     struct sh_video *sh;
     int curr_frame;
     int nr_of_files;
@@ -31,7 +34,7 @@ typedef struct mf {
     struct stream **streams;
 } mf_t;
 
-mf_t *open_mf_pattern(void *talloc_ctx, char *filename);
-mf_t *open_mf_single(void *talloc_ctx, char *filename);
+mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filename);
+mf_t *open_mf_single(void *talloc_ctx, struct mp_log *log, char *filename);
 
 #endif /* MPLAYER_MF_H */

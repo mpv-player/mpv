@@ -139,7 +139,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
 
-    *demuxer = demux_open(*stream, "mkv", params, opts);
+    *demuxer = demux_open(*stream, "mkv", params, mpctx->global);
     if (!*demuxer) {
         talloc_free(filename);
         free_stream(*stream);
@@ -177,7 +177,7 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
     struct stream *s = stream_open(filename, mpctx->opts);
     if (!s)
         return false;
-    struct demuxer *d = demux_open(s, "mkv", &params, mpctx->opts);
+    struct demuxer *d = demux_open(s, "mkv", &params, mpctx->global);
 
     if (!d) {
         free_stream(s);
@@ -264,7 +264,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
             MP_INFO(mpctx, "Loading references from '%s'.\n",
                    opts->ordered_chapters_files);
             struct playlist *pl =
-                playlist_parse_file(opts->ordered_chapters_files, opts);
+                playlist_parse_file(opts->ordered_chapters_files, mpctx->global);
             talloc_steal(tmp, pl);
             for (struct playlist_entry *e = pl->first; e; e = e->next)
                 MP_TARRAY_APPEND(tmp, filenames, num_filenames, e->filename);

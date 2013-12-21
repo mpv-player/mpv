@@ -52,13 +52,14 @@ static void mf_add(mf_t *mf, const char *fname)
     MP_TARRAY_APPEND(mf, mf->names, mf->nr_of_files, entry);
 }
 
-mf_t *open_mf_pattern(void *talloc_ctx, char *filename)
+mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filename)
 {
 #if defined(HAVE_GLOB) || defined(__MINGW32__)
     int error_count = 0;
     int count = 0;
 
     mf_t *mf = talloc_zero(talloc_ctx, mf_t);
+    mf->log = log;
 
     if (filename[0] == '@') {
         FILE *lst_f = fopen(filename + 1, "r");
@@ -70,24 +71,21 @@ mf_t *open_mf_pattern(void *talloc_ctx, char *filename)
                 while (t > fname && isspace(*t))
                     *(t--) = 0;
                 if (!mp_path_exists(fname)) {
-                    mp_msg(MSGT_STREAM, MSGL_V, "[mf] file not found: '%s'\n",
-                           fname);
+                    mp_verbose(log, "file not found: '%s'\n", fname);
                 } else {
                     mf_add(mf, fname);
                 }
             }
             fclose(lst_f);
 
-            mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] number of files: %d\n",
-                   mf->nr_of_files);
+            mp_info(log, "number of files: %d\n", mf->nr_of_files);
             goto exit_mf;
         }
-        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] %s is not indirect filelist\n",
-               filename + 1);
+        mp_info(log, "%s is not indirect filelist\n", filename + 1);
     }
 
     if (strchr(filename, ',')) {
-        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] filelist: %s\n", filename);
+        mp_info(log, "filelist: %s\n", filename);
         bstr bfilename = bstr0(filename);
 
         while (bfilename.len) {
@@ -96,15 +94,13 @@ mf_t *open_mf_pattern(void *talloc_ctx, char *filename)
             char *fname2 = bstrdup0(mf, bfname);
 
             if (!mp_path_exists(fname2))
-                mp_msg(MSGT_STREAM, MSGL_V, "[mf] file not found: '%s'\n",
-                       fname2);
+                mp_verbose(log, "file not found: '%s'\n", fname2);
             else {
                 mf_add(mf, fname2);
             }
             talloc_free(fname2);
         }
-        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] number of files: %d\n",
-               mf->nr_of_files);
+        mp_info(log, "number of files: %d\n", mf->nr_of_files);
 
         goto exit_mf;
     }
@@ -116,7 +112,7 @@ mf_t *open_mf_pattern(void *talloc_ctx, char *filename)
         if (!strchr(filename, '*'))
             strcat(fname, "*");
 
-        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] search expr: %s\n", fname);
+        mp_info(log, "search expr: %s\n", fname);
 
         glob_t gg;
         if (glob(fname, 0, NULL, &gg)) {
@@ -129,38 +125,37 @@ mf_t *open_mf_pattern(void *talloc_ctx, char *filename)
                 continue;
             mf_add(mf, gg.gl_pathv[i]);
         }
-        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] number of files: %d\n",
-               mf->nr_of_files);
+        mp_info(log, "number of files: %d\n", mf->nr_of_files);
         globfree(&gg);
         goto exit_mf;
     }
 
-    mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] search expr: %s\n", filename);
+    mp_info(log, "search expr: %s\n", filename);
 
     while (error_count < 5) {
         sprintf(fname, filename, count++);
         if (!mp_path_exists(fname)) {
             error_count++;
-            mp_msg(MSGT_STREAM, MSGL_V, "[mf] file not found: '%s'\n", fname);
+            mp_verbose(log, "file not found: '%s'\n", fname);
         } else {
             mf_add(mf, fname);
         }
     }
 
-    mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] number of files: %d\n",
-           mf->nr_of_files);
+    mp_info(log, "number of files: %d\n", mf->nr_of_files);
 
 exit_mf:
     return mf;
 #else
-    mp_msg(MSGT_STREAM, MSGL_FATAL, "[mf] mf support is disabled on your os\n");
+    mp_fatal(log, "mf support is disabled on your os\n");
     return 0;
 #endif
 }
 
-mf_t *open_mf_single(void *talloc_ctx, char *filename)
+mf_t *open_mf_single(void *talloc_ctx, struct mp_log *log, char *filename)
 {
     mf_t *mf = talloc_zero(talloc_ctx, mf_t);
+    mf->log = log;
     mf_add(mf, filename);
     return mf;
 }

@@ -73,7 +73,7 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
 
     bstr buf = stream_read_complete(s, NULL, 100000000);
     if (!buf.start) {
-        mp_msg(MSGT_ASS, MSGL_ERR, "Refusing to load subtitle file "
+        MP_ERR(demuxer, "Refusing to load subtitle file "
                 "larger than 100 MB: %s\n", demuxer->filename);
         return -1;
     }

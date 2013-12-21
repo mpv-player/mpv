@@ -33,6 +33,7 @@
 #include "common/av_common.h"
 #include "talloc.h"
 #include "common/msg.h"
+#include "common/global.h"
 
 #include "stream/stream.h"
 #include "demux.h"
@@ -225,7 +226,7 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
 struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
 {
     if (demuxer->num_streams > MAX_SH_STREAMS) {
-        mp_msg(MSGT_DEMUXER, MSGL_WARN, "Too many streams.");
+        MP_WARN(demuxer, "Too many streams.");
         return NULL;
     }
 
@@ -353,8 +354,7 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
     if (stream->type != STREAM_VIDEO && dp->pts == MP_NOPTS_VALUE)
         dp->pts = dp->dts;
 
-    mp_msg(MSGT_DEMUXER, MSGL_DBG2,
-           "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIu64" "
+    MP_DBG(demuxer, "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIu64" "
            "[packs: A=%d V=%d S=%d]\n", stream_type_name(stream->type),
            dp->len, dp->pts, dp->pos, count_packs(demuxer, STREAM_AUDIO),
            count_packs(demuxer, STREAM_VIDEO), count_packs(demuxer, STREAM_SUB));
@@ -373,13 +373,13 @@ static bool demux_check_queue_full(demuxer_t *demux)
 overflow:
 
     if (!demux->warned_queue_overflow) {
-        mp_msg(MSGT_DEMUXER, MSGL_ERR, "\nToo many packets in the demuxer "
-                "packet queue (video: %d packets in %d bytes, audio: %d "
-                "packets in %d bytes, sub: %d packets in %d bytes).\n",
-                count_packs(demux, STREAM_VIDEO), count_bytes(demux, STREAM_VIDEO),
-                count_packs(demux, STREAM_AUDIO), count_bytes(demux, STREAM_AUDIO),
-                count_packs(demux, STREAM_SUB), count_bytes(demux, STREAM_SUB));
-        mp_msg(MSGT_DEMUXER, MSGL_HINT, "Maybe you are playing a non-"
+        MP_ERR(demux, "\nToo many packets in the demuxer "
+               "packet queue (video: %d packets in %d bytes, audio: %d "
+               "packets in %d bytes, sub: %d packets in %d bytes).\n",
+               count_packs(demux, STREAM_VIDEO), count_bytes(demux, STREAM_VIDEO),
+               count_packs(demux, STREAM_AUDIO), count_bytes(demux, STREAM_AUDIO),
+               count_packs(demux, STREAM_SUB), count_bytes(demux, STREAM_SUB));
+        MP_INFO(demux, "Maybe you are playing a non-"
                 "interleaved stream/file or the codec failed?\n");
     }
     demux->warned_queue_overflow = true;
@@ -399,8 +399,8 @@ static void ds_get_packets(struct sh_stream *sh)
 {
     struct demux_stream *ds = sh->ds;
     demuxer_t *demux = sh->demuxer;
-    mp_msg(MSGT_DEMUXER, MSGL_DBG3, "ds_get_packets (%s) called\n",
-           stream_type_name(sh->type));
+    MP_TRACE(demux, "ds_get_packets (%s) called\n",
+             stream_type_name(sh->type));
     while (1) {
         if (ds->head)
             return;
@@ -411,8 +411,8 @@ static void ds_get_packets(struct sh_stream *sh)
         if (!demux_fill_buffer(demux))
             break; // EOF
     }
-    mp_msg(MSGT_DEMUXER, MSGL_V, "ds_get_packets: EOF reached (stream: %s)\n",
-           stream_type_name(sh->type));
+    MP_VERBOSE(demux, "ds_get_packets: EOF reached (stream: %s)\n",
+               stream_type_name(sh->type));
     ds->eof = 1;
 }
 
@@ -476,16 +476,15 @@ bool demux_stream_eof(struct sh_stream *sh)
 
 // ====================================================================
 
-void demuxer_help(void)
+void demuxer_help(struct mp_log *log)
 {
     int i;
 
-    mp_msg(MSGT_DEMUXER, MSGL_INFO, "Available demuxers:\n");
-    mp_msg(MSGT_DEMUXER, MSGL_INFO, " demuxer:   info:\n");
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DEMUXERS\n");
+    mp_info(log, "Available demuxers:\n");
+    mp_info(log, " demuxer:   info:\n");
     for (i = 0; demuxer_list[i]; i++) {
-        mp_msg(MSGT_DEMUXER, MSGL_INFO, "%10s  %s\n",
-               demuxer_list[i]->name, demuxer_list[i]->desc);
+        mp_info(log, "%10s  %s\n",
+                demuxer_list[i]->name, demuxer_list[i]->desc);
     }
 }
 
@@ -500,7 +499,8 @@ static const char *d_level(enum demux_check level)
     abort();
 }
 
-static struct demuxer *open_given_type(struct MPOpts *opts,
+static struct demuxer *open_given_type(struct mpv_global *global,
+                                       struct mp_log *log,
                                        const struct demuxer_desc *desc,
                                        struct stream *stream,
                                        struct demuxer_params *params,
@@ -516,25 +516,26 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
                     stream->end_pos > 0,
         .accurate_seek = true,
         .filepos = -1,
-        .opts = opts,
+        .opts = global->opts,
+        .global = global,
+        .log = mp_log_new(demuxer, log, desc->name),
         .filename = talloc_strdup(demuxer, stream->url),
         .metadata = talloc_zero(demuxer, struct mp_tags),
     };
     demuxer->params = params; // temporary during open()
     stream_seek(stream, stream->start_pos);
 
-    mp_msg(MSGT_DEMUXER, MSGL_V, "Trying demuxer: %s (force-level: %s)\n",
-           desc->name, d_level(check));
+    mp_verbose(log, "Trying demuxer: %s (force-level: %s)\n",
+               desc->name, d_level(check));
 
     int ret = demuxer->desc->open(demuxer, check);
     if (ret >= 0) {
         demuxer->params = NULL;
         if (demuxer->filetype)
-            mp_msg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s (%s)\n",
+            mp_info(log, "Detected file format: %s (%s)\n",
                     demuxer->filetype, desc->desc);
         else
-            mp_msg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s\n",
-                    desc->desc);
+            mp_info(log, "Detected file format: %s\n", desc->desc);
         if (stream_manages_timeline(demuxer->stream)) {
             // Incorrect, but fixes some behavior with DVD/BD
             demuxer->ts_resets_possible = false;
@@ -548,8 +549,8 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
         demux_info_update(demuxer);
         // Pretend we can seek if we can't seek, but there's a cache.
         if (!demuxer->seekable && stream->uncached_stream) {
-            mp_msg(MSGT_DEMUXER, MSGL_WARN,
-                   "File is not seekable, but there's a cache: enabling seeking.\n");
+            mp_warn(log,
+                    "File is not seekable, but there's a cache: enabling seeking.\n");
             demuxer->seekable = true;
         }
         return demuxer;
@@ -564,10 +565,13 @@ static const int d_request[] = {DEMUX_CHECK_REQUEST, -1};
 static const int d_force[]   = {DEMUX_CHECK_FORCE, -1};
 
 struct demuxer *demux_open(struct stream *stream, char *force_format,
-                           struct demuxer_params *params, struct MPOpts *opts)
+                           struct demuxer_params *params,
+                           struct mpv_global *global)
 {
     const int *check_levels = d_normal;
     const struct demuxer_desc *check_desc = NULL;
+    struct mp_log *log = mp_log_new(NULL, global->log, "!demux");
+    struct demuxer *demuxer = NULL;
 
     if (!force_format)
         force_format = stream->demuxer;
@@ -583,9 +587,8 @@ struct demuxer *demux_open(struct stream *stream, char *force_format,
                 check_desc = demuxer_list[n];
         }
         if (!check_desc) {
-            mp_msg(MSGT_DEMUXER, MSGL_ERR, "Demuxer %s does not exist.\n",
-                   force_format);
-            return NULL;
+            mp_err(log, "Demuxer %s does not exist.\n", force_format);
+            goto done;
         }
     }
 
@@ -599,15 +602,16 @@ struct demuxer *demux_open(struct stream *stream, char *force_format,
         for (int n = 0; demuxer_list[n]; n++) {
             const struct demuxer_desc *desc = demuxer_list[n];
             if (!check_desc || desc == check_desc) {
-                struct demuxer *demuxer = open_given_type(opts, desc, stream,
-                                                          params, level);
+                demuxer = open_given_type(global, log, desc, stream, params, level);
                 if (demuxer)
-                    return demuxer;
+                    goto done;
             }
         }
     }
 
-    return NULL;
+done:
+    talloc_free(log);
+    return demuxer;
 }
 
 void demux_flush(demuxer_t *demuxer)
@@ -620,7 +624,7 @@ void demux_flush(demuxer_t *demuxer)
 int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     if (!demuxer->seekable) {
-        mp_msg(MSGT_DEMUXER, MSGL_WARN, "Cannot seek in this file.\n");
+        MP_WARN(demuxer, "Cannot seek in this file.\n");
         return 0;
     }
 
@@ -716,7 +720,7 @@ int demux_info_add_bstr(demuxer_t *demuxer, struct bstr opt, struct bstr param)
     if (oldval) {
         if (bstrcmp0(param, oldval) == 0)
             return 0;
-        mp_msg(MSGT_DEMUX, MSGL_INFO, "Demuxer info %.*s changed to %.*s\n",
+        MP_INFO(demuxer, "Demuxer info %.*s changed to %.*s\n",
                 BSTR_P(opt), BSTR_P(param));
     }
 
@@ -732,16 +736,16 @@ int demux_info_print(demuxer_t *demuxer)
     if (!info || !info->num_keys)
         return 0;
 
-    mp_msg(MSGT_DEMUX, MSGL_INFO, "Clip info:\n");
+    MP_INFO(demuxer, "Clip info:\n");
     for (n = 0; n < info->num_keys; n++) {
-        mp_msg(MSGT_DEMUX, MSGL_INFO, " %s: %s\n", info->keys[n],
+        MP_INFO(demuxer, " %s: %s\n", info->keys[n],
                info->values[n]);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CLIP_INFO_NAME%d=%s\n", n,
-               info->keys[n]);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CLIP_INFO_VALUE%d=%s\n", n,
-               info->values[n]);
+        MP_SMODE(demuxer, "ID_CLIP_INFO_NAME%d=%s\n", n,
+                 info->keys[n]);
+        MP_SMODE(demuxer, "ID_CLIP_INFO_VALUE%d=%s\n", n,
+                 info->values[n]);
     }
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CLIP_INFO_N=%d\n", n);
+    MP_SMODE(demuxer, "ID_CLIP_INFO_N=%d\n", n);
 
     return 0;
 }

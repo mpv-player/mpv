@@ -26,6 +26,8 @@
 #include "stream/stream.h"
 #include "bstr/bstr.h"
 
+struct mp_log;
+
 
 /* EBML version supported */
 #define EBML_VERSION 1
@@ -57,6 +59,7 @@ struct ebml_elem_desc {
 };
 
 struct ebml_parse_ctx {
+    struct mp_log *log;
     void *talloc_ctx;
     int bytes_read;
     bool has_errors;
@@ -99,8 +102,9 @@ double ebml_read_float (stream_t *s, uint64_t *length);
 char *ebml_read_ascii (stream_t *s, uint64_t *length);
 char *ebml_read_utf8 (stream_t *s, uint64_t *length);
 int ebml_read_skip (stream_t *s, uint64_t *length);
-int ebml_read_skip_or_resync_cluster(stream_t *s, uint64_t *length);
-int ebml_resync_cluster(stream_t *s);
+int ebml_read_skip_or_resync_cluster(struct mp_log *log, stream_t *s,
+                                     uint64_t *length);
+int ebml_resync_cluster(struct mp_log *log, stream_t *s);
 uint32_t ebml_read_master (stream_t *s, uint64_t *length);
 
 int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,

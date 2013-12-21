@@ -539,7 +539,7 @@ static struct playlist *do_parse(struct stream* stream, bool forced,
   };
 
   bool success = false;
-  struct demuxer *pl_demux = demux_open(stream, "playlist", NULL, global->opts);
+  struct demuxer *pl_demux = demux_open(stream, "playlist", NULL, global);
   if (pl_demux && pl_demux->playlist) {
     playlist_transfer_entries(p.pl, pl_demux->playlist);
     success = true;
