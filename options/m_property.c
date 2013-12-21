@@ -158,7 +158,7 @@ int m_property_do(struct mp_log *log, const m_option_t *prop_list,
         if (!log)
             return M_PROPERTY_ERROR;
         // (reject 0 return value: success, but empty string with flag)
-        if (m_option_parse(&opt, bstr0(name), bstr0(arg), &val) <= 0)
+        if (m_option_parse(log, &opt, bstr0(name), bstr0(arg), &val) <= 0)
             return M_PROPERTY_ERROR;
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
         m_option_free(&opt, &val);

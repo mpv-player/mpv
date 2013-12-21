@@ -299,7 +299,7 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
             .priv_defaults = sinfo->priv_defaults,
             .options = sinfo->options,
         };
-        struct m_config *config = m_config_from_obj_desc(s, &desc);
+        struct m_config *config = m_config_from_obj_desc(s, mp_null_log, &desc);
         s->priv = config->optstruct;
         if (s->info->url_options && !parse_url(s, config)) {
             mp_msg(MSGT_OPEN, MSGL_ERR, "URL parsing failed on url %s\n", url);

@@ -171,7 +171,7 @@ static struct vo *vo_create(struct mpv_global *global,
     };
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
-    struct m_config *config = m_config_from_obj_desc(vo, &desc);
+    struct m_config *config = m_config_from_obj_desc(vo, vo->log, &desc);
     if (m_config_apply_defaults(config, name, vo->opts->vo_defs) < 0)
         goto error;
     if (m_config_set_obj_params(config, args) < 0)

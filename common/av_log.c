@@ -147,30 +147,31 @@ void init_libav(void)
 }
 
 #define V(x) (x)>>16, (x)>>8 & 255, (x) & 255
-static void print_version(int v, char *name, unsigned buildv, unsigned runv)
+static void print_version(struct mp_log *log, int v, char *name,
+                          unsigned buildv, unsigned runv)
 {
-    mp_msg(MSGT_CPLAYER, v, "   %-15s %d.%d.%d", name, V(buildv));
+    mp_msg_log(log, v, "   %-15s %d.%d.%d", name, V(buildv));
     if (buildv != runv)
-        mp_msg(MSGT_CPLAYER, v, " (runtime %d.%d.%d)", V(runv));
-    mp_msg(MSGT_CPLAYER, v, "\n");
+        mp_msg_log(log, v, " (runtime %d.%d.%d)", V(runv));
+    mp_msg_log(log, v, "\n");
 }
 #undef V
 
-void print_libav_versions(int v)
+void print_libav_versions(struct mp_log *log, int v)
 {
-    mp_msg(MSGT_CPLAYER, v, "%s library versions:\n", LIB_PREFIX);
+    mp_msg_log(log, v, "%s library versions:\n", LIB_PREFIX);
 
-    print_version(v, "libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version());
-    print_version(v, "libavcodec",    LIBAVCODEC_VERSION_INT,    avcodec_version());
-    print_version(v, "libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version());
-    print_version(v, "libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version());
+    print_version(log, v, "libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version());
+    print_version(log, v, "libavcodec",    LIBAVCODEC_VERSION_INT,    avcodec_version());
+    print_version(log, v, "libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version());
+    print_version(log, v, "libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version());
 #if HAVE_LIBAVFILTER
-    print_version(v, "libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version());
+    print_version(log, v, "libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version());
 #endif
 #if HAVE_LIBAVRESAMPLE
-    print_version(v, "libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version());
+    print_version(log, v, "libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version());
 #endif
 #if HAVE_LIBSWRESAMPLE
-    print_version(v, "libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version());
+    print_version(log, v, "libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version());
 #endif
 }

@@ -1,2 +1,3 @@
 void init_libav(void);
-void print_libav_versions(int v);
+struct mp_log;
+void print_libav_versions(struct mp_log *log, int v);

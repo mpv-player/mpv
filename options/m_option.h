@@ -31,6 +31,7 @@
 typedef struct m_option_type m_option_type_t;
 typedef struct m_option m_option_t;
 struct m_config;
+struct mp_log;
 
 ///////////////////////////// Options types declarations ////////////////////
 
@@ -63,7 +64,8 @@ extern const m_option_type_t m_option_type_size_box;
 extern const m_option_type_t m_option_type_chmap;
 
 // Callback used by m_option_type_print_func options.
-typedef int (*m_opt_func_full_t)(const m_option_t *, const char *, const char *);
+typedef int (*m_opt_func_full_t)(struct mp_log *log, const m_option_t *,
+                                 const char *, const char *);
 
 enum m_rel_time_type {
     REL_TIME_NONE,
@@ -113,6 +115,9 @@ struct m_obj_desc {
     bool hidden;
     // Callback to print custom help if "help" is passed
     void (*print_help)(void);
+    // Set by m_obj_list_find(). If the requested name is an old alias, this
+    // is set to the old name (while the name field uses the new name).
+    const char *replaced_name;
 };
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.
@@ -224,6 +229,7 @@ struct m_option_type {
     // Parse the data from a string.
     /** It is the only required function, all others can be NULL.
      *
+     *  \param log for outputting parser error or help messages
      *  \param opt The option that is parsed.
      *  \param name The full option name.
      *  \param param The parameter to parse.
@@ -233,8 +239,8 @@ struct m_option_type {
      *  \return On error a negative value is returned, on success the number
      *          of arguments consumed. For details see \ref OptionParserReturn.
      */
-    int (*parse)(const m_option_t *opt, struct bstr name, struct bstr param,
-                 void *dst);
+    int (*parse)(struct mp_log *log, const m_option_t *opt,
+                 struct bstr name, struct bstr param, void *dst);
 
     // Print back a value in string form.
     /** \param opt The option to print.
@@ -439,10 +445,10 @@ char *m_option_strerror(int code);
 const m_option_t *m_option_list_find(const m_option_t *list, const char *name);
 
 // Helper to parse options, see \ref m_option_type::parse.
-static inline int m_option_parse(const m_option_t *opt, struct bstr name,
-                                 struct bstr param, void *dst)
+static inline int m_option_parse(struct mp_log *log, const m_option_t *opt,
+                                 struct bstr name, struct bstr param, void *dst)
 {
-    return opt->type->parse(opt, name, param, dst);
+    return opt->type->parse(log, opt, name, param, dst);
 }
 
 // Helper to print options, see \ref m_option_type::print.

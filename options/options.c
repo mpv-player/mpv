@@ -64,10 +64,10 @@ extern int sws_flags;
 
 extern const char mp_help_text[];
 
-static int print_version_opt(const m_option_t *opt, const char *name,
-                             const char *param)
+static int print_version_opt(struct mp_log *log, const m_option_t *opt,
+                             const char *name, const char *param)
 {
-    mp_print_version(true);
+    mp_print_version(log, true);
     return M_OPT_EXIT;
 }
 

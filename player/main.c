@@ -94,13 +94,13 @@ const char mp_help_text[] =
 " --list-options    list all mpv options\n"
 "\n";
 
-void mp_print_version(int always)
+void mp_print_version(struct mp_log *log, int always)
 {
     int v = always ? MSGL_INFO : MSGL_V;
-    mp_msg(MSGT_CPLAYER, v,
+    mp_msg_log(log, v,
            "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
-    print_libav_versions(v);
-    mp_msg(MSGT_CPLAYER, v, "\n");
+    print_libav_versions(log, v);
+    mp_msg_log(log, v, "\n");
 }
 
 static MP_NORETURN void exit_player(struct MPContext *mpctx,
@@ -292,8 +292,14 @@ static int mpv_main(int argc, char *argv[])
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
     };
 
+    mpctx->global = talloc_zero(mpctx, struct mpv_global);
+
+    // Nothing must call mp_msg*() and related before this
+    mp_msg_init(mpctx->global);
+    mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
+
     // Create the config context and register the options
-    mpctx->mconfig = m_config_new(mpctx, sizeof(struct MPOpts),
+    mpctx->mconfig = m_config_new(mpctx, mpctx->log, sizeof(struct MPOpts),
                                   &mp_default_opts, mp_opts);
     mpctx->opts = mpctx->mconfig->optstruct;
     mpctx->mconfig->includefunc = cfg_include;
@@ -302,14 +308,8 @@ static int mpv_main(int argc, char *argv[])
     mpctx->mconfig->is_toplevel = true;
 
     struct MPOpts *opts = mpctx->opts;
-
-
-    mpctx->global = talloc_zero(mpctx, struct mpv_global);
     mpctx->global->opts = opts;
 
-    // Nothing must call mp_msg() before this
-    mp_msg_init(mpctx->global);
-    mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
 
     init_libav();
     GetCpuCaps(&gCpuCaps);
@@ -321,7 +321,7 @@ static int mpv_main(int argc, char *argv[])
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);
     mp_msg_update_msglevels(mpctx->global);
 
-    mp_print_version(false);
+    mp_print_version(mpctx->log, false);
 
     if (!mp_parse_cfgfiles(mpctx))
         exit_player(mpctx, EXIT_ERROR);
@@ -348,7 +348,7 @@ static int mpv_main(int argc, char *argv[])
     MP_VERBOSE(mpctx, "\n");
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
-        mp_print_version(true);
+        mp_print_version(mpctx->log, true);
         MP_INFO(mpctx, "%s", mp_help_text);
         exit_player(mpctx, EXIT_NONE);
     }

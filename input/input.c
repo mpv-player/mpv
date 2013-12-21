@@ -105,8 +105,8 @@ struct key_name {
 #define OARG_INT(def)           OPT_INT(ARG(i), 0, OPTDEF_INT(def))
 #define OARG_CHOICE(def, c)     OPT_CHOICE(ARG(i), 0, c, OPTDEF_INT(def))
 
-static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
-                           struct bstr param, void *dst);
+static int parse_cycle_dir(struct mp_log *log, const struct m_option *opt,
+                           struct bstr name, struct bstr param, void *dst);
 static const struct m_option_type m_option_type_cycle_dir = {
     .name = "up|down",
     .parse = parse_cycle_dir,
@@ -813,8 +813,8 @@ void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
     input_unlock(ictx);
 }
 
-static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
-                           struct bstr param, void *dst)
+static int parse_cycle_dir(struct mp_log *log, const struct m_option *opt,
+                           struct bstr name, struct bstr param, void *dst)
 {
     double val;
     if (bstrcmp0(param, "up") == 0) {
@@ -822,7 +822,7 @@ static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
     } else if (bstrcmp0(param, "down") == 0) {
         val = -1;
     } else {
-        return m_option_type_double.parse(opt, name, param, dst);
+        return m_option_type_double.parse(log, opt, name, param, dst);
     }
     *(double *)dst = val;
     return 1;
@@ -1041,7 +1041,7 @@ static struct mp_cmd *parse_cmd(struct parse_ctx *ctx, int def_flags)
         struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
         cmdarg->type = opt;
         cmd->nargs++;
-        r = m_option_parse(opt, bstr0(cmd->name), cur_token, &cmdarg->v);
+        r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &cmdarg->v);
         if (r < 0) {
             MP_ERR(ctx, "Command %s: argument %d can't be parsed: %s.\n",
                    cmd->name, i + 1, m_option_strerror(r));

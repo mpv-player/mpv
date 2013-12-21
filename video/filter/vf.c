@@ -237,7 +237,7 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
         .query_format = vf_default_query_format,
         .out_pool = talloc_steal(vf, mp_image_pool_new(16)),
     };
-    struct m_config *config = m_config_from_obj_desc(vf, &desc);
+    struct m_config *config = m_config_from_obj_desc(vf, vf->log, &desc);
     if (m_config_apply_defaults(config, name, c->opts->vf_defs) < 0)
         goto error;
     if (m_config_set_obj_params(config, args) < 0)

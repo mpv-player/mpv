@@ -274,7 +274,8 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
         const struct gl_priv *vodef = p->vo->driver->priv_defaults;
         const struct gl_video_opts *def =
             vodef ? vodef->renderer_opts : gl_video_conf.defaults;
-        cfg = m_config_new(NULL, sizeof(*opts), def, gl_video_conf.opts);
+        cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), def,
+                           gl_video_conf.opts);
         opts = cfg->optstruct;
         r = m_config_parse_suboptions(cfg, "opengl", args);
     }

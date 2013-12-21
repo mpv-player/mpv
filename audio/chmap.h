@@ -121,7 +121,9 @@ void mp_chmap_get_reorder(int dst[MP_NUM_CHANNELS], const struct mp_chmap *from,
 
 char *mp_chmap_to_str(const struct mp_chmap *src);
 bool mp_chmap_from_str(struct mp_chmap *dst, bstr src);
-void mp_chmap_print_help(int msgt, int msgl);
+
+struct mp_log;
+void mp_chmap_print_help(struct mp_log *log);
 
 // Use these to avoid chaos in case lavc's definition should diverge from MS.
 #define mp_chmap_to_waveext mp_chmap_to_lavc

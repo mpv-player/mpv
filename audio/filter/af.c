@@ -205,7 +205,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         .data = talloc_zero(af, struct mp_audio),
         .log = mp_log_new(af, s->log, name),
     };
-    struct m_config *config = m_config_from_obj_desc(af, &desc);
+    struct m_config *config = m_config_from_obj_desc(af, s->log, &desc);
     if (m_config_apply_defaults(config, name, s->opts->af_defs) < 0)
         goto error;
     if (m_config_set_obj_params(config, args) < 0)

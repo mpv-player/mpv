@@ -2294,7 +2294,8 @@ static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
     struct m_obj_settings *new_chain = NULL;
     m_option_copy(co->opt, &new_chain, co->data);
 
-    int r = m_option_parse(co->opt, bstr0(optname), bstr0(arg), &new_chain);
+    int r = m_option_parse(mpctx->log, co->opt, bstr0(optname), bstr0(arg),
+                           &new_chain);
     if (r >= 0)
         r = set_filters(mpctx, mediatype, new_chain);
 
