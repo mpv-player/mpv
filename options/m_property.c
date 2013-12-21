@@ -52,8 +52,8 @@ static const struct legacy_prop legacy_props[] = {
     {0}
 };
 
-static bool translate_legacy_property(const char *name, char *buffer,
-                                      size_t buffer_size)
+static bool translate_legacy_property(struct mp_log *log, const char *name,
+                                      char *buffer, size_t buffer_size)
 {
     if (strlen(name) + 1 > buffer_size)
         return false;
@@ -75,9 +75,9 @@ static bool translate_legacy_property(const char *name, char *buffer,
             buffer[n] = '-';
     }
 
-    if (strcmp(old_name, buffer) != 0) {
-        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Warning: property '%s' is deprecated, "
-               "replaced with '%s'. Fix your input.conf!\n", old_name, buffer);
+    if (log && strcmp(old_name, buffer) != 0) {
+        mp_warn(log, "Warning: property '%s' is deprecated, replaced with '%s'."
+                " Fix your input.conf!\n", old_name, buffer);
     }
 
     return true;
@@ -117,14 +117,15 @@ static int do_action(const m_option_t *prop_list, const char *name,
     return r;
 }
 
-int m_property_do(const m_option_t *prop_list, const char *in_name,
-                  int action, void *arg, void *ctx)
+// (as a hack, log can be NULL on read-only paths)
+int m_property_do(struct mp_log *log, const m_option_t *prop_list,
+                  const char *in_name, int action, void *arg, void *ctx)
 {
     union m_option_value val = {0};
     int r;
 
     char name[64];
-    if (!translate_legacy_property(in_name, name, sizeof(name)))
+    if (!translate_legacy_property(log, in_name, name, sizeof(name)))
         return M_PROPERTY_UNKNOWN;
 
     struct m_option opt = {0};
@@ -154,6 +155,8 @@ int m_property_do(const m_option_t *prop_list, const char *in_name,
         return str != NULL;
     }
     case M_PROPERTY_SET_STRING: {
+        if (!log)
+            return M_PROPERTY_ERROR;
         // (reject 0 return value: success, but empty string with flag)
         if (m_option_parse(&opt, bstr0(name), bstr0(arg), &val) <= 0)
             return M_PROPERTY_ERROR;
@@ -162,6 +165,8 @@ int m_property_do(const m_option_t *prop_list, const char *in_name,
         return r;
     }
     case M_PROPERTY_SWITCH: {
+        if (!log)
+            return M_PROPERTY_ERROR;
         struct m_property_switch_arg *sarg = arg;
         if ((r = do_action(prop_list, name, M_PROPERTY_SWITCH, arg, ctx)) !=
             M_PROPERTY_NOT_IMPLEMENTED)
@@ -177,16 +182,16 @@ int m_property_do(const m_option_t *prop_list, const char *in_name,
         return r;
     }
     case M_PROPERTY_SET: {
+        if (!log)
+            return M_PROPERTY_ERROR;
         if (!opt.type->clamp) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN, "Property '%s' without clamp().\n",
-                   name);
+            mp_warn(log, "Property '%s' without clamp().\n", name);
         } else {
             m_option_copy(&opt, &val, arg);
             r = opt.type->clamp(&opt, arg);
             m_option_free(&opt, &val);
             if (r != 0) {
-                mp_msg(MSGT_CPLAYER, MSGL_ERR,
-                       "Property '%s': invalid value.\n", name);
+                mp_err(log, "Property '%s': invalid value.\n", name);
                 return M_PROPERTY_ERROR;
             }
         }
@@ -204,7 +209,7 @@ static int m_property_do_bstr(const m_option_t *prop_list, bstr name,
     if (name.len >= sizeof(name0))
         return M_PROPERTY_UNKNOWN;
     snprintf(name0, sizeof(name0), "%.*s", BSTR_P(name));
-    return m_property_do(prop_list, name0, action, arg, ctx);
+    return m_property_do(NULL, prop_list, name0, action, arg, ctx);
 }
 
 static void append_str(char **s, int *len, bstr append)
@@ -301,12 +306,13 @@ char *m_properties_expand_string(const m_option_t *prop_list,
     return ret;
 }
 
-void m_properties_print_help_list(const m_option_t *list)
+void m_properties_print_help_list(struct mp_log *log,
+                                  const struct m_option* list)
 {
     char min[50], max[50];
     int i, count = 0;
 
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO,
+    mp_info(log,
             "\n Name                 Type            Min        Max\n\n");
     for (i = 0; list[i].name; i++) {
         const m_option_t *opt = &list[i];
@@ -318,7 +324,7 @@ void m_properties_print_help_list(const m_option_t *list)
             sprintf(max, "%-8.0f", opt->max);
         else
             strcpy(max, "No");
-        mp_msg(MSGT_CFGPARSER, MSGL_INFO,
+        mp_info(log,
                " %-20.20s %-15.15s %-10.10s %-10.10s\n",
                opt->name,
                opt->type->name,
@@ -326,7 +332,7 @@ void m_properties_print_help_list(const m_option_t *list)
                max);
         count++;
     }
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d properties\n", count);
+    mp_info(log, "\nTotal: %d properties\n", count);
 }
 
 int m_property_int_ro(const m_option_t *prop, int action,

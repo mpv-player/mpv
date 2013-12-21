@@ -2040,7 +2040,7 @@ const struct m_option *mp_get_property_list(void)
 int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
-    return m_property_do(mp_properties, name, action, val, ctx);
+    return m_property_do(ctx->log, mp_properties, name, action, val, ctx);
 }
 
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
@@ -2048,9 +2048,9 @@ char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
     return m_properties_expand_string(mp_properties, str, mpctx);
 }
 
-void property_print_help(void)
+void property_print_help(struct mp_log *log)
 {
-    m_properties_print_help_list(mp_properties);
+    m_properties_print_help_list(log, mp_properties);
 }
 
 

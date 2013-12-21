@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 struct m_option;
+struct mp_log;
 
 extern const struct m_option_type m_option_type_dummy;
 
@@ -106,11 +107,12 @@ enum mp_property_return {
 // action: one of m_property_action
 // ctx: opaque value passed through to property implementation
 // returns: one of mp_property_return
-int m_property_do(const struct m_option* prop_list, const char* property_name,
-                  int action, void* arg, void *ctx);
+int m_property_do(struct mp_log *log, const struct m_option* prop_list,
+                  const char* property_name, int action, void* arg, void *ctx);
 
 // Print a list of properties.
-void m_properties_print_help_list(const struct m_option* list);
+void m_properties_print_help_list(struct mp_log *log,
+                                  const struct m_option* list);
 
 // Expand a property string.
 // This function allows to print strings containing property values.

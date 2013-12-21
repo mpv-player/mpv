@@ -223,7 +223,7 @@ static bool handle_help_options(struct MPContext *mpctx)
         opt_exit = 1;
     }
     if (opts->list_properties) {
-        property_print_help();
+        property_print_help(log);
         opt_exit = 1;
     }
 #if HAVE_ENCODING
