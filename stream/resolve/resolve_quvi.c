@@ -19,6 +19,7 @@
 #include <quvi/quvi.h>
 
 #include "talloc.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "options/options.h"
 #include "resolve.h"
@@ -34,7 +35,8 @@ static void add_source(struct mp_resolve_result *res, const char *url,
     MP_TARRAY_APPEND(res, res->srcs, res->num_srcs, src);
 }
 
-struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
+struct mp_resolve_result *mp_resolve_quvi(const char *url,
+                                          struct mpv_global *global)
 {
     QUVIcode rc;
     bool mp_url = false;
@@ -58,7 +60,10 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
         return NULL;
     }
 
-    mp_msg(MSGT_OPEN, MSGL_INFO, "[quvi] Checking URL...\n");
+    struct MPOpts *opts = global->opts;
+    struct mp_log *log = mp_log_new(NULL, global->log, "quvi");
+
+    mp_info(log, "Checking URL...\n");
 
     const char *req_format = opts->quvi_format ? opts->quvi_format : "best";
 
@@ -73,8 +78,9 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
     quvi_media_t m;
     rc = quvi_parse(q, (char *)url, &m);
     if (rc != QUVI_OK) {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "[quvi] %s\n", quvi_strerror(q, rc));
+        mp_err(log, "%s\n", quvi_strerror(q, rc));
         quvi_close(&q);
+        talloc_free(log);
         return NULL;
     }
 
@@ -107,5 +113,6 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
     if (strcmp(req_format, "best") != 0 && strcmp(req_format, "default") != 0)
         add_source(result, NULL, req_format);
 
+    talloc_free(log);
     return result;
 }

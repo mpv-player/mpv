@@ -851,12 +851,12 @@ static void init_sub_renderer(struct MPContext *mpctx)
 }
 
 static struct mp_resolve_result *resolve_url(const char *filename,
-                                             struct MPOpts *opts)
+                                             struct mpv_global *global)
 {
     if (!mp_is_url(bstr0(filename)))
         return NULL;
 #if HAVE_LIBQUVI
-    return mp_resolve_quvi(filename, opts);
+    return mp_resolve_quvi(filename, global);
 #else
     return NULL;
 #endif
@@ -1037,7 +1037,7 @@ static void play_current_file(struct MPContext *mpctx)
     assert(mpctx->d_sub == NULL);
 
     char *stream_filename = mpctx->filename;
-    mpctx->resolve_result = resolve_url(stream_filename, opts);
+    mpctx->resolve_result = resolve_url(stream_filename, mpctx->global);
     if (mpctx->resolve_result) {
         print_resolve_contents(mpctx->log, mpctx->resolve_result);
         if (mpctx->resolve_result->playlist) {

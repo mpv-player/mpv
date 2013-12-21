@@ -19,8 +19,7 @@
 #ifndef MP_RESOLVE_H
 #define MP_RESOLVE_H
 
-struct MPContext;
-struct MPOpts;
+struct mpv_global;
 
 struct mp_resolve_result {
     char *url;
@@ -48,6 +47,7 @@ struct mp_resolve_sub {
     char *lang;
 };
 
-struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts);
+struct mp_resolve_result *mp_resolve_quvi(const char *url,
+                                          struct mpv_global *global);
 
 #endif
