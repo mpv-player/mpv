@@ -166,7 +166,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     set_msg_color(stream, lev);
     if (header) {
-        if (lev >= MSGL_V || verbose || mp_msg_module) {
+        if ((lev >= MSGL_V && lev != MSGL_SMODE) || verbose || mp_msg_module) {
             fprintf(stream, "[%s] ", log->verbose_prefix);
         } else if (log->prefix) {
             fprintf(stream, "[%s] ", log->prefix);
