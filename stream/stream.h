@@ -158,7 +158,9 @@ typedef struct stream {
     char *lavf_type; // name of expected demuxer type for lavf
     bool safe_origin; // used for playlists that can be opened safely
     bool allow_caching; // stream cache makes sense
+    struct mp_log *log;
     struct MPOpts *opts;
+    struct mpv_global *global;
 
     FILE *capture_file;
     char *capture_filename;
@@ -236,16 +238,16 @@ int stream_read_partial(stream_t *s, char *buf, int buf_size);
 struct bstr stream_peek(stream_t *s, int len);
 void stream_drop_buffers(stream_t *s);
 
-struct MPOpts;
+struct mpv_global;
 
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size);
 int stream_control(stream_t *s, int cmd, void *arg);
 void stream_update_size(stream_t *s);
 void free_stream(stream_t *s);
-struct stream *stream_create(const char *url, int flags, struct MPOpts *options);
-struct stream *stream_open(const char *filename, struct MPOpts *options);
-stream_t *open_output_stream(const char *filename, struct MPOpts *options);
+struct stream *stream_create(const char *url, int flags, struct mpv_global *global);
+struct stream *stream_open(const char *filename, struct mpv_global *global);
+stream_t *open_output_stream(const char *filename, struct mpv_global *global);
 stream_t *open_memory_stream(void *data, int len);
 struct demux_stream;
 

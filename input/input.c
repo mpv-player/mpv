@@ -2208,7 +2208,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
                "Input config file %s not found.\n", file);
         goto done;
     }
-    s = stream_open(file, NULL);
+    s = stream_open(file, ictx->global);
     if (!s) {
         MP_ERR(ictx, "Can't open input config file %s.\n", file);
         goto done;

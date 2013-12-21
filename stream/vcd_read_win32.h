@@ -70,11 +70,11 @@ static int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
     return VCD_SECTOR_DATA * (vcd_get_msf(vcd, track + 1));
 }
 
-static mp_vcd_priv_t* vcd_read_toc(int fd)
+static mp_vcd_priv_t* vcd_read_toc(stream_t *stream, int fd)
 {
     DWORD dwBytesReturned;
     HANDLE hd;
-    int i, min = 0, sec = 0, frame = 0;
+    int i;
     mp_vcd_priv_t* vcd = malloc(sizeof(mp_vcd_priv_t));
     if (!vcd)
 	return NULL;
@@ -82,21 +82,16 @@ static mp_vcd_priv_t* vcd_read_toc(int fd)
     hd = (HANDLE)_get_osfhandle(fd);
     if (!DeviceIoControl(hd, IOCTL_CDROM_READ_TOC, NULL, 0, &vcd->toc,
 		sizeof(CDROM_TOC), &dwBytesReturned, NULL)) {
-	mp_msg(MSGT_OPEN, MSGL_ERR, "read CDROM toc header: %lu\n",
+	MP_ERR(stream, "read CDROM toc header: %lu\n",
 		GetLastError());
 	free(vcd);
 	return NULL;
     }
 
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_START_TRACK=%d\n",
-	    vcd->toc.FirstTrack);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_END_TRACK=%d\n",
-	    vcd->toc.LastTrack);
-
     for (i = vcd->toc.FirstTrack; i <= vcd->toc.LastTrack + 1; i++) {
 	int index = i - vcd->toc.FirstTrack;
 	if (i <= vcd->toc.LastTrack) {
-	    mp_msg(MSGT_OPEN, MSGL_INFO, "track %02d:  adr=%d  ctrl=%d"
+	    MP_INFO(stream, "track %02d:  adr=%d  ctrl=%d"
 		    "  %02d:%02d:%02d\n",
 		    vcd->toc.TrackData[index].TrackNumber,
 		    vcd->toc.TrackData[index].Adr,
@@ -104,27 +99,6 @@ static mp_vcd_priv_t* vcd_read_toc(int fd)
 		    vcd->toc.TrackData[index].Address[1],
 		    vcd->toc.TrackData[index].Address[2],
 		    vcd->toc.TrackData[index].Address[3]);
-	}
-
-	if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO)) {
-	    if (i > vcd->toc.FirstTrack) {
-		min = vcd->toc.TrackData[index].Address[1] - min;
-		sec = vcd->toc.TrackData[index].Address[2] - sec;
-		frame = vcd->toc.TrackData[index].Address[3] - frame;
-		if (frame < 0) {
-		    frame += 75;
-		    sec--;
-		}
-		if (sec < 0) {
-		    sec += 60;
-		    min--;
-		}
-		mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_TRACK_%d_MSF="
-			"%02d:%02d:%02d\n", i - 1, min, sec, frame);
-		min = vcd->toc.TrackData[index].Address[1];
-		sec = vcd->toc.TrackData[index].Address[2];
-		frame = vcd->toc.TrackData[index].Address[3];
-	    }
 	}
     }
 

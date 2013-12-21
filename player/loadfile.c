@@ -724,7 +724,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     char *disp_filename = filename;
     if (strncmp(disp_filename, "memory://", 9) == 0)
         disp_filename = "memory://"; // avoid noise
-    struct stream *stream = stream_open(filename, mpctx->opts);
+    struct stream *stream = stream_open(filename, mpctx->global);
     if (!stream)
         goto err_out;
     stream_enable_cache_percent(&stream, stream_cache,
@@ -1046,7 +1046,7 @@ static void play_current_file(struct MPContext *mpctx)
         }
         stream_filename = mpctx->resolve_result->url;
     }
-    mpctx->stream = stream_open(stream_filename, opts);
+    mpctx->stream = stream_open(stream_filename, mpctx->global);
     if (!mpctx->stream) { // error...
         demux_was_interrupted(mpctx);
         goto terminate_playback;

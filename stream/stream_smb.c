@@ -124,24 +124,24 @@ static int open_f (stream_t *stream, int mode)
   else if (mode == STREAM_WRITE) //who's gonna do that ?
     m = O_RDWR|O_CREAT|O_TRUNC;
   else {
-    mp_msg(MSGT_OPEN, MSGL_ERR, "[smb] Unknown open mode %d\n", mode);
+    MP_ERR(stream, "[smb] Unknown open mode %d\n", mode);
     return STREAM_UNSUPPORTED;
   }
 
   if(!filename) {
-    mp_msg(MSGT_OPEN,MSGL_ERR, "[smb] Bad url\n");
+    MP_ERR(stream, "[smb] Bad url\n");
     return STREAM_ERROR;
   }
 
   err = smbc_init(smb_auth_fn, 1);
   if (err < 0) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,"Cannot init the libsmbclient library: %d\n",err);
+    MP_ERR(stream, "Cannot init the libsmbclient library: %d\n",err);
     return STREAM_ERROR;
   }
 
   fd = smbc_open(filename, m,0644);
   if (fd < 0) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,"Could not open from LAN: '%s'\n", filename);
+    MP_ERR(stream, "Could not open from LAN: '%s'\n", filename);
     return STREAM_ERROR;
   }
 

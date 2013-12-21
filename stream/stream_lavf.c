@@ -142,14 +142,14 @@ static int open_f(stream_t *stream, int mode)
     else if (mode == STREAM_WRITE)
         flags = AVIO_FLAG_WRITE;
     else {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "[ffmpeg] Unknown open mode %d\n", mode);
+        MP_ERR(stream, "[ffmpeg] Unknown open mode %d\n", mode);
         res = STREAM_UNSUPPORTED;
         goto out;
     }
 
     const char *filename = stream->url;
     if (!filename) {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "[ffmpeg] No URL\n");
+        MP_ERR(stream, "[ffmpeg] No URL\n");
         goto out;
     }
     for (int i = 0; i < sizeof(prefix) / sizeof(prefix[0]); i++)
@@ -168,7 +168,7 @@ static int open_f(stream_t *stream, int mode)
         talloc_free(temp);
         return STREAM_OK;
     }
-    mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] Opening %s\n", filename);
+    MP_VERBOSE(stream, "[ffmpeg] Opening %s\n", filename);
 
     // Replace "mms://" with "mmsh://", so that most mms:// URLs just work.
     bstr b_filename = bstr0(filename);
@@ -182,7 +182,7 @@ static int open_f(stream_t *stream, int mode)
     if (network_useragent)
         av_dict_set(&dict, "user-agent", network_useragent, 0);
     if (network_cookies_enabled)
-        av_dict_set(&dict, "cookies", talloc_steal(temp, cookies_lavf()), 0);
+        av_dict_set(&dict, "cookies", talloc_steal(temp, cookies_lavf(stream->log)), 0);
     av_dict_set(&dict, "tls_verify", network_tls_verify ? "1" : "0", 0);
     if (network_tls_ca_file)
         av_dict_set(&dict, "ca_file", network_tls_ca_file, 0);
@@ -204,14 +204,14 @@ static int open_f(stream_t *stream, int mode)
     int err = avio_open2(&avio, filename, flags, NULL, &dict);
     if (err < 0) {
         if (err == AVERROR_PROTOCOL_NOT_FOUND)
-            mp_msg(MSGT_OPEN, MSGL_ERR, "[ffmpeg] Protocol not found. Make sure"
+            MP_ERR(stream, "[ffmpeg] Protocol not found. Make sure"
                    " ffmpeg/Libav is compiled with networking support.\n");
         goto out;
     }
 
     AVDictionaryEntry *t = NULL;
     while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] Could not set stream option %s=%s\n",
+        MP_VERBOSE(stream, "[ffmpeg] Could not set stream option %s=%s\n",
                t->key, t->value);
     }
 

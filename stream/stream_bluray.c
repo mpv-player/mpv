@@ -308,25 +308,23 @@ static int bluray_stream_open(stream_t *s, int mode)
         device = bluray_device;
 
     if (!device) {
-        mp_msg(MSGT_OPEN, MSGL_ERR,
-                "No Blu-ray device/location was specified ...\n");
+        MP_ERR(s, "No Blu-ray device/location was specified ...\n");
         return STREAM_UNSUPPORTED;
     }
 
     /* open device */
     bd = bd_open(device, NULL);
     if (!bd) {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "Couldn't open Blu-ray device: %s\n",
+        MP_ERR(s, "Couldn't open Blu-ray device: %s\n",
                device);
         return STREAM_UNSUPPORTED;
     }
 
     /* check for available titles on disc */
     b->num_titles = bd_get_titles(bd, TITLES_RELEVANT, angle);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_BLURAY_TITLES=%d\n", b->num_titles);
+    MP_SMODE(s, "ID_BLURAY_TITLES=%d\n", b->num_titles);
     if (!b->num_titles) {
-        mp_msg(MSGT_OPEN, MSGL_ERR,
-               "Can't find any Blu-ray-compatible title here.\n");
+        MP_ERR(s, "Can't find any Blu-ray-compatible title here.\n");
         bd_close(bd);
         return STREAM_UNSUPPORTED;
     }
@@ -344,12 +342,9 @@ static int bluray_stream_open(stream_t *s, int mode)
         sec  = ti->duration / 90000;
         msec = (ti->duration - sec) % 1000;
 
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_BLURAY_TITLE_%d_CHAPTERS=%d\n", i + 1, ti->chapter_count);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_BLURAY_TITLE_%d_ANGLE=%d\n", i + 1, ti->angle_count);
-        mp_msg(MSGT_IDENTIFY, MSGL_V,
-               "ID_BLURAY_TITLE_%d_LENGTH=%d.%03d\n", i + 1, sec, msec);
+        MP_SMODE(s, "ID_BLURAY_TITLE_%d_CHAPTERS=%d\n", i + 1, ti->chapter_count);
+        MP_SMODE(s, "ID_BLURAY_TITLE_%d_ANGLE=%d\n", i + 1, ti->angle_count);
+        MP_SMODE(s, "ID_BLURAY_TITLE_%d_LENGTH=%d.%03d\n", i + 1, sec, msec);
 
         /* try to guess which title may contain the main movie */
         if (ti->duration > max_duration) {
@@ -367,8 +362,7 @@ static int bluray_stream_open(stream_t *s, int mode)
     bd_select_title(bd, title);
 
     title_size = bd_get_title_size(bd);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-           "ID_BLURAY_CURRENT_TITLE=%d\n", title + 1);
+    MP_SMODE(s, "ID_BLURAY_CURRENT_TITLE=%d\n", title + 1);
 
     /* Get current title information */
     info = bd_get_title_info(bd, title, angle);
@@ -382,7 +376,7 @@ static int bluray_stream_open(stream_t *s, int mode)
     if (angle)
         bd_select_angle(bd, angle);
 
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_BLURAY_CURRENT_ANGLE=%d\n", angle + 1);
+    MP_SMODE(s, "ID_BLURAY_CURRENT_ANGLE=%d\n", angle + 1);
 
     bd_free_title_info(info);
 
@@ -401,7 +395,7 @@ err_no_info:
     s->flags       = MP_STREAM_SEEK;
     s->priv        = b;
 
-    mp_msg(MSGT_OPEN, MSGL_V, "Blu-ray successfully opened.\n");
+    MP_VERBOSE(s, "Blu-ray successfully opened.\n");
 
     return STREAM_OK;
 }

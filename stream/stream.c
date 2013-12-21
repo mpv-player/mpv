@@ -38,6 +38,7 @@
 #include "config.h"
 
 #include "common/common.h"
+#include "common/global.h"
 #include "bstr/bstr.h"
 #include "common/msg.h"
 #include "options/path.h"
@@ -228,14 +229,14 @@ static bool parse_url(struct stream *st, struct m_config *config)
         if (f[n].len) {
             const char *opt = find_url_opt(st, f_names[n]);
             if (!opt) {
-                mp_msg(MSGT_OPEN, MSGL_ERR, "Stream type '%s' accepts no '%s' "
-                        "field in URLs.\n", st->info->name, f_names[n]);
+                MP_ERR(st, "Stream type '%s' accepts no '%s' field in URLs.\n",
+                       st->info->name, f_names[n]);
                 return false;
             }
             int r = m_config_set_option(config, bstr0(opt), f[n]);
             if (r < 0) {
-                mp_msg(MSGT_OPEN, MSGL_ERR, "Error setting stream option: %s\n",
-                        m_option_strerror(r));
+                MP_ERR(st, "Error setting stream option: %s\n",
+                       m_option_strerror(r));
                 return false;
             }
         }
@@ -263,7 +264,7 @@ static const char *match_proto(const char *url, const char *proto)
 }
 
 static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
-                         const char *url, int flags, struct MPOpts *options,
+                         const char *url, int flags, struct mpv_global *global,
                          struct stream **ret)
 {
     if (sinfo->stream_filter != !!underlying)
@@ -285,8 +286,10 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     }
 
     stream_t *s = new_stream();
+    s->log = mp_log_new(s, global->log, sinfo->name);
     s->info = sinfo;
-    s->opts = options;
+    s->opts = global->opts;
+    s->global = global;
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);
     s->source = underlying;
@@ -299,10 +302,10 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
             .priv_defaults = sinfo->priv_defaults,
             .options = sinfo->options,
         };
-        struct m_config *config = m_config_from_obj_desc(s, mp_null_log, &desc);
+        struct m_config *config = m_config_from_obj_desc(s, s->log, &desc);
         s->priv = config->optstruct;
         if (s->info->url_options && !parse_url(s, config)) {
-            mp_msg(MSGT_OPEN, MSGL_ERR, "URL parsing failed on url %s\n", url);
+            MP_ERR(s, "URL parsing failed on url %s\n", url);
             talloc_free(s);
             return STREAM_ERROR;
         }
@@ -329,43 +332,44 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
 
     s->uncached_type = s->type;
 
-    mp_msg(MSGT_OPEN, MSGL_V, "[stream] [%s] %s\n", sinfo->name, url);
+    MP_VERBOSE(s, "Opened: [%s] %s\n", sinfo->name, url);
 
     if (s->mime_type)
-        mp_msg(MSGT_OPEN, MSGL_V, "Mime-type: '%s'\n", s->mime_type);
+        MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
 
     *ret = s;
     return STREAM_OK;
 }
 
-struct stream *stream_create(const char *url, int flags, struct MPOpts *options)
+struct stream *stream_create(const char *url, int flags, struct mpv_global *global)
 {
+    struct mp_log *log = mp_log_new(NULL, global->log, "!stream");
     struct stream *s = NULL;
     assert(url);
 
     // Open stream proper
     for (int i = 0; stream_list[i]; i++) {
-        int r = open_internal(stream_list[i], NULL, url, flags, options, &s);
+        int r = open_internal(stream_list[i], NULL, url, flags, global, &s);
         if (r == STREAM_OK)
             break;
         if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED)
             continue;
         if (r != STREAM_OK) {
-            mp_msg(MSGT_OPEN, MSGL_ERR, "Failed to open %s.\n", url);
-            return NULL;
+            mp_err(log, "Failed to open %s.\n", url);
+            goto done;
         }
     }
 
     if (!s) {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "No stream found to handle url %s\n", url);
-        return NULL;
+        mp_err(log, "No stream found to handle url %s\n", url);
+        goto done;
     }
 
     // Open stream filters
     for (;;) {
         struct stream *new = NULL;
         for (int i = 0; stream_list[i]; i++) {
-            int r = open_internal(stream_list[i], s, s->url, flags, options, &new);
+            int r = open_internal(stream_list[i], s, s->url, flags, global, &new);
             if (r == STREAM_OK)
                 break;
         }
@@ -374,17 +378,19 @@ struct stream *stream_create(const char *url, int flags, struct MPOpts *options)
         s = new;
     }
 
+done:
+    talloc_free(log);
     return s;
 }
 
-struct stream *stream_open(const char *filename, struct MPOpts *options)
+struct stream *stream_open(const char *filename, struct mpv_global *global)
 {
-    return stream_create(filename, STREAM_READ, options);
+    return stream_create(filename, STREAM_READ, global);
 }
 
-stream_t *open_output_stream(const char *filename, struct MPOpts *options)
+stream_t *open_output_stream(const char *filename, struct mpv_global *global)
 {
-    return stream_create(filename, STREAM_WRITE, options);
+    return stream_create(filename, STREAM_WRITE, global);
 }
 
 static int stream_reconnect(stream_t *s)
@@ -397,8 +403,7 @@ static int stream_reconnect(stream_t *s)
         return 0;
     int64_t pos = s->pos;
     for (int retry = 0; retry < MAX_RECONNECT_RETRIES; retry++) {
-        mp_msg(MSGT_STREAM, MSGL_WARN,
-               "Connection lost! Attempting to reconnect (%d)...\n", retry + 1);
+        MP_WARN(s, "Connection lost! Attempting to reconnect (%d)...\n", retry + 1);
 
         if (stream_check_interrupt(retry ? RECONNECT_SLEEP_MS : 0))
             return 0;
@@ -432,8 +437,7 @@ void stream_set_capture_file(stream_t *s, const char *filename)
             if (s->capture_file) {
                 s->capture_filename = talloc_strdup(NULL, filename);
             } else {
-                mp_msg(MSGT_GLOBAL, MSGL_ERR,
-                        "Error opening capture file: %s\n", strerror(errno));
+                MP_ERR(s, "Error opening capture file: %s\n", strerror(errno));
             }
         }
     }
@@ -443,8 +447,7 @@ static void stream_capture_write(stream_t *s, void *buf, size_t len)
 {
     if (s->capture_file && len > 0) {
         if (fwrite(buf, len, 1, s->capture_file) < 1) {
-            mp_msg(MSGT_GLOBAL, MSGL_ERR, "Error writing capture file: %s\n",
-                    strerror(errno));
+            MP_ERR(s, "Error writing capture file: %s\n", strerror(errno));
             stream_set_capture_file(s, NULL);
         }
     }
@@ -619,16 +622,15 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
     if (newpos != s->pos) {
         if (newpos > s->pos && !(s->flags & MP_STREAM_SEEK_FW)) {
-            mp_msg(MSGT_STREAM, MSGL_ERR, "Can not seek in this stream\n");
+            MP_ERR(s, "Can not seek in this stream\n");
             return 0;
         }
         if (newpos < s->pos && !(s->flags & MP_STREAM_SEEK_BW)) {
-            mp_msg(MSGT_STREAM, MSGL_ERR,
-                    "Cannot seek backward in linear streams!\n");
+            MP_ERR(s, "Cannot seek backward in linear streams!\n");
             return 1;
         }
         if (s->seek(s, newpos) <= 0) {
-            mp_msg(MSGT_STREAM, MSGL_ERR, "Seek failed\n");
+            MP_ERR(s, "Seek failed\n");
             return 0;
         }
     }
@@ -653,8 +655,8 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     if (s->sector_size)
         newpos = (pos / s->sector_size) * s->sector_size;
 
-    mp_msg(MSGT_STREAM, MSGL_DBG3, "Seek from %" PRId64 " to %" PRId64
-           " (with offset %d)\n", s->pos, pos, (int)(pos - newpos));
+    MP_TRACE(s, "Seek from %" PRId64 " to %" PRId64
+             " (with offset %d)\n", s->pos, pos, (int)(pos - newpos));
 
     if (pos >= s->pos && !(s->flags & MP_STREAM_SEEK) &&
         (s->flags & MP_STREAM_FAST_SKIPPING))
@@ -672,22 +674,20 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     s->buf_len = 0;
     s->eof = 0; // eof should be set only on read
 
-    mp_msg(MSGT_STREAM, MSGL_V,
-           "stream_seek: Seek to/past EOF: no buffer preloaded.\n");
+    MP_VERBOSE(s, "Seek to/past EOF: no buffer preloaded.\n");
     return 1;
 }
 
 int stream_seek(stream_t *s, int64_t pos)
 {
 
-    mp_msg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%llX\n", (long long)pos);
+    MP_TRACE(s, "seek to 0x%llX\n", (long long)pos);
 
     if (pos == stream_tell(s))
         return 1;
 
     if (pos < 0) {
-        mp_msg(MSGT_DEMUX, MSGL_ERR, "Invalid seek to negative position %llx!\n",
-               (long long)pos);
+        MP_ERR(s, "Invalid seek to negative position %llx!\n", (long long)pos);
         pos = 0;
     }
     if (pos < s->pos) {
@@ -772,8 +772,11 @@ int stream_check_interrupt(int time)
 stream_t *open_memory_stream(void *data, int len)
 {
     assert(len >= 0);
-    stream_t *s = stream_open("memory://", NULL);
+    struct mpv_global *dummy = talloc_zero(NULL, struct mpv_global);
+    dummy->log = mp_null_log;
+    stream_t *s = stream_open("memory://", dummy);
     assert(s);
+    talloc_steal(s, dummy);
     stream_control(s, STREAM_CTRL_SET_CONTENTS, &(bstr){data, len});
     return s;
 }
@@ -822,8 +825,11 @@ static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
     cache->safe_origin = orig->safe_origin;
     cache->opts = orig->opts;
+    cache->global = orig->global;
     cache->start_pos = orig->start_pos;
     cache->end_pos = orig->end_pos;
+
+    cache->log = mp_log_new(cache, cache->global->log, "cache");
 
     int res = stream_cache_init(cache, orig, size, min, seek_limit);
     if (res <= 0) {

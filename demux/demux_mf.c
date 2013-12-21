@@ -68,7 +68,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
     if (!stream) {
         char *filename = mf->names[mf->curr_frame];
         if (filename)
-            stream = stream_open(filename, demuxer->opts);
+            stream = stream_open(filename, demuxer->global);
     }
 
     if (stream) {

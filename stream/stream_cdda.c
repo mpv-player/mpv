@@ -133,7 +133,7 @@ static bool print_cdtext(stream_t *s, int track)
     cdtext_t *text = cdio_get_cdtext(p->cd->p_cdio);
 #endif
     if (text) {
-        mp_msg(MSGT_SEEK, MSGL_INFO, "CD-Text (%s):\n", track ? "track" : "CD");
+        MP_INFO(s, "CD-Text (%s):\n", track ? "track" : "CD");
         for (int i = 0; i < sizeof(cdtext_name) / sizeof(cdtext_name[0]); i++) {
             const char *name = cdtext_name[i];
 #ifdef OLD_API
@@ -142,7 +142,7 @@ static bool print_cdtext(stream_t *s, int track)
             const char *value = cdtext_get_const(text, i, track);
 #endif
             if (name && value)
-                mp_msg(MSGT_SEEK, MSGL_INFO, "  %s: '%s'\n", name, value);
+                MP_INFO(s, "  %s: '%s'\n", name, value);
         }
         return true;
     }
@@ -154,13 +154,13 @@ static void print_track_info(stream_t *s, int track)
     cdda_priv* p = (cdda_priv*)s->priv;
     cd_track_t *cd_track = cd_info_get_track(p->cd_info, track);
     if( cd_track!=NULL ) {
-        mp_msg(MSGT_SEEK, MSGL_INFO, "\n%s\n", cd_track->name);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CDDA_TRACK=%d\n",
+        MP_INFO(s, "\n%s\n", cd_track->name);
+        MP_INFO(s, "ID_CDDA_TRACK=%d\n",
                cd_track->track_nb);
     }
     if (print_cdtext(s, track)) {
         // hack for term OSD overwriting the last line of CDTEXT
-        mp_msg(MSGT_SEEK, MSGL_INFO, "\n");
+        MP_INFO(s, "\n");
     }
 }
 
@@ -340,7 +340,7 @@ static int open_cdda(stream_t *st, int m)
 #endif
 
     if (!cdd) {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "Can't open CDDA device.\n");
+        MP_ERR(st, "Can't open CDDA device.\n");
         return STREAM_ERROR;
     }
 
@@ -350,13 +350,13 @@ static int open_cdda(stream_t *st, int m)
         cdd->nsectors = p->sector_size;
 
     if (cdda_open(cdd) != 0) {
-        mp_msg(MSGT_OPEN, MSGL_ERR, "Can't open disc.\n");
+        MP_ERR(st, "Can't open disc.\n");
         cdda_close(cdd);
         return STREAM_ERROR;
     }
 
     cd_info = cd_info_new();
-    mp_msg(MSGT_OPEN, MSGL_INFO, "Found audio CD with %d tracks.\n",
+    MP_INFO(st, "Found audio CD with %d tracks.\n",
             (int)cdda_tracks(cdd));
     for (i = 0; i < cdd->tracks; i++) {
         char track_name[80];

@@ -127,7 +127,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
     free_demuxer(*demuxer);
     free_stream(*stream);
 
-    *stream = stream_open(filename, opts);
+    *stream = stream_open(filename, mpctx->global);
     if (!*stream) {
         talloc_free(filename);
         return -1;
@@ -174,7 +174,7 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
         .matroska_wanted_segment = segment,
         .matroska_was_valid = &was_valid,
     };
-    struct stream *s = stream_open(filename, mpctx->opts);
+    struct stream *s = stream_open(filename, mpctx->global);
     if (!s)
         return false;
     struct demuxer *d = demux_open(s, "mkv", &params, mpctx->global);

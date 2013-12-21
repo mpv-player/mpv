@@ -399,8 +399,8 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
         buf[sizeof(buf) - 1] = 0;
 
         if (value_has_flag(de ? de->value : "", "pass2")) {
-            if (!(*bytebuf = stream_open(buf, NULL))) {
-                mp_msg(MSGT_ENCODE, MSGL_WARN, "%s: could not open '%s', "
+            if (!(*bytebuf = stream_open(buf, ctx->global))) {
+                MP_WARN(ctx, "%s: could not open '%s', "
                        "disabling 2-pass encoding at pass 2\n", prefix, buf);
                 stream->codec->flags &= ~CODEC_FLAG_PASS2;
                 set_to_avdictionary(ctx, dictp, "flags", "-pass2");
@@ -421,9 +421,8 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
         }
 
         if (value_has_flag(de ? de->value : "", "pass1")) {
-            if (!(*bytebuf = open_output_stream(buf, NULL))) {
-                mp_msg(
-                    MSGT_ENCODE, MSGL_WARN,
+            if (!(*bytebuf = open_output_stream(buf, ctx->global))) {
+                MP_WARN(ctx,
                     "%s: could not open '%s', disabling "
                     "2-pass encoding at pass 1\n",
                     prefix, ctx->avc->filename);

@@ -188,7 +188,7 @@ static bool try_open(struct MPContext *mpctx, char *filename)
         || bstrcasecmp(bstr0(mpctx->demuxer->filename), bfilename) == 0)
         return false;
 
-    struct stream *s = stream_open(filename, mpctx->opts);
+    struct stream *s = stream_open(filename, mpctx->global);
     if (!s)
         return false;
     struct demuxer *d = demux_open(s, NULL, NULL, mpctx->global);

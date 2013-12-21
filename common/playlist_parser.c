@@ -499,7 +499,7 @@ struct playlist *playlist_parse_file(const char *file, struct mpv_global *global
 {
   struct mp_log *log = mp_log_new(NULL, global->log, "!playlist_parser");
   struct playlist *ret = NULL;
-  stream_t *stream = stream_open(file, global->opts);
+  stream_t *stream = stream_open(file, global);
   if(!stream) {
       mp_err(log, "Error while opening playlist file %s: %s\n",
              file, strerror(errno));

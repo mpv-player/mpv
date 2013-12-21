@@ -90,11 +90,12 @@ static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
         mp_msg_log(lcms2_dumb_crap, MSGL_ERR, "lcms2: %s\n", msg);
 }
 
-static struct bstr load_file(void *talloc_ctx, const char *filename)
+static struct bstr load_file(void *talloc_ctx, const char *filename,
+                             struct mpv_global *global)
 {
     struct bstr res = {0};
     char *fname = mp_get_user_path(NULL, filename);
-    stream_t *s = stream_open(fname, NULL);
+    stream_t *s = stream_open(fname, global);
     if (s) {
         res = stream_read_complete(s, talloc_ctx, 1000000000);
         free_stream(s);
@@ -121,7 +122,7 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
     bool locked = false;
 
     mp_msg_log(log, MSGL_INFO, "Opening ICC profile '%s'\n", opts->profile);
-    struct bstr iccdata = load_file(tmp, opts->profile);
+    struct bstr iccdata = load_file(tmp, opts->profile, global);
     if (!iccdata.len)
         goto error_exit;
 
@@ -132,7 +133,7 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
     if (opts->cache) {
         mp_msg_log(log, MSGL_INFO, "Opening 3D LUT cache in file '%s'.\n",
                    opts->cache);
-        struct bstr cachedata = load_file(tmp, opts->cache);
+        struct bstr cachedata = load_file(tmp, opts->cache, global);
         if (bstr_eatstart(&cachedata, bstr0(LUT3D_CACHE_HEADER))
             && bstr_eatstart(&cachedata, bstr0(cache_info))
             && bstr_eatstart(&cachedata, iccdata)

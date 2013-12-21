@@ -22,11 +22,12 @@
 #include "config.h"
 #include <inttypes.h>
 #include <dvdread/ifo_types.h>
+#include "stream.h"
 
 extern const char * const dvd_audio_stream_channels[6];
 extern const char * const dvd_audio_stream_types[8];
 
-void dvd_set_speed(char *device, unsigned speed);
+void dvd_set_speed(stream_t *stream, char *device, unsigned speed);
 int mp_dvdtimetomsec(dvd_time_t *dt);
 
 #endif /* MPLAYER_STREAM_DVD_COMMON_H */
