@@ -64,7 +64,7 @@ static int parse_include(struct m_config *config, struct bstr param, bool set,
     if (!set)
         return 1;
     char *filename = bstrdup0(NULL, param);
-    config->includefunc(config, filename, flags);
+    config->includefunc(config->includefunc_ctx, filename, flags);
     talloc_free(filename);
     return 1;
 }

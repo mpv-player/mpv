@@ -61,7 +61,8 @@ typedef struct m_config {
 
     bool use_profiles;
     bool is_toplevel;
-    int (*includefunc)(struct m_config *conf, char *filename, int flags);
+    int (*includefunc)(void *ctx, char *filename, int flags);
+    void *includefunc_ctx;
 
     void *optstruct; // struct mpopts or other
 } m_config_t;

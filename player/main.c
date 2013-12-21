@@ -292,9 +292,10 @@ static void init_input(struct MPContext *mpctx)
 #endif
 }
 
-static int cfg_include(struct m_config *conf, char *filename, int flags)
+static int cfg_include(void *ctx, char *filename, int flags)
 {
-    return m_config_parse_config_file(conf, filename, flags);
+    struct MPContext *mpctx = ctx;
+    return m_config_parse_config_file(mpctx->mconfig, filename, flags);
 }
 
 static int mpv_main(int argc, char *argv[])
@@ -318,6 +319,7 @@ static int mpv_main(int argc, char *argv[])
                                   &mp_default_opts, mp_opts);
     mpctx->opts = mpctx->mconfig->optstruct;
     mpctx->mconfig->includefunc = cfg_include;
+    mpctx->mconfig->includefunc_ctx = mpctx;
     mpctx->mconfig->use_profiles = true;
     mpctx->mconfig->is_toplevel = true;
 
