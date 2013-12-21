@@ -58,7 +58,6 @@ static void reset(struct vf_instance *vf)
     struct pullup_context *c;
     vf->priv->ctx = c = pullup_alloc_context();
     vf->priv->fakecount = 1;
-    c->verbose = verbose>0;
     c->junk_left = vf->priv->junk_left;
     c->junk_right = vf->priv->junk_right;
     c->junk_top = vf->priv->junk_top;

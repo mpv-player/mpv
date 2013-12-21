@@ -40,16 +40,23 @@
 #define MSGSIZE_MAX 6144
 
 struct mp_log_root {
-    /* This should, at some point, contain all mp_msg related state, instead
-     * of having global variables (at least as long as we don't want to
-     * control the terminal, which is global anyway). But for now, there is
-     * not much. */
     struct mpv_global *global;
-    char *msglevels; // protected by mp_msg_lock
+    // --- protected by mp_msg_lock
+    char *msglevels;
+    bool smode; // slave mode compatibility glue
+    bool module;
+    // --- semi-atomic access
+    bool color;
+    int verbose;
+    bool force_stderr;
+    bool mute;
+    // --- must be accessed atomically
     /* This is incremented every time the msglevels must be reloaded.
      * (This is perhaps better than maintaining a globally accessible and
      * synchronized mp_log tree.) */
     int64_t reload_counter;
+    int header;         // indicate if last line printed ended with \n or \r
+    int statusline;     // indicates if last line printed was a status line
 };
 
 struct mp_log {
@@ -63,29 +70,8 @@ struct mp_log {
 // Protects some (not all) state in mp_log_root
 static pthread_mutex_t mp_msg_lock = PTHREAD_MUTEX_INITIALIZER;
 
-bool mp_msg_stdout_in_use;
-int verbose;
-bool mp_msg_mute;
-int mp_smode;
-int mp_msg_color = 1;
-int mp_msg_module;
-int mp_msg_cancolor;
-
-// indicate if last line printed ended with \n or \r
-static int header = 1;
-// indicates if last line printed was a status line
-static int statusline;
-
 static const struct mp_log null_log = {0};
 struct mp_log *const mp_null_log = (struct mp_log *)&null_log;
-
-static void mp_msg_do_init(void)
-{
-    char *env = getenv("MPV_VERBOSE");
-    if (env)
-        verbose = atoi(env);
-    mp_msg_cancolor = isatty(fileno(stdout));
-}
 
 static bool match_mod(const char *name, bstr mod)
 {
@@ -99,7 +85,7 @@ static bool match_mod(const char *name, bstr mod)
 static void update_loglevel(struct mp_log *log)
 {
     pthread_mutex_lock(&mp_msg_lock);
-    log->level = MSGL_STATUS + verbose; // default log level
+    log->level = MSGL_STATUS + log->root->verbose; // default log level
     // Stupid exception for the remains of -identify
     if (match_mod(log->verbose_prefix, bstr0("identify")))
         log->level = -1;
@@ -117,29 +103,23 @@ static void update_loglevel(struct mp_log *log)
 // Return whether the message at this verbosity level would be actually printed.
 bool mp_msg_test(struct mp_log *log, int lev)
 {
-    if (mp_msg_mute || !log->root)
+    mp_memory_barrier();
+    if (!log->root || log->root->mute)
         return false;
     if (lev == MSGL_STATUS) {
         // skip status line output if stderr is a tty but in background
         if (terminal_in_background())
             return false;
     }
-    mp_memory_barrier();
     if (log->reload_counter != log->root->reload_counter)
         update_loglevel(log);
-    return lev <= log->level || (mp_smode && lev == MSGL_SMODE);
-}
-
-static int mp_msg_docolor(void)
-{
-    return mp_msg_cancolor && mp_msg_color;
+    return lev <= log->level || (log->root->smode && lev == MSGL_SMODE);
 }
 
 static void set_msg_color(FILE* stream, int lev)
 {
     static const int v_colors[] = {9, 1, 3, -1, -1, 2, 8, 8, -1};
-    if (mp_msg_docolor())
-        terminal_set_foreground_color(stream, v_colors[lev]);
+    terminal_set_foreground_color(stream, v_colors[lev]);
 }
 
 void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
@@ -149,7 +129,8 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     pthread_mutex_lock(&mp_msg_lock);
 
-    FILE *stream = (mp_msg_stdout_in_use || lev == MSGL_STATUS) ? stderr : stdout;
+    struct mp_log_root *root = log->root;
+    FILE *stream = (root->force_stderr || lev == MSGL_STATUS) ? stderr : stdout;
 
     char tmp[MSGSIZE_MAX];
     if (vsnprintf(tmp, MSGSIZE_MAX, format, va) < 0)
@@ -160,13 +141,14 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     /* A status line is normally intended to be overwritten by the next
      * status line, and does not end with a '\n'. If we're printing a normal
      * line instead after the status one print '\n' to change line. */
-    if (statusline && lev != MSGL_STATUS)
+    if (root->statusline && lev != MSGL_STATUS)
         fprintf(stderr, "\n");
-    statusline = lev == MSGL_STATUS;
+    root->statusline = lev == MSGL_STATUS;
 
-    set_msg_color(stream, lev);
-    if (header) {
-        if ((lev >= MSGL_V && lev != MSGL_SMODE) || verbose || mp_msg_module) {
+    if (root->color)
+        set_msg_color(stream, lev);
+    if (root->header) {
+        if ((lev >= MSGL_V && lev != MSGL_SMODE) || root->verbose || root->module) {
             fprintf(stream, "[%s] ", log->verbose_prefix);
         } else if (log->prefix) {
             fprintf(stream, "[%s] ", log->prefix);
@@ -174,11 +156,11 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     }
 
     size_t len = strlen(tmp);
-    header = len && (tmp[len - 1] == '\n' || tmp[len - 1] == '\r');
+    root->header = len && (tmp[len - 1] == '\n' || tmp[len - 1] == '\r');
 
     fprintf(stream, "%s", tmp);
 
-    if (mp_msg_docolor())
+    if (root->color)
         terminal_set_foreground_color(stream, -1);
     fflush(stream);
 
@@ -226,30 +208,52 @@ void mp_msg_init(struct mpv_global *global)
 
     struct mp_log_root *root = talloc_zero(NULL, struct mp_log_root);
     root->global = global;
+    root->header = 1;
     root->reload_counter = 1;
 
     struct mp_log dummy = { .root = root };
     struct mp_log *log = mp_log_new(root, &dummy, "");
 
-    mp_msg_do_init();
-
     global->log = log;
-}
 
-struct mpv_global *mp_log_get_global(struct mp_log *log)
-{
-    return log->root->global;
+    mp_msg_update_msglevels(global);
 }
 
 void mp_msg_update_msglevels(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;
+    struct MPOpts *opts = global->opts;
+
+    if (!opts)
+        return;
+
     pthread_mutex_lock(&mp_msg_lock);
+
+    root->verbose = opts->verbose;
+    root->module = opts->msg_module;
+    root->smode = opts->msg_identify;
+    root->color = opts->msg_color && isatty(fileno(stdout));
+
     talloc_free(root->msglevels);
     root->msglevels = talloc_strdup(root, global->opts->msglevels);
+
     mp_atomic_add_and_fetch(&root->reload_counter, 1);
     mp_memory_barrier();
     pthread_mutex_unlock(&mp_msg_lock);
+}
+
+void mp_msg_mute(struct mpv_global *global, bool mute)
+{
+    struct mp_log_root *root = global->log->root;
+
+    root->mute = mute;
+}
+
+void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr)
+{
+    struct mp_log_root *root = global->log->root;
+
+    root->force_stderr = force_stderr;
 }
 
 void mp_msg_uninit(struct mpv_global *global)

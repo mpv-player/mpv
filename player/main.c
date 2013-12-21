@@ -312,6 +312,11 @@ static int mpv_main(int argc, char *argv[])
     struct MPOpts *opts = mpctx->opts;
     mpctx->global->opts = opts;
 
+    char *verbose_env = getenv("MPV_VERBOSE");
+    if (verbose_env)
+        opts->verbose = atoi(verbose_env);
+    mp_msg_update_msglevels(mpctx->global);
+
     init_libav(mpctx->global);
     GetCpuCaps(&gCpuCaps);
     screenshot_init(mpctx);
@@ -319,7 +324,7 @@ static int mpv_main(int argc, char *argv[])
     command_init(mpctx);
 
     // Preparse the command line
-    m_config_preparse_command_line(mpctx->mconfig, argc, argv);
+    m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argc, argv);
     mp_msg_update_msglevels(mpctx->global);
 
     mp_print_version(mpctx->log, false);

@@ -45,6 +45,10 @@ typedef struct mp_vo_opts {
 
 typedef struct MPOpts {
     char *msglevels;
+    int verbose;
+    int msg_identify;
+    int msg_color;
+    int msg_module;
 
     char **reset_options;
     char **lua_files;

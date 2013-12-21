@@ -28,11 +28,6 @@
 
 struct mp_log;
 
-extern int verbose;
-extern bool mp_msg_mute;
-extern bool mp_msg_stdout_in_use;
-extern int mp_smode; // slave mode compatibility glue
-
 // A mp_log instance that never outputs anything.
 extern struct mp_log *const mp_null_log;
 
@@ -85,8 +80,8 @@ struct mpv_global;
 void mp_msg_init(struct mpv_global *global);
 void mp_msg_uninit(struct mpv_global *global);
 void mp_msg_update_msglevels(struct mpv_global *global);
-
-struct mpv_global *mp_log_get_global(struct mp_log *log);
+void mp_msg_mute(struct mpv_global *global, bool mute);
+void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr);
 
 struct bstr;
 int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level);

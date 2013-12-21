@@ -25,9 +25,11 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "common/global.h"
 #include "common/msg.h"
 #include "m_option.h"
 #include "m_config.h"
+#include "options.h"
 #include "common/playlist.h"
 #include "common/playlist_parser.h"
 #include "parse_commandline.h"
@@ -263,10 +265,13 @@ err_out:
  * command line parsing), and --really-quiet suppresses messages printed
  * during normal options parsing.
  */
-void m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
+void m_config_preparse_command_line(m_config_t *config, struct mpv_global *global,
+                                    int argc, char **argv)
 {
+    struct MPOpts *opts = global->opts;
+
     // Hack to shut up parser error messages
-    mp_msg_mute = true;
+    mp_msg_mute(global, true);
 
     struct parse_state p = {config, argc, argv};
     while (split_opt_silent(&p) == 0) {
@@ -276,9 +281,9 @@ void m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
             int flags = M_SETOPT_FROM_CMDLINE | M_SETOPT_PRE_PARSE_ONLY;
             m_config_set_option_ext(config, p.arg, p.param, flags);
             if (bstrcmp0(p.arg, "v") == 0)
-                verbose++;
+                opts->verbose++;
         }
     }
 
-    mp_msg_mute = false;
+    mp_msg_mute(global, false);
 }

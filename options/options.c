@@ -215,10 +215,8 @@ extern const m_option_t ad_lavc_decode_opts_conf[];
 extern const m_option_t mp_input_opts[];
 
 const m_option_t mp_opts[] = {
-    // handled in command line pre-parser (parser-mpcmd.c)
+    // handled in command line pre-parser (parse_commandline.c)
     {"v", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
-
-    // handled in command line parser (parser-mpcmd.c)
     {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN, 1, 0, NULL},
     {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
     {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
@@ -236,11 +234,12 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),
-    {"really-quiet", &verbose, CONF_TYPE_STORE, CONF_GLOBAL|CONF_PRE_PARSE, 0, -10, NULL},
+    OPT_FLAG_STORE("really-quiet", verbose, CONF_GLOBAL | CONF_PRE_PARSE, -10),
     OPT_GENERAL(char*, "msglevel", msglevels, CONF_GLOBAL|CONF_PRE_PARSE,
                 .type = &m_option_type_msglevels),
-    {"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL | CONF_PRE_PARSE, 0, 1, NULL},
-    {"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+    OPT_FLAG("msgcolor", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
+    OPT_FLAG("msgmodule", msg_module, CONF_GLOBAL),
+    OPT_FLAG("identify", msg_identify, CONF_GLOBAL),
 #if HAVE_PRIORITY
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
@@ -628,7 +627,6 @@ const m_option_t mp_opts[] = {
     {"", (void *) mp_input_opts, CONF_TYPE_SUBCONFIG},
 
     OPT_FLAG("list-properties", list_properties, CONF_GLOBAL),
-    {"identify", &mp_smode, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     {"help", (void *) mp_help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"h", (void *) mp_help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"version", (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
@@ -659,6 +657,7 @@ const m_option_t mp_opts[] = {
 };
 
 const struct MPOpts mp_default_opts = {
+    .msg_color = 1,
     .reset_options = (char **)(const char *[]){"pause", NULL},
     .audio_driver_list = NULL,
     .audio_decoders = "-spdif:*", // never select spdif by default

@@ -130,7 +130,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options,
             !strcmp(filename, "/dev/stdout") ||
             !strcmp(filename, "pipe:") ||
             !strcmp(filename, "pipe:1")))
-        mp_msg_stdout_in_use = 1;
+        mp_msg_force_stderr(global, true);
 
     ctx = talloc_zero(NULL, struct encode_lavc_context);
     ctx->log = mp_log_new(ctx, global->log, "encode-lavc");
