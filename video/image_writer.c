@@ -107,6 +107,11 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     avctx->width = image->w;
     avctx->height = image->h;
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
+    if (avctx->pix_fmt == AV_PIX_FMT_NONE) {
+        MP_ERR(ctx, "Image format %s not supported by lavc.\n",
+               mp_imgfmt_to_name(image->imgfmt));
+        goto error_exit;
+    }
     if (ctx->writer->lavc_codec == AV_CODEC_ID_PNG) {
         avctx->compression_level = ctx->opts->png_compression;
         avctx->prediction_method = ctx->opts->png_filter;

@@ -20,7 +20,6 @@
 #include <libavutil/avutil.h>
 
 #include "config.h"
-#include "common/msg.h"
 #include "video/img_format.h"
 #include "fmt-conversion.h"
 
@@ -203,15 +202,11 @@ enum AVPixelFormat imgfmt2pixfmt(int fmt)
     if (fmt == IMGFMT_NONE)
         return AV_PIX_FMT_NONE;
 
-    int i;
-    enum AVPixelFormat pix_fmt;
-    for (i = 0; conversion_map[i].fmt; i++)
+    for (int i = 0; conversion_map[i].fmt; i++) {
         if (conversion_map[i].fmt == fmt)
-            break;
-    pix_fmt = conversion_map[i].pix_fmt;
-    if (pix_fmt == AV_PIX_FMT_NONE)
-        mp_msg(MSGT_GLOBAL, MSGL_V, "Unsupported format %s\n", vo_format_name(fmt));
-    return pix_fmt;
+            return conversion_map[i].pix_fmt;
+    }
+    return AV_PIX_FMT_NONE;
 }
 
 int pixfmt2imgfmt(enum AVPixelFormat pix_fmt)
@@ -219,15 +214,9 @@ int pixfmt2imgfmt(enum AVPixelFormat pix_fmt)
     if (pix_fmt == AV_PIX_FMT_NONE)
         return IMGFMT_NONE;
 
-    int i;
-    for (i = 0; conversion_map[i].pix_fmt != AV_PIX_FMT_NONE; i++)
+    for (int i = 0; conversion_map[i].pix_fmt != AV_PIX_FMT_NONE; i++) {
         if (conversion_map[i].pix_fmt == pix_fmt)
-            break;
-    int fmt = conversion_map[i].fmt;
-    if (!fmt) {
-        const char *fmtname = av_get_pix_fmt_name(pix_fmt);
-        mp_msg(MSGT_GLOBAL, MSGL_ERR, "Unsupported PixelFormat %s (%d)\n",
-               fmtname ? fmtname : "INVALID", pix_fmt);
+            return conversion_map[i].fmt;
     }
-    return fmt;
+    return 0;
 }
