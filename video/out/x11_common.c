@@ -237,16 +237,13 @@ static const struct fstype fstypes[] = {
     {0},
 };
 
-void fstype_help(void)
+void fstype_help(struct mp_log *log)
 {
-    mp_msg(MSGT_VO, MSGL_INFO, "Available fullscreen layer change modes:\n");
-    for (int n = 0; fstypes[n].sym; n++) {
-        mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", fstypes[n].sym,
-               fstypes[n].help);
-    }
-    mp_msg(MSGT_VO, MSGL_INFO,
-           "You can also negate the settings with simply putting '-' in the beginning");
-    mp_msg(MSGT_VO, MSGL_INFO, "\n");
+    mp_info(log, "Available fullscreen layer change modes:\n");
+    for (int n = 0; fstypes[n].sym; n++)
+        mp_info(log, "    %-15s %s\n", fstypes[n].sym, fstypes[n].help);
+    mp_info(log,
+            "You can also negate the settings with simply putting '-' in the beginning\n");
 }
 
 static void fstype_dump(struct vo_x11_state *x11)

@@ -211,7 +211,7 @@ static bool handle_help_options(struct MPContext *mpctx)
     }
 #if HAVE_X11
     if (opts->vo.fstype_list && strcmp(opts->vo.fstype_list[0], "help") == 0) {
-        fstype_help();
+        fstype_help(log);
         MP_INFO(mpctx, "\n");
         opt_exit = 1;
     }
