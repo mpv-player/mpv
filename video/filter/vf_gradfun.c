@@ -379,7 +379,7 @@ static int vf_open(vf_instance_t *vf)
     bool have_size = vf->priv->cfg_size > -1;
 
     if (have_radius && have_size) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR, "scale: gradfun: only one of "
+        MP_ERR(vf, "scale: gradfun: only one of "
               "radius/size parameters allowed at the same time!\n");
         return 0;
     }

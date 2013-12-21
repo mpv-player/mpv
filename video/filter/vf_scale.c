@@ -191,9 +191,7 @@ static unsigned int find_best_out(vf_instance_t *vf, int in_format)
 
         ret = check_outfmt(vf, format);
 
-        mp_msg(MSGT_VFILTER, MSGL_DBG2, "scale: query(%s) -> %d\n",
-               vo_format_name(
-                   format), ret & 3);
+        MP_DBG(vf, "scale: query(%s) -> %d\n", vo_format_name(format), ret & 3);
         if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
             best = format; // no conversion -> bingo!
             break;
@@ -226,8 +224,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     int round_w = 0, round_h = 0;
 
     if (!best) {
-        mp_msg(MSGT_VFILTER, MSGL_WARN,
-               "SwScale: no supported outfmt found :(\n");
+        MP_WARN(vf, "SwScale: no supported outfmt found :(\n");
         return -1;
     }
 
@@ -251,8 +248,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         // TODO: establish a direct connection to the user's brain
         // and find out what the heck he thinks MPlayer should do
         // with this nonsense.
-        mp_msg(MSGT_VFILTER, MSGL_ERR,
-               "SwScale: EUSERBROKEN Check your parameters, they make no sense!\n");
+        MP_ERR(vf, "SwScale: EUSERBROKEN Check your parameters, they make no sense!\n");
         return -1;
     }
 
@@ -289,7 +285,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         }
     }
 
-    mp_msg(MSGT_VFILTER, MSGL_DBG2, "SwScale: scaling %dx%d %s to %dx%d %s  \n",
+    MP_DBG(vf, "SwScale: scaling %dx%d %s to %dx%d %s  \n",
            width, height, vo_format_name(outfmt), vf->priv->w, vf->priv->h,
            vo_format_name(best));
 
@@ -329,8 +325,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 
     if (mp_sws_reinit(vf->priv->sws) < 0) {
         // error...
-        mp_msg(MSGT_VFILTER, MSGL_WARN,
-               "Couldn't init libswscale for this setup\n");
+        MP_WARN(vf, "Couldn't init libswscale for this setup\n");
         return -1;
     }
     return 0;
@@ -401,7 +396,7 @@ static int vf_open(vf_instance_t *vf)
     vf->priv->sws->params[0] = vf->priv->param[0];
     vf->priv->sws->params[1] = vf->priv->param[1];
 
-    mp_msg(MSGT_VFILTER, MSGL_V, "SwScale params: %d x %d (-1=no scaling)\n",
+    MP_VERBOSE(vf, "SwScale params: %d x %d (-1=no scaling)\n",
            vf->priv->cfg_w, vf->priv->cfg_h);
 
     return 1;

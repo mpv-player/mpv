@@ -135,11 +135,11 @@ static int config(struct vf_instance *vf,
     vf->priv->filter.out_cnt = 1;
 
     if (!vf->priv->filter.in_fmt) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR, "invalid input/output format\n");
+        MP_ERR(vf, "invalid input/output format\n");
         return 0;
     }
     if (vf->priv->filter.config && vf->priv->filter.config(&vf->priv->filter) < 0) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR, "filter config failed\n");
+        MP_ERR(vf, "filter config failed\n");
         return 0;
     }
 
@@ -167,13 +167,11 @@ static int config(struct vf_instance *vf,
     }
 
     if (!vf->priv->outfmt) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR,
-               "filter config wants an unsupported output format\n");
+        MP_ERR(vf, "filter config wants an unsupported output format\n");
         return 0;
     }
     if (!vf->priv->out_cnt || vf->priv->out_cnt > FILTER_MAX_OUTCNT) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR,
-               "filter config wants to yield zero or too many output frames\n");
+        MP_ERR(vf, "filter config wants to yield zero or too many output frames\n");
         return 0;
     }
 
@@ -308,14 +306,13 @@ static int vf_open(vf_instance_t *vf)
 {
     int i;
     if (!vf->priv->cfg_dllname) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR,
-               "usage: -vf dlopen=filename.so:function:args\n");
+        MP_ERR(vf, "usage: -vf dlopen=filename.so:function:args\n");
         return 0;
     }
 
     vf->priv->dll = DLLOpen(vf->priv->cfg_dllname);
     if (!vf->priv->dll) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR, "library not found: %s\n",
+        MP_ERR(vf, "library not found: %s\n",
                vf->priv->cfg_dllname);
         return 0;
     }
@@ -323,7 +320,7 @@ static int vf_open(vf_instance_t *vf)
     vf_dlopen_getcontext_func *func =
         (vf_dlopen_getcontext_func *) DLLSymbol(vf->priv->dll, "vf_dlopen_getcontext");
     if (!func) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR, "library is not a filter: %s\n",
+        MP_ERR(vf, "library is not a filter: %s\n",
                vf->priv->cfg_dllname);
         return 0;
     }
@@ -346,15 +343,13 @@ static int vf_open(vf_instance_t *vf)
     if (func(&vf->priv->filter, vf->priv->cfg_argc,
              (const char **)vf->priv->cfg_argv)  < 0)
     {
-        mp_msg(MSGT_VFILTER, MSGL_ERR,
-               "function did not create a filter: %s\n",
+        MP_ERR(vf, "function did not create a filter: %s\n",
                vf->priv->cfg_dllname);
         return 0;
     }
 
     if (!vf->priv->filter.put_image) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR,
-               "function did not create a filter that can put images: %s\n",
+        MP_ERR(vf, "function did not create a filter that can put images: %s\n",
                vf->priv->cfg_dllname);
         return 0;
     }

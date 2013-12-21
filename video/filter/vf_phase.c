@@ -88,7 +88,8 @@ static void do_plane(unsigned char *to, unsigned char *from,
  * between the fields.
  */
 
-static enum mode analyze_plane(unsigned char *old, unsigned char *new,
+static enum mode analyze_plane(struct vf_instance *vf,
+                               unsigned char *old, unsigned char *new,
 			       int w, int h, int os, int ns, enum mode mode,
 			       int unused, int fields)
    {
@@ -188,14 +189,11 @@ static enum mode analyze_plane(unsigned char *old, unsigned char *new,
 	 mode=PROGRESSIVE;
       }
 
-   if( mp_msg_test(MSGT_VFILTER,MSGL_V) )
-      {
-      mp_msg(MSGT_VFILTER, MSGL_INFO, "%c", mode==BOTTOM_FIRST?'b':mode==TOP_FIRST?'t':'p');
-      if(tdiff==65536.0) mp_msg(MSGT_VFILTER, MSGL_INFO,"     N/A "); else mp_msg(MSGT_VFILTER, MSGL_INFO," %8.2f", tdiff);
-      if(bdiff==65536.0) mp_msg(MSGT_VFILTER, MSGL_INFO,"     N/A "); else mp_msg(MSGT_VFILTER, MSGL_INFO," %8.2f", bdiff);
-      if(pdiff==65536.0) mp_msg(MSGT_VFILTER, MSGL_INFO,"     N/A "); else mp_msg(MSGT_VFILTER, MSGL_INFO," %8.2f", pdiff);
-      mp_msg(MSGT_VFILTER, MSGL_INFO,"        \n");
-      }
+      MP_INFO(vf, "%c", mode==BOTTOM_FIRST?'b':mode==TOP_FIRST?'t':'p');
+      if(tdiff==65536.0) MP_INFO(vf, "     N/A "); else MP_INFO(vf, " %8.2f", tdiff);
+      if(bdiff==65536.0) MP_INFO(vf, "     N/A "); else MP_INFO(vf, " %8.2f", bdiff);
+      if(pdiff==65536.0) MP_INFO(vf, "     N/A "); else MP_INFO(vf, " %8.2f", pdiff);
+      MP_INFO(vf, "        \n");
 
    return mode;
    }
@@ -216,7 +214,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
    if(!vf->priv->buf[0])
       mode=PROGRESSIVE;
    else
-      mode=analyze_plane(vf->priv->buf[0], mpi->planes[0],
+      mode=analyze_plane(vf, vf->priv->buf[0], mpi->planes[0],
 			 pw[0], dmpi->h, pw[0], mpi->stride[0], mode,
 			 vf->priv->verbose, mpi->fields);
 

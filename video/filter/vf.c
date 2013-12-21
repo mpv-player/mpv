@@ -26,6 +26,7 @@
 
 #include "config.h"
 
+#include "common/global.h"
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "options/m_config.h"
@@ -194,29 +195,29 @@ static int vf_default_query_format(struct vf_instance *vf, unsigned int fmt)
     return vf_next_query_format(vf, fmt);
 }
 
-static void print_fmt(int msglevel, struct mp_image_params *p)
+static void print_fmt(struct mp_log *log, int msglevel, struct mp_image_params *p)
 {
     if (p && p->imgfmt) {
-        mp_msg(MSGT_VFILTER, msglevel, "%dx%d", p->w, p->h);
+        mp_msg_log(log, msglevel, "%dx%d", p->w, p->h);
         if (p->w != p->d_w || p->h != p->d_h)
-            mp_msg(MSGT_VFILTER, msglevel, "->%dx%d", p->d_w, p->d_h);
-        mp_msg(MSGT_VFILTER, msglevel, " %s", mp_imgfmt_to_name(p->imgfmt));
-        mp_msg(MSGT_VFILTER, msglevel, " %s/%s", mp_csp_names[p->colorspace],
-               mp_csp_levels_names[p->colorlevels]);
+            mp_msg_log(log, msglevel, "->%dx%d", p->d_w, p->d_h);
+        mp_msg_log(log, msglevel, " %s", mp_imgfmt_to_name(p->imgfmt));
+        mp_msg_log(log, msglevel, " %s/%s", mp_csp_names[p->colorspace],
+                   mp_csp_levels_names[p->colorlevels]);
     } else {
-        mp_msg(MSGT_VFILTER, msglevel, "???");
+        mp_msg_log(log, msglevel, "???");
     }
 }
 
 void vf_print_filter_chain(struct vf_chain *c, int msglevel)
 {
-    if (!mp_msg_test(MSGT_VFILTER, msglevel))
+    if (!mp_msg_test_log(c->log, msglevel))
         return;
 
     for (vf_instance_t *f = c->first; f; f = f->next) {
-        mp_msg(MSGT_VFILTER, msglevel, " [%s] ", f->info->name);
-        print_fmt(msglevel, &f->fmt_out);
-        mp_msg(MSGT_VFILTER, msglevel, "\n");
+        mp_msg_log(c->log, msglevel, " [%s] ", f->info->name);
+        print_fmt(c->log, msglevel, &f->fmt_out);
+        mp_msg_log(c->log, msglevel, "\n");
     }
 }
 
@@ -225,14 +226,13 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
 {
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &vf_obj_list, bstr0(name))) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR,
-                "Couldn't find video filter '%s'.\n", name);
+        MP_ERR(c, "Couldn't find video filter '%s'.\n", name);
         return NULL;
     }
     vf_instance_t *vf = talloc_zero(NULL, struct vf_instance);
     *vf = (vf_instance_t) {
         .info = desc.p,
-        .opts = c->opts,
+        .log = mp_log_new(vf, c->log, name),
         .hwdec = c->hwdec,
         .query_format = vf_default_query_format,
         .out_pool = talloc_steal(vf, mp_image_pool_new(16)),
@@ -249,7 +249,7 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
     return vf;
 
 error:
-    mp_msg(MSGT_VFILTER, MSGL_ERR, "Creating filter '%s' failed.\n", name);
+    MP_ERR(c, "Creating filter '%s' failed.\n", name);
     talloc_free(vf);
     return NULL;
 }
@@ -266,8 +266,7 @@ static vf_instance_t *vf_open_filter(struct vf_chain *c, const char *name,
     p += sprintf(str, "%s", name);
     for (i = 0; args && args[2 * i]; i++)
         p += sprintf(p, " %s=%s", args[2 * i], args[2 * i + 1]);
-    mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
-           "Opening video filter: ", str);
+    MP_INFO(c, "Opening video filter: [%s]\n", str);
     return vf_open(c, name, args);
 }
 
@@ -437,7 +436,7 @@ static void update_formats(struct vf_chain *c, struct vf_instance *vf,
         // If there are output formats, but no input formats (meaning the
         // filters after vf work, but vf can't output any format the filters
         // after it accept), try to insert a conversion filter.
-        mp_msg(MSGT_VFILTER, MSGL_INFO, "Using conversion filter.\n");
+        MP_INFO(c, "Using conversion filter.\n");
         struct vf_instance *conv = vf_open(c, "scale", NULL);
         if (conv) {
             conv->next = vf->next;
@@ -507,8 +506,8 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
     c->initialized = r < 0 ? -1 : 1;
     int loglevel = r < 0 ? MSGL_WARN : MSGL_V;
     if (r == -2)
-        mp_msg(MSGT_VFILTER, MSGL_ERR, "Image formats incompatible.\n");
-    mp_msg(MSGT_VFILTER, loglevel, "Video filter chain:\n");
+        MP_ERR(c, "Image formats incompatible.\n");
+    mp_msg_log(c->log, loglevel, "Video filter chain:\n");
     vf_print_filter_chain(c, loglevel);
     return r;
 }
@@ -548,11 +547,13 @@ static int output_query_format(struct vf_instance *vf, unsigned int fmt)
     return 0;
 }
 
-struct vf_chain *vf_new(struct MPOpts *opts)
+struct vf_chain *vf_new(struct mpv_global *global)
 {
     struct vf_chain *c = talloc_ptrtype(NULL, c);
     *c = (struct vf_chain){
-        .opts = opts,
+        .opts = global->opts,
+        .log = mp_log_new(c, global->log, "!vf"),
+        .global = global,
     };
     static const struct vf_info in = { .name = "in" };
     c->first = talloc(c, struct vf_instance);

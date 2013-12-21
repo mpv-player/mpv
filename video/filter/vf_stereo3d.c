@@ -156,7 +156,7 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
                   int d_height, unsigned int flags, unsigned int outfmt)
 {
     if ((width & 1) || (height & 1)) {
-        mp_msg(MSGT_VFILTER, MSGL_WARN, "[stereo3d] invalid height or width\n");
+        MP_WARN(vf, "[stereo3d] invalid height or width\n");
         return 0;
     }
     //default input values
@@ -197,8 +197,7 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
         vf->priv->in.row_left   = vf->priv->height;
         break;
     default:
-        mp_msg(MSGT_VFILTER, MSGL_WARN,
-               "[stereo3d] stereo format of input is not supported\n");
+        MP_WARN(vf, "[stereo3d] stereo format of input is not supported\n");
         return 0;
         break;
     }
@@ -272,8 +271,7 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
         //use default settings
         break;
     default:
-        mp_msg(MSGT_VFILTER, MSGL_WARN,
-            "[stereo3d] stereo format of output is not supported\n");
+        MP_WARN(vf, "[stereo3d] stereo format of output is not supported\n");
         return 0;
         break;
     }
@@ -377,8 +375,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
             break;
         }
         default:
-            mp_msg(MSGT_VFILTER, MSGL_WARN,
-                   "[stereo3d] stereo format of output is not supported\n");
+            MP_WARN(vf, "[stereo3d] stereo format of output is not supported\n");
             return NULL;
             break;
         }

@@ -27,6 +27,7 @@
 #include "video/vfcap.h"
 
 struct MPOpts;
+struct mpv_global;
 struct vf_instance;
 struct vf_priv_s;
 struct m_obj_settings;
@@ -79,7 +80,7 @@ typedef struct vf_instance {
 
     struct mp_image_pool *out_pool;
     struct vf_priv_s *priv;
-    struct MPOpts *opts;
+    struct mp_log *log;
     struct mp_hwdec_info *hwdec;
 
     struct mp_image **out_queued;
@@ -100,7 +101,9 @@ struct vf_chain {
     struct mp_image_params output_params;
     uint8_t allowed_output_formats[IMGFMT_END - IMGFMT_START];
 
+    struct mp_log *log;
     struct MPOpts *opts;
+    struct mpv_global *global;
     struct mp_hwdec_info *hwdec;
 };
 
@@ -122,7 +125,7 @@ enum vf_ctrl {
     VFCTRL_SET_OSD_OBJ,
 };
 
-struct vf_chain *vf_new(struct MPOpts *opts);
+struct vf_chain *vf_new(struct mpv_global *global);
 void vf_destroy(struct vf_chain *c);
 int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params);
 int vf_control_any(struct vf_chain *c, int cmd, void *arg);

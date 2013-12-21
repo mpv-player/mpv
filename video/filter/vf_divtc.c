@@ -286,8 +286,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
       case 2:
 	 if(p->frameno/5>p->bcount)
 	    {
-	    mp_msg(MSGT_VFILTER, MSGL_ERR,
-		   "\n%s: Log file ends prematurely! "
+	    MP_ERR(vf, "\n%s: Log file ends prematurely! "
 		   "Switching to one pass mode.\n", vf->info->name);
 	    p->pass=0;
 	    break;
@@ -308,8 +307,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
 	    if(f<100)
 	       {
-	       mp_msg(MSGT_VFILTER, MSGL_INFO,
-		      "\n%s: Mismatch with pass-1: %+d frame(s).\n",
+	       MP_INFO(vf, "\n%s: Mismatch with pass-1: %+d frame(s).\n",
 		      vf->info->name, f);
 
 	       p->frameno+=f;
@@ -317,8 +315,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 	       }
 	    else if(p->misscount++>=30)
 	       {
-	       mp_msg(MSGT_VFILTER, MSGL_ERR,
-		      "\n%s: Sync with pass-1 lost! "
+	       MP_ERR(vf, "\n%s: Sync with pass-1 lost! "
 		      "Switching to one pass mode.\n", vf->info->name);
 	       p->pass=0;
 	       break;
@@ -352,8 +349,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
    if(newphase!=p->phase && ((p->phase+4)%5<n)==((newphase+4)%5<n))
       {
       p->phase=newphase;
-      mp_msg(MSGT_VFILTER, MSGL_STATUS,
-	     "\n%s: Telecine phase %d.\n", vf->info->name, p->phase);
+      MP_INFO(vf, "\n%s: Telecine phase %d.\n", vf->info->name, p->phase);
       }
 
    switch((p->frameno++-p->phase+10)%5)
@@ -381,8 +377,9 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
    return mpi;
    }
 
-static int analyze(struct vf_priv_s *p)
+static int analyze(struct vf_instance *vf)
    {
+   struct vf_priv_s *p = vf->priv;
    int *buf=0, *bp, bufsize=0, n, b, f, i, j, m, s;
    unsigned int *cbuf=0, *cp;
    int8_t *pbuf;
@@ -403,7 +400,7 @@ static int analyze(struct vf_priv_s *p)
 
 	 if(!bp || !cp)
 	    {
-	    mp_msg(MSGT_VFILTER, MSGL_FATAL, "%s: Not enough memory.\n",
+	    MP_FATAL(vf, "%s: Not enough memory.\n",
 		   vf_info_divtc.name);
 	    free(buf);
 	    free(cbuf);
@@ -416,7 +413,7 @@ static int analyze(struct vf_priv_s *p)
 
    if(n <= 15)
       {
-      mp_msg(MSGT_VFILTER, MSGL_FATAL, "%s: Empty 2-pass log file.\n",
+      MP_FATAL(vf, "%s: Empty 2-pass log file.\n",
 	     vf_info_divtc.name);
       free(buf);
       free(cbuf);
@@ -460,8 +457,7 @@ static int analyze(struct vf_priv_s *p)
 
       p->deghost=s1>s0?deghost:0;
 
-      mp_msg(MSGT_VFILTER, MSGL_INFO,
-	     "%s: Deghosting %-3s (relative pattern strength %+.2fdB).\n",
+      MP_INFO(vf, "%s: Deghosting %-3s (relative pattern strength %+.2fdB).\n",
 	     vf_info_divtc.name,
 	     p->deghost?"ON":"OFF",
 	     10.0*log10(s1/s0));
@@ -493,7 +489,7 @@ static int analyze(struct vf_priv_s *p)
    if(f==b)
       {
       free(buf-15);
-      mp_msg(MSGT_VFILTER, MSGL_FATAL, "%s: No telecine pattern found!\n",
+      MP_FATAL(vf, "%s: No telecine pattern found!\n",
 	     vf_info_divtc.name);
       return 0;
       }
@@ -623,8 +619,7 @@ static int vf_open(vf_instance_t *vf)
       case 1:
 	 if(!(p->file=fopen(p->filename, "w")))
 	    {
-	    mp_msg(MSGT_VFILTER, MSGL_FATAL,
-		   "%s: Can't create file %s.\n", vf->info->name, p->filename);
+	    MP_FATAL(vf, "%s: Can't create file %s.\n", vf->info->name, p->filename);
 	    goto fail;
 	    }
 
@@ -633,12 +628,11 @@ static int vf_open(vf_instance_t *vf)
       case 2:
 	 if(!(p->file=fopen(p->filename, "r")))
 	    {
-	    mp_msg(MSGT_VFILTER, MSGL_FATAL,
-		   "%s: Can't open file %s.\n", vf->info->name, p->filename);
+	    MP_FATAL(vf, "%s: Can't open file %s.\n", vf->info->name, p->filename);
 	    goto fail;
 	    }
 
-	 if(!analyze(p))
+	 if(!analyze(vf))
 	    goto fail;
 
 	 fclose(p->file);
