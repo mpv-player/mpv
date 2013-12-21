@@ -98,9 +98,8 @@ struct mp_decoder_list *mp_select_decoders(struct mp_decoder_list *all,
         struct mp_decoder_list *dest = exclude ? remove : list;
         bstr family, decoder;
         if (!bstr_split_tok(entry, ":", &family, &decoder)) {
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Decoders must be specified as "
-                   "'family:decoder' for the --ad/--vd options.\n");
-            break;
+            family = entry;
+            decoder = bstr0("*");
         }
         if (bstr_equals0(decoder, "*")) {
             for (int n = 0; n < all->num_entries; n++) {
