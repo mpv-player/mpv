@@ -171,25 +171,26 @@ typedef struct mp_cmd {
 bool mp_input_is_abort_cmd(int cmd_id);
 
 /* Add a new command input source.
- * "fd" is a file descriptor (use a negative value if you don't use any fd)
+ * "fd" is a file descriptor (use -1 if you don't use any fd)
  * "select" tells whether to use select() on the fd to determine when to
  * try reading.
- * "read_func" is optional. If NULL a default function which reads data
- * directly from the fd will be used. It must return either text data
- * or one of the MP_INPUT error codes above.
+ * "read_cmd_func" is optional. It must return either text data or one of the
+ * MP_INPUT error codes above. For return values >= 0, it behaves like UNIX
+ * read() and returns the number of bytes copied to the dest buffer.
+ * "read_key_func" is optional. It returns either key codes (ASCII, keycodes.h),
+ * or MP_INPUT error codes.
  * "close_func" will be called when closing. Can be NULL. Its return value
  * is ignored (it's only there to allow using standard close() as the func).
+ * "ctx" is for free use, and is passed to the callbacks.
  */
-int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
-                        int read_func(int fd, char *dest, int size),
-                        int close_func(int fd));
+int mp_input_add_fd(struct input_ctx *ictx, int fd, int select,
+                    int read_cmd_func(void *ctx, int fd, char *dest, int size),
+                    int read_key_func(void *ctx, int fd),
+                    int close_func(void *ctx, int fd), void *ctx);
 
-/* The args are similar to the cmd version above, except you must give
- * a read_func, and it should return key codes (ASCII plus keycodes.h).
+/* Can be passed as read_func for above function in order to read() from the FD.
  */
-int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
-                        int read_func(void *ctx, int fd),
-                        int close_func(int fd), void *ctx);
+int input_default_read_cmd(void *ctx, int fd, char *buf, int l);
 
 // Process keyboard input. code is a key code from keycodes.h, possibly
 // with modifiers applied. MP_INPUT_RELEASE_ALL is also a valid value.

@@ -504,8 +504,8 @@ struct input_fd {
     struct mp_log *log;
     int fd;
     int (*read_key)(void *ctx, int fd);
-    int (*read_cmd)(int fd, char *dest, int size);
-    int (*close_func)(int fd);
+    int (*read_cmd)(void *ctx, int fd, char *dest, int size);
+    int (*close_func)(void *ctx, int fd);
     void *ctx;
     unsigned eof : 1;
     unsigned drop : 1;
@@ -540,6 +540,7 @@ struct cmd_queue {
 struct input_ctx {
     pthread_mutex_t mutex;
     struct mp_log *log;
+    struct mpv_global *global;
 
     bool using_alt_gr;
     bool using_ar;
@@ -628,14 +629,15 @@ const m_option_t mp_input_opts[] = {
     OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
     OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
     OPT_FLAG("right-alt-gr", input.use_alt_gr, CONF_GLOBAL),
+#if HAVE_LIRC
+    OPT_STRING("lircconf", input.lirc_configfile, CONF_GLOBAL),
+#endif
 #if HAVE_COCOA
     OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
     OPT_FLAG("media-keys", input.use_media_keys, CONF_GLOBAL),
 #endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
-
-static int default_cmd_func(int fd, char *buf, int l);
 
 static const char builtin_input_conf[] =
 #include "input/input_conf.h"
@@ -752,67 +754,36 @@ static struct mp_cmd *queue_peek_tail(struct cmd_queue *queue)
     return cur;
 }
 
-static struct input_fd *mp_input_add_fd(struct input_ctx *ictx)
+int mp_input_add_fd(struct input_ctx *ictx, int unix_fd, int select,
+                    int read_cmd_func(void *ctx, int fd, char *dest, int size),
+                    int read_key_func(void *ctx, int fd),
+                    int close_func(void *ctx, int fd), void *ctx)
 {
+    if (select && unix_fd < 0) {
+        MP_ERR(ictx, "Invalid fd %d in mp_input_add_fd", unix_fd);
+        return 0;
+    }
+
+    input_lock(ictx);
+    struct input_fd *fd = NULL;
     if (ictx->num_fds == MP_MAX_FDS) {
         MP_ERR(ictx, "Too many file descriptors.\n");
-        return NULL;
+    } else {
+        fd = &ictx->fds[ictx->num_fds];
     }
-
-    struct input_fd *fd = &ictx->fds[ictx->num_fds];
     *fd = (struct input_fd){
         .log = ictx->log,
-        .fd = -1,
+        .fd = unix_fd,
+        .select = select,
+        .read_cmd = read_cmd_func,
+        .read_key = read_key_func,
+        .close_func = close_func,
+        .ctx = ctx,
     };
     ictx->num_fds++;
-
-    return fd;
-}
-
-int mp_input_add_cmd_fd(struct input_ctx *ictx, int unix_fd, int select,
-                        int read_func(int fd, char *dest, int size),
-                        int close_func(int fd))
-{
-    if (select && unix_fd < 0) {
-        MP_ERR(ictx, "Invalid fd %d in mp_input_add_cmd_fd", unix_fd);
-        return 0;
-    }
-
-    input_lock(ictx);
-    struct input_fd *fd = mp_input_add_fd(ictx);
-    if (fd) {
-        fd->fd = unix_fd;
-        fd->select = select;
-        fd->read_cmd = read_func ? read_func : default_cmd_func;
-        fd->close_func = close_func;
-    }
     input_unlock(ictx);
     return !!fd;
 }
-
-int mp_input_add_key_fd(struct input_ctx *ictx, int unix_fd, int select,
-                        int read_func(void *ctx, int fd),
-                        int close_func(int fd), void *ctx)
-{
-    if (select && unix_fd < 0) {
-        MP_ERR(ictx, "Invalid fd %d in mp_input_add_key_fd", unix_fd);
-        return 0;
-    }
-    assert(read_func);
-
-    input_lock(ictx);
-    struct input_fd *fd = mp_input_add_fd(ictx);
-    if (fd) {
-        fd->fd = unix_fd;
-        fd->select = select;
-        fd->read_key = read_func;
-        fd->close_func = close_func;
-        fd->ctx = ctx;
-    }
-    input_unlock(ictx);
-    return !!fd;
-}
-
 
 static void mp_input_rm_fd(struct input_ctx *ictx, int fd)
 {
@@ -826,7 +797,7 @@ static void mp_input_rm_fd(struct input_ctx *ictx, int fd)
     if (i == ictx->num_fds)
         return;
     if (fds[i].close_func)
-        fds[i].close_func(fds[i].fd);
+        fds[i].close_func(fds[i].ctx, fds[i].fd);
     talloc_free(fds[i].buffer);
 
     if (i + 1 < ictx->num_fds)
@@ -1205,7 +1176,7 @@ static int read_cmd(struct input_fd *mp_fd, char **ret)
 
     // Get some data if needed/possible
     while (!mp_fd->got_cmd && !mp_fd->eof && (mp_fd->size - mp_fd->pos > 1)) {
-        int r = mp_fd->read_cmd(mp_fd->fd, mp_fd->buffer + mp_fd->pos,
+        int r = mp_fd->read_cmd(mp_fd->ctx, mp_fd->fd, mp_fd->buffer + mp_fd->pos,
                                 mp_fd->size - 1 - mp_fd->pos);
         // Error ?
         if (r < 0) {
@@ -1272,7 +1243,7 @@ static int read_cmd(struct input_fd *mp_fd, char **ret)
         return MP_INPUT_NOTHING;
 }
 
-static int default_cmd_func(int fd, char *buf, int l)
+int input_default_read_cmd(void *ctx, int fd, char *buf, int l)
 {
     while (1) {
         int r = read(fd, buf, l);
@@ -2377,12 +2348,18 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
     input_unlock(ictx);
 }
 
+static int close_fd(void *ctx, int fd)
+{
+    return close(fd);
+}
+
 struct input_ctx *mp_input_init(struct mpv_global *global)
 {
     struct input_conf *input_conf = &global->opts->input;
 
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
     *ictx = (struct input_ctx){
+        .global = global,
         .log = mp_log_new(ictx, global->log, "input"),
         .key_fifo_size = input_conf->key_fifo_size,
         .doubleclick_time = input_conf->doubleclick_time,
@@ -2432,8 +2409,8 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     if (ret < 0)
         MP_ERR(ictx, "Failed to initialize wakeup pipe: %s\n", strerror(errno));
     else
-        mp_input_add_key_fd(ictx, ictx->wakeup_pipe[0], true, read_wakeup,
-                            NULL, NULL);
+        mp_input_add_fd(ictx, ictx->wakeup_pipe[0], true, NULL, read_wakeup,
+                        NULL, NULL);
 #endif
 
     bool config_ok = false;
@@ -2446,28 +2423,17 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         talloc_free(file);
     }
     if (!config_ok) {
-        MP_VERBOSE(ictx, "Falling back on default (hardcoded) "
-                   "input config\n");
+        MP_VERBOSE(ictx, "Falling back on default (hardcoded) input config\n");
     }
 
 #if HAVE_JOYSTICK
-    if (input_conf->use_joystick) {
-        int fd = mp_input_joystick_init(input_conf->js_dev);
-        if (fd < 0)
-            MP_ERR(ictx, "Can't init input joystick\n");
-        else
-            mp_input_add_key_fd(ictx, fd, 1, mp_input_joystick_read,
-                                close, NULL);
-    }
+    if (input_conf->use_joystick)
+        mp_input_joystick_init(ictx, ictx->log, input_conf->js_dev);
 #endif
 
 #if HAVE_LIRC
-    if (input_conf->use_lirc) {
-        int fd = mp_input_lirc_init();
-        if (fd > 0)
-            mp_input_add_cmd_fd(ictx, fd, 0, mp_input_lirc_read,
-                                mp_input_lirc_close);
-    }
+    if (input_conf->use_lirc)
+        mp_input_lirc_init(ictx, ictx->log, input_conf->lirc_configfile);
 #endif
 
     if (input_conf->use_alt_gr) {
@@ -2499,7 +2465,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
 #endif
         int in_file_fd = open(input_conf->in_file, mode);
         if (in_file_fd >= 0)
-            mp_input_add_cmd_fd(ictx, in_file_fd, 1, NULL, close);
+            mp_input_add_fd(ictx, in_file_fd, 1, input_default_read_cmd, NULL, close_fd, NULL);
         else
             MP_ERR(ictx, "Can't open %s: %s\n", input_conf->in_file,
                    strerror(errno));
@@ -2534,7 +2500,7 @@ void mp_input_uninit(struct input_ctx *ictx)
 
     for (int i = 0; i < ictx->num_fds; i++) {
         if (ictx->fds[i].close_func)
-            ictx->fds[i].close_func(ictx->fds[i].fd);
+            ictx->fds[i].close_func(ictx->fds[i].ctx, ictx->fds[i].fd);
     }
     for (int i = 0; i < 2; i++) {
         if (ictx->wakeup_pipe[i] != -1)

@@ -27,6 +27,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+struct input_ctx;
+
 /* Screen size. Initialized by load_termcap() and get_screen_size() */
 extern int screen_width;
 extern int screen_height;
@@ -36,6 +38,12 @@ extern char * erase_to_end_of_line;
 
 /* Global initialization for terminal output. */
 int terminal_init(void);
+
+/* Setup ictx to read input commands from stdin (slave mode) */
+void terminal_setup_stdin_cmd_input(struct input_ctx *ictx);
+
+/* Setup ictx to read keys from the terminal */
+void terminal_setup_getch(struct input_ctx *ictx);
 
 /* Return whether the process has been backgrounded. */
 bool terminal_in_background(void);
@@ -53,19 +61,5 @@ void getch2_disable(void);
 
 /* Enable and disable STDIN line-buffering */
 void getch2_poll(void);
-
-/* Read a character or a special key code (see keycodes.h) */
-struct input_ctx;
-bool getch2(struct input_ctx *ictx);
-
-#if defined(__MINGW32__)
-// slave cmd function for Windows
-int mp_input_slave_cmd_func(int fd,char* dest,int size);
-#define USE_FD0_CMD_SELECT  0
-#define MP_INPUT_SLAVE_CMD_FUNC     mp_input_slave_cmd_func
-#else
-#define USE_FD0_CMD_SELECT  1
-#define MP_INPUT_SLAVE_CMD_FUNC     NULL
-#endif
 
 #endif /* MPLAYER_GETCH2_H */

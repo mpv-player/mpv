@@ -33,6 +33,10 @@
 #include "input/input.h"
 #include "terminal.h"
 
+int screen_width = 80;
+int screen_height = 24;
+char *erase_to_end_of_line = NULL;
+
 #define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
 #define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
 static short stdoutAttrs = 0;
@@ -47,7 +51,7 @@ static const unsigned char ansi2win32[8] = {
     FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
 };
 
-int mp_input_slave_cmd_func(int fd, char *dest, int size)
+static int mp_input_slave_cmd_func(void *ctx, int fd, char *dest, int size)
 {
     DWORD retval;
     HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
@@ -66,9 +70,10 @@ int mp_input_slave_cmd_func(int fd, char *dest, int size)
     return MP_INPUT_NOTHING;
 }
 
-int screen_width = 80;
-int screen_height = 24;
-char *erase_to_end_of_line = NULL;
+void terminal_setup_stdin_cmd_input(struct input_ctx *ictx)
+{
+    mp_input_add_fd(ictx, 0, 0, mp_input_slave_cmd_func, NULL, NULL, NULL);
+}
 
 void get_screen_size(void)
 {
@@ -172,12 +177,24 @@ static int getch2_internal(void)
     return -1;
 }
 
-bool getch2(struct input_ctx *ctx)
+static bool getch2(struct input_ctx *ctx)
 {
     int r = getch2_internal();
     if (r >= 0)
         mp_input_put_key(ctx, r);
     return true;
+}
+
+static int read_keys(void *ctx, int fd)
+{
+    if (getch2(ctx))
+        return MP_INPUT_NOTHING;
+    return MP_INPUT_DEAD;
+}
+
+void terminal_setup_getch(struct input_ctx *ictx)
+{
+    mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
 }
 
 void getch2_poll(void)

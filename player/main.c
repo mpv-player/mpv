@@ -270,28 +270,6 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
     mp_time_init();
 }
 
-static int read_keys(void *ctx, int fd)
-{
-    if (getch2(ctx))
-        return MP_INPUT_NOTHING;
-    return MP_INPUT_DEAD;
-}
-
-static void init_input(struct MPContext *mpctx)
-{
-    mpctx->input = mp_input_init(mpctx->global);
-    if (mpctx->opts->slave_mode)
-        mp_input_add_cmd_fd(mpctx->input, 0, USE_FD0_CMD_SELECT, MP_INPUT_SLAVE_CMD_FUNC, NULL);
-    else if (mpctx->opts->consolecontrols)
-        mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->input);
-    // Set the libstream interrupt callback
-    stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
-
-#if HAVE_COCOA
-    cocoa_set_input_context(mpctx->input);
-#endif
-}
-
 static int cfg_include(void *ctx, char *filename, int flags)
 {
     struct MPContext *mpctx = ctx;
@@ -379,7 +357,11 @@ static int mpv_main(int argc, char *argv[])
     set_priority();
 #endif
 
-    init_input(mpctx);
+    mpctx->input = mp_input_init(mpctx->global);
+    stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+#if HAVE_COCOA
+    cocoa_set_input_context(mpctx->input);
+#endif
 
 #if HAVE_ENCODING
     if (opts->encode_output.file && *opts->encode_output.file) {
@@ -396,6 +378,11 @@ static int mpv_main(int argc, char *argv[])
         mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
     }
 #endif
+
+    if (mpctx->opts->slave_mode)
+        terminal_setup_stdin_cmd_input(mpctx->input);
+    else if (mpctx->opts->consolecontrols)
+        terminal_setup_getch(mpctx->input);
 
     if (opts->consolecontrols)
         getch2_enable();

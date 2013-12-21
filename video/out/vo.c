@@ -434,8 +434,8 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     if (vo->config_ok)
         vo->params = talloc_memdup(vo, &p2, sizeof(p2));
     if (vo->registered_fd == -1 && vo->event_fd != -1 && vo->config_ok) {
-        mp_input_add_key_fd(vo->input_ctx, vo->event_fd, 1, event_fd_callback,
-                            NULL, vo);
+        mp_input_add_fd(vo->input_ctx, vo->event_fd, 1, NULL, event_fd_callback,
+                        NULL, vo);
         vo->registered_fd = vo->event_fd;
     }
     vo->frame_loaded = false;

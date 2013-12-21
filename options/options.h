@@ -254,6 +254,7 @@ typedef struct MPOpts {
         char *in_file;
         int use_joystick;
         int use_lirc;
+        char *lirc_configfile;
         int use_lircc;
         int use_alt_gr;
         int use_ar;
