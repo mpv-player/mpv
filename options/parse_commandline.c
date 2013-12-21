@@ -114,7 +114,6 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                                    struct mpv_global *global,
                                    int argc, char **argv)
 {
-    struct MPOpts *opts = config->optstruct;
     int ret = M_OPT_UNKNOWN;
     int mode = 0;
     struct playlist_entry *local_start = NULL;
@@ -186,7 +185,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             if (bstrcmp0(p.arg, "playlist") == 0) {
                 // append the playlist to the local args
                 char *param0 = bstrdup0(NULL, p.param);
-                struct playlist *pl = playlist_parse_file(param0, opts);
+                struct playlist *pl = playlist_parse_file(param0, global);
                 talloc_free(param0);
                 if (!pl) {
                     MP_FATAL(config, "Error reading playlist '%.*s'", BSTR_P(p.param));

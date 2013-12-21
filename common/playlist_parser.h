@@ -19,11 +19,9 @@
 #ifndef MPLAYER_PLAYLISTPARSER_H
 #define MPLAYER_PLAYLISTPARSER_H
 
-#include <stdbool.h>
-
-struct MPOpts;
+struct mpv_global;
 struct playlist;
 
-struct playlist *playlist_parse_file(const char *file, struct MPOpts *opts);
+struct playlist *playlist_parse_file(const char *file, struct mpv_global *global);
 
 #endif
