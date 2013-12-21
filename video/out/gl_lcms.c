@@ -103,7 +103,8 @@ static struct bstr load_file(void *talloc_ctx, const char *filename)
 
 #define LUT3D_CACHE_HEADER "mpv 3dlut cache 1.0\n"
 
-struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
+struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
+                          struct mpv_global *global)
 {
     int s_r, s_g, s_b;
     if (!parse_3dlut_size(opts->size_str, &s_r, &s_g, &s_b))
@@ -223,7 +224,8 @@ const struct m_sub_options mp_icc_conf = {
     .defaults = &(const struct mp_icc_opts) {0},
 };
 
-struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
+struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
+                          struct mpv_global *global)
 {
     mp_msg_log(log, MSGL_FATAL, "LCMS2 support not compiled.\n");
     return NULL;
