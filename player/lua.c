@@ -414,14 +414,13 @@ static int script_property_list(lua_State *L)
 
 static int script_property_string(lua_State *L)
 {
-    const struct m_option *props = mp_get_property_list();
     struct MPContext *mpctx = get_mpctx(L);
     const char *name = luaL_checkstring(L, 1);
     int type = lua_tointeger(L, lua_upvalueindex(1))
                ? M_PROPERTY_PRINT : M_PROPERTY_GET_STRING;
 
     char *result = NULL;
-    if (m_property_do(props, name, type, &result, mpctx) >= 0 && result) {
+    if (mp_property_do(name, type, &result, mpctx) >= 0 && result) {
         lua_pushstring(L, result);
         talloc_free(result);
         return 1;
