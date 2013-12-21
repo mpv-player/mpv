@@ -29,7 +29,7 @@
 
 #include <libavutil/common.h>
 
-#include "config.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "options/path.h"
 #include "ass_mp.h"
@@ -150,7 +150,8 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
     ass_set_line_spacing(priv, set_line_spacing);
 }
 
-void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts)
+void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
+                            struct mpv_global *global, struct mp_log *log)
 {
     char *default_font = mp_find_user_config_file("subfont.ttf");
     char *config       = mp_find_config_file("fonts.conf");
@@ -216,22 +217,25 @@ static int map_ass_level[] = {
 
 static void message_callback(int level, const char *format, va_list va, void *ctx)
 {
+    struct mp_log *log = ctx;
+    if (!log)
+        return;
     level = map_ass_level[level];
-    mp_msg_va(MSGT_ASS, level, format, va);
+    mp_msg_log_va(log, level, format, va);
     // libass messages lack trailing \n
-    mp_msg(MSGT_ASS, level, "\n");
+    mp_msg_log(log, level, "\n");
 }
 
-ASS_Library *mp_ass_init(struct MPOpts *opts)
+ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log)
 {
     char *path = mp_find_user_config_file("fonts");
     ASS_Library *priv = ass_library_init();
     if (!priv)
         abort();
-    ass_set_message_cb(priv, message_callback, NULL);
+    ass_set_message_cb(priv, message_callback, log);
     if (path)
         ass_set_fonts_dir(priv, path);
-    ass_set_extract_fonts(priv, opts->use_embedded_fonts);
+    ass_set_extract_fonts(priv, global->opts->use_embedded_fonts);
     talloc_free(path);
     return priv;
 }

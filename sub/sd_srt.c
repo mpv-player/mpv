@@ -273,7 +273,8 @@ static int read_attr(char **s, struct bstr *attr, struct bstr *val)
     return 0;
 }
 
-static void convert_subrip(const char *orig, char *dest, int dest_buffer_size)
+static void convert_subrip(struct sd *sd, const char *orig,
+                           char *dest, int dest_buffer_size)
 {
     /* line is not const to avoid warnings with strtol, etc.
      * orig content won't be changed */
@@ -392,8 +393,7 @@ static void convert_subrip(const char *orig, char *dest, int dest_buffer_size)
                         tag->has_color = true;
                     } else {
                         // We didn't find any matching color
-                        mp_msg(MSGT_SUBREADER, MSGL_WARN,
-                                "SubRip: unknown font color in subtitle: >%s<\n",
+                        MP_WARN(sd, "unknown font color in subtitle: >%s<\n",
                                 orig);
                         append_text(&new_line, "{\\c}");
                     }
@@ -406,8 +406,8 @@ static void convert_subrip(const char *orig, char *dest, int dest_buffer_size)
                     tag->has_face = true;
                     has_valid_attr = true;
                 } else
-                    mp_msg(MSGT_SUBREADER, MSGL_WARN,"SubRip: unrecognized "
-                            "attribute \"%.*s\" in font tag\n", BSTR_P(attr));
+                    MP_WARN(sd, "unrecognized attribute \"%.*s\" in font tag\n",
+                            BSTR_P(attr));
             }
 
             if (!has_valid_attr || *line != '>') { /* Not valid font tag */
@@ -463,7 +463,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 {
     char dest[SD_MAX_LINE_LEN];
     // Assume input buffer is padded with 0
-    convert_subrip(packet->buffer, dest, sizeof(dest));
+    convert_subrip(sd, packet->buffer, dest, sizeof(dest));
     sd_conv_add_packet(sd, dest, strlen(dest), packet->pts, packet->duration);
 }
 

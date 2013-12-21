@@ -313,6 +313,7 @@ typedef struct MPContext {
      */
     struct ass_renderer *ass_renderer;
     struct ass_library *ass_library;
+    struct mp_log *ass_log;
 
     int last_dvb_step;
 

@@ -8,7 +8,7 @@
 
 struct sh_stream;
 struct ass_track;
-struct MPOpts;
+struct mpv_global;
 struct demux_packet;
 struct ass_library;
 struct ass_renderer;
@@ -22,7 +22,7 @@ enum sd_ctrl {
     SD_CTRL_GET_RESOLUTION,
 };
 
-struct dec_sub *sub_create(struct MPOpts *opts);
+struct dec_sub *sub_create(struct mpv_global *global);
 void sub_destroy(struct dec_sub *sub);
 
 void sub_set_video_res(struct dec_sub *sub, int w, int h);

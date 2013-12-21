@@ -102,12 +102,12 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     }
     // plaintext subs
     if (packet->pts == MP_NOPTS_VALUE) {
-        mp_msg(MSGT_SUBREADER, MSGL_WARN, "Subtitle without pts, ignored\n");
+        MP_WARN(sd, "Subtitle without pts, ignored\n");
         return;
     }
     if (packet->duration <= 0) {
-        mp_msg(MSGT_SUBREADER, MSGL_WARN, "Subtitle without duration or "
-               "duration set to 0 at pts %f, ignored\n", packet->pts);
+        MP_WARN(sd, "Subtitle without duration or "
+                "duration set to 0 at pts %f, ignored\n", packet->pts);
         return;
     }
     unsigned char *text = packet->buffer;
@@ -390,7 +390,7 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     {
         int msgl = basic_conv ? MSGL_V : MSGL_WARN;
         ctx->last_params = params;
-        mp_msg(MSGT_SUBREADER, msgl, "[sd_ass] mangling colors like vsfilter: "
+        MP_MSG(sd, msgl, "mangling colors like vsfilter: "
                "RGB -> %s %s -> %s %s -> RGB\n", mp_csp_names[csp],
                mp_csp_levels_names[levels], mp_csp_names[params.colorspace],
                mp_csp_levels_names[params.colorlevels]);

@@ -399,13 +399,14 @@ static int mpv_main(int argc, char *argv[])
         getch2_enable();
 
 #if HAVE_LIBASS
-    mpctx->ass_library = mp_ass_init(opts);
+    mpctx->ass_log = mp_log_new(mpctx, mpctx->global->log, "!libass");
+    mpctx->ass_library = mp_ass_init(mpctx->global, mpctx->ass_log);
 #else
     MP_WARN(mpctx, "Compiled without libass.\n");
     MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
 #endif
 
-    mpctx->osd = osd_create(opts);
+    mpctx->osd = osd_create(mpctx->global);
 
     if (opts->force_vo) {
         opts->fixed_vo = 1;

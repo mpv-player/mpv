@@ -842,8 +842,10 @@ static void init_sub_renderer(struct MPContext *mpctx)
     assert(!mpctx->ass_renderer);
 
     mpctx->ass_renderer = ass_renderer_init(mpctx->ass_library);
-    if (mpctx->ass_renderer)
-        mp_ass_configure_fonts(mpctx->ass_renderer, mpctx->opts->sub_text_style);
+    if (mpctx->ass_renderer) {
+        mp_ass_configure_fonts(mpctx->ass_renderer, mpctx->opts->sub_text_style,
+                               mpctx->global, mpctx->ass_log);
+    }
     mpctx->initialized_flags |= INITIALIZED_LIBASS;
 #endif
 }

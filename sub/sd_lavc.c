@@ -111,8 +111,7 @@ static int init(struct sd *sd)
     return 0;
 
  error:
-    mp_msg(MSGT_SUBREADER, MSGL_ERR,
-           "Could not open libavcodec subtitle decoder\n");
+    MP_FATAL(sd, "Could not open libavcodec subtitle decoder\n");
     av_free(ctx);
     talloc_free(priv);
     return -1;
@@ -202,8 +201,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             }
             break;
         default:
-            mp_msg(MSGT_SUBREADER, MSGL_ERR, "sd_lavc: unsupported subtitle "
-                   "type from libavcodec\n");
+            MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
             break;
         }
     }

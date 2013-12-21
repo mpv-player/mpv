@@ -48,7 +48,8 @@ static void create_ass_renderer(struct osd_state *osd, struct osd_object *obj)
     if (obj->osd_render)
         return;
 
-    obj->osd_ass_library = mp_ass_init(osd->opts);
+    struct mp_log *ass_log = mp_log_new(obj, osd->log, "libass");
+    obj->osd_ass_library = mp_ass_init(osd->global, ass_log);
     ass_add_font(obj->osd_ass_library, "mpv-osd-symbols", (void *)osd_font_pfb,
                  sizeof(osd_font_pfb) - 1);
 
@@ -56,7 +57,8 @@ static void create_ass_renderer(struct osd_state *osd, struct osd_object *obj)
     if (!obj->osd_render)
         abort();
 
-    mp_ass_configure_fonts(obj->osd_render, osd->opts->osd_style);
+    mp_ass_configure_fonts(obj->osd_render, osd->opts->osd_style,
+                           osd->global, ass_log);
     ass_set_aspect_ratio(obj->osd_render, 1.0, 1.0);
 }
 
