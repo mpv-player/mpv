@@ -58,8 +58,6 @@ void set_priority(void)
             if (strcasecmp(priority_presets_defs[i].name, proc_priority) == 0)
                 break;
         }
-        mp_msg(MSGT_CPLAYER, MSGL_STATUS, "Setting process priority: %s\n",
-               priority_presets_defs[i].name);
 
         SetPriorityClass(GetCurrentProcess(), priority_presets_defs[i].prio);
     }
