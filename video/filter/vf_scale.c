@@ -393,6 +393,7 @@ static int vf_open(vf_instance_t *vf)
     vf->control = control;
     vf->uninit = uninit;
     vf->priv->sws = mp_sws_alloc(vf);
+    vf->priv->sws->log = vf->log;
     vf->priv->sws->params[0] = vf->priv->param[0];
     vf->priv->sws->params[1] = vf->priv->param[1];
 
