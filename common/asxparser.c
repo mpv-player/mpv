@@ -427,18 +427,6 @@ asx_parse_ref(ASX_Parser_t* parser, char** attribs) {
     asx_warning_attrib_required(parser,"REF" ,"HREF" );
     return;
   }
-#if 0
-  // replace http my mmshttp to avoid infinite loops
-  // disabled since some playlists for e.g. WinAMP use asx as well
-  // "-user-agent NSPlayer/4.1.0.3856" is a possible workaround
-  if (strncmp(href, "http://", 7) == 0) {
-    char *newref = malloc(3 + strlen(href) + 1);
-    strcpy(newref, "mms");
-    strcpy(newref + 3, href);
-    free(href);
-    href = newref;
-  }
-#endif
 
   playlist_add_file(parser->pl, href);
 
