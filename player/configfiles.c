@@ -76,66 +76,17 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
 // command line.
 #define FILE_LOCAL_FLAGS (M_SETOPT_BACKUP | M_SETOPT_PRESERVE_CMDLINE)
 
-#define PROFILE_CFG_PROTOCOL "protocol."
-
-static void mp_load_per_protocol_config(struct MPContext *mpctx)
+static void mp_auto_load_profile(struct MPContext *mpctx, char *category,
+                                 bstr item)
 {
-    char *str;
-    const char *file = mpctx->filename;
-    char protocol[strlen(PROFILE_CFG_PROTOCOL) + strlen(file) + 1];
-    m_profile_t *p;
-
-    /* does filename actually uses a protocol ? */
-    if (!mp_is_url(bstr0(file)))
-        return;
-    str = strstr(file, "://");
-    if (!str)
+    if (!item.len)
         return;
 
-    sprintf(protocol, "%s%s", PROFILE_CFG_PROTOCOL, file);
-    protocol[strlen(PROFILE_CFG_PROTOCOL) + strlen(file) - strlen(str)] = '\0';
-    p = m_config_get_profile0(mpctx->mconfig, protocol);
+    char t[512];
+    snprintf(t, sizeof(t), "%s.%.*s", category, BSTR_P(item));
+    m_profile_t *p = m_config_get_profile0(mpctx->mconfig, t);
     if (p) {
-        MP_INFO(mpctx, "Loading protocol-related profile '%s'\n", protocol);
-        m_config_set_profile(mpctx->mconfig, p, FILE_LOCAL_FLAGS);
-    }
-}
-
-#define PROFILE_CFG_EXTENSION "extension."
-
-static void mp_load_per_extension_config(struct MPContext *mpctx)
-{
-    char *str;
-    const char *file = mpctx->filename;
-    char extension[strlen(PROFILE_CFG_EXTENSION) + 8];
-    m_profile_t *p;
-
-    /* does filename actually have an extension ? */
-    str = strrchr(file, '.');
-    if (!str)
-        return;
-
-    sprintf(extension, PROFILE_CFG_EXTENSION);
-    strncat(extension, ++str, 7);
-    p = m_config_get_profile0(mpctx->mconfig, extension);
-    if (p) {
-        MP_INFO(mpctx, "Loading extension-related profile '%s'\n", extension);
-        m_config_set_profile(mpctx->mconfig, p, FILE_LOCAL_FLAGS);
-    }
-}
-
-static void mp_load_per_output_config(struct MPContext *mpctx, char *cfg, char *out)
-{
-    char profile[strlen(cfg) + strlen(out) + 1];
-    m_profile_t *p;
-
-    if (!out && !out[0])
-        return;
-
-    sprintf(profile, "%s%s", cfg, out);
-    p = m_config_get_profile0(mpctx->mconfig, profile);
-    if (p) {
-        MP_INFO(mpctx, "Loading extension-related profile '%s'\n", profile);
+        MP_INFO(mpctx, "Auto-loading profile '%s'\n", t);
         m_config_set_profile(mpctx->mconfig, p, FILE_LOCAL_FLAGS);
     }
 }
@@ -144,14 +95,17 @@ void mp_load_auto_profiles(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    mp_load_per_protocol_config(mpctx);
-    mp_load_per_extension_config(mpctx);
+    mp_auto_load_profile(mpctx, "protocol",
+                         mp_split_proto(bstr0(mpctx->filename), NULL));
+    mp_auto_load_profile(mpctx, "extension",
+                         bstr0(mp_splitext(mpctx->filename, NULL)));
+
     mp_load_per_file_config(mpctx);
 
     if (opts->vo.video_driver_list)
-        mp_load_per_output_config(mpctx, "vo.", opts->vo.video_driver_list[0].name);
+        mp_auto_load_profile(mpctx, "vo", bstr0(opts->vo.video_driver_list[0].name));
     if (opts->audio_driver_list)
-        mp_load_per_output_config(mpctx, "ao.", opts->audio_driver_list[0].name);
+        mp_auto_load_profile(mpctx, "ao", bstr0(opts->audio_driver_list[0].name));
 }
 
 /**
