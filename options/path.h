@@ -50,10 +50,10 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
 
 char *mp_basename(const char *path);
 
-/* Return file extension, including the '.'. If root is not NULL, set it to the
- * part of the path without extension. So: path == root + returnvalue
+/* Return file extension, excluding the '.'. If root is not NULL, set it to the
+ * part of the path without extension. So: path == root + "." + extension
  * Don't consider it a file extension if the only '.' is the first character.
- * Return "" if no extension.
+ * Return NULL if no extension and don't set *root in this case.
  */
 char *mp_splitext(const char *path, bstr *root);
 

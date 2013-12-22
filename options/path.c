@@ -155,11 +155,11 @@ char *mp_splitext(const char *path, bstr *root)
 {
     assert(path);
     const char *split = strrchr(path, '.');
-    if (!split)
-        split = path + strlen(path);
+    if (!split || !split[1] || strchr(split, '/'))
+        return NULL;
     if (root)
-        *root = (bstr){.start = (char *)path, .len = path - split};
-    return (char *)split;
+        *root = (bstr){(char *)path, split - path};
+    return (char *)split + 1;
 }
 
 char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2)
