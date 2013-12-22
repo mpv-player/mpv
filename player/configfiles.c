@@ -72,9 +72,51 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
     return true;
 }
 
+static int try_load_config(struct MPContext *mpctx, const char *file, int flags)
+{
+    if (!mp_path_exists(file))
+        return 0;
+    MP_INFO(mpctx, "Loading config '%s'\n", file);
+    m_config_parse_config_file(mpctx->mconfig, file, flags);
+    return 1;
+}
+
 // Set options file-local, and don't set them if the user set them via the
 // command line.
 #define FILE_LOCAL_FLAGS (M_SETOPT_BACKUP | M_SETOPT_PRESERVE_CMDLINE)
+
+static void mp_load_per_file_config(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    char *confpath;
+    char cfg[MP_PATH_MAX];
+    const char *name;
+    const char *file = mpctx->filename;
+
+    if (strlen(file) > MP_PATH_MAX - 14) {
+        MP_WARN(mpctx, "Filename is too long, "
+               "can not load file or directory specific config files\n");
+        return;
+    }
+    sprintf(cfg, "%s.conf", file);
+
+    name = mp_basename(cfg);
+    if (opts->use_filedir_conf) {
+        char dircfg[MP_PATH_MAX];
+        strcpy(dircfg, cfg);
+        strcpy(dircfg + (name - cfg), "mpv.conf");
+        try_load_config(mpctx, dircfg, FILE_LOCAL_FLAGS);
+
+        if (try_load_config(mpctx, cfg, FILE_LOCAL_FLAGS))
+            return;
+    }
+
+    if ((confpath = mp_find_user_config_file(NULL, mpctx->global, name))) {
+        try_load_config(mpctx, confpath, FILE_LOCAL_FLAGS);
+
+        talloc_free(confpath);
+    }
+}
 
 static void mp_auto_load_profile(struct MPContext *mpctx, char *category,
                                  bstr item)
@@ -106,52 +148,6 @@ void mp_load_auto_profiles(struct MPContext *mpctx)
         mp_auto_load_profile(mpctx, "vo", bstr0(opts->vo.video_driver_list[0].name));
     if (opts->audio_driver_list)
         mp_auto_load_profile(mpctx, "ao", bstr0(opts->audio_driver_list[0].name));
-}
-
-/**
- * Tries to load a config file (in file local mode)
- * @return 0 if file was not found, 1 otherwise
- */
-static int try_load_config(struct MPContext *mpctx, const char *file, int flags)
-{
-    if (!mp_path_exists(file))
-        return 0;
-    MP_INFO(mpctx, "Loading config '%s'\n", file);
-    m_config_parse_config_file(mpctx->mconfig, file, flags);
-    return 1;
-}
-
-void mp_load_per_file_config(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-    char *confpath;
-    char cfg[MP_PATH_MAX];
-    const char *name;
-    const char *file = mpctx->filename;
-
-    if (strlen(file) > MP_PATH_MAX - 14) {
-        MP_WARN(mpctx, "Filename is too long, "
-               "can not load file or directory specific config files\n");
-        return;
-    }
-    sprintf(cfg, "%s.conf", file);
-
-    name = mp_basename(cfg);
-    if (opts->use_filedir_conf) {
-        char dircfg[MP_PATH_MAX];
-        strcpy(dircfg, cfg);
-        strcpy(dircfg + (name - cfg), "mpv.conf");
-        try_load_config(mpctx, dircfg, FILE_LOCAL_FLAGS);
-
-        if (try_load_config(mpctx, cfg, FILE_LOCAL_FLAGS))
-            return;
-    }
-
-    if ((confpath = mp_find_user_config_file(NULL, mpctx->global, name))) {
-        try_load_config(mpctx, confpath, FILE_LOCAL_FLAGS);
-
-        talloc_free(confpath);
-    }
 }
 
 #define MP_WATCH_LATER_CONF "watch_later"

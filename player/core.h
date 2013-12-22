@@ -350,7 +350,6 @@ void clear_audio_decode_buffers(struct MPContext *mpctx);
 // configfiles.c
 bool mp_parse_cfgfiles(struct MPContext *mpctx);
 void mp_load_auto_profiles(struct MPContext *mpctx);
-void mp_load_per_file_config(struct MPContext *mpctx);
 void mp_load_playback_resume(struct MPContext *mpctx, const char *file);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
 struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
