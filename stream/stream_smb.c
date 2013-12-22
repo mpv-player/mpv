@@ -31,32 +31,11 @@ struct priv {
     int fd;
 };
 
-static char smb_password[15];
-static char smb_username[15];
-
 static void smb_auth_fn(const char *server, const char *share,
              char *workgroup, int wgmaxlen, char *username, int unmaxlen,
 	     char *password, int pwmaxlen)
 {
-  char temp[128];
-
-  strcpy(temp, "LAN");
-  if (temp[strlen(temp) - 1] == 0x0a)
-    temp[strlen(temp) - 1] = 0x00;
-
-  if (temp[0]) strncpy(workgroup, temp, wgmaxlen - 1);
-
-  strcpy(temp, smb_username);
-  if (temp[strlen(temp) - 1] == 0x0a)
-    temp[strlen(temp) - 1] = 0x00;
-
-  if (temp[0]) strncpy(username, temp, unmaxlen - 1);
-
-  strcpy(temp, smb_password);
-  if (temp[strlen(temp) - 1] == 0x0a)
-    temp[strlen(temp) - 1] = 0x00;
-
-   if (temp[0]) strncpy(password, temp, pwmaxlen - 1);
+  strncpy(workgroup, "LAN", wgmaxlen - 1);
 }
 
 static int control(stream_t *s, int cmd, void *arg) {
