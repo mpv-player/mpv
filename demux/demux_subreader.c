@@ -127,7 +127,8 @@ static int eol(char p) {
 static void trail_space(char *s) {
 	int i = 0;
 	while (isspace(s[i])) ++i;
-	if (i) strcpy(s, s + i);
+        int copylen = strlen(s + i);
+	if (i) memmove(s, s + i, copylen);
 	i = strlen(s) - 1;
 	while (i > 0 && isspace(s[i])) s[i--] = '\0';
 }
