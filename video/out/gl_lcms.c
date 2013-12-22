@@ -86,8 +86,10 @@ const struct m_sub_options mp_icc_conf = {
 static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
                                 const char *msg)
 {
+    pthread_mutex_lock(&lcms2_dumb_crap_lock);
     if (lcms2_dumb_crap)
         mp_msg(lcms2_dumb_crap, MSGL_ERR, "lcms2: %s\n", msg);
+    pthread_mutex_unlock(&lcms2_dumb_crap_lock);
 }
 
 static struct bstr load_file(void *talloc_ctx, const char *filename,
