@@ -292,7 +292,7 @@ int vo_get_buffered_frame(struct vo *vo, bool eof);
 void vo_skip_frame(struct vo *vo);
 void vo_new_frame_imminent(struct vo *vo);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
-void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration);
+void vo_flip_page(struct vo *vo, int64_t pts_us, int duration);
 void vo_check_events(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);

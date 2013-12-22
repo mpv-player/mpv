@@ -262,7 +262,7 @@ void vo_draw_osd(struct vo *vo, struct osd_state *osd)
         vo->driver->draw_osd(vo, osd);
 }
 
-void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration)
+void vo_flip_page(struct vo *vo, int64_t pts_us, int duration)
 {
     if (!vo->config_ok)
         return;
