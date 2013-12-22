@@ -231,6 +231,17 @@ bool mp_is_url(bstr path)
     return true;
 }
 
+// Return the protocol part of path, e.g. "http" if path is "http://...".
+// On success, out_url (if not NULL) is set to the part after the "://".
+bstr mp_split_proto(bstr path, bstr *out_url)
+{
+    if (!mp_is_url(path))
+        return (bstr){0};
+    bstr r;
+    bstr_split_tok(path, "://", &r, out_url ? out_url : &(bstr){0});
+    return r;
+}
+
 void mp_mk_config_dir(struct mpv_global *global, char *subdir)
 {
     void *tmp = talloc_new(NULL);
