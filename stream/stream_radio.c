@@ -864,7 +864,7 @@ static int open_s(stream_t *stream,int mode)
     MP_VERBOSE(priv, "\n");
 
     if(priv->driver)
-        MP_INFO(priv, priv->driver->info);
+        MP_INFO(priv, "%s", priv->driver->info);
     else{
         MP_INFO(priv, "Unknown driver name: %s\n",priv->radio_param->driver);
         close_s(stream);
