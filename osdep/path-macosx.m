@@ -21,7 +21,7 @@
 #include "osdep/path.h"
 
 char *mp_get_macosx_bundled_path(void *talloc_ctx, struct mpv_global *global,
-                                 const char *filename)
+                                 const char *file)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSString *path = [[NSBundle mainBundle] resourcePath];
