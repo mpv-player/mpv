@@ -1020,10 +1020,12 @@ static int update_presentation_queue_status(struct vo *vo)
             break;
         if (vc->vsync_interval > 1) {
             uint64_t qtime = vc->queue_time[vc->query_surface_num];
+            int diff = ((int64_t)vtime - (int64_t)qtime) / 1e6;
+            MP_TRACE(vo, "Queue time difference: %d ms\n", diff);
             if (vtime < qtime + vc->vsync_interval / 2)
-                MP_VERBOSE(vo, "Frame shown too early\n");
+                MP_VERBOSE(vo, "Frame shown too early (%d ms)\n", diff);
             if (vtime > qtime + vc->vsync_interval)
-                MP_VERBOSE(vo, "Frame shown late\n");
+                MP_VERBOSE(vo, "Frame shown late (%d ms)\n", diff);
         }
         vc->query_surface_num = WRAP_ADD(vc->query_surface_num, 1,
                                          vc->num_output_surfaces);
