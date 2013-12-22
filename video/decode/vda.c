@@ -79,7 +79,7 @@ static void print_vda_error(struct mp_log *log, int lev, char *message,
     for (int n = 0; vda_errors[n].code < 0; n++)
         if (vda_errors[n].code == error_code) {
             mp_msg(log, lev, "%s: %s (%d)\n",
-                       message, vda_errors[n].reason, error_code);
+                   message, vda_errors[n].reason, error_code);
             return;
         }
 
@@ -135,7 +135,7 @@ static int init_vda_decoder(struct lavc_ctx *ctx)
         &p->vda_ctx, ctx->avctx->extradata, ctx->avctx->extradata_size);
 
     if (status) {
-        print_vda_error(ctx->log, "failed to init VDA decoder", status);
+        print_vda_error(ctx->log, MSGL_ERR, "failed to init VDA decoder", status);
         return -1;
     }
 
