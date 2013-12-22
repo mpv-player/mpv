@@ -1335,9 +1335,16 @@ static int parse_msglevels(struct mp_log *log, const m_option_t *opt,
         }
     }
 
-    if (dst) {
-        talloc_free(VAL(dst));
-        VAL(dst) = bstrdup0(NULL, param);
+    if (dst && param.len) {
+        char *prev = VAL(dst);
+        char *new;
+        if (prev && prev[0]) {
+            new = talloc_asprintf(NULL, "%s:%.*s", prev, BSTR_P(param));
+        } else {
+            new = bstrdup0(NULL, param);
+        }
+        talloc_free(prev);
+        VAL(dst) = new;
     }
 
     return 1;
