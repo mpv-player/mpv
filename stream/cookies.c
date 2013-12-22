@@ -50,24 +50,14 @@ typedef struct cookie_list_type {
     struct cookie_list_type *next;
 } cookie_list_t;
 
-/* Pointer to the linked list of cookies */
-static struct cookie_list_type *cookie_list = NULL;
-
-
 /* Like strdup, but stops at anything <31. */
-static char *col_dup(const char *src)
+static char *col_dup(void *talloc_ctx, const char *src)
 {
-    char *dst;
     int length = 0;
-
     while (src[length] > 31)
 	length++;
 
-    dst = malloc(length + 1);
-    strncpy(dst, src, length);
-    dst[length] = 0;
-
-    return dst;
+    return talloc_strndup(talloc_ctx, src, length);
 }
 
 /* Finds the start of all the columns */
@@ -138,27 +128,27 @@ err_out:
 }
 
 /* Loads a cookies.txt file into a linked list. */
-static struct cookie_list_type *load_cookies_from(struct mp_log *log,
-                                                  const char *filename,
-						  struct cookie_list_type
-						  *list)
+static struct cookie_list_type *load_cookies_from(void *ctx,
+                                                  struct mp_log *log,
+                                                  const char *filename)
 {
     char *ptr, *file;
     int64_t length;
 
     ptr = file = load_file(log, filename, &length);
     if (!ptr)
-	return list;
+	return NULL;
 
+    struct cookie_list_type *list = NULL;
     while (*ptr) {
 	char *cols[7];
 	if (parse_line(&ptr, cols)) {
 	    struct cookie_list_type *new;
-	    new = malloc(sizeof(cookie_list_t));
-	    new->name = col_dup(cols[5]);
-	    new->value = col_dup(cols[6]);
-	    new->path = col_dup(cols[2]);
-	    new->domain = col_dup(cols[0]);
+	    new = talloc_zero(ctx, cookie_list_t);
+	    new->name = col_dup(new, cols[5]);
+	    new->value = col_dup(new, cols[6]);
+	    new->path = col_dup(new, cols[2]);
+	    new->domain = col_dup(new, cols[0]);
 	    new->secure = (*(cols[3]) == 't') || (*(cols[3]) == 'T');
 	    new->next = list;
 	    list = new;
@@ -173,10 +163,11 @@ static struct cookie_list_type *load_cookies_from(struct mp_log *log,
 // separated by newlines.
 char *cookies_lavf(void *talloc_ctx, struct mp_log *log, char *file)
 {
-    if (!cookie_list && file && file[0])
-        cookie_list = load_cookies_from(log, file, NULL);
+    void *tmp = talloc_new(NULL);
+    struct cookie_list_type *list = NULL;
+    if (file && file[0])
+        list = load_cookies_from(tmp, log, file);
 
-    struct cookie_list_type *list = cookie_list;
     char *res = talloc_strdup(talloc_ctx, "");
 
     while (list) {
@@ -186,5 +177,6 @@ char *cookies_lavf(void *talloc_ctx, struct mp_log *log, char *file)
         list = list->next;
     }
 
+    talloc_free(tmp);
     return res;
 }

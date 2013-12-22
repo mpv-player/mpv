@@ -22,6 +22,7 @@
 
 #include "config.h"
 #include "options/options.h"
+#include "options/path.h"
 #include "common/msg.h"
 #include "stream.h"
 #include "options/m_option.h"
@@ -184,7 +185,11 @@ static int open_f(stream_t *stream, int mode)
         av_dict_set(&dict, "user-agent", opts->network_useragent, 0);
     if (opts->network_cookies_enabled) {
         char *file = opts->network_cookies_file;
-        av_dict_set(&dict, "cookies", cookies_lavf(temp, stream->log, file), 0);
+        if (file && file[0])
+            file = mp_get_user_path(temp, stream->global, file);
+        char *cookies = cookies_lavf(temp, stream->log, file);
+        if (cookies && cookies[0])
+            av_dict_set(&dict, "cookies", cookies, 0);
     }
     av_dict_set(&dict, "tls_verify", opts->network_tls_verify ? "1" : "0", 0);
     if (opts->network_tls_ca_file)
