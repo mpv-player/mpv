@@ -101,6 +101,7 @@ static void update_loglevel(struct mp_log *log)
 }
 
 // Return whether the message at this verbosity level would be actually printed.
+// Thread-safety: see mp_msg().
 bool mp_msg_test(struct mp_log *log, int lev)
 {
     mp_memory_barrier();
@@ -173,6 +174,8 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 // parent's name. If the name starts with "/", the parent's name is not
 // prefixed (except in verbose mode), and if it starts with "!", the name is
 // not printed at all (except in verbose mode).
+// Thread-safety: fully thread-safe, but keep in mind that talloc is not (so
+//                talloc_ctx must be owned by the current thread).
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
                           const char *name)
 {
@@ -262,6 +265,9 @@ void mp_msg_uninit(struct mpv_global *global)
     global->log = NULL;
 }
 
+// Thread-safety: fully thread-safe, but keep in mind that the lifetime of
+//                log must be guaranteed during the call.
+//                Never call this from signal handlers.
 void mp_msg(struct mp_log *log, int lev, const char *format, ...)
 {
     va_list va;
