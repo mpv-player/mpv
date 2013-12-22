@@ -451,7 +451,8 @@ static subtitle *sub_read_line_subviewer(stream_t *st, subtitle *current,
 
             if (j != 0)
                 full_line[j++] = '\n';
-            strcpy(&full_line[j], line);
+            snprintf(&full_line[j], sizeof(full_line) - j, "%s", line);
+            full_line[LINE_LEN] = '\0';
             j += len;
         }
 
@@ -936,7 +937,7 @@ static subtitle *sub_read_line_jacosub(stream_t* st, subtitle * current,
 	    } else {
 		current->alignment = SUB_ALIGNMENT_BOTTOMCENTER;
 	    }
-	    strcpy(line2, line1);
+            snprintf(line2, sizeof(line2), "%s", line1);
 	    p = line2;
 	}
 	for (q = line1; (!eol(*p)) && (current->lines < SUB_MAX_TEXT); ++p) {
