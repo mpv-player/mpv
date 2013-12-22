@@ -98,7 +98,8 @@ void mp_print_version(struct mp_log *log, int always)
 {
     int v = always ? MSGL_INFO : MSGL_V;
     mp_msg(log, v,
-           "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
+           "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n",
+           mpv_version, mpv_builddate);
     print_libav_versions(log, v);
     mp_msg(log, v, "\n");
 }
@@ -300,9 +301,13 @@ static int mpv_main(int argc, char *argv[])
     mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
     mpctx->statusline = mp_log_new(mpctx, mpctx->log, "!statusline");
 
+    struct MPOpts *def_opts = talloc_ptrtype(mpctx, def_opts);
+    *def_opts = mp_default_opts;
+    def_opts->network_useragent = (char *)mpv_version;
+
     // Create the config context and register the options
     mpctx->mconfig = m_config_new(mpctx, mpctx->log, sizeof(struct MPOpts),
-                                  &mp_default_opts, mp_opts);
+                                  def_opts, mp_opts);
     mpctx->opts = mpctx->mconfig->optstruct;
     mpctx->mconfig->includefunc = cfg_include;
     mpctx->mconfig->includefunc_ctx = mpctx;

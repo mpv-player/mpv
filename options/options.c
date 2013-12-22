@@ -29,9 +29,9 @@
 
 #include "options.h"
 #include "config.h"
-#include "version.h"
 #include "m_config.h"
 #include "m_option.h"
+#include "common/common.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "video/csputils.h"
@@ -739,8 +739,6 @@ const struct MPOpts mp_default_opts = {
     .hwdec_codecs = "h264,vc1,wmv3",
 
     .index_mode = -1,
-
-    .network_useragent = "mpv " VERSION,
 
     .ad_lavc_param = {
         .ac3drc = 1.,

@@ -22,5 +22,5 @@
 #define BUILDDATE "UNKNOWN"
 #endif
 
-const char *mplayer_version  = "mpv " VERSION;
-const char *mplayer_builddate = BUILDDATE;
+const char *mpv_version  = "mpv " VERSION;
+const char *mpv_builddate = BUILDDATE;

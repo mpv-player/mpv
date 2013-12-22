@@ -59,8 +59,8 @@ enum stream_type {
     STREAM_TYPE_COUNT,
 };
 
-extern const char *mplayer_version;
-extern const char *mplayer_builddate;
+extern const char *mpv_version;
+extern const char *mpv_builddate;
 
 char *mp_format_time(double time, bool fractions);
 char *mp_format_time_fmt(const char *fmt, double time);
