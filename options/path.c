@@ -219,7 +219,7 @@ bool mp_path_isdir(const char *path)
 bool mp_is_url(bstr path)
 {
     int proto = bstr_find0(path, "://");
-    if (proto < 0)
+    if (proto < 1)
         return false;
     // The protocol part must be alphanumeric, otherwise it's not an URL.
     for (int i = 0; i < proto; i++) {
