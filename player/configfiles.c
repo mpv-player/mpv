@@ -89,23 +89,22 @@ static void mp_load_per_file_config(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     char *confpath;
-    char cfg[MP_PATH_MAX];
-    const char *name;
+    char cfg[512];
     const char *file = mpctx->filename;
 
-    if (strlen(file) > MP_PATH_MAX - 14) {
+    if (snprintf(cfg, sizeof(cfg), "%s.conf", file) >= sizeof(cfg)) {
         MP_WARN(mpctx, "Filename is too long, "
                "can not load file or directory specific config files\n");
         return;
     }
-    sprintf(cfg, "%s.conf", file);
 
-    name = mp_basename(cfg);
+    char *name = mp_basename(cfg);
+
     if (opts->use_filedir_conf) {
-        char dircfg[MP_PATH_MAX];
-        strcpy(dircfg, cfg);
-        strcpy(dircfg + (name - cfg), "mpv.conf");
+        bstr dir = mp_dirname(cfg);
+        char *dircfg = mp_path_join(NULL, dir, bstr0("mpv.conf"));
         try_load_config(mpctx, dircfg, FILE_LOCAL_FLAGS);
+        talloc_free(dircfg);
 
         if (try_load_config(mpctx, cfg, FILE_LOCAL_FLAGS))
             return;
