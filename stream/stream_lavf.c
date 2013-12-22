@@ -131,6 +131,7 @@ static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
 static int open_f(stream_t *stream, int mode)
 {
+    struct MPOpts *opts = stream->opts;
     int flags = 0;
     AVIOContext *avio = NULL;
     int res = STREAM_ERROR;
@@ -179,22 +180,24 @@ static int open_f(stream_t *stream, int mode)
     }
 
     // HTTP specific options (other protocols ignore them)
-    if (network_useragent)
-        av_dict_set(&dict, "user-agent", network_useragent, 0);
-    if (network_cookies_enabled)
-        av_dict_set(&dict, "cookies", talloc_steal(temp, cookies_lavf(stream->log)), 0);
-    av_dict_set(&dict, "tls_verify", network_tls_verify ? "1" : "0", 0);
-    if (network_tls_ca_file)
-        av_dict_set(&dict, "ca_file", network_tls_ca_file, 0);
-    char *cust_headers = talloc_strdup(temp, "");
-    if (network_referrer) {
-        cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",
-                                              network_referrer);
+    if (opts->network_useragent)
+        av_dict_set(&dict, "user-agent", opts->network_useragent, 0);
+    if (opts->network_cookies_enabled) {
+        char *file = opts->network_cookies_file;
+        av_dict_set(&dict, "cookies", cookies_lavf(temp, stream->log, file), 0);
     }
-    if (network_http_header_fields) {
-        for (int n = 0; network_http_header_fields[n]; n++) {
+    av_dict_set(&dict, "tls_verify", opts->network_tls_verify ? "1" : "0", 0);
+    if (opts->network_tls_ca_file)
+        av_dict_set(&dict, "ca_file", opts->network_tls_ca_file, 0);
+    char *cust_headers = talloc_strdup(temp, "");
+    if (opts->network_referrer) {
+        cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",
+                                              opts->network_referrer);
+    }
+    if (opts->network_http_header_fields) {
+        for (int n = 0; opts->network_http_header_fields[n]; n++) {
             cust_headers = talloc_asprintf_append(cust_headers, "%s\r\n",
-                                                  network_http_header_fields[n]);
+                                                  opts->network_http_header_fields[n]);
         }
     }
     if (strlen(cust_headers))

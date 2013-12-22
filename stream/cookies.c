@@ -39,8 +39,6 @@
 
 #define MAX_COOKIES 20
 
-char *cookies_file = NULL;
-
 typedef struct cookie_list_type {
     char *name;
     char *value;
@@ -173,13 +171,13 @@ static struct cookie_list_type *load_cookies_from(struct mp_log *log,
 // Return a cookies string as expected by lavf (libavformat/http.c). The format
 // is like a Set-Cookie header (http://curl.haxx.se/rfc/cookie_spec.html),
 // separated by newlines.
-char *cookies_lavf(struct mp_log *log)
+char *cookies_lavf(void *talloc_ctx, struct mp_log *log, char *file)
 {
-    if (!cookie_list && cookies_file)
-        cookie_list = load_cookies_from(log, cookies_file, NULL);
+    if (!cookie_list && file && file[0])
+        cookie_list = load_cookies_from(log, file, NULL);
 
     struct cookie_list_type *list = cookie_list;
-    char *res = talloc_strdup(NULL, "");
+    char *res = talloc_strdup(talloc_ctx, "");
 
     while (list) {
         res = talloc_asprintf_append_buffer(res,

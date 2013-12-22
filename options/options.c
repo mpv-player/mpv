@@ -42,19 +42,6 @@
 #include "player/core.h"
 #include "osdep/priority.h"
 
-int   network_bandwidth=0;
-int   network_cookies_enabled = 0;
-char *network_useragent="mpv " VERSION;
-char *network_referrer=NULL;
-char **network_http_header_fields=NULL;
-int   network_tls_verify;
-char *network_tls_ca_file;
-
-extern char *lirc_configfile;
-
-extern int mp_msg_color;
-extern int mp_msg_module;
-
 /* defined in demux: */
 extern const m_option_t demux_rawaudio_opts[];
 extern const m_option_t demux_rawvideo_opts[];
@@ -279,18 +266,18 @@ const m_option_t mp_opts[] = {
     {"bluray-angle",   &bluray_angle,   CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
 #endif /* HAVE_LIBBLURAY */
 
-    {"http-header-fields", &network_http_header_fields, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-    {"user-agent", &network_useragent, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"referrer", &network_referrer, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"cookies", &network_cookies_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"cookies-file", &cookies_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_STRINGLIST("http-header-fields", network_http_header_fields, 0),
+    OPT_STRING("user-agent", network_useragent, 0),
+    OPT_STRING("referrer", network_referrer, 0),
+    OPT_FLAG("cookies", network_cookies_enabled, 0),
+    OPT_STRING("cookies-file", network_cookies_file, 0),
     OPT_CHOICE("rtsp-transport", network_rtsp_transport, 0,
                ({"lavf", 0},
                 {"udp", 1},
                 {"tcp", 2},
                 {"http", 3})),
-    {"tls-verify", &network_tls_verify, CONF_TYPE_FLAG, 0, 0, 0, NULL},
-    {"tls-ca-file", &network_tls_ca_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_FLAG("tls-verify", network_tls_verify, 0),
+    OPT_STRING("tls-ca-file", network_tls_ca_file, 0),
 
 // ------------------------- demuxer options --------------------
 
@@ -752,6 +739,8 @@ const struct MPOpts mp_default_opts = {
     .hwdec_codecs = "h264,vc1,wmv3",
 
     .index_mode = -1,
+
+    .network_useragent = "mpv " VERSION,
 
     .ad_lavc_param = {
         .ac3drc = 1.,

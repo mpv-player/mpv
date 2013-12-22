@@ -218,6 +218,14 @@ typedef struct MPOpts {
     int hwdec_api;
     char *hwdec_codecs;
 
+    int network_cookies_enabled;
+    char *network_cookies_file;
+    char *network_useragent;
+    char *network_referrer;
+    char **network_http_header_fields;
+    int network_tls_verify;
+    char *network_tls_ca_file;
+
     struct lavc_param {
         int fast;
         char *skip_loop_filter_str;
@@ -288,15 +296,6 @@ typedef struct MPOpts {
         int audio_first;
     } encode_output;
 } MPOpts;
-
-// Should be moved into MPOpts
-extern char **network_http_header_fields;
-extern char *network_useragent;
-extern char *network_referrer;
-extern int   network_cookies_enabled;
-extern int   network_tls_verify;
-extern char *network_tls_ca_file;
-extern char *cookies_file;
 
 extern const m_option_t mp_opts[];
 extern const struct MPOpts mp_default_opts;
