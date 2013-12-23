@@ -592,6 +592,7 @@ Name                            W Comment
 ``video-pan-x``                 x see ``--video-pan-x``
 ``video-pan-y``                 x see ``--video-pan-y``
 ``video-zoom``                  x see ``--video-zoom``
+``video-unscaled``              x see ``--video-unscaled``
 ``program``                     x switch TS program (write-only)
 ``sid``                         x current subtitle track (similar to ``--sid``)
 ``sub``                         x alias for ``sid``
