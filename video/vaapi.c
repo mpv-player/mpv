@@ -108,6 +108,7 @@ static void va_get_formats(struct mp_vaapi_ctx *ctx)
 
 struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog)
 {
+    struct mp_vaapi_ctx *res = NULL;
     struct mp_log *log = mp_log_new(NULL, plog, "/vaapi");
     int major_version, minor_version;
     int status = vaInitialize(display, &major_version, &minor_version);
@@ -116,7 +117,7 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog)
 
     mp_verbose(log, "VA API version %d.%d\n", major_version, minor_version);
 
-    struct mp_vaapi_ctx *res = talloc_ptrtype(NULL, res);
+    res = talloc_ptrtype(NULL, res);
     *res = (struct mp_vaapi_ctx) {
         .log = talloc_steal(res, log),
         .display = display,
