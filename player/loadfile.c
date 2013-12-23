@@ -815,7 +815,7 @@ static bool attachment_is_font(struct mp_log *log, struct demux_attachment *att)
             || strcasecmp(ext, ".otf") == 0)
         {
             mp_warn(log, "Loading font attachment '%s' with MIME type %s. "
-                    "Assuming is probably a broken Matroska file, which was "
+                    "Assuming this is a broken Matroska file, which was "
                     "muxed without setting a correct font MIME type.\n",
                     att->name, att->type);
             return true;
