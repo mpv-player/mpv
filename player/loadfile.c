@@ -800,7 +800,7 @@ static void open_subtitles_from_resolve(struct MPContext *mpctx)
     }
 }
 
-static bool attachment_is_font(struct demux_attachment *att)
+static bool attachment_is_font(struct mp_log *log, struct demux_attachment *att)
 {
     if (!att->name || !att->type || !att->data || !att->data_size)
         return false;
@@ -813,7 +813,13 @@ static bool attachment_is_font(struct demux_attachment *att)
         char *ext = att->name + strlen(att->name) - 4;
         if (strcasecmp(ext, ".ttf") == 0 || strcasecmp(ext, ".ttc") == 0
             || strcasecmp(ext, ".otf") == 0)
+        {
+            mp_warn(log, "Loading font attachment '%s' with MIME type %s. "
+                    "Assuming is probably a broken Matroska file, which was "
+                    "muxed without setting a correct font MIME type.\n",
+                    att->name, att->type);
             return true;
+        }
     }
     return false;
 }
@@ -826,9 +832,12 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
             struct demuxer *d = mpctx->sources[j];
             for (int i = 0; i < d->num_attachments; i++) {
                 struct demux_attachment *att = d->attachments + i;
-                if (mpctx->opts->use_embedded_fonts && attachment_is_font(att))
+                if (mpctx->opts->use_embedded_fonts &&
+                    attachment_is_font(mpctx->log, att))
+                {
                     ass_add_font(mpctx->ass_library, att->name, att->data,
                                  att->data_size);
+                }
             }
         }
     }
