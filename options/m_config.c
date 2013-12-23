@@ -490,6 +490,11 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
     if ((flags & M_SETOPT_PRESERVE_CMDLINE) && co->is_set_from_cmdline)
         set = false;
 
+    if (set) {
+        MP_VERBOSE(config, "Setting option '%.*s' = '%.*s' (flags = %d)\n",
+                   BSTR_P(name), BSTR_P(param), flags);
+    }
+
     // Check if this option isn't forbidden in the current mode
     if ((flags & M_SETOPT_FROM_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
         MP_ERR(config, "The %.*s option can't be used in a config file.\n",
