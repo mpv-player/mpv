@@ -46,7 +46,7 @@ enum AVSampleFormat af_to_avformat(int fmt)
         if (audio_conversion_map[i].fmt == fmt)
             return audio_conversion_map[i].sample_fmt;
     }
-    return 0;
+    return AV_SAMPLE_FMT_NONE;
 }
 
 int af_from_avformat(enum AVSampleFormat sample_fmt)
