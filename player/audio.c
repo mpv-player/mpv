@@ -104,7 +104,8 @@ int reinit_audio_filters(struct MPContext *mpctx)
 void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct sh_stream *sh = init_demux_stream(mpctx, STREAM_AUDIO);
+    struct track *track = mpctx->current_track[STREAM_AUDIO];
+    struct sh_stream *sh = init_demux_stream(mpctx, track);
     if (!sh) {
         uninit_player(mpctx, INITIALIZED_AO);
         goto no_audio;
@@ -186,9 +187,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
 
 init_error:
     uninit_player(mpctx, INITIALIZED_ACODEC | INITIALIZED_AO);
-    cleanup_demux_stream(mpctx, STREAM_AUDIO);
 no_audio:
-    mpctx->current_track[STREAM_AUDIO] = NULL;
+    mp_deselect_track(mpctx, track);
     MP_INFO(mpctx, "Audio: no audio\n");
 }
 

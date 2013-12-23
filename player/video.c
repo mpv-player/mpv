@@ -136,8 +136,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     assert(!(mpctx->initialized_flags & INITIALIZED_VCODEC));
     assert(!mpctx->d_video);
-    init_demux_stream(mpctx, STREAM_VIDEO);
-    struct sh_stream *sh = mpctx->sh[STREAM_VIDEO];
+    struct track *track = mpctx->current_track[STREAM_VIDEO];
+    struct sh_stream *sh = init_demux_stream(mpctx, track);
     if (!sh)
         goto no_video;
 
@@ -216,8 +216,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 err_out:
 no_video:
     uninit_player(mpctx, INITIALIZED_VCODEC | (opts->force_vo ? 0 : INITIALIZED_VO));
-    cleanup_demux_stream(mpctx, STREAM_VIDEO);
-    mpctx->current_track[STREAM_VIDEO] = NULL;
+    mp_deselect_track(mpctx, track);
     handle_force_window(mpctx, true);
     MP_INFO(mpctx, "Video: no video\n");
     return 0;
@@ -319,9 +318,11 @@ void video_execute_format_change(struct MPContext *mpctx)
 static int check_framedrop(struct MPContext *mpctx, double frame_time)
 {
     struct MPOpts *opts = mpctx->opts;
+    struct track *t_audio = mpctx->current_track[STREAM_AUDIO];
+    struct sh_stream *sh_audio = t_audio ? t_audio->stream : NULL;
     // check for frame-drop:
-    if (mpctx->d_audio && !mpctx->ao->untimed &&
-        !demux_stream_eof(mpctx->sh[STREAM_AUDIO]))
+    if (mpctx->d_audio && !mpctx->ao->untimed && sh_audio &&
+        !demux_stream_eof(sh_audio))
     {
         float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
         float d = delay - mpctx->delay;

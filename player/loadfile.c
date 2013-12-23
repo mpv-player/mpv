@@ -75,17 +75,17 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         mixer_uninit_audio(mpctx->mixer);
         audio_uninit(mpctx->d_audio);
         mpctx->d_audio = NULL;
-        cleanup_demux_stream(mpctx, STREAM_AUDIO);
+        reselect_demux_streams(mpctx);
     }
 
     if (mask & INITIALIZED_SUB) {
         mpctx->initialized_flags &= ~INITIALIZED_SUB;
         if (mpctx->d_sub)
             sub_reset(mpctx->d_sub);
-        cleanup_demux_stream(mpctx, STREAM_SUB);
         mpctx->d_sub = NULL; // Note: not free'd.
         mpctx->osd->dec_sub = NULL;
         reset_subtitles(mpctx);
+        reselect_demux_streams(mpctx);
     }
 
     if (mask & INITIALIZED_LIBASS) {
@@ -103,8 +103,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         if (mpctx->d_video)
             video_uninit(mpctx->d_video);
         mpctx->d_video = NULL;
-        cleanup_demux_stream(mpctx, STREAM_VIDEO);
         mpctx->sync_audio_to_video = false;
+        reselect_demux_streams(mpctx);
     }
 
     if (mask & INITIALIZED_DEMUXER) {
@@ -200,8 +200,7 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
         tname = "Subs"; selopt = "sid"; langopt = "slang"; iid = "SID";
         break;
     }
-    MP_INFO(mpctx, "[stream] %-5s %3s",
-            tname, mpctx->current_track[t->type] == t ? "(+)" : "");
+    MP_INFO(mpctx, "[stream] %-5s %3s", tname, t->selected ? "(+)" : "");
     MP_INFO(mpctx, " --%s=%d", selopt, t->user_tid);
     if (t->lang && langopt)
         MP_INFO(mpctx, " --%s=%s", langopt, t->lang);
@@ -260,52 +259,29 @@ static void print_file_properties(struct MPContext *mpctx)
     }
 }
 
-struct sh_stream *init_demux_stream(struct MPContext *mpctx,
-                                    enum stream_type type)
+// Enable needed streams, disable others.
+// Note that switching all tracks at once (instead when initializing something)
+// can be important, because reading from a demuxer stream (e.g. during init)
+// will implicitly discard interleaved packets from unselected streams.
+void reselect_demux_streams(struct MPContext *mpctx)
 {
-    struct track *track = mpctx->current_track[type];
-    struct sh_stream *stream = track ? track->stream : NULL;
-    mpctx->sh[type] = stream;
-    if (stream) {
-        demuxer_switch_track(stream->demuxer, type, stream);
-        if (track->is_external) {
-            double pts = get_main_demux_pts(mpctx);
-            demux_seek(stream->demuxer, pts, SEEK_ABSOLUTE);
-        }
+    // Note: we assume that all demuxer streams are covered by the track list.
+    for (int t = 0; t < mpctx->num_tracks; t++) {
+        struct track *track = mpctx->tracks[t];
+        if (track->demuxer)
+            demuxer_select_track(track->demuxer, track->stream, track->selected);
     }
-    return stream;
 }
 
-void cleanup_demux_stream(struct MPContext *mpctx, enum stream_type type)
+// External demuxers might need a seek to the current playback position.
+// Also return the stream for convenience.
+struct sh_stream *init_demux_stream(struct MPContext *mpctx, struct track *track)
 {
-    struct sh_stream *stream = mpctx->sh[type];
-    if (stream)
-        demuxer_switch_track(stream->demuxer, type, NULL);
-    mpctx->sh[type] = NULL;
-}
-
-// Switch the demuxers to current track selection. This is possibly important
-// for intialization: if something reads packets from the demuxer (like at least
-// reinit_audio_chain does, or when seeking), packets from the other streams
-// should be queued instead of discarded. So all streams should be enabled
-// before the first initialization function is called.
-static void preselect_demux_streams(struct MPContext *mpctx)
-{
-    // Disable all streams, just to be sure no unwanted streams are selected.
-    for (int n = 0; n < mpctx->num_sources; n++) {
-        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-            struct track *track = mpctx->current_track[type];
-            if (!(track && track->demuxer == mpctx->sources[n] &&
-                  demuxer_stream_is_selected(track->demuxer, track->stream)))
-                demuxer_switch_track(mpctx->sources[n], type, NULL);
-        }
+    if (track && track->demuxer && track->selected && track->is_external) {
+        double pts = get_main_demux_pts(mpctx);
+        demux_seek(track->demuxer, pts, SEEK_ABSOLUTE);
     }
-
-    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-        struct track *track = mpctx->current_track[type];
-        if (track && track->stream)
-            demuxer_switch_track(track->stream->demuxer, type, track->stream);
-    }
+    return track ? track->stream : NULL;
 }
 
 static struct sh_stream *select_fallback_stream(struct demuxer *d,
@@ -359,7 +335,7 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
             }
         }
     }
-    preselect_demux_streams(mpctx);
+    reselect_demux_streams(mpctx);
 
     return true;
 }
@@ -416,9 +392,8 @@ static struct track *add_stream_track(struct MPContext *mpctx,
             track->stream = stream;
             track->demuxer_id = stream->demuxer_id;
             // Initialize lazily selected track
-            bool selected = track == mpctx->current_track[STREAM_SUB];
-            demuxer_select_track(track->demuxer, stream, selected);
-            if (selected)
+            demuxer_select_track(track->demuxer, stream, track->selected);
+            if (track->selected)
                 reinit_subs(mpctx);
             return track;
         }
@@ -617,7 +592,17 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
         uninit_player(mpctx, INITIALIZED_SUB);
     }
 
+    if (current)
+        current->selected = false;
+
+    reselect_demux_streams(mpctx);
+
     mpctx->current_track[type] = track;
+
+    if (track)
+        track->selected = true;
+
+    reselect_demux_streams(mpctx);
 
     int user_tid = track ? track->user_tid : -2;
     if (type == STREAM_VIDEO) {
@@ -636,6 +621,12 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
 
     talloc_free(mpctx->track_layout_hash);
     mpctx->track_layout_hash = talloc_steal(mpctx, track_layout_hash(mpctx));
+}
+
+void mp_deselect_track(struct MPContext *mpctx, struct track *track)
+{
+    if (track && track->selected)
+        mp_switch_track(mpctx, track->type, NULL);
 }
 
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
@@ -658,11 +649,9 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     if (!track->is_external)
         return false;
 
-    if (mpctx->current_track[track->type] == track) {
-        mp_switch_track(mpctx, track->type, NULL);
-        if (mpctx->current_track[track->type] == track)
-            return false;
-    }
+    mp_deselect_track(mpctx, track);
+    if (track->selected)
+        return false;
 
     int index = 0;
     while (index < mpctx->num_tracks && mpctx->tracks[index] != track)
@@ -1157,11 +1146,14 @@ goto_reopen_demuxer: ;
     mpctx->current_track[STREAM_SUB] =
         select_track(mpctx, STREAM_SUB, mpctx->opts->sub_id,
                      mpctx->opts->sub_lang);
+    for (int t = 0; t < mpctx->num_tracks; t++) {
+        struct track *track = mpctx->tracks[t];
+        track->selected = track == mpctx->current_track[track->type];
+    }
+    reselect_demux_streams(mpctx);
 
     demux_info_print(mpctx->master_demuxer);
     print_file_properties(mpctx);
-
-    preselect_demux_streams(mpctx);
 
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx && mpctx->current_track[STREAM_VIDEO])

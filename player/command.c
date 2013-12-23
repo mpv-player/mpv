@@ -1067,10 +1067,9 @@ static int property_list_tracks(m_option_t *prop, int action, void *arg,
                 if (track->type != type)
                     continue;
 
-                bool selected = mpctx->current_track[track->type] == track;
                 res = talloc_asprintf_append(res, "%s: ",
                                              track_type_name(track->type));
-                if (selected)
+                if (track->selected)
                     res = talloc_asprintf_append(res, "> ");
                 res = talloc_asprintf_append(res, "(%d) ", track->user_tid);
                 if (track->title)
@@ -1079,7 +1078,7 @@ static int property_list_tracks(m_option_t *prop, int action, void *arg,
                     res = talloc_asprintf_append(res, "(%s) ", track->lang);
                 if (track->is_external)
                     res = talloc_asprintf_append(res, "(external) ");
-                if (selected)
+                if (track->selected)
                     res = talloc_asprintf_append(res, "<");
                 res = talloc_asprintf_append(res, "\n");
             }

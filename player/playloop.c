@@ -301,9 +301,10 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
 
     // If audio or demuxer subs come from different files, seek them too:
     bool have_external_tracks = false;
-    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-        struct track *track = mpctx->current_track[type];
-        have_external_tracks |= track && track->is_external && track->demuxer;
+    for (int t = 0; t < mpctx->num_tracks; t++) {
+        struct track *track = mpctx->tracks[t];
+        have_external_tracks |= track->selected && track->is_external &&
+                                track->demuxer;
     }
     if (have_external_tracks) {
         double main_new_pos;
@@ -312,9 +313,9 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         } else {
             main_new_pos = get_main_demux_pts(mpctx);
         }
-        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-            struct track *track = mpctx->current_track[type];
-            if (track && track->is_external && track->demuxer)
+        for (int t = 0; t < mpctx->num_tracks; t++) {
+            struct track *track = mpctx->tracks[t];
+            if (track->selected && track->is_external && track->demuxer)
                 demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE);
         }
     }
@@ -1027,7 +1028,6 @@ void run_playloop(struct MPContext *mpctx)
                 if (!opts->force_vo)
                     uninit |= INITIALIZED_VO;
                 uninit_player(mpctx, uninit);
-                mpctx->current_track[STREAM_VIDEO] = NULL;
                 if (!mpctx->current_track[STREAM_AUDIO])
                     mpctx->stop_play = PT_NEXT_ENTRY;
                 mpctx->error_playing = true;

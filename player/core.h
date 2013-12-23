@@ -108,6 +108,10 @@ enum seek_type {
 
 struct track {
     enum stream_type type;
+
+    // Currently used for decoding.
+    bool selected;
+
     // The type specific ID, also called aid (audio), sid (subs), vid (video).
     // For UI purposes only; this ID doesn't have anything to do with any
     // IDs coming from demuxers or container files.
@@ -197,8 +201,6 @@ typedef struct MPContext {
 
     // Selected tracks. NULL if no track selected.
     struct track *current_track[STREAM_TYPE_COUNT];
-
-    struct sh_stream *sh[STREAM_TYPE_COUNT];
 
     struct dec_video *d_video;
     struct dec_audio *d_audio;
@@ -367,13 +369,13 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask);
 struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename);
 void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
                      struct track *track);
+void mp_deselect_track(struct MPContext *mpctx, struct track *track);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
 bool timeline_set_part(struct MPContext *mpctx, int i, bool force);
 double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_reset);
-struct sh_stream *init_demux_stream(struct MPContext *mpctx,
-                                    enum stream_type type);
-void cleanup_demux_stream(struct MPContext *mpctx, enum stream_type type);
+struct sh_stream *init_demux_stream(struct MPContext *mpctx, struct track *track);
+void reselect_demux_streams(struct MPContext *mpctx);
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,

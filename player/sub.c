@@ -57,9 +57,10 @@ static bool is_interleaved(struct MPContext *mpctx, struct track *track)
         return false;
 
     struct demuxer *demuxer = track->demuxer;
-    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-        struct track *other = mpctx->current_track[type];
-        if (other && other != track && other->demuxer && other->demuxer == demuxer)
+    for (int t = 0; t < mpctx->num_tracks; t++) {
+        struct track *other = mpctx->tracks[t];
+        if (other != track && other->selected && other->demuxer == demuxer &&
+            (other->type == STREAM_VIDEO || other->type == STREAM_AUDIO))
             return true;
     }
     return false;
@@ -175,8 +176,7 @@ void reinit_subs(struct MPContext *mpctx)
 
     assert(!(mpctx->initialized_flags & INITIALIZED_SUB));
 
-    init_demux_stream(mpctx, STREAM_SUB);
-    struct sh_stream *sh = mpctx->sh[STREAM_SUB];
+    struct sh_stream *sh = init_demux_stream(mpctx, track);
 
     // No track selected, or lazily added DVD track (will actually be created
     // on first sub packet)
