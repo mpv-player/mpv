@@ -1222,7 +1222,7 @@ OPTIONS
     like any other binding). See `INPUT.CONF`_.
 
 ``--joystick``, ``--no-joystick``
-    Enable/disable joystick support. Enabled by default.
+    Enable/disable joystick support. Disabled by default.
 
 ``--no-keepaspect``, ``--keepaspect``
     ``--no-keepaspect`` will always stretch the video to window size, and will

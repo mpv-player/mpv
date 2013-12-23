@@ -756,7 +756,6 @@ const struct MPOpts mp_default_opts = {
         .doubleclick_time = 300,
         .ar_delay = 200,
         .ar_rate = 40,
-        .use_joystick = 1,
         .use_lirc = 1,
         .use_alt_gr = 1,
 #if HAVE_COCOA
