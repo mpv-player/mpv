@@ -179,7 +179,7 @@ Command Line Switches
     ``-panscanrange``           ``--video-zoom``, ``--video-pan-x/y``
     ``-pp ...``                 ``'--vf=pp=[...]'``
     ``-pphelp``                 ``--vf=pp:help``
-    ``-identify``               ``--msglevel=identify=trace``
+    ``dvdnav://``               ``dvdnav://menu``
     =========================== ========================================
 
 .. note::
