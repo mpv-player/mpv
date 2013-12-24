@@ -181,7 +181,8 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
             clear_audio_output_buffers(mpctx);
     }
 
-    reset_subtitles(mpctx);
+    reset_subtitles(mpctx, 0);
+    reset_subtitles(mpctx, 1);
 
     mpctx->video_pts = MP_NOPTS_VALUE;
     mpctx->video_next_pts = MP_NOPTS_VALUE;
@@ -271,7 +272,8 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     if (need_reset) {
         reinit_video_chain(mpctx);
         reinit_audio_chain(mpctx);
-        reinit_subs(mpctx);
+        reinit_subs(mpctx, 0);
+        reinit_subs(mpctx, 1);
     }
 
     int demuxer_style = 0;

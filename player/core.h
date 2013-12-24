@@ -35,6 +35,7 @@
 #define INITIALIZED_ACODEC  1024
 #define INITIALIZED_VCODEC  2048
 #define INITIALIZED_SUB     4096
+#define INITIALIZED_SUB2    8192
 #define INITIALIZED_ALL     0xFFFF
 
 
@@ -208,7 +209,7 @@ typedef struct MPContext {
 
     struct dec_video *d_video;
     struct dec_audio *d_audio;
-    struct dec_sub *d_sub;
+    struct dec_sub *d_sub[2];
 
     // Uses: accessing metadata (consider ordered chapters case, where the main
     // demuxer defines metadata), or special purpose demuxers like TV.
@@ -439,9 +440,9 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig);
 void add_frame_pts(struct MPContext *mpctx, double pts);
 
 // sub.c
-void reset_subtitles(struct MPContext *mpctx);
+void reset_subtitles(struct MPContext *mpctx, int order);
 void uninit_subs(struct demuxer *demuxer);
-void reinit_subs(struct MPContext *mpctx);
+void reinit_subs(struct MPContext *mpctx, int order);
 void update_osd_msg(struct MPContext *mpctx);
 void update_subtitles(struct MPContext *mpctx);
 

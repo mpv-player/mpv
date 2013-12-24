@@ -84,7 +84,7 @@ struct mp_osd_res {
 
 enum mp_osdtype {
     OSDTYPE_SUB,
-    OSDTYPE_SUBTEXT,
+    OSDTYPE_SUB2,
 
     OSDTYPE_NAV_HIGHLIGHT,      // dvdnav fake highlights
 
@@ -105,6 +105,12 @@ struct osd_object {
 
     bool force_redraw;
 
+    // OSDTYPE_SUB
+    struct dec_sub *dec_sub;
+    double video_offset;
+    bool render_bitmap_subs;
+    char *sub_text;
+
     // caches for OSD conversion (internal to render_object())
     struct osd_conv_cache *cache[OSD_CONV_CACHE_MAX];
     struct sub_bitmaps cached;
@@ -124,11 +130,9 @@ struct osd_object {
 struct osd_state {
     struct osd_object *objs[MAX_OSD_PARTS];
 
-    double video_offset;
     double vo_pts;
 
     bool render_subs_in_filter;
-    bool render_bitmap_subs;
 
     struct mp_osd_res last_vo_res;
 
@@ -136,8 +140,6 @@ struct osd_state {
 
     // OSDTYPE_OSD
     char *osd_text;
-    // OSDTYPE_SUBTEXT
-    char *sub_text;
     // OSDTYPE_PROGBAR
     int progbar_type;      // <0: disabled, 1-255: symbol, else: no symbol
     float progbar_value;   // range 0.0-1.0
@@ -148,8 +150,6 @@ struct osd_state {
     int external_res_x, external_res_y;
     // OSDTYPE_EXTERNAL2
     struct sub_bitmaps external2;
-    // OSDTYPE_SUB
-    struct dec_sub *dec_sub;
     // OSDTYPE_NAV_HIGHLIGHT
     void *highlight_priv;
 
@@ -206,7 +206,7 @@ extern const struct m_sub_options osd_style_conf;
 
 struct osd_state *osd_create(struct mpv_global *global);
 void osd_set_text(struct osd_state *osd, const char *text);
-void osd_set_sub(struct osd_state *osd, const char *text);
+void osd_set_sub(struct osd_state *osd, struct osd_object *obj, const char *text);
 void osd_changed(struct osd_state *osd, int new_value);
 void osd_changed_all(struct osd_state *osd);
 void osd_free(struct osd_state *osd);

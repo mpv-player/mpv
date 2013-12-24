@@ -595,6 +595,7 @@ Name                            W Comment
 ``video-unscaled``              x see ``--video-unscaled``
 ``program``                     x switch TS program (write-only)
 ``sid``                         x current subtitle track (similar to ``--sid``)
+``secondary-sid``               x secondary subtitle track (``--secondary-sid``)
 ``sub``                         x alias for ``sid``
 ``sub-delay``                   x see ``--sub-delay``
 ``sub-pos``                     x see ``--sub-pos``

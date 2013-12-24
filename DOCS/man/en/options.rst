@@ -2017,6 +2017,28 @@ OPTIONS
     Specify the screen width for video output drivers which do not know the
     screen resolution, like ``x11`` and TV-out.
 
+``--secondary-sid=<ID|auto|no>``
+    Select a secondary subtitle stream. This is similar to ``--sid``. If a
+    secondary subtitle is selected, it will be rendered as toptitle (i.e. on
+    the top of the screen) alongside the normal subtitle, and provides a way
+    to render two subtitles at once.
+
+    there are some caveats associated with this feature. For example, secondary
+    subtitles are never shown on the terminal if video is disabled.
+
+    .. note::
+
+        Styling and interpretation of any formatting tags is disabled for the
+        secondary subtitle. Internally, the same mechanism as ``--no-ass`` is
+        used to strip the styling.
+
+    .. note::
+
+        If the main subtitle stream contains formatting tags which display the
+        subtitle at the top of the screen, it will overlap with the secondary
+        subtitle. To prevent this, you could use ``--no-ass`` to disable
+        styling in the main subtitle stream.
+
 ``--show-profile=<profile>``
     Show the description and content of a profile.
 

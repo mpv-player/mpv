@@ -980,14 +980,23 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
-                                int direction, struct track *track)
+static struct track* track_next(struct MPContext *mpctx, int order,
+                                enum stream_type type, int direction,
+                                struct track *track)
 {
     assert(direction == -1 || direction == +1);
     struct track *prev = NULL, *next = NULL;
     bool seen = track == NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *cur = mpctx->tracks[n];
+        // One track can be selected only one time - pretend already selected
+        // tracks don't exist.
+        for (int r = 0; r < NUM_PTRACKS; r++) {
+            if (r != order && mpctx->current_track[r][type] == cur)
+                cur = NULL;
+        }
+        if (!cur)
+            continue;
         if (cur->type == type) {
             if (cur == track) {
                 seen = true;
@@ -1005,11 +1014,12 @@ static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
 }
 
 static int property_switch_track(m_option_t *prop, int action, void *arg,
-                                 MPContext *mpctx, enum stream_type type)
+                                 MPContext *mpctx, int order,
+                                 enum stream_type type)
 {
     if (!mpctx->num_sources)
         return M_PROPERTY_UNAVAILABLE;
-    struct track *track = mpctx->current_track[0][type];
+    struct track *track = mpctx->current_track[order][type];
 
     switch (action) {
     case M_PROPERTY_GET:
@@ -1034,12 +1044,13 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
 
     case M_PROPERTY_SWITCH: {
         struct m_property_switch_arg *sarg = arg;
-        mp_switch_track(mpctx, type,
-            track_next(mpctx, type, sarg->inc >= 0 ? +1 : -1, track));
+        mp_switch_track_n(mpctx, order, type,
+            track_next(mpctx, order, type, sarg->inc >= 0 ? +1 : -1, track));
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        mp_switch_track(mpctx, type, mp_track_by_tid(mpctx, type, *(int *)arg));
+        track = mp_track_by_tid(mpctx, type, *(int *)arg);
+        mp_switch_track_n(mpctx, order, type, track);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -1102,14 +1113,14 @@ static int property_list_tracks(m_option_t *prop, int action, void *arg,
 static int mp_property_audio(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    return property_switch_track(prop, action, arg, mpctx, STREAM_AUDIO);
+    return property_switch_track(prop, action, arg, mpctx, 0, STREAM_AUDIO);
 }
 
 /// Selected video id (RW)
 static int mp_property_video(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    return property_switch_track(prop, action, arg, mpctx, STREAM_VIDEO);
+    return property_switch_track(prop, action, arg, mpctx, 0, STREAM_VIDEO);
 }
 
 static struct track *find_track_by_demuxer_id(MPContext *mpctx,
@@ -1623,7 +1634,13 @@ static int property_osd_helper(m_option_t *prop, int action, void *arg,
 static int mp_property_sub(m_option_t *prop, int action, void *arg,
                            MPContext *mpctx)
 {
-    return property_switch_track(prop, action, arg, mpctx, STREAM_SUB);
+    return property_switch_track(prop, action, arg, mpctx, 0, STREAM_SUB);
+}
+
+static int mp_property_sub2(m_option_t *prop, int action, void *arg,
+                            MPContext *mpctx)
+{
+    return property_switch_track(prop, action, arg, mpctx, 1, STREAM_SUB);
 }
 
 /// Subtitle delay (RW)
@@ -1997,6 +2014,7 @@ static const m_option_t mp_properties[] = {
 
     // Subs
     M_OPTION_PROPERTY_CUSTOM("sid", mp_property_sub),
+    M_OPTION_PROPERTY_CUSTOM("secondary-sid", mp_property_sub2),
     M_OPTION_PROPERTY_CUSTOM("sub-delay", mp_property_sub_delay),
     M_OPTION_PROPERTY_CUSTOM("sub-pos", mp_property_sub_pos),
     M_OPTION_PROPERTY_CUSTOM("sub-visibility", property_osd_helper),
@@ -2109,6 +2127,7 @@ static struct property_osd_display {
     { "angle", "Angle" },
     // subs
     { "sub", "Subtitles" },
+    { "secondary-sid", "Secondary subtitles" },
     { "sub-pos", "Sub position" },
     { "sub-delay", "Sub delay", .osd_id = OSD_MSG_SUB_DELAY },
     { "sub-visibility", "Subtitles" },
@@ -2714,12 +2733,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SUB_STEP:
-    case MP_CMD_SUB_SEEK:
-        if (mpctx->osd->dec_sub) {
+    case MP_CMD_SUB_SEEK: {
+        struct osd_object *obj = mpctx->osd->objs[OSDTYPE_SUB];
+        if (obj->dec_sub) {
             double a[2];
-            a[0] = mpctx->video_pts - mpctx->osd->video_offset + opts->sub_delay;
+            a[0] = mpctx->video_pts - obj->video_offset + opts->sub_delay;
             a[1] = cmd->args[0].v.i;
-            if (sub_control(mpctx->osd->dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
+            if (sub_control(obj->dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
                 if (cmd->id == MP_CMD_SUB_STEP) {
                     opts->sub_delay += a[0];
                     osd_changed_all(mpctx->osd);
@@ -2742,6 +2762,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             }
         }
         break;
+    }
 
     case MP_CMD_OSD: {
         int v = cmd->args[0].v.i;

@@ -373,8 +373,8 @@ void set_osd_subtitle(struct MPContext *mpctx, const char *text)
 {
     if (!text)
         text = "";
-    if (strcmp(mpctx->osd->sub_text, text) != 0) {
-        osd_set_sub(mpctx->osd, text);
+    if (strcmp(mpctx->osd->objs[OSDTYPE_SUB]->sub_text, text) != 0) {
+        osd_set_sub(mpctx->osd, mpctx->osd->objs[OSDTYPE_SUB], text);
         if (!mpctx->video_out) {
             rm_osd_msg(mpctx, OSD_MSG_SUB_BASE);
             if (text && text[0])

@@ -199,7 +199,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     mpctx->vo_pts_history_seek_ts++;
 
     vo_seek_reset(mpctx->video_out);
-    reset_subtitles(mpctx);
+    reset_subtitles(mpctx, 0);
+    reset_subtitles(mpctx, 1);
 
     if (opts->force_fps) {
         d_video->fps = opts->force_fps;

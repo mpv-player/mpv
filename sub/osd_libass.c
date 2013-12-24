@@ -411,7 +411,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
 
     clear_obj(obj);
 
-    if (!osd->sub_text || !osd->sub_text[0])
+    if (!obj->sub_text || !obj->sub_text[0] || obj->render_bitmap_subs)
         return;
 
     create_ass_renderer(osd, obj);
@@ -423,12 +423,14 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
 
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
     mp_ass_set_style(style, obj->osd_track->PlayResY, &font);
+    if (obj->type == OSDTYPE_SUB2)
+        style->Alignment = 6;
 
 #if LIBASS_VERSION >= 0x01010000
     ass_set_line_position(obj->osd_render, 100 - opts->sub_pos);
 #endif
 
-    char *escaped_text = mangle_ass(osd->sub_text);
+    char *escaped_text = mangle_ass(obj->sub_text);
     add_osd_ass_event(obj->osd_track, escaped_text);
     talloc_free(escaped_text);
 }
@@ -439,7 +441,8 @@ static void update_object(struct osd_state *osd, struct osd_object *obj)
     case OSDTYPE_OSD:
         update_osd(osd, obj);
         break;
-    case OSDTYPE_SUBTEXT:
+    case OSDTYPE_SUB:
+    case OSDTYPE_SUB2:
         update_sub(osd, obj);
         break;
     case OSDTYPE_PROGBAR:

@@ -88,21 +88,22 @@ struct osd_state *osd_create(struct mpv_global *global)
         .global = global,
         .log = mp_log_new(osd, global->log, "osd"),
         .osd_text = talloc_strdup(osd, ""),
-        .sub_text = talloc_strdup(osd, ""),
         .progbar_type = -1,
     };
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        struct osd_object *obj = talloc_struct(osd, struct osd_object, {
+        struct osd_object *obj = talloc(osd, struct osd_object);
+        *obj = (struct osd_object) {
             .type = n,
-        });
+            .sub_text = talloc_strdup(obj, ""),
+        };
         for (int i = 0; i < OSD_CONV_CACHE_MAX; i++)
             obj->cache[i] = talloc_steal(obj, osd_conv_cache_new());
         osd->objs[n] = obj;
     }
 
-    osd->objs[OSDTYPE_SUB]->is_sub = true;      // dec_sub.c
-    osd->objs[OSDTYPE_SUBTEXT]->is_sub = true;  // osd_libass.c
+    osd->objs[OSDTYPE_SUB]->is_sub = true;
+    osd->objs[OSDTYPE_SUB2]->is_sub = true;
 
     osd_init_backend(osd);
     return osd;
@@ -133,10 +134,10 @@ void osd_set_text(struct osd_state *osd, const char *text)
         osd_changed(osd, OSDTYPE_OSD);
 }
 
-void osd_set_sub(struct osd_state *osd, const char *text)
+void osd_set_sub(struct osd_state *osd, struct osd_object *obj, const char *text)
 {
-    if (!set_text(osd, &osd->sub_text, text))
-        osd_changed(osd, OSDTYPE_SUBTEXT);
+    if (!set_text(obj, &obj->sub_text, text))
+        osd_changed(osd, obj->type);
 }
 
 static void render_object(struct osd_state *osd, struct osd_object *obj,
@@ -157,12 +158,14 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
         obj->force_redraw = true;
     obj->vo_res = res;
 
-    if (obj->type == OSDTYPE_SUB) {
-        if (osd->render_bitmap_subs && osd->dec_sub) {
+    if (obj->type == OSDTYPE_SUB || obj->type == OSDTYPE_SUB2) {
+        if (obj->render_bitmap_subs && obj->dec_sub) {
             double sub_pts = video_pts;
             if (sub_pts != MP_NOPTS_VALUE)
-                sub_pts -= osd->video_offset - opts->sub_delay;
-            sub_get_bitmaps(osd->dec_sub, obj->vo_res, sub_pts, out_imgs);
+                sub_pts -= obj->video_offset - opts->sub_delay;
+            sub_get_bitmaps(obj->dec_sub, obj->vo_res, sub_pts, out_imgs);
+        } else {
+            osd_object_get_bitmaps(osd, obj, out_imgs);
         }
     } else if (obj->type == OSDTYPE_EXTERNAL2) {
         if (osd->external2.format) {

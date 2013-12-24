@@ -147,6 +147,7 @@ typedef struct MPOpts {
     int audio_id;
     int video_id;
     int sub_id;
+    int sub2_id;
     char **audio_lang;
     char **sub_lang;
     int audio_display;

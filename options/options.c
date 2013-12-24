@@ -301,6 +301,7 @@ const m_option_t mp_opts[] = {
     OPT_TRACKCHOICE("aid", audio_id),
     OPT_TRACKCHOICE("vid", video_id),
     OPT_TRACKCHOICE("sid", sub_id),
+    OPT_TRACKCHOICE("secondary-sid", sub2_id),
     OPT_FLAG_STORE("no-sub", sub_id, 0, -2),
     OPT_FLAG_STORE("no-video", video_id, 0, -2),
     OPT_FLAG_STORE("no-audio", audio_id, 0, -2),

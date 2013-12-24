@@ -222,8 +222,8 @@ void mp_nav_get_highlight(struct osd_state *osd, struct mp_osd_res res,
 
     nav->hi_elem = sub;
     int sizes[2] = {0};
-    if (mpctx->d_sub)
-        sub_control(mpctx->d_sub, SD_CTRL_GET_RESOLUTION, sizes);
+    if (mpctx->d_sub[0])
+        sub_control(mpctx->d_sub[0], SD_CTRL_GET_RESOLUTION, sizes);
     if (sizes[0] < 1 || sizes[1] < 1) {
         struct mp_image_params vid = {0};
         if (mpctx->d_video)

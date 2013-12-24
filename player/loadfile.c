@@ -62,6 +62,16 @@
 #include "stream/dvbin.h"
 #endif
 
+static void uninit_sub(struct MPContext *mpctx, int order)
+{
+    if (mpctx->d_sub[order])
+        sub_reset(mpctx->d_sub[order]);
+    mpctx->d_sub[order] = NULL; // Note: not free'd.
+    mpctx->osd->objs[order ? OSDTYPE_SUB2 : OSDTYPE_SUB]->dec_sub = NULL;
+    reset_subtitles(mpctx, order);
+    reselect_demux_streams(mpctx);
+}
+
 void uninit_player(struct MPContext *mpctx, unsigned int mask)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -80,12 +90,11 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_SUB) {
         mpctx->initialized_flags &= ~INITIALIZED_SUB;
-        if (mpctx->d_sub)
-            sub_reset(mpctx->d_sub);
-        mpctx->d_sub = NULL; // Note: not free'd.
-        mpctx->osd->dec_sub = NULL;
-        reset_subtitles(mpctx);
-        reselect_demux_streams(mpctx);
+        uninit_sub(mpctx, 0);
+    }
+    if (mask & INITIALIZED_SUB2) {
+        mpctx->initialized_flags &= ~INITIALIZED_SUB2;
+        uninit_sub(mpctx, 1);
     }
 
     if (mask & INITIALIZED_LIBASS) {
@@ -110,7 +119,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     if (mask & INITIALIZED_DEMUXER) {
         mpctx->initialized_flags &= ~INITIALIZED_DEMUXER;
         assert(!(mpctx->initialized_flags &
-                 (INITIALIZED_VCODEC | INITIALIZED_ACODEC | INITIALIZED_SUB)));
+                 (INITIALIZED_VCODEC | INITIALIZED_ACODEC |
+                  INITIALIZED_SUB2 | INITIALIZED_SUB)));
         for (int i = 0; i < mpctx->num_tracks; i++) {
             talloc_free(mpctx->tracks[i]);
         }
@@ -119,7 +129,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
             for (int t = 0; t < STREAM_TYPE_COUNT; t++)
                 mpctx->current_track[r][t] = NULL;
         }
-        assert(!mpctx->d_video && !mpctx->d_audio && !mpctx->d_sub);
+        assert(!mpctx->d_video && !mpctx->d_audio &&
+               !mpctx->d_sub[0] && !mpctx->d_sub[1]);
         mpctx->master_demuxer = NULL;
         for (int i = 0; i < mpctx->num_sources; i++) {
             uninit_subs(mpctx->sources[i]);
@@ -324,7 +335,7 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     enum stop_play_reason orig_stop_play = mpctx->stop_play;
     if (!mpctx->d_video && mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;  // let audio uninit drain data
-    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts->fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts->gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB);
+    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts->fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts->gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB | INITIALIZED_SUB2);
     mpctx->stop_play = orig_stop_play;
 
     mpctx->demuxer = n->source;
@@ -405,8 +416,10 @@ static struct track *add_stream_track(struct MPContext *mpctx,
             track->demuxer_id = stream->demuxer_id;
             // Initialize lazily selected track
             demuxer_select_track(track->demuxer, stream, track->selected);
-            if (track->selected)
-                reinit_subs(mpctx);
+            if (mpctx->current_track[0][STREAM_SUB] == track)
+                reinit_subs(mpctx, 0);
+            if (mpctx->current_track[1][STREAM_SUB] == track)
+                reinit_subs(mpctx, 1);
             return track;
         }
     }
@@ -605,6 +618,9 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         } else if (type == STREAM_SUB) {
             uninit_player(mpctx, INITIALIZED_SUB);
         }
+    } else if (order == 1) {
+        if (type == STREAM_SUB)
+            uninit_player(mpctx, INITIALIZED_SUB2);
     }
 
     if (current)
@@ -631,8 +647,13 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
             mp_notify_property(mpctx, "aid");
         } else if (type == STREAM_SUB) {
             mpctx->opts->sub_id = user_tid;
-            reinit_subs(mpctx);
+            reinit_subs(mpctx, 0);
             mp_notify_property(mpctx, "sid");
+        }
+    } else if (order == 1) {
+        if (type == STREAM_SUB) {
+            mpctx->opts->sub2_id = user_tid;
+            reinit_subs(mpctx, 1);
         }
     }
 
@@ -1048,7 +1069,8 @@ static void play_current_file(struct MPContext *mpctx)
     assert(mpctx->demuxer == NULL);
     assert(mpctx->d_audio == NULL);
     assert(mpctx->d_video == NULL);
-    assert(mpctx->d_sub == NULL);
+    assert(mpctx->d_sub[0] == NULL);
+    assert(mpctx->d_sub[1] == NULL);
 
     char *stream_filename = mpctx->filename;
     mpctx->resolve_result = resolve_url(stream_filename, mpctx->global);
@@ -1189,7 +1211,8 @@ goto_reopen_demuxer: ;
 
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
-    reinit_subs(mpctx);
+    reinit_subs(mpctx, 0);
+    reinit_subs(mpctx, 1);
 
     //==================== START PLAYING =======================
 
