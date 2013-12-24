@@ -147,6 +147,8 @@ enum {
     MAX_NUM_VO_PTS = 100,
 };
 
+#define NUM_PTRACKS 2
+
 typedef struct MPContext {
     struct mpv_global *global;
     struct MPOpts *opts;
@@ -200,7 +202,9 @@ typedef struct MPContext {
     char *track_layout_hash;
 
     // Selected tracks. NULL if no track selected.
-    struct track *current_track[STREAM_TYPE_COUNT];
+    // There can be NUM_PTRACKS of the same STREAM_TYPE selected at once.
+    // Currently, this is used for the secondary subtitle track only.
+    struct track *current_track[NUM_PTRACKS][STREAM_TYPE_COUNT];
 
     struct dec_video *d_video;
     struct dec_audio *d_audio;
@@ -369,6 +373,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask);
 struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename);
 void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
                      struct track *track);
+void mp_switch_track_n(struct MPContext *mpctx, int order,
+                       enum stream_type type, struct track *track);
 void mp_deselect_track(struct MPContext *mpctx, struct track *track);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);

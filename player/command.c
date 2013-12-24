@@ -1009,7 +1009,7 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
 {
     if (!mpctx->num_sources)
         return M_PROPERTY_UNAVAILABLE;
-    struct track *track = mpctx->current_track[type];
+    struct track *track = mpctx->current_track[0][type];
 
     switch (action) {
     case M_PROPERTY_GET:

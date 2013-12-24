@@ -104,7 +104,7 @@ int reinit_audio_filters(struct MPContext *mpctx)
 void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct track *track = mpctx->current_track[STREAM_AUDIO];
+    struct track *track = mpctx->current_track[0][STREAM_AUDIO];
     struct sh_stream *sh = init_demux_stream(mpctx, track);
     if (!sh) {
         uninit_player(mpctx, INITIALIZED_AO);

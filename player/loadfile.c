@@ -115,8 +115,10 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
             talloc_free(mpctx->tracks[i]);
         }
         mpctx->num_tracks = 0;
-        for (int t = 0; t < STREAM_TYPE_COUNT; t++)
-            mpctx->current_track[t] = NULL;
+        for (int r = 0; r < NUM_PTRACKS; r++) {
+            for (int t = 0; t < STREAM_TYPE_COUNT; t++)
+                mpctx->current_track[r][t] = NULL;
+        }
         assert(!mpctx->d_video && !mpctx->d_audio && !mpctx->d_sub);
         mpctx->master_demuxer = NULL;
         for (int i = 0; i < mpctx->num_sources; i++) {
@@ -582,24 +584,27 @@ static void check_previous_track_selection(struct MPContext *mpctx)
     talloc_free(h);
 }
 
-void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
-                     struct track *track)
+void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type,
+                       struct track *track)
 {
     assert(!track || track->type == type);
+    assert(order >= 0 && order < NUM_PTRACKS);
 
-    struct track *current = mpctx->current_track[type];
+    struct track *current = mpctx->current_track[order][type];
     if (track == current)
         return;
 
-    if (type == STREAM_VIDEO) {
-        int uninit = INITIALIZED_VCODEC;
-        if (!mpctx->opts->force_vo)
-            uninit |= mpctx->opts->fixed_vo && track ? 0 : INITIALIZED_VO;
-        uninit_player(mpctx, uninit);
-    } else if (type == STREAM_AUDIO) {
-        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
-    } else if (type == STREAM_SUB) {
-        uninit_player(mpctx, INITIALIZED_SUB);
+    if (order == 0) {
+        if (type == STREAM_VIDEO) {
+            int uninit = INITIALIZED_VCODEC;
+            if (!mpctx->opts->force_vo)
+                uninit |= mpctx->opts->fixed_vo && track ? 0 : INITIALIZED_VO;
+            uninit_player(mpctx, uninit);
+        } else if (type == STREAM_AUDIO) {
+            uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
+        } else if (type == STREAM_SUB) {
+            uninit_player(mpctx, INITIALIZED_SUB);
+        }
     }
 
     if (current)
@@ -607,7 +612,7 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
 
     reselect_demux_streams(mpctx);
 
-    mpctx->current_track[type] = track;
+    mpctx->current_track[order][type] = track;
 
     if (track)
         track->selected = true;
@@ -615,35 +620,45 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
     reselect_demux_streams(mpctx);
 
     int user_tid = track ? track->user_tid : -2;
-    if (type == STREAM_VIDEO) {
-        mpctx->opts->video_id = user_tid;
-        reinit_video_chain(mpctx);
-        mp_notify_property(mpctx, "vid");
-    } else if (type == STREAM_AUDIO) {
-        mpctx->opts->audio_id = user_tid;
-        reinit_audio_chain(mpctx);
-        mp_notify_property(mpctx, "aid");
-    } else if (type == STREAM_SUB) {
-        mpctx->opts->sub_id = user_tid;
-        reinit_subs(mpctx);
-        mp_notify_property(mpctx, "sid");
+    if (order == 0) {
+        if (type == STREAM_VIDEO) {
+            mpctx->opts->video_id = user_tid;
+            reinit_video_chain(mpctx);
+            mp_notify_property(mpctx, "vid");
+        } else if (type == STREAM_AUDIO) {
+            mpctx->opts->audio_id = user_tid;
+            reinit_audio_chain(mpctx);
+            mp_notify_property(mpctx, "aid");
+        } else if (type == STREAM_SUB) {
+            mpctx->opts->sub_id = user_tid;
+            reinit_subs(mpctx);
+            mp_notify_property(mpctx, "sid");
+        }
     }
 
     talloc_free(mpctx->track_layout_hash);
     mpctx->track_layout_hash = talloc_steal(mpctx, track_layout_hash(mpctx));
 }
 
+void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
+                     struct track *track)
+{
+    mp_switch_track_n(mpctx, 0, type, track);
+}
+
 void mp_deselect_track(struct MPContext *mpctx, struct track *track)
 {
-    if (track && track->selected)
-        mp_switch_track(mpctx, track->type, NULL);
+    if (track && track->selected) {
+        for (int t = 0; t < NUM_PTRACKS; t++)
+            mp_switch_track_n(mpctx, t, track->type, NULL);
+    }
 }
 
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid)
 {
     if (tid == -1)
-        return mpctx->current_track[type];
+        return mpctx->current_track[0][type];
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
         if (track->type == type && track->user_tid == tid)
@@ -1148,17 +1163,17 @@ goto_reopen_demuxer: ;
 
     check_previous_track_selection(mpctx);
 
-    mpctx->current_track[STREAM_VIDEO] =
+    mpctx->current_track[0][STREAM_VIDEO] =
         select_track(mpctx, STREAM_VIDEO, mpctx->opts->video_id, NULL);
-    mpctx->current_track[STREAM_AUDIO] =
+    mpctx->current_track[0][STREAM_AUDIO] =
         select_track(mpctx, STREAM_AUDIO, mpctx->opts->audio_id,
                      mpctx->opts->audio_lang);
-    mpctx->current_track[STREAM_SUB] =
+    mpctx->current_track[0][STREAM_SUB] =
         select_track(mpctx, STREAM_SUB, mpctx->opts->sub_id,
                      mpctx->opts->sub_lang);
     for (int t = 0; t < mpctx->num_tracks; t++) {
         struct track *track = mpctx->tracks[t];
-        track->selected = track == mpctx->current_track[track->type];
+        track->selected = track == mpctx->current_track[0][track->type];
     }
     reselect_demux_streams(mpctx);
 
@@ -1166,9 +1181,9 @@ goto_reopen_demuxer: ;
     print_file_properties(mpctx);
 
 #if HAVE_ENCODING
-    if (mpctx->encode_lavc_ctx && mpctx->current_track[STREAM_VIDEO])
+    if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_VIDEO])
         encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_VIDEO);
-    if (mpctx->encode_lavc_ctx && mpctx->current_track[STREAM_AUDIO])
+    if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_AUDIO])
         encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_AUDIO);
 #endif
 

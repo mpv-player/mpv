@@ -80,7 +80,7 @@ void update_subtitles(struct MPContext *mpctx)
     if (!(mpctx->initialized_flags & INITIALIZED_SUB))
         return;
 
-    struct track *track = mpctx->current_track[STREAM_SUB];
+    struct track *track = mpctx->current_track[0][STREAM_SUB];
     struct dec_sub *dec_sub = mpctx->d_sub;
     assert(track && dec_sub);
 
@@ -172,7 +172,7 @@ static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st
 void reinit_subs(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct track *track = mpctx->current_track[STREAM_SUB];
+    struct track *track = mpctx->current_track[0][STREAM_SUB];
 
     assert(!(mpctx->initialized_flags & INITIALIZED_SUB));
 

@@ -136,7 +136,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     assert(!(mpctx->initialized_flags & INITIALIZED_VCODEC));
     assert(!mpctx->d_video);
-    struct track *track = mpctx->current_track[STREAM_VIDEO];
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
     struct sh_stream *sh = init_demux_stream(mpctx, track);
     if (!sh)
         goto no_video;
@@ -318,7 +318,7 @@ void video_execute_format_change(struct MPContext *mpctx)
 static int check_framedrop(struct MPContext *mpctx, double frame_time)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct track *t_audio = mpctx->current_track[STREAM_AUDIO];
+    struct track *t_audio = mpctx->current_track[0][STREAM_AUDIO];
     struct sh_stream *sh_audio = t_audio ? t_audio->stream : NULL;
     // check for frame-drop:
     if (mpctx->d_audio && !mpctx->ao->untimed && sh_audio &&
