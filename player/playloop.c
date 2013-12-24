@@ -299,24 +299,17 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         return -1;
     }
 
-    // If audio or demuxer subs come from different files, seek them too:
-    bool have_external_tracks = false;
+    // Seek external, extra files too:
     for (int t = 0; t < mpctx->num_tracks; t++) {
         struct track *track = mpctx->tracks[t];
-        have_external_tracks |= track->selected && track->is_external &&
-                                track->demuxer;
-    }
-    if (have_external_tracks) {
-        double main_new_pos;
-        if (seek.type == MPSEEK_ABSOLUTE) {
-            main_new_pos = seek.amount - mpctx->video_offset;
-        } else {
-            main_new_pos = get_main_demux_pts(mpctx);
-        }
-        for (int t = 0; t < mpctx->num_tracks; t++) {
-            struct track *track = mpctx->tracks[t];
-            if (track->selected && track->is_external && track->demuxer)
-                demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE);
+        if (track->selected && track->is_external && track->demuxer) {
+            double main_new_pos;
+            if (seek.type == MPSEEK_ABSOLUTE) {
+                main_new_pos = seek.amount - mpctx->video_offset;
+            } else {
+                main_new_pos = get_main_demux_pts(mpctx);
+            }
+            demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE);
         }
     }
 
