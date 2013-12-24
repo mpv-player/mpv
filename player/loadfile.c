@@ -274,13 +274,23 @@ void reselect_demux_streams(struct MPContext *mpctx)
 }
 
 // External demuxers might need a seek to the current playback position.
-// Also return the stream for convenience.
-struct sh_stream *init_demux_stream(struct MPContext *mpctx, struct track *track)
+static void external_track_seek(struct MPContext *mpctx, struct track *track)
 {
     if (track && track->demuxer && track->selected && track->is_external) {
+        for (int t = 0; t < mpctx->num_tracks; t++) {
+            struct track *other = mpctx->tracks[t];
+            if (other->demuxer == track->demuxer &&
+                demuxer_stream_is_selected(other->demuxer, other->stream))
+                return;
+        }
         double pts = get_main_demux_pts(mpctx);
         demux_seek(track->demuxer, pts, SEEK_ABSOLUTE);
     }
+}
+
+struct sh_stream *init_demux_stream(struct MPContext *mpctx, struct track *track)
+{
+    external_track_seek(mpctx, track);
     return track ? track->stream : NULL;
 }
 
