@@ -591,6 +591,8 @@ static void check_previous_track_selection(struct MPContext *mpctx)
             mpctx->opts->audio_id = -1;
         if (opts->sub_id >= 0)
             mpctx->opts->sub_id = -1;
+        if (opts->sub2_id >= 0)
+            mpctx->opts->sub2_id = -2;
         talloc_free(mpctx->track_layout_hash);
         mpctx->track_layout_hash = NULL;
     }
