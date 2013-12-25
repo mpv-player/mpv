@@ -349,7 +349,12 @@ static int create_gl_context(struct vo *vo, int gl3profile)
 static void cocoa_set_window_title(struct vo *vo, const char *title)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    [s->window setTitle: [NSString stringWithUTF8String:title]];
+    void *talloc_ctx   = talloc_new(NULL);
+    struct bstr btitle = bstr_sanitize_utf8_latin1(talloc_ctx, bstr0(title));
+    NSString *nstitle  = [NSString stringWithUTF8String:btitle.start];
+    if (nstitle)
+        [s->window setTitle: nstitle];
+    talloc_free(talloc_ctx);
 }
 
 static void update_window(struct vo *vo, int d_width, int d_height)
