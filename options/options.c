@@ -709,6 +709,7 @@ const struct MPOpts mp_default_opts = {
     .audio_id = -1,
     .video_id = -1,
     .sub_id = -1,
+    .sub2_id = -2,
     .audio_display = 1,
     .sub_visibility = 1,
     .sub_pos = 100,

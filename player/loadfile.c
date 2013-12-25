@@ -607,6 +607,12 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
     if (track == current)
         return;
 
+    if (track && track->selected) {
+        // Track has been selected in a different order parameter.
+        MP_ERR(mpctx, "Track %d is already selected.\n", track->user_tid);
+        return;
+    }
+
     if (order == 0) {
         if (type == STREAM_VIDEO) {
             int uninit = INITIALIZED_VCODEC;
@@ -1193,9 +1199,21 @@ goto_reopen_demuxer: ;
     mpctx->current_track[0][STREAM_SUB] =
         select_track(mpctx, STREAM_SUB, mpctx->opts->sub_id,
                      mpctx->opts->sub_lang);
-    for (int t = 0; t < mpctx->num_tracks; t++) {
-        struct track *track = mpctx->tracks[t];
-        track->selected = track == mpctx->current_track[0][track->type];
+    mpctx->current_track[1][STREAM_SUB] =
+        select_track(mpctx, STREAM_SUB, mpctx->opts->sub2_id, NULL);
+    for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
+        for (int i = 0; i < NUM_PTRACKS; i++) {
+            struct track *track = mpctx->current_track[i][t];
+            if (track) {
+                if (track->selected) {
+                    MP_ERR(mpctx, "Track %d can't be selected twice.\n",
+                           track->user_tid);
+                    mpctx->current_track[i][t] = NULL;
+                } else {
+                    track->selected = true;
+                }
+            }
+        }
     }
     reselect_demux_streams(mpctx);
 
