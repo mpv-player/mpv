@@ -41,10 +41,13 @@ def check_libs(libs, function):
 
 def check_statement(header, statement, **kw_ext):
     def fn(ctx, dependency_identifier, **kw):
-        fragment = """
-            #include <{0}>
-            int main(int argc, char **argv)
-            {{ {1}; return 0; }} """.format(header, statement)
+        headers = header
+        if not isinstance(headers, list):
+            headers = [header]
+        hs = "\n".join(["#include <{0}>".format(h) for h in headers])
+        fragment = ("{0}\n"
+                    "int main(int argc, char **argv)\n"
+                    "{{ {1}; return 0; }}").format(hs, statement)
         opts = __merge_options__(dependency_identifier,
                                  {'fragment':fragment},
                                  __define_options__(dependency_identifier),
