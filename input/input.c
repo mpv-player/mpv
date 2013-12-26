@@ -179,13 +179,24 @@ struct input_ctx {
     int wakeup_pipe[2];
 };
 
-
 int async_quit_request;
 
+static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
+                        const char *location, const char *restrict_section);
+
 static int print_key_list(struct mp_log *log, m_option_t *cfg,
-                          char *optname, char *optparam);
+                          char *optname, char *optparam)
+{
+    mp_print_key_list(log);
+    return M_OPT_EXIT;
+}
+
 static int print_cmd_list(struct mp_log *log, m_option_t *cfg,
-                          char *optname, char *optparam);
+                          char *optname, char *optparam)
+{
+    mp_print_cmd_list(log);
+    return M_OPT_EXIT;
+}
 
 #define OPT_BASE_STRUCT struct MPOpts
 
@@ -287,174 +298,6 @@ static struct mp_cmd *queue_peek_tail(struct cmd_queue *queue)
         cur = cur->queue_next;
     return cur;
 }
-
-int mp_input_add_fd(struct input_ctx *ictx, int unix_fd, int select,
-                    int read_cmd_func(void *ctx, int fd, char *dest, int size),
-                    int read_key_func(void *ctx, int fd),
-                    int close_func(void *ctx, int fd), void *ctx)
-{
-    if (select && unix_fd < 0) {
-        MP_ERR(ictx, "Invalid fd %d in mp_input_add_fd", unix_fd);
-        return 0;
-    }
-
-    input_lock(ictx);
-    struct input_fd *fd = NULL;
-    if (ictx->num_fds == MP_MAX_FDS) {
-        MP_ERR(ictx, "Too many file descriptors.\n");
-    } else {
-        fd = &ictx->fds[ictx->num_fds];
-    }
-    *fd = (struct input_fd){
-        .log = ictx->log,
-        .fd = unix_fd,
-        .select = select,
-        .read_cmd = read_cmd_func,
-        .read_key = read_key_func,
-        .close_func = close_func,
-        .ctx = ctx,
-    };
-    ictx->num_fds++;
-    input_unlock(ictx);
-    return !!fd;
-}
-
-static void mp_input_rm_fd(struct input_ctx *ictx, int fd)
-{
-    struct input_fd *fds = ictx->fds;
-    unsigned int i;
-
-    for (i = 0; i < ictx->num_fds; i++) {
-        if (fds[i].fd == fd)
-            break;
-    }
-    if (i == ictx->num_fds)
-        return;
-    if (fds[i].close_func)
-        fds[i].close_func(fds[i].ctx, fds[i].fd);
-    talloc_free(fds[i].buffer);
-
-    if (i + 1 < ictx->num_fds)
-        memmove(&fds[i], &fds[i + 1],
-                (ictx->num_fds - i - 1) * sizeof(struct input_fd));
-    ictx->num_fds--;
-}
-
-void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
-{
-    input_lock(ictx);
-    mp_input_rm_fd(ictx, fd);
-    input_unlock(ictx);
-}
-
-#define MP_CMD_MAX_SIZE 4096
-
-static int read_cmd(struct input_fd *mp_fd, char **ret)
-{
-    char *end;
-    *ret = NULL;
-
-    // Allocate the buffer if it doesn't exist
-    if (!mp_fd->buffer) {
-        mp_fd->buffer = talloc_size(NULL, MP_CMD_MAX_SIZE);
-        mp_fd->pos = 0;
-        mp_fd->size = MP_CMD_MAX_SIZE;
-    }
-
-    // Get some data if needed/possible
-    while (!mp_fd->got_cmd && !mp_fd->eof && (mp_fd->size - mp_fd->pos > 1)) {
-        int r = mp_fd->read_cmd(mp_fd->ctx, mp_fd->fd, mp_fd->buffer + mp_fd->pos,
-                                mp_fd->size - 1 - mp_fd->pos);
-        // Error ?
-        if (r < 0) {
-            switch (r) {
-            case MP_INPUT_ERROR:
-            case MP_INPUT_DEAD:
-                MP_ERR(mp_fd, "Error while reading command file descriptor %d: %s\n",
-                       mp_fd->fd, strerror(errno));
-            case MP_INPUT_NOTHING:
-                return r;
-            case MP_INPUT_RETRY:
-                continue;
-            }
-            // EOF ?
-        } else if (r == 0) {
-            mp_fd->eof = 1;
-            break;
-        }
-        mp_fd->pos += r;
-        break;
-    }
-
-    mp_fd->got_cmd = 0;
-
-    while (1) {
-        int l = 0;
-        // Find the cmd end
-        mp_fd->buffer[mp_fd->pos] = '\0';
-        end = strchr(mp_fd->buffer, '\r');
-        if (end)
-            *end = '\n';
-        end = strchr(mp_fd->buffer, '\n');
-        // No cmd end ?
-        if (!end) {
-            // If buffer is full we must drop all until the next \n
-            if (mp_fd->size - mp_fd->pos <= 1) {
-                MP_ERR(mp_fd, "Command buffer of file descriptor %d is full: "
-                       "dropping content.\n", mp_fd->fd);
-                mp_fd->pos = 0;
-                mp_fd->drop = 1;
-            }
-            break;
-        }
-        // We already have a cmd : set the got_cmd flag
-        else if ((*ret)) {
-            mp_fd->got_cmd = 1;
-            break;
-        }
-
-        l = end - mp_fd->buffer;
-
-        // Not dropping : put the cmd in ret
-        if (!mp_fd->drop)
-            *ret = talloc_strndup(NULL, mp_fd->buffer, l);
-        else
-            mp_fd->drop = 0;
-        mp_fd->pos -= l + 1;
-        memmove(mp_fd->buffer, end + 1, mp_fd->pos);
-    }
-
-    if (*ret)
-        return 1;
-    else
-        return MP_INPUT_NOTHING;
-}
-
-int input_default_read_cmd(void *ctx, int fd, char *buf, int l)
-{
-    while (1) {
-        int r = read(fd, buf, l);
-        // Error ?
-        if (r < 0) {
-            if (errno == EINTR)
-                continue;
-            else if (errno == EAGAIN)
-                return MP_INPUT_NOTHING;
-            return MP_INPUT_ERROR;
-            // EOF ?
-        }
-        return r;
-    }
-}
-
-#ifndef __MINGW32__
-static int read_wakeup(void *ctx, int fd)
-{
-    char buf[100];
-    read(fd, buf, sizeof(buf));
-    return MP_INPUT_NOTHING;
-}
-#endif
 
 static bool bind_matches_key(struct cmd_bind *bind, int n, const int *keys);
 
@@ -958,6 +801,177 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
     input_unlock(ictx);
 }
 
+unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
+{
+    // Make the frontend always display the mouse cursor (as long as it's not
+    // forced invisible) if mouse input is desired.
+    input_lock(ictx);
+    if (mp_input_test_mouse_active(ictx, ictx->mouse_x, ictx->mouse_y))
+        ictx->mouse_event_counter++;
+    int ret = ictx->mouse_event_counter;
+    input_unlock(ictx);
+    return ret;
+}
+
+int input_default_read_cmd(void *ctx, int fd, char *buf, int l)
+{
+    while (1) {
+        int r = read(fd, buf, l);
+        // Error ?
+        if (r < 0) {
+            if (errno == EINTR)
+                continue;
+            else if (errno == EAGAIN)
+                return MP_INPUT_NOTHING;
+            return MP_INPUT_ERROR;
+            // EOF ?
+        }
+        return r;
+    }
+}
+
+int mp_input_add_fd(struct input_ctx *ictx, int unix_fd, int select,
+                    int read_cmd_func(void *ctx, int fd, char *dest, int size),
+                    int read_key_func(void *ctx, int fd),
+                    int close_func(void *ctx, int fd), void *ctx)
+{
+    if (select && unix_fd < 0) {
+        MP_ERR(ictx, "Invalid fd %d in mp_input_add_fd", unix_fd);
+        return 0;
+    }
+
+    input_lock(ictx);
+    struct input_fd *fd = NULL;
+    if (ictx->num_fds == MP_MAX_FDS) {
+        MP_ERR(ictx, "Too many file descriptors.\n");
+    } else {
+        fd = &ictx->fds[ictx->num_fds];
+    }
+    *fd = (struct input_fd){
+        .log = ictx->log,
+        .fd = unix_fd,
+        .select = select,
+        .read_cmd = read_cmd_func,
+        .read_key = read_key_func,
+        .close_func = close_func,
+        .ctx = ctx,
+    };
+    ictx->num_fds++;
+    input_unlock(ictx);
+    return !!fd;
+}
+
+static void mp_input_rm_fd(struct input_ctx *ictx, int fd)
+{
+    struct input_fd *fds = ictx->fds;
+    unsigned int i;
+
+    for (i = 0; i < ictx->num_fds; i++) {
+        if (fds[i].fd == fd)
+            break;
+    }
+    if (i == ictx->num_fds)
+        return;
+    if (fds[i].close_func)
+        fds[i].close_func(fds[i].ctx, fds[i].fd);
+    talloc_free(fds[i].buffer);
+
+    if (i + 1 < ictx->num_fds)
+        memmove(&fds[i], &fds[i + 1],
+                (ictx->num_fds - i - 1) * sizeof(struct input_fd));
+    ictx->num_fds--;
+}
+
+void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
+{
+    input_lock(ictx);
+    mp_input_rm_fd(ictx, fd);
+    input_unlock(ictx);
+}
+
+#define MP_CMD_MAX_SIZE 4096
+
+static int read_cmd(struct input_fd *mp_fd, char **ret)
+{
+    char *end;
+    *ret = NULL;
+
+    // Allocate the buffer if it doesn't exist
+    if (!mp_fd->buffer) {
+        mp_fd->buffer = talloc_size(NULL, MP_CMD_MAX_SIZE);
+        mp_fd->pos = 0;
+        mp_fd->size = MP_CMD_MAX_SIZE;
+    }
+
+    // Get some data if needed/possible
+    while (!mp_fd->got_cmd && !mp_fd->eof && (mp_fd->size - mp_fd->pos > 1)) {
+        int r = mp_fd->read_cmd(mp_fd->ctx, mp_fd->fd, mp_fd->buffer + mp_fd->pos,
+                                mp_fd->size - 1 - mp_fd->pos);
+        // Error ?
+        if (r < 0) {
+            switch (r) {
+            case MP_INPUT_ERROR:
+            case MP_INPUT_DEAD:
+                MP_ERR(mp_fd, "Error while reading command file descriptor %d: %s\n",
+                       mp_fd->fd, strerror(errno));
+            case MP_INPUT_NOTHING:
+                return r;
+            case MP_INPUT_RETRY:
+                continue;
+            }
+            // EOF ?
+        } else if (r == 0) {
+            mp_fd->eof = 1;
+            break;
+        }
+        mp_fd->pos += r;
+        break;
+    }
+
+    mp_fd->got_cmd = 0;
+
+    while (1) {
+        int l = 0;
+        // Find the cmd end
+        mp_fd->buffer[mp_fd->pos] = '\0';
+        end = strchr(mp_fd->buffer, '\r');
+        if (end)
+            *end = '\n';
+        end = strchr(mp_fd->buffer, '\n');
+        // No cmd end ?
+        if (!end) {
+            // If buffer is full we must drop all until the next \n
+            if (mp_fd->size - mp_fd->pos <= 1) {
+                MP_ERR(mp_fd, "Command buffer of file descriptor %d is full: "
+                       "dropping content.\n", mp_fd->fd);
+                mp_fd->pos = 0;
+                mp_fd->drop = 1;
+            }
+            break;
+        }
+        // We already have a cmd : set the got_cmd flag
+        else if ((*ret)) {
+            mp_fd->got_cmd = 1;
+            break;
+        }
+
+        l = end - mp_fd->buffer;
+
+        // Not dropping : put the cmd in ret
+        if (!mp_fd->drop)
+            *ret = talloc_strndup(NULL, mp_fd->buffer, l);
+        else
+            mp_fd->drop = 0;
+        mp_fd->pos -= l + 1;
+        memmove(mp_fd->buffer, end + 1, mp_fd->pos);
+    }
+
+    if (*ret)
+        return 1;
+    else
+        return MP_INPUT_NOTHING;
+}
+
 static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
 {
     int r;
@@ -1182,10 +1196,133 @@ void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y)
     input_unlock(ictx);
 }
 
+// If name is NULL, return "default".
+// Return a statically allocated name of the section (i.e. return value never
+// gets deallocated).
+static char *normalize_section(struct input_ctx *ictx, char *name)
+{
+    return get_bind_section(ictx, bstr0(name))->section;
+}
+
+void mp_input_disable_section(struct input_ctx *ictx, char *name)
+{
+    input_lock(ictx);
+    name = normalize_section(ictx, name);
+
+    // Remove old section, or make sure it's on top if re-enabled
+    for (int i = ictx->num_active_sections - 1; i >= 0; i--) {
+        struct active_section *as = &ictx->active_sections[i];
+        if (strcmp(as->name, name) == 0) {
+            MP_TARRAY_REMOVE_AT(ictx->active_sections,
+                                ictx->num_active_sections, i);
+        }
+    }
+    input_unlock(ictx);
+}
+
+void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
+{
+    input_lock(ictx);
+    name = normalize_section(ictx, name);
+
+    mp_input_disable_section(ictx, name);
+
+    MP_VERBOSE(ictx, "enable section '%s'\n", name);
+
+    if (ictx->num_active_sections < MAX_ACTIVE_SECTIONS) {
+        ictx->active_sections[ictx->num_active_sections++] =
+            (struct active_section) {name, flags};
+    }
+
+    MP_DBG(ictx, "active section stack:\n");
+    for (int n = 0; n < ictx->num_active_sections; n++) {
+        MP_DBG(ictx, " %s %d\n", ictx->active_sections[n].name,
+               ictx->active_sections[n].flags);
+    }
+
+    input_unlock(ictx);
+}
+
+void mp_input_disable_all_sections(struct input_ctx *ictx)
+{
+    input_lock(ictx);
+    ictx->num_active_sections = 0;
+    input_unlock(ictx);
+}
+
+void mp_input_set_section_mouse_area(struct input_ctx *ictx, char *name,
+                                     int x0, int y0, int x1, int y1)
+{
+    input_lock(ictx);
+    struct cmd_bind_section *s = get_bind_section(ictx, bstr0(name));
+    s->mouse_area = (struct mp_rect){x0, y0, x1, y1};
+    s->mouse_area_set = x0 != x1 && y0 != y1;
+    input_unlock(ictx);
+}
+
+static bool test_mouse(struct input_ctx *ictx, int x, int y, int rej_flags)
+{
+    input_lock(ictx);
+    bool res = false;
+    for (int i = 0; i < ictx->num_active_sections; i++) {
+        struct active_section *as = &ictx->active_sections[i];
+        if (as->flags & rej_flags)
+            continue;
+        struct cmd_bind_section *s = get_bind_section(ictx, bstr0(as->name));
+        if (s->mouse_area_set && test_rect(&s->mouse_area, x, y)) {
+            res = true;
+            break;
+        }
+    }
+    input_unlock(ictx);
+    return res;
+}
+
+bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y)
+{
+    return test_mouse(ictx, x, y, MP_INPUT_ALLOW_HIDE_CURSOR);
+}
+
+bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
+{
+    return test_mouse(ictx, x, y, MP_INPUT_ALLOW_VO_DRAGGING);
+}
+
 static void bind_dealloc(struct cmd_bind *bind)
 {
     talloc_free(bind->cmd);
     talloc_free(bind->location);
+}
+
+// builtin: if true, remove all builtin binds, else remove all user binds
+static void remove_binds(struct cmd_bind_section *bs, bool builtin)
+{
+    for (int n = bs->num_binds - 1; n >= 0; n--) {
+        if (bs->binds[n].is_builtin == builtin) {
+            bind_dealloc(&bs->binds[n]);
+            assert(bs->num_binds >= 1);
+            bs->binds[n] = bs->binds[bs->num_binds - 1];
+            bs->num_binds--;
+        }
+    }
+}
+
+void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
+                             char *contents, bool builtin)
+{
+    if (!name || !name[0])
+        return; // parse_config() changes semantics with restrict_section==empty
+    input_lock(ictx);
+    if (contents) {
+        parse_config(ictx, builtin, bstr0(contents), location, name);
+    } else {
+        // Disable:
+        mp_input_disable_section(ictx, name);
+        // Delete:
+        struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(name));
+        remove_binds(bs, builtin);
+    }
+    input_unlock(ictx);
 }
 
 static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
@@ -1314,133 +1451,19 @@ done:
     return r;
 }
 
-// If name is NULL, return "default".
-// Return a statically allocated name of the section (i.e. return value never
-// gets deallocated).
-static char *normalize_section(struct input_ctx *ictx, char *name)
-{
-    return get_bind_section(ictx, bstr0(name))->section;
-}
-
-void mp_input_disable_section(struct input_ctx *ictx, char *name)
-{
-    input_lock(ictx);
-    name = normalize_section(ictx, name);
-
-    // Remove old section, or make sure it's on top if re-enabled
-    for (int i = ictx->num_active_sections - 1; i >= 0; i--) {
-        struct active_section *as = &ictx->active_sections[i];
-        if (strcmp(as->name, name) == 0) {
-            MP_TARRAY_REMOVE_AT(ictx->active_sections,
-                                ictx->num_active_sections, i);
-        }
-    }
-    input_unlock(ictx);
-}
-
-void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
-{
-    input_lock(ictx);
-    name = normalize_section(ictx, name);
-
-    mp_input_disable_section(ictx, name);
-
-    MP_VERBOSE(ictx, "enable section '%s'\n", name);
-
-    if (ictx->num_active_sections < MAX_ACTIVE_SECTIONS) {
-        ictx->active_sections[ictx->num_active_sections++] =
-            (struct active_section) {name, flags};
-    }
-
-    MP_DBG(ictx, "active section stack:\n");
-    for (int n = 0; n < ictx->num_active_sections; n++) {
-        MP_DBG(ictx, " %s %d\n", ictx->active_sections[n].name,
-               ictx->active_sections[n].flags);
-    }
-
-    input_unlock(ictx);
-}
-
-void mp_input_disable_all_sections(struct input_ctx *ictx)
-{
-    input_lock(ictx);
-    ictx->num_active_sections = 0;
-    input_unlock(ictx);
-}
-
-void mp_input_set_section_mouse_area(struct input_ctx *ictx, char *name,
-                                     int x0, int y0, int x1, int y1)
-{
-    input_lock(ictx);
-    struct cmd_bind_section *s = get_bind_section(ictx, bstr0(name));
-    s->mouse_area = (struct mp_rect){x0, y0, x1, y1};
-    s->mouse_area_set = x0 != x1 && y0 != y1;
-    input_unlock(ictx);
-}
-
-static bool test_mouse(struct input_ctx *ictx, int x, int y, int rej_flags)
-{
-    input_lock(ictx);
-    bool res = false;
-    for (int i = 0; i < ictx->num_active_sections; i++) {
-        struct active_section *as = &ictx->active_sections[i];
-        if (as->flags & rej_flags)
-            continue;
-        struct cmd_bind_section *s = get_bind_section(ictx, bstr0(as->name));
-        if (s->mouse_area_set && test_rect(&s->mouse_area, x, y)) {
-            res = true;
-            break;
-        }
-    }
-    input_unlock(ictx);
-    return res;
-}
-
-bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y)
-{
-    return test_mouse(ictx, x, y, MP_INPUT_ALLOW_HIDE_CURSOR);
-}
-
-bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
-{
-    return test_mouse(ictx, x, y, MP_INPUT_ALLOW_VO_DRAGGING);
-}
-
-// builtin: if true, remove all builtin binds, else remove all user binds
-static void remove_binds(struct cmd_bind_section *bs, bool builtin)
-{
-    for (int n = bs->num_binds - 1; n >= 0; n--) {
-        if (bs->binds[n].is_builtin == builtin) {
-            bind_dealloc(&bs->binds[n]);
-            assert(bs->num_binds >= 1);
-            bs->binds[n] = bs->binds[bs->num_binds - 1];
-            bs->num_binds--;
-        }
-    }
-}
-
-void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
-                             char *contents, bool builtin)
-{
-    if (!name || !name[0])
-        return; // parse_config() changes semantics with restrict_section==empty
-    input_lock(ictx);
-    if (contents) {
-        parse_config(ictx, builtin, bstr0(contents), location, name);
-    } else {
-        // Disable:
-        mp_input_disable_section(ictx, name);
-        // Delete:
-        struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(name));
-        remove_binds(bs, builtin);
-    }
-    input_unlock(ictx);
-}
-
 static int close_fd(void *ctx, int fd)
 {
     return close(fd);
 }
+
+#ifndef __MINGW32__
+static int read_wakeup(void *ctx, int fd)
+{
+    char buf[100];
+    read(fd, buf, sizeof(buf));
+    return MP_INPUT_NOTHING;
+}
+#endif
 
 struct input_ctx *mp_input_init(struct mpv_global *global)
 {
@@ -1601,20 +1624,6 @@ void mp_input_uninit(struct input_ctx *ictx)
     talloc_free(ictx);
 }
 
-static int print_key_list(struct mp_log *log, m_option_t *cfg,
-                          char *optname, char *optparam)
-{
-    mp_print_key_list(log);
-    return M_OPT_EXIT;
-}
-
-static int print_cmd_list(struct mp_log *log, m_option_t *cfg,
-                          char *optname, char *optparam)
-{
-    mp_print_cmd_list(log);
-    return M_OPT_EXIT;
-}
-
 void mp_input_wakeup(struct input_ctx *ictx)
 {
     input_lock(ictx);
@@ -1649,18 +1658,6 @@ int mp_input_check_interrupt(struct input_ctx *ictx, int time)
     }
     input_unlock(ictx);
     return res;
-}
-
-unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
-{
-    // Make the frontend always display the mouse cursor (as long as it's not
-    // forced invisible) if mouse input is desired.
-    input_lock(ictx);
-    if (mp_input_test_mouse_active(ictx, ictx->mouse_x, ictx->mouse_y))
-        ictx->mouse_event_counter++;
-    int ret = ictx->mouse_event_counter;
-    input_unlock(ictx);
-    return ret;
 }
 
 bool mp_input_use_alt_gr(struct input_ctx *ictx)
