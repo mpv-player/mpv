@@ -50,9 +50,7 @@ extern const m_option_type_t m_option_type_time;
 extern const m_option_type_t m_option_type_rel_time;
 extern const m_option_type_t m_option_type_choice;
 extern const m_option_type_t m_option_type_msglevels;
-extern const m_option_type_t m_option_type_print;
-extern const m_option_type_t m_option_type_print_func;
-extern const m_option_type_t m_option_type_print_func_param;
+extern const m_option_type_t m_option_type_print_fn;
 extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_subconfig_struct;
 extern const m_option_type_t m_option_type_imgfmt;
@@ -63,9 +61,8 @@ extern const m_option_type_t m_option_type_geometry;
 extern const m_option_type_t m_option_type_size_box;
 extern const m_option_type_t m_option_type_chmap;
 
-// Callback used by m_option_type_print_func options.
-typedef int (*m_opt_func_full_t)(struct mp_log *log, const m_option_t *,
-                                 const char *, const char *);
+// Callback used by m_option_type_print_fn options.
+typedef void (*m_opt_print_fn)(struct mp_log *log);
 
 enum m_rel_time_type {
     REL_TIME_NONE,
@@ -178,8 +175,6 @@ struct m_sub_options {
 #define CONF_TYPE_FLOAT         (&m_option_type_float)
 #define CONF_TYPE_DOUBLE        (&m_option_type_double)
 #define CONF_TYPE_STRING        (&m_option_type_string)
-#define CONF_TYPE_PRINT         (&m_option_type_print)
-#define CONF_TYPE_PRINT_FUNC    (&m_option_type_print_func)
 #define CONF_TYPE_SUBCONFIG     (&m_option_type_subconfig)
 #define CONF_TYPE_STRING_LIST   (&m_option_type_string_list)
 #define CONF_TYPE_IMGFMT        (&m_option_type_imgfmt)
@@ -291,11 +286,7 @@ struct m_option {
     // Option name.
     const char *name;
 
-    // Reserved for higher level APIs, it shouldn't be used by parsers.
-    /** The suboption parser and func types do use it. They should instead
-     *  use the priv field but this was inherited from older versions of the
-     *  config code.
-     */
+    // Deprecated field for "old" options which mutate global state.
     void *p;
 
     // Option type.
@@ -313,9 +304,6 @@ struct m_option {
     double max;
 
     // Type dependent data (for all kinds of extended settings).
-    /** This used to be a function pointer to hold a 'reverse to defaults' func.
-     *  Now it can be used to pass any type of extra args needed by the parser.
-     */
     void *priv;
 
     int is_new_option;
@@ -634,6 +622,12 @@ extern const char m_option_path_separator;
                 .priv = MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn))
 #define OPT_STRING_VALIDATE(...) \
     OPT_STRING_VALIDATE_(__VA_ARGS__, .type = &m_option_type_string)
+
+#define OPT_PRINT(optname, fn)                                  \
+    {.name = optname,                                           \
+     .flags = M_OPT_GLOBAL | M_OPT_NOCFG | M_OPT_PRE_PARSE,     \
+     .type = &m_option_type_print_fn,                           \
+     .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn) }
 
 // subconf must have the type struct m_sub_options.
 // All sub-options are prefixed with "name-" and are added to the current

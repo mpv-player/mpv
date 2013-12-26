@@ -184,20 +184,6 @@ int async_quit_request;
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
                         const char *location, const char *restrict_section);
 
-static int print_key_list(struct mp_log *log, m_option_t *cfg,
-                          char *optname, char *optparam)
-{
-    mp_print_key_list(log);
-    return M_OPT_EXIT;
-}
-
-static int print_cmd_list(struct mp_log *log, m_option_t *cfg,
-                          char *optname, char *optparam)
-{
-    mp_print_cmd_list(log);
-    return M_OPT_EXIT;
-}
-
 #define OPT_BASE_STRUCT struct MPOpts
 
 // Our command line options
@@ -205,8 +191,8 @@ static const m_option_t input_config[] = {
     OPT_STRING("conf", input.config_file, CONF_GLOBAL),
     OPT_INT("ar-delay", input.ar_delay, CONF_GLOBAL),
     OPT_INT("ar-rate", input.ar_rate, CONF_GLOBAL),
-    { "keylist", print_key_list, CONF_TYPE_PRINT_FUNC, CONF_GLOBAL | CONF_NOCFG },
-    { "cmdlist", print_cmd_list, CONF_TYPE_PRINT_FUNC, CONF_GLOBAL | CONF_NOCFG },
+    OPT_PRINT("keylist", mp_print_key_list),
+    OPT_PRINT("cmdlist", mp_print_cmd_list),
     OPT_STRING("js-dev", input.js_dev, CONF_GLOBAL),
     OPT_STRING("file", input.in_file, CONF_GLOBAL),
     OPT_FLAG("default-bindings", input.default_bindings, CONF_GLOBAL),

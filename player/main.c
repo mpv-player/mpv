@@ -224,10 +224,6 @@ static bool handle_help_options(struct MPContext *mpctx)
         MP_INFO(mpctx, "\n");
         opt_exit = 1;
     }
-    if (opts->list_properties) {
-        property_print_help(log);
-        opt_exit = 1;
-    }
 #if HAVE_ENCODING
     if (encode_lavc_showhelp(log, &opts->encode_output))
         opt_exit = 1;

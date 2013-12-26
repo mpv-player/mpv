@@ -1153,36 +1153,11 @@ const m_option_type_t m_option_type_string_list = {
 static int parse_print(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
-    if (opt->type == CONF_TYPE_PRINT) {
-        const char *msg = opt->p;
-        mp_info(log, "%s", msg);
-    } else {
-        char *name0 = bstrdup0(NULL, name);
-        char *param0 = bstrdup0(NULL, param);
-        int r = ((m_opt_func_full_t) opt->p)(log, opt, name0, param0);
-        talloc_free(name0);
-        talloc_free(param0);
-        return r;
-    }
-
-    if (opt->priv == NULL)
-        return M_OPT_EXIT;
-    return 0;
+    ((m_opt_print_fn) opt->priv)(log);
+    return M_OPT_EXIT;
 }
 
-const m_option_type_t m_option_type_print = {
-    .name  = "Print",
-    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
-    .parse = parse_print,
-};
-
-const m_option_type_t m_option_type_print_func_param = {
-    .name  = "Print",
-    .flags = M_OPT_TYPE_ALLOW_WILDCARD,
-    .parse = parse_print,
-};
-
-const m_option_type_t m_option_type_print_func = {
+const m_option_type_t m_option_type_print_fn = {
     .name  = "Print",
     .flags = M_OPT_TYPE_ALLOW_WILDCARD | M_OPT_TYPE_OPTIONAL_PARAM,
     .parse = parse_print,

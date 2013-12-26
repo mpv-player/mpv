@@ -133,7 +133,6 @@ typedef struct MPOpts {
     int player_idle_mode;
     int slave_mode;
     int consolecontrols;
-    int list_properties;
     struct m_rel_time play_start;
     struct m_rel_time play_end;
     struct m_rel_time play_length;

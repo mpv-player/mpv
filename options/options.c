@@ -40,6 +40,7 @@
 #include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
 #include "player/core.h"
+#include "player/command.h"
 #include "osdep/priority.h"
 
 /* defined in demux: */
@@ -51,11 +52,14 @@ extern int sws_flags;
 
 extern const char mp_help_text[];
 
-static int print_version_opt(struct mp_log *log, const m_option_t *opt,
-                             const char *name, const char *param)
+static void print_version(struct mp_log *log)
 {
     mp_print_version(log, true);
-    return M_OPT_EXIT;
+}
+
+static void print_help(struct mp_log *log)
+{
+    mp_info(log, "%s", mp_help_text);
 }
 
 #if HAVE_RADIO
@@ -214,7 +218,7 @@ const m_option_t mp_opts[] = {
     { "show-profile", NULL, CONF_TYPE_STRING, CONF_NOCFG },
     { "list-options", NULL, CONF_TYPE_STORE, CONF_NOCFG },
 
-    // handled in mplayer.c (looks at the raw argv[])
+    // handled in main.c (looks at the raw argv[])
     {"leak-report", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG },
 
     OPT_FLAG("shuffle", shuffle, CONF_GLOBAL | CONF_NOCFG),
@@ -614,11 +618,11 @@ const m_option_t mp_opts[] = {
 
     {"", (void *) mp_input_opts, CONF_TYPE_SUBCONFIG},
 
-    OPT_FLAG("list-properties", list_properties, CONF_GLOBAL),
-    {"help", (void *) mp_help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
-    {"h", (void *) mp_help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
-    {"version", (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
-    {"V",       (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
+    OPT_PRINT("list-properties", property_print_help),
+    OPT_PRINT("help", print_help),
+    OPT_PRINT("h", print_help),
+    OPT_PRINT("version", print_version),
+    OPT_PRINT("V", print_version),
 
 #if HAVE_ENCODING
     OPT_STRING("o", encode_output.file, CONF_GLOBAL),
