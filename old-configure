@@ -1504,8 +1504,19 @@ echores "$_termios"
 
 echocheck "shm"
 if test "$_shm" = auto ; then
+  cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+int main(void) {
+  shmget(0, 0, 0);
+  shmat(0, 0, 0);
+  shmctl(0, 0, 0);
+  return 0;
+}
+EOF
   _shm=no
-  statement_check sys/shm.h 'shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0)' && _shm=yes
+  cc_check && _shm=yes
 fi
 if test "$_shm" = yes ; then
   def_shm='#define HAVE_SHM 1'

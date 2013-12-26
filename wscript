@@ -138,7 +138,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--shm',
         'desc': 'shm',
-        'func': check_statement('sys/shm.h',
+        'func': check_statement(['sys/types.h', 'sys/ipc.h', 'sys/shm.h'],
             'shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0)')
     }, {
         'name': 'posix-select',

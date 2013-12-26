@@ -34,6 +34,7 @@
 #include "config.h"
 
 #if HAVE_SHM && HAVE_XEXT
+#include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
