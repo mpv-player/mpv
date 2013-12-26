@@ -142,25 +142,6 @@ static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     return 1;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
-{
-    struct priv *p = vo->priv;
-    p->fns.uninit(vo);
-
-    p->image_width  = params->w;
-    p->image_height = params->h;
-
-    int mpgl_caps = MPGL_CAP_GL_LEGACY;
-    if (!mpgl_config_window(
-            p->mpglctx, mpgl_caps, vo->dwidth, vo->dheight, flags))
-        return -1;
-
-    init_gl(vo, vo->dwidth, vo->dheight);
-    p->fns.init(vo);
-
-    return 0;
-}
-
 // map x/y (in range 0..1) to the video texture, and emit OpenGL vertexes
 static void video_vertex(struct vo *vo, float x, float y)
 {
@@ -548,43 +529,56 @@ static struct cv_functions iosurface_functions = {
 };
 #endif /* HAVE_VDA_HWACCEL */
 
-static int query_format(struct vo *vo, uint32_t format)
+struct fmt_entry {
+    enum mp_imgfmt imgfmt;
+    OSType cvfmt;
+    struct cv_functions *funs;
+};
+
+static const struct fmt_entry supported_fmts[] = {
+#if HAVE_VDA_HWACCEL
+    { IMGFMT_VDA,   0,                  &iosurface_functions },
+#endif
+    { IMGFMT_YUYV,  kYUVSPixelFormat,   &cv_functions },
+    { IMGFMT_UYVY,  k2vuyPixelFormat,   &cv_functions },
+    { IMGFMT_RGB24, k24RGBPixelFormat,  &cv_functions },
+    { IMGFMT_BGRA,  k32BGRAPixelFormat, &cv_functions },
+    { IMGFMT_NONE,  0,                  NULL }
+};
+
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct priv *p = vo->priv;
-    const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+    if (p->fns.uninit)
+        p->fns.uninit(vo);
 
-    switch (format) {
-#if HAVE_VDA_HWACCEL
-        case IMGFMT_VDA:
-            p->fns = iosurface_functions;
-            return flags;
-#endif
+    for (int i = 0; supported_fmts[i].imgfmt; i++)
+        if (supported_fmts[i].imgfmt == params->imgfmt) {
+            p->fns       = *supported_fmts[i].funs;
+            p->cv.pixfmt = supported_fmts[i].cvfmt;
+            break;
+        }
 
-        case IMGFMT_YUYV:
-            p->fns       = cv_functions;
-            p->cv.pixfmt = kYUVSPixelFormat;
-            return flags;
+    p->image_width  = params->w;
+    p->image_height = params->h;
 
-        case IMGFMT_UYVY:
-            p->fns       = cv_functions;
-            p->cv.pixfmt = k2vuyPixelFormat;
-            return flags;
+    int mpgl_caps = MPGL_CAP_GL_LEGACY;
+    if (!mpgl_config_window(
+            p->mpglctx, mpgl_caps, vo->dwidth, vo->dheight, flags))
+        return -1;
 
-        case IMGFMT_RGB24:
-            p->fns       = cv_functions;
-            p->cv.pixfmt = k24RGBPixelFormat;
-            return flags;
+    init_gl(vo, vo->dwidth, vo->dheight);
+    p->fns.init(vo);
 
-        case IMGFMT_ARGB:
-            p->fns       = cv_functions;
-            p->cv.pixfmt = k32ARGBPixelFormat;
-            return flags;
+    return 0;
+}
 
-        case IMGFMT_BGRA:
-            p->fns       = cv_functions;
-            p->cv.pixfmt = k32BGRAPixelFormat;
-            return flags;
-    }
+
+static int query_format(struct vo *vo, uint32_t format)
+{
+    for (int i = 0; supported_fmts[i].imgfmt; i++)
+        if (supported_fmts[i].imgfmt == format)
+            return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     return 0;
 }
 
