@@ -21,6 +21,8 @@
 #ifndef MPLAYER_KEYCODES_H
 #define MPLAYER_KEYCODES_H
 
+// Key in the range [0, MP_KEY_BASE) follow unicode.
+// Special keys come after this.
 #define MP_KEY_BASE (1<<21)
 
 #define MP_KEY_ENTER 13
@@ -250,5 +252,21 @@
 // Use this when the key shouldn't be auto-repeated (like mouse buttons)
 // Also means both key-down key-up events produce emit bound commands.
 #define MP_NO_REPEAT_KEY       (1<<29)
+
+// Get input key from its name.
+int mp_input_get_key_from_name(const char *name);
+
+// Append given key by name to ret, return ret.
+char *mp_input_get_key_name(int key, char *ret);
+
+// Combination of multiple keys to string.
+char *mp_input_get_key_combo_name(int *keys, int max);
+
+// String containing combination of multiple string to keys.
+int mp_input_get_keys_from_string(char *str, int max_num_keys,
+                                  int *out_num_keys, int *keys);
+
+struct mp_log;
+void mp_print_key_list(struct mp_log *out);
 
 #endif /* MPLAYER_KEYCODES_H */

@@ -204,7 +204,10 @@ SOURCES = audio/audio.c \
           demux/demux_subreader.c \
           demux/ebml.c \
           demux/mf.c \
+          input/cmd_list.c \
+          input/cmd_parse.c \
           input/input.c \
+          input/keycodes.c \
           misc/charset_conv.c \
           misc/ring.c \
           options/m_config.c \

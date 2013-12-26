@@ -195,7 +195,10 @@ def build(ctx):
         ( "demux/mf.c" ),
 
         ## Input
+        ( "input/cmd_list.c" ),
+        ( "input/cmd_parse.c" ),
         ( "input/input.c" ),
+        ( "input/keycodes.c" ),
         ( "input/joystick.c",                    "joystick" ),
         ( "input/lirc.c",                        "lirc" ),
 

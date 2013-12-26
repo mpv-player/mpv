@@ -21,81 +21,9 @@
 
 #include <stdbool.h>
 #include "bstr/bstr.h"
-#include "options/m_option.h"
 
-// All command IDs
-enum mp_command_type {
-    MP_CMD_IGNORE,
-    MP_CMD_SEEK,
-    MP_CMD_REVERT_SEEK,
-    MP_CMD_QUIT,
-    MP_CMD_QUIT_WATCH_LATER,
-    MP_CMD_PLAYLIST_NEXT,
-    MP_CMD_PLAYLIST_PREV,
-    MP_CMD_OSD,
-    MP_CMD_TV_STEP_CHANNEL,
-    MP_CMD_TV_STEP_NORM,
-    MP_CMD_TV_STEP_CHANNEL_LIST,
-    MP_CMD_SCREENSHOT,
-    MP_CMD_SCREENSHOT_TO_FILE,
-    MP_CMD_LOADFILE,
-    MP_CMD_LOADLIST,
-    MP_CMD_PLAYLIST_CLEAR,
-    MP_CMD_PLAYLIST_REMOVE,
-    MP_CMD_PLAYLIST_MOVE,
-    MP_CMD_SUB_STEP,
-    MP_CMD_SUB_SEEK,
-    MP_CMD_TV_SET_CHANNEL,
-    MP_CMD_TV_LAST_CHANNEL,
-    MP_CMD_TV_SET_FREQ,
-    MP_CMD_TV_SET_NORM,
-    MP_CMD_FRAME_STEP,
-    MP_CMD_FRAME_BACK_STEP,
-    MP_CMD_RUN,
-    MP_CMD_SUB_ADD,
-    MP_CMD_SUB_REMOVE,
-    MP_CMD_SUB_RELOAD,
-    MP_CMD_SET,
-    MP_CMD_GET_PROPERTY,
-    MP_CMD_PRINT_TEXT,
-    MP_CMD_SHOW_TEXT,
-    MP_CMD_SHOW_PROGRESS,
-    MP_CMD_ADD,
-    MP_CMD_CYCLE,
-    MP_CMD_MULTIPLY,
-    MP_CMD_CYCLE_VALUES,
-    MP_CMD_TV_STEP_FREQ,
-    MP_CMD_TV_START_SCAN,
-    MP_CMD_STOP,
-
-    MP_CMD_ENABLE_INPUT_SECTION,
-    MP_CMD_DISABLE_INPUT_SECTION,
-
-    MP_CMD_DVDNAV,
-
-    /// DVB commands
-    MP_CMD_DVB_SET_CHANNEL,
-
-    /// Audio Filter commands
-    MP_CMD_AF,
-
-    /// Video filter commands
-    MP_CMD_VF,
-
-    /// Video output commands
-    MP_CMD_VO_CMDLINE,
-
-    /// Internal for Lua scripts
-    MP_CMD_SCRIPT_DISPATCH,
-
-    MP_CMD_OVERLAY_ADD,
-    MP_CMD_OVERLAY_REMOVE,
-
-    // Internal
-    MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
-};
-
-#define MP_CMD_MAX_ARGS 10
+#include "cmd_list.h"
+#include "cmd_parse.h"
 
 // Error codes for the drivers
 
@@ -166,10 +94,6 @@ typedef struct mp_cmd {
     const struct mp_cmd_def *def;
 } mp_cmd_t;
 
-
-// Executing this command will abort playback (play something else, or quit).
-bool mp_input_is_abort_cmd(int cmd_id);
-
 /* Add a new command input source.
  * "fd" is a file descriptor (use -1 if you don't use any fd)
  * "select" tells whether to use select() on the fd to determine when to
@@ -212,9 +136,6 @@ void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y);
 // As for the cmd one you usually don't need this function.
 void mp_input_rm_key_fd(struct input_ctx *ictx, int fd);
 
-// Get input key from its name.
-int mp_input_get_key_from_name(const char *name);
-
 // Add a command to the command queue.
 int mp_input_queue_cmd(struct input_ctx *ictx, struct mp_cmd *cmd);
 
@@ -229,25 +150,6 @@ struct mp_cmd *mp_input_get_cmd(struct input_ctx *ictx, int time,
 // The location parameter is for error messages.
 struct mp_cmd *mp_input_parse_cmd(struct input_ctx *ictx, bstr str,
                                   const char *location);
-
-// Similar to mp_input_parse_cmd(), but takes a list of strings instead.
-// Also, def_flags contains initial command flags (see mp_cmd_flags; the default
-// as used by mp_input_parse_cmd is MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES).
-// Keep in mind that these functions (naturally) don't take multiple commands,
-// i.e. a ";" argument does not start a new command.
-// The _strv version is limitted to MP_CMD_MAX_ARGS argv array items.
-struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
-                                       const char **argv, const char *location);
-struct mp_cmd *mp_input_parse_cmd_bstrv(struct mp_log *log, int def_flags,
-                                        int argc, bstr *argv,
-                                        const char *location);
-
-// After getting a command from mp_input_get_cmd you need to free it using this
-// function
-void mp_cmd_free(struct mp_cmd *cmd);
-
-// This creates a copy of a command (used by the auto repeat stuff).
-struct mp_cmd *mp_cmd_clone(struct mp_cmd *cmd);
 
 // Set current input section. The section is appended on top of the list of
 // active sections, so its bindings are considered first. If the section was

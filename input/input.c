@@ -39,6 +39,8 @@
 
 #include "input.h"
 #include "keycodes.h"
+#include "cmd_list.h"
+#include "cmd_parse.h"
 #include "osdep/timer.h"
 #include "common/msg.h"
 #include "common/global.h"
@@ -74,428 +76,13 @@ struct cmd_bind {
     struct cmd_bind_section *owner;
 };
 
-struct key_name {
-    int key;
-    char *name;
-};
-
-// This does not specify the real destination of the command parameter values,
-// it just provides a dummy for the OPT_ macros.
-#define OPT_BASE_STRUCT struct mp_cmd_arg
-#define ARG(t) "", v. t
-
-/* This array defines all known commands.
- * The first field is an id used to recognize the command.
- * The second is the command name used in slave mode and input.conf.
- * Then comes the definition of each argument, first mandatory arguments
- * (ARG_INT, ARG_FLOAT, ARG_STRING) if any, then optional arguments
- * (OARG_INT(default), etc) if any. The command will be given the default
- * argument value if the user didn't give enough arguments to specify it.
- * A command can take a maximum of MP_CMD_MAX_ARGS arguments.
- */
-
-#define ARG_INT                 OPT_INT(ARG(i), 0)
-#define ARG_FLOAT               OPT_FLOAT(ARG(f), 0)
-#define ARG_DOUBLE              OPT_DOUBLE(ARG(d), 0)
-#define ARG_STRING              OPT_STRING(ARG(s), 0)
-#define ARG_CHOICE(c)           OPT_CHOICE(ARG(i), 0, c)
-#define ARG_CHOICE_OR_INT(...)  OPT_CHOICE_OR_INT(ARG(i), 0, __VA_ARGS__)
-#define ARG_TIME                OPT_TIME(ARG(d), 0)
-#define OARG_DOUBLE(def)        OPT_DOUBLE(ARG(d), 0, OPTDEF_DOUBLE(def))
-#define OARG_INT(def)           OPT_INT(ARG(i), 0, OPTDEF_INT(def))
-#define OARG_CHOICE(def, c)     OPT_CHOICE(ARG(i), 0, c, OPTDEF_INT(def))
-
-static int parse_cycle_dir(struct mp_log *log, const struct m_option *opt,
-                           struct bstr name, struct bstr param, void *dst);
-static const struct m_option_type m_option_type_cycle_dir = {
-    .name = "up|down",
-    .parse = parse_cycle_dir,
-    .size = sizeof(double),
-};
-
-#define OPT_CYCLEDIR(...) \
-    OPT_GENERAL(double, __VA_ARGS__, .type = &m_option_type_cycle_dir)
-
-#define OARG_CYCLEDIR(def)     OPT_CYCLEDIR(ARG(d), 0, OPTDEF_DOUBLE(def))
-
-struct mp_cmd_def {
-    int id;             // one of MP_CMD_...
-    const char *name;   // user-visible name (as used in input.conf)
-    const struct m_option args[MP_CMD_MAX_ARGS];
-    bool allow_auto_repeat; // react to repeated key events
-    bool vararg;        // last argument can be given 0 to multiple times
-};
-
-static const struct mp_cmd_def mp_cmds[] = {
-  { MP_CMD_IGNORE, "ignore", },
-
-  { MP_CMD_SEEK, "seek", {
-      ARG_TIME,
-      OARG_CHOICE(0, ({"relative", 0},          {"0", 0}, {"-", 0},
-                      {"absolute-percent", 1},  {"1", 1},
-                      {"absolute", 2},          {"2", 2})),
-      OARG_CHOICE(0, ({"default-precise", 0},   {"0", 0},
-                      {"exact", 1},             {"1", 1},
-                      {"keyframes", -1},        {"-1", -1})),
-    },
-    .allow_auto_repeat = true,
-  },
-  { MP_CMD_REVERT_SEEK, "revert_seek", },
-  { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
-  { MP_CMD_QUIT_WATCH_LATER, "quit_watch_later", },
-  { MP_CMD_STOP, "stop", },
-  { MP_CMD_FRAME_STEP, "frame_step", .allow_auto_repeat = true },
-  { MP_CMD_FRAME_BACK_STEP, "frame_back_step", .allow_auto_repeat = true },
-  { MP_CMD_PLAYLIST_NEXT, "playlist_next", {
-      OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
-                      {"force", 1},             {"1", 1})),
-  }},
-  { MP_CMD_PLAYLIST_PREV, "playlist_prev", {
-      OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
-                      {"force", 1},             {"1", 1})),
-  }},
-  { MP_CMD_SUB_STEP, "sub_step", { ARG_INT }, .allow_auto_repeat = true },
-  { MP_CMD_SUB_SEEK, "sub_seek", { ARG_INT }, .allow_auto_repeat = true },
-  { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
-  { MP_CMD_PRINT_TEXT, "print_text", { ARG_STRING }, .allow_auto_repeat = true },
-  { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) },
-    .allow_auto_repeat = true},
-  { MP_CMD_SHOW_PROGRESS, "show_progress",  .allow_auto_repeat = true},
-  { MP_CMD_SUB_ADD, "sub_add", { ARG_STRING } },
-  { MP_CMD_SUB_REMOVE, "sub_remove", { OARG_INT(-1) } },
-  { MP_CMD_SUB_RELOAD, "sub_reload", { OARG_INT(-1) } },
-
-  { MP_CMD_TV_START_SCAN, "tv_start_scan", },
-  { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", { ARG_INT } },
-  { MP_CMD_TV_STEP_NORM, "tv_step_norm", },
-  { MP_CMD_TV_STEP_CHANNEL_LIST, "tv_step_chanlist", },
-  { MP_CMD_TV_SET_CHANNEL, "tv_set_channel", { ARG_STRING } },
-  { MP_CMD_TV_LAST_CHANNEL, "tv_last_channel", },
-  { MP_CMD_TV_SET_FREQ, "tv_set_freq", { ARG_FLOAT } },
-  { MP_CMD_TV_STEP_FREQ, "tv_step_freq", { ARG_FLOAT } },
-  { MP_CMD_TV_SET_NORM, "tv_set_norm", { ARG_STRING } },
-
-  { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", { ARG_INT, ARG_INT } },
-
-  { MP_CMD_SCREENSHOT, "screenshot", {
-      OARG_CHOICE(2, ({"video", 0},
-                      {"window", 1},
-                      {"subtitles", 2}, {"-", 2})),
-      OARG_CHOICE(0, ({"single", 0},
-                      {"each-frame", 1})),
-  }},
-  { MP_CMD_SCREENSHOT_TO_FILE, "screenshot_to_file", {
-      ARG_STRING,
-      OARG_CHOICE(2, ({"video", 0},
-                      {"window", 1},
-                      {"subtitles", 2})),
-  }},
-  { MP_CMD_LOADFILE, "loadfile", {
-      ARG_STRING,
-      OARG_CHOICE(0, ({"replace", 0},          {"0", 0},
-                      {"append", 1},           {"1", 1})),
-  }},
-  { MP_CMD_LOADLIST, "loadlist", {
-      ARG_STRING,
-      OARG_CHOICE(0, ({"replace", 0},          {"0", 0},
-                      {"append", 1},           {"1", 1})),
-  }},
-  { MP_CMD_PLAYLIST_CLEAR, "playlist_clear", },
-  { MP_CMD_PLAYLIST_REMOVE, "playlist_remove", {
-      ARG_CHOICE_OR_INT(0, INT_MAX, ({"current", -1})),
-  }},
-  { MP_CMD_PLAYLIST_MOVE, "playlist_move", { ARG_INT, ARG_INT } },
-  { MP_CMD_RUN, "run", { ARG_STRING, ARG_STRING }, .vararg = true },
-
-  { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
-  { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
-  { MP_CMD_ADD, "add", { ARG_STRING, OARG_DOUBLE(0) },
-    .allow_auto_repeat = true},
-  { MP_CMD_CYCLE, "cycle", {
-      ARG_STRING,
-      OARG_CYCLEDIR(1),
-    },
-    .allow_auto_repeat = true
-  },
-  { MP_CMD_MULTIPLY, "multiply", { ARG_STRING, ARG_DOUBLE },
-    .allow_auto_repeat = true},
-
-  { MP_CMD_CYCLE_VALUES, "cycle_values", { ARG_STRING, ARG_STRING, ARG_STRING },
-    .vararg = true, .allow_auto_repeat = true},
-
-  { MP_CMD_ENABLE_INPUT_SECTION,  "enable_section",  {
-      ARG_STRING,
-      OARG_CHOICE(0, ({"default", 0},
-                      {"exclusive", 1})),
-  }},
-  { MP_CMD_DISABLE_INPUT_SECTION, "disable_section", { ARG_STRING } },
-
-  { MP_CMD_DVDNAV, "dvdnav", { ARG_STRING } },
-
-  { MP_CMD_AF, "af", { ARG_STRING, ARG_STRING } },
-
-  { MP_CMD_VF, "vf", { ARG_STRING, ARG_STRING } },
-
-  { MP_CMD_VO_CMDLINE, "vo_cmdline", { ARG_STRING } },
-
-  { MP_CMD_SCRIPT_DISPATCH, "script_dispatch", { ARG_STRING, ARG_INT } },
-
-  { MP_CMD_OVERLAY_ADD, "overlay_add",
-      { ARG_INT, ARG_INT, ARG_INT, ARG_STRING, ARG_INT, ARG_STRING, ARG_INT,
-        ARG_INT, ARG_INT }},
-  { MP_CMD_OVERLAY_REMOVE, "overlay_remove", { ARG_INT } },
-
-  {0}
-};
-
-#undef OPT_BASE_STRUCT
-#undef ARG
-
-// Map legacy commands to proper commands
-struct legacy_cmd {
-    const char *old, *new;
-};
-static const struct legacy_cmd legacy_cmds[] = {
-    {"loop",                    "cycle loop"},
-    {"seek_chapter",            "add chapter"},
-    {"switch_angle",            "cycle angle"},
-    {"pause",                   "cycle pause"},
-    {"volume",                  "add volume"},
-    {"mute",                    "cycle mute"},
-    {"audio_delay",             "add audio-delay"},
-    {"switch_audio",            "cycle audio"},
-    {"balance",                 "add balance"},
-    {"vo_fullscreen",           "cycle fullscreen"},
-    {"panscan",                 "add panscan"},
-    {"vo_ontop",                "cycle ontop"},
-    {"vo_border",               "cycle border"},
-    {"frame_drop",              "cycle framedrop"},
-    {"gamma",                   "add gamma"},
-    {"brightness",              "add brightness"},
-    {"contrast",                "add contrast"},
-    {"saturation",              "add saturation"},
-    {"hue",                     "add hue"},
-    {"switch_vsync",            "cycle vsync"},
-    {"sub_load",                "sub_add"},
-    {"sub_select",              "cycle sub"},
-    {"sub_pos",                 "add sub-pos"},
-    {"sub_delay",               "add sub-delay"},
-    {"sub_visibility",          "cycle sub-visibility"},
-    {"forced_subs_only",        "cycle sub-forced-only"},
-    {"sub_scale",               "add sub-scale"},
-    {"ass_use_margins",         "cycle ass-use-margins"},
-    {"tv_set_brightness",       "add tv-brightness"},
-    {"tv_set_hue",              "add tv-hue"},
-    {"tv_set_saturation",       "add tv-saturation"},
-    {"tv_set_contrast",         "add tv-contrast"},
-    {"step_property_osd",       "cycle"},
-    {"step_property",           "no-osd cycle"},
-    {"set_property",            "no-osd set"},
-    {"set_property_osd",        "set"},
-    {"speed_set",               "set speed"},
-    {"osd_show_text",           "show_text"},
-    {"osd_show_property_text",  "show_text"},
-    {"osd_show_progression",    "show_progress"},
-    {"show_chapters_osd",       "show_text ${chapter-list}"},
-    {"show_chapters",           "show_text ${chapter-list}"},
-    {"show_tracks_osd",         "show_text ${track-list}"},
-    {"show_tracks",             "show_text ${track-list}"},
-    {"show_playlist",           "show_text ${playlist}"},
-    {"speed_mult",              "multiply speed"},
-
-    // Approximate (can fail if user added additional whitespace)
-    {"pt_step 1",               "playlist_next"},
-    {"pt_step -1",              "playlist_prev"},
-    // Switch_ratio without argument resets aspect ratio
-    {"switch_ratio ",           "set aspect "},
-    {"switch_ratio",            "set aspect 0"},
-    {0}
-};
-
-
-/// The names of the keys as used in input.conf
-/// If you add some new keys, you also need to add them here
-
-static const struct key_name key_names[] = {
-  { ' ', "SPACE" },
-  { '#', "SHARP" },
-  { MP_KEY_ENTER, "ENTER" },
-  { MP_KEY_TAB, "TAB" },
-  { MP_KEY_BACKSPACE, "BS" },
-  { MP_KEY_DELETE, "DEL" },
-  { MP_KEY_INSERT, "INS" },
-  { MP_KEY_HOME, "HOME" },
-  { MP_KEY_END, "END" },
-  { MP_KEY_PAGE_UP, "PGUP" },
-  { MP_KEY_PAGE_DOWN, "PGDWN" },
-  { MP_KEY_ESC, "ESC" },
-  { MP_KEY_PRINT, "PRINT" },
-  { MP_KEY_RIGHT, "RIGHT" },
-  { MP_KEY_LEFT, "LEFT" },
-  { MP_KEY_DOWN, "DOWN" },
-  { MP_KEY_UP, "UP" },
-  { MP_KEY_F+1, "F1" },
-  { MP_KEY_F+2, "F2" },
-  { MP_KEY_F+3, "F3" },
-  { MP_KEY_F+4, "F4" },
-  { MP_KEY_F+5, "F5" },
-  { MP_KEY_F+6, "F6" },
-  { MP_KEY_F+7, "F7" },
-  { MP_KEY_F+8, "F8" },
-  { MP_KEY_F+9, "F9" },
-  { MP_KEY_F+10, "F10" },
-  { MP_KEY_F+11, "F11" },
-  { MP_KEY_F+12, "F12" },
-  { MP_KEY_KP0, "KP0" },
-  { MP_KEY_KP1, "KP1" },
-  { MP_KEY_KP2, "KP2" },
-  { MP_KEY_KP3, "KP3" },
-  { MP_KEY_KP4, "KP4" },
-  { MP_KEY_KP5, "KP5" },
-  { MP_KEY_KP6, "KP6" },
-  { MP_KEY_KP7, "KP7" },
-  { MP_KEY_KP8, "KP8" },
-  { MP_KEY_KP9, "KP9" },
-  { MP_KEY_KPDEL, "KP_DEL" },
-  { MP_KEY_KPDEC, "KP_DEC" },
-  { MP_KEY_KPINS, "KP_INS" },
-  { MP_KEY_KPENTER, "KP_ENTER" },
-  { MP_MOUSE_BTN0, "MOUSE_BTN0" },
-  { MP_MOUSE_BTN1, "MOUSE_BTN1" },
-  { MP_MOUSE_BTN2, "MOUSE_BTN2" },
-  { MP_MOUSE_BTN3, "MOUSE_BTN3" },
-  { MP_MOUSE_BTN4, "MOUSE_BTN4" },
-  { MP_MOUSE_BTN5, "MOUSE_BTN5" },
-  { MP_MOUSE_BTN6, "MOUSE_BTN6" },
-  { MP_MOUSE_BTN7, "MOUSE_BTN7" },
-  { MP_MOUSE_BTN8, "MOUSE_BTN8" },
-  { MP_MOUSE_BTN9, "MOUSE_BTN9" },
-  { MP_MOUSE_BTN10, "MOUSE_BTN10" },
-  { MP_MOUSE_BTN11, "MOUSE_BTN11" },
-  { MP_MOUSE_BTN12, "MOUSE_BTN12" },
-  { MP_MOUSE_BTN13, "MOUSE_BTN13" },
-  { MP_MOUSE_BTN14, "MOUSE_BTN14" },
-  { MP_MOUSE_BTN15, "MOUSE_BTN15" },
-  { MP_MOUSE_BTN16, "MOUSE_BTN16" },
-  { MP_MOUSE_BTN17, "MOUSE_BTN17" },
-  { MP_MOUSE_BTN18, "MOUSE_BTN18" },
-  { MP_MOUSE_BTN19, "MOUSE_BTN19" },
-  { MP_MOUSE_BTN0_DBL, "MOUSE_BTN0_DBL" },
-  { MP_MOUSE_BTN1_DBL, "MOUSE_BTN1_DBL" },
-  { MP_MOUSE_BTN2_DBL, "MOUSE_BTN2_DBL" },
-  { MP_MOUSE_BTN3_DBL, "MOUSE_BTN3_DBL" },
-  { MP_MOUSE_BTN4_DBL, "MOUSE_BTN4_DBL" },
-  { MP_MOUSE_BTN5_DBL, "MOUSE_BTN5_DBL" },
-  { MP_MOUSE_BTN6_DBL, "MOUSE_BTN6_DBL" },
-  { MP_MOUSE_BTN7_DBL, "MOUSE_BTN7_DBL" },
-  { MP_MOUSE_BTN8_DBL, "MOUSE_BTN8_DBL" },
-  { MP_MOUSE_BTN9_DBL, "MOUSE_BTN9_DBL" },
-  { MP_MOUSE_BTN10_DBL, "MOUSE_BTN10_DBL" },
-  { MP_MOUSE_BTN11_DBL, "MOUSE_BTN11_DBL" },
-  { MP_MOUSE_BTN12_DBL, "MOUSE_BTN12_DBL" },
-  { MP_MOUSE_BTN13_DBL, "MOUSE_BTN13_DBL" },
-  { MP_MOUSE_BTN14_DBL, "MOUSE_BTN14_DBL" },
-  { MP_MOUSE_BTN15_DBL, "MOUSE_BTN15_DBL" },
-  { MP_MOUSE_BTN16_DBL, "MOUSE_BTN16_DBL" },
-  { MP_MOUSE_BTN17_DBL, "MOUSE_BTN17_DBL" },
-  { MP_MOUSE_BTN18_DBL, "MOUSE_BTN18_DBL" },
-  { MP_MOUSE_BTN19_DBL, "MOUSE_BTN19_DBL" },
-  { MP_JOY_AXIS1_MINUS, "JOY_UP" },
-  { MP_JOY_AXIS1_PLUS, "JOY_DOWN" },
-  { MP_JOY_AXIS0_MINUS, "JOY_LEFT" },
-  { MP_JOY_AXIS0_PLUS, "JOY_RIGHT" },
-
-  { MP_JOY_AXIS0_PLUS,  "JOY_AXIS0_PLUS" },
-  { MP_JOY_AXIS0_MINUS, "JOY_AXIS0_MINUS" },
-  { MP_JOY_AXIS1_PLUS,  "JOY_AXIS1_PLUS" },
-  { MP_JOY_AXIS1_MINUS, "JOY_AXIS1_MINUS" },
-  { MP_JOY_AXIS2_PLUS,  "JOY_AXIS2_PLUS" },
-  { MP_JOY_AXIS2_MINUS, "JOY_AXIS2_MINUS" },
-  { MP_JOY_AXIS3_PLUS,  "JOY_AXIS3_PLUS" },
-  { MP_JOY_AXIS3_MINUS, "JOY_AXIS3_MINUS" },
-  { MP_JOY_AXIS4_PLUS,  "JOY_AXIS4_PLUS" },
-  { MP_JOY_AXIS4_MINUS, "JOY_AXIS4_MINUS" },
-  { MP_JOY_AXIS5_PLUS,  "JOY_AXIS5_PLUS" },
-  { MP_JOY_AXIS5_MINUS, "JOY_AXIS5_MINUS" },
-  { MP_JOY_AXIS6_PLUS,  "JOY_AXIS6_PLUS" },
-  { MP_JOY_AXIS6_MINUS, "JOY_AXIS6_MINUS" },
-  { MP_JOY_AXIS7_PLUS,  "JOY_AXIS7_PLUS" },
-  { MP_JOY_AXIS7_MINUS, "JOY_AXIS7_MINUS" },
-  { MP_JOY_AXIS8_PLUS,  "JOY_AXIS8_PLUS" },
-  { MP_JOY_AXIS8_MINUS, "JOY_AXIS8_MINUS" },
-  { MP_JOY_AXIS9_PLUS,  "JOY_AXIS9_PLUS" },
-  { MP_JOY_AXIS9_MINUS, "JOY_AXIS9_MINUS" },
-
-  { MP_JOY_BTN0,        "JOY_BTN0" },
-  { MP_JOY_BTN1,        "JOY_BTN1" },
-  { MP_JOY_BTN2,        "JOY_BTN2" },
-  { MP_JOY_BTN3,        "JOY_BTN3" },
-  { MP_JOY_BTN4,        "JOY_BTN4" },
-  { MP_JOY_BTN5,        "JOY_BTN5" },
-  { MP_JOY_BTN6,        "JOY_BTN6" },
-  { MP_JOY_BTN7,        "JOY_BTN7" },
-  { MP_JOY_BTN8,        "JOY_BTN8" },
-  { MP_JOY_BTN9,        "JOY_BTN9" },
-
-  { MP_AR_PLAY,         "AR_PLAY" },
-  { MP_AR_PLAY_HOLD,    "AR_PLAY_HOLD" },
-  { MP_AR_CENTER,       "AR_CENTER" },
-  { MP_AR_CENTER_HOLD,  "AR_CENTER_HOLD" },
-  { MP_AR_NEXT,         "AR_NEXT" },
-  { MP_AR_NEXT_HOLD,    "AR_NEXT_HOLD" },
-  { MP_AR_PREV,         "AR_PREV" },
-  { MP_AR_PREV_HOLD,    "AR_PREV_HOLD" },
-  { MP_AR_MENU,         "AR_MENU" },
-  { MP_AR_MENU_HOLD,    "AR_MENU_HOLD" },
-  { MP_AR_VUP,          "AR_VUP" },
-  { MP_AR_VUP_HOLD,     "AR_VUP_HOLD" },
-  { MP_AR_VDOWN,        "AR_VDOWN" },
-  { MP_AR_VDOWN_HOLD,   "AR_VDOWN_HOLD" },
-
-  { MP_AXIS_UP,         "AXIS_UP" },
-  { MP_AXIS_DOWN,       "AXIS_DOWN" },
-  { MP_AXIS_LEFT,       "AXIS_LEFT" },
-  { MP_AXIS_RIGHT,      "AXIS_RIGHT" },
-
-  { MP_KEY_POWER,       "POWER" },
-  { MP_KEY_MENU,        "MENU" },
-  { MP_KEY_PLAY,        "PLAY" },
-  { MP_KEY_PAUSE,       "PAUSE" },
-  { MP_KEY_PLAYPAUSE,   "PLAYPAUSE" },
-  { MP_KEY_STOP,        "STOP" },
-  { MP_KEY_FORWARD,     "FORWARD" },
-  { MP_KEY_REWIND,      "REWIND" },
-  { MP_KEY_NEXT,        "NEXT" },
-  { MP_KEY_PREV,        "PREV" },
-  { MP_KEY_VOLUME_UP,   "VOLUME_UP" },
-  { MP_KEY_VOLUME_DOWN, "VOLUME_DOWN" },
-  { MP_KEY_MUTE,        "MUTE" },
-  { MP_KEY_HOMEPAGE,    "HOMEPAGE" },
-  { MP_KEY_WWW,         "WWW" },
-  { MP_KEY_MAIL,        "MAIL" },
-  { MP_KEY_FAVORITES,   "FAVORITES" },
-  { MP_KEY_SEARCH,      "SEARCH" },
-  { MP_KEY_SLEEP,       "SLEEP" },
-
-  // These are kept for backward compatibility
-  { MP_KEY_PAUSE,   "XF86_PAUSE" },
-  { MP_KEY_STOP,    "XF86_STOP" },
-  { MP_KEY_PREV,    "XF86_PREV" },
-  { MP_KEY_NEXT,    "XF86_NEXT" },
-
-  { MP_KEY_CLOSE_WIN,   "CLOSE_WIN" },
-  { MP_KEY_MOUSE_MOVE,  "MOUSE_MOVE" },
-  { MP_KEY_MOUSE_LEAVE, "MOUSE_LEAVE" },
-
-  { 0, NULL }
-};
-
-struct key_name modifier_names[] = {
-    { MP_KEY_MODIFIER_SHIFT, "Shift" },
-    { MP_KEY_MODIFIER_CTRL,  "Ctrl" },
-    { MP_KEY_MODIFIER_ALT,   "Alt" },
-    { MP_KEY_MODIFIER_META,  "Meta" },
-    { 0 }
+struct cmd_bind_section {
+    struct cmd_bind *binds;
+    int num_binds;
+    char *section;
+    struct mp_rect mouse_area;  // set at runtime, if at all
+    bool mouse_area_set;        // mouse_area is valid and should be tested
+    struct cmd_bind_section *next;
 };
 
 #define MP_MAX_FDS 10
@@ -515,15 +102,6 @@ struct input_fd {
     // These fields are for the cmd fds.
     char *buffer;
     int pos, size;
-};
-
-struct cmd_bind_section {
-    struct cmd_bind *binds;
-    int num_binds;
-    char *section;
-    struct mp_rect mouse_area;  // set at runtime, if at all
-    bool mouse_area_set;        // mouse_area is valid and should be tested
-    struct cmd_bind_section *next;
 };
 
 #define MAX_ACTIVE_SECTIONS 5
@@ -604,8 +182,10 @@ struct input_ctx {
 
 int async_quit_request;
 
-static int print_key_list(m_option_t *cfg, char *optname, char *optparam);
-static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam);
+static int print_key_list(struct mp_log *log, m_option_t *cfg,
+                          char *optname, char *optparam);
+static int print_cmd_list(struct mp_log *log, m_option_t *cfg,
+                          char *optname, char *optparam);
 
 #define OPT_BASE_STRUCT struct MPOpts
 
@@ -646,52 +226,6 @@ static const char builtin_input_conf[] =
 static bool test_rect(struct mp_rect *rc, int x, int y)
 {
     return x >= rc->x0 && y >= rc->y0 && x < rc->x1 && y < rc->y1;
-}
-
-static char *get_key_name(int key, char *ret)
-{
-    for (int i = 0; modifier_names[i].name; i++) {
-        if (modifier_names[i].key & key) {
-            ret = talloc_asprintf_append_buffer(ret, "%s+",
-                                                modifier_names[i].name);
-            key -= modifier_names[i].key;
-        }
-    }
-    for (int i = 0; key_names[i].name != NULL; i++) {
-        if (key_names[i].key == key)
-            return talloc_asprintf_append_buffer(ret, "%s", key_names[i].name);
-    }
-
-    // printable, and valid unicode range
-    if (key >= 32 && key <= 0x10FFFF)
-        return mp_append_utf8_buffer(ret, key);
-
-    // Print the hex key code
-    return talloc_asprintf_append_buffer(ret, "%#-8x", key);
-}
-
-static char *get_key_combo_name(int *keys, int max)
-{
-    char *ret = talloc_strdup(NULL, "");
-    while (max > 0) {
-        ret = get_key_name(*keys, ret);
-        if (--max && *++keys)
-            ret = talloc_asprintf_append_buffer(ret, "-");
-        else
-            break;
-    }
-    return ret;
-}
-
-bool mp_input_is_abort_cmd(int cmd_id)
-{
-    switch (cmd_id) {
-    case MP_CMD_QUIT:
-    case MP_CMD_PLAYLIST_NEXT:
-    case MP_CMD_PLAYLIST_PREV:
-        return true;
-    }
-    return false;
 }
 
 static int queue_count_cmds(struct cmd_queue *queue)
@@ -811,353 +345,6 @@ void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
     input_lock(ictx);
     mp_input_rm_fd(ictx, fd);
     input_unlock(ictx);
-}
-
-static int parse_cycle_dir(struct mp_log *log, const struct m_option *opt,
-                           struct bstr name, struct bstr param, void *dst)
-{
-    double val;
-    if (bstrcmp0(param, "up") == 0) {
-        val = +1;
-    } else if (bstrcmp0(param, "down") == 0) {
-        val = -1;
-    } else {
-        return m_option_type_double.parse(log, opt, name, param, dst);
-    }
-    *(double *)dst = val;
-    return 1;
-}
-
-static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
-{
-    bstr t = bstr_lstrip(str);
-    char nextc = t.len > 0 ? t.start[0] : 0;
-    if (nextc == '#' || nextc == ';')
-        return false; // comment or command separator
-    int next = bstrcspn(t, WHITESPACE);
-    if (!next)
-        return false;
-    *out_token = bstr_splice(t, 0, next);
-    *out_rest = bstr_cut(t, next);
-    return true;
-}
-
-static bool read_escaped_string(void *talloc_ctx, bstr *str, bstr *literal)
-{
-    bstr t = *str;
-    char *new = talloc_strdup(talloc_ctx, "");
-    while (t.len) {
-        if (t.start[0] == '"')
-            break;
-        if (t.start[0] == '\\') {
-            t = bstr_cut(t, 1);
-            if (!mp_parse_escape(&t, &new))
-                goto error;
-        } else {
-            new = talloc_strndup_append_buffer(new, t.start, 1);
-            t = bstr_cut(t, 1);
-        }
-    }
-    int len = str->len - t.len;
-    *literal = new ? bstr0(new) : bstr_splice(*str, 0, len);
-    *str = bstr_cut(*str, len);
-    return true;
-error:
-    talloc_free(new);
-    return false;
-}
-
-// Somewhat awkward; the main purpose is supporting both strings and
-// pre-split string arrays as input.
-struct parse_ctx {
-    struct mp_log *log;
-    const char *loc;
-    void *tmp;
-    bool array_input; // false: use start/str, true: use num_strs/strs
-    bstr start, str;
-    bstr *strs;
-    int num_strs;
-};
-
-static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
-{
-    *out = (bstr){0};
-    if (ctx->array_input) {
-        if (!ctx->num_strs)
-            return 0;
-        *out = ctx->strs[0];
-        ctx->strs++;
-        ctx->num_strs--;
-        return 1;
-    } else {
-        ctx->str = bstr_lstrip(ctx->str);
-        bstr start = ctx->str;
-        if (bstr_eatstart0(&ctx->str, "\"")) {
-            if (!read_escaped_string(ctx->tmp, &ctx->str, out)) {
-                MP_ERR(ctx, "Broken string escapes: ...>%.*s<.\n", BSTR_P(start));
-                return -1;
-            }
-            if (!bstr_eatstart0(&ctx->str, "\"")) {
-                MP_ERR(ctx, "Unterminated quotes: ...>%.*s<.\n", BSTR_P(start));
-                return -1;
-            }
-            return 1;
-        }
-        return read_token(ctx->str, &ctx->str, out) ? 1 : 0;
-    }
-}
-
-static bstr pctx_get_trailing(struct parse_ctx *ctx)
-{
-    if (ctx->array_input) {
-        if (ctx->num_strs == 0)
-            return (bstr){0};
-        return ctx->strs[0]; // mentioning the first trailing arg is enough?
-    } else {
-        bstr dummy;
-        if (!read_token(ctx->str, &dummy, &dummy))
-            return (bstr){0};
-        return ctx->str;
-    }
-}
-
-struct flag {
-    const char *name;
-    unsigned int remove, add;
-};
-
-static const struct flag cmd_flags[] = {
-    {"pausing",             MP_PAUSING_FLAGS, MP_PAUSING},
-    {"pausing-toggle",      MP_PAUSING_FLAGS, MP_PAUSING_TOGGLE},
-    {"no-osd",              MP_ON_OSD_FLAGS, MP_ON_OSD_NO},
-    {"osd-bar",             MP_ON_OSD_FLAGS, MP_ON_OSD_BAR},
-    {"osd-msg",             MP_ON_OSD_FLAGS, MP_ON_OSD_MSG},
-    {"osd-msg-bar",         MP_ON_OSD_FLAGS, MP_ON_OSD_MSG | MP_ON_OSD_BAR},
-    {"osd-auto",            MP_ON_OSD_FLAGS, MP_ON_OSD_AUTO},
-    {"expand-properties",   0,                    MP_EXPAND_PROPERTIES},
-    {"raw",                 MP_EXPAND_PROPERTIES, 0},
-    {0}
-};
-
-static struct mp_cmd *parse_cmd(struct parse_ctx *ctx, int def_flags)
-{
-    struct mp_cmd *cmd = NULL;
-    int r;
-
-    if (!ctx->array_input) {
-        ctx->str = bstr_lstrip(ctx->str);
-        for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
-            bstr old = bstr0(entry->old);
-            bool silent = bstr_eatstart0(&old, "!");
-            if (bstrcasecmp(bstr_splice(ctx->str, 0, old.len), old) == 0) {
-                if (!silent) {
-                    MP_WARN(ctx, "Warning: command '%.*s' is deprecated, "
-                            "replaced with '%s' at %s.\n",
-                            BSTR_P(old), entry->new, ctx->loc);
-                }
-                bstr s = bstr_cut(ctx->str, old.len);
-                ctx->str = bstr0(talloc_asprintf(ctx->tmp, "%s%.*s", entry->new,
-                                                 BSTR_P(s)));
-                ctx->start = ctx->str;
-                break;
-            }
-        }
-    }
-
-    bstr cur_token;
-    if (pctx_read_token(ctx, &cur_token) < 0)
-        goto error;
-
-    while (1) {
-        for (int n = 0; cmd_flags[n].name; n++) {
-            if (bstr_equals0(cur_token, cmd_flags[n].name)) {
-                if (pctx_read_token(ctx, &cur_token) < 0)
-                    goto error;
-                def_flags &= ~cmd_flags[n].remove;
-                def_flags |= cmd_flags[n].add;
-                goto cont;
-            }
-        }
-        break;
-    cont: ;
-    }
-
-    if (cur_token.len == 0) {
-        MP_ERR(ctx, "Command name missing.\n");
-        goto error;
-    }
-    const struct mp_cmd_def *cmd_def = NULL;
-    for (int n = 0; mp_cmds[n].name; n++) {
-        if (bstr_equals0(cur_token, mp_cmds[n].name)) {
-            cmd_def = &mp_cmds[n];
-            break;
-        }
-    }
-
-    if (!cmd_def) {
-        MP_ERR(ctx, "Command '%.*s' not found.\n", BSTR_P(cur_token));
-        goto error;
-    }
-
-    cmd = talloc_ptrtype(NULL, cmd);
-    *cmd = (struct mp_cmd) {
-        .name = (char *)cmd_def->name,
-        .id = cmd_def->id,
-        .flags = def_flags,
-        .scale = 1,
-        .def = cmd_def,
-    };
-
-    for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
-        const struct m_option *opt = &cmd_def->args[i];
-        bool is_vararg = cmd_def->vararg &&
-            (i + 1 >= MP_CMD_MAX_ARGS || !cmd_def->args[i + 1].type); // last arg
-        if (!opt->type && is_vararg && cmd->nargs > 0)
-            opt = cmd->args[cmd->nargs - 1].type;
-        if (!opt->type)
-            break;
-
-        r = pctx_read_token(ctx, &cur_token);
-        if (r < 0) {
-            MP_ERR(ctx, "Command %s: error in argument %d.\n", cmd->name, i + 1);
-            goto error;
-        }
-        if (r < 1) {
-            if (is_vararg)
-                continue;
-            // Skip optional arguments
-            if (opt->defval) {
-                struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
-                cmdarg->type = opt;
-                memcpy(&cmdarg->v, opt->defval, opt->type->size);
-                cmd->nargs++;
-                continue;
-            }
-            MP_ERR(ctx, "Command %s: more than %d arguments required.\n",
-                   cmd->name, cmd->nargs);
-            goto error;
-        }
-
-        struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
-        cmdarg->type = opt;
-        cmd->nargs++;
-        r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &cmdarg->v);
-        if (r < 0) {
-            MP_ERR(ctx, "Command %s: argument %d can't be parsed: %s.\n",
-                   cmd->name, i + 1, m_option_strerror(r));
-            goto error;
-        }
-        if (opt->type == &m_option_type_string)
-            talloc_steal(cmd, cmdarg->v.s);
-    }
-
-    bstr left = pctx_get_trailing(ctx);
-    if (left.len) {
-        MP_ERR(ctx, "Command %s has trailing unused arguments: '%.*s'.\n",
-               cmd->name, BSTR_P(left));
-        // Better make it fatal to make it clear something is wrong.
-        goto error;
-    }
-
-    if (!ctx->array_input) {
-        bstr orig = {ctx->start.start, ctx->str.start - ctx->start.start};
-        cmd->original = bstrdup(cmd, bstr_strip(orig));
-    }
-
-    return cmd;
-
-error:
-    MP_ERR(ctx, "Command was defined at %s.\n", ctx->loc);
-    talloc_free(cmd);
-    return NULL;
-}
-
-static struct mp_cmd *parse_cmd_str(struct mp_log *log, bstr *str, const char *loc)
-{
-    struct parse_ctx ctx = {
-        .log = log,
-        .loc = loc,
-        .tmp = talloc_new(NULL),
-        .str = *str,
-        .start = *str,
-    };
-    struct mp_cmd *res = parse_cmd(&ctx, MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES);
-    talloc_free(ctx.tmp);
-    *str = ctx.str;
-    return res;
-}
-
-mp_cmd_t *mp_input_parse_cmd(struct input_ctx *ictx, bstr str, const char *loc)
-{
-    bstr original = str;
-    struct mp_cmd *cmd = parse_cmd_str(ictx->log, &str, loc);
-    if (!cmd)
-        return NULL;
-
-    struct mp_cmd **p_prev = NULL;
-    while (1) {
-        str = bstr_lstrip(str);
-        // read_token just to check whether it's trailing whitespace only
-        bstr u1, u2;
-        if (!bstr_eatstart0(&str, ";") || !read_token(str, &u1, &u2))
-            break;
-        // Multi-command. Since other input.c code uses queue_next for its
-        // own purposes, a pseudo-command is used to wrap the command list.
-        if (!p_prev) {
-            struct mp_cmd *list = talloc_ptrtype(NULL, list);
-            *list = (struct mp_cmd) {
-                .id = MP_CMD_COMMAND_LIST,
-                .name = "list",
-                .original = bstrdup(list, original),
-            };
-            talloc_steal(list, cmd);
-            list->args[0].v.p = cmd;
-            p_prev = &cmd->queue_next;
-            cmd = list;
-        }
-        struct mp_cmd *sub = parse_cmd_str(ictx->log, &str, loc);
-        if (!sub) {
-            talloc_free(cmd);
-            return NULL;
-        }
-        talloc_steal(cmd, sub);
-        *p_prev = sub;
-        p_prev = &sub->queue_next;
-    }
-
-    return cmd;
-}
-
-struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
-                                       const char **argv, const char *location)
-{
-    bstr args[MP_CMD_MAX_ARGS];
-    int num = 0;
-    for (; argv[num]; num++) {
-        if (num > MP_CMD_MAX_ARGS) {
-            mp_err(log, "%s: too many arguments.\n", location);
-            return NULL;
-        }
-        args[num] = bstr0(argv[num]);
-    }
-    return mp_input_parse_cmd_bstrv(log, def_flags, num, args, location);
-}
-
-struct mp_cmd *mp_input_parse_cmd_bstrv(struct mp_log *log, int def_flags,
-                                        int argc, bstr *argv,
-                                        const char *location)
-{
-    struct parse_ctx ctx = {
-        .log = log,
-        .loc = location,
-        .tmp = talloc_new(NULL),
-        .array_input = true,
-        .strs = argv,
-        .num_strs = argc,
-    };
-    struct mp_cmd *res = parse_cmd(&ctx, def_flags);
-    talloc_free(ctx.tmp);
-    return res;
 }
 
 #define MP_CMD_MAX_SIZE 4096
@@ -1293,7 +480,7 @@ static void append_bind_info(struct input_ctx *ictx, char **pmsg,
 
 static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
 {
-    char *key_buf = get_key_combo_name(keys, n);
+    char *key_buf = mp_input_get_key_combo_name(keys, n);
     // "$>" to disable property substitution when invoking "show_text"
     char *msg = talloc_asprintf(NULL, "$>Key %s is bound to:\n", key_buf);
     talloc_free(key_buf);
@@ -1456,7 +643,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
         if (n == 1 && (keys[0] == MP_KEY_MOUSE_MOVE ||
                        keys[0] == MP_KEY_MOUSE_LEAVE))
             msgl = MSGL_DEBUG;
-        char *key_buf = get_key_combo_name(keys, n);
+        char *key_buf = mp_input_get_key_combo_name(keys, n);
         MP_MSG(ictx, msgl, "No bind found for key '%s'.\n", key_buf);
         talloc_free(key_buf);
         return NULL;
@@ -1465,13 +652,13 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
     if (ret) {
         ret->input_section = cmd->owner->section;
         if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
-            char *keyname = get_key_combo_name(keys, n);
+            char *keyname = mp_input_get_key_combo_name(keys, n);
             MP_DBG(ictx, "key '%s' -> '%s' in '%s'\n",
                    keyname, cmd->cmd, ret->input_section);
             talloc_free(keyname);
         }
     } else {
-        char *key_buf = get_key_combo_name(keys, n);
+        char *key_buf = mp_input_get_key_combo_name(keys, n);
         MP_ERR(ictx, "Invalid command for bound key '%s': '%s'\n",
                key_buf, cmd->cmd);
         talloc_free(key_buf);
@@ -1580,7 +767,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 
     if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
         int noflags = code & ~(MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
-        char *key = get_key_name(noflags, NULL);
+        char *key = mp_input_get_key_name(noflags, NULL);
         MP_DBG(ictx, "key code=%#x '%s'%s%s\n",
                code, key, (code & MP_KEY_STATE_DOWN) ? " down" : "",
                (code & MP_KEY_STATE_UP) ? " up" : "");
@@ -1995,105 +1182,6 @@ void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y)
     input_unlock(ictx);
 }
 
-void mp_cmd_free(mp_cmd_t *cmd)
-{
-    talloc_free(cmd);
-}
-
-mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
-{
-    mp_cmd_t *ret;
-    int i;
-
-    if (!cmd)
-        return NULL;
-
-    ret = talloc_memdup(NULL, cmd, sizeof(mp_cmd_t));
-    ret->name = talloc_strdup(ret, cmd->name);
-    for (i = 0; i < ret->nargs; i++) {
-        if (cmd->args[i].type->type == &m_option_type_string)
-            ret->args[i].v.s = talloc_strdup(ret, cmd->args[i].v.s);
-    }
-
-    if (cmd->id == MP_CMD_COMMAND_LIST) {
-        struct mp_cmd *prev = NULL;
-        for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next) {
-            sub = mp_cmd_clone(sub);
-            talloc_steal(ret, sub);
-            if (prev) {
-                prev->queue_next = sub;
-            } else {
-                ret->args[0].v.p = sub;
-            }
-            prev = sub;
-        }
-    }
-
-    return ret;
-}
-
-int mp_input_get_key_from_name(const char *name)
-{
-    int modifiers = 0;
-    const char *p;
-    while ((p = strchr(name, '+'))) {
-        for (struct key_name *m = modifier_names; m->name; m++)
-            if (!bstrcasecmp(bstr0(m->name),
-                             (struct bstr){(char *)name, p - name})) {
-                modifiers |= m->key;
-                goto found;
-            }
-        if (!strcmp(name, "+"))
-            return '+' + modifiers;
-        return -1;
-found:
-        name = p + 1;
-    }
-
-    struct bstr bname = bstr0(name);
-
-    struct bstr rest;
-    int code = bstr_decode_utf8(bname, &rest);
-    if (code >= 0 && rest.len == 0)
-        return code + modifiers;
-
-    if (bstr_startswith0(bname, "0x"))
-        return strtol(name, NULL, 16) + modifiers;
-
-    for (int i = 0; key_names[i].name != NULL; i++) {
-        if (strcasecmp(key_names[i].name, name) == 0)
-            return key_names[i].key + modifiers;
-    }
-
-    return -1;
-}
-
-static int get_input_from_name(char *name, int *out_num_keys, int *keys)
-{
-    char *end, *ptr;
-    int n = 0;
-
-    ptr = name;
-    n = 0;
-    for (end = strchr(ptr, '-'); ptr != NULL; end = strchr(ptr, '-')) {
-        if (end && end[1] != '\0') {
-            if (end[1] == '-')
-                end = &end[1];
-            end[0] = '\0';
-        }
-        keys[n] = mp_input_get_key_from_name(ptr);
-        if (keys[n] < 0)
-            return 0;
-        n++;
-        if (end && end[1] != '\0' && n < MP_MAX_KEY_DOWN)
-            ptr = &end[1];
-        else
-            break;
-    }
-    *out_num_keys = n;
-    return 1;
-}
-
 static void bind_dealloc(struct cmd_bind *bind)
 {
     talloc_free(bind->cmd);
@@ -2166,7 +1254,8 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
         char *name = bstrdup0(NULL, keyname);
         int keys[MP_MAX_KEY_DOWN];
         int num_keys = 0;
-        if (!get_input_from_name(name, &num_keys, keys)) {
+        if (!mp_input_get_keys_from_string(name, MP_MAX_KEY_DOWN, &num_keys, keys))
+        {
             talloc_free(name);
             MP_ERR(ictx, "Unknown key '%.*s' at %s\n", BSTR_P(keyname), cur_loc);
             continue;
@@ -2512,29 +1601,17 @@ void mp_input_uninit(struct input_ctx *ictx)
     talloc_free(ictx);
 }
 
-static int print_key_list(m_option_t *cfg, char *optname, char *optparam)
+static int print_key_list(struct mp_log *log, m_option_t *cfg,
+                          char *optname, char *optparam)
 {
-    int i;
-    printf("\n");
-    for (i = 0; key_names[i].name != NULL; i++)
-        printf("%s\n", key_names[i].name);
+    mp_print_key_list(log);
     return M_OPT_EXIT;
 }
 
-static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam)
+static int print_cmd_list(struct mp_log *log, m_option_t *cfg,
+                          char *optname, char *optparam)
 {
-    for (int i = 0; mp_cmds[i].name; i++) {
-        const struct mp_cmd_def *def = &mp_cmds[i];
-        printf("%-20.20s", def->name);
-        for (int j = 0; j < MP_CMD_MAX_ARGS && def->args[j].type; j++) {
-            const char *type = def->args[j].type->name;
-            if (def->args[j].defval)
-                printf(" [%s]", type);
-            else
-                printf(" %s", type);
-        }
-        printf("\n");
-    }
+    mp_print_cmd_list(log);
     return M_OPT_EXIT;
 }
 
@@ -2589,4 +1666,10 @@ unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
 bool mp_input_use_alt_gr(struct input_ctx *ictx)
 {
     return ictx->using_alt_gr;
+}
+
+struct mp_cmd *mp_input_parse_cmd(struct input_ctx *ictx, bstr str,
+                                  const char *location)
+{
+    return mp_input_parse_cmd_(ictx->log, str, location);
 }
