@@ -136,6 +136,8 @@ static const char x11_icon[] =
 #include "video/out/x11_icon.inc"
 ;
 
+static struct mp_log *x11_error_output;
+
 static void vo_x11_update_geometry(struct vo *vo);
 static void vo_x11_fullscreen(struct vo *vo);
 static int vo_x11_get_fs_type(struct vo *vo);
@@ -217,6 +219,24 @@ static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
     } else {
         XDefineCursor(x11->display, x11->window, 0);
     }
+}
+
+static int x11_errorhandler(Display *display, XErrorEvent *event)
+{
+    struct mp_log *log = x11_error_output;
+    char msg[60];
+
+    XGetErrorText(display, event->error_code, (char *) &msg, sizeof(msg));
+
+    mp_err(log, "X11 error: %s\n", msg);
+
+    mp_verbose(log, "Type: %x, display: %p, resourceid: %lx, serial: %lx\n",
+               event->type, event->display, event->resourceid, event->serial);
+    mp_verbose(log, "Error code: %x, request code: %x, minor code: %x\n",
+               event->error_code, event->request_code, event->minor_code);
+
+//    abort();
+    return 0;
 }
 
 struct fstype {
@@ -455,6 +475,9 @@ int vo_x11_init(struct vo *vo)
     };
     vo->x11 = x11;
 
+    x11_error_output = x11->log;
+    XSetErrorHandler(x11_errorhandler);
+
     dispName = XDisplayName(NULL);
 
     MP_VERBOSE(x11, "X11 opening display: %s\n", dispName);
@@ -463,6 +486,9 @@ int vo_x11_init(struct vo *vo)
     if (!x11->display) {
         MP_MSG(x11, vo->probing ? MSGL_V : MSGL_ERR,
                "couldn't open the X11 display (%s)!\n", dispName);
+
+        x11_error_output = NULL;
+        XSetErrorHandler(NULL);
 
         talloc_free(x11);
         vo->x11 = NULL;
@@ -686,6 +712,8 @@ void vo_x11_uninit(struct vo *vo)
     MP_VERBOSE(x11, "uninit ...\n");
     if (x11->xim)
         XCloseIM(x11->xim);
+    x11_error_output = NULL;
+    XSetErrorHandler(NULL);
     XCloseDisplay(x11->display);
 
     talloc_free(x11);
