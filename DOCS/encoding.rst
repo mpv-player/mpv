@@ -43,7 +43,7 @@ One can then encode using this profile using the command::
   mpv infile -o outfile.mp4 -profile myencprofile
 
 Some example profiles are provided in a file
-etc/encoding-example-profiles.conf; as for this, see below.
+etc/encoding-profiles.conf; as for this, see below.
 
 
 Encoding examples
@@ -89,13 +89,12 @@ Device targets
 As the options for various devices can get complex, profiles can be used.
 
 An example profile file for encoding is provided in
-etc/encoding-example-profiles.conf in the source tree. You can include it into
-your configuration by doing::
+etc/encoding-profiles.conf in the source tree. This file is installed and loaded
+by default (if libavfilter is enabled at compilation). If you want to modify
+it, you can replace and it with your own copy by doing::
 
   mkdir -p ~/.mpv
-  curl https://raw.github.com/mpv-player/mpv/master/etc/encoding-example-profiles.conf \
-    > ~/.mpv/encoding-profiles.conf
-  echo "include = $HOME/.mpv/encoding-profiles.conf" >> ~/.mpv/config
+  cp /etc/mpv/encoding-profiles.conf ~/.mpv/encoding-profiles.conf
 
 Refer to the top of that file for more comments - in a nutshell, the following
 options are added by it::

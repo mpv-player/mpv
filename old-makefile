@@ -517,7 +517,11 @@ install-mpv-desktop: etc/mpv.desktop
 	$(INSTALL) -d $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mpv.desktop $(prefix)/share/applications/
 
-install-data: install-mpv-icons install-mpv-desktop
+install-mpv-config: etc/encoding-profiles.conf
+	$(INSTALL) -d $(CONFDIR)
+	$(INSTALL) -m 644 etc/encoding-profiles.conf $(CONFDIR)
+
+install-data: install-mpv-icons install-mpv-desktop install-mpv-config
 
 uninstall:
 	$(RM) $(BINDIR)/mpv$(EXESUF)

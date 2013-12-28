@@ -49,14 +49,20 @@
 bool mp_parse_cfgfiles(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    m_config_t *conf = mpctx->mconfig;
-    char *conffile;
     if (!opts->load_config)
         return true;
-    if (m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf", 0) < 0)
-        return false;
+
+    m_config_t *conf = mpctx->mconfig;
+    void *tmp = talloc_new(NULL);
+    bool r = true;
+    char *conffile;
+
+    if (m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf", 0) < 0) {
+        r = false;
+        goto done;
+    }
     mp_mk_config_dir(mpctx->global, NULL);
-    if (!(conffile = mp_find_user_config_file(NULL, mpctx->global, "config")))
+    if (!(conffile = mp_find_user_config_file(tmp, mpctx->global, "config")))
         MP_ERR(mpctx, "mp_find_user_config_file(\"config\") problem\n");
     else {
         int fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY | O_CLOEXEC, 0666);
@@ -65,11 +71,22 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
             write(fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
             close(fd);
         }
-        if (m_config_parse_config_file(conf, conffile, 0) < 0)
-            return false;
-        talloc_free(conffile);
+        if (m_config_parse_config_file(conf, conffile, 0) < 0) {
+            r = false;
+            goto done;
+        }
     }
-    return true;
+
+    // The #if is a stupid hack to avoid errors if libavfilter is not available.
+#if HAVE_VF_LAVFI && HAVE_ENCODING
+    conffile = mp_find_config_file(tmp, mpctx->global, "encoding-profiles.conf");
+    if (conffile && mp_path_exists(conffile))
+        m_config_parse_config_file(mpctx->mconfig, conffile, 0);
+#endif
+
+done:
+    talloc_free(tmp);
+    return r;
 }
 
 static int try_load_config(struct MPContext *mpctx, const char *file, int flags)
