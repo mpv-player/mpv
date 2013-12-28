@@ -327,4 +327,26 @@ char *mp_getenv(const char *name)
     return NULL;
 }
 
+void mp_attach_console(void)
+{
+    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+        // We have been started by something with a console window.
+        // Redirect output streams to that console's low-level handles,
+        // so we can actually use WriteConsole later on.
+
+        int hConHandle;
+        intptr_t hStdio;
+
+        hStdio = (intptr_t)GetStdHandle(STD_OUTPUT_HANDLE);
+        hConHandle = _open_osfhandle(hStdio, _O_TEXT);
+        *stdout = *_fdopen(hConHandle, "w");
+        setvbuf(stdout, NULL, _IONBF, 0);
+
+        hStdio = (intptr_t)GetStdHandle(STD_ERROR_HANDLE);
+        hConHandle = _open_osfhandle(hStdio, _O_TEXT);
+        *stderr = *_fdopen(hConHandle, "w");
+        setvbuf(stderr, NULL, _IONBF, 0);
+    }
+}
+
 #endif // __MINGW32__

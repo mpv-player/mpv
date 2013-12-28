@@ -36,7 +36,7 @@ def __add_mingw_flags__(ctx):
     ctx.env.CFLAGS += ['-DBYTE_ORDER=1234']
     ctx.env.CFLAGS += ['-DLITLE_ENDIAN=1234']
     ctx.env.CFLAGS += ['-DBIG_ENDIAN=4321']
-    ctx.env.LAST_LINKFLAGS += ['-mconsole']
+    ctx.env.LAST_LINKFLAGS += ['-mwindows']
 
 def __add_cygwin_flags__(ctx):
     ctx.env.CFLAGS += ['-mwin32']

@@ -249,6 +249,7 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
         talloc_enable_leak_report();
 
 #ifdef __MINGW32__
+    mp_attach_console();
     mp_get_converted_argv(p_argc, p_argv);
 #endif
 
