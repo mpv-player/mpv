@@ -113,56 +113,57 @@ int mp_stat(const char *path, struct stat *buf)
     return res;
 }
 
+static int mp_check_console(HANDLE *wstream)
+{
+    if (wstream != INVALID_HANDLE_VALUE) {
+        unsigned int filetype = GetFileType(wstream);
+
+        if (!((filetype == FILE_TYPE_UNKNOWN) &&
+            (GetLastError() != ERROR_SUCCESS)))
+        {
+            filetype &= ~(FILE_TYPE_REMOTE);
+
+            if (filetype == FILE_TYPE_CHAR) {
+                DWORD ConsoleMode;
+                int ret = GetConsoleMode(wstream, &ConsoleMode);
+
+                if (!(!ret && (GetLastError() == ERROR_INVALID_HANDLE))) {
+                    // This seems to be a console
+                    return 1;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
 static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
     int done = 0;
 
-    if (stream == stdout || stream == stderr)
-    {
-        HANDLE *wstream = GetStdHandle(stream == stdout ?
-                                       STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
-        if (wstream != INVALID_HANDLE_VALUE)
-        {
-            // figure out whether we're writing to a console
-            unsigned int filetype = GetFileType(wstream);
-            if (!((filetype == FILE_TYPE_UNKNOWN) &&
-                (GetLastError() != ERROR_SUCCESS)))
-            {
-                int isConsole;
-                filetype &= ~(FILE_TYPE_REMOTE);
-                if (filetype == FILE_TYPE_CHAR)
-                {
-                    DWORD ConsoleMode;
-                    int ret = GetConsoleMode(wstream, &ConsoleMode);
-                    if (!ret && (GetLastError() == ERROR_INVALID_HANDLE))
-                        isConsole = 0;
-                    else
-                        isConsole = 1;
-                }
-                else
-                    isConsole = 0;
+    HANDLE *wstream = INVALID_HANDLE_VALUE;
 
-                if (isConsole)
-                {
-                    int nchars = vsnprintf(NULL, 0, format, args) + 1;
-                    char *buf = talloc_array(NULL, char, nchars);
-                    if (buf)
-                    {
-                        vsnprintf(buf, nchars, format, args);
-                        wchar_t *out = mp_from_utf8(NULL, buf);
-                        size_t nchars = wcslen(out);
-                        talloc_free(buf);
-                        done = WriteConsoleW(wstream, out, nchars, NULL, NULL);
-                        talloc_free(out);
-                    }
-                }
-                else
-                    done = vfprintf(stream, format, args);
-            }
-        }
+    if (stream == stdout || stream == stderr) {
+        wstream = GetStdHandle(stream == stdout ?
+                               STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     }
-    else
+
+    if (mp_check_console(wstream)) {
+        size_t len = vsnprintf(NULL, 0, format, args) + 1;
+        char *buf = talloc_array(NULL, char, len);
+
+        if (buf) {
+            vsnprintf(buf, len, format, args);
+            wchar_t *out = mp_from_utf8(NULL, buf);
+            size_t len = wcslen(out);
+            talloc_free(buf);
+            done = WriteConsoleW(wstream, out, len, NULL, NULL);
+            talloc_free(out);
+        }
+    } else {
         done = vfprintf(stream, format, args);
+    }
 
     return done;
 }
