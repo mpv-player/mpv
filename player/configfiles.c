@@ -53,7 +53,7 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
     char *conffile;
     if (!opts->load_config)
         return true;
-    if (!m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf", 0) < 0)
+    if (m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf", 0) < 0)
         return false;
     mp_mk_config_dir(mpctx->global, NULL);
     if (!(conffile = mp_find_user_config_file(NULL, mpctx->global, "config")))
