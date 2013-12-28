@@ -1426,10 +1426,14 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
         goto done;
     }
     bstr data = stream_read_complete(s, tmp, 1000000);
-    MP_VERBOSE(ictx, "Parsing input config file %s\n", file);
-    int n_binds = parse_config(ictx, false, data, file, NULL);
-    MP_VERBOSE(ictx, "Input config file %s parsed: %d binds\n", file, n_binds);
-    r = 1;
+    if (data.start) {
+        MP_VERBOSE(ictx, "Parsing input config file %s\n", file);
+        int num = parse_config(ictx, false, data, file, NULL);
+        MP_VERBOSE(ictx, "Input config file %s parsed: %d binds\n", file, num);
+        r = 1;
+    } else {
+        MP_ERR(ictx, "Error reading input config file %s\n", file);
+    }
 
 done:
     free_stream(s);
