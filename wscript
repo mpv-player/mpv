@@ -377,12 +377,14 @@ audio_output_features = [
     {
         'name': '--sdl2',
         'desc': 'SDL2',
-        'func': check_pkg_config('sdl2')
+        'func': check_pkg_config('sdl2'),
+        'default': 'disable'
     }, {
         'name': '--sdl',
         'desc': 'SDL (1.x)',
         'deps_neg': [ 'sdl2' ],
-        'func': check_pkg_config('sdl')
+        'func': check_pkg_config('sdl'),
+        'default': 'disable'
     }, {
         'name': 'oss-audio-4front',
         'desc': 'OSS (implementation from opensound.com)',
