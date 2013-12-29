@@ -843,20 +843,26 @@ static void open_subtitles_from_resolve(struct MPContext *mpctx)
     }
 }
 
+static const char *font_mimetypes[] = {
+    "application/x-truetype-font",
+    "application/x-font",
+    NULL
+};
+
+static const char *font_exts[] = {".ttf", ".ttc", ".otf", NULL};
+
 static bool attachment_is_font(struct mp_log *log, struct demux_attachment *att)
 {
     if (!att->name || !att->type || !att->data || !att->data_size)
         return false;
-    // match against MIME types
-    if (strcmp(att->type, "application/x-truetype-font") == 0
-        || strcmp(att->type, "application/x-font") == 0)
-        return true;
+    for (int n = 0; font_mimetypes[n]; n++) {
+        if (strcmp(font_mimetypes[n], att->type) == 0)
+            return true;
+    }
     // fallback: match against file extension
-    if (strlen(att->name) > 4) {
-        char *ext = att->name + strlen(att->name) - 4;
-        if (strcasecmp(ext, ".ttf") == 0 || strcasecmp(ext, ".ttc") == 0
-            || strcasecmp(ext, ".otf") == 0)
-        {
+    char *ext = strlen(att->name) > 4 ? att->name + strlen(att->name) - 4 : "";
+    for (int n = 0; font_exts[n]; n++) {
+        if (strcasecmp(ext, font_exts[n]) == 0) {
             mp_warn(log, "Loading font attachment '%s' with MIME type %s. "
                     "Assuming this is a broken Matroska file, which was "
                     "muxed without setting a correct font MIME type.\n",
