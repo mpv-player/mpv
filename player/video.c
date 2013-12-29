@@ -65,6 +65,7 @@ static void reconfig_video(struct MPContext *mpctx,
                            const struct mp_image_params *params,
                            bool probe_only)
 {
+    struct MPOpts *opts = mpctx->opts;
     struct dec_video *d_video = mpctx->d_video;
 
     d_video->decoder_output = *params;
@@ -96,6 +97,19 @@ static void reconfig_video(struct MPContext *mpctx,
     int r = vo_reconfig(mpctx->video_out, &p, 0);
     if (r < 0)
         d_video->vfilter->initialized = -1;
+
+    if (r >= 0) {
+        if (opts->gamma_gamma != 1000)
+            video_set_colors(d_video, "gamma", opts->gamma_gamma);
+        if (opts->gamma_brightness != 1000)
+            video_set_colors(d_video, "brightness", opts->gamma_brightness);
+        if (opts->gamma_contrast != 1000)
+            video_set_colors(d_video, "contrast", opts->gamma_contrast);
+        if (opts->gamma_saturation != 1000)
+            video_set_colors(d_video, "saturation", opts->gamma_saturation);
+        if (opts->gamma_hue != 1000)
+            video_set_colors(d_video, "hue", opts->gamma_hue);
+    }
 }
 
 static void recreate_video_filters(struct MPContext *mpctx)

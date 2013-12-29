@@ -436,17 +436,6 @@ int video_reconfig_filters(struct dec_video *d_video,
 
     d_video->vf_input = p;
 
-    if (opts->gamma_gamma != 1000)
-        video_set_colors(d_video, "gamma", opts->gamma_gamma);
-    if (opts->gamma_brightness != 1000)
-        video_set_colors(d_video, "brightness", opts->gamma_brightness);
-    if (opts->gamma_contrast != 1000)
-        video_set_colors(d_video, "contrast", opts->gamma_contrast);
-    if (opts->gamma_saturation != 1000)
-        video_set_colors(d_video, "saturation", opts->gamma_saturation);
-    if (opts->gamma_hue != 1000)
-        video_set_colors(d_video, "hue", opts->gamma_hue);
-
     return 0;
 }
 
