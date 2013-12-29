@@ -1,0 +1,41 @@
+Changes
+-------
+
+- Build system switches to waf. The old build system is still available by
+  running ``./old-configure``, but it will be removed some time in the future.
+- The "run" input command changes in a not backwards compatible way.
+- Some input.conf commands were replaced (such as speed_mult).
+- Many audio/video filter have changed sub-options in a not backwards
+  compatible way. (This is a consequence of unifying audio/video filter
+  option parsing.)
+- Most video filters now use libavfilter internally if available.
+- Disable key autorepeat for some key binds, which prevents accidentally
+  triggering a binding multiple times.
+- Encoding: install and include encoding profiles by default.
+
+Bug fixes
+---------
+
+- Fix a bug that degraded vdpau playback after ~1 hour of runtime.
+- Restrict hardware decoding to codecs where it generally makes sense. This
+  excludes mpeg4 for example, which often causes hardware decoders to decode to
+  garbage. Use ``--hwdec-codecs`` to enable hardware decoding for more codecs.
+
+New features
+------------
+
+- Add window-scale property, which allows changing the window size via mpv key
+  bindings.
+- Add revert_seek command, which is meant to undo accidental seeks.
+- Hardware decoding (vdpau, vda, vaapi) can now be used with vo_opengl.
+- Pulseaudio: set pulse stream name to mpv window title (like MPlayer).
+- Support showing 2 subtitles at a time (``--secondary-sid``).
+- Re-add some basic ``dvdnav://`` support. This doesn't handle navigation
+  highlights correctly, but navigation should mostly work. (Note that
+  ``dvdnav://`` by default starts the longest title, instead of the DVD menu.
+  The menu is available with ``dvdnav://menu``.)
+- Win32: you can drop files on the mpv window.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log f572d2..f06a87`` in
+the git repository.
