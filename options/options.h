@@ -228,6 +228,7 @@ typedef struct MPOpts {
 
     struct lavc_param {
         int fast;
+        int show_all;
         char *skip_loop_filter_str;
         char *skip_idct_str;
         char *skip_frame_str;

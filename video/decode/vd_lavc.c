@@ -73,6 +73,7 @@ static void uninit(struct dec_video *vd);
 
 const m_option_t lavc_decode_opts_conf[] = {
     OPT_FLAG_CONSTANTS("fast", lavc_param.fast, 0, 0, CODEC_FLAG2_FAST),
+    OPT_FLAG("show-all", lavc_param.show_all, 0),
     OPT_STRING("skiploopfilter", lavc_param.skip_loop_filter_str, 0),
     OPT_STRING("skipidct", lavc_param.skip_idct_str, 0),
     OPT_STRING("skipframe", lavc_param.skip_frame_str, 0),
@@ -421,6 +422,15 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->flags |= lavc_param->bitexact;
 
     avctx->flags2 |= lavc_param->fast;
+    if (lavc_param->show_all) {
+#ifdef CODEC_FLAG2_SHOW_ALL
+        avctx->flags2 |= CODEC_FLAG2_SHOW_ALL; // ffmpeg only?
+#endif
+#ifdef CODEC_FLAG_OUTPUT_CORRUPT
+        avctx->flags |= CODEC_FLAG_OUTPUT_CORRUPT; // added with Libav 10
+#endif
+    }
+
     avctx->skip_loop_filter = str2AVDiscard(vd, lavc_param->skip_loop_filter_str);
     avctx->skip_idct = str2AVDiscard(vd, lavc_param->skip_idct_str);
     avctx->skip_frame = str2AVDiscard(vd, lavc_param->skip_frame_str);

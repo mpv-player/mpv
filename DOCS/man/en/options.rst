@@ -2631,6 +2631,11 @@ OPTIONS
 
         ``--vd--lavc-o=debug=pict``
 
+``--vd-lavc-show-all=<yes|no>``
+    Show even broken/corrupt frames (default: yes). If this option is set to
+    no, libavcodec won't output frames that were either decoded before an
+    initial keyframe was decoded, or frames that are recognized as corrupted.
+
 ``--vd-lavc-skiploopfilter=<skipvalue> (H.264 only)``
     Skips the loop filter (AKA deblocking) during H.264 decoding. Since
     the filtered frame is supposed to be used as reference for decoding
