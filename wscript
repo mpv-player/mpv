@@ -59,6 +59,11 @@ build_options = [
         'desc': 'w32 executable',
         'deps_any': [ 'os-win32', 'os-cygwin'],
         'func': check_ctx_vars('WINDRES')
+    }, {
+        'name': '--asm',
+        'desc': 'inline assembly',
+        'default': 'enable',
+        'func': check_true,
     }
 ]
 
