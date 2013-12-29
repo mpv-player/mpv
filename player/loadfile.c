@@ -845,7 +845,9 @@ static void open_subtitles_from_resolve(struct MPContext *mpctx)
 
 static const char *font_mimetypes[] = {
     "application/x-truetype-font",
-    "application/x-font",
+    "application/vnd.ms-opentype",
+    "application/x-font-ttf",
+    "application/x-font", // probably incorrect
     NULL
 };
 
