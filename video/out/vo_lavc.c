@@ -402,7 +402,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 
     if (vc->lastipts != MP_NOPTS_VALUE) {
-        frame = avcodec_alloc_frame();
+        frame = av_frame_alloc();
 
         // we have a valid image in lastimg
         while (vc->lastipts < frameipts) {
@@ -419,7 +419,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                 skipframes = 0;
 
             if (thisduration > skipframes) {
-                avcodec_get_frame_defaults(frame);
+                av_frame_unref(frame);
 
                 // this is a nop, unless the worst time base is the STREAM time base
                 frame->pts = av_rescale_q(vc->lastipts + skipframes,
@@ -428,7 +428,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                 enum AVPictureType savetype = frame->pict_type;
                 mp_image_copy_fields_to_av_frame(frame, vc->lastimg);
                 frame->pict_type = savetype;
-                    // keep this at avcodec_get_frame_defaults default
+                    // keep this at av_frame_unref default
 
                 frame->quality = avc->global_quality;
 
@@ -444,7 +444,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             vc->lastipts += thisduration;
         }
 
-        avcodec_free_frame(&frame);
+        av_frame_free(&frame);
     }
 
     if (!mpi) {
