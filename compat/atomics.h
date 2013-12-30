@@ -19,5 +19,12 @@
 // At this point both gcc and clang had __sync_synchronize support for some
 // time. We only support a full memory barrier.
 
-#define mp_memory_barrier()           __sync_synchronize()
-#define mp_atomic_add_and_fetch(a, b) __sync_add_and_fetch(a, b)
+#include "config.h"
+
+#if HAVE_ATOMIC_BUILTINS
+# define mp_memory_barrier()           __atomic_thread_fence(__ATOMIC_SEQ_CST)
+# define mp_atomic_add_and_fetch(a, b) __atomic_add_fetch(a, b,__ATOMIC_SEQ_CST)
+#else
+# define mp_memory_barrier()           __sync_synchronize()
+# define mp_atomic_add_and_fetch(a, b) __sync_add_and_fetch(a, b)
+#endif
