@@ -356,6 +356,57 @@ struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s)
     return new;
 }
 
+static void resize_append(void *talloc_ctx, bstr *s, size_t append_min)
+{
+    size_t size = talloc_get_size(s->start);
+    assert(s->len <= size);
+    if (append_min > size - s->len) {
+        if (append_min < size)
+            append_min = size; // preallocate in power of 2s
+        s->start = talloc_realloc_size(talloc_ctx, s->start, size + append_min);
+    }
+}
+
+// Append the string, so that *s = *s + append. s->start is expected to be
+// a talloc allocation (which can be realloced) or NULL.
+// This function will always implicitly append a \0 after the new string for
+// convenience.
+// talloc_ctx will be used as parent context, if s->start is NULL.
+void bstr_xappend(void *talloc_ctx, bstr *s, bstr append)
+{
+    resize_append(talloc_ctx, s, append.len + 1);
+    memcpy(s->start + s->len, append.start, append.len);
+    s->len += append.len;
+    s->start[s->len] = '\0';
+}
+
+void bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    bstr_xappend_vasprintf(talloc_ctx, s, fmt, ap);
+    va_end(ap);
+}
+
+// Exactly as bstr_xappend(), but with a formatted string.
+void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt,
+                            va_list ap)
+{
+    int size;
+    va_list copy;
+    va_copy(copy, ap);
+    char c;
+    size = vsnprintf(&c, 1, fmt, copy);
+    va_end(copy);
+
+    if (size < 0)
+        abort();
+
+    resize_append(talloc_ctx, s, size + 1);
+    vsnprintf(s->start + s->len, size + 1, fmt, ap);
+    s->len += size;
+}
+
 bool bstr_case_startswith(struct bstr s, struct bstr prefix)
 {
     struct bstr start = bstr_splice(s, 0, prefix.len);

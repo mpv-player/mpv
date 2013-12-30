@@ -23,8 +23,10 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 #include "talloc.h"
+#include "compat/compiler.h"
 
 /* NOTE: 'len' is size_t, but most string-handling functions below assume
  * that input size has been sanity checked and len fits in an int.
@@ -117,6 +119,12 @@ struct bstr bstr_getline(struct bstr str, struct bstr *rest);
 // Strip one trailing line break. This is intended for use with bstr_getline,
 // and will remove the trailing \n or \r\n sequence.
 struct bstr bstr_strip_linebreaks(struct bstr str);
+
+void bstr_xappend(void *talloc_ctx, bstr *s, bstr append);
+void bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
+    PRINTF_ATTRIBUTE(3, 4);
+void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt, va_list va)
+    PRINTF_ATTRIBUTE(3, 0);
 
 // If s starts with prefix, return true and return the rest of the string in s.
 bool bstr_eatstart(struct bstr *s, struct bstr prefix);
