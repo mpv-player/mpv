@@ -25,6 +25,7 @@
 #include "config.h"
 
 #include "talloc.h"
+#include "bstr/bstr.h"
 #include "common/common.h"
 #include "common/msg.h"
 #include "osd.h"
@@ -157,27 +158,33 @@ void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
     snprintf(buffer, buffer_size, "\xFF%c", osd_function);
 }
 
-static char *mangle_ass(const char *in)
+static void mangle_ass(bstr *dst, const char *in)
 {
-    char *res = talloc_strdup(NULL, "");
     while (*in) {
         // As used by osd_get_function_sym().
         if (in[0] == '\xFF' && in[1]) {
-            res = talloc_strdup_append_buffer(res, ASS_USE_OSD_FONT);
-            res = mp_append_utf8_buffer(res, OSD_CODEPOINTS + in[1]);
-            res = talloc_strdup_append_buffer(res, "{\\r}");
+            bstr_xappend(NULL, dst, bstr0(ASS_USE_OSD_FONT));
+            mp_append_utf8_bstr(NULL, dst, OSD_CODEPOINTS + in[1]);
+            bstr_xappend(NULL, dst, bstr0("{\\r}"));
             in += 2;
             continue;
         }
         if (*in == '{')
-            res = talloc_strdup_append_buffer(res, "\\");
-        res = talloc_strndup_append_buffer(res, in, 1);
+            bstr_xappend(NULL, dst, bstr0("\\"));
+        bstr_xappend(NULL, dst, (bstr){(char *)in, 1});
         // Break ASS escapes with U+2060 WORD JOINER
         if (*in == '\\')
-            res = mp_append_utf8_buffer(res, 0x2060);
+            mp_append_utf8_bstr(NULL, dst, 0x2060);
         in++;
     }
-    return res;
+}
+
+static void add_osd_ass_event_escaped(ASS_Track *track, const char *text)
+{
+    bstr buf = {0};
+    mangle_ass(&buf, text);
+    add_osd_ass_event(track, buf.start);
+    talloc_free(buf.start);
 }
 
 static void update_osd(struct osd_state *osd, struct osd_object *obj)
@@ -200,9 +207,7 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj)
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
     mp_ass_set_style(style, playresy, &font);
 
-    char *text = mangle_ass(osd->osd_text);
-    add_osd_ass_event(obj->osd_track, text);
-    talloc_free(text);
+    add_osd_ass_event_escaped(obj->osd_track, osd->osd_text);
 }
 
 // align: -1 .. +1
@@ -323,20 +328,20 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     float sx = px - border * 2 - height / 4; // includes additional spacing
     float sy = py + height / 2;
 
-    char *text = talloc_asprintf(NULL, "{\\an6\\pos(%f,%f)}", sx, sy);
+    bstr buf = bstr0(talloc_asprintf(NULL, "{\\an6\\pos(%f,%f)}", sx, sy));
 
     if (osd->progbar_type == 0 || osd->progbar_type >= 256) {
         // no sym
     } else if (osd->progbar_type >= 32) {
-        text = mp_append_utf8_buffer(text, osd->progbar_type);
+        mp_append_utf8_bstr(NULL, &buf, osd->progbar_type);
     } else {
-        text = talloc_strdup_append_buffer(text, ASS_USE_OSD_FONT);
-        text = mp_append_utf8_buffer(text, OSD_CODEPOINTS + osd->progbar_type);
-        text = talloc_strdup_append_buffer(text, "{\\r}");
+        bstr_xappend(NULL, &buf, bstr0(ASS_USE_OSD_FONT));
+        mp_append_utf8_bstr(NULL, &buf, OSD_CODEPOINTS + osd->progbar_type);
+        bstr_xappend(NULL, &buf, bstr0("{\\r}"));
     }
 
-    add_osd_ass_event(obj->osd_track, text);
-    talloc_free(text);
+    add_osd_ass_event(obj->osd_track, buf.start);
+    talloc_free(buf.start);
 
     struct ass_draw *d = &(struct ass_draw) { .scale = 4 };
     // filled area
@@ -430,9 +435,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
     ass_set_line_position(obj->osd_render, 100 - opts->sub_pos);
 #endif
 
-    char *escaped_text = mangle_ass(obj->sub_text);
-    add_osd_ass_event(obj->osd_track, escaped_text);
-    talloc_free(escaped_text);
+    add_osd_ass_event_escaped(obj->osd_track, obj->sub_text);
 }
 
 static void update_object(struct osd_state *osd, struct osd_object *obj)
