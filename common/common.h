@@ -73,8 +73,6 @@ struct mp_rect {
 void mp_rect_union(struct mp_rect *rc, const struct mp_rect *src);
 bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2);
 
-char *mp_append_utf8_buffer(char *buffer, uint32_t codepoint);
-
 struct bstr;
 
 void mp_append_utf8_bstr(void *talloc_ctx, struct bstr *buf, uint32_t codepoint);

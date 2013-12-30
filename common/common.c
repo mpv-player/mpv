@@ -105,17 +105,8 @@ bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2)
 }
 
 // Encode the unicode codepoint as UTF-8, and append to the end of the
-// talloc'ed buffer.
-char *mp_append_utf8_buffer(char *buffer, uint32_t codepoint)
-{
-    char data[8];
-    uint8_t tmp;
-    char *output = data;
-    PUT_UTF8(codepoint, tmp, *output++ = tmp;);
-    return talloc_strndup_append_buffer(buffer, data, output - data);
-}
-
-// Like mp_append_utf8_buffer, but use bstr_xappend().
+// talloc'ed buffer. All guarantees bstr_xappend() give applies, such as
+// implicit \0-termination for convenience.
 void mp_append_utf8_bstr(void *talloc_ctx, struct bstr *buf, uint32_t codepoint)
 {
     char data[8];
