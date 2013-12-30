@@ -208,7 +208,7 @@ static int init(struct dec_audio *da, const char *decoder)
 
     lavc_context = avcodec_alloc_context3(lavc_codec);
     ctx->avctx = lavc_context;
-    ctx->avframe = avcodec_alloc_frame();
+    ctx->avframe = av_frame_alloc();
     lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id;
 
@@ -299,7 +299,7 @@ static void uninit(struct dec_audio *da)
         av_freep(&lavc_context->extradata);
         av_freep(&lavc_context);
     }
-    avcodec_free_frame(&ctx->avframe);
+    av_frame_free(&ctx->avframe);
 }
 
 static int control(struct dec_audio *da, int cmd, void *arg)

@@ -56,7 +56,7 @@
     avfilter_graph_parse(graph, filters, inputs, outputs, log_ctx)
 #else
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
-    avfilter_graph_parse(graph, filters, &(inputs), &(outputs), log_ctx)
+    avfilter_graph_parse_ptr(graph, filters, &(inputs), &(outputs), log_ctx)
 #endif
 
 // ":" is deprecated, but "|" doesn't work in earlier versions.

@@ -185,7 +185,7 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
         }
         in_frame.samples = s->in_samples;
 
-        AVFrame *frame = avcodec_alloc_frame();
+        AVFrame *frame = av_frame_alloc();
         if (!frame) {
             MP_FATAL(af, "[libaf] Could not allocate memory \n");
             return -1;
@@ -205,7 +205,7 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
             return -1;
         }
 
-        avcodec_free_frame(&frame);
+        av_frame_free(&frame);
 
         mp_audio_buffer_skip(s->pending, consumed_pending);
 

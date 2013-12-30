@@ -223,7 +223,7 @@ static int encode(struct ao *ao, double apts, void **data)
     packet.size = ac->buffer_size;
     if(data)
     {
-        frame = avcodec_alloc_frame();
+        frame = av_frame_alloc();
         frame->nb_samples = ac->aframesize;
 
         assert(ao->channels.num <= AV_NUM_DATA_POINTERS);
@@ -259,7 +259,7 @@ static int encode(struct ao *ao, double apts, void **data)
                 ac->savepts = frame->pts;
         }
 
-        avcodec_free_frame(&frame);
+        av_frame_free(&frame);
     }
     else
     {
