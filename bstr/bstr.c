@@ -25,6 +25,7 @@
 
 #include "talloc.h"
 
+#include "common/common.h"
 #include "bstr/bstr.h"
 
 int bstrcmp(struct bstr str1, struct bstr str2)
@@ -318,13 +319,6 @@ int bstr_validate_utf8(struct bstr s)
     return 0;
 }
 
-static void append_bstr(bstr *buf, bstr s)
-{
-    buf->start = talloc_realloc(NULL, buf->start, unsigned char, buf->len + s.len);
-    memcpy(buf->start + buf->len, s.start, s.len);
-    buf->len += s.len;
-}
-
 struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s)
 {
     bstr new = {0};
@@ -333,13 +327,8 @@ struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s)
     while (left.len) {
         int r = bstr_decode_utf8(left, &left);
         if (r < 0) {
-            append_bstr(&new, (bstr){first_ok, left.start - first_ok});
-            uint32_t codepoint = (unsigned char)left.start[0];
-            char data[8];
-            uint8_t tmp;
-            char *output = data;
-            PUT_UTF8(codepoint, tmp, *output++ = tmp;);
-            append_bstr(&new, (bstr){data, output - data});
+            bstr_xappend(talloc_ctx, &new, (bstr){first_ok, left.start - first_ok});
+            mp_append_utf8_bstr(talloc_ctx, &new, (unsigned char)left.start[0]);
             left.start += 1;
             left.len -= 1;
             first_ok = left.start;
@@ -348,11 +337,7 @@ struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s)
     if (!new.start)
         return s;
     if (first_ok != left.start)
-        append_bstr(&new, (bstr){first_ok, left.start - first_ok});
-    // For convenience
-    append_bstr(&new, (bstr){"\0", 1});
-    new.len -= 1;
-    talloc_steal(talloc_ctx, new.start);
+        bstr_xappend(talloc_ctx, &new, (bstr){first_ok, left.start - first_ok});
     return new;
 }
 
