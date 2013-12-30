@@ -1329,6 +1329,21 @@ if test "$_pthreads" = no ; then
   die "Unable to find pthreads support."
 fi
 
+
+echocheck "compiler support for __atomic built-ins"
+_atomic=no
+for _ld_tmp in "" "-latomic" ; do
+  statement_check stdint.h 'int64_t test = 0; test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)' $_ld_tmp &&
+    libs_mplayer="$libs_mplayer $_ld_tmp" && _atomic=yes && break
+done
+if test "$_atomic" = yes ; then
+  def_atomic="#define HAVE_ATOMIC_BUILTINS 1"
+else
+  def_atomic="#define HAVE_ATOMIC_BUILTINS 0"
+fi
+echores "$_atomic"
+
+
 if test "$_pthreads" = yes ; then
 
 # Cargo-cult for -lrt, which is needed on not so recent glibc version for
@@ -3521,6 +3536,7 @@ $def_avresample_has_set_channel_mapping
 
 $def_fast_64bit
 $def_pthreads
+$def_atomic
 
 #define HAVE_INLINE_ASM 1
 

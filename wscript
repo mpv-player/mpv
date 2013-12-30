@@ -99,6 +99,13 @@ main_dependencies = [
         'req': True,
         'fmsg': 'Unable to find pthreads support.'
     }, {
+        'name': 'atomic_builtins',
+        'desc': 'compiler support for __atomic built-ins',
+        'func': check_libs(['atomic'],
+            check_statement('stdint.h',
+                'int64_t test = 0;'
+                'test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)'))
+    }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
         'deps': [ 'pthreads' ],
