@@ -429,7 +429,7 @@ Available filters are:
             ``'--vf=lavfi=yadif:o="threads=2,thread_type=slice"'``
                 forces a specific threading configuration.
 
-``noise[=<strength>[:average][:pattern][:temporal][:uniform][:hq]``
+``noise[=<strength>[:averaged][:pattern][:temporal][:uniform][:hq]``
     Adds noise.
 
     ``strength``
@@ -438,7 +438,7 @@ Available filters are:
         (using ``--vf=lavfi=[noise=...]``), or tell the libavfilter developers
         to stop being stupid.
 
-    ``average``
+    ``averaged``
         averaged temporal noise (smoother, but a lot slower)
 
     ``pattern``
