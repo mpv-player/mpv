@@ -746,20 +746,17 @@ const m_option_type_t m_option_type_float = {
 
 static char *unescape_string(void *talloc_ctx, bstr str)
 {
-    char *res = talloc_strdup(talloc_ctx, "");
+    bstr dst = {0};
     while (str.len) {
-        bstr rest;
-        bool esc = bstr_split_tok(str, "\\", &str, &rest);
-        res = talloc_strndup_append_buffer(res, str.start, str.len);
-        if (esc) {
-            if (!mp_parse_escape(&rest, &res)) {
-                talloc_free(res);
-                return NULL;
-            }
+        if (!mp_append_escaped_string(talloc_ctx, &dst, &str)) {
+            talloc_free(dst.start);
+            return NULL;
         }
-        str = rest;
+        if (!bstr_eatstart0(&str, "\""))
+            break;
+        bstr_xappend(talloc_ctx, &dst, bstr0("\""));
     }
-    return res;
+    return dst.start;
 }
 
 static char *escape_string(char *str0)

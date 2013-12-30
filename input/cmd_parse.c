@@ -41,31 +41,6 @@ static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
     return true;
 }
 
-static bool read_escaped_string(void *talloc_ctx, bstr *str, bstr *literal)
-{
-    bstr t = *str;
-    char *new = talloc_strdup(talloc_ctx, "");
-    while (t.len) {
-        if (t.start[0] == '"')
-            break;
-        if (t.start[0] == '\\') {
-            t = bstr_cut(t, 1);
-            if (!mp_parse_escape(&t, &new))
-                goto error;
-        } else {
-            new = talloc_strndup_append_buffer(new, t.start, 1);
-            t = bstr_cut(t, 1);
-        }
-    }
-    int len = str->len - t.len;
-    *literal = new ? bstr0(new) : bstr_splice(*str, 0, len);
-    *str = bstr_cut(*str, len);
-    return true;
-error:
-    talloc_free(new);
-    return false;
-}
-
 // Somewhat awkward; the main purpose is supporting both strings and
 // pre-split string arrays as input.
 struct parse_ctx {
@@ -92,7 +67,7 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
         ctx->str = bstr_lstrip(ctx->str);
         bstr start = ctx->str;
         if (bstr_eatstart0(&ctx->str, "\"")) {
-            if (!read_escaped_string(ctx->tmp, &ctx->str, out)) {
+            if (!mp_append_escaped_string_noalloc(ctx->tmp, out, &ctx->str)) {
                 MP_ERR(ctx, "Broken string escapes: ...>%.*s<.\n", BSTR_P(start));
                 return -1;
             }
