@@ -251,39 +251,49 @@ found:
     return -1;
 }
 
-char *mp_input_get_key_name(int key, char *ret)
+static void mp_input_append_key_name(bstr *buf, int key)
 {
     for (int i = 0; modifier_names[i].name; i++) {
         if (modifier_names[i].key & key) {
-            ret = talloc_asprintf_append_buffer(ret, "%s+",
-                                                modifier_names[i].name);
+            bstr_xappend_asprintf(NULL, buf, "%s+", modifier_names[i].name);
             key -= modifier_names[i].key;
         }
     }
     for (int i = 0; key_names[i].name != NULL; i++) {
-        if (key_names[i].key == key)
-            return talloc_asprintf_append_buffer(ret, "%s", key_names[i].name);
+        if (key_names[i].key == key) {
+            bstr_xappend_asprintf(NULL, buf, "%s", key_names[i].name);
+            return;
+        }
     }
 
     // printable, and valid unicode range
-    if (key >= 32 && key <= 0x10FFFF)
-        return mp_append_utf8_buffer(ret, key);
+    if (key >= 32 && key <= 0x10FFFF) {
+        mp_append_utf8_bstr(NULL, buf, key);
+        return;
+    }
 
     // Print the hex key code
-    return talloc_asprintf_append_buffer(ret, "%#-8x", key);
+    bstr_xappend_asprintf(NULL, buf, "%#-8x", key);
+}
+
+char *mp_input_get_key_name(int key)
+{
+    bstr dst = {0};
+    mp_input_append_key_name(&dst, key);
+    return dst.start;
 }
 
 char *mp_input_get_key_combo_name(int *keys, int max)
 {
-    char *ret = talloc_strdup(NULL, "");
+    bstr dst = {0};
     while (max > 0) {
-        ret = mp_input_get_key_name(*keys, ret);
+        mp_input_append_key_name(&dst, *keys);
         if (--max && *++keys)
-            ret = talloc_asprintf_append_buffer(ret, "-");
+            bstr_xappend(NULL, &dst, bstr0("-"));
         else
             break;
     }
-    return ret;
+    return dst.start;
 }
 
 int mp_input_get_keys_from_string(char *name, int max_num_keys,

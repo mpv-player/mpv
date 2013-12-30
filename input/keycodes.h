@@ -256,8 +256,8 @@
 // Get input key from its name.
 int mp_input_get_key_from_name(const char *name);
 
-// Append given key by name to ret, return ret.
-char *mp_input_get_key_name(int key, char *ret);
+// Return given key (plus modifiers) as talloc'ed name.
+char *mp_input_get_key_name(int key);
 
 // Combination of multiple keys to string.
 char *mp_input_get_key_combo_name(int *keys, int max);

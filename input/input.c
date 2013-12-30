@@ -596,7 +596,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 
     if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
         int noflags = code & ~(MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
-        char *key = mp_input_get_key_name(noflags, NULL);
+        char *key = mp_input_get_key_name(noflags);
         MP_DBG(ictx, "key code=%#x '%s'%s%s\n",
                code, key, (code & MP_KEY_STATE_DOWN) ? " down" : "",
                (code & MP_KEY_STATE_UP) ? " up" : "");
