@@ -98,7 +98,7 @@ void mp_print_version(struct mp_log *log, int always)
 {
     int v = always ? MSGL_INFO : MSGL_V;
     mp_msg(log, v,
-           "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n",
+           "%s (C) 2000-2014 mpv/MPlayer/mplayer2 projects\n built on %s\n",
            mpv_version, mpv_builddate);
     print_libav_versions(log, v);
     mp_msg(log, v, "\n");
