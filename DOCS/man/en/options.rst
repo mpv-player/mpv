@@ -1369,8 +1369,7 @@ OPTIONS
     :trace:     very noisy debug messages
 
     One special case is the ``identify`` module name. This is silenced by
-    default, and can be set to ``trace`` level to enable the remains of the
-    code once enabled with the ``-identify`` option.
+    default, and can be enabled with the ``-identify`` option.
 
 ``--msgmodule``
     Prepend module name in front of each console message.
