@@ -2,11 +2,14 @@
 Type=Application
 Name=mpv Media Player
 Name[ca]=Reproductor multimèdia mpv
+Name[cs]=mpv přehrávač
 Name[pl]=mpv odtwarzacz multimedialny
 Name[ru]=Проигрыватель mpv
 GenericName=Multimedia player
+GenericName[cs]=Multimediální přehrávač
 Comment=Play movies and songs
 Comment[ca]=Reproduïu vídeos i cançons
+Comment[cs]=Přehrává filmy a hudbu
 Comment[de]=Filme und Musik abspielen
 Comment[es]=Reproduzca vídeos y canciones
 Comment[fr]=Lecteur multimédia
