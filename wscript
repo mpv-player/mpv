@@ -118,7 +118,7 @@ main_dependencies = [
         'func': check_true,
         'deps_any': ['atomic-builtins', 'sync-builtins'],
         'req': True,
-        'fmsg': 'your compiler must support either __atomic or __aync bult-ins',
+        'fmsg': 'your compiler must support either __atomic or __sync built-ins',
     }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
