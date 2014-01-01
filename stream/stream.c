@@ -562,7 +562,7 @@ struct bstr stream_peek(stream_t *s, int len)
         while (buf_valid < len) {
             int chunk = MPMAX(len - buf_valid, STREAM_BUFFER_SIZE);
             if (s->sector_size)
-                chunk = STREAM_BUFFER_SIZE;
+                chunk = s->sector_size;
             assert(buf_valid + chunk <= TOTAL_BUFFER_SIZE);
             int read = stream_read_unbuffered(s, &s->buffer[buf_valid], chunk);
             if (read == 0)
