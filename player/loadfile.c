@@ -281,7 +281,7 @@ void reselect_demux_streams(struct MPContext *mpctx)
     // Note: we assume that all demuxer streams are covered by the track list.
     for (int t = 0; t < mpctx->num_tracks; t++) {
         struct track *track = mpctx->tracks[t];
-        if (track->demuxer)
+        if (track->demuxer && track->stream)
             demuxer_select_track(track->demuxer, track->stream, track->selected);
     }
 }
