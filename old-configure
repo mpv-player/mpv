@@ -1343,6 +1343,23 @@ else
 fi
 echores "$_atomic"
 
+if test "$_atomic" = no ; then
+  echocheck "compiler support for __sync built-ins"
+  _sync=no
+  statement_check stdint.h 'int64_t test = 0; test = __sync_add_and_fetch(&test, 1)' && _sync=yes
+  if test "$_sync" = yes ; then
+    def_sync="#define HAVE_SYNC_BUILTINS 1"
+  else
+    def_sync="#define HAVE_SYNC_BUILTINS 0"
+  fi
+  echores "$_sync"
+else
+  def_sync="#define HAVE_SYNC_BUILTINS 0"
+fi
+
+if test "$_atomic" = no && test "$_sync" = no ; then
+  die "your compiler must support either __atomic or __aync bult-ins."
+fi
 
 if test "$_pthreads" = yes ; then
 
@@ -3537,6 +3554,7 @@ $def_avresample_has_set_channel_mapping
 $def_fast_64bit
 $def_pthreads
 $def_atomic
+$def_sync
 
 #define HAVE_INLINE_ASM 1
 

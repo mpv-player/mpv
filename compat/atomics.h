@@ -24,7 +24,9 @@
 #if HAVE_ATOMIC_BUILTINS
 # define mp_memory_barrier()           __atomic_thread_fence(__ATOMIC_SEQ_CST)
 # define mp_atomic_add_and_fetch(a, b) __atomic_add_fetch(a, b,__ATOMIC_SEQ_CST)
-#else
+#elif HAVE_SYNC_BUILTINS
 # define mp_memory_barrier()           __sync_synchronize()
 # define mp_atomic_add_and_fetch(a, b) __sync_add_and_fetch(a, b)
+#else
+# error "this should have been a configuration error, report a bug please"
 #endif
