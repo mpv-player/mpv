@@ -1358,7 +1358,7 @@ else
 fi
 
 if test "$_atomic" = no && test "$_sync" = no ; then
-  die "your compiler must support either __atomic or __aync bult-ins."
+  die "your compiler must support either __atomic or __sync built-ins."
 fi
 
 if test "$_pthreads" = yes ; then
