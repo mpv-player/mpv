@@ -57,6 +57,13 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
     bool r = true;
     char *conffile;
 
+    // The #if is a stupid hack to avoid errors if libavfilter is not available.
+#if HAVE_VF_LAVFI && HAVE_ENCODING
+    conffile = mp_find_config_file(tmp, mpctx->global, "encoding-profiles.conf");
+    if (conffile && mp_path_exists(conffile))
+        m_config_parse_config_file(mpctx->mconfig, conffile, 0);
+#endif
+
     if (m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf", 0) < 0) {
         r = false;
         goto done;
@@ -76,13 +83,6 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
             goto done;
         }
     }
-
-    // The #if is a stupid hack to avoid errors if libavfilter is not available.
-#if HAVE_VF_LAVFI && HAVE_ENCODING
-    conffile = mp_find_config_file(tmp, mpctx->global, "encoding-profiles.conf");
-    if (conffile && mp_path_exists(conffile))
-        m_config_parse_config_file(mpctx->mconfig, conffile, 0);
-#endif
 
 done:
     talloc_free(tmp);
