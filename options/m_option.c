@@ -1296,6 +1296,17 @@ static int parse_msglevels(struct mp_log *log, const m_option_t *opt,
     if (param.start == NULL)
         return M_OPT_MISSING_PARAM;
 
+    if (bstr_equals0(param, "help")) {
+        mp_info(log, "Syntax: --msglevel=module1=level:module2=level:...\n"
+                     "'module' is output prefix as shown with -v, or a prefix\n"
+                     "of it. level is one of:\n\n"
+                     "  fatal error warn info status v debug trace\n\n"
+                     "The level specifies the minimum log level a message\n"
+                     "must have to be printed.\n"
+                     "The special module name 'all' affects all modules.\n");
+        return M_OPT_EXIT;
+    }
+
     bstr s = param;
     while (1) {
         int res = mp_msg_split_msglevel(&s, &(bstr){0}, &(int){0});
