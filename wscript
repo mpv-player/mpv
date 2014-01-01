@@ -77,7 +77,7 @@ main_dependencies = [
         'desc': 'linker support for --nxcompat --no-seh --dynamicbase',
         'func': check_cc(linkflags=['-Wl,--nxcompat', '-Wl,--no-seh', '-Wl,--dynamicbase'])
     }, {
-        'name': 'ebx_available',
+        'name': 'ebx-available',
         'desc': 'ebx availability',
         'func': check_cc(fragment=load_fragment('ebx.c'))
     } , {
@@ -99,12 +99,26 @@ main_dependencies = [
         'req': True,
         'fmsg': 'Unable to find pthreads support.'
     }, {
-        'name': 'atomic_builtins',
+        'name': 'atomic-builtins',
         'desc': 'compiler support for __atomic built-ins',
         'func': check_libs(['atomic'],
             check_statement('stdint.h',
                 'int64_t test = 0;'
                 'test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)'))
+    }, {
+        'name': 'sync-builtins',
+        'desc': 'compiler support for __sync built-ins',
+        'func': check_statement('stdint.h',
+                    'int64_t test = 0;'
+                    'test = __sync_add_and_fetch(&test, 1)'),
+        'deps_neg': [ 'atomic-builtins' ],
+    }, {
+        'name': 'thread-synchronization-builtins',
+        'desc': 'compiler support for usable thread synchronization built-ins',
+        'func': check_true,
+        'deps_any': ['atomic-builtins', 'sync-builtins'],
+        'req': True,
+        'fmsg': 'your compiler must support either __atomic or __aync bult-ins',
     }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
