@@ -2022,8 +2022,10 @@ OPTIONS
     the top of the screen) alongside the normal subtitle, and provides a way
     to render two subtitles at once.
 
-    there are some caveats associated with this feature. For example, secondary
-    subtitles are never shown on the terminal if video is disabled.
+    there are some caveats associated with this feature. For example, bitmap
+    subtitles will always be rendered in their usual position, so selecting a
+    bitmap subtitle as secondary subtitle will result in overlapping subtitles.
+    Secondary subtitles are never shown on the terminal if video is disabled.
 
     .. note::
 
