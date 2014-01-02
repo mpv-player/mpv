@@ -240,9 +240,6 @@ static void buffer_swap(struct priv *p)
     struct buffer *tmp = p->back_buffer;
     p->back_buffer = p->front_buffer;
     p->front_buffer = tmp;
-
-    // after swap set is_new to false, but keep busy
-    p->back_buffer->is_new = false;
 }
 
 
@@ -250,31 +247,30 @@ static void buffer_swap(struct priv *p)
 // is busy (unlikely)
 static struct buffer * buffer_get_back(struct priv *p)
 {
-    if (p->back_buffer->is_new || p->back_buffer->is_busy)
+    if (p->back_buffer->is_busy)
         return NULL;
-
-    p->back_buffer->is_busy = true;
 
     return p->back_buffer;
 }
 
-static bool buffer_finalise_back(struct priv *p)
+static bool buffer_finalise_back(struct buffer *buf)
 {
-    p->back_buffer->is_new = true;
-    p->back_buffer->is_busy = false;
-
+    buf->is_new = true;
     return true;
 }
 
 static struct buffer * buffer_get_front(struct priv *p)
 {
+    if (!p->front_buffer->is_new)
+        return NULL;
+
     p->front_buffer->is_busy = true;
     return p->front_buffer;
 }
 
-static bool buffer_finalise_front(struct priv *p)
+static bool buffer_finalise_front(struct buffer *buf)
 {
-    p->front_buffer->is_new = false; // is_busy is reset on handle_release
+    buf->is_new = false; // is_busy is reset on handle_release
     return true;
 }
 
@@ -469,36 +465,44 @@ static void frame_handle_redraw(void *data,
     struct vo_wayland_state *wl = p->wl;
     struct buffer *buf = buffer_get_front(p);
 
-    if (p->resize_attach) {
-        wl_surface_attach(wl->window.surface, buf->wlbuf, p->x, p->y);
+    if (buf) {
+        if (p->resize_attach) {
+            wl_surface_attach(wl->window.surface, buf->wlbuf, p->x, p->y);
+            wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
+            wl_surface_commit(wl->window.surface);
+
+            if (callback)
+                wl_callback_destroy(callback);
+
+            p->redraw_callback = NULL;
+            buffer_finalise_front(buf);
+            p->resize_attach = false;
+
+            destroy_shm_buffer(&p->tmp_buffer);
+
+            // I have to destroy the callback and return early to avoid black flickers
+            // I don't exactly know why this, but I guess the back buffer is still
+            // empty. The callback loop will be restored on the next flip_page call
+            return;
+        }
+
+        wl_surface_attach(wl->window.surface, buf->wlbuf, 0, 0);
         wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
-        wl_surface_commit(wl->window.surface);
 
         if (callback)
             wl_callback_destroy(callback);
 
-        p->redraw_callback = NULL;
-        buffer_finalise_front(p);
-        p->resize_attach = false;
-
-        destroy_shm_buffer(&p->tmp_buffer);
-
-        // I have to destroy the callback and return early to avoid black flickers
-        // I don't exactly know why this, but I guess the back buffer is still
-        // empty. The callback loop will be restored on the next flip_page call
-        return;
+        p->redraw_callback = wl_surface_frame(wl->window.surface);
+        wl_callback_add_listener(p->redraw_callback, &frame_listener, p);
+        wl_surface_commit(wl->window.surface);
+        buffer_finalise_front(buf);
     }
+    else {
+        if (callback)
+            wl_callback_destroy(callback);
 
-    wl_surface_attach(wl->window.surface, buf->wlbuf, 0, 0);
-    wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
-
-    if (callback)
-        wl_callback_destroy(callback);
-
-    p->redraw_callback = wl_surface_frame(wl->window.surface);
-    wl_callback_add_listener(p->redraw_callback, &frame_listener, p);
-    wl_surface_commit(wl->window.surface);
-    buffer_finalise_front(p);
+        p->redraw_callback = NULL;
+    }
 }
 
 static const struct wl_callback_listener frame_listener = {
@@ -549,7 +553,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     mp_sws_scale(p->sws, &img, &src);
 
     mp_image_setrefp(&p->original_image, mpi);
-    buffer_finalise_back(p);
+    buffer_finalise_back(buf);
 }
 
 static void draw_osd(struct vo *vo, struct osd_state *osd)
