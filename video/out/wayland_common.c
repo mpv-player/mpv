@@ -810,7 +810,7 @@ static void vo_wayland_border (struct vo *vo)
 static void vo_wayland_fullscreen (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
-    if (!wl->display.shell)
+    if (!wl->display.shell || !!vo->opts->fullscreen == wl->window.is_fullscreen)
         return;
 
     struct wl_output *fs_output = wl->display.fs_output;
