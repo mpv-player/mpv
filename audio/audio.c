@@ -15,6 +15,9 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdint.h>
+#include <limits.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include <libavutil/mem.h>
@@ -145,6 +148,8 @@ static void mp_audio_destructor(void *ptr)
 void mp_audio_realloc(struct mp_audio *mpa, int samples)
 {
     assert(samples >= 0);
+    if (samples >= INT_MAX / mpa->sstride)
+        abort(); // oom
     int size = MPMAX(samples * mpa->sstride, 1);
     for (int n = 0; n < mpa->num_planes; n++) {
         if (size != mpa->allocated[n]) {
