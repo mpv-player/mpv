@@ -2,6 +2,8 @@
 #import <OpenGL/OpenGL.h>
 #import <Cocoa/Cocoa.h>
 
+#include "osdep/macosx_compat.h"
+
 int main(int argc, char **argv) {
     @autoreleasepool {
         NSArray *ary = @[@1, @2, @3];
