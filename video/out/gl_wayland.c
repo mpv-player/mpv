@@ -167,7 +167,6 @@ static void egl_create_window(struct vo_wayland_state *wl,
                    egl_ctx->egl.ctx);
 
     wl_display_dispatch_pending(wl->display.display);
-
 }
 
 static bool config_window_wayland(struct MPGLContext *ctx,

@@ -587,29 +587,27 @@ static void shedule_resize(struct vo_wayland_state *wl,
     // don't keep the aspect ration in fullscreen mode, because the compositor
     // shows the desktop in the border regions if the video has not the same
     // aspect ration as the screen
-    if (!wl->window.is_fullscreen) {
-        /* if only the height is changed we have to calculate the width
-         * in any other case we calculate the height */
-        switch (edges) {
-            case WL_SHELL_SURFACE_RESIZE_TOP:
-            case WL_SHELL_SURFACE_RESIZE_BOTTOM:
+    /* if only the height is changed we have to calculate the width
+     * in any other case we calculate the height */
+    switch (edges) {
+        case WL_SHELL_SURFACE_RESIZE_TOP:
+        case WL_SHELL_SURFACE_RESIZE_BOTTOM:
+            width = wl->window.aspect * height;
+            break;
+        case WL_SHELL_SURFACE_RESIZE_LEFT:
+        case WL_SHELL_SURFACE_RESIZE_RIGHT:
+        case WL_SHELL_SURFACE_RESIZE_TOP_LEFT:    // just a preference
+        case WL_SHELL_SURFACE_RESIZE_TOP_RIGHT:
+        case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
+        case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
+            height = (1 / wl->window.aspect) * width;
+            break;
+        default:
+            if (wl->window.aspect < temp_aspect)
                 width = wl->window.aspect * height;
-                break;
-            case WL_SHELL_SURFACE_RESIZE_LEFT:
-            case WL_SHELL_SURFACE_RESIZE_RIGHT:
-            case WL_SHELL_SURFACE_RESIZE_TOP_LEFT:    // just a preference
-            case WL_SHELL_SURFACE_RESIZE_TOP_RIGHT:
-            case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
-            case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
+            else
                 height = (1 / wl->window.aspect) * width;
-                break;
-            default:
-                if (wl->window.aspect < temp_aspect)
-                    width = wl->window.aspect * height;
-                else
-                    height = (1 / wl->window.aspect) * width;
-                break;
-        }
+            break;
     }
 
     if (edges & WL_SHELL_SURFACE_RESIZE_LEFT)
@@ -986,6 +984,9 @@ bool vo_wayland_config (struct vo *vo, uint32_t d_width,
     wl->window.p_height = d_height;
     wl->window.aspect = wl->window.width / (float) MPMAX(wl->window.height, 1);
 
+    vo_wayland_ontop(vo); // workaround for the weston fullscreen bug
+    // I can't set fullscreen twice so I need to change back and forth to get
+    // the right configure event from weston.
     vo_wayland_fullscreen(vo);
 
     return true;
