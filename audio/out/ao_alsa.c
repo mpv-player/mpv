@@ -53,7 +53,6 @@ struct priv {
     snd_pcm_t *alsa;
     snd_pcm_format_t alsa_fmt;
     int can_pause;
-    int can_resume;
     snd_pcm_sframes_t prepause_frames;
     float delay_before_pause;
     int buffersize; // in frames
@@ -522,7 +521,6 @@ static int init(struct ao *ao)
     /* end setting sw-params */
 
     p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
-    p->can_resume = snd_pcm_hw_params_can_resume(alsa_hwparams);
 
     MP_VERBOSE(ao, "opened: %d Hz/%d channels/%d bps/%d samples buffer/%s\n",
                ao->samplerate, ao->channels.num, af_fmt2bits(ao->format),
@@ -590,16 +588,17 @@ static void audio_resume(struct ao *ao)
 
         while ((err = snd_pcm_resume(p->alsa)) == -EAGAIN)
             sleep(1);
+    }
 
-        if (err < 0 || !p->can_resume) {
-            /* Some ALSA drivers that cannot resume playback are buggy and
-               fail to work even after snd_pcm_resume (or the high-level
-               snd_pcm_recover) indicates success, so always call
-               snd_pcm_prepare here. */
-            MP_VERBOSE(ao, "hardware does not support resume\n");
-            err = snd_pcm_prepare(p->alsa);
-            CHECK_ALSA_ERROR("pcm prepare error");
-        }
+    if (p->can_pause) {
+        err = snd_pcm_pause(p->alsa, 0);
+        CHECK_ALSA_ERROR("pcm resume error");
+    } else {
+        MP_VERBOSE(ao, "resume not supported by hardware\n");
+        err = snd_pcm_prepare(p->alsa);
+        CHECK_ALSA_ERROR("pcm prepare error");
+        if (p->prepause_frames)
+            ao_play_silence(ao, p->prepause_frames);
     }
 
 alsa_error: ;
