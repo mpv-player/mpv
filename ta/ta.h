@@ -54,6 +54,7 @@ void *ta_find_parent(void *ptr);
 
 // Utility functions
 size_t ta_calc_array_size(size_t element_size, size_t count);
+size_t ta_calc_prealloc_elems(size_t nextidx);
 void *ta_new_context(void *ta_parent);
 void *ta_steal_(void *ta_parent, void *ptr);
 void *ta_memdup(void *ta_parent, void *ptr, size_t size);
