@@ -53,6 +53,7 @@ struct priv {
     snd_pcm_t *alsa;
     snd_pcm_format_t alsa_fmt;
     int can_pause;
+    int can_resume;
     snd_pcm_sframes_t prepause_frames;
     float delay_before_pause;
     int buffersize; // in frames
@@ -521,6 +522,7 @@ static int init(struct ao *ao)
     /* end setting sw-params */
 
     p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
+    p->can_resume = snd_pcm_hw_params_can_resume(alsa_hwparams);
 
     MP_VERBOSE(ao, "opened: %d Hz/%d channels/%d bps/%d samples buffer/%s\n",
                ao->samplerate, ao->channels.num, af_fmt2bits(ao->format),
@@ -585,18 +587,19 @@ static void audio_resume(struct ao *ao)
 
     if (snd_pcm_state(p->alsa) == SND_PCM_STATE_SUSPENDED) {
         MP_INFO(ao, "PCM in suspend mode, trying to resume.\n");
+
         while ((err = snd_pcm_resume(p->alsa)) == -EAGAIN)
             sleep(1);
-    }
-    if (p->can_pause) {
-        err = snd_pcm_pause(p->alsa, 0);
-        CHECK_ALSA_ERROR("pcm resume error");
-    } else {
-        MP_VERBOSE(ao, "resume not supported by hardware\n");
-        err = snd_pcm_prepare(p->alsa);
-        CHECK_ALSA_ERROR("pcm prepare error");
-        if (p->prepause_frames)
-            ao_play_silence(ao, p->prepause_frames);
+
+        if (err < 0 || !p->can_resume) {
+            /* Some ALSA drivers that cannot resume playback are buggy and
+               fail to work even after snd_pcm_resume (or the high-level
+               snd_pcm_recover) indicates success, so always call
+               snd_pcm_prepare here. */
+            MP_VERBOSE(ao, "hardware does not support resume\n");
+            err = snd_pcm_prepare(p->alsa);
+            CHECK_ALSA_ERROR("pcm prepare error");
+        }
     }
 
 alsa_error: ;
@@ -639,11 +642,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             /* nothing to do */
             res = 0;
         } else if (res == -ESTRPIPE) {  /* suspend */
-            MP_INFO(ao, "PCM in suspend mode, trying to resume.\n");
-            while ((res = snd_pcm_resume(p->alsa)) == -EAGAIN)
-                sleep(1);
-        }
-        if (res < 0) {
+            audio_resume(ao);
+        } else if (res < 0) {
             MP_ERR(ao, "Write error: %s\n", snd_strerror(res));
             res = snd_pcm_prepare(p->alsa);
             int err = res;
