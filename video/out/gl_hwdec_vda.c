@@ -20,6 +20,7 @@
 #include <IOSurface/IOSurface.h>
 #include <CoreVideo/CoreVideo.h>
 #include <OpenGL/OpenGL.h>
+#include <OpenGL/CGLIOSurface.h>
 
 #include "video/decode/dec_video.h"
 #include "cocoa_common.h"
