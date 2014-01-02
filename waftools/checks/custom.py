@@ -3,7 +3,8 @@ from waftools.checks.generic import *
 from waflib import Utils
 import os
 
-__all__ = ["check_pthreads", "check_iconv", "check_lua", "check_oss_4front"]
+__all__ = ["check_pthreads", "check_iconv", "check_lua", "check_oss_4front",
+           "check_cocoa"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -99,5 +100,15 @@ def check_oss_4front(ctx, dependency_identifier):
                            'PATH_DEV_MIXER="/dev/mixer"'],
                   cflags='-I{0}'.format(include_dir),
                   fragment=load_fragment('oss_audio.c'))
+
+    return fn(ctx, dependency_identifier)
+
+def check_cocoa(ctx, dependency_identifier):
+    fn = check_cc(
+        fragment         = load_fragment('cocoa.m'),
+        compile_filename = 'test.m',
+        framework_name   = ['Cocoa', 'IOKit', 'OpenGL'],
+        includes         = ctx.srcnode.abspath(),
+        linkflags        = '-fobjc-arc')
 
     return fn(ctx, dependency_identifier)

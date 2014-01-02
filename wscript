@@ -498,11 +498,7 @@ video_output_features = [
     {
         'name': '--cocoa',
         'desc': 'Cocoa',
-        'func': check_cc(
-            fragment=load_fragment('cocoa.m'),
-            compile_filename='test.m',
-            framework_name=['Cocoa', 'IOKit', 'OpenGL'],
-            linkflags='-fobjc-arc')
+        'func': check_cocoa
     } , {
         'name': 'gdi',
         'desc': 'GDI',
