@@ -447,6 +447,19 @@ def build(ctx):
         **cprog_kwargs
     )
 
+    if ctx.env.DEST_OS == 'win32':
+        wrapctx = ctx(
+            target       = "mpv",
+            source       = ['osdep/win32-console-wrapper.c'],
+            features     = "c cprogram",
+            install_path = ctx.env.BINDIR
+        )
+
+        wrapctx.env.cprogram_PATTERN = "%s.com"
+        wrapflags = ['-municode', '-mconsole']
+        wrapctx.env.CFLAGS = wrapflags
+        wrapctx.env.LAST_LINKFLAGS = wrapflags
+
     if ctx.dependency_satisfied('macosx-bundle'):
         from waflib import Utils
         ctx.install_files(ctx.env.BINDIR, 'mpv', chmod=Utils.O755)
