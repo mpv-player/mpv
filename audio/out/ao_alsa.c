@@ -657,7 +657,6 @@ alsa_error:
     return -1;
 }
 
-/* how many byes are free in the buffer */
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
