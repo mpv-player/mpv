@@ -20,6 +20,8 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include <libavutil/common.h>
 
@@ -348,6 +350,8 @@ static void resize_append(void *talloc_ctx, bstr *s, size_t append_min)
     if (append_min > size - s->len) {
         if (append_min < size)
             append_min = size; // preallocate in power of 2s
+        if (size >= SIZE_MAX / 2 || append_min >= SIZE_MAX / 2)
+            abort(); // oom
         s->start = talloc_realloc_size(talloc_ctx, s->start, size + append_min);
     }
 }
