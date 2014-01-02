@@ -25,6 +25,7 @@
 #include <QuartzCore/QuartzCore.h>
 #if HAVE_VDA_HWACCEL
 #include <IOSurface/IOSurface.h>
+#include <OpenGL/CGLIOSurface.h>
 #endif
 
 #include <assert.h>
