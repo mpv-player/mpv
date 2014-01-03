@@ -1608,6 +1608,9 @@ OPTIONS
     controls how much of the image is cropped. May not work with all video
     output drivers.
 
+``--pause``
+    Start the player in paused state.
+
 ``--playing-msg=<string>``
     Print out a string after starting playback. The string is expanded for
     properties, e.g. ``--playing-msg='file: ${filename}'`` will print the string
