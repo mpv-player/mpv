@@ -1520,6 +1520,7 @@ pvr_stream_open (stream_t *stream, int mode)
     return STREAM_UNSUPPORTED;
 
   pvr = pvr_init ();
+  pvr->log = stream->log;
 
   /**
    * if the url, i.e. 'pvr://8', contains the channel, use it,
