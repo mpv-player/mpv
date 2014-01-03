@@ -243,7 +243,7 @@ void mp_nav_get_highlight(struct osd_state *osd, struct mp_osd_res res,
     sub->y = nav->highlight[1];
     sub->w = MPCLAMP(nav->highlight[2] - sub->x, 0, sizes[0]);
     sub->h = MPCLAMP(nav->highlight[3] - sub->y, 0, sizes[1]);
-    sub->stride = sub->w;
+    sub->stride = sub->w * 4;
     out_imgs->format = SUBBITMAP_RGBA;
     out_imgs->parts = sub;
     out_imgs->num_parts = sub->w > 0 && sub->h > 0 && nav->hi_visible;
