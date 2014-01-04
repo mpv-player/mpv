@@ -102,6 +102,11 @@ struct vo_x11_state {
     /* Increment it before XShmPutImage */
     int ShmCompletionWaitCount;
 
+    /* drag and drop */
+    Atom dnd_property;
+    Atom dnd_requested_format;
+    Window dnd_src_window;
+
     Atom XA_NET_SUPPORTED;
     Atom XA_NET_WM_STATE;
     Atom XA_NET_WM_STATE_FULLSCREEN;
@@ -119,6 +124,18 @@ struct vo_x11_state {
     Atom XAWM_DELETE_WINDOW;
     Atom XAUTF8_STRING;
     Atom XA_NET_WM_CM;
+    Atom XATARGETS;
+    Atom XAXdndAware;
+    Atom XAXdndEnter;
+    Atom XAXdndLeave;
+    Atom XAXdndPosition;
+    Atom XAXdndStatus;
+    Atom XAXdndActionCopy;
+    Atom XAXdndTypeList;
+    Atom XAXdndDrop;
+    Atom XAXdndSelection;
+    Atom XAXdndFinished;
+    Atom XA_uri_list;
 };
 
 int vo_x11_init(struct vo *vo);

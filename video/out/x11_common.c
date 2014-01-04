@@ -93,6 +93,8 @@
 #define WIN_LAYER_ONTOP                  6
 #define WIN_LAYER_ABOVE_DOCK             10
 
+#define DND_VERSION 5
+
 // ----- Motif header: -------
 
 #define MWM_HINTS_FUNCTIONS     (1L << 0)
@@ -342,17 +344,17 @@ static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
     return 0;
 }
 
-static int x11_get_property(struct vo_x11_state *x11, Atom type, Atom **args,
-                            unsigned long *nitems)
+static bool x11_get_property(struct vo_x11_state *x11, Window wnd, Atom type,
+                             Atom **args, unsigned long *nitems)
 {
     int format;
     unsigned long bytesafter;
 
     return Success ==
-           XGetWindowProperty(x11->display, x11->rootwin, type, 0, 16384, False,
+           XGetWindowProperty(x11->display, wnd, type, 0, 16384, False,
                               AnyPropertyType, &type, &format, nitems,
                               &bytesafter, (unsigned char **) args)
-           && *nitems > 0;
+           && *nitems > 0 && bytesafter == 0;
 }
 
 static int vo_wm_detect(struct vo *vo)
@@ -362,12 +364,13 @@ static int vo_wm_detect(struct vo *vo)
     int wm = 0;
     unsigned long nitems;
     Atom *args = NULL;
+    Window win = x11->rootwin;
 
     if (vo->opts->WinID >= 0)
         return 0;
 
 // -- supports layers
-    if (x11_get_property(x11, x11->XA_WIN_PROTOCOLS, &args, &nitems)) {
+    if (x11_get_property(x11, win, x11->XA_WIN_PROTOCOLS, &args, &nitems)) {
         MP_VERBOSE(x11, "Detected wm supports layers.\n");
         for (i = 0; i < nitems; i++) {
             if (args[i] == x11->XA_WIN_LAYER)
@@ -376,7 +379,7 @@ static int vo_wm_detect(struct vo *vo)
         XFree(args);
     }
 // --- netwm
-    if (x11_get_property(x11, x11->XA_NET_SUPPORTED, &args, &nitems)) {
+    if (x11_get_property(x11, win, x11->XA_NET_SUPPORTED, &args, &nitems)) {
         MP_VERBOSE(x11, "Detected wm supports NetWM.\n");
         for (i = 0; i < nitems; i++)
             wm |= net_wm_support_state_test(vo->x11, args[i]);
@@ -407,9 +410,21 @@ static void init_atoms(struct vo_x11_state *x11)
     XA_INIT(WM_PROTOCOLS);
     XA_INIT(WM_DELETE_WINDOW);
     XA_INIT(UTF8_STRING);
+    XA_INIT(TARGETS);
+    XA_INIT(XdndAware);
+    XA_INIT(XdndEnter);
+    XA_INIT(XdndLeave);
+    XA_INIT(XdndPosition);
+    XA_INIT(XdndStatus);
+    XA_INIT(XdndActionCopy);
+    XA_INIT(XdndTypeList);
+    XA_INIT(XdndDrop);
+    XA_INIT(XdndSelection);
+    XA_INIT(XdndFinished);
     char buf[50];
     sprintf(buf, "_NET_WM_CM_S%d", x11->screen);
     x11->XA_NET_WM_CM = XInternAtom(x11->display, buf, False);
+    x11->XA_uri_list = XInternAtom(x11->display, "text/uri-list", False);
 }
 
 static void vo_x11_update_screeninfo(struct vo *vo)
@@ -720,6 +735,155 @@ void vo_x11_uninit(struct vo *vo)
     vo->x11 = NULL;
 }
 
+// The data is in the form of the mimetype text/uri-list.
+static bool dnd_handle_drop_data(struct vo *vo, bstr data)
+{
+    void *tmp = talloc_new(NULL);
+    int num_files = 0;
+    char **files = NULL;
+    while (data.len) {
+        bstr line = bstr_getline(data, &data);
+        line = bstr_strip_linebreaks(line);
+        if (bstr_startswith0(line, "#"))
+            continue;
+        char *s = bstrto0(tmp, line);
+        MP_TARRAY_APPEND(tmp, files, num_files, s);
+    }
+    vo_drop_files(vo, num_files, files);
+    talloc_free(tmp);
+    return num_files > 0;
+}
+
+static void vo_x11_dnd_init_window(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    Atom version = DND_VERSION;
+    XChangeProperty(x11->display, x11->window, x11->XAXdndAware, XA_ATOM,
+                    32, PropModeReplace, (unsigned char *)&version, 1);
+
+    x11->dnd_property = XInternAtom(x11->display, "mpv_dnd_selection", False);
+}
+
+static void dnd_select_format(struct vo_x11_state *x11, Atom *args, int items)
+{
+    for (int n = 0; n < items; n++) {
+        // There are other types; possibly not worth supporting.
+        if (args[n] == x11->XA_uri_list)
+            x11->dnd_requested_format = args[n];
+    }
+}
+
+static void dnd_reset(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    x11->dnd_src_window = 0;
+    x11->dnd_requested_format = 0;
+}
+
+static void vo_x11_dnd_handle_message(struct vo *vo, XClientMessageEvent *ce)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    if (!x11->window)
+        return;
+
+    if (ce->message_type == x11->XAXdndEnter) {
+        x11->dnd_requested_format = 0;
+
+        Window src = ce->data.l[0];
+        if (ce->data.l[1] & 1) {
+            unsigned long nitems = 0;
+            Atom *args = NULL;
+            if (x11_get_property(x11, src, x11->XAXdndTypeList, &args, &nitems)) {
+                dnd_select_format(x11, args, nitems);
+                XFree(args);
+            }
+        } else {
+            Atom args[3];
+            for (int n = 2; n <= 4; n++)
+                args[n - 2] = ce->data.l[n];
+            dnd_select_format(x11, args, 3);
+        }
+    } else if (ce->message_type == x11->XAXdndPosition) {
+        Window src = ce->data.l[0];
+        XEvent xev;
+
+        xev.xclient.type = ClientMessage;
+        xev.xclient.serial = 0;
+        xev.xclient.send_event = True;
+        xev.xclient.message_type = x11->XAXdndStatus;
+        xev.xclient.window = src;
+        xev.xclient.format = 32;
+        xev.xclient.data.l[0] = x11->window;
+        xev.xclient.data.l[1] = x11->dnd_requested_format ? 1 : 0;
+        xev.xclient.data.l[2] = 0;
+        xev.xclient.data.l[3] = 0;
+        xev.xclient.data.l[4] = x11->XAXdndActionCopy;
+
+        XSendEvent(x11->display, src, False, 0, &xev);
+    } else if (ce->message_type == x11->XAXdndDrop) {
+        x11->dnd_src_window = ce->data.l[0];
+        XConvertSelection(x11->display, x11->XAXdndSelection,
+                          x11->dnd_requested_format, x11->dnd_property,
+                          x11->window, ce->data.l[2]);
+    } else if (ce->message_type == x11->XAXdndLeave) {
+        dnd_reset(vo);
+    }
+}
+
+static void vo_x11_dnd_handle_selection(struct vo *vo, XSelectionEvent *se)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    if (!x11->window || !x11->dnd_src_window)
+        return;
+
+    bool success = false;
+
+    if (se->selection == x11->XAXdndSelection &&
+        se->property == x11->dnd_property &&
+        se->target == x11->dnd_requested_format)
+    {
+        Atom type;
+        int format;
+        unsigned long nitems;
+        unsigned long bytes_left;
+        unsigned char *prop;
+        if (XGetWindowProperty(x11->display, x11->window, x11->dnd_property,
+                              0, 64 * 1024, False, x11->dnd_requested_format,
+                              &type, &format, &nitems, &bytes_left, &prop)
+                == Success)
+        {
+            if (!bytes_left && type == x11->dnd_requested_format && format == 8)
+            {
+                // No idea if this is guaranteed to be \0-padded, so use bstr.
+                success = dnd_handle_drop_data(vo, (bstr){prop, nitems});
+            }
+            XFree(prop);
+        }
+    }
+
+    XEvent xev;
+
+    xev.xclient.type = ClientMessage;
+    xev.xclient.serial = 0;
+    xev.xclient.send_event = True;
+    xev.xclient.message_type = x11->XAXdndFinished;
+    xev.xclient.window = x11->dnd_src_window;
+    xev.xclient.format = 32;
+    xev.xclient.data.l[0] = x11->window;
+    xev.xclient.data.l[1] = success ? 1 : 0;
+    xev.xclient.data.l[2] = success ? x11->XAXdndActionCopy : 0;
+    xev.xclient.data.l[3] = 0;
+    xev.xclient.data.l[4] = 0;
+
+    XSendEvent(x11->display, x11->dnd_src_window, False, 0, &xev);
+
+    dnd_reset(vo);
+}
+
 static void update_vo_size(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -838,6 +1002,10 @@ int vo_x11_check_events(struct vo *vo)
             if (Event.xclient.message_type == x11->XAWM_PROTOCOLS &&
                 Event.xclient.data.l[0] == x11->XAWM_DELETE_WINDOW)
                 mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
+            vo_x11_dnd_handle_message(vo, &Event.xclient);
+            break;
+        case SelectionNotify:
+            vo_x11_dnd_handle_selection(vo, &Event.xselection);
             break;
         default:
             if (Event.type == x11->ShmCompletionEvent) {
@@ -1129,6 +1297,7 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
 
     vo_x11_set_wm_icon(x11);
     vo_x11_update_window_title(vo);
+    vo_x11_dnd_init_window(vo);
 }
 
 static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
