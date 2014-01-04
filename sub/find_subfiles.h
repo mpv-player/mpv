@@ -19,6 +19,8 @@
 #ifndef MPLAYER_FIND_SUBFILES_H
 #define MPLAYER_FIND_SUBFILES_H
 
+#include <stdbool.h>
+
 struct subfn {
     int priority;
     char *fname;
@@ -27,5 +29,7 @@ struct subfn {
 
 struct mpv_global;
 struct subfn *find_text_subtitles(struct mpv_global *global, const char *fname);
+
+bool mp_might_be_subtitle_file(const char *filename);
 
 #endif /* MPLAYER_FINDFILES_H */

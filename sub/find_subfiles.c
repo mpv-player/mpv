@@ -42,6 +42,11 @@ static struct bstr get_ext(struct bstr s)
     return bstr_splice(s, dotpos + 1, s.len);
 }
 
+bool mp_might_be_subtitle_file(const char *filename)
+{
+    return is_sub_ext(get_ext(bstr0(filename)));
+}
+
 static int compare_sub_filename(const void *a, const void *b)
 {
     const struct subfn *s1 = a;
