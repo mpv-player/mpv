@@ -206,6 +206,7 @@ SOURCES = audio/audio.c \
           demux/mf.c \
           input/cmd_list.c \
           input/cmd_parse.c \
+          input/event.c \
           input/input.c \
           input/keycodes.c \
           misc/charset_conv.c \
