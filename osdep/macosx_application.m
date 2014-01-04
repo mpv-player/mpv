@@ -22,6 +22,7 @@
 
 #include "common/msg.h"
 #include "input/input.h"
+#include "input/event.h"
 #include "input/keycodes.h"
 
 #include "osdep/macosx_application_objc.h"
@@ -53,21 +54,6 @@ static pthread_t playback_thread_id;
 Application *mpv_shared_app(void)
 {
     return (Application *)[Application sharedApplication];
-}
-
-static NSString *escape_loadfile_name(NSString *input)
-{
-    NSArray *mappings = @[
-        @{ @"in": @"\\", @"out": @"\\\\" },
-        @{ @"in": @"\"", @"out": @"\\\"" },
-    ];
-
-    for (NSDictionary *mapping in mappings) {
-        input = [input stringByReplacingOccurrencesOfString:mapping[@"in"]
-                                                 withString:mapping[@"out"]];
-    }
-
-    return input;
 }
 
 @implementation Application
@@ -287,17 +273,23 @@ static NSString *escape_loadfile_name(NSString *input)
     }
 }
 
+
+- (void)handleFilesArray:(NSArray *)files
+{
+    size_t num_files  = [files count];
+    char **files_utf8 = talloc_array(NULL, char*, num_files);
+    [files enumerateObjectsUsingBlock:^(id obj, NSUInteger i, BOOL *_){
+        char *filename = (char *)[obj UTF8String];
+        size_t bytes   = [obj lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+        files_utf8[i]  = talloc_memdup(files_utf8, filename, bytes + 1);
+    }];
+    mp_event_drop_files(self.inputContext, num_files, files_utf8);
+    talloc_free(files_utf8);
+}
+
 - (void)handleFiles
 {
-    void *ctx = talloc_new(NULL);
-    [self.files enumerateObjectsUsingBlock:^(id obj, NSUInteger i, BOOL *_){
-        const char *file = [escape_loadfile_name(obj) UTF8String];
-        const char *append = (i == 0) ? "" : " append";
-        char *cmd = talloc_asprintf(ctx, "raw loadfile \"%s\"%s", file, append);
-        mp_cmd_t *cmdt = mp_input_parse_cmd(self.inputContext, bstr0(cmd), "");
-        mp_input_queue_cmd(self.inputContext, cmdt);
-    }];
-    talloc_free(ctx);
+    [self handleFilesArray:self.files];
 }
 @end
 
