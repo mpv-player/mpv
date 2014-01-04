@@ -579,6 +579,11 @@ video_output_features = [
         'deps_any': [ 'gl-cocoa', 'gl-x11', 'gl-win32', 'gl-wayland' ],
         'func': check_true
     } , {
+        'name': '--gl-old',
+        'desc': 'legacy OpenGL video output',
+        'deps': [ 'gl' ],
+        'func': check_true
+    } , {
         'name': '--corevideo',
         'desc': 'CoreVideo',
         'deps': [ 'gl', 'gl-cocoa' ],
