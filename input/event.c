@@ -33,7 +33,7 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files)
                 files[i],
                 NULL
             };
-            mp_input_run_cmd(ictx, cmd, "<drop-subtitle>");
+            mp_input_run_cmd(ictx, MP_ON_OSD_AUTO, cmd, "<drop-subtitle>");
         }
     } else {
         for (int i = 0; i < num_files; i++) {
@@ -44,7 +44,7 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files)
                 (i == 0) ? "replace" : "append",
                 NULL
             };
-            mp_input_run_cmd(ictx, cmd, "<drop-files>");
+            mp_input_run_cmd(ictx, MP_ON_OSD_AUTO, cmd, "<drop-files>");
         }
     }
 }

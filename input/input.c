@@ -1661,11 +1661,9 @@ struct mp_cmd *mp_input_parse_cmd(struct input_ctx *ictx, bstr str,
     return mp_input_parse_cmd_(ictx->log, str, location);
 }
 
-void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd,
+void mp_input_run_cmd(struct input_ctx *ictx, int def_flags, const char **cmd,
                       const char *location)
 {
-    mp_cmd_t *cmdt = mp_input_parse_cmd_strv(ictx->log,
-                                             MP_ON_OSD_AUTO,
-                                             cmd, location);
+    mp_cmd_t *cmdt = mp_input_parse_cmd_strv(ictx->log, def_flags, cmd, location);
     mp_input_queue_cmd(ictx, cmdt);
 }
