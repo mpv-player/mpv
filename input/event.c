@@ -48,3 +48,27 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files)
         }
     }
 }
+
+int mp_event_drop_mime_data(struct input_ctx *ictx, const char *mime_type,
+                            bstr data)
+{
+    // X11 and Wayland file list format.
+    if (strcmp(mime_type, "text/uri-list") == 0) {
+        void *tmp = talloc_new(NULL);
+        int num_files = 0;
+        char **files = NULL;
+        while (data.len) {
+            bstr line = bstr_getline(data, &data);
+            line = bstr_strip_linebreaks(line);
+            if (bstr_startswith0(line, "#"))
+                continue;
+            char *s = bstrto0(tmp, line);
+            MP_TARRAY_APPEND(tmp, files, num_files, s);
+        }
+        mp_event_drop_files(ictx, num_files, files);
+        talloc_free(tmp);
+        return num_files > 0;
+    } else {
+        return -1;
+    }
+}

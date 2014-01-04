@@ -736,25 +736,6 @@ void vo_x11_uninit(struct vo *vo)
     vo->x11 = NULL;
 }
 
-// The data is in the form of the mimetype text/uri-list.
-static bool dnd_handle_drop_data(struct vo *vo, bstr data)
-{
-    void *tmp = talloc_new(NULL);
-    int num_files = 0;
-    char **files = NULL;
-    while (data.len) {
-        bstr line = bstr_getline(data, &data);
-        line = bstr_strip_linebreaks(line);
-        if (bstr_startswith0(line, "#"))
-            continue;
-        char *s = bstrto0(tmp, line);
-        MP_TARRAY_APPEND(tmp, files, num_files, s);
-    }
-    mp_event_drop_files(vo->input_ctx, num_files, files);
-    talloc_free(tmp);
-    return num_files > 0;
-}
-
 static void vo_x11_dnd_init_window(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -860,7 +841,8 @@ static void vo_x11_dnd_handle_selection(struct vo *vo, XSelectionEvent *se)
             if (!bytes_left && type == x11->dnd_requested_format && format == 8)
             {
                 // No idea if this is guaranteed to be \0-padded, so use bstr.
-                success = dnd_handle_drop_data(vo, (bstr){prop, nitems});
+                success = mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
+                                                  (bstr){prop, nitems}) > 0;
             }
             XFree(prop);
         }

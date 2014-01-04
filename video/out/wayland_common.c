@@ -734,30 +734,6 @@ static void shedule_resize(struct vo_wayland_state *wl,
     wl->vo->dheight = height;
 }
 
-// stolen from x11 code
-// The data is in the form of the mimetype text/uri-list.
-static bool dnd_handle_drop_data(struct vo *vo, bstr data)
-{
-    void *tmp = talloc_new(NULL);
-    int num_files = 0;
-    char **files = NULL;
-
-    while (data.len) {
-        bstr line = bstr_getline(data, &data);
-        line = bstr_strip_linebreaks(line);
-        if (bstr_startswith0(line, "#"))
-            continue;
-
-        char *s = bstrto0(tmp, line);
-        MP_TARRAY_APPEND(tmp, files, num_files, s);
-
-    }
-    mp_event_drop_files(vo->input_ctx, num_files, files);
-
-    talloc_free(tmp);
-    return num_files > 0;
-}
-
 static bool create_display (struct vo_wayland_state *wl)
 {
     wl->display.display = wl_display_connect(NULL);
@@ -1038,7 +1014,8 @@ static int vo_wayland_check_events (struct vo *vo)
                     if (has_read < to_read) {
                         buffer[str_len] = 0;
                         struct bstr file_list = bstr0(buffer);
-                        dnd_handle_drop_data(wl->vo, file_list);
+                        mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
+                                                file_list);
                         break;
                     }
                 }
