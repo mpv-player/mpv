@@ -196,10 +196,38 @@ static void releaseGlContext_wayland(MPGLContext *ctx)
     wl->egl_context.egl.ctx = NULL;
 }
 
+static const struct wl_callback_listener frame_listener;
+
+static void frame_handle_redraw(void *data,
+                                struct wl_callback *callback,
+                                uint32_t time)
+
+{
+    MPGLContext *ctx = data;
+    struct vo_wayland_state *wl = ctx->vo->wayland;
+
+    if (callback)
+        wl_callback_destroy(callback);
+
+    //struct wl_callback *tmp = wl_surface_frame(wl->window.surface);
+    //wl_callback_add_listener(tmp, &frame_listener, ctx);
+    wl->egl_context.redraw_callback = wl_surface_frame(wl->window.surface);
+    wl_callback_add_listener(wl->egl_context.redraw_callback, &frame_listener, ctx);
+
+    eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
+}
+
+static const struct wl_callback_listener frame_listener = {
+    frame_handle_redraw
+};
+
 static void swapGlBuffers_wayland(MPGLContext *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
-    eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
+//    eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
+
+    if (!wl->egl_context.redraw_callback)
+        frame_handle_redraw(ctx, NULL, 0);
 }
 
 static int control(struct vo *vo, int *events, int request, void *data)
