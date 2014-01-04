@@ -27,6 +27,12 @@
 
 #include "config.h"
 
+#if HAVE_GL_WAYLAND
+#include <wayland-egl.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#endif
+
 struct vo;
 
 struct vo_wayland_output {
@@ -42,6 +48,20 @@ struct vo_wayland_output {
 struct vo_wayland_state {
     struct vo *vo;
     struct mp_log* log;
+
+#if HAVE_GL_WAYLAND
+    struct {
+        EGLSurface egl_surface;
+
+        struct wl_egl_window *egl_window;
+
+        struct {
+            EGLDisplay dpy;
+            EGLContext ctx;
+            EGLConfig conf;
+        } egl;
+    } egl_context;
+#endif
 
     struct {
         int fd;
