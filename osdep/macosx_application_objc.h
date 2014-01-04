@@ -36,6 +36,7 @@
 - (void)initialize_menu;
 - (void)registerSelector:(SEL)selector forKey:(MPMenuKey)key;
 - (void)stopPlayback;
+- (void)handleFilesArray:(NSArray *)files;
 
 @property(nonatomic, assign) struct input_ctx *inputContext;
 @property(nonatomic, retain) EventsResponder *eventsResponder;

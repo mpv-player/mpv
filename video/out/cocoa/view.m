@@ -30,6 +30,14 @@
 @synthesize adapter = _adapter;
 @synthesize tracker = _tracker;
 
+- (id)initWithFrame:(NSRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self registerForDraggedTypes:@[NSFilenamesPboardType]];
+    }
+    return self;
+}
+
 - (void)setFullScreen:(BOOL)willBeFullscreen
 {
     if (willBeFullscreen && ![self isInFullScreenMode]) {
@@ -222,5 +230,18 @@
 {
     [self.adapter performAsyncResize:[self frameInPixels].size];
     [self.adapter setNeedsResize];
+}
+
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+{
+    return NSDragOperationEvery;
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
+{
+    NSPasteboard *pboard = [sender draggingPasteboard];
+    NSArray *pbitems = [pboard propertyListForType:NSFilenamesPboardType];
+    [self.adapter handleFilesArray:pbitems];
+    return YES;
 }
 @end

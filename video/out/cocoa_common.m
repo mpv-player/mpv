@@ -29,6 +29,7 @@
 
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_application.h"
+#include "osdep/macosx_application_objc.h"
 #include "osdep/macosx_events.h"
 
 #include "config.h"
@@ -659,5 +660,10 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (NSScreen *)fsScreen {
     struct vo_cocoa_state *s = self.vout->cocoa;
     return s->fs_screen;
+}
+
+- (void)handleFilesArray:(NSArray *)files
+{
+    [mpv_shared_app() handleFilesArray:files];
 }
 @end

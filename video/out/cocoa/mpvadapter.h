@@ -25,6 +25,7 @@
 - (void)putAxis:(int)mpkey delta:(float)delta;
 - (void)putCommand:(char*)cmd;
 - (void)performAsyncResize:(NSSize)size;
+- (void)handleFilesArray:(NSArray *)files;
 
 - (BOOL)isInFullScreenMode;
 - (NSSize)videoSize;
