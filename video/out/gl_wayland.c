@@ -104,7 +104,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     if (!wl->egl_context.egl.ctx) {
         /* fallback to any GL version */
         MP_WARN(wl, "can't create context for requested OpenGL version: "
-                    "fall back to any version available");
+                    "fall back to any version available\n");
         context_attribs[0] = EGL_NONE;
         wl->egl_context.egl.ctx = eglCreateContext(wl->egl_context.egl.dpy,
                                                    wl->egl_context.egl.conf,
@@ -209,8 +209,6 @@ static void frame_handle_redraw(void *data,
     if (callback)
         wl_callback_destroy(callback);
 
-    //struct wl_callback *tmp = wl_surface_frame(wl->window.surface);
-    //wl_callback_add_listener(tmp, &frame_listener, ctx);
     wl->egl_context.redraw_callback = wl_surface_frame(wl->window.surface);
     wl_callback_add_listener(wl->egl_context.redraw_callback, &frame_listener, ctx);
 
@@ -224,7 +222,6 @@ static const struct wl_callback_listener frame_listener = {
 static void swapGlBuffers_wayland(MPGLContext *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
-//    eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
 
     if (!wl->egl_context.redraw_callback)
         frame_handle_redraw(ctx, NULL, 0);
@@ -235,7 +232,6 @@ static int control(struct vo *vo, int *events, int request, void *data)
     struct vo_wayland_state *wl = vo->wayland;
     int r = vo_wayland_control(vo, events, request, data);
 
-    // NOTE: VO_EVENT_EXPOSE is never returned by the wayland backend
     if (*events & VO_EVENT_RESIZE)
         egl_resize(wl);
 
