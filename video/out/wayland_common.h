@@ -61,7 +61,6 @@ struct vo_wayland_state {
             EGLConfig conf;
         } egl;
 
-
         struct wl_callback * redraw_callback;
     } egl_context;
 #endif
