@@ -106,10 +106,6 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     EGLint context_attribs[] = {
         EGL_CONTEXT_MAJOR_VERSION_KHR,
         MPGL_VER_GET_MAJOR(ctx->requested_gl_version),
-        /* EGL_CONTEXT_MINOR_VERSION_KHR, */
-        /* MPGL_VER_GET_MINOR(ctx->requested_gl_version), */
-        /* EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE_BIT_KHR, 0, */
-        /* Segfaults on anything else than the major version */
         EGL_NONE
     };
 
@@ -125,6 +121,8 @@ static bool egl_create_context(struct vo_wayland_state *wl,
                                         context_attribs);
     if (!egl_ctx->egl.ctx) {
         /* fallback to any GL version */
+        MP_WARN(wl, "can't create context for requested OpenGL version: "
+                    "fall back to any version available");
         context_attribs[0] = EGL_NONE;
         egl_ctx->egl.ctx = eglCreateContext(egl_ctx->egl.dpy,
                                             egl_ctx->egl.conf,
