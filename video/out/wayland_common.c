@@ -897,8 +897,9 @@ void vo_wayland_uninit (struct vo *vo)
 
 static void vo_wayland_ontop (struct vo *vo)
 {
-    vo->opts->ontop = !vo->opts->ontop;
-    vo->opts->fullscreen = !vo->opts->fullscreen;
+    MP_DBG(vo->wayland, "going ontop\n");
+    vo->opts->ontop = 0;
+    vo->opts->fullscreen = 1;
 
     /* use the already existing code to leave fullscreen mode and go into
      * toplevel mode */
@@ -925,10 +926,6 @@ static void vo_wayland_fullscreen (struct vo *vo)
     struct wl_output *fs_output = wl->display.fs_output;
 
     if (vo->opts->fullscreen) {
-        if (!!vo->opts->fullscreen == wl->window.is_fullscreen)
-            vo_wayland_ontop(vo); // workaround for weston bug
-            // switch back to toplevel first before going fullscreen again
-
         MP_DBG(wl, "going fullscreen\n");
         wl->window.is_fullscreen = true;
         wl->window.p_width = wl->window.width;
