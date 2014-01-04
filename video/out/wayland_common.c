@@ -942,12 +942,16 @@ static void vo_wayland_border (struct vo *vo)
 static void vo_wayland_fullscreen (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
-    if (!wl->display.shell || !!vo->opts->fullscreen == wl->window.is_fullscreen)
+    if (!wl->display.shell)
         return;
 
     struct wl_output *fs_output = wl->display.fs_output;
 
     if (vo->opts->fullscreen) {
+        if (!!vo->opts->fullscreen == wl->window.is_fullscreen)
+            vo_wayland_ontop(vo); // workaround for weston bug
+            // switch back to toplevel first before going fullscreen again
+
         MP_DBG(wl, "going fullscreen\n");
         wl->window.is_fullscreen = true;
         wl->window.p_width = wl->window.width;
@@ -1167,9 +1171,6 @@ bool vo_wayland_config (struct vo *vo, uint32_t d_width,
     wl->window.p_height = d_height;
     wl->window.aspect = wl->window.width / (float) MPMAX(wl->window.height, 1);
 
-    vo_wayland_ontop(vo); // workaround for the weston fullscreen bug
-    // I can't set fullscreen twice so I need to change back and forth to get
-    // the right configure event from weston.
     vo_wayland_fullscreen(vo);
 
     return true;
