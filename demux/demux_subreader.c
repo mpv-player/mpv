@@ -1337,6 +1337,9 @@ static int d_open_file(struct demuxer *demuxer, enum demux_check check)
     if (check > DEMUX_CHECK_REQUEST)
         return -1;
 
+    if (!demuxer->params || !demuxer->params->expect_subtitle)
+        return -1;
+
     struct stream *ps = read_probe_stream(demuxer->stream, PROBE_SIZE);
 
     struct subreader sr;

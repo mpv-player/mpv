@@ -776,6 +776,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
                                 opts->stream_cache_seek_min_percent);
     struct demuxer_params params = {
         .ass_library = mpctx->ass_library, // demux_libass requires it
+        .expect_subtitle = filter == STREAM_SUB,
     };
     struct demuxer *demuxer =
         demux_open(stream, demuxer_name, &params, mpctx->global);
