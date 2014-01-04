@@ -619,3 +619,28 @@ void vo_mouse_movement(struct vo *vo, int posx, int posy)
     vo_control(vo, VOCTRL_WINDOW_TO_OSD_COORDS, p);
     mp_input_set_mouse_pos(vo->input_ctx, p[0], p[1]);
 }
+
+static void run_cmd(struct vo *vo, const char **cmd)
+{
+    mp_cmd_t *cmdt = mp_input_parse_cmd_strv(vo->log,
+                                             MP_ON_OSD_AUTO,
+                                             cmd, "<window>");
+    mp_input_queue_cmd(vo->input_ctx, cmdt);
+}
+
+// Handle drag & drop event of a list of files on the VO window.
+void vo_drop_files(struct vo *vo, int num_files, char **files)
+{
+    for (int i = 0; i < num_files; i++) {
+        const char *cmd[] = {
+            "loadfile",
+            files[i],
+            /* Start playing the dropped files right away */
+            (i == 0) ? "replace" : "append",
+            NULL
+        };
+
+        MP_VERBOSE(vo, "received dropped file: %s\n", files[i]);
+        run_cmd(vo, cmd);
+    }
+}

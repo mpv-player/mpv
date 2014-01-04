@@ -309,6 +309,7 @@ struct mp_keymap {
 int lookup_keymap_table(const struct mp_keymap *map, int key);
 
 void vo_mouse_movement(struct vo *vo, int posx, int posy);
+void vo_drop_files(struct vo *vo, int num_files, char **files);
 
 struct mp_osd_res;
 void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
