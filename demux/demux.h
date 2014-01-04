@@ -152,6 +152,7 @@ struct demuxer_params {
     int matroska_wanted_segment;
     bool *matroska_was_valid;
     struct ass_library *ass_library;
+    bool expect_subtitle;
 };
 
 typedef struct demuxer {
