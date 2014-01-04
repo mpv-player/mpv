@@ -43,7 +43,6 @@
 #include "video/mp_image.h"
 #include "video/vfcap.h"
 #include "sub/osd.h"
-#include "sub/find_subfiles.h"
 
 //
 // Externally visible list of all vo drivers
@@ -619,44 +618,4 @@ void vo_mouse_movement(struct vo *vo, int posx, int posy)
     float p[2] = {posx, posy};
     vo_control(vo, VOCTRL_WINDOW_TO_OSD_COORDS, p);
     mp_input_set_mouse_pos(vo->input_ctx, p[0], p[1]);
-}
-
-static void run_cmd(struct vo *vo, const char **cmd)
-{
-    mp_cmd_t *cmdt = mp_input_parse_cmd_strv(vo->log,
-                                             MP_ON_OSD_AUTO,
-                                             cmd, "<window>");
-    mp_input_queue_cmd(vo->input_ctx, cmdt);
-}
-
-// Handle drag & drop event of a list of files on the VO window.
-void vo_drop_files(struct vo *vo, int num_files, char **files)
-{
-    bool all_sub = true;
-    for (int i = 0; i < num_files; i++)
-        all_sub &= mp_might_be_subtitle_file(files[i]);
-
-    if (all_sub) {
-        for (int i = 0; i < num_files; i++) {
-            const char *cmd[] = {
-                "sub_add",
-                files[i],
-                NULL
-            };
-            run_cmd(vo, cmd);
-        }
-    } else {
-        for (int i = 0; i < num_files; i++) {
-            const char *cmd[] = {
-                "loadfile",
-                files[i],
-                /* Start playing the dropped files right away */
-                (i == 0) ? "replace" : "append",
-                NULL
-            };
-
-            MP_VERBOSE(vo, "received dropped file: %s\n", files[i]);
-            run_cmd(vo, cmd);
-        }
-    }
 }

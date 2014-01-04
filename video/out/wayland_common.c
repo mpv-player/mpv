@@ -44,6 +44,7 @@
 #include "osdep/timer.h"
 
 #include "input/input.h"
+#include "input/event.h"
 #include "input/keycodes.h"
 
 #define MOD_SHIFT_MASK      0x01
@@ -751,7 +752,7 @@ static bool dnd_handle_drop_data(struct vo *vo, bstr data)
         MP_TARRAY_APPEND(tmp, files, num_files, s);
 
     }
-    vo_drop_files(vo, num_files, files);
+    mp_event_drop_files(vo->input_ctx, num_files, files);
 
     talloc_free(tmp);
     return num_files > 0;

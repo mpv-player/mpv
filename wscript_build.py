@@ -197,6 +197,7 @@ def build(ctx):
         ## Input
         ( "input/cmd_list.c" ),
         ( "input/cmd_parse.c" ),
+        ( "input/event.c" ),
         ( "input/input.c" ),
         ( "input/keycodes.c" ),
         ( "input/joystick.c",                    "joystick" ),

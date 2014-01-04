@@ -210,6 +210,10 @@ int mp_input_check_interrupt(struct input_ctx *ictx, int time);
 // characters. If false, count Right Alt as the modifier Alt key.
 bool mp_input_use_alt_gr(struct input_ctx *ictx);
 
+// Runs a command parsing the input string array
+void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd,
+                      const char *location);
+
 extern int async_quit_request;
 
 #endif /* MPLAYER_INPUT_H */

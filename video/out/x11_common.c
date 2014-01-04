@@ -27,6 +27,7 @@
 #include "options/options.h"
 #include "common/msg.h"
 #include "input/input.h"
+#include "input/event.h"
 #include "libavutil/common.h"
 #include "x11_common.h"
 #include "talloc.h"
@@ -749,7 +750,7 @@ static bool dnd_handle_drop_data(struct vo *vo, bstr data)
         char *s = bstrto0(tmp, line);
         MP_TARRAY_APPEND(tmp, files, num_files, s);
     }
-    vo_drop_files(vo, num_files, files);
+    mp_event_drop_files(vo->input_ctx, num_files, files);
     talloc_free(tmp);
     return num_files > 0;
 }
