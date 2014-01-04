@@ -1000,7 +1000,7 @@ static int vo_wayland_check_events (struct vo *vo)
                 size_t str_len = 0;
                 int has_read = 0;
 
-                while (0 < (has_read = read(fd.fd, buffer, to_read))) {
+                while (0 < (has_read = read(fd.fd, buffer+str_len, to_read))) {
                     if (buffer_len + to_read < buffer_len) {
                         MP_ERR(wl, "Integer overflow while reading from fd\n");
                         free(buffer);
