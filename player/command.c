@@ -3052,6 +3052,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_RUN: {
 #ifndef __MINGW32__
+        mp_msg(mpctx->statusline, MSGL_STATUS, "\n");
         char *args[MP_CMD_MAX_ARGS + 1] = {0};
         for (int n = 0; n < cmd->nargs; n++)
             args[n] = cmd->args[n].v.s;
@@ -3062,7 +3063,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             // about having to wait for the second process to terminate.
             if (fork() == 0) {
                 execvp(args[0], args);
-                _exit(0);
+                // mp_msg() is not safe to be called from a forked process.
+                char s[] = "Executing program failed.\n";
+                write(2, s, sizeof(s) - 1);
+                _exit(1);
             }
             _exit(0);
         }
