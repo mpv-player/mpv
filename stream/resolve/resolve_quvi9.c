@@ -111,7 +111,7 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url,
         quvi_media_free(media);
     }
 
-    if (quvi_supports(q, url, mode, QUVI_SUPPORTS_TYPE_SUBTITLE)) {
+    if (opts->quvi_fetch_subtitles && quvi_supports(q, url, mode, QUVI_SUPPORTS_TYPE_SUBTITLE)) {
         mp_info(log, "Getting subtitles...\n");
         quvi_subtitle_t qsub = quvi_subtitle_new(q, url);
         if (mp_quvi_ok(q, log)) {
