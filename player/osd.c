@@ -485,8 +485,8 @@ void update_osd_msg(struct MPContext *mpctx)
                 mpctx->terminal_osd_text = talloc_strdup(mpctx, msg->msg);
                 // Multi-line message => clear what will be the second line
                 write_status_line(mpctx, "");
-                MP_MSG(mpctx, MSGL_STATUS, "%s%s\n", opts->term_osd_esc,
-                       mpctx->terminal_osd_text);
+                mp_msg(mpctx->statusline, MSGL_STATUS,
+                       "%s%s\n", opts->term_osd_esc, mpctx->terminal_osd_text);
                 print_status(mpctx);
             }
         }
@@ -512,6 +512,6 @@ void update_osd_msg(struct MPContext *mpctx)
     // Clear the term osd line
     if (opts->term_osd && mpctx->terminal_osd_text[0]) {
         mpctx->terminal_osd_text[0] = '\0';
-        MP_MSG(mpctx, MSGL_STATUS, "%s\n", opts->term_osd_esc);
+        mp_msg(mpctx->statusline, MSGL_STATUS, "%s\n", opts->term_osd_esc);
     }
 }
