@@ -508,7 +508,7 @@ static int match_lang(char **langs, char *lang)
  * lang is a string list, NULL is same as empty list
  * Sort tracks based on the following criteria, and pick the first:
  * 0) track matches tid (always wins)
- * 1) track is external
+ * 1) track is external (no_default cancels this)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
  * 3) track is marked default
@@ -520,8 +520,10 @@ static int match_lang(char **langs, char *lang)
 // Return whether t1 is preferred over t2
 static bool compare_track(struct track *t1, struct track *t2, char **langs)
 {
-    if (t1->is_external != t2->is_external)
-        return t1->is_external;
+    bool ext1 = t1->is_external && !t1->no_default;
+    bool ext2 = t2->is_external && !t2->no_default;
+    if (ext1 != ext2)
+        return ext1;
     if (t1->auto_loaded != t2->auto_loaded)
         return !t1->auto_loaded;
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
@@ -549,7 +551,7 @@ static struct track *select_track(struct MPContext *mpctx,
         if (!pick || compare_track(track, pick, langs))
             pick = track;
     }
-    if (pick && !select_fallback && !pick->is_external
+    if (pick && !select_fallback && !(pick->is_external && !pick->no_default)
         && !match_lang(langs, pick->lang) && !pick->default_track)
         pick = NULL;
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
@@ -839,8 +841,10 @@ static void open_subtitles_from_resolve(struct MPContext *mpctx)
         struct track *t =
             open_external_file(mpctx, s, opts->sub_demuxer_name, 0, STREAM_SUB);
         talloc_free(s);
-        if (t)
+        if (t) {
             t->lang = talloc_strdup(t, sub->lang);
+            t->no_default = true;
+        }
     }
 }
 

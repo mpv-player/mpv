@@ -128,6 +128,7 @@ struct track {
 
     // If this track is from an external file (e.g. subtitle file).
     bool is_external;
+    bool no_default;            // pretend it's not external for auto-selection
     char *external_filename;
     bool auto_loaded;
 
