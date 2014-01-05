@@ -316,6 +316,7 @@ const m_option_t mp_opts[] = {
                ({"no", 0}, {"attachment", 1})),
 
     OPT_STRING("quvi-format", quvi_format, 0),
+    OPT_FLAG("quvi-fetch-subtitles", quvi_fetch_subtitles, 0),
 
 #if HAVE_CDDA
     { "cdda", (void *)&cdda_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
@@ -718,6 +719,7 @@ const struct MPOpts mp_default_opts = {
     .sub_visibility = 1,
     .sub_pos = 100,
     .sub_speed = 1.0,
+    .quvi_fetch_subtitles = 1,
     .audio_output_channels = MP_CHMAP_INIT_STEREO,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,

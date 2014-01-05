@@ -1743,6 +1743,13 @@ OPTIONS
 
     Also see ``--really-quiet`` and ``--msglevel``.
 
+``--quvi-fetch-subtitles=<yes|no>``
+    Toggles fetching of subtitles from streaming sites with libquvi.
+
+    Supported in libquvi 0.9.x.
+
+    Enabled by default
+
 ``--quvi-format=<best|default|...>``
     Video format/quality that is directly passed to libquvi (default: ``best``).
     This is used when opening links to streaming sites like YouTube. The
