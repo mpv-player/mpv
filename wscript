@@ -335,6 +335,7 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'name': '--libswresample',
         'desc': 'libswresample',
         'func': check_pkg_config('libswresample', '>= 0.17.102'),
+        'deps_neg': ['libavresample'],
     }, {
         'name': 'resampler',
         'desc': 'usable resampler found',
