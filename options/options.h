@@ -158,6 +158,7 @@ typedef struct MPOpts {
     int forced_subs_only;
     int stretch_dvd_subs;
     char *quvi_format;
+    int quvi_fetch_subtitles;
 
     // subreader.c
     int suboverlap_enabled;
