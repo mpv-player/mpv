@@ -274,7 +274,8 @@ static void subtract_window_borders(HWND hwnd, RECT *rc)
 
 // turn a WMSZ_* input value in v into the border that should be resized
 // returns: 0=left, 1=top, 2=right, 3=bottom, -1=undefined
-static int get_resize_border(int v) {
+static int get_resize_border(int v)
+{
     switch (v) {
     case WMSZ_LEFT: return 3;
     case WMSZ_TOP: return 2;
@@ -513,30 +514,39 @@ int vo_w32_check_events(struct vo *vo)
     struct vo_w32_state *w32 = vo->w32;
     MSG msg;
     w32->event_flags = 0;
+
     while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessageW(&msg);
     }
+
     if (vo->opts->WinID >= 0) {
         BOOL res;
         RECT r;
         POINT p;
         res = GetClientRect(w32->window, &r);
+
         if (res && (r.right != vo->dwidth || r.bottom != vo->dheight)) {
             vo->dwidth = r.right; vo->dheight = r.bottom;
             w32->event_flags |= VO_EVENT_RESIZE;
         }
+
         p.x = 0; p.y = 0;
         ClientToScreen(w32->window, &p);
+
         if (p.x != w32->window_x || p.y != w32->window_y) {
             w32->window_x = p.x; w32->window_y = p.y;
         }
+
         res = GetClientRect(WIN_ID_TO_HWND(vo->opts->WinID), &r);
+
         if (res && (r.right != vo->dwidth || r.bottom != vo->dheight))
             MoveWindow(w32->window, 0, 0, r.right, r.bottom, FALSE);
-        if (!IsWindow(WIN_ID_TO_HWND(vo->opts->WinID)))
+
+        if (!IsWindow(WIN_ID_TO_HWND(vo->opts->WinID))) {
             // Window has probably been closed, e.g. due to program crash
             mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
+        }
     }
 
     return w32->event_flags;
@@ -551,8 +561,10 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
     vo->xinerama_y = r->top;
     vo->opts->screenwidth = r->right - r->left;
     vo->opts->screenheight = r->bottom - r->top;
+
     if (w32->mon_cnt == w32->mon_id)
         return FALSE;
+
     w32->mon_cnt++;
     return TRUE;
 }
@@ -577,14 +589,20 @@ static void w32_update_xinerama_info(struct vo *vo)
     struct mp_vo_opts *opts = vo->opts;
     int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
     vo->xinerama_x = vo->xinerama_y = 0;
+
     if (opts->fullscreen && screen == -2) {
         int tmp;
         vo->xinerama_x = GetSystemMetrics(SM_XVIRTUALSCREEN);
         vo->xinerama_y = GetSystemMetrics(SM_YVIRTUALSCREEN);
         tmp = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-        if (tmp) vo->opts->screenwidth = tmp;
+
+        if (tmp)
+            vo->opts->screenwidth = tmp;
+
         tmp = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-        if (tmp) vo->opts->screenheight = tmp;
+
+        if (tmp)
+            vo->opts->screenheight = tmp;
     } else if (screen == -1) {
         MONITORINFO mi;
         HMONITOR m = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
@@ -599,8 +617,8 @@ static void w32_update_xinerama_info(struct vo *vo)
         w32->mon_id = screen;
         EnumDisplayMonitors(NULL, NULL, mon_enum, (LONG_PTR)vo);
     }
-    aspect_save_screenres(vo, vo->opts->screenwidth,
-                          vo->opts->screenheight);
+
+    aspect_save_screenres(vo, vo->opts->screenwidth, vo->opts->screenheight);
 }
 
 static void updateScreenProperties(struct vo *vo)
@@ -609,6 +627,7 @@ static void updateScreenProperties(struct vo *vo)
     dm.dmSize = sizeof dm;
     dm.dmDriverExtra = 0;
     dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+
     if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm)) {
         MP_ERR(vo, "win32: unable to enumerate display settings!\n");
         return;
@@ -659,6 +678,7 @@ static int reinit_window_state(struct vo *vo)
             MP_VERBOSE(vo, "save window bounds: %d:%d:%d:%d\n",
                    w32->prev_x, w32->prev_y, w32->prev_width, w32->prev_height);
         }
+
         vo->dwidth = vo->opts->screenwidth;
         vo->dheight = vo->opts->screenheight;
         w32->window_x = vo->xinerama_x;
@@ -720,12 +740,15 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
     pfd.nSize = sizeof pfd;
     pfd.nVersion = 1;
     pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+
     if (flags & VOFLAG_STEREO)
         pfd.dwFlags |= PFD_STEREO;
+
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 24;
     pfd.iLayerType = PFD_MAIN_PLANE;
     pf = ChoosePixelFormat(vo_hdc, &pfd);
+
     if (!pf) {
         MP_ERR(vo, "win32: unable to select a valid pixel format!\n");
         ReleaseDC(w32->window, vo_hdc);
@@ -764,6 +787,7 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
             w32->window_x = w32->prev_x = vo->dx;
             w32->window_y = w32->prev_y = vo->dy;
         }
+
         if (reset_size) {
             w32->prev_width = vo->dwidth = width;
             w32->prev_height = vo->dheight = height;
@@ -850,7 +874,7 @@ int vo_w32_init(struct vo *vo)
         DropTarget_Init(dropTarget, vo);
         RegisterDragDrop(w32->window, &dropTarget->iface);
     }
-   
+
     w32->tracking   = FALSE;
     w32->trackEvent = (TRACKMOUSEEVENT){
         .cbSize    = sizeof(TRACKMOUSEEVENT),
@@ -860,6 +884,7 @@ int vo_w32_init(struct vo *vo)
 
     if (vo->opts->WinID >= 0)
         EnableWindow(w32->window, 0);
+
     w32->cursor_visible = true;
 
     // we don't have proper event handling
@@ -921,70 +946,74 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_w32_state *w32 = vo->w32;
     switch (request) {
-    case VOCTRL_CHECK_EVENTS:
-        *events |= vo_w32_check_events(vo);
-        return VO_TRUE;
-    case VOCTRL_FULLSCREEN:
-        vo_w32_fullscreen(vo);
-        *events |= VO_EVENT_RESIZE;
-        return VO_TRUE;
-    case VOCTRL_ONTOP:
-        vo_w32_ontop(vo);
-        return VO_TRUE;
-    case VOCTRL_BORDER:
-        vo_w32_border(vo);
-        *events |= VO_EVENT_RESIZE;
-        return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        w32_update_xinerama_info(vo);
-        return VO_TRUE;
-    case VOCTRL_GET_WINDOW_SIZE: {
-        int *s = arg;
-        if (!w32->window_bounds_initialized)
-            return VO_FALSE;
-        s[0] = w32->current_fs ? w32->prev_width : vo->dwidth;
-        s[1] = w32->current_fs ? w32->prev_height : vo->dheight;
-        return VO_TRUE;
-    }
-    case VOCTRL_SET_WINDOW_SIZE: {
-        int *s = arg;
-        if (!w32->window_bounds_initialized)
-            return VO_FALSE;
-        if (w32->current_fs) {
-            w32->prev_width = s[0];
-            w32->prev_height = s[1];
-        } else {
-            vo->dwidth = s[0];
-            vo->dheight = s[1];
-        }
-        reinit_window_state(vo);
-        *events |= VO_EVENT_RESIZE;
-        return VO_TRUE;
-    }
-    case VOCTRL_SET_CURSOR_VISIBILITY:
-        w32->cursor_visible = *(bool *)arg;
+        case VOCTRL_CHECK_EVENTS:
+            *events |= vo_w32_check_events(vo);
+            return VO_TRUE;
+        case VOCTRL_FULLSCREEN:
+            vo_w32_fullscreen(vo);
+            *events |= VO_EVENT_RESIZE;
+            return VO_TRUE;
+        case VOCTRL_ONTOP:
+            vo_w32_ontop(vo);
+            return VO_TRUE;
+        case VOCTRL_BORDER:
+            vo_w32_border(vo);
+            *events |= VO_EVENT_RESIZE;
+            return VO_TRUE;
+        case VOCTRL_UPDATE_SCREENINFO:
+            w32_update_xinerama_info(vo);
+            return VO_TRUE;
+        case VOCTRL_GET_WINDOW_SIZE: {
+            int *s = arg;
 
-        if (vo_w32_is_cursor_in_client(vo)) {
-            if (w32->cursor_visible)
-                SetCursor(LoadCursor(NULL, IDC_ARROW));
-            else
-                SetCursor(NULL);
+            if (!w32->window_bounds_initialized)
+                return VO_FALSE;
+
+            s[0] = w32->current_fs ? w32->prev_width : vo->dwidth;
+            s[1] = w32->current_fs ? w32->prev_height : vo->dheight;
+            return VO_TRUE;
         }
-        return VO_TRUE;
-    case VOCTRL_KILL_SCREENSAVER:
-        w32->disable_screensaver = true;
-        SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
-        return VO_TRUE;
-    case VOCTRL_RESTORE_SCREENSAVER:
-        w32->disable_screensaver = false;
-        SetThreadExecutionState(ES_CONTINUOUS);
-        return VO_TRUE;
-    case VOCTRL_UPDATE_WINDOW_TITLE: {
-        wchar_t *title = mp_from_utf8(NULL, (char *)arg);
-        SetWindowTextW(w32->window, title);
-        talloc_free(title);
-        return VO_TRUE;
-    }
+        case VOCTRL_SET_WINDOW_SIZE: {
+            int *s = arg;
+
+            if (!w32->window_bounds_initialized)
+                return VO_FALSE;
+            if (w32->current_fs) {
+                w32->prev_width = s[0];
+                w32->prev_height = s[1];
+            } else {
+                vo->dwidth = s[0];
+                vo->dheight = s[1];
+            }
+
+            reinit_window_state(vo);
+            *events |= VO_EVENT_RESIZE;
+            return VO_TRUE;
+        }
+        case VOCTRL_SET_CURSOR_VISIBILITY:
+            w32->cursor_visible = *(bool *)arg;
+
+            if (vo_w32_is_cursor_in_client(vo)) {
+                if (w32->cursor_visible)
+                    SetCursor(LoadCursor(NULL, IDC_ARROW));
+                else
+                    SetCursor(NULL);
+            }
+            return VO_TRUE;
+        case VOCTRL_KILL_SCREENSAVER:
+            w32->disable_screensaver = true;
+            SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
+            return VO_TRUE;
+        case VOCTRL_RESTORE_SCREENSAVER:
+            w32->disable_screensaver = false;
+            SetThreadExecutionState(ES_CONTINUOUS);
+            return VO_TRUE;
+        case VOCTRL_UPDATE_WINDOW_TITLE: {
+            wchar_t *title = mp_from_utf8(NULL, (char *)arg);
+            SetWindowTextW(w32->window, title);
+            talloc_free(title);
+            return VO_TRUE;
+        }
     }
     return VO_NOTIMPL;
 }
@@ -1000,8 +1029,10 @@ void vo_w32_uninit(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     MP_VERBOSE(vo, "win32: uninit\n");
+
     if (!w32)
         return;
+
     RevokeDragDrop(w32->window);
     OleUninitialize();
     SetThreadExecutionState(ES_CONTINUOUS);
