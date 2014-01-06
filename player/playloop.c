@@ -595,7 +595,7 @@ static void update_avsync(struct MPContext *mpctx)
 
     double a_pos = playing_audio_pts(mpctx);
 
-    mpctx->last_av_difference = a_pos - mpctx->video_pts - mpctx->audio_delay;
+    mpctx->last_av_difference = a_pos - mpctx->video_pts + mpctx->audio_delay;
     if (mpctx->time_frame > 0)
         mpctx->last_av_difference +=
                 mpctx->time_frame * mpctx->opts->playback_speed;
@@ -629,7 +629,7 @@ static void adjust_sync(struct MPContext *mpctx, double frame_time)
     double av_delay = a_pts - v_pts;
     // Try to sync vo_flip() so it will *finish* at given time
     av_delay += mpctx->last_vo_flip_duration;
-    av_delay -= mpctx->audio_delay;   // This much pts difference is desired
+    av_delay += mpctx->audio_delay;   // This much pts difference is desired
 
     double change = av_delay * 0.1;
     double max_change = opts->default_max_pts_correction >= 0 ?

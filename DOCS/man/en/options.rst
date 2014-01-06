@@ -591,8 +591,8 @@ OPTIONS
     ``--cursor-autohide``.
 
 ``--audio-delay=<sec>``
-    Audio delay in seconds (positive or negative float value). Negative values
-    delay the audio, and positive values delay the video.
+    Audio delay in seconds (positive or negative float value). Positive values
+    delay the audio, and negative values delay the video.
 
 ``--deinterlace=<yes|no|auto>``
     Enable or disable interlacing (default: auto, which usually means no).

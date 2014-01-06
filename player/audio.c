@@ -306,7 +306,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
             ptsdiff = written_pts - mpctx->hrseek_pts;
         else
             ptsdiff = written_pts - mpctx->video_next_pts - mpctx->delay
-                      - mpctx->audio_delay;
+                      + mpctx->audio_delay;
         samples = ptsdiff * real_samplerate;
 
         // ogg demuxers give packets without timing
@@ -410,7 +410,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     }
 
     if (endpts != MP_NOPTS_VALUE) {
-        double samples = (endpts - written_audio_pts(mpctx) + mpctx->audio_delay)
+        double samples = (endpts - written_audio_pts(mpctx) - mpctx->audio_delay)
                          * ao->samplerate / opts->playback_speed;
         if (playsize > samples) {
             playsize = MPMAX(samples, 0);
