@@ -46,7 +46,7 @@ char *mp_get_win_config_path(const char *filename)
     void *tmp = talloc_new(NULL);
 
 #ifndef __CYGWIN__
-    if (SHGetFolderPathW(NULL, CSIDL_LOCAL_APPDATA|CSIDL_FLAG_CREATE, NULL,
+    if (SHGetFolderPathW(NULL, CSIDL_APPDATA|CSIDL_FLAG_CREATE, NULL,
         SHGFP_TYPE_CURRENT, w_appdir) != S_OK)
         w_appdir[0] = '\0';
 #endif
