@@ -2737,11 +2737,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         struct osd_object *obj = mpctx->osd->objs[OSDTYPE_SUB];
         if (obj->dec_sub) {
             double a[2];
-            a[0] = mpctx->video_pts - obj->video_offset + opts->sub_delay;
+            a[0] = mpctx->video_pts - obj->video_offset - opts->sub_delay;
             a[1] = cmd->args[0].v.i;
             if (sub_control(obj->dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
                 if (cmd->id == MP_CMD_SUB_STEP) {
-                    opts->sub_delay += a[0];
+                    opts->sub_delay -= a[0];
                     osd_changed_all(mpctx->osd);
                     set_osd_msg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
                                  "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));
