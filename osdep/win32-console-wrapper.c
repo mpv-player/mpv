@@ -74,7 +74,7 @@ int wmain(int argc, wchar_t **argv, wchar_t **envp)
     len = wcslen(exe) + wcslen(args) + 1;
     eargs = malloc(len * sizeof(wchar_t));
     swprintf(eargs, len, L"%s%s", exe, args);
-    free(cmd);
+    LocalFree(cmd);
 
     cr_runproc(exe, eargs);
 
