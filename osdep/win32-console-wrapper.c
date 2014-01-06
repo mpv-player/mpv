@@ -59,22 +59,49 @@ void cr_runproc(wchar_t *name, wchar_t *cmdline)
     }
 }
 
+const wchar_t *cr_getargs(const wchar_t *cmd)
+{
+    wchar_t *args;
+
+    if (cmd[0] == '"') {
+        /* If the first argument starts with a quote, it always ends at the
+           next quote */
+        args = wcschr(cmd + 1, '"');
+
+        if (!args)
+            return L"";
+        args ++;
+    } else {
+        /* If the first argument is unquoted, it always ends at the next space.
+           Unlike the other arguments, it can't contain embedded quotes. */
+        args = wcspbrk(cmd, L" \t");
+        if (!args)
+            return L"";
+    }
+
+    /* Skip whitespace */
+    while (*args == ' ' || *args == '\t')
+        args ++;
+
+    return args;
+}
+
 int wmain(int argc, wchar_t **argv, wchar_t **envp)
 {
-    wchar_t *cmd, *args, *eargs;
+    const wchar_t *args;
+    wchar_t *cmd, *eargs;
     wchar_t exe[MAX_PATH];
     size_t len;
 
     cmd = GetCommandLineW();
-    args = cmd + wcslen(argv[0]);
+    args = cr_getargs(cmd);
 
     GetModuleFileNameW(NULL, exe, MAX_PATH);
     wcscpy(wcsrchr(exe, '.') + 1, L"exe");
 
-    len = wcslen(exe) + wcslen(args) + 1;
+    len = wcslen(exe) + wcslen(args) + 4;
     eargs = malloc(len * sizeof(wchar_t));
-    swprintf(eargs, len, L"%s%s", exe, args);
-    LocalFree(cmd);
+    swprintf(eargs, len, L"\"%s\" %s", exe, args);
 
     cr_runproc(exe, eargs);
 
