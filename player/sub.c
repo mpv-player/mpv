@@ -102,7 +102,7 @@ static void update_subtitle(struct MPContext *mpctx, int order)
     osd_obj->video_offset = track->under_timeline ? mpctx->video_offset : 0;
 
     double refpts_s = mpctx->playback_pts - osd_obj->video_offset;
-    double curpts_s = refpts_s + opts->sub_delay;
+    double curpts_s = refpts_s - opts->sub_delay;
 
     if (!track->preloaded && track->stream) {
         struct sh_stream *sh_stream = track->stream;
