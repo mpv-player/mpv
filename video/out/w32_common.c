@@ -321,156 +321,156 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     int mouse_button = 0;
 
     switch (message) {
-        case WM_ERASEBKGND: // no need to erase background seperately
-            return 1;
-        case WM_PAINT:
-            w32->event_flags |= VO_EVENT_EXPOSE;
-            break;
-        case WM_MOVE: {
-            POINT p = {0};
-            ClientToScreen(w32->window, &p);
-            w32->window_x = p.x;
-            w32->window_y = p.y;
-            MP_VERBOSE(vo, "move window: %d:%d\n",
-                   w32->window_x, w32->window_y);
-            break;
+    case WM_ERASEBKGND: // no need to erase background seperately
+        return 1;
+    case WM_PAINT:
+        w32->event_flags |= VO_EVENT_EXPOSE;
+        break;
+    case WM_MOVE: {
+        POINT p = {0};
+        ClientToScreen(w32->window, &p);
+        w32->window_x = p.x;
+        w32->window_y = p.y;
+        MP_VERBOSE(vo, "move window: %d:%d\n",
+                w32->window_x, w32->window_y);
+        break;
+    }
+    case WM_SIZE: {
+        w32->event_flags |= VO_EVENT_RESIZE;
+        RECT r;
+        GetClientRect(w32->window, &r);
+        vo->dwidth = r.right;
+        vo->dheight = r.bottom;
+        MP_VERBOSE(vo, "resize window: %d:%d\n",
+                vo->dwidth, vo->dheight);
+        break;
+    }
+    case WM_SIZING:
+        if (vo->opts->keepaspect && !vo->opts->fullscreen &&
+            vo->opts->WinID < 0)
+        {
+            RECT *rc = (RECT*)lParam;
+            // get client area of the windows if it had the rect rc
+            // (subtracting the window borders)
+            RECT r = *rc;
+            subtract_window_borders(w32->window, &r);
+            int c_w = r.right - r.left, c_h = r.bottom - r.top;
+            float aspect = w32->o_dwidth / (float) MPMAX(w32->o_dheight, 1);
+            int d_w = c_h * aspect - c_w;
+            int d_h = c_w / aspect - c_h;
+            int d_corners[4] = { d_w, d_h, -d_w, -d_h };
+            int corners[4] = { rc->left, rc->top, rc->right, rc->bottom };
+            int corner = get_resize_border(wParam);
+            if (corner >= 0)
+                corners[corner] -= d_corners[corner];
+            *rc = (RECT) { corners[0], corners[1], corners[2], corners[3] };
+            return TRUE;
         }
-        case WM_SIZE: {
-            w32->event_flags |= VO_EVENT_RESIZE;
-            RECT r;
-            GetClientRect(w32->window, &r);
-            vo->dwidth = r.right;
-            vo->dheight = r.bottom;
-            MP_VERBOSE(vo, "resize window: %d:%d\n",
-                   vo->dwidth, vo->dheight);
-            break;
-        }
-        case WM_SIZING:
-            if (vo->opts->keepaspect && !vo->opts->fullscreen &&
-                vo->opts->WinID < 0)
-            {
-                RECT *rc = (RECT*)lParam;
-                // get client area of the windows if it had the rect rc
-                // (subtracting the window borders)
-                RECT r = *rc;
-                subtract_window_borders(w32->window, &r);
-                int c_w = r.right - r.left, c_h = r.bottom - r.top;
-                float aspect = w32->o_dwidth / (float) MPMAX(w32->o_dheight, 1);
-                int d_w = c_h * aspect - c_w;
-                int d_h = c_w / aspect - c_h;
-                int d_corners[4] = { d_w, d_h, -d_w, -d_h };
-                int corners[4] = { rc->left, rc->top, rc->right, rc->bottom };
-                int corner = get_resize_border(wParam);
-                if (corner >= 0)
-                    corners[corner] -= d_corners[corner];
-                *rc = (RECT) { corners[0], corners[1], corners[2], corners[3] };
-                return TRUE;
-            }
-            break;
-        case WM_CLOSE:
-            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
-            break;
-        case WM_SYSCOMMAND:
-            switch (wParam) {
-            case SC_SCREENSAVE:
-            case SC_MONITORPOWER:
-                if (w32->disable_screensaver) {
-                    MP_VERBOSE(vo, "win32: killing screensaver\n");
-                    return 0;
-                }
-                break;
-            }
-            break;
-        case WM_KEYDOWN:
-        case WM_SYSKEYDOWN: {
-            int mpkey = lookup_keymap_table(vk_map, wParam);
-            if (mpkey)
-                mp_input_put_key(vo->input_ctx, mpkey | mod_state(vo));
-            if (wParam == VK_F10)
-                return 0;
-            break;
-        }
-        case WM_CHAR:
-        case WM_SYSCHAR: {
-            int mods = mod_state(vo);
-            int code = wParam;
-            // Windows enables Ctrl+Alt when AltGr (VK_RMENU) is pressed.
-            // E.g. AltGr+9 on a German keyboard would yield Ctrl+Alt+[
-            // Warning: wine handles this differently. Don't test this on wine!
-            if (key_state(vo, VK_RMENU) && mp_input_use_alt_gr(vo->input_ctx))
-                mods &= ~(MP_KEY_MODIFIER_CTRL | MP_KEY_MODIFIER_ALT);
-            // Apparently Ctrl+A to Ctrl+Z is special cased, and produces
-            // character codes from 1-26. Work it around.
-            // Also, enter/return (including the keypad variant) and CTRL+J both
-            // map to wParam==10. As a workaround, check VK_RETURN to
-            // distinguish these two key combinations.
-            if ((mods & MP_KEY_MODIFIER_CTRL) && code >= 1 && code <= 26
-                && !key_state(vo, VK_RETURN))
-                code = code - 1 + (mods & MP_KEY_MODIFIER_SHIFT ? 'A' : 'a');
-            if (code >= 32 && code < (1<<21)) {
-                mp_input_put_key(vo->input_ctx, code | mods);
-                // At least with Alt+char, not calling DefWindowProcW stops
-                // Windows from emitting a beep.
+        break;
+    case WM_CLOSE:
+        mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
+        break;
+    case WM_SYSCOMMAND:
+        switch (wParam) {
+        case SC_SCREENSAVE:
+        case SC_MONITORPOWER:
+            if (w32->disable_screensaver) {
+                MP_VERBOSE(vo, "win32: killing screensaver\n");
                 return 0;
             }
             break;
         }
-        case WM_SETCURSOR:
-            if (LOWORD(lParam) == HTCLIENT && !w32->cursor_visible) {
-                SetCursor(NULL);
-                return TRUE;
-            }
-            break;
-        case WM_MOUSELEAVE:
-            w32->tracking = FALSE;
-            mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
-            break;
-        case WM_MOUSEMOVE: {
-            if (!w32->tracking)
-                w32->tracking = TrackMouseEvent(&w32->trackEvent);
-            // Windows can send spurious mouse events, which would make the mpv
-            // core unhide the mouse cursor on completely unrelated events. See:
-            //  https://blogs.msdn.com/b/oldnewthing/archive/2003/10/01/55108.aspx
-            int x = GET_X_LPARAM(lParam);
-            int y = GET_Y_LPARAM(lParam);
-            if (x != w32->mouse_x || y != w32->mouse_y) {
-                w32->mouse_x = x;
-                w32->mouse_y = y;
-                vo_mouse_movement(vo, x, y);
-            }
-            break;
+        break;
+    case WM_KEYDOWN:
+    case WM_SYSKEYDOWN: {
+        int mpkey = lookup_keymap_table(vk_map, wParam);
+        if (mpkey)
+            mp_input_put_key(vo->input_ctx, mpkey | mod_state(vo));
+        if (wParam == VK_F10)
+            return 0;
+        break;
+    }
+    case WM_CHAR:
+    case WM_SYSCHAR: {
+        int mods = mod_state(vo);
+        int code = wParam;
+        // Windows enables Ctrl+Alt when AltGr (VK_RMENU) is pressed.
+        // E.g. AltGr+9 on a German keyboard would yield Ctrl+Alt+[
+        // Warning: wine handles this differently. Don't test this on wine!
+        if (key_state(vo, VK_RMENU) && mp_input_use_alt_gr(vo->input_ctx))
+            mods &= ~(MP_KEY_MODIFIER_CTRL | MP_KEY_MODIFIER_ALT);
+        // Apparently Ctrl+A to Ctrl+Z is special cased, and produces
+        // character codes from 1-26. Work it around.
+        // Also, enter/return (including the keypad variant) and CTRL+J both
+        // map to wParam==10. As a workaround, check VK_RETURN to
+        // distinguish these two key combinations.
+        if ((mods & MP_KEY_MODIFIER_CTRL) && code >= 1 && code <= 26
+            && !key_state(vo, VK_RETURN))
+            code = code - 1 + (mods & MP_KEY_MODIFIER_SHIFT ? 'A' : 'a');
+        if (code >= 32 && code < (1<<21)) {
+            mp_input_put_key(vo->input_ctx, code | mods);
+            // At least with Alt+char, not calling DefWindowProcW stops
+            // Windows from emitting a beep.
+            return 0;
         }
-        case WM_LBUTTONDOWN:
-            mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN;
-            break;
-        case WM_LBUTTONUP:
-            mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_UP;
-            break;
-        case WM_MBUTTONDOWN:
-            mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_DOWN;
-            break;
-        case WM_MBUTTONUP:
-            mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_UP;
-            break;
-        case WM_RBUTTONDOWN:
-            mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_DOWN;
-            break;
-        case WM_RBUTTONUP:
-            mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_UP;
-            break;
-        case WM_MOUSEWHEEL: {
-            int x = GET_WHEEL_DELTA_WPARAM(wParam);
-            mouse_button = x > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
-            break;
+        break;
+    }
+    case WM_SETCURSOR:
+        if (LOWORD(lParam) == HTCLIENT && !w32->cursor_visible) {
+            SetCursor(NULL);
+            return TRUE;
         }
-        case WM_XBUTTONDOWN:
-            mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
-            mouse_button |= MP_KEY_STATE_DOWN;
-            break;
-        case WM_XBUTTONUP:
-            mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
-            mouse_button |= MP_KEY_STATE_UP;
-            break;
+        break;
+    case WM_MOUSELEAVE:
+        w32->tracking = FALSE;
+        mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
+        break;
+    case WM_MOUSEMOVE: {
+        if (!w32->tracking)
+            w32->tracking = TrackMouseEvent(&w32->trackEvent);
+        // Windows can send spurious mouse events, which would make the mpv
+        // core unhide the mouse cursor on completely unrelated events. See:
+        //  https://blogs.msdn.com/b/oldnewthing/archive/2003/10/01/55108.aspx
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        if (x != w32->mouse_x || y != w32->mouse_y) {
+            w32->mouse_x = x;
+            w32->mouse_y = y;
+            vo_mouse_movement(vo, x, y);
+        }
+        break;
+    }
+    case WM_LBUTTONDOWN:
+        mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN;
+        break;
+    case WM_LBUTTONUP:
+        mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_UP;
+        break;
+    case WM_MBUTTONDOWN:
+        mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_DOWN;
+        break;
+    case WM_MBUTTONUP:
+        mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_UP;
+        break;
+    case WM_RBUTTONDOWN:
+        mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_DOWN;
+        break;
+    case WM_RBUTTONUP:
+        mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_UP;
+        break;
+    case WM_MOUSEWHEEL: {
+        int x = GET_WHEEL_DELTA_WPARAM(wParam);
+        mouse_button = x > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
+        break;
+    }
+    case WM_XBUTTONDOWN:
+        mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
+        mouse_button |= MP_KEY_STATE_DOWN;
+        break;
+    case WM_XBUTTONUP:
+        mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
+        mouse_button |= MP_KEY_STATE_UP;
+        break;
     }
 
     if (mouse_button) {
@@ -947,74 +947,74 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_w32_state *w32 = vo->w32;
     switch (request) {
-        case VOCTRL_CHECK_EVENTS:
-            *events |= vo_w32_check_events(vo);
-            return VO_TRUE;
-        case VOCTRL_FULLSCREEN:
-            vo_w32_fullscreen(vo);
-            *events |= VO_EVENT_RESIZE;
-            return VO_TRUE;
-        case VOCTRL_ONTOP:
-            vo_w32_ontop(vo);
-            return VO_TRUE;
-        case VOCTRL_BORDER:
-            vo_w32_border(vo);
-            *events |= VO_EVENT_RESIZE;
-            return VO_TRUE;
-        case VOCTRL_UPDATE_SCREENINFO:
-            w32_update_xinerama_info(vo);
-            return VO_TRUE;
-        case VOCTRL_GET_WINDOW_SIZE: {
-            int *s = arg;
+    case VOCTRL_CHECK_EVENTS:
+        *events |= vo_w32_check_events(vo);
+        return VO_TRUE;
+    case VOCTRL_FULLSCREEN:
+        vo_w32_fullscreen(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_ONTOP:
+        vo_w32_ontop(vo);
+        return VO_TRUE;
+    case VOCTRL_BORDER:
+        vo_w32_border(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_UPDATE_SCREENINFO:
+        w32_update_xinerama_info(vo);
+        return VO_TRUE;
+    case VOCTRL_GET_WINDOW_SIZE: {
+        int *s = arg;
 
-            if (!w32->window_bounds_initialized)
-                return VO_FALSE;
+        if (!w32->window_bounds_initialized)
+            return VO_FALSE;
 
-            s[0] = w32->current_fs ? w32->prev_width : vo->dwidth;
-            s[1] = w32->current_fs ? w32->prev_height : vo->dheight;
-            return VO_TRUE;
+        s[0] = w32->current_fs ? w32->prev_width : vo->dwidth;
+        s[1] = w32->current_fs ? w32->prev_height : vo->dheight;
+        return VO_TRUE;
+    }
+    case VOCTRL_SET_WINDOW_SIZE: {
+        int *s = arg;
+
+        if (!w32->window_bounds_initialized)
+            return VO_FALSE;
+        if (w32->current_fs) {
+            w32->prev_width = s[0];
+            w32->prev_height = s[1];
+        } else {
+            vo->dwidth = s[0];
+            vo->dheight = s[1];
         }
-        case VOCTRL_SET_WINDOW_SIZE: {
-            int *s = arg;
 
-            if (!w32->window_bounds_initialized)
-                return VO_FALSE;
-            if (w32->current_fs) {
-                w32->prev_width = s[0];
-                w32->prev_height = s[1];
-            } else {
-                vo->dwidth = s[0];
-                vo->dheight = s[1];
-            }
+        reinit_window_state(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    }
+    case VOCTRL_SET_CURSOR_VISIBILITY:
+        w32->cursor_visible = *(bool *)arg;
 
-            reinit_window_state(vo);
-            *events |= VO_EVENT_RESIZE;
-            return VO_TRUE;
+        if (vo_w32_is_cursor_in_client(vo)) {
+            if (w32->cursor_visible)
+                SetCursor(LoadCursor(NULL, IDC_ARROW));
+            else
+                SetCursor(NULL);
         }
-        case VOCTRL_SET_CURSOR_VISIBILITY:
-            w32->cursor_visible = *(bool *)arg;
-
-            if (vo_w32_is_cursor_in_client(vo)) {
-                if (w32->cursor_visible)
-                    SetCursor(LoadCursor(NULL, IDC_ARROW));
-                else
-                    SetCursor(NULL);
-            }
-            return VO_TRUE;
-        case VOCTRL_KILL_SCREENSAVER:
-            w32->disable_screensaver = true;
-            SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
-            return VO_TRUE;
-        case VOCTRL_RESTORE_SCREENSAVER:
-            w32->disable_screensaver = false;
-            SetThreadExecutionState(ES_CONTINUOUS);
-            return VO_TRUE;
-        case VOCTRL_UPDATE_WINDOW_TITLE: {
-            wchar_t *title = mp_from_utf8(NULL, (char *)arg);
-            SetWindowTextW(w32->window, title);
-            talloc_free(title);
-            return VO_TRUE;
-        }
+        return VO_TRUE;
+    case VOCTRL_KILL_SCREENSAVER:
+        w32->disable_screensaver = true;
+        SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
+        return VO_TRUE;
+    case VOCTRL_RESTORE_SCREENSAVER:
+        w32->disable_screensaver = false;
+        SetThreadExecutionState(ES_CONTINUOUS);
+        return VO_TRUE;
+    case VOCTRL_UPDATE_WINDOW_TITLE: {
+        wchar_t *title = mp_from_utf8(NULL, (char *)arg);
+        SetWindowTextW(w32->window, title);
+        talloc_free(title);
+        return VO_TRUE;
+    }
     }
     return VO_NOTIMPL;
 }
