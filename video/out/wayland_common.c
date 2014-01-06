@@ -767,9 +767,12 @@ static void destroy_display (struct vo_wayland_state *wl)
     if (wl->display.compositor)
         wl_compositor_destroy(wl->display.compositor);
 
-    wl_registry_destroy(wl->display.registry);
-    wl_display_flush(wl->display.display);
-    wl_display_disconnect(wl->display.display);
+    if (wl->display.registry)
+        wl_registry_destroy(wl->display.registry);
+    if (wl->display.display) {
+        wl_display_flush(wl->display.display);
+        wl_display_disconnect(wl->display.display);
+    }
 }
 
 static bool create_window (struct vo_wayland_state *wl)
@@ -794,8 +797,10 @@ static bool create_window (struct vo_wayland_state *wl)
 
 static void destroy_window (struct vo_wayland_state *wl)
 {
-    wl_shell_surface_destroy(wl->window.shell_surface);
-    wl_surface_destroy(wl->window.surface);
+    if (wl->window.shell_surface)
+        wl_shell_surface_destroy(wl->window.shell_surface);
+    if (wl->window.surface)
+        wl_surface_destroy(wl->window.surface);
 }
 
 static bool create_cursor (struct vo_wayland_state *wl)
@@ -846,8 +851,9 @@ static void destroy_input (struct vo_wayland_state *wl)
         wl_keyboard_destroy(wl->input.keyboard);
         xkb_map_unref(wl->input.xkb.keymap);
         xkb_state_unref(wl->input.xkb.state);
-        xkb_context_unref(wl->input.xkb.context);
     }
+    if (wl->input.xkb.context)
+        xkb_context_unref(wl->input.xkb.context);
 
     if (wl->input.pointer)
         wl_pointer_destroy(wl->input.pointer);
@@ -876,6 +882,7 @@ int vo_wayland_init (struct vo *vo)
         || !create_window(wl)
         || !create_cursor(wl))
     {
+        vo_wayland_uninit(vo);
         return false;
     }
 
