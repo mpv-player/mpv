@@ -34,10 +34,11 @@ void cr_perror(const wchar_t *prefix)
     LocalFree(error);
 }
 
-void cr_runproc(wchar_t *name, wchar_t *cmdline)
+int cr_runproc(wchar_t *name, wchar_t *cmdline)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
+    DWORD retval = 1;
 
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
@@ -54,9 +55,12 @@ void cr_runproc(wchar_t *name, wchar_t *cmdline)
         cr_perror(L"CreateProcess");
     } else {
         WaitForSingleObject(pi.hProcess, INFINITE);
+        GetExitCodeProcess(pi.hProcess, &retval);
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
     }
+
+    return (int)retval;
 }
 
 int wmain(int argc, wchar_t **argv, wchar_t **envp)
@@ -68,7 +72,5 @@ int wmain(int argc, wchar_t **argv, wchar_t **envp)
     GetModuleFileNameW(NULL, exe, MAX_PATH);
     wcscpy(wcsrchr(exe, '.') + 1, L"exe");
 
-    cr_runproc(exe, cmd);
-
-    return 0;
+    return cr_runproc(exe, cmd);
 }
