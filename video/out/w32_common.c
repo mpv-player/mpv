@@ -486,7 +486,7 @@ static int reinit_window_state(struct vo *vo)
 
     DWORD style = update_style(vo, GetWindowLong(w32->window, GWL_STYLE));
 
-    if (vo->opts->fullscreen || vo->opts->ontop)
+    if (vo->opts->ontop)
         layer = HWND_TOPMOST;
 
     // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
@@ -506,6 +506,7 @@ static int reinit_window_state(struct vo *vo)
         vo->dheight = vo->opts->screenheight;
         w32->window_x = vo->xinerama_x;
         w32->window_y = vo->xinerama_y;
+        style &= ~WS_OVERLAPPEDWINDOW;
     } else {
         if (toggle_fs) {
             // Restore window position and size when switching from fullscreen.
