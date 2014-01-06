@@ -71,6 +71,9 @@ struct vo_cocoa_state {
     void (*resize_redraw)(struct vo *vo, int w, int h);
 
     struct mp_log *log;
+
+    uint32_t old_dwidth;
+    uint32_t old_dheight;
 };
 
 void *vo_cocoa_glgetaddr(const char *s)
@@ -356,14 +359,6 @@ static void cocoa_set_window_title(struct vo *vo, const char *title)
     talloc_free(talloc_ctx);
 }
 
-static void update_window(struct vo *vo, int d_width, int d_height)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    [s->window queueNewVideoSize:NSMakeSize(d_width, d_height)];
-    cocoa_set_window_title(vo, vo_get_window_title(vo));
-    vo_cocoa_fullscreen(vo);
-}
-
 static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -386,9 +381,8 @@ static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
     vo_cocoa_set_current_context(vo, false);
 }
 
-int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
-                           uint32_t d_height, uint32_t flags,
-                           int gl3profile)
+int vo_cocoa_config_window(struct vo *vo, uint32_t width, uint32_t height,
+                           uint32_t flags, int gl3profile)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     __block int ctxok = 0;
@@ -397,6 +391,10 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
         s->inside_sync_section  = true;
         s->enable_resize_redraw = false;
         s->aspdat = vo->aspdat;
+
+        bool reset_size = s->old_dwidth != width || s->old_dheight != height;
+        s->old_dwidth  = width;
+        s->old_dheight = height;
 
         if (flags & VOFLAG_HIDDEN) {
             // This is certainly the first execution of vo_config_window and
@@ -417,16 +415,17 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
             }
 
             if (!s->window)
-                create_window(vo, d_width, d_height, flags);
+                create_window(vo, width, height, flags);
         }
 
         if (s->window) {
             // Everything is properly initialized
-            update_window(vo, d_width, d_height);
+            if (reset_size)
+                [s->window queueNewVideoSize:NSMakeSize(width, height)];
+            cocoa_set_window_title(vo, vo_get_window_title(vo));
+            vo_cocoa_fullscreen(vo);
         }
-    });
 
-    dispatch_sync(dispatch_get_main_queue(), ^{
         s->inside_sync_section  = false;
         s->enable_resize_redraw = true;
     });
