@@ -61,23 +61,14 @@ void cr_runproc(wchar_t *name, wchar_t *cmdline)
 
 int wmain(int argc, wchar_t **argv, wchar_t **envp)
 {
-    wchar_t *cmd, *args, *eargs;
+    wchar_t *cmd;
     wchar_t exe[MAX_PATH];
-    size_t len;
 
     cmd = GetCommandLineW();
-    args = cmd + wcslen(argv[0]);
-
     GetModuleFileNameW(NULL, exe, MAX_PATH);
     wcscpy(wcsrchr(exe, '.') + 1, L"exe");
 
-    len = wcslen(exe) + wcslen(args) + 1;
-    eargs = malloc(len * sizeof(wchar_t));
-    swprintf(eargs, len, L"%s%s", exe, args);
-    LocalFree(cmd);
+    cr_runproc(exe, cmd);
 
-    cr_runproc(exe, eargs);
-
-    free(eargs);
     return 0;
 }
