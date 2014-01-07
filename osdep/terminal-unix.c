@@ -47,6 +47,8 @@
 #include "input/keycodes.h"
 #include "terminal.h"
 
+static int use_terminal;
+
 #if HAVE_TERMIOS
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
@@ -454,7 +456,7 @@ static volatile int getch2_enabled = 0;
 
 static void do_activate_getch2(void)
 {
-    if (getch2_active)
+    if (getch2_active || !use_terminal)
         return;
 
 #if HAVE_TERMINFO || HAVE_TERMCAP
@@ -612,6 +614,8 @@ void terminal_setup_stdin_cmd_input(struct input_ctx *ictx)
 
 int terminal_init(void)
 {
-    load_termcap(NULL);
+    use_terminal = isatty(1);
+    if (use_terminal)
+        load_termcap(NULL);
     return 0;
 }
