@@ -126,6 +126,12 @@ Available audio output drivers are:
         string uses a local connection, "localhost" uses network transfer
         (most likely not what you want).
 
+    ``buffer=<1-2000|native>``
+        Set the audio buffer size in milliseconds. A higher value buffers
+        more data, and has a lower probability of buffer underruns. A smaller
+        value makes the audio stream react faster, e.g. to playback speed
+        changes. Default: 1000.
+
 ``portaudio``
     PortAudio audio output driver. This works on all platforms, and has
     extensive MS Windows support.

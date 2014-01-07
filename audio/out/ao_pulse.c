@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdint.h>
 
 #include <pulse/pulseaudio.h>
 
@@ -55,6 +56,7 @@ struct priv {
 
     char *cfg_host;
     char *cfg_sink;
+    int cfg_buffer;
 };
 
 #define GENERIC_ERR_MSG(str) \
@@ -328,7 +330,8 @@ static int init(struct ao *ao)
                                           stream_latency_update_cb, ao);
     pa_buffer_attr bufattr = {
         .maxlength = -1,
-        .tlength = pa_usec_to_bytes(1000000, &ss),
+        .tlength = priv->cfg_buffer > 0 ?
+            pa_usec_to_bytes(priv->cfg_buffer * 1000, &ss) : (uint32_t)-1,
         .prebuf = -1,
         .minreq = -1,
         .fragsize = -1,
@@ -617,9 +620,13 @@ const struct ao_driver audio_out_pulse = {
     .pause     = pause,
     .resume    = resume,
     .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .cfg_buffer = 1000,
+    },
     .options = (const struct m_option[]) {
         OPT_STRING("host", cfg_host, 0),
         OPT_STRING("sink", cfg_sink, 0),
+        OPT_CHOICE_OR_INT("buffer", cfg_buffer, 0, 1, 2000, ({"native", -1})),
         {0}
     },
 };
