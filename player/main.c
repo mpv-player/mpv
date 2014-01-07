@@ -79,6 +79,14 @@
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
+
+#ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
+#define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE (0x0001)
+#endif
+
+#ifndef BASE_SEARCH_PATH_PERMANENT
+#define BASE_SEARCH_PATH_PERMANENT (0x8000)
+#endif
 #endif
 
 const char mp_help_text[] =
@@ -265,6 +273,19 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
 
     // Enable heap corruption detection
     HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
+
+    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+    WINBOOL (WINAPI *pSetDllDirectory)(LPCWSTR lpPathName) =
+        (WINBOOL (WINAPI *)(LPCWSTR))GetProcAddress(kernel32, "SetDllDirectoryW");
+    WINBOOL (WINAPI *pSetSearchPathMode)(DWORD Flags) =
+        (WINBOOL (WINAPI *)(DWORD))GetProcAddress(kernel32, "SetSearchPathMode");
+
+    // Always use safe search paths for DLLs and other files, ie. never use the
+    // current directory
+    if (pSetSearchPathMode)
+        pSetDllDirectory(L"");
+    if (pSetSearchPathMode)
+        pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
 #endif
 
     terminal_init();
