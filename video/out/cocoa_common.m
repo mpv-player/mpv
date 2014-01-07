@@ -262,7 +262,7 @@ static void create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts  = vo->opts;
 
-    const NSRect contentRect = NSMakeRect(0, 0, d_width, d_height);
+    const NSRect contentRect = NSMakeRect(vo->dx, vo->dy, d_width, d_height);
 
     int window_mask = 0;
     if (opts->border) {
@@ -299,7 +299,6 @@ static void create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     [s->window setDelegate:s->window];
     [s->window makeMainWindow];
 
-    [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
     [s->window makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
 
