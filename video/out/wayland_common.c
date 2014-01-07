@@ -632,6 +632,9 @@ static void shedule_resize(struct vo_wayland_state *wl,
 
 static bool create_display (struct vo_wayland_state *wl)
 {
+    if (wl->vo->probing && !getenv("XDG_RUNTIME_DIR"))
+        return false;
+
     wl->display.display = wl_display_connect(NULL);
 
     if (!wl->display.display) {
