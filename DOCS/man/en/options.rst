@@ -1142,6 +1142,9 @@ OPTIONS
     Allow hardware decoding for a given list of codecs only. The special value
     ``all`` always allows all codecs.
 
+    You can get the list of allowed codecs with ``mpv --vd=help``. Remove the
+    prefix, e.g. instead of ``lavc:h264`` use ``h264``.
+
     By default this is set to ``h264,vc1,wmv3``.
 
     This is usually only needed with broken GPUs, where a codec is reported
