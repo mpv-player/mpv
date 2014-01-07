@@ -36,10 +36,6 @@
 #include "misc/ring.h"
 #include "ao.h"
 
-#ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
-#define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE 0x00000001
-#endif
-
 #ifndef PKEY_Device_FriendlyName
 DEFINE_PROPERTYKEY(PKEY_Device_FriendlyName,
                    0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
@@ -136,17 +132,6 @@ static int fill_VistaBlob(wasapi_state *state)
 {
     if (!state)
         return 1;
-    HMODULE hkernel32 = GetModuleHandleW(L"kernel32.dll");
-    if (!hkernel32)
-        return 1;
-    WINBOOL (WINAPI *pSetDllDirectory)(LPCWSTR lpPathName) =
-        (WINBOOL (WINAPI *)(LPCWSTR))GetProcAddress(hkernel32, "SetDllDirectoryW");
-    WINBOOL (WINAPI *pSetSearchPathMode)(DWORD Flags) =
-        (WINBOOL (WINAPI *)(DWORD))GetProcAddress(hkernel32, "SetSearchPathMode");
-    if (pSetSearchPathMode)
-        pSetDllDirectory(L"");  /* Attempt to use safe search paths */
-    if (pSetSearchPathMode)
-        pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
     state->VistaBlob.hAvrt = LoadLibraryW(L"avrt.dll");
     if (!state->VistaBlob.hAvrt)
         goto exit_label;
@@ -160,8 +145,6 @@ static int fill_VistaBlob(wasapi_state *state)
 exit_label:
     if (state->VistaBlob.hAvrt)
         FreeLibrary(state->VistaBlob.hAvrt);
-    if (pSetSearchPathMode)
-        pSetDllDirectory(NULL);
     return 1;
 }
 
