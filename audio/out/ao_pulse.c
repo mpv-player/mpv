@@ -621,7 +621,7 @@ const struct ao_driver audio_out_pulse = {
     .resume    = resume,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
-        .cfg_buffer = 1000,
+        .cfg_buffer = 250,
     },
     .options = (const struct m_option[]) {
         OPT_STRING("host", cfg_host, 0),
