@@ -262,6 +262,9 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     // stop Windows from showing all kinds of annoying error dialogs
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
+
+    // Enable heap corruption detection
+    HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
 #endif
 
     terminal_init();
