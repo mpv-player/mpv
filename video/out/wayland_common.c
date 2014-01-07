@@ -683,6 +683,8 @@ static void shedule_resize(struct vo_wayland_state *wl,
     int32_t x, y;
     float temp_aspect = width / (float) MPMAX(height, 1);
 
+    MP_DBG(wl, "shedule resize: %dx%d\n", width, height);
+
     if (width < minimum_size)
         width = minimum_size;
 
@@ -907,13 +909,11 @@ void vo_wayland_uninit (struct vo *vo)
 
 static void vo_wayland_ontop (struct vo *vo)
 {
-    MP_DBG(vo->wayland, "going ontop\n");
-    vo->opts->ontop = 0;
-    vo->opts->fullscreen = 1;
-
-    /* use the already existing code to leave fullscreen mode and go into
-     * toplevel mode */
-    vo_wayland_fullscreen(vo);
+    struct vo_wayland_state *wl = vo->wayland;
+    MP_DBG(wl, "going ontop\n");
+    vo->opts->ontop = 1;
+    wl_shell_surface_set_toplevel(wl->window.shell_surface);
+    shedule_resize(wl, 0, wl->window.width, wl->window.height);
 }
 
 static void vo_wayland_border (struct vo *vo)
@@ -1089,6 +1089,9 @@ static void vo_wayland_update_screeninfo (struct vo *vo)
         }
     }
 
+    wl->window.fs_width = opts->screenwidth;
+    wl->window.fs_height = opts->screenheight;
+
     aspect_save_screenres(vo, opts->screenwidth, opts->screenheight);
 }
 
@@ -1150,13 +1153,26 @@ bool vo_wayland_config (struct vo *vo, uint32_t d_width,
 {
     struct vo_wayland_state *wl = vo->wayland;
 
-    wl->window.width = d_width;
-    wl->window.height = d_height;
     wl->window.p_width = d_width;
     wl->window.p_height = d_height;
-    wl->window.aspect = wl->window.width / (float) MPMAX(wl->window.height, 1);
+    wl->window.aspect = d_width / (float) MPMAX(d_height, 1);
 
-    vo_wayland_fullscreen(vo);
+    if (!(flags & VOFLAG_HIDDEN)) {
+        if (!wl->window.is_init) {
+            wl->window.width = d_width;
+            wl->window.height = d_height;
+        }
+
+        if (vo->opts->fullscreen) {
+            if (wl->window.is_fullscreen)
+                shedule_resize(wl, 0, wl->window.fs_width, wl->window.fs_height);
+            else
+                vo_wayland_fullscreen(vo);
+        }
+        else
+            vo_wayland_ontop(vo);
+        wl->window.is_init = true;
+    }
 
     return true;
 }

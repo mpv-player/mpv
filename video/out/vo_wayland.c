@@ -639,6 +639,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
 
     vo_wayland_config(vo, vo->dwidth, vo->dheight, flags);
 
+    if (p->wl->window.events & VO_EVENT_RESIZE)
+        resize(p);
+
     return 0;
 }
 

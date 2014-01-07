@@ -80,7 +80,7 @@ struct vo_wayland_state {
     } display;
 
     struct {
-        int32_t width;
+        int32_t width;    // current size of the window
         int32_t height;
         int32_t p_width;  // previous sizes for leaving fullscreen
         int32_t p_height;
@@ -90,7 +90,10 @@ struct vo_wayland_state {
         int32_t sh_y;
         float aspect;
 
+        bool is_init;       // true if the window has a valid size
         bool is_fullscreen; // don't keep aspect ratio in fullscreen mode
+        int32_t fs_width;   // fullscreen sizes
+        int32_t fs_height;
 
         struct wl_surface *surface;
         int32_t mouse_x; // mouse position inside the surface
