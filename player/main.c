@@ -261,7 +261,7 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     // stop Windows from showing all kinds of annoying error dialogs
-    SetErrorMode(0x8003);
+    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
 #endif
 
     terminal_init();
