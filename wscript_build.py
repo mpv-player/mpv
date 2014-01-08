@@ -21,22 +21,14 @@ def _build_man(ctx):
     _add_rst_manual_dependencies(ctx)
 
 def _build_pdf(ctx):
-    from waflib import TaskGen
+    ctx(
+        name         = 'rst2pdf',
+        target       = 'DOCS/man/en/mpv.pdf',
+        source       = 'DOCS/man/en/mpv.rst',
+        rule         = '${RST2PDF} -c --repeat-table-rows ${SRC} -o ${TGT}',
+        install_path = ctx.env.DOCDIR)
 
-    TaskGen.declare_chain(
-        name    = 'rst2pdf',
-        rule    = '${RST2PDF} ${RST2PDF_FLAGS} ${SRC} -o ${TGT}',
-        ext_in  = '.rst',
-        ext_out = '.pdf',
-        shell   = True )
-
-    ctx.env.RST2PDF_FLAGS = [
-        '-c --repeat-table-rows'
-    ]
-
-    ctx(source = 'DOCS/man/en/mpv.rst')
     _add_rst_manual_dependencies(ctx)
-    ctx.install_files(ctx.env.DOCDIR, ['DOCS/man/en/mpv.pdf'])
 
 def build(ctx):
     ctx.load('waf_customizations')
