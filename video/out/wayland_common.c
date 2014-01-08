@@ -144,7 +144,7 @@ static void display_handle_delete_id(void *data,
     MP_DBG(wl, "Object %u deleted\n", id);
 }
 
-const struct wl_display_listener display_listener = {
+static const struct wl_display_listener display_listener = {
     display_handle_error,
     display_handle_delete_id
 };
@@ -171,7 +171,7 @@ static void ssurface_handle_popup_done(void *data,
 {
 }
 
-const struct wl_shell_surface_listener shell_surface_listener = {
+static const struct wl_shell_surface_listener shell_surface_listener = {
     ssurface_handle_ping,
     ssurface_handle_configure,
     ssurface_handle_popup_done
@@ -220,7 +220,7 @@ static void output_handle_mode(void *data,
     output->flags = flags;
 }
 
-const struct wl_output_listener output_listener = {
+static const struct wl_output_listener output_listener = {
     output_handle_geometry,
     output_handle_mode
 };
@@ -329,7 +329,7 @@ static void keyboard_handle_modifiers(void *data,
                           0, 0, group);
 }
 
-const struct wl_keyboard_listener keyboard_listener = {
+static const struct wl_keyboard_listener keyboard_listener = {
     keyboard_handle_keymap,
     keyboard_handle_enter,
     keyboard_handle_leave,
