@@ -924,7 +924,7 @@ static double get_wakeup_period(struct MPContext *mpctx)
      */
     double sleeptime = WAKEUP_PERIOD;
 
-#ifndef HAVE_POSIX_SELECT
+#if !HAVE_POSIX_SELECT
     // No proper file descriptor event handling; keep waking up to poll input
     sleeptime = MPMIN(sleeptime, 0.02);
 #endif
