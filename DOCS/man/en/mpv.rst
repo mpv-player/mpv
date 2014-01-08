@@ -10,11 +10,6 @@ a movie player
 :Manual section: 1
 :Manual group: multimedia
 
-.. raw:: latex
-
-    \tableofcontents
-    \pagebreak
-
 SYNOPSIS
 ========
 

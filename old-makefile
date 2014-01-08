@@ -373,11 +373,8 @@ endif
 
 all: $(ALL_TARGETS)
 
-%.tex: %.rst
-	$(RST2LATEX) --config=DOCS/man/docutils.conf $< $@
-
-%.pdf: %.tex
-	pdflatex -interaction=batchmode -jobname=$(basename $@) $<; pdflatex -interaction=batchmode -jobname=$(basename $@) $<
+%.pdf: %.rst
+	$(RST2PDF) -c --repeat-table-rows $< -o $@
 
 %.1: %.rst
 	$(RST2MAN) $< $@
@@ -536,7 +533,7 @@ clean:
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
 	-$(RM) $(call ADD_ALL_EXESUFS,mpv)
-	-$(RM) $(call ADDSUFFIXES,.pdf .tex .log .aux .out .toc,DOCS/man/*/mpv)
+	-$(RM) $(call ADDSUFFIXES,.pdf,DOCS/man/*/mpv)
 	-$(RM) DOCS/man/*/mpv.1
 	-$(RM) version.h
 	-$(RM) input/input_conf.h

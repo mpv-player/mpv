@@ -934,19 +934,19 @@ else
 fi
 echores "$_build_man"
 
-_rst2latex=rst2latex
-if [ -f "$(which rst2latex.py)" ] ; then
-  _rst2latex=rst2latex.py
+_rst2pdf=rst2pdf
+if [ -f "$(which rst2pdf.py)" ] ; then
+  _rst2pdf=rst2pdf.py
 fi
 
-echocheck "whether to build manual PDFs with rst2latex"
-texcheck() {
-    echo test | $_rst2latex --config=DOCS/man/docutils.conf | pdflatex -halt-on-error -draftmode -output-directory="$mplayer_tmpdir"
+echocheck "whether to build manual PDFs with rst2pdf"
+pdfcheck() {
+    echo test | $_rst2pdf -c --repeat-table-rows -o "$mplayer_tmpdir/test.pdf"
 }
 
 if test "$_build_pdf" = auto ; then
     _build_pdf=no
-    command_check texcheck && _build_pdf=yes
+    command_check pdfcheck && _build_pdf=yes
 else
     _build_pdf=no
 fi
@@ -3269,7 +3269,7 @@ GETCH = $_getch
 TIMER = $_timer
 RST2MAN = $_rst2man
 BUILD_MAN = $_build_man
-RST2LATEX = $_rst2latex
+RST2PDF = $_rst2pdf
 BUILD_PDF = $_build_pdf
 
 EXESUF      = $_exesuf

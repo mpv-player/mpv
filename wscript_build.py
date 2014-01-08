@@ -24,26 +24,14 @@ def _build_pdf(ctx):
     from waflib import TaskGen
 
     TaskGen.declare_chain(
-        name    = 'rst2latex',
-        rule    = '${RST2LATEX} ${RST2LATEX_FLAGS} ${SRC} ${TGT}',
+        name    = 'rst2pdf',
+        rule    = '${RST2PDF} ${RST2PDF_FLAGS} ${SRC} -o ${TGT}',
         ext_in  = '.rst',
-        ext_out = '.tex' )
-
-    TaskGen.declare_chain(
-        name    = 'pdflatex',
-        rule    = '${PDFLATEX} ${PDFLATEX_FLAGS} ${SRC}; ' * 2,
-        ext_in  = '.tex',
         ext_out = '.pdf',
         shell   = True )
 
-    ctx.env.RST2LATEX_FLAGS = [
-        '--config=' + ctx.srcnode.abspath() + '/DOCS/man/docutils.conf'
-    ]
-
-    ctx.env.PDFLATEX_FLAGS = [
-        '--interaction=batchmode',
-        '--output-directory=DOCS/man/en/',
-        '--jobname=mpv'
+    ctx.env.RST2PDF_FLAGS = [
+        '-c --repeat-table-rows'
     ]
 
     ctx(source = 'DOCS/man/en/mpv.rst')
