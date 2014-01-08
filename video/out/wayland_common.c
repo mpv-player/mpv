@@ -762,16 +762,16 @@ static bool create_display (struct vo_wayland_state *wl)
 
 static void destroy_display (struct vo_wayland_state *wl)
 {
-    struct vo_wayland_output *output;
+    struct vo_wayland_output *output = NULL;
+    struct vo_wayland_output *tmp = NULL;
 
-    wl_list_for_each(output, &wl->display.output_list, link) {
+    wl_list_for_each_safe(output, tmp, &wl->display.output_list, link) {
         if (output && output->output) {
             wl_output_destroy(output->output);
             output->output = NULL;
+            wl_list_remove(&output->link);
         }
     }
-
-    wl_list_empty(&wl->display.output_list);
 
     if (wl->display.shm)
         wl_shm_destroy(wl->display.shm);
