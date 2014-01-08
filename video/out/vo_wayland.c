@@ -539,7 +539,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct buffer *buf = buffer_get_back(p);
 
     if (!buf) {
-        MP_WARN(p->wl, "can't draw, back buffer is busy\n");
+        MP_VERBOSE(p->wl, "can't draw, back buffer is busy\n");
         return;
     }
 
@@ -570,7 +570,7 @@ static void flip_page(struct vo *vo)
     buffer_swap(p);
 
     if (!p->redraw_callback) {
-        MP_INFO(p->wl, "restart frame callback\n");
+        MP_DBG(p->wl, "restart frame callback\n");
         frame_handle_redraw(p, NULL, 0);
     }
 }
