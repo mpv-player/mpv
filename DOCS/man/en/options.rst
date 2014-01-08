@@ -1970,6 +1970,12 @@ OPTIONS
         Filename of the currently played video.
     ``%F``
         Same as ``%f``, but strip the file extension, including the dot.
+    ``%x``
+        Directory path of the currently played video. If the video is not on
+        the filesystem (but e.g. ``http://``), this expand to an empty string.
+    ``%X{fallback}``
+        Same as ``%x``, but if the video file is not on the filesystem, return
+        the fallback string inside the ``{...}``.
     ``%p``
         Current playback time, in the same format as used in the OSD. The
         result is a string of the form "HH:MM:SS". For example, if the video is

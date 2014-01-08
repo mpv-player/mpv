@@ -178,6 +178,27 @@ static char *create_fname(struct MPContext *mpctx, char *template,
             }
             break;
         }
+        case 'x':
+        case 'X': {
+            char *fallback = "";
+            if (fmt == 'X') {
+                if (template[0] != '{')
+                    goto error_exit;
+                char *end = strchr(template, '}');
+                if (!end)
+                    goto error_exit;
+                fallback = talloc_strndup(res, template + 1, end - template - 1);
+                template = end + 1;
+            }
+            if (!mpctx->filename || mp_is_url(bstr0(mpctx->filename))) {
+                res = talloc_strdup_append(res, fallback);
+            } else {
+                bstr dir = mp_dirname(mpctx->filename);
+                if (!bstr_equals0(dir, "."))
+                    res = talloc_asprintf_append(res, "%.*s", BSTR_P(dir));
+            }
+            break;
+        }
         case 'p':
         case 'P': {
             char *t = mp_format_time(get_current_time(mpctx), fmt == 'P');
