@@ -464,13 +464,12 @@ static const struct wl_seat_listener seat_listener = {
 };
 
 static void registry_handle_global (void *data,
-                                    struct wl_registry *registry,
+                                    struct wl_registry *reg,
                                     uint32_t id,
                                     const char *interface,
                                     uint32_t version)
 {
     struct vo_wayland_state *wl = data;
-    struct wl_registry *reg = wl->display.registry;
 
     if (strcmp(interface, "wl_compositor") == 0) {
 
