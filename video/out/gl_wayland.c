@@ -188,11 +188,12 @@ static void releaseGlContext_wayland(MPGLContext *ctx)
     struct vo_wayland_state *wl = ctx->vo->wayland;
 
     gl->Finish();
+    eglReleaseThread();
+    wl_egl_window_destroy(wl->egl_context.egl_window);
+    eglDestroySurface(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
     eglMakeCurrent(wl->egl_context.egl.dpy, NULL, NULL, EGL_NO_CONTEXT);
     eglDestroyContext(wl->egl_context.egl.dpy, wl->egl_context.egl.ctx);
     eglTerminate(wl->egl_context.egl.dpy);
-    eglReleaseThread();
-    wl_egl_window_destroy(wl->egl_context.egl_window);
     wl->egl_context.egl.ctx = NULL;
 }
 

@@ -763,6 +763,20 @@ static bool create_display (struct vo_wayland_state *wl)
 
 static void destroy_display (struct vo_wayland_state *wl)
 {
+    struct vo_wayland_output *output;
+
+    wl_list_for_each(output, &wl->display.output_list, link) {
+        if (output && output->output) {
+            wl_output_destroy(output->output);
+            output->output = NULL;
+        }
+    }
+
+    wl_list_empty(&wl->display.output_list);
+
+    if (wl->display.shm)
+        wl_shm_destroy(wl->display.shm);
+
     if (wl->display.shell)
         wl_shell_destroy(wl->display.shell);
 
@@ -771,6 +785,7 @@ static void destroy_display (struct vo_wayland_state *wl)
 
     if (wl->display.registry)
         wl_registry_destroy(wl->display.registry);
+
     if (wl->display.display) {
         wl_display_flush(wl->display.display);
         wl_display_disconnect(wl->display.display);
@@ -801,6 +816,7 @@ static void destroy_window (struct vo_wayland_state *wl)
 {
     if (wl->window.shell_surface)
         wl_shell_surface_destroy(wl->window.shell_surface);
+
     if (wl->window.surface)
         wl_surface_destroy(wl->window.surface);
 }
@@ -854,6 +870,7 @@ static void destroy_input (struct vo_wayland_state *wl)
         xkb_map_unref(wl->input.xkb.keymap);
         xkb_state_unref(wl->input.xkb.state);
     }
+
     if (wl->input.xkb.context)
         xkb_context_unref(wl->input.xkb.context);
 
@@ -1020,6 +1037,7 @@ static int vo_wayland_check_events (struct vo *vo)
                         struct bstr file_list = bstr0(buffer);
                         mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
                                                 file_list);
+                        free(buffer);
                         break;
                     }
                 }

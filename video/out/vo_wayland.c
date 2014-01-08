@@ -651,6 +651,9 @@ static void uninit(struct vo *vo)
     for (int i = 0; i < MAX_BUFFERS; ++i)
         destroy_shm_buffer(&p->buffers[i]);
 
+    if (p->redraw_callback)
+        wl_callback_destroy(p->redraw_callback);
+
     talloc_free(p->original_image);
 
     vo_wayland_uninit(vo);
