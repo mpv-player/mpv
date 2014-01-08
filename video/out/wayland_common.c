@@ -646,7 +646,6 @@ static bool create_display (struct vo_wayland_state *wl)
 
     wl_display_add_listener(wl->display.display, &display_listener, wl);
 
-    wl_list_init(&wl->display.output_list);
     wl->display.registry = wl_display_get_registry(wl->display.display);
     wl_registry_add_listener(wl->display.registry, &registry_listener, wl);
 
@@ -784,6 +783,8 @@ int vo_wayland_init (struct vo *vo)
     struct vo_wayland_state *wl = vo->wayland;
     wl->vo = vo;
     wl->log = mp_log_new(wl, vo->log, "wayland");
+
+    wl_list_init(&wl->display.output_list);
 
     if (!create_input(wl)
         || !create_display(wl)
