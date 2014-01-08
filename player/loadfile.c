@@ -1029,6 +1029,7 @@ static void load_per_file_options(m_config_t *conf,
 static void play_current_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
+    void *tmp = talloc_new(NULL);
     double playback_start = -1e100;
 
     mpctx->initialized_flags |= INITIALIZED_PLAYBACK;
@@ -1046,6 +1047,10 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (!mpctx->filename)
         goto terminate_playback;
+
+    char *local_filename = mp_file_url_to_filename(tmp, bstr0(mpctx->filename));
+    if (local_filename)
+        mpctx->filename = local_filename;
 
 #if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
@@ -1096,6 +1101,7 @@ static void play_current_file(struct MPContext *mpctx)
     char *stream_filename = mpctx->filename;
     mpctx->resolve_result = resolve_url(stream_filename, mpctx->global);
     if (mpctx->resolve_result) {
+        talloc_steal(tmp, mpctx->resolve_result);
         print_resolve_contents(mpctx->log, mpctx->resolve_result);
         if (mpctx->resolve_result->playlist) {
             transfer_playlist(mpctx, mpctx->resolve_result->playlist);
@@ -1370,8 +1376,8 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
         getch2_enable();
 
     mpctx->filename = NULL;
-    talloc_free(mpctx->resolve_result);
     mpctx->resolve_result = NULL;
+    talloc_free(tmp);
 
     // Played/paused for longer than 3 seconds -> ok
     bool playback_short = mpctx->stop_play == AT_END_OF_FILE &&

@@ -32,6 +32,7 @@
 #include "common/msg.h"
 #include "stream.h"
 #include "options/m_option.h"
+#include "options/path.h"
 
 struct priv {
     int fd;
@@ -91,10 +92,25 @@ static void s_close(stream_t *s)
         close(p->fd);
 }
 
+// If url is a file:// URL, return the local filename, otherwise return NULL.
+char *mp_file_url_to_filename(void *talloc_ctx, bstr url)
+{
+    bstr proto = mp_split_proto(url, &url);
+    if (bstrcasecmp0(proto, "file") != 0)
+        return NULL;
+    char *filename = bstrto0(talloc_ctx, url);
+    mp_url_unescape_inplace(filename);
+#if HAVE_DOS_PATHS
+    // extract '/' from '/x:/path'
+    if (filename[0] == '/' && filename[1] && filename[2] == ':')
+        memmove(filename, filename + 1, strlen(filename)); // including \0
+#endif
+    return filename;
+}
+
 static int open_f(stream_t *stream, int mode)
 {
     int fd;
-    char *filename = stream->path;
     struct priv *priv = talloc_ptrtype(stream, priv);
     *priv = (struct priv) {
         .fd = -1
@@ -111,15 +127,12 @@ static int open_f(stream_t *stream, int mode)
         return STREAM_UNSUPPORTED;
     }
 
-    // "file://" prefix -> decode URL-style escapes
-    if (strlen(stream->url) > strlen(stream->path))
-        mp_url_unescape_inplace(stream->path);
-
-#if HAVE_DOS_PATHS
-    // extract '/' from '/x:/path'
-    if (filename[0] == '/' && filename[1] && filename[2] == ':')
-        filename++;
-#endif
+    char *filename = mp_file_url_to_filename(stream, bstr0(stream->url));
+    if (filename) {
+        stream->path = filename;
+    } else {
+        filename = stream->path;
+    }
 
     if (!strcmp(filename, "-")) {
         if (mode == STREAM_READ) {
@@ -151,8 +164,7 @@ static int open_f(stream_t *stream, int mode)
 #ifndef __MINGW32__
         struct stat st;
         if (fstat(fd, &st) == 0 && S_ISDIR(st.st_mode)) {
-            MP_ERR(stream, "File is a directory: '%s'\n",
-                    filename);
+            MP_ERR(stream, "File is a directory: '%s'\n", filename);
             close(fd);
             return STREAM_ERROR;
         }
