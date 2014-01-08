@@ -443,7 +443,6 @@ static void seat_handle_capabilities(void *data,
 
     if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !wl->input.keyboard) {
         wl->input.keyboard = wl_seat_get_keyboard(seat);
-        wl_keyboard_set_user_data(wl->input.keyboard, wl);
         wl_keyboard_add_listener(wl->input.keyboard, &keyboard_listener, wl);
     }
     else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && wl->input.keyboard) {
@@ -452,7 +451,6 @@ static void seat_handle_capabilities(void *data,
     }
     if ((caps & WL_SEAT_CAPABILITY_POINTER) && !wl->input.pointer) {
         wl->input.pointer = wl_seat_get_pointer(seat);
-        wl_pointer_set_user_data(wl->input.pointer, wl);
         wl_pointer_add_listener(wl->input.pointer, &pointer_listener, wl);
     }
     else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && wl->input.pointer) {
