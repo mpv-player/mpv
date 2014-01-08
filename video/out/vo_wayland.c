@@ -663,10 +663,8 @@ static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    if (!vo_wayland_init(vo)) {
-        MP_ERR(p->wl, "could not initalise backend\n");
+    if (!vo_wayland_init(vo))
         return -1;
-    }
 
     p->vo = vo;
     p->wl = vo->wayland;
