@@ -420,7 +420,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
 
     // 23.976 FPS is used as default timebase for frame based formats
     if (sub->video_fps && sh->sub->frame_based)
-        sub_speed *= sub->video_fps / 23.976;
+        sub_speed *= 23.976 / sub->video_fps;
 
     if (opts->sub_fps && sub->video_fps)
         sub_speed *= opts->sub_fps / sub->video_fps;
