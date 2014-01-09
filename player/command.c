@@ -1502,37 +1502,43 @@ static int mp_property_height(m_option_t *prop, int action, void *arg,
                              vd->vf_input.h ? vd->vf_input.h : sh->disp_h);
 }
 
-static int property_vo_wh(m_option_t *prop, int action, void *arg,
-                          MPContext *mpctx, bool get_w)
+static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
 {
-    struct vo *vo = mpctx->video_out;
-    if (!mpctx->d_video || !vo || !vo->hasframe)
-        return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(prop, action, arg,
-                             get_w ? vo->aspdat.prew : vo->aspdat.preh);
+    if (!mpctx->d_video || !mpctx->d_video->vfilter ||
+        mpctx->d_video->vfilter->initialized < 1)
+        return (struct mp_image_params){0};
+
+    return mpctx->d_video->vfilter->output_params;
 }
 
 static int mp_property_dwidth(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
-    return property_vo_wh(prop, action, arg, mpctx, true);
+    struct mp_image_params params = get_video_out_params(mpctx);
+    if (!params.imgfmt)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop, action, arg, params.d_w);
 }
 
 static int mp_property_dheight(m_option_t *prop, int action, void *arg,
                                  MPContext *mpctx)
 {
-    return property_vo_wh(prop, action, arg, mpctx, false);
+    struct mp_image_params params = get_video_out_params(mpctx);
+    if (!params.imgfmt)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop, action, arg, params.d_h);
 }
 
 static int mp_property_window_scale(m_option_t *prop, int action, void *arg,
                                     MPContext *mpctx)
 {
     struct vo *vo = mpctx->video_out;
-    if (!vo || !vo->hasframe)
+    if (!vo)
         return M_PROPERTY_UNAVAILABLE;
 
-    int vid_w = vo->aspdat.prew;
-    int vid_h = vo->aspdat.preh;
+    struct mp_image_params params = get_video_out_params(mpctx);
+    int vid_w = params.d_w;
+    int vid_h = params.d_h;
     if (vid_w < 1 || vid_h < 1)
         return M_PROPERTY_UNAVAILABLE;
 
