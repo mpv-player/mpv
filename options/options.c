@@ -651,7 +651,6 @@ const m_option_t mp_opts[] = {
 
 const struct MPOpts mp_default_opts = {
     .msg_color = 1,
-    .reset_options = (char **)(const char *[]){"pause", NULL},
     .audio_driver_list = NULL,
     .audio_decoders = "-spdif:*", // never select spdif by default
     .video_decoders = NULL,

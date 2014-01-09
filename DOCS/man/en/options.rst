@@ -1845,7 +1845,7 @@ OPTIONS
     behavior is the opposite of MPlayer's, which tries to reset all settings
     when starting next file.)
 
-    Default: ``--reset-on-next-file=pause`` (only the pause mode is reset).
+    Default: Do not reset anything.
 
     This can be changed with this option. It accepts a list of options, and
     mpv will reset the value of these options on playback start to the initial
@@ -1860,13 +1860,13 @@ OPTIONS
 
     .. admonition:: Examples
 
+        - ``--reset-on-next-file=pause``
+          Reset pause mode when switching to the next file.
         - ``--reset-on-next-file=fullscreen,speed``
           Reset fullscreen and playback speed settings if they were changed
           during playback.
         - ``--reset-on-next-file=all``
           Try to reset all settings that were changed during playback.
-        - ``--reset-on-next-file=""``
-          Do not reset pause mode.
 
 ``--right-alt-gr``, ``--no-right-alt-gr``
     (Cocoa and Windows only)
