@@ -33,7 +33,8 @@
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        [self registerForDraggedTypes:@[NSFilenamesPboardType]];
+        [self registerForDraggedTypes:@[NSFilenamesPboardType,
+                                        NSURLPboardType]];
     }
     return self;
 }
@@ -234,14 +235,27 @@
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
-    return NSDragOperationEvery;
+    NSPasteboard *pboard = [sender draggingPasteboard];
+    NSArray *types = [pboard types];
+    if ([types containsObject:NSFilenamesPboardType] ||
+        [types containsObject:NSURLPboardType])
+        return NSDragOperationCopy;
+    else
+        return NSDragOperationNone;
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
-    NSArray *pbitems = [pboard propertyListForType:NSFilenamesPboardType];
-    [self.adapter handleFilesArray:pbitems];
-    return YES;
+    if ([[pboard types] containsObject:NSURLPboardType]) {
+        NSURL *file_url = [NSURL URLFromPasteboard:pboard];
+        [self.adapter handleFilesArray:@[[file_url absoluteString]]];
+        return YES;
+    } else if ([[pboard types] containsObject:NSFilenamesPboardType]) {
+        NSArray *pbitems = [pboard propertyListForType:NSFilenamesPboardType];
+        [self.adapter handleFilesArray:pbitems];
+        return YES;
+    }
+    return NO;
 }
 @end
