@@ -20,7 +20,6 @@
 
 @interface MpvVideoView : NSView <NSDraggingDestination> {
     BOOL hasMouseDown;
-    BOOL draggingTypeURL;
 }
 @property(nonatomic, retain) MpvCocoaAdapter *adapter;
 @property(nonatomic, retain) NSTrackingArea *tracker;

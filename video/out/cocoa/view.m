@@ -33,7 +33,7 @@
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        [self registerForDraggedTypes:@[NSFilenamesPboardType, 
+        [self registerForDraggedTypes:@[NSFilenamesPboardType,
                                         NSURLPboardType]];
     }
     return self;
@@ -236,44 +236,26 @@
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
-    NSArray* pbitems = [pboard propertyListForType:NSFilenamesPboardType];
-    NSDragOperation drag_mask = [sender draggingSourceOperationMask];
-    if (pbitems) { // file(s) exist on the filesystem
-        draggingTypeURL = NO;
-        // allow to customize mouse cursor
-        if (drag_mask & NSDragOperationLink)
-            return NSDragOperationLink;
-        else if (drag_mask & NSDragOperationCopy)
-            return NSDragOperationCopy;
-        return NSDragOperationEvery;
-    } else { // web url file
-        draggingTypeURL = YES;
-        return (drag_mask & NSDragOperationEvery)
-        ? NSDragOperationCopy : NSDragOperationNone;
-    }
+    NSArray *types = [pboard types];
+    if ([types containsObject:NSFilenamesPboardType] ||
+        [types containsObject:NSURLPboardType])
+        return NSDragOperationCopy;
+    else
+        return NSDragOperationNone;
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
-    if (draggingTypeURL) {
-        if ([[pboard types] containsObject:NSURLPboardType]) {
-            NSURL* file_url = [NSURL URLFromPasteboard:pboard];
-            NSString* file_path = [NSTemporaryDirectory()
-                                   stringByAppendingPathComponent:
-                                   [file_url lastPathComponent]];
-            BOOL ok = [[NSData dataWithContentsOfURL:file_url]
-                       writeToFile:file_path atomically:YES];
-            if (ok) {
-                [self.adapter handleFilesArray:@[file_path]];
-                return YES;
-            }
-        }
-        return NO;
-    } else {
+    if ([[pboard types] containsObject:NSURLPboardType]) {
+        NSURL *file_url = [NSURL URLFromPasteboard:pboard];
+        [self.adapter handleFilesArray:@[[file_url absoluteString]]];
+        return YES;
+    } else if ([[pboard types] containsObject:NSFilenamesPboardType]) {
         NSArray *pbitems = [pboard propertyListForType:NSFilenamesPboardType];
         [self.adapter handleFilesArray:pbitems];
         return YES;
     }
+    return NO;
 }
 @end
