@@ -23,9 +23,6 @@
 struct vo;
 
 void aspect_save_videores(struct vo *vo, int w, int h, int d_w, int d_h);
-void aspect_save_screenres(struct vo *vo, int scrw, int scrh);
-
-void aspect_calc_monitor(struct vo *vo, int *w, int *h);
 void aspect_calc_panscan(struct vo *vo, int *out_w, int *out_h);
 
 #endif /* MPLAYER_ASPECT_H */

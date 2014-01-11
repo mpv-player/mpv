@@ -35,37 +35,16 @@ void aspect_save_videores(struct vo *vo, int w, int h, int d_w, int d_h)
     vo->aspdat.par = (double)d_w / d_h * h / w;
 }
 
-void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
-{
-    MP_DBG(vo, "aspect_save_screenres %dx%d\n", scrw, scrh);
-    struct mp_vo_opts *opts = vo->opts;
-    if (scrw > 0 && scrh > 0 && opts->force_monitor_aspect)
-        vo->aspdat.monitor_par = opts->force_monitor_aspect * scrh / scrw;
-    else
-        vo->aspdat.monitor_par = 1.0 / opts->monitor_pixel_aspect;
-}
-
-void aspect_calc_monitor(struct vo *vo, int *w, int *h)
-{
-    float pixelaspect = vo->aspdat.monitor_par;
-
-    if (pixelaspect < 1) {
-        *h /= pixelaspect;
-    } else {
-        *w *= pixelaspect;
-    }
-}
-
 static void aspect_calc(struct vo *vo, int *srcw, int *srch)
 {
     struct aspect_data *aspdat = &vo->aspdat;
-    float pixelaspect = aspdat->monitor_par;
+    float pixelaspect = vo->monitor_par;
 
     int fitw = FFMAX(1, vo->dwidth);
     int fith = FFMAX(1, vo->dheight);
 
     MP_DBG(vo, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
-           fitw, fith, aspdat->monitor_par);
+           fitw, fith, pixelaspect);
     *srcw = fitw;
     *srch = (float)fitw / aspdat->prew * aspdat->preh / pixelaspect;
     MP_DBG(vo, "aspect(1) wh: %dx%d (org: %dx%d)\n",

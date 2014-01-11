@@ -892,7 +892,6 @@ static void update_screeninfo(struct vo *vo)
     struct mp_vo_opts *opts = vo->opts;
     opts->screenwidth = mode.w;
     opts->screenheight = mode.h;
-    aspect_save_screenres(vo, opts->screenwidth, opts->screenheight);
 }
 
 static struct mp_image *get_screenshot(struct vo *vo)

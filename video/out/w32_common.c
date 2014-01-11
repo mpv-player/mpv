@@ -617,8 +617,6 @@ static void w32_update_xinerama_info(struct vo *vo)
         w32->mon_id = screen;
         EnumDisplayMonitors(NULL, NULL, mon_enum, (LONG_PTR)vo);
     }
-
-    aspect_save_screenres(vo, vo->opts->screenwidth, vo->opts->screenheight);
 }
 
 static void updateScreenProperties(struct vo *vo)

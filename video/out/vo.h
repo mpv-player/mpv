@@ -265,12 +265,12 @@ struct vo {
 
     int xinerama_x;
     int xinerama_y;
+    float monitor_par;
 
     struct aspect_data {
-        float monitor_par; // out of screen size or from options
-        int orgw; // real width
+        int orgw; // real width         (same as params->w and h)
         int orgh; // real height
-        int prew; // prescaled width
+        int prew; // prescaled width    (same as params->d_w and d_h)
         int preh; // prescaled height
         float par; // pixel aspect ratio out of orgw/orgh and prew/preh
     } aspdat;

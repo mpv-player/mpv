@@ -219,7 +219,6 @@ static void vo_cocoa_update_screen_info(struct vo *vo)
 
     NSRect r = [s->current_screen frame];
 
-    aspect_save_screenres(vo, r.size.width, r.size.height);
     opts->screenwidth  = r.size.width;
     opts->screenheight = r.size.height;
 }

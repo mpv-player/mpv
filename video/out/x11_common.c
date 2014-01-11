@@ -470,7 +470,6 @@ static void vo_x11_update_screeninfo(struct vo *vo)
         XFree(screens);
     }
 #endif
-    aspect_save_screenres(vo, opts->screenwidth, opts->screenheight);
 }
 
 int vo_x11_init(struct vo *vo)

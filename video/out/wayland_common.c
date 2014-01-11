@@ -1107,8 +1107,6 @@ static void vo_wayland_update_screeninfo (struct vo *vo)
 
     wl->window.fs_width = opts->screenwidth;
     wl->window.fs_height = opts->screenheight;
-
-    aspect_save_screenres(vo, opts->screenwidth, opts->screenheight);
 }
 
 int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)

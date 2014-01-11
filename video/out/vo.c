@@ -165,7 +165,7 @@ static struct vo *vo_create(struct mpv_global *global,
         .input_ctx = input_ctx,
         .event_fd = -1,
         .registered_fd = -1,
-        .aspdat = { .monitor_par = 1 },
+        .monitor_par = 1,
         .next_pts = MP_NOPTS_VALUE,
         .next_pts2 = MP_NOPTS_VALUE,
     };
@@ -339,6 +339,21 @@ autoprobe:
     return NULL;
 }
 
+static void calc_monitor_aspect(struct mp_vo_opts *opts, int scr_w, int scr_h,
+                                float *pixelaspect, int *w, int *h)
+{
+    *pixelaspect = 1.0 / opts->monitor_pixel_aspect;
+
+    if (scr_w > 0 && scr_h > 0 && opts->force_monitor_aspect)
+        *pixelaspect = opts->force_monitor_aspect * scr_h / scr_w;
+
+    if (*pixelaspect < 1) {
+        *h /= *pixelaspect;
+    } else {
+        *w *= *pixelaspect;
+    }
+}
+
 // Fit *w/*h into the size specified by geo.
 static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
                           struct m_geometry *geo, bool allow_upscale)
@@ -378,7 +393,9 @@ static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
     int scr_w = opts->screenwidth;
     int scr_h = opts->screenheight;
 
-    aspect_calc_monitor(vo, &d_w, &d_h);
+    MP_DBG(vo, "screen size: %dx%d\n", scr_w, scr_h);
+
+    calc_monitor_aspect(opts, scr_w, scr_h, &vo->monitor_par, &d_w, &d_h);
 
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit, true);
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_larger, false);
@@ -572,7 +589,7 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
     struct mp_osd_res osd = {
         .w = vo->dwidth,
         .h = vo->dheight,
-        .display_par = vo->aspdat.monitor_par,
+        .display_par = vo->monitor_par,
     };
     if (opts->keepaspect) {
         int scaled_width, scaled_height;
