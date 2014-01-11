@@ -221,8 +221,6 @@ static void vo_cocoa_update_screen_info(struct vo *vo)
     aspect_save_screenres(vo, r.size.width, r.size.height);
     opts->screenwidth  = r.size.width;
     opts->screenheight = r.size.height;
-    vo->xinerama_x     = r.origin.x;
-    vo->xinerama_y     = r.origin.y;
 }
 
 static void resize_window(struct vo *vo)
@@ -276,7 +274,8 @@ static void create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
         [[MpvVideoWindow alloc] initWithContentRect:contentRect
                                           styleMask:window_mask
                                             backing:NSBackingStoreBuffered
-                                              defer:NO];
+                                              defer:NO
+                                             screen:s->current_screen];
     s->view = [[[MpvVideoView alloc] initWithFrame:contentRect] autorelease];
 
     [s->view setWantsBestResolutionOpenGLSurface:YES];
