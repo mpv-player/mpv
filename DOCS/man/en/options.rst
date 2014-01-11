@@ -2027,14 +2027,6 @@ OPTIONS
     ``%%``
         Replaced with the ``%`` character itself.
 
-``--screenh=<pixels>``
-    Specify the screen height for video output drivers which do not know the
-    screen resolution, like ``x11`` and TV-out.
-
-``--screenw=<pixels>``
-    Specify the screen width for video output drivers which do not know the
-    screen resolution, like ``x11`` and TV-out.
-
 ``--secondary-sid=<ID|auto|no>``
     Select a secondary subtitle stream. This is similar to ``--sid``. If a
     secondary subtitle is selected, it will be rendered as toptitle (i.e. on

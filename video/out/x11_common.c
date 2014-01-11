@@ -524,13 +524,8 @@ int vo_x11_init(struct vo *vo)
 
     init_atoms(vo->x11);
 
-    x11->ws_width = opts->screenwidth;
-    x11->ws_height = opts->screenheight;
-
-    if (!x11->ws_width)
-        x11->ws_width = DisplayWidth(x11->display, x11->screen);
-    if (!x11->ws_height)
-        x11->ws_height = DisplayHeight(x11->display, x11->screen);
+    x11->ws_width = DisplayWidth(x11->display, x11->screen);
+    x11->ws_height = DisplayHeight(x11->display, x11->screen);
 
     opts->screenwidth = x11->ws_width;
     opts->screenheight = x11->ws_height;

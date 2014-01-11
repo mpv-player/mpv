@@ -473,9 +473,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("volume-restore-data", mixer_restore_volume_data, 0),
     OPT_FLAG("gapless-audio", gapless_audio, 0),
 
-    // set screen dimensions (when not detectable or virtual!=visible)
-    OPT_INTRANGE("screenw", vo.screenwidth, CONF_GLOBAL, 0, 4096),
-    OPT_INTRANGE("screenh", vo.screenheight, CONF_GLOBAL, 0, 4096),
     OPT_GEOMETRY("geometry", vo.geometry, 0),
     OPT_SIZE_BOX("autofit", vo.autofit, 0),
     OPT_SIZE_BOX("autofit-larger", vo.autofit_larger, 0),
