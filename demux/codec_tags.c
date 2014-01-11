@@ -284,6 +284,7 @@ static const struct mp_codec_tag mp_video_codec_tags[] = {
     {MKTAG('D', 'V', 'O', 'O'), "rawvideo"},
     // ------- internal mplayer FourCCs ------
     {MKTAG('A', 'N', 'M', ' '), "anm"},
+    {MKTAG('B', 'I', 'K', 'b'), "binkvideo"},
     {MKTAG('B', 'I', 'K', 'f'), "binkvideo"},
     {MKTAG('B', 'I', 'K', 'g'), "binkvideo"},
     {MKTAG('B', 'I', 'K', 'h'), "binkvideo"},
