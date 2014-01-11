@@ -103,8 +103,7 @@ static int init(struct sd *sd)
     ctx = avcodec_alloc_context3(sub_codec);
     if (!ctx)
         goto error;
-    ctx->extradata_size = sd->extradata_len;
-    ctx->extradata = sd->extradata;
+    mp_lavc_set_extradata(ctx, sd->extradata, sd->extradata_len);
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
     priv->avctx = ctx;
@@ -264,6 +263,7 @@ static void uninit(struct sd *sd)
 
     clear(priv);
     avcodec_close(priv->avctx);
+    av_free(priv->avctx->extradata);
     av_free(priv->avctx);
     talloc_free(priv);
 }
