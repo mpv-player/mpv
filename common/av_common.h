@@ -27,6 +27,7 @@
 struct mp_decoder_list;
 struct demux_packet;
 
+int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size);
 void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st);
 void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb);
 int64_t mp_pts_to_av(double mp_pts, AVRational *tb);

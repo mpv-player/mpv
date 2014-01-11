@@ -172,11 +172,8 @@ static void set_from_wf(AVCodecContext *avctx, MP_WAVEFORMATEX *wf)
     avctx->block_align = wf->nBlockAlign;
     avctx->bits_per_coded_sample = wf->wBitsPerSample;
 
-    if (wf->cbSize > 0) {
-        avctx->extradata = av_mallocz(wf->cbSize + FF_INPUT_BUFFER_PADDING_SIZE);
-        avctx->extradata_size = wf->cbSize;
-        memcpy(avctx->extradata, wf + 1, avctx->extradata_size);
-    }
+    if (wf->cbSize > 0)
+        mp_lavc_set_extradata(avctx, wf + 1, wf->cbSize);
 }
 
 static int init(struct dec_audio *da, const char *decoder)
@@ -244,11 +241,8 @@ static int init(struct dec_audio *da, const char *decoder)
     // demux_mkv, demux_mpg
     if (sh_audio->codecdata_len && sh_audio->codecdata &&
             !lavc_context->extradata) {
-        lavc_context->extradata = av_malloc(sh_audio->codecdata_len +
-                                            FF_INPUT_BUFFER_PADDING_SIZE);
-        lavc_context->extradata_size = sh_audio->codecdata_len;
-        memcpy(lavc_context->extradata, (char *)sh_audio->codecdata,
-               lavc_context->extradata_size);
+        mp_lavc_set_extradata(lavc_context, sh_audio->codecdata,
+                              sh_audio->codecdata_len);
     }
 
     if (sh->lav_headers)

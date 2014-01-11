@@ -29,6 +29,19 @@
 
 #include "osdep/numcores.h"
 
+int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size)
+{
+    if (size) {
+        av_free(avctx->extradata);
+        avctx->extradata_size = 0;
+        avctx->extradata = av_mallocz(size + FF_INPUT_BUFFER_PADDING_SIZE);
+        if (!avctx->extradata)
+            return -1;
+        avctx->extradata_size = size;
+        memcpy(avctx->extradata, ptr, size);
+    }
+    return 0;
+}
 
 // Copy the codec-related fields from st into avctx. This does not set the
 // codec itself, only codec related header data provided by libavformat.
@@ -38,16 +51,7 @@
 // This is strictly for decoding only.
 void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
 {
-    if (st->extradata_size) {
-        av_free(avctx->extradata);
-        avctx->extradata_size = 0;
-        avctx->extradata =
-            av_mallocz(st->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-        if (avctx->extradata) {
-            avctx->extradata_size = st->extradata_size;
-            memcpy(avctx->extradata, st->extradata, st->extradata_size);
-        }
-    }
+    mp_lavc_set_extradata(avctx, st->extradata, st->extradata_size);
     avctx->codec_tag                = st->codec_tag;
     avctx->stream_codec_tag         = st->stream_codec_tag;
     avctx->bit_rate                 = st->bit_rate;
