@@ -318,10 +318,7 @@ static void set_from_bih(AVCodecContext *avctx, uint32_t format,
         if (bih->biSize <= sizeof(*bih))
            break;
         av_opt_set_int(avctx, "extern_huff", 1, AV_OPT_SEARCH_CHILDREN);
-        avctx->extradata_size = bih->biSize - sizeof(*bih);
-        avctx->extradata = av_mallocz(avctx->extradata_size +
-                                      FF_INPUT_BUFFER_PADDING_SIZE);
-        memcpy(avctx->extradata, bih + 1, avctx->extradata_size);
+        mp_lavc_set_extradata(avctx, bih + 1, bih->biSize - sizeof(*bih));
         break;
 
     case MP_FOURCC('R','V','1','0'):
@@ -331,29 +328,21 @@ static void set_from_bih(AVCodecContext *avctx, uint32_t format,
     case MP_FOURCC('R','V','4','0'):
         if (bih->biSize < sizeof(*bih) + 8) {
             // only 1 packet per frame & sub_id from fourcc
-           avctx->extradata_size = 8;
-            avctx->extradata = av_mallocz(avctx->extradata_size +
-                                          FF_INPUT_BUFFER_PADDING_SIZE);
-            ((uint32_t *)avctx->extradata)[0] = 0;
-            ((uint32_t *)avctx->extradata)[1] =
-                    format == MP_FOURCC('R','V','1','3') ?
-                    0x10003001 : 0x10000000;
+            uint32_t extradata[2] = {
+                0,
+                format == MP_FOURCC('R','V','1','3') ? 0x10003001 : 0x10000000,
+            };
+            mp_lavc_set_extradata(avctx, &extradata, 8);
         } else {
             // has extra slice header (demux_rm or rm->avi streamcopy)
-           avctx->extradata_size = bih->biSize - sizeof(*bih);
-            avctx->extradata = av_mallocz(avctx->extradata_size +
-                                          FF_INPUT_BUFFER_PADDING_SIZE);
-            memcpy(avctx->extradata, bih + 1, avctx->extradata_size);
+            mp_lavc_set_extradata(avctx, bih + 1, bih->biSize - sizeof(*bih));
         }
         break;
 
     default:
         if (bih->biSize <= sizeof(*bih))
             break;
-        avctx->extradata_size = bih->biSize - sizeof(*bih);
-        avctx->extradata = av_mallocz(avctx->extradata_size +
-                                      FF_INPUT_BUFFER_PADDING_SIZE);
-        memcpy(avctx->extradata, bih + 1, avctx->extradata_size);
+        mp_lavc_set_extradata(avctx, bih + 1, bih->biSize - sizeof(*bih));
         break;
     }
 
