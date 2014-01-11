@@ -315,10 +315,7 @@ static void set_from_bih(AVCodecContext *avctx, uint32_t format,
         /* AVRn stores huffman table in AVI header */
         /* Pegasus MJPEG stores it also in AVI header, but it uses the common
          * MJPG fourcc :( */
-        if (bih->biSize <= sizeof(*bih))
-           break;
         av_opt_set_int(avctx, "extern_huff", 1, AV_OPT_SEARCH_CHILDREN);
-        mp_lavc_set_extradata(avctx, bih + 1, bih->biSize - sizeof(*bih));
         break;
 
     case MP_FOURCC('R','V','1','0'):
@@ -333,18 +330,12 @@ static void set_from_bih(AVCodecContext *avctx, uint32_t format,
                 format == MP_FOURCC('R','V','1','3') ? 0x10003001 : 0x10000000,
             };
             mp_lavc_set_extradata(avctx, &extradata, 8);
-        } else {
-            // has extra slice header (demux_rm or rm->avi streamcopy)
-            mp_lavc_set_extradata(avctx, bih + 1, bih->biSize - sizeof(*bih));
         }
         break;
-
-    default:
-        if (bih->biSize <= sizeof(*bih))
-            break;
-        mp_lavc_set_extradata(avctx, bih + 1, bih->biSize - sizeof(*bih));
-        break;
     }
+
+    if (bih->biSize > sizeof(*bih) && avctx->extradata_size == 0)
+        mp_lavc_set_extradata(avctx, bih + 1, bih->biSize - sizeof(*bih));
 
     avctx->bits_per_coded_sample = bih->biBitCount;
     avctx->coded_width  = bih->biWidth;
