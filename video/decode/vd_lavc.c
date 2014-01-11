@@ -307,18 +307,6 @@ static int init(struct dec_video *vd, const char *decoder)
 static void set_from_bih(AVCodecContext *avctx, uint32_t format,
                          MP_BITMAPINFOHEADER *bih)
 {
-
-    switch (format) {
-    case MP_FOURCC('S','V','Q','3'):
-    case MP_FOURCC('A','V','R','n'):
-    case MP_FOURCC('M','J','P','G'):
-        /* AVRn stores huffman table in AVI header */
-        /* Pegasus MJPEG stores it also in AVI header, but it uses the common
-         * MJPG fourcc :( */
-        av_opt_set_int(avctx, "extern_huff", 1, AV_OPT_SEARCH_CHILDREN);
-        break;
-    }
-
     if (bih->biSize > sizeof(*bih))
         mp_lavc_set_extradata(avctx, bih + 1, bih->biSize - sizeof(*bih));
 
