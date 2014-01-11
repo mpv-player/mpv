@@ -39,13 +39,7 @@ void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
 {
     MP_DBG(vo, "aspect_save_screenres %dx%d\n", scrw, scrh);
     struct mp_vo_opts *opts = vo->opts;
-    if (scrw <= 0 && scrh <= 0)
-        scrw = 1024;
-    if (scrh <= 0)
-        scrh = (scrw * 3 + 3) / 4;
-    if (scrw <= 0)
-        scrw = (scrh * 4 + 2) / 3;
-    if (opts->force_monitor_aspect)
+    if (scrw > 0 && scrh > 0 && opts->force_monitor_aspect)
         vo->aspdat.monitor_par = opts->force_monitor_aspect * scrh / scrw;
     else
         vo->aspdat.monitor_par = 1.0 / opts->monitor_pixel_aspect;
