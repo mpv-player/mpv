@@ -144,8 +144,7 @@ int vo_x11_check_events(struct vo *vo);
 bool vo_x11_screen_is_composited(struct vo *vo);
 void fstype_help(struct mp_log *log);
 void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis,
-                             int x, int y, unsigned int width,
-                             unsigned int height, int flags,
+                             unsigned int width, unsigned int height, int flags,
                              const char *classname);
 void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);

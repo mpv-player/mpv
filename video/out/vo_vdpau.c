@@ -801,8 +801,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     free_video_specific(vo);
 
-    vo_x11_config_vo_window(vo, NULL, vo->dx, vo->dy, d_width, d_height,
-                            flags, "vdpau");
+    vo_x11_config_vo_window(vo, NULL, d_width, d_height, flags, "vdpau");
 
     if (initialize_vdpau_objects(vo) < 0)
         return -1;

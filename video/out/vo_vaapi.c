@@ -157,8 +157,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     free_video_specific(p);
 
-    vo_x11_config_vo_window(vo, NULL, vo->dx, vo->dy, vo->dwidth, vo->dheight,
-                            flags, "vaapi");
+    vo_x11_config_vo_window(vo, NULL, vo->dwidth, vo->dheight, flags, "vaapi");
 
     if (params->imgfmt != IMGFMT_VAAPI) {
         if (!alloc_swdec_surfaces(p, params->w, params->h, params->imgfmt))

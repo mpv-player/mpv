@@ -1335,12 +1335,14 @@ static void vo_x11_highlevel_resize(struct vo *vo, int x, int y, int w, int h)
  *
  * If the window already exists, it just moves and resizes it.
  */
-void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
+void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis,
                              unsigned int width, unsigned int height, int flags,
                              const char *classname)
 {
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
+    int x = vo->dx;
+    int y = vo->dy;
 
     if (opts->WinID >= 0) {
         if (opts->WinID == 0)
