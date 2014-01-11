@@ -317,24 +317,9 @@ static void set_from_bih(AVCodecContext *avctx, uint32_t format,
          * MJPG fourcc :( */
         av_opt_set_int(avctx, "extern_huff", 1, AV_OPT_SEARCH_CHILDREN);
         break;
-
-    case MP_FOURCC('R','V','1','0'):
-    case MP_FOURCC('R','V','1','3'):
-    case MP_FOURCC('R','V','2','0'):
-    case MP_FOURCC('R','V','3','0'):
-    case MP_FOURCC('R','V','4','0'):
-        if (bih->biSize < sizeof(*bih) + 8) {
-            // only 1 packet per frame & sub_id from fourcc
-            uint32_t extradata[2] = {
-                0,
-                format == MP_FOURCC('R','V','1','3') ? 0x10003001 : 0x10000000,
-            };
-            mp_lavc_set_extradata(avctx, &extradata, 8);
-        }
-        break;
     }
 
-    if (bih->biSize > sizeof(*bih) && avctx->extradata_size == 0)
+    if (bih->biSize > sizeof(*bih))
         mp_lavc_set_extradata(avctx, bih + 1, bih->biSize - sizeof(*bih));
 
     avctx->bits_per_coded_sample = bih->biBitCount;
