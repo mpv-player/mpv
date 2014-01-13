@@ -272,6 +272,10 @@ static int load_termcap(char *termtype){
     char *buf_ptr = &term_buf[0];
     char *tmp;
 
+    // References for terminfo/termcap codes:
+    //  http://linux.die.net/man/5/termcap
+    //  http://unixhelp.ed.ac.uk/CGI/man-cgi?terminfo+5
+
     tmp = tgetstr("ce", &buf_ptr);
     if (tmp)
         terminal_erase_to_end_of_line = tmp;
