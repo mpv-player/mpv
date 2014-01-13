@@ -124,7 +124,6 @@ typedef struct MPOpts {
     int softsleep;
     int frame_dropping;
     int term_osd;
-    char *term_osd_esc;
     char *playing_msg;
     char *status_msg;
     char *osd_status_msg;

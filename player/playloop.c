@@ -1164,7 +1164,6 @@ void run_playloop(struct MPContext *mpctx)
             get_relative_time(mpctx);
         }
         update_avsync(mpctx);
-        print_status(mpctx);
         screenshot_flip(mpctx);
         new_frame_shown = true;
 
@@ -1188,10 +1187,6 @@ void run_playloop(struct MPContext *mpctx)
 
     update_osd_msg(mpctx);
 
-    // The cache status is part of the status line. Possibly update it.
-    if (mpctx->paused && mp_get_cache_percent(mpctx) >= 0)
-        print_status(mpctx);
-
     if (!video_left && (!mpctx->paused || was_restart)) {
         double a_pos = 0;
         if (mpctx->d_audio) {
@@ -1199,7 +1194,6 @@ void run_playloop(struct MPContext *mpctx)
                      mpctx->opts->playback_speed * buffered_audio);
         }
         mpctx->playback_pts = a_pos;
-        print_status(mpctx);
     }
 
     update_subtitles(mpctx);

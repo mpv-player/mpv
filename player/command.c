@@ -3058,7 +3058,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_RUN: {
 #ifndef __MINGW32__
-        mp_msg(mpctx->statusline, MSGL_STATUS, "\n");
+        mp_msg_flush_status_line(mpctx->global);
         char *args[MP_CMD_MAX_ARGS + 1] = {0};
         for (int n = 0; n < cmd->nargs; n++)
             args[n] = cmd->args[n].v.s;

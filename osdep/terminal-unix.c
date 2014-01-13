@@ -56,7 +56,8 @@ static volatile int tio_orig_set;
 
 int screen_width = 80;
 int screen_height = 24;
-char * erase_to_end_of_line = NULL;
+char *terminal_erase_to_end_of_line = "\033[A";
+char *terminal_cursor_up = "\033[K";
 
 typedef struct {
     char *cap;
@@ -267,10 +268,16 @@ static int load_termcap(char *termtype){
 #endif
     ensure_cap(&termcap_buf, 2048);
 
-    static char term_buf[64];
+    static char term_buf[128];
     char *buf_ptr = &term_buf[0];
+    char *tmp;
 
-    erase_to_end_of_line = tgetstr("ce", &buf_ptr);
+    tmp = tgetstr("ce", &buf_ptr);
+    if (tmp)
+        terminal_erase_to_end_of_line = tmp;
+    tmp = tgetstr("ku", &buf_ptr);
+    if (tmp)
+        terminal_cursor_up = tmp;
 
     screen_width  = tgetnum("co");
     screen_height = tgetnum("li");

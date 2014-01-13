@@ -2378,11 +2378,6 @@ OPTIONS
     Display OSD messages on the console when no video output is available.
     Enabled by default.
 
-``--term-osd-esc=<string>``
-    Specify the escape sequence to use before writing an OSD message on the
-    console. The escape sequence should move the pointer to the beginning of
-    the line used for the OSD and clear it (default: ``^[[A\r^[[K``).
-
 ``--title=<string>``
     Set the window title. Properties are expanded on playback start.
     (See `Property Expansion`_.)

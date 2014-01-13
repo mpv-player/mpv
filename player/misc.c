@@ -170,10 +170,8 @@ void stream_dump(struct MPContext *mpctx)
         if (!opts->quiet && ((stream->pos / (1024 * 1024)) % 2) == 1) {
             uint64_t pos = stream->pos - stream->start_pos;
             uint64_t end = stream->end_pos - stream->start_pos;
-            char *line = talloc_asprintf(NULL, "Dumping %lld/%lld...",
-                (long long int)pos, (long long int)end);
-            write_status_line(mpctx, line);
-            talloc_free(line);
+            MP_MSG(mpctx, MSGL_STATUS, "Dumping %lld/%lld...",
+                   (long long int)pos, (long long int)end);
         }
         stream_fill_buffer(stream);
         for (;;) {

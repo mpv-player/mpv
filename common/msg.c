@@ -43,8 +43,12 @@ struct mp_log_root {
     struct mpv_global *global;
     // --- protected by mp_msg_lock
     char *msglevels;
-    bool smode; // slave mode compatibility glue
+    bool smode;         // slave mode compatibility glue
     bool module;
+    bool termosd;       // use terminal control codes for status line
+    bool header;        // indicate that message header should be printed
+    int blank_lines;    // number of lines useable by status
+    int status_lines;   // number of current status lines
     // --- semi-atomic access
     bool color;
     int verbose;
@@ -55,8 +59,6 @@ struct mp_log_root {
      * (This is perhaps better than maintaining a globally accessible and
      * synchronized mp_log tree.) */
     int64_t reload_counter;
-    int header;         // indicate if last line printed ended with \n or \r
-    int statusline;     // indicates if last line printed was a status line
 };
 
 struct mp_log {
@@ -117,6 +119,61 @@ bool mp_msg_test(struct mp_log *log, int lev)
     return lev <= log->level || (log->root->smode && lev == MSGL_SMODE);
 }
 
+// Reposition cursor and clear lines for outputting the status line. In certain
+// cases, like term OSD and subtitle display, the status can consist of
+// multiple lines.
+static void prepare_status_line(struct mp_log_root *root, char *new_status)
+{
+    FILE *f = stderr;
+    size_t old_lines = root->blank_lines;
+
+    size_t new_lines = 1;
+    char *tmp = new_status;
+    while (1) {
+        tmp = strchr(tmp, '\n');
+        if (!tmp)
+            break;
+        new_lines++;
+        tmp++;
+    }
+
+    // clear the status line itself
+    fprintf(f, "\r%s", terminal_erase_to_end_of_line);
+    // and clear all previous old lines
+    for (size_t n = 1; n < old_lines; n++)
+        fprintf(f, "%s\r%s", terminal_cursor_up, terminal_erase_to_end_of_line);
+    // skip "unused" blank lines, so that status is aligned to term bottom
+    for (size_t n = new_lines; n < old_lines; n++)
+        fprintf(f, "\n");
+
+    root->status_lines = new_lines;
+    root->blank_lines = MPMAX(root->blank_lines, new_lines);
+}
+
+static void flush_status_line(struct mp_log_root *root)
+{
+    // If there was a status line, don't overwrite it, but skip it.
+    if (root->status_lines)
+        fprintf(stderr, "\n");
+    root->status_lines = 0;
+    root->blank_lines = 0;
+}
+
+void mp_msg_flush_status_line(struct mpv_global *global)
+{
+    pthread_mutex_lock(&mp_msg_lock);
+    flush_status_line(global->log->root);
+    pthread_mutex_unlock(&mp_msg_lock);
+}
+
+bool mp_msg_has_status_line(struct mpv_global *global)
+{
+    pthread_mutex_lock(&mp_msg_lock);
+    bool r = global->log->root->status_lines > 0;
+    pthread_mutex_unlock(&mp_msg_lock);
+    return r;
+}
+
 static void set_msg_color(FILE* stream, int lev)
 {
     static const int v_colors[] = {9, 1, 3, -1, -1, 2, 8, 8, -1};
@@ -139,12 +196,21 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     tmp[MSGSIZE_MAX - 2] = '\n';
     tmp[MSGSIZE_MAX - 1] = 0;
 
-    /* A status line is normally intended to be overwritten by the next
-     * status line, and does not end with a '\n'. If we're printing a normal
-     * line instead after the status one print '\n' to change line. */
-    if (root->statusline && lev != MSGL_STATUS)
-        fprintf(stderr, "\n");
-    root->statusline = lev == MSGL_STATUS;
+    char *terminate = "";
+
+    if (lev == MSGL_STATUS) {
+        if (root->termosd) {
+            prepare_status_line(root, tmp);
+            terminate = "\r";
+        } else {
+            terminate = "\n";
+        }
+        root->header = true;
+    } else {
+        flush_status_line(root);
+        size_t len = strlen(tmp);
+        root->header = len && tmp[len - 1] == '\n';
+    }
 
     if (root->color)
         set_msg_color(stream, lev);
@@ -156,10 +222,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         }
     }
 
-    size_t len = strlen(tmp);
-    root->header = len && (tmp[len - 1] == '\n' || tmp[len - 1] == '\r');
-
-    fprintf(stream, "%s", tmp);
+    fprintf(stream, "%s%s", tmp, terminate);
 
     if (root->color)
         terminal_set_foreground_color(stream, -1);
@@ -211,7 +274,7 @@ void mp_msg_init(struct mpv_global *global)
 
     struct mp_log_root *root = talloc_zero(NULL, struct mp_log_root);
     root->global = global;
-    root->header = 1;
+    root->header = true;
     root->reload_counter = 1;
 
     struct mp_log dummy = { .root = root };
@@ -236,6 +299,7 @@ void mp_msg_update_msglevels(struct mpv_global *global)
     root->module = opts->msg_module;
     root->smode = opts->msg_identify;
     root->color = opts->msg_color && isatty(fileno(stdout));
+    root->termosd = !opts->slave_mode && isatty(fileno(stdout));
 
     talloc_free(root->msglevels);
     root->msglevels = talloc_strdup(root, global->opts->msglevels);

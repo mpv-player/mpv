@@ -33,9 +33,10 @@
 #include "input/input.h"
 #include "terminal.h"
 
-int screen_width = 80;
+int screen_width = 79;
 int screen_height = 24;
-char *erase_to_end_of_line = NULL;
+char *terminal_erase_to_end_of_line = "";
+char *terminal_cursor_up = "";
 
 #define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
 #define hSTDERR GetStdHandle(STD_ERROR_HANDLE)

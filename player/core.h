@@ -160,7 +160,9 @@ typedef struct MPContext {
     struct input_ctx *input;
     struct osd_state *osd;
     struct mp_osd_msg *osd_msg_stack;
-    char *terminal_osd_text;
+    char *term_osd_text;
+    char *term_osd_status;
+    char *term_osd_contents;
     char *last_window_title;
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
@@ -408,7 +410,6 @@ void update_window_title(struct MPContext *mpctx, bool force);
 void stream_dump(struct MPContext *mpctx);
 
 // osd.c
-void write_status_line(struct MPContext *mpctx, const char *line);
 void print_status(struct MPContext *mpctx);
 void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
                  double min, double max, double val);

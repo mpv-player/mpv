@@ -33,8 +33,8 @@ struct input_ctx;
 extern int screen_width;
 extern int screen_height;
 
-/* Termcap code to erase to end of line */
-extern char * erase_to_end_of_line;
+extern char *terminal_erase_to_end_of_line;
+extern char *terminal_cursor_up;
 
 /* Global initialization for terminal output. */
 int terminal_init(void);
