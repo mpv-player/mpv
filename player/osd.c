@@ -435,9 +435,12 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
-        mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
-                                        mpctx->opts->osd_duration);
-        msg->show_position = true;
+        // Never in term-osd mode
+        if (mpctx->video_out && mpctx->opts->term_osd != 1) {
+            mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
+                                            mpctx->opts->osd_duration);
+            msg->show_position = true;
+        }
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CHAPTER_TEXT) {
         char *chapter = chapter_display_name(mpctx, get_current_chapter(mpctx));
