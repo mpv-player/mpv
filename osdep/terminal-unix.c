@@ -56,8 +56,8 @@ static volatile int tio_orig_set;
 
 int screen_width = 80;
 int screen_height = 24;
-char *terminal_erase_to_end_of_line = "\033[A";
-char *terminal_cursor_up = "\033[K";
+char *terminal_erase_to_end_of_line = "\033[K";
+char *terminal_cursor_up = "\033[A";
 
 typedef struct {
     char *cap;
