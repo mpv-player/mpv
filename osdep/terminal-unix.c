@@ -337,6 +337,9 @@ static int load_termcap(char *termtype){
     /* mintty uses this instead of the "K2" cap for keypad center */
     keys_push_once("\033OE", MP_KEY_KP5);
 
+    /* fallback if terminfo and termcap are not available */
+    keys_push_once("\012", MP_KEY_ENTER);
+
     return getch2_keys.len;
 }
 
