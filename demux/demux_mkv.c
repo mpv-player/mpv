@@ -1917,9 +1917,6 @@ static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
     return 1;
 }
 
-#define SKIP_BITS(n) buffer<<=n
-#define SHOW_BITS(n) ((buffer)>>(32-(n)))
-
 static int64_t real_fix_timestamp(unsigned char *buf, int len, int64_t timestamp,
                                   unsigned int format, int64_t *kf_base,
                                   int *kf_pts)
