@@ -723,7 +723,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     stream_t *s = demuxer->stream;
 
     if (opts->index_mode == 0 || opts->index_mode == 2) {
-        ebml_read_skip(s, NULL);
+        ebml_read_skip(demuxer->log, -1, s);
         return 0;
     }
 
@@ -1128,7 +1128,7 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
         res = 2;
     }
     if (!at_filepos && id != EBML_ID_INVALID)
-        ebml_read_skip(s, NULL);
+        ebml_read_skip(demuxer->log, -1, s);
     return res;
 }
 
@@ -2454,11 +2454,12 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
                 block->keyframe = false;
             break;
 
+        case MATROSKA_ID_CLUSTER:
         case EBML_ID_INVALID:
             goto error;
 
         default:
-            if (ebml_read_skip_or_resync_cluster(demuxer->log, end, s) != 0)
+            if (ebml_read_skip(demuxer->log, end, s) != 0)
                 goto error;
             break;
         }
@@ -2519,8 +2520,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
                 goto find_next_cluster;
 
             default: ;
-                if (ebml_read_skip_or_resync_cluster
-                        (demuxer->log, mkv_d->cluster_end, s) != 0)
+                if (ebml_read_skip(demuxer->log, mkv_d->cluster_end, s) != 0)
                     goto find_next_cluster;
                 break;
             }
@@ -2535,7 +2535,13 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
                 break;
             if (s->eof)
                 return -1;
-            ebml_read_skip_or_resync_cluster(demuxer->log, -1, s);
+            // For the sake of robustness, consider even unknown level 1
+            // elements the same as unknown/broken IDs.
+            if (!ebml_is_mkv_level1_id(id) ||
+                ebml_read_skip(demuxer->log, -1, s) != 0)
+            {
+                ebml_resync_cluster(demuxer->log, s);
+            }
         }
     next_cluster:
         mkv_d->cluster_end = ebml_read_length(s, NULL);

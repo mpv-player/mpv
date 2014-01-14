@@ -41,6 +41,26 @@
 #define SIZE_MAX ((size_t)-1)
 #endif
 
+// Whether the id is a known Matroska level 1 element (allowed as element on
+// global file level, after the level 0 MATROSKA_ID_SEGMENT).
+// This (intentionally) doesn't include "global" elements.
+bool ebml_is_mkv_level1_id(uint32_t id)
+{
+    switch (id) {
+    case MATROSKA_ID_SEEKHEAD:
+    case MATROSKA_ID_INFO:
+    case MATROSKA_ID_CLUSTER:
+    case MATROSKA_ID_TRACKS:
+    case MATROSKA_ID_CUES:
+    case MATROSKA_ID_ATTACHMENTS:
+    case MATROSKA_ID_CHAPTERS:
+    case MATROSKA_ID_TAGS:
+        return true;
+    default:
+        return false;
+    }
+}
+
 /*
  * Read: the element content data ID.
  * Return: the ID.
@@ -252,21 +272,32 @@ char *ebml_read_utf8(stream_t *s, uint64_t *length)
 
 /*
  * Skip the current element.
+ * end: the end of the parent element or -1 (for robust error handling)
  */
-int ebml_read_skip(stream_t *s, uint64_t *length)
+int ebml_read_skip(struct mp_log *log, int64_t end, stream_t *s)
 {
     uint64_t len;
     int l;
 
+    int64_t pos = stream_tell(s);
+
     len = ebml_read_length(s, &l);
     if (len == EBML_UINT_INVALID)
-        return 1;
-    if (length)
-        *length = len + l;
+        goto invalid;
 
-    stream_skip(s, len);
+    int64_t pos2 = stream_tell(s);
+    if (len >= INT64_MAX - pos2 || (end > 0 && pos2 + len > end))
+        goto invalid;
+
+    if (!stream_skip(s, len))
+        goto invalid;
 
     return 0;
+
+invalid:
+    mp_err(log, "Invalid EBML length at position %"PRId64"\n", pos);
+    stream_seek(s, pos);
+    return 1;
 }
 
 /*
@@ -289,38 +320,6 @@ int ebml_resync_cluster(struct mp_log *log, stream_t *s)
         pos++;
     }
     return -1;
-}
-
-/*
- * Skip the current element, or on error, call ebml_resync_cluster().
- * end gives the maximum possible file pos (due to EBML parent element size).
- */
-int ebml_read_skip_or_resync_cluster(struct mp_log *log, int64_t end,
-                                     stream_t *s)
-{
-    uint64_t len;
-    int l;
-
-    len = ebml_read_length(s, &l);
-    if (len == EBML_UINT_INVALID)
-        goto resync;
-
-    int64_t pos = stream_tell(s);
-
-    if (end >= 0 && pos + len > end)
-        goto resync;
-
-    // When reading corrupted elements, len will often be a random high number,
-    // and stream_skip() will fail when skipping past EOF.
-    if (!stream_skip(s, len)) {
-        stream_seek(s, pos);
-        goto resync;
-    }
-
-    return 0;
-
-resync:
-    return ebml_resync_cluster(log, s) < 0 ? -1 : 1;
 }
 
 /*
