@@ -2270,7 +2270,7 @@ static void index_block(demuxer_t *demuxer, struct block_info *block)
     }
 }
 
-static int read_block(demuxer_t *demuxer, struct block_info *block)
+static int read_block(demuxer_t *demuxer, int64_t end, struct block_info *block)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
@@ -2281,7 +2281,7 @@ static int read_block(demuxer_t *demuxer, struct block_info *block)
 
     free_block(block);
     length = ebml_read_length(s, NULL);
-    if (length > 500000000)
+    if (length > 500000000 || stream_tell(s) + length > (uint64_t)end)
         goto exit;
     block->alloc = malloc(length + AV_LZO_INPUT_PADDING);
     if (!block->alloc)
@@ -2442,7 +2442,7 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             break;
 
         case MATROSKA_ID_BLOCK:
-            if (read_block(demuxer, block) < 0)
+            if (read_block(demuxer, end, block) < 0)
                 goto error;
             break;
 
@@ -2458,7 +2458,7 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             goto error;
 
         default:
-            if (ebml_read_skip_or_resync_cluster(demuxer->log, s, NULL) != 0)
+            if (ebml_read_skip_or_resync_cluster(demuxer->log, end, s) != 0)
                 goto error;
             break;
         }
@@ -2491,6 +2491,8 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
             case MATROSKA_ID_BLOCKGROUP: {
                 int64_t end = ebml_read_length(s, NULL);
                 end += stream_tell(s);
+                if (end > mkv_d->cluster_end)
+                    goto find_next_cluster;
                 int res = read_block_group(demuxer, end, block);
                 if (res < 0)
                     goto find_next_cluster;
@@ -2501,7 +2503,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
 
             case MATROSKA_ID_SIMPLEBLOCK: {
                 *block = (struct block_info){ .simple = true };
-                int res = read_block(demuxer, block);
+                int res = read_block(demuxer, mkv_d->cluster_end, block);
                 if (res < 0)
                     goto find_next_cluster;
                 if (res > 0)
@@ -2517,7 +2519,8 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
                 goto find_next_cluster;
 
             default: ;
-                if (ebml_read_skip_or_resync_cluster(demuxer->log, s, NULL) != 0)
+                if (ebml_read_skip_or_resync_cluster
+                        (demuxer->log, mkv_d->cluster_end, s) != 0)
                     goto find_next_cluster;
                 break;
             }
@@ -2532,7 +2535,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
                 break;
             if (s->eof)
                 return -1;
-            ebml_read_skip_or_resync_cluster(demuxer->log, s, NULL);
+            ebml_read_skip_or_resync_cluster(demuxer->log, -1, s);
         }
     next_cluster:
         mkv_d->cluster_end = ebml_read_length(s, NULL);
