@@ -196,6 +196,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     tmp[MSGSIZE_MAX - 2] = '\n';
     tmp[MSGSIZE_MAX - 1] = 0;
 
+    bool header = root->header;
     char *terminate = "";
 
     if (lev == MSGL_STATUS) {
@@ -214,7 +215,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     if (root->color)
         set_msg_color(stream, lev);
-    if (root->header) {
+    if (header) {
         if ((lev >= MSGL_V && lev != MSGL_SMODE) || root->verbose || root->module) {
             fprintf(stream, "[%s] ", log->verbose_prefix);
         } else if (log->prefix) {
