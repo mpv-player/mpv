@@ -420,6 +420,10 @@ video/out/gl_video.c: video/out/gl_video_shaders.h
 video/out/gl_video_shaders.h: TOOLS/file2string.pl video/out/gl_video_shaders.glsl
 	./$^ >$@
 
+osdep/macosx_application.m: osdep/macosx_icon.inc
+osdep/macosx_icon.inc: TOOLS/file2string.pl TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns
+	./$^ >$@
+
 video/out/x11_common.c: video/out/x11_icon.inc
 video/out/x11_icon.inc: TOOLS/file2string.pl video/out/x11_icon.bin
 	./$^ >$@
@@ -541,6 +545,7 @@ clean:
 	-$(RM) demux/ebml_types.h demux/ebml_defs.c
 	-$(RM) video/out/gl_video_shaders.h
 	-$(RM) video/out/x11_icon.inc
+	-$(RM) osdep/macosx_icon.inc
 	-$(RM) sub/osd_font.h
 	-$(RM) player/lua/defaults.inc
 	-$(RM) player/lua/assdraw.inc

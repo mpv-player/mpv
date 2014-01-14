@@ -35,6 +35,10 @@ def build(ctx):
     ctx.load('generators.sources')
 
     ctx.file2string(
+        source = "TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns",
+        target = "osdep/macosx_icon.inc")
+
+    ctx.file2string(
         source = "video/out/x11_icon.bin",
         target = "video/out/x11_icon.inc")
 
