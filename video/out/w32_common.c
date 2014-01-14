@@ -39,6 +39,10 @@
 
 static const wchar_t classname[] = L"mpv";
 
+enum mp_messages {
+    MPM_PUTKEY = WM_USER,
+};
+
 static const struct mp_keymap vk_map[] = {
     // special keys
     {VK_ESCAPE, MP_KEY_ESC}, {VK_BACK, MP_KEY_BS}, {VK_TAB, MP_KEY_TAB},
@@ -381,15 +385,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         }
         break;
-    case WM_KEYDOWN:
-    case WM_SYSKEYDOWN: {
-        int mpkey = lookup_keymap_table(vk_map, wParam);
-        if (mpkey)
-            mp_input_put_key(vo->input_ctx, mpkey | mod_state(vo));
+    case MPM_PUTKEY:
+        mp_input_put_key(vo->input_ctx, wParam | mod_state(vo));
+        break;
+    case WM_SYSKEYDOWN:
         if (wParam == VK_F10)
             return 0;
         break;
-    }
     case WM_CHAR:
     case WM_SYSCHAR: {
         int mods = mod_state(vo);
@@ -401,11 +403,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             mods &= ~(MP_KEY_MODIFIER_CTRL | MP_KEY_MODIFIER_ALT);
         // Apparently Ctrl+A to Ctrl+Z is special cased, and produces
         // character codes from 1-26. Work it around.
-        // Also, enter/return (including the keypad variant) and CTRL+J both
-        // map to wParam==10. As a workaround, check VK_RETURN to
-        // distinguish these two key combinations.
-        if ((mods & MP_KEY_MODIFIER_CTRL) && code >= 1 && code <= 26
-            && !key_state(vo, VK_RETURN))
+        if ((mods & MP_KEY_MODIFIER_CTRL) && code >= 1 && code <= 26)
             code = code - 1 + (mods & MP_KEY_MODIFIER_SHIFT ? 'A' : 'a');
         if (code >= 32 && code < (1<<21)) {
             mp_input_put_key(vo->input_ctx, code | mods);
@@ -496,6 +494,24 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
+static bool translate_key_input(MSG *msg)
+{
+    if (msg->message != WM_KEYDOWN && msg->message != WM_SYSKEYDOWN &&
+        msg->message != WM_KEYUP && msg->message != WM_SYSKEYUP)
+        return false;
+
+    int mpkey = lookup_keymap_table(vk_map, msg->wParam);
+
+    if (mpkey) {
+        if (msg->message == WM_KEYDOWN || msg->message == WM_SYSKEYDOWN)
+            SendMessageW(msg->hwnd, MPM_PUTKEY, mpkey, 0);
+
+        return true;
+    }
+
+    return false;
+}
+
 /**
  * \brief Dispatch incoming window events and handle them.
  *
@@ -516,7 +532,13 @@ int vo_w32_check_events(struct vo *vo)
     w32->event_flags = 0;
 
     while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
+        // Decode key messages and synthesize MPM_PUTKEY for keys in the
+        // keymap table
+        if (!translate_key_input(&msg)) {
+            // TranslateMessage only needs to generate WM_CHAR for keys that
+            // haven't already been decoded
+            TranslateMessage(&msg);
+        }
         DispatchMessageW(&msg);
     }
 
