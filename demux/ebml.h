@@ -102,8 +102,8 @@ double ebml_read_float (stream_t *s, uint64_t *length);
 char *ebml_read_ascii (stream_t *s, uint64_t *length);
 char *ebml_read_utf8 (stream_t *s, uint64_t *length);
 int ebml_read_skip (stream_t *s, uint64_t *length);
-int ebml_read_skip_or_resync_cluster(struct mp_log *log, stream_t *s,
-                                     uint64_t *length);
+int ebml_read_skip_or_resync_cluster(struct mp_log *log, int64_t end,
+                                     stream_t *s);
 int ebml_resync_cluster(struct mp_log *log, stream_t *s);
 uint32_t ebml_read_master (stream_t *s, uint64_t *length);
 

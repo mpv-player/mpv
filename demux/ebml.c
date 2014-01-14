@@ -293,9 +293,10 @@ int ebml_resync_cluster(struct mp_log *log, stream_t *s)
 
 /*
  * Skip the current element, or on error, call ebml_resync_cluster().
+ * end gives the maximum possible file pos (due to EBML parent element size).
  */
-int ebml_read_skip_or_resync_cluster(struct mp_log *log, stream_t *s,
-                                     uint64_t *length)
+int ebml_read_skip_or_resync_cluster(struct mp_log *log, int64_t end,
+                                     stream_t *s)
 {
     uint64_t len;
     int l;
@@ -304,10 +305,10 @@ int ebml_read_skip_or_resync_cluster(struct mp_log *log, stream_t *s,
     if (len == EBML_UINT_INVALID)
         goto resync;
 
-    if (length)
-        *length = len + l;
-
     int64_t pos = stream_tell(s);
+
+    if (end >= 0 && pos + len > end)
+        goto resync;
 
     // When reading corrupted elements, len will often be a random high number,
     // and stream_skip() will fail when skipping past EOF.
