@@ -279,7 +279,7 @@ static int load_termcap(char *termtype){
     tmp = tgetstr("ce", &buf_ptr);
     if (tmp)
         terminal_erase_to_end_of_line = tmp;
-    tmp = tgetstr("ku", &buf_ptr);
+    tmp = tgetstr("up", &buf_ptr);
     if (tmp)
         terminal_cursor_up = tmp;
 
