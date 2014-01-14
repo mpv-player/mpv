@@ -65,7 +65,7 @@ bool ebml_is_mkv_level1_id(uint32_t id)
  * Read: the element content data ID.
  * Return: the ID.
  */
-uint32_t ebml_read_id(stream_t *s, int *length)
+uint32_t ebml_read_id(stream_t *s)
 {
     int i, len_mask = 0x80;
     uint32_t id;
@@ -74,8 +74,6 @@ uint32_t ebml_read_id(stream_t *s, int *length)
         len_mask >>= 1;
     if (i >= 4)
         return EBML_ID_INVALID;
-    if (length)
-        *length = i + 1;
     while (i--)
         id = (id << 8) | stream_read_char(s);
     return id;
@@ -134,7 +132,7 @@ int64_t ebml_read_vlen_int(bstr *buffer)
 /*
  * Read: element content length.
  */
-uint64_t ebml_read_length(stream_t *s, int *length)
+uint64_t ebml_read_length(stream_t *s)
 {
     int i, j, num_ffs = 0, len_mask = 0x80;
     uint64_t len;
@@ -144,8 +142,6 @@ uint64_t ebml_read_length(stream_t *s, int *length)
     if (i >= 8)
         return EBML_UINT_INVALID;
     j = i + 1;
-    if (length)
-        *length = j;
     if ((int) (len &= (len_mask - 1)) == len_mask - 1)
         num_ffs++;
     while (i--) {
@@ -163,16 +159,13 @@ uint64_t ebml_read_length(stream_t *s, int *length)
 /*
  * Read the next element as an unsigned int.
  */
-uint64_t ebml_read_uint(stream_t *s, uint64_t *length)
+uint64_t ebml_read_uint(stream_t *s)
 {
     uint64_t len, value = 0;
-    int l;
 
-    len = ebml_read_length(s, &l);
+    len = ebml_read_length(s);
     if (len == EBML_UINT_INVALID || len < 1 || len > 8)
         return EBML_UINT_INVALID;
-    if (length)
-        *length = len + l;
 
     while (len--)
         value = (value << 8) | stream_read_char(s);
@@ -183,17 +176,15 @@ uint64_t ebml_read_uint(stream_t *s, uint64_t *length)
 /*
  * Read the next element as a signed int.
  */
-int64_t ebml_read_int(stream_t *s, uint64_t *length)
+int64_t ebml_read_int(stream_t *s)
 {
     int64_t value = 0;
     uint64_t len;
     int l;
 
-    len = ebml_read_length(s, &l);
+    len = ebml_read_length(s);
     if (len == EBML_UINT_INVALID || len < 1 || len > 8)
         return EBML_INT_INVALID;
-    if (length)
-        *length = len + l;
 
     len--;
     l = stream_read_char(s);
@@ -213,11 +204,10 @@ int64_t ebml_read_int(stream_t *s, uint64_t *length)
 int ebml_read_skip(struct mp_log *log, int64_t end, stream_t *s)
 {
     uint64_t len;
-    int l;
 
     int64_t pos = stream_tell(s);
 
-    len = ebml_read_length(s, &l);
+    len = ebml_read_length(s);
     if (len == EBML_UINT_INVALID)
         goto invalid;
 
@@ -613,7 +603,7 @@ int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
 {
     ctx->has_errors = false;
     int msglevel = ctx->no_error_messages ? MSGL_DEBUG : MSGL_WARN;
-    uint64_t length = ebml_read_length(s, &ctx->bytes_read);
+    uint64_t length = ebml_read_length(s);
     if (s->eof) {
         MP_MSG(ctx, msglevel, "Unexpected end of file "
                    "- partial or corrupt file?\n");
@@ -625,7 +615,6 @@ int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
     }
     ctx->talloc_ctx = talloc_size(NULL, length + 8);
     int read_len = stream_read(s, ctx->talloc_ctx, length);
-    ctx->bytes_read += read_len;
     if (read_len < length)
         MP_MSG(ctx, msglevel, "Unexpected end of file - partial or corrupt file?\n");
     ebml_parse_element(ctx, target, ctx->talloc_ctx, read_len, desc, 0);

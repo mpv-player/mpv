@@ -61,7 +61,6 @@ struct ebml_elem_desc {
 struct ebml_parse_ctx {
     struct mp_log *log;
     void *talloc_ctx;
-    int bytes_read;
     bool has_errors;
     bool no_error_messages;
 };
@@ -93,12 +92,12 @@ struct ebml_parse_ctx {
 
 
 bool ebml_is_mkv_level1_id(uint32_t id);
-uint32_t ebml_read_id (stream_t *s, int *length);
+uint32_t ebml_read_id (stream_t *s);
 uint64_t ebml_read_vlen_uint (bstr *buffer);
 int64_t ebml_read_vlen_int (bstr *buffer);
-uint64_t ebml_read_length (stream_t *s, int *length);
-uint64_t ebml_read_uint (stream_t *s, uint64_t *length);
-int64_t ebml_read_int (stream_t *s, uint64_t *length);
+uint64_t ebml_read_length (stream_t *s);
+uint64_t ebml_read_uint (stream_t *s);
+int64_t ebml_read_int (stream_t *s);
 int ebml_read_skip(struct mp_log *log, int64_t end, stream_t *s);
 int ebml_resync_cluster(struct mp_log *log, stream_t *s);
 

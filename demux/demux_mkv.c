@@ -773,7 +773,7 @@ static void read_deferred_cues(demuxer_t *demuxer)
             MP_WARN(demuxer, "Failed to seek to cues\n");
             return;
         }
-        if (ebml_read_id(s, NULL) != MATROSKA_ID_CUES) {
+        if (ebml_read_id(s) != MATROSKA_ID_CUES) {
             MP_WARN(demuxer, "Expected element not found\n");
             return;
         }
@@ -1044,7 +1044,7 @@ static bool seek_pos_id(struct demuxer *demuxer, int64_t pos, uint32_t id)
         MP_WARN(demuxer, "Failed to seek in file\n");
         return false;
     }
-    if (ebml_read_id(s, NULL) != id) {
+    if (ebml_read_id(s) != id) {
         MP_WARN(demuxer, "Expected element not found\n");
         return false;
     }
@@ -1708,7 +1708,7 @@ static int read_ebml_header(demuxer_t *demuxer)
 {
     stream_t *s = demuxer->stream;
 
-    if (ebml_read_id(s, NULL) != EBML_ID_EBML)
+    if (ebml_read_id(s) != EBML_ID_EBML)
         return 0;
     struct ebml_ebml ebml_master = {{0}};
     struct ebml_parse_ctx parse_ctx = { demuxer->log, .no_error_messages = true };
@@ -1755,12 +1755,12 @@ static int read_mkv_segment_header(demuxer_t *demuxer)
         num_skip = demuxer->params->matroska_wanted_segment;
 
     while (!s->eof) {
-        if (ebml_read_id(s, NULL) != MATROSKA_ID_SEGMENT) {
+        if (ebml_read_id(s) != MATROSKA_ID_SEGMENT) {
             MP_VERBOSE(demuxer, "segment not found\n");
             return 0;
         }
         MP_VERBOSE(demuxer, "+ a segment...\n");
-        uint64_t len = ebml_read_length(s, NULL);
+        uint64_t len = ebml_read_length(s);
         if (num_skip <= 0)
             return 1;
         num_skip--;
@@ -1806,7 +1806,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         *demuxer->params->matroska_was_valid = true;
 
     while (1) {
-        uint32_t id = ebml_read_id(s, NULL);
+        uint32_t id = ebml_read_id(s);
         if (s->eof) {
             MP_WARN(demuxer, "Unexpected end of file (no clusters found)\n");
             break;
@@ -2277,7 +2277,7 @@ static int read_block(demuxer_t *demuxer, int64_t end, struct block_info *block)
     int res = -1;
 
     free_block(block);
-    length = ebml_read_length(s, NULL);
+    length = ebml_read_length(s);
     if (length > 500000000 || stream_tell(s) + length > (uint64_t)end)
         goto exit;
     block->alloc = malloc(length + AV_LZO_INPUT_PADDING);
@@ -2430,9 +2430,9 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
     *block = (struct block_info){ .keyframe = true };
 
     while (stream_tell(s) < end) {
-        switch (ebml_read_id(s, NULL)) {
+        switch (ebml_read_id(s)) {
         case MATROSKA_ID_BLOCKDURATION:
-            block->duration = ebml_read_uint(s, NULL);
+            block->duration = ebml_read_uint(s);
             if (block->duration == EBML_UINT_INVALID)
                 goto error;
             block->duration *= mkv_d->tc_scale;
@@ -2444,7 +2444,7 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             break;
 
         case MATROSKA_ID_REFERENCEBLOCK:;
-            int64_t num = ebml_read_int(s, NULL);
+            int64_t num = ebml_read_int(s);
             if (num == EBML_INT_INVALID)
                 goto error;
             if (num)
@@ -2477,9 +2477,9 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
     while (1) {
         while (stream_tell(s) < mkv_d->cluster_end) {
             int64_t start_filepos = stream_tell(s);
-            switch (ebml_read_id(s, NULL)) {
+            switch (ebml_read_id(s)) {
             case MATROSKA_ID_TIMECODE: {
-                uint64_t num = ebml_read_uint(s, NULL);
+                uint64_t num = ebml_read_uint(s);
                 if (num == EBML_UINT_INVALID)
                     goto find_next_cluster;
                 mkv_d->cluster_tc = num * mkv_d->tc_scale;
@@ -2487,7 +2487,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
             }
 
             case MATROSKA_ID_BLOCKGROUP: {
-                int64_t end = ebml_read_length(s, NULL);
+                int64_t end = ebml_read_length(s);
                 end += stream_tell(s);
                 if (end > mkv_d->cluster_end)
                     goto find_next_cluster;
@@ -2527,7 +2527,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
         mkv_d->cluster_end = 0;
         for (;;) {
             mkv_d->cluster_start = stream_tell(s);
-            uint32_t id = ebml_read_id(s, NULL);
+            uint32_t id = ebml_read_id(s);
             if (id == MATROSKA_ID_CLUSTER)
                 break;
             if (s->eof)
@@ -2541,7 +2541,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
             }
         }
     next_cluster:
-        mkv_d->cluster_end = ebml_read_length(s, NULL);
+        mkv_d->cluster_end = ebml_read_length(s);
         // mkv files for "streaming" can have this legally
         if (mkv_d->cluster_end != EBML_UINT_INVALID)
             mkv_d->cluster_end += stream_tell(s);
