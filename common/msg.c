@@ -125,7 +125,6 @@ bool mp_msg_test(struct mp_log *log, int lev)
 static void prepare_status_line(struct mp_log_root *root, char *new_status)
 {
     FILE *f = stderr;
-    size_t old_lines = root->blank_lines;
 
     size_t new_lines = 1;
     char *tmp = new_status;
@@ -137,13 +136,16 @@ static void prepare_status_line(struct mp_log_root *root, char *new_status)
         tmp++;
     }
 
+    size_t old_lines = root->status_lines;
+    size_t clear_lines = MPMIN(MPMAX(new_lines, old_lines), root->blank_lines);
+
     // clear the status line itself
     fprintf(f, "\r%s", terminal_erase_to_end_of_line);
     // and clear all previous old lines
-    for (size_t n = 1; n < old_lines; n++)
+    for (size_t n = 1; n < clear_lines; n++)
         fprintf(f, "%s\r%s", terminal_cursor_up, terminal_erase_to_end_of_line);
     // skip "unused" blank lines, so that status is aligned to term bottom
-    for (size_t n = new_lines; n < old_lines; n++)
+    for (size_t n = new_lines; n < clear_lines; n++)
         fprintf(f, "\n");
 
     root->status_lines = new_lines;
