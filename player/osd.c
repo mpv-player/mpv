@@ -109,7 +109,7 @@ void print_status(struct MPContext *mpctx)
 
     update_window_title(mpctx, false);
 
-    if (opts->quiet) {
+    if (opts->quiet || !(mpctx->initialized_flags & INITIALIZED_PLAYBACK)) {
         term_osd_set_status(mpctx, "");
         return;
     }
