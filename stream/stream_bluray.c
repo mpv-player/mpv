@@ -390,6 +390,7 @@ err_no_info:
     b->current_angle   = angle;
     b->current_title   = title;
 
+    s->type        = STREAMTYPE_BLURAY;
     s->end_pos     = title_size;
     s->sector_size = BLURAY_SECTOR_SIZE;
     s->flags       = MP_STREAM_SEEK;
