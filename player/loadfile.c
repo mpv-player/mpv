@@ -443,13 +443,16 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         track->preloaded = !!stream->sub->track;
 
     // Needed for DVD and Blu-ray.
-    if (!track->lang) {
+    struct stream *st = track->demuxer->stream;
+    if (!track->lang && (st->uncached_type == STREAMTYPE_BLURAY ||
+                         st->uncached_type == STREAMTYPE_DVD))
+    {
         struct stream_lang_req req = {
             .type = track->type,
             .id = map_id_from_demuxer(track->demuxer, track->type,
                                       track->demuxer_id)
         };
-        stream_control(track->demuxer->stream, STREAM_CTRL_GET_LANG, &req);
+        stream_control(st, STREAM_CTRL_GET_LANG, &req);
         if (req.name[0])
             track->lang = talloc_strdup(track, req.name);
     }
@@ -472,6 +475,8 @@ static void add_dvd_tracks(struct MPContext *mpctx)
     struct demuxer *demuxer = mpctx->demuxer;
     struct stream *stream = demuxer->stream;
     struct stream_dvd_info_req info;
+    if (stream->uncached_type != STREAMTYPE_DVD)
+        return;
     if (stream_control(stream, STREAM_CTRL_GET_DVD_INFO, &info) > 0) {
         for (int n = 0; n < info.num_subs; n++) {
             struct track *track = talloc_ptrtype(NULL, track);
