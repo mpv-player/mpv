@@ -99,12 +99,8 @@ int64_t ebml_read_vlen_int (bstr *buffer);
 uint64_t ebml_read_length (stream_t *s, int *length);
 uint64_t ebml_read_uint (stream_t *s, uint64_t *length);
 int64_t ebml_read_int (stream_t *s, uint64_t *length);
-double ebml_read_float (stream_t *s, uint64_t *length);
-char *ebml_read_ascii (stream_t *s, uint64_t *length);
-char *ebml_read_utf8 (stream_t *s, uint64_t *length);
 int ebml_read_skip(struct mp_log *log, int64_t end, stream_t *s);
 int ebml_resync_cluster(struct mp_log *log, stream_t *s);
-uint32_t ebml_read_master (stream_t *s, uint64_t *length);
 
 int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
                       void *target, const struct ebml_elem_desc *desc);

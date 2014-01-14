@@ -207,70 +207,6 @@ int64_t ebml_read_int(stream_t *s, uint64_t *length)
 }
 
 /*
- * Read the next element as a float.
- */
-double ebml_read_float(stream_t *s, uint64_t *length)
-{
-    double value;
-    uint64_t len;
-    int l;
-
-    len = ebml_read_length(s, &l);
-    switch (len) {
-    case 4:
-        value = av_int2float(stream_read_dword(s));
-        break;
-
-    case 8:
-        value = av_int2double(stream_read_qword(s));
-        break;
-
-    default:
-        return EBML_FLOAT_INVALID;
-    }
-
-    if (length)
-        *length = len + l;
-
-    return value;
-}
-
-/*
- * Read the next element as an ASCII string.
- */
-char *ebml_read_ascii(stream_t *s, uint64_t *length)
-{
-    uint64_t len;
-    char *str;
-    int l;
-
-    len = ebml_read_length(s, &l);
-    if (len == EBML_UINT_INVALID)
-        return NULL;
-    if (len > SIZE_MAX - 1)
-        return NULL;
-    if (length)
-        *length = len + l;
-
-    str = malloc(len + 1);
-    if (stream_read(s, str, len) != (int) len) {
-        free(str);
-        return NULL;
-    }
-    str[len] = '\0';
-
-    return str;
-}
-
-/*
- * Read the next element as a UTF-8 string.
- */
-char *ebml_read_utf8(stream_t *s, uint64_t *length)
-{
-    return ebml_read_ascii(s, length);
-}
-
-/*
  * Skip the current element.
  * end: the end of the parent element or -1 (for robust error handling)
  */
@@ -320,28 +256,6 @@ int ebml_resync_cluster(struct mp_log *log, stream_t *s)
         pos++;
     }
     return -1;
-}
-
-/*
- * Read the next element, but only the header. The contents
- * are supposed to be sub-elements which can be read separately.
- */
-uint32_t ebml_read_master(stream_t *s, uint64_t *length)
-{
-    uint64_t len;
-    uint32_t id;
-
-    id = ebml_read_id(s, NULL);
-    if (id == EBML_ID_INVALID)
-        return id;
-
-    len = ebml_read_length(s, NULL);
-    if (len == EBML_UINT_INVALID)
-        return EBML_ID_INVALID;
-    if (length)
-        *length = len;
-
-    return id;
 }
 
 
