@@ -766,7 +766,7 @@ def options(opt):
     group.add_option('--lua',
         type    = 'string',
         dest    = 'LUA_VER',
-        help    = "select Lua package which should be autodetected. Choices: 51 51deb 52 52deb luajit")
+        help    = "select Lua package which should be autodetected. Choices: 51 51deb 51fbsd 52 52deb 52fbsd luajit")
 
 @conf
 def is_debug_build(ctx):
