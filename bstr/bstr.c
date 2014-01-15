@@ -296,6 +296,17 @@ int bstr_decode_utf8(struct bstr s, struct bstr *out_next)
     return codepoint;
 }
 
+struct bstr bstr_split_utf8(struct bstr str, struct bstr *out_next)
+{
+    bstr rest;
+    int code = bstr_decode_utf8(str, &rest);
+    if (code < 0)
+        return (bstr){0};
+    if (out_next)
+        *out_next = rest;
+    return bstr_splice(str, 0, str.len - rest.len);
+}
+
 int bstr_validate_utf8(struct bstr s)
 {
     while (s.len) {
