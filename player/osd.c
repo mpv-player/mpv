@@ -110,7 +110,8 @@ static void add_term_osd_bar(struct MPContext *mpctx, char **line, int width)
     if (width < 5)
         return;
 
-    int pos = get_percent_pos(mpctx) / 100.0 * (width - 2);
+    int pos = get_current_pos_ratio(mpctx, false) * (width - 2);
+    pos = MPCLAMP(pos, 0, width - 2);
 
     bstr chars = bstr0(opts->term_osd_bar_chars);
     bstr parts[5];
