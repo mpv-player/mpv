@@ -302,7 +302,7 @@ void mp_msg_update_msglevels(struct mpv_global *global)
     root->module = opts->msg_module;
     root->smode = opts->msg_identify;
     root->color = opts->msg_color && isatty(fileno(stdout));
-    root->termosd = !opts->slave_mode && isatty(fileno(stdout));
+    root->termosd = !opts->slave_mode && isatty(fileno(stderr));
 
     talloc_free(root->msglevels);
     root->msglevels = talloc_strdup(root, global->opts->msglevels);
