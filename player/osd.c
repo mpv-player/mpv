@@ -103,6 +103,29 @@ static void term_osd_set_status(struct MPContext *mpctx, const char *text)
     term_osd_update(mpctx);
 }
 
+static void add_term_osd_bar(struct MPContext *mpctx, char **line, int width)
+{
+    struct MPOpts *opts = mpctx->opts;
+
+    if (width < 5)
+        return;
+
+    int pos = get_percent_pos(mpctx) / 100.0 * (width - 2);
+
+    bstr chars = bstr0(opts->term_osd_bar_chars);
+    bstr parts[5];
+    for (int n = 0; n < 5; n++)
+        parts[n] = bstr_split_utf8(chars, &chars);
+
+    saddf(line, "%.*s", BSTR_P(parts[0]));
+    for (int n = 0; n < pos; n++)
+        saddf(line, "%.*s", BSTR_P(parts[1]));
+    saddf(line, "%.*s", BSTR_P(parts[2]));
+    for (int n = 0; n < width - 2 - pos - 1; n++)
+        saddf(line, "%.*s", BSTR_P(parts[3]));
+    saddf(line, "%.*s", BSTR_P(parts[4]));
+}
+
 void print_status(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -181,6 +204,12 @@ void print_status(struct MPContext *mpctx)
     int cache = mp_get_cache_percent(mpctx);
     if (cache >= 0)
         saddf(&line, " Cache: %d%%", cache);
+
+    if (opts->term_osd_bar) {
+        saddf(&line, "\n");
+        get_screen_size();
+        add_term_osd_bar(mpctx, &line, screen_width);
+    }
 
     // end
     term_osd_set_status(mpctx, line);

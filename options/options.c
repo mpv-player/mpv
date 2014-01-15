@@ -597,6 +597,9 @@ const m_option_t mp_opts[] = {
                 {"auto", 2},
                 {"no", 0})),
 
+    OPT_FLAG("term-osd-bar", term_osd_bar, 0),
+    OPT_STRING("term-osd-bar-chars", term_osd_bar_chars, 0),
+
     OPT_STRING("playing-msg", playing_msg, M_OPT_PARSE_ESCAPES),
     OPT_STRING("status-msg", status_msg, M_OPT_PARSE_ESCAPES),
     OPT_STRING("osd-status-msg", osd_status_msg, M_OPT_PARSE_ESCAPES),
@@ -702,6 +705,7 @@ const struct MPOpts mp_default_opts = {
     .user_pts_assoc_mode = 1,
     .initial_audio_sync = 1,
     .term_osd = 2,
+    .term_osd_bar_chars = "[-+-]",
     .consolecontrols = 1,
     .play_frames = -1,
     .keep_open = 0,

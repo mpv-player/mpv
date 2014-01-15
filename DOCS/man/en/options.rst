@@ -2380,6 +2380,18 @@ OPTIONS
 
     ``force`` enables terminal OSD even if a video window is created.
 
+``--term-osd-bar``, ``--no-term-osd-bar``
+    Enable printing a progress bar under the status line on the terminal.
+    (Disabled by default.)
+
+``--term-osd-bar-chars=<string>``
+    Customize the ``--term-osd-bar`` feature. The string is expected to
+    consist of 5 characters (start, left space, position indicator,
+    right space, end). You can use unicode characters, but note that double-
+    width characters will not be treated correctly.
+
+    Default: ``[-+-]``.
+
 ``--title=<string>``
     Set the window title. Properties are expanded on playback start.
     (See `Property Expansion`_.)
