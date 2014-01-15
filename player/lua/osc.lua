@@ -932,7 +932,7 @@ function osc_init()
     end
 
     local posF = function ()
-        if mp.property_get("length") == nil then
+        if mp.property_get("percent-pos") == nil then
             return nil
         else
             return tonumber(mp.property_get("percent-pos"))
@@ -952,7 +952,7 @@ function osc_init()
     local metainfo = {}
 
 
-    metainfo.enabled = (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0)
+    metainfo.enabled = not (mp.property_get("percent-pos") == nil)
     metainfo.styledown = false
     metainfo.slider = {}
     metainfo.slider.border = 1
