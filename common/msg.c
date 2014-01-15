@@ -49,10 +49,10 @@ struct mp_log_root {
     bool header;        // indicate that message header should be printed
     int blank_lines;    // number of lines useable by status
     int status_lines;   // number of current status lines
-    // --- semi-atomic access
     bool color;
     int verbose;
     bool force_stderr;
+    // --- semi-atomic access
     bool mute;
     // --- must be accessed atomically
     /* This is incremented every time the msglevels must be reloaded.
