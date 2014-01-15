@@ -110,8 +110,8 @@ static void add_term_osd_bar(struct MPContext *mpctx, char **line, int width)
     if (width < 5)
         return;
 
-    int pos = get_current_pos_ratio(mpctx, false) * (width - 2);
-    pos = MPCLAMP(pos, 0, width - 2);
+    int pos = get_current_pos_ratio(mpctx, false) * (width - 3);
+    pos = MPCLAMP(pos, 0, width - 3);
 
     bstr chars = bstr0(opts->term_osd_bar_chars);
     bstr parts[5];
@@ -122,7 +122,7 @@ static void add_term_osd_bar(struct MPContext *mpctx, char **line, int width)
     for (int n = 0; n < pos; n++)
         saddf(line, "%.*s", BSTR_P(parts[1]));
     saddf(line, "%.*s", BSTR_P(parts[2]));
-    for (int n = 0; n < width - 2 - pos - 1; n++)
+    for (int n = 0; n < width - 3 - pos; n++)
         saddf(line, "%.*s", BSTR_P(parts[3]));
     saddf(line, "%.*s", BSTR_P(parts[4]));
 }
