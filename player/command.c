@@ -353,13 +353,18 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
-    case M_PROPERTY_SET: ;
+    case M_PROPERTY_SET: {
         double pos = *(double *)arg;
         queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, 0);
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(double *)arg = get_current_pos_ratio(mpctx, false) * 100.0;
+    }
+    case M_PROPERTY_GET: {
+        double pos = get_current_pos_ratio(mpctx, false) * 100.0;
+        if (pos < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        *(double *)arg = pos;
         return M_PROPERTY_OK;
+    }
     case M_PROPERTY_PRINT:
         *(char **)arg = talloc_asprintf(NULL, "%d", get_percent_pos(mpctx));
         return M_PROPERTY_OK;
