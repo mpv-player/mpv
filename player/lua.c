@@ -258,20 +258,11 @@ static void kill_script(struct script_ctx *ctx)
     talloc_free(ctx);
 }
 
-static const char *log_level[] = {
-    [MSGL_FATAL] = "fatal",
-    [MSGL_ERR] = "error",
-    [MSGL_WARN] = "warn",
-    [MSGL_INFO] = "info",
-    [MSGL_V] = "verbose",
-    [MSGL_DEBUG] = "debug",
-};
-
 static int check_loglevel(lua_State *L, int arg)
 {
     const char *level = luaL_checkstring(L, arg);
-    for (int n = 0; n < MP_ARRAY_SIZE(log_level); n++) {
-        if (log_level[n] && strcasecmp(log_level[n], level) == 0)
+    for (int n = 0; n < MSGL_MAX; n++) {
+        if (mp_log_levels[n] && strcasecmp(mp_log_levels[n], level) == 0)
             return n;
     }
     luaL_error(L, "Invalid log level '%s'", level);

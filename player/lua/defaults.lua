@@ -70,7 +70,7 @@ mp.msg = {
     error = function(...) return mp.log("error", ...) end,
     warn = function(...) return mp.log("warn", ...) end,
     info = function(...) return mp.log("info", ...) end,
-    verbose = function(...) return mp.log("verbose", ...) end,
+    verbose = function(...) return mp.log("v", ...) end,
     debug = function(...) return mp.log("debug", ...) end,
 }
 
