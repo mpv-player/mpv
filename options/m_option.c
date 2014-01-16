@@ -1145,6 +1145,70 @@ const m_option_type_t m_option_type_string_list = {
     .free  = free_str_list,
 };
 
+static int read_subparam(struct mp_log *log, bstr optname,
+                         bstr *str, bstr *out_subparam);
+
+static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param, void *dst)
+{
+    char **lst = NULL;
+    int num = 0;
+    int r = 0;
+
+    while (param.len) {
+        bstr key, val;
+        r = read_subparam(log, name, &param, &key);
+        if (r < 0)
+            break;
+        if (!bstr_eatstart0(&param, "=")) {
+            mp_err(log, "Expected '=' and a value.\n");
+            r = M_OPT_INVALID;
+            break;
+        }
+        r = read_subparam(log, name, &param, &val);
+        if (r < 0)
+            break;
+        MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, key));
+        MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, val));
+
+        if (!bstr_eatstart0(&param, ","))
+            break;
+    }
+    MP_TARRAY_APPEND(NULL, lst, num, NULL);
+
+    if (param.len) {
+        mp_err(log, "Unparseable garbage at end of option value: '%.*s'\n",
+               BSTR_P(param));
+        r = M_OPT_INVALID;
+    }
+
+    VAL(dst) = lst;
+    if (r < 0)
+        free_str_list(dst);
+    return r;
+}
+
+static char *print_keyvalue_list(const m_option_t *opt, const void *src)
+{
+    char **lst = VAL(src);
+    char *ret = talloc_strdup(NULL, "");
+    for (int n = 0; lst && lst[n] && lst[n + 1]; n += 2) {
+        if (ret[0])
+            ret = talloc_strdup_append(ret, ",");
+        ret = talloc_asprintf_append("%s%s=%s", ret, lst[n], lst[n + 1]);
+    }
+    return ret;
+}
+
+const m_option_type_t m_option_type_keyvalue_list = {
+    .name  = "Key/value list",
+    .size  = sizeof(char **),
+    .flags = M_OPT_TYPE_DYNAMIC,
+    .parse = parse_keyvalue_list,
+    .print = print_keyvalue_list,
+    .copy  = copy_str_list,
+    .free  = free_str_list,
+};
 
 /////////////////// Print
 

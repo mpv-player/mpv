@@ -46,6 +46,7 @@ extern const m_option_type_t m_option_type_float;
 extern const m_option_type_t m_option_type_double;
 extern const m_option_type_t m_option_type_string;
 extern const m_option_type_t m_option_type_string_list;
+extern const m_option_type_t m_option_type_keyvalue_list;
 extern const m_option_type_t m_option_type_time;
 extern const m_option_type_t m_option_type_rel_time;
 extern const m_option_type_t m_option_type_choice;
@@ -199,6 +200,7 @@ union m_option_value {
     double double_;
     char *string;
     char **string_list;
+    char **keyvalue_list;
     int imgfmt;
     unsigned int fourcc;
     int afmt;
@@ -533,6 +535,9 @@ extern const char m_option_path_separator;
 
 #define OPT_STRINGLIST(...) \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list)
+
+#define OPT_KEYVALUELIST(...) \
+    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_keyvalue_list)
 
 #define OPT_PATHLIST(...)                                                \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list, \
