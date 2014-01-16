@@ -269,7 +269,6 @@ static bool cache_fill(struct priv *s)
     // The read call might take a long time and block, so drop the lock.
     pthread_mutex_unlock(&s->mutex);
     len = stream_read_partial(s->stream, &s->buffer[pos], space);
-    mp_sleep_us(100000);
     pthread_mutex_lock(&s->mutex);
 
     double pts;
