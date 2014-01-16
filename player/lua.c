@@ -10,6 +10,7 @@
 #include "common/common.h"
 #include "options/m_property.h"
 #include "common/msg.h"
+#include "common/msg_control.h"
 #include "options/m_option.h"
 #include "input/input.h"
 #include "options/path.h"
@@ -39,6 +40,7 @@ static const char *builtin_lua_scripts[][2] = {
 struct script_ctx {
     const char *name;
     lua_State *state;
+    struct mp_log_buffer *messages;
     struct mp_log *log;
     struct MPContext *mpctx;
 };
@@ -244,6 +246,8 @@ static void kill_script(struct script_ctx *ctx)
     if (!ctx)
         return;
     struct lua_ctx *lctx = ctx->mpctx->lua_ctx;
+    if (ctx->messages)
+        mp_msg_log_buffer_destroy(ctx->messages);
     lua_close(ctx->state);
     for (int n = 0; n < lctx->num_scripts; n++) {
         if (lctx->scripts[n] == ctx) {
@@ -263,20 +267,22 @@ static const char *log_level[] = {
     [MSGL_DEBUG] = "debug",
 };
 
+static int check_loglevel(lua_State *L, int arg)
+{
+    const char *level = luaL_checkstring(L, arg);
+    for (int n = 0; n < MP_ARRAY_SIZE(log_level); n++) {
+        if (log_level[n] && strcasecmp(log_level[n], level) == 0)
+            return n;
+    }
+    luaL_error(L, "Invalid log level '%s'", level);
+    abort();
+}
+
 static int script_log(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
 
-    const char *level = luaL_checkstring(L, 1);
-    int msgl = -1;
-    for (int n = 0; n < MP_ARRAY_SIZE(log_level); n++) {
-        if (log_level[n] && strcasecmp(log_level[n], level) == 0) {
-            msgl = n;
-            break;
-        }
-    }
-    if (msgl < 0)
-        luaL_error(L, "Invalid log level '%s'", level);
+    int msgl = check_loglevel(L, 1);
 
     int last = lua_gettop(L);
     lua_getglobal(L, "tostring"); // args... tostring
@@ -319,6 +325,34 @@ static int run_event(lua_State *L)
     return 0;
 }
 
+static void poll_messages(struct script_ctx *ctx)
+{
+    lua_State *L = ctx->state;
+
+    if (!ctx->messages)
+        return;
+
+    while (1) {
+        struct mp_log_buffer_entry *msg = mp_msg_log_buffer_read(ctx->messages);
+        if (!msg)
+            break;
+
+        lua_pushstring(L, "message"); // msg
+        lua_newtable(L); // msg t
+        lua_pushstring(L, msg->prefix); // msg t s
+        lua_setfield(L, -2, "prefix"); // msg t
+        lua_pushstring(L, mp_log_levels[msg->level]); // msg t s
+        lua_setfield(L, -2, "level"); // msg t
+        lua_pushstring(L, msg->text); // msg t s
+        lua_setfield(L, -2, "text"); // msg t
+
+        if (mp_cpcall(L, run_event, 2) != 0)
+            report_error(L);
+
+        talloc_free(msg);
+    }
+}
+
 void mp_lua_event(struct MPContext *mpctx, const char *name, const char *arg)
 {
     // There is no proper subscription mechanism yet, so all scripts get it.
@@ -334,7 +368,22 @@ void mp_lua_event(struct MPContext *mpctx, const char *name, const char *arg)
         }
         if (mp_cpcall(L, run_event, 2) != 0)
             report_error(L);
+        poll_messages(ctx);
     }
+}
+
+static int script_enable_messages(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    if (ctx->messages)
+        luaL_error(L, "messages already enabled");
+
+    int size = luaL_checkinteger(L, 1);
+    int level = check_loglevel(L, 2);
+    if (size < 2 || size > 100000)
+        luaL_error(L, "size argument out of range");
+    ctx->messages = mp_msg_log_buffer_new(ctx->mpctx->global, size, level);
+    return 0;
 }
 
 static int run_script_dispatch(lua_State *L)
@@ -661,6 +710,7 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(input_disable_section),
     FN_ENTRY(input_set_section_mouse_area),
     FN_ENTRY(format_time),
+    FN_ENTRY(enable_messages),
 };
 
 // On stack: mp table
