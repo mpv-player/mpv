@@ -197,13 +197,18 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         snprintf(tmp, MSGSIZE_MAX, "[fprintf error]\n");
     tmp[MSGSIZE_MAX - 2] = '\n';
     tmp[MSGSIZE_MAX - 1] = 0;
+    char *text = tmp;
 
     bool header = root->header;
-    char *terminate = "";
+    const char *prefix = log->prefix;
+    char *terminate = NULL;
+
+    if ((lev >= MSGL_V && lev != MSGL_SMODE) || root->verbose || root->module)
+        prefix = log->verbose_prefix;
 
     if (lev == MSGL_STATUS) {
         if (root->termosd) {
-            prepare_status_line(root, tmp);
+            prepare_status_line(root, text);
             terminate = "\r";
         } else {
             terminate = "\n";
@@ -211,21 +216,27 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         root->header = true;
     } else {
         flush_status_line(root);
-        size_t len = strlen(tmp);
-        root->header = len && tmp[len - 1] == '\n';
+        size_t len = strlen(text);
+        root->header = len && text[len - 1] == '\n';
     }
 
     if (root->color)
         set_msg_color(stream, lev);
-    if (header) {
-        if ((lev >= MSGL_V && lev != MSGL_SMODE) || root->verbose || root->module) {
-            fprintf(stream, "[%s] ", log->verbose_prefix);
-        } else if (log->prefix) {
-            fprintf(stream, "[%s] ", log->prefix);
-        }
-    }
 
-    fprintf(stream, "%s%s", tmp, terminate);
+    do {
+        if (header && prefix)
+            fprintf(stream, "[%s] ", prefix);
+
+        char *next = strchr(text, '\n');
+        int len = next ? next - text + 1 : strlen(text);
+        fprintf(stream, "%.*s", len, text);
+        text = text + len;
+
+        header = true;
+    } while (text[0]);
+
+    if (terminate)
+        fprintf(stream, "%s", terminate);
 
     if (root->color)
         terminal_set_foreground_color(stream, -1);
