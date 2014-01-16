@@ -33,6 +33,9 @@
 // the cache is active.
 #define CACHE_UPDATE_CONTROLS_TIME 2.0
 
+// Time in seconds the cache prints a new message at all.
+#define CACHE_NO_SPAM 5.0
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,6 +80,7 @@ struct priv {
 
     // Owned by the main thread
     stream_t *cache;        // wrapper stream, used by demuxer etc.
+    double last_warn_time;
 
     // Owned by the cache thread
     stream_t *stream;       // "real" stream, used to read from the source media
@@ -142,14 +146,18 @@ static int cache_wakeup_and_wait(struct priv *s, double *retry_time)
     if (stream_check_interrupt(0))
         return CACHE_INTERRUPTED;
 
-    // Print a "more severe" warning after waiting 1 second and no new data
-    if ((*retry_time) >= 1.0) {
-        MP_ERR(s, "Cache keeps not responding.\n");
-    } else if (*retry_time > 0.1) {
-        MP_WARN(s, "Cache is not responding - slow/stuck network connection?\n");
-    }
-
     double start = mp_time_sec();
+
+    if (!s->last_warn_time || start - s->last_warn_time >= CACHE_NO_SPAM) {
+        // Print a "more severe" warning after waiting 1 second and no new data
+        if ((*retry_time) >= 1.0) {
+            MP_ERR(s, "Cache keeps not responding.\n");
+            s->last_warn_time = start;
+        } else if (*retry_time > 0.1) {
+            MP_WARN(s, "Cache is not responding - slow/stuck network connection?\n");
+            s->last_warn_time = start;
+        }
+    }
 
     pthread_cond_signal(&s->wakeup);
     mpthread_cond_timed_wait(&s->wakeup, &s->mutex, CACHE_WAIT_TIME);
@@ -261,6 +269,7 @@ static bool cache_fill(struct priv *s)
     // The read call might take a long time and block, so drop the lock.
     pthread_mutex_unlock(&s->mutex);
     len = stream_read_partial(s->stream, &s->buffer[pos], space);
+    mp_sleep_us(100000);
     pthread_mutex_lock(&s->mutex);
 
     double pts;
