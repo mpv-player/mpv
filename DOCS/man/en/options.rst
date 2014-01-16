@@ -1296,6 +1296,11 @@ OPTIONS
     Load a Lua script. You can load multiple scripts by separating them with
     commas (``,``).
 
+``--lua-opts=key1=value1,key2=value2,...``
+    Set options for scripts. A Lua script can query an option by key. If an
+    option is used and what semantics the option value has depends entirely on
+    the loaded Lua scripts. Values not claimed by any scripts are ignored.
+
 ``--mc=<seconds/frame>``
     Maximum A-V sync correction per frame (in seconds)
 

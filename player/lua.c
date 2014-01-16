@@ -676,6 +676,21 @@ static int script_format_time(lua_State *L)
     return 1;
 }
 
+static int script_getopt(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    char **opts = mpctx->opts->lua_opts;
+    const char *name = luaL_checkstring(L, 1);
+
+    for (int n = 0; opts && opts[n] && opts[n + 1]; n++) {
+        if (strcmp(opts[n], name) == 0) {
+            lua_pushstring(L, opts[n + 1]);
+            return 1;
+        }
+    }
+    return 0;
+}
+
 struct fn_entry {
     const char *name;
     int (*fn)(lua_State *L);
@@ -702,6 +717,7 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(input_set_section_mouse_area),
     FN_ENTRY(format_time),
     FN_ENTRY(enable_messages),
+    FN_ENTRY(getopt),
 };
 
 // On stack: mp table

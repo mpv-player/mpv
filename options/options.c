@@ -239,6 +239,7 @@ const m_option_t mp_opts[] = {
 
 #if HAVE_LUA
     OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL),
+    OPT_KEYVALUELIST("lua-opts", lua_opts, CONF_GLOBAL),
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
 #endif
 
