@@ -30,6 +30,8 @@
 
 #include "config.h"
 #include "talloc.h"
+#include "common/msg.h"
+#include "common/msg_control.h"
 #include "command.h"
 #include "osdep/timer.h"
 #include "common/common.h"

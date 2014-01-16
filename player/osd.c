@@ -27,6 +27,7 @@
 #include "talloc.h"
 
 #include "common/msg.h"
+#include "common/msg_control.h"
 #include "options/options.h"
 #include "common/common.h"
 #include "options/m_property.h"

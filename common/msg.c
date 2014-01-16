@@ -34,7 +34,8 @@
 #include "osdep/terminal.h"
 #include "osdep/io.h"
 
-#include "common/msg.h"
+#include "msg.h"
+#include "msg_control.h"
 
 /* maximum message length of mp_msg */
 #define MSGSIZE_MAX 6144

@@ -41,6 +41,7 @@
 #include "options/m_property.h"
 #include "common/common.h"
 #include "common/msg.h"
+#include "common/msg_control.h"
 #include "common/global.h"
 #include "options/parse_configfile.h"
 #include "options/parse_commandline.h"

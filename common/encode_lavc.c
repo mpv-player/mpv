@@ -25,6 +25,7 @@
 #include "encode_lavc.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "common/msg_control.h"
 #include "video/vfcap.h"
 #include "options/options.h"
 #include "osdep/timer.h"

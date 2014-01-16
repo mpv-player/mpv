@@ -27,6 +27,7 @@
 
 #include "common/global.h"
 #include "common/msg.h"
+#include "common/msg_control.h"
 #include "m_option.h"
 #include "m_config.h"
 #include "options.h"
