@@ -63,7 +63,7 @@ bool mp_msg_test(struct mp_log *log, int lev);
 #define mp_trace(log, ...)      mp_msg(log, MSGL_TRACE, __VA_ARGS__)
 
 // Convenience macros, typically called with a pointer to a context struct
-// as first argument, which has a "struct mp_log log;" member.
+// as first argument, which has a "struct mp_log *log;" member.
 
 #define MP_MSG(obj, lev, ...)   mp_msg((obj)->log, lev, __VA_ARGS__)
 
