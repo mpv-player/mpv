@@ -477,7 +477,7 @@ void mp_msg(struct mp_log *log, int lev, const char *format, ...)
     va_end(va);
 }
 
-static const char *level_names[] = {
+char *mp_log_levels[MSGL_MAX + 1] = {
     [MSGL_FATAL]        = "fatal",
     [MSGL_ERR]          = "error",
     [MSGL_WARN]         = "warn",
@@ -498,8 +498,8 @@ int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level)
     if (!bstr_split_tok(elem, "=", &mod, &level) || mod.len == 0)
         return -1;
     int ilevel = -1;
-    for (int n = 0; n < MP_ARRAY_SIZE(level_names); n++) {
-        if (level_names[n] && bstr_equals0(level, level_names[n])) {
+    for (int n = 0; n < MP_ARRAY_SIZE(mp_log_levels); n++) {
+        if (mp_log_levels[n] && bstr_equals0(level, mp_log_levels[n])) {
             ilevel = n;
             break;
         }

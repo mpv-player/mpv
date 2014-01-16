@@ -27,4 +27,6 @@ struct mp_log_buffer_entry *mp_msg_log_buffer_read(struct mp_log_buffer *buffer)
 struct bstr;
 int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level);
 
+extern char *mp_log_levels[MSGL_MAX + 1];
+
 #endif

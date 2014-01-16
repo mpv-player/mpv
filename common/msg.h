@@ -42,6 +42,8 @@ enum {
     MSGL_DEBUG,     // -v -v
     MSGL_TRACE,     // -v -v -v
     MSGL_SMODE,     // old slave mode (-identify)
+
+    MSGL_MAX = MSGL_SMODE,
 };
 
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
