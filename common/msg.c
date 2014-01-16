@@ -30,6 +30,7 @@
 #include "compat/atomics.h"
 #include "common/common.h"
 #include "common/global.h"
+#include "misc/ring.h"
 #include "options/options.h"
 #include "osdep/terminal.h"
 #include "osdep/io.h"
@@ -53,6 +54,8 @@ struct mp_log_root {
     bool color;
     int verbose;
     bool force_stderr;
+    struct mp_log_buffer **buffers;
+    int num_buffers;
     // --- semi-atomic access
     bool mute;
     // --- must be accessed atomically
@@ -66,8 +69,15 @@ struct mp_log {
     struct mp_log_root *root;
     const char *prefix;
     const char *verbose_prefix;
-    int level;
+    int level;                  // minimum log level for any outputs
+    int terminal_level;         // minimum log level for terminal output
     int64_t reload_counter;
+};
+
+struct mp_log_buffer {
+    struct mp_log_root *root;
+    struct mp_ring *ring;
+    int level;
 };
 
 // Protects some (not all) state in mp_log_root
@@ -99,6 +109,9 @@ static void update_loglevel(struct mp_log *log)
         if (match_mod(log->verbose_prefix, mod))
             log->level = level;
     }
+    log->terminal_level = log->level;
+    for (int n = 0; n < log->root->num_buffers; n++)
+        log->level = MPMAX(log->level, log->root->buffers[n]->level);
     log->reload_counter = log->root->reload_counter;
     pthread_mutex_unlock(&mp_msg_lock);
 }
@@ -110,11 +123,6 @@ bool mp_msg_test(struct mp_log *log, int lev)
     mp_memory_barrier();
     if (!log->root || log->root->mute)
         return false;
-    if (lev == MSGL_STATUS) {
-        // skip status line output if stderr is a tty but in background
-        if (terminal_in_background())
-            return false;
-    }
     if (log->reload_counter != log->root->reload_counter)
         update_loglevel(log);
     return lev <= log->level || (log->root->smode && lev == MSGL_SMODE);
@@ -183,22 +191,13 @@ static void set_msg_color(FILE* stream, int lev)
     terminal_set_foreground_color(stream, v_colors[lev]);
 }
 
-void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
+static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
 {
-    if (!mp_msg_test(log, lev))
-        return; // do not display
-
-    pthread_mutex_lock(&mp_msg_lock);
-
     struct mp_log_root *root = log->root;
     FILE *stream = (root->force_stderr || lev == MSGL_STATUS) ? stderr : stdout;
 
-    char tmp[MSGSIZE_MAX];
-    if (vsnprintf(tmp, MSGSIZE_MAX, format, va) < 0)
-        snprintf(tmp, MSGSIZE_MAX, "[fprintf error]\n");
-    tmp[MSGSIZE_MAX - 2] = '\n';
-    tmp[MSGSIZE_MAX - 1] = 0;
-    char *text = tmp;
+    if (!(lev <= log->terminal_level || (root->smode && lev == MSGL_SMODE)))
+        return;
 
     bool header = root->header;
     const char *prefix = log->prefix;
@@ -208,6 +207,9 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         prefix = log->verbose_prefix;
 
     if (lev == MSGL_STATUS) {
+        // skip status line output if stderr is a tty but in background
+        if (terminal_in_background())
+            return;
         if (root->termosd) {
             prepare_status_line(root, text);
             terminate = "\r";
@@ -242,6 +244,54 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     if (root->color)
         terminal_set_foreground_color(stream, -1);
     fflush(stream);
+}
+
+static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
+{
+    struct mp_log_root *root = log->root;
+    for (int n = 0; n < root->num_buffers; n++) {
+        struct mp_log_buffer *buffer = root->buffers[n];
+        if (lev >= buffer->level) {
+            // Assuming a single writer (serialized by msg lock)
+            int avail = mp_ring_available(buffer->ring) / sizeof(void *);
+            if (avail < 1)
+                continue;
+            struct mp_log_buffer_entry *entry = talloc_ptrtype(NULL, entry);
+            if (avail > 1) {
+                *entry = (struct mp_log_buffer_entry) {
+                    .prefix = talloc_strdup(entry, log->verbose_prefix),
+                    .level = lev,
+                    .text = talloc_strdup(entry, text),
+                };
+            } else {
+                // write overflow message to signal that messages might be lost
+                *entry = (struct mp_log_buffer_entry) {
+                    .prefix = "overflow",
+                    .level = MSGL_FATAL,
+                    .text = "",
+                };
+            }
+            mp_ring_write(buffer->ring, (unsigned char *)&entry, sizeof(entry));
+        }
+    }
+}
+
+void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
+{
+    if (!mp_msg_test(log, lev))
+        return; // do not display
+
+    pthread_mutex_lock(&mp_msg_lock);
+
+    char tmp[MSGSIZE_MAX];
+    if (vsnprintf(tmp, MSGSIZE_MAX, format, va) < 0)
+        snprintf(tmp, MSGSIZE_MAX, "[fprintf error]\n");
+    tmp[MSGSIZE_MAX - 2] = '\n';
+    tmp[MSGSIZE_MAX - 1] = 0;
+    char *text = tmp;
+
+    print_msg_on_terminal(log, lev, text);
+    write_msg_to_buffers(log, lev, text);
 
     pthread_mutex_unlock(&mp_msg_lock);
 }
@@ -342,6 +392,78 @@ void mp_msg_uninit(struct mpv_global *global)
 {
     talloc_free(global->log->root);
     global->log = NULL;
+}
+
+struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
+                                            int size, int level)
+{
+    struct mp_log_root *root = global->log->root;
+
+    pthread_mutex_lock(&mp_msg_lock);
+
+    struct mp_log_buffer *buffer = talloc_ptrtype(NULL, buffer);
+    *buffer = (struct mp_log_buffer) {
+        .root = root,
+        .level = level,
+        .ring = mp_ring_new(buffer, sizeof(void *) * size),
+    };
+    if (!buffer->ring)
+        abort();
+
+    MP_TARRAY_APPEND(root, root->buffers, root->num_buffers, buffer);
+
+    mp_atomic_add_and_fetch(&root->reload_counter, 1);
+    mp_memory_barrier();
+
+    pthread_mutex_unlock(&mp_msg_lock);
+
+    return buffer;
+}
+
+void mp_msg_log_buffer_destroy(struct mp_log_buffer *buffer)
+{
+    if (!buffer)
+        return;
+
+    pthread_mutex_lock(&mp_msg_lock);
+
+    struct mp_log_root *root = buffer->root;
+    for (int n = 0; n < root->num_buffers; n++) {
+        if (root->buffers[n] == buffer) {
+            MP_TARRAY_REMOVE_AT(root->buffers, root->num_buffers, n);
+            goto found;
+        }
+    }
+
+    abort();
+
+found:
+
+    while (1) {
+        struct mp_log_buffer_entry *e = mp_msg_log_buffer_read(buffer);
+        if (!e)
+            break;
+        talloc_free(e);
+    }
+    talloc_free(buffer);
+
+    mp_atomic_add_and_fetch(&root->reload_counter, 1);
+    mp_memory_barrier();
+
+    pthread_mutex_unlock(&mp_msg_lock);
+}
+
+// Return a queued message, or if the buffer is empty, NULL.
+// Thread-safety: one buffer can be read by a single thread only.
+struct mp_log_buffer_entry *mp_msg_log_buffer_read(struct mp_log_buffer *buffer)
+{
+    void *ptr = NULL;
+    int read = mp_ring_read(buffer->ring, (unsigned char *)&ptr, sizeof(ptr));
+    if (read == 0)
+        return NULL;
+    if (read != sizeof(ptr))
+        abort();
+    return ptr;
 }
 
 // Thread-safety: fully thread-safe, but keep in mind that the lifetime of

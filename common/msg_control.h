@@ -12,6 +12,18 @@ void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr);
 void mp_msg_flush_status_line(struct mpv_global *global);
 bool mp_msg_has_status_line(struct mpv_global *global);
 
+struct mp_log_buffer_entry {
+    char *prefix;
+    int level;
+    char *text;
+};
+
+struct mp_log_buffer;
+struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
+                                            int size, int level);
+void mp_msg_log_buffer_destroy(struct mp_log_buffer *buffer);
+struct mp_log_buffer_entry *mp_msg_log_buffer_read(struct mp_log_buffer *buffer);
+
 struct bstr;
 int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level);
 
