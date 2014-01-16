@@ -77,7 +77,6 @@ struct dirent *mp_readdir(DIR *dir);
 int mp_closedir(DIR *dir);
 int mp_mkdir(const char *path, int mode);
 char *mp_getenv(const char *name);
-void mp_attach_console(void);
 
 // NOTE: stat is not overridden with mp_stat, because MinGW-w64 defines it as
 //       macro.

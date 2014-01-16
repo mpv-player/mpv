@@ -24,6 +24,7 @@
 
 
 #include "config.h"
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -238,6 +239,22 @@ void terminal_set_foreground_color(FILE *stream, int c)
 
 int terminal_init(void)
 {
+    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+        // We have been started by something with a console window.
+        // Redirect output streams to that console's low-level handles,
+        // so we can actually use WriteConsole later on.
+
+        int hConHandle;
+
+        hConHandle = _open_osfhandle((intptr_t)hSTDOUT, _O_TEXT);
+        *stdout = *_fdopen(hConHandle, "w");
+        setvbuf(stdout, NULL, _IONBF, 0);
+
+        hConHandle = _open_osfhandle((intptr_t)hSTDERR, _O_TEXT);
+        *stderr = *_fdopen(hConHandle, "w");
+        setvbuf(stderr, NULL, _IONBF, 0);
+    }
+
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
     DWORD cmode = 0;
     GetConsoleMode(hSTDOUT, &cmode);
