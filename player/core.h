@@ -416,7 +416,6 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
                  double min, double max, double val);
 void set_osd_msg(struct MPContext *mpctx, int id, int level, int time,
                  const char* fmt, ...) PRINTF_ATTRIBUTE(5,6);
-void rm_osd_msg(struct MPContext *mpctx, int id);
 void set_osd_function(struct MPContext *mpctx, int osd_function);
 void set_osd_subtitle(struct MPContext *mpctx, const char *text);
 

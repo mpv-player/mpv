@@ -233,8 +233,6 @@ void print_status(struct MPContext *mpctx)
 
 typedef struct mp_osd_msg mp_osd_msg_t;
 struct mp_osd_msg {
-    /// Previous message on the stack.
-    mp_osd_msg_t *prev;
     /// Message text.
     char *msg;
     int id, level, started;
@@ -249,16 +247,18 @@ struct mp_osd_msg {
 static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int id, int level,
                                  int time)
 {
-    rm_osd_msg(mpctx, id);
-    mp_osd_msg_t *msg = talloc_struct(mpctx, mp_osd_msg_t, {
-        .prev = mpctx->osd_msg_stack,
+    struct MPOpts *opts = mpctx->opts;
+    if (level > opts->osd_level)
+        return NULL;
+
+    talloc_free(mpctx->osd_msg_stack);
+    mpctx->osd_msg_stack = talloc_struct(mpctx, mp_osd_msg_t, {
         .msg = "",
         .id = id,
         .level = level,
         .time = time / 1000.0,
     });
-    mpctx->osd_msg_stack = msg;
-    return msg;
+    return mpctx->osd_msg_stack;
 }
 
 static void set_osd_msg_va(struct MPContext *mpctx, int id, int level, int time,
@@ -267,7 +267,8 @@ static void set_osd_msg_va(struct MPContext *mpctx, int id, int level, int time,
     if (level == OSD_LEVEL_INVISIBLE)
         return;
     mp_osd_msg_t *msg = add_osd_msg(mpctx, id, level, time);
-    msg->msg = talloc_vasprintf(msg, fmt, ap);
+    if (msg)
+        msg->msg = talloc_vasprintf(msg, fmt, ap);
 }
 
 void set_osd_msg(struct MPContext *mpctx, int id, int level, int time,
@@ -280,31 +281,6 @@ void set_osd_msg(struct MPContext *mpctx, int id, int level, int time,
 }
 
 /**
- *  \brief Remove a message from the OSD stack
- *
- *  This function can be used to get rid of a message right away.
- *
- */
-
-void rm_osd_msg(struct MPContext *mpctx, int id)
-{
-    mp_osd_msg_t *msg, *last = NULL;
-
-    // Search for the msg
-    for (msg = mpctx->osd_msg_stack; msg && msg->id != id;
-         last = msg, msg = msg->prev) ;
-    if (!msg)
-        return;
-
-    // Detach it from the stack and free it
-    if (last)
-        last->prev = msg->prev;
-    else
-        mpctx->osd_msg_stack = msg->prev;
-    talloc_free(msg);
-}
-
-/**
  *  \brief Get the current message from the OSD stack.
  *
  *  This function decrements the message timer and destroys the old ones.
@@ -314,11 +290,8 @@ void rm_osd_msg(struct MPContext *mpctx, int id)
 
 static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = mpctx->opts;
-    mp_osd_msg_t *msg, *prev, *last = NULL;
     double now = mp_time_sec();
     double diff;
-    char hidden_dec_done = 0;
 
     if (mpctx->osd_visible && now >= mpctx->osd_visible) {
         mpctx->osd_visible = 0;
@@ -336,33 +309,19 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
 
     mpctx->osd_last_update = now;
 
-    // Look for the first message in the stack with high enough level.
-    for (msg = mpctx->osd_msg_stack; msg; last = msg, msg = prev) {
-        prev = msg->prev;
-        if (msg->level > opts->osd_level && hidden_dec_done)
-            continue;
-        // The message has a high enough level or it is the first hidden one
-        // in both cases we decrement the timer or kill it.
+    mp_osd_msg_t *msg = mpctx->osd_msg_stack;
+    if (msg) {
         if (!msg->started || msg->time > diff) {
             if (msg->started)
                 msg->time -= diff;
             else
                 msg->started = 1;
             // display it
-            if (msg->level <= opts->osd_level)
-                return msg;
-            hidden_dec_done = 1;
-            continue;
+            return msg;
         }
         // kill the message
         talloc_free(msg);
-        if (last) {
-            last->prev = prev;
-            msg = last;
-        } else {
-            mpctx->osd_msg_stack = prev;
-            msg = NULL;
-        }
+        mpctx->osd_msg_stack = NULL;
     }
     // Nothing found
     return NULL;
@@ -496,7 +455,8 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
         if (mpctx->video_out && mpctx->opts->term_osd != 1) {
             mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
                                             mpctx->opts->osd_duration);
-            msg->show_position = true;
+            if (msg)
+                msg->show_position = true;
         }
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CHAPTER_TEXT) {

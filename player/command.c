@@ -2790,8 +2790,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (msg_osd && opts->osd_level <= 1)
             set_osd_msg(mpctx, OSD_MSG_OSD_STATUS, 0, osd_duration,
                          "OSD: %s", opts->osd_level ? "yes" : "no");
-        else
-            rm_osd_msg(mpctx, OSD_MSG_OSD_STATUS);
         break;
     }
 
