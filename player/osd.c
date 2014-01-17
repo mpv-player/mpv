@@ -68,8 +68,10 @@ static char *join_lines(void *ta_ctx, char **parts, int num_parts)
 static void term_osd_update(struct MPContext *mpctx)
 {
     int num_parts = 0;
-    char *parts[2] = {0};
+    char *parts[3] = {0};
 
+    if (mpctx->term_osd_subs && mpctx->term_osd_subs[0])
+        parts[num_parts++] = mpctx->term_osd_subs;
     if (mpctx->term_osd_text && mpctx->term_osd_text[0])
         parts[num_parts++] = mpctx->term_osd_text;
     if (mpctx->term_osd_status && mpctx->term_osd_status[0])
@@ -86,6 +88,17 @@ static void term_osd_update(struct MPContext *mpctx)
         mpctx->term_osd_contents = s;
         mp_msg(mpctx->statusline, MSGL_STATUS, "%s", s);
     }
+}
+
+static void term_osd_set_subs(struct MPContext *mpctx, const char *text)
+{
+    if (mpctx->video_out || !text)
+        text = ""; // disable
+    if (strcmp(mpctx->term_osd_subs ? mpctx->term_osd_subs : "", text) == 0)
+        return;
+    talloc_free(mpctx->term_osd_subs);
+    mpctx->term_osd_subs = talloc_strdup(mpctx, text);
+    term_osd_update(mpctx);
 }
 
 static void term_osd_set_text(struct MPContext *mpctx, const char *text)
@@ -425,18 +438,8 @@ void set_osd_function(struct MPContext *mpctx, int osd_function)
  */
 void set_osd_subtitle(struct MPContext *mpctx, const char *text)
 {
-    if (!text)
-        text = "";
-    if (strcmp(mpctx->osd->objs[OSDTYPE_SUB]->sub_text, text) != 0) {
-        osd_set_sub(mpctx->osd, mpctx->osd->objs[OSDTYPE_SUB], text);
-        if (!mpctx->video_out) {
-            rm_osd_msg(mpctx, OSD_MSG_SUB_BASE);
-            if (text && text[0])
-                set_osd_msg(mpctx, OSD_MSG_SUB_BASE, 1, INT_MAX, "%s", text);
-        }
-    }
-    if (!text[0])
-        rm_osd_msg(mpctx, OSD_MSG_SUB_BASE);
+    osd_set_sub(mpctx->osd, mpctx->osd->objs[OSDTYPE_SUB], text);
+    term_osd_set_subs(mpctx, text);
 }
 
 // sym == mpctx->osd_function

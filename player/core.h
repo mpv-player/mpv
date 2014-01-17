@@ -162,6 +162,7 @@ typedef struct MPContext {
     struct mp_osd_msg *osd_msg_stack;
     char *term_osd_text;
     char *term_osd_status;
+    char *term_osd_subs;
     char *term_osd_contents;
     char *last_window_title;
 
