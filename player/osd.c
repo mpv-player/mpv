@@ -235,7 +235,7 @@ typedef struct mp_osd_msg mp_osd_msg_t;
 struct mp_osd_msg {
     /// Message text.
     char *msg;
-    int id, level, started;
+    int started;
     /// Display duration in seconds.
     double time;
     // Show full OSD for duration of message instead of msg
@@ -244,8 +244,7 @@ struct mp_osd_msg {
 };
 
 // time is in ms
-static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int id, int level,
-                                 int time)
+static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int level, int time)
 {
     struct MPOpts *opts = mpctx->opts;
     if (level > opts->osd_level)
@@ -254,29 +253,27 @@ static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int id, int level,
     talloc_free(mpctx->osd_msg_stack);
     mpctx->osd_msg_stack = talloc_struct(mpctx, mp_osd_msg_t, {
         .msg = "",
-        .id = id,
-        .level = level,
         .time = time / 1000.0,
     });
     return mpctx->osd_msg_stack;
 }
 
-static void set_osd_msg_va(struct MPContext *mpctx, int id, int level, int time,
+static void set_osd_msg_va(struct MPContext *mpctx, int level, int time,
                            const char *fmt, va_list ap)
 {
     if (level == OSD_LEVEL_INVISIBLE)
         return;
-    mp_osd_msg_t *msg = add_osd_msg(mpctx, id, level, time);
+    mp_osd_msg_t *msg = add_osd_msg(mpctx, level, time);
     if (msg)
         msg->msg = talloc_vasprintf(msg, fmt, ap);
 }
 
-void set_osd_msg(struct MPContext *mpctx, int id, int level, int time,
+void set_osd_msg(struct MPContext *mpctx, int level, int time,
                  const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    set_osd_msg_va(mpctx, id, level, time, fmt, ap);
+    set_osd_msg_va(mpctx, level, time, fmt, ap);
     va_end(ap);
 }
 
@@ -345,7 +342,7 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
         return;
     }
 
-    set_osd_msg(mpctx, OSD_MSG_BAR, 1, opts->osd_duration, "%s: %d %%",
+    set_osd_msg(mpctx, 1, opts->osd_duration, "%s: %d %%",
                 name, ROUND(100 * (val - min) / (max - min)));
 }
 
@@ -453,22 +450,21 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
         // Never in term-osd mode
         if (mpctx->video_out && mpctx->opts->term_osd != 1) {
-            mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
-                                            mpctx->opts->osd_duration);
+            mp_osd_msg_t *msg = add_osd_msg(mpctx, 1, mpctx->opts->osd_duration);
             if (msg)
                 msg->show_position = true;
         }
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CHAPTER_TEXT) {
         char *chapter = chapter_display_name(mpctx, get_current_chapter(mpctx));
-        set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
+        set_osd_msg(mpctx, 1, mpctx->opts->osd_duration,
                      "Chapter: %s", chapter);
         talloc_free(chapter);
     }
     if ((mpctx->add_osd_seek_info & OSD_SEEK_INFO_EDITION)
         && mpctx->master_demuxer)
     {
-        set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
+        set_osd_msg(mpctx, 1, mpctx->opts->osd_duration,
                      "Playing edition %d of %d.",
                      mpctx->master_demuxer->edition + 1,
                      mpctx->master_demuxer->num_editions);

@@ -2098,8 +2098,6 @@ static struct property_osd_display {
     const char *osd_name;
     // progressbar type
     int osd_progbar;
-    // osd msg id if it must be shared
-    int osd_id;
     // Needs special ways to display the new value (seeks are delayed)
     int seek_msg, seek_bar;
     // Free-form message (if NULL, osd_name or the property name is used)
@@ -2142,7 +2140,7 @@ static struct property_osd_display {
     { "sub", "Subtitles" },
     { "secondary-sid", "Secondary subtitles" },
     { "sub-pos", "Sub position" },
-    { "sub-delay", "Sub delay", .osd_id = OSD_MSG_SUB_DELAY },
+    { "sub-delay", "Sub delay" },
     { "sub-visibility", "Subtitles" },
     { "sub-forced-only", "Forced sub only" },
     { "sub-scale", "Sub Scale"},
@@ -2238,14 +2236,8 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
                                   osd_msg && osd_msg[0] ? " " : "", t);
     }
 
-    if (osd_msg && osd_msg[0]) {
-        int osd_id = 0;
-        if (p) {
-            int index = p - property_osd_display;
-            osd_id = p->osd_id ? p->osd_id : OSD_MSG_PROPERTY + index;
-        }
-        set_osd_msg(mpctx, osd_id, 1, opts->osd_duration, "%s", osd_msg);
-    }
+    if (osd_msg && osd_msg[0])
+        set_osd_msg(mpctx, 1, opts->osd_duration, "%s", osd_msg);
 
     talloc_free(tmp);
 }
@@ -2344,7 +2336,7 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
             const char *prop = filter_opt[mediatype];
             show_property_osd(mpctx, prop, MP_ON_OSD_MSG);
         } else {
-            set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
+            set_osd_msg(mpctx, 1, mpctx->opts->osd_duration,
                          "Changing filters failed!");
         }
     }
@@ -2604,10 +2596,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
             show_property_osd(mpctx, cmd->args[0].v.s, on_osd);
         } else if (r == M_PROPERTY_UNKNOWN) {
-            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+            set_osd_msg(mpctx, osdl, osd_duration,
                         "Unknown property: '%s'", cmd->args[0].v.s);
         } else if (r <= 0) {
-            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+            set_osd_msg(mpctx, osdl, osd_duration,
                         "Failed to set property '%s' to '%s'",
                         cmd->args[0].v.s, cmd->args[1].v.s);
         }
@@ -2633,10 +2625,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
             show_property_osd(mpctx, property, on_osd);
         } else if (r == M_PROPERTY_UNKNOWN) {
-            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+            set_osd_msg(mpctx, osdl, osd_duration,
                         "Unknown property: '%s'", property);
         } else if (r <= 0) {
-            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+            set_osd_msg(mpctx, osdl, osd_duration,
                         "Failed to increment property '%s' by %g",
                         property, s.inc);
         }
@@ -2651,10 +2643,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
             show_property_osd(mpctx, property, on_osd);
         } else if (r == M_PROPERTY_UNKNOWN) {
-            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+            set_osd_msg(mpctx, osdl, osd_duration,
                         "Unknown property: '%s'", property);
         } else if (r <= 0) {
-            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+            set_osd_msg(mpctx, osdl, osd_duration,
                         "Failed to multiply property '%s' by %g", property, f);
         }
         break;
@@ -2684,10 +2676,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
                 show_property_osd(mpctx, property, on_osd);
             } else if (r == M_PROPERTY_UNKNOWN) {
-                set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+                set_osd_msg(mpctx, osdl, osd_duration,
                             "Unknown property: '%s'", property);
             } else if (r <= 0) {
-                set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+                set_osd_msg(mpctx, osdl, osd_duration,
                             "Failed to set property '%s' to '%s'",
                             property, value);
             }
@@ -2756,7 +2748,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 if (cmd->id == MP_CMD_SUB_STEP) {
                     opts->sub_delay -= a[0];
                     osd_changed_all(mpctx->osd);
-                    set_osd_msg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
+                    set_osd_msg(mpctx, osdl, osd_duration,
                                  "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));
                 } else {
                     // We can easily get stuck by failing to seek to the video
@@ -2788,7 +2780,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         else
             opts->osd_level = v > max ? max : v;
         if (msg_osd && opts->osd_level <= 1)
-            set_osd_msg(mpctx, OSD_MSG_OSD_STATUS, 0, osd_duration,
+            set_osd_msg(mpctx, 0, osd_duration,
                          "OSD: %s", opts->osd_level ? "yes" : "no");
         break;
     }
@@ -2800,7 +2792,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SHOW_TEXT: {
         // if no argument supplied use default osd_duration, else <arg> ms.
-        set_osd_msg(mpctx, OSD_MSG_TEXT, cmd->args[2].v.i,
+        set_osd_msg(mpctx, cmd->args[2].v.i,
                     (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
                     "%s", cmd->args[0].v.s);
         break;
@@ -2904,7 +2896,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #if HAVE_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_freq(mpctx->stream, ROUND(cmd->args[0].v.f));
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
+            set_osd_msg(mpctx, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
@@ -2917,7 +2909,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #if HAVE_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_force_freq_step(mpctx->stream, ROUND(cmd->args[0].v.f));
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: f %d",
+            set_osd_msg(mpctx, osdl, osd_duration, "%s: f %d",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_frequency(mpctx->stream));
         }
@@ -2938,7 +2930,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 tv_step_channel(get_tvh(mpctx), TV_CHANNEL_LOWER);
             }
             if (tv_channel_list) {
-                set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
+                set_osd_msg(mpctx, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
             }
         }
@@ -2946,7 +2938,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         else if (mpctx->stream &&
                  mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_channel_step(mpctx->stream, cmd->args[0].v.i);
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
+            set_osd_msg(mpctx, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
@@ -2974,14 +2966,14 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (get_tvh(mpctx)) {
             tv_set_channel(get_tvh(mpctx), cmd->args[0].v.s);
             if (tv_channel_list) {
-                set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
+                set_osd_msg(mpctx, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
             }
         }
 #if HAVE_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_channel(mpctx->stream, cmd->args[0].v.s);
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
+            set_osd_msg(mpctx, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
@@ -3005,14 +2997,14 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (get_tvh(mpctx)) {
             tv_last_channel(get_tvh(mpctx));
             if (tv_channel_list) {
-                set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
+                set_osd_msg(mpctx, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
             }
         }
 #if HAVE_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_lastchannel(mpctx->stream);
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
+            set_osd_msg(mpctx, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
@@ -3105,9 +3097,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             char *s = cmd->args[0].v.s;
             MP_INFO(mpctx, "Setting vo cmd line to '%s'.\n", s);
             if (vo_control(mpctx->video_out, VOCTRL_SET_COMMAND_LINE, s) > 0) {
-                set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration, "vo='%s'", s);
+                set_osd_msg(mpctx, osdl, osd_duration, "vo='%s'", s);
             } else {
-                set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration, "Failed!");
+                set_osd_msg(mpctx, osdl, osd_duration, "Failed!");
             }
         }
         break;
