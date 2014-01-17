@@ -24,6 +24,8 @@ enum sd_ctrl {
 
 struct dec_sub *sub_create(struct mpv_global *global);
 void sub_destroy(struct dec_sub *sub);
+void sub_lock(struct dec_sub *sub);
+void sub_unlock(struct dec_sub *sub);
 
 void sub_set_video_res(struct dec_sub *sub, int w, int h);
 void sub_set_video_fps(struct dec_sub *sub, double fps);

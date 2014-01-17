@@ -246,6 +246,9 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
         if ((draw_flags & OSD_DRAW_SUB_ONLY) && !obj->is_sub)
             continue;
 
+        if (obj->dec_sub)
+            sub_lock(obj->dec_sub);
+
         struct sub_bitmaps imgs;
         render_object(osd, obj, res, video_pts, formats, &imgs);
         if (imgs.num_parts > 0) {
@@ -256,6 +259,9 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
                        obj->type, imgs.format);
             }
         }
+
+        if (obj->dec_sub)
+            sub_unlock(obj->dec_sub);
     }
 }
 

@@ -136,10 +136,15 @@ static void update_subtitle(struct MPContext *mpctx, int order)
 
     // Handle displaying subtitles on terminal; never done for secondary subs
     if (order == 0) {
-        if (!osd_obj->render_bitmap_subs || !mpctx->video_out)
+        if (!osd_obj->render_bitmap_subs || !mpctx->video_out) {
+            sub_lock(dec_sub);
             set_osd_subtitle(mpctx, sub_get_text(dec_sub, curpts_s));
+            sub_unlock(dec_sub);
+        }
     } else if (order == 1) {
+        sub_lock(dec_sub);
         osd_set_sub(mpctx->osd, osd_obj, sub_get_text(dec_sub, curpts_s));
+        sub_unlock(dec_sub);
     }
 }
 
