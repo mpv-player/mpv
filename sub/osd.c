@@ -210,6 +210,7 @@ void osd_set_nav_highlight(struct osd_state *osd, void *priv)
 {
     pthread_mutex_lock(&osd->lock);
     osd->objs[OSDTYPE_NAV_HIGHLIGHT]->highlight_priv = priv;
+    osd_changed_unlocked(osd, OSDTYPE_NAV_HIGHLIGHT);
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -248,7 +249,7 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
         }
     } else if (obj->type == OSDTYPE_NAV_HIGHLIGHT) {
         if (obj->highlight_priv)
-            mp_nav_get_highlight(osd, obj->vo_res, out_imgs);
+            mp_nav_get_highlight(obj->highlight_priv, obj->vo_res, out_imgs);
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
