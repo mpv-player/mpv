@@ -727,7 +727,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         [SUBBITMAP_RGBA] = true,
     };
 
-    osd_draw(osd, vc->osd_res, osd->vo_pts, 0, osdformats, draw_osd_cb, vo);
+    osd_draw(osd, vc->osd_res, osd_get_vo_pts(osd), 0, osdformats, draw_osd_cb, vo);
 }
 
 static int preinit(struct vo *vo)

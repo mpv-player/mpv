@@ -622,7 +622,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .display_par = 1.0 / vo->aspdat.par,
     };
 
-    osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);
+    osd_draw_on_image(osd, res, osd_get_vo_pts(osd), 0, &img);
 }
 
 static void wait_for_completion(struct vo *vo, int max_outstanding)

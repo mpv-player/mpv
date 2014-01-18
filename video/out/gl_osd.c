@@ -282,7 +282,7 @@ void mpgl_osd_draw_cb(struct mpgl_osd *ctx,
 {
     struct draw_cb_closure c = {ctx, cb, cb_ctx};
     reset(ctx);
-    osd_draw(osd, res, osd->vo_pts, 0, ctx->formats, draw_cb, &c);
+    osd_draw(osd, res, osd_get_vo_pts(osd), 0, ctx->formats, draw_cb, &c);
 }
 
 void mpgl_osd_redraw_cb(struct mpgl_osd *ctx,
@@ -376,5 +376,5 @@ static void draw_legacy_cb(void *pctx, struct sub_bitmaps *imgs)
 void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, struct osd_state *osd,
                           struct mp_osd_res res)
 {
-    osd_draw(osd, res, osd->vo_pts, 0, ctx->formats, draw_legacy_cb, ctx);
+    osd_draw(osd, res, osd_get_vo_pts(osd), 0, ctx->formats, draw_legacy_cb, ctx);
 }

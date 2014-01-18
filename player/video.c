@@ -126,8 +126,8 @@ static void recreate_video_filters(struct MPContext *mpctx)
 
     // for vf_sub
     vf_control_any(d_video->vfilter, VFCTRL_SET_OSD_OBJ, mpctx->osd);
-    mpctx->osd->render_subs_in_filter
-        = vf_control_any(d_video->vfilter, VFCTRL_INIT_OSD, NULL) == CONTROL_OK;
+    osd_set_render_subs_in_filter(mpctx->osd,
+        vf_control_any(d_video->vfilter, VFCTRL_INIT_OSD, NULL) == CONTROL_OK);
 
     set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
 }

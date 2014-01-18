@@ -997,7 +997,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         [SUBBITMAP_RGBA] = true,
     };
 
-    osd_draw(osd, vc->osd_rect, osd->vo_pts, 0, formats, draw_osd_cb, vo);
+    osd_draw(osd, vc->osd_rect, osd_get_vo_pts(osd), 0, formats, draw_osd_cb, vo);
 }
 
 static int update_presentation_queue_status(struct vo *vo)

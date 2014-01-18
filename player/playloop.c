@@ -136,7 +136,7 @@ static void draw_osd(struct MPContext *mpctx)
 {
     struct vo *vo = mpctx->video_out;
 
-    mpctx->osd->vo_pts = mpctx->video_pts;
+    osd_set_vo_pts(mpctx->osd, mpctx->video_pts);
     vo_draw_osd(vo, mpctx->osd);
 }
 
@@ -646,10 +646,9 @@ static bool handle_osd_redraw(struct MPContext *mpctx)
 {
     if (!mpctx->video_out || !mpctx->video_out->config_ok)
         return false;
-    bool want_redraw = vo_get_want_redraw(mpctx->video_out);
-    if (mpctx->video_out->driver->draw_osd)
-        want_redraw |= mpctx->osd->want_redraw;
-    mpctx->osd->want_redraw = false;
+    bool want_redraw = vo_get_want_redraw(mpctx->video_out) |
+                        (osd_query_and_reset_want_redraw(mpctx->osd) &&
+                         mpctx->video_out->driver->draw_osd);
     if (want_redraw) {
         if (redraw_osd(mpctx))
             return true;

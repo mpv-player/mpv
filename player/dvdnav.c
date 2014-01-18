@@ -39,8 +39,11 @@ struct mp_nav_state {
     bool nav_eof;
     bool nav_menu;
     bool nav_draining;
+
+    // Accessed by OSD (possibly separate thread)
     int hi_visible;
     int highlight[4]; // x0 y0 x1 y1
+    int vidsize[2];
     int subsize[2];
     struct sub_bitmap *hi_elem;
 };
@@ -78,6 +81,7 @@ void mp_nav_reset(struct MPContext *mpctx)
         return;
     struct mp_nav_cmd inp = {MP_NAV_CMD_RESUME};
     stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+    osd_set_nav_highlight(mpctx->osd, NULL);
     nav->hi_visible = 0;
     nav->nav_menu = false;
     nav->nav_draining = false;
@@ -90,6 +94,7 @@ void mp_nav_reset(struct MPContext *mpctx)
 
 void mp_nav_destroy(struct MPContext *mpctx)
 {
+    osd_set_nav_highlight(mpctx->osd, NULL);
     if (!mpctx->nav_state)
         return;
     mp_input_disable_section(mpctx->input, "dvdnav");
@@ -164,19 +169,32 @@ void mp_handle_nav(struct MPContext *mpctx)
                 mp_input_disable_section(mpctx->input, "dvdnav-menu");
             }
             break;
-        case MP_NAV_EVENT_HIGHLIGHT:
+        case MP_NAV_EVENT_HIGHLIGHT: {
             MP_VERBOSE(nav, "highlight: %d %d %d - %d %d\n",
                        ev->u.highlight.display,
                        ev->u.highlight.sx, ev->u.highlight.sy,
                        ev->u.highlight.ex, ev->u.highlight.ey);
+            osd_set_nav_highlight(mpctx->osd, NULL);
             nav->highlight[0] = ev->u.highlight.sx;
             nav->highlight[1] = ev->u.highlight.sy;
             nav->highlight[2] = ev->u.highlight.ex;
             nav->highlight[3] = ev->u.highlight.ey;
             nav->hi_visible = ev->u.highlight.display;
-            mpctx->osd->highlight_priv = mpctx;
-            osd_changed(mpctx->osd, OSDTYPE_NAV_HIGHLIGHT);
+            int sizes[2] = {0};
+            if (mpctx->d_sub[0])
+                sub_control(mpctx->d_sub[0], SD_CTRL_GET_RESOLUTION, sizes);
+            if (sizes[0] < 1 || sizes[1] < 1) {
+                struct mp_image_params vid = {0};
+                if (mpctx->d_video)
+                    vid = mpctx->d_video->decoder_output;
+                sizes[0] = vid.w;
+                sizes[1] = vid.h;
+            }
+            for (int n = 0; n < 2; n++)
+                nav->vidsize[n] = sizes[n];
+            osd_set_nav_highlight(mpctx->osd, mpctx);
             break;
+        }
         default: ; // ignore
         }
         talloc_free(ev);
@@ -209,10 +227,10 @@ void mp_handle_nav(struct MPContext *mpctx)
 // Note: a proper solution would introduce something like
 //       SD_CTRL_APPLY_DVDNAV, which would crop the vobsub frame,
 //       and apply the current CLUT.
-void mp_nav_get_highlight(struct osd_state *osd, struct mp_osd_res res,
+void mp_nav_get_highlight(void *priv, struct mp_osd_res res,
                           struct sub_bitmaps *out_imgs)
 {
-    struct MPContext *mpctx = osd->highlight_priv;
+    struct MPContext *mpctx = priv;
     struct mp_nav_state *nav = mpctx ? mpctx->nav_state : NULL;
     if (!nav)
         return;
@@ -221,16 +239,7 @@ void mp_nav_get_highlight(struct osd_state *osd, struct mp_osd_res res,
         sub = talloc_zero(nav, struct sub_bitmap);
 
     nav->hi_elem = sub;
-    int sizes[2] = {0};
-    if (mpctx->d_sub[0])
-        sub_control(mpctx->d_sub[0], SD_CTRL_GET_RESOLUTION, sizes);
-    if (sizes[0] < 1 || sizes[1] < 1) {
-        struct mp_image_params vid = {0};
-        if (mpctx->d_video)
-            vid = mpctx->d_video->decoder_output;
-        sizes[0] = vid.w;
-        sizes[1] = vid.h;
-    }
+    int sizes[2] = {nav->vidsize[0], nav->vidsize[1]};
     if (sizes[0] < 1 || sizes[1] < 1)
         return;
     if (sizes[0] != nav->subsize[0] || sizes[1] != nav->subsize[1]) {

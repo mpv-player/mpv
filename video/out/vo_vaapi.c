@@ -435,7 +435,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     for (int n = 0; n < MAX_OSD_PARTS; n++)
         p->osd_parts[n].active = false;
-    osd_draw(osd, *res, osd->vo_pts, 0, osd_formats, draw_osd_cb, p);
+    osd_draw(osd, *res, osd_get_vo_pts(osd), 0, osd_formats, draw_osd_cb, p);
 }
 
 static int get_displayattribtype(const char *name)

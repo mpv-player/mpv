@@ -29,6 +29,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "osd.h"
+#include "osd_state.h"
 
 static const char osd_font_pfb[] =
 #include "sub/osd_font.h"
@@ -193,7 +194,7 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj)
 
     create_ass_track(osd, obj, 0, 0);
     clear_obj(obj);
-    if (!osd->osd_text[0])
+    if (!obj->text[0])
         return;
 
     struct osd_style_opts font = *opts->osd_style;
@@ -207,7 +208,7 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj)
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
     mp_ass_set_style(style, playresy, &font);
 
-    add_osd_ass_event_escaped(obj->osd_track, osd->osd_text);
+    add_osd_ass_event_escaped(obj->osd_track, obj->text);
 }
 
 // align: -1 .. +1
@@ -322,7 +323,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
     clear_obj(obj);
 
-    if (osd->progbar_type < 0)
+    if (obj->progbar_state.type < 0)
         return;
 
     float sx = px - border * 2 - height / 4; // includes additional spacing
@@ -330,13 +331,13 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
     bstr buf = bstr0(talloc_asprintf(NULL, "{\\an6\\pos(%f,%f)}", sx, sy));
 
-    if (osd->progbar_type == 0 || osd->progbar_type >= 256) {
+    if (obj->progbar_state.type == 0 || obj->progbar_state.type >= 256) {
         // no sym
-    } else if (osd->progbar_type >= 32) {
-        mp_append_utf8_bstr(NULL, &buf, osd->progbar_type);
+    } else if (obj->progbar_state.type >= 32) {
+        mp_append_utf8_bstr(NULL, &buf, obj->progbar_state.type);
     } else {
         bstr_xappend(NULL, &buf, bstr0(ASS_USE_OSD_FONT));
-        mp_append_utf8_bstr(NULL, &buf, OSD_CODEPOINTS + osd->progbar_type);
+        mp_append_utf8_bstr(NULL, &buf, OSD_CODEPOINTS + obj->progbar_state.type);
         bstr_xappend(NULL, &buf, bstr0("{\\r}"));
     }
 
@@ -347,7 +348,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     // filled area
     d->text = talloc_asprintf_append(d->text, "{\\bord0\\pos(%f,%f)}", px, py);
     ass_draw_start(d);
-    float pos = osd->progbar_value * width - border / 2;
+    float pos = obj->progbar_state.value * width - border / 2;
     ass_draw_rect_cw(d, 0, 0, pos, height);
     ass_draw_stop(d);
     add_osd_ass_event(obj->osd_track, d->text);
@@ -373,8 +374,8 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     ass_draw_rect_ccw(d, 0, 0, width, height);
 
     // chapter marks
-    for (int n = 0; n < osd->progbar_num_stops; n++) {
-        float s = osd->progbar_stops[n] * width;
+    for (int n = 0; n < obj->progbar_state.num_stops; n++) {
+        float s = obj->progbar_state.stops[n] * width;
         float dent = border * 1.3;
 
         if (s > dent && s < width - dent) {
@@ -395,10 +396,10 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
 static void update_external(struct osd_state *osd, struct osd_object *obj)
 {
-    create_ass_track(osd, obj, osd->external_res_x, osd->external_res_y);
+    create_ass_track(osd, obj, obj->external_res_x, obj->external_res_y);
     clear_obj(obj);
 
-    bstr t = bstr0(osd->external);
+    bstr t = bstr0(obj->text);
     while (t.len) {
         bstr line;
         bstr_split_tok(t, "\n", &line, &t);
@@ -416,7 +417,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
 
     clear_obj(obj);
 
-    if (!obj->sub_text || !obj->sub_text[0] || obj->render_bitmap_subs)
+    if (!obj->text || !obj->text[0] || obj->sub_state.render_bitmap_subs)
         return;
 
     create_ass_renderer(osd, obj);
@@ -435,7 +436,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
     ass_set_line_position(obj->osd_render, 100 - opts->sub_pos);
 #endif
 
-    add_osd_ass_event_escaped(obj->osd_track, obj->sub_text);
+    add_osd_ass_event_escaped(obj->osd_track, obj->text);
 }
 
 static void update_object(struct osd_state *osd, struct osd_object *obj)
@@ -474,9 +475,12 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
     talloc_steal(obj, obj->parts_cache);
 }
 
-void osd_object_get_resolution(struct osd_state *osd, struct osd_object *obj,
+void osd_object_get_resolution(struct osd_state *osd, int obj,
                                int *out_w, int *out_h)
 {
-    *out_w = obj->osd_track ? obj->osd_track->PlayResX : 0;
-    *out_h = obj->osd_track ? obj->osd_track->PlayResY : 0;
+    pthread_mutex_lock(&osd->lock);
+    struct osd_object *osd_obj = osd->objs[obj];
+    *out_w = osd_obj->osd_track ? osd_obj->osd_track->PlayResX : 0;
+    *out_h = osd_obj->osd_track ? osd_obj->osd_track->PlayResY : 0;
+    pthread_mutex_unlock(&osd->lock);
 }

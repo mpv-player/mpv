@@ -307,7 +307,7 @@ static void add_subs(struct MPContext *mpctx, struct mp_image *image)
         .display_par = sar / dar,
     };
 
-    osd_draw_on_image(mpctx->osd, res, mpctx->osd->vo_pts,
+    osd_draw_on_image(mpctx->osd, res, osd_get_vo_pts(mpctx->osd),
                       OSD_DRAW_SUB_ONLY, image);
 }
 
@@ -330,7 +330,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
 {
     struct mp_image *image = NULL;
     if (mpctx->video_out && mpctx->video_out->config_ok) {
-        if (mode == MODE_SUBTITLES && mpctx->osd->render_subs_in_filter)
+        if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
             mode = 0;
 
         struct voctrl_screenshot_args args =
@@ -386,7 +386,7 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
-    if (mode == MODE_SUBTITLES && mpctx->osd->render_subs_in_filter)
+    if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
         mode = 0;
 
     if (each_frame) {

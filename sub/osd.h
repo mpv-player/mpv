@@ -97,70 +97,6 @@ enum mp_osdtype {
     MAX_OSD_PARTS
 };
 
-#define OSD_CONV_CACHE_MAX 4
-
-struct osd_object {
-    int type; // OSDTYPE_*
-    bool is_sub;
-
-    bool force_redraw;
-
-    // OSDTYPE_SUB
-    struct dec_sub *dec_sub;
-    double video_offset;
-    bool render_bitmap_subs;
-    char *sub_text;
-
-    // caches for OSD conversion (internal to render_object())
-    struct osd_conv_cache *cache[OSD_CONV_CACHE_MAX];
-    struct sub_bitmaps cached;
-
-    // VO cache state
-    int vo_bitmap_id;
-    int vo_bitmap_pos_id;
-    struct mp_osd_res vo_res;
-
-    // Internally used by osd_libass.c
-    struct sub_bitmap *parts_cache;
-    struct ass_track *osd_track;
-    struct ass_renderer *osd_render;
-    struct ass_library *osd_ass_library;
-};
-
-struct osd_state {
-    struct osd_object *objs[MAX_OSD_PARTS];
-
-    double vo_pts;
-
-    bool render_subs_in_filter;
-
-    struct mp_osd_res last_vo_res;
-
-    bool want_redraw;
-
-    // OSDTYPE_OSD
-    char *osd_text;
-    // OSDTYPE_PROGBAR
-    int progbar_type;      // <0: disabled, 1-255: symbol, else: no symbol
-    float progbar_value;   // range 0.0-1.0
-    float *progbar_stops;  // used for chapter indicators (0.0-1.0 each)
-    int progbar_num_stops;
-    // OSDTYPE_EXTERNAL
-    char *external;
-    int external_res_x, external_res_y;
-    // OSDTYPE_EXTERNAL2
-    struct sub_bitmaps external2;
-    // OSDTYPE_NAV_HIGHLIGHT
-    void *highlight_priv;
-
-    struct MPOpts *opts;
-    struct mpv_global *global;
-    struct mp_log *log;
-
-    // Internal to sub.c
-    struct mp_draw_sub_cache *draw_cache;
-};
-
 // Start of OSD symbols in osd_font.pfb
 #define OSD_CODEPOINTS 0xE000
 
@@ -204,12 +140,46 @@ struct osd_style_opts {
 
 extern const struct m_sub_options osd_style_conf;
 
+struct osd_state;
+struct osd_object;
+struct mpv_global;
+
 struct osd_state *osd_create(struct mpv_global *global);
-void osd_set_text(struct osd_state *osd, const char *text);
-void osd_set_sub(struct osd_state *osd, struct osd_object *obj, const char *text);
 void osd_changed(struct osd_state *osd, int new_value);
 void osd_changed_all(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
+
+bool osd_query_and_reset_want_redraw(struct osd_state *osd);
+
+double osd_get_vo_pts(struct osd_state *osd);
+void osd_set_vo_pts(struct osd_state *osd, double vo_pts);
+
+void osd_set_text(struct osd_state *osd, int obj, const char *text);
+
+struct osd_sub_state {
+    struct dec_sub *dec_sub;
+    double video_offset;
+    bool render_bitmap_subs;
+};
+void osd_set_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate);
+void osd_get_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate);
+
+bool osd_get_render_subs_in_filter(struct osd_state *osd);
+void osd_set_render_subs_in_filter(struct osd_state *osd, bool s);
+
+struct osd_progbar_state {
+    int type;           // <0: disabled, 1-255: symbol, else: no symbol
+    float value;        // range 0.0-1.0
+    float *stops;       // used for chapter indicators (0.0-1.0 each)
+    int num_stops;
+};
+void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s);
+
+void osd_set_external(struct osd_state *osd, int res_x, int res_y, char *text);
+
+void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs);
+
+void osd_set_nav_highlight(struct osd_state *osd, void *priv);
 
 enum mp_osd_draw_flags {
     OSD_DRAW_SUB_FILTER = (1 << 0),
@@ -230,27 +200,34 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
                          double video_pts, int draw_flags,
                          struct mp_image_pool *pool, struct mp_image *dest);
 
-void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
+void osd_object_get_scale_factor(struct osd_state *osd, int obj,
                                  double *sw, double *sh);
 
 void osd_coords_to_video(struct osd_state *osd, int frame_w, int frame_h,
                          int *x, int *y);
+
+struct mp_osd_res osd_get_vo_res(struct osd_state *osd, int obj);
 
 void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
                          struct mp_osd_res res, double compensate_par);
 
 // defined in osd_libass.c and osd_dummy.c
 
+// internal use only
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
                             struct sub_bitmaps *out_imgs);
-void osd_object_get_resolution(struct osd_state *osd, struct osd_object *obj,
-                               int *out_w, int *out_h);
-void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
 void osd_init_backend(struct osd_state *osd);
 void osd_destroy_backend(struct osd_state *osd);
 
+// doesn't need locking
+void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
+
+// defined in backend, but locks if required
+void osd_object_get_resolution(struct osd_state *osd, int obj,
+                               int *out_w, int *out_h);
+
 // defined in player
-void mp_nav_get_highlight(struct osd_state *osd, struct mp_osd_res res,
+void mp_nav_get_highlight(void *priv, struct mp_osd_res res,
                           struct sub_bitmaps *out_imgs);
 
 #endif /* MPLAYER_SUB_H */

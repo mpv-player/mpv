@@ -67,7 +67,8 @@ static void uninit_sub(struct MPContext *mpctx, int order)
     if (mpctx->d_sub[order])
         sub_reset(mpctx->d_sub[order]);
     mpctx->d_sub[order] = NULL; // Note: not free'd.
-    mpctx->osd->objs[order ? OSDTYPE_SUB2 : OSDTYPE_SUB]->dec_sub = NULL;
+    int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
+    osd_set_sub(mpctx->osd, obj, NULL);
     reset_subtitles(mpctx, order);
     reselect_demux_streams(mpctx);
 }

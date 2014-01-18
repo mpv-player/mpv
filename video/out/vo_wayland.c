@@ -560,7 +560,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct priv *p = vo->priv;
     struct mp_image img = buffer_get_mp_image(p, p->back_buffer);
-    osd_draw_on_image(osd, p->osd, osd->vo_pts, 0, &img);
+    osd_draw_on_image(osd, p->osd, osd_get_vo_pts(osd), 0, &img);
 }
 
 static void flip_page(struct vo *vo)

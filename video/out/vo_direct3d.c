@@ -1700,7 +1700,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     if (!priv->d3d_device)
         return;
 
-    osd_draw(osd, priv->osd_res, osd->vo_pts, 0, osd_fmt_supported,
+    osd_draw(osd, priv->osd_res, osd_get_vo_pts(osd), 0, osd_fmt_supported,
              draw_osd_cb, priv);
 }
 

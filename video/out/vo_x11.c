@@ -427,7 +427,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     struct mp_image img = get_x_buffer(p, p->current_buf);
 
-    osd_draw_on_image(osd, p->osd, osd->vo_pts, 0, &img);
+    osd_draw_on_image(osd, p->osd, osd_get_vo_pts(osd), 0, &img);
 }
 
 static mp_image_t *get_screenshot(struct vo *vo)

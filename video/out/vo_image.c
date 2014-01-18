@@ -97,7 +97,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .display_par = sar / dar,
     };
 
-    osd_draw_on_image(osd, dim, osd->vo_pts, OSD_DRAW_SUB_ONLY, p->current);
+    osd_draw_on_image(osd, dim, osd_get_vo_pts(osd), OSD_DRAW_SUB_ONLY, p->current);
 }
 
 static void flip_page(struct vo *vo)

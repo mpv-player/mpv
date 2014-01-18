@@ -34,6 +34,7 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "osd.h"
+#include "osd_state.h"
 #include "dec_sub.h"
 #include "img_convert.h"
 #include "draw_bmp.h"
@@ -87,15 +88,15 @@ struct osd_state *osd_create(struct mpv_global *global)
         .opts = global->opts,
         .global = global,
         .log = mp_log_new(osd, global->log, "osd"),
-        .osd_text = talloc_strdup(osd, ""),
-        .progbar_type = -1,
     };
+    pthread_mutex_init(&osd->lock, NULL);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = talloc(osd, struct osd_object);
         *obj = (struct osd_object) {
             .type = n,
-            .sub_text = talloc_strdup(obj, ""),
+            .text = talloc_strdup(obj, ""),
+            .progbar_state = {.type = -1},
         };
         for (int i = 0; i < OSD_CONV_CACHE_MAX; i++)
             obj->cache[i] = talloc_steal(obj, osd_conv_cache_new());
@@ -114,30 +115,102 @@ void osd_free(struct osd_state *osd)
     if (!osd)
         return;
     osd_destroy_backend(osd);
+    pthread_mutex_destroy(&osd->lock);
     talloc_free(osd);
 }
 
-static bool set_text(void *talloc_ctx, char **var, const char *text)
+static void osd_changed_unlocked(struct osd_state *osd, int obj)
 {
+    osd->objs[obj]->force_redraw = true;
+    osd->want_redraw = true;
+}
+
+void osd_set_text(struct osd_state *osd, int obj, const char *text)
+{
+    pthread_mutex_lock(&osd->lock);
+    struct osd_object *osd_obj = osd->objs[obj];
     if (!text)
         text = "";
-    if (strcmp(*var, text) == 0)
-        return true;
-    talloc_free(*var);
-    *var = talloc_strdup(talloc_ctx, text);
-    return false;
+    if (strcmp(osd_obj->text, text) != 0) {
+        talloc_free(osd_obj->text);
+        osd_obj->text = talloc_strdup(osd_obj, text);
+        osd_changed_unlocked(osd, obj);
+    }
+    pthread_mutex_unlock(&osd->lock);
 }
 
-void osd_set_text(struct osd_state *osd, const char *text)
+void osd_set_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate)
 {
-    if (!set_text(osd, &osd->osd_text, text))
-        osd_changed(osd, OSDTYPE_OSD);
+    pthread_mutex_lock(&osd->lock);
+    osd->objs[obj]->sub_state = substate ? *substate : (struct osd_sub_state){0};
+    pthread_mutex_unlock(&osd->lock);
 }
 
-void osd_set_sub(struct osd_state *osd, struct osd_object *obj, const char *text)
+void osd_get_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate)
 {
-    if (!set_text(obj, &obj->sub_text, text))
-        osd_changed(osd, obj->type);
+    pthread_mutex_lock(&osd->lock);
+    *substate = osd->objs[obj]->sub_state;
+    pthread_mutex_unlock(&osd->lock);
+}
+
+bool osd_get_render_subs_in_filter(struct osd_state *osd)
+{
+    pthread_mutex_lock(&osd->lock);
+    bool r = osd->render_subs_in_filter;
+    pthread_mutex_unlock(&osd->lock);
+    return r;
+}
+
+void osd_set_render_subs_in_filter(struct osd_state *osd, bool s)
+{
+    pthread_mutex_lock(&osd->lock);
+    osd->render_subs_in_filter = s;
+    pthread_mutex_unlock(&osd->lock);
+}
+
+void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
+{
+    pthread_mutex_lock(&osd->lock);
+    struct osd_object *osd_obj = osd->objs[OSDTYPE_PROGBAR];
+    osd_obj->progbar_state.type = s->type;
+    osd_obj->progbar_state.value = s->value;
+    osd_obj->progbar_state.num_stops = s->num_stops;
+    MP_TARRAY_GROW(osd_obj, osd_obj->progbar_state.stops, s->num_stops);
+    memcpy(osd_obj->progbar_state.stops, s->stops,
+           sizeof(osd_obj->progbar_state.stops[0]) * s->num_stops);
+    osd_changed_unlocked(osd, osd_obj->type);
+    pthread_mutex_unlock(&osd->lock);
+}
+
+void osd_set_external(struct osd_state *osd, int res_x, int res_y, char *text)
+{
+    pthread_mutex_lock(&osd->lock);
+    struct osd_object *osd_obj = osd->objs[OSDTYPE_EXTERNAL];
+    if (strcmp(osd_obj->text, text) != 0 ||
+        osd_obj->external_res_x != res_x ||
+        osd_obj->external_res_y != res_y)
+    {
+        talloc_free(osd_obj->text);
+        osd_obj->text = talloc_strdup(osd_obj, text);
+        osd_obj->external_res_x = res_x;
+        osd_obj->external_res_y = res_y;
+        osd_changed_unlocked(osd, osd_obj->type);
+    }
+    pthread_mutex_unlock(&osd->lock);
+}
+
+void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs)
+{
+    pthread_mutex_lock(&osd->lock);
+    osd->objs[OSDTYPE_EXTERNAL2]->external2 = imgs;
+    pthread_mutex_unlock(&osd->lock);
+}
+
+void osd_set_nav_highlight(struct osd_state *osd, void *priv)
+{
+    pthread_mutex_lock(&osd->lock);
+    osd->objs[OSDTYPE_NAV_HIGHLIGHT]->highlight_priv = priv;
+    pthread_mutex_unlock(&osd->lock);
 }
 
 static void render_object(struct osd_state *osd, struct osd_object *obj,
@@ -159,21 +232,23 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
     obj->vo_res = res;
 
     if (obj->type == OSDTYPE_SUB || obj->type == OSDTYPE_SUB2) {
-        if (obj->render_bitmap_subs && obj->dec_sub) {
+        struct osd_sub_state *sub = &obj->sub_state;
+        if (sub->render_bitmap_subs && sub->dec_sub) {
             double sub_pts = video_pts;
             if (sub_pts != MP_NOPTS_VALUE)
-                sub_pts -= obj->video_offset + opts->sub_delay;
-            sub_get_bitmaps(obj->dec_sub, obj->vo_res, sub_pts, out_imgs);
+                sub_pts -= sub->video_offset + opts->sub_delay;
+            sub_get_bitmaps(sub->dec_sub, obj->vo_res, sub_pts, out_imgs);
         } else {
             osd_object_get_bitmaps(osd, obj, out_imgs);
         }
     } else if (obj->type == OSDTYPE_EXTERNAL2) {
-        if (osd->external2.format) {
-            *out_imgs = osd->external2;
-            osd->external2.bitmap_id = osd->external2.bitmap_pos_id = 0;
+        if (obj->external2 && obj->external2->format) {
+            *out_imgs = *obj->external2;
+            obj->external2->bitmap_id = obj->external2->bitmap_pos_id = 0;
         }
     } else if (obj->type == OSDTYPE_NAV_HIGHLIGHT) {
-        mp_nav_get_highlight(osd, obj->vo_res, out_imgs);
+        if (obj->highlight_priv)
+            mp_nav_get_highlight(osd, obj->vo_res, out_imgs);
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
@@ -230,11 +305,10 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
               const bool formats[SUBBITMAP_COUNT],
               void (*cb)(void *ctx, struct sub_bitmaps *imgs), void *cb_ctx)
 {
+    pthread_mutex_lock(&osd->lock);
+
     if (draw_flags & OSD_DRAW_SUB_FILTER)
         draw_flags |= OSD_DRAW_SUB_ONLY;
-
-    if (!(draw_flags & OSD_DRAW_SUB_ONLY))
-        osd->last_vo_res = res;
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = osd->objs[n];
@@ -246,8 +320,8 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
         if ((draw_flags & OSD_DRAW_SUB_ONLY) && !obj->is_sub)
             continue;
 
-        if (obj->dec_sub)
-            sub_lock(obj->dec_sub);
+        if (obj->sub_state.dec_sub)
+            sub_lock(obj->sub_state.dec_sub);
 
         struct sub_bitmaps imgs;
         render_object(osd, obj, res, video_pts, formats, &imgs);
@@ -260,9 +334,11 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
             }
         }
 
-        if (obj->dec_sub)
-            sub_unlock(obj->dec_sub);
+        if (obj->sub_state.dec_sub)
+            sub_unlock(obj->sub_state.dec_sub);
     }
+
+    pthread_mutex_unlock(&osd->lock);
 }
 
 struct draw_on_image_closure {
@@ -311,11 +387,9 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
 
 void osd_changed(struct osd_state *osd, int new_value)
 {
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        if (osd->objs[n]->type == new_value)
-            osd->objs[n]->force_redraw = true;
-    }
-    osd->want_redraw = true;
+    pthread_mutex_lock(&osd->lock);
+    osd_changed_unlocked(osd, new_value);
+    pthread_mutex_unlock(&osd->lock);
 }
 
 void osd_changed_all(struct osd_state *osd)
@@ -324,15 +398,41 @@ void osd_changed_all(struct osd_state *osd)
         osd_changed(osd, n);
 }
 
+bool osd_query_and_reset_want_redraw(struct osd_state *osd)
+{
+    pthread_mutex_lock(&osd->lock);
+    bool r = osd->want_redraw;
+    osd->want_redraw = false;
+    pthread_mutex_unlock(&osd->lock);
+    return r;
+}
+
+double osd_get_vo_pts(struct osd_state *osd)
+{
+    pthread_mutex_lock(&osd->lock);
+    double r = osd->vo_pts;
+    pthread_mutex_unlock(&osd->lock);
+    return r;
+}
+
+void osd_set_vo_pts(struct osd_state *osd, double vo_pts)
+{
+    pthread_mutex_lock(&osd->lock);
+    osd->vo_pts = vo_pts;
+    pthread_mutex_unlock(&osd->lock);
+}
+
 // Scale factor to translate OSD coordinates to what the obj uses internally.
 // osd_coordinates * (sw, sh) = obj_coordinates
-void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
+void osd_object_get_scale_factor(struct osd_state *osd, int obj,
                                  double *sw, double *sh)
 {
     int nw, nh;
     osd_object_get_resolution(osd, obj, &nw, &nh);
-    *sw = nw / (double)obj->vo_res.w;
-    *sh = nh / (double)obj->vo_res.h;
+    pthread_mutex_lock(&osd->lock);
+    *sw = nw / (double)osd->objs[obj]->vo_res.w;
+    *sh = nh / (double)osd->objs[obj]->vo_res.h;
+    pthread_mutex_unlock(&osd->lock);
 }
 
 // Turn *x and *y, which are given in OSD coordinates, to video coordinates.
@@ -342,6 +442,7 @@ void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
 void osd_coords_to_video(struct osd_state *osd, int frame_w, int frame_h,
                          int *x, int *y)
 {
+    pthread_mutex_lock(&osd->lock);
     struct mp_osd_res res = osd->objs[OSDTYPE_OSD]->vo_res;
     int vidw = res.w - res.ml - res.mr;
     int vidh = res.h - res.mt - res.mb;
@@ -350,6 +451,15 @@ void osd_coords_to_video(struct osd_state *osd, int frame_w, int frame_h,
     // The OSD size + margins make up the scaled rectangle of the video.
     *x = (*x - res.ml) / xscale;
     *y = (*y - res.mt) / yscale;
+    pthread_mutex_unlock(&osd->lock);
+}
+
+struct mp_osd_res osd_get_vo_res(struct osd_state *osd, int obj)
+{
+    pthread_mutex_lock(&osd->lock);
+    struct mp_osd_res res = osd->objs[obj]->vo_res;
+    pthread_mutex_unlock(&osd->lock);
+    return res;
 }
 
 // Position the subbitmaps in imgs on the screen. Basically, this fits the

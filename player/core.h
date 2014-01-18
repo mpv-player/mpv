@@ -23,6 +23,7 @@
 
 #include "common/common.h"
 #include "options/options.h"
+#include "sub/osd.h"
 
 // definitions used internally by the core player code
 
@@ -158,6 +159,7 @@ typedef struct MPContext {
     int osd_function;
     double osd_function_visible;
     double osd_last_update;
+    struct osd_progbar_state osd_progbar;
 
     struct playlist *playlist;
     char *filename; // currently playing file

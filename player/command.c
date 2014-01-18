@@ -87,6 +87,7 @@ struct command_ctx {
 
 #define OVERLAY_MAX_ID 64
     void *overlay_map[OVERLAY_MAX_ID];
+    struct sub_bitmaps external2;
 };
 
 static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
@@ -1573,20 +1574,22 @@ static int mp_property_window_scale(m_option_t *prop, int action, void *arg,
 static int mp_property_osd_w(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    return m_property_int_ro(prop, action, arg, mpctx->osd->last_vo_res.w);
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_OSD);
+    return m_property_int_ro(prop, action, arg, vo_res.w);
 }
 
 static int mp_property_osd_h(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    return m_property_int_ro(prop, action, arg, mpctx->osd->last_vo_res.w);
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_OSD);
+    return m_property_int_ro(prop, action, arg, vo_res.w);
 }
 
 static int mp_property_osd_par(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
-    return m_property_double_ro(prop, action, arg,
-                                mpctx->osd->last_vo_res.display_par);
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_OSD);
+    return m_property_double_ro(prop, action, arg, vo_res.display_par);
 }
 
 /// Video fps (RO)
@@ -2348,7 +2351,7 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
 static int ext2_sub_find(struct MPContext *mpctx, int id)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
-    struct sub_bitmaps *sub = &mpctx->osd->external2;
+    struct sub_bitmaps *sub = &cmd->external2;
     void *p = NULL;
     if (id >= 0 && id < OVERLAY_MAX_ID)
         p = cmd->overlay_map[id];
@@ -2363,10 +2366,10 @@ static int ext2_sub_find(struct MPContext *mpctx, int id)
 
 static int ext2_sub_alloc(struct MPContext *mpctx)
 {
-    struct osd_state *osd = mpctx->osd;
-    struct sub_bitmaps *sub = &osd->external2;
+    struct command_ctx *cmd = mpctx->command_ctx;
+    struct sub_bitmaps *sub = &cmd->external2;
     struct sub_bitmap b = {0};
-    MP_TARRAY_APPEND(osd, sub->parts, sub->num_parts, b);
+    MP_TARRAY_APPEND(cmd, sub->parts, sub->num_parts, b);
     return sub->num_parts - 1;
 }
 
@@ -2375,14 +2378,16 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
                        int stride)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
-    struct osd_state *osd = mpctx->osd;
+    int r = -1;
+    // Temporarily unmap them to avoid race condition with concurrent access.
+    osd_set_external2(mpctx->osd, NULL);
     if (strcmp(fmt, "bgra") != 0) {
         MP_ERR(mpctx, "overlay_add: unsupported OSD format '%s'\n", fmt);
-        return -1;
+        goto error;
     }
     if (id < 0 || id >= OVERLAY_MAX_ID) {
         MP_ERR(mpctx, "overlay_add: invalid id %d\n", id);
-        return -1;
+        goto error;
     }
     int fd = -1;
     bool close_fd = true;
@@ -2400,48 +2405,52 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
         close(fd);
     if (!p) {
         MP_ERR(mpctx, "overlay_add: could not open or map '%s'\n", file);
-        return -1;
+        goto error;
     }
     int index = ext2_sub_find(mpctx, id);
     if (index < 0)
         index = ext2_sub_alloc(mpctx);
     if (index < 0) {
         munmap(p, h * stride);
-        return -1;
+        goto error;
     }
     cmd->overlay_map[id] = p;
-    osd->external2.parts[index] = (struct sub_bitmap) {
+    cmd->external2.parts[index] = (struct sub_bitmap) {
         .bitmap = p,
         .stride = stride,
         .x = x, .y = y,
         .w = w, .h = h,
         .dw = w, .dh = h,
     };
-    osd->external2.bitmap_id = osd->external2.bitmap_pos_id = 1;
-    osd->external2.format = SUBBITMAP_RGBA;
-    osd->want_redraw = true;
-    return 0;
+    cmd->external2.bitmap_id = cmd->external2.bitmap_pos_id = 1;
+    cmd->external2.format = SUBBITMAP_RGBA;
+    r = 0;
+error:
+    osd_set_external2(mpctx->osd, &cmd->external2);
+    return r;
 }
 
 static void overlay_remove(struct MPContext *mpctx, int id)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
-    struct osd_state *osd = mpctx->osd;
+    osd_set_external2(mpctx->osd, NULL);
     int index = ext2_sub_find(mpctx, id);
     if (index >= 0) {
-        struct sub_bitmaps *sub = &osd->external2;
+        struct sub_bitmaps *sub = &cmd->external2;
         struct sub_bitmap *part = &sub->parts[index];
         munmap(part->bitmap, part->h * part->stride);
         MP_TARRAY_REMOVE_AT(sub->parts, sub->num_parts, index);
         cmd->overlay_map[id] = NULL;
         sub->bitmap_id = sub->bitmap_pos_id = 1;
     }
+    osd_set_external2(mpctx->osd, &cmd->external2);
 }
 
 static void overlay_uninit(struct MPContext *mpctx)
 {
     for (int id = 0; id < OVERLAY_MAX_ID; id++)
         overlay_remove(mpctx, id);
+    osd_set_external2(mpctx->osd, NULL);
 }
 
 #else
@@ -2739,12 +2748,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SUB_STEP:
     case MP_CMD_SUB_SEEK: {
-        struct osd_object *obj = mpctx->osd->objs[OSDTYPE_SUB];
-        if (obj->dec_sub) {
+        struct osd_sub_state state;
+        osd_get_sub(mpctx->osd, OSDTYPE_SUB, &state);
+        if (state.dec_sub) {
             double a[2];
-            a[0] = mpctx->video_pts - obj->video_offset - opts->sub_delay;
+            a[0] = mpctx->video_pts - state.video_offset - opts->sub_delay;
             a[1] = cmd->args[0].v.i;
-            if (sub_control(obj->dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
+            if (sub_control(state.dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
                 if (cmd->id == MP_CMD_SUB_STEP) {
                     opts->sub_delay -= a[0];
                     osd_changed_all(mpctx->osd);
