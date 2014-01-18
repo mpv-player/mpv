@@ -2448,6 +2448,8 @@ static void overlay_remove(struct MPContext *mpctx, int id)
 
 static void overlay_uninit(struct MPContext *mpctx)
 {
+    if (!mpctx->osd)
+        return;
     for (int id = 0; id < OVERLAY_MAX_ID; id++)
         overlay_remove(mpctx, id);
     osd_set_external2(mpctx->osd, NULL);
