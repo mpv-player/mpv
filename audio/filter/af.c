@@ -345,26 +345,28 @@ static int af_count_filters(struct af_stream *s)
 // (So we know what conversion filter with what format to insert next.)
 static char *af_find_conversion_filter(int srcfmt, int *dstfmt)
 {
-#define NUM_FMT 64
-#define NUM_FILT 32
-#define NUM_NODES (NUM_FMT * NUM_FILT)
+#define MAX_NODES (64 * 32)
+    int num_fmt = 0, num_filt = 0;
     for (int n = 0; filter_list[n]; n++)
-        assert(n < NUM_FILT);
+        num_filt = n + 1;
     for (int n = 0; af_fmtstr_table[n].format; n++)
-        assert(n < NUM_FMT);
+        num_fmt = n + 1;
 
-    bool visited[NUM_NODES] = {0};
-    unsigned char distance[NUM_NODES];
-    short previous[NUM_NODES] = {0};
-    for (int n = 0; n < NUM_NODES; n++) {
+    int num_nodes = num_fmt * num_filt;
+    assert(num_nodes < MAX_NODES);
+
+    bool visited[MAX_NODES] = {0};
+    unsigned char distance[MAX_NODES];
+    short previous[MAX_NODES] = {0};
+    for (int n = 0; n < num_nodes; n++) {
         distance[n] = 255;
-        if (af_fmtstr_table[n % NUM_FMT].format == srcfmt)
+        if (af_fmtstr_table[n % num_fmt].format == srcfmt)
             distance[n] = 0;
     }
 
     while (1) {
         int next = -1;
-        for (int n = 0; n < NUM_NODES; n++) {
+        for (int n = 0; n < num_nodes; n++) {
             if (!visited[n] && (next < 0 || (distance[n] < distance[next])))
                 next = n;
         }
@@ -372,13 +374,13 @@ static char *af_find_conversion_filter(int srcfmt, int *dstfmt)
             return NULL;
         visited[next] = true;
 
-        int fmt = next % NUM_FMT;
+        int fmt = next % num_fmt;
         if (af_fmtstr_table[fmt].format == *dstfmt) {
             // Best match found
             for (int cur = next; cur >= 0; cur = previous[cur] - 1) {
                 if (distance[cur] == 1) {
-                    *dstfmt = af_fmtstr_table[cur % NUM_FMT].format;
-                    return (char *)filter_list[cur / NUM_FMT]->name;
+                    *dstfmt = af_fmtstr_table[cur % num_fmt].format;
+                    return (char *)filter_list[cur / num_fmt]->name;
                 }
             }
             return NULL;
@@ -392,7 +394,7 @@ static char *af_find_conversion_filter(int srcfmt, int *dstfmt)
                 if (i != fmt && af->test_conversion(af_fmtstr_table[fmt].format,
                                                     af_fmtstr_table[i].format))
                 {
-                    int other = n * NUM_FMT + i;
+                    int other = n * num_fmt + i;
                     int ndist = distance[next] + 1;
                     if (ndist < distance[other]) {
                         distance[other] = ndist;
@@ -403,9 +405,7 @@ static char *af_find_conversion_filter(int srcfmt, int *dstfmt)
         }
     }
     assert(0);
-#undef NUM_FMT
-#undef NUM_FILT
-#undef NODE_N
+#undef MAX_NODES
 }
 
 static bool af_is_conversion_filter(struct af_instance *af)
