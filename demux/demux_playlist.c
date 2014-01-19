@@ -30,6 +30,7 @@ struct pl_parser {
     char buffer[8 * 1024];
     int utf16;
     struct playlist *pl;
+    bool error;
     bool probing;
 };
 
@@ -40,6 +41,8 @@ static char *pl_get_line0(struct pl_parser *p)
         int len = strlen(res);
         if (len > 0 && res[len - 1] == '\n')
             res[len - 1] = '\0';
+    } else {
+        p->error |= !p->s->eof;
     }
     return res;
 }
@@ -58,7 +61,7 @@ static void pl_add(struct pl_parser *p, bstr entry)
 
 static bool pl_eof(struct pl_parser *p)
 {
-    return p->s->eof;
+    return p->error || p->s->eof;
 }
 
 static int parse_m3u(struct pl_parser *p)
@@ -175,9 +178,10 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     }
 
     p->probing = false;
+    p->error = false;
     p->s = demuxer->stream;
     p->utf16 = stream_skip_bom(p->s);
-    bool ok = fmt->parse(p) >= 0;
+    bool ok = fmt->parse(p) >= 0 && !p->error;
     if (ok)
         playlist_add_base_path(p->pl, mp_dirname(demuxer->filename));
     demuxer->playlist = talloc_steal(demuxer, p->pl);
