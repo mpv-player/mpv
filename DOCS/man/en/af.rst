@@ -147,7 +147,7 @@ Available filters are:
     0    no matrix decoding (default)
     ==== ===================================
 
-``equalizer=[g1:g2:g3:...:g10]``
+``equalizer=g1:g2:g3:...:g10``
     10 octave band graphic equalizer, implemented using 10 IIR band-pass
     filters. This means that it works regardless of what type of audio is
     being played back. The center frequencies for the 10 bands are:
