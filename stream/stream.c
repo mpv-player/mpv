@@ -898,7 +898,7 @@ unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
     while (1) {
         // Reserve 1 byte of ptr for terminating \0.
         int l = read_characters(s, &mem[read], max - read - 1, utf16);
-        if (l < 0) {
+        if (l < 0 || memchr(&mem[read], '\0', l)) {
             MP_VERBOSE(s, "error reading line\n");
             s->eof = false;
             return NULL;
