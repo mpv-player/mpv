@@ -364,23 +364,6 @@ static bool parse_smil(play_tree_parser_t* p) {
   return true;
 }
 
-static bool parse_textplain(play_tree_parser_t* p) {
-  char* line;
-
-  MP_VERBOSE(p, "Trying plaintext playlist...\n");
-  play_tree_parser_stop_keeping(p);
-
-  while((line = play_tree_parser_get_line(p)) != NULL) {
-    strstrip(line);
-    if(line[0] == '\0' || line[0] == '#' || (line[0] == '/' && line[1] == '/'))
-      continue;
-
-      playlist_add_file(p->pl,line);
-  }
-
-  return true;
-}
-
 /**
  * \brief decode the base64 used in nsc files
  * \param in input string, 0-terminated
@@ -524,7 +507,6 @@ static const parser_fn pl_parsers[] = {
     parse_asx,
     parse_smil,
     parse_nsc,
-    parse_textplain
 };
 
 
@@ -548,8 +530,6 @@ static struct playlist *do_parse(struct stream* stream, bool forced,
   if (!success && play_tree_parser_get_line(&p) != NULL) {
     for (int n = 0; n < sizeof(pl_parsers) / sizeof(pl_parsers[0]); n++) {
       play_tree_parser_reset(&p);
-      if (pl_parsers[n] == parse_textplain && !forced)
-        break;
       if (pl_parsers[n](&p)) {
         success = true;
         break;

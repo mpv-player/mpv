@@ -26,12 +26,14 @@
 #define PROBE_SIZE (8 * 1024)
 
 struct pl_parser {
+    struct mp_log *log;
     struct stream *s;
     char buffer[8 * 1024];
     int utf16;
     struct playlist *pl;
     bool error;
     bool probing;
+    bool force;
 };
 
 static char *pl_get_line0(struct pl_parser *p)
@@ -134,6 +136,22 @@ static int parse_pls(struct pl_parser *p)
     return 0;
 }
 
+static int parse_txt(struct pl_parser *p)
+{
+    if (!p->force)
+        return -1;
+    if (p->probing)
+        return 0;
+    MP_WARN(p, "Reading plaintext playlist.\n");
+    while (!pl_eof(p)) {
+        bstr line = bstr_strip(pl_get_line(p));
+        if (line.len == 0)
+            continue;
+        pl_add(p, line);
+    }
+    return 0;
+}
+
 struct pl_format {
     const char *name;
     int (*parse)(struct pl_parser *p);
@@ -144,9 +162,10 @@ static const struct pl_format formats[] = {
     {"ini", parse_ref_init},
     {"mov", parse_mov_rtsptext},
     {"pls", parse_pls},
+    {"txt", parse_txt},
 };
 
-static const struct pl_format *probe_pl(struct pl_parser *p, bool force)
+static const struct pl_format *probe_pl(struct pl_parser *p)
 {
     int64_t start = stream_tell(p->s);
     for (int n = 0; n < MP_ARRAY_SIZE(formats); n++) {
@@ -163,13 +182,15 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     bool force = check < DEMUX_CHECK_UNSAFE || check == DEMUX_CHECK_REQUEST;
 
     struct pl_parser *p = talloc_zero(NULL, struct pl_parser);
+    p->log = demuxer->log;
     p->pl = talloc_zero(p, struct playlist);
 
     bstr probe_buf = stream_peek(demuxer->stream, PROBE_SIZE);
     p->s = open_memory_stream(probe_buf.start, probe_buf.len);
     p->utf16 = stream_skip_bom(p->s);
+    p->force = force;
     p->probing = true;
-    const struct pl_format *fmt = probe_pl(p, force);
+    const struct pl_format *fmt = probe_pl(p);
     free_stream(p->s);
     playlist_clear(p->pl);
     if (!fmt) {
