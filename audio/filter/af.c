@@ -346,13 +346,15 @@ static int af_count_filters(struct af_stream *s)
 static char *af_find_conversion_filter(int srcfmt, int *dstfmt)
 {
 #define MAX_NODES 64 * 32
-unsigned num_fmt, num_filt, num_nodes;
+    unsigned num_fmt = 0, num_filt = 0;
     for (int n = 0; filter_list[n]; n++)
         num_filt = n;
     for (int n = 0; af_fmtstr_table[n].format; n++)
         num_fmt = n;
         
-    num_nodes =  (num_fmt * num_filt);
+    unsigned num_nodes =  (num_fmt * num_filt);
+    
+    assert(num_nodes < MAX_NODES);
 
     bool visited[MAX_NODES] = {0};
     unsigned char distance[MAX_NODES];
