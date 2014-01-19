@@ -61,7 +61,7 @@ static char *col_dup(void *talloc_ctx, const char *src)
 }
 
 /* Finds the start of all the columns */
-static int parse_line(char **ptr, char *cols[6])
+static int parse_line(char **ptr, char *cols[7])
 {
     int col;
     cols[0] = *ptr;
