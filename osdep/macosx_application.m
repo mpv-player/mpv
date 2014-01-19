@@ -264,7 +264,7 @@ Application *mpv_shared_app(void)
         }
     }];
 
-    self.files = [filesToOpen sortedArrayUsingSelector:@selector(compare:)];
+    self.files = [filesToOpen sortedArrayUsingSelector:@selector(localizedStandardCompare:)];
     if (self.willStopOnOpenEvent) {
         self.willStopOnOpenEvent = NO;
         cocoa_stop_runloop();
