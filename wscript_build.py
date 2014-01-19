@@ -378,6 +378,8 @@ def build(ctx):
         ( "osdep/path-win.c",                    "os-cygwin" ),
         ( "osdep/glob-win.c",                    "glob-win32-replacement" ),
         ( "osdep/priority.c",                    "priority" ),
+        ( "osdep/w32_keyboard.c",                "os-win32" ),
+        ( "osdep/w32_keyboard.c",                "os-cygwin" ),
         ( "osdep/mpv.rc",                        "win32-executable" ),
 
         ## tree_allocator
