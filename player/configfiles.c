@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdlib.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <sys/types.h>
@@ -173,25 +174,26 @@ static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
 {
     char *res = NULL;
     void *tmp = talloc_new(NULL);
-    const char *realpath = fname;
+    const char *real_path = fname;
     bstr bfname = bstr0(fname);
     if (!mp_is_url(bfname)) {
-        char *cwd = mp_getcwd(tmp);
-        if (!cwd)
+        const char *allocated = realpath(fname, NULL);
+        if (!allocated)
             goto exit;
-        realpath = mp_path_join(tmp, bstr0(cwd), bstr0(fname));
+        real_path = talloc_strdup(tmp, allocated);
+        free(allocated);
     }
 #if HAVE_DVDREAD || HAVE_DVDNAV
     if (bstr_startswith0(bfname, "dvd://"))
-        realpath = talloc_asprintf(tmp, "%s - %s", realpath, dvd_device);
+        real_path = talloc_asprintf(tmp, "%s - %s", real_path, dvd_device);
 #endif
 #if HAVE_LIBBLURAY
     if (bstr_startswith0(bfname, "br://") || bstr_startswith0(bfname, "bd://") ||
         bstr_startswith0(bfname, "bluray://"))
-        realpath = talloc_asprintf(tmp, "%s - %s", realpath, bluray_device);
+        real_path = talloc_asprintf(tmp, "%s - %s", real_path, bluray_device);
 #endif
     uint8_t md5[16];
-    av_md5_sum(md5, realpath, strlen(realpath));
+    av_md5_sum(md5, real_path, strlen(real_path));
     char *conf = talloc_strdup(tmp, "");
     for (int i = 0; i < 16; i++)
         conf = talloc_asprintf_append(conf, "%02X", md5[i]);
