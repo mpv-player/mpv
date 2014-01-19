@@ -406,9 +406,7 @@ static char *af_find_conversion_filter(int srcfmt, int *dstfmt)
         }
     }
     assert(0);
-#undef num_fmt
-#undef num_filt
-#undef NODE_N
+#undef MAX_NODES
 }
 
 static bool af_is_conversion_filter(struct af_instance *af)
