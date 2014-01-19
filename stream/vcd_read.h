@@ -126,7 +126,7 @@ static mp_vcd_priv_t* vcd_read_toc(stream_t *stream, int fd){
 
 static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
 #ifndef sun
-  memcpy(vcd->buf,&vcd->entry.cdte_addr.msf,sizeof(struct cdrom_msf));
+  memcpy(vcd->buf,&vcd->entry.cdte_addr.msf,sizeof(vcd->entry.cdte_addr.msf));
   if(ioctl(vcd->fd,CDROMREADRAW,vcd->buf)==-1) return 0; // EOF?
   memcpy(mem,&vcd->buf[VCD_SECTOR_OFFS],VCD_SECTOR_DATA);
 #else
