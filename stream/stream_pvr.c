@@ -190,7 +190,7 @@ pvr_uninit (struct pvr_t *pvr)
     return;
 
   /* close device */
-  if (pvr->dev_fd)
+  if (pvr->dev_fd != -1)
     close (pvr->dev_fd);
 
   free (pvr->video_dev);
