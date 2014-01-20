@@ -263,7 +263,7 @@ static bool parse_smil(play_tree_parser_t* p) {
   }
 
   if (!line) return NULL;
-  MP_VERBOSE(p, "Detected smil playlist format\n");
+  MP_VERBOSE(p, "Detected smi l playlist format\n");
   play_tree_parser_stop_keeping(p);
 
   if (strncasecmp(line,"(smil-document",14)==0) {
@@ -521,13 +521,7 @@ static struct playlist *do_parse(struct stream* stream, bool forced,
   };
 
   bool success = false;
-  struct demuxer *pl_demux = demux_open(stream, "playlist", NULL, global);
-  if (pl_demux && pl_demux->playlist) {
-    playlist_transfer_entries(p.pl, pl_demux->playlist);
-    success = true;
-  }
-  free_demuxer(pl_demux);
-  if (!success && play_tree_parser_get_line(&p) != NULL) {
+  if (play_tree_parser_get_line(&p) != NULL) {
     for (int n = 0; n < sizeof(pl_parsers) / sizeof(pl_parsers[0]); n++) {
       play_tree_parser_reset(&p);
       if (pl_parsers[n](&p)) {
@@ -536,6 +530,12 @@ static struct playlist *do_parse(struct stream* stream, bool forced,
       }
     }
   }
+  struct demuxer *pl_demux = demux_open(stream, "playlist", NULL, global);
+  if (!success && pl_demux && pl_demux->playlist) {
+    playlist_transfer_entries(p.pl, pl_demux->playlist);
+    success = true;
+  }
+  free_demuxer(pl_demux);
 
   if(success)
     mp_verbose(log, "Playlist successfully parsed\n");
