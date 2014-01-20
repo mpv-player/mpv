@@ -1332,6 +1332,8 @@ goto_reopen_demuxer: ;
     if (mpctx->opts->pause)
         pause_player(mpctx);
 
+    mp_notify(mpctx, MP_EVENT_PLAYBACK_START, NULL);
+
     playback_start = mp_time_sec();
     mpctx->error_playing = false;
     while (!mpctx->stop_play)

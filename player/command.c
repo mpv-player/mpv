@@ -3223,6 +3223,7 @@ void mp_flush_events(struct MPContext *mpctx)
             switch (event) {
             case MP_EVENT_TICK:             name = "tick"; break;
             case MP_EVENT_TRACKS_CHANGED:   name = "track-layout"; break;
+            case MP_EVENT_PLAYBACK_START:   name = "playback-start"; break;
             case MP_EVENT_START_FILE:       name = "start"; break;
             case MP_EVENT_END_FILE:         name = "end"; break;
             default: ;

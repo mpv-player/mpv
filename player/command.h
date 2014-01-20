@@ -40,6 +40,7 @@ enum mp_event {
     MP_EVENT_PROPERTY,          // char*, property that is changed
     MP_EVENT_TRACKS_CHANGED,
     MP_EVENT_START_FILE,
+    MP_EVENT_PLAYBACK_START,
     MP_EVENT_END_FILE,
 };
 
