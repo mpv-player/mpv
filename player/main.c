@@ -288,6 +288,7 @@ static int mpv_main(int argc, char *argv[])
     *mpctx = (struct MPContext){
         .last_dvb_step = 1,
         .term_osd_contents = talloc_strdup(mpctx, ""),
+        .osd_progbar = { .type = -1 },
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
     };
 
