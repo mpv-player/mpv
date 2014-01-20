@@ -476,7 +476,7 @@ static bool translate_key_input(MSG *msg)
         msg->message != WM_KEYUP && msg->message != WM_SYSKEYUP)
         return false;
 
-    bool ext = msg->lParam & KF_EXTENDED;
+    bool ext = HIWORD(msg->lParam) & KF_EXTENDED;
     int mpkey = mp_w32_vkey_to_mpkey(msg->wParam, ext);
 
     // If we don't want the key, return false so TranslateMessage can convert
