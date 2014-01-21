@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <libavutil/common.h>
-
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
 #include "vo.h"
@@ -62,8 +60,8 @@ static void aspect_calc_panscan(struct mp_log *log, struct mp_vo_opts *opts,
 // Clamp [start, end) to range [0, size) with various fallbacks.
 static void clamp_size(int size, int *start, int *end)
 {
-    *start = FFMAX(0, *start);
-    *end = FFMIN(size, *end);
+    *start = MPMAX(0, *start);
+    *end = MPMIN(size, *end);
     if (*start >= *end) {
         *start = 0;
         *end = 1;
