@@ -646,13 +646,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     return self.vout->opts->fullscreen;
 }
 
-- (NSSize)videoSize {
-    return (NSSize) {
-        .width  = self.vout->cocoa->aspdat.prew,
-        .height = self.vout->cocoa->aspdat.preh,
-    };
-}
-
 - (NSScreen *)fsScreen {
     struct vo_cocoa_state *s = self.vout->cocoa;
     return s->fs_screen;

@@ -28,7 +28,6 @@
 - (void)handleFilesArray:(NSArray *)files;
 
 - (BOOL)isInFullScreenMode;
-- (NSSize)videoSize;
 - (NSScreen *)fsScreen;
 @property(nonatomic, assign) struct vo *vout;
 @end
