@@ -23,80 +23,40 @@
 #include "vo.h"
 #include "common/msg.h"
 #include "options/options.h"
+#include "video/mp_image.h"
 
 #include "vo.h"
 #include "sub/osd.h"
 
-void aspect_save_videores(struct vo *vo, int w, int h, int d_w, int d_h)
+static void aspect_calc_panscan(struct mp_log *log, struct mp_vo_opts *opts,
+                                struct mp_image_params *video,
+                                int window_w, int window_h, double monitor_par,
+                                int *out_w, int *out_h)
 {
-    vo->aspdat.orgw = w;
-    vo->aspdat.orgh = h;
-    vo->aspdat.prew = d_w;
-    vo->aspdat.preh = d_h;
-    vo->aspdat.par = (double)d_w / d_h * h / w;
-}
-
-static void aspect_calc(struct vo *vo, int *srcw, int *srch)
-{
-    struct aspect_data *aspdat = &vo->aspdat;
-    float pixelaspect = vo->monitor_par;
-
-    int fitw = FFMAX(1, vo->dwidth);
-    int fith = FFMAX(1, vo->dheight);
-
-    MP_DBG(vo, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
-           fitw, fith, pixelaspect);
-    *srcw = fitw;
-    *srch = (float)fitw / aspdat->prew * aspdat->preh / pixelaspect;
-    MP_DBG(vo, "aspect(1) wh: %dx%d (org: %dx%d)\n",
-           *srcw, *srch, aspdat->prew, aspdat->preh);
-    if (*srch > fith || *srch < aspdat->orgh) {
-        int tmpw = (float)fith / aspdat->preh * aspdat->prew * pixelaspect;
-        if (tmpw <= fitw) {
-            *srch = fith;
-            *srcw = tmpw;
-        } else if (*srch > fith) {
-            MP_WARN(vo, "No suitable new aspect found!\n");
+    mp_dbg(log, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
+           window_w, window_h, monitor_par);
+    int fwidth = window_w;
+    int fheight = (float)window_w / video->d_w * video->d_h / monitor_par;
+    mp_dbg(log, "aspect(1) wh: %dx%d (org: %dx%d)\n",
+           fwidth, fheight, video->d_w, video->d_h);
+    if (fheight > window_h || fheight < video->h) {
+        int tmpw = (float)window_h / video->d_h * video->d_w * monitor_par;
+        if (tmpw <= window_w) {
+            fheight = window_h;
+            fwidth = tmpw;
+        } else if (fheight > window_h) {
+            mp_warn(log, "No suitable new aspect found!\n");
         }
     }
-    MP_DBG(vo, "aspect(2) wh: %dx%d (org: %dx%d)\n",
-           *srcw, *srch, aspdat->prew, aspdat->preh);
-}
+    mp_dbg(log, "aspect(2) wh: %dx%d (org: %dx%d)\n",
+           fwidth, fheight, video->d_w, video->d_h);
 
-void aspect_calc_panscan(struct vo *vo, int *out_w, int *out_h)
-{
-    struct mp_vo_opts *opts = vo->opts;
-    int fwidth, fheight;
-    aspect_calc(vo, &fwidth, &fheight);
-
-    int vo_panscan_area = vo->dheight - fheight;
+    int vo_panscan_area = window_h - fheight;
     if (!vo_panscan_area)
-        vo_panscan_area = vo->dwidth - fwidth;
+        vo_panscan_area = window_w - fwidth;
 
     *out_w = fwidth + vo_panscan_area * opts->panscan * fwidth / fheight;
     *out_h = fheight + vo_panscan_area * opts->panscan;
-}
-
-
-static void print_video_rect(struct vo *vo, struct mp_rect src,
-                             struct mp_rect dst, struct mp_osd_res osd)
-{
-    int sw = src.x1 - src.x0, sh = src.y1 - src.y0;
-    int dw = dst.x1 - dst.x0, dh = dst.y1 - dst.y0;
-
-    MP_VERBOSE(&vo->vo_log, "Window size: %dx%d\n",
-               vo->dwidth, vo->dheight);
-    MP_VERBOSE(&vo->vo_log, "Video source: %dx%d (%dx%d)\n",
-               vo->aspdat.orgw, vo->aspdat.orgh,
-               vo->aspdat.prew, vo->aspdat.preh);
-    MP_VERBOSE(&vo->vo_log, "Video display: (%d, %d) %dx%d -> (%d, %d) %dx%d\n",
-               src.x0, src.y0, sw, sh, dst.x0, dst.y0, dw, dh);
-    MP_VERBOSE(&vo->vo_log, "Video scale: %f/%f\n",
-               (double)dw / sw, (double)dh / sh);
-    MP_VERBOSE(&vo->vo_log, "OSD borders: l=%d t=%d r=%d b=%d\n",
-               osd.ml, osd.mt, osd.mr, osd.mb);
-    MP_VERBOSE(&vo->vo_log, "Video borders: l=%d t=%d r=%d b=%d\n",
-               dst.x0, dst.y0, vo->dwidth - dst.x1, vo->dheight - dst.y1);
 }
 
 // Clamp [start, end) to range [0, size) with various fallbacks.
@@ -168,32 +128,33 @@ static void src_dst_split_scaling(int src_size, int dst_size,
     clamp_size(dst_size, dst_start, dst_end);
 }
 
-// Calculate the appropriate source and destination rectangle to
-// get a correctly scaled picture, including pan-scan.
-// out_src: visible part of the video
-// out_dst: area of screen covered by the video source rectangle
-// out_osd: OSD size, OSD margins, etc.
-void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
-                          struct mp_rect *out_dst, struct mp_osd_res *out_osd)
+void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
+                          struct mp_image_params *video,
+                          int window_w, int window_h, double monitor_par,
+                          struct mp_rect *out_src,
+                          struct mp_rect *out_dst,
+                          struct mp_osd_res *out_osd)
 {
-    struct mp_vo_opts *opts = vo->opts;
-    int src_w = vo->aspdat.orgw;
-    int src_h = vo->aspdat.orgh;
-    struct mp_rect dst = {0, 0, vo->dwidth, vo->dheight};
-    struct mp_rect src = {0, 0, src_w,      src_h};
+    int src_w = video->w;
+    int src_h = video->h;
+    window_w = MPMAX(1, window_w);
+    window_h = MPMAX(1, window_h);
+    struct mp_rect dst = {0, 0, window_w, window_h};
+    struct mp_rect src = {0, 0, src_w,    src_h};
     struct mp_osd_res osd = {
-        .w = vo->dwidth,
-        .h = vo->dheight,
-        .display_par = vo->monitor_par,
+        .w = window_w,
+        .h = window_h,
+        .display_par = monitor_par,
     };
     if (opts->keepaspect) {
         int scaled_width, scaled_height;
-        aspect_calc_panscan(vo, &scaled_width, &scaled_height);
-        src_dst_split_scaling(src_w, vo->dwidth, scaled_width, opts->unscaled,
+        aspect_calc_panscan(log, opts, video, window_w, window_h, monitor_par,
+                            &scaled_width, &scaled_height);
+        src_dst_split_scaling(src_w, window_w, scaled_width, opts->unscaled,
                               opts->zoom, opts->align_x, opts->pan_x,
                               &src.x0, &src.x1, &dst.x0, &dst.x1,
                               &osd.ml, &osd.mr);
-        src_dst_split_scaling(src_h, vo->dheight, scaled_height, opts->unscaled,
+        src_dst_split_scaling(src_h, window_h, scaled_height, opts->unscaled,
                               opts->zoom, opts->align_y, opts->pan_y,
                               &src.y0, &src.y1, &dst.y0, &dst.y1,
                               &osd.mt, &osd.mb);
@@ -203,5 +164,19 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
     *out_dst = dst;
     *out_osd = osd;
 
-    print_video_rect(vo, src, dst, osd);
+    int sw = src.x1 - src.x0, sh = src.y1 - src.y0;
+    int dw = dst.x1 - dst.x0, dh = dst.y1 - dst.y0;
+
+    mp_verbose(log, "Window size: %dx%d\n",
+               window_w, window_h);
+    mp_verbose(log, "Video source: %dx%d (%dx%d)\n",
+               video->w, video->h, video->d_w, video->d_h);
+    mp_verbose(log, "Video display: (%d, %d) %dx%d -> (%d, %d) %dx%d\n",
+               src.x0, src.y0, sw, sh, dst.x0, dst.y0, dw, dh);
+    mp_verbose(log, "Video scale: %f/%f\n",
+               (double)dw / sw, (double)dh / sh);
+    mp_verbose(log, "OSD borders: l=%d t=%d r=%d b=%d\n",
+               osd.ml, osd.mt, osd.mr, osd.mb);
+    mp_verbose(log, "Video borders: l=%d t=%d r=%d b=%d\n",
+               dst.x0, dst.y0, window_w - dst.x1, window_h - dst.y1);
 }

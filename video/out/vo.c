@@ -156,7 +156,6 @@ static struct vo *vo_create(struct mpv_global *global,
     };
     struct vo *vo = talloc_ptrtype(NULL, vo);
     *vo = (struct vo) {
-        .vo_log = { .log = talloc_steal(vo, log) },
         .log = mp_log_new(vo, log, name),
         .driver = desc.p,
         .opts = &global->opts->vo,
@@ -169,6 +168,7 @@ static struct vo *vo_create(struct mpv_global *global,
         .next_pts = MP_NOPTS_VALUE,
         .next_pts2 = MP_NOPTS_VALUE,
     };
+    talloc_steal(vo, log);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
     struct m_config *config = m_config_from_obj_desc(vo, vo->log, &desc);
@@ -422,7 +422,6 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     int d_width = params->d_w;
     int d_height = params->d_h;
-    aspect_save_videores(vo, params->w, params->h, d_width, d_height);
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
         determine_window_geometry(vo, params->d_w, params->d_h);
@@ -432,10 +431,10 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     vo->dwidth = d_width;
     vo->dheight = d_height;
 
-    talloc_free(vo->params);
-    vo->params = NULL;
-
     struct mp_image_params p2 = *params;
+
+    talloc_free(vo->params);
+    vo->params = talloc_memdup(vo, &p2, sizeof(p2));;
 
     int ret;
     if (vo->driver->reconfig) {
@@ -448,8 +447,10 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     }
     vo->config_ok = (ret >= 0);
     vo->config_count += vo->config_ok;
-    if (vo->config_ok)
-        vo->params = talloc_memdup(vo, &p2, sizeof(p2));
+    if (!vo->config_ok) {
+        talloc_free(vo->params);
+        vo->params = NULL;
+    }
     if (vo->registered_fd == -1 && vo->event_fd != -1 && vo->config_ok) {
         mp_input_add_fd(vo->input_ctx, vo->event_fd, 1, NULL, event_fd_callback,
                         NULL, vo);
@@ -481,6 +482,18 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 int lookup_keymap_table(const struct mp_keymap *map, int key) {
   while (map->from && map->from != key) map++;
   return map->to;
+}
+
+// Calculate the appropriate source and destination rectangle to
+// get a correctly scaled picture, including pan-scan.
+// out_src: visible part of the video
+// out_dst: area of screen covered by the video source rectangle
+// out_osd: OSD size, OSD margins, etc.
+void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
+                          struct mp_rect *out_dst, struct mp_osd_res *out_osd)
+{
+    mp_get_src_dst_rects(vo->log, vo->opts, vo->params, vo->dwidth, vo->dheight,
+                         vo->monitor_par, out_src, out_dst, out_osd);
 }
 
 // Return the window title the VO should set. Always returns a null terminated

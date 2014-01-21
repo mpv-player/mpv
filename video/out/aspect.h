@@ -18,11 +18,17 @@
 
 #ifndef MPLAYER_ASPECT_H
 #define MPLAYER_ASPECT_H
-/* Stuff for correct aspect scaling. */
 
-struct vo;
-
-void aspect_save_videores(struct vo *vo, int w, int h, int d_w, int d_h);
-void aspect_calc_panscan(struct vo *vo, int *out_w, int *out_h);
+struct mp_log;
+struct mp_vo_opts;
+struct mp_image_params;
+struct mp_rect;
+struct mp_osd_res;
+void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
+                          struct mp_image_params *video,
+                          int window_w, int window_h, double monitor_par,
+                          struct mp_rect *out_src,
+                          struct mp_rect *out_dst,
+                          struct mp_osd_res *out_osd);
 
 #endif /* MPLAYER_ASPECT_H */

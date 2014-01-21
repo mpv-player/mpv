@@ -57,8 +57,6 @@ struct vo_cocoa_state {
 
     NSInteger window_level;
 
-    struct aspect_data aspdat;
-
     bool did_resize;
     bool skip_next_swap_buffer;
     bool inside_sync_section;
@@ -388,7 +386,6 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t width, uint32_t height,
     dispatch_sync(dispatch_get_main_queue(), ^{
         s->inside_sync_section  = true;
         s->enable_resize_redraw = false;
-        s->aspdat = vo->aspdat;
 
         bool reset_size = s->old_dwidth != width || s->old_dheight != height;
         s->old_dwidth  = width;

@@ -221,9 +221,6 @@ struct vo_driver {
 };
 
 struct vo {
-    struct {
-        struct mp_log *log; // Using "[vo]" as prefix
-    } vo_log;
     struct mp_log *log; // Using e.g. "[vo/vdpau]" as prefix
     int config_ok;      // Last config call was successful?
     int config_count;   // Total number of successful config calls
@@ -260,20 +257,14 @@ struct vo {
     // requested position/resolution (usually window position/window size)
     int dx;
     int dy;
-    int dwidth;
-    int dheight;
 
     int xinerama_x;
     int xinerama_y;
-    float monitor_par;
 
-    struct aspect_data {
-        int orgw; // real width         (same as params->w and h)
-        int orgh; // real height
-        int prew; // prescaled width    (same as params->d_w and d_h)
-        int preh; // prescaled height
-        float par; // pixel aspect ratio out of orgw/orgh and prew/preh
-    } aspdat;
+    // current window state
+    int dwidth;
+    int dheight;
+    float monitor_par;
 
     char *window_title;
 };
