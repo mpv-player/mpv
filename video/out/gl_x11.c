@@ -157,7 +157,7 @@ static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs, int flags
         return NULL;
 
     // The list in fbc is sorted (so that the first element is the best).
-    GLXFBConfig fbconfig = fbc[0];
+    GLXFBConfig fbconfig = fbcount > 0 ? fbc[0] : NULL;
 
     if (flags & VOFLAG_ALPHA) {
         for (int n = 0; n < fbcount; n++) {
