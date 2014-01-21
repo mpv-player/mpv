@@ -87,16 +87,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct priv *p = vo->priv;
 
-    struct aspect_data asp = vo->aspdat;
-    double sar = (double)asp.orgw / asp.orgh;
-    double dar = (double)asp.prew / asp.preh;
-
-    struct mp_osd_res dim = {
-        .w = asp.orgw,
-        .h = asp.orgh,
-        .display_par = sar / dar,
-    };
-
+    struct mp_osd_res dim = osd_res_from_image_params(vo->params);
     osd_draw_on_image(osd, dim, osd_get_vo_pts(osd), OSD_DRAW_SUB_ONLY, p->current);
 }
 

@@ -1458,11 +1458,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     struct mp_osd_res res = p->osd_res;
 
     if (p->scaled_osd) {
-        res = (struct mp_osd_res) {
-            .w = p->image_width,
-            .h = p->image_height,
-            .display_par = 1.0 / vo->aspdat.par,
-        };
+        res = osd_res_from_image_params(vo->params);
         gl->MatrixMode(GL_MODELVIEW);
         gl->PushMatrix();
         // Setup image space -> screen space (assumes osd_res in screen space)
@@ -2009,6 +2005,9 @@ static mp_image_t *get_screenshot(struct vo *vo)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
+    if (!vo->params)
+        return NULL;
+
     mp_image_t *image = mp_image_alloc(p->image_format, p->texture_width,
                                                         p->texture_height);
 
@@ -2025,9 +2024,7 @@ static mp_image_t *get_screenshot(struct vo *vo)
         gl->ActiveTexture(GL_TEXTURE0);
     }
     mp_image_set_size(image, p->image_width, p->image_height);
-    mp_image_set_display_size(image, vo->aspdat.prew, vo->aspdat.preh);
-
-    mp_image_set_colorspace_details(image, &p->colorspace);
+    mp_image_set_attributes(image, vo->params);
 
     return image;
 }

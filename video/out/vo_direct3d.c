@@ -1432,15 +1432,15 @@ static mp_image_t *get_screenshot(d3d_priv *priv)
     if (!priv->have_image)
         return NULL;
 
+    if (!priv->vo->params)
+        return NULL;
+
     struct mp_image buffer;
     if (!get_video_buffer(priv, &buffer))
         return NULL;
 
     struct mp_image *image = mp_image_new_copy(&buffer);
-    mp_image_set_display_size(image, priv->vo->aspdat.prew,
-                                     priv->vo->aspdat.preh);
-
-    mp_image_set_colorspace_details(image, &priv->colorspace);
+    mp_image_set_attributes(image, priv->vo->params);
 
     d3d_unlock_video_objects(priv);
     return image;

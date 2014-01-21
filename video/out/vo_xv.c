@@ -616,12 +616,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     struct mp_image img = get_xv_buffer(vo, ctx->current_buf);
 
-    struct mp_osd_res res = {
-        .w = ctx->image_width,
-        .h = ctx->image_height,
-        .display_par = 1.0 / vo->aspdat.par,
-    };
-
+    struct mp_osd_res res = osd_res_from_image_params(vo->params);
     osd_draw_on_image(osd, res, osd_get_vo_pts(osd), 0, &img);
 }
 

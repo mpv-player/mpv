@@ -420,11 +420,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     if (!p->osd_format.fourcc)
         return;
 
-    struct mp_osd_res vid_res = {
-        .w = p->image_params.w,
-        .h = p->image_params.h,
-        .display_par = 1.0 / vo->aspdat.par,
-    };
+    struct mp_osd_res vid_res = osd_res_from_image_params(vo->params);
 
     struct mp_osd_res *res;
     if (p->osd_screen) {

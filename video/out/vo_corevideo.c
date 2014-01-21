@@ -279,7 +279,7 @@ static int get_image_fmt(struct vo *vo, CVPixelBufferRef pbuf)
 static mp_image_t *get_screenshot(struct vo *vo, CVPixelBufferRef pbuf)
 {
     int img_fmt = get_image_fmt(vo, pbuf);
-    if (img_fmt < 0) return NULL;
+    if (img_fmt < 0 || !vo->params) return NULL;
 
     struct priv *p = vo->priv;
     CVPixelBufferLockBaseAddress(pbuf, 0);
@@ -295,8 +295,7 @@ static mp_image_t *get_screenshot(struct vo *vo, CVPixelBufferRef pbuf)
     img.stride[0] = stride;
 
     struct mp_image *image = mp_image_new_copy(&img);
-    mp_image_set_display_size(image, vo->aspdat.prew, vo->aspdat.preh);
-    mp_image_set_colorspace_details(image, &p->colorspace);
+    mp_image_set_attributes(image, vo->params);
     CVPixelBufferUnlockBaseAddress(pbuf, 0);
 
     return image;

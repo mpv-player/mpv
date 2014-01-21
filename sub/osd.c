@@ -386,6 +386,21 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
              &draw_on_image, &closure);
 }
 
+// Setup the OSD resolution to render into an image with the given parameters.
+// The interesting part about this is that OSD has to compensate the aspect
+// ratio if the image does not have a 1:1 pixel aspect ratio.
+struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p)
+{
+    double sar = (double)p->w / p->h;
+    double dar = (double)p->d_w / p->d_h;
+
+    return (struct mp_osd_res) {
+        .w = p->w,
+        .h = p->h,
+        .display_par = sar / dar,
+    };
+}
+
 void osd_changed(struct osd_state *osd, int new_value)
 {
     pthread_mutex_lock(&osd->lock);

@@ -1239,6 +1239,9 @@ static struct mp_image *get_screenshot(struct vo *vo)
     VdpStatus vdp_st;
     struct vdp_functions *vdp = vc->vdp;
 
+    if (!vo->params)
+        return NULL;
+
     if (vc->screenshot_surface == VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_create(vc->vdp_device,
                                             OUTPUT_RGBA_FORMAT,
@@ -1253,7 +1256,7 @@ static struct mp_image *get_screenshot(struct vo *vo)
     struct mp_image *image = read_output_surface(vo, vc->screenshot_surface,
                                                  vc->vid_width, vc->vid_height);
 
-    mp_image_set_display_size(image, vo->aspdat.prew, vo->aspdat.preh);
+    mp_image_set_display_size(image, vo->params->d_w, vo->params->d_h);
 
     return image;
 }
