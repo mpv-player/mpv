@@ -134,11 +134,13 @@ static int load_file(struct script_ctx *ctx, const char *fname)
 {
     int r = 0;
     lua_State *L = ctx->state;
-    if (luaL_loadfile(L, fname) || lua_pcall(L, 0, 0, 0)) {
+    char *res_name = mp_get_user_path(NULL, ctx->mpctx->global, fname);
+    if (luaL_loadfile(L, res_name) || lua_pcall(L, 0, 0, 0)) {
         report_error(L);
         r = -1;
     }
     assert(lua_gettop(L) == 0);
+    talloc_free(res_name);
     return r;
 }
 
