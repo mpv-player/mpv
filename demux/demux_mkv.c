@@ -165,7 +165,7 @@ typedef struct mkv_index {
 } mkv_index_t;
 
 typedef struct mkv_demuxer {
-    int64_t segment_start;
+    int64_t segment_start, segment_end;
 
     double duration, last_pts;
     uint64_t last_filepos;
@@ -1680,7 +1680,7 @@ static int read_ebml_header(demuxer_t *demuxer)
     return 1;
 }
 
-static int read_mkv_segment_header(demuxer_t *demuxer)
+static int read_mkv_segment_header(demuxer_t *demuxer, int64_t *segment_end)
 {
     stream_t *s = demuxer->stream;
     int num_skip = 0;
@@ -1694,16 +1694,16 @@ static int read_mkv_segment_header(demuxer_t *demuxer)
         }
         MP_VERBOSE(demuxer, "+ a segment...\n");
         uint64_t len = ebml_read_length(s);
+        *segment_end = (len == EBML_UINT_INVALID) ? 0 : stream_tell(s) + len;
         if (num_skip <= 0)
             return 1;
         num_skip--;
         MP_VERBOSE(demuxer, "  (skipping)\n");
-        if (len == EBML_UINT_INVALID)
+        if (*segment_end <= 0)
             break;
-        int64_t next = stream_tell(s) + len;
-        if (next >= s->end_pos)
+        if (*segment_end >= s->end_pos)
             return 0;
-        if (!stream_seek(s, next)) {
+        if (!stream_seek(s, *segment_end)) {
             MP_WARN(demuxer, "Failed to seek in file\n");
             return 0;
         }
@@ -1721,18 +1721,20 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     stream_t *s = demuxer->stream;
     mkv_demuxer_t *mkv_d;
     int64_t start_pos;
+    int64_t end_pos;
 
     if (!read_ebml_header(demuxer))
         return -1;
     MP_VERBOSE(demuxer, "Found the head...\n");
 
-    if (!read_mkv_segment_header(demuxer))
+    if (!read_mkv_segment_header(demuxer, &end_pos))
         return -1;
 
     mkv_d = talloc_zero(demuxer, struct mkv_demuxer);
     demuxer->priv = mkv_d;
     mkv_d->tc_scale = 1000000;
     mkv_d->segment_start = stream_tell(s);
+    mkv_d->segment_end = end_pos;
 
     if (demuxer->params && demuxer->params->matroska_was_valid)
         *demuxer->params->matroska_was_valid = true;
@@ -2504,6 +2506,11 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
                 break;
             if (s->eof)
                 return -1;
+            if (id == EBML_ID_EBML && stream_tell(s) >= mkv_d->segment_end) {
+                // Appended segment - don't use its clusters, consider this EOF.
+                stream_seek(s, stream_tell(s) - 4);
+                return -1;
+            }
             // For the sake of robustness, consider even unknown level 1
             // elements the same as unknown/broken IDs.
             if (!ebml_is_mkv_level1_id(id) ||
