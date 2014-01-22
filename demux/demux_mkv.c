@@ -2575,10 +2575,6 @@ static int create_index_until(struct demuxer *demuxer, uint64_t timecode)
     mkv_index_t *index = get_highest_index_entry(demuxer);
 
     if (!index || index->timecode * mkv_d->tc_scale < timecode) {
-        int64_t old_filepos = stream_tell(s);
-        int64_t old_cluster_start = mkv_d->cluster_start;
-        int64_t old_cluster_end = mkv_d->cluster_end;
-        uint64_t old_cluster_tc = mkv_d->cluster_tc;
         if (index)
             stream_seek(s, index->filepos);
         MP_VERBOSE(demuxer, "creating index until TC %" PRIu64 "\n", timecode);
@@ -2596,10 +2592,6 @@ static int create_index_until(struct demuxer *demuxer, uint64_t timecode)
             if (index && index->timecode * mkv_d->tc_scale >= timecode)
                 break;
         }
-        stream_seek(s, old_filepos);
-        mkv_d->cluster_start = old_cluster_start;
-        mkv_d->cluster_end = old_cluster_end;
-        mkv_d->cluster_tc = old_cluster_tc;
     }
     if (!mkv_d->indexes) {
         MP_WARN(demuxer, "no target for seek found\n");
