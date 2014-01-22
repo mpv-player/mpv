@@ -1088,29 +1088,17 @@ static void display_create_tracks(demuxer_t *demuxer)
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
 
     for (int i = 0; i < mkv_d->num_tracks; i++) {
-        char *type = "unknown", str[32];
-        *str = '\0';
         switch (mkv_d->tracks[i]->type) {
         case MATROSKA_TRACK_VIDEO:
-            type = "video";
             demux_mkv_open_video(demuxer, mkv_d->tracks[i]);
             break;
         case MATROSKA_TRACK_AUDIO:
-            type = "audio";
             demux_mkv_open_audio(demuxer, mkv_d->tracks[i]);
             break;
         case MATROSKA_TRACK_SUBTITLE:
-            type = "subtitles";
             demux_mkv_open_sub(demuxer, mkv_d->tracks[i]);
             break;
         }
-        if (mkv_d->tracks[i]->name)
-            MP_VERBOSE(demuxer, "Track ID %u: %s (%s) \"%s\"\n",
-                    mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id,
-                    mkv_d->tracks[i]->name);
-        else
-            MP_VERBOSE(demuxer, "Track ID %u: %s (%s)\n",
-                    mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id);
     }
 }
 
