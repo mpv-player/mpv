@@ -263,9 +263,19 @@ static void print_file_properties(struct MPContext *mpctx)
         }
     }
     struct demuxer *demuxer = mpctx->master_demuxer;
-    if (demuxer->num_editions > 1)
-        MP_INFO(mpctx, "Playing edition %d of %d (--edition=%d).\n",
-                demuxer->edition + 1, demuxer->num_editions, demuxer->edition);
+    if (demuxer->num_editions > 1) {
+        for (int n = 0; n < demuxer->num_editions; n++) {
+            struct demux_edition *edition = &demuxer->editions[n];
+            MP_INFO(mpctx, "[edition] %3s --edition=%d",
+                    n == demuxer->edition ? "(+)" : "", n);
+            char *name = mp_tags_get_str(edition->metadata, "title");
+            if (name)
+                MP_INFO(mpctx, " '%s'", name);
+            if (edition->default_edition)
+                MP_INFO(mpctx, " (*)");
+            MP_INFO(mpctx, "\n");
+        }
+    }
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int n = 0; n < mpctx->num_tracks; n++)
             if (mpctx->tracks[n]->type == t)

@@ -173,6 +173,8 @@ typedef struct mkv_demuxer {
     mkv_track_t **tracks;
     int num_tracks;
 
+    struct ebml_tags *tags;
+
     uint64_t tc_scale, cluster_tc;
 
     uint64_t cluster_start;
@@ -783,6 +785,14 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
     int selected_edition = -1;
     int num_editions = file_chapters.n_edition_entry;
     struct ebml_edition_entry *editions = file_chapters.edition_entry;
+    for (int i = 0; i < num_editions; i++) {
+        struct demux_edition new = {
+            .demuxer_id = editions[i].edition_uid,
+            .default_edition = editions[i].edition_flag_default,
+            .metadata = talloc_zero(demuxer, struct mp_tags),
+        };
+        MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, new);
+    }
     if (wanted_edition >= 0 && wanted_edition < num_editions) {
         selected_edition = wanted_edition;
         MP_VERBOSE(demuxer, "User-specified edition: %d\n",
@@ -894,9 +904,6 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
             }
         }
     }
-    if (num_editions > 1)
-        MP_INFO(demuxer, "Found %d editions, will play #%d (first is 0).\n",
-               num_editions, selected_edition);
 
     demuxer->num_editions = num_editions;
     demuxer->edition = selected_edition;
@@ -908,6 +915,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
 
 static int demux_mkv_read_tags(demuxer_t *demuxer)
 {
+    struct mkv_demuxer *mkv_d = demuxer->priv;
     stream_t *s = demuxer->stream;
 
     struct ebml_parse_ctx parse_ctx = {demuxer->log};
@@ -915,10 +923,22 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
     if (ebml_read_element(s, &parse_ctx, &tags, &ebml_tags_desc) < 0)
         return -1;
 
-    for (int i = 0; i < tags.n_tag; i++) {
-        struct ebml_tag tag = tags.tag[i];
-        if (tag.targets.target_track_uid  || tag.targets.target_edition_uid ||
-            tag.targets.target_attachment_uid)
+    mkv_d->tags = talloc_memdup(mkv_d, &tags, sizeof(tags));
+    talloc_steal(mkv_d->tags, parse_ctx.talloc_ctx);
+    return 0;
+}
+
+static void process_tags(demuxer_t *demuxer)
+{
+    struct mkv_demuxer *mkv_d = demuxer->priv;
+    struct ebml_tags *tags = mkv_d->tags;
+
+    if (!tags)
+        return;
+
+    for (int i = 0; i < tags->n_tag; i++) {
+        struct ebml_tag tag = tags->tag[i];
+        if (tag.targets.target_track_uid  || tag.targets.target_attachment_uid)
             continue;
 
         if (tag.targets.target_chapter_uid) {
@@ -927,6 +947,23 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
                                          tag.simple_tag[j].tag_name,
                                          tag.simple_tag[j].tag_string);
             }
+        } else if (tag.targets.target_edition_uid) {
+            struct demux_edition *edition = NULL;
+            for (int n = 0; n < demuxer->num_editions; n++) {
+                if (demuxer->editions[n].demuxer_id ==
+                    tag.targets.target_edition_uid)
+                {
+                    edition = &demuxer->editions[n];
+                    break;
+                }
+            }
+            if (edition) {
+                for (int j = 0; j < tag.n_simple_tag; j++) {
+                    mp_tags_set_bstr(edition->metadata,
+                                     tag.simple_tag[j].tag_name,
+                                     tag.simple_tag[j].tag_string);
+                }
+            }
         } else {
             for (int j = 0; j < tag.n_simple_tag; j++) {
                 demux_info_add_bstr(demuxer, tag.simple_tag[j].tag_name,
@@ -934,9 +971,6 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
             }
         }
     }
-
-    talloc_free(parse_ctx.talloc_ctx);
-    return 0;
 }
 
 static int demux_mkv_read_attachments(demuxer_t *demuxer)
@@ -1798,6 +1832,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 
     MP_VERBOSE(demuxer, "All headers are parsed!\n");
 
+    process_tags(demuxer);
     display_create_tracks(demuxer);
 
     return 0;

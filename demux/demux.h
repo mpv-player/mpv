@@ -120,6 +120,12 @@ typedef struct demux_chapter
     uint64_t demuxer_id; // for mapping to internal demuxer data structures
 } demux_chapter_t;
 
+struct demux_edition {
+    uint64_t demuxer_id;
+    bool default_edition;
+    struct mp_tags *metadata;
+};
+
 struct matroska_segment_uid {
     unsigned char segment[16];
     uint64_t edition;
@@ -175,6 +181,7 @@ typedef struct demuxer {
     int num_streams;
     bool stream_autoselect;
 
+    struct demux_edition *editions;
     int num_editions;
     int edition;
 
