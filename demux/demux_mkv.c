@@ -1762,10 +1762,8 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
             break;
         }
         int res = read_header_element(demuxer, id, start_pos);
-        if (res <= -2)
-            return -1;
         if (res < 0)
-            break;
+            return -1;
     }
 
     // Read headers that come after the first cluster (i.e. require seeking).
@@ -1800,10 +1798,8 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         }
         elem->parsed = false; // don't make read_header_element skip it
         int res = read_header_element(demuxer, elem->id, elem->pos);
-        if (res <= -2)
-            return -1;
         if (res < 0)
-            break;
+            return -1;
     }
     if (!stream_seek(s, start_pos)) {
         MP_ERR(demuxer, "Couldn't seek back after reading headers?\n");
