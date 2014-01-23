@@ -153,13 +153,13 @@ static int af_open(struct af_instance* af){
     int   j,k;
 
     int nch = s->nch;
-    if(AF_OK != control(af,AF_CONTROL_SET_PAN_NOUT, &nch))
+    if(nch && AF_OK != control(af,AF_CONTROL_SET_PAN_NOUT, &nch))
         return AF_ERROR;
 
     // Read pan values
     char *cp = s->matrixstr;
     j = 0; k = 0;
-    while(k < AF_NCH){
+    while(cp && k < AF_NCH){
         sscanf(cp, "%f%n" , &s->level[j][k], &n);
         MP_VERBOSE(af, "[pan] Pan level from channel %i to"
                 " channel %i = %f\n",k,j,s->level[j][k]);
