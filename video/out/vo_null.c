@@ -43,9 +43,7 @@ static int query_format(struct vo *vo, uint32_t format)
     return VFCAP_CSP_SUPPORTED;
 }
 
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     return 0;
 }
@@ -69,7 +67,7 @@ const struct vo_driver video_out_null = {
     .name = "null",
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,

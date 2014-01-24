@@ -1709,30 +1709,28 @@ static bool config_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     return mpgl_config_window(p->glctx, mpgl_caps, d_width, d_height, flags);
 }
 
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct gl_priv *p = vo->priv;
 
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(format);
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(params->imgfmt);
 
-    p->image_height = height;
-    p->image_width = width;
-    p->image_format = format;
+    p->image_height = params->h;
+    p->image_width = params->w;
+    p->image_format = params->imgfmt;
     p->is_yuv = !!(desc.flags & MP_IMGFLAG_YUV_P);
     p->is_yuv |= (desc.chroma_xs << 8) | (desc.chroma_ys << 16);
-    if (format == IMGFMT_Y8)
+    if (p->image_format == IMGFMT_Y8)
         p->is_yuv = 0;
-    glFindFormat(format, p->have_texture_rg, NULL, &p->texfmt, &p->gl_format,
-                 &p->gl_type);
+    glFindFormat(p->image_format, p->have_texture_rg, NULL, &p->texfmt,
+                 &p->gl_format, &p->gl_type);
 
     p->vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
     if (vo->config_count)
         uninitGl(vo);
 
-    if (!config_window(vo, d_width, d_height, flags))
+    if (!config_window(vo, vo->dwidth, vo->dheight, flags))
         return -1;
 
     initGl(vo, vo->dwidth, vo->dheight);
@@ -2165,7 +2163,7 @@ const struct vo_driver video_out_opengl_old = {
     .name = "opengl-old",
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .draw_osd = draw_osd,

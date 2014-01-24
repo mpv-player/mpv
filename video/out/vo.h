@@ -155,20 +155,6 @@ struct vo_driver {
 
     /*
      * Initialize or reconfigure the display driver.
-     *   width,height: image source size
-     *   d_width,d_height: requested window size, just a hint
-     *   flags: combination of VOFLAG_ values
-     *   title: window title, if available
-     *   format: fourcc of pixel format
-     * returns : zero on successful initialization, non-zero on error.
-     */
-    int (*config)(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format);
-
-    /*
-     * Initialize or reconfigure the display driver. Alternative to config(),
-     * and can carry more image parameters.
      *   params: video parameters, like pixel format and frame size
      *   flags: combination of VOFLAG_ values
      * returns: < 0 on error, >= 0 on success

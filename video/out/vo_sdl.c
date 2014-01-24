@@ -398,11 +398,11 @@ static void set_fullscreen(struct vo *vo)
     force_resize(vo);
 }
 
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct priv *vc = vo->priv;
+    int win_w = vo->dwidth;
+    int win_h = vo->dheight;
 
     if (vc->reinit_renderer) {
         destroy_renderer(vo);
@@ -410,9 +410,9 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     if (vc->window)
-        SDL_SetWindowSize(vc->window, d_width, d_height);
+        SDL_SetWindowSize(vc->window, win_w, win_h);
     else {
-        if (init_renderer(vo, d_width, d_height) != 0)
+        if (init_renderer(vo, win_w, win_h) != 0)
             return -1;
     }
 
@@ -432,14 +432,15 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     vc->tex_swapped = texfmt == SDL_PIXELFORMAT_YV12;
     vc->tex = SDL_CreateTexture(vc->renderer, texfmt,
-                                SDL_TEXTUREACCESS_STREAMING, width, height);
+                                SDL_TEXTUREACCESS_STREAMING,
+                                params->w, params->h);
     if (!vc->tex) {
         MP_ERR(vo, "Could not create a texture\n");
         return -1;
     }
 
     mp_image_t *texmpi = &vc->texmpi;
-    mp_image_set_size(texmpi, width, height);
+    mp_image_set_size(texmpi, params->w, params->h);
     mp_image_setfmt(texmpi, format);
     switch (texmpi->num_planes) {
     case 1:
@@ -452,7 +453,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
     }
 
-    resize(vo, d_width, d_height);
+    resize(vo, win_w, win_h);
 
     SDL_DisableScreenSaver();
 
@@ -1011,7 +1012,7 @@ const struct vo_driver video_out_sdl = {
     },
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .uninit = uninit,

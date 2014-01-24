@@ -781,9 +781,7 @@ static bool status_ok(struct vo *vo)
  * connect to X server, create and map window, initialize all
  * VDPAU objects, create different surfaces etc.
  */
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct vdpctx *vc = vo->priv;
 
@@ -791,17 +789,17 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
 
     vc->flip = flags & VOFLAG_FLIPPING;
-    vc->image_format = format;
-    vc->vid_width    = width;
-    vc->vid_height   = height;
+    vc->image_format = params->imgfmt;
+    vc->vid_width    = params->w;
+    vc->vid_height   = params->h;
 
-    vc->rgb_mode = get_rgb_format(format) >= 0;
+    vc->rgb_mode = get_rgb_format(params->imgfmt) >= 0;
 
     vc->deint = vc->rgb_mode ? 0 : vc->user_deint;
 
     free_video_specific(vo);
 
-    vo_x11_config_vo_window(vo, NULL, d_width, d_height, flags, "vdpau");
+    vo_x11_config_vo_window(vo, NULL, vo->dwidth, vo->dheight, flags, "vdpau");
 
     if (initialize_vdpau_objects(vo) < 0)
         return -1;
@@ -1513,7 +1511,7 @@ const struct vo_driver video_out_vdpau = {
     .name = "vdpau",
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .get_buffered_frame = set_next_frame_info,

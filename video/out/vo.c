@@ -431,21 +431,11 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     vo->dwidth = d_width;
     vo->dheight = d_height;
 
-    struct mp_image_params p2 = *params;
-
     talloc_free(vo->params);
-    vo->params = talloc_memdup(vo, &p2, sizeof(p2));;
+    vo->params = talloc_memdup(vo, params, sizeof(*params));
 
-    int ret;
-    if (vo->driver->reconfig) {
-        ret = vo->driver->reconfig(vo, &p2, flags);
-    } else {
-        // Old config() takes window size, while reconfig() takes aspect (!)
-        ret = vo->driver->config(vo, p2.w, p2.h, d_width, d_height, flags,
-                                 p2.imgfmt);
-        ret = ret ? -1 : 0;
-    }
-    vo->config_ok = (ret >= 0);
+    int ret = vo->driver->reconfig(vo, vo->params, flags);
+    vo->config_ok = ret >= 0;
     vo->config_count += vo->config_ok;
     if (!vo->config_ok) {
         talloc_free(vo->params);

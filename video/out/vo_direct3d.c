@@ -1260,19 +1260,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return r;
 }
 
-/** @brief libvo Callback: Configre the Direct3D adapter.
- *  @param width    Movie source width
- *  @param height   Movie source height
- *  @param d_width  Screen (destination) width
- *  @param d_height Screen (destination) height
- *  @param options  Options bitmap
- *  @param format   Movie colorspace format (using MPlayer's
- *                  defines, e.g. IMGFMT_YUYV)
- *  @return 0 on success, VO_ERROR on failure
- */
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t options,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     d3d_priv *priv = vo->priv;
 
@@ -1281,20 +1269,20 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     /* w32_common framework call. Creates window on the screen with
      * the given coordinates.
      */
-    if (!vo_w32_config(vo, d_width, d_height, options)) {
+    if (!vo_w32_config(vo, vo->dwidth, vo->dheight, flags)) {
         MP_VERBOSE(priv, "Creating window failed.\n");
         return VO_ERROR;
     }
 
-    if ((priv->image_format != format)
-        || (priv->src_width != width)
-        || (priv->src_height != height))
+    if ((priv->image_format != params->imgfmt)
+        || (priv->src_width != params->w)
+        || (priv->src_height != params->h))
     {
         d3d_destroy_video_objects(priv);
 
-        priv->src_width = width;
-        priv->src_height = height;
-        init_rendering_mode(priv, format, true);
+        priv->src_width = params->w;
+        priv->src_height = params->h;
+        init_rendering_mode(priv, params->imgfmt, true);
     }
 
     if (!resize_d3d(priv))
@@ -1737,7 +1725,7 @@ const struct vo_driver video_out_direct3d = {
     .name = "direct3d",
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .draw_osd = draw_osd,
@@ -1753,7 +1741,7 @@ const struct vo_driver video_out_direct3d_shaders = {
     .name = "direct3d_shaders",
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .draw_osd = draw_osd,

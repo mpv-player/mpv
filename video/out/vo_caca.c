@@ -83,7 +83,7 @@ static int resize(struct vo *vo)
                                 rmask, gmask, bmask, amask);
     if (dither == NULL) {
         MP_FATAL(vo, "caca_create_dither failed!\n");
-        return ENOSYS;
+        return -1;
     }
     dither_buffer =
         talloc_array(NULL, uint8_t, depth * image_width * image_height);
@@ -97,13 +97,11 @@ static int resize(struct vo *vo)
     return 0;
 }
 
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
-    image_height = height;
-    image_width  = width;
-    image_format = format;
+    image_height = params->h;
+    image_width  = params->w;
+    image_format = params->imgfmt;
 
     return resize(vo);
 }
@@ -290,7 +288,7 @@ const struct vo_driver video_out_caca = {
     .description = "libcaca",
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,

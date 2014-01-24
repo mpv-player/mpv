@@ -417,12 +417,10 @@ static void resize(struct vo *vo)
 }
 
 /*
- * connect to server, create and map window,
+ * create and map window,
  * allocate colors and (shared) memory
  */
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct xvctx *ctx = vo->priv;
@@ -430,9 +428,9 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     mp_image_unrefp(&ctx->original_image);
 
-    ctx->image_height = height;
-    ctx->image_width = width;
-    ctx->image_format = format;
+    ctx->image_height = params->h;
+    ctx->image_width  = params->w;
+    ctx->image_format = params->imgfmt;
 
     if ((ctx->max_width != 0 && ctx->max_height != 0)
         && (ctx->image_width > ctx->max_width
@@ -449,7 +447,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         MP_VERBOSE(vo, "Xvideo image format: 0x%x (%4.4s) %s\n",
                    ctx->fo[i].id, (char *) &ctx->fo[i].id,
                    (ctx->fo[i].format == XvPacked) ? "packed" : "planar");
-        if (ctx->fo[i].id == find_xv_format(format))
+        if (ctx->fo[i].id == find_xv_format(ctx->image_format))
             ctx->xv_format = ctx->fo[i].id;
     }
     if (!ctx->xv_format)
@@ -889,7 +887,7 @@ const struct vo_driver video_out_xv = {
     .name = "xv",
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .draw_osd = draw_osd,

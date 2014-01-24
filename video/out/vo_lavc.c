@@ -89,20 +89,20 @@ static void uninit(struct vo *vo)
     vo->priv = NULL;
 }
 
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct priv *vc = vo->priv;
-    enum AVPixelFormat pix_fmt = imgfmt2pixfmt(format);
+    enum AVPixelFormat pix_fmt = imgfmt2pixfmt(params->imgfmt);
     AVRational display_aspect_ratio, image_aspect_ratio;
     AVRational aspect;
+    uint32_t width = params->w;
+    uint32_t height = params->h;
 
     if (!vc)
         return -1;
 
-    display_aspect_ratio.num = d_width;
-    display_aspect_ratio.den = d_height;
+    display_aspect_ratio.num = params->d_w;
+    display_aspect_ratio.den = params->d_h;
     image_aspect_ratio.num = width;
     image_aspect_ratio.den = height;
     aspect = av_div_q(display_aspect_ratio, image_aspect_ratio);
@@ -137,7 +137,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     if (pix_fmt == AV_PIX_FMT_NONE) {
         MP_FATAL(vo, "Format %s not supported by lavc.\n",
-                 mp_imgfmt_to_name(format));
+                 mp_imgfmt_to_name(params->imgfmt));
         goto error;
     }
 
@@ -524,7 +524,7 @@ const struct vo_driver video_out_lavc = {
     .name = "lavc",
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .uninit = uninit,
     .draw_image = draw_image,
