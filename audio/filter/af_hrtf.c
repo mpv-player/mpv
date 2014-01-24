@@ -296,7 +296,7 @@ static int control(struct af_instance *af, int cmd, void* arg)
 	if(af->data->rate != 48000) {
 	    // automatic samplerate adjustment in the filter chain
 	    // is not yet supported.
-	    MP_ERR(af, "[hrtf] ERROR: Sampling rate is not 48000 Hz (%d)!\n",
+	    MP_ERR(af, "ERROR: Sampling rate is not 48000 Hz (%d)!\n",
 		   af->data->rate);
 	    return AF_ERROR;
 	}
@@ -367,25 +367,25 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 	s->print_flag = 0;
 	switch (s->decode_mode) {
 	case HRTF_MIX_51:
-	  MP_INFO(af, "[hrtf] Using HRTF to mix %s discrete surround into "
+	  MP_INFO(af, "Using HRTF to mix %s discrete surround into "
 		 "L, R channels\n", s->matrix_mode ? "5+1" : "5");
 	  break;
 	case HRTF_MIX_STEREO:
-	  MP_INFO(af, "[hrtf] Using HRTF to mix stereo into "
+	  MP_INFO(af, "Using HRTF to mix stereo into "
 		 "L, R channels\n");
 	  break;
 	case HRTF_MIX_MATRIX2CH:
-	  MP_INFO(af, "[hrtf] Using active matrix to decode 2 channel "
+	  MP_INFO(af, "Using active matrix to decode 2 channel "
 		 "input, HRTF to mix %s matrix surround into "
 		 "L, R channels\n", "3/2");
 	  break;
 	default:
-	  MP_WARN(af, "[hrtf] bogus decode_mode: %d\n", s->decode_mode);
+	  MP_WARN(af, "bogus decode_mode: %d\n", s->decode_mode);
 	  break;
 	}
 
        if(s->matrix_mode)
-	  MP_INFO(af, "[hrtf] Using active matrix to decode rear center "
+	  MP_INFO(af, "Using active matrix to decode rear center "
 		 "channel\n");
     }
 
@@ -595,7 +595,7 @@ static int af_open(struct af_instance* af)
     s->print_flag = 1;
 
     if (allocate(s) != 0) {
- 	MP_ERR(af, "[hrtf] Memory allocation error.\n");
+ 	MP_ERR(af, "Memory allocation error.\n");
 	return AF_ERROR;
     }
 
@@ -614,13 +614,13 @@ static int af_open(struct af_instance* af)
     s->cr_ir = cr_filt + (s->cr_o = pulse_detect(cr_filt));
 
     if((s->ba_ir = malloc(s->basslen * sizeof(float))) == NULL) {
- 	MP_ERR(af, "[hrtf] Memory allocation error.\n");
+ 	MP_ERR(af, "Memory allocation error.\n");
 	return AF_ERROR;
     }
     fc = 2.0 * BASSFILTFREQ / (float)af->data->rate;
     if(af_filter_design_fir(s->basslen, s->ba_ir, &fc, LP | KAISER, 4 * M_PI) ==
        -1) {
-	MP_ERR(af, "[hrtf] Unable to design low-pass "
+	MP_ERR(af, "Unable to design low-pass "
 	       "filter.\n");
 	return AF_ERROR;
     }

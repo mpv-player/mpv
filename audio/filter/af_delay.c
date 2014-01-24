@@ -54,7 +54,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     struct mp_audio *in = arg;
 
     if (in->bps != 1 && in->bps != 2 && in->bps != 4) {
-      MP_FATAL(af, "[delay] Sample format not supported\n");
+      MP_FATAL(af, "Sample format not supported\n");
       return AF_ERROR;
     }
 
@@ -69,16 +69,16 @@ static int control(struct af_instance* af, int cmd, void* arg)
     for(i=0;i<af->data->nch;i++){
       s->q[i] = calloc(L,af->data->bps);
       if(NULL == s->q[i])
-	MP_FATAL(af, "[delay] Out of memory\n");
+	MP_FATAL(af, "Out of memory\n");
     }
 
     if(AF_OK != af_from_ms(AF_NCH, s->d, s->wi, af->data->rate, 0.0, 1000.0))
       return AF_ERROR;
     s->ri = 0;
     for(i=0;i<AF_NCH;i++){
-      MP_DBG(af, "[delay] Channel %i delayed by %0.3fms\n",
+      MP_DBG(af, "Channel %i delayed by %0.3fms\n",
              i,MPCLAMP(s->d[i],0.0,1000.0));
-      MP_TRACE(af, "[delay] Channel %i delayed by %i samples\n",
+      MP_TRACE(af, "Channel %i delayed by %i samples\n",
              i,s->wi[i]);
     }
     return AF_OK;

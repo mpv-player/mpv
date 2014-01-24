@@ -124,14 +124,14 @@ static int check_routes(struct af_instance *af, int nin, int nout)
   af_channels_t* s = af->priv;
   int i;
   if((s->nr < 1) || (s->nr > AF_NCH)){
-    MP_ERR(af, "[channels] The number of routing pairs must be"
+    MP_ERR(af, "The number of routing pairs must be"
 	   " between 1 and %i. Current value is %i\n",AF_NCH,s->nr);
     return AF_ERROR;
   }
 
   for(i=0;i<s->nr;i++){
     if((s->route[i][FR] >= nin) || (s->route[i][TO] >= nout)){
-      MP_ERR(af, "[channels] Invalid routing in pair nr. %i.\n", i);
+      MP_ERR(af, "Invalid routing in pair nr. %i.\n", i);
       return AF_ERROR;
     }
   }
@@ -220,11 +220,11 @@ static int af_open(struct af_instance* af){
         do {
             int n = 0;
             if (ch >= AF_NCH) {
-                MP_FATAL(af, "[channels] Can't have more than %d routes.\n", AF_NCH);
+                MP_FATAL(af, "Can't have more than %d routes.\n", AF_NCH);
                 return AF_ERROR;
             }
             sscanf(cp, "%i-%i%n" ,&s->route[ch][FR], &s->route[ch][TO], &n);
-            MP_VERBOSE(af, "[channels] Routing from channel %i to"
+            MP_VERBOSE(af, "Routing from channel %i to"
                 " channel %i\n",s->route[ch][FR],s->route[ch][TO]);
             cp = &cp[n];
             ch++;

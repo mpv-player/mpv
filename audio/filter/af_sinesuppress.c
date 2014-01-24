@@ -99,7 +99,7 @@ static int play_s16(struct af_instance* af, struct mp_audio* data, int f)
     s->pos += 2 * M_PI * s->freq / data->rate;
   }
 
-   MP_VERBOSE(af, "[sinesuppress] f:%8.2f: amp:%8.2f\n", s->freq, sqrt(s->real*s->real + s->imag*s->imag) / s->ref);
+   MP_VERBOSE(af, "f:%8.2f: amp:%8.2f\n", s->freq, sqrt(s->real*s->real + s->imag*s->imag) / s->ref);
 
   return 0;
 }

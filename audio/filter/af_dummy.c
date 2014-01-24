@@ -33,7 +33,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
   switch(cmd){
   case AF_CONTROL_REINIT: ;
     *af->data = *(struct mp_audio*)arg;
-    MP_VERBOSE(af, "[dummy] Was reinitialized: %iHz/%ich/%s\n",
+    MP_VERBOSE(af, "Was reinitialized: %iHz/%ich/%s\n",
 	af->data->rate,af->data->nch,af_fmt_to_str(af->data->format));
     return AF_OK;
   }

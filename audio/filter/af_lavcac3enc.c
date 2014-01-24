@@ -187,7 +187,7 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
 
         AVFrame *frame = avcodec_alloc_frame();
         if (!frame) {
-            MP_FATAL(af, "[libaf] Could not allocate memory \n");
+            MP_FATAL(af, "Could not allocate memory \n");
             return -1;
         }
         frame->nb_samples = s->in_samples;
@@ -201,7 +201,7 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
         int ok;
         ret = avcodec_encode_audio2(s->lavc_actx, &s->pkt, frame, &ok);
         if (ret < 0 || !ok) {
-            MP_FATAL(af, "[lavac3enc] Encode failed.\n");
+            MP_FATAL(af, "Encode failed.\n");
             return -1;
         }
 
