@@ -595,8 +595,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
     struct priv *p = vo->priv;
     mp_image_unrefp(&p->original_image);
 
-    p->width = vo->dwidth;
-    p->height = vo->dheight;
+    p->width = fmt->w;
+    p->height = fmt->h;
     p->in_format = *fmt;
 
     struct supported_format *sf;
