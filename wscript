@@ -406,7 +406,7 @@ audio_output_features = [
         'func': check_pkg_config('sdl2'),
         'default': 'disable'
     }, {
-        'name': '--sdl',
+        'name': '--sdl1',
         'desc': 'SDL (1.x)',
         'deps_neg': [ 'sdl2' ],
         'func': check_pkg_config('sdl'),
