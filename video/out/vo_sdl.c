@@ -423,7 +423,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     for (i = 0; i < vc->renderer_info.num_texture_formats; ++i)
         for (j = 0; j < sizeof(formats) / sizeof(formats[0]); ++j)
             if (vc->renderer_info.texture_formats[i] == formats[j].sdl)
-                if (format == formats[j].mpv)
+                if (params->imgfmt == formats[j].mpv)
                     texfmt = formats[j].sdl;
     if (texfmt == SDL_PIXELFORMAT_UNKNOWN) {
         MP_ERR(vo, "Invalid pixel format\n");
@@ -441,7 +441,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     mp_image_t *texmpi = &vc->texmpi;
     mp_image_set_size(texmpi, params->w, params->h);
-    mp_image_setfmt(texmpi, format);
+    mp_image_setfmt(texmpi, params->imgfmt);
     switch (texmpi->num_planes) {
     case 1:
     case 3:
