@@ -81,7 +81,7 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #if HAVE_OPENAL
     &audio_out_openal,
 #endif
-#if HAVE_SDL || HAVE_SDL2
+#if HAVE_SDL1 || HAVE_SDL2
     &audio_out_sdl,
 #endif
     &audio_out_null,

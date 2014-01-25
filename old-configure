@@ -2206,7 +2206,7 @@ if test "$_sdl2" = yes ; then
 fi
 if test "$_sdl2" = yes ; then
   _sdl=yes # sdl2 implies sdl
-  def_sdl='#define HAVE_SDL 1'
+  def_sdl='#define HAVE_SDL1 1'
   def_sdl2='#define HAVE_SDL2 1'
   vomodules="sdl $vomodules"
   aomodules="sdl $aomodules"
@@ -2219,11 +2219,11 @@ else
     pkg_config_add 'sdl' && _sdl=yes
   fi
   if test "$_sdl" = yes ; then
-    def_sdl='#define HAVE_SDL 1'
+    def_sdl='#define HAVE_SDL1 1'
     novomodules="sdl $novomodules"
     aomodules="sdl $aomodules"
   else
-    def_sdl='#define HAVE_SDL 0'
+    def_sdl='#define HAVE_SDL1 0'
     novomodules="sdl $novomodules"
     noaomodules="sdl $noaomodules"
   fi
