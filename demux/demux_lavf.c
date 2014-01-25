@@ -90,9 +90,11 @@ struct format_hack {
     const char *mime_type;
     int probescore;
     float analyzeduration;
+    bool max_probe;         // use probescore only if max. probe size reached
 };
 
 static const struct format_hack format_hacks[] = {
+    // for webradios
     {"aac", "audio/aacp", 25, 0.5},
     {"aac", "audio/aac",  25, 0.5},
     {"mp3", "audio/mpeg", 25, 0.5},
@@ -103,15 +105,6 @@ static const char *format_blacklist[] = {
     "tty",      // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
     0
 };
-
-static const struct format_hack *find_format_from_mime_type(char *mime_type)
-{
-    for (int n = 0; format_hacks[n].ff_name; n++) {
-        if (strcasecmp(format_hacks[n].mime_type, mime_type) == 0)
-            return &format_hacks[n];
-    }
-    return NULL;
-}
 
 static int mp_read(void *opaque, uint8_t *buf, int size)
 {
@@ -223,17 +216,9 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         priv->filename = sep + 1;
     }
 
-    const char *expected_format = NULL;
-    int expected_format_probescore = AVPROBE_SCORE_MAX;
     char *mime_type = demuxer->stream->mime_type;
-
-    if (lavfdopts->allow_mimetype && mime_type) {
-        priv->format_hack = find_format_from_mime_type(mime_type);
-        if (priv->format_hack) {
-            expected_format = priv->format_hack->ff_name;
-            expected_format_probescore = priv->format_hack->probescore;
-        }
-    }
+    if (!lavfdopts->allow_mimetype || !mime_type)
+        mime_type = "";
 
     const char *format = lavfdopts->format;
     if (!format)
@@ -269,12 +254,13 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         .buf = av_mallocz(PROBE_BUF_SIZE + FF_INPUT_BUFFER_PADDING_SIZE),
     };
 
-    while (avpd.buf_size < PROBE_BUF_SIZE) {
+    bool final_probe = false;
+    do {
         int nsize = av_clip(avpd.buf_size * 2, INITIAL_PROBE_SIZE,
                             PROBE_BUF_SIZE);
         bstr buf = stream_peek(s, nsize);
         if (buf.len <= avpd.buf_size)
-            break;
+            final_probe = true;
         memcpy(avpd.buf, buf.start, buf.len);
         avpd.buf_size = buf.len;
 
@@ -283,20 +269,32 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 
         if (priv->avif) {
             MP_VERBOSE(demuxer, "Found '%s' at score=%d size=%d.\n",
-                   priv->avif->name, score, avpd.buf_size);
+                       priv->avif->name, score, avpd.buf_size);
+
+            priv->format_hack = NULL;
+            for (int n = 0; format_hacks[n].ff_name; n++) {
+                const struct format_hack *entry = &format_hacks[n];
+                if (strcmp(entry->ff_name, priv->avif->name) != 0)
+                    continue;
+                if (entry->mime_type && strcasecmp(entry->mime_type, mime_type) != 0)
+                    continue;
+                priv->format_hack = entry;
+                break;
+            }
 
             if (score >= min_probe)
                 break;
 
-            if (expected_format) {
-                if (strcmp(priv->avif->name, expected_format) == 0 &&
-                    score >= expected_format_probescore)
+            if (priv->format_hack) {
+                if (score >= priv->format_hack->probescore &&
+                    (!priv->format_hack->max_probe || final_probe))
                     break;
             }
         }
 
         priv->avif = NULL;
-    }
+        priv->format_hack = NULL;
+    } while (!final_probe);
 
     av_free(avpd.buf);
 
