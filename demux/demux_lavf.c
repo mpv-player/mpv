@@ -98,6 +98,8 @@ static const struct format_hack format_hacks[] = {
     {"aac", "audio/aacp", 25, 0.5},
     {"aac", "audio/aac",  25, 0.5},
     {"mp3", "audio/mpeg", 25, 0.5},
+    // some mp3 files don't detect correctly
+    {"mp3", NULL,         24, .max_probe = true},
     {0}
 };
 
