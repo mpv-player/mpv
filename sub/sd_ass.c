@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 #include <libavutil/common.h>
 #include <ass/ass.h>
@@ -142,9 +143,11 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
                                opts->ass_vsfilter_aspect_compat))
     {
         // Let's use the original video PAR for vsfilter compatibility:
-        scale = scale
+        double par = scale
             * (ctx->video_params.d_w / (double)ctx->video_params.d_h)
             / (ctx->video_params.w   / (double)ctx->video_params.h);
+        if (isnormal(par))
+            scale = par;
     }
     mp_ass_configure(renderer, opts, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
