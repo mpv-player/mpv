@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/common.h>
@@ -233,9 +234,11 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
             opts->stretch_dvd_subs) {
         // For DVD subs, try to keep the subtitle PAR at display PAR.
-        video_par =
+        double par =
               (priv->video_params.d_w / (double)priv->video_params.d_h)
             / (priv->video_params.w   / (double)priv->video_params.h);
+        if (isnormal(par))
+            video_par = par;
     }
     int insize[2];
     get_resolution(sd, insize);
