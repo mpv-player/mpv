@@ -478,7 +478,10 @@ static void frame_handle_redraw(void *data,
         buffer_finalise_front(buf);
 
         // to avoid multiple resizes of non-shown frames
-        p->resize_attach = false;
+        if (p->resize_attach) {
+            destroy_shm_buffer(&p->tmp_buffer);
+            p->resize_attach = false;
+        }
     }
     else {
         if (callback)
