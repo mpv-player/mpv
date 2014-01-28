@@ -466,27 +466,7 @@ static void frame_handle_redraw(void *data,
     struct buffer *buf = buffer_get_front(p);
 
     if (buf) {
-        if (p->resize_attach) {
-            wl_surface_attach(wl->window.surface, buf->wlbuf, p->x, p->y);
-            wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
-            wl_surface_commit(wl->window.surface);
-
-            if (callback)
-                wl_callback_destroy(callback);
-
-            p->redraw_callback = NULL;
-            buffer_finalise_front(buf);
-            p->resize_attach = false;
-
-            destroy_shm_buffer(&p->tmp_buffer);
-
-            // I have to destroy the callback and return early to avoid black flickers
-            // I don't exactly know why this, but I guess the back buffer is still
-            // empty. The callback loop will be restored on the next flip_page call
-            return;
-        }
-
-        wl_surface_attach(wl->window.surface, buf->wlbuf, 0, 0);
+        wl_surface_attach(wl->window.surface, buf->wlbuf, p->x, p->y);
         wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
 
         if (callback)
@@ -496,6 +476,9 @@ static void frame_handle_redraw(void *data,
         wl_callback_add_listener(p->redraw_callback, &frame_listener, p);
         wl_surface_commit(wl->window.surface);
         buffer_finalise_front(buf);
+
+        // to avoid multiple resizes of non-shown frames
+        p->resize_attach = false;
     }
     else {
         if (callback)
