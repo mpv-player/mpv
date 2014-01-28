@@ -610,6 +610,12 @@ static void registry_handle_global (void *data,
                 wl->input.devman, wl->input.seat);
         wl_data_device_add_listener(wl->input.datadev, &data_device_listener, wl);
     }
+
+    else if (strcmp(interface, "wl_subcompositor") == 0) {
+
+        wl->display.subcomp = wl_registry_bind(reg, id,
+                                               &wl_subcompositor_interface, 1);
+    }
 }
 
 static void registry_handle_global_remove (void *data,
@@ -793,9 +799,23 @@ static void destroy_display (struct vo_wayland_state *wl)
 
 static bool create_window (struct vo_wayland_state *wl)
 {
-    wl->window.surface = wl_compositor_create_surface(wl->display.compositor);
-    wl->window.shell_surface = wl_shell_get_shell_surface(wl->display.shell,
-                                                          wl->window.surface);
+    wl->window.video_surface =
+        wl_compositor_create_surface(wl->display.compositor);
+    wl->window.shell_surface =
+        wl_shell_get_shell_surface(wl->display.shell, wl->window.video_surface);
+
+    // Commits on surfaces bound to a subsurface are cached until the parent
+    // surface is commited, in this case the video surface.
+    // Which means we can call commit anywhere.
+    for (int i = 0; i < MAX_OSD_PARTS; ++i) {
+        wl->window.osd_surfaces[i] =
+            wl_compositor_create_surface(wl->display.compositor);
+        wl->window.osd_subsurfaces[i] =
+            wl_subcompositor_get_subsurface(wl->display.subcomp,
+                                            wl->window.osd_surfaces[i],
+                                            wl->window.video_surface); // parent
+        wl_subsurface_set_sync(wl->window.osd_subsurfaces[i]);
+    }
 
     if (!wl->window.shell_surface) {
         MP_ERR(wl, "creating shell surface failed\n");
@@ -816,8 +836,8 @@ static void destroy_window (struct vo_wayland_state *wl)
     if (wl->window.shell_surface)
         wl_shell_surface_destroy(wl->window.shell_surface);
 
-    if (wl->window.surface)
-        wl_surface_destroy(wl->window.surface);
+    if (wl->window.video_surface)
+        wl_surface_destroy(wl->window.video_surface);
 }
 
 static bool create_cursor (struct vo_wayland_state *wl)

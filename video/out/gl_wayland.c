@@ -131,7 +131,7 @@ static void egl_create_window(struct vo_wayland_state *wl,
                               uint32_t width,
                               uint32_t height)
 {
-    wl->egl_context.egl_window = wl_egl_window_create(wl->window.surface,
+    wl->egl_context.egl_window = wl_egl_window_create(wl->window.video_surface,
                                                       wl->window.width,
                                                       wl->window.height);
 

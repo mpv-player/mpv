@@ -48,7 +48,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi);
 
 static const struct wl_callback_listener frame_listener;
 static const struct wl_buffer_listener buffer_listener;
-static const struct wl_shm_listener shm_listener;
 
 struct fmtentry {
     enum wl_shm_format wl_fmt;
@@ -105,6 +104,7 @@ struct buffer {
     bool to_resize;
     void *shm_data;
     size_t shm_size;
+    struct wl_shm_pool *shm_pool; // shares memory
 };
 
 struct buffer_pool {
@@ -145,6 +145,7 @@ struct priv {
     struct wl_callback *redraw_callback;
 
     struct buffer_pool video_bufpool;
+    struct buffer_pool osd_bufpool;
     struct buffer *attached_buffer;
 
     struct mp_image *original_image;
@@ -152,6 +153,9 @@ struct priv {
     int height;
 
     int x, y; // coords for resizing
+
+    // this id tells us if the subtitle part has changed or not
+    int bitmap_pos_id[MAX_OSD_PARTS];
 
     // options
     int enable_alpha;
@@ -256,18 +260,16 @@ static const struct fmtentry * is_wayland_format_supported(struct priv *p,
 
 // buffer functions
 
-static bool buffer_finalise_back(struct buffer *buf)
-{
-    buf->is_new = true;
-    return true;
-}
-
-static bool buffer_finalise_front(struct buffer *buf)
+static void buffer_finalise_front(struct buffer *buf)
 {
     buf->is_new = false; // is_busy is reset on handle_release
     buf->is_busy = true;
     buf->is_attached = true;
-    return true;
+}
+
+static void buffer_finalise_back(struct buffer *buf)
+{
+    buf->is_new = true;
 }
 
 static void buffer_destroy_content(struct buffer *buf)
@@ -456,6 +458,14 @@ static struct buffer * buffer_pool_get_front(struct buffer_pool *pool)
     return pool->front_buffer;
 }
 
+static struct buffer * buffer_pool_get_no(struct buffer_pool *pool, uint32_t no)
+{
+    if (no >= pool->buffer_no)
+        return NULL;
+
+    return &pool->buffers[no];
+}
+
 
 static bool redraw_frame(struct priv *p)
 {
@@ -516,8 +526,22 @@ static bool resize(struct priv *p)
         return false;
 
     if (!buffer_pool_resize(&p->video_bufpool, p->dst_w, p->dst_h)) {
-        MP_ERR(wl, "failed to resize buffers\n");
+        MP_ERR(wl, "failed to resize video buffers\n");
         return false;
+    }
+    if (!buffer_pool_resize(&p->osd_bufpool, p->dst_w, p->dst_h)) {
+        MP_ERR(wl, "failed to resize osd buffers\n");
+        return false;
+    }
+
+    // attach NULL buffers to the surfaces to avoid artifacts
+    for (int i = 0; i < MAX_OSD_PARTS; ++i) {
+        wl_subsurface_set_desync(p->wl->window.osd_subsurfaces[i]);
+        struct wl_surface *s = p->wl->window.osd_surfaces[i];
+        wl_surface_attach(s, NULL, 0, 0);
+        wl_surface_damage(s, 0, 0, p->dst_w, p->dst_h);
+        wl_surface_commit(s);
+        wl_subsurface_set_sync(p->wl->window.osd_subsurfaces[i]);
     }
 
     wl->window.width = p->dst_w;
@@ -529,7 +553,7 @@ static bool resize(struct priv *p)
         struct wl_region *opaque =
             wl_compositor_create_region(wl->display.compositor);
         wl_region_add(opaque, 0, 0, p->dst_w, p->dst_h);
-        wl_surface_set_opaque_region(wl->window.surface, opaque);
+        wl_surface_set_opaque_region(wl->window.video_surface, opaque);
         wl_region_destroy(opaque);
     }
 
@@ -564,18 +588,19 @@ static void frame_handle_redraw(void *data,
     struct buffer *buf = buffer_pool_get_front(&p->video_bufpool);
 
     if (buf) {
-        wl_surface_attach(wl->window.surface, buf->wlbuf, p->x, p->y);
-        wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
+        wl_surface_attach(wl->window.video_surface, buf->wlbuf, p->x, p->y);
+        wl_surface_damage(wl->window.video_surface, 0, 0, p->dst_w, p->dst_h);
 
         if (callback)
             wl_callback_destroy(callback);
 
-        p->redraw_callback = wl_surface_frame(wl->window.surface);
+        p->redraw_callback = wl_surface_frame(wl->window.video_surface);
         wl_callback_add_listener(p->redraw_callback, &frame_listener, p);
-        wl_surface_commit(wl->window.surface);
+        wl_surface_commit(wl->window.video_surface);
+        buffer_finalise_front(buf);
 
         // resize attached buffer
-       if (p->attached_buffer) {
+        if (p->attached_buffer) {
             p->attached_buffer->is_attached = false;
             buffer_resize(&p->video_bufpool, p->attached_buffer, p->dst_w, p->dst_h);
         }
@@ -652,14 +677,64 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     buffer_finalise_back(buf);
 }
 
+static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
+{
+    struct priv *p = ctx;
+    int id = imgs->render_index;
+
+    struct wl_surface *s = p->wl->window.osd_surfaces[id];
+    struct buffer * buf = buffer_pool_get_no(&p->osd_bufpool, id);
+    if (!buf)
+        return;
+
+    if (imgs->bitmap_pos_id != p->bitmap_pos_id[id]) {
+        p->bitmap_pos_id[id] = imgs->bitmap_pos_id;
+
+        struct mp_rect bb;
+        if (!mp_sub_bitmaps_bb(imgs, &bb))
+            return;
+
+        struct mp_image wlimg = buffer_get_mp_image(p, &p->osd_bufpool, buf);
+        mp_image_clear(&wlimg, 0, 0, wlimg.w, wlimg.h);
+
+        for (int n = 0; n < imgs->num_parts; n++) {
+            struct sub_bitmap *sub = &imgs->parts[n];
+
+            size_t dst = (bb.y0) * wlimg.stride[0] +
+                         (bb.x0) * 4;
+
+            memcpy_pic(wlimg.planes[0] + dst, sub->bitmap, sub->w * 4, sub->h,
+                       wlimg.stride[0], sub->stride);
+        }
+        wl_subsurface_set_position(p->wl->window.osd_subsurfaces[id], 0, 0);
+        wl_surface_attach(s, buf->wlbuf, 0, 0);
+        wl_surface_damage(s, bb.x0, bb.y0, bb.x1, bb.y1);
+        wl_surface_commit(s);
+    }
+    else {
+        wl_surface_attach(s, buf->wlbuf, 0, 0);
+        wl_surface_commit(s);
+    }
+}
+
+static const bool osd_formats[SUBBITMAP_COUNT] = {
+    [SUBBITMAP_RGBA] = true,
+};
+
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct priv *p = vo->priv;
-    struct buffer *buf = buffer_pool_get_back(&p->video_bufpool);
-    if (buf) {
-        struct mp_image img = buffer_get_mp_image(p, &p->video_bufpool, buf);
-        osd_draw_on_image(osd, p->osd, osd_get_vo_pts(osd), 0, &img);
+    // deattach all buffers and attach all needed buffers in osd_draw
+    // only the most recent attach & commit is applied once the parent surface
+    // is committed
+    for (int i = 0; i < MAX_OSD_PARTS; ++i) {
+        struct wl_surface *s = p->wl->window.osd_surfaces[i];
+        wl_surface_attach(s, NULL, 0, 0);
+        wl_surface_damage(s, 0, 0, p->dst_w, p->dst_h);
+        wl_surface_commit(s);
     }
+
+    osd_draw(osd, p->osd, osd_get_vo_pts(osd), 0, osd_formats, draw_osd_cb, p);
 }
 
 static void flip_page(struct vo *vo)
@@ -725,9 +800,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
             p->video_format = entry;
     }
 
-
     buffer_pool_reinit(p, &p->video_bufpool, (p->use_triplebuffering ? 3 : 2),
-                p->width, p->height, p->video_format, p->wl->display.shm);
+            p->width, p->height, p->video_format, p->wl->display.shm);
+    buffer_pool_reinit(p, &p->osd_bufpool, MAX_OSD_PARTS, p->width, p->height,
+            &fmttable[DEFAULT_ALPHA_FORMAT_ENTRY], p->wl->display.shm);
 
     vo_wayland_config(vo, vo->dwidth, vo->dheight, flags);
 
@@ -741,6 +817,7 @@ static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
     buffer_pool_destroy(&p->video_bufpool);
+    buffer_pool_destroy(&p->osd_bufpool);
 
     if (p->redraw_callback)
         wl_callback_destroy(p->redraw_callback);
