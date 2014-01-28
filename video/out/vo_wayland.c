@@ -149,7 +149,7 @@ struct priv {
 
     // options
     int enable_alpha;
-    int use_default;
+    int use_rgb565;
 };
 
 /* copied from weston clients */
@@ -230,6 +230,21 @@ static int os_create_anonymous_file(off_t size)
 static bool is_alpha_format(const struct fmtentry *fmt)
 {
     return !!(mp_imgfmt_get_desc(fmt->mp_fmt).flags & MP_IMGFLAG_ALPHA);
+}
+
+static const struct fmtentry * is_wayland_format_supported(struct priv *p,
+                                                           enum wl_shm_format fmt)
+{
+    struct supported_format *sf;
+
+    // find the matching format first
+    wl_list_for_each(sf, &p->format_list, link) {
+        if (sf->fmt->wl_fmt == fmt) {
+            return sf->fmt;
+        }
+    }
+
+    return NULL;
 }
 
 static void buffer_swap(struct priv *p)
@@ -587,7 +602,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
 
     struct supported_format *sf;
 
-    // find the same format first
+    // find the matching format first
     wl_list_for_each(sf, &p->format_list, link) {
         if (sf->fmt->mp_fmt == fmt->imgfmt && (p->enable_alpha == sf->is_alpha)) {
             p->pref_format = sf->fmt;
@@ -595,25 +610,22 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
         }
     }
 
-    // if the format is not supported choose one of the fancy formats next
-    // the default formats are always last
     if (!p->pref_format) {
-        wl_list_for_each(sf, &p->format_list, link) {
-            if (p->enable_alpha == sf->is_alpha) {
-                p->pref_format = sf->fmt;
-                break;
-            }
-        }
-    }
-
-    // if use default is enable overwrite the auto selected one
-    if (p->use_default) {
+        // if use default is enable overwrite the auto selected one
         if (p->enable_alpha)
             p->pref_format = &fmttable[DEFAULT_ALPHA_FORMAT_ENTRY];
         else
             p->pref_format = &fmttable[DEFAULT_FORMAT_ENTRY];
     }
 
+    // overides alpha
+    // use rgb565 if performance is your main concern
+    if (p->use_rgb565) {
+        const struct fmtentry *fmt =
+            is_wayland_format_supported(p, WL_SHM_FORMAT_RGB565);
+        if (fmt)
+            p->pref_format = fmt;
+    }
 
     p->bytes_per_pixel = mp_imgfmt_get_desc(p->pref_format->mp_fmt).bytes[0];
     MP_VERBOSE(p->wl, "bytes per pixel: %d\n", p->bytes_per_pixel);
@@ -718,7 +730,7 @@ const struct vo_driver video_out_wayland = {
     .uninit = uninit,
     .options = (const struct m_option[]) {
         OPT_FLAG("alpha", enable_alpha, 0),
-        OPT_FLAG("default-format", use_default, 0),
+        OPT_FLAG("rgb565", use_rgb565, 0),
         {0}
     },
 };
