@@ -175,6 +175,10 @@ static int mp_chroma_div_up(int size, int shift)
 // Caller has to make sure this doesn't exceed the allocated plane data/strides.
 void mp_image_set_size(struct mp_image *mpi, int w, int h)
 {
+    // av_image_check_size has similar checks and triggers around 16000*16000
+    if (w >= (1 << 14) || h >= (1 << 14) || w < 0 || h < 0)
+        abort();
+
     mpi->w = mpi->display_w = w;
     mpi->h = mpi->display_h = h;
     for (int n = 0; n < mpi->num_planes; n++) {
