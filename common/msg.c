@@ -210,6 +210,9 @@ static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
         // skip status line output if stderr is a tty but in background
         if (terminal_in_background())
             return;
+        // don't clear if we don't have to
+        if (!text[0] && !root->status_lines)
+            return;
         if (root->termosd) {
             prepare_status_line(root, text);
             terminate = "\r";
