@@ -621,10 +621,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
     // overides alpha
     // use rgb565 if performance is your main concern
     if (p->use_rgb565) {
-        const struct fmtentry *fmt =
+        const struct fmtentry *mp_fmt =
             is_wayland_format_supported(p, WL_SHM_FORMAT_RGB565);
-        if (fmt)
-            p->pref_format = fmt;
+        if (mp_fmt)
+            p->pref_format = mp_fmt;
     }
 
     p->bytes_per_pixel = mp_imgfmt_get_desc(p->pref_format->mp_fmt).bytes[0];
