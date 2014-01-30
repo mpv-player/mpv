@@ -1485,13 +1485,13 @@ OPTIONS
 ``--osd-bar-h=<0.1-50>``
     Height of the OSD bar, in percentage of the screen height (default: 3.125).
 
-``--osd-back-color=<#RRGGBB>``, ``--sub-text-back-color=<#RRGGBB>``
+``--osd-back-color=<color>``, ``--sub-text-back-color=<color>``
     See ``--osd-color``. Color used for OSD/sub text background.
 
 ``--osd-blur=<0..20.0>``, ``--sub-text-blur=<0..20.0>``
     Gaussian blur factor. 0 means no blur applied (default).
 
-``--osd-border-color=<#RRGGBB>``, ``--sub-text-border-color=<#RRGGBB>``
+``--osd-border-color=<color>``, ``--sub-text-border-color=<color>``
     See ``--osd-color``. Color used for the OSD/sub font border.
 
     .. note::
@@ -1506,16 +1506,28 @@ OPTIONS
 
     Default: 2.5.
 
-``--osd-color=<#RRGGBB|#AARRGGBB>``, ``--sub-text-color=<#RRGGBB|#AARRGGBB>``
+``--osd-color=<color>``, ``--sub-text-color=<color>``
     Specify the color used for OSD/unstyled text subtitles.
 
-    The color is specified as a RGB hex triplet, and each 2-digit group
-    expresses a color value in the range 0 (``00``) to 255 (``FF``).
-    For example, ``#FF0000`` is red. This is similar to web colors.
+    The color is specified in the form ``r/g/b``, where each color component
+    is specified as number in the range 0.0 to 1.0. It's also possible to
+    specify the transparency by using ``r/g/b/a``, where the alpha value 0
+    means fully transparent, and 1.0 means opaque. If the alpha component is
+    not given, the color is 100% opaque.
 
-    You can specify transparency by specifying an alpha value in the form
-    ``#AARRGGBB``. ``00`` is fully transparent, while ``FF`` is opaque (opaque
-    is default with the shorter color specification).
+    Passing a single number to the option sets the OSD to gray, and the form
+    ``gray/a`` lets you specify alpha additionally.
+
+    .. admonition:: Examples
+
+        - ``--osd-color=1.0/0.0/0.0`` set OSD to opaque red
+        - ``--osd-color=1.0/0.0/0.0/0.75`` set OSD to opaque red with 75% alpha
+        - ``--osd-color=0.5/0.75`` set OSD to 50% gray with 75% alpha
+
+    Alternatively, the color can be specified as a RGB hex triplet in the form
+    ``#RRGGBB``, where each 2-digit group expresses a color value in the
+    range 0 (``00``) to 255 (``FF``). For example, ``#FF0000`` is red.
+    This is similar to web colors.
 
     .. admonition:: Examples
 
@@ -1587,7 +1599,7 @@ OPTIONS
     are always in actual pixels. The effect is that changing the window size
     won't change the OSD font size.
 
-``--osd-shadow-color=<#RRGGBB>, --sub-text-shadow-color=<#RRGGBB>``
+``--osd-shadow-color=<color>, --sub-text-shadow-color=<color>``
     See ``--osd-color``. Color used for OSD/sub text shadow.
 
 ``--osd-shadow-offset=<size>, --sub-text-shadow-offset=<size>``

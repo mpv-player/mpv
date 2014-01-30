@@ -1410,6 +1410,28 @@ const m_option_type_t m_option_type_msglevels = {
 
 #undef VAL
 
+// Split the string on the given split character.
+// out_arr is at least max entries long.
+// Return number of out_arr entries filled.
+static int split_char(bstr str, unsigned char split, int max, bstr *out_arr)
+{
+    if (max < 1)
+        return 0;
+
+    int count = 0;
+    while (1) {
+        int next = bstrchr(str, split);
+        if (next >= 0 && max - count > 1) {
+            out_arr[count++] = bstr_splice(str, 0, next);
+            str = bstr_cut(str, next + 1);
+        } else {
+            out_arr[count++] = str;
+            break;
+        }
+    }
+    return count;
+}
+
 static int parse_color(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
@@ -1434,7 +1456,24 @@ static int parse_color(struct mp_log *log, const m_option_t *opt,
             has_alpha ? (c >> 24) & 0xFF : 0xFF,
         };
     } else {
-        goto error;
+        bstr comp_str[5];
+        int num = split_char(param, '/', 5, comp_str);
+        if (num < 1 || num > 4)
+            goto error;
+        double comp[4] = {0, 0, 0, 1};
+        for (int n = 0; n < num; n++) {
+            bstr rest;
+            double d = bstrtod(comp_str[n], &rest);
+            if (rest.len || !comp_str[n].len || d < 0 || d > 1 || !isnormal(d))
+                goto error;
+            comp[n] = d;
+        }
+        if (num == 2)
+            comp[3] = comp[1];
+        if (num < 3)
+            comp[2] = comp[1] = comp[0];
+        color = (struct m_color) { comp[0] * 0xFF, comp[1] * 0xFF,
+                                   comp[2] * 0xFF, comp[3] * 0xFF };
     }
 
     if (dst)
@@ -1445,7 +1484,9 @@ static int parse_color(struct mp_log *log, const m_option_t *opt,
 error:
     mp_err(log, "Option %.*s: invalid color: '%.*s'\n",
            BSTR_P(name), BSTR_P(param));
-    mp_err(log, "Valid colors must be in the form #RRRGGBB or #AARRGGBB (in hex)\n");
+    mp_err(log, "Valid colors must be in the form #RRGGBB or #AARRGGBB (in hex)\n"
+                "Or in the form 'r/g/b/a', where each component is a value in the\n"
+                "range 0.0-1.0. (Also allowed: 'gray', 'gray/a', 'r/g/b'.\n");
     return M_OPT_INVALID;
 }
 
