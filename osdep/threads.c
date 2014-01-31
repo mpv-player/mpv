@@ -55,3 +55,14 @@ int mpthread_cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
     timespec_add_seconds(&ts, timeout);
     return pthread_cond_timedwait(cond, mutex, &ts);
 }
+
+// Helper to reduce boiler plate.
+int mpthread_mutex_init_recursive(pthread_mutex_t *mutex)
+{
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    int r = pthread_mutex_init(mutex, &attr);
+    pthread_mutexattr_destroy(&attr);
+    return r;
+}

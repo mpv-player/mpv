@@ -41,6 +41,7 @@
 #include "keycodes.h"
 #include "cmd_list.h"
 #include "cmd_parse.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "common/msg.h"
 #include "common/global.h"
@@ -1474,11 +1475,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         .wakeup_pipe = {-1, -1},
     };
 
-    pthread_mutexattr_t attr;
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&ictx->mutex, &attr);
-    pthread_mutexattr_destroy(&attr);
+    mpthread_mutex_init_recursive(&ictx->mutex);
 
     // Setup default section, so that it does nothing.
     mp_input_enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |

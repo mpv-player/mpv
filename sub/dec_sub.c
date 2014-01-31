@@ -31,6 +31,7 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "misc/charset_conv.h"
+#include "osdep/threads.h"
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
@@ -96,11 +97,7 @@ struct dec_sub *sub_create(struct mpv_global *global)
     sub->log = mp_log_new(sub, global->log, "sub");
     sub->opts = global->opts;
 
-    pthread_mutexattr_t attr;
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&sub->lock, &attr);
-    pthread_mutexattr_destroy(&attr);
+    mpthread_mutex_init_recursive(&sub->lock);
 
     return sub;
 }
