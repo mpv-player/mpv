@@ -75,6 +75,7 @@ struct priv {
     int64_t fill_limit;     // we should fill buffer only if space>=fill_limit
     int64_t seek_limit;     // keep filling cache if distance is less that seek limit
     struct byte_meta *bm;   // additional per-byte metadata
+    bool seekable;          // underlying stream is seekable
 
     struct mp_log *log;
 
@@ -475,6 +476,7 @@ static int cache_seek(stream_t *cache, int64_t pos)
 {
     struct priv *s = cache->priv;
     assert(s->cache_thread_running);
+    int r = 1;
 
     pthread_mutex_lock(&s->mutex);
 
@@ -482,12 +484,21 @@ static int cache_seek(stream_t *cache, int64_t pos)
            " (cur=%" PRId64 ") <= %" PRId64 "  \n",
            s->min_filepos, pos, s->read_filepos, s->max_filepos);
 
-    cache->pos = s->read_filepos = pos;
-    s->eof = false; // so that cache_read() will actually wait for new data
-    pthread_cond_signal(&s->wakeup);
+    if (!s->seekable && pos > s->max_filepos) {
+        MP_ERR(s, "Attempting to seek past cached data in unseekable stream.\n");
+        r = 0;
+    } else if (!s->seekable && pos < s->min_filepos) {
+        MP_ERR(s, "Attempting to seek before cached data in unseekable stream.\n");
+        r = 0;
+    } else {
+        cache->pos = s->read_filepos = pos;
+        s->eof = false; // so that cache_read() will actually wait for new data
+        pthread_cond_signal(&s->wakeup);
+    }
+
     pthread_mutex_unlock(&s->mutex);
 
-    return 1;
+    return r;
 }
 
 static int cache_control(stream_t *cache, int cmd, void *arg)
@@ -599,6 +610,9 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
         s->seek_limit = s->buffer_size - s->fill_limit;
     if (min > s->buffer_size - s->fill_limit)
         min = s->buffer_size - s->fill_limit;
+
+    s->seekable = (stream->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK &&
+                  stream->end_pos > 0;
 
     if (pthread_create(&s->cache_thread, NULL, cache_thread, s) != 0) {
         MP_ERR(s, "Starting cache process/thread failed: %s.\n",
