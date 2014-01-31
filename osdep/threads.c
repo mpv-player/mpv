@@ -46,13 +46,22 @@ static void timespec_add_seconds(struct timespec *ts, double seconds)
     ts->tv_nsec += nsecs;
 }
 
-// Call pthread_cond_timedwait() with a relative timeout in seconds
-int mpthread_cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
-                             double timeout)
+// Return the argument to pass to e.g. pthread_cond_timedwait().
+// (Note that pthread_cond_t supports multiple clocks; this function computes
+// the time value needed by the default clock.)
+struct timespec mpthread_get_deadline(double timeout)
 {
     struct timespec ts;
     get_pthread_time(&ts);
     timespec_add_seconds(&ts, timeout);
+    return ts;
+}
+
+// Call pthread_cond_timedwait() with a relative timeout in seconds
+int mpthread_cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
+                             double timeout)
+{
+    struct timespec ts = mpthread_get_deadline(timeout);
     return pthread_cond_timedwait(cond, mutex, &ts);
 }
 
