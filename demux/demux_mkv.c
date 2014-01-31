@@ -154,9 +154,6 @@ typedef struct mkv_track {
 
     /* latest added index entry for this track */
     int last_index_entry;
-
-    /* For VobSubs and SSA/ASS */
-    sh_sub_t *sh_sub;
 } mkv_track_t;
 
 typedef struct mkv_index {
@@ -1646,7 +1643,6 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     track->stream = sh;
     sh_sub_t *sh_s = sh->sub;
     sh->demuxer_id = track->tnum;
-    track->sh_sub = sh_s;
     sh->codec = subtitle_type;
     bstr buffer = demux_mkv_decode(demuxer->log, track, in, 2);
     if (buffer.start && buffer.start != track->private_data) {
