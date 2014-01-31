@@ -251,7 +251,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 
     AVProbeData avpd = {
         // Disable file-extension matching with normal checks
-        .filename = check <= DEMUX_CHECK_REQUEST ? priv->filename : NULL,
+        .filename = check <= DEMUX_CHECK_REQUEST ? priv->filename : "",
         .buf_size = 0,
         .buf = av_mallocz(PROBE_BUF_SIZE + FF_INPUT_BUFFER_PADDING_SIZE),
     };
