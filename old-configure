@@ -1169,10 +1169,10 @@ fi
 
 if test "$cc_vendor" = "gnu" ; then
   cflag_check -Wundef && WARNFLAGS="-Wundef $WARNFLAGS"
-  # -std=gnu99 is not a warning flag but is placed in WARN_CFLAGS because
+  # -std=c99 is not a warning flag but is placed in WARN_CFLAGS because
   # that's the only variable specific to C now, and this option is not valid
   # for C++.
-  cflag_check -std=gnu99 && WARN_CFLAGS="-std=gnu99 $WARN_CFLAGS"
+  cflag_check -std=c99 && WARN_CFLAGS="-std=c99 $WARN_CFLAGS"
   cflag_check -Wno-pointer-sign && WARN_CFLAGS="-Wno-pointer-sign $WARN_CFLAGS"
   cflag_check -Wdisabled-optimization && WARN_CFLAGS="-Wdisabled-optimization $WARN_CFLAGS"
   cflag_check -Wmissing-prototypes && WARN_CFLAGS="-Wmissing-prototypes $WARN_CFLAGS"
