@@ -826,6 +826,8 @@ int vo_x11_check_events(struct vo *vo)
             break;
         }
         case MapNotify:
+            x11->window_hidden = false;
+            vo_x11_update_geometry(vo);
             x11->vo_hint.win_gravity = x11->old_gravity;
             XSetWMNormalHints(display, x11->window, &x11->vo_hint);
             x11->fs_flip = 0;
@@ -1129,13 +1131,18 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
 
     vo_x11_set_wm_icon(x11);
     vo_x11_update_window_title(vo);
+
+    // The real size is only known when the window is mapped, which
+    // unfortunately happens asynchronous to VO initialization. At least
+    // vdpau needs a _some_ window size, though.
+    x11->win_width = w;
+    x11->win_height = h;
 }
 
 static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
 {
     struct vo_x11_state *x11 = vo->x11;
 
-    x11->window_hidden = false;
     vo_x11_move_resize(vo, true, true, x, y, w, h);
     if (!vo->opts->border)
         vo_x11_decoration(vo, 0);
@@ -1342,6 +1349,8 @@ static void vo_x11_update_geometry(struct vo *vo)
     int dummy_int;
     Window dummy_win;
     Window win = vo->opts->WinID > 0 ? vo->opts->WinID : x11->window;
+    if (x11->window_hidden)
+        return;
     XGetGeometry(x11->display, win, &dummy_win, &dummy_int, &dummy_int,
                  &w, &h, &dummy_int, &dummy_uint);
     if (w <= INT_MAX && h <= INT_MAX) {
