@@ -1269,12 +1269,6 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     vo_x11_set_wm_icon(x11);
     vo_x11_update_window_title(vo);
     vo_x11_dnd_init_window(vo);
-
-    // The real size is only known when the window is mapped, which
-    // unfortunately happens asynchronous to VO initialization. At least
-    // vdpau needs a _some_ window size, though.
-    x11->win_width = w;
-    x11->win_height = h;
 }
 
 static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
@@ -1377,6 +1371,13 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis,
     XSync(x11->display, False);
 
     vo_x11_update_geometry(vo);
+    if (x11->window_hidden) {
+        // The real size is only known when the window is mapped, which
+        // unfortunately happens asynchronous to VO initialization. At least
+        // vdpau needs a _some_ window size, though.
+        x11->win_width = width;
+        x11->win_height = height;
+    }
     update_vo_size(vo);
     x11->pending_vo_events &= ~VO_EVENT_RESIZE; // implicitly done by the VO
 }
