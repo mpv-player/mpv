@@ -1061,6 +1061,10 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     if (vc->vsync_interval == 1)
         duration = -1;  // Make sure drop logic is disabled
 
+    /* If the presentation time may not be before our last timestamp sync. */
+    if (pts_us && pts_us < vc->last_sync_update)
+        pts_us = vc->last_sync_update;
+
     uint64_t now = sync_vdptime(vo);
     uint64_t pts = pts_us ? convert_to_vdptime(vo, pts_us) : now;
     uint64_t ideal_pts = pts;
