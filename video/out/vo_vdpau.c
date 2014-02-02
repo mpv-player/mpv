@@ -176,6 +176,9 @@ static int change_vdptime_sync(struct vo *vo, int64_t *t)
             vdp_time -= (t2 - t1) * 1000ULL;
         else
             vdp_time = old;
+    } else if (!vdp_time) {
+        /* Some drivers do not return timestamps. */
+        vdp_time = old;
     }
     MP_DBG(vo, "adjusting VdpTime offset by %f µs\n",
            (int64_t)(vdp_time - old) / 1000.);
