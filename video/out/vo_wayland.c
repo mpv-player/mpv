@@ -41,13 +41,6 @@
 
 #define MAX_BUFFERS 2
 
-// minium target version for the new formats (1.2.90)
-#define MINIMUM_VERSION (1 << 16 | 2 << 8 | 90)
-
-#define CURRENT_VERSION (WAYLAND_VERSION_MAJOR << 16 | \
-                         WAYLAND_VERSION_MINOR << 8  | \
-                         WAYLAND_VERSION_MICRO)
-
 static void draw_image(struct vo *vo, mp_image_t *mpi);
 
 static const struct wl_callback_listener frame_listener;
@@ -65,7 +58,6 @@ struct fmtentry {
 static const struct fmtentry fmttable[] = {
     {WL_SHM_FORMAT_ARGB8888, IMGFMT_BGRA}, // 8b 8g 8r 8a
     {WL_SHM_FORMAT_XRGB8888, IMGFMT_BGR0},
-#if CURRENT_VERSION >= MINIMUM_VERSION
     {WL_SHM_FORMAT_RGB332,   IMGFMT_BGR8}, // 3b 3g 2r
     {WL_SHM_FORMAT_BGR233,   IMGFMT_RGB8}, // 3r 3g 3b,
     {WL_SHM_FORMAT_XRGB4444, IMGFMT_BGR12_LE}, // 4b 4g 4r 4a
@@ -94,7 +86,6 @@ static const struct fmtentry fmttable[] = {
     {WL_SHM_FORMAT_ABGR8888, IMGFMT_RGBA},
     {WL_SHM_FORMAT_RGBA8888, IMGFMT_ABGR},
     {WL_SHM_FORMAT_BGRA8888, IMGFMT_ARGB},
-#endif
 };
 
 #define MAX_FORMAT_ENTRIES (sizeof(fmttable) / sizeof(fmttable[0]))
