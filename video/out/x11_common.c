@@ -757,7 +757,6 @@ int vo_x11_check_events(struct vo *vo)
         vo_x11_update_geometry(vo);
     while (XPending(display)) {
         XNextEvent(display, &Event);
-//       printf("\rEvent.type=%X  \n",Event.type);
         switch (Event.type) {
         case Expose:
             x11->pending_vo_events |= VO_EVENT_EXPOSE;
@@ -818,13 +817,6 @@ int vo_x11_check_events(struct vo *vo)
                              (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_UP);
             break;
-        case PropertyNotify: {
-            char *name = XGetAtomName(display, Event.xproperty.atom);
-            if (!name)
-                break;
-            XFree(name);
-            break;
-        }
         case MapNotify:
             x11->window_hidden = false;
             vo_x11_update_geometry(vo);
