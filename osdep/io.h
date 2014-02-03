@@ -94,7 +94,13 @@ char *mp_getenv(const char *name);
 
 #else /* __MINGW32__ */
 
+//GNU HURD doesn't define PATH_MAX
+//http://www.gnu.org/software/hurd/community/gsoc/project_ideas/maxpath.html
+#ifdef PATH_MAX
 #define MP_PATH_MAX PATH_MAX
+#else
+#define MP_PATH_MAX 4096
+#endif 
 
 #define mp_stat(...) stat(__VA_ARGS__)
 
