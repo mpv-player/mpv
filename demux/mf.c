@@ -64,11 +64,11 @@ mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filename)
     if (filename[0] == '@') {
         FILE *lst_f = fopen(filename + 1, "r");
         if (lst_f) {
-            char *fname = talloc_size(mf, MP_PATH_MAX);
-            while (fgets(fname, MP_PATH_MAX, lst_f)) {
+            char *fname = talloc_size(mf, 512);
+            while (fgets(fname, 512, lst_f)) {
                 /* remove spaces from end of fname */
                 char *t = fname + strlen(fname) - 1;
-                while (t > fname && isspace(*t))
+                while (t > fname && isspace((unsigned char)*t))
                     *(t--) = 0;
                 if (!mp_path_exists(fname)) {
                     mp_verbose(log, "file not found: '%s'\n", fname);
