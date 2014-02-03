@@ -1282,6 +1282,18 @@ static int video_refresh_property_helper(m_option_t *prop, int action,
     return r;
 }
 
+static void append_csp(char **ptr, const char *name, const char *const *names,
+                       int value)
+{
+    const char *cspname = names[value];
+    if (name[0] == '*') {
+        name++;
+    } else if (value == 0) {
+        cspname = "unknown";
+    }
+    *ptr = talloc_asprintf_append(*ptr, "%s: %s\n", name, cspname);
+}
+
 static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
                                    MPContext *mpctx)
 {
@@ -1298,20 +1310,10 @@ static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
     if (mpctx->d_video)
         vd_csp = mpctx->d_video->decoder_output;
 
-    char *res = talloc_asprintf(NULL, "%s",
-                                mp_csp_names[opts->requested_colorspace]);
-    if (!vo_csp.format) {
-        res = talloc_asprintf_append(res, " (VO: unknown)");
-    } else if (vo_csp.format != opts->requested_colorspace) {
-        res = talloc_asprintf_append(res, " (VO: %s)",
-                                     mp_csp_names[vo_csp.format]);
-    }
-    if (!vd_csp.colorspace) {
-        res = talloc_asprintf_append(res, " (VD: unknown)");
-    } else if (!vo_csp.format || vd_csp.colorspace != vo_csp.format) {
-        res = talloc_asprintf_append(res, " (VD: %s)",
-                                     mp_csp_names[vd_csp.colorspace]);
-    }
+    char *res = talloc_strdup(NULL, "");
+    append_csp(&res, "*Requested", mp_csp_names, opts->requested_colorspace);
+    append_csp(&res, "Video decoder", mp_csp_names, vd_csp.colorspace);
+    append_csp(&res, "Video output", mp_csp_names, vo_csp.format);
     *(char **)arg = res;
     return M_PROPERTY_OK;
 }
@@ -1332,20 +1334,11 @@ static int mp_property_colormatrix_input_range(m_option_t *prop, int action,
     if (mpctx->d_video)
         vd_csp = mpctx->d_video->decoder_output;
 
-    char *res = talloc_asprintf(NULL, "%s",
-                                mp_csp_levels_names[opts->requested_input_range]);
-    if (!vo_csp.levels_in) {
-        res = talloc_asprintf_append(res, " (VO: unknown)");
-    } else if (vo_csp.levels_in != opts->requested_input_range) {
-        res = talloc_asprintf_append(res, " (VO: %s)",
-                                     mp_csp_levels_names[vo_csp.levels_in]);
-    }
-    if (!vd_csp.colorlevels) {
-        res = talloc_asprintf_append(res, " (VD: unknown)");
-    } else if (!vo_csp.levels_in || vd_csp.colorlevels != vo_csp.levels_in) {
-        res = talloc_asprintf_append(res, " (VD: %s)",
-                                     mp_csp_levels_names[vd_csp.colorlevels]);
-    }
+    char *res = talloc_strdup(NULL, "");
+    append_csp(&res, "*Requested", mp_csp_levels_names,
+               opts->requested_input_range);
+    append_csp(&res, "Video decoder", mp_csp_levels_names, vd_csp.colorlevels);
+    append_csp(&res, "Video output", mp_csp_levels_names, vo_csp.levels_in);
     *(char **)arg = res;
     return M_PROPERTY_OK;
 }
@@ -1358,18 +1351,14 @@ static int mp_property_colormatrix_output_range(m_option_t *prop, int action,
 
     struct MPOpts *opts = mpctx->opts;
 
-    int req = opts->requested_output_range;
     struct mp_csp_details actual = {0};
     if (mpctx->video_out)
         vo_control(mpctx->video_out, VOCTRL_GET_YUV_COLORSPACE, &actual);
 
-    char *res = talloc_asprintf(NULL, "%s", mp_csp_levels_names[req]);
-    if (!actual.levels_out) {
-        res = talloc_asprintf_append(res, " (Actual: unknown)");
-    } else if (actual.levels_out != req) {
-        res = talloc_asprintf_append(res, " (Actual: %s)",
-                                     mp_csp_levels_names[actual.levels_out]);
-    }
+    char *res = talloc_strdup(NULL, "");
+    append_csp(&res, "*Requested", mp_csp_levels_names,
+               opts->requested_output_range);
+    append_csp(&res, "Video output", mp_csp_levels_names, actual.levels_out);
     *(char **)arg = res;
     return M_PROPERTY_OK;
 }
@@ -2130,9 +2119,12 @@ static struct property_osd_display {
     { "border", "Border" },
     { "framedrop", "Framedrop" },
     { "deinterlace", "Deinterlace" },
-    { "colormatrix", "YUV colormatrix" },
-    { "colormatrix-input-range", "YUV input range" },
-    { "colormatrix-output-range", "RGB output range" },
+    { "colormatrix",
+       .msg = "YUV colormatrix:\n${colormatrix}" },
+    { "colormatrix-input-range",
+       .msg = "YUV input range:\n${colormatrix-input-range}" },
+    { "colormatrix-output-range",
+       .msg = "RGB output range:\n${colormatrix-output-range}" },
     { "gamma", "Gamma", .osd_progbar = OSD_BRIGHTNESS },
     { "brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS },
     { "contrast", "Contrast", .osd_progbar = OSD_CONTRAST },
