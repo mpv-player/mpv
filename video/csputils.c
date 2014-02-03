@@ -35,7 +35,7 @@
 
 #include "csputils.h"
 
-char * const mp_csp_names[MP_CSP_COUNT] = {
+const char *const mp_csp_names[MP_CSP_COUNT] = {
     "Autoselect",
     "BT.601 (SD)",
     "BT.709 (HD)",
@@ -45,13 +45,13 @@ char * const mp_csp_names[MP_CSP_COUNT] = {
     "YCgCo",
 };
 
-char * const mp_csp_levels_names[MP_CSP_LEVELS_COUNT] = {
+const char *const mp_csp_levels_names[MP_CSP_LEVELS_COUNT] = {
     "Autoselect",
     "TV",
     "PC",
 };
 
-char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
+const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
     "brightness",
     "contrast",
     "hue",

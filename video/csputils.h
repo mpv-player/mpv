@@ -44,7 +44,7 @@ enum mp_csp {
 };
 
 // Any enum mp_csp value is a valid index (except MP_CSP_COUNT)
-extern char * const mp_csp_names[MP_CSP_COUNT];
+extern const char *const mp_csp_names[MP_CSP_COUNT];
 
 enum mp_csp_levels {
     MP_CSP_LEVELS_AUTO,
@@ -54,7 +54,7 @@ enum mp_csp_levels {
 };
 
 // Any enum mp_csp_levels value is a valid index (except MP_CSP_LEVELS_COUNT)
-extern char * const mp_csp_levels_names[MP_CSP_LEVELS_COUNT];
+extern const char *const mp_csp_levels_names[MP_CSP_LEVELS_COUNT];
 
 struct mp_csp_details {
     enum mp_csp format;
@@ -111,7 +111,7 @@ enum mp_csp_equalizer_param {
 
 #define MP_CSP_EQ_CAPS_GAMMA (1 << MP_CSP_EQ_GAMMA)
 
-extern char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT];
+extern const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT];
 
 // Default initialization with 0 is enough, except for the capabilities field
 struct mp_csp_equalizer {
