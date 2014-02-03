@@ -54,16 +54,6 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #include <sys/stat.h>
 #include <fcntl.h>
 
-// Windows' MAX_PATH/PATH_MAX/FILENAME_MAX is fixed to 260, but this limit
-// applies to unicode paths encoded with wchar_t (2 bytes on Windows). The UTF-8
-// version could end up bigger in memory. In the worst case each wchar_t is
-// encoded to 3 bytes in UTF-8, so in the worst case we have:
-//      wcslen(wpath) * 3 <= strlen(utf8path)
-// Thus we need MP_PATH_MAX as the UTF-8/char version of PATH_MAX.
-// Also make sure there's free space for the terminating \0.
-// (For codepoints encoded as UTF-16 surrogate pairs, UTF-8 has the same length.)
-#define MP_PATH_MAX (FILENAME_MAX * 3 + 1)
-
 void mp_get_converted_argv(int *argc, char ***argv);
 
 int mp_stat(const char *path, struct stat *buf);
@@ -93,8 +83,6 @@ char *mp_getenv(const char *name);
 #define getenv(...) mp_getenv(__VA_ARGS__)
 
 #else /* __MINGW32__ */
-
-#define MP_PATH_MAX PATH_MAX
 
 #define mp_stat(...) stat(__VA_ARGS__)
 

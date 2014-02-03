@@ -217,6 +217,16 @@ FILE *mp_fopen(const char *filename, const char *mode)
     return res;
 }
 
+// Windows' MAX_PATH/PATH_MAX/FILENAME_MAX is fixed to 260, but this limit
+// applies to unicode paths encoded with wchar_t (2 bytes on Windows). The UTF-8
+// version could end up bigger in memory. In the worst case each wchar_t is
+// encoded to 3 bytes in UTF-8, so in the worst case we have:
+//      wcslen(wpath) * 3 <= strlen(utf8path)
+// Thus we need MP_PATH_MAX as the UTF-8/char version of PATH_MAX.
+// Also make sure there's free space for the terminating \0.
+// (For codepoints encoded as UTF-16 surrogate pairs, UTF-8 has the same length.)
+#define MP_PATH_MAX (FILENAME_MAX * 3 + 1)
+
 struct mp_dir {
     DIR crap;   // must be first member
     _WDIR *wdir;
