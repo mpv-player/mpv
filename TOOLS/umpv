@@ -3,15 +3,14 @@
 """
 This script emulates "unique application" functionality on Linux. When starting
 playback with this script, it will try to reuse an already running instance of
-mpv (but only if that was started with umpv).
+mpv (but only if that was started with umpv). Other mpv instances (not started
+by umpv) are ignored, and the script doesn't know about them.
 
-This script only uses mpv instances started with umpv. Other instances are
-ignored, and don't exist for the script.
-
-This only takes filenames as arguments. If mpv is already running, they are
-appended to mpv's internal playlist. If the file does not exist or is otherwise
-not playable, mpv will skip the playlist entry when attempting to play it (from
-the GUI perspective, it's silently ignored).
+This only takes filenames as arguments. Custom options can't be used; the script
+interprets them as filenames. If mpv is already running, the files passed to
+umpv are appended to mpv's internal playlist. If a file does not exist or is
+otherwise not playable, mpv will skip the playlist entry when attempting to
+play it (from the GUI perspective, it's silently ignored).
 
 If mpv isn't running yet, this script will start mpv and let it control the
 current terminal.
@@ -26,7 +25,10 @@ Note that you can control the mpv instance by writing to the command fifo:
 Warning:
 
 The script attempts to make sure the FIFO is safely created (i.e. not world-
-readable, not trying to open a bogus
+writable), and checks that it's really a FIFO. This is important for security,
+because the FIFO allows anyone with write access to run arbitrary commands
+in mpv's context using the "run" input command. If you are worried about
+security, you should verify that the code handles these concerns correctly.
 """
 
 import sys
