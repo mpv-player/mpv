@@ -14,9 +14,7 @@ not playable, mpv will skip the playlist entry when attempting to play it (from
 the GUI perspective, it's silently ignored).
 
 If mpv isn't running yet, this script will start mpv and let it control the
-current terminal. If you play an audio-only file, mpv will not open a window
-(that is its normal behavior; but it might not be what a user expects if this
-script is used in a GUI setting).
+current terminal.
 
 mpv will terminate if there are no more files to play, and running the umpv
 script after that will start a new mpv instance.
@@ -88,4 +86,4 @@ else:
             raise e
     os.mkfifo(FIFO, 0600)
 
-    subprocess.check_call(["mpv", "--input-file=" + FIFO] + files)
+    subprocess.check_call(["mpv", "--force-window", "--input-file=" + FIFO] + files)
