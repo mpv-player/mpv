@@ -528,6 +528,7 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
         AVDictionary *dict = NULL;
         av_packet_unpack_dictionary(md, md_size, &dict);
         if (dict) {
+            mp_tags_clear(demuxer->metadata);
             add_metadata(demuxer, dict);
             av_dict_free(&dict);
         }

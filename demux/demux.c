@@ -713,6 +713,12 @@ char *mp_tags_get_bstr(struct mp_tags *tags, bstr key)
     return NULL;
 }
 
+void mp_tags_clear(struct mp_tags *tags)
+{
+    *tags = (struct mp_tags){0};
+    talloc_free_children(tags);
+}
+
 int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
 {
     return demux_info_add_bstr(demuxer, bstr0(opt), bstr0(param));

@@ -304,6 +304,7 @@ void mp_tags_set_str(struct mp_tags *tags, const char *key, const char *value);
 void mp_tags_set_bstr(struct mp_tags *tags, bstr key, bstr value);
 char *mp_tags_get_str(struct mp_tags *tags, const char *key);
 char *mp_tags_get_bstr(struct mp_tags *tags, bstr key);
+void mp_tags_clear(struct mp_tags *tags);
 
 bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
                             struct matroska_segment_uid *b);
