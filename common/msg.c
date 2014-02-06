@@ -45,6 +45,7 @@ struct mp_log_root {
     struct mpv_global *global;
     // --- protected by mp_msg_lock
     char *msglevels;
+    bool use_terminal;  // make accesses to stderr/stdout
     bool smode;         // slave mode compatibility glue
     bool module;
     bool termosd;       // use terminal control codes for status line
@@ -98,18 +99,22 @@ static bool match_mod(const char *name, bstr mod)
 static void update_loglevel(struct mp_log *log)
 {
     pthread_mutex_lock(&mp_msg_lock);
-    log->level = MSGL_STATUS + log->root->verbose; // default log level
-    // Stupid exception for the remains of -identify
-    if (match_mod(log->verbose_prefix, bstr0("identify")))
-        log->level = -1;
-    bstr s = bstr0(log->root->msglevels);
-    bstr mod;
-    int level;
-    while (mp_msg_split_msglevel(&s, &mod, &level) > 0) {
-        if (match_mod(log->verbose_prefix, mod))
-            log->level = level;
+    log->level = -1;
+    log->terminal_level = -1;
+    if (log->root->use_terminal) {
+        log->level = MSGL_STATUS + log->root->verbose; // default log level
+        // Stupid exception for the remains of -identify
+        if (match_mod(log->verbose_prefix, bstr0("identify")))
+            log->level = -1;
+        bstr s = bstr0(log->root->msglevels);
+        bstr mod;
+        int level;
+        while (mp_msg_split_msglevel(&s, &mod, &level) > 0) {
+            if (match_mod(log->verbose_prefix, mod))
+                log->level = level;
+        }
+        log->terminal_level = log->root->use_terminal ? log->level : -1;
     }
-    log->terminal_level = log->level;
     for (int n = 0; n < log->root->num_buffers; n++)
         log->level = MPMAX(log->level, log->root->buffers[n]->level);
     log->reload_counter = log->root->reload_counter;
@@ -372,8 +377,11 @@ void mp_msg_update_msglevels(struct mpv_global *global)
     root->verbose = opts->verbose;
     root->module = opts->msg_module;
     root->smode = opts->msg_identify;
-    root->color = opts->msg_color && isatty(fileno(stdout));
-    root->termosd = !opts->slave_mode && isatty(fileno(stderr));
+    root->use_terminal = opts->use_terminal;
+    if (root->use_terminal) {
+        root->color = opts->msg_color && isatty(fileno(stdout));
+        root->termosd = !opts->slave_mode && isatty(fileno(stderr));
+    }
 
     talloc_free(root->msglevels);
     root->msglevels = talloc_strdup(root, global->opts->msglevels);

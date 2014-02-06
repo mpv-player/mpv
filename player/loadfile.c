@@ -1097,7 +1097,7 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
                           mpctx->playlist->current->num_params);
 
-    if (!opts->consolecontrols)
+    if (opts->use_terminal && !opts->consolecontrols)
         getch2_disable();
 
 #if HAVE_LIBASS
@@ -1393,7 +1393,7 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     if (mpctx->stop_play != PT_RESTART)
         m_config_restore_backups(mpctx->mconfig);
 
-    if (opts->consolecontrols)
+    if (opts->use_terminal && opts->consolecontrols)
         getch2_enable();
 
     mpctx->filename = NULL;

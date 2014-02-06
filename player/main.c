@@ -149,7 +149,8 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     mpctx->ass_library = NULL;
 #endif
 
-    getch2_disable();
+    if (mpctx->opts->use_terminal)
+        getch2_disable();
     uninit_libav(mpctx->global);
 
     if (how != EXIT_NONE) {
@@ -288,8 +289,6 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
         pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
 #endif
 
-    terminal_init();
-
     mp_time_init();
 }
 
@@ -342,17 +341,20 @@ static int mpv_main(int argc, char *argv[])
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)
         opts->verbose = atoi(verbose_env);
+
+    // Preparse the command line
+    m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argc, argv);
+
     mp_msg_update_msglevels(mpctx->global);
+
+    if (opts->use_terminal)
+        terminal_init();
 
     init_libav(mpctx->global);
     GetCpuCaps(&gCpuCaps);
     screenshot_init(mpctx);
     mpctx->mixer = mixer_init(mpctx, mpctx->global);
     command_init(mpctx);
-
-    // Preparse the command line
-    m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argc, argv);
-    mp_msg_update_msglevels(mpctx->global);
 
     mp_print_version(mpctx->log, false);
 
@@ -413,13 +415,15 @@ static int mpv_main(int argc, char *argv[])
     }
 #endif
 
-    if (mpctx->opts->slave_mode)
-        terminal_setup_stdin_cmd_input(mpctx->input);
-    else if (mpctx->opts->consolecontrols)
-        terminal_setup_getch(mpctx->input);
+    if (opts->use_terminal) {
+        if (mpctx->opts->slave_mode)
+            terminal_setup_stdin_cmd_input(mpctx->input);
+        else if (mpctx->opts->consolecontrols)
+            terminal_setup_getch(mpctx->input);
 
-    if (opts->consolecontrols)
-        getch2_enable();
+        if (opts->consolecontrols)
+            getch2_enable();
+    }
 
 #if HAVE_LIBASS
     mpctx->ass_log = mp_log_new(mpctx, mpctx->global->log, "!libass");
