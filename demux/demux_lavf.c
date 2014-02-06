@@ -536,6 +536,23 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
 #endif
 }
 
+static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
+{
+#if HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA
+    int md_size;
+    const uint8_t *md;
+    md = av_packet_get_side_data(pkt, AV_PKT_DATA_METADATA_UPDATE, &md_size);
+    if (md) {
+        AVDictionary *dict = NULL;
+        av_packet_unpack_dictionary(md, md_size, &dict);
+        if (dict) {
+            add_metadata(demuxer, dict);
+            av_dict_free(&dict);
+        }
+    }
+#endif
+}
+
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
     struct MPOpts *opts = demuxer->opts;
