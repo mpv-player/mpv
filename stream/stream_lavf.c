@@ -259,7 +259,7 @@ out:
 static void append_meta(char ***info, int *num_info, bstr name, bstr val)
 {
     if (name.len && val.len) {
-        char *cname = talloc_asprintf(*info, "%.*s", BSTR_P(name));
+        char *cname = talloc_asprintf(*info, "icy-%.*s", BSTR_P(name));
         char *cval = talloc_asprintf(*info, "%.*s", BSTR_P(val));
         MP_TARRAY_APPEND(NULL, *info, *num_info, cname);
         MP_TARRAY_APPEND(NULL, *info, *num_info, cval);
