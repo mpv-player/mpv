@@ -1,3 +1,6 @@
+Cross Compiling to Windows
+==========================
+
 Cross compiling mpv to Windows is supported with MinGW-w64. This can be used to
 produce both 32 bit and 64 bit executables. MinGW-w64 is available from
 http://mingw-w64.sourceforge.net.
@@ -16,8 +19,9 @@ Note that MinGW environments included in Linux distributions are often broken,
 outdated and useless, and usually don't use MinGW-w64.
 
 Example with MXE
-================
+----------------
 
+```bash
 # Download MXE. Note that compiling the required packages requires about 1 GB
 # or more!
 
@@ -46,3 +50,4 @@ cd mpv
 export PATH=/opt/mingw/usr/bin/:$PATH
 DEST_OS=win32 TARGET=i686-w64-mingw32 ./waf configure
 ./waf build
+```
