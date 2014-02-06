@@ -727,7 +727,7 @@ static int demux_info_print(demuxer_t *demuxer)
     if (!info || !info->num_keys)
         return 0;
 
-    mp_info(demuxer->glog, "Clip info:\n");
+    mp_info(demuxer->glog, "File tags:\n");
     for (n = 0; n < info->num_keys; n++) {
         mp_info(demuxer->glog, " %s: %s\n", info->keys[n], info->values[n]);
         mp_msg(demuxer->glog, MSGL_SMODE, "ID_CLIP_INFO_NAME%d=%s\n", n,
