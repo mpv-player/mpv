@@ -706,6 +706,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     talloc_set_destructor(pkt, destroy_avpacket);
 
     add_new_streams(demux);
+    update_metadata(demux, pkt);
 
     assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
     struct sh_stream *stream = priv->streams[pkt->stream_index];
@@ -721,8 +722,6 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     // allocations so we can safely queue the packet for any length of time.
     if (av_dup_packet(pkt) < 0)
         abort();
-
-    update_metadata(demux, pkt);
 
     dp = new_demux_packet_fromdata(pkt->data, pkt->size);
     dp->avpacket = talloc_steal(dp, pkt);
