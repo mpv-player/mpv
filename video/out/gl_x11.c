@@ -218,6 +218,7 @@ static bool config_window_x11(struct MPGLContext *ctx, uint32_t d_width,
     int glx_attribs[] = {
         GLX_STEREO, False,
         GLX_X_RENDERABLE, True,
+        GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
         GLX_RED_SIZE, 1,
         GLX_GREEN_SIZE, 1,
         GLX_BLUE_SIZE, 1,
