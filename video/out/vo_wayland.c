@@ -29,12 +29,17 @@
 #include <libavutil/common.h>
 
 #include "config.h"
+
 #include "vo.h"
-#include "sub/osd.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
-#include "common/msg.h"
 #include "video/sws_utils.h"
+#include "video/memcpy_pic.h"
+
+#include "sub/osd.h"
+#include "sub/img_convert.h"
+
+#include "common/msg.h"
 
 #include "wayland_common.h"
 #include "wayland-version.h"
@@ -92,12 +97,29 @@ static const struct fmtentry fmttable[] = {
 #define DEFAULT_FORMAT_ENTRY 1
 #define DEFAULT_ALPHA_FORMAT_ENTRY 0
 
+struct priv;
+
 struct buffer {
     struct wl_buffer *wlbuf;
     bool is_busy;
     bool is_new;
+    bool is_attached;
+    bool to_resize;
     void *shm_data;
     size_t shm_size;
+};
+
+struct buffer_pool {
+    struct buffer *buffers;
+    struct buffer *front_buffer; // just pointers to any of the buffers
+    struct buffer *middle_buffer; // just pointers to any of the buffers
+    struct buffer *back_buffer;
+    uint32_t buffer_no;
+    uint32_t size;
+    uint32_t stride;
+    uint32_t bytes_per_pixel;
+    enum wl_shm_format format; // TODO use fmtentry here
+    struct wl_shm *shm;
 };
 
 struct supported_format {
@@ -111,9 +133,7 @@ struct priv {
     struct vo_wayland_state *wl;
 
     struct wl_list format_list;
-    const struct fmtentry *pref_format;
-    int bytes_per_pixel;
-    int stride;
+    const struct fmtentry *video_format;
 
     struct mp_rect src;
     struct mp_rect dst;
@@ -126,21 +146,19 @@ struct priv {
 
     struct wl_callback *redraw_callback;
 
-    struct buffer buffers[MAX_BUFFERS];
-    struct buffer *front_buffer;
-    struct buffer *back_buffer;
-    struct buffer tmp_buffer;
+    struct buffer_pool video_bufpool;
+    struct buffer *attached_buffer;
 
     struct mp_image *original_image;
     int width;  // width of the original image
     int height;
 
     int x, y; // coords for resizing
-    bool resize_attach;
 
     // options
     int enable_alpha;
     int use_rgb565;
+    int use_triplebuffering;
 };
 
 /* copied from weston clients */
@@ -238,26 +256,7 @@ static const struct fmtentry * is_wayland_format_supported(struct priv *p,
     return NULL;
 }
 
-static void buffer_swap(struct priv *p)
-{
-    if (!p->back_buffer->is_new)
-        return;
-
-    struct buffer *tmp = p->back_buffer;
-    p->back_buffer = p->front_buffer;
-    p->front_buffer = tmp;
-}
-
-
-// returns NULL if the back_buffer contains a new image or if the back buffer
-// is busy (unlikely)
-static struct buffer * buffer_get_back(struct priv *p)
-{
-    if (p->back_buffer->is_busy)
-        return NULL;
-
-    return p->back_buffer;
-}
+// buffer functions
 
 static bool buffer_finalise_back(struct buffer *buf)
 {
@@ -265,95 +264,199 @@ static bool buffer_finalise_back(struct buffer *buf)
     return true;
 }
 
-static struct buffer * buffer_get_front(struct priv *p)
-{
-    if (!p->front_buffer->is_new)
-        return NULL;
-
-    p->front_buffer->is_busy = true;
-    return p->front_buffer;
-}
-
 static bool buffer_finalise_front(struct buffer *buf)
 {
     buf->is_new = false; // is_busy is reset on handle_release
+    buf->is_busy = true;
+    buf->is_attached = true;
     return true;
 }
 
-static struct mp_image buffer_get_mp_image(struct priv *p, struct buffer *buf)
+static void buffer_destroy_content(struct buffer *buf)
+{
+    if (buf->wlbuf) {
+        wl_buffer_destroy(buf->wlbuf);
+        buf->wlbuf = NULL;
+    }
+    if (buf->shm_data) {
+        munmap(buf->shm_data, buf->shm_size);
+        buf->shm_data = NULL;
+        buf->shm_size = 0;
+    }
+}
+
+static bool buffer_create_content(struct buffer_pool *pool,
+                                  struct buffer *buf,
+                                  int width,
+                                  int height)
+{
+    int fd;
+    void *data;
+    struct wl_shm_pool *shm_pool;
+
+    fd = os_create_anonymous_file(pool->size);
+    if (fd < 0) {
+        return false;
+    }
+
+    data = mmap(NULL, pool->size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (data == MAP_FAILED) {
+        close(fd);
+        return false;
+    }
+
+    // wl-buffers of the same shm_pool share it's content which might be useful
+    // if we resize the buffers (from the docs).
+    shm_pool = wl_shm_create_pool(pool->shm, fd, pool->size);
+    buf->wlbuf = wl_shm_pool_create_buffer(shm_pool, 0, width, height,
+                                           pool->stride, pool->format);
+    wl_buffer_add_listener(buf->wlbuf, &buffer_listener, buf);
+
+    wl_shm_pool_destroy(shm_pool);
+    close(fd);
+
+    buf->shm_size = pool->size;
+    buf->shm_data = data;
+    buf->is_new = false;
+    buf->is_busy = false;
+    return true;
+}
+
+static bool buffer_resize(struct buffer_pool *pool, struct buffer *buf,
+                          uint32_t width, uint32_t height)
+{
+    if (buf->is_attached) {
+        buf->to_resize = true;
+        return true;
+    }
+
+    if (buf->shm_size == pool->size)
+        return true;
+
+    buf->to_resize = false;
+    buffer_destroy_content(buf);
+    return buffer_create_content(pool, buf, width, height);
+}
+
+static struct mp_image buffer_get_mp_image(struct priv *p,
+                                           struct buffer_pool *pool,
+                                           struct buffer *buf)
 {
     struct mp_image img = {0};
     mp_image_set_params(&img, &p->sws->dst);
 
     img.planes[0] = buf->shm_data;
-    img.stride[0] = p->stride;
+    img.stride[0] = pool->stride;
 
     return img;
 }
 
-static bool create_shm_buffer(struct priv *p,
-                              struct buffer *buffer,
-                              int width,
-                              int height,
-                              uint32_t format)
+
+// buffer pool functions
+
+static void buffer_pool_init(struct priv *p,
+                             struct buffer_pool *pool,
+                             uint32_t buffer_no,
+                             uint32_t width, uint32_t height,
+                             const struct fmtentry *fmt,
+                             struct wl_shm *shm)
 {
-    struct wl_shm_pool *pool;
-    int fd, size;
-    void *data;
+    pool->shm = shm;
+    pool->buffers = calloc(buffer_no, sizeof(struct buffer));
+    pool->buffer_no = buffer_no;
+    pool->format = fmt->wl_fmt;
+    pool->bytes_per_pixel = mp_imgfmt_get_desc(fmt->mp_fmt).bytes[0];
+    pool->stride = FFALIGN(width * pool->bytes_per_pixel, SWS_MIN_BYTE_ALIGN);
+    pool->size = pool->stride * height;
 
-    p->stride = FFALIGN(width * p->bytes_per_pixel, SWS_MIN_BYTE_ALIGN);
-    size = p->stride * height;
+    for (uint32_t i = 0; i < buffer_no; ++i)
+        buffer_create_content(pool, &pool->buffers[i], width, height);
 
-    fd = os_create_anonymous_file(size);
-    if (fd < 0) {
-        MP_ERR(p->wl, "creating a buffer file for %d B failed: %m", size);
-        return false;
+    if (buffer_no == 3) {
+        pool->back_buffer = &pool->buffers[0];
+        pool->middle_buffer = &pool->buffers[1];
+        pool->front_buffer = &pool->buffers[2];
     }
-
-    data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (data == MAP_FAILED) {
-        MP_ERR(p->wl, "mmap failed: %m\n");
-        close(fd);
-        return false;
+    else if (buffer_no == 2) {
+        pool->back_buffer = &pool->buffers[0];
+        pool->front_buffer = &pool->buffers[1];
+        pool->middle_buffer = NULL;
     }
-
-    pool = wl_shm_create_pool(p->wl->display.shm, fd, size);
-    buffer->wlbuf = wl_shm_pool_create_buffer(pool, 0, width, height,
-                                              p->stride, format);
-    wl_buffer_add_listener(buffer->wlbuf, &buffer_listener, buffer);
-    wl_shm_pool_destroy(pool);
-    close(fd);
-
-    buffer->shm_size = size;
-    buffer->shm_data = data;
-    buffer->is_new = false;
-    buffer->is_busy = false;
-    return true;
-}
-
-static void destroy_shm_buffer(struct buffer *buffer)
-{
-    if (buffer->wlbuf) {
-        wl_buffer_destroy(buffer->wlbuf);
-        buffer->wlbuf = NULL;
-    }
-    if (buffer->shm_data) {
-        munmap(buffer->shm_data, buffer->shm_size);
-        buffer->shm_data = NULL;
-        buffer->shm_size = 0;
+    else {
+        pool->back_buffer = NULL;
+        pool->middle_buffer = NULL;
+        pool->front_buffer = NULL;
     }
 }
 
-static bool reinit_shm_buffers(struct priv *p, int width, int height)
+static bool buffer_pool_resize(struct buffer_pool *pool,
+                               int width,
+                               int height)
 {
     bool ret = true;
-    enum wl_shm_format fmt = p->pref_format->wl_fmt;
-    for (int i = 0; ret && i < MAX_BUFFERS; ++i) {
-        destroy_shm_buffer(&p->buffers[i]);
-        ret = create_shm_buffer(p, &p->buffers[i], width, height, fmt);
-    }
+
+    pool->stride = FFALIGN(width * pool->bytes_per_pixel, SWS_MIN_BYTE_ALIGN);
+    pool->size = pool->stride * height;
+
+    for (uint32_t i = 0; ret && i < pool->buffer_no; ++i)
+        ret = buffer_resize(pool, &pool->buffers[i], width, height);
+
     return ret;
 }
+
+static void buffer_pool_destroy(struct buffer_pool *pool)
+{
+    for (uint32_t i = 0; i < pool->buffer_no; ++i)
+        buffer_destroy_content(&pool->buffers[i]);
+
+    free(pool->buffers);
+    pool->front_buffer = NULL;
+    pool->back_buffer = NULL;
+    pool->buffers = NULL;
+}
+
+static void buffer_pool_swap(struct buffer_pool *pool)
+{
+    if (pool->buffer_no == 3) {
+        if (pool->back_buffer->is_new) {
+            struct buffer *tmp = pool->back_buffer;
+            pool->back_buffer = pool->middle_buffer;
+            pool->middle_buffer = tmp;
+        }
+        if (!pool->front_buffer->is_busy && !pool->front_buffer->is_new) {
+            struct buffer *tmp = pool->front_buffer;
+            pool->front_buffer = pool->middle_buffer;
+            pool->middle_buffer = tmp;
+        }
+    }
+    else if (pool->buffer_no == 2) {
+        if (pool->back_buffer->is_new) {
+            struct buffer *tmp = pool->back_buffer;
+            pool->back_buffer = pool->front_buffer;
+            pool->front_buffer = tmp;
+        }
+    }
+}
+
+// returns NULL if the back buffer is busy
+static struct buffer * buffer_pool_get_back(struct buffer_pool *pool)
+{
+    if (!pool->back_buffer || pool->back_buffer->is_busy)
+        return NULL;
+
+    return pool->back_buffer;
+}
+
+// returns NULL if the front buffer is not new
+static struct buffer * buffer_pool_get_front(struct buffer_pool *pool)
+{
+    if (!pool->front_buffer || !pool->front_buffer->is_new)
+        return NULL;
+
+    pool->front_buffer->is_busy = true;
+    return pool->front_buffer;
+}
+
 
 static bool redraw_frame(struct priv *p)
 {
@@ -375,12 +478,6 @@ static mp_image_t *get_screenshot(struct priv *p)
 static bool resize(struct priv *p)
 {
     struct vo_wayland_state *wl = p->wl;
-
-    // if the newly resized buffer isn't attached, then don't resize again,
-    // because the front buffer might be empty and the temporary buffer might
-    // still be valid
-    if (p->resize_attach)
-        return false;
 
     int32_t x = wl->window.sh_x;
     int32_t y = wl->window.sh_y;
@@ -407,7 +504,7 @@ static bool resize(struct priv *p)
     mp_sws_set_from_cmdline(p->sws);
     p->sws->src = p->in_format;
     p->sws->dst = (struct mp_image_params) {
-        .imgfmt = p->pref_format->mp_fmt,
+        .imgfmt = p->video_format->mp_fmt,
         .w = p->dst_w,
         .h = p->dst_h,
         .d_w = p->dst_w,
@@ -419,12 +516,7 @@ static bool resize(struct priv *p)
     if (mp_sws_reinit(p->sws) < 0)
         return false;
 
-    // copy pointers
-    p->tmp_buffer = *p->front_buffer;
-    p->front_buffer->shm_data = NULL;
-    p->front_buffer->wlbuf = NULL;
-
-    if (!reinit_shm_buffers(p, p->dst_w, p->dst_h)) {
+    if (!buffer_pool_resize(&p->video_bufpool, p->dst_w, p->dst_h)) {
         MP_ERR(wl, "failed to resize buffers\n");
         return false;
     }
@@ -444,7 +536,6 @@ static bool resize(struct priv *p)
 
     p->x = x;
     p->y = y;
-    p->resize_attach = true;
     p->wl->window.events = 0;
     p->vo->want_redraw = true;
     return true;
@@ -452,6 +543,7 @@ static bool resize(struct priv *p)
 
 
 /* wayland listeners */
+
 
 static void buffer_handle_release(void *data, struct wl_buffer *buffer)
 {
@@ -469,7 +561,8 @@ static void frame_handle_redraw(void *data,
 {
     struct priv *p = data;
     struct vo_wayland_state *wl = p->wl;
-    struct buffer *buf = buffer_get_front(p);
+    buffer_pool_swap(&p->video_bufpool);
+    struct buffer *buf = buffer_pool_get_front(&p->video_bufpool);
 
     if (buf) {
         wl_surface_attach(wl->window.surface, buf->wlbuf, p->x, p->y);
@@ -481,15 +574,17 @@ static void frame_handle_redraw(void *data,
         p->redraw_callback = wl_surface_frame(wl->window.surface);
         wl_callback_add_listener(p->redraw_callback, &frame_listener, p);
         wl_surface_commit(wl->window.surface);
+
+        // resize attached buffer
+       if (p->attached_buffer) {
+            p->attached_buffer->is_attached = false;
+            buffer_resize(&p->video_bufpool, p->attached_buffer, p->dst_w, p->dst_h);
+        }
+        p->attached_buffer = buf;
         buffer_finalise_front(buf);
 
-        // to avoid multiple resizes of non-shown frames
-        if (p->resize_attach) {
-            destroy_shm_buffer(&p->tmp_buffer);
-            p->resize_attach = false;
-            p->x = 0;
-            p->y = 0;
-        }
+        p->x = 0;
+        p->y = 0;
     }
     else {
         if (callback)
@@ -508,7 +603,7 @@ static void shm_handle_format(void *data,
                               uint32_t format)
 {
     struct priv *p = data;
-    for (int i = 0; i < MAX_FORMAT_ENTRIES; ++i) {
+    for (uint32_t i = 0; i < MAX_FORMAT_ENTRIES; ++i) {
         if (fmttable[i].wl_fmt == format) {
             MP_INFO(p->wl, "format %s supported by hw\n",
                     mp_imgfmt_to_name(fmttable[i].mp_fmt));
@@ -530,11 +625,19 @@ static const struct wl_shm_listener shm_listener = {
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
-    struct buffer *buf = buffer_get_back(p);
+    struct buffer *buf = buffer_pool_get_back(&p->video_bufpool);
 
     if (!buf) {
         MP_VERBOSE(p->wl, "can't draw, back buffer is busy\n");
         return;
+    }
+
+    if (buf->to_resize) {
+        if (buf->is_attached) {
+            MP_WARN(p->wl, "resizing attached buffer, use triple-buffering\n");
+            buf->is_attached = false;
+        }
+        buffer_resize(&p->video_bufpool, buf, p->dst_w, p->dst_h);
     }
 
     struct mp_image src = *mpi;
@@ -543,7 +646,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
     mp_image_crop_rc(&src, src_rc);
 
-    struct mp_image img = buffer_get_mp_image(p, buf);
+    struct mp_image img = buffer_get_mp_image(p, &p->video_bufpool, buf);
     mp_sws_scale(p->sws, &img, &src);
 
     mp_image_setrefp(&p->original_image, mpi);
@@ -553,15 +656,18 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct priv *p = vo->priv;
-    struct mp_image img = buffer_get_mp_image(p, p->back_buffer);
-    osd_draw_on_image(osd, p->osd, osd_get_vo_pts(osd), 0, &img);
+    struct buffer *buf = buffer_pool_get_back(&p->video_bufpool);
+    if (buf) {
+        struct mp_image img = buffer_get_mp_image(p, &p->video_bufpool, buf);
+        osd_draw_on_image(osd, p->osd, osd_get_vo_pts(osd), 0, &img);
+    }
 }
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    buffer_swap(p);
+    buffer_pool_swap(&p->video_bufpool);
 
     if (!p->redraw_callback) {
         MP_DBG(p->wl, "restart frame callback\n");
@@ -598,35 +704,30 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
     // find the matching format first
     wl_list_for_each(sf, &p->format_list, link) {
         if (sf->fmt->mp_fmt == fmt->imgfmt && (p->enable_alpha == sf->is_alpha)) {
-            p->pref_format = sf->fmt;
+            p->video_format = sf->fmt;
             break;
         }
     }
 
-    if (!p->pref_format) {
+    if (!p->video_format) {
         // if use default is enable overwrite the auto selected one
         if (p->enable_alpha)
-            p->pref_format = &fmttable[DEFAULT_ALPHA_FORMAT_ENTRY];
+            p->video_format = &fmttable[DEFAULT_ALPHA_FORMAT_ENTRY];
         else
-            p->pref_format = &fmttable[DEFAULT_FORMAT_ENTRY];
+            p->video_format = &fmttable[DEFAULT_FORMAT_ENTRY];
     }
 
     // overides alpha
     // use rgb565 if performance is your main concern
     if (p->use_rgb565) {
-        const struct fmtentry *mp_fmt =
+        const struct fmtentry *fmt =
             is_wayland_format_supported(p, WL_SHM_FORMAT_RGB565);
-        if (mp_fmt)
-            p->pref_format = mp_fmt;
+        if (fmt)
+            p->video_format = fmt;
     }
 
-    p->bytes_per_pixel = mp_imgfmt_get_desc(p->pref_format->mp_fmt).bytes[0];
-    MP_VERBOSE(p->wl, "bytes per pixel: %d\n", p->bytes_per_pixel);
-
-    if (!reinit_shm_buffers(p, p->width, p->height)) {
-        MP_ERR(p->wl, "failed to initialise buffers\n");
-        return -1;
-    }
+    buffer_pool_init(p, &p->video_bufpool, (p->use_triplebuffering ? 3 : 2),
+            p->width, p->height, p->video_format, p->wl->display.shm);
 
     vo_wayland_config(vo, vo->dwidth, vo->dheight, flags);
 
@@ -639,8 +740,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    for (int i = 0; i < MAX_BUFFERS; ++i)
-        destroy_shm_buffer(&p->buffers[i]);
+    buffer_pool_destroy(&p->video_bufpool);
 
     if (p->redraw_callback)
         wl_callback_destroy(p->redraw_callback);
@@ -660,9 +760,6 @@ static int preinit(struct vo *vo)
     p->vo = vo;
     p->wl = vo->wayland;
     p->sws = mp_sws_alloc(vo);
-
-    p->front_buffer = &p->buffers[1];
-    p->back_buffer = &p->buffers[0];
 
     wl_list_init(&p->format_list);
 
@@ -724,6 +821,7 @@ const struct vo_driver video_out_wayland = {
     .options = (const struct m_option[]) {
         OPT_FLAG("alpha", enable_alpha, 0),
         OPT_FLAG("rgb565", use_rgb565, 0),
+        OPT_FLAG("triple-buffering", use_triplebuffering, 0),
         {0}
     },
 };
