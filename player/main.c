@@ -130,10 +130,6 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     mp_lua_uninit(mpctx);
 #endif
 
-#if defined(__MINGW32__)
-    timeEndPeriod(1);
-#endif
-
 #if HAVE_COCOA
     cocoa_set_input_context(NULL);
 #endif
