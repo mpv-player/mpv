@@ -243,9 +243,6 @@ struct demuxer *demux_open(struct stream *stream, char *force_format,
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, int flags);
 
-int demux_info_add(struct demuxer *demuxer, const char *opt, const char *param);
-int demux_info_add_bstr(struct demuxer *demuxer, struct bstr opt,
-                        struct bstr param);
 char *demux_info_get(struct demuxer *demuxer, const char *opt);
 void demux_info_update(struct demuxer *demuxer);
 
@@ -263,8 +260,6 @@ int demuxer_add_attachment(struct demuxer *demuxer, struct bstr name,
                            struct bstr type, struct bstr data);
 int demuxer_add_chapter(struct demuxer *demuxer, struct bstr name,
                         uint64_t start, uint64_t end, uint64_t demuxer_id);
-void demuxer_add_chapter_info(struct demuxer *demuxer, uint64_t demuxer_id,
-                              bstr key, bstr value);
 int demuxer_seek_chapter(struct demuxer *demuxer, int chapter,
                          double *seek_pts);
 void demuxer_sort_chapters(demuxer_t *demuxer);

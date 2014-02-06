@@ -351,7 +351,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
                mkv_d->duration);
     }
     if (info.n_title) {
-        demux_info_add_bstr(demuxer, bstr0("TITLE"), info.title);
+        mp_tags_set_bstr(demuxer->metadata, bstr0("TITLE"), info.title);
     }
     if (info.n_segment_uid) {
         int len = info.segment_uid.len;
@@ -938,33 +938,34 @@ static void process_tags(demuxer_t *demuxer)
         if (tag.targets.target_track_uid  || tag.targets.target_attachment_uid)
             continue;
 
+        struct mp_tags *dst = NULL;
+
         if (tag.targets.target_chapter_uid) {
-            for (int j = 0; j < tag.n_simple_tag; j++) {
-                demuxer_add_chapter_info(demuxer, tag.targets.target_chapter_uid,
-                                         tag.simple_tag[j].tag_name,
-                                         tag.simple_tag[j].tag_string);
+            for (int n = 0; n < demuxer->num_chapters; n++) {
+                if (demuxer->chapters[n].demuxer_id ==
+                    tag.targets.target_chapter_uid)
+                {
+                    dst = demuxer->chapters[n].metadata;
+                    break;
+                }
             }
         } else if (tag.targets.target_edition_uid) {
-            struct demux_edition *edition = NULL;
             for (int n = 0; n < demuxer->num_editions; n++) {
                 if (demuxer->editions[n].demuxer_id ==
                     tag.targets.target_edition_uid)
                 {
-                    edition = &demuxer->editions[n];
+                    dst = demuxer->editions[n].metadata;
                     break;
                 }
             }
-            if (edition) {
-                for (int j = 0; j < tag.n_simple_tag; j++) {
-                    mp_tags_set_bstr(edition->metadata,
-                                     tag.simple_tag[j].tag_name,
-                                     tag.simple_tag[j].tag_string);
-                }
-            }
         } else {
+            dst = demuxer->metadata;
+        }
+
+        if (dst) {
             for (int j = 0; j < tag.n_simple_tag; j++) {
-                demux_info_add_bstr(demuxer, tag.simple_tag[j].tag_name,
-                                    tag.simple_tag[j].tag_string);
+                mp_tags_set_bstr(dst, tag.simple_tag[j].tag_name,
+                                      tag.simple_tag[j].tag_string);
             }
         }
     }

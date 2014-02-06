@@ -719,17 +719,6 @@ void mp_tags_clear(struct mp_tags *tags)
     talloc_free_children(tags);
 }
 
-int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
-{
-    return demux_info_add_bstr(demuxer, bstr0(opt), bstr0(param));
-}
-
-int demux_info_add_bstr(demuxer_t *demuxer, struct bstr opt, struct bstr param)
-{
-    mp_tags_set_bstr(demuxer->metadata, opt, param);
-    return 1;
-}
-
 static int demux_info_print(demuxer_t *demuxer)
 {
     struct mp_tags *info = demuxer->metadata;
@@ -886,19 +875,7 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
     };
     mp_tags_set_bstr(new.metadata, bstr0("TITLE"), name);
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
-    return 0;
-}
-
-void demuxer_add_chapter_info(struct demuxer *demuxer, uint64_t demuxer_id,
-                              bstr key, bstr value)
-{
-    for (int n = 0; n < demuxer->num_chapters; n++) {
-        struct demux_chapter *ch = &demuxer->chapters[n];
-        if (ch->demuxer_id == demuxer_id) {
-            mp_tags_set_bstr(ch->metadata, key, value);
-            return;
-        }
-    }
+    return demuxer->num_chapters - 1;
 }
 
 static void add_stream_chapters(struct demuxer *demuxer)

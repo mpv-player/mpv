@@ -511,11 +511,11 @@ static void add_new_streams(demuxer_t *demuxer)
         handle_stream(demuxer, priv->num_streams);
 }
 
-static void add_metadata(demuxer_t *demuxer, AVDictionary *metadata)
+static void add_metadata(struct mp_tags *tags, AVDictionary *metadata)
 {
     AVDictionaryEntry *t = NULL;
     while ((t = av_dict_get(metadata, "", t, AV_DICT_IGNORE_SUFFIX)))
-        demux_info_add(demuxer, t->key, t->value);
+        mp_tags_set_str(tags, t->key, t->value);
 }
 
 static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
@@ -529,7 +529,7 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
         av_packet_unpack_dictionary(md, md_size, &dict);
         if (dict) {
             mp_tags_clear(demuxer->metadata);
-            add_metadata(demuxer, dict);
+            add_metadata(demuxer->metadata, dict);
             av_dict_free(&dict);
         }
     }
@@ -654,25 +654,21 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         uint64_t end   = av_rescale_q(c->end, c->time_base,
                                       (AVRational){1, 1000000000});
         t = av_dict_get(c->metadata, "title", NULL, 0);
-        demuxer_add_chapter(demuxer, t ? bstr0(t->value) : bstr0(NULL),
-                            start, end, i);
-        t = NULL;
-        while ((t = av_dict_get(c->metadata, "", t, AV_DICT_IGNORE_SUFFIX))) {
-            demuxer_add_chapter_info(demuxer, i, bstr0(t->key),
-                                     bstr0(t->value));
-        }
+        int index = demuxer_add_chapter(demuxer, t ? bstr0(t->value) : bstr0(""),
+                                        start, end, i);
+        add_metadata(demuxer->chapters[index].metadata, c->metadata);
     }
 
     add_new_streams(demuxer);
 
-    add_metadata(demuxer, avfc->metadata);
+    add_metadata(demuxer->metadata, avfc->metadata);
 
     // Often useful with OGG audio-only files, which have metadata in the audio
     // track metadata instead of the main metadata.
     if (demuxer->num_streams == 1) {
         for (int n = 0; n < priv->num_streams; n++) {
             if (priv->streams[n])
-                add_metadata(demuxer, avfc->streams[n]->metadata);
+                add_metadata(demuxer->metadata, avfc->streams[n]->metadata);
         }
     }
 
