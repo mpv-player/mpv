@@ -562,10 +562,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
     /* Keep side data as side data instead of mashing it into the packet
      * stream. */
-    if (av_opt_set(avfc, "fflags", "+keepside", 0) < 0) {
-        MP_WARN(demuxer, "demux_lavf, couldn't set option keepdata; "
-                "in-stream metadata updates will be ignored\n");
-    }
+    av_opt_set(avfc, "fflags", "+keepside", 0);
 
     if (lavfdopts->probesize) {
         if (av_opt_set_int(avfc, "probesize", lavfdopts->probesize, 0) < 0)
