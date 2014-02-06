@@ -44,6 +44,11 @@ static bool create_context_x11_old(struct MPGLContext *ctx)
     if (glx_ctx->context)
         return true;
 
+    if (!glx_ctx->vinfo) {
+        MP_FATAL(vo, "Can't create a legacy GLX context without X visual\n");
+        return false;
+    }
+
     GLXContext new_context = glXCreateContext(display, glx_ctx->vinfo, NULL,
                                               True);
     if (!new_context) {
@@ -254,12 +259,13 @@ static bool config_window_x11(struct MPGLContext *ctx, uint32_t d_width,
 
     glx_ctx->fbc = fbc;
     glx_ctx->vinfo = glXGetVisualFromFBConfig(vo->x11->display, fbc);
-    if (!glx_ctx->vinfo) {
-        MP_ERR(vo, "Selected GLX FB config has no associated X visual\n");
-        return false;
+    if (glx_ctx->vinfo) {
+        MP_VERBOSE(vo, "GLX chose visual with ID 0x%x\n",
+                   (int)glx_ctx->vinfo->visualid);
+    } else {
+        MP_WARN(vo, "Selected GLX FB config has no associated X visual\n");
     }
 
-    MP_VERBOSE(vo, "GLX chose visual with ID 0x%x\n", (int)glx_ctx->vinfo->visualid);
 
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_RED_SIZE, &ctx->depth_r);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->depth_g);
