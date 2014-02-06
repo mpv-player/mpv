@@ -1256,7 +1256,7 @@ goto_reopen_demuxer: ;
     }
     reselect_demux_streams(mpctx);
 
-    demux_info_print(mpctx->master_demuxer);
+    demux_info_update(mpctx->master_demuxer);
     print_file_properties(mpctx);
 
 #if HAVE_ENCODING

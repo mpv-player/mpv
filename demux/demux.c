@@ -720,19 +720,11 @@ int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
 
 int demux_info_add_bstr(demuxer_t *demuxer, struct bstr opt, struct bstr param)
 {
-    char *oldval = mp_tags_get_bstr(demuxer->metadata, opt);
-    if (oldval) {
-        if (bstrcmp0(param, oldval) == 0)
-            return 0;
-        MP_INFO(demuxer, "Demuxer info %.*s changed to %.*s\n",
-                BSTR_P(opt), BSTR_P(param));
-    }
-
     mp_tags_set_bstr(demuxer->metadata, opt, param);
     return 1;
 }
 
-int demux_info_print(demuxer_t *demuxer)
+static int demux_info_print(demuxer_t *demuxer)
 {
     struct mp_tags *info = demuxer->metadata;
     int n;
@@ -760,13 +752,28 @@ char *demux_info_get(demuxer_t *demuxer, const char *opt)
 
 void demux_info_update(struct demuxer *demuxer)
 {
-    demux_control(demuxer, DEMUXER_CTRL_UPDATE_INFO, NULL);
+    struct mp_tags *tags = demuxer->metadata;
     // Take care of stream metadata as well
     char **meta;
     if (stream_control(demuxer->stream, STREAM_CTRL_GET_METADATA, &meta) > 0) {
         for (int n = 0; meta[n + 0]; n += 2)
-            demux_info_add(demuxer, meta[n + 0], meta[n + 1]);
+            mp_tags_set_str(tags, meta[n + 0], meta[n + 1]);
         talloc_free(meta);
+    }
+    // Check for metadata changes the hard way.
+    char *data = talloc_strdup(demuxer, "");
+    for (int n = 0; n < tags->num_keys; n++) {
+        data = talloc_asprintf_append_buffer(data, "%s=%s\n", tags->keys[n],
+                                             tags->values[n]);
+    }
+    if (!demuxer->previous_metadata ||
+        strcmp(demuxer->previous_metadata, data) != 0)
+    {
+        talloc_free(demuxer->previous_metadata);
+        demuxer->previous_metadata = data;
+        demux_info_print(demuxer);
+    } else {
+        talloc_free(data);
     }
 }
 

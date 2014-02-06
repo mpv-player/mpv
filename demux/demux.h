@@ -50,8 +50,7 @@ enum demuxer_type {
 #define DEMUXER_CTRL_GUESS 2
 
 enum demux_ctrl {
-    DEMUXER_CTRL_UPDATE_INFO = 1,
-    DEMUXER_CTRL_SWITCHED_TRACKS,
+    DEMUXER_CTRL_SWITCHED_TRACKS = 1,
     DEMUXER_CTRL_GET_TIME_LENGTH,
     DEMUXER_CTRL_GET_START_TIME,
     DEMUXER_CTRL_RESYNC,
@@ -199,6 +198,7 @@ typedef struct demuxer {
     struct playlist *playlist;
 
     struct mp_tags *metadata;
+    char *previous_metadata;
 
     void *priv;   // demuxer-specific internal data
     struct MPOpts *opts;
@@ -247,7 +247,6 @@ int demux_info_add(struct demuxer *demuxer, const char *opt, const char *param);
 int demux_info_add_bstr(struct demuxer *demuxer, struct bstr opt,
                         struct bstr param);
 char *demux_info_get(struct demuxer *demuxer, const char *opt);
-int demux_info_print(struct demuxer *demuxer);
 void demux_info_update(struct demuxer *demuxer);
 
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
