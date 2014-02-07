@@ -1325,13 +1325,14 @@ goto_reopen_demuxer: ;
     // If there's a timeline force an absolute seek to initialize state
     double startpos = rel_time_to_abs(mpctx, opts->play_start, -1);
     if (startpos != -1 || mpctx->timeline) {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0, true);
         execute_queued_seek(mpctx);
     }
     if (startpos == -1 && mpctx->resolve_result &&
         mpctx->resolve_result->start_time > 0)
     {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->resolve_result->start_time, 0);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->resolve_result->start_time,
+                   0, true);
         execute_queued_seek(mpctx);
     }
     if (opts->chapterrange[0] > 0) {

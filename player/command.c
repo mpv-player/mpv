@@ -358,7 +358,7 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
     switch (action) {
     case M_PROPERTY_SET: {
         double pos = *(double *)arg;
-        queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, 0);
+        queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, 0, true);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET: {
@@ -383,7 +383,7 @@ static int mp_property_time_pos(m_option_t *prop, int action,
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, 0);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, 0, true);
         return M_PROPERTY_OK;
     }
     return property_time(prop, action, arg, get_current_time(mpctx));
@@ -2562,14 +2562,14 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         int exact = cmd->args[2].v.i;
         mark_seek(mpctx);
         if (abs == 2) {   // Absolute seek to a timestamp in seconds
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact, false);
             set_osd_function(mpctx,
                              v > get_current_time(mpctx) ? OSD_FFW : OSD_REW);
         } else if (abs) {           /* Absolute seek by percentage */
-            queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, exact);
+            queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, exact, false);
             set_osd_function(mpctx, OSD_FFW); // Direction isn't set correctly
         } else {
-            queue_seek(mpctx, MPSEEK_RELATIVE, v, exact);
+            queue_seek(mpctx, MPSEEK_RELATIVE, v, exact, false);
             set_osd_function(mpctx, (v > 0) ? OSD_FFW : OSD_REW);
         }
         if (bar_osd)
@@ -2583,7 +2583,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         double oldpts = cmdctx->last_seek_pts;
         if (oldpts != MP_NOPTS_VALUE) {
             cmdctx->last_seek_pts = get_current_time(mpctx);
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, 1);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, 1, false);
             set_osd_function(mpctx, OSD_REW);
             if (bar_osd)
                 mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
@@ -2761,7 +2761,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                     // rounding for the mess of it.
                     a[0] += 0.01 * (a[1] > 0 ? 1 : -1);
                     mark_seek(mpctx);
-                    queue_seek(mpctx, MPSEEK_RELATIVE, a[0], 1);
+                    queue_seek(mpctx, MPSEEK_RELATIVE, a[0], 1, false);
                     set_osd_function(mpctx, (a[0] > 0) ? OSD_FFW : OSD_REW);
                     if (bar_osd)
                         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;

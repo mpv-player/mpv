@@ -298,6 +298,7 @@ typedef struct MPContext {
         enum seek_type type;
         double amount;
         int exact;  // -1 = disable, 0 = default, 1 = enable
+        bool immediate; // disable seek delay logic
         // currently not set by commands, only used internally by seek()
         int direction; // -1 = backward, 0 = default, 1 = forward
     } seek;
@@ -413,7 +414,7 @@ void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx, int dir);
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
-                int exact);
+                int exact, bool immediate);
 bool mp_seek_chapter(struct MPContext *mpctx, int chapter);
 double get_time_length(struct MPContext *mpctx);
 double get_current_time(struct MPContext *mpctx);

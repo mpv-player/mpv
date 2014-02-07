@@ -351,12 +351,14 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     return 0;
 }
 
+// This combines consecutive seek requests.
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
-                int exact)
+                int exact, bool immediate)
 {
     struct seek_params *seek = &mpctx->seek;
     switch (type) {
     case MPSEEK_RELATIVE:
+        seek->immediate |= immediate;
         if (seek->type == MPSEEK_FACTOR)
             return;  // Well... not common enough to bother doing better
         seek->amount += amount;
@@ -377,6 +379,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
             .type = type,
             .amount = amount,
             .exact = exact,
+            .immediate = immediate,
         };
         return;
     case MPSEEK_NONE:
@@ -389,6 +392,12 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
 void execute_queued_seek(struct MPContext *mpctx)
 {
     if (mpctx->seek.type) {
+        /* If the user seeks continuously (keeps arrow key down)
+         * try to finish showing a frame from one location before doing
+         * another seek (which could lead to unchanging display). */
+        if (!mpctx->seek.immediate && mpctx->restart_playback &&
+            mp_time_sec() - mpctx->start_timestamp < 0.3)
+            return;
         mp_seek(mpctx, mpctx->seek, false);
         mpctx->seek = (struct seek_params){0};
     }
@@ -582,7 +591,7 @@ bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
     return false;
 
 do_seek:
-    queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0);
+    queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0, true);
     mpctx->last_chapter_seek = chapter;
     mpctx->last_chapter_pts = pts;
     return true;
@@ -740,15 +749,6 @@ static void handle_input_and_seek_coalesce(struct MPContext *mpctx)
 
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
-        /* Allow running consecutive seek commands to combine them,
-         * but execute the seek before running other commands.
-         * If the user seeks continuously (keeps arrow key down)
-         * try to finish showing a frame from one location before doing
-         * another seek (which could lead to unchanging display). */
-        if ((mpctx->seek.type && cmd->id != MP_CMD_SEEK) ||
-            (mpctx->restart_playback && cmd->id == MP_CMD_SEEK &&
-             mp_time_sec() - mpctx->start_timestamp < 0.3))
-            break;
         cmd = mp_input_get_cmd(mpctx->input, 0, 0);
         run_command(mpctx, cmd);
         mp_cmd_free(cmd);
@@ -802,14 +802,14 @@ static void handle_backstep(struct MPContext *mpctx)
     if (demuxer_ok && mpctx->d_video && current_pts != MP_NOPTS_VALUE) {
         double seek_pts = find_previous_pts(mpctx, current_pts);
         if (seek_pts != MP_NOPTS_VALUE) {
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 2);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 2, true);
         } else {
             double last = get_last_frame_pts(mpctx);
             if (last != MP_NOPTS_VALUE && last >= current_pts &&
                 mpctx->backstep_start_seek_ts != mpctx->vo_pts_history_seek_ts)
             {
                 MP_ERR(mpctx, "Backstep failed.\n");
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, current_pts, 2);
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, current_pts, 2, true);
             } else if (!mpctx->hrseek_active) {
                 MP_VERBOSE(mpctx, "Start backstep indexing.\n");
                 // Force it to index the video up until current_pts.
@@ -845,7 +845,7 @@ static void handle_sstep(struct MPContext *mpctx)
         !mpctx->restart_playback)
     {
         set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, 0);
+        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, 0, true);
     }
 }
 
