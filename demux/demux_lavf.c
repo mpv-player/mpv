@@ -560,9 +560,13 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         avfc->flags |= AVFMT_FLAG_GENPTS;
     if (opts->index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
+
+#if LIBAVFORMAT_VERSION_MICRO >= 100
     /* Keep side data as side data instead of mashing it into the packet
-     * stream. */
+     * stream.
+     * Note: Libav doesn't have this horrible insanity. */
     av_opt_set(avfc, "fflags", "+keepside", 0);
+#endif
 
     if (lavfdopts->probesize) {
         if (av_opt_set_int(avfc, "probesize", lavfdopts->probesize, 0) < 0)
