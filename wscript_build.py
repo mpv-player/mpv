@@ -319,6 +319,7 @@ def build(ctx):
         ( "video/filter/vf_stereo3d.c" ),
         ( "video/filter/vf_sub.c" ),
         ( "video/filter/vf_swapuv.c" ),
+        ( "video/filter/vf_tfields.c" ),
         ( "video/filter/vf_unsharp.c" ),
         ( "video/filter/vf_vavpp.c",             "vaapi-vpp"),
         ( "video/filter/vf_yadif.c" ),
