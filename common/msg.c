@@ -149,7 +149,13 @@ static void prepare_status_line(struct mp_log_root *root, char *new_status)
     size_t clear_lines = MPMIN(MPMAX(new_lines, old_lines), root->blank_lines);
 
     // clear the status line itself
-    fprintf(f, "\r%s", terminal_erase_to_end_of_line);
+    if (terminal_erase_to_end_of_line[0]) {
+        fprintf(f, "\r%s", terminal_erase_to_end_of_line);
+    } else {
+        // This code is for MS windows (no ANSI control sequences)
+        get_screen_size();
+        fprintf(f, "\r%*s\r", screen_width - 1, "");
+    }
     // and clear all previous old lines
     for (size_t n = 1; n < clear_lines; n++)
         fprintf(f, "%s\r%s", terminal_cursor_up, terminal_erase_to_end_of_line);
