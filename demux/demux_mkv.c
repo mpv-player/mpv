@@ -190,7 +190,7 @@ typedef struct mkv_demuxer {
     int num_headers;
 
     uint64_t skip_to_timecode;
-    int v_skip_to_keyframe, a_skip_to_keyframe;
+    int v_skip_to_keyframe, a_skip_to_keyframe, a_no_timecode_check;
     int subtitle_preroll;
 } mkv_demuxer_t;
 
@@ -2351,11 +2351,10 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     current_pts = tc / 1e9;
 
     if (track->type == MATROSKA_TRACK_AUDIO) {
-        use_this_block = 1;
+        if (mkv_d->a_no_timecode_check)
+            use_this_block = !mkv_d->v_skip_to_keyframe;
         if (mkv_d->a_skip_to_keyframe)
-            use_this_block = keyframe;
-        if (mkv_d->v_skip_to_keyframe)
-            use_this_block = 0;
+            use_this_block &= keyframe;
     } else if (track->type == MATROSKA_TRACK_SUBTITLE) {
         if (!use_this_block && mkv_d->subtitle_preroll)
             use_this_block = 1;
@@ -2739,6 +2738,10 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 
         mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
         mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
+
+        // This is probably not needed, but can't be sure.
+        mkv_d->a_no_timecode_check = st_active[STREAM_VIDEO];
+
         if (flags & SEEK_FORWARD) {
             mkv_d->skip_to_timecode = target_timecode;
         } else {
