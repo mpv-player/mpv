@@ -226,7 +226,7 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
 struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
 {
     if (demuxer->num_streams > MAX_SH_STREAMS) {
-        MP_WARN(demuxer, "Too many streams.");
+        MP_WARN(demuxer, "Too many streams.\n");
         return NULL;
     }
 
@@ -373,7 +373,7 @@ static bool demux_check_queue_full(demuxer_t *demux)
 overflow:
 
     if (!demux->warned_queue_overflow) {
-        MP_ERR(demux, "\nToo many packets in the demuxer "
+        MP_ERR(demux, "Too many packets in the demuxer "
                "packet queue (video: %d packets in %d bytes, audio: %d "
                "packets in %d bytes, sub: %d packets in %d bytes).\n",
                count_packs(demux, STREAM_VIDEO), count_bytes(demux, STREAM_VIDEO),
