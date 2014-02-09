@@ -334,11 +334,13 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         res = audio_decode(d_audio, ao->buffer, a);
         if (skip_samples <= mp_audio_buffer_samples(ao->buffer)) {
             mp_audio_buffer_skip(ao->buffer, skip_samples);
+            ao->buffer_playable_samples = 0;
             if (res < 0)
                 return res;
             return audio_decode(d_audio, ao->buffer, playsize);
         }
         mp_audio_buffer_clear(ao->buffer);
+        ao->buffer_playable_samples = 0;
         if (res < 0)
             return res;
     }
@@ -442,6 +444,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     mp_audio_buffer_peek(ao->buffer, &data);
     data.samples = MPMIN(data.samples, playsize);
     int played = write_to_ao(mpctx, &data, playflags, written_audio_pts(mpctx));
+    assert(played >= 0 && played <= data.samples);
     ao->buffer_playable_samples = playsize - played;
 
     if (played > 0) {
