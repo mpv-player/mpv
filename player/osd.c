@@ -70,6 +70,9 @@ static void term_osd_update(struct MPContext *mpctx)
     int num_parts = 0;
     char *parts[3] = {0};
 
+    if (!mpctx->opts->use_terminal)
+        return;
+
     if (mpctx->term_osd_subs && mpctx->term_osd_subs[0])
         parts[num_parts++] = mpctx->term_osd_subs;
     if (mpctx->term_osd_text && mpctx->term_osd_text[0])
@@ -146,6 +149,9 @@ void print_status(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
 
     update_window_title(mpctx, false);
+
+    if (!opts->use_terminal)
+        return;
 
     if (opts->quiet || !(mpctx->initialized_flags & INITIALIZED_PLAYBACK)) {
         term_osd_set_status(mpctx, "");

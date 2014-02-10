@@ -31,6 +31,7 @@
 #include "osdep/priority.h"
 #include "osdep/terminal.h"
 #include "osdep/timer.h"
+#include "osdep/threads.h"
 
 #include "common/av_log.h"
 #include "common/codecs.h"
@@ -61,6 +62,7 @@
 #include "video/out/vo.h"
 
 #include "core.h"
+#include "client.h"
 #include "lua.h"
 #include "command.h"
 #include "screenshot.h"
@@ -89,6 +91,8 @@
 #endif
 #endif
 
+static bool terminal_initialized;
+
 const char mp_help_text[] =
 "Usage:   mpv [options] [url|path/]filename\n"
 "\n"
@@ -113,11 +117,20 @@ void mp_print_version(struct mp_log *log, int always)
     mp_msg(log, v, "\n");
 }
 
-static MP_NORETURN void exit_player(struct MPContext *mpctx,
-                                    enum exit_reason how)
+static void shutdown_clients(struct MPContext *mpctx)
 {
-    int rc;
-    uninit_player(mpctx, INITIALIZED_ALL);
+    while (mpctx->clients && mp_clients_num(mpctx)) {
+        mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
+        mp_dispatch_queue_process(mpctx->dispatch, 0);
+        mp_input_get_cmd(mpctx->input, 100, 1);
+    }
+    mp_clients_destroy(mpctx);
+}
+
+void mp_destroy(struct MPContext *mpctx)
+{
+    if (mpctx->initialized)
+        uninit_player(mpctx, INITIALIZED_ALL);
 
 #if HAVE_ENCODING
     encode_lavc_finish(mpctx->encode_lavc_ctx);
@@ -126,17 +139,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 
     mpctx->encode_lavc_ctx = NULL;
 
-#if HAVE_LUA
-    mp_lua_uninit(mpctx);
-#endif
-
-#if defined(__MINGW32__)
-    timeEndPeriod(1);
-#endif
-
-#if HAVE_COCOA
-    cocoa_set_input_context(NULL);
-#endif
+    shutdown_clients(mpctx);
 
     command_uninit(mpctx);
 
@@ -145,12 +148,26 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     osd_free(mpctx->osd);
 
 #if HAVE_LIBASS
-    ass_library_done(mpctx->ass_library);
-    mpctx->ass_library = NULL;
+    if (mpctx->ass_library)
+        ass_library_done(mpctx->ass_library);
 #endif
 
-    getch2_disable();
+    if (mpctx->opts->use_terminal)
+        getch2_disable();
     uninit_libav(mpctx->global);
+
+    mp_msg_uninit(mpctx->global);
+    talloc_free(mpctx);
+}
+
+static MP_NORETURN void exit_player(struct MPContext *mpctx,
+                                    enum exit_reason how)
+{
+    int rc;
+
+#if HAVE_COCOA
+    cocoa_set_input_context(NULL);
+#endif
 
     if (how != EXIT_NONE) {
         const char *reason;
@@ -186,11 +203,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
         }
     }
 
-    // must be last since e.g. mp_msg uses option values
-    // that will be freed by this.
-
-    mp_msg_uninit(mpctx->global);
-    talloc_free(mpctx);
+    mp_destroy(mpctx);
 
 #if HAVE_COCOA
     terminate_cocoa_application();
@@ -287,10 +300,6 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
     if (pSetSearchPathMode)
         pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
 #endif
-
-    terminal_init();
-
-    mp_time_init();
 }
 
 static int cfg_include(void *ctx, char *filename, int flags)
@@ -299,14 +308,10 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return m_config_parse_config_file(mpctx->mconfig, filename, flags);
 }
 
-static int mpv_main(int argc, char *argv[])
+struct MPContext *mp_create(void)
 {
-    osdep_preinit(&argc, &argv);
-
-    if (argc >= 1) {
-        argc--;
-        argv++;
-    }
+    mp_time_init();
+    GetCpuCaps(&gCpuCaps);
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
@@ -314,6 +319,7 @@ static int mpv_main(int argc, char *argv[])
         .term_osd_contents = talloc_strdup(mpctx, ""),
         .osd_progbar = { .type = -1 },
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
+        .dispatch = mp_dispatch_create(mpctx),
     };
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
@@ -336,22 +342,132 @@ static int mpv_main(int argc, char *argv[])
     mpctx->mconfig->use_profiles = true;
     mpctx->mconfig->is_toplevel = true;
 
+    mpctx->global->opts = mpctx->opts;
+
+    screenshot_init(mpctx);
+    mpctx->mixer = mixer_init(mpctx, mpctx->global);
+    command_init(mpctx);
+    init_libav(mpctx->global);
+    mp_clients_init(mpctx);
+
+    return mpctx;
+}
+
+// Finish mpctx initialization. This must be done after setting up all options.
+// Some of the initializations depend on the options, and can't be changed or
+// undone later.
+// cplayer: true if called by the command line player, false for client API
+// Returns: <0 on error, 0 on success.
+int mp_initialize(struct MPContext *mpctx)
+{
     struct MPOpts *opts = mpctx->opts;
-    mpctx->global->opts = opts;
+
+    assert(!mpctx->initialized);
+
+    if (mpctx->opts->use_terminal && !terminal_initialized) {
+        terminal_initialized = true;
+        terminal_init();
+    }
+
+    mpctx->input = mp_input_init(mpctx->global);
+    stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+
+#if HAVE_ENCODING
+    if (opts->encode_output.file && *opts->encode_output.file) {
+        mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output,
+                                                  mpctx->global);
+        if(!mpctx->encode_lavc_ctx) {
+            MP_INFO(mpctx, "Encoding initialization failed.");
+            return -1;
+        }
+        m_config_set_option0(mpctx->mconfig, "vo", "lavc");
+        m_config_set_option0(mpctx->mconfig, "ao", "lavc");
+        m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
+        m_config_set_option0(mpctx->mconfig, "force-window", "no");
+        m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
+        mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
+    }
+#endif
+
+    if (opts->use_terminal) {
+        if (mpctx->opts->slave_mode)
+            terminal_setup_stdin_cmd_input(mpctx->input);
+        else if (mpctx->opts->consolecontrols)
+            terminal_setup_getch(mpctx->input);
+
+        if (opts->consolecontrols)
+            getch2_enable();
+    }
+
+#if HAVE_LIBASS
+    mpctx->ass_log = mp_log_new(mpctx, mpctx->global->log, "!libass");
+    mpctx->ass_library = mp_ass_init(mpctx->global, mpctx->ass_log);
+#else
+    MP_WARN(mpctx, "Compiled without libass.\n");
+    MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
+#endif
+
+    mpctx->osd = osd_create(mpctx->global);
+
+    // From this point on, all mpctx members are initialized.
+    mpctx->initialized = true;
+
+    if (opts->force_vo) {
+        opts->fixed_vo = 1;
+        mpctx->video_out = init_best_video_out(mpctx->global, mpctx->input,
+                                               mpctx->encode_lavc_ctx);
+        if (!mpctx->video_out) {
+            MP_FATAL(mpctx, "Error opening/initializing "
+                    "the selected video_out (-vo) device.\n");
+            return -1;
+        }
+        mpctx->mouse_cursor_visible = true;
+        mpctx->initialized_flags |= INITIALIZED_VO;
+    }
+
+#if HAVE_LUA
+    // Lua user scripts can call arbitrary functions. Load them at a point
+    // where this is safe.
+    mp_lua_init(mpctx);
+#endif
+
+    if (opts->shuffle)
+        playlist_shuffle(mpctx->playlist);
+
+    if (opts->merge_files)
+        merge_playlist_files(mpctx->playlist);
+
+    mpctx->playlist->current = mp_check_playlist_resume(mpctx, mpctx->playlist);
+    if (!mpctx->playlist->current)
+        mpctx->playlist->current = mpctx->playlist->first;
+
+    return 0;
+}
+
+int mpv_main(int argc, char *argv[])
+{
+    osdep_preinit(&argc, &argv);
+
+    if (argc >= 1) {
+        argc--;
+        argv++;
+    }
+
+    struct MPContext *mpctx = mp_create();
+    struct MPOpts *opts = mpctx->opts;
 
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)
         opts->verbose = atoi(verbose_env);
-    mp_msg_update_msglevels(mpctx->global);
-
-    init_libav(mpctx->global);
-    GetCpuCaps(&gCpuCaps);
-    screenshot_init(mpctx);
-    mpctx->mixer = mixer_init(mpctx, mpctx->global);
-    command_init(mpctx);
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argc, argv);
+
+    if (mpctx->opts->use_terminal && !terminal_initialized) {
+        terminal_initialized = true;
+        terminal_init();
+    }
+
     mp_msg_update_msglevels(mpctx->global);
 
     mp_print_version(mpctx->log, false);
@@ -390,88 +506,16 @@ static int mpv_main(int argc, char *argv[])
     set_priority();
 #endif
 
-    mpctx->input = mp_input_init(mpctx->global);
-    stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+    if (mp_initialize(mpctx) < 0)
+        exit_player(mpctx, EXIT_ERROR);
+
 #if HAVE_COCOA
     cocoa_set_input_context(mpctx->input);
 #endif
-
-#if HAVE_ENCODING
-    if (opts->encode_output.file && *opts->encode_output.file) {
-        mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output,
-                                                  mpctx->global);
-        if(!mpctx->encode_lavc_ctx) {
-            MP_INFO(mpctx, "Encoding initialization failed.");
-            exit_player(mpctx, EXIT_ERROR);
-        }
-        m_config_set_option0(mpctx->mconfig, "vo", "lavc");
-        m_config_set_option0(mpctx->mconfig, "ao", "lavc");
-        m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
-        m_config_set_option0(mpctx->mconfig, "force-window", "no");
-        m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
-        mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
-    }
-#endif
-
-    if (mpctx->opts->slave_mode)
-        terminal_setup_stdin_cmd_input(mpctx->input);
-    else if (mpctx->opts->consolecontrols)
-        terminal_setup_getch(mpctx->input);
-
-    if (opts->consolecontrols)
-        getch2_enable();
-
-#if HAVE_LIBASS
-    mpctx->ass_log = mp_log_new(mpctx, mpctx->global->log, "!libass");
-    mpctx->ass_library = mp_ass_init(mpctx->global, mpctx->ass_log);
-#else
-    MP_WARN(mpctx, "Compiled without libass.\n");
-    MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
-#endif
-
-    mpctx->osd = osd_create(mpctx->global);
-
-    if (opts->force_vo) {
-        opts->fixed_vo = 1;
-        mpctx->video_out = init_best_video_out(mpctx->global, mpctx->input,
-                                               mpctx->encode_lavc_ctx);
-        if (!mpctx->video_out) {
-            MP_FATAL(mpctx, "Error opening/initializing "
-                    "the selected video_out (-vo) device.\n");
-            exit_player(mpctx, EXIT_ERROR);
-        }
-        mpctx->mouse_cursor_visible = true;
-        mpctx->initialized_flags |= INITIALIZED_VO;
-    }
-
-#if HAVE_LUA
-    // Lua user scripts can call arbitrary functions. Load them at a point
-    // where this is safe.
-    mp_lua_init(mpctx);
-#endif
-
-    if (opts->shuffle)
-        playlist_shuffle(mpctx->playlist);
-
-    if (opts->merge_files)
-        merge_playlist_files(mpctx->playlist);
-
-    mpctx->playlist->current = mp_check_playlist_resume(mpctx, mpctx->playlist);
-    if (!mpctx->playlist->current)
-        mpctx->playlist->current = mpctx->playlist->first;
 
     mp_play_files(mpctx);
 
     exit_player(mpctx, mpctx->stop_play == PT_QUIT ? EXIT_QUIT : mpctx->quit_player_rc);
 
     return 1;
-}
-
-int main(int argc, char *argv[])
-{
-#if HAVE_COCOA
-    return cocoa_main(mpv_main, argc, argv);
-#else
-    return mpv_main(argc, argv);
-#endif
 }

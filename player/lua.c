@@ -16,9 +16,12 @@
 #include "options/path.h"
 #include "bstr/bstr.h"
 #include "osdep/timer.h"
+#include "osdep/threads.h"
 #include "sub/osd.h"
 #include "core.h"
 #include "command.h"
+#include "client.h"
+#include "libmpv/client.h"
 #include "lua.h"
 
 // List of builtin modules and their contents as strings.
@@ -40,24 +43,11 @@ static const char *builtin_lua_scripts[][2] = {
 struct script_ctx {
     const char *name;
     lua_State *state;
-    struct mp_log_buffer *messages;
     struct mp_log *log;
+    struct mpv_handle *client;
     struct MPContext *mpctx;
+    int suspended;
 };
-
-struct lua_ctx {
-    struct script_ctx **scripts;
-    int num_scripts;
-};
-
-static struct script_ctx *find_script(struct lua_ctx *lctx, const char *name)
-{
-    for (int n = 0; n < lctx->num_scripts; n++) {
-        if (strcmp(lctx->scripts[n]->name, name) == 0)
-            return lctx->scripts[n];
-    }
-    return NULL;
-}
 
 static struct script_ctx *get_ctx(lua_State *L)
 {
@@ -103,10 +93,29 @@ static void report_error(lua_State *L)
     lua_pop(L, 1);
 }
 
+// Check client API error code:
+//  if err >= 0, return 0.
+//  if err < 0, raise the error as Lua error.
+static int check_error(lua_State *L, int err)
+{
+    if (err >= 0)
+        return 0;
+    luaL_error(L, "mpv API error: %s", mpv_error_string(err));
+    abort();
+}
+
+static int run_event_loop(lua_State *L)
+{
+    lua_getglobal(L, "mp_event_loop");
+    if (lua_isnil(L, -1))
+        luaL_error(L, "no event loop function\n");
+    lua_call(L, 0, 0);
+    return 0;
+}
+
 static void add_functions(struct script_ctx *ctx);
 
-static char *script_name_from_filename(void *talloc_ctx, struct lua_ctx *lctx,
-                                       const char *fname)
+static char *script_name_from_filename(void *talloc_ctx, const char *fname)
 {
     fname = mp_basename(fname);
     if (fname[0] == '@')
@@ -124,10 +133,7 @@ static char *script_name_from_filename(void *talloc_ctx, struct lua_ctx *lctx,
             !(c >= '0' && c <= '9'))
             name[n] = '_';
     }
-    // Make unique (stupid but simple)
-    while (find_script(lctx, name))
-        name = talloc_strdup_append(name, "_");
-    return name;
+    return talloc_asprintf(talloc_ctx, "lua/%s", name);
 }
 
 static int load_file(struct script_ctx *ctx, const char *fname)
@@ -171,16 +177,28 @@ static bool require(lua_State *L, const char *name)
     return true;
 }
 
-static void mp_lua_load_script(struct MPContext *mpctx, const char *fname)
+struct thread_arg {
+    struct MPContext *mpctx;
+    mpv_handle *client;
+    const char *fname;
+};
+
+static void *lua_thread(void *p)
 {
-    struct lua_ctx *lctx = mpctx->lua_ctx;
+    pthread_detach(pthread_self());
+
+    struct thread_arg *arg = p;
+    struct MPContext *mpctx = arg->mpctx;
+    const char *fname = arg->fname;
+    mpv_handle *client = arg->client;
+
     struct script_ctx *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct script_ctx) {
         .mpctx = mpctx,
-        .name = script_name_from_filename(ctx, lctx, fname),
+        .client = client,
+        .name = mpv_client_name(client),
+        .log = mp_client_get_log(client),
     };
-    char *log_name = talloc_asprintf(ctx, "lua/%s", ctx->name);
-    ctx->log = mp_log_new(ctx, mpctx->log, log_name);
 
     lua_State *L = ctx->state = luaL_newstate();
     if (!L)
@@ -234,30 +252,43 @@ static void mp_lua_load_script(struct MPContext *mpctx, const char *fname)
             goto error_out;
     }
 
-    MP_TARRAY_APPEND(lctx, lctx->scripts, lctx->num_scripts, ctx);
-    return;
+    // Call the script's event loop runs until the script terminates and unloads.
+    if (mp_cpcall(L, run_event_loop, 0) != 0)
+        report_error(L);
 
 error_out:
+    if (ctx->suspended)
+        mpv_resume(ctx->client);
     if (ctx->state)
         lua_close(ctx->state);
+    mpv_destroy(ctx->client);
     talloc_free(ctx);
+    talloc_free(arg);
+    return NULL;
 }
 
-static void kill_script(struct script_ctx *ctx)
+static void mp_lua_load_script(struct MPContext *mpctx, const char *fname)
 {
-    if (!ctx)
+    struct thread_arg *arg = talloc_ptrtype(NULL, arg);
+    char *name = script_name_from_filename(arg, fname);
+    *arg = (struct thread_arg){
+        .mpctx = mpctx,
+        .fname = talloc_strdup(arg, fname),
+        // Create the client before creating the thread; otherwise a race
+        // condition could happen, where MPContext is destroyed while the
+        // thread tries to create the client.
+        .client = mp_new_client(mpctx->clients, name),
+    };
+    if (!arg->client) {
+        talloc_free(arg);
         return;
-    struct lua_ctx *lctx = ctx->mpctx->lua_ctx;
-    if (ctx->messages)
-        mp_msg_log_buffer_destroy(ctx->messages);
-    lua_close(ctx->state);
-    for (int n = 0; n < lctx->num_scripts; n++) {
-        if (lctx->scripts[n] == ctx) {
-            MP_TARRAY_REMOVE_AT(lctx->scripts, lctx->num_scripts, n);
-            break;
-        }
     }
-    talloc_free(ctx);
+
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, lua_thread, arg))
+        talloc_free(arg);
+
+    return;
 }
 
 static int check_loglevel(lua_State *L, int arg)
@@ -308,139 +339,130 @@ static int script_find_config_file(lua_State *L)
     return 1;
 }
 
-static int run_event(lua_State *L)
+static int script_suspend(lua_State *L)
 {
-    lua_getglobal(L, "mp_event"); // name arg mp_event
-    if (lua_isnil(L, -1))
-        return 0;
-    lua_insert(L, -3); // mp_event name arg
-    lua_call(L, 2, 0);
+    struct script_ctx *ctx = get_ctx(L);
+    if (!ctx->suspended)
+        mpv_suspend(ctx->client);
+    ctx->suspended++;
     return 0;
 }
 
-static void poll_messages(struct script_ctx *ctx)
+static int script_resume(lua_State *L)
 {
-    lua_State *L = ctx->state;
-
-    if (!ctx->messages)
-        return;
-
-    while (1) {
-        struct mp_log_buffer_entry *msg = mp_msg_log_buffer_read(ctx->messages);
-        if (!msg)
-            break;
-
-        lua_pushstring(L, "message"); // msg
-        lua_newtable(L); // msg t
-        lua_pushstring(L, msg->prefix); // msg t s
-        lua_setfield(L, -2, "prefix"); // msg t
-        lua_pushstring(L, mp_log_levels[msg->level]); // msg t s
-        lua_setfield(L, -2, "level"); // msg t
-        lua_pushstring(L, msg->text); // msg t s
-        lua_setfield(L, -2, "text"); // msg t
-
-        if (mp_cpcall(L, run_event, 2) != 0)
-            report_error(L);
-
-        talloc_free(msg);
+    struct script_ctx *ctx = get_ctx(L);
+    static const char *modes[] = {"normal", "all", NULL};
+    if (luaL_checkoption(L, 1, "normal", modes) == 1) {
+        if (ctx->suspended)
+            mpv_resume(ctx->client);
+        ctx->suspended = 0;
+    } else {
+        if (ctx->suspended < 1)
+            luaL_error(L, "trying to resume, but core is not suspended");
+        ctx->suspended--;
+        if (!ctx->suspended)
+            mpv_resume(ctx->client);
     }
+    return 0;
 }
 
-void mp_lua_event(struct MPContext *mpctx, const char *name, const char *arg)
+static int script_wait_event(lua_State *L)
 {
-    // There is no proper subscription mechanism yet, so all scripts get it.
-    struct lua_ctx *lctx = mpctx->lua_ctx;
-    for (int n = 0; n < lctx->num_scripts; n++) {
-        struct script_ctx *ctx = lctx->scripts[n];
-        lua_State *L = ctx->state;
-        lua_pushstring(L, name);
-        if (arg) {
-            lua_pushstring(L, arg);
-        } else {
-            lua_pushnil(L);
-        }
-        if (mp_cpcall(L, run_event, 2) != 0)
-            report_error(L);
-        poll_messages(ctx);
+    struct script_ctx *ctx = get_ctx(L);
+
+    double timeout = luaL_optnumber(L, 1, 1e20);
+
+    // This will almost surely lead to a deadlock. (Polling is still ok.)
+    if (ctx->suspended && timeout > 0)
+        luaL_error(L, "attempting to wait while core is suspended");
+
+    mpv_event *event = mpv_wait_event(ctx->client, timeout);
+
+    lua_newtable(L); // event
+    lua_pushstring(L, mpv_event_name(event->event_id)); // event name
+    lua_setfield(L, -2, "event"); // event
+
+    if (event->error < 0) {
+        lua_pushstring(L, mpv_error_string(event->error)); // event err
+        lua_setfield(L, -2, "error"); // event
     }
+
+    switch (event->event_id) {
+    case MPV_EVENT_LOG_MESSAGE: {
+        mpv_event_log_message *msg = event->data;
+
+        lua_pushstring(L, msg->prefix); // event s
+        lua_setfield(L, -2, "prefix"); // event
+        lua_pushstring(L, msg->level); // event s
+        lua_setfield(L, -2, "level"); // event
+        lua_pushstring(L, msg->text); // event s
+        lua_setfield(L, -2, "text"); // event
+        break;
+    }
+    case MPV_EVENT_SCRIPT_INPUT_DISPATCH: {
+        mpv_event_script_input_dispatch *msg = event->data;
+
+        lua_pushinteger(L, msg->arg0); // event i
+        lua_setfield(L, -2, "arg0"); // event
+        lua_pushstring(L, msg->type); // event s
+        lua_setfield(L, -2, "type"); // event
+        break;
+    }
+    default: ;
+    }
+
+    return 1;
+}
+
+static int script_request_event(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    const char *event = luaL_checkstring(L, 1);
+    bool enable = lua_toboolean(L, 2);
+    // brute force event name -> id; stops working for events > assumed max
+    int event_id = -1;
+    for (int n = 0; n < 256; n++) {
+        const char *name = mpv_event_name(n);
+        if (name && strcmp(name, event) == 0) {
+            event_id = n;
+            break;
+        }
+    }
+    lua_pushboolean(L, mpv_request_event(ctx->client, event_id, enable) >= 0);
+    return 1;
 }
 
 static int script_enable_messages(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
-    if (ctx->messages)
-        luaL_error(L, "messages already enabled");
-
-    int size = luaL_checkinteger(L, 1);
-    int level = check_loglevel(L, 2);
-    if (size < 2 || size > 100000)
-        luaL_error(L, "size argument out of range");
-    ctx->messages = mp_msg_log_buffer_new(ctx->mpctx->global, size, level);
-    return 0;
-}
-
-static int run_script_dispatch(lua_State *L)
-{
-    int id = lua_tointeger(L, 1);
-    const char *event = lua_tostring(L, 2);
-    lua_getglobal(L, "mp_script_dispatch");
-    if (lua_isnil(L, -1))
-        return 0;
-    lua_pushinteger(L, id);
-    lua_pushstring(L, event);
-    lua_call(L, 2, 0);
-    return 0;
-}
-
-void mp_lua_script_dispatch(struct MPContext *mpctx, char *script_name,
-                            int id, char *event)
-{
-    struct script_ctx *ctx = find_script(mpctx->lua_ctx, script_name);
-    if (!ctx) {
-        MP_VERBOSE(mpctx, "Can't find script '%s' when handling input.\n",
-                   script_name);
-        return;
-    }
-    lua_State *L = ctx->state;
-    lua_pushinteger(L, id);
-    lua_pushstring(L, event);
-    if (mp_cpcall(L, run_script_dispatch, 2) != 0)
-        report_error(L);
+    check_loglevel(L, 1);
+    const char *level = luaL_checkstring(L, 1);
+    return check_error(L, mpv_request_log_messages(ctx->client, level));
 }
 
 static int script_send_command(lua_State *L)
 {
-    struct MPContext *mpctx = get_mpctx(L);
+    struct script_ctx *ctx = get_ctx(L);
     const char *s = luaL_checkstring(L, 1);
 
-    mp_cmd_t *cmd = mp_input_parse_cmd(mpctx->input, bstr0((char*)s), "<lua>");
-    if (!cmd)
-        luaL_error(L, "error parsing command");
-    mp_input_queue_cmd(mpctx->input, cmd);
-
-    return 0;
+    return check_error(L, mpv_command_string(ctx->client, s));
 }
 
 static int script_send_commandv(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     int num = lua_gettop(L);
-    bstr args[50];
-    if (num > MP_ARRAY_SIZE(args))
+    const char *args[50];
+    if (num + 1 > MP_ARRAY_SIZE(args))
         luaL_error(L, "too many arguments");
     for (int n = 1; n <= num; n++) {
-        size_t len;
-        const char *s = lua_tolstring(L, n, &len);
+        const char *s = lua_tostring(L, n);
         if (!s)
             luaL_error(L, "argument %d is not a string", n);
-        args[n - 1] = (bstr){(char *)s, len};
+        args[n - 1] = s;
     }
-    mp_cmd_t *cmd = mp_input_parse_cmd_bstrv(ctx->log, 0, num, args, "<lua>");
-    if (!cmd)
-        luaL_error(L, "error parsing command");
-    mp_input_queue_cmd(ctx->mpctx->input, cmd);
-
-    return 0;
+    args[num] = NULL;
+    return check_error(L, mpv_command(ctx->client, args));
 }
 
 static int script_property_list(lua_State *L)
@@ -457,18 +479,24 @@ static int script_property_list(lua_State *L)
 
 static int script_property_string(lua_State *L)
 {
-    struct MPContext *mpctx = get_mpctx(L);
+    struct script_ctx *ctx = get_ctx(L);
     const char *name = luaL_checkstring(L, 1);
     int type = lua_tointeger(L, lua_upvalueindex(1))
-               ? M_PROPERTY_PRINT : M_PROPERTY_GET_STRING;
+               ? MPV_FORMAT_OSD_STRING : MPV_FORMAT_STRING;
 
     char *result = NULL;
-    if (mp_property_do(name, type, &result, mpctx) >= 0 && result) {
+    int err = mpv_get_property(ctx->client, name, type, &result);
+    if (err >= 0) {
         lua_pushstring(L, result);
         talloc_free(result);
         return 1;
     }
-    if (type == M_PROPERTY_PRINT) {
+    // out of convenience, property access errors are not hard errors
+    if (err != MPV_ERROR_PROPERTY_NOT_FOUND &&
+        err != MPV_ERROR_PROPERTY_ERROR &&
+        err != MPV_ERROR_PROPERTY_UNAVAILABLE)
+        check_error(L, err);
+    if (type == MPV_FORMAT_OSD_STRING) {
         lua_pushstring(L, "");
         return 1;
     }
@@ -528,6 +556,7 @@ static int script_get_timer(lua_State *L)
 static int script_get_chapter_list(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
+    mp_dispatch_lock(mpctx->dispatch);
     lua_newtable(L); // list
     int num = get_chapter_count(mpctx);
     for (int n = 0; n < num; n++) {
@@ -543,6 +572,7 @@ static int script_get_chapter_list(lua_State *L)
         lua_settable(L, -3); // list
         talloc_free(name);
     }
+    mp_dispatch_unlock(mpctx->dispatch);
     return 1;
 }
 
@@ -559,6 +589,7 @@ static const char *stream_type(enum stream_type t)
 static int script_get_track_list(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
+    mp_dispatch_lock(mpctx->dispatch);
     lua_newtable(L); // list
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
@@ -593,6 +624,7 @@ static int script_get_track_list(lua_State *L)
         lua_insert(L, -2); // list n1 track
         lua_settable(L, -3); // list
     }
+    mp_dispatch_unlock(mpctx->dispatch);
     return 1;
 }
 
@@ -668,16 +700,24 @@ static int script_format_time(lua_State *L)
 static int script_getopt(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
+
+    mp_dispatch_lock(mpctx->dispatch);
+
     char **opts = mpctx->opts->lua_opts;
     const char *name = luaL_checkstring(L, 1);
+    int r = 0;
 
     for (int n = 0; opts && opts[n] && opts[n + 1]; n++) {
         if (strcmp(opts[n], name) == 0) {
             lua_pushstring(L, opts[n + 1]);
-            return 1;
+            r = 1;
+            break;
         }
     }
-    return 0;
+
+    mp_dispatch_unlock(mpctx->dispatch);
+
+    return r;
 }
 
 struct fn_entry {
@@ -689,6 +729,10 @@ struct fn_entry {
 
 static struct fn_entry fn_list[] = {
     FN_ENTRY(log),
+    FN_ENTRY(suspend),
+    FN_ENTRY(resume),
+    FN_ENTRY(wait_event),
+    FN_ENTRY(request_event),
     FN_ENTRY(find_config_file),
     FN_ENTRY(send_command),
     FN_ENTRY(send_commandv),
@@ -730,7 +774,6 @@ static void add_functions(struct script_ctx *ctx)
 
 void mp_lua_init(struct MPContext *mpctx)
 {
-    mpctx->lua_ctx = talloc_zero(NULL, struct lua_ctx);
     // Load scripts from options
     if (mpctx->opts->lua_load_osc)
         mp_lua_load_script(mpctx, "@osc");
@@ -738,15 +781,5 @@ void mp_lua_init(struct MPContext *mpctx)
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])
             mp_lua_load_script(mpctx, files[n]);
-    }
-}
-
-void mp_lua_uninit(struct MPContext *mpctx)
-{
-    if (mpctx->lua_ctx) {
-        while (mpctx->lua_ctx->num_scripts)
-            kill_script(mpctx->lua_ctx->scripts[0]);
-        talloc_free(mpctx->lua_ctx);
-        mpctx->lua_ctx = NULL;
     }
 }

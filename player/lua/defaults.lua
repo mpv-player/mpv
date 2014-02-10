@@ -52,17 +52,93 @@ function mp.set_mouse_area(x0, y0, x1, y1, section)
     mp.input_set_section_mouse_area(section or default_section, x0, y0, x1, y1)
 end
 
--- called by C on script_dispatch input command
-function mp_script_dispatch(id, event)
-    local cb = callbacks[id]
+local function script_dispatch(event)
+    local cb = callbacks[event.arg0]
     if cb then
-        if event == "press" and cb.press then
+        if event.type == "press" and cb.press then
             cb.press()
-        elseif event == "keyup_follows" and cb.before_press then
+        elseif event.type == "keyup_follows" and cb.before_press then
             cb.before_press()
         end
     end
 end
+
+local timers = {}
+
+-- Install a one-shot timer. Once the given amount of seconds has passed from
+-- now, the callback will be called as cb(), and the timer is removed.
+function mp.add_timeout(seconds, cb)
+    local t = mp.add_periodic_timer(seconds, cb)
+    t.oneshot = true
+    return t
+end
+
+-- Install a periodic timer. It works like add_timeout(), but after cb() is
+-- called, the timer is re-added.
+function mp.add_periodic_timer(seconds, cb)
+    local t = {
+        timeout = seconds,
+        cb = cb,
+        oneshot = false,
+        next_deadline = mp.get_timer() + seconds,
+    }
+    timers[t] = t
+    return t
+end
+
+function mp.cancel_timer(t)
+    if t then
+        timers[t] = nil
+    end
+end
+
+-- Return the timer that expires next.
+local function get_next_timer()
+    local best = nil
+    for t, _ in pairs(timers) do
+        if (best == nil) or (t.next_deadline < best.next_deadline) then
+            best = t
+        end
+    end
+    return best
+end
+
+-- Run timers that have met their deadline.
+-- Return: next absolute time a timer expires as number, or nil if no timers
+local function process_timers()
+    while true do
+        local timer = get_next_timer()
+        if not timer then
+            return
+        end
+        local wait = timer.next_deadline - mp.get_timer()
+        if wait > 0 then
+            return wait
+        else
+            if timer.oneshot then
+                timers[timer] = nil
+            end
+            timer.cb()
+            if not timer.oneshot then
+                timer.next_deadline = mp.get_timer() + timer.timeout
+            end
+        end
+    end
+end
+
+-- used by default event loop (mp_event_loop()) to decide when to quit
+mp.keep_running = true
+
+local event_handlers = {}
+
+function mp.register_event(name, cb)
+    event_handlers[name] = cb
+    mp.request_event(name, true)
+end
+
+-- default handlers
+mp.register_event("shutdown", function() mp.keep_running = false end)
+mp.register_event("script-input-dispatch", script_dispatch)
 
 mp.msg = {
     log = mp.log,
@@ -78,5 +154,35 @@ _G.print = mp.msg.info
 
 package.loaded["mp"] = mp
 package.loaded["mp.msg"] = mp.msg
+
+_G.mp_event_loop = function()
+    local more_events = true
+    mp.suspend()
+    while mp.keep_running do
+        local wait = process_timers()
+        if wait == nil then
+            wait = 1e20 -- infinity for all practical purposes
+        end
+        if more_events then
+            wait = 0
+        end
+        -- Resume playloop - important especially if an error happened while
+        -- suspended, and the error was handled, but no resume was done.
+        if wait > 0 then
+            mp.resume("all")
+        end
+        local e = mp.wait_event(wait)
+        -- Empty the event queue while suspended; otherwise, each
+        -- event will keep us waiting until the core suspends again.
+        mp.suspend()
+        more_events = (e.event ~= "none")
+        if more_events then
+            local handler = event_handlers[e.event]
+            if handler then
+                handler(e)
+            end
+        end
+    end
+end
 
 return {}

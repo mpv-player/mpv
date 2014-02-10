@@ -226,6 +226,7 @@ const m_option_t mp_opts[] = {
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),
     OPT_FLAG_STORE("really-quiet", verbose, CONF_GLOBAL | CONF_PRE_PARSE, -10),
+    OPT_FLAG("terminal", use_terminal, CONF_GLOBAL | CONF_PRE_PARSE),
     OPT_GENERAL(char*, "msglevel", msglevels, CONF_GLOBAL|CONF_PRE_PARSE,
                 .type = &m_option_type_msglevels),
     OPT_FLAG("msgcolor", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
@@ -649,6 +650,7 @@ const m_option_t mp_opts[] = {
 };
 
 const struct MPOpts mp_default_opts = {
+    .use_terminal = 1,
     .msg_color = 1,
     .audio_driver_list = NULL,
     .audio_decoders = "-spdif:*", // never select spdif by default

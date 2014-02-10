@@ -21,6 +21,7 @@
 #include <windows.h>
 #include <sys/time.h>
 #include <mmsystem.h>
+#include <stdlib.h>
 #include "timer.h"
 
 void mp_sleep_us(int64_t us)
@@ -42,8 +43,15 @@ uint64_t mp_raw_time_us(void)
     return tv.tv_sec * 1000000LL + tv.tv_usec;
 }
 
+static void restore_timer(void)
+{
+    // The MSDN documents that begin/end "must" be matched. This satisfies
+    // this requirement.
+    timeEndPeriod(1);
+}
+
 void mp_raw_time_init(void)
 {
-    // request 1ms timer resolution
-    timeBeginPeriod(1);
+    timeBeginPeriod(1); // request 1ms timer resolution
+    atexit(restore_timer);
 }

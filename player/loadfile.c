@@ -57,6 +57,7 @@
 
 #include "core.h"
 #include "command.h"
+#include "libmpv/client.h"
 
 #if HAVE_DVBIN
 #include "stream/dvbin.h"
@@ -470,7 +471,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
 
     demuxer_select_track(track->demuxer, stream, false);
 
-    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
+    mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
     return track;
 }
@@ -503,7 +504,7 @@ static void add_dvd_tracks(struct MPContext *mpctx)
             stream_control(stream, STREAM_CTRL_GET_LANG, &req);
             track->lang = talloc_strdup(track, req.name);
 
-            mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
+            mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
         }
     }
     demuxer_enable_autoselect(demuxer);
@@ -666,15 +667,12 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         if (type == STREAM_VIDEO) {
             mpctx->opts->video_id = user_tid;
             reinit_video_chain(mpctx);
-            mp_notify_property(mpctx, "vid");
         } else if (type == STREAM_AUDIO) {
             mpctx->opts->audio_id = user_tid;
             reinit_audio_chain(mpctx);
-            mp_notify_property(mpctx, "aid");
         } else if (type == STREAM_SUB) {
             mpctx->opts->sub_id = user_tid;
             reinit_subs(mpctx, 0);
-            mp_notify_property(mpctx, "sid");
         }
     } else if (order == 1) {
         if (type == STREAM_SUB) {
@@ -683,6 +681,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         }
     }
 
+    mp_notify(mpctx, MPV_EVENT_TRACK_SWITCHED, NULL);
     osd_changed_all(mpctx->osd);
 
     talloc_free(mpctx->track_layout_hash);
@@ -738,7 +737,7 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     mpctx->num_tracks--;
     talloc_free(track);
 
-    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
+    mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
     return true;
 }
@@ -1052,8 +1051,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     mpctx->initialized_flags |= INITIALIZED_PLAYBACK;
 
-    mp_notify(mpctx, MP_EVENT_START_FILE, NULL);
-    mp_flush_events(mpctx);
+    mp_notify(mpctx, MPV_EVENT_START_FILE, NULL);
 
     mpctx->stop_play = 0;
     mpctx->filename = NULL;
@@ -1097,7 +1095,7 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
                           mpctx->playlist->current->num_params);
 
-    if (!opts->consolecontrols)
+    if (opts->use_terminal && !opts->consolecontrols)
         getch2_disable();
 
 #if HAVE_LIBASS
@@ -1345,7 +1343,7 @@ goto_reopen_demuxer: ;
     if (mpctx->opts->pause)
         pause_player(mpctx);
 
-    mp_notify(mpctx, MP_EVENT_PLAYBACK_START, NULL);
+    mp_notify(mpctx, MPV_EVENT_PLAYBACK_START, NULL);
 
     playback_start = mp_time_sec();
     mpctx->error_playing = false;
@@ -1393,7 +1391,7 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     if (mpctx->stop_play != PT_RESTART)
         m_config_restore_backups(mpctx->mconfig);
 
-    if (opts->consolecontrols)
+    if (opts->use_terminal && opts->consolecontrols)
         getch2_enable();
 
     mpctx->filename = NULL;
@@ -1410,9 +1408,8 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
         mpctx->playlist->current->init_failed = init_failed;
     }
 
-    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
-    mp_notify(mpctx, MP_EVENT_END_FILE, NULL);
-    mp_flush_events(mpctx);
+    mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
+    mp_notify(mpctx, MPV_EVENT_END_FILE, NULL);
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,

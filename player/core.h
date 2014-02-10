@@ -140,12 +140,16 @@ enum {
 #define NUM_PTRACKS 2
 
 typedef struct MPContext {
+    bool initialized;
     struct mpv_global *global;
     struct MPOpts *opts;
     struct mp_log *log;
-    struct mp_log *statusline;
     struct m_config *mconfig;
     struct input_ctx *input;
+    struct mp_client_api *clients;
+    struct mp_dispatch_queue *dispatch;
+
+    struct mp_log *statusline;
     struct osd_state *osd;
     struct mp_osd_msg *osd_msg_stack;
     char *term_osd_text;
@@ -335,7 +339,6 @@ typedef struct MPContext {
     struct screenshot_ctx *screenshot_ctx;
     struct command_ctx *command_ctx;
     struct encode_lavc_context *encode_lavc_ctx;
-    struct lua_ctx *lua_ctx;
     struct mp_nav_state *nav_state;
 } MPContext;
 
@@ -385,6 +388,10 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 
 // main.c
+int mpv_main(int argc, char *argv[]);
+int mp_initialize(struct MPContext *mpctx);
+struct MPContext *mp_create(void);
+void mp_destroy(struct MPContext *mpctx);
 void mp_print_version(struct mp_log *log, int always);
 
 // misc.c

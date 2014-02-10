@@ -2411,6 +2411,13 @@ OPTIONS
 
     Default: ``[-+-]``.
 
+``--no-terminal``, ``--terminal``
+    Disable any use of the terminal and stdin/stdout/stderr. This completely
+    silences any message output.
+
+    Unlike ``--really-quiet``, this disables input and terminal initialization
+    as well.
+
 ``--title=<string>``
     Set the window title. Properties are expanded on playback start.
     (See `Property Expansion`_.)

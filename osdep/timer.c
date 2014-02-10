@@ -16,12 +16,14 @@
  */
 
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "timer.h"
 
 static uint64_t raw_time_offset;
+pthread_once_t timer_init_once = PTHREAD_ONCE_INIT;
 
-void mp_time_init(void)
+static void do_timer_init(void)
 {
     mp_raw_time_init();
     srand(mp_raw_time_us());
@@ -30,6 +32,11 @@ void mp_time_init(void)
     // Also,we rule that the timer never returns 0 (so default-initialized
     // time values will be always in the past).
     raw_time_offset -= 10000000;
+}
+
+void mp_time_init(void)
+{
+    pthread_once(&timer_init_once, do_timer_init);
 }
 
 int64_t mp_time_us(void)
