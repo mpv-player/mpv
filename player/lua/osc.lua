@@ -1257,14 +1257,9 @@ function tick()
     end
 end
 
-function mp_event(name, arg)
-    if name == "tick" then
-        tick()
-    elseif name == "start" or name == "track-layout" then
-        request_init()
-    elseif name == "end" then
-    end
-end
+mp.register_event("tick", tick)
+mp.register_event("start-file", request_init)
+mp.register_event("tracks-changed", request_init)
 
 -- mouse show/hide bindings
 mp.set_key_bindings({

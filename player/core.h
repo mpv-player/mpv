@@ -339,7 +339,6 @@ typedef struct MPContext {
     struct screenshot_ctx *screenshot_ctx;
     struct command_ctx *command_ctx;
     struct encode_lavc_context *encode_lavc_ctx;
-    struct lua_ctx *lua_ctx;
     struct mp_nav_state *nav_state;
 } MPContext;
 

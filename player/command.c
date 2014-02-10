@@ -78,8 +78,6 @@
 #include "lua.h"
 
 struct command_ctx {
-    int events;
-
     double last_seek_time;
     double last_seek_pts;
 
@@ -3119,14 +3117,20 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                          cmd->args[1].v.s, msg_osd);
         break;
 
-    case MP_CMD_SCRIPT_DISPATCH:
-        if (mpctx->lua_ctx) {
-#if HAVE_LUA
-            mp_lua_script_dispatch(mpctx, cmd->args[0].v.s, cmd->args[1].v.i,
-                            cmd->key_up_follows ? "keyup_follows" : "press");
-#endif
+    case MP_CMD_SCRIPT_DISPATCH: {
+        mpv_event_script_input_dispatch *event = talloc_ptrtype(NULL, event);
+        *event = (mpv_event_script_input_dispatch){
+            .arg0 = cmd->args[1].v.i,
+            .type = cmd->key_up_follows ? "keyup_follows" : "press",
+        };
+        if (mp_client_send_event(mpctx, cmd->args[0].v.s,
+                                 MPV_EVENT_SCRIPT_INPUT_DISPATCH, event) < 0)
+        {
+            MP_VERBOSE(mpctx, "Can't find script '%s' when handling input.\n",
+                       cmd->args[0].v.s);
         }
         break;
+    }
 
 #if HAVE_SYS_MMAN_H
     case MP_CMD_OVERLAY_ADD:
@@ -3182,45 +3186,8 @@ void command_init(struct MPContext *mpctx)
 void mp_notify(struct MPContext *mpctx, int event, void *arg)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
-    ctx->events |= 1u << event;
     if (event == MPV_EVENT_START_FILE)
         ctx->last_seek_pts = MP_NOPTS_VALUE;
 
     mp_client_broadcast_event(mpctx, event, arg);
-}
-
-static void handle_script_event(struct MPContext *mpctx, const char *name,
-                                const char *arg)
-{
-#if HAVE_LUA
-    mp_lua_event(mpctx, name, arg);
-#endif
-}
-
-void mp_flush_events(struct MPContext *mpctx)
-{
-    struct command_ctx *ctx = mpctx->command_ctx;
-
-    ctx->events |= (1u << MPV_EVENT_TICK);
-
-    for (int n = 0; n < 16; n++) {
-        int event = n;
-        unsigned mask = 1 << event;
-        if (ctx->events & mask) {
-            // The event handler could set event flags again; in this case let
-            // the next mp_flush_events() call handle it to avoid infinite loops.
-            ctx->events &= ~mask;
-            const char *name = NULL;
-            switch (event) {
-            case MPV_EVENT_TICK:             name = "tick"; break;
-            case MPV_EVENT_TRACKS_CHANGED:   name = "track-layout"; break;
-            case MPV_EVENT_PLAYBACK_START:   name = "playback-start"; break;
-            case MPV_EVENT_START_FILE:       name = "start"; break;
-            case MPV_EVENT_END_FILE:         name = "end"; break;
-            default: ;
-            }
-            if (name)
-                handle_script_event(mpctx, name, "");
-        }
-    }
 }

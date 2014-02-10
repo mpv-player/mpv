@@ -35,6 +35,5 @@ int mp_property_do(const char* name, int action, void* val,
 const struct m_option *mp_get_property_list(void);
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg);
-void mp_flush_events(struct MPContext *mpctx);
 
 #endif /* MPLAYER_COMMAND_H */

@@ -52,17 +52,30 @@ function mp.set_mouse_area(x0, y0, x1, y1, section)
     mp.input_set_section_mouse_area(section or default_section, x0, y0, x1, y1)
 end
 
--- called by C on script_dispatch input command
-function mp_script_dispatch(id, event)
-    local cb = callbacks[id]
+local function script_dispatch(event)
+    local cb = callbacks[event.arg0]
     if cb then
-        if event == "press" and cb.press then
+        if event.type == "press" and cb.press then
             cb.press()
-        elseif event == "keyup_follows" and cb.before_press then
+        elseif event.type == "keyup_follows" and cb.before_press then
             cb.before_press()
         end
     end
 end
+
+-- used by default event loop (mp_event_loop()) to decide when to quit
+mp.keep_running = true
+
+local event_handlers = {}
+
+function mp.register_event(name, cb)
+    event_handlers[name] = cb
+    mp.request_event(name, true)
+end
+
+-- default handlers
+mp.register_event("shutdown", function() mp.keep_running = false end)
+mp.register_event("script-input-dispatch", script_dispatch)
 
 mp.msg = {
     log = mp.log,
@@ -78,5 +91,29 @@ _G.print = mp.msg.info
 
 package.loaded["mp"] = mp
 package.loaded["mp.msg"] = mp.msg
+
+_G.mp_event_loop = function()
+    wait = 0
+    while mp.keep_running do
+        -- Drop all locks - important especially if an error happened while
+        -- locked, and the error was handled, but the lock not dropped.
+        if wait > 0 then
+            mp.resume("all")
+        end
+        local e = mp.wait_event(wait)
+        if e.event == "none" then
+            wait = 1e20
+        else
+            -- Empty the event queue while suspended; otherwise, each
+            -- event will keep us waiting until the core suspends again.
+            mp.suspend()
+            wait = 0
+            local handler = event_handlers[e.event]
+            if handler then
+                handler(e)
+            end
+        end
+    end
+end
 
 return {}

@@ -139,9 +139,6 @@ void mp_destroy(struct MPContext *mpctx)
 
     mpctx->encode_lavc_ctx = NULL;
 
-#if HAVE_LUA
-    mp_lua_uninit(mpctx);
-#endif
     shutdown_clients(mpctx);
 
     command_uninit(mpctx);

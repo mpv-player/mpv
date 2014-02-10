@@ -1052,7 +1052,6 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->initialized_flags |= INITIALIZED_PLAYBACK;
 
     mp_notify(mpctx, MPV_EVENT_START_FILE, NULL);
-    mp_flush_events(mpctx);
 
     mpctx->stop_play = 0;
     mpctx->filename = NULL;
@@ -1411,7 +1410,6 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
     mp_notify(mpctx, MPV_EVENT_END_FILE, NULL);
-    mp_flush_events(mpctx);
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,
