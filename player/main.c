@@ -444,7 +444,7 @@ int mp_initialize(struct MPContext *mpctx)
     return 0;
 }
 
-static int mpv_main(int argc, char *argv[])
+int mpv_main(int argc, char *argv[])
 {
     osdep_preinit(&argc, &argv);
 
@@ -518,13 +518,4 @@ static int mpv_main(int argc, char *argv[])
     exit_player(mpctx, mpctx->stop_play == PT_QUIT ? EXIT_QUIT : mpctx->quit_player_rc);
 
     return 1;
-}
-
-int main(int argc, char *argv[])
-{
-#if HAVE_COCOA
-    return cocoa_main(mpv_main, argc, argv);
-#else
-    return mpv_main(argc, argv);
-#endif
 }

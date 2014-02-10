@@ -388,6 +388,7 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 
 // main.c
+int mpv_main(int argc, char *argv[]);
 int mp_initialize(struct MPContext *mpctx);
 struct MPContext *mp_create(void);
 void mp_destroy(struct MPContext *mpctx);

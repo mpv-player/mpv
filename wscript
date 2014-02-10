@@ -10,6 +10,11 @@ from waftools.checks.custom import *
 
 build_options = [
     {
+        'name': '--shared',
+        'desc': 'enable shared library',
+        'default': 'disable',
+        'func': check_true
+    }, {
         'name': '--static-build',
         'desc': 'static build',
         'default': 'disable',
@@ -738,6 +743,8 @@ _INSTALL_DIRS_LIST = [
     ('bindir',  '${PREFIX}/bin',      'binary files'),
     ('libdir',  '${PREFIX}/lib',      'library files'),
     ('confdir', '${PREFIX}/etc/mpv',  'configuration files'),
+
+    ('incdir',  '${PREFIX}/include',  'include files'),
 
     ('datadir', '${PREFIX}/share',    'data files'),
     ('mandir',  '${DATADIR}/man',     'man pages '),
