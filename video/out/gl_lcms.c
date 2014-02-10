@@ -168,9 +168,9 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
        V = 1.099 * L^0.45 - 0.099 for L >= 0.018
        V = 4.500 * L              for L <  0.018
 
-       The 0.18 parameter comes from inserting 0.018 into the function */
+       The 0.081 parameter comes from inserting 0.018 into the function */
     cmsToneCurve *tonecurve = cmsBuildParametricToneCurve(NULL, 4,
-            (cmsFloat64Number[5]){1/0.45, 1/1.099, 0.099, 1/4.5, 0.18});
+            (cmsFloat64Number[5]){1/0.45, 1/1.099, 0.099/1.099, 1/4.5, 0.081});
     cmsHPROFILE vid_profile = cmsCreateRGBProfile(&d65, &bt709prim,
                         (cmsToneCurve*[3]){tonecurve, tonecurve, tonecurve});
     cmsFreeToneCurve(tonecurve);
