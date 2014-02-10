@@ -452,6 +452,17 @@ def build(ctx):
         for f in headers:
             ctx.install_as(ctx.env.INCDIR + '/libmpv/' + f, 'libmpv/' + f)
 
+    if ctx.dependency_satisfied('client-api-examples'):
+        # This assumes all examples are single-file (as examples should be)
+        for f in ["simple"]:
+            ctx(
+                target       = f,
+                source       = "DOCS/client_api_examples/" + f + ".c",
+                includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()],
+                use          = "mpv",
+                features     = "c cprogram",
+            )
+
     if ctx.env.DEST_OS == 'win32':
         wrapctx = ctx(
             target       = "mpv",

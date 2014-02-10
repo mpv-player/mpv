@@ -15,6 +15,11 @@ build_options = [
         'default': 'disable',
         'func': check_true
     }, {
+        'name': '--client-api-examples',
+        'desc': 'build client API examples',
+        'deps': ['shared'],
+        'func': check_true
+    }, {
         'name': '--static-build',
         'desc': 'static build',
         'default': 'disable',
