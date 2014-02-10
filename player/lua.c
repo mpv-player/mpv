@@ -468,6 +468,15 @@ static int script_commandv(lua_State *L)
     return check_error(L, mpv_command(ctx->client, args));
 }
 
+static int script_set_property(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    const char *p = luaL_checkstring(L, 1);
+    const char *v = luaL_checkstring(L, 2);
+
+    return check_error(L, mpv_set_property_string(ctx->client, p, v));
+}
+
 static int script_property_list(lua_State *L)
 {
     const struct m_option *props = mp_get_property_list();
@@ -734,6 +743,7 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(find_config_file),
     FN_ENTRY(command),
     FN_ENTRY(commandv),
+    FN_ENTRY(set_property),
     FN_ENTRY(property_list),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),
