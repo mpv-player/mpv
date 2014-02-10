@@ -94,14 +94,17 @@ static void report_error(lua_State *L)
 }
 
 // Check client API error code:
-//  if err >= 0, return 0.
-//  if err < 0, raise the error as Lua error.
+//  if err >= 0, push "true" to the stack, and return 1
+//  if err < 0, push nil and then the error string to the stack, and return 2
 static int check_error(lua_State *L, int err)
 {
-    if (err >= 0)
-        return 0;
-    luaL_error(L, "mpv API error: %s", mpv_error_string(err));
-    abort();
+    if (err >= 0) {
+        lua_pushboolean(L, 1);
+        return 1;
+    }
+    lua_pushnil(L);
+    lua_pushstring(L, mpv_error_string(err));
+    return 2;
 }
 
 static int run_event_loop(lua_State *L)
@@ -491,16 +494,11 @@ static int script_get_property(lua_State *L)
         talloc_free(result);
         return 1;
     }
-    // out of convenience, property access errors are not hard errors
-    if (err != MPV_ERROR_PROPERTY_NOT_FOUND &&
-        err != MPV_ERROR_PROPERTY_ERROR &&
-        err != MPV_ERROR_PROPERTY_UNAVAILABLE)
-        check_error(L, err);
     if (type == MPV_FORMAT_OSD_STRING) {
         lua_pushstring(L, "");
-        return 1;
+        lua_pushstring(L, mpv_error_string(err));
     }
-    return 0;
+    return check_error(L, err);
 }
 
 static int script_set_osd_ass(lua_State *L)
