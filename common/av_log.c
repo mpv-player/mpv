@@ -181,31 +181,41 @@ void uninit_libav(struct mpv_global *global)
 }
 
 #define V(x) (x)>>16, (x)>>8 & 255, (x) & 255
-static void print_version(struct mp_log *log, int v, char *name,
-                          unsigned buildv, unsigned runv)
-{
-    mp_msg(log, v, "   %-15s %d.%d.%d", name, V(buildv));
-    if (buildv != runv)
-        mp_msg(log, v, " (runtime %d.%d.%d)", V(runv));
-    mp_msg(log, v, "\n");
-}
-#undef V
+
+struct lib {
+    const char *name;
+    unsigned buildv;
+    unsigned runv;
+};
 
 void print_libav_versions(struct mp_log *log, int v)
 {
-    mp_msg(log, v, "%s library versions:\n", LIB_PREFIX);
-
-    print_version(log, v, "libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version());
-    print_version(log, v, "libavcodec",    LIBAVCODEC_VERSION_INT,    avcodec_version());
-    print_version(log, v, "libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version());
-    print_version(log, v, "libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version());
+    const struct lib libs[] = {
+        {"libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version()},
+        {"libavcodec",    LIBAVCODEC_VERSION_INT,    avcodec_version()},
+        {"libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version()},
+        {"libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version()},
 #if HAVE_LIBAVFILTER
-    print_version(log, v, "libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version());
+        {"libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version()},
 #endif
 #if HAVE_LIBAVRESAMPLE
-    print_version(log, v, "libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version());
+        {"libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version()},
 #endif
 #if HAVE_LIBSWRESAMPLE
-    print_version(log, v, "libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version());
+        {"libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version()},
 #endif
+    };
+
+    mp_msg(log, v, "%s library versions:\n", LIB_PREFIX);
+
+    for (int n = 0; n < MP_ARRAY_SIZE(libs); n++) {
+        const struct lib *l = &libs[n];
+        mp_msg(log, v, "   %-15s %d.%d.%d", l->name, V(l->buildv));
+        if (l->buildv != l->runv) {
+            mp_msg(log, v, " (runtime %d.%d.%d)", V(l->runv));
+        }
+        mp_msg(log, v, "\n");
+    }
 }
+
+#undef V
