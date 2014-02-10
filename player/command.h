@@ -34,19 +34,7 @@ int mp_property_do(const char* name, int action, void* val,
 
 const struct m_option *mp_get_property_list(void);
 
-enum mp_event {
-    MP_EVENT_NONE,
-    MP_EVENT_TICK,
-    MP_EVENT_PROPERTY,          // char*, property that is changed
-    MP_EVENT_TRACKS_CHANGED,
-    MP_EVENT_START_FILE,
-    MP_EVENT_PLAYBACK_START,
-    MP_EVENT_END_FILE,
-};
-
-void mp_notify(struct MPContext *mpctx, enum mp_event event, void *arg);
-void mp_notify_property(struct MPContext *mpctx, const char *property);
-
+void mp_notify(struct MPContext *mpctx, int event, void *arg);
 void mp_flush_events(struct MPContext *mpctx);
 
 #endif /* MPLAYER_COMMAND_H */

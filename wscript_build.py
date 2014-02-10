@@ -202,6 +202,7 @@ def build(ctx):
 
         ## Player
         ( "player/audio.c" ),
+        ( "player/client.c" ),
         ( "player/command.c" ),
         ( "player/configfiles.c" ),
         ( "player/dvdnav.c" ),

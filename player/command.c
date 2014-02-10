@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "talloc.h"
+#include "client.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "command.h"
@@ -3178,16 +3179,14 @@ void command_init(struct MPContext *mpctx)
     };
 }
 
-// Notify that a property might have changed.
-void mp_notify_property(struct MPContext *mpctx, const char *property)
-{
-    mp_notify(mpctx, MP_EVENT_PROPERTY, (void *)property);
-}
-
-void mp_notify(struct MPContext *mpctx, enum mp_event event, void *arg)
+void mp_notify(struct MPContext *mpctx, int event, void *arg)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
     ctx->events |= 1u << event;
+    if (event == MPV_EVENT_START_FILE)
+        ctx->last_seek_pts = MP_NOPTS_VALUE;
+
+    mp_client_broadcast_event(mpctx, event, arg);
 }
 
 static void handle_script_event(struct MPContext *mpctx, const char *name,
@@ -3202,10 +3201,10 @@ void mp_flush_events(struct MPContext *mpctx)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
 
-    ctx->events |= (1u << MP_EVENT_TICK);
+    ctx->events |= (1u << MPV_EVENT_TICK);
 
     for (int n = 0; n < 16; n++) {
-        enum mp_event event = n;
+        int event = n;
         unsigned mask = 1 << event;
         if (ctx->events & mask) {
             // The event handler could set event flags again; in this case let
@@ -3213,17 +3212,15 @@ void mp_flush_events(struct MPContext *mpctx)
             ctx->events &= ~mask;
             const char *name = NULL;
             switch (event) {
-            case MP_EVENT_TICK:             name = "tick"; break;
-            case MP_EVENT_TRACKS_CHANGED:   name = "track-layout"; break;
-            case MP_EVENT_PLAYBACK_START:   name = "playback-start"; break;
-            case MP_EVENT_START_FILE:       name = "start"; break;
-            case MP_EVENT_END_FILE:         name = "end"; break;
+            case MPV_EVENT_TICK:             name = "tick"; break;
+            case MPV_EVENT_TRACKS_CHANGED:   name = "track-layout"; break;
+            case MPV_EVENT_PLAYBACK_START:   name = "playback-start"; break;
+            case MPV_EVENT_START_FILE:       name = "start"; break;
+            case MPV_EVENT_END_FILE:         name = "end"; break;
             default: ;
             }
             if (name)
                 handle_script_event(mpctx, name, "");
-            if (event == MP_EVENT_START_FILE)
-                ctx->last_seek_pts = MP_NOPTS_VALUE;
         }
     }
 }

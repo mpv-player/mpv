@@ -34,6 +34,7 @@
 #include "input/input.h"
 
 #include "osdep/terminal.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 
 #include "audio/mixer.h"
@@ -50,6 +51,7 @@
 #include "core.h"
 #include "screenshot.h"
 #include "command.h"
+#include "libmpv/client.h"
 
 #define WAKEUP_PERIOD 0.5
 
@@ -79,7 +81,7 @@ static const char av_desync_help_text[] =
 
 void pause_player(struct MPContext *mpctx)
 {
-    mp_notify_property(mpctx, "pause");
+    mp_notify(mpctx, MPV_EVENT_PAUSE, NULL);
 
     mpctx->opts->pause = 1;
 
@@ -110,7 +112,7 @@ void pause_player(struct MPContext *mpctx)
 
 void unpause_player(struct MPContext *mpctx)
 {
-    mp_notify_property(mpctx, "pause");
+    mp_notify(mpctx, MPV_EVENT_UNPAUSE, NULL);
 
     mpctx->opts->pause = 0;
 
@@ -749,12 +751,14 @@ static void handle_input_and_seek_coalesce(struct MPContext *mpctx)
 
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
+        mp_dispatch_queue_process(mpctx->dispatch, 0);
         cmd = mp_input_get_cmd(mpctx->input, 0, 0);
         run_command(mpctx, cmd);
         mp_cmd_free(cmd);
         if (mpctx->stop_play)
             break;
     }
+    mp_dispatch_queue_process(mpctx->dispatch, 0);
 }
 
 void add_frame_pts(struct MPContext *mpctx, double pts)
@@ -1166,8 +1170,13 @@ void run_playloop(struct MPContext *mpctx)
         screenshot_flip(mpctx);
         new_frame_shown = true;
 
+        mp_notify(mpctx, MPV_EVENT_TICK, NULL);
+
         break;
     } // video
+
+    if (!video_left || mpctx->paused)
+        mp_notify(mpctx, MPV_EVENT_TICK, NULL);
 
     video_left &= mpctx->sync_audio_to_video; // force no-video semantics
 
@@ -1308,6 +1317,7 @@ void run_playloop(struct MPContext *mpctx)
 void idle_loop(struct MPContext *mpctx)
 {
     // ================= idle loop (STOP state) =========================
+    mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
     bool need_reinit = true;
     while (mpctx->opts->player_idle_mode && !mpctx->playlist->current
            && mpctx->stop_play != PT_QUIT)
@@ -1331,6 +1341,7 @@ void idle_loop(struct MPContext *mpctx)
             run_command(mpctx, cmd);
         mp_cmd_free(cmd);
         mp_flush_events(mpctx);
+        mp_dispatch_queue_process(mpctx->dispatch, 0);
         if (mpctx->opts->use_terminal)
             getch2_poll();
     }

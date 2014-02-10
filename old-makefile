@@ -224,6 +224,7 @@ SOURCES = audio/audio.c \
           osdep/timer.c \
           osdep/threads.c \
           player/audio.c \
+          player/client.c \
           player/configfiles.c \
           player/command.c \
           player/dvdnav.c \
