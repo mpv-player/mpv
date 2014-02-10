@@ -1,3 +1,6 @@
+function mp.get_script_name()
+    return mp.script_name
+end
 
 local callbacks = {}
 -- each script has its own section, so that they don't conflict
@@ -133,7 +136,7 @@ local event_handlers = {}
 
 function mp.register_event(name, cb)
     event_handlers[name] = cb
-    mp.request_event(name, true)
+    return mp.request_event(name, true)
 end
 
 -- default handlers
@@ -169,7 +172,7 @@ _G.mp_event_loop = function()
         -- Resume playloop - important especially if an error happened while
         -- suspended, and the error was handled, but no resume was done.
         if wait > 0 then
-            mp.resume("all")
+            mp.resume_all()
         end
         local e = mp.wait_event(wait)
         -- Empty the event queue while suspended; otherwise, each

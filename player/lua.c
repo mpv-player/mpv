@@ -354,18 +354,20 @@ static int script_suspend(lua_State *L)
 static int script_resume(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
-    static const char *modes[] = {"normal", "all", NULL};
-    if (luaL_checkoption(L, 1, "normal", modes) == 1) {
-        if (ctx->suspended)
-            mpv_resume(ctx->client);
-        ctx->suspended = 0;
-    } else {
-        if (ctx->suspended < 1)
-            luaL_error(L, "trying to resume, but core is not suspended");
-        ctx->suspended--;
-        if (!ctx->suspended)
-            mpv_resume(ctx->client);
-    }
+    if (ctx->suspended < 1)
+        luaL_error(L, "trying to resume, but core is not suspended");
+    ctx->suspended--;
+    if (!ctx->suspended)
+        mpv_resume(ctx->client);
+    return 0;
+}
+
+static int script_resume_all(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    if (ctx->suspended)
+        mpv_resume(ctx->client);
+    ctx->suspended = 0;
     return 0;
 }
 
@@ -738,6 +740,7 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(log),
     FN_ENTRY(suspend),
     FN_ENTRY(resume),
+    FN_ENTRY(resume_all),
     FN_ENTRY(wait_event),
     FN_ENTRY(request_event),
     FN_ENTRY(find_config_file),
