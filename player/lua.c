@@ -440,7 +440,7 @@ static int script_enable_messages(lua_State *L)
     return check_error(L, mpv_request_log_messages(ctx->client, level));
 }
 
-static int script_send_command(lua_State *L)
+static int script_command(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     const char *s = luaL_checkstring(L, 1);
@@ -448,7 +448,7 @@ static int script_send_command(lua_State *L)
     return check_error(L, mpv_command_string(ctx->client, s));
 }
 
-static int script_send_commandv(lua_State *L)
+static int script_commandv(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     int num = lua_gettop(L);
@@ -477,7 +477,7 @@ static int script_property_list(lua_State *L)
     return 1;
 }
 
-static int script_property_string(lua_State *L)
+static int script_get_property(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     const char *name = luaL_checkstring(L, 1);
@@ -547,7 +547,7 @@ static int script_get_mouse_pos(lua_State *L)
     return 2;
 }
 
-static int script_get_timer(lua_State *L)
+static int script_get_time(lua_State *L)
 {
     lua_pushnumber(L, mp_time_sec());
     return 1;
@@ -697,7 +697,7 @@ static int script_format_time(lua_State *L)
     return 1;
 }
 
-static int script_getopt(lua_State *L)
+static int script_get_opt(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
 
@@ -734,14 +734,14 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(wait_event),
     FN_ENTRY(request_event),
     FN_ENTRY(find_config_file),
-    FN_ENTRY(send_command),
-    FN_ENTRY(send_commandv),
+    FN_ENTRY(command),
+    FN_ENTRY(commandv),
     FN_ENTRY(property_list),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),
     FN_ENTRY(get_screen_size),
     FN_ENTRY(get_mouse_pos),
-    FN_ENTRY(get_timer),
+    FN_ENTRY(get_time),
     FN_ENTRY(get_chapter_list),
     FN_ENTRY(get_track_list),
     FN_ENTRY(input_define_section),
@@ -750,7 +750,7 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(input_set_section_mouse_area),
     FN_ENTRY(format_time),
     FN_ENTRY(enable_messages),
-    FN_ENTRY(getopt),
+    FN_ENTRY(get_opt),
 };
 
 // On stack: mp table
@@ -764,12 +764,12 @@ static void add_functions(struct script_ctx *ctx)
     }
 
     lua_pushinteger(L, 0);
-    lua_pushcclosure(L, script_property_string, 1);
-    lua_setfield(L, -2, "property_get");
+    lua_pushcclosure(L, script_get_property, 1);
+    lua_setfield(L, -2, "get_property");
 
     lua_pushinteger(L, 1);
-    lua_pushcclosure(L, script_property_string, 1);
-    lua_setfield(L, -2, "property_get_string");
+    lua_pushcclosure(L, script_get_property, 1);
+    lua_setfield(L, -2, "get_property_osd");
 }
 
 void mp_lua_init(struct MPContext *mpctx)
