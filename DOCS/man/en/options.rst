@@ -103,6 +103,13 @@ OPTIONS
     Override movie aspect ratio, in case aspect information is incorrect or
     missing in the file being played. See also ``--no-aspect``.
 
+    Two values have special meaning:
+
+    :0:  disable aspect ratio handling, pretend the video has square pixels
+    :-1: use the video stream or container aspect (default)
+
+    But note that handling of these special values might change in the future.
+
     .. admonition:: Examples
 
         - ``--aspect=4:3``  or ``--aspect=1.3333``
