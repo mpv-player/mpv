@@ -54,7 +54,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     ::
 
-        mp.command("loadfile " + filename + " append")
+        mp.command("loadfile " .. filename .. " append")
         mp.commandv("loadfile", filename, "append")
 
     These two commands are equivalent, except that the first version breaks
