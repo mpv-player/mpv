@@ -446,6 +446,7 @@ def build(ctx):
             features     = "c cshlib syms",
             export_symbols_regex = 'mpv_.*',
             install_path = ctx.env.LIBDIR,
+            vnum         = "0.0.0",
         )
 
         headers = ["client.h"]
