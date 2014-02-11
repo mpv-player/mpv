@@ -412,6 +412,12 @@ int mp_initialize(struct MPContext *mpctx)
     // From this point on, all mpctx members are initialized.
     mpctx->initialized = true;
 
+
+#if HAVE_COCOA
+    if (mpctx->is_cplayer)
+        cocoa_set_input_context(mpctx->input);
+#endif
+
     if (opts->force_vo) {
         opts->fixed_vo = 1;
         mpctx->video_out = init_best_video_out(mpctx->global, mpctx->input,
@@ -455,6 +461,8 @@ int mpv_main(int argc, char *argv[])
 
     struct MPContext *mpctx = mp_create();
     struct MPOpts *opts = mpctx->opts;
+
+    mpctx->is_cplayer = true;
 
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)
@@ -508,10 +516,6 @@ int mpv_main(int argc, char *argv[])
 
     if (mp_initialize(mpctx) < 0)
         exit_player(mpctx, EXIT_ERROR);
-
-#if HAVE_COCOA
-    cocoa_set_input_context(mpctx->input);
-#endif
 
     mp_play_files(mpctx);
 
