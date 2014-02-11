@@ -97,13 +97,14 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     Example:
 
-    ```
-    function my_fn()
-        print("start of playback!")
-    end
+    ::
 
-    mp.register_event("playback-start", my_fn)
-    ```
+        function my_fn()
+            print("start of playback!")
+        end
+
+        mp.register_event("playback-start", my_fn)
+
 
 ``mp.add_timeout(seconds, fn)``
     Call the given function fn when the given number of seconds has elapsed.
