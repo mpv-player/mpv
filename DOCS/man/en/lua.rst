@@ -21,13 +21,13 @@ the ``--lua`` option. Each script runs in its own thread. Your script is
 first run "as is", and once that is done, the event loop is entered. This
 event loop will dispatch events received by mpv and call your own event
 handlers which you have registered with ``mp.register_event``, or timers
-added with ``mp.add_timeout`` or similar. When the player quits, all scripts
-will be asked to terminate.
+added with ``mp.add_timeout`` or similar.
 
-This happens via a ``shutdown`` event, which by default will make the event
-loop return. If your script got into an endless loop, mpv will probably behave
-fine during playback, but it won't terminate when quitting because it's waiting
-on your script.
+When the player quits, all scripts will be asked to terminate. This happens via
+a ``shutdown`` event, which by default will make the event loop return. If your
+script got into an endless loop, mpv will probably behave fine during playback
+(unless the player is suspended, see ``mp.suspend``), but it won't terminate
+when quitting, because it's waiting on your script.
 
 Internally, the C code will call the Lua function ``mp_event_loop`` after
 loading a Lua script. This function is normally defined by the default prelude
