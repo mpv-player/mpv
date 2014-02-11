@@ -45,6 +45,21 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     Returns true on success, or ``nil, error`` on error.
 
+``mp.commandv(arg1, arg2, ...)``
+    Similar to ``mp.command``, but pass each command argument as separate
+    parameter. This has the advantage that you don't have to care about
+    quoting and escaping in some cases.
+
+    Example:
+
+    ::
+
+        mp.command("loadfile " + filename + " append")
+        mp.commandv("loadfile", filename, "append")
+
+    These two commands are equivalent, except that the first version breaks
+    if the filename contains spaces or certain special characters.
+
 ``mp.get_property(name)``
     Return the value of the given property as string. These are the same
     properties as used in input.conf. See `Properties`_ for a list of
