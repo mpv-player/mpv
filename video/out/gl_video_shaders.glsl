@@ -45,8 +45,14 @@
 #if __VERSION__ >= 130
 vec3 srgb_compand(vec3 v)
 {
-    return mix(1.055 * pow(v, vec3(1.0/2.4)) - vec3(0.055), v * 12.92,
-               lessThanEqual(v, vec3(0.0031308)));
+    return mix(v * 12.92, 1.055 * pow(v, vec3(1.0/2.4)) - vec3(0.055),
+               lessThanEqual(vec3(0.0031308), v));
+}
+
+vec3 bt709_expand(vec3 v)
+{
+    return mix(v / 4.5, pow((v + vec3(0.099))/1.099, vec3(1/0.45)),
+               lessThanEqual(vec3(0.0812), v));
 }
 #endif
 
@@ -384,6 +390,13 @@ void main() {
     color = texture3D(lut_3d, color).rgb;
 #endif
 #ifdef USE_SRGB
+    // Go from "linear" (0.45) to BT.709 to true linear to sRGB
+#ifndef USE_3DLUT
+    // Unless we are using a 3DLUT, in which case USE_LINEAR_CONV_INV
+    // already triggered earlier.
+    color = pow(color, vec3(0.45));
+#endif
+    color = bt709_expand(color.rgb);
     color.rgb = srgb_compand(color.rgb);
 #endif
 #ifdef USE_DITHER
