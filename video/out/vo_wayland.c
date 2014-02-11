@@ -487,6 +487,8 @@ static void frame_handle_redraw(void *data,
         if (p->resize_attach) {
             destroy_shm_buffer(&p->tmp_buffer);
             p->resize_attach = false;
+            p->x = 0;
+            p->y = 0;
         }
     }
     else {
