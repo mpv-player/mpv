@@ -789,9 +789,14 @@ Available video output drivers are:
 ``wayland`` (Wayland only)
     Wayland shared memory video output as fallback for ``opengl``.
 
-    ``default-format``
-        Use the default RGB32 format instead of an auto-detected one.
-
     ``alpha``
         Use a buffer format that supports videos and images with alpha
         information
+    ``rgb565``
+        Use RGB565 as buffer format. This format is implemented on most
+        platforms, especially on embedded where it is far more efficient then
+        RGB8888.
+    ``triple-buffering``
+        Use 3 buffers instead of 2. This can lead to more fluid playback, but
+        uses more memory.
+
