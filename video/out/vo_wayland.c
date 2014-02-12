@@ -720,10 +720,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
     // overides alpha
     // use rgb565 if performance is your main concern
     if (p->use_rgb565) {
-        const struct fmtentry *fmt =
+        const struct fmtentry *entry =
             is_wayland_format_supported(p, WL_SHM_FORMAT_RGB565);
-        if (fmt)
-            p->video_format = fmt;
+        if (entry)
+            p->video_format = entry;
     }
 
     buffer_pool_init(p, &p->video_bufpool, (p->use_triplebuffering ? 3 : 2),
