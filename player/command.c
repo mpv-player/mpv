@@ -707,8 +707,8 @@ static int tag_property(m_option_t *prop, int action, void *arg,
         char **slist = NULL;
         int num = 0;
         for (int n = 0; n < tags->num_keys; n++) {
-            MP_TARRAY_APPEND(NULL, slist, num, tags->keys[n]);
-            MP_TARRAY_APPEND(NULL, slist, num, tags->values[n]);
+            MP_TARRAY_APPEND(NULL, slist, num, talloc_strdup(NULL, tags->keys[n]));
+            MP_TARRAY_APPEND(NULL, slist, num, talloc_strdup(NULL, tags->values[n]));
         }
         MP_TARRAY_APPEND(NULL, slist, num, NULL);
         *(char ***)arg = slist;
