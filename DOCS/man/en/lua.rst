@@ -32,6 +32,9 @@ when quitting, because it's waiting on your script.
 Internally, the C code will call the Lua function ``mp_event_loop`` after
 loading a Lua script. This function is normally defined by the default prelude
 loaded before your script (see ``player/lua/defaults.lua`` in the mpv sources).
+The event loop will wait for events and dispatch events registered with
+``mp.register_event``. It will also handle timers added with ``mp.add_timeout``
+and similar (by waiting with a timeout).
 
 mp functions
 ------------
@@ -89,39 +92,17 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
 ``mp.register_event(name, fn)``
     Call a specific function when an event happens. The event name is a string,
-    and the function is a Lua function value.
+    and the function fn is a Lua function value.
+
+    Some events have associated data. This is put into a Lua table and passed
+    as argument to fn. The Lua table by default contains a ``name`` field,
+    which is a string containing the event name. If the event has an error
+    associated, the ``error`` field is set to a string describing the error,
+    on success it's not set.
 
     Returns true if such an event exists, false otherwise.
 
-    ====================== =====================================================
-    Name                   Comment
-    ====================== =====================================================
-    ``shutdown``
-    ``log-message``        for ``mp.enable_messages`` (undocumented)
-    ``get-property-reply`` (undocumented)
-    ``set-property-reply`` (undocumented)
-    ``command-reply``      (undocumented)
-    ``start-file``         happens right before a new file is loaded
-    ``end-file``           happens after a file was unloaded
-    ``playback-start``     happens atfer a file was loaded and begins playback
-    ``tracks-changed``     list of tracks was updated
-    ``track-switched``     a video/audio/sub track was switched
-    ``idle``               idle mode is entered (no file is loaded, ``--idle``)
-    ``pause``              player was paused
-    ``unpause``            player was unpaused
-    ``tick``               called after a video frame was displayed
-    ====================== =====================================================
-
-    Example:
-
-    ::
-
-        function my_fn()
-            print("start of playback!")
-        end
-
-        mp.register_event("playback-start", my_fn)
-
+    See `Events`_ and `List of events`_ for details.
 
 ``mp.add_timeout(seconds, fn)``
     Call the given function fn when the given number of seconds has elapsed.
@@ -192,3 +173,78 @@ with ``require 'mp.msg'``.
 ``msg.fatal(...)``, ``msg.error(...)``, ``msg.warn(...)``, ``msg.info(...)``, ``msg.verbose(...)``, ``msg.debug(...)``
     All of these are shortcuts and equivalent to the corresponding
     ``msg.log(level, ...)`` call.
+
+Events
+------
+
+Events are notifications from player core to scripts. You can register an
+event handler with ``mp.register_event``.
+
+Note that all scripts (and other parts of the player) receive events equally,
+and there's no such thing as blocking other scripts from receiving events.
+
+Example:
+
+::
+
+    function my_fn()
+        print("start of playback!")
+    end
+
+    mp.register_event("playback-start", my_fn)
+
+
+List of events
+--------------
+
+``shutdown``
+    Sent when the player quits, and the script should terminate. Normally
+    handled automatically. See `Mode of operation`_.
+
+``log-message``
+    Undocumented (for ``mp.enable_messages``).
+
+``get-property-reply``
+    Undocumented (not useful for Lua scripts).
+
+``set-property-reply``
+    Undocumented (not useful for Lua scripts).
+
+``command-reply``
+    Undocumented (not useful for Lua scripts).
+
+``start-file``
+    Happens right before a new file is loaded. When you receive this, the
+    player is loading the file (or possibly already done with it).
+
+``end-file``
+    Happens after a file was unloaded. Typically, the player will load the
+    next file right away, or quit if this was the last file.
+
+``playback-start``
+    Happens atfer a file was loaded and begins playback.
+
+``tracks-changed``
+    List of video/audio/sub tracks was updated. (This happens on playback start,
+    and very rarely during playback.)
+
+``track-switched``
+    A video/audio/sub track was switched. This usually happens on user
+    interaction, or if a script changes track.
+
+``idle``
+    Idle mode is entered. This happens when playback ended, and the player was
+    started with ``--idle`` or ``--force-window``. This mode is implicitly ended
+    when the ``start-file`` or ``shutdown`` events happen.
+
+``pause``
+    Playback was paused.
+
+``unpause``
+    Playback was unpaused.
+
+``tick``
+    Called after a video frame was displayed. This is a hack, and you should
+    avoid using it. Use timers instead and maybe watch pausing/unpausing events
+    to avoid wasting CPU when the player is paused.
+
