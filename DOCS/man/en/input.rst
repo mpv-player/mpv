@@ -506,120 +506,351 @@ information. They can be manipulated with the ``set``/``add``/``cycle``
 commands, and retrieved with ``show_text``, or anything else that uses property
 expansion. (See `Property Expansion`_.)
 
-The ``W`` column indicates whether the property is generally writable. If an
-option is referenced, the property should take/return exactly the same values
-as the option.
+The property name is annotated with RW to indicate whether the property is
+generally writable.
 
-=============================== = ==================================================
-Name                            W Comment
-=============================== = ==================================================
-``osd-level``                   x see ``--osd-level``
-``osd-scale``                   x osd font size multiplicator, see ``--osd-scale``
-``loop``                        x see ``--loop``
-``speed``                       x see ``--speed``
-``filename``                      currently played file (path stripped)
-``path``                          currently played file (full path)
-``media-title``                   filename, title tag, or libquvi ``QUVIPROP_PAGETITLE``
+If an option is referenced, the property will normally take/return exactly the
+same values as the option. In these cases, properties are merely a way to change
+an option at runtime.
+
+``osd-level`` (RW)
+    See ``--osd-level``.
+
+``osd-scale`` (RW)
+    OSD font size multiplicator, see ``--osd-scale``.
+
+``loop`` (RW)
+    See ``--loop``.
+
+``speed`` (RW)
+    See ``--speed``.
+
+``filename``
+    Currently played file, with path stripped. If this is an URL, try to undo
+    percent encoding as well. (The result is not necessarily correct, but
+    looks better for display purposes. Use the ``path`` property to get an
+    unmodified filename.)
+
+``path``
+    Full path of the currently played file.
+
+``media-title``
+    If libquvi is used and libquvi returns a page title for the currently
+    played URL, return the page title.
+
+    Otherwise, if the currently played file has a ``title`` tag, use that.
+
+    Otherwise, return the ``filename`` property.
+
 ``demuxer``
-``stream-path``                   filename (full path) of stream layer filename
-``stream-pos``                  x byte position in source stream
-``stream-start``                  start byte offset in source stream
-``stream-end``                    end position in bytes in source stream
-``stream-length``                 length in bytes (``${stream-end} - ${stream-start}``)
-``stream-time-pos``             x time position in source stream (also see ``time-pos``)
-``length``                        length of the current file in seconds
-``avsync``                        last A/V synchronization difference
-``percent-pos``                 x position in current file (0-100)
-``ratio-pos``                   x position in current file (0.0-1.0)
-``time-pos``                    x position in current file in seconds
-``time-remaining``                estimated remaining length of the file in seconds
-``playtime-remaining``            ``time-remaining`` scaled by the the current ``speed``
-``chapter``                     x current chapter number
-``edition``                     x current MKV edition number
-``titles``                        number of DVD titles
-``chapters``                      number of chapters
-``editions``                      number of MKV editions
-``angle``                       x current DVD angle
-``metadata``                      metadata key/value pairs
-``metadata/<key>``                value of metadata entry ``<key>``
-``chapter-metadata``              metadata of current chapter (works similar)
-``pause``                       x pause status (bool)
-``cache``                         network cache fill state (0-100)
-``pts-association-mode``        x see ``--pts-association-mode``
-``hr-seek``                     x see ``--hr-seek``
-``volume``                      x current volume (0-100)
-``mute``                        x current mute status (bool)
-``audio-delay``                 x see ``--audio-delay``
-``audio-format``                  audio format (string)
-``audio-codec``                   audio codec selected for decoding
-``audio-bitrate``                 audio bitrate
-``samplerate``                    audio samplerate
-``channels``                      number of audio channels
-``aid``                         x current audio track (similar to ``--aid``)
-``audio``                       x alias for ``aid``
-``balance``                     x audio channel balance
-``fullscreen``                  x see ``--fullscreen``
-``deinterlace``                 x similar to ``--deinterlace``
-``colormatrix``                 x see ``--colormatrix``
-``colormatrix-input-range``     x see ``--colormatrix-input-range``
-``colormatrix-output-range``    x see ``--colormatrix-output-range``
-``ontop``                       x see ``--ontop``
-``border``                      x see ``--border``
-``framedrop``                   x see ``--framedrop``
-``gamma``                       x see ``--gamma``
-``brightness``                  x see ``--brightness``
-``contrast``                    x see ``--contrast``
-``saturation``                  x see ``--saturation``
-``hue``                         x see ``--hue``
-``panscan``                     x see ``--panscan``
-``video-format``                  video format (string)
-``video-codec``                   video codec selected for decoding
-``video-bitrate``                 video bitrate
-``width``                         video width (container or decoded size)
-``height``                        video height
-``fps``                           container FPS (may contain bogus values)
-``dwidth``                        video width (after filters and aspect scaling)
-``dheight``                       video height
-``window-scale``                x window size multiplier (1 means video size)
-``aspect``                      x video aspect
-``osd-width``                     last known OSD width (can be 0)
-``osd-height``                    last known OSD height (can be 0)
-``osd-par``                       last known OSD display pixel aspect (can be 0)
-``vid``                         x current video track (similar to ``--vid``)
-``video``                       x alias for ``vid``
-``video-align-x``               x see ``--video-align-x``
-``video-align-y``               x see ``--video-align-y``
-``video-pan-x``                 x see ``--video-pan-x``
-``video-pan-y``                 x see ``--video-pan-y``
-``video-zoom``                  x see ``--video-zoom``
-``video-unscaled``              x see ``--video-unscaled``
-``program``                     x switch TS program (write-only)
-``sid``                         x current subtitle track (similar to ``--sid``)
-``secondary-sid``               x secondary subtitle track (``--secondary-sid``)
-``sub``                         x alias for ``sid``
-``sub-delay``                   x see ``--sub-delay``
-``sub-pos``                     x see ``--sub-pos``
-``sub-visibility``              x see ``--sub-visibility``
-``sub-forced-only``             x see ``--sub-forced-only``
-``sub-scale``                   x subtitle font size multiplicator
-``ass-use-margins``             x see ``--ass-use-margins``
-``ass-vsfilter-aspect-compat``  x see ``--ass-vsfilter-aspect-compat``
-``ass-style-override``          x see ``--ass-style-override``
-``stream-capture``              x a filename, see ``--capture``
-``tv-brightness``               x
-``tv-contrast``                 x
-``tv-saturation``               x
-``tv-hue``                      x
-``playlist-pos``                  current position on playlist
-``playlist-count``                number of total playlist entries
-``playlist``                      playlist, current entry marked
-``track-list``                    list of audio/video/sub tracks, current entry marked
-``chapter-list``                  list of chapters, current entry marked
-``quvi-format``                 x see ``--quvi-format``
-``af``                          x see ``--af``
-``vf``                          x see ``--vf``
-``options/name``                  read-only access to value of option ``--name``
-=============================== = ==================================================
+    Name of the current demuxer. (This is useless.)
+
+``stream-path``
+    Filename (full path) of the stream layer filename. (This is probably
+    useless. It looks like this can be different from ``filename`` only when
+    using e.g. ordered chapters.)
+
+``stream-pos`` (RW)
+    Raw byte position in source stream.
+
+``stream-start``
+    Raw start byte offset in source stream (rarely different from 0).
+
+``stream-end``
+    Raw end position in bytes in source stream.
+
+``stream-length``
+    Length in bytes of the source stream (``${stream-end} - ${stream-start}``).
+
+``stream-time-pos`` (RW)
+    Time position in source stream. This only works for DVD and Bluray. This
+    is probably never different from ``time-pos``, because ``time-pos`` is
+    forced to this value anyway.
+
+``length``
+    Length of the current file in seconds. If the length is unknown, the
+    property is unavailable. Note that the file duration is not always exactly
+    known, so this is an estimate.
+
+``avsync``
+    Last A/V synchronization difference. Unavailable if audio or video is
+    disabled.
+
+``percent-pos`` (RW)
+    Position in current file (0-100). The advantage over using this instead of
+    calculating it out of other properties is that it properly falls back to
+    estimating the playback position from the byte position, if the file
+    duration is not known.
+
+``ratio-pos`` (RW)
+    Position in current file (0.0-1.0). higher precision that ``percent-pos``.
+
+``time-pos`` (RW)
+    Position in current file in seconds.
+
+``time-remaining``
+    Remaining length of the file in seconds. Note that the file duration is not
+    always exactly known, so this is an estimate.
+
+``playtime-remaining``
+    ``time-remaining`` scaled by the the current ``speed``.
+
+``chapter`` (RW)
+    Current chapter number. The number of the first chapter is 0.
+
+``edition`` (RW)
+    Current MKV edition number. Setting this property to a different value will
+    restart playback. The number of the first edition is 0.
+
+``titles``
+    Number of DVD titles.
+
+``chapters``
+    Number of chapters.
+
+``editions``
+    Number of MKV editions.
+
+``angle`` (RW)
+    Current DVD angle.
+
+``metadata``
+    Metadata key/value pairs. The raw property value will return a list of
+    key and value strings separated by ``,``. (If a key or value contains ``,``,
+    you're screwed.)
+
+``metadata/<key>``
+    Value of metadata entry ``<key>``.
+
+``chapter-metadata``
+    Metadata of current chapter. Works similar to ``metadata`` property. This
+    also allows referring to a key directly.
+
+``pause`` (RW)
+    Pause status. This is usually ``yes`` or ``no``. See ``--pause``.
+
+``cache``
+    Network cache fill state (0-100).
+
+``pts-association-mode`` (RW)
+    See ``--pts-association-mode``.
+
+``hr-seek`` (RW)
+    See ``--hr-seek``.
+
+``volume`` (RW)
+    Current volume (0-100).
+
+``mute`` (RW)
+    Current mute status (``yes``/``no``).
+
+``audio-delay`` (RW)
+    See ``--audio-delay``.
+
+``audio-format``
+    Audio format as string.
+
+``audio-codec``
+    Audio codec selected for decoding.
+
+``audio-bitrate``
+    Audio bitrate. This is probably a very bad guess in most cases.
+
+``samplerate``
+    Audio samplerate.
+
+``channels``
+    Number of audio channels. The OSD value of this property is actually the
+    channel layout, while the raw value returns the number of channels only.
+
+``aid`` (RW)
+    Current audio track (similar to ``--aid``).
+
+``audio`` (RW)
+    Alias for ``aid``.
+
+``balance`` (RW)
+    Audio channel balance. (The implementation of this feature is rather odd.
+    It doesn't change the volumes of each channel, but instead sets up a pan
+    matrix to mix the the left and right channels.)
+
+``fullscreen`` (RW)
+    See ``--fullscreen``.
+
+``deinterlace`` (RW)
+    See ``--deinterlace``.
+
+``colormatrix`` (RW)
+    See ``--colormatrix``.
+
+``colormatrix-input-range`` (RW)
+    See ``--colormatrix-input-range``.
+
+``colormatrix-output-range`` (RW)
+    See ``--colormatrix-output-range``.
+
+``ontop`` (RW)
+    See ``--ontop``.
+
+``border`` (RW)
+    See ``--border``.
+
+``framedrop`` (RW)
+    See ``--framedrop``.
+
+``gamma`` (RW)
+    See ``--gamma``.
+
+``brightness`` (RW)
+    See ``--brightness``.
+
+``contrast`` (RW)
+    See ``--contrast``.
+
+``saturation`` (RW)
+    See ``--saturation``.
+
+``hue`` (RW)
+    See ``--hue``.
+
+``panscan`` (RW)
+    See ``--panscan``.
+
+``video-format``
+    Video format as string.
+
+``video-codec``
+    Video codec selected for decoding.
+
+``video-bitrate``
+    Video bitrate (a bad guess).
+
+``width``, ``height``
+    Video size. This uses the size of the video as decoded, or if no video
+    frame has been decoded yet, the (possibly incorrect) container indicated
+    size.
+
+``fps``
+    Container FPS. This can easily contain bogus values. For videos that use
+    modern container formats or video codecs, this will often be incorrect.
+
+``dwidth``, ``dheight``
+    Video display size. This is the video size after filters and aspect scaling
+    have been applied. The actual video window size can still be different
+    from this.
+
+``window-scale`` (RW)
+    Window size multiplier. Setting this will resize the video window to the
+    values contained in ``dwidth`` and ``dheight`` multiplied with the value
+    set with this property. Setting ``1`` will resize to original video size
+    (or to be exactly, the size the video filters output). ``2`` will set the
+    double size, ``0.5`` halves the size.
+
+``aspect`` (RW)
+    Video aspect, see ``--aspect``.
+
+``osd-width``, ``osd-height``
+    Last known OSD width (can be 0). This is needed if you want to use the
+    ``overlay_add`` command. It gives you the actual OSD size, which can be
+    different from the window size in some cases.
+
+``osd-par``
+    Last known OSD display pixel aspect (can be 0).
+
+``vid`` (RW)
+    Current video track (similar to ``--vid``).
+
+``video`` (RW)
+    Alias for ``vid``.
+
+``video-align-x``, ``video-align-y`` (RW)
+    See ``--video-align-x`` and ``--video-align-y``.
+
+``video-pan-x``, ``video-pan-y`` (RW)
+    See ``--video-pan-x`` and ``--video-pan-y``.
+
+``video-zoom`` (RW)
+    See ``--video-zoom``.
+
+``video-unscaled`` (W)
+    See ``--video-unscaled``.
+
+``program`` (W)
+    Switch TS program (write-only).
+
+``sid`` (RW)
+    Current subtitle track (similar to ``--sid``).
+
+``secondary-sid`` (RW)
+    Secondary subtitle track (see ``--secondary-sid``).
+
+``sub`` (RW)
+    Alias for ``sid``.
+
+``sub-delay`` (RW)
+    See ``--sub-delay``.
+
+``sub-pos`` (RW)
+    See ``--sub-pos``.
+
+``sub-visibility`` (RW)
+    See ``--sub-visibility``.
+
+``sub-forced-only`` (RW)
+    See ``--sub-forced-only``.
+
+``sub-scale`` (RW)
+    Subtitle font size multiplicator.
+
+``ass-use-margins`` (RW)
+    See ``--ass-use-margins``.
+
+``ass-vsfilter-aspect-compat`` (RW)
+    See ``--ass-vsfilter-aspect-compat``.
+
+``ass-style-override`` (RW)
+    See ``--ass-style-override``.
+
+``stream-capture`` (RW)
+    A filename, see ``--capture``. Setting this will start capture using the
+    given filename. Setting it to an empty string will stop it.
+
+``tv-brightness``, ``tv-contrast``, ``tv-saturation``, ``tv-hue`` (RW)
+    TV stuff.
+
+``playlist-pos`` (RW)
+    Current position on playlist. The first entry is on position 0. Writing
+    to the property will restart playback at the written entry.
+
+``playlist-count``
+    Number of total playlist entries.
+
+``playlist``
+    Playlist, current entry marked. Currently, the raw property value is
+    useless.
+
+``track-list``
+    List of audio/video/sub tracks, current entry marked. Currently, the raw
+    property value is useless.
+
+``chapter-list``
+    List of chapters, current entry marked. Currently, the raw property value
+    is useless.
+
+``quvi-format`` (RW)
+    See ``--quvi-format``. Cycling this property (``cycle``) will attempt to
+    cycle through known format, although currently this feature doesn't work
+    well at all.
+
+``af`` (RW)
+    See ``--af`` and the ``af`` command.
+
+``vf`` (RW)
+    See ``--vf`` and the ``vf`` command.
+
+``options/<name>`` (RW)
+    Read-only access to value of option ``--<name>``. If the player is in idle
+    mode, the option can be changed by writing to this property.
 
 Property Expansion
 ------------------
