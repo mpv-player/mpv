@@ -40,8 +40,8 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 ``require 'mp'``. It provides the core client API.
 
 ``mp.command(string)``
-    Run the command the given command. This is similar to the commands used in
-    input.conf. See `List of Input Commands`_.
+    Run the given command. This is similar to the commands used in input.conf.
+    See `List of Input Commands`_.
 
     Returns true on success, or ``nil, error`` on error.
 
@@ -140,8 +140,8 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Returns a timer handle. See ``mp.cancel_timer``.
 
 ``mp.cancel_timer(t)``
-    Terminate the given timer. t is the value returned by ``mp.add_timeout``
-    or ``mp.add_periodic_timer``.
+    Terminate the given timer. t is a timer handle (value returned by
+    ``mp.add_timeout`` or ``mp.add_periodic_timer``).
 
 ``mp.get_opt(key)``
     Return a setting from the ``--lua-opts`` option. It's up to the user and
