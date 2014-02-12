@@ -59,7 +59,11 @@ char *mp_get_win_config_path(const char *filename)
         res = mp_path_join(NULL, bstr0(temp), bstr0(filename));
         if (!mp_path_exists(res) || mp_path_isdir(res)) {
             talloc_free(res);
-            res = NULL;
+            res = mp_path_join(NULL, bstr0(dir), bstr0(filename));
+            if (!mp_path_exists(res) || mp_path_isdir(res)) {
+                talloc_free(res);
+                res = NULL;
+            }
         }
     }
 
