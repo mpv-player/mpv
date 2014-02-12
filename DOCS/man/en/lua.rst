@@ -153,6 +153,13 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     long time, but doesn't really need access to the player (like a network
     operation). Note that you still can access the player at any time.
 
+``mp.enable_messages(level)``
+    Set the minimum log level of which mpv message output to receive. These
+    messages are normally printed to the terminal. By calling this function,
+    you can set the minimum log level of messages which should be received with
+    the ``log-message`` event. See the description of this event for details.
+    The level is a string, see ``msg.log`` for allowed log levels.
+
 mp.msg functions
 ----------------
 
@@ -187,11 +194,12 @@ Example:
 
 ::
 
-    function my_fn()
+    function my_fn(event)
         print("start of playback!")
     end
 
     mp.register_event("playback-start", my_fn)
+
 
 
 List of events
@@ -202,7 +210,33 @@ List of events
     handled automatically. See `Mode of operation`_.
 
 ``log-message``
-    Undocumented (for ``mp.enable_messages``).
+    Receives messages enabled with ``mp.enable_messages``. The message data
+    is contained in the table passed as first parameter to the event handler.
+    The table contains, in addition to the default event fields, the following
+    fields:
+
+    ``prefix``
+        The module prefix, identifies the sender of the message. This is what
+        the terminal player puts in front of the message text when using the
+        ``--v`` option, and is also what is used for ``--msglevel``.
+
+    ``level``
+        The log level as string. See ``msg.log`` for possible log level names.
+        Note that later versions of mpv might add new levels or remove
+        (undocumented) existing ones.
+
+    ``text``
+        The log message. Note that this is the direct output of a printf()
+        style output API. The text will contain embedded newlines, and it's
+        possible that a single message contains multiple lines, or that a
+        message contains a partial line.
+
+        It's safe to display messages only if they end with a newline character,
+        and to buffer them otherwise.
+
+    Keep in mind that these messages are meant to be hints for humans. You
+    should not parse them, and prefix/level/text of messages might change
+    any time.
 
 ``get-property-reply``
     Undocumented (not useful for Lua scripts).
