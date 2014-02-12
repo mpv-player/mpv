@@ -476,8 +476,8 @@ int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
 
 /**
  * Set a property asynchronously. You will receive the result of the operation
- * as MPV_EVENT_PROPERTY_SET_REPLY event. The mpv.error field will contain the
- * result status of the operation. Otherwise, this function is similar to
+ * as MPV_EVENT_PROPERTY_SET_REPLY event. The mpv_event.error field will contain
+ * the result status of the operation. Otherwise, this function is similar to
  * mpv_set_property().
  *
  * @param reply_userdata see section about asynchronous calls
@@ -527,6 +527,7 @@ char *mpv_get_property_osd_string(mpv_handle *ctx, const char *name);
 /**
  * Get a property asynchronously. You will receive the result of the operation
  * as well as the property data with the MPV_EVENT_GET_PROPERTY_REPLY event.
+ * You should check the mpv_event.error field on the reply event.
  *
  * @param reply_userdata see section about asynchronous calls
  * @param name The property name.
@@ -693,8 +694,10 @@ typedef struct mpv_event {
      */
     mpv_event_id event_id;
     /**
-     * This is used for MPV_EVENT_ERROR only, and contains the error code.
-     * It is set to 0 for all other events.
+     * This is mainly used for events that are replies to (asynchronous)
+     * requests. It contains a status code, which is >= 0 on success, or < 0
+     * on error (a mpv_error value). Usually, this will be set if an
+     * asynchronous request fails.
      */
     int error;
     /**
