@@ -205,6 +205,41 @@ Example:
 List of events
 --------------
 
+``start-file``
+    Happens right before a new file is loaded. When you receive this, the
+    player is loading the file (or possibly already done with it).
+
+``end-file``
+    Happens after a file was unloaded. Typically, the player will load the
+    next file right away, or quit if this was the last file.
+
+``playback-start``
+    Happens atfer a file was loaded and begins playback.
+
+``tracks-changed``
+    List of video/audio/sub tracks was updated. (This happens on playback start,
+    and very rarely during playback.)
+
+``track-switched``
+    A video/audio/sub track was switched. This usually happens on user
+    interaction, or if a script changes track.
+
+``idle``
+    Idle mode is entered. This happens when playback ended, and the player was
+    started with ``--idle`` or ``--force-window``. This mode is implicitly ended
+    when the ``start-file`` or ``shutdown`` events happen.
+
+``pause``
+    Playback was paused.
+
+``unpause``
+    Playback was unpaused.
+
+``tick``
+    Called after a video frame was displayed. This is a hack, and you should
+    avoid using it. Use timers instead and maybe watch pausing/unpausing events
+    to avoid wasting CPU when the player is paused.
+
 ``shutdown``
     Sent when the player quits, and the script should terminate. Normally
     handled automatically. See `Mode of operation`_.
@@ -246,39 +281,3 @@ List of events
 
 ``command-reply``
     Undocumented (not useful for Lua scripts).
-
-``start-file``
-    Happens right before a new file is loaded. When you receive this, the
-    player is loading the file (or possibly already done with it).
-
-``end-file``
-    Happens after a file was unloaded. Typically, the player will load the
-    next file right away, or quit if this was the last file.
-
-``playback-start``
-    Happens atfer a file was loaded and begins playback.
-
-``tracks-changed``
-    List of video/audio/sub tracks was updated. (This happens on playback start,
-    and very rarely during playback.)
-
-``track-switched``
-    A video/audio/sub track was switched. This usually happens on user
-    interaction, or if a script changes track.
-
-``idle``
-    Idle mode is entered. This happens when playback ended, and the player was
-    started with ``--idle`` or ``--force-window``. This mode is implicitly ended
-    when the ``start-file`` or ``shutdown`` events happen.
-
-``pause``
-    Playback was paused.
-
-``unpause``
-    Playback was unpaused.
-
-``tick``
-    Called after a video frame was displayed. This is a hack, and you should
-    avoid using it. Use timers instead and maybe watch pausing/unpausing events
-    to avoid wasting CPU when the player is paused.
-
