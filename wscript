@@ -298,7 +298,7 @@ If you really mean to compile without libass support use --disable-libass."
     }, {
         'name': '--mpg123',
         'desc': 'mpg123 support',
-        'func': check_pkg_config('libmpg123', '>= 1.2.0'),
+        'func': check_pkg_config('libmpg123', '>= 1.14.0'),
     }, {
         'name': '--ladspa',
         'desc': 'LADSPA plugin support',
