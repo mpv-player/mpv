@@ -25,13 +25,13 @@ def __add_gcc_flags__(ctx):
                        "-Wno-switch", "-Wno-parentheses", "-Wpointer-arith",
                        "-Wredundant-decls", "-Wno-pointer-sign",
                        "-Werror=implicit-function-declaration",
-                       "-Wno-tautological-compare",
-                       "-Wno-tautological-constant-out-of-range-compare",
                        "-Wno-error=deprecated-declarations",
                        "-Wno-error=unused-function" ]
 
 def __add_clang_flags__(ctx):
-    ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics"]
+    ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics",
+                       "-Wno-tautological-compare",
+                       "-Wno-tautological-constant-out-of-range-compare" ]
 
 def __add_mingw_flags__(ctx):
     ctx.env.CFLAGS += ['-D__USE_MINGW_ANSI_STDIO=1']
