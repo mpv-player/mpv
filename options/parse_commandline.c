@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "osdep/io.h"
 #include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
@@ -110,6 +111,28 @@ static bool split_opt(struct parse_state *p)
              BSTR_P(p->arg), m_option_strerror(r));
     return false;
 }
+
+#ifdef __MINGW32__
+static void process_non_option(struct playlist *files, const char *arg)
+{
+    glob_t gg;
+
+    // Glob filenames on Windows (cmd.exe doesn't do this automatically)
+    if (glob(arg, 0, NULL, &gg)) {
+        playlist_add_file(files, arg);
+    } else {
+        for (int i = 0; i < gg.gl_pathc; i++)
+            playlist_add_file(files, gg.gl_pathv[i]);
+
+        globfree(&gg);
+    }
+}
+#else
+static void process_non_option(struct playlist *files, const char *arg)
+{
+    playlist_add_file(files, arg);
+}
+#endif
 
 // returns M_OPT_... error code
 int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
@@ -234,8 +257,9 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
 
                 } else // dvd:// or dvd://x entry
                     playlist_add_file(files, file0);
-            } else
-                playlist_add_file(files, file0);
+            } else {
+                process_non_option(files, file0);
+            }
             talloc_free(tmp);
 
             // Lock stdin if it will be used as input
