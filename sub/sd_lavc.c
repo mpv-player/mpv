@@ -21,12 +21,14 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/common.h>
+#include <libavutil/intreadwrite.h>
 
 #include "talloc.h"
 #include "common/msg.h"
 #include "common/av_common.h"
 #include "options/options.h"
 #include "video/mp_image.h"
+#include "video/csputils.h"
 #include "sd.h"
 #include "dec_sub.h"
 
@@ -92,6 +94,35 @@ static void get_resolution(struct sd *sd, int wh[2])
     guess_resolution(priv->avctx->codec_id, &wh[0], &wh[1]);
 }
 
+static void set_mp4_vobsub_idx(AVCodecContext *avctx, char *src, int w, int h)
+{
+    char pal_s[128];
+    int pal_s_pos = 0;
+    for (int i = 0; i < 16; i++) {
+        unsigned int e = AV_RB32(src + i * 4);
+
+        // lavc doesn't accept YUV palette - "does god hate me?"
+        struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
+        csp.int_bits_in = 8;
+        csp.int_bits_out = 8;
+        float cmatrix[3][4];
+        mp_get_yuv2rgb_coeffs(&csp, cmatrix);
+        int c[3] = {(e >> 16) & 0xff, (e >> 8) & 0xff, e & 0xff};
+        mp_map_int_color(cmatrix, 8, c);
+        e = (c[2] << 16) | (c[1] << 8) | c[0];
+
+        snprintf(pal_s + pal_s_pos, sizeof(pal_s) - pal_s_pos, "%06x%s", e,
+                 i != 15 ? ", " : "");
+        pal_s_pos = strlen(pal_s);
+        if (pal_s_pos >= sizeof(pal_s))
+            break;
+    }
+
+    char buf[256] = "";
+    snprintf(buf, sizeof(buf), "size: %dx%d\npalette: %s\n", w, h, pal_s);
+    mp_lavc_set_extradata(avctx, buf, strlen(buf));
+}
+
 static int init(struct sd *sd)
 {
     struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
@@ -104,6 +135,11 @@ static int init(struct sd *sd)
     if (!ctx)
         goto error;
     mp_lavc_set_extradata(ctx, sd->extradata, sd->extradata_len);
+    if (sd->extradata_len == 64 && sd->sub_stream_w && sd->sub_stream_h &&
+        cid == AV_CODEC_ID_DVD_SUBTITLE)
+    {
+        set_mp4_vobsub_idx(ctx, sd->extradata, sd->sub_stream_w, sd->sub_stream_h);
+    }
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
     priv->avctx = ctx;
