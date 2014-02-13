@@ -3025,9 +3025,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 #endif /* HAVE_TV */
 
-    case MP_CMD_SUB_ADD:
-        mp_add_subtitles(mpctx, cmd->args[0].v.s);
+    case MP_CMD_SUB_ADD: {
+        struct track *sub = mp_add_subtitles(mpctx, cmd->args[0].v.s);
+        if (sub)
+            mp_switch_track(mpctx, sub->type, sub);
         break;
+    }
 
     case MP_CMD_SUB_REMOVE: {
         struct track *sub = mp_track_by_tid(mpctx, STREAM_SUB, cmd->args[0].v.i);
