@@ -25,6 +25,8 @@ def __add_gcc_flags__(ctx):
                        "-Wno-switch", "-Wno-parentheses", "-Wpointer-arith",
                        "-Wredundant-decls", "-Wno-pointer-sign",
                        "-Werror=implicit-function-declaration",
+                       "-Wno-tautological-compare",
+                       "-Wno-tautological-constant-out-of-range-compare",
                        "-Wno-error=deprecated-declarations",
                        "-Wno-error=unused-function" ]
 
