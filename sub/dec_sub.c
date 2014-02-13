@@ -175,6 +175,8 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
     struct sd init_sd = sub->init_sd;
     init_sd.codec = sh->codec;
     init_sd.ass_track = sh->sub->track;
+    init_sd.sub_stream_w = sh->sub->w;
+    init_sd.sub_stream_h = sh->sub->h;
 
     while (sub->num_sd < MAX_NUM_SD) {
         struct sd *sd = talloc(NULL, struct sd);

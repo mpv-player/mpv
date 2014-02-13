@@ -458,6 +458,8 @@ static void handle_stream(demuxer_t *demuxer, int i)
             memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
             sh_sub->extradata_len = codec->extradata_size;
         }
+        sh_sub->w = codec->width;
+        sh_sub->h = codec->height;
 
         // Hack for MicroDVD: if time_base matches the ffmpeg microdvd reader's
         // default FPS (23.976), assume the MicroDVD file did not declare a

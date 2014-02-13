@@ -25,6 +25,9 @@ struct sd {
     // the resolution of the VO, nor does it have to be the OSD resolution.
     int sub_video_w, sub_video_h;
 
+    // Resolution hints stored in mp4 files.
+    int sub_stream_w, sub_stream_h;
+
     // Make sd_ass use an existing track
     struct ass_track *ass_track;
 
