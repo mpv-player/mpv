@@ -42,6 +42,7 @@ def __add_mingw_flags__(ctx):
 
 def __add_cygwin_flags__(ctx):
     ctx.env.CFLAGS += ['-mwin32']
+    ctx.env.CFLAGS += ['-U__STRICT_ANSI__']
 
 __compiler_map__ = {
     '__GNUC__':  __add_gcc_flags__,
