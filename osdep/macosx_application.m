@@ -389,13 +389,10 @@ void cocoa_stop_runloop(void)
 
 void cocoa_set_input_context(struct input_ctx *input_context)
 {
-    if (input_context) {
-        [mpv_shared_app().input_ready lock];
-        [mpv_shared_app().input_ready signal];
-        [mpv_shared_app().input_ready unlock];
-    }
-
+    [mpv_shared_app().input_ready lock];
     mpv_shared_app().inputContext = input_context;
+    [mpv_shared_app().input_ready signal];
+    [mpv_shared_app().input_ready unlock];
 }
 
 void cocoa_post_fake_event(void)
