@@ -26,16 +26,8 @@
 #include <limits.h>
 #include <sys/types.h>
 
-#include "osdep/io.h"
-
 #include "config.h"
-
-#if HAVE_GLOB
-#include <glob.h>
-#else
-#include "osdep/glob.h"
-#endif
-
+#include "osdep/io.h"
 #include "talloc.h"
 #include "common/msg.h"
 #include "stream/stream.h"

@@ -20,11 +20,16 @@
 #ifndef MPLAYER_OSDEP_IO
 #define MPLAYER_OSDEP_IO
 
+#include "config.h"
 #include <stdbool.h>
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#if HAVE_GLOB
+#include <glob.h>
+#endif
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -71,6 +76,18 @@ int mp_closedir(DIR *dir);
 int mp_mkdir(const char *path, int mode);
 char *mp_getenv(const char *name);
 
+typedef struct {
+    size_t gl_pathc;
+    char **gl_pathv;
+    size_t gl_offs;
+    void *ctx;
+} mp_glob_t;
+
+// glob-win.c
+int mp_glob(const char *restrict pattern, int flags,
+            int (*errfunc)(const char*, int), mp_glob_t *restrict pglob);
+void mp_globfree(mp_glob_t *pglob);
+
 // NOTE: stat is not overridden with mp_stat, because MinGW-w64 defines it as
 //       macro.
 
@@ -84,6 +101,14 @@ char *mp_getenv(const char *name);
 #define closedir(...) mp_closedir(__VA_ARGS__)
 #define mkdir(...) mp_mkdir(__VA_ARGS__)
 #define getenv(...) mp_getenv(__VA_ARGS__)
+
+#ifndef GLOB_NOMATCH
+#define GLOB_NOMATCH 3
+#endif
+
+#define glob_t mp_glob_t
+#define glob(...) mp_glob(__VA_ARGS__)
+#define globfree(...) mp_globfree(__VA_ARGS__)
 
 #else /* __MINGW32__ */
 
