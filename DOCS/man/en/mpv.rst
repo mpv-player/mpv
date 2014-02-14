@@ -603,6 +603,11 @@ FILES
 ``~/.mpv/input.conf``
     input bindings (see ``--input-keylist`` for the full list)
 
+``~/.mpv/lua/``
+    All files in this directly are loaded as if they were passed to the
+    ``--lua`` option. They are loaded in alphabetical order, and sub-directories
+    and files with no ``.lua`` extension are ignored.
+
 
 EXAMPLES OF MPV USAGE
 =====================
