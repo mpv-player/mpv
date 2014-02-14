@@ -9,6 +9,8 @@ Using mingw-w64-cmake to setup a MinGW-w64 environment is recommended (this will
 also build mpv and its dependencies): https://github.com/lachs0r/mingw-w64-cmake
 
 Alternatively, use MXE: http://mxe.cc
+With MXE, you have to modify the file settings.mk to target MinGW-w64 (even if
+you compile to 32 bit).
 
 Warning: the original MinGW (http://www.mingw.org) is unsupported.
 
