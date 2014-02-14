@@ -32,9 +32,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+
 #include "config.h"
+
 #include "common/global.h"
 #include "common/msg.h"
+#include "options/options.h"
 #include "options/path.h"
 #include "talloc.h"
 #include "osdep/io.h"
@@ -53,6 +56,10 @@ static const lookup_fun config_lookup_functions[] = {
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename)
 {
+    struct MPOpts *opts = global->opts;
+    if (!opts->load_config)
+        return NULL;
+
     for (int i = 0; config_lookup_functions[i] != NULL; i++) {
         char *path = config_lookup_functions[i](talloc_ctx, global, filename);
         if (!path) continue;
@@ -68,6 +75,10 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
 char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
                                const char *filename)
 {
+    struct MPOpts *opts = global->opts;
+    if (!opts->load_config)
+        return NULL;
+
     char *homedir = getenv("MPV_HOME");
     char *configdir = NULL;
     char *result = NULL;

@@ -121,7 +121,7 @@ function read_config(options, identifier)
 
     local conffilename = "plugin_" .. identifier .. ".conf"
     local conffile = mp.find_config_file(conffilename)
-    local f = io.open(conffile,"r")
+    local f = conffile and io.open(conffile,"r")
     if f == nil then
         -- config not found
     else
