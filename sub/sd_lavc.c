@@ -91,6 +91,10 @@ static void get_resolution(struct sd *sd, int wh[2])
     struct sd_lavc_priv *priv = sd->priv;
     wh[0] = priv->avctx->width;
     wh[1] = priv->avctx->height;
+    if (wh[0] <= 0 || wh[1] <= 0) {
+        wh[0] = priv->video_params.w;
+        wh[1] = priv->video_params.h;
+    }
     guess_resolution(priv->avctx->codec_id, &wh[0], &wh[1]);
 }
 
