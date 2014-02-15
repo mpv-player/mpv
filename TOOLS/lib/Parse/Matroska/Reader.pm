@@ -132,7 +132,8 @@ sub _bin2int($) {
 # creates a floating-point number with the given mantissa and exponent
 sub _ldexp {
     my ($mantissa, $exponent) = @_;
-    return $mantissa * Math::BigRat->new(2)**$exponent;
+    my $r = new Math::BigRat($mantissa);
+    return $r * Math::BigRat->new(2)**$exponent;
 }
 
 # NOTE: the read_* functions are hard to read because they're ports
@@ -252,25 +253,27 @@ bytes from the internal filehandle.
 Only lengths C<4> and C<8> are supported (C C<float> and C<double>).
 
 =cut
-sub read_float {
-    my ($self, $length) = @_;
-    my $i = $self->read_uint($length);
-    my $f;
+{
+    my $b1 = new Math::BigInt 1;
 
-    use bigrat try => BIGINT_TRY;
+    sub read_float {
+        my ($self, $length) = @_;
+        my $i = new Math::BigInt $self->read_uint($length)->bstr;
+        my $f;
 
-    # These evil expressions reinterpret an unsigned int as IEEE binary floats
-    if ($length == 4) {
-        $f = _ldexp(($i & (1<<23 - 1)) + (1<<23), ($i>>23 & (1<<8 - 1)) - 150);
-        $f = -$f if $i & (1<<31);
-    } elsif ($length == 8) {
-        $f = _ldexp(($i & (1<<52 - 1)) + (1<<52), ($i>>52 & (1<<12 - 1)) - 1075);
-        $f = -$f if $i & (1<<63);
-    } else {
-        croak "Matroska Syntax error: unsupported IEEE float byte size $length";
+        # These evil expressions reinterpret an unsigned int as IEEE binary floats
+        if ($length == 4) {
+            $f = _ldexp(($i & ((1<<23) - 1)) + (1<<23), ($i>>23 & ((1<<8) - 1)) - 150);
+            $f = -$f if $i & ($b1<<31);
+        } elsif ($length == 8) {
+            $f = _ldexp(($i & (($b1<<52) - 1)) + ($b1<<52), ($i>>52 & ((1<<12) - 1)) - 1075);
+            $f = -$f if $i & ($b1<<63);
+        } else {
+            croak "Matroska Syntax error: unsupported IEEE float byte size $length";
+        }
+
+        return $f;
     }
-
-    return $f;
 }
 
 =method read_ebml_id($length)
