@@ -730,14 +730,51 @@ an option at runtime.
     frame has been decoded yet, the (possibly incorrect) container indicated
     size.
 
-``fps``
-    Container FPS. This can easily contain bogus values. For videos that use
-    modern container formats or video codecs, this will often be incorrect.
+``video-params``
+    Video parameters, as output by the decoder (with overrides like aspect
+    etc. applied). This has a number of sub-properties:
+
+    ``video-params/pixelformat``
+        The pixel format as string. This uses the same names as used in other
+        places of mpv.
+
+    ``video-params/w``, ``video-params/h``
+        Video size as integers, with no aspect correction applied.
+
+    ``video-params/dw``, ``video-params/dh``
+        Video size as integers, scaled for correct aspect ratio.
+
+    ``video-params/aspect``
+        Display aspect ratio as float.
+
+    ``video-params/par``
+        Pixel aspect ratio.
+
+    ``video-params/colormatrix``
+        The colormatrix in use as string. (Exact values subject to change.)
+
+    ``video-params/colorlevels``
+        The colorlevels as string. (Exact values subject to change.)
+
+    ``video-params/chroma-location``
+        Chroma location as string. (Exact values subject to change.)
 
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling
     have been applied. The actual video window size can still be different
     from this.
+
+``video-out-params``
+    Same as ``video-params``, but after video filters have been applied. If
+    there are no video filters in use, this will contain the same values as
+    ``video-params``. Note that this is still not necessarily what the video
+    window uses, since all real VOs do their own scaling.
+
+    Has the same sub-properties as ``video-params``.
+
+``fps``
+    Container FPS. This can easily contain bogus values. For videos that use
+    modern container formats or video codecs, this will often be incorrect.
 
 ``window-scale`` (RW)
     Window size multiplier. Setting this will resize the video window to the

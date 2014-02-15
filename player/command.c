@@ -1474,28 +1474,29 @@ static int mp_property_video_bitrate(m_option_t *prop, int action,
     return m_property_int_ro(prop, action, arg, mpctx->d_video->i_bps);
 }
 
-/// Video display width (RO)
-static int mp_property_width(m_option_t *prop, int action, void *arg,
-                             MPContext *mpctx)
+static int property_imgparams(struct mp_image_params p, int action, void *arg)
 {
-    struct dec_video *vd = mpctx->d_video;
-    if (!vd)
+    if (!p.imgfmt)
         return M_PROPERTY_UNAVAILABLE;
-    struct sh_video *sh = vd->header->video;
-    return m_property_int_ro(prop, action, arg,
-                             vd->vf_input.w ? vd->vf_input.w : sh->disp_w);
-}
 
-/// Video display height (RO)
-static int mp_property_height(m_option_t *prop, int action, void *arg,
-                              MPContext *mpctx)
-{
-    struct dec_video *vd = mpctx->d_video;
-    if (!vd)
-        return M_PROPERTY_UNAVAILABLE;
-    struct sh_video *sh = vd->header->video;
-    return m_property_int_ro(prop, action, arg,
-                             vd->vf_input.h ? vd->vf_input.h : sh->disp_h);
+    double dar = p.d_w / (double)p.d_h;
+    double sar = p.w / (double)p.h;
+
+    struct m_sub_property props[] = {
+        {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p.imgfmt))},
+        {"w",               SUB_PROP_INT(p.w)},
+        {"h",               SUB_PROP_INT(p.h)},
+        {"dw",              SUB_PROP_INT(p.d_w)},
+        {"dh",              SUB_PROP_INT(p.d_h)},
+        {"aspect",          SUB_PROP_FLOAT(dar)},
+        {"par",             SUB_PROP_FLOAT(dar / sar)},
+        {"colormatrix",     SUB_PROP_STR(mp_csp_names[p.colorspace])},
+        {"colorlevels",     SUB_PROP_STR(mp_csp_levels_names[p.colorlevels])},
+        {"chroma-location", SUB_PROP_STR(mp_chroma_names[p.chroma_location])},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
 }
 
 static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
@@ -1507,22 +1508,32 @@ static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
     return mpctx->d_video->vfilter->output_params;
 }
 
-static int mp_property_dwidth(m_option_t *prop, int action, void *arg,
-                                MPContext *mpctx)
+static int mp_property_vo_imgparams(m_option_t *prop, int action, void *arg,
+                                    MPContext *mpctx)
 {
-    struct mp_image_params params = get_video_out_params(mpctx);
-    if (!params.imgfmt)
-        return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(prop, action, arg, params.d_w);
+    return property_imgparams(get_video_out_params(mpctx), action, arg);
 }
 
-static int mp_property_dheight(m_option_t *prop, int action, void *arg,
-                                 MPContext *mpctx)
+static int mp_property_vd_imgparams(m_option_t *prop, int action, void *arg,
+                                    MPContext *mpctx)
 {
-    struct mp_image_params params = get_video_out_params(mpctx);
-    if (!params.imgfmt)
+    struct dec_video *vd = mpctx->d_video;
+    if (!vd)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(prop, action, arg, params.d_h);
+    struct sh_video *sh = vd->header->video;
+    if (vd->vf_input.imgfmt) {
+        return property_imgparams(vd->vf_input, action, arg);
+    } else if (sh->disp_w && sh->disp_h) {
+        // Simplistic fallback for stupid scripts querying "width"/"height"
+        // before the first frame is decoded.
+        struct m_sub_property props[] = {
+            {"w", SUB_PROP_INT(sh->disp_w)},
+            {"h", SUB_PROP_INT(sh->disp_h)},
+            {0}
+        };
+        return m_property_read_sub(props, action, arg);
+    }
+    return M_PROPERTY_UNAVAILABLE;
 }
 
 static int mp_property_window_scale(m_option_t *prop, int action, void *arg,
@@ -1880,6 +1891,10 @@ static int mp_property_options(m_option_t *prop, int action, void *arg,
 #define M_PROPERTY_ALIAS(name, real_property) \
     {(name), mp_property_alias, &m_option_type_dummy, 0, 0, 0, (real_property)}
 
+// A generic property; the property callback must implement M_PROPERTY_GET_TYPE.
+#define M_PROPERTY(name, handler) \
+    {(name), handler, &m_option_type_dummy}
+
 /// All properties available in MPlayer.
 /** \ingroup Properties
  */
@@ -1990,18 +2005,18 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("video-pan-x", panscan_property_helper),
     M_OPTION_PROPERTY_CUSTOM("video-pan-y", panscan_property_helper),
     M_OPTION_PROPERTY_CUSTOM("video-unscaled", panscan_property_helper),
+    M_PROPERTY("video-out-params", mp_property_vo_imgparams),
+    M_PROPERTY("video-params", mp_property_vd_imgparams),
     { "video-format", mp_property_video_format, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "video-codec", mp_property_video_codec, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "video-bitrate", mp_property_video_bitrate, CONF_TYPE_INT,
       0, 0, 0, NULL },
-    { "width", mp_property_width, CONF_TYPE_INT,
-      0, 0, 0, NULL },
-    { "height", mp_property_height, CONF_TYPE_INT,
-      0, 0, 0, NULL },
-    { "dwidth", mp_property_dwidth, CONF_TYPE_INT },
-    { "dheight", mp_property_dheight, CONF_TYPE_INT },
+    M_PROPERTY_ALIAS("dwidth", "video-out-params/dw"),
+    M_PROPERTY_ALIAS("dheight", "video-out-params/dh"),
+    M_PROPERTY_ALIAS("width", "video-params/w"),
+    M_PROPERTY_ALIAS("height", "video-params/h"),
     { "window-scale", mp_property_window_scale, CONF_TYPE_DOUBLE,
       CONF_RANGE, 0.125, 8 },
     { "fps", mp_property_fps, CONF_TYPE_FLOAT,
