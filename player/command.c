@@ -469,11 +469,27 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int get_chapter_entry(int item, int action, void *arg, void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+    char *name = chapter_name(mpctx, item);
+    double time = chapter_start_time(mpctx, item);
+    struct m_sub_property props[] = {
+        {"title",       SUB_PROP_STR(name)},
+        {"time",        CONF_TYPE_TIME, {.time = time}},
+        {0}
+    };
+
+    int r = m_property_read_sub(props, action, arg);
+    talloc_free(name);
+    return r;
+}
+
 static int mp_property_list_chapters(m_option_t *prop, int action, void *arg,
                                      MPContext *mpctx)
 {
-    if (action == M_PROPERTY_GET) {
-        int count = get_chapter_count(mpctx);
+    int count = get_chapter_count(mpctx);
+    if (action == M_PROPERTY_PRINT) {
         int cur = mpctx->num_sources ? get_current_chapter(mpctx) : -1;
         char *res = NULL;
         int n;
@@ -498,7 +514,7 @@ static int mp_property_list_chapters(m_option_t *prop, int action, void *arg,
         *(char **)arg = res;
         return M_PROPERTY_OK;
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_read_list(action, arg, count, get_chapter_entry, mpctx);
 }
 
 static int mp_property_edition(m_option_t *prop, int action, void *arg,
@@ -1987,7 +2003,7 @@ static const m_option_t mp_properties[] = {
     { "clock", mp_property_clock, CONF_TYPE_STRING,
       0, 0, 0, NULL },
 
-    { "chapter-list", mp_property_list_chapters, CONF_TYPE_STRING },
+    M_PROPERTY("chapter-list", mp_property_list_chapters),
     M_PROPERTY("track-list", property_list_tracks),
 
     M_PROPERTY("playlist", mp_property_playlist),

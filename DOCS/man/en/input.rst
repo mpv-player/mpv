@@ -925,6 +925,18 @@ an option at runtime.
     List of chapters, current entry marked. Currently, the raw property value
     is useless.
 
+    This has a number of sub-properties. Replace ``N`` with the 0-based chapter
+    index.
+
+    ``chapter-list/count``
+        Number of chapters.
+
+    ``chapter-list/N/title``
+        Chapter title as stored in the file. Not always available.
+
+    ``chapter-list/N/time``
+        Chapter start time in seconds as float.
+
 ``quvi-format`` (RW)
     See ``--quvi-format``. Cycling this property (``cycle``) will attempt to
     cycle through known format, although currently this feature doesn't work
