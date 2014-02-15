@@ -447,3 +447,80 @@ int m_property_read_sub(const struct m_sub_property *props, int action, void *ar
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
+
+
+// Make a list of items available as indexed sub-properties. E.g. you can access
+// item 0 as "property/0", item 1 as "property/1", etc., where each of these
+// properties is redirected to the get_item(0, ...), get_item(1, ...), callback.
+// Additionally, the number of entries is made available as "property/count".
+// action, arg: property access.
+// count: number of items.
+// get_item: callback to access a single item.
+// ctx: userdata passed to get_item.
+int m_property_read_list(int action, void *arg, int count,
+                         m_get_item_cb get_item, void *ctx)
+{
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){
+            .name = "",
+            .type = CONF_TYPE_STRING,
+        };
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_PRINT: {
+        // See m_property_read_sub() remarks.
+        char *res = NULL;
+        for (int n = 0; n < count; n++) {
+            char *s = NULL;
+            int r = get_item(n, M_PROPERTY_PRINT, &s, ctx);
+            if (r != M_PROPERTY_OK) {
+                talloc_free(res);
+                return r;
+            }
+            ta_xasprintf_append(&res, "%d: %s\n", n, s);
+            talloc_free(s);
+        }
+        *(char **)arg = res;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_KEY_ACTION: {
+        struct m_property_action_arg *ka = arg;
+        if (strcmp(ka->key, "count") == 0) {
+            switch (ka->action) {
+            case M_PROPERTY_GET_TYPE: {
+                struct m_option opt = {
+                    .name = "",
+                    .type = CONF_TYPE_INT,
+                };
+                *(struct m_option *)ka->arg = opt;
+                return M_PROPERTY_OK;
+            }
+            case M_PROPERTY_GET:
+                *(int *)ka->arg = MPMAX(0, count);
+                return M_PROPERTY_OK;
+            }
+            return M_PROPERTY_NOT_IMPLEMENTED;
+        }
+        // This is expected of the form "123" or "123/rest"
+        char *next = strchr(ka->key, '/');
+        char *end = NULL;
+        long int item = strtol(ka->key, &end, 10);
+        // not a number, trailing characters, etc.
+        if (end != ka->key + strlen(ka->key) && end != next)
+            return M_PROPERTY_UNKNOWN;
+        if (item < 0 || item >= count)
+            return M_PROPERTY_UNKNOWN;
+        if (next) {
+            // Sub-path
+            struct m_property_action_arg n_ka = *ka;
+            n_ka.key = next + 1;
+            return get_item(item, M_PROPERTY_KEY_ACTION, &n_ka, ctx);
+        } else {
+            // Direct query
+            return get_item(item, ka->action, ka->arg, ctx);
+        }
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}

@@ -167,4 +167,16 @@ struct m_sub_property {
 
 int m_property_read_sub(const struct m_sub_property *props, int action, void *arg);
 
+
+// Used with m_property_read_list().
+// Get an entry. item is the 0-based index of the item. This behaves like a
+// top-level property request (but you must implement M_PROPERTY_GET_TYPE).
+// item will be in range [0, count), for count see m_property_read_list()
+// action, arg are for property access.
+// ctx is userdata passed to m_property_read_list.
+typedef int (*m_get_item_cb)(int item, int action, void *arg, void *ctx);
+
+int m_property_read_list(int action, void *arg, int count,
+                         m_get_item_cb get_item, void *ctx);
+
 #endif /* MPLAYER_M_PROPERTY_H */
