@@ -59,6 +59,12 @@ const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
     "gamma",
 };
 
+const char *const mp_chroma_names[MP_CHROMA_COUNT] = {
+    "unknown",
+    "mpeg2/4/h264",
+    "mpeg1/jpeg",
+};
+
 enum mp_csp avcol_spc_to_mp_csp(int avcolorspace)
 {
     switch (avcolorspace) {

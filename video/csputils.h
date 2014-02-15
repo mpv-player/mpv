@@ -92,7 +92,10 @@ enum mp_chroma_location {
     MP_CHROMA_AUTO,
     MP_CHROMA_LEFT,     // mpeg2/4, h264
     MP_CHROMA_CENTER,   // mpeg1, jpeg
+    MP_CHROMA_COUNT,
 };
+
+extern const char *const mp_chroma_names[MP_CHROMA_COUNT];
 
 enum mp_csp_equalizer_param {
     MP_CSP_EQ_BRIGHTNESS,
