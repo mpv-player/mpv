@@ -866,6 +866,15 @@ an option at runtime.
     Playlist, current entry marked. Currently, the raw property value is
     useless.
 
+    This has a number of sub-properties. Replace ``N`` with the 0-based playlist
+    entry index.
+
+    ``playlist/count``
+        Number of playlist entries (same as ``playlist-count``).
+
+    ``playlist/N/filename``
+        Filename of the Nth entry.
+
 ``track-list``
     List of audio/video/sub tracks, current entry marked. Currently, the raw
     property value is useless.

@@ -1779,20 +1779,25 @@ static int mp_property_playlist_pos(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_playlist_count(m_option_t *prop, int action, void *arg,
-                                      MPContext *mpctx)
+static int get_playlist_entry(int item, int action, void *arg, void *ctx)
 {
-    if (action == M_PROPERTY_GET) {
-        *(int *)arg = playlist_entry_count(mpctx->playlist);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    struct MPContext *mpctx = ctx;
+    struct playlist_entry *e = playlist_entry_from_index(mpctx->playlist, item);
+    if (!e)
+        return M_PROPERTY_ERROR;
+
+    struct m_sub_property props[] = {
+        {"filename",    SUB_PROP_STR(e->filename)},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
 }
 
 static int mp_property_playlist(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
-    if (action == M_PROPERTY_GET) {
+    if (action == M_PROPERTY_PRINT) {
         char *res = talloc_strdup(NULL, "");
 
         for (struct playlist_entry *e = mpctx->playlist->first; e; e = e->next)
@@ -1807,7 +1812,8 @@ static int mp_property_playlist(m_option_t *prop, int action, void *arg,
         *(char **)arg = res;
         return M_PROPERTY_OK;
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_read_list(action, arg, playlist_entry_count(mpctx->playlist),
+                                get_playlist_entry, mpctx);
 }
 
 static char *print_obj_osd_list(struct m_obj_settings *list)
@@ -1984,9 +1990,9 @@ static const m_option_t mp_properties[] = {
     { "chapter-list", mp_property_list_chapters, CONF_TYPE_STRING },
     M_PROPERTY("track-list", property_list_tracks),
 
-    { "playlist", mp_property_playlist, CONF_TYPE_STRING },
+    M_PROPERTY("playlist", mp_property_playlist),
     { "playlist-pos", mp_property_playlist_pos, CONF_TYPE_INT },
-    { "playlist-count", mp_property_playlist_count, CONF_TYPE_INT },
+    M_PROPERTY_ALIAS("playlist-count", "playlist/count"),
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,
