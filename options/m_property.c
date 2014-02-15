@@ -386,3 +386,64 @@ int m_property_strdup_ro(const struct m_option* prop, int action, void* arg,
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
+
+// This allows you to make a list of values (like from a struct) available
+// as a number of sub-properties. The property list is set up with the current
+// property values on the stack before calling this function.
+// This does not support write access.
+int m_property_read_sub(const struct m_sub_property *props, int action, void *arg)
+{
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){
+            .name = "",
+            .type = CONF_TYPE_STRING,
+        };
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_PRINT: {
+        // Output "something" - what it really should return is not yet decided.
+        // It should probably be something that is easy to consume by slave
+        // mode clients. (M_PROPERTY_PRINT on the other hand can return this
+        // as human readable version just fine).
+        char *res = NULL;
+        for (int n = 0; props && props[n].name; n++) {
+            const struct m_sub_property *prop = &props[n];
+            if (prop->unavailable)
+                continue;
+            struct m_option type = { .name = "", .type = prop->type, };
+            char *s = m_option_print(&type, &prop->value);
+            ta_xasprintf_append(&res, "%s=%s\n", prop->name, s);
+            talloc_free(s);
+        }
+        *(char **)arg = res;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_KEY_ACTION: {
+        struct m_property_action_arg *ka = arg;
+        const struct m_sub_property *prop = NULL;
+        for (int n = 0; props && props[n].name; n++) {
+            if (strcmp(props[n].name, ka->key) == 0) {
+                prop = &props[n];
+                break;
+            }
+        }
+        if (!prop)
+            return M_PROPERTY_UNKNOWN;
+        if (prop->unavailable)
+            return M_PROPERTY_UNAVAILABLE;
+        struct m_option type = { .name = "", .type = prop->type, };
+        switch (ka->action) {
+        case M_PROPERTY_GET: {
+            memset(ka->arg, 0, type.type->size);
+            m_option_copy(&type, ka->arg, &prop->value);
+            return M_PROPERTY_OK;
+        }
+        case M_PROPERTY_GET_TYPE:
+            *(struct m_option *)ka->arg = type;
+            return M_PROPERTY_OK;
+        }
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}

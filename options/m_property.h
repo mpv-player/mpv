@@ -22,7 +22,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-struct m_option;
+#include "m_option.h"
+
 struct mp_log;
 
 extern const struct m_option_type m_option_type_dummy;
@@ -140,5 +141,30 @@ int m_property_double_ro(const struct m_option* prop, int action, void* arg,
                          double var);
 int m_property_strdup_ro(const struct m_option* prop, int action, void* arg,
                          const char *var);
+
+struct m_sub_property {
+    // Name of the sub-property - this will be prefixed with the parent
+    // property's name.
+    const char *name;
+    // Type of the data stored in the value member. See m_option.
+    const struct m_option_type *type;
+    // Data returned by the sub-property. m_property_read_sub() will make a
+    // copy of this if needed. It will never write or free the data.
+    union m_option_value value;
+    // This can be set to true if the property should be hidden.
+    bool unavailable;
+};
+
+// Convenience macros which can be used as part of a sub_property entry.
+#define SUB_PROP_INT(i) \
+    .type = CONF_TYPE_INT, .value = {.int_ = (i)}
+#define SUB_PROP_STR(s) \
+    .type = CONF_TYPE_STRING, .value = {.string = (char *)(s)}
+#define SUB_PROP_FLOAT(f) \
+    .type = CONF_TYPE_FLOAT, .value = {.float_ = (f)}
+#define SUB_PROP_FLAG(f) \
+    .type = CONF_TYPE_FLAG, .value = {.flag = (f)}
+
+int m_property_read_sub(const struct m_sub_property *props, int action, void *arg);
 
 #endif /* MPLAYER_M_PROPERTY_H */
