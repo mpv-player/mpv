@@ -1063,6 +1063,33 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
     return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
+static int get_track_entry(int item, int action, void *arg, void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+    struct track *track = mpctx->tracks[item];
+
+    struct m_sub_property props[] = {
+        {"id",          SUB_PROP_INT(track->user_tid)},
+        {"type",        SUB_PROP_STR(stream_type_name(track->type)),
+                        .unavailable = !stream_type_name(track->type)},
+        {"src-id",      SUB_PROP_INT(track->demuxer_id),
+                        .unavailable = track->demuxer_id == -1},
+        {"title",       SUB_PROP_STR(track->title),
+                        .unavailable = !track->title},
+        {"lang",        SUB_PROP_STR(track->lang),
+                        .unavailable = !track->lang},
+        {"albumart",    SUB_PROP_FLAG(track->attached_picture)},
+        {"default",     SUB_PROP_FLAG(track->default_track)},
+        {"external",    SUB_PROP_FLAG(track->is_external)},
+        {"selected",    SUB_PROP_FLAG(track->selected)},
+        {"external-filename", SUB_PROP_STR(track->external_filename),
+                        .unavailable = !track->external_filename},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
 static const char *track_type_name(enum stream_type t)
 {
     switch (t) {
@@ -1076,7 +1103,7 @@ static const char *track_type_name(enum stream_type t)
 static int property_list_tracks(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
-    if (action == M_PROPERTY_GET) {
+    if (action == M_PROPERTY_PRINT) {
         char *res = NULL;
 
         for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
@@ -1113,7 +1140,8 @@ static int property_list_tracks(m_option_t *prop, int action, void *arg,
         *(char **)arg = res;
         return M_PROPERTY_OK;
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_read_list(action, arg, mpctx->num_tracks,
+                                get_track_entry, mpctx);
 }
 
 /// Selected audio id (RW)
@@ -1954,7 +1982,7 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
 
     { "chapter-list", mp_property_list_chapters, CONF_TYPE_STRING },
-    { "track-list", property_list_tracks, CONF_TYPE_STRING },
+    M_PROPERTY("track-list", property_list_tracks),
 
     { "playlist", mp_property_playlist, CONF_TYPE_STRING },
     { "playlist-pos", mp_property_playlist_pos, CONF_TYPE_INT },

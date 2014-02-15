@@ -870,6 +870,48 @@ an option at runtime.
     List of audio/video/sub tracks, current entry marked. Currently, the raw
     property value is useless.
 
+    This has a number of sub-properties. Replace ``N`` with the 0-based track
+    index.
+
+    ``track-list/count``
+        Total number of tracks.
+
+    ``track-list/N/id``
+        The ID as it's used for ``-sid``/``--aid``/``--vid``. This is unique
+        within tracks of the same type (sub/audio/video), but otherwise not.
+
+    ``track-list/N/type``
+        String describing the media type. One of ``audio``, ``video``, ``sub``.
+
+    ``track-list/N/src-id``
+        Track ID as used in the source file. Not always available.
+
+    ``track-list/N/title``
+        Track title as it is stored in the file. Not always available.
+
+    ``track-list/N/lang``
+        Track language as identified by the file. Not always available.
+
+    ``track-list/N/albumart``
+        ``yes`` if this is a video track that consists of a single picture,
+        ``no`` or unavailable otherwise. This is used for video tracks that are
+        really attached pictures in audio files.
+
+    ``track-list/N/default``
+        ``yes`` if the track has the default flag set in the file, ``no``
+        otherwise.
+
+    ``track-list/N/external``
+        ``yes`` if the track is an external file, ``no`` otherwise. This is
+        set for separate subtitle files.
+
+    ``track-list/N/external-filename``
+        The filename if the track is from an external file, unavailable
+        otherwise.
+
+    ``track-list/N/selected``
+        ``yes`` if the track is currently decoded, ``no`` otherwise.
+
 ``chapter-list``
     List of chapters, current entry marked. Currently, the raw property value
     is useless.
