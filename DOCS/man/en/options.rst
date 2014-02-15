@@ -1412,10 +1412,8 @@ OPTIONS
 ``--no-config``
     Do not load default configuration files. This prevents loading of
     ``~/.mpv/config`` and ``~/.mpv/input.conf``, as well as loading the
-    same files from system wide configuration directories.
-
-    Loading of some configuration files is not affected by this option, such
-    as configuration files for DVB code and fontconfig.
+    same files from system wide configuration directories. Other configuration
+    files are blocked as well, such as resume playback files.
 
     .. note::
 

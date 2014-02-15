@@ -1,5 +1,9 @@
 #include <assert.h>
 #include <string.h>
+#include <sys/types.h>
+#include <dirent.h>
+
+#include "osdep/io.h"
 
 #include <lua.h>
 #include <lualib.h>
@@ -87,9 +91,9 @@ static int mp_cpcall(lua_State *L, lua_CFunction fn, int args)
 
 static void report_error(lua_State *L)
 {
-    struct MPContext *mpctx = get_mpctx(L);
+    struct script_ctx *ctx = get_ctx(L);
     const char *err = lua_tostring(L, -1);
-    MP_WARN(mpctx, "Error: %s\n", err ? err : "[unknown]");
+    MP_WARN(ctx, "Error: %s\n", err ? err : "[unknown]");
     lua_pop(L, 1);
 }
 
@@ -144,6 +148,7 @@ static int load_file(struct script_ctx *ctx, const char *fname)
     int r = 0;
     lua_State *L = ctx->state;
     char *res_name = mp_get_user_path(NULL, ctx->mpctx->global, fname);
+    MP_VERBOSE(ctx, "loading file %s\n", res_name);
     if (luaL_loadfile(L, res_name) || lua_pcall(L, 0, 0, 0)) {
         report_error(L);
         r = -1;
@@ -170,8 +175,10 @@ static int load_builtin(lua_State *L)
 // Execute "require " .. name
 static bool require(lua_State *L, const char *name)
 {
-    char buf[80];
+    struct script_ctx *ctx = get_ctx(L);
+    MP_VERBOSE(ctx, "loading %s\n", name);
     // Lazy, but better than calling the "require" function manually
+    char buf[80];
     snprintf(buf, sizeof(buf), "require '%s'", name);
     if (luaL_loadstring(L, buf) || lua_pcall(L, 0, 0, 0)) {
         report_error(L);
@@ -260,6 +267,7 @@ static void *lua_thread(void *p)
         report_error(L);
 
 error_out:
+    MP_VERBOSE(ctx, "exiting.\n");
     if (ctx->suspended)
         mpv_resume(ctx->client);
     if (ctx->state)
@@ -783,6 +791,34 @@ static void add_functions(struct script_ctx *ctx)
     lua_setfield(L, -2, "get_property_osd");
 }
 
+static int compare_filename(const void *pa, const void *pb)
+{
+    char *a = (char *)pa;
+    char *b = (char *)pb;
+    return strcmp(a, b);
+}
+
+static char **list_lua_files(void *talloc_ctx, char *path)
+{
+    char **files = NULL;
+    int count = 0;
+    DIR *dp = opendir(path);
+    if (!dp)
+        return NULL;
+    struct dirent *ep;
+    while ((ep = readdir(dp))) {
+        char *ext = mp_splitext(ep->d_name, NULL);
+        if (!ext || strcasecmp(ext, "lua") != 0)
+            continue;
+        char *fname = mp_path_join(talloc_ctx, bstr0(path), bstr0(ep->d_name));
+        MP_TARRAY_APPEND(talloc_ctx, files, count, fname);
+    }
+    closedir(dp);
+    qsort(files, count, sizeof(char *), compare_filename);
+    MP_TARRAY_APPEND(talloc_ctx, files, count, NULL);
+    return files;
+}
+
 void mp_lua_init(struct MPContext *mpctx)
 {
     // Load scripts from options
@@ -793,4 +829,13 @@ void mp_lua_init(struct MPContext *mpctx)
         if (files[n][0])
             mp_lua_load_script(mpctx, files[n]);
     }
+    // Load ~/.mpv/lua/*
+    void *tmp = talloc_new(NULL);
+    char *lua_path = mp_find_user_config_file(tmp, mpctx->global, "lua");
+    if (lua_path) {
+        files = list_lua_files(tmp, lua_path);
+        for (int n = 0; files && files[n]; n++)
+            mp_lua_load_script(mpctx, files[n]);
+    }
+    talloc_free(tmp);
 }

@@ -135,7 +135,12 @@ mp.keep_running = true
 local event_handlers = {}
 
 function mp.register_event(name, cb)
-    event_handlers[name] = cb
+    local list = event_handlers[name]
+    if not list then
+        list = {}
+        event_handlers[name] = list
+    end
+    list[#list + 1] = cb
     return mp.request_event(name, true)
 end
 
@@ -180,9 +185,11 @@ _G.mp_event_loop = function()
         mp.suspend()
         more_events = (e.event ~= "none")
         if more_events then
-            local handler = event_handlers[e.event]
-            if handler then
-                handler(e)
+            local handlers = event_handlers[e.event]
+            if handlers then
+                for _, handler in ipairs(handlers) do
+                    handler(e)
+                end
             end
         end
     end

@@ -100,6 +100,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     associated, the ``error`` field is set to a string describing the error,
     on success it's not set.
 
+    If multiple functions are registered for the same event, they are run in
+    registration order, which the first registered function running before all
+    the other ones.
+
     Returns true if such an event exists, false otherwise.
 
     See `Events`_ and `List of events`_ for details.
