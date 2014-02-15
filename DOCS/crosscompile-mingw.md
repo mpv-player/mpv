@@ -30,7 +30,7 @@ Example with MXE
 ----------------
 
 ```bash
-# Download MXE. Note that compiling the required packages requires about 1 GB
+# Download MXE. Note that compiling the required packages requires about 1.4 GB
 # or more!
 
 cd /opt
