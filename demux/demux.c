@@ -281,7 +281,7 @@ void free_demuxer(demuxer_t *demuxer)
     talloc_free(demuxer);
 }
 
-static const char *stream_type_name(enum stream_type type)
+const char *stream_type_name(enum stream_type type)
 {
     switch (type) {
     case STREAM_VIDEO:  return "video";
