@@ -44,8 +44,6 @@
 #include "wayland_common.h"
 #include "wayland-version.h"
 
-#define MAX_BUFFERS 2
-
 static void draw_image(struct vo *vo, mp_image_t *mpi);
 
 static const struct wl_callback_listener frame_listener;
