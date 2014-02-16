@@ -68,16 +68,12 @@ end
 
 local timers = {}
 
--- Install a one-shot timer. Once the given amount of seconds has passed from
--- now, the callback will be called as cb(), and the timer is removed.
 function mp.add_timeout(seconds, cb)
     local t = mp.add_periodic_timer(seconds, cb)
     t.oneshot = true
     return t
 end
 
--- Install a periodic timer. It works like add_timeout(), but after cb() is
--- called, the timer is re-added.
 function mp.add_periodic_timer(seconds, cb)
     local t = {
         timeout = seconds,
