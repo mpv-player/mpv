@@ -37,19 +37,29 @@ cd /opt
 git clone https://github.com/mxe/mxe mingw
 cd mingw
 
+# Set build options.
+
+# The JOBS environment variable controls threads to use when building. DO NOT
+# use the regular `make -j4` option with MXE as it will slow down the build.
+# Alternatively, you can set this in the make command by appending "JOBS=4"
+# to the end of command:
+echo "JOBS := 4" >> settings.mk
+
+# The MXE_TARGET environment variable builds MinGW-w64 for 32 bit targets.
+# Alternatively, you can specify this in the make command by appending
+# "MXE_TARGETS=i686-w64-mingw32" to the end of command:
+echo "MXE_TARGETS := i686-w64-mingw32" >> settings.mk
+
+# If you want to build 64 bit version, use this:
+# echo "MXE_TARGETS := x86_64-w64-mingw32" >> settings.mk
+
 # Build required packages. The following provide a minimum required to build
 # mpv.
 
-# The JOBS environment variable controls threads to use when building. DO NOT
-# use the regular `make -j4` option with MXE. Alternatively, you can make this
-# a default so you don't need to type `JOBS=4` every time you build:
-# echo "JOBS := 4" >> settings.mk
+make gcc ffmpeg libass jpeg pthreads
 
-# The MXE_TARGET environment variable builds MinGW-w64 for 32 bit targets.
-# You can make this a default:
-# echo "MXE_TARGETS := i686-w64-mingw32" >> settings.mk
-
-make gcc ffmpeg libass jpeg pthreads MXE_TARGETS=i686-w64-mingw32 JOBS=4
+# Add MXE binaries to $PATH
+export PATH=/opt/mingw/usr/bin/:$PATH
 
 # Build mpv. The target will be used to automatically select the name of the
 # build tools involved (e.g. it will use i686-w64-mingw32-gcc).
@@ -57,7 +67,8 @@ make gcc ffmpeg libass jpeg pthreads MXE_TARGETS=i686-w64-mingw32 JOBS=4
 cd ..
 git clone https://github.com/mpv-player/mpv.git
 cd mpv
-export PATH=/opt/mingw/usr/bin/:$PATH
 DEST_OS=win32 TARGET=i686-w64-mingw32 ./waf configure
+# Or, if 64 bit version,
+# DEST_OS=win32 TARGET=x86_64-w64-mingw32 ./waf configure
 ./waf build
 ```
