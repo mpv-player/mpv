@@ -63,22 +63,24 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     These two commands are equivalent, except that the first version breaks
     if the filename contains spaces or certain special characters.
 
-``mp.get_property(name)``
+``mp.get_property(name [,def])``
     Return the value of the given property as string. These are the same
     properties as used in input.conf. See `Properties`_ for a list of
     properties. The returned string is formatted similar to ``${=name}``
     (see `Property Expansion`_).
 
-    Returns the string on success, or ``nil, error`` on error.
+    Returns the string on success, or ``def, error`` on error. ``def`` is the
+    second parameter provided to the function, and is nil if it's missing.
 
-``mp.get_property_osd(name)``
+``mp.get_property_osd(name [,def])``
     Similar to ``mp.get_property``, but return the property value formatted for
     OSD. This is the same string as printed with ``${name}`` when used in
     input.conf.
 
-    Returns the string on success, or ``"", error`` on error.
-    Unlike ``get_property()``, assigning the return value to a variable will
-    always result in a string.
+    Returns the string on success, or ``def, error`` on error. ``def`` is the
+    second parameter provided to the function, and is an empty string if it's
+    missing. Unlike ``get_property()``, assigning the return value to a variable
+    will always result in a string.
 
 ``mp.set_property(name, value)``
     Set the given property to the given value. See ``mp.get_property`` and

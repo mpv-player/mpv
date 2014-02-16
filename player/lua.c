@@ -505,6 +505,8 @@ static int script_get_property(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     int type = lua_tointeger(L, lua_upvalueindex(1))
                ? MPV_FORMAT_OSD_STRING : MPV_FORMAT_STRING;
+    char *def_fallback = type == MPV_FORMAT_OSD_STRING ? "" : NULL;
+    char *def = (char *)luaL_optstring(L, 2, def_fallback);
 
     char *result = NULL;
     int err = mpv_get_property(ctx->client, name, type, &result);
@@ -513,9 +515,10 @@ static int script_get_property(lua_State *L)
         talloc_free(result);
         return 1;
     }
-    if (type == MPV_FORMAT_OSD_STRING) {
-        lua_pushstring(L, "");
+    if (def) {
+        lua_pushstring(L, def);
         lua_pushstring(L, mpv_error_string(err));
+        return 2;
     }
     return check_error(L, err);
 }
