@@ -647,17 +647,14 @@ int vo_w32_init(struct vo *vo)
 
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 
-    HICON mplayerIcon = LoadIconW(hInstance, L"IDI_ICON1");
-
     WNDCLASSEXW wcex = {
         .cbSize = sizeof wcex,
         .style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW,
         .lpfnWndProc = WndProc,
         .hInstance = hInstance,
-        .hIcon = mplayerIcon,
+        .hIcon = LoadIconW(hInstance, L"IDI_ICON1"),
         .hCursor = LoadCursor(NULL, IDC_ARROW),
         .lpszClassName = classname,
-        .hIconSm = mplayerIcon,
     };
 
     if (!RegisterClassExW(&wcex)) {
