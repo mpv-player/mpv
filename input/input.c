@@ -438,6 +438,7 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
             return bind;
     }
 
+    struct cmd_bind *best_bind = NULL;
     for (int i = ictx->num_active_sections - 1; i >= 0; i--) {
         struct active_section *s = &ictx->active_sections[i];
         struct cmd_bind *bind = find_bind_for_key_section(ictx, s->name, n, keys);
@@ -446,13 +447,16 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
             if (!use_mouse || (bs->mouse_area_set && test_rect(&bs->mouse_area,
                                                                ictx->mouse_vo_x,
                                                                ictx->mouse_vo_y)))
-                return bind;
+            {
+                if (!best_bind || (best_bind->is_builtin && !bind->is_builtin))
+                    best_bind = bind;
+            }
         }
         if (s->flags & MP_INPUT_EXCLUSIVE)
             break;
     }
 
-    return NULL;
+    return best_bind;
 }
 
 static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
