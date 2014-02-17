@@ -141,24 +141,29 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     nothing if the ``name`` wasn't registered.
 
 ``mp.add_key_binding(key, name|fn [,fn])``
-    Register a key binding. The binding will be mapped to the given ``key``,
-    which is a string describing the physical key. This uses the same key
-    names as in input.conf, and also allows combinations (e.g. ``ctrl+a``).
+    Register callback to be run on a key binding. The binding will be mapped to
+    the given ``key``, which is a string describing the physical key. This uses
+    the same key names as in input.conf, and also allows combinations
+    (e.g. ``ctrl+a``).
 
-    Key bindings are dispatched as script commands. The ``name`` argument is
-    the name used to invoke command handlers as registered by
-    ``mp.register_script_command``. The name can also be used by users to remap
-    the bindings provided by your script (see below).
+    After calling this function, key presses will cause the function ``fn`` to
+    be called (unless the user overmapped the key with another binding).
 
-    If a key binding or a command with the given name already exists, it's
-    overwritten.
+    The ``name`` argument should be a short symbolic string. It allows the user
+    to remap the key binding via input.conf using the ``script_message``
+    command, the script name, and the name of the key binding (see below for
+    an example). The name should be unique across other bindings in the same
+    script - if not, the previous binding with the same name will be
+    overwritten. You can omit the name, in which case a random name is generated
+    internally.
 
-    The ``fn`` parameter is optional. If provided, it must be a function, and
-    will be called when the key is pressed. Actually, this just for
-    convenience, and literally calls ``mp.register_script_command(name, fn)``.
+    Internally, key bindings are dispatched via the ``script_message`` input
+    command and ``mp.register_script_command``.
 
-    You can also omit the name and only provide a function ``fn`` instead. Then
-    a random name is generated internally.
+    Trying to map multiple commands to a key will essentially prefer a random
+    binding, while the other bindings are not called. It is guaranteed that
+    user defined bindings in the central input.conf are preferred over bindings
+    added with this function (but see ``mp.add_forced_key_binding``).
 
     Example:
 
