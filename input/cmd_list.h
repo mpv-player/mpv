@@ -98,6 +98,7 @@ enum mp_command_type {
 
     /// Internal for Lua scripts
     MP_CMD_SCRIPT_DISPATCH,
+    MP_CMD_SCRIPT_MESSAGE,
 
     MP_CMD_OVERLAY_ADD,
     MP_CMD_OVERLAY_REMOVE,

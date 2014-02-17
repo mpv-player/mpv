@@ -615,6 +615,13 @@ typedef enum mpv_event_id {
      * to a client.
      */
     MPV_EVENT_SCRIPT_INPUT_DISPATCH = 15,
+    /**
+     * Triggered by the script_message input command. The command uses the
+     * first argument of the command as client name (see mpv_client_name()) to
+     * dispatch the message, and passes along the all arguments starting from
+     * the seconand argument as strings.
+     */
+    MPV_EVENT_CLIENT_MESSAGE    = 16,
 } mpv_event_id;
 
 /**
@@ -687,6 +694,17 @@ typedef struct mpv_event_script_input_dispatch {
     const char *type;
 } mpv_event_script_input_dispatch;
 
+typedef struct mpv_event_client_message {
+    /**
+     * Arbitrary arguments chosen by the sender of the message. If num_args > 0,
+     * you can access args[0] through args[num_args - 1] (inclusive). What
+     * these arguments mean is up to the sender and receiver.
+     * None of the valid items is NULL.
+     */
+    int num_args;
+    const char **args;
+} mpv_event_client_message;
+
 typedef struct mpv_event {
     /**
      * One of mpv_event. Keep in mind that later ABI compatible releases might
@@ -712,6 +730,7 @@ typedef struct mpv_event {
      *  MPV_EVENT_GET_PROPERTY_REPLY:     mpv_event_property*
      *  MPV_EVENT_LOG_MESSAGE:            mpv_event_log_message*
      *  MPV_EVENT_SCRIPT_INPUT_DISPATCH:  mpv_event_script_input_dispatch*
+     *  MPV_EVENT_CLIENT_MESSAGE:         mpv_event_client_message*
      *  other: NULL
      *
      * Note: future enhancements might add new event struct for existing or new

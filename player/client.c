@@ -841,6 +841,7 @@ static const char *event_table[] = {
     [MPV_EVENT_UNPAUSE] = "unpause",
     [MPV_EVENT_TICK] = "tick",
     [MPV_EVENT_SCRIPT_INPUT_DISPATCH] = "script-input-dispatch",
+    [MPV_EVENT_CLIENT_MESSAGE] = "client-message",
 };
 
 const char *mpv_event_name(mpv_event_id event)

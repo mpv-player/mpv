@@ -287,3 +287,9 @@ List of events
 
 ``command-reply``
     Undocumented (not useful for Lua scripts).
+
+``script-input-dispatch``
+    Undocumented (used internally).
+
+``client-message``
+    Undocumented (used internally).

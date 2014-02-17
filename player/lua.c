@@ -421,9 +421,22 @@ static int script_wait_event(lua_State *L)
         lua_setfield(L, -2, "type"); // event
         break;
     }
+    case MPV_EVENT_CLIENT_MESSAGE: {
+        mpv_event_client_message *msg = event->data;
+
+        lua_newtable(L); // event args
+        for (int n = 0; n < msg->num_args; n++) {
+            lua_pushinteger(L, n + 1); // event args N
+            lua_pushstring(L, msg->args[n]); // event args N val
+            lua_settable(L, -3); // event args
+        }
+        lua_setfield(L, -2, "args"); // event
+        break;
+    }
     default: ;
     }
 
+    // return event
     return 1;
 }
 

@@ -3200,6 +3200,22 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
+    case MP_CMD_SCRIPT_MESSAGE: {
+        mpv_event_client_message *event = talloc_ptrtype(NULL, event);
+        *event = (mpv_event_client_message){0};
+        for (int n = 1; n < cmd->nargs; n++) {
+            MP_TARRAY_APPEND(event, event->args, event->num_args,
+                             cmd->args[n].v.s);
+        }
+        if (mp_client_send_event(mpctx, cmd->args[0].v.s,
+                                 MPV_EVENT_CLIENT_MESSAGE, event) < 0)
+        {
+            MP_VERBOSE(mpctx, "Can't find script '%s' for %s.\n",
+                       cmd->args[0].v.s, cmd->name);
+        }
+        break;
+    }
+
 #if HAVE_SYS_MMAN_H
     case MP_CMD_OVERLAY_ADD:
         overlay_add(mpctx,
