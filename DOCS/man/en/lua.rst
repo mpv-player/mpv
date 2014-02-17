@@ -103,43 +103,6 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Return the current mpv internal time in seconds as a number. This is
     basically the system time, with an arbitrary offset.
 
-``mp.register_script_command(name, fn)``
-    Register a command named ``name``. If the script receives a message
-    with the given name as first argument, ``fn(...)`` is called with the
-    rest of the script commands.
-
-    If a command with the given name already exists, it's overwritten.
-
-    This is intended for allowing users to interact the script in some ways
-    using the ``script_message`` input command.
-
-    Example:
-
-    In a script, say ``fooscript.lua``:
-
-    ::
-
-        function something_handler(arg1, arg2)
-            print("arg1=" .. arg1)
-            print("arg2=" .. arg2)
-        end
-        mp.register_script_command("something", something_handler)
-
-    input.conf:
-
-    ::
-
-        x script_message lua/fooscript something "hello" "you"
-
-    This will print the lines ``arg1=hello`` and ``arg2=you`` when the
-    key ``x`` is pressed.
-
-    Also see ``mp.add_key_binding`` how to add key bindings by default.
-
-``mp.unregister_script_command(name)``
-    Undo a previous registration with ``mp.register_script_command``. Does
-    nothing if the ``name`` wasn't registered.
-
 ``mp.add_key_binding(key, name|fn [,fn])``
     Register callback to be run on a key binding. The binding will be mapped to
     the given ``key``, which is a string describing the physical key. This uses
@@ -279,6 +242,18 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     you can set the minimum log level of messages which should be received with
     the ``log-message`` event. See the description of this event for details.
     The level is a string, see ``msg.log`` for allowed log levels.
+
+``mp.register_script_command(name, fn)``
+    This is a helper to dispatch ``script_message`` invocations to Lua
+    functions. ``fn`` is called if ``script_message`` is called on this script
+    with ``name`` as first parameter. The other parameters are passed to ``fn``.
+    If a command with the given name is already registered, it's overwritten.
+
+    Used by ``mp.add_key_binding``, so be careful about name collisions.
+
+``mp.unregister_script_command(name)``
+    Undo a previous registration with ``mp.register_script_command``. Does
+    nothing if the ``name`` wasn't registered.
 
 mp.msg functions
 ----------------
