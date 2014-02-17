@@ -281,7 +281,6 @@ static mp_image_t *get_screenshot(struct vo *vo, CVPixelBufferRef pbuf)
     int img_fmt = get_image_fmt(vo, pbuf);
     if (img_fmt < 0 || !vo->params) return NULL;
 
-    struct priv *p = vo->priv;
     CVPixelBufferLockBaseAddress(pbuf, 0);
     void *base = CVPixelBufferGetBaseAddress(pbuf);
     size_t width  = CVPixelBufferGetWidth(pbuf);
