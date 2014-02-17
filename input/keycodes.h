@@ -260,7 +260,7 @@ int mp_input_get_key_from_name(const char *name);
 char *mp_input_get_key_name(int key);
 
 // Combination of multiple keys to string.
-char *mp_input_get_key_combo_name(int *keys, int max);
+char *mp_input_get_key_combo_name(const int *keys, int max);
 
 // String containing combination of multiple string to keys.
 int mp_input_get_keys_from_string(char *str, int max_num_keys,

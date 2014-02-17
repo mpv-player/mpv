@@ -283,7 +283,7 @@ char *mp_input_get_key_name(int key)
     return dst.start;
 }
 
-char *mp_input_get_key_combo_name(int *keys, int max)
+char *mp_input_get_key_combo_name(const int *keys, int max)
 {
     bstr dst = {0};
     while (max > 0) {
