@@ -1349,6 +1349,13 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
         .num_keys = num_keys,
     };
     memcpy(bind->keys, keys, num_keys * sizeof(bind->keys[0]));
+    if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
+        char *s = mp_input_get_key_combo_name(keys, num_keys);
+        MP_DBG(ictx, "add: section='%s' key='%s'%s cmd='%s' location='%s'\n",
+               bind->owner->section, s, bind->is_builtin ? " builtin" : "",
+               bind->cmd, bind->location);
+        talloc_free(s);
+    }
 }
 
 // restrict_section: every entry is forced to this section name
