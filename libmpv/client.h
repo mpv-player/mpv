@@ -622,6 +622,22 @@ typedef enum mpv_event_id {
      * the seconand argument as strings.
      */
     MPV_EVENT_CLIENT_MESSAGE    = 16,
+    /**
+     * Happens after video changed in some way. This can happen on resolution
+     * changes, pixel format changes, or video filter changes. The event is
+     * sent after the video filters and the VO are reconfigured. Applications
+     * embedding a mpv window should listen to this event in order to resize
+     * the window if needed.
+     * Note that this event can happen sporadically, and you should check
+     * yourself whether the video parameters really changed before doing
+     * something expensive.
+     */
+    MPV_EVENT_VIDEO_RECONFIG    = 17,
+    /**
+     * Similar to MPV_EVENT_VIDEO_RECONFIG. This is relatively uninteresting,
+     * because there is no such thing as audio output embedding.
+     */
+    MPV_EVENT_AUDIO_RECONFIG    = 18,
 } mpv_event_id;
 
 /**

@@ -21,6 +21,8 @@
 
 #include <stdbool.h>
 
+#include "libmpv/client.h"
+
 #include "common/common.h"
 #include "options/options.h"
 #include "sub/osd.h"

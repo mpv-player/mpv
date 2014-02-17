@@ -51,7 +51,6 @@
 #include "core.h"
 #include "screenshot.h"
 #include "command.h"
-#include "libmpv/client.h"
 
 #define WAKEUP_PERIOD 0.5
 
@@ -893,6 +892,7 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
         };
         vo_reconfig(vo, &p, 0);
         redraw_osd(mpctx);
+        mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
     }
 }
 

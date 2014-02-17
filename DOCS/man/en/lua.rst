@@ -391,3 +391,9 @@ List of events
 
 ``client-message``
     Undocumented (used internally).
+
+``video-reconfig``
+    Happens on video output or filter reconfig.
+
+``audio-reconfig``
+    Happens on audio output or filter reconfig.

@@ -72,6 +72,10 @@ static void reconfig_video(struct MPContext *mpctx,
 
     set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
 
+    // The event should happen _after_ filter and VO reconfig. Since we don't
+    // have any fine grained locking, this is just as good.
+    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
+
     if (video_reconfig_filters(d_video, params) < 0) {
         // Most video filters don't work with hardware decoding, so this
         // might be the reason filter reconfig failed.

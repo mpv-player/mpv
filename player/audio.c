@@ -39,6 +39,7 @@
 #include "video/decode/dec_video.h"
 
 #include "core.h"
+#include "command.h"
 
 static int build_afilter_chain(struct MPContext *mpctx)
 {
@@ -110,6 +111,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
         uninit_player(mpctx, INITIALIZED_AO);
         goto no_audio;
     }
+
+    mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
     if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
         mpctx->initialized_flags |= INITIALIZED_ACODEC;
