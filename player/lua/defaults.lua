@@ -4,7 +4,7 @@ end
 
 local callbacks = {}
 -- each script has its own section, so that they don't conflict
-local default_section = "input_" .. mp.script_name
+local default_section = "input_dispatch_" .. mp.script_name
 
 -- Set the list of key bindings. These will override the user's bindings, so
 -- you should use this sparingly.
@@ -66,6 +66,64 @@ local function script_dispatch(event)
     end
 end
 
+-- "Newer" and more convenient API
+
+local key_bindings = {}
+local command_id = 1
+
+local function update_key_bindings()
+    for i = 1, 2 do
+        local section, flags
+        local def = i == 1
+        if def then
+            section = "input_" .. mp.script_name
+            flags = "builtin"
+        else
+            section = "input_forced_" .. mp.script_name
+            flags = "default"
+        end
+        local cfg = ""
+        for k, v in pairs(key_bindings) do
+            if v.forced ~= def then
+                cfg = cfg .. v.key .. " script_message " .. mp.script_name
+                      .. " " .. v.name .. "\n"
+            end
+        end
+        mp.input_define_section(section, cfg, flags)
+        -- TODO: remove the section if the script is stopped
+        mp.input_enable_section(section)
+    end
+end
+
+local function add_binding(attrs, key, name, fn)
+    if (type(name) ~= "string") and (not fn) then
+        fn = name
+        name = "command" .. tostring(command_id)
+        command_id = command_id + 1
+    end
+    attrs.key = key
+    attrs.name = name
+    key_bindings[name] = attrs
+    update_key_bindings()
+    if fn then
+        mp.register_script_command(name, fn)
+    end
+end
+
+function mp.add_key_binding(...)
+    add_binding({forced=false}, ...)
+end
+
+function mp.add_forced_key_binding(...)
+    add_binding({forced=true}, ...)
+end
+
+function mp.remove_key_binding(name)
+    key_bindings[name] = nil
+    update_key_bindings()
+    mp.unregister_script_command(name)
+end
+
 local timers = {}
 
 function mp.add_timeout(seconds, cb)
@@ -125,6 +183,23 @@ local function process_timers()
     end
 end
 
+local commands = {}
+
+function mp.register_script_command(name, fn)
+    commands[name] = fn
+end
+
+function mp.unregister_script_command(name)
+    commands[name] = nil
+end
+
+local function command_dispatch(ev)
+    if #ev.args > 0 then
+        local handler = commands[ev.args[1]]
+        handler(unpack(ev.args, 2))
+    end
+end
+
 -- used by default event loop (mp_event_loop()) to decide when to quit
 mp.keep_running = true
 
@@ -143,6 +218,7 @@ end
 -- default handlers
 mp.register_event("shutdown", function() mp.keep_running = false end)
 mp.register_event("script-input-dispatch", script_dispatch)
+mp.register_event("client-message", command_dispatch)
 
 mp.msg = {
     log = mp.log,

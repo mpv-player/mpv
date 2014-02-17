@@ -666,7 +666,18 @@ static int script_input_define_section(lua_State *L)
     struct MPContext *mpctx = get_mpctx(L);
     char *section = (char *)luaL_checkstring(L, 1);
     char *contents = (char *)luaL_checkstring(L, 2);
-    mp_input_define_section(mpctx->input, section, "<script>", contents, true);
+    char *flags = (char *)luaL_optstring(L, 3, "");
+    bool builtin = true;
+    if (strcmp(flags, "builtin") == 0) {
+        builtin = true;
+    } else if (strcmp(flags, "default") == 0) {
+        builtin = false;
+    } else if (strcmp(flags, "") == 0) {
+        //pass
+    } else {
+        luaL_error(L, "invalid flags: '%*'", flags);
+    }
+    mp_input_define_section(mpctx->input, section, "<script>", contents, builtin);
     return 0;
 }
 

@@ -92,6 +92,97 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Return the current mpv internal time in seconds as a number. This is
     basically the system time, with an arbitrary offset.
 
+``mp.register_script_command(name, fn)``
+    Register a command named ``name``. If the script receives a message
+    with the given name as first argument, ``fn(...)`` is called with the
+    rest of the script commands.
+
+    If a command with the given name already exists, it's overwritten.
+
+    This is intended for allowing users to interact the script in some ways
+    using the ``script_message`` input command.
+
+    Example:
+
+    In a script, say ``fooscript.lua``:
+
+    ::
+
+        function something_handler(arg1, arg2)
+            print("arg1=" .. arg1)
+            print("arg2=" .. arg2)
+        end
+        mp.register_script_command("something", something_handler)
+
+    input.conf:
+
+    ::
+
+        x script_message lua/fooscript something "hello" "you"
+
+    This will print the lines ``arg1=hello`` and ``arg2=something`` when the
+    key ``x`` is pressed.
+
+    Also see ``mp.add_key_binding`` how to add key bindings by default.
+
+``mp.unregister_script_command(name)``
+    Undo a previous registration with ``mp.register_script_command``. Does
+    nothing if the ``name`` wasn't registered.
+
+``mp.add_key_binding(key, name|fn [,fn])``
+    Register a key binding. The binding will be mapped to the given ``key``,
+    which is a string describing the physical key. This uses the same key
+    names as in input.conf, and also allows combinations (e.g. ``ctrl+a``).
+
+    Key bindings are dispatched as script commands. The ``name`` argument is
+    the name used to invoke command handlers as registered by
+    ``mp.register_script_command``. The name can also be used by users to remap
+    the bindings provided by your script (see below).
+
+    If a key binding or a command with the given name already exists, it's
+    overwritten.
+
+    The ``fn`` parameter is optional. If provided, it must be a function, and
+    will be called when the key is pressed. Actually, this just for
+    convenience, and literally calls ``mp.register_script_command(name, fn)``.
+
+    You can also omit the name and only provide a function ``fn`` instead. Then
+    a random name is generated internally.
+
+    Example:
+
+    ::
+
+        function something_handler()
+            print("the key was pressed")
+        end
+        mp.add_key_binding("x", "something", something_handler)
+
+    This will print the message ``the key was pressed`` when ``x`` was pressed.
+
+    The user can remap these key bindings. Assume the above script was using
+    the filename ``fooscript.lua``, then the user has to put the following
+    into his input.conf to remap the command to the ``y`` key:
+
+    ::
+
+        y script_message lua/fooscript something
+
+    This will print the message when the key ``y`` is pressed. (``x`` will
+    still work, unless the user overmaps it.)
+
+``mp.add_forced_key_binding(...)``
+    This works almost the same as ``mp.add_key_binding``, but registers the
+    key binding in a way that will overwrite the user's custom bindings in his
+    input.conf. (``mp.add_key_binding`` overwrites default key bindings only,
+    but not those by the user's input.conf.)
+
+``mp.remove_key_binding(name)``
+    Remove a key binding added with ``mp.add_key_binding`` or
+    ``mp.add_forced_key_binding``. Use the same name as you used when adding
+    the bindings. It's not possible to remove bindings for which you omitted
+    the name.
+
 ``mp.register_event(name, fn)``
     Call a specific function when an event happens. The event name is a string,
     and the function fn is a Lua function value.
@@ -136,7 +227,14 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     this equally, so you should be careful about collisions.
 
 ``mp.get_script_name()``
-    Return the name of the current script.
+    Return the name of the current script. The name is usually made of the
+    filename of the script, with directory and file extension removed, and
+    prefixed with ``lua/``. If there are several script which would have the
+    same name, it's made unique by appending a number.
+
+    .. admonition:: Example
+
+        The script ``/path/to/fooscript.lua`` becomes ``lua/fooscript``.
 
 ``mp.suspend()``
     Suspend the mpv main loop. There is a long-winded explanation of this in
