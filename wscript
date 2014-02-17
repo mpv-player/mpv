@@ -197,6 +197,11 @@ iconv support use --disable-iconv.",
         'desc': 'setmode()',
         'func': check_statement('io.h', 'setmode(0, 0)')
     }, {
+        'name': 'bsd-fstatfs',
+        'desc': "BSD's fstatfs()",
+        'func': check_statement(['sys/param.h', 'sys/mount.h'],
+                                'struct statfs fs; fstatfs(0, &fs)')
+    }, {
         'name': 'sys-sysinfo-h',
         'desc': 'sys/sysinfo.h',
         'func': check_statement('sys/sysinfo.h',

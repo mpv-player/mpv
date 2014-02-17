@@ -34,6 +34,11 @@
 #include "options/m_option.h"
 #include "options/path.h"
 
+#if HAVE_BSD_FSTATFS
+#include <sys/param.h>
+#include <sys/mount.h>
+#endif
+
 struct priv {
     int fd;
     bool close;
@@ -107,6 +112,26 @@ char *mp_file_url_to_filename(void *talloc_ctx, bstr url)
 #endif
     return filename;
 }
+
+#if HAVE_BSD_FSTATFS
+static bool check_stream_network(stream_t *stream)
+{
+    struct statfs fs;
+    const char *stypes[] = { "afpfs", "nfs", "smbfs", "webdav", NULL };
+    struct priv *priv = stream->priv;
+    if (fstatfs(priv->fd, &fs) == 0)
+        for (int i=0; stypes[i]; i++)
+            if (strcmp(stypes[i], fs.f_fstypename) == 0)
+                return true;
+    return false;
+
+}
+#else
+static bool check_stream_network(stream_t *stream)
+{
+    return false;
+}
+#endif
 
 static int open_f(stream_t *stream, int mode)
 {
@@ -194,6 +219,9 @@ static int open_f(stream_t *stream, int mode)
     stream->control = control;
     stream->read_chunk = 64 * 1024;
     stream->close = s_close;
+
+    if (check_stream_network(stream))
+        stream->streaming = true;
 
     return STREAM_OK;
 }
