@@ -120,7 +120,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
         x script_message lua/fooscript something "hello" "you"
 
-    This will print the lines ``arg1=hello`` and ``arg2=something`` when the
+    This will print the lines ``arg1=hello`` and ``arg2=you`` when the
     key ``x`` is pressed.
 
     Also see ``mp.add_key_binding`` how to add key bindings by default.
