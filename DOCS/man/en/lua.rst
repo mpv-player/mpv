@@ -1,27 +1,38 @@
 LUA SCRIPTING
 =============
 
-mpv can load Lua scripts. These scripts can be used to control mpv in a similar
-way to slave mode. mpv provides the builtin module ``mp`` (can be loaded
-with ``require 'mp'``), which provides functions to send commands to the
-mpv core and to retrieve information about playback state, user settings,
-file information, and so on.
+mpv can load Lua scripts. Scripts in ``~/.mpv/lua/`` will be loaded on program
+start, or if passed to ``--lua``. mpv provides the builtin module ``mp``, which
+provides functions to send commands to the mpv core and to retrieve information
+about playback state, user settings, file information, and so on.
 
-.. admonition:: Warning
+These scripts can be used to control mpv in a similar way to slave mode.
+Technically, the Lua code uses the client API internally.
 
-    Lua scripting is work in progress, and it's in a very early stage. When
-    writing scripts, rely only on the features and functions documented here.
-    Everything else is subject to change.
+Example
+-------
+
+A script which leaves fullscreen mode when the player is paused:
+
+::
+
+    function on_pause()
+        mp.set_property("fullscreen", "no")
+    end
+    mp.register_event("pause", on_pause)
+
+This script provides a pretty weird feature, but Lua scripting was made to
+allow users implement features which are not going to be added to the mpv core.
 
 Mode of operation
 -----------------
 
-Your script will be loaded by the player at program start if you pass it to
-the ``--lua`` option. Each script runs in its own thread. Your script is
-first run "as is", and once that is done, the event loop is entered. This
-event loop will dispatch events received by mpv and call your own event
-handlers which you have registered with ``mp.register_event``, or timers
-added with ``mp.add_timeout`` or similar.
+Your script will be loaded by the player at program start from ``~/.mpv/lua/``,
+or ``--lua``, or in some cases, internally (like ``--osc``). Each script runs
+in its own thread. Your script is first run "as is", and once that is done,
+the event loop is entered. This event loop will dispatch events received by mpv
+and call your own event handlers which you have registered with
+``mp.register_event``, or timers added with ``mp.add_timeout`` or similar.
 
 When the player quits, all scripts will be asked to terminate. This happens via
 a ``shutdown`` event, which by default will make the event loop return. If your
