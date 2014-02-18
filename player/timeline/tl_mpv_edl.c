@@ -164,7 +164,7 @@ static void copy_chapters(struct chapter **chapters, int *num_chapters,
         double time = demuxer_chapter_time(src, n);
         if (time >= start && time <= start + len) {
             struct chapter ch = {
-                .start = dest_offset + time,
+                .start = dest_offset + time - start,
                 .name = talloc_steal(*chapters, demuxer_chapter_name(src, n)),
             };
             MP_TARRAY_APPEND(NULL, *chapters, *num_chapters, ch);
