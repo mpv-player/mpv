@@ -1084,6 +1084,8 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct MPContext *mpctx = ctx;
     struct track *track = mpctx->tracks[item];
 
+    const char *codec = track->stream ? track->stream->codec : NULL;
+
     struct m_sub_property props[] = {
         {"id",          SUB_PROP_INT(track->user_tid)},
         {"type",        SUB_PROP_STR(stream_type_name(track->type)),
@@ -1100,6 +1102,8 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"selected",    SUB_PROP_FLAG(track->selected)},
         {"external-filename", SUB_PROP_STR(track->external_filename),
                         .unavailable = !track->external_filename},
+        {"codec",       SUB_PROP_STR(codec),
+                        .unavailable = !codec},
         {0}
     };
 

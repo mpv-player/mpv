@@ -918,6 +918,10 @@ an option at runtime.
         ``yes`` if the track has the default flag set in the file, ``no``
         otherwise.
 
+    ``track-list/N/codec``
+        The codec name used by this track, for example ``h264``. Unavailable
+        in some rare cases.
+
     ``track-list/N/external``
         ``yes`` if the track is an external file, ``no`` otherwise. This is
         set for separate subtitle files.
