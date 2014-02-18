@@ -619,6 +619,28 @@ an option at runtime.
 ``editions``
     Number of MKV editions.
 
+``edition-list``
+    List of editions, current entry marked. Currently, the raw property value
+    is useless.
+
+    This has a number of sub-properties. Replace ``N`` with the 0-based edition
+    index.
+
+    ``edition-list/count``
+        Number of editions. If there are no editions, this can be 0 or 1 (1
+        if there's a useless dummy edition).
+
+    ``edition-list/N/id``
+        Edition ID as integer. Use this to set the ``edition`` property.
+        Currently, this is the same as the edition index.
+
+    ``edition-list/N/default``
+        ``yes`` if this is the default edition, ``no`` otherwise.
+
+    ``edition-list/N/title``
+        Edition title as stored in the file. Not always available.
+
+
 ``angle`` (RW)
     Current DVD angle.
 

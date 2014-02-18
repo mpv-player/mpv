@@ -556,6 +556,66 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+
+static int get_edition_entry(int item, int action, void *arg, void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demux_edition *ed = &demuxer->editions[item];
+
+    char *title = mp_tags_get_str(ed->metadata, "title");
+
+    struct m_sub_property props[] = {
+        {"id",          SUB_PROP_INT(item)},
+        {"title",       SUB_PROP_STR(title),
+                        .unavailable = !title},
+        {"default",     SUB_PROP_FLAG(ed->default_edition)},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
+static int property_list_editions(m_option_t *prop, int action, void *arg,
+                                  MPContext *mpctx)
+{
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    if (action == M_PROPERTY_PRINT) {
+        char *res = NULL;
+
+        struct demux_edition *editions = demuxer->editions;
+        int num_editions = demuxer->num_editions;
+        int current = demuxer->edition;
+
+        if (!num_editions)
+            res = talloc_asprintf_append(res, "No editions.");
+
+        for (int n = 0; n < num_editions; n++) {
+            struct demux_edition *ed = &editions[n];
+
+            if (n == current)
+                res = talloc_asprintf_append(res, "> ");
+            res = talloc_asprintf_append(res, "%d: ", n);
+            char *title = mp_tags_get_str(ed->metadata, "title");
+            if (!title)
+                title = "unnamed";
+            res = talloc_asprintf_append(res, "'%s' ", title);
+            if (n == current)
+                res = talloc_asprintf_append(res, "<");
+            res = talloc_asprintf_append(res, "\n");
+        }
+
+        *(char **)arg = res;
+        return M_PROPERTY_OK;
+    }
+    return m_property_read_list(action, arg, demuxer->num_editions,
+                                get_edition_entry, mpctx);
+}
+
 static struct mp_resolve_src *find_source(struct mp_resolve_result *res,
                                           char *encid, char *url)
 {
@@ -2009,6 +2069,7 @@ static const m_option_t mp_properties[] = {
 
     M_PROPERTY("chapter-list", mp_property_list_chapters),
     M_PROPERTY("track-list", property_list_tracks),
+    M_PROPERTY("edition-list", property_list_editions),
 
     M_PROPERTY("playlist", mp_property_playlist),
     { "playlist-pos", mp_property_playlist_pos, CONF_TYPE_INT },
