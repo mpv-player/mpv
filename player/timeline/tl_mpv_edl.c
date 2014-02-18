@@ -36,6 +36,7 @@ struct tl_part {
     char *filename;             // what is stream_open()ed
     double offset;              // offset into the source file
     double length;              // length of the part (-1 if rest of the file)
+    bool chapter_ts;
 };
 
 struct tl_parts {
@@ -102,6 +103,9 @@ static struct tl_parts *parse_edl(bstr str)
             } else if (bstr_equals0(name, "length")) {
                 if (!parse_time(val, &p.length))
                     goto error;
+            } else if (bstr_equals0(name, "timestamps")) {
+                if (bstr_equals0(val, "chapters"))
+                    p.chapter_ts = true;
             }
             nparam++;
             if (!bstr_eatstart0(&str, ","))
@@ -182,6 +186,21 @@ static double source_get_length(struct demuxer *demuxer)
     return time;
 }
 
+static void resolve_timestamps(struct tl_part *part, struct demuxer *demuxer)
+{
+    if (part->chapter_ts) {
+        double start = demuxer_chapter_time(demuxer, part->offset);
+        double length = part->length;
+        double end = length;
+        if (end >= 0)
+            end = demuxer_chapter_time(demuxer, part->offset + part->length);
+        if (end >= 0 && start >= 0)
+            length = end - start;
+        part->offset = start;
+        part->length = length;
+    }
+}
+
 static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
 {
     struct chapter *chapters = talloc_new(NULL);
@@ -194,6 +213,8 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
         struct demuxer *source = open_source(mpctx, part->filename);
         if (!source)
             goto error;
+
+        resolve_timestamps(part, source);
 
         double len = source_get_length(source);
         if (len <= 0) {

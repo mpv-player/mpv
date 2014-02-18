@@ -78,7 +78,7 @@ The parameter name defines the meaning of the parameter:
 2) ``start``, a time value that specifies the start offset into the source file.
 3) ``length``, a time value that specifies the length of the segment.
 
-(Currently, time values are floating point values in seconds.)
+See the section below for the format of timestamps.
 
 Unnamed parameters carry implicit names. The parameter position determines
 which of the parameters listed above is set. For example, the second parameter
@@ -94,6 +94,22 @@ to ``20``, ``param3`` to ``value,escaped``, ``param4`` to ``value2``.
 
 Instead of line breaks, the character ``;`` can be used. Line feed bytes and
 ``;`` are treated equally.
+
+Timestamp format
+================
+
+Currently, time values are floating point values in seconds.
+
+As an extension, you can set the ``timestamps=chapters`` option. If this option
+is set, timestamps have to be integers, and refer to chapter numbers, starting
+with 0.
+
+Example::
+
+    # mpv EDL v0
+    file.mkv,2,4,timestamps=chapters
+
+Plays chapter 3 and ends with the start of chapter 7 (4 chapters later).
 
 Syntax of EDL URIs
 ==================
