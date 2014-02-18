@@ -39,6 +39,10 @@
 #include <sys/mount.h>
 #endif
 
+#ifdef __MINGW32__
+#include <windows.h>
+#endif
+
 struct priv {
     int fd;
     bool close;
@@ -125,6 +129,19 @@ static bool check_stream_network(stream_t *stream)
                 return true;
     return false;
 
+}
+#elif defined(__MINGW32__)
+static bool check_stream_network(stream_t *stream)
+{
+    wchar_t volume[MAX_PATH];
+    wchar_t *path = mp_from_utf8(NULL, stream->path);
+    bool remote = false;
+
+    if (GetVolumePathNameW(path, volume, MAX_PATH))
+        remote = GetDriveTypeW(volume) == DRIVE_REMOTE;
+
+    talloc_free(path);
+    return remote;
 }
 #else
 static bool check_stream_network(stream_t *stream)
