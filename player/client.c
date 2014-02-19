@@ -844,6 +844,7 @@ static const char *event_table[] = {
     [MPV_EVENT_CLIENT_MESSAGE] = "client-message",
     [MPV_EVENT_VIDEO_RECONFIG] = "video-reconfig",
     [MPV_EVENT_AUDIO_RECONFIG] = "audio-reconfig",
+    [MPV_EVENT_METADATA_UPDATE] = "metadata-update",
 };
 
 const char *mpv_event_name(mpv_event_id event)

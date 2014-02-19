@@ -638,6 +638,12 @@ typedef enum mpv_event_id {
      * because there is no such thing as audio output embedding.
      */
     MPV_EVENT_AUDIO_RECONFIG    = 18,
+    /**
+     * Happens when metadata (like file tags) is possibly updated. (It's left
+     * unspecified whether this happens on file start or only when it changes
+     * within a file.)
+     */
+    MPV_EVENT_METADATA_UPDATE   = 19,
 } mpv_event_id;
 
 /**

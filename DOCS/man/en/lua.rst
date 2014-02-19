@@ -388,3 +388,6 @@ List of events
 
 ``audio-reconfig``
     Happens on audio output or filter reconfig.
+
+``metadata-update``
+    Metadata (like file tags) was updated.

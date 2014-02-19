@@ -745,7 +745,7 @@ char *demux_info_get(demuxer_t *demuxer, const char *opt)
     return mp_tags_get_str(demuxer->metadata, opt);
 }
 
-void demux_info_update(struct demuxer *demuxer)
+bool demux_info_update(struct demuxer *demuxer)
 {
     struct mp_tags *tags = demuxer->metadata;
     // Take care of stream metadata as well
@@ -767,8 +767,10 @@ void demux_info_update(struct demuxer *demuxer)
         talloc_free(demuxer->previous_metadata);
         demuxer->previous_metadata = data;
         demux_info_print(demuxer);
+        return true;
     } else {
         talloc_free(data);
+        return false;
     }
 }
 

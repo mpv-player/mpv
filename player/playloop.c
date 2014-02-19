@@ -669,7 +669,8 @@ static bool handle_osd_redraw(struct MPContext *mpctx)
 static void handle_metadata_update(struct MPContext *mpctx)
 {
     if (mp_time_sec() > mpctx->last_metadata_update + 2) {
-        demux_info_update(mpctx->demuxer);
+        if (demux_info_update(mpctx->demuxer))
+            mp_notify(mpctx, MPV_EVENT_METADATA_UPDATE, NULL);
         mpctx->last_metadata_update = mp_time_sec();
     }
 }

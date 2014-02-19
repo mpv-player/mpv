@@ -244,7 +244,7 @@ void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, int flags);
 
 char *demux_info_get(struct demuxer *demuxer, const char *opt);
-void demux_info_update(struct demuxer *demuxer);
+bool demux_info_update(struct demuxer *demuxer);
 
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
