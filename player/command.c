@@ -801,7 +801,10 @@ static int tag_property(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
-        char *meta = mp_tags_get_str(tags, ka->key);
+        bstr key = bstr0(ka->key);
+        // Direct access without this prefix is allowed for compatibility.
+        bstr_eatstart0(&key, "by-key/");
+        char *meta = mp_tags_get_bstr(tags, key);
         if (!meta)
             return M_PROPERTY_UNKNOWN;
         switch (ka->action) {

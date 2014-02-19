@@ -649,8 +649,14 @@ an option at runtime.
     key and value strings separated by ``,``. (If a key or value contains ``,``,
     you're screwed.)
 
-``metadata/<key>``
-    Value of metadata entry ``<key>``.
+    This has a number of sub-properties:
+
+    ``metadata/by-key/<key>``
+        Value of metadata entry ``<key>``.
+
+    ``metadata/<key>``
+        Old version of ``metadata/by-key/<key>``. Use is discouraged, because
+        the metadata key string could conflict with other sub-properties.
 
 ``chapter-metadata``
     Metadata of current chapter. Works similar to ``metadata`` property. This
