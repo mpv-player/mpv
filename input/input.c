@@ -1220,8 +1220,18 @@ void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
     MP_VERBOSE(ictx, "enable section '%s'\n", name);
 
     if (ictx->num_active_sections < MAX_ACTIVE_SECTIONS) {
-        ictx->active_sections[ictx->num_active_sections++] =
-            (struct active_section) {name, flags};
+        int top = ictx->num_active_sections;
+        if (!(flags & MP_INPUT_ON_TOP)) {
+            // insert before the first top entry
+            for (top = 0; top < ictx->num_active_sections; top++) {
+                if (ictx->active_sections[top].flags & MP_INPUT_ON_TOP)
+                    break;
+            }
+            for (int n = ictx->num_active_sections; n > top; n--)
+                ictx->active_sections[n] = ictx->active_sections[n - 1];
+        }
+        ictx->active_sections[top] = (struct active_section){name, flags};
+        ictx->num_active_sections++;
     }
 
     MP_DBG(ictx, "active section stack:\n");

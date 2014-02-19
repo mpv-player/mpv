@@ -164,7 +164,8 @@ void mp_handle_nav(struct MPContext *mpctx)
         case MP_NAV_EVENT_MENU_MODE:
             nav->nav_menu = ev->u.menu_mode.enable;
             if (nav->nav_menu) {
-                mp_input_enable_section(mpctx->input, "dvdnav-menu", 0);
+                mp_input_enable_section(mpctx->input, "dvdnav-menu",
+                                        MP_INPUT_ON_TOP);
             } else {
                 mp_input_disable_section(mpctx->input, "dvdnav-menu");
             }
