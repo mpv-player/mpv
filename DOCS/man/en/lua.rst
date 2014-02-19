@@ -312,12 +312,12 @@ List of events
     Happens atfer a file was loaded and begins playback.
 
 ``tracks-changed``
-    List of video/audio/sub tracks was updated. (This happens on playback start,
-    and very rarely during playback.)
+    The list of video/audio/sub tracks was updated. (This happens on playback
+    start, and very rarely during playback.)
 
 ``track-switched``
-    A video/audio/sub track was switched. This usually happens on user
-    interaction, or if a script changes track.
+    A video/audio/subtitle track was switched on or off. This usually happens
+    when the user (or a script) changes the subtitle track and so on.
 
 ``idle``
     Idle mode is entered. This happens when playback ended, and the player was
