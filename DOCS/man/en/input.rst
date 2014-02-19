@@ -671,8 +671,14 @@ an option at runtime.
     welcome how exactly this property should work.
 
 ``chapter-metadata``
-    Metadata of current chapter. Works similar to ``metadata`` property. This
-    also allows referring to a key directly.
+    Metadata of current chapter. Works similar to ``metadata`` property. IT
+    also allows the same access methods (using sub-properties).
+
+    Per-chapter metadata is very rare. Usually, only the chapter name
+    (``title``) is set.
+
+    For accessing other information, like chapter start, see the
+    ``chapter-list`` property.
 
 ``pause`` (RW)
     Pause status. This is usually ``yes`` or ``no``. See ``--pause``.
