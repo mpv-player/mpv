@@ -599,11 +599,11 @@ void vf_set_dar(int *d_w, int *d_h, int w, int h, double dar)
     *d_w = w;
     *d_h = h;
     if (dar > 0.01) {
-        *d_w = h * dar;
+        *d_w = h * dar + 0.5;
         // we don't like horizontal downscale
         if (*d_w < w) {
             *d_w = w;
-            *d_h = w / dar;
+            *d_h = w / dar + 0.5;
         }
     }
 }
