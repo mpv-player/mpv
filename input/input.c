@@ -311,8 +311,7 @@ static void append_bind_info(struct input_ctx *ictx, char **pmsg,
 static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
 {
     char *key_buf = mp_input_get_key_combo_name(keys, n);
-    // "$>" to disable property substitution when invoking "show_text"
-    char *msg = talloc_asprintf(NULL, "$>Key %s is bound to:\n", key_buf);
+    char *msg = talloc_asprintf(NULL, "Key %s is bound to:\n", key_buf);
     talloc_free(key_buf);
 
     int count = 0;
@@ -333,9 +332,9 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
         msg = talloc_asprintf_append(msg, "(nothing)");
 
     MP_VERBOSE(ictx, "%s\n", msg);
-
-    mp_cmd_t *res = mp_input_parse_cmd(ictx, bstr0("show_text \"\""), "");
-    res->args[0].v.s = talloc_steal(res, msg);
+    const char *args[] = {"show_text", msg, NULL};
+    mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, MP_ON_OSD_MSG, args, "");
+    talloc_free(msg);
     return res;
 }
 
