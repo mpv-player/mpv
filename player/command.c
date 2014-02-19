@@ -770,6 +770,19 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int get_tag_entry(int item, int action, void *arg, void *ctx)
+{
+    struct mp_tags *tags = ctx;
+
+    struct m_sub_property props[] = {
+        {"key",     SUB_PROP_STR(tags->keys[item])},
+        {"value",   SUB_PROP_STR(tags->values[item])},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
 static int tag_property(m_option_t *prop, int action, void *arg,
                         struct mp_tags *tags)
 {
@@ -802,6 +815,12 @@ static int tag_property(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
         bstr key = bstr0(ka->key);
+        if (bstr_eatstart0(&key, "list/")) {
+            struct m_property_action_arg nka = *ka;
+            nka.key = key.start; // ok because slice ends with \0
+            return m_property_read_list(action, &nka, tags->num_keys,
+                                        get_tag_entry, tags);
+        }
         // Direct access without this prefix is allowed for compatibility.
         bstr_eatstart0(&key, "by-key/");
         char *meta = mp_tags_get_bstr(tags, key);

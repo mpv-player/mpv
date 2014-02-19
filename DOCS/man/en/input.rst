@@ -654,9 +654,21 @@ an option at runtime.
     ``metadata/by-key/<key>``
         Value of metadata entry ``<key>``.
 
+    ``metadata/list/count``
+        Number of metadata entries.
+
+    ``metadata/list/N/name``
+        Key name of the Nth metadata entry. (The first entry is ``0``).
+
+    ``metadata/list/N/value``
+        Value of the Nth metadata entry.
+
     ``metadata/<key>``
         Old version of ``metadata/by-key/<key>``. Use is discouraged, because
         the metadata key string could conflict with other sub-properties.
+
+    The layout of this property might be subject to change. Suggestions are
+    welcome how exactly this property should work.
 
 ``chapter-metadata``
     Metadata of current chapter. Works similar to ``metadata`` property. This
