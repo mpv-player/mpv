@@ -465,6 +465,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                 return 0;
             }
         }
+
+        if (mouse_button & MP_KEY_STATE_DOWN)
+            SetCapture(w32->window);
+        else
+            ReleaseCapture();
     }
 
     return DefWindowProcW(hWnd, message, wParam, lParam);
