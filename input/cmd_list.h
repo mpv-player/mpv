@@ -107,7 +107,8 @@ enum mp_command_type {
 };
 
 // Executing this command will abort playback (play something else, or quit).
-bool mp_input_is_abort_cmd(int cmd_id);
+struct mp_cmd;
+bool mp_input_is_abort_cmd(struct mp_cmd *cmd);
 
 struct bstr;
 bool mp_replace_legacy_cmd(void *talloc_ctx, struct bstr *s);

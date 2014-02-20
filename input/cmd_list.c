@@ -253,13 +253,27 @@ bool mp_replace_legacy_cmd(void *t, bstr *s)
     return false;
 }
 
-bool mp_input_is_abort_cmd(int cmd_id)
+static bool is_abort_cmd(int cmd_id)
 {
     switch (cmd_id) {
     case MP_CMD_QUIT:
     case MP_CMD_PLAYLIST_NEXT:
     case MP_CMD_PLAYLIST_PREV:
         return true;
+    }
+    return false;
+}
+
+bool mp_input_is_abort_cmd(struct mp_cmd *cmd)
+{
+    if (is_abort_cmd(cmd->id))
+        return true;
+    if (cmd->id == MP_CMD_COMMAND_LIST) {
+        for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next)
+        {
+            if (mp_input_is_abort_cmd(cmd))
+                return true;
+        }
     }
     return false;
 }
