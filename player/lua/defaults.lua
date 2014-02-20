@@ -196,7 +196,9 @@ end
 local function command_dispatch(ev)
     if #ev.args > 0 then
         local handler = commands[ev.args[1]]
-        handler(unpack(ev.args, 2))
+        if handler then
+            handler(unpack(ev.args, 2))
+        end
     end
 end
 
