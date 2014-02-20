@@ -462,6 +462,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                 // Window dragging hack
                 ReleaseCapture();
                 SendMessage(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+                mp_input_put_key(vo->input_ctx, MP_MOUSE_BTN0 |
+                                                MP_KEY_STATE_UP);
                 return 0;
             }
         }
