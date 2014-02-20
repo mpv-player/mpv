@@ -544,9 +544,9 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
 
 static int find_key_down(struct input_ctx *ictx, int code)
 {
-    code &= ~(MP_KEY_STATE_UP | MP_KEY_STATE_DOWN);
+    code &= ~(MP_KEY_STATE_UP | MP_KEY_STATE_DOWN | MP_KEY_MODIFIER_MASK);
     for (int j = 0; j < ictx->num_key_down; j++) {
-        if (ictx->key_down[j] == code)
+        if ((ictx->key_down[j] & ~MP_KEY_MODIFIER_MASK) == code)
             return j;
     }
     return -1;
