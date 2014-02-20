@@ -2221,6 +2221,27 @@ char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
     return m_properties_expand_string(mp_properties, str, mpctx);
 }
 
+// Before expanding properties, parse C-style escapes like "\n"
+char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str)
+{
+    void *tmp = talloc_new(NULL);
+    bstr strb = bstr0(str);
+    bstr dst = {0};
+    while (strb.len) {
+        if (!mp_append_escaped_string(tmp, &dst, &strb)) {
+            talloc_free(tmp);
+            return talloc_strdup(NULL, "(broken escape sequences)");
+        }
+        // pass " through literally
+        if (!bstr_eatstart0(&strb, "\""))
+            break;
+        bstr_xappend(tmp, &dst, bstr0("\""));
+    }
+    char *r = mp_property_expand_string(mpctx, dst.start);
+    talloc_free(tmp);
+    return r;
+}
+
 void property_print_help(struct mp_log *log)
 {
     m_properties_print_help_list(log, mp_properties);

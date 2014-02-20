@@ -159,7 +159,7 @@ void print_status(struct MPContext *mpctx)
     }
 
     if (opts->status_msg) {
-        char *r = mp_property_expand_string(mpctx, opts->status_msg);
+        char *r = mp_property_expand_escaped_string(mpctx, opts->status_msg);
         term_osd_set_status(mpctx, r);
         talloc_free(r);
         return;
@@ -428,7 +428,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
     saddf_osd_function_sym(buffer, sym);
     char *custom_msg = mpctx->opts->osd_status_msg;
     if (custom_msg && full) {
-        char *text = mp_property_expand_string(mpctx, custom_msg);
+        char *text = mp_property_expand_escaped_string(mpctx, custom_msg);
         *buffer = talloc_strdup_append(*buffer, text);
         talloc_free(text);
     } else {

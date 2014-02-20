@@ -602,9 +602,9 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("term-osd-bar", term_osd_bar, 0),
     OPT_STRING("term-osd-bar-chars", term_osd_bar_chars, 0),
 
-    OPT_STRING("playing-msg", playing_msg, M_OPT_PARSE_ESCAPES),
-    OPT_STRING("status-msg", status_msg, M_OPT_PARSE_ESCAPES),
-    OPT_STRING("osd-status-msg", osd_status_msg, M_OPT_PARSE_ESCAPES),
+    OPT_STRING("playing-msg", playing_msg, 0),
+    OPT_STRING("status-msg", status_msg, 0),
+    OPT_STRING("osd-status-msg", osd_status_msg, 0),
 
     OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
     OPT_FLAG("idle", player_idle_mode, CONF_GLOBAL),

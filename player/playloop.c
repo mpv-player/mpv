@@ -1244,7 +1244,8 @@ void run_playloop(struct MPContext *mpctx)
 
         if (opts->playing_msg && !mpctx->playing_msg_shown && new_frame_shown) {
             mpctx->playing_msg_shown = true;
-            char *msg = mp_property_expand_string(mpctx, opts->playing_msg);
+            char *msg =
+                mp_property_expand_escaped_string(mpctx, opts->playing_msg);
             MP_INFO(mpctx, "%s\n", msg);
             talloc_free(msg);
         }

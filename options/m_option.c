@@ -745,36 +745,6 @@ const m_option_type_t m_option_type_float = {
 #undef VAL
 #define VAL(x) (*(char **)(x))
 
-static char *unescape_string(void *talloc_ctx, bstr str)
-{
-    bstr dst = {0};
-    while (str.len) {
-        if (!mp_append_escaped_string(talloc_ctx, &dst, &str)) {
-            talloc_free(dst.start);
-            return NULL;
-        }
-        if (!bstr_eatstart0(&str, "\""))
-            break;
-        bstr_xappend(talloc_ctx, &dst, bstr0("\""));
-    }
-    return dst.start;
-}
-
-static char *escape_string(char *str0)
-{
-    char *res = talloc_strdup(NULL, "");
-    bstr str = bstr0(str0);
-    while (str.len) {
-        bstr rest;
-        bool esc = bstr_split_tok(str, "\\", &str, &rest);
-        res = talloc_strndup_append_buffer(res, str.start, str.len);
-        if (esc)
-            res = talloc_strdup_append_buffer(res, "\\\\");
-        str = rest;
-    }
-    return res;
-}
-
 static int clamp_str(const m_option_t *opt, void *val)
 {
     char *v = VAL(val);
@@ -789,43 +759,26 @@ static int clamp_str(const m_option_t *opt, void *val)
 static int parse_str(struct mp_log *log, const m_option_t *opt,
                      struct bstr name, struct bstr param, void *dst)
 {
-    int r = 1;
-    void *tmp = talloc_new(NULL);
-
-    if (param.start == NULL) {
-        r = M_OPT_MISSING_PARAM;
-        goto exit;
-    }
+    if (param.start == NULL)
+        return M_OPT_MISSING_PARAM;
 
     m_opt_string_validate_fn validate = opt->priv;
     if (validate) {
-        r = validate(log, opt, name, param);
+        int r = validate(log, opt, name, param);
         if (r < 0)
-            goto exit;
-    }
-
-    if (opt->flags & M_OPT_PARSE_ESCAPES) {
-        char *res = unescape_string(tmp, param);
-        if (!res) {
-            mp_err(log, "Parameter has broken escapes: %.*s\n", BSTR_P(param));
-            r = M_OPT_INVALID;
-            goto exit;
-        }
-        param = bstr0(res);
+            return r;
     }
 
     if ((opt->flags & M_OPT_MIN) && (param.len < opt->min)) {
         mp_err(log, "Parameter must be >= %d chars: %.*s\n",
                (int) opt->min, BSTR_P(param));
-        r = M_OPT_OUT_OF_RANGE;
-        goto exit;
+        return M_OPT_OUT_OF_RANGE;
     }
 
     if ((opt->flags & M_OPT_MAX) && (param.len > opt->max)) {
         mp_err(log, "Parameter must be <= %d chars: %.*s\n",
                (int) opt->max, BSTR_P(param));
-        r = M_OPT_OUT_OF_RANGE;
-        goto exit;
+        return M_OPT_OUT_OF_RANGE;
     }
 
     if (dst) {
@@ -833,16 +786,12 @@ static int parse_str(struct mp_log *log, const m_option_t *opt,
         VAL(dst) = bstrdup0(NULL, param);
     }
 
-exit:
-    talloc_free(tmp);
-    return r;
+    return 0;
 }
 
 static char *print_str(const m_option_t *opt, const void *val)
 {
-    bool need_escape = opt->flags & M_OPT_PARSE_ESCAPES;
-    char *s = val ? VAL(val) : NULL;
-    return s ? (need_escape ? escape_string(s) : talloc_strdup(NULL, s)) : NULL;
+    return talloc_strdup(NULL, val ? VAL(val) : NULL);
 }
 
 static void copy_str(const m_option_t *opt, void *dst, const void *src)
