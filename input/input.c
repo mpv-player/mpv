@@ -238,7 +238,7 @@ static bool queue_has_abort_cmds(struct cmd_queue *queue)
 {
     bool ret = false;
     for (struct mp_cmd *cmd = queue->first; cmd; cmd = cmd->queue_next)
-        if (mp_input_is_abort_cmd(cmd->id)) {
+        if (mp_input_is_abort_cmd(cmd)) {
             ret = true;
             break;
         }
@@ -584,7 +584,7 @@ static bool should_drop_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
 {
     struct cmd_queue *queue = &ictx->cmd_queue;
     return (queue_count_cmds(queue) >= ictx->key_fifo_size &&
-            (!mp_input_is_abort_cmd(cmd->id) || queue_has_abort_cmds(queue)));
+            (!mp_input_is_abort_cmd(cmd) || queue_has_abort_cmds(queue)));
 }
 
 static void interpret_key(struct input_ctx *ictx, int code, double scale)

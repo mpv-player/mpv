@@ -52,11 +52,6 @@ You can bind multiple commands to one key. For example:
 
 | a show_text "command 1" ; show_text "command 2"
 
-Note that some magic is disabled for keys: seek commands inside lists are not
-coalesced (seeking will appear slower), and no check is done for abort commands
-(so these commands can't be used to abort playback if the network cache is
-stuck).
-
 List of Input Commands
 ----------------------
 

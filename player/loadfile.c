@@ -1024,7 +1024,7 @@ static bool demux_was_interrupted(struct MPContext *mpctx)
         mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, 0, 0);
         if (!cmd)
             break;
-        if (mp_input_is_abort_cmd(cmd->id))
+        if (mp_input_is_abort_cmd(cmd))
             run_command(mpctx, cmd);
         mp_cmd_free(cmd);
     }
