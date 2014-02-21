@@ -652,7 +652,7 @@ an option at runtime.
     ``metadata/list/count``
         Number of metadata entries.
 
-    ``metadata/list/N/name``
+    ``metadata/list/N/key``
         Key name of the Nth metadata entry. (The first entry is ``0``).
 
     ``metadata/list/N/value``
