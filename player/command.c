@@ -543,7 +543,6 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_GET_TYPE: {
         struct m_option opt = {
-            .name = prop->name,
             .type = CONF_TYPE_INT,
             .flags = CONF_RANGE,
             .min = 0,
@@ -757,7 +756,6 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE: {
         struct m_option opt = {
-            .name = prop->name,
             .type = CONF_TYPE_INT,
             .flags = CONF_RANGE,
             .min = 1,
@@ -1868,7 +1866,6 @@ static int mp_property_playlist_pos(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_GET_TYPE: {
         struct m_option opt = {
-            .name = prop->name,
             .type = CONF_TYPE_INT,
             .flags = CONF_RANGE,
             .min = 0,
@@ -1968,13 +1965,7 @@ static int mp_property_alias(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
     const char *real_property = prop->priv;
-    int r = mp_property_do(real_property, action, arg, mpctx);
-    if (action == M_PROPERTY_GET_TYPE && r >= 0) {
-        // Fix the property name
-        struct m_option *type = arg;
-        type->name = prop->name;
-    }
-    return r;
+    return mp_property_do(real_property, action, arg, mpctx);
 }
 
 static int mp_property_options(m_option_t *prop, int action, void *arg,
@@ -2182,8 +2173,8 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("ass-style-override", property_osd_helper),
 #endif
 
-    M_OPTION_PROPERTY_CUSTOM("vf*", mp_property_vf),
-    M_OPTION_PROPERTY_CUSTOM("af*", mp_property_af),
+    M_OPTION_PROPERTY_CUSTOM("vf", mp_property_vf),
+    M_OPTION_PROPERTY_CUSTOM("af", mp_property_af),
 
 #if HAVE_TV
     { "tv-brightness", mp_property_tv_color, CONF_TYPE_INT,
@@ -2313,8 +2304,8 @@ static struct property_osd_display {
     { "sub-scale", "Sub Scale"},
     { "ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
     { "ass-style-override", "ASS subtitle style override"},
-    { "vf*", "Video filters", .msg = "Video filters:\n${vf}"},
-    { "af*", "Audio filters", .msg = "Audio filters:\n${af}"},
+    { "vf", "Video filters", .msg = "Video filters:\n${vf}"},
+    { "af", "Audio filters", .msg = "Audio filters:\n${af}"},
 #if HAVE_TV
     { "tv-brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS },
     { "tv-hue", "Hue", .osd_progbar = OSD_HUE},
@@ -2329,6 +2320,7 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
     struct MPOpts *opts = mpctx->opts;
     struct m_option prop = {0};
     struct property_osd_display *p;
+    const char *name = pname;
 
     if (mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0)
         return;
@@ -2340,7 +2332,7 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
 
     // look for the command
     for (p = property_osd_display; p->name; p++) {
-        if (!strcmp(p->name, prop.name)) {
+        if (!strcmp(p->name, name)) {
             osd_progbar = p->seek_bar ? 1 : p->osd_progbar;
             osd_name = p->seek_msg ? "" : p->osd_name;
             break;
@@ -2355,7 +2347,7 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
     }
 
     if (osd_mode != MP_ON_OSD_AUTO) {
-        osd_name = osd_name ? osd_name : prop.name;
+        osd_name = osd_name ? osd_name : name;
         if (!(osd_mode & MP_ON_OSD_MSG)) {
             osd_name = NULL;
             msg = NULL;
@@ -2375,18 +2367,18 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
     void *tmp = talloc_new(NULL);
 
     if (!msg && osd_name)
-        msg = talloc_asprintf(tmp, "%s: ${%s}", osd_name, prop.name);
+        msg = talloc_asprintf(tmp, "%s: ${%s}", osd_name, name);
 
     if (osd_progbar && (prop.flags & CONF_RANGE) == CONF_RANGE) {
         bool ok = false;
         if (prop.type == CONF_TYPE_INT) {
             int i;
-            ok = mp_property_do(prop.name, M_PROPERTY_GET, &i, mpctx) > 0;
+            ok = mp_property_do(name, M_PROPERTY_GET, &i, mpctx) > 0;
             if (ok)
                 set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, i);
         } else if (prop.type == CONF_TYPE_FLOAT) {
             float f;
-            ok = mp_property_do(prop.name, M_PROPERTY_GET, &f, mpctx) > 0;
+            ok = mp_property_do(name, M_PROPERTY_GET, &f, mpctx) > 0;
             if (ok)
                 set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, f);
         }

@@ -37,7 +37,6 @@
 
 const struct m_option_type m_option_type_dummy = {
     .name = "Unknown",
-    .flags = M_OPT_TYPE_ALLOW_WILDCARD, // make "vf*" property work
 };
 
 struct legacy_prop {
@@ -395,10 +394,7 @@ int m_property_read_sub(const struct m_sub_property *props, int action, void *ar
 {
     switch (action) {
     case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){
-            .name = "",
-            .type = CONF_TYPE_STRING,
-        };
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
     case M_PROPERTY_PRINT: {
@@ -411,7 +407,7 @@ int m_property_read_sub(const struct m_sub_property *props, int action, void *ar
             const struct m_sub_property *prop = &props[n];
             if (prop->unavailable)
                 continue;
-            struct m_option type = { .name = "", .type = prop->type, };
+            struct m_option type = {.type = prop->type};
             char *s = m_option_print(&type, &prop->value);
             ta_xasprintf_append(&res, "%s=%s\n", prop->name, s);
             talloc_free(s);
@@ -432,7 +428,7 @@ int m_property_read_sub(const struct m_sub_property *props, int action, void *ar
             return M_PROPERTY_UNKNOWN;
         if (prop->unavailable)
             return M_PROPERTY_UNAVAILABLE;
-        struct m_option type = { .name = "", .type = prop->type, };
+        struct m_option type = {.type = prop->type};
         switch (ka->action) {
         case M_PROPERTY_GET: {
             memset(ka->arg, 0, type.type->size);
@@ -462,10 +458,7 @@ int m_property_read_list(int action, void *arg, int count,
 {
     switch (action) {
     case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){
-            .name = "",
-            .type = CONF_TYPE_STRING,
-        };
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
     case M_PROPERTY_PRINT: {
@@ -489,10 +482,7 @@ int m_property_read_list(int action, void *arg, int count,
         if (strcmp(ka->key, "count") == 0) {
             switch (ka->action) {
             case M_PROPERTY_GET_TYPE: {
-                struct m_option opt = {
-                    .name = "",
-                    .type = CONF_TYPE_INT,
-                };
+                struct m_option opt = {.type = CONF_TYPE_INT};
                 *(struct m_option *)ka->arg = opt;
                 return M_PROPERTY_OK;
             }
