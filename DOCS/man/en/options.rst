@@ -796,7 +796,7 @@ OPTIONS
 
 ``--field-dominance=<auto|top|bottom>``
     Set first field for interlaced content. Useful for deinterlacers that
-    double the framerate: ``--vf=yadif=1`` and ``--vo=vdpau:deint``.
+    double the framerate: ``--vf=yadif=field`` and ``--vo=vdpau:deint``.
 
     :auto:    (default) If the decoder does not export the appropriate
               information, it falls back on ``top`` (top field first).
