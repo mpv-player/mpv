@@ -953,9 +953,8 @@ static int parse_str_list(struct mp_log *log, const m_option_t *opt,
 {
     char **res;
     int op = OP_NONE;
-    int len = strlen(opt->name);
-    if (opt->name[len - 1] == '*' && (name.len > len - 1)) {
-        struct bstr suffix = bstr_cut(name, len - 1);
+    if (bstr_endswith0(bstr0(opt->name), "*")) {
+        struct bstr suffix = bstr_cut(name, strlen(opt->name) - 1);
         if (bstrcmp0(suffix, "-add") == 0)
             op = OP_ADD;
         else if (bstrcmp0(suffix, "-pre") == 0)
@@ -964,6 +963,8 @@ static int parse_str_list(struct mp_log *log, const m_option_t *opt,
             op = OP_DEL;
         else if (bstrcmp0(suffix, "-clr") == 0)
             op = OP_CLR;
+        else if (suffix.len == 0)
+            op = OP_NONE;
         else
             return M_OPT_UNKNOWN;
     }
@@ -2327,7 +2328,6 @@ static int parse_obj_settings_del(struct mp_log *log, struct bstr opt_name,
 static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                                    struct bstr name, struct bstr param, void *dst)
 {
-    int len = strlen(opt->name);
     m_obj_settings_t *res = NULL;
     int op = OP_NONE;
     bool *mark_del = NULL;
@@ -2336,8 +2336,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
 
     assert(opt->priv);
 
-    if (opt->name[len - 1] == '*' && (name.len > len - 1)) {
-        struct bstr suffix = bstr_cut(name, len - 1);
+    if (bstr_endswith0(bstr0(opt->name), "*")) {
+        struct bstr suffix = bstr_cut(name, strlen(opt->name) - 1);
         if (bstrcmp0(suffix, "-add") == 0)
             op = OP_ADD;
         else if (bstrcmp0(suffix, "-set") == 0)
@@ -2350,10 +2350,11 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             op = OP_CLR;
         else if (bstrcmp0(suffix, "-toggle") == 0)
             op = OP_TOGGLE;
+        else if (suffix.len == 0)
+            op = OP_NONE;
         else {
-            char prefix[len];
-            strncpy(prefix, opt->name, len - 1);
-            prefix[len - 1] = '\0';
+            char pre[80];
+            snprintf(pre, sizeof(pre), "%.*s", strlen(opt->name) - 1, opt->name);
             mp_err(log, "Option %.*s: unknown postfix %.*s\n"
                    "Supported postfixes are:\n"
                    "  %s-set\n"
@@ -2368,7 +2369,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                    " Filter names work as well.\n\n"
                    "  %s-clr\n"
                    " Clear the current list.\n",
-                   BSTR_P(name), BSTR_P(suffix), prefix, prefix, prefix, prefix, prefix);
+                   BSTR_P(name), BSTR_P(suffix), pre, pre, pre, pre, pre);
 
             return M_OPT_UNKNOWN;
         }
