@@ -216,7 +216,7 @@ typedef enum mpv_error {
     /**
      * Error setting or getting a property.
      */
-    MPV_ERROR_PROPERTY_ERROR    = -11,
+    MPV_ERROR_PROPERTY_ERROR    = -11
 } mpv_error;
 
 /**
@@ -388,7 +388,7 @@ typedef enum mpv_format {
      *
      * Only valid when doing read access. The rest works like MPV_FORMAT_STRING.
      */
-    MPV_FORMAT_OSD_STRING       = 2,
+    MPV_FORMAT_OSD_STRING       = 2
 } mpv_format;
 
 /**
@@ -643,7 +643,7 @@ typedef enum mpv_event_id {
      * unspecified whether this happens on file start or only when it changes
      * within a file.)
      */
-    MPV_EVENT_METADATA_UPDATE   = 19,
+    MPV_EVENT_METADATA_UPDATE   = 19
 } mpv_event_id;
 
 /**
