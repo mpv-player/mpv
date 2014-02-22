@@ -122,6 +122,7 @@ const struct mp_cmd_def mp_cmds[] = {
       ARG_STRING,
       OARG_CHOICE(0, ({"replace", 0},          {"0", 0},
                       {"append", 1},           {"1", 1})),
+      OPT_KEYVALUELIST("", v.p, 0, .defval = (void*)&(const const*const*){NULL})
   }},
   { MP_CMD_LOADLIST, "loadlist", {
       ARG_STRING,
