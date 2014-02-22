@@ -75,6 +75,7 @@ struct mp_cmd_arg {
         float f;
         double d;
         char *s;
+        char **str_list;
         void *p;
     } v;
 };

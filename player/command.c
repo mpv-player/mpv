@@ -2973,7 +2973,15 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (!append)
             playlist_clear(mpctx->playlist);
 
-        playlist_add(mpctx->playlist, playlist_entry_new(filename));
+        struct playlist_entry *entry = playlist_entry_new(filename);
+        if (cmd->args[2].v.str_list) {
+            char **pairs = cmd->args[2].v.str_list;
+            for (int i = 0; pairs[i] && pairs[i + 1]; i += 2) {
+                playlist_entry_add_param(entry, bstr0(pairs[i]),
+                                         bstr0(pairs[i + 1]));
+            }
+        }
+        playlist_add(mpctx->playlist, entry);
 
         if (!append)
             mp_set_playlist_entry(mpctx, mpctx->playlist->first);
