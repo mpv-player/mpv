@@ -755,7 +755,7 @@ typedef struct mpv_event {
      *  MPV_EVENT_CLIENT_MESSAGE:         mpv_event_client_message*
      *  other: NULL
      *
-     * Note: future enhancements might add new event struct for existing or new
+     * Note: future enhancements might add new event structs for existing or new
      *       event types.
      */
     void *data;
