@@ -32,7 +32,7 @@ size_t ta_calc_array_size(size_t element_size, size_t count)
 
 // This is used when an array has to be enlarged for appending new elements.
 // Return a "good" size for the new array (in number of elements). This returns
-// a value >= nextidx, unless the calculation overflows, in which case SIZE_MAX
+// a value > nextidx, unless the calculation overflows, in which case SIZE_MAX
 // is returned.
 size_t ta_calc_prealloc_elems(size_t nextidx)
 {
