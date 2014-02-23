@@ -730,8 +730,10 @@ static int control(stream_t *stream,int cmd,void* arg)
         case STREAM_CTRL_GET_DVD_VOLUME_ID:
         {
             char buffer[128];
-            if (DVDUDFVolumeInfo(d->dvd, buffer, sizeof(buffer), NULL, 0) < 0
-                    && DVDISOVolumeInfo(d->dvd, buffer, sizeof(buffer), NULL, 0) < 0)
+            if (DVDUDFVolumeInfo(d->dvd, buffer, sizeof(buffer), NULL, 0) < 0 &&
+                DVDISOVolumeInfo(d->dvd, buffer, sizeof(buffer), NULL, 0) < 0)
+                return STREAM_ERROR;
+            if (!buffer[0])
                 return STREAM_ERROR;
             *(char**)arg = talloc_strdup(NULL, buffer);
             return STREAM_OK;
