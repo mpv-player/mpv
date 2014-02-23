@@ -732,9 +732,9 @@ static int control(stream_t *stream,int cmd,void* arg)
             char buffer[128];
             if (DVDUDFVolumeInfo(d->dvd, buffer, sizeof(buffer), NULL, 0) < 0 &&
                 DVDISOVolumeInfo(d->dvd, buffer, sizeof(buffer), NULL, 0) < 0)
-                return STREAM_ERROR;
+                break;
             if (!buffer[0])
-                return STREAM_ERROR;
+                break;
             *(char**)arg = talloc_strdup(NULL, buffer);
             return STREAM_OK;
         }
