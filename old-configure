@@ -3398,6 +3398,8 @@ cat > $TMPH << EOF
 
 #define MPLAYER_CONFDIR "$_confdir"
 
+/* we didn't bother to add actual config checks for this */
+#define HAVE_BSD_FSTATFS 0
 
 /* system headers */
 $def_mman_h
