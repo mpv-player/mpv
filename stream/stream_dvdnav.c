@@ -602,6 +602,13 @@ static int control(stream_t *stream, int cmd, void *arg)
         handle_cmd(stream, (struct mp_nav_cmd *)arg);
         return STREAM_OK;
     }
+    case STREAM_CTRL_GET_DVD_VOLUME_ID: {
+        const char *volume = NULL;
+        if (dvdnav_get_title_string(dvdnav, &volume) != DVDNAV_STATUS_OK || !volume)
+            return STREAM_ERROR;
+        *(char**)arg = talloc_strdup(NULL, volume);
+        return STREAM_OK;
+    }
     }
 
     return STREAM_UNSUPPORTED;

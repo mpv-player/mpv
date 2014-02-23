@@ -194,6 +194,15 @@ static int mp_property_media_title(m_option_t *prop, int action, void *arg,
         name = demux_info_get(mpctx->master_demuxer, "title");
         if (name && name[0])
             return m_property_strdup_ro(prop, action, arg, name);
+        struct stream *stream = mpctx->master_demuxer->stream;
+        if (stream && stream->type == STREAMTYPE_DVD &&
+            stream_control(stream, STREAM_CTRL_GET_DVD_VOLUME_ID, &name) &&
+            name)
+        {
+            int r = m_property_strdup_ro(prop, action, arg, name);
+            talloc_free(name);
+            return r;
+        }
     }
     return mp_property_filename(prop, action, arg, mpctx);
 }

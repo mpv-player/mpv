@@ -543,6 +543,8 @@ an option at runtime.
 
     Otherwise, if the currently played file has a ``title`` tag, use that.
 
+    Otherwise, if the media type is DVD, return the volume ID of DVD.
+
     Otherwise, return the ``filename`` property.
 
 ``demuxer``
