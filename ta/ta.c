@@ -105,6 +105,10 @@ static struct ta_ext_header *get_or_alloc_ext_header(void *ptr)
  * Setting parent==NULL (with ptr!=NULL) always succeeds, and unsets the
  * parent of ptr. Operations ptr==NULL always succeed and do nothing.
  * Returns true on success, false on OOM.
+ *
+ * Warning: if ta_parent is a direct or indirect child of ptr, things will go
+ *          wrong. The function will apparently succeed, but creates circular
+ *          parent links, which are not allowed.
  */
 bool ta_set_parent(void *ptr, void *ta_parent)
 {
