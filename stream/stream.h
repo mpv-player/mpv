@@ -99,6 +99,7 @@ enum stream_ctrl {
     STREAM_CTRL_GET_BASE_FILENAME,
     STREAM_CTRL_GET_NAV_EVENT,          // struct mp_nav_event**
     STREAM_CTRL_NAV_CMD,                // struct mp_nav_cmd*
+    STREAM_CTRL_GET_DVD_VOLUME_ID,
 };
 
 struct stream_lang_req {

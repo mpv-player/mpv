@@ -727,6 +727,15 @@ static int control(stream_t *stream,int cmd,void* arg)
             memcpy(req->palette, d->cur_pgc->palette, sizeof(req->palette));
             return STREAM_OK;
         }
+        case STREAM_CTRL_GET_DVD_VOLUME_ID:
+        {
+            char buffer[128];
+            if (DVDUDFVolumeInfo(d->dvd, buffer, sizeof(buffer), NULL, 0) < 0
+                    && DVDISOVolumeInfo(d->dvd, buffer, sizeof(buffer), NULL, 0) < 0)
+                return STREAM_ERROR;
+            *(char**)arg = talloc_strdup(NULL, buffer);
+            return STREAM_OK;
+        }
     }
     return STREAM_UNSUPPORTED;
 }
