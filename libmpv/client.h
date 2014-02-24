@@ -364,6 +364,14 @@ typedef enum mpv_format {
      * The basic type is char*. It returns the raw property string, like
      * using ${=property} in input.conf (see input.rst).
      *
+     * NULL isn't an allowed value.
+     *
+     * Warning: although the encoding is usually UTF-8, this is not always the
+     *          case. File tags often store strings in some legacy codepage,
+     *          and even filenames don't necessarily have to be in UTF-8 (at
+     *          least on Linux). If you pass the strings to code that requires
+     *          valid UTF-8, you have to sanitize it in some way.
+     *
      * Example for reading:
      *
      *     char *result = NULL;
@@ -664,6 +672,8 @@ int mpv_get_property(mpv_handle *ctx, const char *name, mpv_format format,
 /**
  * Return the value of the property with the given name as string. This is
  * equivalent to mpv_get_property() with MPV_FORMAT_STRING.
+ *
+ * See MPV_FORMAT_STRING for character encoding issues.
  *
  * On error, NULL is returned. Use mpv_get_property() if you want fine-grained
  * error reporting.
