@@ -251,7 +251,7 @@ local nicetypes = {video = "Video", audio = "Audio", sub = "Subtitle"}
 
 -- updates the OSC internal playlists, should be run each time the track-layout changes
 function update_tracklist()
-    local tracktable = mp.get_track_list()
+    local tracktable = mp.get_property_native("track-list", {})
 
     -- by osc_id
     tracks_osc = {}
@@ -284,7 +284,7 @@ function get_tracklist(type)
         for n = 1, #tracks_osc[type] do
             local track = tracks_osc[type][n]
             local lang, title, selected = "unkown", "", "{\\fscx" .. select_scale .. "\\fscy" .. select_scale .. "}○{\\fscx100\\fscy100}"
-            if not(track.language == nil) then lang = track.language end
+            if not(track.lang == nil) then lang = track.lang end
             if not(track.title == nil) then title = track.title end
             if (track.id == tonumber(mp.get_property(type))) then
                 selected = "{\\fscx" .. select_scale .. "\\fscy" .. select_scale .. "}●{\\fscx100\\fscy100}"
@@ -318,7 +318,7 @@ function set_track(type, next)
         show_message(nicetypes[type] .. " Track: none")
     else
         show_message(nicetypes[type]  .. " Track: " .. new_track_osc .. "/" .. #tracks_osc[type]
-            .. " [" .. (tracks_osc[type][new_track_osc].language or "unkown") .. "] " .. (tracks_osc[type][new_track_osc].title or ""))
+            .. " [" .. (tracks_osc[type][new_track_osc].lang or "unkown") .. "] " .. (tracks_osc[type][new_track_osc].title or ""))
     end
 end
 
@@ -804,7 +804,7 @@ function osc_init()
     --chapters
     -- do we have any?
     local metainfo = {}
-    metainfo.enabled = ((#mp.get_chapter_list()) > 0)
+    metainfo.enabled = ((#mp.get_property_native("chapter-list", {})) > 0)
 
     --prev
     local eventresponder = {}
@@ -923,7 +923,7 @@ function osc_init()
             duration = tonumber(mp.get_property("length"))
         end
 
-        local chapters = mp.get_chapter_list()
+        local chapters = mp.get_property_native("chapter-list", {})
         local markers = {}
         for n = 1, #chapters do
             markers[n] = (chapters[n].time / duration * 100)

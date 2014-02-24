@@ -726,81 +726,6 @@ static int script_get_time(lua_State *L)
     return 1;
 }
 
-static int script_get_chapter_list(lua_State *L)
-{
-    struct MPContext *mpctx = get_mpctx(L);
-    mp_dispatch_lock(mpctx->dispatch);
-    lua_newtable(L); // list
-    int num = get_chapter_count(mpctx);
-    for (int n = 0; n < num; n++) {
-        double time = chapter_start_time(mpctx, n);
-        char *name = chapter_display_name(mpctx, n);
-        lua_newtable(L); // list ch
-        lua_pushnumber(L, time); // list ch time
-        lua_setfield(L, -2, "time"); // list ch
-        lua_pushstring(L, name); // list ch name
-        lua_setfield(L, -2, "name"); // list ch
-        lua_pushinteger(L, n + 1); // list ch n1
-        lua_insert(L, -2); // list n1 ch
-        lua_settable(L, -3); // list
-        talloc_free(name);
-    }
-    mp_dispatch_unlock(mpctx->dispatch);
-    return 1;
-}
-
-static const char *stream_type(enum stream_type t)
-{
-    switch (t) {
-    case STREAM_VIDEO: return "video";
-    case STREAM_AUDIO: return "audio";
-    case STREAM_SUB:   return "sub";
-    default:           return "unknown";
-    }
-}
-
-static int script_get_track_list(lua_State *L)
-{
-    struct MPContext *mpctx = get_mpctx(L);
-    mp_dispatch_lock(mpctx->dispatch);
-    lua_newtable(L); // list
-    for (int n = 0; n < mpctx->num_tracks; n++) {
-        struct track *track = mpctx->tracks[n];
-        lua_newtable(L); // list track
-
-        lua_pushstring(L, stream_type(track->type));
-        lua_setfield(L, -2, "type");
-        lua_pushinteger(L, track->user_tid);
-        lua_setfield(L, -2, "id");
-        lua_pushboolean(L, track->default_track);
-        lua_setfield(L, -2, "default");
-        lua_pushboolean(L, track->attached_picture);
-        lua_setfield(L, -2, "attached_picture");
-        if (track->lang) {
-            lua_pushstring(L, track->lang);
-            lua_setfield(L, -2, "language");
-        }
-        if (track->title) {
-            lua_pushstring(L, track->title);
-            lua_setfield(L, -2, "title");
-        }
-        lua_pushboolean(L, track->is_external);
-        lua_setfield(L, -2, "external");
-        if (track->external_filename) {
-            lua_pushstring(L, track->external_filename);
-            lua_setfield(L, -2, "external_filename");
-        }
-        lua_pushboolean(L, track->auto_loaded);
-        lua_setfield(L, -2, "auto_loaded");
-
-        lua_pushinteger(L, n + 1); // list track n1
-        lua_insert(L, -2); // list n1 track
-        lua_settable(L, -3); // list
-    }
-    mp_dispatch_unlock(mpctx->dispatch);
-    return 1;
-}
-
 static int script_input_define_section(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
@@ -933,8 +858,6 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(get_screen_size),
     FN_ENTRY(get_mouse_pos),
     FN_ENTRY(get_time),
-    FN_ENTRY(get_chapter_list),
-    FN_ENTRY(get_track_list),
     FN_ENTRY(input_define_section),
     FN_ENTRY(input_enable_section),
     FN_ENTRY(input_disable_section),
