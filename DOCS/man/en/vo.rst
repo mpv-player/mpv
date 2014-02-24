@@ -462,6 +462,14 @@ Available video output drivers are:
         3
             absolute colorimetric (default)
 
+    ``icc-approx-gamma``
+        Approximate the actual BT.709 gamma function as a pure power curve of
+        1.95. This is not quite correct, but it was historically used as a
+        faster version of the actual function, and seems to still be used by
+        many video editing programs and perhaps even studios. If you find your
+        videos displaying ever so slightly slightly brighter than you'd expect
+        them to, try enabling this option.
+
     ``3dlut-size=<r>x<g>x<b>``
         Size of the 3D LUT generated from the ICC profile in each dimension.
         Default is 128x256x64.
