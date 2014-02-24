@@ -426,9 +426,32 @@ int m_property_read_sub(const struct m_sub_property *props, int action, void *ar
 {
     switch (action) {
     case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
+    case M_PROPERTY_GET: {
+        struct mpv_node node;
+        node.format = MPV_FORMAT_NODE_MAP;
+        node.u.list = talloc_zero(NULL, mpv_node_list);
+        mpv_node_list *list = node.u.list;
+        for (int n = 0; props && props[n].name; n++) {
+            const struct m_sub_property *prop = &props[n];
+            if (prop->unavailable)
+                continue;
+            MP_TARRAY_GROW(list, list->values, list->num);
+            MP_TARRAY_GROW(list, list->keys, list->num);
+            struct m_option type = {.type = prop->type};
+            mpv_node *val = &list->values[list->num];
+            if (m_option_get_node(&type, list, val, (void*)&prop->value) < 0) {
+                char *s = m_option_print(&type, &prop->value);
+                val->format = MPV_FORMAT_STRING;
+                val->u.string = talloc_steal(list, s);
+            }
+            list->keys[list->num] = (char *)prop->name;
+            list->num++;
+        }
+        *(struct mpv_node *)arg = node;
+        return M_PROPERTY_OK;
+    }
     case M_PROPERTY_PRINT: {
         // Output "something" - what it really should return is not yet decided.
         // It should probably be something that is easy to consume by slave
@@ -490,9 +513,36 @@ int m_property_read_list(int action, void *arg, int count,
 {
     switch (action) {
     case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
+    case M_PROPERTY_GET: {
+        struct mpv_node node;
+        node.format = MPV_FORMAT_NODE_ARRAY;
+        node.u.list = talloc_zero(NULL, mpv_node_list);
+        node.u.list->num = count;
+        node.u.list->values = talloc_array(node.u.list, mpv_node, count);
+        for (int n = 0; n < count; n++) {
+            struct mpv_node *sub = &node.u.list->values[n];
+            sub->format = MPV_FORMAT_NONE;
+            int r;
+            r = get_item(n, M_PROPERTY_GET_NODE, sub, ctx);
+            if (r == M_PROPERTY_NOT_IMPLEMENTED) {
+                struct m_option opt = {0};
+                r = get_item(n, M_PROPERTY_GET_TYPE, &opt, ctx);
+                if (r != M_PROPERTY_OK)
+                    goto err;
+                union m_option_value val = {0};
+                r = get_item(n, M_PROPERTY_GET, &val, ctx);
+                if (r != M_PROPERTY_OK)
+                    goto err;
+                m_option_get_node(&opt, node.u.list, sub, &val);
+                m_option_free(&opt, &val);
+            err: ;
+            }
+        }
+        *(struct mpv_node *)arg = node;
+        return M_PROPERTY_OK;
+    }
     case M_PROPERTY_PRINT: {
         // See m_property_read_sub() remarks.
         char *res = NULL;
