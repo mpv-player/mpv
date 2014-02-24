@@ -708,6 +708,26 @@ void m_config_print_option_list(const struct m_config *config)
     MP_INFO(config, "\nTotal: %d options\n", count);
 }
 
+char **m_config_list_options(void *ta_parent, const struct m_config *config)
+{
+    char **list = talloc_new(ta_parent);
+    int count = 0;
+    for (int i = 0; i < config->num_opts; i++) {
+        struct m_config_option *co = &config->opts[i];
+        const struct m_option *opt = co->opt;
+        if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
+            continue;
+        if (co->is_generated)
+            continue;
+        // For use with CONF_TYPE_STRING_LIST, it's important not to set list
+        // as allocation parent.
+        char *s = talloc_strdup(ta_parent, co->name);
+        MP_TARRAY_APPEND(ta_parent, list, count, s);
+    }
+    MP_TARRAY_APPEND(ta_parent, list, count, NULL);
+    return list;
+}
+
 struct m_profile *m_config_get_profile(const struct m_config *config, bstr name)
 {
     for (struct m_profile *p = config->profiles; p; p = p->next) {

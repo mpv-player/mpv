@@ -1977,14 +1977,8 @@ static int mp_property_alias(m_option_t *prop, int action, void *arg,
     return mp_property_do(real_property, action, arg, mpctx);
 }
 
-static int mp_property_options(m_option_t *prop, int action, void *arg,
-                               MPContext *mpctx)
+static int access_options(struct m_property_action_arg *ka, MPContext *mpctx)
 {
-    if (action != M_PROPERTY_KEY_ACTION)
-        return M_PROPERTY_NOT_IMPLEMENTED;
-
-    struct m_property_action_arg *ka = arg;
-
     struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
                                                   bstr0(ka->key));
     if (!opt)
@@ -2008,7 +2002,22 @@ static int mp_property_options(m_option_t *prop, int action, void *arg,
         *(struct m_option *)ka->arg = *opt->opt;
         return M_PROPERTY_OK;
     }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
 
+static int mp_property_options(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+        *(char ***)arg = m_config_list_options(NULL, mpctx->mconfig);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_KEY_ACTION:
+        return access_options(arg, mpctx);
+    }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 

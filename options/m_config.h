@@ -170,6 +170,9 @@ const char *m_config_get_positional_option(const struct m_config *config, int n)
 // Returns: error code (<0), or number of expected params (0, 1)
 int m_config_option_requires_param(struct m_config *config, bstr name);
 
+// Return all (visible) option names as NULL terminated string list.
+char **m_config_list_options(void *ta_parent, const struct m_config *config);
+
 /*  Print a list of all registered options.
  *  \param config The config object.
  */
