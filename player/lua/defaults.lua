@@ -1,3 +1,5 @@
+mp.UNKNOWN_TYPE = "this value is inserted if the C type is not supported"
+
 function mp.get_script_name()
     return mp.script_name
 end

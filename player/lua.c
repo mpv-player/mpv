@@ -2,6 +2,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <math.h>
 
 #include "osdep/io.h"
 
@@ -232,7 +233,15 @@ static void *lua_thread(void *p)
     lua_pushstring(L, ctx->name); // mp name
     lua_setfield(L, -2, "script_name"); // mp
 
+    // used by pushnode()
+    lua_newtable(L); // mp table
+    lua_pushvalue(L, -1); // mp table table
+    lua_setfield(L, LUA_REGISTRYINDEX, "UNKNOWN_TYPE"); // mp table
+    lua_setfield(L, -2, "UNKNOWN_TYPE"); // mp
+
     lua_pop(L, 1); // -
+
+    assert(lua_gettop(L) == 0);
 
     // Add a preloader for each builtin Lua module
     lua_getglobal(L, "package"); // package
@@ -500,6 +509,33 @@ static int script_set_property(lua_State *L)
     return check_error(L, mpv_set_property_string(ctx->client, p, v));
 }
 
+static int script_set_property_bool(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    const char *p = luaL_checkstring(L, 1);
+    int v = lua_toboolean(L, 2);
+
+    return check_error(L, mpv_set_property(ctx->client, p, MPV_FORMAT_FLAG, &v));
+}
+
+static int script_set_property_number(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    const char *p = luaL_checkstring(L, 1);
+    double d = luaL_checknumber(L, 2);
+    // If the number might be an integer, then set it as integer. The mpv core
+    // will (probably) convert INT64 to DOUBLE when setting, but not the other
+    // way around.
+    int64_t v = d;
+    int res;
+    if (d == (double)v) {
+        res = mpv_set_property(ctx->client, p, MPV_FORMAT_INT64, &v);
+    } else {
+        res = mpv_set_property(ctx->client, p, MPV_FORMAT_DOUBLE, &d);
+    }
+    return check_error(L, res);
+}
+
 static int script_property_list(lua_State *L)
 {
     const struct m_option *props = mp_get_property_list();
@@ -518,8 +554,6 @@ static int script_get_property(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     int type = lua_tointeger(L, lua_upvalueindex(1))
                ? MPV_FORMAT_OSD_STRING : MPV_FORMAT_STRING;
-    char *def_fallback = type == MPV_FORMAT_OSD_STRING ? "" : NULL;
-    char *def = (char *)luaL_optstring(L, 2, def_fallback);
 
     char *result = NULL;
     int err = mpv_get_property(ctx->client, name, type, &result);
@@ -527,13 +561,119 @@ static int script_get_property(lua_State *L)
         lua_pushstring(L, result);
         talloc_free(result);
         return 1;
-    }
-    if (def) {
-        lua_pushstring(L, def);
+    } else {
+        if (lua_isnoneornil(L, 2) && type == MPV_FORMAT_OSD_STRING) {
+            lua_pushstring(L, "");
+        } else {
+            lua_pushvalue(L, 2);
+        }
         lua_pushstring(L, mpv_error_string(err));
         return 2;
     }
-    return check_error(L, err);
+}
+
+static int script_get_property_bool(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    const char *name = luaL_checkstring(L, 1);
+
+    int result = 0;
+    int err = mpv_get_property(ctx->client, name, MPV_FORMAT_FLAG, &result);
+    if (err >= 0) {
+        lua_pushboolean(L, !!result);
+        return 1;
+    } else {
+        lua_pushvalue(L, 2);
+        lua_pushstring(L, mpv_error_string(err));
+        return 2;
+    }
+}
+
+static int script_get_property_number(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    const char *name = luaL_checkstring(L, 1);
+
+    // Note: the mpv core will (hopefully) convert INT64 to DOUBLE
+    double result = 0;
+    int err = mpv_get_property(ctx->client, name, MPV_FORMAT_DOUBLE, &result);
+    if (err >= 0) {
+        lua_pushnumber(L, result);
+        return 1;
+    } else {
+        lua_pushvalue(L, 2);
+        lua_pushstring(L, mpv_error_string(err));
+        return 2;
+    }
+}
+
+static bool pushnode(lua_State *L, mpv_node *node, int depth)
+{
+    depth--;
+    if (depth < 0)
+        return false;
+    luaL_checkstack(L, 6, "stack overflow");
+
+    switch (node->format) {
+    case MPV_FORMAT_STRING:
+        lua_pushstring(L, node->u.string);
+        break;
+    case MPV_FORMAT_INT64:
+        lua_pushnumber(L, node->u.int64);
+        break;
+    case MPV_FORMAT_DOUBLE:
+        lua_pushnumber(L, node->u.double_);
+        break;
+    case MPV_FORMAT_NONE:
+        lua_pushnil(L);
+        break;
+    case MPV_FORMAT_FLAG:
+        lua_pushboolean(L, node->u.flag);
+        break;
+    case MPV_FORMAT_NODE_ARRAY:
+        lua_newtable(L); // table
+        for (int n = 0; n < node->u.list->num; n++) {
+            if (!pushnode(L, &node->u.list->values[n], depth)) // table value
+                return false;
+            lua_rawseti(L, -2, n + 1); // table
+        }
+        break;
+    case MPV_FORMAT_NODE_MAP:
+        lua_newtable(L); // table
+        for (int n = 0; n < node->u.list->num; n++) {
+            lua_pushstring(L, node->u.list->keys[n]); // table key
+            if (!pushnode(L, &node->u.list->values[n], depth)) // table key value
+                return false;
+            lua_rawset(L, -3);
+        }
+        break;
+    default:
+        // unknown value - what do we do?
+        // for now, set a unique dummy value
+        lua_getfield(L, LUA_REGISTRYINDEX, "UNKNOWN_TYPE");
+        break;
+    }
+    return true;
+}
+
+static int script_get_property_native(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    const char *name = luaL_checkstring(L, 1);
+
+    mpv_node node;
+    int err = mpv_get_property(ctx->client, name, MPV_FORMAT_NODE, &node);
+    const char *errstr = mpv_error_string(err);
+    if (err >= 0) {
+        bool ok = pushnode(L, &node, 50);
+        mpv_free_node_contents(&node);
+        if (ok)
+            return 1;
+        errstr = "value too large";
+    }
+    lua_pushvalue(L, 2);
+    lua_pushstring(L, errstr);
+    return 2;
 }
 
 static int script_set_osd_ass(lua_State *L)
@@ -781,7 +921,12 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(find_config_file),
     FN_ENTRY(command),
     FN_ENTRY(commandv),
+    FN_ENTRY(get_property_bool),
+    FN_ENTRY(get_property_number),
+    FN_ENTRY(get_property_native),
     FN_ENTRY(set_property),
+    FN_ENTRY(set_property_bool),
+    FN_ENTRY(set_property_number),
     FN_ENTRY(property_list),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),

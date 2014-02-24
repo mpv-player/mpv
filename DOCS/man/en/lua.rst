@@ -93,11 +93,49 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     missing. Unlike ``get_property()``, assigning the return value to a variable
     will always result in a string.
 
+``mp.get_property_bool(name [,def])``
+    Similar to ``mp.get_property``, but return the property value as boolean.
+
+    Returns a boolean on success, or ``def, error`` on error.
+
+``mp.get_property_number(name [,def])``
+    Similar to ``mp.get_property``, but return the property value as number.
+
+    Note that while Lua does not distinguish between integers and floats,
+    mpv internals do. This function simply request a double float from mpv,
+    and mpv will usually convert integer property values to float.
+
+    Returns a number on success, or ``def, error`` on error.
+
+``mp.get_property_native(name [,def])``
+    Similar to ``mp.get_property``, but return the property value using the best
+    Lua type for the property. Most time, this will return a string, boolean,
+    or number. Some properties (for example ``chapter-list``) are returned as
+    tables.
+
+    Returns a value on success, or ``def, error`` on error. Note that ``nil``
+    might be a possible, valid value too in some corner cases.
+
+    (There is no ``mp.set_property_native`` yet.)
+
 ``mp.set_property(name, value)``
-    Set the given property to the given value. See ``mp.get_property`` and
-    `Properties`_ for more information about properties.
+    Set the given property to the given string value. See ``mp.get_property``
+    and `Properties`_ for more information about properties.
 
     Returns true on success, or ``nil, error`` on error.
+
+``mp.set_property_bool(name, value)``
+    Similar to ``mp.set_property``, but set the given property to the given
+    boolean value.
+
+``mp.set_property_number(name, value)``
+    Similar to ``mp.set_property``, but set the given property to the given
+    numeric value.
+
+    Note that while Lua does not distinguish between integers and floats,
+    mpv internals do. This function will test whether the number can be
+    represented as integer, and if so, it will pass an integer value to mpv,
+    otherwise a double float.
 
 ``mp.get_time()``
     Return the current mpv internal time in seconds as a number. This is
