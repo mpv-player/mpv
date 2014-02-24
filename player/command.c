@@ -877,9 +877,9 @@ static int mp_property_pause(m_option_t *prop, int action, void *arg,
 
     if (action == M_PROPERTY_SET) {
         if (*(int *)arg) {
-            pause_player(mpctx);
+            pause_player(mpctx, PAUSE_BY_COMMAND);
         } else {
-            unpause_player(mpctx);
+            unpause_player(mpctx, PAUSE_BY_COMMAND);
         }
         return M_PROPERTY_OK;
     }
@@ -3369,12 +3369,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     if (cmd->flags & MP_PAUSING)
-        pause_player(mpctx);
+        pause_player(mpctx, PAUSE_BY_COMMAND);
     if (cmd->flags & MP_PAUSING_TOGGLE) {
         if (opts->pause)
-            unpause_player(mpctx);
+            unpause_player(mpctx, PAUSE_BY_COMMAND);
         else
-            pause_player(mpctx);
+            pause_player(mpctx, PAUSE_BY_COMMAND);
     }
 }
 

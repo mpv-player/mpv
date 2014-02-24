@@ -97,6 +97,11 @@ enum seek_type {
     MPSEEK_FACTOR,
 };
 
+// A bit-mask would be best, but I preferred not to use that with the client API.
+#define PAUSE_BY_COMMAND ((mpv_event_pause_reason){.by_command=1})
+#define PAUSE_BY_CACHE ((mpv_event_pause_reason){.by_cache=1})
+#define PAUSE_BY_KEEP_OPEN ((mpv_event_pause_reason){.by_keep_open=1})
+
 struct track {
     enum stream_type type;
 
@@ -420,8 +425,8 @@ void set_osd_function(struct MPContext *mpctx, int osd_function);
 void set_osd_subtitle(struct MPContext *mpctx, const char *text);
 
 // playloop.c
-void pause_player(struct MPContext *mpctx);
-void unpause_player(struct MPContext *mpctx);
+void pause_player(struct MPContext *mpctx, mpv_event_pause_reason reason);
+void unpause_player(struct MPContext *mpctx, mpv_event_pause_reason reason);
 void add_step_frame(struct MPContext *mpctx, int dir);
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
                 int exact, bool immediate);

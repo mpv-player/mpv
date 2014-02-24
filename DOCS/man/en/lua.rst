@@ -365,6 +365,25 @@ List of events
 ``pause``
     Playback was paused.
 
+    Has the following event fields:
+
+    ``real_paused``
+        Current playback pause state as boolean.
+
+    ``user_paused``
+        User requested pause state.
+
+    ``by_command``
+        If the action was triggered by an input command (or via an user key
+        binding). It's false if it was an automatic action.
+
+    ``by_cache``
+        If the action was triggered by a low (or recovering) cache state.
+
+    ``by_keep_open``
+        If the pausing was triggered because the end of playback was reached,
+        and the "keep-open" option is enabled, 0 otherwise.
+
 ``unpause``
     Playback was unpaused.
 

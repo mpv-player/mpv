@@ -1339,7 +1339,7 @@ goto_reopen_demuxer: ;
     get_relative_time(mpctx); // reset current delta
 
     if (mpctx->opts->pause)
-        pause_player(mpctx);
+        pause_player(mpctx, PAUSE_BY_COMMAND);
 
     mp_notify(mpctx, MPV_EVENT_PLAYBACK_START, NULL);
 

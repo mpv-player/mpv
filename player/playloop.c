@@ -78,17 +78,15 @@ static const char av_desync_help_text[] =
 "If none of this helps you, file a bug report.\n\n";
 
 
-void pause_player(struct MPContext *mpctx)
+void pause_player(struct MPContext *mpctx, mpv_event_pause_reason reason)
 {
-    mp_notify(mpctx, MPV_EVENT_PAUSE, NULL);
-
     mpctx->opts->pause = 1;
 
     if (mpctx->video_out)
         vo_control(mpctx->video_out, VOCTRL_RESTORE_SCREENSAVER, NULL);
 
     if (mpctx->paused)
-        return;
+        goto end;
     mpctx->paused = true;
     mpctx->step_frames = 0;
     mpctx->time_frame -= get_relative_time(mpctx);
@@ -107,22 +105,25 @@ void pause_player(struct MPContext *mpctx)
 
     if (!mpctx->opts->quiet)
         MP_SMODE(mpctx, "ID_PAUSED\n");
+
+end:
+    reason.user_paused = !!mpctx->opts->pause;
+    reason.real_paused = !!mpctx->paused;
+    mp_notify(mpctx, MPV_EVENT_UNPAUSE, &reason);
 }
 
-void unpause_player(struct MPContext *mpctx)
+void unpause_player(struct MPContext *mpctx, mpv_event_pause_reason reason)
 {
-    mp_notify(mpctx, MPV_EVENT_UNPAUSE, NULL);
-
     mpctx->opts->pause = 0;
 
     if (mpctx->video_out && mpctx->opts->stop_screensaver)
         vo_control(mpctx->video_out, VOCTRL_KILL_SCREENSAVER, NULL);
 
     if (!mpctx->paused)
-        return;
+        goto end;
     // Don't actually unpause while cache is loading.
     if (mpctx->paused_for_cache)
-        return;
+        goto end;
     mpctx->paused = false;
     mpctx->osd_function = 0;
 
@@ -131,6 +132,11 @@ void unpause_player(struct MPContext *mpctx)
     if (mpctx->video_out && mpctx->d_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);      // resume video
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
+
+end:
+    reason.user_paused = !!mpctx->opts->pause;
+    reason.real_paused = !!mpctx->paused;
+    mp_notify(mpctx, MPV_EVENT_UNPAUSE, &reason);
 }
 
 static void draw_osd(struct MPContext *mpctx)
@@ -159,12 +165,12 @@ void add_step_frame(struct MPContext *mpctx, int dir)
         return;
     if (dir > 0) {
         mpctx->step_frames += 1;
-        unpause_player(mpctx);
+        unpause_player(mpctx, PAUSE_BY_COMMAND);
     } else if (dir < 0) {
         if (!mpctx->backstep_active && !mpctx->hrseek_active) {
             mpctx->backstep_active = true;
             mpctx->backstep_start_seek_ts = mpctx->vo_pts_history_seek_ts;
-            pause_player(mpctx);
+            pause_player(mpctx, PAUSE_BY_COMMAND);
         }
     }
 }
@@ -684,14 +690,14 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
         if (cache < 0 || cache >= opts->stream_cache_min_percent || idle) {
             mpctx->paused_for_cache = false;
             if (!opts->pause)
-                unpause_player(mpctx);
+                unpause_player(mpctx, PAUSE_BY_CACHE);
         }
     } else {
         if (cache >= 0 && cache <= opts->stream_cache_pause && !idle &&
             opts->stream_cache_pause < opts->stream_cache_min_percent)
         {
             bool prev_paused_user = opts->pause;
-            pause_player(mpctx);
+            pause_player(mpctx, PAUSE_BY_CACHE);
             mpctx->paused_for_cache = true;
             opts->pause = prev_paused_user;
         }
@@ -857,7 +863,7 @@ static void handle_keep_open(struct MPContext *mpctx)
     if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
         mpctx->playback_pts = mpctx->last_vo_pts;
-        pause_player(mpctx);
+        pause_player(mpctx, PAUSE_BY_KEEP_OPEN);
     }
 }
 
@@ -1261,7 +1267,7 @@ void run_playloop(struct MPContext *mpctx)
             if (new_frame_shown)
                 mpctx->step_frames--;
             if (mpctx->step_frames == 0)
-                pause_player(mpctx);
+                pause_player(mpctx, PAUSE_BY_COMMAND);
         }
 
     }

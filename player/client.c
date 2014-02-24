@@ -324,23 +324,37 @@ static void status_reply(struct mpv_handle *ctx, int event,
     send_reply(ctx, userdata, &reply);
 }
 
+// set ev->data to a new copy of the original data
+static void dup_event_data(struct mpv_event *ev)
+{
+    switch (ev->event_id) {
+    case MPV_EVENT_PAUSE:
+    case MPV_EVENT_UNPAUSE:
+        ev->data = talloc_memdup(NULL, ev->data, sizeof(mpv_event_pause_reason));
+        break;
+    default:
+        // Doesn't use events with memory allocation.
+        if (ev->data)
+            abort();
+    }
+}
+
 void mp_client_broadcast_event(struct MPContext *mpctx, int event, void *data)
 {
     struct mp_client_api *clients = mpctx->clients;
 
-    struct mpv_event event_data = {
-        .event_id = event,
-        .data = data,
-    };
-
     pthread_mutex_lock(&clients->lock);
 
-    for (int n = 0; n < clients->num_clients; n++)
+    for (int n = 0; n < clients->num_clients; n++) {
+        struct mpv_event event_data = {
+            .event_id = event,
+            .data = data,
+        };
+        dup_event_data(&event_data);
         send_event(clients->clients[n], &event_data);
+    }
 
     pthread_mutex_unlock(&clients->lock);
-
-    talloc_free(data);
 }
 
 int mp_client_send_event(struct MPContext *mpctx, const char *client_name,
