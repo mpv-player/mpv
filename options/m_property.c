@@ -183,16 +183,12 @@ int m_property_do(struct mp_log *log, const m_option_t *prop_list,
     case M_PROPERTY_SET: {
         if (!log)
             return M_PROPERTY_ERROR;
-        if (!opt.type->clamp) {
-            mp_warn(log, "Property '%s' without clamp().\n", name);
-        } else {
-            m_option_copy(&opt, &val, arg);
-            r = opt.type->clamp(&opt, arg);
-            m_option_free(&opt, &val);
-            if (r != 0) {
-                mp_err(log, "Property '%s': invalid value.\n", name);
-                return M_PROPERTY_ERROR;
-            }
+        m_option_copy(&opt, &val, arg);
+        r = opt.type->clamp ? opt.type->clamp(&opt, arg) : 0;
+        m_option_free(&opt, &val);
+        if (r != 0) {
+            mp_err(log, "Property '%s': invalid value.\n", name);
+            return M_PROPERTY_ERROR;
         }
         return do_action(prop_list, name, M_PROPERTY_SET, arg, ctx);
     }
