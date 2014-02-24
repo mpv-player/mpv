@@ -11,7 +11,7 @@ from waftools.checks.custom import *
 build_options = [
     {
         'name': '--shared',
-        'desc': 'enable shared library',
+        'desc': 'shared library',
         'default': 'disable',
         'func': check_true
     }, {
