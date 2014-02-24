@@ -21,7 +21,8 @@ int main(int argc, char *argv[])
     // Enable default key bindings, so the user can actually interact with
     // the player (and e.g. close the window).
     check_error(mpv_set_option_string(ctx, "input-default-bindings", "yes"));
-    check_error(mpv_set_option_string(ctx, "osc", "yes"));
+    int val = 1;
+    check_error(mpv_set_option(ctx, "osc", MPV_FORMAT_FLAG, &val));
 
     // Done setting up options.
     check_error(mpv_initialize(ctx));
