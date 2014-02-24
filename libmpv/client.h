@@ -394,8 +394,150 @@ typedef enum mpv_format {
      *
      * Only valid when doing read access. The rest works like MPV_FORMAT_STRING.
      */
-    MPV_FORMAT_OSD_STRING       = 2
+    MPV_FORMAT_OSD_STRING       = 2,
+    /**
+     * The basic type is int. The only allowed values are 0 ("no")
+     * and 1 ("yes").
+     *
+     * Example for reading:
+     *
+     *     int result;
+     *     if (mpv_get_property(ctx, "property", MPV_FORMAT_FLAG, &result) < 0)
+     *         goto error;
+     *     printf("%s\n", result ? "true" : "false");
+     *
+     * Example for writing:
+     *
+     *     int flag = 1;
+     *     mpv_set_property(ctx, "property", MPV_FORMAT_STRING, &flag);
+     */
+    MPV_FORMAT_FLAG             = 3,
+    /**
+     * The basic type is int64_t.
+     */
+    MPV_FORMAT_INT64            = 4,
+    /**
+     * The basic type is double.
+     */
+    MPV_FORMAT_DOUBLE           = 5,
+    /**
+     * The type is mpv_node.
+     *
+     * For reading, you usually would pass a pointer to a stack-allocated
+     * mpv_node value to mpv, and when you're done you call
+     * mpv_free_node_contents(&node).
+     * You're expected not to write to the data - if you have to, copy it
+     * first (which you have to do manually).
+     *
+     * For writing, you construct your own mpv_node, and pass a pointer to the
+     * API. The API will never write to your data (and copy it if needed), so
+     * you're free to use any form of allocation or memory management you like.
+     *
+     * Warning: when reading, always check the mpv_node.format member. For
+     *          example, properties might change their type in future versions
+     *          of mpv, or sometimes even during runtime.
+     *
+     * Example for reading:
+     *
+     *     mpv_node result;
+     *     if (mpv_get_property(ctx, "property", MPV_FORMAT_NODE, &result) < 0)
+     *         goto error;
+     *     printf("format=%d\n", (int)result.format);
+     *     mpv_free_node_contents(&result).
+     *
+     * Example for writing:
+     *
+     *     mpv_node value;
+     *     value.format = MPV_FORMAT_STRING;
+     *     value.u.string = "hello";
+     *     mpv_set_property(ctx, "property", MPV_FORMAT_NODE, &value);
+     */
+    MPV_FORMAT_NODE             = 6,
+    /**
+     * Used with mpv_node only. Can usually not be used directly.
+     */
+    MPV_FORMAT_NODE_ARRAY       = 7,
+    /**
+     * See MPV_FORMAT_NODE_ARRAY.
+     */
+    MPV_FORMAT_NODE_MAP         = 8
 } mpv_format;
+
+/**
+ * Generic data storage.
+ *
+ * If mpv writes this struct (e.g. via mpv_get_property()), you must not change
+ * the data. You have to free it with mpv_free_node_contents().
+ */
+typedef struct mpv_node {
+    union {
+        char *string;   /** valid if format==MPV_FORMAT_STRING */
+        int flag;       /** valid if format==MPV_FORMAT_FLAG   */
+        int64_t int64;  /** valid if format==MPV_FORMAT_INT64  */
+        double double_; /** valid if format==MPV_FORMAT_DOUBLE */
+        /**
+         * valid if format==MPV_FORMAT_NODE_ARRAY
+         *    or if format==MPV_FORMAT_NODE_MAP
+         */
+        struct mpv_node_list *list;
+    } u;
+    /**
+     * Type of the data stored in this struct. This value rules what members in
+     * the given union can be accessed. The following formats are currently
+     * defined to be allowed in mpv_node:
+     *
+     *  MPV_FORMAT_STRING       (u.string)
+     *  MPV_FORMAT_FLAG         (u.flag)
+     *  MPV_FORMAT_INT64        (u.int64)
+     *  MPV_FORMAT_DOUBLE       (u.double_)
+     *  MPV_FORMAT_NODE_ARRAY   (u.list)
+     *  MPV_FORMAT_NODE_MAP     (u.list)
+     *  MPV_FORMAT_NONE         (no member)
+     *
+     * If you encounter a value you don't know, you must not make any
+     * assumptions about the contents of union u.
+     */
+    mpv_format format;
+} mpv_node;
+
+/**
+ * (see mpv_node)
+ */
+typedef struct mpv_node_list {
+    /**
+     * Number of entries. Negative values are not allowed.
+     */
+    int num;
+    /**
+     * MPV_FORMAT_NODE_ARRAY:
+     *  values[N] refers to value of the Nth item
+     *
+     * MPV_FORMAT_NODE_MAP:
+     *  values[N] refers to value of the Nth key/value pair
+     *
+     * If num > 0, values[0] to values[num-1] (inclusive) are valid.
+     * Otherwise, this can be NULL.
+     */
+    mpv_node *values;
+    /**
+     * MPV_FORMAT_NODE_ARRAY:
+     *  unused (typically NULL), access is not allowed
+     *
+     * MPV_FORMAT_NODE_MAP:
+     *  keys[N] refers to key of the Nth key/value pair. If num > 0, keys[0] to
+     *  keys[num-1] (inclusive) are valid. Otherwise, this can be NULL.
+     *  The keys are in random order. The only guarantee is that keys[N] belongs
+     *  to the value values[N]. NULL keys are not allowed.
+     */
+    char **keys;
+} mpv_node_list;
+
+/**
+ * Frees any data referenced by the node. It doesn't free the node itself.
+ * Call this only if the mpv client API set the node. If you constructed the
+ * node yourself (manually), you have to free it yourself.
+ */
+void mpv_free_node_contents(mpv_node *node);
 
 /**
  * Set an option. Note that you can't normally set options during runtime. It
@@ -465,6 +607,10 @@ int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
  * can be queried or set at runtime. For example, writing to the pause property
  * will actually pause or unpause playback.
  *
+ * If the format doesn't match with the internal format of the property, it's
+ * converted. This conversion doesn't always yield useful values, so you
+ * should be careful which format you use.
+ *
  * @param name The property name. See input.rst for a list of properties.
  * @param format see enum mpv_format. Currently, only MPV_FORMAT_STRING is valid.
  * @param[in] data Option value.
@@ -489,7 +635,8 @@ int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
  * @param reply_userdata see section about asynchronous calls
  * @param name The property name.
  * @param format see enum mpv_format. Currently, only MPV_FORMAT_STRING is valid.
- * @param[in] data Option value. The value will be copied by the function.
+ * @param[in] data Option value. The value will be copied by the function. It
+ *                 will never be modified by the client API.
  * @return error code if sending the request failed
  */
 int mpv_set_property_async(mpv_handle *ctx, uint64_t reply_userdata,
@@ -498,11 +645,17 @@ int mpv_set_property_async(mpv_handle *ctx, uint64_t reply_userdata,
 /**
  * Read the value of the given property.
  *
+ * If the format doesn't match with the internal format of the property, it's
+ * converted. This conversion doesn't always yield useful values, so you
+ * should be careful which format you use.
+ *
  * @param name The property name.
  * @param format see enum mpv_format.
  * @param[out] data Pointer to the variable holding the option value. On
  *                  success, the variable will be set to a copy of the option
- *                  value. You can free the value with mpv_free().
+ *                  value. For formats that require dynamic memory allocation,
+ *                  you can free the value with mpv_free() (strings) or
+ *                  mpv_free_node_contents() (MPV_FORMAT_NODE).
  * @return error code
  */
 int mpv_get_property(mpv_handle *ctx, const char *name, mpv_format format,
