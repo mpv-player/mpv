@@ -441,6 +441,54 @@ void mpv_wakeup(mpv_handle *ctx)
     pthread_mutex_unlock(&ctx->lock);
 }
 
+// map client API types to internal types
+static const struct m_option type_conv[] = {
+    [MPV_FORMAT_STRING]     = { .type = CONF_TYPE_STRING },
+    [MPV_FORMAT_FLAG]       = { .type = CONF_TYPE_FLAG },
+    [MPV_FORMAT_INT64]      = { .type = CONF_TYPE_INT64 },
+    [MPV_FORMAT_DOUBLE]     = { .type = CONF_TYPE_DOUBLE },
+    [MPV_FORMAT_NODE]       = { .type = CONF_TYPE_NODE },
+};
+
+static const struct m_option *get_mp_type(mpv_format format)
+{
+    if (format < 0 || format >= MP_ARRAY_SIZE(type_conv))
+        return NULL;
+    if (!type_conv[format].type)
+        return NULL;
+    return &type_conv[format];
+}
+
+// for read requests - MPV_FORMAT_OSD_STRING special handling
+static const struct m_option *get_mp_type_get(mpv_format format)
+{
+    if (format == MPV_FORMAT_OSD_STRING)
+        format = MPV_FORMAT_STRING; // it's string data, just other semantics
+    return get_mp_type(format);
+}
+
+// move src->dst, and do implicit conversion if possible (conversions to or
+// from strings are handled otherwise)
+static bool conv_node_to_format(void *dst, mpv_format dst_fmt, mpv_node *src)
+{
+    if (dst_fmt == src->format) {
+        const struct m_option *type = get_mp_type(dst_fmt);
+        memcpy(dst, &src->u, type->type->size);
+        return true;
+    }
+    if (dst_fmt == MPV_FORMAT_DOUBLE && src->format == MPV_FORMAT_INT64) {
+        *(double *)dst = src->u.int64;
+        return true;
+    }
+    return false;
+}
+
+void mpv_free_node_contents(mpv_node *node)
+{
+    static const struct m_option type = { .type = CONF_TYPE_NODE };
+    m_option_free(&type, node);
+}
+
 int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
                    void *data)
 {
@@ -584,6 +632,7 @@ static int translate_property_error(int errc)
     case M_PROPERTY_UNAVAILABLE:        return MPV_ERROR_PROPERTY_UNAVAILABLE;
     case M_PROPERTY_NOT_IMPLEMENTED:    return MPV_ERROR_PROPERTY_ERROR;
     case M_PROPERTY_UNKNOWN:            return MPV_ERROR_PROPERTY_NOT_FOUND;
+    case M_PROPERTY_INVALID_FORMAT:     return MPV_ERROR_PROPERTY_FORMAT;
     // shouldn't happen
     default:                            return MPV_ERROR_PROPERTY_ERROR;
     }
@@ -599,25 +648,40 @@ struct setproperty_request {
     uint64_t userdata;
 };
 
-static int property_format_to_set_cmd(int format)
-{
-    switch (format) {
-    case MPV_FORMAT_STRING:     return M_PROPERTY_SET_STRING;
-    default:                    return MPV_ERROR_PROPERTY_FORMAT;
-    }
-}
-
 static void setproperty_fn(void *arg)
 {
     struct setproperty_request *req = arg;
+    const struct m_option *type = get_mp_type(req->format);
 
-    int cmd = property_format_to_set_cmd(req->format);
-    if (cmd < 0) {
-        req->status = cmd;
-    } else {
-        int err = mp_property_do(req->name, cmd, req->data, req->mpctx);
-        req->status = translate_property_error(err);
+    struct mpv_node node;
+    node.format = req->format;
+
+    req->status = 0;
+    switch (req->format) {
+    case MPV_FORMAT_NODE:
+        node = *(struct mpv_node *)req->data;
+        break;
+    case MPV_FORMAT_STRING:
+    case MPV_FORMAT_FLAG:
+    case MPV_FORMAT_INT64:
+    case MPV_FORMAT_DOUBLE:
+        // These are basically emulated via mpv_node.
+        memcpy(&node.u, req->data, type->type->size);
+        break;
+    default:
+        abort();
     }
+
+    int err = mp_property_do(req->name, M_PROPERTY_SET_NODE, &node, req->mpctx);
+    if (err == M_PROPERTY_NOT_IMPLEMENTED && req->format == MPV_FORMAT_STRING) {
+        // Go through explicit string conversion. M_PROPERTY_SET_NODE doesn't
+        // do this, because it tries to be somewhat type-strict. But the client
+        // needs a way to set everything by string.
+        err = mp_property_do(req->name, M_PROPERTY_SET_STRING, node.u.string,
+                             req->mpctx);
+    }
+
+    req->status = translate_property_error(err);
 
     if (req->reply_ctx) {
         status_reply(req->reply_ctx, MPV_EVENT_SET_PROPERTY_REPLY,
@@ -630,6 +694,8 @@ int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
 {
     if (!ctx->mpctx->initialized)
         return MPV_ERROR_UNINITIALIZED;
+    if (!get_mp_type(format))
+        return MPV_ERROR_PROPERTY_FORMAT;
 
     struct setproperty_request req = {
         .mpctx = ctx->mpctx,
@@ -646,31 +712,36 @@ int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
     return mpv_set_property(ctx, name, MPV_FORMAT_STRING, &data);
 }
 
+static void free_prop_set_req(void *ptr)
+{
+    struct setproperty_request *req = ptr;
+    const struct m_option *type = get_mp_type(req->format);
+    m_option_free(type, req->data);
+}
+
 int mpv_set_property_async(mpv_handle *ctx, uint64_t ud, const char *name,
                            mpv_format format, void *data)
 {
+    const struct m_option *type = get_mp_type(format);
     if (!ctx->mpctx->initialized)
         return MPV_ERROR_UNINITIALIZED;
+    if (!type)
+        return MPV_ERROR_PROPERTY_FORMAT;
 
     struct setproperty_request *req = talloc_ptrtype(NULL, req);
     *req = (struct setproperty_request){
         .mpctx = ctx->mpctx,
         .name = talloc_strdup(req, name),
-        .format = MPV_FORMAT_STRING,
-        .data = talloc_strdup(req, *(char **)data), // for now always a string
+        .format = format,
+        .data = talloc_zero_size(req, type->type->size),
         .reply_ctx = ctx,
         .userdata = ud,
     };
-    return run_async(ctx, setproperty_fn, req);
-}
 
-static int property_format_to_get_cmd(int format)
-{
-    switch (format) {
-    case MPV_FORMAT_STRING:     return M_PROPERTY_GET_STRING;
-    case MPV_FORMAT_OSD_STRING: return M_PROPERTY_PRINT;
-    default:                    return MPV_ERROR_PROPERTY_FORMAT;
-    }
+    m_option_copy(type, req->data, data);
+    talloc_set_destructor(req, free_prop_set_req);
+
+    return run_async(ctx, setproperty_fn, req);
 }
 
 struct getproperty_request {
@@ -683,28 +754,76 @@ struct getproperty_request {
     uint64_t userdata;
 };
 
+static void free_prop_data(void *ptr)
+{
+    struct mpv_event_property *prop = ptr;
+    const struct m_option *type = get_mp_type_get(prop->format);
+    m_option_free(type, prop->data);
+}
+
 static void getproperty_fn(void *arg)
 {
     struct getproperty_request *req = arg;
+    const struct m_option *type = get_mp_type_get(req->format);
 
-    char *xdata = NULL; // currently, we support strings only
+    union m_option_value xdata = {0};
     void *data = req->data ? req->data : &xdata;
 
-    int cmd = property_format_to_get_cmd(req->format);
-    if (cmd < 0) {
-        req->status = cmd;
-    } else {
-        int err = mp_property_do(req->name, cmd, data, req->mpctx);
-        req->status = translate_property_error(err);
+    int err = -1;
+    switch (req->format) {
+    case MPV_FORMAT_OSD_STRING:
+        err = mp_property_do(req->name, M_PROPERTY_PRINT, data, req->mpctx);
+        break;
+    case MPV_FORMAT_STRING: {
+        char *s = NULL;
+        err = mp_property_do(req->name, M_PROPERTY_GET_STRING, &s, req->mpctx);
+        if (err == M_PROPERTY_OK)
+            *(char **)req->data = s;
+        break;
     }
+    case MPV_FORMAT_NODE:
+    case MPV_FORMAT_FLAG:
+    case MPV_FORMAT_INT64:
+    case MPV_FORMAT_DOUBLE: {
+        struct mpv_node node = {{0}};
+        err = mp_property_do(req->name, M_PROPERTY_GET_NODE, &node, req->mpctx);
+        if (err == M_PROPERTY_NOT_IMPLEMENTED) {
+            // Go through explicit string conversion. Same reasoning as on the
+            // GET code path.
+            char *s = NULL;
+            err = mp_property_do(req->name, M_PROPERTY_GET_STRING, &s,
+                                 req->mpctx);
+            if (err != M_PROPERTY_OK)
+                break;
+            node.format = MPV_FORMAT_STRING;
+            node.u.string = s;
+        }
+        if (req->format == MPV_FORMAT_NODE) {
+            *(struct mpv_node *)data = node;
+        } else {
+            if (!conv_node_to_format(data, req->format, &node)) {
+                err = M_PROPERTY_INVALID_FORMAT;
+                mpv_free_node_contents(&node);
+            }
+        }
+        break;
+    }
+    default:
+        abort();
+    }
+
+    req->status = translate_property_error(err);
 
     if (req->reply_ctx) {
         struct mpv_event_property *prop = talloc_ptrtype(NULL, prop);
         *prop = (struct mpv_event_property){
             .name = talloc_steal(prop, (char *)req->name),
             .format = req->format,
-            .data = talloc_steal(prop, xdata),
+            .data = talloc_size(prop, type->type->size),
         };
+        // move data
+        memcpy(prop->data, &xdata, type->type->size);
+        talloc_set_destructor(prop, free_prop_data);
         struct mpv_event reply = {
             .event_id = MPV_EVENT_GET_PROPERTY_REPLY,
             .data = prop,
@@ -720,6 +839,10 @@ int mpv_get_property(mpv_handle *ctx, const char *name, mpv_format format,
 {
     if (!ctx->mpctx->initialized)
         return MPV_ERROR_UNINITIALIZED;
+    if (!data)
+        return MPV_ERROR_INVALID_PARAMETER;
+    if (!get_mp_type_get(format))
+        return MPV_ERROR_PROPERTY_FORMAT;
 
     struct getproperty_request req = {
         .mpctx = ctx->mpctx,
@@ -750,6 +873,8 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t ud, const char *name,
 {
     if (!ctx->mpctx->initialized)
         return MPV_ERROR_UNINITIALIZED;
+    if (!get_mp_type_get(format))
+        return MPV_ERROR_PROPERTY_FORMAT;
 
     struct getproperty_request *req = talloc_ptrtype(NULL, req);
     *req = (struct getproperty_request){
