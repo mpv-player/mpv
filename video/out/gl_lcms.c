@@ -73,6 +73,7 @@ const struct m_sub_options mp_icc_conf = {
         OPT_STRING("icc-profile", profile, 0),
         OPT_STRING("icc-cache", cache, 0),
         OPT_INT("icc-intent", intent, 0),
+        OPT_FLAG("icc-approx-gamma", approx, 0),
         OPT_STRING_VALIDATE("3dlut-size", size_str, 0, validate_3dlut_size_opt),
         {0}
     },
@@ -164,13 +165,22 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
         .Blue  = {0.15, 0.06, 1.0},
     };
 
-    /* Rec BT.709 defines the tone curve as:
-       V = 1.099 * L^0.45 - 0.099 for L >= 0.018
-       V = 4.500 * L              for L <  0.018
+    cmsToneCurve *tonecurve;
+    if (opts->approx) {
+        /* Apple's CMS, among other programs that rely on it, uses 1.95 as a
+           faster approximation of this curve. It's not quite correct, but the
+           option is provided for compatibility with such incorrect clips. */
+        tonecurve = cmsBuildGamma(NULL, 1.95);
+    } else {
+        /* Rec BT.709 defines the tone curve as:
+           V = 1.099 * L^0.45 - 0.099 for L >= 0.018
+           V = 4.500 * L              for L <  0.018
 
-       The 0.081 parameter comes from inserting 0.018 into the function */
-    cmsToneCurve *tonecurve = cmsBuildParametricToneCurve(NULL, 4,
+           The 0.081 parameter comes from inserting 0.018 into the function */
+        tonecurve = cmsBuildParametricToneCurve(NULL, 4,
             (cmsFloat64Number[5]){1/0.45, 1/1.099, 0.099/1.099, 1/4.5, 0.081});
+    }
+
     cmsHPROFILE vid_profile = cmsCreateRGBProfile(&d65, &bt709prim,
                         (cmsToneCurve*[3]){tonecurve, tonecurve, tonecurve});
     cmsFreeToneCurve(tonecurve);
