@@ -372,10 +372,16 @@ typedef enum mpv_format {
      *     printf("%s\n", result);
      *     mpv_free(result);
      *
+     * Or just use mpv_get_property_string().
+     *
      * Example for writing:
      *
      *     char *value = "the new value";
-     *     mpv_set_property(ctx, "property", MPV_FORMAT_STRING, (void *)value);
+     *     // yep, you pass the address to the variable
+     *     // (needed for symmetry with other types and mpv_get_property)
+     *     mpv_set_property(ctx, "property", MPV_FORMAT_STRING, &value);
+     *
+     * Or just use mpv_set_property_string().
      *
      */
     MPV_FORMAT_STRING           = 1,
@@ -673,7 +679,13 @@ typedef struct mpv_event_property {
      */
     mpv_format format;
     /**
-     * Received property value. Depends on the format.
+     * Received property value. Depends on the format. This is like the
+     * pointer argument passed to mpv_get_property().
+     *
+     * For example, for MPV_FORMAT_STRING you get the string with:
+     *
+     *    char *value = *(char **)(event_property->data);
+     *
      * Note that this is set to NULL if retrieving the property failed.
      * See mpv_event.error for the status.
      */

@@ -462,7 +462,7 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
     } else {
         if (format != MPV_FORMAT_STRING)
             return MPV_ERROR_OPTION_FORMAT;
-        const char *value = data;
+        const char *value = *(char **)data;
         int err = m_config_set_option0(ctx->mpctx->mconfig, name, value);
         switch (err) {
         case M_OPT_MISSING_PARAM:
@@ -481,7 +481,7 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
 
 int mpv_set_option_string(mpv_handle *ctx, const char *name, const char *data)
 {
-    return mpv_set_option(ctx, name, MPV_FORMAT_STRING, (void *)data);
+    return mpv_set_option(ctx, name, MPV_FORMAT_STRING, &data);
 }
 
 // Run a command in the playback thread.
@@ -635,7 +635,7 @@ int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
         .mpctx = ctx->mpctx,
         .name = name,
         .format = format,
-        .data = data,
+        .data = *(char **)data,
     };
     run_locked(ctx, setproperty_fn, &req);
     return req.status;
@@ -643,7 +643,7 @@ int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
 
 int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
 {
-    return mpv_set_property(ctx, name, MPV_FORMAT_STRING, (void *)data);
+    return mpv_set_property(ctx, name, MPV_FORMAT_STRING, &data);
 }
 
 int mpv_set_property_async(mpv_handle *ctx, uint64_t ud, const char *name,
@@ -657,7 +657,7 @@ int mpv_set_property_async(mpv_handle *ctx, uint64_t ud, const char *name,
         .mpctx = ctx->mpctx,
         .name = talloc_strdup(req, name),
         .format = MPV_FORMAT_STRING,
-        .data = talloc_strdup(req, data), // for now always a string
+        .data = talloc_strdup(req, *(char **)data), // for now always a string
         .reply_ctx = ctx,
         .userdata = ud,
     };
