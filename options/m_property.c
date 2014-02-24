@@ -29,6 +29,8 @@
 
 #include <libavutil/common.h>
 
+#include "libmpv/client.h"
+
 #include "talloc.h"
 #include "m_option.h"
 #include "m_property.h"
@@ -191,6 +193,40 @@ int m_property_do(struct mp_log *log, const m_option_t *prop_list,
             return M_PROPERTY_ERROR;
         }
         return do_action(prop_list, name, M_PROPERTY_SET, arg, ctx);
+    }
+    case M_PROPERTY_GET_NODE: {
+        if ((r = do_action(prop_list, name, M_PROPERTY_GET_NODE, arg, ctx)) !=
+            M_PROPERTY_NOT_IMPLEMENTED)
+            return r;
+        if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
+            return r;
+        struct mpv_node *node = arg;
+        int err = m_option_get_node(&opt, NULL, node, &val);
+        if (err == M_OPT_UNKNOWN) {
+            r = M_PROPERTY_NOT_IMPLEMENTED;
+        } else if (r < 0) {
+            r = M_PROPERTY_INVALID_FORMAT;
+        } else {
+            r = M_PROPERTY_OK;
+        }
+        m_option_free(&opt, &val);
+        return r;
+    }
+    case M_PROPERTY_SET_NODE: {
+        if ((r = do_action(prop_list, name, M_PROPERTY_SET_NODE, arg, ctx)) !=
+            M_PROPERTY_NOT_IMPLEMENTED)
+            return r;
+        struct mpv_node *node = arg;
+        int err = m_option_set_node(&opt, &val, node);
+        if (err == M_OPT_UNKNOWN) {
+            r = M_PROPERTY_NOT_IMPLEMENTED;
+        } else if (r < 0) {
+            r = M_PROPERTY_INVALID_FORMAT;
+        } else {
+            r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
+        }
+        m_option_free(&opt, &val);
+        return r;
     }
     default:
         return do_action(prop_list, name, action, arg, ctx);

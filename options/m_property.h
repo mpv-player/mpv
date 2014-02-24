@@ -68,6 +68,14 @@ enum mp_property_action {
     //  arg: char*
     M_PROPERTY_SET_STRING,
 
+    // Set a mpv_node value.
+    //  arg: mpv_node*
+    M_PROPERTY_GET_NODE,
+
+    // Get a mpv_node value.
+    //  arg: mpv_node*
+    M_PROPERTY_SET_NODE,
+
     // Pass down an action to a sub-property.
     //  arg: struct m_property_action_arg*
     M_PROPERTY_KEY_ACTION,
@@ -102,6 +110,9 @@ enum mp_property_return {
 
     // Returned when asking for a property that doesn't exist.
     M_PROPERTY_UNKNOWN = -3,
+
+    // When trying to set invalid or incorrectly formatted data.
+    M_PROPERTY_INVALID_FORMAT = -4,
 };
 
 // Access a property.
