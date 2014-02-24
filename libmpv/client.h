@@ -476,7 +476,7 @@ int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
 
 /**
  * Set a property asynchronously. You will receive the result of the operation
- * as MPV_EVENT_PROPERTY_SET_REPLY event. The mpv_event.error field will contain
+ * as MPV_EVENT_SET_PROPERTY_REPLY event. The mpv_event.error field will contain
  * the result status of the operation. Otherwise, this function is similar to
  * mpv_set_property().
  *
