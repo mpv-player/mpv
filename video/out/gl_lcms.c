@@ -71,6 +71,7 @@ static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
 const struct m_sub_options mp_icc_conf = {
     .opts = (m_option_t[]) {
         OPT_STRING("icc-profile", profile, 0),
+        OPT_FLAG("icc-profile-auto", profile_auto, 0),
         OPT_STRING("icc-cache", cache, 0),
         OPT_INT("icc-intent", intent, 0),
         OPT_STRING_VALIDATE("3dlut-size", size_str, 0, validate_3dlut_size_opt),
@@ -104,6 +105,17 @@ static struct bstr load_file(void *talloc_ctx, const char *filename,
     }
     talloc_free(fname);
     return res;
+}
+
+bool mp_icc_set_profile(struct mp_icc_opts *opts, char *profile)
+{
+    if (!opts->profile || strcmp(opts->profile, profile) != 0) {
+        if (opts->profile)
+            talloc_free(opts->profile);
+        opts->profile = talloc_strdup(opts, profile);
+        return true;
+    }
+    return false;
 }
 
 #define LUT3D_CACHE_HEADER "mpv 3dlut cache 1.0\n"

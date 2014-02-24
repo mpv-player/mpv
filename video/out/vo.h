@@ -32,6 +32,7 @@
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
+#define VO_EVENT_ICC_PROFILE_PATH_CHANGED 4
 
 enum mp_voctrl {
     /* signal a device reset seek */
@@ -82,6 +83,8 @@ enum mp_voctrl {
     VOCTRL_SCREENSHOT,                  // struct voctrl_screenshot_args*
 
     VOCTRL_SET_COMMAND_LINE,            // char**
+
+    VOCTRL_GET_ICC_PROFILE_PATH,        // char**
 };
 
 // VOCTRL_SET_EQUALIZER
