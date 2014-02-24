@@ -722,7 +722,8 @@ static int script_get_mouse_pos(lua_State *L)
 
 static int script_get_time(lua_State *L)
 {
-    lua_pushnumber(L, mp_time_sec());
+    struct script_ctx *ctx = get_ctx(L);
+    lua_pushnumber(L, mpv_get_time_us(ctx->client) / (double)(1000 * 1000));
     return 1;
 }
 

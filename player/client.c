@@ -24,6 +24,7 @@
 #include "options/m_option.h"
 #include "options/m_property.h"
 #include "osdep/threads.h"
+#include "osdep/timer.h"
 
 #include "command.h"
 #include "core.h"
@@ -991,4 +992,9 @@ const char *mpv_event_name(mpv_event_id event)
 void mpv_free(void *data)
 {
     talloc_free(data);
+}
+
+int64_t mpv_get_time_us(mpv_handle *ctx)
+{
+    return mp_time_us();
 }

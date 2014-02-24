@@ -351,6 +351,18 @@ void mpv_suspend(mpv_handle *ctx);
 void mpv_resume(mpv_handle *ctx);
 
 /**
+ * Return the internal time in microseconds. This has an arbitrary start offset,
+ * but will never wrap or go backwards (note: the latter is probably a lie in
+ * the current implementation, it can go backwards on system clock changes).
+ *
+ * Note that this is always the real time, and doesn't necessarily have to do
+ * with playback time. For example, playback could go faster or slower due to
+ * playback speed, or due to playback being paused. Use the "time-pos" property
+ * instead to get the playback status.
+ */
+int64_t mpv_get_time_us(mpv_handle *ctx);
+
+/**
  * Data format for options and properties. The API functions to get/set
  * properties and options support multiple formats, and this enum describes
  * them.
