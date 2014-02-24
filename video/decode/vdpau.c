@@ -126,7 +126,8 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx)
         goto fail;
     }
     if (p->vid_width > maxw || p->vid_height > maxh) {
-        MP_ERR(p, "Video too large.\n");
+        MP_ERR(p, "Video resolution(%dx%d) is larger than the maximum size(%dx%d) supported.\n",
+               p->vid_width, p->vid_height, maxw, maxh);
         goto fail;
     }
 
