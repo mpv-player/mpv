@@ -2354,7 +2354,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             op = OP_NONE;
         else {
             char pre[80];
-            snprintf(pre, sizeof(pre), "%.*s", strlen(opt->name) - 1, opt->name);
+            snprintf(pre, sizeof(pre), "%.*s", (int)(strlen(opt->name) - 1),
+                     opt->name);
             mp_err(log, "Option %.*s: unknown postfix %.*s\n"
                    "Supported postfixes are:\n"
                    "  %s-set\n"
