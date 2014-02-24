@@ -805,10 +805,10 @@ static const char *err_table[] = {
     [-MPV_ERROR_UNINITIALIZED] = "core not uninitialized",
     [-MPV_ERROR_INVALID_PARAMETER] = "invalid parameter",
     [-MPV_ERROR_OPTION_NOT_FOUND] = "option not found",
-    [-MPV_ERROR_OPTION_FORMAT] = "unsupported format for setting option",
+    [-MPV_ERROR_OPTION_FORMAT] = "unsupported format for accessing option",
     [-MPV_ERROR_OPTION_ERROR] = "error setting option",
     [-MPV_ERROR_PROPERTY_NOT_FOUND] = "property not found",
-    [-MPV_ERROR_PROPERTY_FORMAT] = "unsupported format for setting property",
+    [-MPV_ERROR_PROPERTY_FORMAT] = "unsupported format for accessing property",
     [-MPV_ERROR_PROPERTY_UNAVAILABLE] = "property unavailable",
     [-MPV_ERROR_PROPERTY_ERROR] = "error accessing property",
 };
