@@ -24,6 +24,8 @@
 
 #define MP_CMD_MAX_ARGS 10
 
+#define MP_CMD_OPT_ARG 0x1000
+
 struct mp_cmd_def {
     int id;             // one of MP_CMD_...
     const char *name;   // user-visible name (as used in input.conf)

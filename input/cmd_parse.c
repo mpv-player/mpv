@@ -199,10 +199,11 @@ static struct mp_cmd *parse_cmd(struct parse_ctx *ctx, int def_flags)
             if (is_vararg)
                 continue;
             // Skip optional arguments
-            if (opt->defval) {
+            if (opt->defval || (opt->flags & MP_CMD_OPT_ARG)) {
                 struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
                 cmdarg->type = opt;
-                m_option_copy(opt, &cmdarg->v, opt->defval);
+                if (opt->defval)
+                    m_option_copy(opt, &cmdarg->v, opt->defval);
                 cmd->nargs++;
                 continue;
             }
