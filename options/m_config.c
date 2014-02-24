@@ -28,6 +28,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "libmpv/client.h"
+
 #include "talloc.h"
 
 #include "m_config.h"
@@ -604,6 +606,35 @@ int m_config_set_option(struct m_config *config, struct bstr name,
                                  struct bstr param)
 {
     return m_config_set_option_ext(config, name, param, 0);
+}
+
+int m_config_set_option_node(struct m_config *config, bstr name,
+                             struct mpv_node *data, int flags)
+{
+    char *value = NULL;
+    if (data->format == MPV_FORMAT_STRING) {
+        value = *(char **)data;
+    } else {
+        // This is pretty lame, but the simplest for now. It will fail very
+        // hard for string lists with items that contain ',' characters.
+        union m_option_value val = {0};
+        const struct m_option *opt = m_config_get_option(config, name);
+        if (!opt)
+            return M_OPT_UNKNOWN;
+        if (m_option_set_node(opt, &val, data) < 0)
+            return M_OPT_INVALID;
+        value = m_option_print(opt, &val);
+        m_option_free(opt, &val);
+    }
+    int r;
+    if (value) {
+        r = m_config_set_option_ext(config, name, bstr0(value), flags);
+    } else {
+        r = M_OPT_OUT_OF_RANGE;
+    }
+    if (data->format != MPV_FORMAT_STRING)
+        talloc_free(value);
+    return r;
 }
 
 const struct m_option *m_config_get_option(const struct m_config *config,

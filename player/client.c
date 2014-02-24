@@ -508,15 +508,24 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
             return err;
         }
     } else {
-        if (format != MPV_FORMAT_STRING)
+        const struct m_option *type = get_mp_type(format);
+        if (!type)
             return MPV_ERROR_OPTION_FORMAT;
-        const char *value = *(char **)data;
-        int err = m_config_set_option0(ctx->mpctx->mconfig, name, value);
+        struct mpv_node tmp;
+        if (format != MPV_FORMAT_NODE) {
+            tmp.format = format;
+            memcpy(&tmp.u, data, type->type->size);
+            format = MPV_FORMAT_NODE;
+            data = &tmp;
+        }
+        int err = m_config_set_option_node(ctx->mpctx->mconfig, bstr0(name),
+                                           data, 0);
         switch (err) {
         case M_OPT_MISSING_PARAM:
         case M_OPT_INVALID:
-        case M_OPT_OUT_OF_RANGE:
             return MPV_ERROR_OPTION_ERROR;
+        case M_OPT_OUT_OF_RANGE:
+            return MPV_ERROR_OPTION_FORMAT;
         case M_OPT_UNKNOWN:
             return MPV_ERROR_OPTION_NOT_FOUND;
         default:

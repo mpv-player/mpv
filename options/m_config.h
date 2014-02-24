@@ -139,6 +139,12 @@ static inline int m_config_set_option0(struct m_config *config,
     return m_config_set_option(config, bstr0(name), bstr0(param));
 }
 
+// Same as m_config_set_option_ext(), but set as data using mpv_node.
+struct mpv_node;
+int m_config_set_option_node(struct m_config *config, bstr name,
+                             struct mpv_node *data, int flags);
+
+
 int m_config_parse_suboptions(struct m_config *config, char *name,
                               char *subopts);
 
