@@ -32,6 +32,7 @@ typedef struct m_option_type m_option_type_t;
 typedef struct m_option m_option_t;
 struct m_config;
 struct mp_log;
+struct mpv_node;
 
 ///////////////////////////// Options types declarations ////////////////////
 
@@ -61,6 +62,7 @@ extern const m_option_type_t m_option_type_color;
 extern const m_option_type_t m_option_type_geometry;
 extern const m_option_type_t m_option_type_size_box;
 extern const m_option_type_t m_option_type_chmap;
+extern const m_option_type_t m_option_type_node;
 
 // Callback used by m_option_type_print_fn options.
 typedef void (*m_opt_print_fn)(struct mp_log *log);
@@ -168,7 +170,6 @@ struct m_sub_options {
     const void *defaults;
 };
 
-// FIXME: backward compatibility
 #define CONF_TYPE_FLAG          (&m_option_type_flag)
 #define CONF_TYPE_STORE         (&m_option_type_store)
 #define CONF_TYPE_INT           (&m_option_type_int)
@@ -185,6 +186,7 @@ struct m_sub_options {
 #define CONF_TYPE_TIME          (&m_option_type_time)
 #define CONF_TYPE_CHOICE        (&m_option_type_choice)
 #define CONF_TYPE_INT_PAIR      (&m_option_type_intpair)
+#define CONF_TYPE_NODE          (&m_option_type_node)
 
 // Possible option values. Code is allowed to access option data without going
 // through this union. It serves for self-documentation and to get minimal
@@ -253,6 +255,7 @@ struct m_option_type {
     char *(*pretty_print)(const m_option_t *opt, const void *val);
 
     // Copy data between two locations. Deep copy if the data has pointers.
+    // The implementation must free *dst if memory allocation is involved.
     /** \param opt The option to copy.
      *  \param dst Pointer to the destination memory.
      *  \param src Pointer to the source memory.
@@ -281,6 +284,21 @@ struct m_option_type {
     //  M_OPT_INVALID:      val was invalid, and can't be made valid
     //  0:                  val was already valid and is unchanged
     int (*clamp)(const m_option_t *opt, void *val);
+
+    // Set the option value in dst to the contents of src.
+    // (If the option is dynamic, the old value in *dst has to be freed.)
+    // Return values:
+    //  M_OPT_UNKNOWN:      src is in an unknown format
+    //  M_OPT_INVALID:      src is incorrectly formatted
+    //  >= 0:               success
+    //  other error code:   some other error, essentially M_OPT_INVALID refined
+    int (*set)(const m_option_t *opt, void *dst, struct mpv_node *src);
+
+    // Copy the option value in src to dst. Use ta_parent for any dynamic
+    // memory allocations. It's explicitly allowed to have mpv_node reference
+    // static strings (and even mpv_node_list.keys), though.
+    int (*get)(const m_option_t *opt, void *ta_parent, struct mpv_node *dst,
+               void *src);
 };
 
 // Option description
@@ -469,6 +487,24 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 {
     if (opt->type->free)
         opt->type->free(dst);
+}
+
+// see m_option_type.set
+static inline int m_option_set_node(const m_option_t *opt, void *dst,
+                                    struct mpv_node *src)
+{
+    if (opt->type->set)
+        return opt->type->set(opt, dst, src);
+    return M_OPT_UNKNOWN;
+}
+
+// see m_option_type.get
+static inline int m_option_get_node(const m_option_t *opt, void *ta_parent,
+                                    struct mpv_node *dst, void *src)
+{
+    if (opt->type->get)
+        return opt->type->get(opt, ta_parent, dst, src);
+    return M_OPT_UNKNOWN;
 }
 
 int m_option_required_params(const m_option_t *opt);
