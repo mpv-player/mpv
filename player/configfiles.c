@@ -196,39 +196,39 @@ exit:
 }
 
 static const char *backup_properties[] = {
-    "osd-level",
+    "options/osd-level",
     //"loop",
-    "speed",
-    "edition",
-    "pause",
+    "options/speed",
+    "options/edition",
+    "options/pause",
     "volume-restore-data",
-    "audio-delay",
+    "options/audio-delay",
     //"balance",
-    "fullscreen",
-    "colormatrix",
-    "colormatrix-input-range",
-    "colormatrix-output-range",
-    "ontop",
-    "border",
-    "gamma",
-    "brightness",
-    "contrast",
-    "saturation",
-    "hue",
-    "deinterlace",
-    "vf",
-    "af",
-    "panscan",
-    "aid",
-    "vid",
-    "sid",
-    "sub-delay",
-    "sub-pos",
-    "sub-visibility",
-    "sub-scale",
-    "ass-use-margins",
-    "ass-vsfilter-aspect-compat",
-    "ass-style-override",
+    "options/fullscreen",
+    "options/colormatrix",
+    "options/colormatrix-input-range",
+    "options/colormatrix-output-range",
+    "options/ontop",
+    "options/border",
+    "options/gamma",
+    "options/brightness",
+    "options/contrast",
+    "options/saturation",
+    "options/hue",
+    "options/deinterlace",
+    "options/vf",
+    "options/af",
+    "options/panscan",
+    "options/aid",
+    "options/vid",
+    "options/sid",
+    "options/sub-delay",
+    "options/sub-pos",
+    "options/sub-visibility",
+    "options/sub-scale",
+    "options/ass-use-margins",
+    "options/ass-vsfilter-aspect-compat",
+    "options/ass-style-override",
     0
 };
 
@@ -241,10 +241,8 @@ void mp_get_resume_defaults(struct MPContext *mpctx)
         talloc_zero_array(mpctx, char*, MP_ARRAY_SIZE(backup_properties));
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];
-        char name[80];
-        snprintf(name, sizeof(name), "options/%s", pname);
         char *val = NULL;
-        int r = mp_property_do(name, M_PROPERTY_GET_STRING, &val, mpctx);
+        int r = mp_property_do(pname, M_PROPERTY_GET_STRING, &val, mpctx);
         if (r == M_PROPERTY_OK)
             list[i] = talloc_steal(list, val);
     }
@@ -292,6 +290,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         char *val = NULL;
         int r = mp_property_do(pname, M_PROPERTY_GET_STRING, &val, mpctx);
         if (r == M_PROPERTY_OK) {
+            if (strncmp(pname, "options/", 8) == 0)
+                pname += 8;
             // Only store it if it's different from the initial value.
             char *prev = mpctx->resume_defaults[i];
             if (!prev || strcmp(prev, val) != 0) {
