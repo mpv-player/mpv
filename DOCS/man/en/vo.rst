@@ -464,11 +464,11 @@ Available video output drivers are:
 
     ``icc-approx-gamma``
         Approximate the actual BT.709 gamma function as a pure power curve of
-        1.95. This is not quite correct, but it was historically used as a
-        faster version of the actual function, and seems to still be used by
-        many video editing programs and perhaps even studios. If you find your
-        videos displaying ever so slightly slightly brighter than you'd expect
-        them to, try enabling this option.
+        1.95. A number of video editing programs and studios apparently use this
+        for mastering instead of the true curve. Most notably, anything in the
+        Apple ecosystem uses this approximation - including all programs
+        compatible with it. It's a sound idea to try enabling this flag first
+        when watching movies and shows to see if things look better that way.
 
     ``3dlut-size=<r>x<g>x<b>``
         Size of the 3D LUT generated from the ICC profile in each dimension.
