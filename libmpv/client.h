@@ -561,11 +561,14 @@ void mpv_free_node_contents(mpv_node *node);
 
 /**
  * Set an option. Note that you can't normally set options during runtime. It
- * works in uninitialized state (see mpv_create()), and in some cases in idle
- * mode.
+ * works in uninitialized state (see mpv_create()), and in some cases in at
+ * runtime.
  *
- * You can use mpv_set_property() to change options during playback, but this
- * does not work with all options.
+ * Changing options at runtime does not always work. For some options, attempts
+ * to change them simply fails. Many other options may require reloading the
+ * file for changes to take effect. In general, you should prefer calling
+ * mpv_set_property() to change settings during playback, because the property
+ * mechanism guarantees that changes take effect immediately.
  *
  * @param name Option name. This is the same as on the mpv command line, but
  *             without the leading "--".

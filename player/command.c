@@ -1991,9 +1991,7 @@ static int access_options(struct m_property_action_arg *ka, MPContext *mpctx)
         m_option_copy(opt->opt, ka->arg, opt->data);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        if (!(mpctx->initialized_flags & INITIALIZED_PLAYBACK) &&
-            !(opt->opt->flags & (M_OPT_PRE_PARSE | M_OPT_GLOBAL)))
-        {
+        if (!(opt->opt->flags & (M_OPT_PRE_PARSE | M_OPT_FIXED))) {
             m_option_copy(opt->opt, opt->data, ka->arg);
             return M_PROPERTY_OK;
         }

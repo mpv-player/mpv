@@ -208,18 +208,19 @@ extern const m_option_t mp_input_opts[];
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
     {"v", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
-    {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN, 1, 0, NULL},
-    {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
-    {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
+    {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED,
+     1, 0, NULL},
+    {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, 0, 0, NULL},
+    {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, 0, 0, NULL},
 
     // handled in m_config.c
-    { "include", NULL, CONF_TYPE_STRING },
-    { "profile", NULL, CONF_TYPE_STRING_LIST },
-    { "show-profile", NULL, CONF_TYPE_STRING, CONF_NOCFG },
-    { "list-options", NULL, CONF_TYPE_STORE, CONF_NOCFG },
+    { "include", NULL, CONF_TYPE_STRING, M_OPT_FIXED },
+    { "profile", NULL, CONF_TYPE_STRING_LIST, M_OPT_FIXED },
+    { "show-profile", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED },
+    { "list-options", NULL, CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED },
 
     // handled in main.c (looks at the raw argv[])
-    {"leak-report", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG },
+    {"leak-report", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG | M_OPT_FIXED },
 
     OPT_FLAG("shuffle", shuffle, CONF_GLOBAL | CONF_NOCFG),
 
@@ -238,11 +239,11 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
     OPT_STRING("config-dir", force_configdir,
                CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
-    OPT_STRINGLIST("reset-on-next-file", reset_options, CONF_GLOBAL),
+    OPT_STRINGLIST("reset-on-next-file", reset_options, M_OPT_GLOBAL),
 
 #if HAVE_LUA
     OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL),
-    OPT_KEYVALUELIST("lua-opts", lua_opts, CONF_GLOBAL),
+    OPT_KEYVALUELIST("lua-opts", lua_opts, M_OPT_GLOBAL),
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
 #endif
 
@@ -256,7 +257,8 @@ const m_option_t mp_opts[] = {
                       ({"no", 0}),
                       OPTDEF_INT(320)),
     OPT_FLOATRANGE("cache-min", stream_cache_min_percent, 0, 0, 99),
-    OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0, 0, 99),
+    OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0,
+                   0, 99),
     OPT_CHOICE_OR_INT("cache-pause", stream_cache_pause, 0,
                       0, 40, ({"no", -1})),
 
@@ -289,7 +291,7 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- demuxer options --------------------
 
-    OPT_CHOICE_OR_INT("frames", play_frames, 0, 0, INT_MAX,
+    OPT_CHOICE_OR_INT("frames", play_frames, M_OPT_FIXED, 0, INT_MAX,
                       ({"all", -1})),
 
     // seek to byte/seconds position
@@ -298,7 +300,7 @@ const m_option_t mp_opts[] = {
     OPT_REL_TIME("end", play_end, 0),
     OPT_REL_TIME("length", play_length, 0),
 
-    OPT_FLAG("pause", pause, 0),
+    OPT_FLAG("pause", pause, M_OPT_FIXED),
     OPT_FLAG("keep-open", keep_open, 0),
 
     // AVI and Ogg only: (re)build index at startup
@@ -353,11 +355,12 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("mc", default_max_pts_correction, 0, 0, 100),
 
     // force video/audio rate:
-    OPT_DOUBLE("fps", force_fps, CONF_MIN, 0),
+    OPT_DOUBLE("fps", force_fps, CONF_MIN | M_OPT_FIXED),
     OPT_INTRANGE("srate", force_srate, 0, 1000, 8*48000),
     OPT_CHMAP("channels", audio_output_channels, CONF_MIN, .min = 1),
     OPT_AUDIOFORMAT("format", audio_output_format, 0),
-    OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE, .min = 0.01, .max = 100.0),
+    OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE | M_OPT_FIXED,
+               .min = 0.01, .max = 100.0),
 
     // set a-v distance
     OPT_FLOATRANGE("audio-delay", audio_delay, 0, -100.0, 100.0),
@@ -365,11 +368,11 @@ const m_option_t mp_opts[] = {
 // ------------------------- codec/vfilter options --------------------
 
     OPT_SETTINGSLIST("af-defaults", af_defs, 0, &af_obj_list),
-    OPT_SETTINGSLIST("af*", af_settings, 0, &af_obj_list),
+    OPT_SETTINGSLIST("af*", af_settings, M_OPT_FIXED, &af_obj_list),
     OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list),
-    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
+    OPT_SETTINGSLIST("vf*", vf_settings, M_OPT_FIXED, &vf_obj_list),
 
-    OPT_CHOICE("deinterlace", deinterlace, M_OPT_OPTIONAL_PARAM,
+    OPT_CHOICE("deinterlace", deinterlace, M_OPT_OPTIONAL_PARAM | M_OPT_FIXED,
                ({"auto", -1},
                 {"no", 0},
                 {"yes", 1}, {"", 1})),
@@ -460,8 +463,8 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
     OPT_FLAG("force-window", force_vo, CONF_GLOBAL),
-    OPT_FLAG("ontop", vo.ontop, 0),
-    OPT_FLAG("border", vo.border, 0),
+    OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
+    OPT_FLAG("border", vo.border, M_OPT_FIXED),
 
     OPT_CHOICE("softvol", softvol, 0,
                ({"no", SOFTVOL_NO},
@@ -475,7 +478,7 @@ const m_option_t mp_opts[] = {
                 {"no", 0},
                 {"yes", 1}, {"", 1})),
     OPT_STRING("volume-restore-data", mixer_restore_volume_data, 0),
-    OPT_FLAG("gapless-audio", gapless_audio, 0),
+    OPT_FLAG("gapless-audio", gapless_audio, M_OPT_FIXED),
 
     OPT_GEOMETRY("geometry", vo.geometry, 0),
     OPT_SIZE_BOX("autofit", vo.autofit, 0),
@@ -488,11 +491,11 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("monitoraspect", vo.force_monitor_aspect, 0, 0.0, 9.0),
     OPT_FLOATRANGE("monitorpixelaspect", vo.monitor_pixel_aspect, 0, 0.2, 9.0),
     // start in fullscreen mode:
-    OPT_FLAG("fullscreen", vo.fullscreen, 0),
-    OPT_FLAG("fs", vo.fullscreen, 0),
+    OPT_FLAG("fullscreen", vo.fullscreen, M_OPT_FIXED),
+    OPT_FLAG("fs", vo.fullscreen, M_OPT_FIXED),
     // set fullscreen switch method (workaround for buggy WMs)
     OPT_INTRANGE("fsmode-dontuse", vo.fsmode, 0, 31, 4096),
-    OPT_FLAG("native-keyrepeat", vo.native_keyrepeat, 0),
+    OPT_FLAG("native-keyrepeat", vo.native_keyrepeat, M_OPT_FIXED),
     OPT_FLOATRANGE("panscan", vo.panscan, 0, 0.0, 1.0),
     OPT_FLOATRANGE("video-zoom", vo.zoom, 0, -20.0, 20.0),
     OPT_FLOATRANGE("video-pan-x", vo.pan_x, 0, -3.0, 3.0),
@@ -547,7 +550,7 @@ const m_option_t mp_opts[] = {
 
 //---------------------- mplayer-only options ------------------------
 
-    OPT_FLAG("use-filedir-conf", use_filedir_conf, CONF_GLOBAL),
+    OPT_FLAG("use-filedir-conf", use_filedir_conf, M_OPT_GLOBAL),
     OPT_CHOICE("osd-level", osd_level, 0,
                ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
@@ -562,10 +565,10 @@ const m_option_t mp_opts[] = {
                 {"yes", 1},
                 {"hard", 2})),
 
-    OPT_FLAG("untimed", untimed, 0),
+    OPT_FLAG("untimed", untimed, M_OPT_FIXED),
 
-    OPT_STRING("stream-capture", stream_capture, 0),
-    OPT_STRING("stream-dump", stream_dump, 0),
+    OPT_STRING("stream-capture", stream_capture, M_OPT_FIXED),
+    OPT_STRING("stream-dump", stream_dump, M_OPT_FIXED),
 
     OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 2, 10000,
                       ({"no", -1}, {"1", -1},
@@ -609,7 +612,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("osd-status-msg", osd_status_msg, 0),
 
     OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
-    OPT_FLAG("idle", player_idle_mode, CONF_GLOBAL),
+    OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
     OPT_FLAG("mouse-movements", vo.enable_mouse_movements, CONF_GLOBAL),

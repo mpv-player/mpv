@@ -1009,8 +1009,10 @@ an option at runtime.
     See ``--vf`` and the ``vf`` command.
 
 ``options/<name>`` (RW)
-    Read-only access to value of option ``--<name>``. If the player is in idle
-    mode, the option can be changed by writing to this property.
+    Read-only access to value of option ``--<name>``. Most options can be
+    changed at runtime by writing to this property. Note that many options
+    require reloading the file for changes to take effect. If there is an
+    equivalent property, prefer setting the property instead.
 
 Property Expansion
 ------------------

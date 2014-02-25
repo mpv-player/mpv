@@ -350,6 +350,12 @@ struct m_option {
 // This option can't be set per-file when used with struct m_config.
 #define M_OPT_GLOBAL            (1 << 4)
 
+// Can not be freely changed at runtime (normally, all options can be changed,
+// even if the settings don't get effective immediately). Note that an option
+// might still change even if this is set, e.g. via properties or per-file
+// options.
+#define M_OPT_FIXED             (1 << 5)
+
 // The option should be set during command line pre-parsing
 #define M_OPT_PRE_PARSE         (1 << 6)
 
@@ -361,7 +367,7 @@ struct m_option {
 #define CONF_MAX                M_OPT_MAX
 #define CONF_RANGE              M_OPT_RANGE
 #define CONF_NOCFG              M_OPT_NOCFG
-#define CONF_GLOBAL             M_OPT_GLOBAL
+#define CONF_GLOBAL             (M_OPT_GLOBAL | M_OPT_FIXED)
 #define CONF_PRE_PARSE          M_OPT_PRE_PARSE
 
 // These flags are used to describe special parser capabilities or behavior.
@@ -661,10 +667,10 @@ extern const char m_option_path_separator;
 #define OPT_STRING_VALIDATE(...) \
     OPT_STRING_VALIDATE_(__VA_ARGS__, .type = &m_option_type_string)
 
-#define OPT_PRINT(optname, fn)                                  \
-    {.name = optname,                                           \
-     .flags = M_OPT_GLOBAL | M_OPT_NOCFG | M_OPT_PRE_PARSE,     \
-     .type = &m_option_type_print_fn,                           \
+#define OPT_PRINT(optname, fn)                                              \
+    {.name = optname,                                                       \
+     .flags = M_OPT_FIXED | M_OPT_GLOBAL | M_OPT_NOCFG | M_OPT_PRE_PARSE,   \
+     .type = &m_option_type_print_fn,                                       \
      .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn) }
 
 // subconf must have the type struct m_sub_options.
