@@ -1386,6 +1386,17 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
         line = bstr_lstrip(line);
         if (line.len == 0 || bstr_startswith0(line, "#"))
             continue;
+        if (bstr_eatstart0(&line, "default-bindings ")) {
+            bstr orig = line;
+            bstr_split_tok(line, "#", &line, &(bstr){0});
+            line = bstr_strip(line);
+            if (bstr_equals0(line, "start")) {
+                builtin = true;
+            } else {
+                MP_ERR(ictx, "Broken line: %.*s at %s\n", BSTR_P(orig), cur_loc);
+            }
+            continue;
+        }
         struct bstr command;
         // Find the key name starting a line
         struct bstr keyname = bstr_split(line, WHITESPACE, &command);
