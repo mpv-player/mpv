@@ -483,9 +483,6 @@ behavior of mpv.
     Directory where mpv looks for user settings. Overrides ``HOME``, and mpv
     will try to load the config file as ``$MPV_HOME/config``.
 
-``MPV_LOCALEDIR``
-    Directory where mpv looks for gettext translation files (if enabled).
-
 ``MPV_VERBOSE`` (see also ``-v`` and ``--msglevel``)
     Set the initial verbosity level across all message modules (default: 0).
     The resulting verbosity corresponds to that of ``--msglevel=5`` plus the
