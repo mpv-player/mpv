@@ -557,6 +557,15 @@ OPTIONS
         It is advisable to use your graphics driver's color range option
         instead, if available.
 
+``--config-dir=<path>``
+    Force a different configuration directory. If this is set, the given
+    directory is used to load configuration files, and all other configuration
+    directories are ignored. This means the global mpv configuration directory
+    as well as per-user directories are ignored, and overrides through
+    environment variables (``MPV_HOME``) are also ignored.
+
+    Note that the ``--no-config`` option takes precedence over this option.
+
 ``--consolecontrols``, ``--no-consolecontrols``
     ``--no-consolecontrols`` prevents the player from reading key events from
     standard input. Useful when reading data from standard input. This is
@@ -1419,6 +1428,8 @@ OPTIONS
 
         Files explicitly requested by command line options, like
         ``--include`` or ``--use-filedir-conf``, will still be loaded.
+
+    Also see ``--config-dir``.
 
 ``--no-idx``
     Do not use index present in the file even if one is present.

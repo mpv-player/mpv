@@ -106,6 +106,7 @@ typedef struct MPOpts {
     int merge_files;
     int quiet;
     int load_config;
+    char *force_configdir;
     int use_filedir_conf;
     int stream_cache_size;
     int stream_cache_def_size;
