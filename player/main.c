@@ -412,6 +412,7 @@ int mp_initialize(struct MPContext *mpctx)
     // From this point on, all mpctx members are initialized.
     mpctx->initialized = true;
 
+    mp_get_resume_defaults(mpctx);
 
 #if HAVE_COCOA
     if (mpctx->is_cplayer)

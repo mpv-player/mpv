@@ -232,6 +232,25 @@ static const char *backup_properties[] = {
     0
 };
 
+// Used to retrieve default settings, which should not be stored in the
+// resume config. Uses backup_properties[] meaning/order of values.
+// This explicitly includes values set by config files and command line.
+void mp_get_resume_defaults(struct MPContext *mpctx)
+{
+    char **list =
+        talloc_zero_array(mpctx, char*, MP_ARRAY_SIZE(backup_properties));
+    for (int i = 0; backup_properties[i]; i++) {
+        const char *pname = backup_properties[i];
+        char name[80];
+        snprintf(name, sizeof(name), "options/%s", pname);
+        char *val = NULL;
+        int r = mp_property_do(name, M_PROPERTY_GET_STRING, &val, mpctx);
+        if (r == M_PROPERTY_OK)
+            list[i] = talloc_steal(list, val);
+    }
+    mpctx->resume_defaults = list;
+}
+
 // Should follow what parser-cfg.c does/needs
 static bool needs_config_quoting(const char *s)
 {
@@ -273,11 +292,15 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         char *val = NULL;
         int r = mp_property_do(pname, M_PROPERTY_GET_STRING, &val, mpctx);
         if (r == M_PROPERTY_OK) {
-            if (needs_config_quoting(val)) {
-                // e.g. '%6%STRING'
-                fprintf(file, "%s=%%%d%%%s\n", pname, (int)strlen(val), val);
-            } else {
-                fprintf(file, "%s=%s\n", pname, val);
+            // Only store it if it's different from the initial value.
+            char *prev = mpctx->resume_defaults[i];
+            if (!prev || strcmp(prev, val) != 0) {
+                if (needs_config_quoting(val)) {
+                    // e.g. '%6%STRING'
+                    fprintf(file, "%s=%%%d%%%s\n", pname, (int)strlen(val), val);
+                } else {
+                    fprintf(file, "%s=%s\n", pname, val);
+                }
             }
         }
         talloc_free(val);
