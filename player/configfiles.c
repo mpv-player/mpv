@@ -44,8 +44,6 @@
 #include "core.h"
 #include "command.h"
 
-#define DEF_CONFIG "# Write your default config options here!\n\n\n"
-
 bool mp_parse_cfgfiles(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -71,17 +69,9 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
     mp_mk_config_dir(mpctx->global, NULL);
     if (!(conffile = mp_find_user_config_file(tmp, mpctx->global, "config")))
         MP_ERR(mpctx, "mp_find_user_config_file(\"config\") problem\n");
-    else {
-        int fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY | O_CLOEXEC, 0666);
-        if (fd != -1) {
-            MP_INFO(mpctx, "Creating config file: %s\n", conffile);
-            write(fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
-            close(fd);
-        }
-        if (m_config_parse_config_file(conf, conffile, 0) < 0) {
-            r = false;
-            goto done;
-        }
+    else if (m_config_parse_config_file(conf, conffile, 0) < 0) {
+        r = false;
+        goto done;
     }
 
 done:
