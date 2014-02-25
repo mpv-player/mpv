@@ -1279,5 +1279,5 @@ mp.set_key_bindings({
     {"mouse_btn0_dbl",          "ignore"},
     {"shift+mouse_btn0_dbl",    "ignore"},
     {"mouse_btn2_dbl",          "ignore"},
-}, "input")
+}, "input", "force")
 mp.enable_key_bindings("input")

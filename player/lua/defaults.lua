@@ -27,7 +27,7 @@ local default_section = "input_dispatch_" .. mp.script_name
 -- callback can be a string too, in which case the following will be added like
 -- an input.conf line: key .. " " .. callback
 -- (And callback_down is ignored.)
-function mp.set_key_bindings(list, section)
+function mp.set_key_bindings(list, section, flags)
     local cfg = ""
     for i = 1, #list do
         local entry = list[i]
@@ -42,7 +42,7 @@ function mp.set_key_bindings(list, section)
             cfg = cfg .. key .. " " .. cb .. "\n"
         end
     end
-    mp.input_define_section(section or default_section, cfg)
+    mp.input_define_section(section or default_section, cfg, flags)
 end
 
 function mp.enable_key_bindings(section, flags)

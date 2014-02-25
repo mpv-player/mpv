@@ -750,9 +750,9 @@ static int script_input_define_section(lua_State *L)
     char *contents = (char *)luaL_checkstring(L, 2);
     char *flags = (char *)luaL_optstring(L, 3, "");
     bool builtin = true;
-    if (strcmp(flags, "builtin") == 0) {
+    if (strcmp(flags, "default") == 0) {
         builtin = true;
-    } else if (strcmp(flags, "default") == 0) {
+    } else if (strcmp(flags, "force") == 0) {
         builtin = false;
     } else if (strcmp(flags, "") == 0) {
         //pass
