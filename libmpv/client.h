@@ -627,9 +627,11 @@ int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
  * can be queried or set at runtime. For example, writing to the pause property
  * will actually pause or unpause playback.
  *
- * If the format doesn't match with the internal format of the property, it's
- * converted. This conversion doesn't always yield useful values, so you
- * should be careful which format you use.
+ * If the format doesn't match with the internal format of the property, access
+ * usually will fail with MPV_ERROR_PROPERTY_FORMAT. In some cases, the data
+ * is automatically converted and access succeeds. For example, MPV_FORMAT_INT64
+ * is always converted to MPV_FORMAT_DOUBLE, and access using MPV_FORMAT_STRING
+ * usually invokes a string formatter.
  *
  * @param name The property name. See input.rst for a list of properties.
  * @param format see enum mpv_format. Currently, only MPV_FORMAT_STRING is valid.
@@ -665,9 +667,11 @@ int mpv_set_property_async(mpv_handle *ctx, uint64_t reply_userdata,
 /**
  * Read the value of the given property.
  *
- * If the format doesn't match with the internal format of the property, it's
- * converted. This conversion doesn't always yield useful values, so you
- * should be careful which format you use.
+ * If the format doesn't match with the internal format of the property, access
+ * usually will fail with MPV_ERROR_PROPERTY_FORMAT. In some cases, the data
+ * is automatically converted and access succeeds. For example, MPV_FORMAT_INT64
+ * is always converted to MPV_FORMAT_DOUBLE, and access using MPV_FORMAT_STRING
+ * usually invokes a string parser.
  *
  * @param name The property name.
  * @param format see enum mpv_format.
