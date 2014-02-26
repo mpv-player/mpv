@@ -1323,13 +1323,14 @@ void run_playloop(struct MPContext *mpctx)
 void idle_loop(struct MPContext *mpctx)
 {
     // ================= idle loop (STOP state) =========================
-    mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
     bool need_reinit = true;
     while (mpctx->opts->player_idle_mode && !mpctx->playlist->current
            && mpctx->stop_play != PT_QUIT)
     {
-        if (need_reinit)
+        if (need_reinit) {
+            mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
             handle_force_window(mpctx, true);
+        }
         need_reinit = false;
         int uninit = INITIALIZED_AO;
         if (!mpctx->opts->force_vo)
