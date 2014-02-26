@@ -983,7 +983,7 @@ static int parse_str(struct mp_log *log, const m_option_t *opt,
 
 static char *print_str(const m_option_t *opt, const void *val)
 {
-    return talloc_strdup(NULL, val ? VAL(val) : NULL);
+    return talloc_strdup(NULL, VAL(val) ? VAL(val) : "");
 }
 
 static void copy_str(const m_option_t *opt, void *dst, const void *src)
@@ -1279,7 +1279,7 @@ static char *print_str_list(const m_option_t *opt, const void *src)
     char *ret = NULL;
 
     if (!(src && VAL(src)))
-        return NULL;
+        return talloc_strdup(NULL, "");
     lst = VAL(src);
 
     for (int i = 0; lst[i]; i++) {
