@@ -510,7 +510,7 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
     if (ctx->mpctx->initialized) {
         char prop[100];
         snprintf(prop, sizeof(prop), "options/%s", name);
-        int err = mpv_set_property(ctx, name, format, data);
+        int err = mpv_set_property(ctx, prop, format, data);
         switch (err) {
         case MPV_ERROR_PROPERTY_UNAVAILABLE:
         case MPV_ERROR_PROPERTY_ERROR:
@@ -725,7 +725,7 @@ int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
         .mpctx = ctx->mpctx,
         .name = name,
         .format = format,
-        .data = *(char **)data,
+        .data = data,
     };
     run_locked(ctx, setproperty_fn, &req);
     return req.status;
@@ -821,7 +821,8 @@ static void getproperty_fn(void *arg)
                 break;
             node.format = MPV_FORMAT_STRING;
             node.u.string = s;
-        }
+        } else if (err <= 0)
+            break;
         if (req->format == MPV_FORMAT_NODE) {
             *(struct mpv_node *)data = node;
         } else {
