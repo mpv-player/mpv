@@ -2849,7 +2849,7 @@ static int parse_node(struct mp_log *log, const m_option_t *opt,
 
 static char *print_node(const m_option_t *opt, const void *val)
 {
-    return talloc_strdup(NULL, "unimplemented");
+    return NULL;
 }
 
 static void dup_node(void *ta_parent, struct mpv_node *node)
