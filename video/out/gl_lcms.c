@@ -80,7 +80,7 @@ const struct m_sub_options mp_icc_conf = {
     .size = sizeof(struct mp_icc_opts),
     .defaults = &(const struct mp_icc_opts) {
         .size_str = "128x256x64",
-        .intent = INTENT_ABSOLUTE_COLORIMETRIC,
+        .intent = INTENT_RELATIVE_COLORIMETRIC,
     },
 };
 

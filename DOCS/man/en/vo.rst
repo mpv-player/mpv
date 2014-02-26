@@ -456,11 +456,11 @@ Available video output drivers are:
         0
             perceptual
         1
-            relative colorimetric
+            relative colorimetric (default)
         2
             saturation
         3
-            absolute colorimetric (default)
+            absolute colorimetric
 
     ``icc-approx-gamma``
         Approximate the actual BT.709 gamma function as a pure power curve of
