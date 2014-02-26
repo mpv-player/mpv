@@ -238,6 +238,14 @@ static void *lua_thread(void *p)
     lua_pushvalue(L, -1); // mp table table
     lua_setfield(L, LUA_REGISTRYINDEX, "UNKNOWN_TYPE"); // mp table
     lua_setfield(L, -2, "UNKNOWN_TYPE"); // mp
+    lua_newtable(L); // mp table
+    lua_pushvalue(L, -1); // mp table table
+    lua_setfield(L, LUA_REGISTRYINDEX, "MAP"); // mp table
+    lua_setfield(L, -2, "MAP"); // mp
+    lua_newtable(L); // mp table
+    lua_pushvalue(L, -1); // mp table table
+    lua_setfield(L, LUA_REGISTRYINDEX, "ARRAY"); // mp table
+    lua_setfield(L, -2, "ARRAY"); // mp
 
     lua_pop(L, 1); // -
 
@@ -648,6 +656,8 @@ static bool pushnode(lua_State *L, mpv_node *node, int depth)
         break;
     case MPV_FORMAT_NODE_ARRAY:
         lua_newtable(L); // table
+        lua_getfield(L, LUA_REGISTRYINDEX, "ARRAY"); // table mt
+        lua_setmetatable(L, -2); // table
         for (int n = 0; n < node->u.list->num; n++) {
             if (!pushnode(L, &node->u.list->values[n], depth)) // table value
                 return false;
@@ -656,6 +666,8 @@ static bool pushnode(lua_State *L, mpv_node *node, int depth)
         break;
     case MPV_FORMAT_NODE_MAP:
         lua_newtable(L); // table
+        lua_getfield(L, LUA_REGISTRYINDEX, "MAP"); // table mt
+        lua_setmetatable(L, -2); // table
         for (int n = 0; n < node->u.list->num; n++) {
             lua_pushstring(L, node->u.list->keys[n]); // table key
             if (!pushnode(L, &node->u.list->values[n], depth)) // table key value
@@ -666,7 +678,9 @@ static bool pushnode(lua_State *L, mpv_node *node, int depth)
     default:
         // unknown value - what do we do?
         // for now, set a unique dummy value
+        lua_newtable(L); // table
         lua_getfield(L, LUA_REGISTRYINDEX, "UNKNOWN_TYPE");
+        lua_setmetatable(L, -2); // table
         break;
     }
     return true;

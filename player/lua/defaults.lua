@@ -1,4 +1,11 @@
-mp.UNKNOWN_TYPE = "this value is inserted if the C type is not supported"
+mp.UNKNOWN_TYPE.info = "this value is inserted if the C type is not supported"
+mp.UNKNOWN_TYPE.type = "UNKNOWN_TYPE"
+
+mp.ARRAY.info = "native array"
+mp.ARRAY.type = "ARRAY"
+
+mp.MAP.info = "native map"
+mp.MAP.type = "MAP"
 
 function mp.get_script_name()
     return mp.script_name
