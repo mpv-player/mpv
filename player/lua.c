@@ -542,6 +542,12 @@ static int script_set_property_bool(lua_State *L)
     return check_error(L, mpv_set_property(ctx->client, p, MPV_FORMAT_FLAG, &v));
 }
 
+static bool is_int(double d)
+{
+    int64_t v = d;
+    return d == (double)v;
+}
+
 static int script_set_property_number(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -550,14 +556,136 @@ static int script_set_property_number(lua_State *L)
     // If the number might be an integer, then set it as integer. The mpv core
     // will (probably) convert INT64 to DOUBLE when setting, but not the other
     // way around.
-    int64_t v = d;
     int res;
-    if (d == (double)v) {
-        res = mpv_set_property(ctx->client, p, MPV_FORMAT_INT64, &v);
+    if (is_int(d)) {
+        res = mpv_set_property(ctx->client, p, MPV_FORMAT_INT64, &(int64_t){d});
     } else {
         res = mpv_set_property(ctx->client, p, MPV_FORMAT_DOUBLE, &d);
     }
     return check_error(L, res);
+}
+
+static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
+{
+    if (t < 0)
+        t = lua_gettop(L) + (t + 1);
+    switch (lua_type(L, t)) {
+    case LUA_TNIL:
+        dst->format = MPV_FORMAT_NONE;
+        break;
+    case LUA_TNUMBER: {
+        double d = lua_tonumber(L, t);
+        if (is_int(d)) {
+            dst->format = MPV_FORMAT_INT64;
+            dst->u.int64 = d;
+        } else {
+            dst->format = MPV_FORMAT_DOUBLE;
+            dst->u.double_ = d;
+        }
+        break;
+    }
+    case LUA_TBOOLEAN:
+        dst->format = MPV_FORMAT_FLAG;
+        dst->u.flag = !!lua_toboolean(L, t);
+        break;
+    case LUA_TSTRING:
+        dst->format = MPV_FORMAT_STRING;
+        dst->u.string = talloc_strdup(tmp, lua_tostring(L, t));
+        break;
+    case LUA_TTABLE: {
+        // Lua uses the same type for arrays and maps, so guess the correct one.
+        int format = MPV_FORMAT_NONE;
+        if (lua_getmetatable(L, t)) { // mt
+            lua_getfield(L, -1, "type"); // mt val
+            if (lua_type(L, -1) == LUA_TSTRING) {
+                const char *type = lua_tostring(L, -1);
+                if (strcmp(type, "MAP") == 0) {
+                    format = MPV_FORMAT_NODE_MAP;
+                } else if (strcmp(type, "ARRAY") == 0) {
+                    format = MPV_FORMAT_NODE_ARRAY;
+                }
+            }
+        }
+        if (format == MPV_FORMAT_NONE) {
+            // If all keys are integers, and they're in sequence, take it
+            // as an array.
+            int count = 0;
+            for (int n = 1; ; n++) {
+                lua_pushinteger(L, n); // n
+                lua_gettable(L, t); // t[n]
+                bool empty = lua_isnil(L, -1); // t[n]
+                lua_pop(L, 1); // -
+                if (empty) {
+                    count = n;
+                    break;
+                }
+            }
+            if (count > 0)
+                format = MPV_FORMAT_NODE_ARRAY;
+            lua_pushnil(L); // nil
+            while (lua_next(L, t) != 0) { // key value
+                count--;
+                lua_pop(L, 1); // key
+                if (count < 0) {
+                    lua_pop(L, 1); // -
+                    format = MPV_FORMAT_NODE_MAP;
+                    break;
+                }
+            }
+        }
+        if (format == MPV_FORMAT_NONE)
+            format = MPV_FORMAT_NODE_ARRAY; // probably empty table; assume array
+        mpv_node_list *list = talloc_zero(tmp, mpv_node_list);
+        dst->format = format;
+        dst->u.list = list;
+        if (format == MPV_FORMAT_NODE_ARRAY) {
+            for (int n = 0; ; n++) {
+                lua_pushinteger(L, n + 1); // n1
+                lua_gettable(L, t); // t[n1]
+                if (lua_isnil(L, -1))
+                    break;
+                MP_TARRAY_GROW(tmp, list->values, list->num);
+                makenode(tmp, &list->values[n], L, -1);
+                list->num++;
+                lua_pop(L, 1); // -
+            }
+            lua_pop(L, 1); // -
+        } else {
+            lua_pushnil(L); // nil
+            while (lua_next(L, t) != 0) { // key value
+                MP_TARRAY_GROW(tmp, list->values, list->num);
+                MP_TARRAY_GROW(tmp, list->keys, list->num);
+                makenode(tmp, &list->values[list->num], L, -1);
+                if (lua_type(L, -2) != LUA_TSTRING) {
+                    talloc_free(tmp);
+                    luaL_error(L, "key must be a string, but got %s",
+                               lua_typename(L, -2));
+                }
+                list->keys[list->num] = talloc_strdup(tmp, lua_tostring(L, -2));
+                list->num++;
+                lua_pop(L, 1); // key
+            }
+        }
+        break;
+    }
+    default:
+        // unknown type
+        talloc_free(tmp);
+        luaL_error(L, "disallowed Lua type found: %s\n", lua_typename(L, t));
+    }
+}
+
+static int script_set_property_native(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    const char *p = luaL_checkstring(L, 1);
+    struct mpv_node node;
+    void *tmp = talloc_new(NULL);
+    makenode(tmp, &node, L, 2);
+    int res = mpv_set_property(ctx->client, p, MPV_FORMAT_NODE, &node);
+    talloc_free(tmp);
+    return check_error(L, res);
+
 }
 
 static int script_property_list(lua_State *L)
@@ -860,6 +988,7 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(set_property),
     FN_ENTRY(set_property_bool),
     FN_ENTRY(set_property_number),
+    FN_ENTRY(set_property_native),
     FN_ENTRY(property_list),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),

@@ -116,8 +116,6 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Returns a value on success, or ``def, error`` on error. Note that ``nil``
     might be a possible, valid value too in some corner cases.
 
-    (There is no ``mp.set_property_native`` yet.)
-
 ``mp.set_property(name, value)``
     Set the given property to the given string value. See ``mp.get_property``
     and `Properties`_ for more information about properties.
@@ -136,6 +134,18 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     mpv internals do. This function will test whether the number can be
     represented as integer, and if so, it will pass an integer value to mpv,
     otherwise a double float.
+
+``mp.set_property_native(name, value)``
+    Similar to ``mp.set_property``, but set the given property using its native
+    type.
+
+    Since there are several data types which can not represented natively in
+    Lua, this might not always work as expected. For example, while the Lua
+    wrapper can do some guesswork to decide whether a Lua table is an array
+    or a map, this would fail with empty tables. Also, there are not many
+    properties for which it makes sense to use this, instead of
+    ``set_property``, ``set_property_bool``, ``set_property_number``.
+    For these reasons, this function should probably be avoided for now.
 
 ``mp.get_time()``
     Return the current mpv internal time in seconds as a number. This is
