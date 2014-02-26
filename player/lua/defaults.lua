@@ -4,6 +4,15 @@ function mp.get_script_name()
     return mp.script_name
 end
 
+function mp.get_opt(key, def)
+    local opts = mp.get_property_native("options/lua-opts")
+    local val = opts[key]
+    if val == nil then
+        val = def
+    end
+    return val
+end
+
 local callbacks = {}
 -- each script has its own section, so that they don't conflict
 local default_section = "input_dispatch_" .. mp.script_name
