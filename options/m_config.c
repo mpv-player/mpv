@@ -698,9 +698,9 @@ void m_config_print_option_list(const struct m_config *config)
             MP_INFO(config, " (default: %s)", def);
             talloc_free(def);
         }
-        if (opt->flags & CONF_GLOBAL)
+        if (opt->flags & M_OPT_GLOBAL)
             MP_INFO(config, " [global]");
-        if (opt->flags & CONF_NOCFG)
+        if (opt->flags & M_OPT_NOCFG)
             MP_INFO(config, " [nocfg]");
         MP_INFO(config, "\n");
         count++;
