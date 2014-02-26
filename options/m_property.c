@@ -220,7 +220,7 @@ int m_property_do(struct mp_log *log, const m_option_t *prop_list,
         int err = m_option_set_node(&opt, &val, node);
         if (err == M_OPT_UNKNOWN) {
             r = M_PROPERTY_NOT_IMPLEMENTED;
-        } else if (r < 0) {
+        } else if (err < 0) {
             r = M_PROPERTY_INVALID_FORMAT;
         } else {
             r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
