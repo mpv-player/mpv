@@ -1394,7 +1394,7 @@ static char *print_keyvalue_list(const m_option_t *opt, const void *src)
     for (int n = 0; lst && lst[n] && lst[n + 1]; n += 2) {
         if (ret[0])
             ret = talloc_strdup_append(ret, ",");
-        ret = talloc_asprintf_append("%s%s=%s", ret, lst[n], lst[n + 1]);
+        ret = talloc_asprintf_append(ret, "%s=%s", lst[n], lst[n + 1]);
     }
     return ret;
 }
