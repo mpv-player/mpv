@@ -304,7 +304,7 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
     .opts = (m_option_t[]) {
-        OPT_FLAG("gamma", gamma, 0),
+        OPT_FLOATRANGE("gamma", gamma, 0, 0.0, 10.0),
         OPT_FLAG("srgb", srgb, 0),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
@@ -566,10 +566,11 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     gl->Uniform1f(gl->GetUniformLocation(program, "conv_gamma"),
                   p->conv_gamma);
 
+    float gamma = p->opts.gamma ? p->opts.gamma : 1.0;
     gl->Uniform3f(gl->GetUniformLocation(program, "inv_gamma"),
-                  1.0 / cparams.rgamma,
-                  1.0 / cparams.ggamma,
-                  1.0 / cparams.bgamma);
+                  1.0 / (cparams.rgamma * gamma),
+                  1.0 / (cparams.ggamma * gamma),
+                  1.0 / (cparams.bgamma * gamma));
 
     for (int n = 0; n < p->plane_count; n++) {
         char textures_n[32];
@@ -889,7 +890,7 @@ static void compile_shaders(struct gl_video *p)
         shader_def(&header_conv, "USE_ALPHA_BLEND", "1");
 
     shader_def_opt(&header_final, "USE_LINEAR_CONV_INV", p->use_lut_3d);
-    shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma);
+    shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma > 0);
     shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
     shader_def_opt(&header_final, "USE_SRGB", p->opts.srgb);
     shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
@@ -2205,7 +2206,7 @@ bool gl_video_set_equalizer(struct gl_video *p, const char *name, int val)
     if (mp_csp_equalizer_set(&p->video_eq, name, val) >= 0) {
         if (!p->opts.gamma && p->video_eq.values[MP_CSP_EQ_GAMMA] != 0) {
             MP_VERBOSE(p, "Auto-enabling gamma.\n");
-            p->opts.gamma = true;
+            p->opts.gamma = 1.0f;
             compile_shaders(p);
         }
         update_all_uniforms(p);

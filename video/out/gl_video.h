@@ -31,7 +31,7 @@ struct gl_video_opts {
     char *scalers[2];
     float scaler_params[2];
     int indirect;
-    int gamma;
+    float gamma;
     int srgb;
     int scale_sep;
     int fancy_downscaling;

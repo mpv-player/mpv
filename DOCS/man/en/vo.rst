@@ -439,8 +439,13 @@ Available video output drivers are:
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
         Default: rgb.
 
-    ``gamma``
-        Always enable gamma control. (Disables delayed enabling.)
+    ``gamma=<0.0..10.0>``
+        Set a gamma value. If gamma is adjusted in other ways (like with
+        the ``--gamma`` option or keybindings and the ``gamma`` property), the
+        value is multiplied with the other gamma value.
+
+        Setting this value to 1.0 can be used to always enable gamma control.
+        (Disables delayed enabling.)
 
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.
