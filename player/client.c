@@ -210,7 +210,8 @@ void mpv_destroy(mpv_handle *ctx)
             talloc_free(ctx);
             ctx = NULL;
             // shutdown_clients() sleeps to avoid wasting CPU
-            mp_input_wakeup(clients->mpctx->input);
+            if (clients->mpctx->input)
+                mp_input_wakeup(clients->mpctx->input);
             // TODO: make core quit if there are no clients
             break;
         }
