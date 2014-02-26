@@ -677,32 +677,33 @@ static void setproperty_fn(void *arg)
     struct setproperty_request *req = arg;
     const struct m_option *type = get_mp_type(req->format);
 
-    struct mpv_node node;
-    node.format = req->format;
-
-    req->status = 0;
+    int err;
     switch (req->format) {
-    case MPV_FORMAT_NODE:
-        node = *(struct mpv_node *)req->data;
-        break;
-    case MPV_FORMAT_STRING:
-    case MPV_FORMAT_FLAG:
-    case MPV_FORMAT_INT64:
-    case MPV_FORMAT_DOUBLE:
-        // These are basically emulated via mpv_node.
-        memcpy(&node.u, req->data, type->type->size);
-        break;
-    default:
-        abort();
-    }
-
-    int err = mp_property_do(req->name, M_PROPERTY_SET_NODE, &node, req->mpctx);
-    if (err == M_PROPERTY_NOT_IMPLEMENTED && req->format == MPV_FORMAT_STRING) {
+    case MPV_FORMAT_STRING: {
         // Go through explicit string conversion. M_PROPERTY_SET_NODE doesn't
         // do this, because it tries to be somewhat type-strict. But the client
         // needs a way to set everything by string.
-        err = mp_property_do(req->name, M_PROPERTY_SET_STRING, node.u.string,
-                             req->mpctx);
+        char *s = *(char **)req->data;
+        err = mp_property_do(req->name, M_PROPERTY_SET_STRING, s, req->mpctx);
+        break;
+    }
+    case MPV_FORMAT_NODE:
+    case MPV_FORMAT_FLAG:
+    case MPV_FORMAT_INT64:
+    case MPV_FORMAT_DOUBLE: {
+        struct mpv_node node;
+        if (req->format == MPV_FORMAT_NODE) {
+            node = *(struct mpv_node *)req->data;
+        } else {
+            // These are basically emulated via mpv_node.
+            node.format = req->format;
+            memcpy(&node.u, req->data, type->type->size);
+        }
+        err = mp_property_do(req->name, M_PROPERTY_SET_NODE, &node, req->mpctx);
+        break;
+    }
+    default:
+        abort();
     }
 
     req->status = translate_property_error(err);
