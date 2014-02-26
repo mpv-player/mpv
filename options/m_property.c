@@ -216,6 +216,8 @@ int m_property_do(struct mp_log *log, const m_option_t *prop_list,
         if ((r = do_action(prop_list, name, M_PROPERTY_SET_NODE, arg, ctx)) !=
             M_PROPERTY_NOT_IMPLEMENTED)
             return r;
+         if ((r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx)) <= 0)
+             return r;
         struct mpv_node *node = arg;
         int err = m_option_set_node(&opt, &val, node);
         if (err == M_OPT_UNKNOWN) {
