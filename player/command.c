@@ -916,6 +916,12 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_GET:
         mixer_getbothvolume(mpctx->mixer, arg);
         return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+        float val;
+        mixer_getbothvolume(mpctx->mixer, &val);
+        *(char **)arg = talloc_asprintf(NULL, "%i", (int)val);
+        return M_PROPERTY_OK;
+    }
     case M_PROPERTY_SET:
         if (!mixer_audio_initialized(mpctx->mixer))
             return M_PROPERTY_ERROR;
