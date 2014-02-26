@@ -39,8 +39,8 @@ static void get_pthread_time(struct timespec *out_ts)
 
 static void timespec_add_seconds(struct timespec *ts, double seconds)
 {
-    if (seconds > INT_MAX)
-        seconds = INT_MAX;
+    // clamp to 1 week to avoid tv_sec overflows
+    seconds = MPMIN(seconds, 60 * 60 * 24 * 7);
     unsigned long secs = (int)seconds;
     unsigned long nsecs = (seconds - secs) * 1000000000UL;
     if (nsecs + ts->tv_nsec >= 1000000000UL) {
