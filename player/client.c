@@ -188,6 +188,9 @@ void mpv_resume(mpv_handle *ctx)
 
 void mpv_destroy(mpv_handle *ctx)
 {
+    if (!ctx)
+        return;
+
     struct mp_client_api *clients = ctx->clients;
 
     pthread_mutex_lock(&clients->lock);
