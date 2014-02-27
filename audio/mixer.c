@@ -172,21 +172,11 @@ bool mixer_getmute(struct mixer *mixer)
     return mixer->muted;
 }
 
-static void addvolume(struct mixer *mixer, float d)
+void mixer_addvolume(struct mixer *mixer, float step)
 {
     float vol_l, vol_r;
     mixer_getvolume(mixer, &vol_l, &vol_r);
-    mixer_setvolume(mixer, vol_l + d, vol_r + d);
-}
-
-void mixer_incvolume(struct mixer *mixer)
-{
-    addvolume(mixer, mixer->opts->volstep);
-}
-
-void mixer_decvolume(struct mixer *mixer)
-{
-    addvolume(mixer, -mixer->opts->volstep);
+    mixer_setvolume(mixer, vol_l + step, vol_r + step);
 }
 
 void mixer_getbalance(struct mixer *mixer, float *val)

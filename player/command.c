@@ -931,10 +931,7 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
         if (!mixer_audio_initialized(mpctx->mixer))
             return M_PROPERTY_ERROR;
         struct m_property_switch_arg *sarg = arg;
-        if (sarg->inc <= 0)
-            mixer_decvolume(mpctx->mixer);
-        else
-            mixer_incvolume(mpctx->mixer);
+        mixer_addvolume(mpctx->mixer, mpctx->opts->volstep * sarg->inc);
         return M_PROPERTY_OK;
     }
     }
