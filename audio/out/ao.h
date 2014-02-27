@@ -38,6 +38,8 @@ enum aocontrol {
     AOCONTROL_UPDATE_STREAM_TITLE,
 };
 
+// If set, then the queued audio data is the last. Note that after a while, new
+// data might be written again, instead of closing the AO.
 #define AOPLAY_FINAL_CHUNK 1
 
 typedef struct ao_control_vol {
@@ -48,11 +50,18 @@ typedef struct ao_control_vol {
 struct ao;
 
 struct ao_driver {
+    // If true, use with encoding only.
     bool encode;
+    // Name used for --ao.
     const char *name;
+    // Description shown with --ao=help.
     const char *description;
-    int (*control)(struct ao *ao, enum aocontrol cmd, void *arg);
+    // Init the device using ao->format/ao->channels/ao->samplerate. If the
+    // device doesn't accept these parameters, you can attempt to negotiate
+    // fallback parameters, and set the ao format fields accordingly.
     int (*init)(struct ao *ao);
+    // See ao_control() etc. in ao.c
+    int (*control)(struct ao *ao, enum aocontrol cmd, void *arg);
     void (*uninit)(struct ao *ao, bool cut_audio);
     void (*reset)(struct ao*ao);
     int (*get_space)(struct ao *ao);
@@ -71,7 +80,7 @@ struct ao_driver {
 struct ao {
     int samplerate;
     struct mp_chmap channels;
-    int format;
+    int format;                 // one of AF_FORMAT_...
     int bps;                    // bytes per second
     int sstride;                // size of a sample on each plane
                                 // (format_size*num_channels/num_planes)
@@ -80,7 +89,7 @@ struct ao {
     int buffer_playable_samples;// part of the part of the buffer the AO hasn't
                                 // accepted yet with play()
     bool probing;               // if true, don't fail loudly on init
-    bool untimed;
+    bool untimed;               // don't assume realtime playback
     bool no_persistent_volume;  // the AO does the equivalent of af_volume
     bool per_application_mixer; // like above, but volume persists (per app)
     const struct ao_driver *driver;

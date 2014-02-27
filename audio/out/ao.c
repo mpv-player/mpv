@@ -209,12 +209,21 @@ done:
     return ao;
 }
 
+// Uninitialize and destroy the AO.
+//  cut_audio: if false, block until all remaining audio was played.
 void ao_uninit(struct ao *ao, bool cut_audio)
 {
     ao->driver->uninit(ao, cut_audio);
     talloc_free(ao);
 }
 
+// Queue the given audio data. Start playback if it hasn't started yet. Return
+// the number of samples that was accepted (the core will try to queue the rest
+// again later). Should never block.
+//  data: start pointer for each plane. If the audio data is packed, only
+//        data[0] is valid, otherwise there is a plane for each channel.
+//  samples: size of the audio data (see ao->sstride)
+//  flags: currently AOPLAY_FINAL_CHUNK can be set
 int ao_play(struct ao *ao, void **data, int samples, int flags)
 {
     return ao->driver->play(ao, data, samples, flags);
@@ -227,6 +236,11 @@ int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
+// Return size of the buffered data in seconds. Can include the device latency.
+// Basically, this returns how much data there is still to play, and how long
+// it takes until the last sample in the buffer reaches the speakers. This is
+// used for audio/video synchronization, so it's very important to implement
+// this correctly.
 double ao_get_delay(struct ao *ao)
 {
     if (!ao->driver->get_delay) {
@@ -236,23 +250,32 @@ double ao_get_delay(struct ao *ao)
     return ao->driver->get_delay(ao);
 }
 
+// Return free size of the internal audio buffer. This controls how much audio
+// the core should decode and try to queue with ao_play().
 int ao_get_space(struct ao *ao)
 {
     return ao->driver->get_space(ao);
 }
 
+// Stop playback and empty buffers. Essentially go back to the state after
+// ao->init().
 void ao_reset(struct ao *ao)
 {
     if (ao->driver->reset)
         ao->driver->reset(ao);
 }
 
+// Pause playback. Keep the current buffer. ao_get_delay() must return the
+// same value as before pausing.
 void ao_pause(struct ao *ao)
 {
     if (ao->driver->pause)
         ao->driver->pause(ao);
 }
 
+// Resume playback. Play the remaining buffer. If the driver doesn't support
+// pausing, it has to work around this and e.g. use ao_play_silence() to fill
+// the lost audio.
 void ao_resume(struct ao *ao)
 {
     if (ao->driver->resume)
