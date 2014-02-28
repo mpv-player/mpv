@@ -357,7 +357,7 @@ List of events
     next file right away, or quit if this was the last file.
 
 ``file-loaded``
-    Happens atfer a file was loaded and begins playback.
+    Happens after a file was loaded and begins playback.
 
 ``seek``
     Happens on seeking (including ordered chapter segment changes).
