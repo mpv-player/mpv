@@ -19,6 +19,7 @@
 #include <pthread.h>
 
 #include "timer.h"
+#include "common/msg.h"
 
 static uint64_t raw_time_offset;
 pthread_once_t timer_init_once = PTHREAD_ONCE_INIT;
@@ -47,6 +48,16 @@ int64_t mp_time_us(void)
 double mp_time_sec(void)
 {
     return mp_time_us() / (double)(1000 * 1000);
+}
+
+int64_t mp_time_relative_us(int64_t *t)
+{
+    int64_t r = 0;
+    int64_t now = mp_time_us();
+    if (*t)
+        r = now - *t;
+    *t = now;
+    return r;
 }
 
 #if 0
