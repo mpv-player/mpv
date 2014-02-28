@@ -95,10 +95,10 @@ local function update_key_bindings()
         local def = i == 1
         if def then
             section = "input_" .. mp.script_name
-            flags = "builtin"
+            flags = "default"
         else
             section = "input_forced_" .. mp.script_name
-            flags = "default"
+            flags = "force"
         end
         local cfg = ""
         for k, v in pairs(key_bindings) do
