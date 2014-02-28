@@ -356,8 +356,14 @@ List of events
     Happens after a file was unloaded. Typically, the player will load the
     next file right away, or quit if this was the last file.
 
-``playback-start``
+``file-loaded``
     Happens atfer a file was loaded and begins playback.
+
+``seek``
+    Happens on seeking (including ordered chapter segment changes).
+
+``playback-restart``
+    Start of playback after seek or after file was loaded.
 
 ``tracks-changed``
     The list of video/audio/sub tracks was updated. (This happens on playback
