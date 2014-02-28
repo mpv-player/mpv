@@ -208,6 +208,8 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 #if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
 #endif
+
+    mp_notify(mpctx, MPV_EVENT_SEEK, NULL);
 }
 
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
@@ -1167,6 +1169,7 @@ void run_playloop(struct MPContext *mpctx)
                 if (mpctx->d_audio)
                     fill_audio_out_buffers(mpctx, endpts);
                 mpctx->restart_playback = false;
+                mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
             }
             mpctx->time_frame = 0;
             get_relative_time(mpctx);
@@ -1207,6 +1210,8 @@ void run_playloop(struct MPContext *mpctx)
                      mpctx->opts->playback_speed * buffered_audio);
         }
         mpctx->playback_pts = a_pos;
+        if (was_restart)
+            mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
     }
 
     update_subtitles(mpctx);

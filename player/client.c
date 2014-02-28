@@ -997,7 +997,7 @@ static const char *event_table[] = {
     [MPV_EVENT_COMMAND_REPLY] = "command-reply",
     [MPV_EVENT_START_FILE] = "start-file",
     [MPV_EVENT_END_FILE] = "end-file",
-    [MPV_EVENT_PLAYBACK_START] = "playback-start",
+    [MPV_EVENT_FILE_LOADED] = "file-loaded",
     [MPV_EVENT_TRACKS_CHANGED] = "tracks-changed",
     [MPV_EVENT_TRACK_SWITCHED] = "track-switched",
     [MPV_EVENT_IDLE] = "idle",
@@ -1009,6 +1009,8 @@ static const char *event_table[] = {
     [MPV_EVENT_VIDEO_RECONFIG] = "video-reconfig",
     [MPV_EVENT_AUDIO_RECONFIG] = "audio-reconfig",
     [MPV_EVENT_METADATA_UPDATE] = "metadata-update",
+    [MPV_EVENT_SEEK] = "seek",
+    [MPV_EVENT_PLAYBACK_RESTART] = "playback-restart",
 };
 
 const char *mpv_event_name(mpv_event_id event)

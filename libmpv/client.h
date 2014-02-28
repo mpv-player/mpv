@@ -768,7 +768,7 @@ typedef enum mpv_event_id {
      * Notification when the file has been loaded (headers were read etc.), and
      * decoding starts.
      */
-    MPV_EVENT_PLAYBACK_START    = 8,
+    MPV_EVENT_FILE_LOADED       = 8,
     /**
      * The list of video/audio/subtitle tracks was changed.
      */
@@ -831,7 +831,19 @@ typedef enum mpv_event_id {
      * unspecified whether this happens on file start or only when it changes
      * within a file.)
      */
-    MPV_EVENT_METADATA_UPDATE   = 19
+    MPV_EVENT_METADATA_UPDATE   = 19,
+    /**
+     * Happens when a seek was initiated. Playback stops. Usually it will
+     * resume with MPV_EVENT_PLAYBACK_START as soon as the seek is finished.
+     */
+    MPV_EVENT_SEEK              = 20,
+    /**
+     * There was a discontinuity of some sort (like a seek), and playback
+     * was reinitialized. Usually happens after seeking, or ordered chapter
+     * segment switches. The main purpose is allowing the client to detect
+     * when a seek request is finished.
+     */
+    MPV_EVENT_PLAYBACK_RESTART  = 21
 } mpv_event_id;
 
 /**
