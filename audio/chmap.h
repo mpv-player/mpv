@@ -27,7 +27,7 @@
 // Speaker a channel can be assigned to.
 // This corresponds to WAVEFORMATEXTENSIBLE channel mask bit indexes.
 // E.g. channel_mask = (1 << MP_SPEAKER_ID_FL) | ...
-enum {
+enum mp_speaker_id {
     // Official WAVEFORMATEXTENSIBLE (shortened names)
     MP_SPEAKER_ID_FL = 0,       // FRONT_LEFT
     MP_SPEAKER_ID_FR,           // FRONT_RIGHT
