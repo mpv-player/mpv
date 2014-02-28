@@ -125,7 +125,7 @@ char *mp_find_global_config_file(void *talloc_ctx, struct mpv_global *global,
     struct MPOpts *opts = global->opts;
     char *res = NULL;
 
-    if (opts->load_config || !(opts->force_configdir && opts->force_configdir[0]))
+    if (opts->load_config && !(opts->force_configdir && opts->force_configdir[0]))
     {
         if (filename) {
             res = mp_path_join(talloc_ctx, bstr0(MPLAYER_CONFDIR), bstr0(filename));
