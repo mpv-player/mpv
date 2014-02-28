@@ -834,7 +834,7 @@ typedef enum mpv_event_id {
     MPV_EVENT_METADATA_UPDATE   = 19,
     /**
      * Happens when a seek was initiated. Playback stops. Usually it will
-     * resume with MPV_EVENT_PLAYBACK_START as soon as the seek is finished.
+     * resume with MPV_EVENT_PLAYBACK_RESTART as soon as the seek is finished.
      */
     MPV_EVENT_SEEK              = 20,
     /**
