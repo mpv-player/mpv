@@ -34,6 +34,7 @@
 #include "options/options.h"
 #include "osdep/terminal.h"
 #include "osdep/io.h"
+#include "osdep/timer.h"
 
 #include "msg.h"
 #include "msg_control.h"
@@ -48,6 +49,7 @@ struct mp_log_root {
     bool use_terminal;  // make accesses to stderr/stdout
     bool smode;         // slave mode compatibility glue
     bool module;
+    bool show_time;
     bool termosd;       // use terminal control codes for status line
     bool header;        // indicate that message header should be printed
     int blank_lines;    // number of lines useable by status
@@ -241,8 +243,12 @@ static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
         set_msg_color(stream, lev);
 
     do {
-        if (header && prefix)
-            fprintf(stream, "[%s] ", prefix);
+        if (header) {
+            if (root->show_time)
+                fprintf(stream, "[%" PRId64 "] ", mp_time_us());
+            if (prefix)
+                fprintf(stream, "[%s] ", prefix);
+        }
 
         char *next = strchr(text, '\n');
         int len = next ? next - text + 1 : strlen(text);
@@ -378,6 +384,7 @@ void mp_msg_update_msglevels(struct mpv_global *global)
     root->module = opts->msg_module;
     root->smode = opts->msg_identify;
     root->use_terminal = opts->use_terminal;
+    root->show_time = opts->msg_time;
     if (root->use_terminal) {
         root->color = opts->msg_color && isatty(fileno(stdout));
         root->termosd = !opts->slave_mode && isatty(fileno(stderr));

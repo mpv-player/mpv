@@ -50,6 +50,7 @@ typedef struct MPOpts {
     int msg_identify;
     int msg_color;
     int msg_module;
+    int msg_time;
 
     char **reset_options;
     char **lua_files;

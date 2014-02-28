@@ -232,6 +232,7 @@ const m_option_t mp_opts[] = {
                 .type = &m_option_type_msglevels),
     OPT_FLAG("msgcolor", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
     OPT_FLAG("msgmodule", msg_module, CONF_GLOBAL),
+    OPT_FLAG("msgtime", msg_time, CONF_GLOBAL),
     OPT_FLAG("identify", msg_identify, CONF_GLOBAL),
 #if HAVE_PRIORITY
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
