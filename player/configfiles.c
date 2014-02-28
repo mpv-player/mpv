@@ -62,7 +62,8 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
         m_config_parse_config_file(mpctx->mconfig, conffile, 0);
 #endif
 
-    if (m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf", 0) < 0) {
+    conffile = mp_find_global_config_file(tmp, mpctx->global, "mpv.conf");
+    if (conffile && m_config_parse_config_file(conf, conffile, 0) < 0) {
         r = false;
         goto done;
     }
