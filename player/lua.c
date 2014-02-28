@@ -899,7 +899,7 @@ static int script_input_define_section(lua_State *L)
     } else if (strcmp(flags, "") == 0) {
         //pass
     } else {
-        luaL_error(L, "invalid flags: '%*'", flags);
+        luaL_error(L, "invalid flags: '%s'", flags);
     }
     mp_input_define_section(mpctx->input, section, "<script>", contents, builtin);
     return 0;
