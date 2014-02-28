@@ -109,7 +109,7 @@ void pause_player(struct MPContext *mpctx, mpv_event_pause_reason reason)
 end:
     reason.user_paused = !!mpctx->opts->pause;
     reason.real_paused = !!mpctx->paused;
-    mp_notify(mpctx, MPV_EVENT_UNPAUSE, &reason);
+    mp_notify(mpctx, MPV_EVENT_PAUSE, &reason);
 }
 
 void unpause_player(struct MPContext *mpctx, mpv_event_pause_reason reason)
