@@ -164,7 +164,8 @@ static int load_builtin(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     for (int n = 0; builtin_lua_scripts[n][0]; n++) {
         if (strcmp(name, builtin_lua_scripts[n][0]) == 0) {
-            if (luaL_loadstring(L, builtin_lua_scripts[n][1]))
+            const char *script = builtin_lua_scripts[n][1];
+            if (luaL_loadbuffer(L, script, strlen(script), name))
                 lua_error(L);
             lua_call(L, 0, 1);
             return 1;
