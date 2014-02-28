@@ -383,6 +383,15 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_time_start(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
+{
+    double start = get_start_time(mpctx);
+    if (start < 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return property_time(prop, action, arg, start);
+}
+
 /// Current position in seconds (RW)
 static int mp_property_time_pos(m_option_t *prop, int action,
                                 void *arg, MPContext *mpctx)
@@ -906,6 +915,14 @@ static int mp_property_clock(m_option_t *prop, int action, void *arg,
     if ((tmp != NULL) && (strftime(outstr, sizeof(outstr), "%H:%M", tmp) == 5))
         return m_property_strdup_ro(prop, action, arg, outstr);
     return M_PROPERTY_UNAVAILABLE;
+}
+
+static int mp_property_seekable(m_option_t *prop, int action, void *arg,
+                            MPContext *mpctx)
+{
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop, action, arg, !!mpctx->demuxer->seekable);
 }
 
 /// Volume (RW)
@@ -2076,6 +2093,8 @@ static const m_option_t mp_properties[] = {
     { "avsync", mp_property_avsync, CONF_TYPE_DOUBLE },
     { "percent-pos", mp_property_percent_pos, CONF_TYPE_DOUBLE,
       M_OPT_RANGE, 0, 100, NULL },
+    { "time-start", mp_property_time_start, CONF_TYPE_TIME,
+      M_OPT_MIN, 0, 0, NULL },
     { "time-pos", mp_property_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
     { "time-remaining", mp_property_remaining, CONF_TYPE_TIME },
@@ -2098,6 +2117,8 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY("hr-seek"),
     { "clock", mp_property_clock, CONF_TYPE_STRING,
       0, 0, 0, NULL },
+    { "seekable", mp_property_seekable, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
 
     M_PROPERTY("chapter-list", mp_property_list_chapters),
     M_PROPERTY("track-list", property_list_tracks),
