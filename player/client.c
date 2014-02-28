@@ -13,6 +13,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <assert.h>
 
 #include "common/common.h"
@@ -452,7 +453,9 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
             break;
         if (timeout <= 0)
             break;
-        pthread_cond_timedwait(&ctx->wakeup, &ctx->lock, &deadline);
+        int r = pthread_cond_timedwait(&ctx->wakeup, &ctx->lock, &deadline);
+        if (r == ETIMEDOUT)
+            break;
     }
     ctx->queued_wakeup = false;
 
