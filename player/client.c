@@ -191,6 +191,15 @@ void mpv_destroy(mpv_handle *ctx)
     if (!ctx)
         return;
 
+    pthread_mutex_lock(&ctx->lock);
+    // reserved_events equals the number of asynchronous requests that weren't
+    // yet replied. In order to avoid that trying to reply to a removed event
+    // causes a crash, block until all asynchronous requests were served.
+    ctx->event_mask = 0;
+    while (ctx->reserved_events)
+        pthread_cond_wait(&ctx->wakeup, &ctx->lock);
+    pthread_mutex_unlock(&ctx->lock);
+
     struct mp_client_api *clients = ctx->clients;
 
     pthread_mutex_lock(&clients->lock);
