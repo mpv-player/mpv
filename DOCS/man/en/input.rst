@@ -598,6 +598,10 @@ an option at runtime.
 ``time-pos`` (RW)
     Position in current file in seconds.
 
+``time-start``
+    Return the start time of the file. (Usually 0, but some kind of files,
+    especially transport streams, can have a different start time.)
+
 ``time-remaining``
     Remaining length of the file in seconds. Note that the file duration is not
     always exactly known, so this is an estimate.
@@ -1007,6 +1011,9 @@ an option at runtime.
 
 ``vf`` (RW)
     See ``--vf`` and the ``vf`` command.
+
+``seekable``
+    Return whether it's generally possible to seek in the current file.
 
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
