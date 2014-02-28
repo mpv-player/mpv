@@ -245,6 +245,7 @@ const m_option_t mp_opts[] = {
     OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL),
     OPT_KEYVALUELIST("lua-opts", lua_opts, M_OPT_GLOBAL),
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
+    OPT_FLAG("load-scripts", auto_load_scripts, CONF_GLOBAL),
 #endif
 
 // ------------------------- stream options --------------------
@@ -696,6 +697,7 @@ const struct MPOpts mp_default_opts = {
     .osd_scale = 1,
     .osd_scale_by_window = 1,
     .lua_load_osc = 1,
+    .auto_load_scripts = 1,
     .loop_times = -1,
     .ordered_chapters = 1,
     .chapter_merge_threshold = 100,

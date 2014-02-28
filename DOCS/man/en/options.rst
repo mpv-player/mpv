@@ -1286,6 +1286,10 @@ OPTIONS
 ``--list-properties``
     Print a list of the available properties.
 
+``--load-scripts=<yes|no>``
+    If set to ``no``, don't auto-load scripts from ``~/.mpv/lua/``.
+    (Default: ``yes``)
+
 ``--load-unsafe-playlists``
     Normally, something like ``mpv playlist.m3u`` won't load the playlist. This
     is because the playlist code is unsafe. (This is the same in all other

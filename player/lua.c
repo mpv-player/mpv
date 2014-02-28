@@ -1060,6 +1060,8 @@ void mp_lua_init(struct MPContext *mpctx)
         if (files[n][0])
             mp_lua_load_script(mpctx, files[n]);
     }
+    if (!mpctx->opts->auto_load_scripts)
+        return;
     // Load ~/.mpv/lua/*
     void *tmp = talloc_new(NULL);
     char *lua_path = mp_find_user_config_file(tmp, mpctx->global, "lua");

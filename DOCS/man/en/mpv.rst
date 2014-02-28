@@ -603,7 +603,8 @@ FILES
 ``~/.mpv/lua/``
     All files in this directly are loaded as if they were passed to the
     ``--lua`` option. They are loaded in alphabetical order, and sub-directories
-    and files with no ``.lua`` extension are ignored.
+    and files with no ``.lua`` extension are ignored. The ``--load-scripts=no``
+    option disables loading these files.
 
 
 EXAMPLES OF MPV USAGE
