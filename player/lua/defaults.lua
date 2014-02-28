@@ -155,7 +155,7 @@ function mp.add_periodic_timer(seconds, cb)
         timeout = seconds,
         cb = cb,
         oneshot = false,
-        next_deadline = mp.get_timer() + seconds,
+        next_deadline = mp.get_time() + seconds,
     }
     timers[t] = t
     return t
@@ -186,7 +186,7 @@ local function process_timers()
         if not timer then
             return
         end
-        local wait = timer.next_deadline - mp.get_timer()
+        local wait = timer.next_deadline - mp.get_time()
         if wait > 0 then
             return wait
         else
@@ -195,7 +195,7 @@ local function process_timers()
             end
             timer.cb()
             if not timer.oneshot then
-                timer.next_deadline = mp.get_timer() + timer.timeout
+                timer.next_deadline = mp.get_time() + timer.timeout
             end
         end
     end
