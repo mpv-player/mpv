@@ -143,6 +143,7 @@ void mp_destroy(struct MPContext *mpctx)
 
     command_uninit(mpctx);
 
+    mp_dispatch_set_wakeup_fn(mpctx->dispatch, NULL, NULL);
     mp_input_uninit(mpctx->input);
 
     osd_free(mpctx->osd);
@@ -353,6 +354,12 @@ struct MPContext *mp_create(void)
     return mpctx;
 }
 
+static void wakeup_playloop(void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+    mp_input_wakeup(mpctx->input);
+}
+
 // Finish mpctx initialization. This must be done after setting up all options.
 // Some of the initializations depend on the options, and can't be changed or
 // undone later.
@@ -371,6 +378,8 @@ int mp_initialize(struct MPContext *mpctx)
 
     mpctx->input = mp_input_init(mpctx->global);
     stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+
+    mp_dispatch_set_wakeup_fn(mpctx->dispatch, wakeup_playloop, mpctx);
 
 #if HAVE_ENCODING
     if (opts->encode_output.file && *opts->encode_output.file) {
