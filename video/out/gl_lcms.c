@@ -129,8 +129,9 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
     if (!iccdata.len)
         goto error_exit;
 
-    char *cache_info = talloc_asprintf(tmp, "intent=%d, size=%dx%dx%d\n",
-                                       opts->intent, s_r, s_g, s_b);
+    char *cache_info =
+        talloc_asprintf(tmp, "intent=%d, size=%dx%dx%d, approx=%d\n",
+                        opts->intent, s_r, s_g, s_b, opts->approx);
 
     // check cache
     if (opts->cache) {
