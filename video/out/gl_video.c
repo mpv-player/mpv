@@ -1987,7 +1987,6 @@ static const struct fmt_entry *find_tex_format(int bytes_per_comp, int n_channel
 
 static bool init_format(int fmt, struct gl_video *init)
 {
-    bool supported = false;
     struct gl_video dummy;
     if (!init)
         init = &dummy;
@@ -2013,64 +2012,58 @@ static bool init_format(int fmt, struct gl_video *init)
     init->has_alpha = false;
 
     // YUV/planar formats
-    if (!supported && (desc.flags & MP_IMGFLAG_YUV_P)) {
+    if (desc.flags & MP_IMGFLAG_YUV_P) {
         int bits = desc.plane_bits;
         if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
-            supported = true;
             init->plane_bits = bits;
             init->has_alpha = desc.num_planes > 3;
             plane_format[0] = find_tex_format((bits + 7) / 8, 1);
             for (int p = 1; p < desc.num_planes; p++)
                 plane_format[p] = plane_format[0];
+            goto supported;
         }
     }
 
     // YUV/half-packed
-    if (!supported && (fmt == IMGFMT_NV12 || fmt == IMGFMT_NV21)) {
-        supported = true;
+    if (fmt == IMGFMT_NV12 || fmt == IMGFMT_NV21) {
         plane_format[0] = find_tex_format(1, 1);
         plane_format[1] = find_tex_format(1, 2);
         if (fmt == IMGFMT_NV21)
             snprintf(init->color_swizzle, sizeof(init->color_swizzle), "rbga");
+        goto supported;
     }
 
     // RGB/planar
-    if (!supported && fmt == IMGFMT_GBRP) {
-        supported = true;
+    if (fmt == IMGFMT_GBRP) {
         snprintf(init->color_swizzle, sizeof(init->color_swizzle), "brga");
         plane_format[0] = find_tex_format(1, 1);
         for (int p = 1; p < desc.num_planes; p++)
             plane_format[p] = plane_format[0];
+        goto supported;
     }
 
     // XYZ (same organization as RGB packed, but requires conversion matrix)
-    if (!supported && fmt == IMGFMT_XYZ12) {
-        supported = true;
+    if (fmt == IMGFMT_XYZ12) {
         plane_format[0] = find_tex_format(2, 3);
+        goto supported;
     }
 
     // Packed RGB special formats
-    if (!supported) {
-        for (const struct fmt_entry *e = mp_to_gl_formats; e->mp_format; e++) {
-            if (e->mp_format == fmt) {
-                supported = true;
-                plane_format[0] = e;
-                break;
-            }
+    for (const struct fmt_entry *e = mp_to_gl_formats; e->mp_format; e++) {
+        if (e->mp_format == fmt) {
+            plane_format[0] = e;
+            goto supported;
         }
     }
 
     // Packed RGB(A) formats
-    if (!supported) {
-        for (const struct packed_fmt_entry *e = mp_packed_formats; e->fmt; e++) {
-            if (e->fmt == fmt) {
-                supported = true;
-                int n_comp = desc.bytes[0] / e->component_size;
-                plane_format[0] = find_tex_format(e->component_size, n_comp);
-                packed_fmt_swizzle(init->color_swizzle, e);
-                init->has_alpha = e->components[3] != 0;
-                break;
-            }
+    for (const struct packed_fmt_entry *e = mp_packed_formats; e->fmt; e++) {
+        if (e->fmt == fmt) {
+            int n_comp = desc.bytes[0] / e->component_size;
+            plane_format[0] = find_tex_format(e->component_size, n_comp);
+            packed_fmt_swizzle(init->color_swizzle, e);
+            init->has_alpha = e->components[3] != 0;
+            goto supported;
         }
     }
 
@@ -2079,17 +2072,18 @@ static bool init_format(int fmt, struct gl_video *init)
         for (const struct fmt_entry *e = gl_apple_formats; e->mp_format; e++) {
             if (e->mp_format == fmt) {
                 init->is_packed_yuv = true;
-                supported = true;
                 snprintf(init->color_swizzle, sizeof(init->color_swizzle),
                          "gbra");
                 plane_format[0] = e;
-                break;
+                goto supported;
             }
         }
     }
 
-    if (!supported)
-        return false;
+    // Unsupported format
+    return false;
+
+supported:
 
     // Stuff like IMGFMT_420AP10. Untested, most likely insane.
     if (desc.num_planes == 4 && (init->plane_bits % 8) != 0)
