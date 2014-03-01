@@ -1183,8 +1183,12 @@ void run_playloop(struct MPContext *mpctx)
         break;
     } // video
 
-    if (!video_left || mpctx->paused)
-        mp_notify(mpctx, MPV_EVENT_TICK, NULL);
+    if (!video_left || mpctx->paused) {
+        if (mp_time_sec() - mpctx->last_idle_tick > 0.5) {
+            mpctx->last_idle_tick = mp_time_sec();
+            mp_notify(mpctx, MPV_EVENT_TICK, NULL);
+        }
+    }
 
     video_left &= mpctx->sync_audio_to_video; // force no-video semantics
 

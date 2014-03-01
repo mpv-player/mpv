@@ -293,6 +293,7 @@ typedef struct MPContext {
 
     double last_heartbeat;
     double last_metadata_update;
+    double last_idle_tick;
 
     double mouse_timer;
     unsigned int mouse_event_ts;
