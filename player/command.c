@@ -2941,7 +2941,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
 #endif /* HAVE_PVR */
 #if HAVE_DVBIN
-        if (mpctx->stream->type == STREAMTYPE_DVB) {
+        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_DVB) {
             int dir;
             int v = cmd->args[0].v.i;
 
@@ -2979,7 +2979,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
 #if HAVE_DVBIN
     case MP_CMD_DVB_SET_CHANNEL:
-        if (mpctx->stream->type == STREAMTYPE_DVB) {
+        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_DVB) {
             mpctx->last_dvb_step = 1;
 
             if (dvb_set_channel(mpctx->stream, cmd->args[1].v.i,
