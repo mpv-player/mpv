@@ -662,17 +662,12 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
 
     reselect_demux_streams(mpctx);
 
-    if (order == 0) {
-        if (type == STREAM_VIDEO) {
-            reinit_video_chain(mpctx);
-        } else if (type == STREAM_AUDIO) {
-            reinit_audio_chain(mpctx);
-        } else if (type == STREAM_SUB) {
-            reinit_subs(mpctx, 0);
-        }
-    } else if (order == 1) {
-        if (type == STREAM_SUB)
-            reinit_subs(mpctx, 1);
+    if (type == STREAM_VIDEO && order == 0) {
+        reinit_video_chain(mpctx);
+    } else if (type == STREAM_AUDIO && order == 0) {
+        reinit_audio_chain(mpctx);
+    } else if (type == STREAM_SUB && order >= 0 && order <= 2) {
+        reinit_subs(mpctx, order);
     }
 
     mp_notify(mpctx, MPV_EVENT_TRACK_SWITCHED, NULL);
@@ -703,17 +698,14 @@ void mp_mark_user_track_selection(struct MPContext *mpctx, int order,
 {
     struct track *track = mpctx->current_track[order][type];
     int user_tid = track ? track->user_tid : -2;
-    if (order == 0) {
-        if (type == STREAM_VIDEO) {
-            mpctx->opts->video_id = user_tid;
-        } else if (type == STREAM_AUDIO) {
-            mpctx->opts->audio_id = user_tid;
-        } else if (type == STREAM_SUB) {
-            mpctx->opts->sub_id = user_tid;
-        }
-    } else if (order == 1) {
-        if (type == STREAM_SUB)
-            mpctx->opts->sub2_id = user_tid;
+    if (type == STREAM_VIDEO && order == 0) {
+        mpctx->opts->video_id = user_tid;
+    } else if (type == STREAM_AUDIO && order == 0) {
+        mpctx->opts->audio_id = user_tid;
+    } else if (type == STREAM_SUB && order == 0) {
+        mpctx->opts->sub_id = user_tid;
+    } else if (type == STREAM_SUB && order == 1) {
+        mpctx->opts->sub2_id = user_tid;
     }
 }
 
