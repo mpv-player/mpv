@@ -461,11 +461,19 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh_sub->w = codec->width;
         sh_sub->h = codec->height;
 
-        // Hack for MicroDVD: if time_base matches the ffmpeg microdvd reader's
-        // default FPS (23.976), assume the MicroDVD file did not declare a
-        // FPS, and the MicroDVD file uses frame based timing.
-        if (codec->time_base.num == 125 && codec->time_base.den == 2997)
-            sh_sub->frame_based = true;
+        if (matches_avinputformat_name(priv, "microdvd")) {
+            AVRational r;
+            if (av_opt_get_q(avfc, "subfps", AV_OPT_SEARCH_CHILDREN, &r) >= 0) {
+                // File headers don't have a FPS set.
+                if (r.num < 1 || r.den < 1)
+                    sh_sub->frame_based = av_q2d(av_inv_q(codec->time_base));
+            } else {
+                // Older libavcodec versions. If the FPS matches the microdvd
+                // reader's default, assume it uses frame based timing.
+                if (codec->time_base.num == 125 && codec->time_base.den == 2997)
+                    sh_sub->frame_based = 23.976;
+            }
+        }
         break;
     }
     case AVMEDIA_TYPE_ATTACHMENT: {

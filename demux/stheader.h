@@ -88,7 +88,8 @@ typedef struct sh_sub {
     unsigned char *extradata;   // extra header data passed from demuxer
     int extradata_len;
     int w, h;                   // mp4 vobsubs
-    int frame_based;            // timestamps are frame-based
+    double frame_based;         // timestamps are frame-based (and this is the
+                                // fallback framerate used for timestamps)
     bool is_utf8;               // if false, subtitle packet charset is unknown
     struct ass_track *track;    // loaded by libass
     struct dec_sub *dec_sub;    // decoder context
