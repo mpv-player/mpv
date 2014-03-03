@@ -385,6 +385,8 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
 void mp_switch_track_n(struct MPContext *mpctx, int order,
                        enum stream_type type, struct track *track);
 void mp_deselect_track(struct MPContext *mpctx, struct track *track);
+void mp_mark_user_track_selection(struct MPContext *mpctx, int order,
+                                  enum stream_type type);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
 bool timeline_set_part(struct MPContext *mpctx, int i, bool force);

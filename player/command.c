@@ -1178,11 +1178,13 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
         struct m_property_switch_arg *sarg = arg;
         mp_switch_track_n(mpctx, order, type,
             track_next(mpctx, order, type, sarg->inc >= 0 ? +1 : -1, track));
+        mp_mark_user_track_selection(mpctx, order, type);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
         track = mp_track_by_tid(mpctx, type, *(int *)arg);
         mp_switch_track_n(mpctx, order, type, track);
+        mp_mark_user_track_selection(mpctx, order, type);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -3240,8 +3242,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SUB_ADD: {
         struct track *sub = mp_add_subtitles(mpctx, cmd->args[0].v.s);
-        if (sub)
+        if (sub) {
             mp_switch_track(mpctx, sub->type, sub);
+            mp_mark_user_track_selection(mpctx, 0, sub->type);
+        }
         break;
     }
 

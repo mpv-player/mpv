@@ -662,23 +662,17 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
 
     reselect_demux_streams(mpctx);
 
-    int user_tid = track ? track->user_tid : -2;
     if (order == 0) {
         if (type == STREAM_VIDEO) {
-            mpctx->opts->video_id = user_tid;
             reinit_video_chain(mpctx);
         } else if (type == STREAM_AUDIO) {
-            mpctx->opts->audio_id = user_tid;
             reinit_audio_chain(mpctx);
         } else if (type == STREAM_SUB) {
-            mpctx->opts->sub_id = user_tid;
             reinit_subs(mpctx, 0);
         }
     } else if (order == 1) {
-        if (type == STREAM_SUB) {
-            mpctx->opts->sub2_id = user_tid;
+        if (type == STREAM_SUB)
             reinit_subs(mpctx, 1);
-        }
     }
 
     mp_notify(mpctx, MPV_EVENT_TRACK_SWITCHED, NULL);
@@ -699,6 +693,27 @@ void mp_deselect_track(struct MPContext *mpctx, struct track *track)
     if (track && track->selected) {
         for (int t = 0; t < NUM_PTRACKS; t++)
             mp_switch_track_n(mpctx, t, track->type, NULL);
+    }
+}
+
+// Mark the current track selection as explicitly user-requested. (This is
+// different from auto-selection or disabling a track due to errors.)
+void mp_mark_user_track_selection(struct MPContext *mpctx, int order,
+                                  enum stream_type type)
+{
+    struct track *track = mpctx->current_track[order][type];
+    int user_tid = track ? track->user_tid : -2;
+    if (order == 0) {
+        if (type == STREAM_VIDEO) {
+            mpctx->opts->video_id = user_tid;
+        } else if (type == STREAM_AUDIO) {
+            mpctx->opts->audio_id = user_tid;
+        } else if (type == STREAM_SUB) {
+            mpctx->opts->sub_id = user_tid;
+        }
+    } else if (order == 1) {
+        if (type == STREAM_SUB)
+            mpctx->opts->sub2_id = user_tid;
     }
 }
 
