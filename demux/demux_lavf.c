@@ -468,7 +468,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
                 if (r.num < 1 || r.den < 1)
                     sh_sub->frame_based = av_q2d(av_inv_q(codec->time_base));
             } else {
-                // Older libavcodec versions. If the FPS matches the microdvd
+                // Older libavformat versions. If the FPS matches the microdvd
                 // reader's default, assume it uses frame based timing.
                 if (codec->time_base.num == 125 && codec->time_base.den == 2997)
                     sh_sub->frame_based = 23.976;
