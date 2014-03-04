@@ -124,12 +124,12 @@ static int parse_flag(struct mp_log *log, const m_option_t *opt,
                       struct bstr name, struct bstr param, void *dst)
 {
     if (param.len) {
-        if (!bstrcmp0(param, "yes")) {
+        if (!bstrcmp0(param, "yes") || !bstrcmp0(param, "true") || !bstrcmp0(param, "on")) {
             if (dst)
                 VAL(dst) = opt->max;
             return 1;
         }
-        if (!bstrcmp0(param, "no")) {
+        if (!bstrcmp0(param, "no") || !bstrcmp0(param, "false") || !bstrcmp0(param, "off")) {
             if (dst)
                 VAL(dst) = opt->min;
             return 1;
@@ -196,7 +196,7 @@ const m_option_type_t m_option_type_flag = {
 static int parse_store(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
-    if (param.len == 0 || bstrcmp0(param, "yes") == 0) {
+    if (param.len == 0 || !bstrcmp0(param, "yes") || !bstrcmp0(param, "true") || !bstrcmp0(param, "on")) {
         if (dst)
             VAL(dst) = opt->max;
         return 0;
