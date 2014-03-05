@@ -300,6 +300,7 @@ const struct m_sub_options gl_video_conf = {
     .opts = (m_option_t[]) {
         OPT_FLOATRANGE("gamma", gamma, 0, 0.0, 10.0),
         OPT_FLAG("srgb", srgb, 0),
+        OPT_FLAG("approx-gamma", approx_gamma, 0),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
         OPT_CHOICE("stereo", stereo_mode, 0,
@@ -1143,51 +1144,6 @@ static void gen_read_video(struct shader_gen *sh, struct gl_video *p,
     }
 }
 
-// Convert video to RGB.
-// use_indirect: is set to true if the video should be converted to a RGB
-//               FBO before scaling.
-static void build_conv_video(struct shader_gen *sh, struct gl_video *p,
-                             bool *use_indirect)
-{
-    float input_gamma = 1.0;
-    float conv_gamma = 1.0;
-
-    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
-        input_gamma *= 2.6;
-        conv_gamma *= 1.0 / 2.2;
-    }
-
-    if (!p->is_linear_rgb && (p->opts.srgb || p->use_lut_3d))
-        conv_gamma *= 1.0 / 0.45;
-
-    bool convert_input_gamma = input_gamma != 1.0;
-    bool convert_input_to_linear = conv_gamma != 1.0;
-
-    shgen_start_var(sh, "$conv_src$");
-
-    if (convert_input_gamma)
-        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(%f));", input_gamma);
-    if (!p->is_rgb) {
-        shgen_decl(sh, "uniform mat4x3 colormatrix;");
-        shgen_add(sh, "color.rgb = mat3(colormatrix) * color.rgb + colormatrix[3];");
-        shgen_add(sh, "color = clamp(color, 0, 1);");
-    }
-    if (p->opts.alpha_mode == 2 && p->has_alpha)
-        shgen_add(sh, "color.rgb = vec4(color.rgb * color.a, 1);");
-    if (p->opts.alpha_mode == 1)
-        shgen_add(sh, "color.a = 1;");
-    if (convert_input_to_linear)
-        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(%f));", conv_gamma);
-
-    // Don't sample from input video textures before converting the input to
-    // linear light. (Unneeded when sRGB textures are used.)
-    // The conv stage runs always in the first shader, but this means the first
-    // shader must not scale. The "indirect" stage suffices this requirement.
-    *use_indirect |= convert_input_gamma || convert_input_to_linear;
-
-    shgen_stop_var(sh);
-}
-
 static void gen_srgb_compand(struct shader_gen *sh, char *var)
 {
     shgen_add(sh, "%s = mix(%s * 12.92,"
@@ -1202,32 +1158,74 @@ static void gen_bt709_expand(struct shader_gen *sh, char *var)
                   "  lessThanEqual(vec3(0.0812), %s));", var, var, var, var);
 }
 
+// Convert video to RGB.
+// use_indirect: is set to true if the video should be converted to a RGB
+//               FBO before scaling.
+static void build_conv_video(struct shader_gen *sh, struct gl_video *p,
+                             bool *use_indirect)
+{
+    float input_gamma = 1.0; // before conversion to RGB
+    float conv_gamma = 1.0; // after conversion to RGB
+
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+        input_gamma *= 2.6;
+        conv_gamma *= 1.0 / 2.2;
+    }
+
+    bool use_input_gamma = input_gamma != 1.0;
+    bool use_conv_gamma = conv_gamma != 1.0;
+
+    shgen_start_var(sh, "$conv_src$");
+
+    if (use_input_gamma)
+        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(%f));", input_gamma);
+    if (!p->is_rgb) {
+        shgen_decl(sh, "uniform mat4x3 colormatrix;");
+        shgen_add(sh, "color.rgb = mat3(colormatrix) * color.rgb + colormatrix[3];");
+        shgen_add(sh, "color = clamp(color, 0, 1);");
+    }
+    if (p->opts.alpha_mode == 2 && p->has_alpha)
+        shgen_add(sh, "color.rgb = vec4(color.rgb * color.a, 1);");
+    if (p->opts.alpha_mode == 1)
+        shgen_add(sh, "color.a = 1;");
+    if (use_conv_gamma)
+        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(%f));", conv_gamma);
+
+    // If CMS is enabled, we need to convert to linear light before scaling,
+    // unless SRGB textures are used.
+    bool use_linear_gamma = !p->is_linear_rgb && (p->opts.srgb || p->use_lut_3d);
+
+    if (use_linear_gamma) {
+        if (p->opts.approx_gamma)
+            shgen_add(sh, "color.rgb = pow(color.rgb, vec3(1.95));");
+        else
+            gen_bt709_expand(sh, "color.rgb");
+    }
+
+    // The conv stage runs always in the first shader, but this means the first
+    // shader must not scale. The "indirect" stage suffices this requirement.
+    *use_indirect |= use_input_gamma || use_conv_gamma || use_linear_gamma;
+
+    shgen_stop_var(sh);
+}
+
 // Rendering to the screen.
 static void gen_write_screen(struct shader_gen *sh, struct gl_video *p)
 {
-    if (p->use_lut_3d) {
-        // Convert from linear RGB to gamma RGB before putting it through the
-        // 3D-LUT in the final stage.
-        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(0.45));");
-    }
     if (p->opts.gamma > 0) {
+        // User-defined gamma correction factor, purely aesthetic
         shgen_decl(sh, "uniform vec3 inv_gamma;");
         shgen_add(sh, "color.rgb = pow(color.rgb, inv_gamma);");
     }
     if (p->use_lut_3d) {
         shgen_decl(sh, "uniform sampler3D lut_3d;");
+        // For the 3DLUT we are arbitrarily using 2.4 as input gamma so
+        // we pull up to that space first before passing it through the texture.
+        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(1/2.4));");
         shgen_add(sh, "color.rgb = $texture3D$(lut_3d, color.rgb).rgb;");
     }
-    if (p->opts.srgb) {
-        // Go from "linear" (0.45) to BT.709 to true linear to sRGB
-        if (!p->use_lut_3d) {
-            // Unless we are using a 3DLUT, in which case we already did this
-            // earlier.
-            shgen_add(sh, "color.rgb = pow(color.rgb, vec3(0.45));");
-        }
-        gen_bt709_expand(sh, "color.rgb");
+    if (p->opts.srgb)
         gen_srgb_compand(sh, "color.rgb");
-    }
     if (p->dither_texture != 0) {
         shgen_decl(sh, "uniform sampler2D dither;");
         shgen_decl(sh, "uniform vec2 dither_size;");
@@ -1249,13 +1247,19 @@ static void gen_write_screen(struct shader_gen *sh, struct gl_video *p)
 // For RGBA, in the pixel shader.
 static void gen_write_color_osd(struct shader_gen *sh, struct gl_video *p)
 {
-    if (p->opts.srgb && !p->use_lut_3d) {
-        // If no 3dlut is being used, we need to pull up to linear light for
-        // the sRGB function. *IF* 3dlut is used, we do not.
-        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(1.0/0.45));");
+    if (p->opts.srgb || p->use_lut_3d) {
+        // Although we are not scaling in linear light, both 3DLUT and SRGB
+        // still operate on linear light inputs so we have to convert to it
+        // before either step can be applied.
+        gen_bt709_expand(sh, "color.rgb");
+        // NOTE: This always applies the true BT709, maybe we need to use
+        // approx-gamma here too? Maybe we should assume something else
+        // entirely for the OSD?
     }
     if (p->use_lut_3d) {
         shgen_decl(sh, "uniform sampler3D lut_3d;");
+        // Convert to the 3DLUT's 2.4 source gamma
+        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(1/2.4));");
         shgen_add(sh, "color.rgb = $texture3D$(lut_3d, color.rgb).rgb;");
     }
     if (p->opts.srgb)
@@ -1323,11 +1327,9 @@ static void compile_shaders(struct gl_video *p)
 
     bool scale_sep = p->opts.scale_sep && p->scalers[0].kernel;
 
-    // We want to do scaling in linear light. Scaling is closely connected to
-    // texture sampling due to how the shader is structured (or if GL bilinear
-    // scaling is used). The purpose of the "indirect" pass is to convert the
-    // input video to linear RGB.
-    // Another purpose is reducing input to a single texture for scaling.
+    // The purpose of the "indirect" pass is to convert the input video to
+    // RGB (optionally also converting it to linear light). Another purpose is
+    // reducing input to a single texture for scaling.
     bool use_indirect = p->opts.indirect;;
 
     build_conv_video(sh, p, &use_indirect);
@@ -1700,6 +1702,11 @@ void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
     gl->ActiveTexture(GL_TEXTURE0);
 
     p->use_lut_3d = true;
+    if (p->opts.srgb) {
+        MP_WARN(p, "Both icc-profile and srgb specified, disabling the latter.\n");
+        p->opts.srgb = false;
+    }
+
     check_gl_features(p);
 
     debug_check_gl(p, "after 3d lut creation");
@@ -1767,6 +1774,9 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
     p->colorspace = csp;
 
     if (p->is_rgb && (p->opts.srgb || p->use_lut_3d)) {
+        // If we're opening an RGB source like a png file or similar, we just
+        // sample it using GL_SRGB which treats it as an sRGB source and
+        // pretend it's linear as far as CMS is concerned.
         p->is_linear_rgb = true;
         p->image.planes[0].gl_internal_format = GL_SRGB;
     }
@@ -2306,10 +2316,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
     bool have_srgb = gl->mpgl_caps & MPGL_CAP_SRGB_TEX;
-
-    // srgb_compand() not available
-    if (gl->glsl_version < 130)
-        have_srgb = false;
+    bool have_mix = gl->glsl_version >= 130;
 
     char *disabled[10];
     int n_disabled = 0;
@@ -2344,17 +2351,31 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
-    if (!have_srgb && p->opts.srgb) {
+    int use_cms = p->opts.srgb || p->use_lut_3d;
+
+    // srgb_compand() not available
+    if (!have_mix && p->opts.srgb) {
         p->opts.srgb = false;
-        disabled[n_disabled++] = "sRGB";
+        disabled[n_disabled++] = "sRGB output (GLSL version)";
     }
-    if (!have_fbo && p->use_lut_3d) {
+    if (!have_fbo && use_cms) {
+        p->opts.srgb = false;
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (FBO)";
     }
-    if (!have_srgb && p->use_lut_3d) {
-        p->use_lut_3d = false;
-        disabled[n_disabled++] = "color management (sRGB)";
+    if (p->is_rgb) {
+        // When opening RGB files we use SRGB to expand
+        if (!have_srgb && use_cms) {
+            p->opts.srgb = false;
+            p->use_lut_3d = false;
+            disabled[n_disabled++] = "color management (SRGB textures)";
+        }
+    } else {
+        // When opening non-RGB files we use bt709_expand()
+        if (!have_mix && p->use_lut_3d) {
+            p->use_lut_3d = false;
+            disabled[n_disabled++] = "color management (GLSL version)";
+        }
     }
 
     if (!have_fbo) {
