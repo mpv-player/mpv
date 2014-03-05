@@ -60,10 +60,12 @@ struct priv {
     int connect;
     int autostart;
     int stdlayout;
+    int last_chunk;
     volatile int paused;
     volatile int underrun;
     volatile float callback_interval;
     volatile float callback_time;
+    volatile float last_ok_time;      // last time real audio was played
 
     int num_ports;
     struct port_ring ports[MP_NUM_CHANNELS];
@@ -128,11 +130,15 @@ process(jack_nframes_t nframes, void *arg)
             underrun = 1;
     }
 
+    float now = mp_time_us() / 1000000.0;
+
     if (underrun)
         p->underrun = 1;
 
+    if (!p->underrun)
+        p->last_ok_time = now;
+
     if (p->estimate) {
-        float now = mp_time_us() / 1000000.0;
         float diff = p->callback_time + p->callback_interval - now;
         if ((diff > -0.002) && (diff < 0.002))
             p->callback_time += p->callback_interval;
@@ -289,13 +295,22 @@ static float get_delay(struct ao *ao)
     struct priv *p = ao->priv;
     int buffered = mp_ring_buffered(p->ports[0].ring); // could be less
     float in_jack = p->jack_latency;
+    float now = mp_time_us() / 1000000.0;
 
     if (p->estimate && p->callback_interval > 0) {
         float elapsed = mp_time_us() / 1000000.0 - p->callback_time;
         in_jack += p->callback_interval - elapsed;
-        if (in_jack < 0)
-            in_jack = 0;
     }
+
+    if (p->underrun && !buffered && p->last_chunk) {
+        // Report correct buffer drainage, when our buffer is empty, but jack
+        // and/or the audio device still have some audio to play.
+        // Assumes audio clock goes at about the same speed as the system time.
+        in_jack += p->last_ok_time - now;
+    }
+
+    if (in_jack < 0)
+        in_jack = 0;
 
     return (float)buffered / (float)ao->bps + in_jack;
 }
@@ -369,6 +384,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     }
 
     p->underrun = 0;
+    p->last_chunk = flags & AOPLAY_FINAL_CHUNK;
     return ret / ao->sstride;
 }
 
