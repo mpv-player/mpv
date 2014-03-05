@@ -84,7 +84,7 @@ void main() {
 #ifdef USE_OSD_LINEAR_CONV
     // If no 3dlut is being used, we need to pull up to linear light for
     // the sRGB function. *IF* 3dlut is used, we do not.
-    color.rgb = pow(color.rgb, vec3(1.0/0.45));
+    color.rgb = bt709_expand(color.rgb);
 #endif
 #ifdef USE_OSD_3DLUT
     color = vec4(texture3D(lut_3d, color.rgb).rgb, color.a);
