@@ -124,6 +124,7 @@ struct scaler {
     struct filter_kernel *kernel;
     GLuint gl_lut;
     const char *lut_name;
+    const char *lut_samplert;
 
     // kernel points here
     struct filter_kernel kernel_storage;
@@ -174,8 +175,6 @@ struct gl_video {
     bool is_linear_rgb;
     bool has_alpha;
     char color_swizzle[5];
-
-    float input_gamma, conv_gamma;
 
     // per pixel (full pixel when packed, each component when planar)
     int plane_bits;
@@ -269,11 +268,6 @@ static const struct packed_fmt_entry mp_packed_formats[] = {
     {IMGFMT_RGBA64,     2, {1, 2, 3, 4}},
     {IMGFMT_BGRA64,     2, {3, 2, 1, 4}},
     {0},
-};
-
-static const char *osd_shaders[SUBBITMAP_COUNT] = {
-    [SUBBITMAP_LIBASS] = "frag_osd_libass",
-    [SUBBITMAP_RGBA] =   "frag_osd_rgba",
 };
 
 static const struct gl_video_opts gl_video_opts_def = {
@@ -560,12 +554,6 @@ static void update_uniforms(struct gl_video *p, GLuint program)
         gl->UniformMatrix4x3fv(loc, 1, GL_TRUE, &yuv2rgb[0][0]);
     }
 
-    gl->Uniform1f(gl->GetUniformLocation(program, "input_gamma"),
-                  p->input_gamma);
-
-    gl->Uniform1f(gl->GetUniformLocation(program, "conv_gamma"),
-                  p->conv_gamma);
-
     float gamma = p->opts.gamma ? p->opts.gamma : 1.0;
     gl->Uniform3f(gl->GetUniformLocation(program, "inv_gamma"),
                   1.0 / (cparams.rgamma * gamma),
@@ -576,7 +564,7 @@ static void update_uniforms(struct gl_video *p, GLuint program)
         char textures_n[32];
         char textures_size_n[32];
         snprintf(textures_n, sizeof(textures_n), "texture%d", n);
-        snprintf(textures_size_n, sizeof(textures_size_n), "textures_size[%d]", n);
+        snprintf(textures_size_n, sizeof(textures_size_n), "texture%d_size", n);
 
         gl->Uniform1i(gl->GetUniformLocation(program, textures_n), n);
         if (p->gl_target == GL_TEXTURE_2D) {
@@ -654,14 +642,14 @@ static void update_all_uniforms(struct gl_video *p)
 }
 
 #define SECTION_HEADER "#!section "
-
+/*
 static char *get_section(void *talloc_ctx, struct bstr source,
                          const char *section)
 {
     char *res = talloc_strdup(talloc_ctx, "");
     bool copy = false;
     while (source.len) {
-        struct bstr line = bstr_strip_linebreaks(bstr_getline(source, &source));
+        struct bstr line = bstr_strip_linebreaks(bstr_getline(source, source));
         if (bstr_eatstart(&line, bstr0(SECTION_HEADER))) {
             copy = bstrcmp0(line, section) == 0;
         } else if (copy) {
@@ -675,17 +663,15 @@ static char *t_concat(void *talloc_ctx, const char *s1, const char *s2)
 {
     return talloc_asprintf(talloc_ctx, "%s%s", s1, s2);
 }
-
-static GLuint create_shader(struct gl_video *p, GLenum type, const char *header,
-                            const char *source)
+*/
+static GLuint create_shader(struct gl_video *p, GLenum type, const char *source)
 {
     GL *gl = p->gl;
 
     void *tmp = talloc_new(NULL);
-    const char *full_source = t_concat(tmp, header, source);
 
     GLuint shader = gl->CreateShader(type);
-    gl->ShaderSource(shader, 1, &full_source, NULL);
+    gl->ShaderSource(shader, 1, &source, NULL);
     gl->CompileShader(shader);
     GLint status;
     gl->GetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -696,7 +682,7 @@ static GLuint create_shader(struct gl_video *p, GLenum type, const char *header,
     const char *typestr = type == GL_VERTEX_SHADER ? "vertex" : "fragment";
     if (mp_msg_test(p->log, pri)) {
         MP_MSG(p, pri, "%s shader source:\n", typestr);
-        mp_log_source(p->log, pri, full_source);
+        mp_log_source(p->log, pri, source);
     }
     if (log_length > 1) {
         GLchar *logstr = talloc_zero_size(tmp, log_length + 1);
@@ -711,10 +697,10 @@ static GLuint create_shader(struct gl_video *p, GLenum type, const char *header,
 }
 
 static void prog_create_shader(struct gl_video *p, GLuint program, GLenum type,
-                               const char *header,  const char *source)
+                               const char *source)
 {
     GL *gl = p->gl;
-    GLuint shader = create_shader(p, type, header, source);
+    GLuint shader = create_shader(p, type, source);
     gl->AttachShader(program, shader);
     gl->DeleteShader(shader);
 }
@@ -744,115 +730,425 @@ static void bind_attrib_locs(GL *gl, GLuint program)
     gl->BindAttribLocation(program, VERTEX_ATTRIB_TEXCOORD, "vertex_texcoord");
 }
 
-#define PRELUDE_END "// -- prelude end\n"
-
 static GLuint create_program(struct gl_video *p, const char *name,
-                             const char *header, const char *vertex,
-                             const char *frag)
+                             const char *vertex, const char *frag)
 {
     GL *gl = p->gl;
-    MP_VERBOSE(p, "compiling shader program '%s', header:\n", name);
-    const char *real_header = strstr(header, PRELUDE_END);
-    real_header = real_header ? real_header + strlen(PRELUDE_END) : header;
-    mp_log_source(p->log, MSGL_V, real_header);
+    MP_VERBOSE(p, "compiling shader program '%s'.\n", name);
     GLuint prog = gl->CreateProgram();
-    prog_create_shader(p, prog, GL_VERTEX_SHADER, header, vertex);
-    prog_create_shader(p, prog, GL_FRAGMENT_SHADER, header, frag);
+    prog_create_shader(p, prog, GL_VERTEX_SHADER, vertex);
+    prog_create_shader(p, prog, GL_FRAGMENT_SHADER, frag);
     bind_attrib_locs(gl, prog);
     link_shader(p, prog);
     return prog;
 }
 
-static void shader_def(char **shader, const char *name,
-                       const char *value)
+struct shader_var {
+    char *name, *val;
+    bool reserved;
+};
+
+struct shader_gen {
+    GL *gl;
+
+    int temp; // allocate names for temporary variables
+
+    struct shader_var **vars;
+    int num_vars;
+    struct shader_var *cur_var;
+};
+
+static struct shader_var *shgen_find_var(struct shader_gen *sh, char *name)
 {
-    *shader = talloc_asprintf_append(*shader, "#define %s %s\n", name, value);
+    for (int n = 0; n < sh->num_vars; n++) {
+        if (strcmp(sh->vars[n]->name, name) == 0)
+            return sh->vars[n];
+    }
+    return NULL;
 }
 
-static void shader_def_opt(char **shader, const char *name, bool b)
+static struct shader_var *shgen_find_or_add_var(struct shader_gen *sh, char *name)
 {
-    if (b)
-        shader_def(shader, name, "1");
+    struct shader_var *var = shgen_find_var(sh, name);
+    if (!var) {
+        assert(name[0] == '$' && name[strlen(name) - 1] == '$');
+        var = talloc_ptrtype(sh, var);
+        *var = (struct shader_var){
+            .name = talloc_strdup(var, name),
+        };
+        MP_TARRAY_APPEND(sh, sh->vars, sh->num_vars, var);
+    }
+    return var;
 }
 
-static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
+// Add the given variable (clear it if it already exists), and make future
+// calls to shgen_add() append to the variable.
+static void shgen_start_var(struct shader_gen *sh, char *name)
 {
-    const char *target = scaler->index == 0 ? "SAMPLE_L" : "SAMPLE_C";
-    if (!scaler->kernel) {
-        *shader = talloc_asprintf_append(*shader, "#define %s sample_%s\n",
-                                         target, scaler->name);
+    sh->cur_var = shgen_find_or_add_var(sh, name);
+    assert(!sh->cur_var->reserved);
+    // Initialize/reset.
+    sh->cur_var->val = talloc_strdup(sh, "");
+}
+
+// Close the current variable. (Useful for debugging only.)
+static void shgen_stop_var(struct shader_gen *sh)
+{
+    sh->cur_var = NULL;
+}
+
+// Set the variable's contents to val.
+static void shgen_def_var(struct shader_gen *sh, char *name, char *val)
+{
+    struct shader_var *var = shgen_find_or_add_var(sh, name);
+    assert(!var->reserved);
+    var->val = talloc_strdup(sh, val);
+}
+
+#define SH_DECL "#--decl: "
+
+#define shgen_append(sh, ...) \
+    ((sh)->cur_var->val = talloc_asprintf_append((sh)->cur_var->val, __VA_ARGS__))
+
+// Append text + a newline to the current variable.
+#define shgen_add(sh, ...) \
+    (shgen_append(sh, __VA_ARGS__), shgen_append(sh, "\n"))
+
+// Append text that should show up in the shader header. Assumes no line breaks.
+// (It prepends SH_DECL as markers, and later all lines starting with it are
+//  filtered and moved.)
+#define shgen_decl(sh, ...) \
+    shgen_add(sh, SH_DECL __VA_ARGS__)
+
+// Return text with all variables recursively expanded.
+// Everything goes to hell if definitions are recursive.
+// Also explodes if variables are missing.
+static char *shgen_expand_vars(struct shader_gen *sh, char *text,
+                               bool ignore_missing)
+{
+    bool work = true;
+    while (work) {
+        work = false;
+        char *new = talloc_strdup(sh, "");
+        while (1) {
+            char *next = strchr(text, '$');
+            if (!next)
+                break;
+            char *end = strchr(next + 1, '$');
+            assert(end);
+            bstr name = {next, end - next + 1};
+            char *val = NULL;
+            for (int n = 0; n < sh->num_vars; n++) {
+                if (bstr_equals0(name, sh->vars[n]->name)) {
+                    val = sh->vars[n]->val;
+                    break;
+                }
+            }
+            assert(val || ignore_missing);
+            if (val) {
+                new = talloc_asprintf_append_buffer(new, "%.*s%s",
+                            (int)(next - text), text, val);
+                work = true;
+            } else {
+                new = talloc_asprintf_append_buffer(new, "%.*s",
+                            (int)(end + 1 - text), text);
+            }
+            text = end + 1;
+        }
+        text = talloc_asprintf_append_buffer(new, "%s", text);
+    }
+    return text;
+}
+
+// Take the given ","-separated list of variable names, and replace all
+// occurrences of them in the current variable with temporary names.
+// E.g.:
+//  list == "$vara$,$varb$,"$varc$"
+//  and sh->cur_var->val == "hello $vara$ $varb$ $vard$ $vara$"
+// would lead to
+//  sh->cur_var->val == "hello t1 t2 $vard$ t1"
+// This is pure text replacement, and doesn't e.g. affect $vara$ in sh->vars,
+// but since it might silently conflict, we trigger an explicit error should
+// the names conflict.
+static void shgen_replace_temps(struct shader_gen *sh, char *list)
+{
+    int t = sh->temp++;
+    struct shader_gen *tmp = talloc_zero(NULL, struct shader_gen);
+    bstr blist = bstr0(list);
+    while (blist.len) {
+        bstr item;
+        bstr_split_tok(blist, ",", &item, &blist);
+        if (!item.len)
+            break;
+        assert(item.start[0] == '$' && item.start[item.len - 1] == '$');
+        char name[20], value[20];
+        snprintf(name, sizeof(name), "%.*s", BSTR_P(item));
+        snprintf(value, sizeof(value), "%.*s%d",
+                 BSTR_P(bstr_splice(item, 1, -1)), t);
+        shgen_find_or_add_var(sh, name)->reserved = true;
+        shgen_def_var(tmp, name, value);
+    }
+    sh->cur_var->val =
+        talloc_steal(sh, shgen_expand_vars(tmp, sh->cur_var->val, true));
+    talloc_free(tmp);
+}
+
+static char *shgen_make_shader_text(struct shader_gen *sh, char *varname)
+{
+    struct shader_var *var = shgen_find_var(sh, varname);
+    assert(var);
+    assert(!var->reserved);
+    char *text = shgen_expand_vars(sh, var->val, false);
+    char *header = talloc_strdup(sh, "");
+    char *body = talloc_strdup(sh, "");
+    // Extract the magically marked "declarations" and move them to before
+    // the shader function body.
+    bstr stuff = bstr0(text);
+    while (stuff.len) {
+        bstr line = bstr_strip_linebreaks(bstr_getline(stuff, &stuff));
+        char **dst = &body;
+        char *p = "  ";
+        if (bstr_eatstart0(&line, SH_DECL)) {
+            dst = &header;
+            p = "";
+        }
+        if (!line.len)
+            continue;
+        *dst = talloc_asprintf_append_buffer(*dst, "%s%.*s\n", p, BSTR_P(line));
+    }
+    return talloc_asprintf(sh,
+        "#version %d\n"
+        "%s"
+        "void main() {\n"
+        "%s"
+        "}", sh->gl->glsl_version, header, body);
+}
+
+// Generate a shader out of the variables stored in sh.
+// $vertexshader$ is used as contents for the vertex shader.
+// $pixelshader$ is used as contents for the pixel shader.
+static GLuint shgen_shader(struct shader_gen *sh, struct gl_video *p, char *name)
+{
+    char *vertex = shgen_make_shader_text(sh, "$vertexshader$");
+    char *pixel = shgen_make_shader_text(sh, "$pixelshader$");
+    return create_program(p, name, vertex, pixel);
+}
+
+// Read weights from the scaler's lookup table, and declare and set a variable
+// named dstprefix + N for each Nth weight coefficient
+static void gen_lookup_weights(struct shader_gen *sh, const char *dstprefix,
+                               struct scaler *scaler, char *coord)
+{
+    // The textures read here are initialized in init_scaler().
+    int size = scaler->kernel->size;
+    const struct lut_tex_format *fmt = &lut_tex_formats[size];
+    int numch = size / fmt->pixels; // channels per pixel (1-4)
+    for (int n = 0; n < size; n++) {
+        int curpixel_n = n / numch;
+        char curpixel[10];
+        snprintf(curpixel, sizeof(curpixel), "$wp$_%d", curpixel_n);
+        if (n % numch == 0) {
+            if (fmt->pixels > 1) {
+                // get this pixel on the X-axis
+                float x = (curpixel_n + 0.5) / fmt->pixels;
+                shgen_add(sh, "vec4 %s = $texture2D$(%s, vec2(%f, %s));",
+                          curpixel, scaler->lut_name, x, coord);
+            } else {
+                shgen_add(sh, "vec4 %s = $texture1D$(%s, %s);",
+                          curpixel, scaler->lut_name, coord);
+            }
+        }
+        const char *comp[] = {"r", "g", "b", "a"};
+        shgen_add(sh, "float %s%d = %s.%s;", dstprefix, n, curpixel,
+                  comp[n % numch]);
+    }
+    shgen_replace_temps(sh, "$wp$");
+}
+
+static void gen_single_fetch(struct shader_gen *sh, char *tex, char *tc,
+                             char *pt, int rx, int ry)
+{
+    if (rx == 0 && ry == 0) {
+        shgen_append(sh, "$texture2D$(%s, %s)", tex, tc);
     } else {
-        int size = scaler->kernel->size;
-        if (pass != -1) {
+        shgen_append(sh, "$texture2D$(%s, %s + %s * vec2(%d, %d))",
+                     tex, tc, pt, rx, ry);
+    }
+}
+
+// Dumb hack to automagically sample from 2 chroma planes at once.
+// (Will sample from texture1 and texture2.)
+#define CHR_COMBINE 1337
+
+static void gen_fetch_texel(struct shader_gen *sh, int tex, char *tc, char *pt,
+                            int rx, int ry)
+{
+    if (tex == CHR_COMBINE) {
+        shgen_append(sh, "vec4(");
+        gen_single_fetch(sh, "texture1", tc, pt, rx, ry);
+        shgen_append(sh, ".r, ");
+        gen_single_fetch(sh, "texture2", tc, pt, rx, ry);
+        shgen_append(sh, ".r, 0, 1)");
+    } else {
+        char texname[10];
+        snprintf(texname, sizeof(texname), "texture%d", tex);
+        gen_single_fetch(sh, texname, tc, pt, rx, ry);
+    }
+}
+
+static void gen_tex_size(struct shader_gen *sh, char *dstvar, int tex)
+{
+    if (tex == CHR_COMBINE) {
+        shgen_add(sh, "vec2 %s = texture1_size;", dstvar);
+    } else {
+        shgen_add(sh, "vec2 %s = texture%d_size;", dstvar, tex);
+    }
+}
+
+static void gen_convolution(struct shader_gen *sh, char *dstvar,
+                            struct scaler *scaler, int tex, char *tc)
+{
+    int size = scaler->kernel->size;
+    gen_tex_size(sh, "$tex_size$", tex);
+    shgen_add(sh, "vec2 $pt$ = 1.0 / $tex_size$;");
+    shgen_add(sh, "vec2 $fcoord$ = fract(%s * $tex_size$ - 0.5);", tc);
+    shgen_add(sh, "vec2 $base$ = %s - $fcoord$ * $pt$ - $pt$ * %d;",
+              tc, size / 2 - 1);
+    gen_lookup_weights(sh, "$wx$_", scaler, "$fcoord$.x");
+    gen_lookup_weights(sh, "$wy$_", scaler, "$fcoord$.y");
+    shgen_add(sh, "vec4 %s = vec4(0);", dstvar);
+    shgen_add(sh, "vec4 $line$;");
+    for (int y = 0; y < size; y++) {
+        shgen_add(sh, "$line$ = vec4(0);");
+        for (int x = 0; x < size; x++) {
+            shgen_append(sh, "$line$ += $wx$_%d * ", x);
+            gen_fetch_texel(sh, tex, "$base$", "$pt$", x, y);
+            shgen_append(sh, ";\n");
+        }
+        shgen_add(sh, "%s += $wy$_%d * $line$;", dstvar, y);
+    }
+    shgen_replace_temps(sh, "$tex_size$,$pt$,$fcoord$,$base$,$wx$,$wy$,$line$");
+}
+
+// dir is the scale direction: dir=0: x, dir=1: y
+static void gen_convolution_sep(struct shader_gen *sh, char *dstvar, int dir,
+                                struct scaler *scaler, int tex, char *tc)
+{
+    char *d = dir == 0 ? "x" : "y";
+    char *dirvec = dir == 0 ? "vec2(1,0)" : "vec2(0,1)";
+    int dx = dir == 0, dy = dir != 0;
+    int size = scaler->kernel->size;
+    gen_tex_size(sh, "$tex_size$", tex);
+    shgen_add(sh, "float $pt$ = 1.0 / $tex_size$.%s;", d);
+    shgen_add(sh, "float $fcoord$ = fract(%s * $tex_size$ - 0.5).%s;",
+              tc, d);
+    shgen_add(sh, "vec2 $base$ = %s - %s * ($fcoord$ * $pt$ + $pt$ * %d);",
+              tc, dirvec, size / 2 - 1);
+    gen_lookup_weights(sh, "$w$_", scaler, "$fcoord$");
+    shgen_add(sh, "vec4 %s = vec4(0);", dstvar);
+    //shgen_add(sh, "vec4 $t$;");
+    for (int n = 0; n < size; n++) {
+        shgen_append(sh, "%s += $w$_%d * ", dstvar, n);
+        gen_fetch_texel(sh, tex, "$base$", "$pt$", dx * n, dy * n);
+        shgen_append(sh, ";\n");
+    }
+    shgen_replace_temps(sh, "$tex_size$,$pt$,$fcoord$,$base$,$w$");
+}
+
+static void gen_tex_decl(struct shader_gen *sh, int tex)
+{
+    shgen_decl(sh, "uniform $sampler_video$ texture%d;", tex);
+    shgen_decl(sh, "uniform vec2 texture%d_size;", tex);
+}
+
+// pass: -1 = disabled, 0 = full scaling, 1 = first pass, 2 = second pass
+// this also declares uniform parameters for the texture
+static void gen_sampler(struct shader_gen *sh, char *dstvar,
+                        struct scaler *scaler, int pass, int tex, char *tc)
+{
+    if (tex == CHR_COMBINE) {
+        gen_tex_decl(sh, 1);
+        gen_tex_decl(sh, 2);
+    } else {
+        gen_tex_decl(sh, tex);
+    }
+
+    if (scaler->lut_name && scaler->lut_samplert)
+        shgen_decl(sh, "uniform %s %s;", scaler->lut_samplert, scaler->lut_name);
+
+    if (!scaler || pass < 0 || strcmp(scaler->name, "bilinear") == 0) {
+        shgen_append(sh, "vec4 %s = ", dstvar);
+        gen_fetch_texel(sh, tex, tc, "none", 0, 0);
+        shgen_append(sh, ";\n");
+    } else if (!scaler->kernel) {
+        shgen_append(sh, "sample_%s(", scaler->name);
+        shgen_append(sh, "texture%d, texture%d_size, %s);\n", tex, tex, tc);
+    } else {
+        if (pass > 0) {
             // The direction/pass assignment is rather arbitrary, but fixed in
             // other parts of the code (like FBO setup).
-            const char *direction = pass == 0 ? "0, 1" : "1, 0";
-            *shader = talloc_asprintf_append(*shader, "#define %s(p0, p1, p2) "
-                "sample_convolution_sep%d(vec2(%s), %s, p0, p1, p2)\n",
-                target, size, direction, scaler->lut_name);
+            gen_convolution_sep(sh, dstvar, pass == 1 ? 1 : 0, scaler, tex, tc);
         } else {
-            *shader = talloc_asprintf_append(*shader, "#define %s(p0, p1, p2) "
-                "sample_convolution%d(%s, p0, p1, p2)\n",
-                target, size, scaler->lut_name);
+            gen_convolution(sh, dstvar, scaler, tex, tc);
         }
     }
 }
 
-// return false if RGB or 4:4:4 YUV
-static bool input_is_subsampled(struct gl_video *p)
+// Sample from video texture. Depending on the situation, this can build the
+// entire scaler, or parts of the scaler, or even just read without scaling.
+// scale_l is for luma, scale_c for chroma.
+// -1 = disabled, 0 = full pass, 1 = first pass
+static void gen_read_video(struct shader_gen *sh, struct gl_video *p,
+                           int scale_l, int scale_c)
 {
-    for (int i = 0; i < p->plane_count; i++)
-        if (p->image_desc.xs[i] || p->image_desc.ys[i])
-            return true;
-    return false;
-}
-
-static void compile_shaders(struct gl_video *p)
-{
-    GL *gl = p->gl;
-
-    delete_shaders(p);
-
-    void *tmp = talloc_new(NULL);
-
-    struct bstr src = bstr0(vo_opengl_shaders);
-    char *vertex_shader = get_section(tmp, src, "vertex_all");
-    char *shader_prelude = get_section(tmp, src, "prelude");
-    char *s_video = get_section(tmp, src, "frag_video");
-
-    char *header = talloc_asprintf(tmp, "#version %d\n%s%s", gl->glsl_version,
-                                   shader_prelude, PRELUDE_END);
-
+    shgen_decl(sh, "$pixel_in$ vec2 texcoord;");
+    shgen_add(sh, "vec2 chr_texcoord = texcoord;");
     if (p->gl_target == GL_TEXTURE_RECTANGLE) {
-        shader_def(&header, "VIDEO_SAMPLER", "sampler2DRect");
-        shader_def_opt(&header, "USE_RECTANGLE", true);
+        shgen_decl(sh, "uniform vec2 chroma_div;");
+        shgen_add(sh, "chr_texcoord = chr_texcoord * chroma_div;");
     } else {
-        shader_def(&header, "VIDEO_SAMPLER", "sampler2D");
+        // Texture coordinates are [0,1], and chroma plane coordinates are
+        // magically rescaled.
+    }
+    shgen_decl(sh, "uniform vec2 chroma_center_offset;");
+    shgen_add(sh, "chr_texcoord = chr_texcoord + chroma_center_offset;");
+
+    struct scaler *sl = &p->scalers[0];
+    struct scaler *sc = &p->scalers[1];
+    if (p->image_format == IMGFMT_NV12 || p->image_format == IMGFMT_NV21) {
+        gen_sampler(sh, "c1", sl, scale_l, 0, "texcoord");
+        gen_sampler(sh, "c2", sc, scale_c, 1, "chr_texcoord");
+        shgen_add(sh, "vec4 color = vec4(c1.r, c2.rg, 1.0);");
+    } else if (p->plane_count > 1) {
+        gen_sampler(sh, "c1", sl, scale_l, 0, "texcoord");
+        gen_sampler(sh, "c2", sc, scale_c, CHR_COMBINE, "chr_texcoord");
+        shgen_add(sh, "vec4 color = vec4(c1.r, c2.rg, 1.0);");
+    } else {
+        gen_sampler(sh, "color", sl, scale_l, 0, "texcoord");
     }
 
-    // Need to pass alpha through the whole chain. (Not needed for OSD shaders.)
-    if (p->opts.alpha_mode == 1)
-        shader_def_opt(&header, "USE_ALPHA", p->has_alpha);
-
-    char *header_osd = talloc_strdup(tmp, header);
-    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", p->opts.srgb &&
-                                                      !p->use_lut_3d);
-    shader_def_opt(&header_osd, "USE_OSD_3DLUT", p->use_lut_3d);
-    shader_def_opt(&header_osd, "USE_OSD_SRGB", p->opts.srgb);
-
-    for (int n = 0; n < SUBBITMAP_COUNT; n++) {
-        const char *name = osd_shaders[n];
-        if (name) {
-            char *s_osd = get_section(tmp, src, name);
-            p->osd_programs[n] =
-                create_program(p, name, header_osd, vertex_shader, s_osd);
-        }
+    if (p->opts.alpha_mode > 0 && p->has_alpha && p->plane_count > 3) {
+        gen_sampler(sh, "a1", sl, scale_l, 3, "texcoord");
+        shgen_add(sh, "color.a = a1.r;");
     }
 
-    char *header_conv = talloc_strdup(tmp, "");
-    char *header_final = talloc_strdup(tmp, "");
-    char *header_sep = NULL;
+    if (p->color_swizzle[0])
+        shgen_add(sh, "color = color.%s;", p->color_swizzle);
 
+    if (p->is_yuv && !p->is_packed_yuv && p->plane_count == 1) {
+        // Gray input. Still use the color matrix to deal with color levels.
+        // NOTE: actually slightly wrong for 16 bit input video, and completely
+        //       wrong for 9/10 bit input
+        shgen_add(sh, "color.gb = vec2(128.0/255.0);");
+    }
+}
+
+// Convert video to RGB.
+// use_indirect: is set to true if the video should be converted to a RGB
+//               FBO before scaling.
+static void build_conv_video(struct shader_gen *sh, struct gl_video *p,
+                             bool *use_indirect)
+{
     float input_gamma = 1.0;
     float conv_gamma = 1.0;
 
@@ -864,58 +1160,177 @@ static void compile_shaders(struct gl_video *p)
     if (!p->is_linear_rgb && (p->opts.srgb || p->use_lut_3d))
         conv_gamma *= 1.0 / 0.45;
 
-    p->input_gamma = input_gamma;
-    p->conv_gamma = conv_gamma;
+    bool convert_input_gamma = input_gamma != 1.0;
+    bool convert_input_to_linear = conv_gamma != 1.0;
 
-    bool convert_input_gamma = p->input_gamma != 1.0;
-    bool convert_input_to_linear = p->conv_gamma != 1.0;
+    shgen_start_var(sh, "$conv_src$");
 
-    if (p->image_format == IMGFMT_NV12 || p->image_format == IMGFMT_NV21) {
-        shader_def(&header_conv, "USE_CONV", "CONV_NV12");
-    } else if (p->plane_count > 1) {
-        shader_def(&header_conv, "USE_CONV", "CONV_PLANAR");
+    if (convert_input_gamma)
+        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(%f));", input_gamma);
+    if (!p->is_rgb) {
+        shgen_decl(sh, "uniform mat4x3 colormatrix;");
+        shgen_add(sh, "color.rgb = mat3(colormatrix) * color.rgb + colormatrix[3];");
+        shgen_add(sh, "color = clamp(color, 0, 1);");
     }
-
-    if (p->color_swizzle[0])
-        shader_def(&header_conv, "USE_COLOR_SWIZZLE", p->color_swizzle);
-    shader_def_opt(&header_conv, "USE_SWAP_UV", p->image_format == IMGFMT_NV21);
-    shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && !p->is_packed_yuv
-                                              && p->plane_count == 1);
-    shader_def_opt(&header_conv, "USE_INPUT_GAMMA", convert_input_gamma);
-    shader_def_opt(&header_conv, "USE_COLORMATRIX", !p->is_rgb);
-    shader_def_opt(&header_conv, "USE_CONV_GAMMA", convert_input_to_linear);
-    if (p->opts.alpha_mode > 0 && p->has_alpha && p->plane_count > 3)
-        shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
     if (p->opts.alpha_mode == 2 && p->has_alpha)
-        shader_def(&header_conv, "USE_ALPHA_BLEND", "1");
+        shgen_add(sh, "color.rgb = vec4(color.rgb * color.a, 1);");
+    if (p->opts.alpha_mode == 1)
+        shgen_add(sh, "color.a = 1;");
+    if (convert_input_to_linear)
+        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(%f));", conv_gamma);
 
-    shader_def_opt(&header_final, "USE_LINEAR_CONV_INV", p->use_lut_3d);
-    shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma > 0);
-    shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
-    shader_def_opt(&header_final, "USE_SRGB", p->opts.srgb);
-    shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
-    shader_def_opt(&header_final, "USE_TEMPORAL_DITHER", p->opts.temporal_dither);
+    // Don't sample from input video textures before converting the input to
+    // linear light. (Unneeded when sRGB textures are used.)
+    // The conv stage runs always in the first shader, but this means the first
+    // shader must not scale. The "indirect" stage suffices this requirement.
+    *use_indirect |= convert_input_gamma || convert_input_to_linear;
 
-    if (p->opts.scale_sep && p->scalers[0].kernel) {
-        header_sep = talloc_strdup(tmp, "");
-        shader_def_opt(&header_sep, "FIXED_SCALE", true);
-        shader_setup_scaler(&header_sep, &p->scalers[0], 0);
-        shader_setup_scaler(&header_final, &p->scalers[0], 1);
-    } else {
-        shader_setup_scaler(&header_final, &p->scalers[0], -1);
+    shgen_stop_var(sh);
+}
+
+static void gen_srgb_compand(struct shader_gen *sh, char *var)
+{
+    shgen_add(sh, "%s = mix(%s * 12.92,"
+                  "  1.055 * pow(%s, vec3(1.0/2.4)) - vec3(0.055),"
+                  "  lessThanEqual(vec3(0.0031308), %s));", var, var, var, var);
+}
+
+static void gen_bt709_expand(struct shader_gen *sh, char *var)
+{
+    shgen_add(sh, "%s = mix(%s / 4.5,"
+                  "  pow((%s + vec3(0.099))/1.099, vec3(1/0.45)),"
+                  "  lessThanEqual(vec3(0.0812), %s));", var, var, var, var);
+}
+
+// Rendering to the screen.
+static void gen_write_screen(struct shader_gen *sh, struct gl_video *p)
+{
+    if (p->use_lut_3d) {
+        // Convert from linear RGB to gamma RGB before putting it through the
+        // 3D-LUT in the final stage.
+        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(0.45));");
     }
+    if (p->opts.gamma > 0) {
+        shgen_decl(sh, "uniform vec3 inv_gamma;");
+        shgen_add(sh, "color.rgb = pow(color.rgb, inv_gamma);");
+    }
+    if (p->use_lut_3d) {
+        shgen_decl(sh, "uniform sampler3D lut_3d;");
+        shgen_add(sh, "color.rgb = $texture3D$(lut_3d, color.rgb).rgb;");
+    }
+    if (p->opts.srgb) {
+        // Go from "linear" (0.45) to BT.709 to true linear to sRGB
+        if (!p->use_lut_3d) {
+            // Unless we are using a 3DLUT, in which case we already did this
+            // earlier.
+            shgen_add(sh, "color.rgb = pow(color.rgb, vec3(0.45));");
+        }
+        gen_bt709_expand(sh, "color.rgb");
+        gen_srgb_compand(sh, "color.rgb");
+    }
+    if (p->dither_texture != 0) {
+        shgen_decl(sh, "uniform sampler2D dither;");
+        shgen_decl(sh, "uniform vec2 dither_size;");
+        shgen_decl(sh, "uniform float dither_quantization;");
+        shgen_decl(sh, "uniform float dither_center;");
+        shgen_add(sh, "vec2 dither_pos = gl_FragCoord.xy / dither_size;");
+        if (p->opts.temporal_dither) {
+            shgen_decl(sh, "uniform mat2 dither_trafo;");
+            shgen_add(sh, "dither_pos = dither_trafo * dither_pos;");
+        }
+        shgen_add(sh, "float dither_value = texture(dither, dither_pos).r;");
+        shgen_add(sh, "color.rgb = floor(color.rgb * dither_quantization\n"
+                      "                  + dither_value + dither_center)\n"
+                      "              / dither_quantization;");
+    }
+}
+
+// For ASS, this works in the vertex shader (as some kind of optimization).
+// For RGBA, in the pixel shader.
+static void gen_write_color_osd(struct shader_gen *sh, struct gl_video *p)
+{
+    if (p->opts.srgb && !p->use_lut_3d) {
+        // If no 3dlut is being used, we need to pull up to linear light for
+        // the sRGB function. *IF* 3dlut is used, we do not.
+        shgen_add(sh, "color.rgb = pow(color.rgb, vec3(1.0/0.45));");
+    }
+    if (p->use_lut_3d) {
+        shgen_decl(sh, "uniform sampler3D lut_3d;");
+        shgen_add(sh, "color.rgb = $texture3D$(lut_3d, color.rgb).rgb;");
+    }
+    if (p->opts.srgb)
+        gen_srgb_compand(sh, "color.rgb");
+}
+
+static void compile_shaders(struct gl_video *p)
+{
+    GL *gl = p->gl;
+
+    delete_shaders(p);
+
+    struct shader_gen *sh = talloc_zero(NULL, struct shader_gen);
+    sh->gl = gl;
+
+    // GLSL 1.20 compatibility layer
+    bool new = sh->gl->glsl_version >= 130;
+    shgen_def_var(sh, "$texture1D$", new ? "texture" : "texture1D");
+    shgen_def_var(sh, "$texture2D$", new ? "texture" : "texture2D");
+    shgen_def_var(sh, "$texture3D$", new ? "texture" : "texture3D");
+    shgen_def_var(sh, "$vertex_in$", new ? "in" : "attribute");
+    shgen_def_var(sh, "$vertex_out$", new ? "out" : "varying");
+    shgen_def_var(sh, "$pixel_in$", new ? "in" : "varying");
+    if (new) {
+        shgen_start_var(sh, "$write_color$");
+        shgen_decl(sh, "out vec4 out_color;");
+        shgen_add(sh, "out_color = color;");
+    } else {
+        shgen_def_var(sh, "$write_color$", "gl_FragColor = color;");
+    }
+    shgen_def_var(sh, "$c1$", "r");
+    shgen_def_var(sh, "$c2$", "rg");
+    shgen_def_var(sh, "$c3$", "rgb");
+    shgen_def_var(sh, "$c4$", "rgba");
+
+    // Things which every vertex shader needs and does the same anyway.
+    shgen_start_var(sh, "$generalvertex$");
+    shgen_decl(sh, "$vertex_in$ vec2 vertex_texcoord;");
+    shgen_decl(sh, "$vertex_out$ vec2 texcoord;");
+    shgen_add(sh, "texcoord = vertex_texcoord;");
+    shgen_decl(sh, "$vertex_in$ vec2 vertex_position;");
+
+    // Transform position with the standard transform matrix.
+    shgen_start_var(sh, "$transformvertex$");
+    shgen_decl(sh, "uniform mat3 transform;");
+    shgen_add(sh, "gl_Position = vec4(transform * vec3(vertex_position, 1), 1);");
+
+    // Complete vertex shader, 1:1 pixel mapping.
+    shgen_start_var(sh, "$vertex_fixed$");
+    shgen_add(sh, "$generalvertex$");
+    shgen_add(sh, "gl_Position = vec4(vertex_position, 1, 1);");
+
+    // Complete vertex shader, using the standard transform matrix.
+    shgen_start_var(sh, "$vertex_scaled$");
+    shgen_add(sh, "$generalvertex$");
+    shgen_add(sh, "$transformvertex$");
+
+    shgen_stop_var(sh);
+
+    if (p->gl_target == GL_TEXTURE_RECTANGLE) {
+        shgen_def_var(sh, "$sampler_video$", "sampler2DRect");
+    } else {
+        shgen_def_var(sh, "$sampler_video$", "sampler2D");
+    }
+
+    bool scale_sep = p->opts.scale_sep && p->scalers[0].kernel;
 
     // We want to do scaling in linear light. Scaling is closely connected to
     // texture sampling due to how the shader is structured (or if GL bilinear
     // scaling is used). The purpose of the "indirect" pass is to convert the
     // input video to linear RGB.
     // Another purpose is reducing input to a single texture for scaling.
-    bool use_indirect = p->opts.indirect;
+    bool use_indirect = p->opts.indirect;;
 
-    // Don't sample from input video textures before converting the input to
-    // linear light. (Unneeded when sRGB textures are used.)
-    if (convert_input_gamma || convert_input_to_linear)
-        use_indirect = true;
+    build_conv_video(sh, p, &use_indirect);
 
     // It doesn't make sense to scale the chroma with cscale in the 1. scale
     // step and with lscale in the 2. step. If the chroma is subsampled, a
@@ -926,45 +1341,102 @@ static void compile_shaders(struct gl_video *p)
     // has to fetch the coefficients for each texture separately, even though
     // they're the same (this is not an inherent restriction, but would require
     // to restructure the shader).
-    if (header_sep && p->plane_count > 1)
+    if (scale_sep && p->plane_count > 1)
         use_indirect = true;
 
-    if (input_is_subsampled(p)) {
-        shader_setup_scaler(&header_conv, &p->scalers[1], -1);
-    } else {
-        // Force using the luma scaler on chroma. If the "indirect" stage is
-        // used, the actual scaling will happen in the next stage.
-        shader_def(&header_conv, "SAMPLE_C",
-                   use_indirect ? "sample_bilinear" : "SAMPLE_L");
-    }
+    // Chroma scaling works for planar only (and then 1-pass only).
+    int scale_c = p->plane_count > 1 ? 0 : -1;
 
     if (use_indirect) {
+        // 1st pass for converting video to RGB.
         // We don't use filtering for the Y-plane (luma), because it's never
-        // scaled in this scenario.
-        shader_def(&header_conv, "SAMPLE_L", "sample_bilinear");
-        shader_def_opt(&header_conv, "FIXED_SCALE", true);
-        header_conv = t_concat(tmp, header, header_conv);
-        p->indirect_program =
-            create_program(p, "indirect", header_conv, vertex_shader, s_video);
-    } else if (header_sep) {
-        header_sep = t_concat(tmp, header_sep, header_conv);
+        // scaled in this scenario, thus luma=-1 (force bilinear).
+        shgen_start_var(sh, "$pixelshader$");
+        gen_read_video(sh, p, -1, scale_c);
+        shgen_add(sh, "$conv_src$");
+        shgen_add(sh, "$write_color$");
+        shgen_def_var(sh, "$vertexshader$", "$vertex_fixed$");
+        p->indirect_program = shgen_shader(sh, p, "indirect");
+
+        // 2nd pass (1st pass of separated scaling)
+        shgen_start_var(sh, "$pixelshader$");
+        shgen_decl(sh, "$pixel_in$ vec2 texcoord;");
+        gen_sampler(sh, "color", &p->scalers[0], 1, 0, "texcoord");
+        shgen_add(sh, "$write_color$");
+        shgen_def_var(sh, "$vertexshader$", "$vertex_fixed$");
+        p->scale_sep_program = shgen_shader(sh, p, "scale_sep");
+
+        // 3rd pass (2nd pass of separated scaling, writing to screen)
+        shgen_start_var(sh, "$pixelshader$");
+        shgen_decl(sh, "$pixel_in$ vec2 texcoord;");
+        gen_sampler(sh, "color", &p->scalers[0], 2, 0, "texcoord");
+        gen_write_screen(sh, p);
+        shgen_add(sh, "$write_color$");
+        shgen_def_var(sh, "$vertexshader$", "$vertex_scaled$");
+        p->final_program = shgen_shader(sh, p, "final");
+    } else if (scale_sep) {
+        // 1st pass with separated scaling.
+        shgen_start_var(sh, "$pixelshader$");
+        gen_read_video(sh, p, 1, scale_c);
+        shgen_add(sh, "$conv_src$");
+        shgen_add(sh, "$write_color$");
+        shgen_def_var(sh, "$vertexshader$", "$vertex_fixed$");
+        p->scale_sep_program = shgen_shader(sh, p, "scale_sep");
+
+        // 2nd pass
+        shgen_start_var(sh, "$pixelshader$");
+        shgen_decl(sh, "$pixel_in$ vec2 texcoord;");
+        gen_sampler(sh, "color", &p->scalers[0], 2, 0, "texcoord");
+        gen_write_screen(sh, p);
+        shgen_add(sh, "$write_color$");
+        shgen_def_var(sh, "$vertexshader$", "$vertex_scaled$");
+        p->final_program = shgen_shader(sh, p, "final");
     } else {
-        header_final = t_concat(tmp, header_final, header_conv);
+        // Direct 1-pass scaling.
+        shgen_start_var(sh, "$pixelshader$");
+        gen_read_video(sh, p, 0, scale_c);
+        shgen_add(sh, "$conv_src$");
+        gen_write_screen(sh, p);
+        shgen_add(sh, "$write_color$");
+        shgen_def_var(sh, "$vertexshader$", "$vertex_scaled$");
+        p->final_program = shgen_shader(sh, p, "final");
     }
 
-    if (header_sep) {
-        header_sep = t_concat(tmp, header, header_sep);
-        p->scale_sep_program =
-            create_program(p, "scale_sep", header_sep, vertex_shader, s_video);
-    }
+    // ASS OSD (vertex shader)
+    shgen_start_var(sh, "$vertexshader$");
+    shgen_add(sh, "$generalvertex$");
+    shgen_add(sh, "$transformvertex$");
+    shgen_decl(sh, "$vertex_in$ vec4 vertex_color;");
+    shgen_decl(sh, "$vertex_out$ vec4 frag_color;");
+    shgen_add(sh, "vec4 color = vertex_color;");
+    gen_write_color_osd(sh, p);
+    shgen_add(sh, "frag_color = color;");
+    // ASS OSD (pixel shader)
+    shgen_start_var(sh, "$pixelshader$");
+    shgen_decl(sh, "uniform sampler2D texture0;");
+    shgen_decl(sh, "$pixel_in$ vec2 texcoord;");
+    shgen_decl(sh, "$pixel_in$ vec4 frag_color;");
+    shgen_add(sh, "vec4 color = frag_color;");
+    shgen_add(sh, "color.a = color.a * $texture2D$(texture0, texcoord).r;");
+    shgen_add(sh, "$write_color$");
+    p->osd_programs[SUBBITMAP_LIBASS] = shgen_shader(sh, p, "osd_ass");
 
-    header_final = t_concat(tmp, header, header_final);
-    p->final_program =
-        create_program(p, "final", header_final, vertex_shader, s_video);
+    // RGBA OSD (vertex shader)
+    shgen_start_var(sh, "$vertexshader$");
+    shgen_add(sh, "$generalvertex$");
+    shgen_add(sh, "$transformvertex$");
+    shgen_start_var(sh, "$pixelshader$");
+    // RGBA OSD (pixel shader)
+    shgen_decl(sh, "uniform sampler2D texture0;");
+    shgen_decl(sh, "$pixel_in$ vec2 texcoord;");
+    shgen_add(sh, "vec4 color = $texture2D$(texture0, texcoord);");
+    gen_write_color_osd(sh, p);
+    shgen_add(sh, "$write_color$");
+    p->osd_programs[SUBBITMAP_RGBA] = shgen_shader(sh, p, "osd_rgba");
 
     debug_check_gl(p, "shader compilation");
 
-    talloc_free(tmp);
+    talloc_free(sh);
 }
 
 static void delete_program(GL *gl, GLuint *prog)
@@ -1030,9 +1502,8 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
     struct lut_tex_format *fmt = &lut_tex_formats[size];
     bool use_2d = fmt->pixels > 1;
     bool is_luma = scaler->index == 0;
-    scaler->lut_name = use_2d
-                       ? (is_luma ? "lut_l_2d" : "lut_c_2d")
-                       : (is_luma ? "lut_l_1d" : "lut_c_1d");
+    scaler->lut_name = is_luma ? "lut_l" : "lut_c";
+    scaler->lut_samplert = use_2d ? "sampler2D" : "sampler1D";
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_SCALERS + scaler->index);
     GLenum target = use_2d ? GL_TEXTURE_2D : GL_TEXTURE_1D;
@@ -1197,6 +1668,7 @@ static void uninit_rendering(struct gl_video *p)
         gl->DeleteTextures(1, &p->scalers[n].gl_lut);
         p->scalers[n].gl_lut = 0;
         p->scalers[n].lut_name = NULL;
+        p->scalers[n].lut_samplert = NULL;
         p->scalers[n].kernel = NULL;
     }
 
