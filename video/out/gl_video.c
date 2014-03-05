@@ -1301,6 +1301,9 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
     p->colorspace = csp;
 
     if (p->is_rgb && (p->opts.srgb || p->use_lut_3d)) {
+        // If we're opening an RGB source like a png file or similar,
+        // we just sample it using GL_SRGB which treats it as an sRGB source
+        // and pretend it's linear as far as CMS is concerned
         p->is_linear_rgb = true;
         p->image.planes[0].gl_internal_format = GL_SRGB;
     }
@@ -1840,10 +1843,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
     bool have_srgb = gl->mpgl_caps & MPGL_CAP_SRGB_TEX;
-
-    // srgb_compand() not available
-    if (gl->glsl_version < 130)
-        have_srgb = false;
+    bool have_mix = gl->glsl_version >= 130;
 
     char *disabled[10];
     int n_disabled = 0;
@@ -1878,19 +1878,32 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
-    if (!have_srgb && p->opts.srgb) {
+    int use_cms = p->opts.srgb || p->use_lut_3d;
+
+    // srgb_compand() not available
+    if (!have_mix && p->opts.srgb) {
         p->opts.srgb = false;
-        disabled[n_disabled++] = "sRGB";
+        disabled[n_disabled++] = "sRGB output (GLSL version)";
     }
-    if (!have_fbo && p->use_lut_3d) {
+    if (!have_fbo && use_cms) {
+        p->opts.srgb = false;
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (FBO)";
     }
-    if (!have_srgb && p->use_lut_3d) {
-        p->use_lut_3d = false;
-        disabled[n_disabled++] = "color management (sRGB)";
+    if (p->is_rgb) {
+        // When opening RGB files we use SRGB to expand
+        if (!have_srgb && use_cms) {
+            p->opts.srgb = false;
+            p->use_lut_3d = false;
+            disabled[n_disabled++] = "color management (SRGB textures)";
+        }
+    } else {
+        // when opening non-RGB files we use bt709_expand()
+        if (!have_mix && p->use_lut_3d) {
+            p->use_lut_3d = false;
+            disabled[n_disabled++] = "color management (GLSL version)";
+        }
     }
-
     if (!have_fbo) {
         p->opts.scale_sep = false;
         p->opts.indirect = false;
