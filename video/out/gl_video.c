@@ -306,6 +306,7 @@ const struct m_sub_options gl_video_conf = {
     .opts = (m_option_t[]) {
         OPT_FLOATRANGE("gamma", gamma, 0, 0.0, 10.0),
         OPT_FLAG("srgb", srgb, 0),
+        OPT_FLAG("approx-gamma", approx_gamma, 0),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
         OPT_CHOICE("stereo", stereo_mode, 0,
@@ -835,10 +836,11 @@ static void compile_shaders(struct gl_video *p)
         shader_def_opt(&header, "USE_ALPHA", p->has_alpha);
 
     char *header_osd = talloc_strdup(tmp, header);
-    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", p->opts.srgb &&
-                                                      !p->use_lut_3d);
+    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", p->opts.srgb ||
+                                                       p->use_lut_3d);
     shader_def_opt(&header_osd, "USE_OSD_3DLUT", p->use_lut_3d);
-    shader_def_opt(&header_osd, "USE_OSD_SRGB", p->opts.srgb);
+    // 3DLUT overrides SRGB
+    shader_def_opt(&header_osd, "USE_OSD_SRGB", !p->use_lut_3d && p->opts.srgb);
 
     for (int n = 0; n < SUBBITMAP_COUNT; n++) {
         const char *name = osd_shaders[n];
@@ -861,14 +863,16 @@ static void compile_shaders(struct gl_video *p)
         conv_gamma *= 1.0 / 2.2;
     }
 
-    if (!p->is_linear_rgb && (p->opts.srgb || p->use_lut_3d))
-        conv_gamma *= 1.0 / 0.45;
-
     p->input_gamma = input_gamma;
     p->conv_gamma = conv_gamma;
 
-    bool convert_input_gamma = p->input_gamma != 1.0;
-    bool convert_input_to_linear = p->conv_gamma != 1.0;
+    bool use_input_gamma = p->input_gamma != 1.0;
+    bool use_conv_gamma = p->conv_gamma != 1.0;
+
+    // Linear light scaling is only enabled when either color correction
+    // option (3dlut or srgb) is enabled, otherwise scaling is done in the
+    // source space.
+    bool convert_to_linear_gamma = !p->is_linear_rgb && (p->opts.srgb || p->use_lut_3d);
 
     if (p->image_format == IMGFMT_NV12 || p->image_format == IMGFMT_NV21) {
         shader_def(&header_conv, "USE_CONV", "CONV_NV12");
@@ -881,18 +885,20 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_conv, "USE_SWAP_UV", p->image_format == IMGFMT_NV21);
     shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && !p->is_packed_yuv
                                               && p->plane_count == 1);
-    shader_def_opt(&header_conv, "USE_INPUT_GAMMA", convert_input_gamma);
+    shader_def_opt(&header_conv, "USE_INPUT_GAMMA", use_input_gamma);
     shader_def_opt(&header_conv, "USE_COLORMATRIX", !p->is_rgb);
-    shader_def_opt(&header_conv, "USE_CONV_GAMMA", convert_input_to_linear);
+    shader_def_opt(&header_conv, "USE_CONV_GAMMA", use_conv_gamma);
+    shader_def_opt(&header_conv, "USE_LINEAR_LIGHT", convert_to_linear_gamma);
+    shader_def_opt(&header_conv, "USE_APPROX_GAMMA", p->opts.approx_gamma);
     if (p->opts.alpha_mode > 0 && p->has_alpha && p->plane_count > 3)
         shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
     if (p->opts.alpha_mode == 2 && p->has_alpha)
         shader_def(&header_conv, "USE_ALPHA_BLEND", "1");
 
-    shader_def_opt(&header_final, "USE_LINEAR_CONV_INV", p->use_lut_3d);
     shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma > 0);
     shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
-    shader_def_opt(&header_final, "USE_SRGB", p->opts.srgb);
+    // 3DLUT overrides SRGB
+    shader_def_opt(&header_final, "USE_SRGB", p->opts.srgb && !p->use_lut_3d);
     shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
     shader_def_opt(&header_final, "USE_TEMPORAL_DITHER", p->opts.temporal_dither);
 
@@ -913,8 +919,8 @@ static void compile_shaders(struct gl_video *p)
     bool use_indirect = p->opts.indirect;
 
     // Don't sample from input video textures before converting the input to
-    // linear light. (Unneeded when sRGB textures are used.)
-    if (convert_input_gamma || convert_input_to_linear)
+    // linear light.
+    if (use_input_gamma || use_conv_gamma)
         use_indirect = true;
 
     // It doesn't make sense to scale the chroma with cscale in the 1. scale
