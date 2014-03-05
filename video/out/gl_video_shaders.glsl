@@ -82,11 +82,15 @@ void main() {
     color = vertex_color;
 
 #ifdef USE_OSD_LINEAR_CONV
-    // If no 3dlut is being used, we need to pull up to linear light for
-    // the sRGB function. *IF* 3dlut is used, we do not.
+    // Although we are not scaling in linear light, both 3DLUT and SRGB still
+    // operate on linear light inputs so we have to convert to it before
+    // either step can be applied.
     color.rgb = bt709_expand(color.rgb);
+    // NOTE: This always applies the true BT709, maybe we need to use
+    // approx-gamma here too?
 #endif
 #ifdef USE_OSD_3DLUT
+    color.rgb = pow(color.rgb, vec3(1/2.4)); // linear -> 2.4 3DLUT space
     color = vec4(texture3D(lut_3d, color.rgb).rgb, color.a);
 #endif
 #ifdef USE_OSD_SRGB
@@ -369,35 +373,44 @@ void main() {
     color.gb = vec2(128.0/255.0);
 #endif
 #ifdef USE_INPUT_GAMMA
+    // Pre-colormatrix input gamma correction (eg. for MP_IMGFLAG_XYZ)
     color = pow(color, vec3(input_gamma));
 #endif
 #ifdef USE_COLORMATRIX
+    // Conversion from Y'CbCr or other spaces to RGB
     color = mat3(colormatrix) * color + colormatrix[3];
     color = clamp(color, 0, 1);
 #endif
 #ifdef USE_CONV_GAMMA
+    // Post-colormatrix converted gamma correction (eg. for MP_IMGFLAG_XYZ)
     color = pow(color, vec3(conv_gamma));
 #endif
-#ifdef USE_LINEAR_CONV_INV
-    // Convert from linear RGB to gamma RGB before putting it through the 3D-LUT
-    // in the final stage.
-    color = pow(color, vec3(0.45));
+#ifdef USE_LINEAR_LIGHT
+    // If we are scaling in linear light (SRGB or 3DLUT option enabled), we
+    // expand our source colors before scaling
+#ifdef USE_APPROX_GAMMA
+    // We differentiate between approximate BT.709 (gamma 1.95) ...
+    color = pow(color, vec3(1.95));
+#else
+    // ... and actual BT709 (two-part function)
+    color = bt709_expand(color);
 #endif
+#endif
+    // Image upscaling happens roughly here
 #ifdef USE_GAMMA_POW
+    // User-defined gamma correction factor (via the gamma sub-option)
     color = pow(color, inv_gamma);
 #endif
 #ifdef USE_3DLUT
+    // For the 3DLUT we are arbitrarily using 2.4 as input gamma to reduce
+    // the amount of rounding errors, so we pull up to that space first and
+    // then pass it through the 3D texture.
+    color = pow(color, vec3(1/2.4));
     color = texture3D(lut_3d, color).rgb;
 #endif
 #ifdef USE_SRGB
-    // Go from "linear" (0.45) to BT.709 to true linear to sRGB
-#ifndef USE_3DLUT
-    // Unless we are using a 3DLUT, in which case USE_LINEAR_CONV_INV
-    // already triggered earlier.
-    color = pow(color, vec3(0.45));
-#endif
-    color = bt709_expand(color.rgb);
-    color.rgb = srgb_compand(color.rgb);
+    // Compand from the linear scaling gamma to the sRGB output gamma
+    color = srgb_compand(color.rgb);
 #endif
 #ifdef USE_DITHER
     vec2 dither_pos = gl_FragCoord.xy / dither_size;

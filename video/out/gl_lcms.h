@@ -8,7 +8,6 @@ struct mp_icc_opts {
     char *cache;
     char *size_str;
     int intent;
-    int approx;
 };
 
 struct lut3d;
