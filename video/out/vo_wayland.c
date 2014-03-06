@@ -352,15 +352,16 @@ static struct mp_image buffer_get_mp_image(struct priv *p,
 
 // buffer pool functions
 
-static void buffer_pool_init(struct priv *p,
-                             struct buffer_pool *pool,
-                             uint32_t buffer_no,
-                             uint32_t width, uint32_t height,
-                             const struct fmtentry *fmt,
-                             struct wl_shm *shm)
+static void buffer_pool_reinit(struct priv *p,
+                               struct buffer_pool *pool,
+                               uint32_t buffer_no,
+                               uint32_t width, uint32_t height,
+                               const struct fmtentry *fmt,
+                               struct wl_shm *shm)
 {
     pool->shm = shm;
-    pool->buffers = calloc(buffer_no, sizeof(struct buffer));
+    if (!pool->buffers)
+        pool->buffers = calloc(buffer_no, sizeof(struct buffer));
     pool->buffer_no = buffer_no;
     pool->format = fmt->wl_fmt;
     pool->bytes_per_pixel = mp_imgfmt_get_desc(fmt->mp_fmt).bytes[0];
@@ -368,7 +369,7 @@ static void buffer_pool_init(struct priv *p,
     pool->size = pool->stride * height;
 
     for (uint32_t i = 0; i < buffer_no; ++i)
-        buffer_create_content(pool, &pool->buffers[i], width, height);
+        buffer_resize(pool, &pool->buffers[i], width, height);
 
     if (buffer_no == 3) {
         pool->back_buffer = &pool->buffers[0];
@@ -724,8 +725,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
             p->video_format = entry;
     }
 
-    buffer_pool_init(p, &p->video_bufpool, (p->use_triplebuffering ? 3 : 2),
-            p->width, p->height, p->video_format, p->wl->display.shm);
+
+    buffer_pool_reinit(p, &p->video_bufpool, (p->use_triplebuffering ? 3 : 2),
+                p->width, p->height, p->video_format, p->wl->display.shm);
 
     vo_wayland_config(vo, vo->dwidth, vo->dheight, flags);
 
@@ -763,6 +765,7 @@ static int preinit(struct vo *vo)
 
     wl_shm_add_listener(p->wl->display.shm, &shm_listener, p);
     wl_display_dispatch(p->wl->display.display);
+
     return 0;
 }
 
