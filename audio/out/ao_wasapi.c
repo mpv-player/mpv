@@ -35,6 +35,7 @@
 #include "common/msg.h"
 #include "misc/ring.h"
 #include "ao.h"
+#include "compat/atomics.h"
 
 #ifndef PKEY_Device_FriendlyName
 DEFINE_PROPERTYKEY(PKEY_Device_FriendlyName,
@@ -115,6 +116,12 @@ typedef struct wasapi_state {
     HANDLE hTask; /* AV thread */
     DWORD taskIndex; /* AV task ID */
     WAVEFORMATEXTENSIBLE format;
+
+    /* WASAPI internal clock information, for estimating delay */
+    IAudioClock *pAudioClock;
+    UINT64 clock_frequency; /* scale for the "samples" returned by the clock */
+    UINT64 sample_count; /* the amount of samples per channel written to a GetBuffer buffer */
+    LARGE_INTEGER qpc_frequency; /* frequency of windows' high resolution timer */
 
     int opt_exclusive;
     int opt_list;
@@ -512,6 +519,30 @@ static int find_formats(struct ao *const ao)
     }
 }
 
+static int init_clock(struct wasapi_state *state) {
+    HRESULT hr;
+
+    hr = IAudioClient_GetService(state->pAudioClient,
+                                 &IID_IAudioClock,
+                                 (void **)&state->pAudioClock);
+    EXIT_ON_ERROR(hr);
+    hr = IAudioClock_GetFrequency(state->pAudioClock, &state->clock_frequency);
+    EXIT_ON_ERROR(hr);
+
+    QueryPerformanceFrequency(&state->qpc_frequency);
+
+    state->sample_count = 0;
+
+    MP_VERBOSE(state, "IAudioClock::GetFrequency gave a frequency of %"PRIu64".\n", (uint64_t) state->clock_frequency);
+
+    return 0;
+exit_label:
+    MP_ERR(state, "init_clock failed with %s, unable to obtain the audio device's timing!\n",
+           explain_err(hr));
+    SetEvent(state->fatal_error);
+    return 1;
+}
+
 static int fix_format(struct wasapi_state *state)
 {
     HRESULT hr;
@@ -564,6 +595,10 @@ reinit:
     state->buffer_block_size = state->format.Format.nChannels *
                                state->format.Format.wBitsPerSample / 8 *
                                state->bufferFrameCount;
+
+    if (init_clock(state))
+        return 1;
+
     state->hTask =
         state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio", &state->taskIndex);
     MP_VERBOSE(state, "fix_format OK, using %lld byte buffer block size!\n",
@@ -958,6 +993,9 @@ static void thread_pause(wasapi_state *state)
 {
     state->is_playing = 0;
     IAudioClient_Stop(state->pAudioClient);
+    IAudioClient_Reset(state->pAudioClient);
+    state->sample_count = 0;
+    mp_memory_barrier();
 }
 
 /* force_feed - feed in even if available data is smaller than required buffer, to clear the buffer */
@@ -997,11 +1035,19 @@ static void thread_feed(wasapi_state *state,int force_feed)
                                               frame_count,
                                               AUDCLNT_BUFFERFLAGS_SILENT);
         EXIT_ON_ERROR(hr);
+
+        mp_atomic_add_and_fetch(&state->sample_count, frame_count);
+        mp_memory_barrier();
+
         return;
     }
     hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                           frame_count, 0);
     EXIT_ON_ERROR(hr);
+
+    mp_atomic_add_and_fetch(&state->sample_count, frame_count);
+    mp_memory_barrier();
+
     return;
 exit_label:
     MP_ERR(state, "thread_feed fails with %"PRIx32"!\n", (uint32_t)hr);
@@ -1018,9 +1064,10 @@ static void thread_play(wasapi_state *state)
 
 static void thread_reset(wasapi_state *state)
 {
-    IAudioClient_Stop(state->pAudioClient);
-    IAudioClient_Reset(state->pAudioClient);
-    if (state->is_playing) {
+    int playing = state->is_playing;
+    thread_pause(state);
+
+    if (playing) {
         thread_play(state);
     }
 }
@@ -1056,6 +1103,8 @@ static void thread_uninit(wasapi_state *state)
         IAudioClient_Stop(state->pAudioClient);
     if (state->pRenderClient)
         IAudioRenderClient_Release(state->pRenderClient);
+    if (state->pAudioClock)
+        IAudioClock_Release(state->pAudioClock);
     if (state->pAudioClient)
         IAudioClient_Release(state->pAudioClient);
     if (state->pDevice)
@@ -1315,12 +1364,46 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     return ret / ao->sstride;
 }
 
+static float get_device_delay(struct wasapi_state *state) {
+    /* where we pray that sample_count hasn't desynced */
+    mp_memory_barrier();
+    UINT64 sample_count = state->sample_count;
+    UINT64 position, qpc_position;
+    HRESULT hr;
+
+    switch (hr = IAudioClock_GetPosition(state->pAudioClock, &position, &qpc_position)) {
+        case S_OK: case S_FALSE:
+            break;
+        default:
+            MP_ERR(state, "IAudioClock::GetPosition returned %s\n", explain_err(hr));
+    }
+
+    LARGE_INTEGER qpc_count;
+    QueryPerformanceCounter(&qpc_count);
+    UINT64 qpc_diff = (qpc_count.QuadPart * 10000000 / state->qpc_frequency.QuadPart) - qpc_position;
+
+    position += state->clock_frequency * qpc_diff / 10000000;
+
+    /* convert position to the same base as sample_count */
+    position = position * state->format.Format.nSamplesPerSec / state->clock_frequency;
+
+    uint32_t diff = sample_count - position;
+    float delay = diff / (float)state->format.Format.nSamplesPerSec;
+
+    MP_TRACE(state, "device delay: %"PRIu32" samples (%g ms)\n", diff, delay * 1000);
+
+    return delay;
+}
+
 static float get_delay(struct ao *ao)
 {
     if (!ao || !ao->priv)
         return -1.0f;
+
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    return (float)(RING_BUFFER_COUNT * state->buffer_block_size - get_space(ao) * ao->sstride) /
+
+    return get_device_delay(state) +
+           (float)(RING_BUFFER_COUNT * state->buffer_block_size - get_space(ao) * ao->sstride) /
            (float)state->format.Format.nAvgBytesPerSec;
 }
 
