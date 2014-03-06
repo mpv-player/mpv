@@ -121,6 +121,7 @@ typedef struct wasapi_state {
     IAudioClock *pAudioClock;
     UINT64 clock_frequency; /* scale for the "samples" returned by the clock */
     UINT64 sample_count; /* the amount of samples per channel written to a GetBuffer buffer */
+    LARGE_INTEGER qpc_frequency; /* frequency of windows' high resolution timer */
 
     int opt_exclusive;
     int opt_list;
@@ -527,6 +528,8 @@ static int init_clock(struct wasapi_state *state) {
     EXIT_ON_ERROR(hr);
     hr = IAudioClock_GetFrequency(state->pAudioClock, &state->clock_frequency);
     EXIT_ON_ERROR(hr);
+
+    QueryPerformanceFrequency(&state->qpc_frequency);
 
     state->sample_count = 0;
 
@@ -1362,18 +1365,24 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 }
 
 static float get_device_delay(struct wasapi_state *state) {
-    /* where we pray that this hasn't desynced */
+    /* where we pray that sample_count hasn't desynced */
     mp_memory_barrier();
     UINT64 sample_count = state->sample_count;
-    UINT64 position;
+    UINT64 position, qpc_position;
     HRESULT hr;
 
-    switch (hr = IAudioClock_GetPosition(state->pAudioClock, &position, NULL)) {
+    switch (hr = IAudioClock_GetPosition(state->pAudioClock, &position, &qpc_position)) {
         case S_OK: case S_FALSE:
             break;
         default:
             MP_ERR(state, "IAudioClock::GetPosition returned %s\n", explain_err(hr));
     }
+
+    LARGE_INTEGER qpc_count;
+    QueryPerformanceCounter(&qpc_count);
+    UINT64 qpc_diff = (qpc_count.QuadPart * 10000000 / state->qpc_frequency.QuadPart) - qpc_position;
+
+    position += state->clock_frequency * qpc_diff / 10000000;
 
     /* convert position to the same base as sample_count */
     position = position * state->format.Format.nSamplesPerSec / state->clock_frequency;
