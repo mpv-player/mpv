@@ -1339,6 +1339,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis,
         vo_x11_update_geometry(vo);
         x = x11->win_x; y = x11->win_y;
         width = x11->win_width; height = x11->win_height;
+        x11->window_hidden = false;
     }
     if (x11->window == None) {
         vo_x11_create_window(vo, vis, x, y, width, height);
