@@ -45,6 +45,7 @@ struct priv {
 
     int untimed;
     float bufferlen;    // seconds
+    float speed;        // multiplier
 
     // Minimal unit of audio samples that can be written at once. If play() is
     // called with sizes not aligned to this, a rounded size will be returned.
@@ -66,7 +67,7 @@ static void drain(struct ao *ao)
 
     double now = mp_time_sec();
     if (priv->buffered > 0) {
-        priv->buffered -= (now - priv->last_time) * ao->samplerate;
+        priv->buffered -= (now - priv->last_time) * ao->samplerate * priv->speed;
         if (priv->buffered < 0) {
             if (!priv->playing_final)
                 MP_ERR(ao, "buffer underrun\n");
@@ -101,7 +102,7 @@ static void uninit(struct ao *ao, bool cut_audio)
 {
     struct priv *priv = ao->priv;
     if (!cut_audio && !priv->paused)
-        mp_sleep_us(1000.0 * 1000.0 * priv->buffered / ao->samplerate);
+        mp_sleep_us(1000000.0 * priv->buffered / ao->samplerate / priv->speed);
 }
 
 // stop playing and empty buffers (for seeking/pause)
@@ -165,6 +166,9 @@ static float get_delay(struct ao *ao)
     struct priv *priv = ao->priv;
 
     drain(ao);
+
+    // Note how get_delay returns the delay in audio device time (instead of
+    // adjusting for speed), since most AOs seem to also do that.
     return priv->buffered / (double)ao->samplerate;
 }
 
@@ -185,11 +189,13 @@ const struct ao_driver audio_out_null = {
     .priv_defaults = &(const struct priv) {
         .bufferlen = 0.2,
         .outburst = 256,
+        .speed = 1,
     },
     .options = (const struct m_option[]) {
         OPT_FLAG("untimed", untimed, 0),
         OPT_FLOATRANGE("buffer", bufferlen, 0, 0, 100),
         OPT_INTRANGE("outburst", outburst, 0, 1, 100000),
+        OPT_FLOATRANGE("speed", speed, 0, 0, 10000),
         {0}
     },
 };

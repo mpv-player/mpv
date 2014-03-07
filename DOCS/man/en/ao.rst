@@ -178,6 +178,11 @@ Available audio output drivers are:
     ``outburst``
         Simulated chunk size in samples.
 
+    ``speed``
+        Simulated audio playback speed as a multiplier. Usually, a real audio
+        device will not go exactly as fast as the system clock. It will deviate
+        just a little, and this option helps simulating this.
+
 ``pcm``
     Raw PCM/WAVE file writer audio output
 
