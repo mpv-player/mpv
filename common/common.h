@@ -70,6 +70,9 @@ struct mp_rect {
     int x1, y1;
 };
 
+#define mp_rect_w(r) ((r).x1 - (r).x0)
+#define mp_rect_h(r) ((r).y1 - (r).y0)
+
 void mp_rect_union(struct mp_rect *rc, const struct mp_rect *src);
 bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2);
 
