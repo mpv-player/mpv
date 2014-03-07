@@ -1740,7 +1740,7 @@ static int mp_property_osd_h(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
     struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_OSD);
-    return m_property_int_ro(prop, action, arg, vo_res.w);
+    return m_property_int_ro(prop, action, arg, vo_res.h);
 }
 
 static int mp_property_osd_par(m_option_t *prop, int action, void *arg,
