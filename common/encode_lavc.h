@@ -55,6 +55,9 @@ struct encode_lavc_context {
     double audio_pts_offset;
     double last_video_in_pts;
 
+    double last_audio_in_pts;
+    int64_t samples_since_last_pts;
+
     // anti discontinuity mode
     double next_in_pts;
     double discontinuity_pts_offset;

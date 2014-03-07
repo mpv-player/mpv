@@ -386,6 +386,14 @@ void encode_lavc_set_video_fps(struct encode_lavc_context *ctx, float fps)
     ctx->vo_fps = fps;
 }
 
+void encode_lavc_set_audio_pts(struct encode_lavc_context *ctx, double pts)
+{
+    if (ctx) {
+        ctx->last_audio_in_pts = pts;
+        ctx->samples_since_last_pts = 0;
+    }
+}
+
 static void encode_2pass_prepare(struct encode_lavc_context *ctx,
                                  AVDictionary **dictp,
                                  AVStream *stream, struct stream **bytebuf,

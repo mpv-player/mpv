@@ -320,13 +320,16 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
     int bufpos = 0;
     double nextpts;
-    double pts = ao->pts;
     double outpts;
 
     if (!encode_lavc_start(ectx)) {
         MP_WARN(ao, "not ready yet for encoding audio\n");
         return 0;
     }
+
+    double pts = ectx->last_audio_in_pts;
+    pts += ectx->samples_since_last_pts / ao->samplerate;
+    ectx->samples_since_last_pts += samples;
 
     size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
 

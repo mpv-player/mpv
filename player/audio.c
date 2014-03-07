@@ -26,6 +26,7 @@
 #include "talloc.h"
 
 #include "common/msg.h"
+#include "common/encode.h"
 #include "options/options.h"
 #include "common/common.h"
 
@@ -252,6 +253,9 @@ static int write_to_ao(struct MPContext *mpctx, struct mp_audio *data, int flags
         return 0;
     struct ao *ao = mpctx->ao;
     ao->pts = pts;
+#if HAVE_ENCODING
+    encode_lavc_set_audio_pts(mpctx->encode_lavc_ctx, ao->pts);
+#endif
     double real_samplerate = ao->samplerate / mpctx->opts->playback_speed;
     int played = ao_play(mpctx->ao, data->planes, data->samples, flags);
     assert(played <= data->samples);
