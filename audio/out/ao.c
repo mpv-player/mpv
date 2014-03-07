@@ -141,7 +141,6 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     *ao = (struct ao) {
         .driver = desc.p,
         .probing = probing,
-        .opts = global->opts,
         .encode_lavc_ctx = encode_lavc_ctx,
         .input_ctx = input_ctx,
         .samplerate = samplerate,
