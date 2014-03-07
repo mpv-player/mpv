@@ -46,6 +46,7 @@
 #include <alsa/asoundlib.h>
 
 #include "ao.h"
+#include "internal.h"
 #include "audio/format.h"
 #include "audio/reorder_ch.h"
 

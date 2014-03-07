@@ -34,6 +34,7 @@
 #include "audio/format.h"
 #include "audio/reorder_ch.h"
 #include "ao.h"
+#include "internal.h"
 #include "common/msg.h"
 
 #ifdef __MINGW32__

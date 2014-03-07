@@ -982,7 +982,7 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->stop_play = PT_NEXT_ENTRY;
     }
 
-    if (mpctx->d_audio && !mpctx->restart_playback && !mpctx->ao->untimed) {
+    if (mpctx->d_audio && !mpctx->restart_playback && !ao_untimed(mpctx->ao)) {
         int status = fill_audio_out_buffers(mpctx, endpts);
         full_audio_buffers = status >= 0;
         // Not at audio stream EOF yet
@@ -1193,10 +1193,11 @@ void run_playloop(struct MPContext *mpctx)
     video_left &= mpctx->sync_audio_to_video; // force no-video semantics
 
     if (mpctx->d_audio && (mpctx->restart_playback ? !video_left :
-                           mpctx->ao->untimed && (mpctx->delay <= 0 ||
-                                                  !video_left))) {
+                           ao_untimed(mpctx->ao) && (mpctx->delay <= 0 ||
+                                                     !video_left)))
+    {
         int status = fill_audio_out_buffers(mpctx, endpts);
-        full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
+        full_audio_buffers = status >= 0 && !ao_untimed(mpctx->ao);
         // Not at audio stream EOF yet
         audio_left = status > -2;
     }
@@ -1286,7 +1287,7 @@ void run_playloop(struct MPContext *mpctx)
         if (mpctx->restart_playback)
             sleeptime = 0;
         if (mpctx->d_audio && !mpctx->paused) {
-            if (mpctx->ao->untimed) {
+            if (ao_untimed(mpctx->ao)) {
                 if (!video_left)
                     audio_sleep = 0;
             } else if (full_audio_buffers) {

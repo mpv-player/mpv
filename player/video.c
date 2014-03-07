@@ -340,7 +340,7 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
     struct track *t_audio = mpctx->current_track[0][STREAM_AUDIO];
     struct sh_stream *sh_audio = t_audio ? t_audio->stream : NULL;
     // check for frame-drop:
-    if (mpctx->d_audio && !mpctx->ao->untimed && sh_audio &&
+    if (mpctx->d_audio && !ao_untimed(mpctx->ao) && sh_audio &&
         !demux_stream_eof(sh_audio))
     {
         float delay = opts->playback_speed * ao_get_delay(mpctx->ao);

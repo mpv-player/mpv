@@ -21,6 +21,8 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 
+#include "internal.h"
+
 // CoreAudio names are way too verbose
 #define ca_sel    AudioObjectPropertySelector
 #define ca_scope  AudioObjectPropertyScope

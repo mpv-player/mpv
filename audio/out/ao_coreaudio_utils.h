@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include "common/msg.h"
 #include "audio/out/ao.h"
+#include "internal.h"
 
 #define CA_CFSTR_ENCODING kCFStringEncodingASCII
 

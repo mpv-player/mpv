@@ -223,6 +223,11 @@ typedef struct MPContext {
 
     struct mixer *mixer;
     struct ao *ao;
+    double ao_pts;
+    struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
+    int ao_buffer_playable_samples;     // part of the part of the buffer the AO
+                                        // hasn't accepted yet with play()
+
     struct vo *video_out;
 
     /* We're starting playback from scratch or after a seek. Show first

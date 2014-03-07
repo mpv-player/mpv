@@ -25,7 +25,9 @@
 
 #include "config.h"
 #include "ao.h"
+#include "internal.h"
 #include "audio/format.h"
+#include "audio/audio.h"
 
 #include "options/options.h"
 #include "options/m_config.h"
@@ -231,8 +233,15 @@ int ao_play(struct ao *ao, void **data, int samples, int flags)
 
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
-    if (ao->driver->control)
-        return ao->driver->control(ao, cmd, arg);
+    switch (cmd) {
+    case AOCONTROL_HAS_TEMP_VOLUME:
+        return !ao->no_persistent_volume;
+    case AOCONTROL_HAS_PER_APP_VOLUME:
+        return !!ao->per_application_mixer;
+    default:
+        if (ao->driver->control)
+            return ao->driver->control(ao, cmd, arg);
+    }
     return CONTROL_UNKNOWN;
 }
 
@@ -306,4 +315,29 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num)
 {
     return mp_chmap_sel_get_def(s, map, num);
+}
+
+// --- The following functions just return immutable information.
+
+void ao_get_format(struct ao *ao, struct mp_audio *format)
+{
+    *format = (struct mp_audio){0};
+    mp_audio_set_format(format, ao->format);
+    mp_audio_set_channels(format, &ao->channels);
+    format->rate = ao->samplerate;
+}
+
+const char *ao_get_name(struct ao *ao)
+{
+    return ao->driver->name;
+}
+
+const char *ao_get_description(struct ao *ao)
+{
+    return ao->driver->description;
+}
+
+bool ao_untimed(struct ao *ao)
+{
+    return ao->untimed;
 }

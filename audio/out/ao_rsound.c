@@ -33,6 +33,7 @@
 #include "osdep/timer.h"
 #include "audio/format.h"
 #include "ao.h"
+#include "internal.h"
 
 struct priv {
     rsound_t *rd;

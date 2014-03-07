@@ -31,6 +31,7 @@
 #include "common/msg.h"
 #include "misc/ring.h"
 #include "ao.h"
+#include "internal.h"
 
 struct priv {
     PaStream *stream;

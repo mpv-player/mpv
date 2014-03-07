@@ -36,6 +36,7 @@
 #include "audio/fmt-conversion.h"
 #include "talloc.h"
 #include "ao.h"
+#include "internal.h"
 #include "common/msg.h"
 
 #include "common/encode_lavc.h"

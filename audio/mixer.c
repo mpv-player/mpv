@@ -210,7 +210,7 @@ void mixer_setbalance(struct mixer *mixer, float val)
     if (af_control_any_rev(mixer->af, AF_CONTROL_SET_PAN_BALANCE, &val))
         return;
 
-    if (val == 0 || mixer->ao->channels.num < 2)
+    if (val == 0)
         return;
 
     if (!(af_pan_balance = af_add(mixer->af, "pan", NULL))) {
@@ -243,8 +243,9 @@ static void probe_softvol(struct mixer *mixer)
 {
     if (mixer->opts->softvol == SOFTVOL_AUTO) {
         // No system-wide volume => fine with AO volume control.
-        mixer->softvol = !(mixer->ao->per_application_mixer ||
-                           mixer->ao->no_persistent_volume);
+        mixer->softvol =
+            ao_control(mixer->ao, AOCONTROL_HAS_TEMP_VOLUME, 0) != 1 &&
+            ao_control(mixer->ao, AOCONTROL_HAS_PER_APP_VOLUME, 0) != 1;
     } else {
         mixer->softvol = mixer->opts->softvol == SOFTVOL_YES;
     }
@@ -275,9 +276,10 @@ static void restore_volume(struct mixer *mixer)
     int force_mute = -1;
 
     const char *prev_driver = mixer->driver;
-    mixer->driver = mixer->softvol ? "softvol" : ao->driver->name;
+    mixer->driver = mixer->softvol ? "softvol" : ao_get_name(ao);
 
-    bool restore = mixer->softvol || ao->no_persistent_volume;
+    bool restore
+        = mixer->softvol || ao_control(ao, AOCONTROL_HAS_TEMP_VOLUME, 0) == 1;
 
     // Restore old parameters if volume won't survive reinitialization.
     // But not if volume scale is possibly different.

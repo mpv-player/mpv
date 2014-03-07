@@ -31,6 +31,7 @@
 #include "audio/format.h"
 #include "common/msg.h"
 #include "ao.h"
+#include "internal.h"
 #include "input/input.h"
 
 #define PULSE_CLIENT_NAME "mpv"

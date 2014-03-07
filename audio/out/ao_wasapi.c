@@ -35,6 +35,7 @@
 #include "common/msg.h"
 #include "misc/ring.h"
 #include "ao.h"
+#include "internal.h"
 #include "compat/atomics.h"
 
 #ifndef PKEY_Device_FriendlyName

@@ -49,6 +49,7 @@
 #include "audio/format.h"
 
 #include "ao.h"
+#include "internal.h"
 
 struct priv {
     int audio_fd;

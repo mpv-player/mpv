@@ -27,6 +27,7 @@
 
 #include "audio/format.h"
 #include "ao.h"
+#include "internal.h"
 
 struct priv {
     struct sio_hdl *hdl;

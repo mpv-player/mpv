@@ -38,6 +38,7 @@
 #include "common/msg.h"
 
 #include "ao.h"
+#include "internal.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
 #include "options/m_option.h"
