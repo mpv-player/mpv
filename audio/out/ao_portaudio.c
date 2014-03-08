@@ -20,7 +20,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <pthread.h>
 
 #include <libavutil/common.h>
 #include <portaudio.h>
@@ -29,22 +28,12 @@
 #include "options/m_option.h"
 #include "audio/format.h"
 #include "common/msg.h"
-#include "misc/ring.h"
+#include "osdep/timer.h"
 #include "ao.h"
 #include "internal.h"
 
 struct priv {
     PaStream *stream;
-    int framelen;
-
-    pthread_mutex_t ring_mutex;
-
-    // following variables are protected by ring_mutex
-    struct mp_ring *ring;
-    double play_time;   // time when last packet returned to PA is on speaker
-                        // 0 is N/A (0 is not a valid PA time value)
-    int play_silence;   // play this many bytes of silence, before real data
-    bool play_remaining;// play what's left in the buffer, then stop stream
 
     // Options
     char *cfg_device;
@@ -80,12 +69,6 @@ static bool check_pa_ret(struct mp_log *log, int ret)
 }
 
 #define CHECK_PA_RET(ret) check_pa_ret(ao->log, (ret))
-
-static int seconds_to_bytes(struct ao *ao, double seconds)
-{
-    return af_fmt_seconds_to_bytes(ao->format, seconds, ao->channels.num,
-                                   ao->samplerate);
-}
 
 static int to_int(const char *s, int return_on_error)
 {
@@ -142,11 +125,6 @@ static int validate_device_opt(struct mp_log *log, const m_option_t *opt,
     return 0;
 }
 
-static void fill_silence(unsigned char *ptr, int len)
-{
-    memset(ptr, 0, len);
-}
-
 static int stream_callback(const void *input,
                            void *output_v,
                            unsigned long frameCount,
@@ -155,42 +133,17 @@ static int stream_callback(const void *input,
                            void *userData)
 {
     struct ao *ao = userData;
-    struct priv *priv = ao->priv;
-    int res = paContinue;
-    unsigned char *output = output_v;
-    int len_bytes = frameCount * priv->framelen;
-
-    pthread_mutex_lock(&priv->ring_mutex);
 
     // NOTE: PA + ALSA in dmix mode seems to pretend that there is no latency
     //       (outputBufferDacTime == currentTime)
-    priv->play_time = timeInfo->outputBufferDacTime
-                      + len_bytes / (float)ao->bps;
+    double play_time = timeInfo->outputBufferDacTime
+                       + frameCount / (float)ao->samplerate;
+    double latency = play_time - timeInfo->currentTime;
+    int64_t end = mp_time_us() + MPMAX(0, latency * 1000000.0);
 
-    if (priv->play_silence > 0) {
-        int bytes = FFMIN(priv->play_silence, len_bytes);
-        fill_silence(output, bytes);
-        priv->play_silence -= bytes;
-        len_bytes -= bytes;
-        output += bytes;
-    }
-    int read = mp_ring_read(priv->ring, output, len_bytes);
-    len_bytes -= read;
-    output += read;
+    ao_read_data(ao, &output_v, frameCount, end);
 
-    if (len_bytes > 0) {
-        if (priv->play_remaining) {
-            res = paComplete;
-            priv->play_remaining = false;
-        } else {
-            MP_ERR(ao, "Buffer underflow!\n");
-        }
-        fill_silence(output, len_bytes);
-    }
-
-    pthread_mutex_unlock(&priv->ring_mutex);
-
-    return res;
+    return paContinue;
 }
 
 static void uninit(struct ao *ao, bool cut_audio)
@@ -199,18 +152,13 @@ static void uninit(struct ao *ao, bool cut_audio)
 
     if (priv->stream) {
         if (!cut_audio && Pa_IsStreamActive(priv->stream) == 1) {
-            pthread_mutex_lock(&priv->ring_mutex);
-
-            priv->play_remaining = true;
-
-            pthread_mutex_unlock(&priv->ring_mutex);
+            ao_wait_drain(ao);
 
             CHECK_PA_RET(Pa_StopStream(priv->stream));
         }
         CHECK_PA_RET(Pa_CloseStream(priv->stream));
     }
 
-    pthread_mutex_destroy(&priv->ring_mutex);
     Pa_Terminate();
 }
 
@@ -220,8 +168,6 @@ static int init(struct ao *ao)
 
     if (!CHECK_PA_RET(Pa_Initialize()))
         return -1;
-
-    pthread_mutex_init(&priv->ring_mutex, NULL);
 
     int pa_device = Pa_GetDefaultOutputDevice();
     if (priv->cfg_device && priv->cfg_device[0])
@@ -261,8 +207,8 @@ static int init(struct ao *ao)
 
     ao->format = fmt->mp_format;
     sp.sampleFormat = fmt->pa_format;
-    priv->framelen = ao->channels.num * (af_fmt2bits(ao->format) / 8);
-    ao->bps = ao->samplerate * priv->framelen;
+    int framelen = ao->channels.num * (af_fmt2bits(ao->format) / 8);
+    ao->bps = ao->samplerate * framelen;
 
     if (!CHECK_PA_RET(Pa_IsFormatSupported(NULL, &sp, ao->samplerate)))
         goto error_exit;
@@ -271,61 +217,11 @@ static int init(struct ao *ao)
                                     stream_callback, ao)))
         goto error_exit;
 
-    priv->ring = mp_ring_new(priv, seconds_to_bytes(ao, 0.5));
-
     return 0;
 
 error_exit:
     uninit(ao, true);
     return -1;
-}
-
-static int play(struct ao *ao, void **data, int samples, int flags)
-{
-    struct priv *priv = ao->priv;
-
-    pthread_mutex_lock(&priv->ring_mutex);
-
-    int write_len = mp_ring_write(priv->ring, data[0], samples * ao->sstride);
-    if (flags & AOPLAY_FINAL_CHUNK)
-        priv->play_remaining = true;
-
-    pthread_mutex_unlock(&priv->ring_mutex);
-
-    if (Pa_IsStreamStopped(priv->stream) == 1)
-        CHECK_PA_RET(Pa_StartStream(priv->stream));
-
-    return write_len / ao->sstride;
-}
-
-static int get_space(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-
-    pthread_mutex_lock(&priv->ring_mutex);
-
-    int free = mp_ring_available(priv->ring);
-
-    pthread_mutex_unlock(&priv->ring_mutex);
-
-    return free / ao->sstride;
-}
-
-static float get_delay(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-
-    double stream_time = Pa_GetStreamTime(priv->stream);
-
-    pthread_mutex_lock(&priv->ring_mutex);
-
-    float frame_time = priv->play_time ? priv->play_time - stream_time : 0;
-    float buffer_latency = (mp_ring_buffered(priv->ring) + priv->play_silence)
-                           / (float)ao->bps;
-
-    pthread_mutex_unlock(&priv->ring_mutex);
-
-    return buffer_latency + frame_time;
 }
 
 static void reset(struct ao *ao)
@@ -334,41 +230,14 @@ static void reset(struct ao *ao)
 
     if (Pa_IsStreamStopped(priv->stream) != 1)
         CHECK_PA_RET(Pa_AbortStream(priv->stream));
-
-    pthread_mutex_lock(&priv->ring_mutex);
-
-    mp_ring_reset(priv->ring);
-    priv->play_remaining = false;
-    priv->play_time = 0;
-    priv->play_silence = 0;
-
-    pthread_mutex_unlock(&priv->ring_mutex);
-}
-
-static void pause(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-
-    CHECK_PA_RET(Pa_AbortStream(priv->stream));
-
-    double stream_time = Pa_GetStreamTime(priv->stream);
-
-    pthread_mutex_lock(&priv->ring_mutex);
-
-    // When playback resumes, replace the lost audio (due to dropping the
-    // portaudio/driver/hardware internal buffers) with silence.
-    float frame_time = priv->play_time ? priv->play_time - stream_time : 0;
-    priv->play_silence += seconds_to_bytes(ao, FFMAX(frame_time, 0));
-    priv->play_time = 0;
-
-    pthread_mutex_unlock(&priv->ring_mutex);
 }
 
 static void resume(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
-    CHECK_PA_RET(Pa_StartStream(priv->stream));
+    if (Pa_IsStreamStopped(priv->stream) == 1)
+        CHECK_PA_RET(Pa_StartStream(priv->stream));
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -379,10 +248,7 @@ const struct ao_driver audio_out_portaudio = {
     .init      = init,
     .uninit    = uninit,
     .reset     = reset,
-    .get_space = get_space,
-    .play      = play,
-    .get_delay = get_delay,
-    .pause     = pause,
+    .pause     = reset,
     .resume    = resume,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
