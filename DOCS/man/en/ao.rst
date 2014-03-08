@@ -81,9 +81,6 @@ Available audio output drivers are:
     ``name=<client>``
         Client name that is passed to JACK (default: ``mpv``). Useful
         if you want to have certain connections established automatically.
-    ``(no-)estimate``
-        Estimate the audio delay, supposed to make the video playback smoother
-        (default: enabled).
     ``(no-)autostart``
         Automatically start jackd if necessary (default: disabled). Note that
         this tends to be unreliable and will flood stdout with server messages.
