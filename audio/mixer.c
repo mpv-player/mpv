@@ -244,7 +244,7 @@ static void probe_softvol(struct mixer *mixer)
     if (mixer->opts->softvol == SOFTVOL_AUTO) {
         // No system-wide volume => fine with AO volume control.
         mixer->softvol =
-            ao_control(mixer->ao, AOCONTROL_HAS_TEMP_VOLUME, 0) != 1 &&
+            ao_control(mixer->ao, AOCONTROL_HAS_TEMP_VOLUME, 0) != 1 ||
             ao_control(mixer->ao, AOCONTROL_HAS_PER_APP_VOLUME, 0) != 1;
     } else {
         mixer->softvol = mixer->opts->softvol == SOFTVOL_YES;
@@ -278,8 +278,8 @@ static void restore_volume(struct mixer *mixer)
     const char *prev_driver = mixer->driver;
     mixer->driver = mixer->softvol ? "softvol" : ao_get_name(ao);
 
-    bool restore
-        = mixer->softvol || ao_control(ao, AOCONTROL_HAS_TEMP_VOLUME, 0) == 1;
+    bool restore =
+        mixer->softvol || ao_control(ao, AOCONTROL_HAS_TEMP_VOLUME, 0) == 1;
 
     // Restore old parameters if volume won't survive reinitialization.
     // But not if volume scale is possibly different.

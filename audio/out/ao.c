@@ -31,8 +31,13 @@
 
 #include "options/options.h"
 #include "options/m_config.h"
+#include "osdep/timer.h"
 #include "common/msg.h"
+#include "common/common.h"
 #include "common/global.h"
+
+// Minimum buffer size in seconds.
+#define MIN_BUFFER 0.2
 
 extern const struct ao_driver audio_out_oss;
 extern const struct ao_driver audio_out_coreaudio;
@@ -156,16 +161,36 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     if (m_config_set_obj_params(config, args) < 0)
         goto error;
     ao->priv = config->optstruct;
+
     char *chmap = mp_chmap_to_str(&ao->channels);
     MP_VERBOSE(ao, "requested format: %d Hz, %s channels, %s\n",
                ao->samplerate, chmap, af_fmt_to_str(ao->format));
     talloc_free(chmap);
+
+    ao->api = ao->driver->play ? &ao_api_push : &ao_api_pull;
+    ao->api_priv = talloc_zero_size(ao, ao->api->priv_size);
+    assert(!ao->api->priv_defaults && !ao->api->options);
+
     if (ao->driver->init(ao) < 0)
         goto error;
+
     ao->sstride = af_fmt2bits(ao->format) / 8;
-    if (!af_fmt_is_planar(ao->format))
+    ao->num_planes = 1;
+    if (af_fmt_is_planar(ao->format)) {
+        ao->num_planes = ao->channels.num;
+    } else {
         ao->sstride *= ao->channels.num;
+    }
     ao->bps = ao->samplerate * ao->sstride;
+
+    if (!ao->device_buffer && ao->driver->get_space)
+        ao->device_buffer = ao->driver->get_space(ao);
+    ao->buffer = MPMAX(ao->device_buffer, MIN_BUFFER * ao->samplerate);
+    MP_VERBOSE(ao, "using soft-buffer of %d samples.\n", ao->buffer);
+
+    if (ao->api->init(ao) < 0)
+        goto error;
+
     return ao;
 error:
     talloc_free(ao);
@@ -214,7 +239,7 @@ done:
 //  cut_audio: if false, block until all remaining audio was played.
 void ao_uninit(struct ao *ao, bool cut_audio)
 {
-    ao->driver->uninit(ao, cut_audio);
+    ao->api->uninit(ao, cut_audio);
     talloc_free(ao);
 }
 
@@ -227,7 +252,7 @@ void ao_uninit(struct ao *ao, bool cut_audio)
 //  flags: currently AOPLAY_FINAL_CHUNK can be set
 int ao_play(struct ao *ao, void **data, int samples, int flags)
 {
-    return ao->driver->play(ao, data, samples, flags);
+    return ao->api->play(ao, data, samples, flags);
 }
 
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -238,8 +263,8 @@ int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
     case AOCONTROL_HAS_PER_APP_VOLUME:
         return !!ao->per_application_mixer;
     default:
-        if (ao->driver->control)
-            return ao->driver->control(ao, cmd, arg);
+        if (ao->api->control)
+            return ao->api->control(ao, cmd, arg);
     }
     return CONTROL_UNKNOWN;
 }
@@ -251,34 +276,34 @@ int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
 // this correctly.
 double ao_get_delay(struct ao *ao)
 {
-    if (!ao->driver->get_delay) {
+    if (!ao->api->get_delay) {
         assert(ao->untimed);
         return 0;
     }
-    return ao->driver->get_delay(ao);
+    return ao->api->get_delay(ao);
 }
 
 // Return free size of the internal audio buffer. This controls how much audio
 // the core should decode and try to queue with ao_play().
 int ao_get_space(struct ao *ao)
 {
-    return ao->driver->get_space(ao);
+    return ao->api->get_space(ao);
 }
 
 // Stop playback and empty buffers. Essentially go back to the state after
 // ao->init().
 void ao_reset(struct ao *ao)
 {
-    if (ao->driver->reset)
-        ao->driver->reset(ao);
+    if (ao->api->reset)
+        ao->api->reset(ao);
 }
 
 // Pause playback. Keep the current buffer. ao_get_delay() must return the
 // same value as before pausing.
 void ao_pause(struct ao *ao)
 {
-    if (ao->driver->pause)
-        ao->driver->pause(ao);
+    if (ao->api->pause)
+        ao->api->pause(ao);
 }
 
 // Resume playback. Play the remaining buffer. If the driver doesn't support
@@ -286,22 +311,17 @@ void ao_pause(struct ao *ao)
 // the lost audio.
 void ao_resume(struct ao *ao)
 {
-    if (ao->driver->resume)
-        ao->driver->resume(ao);
+    if (ao->api->resume)
+        ao->api->resume(ao);
 }
 
-int ao_play_silence(struct ao *ao, int samples)
+// Wait until the audio buffer is drained. This can be used to emulate draining
+// if native functionality is not available.
+// Only call this on uninit (otherwise, deadlock trouble ahead).
+void ao_wait_drain(struct ao *ao)
 {
-    if (samples <= 0 || AF_FORMAT_IS_SPECIAL(ao->format))
-        return 0;
-    char *p = talloc_size(NULL, samples * ao->sstride);
-    af_fill_silence(p, samples * ao->sstride, ao->format);
-    void *tmp[MP_NUM_CHANNELS];
-    for (int n = 0; n < MP_NUM_CHANNELS; n++)
-        tmp[n] = p;
-    int r = ao_play(ao, tmp, samples, 0);
-    talloc_free(p);
-    return r;
+    // This is probably not entirely accurate, but good enough.
+    mp_sleep_us(ao_get_delay(ao) * 1000000);
 }
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,

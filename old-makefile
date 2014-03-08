@@ -181,6 +181,8 @@ SOURCES = audio/audio.c \
           audio/out/ao.c \
           audio/out/ao_null.c \
           audio/out/ao_pcm.c \
+          audio/out/pull.c \
+          audio/out/push.c \
           bstr/bstr.c \
           common/asxparser.c \
           common/av_common.c \

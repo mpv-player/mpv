@@ -145,6 +145,8 @@ def build(ctx):
         ( "audio/out/ao_sdl.c",                  "sdl2" ),
         ( "audio/out/ao_sndio.c",                "sndio" ),
         ( "audio/out/ao_wasapi.c",               "wasapi" ),
+        ( "audio/out/pull.c" ),
+        ( "audio/out/push.c" ),
 
         ## Bstr
         ( "bstr/bstr.c" ),
