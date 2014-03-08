@@ -74,19 +74,21 @@ static int preinit(struct vo *vo)
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi);
+static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi);
 static void uninit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
     if (!vc)
         return;
 
+    pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
+
     if (vc->lastipts >= 0 && vc->stream)
-        draw_image(vo, NULL);
+        draw_image_unlocked(vo, NULL);
 
     mp_image_unrefp(&vc->lastimg);
 
-    vo->priv = NULL;
+    pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
@@ -100,6 +102,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     if (!vc)
         return -1;
+
+    pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
 
     display_aspect_ratio.num = params->d_w;
     display_aspect_ratio.den = params->d_h;
@@ -123,7 +127,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
                        vc->stream->codec->sample_aspect_ratio.den,
                        aspect.num, aspect.den);
             }
-            return 0;
+            goto done;
         }
 
         /* FIXME Is it possible with raw video? */
@@ -168,9 +172,12 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     mp_image_unrefp(&vc->lastimg);
 
+done:
+    pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
     return 0;
 
 error:
+    pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
     uninit(vo);
     return -1;
 }
@@ -182,14 +189,12 @@ static int query_format(struct vo *vo, uint32_t format)
     if (!vo->encode_lavc_ctx)
         return 0;
 
-    if (!encode_lavc_supports_pixfmt(vo->encode_lavc_ctx, pix_fmt))
-        return 0;
-
-    return
-        VFCAP_CSP_SUPPORTED |
-            // we can do it
-        VFCAP_CSP_SUPPORTED_BY_HW;
-            // we don't convert colorspaces here
+    pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
+    int flags = 0;
+    if (encode_lavc_supports_pixfmt(vo->encode_lavc_ctx, pix_fmt))
+        flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+    pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
+    return flags;
 }
 
 static void write_packet(struct vo *vo, int size, AVPacket *packet)
@@ -272,7 +277,7 @@ static int encode_video(struct vo *vo, AVFrame *frame, AVPacket *packet)
     }
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *vc = vo->priv;
     struct encode_lavc_context *ectx = vo->encode_lavc_ctx;
@@ -479,6 +484,13 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 }
 
+static void draw_image(struct vo *vo, mp_image_t *mpi)
+{
+    pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
+    draw_image_unlocked(vo, mpi);
+    pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
+}
+
 static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 {
 }
@@ -486,6 +498,8 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct priv *vc = vo->priv;
+
+    pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
 
     if (vc->lastimg && vc->lastimg_wants_osd && vo->params) {
         struct mp_osd_res dim = osd_res_from_image_params(vo->params);
@@ -495,11 +509,15 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         osd_draw_on_image(osd, dim, osd_get_vo_pts(osd), OSD_DRAW_SUB_ONLY,
                           vc->lastimg);
     }
+
+    pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *vc = vo->priv;
+    int r = VO_NOTIMPL;
+    pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
     switch (request) {
     case VOCTRL_SET_YUV_COLORSPACE:
         vc->colorspace = *(struct mp_csp_details *)data;
@@ -509,12 +527,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
             vc->colorspace.format = encode_lavc_get_csp(vo->encode_lavc_ctx, vc->stream);
             vc->colorspace.levels_out = encode_lavc_get_csp_levels(vo->encode_lavc_ctx, vc->stream);
         }
-        return 1;
+        r = 1;
+        break;
     case VOCTRL_GET_YUV_COLORSPACE:
         *(struct mp_csp_details *)data = vc->colorspace;
-        return 1;
+        r = 1;
+        break;
     }
-    return VO_NOTIMPL;
+    pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
+    return r;
 }
 
 const struct vo_driver video_out_lavc = {

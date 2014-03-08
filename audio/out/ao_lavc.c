@@ -102,12 +102,14 @@ static int init(struct ao *ao)
         return -1;
     }
 
+    pthread_mutex_lock(&ao->encode_lavc_ctx->lock);
+
     ac->stream = encode_lavc_alloc_stream(ao->encode_lavc_ctx,
                                           AVMEDIA_TYPE_AUDIO);
 
     if (!ac->stream) {
         MP_ERR(ao, "could not get a new audio stream\n");
-        return -1;
+        goto fail;
     }
 
     codec = encode_lavc_get_codec(ao->encode_lavc_ctx, ac->stream);
@@ -126,7 +128,7 @@ static int init(struct ao *ao)
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_any(&sel);
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
-        return -1;
+        goto fail;
     mp_chmap_reorder_to_lavc(&ao->channels);
     ac->stream->codec->channels = ao->channels.num;
     ac->stream->codec->channel_layout = mp_chmap_to_lavc(&ao->channels);
@@ -140,7 +142,7 @@ static int init(struct ao *ao)
     ac->stream->codec->bits_per_raw_sample = ac->sample_size * 8;
 
     if (encode_lavc_open_codec(ao->encode_lavc_ctx, ac->stream) < 0)
-        return -1;
+        goto fail;
 
     ac->pcmhack = 0;
     if (ac->stream->codec->frame_size <= 1)
@@ -169,7 +171,12 @@ static int init(struct ao *ao)
 
     ao->untimed = true;
 
+    pthread_mutex_unlock(&ao->encode_lavc_ctx->lock);
     return 0;
+
+fail:
+    pthread_mutex_unlock(&ao->encode_lavc_ctx->lock);
+    return -1;
 }
 
 // close audio device
@@ -179,8 +186,11 @@ static void uninit(struct ao *ao, bool cut_audio)
     struct priv *ac = ao->priv;
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
 
+    pthread_mutex_lock(&ectx->lock);
+
     if (!encode_lavc_start(ectx)) {
         MP_WARN(ao, "not even ready to encode audio at end -> dropped");
+        pthread_mutex_unlock(&ectx->lock);
         return;
     }
 
@@ -192,7 +202,7 @@ static void uninit(struct ao *ao, bool cut_audio)
         while (encode(ao, outpts, NULL) > 0) ;
     }
 
-    ao->priv = NULL;
+    pthread_mutex_unlock(&ectx->lock);
 }
 
 // return: how many bytes can be played without blocking
@@ -323,8 +333,11 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     double nextpts;
     double outpts;
 
+    pthread_mutex_lock(&ectx->lock);
+
     if (!encode_lavc_start(ectx)) {
         MP_WARN(ao, "not ready yet for encoding audio\n");
+        pthread_mutex_unlock(&ectx->lock);
         return 0;
     }
 
@@ -354,6 +367,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             talloc_free(tmp);
         }
 
+        pthread_mutex_unlock(&ectx->lock);
         return FFMIN(written, samples);
     }
 
@@ -444,6 +458,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             ectx->next_in_pts = nextpts;
     }
 
+    pthread_mutex_unlock(&ectx->lock);
     return bufpos;
 }
 
