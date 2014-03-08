@@ -626,13 +626,10 @@ static float get_delay(struct ao *ao)
     return mp_ring_buffered(p->buffer) / (float)ao->bps;
 }
 
-static void uninit(struct ao *ao, bool immed)
+static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
     OSStatus err = noErr;
-
-    if (!immed)
-        mp_sleep_us(get_delay(ao) * 1000000);
 
     if (!p->is_digital) {
         AudioOutputUnitStop(p->audio_unit);

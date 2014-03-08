@@ -205,13 +205,18 @@ static bool select_chmap(struct ao *ao, pa_channel_map *dst)
            chmap_pa_from_mp(dst, &ao->channels);
 }
 
-static void uninit(struct ao *ao, bool cut_audio)
+static void drain(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    if (priv->stream && !cut_audio) {
+    if (priv->stream) {
         pa_threaded_mainloop_lock(priv->mainloop);
         waitop(priv, pa_stream_drain(priv->stream, success_cb, ao));
     }
+}
+
+static void uninit(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
 
     if (priv->mainloop)
         pa_threaded_mainloop_stop(priv->mainloop);
@@ -366,7 +371,7 @@ fail:
     if (proplist)
         pa_proplist_free(proplist);
 
-    uninit(ao, true);
+    uninit(ao);
     return -1;
 }
 
@@ -620,6 +625,7 @@ const struct ao_driver audio_out_pulse = {
     .get_delay = get_delay,
     .pause     = pause,
     .resume    = resume,
+    .drain     = drain,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .cfg_buffer = 250,

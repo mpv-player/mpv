@@ -59,7 +59,7 @@ struct ao *ao_init_best(struct mpv_global *global,
                         struct input_ctx *input_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels);
-void ao_uninit(struct ao *ao, bool cut_audio);
+void ao_uninit(struct ao *ao);
 void ao_get_format(struct ao *ao, struct mp_audio *format);
 const char *ao_get_name(struct ao *ao);
 const char *ao_get_description(struct ao *ao);
@@ -71,5 +71,6 @@ int ao_get_space(struct ao *ao);
 void ao_reset(struct ao *ao);
 void ao_pause(struct ao *ao);
 void ao_resume(struct ao *ao);
+void ao_drain(struct ao *ao);
 
 #endif /* MPLAYER_AUDIO_OUT_H */

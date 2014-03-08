@@ -79,7 +79,7 @@ struct priv {
     } while (0)
 
 static float get_delay(struct ao *ao);
-static void uninit(struct ao *ao, bool immed);
+static void uninit(struct ao *ao);
 
 /* to set/get/query special features/parameters */
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -530,21 +530,18 @@ static int init(struct ao *ao)
     return 0;
 
 alsa_error:
-    uninit(ao, true);
+    uninit(ao);
     return -1;
 } // end init
 
 
 /* close audio device */
-static void uninit(struct ao *ao, bool immed)
+static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
     if (p->alsa) {
         int err;
-
-        if (!immed)
-            snd_pcm_drain(p->alsa);
 
         err = snd_pcm_close(p->alsa);
         CHECK_ALSA_ERROR("pcm close error");
@@ -554,6 +551,12 @@ static void uninit(struct ao *ao, bool immed)
 
 alsa_error:
     p->alsa = NULL;
+}
+
+static void drain(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    snd_pcm_drain(p->alsa);
 }
 
 static void audio_pause(struct ao *ao)
@@ -712,6 +715,7 @@ const struct ao_driver audio_out_alsa = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
+    .drain     = drain,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .cfg_block = 1,

@@ -427,22 +427,26 @@ ac3_retry:
 }
 
 // close audio device
-static void uninit(struct ao *ao, bool immed)
+static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
     if (p->audio_fd == -1)
         return;
-#ifdef SNDCTL_DSP_SYNC
-    // to get the buffer played
-    if (!immed)
-        ioctl(p->audio_fd, SNDCTL_DSP_SYNC, NULL);
-#endif
 #ifdef SNDCTL_DSP_RESET
-    if (immed)
-        ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
+    ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
 #endif
     close(p->audio_fd);
     p->audio_fd = -1;
+}
+
+static void drain(struct ao *ao)
+{
+#ifdef SNDCTL_DSP_SYNC
+    struct priv *p = ao->priv;
+    // to get the buffer played
+    if (p->audio_fd != -1)
+        ioctl(p->audio_fd, SNDCTL_DSP_SYNC, NULL);
+#endif
 }
 
 #ifndef SNDCTL_DSP_RESET
@@ -601,6 +605,7 @@ const struct ao_driver audio_out_oss = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
+    .drain     = drain,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .audio_fd = -1,

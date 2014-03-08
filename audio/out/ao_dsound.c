@@ -546,10 +546,8 @@ static void audio_resume(struct ao *ao)
 \brief close audio device
 \param immed stop playback immediately
 */
-static void uninit(struct ao *ao, bool immed)
+static void uninit(struct ao *ao)
 {
-    if (!immed)
-        mp_sleep_us(get_delay(ao) * 1000000);
     reset(ao);
 
     DestroyBuffer(ao);

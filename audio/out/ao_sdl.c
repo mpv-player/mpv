@@ -78,7 +78,7 @@ static void audio_callback(void *userdata, Uint8 *stream, int len)
     SDL_UnlockMutex(priv->buffer_mutex);
 }
 
-static void uninit(struct ao *ao, bool cut_audio)
+static void uninit(struct ao *ao)
 {
     struct priv *priv = ao->priv;
     if (!priv)
@@ -134,14 +134,14 @@ static int init(struct ao *ao)
     if (SDL_InitSubSystem(SDL_INIT_AUDIO)) {
         if (!ao->probing)
             MP_ERR(ao, "SDL_Init failed\n");
-        uninit(ao, true);
+        uninit(ao);
         return -1;
     }
 
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_waveext_def(&sel);
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels)) {
-        uninit(ao, true);
+        uninit(ao);
         return -1;
     }
 
@@ -186,7 +186,7 @@ static int init(struct ao *ao)
     if (SDL_OpenAudio(&desired, &obtained)) {
         if (!ao->probing)
             MP_ERR(ao, "could not open audio: %s\n", SDL_GetError());
-        uninit(ao, true);
+        uninit(ao);
         return -1;
     }
 
@@ -217,12 +217,12 @@ static int init(struct ao *ao)
         default:
             if (!ao->probing)
                 MP_ERR(ao, "could not find matching format\n");
-            uninit(ao, true);
+            uninit(ao);
             return -1;
     }
 
     if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, obtained.channels)) {
-        uninit(ao, true);
+        uninit(ao);
         return -1;
     }
 
@@ -231,13 +231,13 @@ static int init(struct ao *ao)
     priv->buffer_mutex = SDL_CreateMutex();
     if (!priv->buffer_mutex) {
         MP_ERR(ao, "SDL_CreateMutex failed\n");
-        uninit(ao, true);
+        uninit(ao);
         return -1;
     }
     priv->underrun_cond = SDL_CreateCond();
     if (!priv->underrun_cond) {
         MP_ERR(ao, "SDL_CreateCond failed\n");
-        uninit(ao, true);
+        uninit(ao);
         return -1;
     }
 

@@ -98,10 +98,15 @@ static int init(struct ao *ao)
 }
 
 // close audio device
-static void uninit(struct ao *ao, bool cut_audio)
+static void uninit(struct ao *ao)
+{
+}
+
+static void wait_drain(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    if (!cut_audio && !priv->paused)
+    drain(ao);
+    if (!priv->paused)
         mp_sleep_us(1000000.0 * priv->buffered / ao->samplerate / priv->speed);
 }
 
@@ -185,6 +190,7 @@ const struct ao_driver audio_out_null = {
     .get_delay = get_delay,
     .pause     = pause,
     .resume    = resume,
+    .drain     = wait_drain,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .bufferlen = 0.2,

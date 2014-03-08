@@ -146,16 +146,13 @@ static int stream_callback(const void *input,
     return paContinue;
 }
 
-static void uninit(struct ao *ao, bool cut_audio)
+static void uninit(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
     if (priv->stream) {
-        if (!cut_audio && Pa_IsStreamActive(priv->stream) == 1) {
-            ao_wait_drain(ao);
-
+        if (Pa_IsStreamActive(priv->stream) == 1)
             CHECK_PA_RET(Pa_StopStream(priv->stream));
-        }
         CHECK_PA_RET(Pa_CloseStream(priv->stream));
     }
 
@@ -220,7 +217,7 @@ static int init(struct ao *ao)
     return 0;
 
 error_exit:
-    uninit(ao, true);
+    uninit(ao);
     return -1;
 }
 

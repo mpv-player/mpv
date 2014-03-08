@@ -173,10 +173,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         struct ao *ao = mpctx->ao;
         mpctx->initialized_flags &= ~INITIALIZED_AO;
         if (ao) {
-            bool drain = false;
             // Note: with gapless_audio, stop_play is not correctly set
             if (opts->gapless_audio || mpctx->stop_play == AT_END_OF_FILE) {
-                drain = true;
                 struct mp_audio data;
                 mp_audio_buffer_peek(mpctx->ao_buffer, &data);
                 int samples = mpctx->ao_buffer_playable_samples;
@@ -187,8 +185,9 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
                     if (played < samples)
                         MP_WARN(mpctx, "Audio output truncated at end.\n");
                 }
+                ao_drain(ao);
             }
-            ao_uninit(ao, drain);
+            ao_uninit(ao);
         }
         mpctx->ao = NULL;
     }

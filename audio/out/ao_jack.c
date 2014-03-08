@@ -207,12 +207,9 @@ err_chmap:
 }
 
 // close audio device
-static void uninit(struct ao *ao, bool immed)
+static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
-
-    if (!immed)
-        ao_wait_drain(ao);
 
     jack_client_close(p->client);
 }

@@ -128,15 +128,9 @@ static int init(struct ao *ao)
     return 0;
 }
 
-static void uninit(struct ao *ao, bool cut_audio)
+static void uninit(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    /* The API does not provide a direct way to explicitly wait until
-     * the last byte has been played server-side as this cannot be
-     * guaranteed by backend drivers, so we approximate this behavior.
-     */
-    if (!cut_audio)
-        mp_sleep_us(rsd_delay_ms(priv->rd) * 1000);
 
     rsd_stop(priv->rd);
     rsd_free(priv->rd);

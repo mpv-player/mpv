@@ -1218,11 +1218,11 @@ static int setup_buffers(struct wasapi_state *state)
     return !state->ringbuff;
 }
 
-static void uninit(struct ao *ao, bool block)
+static void uninit(struct ao *ao)
 {
     MP_VERBOSE(ao, "uninit!\n");
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    state->immed = !block;
+    state->immed = 1;
     SetEvent(state->hUninit);
     /* wait up to 10 seconds */
     if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT)

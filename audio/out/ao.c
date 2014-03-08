@@ -235,11 +235,10 @@ done:
     return ao;
 }
 
-// Uninitialize and destroy the AO.
-//  cut_audio: if false, block until all remaining audio was played.
-void ao_uninit(struct ao *ao, bool cut_audio)
+// Uninitialize and destroy the AO. Remaining audio must be dropped.
+void ao_uninit(struct ao *ao)
 {
-    ao->api->uninit(ao, cut_audio);
+    ao->api->uninit(ao);
     talloc_free(ao);
 }
 
@@ -315,13 +314,22 @@ void ao_resume(struct ao *ao)
         ao->api->resume(ao);
 }
 
-// Wait until the audio buffer is drained. This can be used to emulate draining
-// if native functionality is not available.
-// Only call this on uninit (otherwise, deadlock trouble ahead).
+// Be careful with locking
 void ao_wait_drain(struct ao *ao)
 {
     // This is probably not entirely accurate, but good enough.
     mp_sleep_us(ao_get_delay(ao) * 1000000);
+    ao_reset(ao);
+}
+
+// Block until the current audio buffer has played completely.
+void ao_drain(struct ao *ao)
+{
+    if (ao->api->drain) {
+        ao->api->drain(ao);
+    } else {
+        ao_wait_drain(ao);
+    }
 }
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,

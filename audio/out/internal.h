@@ -100,13 +100,14 @@ struct ao_driver {
     int (*init)(struct ao *ao);
     // Optional. See ao_control() etc. in ao.c
     int (*control)(struct ao *ao, enum aocontrol cmd, void *arg);
-    void (*uninit)(struct ao *ao, bool cut_audio);
+    void (*uninit)(struct ao *ao);
     void (*reset)(struct ao*ao);
     int (*get_space)(struct ao *ao);
     int (*play)(struct ao *ao, void **data, int samples, int flags);
     float (*get_delay)(struct ao *ao);
     void (*pause)(struct ao *ao);
     void (*resume)(struct ao *ao);
+    void (*drain)(struct ao *ao);
 
     // For option parsing (see vo.h)
     int priv_size;

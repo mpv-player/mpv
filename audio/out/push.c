@@ -106,6 +106,17 @@ static void resume(struct ao *ao)
     pthread_mutex_unlock(&p->lock);
 }
 
+static void drain(struct ao *ao)
+{
+    if (ao->driver->drain) {
+        struct ao_push_state *p = ao->api_priv;
+        pthread_mutex_lock(&p->lock);
+        ao->driver->drain(ao);
+        pthread_mutex_unlock(&p->lock);
+    } else {
+        ao_wait_drain(ao);
+    }
+}
 
 static int get_space(struct ao *ao)
 {
@@ -202,7 +213,7 @@ static void *playthread(void *arg)
     return NULL;
 }
 
-static void uninit(struct ao *ao, bool cut_audio)
+static void uninit(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
 
@@ -213,7 +224,7 @@ static void uninit(struct ao *ao, bool cut_audio)
 
     pthread_join(p->thread, NULL);
 
-    ao->driver->uninit(ao, cut_audio);
+    ao->driver->uninit(ao);
 
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);
@@ -231,7 +242,7 @@ static int init(struct ao *ao)
                                &ao->channels, ao->samplerate);
     mp_audio_buffer_preallocate_min(p->buffer, ao->buffer);
     if (pthread_create(&p->thread, NULL, playthread, ao)) {
-        ao->driver->uninit(ao, true);
+        ao->driver->uninit(ao);
         return -1;
     }
     return 0;
@@ -247,6 +258,7 @@ const struct ao_driver ao_api_push = {
     .get_delay = get_delay,
     .pause = pause,
     .resume = resume,
+    .drain = drain,
     .priv_size = sizeof(struct ao_push_state),
 };
 

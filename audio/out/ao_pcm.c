@@ -166,7 +166,7 @@ static int init(struct ao *ao)
 }
 
 // close audio device
-static void uninit(struct ao *ao, bool cut_audio)
+static void uninit(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 

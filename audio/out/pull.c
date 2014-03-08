@@ -190,9 +190,9 @@ static void resume(struct ao *ao)
         ao->driver->resume(ao);
 }
 
-static void uninit(struct ao *ao, bool cut_audio)
+static void uninit(struct ao *ao)
 {
-    ao->driver->uninit(ao, cut_audio);
+    ao->driver->uninit(ao);
 }
 
 static int init(struct ao *ao)
