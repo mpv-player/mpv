@@ -352,13 +352,11 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         res = audio_decode(d_audio, mpctx->ao_buffer, a);
         if (skip_samples <= mp_audio_buffer_samples(mpctx->ao_buffer)) {
             mp_audio_buffer_skip(mpctx->ao_buffer, skip_samples);
-            mpctx->ao_buffer_playable_samples = 0;
             if (res < 0)
                 return res;
             return audio_decode(d_audio, mpctx->ao_buffer, playsize);
         }
         mp_audio_buffer_clear(mpctx->ao_buffer);
-        mpctx->ao_buffer_playable_samples = 0;
         if (res < 0)
             return res;
     }
@@ -458,15 +456,11 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         }
     }
 
-    assert(mpctx->ao_buffer_playable_samples <=
-                mp_audio_buffer_samples(mpctx->ao_buffer));
-
     struct mp_audio data;
     mp_audio_buffer_peek(mpctx->ao_buffer, &data);
     data.samples = MPMIN(data.samples, playsize);
     int played = write_to_ao(mpctx, &data, playflags, written_audio_pts(mpctx));
     assert(played >= 0 && played <= data.samples);
-    mpctx->ao_buffer_playable_samples = playsize - played;
 
     if (played > 0) {
         mp_audio_buffer_skip(mpctx->ao_buffer, played);
@@ -485,7 +479,6 @@ void clear_audio_output_buffers(struct MPContext *mpctx)
     if (mpctx->ao) {
         ao_reset(mpctx->ao);
         mp_audio_buffer_clear(mpctx->ao_buffer);
-        mpctx->ao_buffer_playable_samples = 0;
     }
 }
 
