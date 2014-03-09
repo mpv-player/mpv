@@ -24,58 +24,34 @@
 #include "talloc.h"
 #include "ao.h"
 #include "internal.h"
+#include "common/common.h"
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "osdep/timer.h"
 
-#include <libavutil/fifo.h>
-#include <libavutil/common.h>
 #include <SDL.h>
-
-// hack because SDL can't be asked about the current delay
-#define ESTIMATE_DELAY
 
 struct priv
 {
-    AVFifoBuffer *buffer;
-    SDL_mutex *buffer_mutex;
-    SDL_cond *underrun_cond;
-    bool unpause;
     bool paused;
-#ifdef ESTIMATE_DELAY
-    int64_t callback_time0;
-    int64_t callback_time1;
-#endif
+
     float buflen;
-    float bufcnt;
 };
 
 static void audio_callback(void *userdata, Uint8 *stream, int len)
 {
     struct ao *ao = userdata;
-    struct priv *priv = ao->priv;
 
-    SDL_LockMutex(priv->buffer_mutex);
+    void *data[1] = {stream};
 
-#ifdef ESTIMATE_DELAY
-    priv->callback_time1 = priv->callback_time0;
-    priv->callback_time0 = mp_time_us();
-#endif
+    if (len % ao->sstride)
+        MP_ERR(ao, "SDL audio callback not sample aligned");
 
-    while (len > 0 && !priv->paused) {
-        int got = av_fifo_size(priv->buffer);
-        if (got > len)
-            got = len;
-        if (got > 0) {
-            av_fifo_generic_read(priv->buffer, stream, got, NULL);
-            len -= got;
-            stream += got;
-        }
-        if (len > 0)
-            SDL_CondWait(priv->underrun_cond, priv->buffer_mutex);
-    }
+    // Time this buffer will take, plus assume 1 period (1 callback invocation)
+    // fixed latency.
+    double delay = 2 * len / (double)ao->bps;
 
-    SDL_UnlockMutex(priv->buffer_mutex);
+    ao_read_data(ao, data, len / ao->sstride, mp_time_us() + 1000000LL * delay);
 }
 
 static void uninit(struct ao *ao)
@@ -84,34 +60,13 @@ static void uninit(struct ao *ao)
     if (!priv)
         return;
 
-    // abort the callback
-    priv->paused = 1;
-
     if (SDL_WasInit(SDL_INIT_AUDIO)) {
-        if (priv->buffer_mutex)
-            SDL_LockMutex(priv->buffer_mutex);
-        if (priv->underrun_cond)
-            SDL_CondSignal(priv->underrun_cond);
-        if (priv->buffer_mutex)
-            SDL_UnlockMutex(priv->buffer_mutex);
-
         // make sure the callback exits
         SDL_LockAudio();
 
         // close audio device
         SDL_QuitSubSystem(SDL_INIT_AUDIO);
     }
-
-    // get rid of the mutex
-    if (priv->underrun_cond)
-        SDL_DestroyCond(priv->underrun_cond);
-    if (priv->buffer_mutex)
-        SDL_DestroyMutex(priv->buffer_mutex);
-    if (priv->buffer)
-        av_fifo_free(priv->buffer);
-
-    talloc_free(ao->priv);
-    ao->priv = NULL;
 }
 
 static unsigned int ceil_power_of_two(unsigned int x)
@@ -172,7 +127,7 @@ static int init(struct ao *ao)
     }
     desired.freq = ao->samplerate;
     desired.channels = ao->channels.num;
-    desired.samples = FFMIN(32768, ceil_power_of_two(ao->samplerate *
+    desired.samples = MPMIN(32768, ceil_power_of_two(ao->samplerate *
                                                      priv->buflen));
     desired.callback = audio_callback;
     desired.userdata = ao;
@@ -227,125 +182,26 @@ static int init(struct ao *ao)
     }
 
     ao->samplerate = obtained.freq;
-    priv->buffer = av_fifo_alloc(obtained.size * priv->bufcnt);
-    priv->buffer_mutex = SDL_CreateMutex();
-    if (!priv->buffer_mutex) {
-        MP_ERR(ao, "SDL_CreateMutex failed\n");
-        uninit(ao);
-        return -1;
-    }
-    priv->underrun_cond = SDL_CreateCond();
-    if (!priv->underrun_cond) {
-        MP_ERR(ao, "SDL_CreateCond failed\n");
-        uninit(ao);
-        return -1;
-    }
 
-    priv->unpause = 1;
     priv->paused = 1;
-    priv->callback_time0 = priv->callback_time1 = mp_time_us();
 
     return 1;
-}
-
-static void reset(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-    SDL_LockMutex(priv->buffer_mutex);
-    av_fifo_reset(priv->buffer);
-    SDL_UnlockMutex(priv->buffer_mutex);
-}
-
-static int get_space(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-    SDL_LockMutex(priv->buffer_mutex);
-    int space = av_fifo_space(priv->buffer);
-    SDL_UnlockMutex(priv->buffer_mutex);
-    return space / ao->sstride;
 }
 
 static void pause(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    SDL_PauseAudio(SDL_TRUE);
-    priv->unpause = 0;
+    if (!priv->paused)
+        SDL_PauseAudio(SDL_TRUE);
     priv->paused = 1;
-    SDL_CondSignal(priv->underrun_cond);
-}
-
-static void do_resume(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-    priv->paused = 0;
-    SDL_PauseAudio(SDL_FALSE);
 }
 
 static void resume(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    SDL_LockMutex(priv->buffer_mutex);
-    int free = av_fifo_space(priv->buffer);
-    SDL_UnlockMutex(priv->buffer_mutex);
-    if (free)
-        priv->unpause = 1;
-    else
-        do_resume(ao);
-}
-
-static int play(struct ao *ao, void **data, int samples, int flags)
-{
-    struct priv *priv = ao->priv;
-    int len = samples * ao->sstride;
-    SDL_LockMutex(priv->buffer_mutex);
-    int free = av_fifo_space(priv->buffer);
-    if (len > free) len = free;
-    av_fifo_generic_write(priv->buffer, data[0], len, NULL);
-    SDL_CondSignal(priv->underrun_cond);
-    SDL_UnlockMutex(priv->buffer_mutex);
-    if (priv->unpause) {
-        priv->unpause = 0;
-        do_resume(ao);
-    }
-    return len / ao->sstride;
-}
-
-static float get_delay(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-    SDL_LockMutex(priv->buffer_mutex);
-    int sz = av_fifo_size(priv->buffer);
-#ifdef ESTIMATE_DELAY
-    int64_t callback_time0 = priv->callback_time0;
-    int64_t callback_time1 = priv->callback_time1;
-#endif
-    SDL_UnlockMutex(priv->buffer_mutex);
-
-    // delay component: our FIFO's length
-    float delay = sz / (float) ao->bps;
-
-#ifdef ESTIMATE_DELAY
-    // delay component: outstanding audio living in SDL
-
-    int64_t current_time = mp_time_us();
-
-    // interval between callbacks
-    int64_t callback_interval = callback_time0 - callback_time1;
-    int64_t elapsed_interval = current_time - callback_time0;
-    if (elapsed_interval > callback_interval)
-        elapsed_interval = callback_interval;
-
-    // delay subcomponent: remaining audio from the currently played buffer
-    int64_t buffer_interval = callback_interval - elapsed_interval;
-
-    // delay subcomponent: remaining audio from the next played buffer, as
-    // provided by the callback
-    buffer_interval += callback_interval;
-
-    delay += buffer_interval / 1000000.0;
-#endif
-
-    return delay;
+    if (priv->paused)
+        SDL_PauseAudio(SDL_FALSE);
+    priv->paused = 0;
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -355,20 +211,14 @@ const struct ao_driver audio_out_sdl = {
     .name      = "sdl",
     .init      = init,
     .uninit    = uninit,
-    .get_space = get_space,
-    .play      = play,
-    .get_delay = get_delay,
     .pause     = pause,
     .resume    = resume,
-    .reset     = reset,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .buflen = 0, // use SDL default
-        .bufcnt = 2,
     },
     .options = (const struct m_option[]) {
         OPT_FLOAT("buflen", buflen, 0),
-        OPT_FLOAT("bufcnt", bufcnt, 0),
         {0}
     },
 };
