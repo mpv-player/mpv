@@ -14,9 +14,9 @@ DEST_OS=win32 TARGET=i686-w64-mingw32 ./waf configure
 While building a complete MinGW-w64 toolchain yourself is possible, people have
 created scripts to help ease the process. These are the two recommended methods:
 
-- Using [mingw-w64-cmake](lachs0r/mingw-w64-cmake) to setup a MinGW-w64
-  environment. We recommend you to try this first before MXE. mingw-w64-cmake
-  will also build mpv and its dependencies.
+- Using [mingw-w64-cmake](https://github.com/lachs0r/mingw-w64-cmake) to setup
+  a MinGW-w64 environment. We recommend you to try this first before MXE.
+  mingw-w64-cmake will also build mpv and its dependencies.
 - Alternatively, you can use MXE: http://mxe.cc. With MXE, you have to manually
   set the target to MinGW-w64 (even if you compile to 32 bit). A working example
   below.
