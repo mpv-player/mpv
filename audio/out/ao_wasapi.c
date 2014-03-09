@@ -1381,9 +1381,9 @@ static float get_device_delay(struct wasapi_state *state) {
 
     LARGE_INTEGER qpc_count;
     QueryPerformanceCounter(&qpc_count);
-    UINT64 qpc_diff = (qpc_count.QuadPart * 10000000 / state->qpc_frequency.QuadPart) - qpc_position;
+    double qpc_diff = (qpc_count.QuadPart * 1e7 / state->qpc_frequency.QuadPart) - qpc_position;
 
-    position += state->clock_frequency * qpc_diff / 10000000;
+    position += state->clock_frequency * (uint64_t)(qpc_diff / 1e7);
 
     /* convert position to the same base as sample_count */
     position = position * state->format.Format.nSamplesPerSec / state->clock_frequency;
