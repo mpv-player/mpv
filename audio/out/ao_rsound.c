@@ -112,8 +112,8 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    rsd_set_param(priv->rd, RSD_SAMPLERATE, &ao->samplerate);
-    rsd_set_param(priv->rd, RSD_CHANNELS, &ao->channels.num);
+    rsd_set_param(priv->rd, RSD_SAMPLERATE, (int[]) { ao->samplerate });
+    rsd_set_param(priv->rd, RSD_CHANNELS, (int[]) { ao->channels.num });
 
     ao->format = af_fmt_from_planar(ao->format);
 
