@@ -354,9 +354,6 @@ static int init(struct ao *ao)
 
     struct priv *p = ao->priv;
 
-    p->prepause_frames = 0;
-    p->delay_before_pause = 0;
-
     /* switch for spdif
      * sets opening sequence for SPDIF
      * sets also the playback and other switches 'on the fly'
@@ -379,9 +376,6 @@ static int init(struct ao *ao)
         device = p->cfg_device;
 
     MP_VERBOSE(ao, "using device: %s\n", device);
-
-    p->can_pause = 1;
-
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
 
     int open_mode = p->cfg_block ? 0 : SND_PCM_NONBLOCK;
