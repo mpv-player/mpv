@@ -565,9 +565,11 @@ static void audio_pause(struct ao *ao)
     int err;
 
     if (p->can_pause) {
-        p->delay_before_pause = get_delay(ao);
-        err = snd_pcm_pause(p->alsa, 1);
-        CHECK_ALSA_ERROR("pcm pause error");
+        if (snd_pcm_state(p->alsa) == SND_PCM_STATE_RUNNING) {
+            p->delay_before_pause = get_delay(ao);
+            err = snd_pcm_pause(p->alsa, 1);
+            CHECK_ALSA_ERROR("pcm pause error");
+        }
     } else {
         MP_VERBOSE(ao, "pause not supported by hardware\n");
         if (snd_pcm_delay(p->alsa, &p->prepause_frames) < 0
@@ -595,8 +597,10 @@ static void audio_resume(struct ao *ao)
     }
 
     if (p->can_pause) {
-        err = snd_pcm_pause(p->alsa, 0);
-        CHECK_ALSA_ERROR("pcm resume error");
+        if (snd_pcm_state(p->alsa) == SND_PCM_STATE_PAUSED) {
+            err = snd_pcm_pause(p->alsa, 0);
+            CHECK_ALSA_ERROR("pcm resume error");
+        }
     } else {
         MP_VERBOSE(ao, "resume not supported by hardware\n");
         err = snd_pcm_prepare(p->alsa);
