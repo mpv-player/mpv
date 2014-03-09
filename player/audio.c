@@ -264,6 +264,8 @@ static int write_to_ao(struct MPContext *mpctx, struct mp_audio *data, int flags
 #if HAVE_ENCODING
     encode_lavc_set_audio_pts(mpctx->encode_lavc_ctx, mpctx->ao_pts);
 #endif
+    if (data->samples == 0)
+        return 0;
     double real_samplerate = out_format.rate / mpctx->opts->playback_speed;
     int played = ao_play(mpctx->ao, data->planes, data->samples, flags);
     assert(played <= data->samples);
@@ -455,6 +457,9 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             playflags |= AOPLAY_FINAL_CHUNK;
         }
     }
+
+    if (mpctx->paused)
+        playsize = 0;
 
     struct mp_audio data;
     mp_audio_buffer_peek(mpctx->ao_buffer, &data);
