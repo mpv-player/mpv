@@ -525,6 +525,18 @@ video_output_features = [
         'desc': 'GDI',
         'func': check_cc(lib='gdi32')
     } , {
+        'name': 'winmm',
+        'desc': 'WinMM',
+        'func': check_cc(lib='winmm')
+    } , {
+        'name': 'ole',
+        'desc': 'OLE',
+        'func': check_cc(lib='ole32')
+    } , {
+        'name': 'uuid',
+        'desc': 'UUID',
+        'func': check_cc(lib='uuid')
+    } , {
         'name': '--wayland',
         'desc': 'Wayland',
         'func': check_pkg_config('wayland-client', '>= 1.3.0',
@@ -590,7 +602,7 @@ video_output_features = [
     } , {
         'name': '--gl-win32',
         'desc': 'OpenGL Win32 Backend',
-        'deps': [ 'gdi' ],
+        'deps': [ 'gdi', 'winmm', 'ole', 'uuid' ],
         'groups': [ 'gl' ],
         'func': check_statement('windows.h', 'wglCreateContext(0)',
                                 lib='opengl32')
@@ -653,7 +665,7 @@ video_output_features = [
     }, {
         'name': '--direct3d',
         'desc': 'Direct3D support',
-        'deps': [ 'gdi' ],
+        'deps': [ 'gdi', 'winmm', 'ole', 'uuid' ],
         'func': check_cc(header_name='d3d9.h'),
     }
 ]
