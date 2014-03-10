@@ -317,18 +317,14 @@ Available video output drivers are:
             by very few OpenGL cards.
 
     ``srgb``
-        Enable gamma-correct scaling by working in linear light. This
-        makes use of sRGB textures and framebuffers.
-        This option forces the options ``indirect`` and ``gamma``.
+        Convert and color correct the output to sRGB before displaying it on
+        the screen. This option enables linear light scaling. It also forces
+        the options ``indirect`` and ``gamma``.
 
-        .. note::
-
-            for YUV colorspaces, gamma 1/0.45 (2.222) is assumed. RGB input is
-            always assumed to be in sRGB.
-
-        This option is not really useful, as gamma-correct scaling has not much
-        influence on typical video playback. Most visible effect comes from
-        slightly different gamma.
+        This option is equivalent to using ``icc-profile`` with an sRGB ICC
+        profile, but it is implemented without a 3DLUT and does not require
+        LittleCMS 2. If both ``srgb`` and ``icc-profile`` are present, the
+        latter takes precedence, as they are somewhat redundant.
 
     ``pbo``
         Enable use of PBOs. This is slightly faster, but can sometimes lead to
@@ -449,7 +445,9 @@ Available video output drivers are:
 
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.
-        Needs LittleCMS2 support compiled in.
+        Needs LittleCMS2 support compiled in. This option overrides the ``srgb``
+        property, as using both is somewhat redundant. It also enables linear
+        light scaling.
 
     ``icc-cache=<file>``
         Store and load the 3D LUT created from the ICC profile in this file.
@@ -467,13 +465,15 @@ Available video output drivers are:
         3
             absolute colorimetric
 
-    ``icc-approx-gamma``
+    ``approx-gamma``
         Approximate the actual BT.709 gamma function as a pure power curve of
         1.95. A number of video editing programs and studios apparently use this
         for mastering instead of the true curve. Most notably, anything in the
         Apple ecosystem uses this approximation - including all programs
         compatible with it. It's a sound idea to try enabling this flag first
         when watching movies and shows to see if things look better that way.
+
+        This only affects the output when using either ``icc-profile`` or``srgb``.
 
     ``3dlut-size=<r>x<g>x<b>``
         Size of the 3D LUT generated from the ICC profile in each dimension.
