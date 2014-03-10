@@ -101,7 +101,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         float f_multi;
 
         if (AF_FORMAT_IS_IEC61937(ao->format))
-            return CONTROL_TRUE;
+            return CONTROL_FALSE;
 
         //allocate simple id
         snd_mixer_selem_id_alloca(&sid);
