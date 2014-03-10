@@ -67,7 +67,7 @@ struct priv {
     int cfg_resample;
 };
 
-#define BUFFER_TIME 500000  // 0.5 s
+#define BUFFER_TIME 250000  // 250ms
 #define FRAGCOUNT 16
 
 #define CHECK_ALSA_ERROR(message) \
