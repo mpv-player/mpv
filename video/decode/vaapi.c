@@ -64,7 +64,6 @@ struct priv {
     struct vaapi_context *va_context;
     struct vaapi_context va_context_storage;
 
-    int format, w, h;
     VASurfaceID surfaces[MAX_SURFACES];
 
     struct va_surface_pool *pool;
@@ -163,15 +162,15 @@ static int is_direct_mapping(VADisplay display)
 // We achieve this by reserving surfaces in the pool as needed.
 // Releasing surfaces is necessary after filling the surface id list so
 // that reserved surfaces can be reused for decoding.
-static bool preallocate_surfaces(struct lavc_ctx *ctx, int num)
+static bool preallocate_surfaces(struct lavc_ctx *ctx, int num, int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
-    if (!va_surface_pool_reserve(p->pool, num, p->w, p->h)) {
+    if (!va_surface_pool_reserve(p->pool, num, w, h)) {
         MP_ERR(p, "Could not allocate surfaces.\n");
         return false;
     }
     for (int i = 0; i < num; i++) {
-        struct va_surface *s = va_surface_pool_get(p->pool, p->w, p->h);
+        struct va_surface *s = va_surface_pool_get(p->pool, w, h);
         p->surfaces[i] = s->id;
         va_surface_release(s);
     }
@@ -205,15 +204,13 @@ static bool has_profile(VAProfile *va_profiles, int num_profiles, VAProfile p)
     return false;
 }
 
-static int create_decoder(struct lavc_ctx *ctx)
+static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
 {
     void *tmp = talloc_new(NULL);
 
     struct priv *p = ctx->hwdec_priv;
     VAStatus status;
     int res = -1;
-
-    assert(p->format == IMGFMT_VAAPI);
 
     destroy_decoder(ctx);
 
@@ -254,7 +251,7 @@ static int create_decoder(struct lavc_ctx *ctx)
         goto error;
     }
 
-    if (!preallocate_surfaces(ctx, num_surfaces)) {
+    if (!preallocate_surfaces(ctx, num_surfaces, w, h)) {
         MP_ERR(p, "Could not allocate surfaces.\n");
         goto error;
     }
@@ -265,7 +262,7 @@ static int create_decoder(struct lavc_ctx *ctx)
     if (!CHECK_VA_STATUS(p, "vaQueryConfigEntrypoints()"))
         goto error;
 
-    int entrypoint = find_entrypoint(p->format, ep, num_ep);
+    int entrypoint = find_entrypoint(IMGFMT_VAAPI, ep, num_ep);
     if (entrypoint < 0) {
         MP_ERR(p, "Could not find VA entrypoint.\n");
         goto error;
@@ -289,7 +286,7 @@ static int create_decoder(struct lavc_ctx *ctx)
         goto error;
 
     status = vaCreateContext(p->display, p->va_context->config_id,
-                             p->w, p->h, VA_PROGRESSIVE,
+                             w, h, VA_PROGRESSIVE,
                              p->surfaces, num_surfaces,
                              &p->va_context->context_id);
     if (!CHECK_VA_STATUS(p, "vaCreateContext()"))
@@ -306,20 +303,7 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
 {
     struct priv *p = ctx->hwdec_priv;
 
-    if (format != IMGFMT_VAAPI)
-        return NULL;
-
-    if (format != p->format || w != p->w || h != p->h ||
-        p->va_context->context_id == VA_INVALID_ID)
-    {
-        p->format = format;
-        p->w = w;
-        p->h = h;
-        if (create_decoder(ctx) < 0)
-            return NULL;
-    }
-
-    struct va_surface *s = va_surface_pool_get(p->pool, p->w, p->h);
+    struct va_surface *s = va_surface_pool_get(p->pool, w, h);
     if (s) {
         for (int n = 0; n < MAX_SURFACES; n++) {
             if (p->surfaces[n] == s->id)
@@ -471,6 +455,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .probe = probe,
     .init = init,
     .uninit = uninit,
+    .init_decoder = init_decoder,
     .allocate_image = allocate_image,
 };
 
@@ -480,6 +465,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .probe = probe_copy,
     .init = init_copy,
     .uninit = uninit,
+    .init_decoder = init_decoder,
     .allocate_image = allocate_image,
     .process_image = copy_image,
 };

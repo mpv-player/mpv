@@ -339,6 +339,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     ctx->do_dr1 = ctx->do_hw_dr1 = 0;
     ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->hwdec = hwdec;
+    ctx->hwdec_fmt = 0;
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
     AVCodecContext *avctx = ctx->avctx;
     avctx->opaque = vd;
@@ -511,8 +512,20 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
         const int *okfmt = ctx->hwdec->image_formats;
         for (int n = 0; okfmt && okfmt[n]; n++) {
-            if (imgfmt2pixfmt(okfmt[n]) == fmt[i])
+            if (imgfmt2pixfmt(okfmt[n]) == fmt[i]) {
+                ctx->hwdec_w = avctx->width;
+                ctx->hwdec_h = avctx->height;
+                ctx->hwdec_fmt = okfmt[n];
+                if (ctx->hwdec->init_decoder) {
+                    if (ctx->hwdec->init_decoder(ctx, ctx->hwdec_fmt,
+                                                 ctx->hwdec_w, ctx->hwdec_h) < 0)
+                    {
+                        ctx->hwdec_fmt = 0;
+                        break;
+                    }
+                }
                 return fmt[i];
+            }
         }
     }
 
@@ -535,7 +548,7 @@ static struct mp_image *get_surface_hwdec(struct dec_video *vd, AVFrame *pic)
      * get_buffer callback.
      */
     int imgfmt = pixfmt2imgfmt(pic->format);
-    if (!IMGFMT_IS_HWACCEL(imgfmt))
+    if (!IMGFMT_IS_HWACCEL(imgfmt) || !ctx->hwdec)
         return NULL;
 
     // Using frame->width/height is bad. For non-mod 16 video (which would
@@ -544,6 +557,11 @@ static struct mp_image *get_surface_hwdec(struct dec_video *vd, AVFrame *pic)
     // with decoded size, and the video surfaces must have matching size.
     int w = ctx->avctx->width;
     int h = ctx->avctx->height;
+
+    if (ctx->hwdec->init_decoder) {
+        if (imgfmt != ctx->hwdec_fmt && w != ctx->hwdec_w && h != ctx->hwdec_h)
+            return NULL;
+    }
 
     struct mp_image *mpi = ctx->hwdec->allocate_image(ctx, imgfmt, w, h);
 

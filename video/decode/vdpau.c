@@ -37,9 +37,6 @@ struct priv {
     uint64_t                    preemption_counter;
 
     AVVDPAUContext              context;
-
-    int                         vid_width;
-    int                         vid_height;
 };
 
 struct profile_entry {
@@ -97,7 +94,7 @@ static int handle_preemption(struct lavc_ctx *ctx)
     return 0;
 }
 
-static bool create_vdp_decoder(struct lavc_ctx *ctx)
+static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
     struct vdp_functions *vdp = p->mpvdp->vdp;
@@ -125,17 +122,16 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx)
         MP_ERR(p, "Codec or profile not supported by hardware.\n");
         goto fail;
     }
-    if (p->vid_width > maxw || p->vid_height > maxh) {
+    if (w > maxw || h > maxh) {
         MP_ERR(p, "Video resolution(%dx%d) is larger than the maximum size(%dx%d) supported.\n",
-               p->vid_width, p->vid_height, maxw, maxh);
+               w, h, maxw, maxh);
         goto fail;
     }
 
     int maxrefs = hwdec_get_max_refs(ctx);
 
     vdp_st = vdp->decoder_create(p->vdp_device, pe->hw_profile,
-                                 p->vid_width, p->vid_height, maxrefs,
-                                 &p->context.decoder);
+                                 w, h, maxrefs, &p->context.decoder);
     CHECK_VDP_WARNING(p, "Failed creating VDPAU decoder");
     if (vdp_st != VDP_STATUS_OK)
         goto fail;
@@ -151,19 +147,7 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int fmt,
 {
     struct priv *p = ctx->hwdec_priv;
 
-    if (fmt != IMGFMT_VDPAU)
-        return NULL;
-
     handle_preemption(ctx);
-
-    if (w != p->vid_width || h != p->vid_height ||
-        p->context.decoder == VDP_INVALID_HANDLE)
-    {
-        p->vid_width = w;
-        p->vid_height = h;
-        if (!create_vdp_decoder(ctx))
-            return NULL;
-    }
 
     VdpChromaType chroma;
     mp_vdpau_get_format(IMGFMT_VDPAU, &chroma, NULL);
@@ -226,5 +210,6 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .probe = probe,
     .init = init,
     .uninit = uninit,
+    .init_decoder = init_decoder,
     .allocate_image = allocate_image,
 };

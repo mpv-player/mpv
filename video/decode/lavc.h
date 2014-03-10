@@ -38,6 +38,10 @@ typedef struct lavc_ctx {
     // For free use by hwdec implementation
     void *hwdec_priv;
 
+    int hwdec_fmt;
+    int hwdec_w;
+    int hwdec_h;
+
     // Legacy
     bool do_dr1;
     struct FramePool *dr1_buffer_pool;
@@ -59,7 +63,10 @@ struct vd_lavc_hwdec {
     int (*probe)(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder);
     int (*init)(struct lavc_ctx *ctx);
+    int (*init_decoder)(struct lavc_ctx *ctx, int fmt, int w, int h);
     void (*uninit)(struct lavc_ctx *ctx);
+    // Note: if init_decoder is set, this will always use the values from the
+    //       last successful init_decoder call. Otherwise, it's up to you.
     struct mp_image *(*allocate_image)(struct lavc_ctx *ctx, int fmt,
                                        int w, int h);
     // Process the image returned by the libavcodec decoder.
