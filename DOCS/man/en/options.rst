@@ -455,12 +455,10 @@ OPTIONS
     Specify the CD-ROM device (default: ``/dev/cdrom``).
 
 ``--channels=<number|layout>``
-    Request the number of playback channels (default: 2). mpv asks the
-    decoder to decode the audio into as many channels as specified. Then it is
-    up to the decoder to fulfill the requirement. This is usually only
-    important when playing videos with AC-3, AAC or DTS audio. In that case
-    libavcodec downmixes the audio into the requested number of channels if
-    possible.
+    Request a channel layout for audio output (default: stereo). This  will ask
+    the AO to open a device with the given channel layout. It's up to the AO
+    to accept this layout, or to pick a fallback or to error out if the
+    requested layout is not supported.
 
     The ``--channels`` option either takes a channel number or an explicit
     channel layout. Channel numbers refer to default layouts, e.g. 2 channels
@@ -470,12 +468,17 @@ OPTIONS
     lists speaker names, which can be used to express arbitrary channel
     layouts (e.g. ``fl-fr-lfe`` is 2.1).
 
-    .. note::
+    You can use ``--channels=empty`` to disable this. In this case, the AO
+    use the channel layout as the audio filter chain indicates.
 
-        Currently, this option is not very useful. The main effect of this
-        option is that automatic stereo downmixing is disabled. It depends
-        mainly on the selected audio output and the associated audio subsystem
-        how playback of files with surround audio will behave.
+    This will also request the channel layout from the decoder. If the decoder
+    does not support the layout, it will fall back to its native channel layout.
+    (You can use ``--ad-lavc-downmix=no`` to make the decoder always output
+    its native layout.) Note that only some decoders support remixing audio.
+    Some that do include AC-3, AAC or DTS audio.
+
+    If the channel layout of the media file (i.e. the decoder) and the AO's
+    channel layout don't match, mpv will attempt to insert a conversion filter.
 
 ``--chapter=<start[-end]>``
     Specify which chapter to start playing at. Optionally specify which

@@ -143,12 +143,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         ao_format   = out_format.format;
         ao_channels = out_format.channels;
     } else {
-        // Automatic downmix
-        if (mp_chmap_is_stereo(&opts->audio_output_channels) &&
-            !mp_chmap_is_stereo(&in_format.channels))
-        {
-            mp_chmap_from_channels(&ao_channels, 2);
-        }
+        ao_channels = opts->audio_output_channels; // automatic downmix
     }
 
     // Determine what the filter chain outputs. build_afilter_chain() also
