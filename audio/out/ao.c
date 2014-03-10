@@ -36,9 +36,6 @@
 #include "common/common.h"
 #include "common/global.h"
 
-// Minimum buffer size in seconds.
-#define MIN_BUFFER 0.2
-
 extern const struct ao_driver audio_out_oss;
 extern const struct ao_driver audio_out_coreaudio;
 extern const struct ao_driver audio_out_rsound;

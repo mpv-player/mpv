@@ -24,6 +24,9 @@
 #include "audio/chmap.h"
 #include "audio/chmap_sel.h"
 
+// Minimum buffer size in seconds.
+#define MIN_BUFFER 0.2
+
 /* global data used by ao.c and ao drivers */
 struct ao {
     int samplerate;
