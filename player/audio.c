@@ -143,7 +143,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
         ao_format   = out_format.format;
         ao_channels = out_format.channels;
     } else {
-        ao_channels = opts->audio_output_channels; // automatic downmix
+        if (!AF_FORMAT_IS_SPECIAL(in_format.format))
+            ao_channels = opts->audio_output_channels; // automatic downmix
     }
 
     // Determine what the filter chain outputs. build_afilter_chain() also
