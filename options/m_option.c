@@ -2044,8 +2044,8 @@ static int parse_chmap(struct mp_log *log, const m_option_t *opt,
         return M_OPT_INVALID;
     }
 
-    if ((min_ch > 0 && !mp_chmap_is_valid(&res)) ||
-        (min_ch >= 0 && mp_chmap_is_empty(&res)))
+    if ((min_ch >= 0 && !mp_chmap_is_valid(&res)) &&
+        !(min_ch == 0 && mp_chmap_is_empty(&res)))
     {
         mp_err(log, "Invalid channel layout: %.*s\n", BSTR_P(param));
         return M_OPT_INVALID;
