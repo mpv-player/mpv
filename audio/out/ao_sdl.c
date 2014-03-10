@@ -150,6 +150,12 @@ static int init(struct ao *ao)
                (int) obtained.freq, (int) obtained.channels,
                (int) obtained.format, (int) obtained.samples);
 
+    // The sample count is usually the number of samples the callback requests,
+    // which we assume is the period size. Normally, ao.c will allocate a large
+    // enough buffer. But in case the period size should be pathologically
+    // large, this will help.
+    ao->device_buffer = 3 * obtained.samples;
+
     switch (obtained.format) {
         case AUDIO_U8: ao->format = AF_FORMAT_U8; break;
         case AUDIO_S8: ao->format = AF_FORMAT_S8; break;
