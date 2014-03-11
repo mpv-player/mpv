@@ -458,7 +458,7 @@ def build(ctx):
             PREFIX       = ctx.env.PREFIX,
             LIBDIR       = ctx.env.LIBDIR,
             INCDIR       = ctx.env.INCDIR,
-            vnum         = "0.0.0",
+            VERSION      = ctx.env.VERSION,
         )
 
         headers = ["client.h"]
