@@ -1818,7 +1818,7 @@ OPTIONS
     libquvi 0.9.x:
 
         The following explanations are relevant:
-        `<http://quvi.sourceforge.net/doc/0.9/glossary_termino.html#m_stream_id>`_
+        `<http://quvi.sourceforge.net/r/api/0.9/glossary_termino.html#m_stream_id>`_
 
     The ``quvi-format`` property can be used at runtime to cycle through the
     list of formats. Unfortunately, this is slow. On libquvi 0.4.x, this
