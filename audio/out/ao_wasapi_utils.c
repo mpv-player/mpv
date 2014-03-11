@@ -29,6 +29,7 @@
 #include "audio/out/ao_wasapi_utils.h"
 
 #include "audio/format.h"
+#include "osdep/io.h"
 
 #define MIXER_DEFAULT_LABEL L"mpv - video player"
 
@@ -565,16 +566,6 @@ exit_label:
     return 1;
 }
 
-static char* wstring_to_utf8(wchar_t *wstring) {
-    if (wstring) {
-        int len = WideCharToMultiByte(CP_UTF8, 0, wstring, -1, NULL, 0, NULL, NULL);
-        char *ret = malloc(len);
-        WideCharToMultiByte(CP_UTF8, 0, wstring, -1, ret, len, NULL, NULL);
-        return ret;
-    }
-    return NULL;
-}
-
 static char* get_device_id(IMMDevice *pDevice) {
     if (!pDevice) {
         return NULL;
@@ -586,11 +577,11 @@ static char* get_device_id(IMMDevice *pDevice) {
     HRESULT hr = IMMDevice_GetId(pDevice, &devid);
     EXIT_ON_ERROR(hr);
 
-    idstr = wstring_to_utf8(devid);
+    idstr = mp_to_utf8(NULL, devid);
 
     if (strstr(idstr, "{0.0.0.00000000}.")) {
-        char *stripped = strdup(idstr + strlen("{0.0.0.00000000}."));
-        free(idstr);
+        char *stripped = talloc_strdup(NULL, idstr + strlen("{0.0.0.00000000}."));
+        talloc_free(idstr);
         idstr = stripped;
     }
 
@@ -616,7 +607,7 @@ static char* get_device_name(IMMDevice *pDevice) {
     hr = IPropertyStore_GetValue(pProps, &PKEY_Device_FriendlyName, &devname);
     EXIT_ON_ERROR(hr);
 
-    namestr = wstring_to_utf8(devname.pwszVal);
+    namestr = mp_to_utf8(NULL, devname.pwszVal);
 
 exit_label:
     PropVariantClear(&devname);
@@ -641,7 +632,7 @@ static char* get_device_desc(IMMDevice *pDevice) {
     hr = IPropertyStore_GetValue(pProps, &PKEY_Device_DeviceDesc, &devdesc);
     EXIT_ON_ERROR(hr);
 
-    desc = wstring_to_utf8(devdesc.pwszVal);
+    desc = mp_to_utf8(NULL, devdesc.pwszVal);
 
 exit_label:
     PropVariantClear(&devdesc);
@@ -665,7 +656,7 @@ static int device_id_match(char *idstr, char *candidate) {
     }
 #undef FOUND
 end:
-    free(idstr);
+    talloc_free(idstr);
     return found;
 }
 
@@ -718,17 +709,17 @@ static HRESULT enumerate_with_state(struct mp_log *log, char *header,
             mp_info(log, "%s, ID: %s%s\n", name, id, mark);
         }
 
-        free(name);
-        free(id);
+        talloc_free(name);
+        talloc_free(id);
         SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
     }
-    free(defid);
+    talloc_free(defid);
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
     SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
     return hr;
 
 exit_label:
-    free(defid);
+    talloc_free(defid);
     SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
     SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
@@ -826,17 +817,17 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
                         MP_ERR(ao, "multiple matching devices found!\n");
                         name = get_device_name(prevDevice);
                         MP_ERR(ao, "%s\n", name);
-                        free(name);
+                        talloc_free(name);
                         search_err = 1;
                     }
                     name = get_device_name(pTempDevice);
                     MP_ERR(ao, "%s\n", name);
-                    free(name);
+                    talloc_free(name);
                 }
                 hr = IMMDevice_GetId(pTempDevice, &deviceID);
                 prevDevice = pTempDevice;
             }
-            free(desc);
+            talloc_free(desc);
 
             SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
         }
@@ -963,7 +954,7 @@ int wasapi_thread_init(struct ao *ao)
 
         char *id = get_device_id(state->pDevice);
         MP_VERBOSE(ao, "default device ID: %s\n", id);
-        free(id);
+        talloc_free(id);
     } else {
         hr = find_and_load_device(ao, &state->pDevice, state->opt_device);
     }
@@ -971,7 +962,7 @@ int wasapi_thread_init(struct ao *ao)
 
     char *name = get_device_name(state->pDevice);
     MP_VERBOSE(ao, "device loaded: %s\n", name);
-    free(name);
+    talloc_free(name);
 
     hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
                                      CLSCTX_ALL, NULL, (void **)&state->pAudioClient);
