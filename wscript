@@ -202,6 +202,11 @@ iconv support use --disable-iconv.",
         'func': check_statement(['sys/param.h', 'sys/mount.h'],
                                 'struct statfs fs; fstatfs(0, &fs)')
     }, {
+        'name': 'linux-fstatfs',
+        'desc': "Linux's fstatfs()",
+        'func': check_statement('sys/vfs.h',
+                                'struct statfs fs; fstatfs(0, &fs); fs.f_namelen')
+    }, {
         'name': 'sys-sysinfo-h',
         'desc': 'sys/sysinfo.h',
         'func': check_statement('sys/sysinfo.h',
