@@ -200,7 +200,7 @@ iconv support use --disable-iconv.",
         'name': 'bsd-fstatfs',
         'desc': "BSD's fstatfs()",
         'func': check_statement(['sys/param.h', 'sys/mount.h'],
-                                'struct statfs fs; fstatfs(0, &fs)')
+                                'struct statfs fs; fstatfs(0, &fs); fs.f_fstypename')
     }, {
         'name': 'linux-fstatfs',
         'desc': "Linux's fstatfs()",
