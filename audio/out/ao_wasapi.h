@@ -34,25 +34,11 @@ typedef struct wasapi_state {
     /* Init phase */
     int init_ret;
     HANDLE init_done;
-    HANDLE fatal_error; /* signal to indicate unrecoverable error */
     int share_mode;
 
-    /* Events */
-    HANDLE hPause;
-
-    /* Play */
-    HANDLE hPlay;
-    int is_playing;
-
-    /* Reset */
-    HANDLE hReset;
-
-    /* uninit */
     HANDLE hUninit;
-    LONG immed;
 
     /* volume control */
-    HANDLE hGetvol, hSetvol, hDoneVol;
     DWORD vol_hw_support, status;
     float audio_volume;
 
@@ -70,9 +56,22 @@ typedef struct wasapi_state {
     IAudioRenderClient *pRenderClient;
     IAudioEndpointVolume *pEndpointVolume;
     HANDLE hFeed; /* wasapi event */
+    HANDLE hForceFeed; /* forces writing a buffer (e.g. before audio_resume) */
+    HANDLE hFeedDone; /* set only after a hForceFeed */
     HANDLE hTask; /* AV thread */
     DWORD taskIndex; /* AV task ID */
     WAVEFORMATEXTENSIBLE format;
+
+    /* WASAPI proxy handles, for Single-Threaded Apartment communication.
+       One is needed for each object that's accessed by a different thread. */
+    IAudioClient *pAudioClientProxy;
+    IAudioEndpointVolume *pEndpointVolumeProxy;
+
+    /* Streams used to marshal the proxy objects. The thread owning the actual objects
+       needs to marshal proxy objects into these streams, and the thread that wants the
+       proxies unmarshals them from here. */
+    IStream *sAudioClient;
+    IStream *sEndpointVolume;
 
     /* WASAPI internal clock information, for estimating delay */
     IAudioClock *pAudioClock;

@@ -20,7 +20,6 @@
 #define COBJMACROS 1
 #define _WIN32_WINNT 0x600
 
-#include <process.h>
 #include <initguid.h>
 #include <audioclient.h>
 #include <endpointvolume.h>
@@ -29,15 +28,7 @@
 
 #include "audio/out/ao_wasapi_utils.h"
 
-#include "options/m_option.h"
-#include "options/m_config.h"
 #include "audio/format.h"
-#include "common/msg.h"
-#include "misc/ring.h"
-#include "ao.h"
-#include "internal.h"
-#include "compat/atomics.h"
-#include "osdep/timer.h"
 
 #define EXIT_ON_ERROR(hres)  \
               do { if (FAILED(hres)) { goto exit_label; } } while(0)
@@ -343,7 +334,7 @@ static int try_passthrough(struct wasapi_state *state,
     return 0;
 }
 
-int wasapi_find_formats(struct ao *const ao)
+static int find_formats(struct ao *const ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
 
@@ -470,11 +461,10 @@ static int init_clock(struct wasapi_state *state) {
 exit_label:
     MP_ERR(state, "init_clock failed with %s, unable to obtain the audio device's timing!\n",
            wasapi_explain_err(hr));
-    SetEvent(state->fatal_error);
     return 1;
 }
 
-int wasapi_fix_format(struct wasapi_state *state)
+static int fix_format(struct wasapi_state *state)
 {
     HRESULT hr;
     double offset = 0.5;
@@ -538,7 +528,6 @@ reinit:
 exit_label:
     MP_ERR(state, "fix_format fails with %s, failed to determine buffer block size!\n",
            wasapi_explain_err(hr));
-    SetEvent(state->fatal_error);
     return 1;
 }
 
@@ -552,7 +541,7 @@ static char* wstring_to_utf8(wchar_t *wstring) {
     return NULL;
 }
 
-char* wasapi_get_device_id(IMMDevice *pDevice) {
+static char* get_device_id(IMMDevice *pDevice) {
     if (!pDevice) {
         return NULL;
     }
@@ -576,7 +565,7 @@ exit_label:
     return idstr;
 }
 
-char* wasapi_get_device_name(IMMDevice *pDevice) {
+static char* get_device_name(IMMDevice *pDevice) {
     if (!pDevice) {
         return NULL;
     }
@@ -664,7 +653,7 @@ static HRESULT enumerate_with_state(struct mp_log *log, char *header,
                                                      &pDevice);
     EXIT_ON_ERROR(hr);
 
-    defid = wasapi_get_device_id(pDevice);
+    defid = get_device_id(pDevice);
 
     SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
 
@@ -682,8 +671,8 @@ static HRESULT enumerate_with_state(struct mp_log *log, char *header,
         hr = IMMDeviceCollection_Item(pDevices, i, &pDevice);
         EXIT_ON_ERROR(hr);
 
-        char *name = wasapi_get_device_name(pDevice);
-        char *id = wasapi_get_device_id(pDevice);
+        char *name = get_device_name(pDevice);
+        char *id = get_device_id(pDevice);
 
         char *mark = "";
         if (strcmp(id, defid) == 0)
@@ -715,7 +704,7 @@ exit_label:
 int wasapi_enumerate_devices(struct mp_log *log)
 {
     HRESULT hr;
-    CoInitialize(NULL);
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     hr = enumerate_with_state(log, "Active devices:", DEVICE_STATE_ACTIVE, 1);
     EXIT_ON_ERROR(hr);
@@ -730,7 +719,7 @@ exit_label:
     return 1;
 }
 
-HRESULT wasapi_find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
+static HRESULT find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
                                     char *search)
 {
     HRESULT hr;
@@ -790,7 +779,7 @@ HRESULT wasapi_find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
             hr = IMMDeviceCollection_Item(pDevices, i, &pTempDevice);
             EXIT_ON_ERROR(hr);
 
-            if (device_id_match(wasapi_get_device_id(pTempDevice), devid)) {
+            if (device_id_match(get_device_id(pTempDevice), devid)) {
                 hr = IMMDevice_GetId(pTempDevice, &deviceID);
                 EXIT_ON_ERROR(hr);
                 break;
@@ -801,12 +790,12 @@ HRESULT wasapi_find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
                     char *name;
                     if (!search_err) {
                         MP_ERR(ao, "multiple matching devices found!\n");
-                        name = wasapi_get_device_name(prevDevice);
+                        name = get_device_name(prevDevice);
                         MP_ERR(ao, "%s\n", name);
                         free(name);
                         search_err = 1;
                     }
-                    name = wasapi_get_device_name(pTempDevice);
+                    name = get_device_name(pTempDevice);
                     MP_ERR(ao, "%s\n", name);
                     free(name);
                 }
@@ -864,4 +853,119 @@ int wasapi_validate_device(struct mp_log *log, const m_option_t *opt,
 
     mp_dbg(log, "device=%s %svalid\n", param.start, ret == 1 ? "" : "not ");
     return ret;
+}
+
+HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
+    HRESULT hr;
+    hr = CoGetInterfaceAndReleaseStream(state->sAudioClient,
+                                        &IID_IAudioClient,
+                                        (void**) &state->pAudioClientProxy);
+    state->sAudioClient = NULL;
+    EXIT_ON_ERROR(hr);
+
+    hr = CoGetInterfaceAndReleaseStream(state->sEndpointVolume,
+                                        &IID_IAudioEndpointVolume,
+                                        (void**) &state->pEndpointVolumeProxy);
+    state->sEndpointVolume = NULL;
+    EXIT_ON_ERROR(hr);
+
+exit_label:
+    return hr;
+}
+
+void wasapi_release_proxies(wasapi_state *state) {
+    SAFE_RELEASE(state->pAudioClientProxy, IUnknown_Release(state->pAudioClientProxy));
+    SAFE_RELEASE(state->pEndpointVolumeProxy, IUnknown_Release(state->pEndpointVolumeProxy));
+}
+
+static HRESULT create_proxies(struct wasapi_state *state) {
+    HRESULT hr;
+
+    hr = CreateStreamOnHGlobal(NULL, TRUE, &state->sAudioClient);
+    EXIT_ON_ERROR(hr);
+    hr = CoMarshalInterThreadInterfaceInStream(&IID_IAudioClient,
+                                               (IUnknown*) state->pAudioClient,
+                                               &state->sAudioClient);
+    EXIT_ON_ERROR(hr);
+
+    hr = CreateStreamOnHGlobal(NULL, TRUE, &state->sEndpointVolume);
+    EXIT_ON_ERROR(hr);
+    hr = CoMarshalInterThreadInterfaceInStream(&IID_IAudioEndpointVolume,
+                                               (IUnknown*) state->pEndpointVolume,
+                                               &state->sEndpointVolume);
+exit_label:
+    return hr;
+}
+
+int wasapi_thread_init(struct ao *ao)
+{
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    HRESULT hr;
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
+    if (!state->opt_device) {
+        IMMDeviceEnumerator *pEnumerator;
+        hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                              &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
+        EXIT_ON_ERROR(hr);
+
+        hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
+                                                         eRender, eConsole,
+                                                         &state->pDevice);
+        SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
+
+        char *id = get_device_id(state->pDevice);
+        MP_VERBOSE(ao, "default device ID: %s\n", id);
+        free(id);
+    } else {
+        hr = find_and_load_device(ao, &state->pDevice, state->opt_device);
+    }
+    EXIT_ON_ERROR(hr);
+
+    char *name = get_device_name(state->pDevice);
+    MP_VERBOSE(ao, "device loaded: %s\n", name);
+    free(name);
+
+    hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
+                                     CLSCTX_ALL, NULL, (void **)&state->pAudioClient);
+    EXIT_ON_ERROR(hr);
+
+    hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioEndpointVolume,
+                                     CLSCTX_ALL, NULL,
+                                     (void **)&state->pEndpointVolume);
+    EXIT_ON_ERROR(hr);
+    IAudioEndpointVolume_QueryHardwareSupport(state->pEndpointVolume,
+                                              &state->vol_hw_support);
+
+    state->init_ret = find_formats(ao); /* Probe support formats */
+    if (state->init_ret)
+        goto exit_label;
+    if (!fix_format(state)) { /* now that we're sure what format to use */
+        EXIT_ON_ERROR(create_proxies(state));
+        MP_VERBOSE(ao, "thread_init OK!\n");
+        SetEvent(state->init_done);
+        return state->init_ret;
+    }
+exit_label:
+    state->init_ret = -1;
+    SetEvent(state->init_done);
+    return -1;
+}
+
+void wasapi_thread_uninit(wasapi_state *state)
+{
+    if (state->pAudioClient)
+        IAudioClient_Stop(state->pAudioClient);
+    if (state->pRenderClient)
+        IAudioRenderClient_Release(state->pRenderClient);
+    if (state->pAudioClock)
+        IAudioClock_Release(state->pAudioClock);
+    if (state->pAudioClient)
+        IAudioClient_Release(state->pAudioClient);
+    if (state->pDevice)
+        IMMDevice_Release(state->pDevice);
+    if (state->hTask)
+        state->VistaBlob.pAvRevertMmThreadCharacteristics(state->hTask);
+    CoUninitialize();
+    ExitThread(0);
 }

@@ -20,37 +20,26 @@
 #ifndef MP_AO_WASAPI_UTILS_H_
 #define MP_AO_WASAPI_UTILS_H_
 
-#define COBJMACROS 1
-#define _WIN32_WINNT 0x600
-
 #include "audio/out/ao_wasapi.h"
 
 #include "options/m_option.h"
-#include "options/m_config.h"
-#include "audio/format.h"
 #include "common/msg.h"
-#include "misc/ring.h"
 #include "ao.h"
 #include "internal.h"
-#include "compat/atomics.h"
-#include "osdep/timer.h"
 
 int wasapi_fill_VistaBlob(wasapi_state *state);
 
 const char *wasapi_explain_err(const HRESULT hr);
 
-char* wasapi_get_device_name(IMMDevice *pDevice);
-char* wasapi_get_device_id(IMMDevice *pDevice);
-
-int wasapi_find_formats(struct ao *const ao);
-int wasapi_fix_format(struct wasapi_state *state);
-
 int wasapi_enumerate_devices(struct mp_log *log);
-
-HRESULT wasapi_find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
-                                    char *search);
 
 int wasapi_validate_device(struct mp_log *log, const m_option_t *opt,
                            struct bstr name, struct bstr param);
+
+int wasapi_thread_init(struct ao *ao);
+void wasapi_thread_uninit(wasapi_state *state);
+
+HRESULT wasapi_setup_proxies(wasapi_state *state);
+void wasapi_release_proxies(wasapi_state *state);
 
 #endif
