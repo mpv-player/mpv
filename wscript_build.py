@@ -463,7 +463,7 @@ def build(ctx):
 
         headers = ["client.h"]
         for f in headers:
-            ctx.install_as(ctx.env.INCDIR + '/libmpv/' + f, 'libmpv/' + f)
+            ctx.install_as(ctx.env.INCDIR + '/mpv/' + f, 'libmpv/' + f)
 
         ctx.install_as(ctx.env.LIBDIR + '/pkgconfig/mpv.pc', 'libmpv/mpv.pc')
 
