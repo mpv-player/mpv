@@ -39,6 +39,10 @@
 #include <sys/mount.h>
 #endif
 
+#if HAVE_LINUX_FSTATFS
+#include <sys/vfs.h>
+#endif
+
 #ifdef __MINGW32__
 #include <windows.h>
 #endif
@@ -126,6 +130,27 @@ static bool check_stream_network(stream_t *stream)
     if (fstatfs(priv->fd, &fs) == 0)
         for (int i=0; stypes[i]; i++)
             if (strcmp(stypes[i], fs.f_fstypename) == 0)
+                return true;
+    return false;
+
+}
+#elif HAVE_LINUX_FSTATFS
+static bool check_stream_network(stream_t *stream)
+{
+    struct statfs fs;
+    const uint32_t stypes[] = {
+        0x5346414F/*AFS*/, 0x61756673/*AUFS*/, 0x00C36400/*CEPH*/,
+        0xFF534D42/*CIFS*/, 0x73757245/*CODA*/, 0x19830326/*FHGFS*/,
+        0x65735546/*FUSEBLK*/, 0x65735543/*FUSECTL*/, 0x1161970/*GFS*/,
+        0x47504653/*GPFS*/, 0x6B414653/*KAFS*/, 0x0BD00BD0/*LUSTRE*/,
+        0x564C/*NCP*/, 0x6969/*NFS*/, 0x6E667364/*NFSD*/, 0x7461636f/*OCFS2*/,
+        0xAAD7AAEA/*PANFS*/, 0x50495045/*PIPEFS*/, 0x517B/*SMB*/,
+        0xBEEFDEAD/*SNFS*/, 0xBACBACBC/*VMHGFS*/, 0
+    };
+    struct priv *priv = stream->priv;
+    if (fstatfs(priv->fd, &fs) == 0)
+        for (int i=0; stypes[i]; i++)
+            if (stypes[i] == fs.f_type)
                 return true;
     return false;
 
