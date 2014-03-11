@@ -30,6 +30,8 @@
 
 #include "audio/format.h"
 
+#define MIXER_DEFAULT_LABEL L"mpv - video player"
+
 #define EXIT_ON_ERROR(hres)  \
               do { if (FAILED(hres)) { goto exit_label; } } while(0)
 #define SAFE_RELEASE(unk, release) \
@@ -464,6 +466,31 @@ exit_label:
     return 1;
 }
 
+static int init_session_display(struct wasapi_state *state) {
+    HRESULT hr;
+    wchar_t path[MAX_PATH+12] = {0};
+
+    hr = IAudioClient_GetService(state->pAudioClient,
+                                 &IID_IAudioSessionControl,
+                                 (void **) &state->pSessionControl);
+    EXIT_ON_ERROR(hr);
+
+    GetModuleFileNameW(NULL, path, MAX_PATH);
+    lstrcatW(path, L",-IDI_ICON1");
+
+    hr = IAudioSessionControl_SetDisplayName(state->pSessionControl, MIXER_DEFAULT_LABEL, NULL);
+    EXIT_ON_ERROR(hr);
+    hr = IAudioSessionControl_SetIconPath(state->pSessionControl, path, NULL);
+    EXIT_ON_ERROR(hr);
+
+    return 0;
+
+exit_label:
+    MP_ERR(state, "init_session_display failed with %s.\n",
+           wasapi_explain_err(hr));
+    return 1;
+}
+
 static int fix_format(struct wasapi_state *state)
 {
     HRESULT hr;
@@ -523,6 +550,8 @@ reinit:
                                state->bufferFrameCount;
 
     if (init_clock(state))
+        return 1;
+    if (init_session_display(state))
         return 1;
 
     state->hTask =
@@ -865,23 +894,18 @@ HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
 
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-    hr = CoGetInterfaceAndReleaseStream(state->sAudioClient,
-                                        &IID_IAudioClient,
-                                        (void**) &state->pAudioClientProxy);
-    state->sAudioClient = NULL;
-    EXIT_ON_ERROR(hr);
+#define UNMARSHAL(type, to, from) do {                                    \
+    hr = CoGetInterfaceAndReleaseStream((from), &(type), (void**) &(to)); \
+    (from) = NULL;                                                        \
+    EXIT_ON_ERROR(hr);                                                    \
+} while (0)
 
-    hr = CoGetInterfaceAndReleaseStream(state->sAudioVolume,
-                                        &IID_ISimpleAudioVolume,
-                                        (void**) &state->pAudioVolumeProxy);
-    state->sAudioVolume = NULL;
-    EXIT_ON_ERROR(hr);
+    UNMARSHAL(IID_IAudioClient,         state->pAudioClientProxy,    state->sAudioClient);
+    UNMARSHAL(IID_ISimpleAudioVolume,   state->pAudioVolumeProxy,    state->sAudioVolume);
+    UNMARSHAL(IID_IAudioEndpointVolume, state->pEndpointVolumeProxy, state->sEndpointVolume);
+    UNMARSHAL(IID_IAudioSessionControl, state->pSessionControlProxy, state->sSessionControl);
 
-    hr = CoGetInterfaceAndReleaseStream(state->sEndpointVolume,
-                                        &IID_IAudioEndpointVolume,
-                                        (void**) &state->pEndpointVolumeProxy);
-    state->sEndpointVolume = NULL;
-    EXIT_ON_ERROR(hr);
+#undef UNMARSHAL
 
 exit_label:
     if (hr != S_OK) {
@@ -891,9 +915,10 @@ exit_label:
 }
 
 void wasapi_release_proxies(wasapi_state *state) {
-    SAFE_RELEASE(state->pAudioClientProxy, IUnknown_Release(state->pAudioClientProxy));
-    SAFE_RELEASE(state->pAudioVolumeProxy, IUnknown_Release(state->pAudioVolumeProxy));
+    SAFE_RELEASE(state->pAudioClientProxy,    IUnknown_Release(state->pAudioClientProxy));
+    SAFE_RELEASE(state->pAudioVolumeProxy,    IUnknown_Release(state->pAudioVolumeProxy));
     SAFE_RELEASE(state->pEndpointVolumeProxy, IUnknown_Release(state->pEndpointVolumeProxy));
+    SAFE_RELEASE(state->pSessionControlProxy, IUnknown_Release(state->pSessionControlProxy));
 
     CoUninitialize();
 }
@@ -901,25 +926,20 @@ void wasapi_release_proxies(wasapi_state *state) {
 static HRESULT create_proxies(struct wasapi_state *state) {
     HRESULT hr;
 
-    hr = CreateStreamOnHGlobal(NULL, TRUE, &state->sAudioClient);
-    EXIT_ON_ERROR(hr);
-    hr = CoMarshalInterThreadInterfaceInStream(&IID_IAudioClient,
-                                               (IUnknown*) state->pAudioClient,
-                                               &state->sAudioClient);
-    EXIT_ON_ERROR(hr);
+#define MARSHAL(type, to, from) do {                               \
+    hr = CreateStreamOnHGlobal(NULL, TRUE, &(to));                 \
+    EXIT_ON_ERROR(hr);                                             \
+    hr = CoMarshalInterThreadInterfaceInStream(&(type),            \
+                                               (IUnknown*) (from), \
+                                               &(to));             \
+    EXIT_ON_ERROR(hr);                                             \
+} while (0)
 
-    hr = CreateStreamOnHGlobal(NULL, TRUE, &state->sAudioVolume);
-    EXIT_ON_ERROR(hr);
-    hr = CoMarshalInterThreadInterfaceInStream(&IID_ISimpleAudioVolume,
-                                               (IUnknown*) state->pAudioVolume,
-                                               &state->sAudioVolume);
-    EXIT_ON_ERROR(hr);
+    MARSHAL(IID_IAudioClient,         state->sAudioClient,    state->pAudioClient);
+    MARSHAL(IID_ISimpleAudioVolume,   state->sAudioVolume,    state->pAudioVolume);
+    MARSHAL(IID_IAudioEndpointVolume, state->sEndpointVolume, state->pEndpointVolume);
+    MARSHAL(IID_IAudioSessionControl, state->sSessionControl, state->pSessionControl);
 
-    hr = CreateStreamOnHGlobal(NULL, TRUE, &state->sEndpointVolume);
-    EXIT_ON_ERROR(hr);
-    hr = CoMarshalInterThreadInterfaceInStream(&IID_IAudioEndpointVolume,
-                                               (IUnknown*) state->pEndpointVolume,
-                                               &state->sEndpointVolume);
 exit_label:
     return hr;
 }
@@ -1002,6 +1022,7 @@ void wasapi_thread_uninit(wasapi_state *state)
     SAFE_RELEASE(state->pAudioClock,     IAudioClock_Release(state->pAudioClock));
     SAFE_RELEASE(state->pAudioVolume,    ISimpleAudioVolume_Release(state->pAudioVolume));
     SAFE_RELEASE(state->pEndpointVolume, IAudioEndpointVolume_Release(state->pEndpointVolume));
+    SAFE_RELEASE(state->pSessionControl, IAudioSessionControl_Release(state->pSessionControl));
     SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
     SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
 

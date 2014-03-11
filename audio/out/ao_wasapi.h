@@ -24,6 +24,7 @@
 #define _WIN32_WINNT 0x600
 
 #include <audioclient.h>
+#include <audiopolicy.h>
 #include <mmdeviceapi.h>
 #include <avrt.h>
 
@@ -58,6 +59,7 @@ typedef struct wasapi_state {
     IAudioRenderClient *pRenderClient;
     ISimpleAudioVolume *pAudioVolume;
     IAudioEndpointVolume *pEndpointVolume;
+    IAudioSessionControl *pSessionControl;
     HANDLE hFeed; /* wasapi event */
     HANDLE hForceFeed; /* forces writing a buffer (e.g. before audio_resume) */
     HANDLE hFeedDone; /* set only after a hForceFeed */
@@ -70,6 +72,7 @@ typedef struct wasapi_state {
     IAudioClient *pAudioClientProxy;
     ISimpleAudioVolume *pAudioVolumeProxy;
     IAudioEndpointVolume *pEndpointVolumeProxy;
+    IAudioSessionControl *pSessionControlProxy;
 
     /* Streams used to marshal the proxy objects. The thread owning the actual objects
        needs to marshal proxy objects into these streams, and the thread that wants the
@@ -77,6 +80,7 @@ typedef struct wasapi_state {
     IStream *sAudioClient;
     IStream *sAudioVolume;
     IStream *sEndpointVolume;
+    IStream *sSessionControl;
 
     /* WASAPI internal clock information, for estimating delay */
     IAudioClock *pAudioClock;

@@ -233,6 +233,16 @@ static int init(struct ao *ao)
     return state->init_ret;
 }
 
+static wchar_t* utf8_to_wstring(char *string) {
+    if (string) {
+        int len = MultiByteToWideChar(CP_UTF8, 0, string, -1, NULL, 0);
+        wchar_t *ret = malloc(len * sizeof(wchar_t));
+        MultiByteToWideChar(CP_UTF8, 0, string, -1, ret, len);
+        return ret;
+    }
+    return NULL;
+}
+
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
@@ -285,6 +295,26 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             ISimpleAudioVolume_SetMute(state->pAudioVolumeProxy, mute, NULL);
 
         return CONTROL_OK;
+    case AOCONTROL_UPDATE_STREAM_TITLE: {
+        MP_VERBOSE(state, "Updating stream title to \"%s\"\n", (char*)arg);
+        wchar_t *title = utf8_to_wstring((char*)arg);
+
+        wchar_t *tmp = NULL;
+
+        /* There is a weird race condition in the IAudioSessionControl itself --
+           it seems that *sometimes* the SetDisplayName does not take effect and it still shows
+           the old title. Use this loop to insist until it works. */
+        do {
+            IAudioSessionControl_SetDisplayName(state->pSessionControlProxy, title, NULL);
+
+            SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
+            IAudioSessionControl_GetDisplayName(state->pSessionControlProxy, &tmp);
+        } while (lstrcmpW(title, tmp));
+        SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
+        free(title);
+
+        return CONTROL_OK;
+    }
     default:
         return CONTROL_UNKNOWN;
     }
