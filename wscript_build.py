@@ -1,3 +1,5 @@
+import re
+
 def _add_rst_manual_dependencies(ctx):
     manpage_sources_basenames = """
         options.rst ao.rst vo.rst af.rst vf.rst encode.rst
@@ -440,6 +442,13 @@ def build(ctx):
 
     if ctx.dependency_satisfied('libmpv-shared'):
         ctx.load("syms")
+        vnum = int(re.search('^#define MPV_CLIENT_API_VERSION 0x(.*)UL$',
+                             ctx.path.find_node("libmpv/client.h").read(),
+                             re.M)
+                   .group(1), 16)
+        libversion = (str(vnum >> 24) + '.' +
+                      str((vnum >> 16) & 0xff) + '.' +
+                      str(vnum & 0xffff))
         ctx(
             target       = "mpv",
             source       = ctx.filtered_sources(sources),
@@ -449,7 +458,7 @@ def build(ctx):
             features     = "c cshlib syms",
             export_symbols_regex = 'mpv_.*',
             install_path = ctx.env.LIBDIR,
-            vnum         = "0.0.0",
+            vnum         = libversion,
         )
 
         ctx(
@@ -459,7 +468,7 @@ def build(ctx):
             PREFIX       = ctx.env.PREFIX,
             LIBDIR       = ctx.env.LIBDIR,
             INCDIR       = ctx.env.INCDIR,
-            VERSION      = ctx.env.VERSION,
+            VERSION      = libversion,
         )
 
         headers = ["client.h"]
