@@ -41,6 +41,8 @@ typedef struct wasapi_state {
     /* volume control */
     DWORD vol_hw_support, status;
     float audio_volume;
+    float previous_volume;
+    float initial_volume;
 
     /* Buffers */
     size_t buffer_block_size; /* Size of each block in bytes */
@@ -54,6 +56,7 @@ typedef struct wasapi_state {
     IMMDevice *pDevice;
     IAudioClient *pAudioClient;
     IAudioRenderClient *pRenderClient;
+    ISimpleAudioVolume *pAudioVolume;
     IAudioEndpointVolume *pEndpointVolume;
     HANDLE hFeed; /* wasapi event */
     HANDLE hForceFeed; /* forces writing a buffer (e.g. before audio_resume) */
@@ -65,12 +68,14 @@ typedef struct wasapi_state {
     /* WASAPI proxy handles, for Single-Threaded Apartment communication.
        One is needed for each object that's accessed by a different thread. */
     IAudioClient *pAudioClientProxy;
+    ISimpleAudioVolume *pAudioVolumeProxy;
     IAudioEndpointVolume *pEndpointVolumeProxy;
 
     /* Streams used to marshal the proxy objects. The thread owning the actual objects
        needs to marshal proxy objects into these streams, and the thread that wants the
        proxies unmarshals them from here. */
     IStream *sAudioClient;
+    IStream *sAudioVolume;
     IStream *sEndpointVolume;
 
     /* WASAPI internal clock information, for estimating delay */

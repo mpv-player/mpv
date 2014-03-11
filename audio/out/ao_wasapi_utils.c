@@ -506,6 +506,11 @@ reinit:
                                  &IID_IAudioRenderClient,
                                  (void **)&state->pRenderClient);
     EXIT_ON_ERROR(hr);
+    hr = IAudioClient_GetService(state->pAudioClient,
+                                 &IID_ISimpleAudioVolume,
+                                 (void **) &state->pAudioVolume);
+    EXIT_ON_ERROR(hr);
+
     if (!state->hFeed)
         goto exit_label;
     hr = IAudioClient_SetEventHandle(state->pAudioClient, state->hFeed);
@@ -857,10 +862,19 @@ int wasapi_validate_device(struct mp_log *log, const m_option_t *opt,
 
 HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
     HRESULT hr;
+
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
     hr = CoGetInterfaceAndReleaseStream(state->sAudioClient,
                                         &IID_IAudioClient,
                                         (void**) &state->pAudioClientProxy);
     state->sAudioClient = NULL;
+    EXIT_ON_ERROR(hr);
+
+    hr = CoGetInterfaceAndReleaseStream(state->sAudioVolume,
+                                        &IID_ISimpleAudioVolume,
+                                        (void**) &state->pAudioVolumeProxy);
+    state->sAudioVolume = NULL;
     EXIT_ON_ERROR(hr);
 
     hr = CoGetInterfaceAndReleaseStream(state->sEndpointVolume,
@@ -870,12 +884,18 @@ HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
     EXIT_ON_ERROR(hr);
 
 exit_label:
+    if (hr != S_OK) {
+        MP_ERR(state, "error reading COM proxy: %08x %s\n", hr, wasapi_explain_err(hr));
+    }
     return hr;
 }
 
 void wasapi_release_proxies(wasapi_state *state) {
     SAFE_RELEASE(state->pAudioClientProxy, IUnknown_Release(state->pAudioClientProxy));
+    SAFE_RELEASE(state->pAudioVolumeProxy, IUnknown_Release(state->pAudioVolumeProxy));
     SAFE_RELEASE(state->pEndpointVolumeProxy, IUnknown_Release(state->pEndpointVolumeProxy));
+
+    CoUninitialize();
 }
 
 static HRESULT create_proxies(struct wasapi_state *state) {
@@ -886,6 +906,13 @@ static HRESULT create_proxies(struct wasapi_state *state) {
     hr = CoMarshalInterThreadInterfaceInStream(&IID_IAudioClient,
                                                (IUnknown*) state->pAudioClient,
                                                &state->sAudioClient);
+    EXIT_ON_ERROR(hr);
+
+    hr = CreateStreamOnHGlobal(NULL, TRUE, &state->sAudioVolume);
+    EXIT_ON_ERROR(hr);
+    hr = CoMarshalInterThreadInterfaceInStream(&IID_ISimpleAudioVolume,
+                                               (IUnknown*) state->pAudioVolume,
+                                               &state->sAudioVolume);
     EXIT_ON_ERROR(hr);
 
     hr = CreateStreamOnHGlobal(NULL, TRUE, &state->sEndpointVolume);
@@ -942,6 +969,16 @@ int wasapi_thread_init(struct ao *ao)
         goto exit_label;
     if (!fix_format(state)) { /* now that we're sure what format to use */
         EXIT_ON_ERROR(create_proxies(state));
+
+        if (state->opt_exclusive)
+            IAudioEndpointVolume_GetMasterVolumeLevelScalar(state->pEndpointVolume,
+                                                            &state->initial_volume);
+        else
+            ISimpleAudioVolume_GetMasterVolume(state->pAudioVolume,
+                                               &state->initial_volume);
+
+        state->previous_volume = state->initial_volume;
+
         MP_VERBOSE(ao, "thread_init OK!\n");
         SetEvent(state->init_done);
         return state->init_ret;
@@ -956,14 +993,18 @@ void wasapi_thread_uninit(wasapi_state *state)
 {
     if (state->pAudioClient)
         IAudioClient_Stop(state->pAudioClient);
-    if (state->pRenderClient)
-        IAudioRenderClient_Release(state->pRenderClient);
-    if (state->pAudioClock)
-        IAudioClock_Release(state->pAudioClock);
-    if (state->pAudioClient)
-        IAudioClient_Release(state->pAudioClient);
-    if (state->pDevice)
-        IMMDevice_Release(state->pDevice);
+
+    if (state->opt_exclusive)
+        IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolume,
+                                                        state->initial_volume, NULL);
+
+    SAFE_RELEASE(state->pRenderClient,   IAudioRenderClient_Release(state->pRenderClient));
+    SAFE_RELEASE(state->pAudioClock,     IAudioClock_Release(state->pAudioClock));
+    SAFE_RELEASE(state->pAudioVolume,    ISimpleAudioVolume_Release(state->pAudioVolume));
+    SAFE_RELEASE(state->pEndpointVolume, IAudioEndpointVolume_Release(state->pEndpointVolume));
+    SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
+    SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
+
     if (state->hTask)
         state->VistaBlob.pAvRevertMmThreadCharacteristics(state->hTask);
     CoUninitialize();
