@@ -438,7 +438,7 @@ def build(ctx):
         **cprog_kwargs
     )
 
-    if ctx.dependency_satisfied('shared'):
+    if ctx.dependency_satisfied('libmpv-shared'):
         ctx.load("syms")
         ctx(
             target       = "mpv",

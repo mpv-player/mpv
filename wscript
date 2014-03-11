@@ -10,14 +10,14 @@ from waftools.checks.custom import *
 
 build_options = [
     {
-        'name': '--shared',
+        'name': '--libmpv-shared',
         'desc': 'shared library',
         'default': 'disable',
         'func': check_true
     }, {
         'name': '--client-api-examples',
         'desc': 'build client API examples',
-        'deps': ['shared'],
+        'deps': ['libmpv-shared'],
         'func': check_true
     }, {
         'name': '--static-build',
