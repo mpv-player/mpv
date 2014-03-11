@@ -451,9 +451,21 @@ def build(ctx):
             vnum         = "0.0.0",
         )
 
+        ctx(
+            target       = 'libmpv/mpv.pc',
+            source       = 'libmpv/mpv.pc.in',
+            features     = 'subst',
+            PREFIX       = ctx.env.PREFIX,
+            LIBDIR       = ctx.env.LIBDIR,
+            INCDIR       = ctx.env.INCDIR,
+            vnum         = "0.0.0",
+        )
+
         headers = ["client.h"]
         for f in headers:
             ctx.install_as(ctx.env.INCDIR + '/libmpv/' + f, 'libmpv/' + f)
+
+        ctx.install_as(ctx.env.LIBDIR + '/pkgconfig/mpv.pc', 'libmpv/mpv.pc')
 
     if ctx.dependency_satisfied('client-api-examples'):
         # This assumes all examples are single-file (as examples should be)
