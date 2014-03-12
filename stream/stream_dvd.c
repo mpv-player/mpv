@@ -727,7 +727,7 @@ static int control(stream_t *stream,int cmd,void* arg)
             memcpy(req->palette, d->cur_pgc->palette, sizeof(req->palette));
             return STREAM_OK;
         }
-        case STREAM_CTRL_GET_DVD_VOLUME_ID:
+        case STREAM_CTRL_GET_DISC_NAME:
         {
             char buffer[128];
             if (DVDUDFVolumeInfo(d->dvd, buffer, sizeof(buffer), NULL, 0) < 0 &&

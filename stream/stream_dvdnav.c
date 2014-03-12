@@ -602,7 +602,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         handle_cmd(stream, (struct mp_nav_cmd *)arg);
         return STREAM_OK;
     }
-    case STREAM_CTRL_GET_DVD_VOLUME_ID: {
+    case STREAM_CTRL_GET_DISC_NAME: {
         const char *volume = NULL;
         if (dvdnav_get_title_string(dvdnav, &volume) != DVDNAV_STATUS_OK)
             break;

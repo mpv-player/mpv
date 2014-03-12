@@ -182,6 +182,19 @@ static int mp_property_filename(m_option_t *prop, int action, void *arg,
     return r;
 }
 
+static int media_title_from_stream(struct stream *stream, char **name)
+{
+    if (!stream)
+        return false;
+    switch (stream->type) {
+    case STREAMTYPE_DVD:
+    case STREAMTYPE_BLURAY:
+        return stream_control(stream, STREAM_CTRL_GET_DISC_NAME, name);
+    default:
+        return false;
+    }
+}
+
 static int mp_property_media_title(m_option_t *prop, int action, void *arg,
                                    MPContext *mpctx)
 {
@@ -194,11 +207,8 @@ static int mp_property_media_title(m_option_t *prop, int action, void *arg,
         name = demux_info_get(mpctx->master_demuxer, "title");
         if (name && name[0])
             return m_property_strdup_ro(prop, action, arg, name);
-        struct stream *stream = mpctx->master_demuxer->stream;
-        if (stream && stream->type == STREAMTYPE_DVD &&
-            stream_control(stream, STREAM_CTRL_GET_DVD_VOLUME_ID, &name) &&
-            name)
-        {
+        if (media_title_from_stream(mpctx->master_demuxer->stream, &name)
+                && name) {
             int r = m_property_strdup_ro(prop, action, arg, name);
             talloc_free(name);
             return r;
