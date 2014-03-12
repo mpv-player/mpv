@@ -44,6 +44,31 @@ General formatting
     ```
 - If the body of an if statement uses braces, the else branch should also
   use braces (and reverse).
+
+  Example:
+
+    ```C
+    if (a) {
+        // do something
+        something();
+        something_else();
+    } else {
+        one_line();
+    }
+    ```
+- If an if condition spans multiple physical lines, then put the opening brace
+  for the if body on the next physical line. (Also, preferably always add a
+  brace, even if technically none is needed.)
+
+  Example:
+
+    ```C
+    if (very_long_condition_a &&
+        very_long_condition_b)
+    {
+        code();
+    }
+    ```
 - Remove any trailing whitespace.
 - If the file you're editing uses formatting different from from what is
   described here, it's probably an old file from times when nobody followed a
