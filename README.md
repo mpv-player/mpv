@@ -45,13 +45,22 @@ Essential dependencies (incomplete list):
 - gcc or clang
 - X development headers (xlib, X extensions, libvdpau, libGL, libXv, ...)
 - Audio output development headers (libasound, pulseaudio)
-- fribidi, freetype, fontconfig development headers (for libass)
-- libass
-- FFmpeg libraries (libavutil libavcodec libavformat libswscale libpostproc)
-- libjpeg
+- FFmpeg libraries (libavutil libavcodec libavformat libswscale libavresample)
+- libjpeg (for screenshots)
 - libquvi if you want to play Youtube videos directly
+
+Libass dependencies:
+
+- gcc or clang, yasm on x86 and x86_64
+- fribidi, freetype, fontconfig development headers (for libass)
+
+FFmpeg dependencies:
+
+- gcc or clang, yasm on x86 and x86_64
+- OpenSSL (has to be explicitly enabled when compiling ffmpeg)
 - libx264/libmp3lame/libfdk-aac if you want to use encoding (has to be
   explicitly enabled when compiling ffmpeg)
+- Libav also works, but some features will not work. (See section below.)
 
 Most of the above libraries are available in suitable versions on normal
 Linux distributions. However FFmpeg is an exception (distro versions may be
