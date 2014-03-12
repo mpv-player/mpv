@@ -33,6 +33,7 @@
 #include <assert.h>
 
 #include <libbluray/bluray.h>
+#include <libbluray/meta_data.h>
 #include <libavutil/common.h>
 
 #include "config.h"
@@ -277,7 +278,14 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     }
     case STREAM_CTRL_MANAGES_TIMELINE:
         return STREAM_OK;
-
+    case STREAM_CTRL_GET_DISC_NAME:
+    {
+        const struct meta_dl *meta = bd_get_meta(b->bd);
+        if (!meta || !meta->di_name || !meta->di_name[0])
+            break;
+        *(char**)arg = talloc_strdup(NULL, meta->di_name);
+        return STREAM_OK;
+    }
     default:
         break;
     }

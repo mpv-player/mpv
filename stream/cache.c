@@ -113,7 +113,7 @@ struct priv {
     int stream_cache_idle;
     int stream_cache_fill;
     char **stream_metadata;
-    char *dvd_volume_id;
+    char *disc_name;
 };
 
 // Store additional per-byte metadata. Since per-byte would be way too
@@ -319,10 +319,10 @@ static void update_cached_controls(struct priv *s)
         talloc_free(s->stream_metadata);
         s->stream_metadata = talloc_steal(s, m);
     }
-    if (stream_control(s->stream, STREAM_CTRL_GET_DVD_VOLUME_ID, &t) == STREAM_OK)
+    if (stream_control(s->stream, STREAM_CTRL_GET_DISC_NAME, &t) == STREAM_OK)
     {
-        talloc_free(s->dvd_volume_id);
-        s->dvd_volume_id = talloc_steal(s, t);
+        talloc_free(s->disc_name);
+        s->disc_name = talloc_steal(s, t);
     }
     stream_update_size(s->stream);
     s->stream_size = s->stream->end_pos;
@@ -389,10 +389,10 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         }
         return STREAM_UNSUPPORTED;
     }
-    case STREAM_CTRL_GET_DVD_VOLUME_ID: {
-        if (!s->dvd_volume_id)
+    case STREAM_CTRL_GET_DISC_NAME: {
+        if (!s->disc_name)
             return STREAM_UNSUPPORTED;
-        *(char **)arg = talloc_strdup(NULL, s->dvd_volume_id);
+        *(char **)arg = talloc_strdup(NULL, s->disc_name);
         return STREAM_OK;
     }
     case STREAM_CTRL_RESUME_CACHE:
