@@ -28,9 +28,12 @@
 
 #include "common/common.h"
 #include "af.h"
+#include "demux/demux.h"
 
 struct priv {
     float level;                // Gain level for each channel
+    int rgain_track;            // Enable/disable track based replaygain
+    int rgain_album;            // Enable/disable album based replaygain
     int soft;                   // Enable/disable soft clipping
     int fast;                   // Use fix-point volume control
     float cfg_volume;
@@ -54,6 +57,23 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
         if (af_fmt_is_planar(in->format))
             mp_audio_set_format(af->data, af_fmt_to_planar(af->data->format));
+        if ((s->rgain_track || s->rgain_album) && af->metadata) {
+            char *rgain = NULL, *rest;
+            if (s->rgain_track) {
+                rgain = mp_tags_get_str(af->metadata, "REPLAYGAIN_TRACK_GAIN");
+            } else if (s->rgain_album) {
+                rgain = mp_tags_get_str(af->metadata, "REPLAYGAIN_ALBUM_GAIN");
+            }
+            if (rgain) {
+                float db = strtod(rgain, &rest);
+                if (rest && (rest != rgain) && isfinite(db))
+                    af_from_dB(1, &db, &s->level, 20.0, -200.0, 60.0);
+                else
+                    mp_msg(af->log, MSGL_ERR, "Invalid replaygain value\n");
+            } else {
+                mp_msg(af->log, MSGL_ERR, "Replaygain tags not found\n");
+            }
+        }
         return af_test_output(af, in);
     }
     case AF_CONTROL_SET_VOLUME:
@@ -119,6 +139,8 @@ struct af_info af_info_volume = {
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_FLOATRANGE("volumedb", cfg_volume, 0, -200, 60),
+        OPT_FLAG("replaygain-track", rgain_track, 0),
+        OPT_FLAG("replaygain-album", rgain_album, 0),
         OPT_FLAG("softclip", soft, 0),
         OPT_FLAG("s16", fast, 0),
         {0}

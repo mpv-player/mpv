@@ -279,6 +279,12 @@ Available filters are:
         Sets the desired gain in dB for all channels in the stream from -200dB
         to +60dB, where -200dB mutes the sound completely and +60dB equals a
         gain of 1000 (default: 0).
+    ``replaygain-track``
+        Adjust volume gain according to the track-gain replaygain value stored
+        in the file metadata. Note that this only supports reading REPLAYGAIN_*
+        tags, as written by mp3gain, metaflac, etc...
+    ``replaygain-album``
+        Like replaygain-track, but using the album-gain value instead.
     ``<softclip>``
         Turns soft clipping on. Soft-clipping can make the
         sound more smooth if very high volume levels are used. Enable this
