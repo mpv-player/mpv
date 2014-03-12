@@ -1,6 +1,4 @@
-NOTE: DOCS/OUTDATED-tech/* may contain more detailed information, but most of it
-      is possibly or definitely outdated. This file intends to give a big
-      picture of how mpv is structured.
+This file intends to give a big picture of how mpv is structured.
 
 player/*.c:
     Essentially makes up the player applications, including the main() function
