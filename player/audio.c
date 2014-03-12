@@ -125,6 +125,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->d_audio->global = mpctx->global;
         mpctx->d_audio->opts = opts;
         mpctx->d_audio->header = sh;
+        mpctx->d_audio->metadata = mpctx->demuxer->metadata;
         if (!audio_init_best_codec(mpctx->d_audio, opts->audio_decoders))
             goto init_error;
     }

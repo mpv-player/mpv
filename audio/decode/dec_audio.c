@@ -213,6 +213,8 @@ int audio_init_filters(struct dec_audio *d_audio, int in_samplerate,
     mp_audio_set_channels(&afs->output, out_channels);
     mp_audio_set_format(&afs->output, *out_format);
 
+    afs->metadata = d_audio->metadata;
+
     char *s_from = mp_audio_config_to_str(&afs->input);
     char *s_to = mp_audio_config_to_str(&afs->output);
     MP_VERBOSE(d_audio, "Building audio filter chain for %s -> %s...\n", s_from, s_to);
