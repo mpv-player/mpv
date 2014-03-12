@@ -34,10 +34,66 @@ struct priv {
     float level;                // Gain level for each channel
     int rgain_track;            // Enable/disable track based replaygain
     int rgain_album;            // Enable/disable album based replaygain
+    float rgain_preamp;         // Set replaygain pre-amplification
+    int rgain_noclip;           // Enable/disable clipping prevention
     int soft;                   // Enable/disable soft clipping
     int fast;                   // Use fix-point volume control
     float cfg_volume;
 };
+
+static int decode_float(char *str, float *out)
+{
+    char *rest;
+    float dec_val;
+
+    dec_val = strtod(str, &rest);
+    if (!rest || (rest == str) || !isfinite(dec_val))
+        return -1;
+
+    *out = dec_val;
+    return 0;
+}
+
+static int decode_gain(struct af_instance *af, const char *tag, float *out)
+{
+    char *tag_val = NULL;
+    float dec_val;
+
+    tag_val = mp_tags_get_str(af->metadata, tag);
+    if (!tag_val) {
+        mp_msg(af->log, MSGL_ERR, "Replaygain tags not found\n");
+        return -1;
+    }
+
+    if (decode_float(tag_val, &dec_val)) {
+        mp_msg(af->log, MSGL_ERR, "Invalid replaygain value\n");
+        return -1;
+    }
+
+    *out = dec_val;
+    return 0;
+}
+
+static int decode_peak(struct af_instance *af, const char *tag, float *out)
+{
+    char *tag_val = NULL;
+    float dec_val;
+
+    *out = 1.0;
+
+    tag_val = mp_tags_get_str(af->metadata, tag);
+    if (!tag_val)
+        return 0;
+
+    if (decode_float(tag_val, &dec_val))
+        return 0;
+
+    if (dec_val == 0.0)
+        return 0;
+
+    *out = dec_val;
+    return 0;
+}
 
 static int control(struct af_instance *af, int cmd, void *arg)
 {
@@ -58,20 +114,25 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (af_fmt_is_planar(in->format))
             mp_audio_set_format(af->data, af_fmt_to_planar(af->data->format));
         if ((s->rgain_track || s->rgain_album) && af->metadata) {
-            char *rgain = NULL, *rest;
+            float gain, peak;
+            char *gain_tag = NULL, *peak_tag = NULL;
+
             if (s->rgain_track) {
-                rgain = mp_tags_get_str(af->metadata, "REPLAYGAIN_TRACK_GAIN");
+                gain_tag = "REPLAYGAIN_TRACK_GAIN";
+                peak_tag = "REPLAYGAIN_TRACK_PEAK";
             } else if (s->rgain_album) {
-                rgain = mp_tags_get_str(af->metadata, "REPLAYGAIN_ALBUM_GAIN");
+                gain_tag = "REPLAYGAIN_ALBUM_GAIN";
+                peak_tag = "REPLAYGAIN_ALBUM_PEAK";
             }
-            if (rgain) {
-                float db = strtod(rgain, &rest);
-                if (rest && (rest != rgain) && isfinite(db))
-                    af_from_dB(1, &db, &s->level, 20.0, -200.0, 60.0);
-                else
-                    mp_msg(af->log, MSGL_ERR, "Invalid replaygain value\n");
-            } else {
-                mp_msg(af->log, MSGL_ERR, "Replaygain tags not found\n");
+
+            if (!decode_gain(af, gain_tag, &gain) &&
+                !decode_peak(af, peak_tag, &peak))
+            {
+                gain += s->rgain_preamp;
+                af_from_dB(1, &gain, &s->level, 20.0, -200.0, 60.0);
+
+                if (s->rgain_noclip) // clipping prevention
+                    s->level = MPMIN(s->level, 1.0 / peak);
             }
         }
         return af_test_output(af, in);
@@ -141,6 +202,8 @@ struct af_info af_info_volume = {
         OPT_FLOATRANGE("volumedb", cfg_volume, 0, -200, 60),
         OPT_FLAG("replaygain-track", rgain_track, 0),
         OPT_FLAG("replaygain-album", rgain_album, 0),
+        OPT_FLOATRANGE("replaygain-preamp", rgain_preamp, 0, -15, 15),
+        OPT_FLAG("replaygain-noclip", rgain_noclip, 0, OPTDEF_INT(1)),
         OPT_FLAG("softclip", soft, 0),
         OPT_FLAG("s16", fast, 0),
         {0}
