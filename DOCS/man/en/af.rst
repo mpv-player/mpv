@@ -285,6 +285,12 @@ Available filters are:
         tags, as written by mp3gain, metaflac, etc...
     ``replaygain-album``
         Like replaygain-track, but using the album-gain value instead.
+    ``replaygain-preamp``
+        Pre-amplification gain in dB to apply to the selected replaygain gain
+        (default: 0).
+    ``replaygain-noclip``
+        Prevent clipping caused by replaygain by automatically lowering the
+        gain (default). Use no-replaygain-noclip to disable this.
     ``<softclip>``
         Turns soft clipping on. Soft-clipping can make the
         sound more smooth if very high volume levels are used. Enable this
