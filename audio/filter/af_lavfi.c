@@ -53,6 +53,14 @@
     avfilter_graph_parse(graph, filters, &(inputs), &(outputs), log_ctx)
 #endif
 
+// ":" is deprecated, but "|" doesn't work in earlier versions.
+#if (IS_LIBAV_FORK  && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 7, 0)) || \
+    (!IS_LIBAV_FORK && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 50, 100))
+#define FMTSEP "|"
+#else
+#define FMTSEP ":"
+#endif
+
 struct priv {
     AVFilterGraph *graph;
     AVFilterContext *in;
@@ -78,8 +86,7 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
 {
     void *tmp = talloc_new(NULL);
     struct priv *p = af->priv;
-    AVFilterContext *in = NULL, *out = NULL;
-    int r;
+    AVFilterContext *in = NULL, *out = NULL, *f_format = NULL;
 
     if (bstr0(p->cfg_graph).len == 0) {
         MP_FATAL(af, "lavfi: no filter graph set\n");
@@ -104,12 +111,29 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     if (!outputs || !inputs)
         goto error;
 
+    // Build list of acceptable output sample formats. libavfilter will insert
+    // conversion filters if needed.
+    static const enum AVSampleFormat sample_fmts[] = {
+        AV_SAMPLE_FMT_U8, AV_SAMPLE_FMT_S16, AV_SAMPLE_FMT_S32,
+        AV_SAMPLE_FMT_FLT, AV_SAMPLE_FMT_DBL,
+        AV_SAMPLE_FMT_U8P, AV_SAMPLE_FMT_S16P, AV_SAMPLE_FMT_S32P,
+        AV_SAMPLE_FMT_FLTP, AV_SAMPLE_FMT_DBLP,
+        AV_SAMPLE_FMT_NONE
+    };
+    char *fmtstr = talloc_strdup(tmp, "");
+    for (int n = 0; sample_fmts[n] != AV_SAMPLE_FMT_NONE; n++) {
+        const char *name = av_get_sample_fmt_name(sample_fmts[n]);
+        if (name) {
+            const char *s = fmtstr[0] ? FMTSEP : "";
+            fmtstr = talloc_asprintf_append_buffer(fmtstr, "%s%s", s, name);
+        }
+    }
+
     char *src_args = talloc_asprintf(tmp,
-        "sample_rate=%d:sample_fmt=%s:channels=%d:time_base=%d/%d:"
+        "sample_rate=%d:sample_fmt=%s:time_base=%d/%d:"
         "channel_layout=0x%"PRIx64,  config->rate,
         av_get_sample_fmt_name(af_to_avformat(config->format)),
-        config->channels.num, 1, config->rate,
-        mp_chmap_to_lavc(&config->channels));
+        1, config->rate, mp_chmap_to_lavc(&config->channels));
 
     if (avfilter_graph_create_filter(&in, avfilter_get_by_name("abuffer"),
                                      "src", src_args, NULL, graph) < 0)
@@ -119,27 +143,18 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
                                      "out", NULL, NULL, graph) < 0)
         goto error;
 
-    static const enum AVSampleFormat sample_fmts[] = {
-        AV_SAMPLE_FMT_U8, AV_SAMPLE_FMT_S16, AV_SAMPLE_FMT_S32,
-        AV_SAMPLE_FMT_FLT, AV_SAMPLE_FMT_DBL,
-        AV_SAMPLE_FMT_U8P, AV_SAMPLE_FMT_S16P, AV_SAMPLE_FMT_S32P,
-        AV_SAMPLE_FMT_FLTP, AV_SAMPLE_FMT_DBLP,
-        AV_SAMPLE_FMT_NONE
-    };
-    r = av_opt_set_int_list(out, "sample_fmts", sample_fmts,
-                            AV_SAMPLE_FMT_NONE, AV_OPT_SEARCH_CHILDREN);
-    if (r < 0)
+    if (avfilter_graph_create_filter(&f_format, avfilter_get_by_name("aformat"),
+                                     "format", fmtstr, NULL, graph) < 0)
         goto error;
 
-    r = av_opt_set_int(out, "all_channel_counts", 1, AV_OPT_SEARCH_CHILDREN);
-    if (r < 0)
+    if (avfilter_link(f_format, 0, out, 0) < 0)
         goto error;
 
     outputs->name = av_strdup("in");
     outputs->filter_ctx = in;
 
     inputs->name = av_strdup("out");
-    inputs->filter_ctx = out;
+    inputs->filter_ctx = f_format;
 
     if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
         goto error;
@@ -191,8 +206,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         struct mp_chmap out_cm;
         mp_chmap_from_lavc(&out_cm, l_out->channel_layout);
-        if (!out_cm.num || out_cm.num != l_out->channels)
-            mp_chmap_from_channels(&out_cm, l_out->channels);
         mp_audio_set_channels(out, &out_cm);
 
         if (!mp_audio_config_valid(out))
@@ -223,9 +236,12 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
     // Timebase is 1/sample_rate
     frame->pts = p->samples_in;
 
-    av_frame_set_channels(frame, l_in->channels);
-    av_frame_set_channel_layout(frame, l_in->channel_layout);
-    av_frame_set_sample_rate(frame, l_in->sample_rate);
+    frame->channel_layout = l_in->channel_layout;
+    frame->sample_rate = l_in->sample_rate;
+#if !IS_LIBAV_FORK
+    // FFmpeg being a stupid POS
+    frame->channels = l_in->channels;
+#endif
 
     frame->extended_data = frame->data;
     for (int n = 0; n < data->num_planes; n++)

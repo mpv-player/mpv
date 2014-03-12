@@ -2831,21 +2831,11 @@ fi
 echores "$vf_lavfi"
 
 
-echocheck "libavutil av_opt_set_int_list() API"
-_avutil_has_opt_set_int_list=no
-statement_check libavutil/opt.h 'av_opt_set_int_list(0,0,(int*)0,0,0)' && _avutil_has_opt_set_int_list=yes
-echores "$_avutil_has_opt_set_int_list"
-
-
 echocheck "using libavfilter through af_lavfi"
 if test "$af_lavfi" = auto ; then
     af_lavfi=no
     if test "$libavfilter" = yes ; then
-        if test "$_avutil_has_opt_set_int_list" = no ; then
-            res_comment="libavutil too old"
-        else
-            af_lavfi=yes
-        fi
+        af_lavfi=yes
     fi
 fi
 if test "$af_lavfi" = yes ; then

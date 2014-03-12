@@ -385,12 +385,6 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'desc': 'libavutil ref-counting API',
         'func': check_statement('libavutil/frame.h', 'av_frame_unref(NULL)',
                                 use='libav'),
-    } , {
-        'name': 'av-opt-set-int-list',
-        'desc': 'libavutil av_opt_set_int_list() API',
-        'func': check_statement('libavutil/opt.h',
-                                'av_opt_set_int_list(0,0,(int*)0,0,0)',
-                                use='libav')
     }, {
         'name': '--libavfilter',
         'desc': 'libavfilter',
@@ -406,7 +400,7 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
     }, {
         'name': '--af-lavfi',
         'desc': 'using libavfilter through af_lavfi',
-        'deps': [ 'libavfilter', 'av-opt-set-int-list' ],
+        'deps': [ 'libavfilter', 'avutil-refcounting' ],
         'func': check_true
     }, {
         'name': '--libavdevice',
