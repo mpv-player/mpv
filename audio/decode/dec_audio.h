@@ -21,6 +21,7 @@
 
 #include "audio/chmap.h"
 #include "audio/audio.h"
+#include "demux/demux.h"
 #include "demux/stheader.h"
 
 struct mp_audio_buffer;
@@ -35,6 +36,7 @@ struct dec_audio {
     struct mp_audio_buffer *decode_buffer;
     struct af_stream *afilter;
     char *decoder_desc;
+    struct mp_tags *metadata;
     // set by decoder
     struct mp_audio decoded;    // format of decoded audio (no data, temporarily
                                 // different from decode_buffer during format
