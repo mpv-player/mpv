@@ -67,6 +67,14 @@
 #include "command.h"
 #include "screenshot.h"
 
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+#include <windows.h>
+
+#ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
+#define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE (0x0001)
+#endif
+#endif
+
 #if HAVE_X11
 #include "video/out/x11_common.h"
 #endif
@@ -77,18 +85,6 @@
 
 #ifdef PTW32_STATIC_LIB
 #include <pthread.h>
-#endif
-
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-#include <windows.h>
-
-#ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
-#define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE (0x0001)
-#endif
-
-#ifndef BASE_SEARCH_PATH_PERMANENT
-#define BASE_SEARCH_PATH_PERMANENT (0x8000)
-#endif
 #endif
 
 static bool terminal_initialized;
