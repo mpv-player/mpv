@@ -30,8 +30,6 @@
 
 @implementation MpvVideoWindow {
     NSSize _queued_video_size;
-    bool   _fs_resize_scheduled;
-    bool   _recenter_window_during_constraint;
 }
 
 @synthesize adapter = _adapter;
@@ -45,6 +43,7 @@
                                   backing:buffering_type
                                     defer:flag]) {
         [self setBackgroundColor:[NSColor blackColor]];
+        [self setMinSize:NSMakeSize(50,50)];
     }
     return self;
 }
@@ -66,22 +65,22 @@
 
 - (BOOL)isInFullScreenMode
 {
-    return (([self styleMask] & NSFullScreenWindowMask) ==
-                NSFullScreenWindowMask);
+    return !!([self styleMask] & NSFullScreenWindowMask);
 }
 
 - (void)setFullScreen:(BOOL)willBeFullscreen
 {
-    if (willBeFullscreen && ![self isInFullScreenMode]) {
-        [self setContentResizeIncrements:NSMakeSize(1, 1)];
-        [self toggleFullScreen:nil];
+    if (willBeFullscreen != [self isInFullScreenMode]) {
+        [super toggleFullScreen:nil];
     }
+}
 
-    if (!willBeFullscreen && [self isInFullScreenMode]) {
-        [self setContentAspectRatio:self->_queued_video_size];
-        [self toggleFullScreen:nil];
+- (void)toggleFullScreen:(id)sender {
+    if ([self isInFullScreenMode]) {
+        [self.adapter putCommand:"set fullscreen no"];
+    } else {
+        [self.adapter putCommand:"set fullscreen yes"];
     }
-
 }
 
 - (BOOL)canBecomeMainWindow { return YES; }
@@ -103,74 +102,90 @@
 
 - (void)mulSize:(float)multiplier
 {
-    char *cmd = ta_asprintf(NULL, "set window-scale %f", multiplier);
+    char cmd[50];
+    snprintf(cmd, sizeof(cmd), "set window-scale %f", multiplier);
     [self.adapter putCommand:cmd];
 }
 
-- (int)titleHeight
+- (NSRect)frameRect:(NSRect)f forCenteredContentSize:(NSSize)ns
 {
-    NSRect of    = [self frame];
-    NSRect cb    = [[self contentView] bounds];
-    return of.size.height - cb.size.height;
+    NSRect cr  = [self contentRectForFrameRect:f];
+    CGFloat dx = (cr.size.width  - ns.width)  / 2;
+    CGFloat dy = (cr.size.height - ns.height) / 2;
+    return NSInsetRect(f, dx, dy);
 }
 
 - (void)setCenteredContentSize:(NSSize)ns
 {
-    NSRect f   = [self frame];
-    CGFloat dx = (f.size.width  - ns.width) / 2;
-    CGFloat dy = (f.size.height - ns.height - [self titleHeight]) / 2;
-    NSRect nf  = NSRectFromCGRect(CGRectInset(NSRectToCGRect(f), dx, dy));
-    self->_recenter_window_during_constraint = true;
-    [self setFrame:nf display:NO animate:NO];
+    [self setFrame:[self frameRect:[self frame] forCenteredContentSize:ns]
+           display:NO
+           animate:NO];
 }
 
 - (NSRect)constrainFrameRect:(NSRect)nf toScreen:(NSScreen *)screen
 {
-    NSRect s = [[self screen] visibleFrame];
-    if (nf.origin.y + nf.size.height > s.origin.y + s.size.height) {
-        if (self->_recenter_window_during_constraint)
-            nf.size.height = s.size.height;
-        nf.origin.y = s.origin.y + s.size.height - nf.size.height;
+    if ([self isInFullScreenMode])
+        return [super constrainFrameRect:nf toScreen:screen];
+
+    NSRect of = [self frame];
+    NSRect vf = [[self screen] visibleFrame];
+
+    if (NSMaxY(nf) > NSMaxY(vf)) {
+        // If the new window is bigger than the visible frame, make sure it's
+        // titlebar is visible and at the top of the visible frame.
+        nf.origin.y = NSMaxY(vf) - NSHeight(nf);
+    } else if (NSHeight(of) > NSHeight(vf)) {
+        // If the window is smaller than the visible frame, but it was bigger
+        // previously (so we ran the previous conditional branch), recenter
+        // the smaller window vertically.
+        nf.origin.y = (NSHeight(vf) - NSHeight(nf)) / 2;
     }
+
     return nf;
 }
 
-- (void)setFrame:(NSRect)frame display:(BOOL)display animate:(BOOL)animate
+- (void)windowDidEndLiveResize:(NSNotification *)notification
 {
-    [super setFrame:frame display:display animate:animate];
-    self->_recenter_window_during_constraint = false;
+    [self setFrame:[self constrainFrameRect:self.frame toScreen:self.screen]
+           display:NO];
+}
+
+- (void)tryDequeueSize {
+    if (_queued_video_size.width <= 0.0 || _queued_video_size.height <= 0.0)
+        return;
+
+    if (![self.adapter isInFullScreenMode]) {
+        [self setContentAspectRatio:_queued_video_size];
+        [self setCenteredContentSize:_queued_video_size];
+        _queued_video_size = NSZeroSize;
+    }
 }
 
 - (void)queueNewVideoSize:(NSSize)new_size
 {
-    NSSize prev_size = self->_queued_video_size;
-    self->_queued_video_size = new_size;
-
-    if (!CGSizeEqualToSize(prev_size, new_size))
-        [self dispatchNewVideoSize];
+    if (NSEqualSizes(_queued_video_size, new_size))
+        return;
+    _queued_video_size = new_size;
+    [self tryDequeueSize];
 }
 
-- (void)dispatchNewVideoSize
-{
-    if ([self.adapter isInFullScreenMode]) {
-        self->_fs_resize_scheduled = true;
-    } else {
-        [self applyNewVideoSize];
-    }
+- (void)windowDidBecomeMain:(NSNotification *)notification {
+    [self tryDequeueSize];
 }
 
-- (void)applyNewVideoSize
-{
-    [self setCenteredContentSize:self->_queued_video_size];
-    [self setContentAspectRatio:self->_queued_video_size];
+- (NSSize)window:(NSWindow *)window willUseFullScreenContentSize:(NSSize)size {
+    return window.screen.frame.size;
 }
 
-- (void)didChangeFullScreenState
-{
-    if (![self.adapter isInFullScreenMode] && self->_fs_resize_scheduled) {
-        self->_fs_resize_scheduled = false;
-        [self applyNewVideoSize];
-    }
+- (NSApplicationPresentationOptions)window:(NSWindow *)window
+      willUseFullScreenPresentationOptions:(NSApplicationPresentationOptions)opts {
+    return NSApplicationPresentationFullScreen      |
+           NSApplicationPresentationAutoHideDock    |
+           NSApplicationPresentationAutoHideMenuBar |
+           NSApplicationPresentationAutoHideToolbar;
+}
+
+- (void)windowDidExitFullScreen:(NSNotification *)notification {
+    [self tryDequeueSize];
 }
 @end
-
