@@ -39,6 +39,7 @@ struct priv {
     int rgain_clip;             // Enable/disable clipping prevention
     int soft;                   // Enable/disable soft clipping
     int fast;                   // Use fix-point volume control
+    int detach;                 // Detach if gain volume is neutral
     float cfg_volume;
 };
 
@@ -136,6 +137,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
                     s->rgain = MPMIN(s->rgain, 1.0 / peak);
             }
         }
+        if (s->detach && fabs(s->level + s->rgain - 1.0) < 0.00001)
+            return AF_DETACH;
         return af_test_output(af, in);
     }
     case AF_CONTROL_SET_VOLUME:
@@ -209,6 +212,7 @@ struct af_info af_info_volume = {
         OPT_FLAG("replaygain-clip", rgain_clip, 0),
         OPT_FLAG("softclip", soft, 0),
         OPT_FLAG("s16", fast, 0),
+        OPT_FLAG("detach", detach, 0),
         {0}
     },
 };

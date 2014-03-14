@@ -301,6 +301,12 @@ Available filters are:
     ``s16``
         Force S16 sample format if set. Lower quality, but might be faster
         in some situations.
+    ``detach``
+        Remove the filter if the volume is not changed at audio filter config
+        time. Useful with replaygain: if the current file has no replaygain
+        tags, then the filter will be removed if this option is enabled.
+        (If ``--softvol=yes`` is used and the player volume controls are used
+        during playback, a different volume filter will be inserted.)
 
     .. admonition:: Example
 
