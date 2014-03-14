@@ -266,7 +266,7 @@ Available filters are:
     Filter for internal use only. Converts between signed/unsigned formats
     and formats with different endian.
 
-``volume[=volumedb[:softclip[:s16]]]``
+``volume[=<volumedb>[:...]]``
     Implements software volume control. Use this filter with caution since it
     can reduce the signal to noise ratio of the sound. In most cases it is
     best to use the *Master* volume control of your sound card or the volume
@@ -279,14 +279,14 @@ Available filters are:
         Sets the desired gain in dB for all channels in the stream from -200dB
         to +60dB, where -200dB mutes the sound completely and +60dB equals a
         gain of 1000 (default: 0).
-    ``<softclip>``
+    ``softclip``
         Turns soft clipping on. Soft-clipping can make the
         sound more smooth if very high volume levels are used. Enable this
         option if the dynamic range of the loudspeakers is very low.
 
         *WARNING*: This feature creates distortion and should be considered a
         last resort.
-    ``<s16>``
+    ``s16``
         Force S16 sample format if set. Lower quality, but might be faster
         in some situations.
 
@@ -296,7 +296,7 @@ Available filters are:
             Would amplify the sound by 10.1dB and hard-clip if the sound level
             is too high.
 
-``pan=n[:<matrix>]``
+``pan=n:[<matrix>]``
     Mixes channels arbitrarily. Basically a combination of the volume and the
     channels filter that can be used to down-mix many channels to only a few,
     e.g. stereo to mono, or vary the "width" of the center speaker in a
