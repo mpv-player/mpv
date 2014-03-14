@@ -35,7 +35,7 @@ struct priv {
     int rgain_track;            // Enable/disable track based replaygain
     int rgain_album;            // Enable/disable album based replaygain
     float rgain_preamp;         // Set replaygain pre-amplification
-    int rgain_noclip;           // Enable/disable clipping prevention
+    int rgain_clip;             // Enable/disable clipping prevention
     int soft;                   // Enable/disable soft clipping
     int fast;                   // Use fix-point volume control
     float cfg_volume;
@@ -131,7 +131,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 gain += s->rgain_preamp;
                 af_from_dB(1, &gain, &s->level, 20.0, -200.0, 60.0);
 
-                if (s->rgain_noclip) // clipping prevention
+                if (!s->rgain_clip) // clipping prevention
                     s->level = MPMIN(s->level, 1.0 / peak);
             }
         }
@@ -203,7 +203,7 @@ struct af_info af_info_volume = {
         OPT_FLAG("replaygain-track", rgain_track, 0),
         OPT_FLAG("replaygain-album", rgain_album, 0),
         OPT_FLOATRANGE("replaygain-preamp", rgain_preamp, 0, -15, 15),
-        OPT_FLAG("replaygain-noclip", rgain_noclip, 0, OPTDEF_INT(1)),
+        OPT_FLAG("replaygain-clip", rgain_clip, 0),
         OPT_FLAG("softclip", soft, 0),
         OPT_FLAG("s16", fast, 0),
         {0}

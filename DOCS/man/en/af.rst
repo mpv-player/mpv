@@ -266,7 +266,7 @@ Available filters are:
     Filter for internal use only. Converts between signed/unsigned formats
     and formats with different endian.
 
-``volume[=volumedb[:softclip[:s16]]]``
+``volume[=volumedb[:...]]``
     Implements software volume control. Use this filter with caution since it
     can reduce the signal to noise ratio of the sound. In most cases it is
     best to use the *Master* volume control of your sound card or the volume
@@ -288,9 +288,9 @@ Available filters are:
     ``replaygain-preamp``
         Pre-amplification gain in dB to apply to the selected replaygain gain
         (default: 0).
-    ``replaygain-noclip``
+    ``replaygain-clip=yes|no``
         Prevent clipping caused by replaygain by automatically lowering the
-        gain (default). Use no-replaygain-noclip to disable this.
+        gain (default). Use ``replaygain-clip=no`` to disable this.
     ``<softclip>``
         Turns soft clipping on. Soft-clipping can make the
         sound more smooth if very high volume levels are used. Enable this
