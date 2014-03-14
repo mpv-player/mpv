@@ -6,7 +6,7 @@ def __get_version__(ctx):
                                cwd=ctx.srcnode.abspath())
     process.wait()
     (version, err) = process.communicate()
-    return version.strip().decode("utf-8")
+    return version.strip().decode('utf-8').encode('ascii', 'ignore')
 
 def __get_build_date__():
     import time
