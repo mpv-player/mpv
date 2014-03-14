@@ -31,7 +31,8 @@
 #include "demux/demux.h"
 
 struct priv {
-    float level;                // Gain level for each channel
+    float level;                // User-specified gain level for each channel
+    float rgain;                // Replaygain level
     int rgain_track;            // Enable/disable track based replaygain
     int rgain_album;            // Enable/disable album based replaygain
     float rgain_preamp;         // Set replaygain pre-amplification
@@ -129,10 +130,10 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 !decode_peak(af, peak_tag, &peak))
             {
                 gain += s->rgain_preamp;
-                af_from_dB(1, &gain, &s->level, 20.0, -200.0, 60.0);
+                af_from_dB(1, &gain, &s->rgain, 20.0, -200.0, 60.0);
 
                 if (!s->rgain_clip) // clipping prevention
-                    s->level = MPMIN(s->level, 1.0 / peak);
+                    s->rgain = MPMIN(s->rgain, 1.0 / peak);
             }
         }
         return af_test_output(af, in);
@@ -151,9 +152,11 @@ static void filter_plane(struct af_instance *af, void *ptr, int num_samples)
 {
     struct priv *s = af->priv;
 
+    float level = s->level + s->rgain;
+
     if (af_fmt_from_planar(af->data->format) == AF_FORMAT_S16) {
         int16_t *a = ptr;
-        int vol = 256.0 * s->level;
+        int vol = 256.0 * level;
         if (vol != 256) {
             for (int i = 0; i < num_samples; i++) {
                 int x = (a[i] * vol) >> 8;
@@ -162,7 +165,7 @@ static void filter_plane(struct af_instance *af, void *ptr, int num_samples)
         }
     } else if (af_fmt_from_planar(af->data->format) == AF_FORMAT_FLOAT) {
         float *a = ptr;
-        float vol = s->level;
+        float vol = level;
         if (vol != 1.0) {
             for (int i = 0; i < num_samples; i++) {
                 float x = a[i] * vol;
