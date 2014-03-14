@@ -63,7 +63,7 @@ static int decode_gain(struct af_instance *af, const char *tag, float *out)
 
     tag_val = mp_tags_get_str(af->metadata, tag);
     if (!tag_val) {
-        mp_msg(af->log, MSGL_ERR, "Replaygain tags not found\n");
+        mp_msg(af->log, MSGL_V, "Replaygain tags not found\n");
         return -1;
     }
 
