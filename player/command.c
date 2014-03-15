@@ -436,6 +436,25 @@ static int mp_property_playtime_remaining(m_option_t *prop, int action,
     return property_time(prop, action, arg, remaining / speed);
 }
 
+/// Current title (RO)
+static int mp_property_title(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
+{
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer || !demuxer->stream)
+        return M_PROPERTY_UNAVAILABLE;
+    struct stream *stream = demuxer->stream;
+    unsigned int title = -1;
+    switch (action) {
+    case M_PROPERTY_GET:
+        if (stream_control(stream, STREAM_CTRL_GET_CURRENT_TITLE, &title) <= 0)
+            return M_PROPERTY_UNAVAILABLE;
+        return m_property_int_ro(prop, action, arg, title);
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+}
+
 /// Current chapter (RW)
 static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
@@ -2099,6 +2118,7 @@ static const m_option_t mp_properties[] = {
       M_OPT_MIN, 0, 0, NULL },
     { "time-remaining", mp_property_remaining, CONF_TYPE_TIME },
     { "playtime-remaining", mp_property_playtime_remaining, CONF_TYPE_TIME },
+    { "title", mp_property_title, CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
       M_OPT_MIN, -1, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("edition", mp_property_edition),
