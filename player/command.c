@@ -436,8 +436,8 @@ static int mp_property_playtime_remaining(m_option_t *prop, int action,
     return property_time(prop, action, arg, remaining / speed);
 }
 
-/// Current DVD title (RO)
-static int mp_property_dvd_title(m_option_t *prop, int action, void *arg,
+/// Current BD/DVD title (RO)
+static int mp_property_disc_title(m_option_t *prop, int action, void *arg,
                                  MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->master_demuxer;
@@ -722,9 +722,9 @@ static int mp_property_quvi_format(m_option_t *prop, int action, void *arg,
     return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
-/// Number of titles in DVD
-static int mp_property_dvd_titles(m_option_t *prop, int action, void *arg,
-                                  MPContext *mpctx)
+/// Number of titles in BD/DVD
+static int mp_property_disc_titles(m_option_t *prop, int action, void *arg,
+                                   MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->master_demuxer;
     unsigned int num_titles;
@@ -2118,12 +2118,12 @@ static const m_option_t mp_properties[] = {
       M_OPT_MIN, 0, 0, NULL },
     { "time-remaining", mp_property_remaining, CONF_TYPE_TIME },
     { "playtime-remaining", mp_property_playtime_remaining, CONF_TYPE_TIME },
-    { "dvd-title", mp_property_dvd_title, CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL },
+    { "disc-title", mp_property_disc_title, CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
       M_OPT_MIN, -1, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("edition", mp_property_edition),
     M_OPTION_PROPERTY_CUSTOM("quvi-format", mp_property_quvi_format),
-    { "dvd-titles", mp_property_dvd_titles, CONF_TYPE_INT,
+    { "disc-titles", mp_property_disc_titles, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "chapters", mp_property_chapters, CONF_TYPE_INT,
       0, 0, 0, NULL },

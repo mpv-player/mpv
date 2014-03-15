@@ -616,11 +616,11 @@ an option at runtime.
     Current MKV edition number. Setting this property to a different value will
     restart playback. The number of the first edition is 0.
 
-``dvd-titles``
-    Number of DVD titles.
+``disc-titles``
+    Number of BD/DVD titles.
 
-``dvd-title``
-    Current DVD title number.
+``disc-title``
+    Current BD/DVD title number.
 
 ``chapters``
     Number of chapters.
