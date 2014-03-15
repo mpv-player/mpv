@@ -130,6 +130,9 @@ Sending patches
   tools usually do not break text automatically. On the other hand, you do not
   need to break text that would be unnatural to break (like data for test cases,
   or long URLs).
+
+  Important: put an empty line between the subject line and the commit message.
+  If this is missing, it will break display in common git tools.
 - Try to separate cosmetic and functional changes. It's ok to make a few
   additional cosmetic changes in the same file you're working on, but don't do
   something like reformatting a whole file and hiding an actual functional
