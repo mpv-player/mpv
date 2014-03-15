@@ -485,5 +485,5 @@ void mp_chmap_print_help(struct mp_log *log)
                  std_layout_names[n][0], std_layout_names[n][1]);
     }
     for (int n = 0; n < MP_NUM_CHANNELS; n++)
-        mp_info(log, "    unknown%d\n", n);
+        mp_info(log, "    unknown%d\n", n + 1);
 }
