@@ -209,7 +209,6 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
         sub_set_extradata(sub, sh->sub->extradata, sh->sub->extradata_len);
     struct sd init_sd = sub->init_sd;
     init_sd.codec = sh->codec;
-    init_sd.ass_track = sh->sub->track;
     init_sd.sub_stream_w = sh->sub->w;
     init_sd.sub_stream_h = sh->sub->h;
 
@@ -416,8 +415,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
 
     pthread_mutex_lock(&sub->lock);
 
-    if (!sub_accept_packets_in_advance(sub) || sh->sub->track || sub->num_sd < 1)
-    {
+    if (!sub_accept_packets_in_advance(sub) || sub->num_sd < 1) {
         pthread_mutex_unlock(&sub->lock);
         return false;
     }

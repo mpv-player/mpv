@@ -439,9 +439,6 @@ static struct track *add_stream_track(struct MPContext *mpctx,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
 
-    if (stream->type == STREAM_SUB)
-        track->preloaded = !!stream->sub->track;
-
     // Needed for DVD and Blu-ray.
     struct stream *st = track->demuxer->stream;
     if (!track->lang && (st->uncached_type == STREAMTYPE_BLURAY ||
@@ -789,7 +786,6 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
     struct demuxer_params params = {
-        .ass_library = mpctx->ass_library, // demux_libass requires it
         .expect_subtitle = filter == STREAM_SUB,
     };
     struct demuxer *demuxer =

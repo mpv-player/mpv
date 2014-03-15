@@ -68,13 +68,9 @@ static int init(struct sd *sd)
 
     ctx->is_converted = sd->converted_from != NULL;
 
-    if (sd->ass_track) {
-        ctx->ass_track = sd->ass_track;
-    } else {
-        ctx->ass_track = ass_new_track(sd->ass_library);
-        if (!ctx->is_converted)
-            ctx->ass_track->track_type = TRACK_TYPE_ASS;
-    }
+    ctx->ass_track = ass_new_track(sd->ass_library);
+    if (!ctx->is_converted)
+        ctx->ass_track->track_type = TRACK_TYPE_ASS;
 
     if (sd->extradata) {
         ass_process_codec_private(ctx->ass_track, sd->extradata,
@@ -310,8 +306,7 @@ static void uninit(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
 
-    if (sd->ass_track != ctx->ass_track)
-        ass_free_track(ctx->ass_track);
+    ass_free_track(ctx->ass_track);
     talloc_free(ctx);
 }
 

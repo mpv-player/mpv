@@ -28,9 +28,6 @@ struct sd {
     // Resolution hints stored in mp4 files.
     int sub_stream_w, sub_stream_h;
 
-    // Make sd_ass use an existing track
-    struct ass_track *ass_track;
-
     // Shared renderer for ASS - done to avoid reloading embedded fonts.
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;

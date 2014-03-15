@@ -29,22 +29,26 @@
 
 #define PROBE_SIZE (8 * 1024)
 
-struct priv {
-    ASS_Track *track;
-};
+static void message_callback(int level, const char *format, va_list va, void *ctx)
+{
+    // ignore
+}
 
 static int d_check_file(struct demuxer *demuxer, enum demux_check check)
 {
     const char *user_cp = demuxer->opts->sub_cp;
     struct stream *s = demuxer->stream;
     struct mp_log *log = demuxer->log;
-    // Older versions of libass will behave strange if renderer and track
-    // library handles mismatch, so make sure everything uses a global handle.
-    ASS_Library *lib = demuxer->params ? demuxer->params->ass_library : NULL;
-    if (!lib)
+
+    if (!demuxer->params || !demuxer->params->expect_subtitle)
         return -1;
 
     if (check >= DEMUX_CHECK_UNSAFE) {
+        ASS_Library *lib = ass_library_init();
+        if (!lib)
+            return -1;
+        ass_set_message_cb(lib, message_callback, NULL);
+
         // Probe by loading a part of the beginning of the file with libass.
         // Incomplete scripts are usually ok, and we hope libass is not verbose
         // when dealing with (from its perspective) completely broken binary
@@ -62,12 +66,15 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
         if (cbuf.start == NULL)
             cbuf = buf;
         ASS_Track *track = ass_read_memory(lib, cbuf.start, cbuf.len, NULL);
+        bool ok = !!track;
         if (cbuf.start != buf.start)
             talloc_free(cbuf.start);
         talloc_free(buf.start);
-        if (!track)
+        if (track)
+            ass_free_track(track);
+        ass_library_done(lib);
+        if (!ok)
             return -1;
-        ass_free_track(track);
     }
 
     // Actually load the full thing.
@@ -82,42 +89,22 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
                                                   MP_ICONV_VERBOSE);
     if (cbuf.start == NULL)
         cbuf = buf;
-    ASS_Track *track = ass_read_memory(lib, cbuf.start, cbuf.len, NULL);
     if (cbuf.start != buf.start)
-        talloc_free(cbuf.start);
-    talloc_free(buf.start);
-    if (!track)
-        return -1;
-
-    track->name = strdup(demuxer->filename);
-
-    struct priv *p = talloc_ptrtype(demuxer, p);
-    *p = (struct priv) {
-        .track = track,
-    };
-    demuxer->priv = p;
+        talloc_free(buf.start);
+    talloc_steal(demuxer, cbuf.start);
 
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_SUB);
-    sh->sub->track = track;
     sh->codec = "ass";
+    sh->sub->extradata = cbuf.start;
+    sh->sub->extradata_len = cbuf.len;
 
     demuxer->seekable = true;
 
     return 0;
 }
 
-static void d_close(struct demuxer *demuxer)
-{
-    struct priv *p = demuxer->priv;
-    if (p) {
-        if (p->track)
-            ass_free_track(p->track);
-    }
-}
-
 const struct demuxer_desc demuxer_desc_libass = {
     .name = "libass",
     .desc = "ASS/SSA subtitles (libass)",
     .open = d_check_file,
-    .close = d_close,
 };

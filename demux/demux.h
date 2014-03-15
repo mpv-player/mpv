@@ -156,7 +156,6 @@ struct demuxer_params {
     struct matroska_segment_uid *matroska_wanted_uids;
     int matroska_wanted_segment;
     bool *matroska_was_valid;
-    struct ass_library *ass_library;
     bool expect_subtitle;
 };
 
