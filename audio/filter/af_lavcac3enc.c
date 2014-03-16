@@ -185,7 +185,7 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
         }
         in_frame.samples = s->in_samples;
 
-        AVFrame *frame = avcodec_alloc_frame();
+        AVFrame *frame = av_frame_alloc();
         if (!frame) {
             MP_FATAL(af, "Could not allocate memory \n");
             return -1;
@@ -194,18 +194,18 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
         frame->format = s->lavc_actx->sample_fmt;
         frame->channel_layout = s->lavc_actx->channel_layout;
         assert(in_frame.num_planes <= AV_NUM_DATA_POINTERS);
+        frame->extended_data = frame->data;
         for (int n = 0; n < in_frame.num_planes; n++)
             frame->data[n] = in_frame.planes[n];
         frame->linesize[0] = s->in_samples * audio->sstride;
 
         int ok;
         ret = avcodec_encode_audio2(s->lavc_actx, &s->pkt, frame, &ok);
+        av_frame_free(&frame);
         if (ret < 0 || !ok) {
             MP_FATAL(af, "Encode failed.\n");
             return -1;
         }
-
-        avcodec_free_frame(&frame);
 
         mp_audio_buffer_skip(s->pending, consumed_pending);
 
