@@ -688,7 +688,16 @@ static struct mp_image *image_from_decoder(struct dec_video *vd)
         mp_image_copy_attributes(mpi, &new);
     } else if (ctx->do_dr1 && pic->opaque) {
         struct FrameBuffer *fb = pic->opaque;
-        mp_buffer_ref(fb); // initial reference for mpi
+        // initial reference for mpi
+        if (!new.planes[0] || !mp_buffer_check(fb)) {
+            // Decoder returned an unreferenced buffer! Taking this would just
+            // lead to an eventual double-free. Nothing we can do about this.
+            // So just say "fuck you" in a nice way.
+            MP_FATAL(vd,
+    "Impossible condition detected! This version of Libav/FFmpeg is not\n"
+    "supported anymore. Please update.\n");
+            return NULL;
+        }
         mpi = mp_image_new_external_ref(&new, fb, fb_ref, fb_unref,
                                         fb_is_unique, NULL);
     } else {
@@ -734,6 +743,8 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 
     // Note: potentially resets ctx->pic as it is transferred to mpi
     struct mp_image *mpi = image_from_decoder(vd);
+    if (!mpi)
+        return 0;
     assert(mpi->planes[0]);
     mp_image_set_params(mpi, &params);
 
