@@ -94,7 +94,6 @@ def build(ctx):
         ( "audio/fmt-conversion.c" ),
         ( "audio/format.c" ),
         ( "audio/mixer.c" ),
-        ( "audio/reorder_ch.c" ),
         ( "audio/decode/ad_lavc.c" ),
         ( "audio/decode/ad_mpg123.c",            "mpg123" ),
         ( "audio/decode/ad_spdif.c" ),

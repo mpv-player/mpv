@@ -48,7 +48,6 @@
 #include "ao.h"
 #include "internal.h"
 #include "audio/format.h"
-#include "audio/reorder_ch.h"
 
 struct priv {
     snd_pcm_t *alsa;

@@ -2669,7 +2669,6 @@ echores "yes"
 
 _resampler=no
 _avresample=no
-_avresample_has_set_channel_mapping=no
 
 
 def_libswresample='#define HAVE_LIBSWRESAMPLE 0'
@@ -2685,12 +2684,6 @@ if test "$_disable_avresample" = no ; then
 fi
 echores "$_resampler"
 
-if test "$_avresample" = yes ; then
-  echocheck "libavresample avresample_set_channel_mapping() API"
-  statement_check libavresample/avresample.h 'avresample_set_channel_mapping(NULL, NULL)' && _avresample_has_set_channel_mapping=yes
-  echores "$_avresample_has_set_channel_mapping"
-fi
-
 
 if test "$_resampler" = no ; then
   echocheck "libswresample >= 0.17.104"
@@ -2704,12 +2697,6 @@ fi
 
 if test "$_resampler" = no ; then
   die "No resampler found. Install libavresample or libswresample (FFmpeg)."
-fi
-
-if test "$_avresample_has_set_channel_mapping" = yes ; then
-  def_avresample_has_set_channel_mapping='#define HAVE_AVRESAMPLE_SET_CHANNEL_MAPPING 1'
-else
-  def_avresample_has_set_channel_mapping='#define HAVE_AVRESAMPLE_SET_CHANNEL_MAPPING 0'
 fi
 
 
@@ -3503,7 +3490,6 @@ $def_xv
 $def_encoding
 $def_libavresample
 $def_libswresample
-$def_avresample_has_set_channel_mapping
 
 $def_fast_64bit
 $def_pthreads

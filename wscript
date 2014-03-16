@@ -344,13 +344,6 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'desc': 'libavresample',
         'func': check_pkg_config('libavresample',  '>= 1.1.0'),
     }, {
-        'name': 'avresample-set-channel-mapping',
-        'desc': 'libavresample channel mapping API',
-        'deps': [ 'libavresample' ],
-        'func': check_statement('libavresample/avresample.h',
-                                'avresample_set_channel_mapping(NULL, NULL)',
-                                use='libavresample'),
-    }, {
         'name': '--libswresample',
         'desc': 'libswresample',
         'func': check_pkg_config('libswresample', '>= 0.17.104'),

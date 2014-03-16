@@ -37,7 +37,6 @@
 
 #if HAVE_LIBAVRESAMPLE
 #include <libavresample/avresample.h>
-#define USE_SET_CHANNEL_MAPPING HAVE_AVRESAMPLE_SET_CHANNEL_MAPPING
 #elif HAVE_LIBSWRESAMPLE
 #include <libswresample/swresample.h>
 #define AVAudioResampleContext SwrContext
@@ -49,7 +48,6 @@
 #define avresample_convert(ctx, out, out_planesize, out_samples, in, in_planesize, in_samples) \
     swr_convert(ctx, out, out_samples, (const uint8_t**)(in), in_samples)
 #define avresample_set_channel_mapping swr_set_channel_mapping
-#define USE_SET_CHANNEL_MAPPING 1
 #else
 #error "config.h broken or no resampler found"
 #endif
@@ -59,7 +57,6 @@
 #include "common/av_opts.h"
 #include "audio/filter/af.h"
 #include "audio/fmt-conversion.h"
-#include "audio/reorder_ch.h"
 
 struct af_resample_opts {
     int filter_size;
@@ -210,13 +207,11 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     av_opt_set_int(s->avrctx_out, "in_sample_rate",     s->ctx.out_rate, 0);
     av_opt_set_int(s->avrctx_out, "out_sample_rate",    s->ctx.out_rate, 0);
 
-#if USE_SET_CHANNEL_MAPPING
     // API has weird requirements, quoting avresample.h:
     //  * This function can only be called when the allocated context is not open.
     //  * Also, the input channel layout must have already been set.
     avresample_set_channel_mapping(s->avrctx, s->reorder_in);
     avresample_set_channel_mapping(s->avrctx_out, s->reorder_out);
-#endif
 
     if (avresample_open(s->avrctx) < 0 ||
         avresample_open(s->avrctx_out) < 0)
@@ -319,17 +314,6 @@ static void reorder_planes(struct mp_audio *mpa, int *reorder)
     }
 }
 
-#if !USE_SET_CHANNEL_MAPPING
-static void do_reorder(struct mp_audio *mpa, int *reorder)
-{
-    if (af_fmt_is_planar(mpa->format)) {
-        reorder_planes(mpa, reorder);
-    } else {
-        reorder_channels(mpa->planes[0], reorder, mpa->bps, mpa->nch, mpa->samples);
-    }
-}
-#endif
-
 static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 {
     struct af_resample *s = af->priv;
@@ -344,10 +328,6 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 
     af->delay = get_delay(s) / (double)s->ctx.in_rate;
 
-#if !USE_SET_CHANNEL_MAPPING
-    do_reorder(in, s->reorder_in);
-#endif
-
     if (out->samples) {
         out->samples = avresample_convert(s->avrctx,
             (uint8_t **) out->planes, out->samples * out->sstride, out->samples,
@@ -358,7 +338,6 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 
     *data = *out;
 
-#if USE_SET_CHANNEL_MAPPING
     if (needs_reorder(s->reorder_out, out->nch)) {
         if (af_fmt_is_planar(out->format)) {
             reorder_planes(data, s->reorder_out);
@@ -373,9 +352,6 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
             assert(out_samples == data->samples);
         }
     }
-#else
-    do_reorder(data, s->reorder_out);
-#endif
 
     return 0;
 }

@@ -32,7 +32,6 @@
 
 #include "options/m_option.h"
 #include "audio/format.h"
-#include "audio/reorder_ch.h"
 #include "ao.h"
 #include "internal.h"
 #include "common/msg.h"
