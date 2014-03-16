@@ -204,6 +204,16 @@ void mp_buffer_ref(struct FrameBuffer *buf)
     pool_unlock();
 }
 
+bool mp_buffer_check(struct FrameBuffer *buf)
+{
+    pool_lock();
+    bool ok = buf->refcount > 0;
+    if (ok)
+        buf->refcount++;
+    pool_unlock();
+    return ok;
+}
+
 void mp_buffer_unref(struct FrameBuffer *buf)
 {
     FramePool *pool = buf->pool;

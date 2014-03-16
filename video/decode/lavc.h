@@ -91,5 +91,6 @@ void mp_buffer_ref(struct FrameBuffer *buffer);
 void mp_buffer_unref(struct FrameBuffer *buffer);
 bool mp_buffer_is_unique(struct FrameBuffer *buffer);
 void mp_buffer_pool_free(struct FramePool **pool);
+bool mp_buffer_check(struct FrameBuffer *buffer);
 
 #endif
