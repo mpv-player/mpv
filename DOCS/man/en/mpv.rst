@@ -5,7 +5,6 @@ mpv
 a movie player
 ##############
 
-:Author: wm4
 :Copyright: GPLv2+
 :Manual section: 1
 :Manual group: multimedia
