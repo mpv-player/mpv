@@ -2654,7 +2654,7 @@ fi
 echores "$_lcms2"
 
 
-all_libav_libs="libavutil >= 52.3.0:libavcodec > 54.34.0:libavformat > 54.19.0:libswscale >= 2.0.0"
+all_libav_libs="libavutil >= 52.48.101:libavcodec >= 55.34.1:libavformat >= 55.12.0:libswscale >= 2.1.2"
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   IFS=":"   # shell should not be used for programming
@@ -2673,9 +2673,9 @@ _avresample_has_set_channel_mapping=no
 def_libswresample='#define HAVE_LIBSWRESAMPLE 0'
 def_libavresample='#define HAVE_LIBAVRESAMPLE 0'
 
-echocheck "libavresample >= 1.0.0"
+echocheck "libavresample >= 1.1.0"
 if test "$_disable_avresample" = no ; then
-  if pkg_config_add "libavresample >= 1.0.0" ; then
+  if pkg_config_add "libavresample >= 1.1.0" ; then
     _resampler=yes
     _avresample=yes
     def_libavresample='#define HAVE_LIBAVRESAMPLE 1'
@@ -2691,8 +2691,8 @@ fi
 
 
 if test "$_resampler" = no ; then
-  echocheck "libswresample >= 0.17.102"
-  if pkg_config_add "libswresample >= 0.17.102" ; then
+  echocheck "libswresample >= 0.17.104"
+  if pkg_config_add "libswresample >= 0.17.104" ; then
     _resampler=yes
     def_libswresample='#define HAVE_LIBSWRESAMPLE 1'
   fi

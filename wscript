@@ -325,10 +325,10 @@ If you really mean to compile without libass support use --disable-libass."
 ]
 
 libav_pkg_config_checks = [
-    'libavutil',   '>= 52.3.0',
-    'libavcodec',  '> 54.34.0',
-    'libavformat', '> 54.19.0',
-    'libswscale',  '>= 2.0.0'
+    'libavutil',   '>= 52.48.101',
+    'libavcodec',  '>= 55.34.1',
+    'libavformat', '>= 55.12.0',
+    'libswscale',  '>= 2.1.2'
 ]
 
 libav_dependencies = [
@@ -342,7 +342,7 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
     }, {
         'name': '--libavresample',
         'desc': 'libavresample',
-        'func': check_pkg_config('libavresample',  '>= 1.0.0'),
+        'func': check_pkg_config('libavresample',  '>= 1.1.0'),
     }, {
         'name': 'avresample-set-channel-mapping',
         'desc': 'libavresample channel mapping API',
@@ -353,7 +353,7 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
     }, {
         'name': '--libswresample',
         'desc': 'libswresample',
-        'func': check_pkg_config('libswresample', '>= 0.17.102'),
+        'func': check_pkg_config('libswresample', '>= 0.17.104'),
         'deps_neg': ['libavresample'],
     }, {
         'name': 'resampler',
