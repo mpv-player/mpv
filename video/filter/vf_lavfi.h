@@ -8,7 +8,7 @@
 
 struct vf_lw_opts;
 
-#if HAVE_VF_LAVFI
+#if HAVE_LIBAVFILTER
 
 extern const struct m_sub_options vf_lw_conf;
 

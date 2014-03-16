@@ -370,20 +370,7 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
     }, {
         'name': '--libavfilter',
         'desc': 'libavfilter',
-        'func': compose_checks(
-            check_pkg_config('libavfilter'),
-            check_cc(fragment=load_fragment('libavfilter.c'),
-                     use='libavfilter')),
-    }, {
-        'name': '--vf-lavfi',
-        'desc': 'using libavfilter through vf_lavfi',
-        'deps': [ 'libavfilter' ],
-        'func': check_true
-    }, {
-        'name': '--af-lavfi',
-        'desc': 'using libavfilter through af_lavfi',
-        'deps': [ 'libavfilter' ],
-        'func': check_true
+        'func': check_pkg_config('libavfilter', '>= 3.90.100'),
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',

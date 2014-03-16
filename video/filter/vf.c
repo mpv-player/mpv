@@ -84,7 +84,7 @@ static const vf_info_t *const filter_list[] = {
 #if HAVE_LIBPOSTPROC
     &vf_info_pp,
 #endif
-#if HAVE_VF_LAVFI
+#if HAVE_LIBAVFILTER
     &vf_info_lavfi,
 #endif
 

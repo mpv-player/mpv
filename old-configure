@@ -327,8 +327,6 @@ Optional features:
   --disable-libpostproc  disable postprocess filter (vf_pp) [autodetect]
   --disable-libavdevice  disable libavdevice demuxers [autodetect]
   --disable-libavfilter  disable libavfilter [autodetect]
-  --disable-vf-lavfi     disable vf_lavfi libavfilter bridge [audodetect]
-  --disable-af-lavfi     disable af_lavfi libavfilter bridge [audodetect]
 
 Codecs:
   --enable-jpeg             enable JPEG input/output support [autodetect]
@@ -488,8 +486,6 @@ _rpath=no
 lua=auto
 libpostproc=auto
 libavfilter=auto
-vf_lavfi=auto
-af_lavfi=auto
 libavdevice=auto
 _stream_cache=yes
 _priority=no
@@ -708,10 +704,6 @@ for ac_option do
   --disable-libavdevice) libavdevice=no ;;
   --enable-libavfilter) libavfilter=auto ;;
   --disable-libavfilter) libavfilter=no ;;
-  --enable-vf-lavfi)    vf_lavfi=auto ;;
-  --disable-vf-lavfi)   vf_lavfi=no ;;
-  --enable-af-lavfi)    af_lavfi=auto ;;
-  --disable-af-lavfi)   af_lavfi=no ;;
 
   --enable-enca)        _enca=yes       ;;
   --disable-enca)       _enca=no        ;;
@@ -2733,25 +2725,11 @@ fi
 echores "$_avutil_has_qp_api"
 
 
-# libavfilter as it can be used by vf_lavfi is 3.45.101 in FFmpeg, and
-# 3.5.0 in Libav. Completely useless version numbers.
 echocheck "libavfilter"
 if test "$libavfilter" = auto ; then
     libavfilter=no
-
-    cat > $TMPC <<EOF
-#include <libavfilter/avfilter.h>
-void vf_next_query_format() {}
-int main(void) {
-    avfilter_register_all();
-    vf_next_query_format();
-    return 0;
-}
-EOF
-    if cc_check `$_pkg_config libavfilter --cflags --libs` && pkg_config_add "libavfilter" ; then
+    if pkg_config_add "libavfilter >= 3.90.100" ; then
         libavfilter=yes
-    else
-        res_comment="not found or broken"
     fi
 fi
 if test "$libavfilter" = yes ; then
@@ -2762,41 +2740,10 @@ fi
 echores "$libavfilter"
 
 
-echocheck "using libavfilter through vf_lavfi"
-if test "$vf_lavfi" = auto ; then
-    vf_lavfi=no
-    if test "$libavfilter" = yes ; then
-        vf_lavfi=yes
-    fi
-fi
-if test "$vf_lavfi" = yes ; then
-    def_vf_lavfi='#define HAVE_VF_LAVFI 1'
-else
-    def_vf_lavfi='#define HAVE_VF_LAVFI 0'
-fi
-echores "$vf_lavfi"
-
-
-echocheck "using libavfilter through af_lavfi"
-if test "$af_lavfi" = auto ; then
-    af_lavfi=no
-    if test "$libavfilter" = yes ; then
-        af_lavfi=yes
-    fi
-fi
-if test "$af_lavfi" = yes ; then
-    def_af_lavfi='#define HAVE_AF_LAVFI 1'
-else
-    def_af_lavfi='#define HAVE_AF_LAVFI 0'
-fi
-echores "$af_lavfi"
-
-
 echocheck "libavdevice >= 54.0.0"
 if test "$libavdevice" = auto ; then
     libavdevice=no
-    # Usually, libavdevice depends on libavfilter
-    if test "$libavfilter" = yes && pkg_config_add "libavdevice >= 54.0.0" ; then
+    if pkg_config_add "libavdevice >= 54.0.0" ; then
         libavdevice=yes
     fi
 fi
@@ -3259,8 +3206,6 @@ LUA = $lua
 LIBPOSTPROC = $libpostproc
 LIBAVDEVICE = $libavdevice
 LIBAVFILTER = $libavfilter
-VF_LAVFI = $vf_lavfi
-AF_LAVFI = $af_lavfi
 LIBSMBCLIENT = $_smb
 LIBQUVI = $_libquvi4
 LIBQUVI9 = $_libquvi9
@@ -3399,8 +3344,6 @@ $def_avcodec_has_metadata_update_side_data
 $def_libpostproc
 $def_libavdevice
 $def_libavfilter
-$def_vf_lavfi
-$def_af_lavfi
 
 $def_dlopen
 

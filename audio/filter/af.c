@@ -87,7 +87,7 @@ static struct af_info* filter_list[] = {
 #if HAVE_LIBBS2B
     &af_info_bs2b,
 #endif
-#if HAVE_AF_LAVFI
+#if HAVE_LIBAVFILTER
     &af_info_lavfi,
 #endif
     // Must come last, because they're fallback format conversion filter
