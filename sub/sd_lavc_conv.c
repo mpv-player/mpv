@@ -30,11 +30,7 @@
 #include "bstr/bstr.h"
 #include "sd.h"
 
-#if LIBAVCODEC_VERSION_MICRO >= 100
-#define HAVE_AV_WEBVTT (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 13, 100))
-#else
-#define HAVE_AV_WEBVTT 0
-#endif
+#define HAVE_AV_WEBVTT (LIBAVCODEC_VERSION_MICRO >= 100)
 
 struct sd_lavc_priv {
     AVCodecContext *avctx;

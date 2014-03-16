@@ -41,24 +41,14 @@
 #include "options/m_option.h"
 #include "common/av_opts.h"
 
-#define IS_LIBAV_FORK (LIBAVFILTER_VERSION_MICRO < 100)
-
 // FFmpeg and Libav have slightly different APIs, just enough to cause us
 // unnecessary pain. <Expletive deleted.>
-#if IS_LIBAV_FORK
+#if LIBAVFILTER_VERSION_MICRO < 100
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse(graph, filters, inputs, outputs, log_ctx)
 #else
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse(graph, filters, &(inputs), &(outputs), log_ctx)
-#endif
-
-// ":" is deprecated, but "|" doesn't work in earlier versions.
-#if (IS_LIBAV_FORK  && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 7, 0)) || \
-    (!IS_LIBAV_FORK && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 50, 100))
-#define FMTSEP "|"
-#else
-#define FMTSEP ":"
 #endif
 
 struct priv {
@@ -124,7 +114,7 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     for (int n = 0; sample_fmts[n] != AV_SAMPLE_FMT_NONE; n++) {
         const char *name = av_get_sample_fmt_name(sample_fmts[n]);
         if (name) {
-            const char *s = fmtstr[0] ? FMTSEP : "";
+            const char *s = fmtstr[0] ? "|" : "";
             fmtstr = talloc_asprintf_append_buffer(fmtstr, "%s%s", s, name);
         }
     }
@@ -238,7 +228,7 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 
     frame->channel_layout = l_in->channel_layout;
     frame->sample_rate = l_in->sample_rate;
-#if !IS_LIBAV_FORK
+#if LIBAVFILTER_VERSION_MICRO >= 100
     // FFmpeg being a stupid POS
     frame->channels = l_in->channels;
 #endif

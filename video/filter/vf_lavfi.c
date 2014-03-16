@@ -47,24 +47,14 @@
 #include "vf.h"
 #include "vf_lavfi.h"
 
-#define IS_LIBAV_FORK (LIBAVFILTER_VERSION_MICRO < 100)
-
 // FFmpeg and Libav have slightly different APIs, just enough to cause us
 // unnecessary pain. <Expletive deleted.>
-#if IS_LIBAV_FORK
+#if LIBAVFILTER_VERSION_MICRO < 100
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse(graph, filters, inputs, outputs, log_ctx)
 #else
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse(graph, filters, &(inputs), &(outputs), log_ctx)
-#endif
-
-// ":" is deprecated, but "|" doesn't work in earlier versions.
-#if (IS_LIBAV_FORK  && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 7, 0)) || \
-    (!IS_LIBAV_FORK && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 50, 100))
-#define FMTSEP "|"
-#else
-#define FMTSEP ":"
 #endif
 
 struct vf_priv_s {
@@ -159,7 +149,7 @@ static bool recreate_graph(struct vf_instance *vf, int width, int height,
         if (vf_next_query_format(vf, n)) {
             const char *name = av_get_pix_fmt_name(imgfmt2pixfmt(n));
             if (name) {
-                const char *s = fmtstr[0] ? FMTSEP : "";
+                const char *s = fmtstr[0] ? "|" : "";
                 fmtstr = talloc_asprintf_append_buffer(fmtstr, "%s%s", s, name);
             }
         }

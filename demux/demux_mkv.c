@@ -77,17 +77,6 @@ static const int cook_fl2bps[COOK_FLAVORS] = {
     12016, 16408, 22911, 33506
 };
 
-#define IS_LIBAV_FORK (LIBAVCODEC_VERSION_MICRO < 100)
-
-// Both of these versions were bumped by unrelated commits.
-#if (IS_LIBAV_FORK  && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 7,  1)) || \
-    (!IS_LIBAV_FORK && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 12, 101))
-#define NEED_WAVPACK_PARSE 1
-#else
-#define NEED_WAVPACK_PARSE 0
-#endif
-
-
 enum {
     MAX_NUM_LACES = 256,
 };
@@ -2108,7 +2097,6 @@ static void mkv_seek_reset(demuxer_t *demuxer)
     }
 }
 
-#if NEED_WAVPACK_PARSE
 // Copied from libavformat/matroskadec.c (FFmpeg 310f9dd / 2013-05-30)
 // Originally added with Libav commit 9b6f47c
 // License: LGPL v2.1 or later
@@ -2189,12 +2177,10 @@ fail:
     talloc_free(dst);
     return -1;
 }
-#endif
 
 static bool mkv_parse_packet(mkv_track_t *track, bstr *raw, bstr *out)
 {
     if (track->a_formattag == MP_FOURCC('W', 'V', 'P', 'K')) {
-#if NEED_WAVPACK_PARSE
         int size = raw->len;
         uint8_t *parsed;
         if (libav_parse_wavpack(track, raw->start, &parsed, &size) >= 0) {
@@ -2203,7 +2189,6 @@ static bool mkv_parse_packet(mkv_track_t *track, bstr *raw, bstr *out)
             *raw = (bstr){0};
             return true;
         }
-#endif
     } else if (track->codec_id && strcmp(track->codec_id, MKV_V_PRORES) == 0) {
         size_t newlen = raw->len + 8;
         char *data = talloc_size(track->parser_tmp, newlen);

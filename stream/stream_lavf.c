@@ -119,15 +119,6 @@ static int control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static bool mp_avio_has_opts(AVIOContext *avio)
-{
-#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 0, 0)
-    return avio->av_class != NULL;
-#else
-    return false;
-#endif
-}
-
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
 static int open_f(stream_t *stream, int mode)
@@ -223,7 +214,7 @@ static int open_f(stream_t *stream, int mode)
                t->key, t->value);
     }
 
-    if (mp_avio_has_opts(avio)) {
+    if (avio->av_class) {
         uint8_t *mt = NULL;
         if (av_opt_get(avio, "mime_type", AV_OPT_SEARCH_CHILDREN, &mt) >= 0) {
             stream->mime_type = talloc_strdup(stream, mt);
@@ -270,7 +261,7 @@ static char **read_icy(stream_t *s)
 {
     AVIOContext *avio = s->priv;
 
-    if (!mp_avio_has_opts(avio))
+    if (!avio->av_class)
         return NULL;
 
     uint8_t *icy_header = NULL;
