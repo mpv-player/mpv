@@ -309,7 +309,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 
     ctx->hwdec_info = &vd->hwdec_info;
 
-    ctx->do_hw_dr1 = 0;
     ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->hwdec = hwdec;
     ctx->hwdec_fmt = 0;
@@ -323,7 +322,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     ctx->pic = av_frame_alloc();
 
     if (ctx->hwdec) {
-        ctx->do_hw_dr1         = true;
         avctx->thread_count    = 1;
         avctx->get_format      = get_format_hwdec;
         avctx->get_buffer2     = get_buffer2_hwdec;
