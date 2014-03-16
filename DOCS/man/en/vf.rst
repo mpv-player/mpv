@@ -712,11 +712,6 @@ Available filters are:
         Thickness of the fuzzy edge of the rectangle (added to ``w`` and
         ``h``). When set to -1, a green rectangle is drawn on the screen to
         simplify finding the right ``x``,``y``,``w``,``h`` parameters.
-    ``file=<file>``
-        You can specify a text file to load the coordinates from.  Each line
-        must have a timestamp (in seconds, and in ascending order) and the
-        ``x:y:w:h:t`` coordinates (``t`` can be omitted).
-        (Not supported when using libavfilter.)
     ``show``
         Draw a rectangle showing the area defined by x/y/w/h.
 
