@@ -276,9 +276,7 @@ def build(ctx):
         ( "sub/sd_lavf_srt.c" ),
         ( "sub/sd_microdvd.c" ),
         ( "sub/sd_movtext.c" ),
-        ( "sub/sd_spu.c" ),
         ( "sub/sd_srt.c" ),
-        ( "sub/spudec.c" ),
 
         ## Video
         ( "video/csputils.c" ),

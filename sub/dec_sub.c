@@ -35,7 +35,6 @@
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
-extern const struct sd_functions sd_spu;
 extern const struct sd_functions sd_movtext;
 extern const struct sd_functions sd_srt;
 extern const struct sd_functions sd_microdvd;
@@ -47,7 +46,6 @@ static const struct sd_functions *sd_list[] = {
     &sd_ass,
 #endif
     &sd_lavc,
-    &sd_spu,
     &sd_movtext,
     &sd_srt,
     &sd_microdvd,

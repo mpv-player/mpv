@@ -257,9 +257,7 @@ SOURCES = audio/audio.c \
           sub/sd_lavf_srt.c \
           sub/sd_microdvd.c \
           sub/sd_movtext.c \
-          sub/sd_spu.c \
           sub/sd_srt.c \
-          sub/spudec.c \
           ta/ta.c \
           ta/ta_utils.c \
           ta/ta_talloc.c \
