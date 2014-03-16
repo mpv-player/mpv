@@ -363,12 +363,6 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'req':  True,
         'fmsg': 'No resampler found. Install libavresample or libswresample (FFmpeg).'
     }, {
-        'name': 'avcodec-new-vdpau-api',
-        'desc': 'libavcodec new vdpau API',
-        'func': check_statement('libavutil/pixfmt.h',
-                                'int x = AV_PIX_FMT_VDPAU',
-                                use='libav'),
-    }, {
         'name': 'avcodec-chroma-pos-api',
         'desc': 'libavcodec avcodec_enum_to_chroma_pos API',
         'func': check_statement('libavcodec/avcodec.h', """int x, y;
@@ -381,11 +375,6 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
                                 'av_frame_get_qp_table(NULL, NULL, NULL)',
                                 use='libav')
     }, {
-        'name': 'avutil-refcounting',
-        'desc': 'libavutil ref-counting API',
-        'func': check_statement('libavutil/frame.h', 'av_frame_unref(NULL)',
-                                use='libav'),
-    }, {
         'name': '--libavfilter',
         'desc': 'libavfilter',
         'func': compose_checks(
@@ -395,12 +384,12 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
     }, {
         'name': '--vf-lavfi',
         'desc': 'using libavfilter through vf_lavfi',
-        'deps': [ 'libavfilter', 'avutil-refcounting' ],
+        'deps': [ 'libavfilter' ],
         'func': check_true
     }, {
         'name': '--af-lavfi',
         'desc': 'using libavfilter through af_lavfi',
-        'deps': [ 'libavfilter', 'avutil-refcounting' ],
+        'deps': [ 'libavfilter' ],
         'func': check_true
     }, {
         'name': '--libavdevice',
@@ -678,7 +667,7 @@ hwaccel_features = [
     } , {
         'name': '--vda-hwaccel',
         'desc': 'libavcodec VDA hwaccel',
-        'deps': [ 'corevideo', 'avutil-refcounting'],
+        'deps': [ 'corevideo'],
         'func': compose_checks(
             check_headers('VideoDecodeAcceleration/VDADecoder.h'),
             check_statement('libavcodec/vda.h',
@@ -698,15 +687,9 @@ hwaccel_features = [
         'deps': [ 'gl-cocoa', 'vda-hwaccel' ],
         'func': check_true
     }, {
-        'name': '--vdpau-decoder',
-        'desc': 'VDPAU decoder (old)',
-        'deps': [ 'vdpau' ],
-        'deps_neg': ['avcodec-new-vdpau-api'],
-        'func': check_true,
-    }, {
         'name': '--vdpau-hwaccel',
-        'desc': 'libavcodec VDPAU hwaccel (new)',
-        'deps': [ 'vdpau', 'avcodec-new-vdpau-api' ],
+        'desc': 'libavcodec VDPAU hwaccel',
+        'deps': [ 'vdpau' ],
         'func': check_true,
     }
 ]

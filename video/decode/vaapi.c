@@ -451,7 +451,7 @@ static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .type = HWDEC_VAAPI,
-    .image_formats = (const int[]) {IMGFMT_VAAPI, 0},
+    .image_format = IMGFMT_VAAPI,
     .probe = probe,
     .init = init,
     .uninit = uninit,
@@ -461,7 +461,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .type = HWDEC_VAAPI_COPY,
-    .image_formats = (const int[]) {IMGFMT_VAAPI, 0},
+    .image_format = IMGFMT_VAAPI,
     .probe = probe_copy,
     .init = init_copy,
     .uninit = uninit,

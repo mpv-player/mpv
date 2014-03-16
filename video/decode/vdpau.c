@@ -206,7 +206,7 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
 
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .type = HWDEC_VDPAU,
-    .image_formats = (const int[]) {IMGFMT_VDPAU, 0},
+    .image_format = IMGFMT_VDPAU,
     .probe = probe,
     .init = init,
     .uninit = uninit,

@@ -115,12 +115,11 @@ SOURCES-$(PULSE)                += audio/out/ao_pulse.c
 SOURCES-$(PORTAUDIO)            += audio/out/ao_portaudio.c
 SOURCES-$(RSOUND)               += audio/out/ao_rsound.c
 SOURCES-$(SNDIO)                += audio/out/ao_sndio.c
-SOURCES-$(VDPAU)                += video/vdpau.c video/out/vo_vdpau.c
+SOURCES-$(VDPAU)                += video/vdpau.c video/out/vo_vdpau.c \
+                                   video/decode/vdpau.c
 SOURCES-$(VDPAU_GL_X11)         += video/out/gl_hwdec_vdpau.c
 SOURCES-$(VDA)                  += video/decode/vda.c
 SOURCES-$(VDA_GL)               += video/out/gl_hwdec_vda.c
-SOURCES-$(VDPAU_DEC)            += video/decode/vdpau.c
-SOURCES-$(VDPAU_DEC_OLD)        += video/decode/vdpau_old.c
 SOURCES-$(VAAPI)                += video/out/vo_vaapi.c \
                                    video/decode/vaapi.c \
                                    video/vaapi.c
@@ -135,10 +134,6 @@ SOURCES-$(VF_LAVFI)             += video/filter/vf_lavfi.c
 SOURCES-$(AF_LAVFI)             += audio/filter/af_lavfi.c
 
 SOURCES-$(LUA)                  += player/lua.c
-
-ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
-    SOURCES-yes                 += video/decode/lavc_dr1.c
-endif
 
 SOURCES-$(DLOPEN)               += video/filter/vf_dlopen.c
 

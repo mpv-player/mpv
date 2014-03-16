@@ -600,8 +600,6 @@ void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
 #endif
 }
 
-#if HAVE_AVUTIL_REFCOUNTING
-
 static void frame_free(void *p)
 {
     AVFrame *frame = p;
@@ -659,5 +657,3 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
     talloc_free(new_ref);
     return frame;
 }
-
-#endif /* HAVE_AVUTIL_REFCOUNTING */

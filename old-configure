@@ -1833,9 +1833,11 @@ if test "$_vdpau" = auto && test "$_x11" = yes ; then
 fi
 if test "$_vdpau" = yes ; then
   def_vdpau='#define HAVE_VDPAU 1'
+  def_vdpau_hwaccel='#define HAVE_VDPAU_HWACCEL 1'
   vomodules="vdpau $vomodules"
 else
   def_vdpau='#define HAVE_VDPAU 0'
+  def_vdpau_hwaccel='#define HAVE_VDPAU_HWACCEL 0'
   novomodules="vdpau $novomodules"
 fi
 echores "$_vdpau"
@@ -2711,34 +2713,6 @@ else
 fi
 
 
-echocheck "libavcodec new vdpau API"
-_avcodec_new_vdpau_api=no
-statement_check libavutil/pixfmt.h 'int x = AV_PIX_FMT_VDPAU' && _avcodec_new_vdpau_api=yes
-if test "$_avcodec_new_vdpau_api" = yes ; then
-  def_avcodec_new_vdpau_api='#define HAVE_AVCODEC_NEW_VDPAU_API 1'
-else
-  def_avcodec_new_vdpau_api='#define HAVE_AVCODEC_NEW_VDPAU_API 0'
-fi
-echores "$_avcodec_new_vdpau_api"
-
-_vdpau_dec=no
-_vdpau_dec_old=no
-if test "$_vdpau" = yes ; then
-  if test "$_avcodec_new_vdpau_api" = yes ; then
-    _vdpau_dec=yes
-    def_vdpau_dec='#define HAVE_VDPAU_HWACCEL 1'
-    def_vdpau_dec_old='#define HAVE_VDPAU_DECODER 0'
-  else
-    _vdpau_dec_old=yes
-    def_vdpau_dec='#define HAVE_VDPAU_HWACCEL 0'
-    def_vdpau_dec_old='#define HAVE_VDPAU_DECODER 1'
-  fi
-else
-  def_vdpau_dec='#define HAVE_VDPAU_HWACCEL 0'
-  def_vdpau_dec_old='#define HAVE_VDPAU_DECODER 0'
-fi
-
-
 echocheck "libavcodec avcodec_enum_to_chroma_pos API"
 _avcodec_has_chroma_pos_api=no
 statement_check libavcodec/avcodec.h 'int x, y; avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)' && _avcodec_has_chroma_pos_api=yes
@@ -2770,17 +2744,6 @@ else
   def_avutil_has_qp_api='#define HAVE_AVUTIL_QP_API 0'
 fi
 echores "$_avutil_has_qp_api"
-
-
-echocheck "libavutil ref-counting API"
-_avutil_has_refcounting=no
-statement_check libavutil/frame.h 'av_frame_unref(NULL)' && _avutil_has_refcounting=yes
-if test "$_avutil_has_refcounting" = yes ; then
-  def_avutil_has_refcounting='#define HAVE_AVUTIL_REFCOUNTING 1'
-else
-  def_avutil_has_refcounting='#define HAVE_AVUTIL_REFCOUNTING 0'
-fi
-echores "$_avutil_has_refcounting"
 
 
 # libavfilter as it can be used by vf_lavfi is 3.45.101 in FFmpeg, and
@@ -2816,11 +2779,7 @@ echocheck "using libavfilter through vf_lavfi"
 if test "$vf_lavfi" = auto ; then
     vf_lavfi=no
     if test "$libavfilter" = yes ; then
-        if test "$_avutil_has_refcounting" = no ; then
-            res_comment="libavutil too old"
-        else
-            vf_lavfi=yes
-        fi
+        vf_lavfi=yes
     fi
 fi
 if test "$vf_lavfi" = yes ; then
@@ -2881,13 +2840,9 @@ if darwin ; then
 echocheck "VDA"
 if test "$_vda" = auto ; then
  _vda=no
- if test "$_avutil_has_refcounting" = "yes" ; then
-   header_check VideoDecodeAcceleration/VDADecoder.h &&
-   statement_check libavcodec/vda.h 'ff_vda_create_decoder(NULL, NULL, NULL)' &&
-   _vda=yes
- else
-   res_comment="libavutil too old"
- fi
+ header_check VideoDecodeAcceleration/VDADecoder.h &&
+ statement_check libavcodec/vda.h 'ff_vda_create_decoder(NULL, NULL, NULL)' &&
+ _vda=yes
 fi
 if test "$_vda" = yes ; then
   def_vda='#define HAVE_VDA_HWACCEL 1'
@@ -3303,7 +3258,6 @@ GL_X11 = $_gl_x11
 GL_WAYLAND = $_gl_wayland
 HAVE_POSIX_SELECT = $_posix_select
 HAVE_SYS_MMAN_H = $_mman
-HAVE_AVUTIL_REFCOUNTING = $_avutil_has_refcounting
 JACK = $_jack
 JOYSTICK = $_joystick
 JPEG = $_jpeg
@@ -3343,8 +3297,6 @@ TV_V4L2 = $_tv_v4l2
 LIBV4L2 = $_libv4l2
 VCD = $_vcd
 VDPAU = $_vdpau
-VDPAU_DEC = $_vdpau_dec
-VDPAU_DEC_OLD = $_vdpau_dec_old
 VDPAU_GL_X11 = $_vdpau_gl_x11
 VDA = $_vda
 VDA_REFCOUNTING = $_vda_refcounting
@@ -3454,9 +3406,7 @@ $def_vcd
 $def_mpg123
 $def_zlib
 
-$def_avutil_has_refcounting
 $def_avutil_has_qp_api
-$def_avcodec_new_vdpau_api
 $def_avcodec_has_chroma_pos_api
 $def_avcodec_has_metadata_update_side_data
 $def_libpostproc
@@ -3530,9 +3480,8 @@ $def_gl_wayland
 $def_jpeg
 $def_v4l2
 $def_vdpau
-$def_vdpau_dec
-$def_vdpau_dec_old
 $def_vdpau_gl_x11
+$def_vdpau_hwaccel
 $def_vda
 $def_vda_gl
 $def_vda_refcounting

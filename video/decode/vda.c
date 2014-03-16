@@ -214,7 +214,7 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int fmt,
 
 const struct vd_lavc_hwdec mp_vd_lavc_vda = {
     .type = HWDEC_VDA,
-    .image_formats = (const int[]) { IMGFMT_VDA, 0 },
+    .image_format = IMGFMT_VDA,
     .probe = probe,
     .init = init,
     .uninit = uninit,

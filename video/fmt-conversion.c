@@ -19,7 +19,6 @@
 #include <libavutil/pixdesc.h>
 #include <libavutil/avutil.h>
 
-#include "config.h"
 #include "video/img_format.h"
 #include "fmt-conversion.h"
 
@@ -68,9 +67,7 @@ static const struct {
     {IMGFMT_NV12,  AV_PIX_FMT_NV12},
     {IMGFMT_NV21,  AV_PIX_FMT_NV21},
     {IMGFMT_Y8,    AV_PIX_FMT_GRAY8},
-    // Support really ancient ffmpeg versions (before e91946ed23dfbb)
-    // Newer versions use AV_PIX_FMT_GRAY8A
-    {IMGFMT_YA8,   AV_PIX_FMT_Y400A},
+    {IMGFMT_YA8,   AV_PIX_FMT_GRAY8A},
     {IMGFMT_Y16_LE, AV_PIX_FMT_GRAY16LE},
     {IMGFMT_Y16_BE, AV_PIX_FMT_GRAY16BE},
     {IMGFMT_410P,  AV_PIX_FMT_YUV410P},
@@ -108,7 +105,6 @@ static const struct {
 
     {IMGFMT_420AP, AV_PIX_FMT_YUVA420P},
 
-#if LIBAVUTIL_VERSION_MICRO >= 100 && LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(52, 10, 0)
     {IMGFMT_422AP, AV_PIX_FMT_YUVA422P},
     {IMGFMT_444AP, AV_PIX_FMT_YUVA444P},
 
@@ -132,13 +128,9 @@ static const struct {
     {IMGFMT_444AP10_LE, AV_PIX_FMT_YUVA444P10LE},
     {IMGFMT_444AP16_BE, AV_PIX_FMT_YUVA444P16BE},
     {IMGFMT_444AP16_LE, AV_PIX_FMT_YUVA444P16LE},
-#endif
 
-#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(52, 25, 0)
-    // Libav added this already at 52.10.0
     {IMGFMT_XYZ12_LE,   AV_PIX_FMT_XYZ12LE},
     {IMGFMT_XYZ12_BE,   AV_PIX_FMT_XYZ12BE},
-#endif
 
     // ffmpeg only
 #if LIBAVUTIL_VERSION_MICRO >= 100
@@ -178,19 +170,7 @@ static const struct {
     {IMGFMT_BGR0,  AV_PIX_FMT_BGRA},
 #endif
 
-#if HAVE_AVCODEC_NEW_VDPAU_API
     {IMGFMT_VDPAU,           AV_PIX_FMT_VDPAU},
-#else
-    {IMGFMT_VDPAU_MPEG1,     AV_PIX_FMT_VDPAU_MPEG1},
-    {IMGFMT_VDPAU_MPEG2,     AV_PIX_FMT_VDPAU_MPEG2},
-    {IMGFMT_VDPAU_H264,      AV_PIX_FMT_VDPAU_H264},
-    {IMGFMT_VDPAU_WMV3,      AV_PIX_FMT_VDPAU_WMV3},
-    {IMGFMT_VDPAU_VC1,       AV_PIX_FMT_VDPAU_VC1},
-    {IMGFMT_VDPAU_MPEG4,     AV_PIX_FMT_VDPAU_MPEG4},
-    // map to an arbitrary but existing vdpau format
-    {IMGFMT_VDPAU,           AV_PIX_FMT_VDPAU_H264},
-#endif
-
     {IMGFMT_VDA,             AV_PIX_FMT_VDA_VLD},
     {IMGFMT_VAAPI,           AV_PIX_FMT_VAAPI_VLD},
 
