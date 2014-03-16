@@ -198,20 +198,17 @@ static void destroy_avpacket(void *pkt)
 struct demux_packet *demux_copy_packet(struct demux_packet *dp)
 {
     struct demux_packet *new = NULL;
-    // No av_copy_packet() in Libav
-#if LIBAVCODEC_VERSION_MICRO >= 100
     if (dp->avpacket) {
         assert(dp->buffer == dp->avpacket->data);
         assert(dp->len == dp->avpacket->size);
         AVPacket *newavp = talloc_zero(NULL, AVPacket);
         talloc_set_destructor(newavp, destroy_avpacket);
         av_init_packet(newavp);
-        if (av_copy_packet(newavp, dp->avpacket) < 0)
+        if (av_packet_ref(newavp, dp->avpacket) < 0)
             abort();
         new = new_demux_packet_fromdata(newavp->data, newavp->size);
         new->avpacket = newavp;
     }
-#endif
     if (!new) {
         new = new_demux_packet(dp->len);
         memcpy(new->buffer, dp->buffer, new->len);
