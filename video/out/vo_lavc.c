@@ -282,7 +282,6 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
     struct priv *vc = vo->priv;
     struct encode_lavc_context *ectx = vo->encode_lavc_ctx;
     int size;
-    AVFrame *frame;
     AVCodecContext *avc;
     int64_t frameipts;
     double nextpts;
@@ -407,7 +406,6 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
     }
 
     if (vc->lastipts != MP_NOPTS_VALUE) {
-        frame = avcodec_alloc_frame();
 
         // we have a valid image in lastimg
         while (vc->lastipts < frameipts) {
@@ -424,7 +422,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
                 skipframes = 0;
 
             if (thisduration > skipframes) {
-                avcodec_get_frame_defaults(frame);
+                AVFrame *frame = av_frame_alloc();
 
                 // this is a nop, unless the worst time base is the STREAM time base
                 frame->pts = av_rescale_q(vc->lastipts + skipframes,
@@ -444,12 +442,12 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
                 write_packet(vo, size, &packet);
                 ++vc->lastdisplaycount;
                 vc->lastencodedipts = vc->lastipts + skipframes;
+
+                av_frame_free(&frame);
             }
 
             vc->lastipts += thisduration;
         }
-
-        avcodec_free_frame(&frame);
     }
 
     if (!mpi) {

@@ -216,7 +216,6 @@ static int get_space(struct ao *ao)
 // must get exactly ac->aframesize amount of data
 static int encode(struct ao *ao, double apts, void **data)
 {
-    AVFrame *frame;
     AVPacket packet;
     struct priv *ac = ao->priv;
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
@@ -232,9 +231,8 @@ static int encode(struct ao *ao, double apts, void **data)
     av_init_packet(&packet);
     packet.data = ac->buffer;
     packet.size = ac->buffer_size;
-    if(data)
-    {
-        frame = avcodec_alloc_frame();
+    if(data) {
+        AVFrame *frame = av_frame_alloc();
         frame->nb_samples = ac->aframesize;
 
         assert(ao->channels.num <= AV_NUM_DATA_POINTERS);
@@ -270,7 +268,7 @@ static int encode(struct ao *ao, double apts, void **data)
                 ac->savepts = frame->pts;
         }
 
-        avcodec_free_frame(&frame);
+        av_frame_free(&frame);
     }
     else
     {
