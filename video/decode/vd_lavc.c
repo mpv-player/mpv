@@ -465,10 +465,15 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     if (ctx->hwdec->image_format) {
         for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
             if (ctx->hwdec->image_format == pixfmt2imgfmt(fmt[i])) {
+                // There could be more reasons for a change, e.g. profile change.
+                bool change =
+                    ctx->hwdec_w != avctx->width ||
+                    ctx->hwdec_h != avctx->height ||
+                    ctx->hwdec_fmt != ctx->hwdec->image_format;
                 ctx->hwdec_w = avctx->width;
                 ctx->hwdec_h = avctx->height;
                 ctx->hwdec_fmt = ctx->hwdec->image_format;
-                if (ctx->hwdec->init_decoder) {
+                if (ctx->hwdec->init_decoder && change) {
                     if (ctx->hwdec->init_decoder(ctx, ctx->hwdec_fmt,
                                                  ctx->hwdec_w, ctx->hwdec_h) < 0)
                     {
