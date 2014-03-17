@@ -39,6 +39,9 @@
 #include "video/out/vo.h"
 #include "stream_dvd_common.h"
 
+#define TITLE_MENU -1
+#define TITLE_LONGEST -2
+
 struct priv {
     dvdnav_t *dvdnav;                   // handle to libdvdnav stuff
     char *filename;                     // path
@@ -58,11 +61,15 @@ struct priv {
     char *device;
 };
 
+static const struct priv stream_priv_dflts = {
+  .track = TITLE_LONGEST,
+};
+
 #define OPT_BASE_STRUCT struct priv
 static const m_option_t stream_opts_fields[] = {
-    OPT_CHOICE_OR_INT("title", track, 0, 1, 99,
-                      ({"menu", -1},
-                       {"longest", 0})),
+    OPT_CHOICE_OR_INT("title", track, 0, 0, 99,
+                      ({"menu", TITLE_MENU},
+                       {"longest", TITLE_LONGEST})),
     OPT_STRING("device", device, 0),
     {0}
 };
@@ -532,12 +539,12 @@ static int control(stream_t *stream, int cmd, void *arg)
     case STREAM_CTRL_GET_CURRENT_TITLE: {
         if (dvdnav_current_title_info(dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
             break;
-        *((unsigned int *) arg) = tit;
+        *((unsigned int *) arg) = tit - 1;
         return STREAM_OK;
     }
     case STREAM_CTRL_SET_CURRENT_TITLE: {
         int title = *((unsigned int *) arg);
-        if (dvdnav_title_play(priv->dvdnav, title) != DVDNAV_STATUS_OK)
+        if (dvdnav_title_play(priv->dvdnav, title + 1) != DVDNAV_STATUS_OK)
             break;
         stream_drop_buffers(stream);
         return STREAM_OK;
@@ -681,7 +688,7 @@ static int open_s(stream_t *stream, int mode)
         return STREAM_UNSUPPORTED;
     }
 
-    if (p->track == 0) {
+    if (p->track == TITLE_LONGEST) { // longest
         dvdnav_t *dvdnav = priv->dvdnav;
         uint64_t best_length = 0;
         int best_title = -1;
@@ -699,13 +706,13 @@ static int open_s(stream_t *stream, int mode)
                 }
             }
         }
-        MP_INFO(stream, "Selecting title %d.\n", best_title);
-        p->track = best_title;
+        p->track = best_title - 1;
+        MP_INFO(stream, "Selecting title %d.\n", p->track);
     }
 
-    if (p->track > 0) {
+    if (p->track >= 0) {
         priv->title = p->track;
-        if (dvdnav_title_play(priv->dvdnav, p->track) != DVDNAV_STATUS_OK) {
+        if (dvdnav_title_play(priv->dvdnav, p->track+1) != DVDNAV_STATUS_OK) {
             MP_FATAL(stream, "dvdnav_stream, couldn't select title %d, error '%s'\n",
                    p->track, dvdnav_err_to_string(priv->dvdnav));
             return STREAM_UNSUPPORTED;
@@ -736,6 +743,7 @@ const stream_info_t stream_info_dvdnav = {
     .open = open_s,
     .protocols = (const char*[]){ "dvdnav", NULL },
     .priv_size = sizeof(struct priv),
+    .priv_defaults = &stream_priv_dflts,
     .options = stream_opts_fields,
     .url_options = (const char*[]){
         "hostname=title",
