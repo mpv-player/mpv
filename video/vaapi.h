@@ -106,24 +106,17 @@ VAImageFormat *          va_image_format_from_imgfmt(const struct va_image_forma
 bool                     va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi);
 bool                     va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image);
 
-struct va_surface_pool * va_surface_pool_alloc(struct mp_vaapi_ctx *ctx, int rt_format);
-void                     va_surface_pool_release(struct va_surface_pool *pool);
-void                     va_surface_pool_releasep(struct va_surface_pool **pool);
-void                     va_surface_pool_clear(struct va_surface_pool *pool);
-bool                     va_surface_pool_reserve(struct va_surface_pool *pool, int count, int w, int h);
-int                      va_surface_pool_rt_format(const struct va_surface_pool *pool);
-struct va_surface *      va_surface_pool_get(struct va_surface_pool *pool, int w, int h);
-struct va_surface *      va_surface_pool_get_by_imgfmt(struct va_surface_pool *pool, int imgfmt, int w, int h);
-struct mp_image *        va_surface_pool_get_wrapped(struct va_surface_pool *pool, int imgfmt, int w, int h);
+void va_pool_set_allocator(struct mp_image_pool *pool, struct mp_vaapi_ctx *ctx,
+                           int rt_format);
 
-void                     va_surface_release(struct va_surface *surface);
-void                     va_surface_releasep(struct va_surface **surface);
 struct va_surface *      va_surface_in_mp_image(struct mp_image *mpi);
-struct mp_image *        va_surface_wrap(struct va_surface *surface); // takes ownership
 VASurfaceID              va_surface_id(const struct va_surface *surface);
 VASurfaceID              va_surface_id_in_mp_image(const struct mp_image *mpi);
 bool                     va_surface_upload(struct va_surface *surface, struct mp_image *mpi);
 struct mp_image *        va_surface_download(struct va_surface *surface,
                                              struct mp_image_pool *pool);
+
+int va_surface_image_alloc_imgfmt(struct mp_image *img, int imgfmt);
+int va_surface_upload_image(struct mp_image *va_dst, struct mp_image *sw_src);
 
 #endif
