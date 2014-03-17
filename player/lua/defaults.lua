@@ -87,7 +87,7 @@ end
 -- "Newer" and more convenient API
 
 local key_bindings = {}
-local command_id = 1
+local message_id = 1
 
 local function update_key_bindings()
     for i = 1, 2 do
@@ -116,15 +116,15 @@ end
 local function add_binding(attrs, key, name, fn)
     if (type(name) ~= "string") and (not fn) then
         fn = name
-        name = "command" .. tostring(command_id)
-        command_id = command_id + 1
+        name = "message" .. tostring(message_id)
+        message_id = message_id + 1
     end
     attrs.key = key
     attrs.name = name
     key_bindings[name] = attrs
     update_key_bindings()
     if fn then
-        mp.register_script_command(name, fn)
+        mp.register_script_message(name, fn)
     end
 end
 
@@ -139,7 +139,7 @@ end
 function mp.remove_key_binding(name)
     key_bindings[name] = nil
     update_key_bindings()
-    mp.unregister_script_command(name)
+    mp.unregister_script_message(name)
 end
 
 local timers = {}
@@ -201,19 +201,19 @@ local function process_timers()
     end
 end
 
-local commands = {}
+local messages = {}
 
-function mp.register_script_command(name, fn)
-    commands[name] = fn
+function mp.register_script_message(name, fn)
+    messages[name] = fn
 end
 
-function mp.unregister_script_command(name)
-    commands[name] = nil
+function mp.unregister_script_message(name)
+    messages[name] = nil
 end
 
-local function command_dispatch(ev)
+local function message_dispatch(ev)
     if #ev.args > 0 then
-        local handler = commands[ev.args[1]]
+        local handler = messages[ev.args[1]]
         if handler then
             handler(unpack(ev.args, 2))
         end
@@ -238,7 +238,7 @@ end
 -- default handlers
 mp.register_event("shutdown", function() mp.keep_running = false end)
 mp.register_event("script-input-dispatch", script_dispatch)
-mp.register_event("client-message", command_dispatch)
+mp.register_event("client-message", message_dispatch)
 
 mp.msg = {
     log = mp.log,

@@ -169,7 +169,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     internally.
 
     Internally, key bindings are dispatched via the ``script_message_to`` input
-    command and ``mp.register_script_command``.
+    command and ``mp.register_script_message``.
 
     Trying to map multiple commands to a key will essentially prefer a random
     binding, while the other bindings are not called. It is guaranteed that
@@ -298,17 +298,17 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     the ``log-message`` event. See the description of this event for details.
     The level is a string, see ``msg.log`` for allowed log levels.
 
-``mp.register_script_command(name, fn)``
+``mp.register_script_message(name, fn)``
     This is a helper to dispatch ``script_message`` or ``script_message_to``
     invocations to Lua functions. ``fn`` is called if ``script_message`` or
     ``script_message_to`` (with this script as destination) is run
     with ``name`` as first parameter. The other parameters are passed to ``fn``.
-    If a command with the given name is already registered, it's overwritten.
+    If a message with the given name is already registered, it's overwritten.
 
     Used by ``mp.add_key_binding``, so be careful about name collisions.
 
-``mp.unregister_script_command(name)``
-    Undo a previous registration with ``mp.register_script_command``. Does
+``mp.unregister_script_message(name)``
+    Undo a previous registration with ``mp.register_script_message``. Does
     nothing if the ``name`` wasn't registered.
 
 mp.msg functions
