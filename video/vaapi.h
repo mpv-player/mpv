@@ -81,15 +81,7 @@ struct mp_vaapi_ctx {
     struct va_image_formats *image_formats;
 };
 
-struct va_surface_pool;
 struct va_image_formats;
-
-struct va_surface {
-    VASurfaceID id;      // VA_INVALID_ID if unallocated
-    int w, h, rt_format; // parameters of allocated image (0/0/-1 unallocated)
-
-    struct va_surface_priv *p;
-};
 
 bool check_va_status(struct mp_log *log, VAStatus status, const char *msg);
 
@@ -109,14 +101,12 @@ bool                     va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image
 void va_pool_set_allocator(struct mp_image_pool *pool, struct mp_vaapi_ctx *ctx,
                            int rt_format);
 
-struct va_surface *      va_surface_in_mp_image(struct mp_image *mpi);
-VASurfaceID              va_surface_id(const struct va_surface *surface);
-VASurfaceID              va_surface_id_in_mp_image(const struct mp_image *mpi);
-bool                     va_surface_upload(struct va_surface *surface, struct mp_image *mpi);
-struct mp_image *        va_surface_download(struct va_surface *surface,
-                                             struct mp_image_pool *pool);
+VASurfaceID va_surface_id(struct mp_image *mpi);
+int va_surface_rt_format(struct mp_image *mpi);
+struct mp_image *va_surface_download(struct mp_image *src,
+                                     struct mp_image_pool *pool);
 
-int va_surface_image_alloc_imgfmt(struct mp_image *img, int imgfmt);
-int va_surface_upload_image(struct mp_image *va_dst, struct mp_image *sw_src);
+int va_surface_alloc_imgfmt(struct mp_image *img, int imgfmt);
+int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src);
 
 #endif

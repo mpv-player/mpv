@@ -137,7 +137,7 @@ static bool alloc_swdec_surfaces(struct priv *p, int w, int h, int imgfmt)
     free_video_specific(p);
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++) {
         p->swdec_surfaces[i] = mp_image_pool_get(p->pool, IMGFMT_VAAPI, w, h);
-        if (va_surface_image_alloc_imgfmt(p->swdec_surfaces[i], imgfmt) < 0)
+        if (va_surface_alloc_imgfmt(p->swdec_surfaces[i], imgfmt) < 0)
             return false;
     }
     return true;
@@ -184,7 +184,7 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
 {
     VAStatus status;
 
-    VASurfaceID surface = va_surface_id_in_mp_image(mpi);
+    VASurfaceID surface = va_surface_id(mpi);
     if (surface == VA_INVALID_ID) {
         if (!p->black_surface) {
             int w = p->image_params.w, h = p->image_params.h;
@@ -194,12 +194,12 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
             if (p->black_surface) {
                 struct mp_image *img = mp_image_alloc(fmt, w, h);
                 mp_image_clear(img, 0, 0, w, h);
-                if (va_surface_upload_image(p->black_surface, img) < 0)
+                if (va_surface_upload(p->black_surface, img) < 0)
                     mp_image_unrefp(&p->black_surface);
                 talloc_free(img);
             }
         }
-        surface = va_surface_id_in_mp_image(p->black_surface);
+        surface = va_surface_id(p->black_surface);
     }
 
     int fields = mpi ? mpi->fields : 0;
@@ -273,7 +273,7 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
 
     if (mpi->imgfmt != IMGFMT_VAAPI) {
         struct mp_image *dst = p->swdec_surfaces[p->output_surface];
-        if (!dst || va_surface_upload_image(dst, mpi) < 0) {
+        if (!dst || va_surface_upload(dst, mpi) < 0) {
             MP_WARN(vo, "Could not upload surface.\n");
             return;
         }
@@ -286,11 +286,10 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
 
 static struct mp_image *get_screenshot(struct priv *p)
 {
-    struct va_surface *surface =
-        va_surface_in_mp_image(p->output_surfaces[p->visible_surface]);
-    if (!surface)
+    struct mp_image *hwimg = p->output_surfaces[p->visible_surface];
+    if (!hwimg)
         return NULL;
-    struct mp_image *img = va_surface_download(surface, NULL);
+    struct mp_image *img = va_surface_download(hwimg, NULL);
     if (!img)
         return NULL;
     struct mp_image_params params = p->image_params;

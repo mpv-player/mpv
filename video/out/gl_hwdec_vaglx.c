@@ -113,7 +113,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         return -1;
 
     status = vaCopySurfaceGLX(p->display, p->vaglx_surface,
-                              va_surface_id_in_mp_image(hw_image),
+                              va_surface_id(hw_image),
                               va_get_colorspace_flag(hw_image->colorspace));
     if (!CHECK_VA_STATUS(p, "vaCopySurfaceGLX()"))
         return -1;

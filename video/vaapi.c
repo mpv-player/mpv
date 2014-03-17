@@ -159,12 +159,37 @@ VAImageFormat *va_image_format_from_imgfmt(const struct va_image_formats *format
     return NULL;
 }
 
+struct va_surface {
+    VASurfaceID id;      // VA_INVALID_ID if unallocated
+    int w, h, rt_format; // parameters of allocated image (0/0/-1 unallocated)
+
+    struct va_surface_priv *p;
+};
+
 typedef struct va_surface_priv {
     struct mp_vaapi_ctx *ctx;
     VADisplay display;
     VAImage image;       // used for software decoding case
     bool is_derived;     // is image derived by vaDeriveImage()?
 } va_surface_priv_t;
+
+VASurfaceID va_surface_id(struct mp_image *mpi)
+{
+    return mpi && mpi->imgfmt == IMGFMT_VAAPI ?
+        (VASurfaceID)(uintptr_t)mpi->planes[3] : VA_INVALID_ID;
+}
+
+static struct va_surface *va_surface_in_mp_image(struct mp_image *mpi)
+{
+    return mpi && mpi->imgfmt == IMGFMT_VAAPI ?
+        (struct va_surface*)mpi->planes[0] : NULL;
+}
+
+int va_surface_rt_format(struct mp_image *mpi)
+{
+    struct va_surface *surface = va_surface_in_mp_image(mpi);
+    return surface ? surface->rt_format : 0;
+}
 
 static void va_surface_destroy(struct va_surface *surface)
 {
@@ -262,7 +287,7 @@ static VAImage *va_surface_image_alloc(struct va_surface *surface,
 
 // img must be a VAAPI surface; make sure its internal VAImage is allocated
 // to a format corresponding to imgfmt (or return an error).
-int va_surface_image_alloc_imgfmt(struct mp_image *img, int imgfmt)
+int va_surface_alloc_imgfmt(struct mp_image *img, int imgfmt)
 {
     struct va_surface *surface = va_surface_in_mp_image(img);
     if (!surface)
@@ -274,23 +299,6 @@ int va_surface_image_alloc_imgfmt(struct mp_image *img, int imgfmt)
     if (!va_surface_image_alloc(surface, format))
         return -1;
     return 0;
-}
-
-VASurfaceID va_surface_id_in_mp_image(const struct mp_image *mpi)
-{
-    return mpi && mpi->imgfmt == IMGFMT_VAAPI ?
-        (VASurfaceID)(uintptr_t)mpi->planes[3] : VA_INVALID_ID;
-}
-
-struct va_surface *va_surface_in_mp_image(struct mp_image *mpi)
-{
-    return mpi && mpi->imgfmt == IMGFMT_VAAPI ?
-        (struct va_surface*)mpi->planes[0] : NULL;
-}
-
-VASurfaceID va_surface_id(const struct va_surface *surface)
-{
-    return surface ? surface->id : VA_INVALID_ID;
 }
 
 bool va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi)
@@ -326,44 +334,37 @@ bool va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image)
     return CHECK_VA_STATUS(ctx, "vaUnmapBuffer()");
 }
 
-bool va_surface_upload(struct va_surface *surface, struct mp_image *mpi)
+// va_dst: copy destination, must be IMGFMT_VAAPI
+// sw_src: copy source, must be a software surface
+int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
 {
+    struct va_surface *surface = va_surface_in_mp_image(va_dst);
+    if (!surface)
+        return -1;
     va_surface_priv_t *p = surface->p;
 
     VAImageFormat *format =
-        va_image_format_from_imgfmt(p->ctx->image_formats, mpi->imgfmt);
+        va_image_format_from_imgfmt(p->ctx->image_formats, sw_src->imgfmt);
     if (!format)
-        return false;
+        return -1;
     if (!va_surface_image_alloc(surface, format))
-        return false;
+        return -1;
 
     struct mp_image img;
     if (!va_image_map(p->ctx, &p->image, &img))
-        return false;
-    mp_image_copy(&img, mpi);
+        return -1;
+    mp_image_copy(&img, sw_src);
     va_image_unmap(p->ctx, &p->image);
 
     if (!p->is_derived) {
         VAStatus status = vaPutImage2(p->display, surface->id,
                                       p->image.image_id,
-                                      0, 0, mpi->w, mpi->h,
-                                      0, 0, mpi->w, mpi->h);
+                                      0, 0, sw_src->w, sw_src->h,
+                                      0, 0, sw_src->w, sw_src->h);
         if (!CHECK_VA_STATUS(p->ctx, "vaPutImage()"))
-            return false;
+            return -1;
     }
 
-    return true;
-}
-
-// va_dst: copy destination, must be IMGFMT_VAAPI
-// sw_src: copy source, must be a software surface
-int va_surface_upload_image(struct mp_image *va_dst, struct mp_image *sw_src)
-{
-    struct va_surface *surface = va_surface_in_mp_image(va_dst);
-    if (!surface)
-        return -1;
-    if (!va_surface_upload(surface, sw_src))
-        return -1;
     return 0;
 }
 
@@ -402,11 +403,12 @@ static struct mp_image *try_download(struct va_surface *surface,
 }
 
 // pool is optional (used for allocating returned images).
-// Note: unlike va_surface_upload(), this will attempt to (re)create the
-//       VAImage stored with the va_surface.
-struct mp_image *va_surface_download(struct va_surface *surface,
+struct mp_image *va_surface_download(struct mp_image *src,
                                      struct mp_image_pool *pool)
 {
+    struct va_surface *surface = va_surface_in_mp_image(src);
+    if (!surface)
+        return NULL;
     struct mp_vaapi_ctx *ctx = surface->p->ctx;
     VAStatus status = vaSyncSurface(surface->p->display, surface->id);
     if (!CHECK_VA_STATUS(ctx, "vaSyncSurface()"))

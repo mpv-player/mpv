@@ -170,7 +170,7 @@ static bool preallocate_surfaces(struct lavc_ctx *ctx, int num, int w, int h,
 
     for (int n = 0; n < num; n++) {
         reserve[n] = mp_image_pool_get(p->pool, IMGFMT_VAAPI, w, h);
-        out_surfaces[n] = va_surface_id_in_mp_image(reserve[n]);
+        out_surfaces[n] = va_surface_id(reserve[n]);
         if (out_surfaces[n] == VA_INVALID_ID) {
             MP_ERR(p, "Could not allocate surfaces.\n");
             res = false;
@@ -433,17 +433,14 @@ static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
 {
     struct priv *p = ctx->hwdec_priv;
 
-    struct va_surface *surface = va_surface_in_mp_image(img);
-    if (surface) {
-        struct mp_image *simg = va_surface_download(surface, p->sw_pool);
-        if (simg) {
-            if (!p->printed_readback_warning) {
-                MP_WARN(p, "Using GPU readback. This is usually inefficient.\n");
-                p->printed_readback_warning = true;
-            }
-            talloc_free(img);
-            return simg;
+    struct mp_image *simg = va_surface_download(img, p->sw_pool);
+    if (simg) {
+        if (!p->printed_readback_warning) {
+            MP_WARN(p, "Using GPU readback. This is usually inefficient.\n");
+            p->printed_readback_warning = true;
         }
+        talloc_free(img);
+        return simg;
     }
     return img;
 }
