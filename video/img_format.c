@@ -211,13 +211,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         desc.flags |= MP_IMGFLAG_RGB;
     }
 
-#ifdef AV_PIX_FMT_FLAG_ALPHA
     if (pd->flags & AV_PIX_FMT_FLAG_ALPHA)
         desc.flags |= MP_IMGFLAG_ALPHA;
-#else
-    if (desc.num_planes > 3)
-        desc.flags |= MP_IMGFLAG_ALPHA;
-#endif
 
     if (mpfmt >= IMGFMT_RGB0_START && mpfmt <= IMGFMT_RGB0_END)
         desc.flags &= ~MP_IMGFLAG_ALPHA;
