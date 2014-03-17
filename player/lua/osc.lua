@@ -1257,9 +1257,22 @@ function tick()
     end
 end
 
+function enable_osc(enable)
+    if enable then
+        mp.enable_key_bindings("showhide")
+        show_osc()
+    else
+        hide_osc()
+        mp.disable_key_bindings("showhide")
+    end
+end
+
 mp.register_event("tick", tick)
 mp.register_event("start-file", request_init)
 mp.register_event("tracks-changed", request_init)
+
+mp.register_script_message("enable-osc", function() enable_osc(true) end)
+mp.register_script_message("disable-osc", function() enable_osc(false) end)
 
 -- mouse show/hide bindings
 mp.set_key_bindings({
@@ -1279,5 +1292,6 @@ mp.set_key_bindings({
     {"mouse_btn0_dbl",          "ignore"},
     {"shift+mouse_btn0_dbl",    "ignore"},
     {"mouse_btn2_dbl",          "ignore"},
+    {"del",                     function() enable_osc(false) end}
 }, "input", "force")
 mp.enable_key_bindings("input")
