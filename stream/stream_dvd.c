@@ -64,13 +64,13 @@ int dvd_angle=1;
 
 
 static const dvd_priv_t stream_priv_dflts = {
-  .cfg_title = 1,
+  .cfg_title = 0,
 };
 
 #define OPT_BASE_STRUCT dvd_priv_t
 /// URL definition
 static const m_option_t stream_opts_fields[] = {
-    OPT_INTRANGE("title", cfg_title, 0, 1, 99),
+    OPT_INTRANGE("title", cfg_title, 0, 0, 99),
     OPT_STRING("device", cfg_device, 0),
     {0}
 };
@@ -404,7 +404,7 @@ static int mp_describe_titleset(stream_t *stream, dvd_reader_t *dvd, tt_srpt_t *
         if (tt_srpt->title[title_no].title_set_nr != vts_no)
             continue;
         msec = mp_get_titleset_length(vts_file, tt_srpt, title_no);
-        MP_SMODE(stream, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no + 1, msec / 1000, msec % 1000);
+        MP_SMODE(stream, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no, msec / 1000, msec % 1000);
     }
     ifoClose(vts_file);
     return 1;
@@ -555,7 +555,7 @@ static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec
     if(!vts_file->vts_tmapt || sec < 0)
         return 0;
 
-    duration = (double) mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title-1) / 1000.0f;
+    duration = (double) mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title) / 1000.0f;
     if(sec > duration)
       return 0;
 
@@ -614,7 +614,7 @@ static int control(stream_t *stream,int cmd,void* arg)
     {
         case STREAM_CTRL_GET_TIME_LENGTH:
         {
-            *((double *)arg) = (double) mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title-1)/1000.0;
+            *((double *)arg) = (double) mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title)/1000.0;
             return 1;
         }
         case STREAM_CTRL_GET_START_TIME:
@@ -630,7 +630,7 @@ static int control(stream_t *stream,int cmd,void* arg)
         case STREAM_CTRL_GET_NUM_CHAPTERS:
         {
             int r;
-            r = get_num_chapter(d->vts_file, d->tt_srpt, d->cur_title-1);
+            r = get_num_chapter(d->vts_file, d->tt_srpt, d->cur_title);
             if(! r) return STREAM_UNSUPPORTED;
             *((unsigned int *)arg) = r;
             return 1;
@@ -638,26 +638,26 @@ static int control(stream_t *stream,int cmd,void* arg)
         case STREAM_CTRL_GET_CHAPTER_TIME:
         {
             int r;
-            r = get_chapter_time(d->vts_file, d->tt_srpt, d->cur_title-1, (double *)arg);
+            r = get_chapter_time(d->vts_file, d->tt_srpt, d->cur_title, (double *)arg);
             if(! r) return STREAM_UNSUPPORTED;
             return 1;
         }
         case STREAM_CTRL_SEEK_TO_CHAPTER:
         {
             int r;
-            r = seek_to_chapter(stream, d->vts_file, d->tt_srpt, d->cur_title-1, *((unsigned int *)arg));
+            r = seek_to_chapter(stream, d->vts_file, d->tt_srpt, d->cur_title, *((unsigned int *)arg));
             if(! r) return STREAM_UNSUPPORTED;
 
             return 1;
         }
         case STREAM_CTRL_GET_CURRENT_TITLE:
         {
-            *((unsigned int *)arg) = d->cur_title - 1;
+            *((unsigned int *)arg) = d->cur_title;
             return 1;
         }
         case STREAM_CTRL_GET_CURRENT_CHAPTER:
         {
-            *((unsigned int *)arg) = dvd_chapter_from_cell(d, d->cur_title-1, d->cur_cell);
+            *((unsigned int *)arg) = dvd_chapter_from_cell(d, d->cur_title, d->cur_cell);
             return 1;
         }
         case STREAM_CTRL_GET_CURRENT_TIME:
@@ -749,7 +749,7 @@ static int open_s(stream_t *stream, int mode)
   dvd_priv_t *d = stream->priv;
 
   MP_VERBOSE(stream, "URL: %s\n", stream->url);
-  dvd_title = d->cfg_title;
+  dvd_title = d->cfg_title + 1;
   if(1){
     //int ret,ret2;
     int ttn,pgc_id,pgn;
@@ -828,8 +828,8 @@ static int open_s(stream_t *stream, int mode)
       MP_SMODE(stream, "ID_DVD_TITLES=%d\n", tt_srpt->nr_of_srpts);
       for (title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
       {
-        MP_SMODE(stream, "ID_DVD_TITLE_%d_CHAPTERS=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_ptts);
-        MP_SMODE(stream, "ID_DVD_TITLE_%d_ANGLES=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_angles);
+        MP_SMODE(stream, "ID_DVD_TITLE_%d_CHAPTERS=%d\n", title_no, tt_srpt->title[title_no].nr_of_ptts);
+        MP_SMODE(stream, "ID_DVD_TITLE_%d_ANGLES=%d\n", title_no, tt_srpt->title[title_no].nr_of_angles);
       }
     }
     if (mp_msg_test(stream->log, MSGL_SMODE))
@@ -897,7 +897,7 @@ static int open_s(stream_t *stream, int mode)
     d->vmg_file=vmg_file;
     d->tt_srpt=tt_srpt;
     d->vts_file=vts_file;
-    d->cur_title = dvd_title+1;
+    d->cur_title = dvd_title;
 
     pgc = vts_file->vts_pgcit ? vts_file->vts_pgcit->pgci_srp[ttn].pgc : NULL;
     /**
@@ -1073,10 +1073,10 @@ static int ifo_stream_open (stream_t *stream, int mode)
     priv->cfg_device = talloc_strdup(NULL, dirname(stream->path));
     if(!strncasecmp(filename,"vts_",4))
     {
-        if(sscanf(filename+3, "_%02d_", &priv->cfg_title)!=1)
-            priv->cfg_title = 1;
+        if(sscanf(filename+3, "_%02d_", &priv->cfg_title)!=0)
+            priv->cfg_title = 0;
     }else
-        priv->cfg_title = 1;
+        priv->cfg_title = 0;
 
     free(filename);
     stream->url=talloc_strdup(stream, "dvd://");
