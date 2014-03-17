@@ -181,6 +181,7 @@ Command Line Switches
     ``-pphelp``                 ``--vf=pp:help``
     ``-channels``               ``--channels`` (changed semantics)
     ``dvdnav://``               ``dvdnav://menu``
+    ``dvd://1``                 ``dvd://0`` (0-based offset)
     =========================== ========================================
 
 .. note::
