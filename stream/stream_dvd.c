@@ -749,7 +749,7 @@ static int open_s(stream_t *stream, int mode)
   dvd_priv_t *d = stream->priv;
 
   MP_VERBOSE(stream, "URL: %s\n", stream->url);
-  dvd_title = d->cfg_title+1;
+  dvd_title = d->cfg_title + 1;
   if(1){
     //int ret,ret2;
     int ttn,pgc_id,pgn;

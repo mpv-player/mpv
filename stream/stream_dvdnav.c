@@ -712,7 +712,7 @@ static int open_s(stream_t *stream, int mode)
 
     if (p->track >= 0) {
         priv->title = p->track;
-        if (dvdnav_title_play(priv->dvdnav, p->track+1) != DVDNAV_STATUS_OK) {
+        if (dvdnav_title_play(priv->dvdnav, p->track + 1) != DVDNAV_STATUS_OK) {
             MP_FATAL(stream, "dvdnav_stream, couldn't select title %d, error '%s'\n",
                    p->track, dvdnav_err_to_string(priv->dvdnav));
             return STREAM_UNSUPPORTED;
