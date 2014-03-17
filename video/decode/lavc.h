@@ -40,6 +40,7 @@ typedef struct lavc_ctx {
     int hwdec_fmt;
     int hwdec_w;
     int hwdec_h;
+    int hwdec_profile;
 } vd_ffmpeg_ctx;
 
 struct vd_lavc_hwdec {
