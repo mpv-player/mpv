@@ -38,7 +38,7 @@
 #define GLOBAL 0
 #define LOCAL 1
 
-#define dvd_range(a)  (a > 0 && a < 256)
+#define dvd_range(a)  (a >= 0 && a < 255)
 
 
 struct parse_state {
