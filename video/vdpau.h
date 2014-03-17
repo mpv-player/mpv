@@ -49,7 +49,7 @@ struct mp_vdpau_ctx {
     // Surface pool
     struct surface_entry {
         VdpVideoSurface surface;
-        int fmt, w, h;
+        int w, h;
         VdpChromaType chroma;
         bool in_use;
     } video_surfaces[MAX_VIDEO_SURFACES];
@@ -63,7 +63,7 @@ void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx);
 
 bool mp_vdpau_status_ok(struct mp_vdpau_ctx *ctx);
 
-struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx, int fmt,
+struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
                                             VdpChromaType chroma, int w, int h);
 
 bool mp_vdpau_get_format(int imgfmt, VdpChromaType *out_chroma_type,

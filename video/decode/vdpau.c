@@ -146,7 +146,7 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int fmt,
     VdpChromaType chroma;
     mp_vdpau_get_format(IMGFMT_VDPAU, &chroma, NULL);
 
-    return mp_vdpau_get_video_surface(p->mpvdp, IMGFMT_VDPAU, chroma, w, h);
+    return mp_vdpau_get_video_surface(p->mpvdp, chroma, w, h);
 }
 
 static void uninit(struct lavc_ctx *ctx)
