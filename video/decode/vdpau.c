@@ -39,12 +39,6 @@ struct priv {
     AVVDPAUContext              context;
 };
 
-struct profile_entry {
-    enum AVCodecID av_codec;
-    VdpDecoderProfile vdp_profile;
-    int maxrefs;
-};
-
 #define PE(av_codec_id, ff_profile, vdp_profile)                \
     {AV_CODEC_ID_ ## av_codec_id, FF_PROFILE_ ## ff_profile,    \
      VDP_DECODER_PROFILE_ ## vdp_profile}
