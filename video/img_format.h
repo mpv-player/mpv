@@ -333,7 +333,7 @@ enum mp_imgfmt {
     IMGFMT_XYZ12   = MP_SELECT_LE_BE(IMGFMT_XYZ12_LE, IMGFMT_XYZ12_BE),
 };
 
-static inline bool IMGFMT_IS_RGB(unsigned int fmt)
+static inline bool IMGFMT_IS_RGB(int fmt)
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
     return (desc.flags & MP_IMGFLAG_RGB) && desc.num_planes == 1;
@@ -350,13 +350,13 @@ static inline bool IMGFMT_IS_RGB(unsigned int fmt)
 
 struct mp_imgfmt_entry {
     const char *name;
-    unsigned int fmt;
+    int fmt;
 };
 
 extern struct mp_imgfmt_entry mp_imgfmt_list[];
 
-unsigned int mp_imgfmt_from_name(bstr name, bool allow_hwaccel);
-const char *mp_imgfmt_to_name(unsigned int fmt);
+int mp_imgfmt_from_name(bstr name, bool allow_hwaccel);
+const char *mp_imgfmt_to_name(int fmt);
 
 #define vo_format_name mp_imgfmt_to_name
 

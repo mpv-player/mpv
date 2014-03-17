@@ -106,7 +106,7 @@ static void unref_image(void *ptr)
 // mp_image_alloc() is that there is a transparent mechanism to recycle image
 // data allocations through this pool.
 // The image can be free'd with talloc_free().
-struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, unsigned int fmt,
+struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, int fmt,
                                    int w, int h)
 {
     struct mp_image *new = NULL;

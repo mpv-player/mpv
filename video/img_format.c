@@ -126,7 +126,7 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {0}
 };
 
-unsigned int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
+int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
 {
     int img_fmt = 0;
     for(struct mp_imgfmt_entry *p = mp_imgfmt_list; p->name; ++p) {
@@ -147,7 +147,7 @@ unsigned int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
     return img_fmt;
 }
 
-const char *mp_imgfmt_to_name(unsigned int fmt)
+const char *mp_imgfmt_to_name(int fmt)
 {
     struct mp_imgfmt_entry *p = mp_imgfmt_list;
     for(; p->name; ++p) {

@@ -109,7 +109,7 @@ typedef struct mp_image {
     void* priv;
 } mp_image_t;
 
-struct mp_image *mp_image_alloc(unsigned int fmt, int w, int h);
+struct mp_image *mp_image_alloc(int fmt, int w, int h);
 void mp_image_copy(struct mp_image *dmpi, struct mp_image *mpi);
 void mp_image_copy_attributes(struct mp_image *dmpi, struct mp_image *mpi);
 struct mp_image *mp_image_new_copy(struct mp_image *img);
@@ -127,7 +127,7 @@ void mp_image_vflip(struct mp_image *img);
 void mp_image_set_size(struct mp_image *mpi, int w, int h);
 void mp_image_set_display_size(struct mp_image *mpi, int dw, int dh);
 
-void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt);
+void mp_image_setfmt(mp_image_t* mpi, int out_fmt);
 void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);
 
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *arg,
