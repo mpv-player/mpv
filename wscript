@@ -204,6 +204,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': 'linux-fstatfs',
         'desc': "Linux's fstatfs()",
+        'deps': [ 'os-linux' ],
         'func': check_statement('sys/vfs.h',
                                 'struct statfs fs; fstatfs(0, &fs); fs.f_namelen')
     }, {
