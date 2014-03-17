@@ -3370,7 +3370,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
-    case MP_CMD_SCRIPT_MESSAGE: {
+    case MP_CMD_SCRIPT_MESSAGE_TO: {
         mpv_event_client_message *event = talloc_ptrtype(NULL, event);
         *event = (mpv_event_client_message){0};
         for (int n = 1; n < cmd->nargs; n++) {
@@ -3383,6 +3383,14 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             MP_VERBOSE(mpctx, "Can't find script '%s' for %s.\n",
                        cmd->args[0].v.s, cmd->name);
         }
+        break;
+    }
+    case MP_CMD_SCRIPT_MESSAGE: {
+        const char *args[MP_CMD_MAX_ARGS];
+        mpv_event_client_message event = {.args = args};
+        for (int n = 0; n < cmd->nargs; n++)
+            event.args[event.num_args++] = cmd->args[n].v.s;
+        mp_client_broadcast_event(mpctx, MPV_EVENT_CLIENT_MESSAGE, &event);
         break;
     }
 

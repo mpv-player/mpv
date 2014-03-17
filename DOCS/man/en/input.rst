@@ -443,13 +443,20 @@ Input Commands that are Possibly Subject to Change
     Remove an overlay added with ``overlay_add`` and the same ID. Does nothing
     if no overlay with this ID exists.
 
-``script_message "<target>" "<arg1>" "<arg2>" ...``
-    Send a message to the client named ``<target>``, and pass it the following
-    list of arguments. The target can be for example a script (Lua scripts
-    can get their name via ``mp.get_script_name()``). What this message means,
-    how many arguments it takes, and what the arguments mean is fully up to
-    the target and the sender. Lua scripts use it to add key bindings via
-    input.conf.
+``script_message "<arg1>" "<arg2>" ...``
+    Send a message to all clients, and pass it the following list of arguments.
+    What this message means, how many arguments it takes, and what the arguments
+    mean is fully up to the receiver and the sender. Every client receives the
+    message, so be careful about name clashes (or use ``script_message_to``).
+
+``script_message_to "<target>" "<arg1>" "<arg2>" ...``
+    Same as ``script_message``, but send it only to the client named
+    ``<target>``. Each client (scripts etc.) has a unique name. For example,
+    Lua scripts can get their name via ``mp.get_script_name()``.
+
+    (Scripts use this internally to dispatch key bindings, and this can also
+    be used in input.conf to reassign such bindings.)
+
 
 Undocumented commands: ``tv_start_scan``, ``tv_step_channel``, ``tv_step_norm``,
 ``tv_step_chanlist``, ``tv_set_channel``, ``tv_last_channel``, ``tv_set_freq``,

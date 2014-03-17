@@ -162,13 +162,13 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     The ``name`` argument should be a short symbolic string. It allows the user
     to remap the key binding via input.conf using the ``script_message``
-    command, the script name, and the name of the key binding (see below for
+    command, and the name of the key binding (see below for
     an example). The name should be unique across other bindings in the same
     script - if not, the previous binding with the same name will be
     overwritten. You can omit the name, in which case a random name is generated
     internally.
 
-    Internally, key bindings are dispatched via the ``script_message`` input
+    Internally, key bindings are dispatched via the ``script_message_to`` input
     command and ``mp.register_script_command``.
 
     Trying to map multiple commands to a key will essentially prefer a random
@@ -187,16 +187,23 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     This will print the message ``the key was pressed`` when ``x`` was pressed.
 
-    The user can remap these key bindings. Assume the above script was using
-    the filename ``fooscript.lua``, then the user has to put the following
+    The user can remap these key bindings. Then the user has to put the following
     into his input.conf to remap the command to the ``y`` key:
 
     ::
 
-        y script_message lua/fooscript something
+        y script_message something
+
 
     This will print the message when the key ``y`` is pressed. (``x`` will
     still work, unless the user overmaps it.)
+
+    You can also explicitly send a message to a named script only. Assume the
+    above script was using the filename ``fooscript.lua``:
+
+    ::
+
+        y script_message_to lua/fooscript something
 
 ``mp.add_forced_key_binding(...)``
     This works almost the same as ``mp.add_key_binding``, but registers the
@@ -292,8 +299,9 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     The level is a string, see ``msg.log`` for allowed log levels.
 
 ``mp.register_script_command(name, fn)``
-    This is a helper to dispatch ``script_message`` invocations to Lua
-    functions. ``fn`` is called if ``script_message`` is called on this script
+    This is a helper to dispatch ``script_message`` or ``script_message_to``
+    invocations to Lua functions. ``fn`` is called if ``script_message`` or
+    ``script_message_to`` (with this script as destination) is run
     with ``name`` as first parameter. The other parameters are passed to ``fn``.
     If a command with the given name is already registered, it's overwritten.
 

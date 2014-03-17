@@ -103,7 +103,7 @@ local function update_key_bindings()
         local cfg = ""
         for k, v in pairs(key_bindings) do
             if v.forced ~= def then
-                cfg = cfg .. v.key .. " script_message " .. mp.script_name
+                cfg = cfg .. v.key .. " script_message_to " .. mp.script_name
                       .. " " .. v.name .. "\n"
             end
         end

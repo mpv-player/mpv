@@ -168,7 +168,8 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_VO_CMDLINE, "vo_cmdline", { ARG_STRING } },
 
   { MP_CMD_SCRIPT_DISPATCH, "script_dispatch", { ARG_STRING, ARG_INT } },
-  { MP_CMD_SCRIPT_MESSAGE, "script_message", { ARG_STRING, ARG_STRING },
+  { MP_CMD_SCRIPT_MESSAGE, "script_message", { ARG_STRING }, .vararg = true },
+  { MP_CMD_SCRIPT_MESSAGE_TO, "script_message_to", { ARG_STRING, ARG_STRING },
     .vararg = true },
 
   { MP_CMD_OVERLAY_ADD, "overlay_add",

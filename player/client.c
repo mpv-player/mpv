@@ -339,6 +339,7 @@ static void status_reply(struct mpv_handle *ctx, int event,
 }
 
 // set ev->data to a new copy of the original data
+// (done only for message types that are broadcast)
 static void dup_event_data(struct mpv_event *ev)
 {
     switch (ev->event_id) {
@@ -346,6 +347,17 @@ static void dup_event_data(struct mpv_event *ev)
     case MPV_EVENT_UNPAUSE:
         ev->data = talloc_memdup(NULL, ev->data, sizeof(mpv_event_pause_reason));
         break;
+    case MPV_EVENT_CLIENT_MESSAGE: {
+        struct mpv_event_client_message *src = ev->data;
+        struct mpv_event_client_message *msg =
+            talloc_zero(NULL, struct mpv_event_client_message);
+        for (int n = 0; n < src->num_args; n++) {
+            MP_TARRAY_APPEND(msg, msg->args, msg->num_args,
+                             talloc_strdup(msg, src->args[n]));
+        }
+        ev->data = msg;
+        break;
+    }
     default:
         // Doesn't use events with memory allocation.
         if (ev->data)
