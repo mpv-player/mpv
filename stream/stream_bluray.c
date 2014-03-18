@@ -143,7 +143,14 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         }
         return STREAM_ERROR;
     }
-
+    case STREAM_CTRL_SET_CURRENT_TITLE: {
+        const uint32_t title = *((unsigned int*)arg);
+        if (title < b->num_titles && bd_select_title(b->bd, title)) {
+            b->current_title = title;
+            return STREAM_OK;
+        }
+        return STREAM_ERROR;
+    }
     case STREAM_CTRL_GET_CURRENT_TITLE: {
         *((unsigned int *) arg) = b->current_title;
         return 1;
