@@ -47,7 +47,7 @@
 
 #define BLURAY_DEFAULT_ANGLE      0
 #define BLURAY_DEFAULT_CHAPTER    0
-#define BLURAY_DEFAULT_TITLE      0
+#define BLURAY_DEFAULT_TITLE     -1
 
 // 90khz ticks
 #define BD_TIMEBASE (90000)
@@ -73,7 +73,8 @@ static struct bluray_priv_s bluray_stream_priv_dflts = {
 
 #define OPT_BASE_STRUCT struct bluray_priv_s
 static const m_option_t bluray_stream_opts_fields[] = {
-    OPT_INTRANGE("title", cfg_title, 0, 0, 99999),
+    OPT_CHOICE_OR_INT("title", cfg_title, 0, 0, 99999,
+                      ({"longest", BLURAY_DEFAULT_TITLE})),
     OPT_STRING("device", cfg_device, 0),
     {0}
 };
@@ -350,9 +351,9 @@ static int bluray_stream_open(stream_t *s, int mode)
         sec  = ti->duration / 90000;
         msec = (ti->duration - sec) % 1000;
 
-        MP_SMODE(s, "ID_BLURAY_TITLE_%d_CHAPTERS=%d\n", i + 1, ti->chapter_count);
-        MP_SMODE(s, "ID_BLURAY_TITLE_%d_ANGLE=%d\n", i + 1, ti->angle_count);
-        MP_SMODE(s, "ID_BLURAY_TITLE_%d_LENGTH=%d.%03d\n", i + 1, sec, msec);
+        MP_SMODE(s, "ID_BLURAY_TITLE_%d_CHAPTERS=%d\n", i, ti->chapter_count);
+        MP_SMODE(s, "ID_BLURAY_TITLE_%d_ANGLE=%d\n", i, ti->angle_count);
+        MP_SMODE(s, "ID_BLURAY_TITLE_%d_LENGTH=%d.%03d\n", i, sec, msec);
 
         /* try to guess which title may contain the main movie */
         if (ti->duration > max_duration) {
@@ -364,13 +365,16 @@ static int bluray_stream_open(stream_t *s, int mode)
     }
 
     /* Select current title */
-    title = b->cfg_title ? b->cfg_title - 1: title_guess;
+    if (b->cfg_title != BLURAY_DEFAULT_TITLE)
+        title = b->cfg_title;
+    else
+        title = title_guess;
     title = FFMIN(title, b->num_titles - 1);
 
     bd_select_title(bd, title);
 
     title_size = bd_get_title_size(bd);
-    MP_SMODE(s, "ID_BLURAY_CURRENT_TITLE=%d\n", title + 1);
+    MP_SMODE(s, "ID_BLURAY_CURRENT_TITLE=%d\n", title);
 
     /* Get current title information */
     info = bd_get_title_info(bd, title, angle);
