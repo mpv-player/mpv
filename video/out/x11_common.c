@@ -405,6 +405,7 @@ static void init_atoms(struct vo_x11_state *x11)
     XA_INIT(_NET_WM_NAME);
     XA_INIT(_NET_WM_ICON_NAME);
     XA_INIT(_NET_WM_ICON);
+    XA_INIT(_NET_WM_MOVERESIZE);
     XA_INIT(_WIN_PROTOCOLS);
     XA_INIT(_WIN_LAYER);
     XA_INIT(_WIN_HINTS);
@@ -940,20 +941,51 @@ int vo_x11_check_events(struct vo *vo)
         {
             if (x11->no_autorepeat)
                 mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
+            x11->win_drag_button1_down = false;
             break;
         }
         case MotionNotify:
-            vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
+            if (x11->win_drag_button1_down && !x11->fs &&
+                !mp_input_test_dragging(vo->input_ctx, Event.xmotion.x,
+                                                       Event.xmotion.y))
+            {
+                XUngrabPointer(x11->display, CurrentTime);
+                x11->win_drag_button1_down = false;
+
+                XEvent xev;
+                xev.xclient.type = ClientMessage;
+                xev.xclient.serial = 0;
+                xev.xclient.send_event = True;
+                xev.xclient.message_type = x11->XA_NET_WM_MOVERESIZE;
+                xev.xclient.window = x11->window;
+                xev.xclient.format = 32;
+                xev.xclient.data.l[0] = Event.xmotion.x_root;
+                xev.xclient.data.l[1] = Event.xmotion.y_root;
+                xev.xclient.data.l[2] = 8; // _NET_WM_MOVERESIZE_MOVE
+                xev.xclient.data.l[3] = 1; // button 1
+                xev.xclient.data.l[4] = 1; // source indication: normal
+
+                XSendEvent(x11->display, x11->rootwin, False,
+                           SubstructureRedirectMask | SubstructureNotifyMask,
+                           &xev);
+            } else {
+                vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
+            }
             break;
         case LeaveNotify:
+            x11->win_drag_button1_down = false;
             mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
             break;
         case ButtonPress:
+            if (Event.xbutton.button == 1)
+                x11->win_drag_button1_down = true;
             mp_input_put_key(vo->input_ctx,
                              (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_DOWN);
             break;
         case ButtonRelease:
+            if (Event.xbutton.button == 1)
+                x11->win_drag_button1_down = false;
             mp_input_put_key(vo->input_ctx,
                              (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_UP);

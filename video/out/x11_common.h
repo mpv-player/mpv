@@ -107,6 +107,9 @@ struct vo_x11_state {
     Atom dnd_requested_format;
     Window dnd_src_window;
 
+    /* dragging the window */
+    bool win_drag_button1_down;
+
     Atom XA_NET_SUPPORTED;
     Atom XA_NET_WM_STATE;
     Atom XA_NET_WM_STATE_FULLSCREEN;
@@ -117,6 +120,7 @@ struct vo_x11_state {
     Atom XA_NET_WM_NAME;
     Atom XA_NET_WM_ICON_NAME;
     Atom XA_NET_WM_ICON;
+    Atom XA_NET_WM_MOVERESIZE;
     Atom XA_WIN_PROTOCOLS;
     Atom XA_WIN_LAYER;
     Atom XA_WIN_HINTS;
