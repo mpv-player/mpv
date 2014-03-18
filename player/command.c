@@ -436,7 +436,7 @@ static int mp_property_playtime_remaining(m_option_t *prop, int action,
     return property_time(prop, action, arg, remaining / speed);
 }
 
-/// Current BD/DVD title (RO)
+/// Current BD/DVD title (RW)
 static int mp_property_disc_title(m_option_t *prop, int action, void *arg,
                                  MPContext *mpctx)
 {
@@ -449,7 +449,13 @@ static int mp_property_disc_title(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_GET:
         if (stream_control(stream, STREAM_CTRL_GET_CURRENT_TITLE, &title) <= 0)
             return M_PROPERTY_UNAVAILABLE;
-        return m_property_int_ro(prop, action, arg, title);
+        *(int*)arg = title;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+        title = *(int*)arg;
+        if (stream_control(stream, STREAM_CTRL_SET_CURRENT_TITLE, &title) <= 0)
+            return M_PROPERTY_NOT_IMPLEMENTED;
+        return M_PROPERTY_OK;
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
