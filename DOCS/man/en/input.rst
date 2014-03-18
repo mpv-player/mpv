@@ -626,8 +626,9 @@ an option at runtime.
 ``disc-titles``
     Number of BD/DVD titles.
 
-``disc-title``
-    Current BD/DVD title number.
+``disc-title`` (RW)
+    Current BD/DVD title number. Writing works only for ``dvdnav://`` and
+    ``bd://`` (and aliases for these).
 
 ``chapters``
     Number of chapters.
