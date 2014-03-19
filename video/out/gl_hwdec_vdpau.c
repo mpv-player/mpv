@@ -75,7 +75,7 @@ static void destroy_objects(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->mpgl->gl;
-    struct vdp_functions *vdp = p->ctx->vdp;
+    struct vdp_functions *vdp = &p->ctx->vdp;
     VdpStatus vdp_st;
 
     if (p->vdpgl_surface)
@@ -142,7 +142,7 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->mpgl->gl;
-    struct vdp_functions *vdp = p->ctx->vdp;
+    struct vdp_functions *vdp = &p->ctx->vdp;
     VdpStatus vdp_st;
 
     destroy_objects(hw);
@@ -215,7 +215,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 {
     struct priv *p = hw->priv;
     GL *gl = hw->mpgl->gl;
-    struct vdp_functions *vdp = p->ctx->vdp;
+    struct vdp_functions *vdp = &p->ctx->vdp;
     VdpStatus vdp_st;
 
     assert(hw_image && hw_image->imgfmt == IMGFMT_VDPAU);

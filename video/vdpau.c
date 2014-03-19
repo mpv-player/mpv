@@ -86,7 +86,7 @@ static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx)
         }
     }
 
-    *ctx->vdp = vdp;
+    ctx->vdp = vdp;
     ctx->get_proc_address = get_proc_address;
 
     vdp_st = vdp.preemption_callback_register(ctx->vdp_device,
@@ -150,7 +150,7 @@ static struct mp_image *create_ref(struct surface_entry *e)
 struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
                                             VdpChromaType chroma, int w, int h)
 {
-    struct vdp_functions *vdp = ctx->vdp;
+    struct vdp_functions *vdp = &ctx->vdp;
     VdpStatus vdp_st;
 
     // Destroy all unused surfaces that don't have matching parameters
@@ -205,14 +205,13 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log,
     *ctx = (struct mp_vdpau_ctx) {
         .log = log,
         .x11 = x11,
-        .vdp = talloc_zero(ctx, struct vdp_functions),
     };
 
     mark_vdpau_objects_uninitialized(ctx);
 
     if (win_x11_init_vdpau_procs(ctx) < 0) {
-        if (ctx->vdp->device_destroy)
-            ctx->vdp->device_destroy(ctx->vdp_device);
+        if (ctx->vdp.device_destroy)
+            ctx->vdp.device_destroy(ctx->vdp_device);
         talloc_free(ctx);
         return NULL;
     }
@@ -221,7 +220,7 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log,
 
 void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx)
 {
-    struct vdp_functions *vdp = ctx->vdp;
+    struct vdp_functions *vdp = &ctx->vdp;
     VdpStatus vdp_st;
 
     for (int i = 0; i < MAX_VIDEO_SURFACES; i++) {

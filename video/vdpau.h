@@ -35,7 +35,7 @@ struct vdp_functions {
 // Shared state. Objects created from different VdpDevices are often (always?)
 // incompatible to each other, so all code must use a shared VdpDevice.
 struct mp_vdpau_ctx {
-    struct vdp_functions *vdp;
+    struct vdp_functions vdp;
     VdpGetProcAddress *get_proc_address;
     VdpDevice vdp_device;
     bool is_preempted;                  // set to true during unavailability

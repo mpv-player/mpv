@@ -83,7 +83,7 @@ static int handle_preemption(struct lavc_ctx *ctx)
     }
 
     p->vdp_device = p->mpvdp->vdp_device;
-    p->vdp = p->mpvdp->vdp;
+    p->vdp = &p->mpvdp->vdp;
 
     return 0;
 }
@@ -91,7 +91,7 @@ static int handle_preemption(struct lavc_ctx *ctx)
 static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
-    struct vdp_functions *vdp = p->mpvdp->vdp;
+    struct vdp_functions *vdp = &p->mpvdp->vdp;
     VdpStatus vdp_st;
 
     if (handle_preemption(ctx) < 0)
@@ -173,7 +173,7 @@ static int init(struct lavc_ctx *ctx)
     };
     ctx->hwdec_priv = p;
 
-    p->vdp = p->mpvdp->vdp;
+    p->vdp = &p->mpvdp->vdp;
     p->context.render = p->vdp->decoder_render;
 
     p->preemption_counter = p->mpvdp->preemption_counter;

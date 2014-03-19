@@ -1356,7 +1356,7 @@ static int preinit(struct vo *vo)
 
     vc->preemption_counter = vc->mpvdp->preemption_counter;
     vc->vdp_device = vc->mpvdp->vdp_device;
-    vc->vdp = vc->mpvdp->vdp;
+    vc->vdp = &vc->mpvdp->vdp;
 
     vc->colorspace = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
     vc->video_eq.capabilities = MP_CSP_EQ_CAPS_COLORMATRIX;
