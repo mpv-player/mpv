@@ -95,7 +95,7 @@ static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
     VdpStatus vdp_st;
 
     if (handle_preemption(ctx) < 0)
-        return false;
+        return -1;
 
     if (p->context.decoder != VDP_INVALID_HANDLE)
         vdp->decoder_destroy(p->context.decoder);
@@ -129,11 +129,11 @@ static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
     CHECK_VDP_WARNING(p, "Failed creating VDPAU decoder");
     if (vdp_st != VDP_STATUS_OK)
         goto fail;
-    return true;
+    return 0;
 
 fail:
     p->context.decoder = VDP_INVALID_HANDLE;
-    return false;
+    return -1;
 }
 
 static struct mp_image *allocate_image(struct lavc_ctx *ctx, int fmt,
