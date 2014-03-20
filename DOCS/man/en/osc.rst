@@ -122,6 +122,12 @@ time remaining
     left-click      toggle between total and remaining time
     =============   ================================================
 
+hide
+    | Hide the OSC permanently until mpv is restarted.
+
+    =============   ================================================
+    del             hide the OSC
+    =============   ================================================
 
 Configuration
 -------------
@@ -199,4 +205,25 @@ Configurable parameters
     | Default: 3
     | Minimum amount of pixels the mouse has to move between ticks to make
       the OSC show up
+
+Script commands
+~~~~~~~~~~~~~~~
+
+The OSC script listens to certain script commands. These commands can bound
+in ``input.conf``, or sent by other scripts.
+
+``enable-osc``
+    Undoes ``disable-osc`` or the effect of the ``del`` key.
+
+``disable-osc``
+    Hide the OSC permanently. This is also what the ``del`` key does.
+
+
+.. admonition:: Example
+
+    You could out this into ``input.conf`` to hide the OSC with the ``a`` key
+    and to unhide it with ``b``:
+
+    | a script_message disable-osc
+    | b script_message enable-osc
 
