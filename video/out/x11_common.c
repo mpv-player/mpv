@@ -949,8 +949,8 @@ int vo_x11_check_events(struct vo *vo)
                 !mp_input_test_dragging(vo->input_ctx, Event.xmotion.x,
                                                        Event.xmotion.y))
             {
+                mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
                 XUngrabPointer(x11->display, CurrentTime);
-                x11->win_drag_button1_down = false;
 
                 XEvent xev;
                 xev.xclient.type = ClientMessage;
@@ -971,6 +971,7 @@ int vo_x11_check_events(struct vo *vo)
             } else {
                 vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
             }
+            x11->win_drag_button1_down = false;
             break;
         case LeaveNotify:
             x11->win_drag_button1_down = false;
