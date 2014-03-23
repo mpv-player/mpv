@@ -1,6 +1,7 @@
 language: c
 
 env:
+  - LIBAV=libav-stable
   - LIBAV=libav-git
   - LIBAV=ffmpeg-stable
   - LIBAV=ffmpeg-git
