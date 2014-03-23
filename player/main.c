@@ -460,11 +460,6 @@ int mpv_main(int argc, char *argv[])
 {
     osdep_preinit(&argc, &argv);
 
-    if (argc >= 1) {
-        argc--;
-        argv++;
-    }
-
     struct MPContext *mpctx = mp_create();
     struct MPOpts *opts = mpctx->opts;
 

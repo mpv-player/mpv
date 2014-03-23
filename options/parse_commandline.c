@@ -128,7 +128,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
 
     mode = GLOBAL;
 
-    struct parse_state p = {config, argc, argv};
+    struct parse_state p = {config, argc - 1, argv + 1};
     while (split_opt(&p)) {
         if (p.is_opt) {
             int flags = M_SETOPT_FROM_CMDLINE;
@@ -274,7 +274,7 @@ void m_config_preparse_command_line(m_config_t *config, struct mpv_global *globa
     // Hack to shut up parser error messages
     mp_msg_mute(global, true);
 
-    struct parse_state p = {config, argc, argv};
+    struct parse_state p = {config, argc - 1, argv + 1};
     while (split_opt_silent(&p) == 0) {
         if (p.is_opt) {
             // Ignore non-pre-parse options. They will be set later.
