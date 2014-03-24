@@ -1214,12 +1214,17 @@ void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
 {
     GL *gl = p->gl;
 
-    assert(!p->lut_3d_texture);
-
-    if (!lut3d)
+    if (!lut3d) {
+        if (p->use_lut_3d) {
+            p->use_lut_3d = false;
+            reinit_rendering(p);
+        }
         return;
+    }
 
-    gl->GenTextures(1, &p->lut_3d_texture);
+    if (!p->lut_3d_texture)
+        gl->GenTextures(1, &p->lut_3d_texture);
+
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_3DLUT);
     gl->BindTexture(GL_TEXTURE_3D, p->lut_3d_texture);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
@@ -1237,6 +1242,8 @@ void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
     check_gl_features(p);
 
     debug_check_gl(p, "after 3d lut creation");
+
+    reinit_rendering(p);
 }
 
 static void set_image_textures(struct gl_video *p, struct video_image *vimg,

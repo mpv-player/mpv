@@ -262,27 +262,47 @@ static void unload_hwdec_driver(struct gl_priv *p)
     }
 }
 
+static bool update_icc_profile(struct gl_priv *p, struct mp_icc_opts *opts)
+{
+    struct lut3d *lut3d = NULL;
+    if (opts->profile) {
+        lut3d = mp_load_icc(opts, p->vo->log, p->vo->global);
+        if (!lut3d)
+            return false;
+    }
+    gl_video_set_lut3d(p->renderer, lut3d);
+    talloc_free(lut3d);
+    return true;
+}
+
 static bool reparse_cmdline(struct gl_priv *p, char *args)
 {
     struct m_config *cfg = NULL;
-    struct gl_video_opts *opts = NULL;
+    struct gl_priv *opts = NULL;
     int r = 0;
 
+    // list of options which can be changed at runtime
+#define OPT_BASE_STRUCT struct gl_priv
+    static const struct m_option change_otps[] = {
+        OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
+        OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
+        {0}
+    };
+#undef OPT_BASE_STRUCT
+
     if (strcmp(args, "-") == 0) {
-        opts = p->renderer_opts;
+        opts = p;
     } else {
         const struct gl_priv *vodef = p->vo->driver->priv_defaults;
-        const struct gl_video_opts *def =
-            vodef ? vodef->renderer_opts : gl_video_conf.defaults;
-        cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), def,
-                           gl_video_conf.opts);
+        cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), vodef, change_otps);
         opts = cfg->optstruct;
         r = m_config_parse_suboptions(cfg, "opengl", args);
     }
 
     if (r >= 0) {
         mpgl_lock(p->glctx);
-        gl_video_set_options(p->renderer, opts);
+        gl_video_set_options(p->renderer, opts->renderer_opts);
+        update_icc_profile(p, opts->icc_opts);
         resize(p);
         mpgl_unlock(p->glctx);
     }
@@ -396,14 +416,8 @@ static int preinit(struct vo *vo)
     gl_video_set_output_depth(p->renderer, p->glctx->depth_r, p->glctx->depth_g,
                               p->glctx->depth_b);
     gl_video_set_options(p->renderer, p->renderer_opts);
-
-    if (p->icc_opts->profile) {
-        struct lut3d *lut3d = mp_load_icc(p->icc_opts, vo->log, vo->global);
-        if (!lut3d)
-            goto err_out;
-        gl_video_set_lut3d(p->renderer, lut3d);
-        talloc_free(lut3d);
-    }
+    if (!update_icc_profile(p, p->icc_opts))
+        goto err_out;
 
     mpgl_unset_context(p->glctx);
 
