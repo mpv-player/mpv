@@ -30,29 +30,6 @@ struct priv {
     struct vda_context vda_ctx;
 };
 
-struct profile_entry {
-    enum AVCodecID av_codec;
-    int ff_profile;
-    uint32_t vda_codec;
-};
-
-static const struct profile_entry profiles[] = {
-    { AV_CODEC_ID_H264, FF_PROFILE_UNKNOWN, 'avc1' },
-};
-
-static const struct profile_entry *find_codec(enum AVCodecID id, int ff_profile)
-{
-    for (int n = 0; n < MP_ARRAY_SIZE(profiles); n++) {
-        if (profiles[n].av_codec == id &&
-            (profiles[n].ff_profile == ff_profile ||
-             profiles[n].ff_profile == FF_PROFILE_UNKNOWN))
-        {
-            return &profiles[n];
-        }
-    }
-    return NULL;
-}
-
 struct vda_error {
     int  code;
     char *reason;
@@ -91,7 +68,7 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
 {
     hwdec_request_api(info, "vda");
 
-    if (!find_codec(mp_codec_to_av_codec_id(decoder), FF_PROFILE_UNKNOWN))
+    if (mp_codec_to_av_codec_id(decoder) != AV_CODEC_ID_H264)
         return HWDEC_ERR_NO_CODEC;
     return 0;
 }
@@ -103,13 +80,10 @@ static int init_vda_decoder(struct lavc_ctx *ctx)
     if (p->vda_ctx.decoder)
         ff_vda_destroy_decoder(&p->vda_ctx);
 
-    const struct profile_entry *pe =
-        find_codec(ctx->avctx->codec_id, ctx->avctx->profile);
-
     p->vda_ctx = (struct vda_context) {
         .width             = ctx->avctx->width,
         .height            = ctx->avctx->height,
-        .format            = pe->vda_codec,
+        .format            = 'avc1',
         // equals to k2vuyPixelFormat (= YUY2/UYVY)
         .cv_pix_fmt_type   = kCVPixelFormatType_422YpCbCr8,
 
