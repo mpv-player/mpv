@@ -196,6 +196,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             return STREAM_UNSUPPORTED;
 
         *((double *) arg) = BD_TIME_TO_MP(ti->duration);
+        bd_free_title_info(ti);
         return STREAM_OK;
     }
 
