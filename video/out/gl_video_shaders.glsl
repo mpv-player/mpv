@@ -49,10 +49,10 @@ vec3 srgb_compand(vec3 v)
                lessThanEqual(vec3(0.0031308), v));
 }
 
-vec3 bt709_expand(vec3 v)
+vec3 bt2020_expand(vec3 v)
 {
-    return mix(v / 4.5, pow((v + vec3(0.099))/1.099, vec3(1/0.45)),
-               lessThanEqual(vec3(0.0812), v));
+    return mix(v / 4.5, pow((v + vec3(0.0993))/1.0993, vec3(1/0.45)),
+               lessThanEqual(vec3(0.08145), v));
 }
 #endif
 
@@ -85,8 +85,8 @@ void main() {
     // Although we are not scaling in linear light, both 3DLUT and SRGB still
     // operate on linear light inputs so we have to convert to it before
     // either step can be applied.
-    color.rgb = bt709_expand(color.rgb);
-    // NOTE: This always applies the true BT709, maybe we need to use
+    color.rgb = bt2020_expand(color.rgb);
+    // NOTE: This always applies the true BT2020, maybe we need to use
     // approx-gamma here too?
 #endif
 #ifdef USE_OSD_3DLUT
@@ -387,13 +387,18 @@ void main() {
 #endif
 #ifdef USE_LINEAR_LIGHT
     // If we are scaling in linear light (SRGB or 3DLUT option enabled), we
-    // expand our source colors before scaling
+    // expand our source colors before scaling. This shader currently just
+    // assumes everything uses the BT.2020 12-bit gamma function, since the
+    // difference between this and BT.601, BT.709 and BT.2020 10-bit is well
+    // below the rounding error threshold for both 8-bit and even 10-bit
+    // content. It only makes a difference for 12-bit sources, so it should be
+    // fine to use here.
 #ifdef USE_APPROX_GAMMA
-    // We differentiate between approximate BT.709 (gamma 1.95) ...
+    // We differentiate between approximate BT.2020 (gamma 1.95) ...
     color = pow(color, vec3(1.95));
 #else
-    // ... and actual BT709 (two-part function)
-    color = bt709_expand(color);
+    // ... and actual BT.2020 (two-part function)
+    color = bt2020_expand(color);
 #endif
 #endif
     // Image upscaling happens roughly here

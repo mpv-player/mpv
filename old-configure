@@ -798,6 +798,12 @@ api_statement_check \
     'int x, y; avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)'
 
 api_statement_check \
+    "libavcodec avcol_spc_bt2020 available" \
+    HAVE_AVCOL_SPC_BT2020 \
+    libavcodec/avcodec.h \
+    'int x = AVCOL_SPC_BT2020_NCL'
+
+api_statement_check \
     "libavcodec metadata update side data" \
     HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA \
     libavcodec/avcodec.h \

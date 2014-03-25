@@ -537,6 +537,7 @@ OPTIONS
     :auto:          automatic selection (default)
     :BT.601:        ITU-R BT.601 (SD)
     :BT.709:        ITU-R BT.709 (HD)
+    :BT.2020-NC:    ITU-R BT.2020 non-constant luminance system
     :SMPTE-240M:    SMPTE-240M
 
 ``--colormatrix-input-range=<color-range>``

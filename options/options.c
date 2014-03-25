@@ -387,6 +387,7 @@ const m_option_t mp_opts[] = {
                 {"BT.601", MP_CSP_BT_601},
                 {"BT.709", MP_CSP_BT_709},
                 {"SMPTE-240M", MP_CSP_SMPTE_240M},
+                {"BT.2020-NC", MP_CSP_BT_2020_NC},
                 {"YCgCo", MP_CSP_YCGCO})),
     OPT_CHOICE("colormatrix-input-range", requested_input_range, 0,
                ({"auto", MP_CSP_LEVELS_AUTO},
