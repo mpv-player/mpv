@@ -122,28 +122,6 @@
            animate:NO];
 }
 
-- (NSRect)constrainFrameRect:(NSRect)nf toScreen:(NSScreen *)screen
-{
-    if ([self isInFullScreenMode])
-        return nf;
-
-    NSRect of = [self frame];
-    NSRect vf = [[self screen] visibleFrame];
-
-    if (NSMaxY(nf) > NSMaxY(vf)) {
-        // If the new window is bigger than the visible frame, make sure it's
-        // titlebar is visible and at the top of the visible frame.
-        nf.origin.y = NSMaxY(vf) - NSHeight(nf);
-    } else if (NSHeight(of) > NSHeight(vf)) {
-        // If the window is smaller than the visible frame, but it was bigger
-        // previously (so we ran the previous conditional branch), recenter
-        // the smaller window vertically.
-        nf.origin.y = (NSHeight(vf) - NSHeight(nf)) / 2;
-    }
-
-    return nf;
-}
-
 - (void)windowDidEndLiveResize:(NSNotification *)notification
 {
     [self setFrame:[self constrainFrameRect:self.frame toScreen:self.screen]
