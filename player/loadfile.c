@@ -1335,17 +1335,17 @@ goto_reopen_demuxer: ;
     if (startpos == -1 && mpctx->resolve_result &&
         mpctx->resolve_result->start_time > 0)
         startpos = mpctx->resolve_result->start_time;
+    if (startpos == -1 && opts->chapterrange[0] > 0) {
+        double start = chapter_start_time(mpctx, opts->chapterrange[0] - 1);
+        if (start != MP_NOPTS_VALUE)
+            startpos = start;
+    }
     if (startpos == -1 && mpctx->timeline)
         startpos = 0;
     if (startpos != -1) {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0, true);
         execute_queued_seek(mpctx);
     }
-    if (opts->chapterrange[0] > 0) {
-        if (mp_seek_chapter(mpctx, opts->chapterrange[0] - 1))
-            execute_queued_seek(mpctx);
-    }
-
     get_relative_time(mpctx); // reset current delta
 
     if (mpctx->opts->pause)

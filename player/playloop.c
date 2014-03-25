@@ -947,9 +947,9 @@ void run_playloop(struct MPContext *mpctx)
     }
 
     if (opts->chapterrange[1] > 0) {
-        int cur_chapter = get_current_chapter(mpctx);
-        if (cur_chapter != -1 && cur_chapter + 1 > opts->chapterrange[1])
-            mpctx->stop_play = PT_NEXT_ENTRY;
+        double end = chapter_start_time(mpctx, opts->chapterrange[1]);
+        if (end != MP_NOPTS_VALUE && (endpts == MP_NOPTS_VALUE || end < endpts))
+            endpts = end;
     }
 
     if (mpctx->d_audio && !mpctx->restart_playback && !ao_untimed(mpctx->ao)) {
