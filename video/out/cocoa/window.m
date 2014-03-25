@@ -127,19 +127,31 @@
     if ([self isInFullScreenMode])
         return [super constrainFrameRect:nf toScreen:screen];
 
-    NSRect of = [self frame];
+    NSRect cf = [self frame];
     NSRect vf = [[self screen] visibleFrame];
 
-    if (NSMaxY(nf) > NSMaxY(vf)) {
-        // If the new window is bigger than the visible frame, make sure it's
-        // titlebar is visible and at the top of the visible frame.
+    // Prevent the window's titlebar from exiting the screen on the top edge.
+    // This introduces a 'snap to top' behaviour.
+    if (NSMaxY(nf) > NSMaxY(vf))
         nf.origin.y = NSMaxY(vf) - NSHeight(nf);
-    } else if (NSHeight(of) > NSHeight(vf)) {
-        // If the window is smaller than the visible frame, but it was bigger
-        // previously (so we ran the previous conditional branch), recenter
-        // the smaller window vertically.
+
+    // Prevent window from exiting the screen on the bottom edge
+    if (NSMaxY(nf) < NSMinY(vf))
+        nf.origin.y = NSMinY(vf);
+
+    // Prevent window from exiting the screen on the right edge
+    if (NSMinX(nf) > NSMaxX(vf))
+        nf.origin.x = NSMaxX(vf) - NSWidth(nf);
+
+    // Prevent window from exiting the screen on the left
+    if (NSMaxX(nf) < NSMinX(vf))
+        nf.origin.x = NSMinX(vf);
+
+    if (NSHeight(nf) < NSHeight(vf) && NSHeight(cf) > NSHeight(vf))
+        // If the window height is smaller than the visible frame, but it was
+        // bigger previously recenter the smaller window vertically. This is
+        // needed to counter the 'snap to top' behaviour.
         nf.origin.y = (NSHeight(vf) - NSHeight(nf)) / 2;
-    }
 
     return nf;
 }
