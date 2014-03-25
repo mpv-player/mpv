@@ -521,6 +521,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     if (fmt.flags & MP_IMGFLAG_YUV) {
         if (params->colorspace != MP_CSP_BT_601 &&
             params->colorspace != MP_CSP_BT_709 &&
+            params->colorspace != MP_CSP_BT_2020_NC &&
             params->colorspace != MP_CSP_SMPTE_240M &&
             params->colorspace != MP_CSP_YCGCO)
         {

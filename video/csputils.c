@@ -27,6 +27,8 @@
  * version 2.1 of the License, or (at your option) any later version.
  */
 
+#include "config.h"
+
 #include <stdint.h>
 #include <math.h>
 #include <assert.h>
@@ -40,6 +42,7 @@ const char *const mp_csp_names[MP_CSP_COUNT] = {
     "BT.601 (SD)",
     "BT.709 (HD)",
     "SMPTE-240M",
+    "BT.2020 (NC)",
     "RGB",
     "XYZ",
     "YCgCo",
@@ -68,13 +71,16 @@ const char *const mp_chroma_names[MP_CHROMA_COUNT] = {
 enum mp_csp avcol_spc_to_mp_csp(int avcolorspace)
 {
     switch (avcolorspace) {
-        case AVCOL_SPC_BT709:     return MP_CSP_BT_709;
-        case AVCOL_SPC_BT470BG:   return MP_CSP_BT_601;
-        case AVCOL_SPC_SMPTE170M: return MP_CSP_BT_601;
-        case AVCOL_SPC_SMPTE240M: return MP_CSP_SMPTE_240M;
-        case AVCOL_SPC_RGB:       return MP_CSP_RGB;
-        case AVCOL_SPC_YCOCG:     return MP_CSP_YCGCO;
-        default:                  return MP_CSP_AUTO;
+        case AVCOL_SPC_BT709:      return MP_CSP_BT_709;
+        case AVCOL_SPC_BT470BG:    return MP_CSP_BT_601;
+#if HAVE_AVCOL_SPC_BT2020
+        case AVCOL_SPC_BT2020_NCL: return MP_CSP_BT_2020_NC;
+#endif
+        case AVCOL_SPC_SMPTE170M:  return MP_CSP_BT_601;
+        case AVCOL_SPC_SMPTE240M:  return MP_CSP_SMPTE_240M;
+        case AVCOL_SPC_RGB:        return MP_CSP_RGB;
+        case AVCOL_SPC_YCOCG:      return MP_CSP_YCGCO;
+        default:                   return MP_CSP_AUTO;
     }
 }
 
@@ -92,6 +98,9 @@ int mp_csp_to_avcol_spc(enum mp_csp colorspace)
     switch (colorspace) {
         case MP_CSP_BT_709:     return AVCOL_SPC_BT709;
         case MP_CSP_BT_601:     return AVCOL_SPC_BT470BG;
+#if HAVE_AVCOL_SPC_BT2020
+        case MP_CSP_BT_2020_NC: return AVCOL_SPC_BT2020_NCL;
+#endif
         case MP_CSP_SMPTE_240M: return AVCOL_SPC_SMPTE240M;
         case MP_CSP_RGB:        return AVCOL_SPC_RGB;
         case MP_CSP_YCGCO:      return AVCOL_SPC_YCOCG;
@@ -218,6 +227,7 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
     case MP_CSP_BT_601:     luma_coeffs(m, 0.299,  0.587,  0.114 ); break;
     case MP_CSP_BT_709:     luma_coeffs(m, 0.2126, 0.7152, 0.0722); break;
     case MP_CSP_SMPTE_240M: luma_coeffs(m, 0.2122, 0.7013, 0.0865); break;
+    case MP_CSP_BT_2020_NC: luma_coeffs(m, 0.2627, 0.6780, 0.0593); break;
     case MP_CSP_RGB: {
         static const float ident[3][4] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
         memcpy(m, ident, sizeof(ident));

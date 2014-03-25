@@ -37,6 +37,7 @@ enum mp_csp {
     MP_CSP_BT_601,
     MP_CSP_BT_709,
     MP_CSP_SMPTE_240M,
+    MP_CSP_BT_2020_NC,
     MP_CSP_RGB,
     MP_CSP_XYZ,
     MP_CSP_YCGCO,
