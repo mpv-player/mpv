@@ -306,7 +306,7 @@ static void handle_cmd(stream_t *s, struct mp_nav_cmd *ev)
 }
 
 static inline bool set_event_type(struct priv *priv, int type,
-                                struct mp_nav_event *event)
+                                  struct mp_nav_event *event)
 {
     if (!(priv->next_event & (1 << type)))
         return false;
