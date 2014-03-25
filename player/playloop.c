@@ -547,7 +547,7 @@ double chapter_start_time(struct MPContext *mpctx, int chapter)
         return get_start_time(mpctx);
     if (chapter >= 0 && chapter < mpctx->num_chapters)
         return mpctx->chapters[chapter].start;
-    return -1.0;
+    return MP_NOPTS_VALUE;
 }
 
 int get_chapter_count(struct MPContext *mpctx)
@@ -567,7 +567,7 @@ bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
     mpctx->last_chapter_seek = -2;
 
     double pts = chapter_start_time(mpctx, chapter);
-    if (pts == -1.0)
+    if (pts == MP_NOPTS_VALUE)
         return false;
 
     queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0, true);

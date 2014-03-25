@@ -490,7 +490,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                     chapter_start_time(mpctx, chapter);
                 // If we are far enough into a chapter, seek back to the
                 // beginning of current chapter instead of previous one
-                if (current_chapter_start >= 0 &&
+                if (current_chapter_start != MP_NOPTS_VALUE &&
                     get_current_time(mpctx) - current_chapter_start >
                     mpctx->opts->chapter_seek_threshold)
                     step_all++;
