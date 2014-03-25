@@ -116,20 +116,32 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (af_fmt_is_planar(in->format))
             mp_audio_set_format(af->data, af_fmt_to_planar(af->data->format));
         s->rgain = 1.0;
-        if ((s->rgain_track || s->rgain_album) && af->metadata) {
+        if ((s->rgain_track || s->rgain_album) &&
+            (af->replaygain_data || af->metadata)) {
             float gain, peak;
             char *gain_tag = NULL, *peak_tag = NULL;
 
             if (s->rgain_track) {
-                gain_tag = "REPLAYGAIN_TRACK_GAIN";
-                peak_tag = "REPLAYGAIN_TRACK_PEAK";
+                if (af->replaygain_data) {
+                    gain = af->replaygain_data->track_gain;
+                    peak = af->replaygain_data->track_peak;
+                } else {
+                    gain_tag = "REPLAYGAIN_TRACK_GAIN";
+                    peak_tag = "REPLAYGAIN_TRACK_PEAK";
+                }
             } else if (s->rgain_album) {
-                gain_tag = "REPLAYGAIN_ALBUM_GAIN";
-                peak_tag = "REPLAYGAIN_ALBUM_PEAK";
+                if (af->replaygain_data) {
+                    gain = af->replaygain_data->album_gain;
+                    peak = af->replaygain_data->album_peak;
+                } else {
+                    gain_tag = "REPLAYGAIN_ALBUM_GAIN";
+                    peak_tag = "REPLAYGAIN_ALBUM_PEAK";
+                }
             }
 
-            if (!decode_gain(af, gain_tag, &gain) &&
-                !decode_peak(af, peak_tag, &peak))
+            if (af->replaygain_data ||
+                (!decode_gain(af, gain_tag, &gain) &&
+                 !decode_peak(af, peak_tag, &peak)))
             {
                 gain += s->rgain_preamp;
                 af_from_dB(1, &gain, &s->rgain, 20.0, -200.0, 60.0);
