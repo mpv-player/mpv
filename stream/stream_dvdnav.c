@@ -305,42 +305,47 @@ static void handle_cmd(stream_t *s, struct mp_nav_cmd *ev)
 
 }
 
+static inline bool set_event_type(struct priv *priv, int type,
+                                struct mp_nav_event *event)
+{
+    if (!(priv->next_event & (1 << type)))
+        return false;
+    priv->next_event &= ~(1 << type);
+    event->event = type;
+    return true;
+}
+
 static void fill_next_event(stream_t *s, struct mp_nav_event **ret)
 {
     struct priv *priv = s->priv;
     struct mp_nav_event e = {0};
-    for (int n = 0; n < 30; n++) {
-        if (priv->next_event & (1 << n)) {
-            priv->next_event &= ~(1 << n);
-            e.event = n;
-            switch (e.event) {
-            case MP_NAV_EVENT_HIGHLIGHT: {
-                dvdnav_highlight_event_t hlev = priv->hlev;
-                e.u.highlight.display = hlev.display;
-                e.u.highlight.sx = hlev.sx;
-                e.u.highlight.sy = hlev.sy;
-                e.u.highlight.ex = hlev.ex;
-                e.u.highlight.ey = hlev.ey;
-                e.u.highlight.palette = hlev.palette;
-                break;
-            }
-            case MP_NAV_EVENT_MENU_MODE:
-                e.u.menu_mode.enable = !dvdnav_is_domain_vts(priv->dvdnav);
-                break;
-            case MP_NAV_EVENT_STILL_FRAME:
-                e.u.still_frame.seconds = priv->still_length;
-                break;
-            }
-            break;
-        }
+    if (!set_event_type(priv, MP_NAV_EVENT_RESET_ALL, &e))
+        for (int n = 0; n < 30 && !set_event_type(priv, n, &e); n++) ;
+    switch (e.event) {
+    case MP_NAV_EVENT_NONE:
+        return;
+    case MP_NAV_EVENT_HIGHLIGHT: {
+        dvdnav_highlight_event_t hlev = priv->hlev;
+        e.u.highlight.display = hlev.display;
+        e.u.highlight.sx = hlev.sx;
+        e.u.highlight.sy = hlev.sy;
+        e.u.highlight.ex = hlev.ex;
+        e.u.highlight.ey = hlev.ey;
+        e.u.highlight.palette = hlev.palette;
+        break;
     }
-    if (e.event) {
-        *ret = talloc(NULL, struct mp_nav_event);
-        **ret = e;
+    case MP_NAV_EVENT_MENU_MODE:
+        e.u.menu_mode.enable = !dvdnav_is_domain_vts(priv->dvdnav);
+        break;
+    case MP_NAV_EVENT_STILL_FRAME:
+        e.u.still_frame.seconds = priv->still_length;
+        break;
+    }
+    *ret = talloc(NULL, struct mp_nav_event);
+    **ret = e;
 
-        MP_VERBOSE(s, "DVDNAV: player event '%s'\n",
-                   LOOKUP_NAME(mp_nav_event_types, e.event));
-    }
+    MP_VERBOSE(s, "DVDNAV: player event '%s'\n",
+                LOOKUP_NAME(mp_nav_event_types, e.event));
 }
 
 static int fill_buffer(stream_t *s, char *buf, int max_len)
@@ -421,6 +426,8 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
                 priv->had_initial_vts = true;
                 break;
             }
+            // clear all previous events
+            priv->next_event = 0;
             priv->next_event |= 1 << MP_NAV_EVENT_RESET;
             priv->next_event |= 1 << MP_NAV_EVENT_RESET_ALL;
             if (dvdnav_current_title_info(dvdnav, &tit, &part) == DVDNAV_STATUS_OK)

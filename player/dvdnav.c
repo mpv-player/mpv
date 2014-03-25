@@ -145,7 +145,9 @@ void mp_handle_nav(struct MPContext *mpctx)
         case MP_NAV_EVENT_RESET_ALL: {
             mpctx->stop_play = PT_RELOAD_DEMUXER;
             MP_VERBOSE(nav, "reload\n");
-            break;
+            // return immediately.
+            // other events should be handled after reloaded.
+            return;
         }
         case MP_NAV_EVENT_RESET: {
             nav->nav_still_frame = 0;
