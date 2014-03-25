@@ -501,15 +501,14 @@ int get_percent_pos(struct MPContext *mpctx)
 // -2 is no chapters, -1 is before first chapter
 int get_current_chapter(struct MPContext *mpctx)
 {
+    if (!mpctx->num_chapters)
+        return -2;
     double current_pts = get_current_time(mpctx);
-    if (mpctx->chapters) {
-        int i;
-        for (i = 1; i < mpctx->num_chapters; i++)
-            if (current_pts < mpctx->chapters[i].start)
-                break;
-        return MPMAX(mpctx->last_chapter_seek, i - 1);
-    }
-    return -2;
+    int i;
+    for (i = 1; i < mpctx->num_chapters; i++)
+        if (current_pts < mpctx->chapters[i].start)
+            break;
+    return MPMAX(mpctx->last_chapter_seek, i - 1);
 }
 
 char *chapter_display_name(struct MPContext *mpctx, int chapter)
@@ -536,12 +535,9 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
 // returns NULL if chapter name unavailable
 char *chapter_name(struct MPContext *mpctx, int chapter)
 {
-    if (mpctx->chapters) {
-        if (chapter < 0 || chapter >= mpctx->num_chapters)
-            return NULL;
-        return talloc_strdup(NULL, mpctx->chapters[chapter].name);
-    }
-    return NULL;
+    if (chapter < 0 || chapter >= mpctx->num_chapters)
+        return NULL;
+    return talloc_strdup(NULL, mpctx->chapters[chapter].name);
 }
 
 // returns the start of the chapter in seconds (-1 if unavailable)
@@ -549,7 +545,7 @@ double chapter_start_time(struct MPContext *mpctx, int chapter)
 {
     if (chapter == -1)
         return get_start_time(mpctx);
-    if (mpctx->chapters && chapter < mpctx->num_chapters)
+    if (chapter >= 0 && chapter < mpctx->num_chapters)
         return mpctx->chapters[chapter].start;
     return -1.0;
 }

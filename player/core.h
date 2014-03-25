@@ -194,8 +194,6 @@ typedef struct MPContext {
     struct timeline_part *timeline;
     int num_timeline_parts;
     int timeline_part;
-    // NOTE: even if num_chapters==0, chapters being not NULL signifies presence
-    //       of chapter metadata
     struct chapter *chapters;
     int num_chapters;
     double video_offset;
