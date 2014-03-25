@@ -50,8 +50,7 @@ double get_relative_time(struct MPContext *mpctx)
     return delta * 0.000001;
 }
 
-double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t,
-                       double fallback_time)
+double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
 {
     double length = get_time_length(mpctx);
     switch (t.type) {
@@ -70,19 +69,21 @@ double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t,
             return chapter_start_time(mpctx, t.pos);
         break;
     }
-    return fallback_time;
+    return MP_NOPTS_VALUE;
 }
 
 double get_play_end_pts(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     if (opts->play_end.type) {
-        return rel_time_to_abs(mpctx, opts->play_end, MP_NOPTS_VALUE);
+        return rel_time_to_abs(mpctx, opts->play_end);
     } else if (opts->play_length.type) {
         double startpts = get_start_time(mpctx);
-        double start = rel_time_to_abs(mpctx, opts->play_start, startpts);
-        double length = rel_time_to_abs(mpctx, opts->play_length, -1);
-        if (start != -1 && length != -1)
+        double start = rel_time_to_abs(mpctx, opts->play_start);
+        if (start == MP_NOPTS_VALUE)
+            start = startpts;
+        double length = rel_time_to_abs(mpctx, opts->play_length);
+        if (start != MP_NOPTS_VALUE && length != MP_NOPTS_VALUE)
             return start + length;
     }
     return MP_NOPTS_VALUE;

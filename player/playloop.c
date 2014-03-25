@@ -461,8 +461,7 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     double start = get_start_time(mpctx);
     double len = get_time_length(mpctx);
     if (use_range) {
-        double startpos = rel_time_to_abs(mpctx, mpctx->opts->play_start,
-                MP_NOPTS_VALUE);
+        double startpos = rel_time_to_abs(mpctx, mpctx->opts->play_start);
         double endpos = get_play_end_pts(mpctx);
         if (endpos == MP_NOPTS_VALUE || endpos > start + len)
             endpos = start + len;

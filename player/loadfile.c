@@ -1331,18 +1331,18 @@ goto_reopen_demuxer: ;
     mpctx->seek = (struct seek_params){ 0 };
 
     // If there's a timeline force an absolute seek to initialize state
-    double startpos = rel_time_to_abs(mpctx, opts->play_start, -1);
-    if (startpos == -1 && mpctx->resolve_result &&
+    double startpos = rel_time_to_abs(mpctx, opts->play_start);
+    if (startpos == MP_NOPTS_VALUE && mpctx->resolve_result &&
         mpctx->resolve_result->start_time > 0)
         startpos = mpctx->resolve_result->start_time;
-    if (startpos == -1 && opts->chapterrange[0] > 0) {
+    if (startpos == MP_NOPTS_VALUE && opts->chapterrange[0] > 0) {
         double start = chapter_start_time(mpctx, opts->chapterrange[0] - 1);
         if (start != MP_NOPTS_VALUE)
             startpos = start;
     }
-    if (startpos == -1 && mpctx->timeline)
+    if (startpos == MP_NOPTS_VALUE && mpctx->timeline)
         startpos = 0;
-    if (startpos != -1) {
+    if (startpos != MP_NOPTS_VALUE) {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0, true);
         execute_queued_seek(mpctx);
     }

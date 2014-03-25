@@ -411,8 +411,7 @@ void mp_print_version(struct mp_log *log, int always);
 // misc.c
 double get_start_time(struct MPContext *mpctx);
 double get_main_demux_pts(struct MPContext *mpctx);
-double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t,
-                       double fallback_time);
+double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
 double get_play_end_pts(struct MPContext *mpctx);
 double get_relative_time(struct MPContext *mpctx);
 void merge_playlist_files(struct playlist *pl);
