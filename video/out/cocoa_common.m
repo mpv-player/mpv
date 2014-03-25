@@ -695,7 +695,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         vo->cocoa->inside_sync_section = true;
         dispatch_sync(dispatch_get_main_queue(), ^{
             int *s = arg;
-            [vo->cocoa->window queueNewVideoSize:(NSSize){s[0], s[1]}];
+            [vo->cocoa->window queueNewVideoSize:NSMakeSize(s[0], s[1])];
         });
         vo->cocoa->inside_sync_section = false;
         return VO_TRUE;
