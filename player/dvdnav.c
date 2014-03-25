@@ -166,6 +166,7 @@ void mp_handle_nav(struct MPContext *mpctx)
             MP_VERBOSE(nav, "reload\n");
             // return immediately.
             // other events should be handled after reloaded.
+            talloc_free(ev);
             return;
         }
         case MP_NAV_EVENT_RESET: {
