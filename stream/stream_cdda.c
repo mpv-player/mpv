@@ -273,37 +273,18 @@ static int control(stream_t *stream, int cmd, void *arg)
         *(unsigned int *)arg = end_track + 1 - start_track;
         return STREAM_OK;
     }
-    case STREAM_CTRL_SEEK_TO_CHAPTER:
+    case STREAM_CTRL_GET_CHAPTER_TIME:
     {
-        int r;
-        unsigned int track = *(unsigned int *)arg;
+        int track = *(double *)arg;
         int start_track = get_track_by_sector(p, p->start_sector);
         int end_track = get_track_by_sector(p, p->end_sector);
-        int seek_sector;
-        if (start_track == -1 || end_track == -1)
+        track += start_track + 1;
+        if (track > end_track)
             return STREAM_ERROR;
-        track += start_track;
-        if (track > end_track) {
-            seek(stream, (p->end_sector + 1) * CDIO_CD_FRAMESIZE_RAW);
-            // seeking beyond EOF should not be an error,
-            // the cache cannot handle changing stream pos and
-            // returning error.
-            return STREAM_OK;
-        }
-        seek_sector = track == 0 ? p->start_sector
-                      : p->cd->disc_toc[track].dwStartSector;
-        r = seek(stream, seek_sector * CDIO_CD_FRAMESIZE_RAW);
-        if (r)
-            return STREAM_OK;
-        break;
-    }
-    case STREAM_CTRL_GET_CURRENT_CHAPTER:
-    {
-        int start_track = get_track_by_sector(p, p->start_sector);
-        int cur_track = get_track_by_sector(p, p->sector);
-        if (start_track == -1 || cur_track == -1)
-            return STREAM_ERROR;
-        *(unsigned int *)arg = cur_track - start_track;
+        int64_t sector = p->cd->disc_toc[track].dwStartSector;
+        int64_t pos = sector * CDIO_CD_FRAMESIZE_RAW;
+        // Assume standard audio CD: 44.1khz, 2 channels, s16 samples
+        *(double *)arg = pos / (44100 * 2 * 2);
         return STREAM_OK;
     }
     }
