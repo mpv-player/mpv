@@ -509,9 +509,6 @@ int get_current_chapter(struct MPContext *mpctx)
                 break;
         return MPMAX(mpctx->last_chapter_seek, i - 1);
     }
-    if (mpctx->master_demuxer)
-        return MPMAX(mpctx->last_chapter_seek,
-                demuxer_get_current_chapter(mpctx->master_demuxer, current_pts));
     return -2;
 }
 
@@ -544,8 +541,6 @@ char *chapter_name(struct MPContext *mpctx, int chapter)
             return NULL;
         return talloc_strdup(NULL, mpctx->chapters[chapter].name);
     }
-    if (mpctx->master_demuxer)
-        return demuxer_chapter_name(mpctx->master_demuxer, chapter);
     return NULL;
 }
 
@@ -554,20 +549,14 @@ double chapter_start_time(struct MPContext *mpctx, int chapter)
 {
     if (chapter == -1)
         return get_start_time(mpctx);
-    if (mpctx->chapters)
+    if (mpctx->chapters && chapter < mpctx->num_chapters)
         return mpctx->chapters[chapter].start;
-    if (mpctx->master_demuxer)
-        return demuxer_chapter_time(mpctx->master_demuxer, chapter);
-    return -1;
+    return -1.0;
 }
 
 int get_chapter_count(struct MPContext *mpctx)
 {
-    if (mpctx->chapters)
-        return mpctx->num_chapters;
-    if (mpctx->master_demuxer)
-        return demuxer_chapter_count(mpctx->master_demuxer);
-    return 0;
+    return mpctx->num_chapters;
 }
 
 // Seek to a given chapter. Queues the seek.
@@ -581,23 +570,10 @@ bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
 
     mpctx->last_chapter_seek = -2;
 
-    double pts;
-    if (chapter == -1) {
-        pts = get_start_time(mpctx);
-        goto do_seek;
-    } else if (mpctx->chapters) {
-        pts = mpctx->chapters[chapter].start;
-        goto do_seek;
-    } else if (mpctx->master_demuxer) {
-        int res = demuxer_seek_chapter(mpctx->master_demuxer, chapter, &pts);
-        if (res >= 0) {
-            chapter = res;
-            goto do_seek;
-        }
-    }
-    return false;
+    double pts = chapter_start_time(mpctx, chapter);
+    if (pts == -1.0)
+        return false;
 
-do_seek:
     queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0, true);
     mpctx->last_chapter_seek = chapter;
     mpctx->last_chapter_pts = pts;

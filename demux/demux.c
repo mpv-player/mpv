@@ -98,6 +98,7 @@ struct demux_stream {
 };
 
 static void add_stream_chapters(struct demuxer *demuxer);
+void demuxer_sort_chapters(demuxer_t *demuxer);
 
 static void ds_free_packs(struct demux_stream *ds)
 {
@@ -881,7 +882,10 @@ static void add_stream_chapters(struct demuxer *demuxer)
 {
     if (demuxer->num_chapters)
         return;
-    int num_chapters = demuxer_chapter_count(demuxer);
+    int num_chapters = 0;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS,
+                          &num_chapters) != STREAM_OK)
+        return;
     for (int n = 0; n < num_chapters; n++) {
         double p = n;
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_CHAPTER_TIME, &p)
@@ -889,69 +893,6 @@ static void add_stream_chapters(struct demuxer *demuxer)
             return;
         demuxer_add_chapter(demuxer, bstr0(""), p * 1e9, 0, 0);
     }
-}
-
-/**
- * \brief demuxer_seek_chapter() seeks to a chapter in two possible ways:
- *        either using the demuxer->chapters structure set by the demuxer
- *        or asking help to the stream layer (e.g. dvd)
- * \param chapter - chapter number wished - 0-based
- * \param seek_pts set by the function to the pts to seek to (if demuxer->chapters is set)
- * \return -1 on error, current chapter if successful
- */
-
-int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts)
-{
-    if (chapter >= demuxer->num_chapters)
-        return -1;
-    if (chapter < 0)
-        chapter = 0;
-
-    *seek_pts = demuxer->chapters[chapter].start / 1e9;
-
-    return chapter;
-}
-
-int demuxer_get_current_chapter(demuxer_t *demuxer, double time_now)
-{
-    int chapter = -2;
-    uint64_t now = time_now * 1e9 + 0.5;
-    for (chapter = demuxer->num_chapters - 1; chapter >= 0; --chapter) {
-        if (demuxer->chapters[chapter].start <= now)
-            break;
-    }
-    return chapter;
-}
-
-char *demuxer_chapter_name(demuxer_t *demuxer, int chapter)
-{
-    if (demuxer->num_chapters && demuxer->chapters) {
-        if (chapter >= 0 && chapter < demuxer->num_chapters
-            && demuxer->chapters[chapter].name)
-            return talloc_strdup(NULL, demuxer->chapters[chapter].name);
-    }
-    return NULL;
-}
-
-double demuxer_chapter_time(demuxer_t *demuxer, int chapter)
-{
-    if (demuxer->num_chapters && demuxer->chapters && chapter >= 0
-        && chapter < demuxer->num_chapters) {
-        return demuxer->chapters[chapter].start / 1e9;
-    }
-    return -1.0;
-}
-
-int demuxer_chapter_count(demuxer_t *demuxer)
-{
-    if (!demuxer->num_chapters || !demuxer->chapters) {
-        int num_chapters = 0;
-        if (stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS,
-                           &num_chapters) == STREAM_UNSUPPORTED)
-            num_chapters = 0;
-        return num_chapters;
-    } else
-        return demuxer->num_chapters;
 }
 
 double demuxer_get_time_length(struct demuxer *demuxer)

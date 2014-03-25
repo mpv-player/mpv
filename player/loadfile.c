@@ -1002,6 +1002,24 @@ static void print_timeline(struct MPContext *mpctx)
     }
 }
 
+static void load_chapters(struct MPContext *mpctx)
+{
+    if (!mpctx->chapters && mpctx->master_demuxer &&
+        mpctx->master_demuxer->num_chapters)
+    {
+        int count = mpctx->master_demuxer->num_chapters;
+        mpctx->chapters = talloc_array(NULL, struct chapter, count);
+        mpctx->num_chapters = count;
+        for (int n = 0; n < count; n++) {
+            struct demux_chapter *dchapter = &mpctx->master_demuxer->chapters[n];
+            mpctx->chapters[n] = (struct chapter){
+                .start = dchapter->start / 1e9,
+                .name = talloc_strdup(mpctx->chapters, dchapter->name),
+            };
+        }
+    }
+}
+
 /* When demux performs a blocking operation (network connection or
  * cache filling) if the operation fails we use this function to check
  * if it was interrupted by the user.
@@ -1189,6 +1207,7 @@ goto_reopen_demuxer: ;
         build_cue_timeline(mpctx);
 
     print_timeline(mpctx);
+    load_chapters(mpctx);
 
     if (mpctx->timeline) {
         // With Matroska, the "master" file usually dictates track layout etc.

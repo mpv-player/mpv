@@ -157,19 +157,25 @@ static struct demuxer *open_source(struct MPContext *mpctx, char *filename)
     return d;
 }
 
+static double demuxer_chapter_time(struct demuxer *demuxer, int n)
+{
+    if (n < 0 || n >= demuxer->num_chapters)
+        return -1;
+    return demuxer->chapters[n].start / 1e9;
+}
+
 // Append all chapters from src to the chapters array.
 // Ignore chapters outside of the given time range.
 static void copy_chapters(struct chapter **chapters, int *num_chapters,
                           struct demuxer *src, double start, double len,
                           double dest_offset)
 {
-    int count = demuxer_chapter_count(src);
-    for (int n = 0; n < count; n++) {
+    for (int n = 0; n < src->num_chapters; n++) {
         double time = demuxer_chapter_time(src, n);
         if (time >= start && time <= start + len) {
             struct chapter ch = {
                 .start = dest_offset + time - start,
-                .name = talloc_steal(*chapters, demuxer_chapter_name(src, n)),
+                .name = talloc_strdup(*chapters, src->chapters[n].name),
             };
             MP_TARRAY_APPEND(NULL, *chapters, *num_chapters, ch);
         }
