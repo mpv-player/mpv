@@ -570,8 +570,7 @@ int get_chapter_count(struct MPContext *mpctx)
     return 0;
 }
 
-// Seek to a given chapter. Tries to queue the seek, but might seek immediately
-// in some cases. Returns success, no matter if seek is queued or immediate.
+// Seek to a given chapter. Queues the seek.
 bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
 {
     int num = get_chapter_count(mpctx);
@@ -592,12 +591,6 @@ bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
     } else if (mpctx->master_demuxer) {
         int res = demuxer_seek_chapter(mpctx->master_demuxer, chapter, &pts);
         if (res >= 0) {
-            if (pts == -1) {
-                // for DVD/BD - seek happened via stream layer
-                seek_reset(mpctx, true, true);
-                mpctx->seek = (struct seek_params){0};
-                return true;
-            }
             chapter = res;
             goto do_seek;
         }

@@ -902,46 +902,23 @@ static void add_stream_chapters(struct demuxer *demuxer)
 
 int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts)
 {
-    int ris = STREAM_UNSUPPORTED;
+    if (chapter >= demuxer->num_chapters)
+        return -1;
+    if (chapter < 0)
+        chapter = 0;
 
-    if (demuxer->num_chapters == 0)
-        ris = stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_CHAPTER,
-                             &chapter);
+    *seek_pts = demuxer->chapters[chapter].start / 1e9;
 
-    if (ris != STREAM_UNSUPPORTED) {
-        demux_flush(demuxer);
-        demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
-
-        // exit status may be ok, but main() doesn't have to seek itself
-        // (because e.g. dvds depend on sectors, not on pts)
-        *seek_pts = -1.0;
-
-        return chapter;
-    } else {
-        if (chapter >= demuxer->num_chapters)
-            return -1;
-        if (chapter < 0)
-            chapter = 0;
-
-        *seek_pts = demuxer->chapters[chapter].start / 1e9;
-
-        return chapter;
-    }
+    return chapter;
 }
 
 int demuxer_get_current_chapter(demuxer_t *demuxer, double time_now)
 {
     int chapter = -2;
-    if (!demuxer->num_chapters || !demuxer->chapters) {
-        if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_CHAPTER,
-                           &chapter) == STREAM_UNSUPPORTED)
-            chapter = -2;
-    } else {
-        uint64_t now = time_now * 1e9 + 0.5;
-        for (chapter = demuxer->num_chapters - 1; chapter >= 0; --chapter) {
-            if (demuxer->chapters[chapter].start <= now)
-                break;
-        }
+    uint64_t now = time_now * 1e9 + 0.5;
+    for (chapter = demuxer->num_chapters - 1; chapter >= 0; --chapter) {
+        if (demuxer->chapters[chapter].start <= now)
+            break;
     }
     return chapter;
 }

@@ -161,33 +161,6 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         return 1;
     }
 
-    case STREAM_CTRL_GET_CURRENT_CHAPTER: {
-        *((unsigned int *) arg) = bd_get_current_chapter(b->bd);
-        return 1;
-    }
-
-    case STREAM_CTRL_SEEK_TO_CHAPTER: {
-        BLURAY_TITLE_INFO *ti;
-        int chapter = *((unsigned int *) arg);
-        int64_t pos;
-        int r;
-
-        ti = bd_get_title_info(b->bd, b->current_title, b->current_angle);
-        if (!ti)
-            return STREAM_UNSUPPORTED;
-
-        if (chapter < 0 || chapter > ti->chapter_count) {
-            bd_free_title_info(ti);
-            return STREAM_UNSUPPORTED;
-        }
-
-        pos = bd_chapter_pos(b->bd, chapter);
-        r = bluray_stream_seek(s, pos);
-        bd_free_title_info(ti);
-
-        return r ? 1 : STREAM_UNSUPPORTED;
-    }
-
     case STREAM_CTRL_GET_TIME_LENGTH: {
         BLURAY_TITLE_INFO *ti;
 

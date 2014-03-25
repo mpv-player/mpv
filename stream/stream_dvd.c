@@ -427,49 +427,6 @@ static int get_num_chapter(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title
     return vts_file->vts_ptt_srpt->title[title_no].nr_of_ptts;
 }
 
-static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no, int chapter)
-{
-    dvd_priv_t *d = stream->priv;
-    ptt_info_t ptt;
-    pgc_t *pgc;
-    int64_t pos;
-
-    if(!vts_file || !tt_srpt)
-       return 0;
-
-    if(title_no < 0 || title_no >= tt_srpt->nr_of_srpts)
-       return 0;
-
-    // map global title to vts title
-    title_no = tt_srpt->title[title_no].vts_ttn - 1;
-
-    if(title_no < 0 || title_no >= vts_file->vts_ptt_srpt->nr_of_srpts)
-       return 0;
-
-    if(chapter < 0 || chapter > vts_file->vts_ptt_srpt->title[title_no].nr_of_ptts-1) //no such chapter
-       return 0;
-
-    ptt = vts_file->vts_ptt_srpt->title[title_no].ptt[chapter];
-    pgc = vts_file->vts_pgcit->pgci_srp[ptt.pgcn-1].pgc;
-
-    d->cur_cell = pgc->program_map[ptt.pgn - 1] - 1;
-    if(pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK)
-       d->cur_cell += dvd_angle-1;
-    d->cur_pack       = pgc->cell_playback[d->cur_cell].first_sector;
-    d->cell_last_pack = pgc->cell_playback[d->cur_cell].last_sector;
-
-    d->packs_left     = -1;
-    d->angle_seek     = 0;
-
-    pos = (int64_t) d->cur_pack * 2048;
-    stream_seek(stream, pos);
-
-    MP_VERBOSE(stream, "\r\nSTREAM_DVD, seeked to chapter: %d, cell: %u, pos: %"PRIu64"\n",
-        chapter, d->cur_pack, pos);
-
-    return chapter;
-}
-
 // p: in=chapter number, out=PTS
 static int get_chapter_time(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no, double *p)
 {
@@ -642,22 +599,9 @@ static int control(stream_t *stream,int cmd,void* arg)
             if(! r) return STREAM_UNSUPPORTED;
             return 1;
         }
-        case STREAM_CTRL_SEEK_TO_CHAPTER:
-        {
-            int r;
-            r = seek_to_chapter(stream, d->vts_file, d->tt_srpt, d->cur_title, *((unsigned int *)arg));
-            if(! r) return STREAM_UNSUPPORTED;
-
-            return 1;
-        }
         case STREAM_CTRL_GET_CURRENT_TITLE:
         {
             *((unsigned int *)arg) = d->cur_title;
-            return 1;
-        }
-        case STREAM_CTRL_GET_CURRENT_CHAPTER:
-        {
-            *((unsigned int *)arg) = dvd_chapter_from_cell(d, d->cur_title, d->cur_cell);
             return 1;
         }
         case STREAM_CTRL_GET_CURRENT_TIME:

@@ -466,17 +466,6 @@ static int control(stream_t *stream, int cmd, void *arg)
     int tit, part;
 
     switch (cmd) {
-    case STREAM_CTRL_SEEK_TO_CHAPTER: {
-        int chap = *(unsigned int *)arg + 1;
-
-        if (chap < 1)
-            break;
-        if (dvdnav_current_title_info(dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
-            break;
-        if (dvdnav_part_play(dvdnav, tit, chap) != DVDNAV_STATUS_OK)
-            break;
-        return 1;
-    }
     case STREAM_CTRL_GET_NUM_CHAPTERS: {
         if (dvdnav_current_title_info(dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
             break;
@@ -500,12 +489,6 @@ static int control(stream_t *stream, int cmd, void *arg)
             break;
         *ch = parts[chapter] / 90000.0;
         free(parts);
-        return 1;
-    }
-    case STREAM_CTRL_GET_CURRENT_CHAPTER: {
-        if (dvdnav_current_title_info(dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
-            break;
-        *(unsigned int *)arg = part - 1;
         return 1;
     }
     case STREAM_CTRL_GET_TIME_LENGTH: {
