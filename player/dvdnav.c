@@ -48,6 +48,25 @@ struct mp_nav_state {
     struct sub_bitmap *hi_elem;
 };
 
+static inline bool is_valid_size(int size[2]) {
+    return size[0] >= 1 && size[1] >= 1;
+}
+
+static void update_resolution(struct MPContext *mpctx) {
+    struct mp_nav_state *nav = mpctx->nav_state;
+    if (!nav)
+        return;
+    if (mpctx->d_sub[0])
+        sub_control(mpctx->d_sub[0], SD_CTRL_GET_RESOLUTION, nav->vidsize);
+    if (!is_valid_size(nav->vidsize)) {
+        struct mp_image_params vid = {0};
+        if (mpctx->d_video)
+            vid = mpctx->d_video->decoder_output;
+        nav->vidsize[0] = vid.w;
+        nav->vidsize[1] = vid.h;
+    }
+}
+
 // Allocate state and enable navigation features. Must happen before
 // initializing cache, because the cache would read data. Since stream_dvdnav is
 // in a mode which skips all transitions on reading data (before enabling
@@ -183,18 +202,7 @@ void mp_handle_nav(struct MPContext *mpctx)
             nav->highlight[2] = ev->u.highlight.ex;
             nav->highlight[3] = ev->u.highlight.ey;
             nav->hi_visible = ev->u.highlight.display;
-            int sizes[2] = {0};
-            if (mpctx->d_sub[0])
-                sub_control(mpctx->d_sub[0], SD_CTRL_GET_RESOLUTION, sizes);
-            if (sizes[0] < 1 || sizes[1] < 1) {
-                struct mp_image_params vid = {0};
-                if (mpctx->d_video)
-                    vid = mpctx->d_video->decoder_output;
-                sizes[0] = vid.w;
-                sizes[1] = vid.h;
-            }
-            for (int n = 0; n < 2; n++)
-                nav->vidsize[n] = sizes[n];
+            update_resolution(mpctx);
             osd_set_nav_highlight(mpctx->osd, mpctx);
             break;
         }
@@ -242,9 +250,12 @@ void mp_nav_get_highlight(void *priv, struct mp_osd_res res,
         sub = talloc_zero(nav, struct sub_bitmap);
 
     nav->hi_elem = sub;
+    if (!is_valid_size(nav->vidsize)) {
+        update_resolution(mpctx);
+        if (!is_valid_size(nav->vidsize))
+            return;
+    }
     int sizes[2] = {nav->vidsize[0], nav->vidsize[1]};
-    if (sizes[0] < 1 || sizes[1] < 1)
-        return;
     if (sizes[0] != nav->subsize[0] || sizes[1] != nav->subsize[1]) {
         talloc_free(sub->bitmap);
         sub->bitmap = talloc_array(sub, uint32_t, sizes[0] * sizes[1]);
