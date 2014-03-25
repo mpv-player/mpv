@@ -26,15 +26,19 @@
 #include <string.h>
 #include <assert.h>
 
+#include "config.h"
+
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
 #include <libavutil/avutil.h>
 #include <libavutil/avstring.h>
 #include <libavutil/mathematics.h>
+#if HAVE_AVCODEC_REPLAYGAIN_SIDE_DATA
+# include <libavutil/replaygain.h>
+#endif
 #include <libavutil/opt.h>
 #include "compat/libav.h"
 
-#include "config.h"
 #include "options/options.h"
 #include "common/msg.h"
 #include "common/av_opts.h"
@@ -372,6 +376,37 @@ static void select_tracks(struct demuxer *demuxer, int start)
     }
 }
 
+static void export_replaygain(demuxer_t *demuxer, AVStream *st)
+{
+#if HAVE_AVCODEC_REPLAYGAIN_SIDE_DATA
+    for (int i = 0; i < st->nb_side_data; i++) {
+        AVReplayGain *av_rgain;
+        struct replaygain_data *rgain;
+        AVPacketSideData *src_sd = &st->side_data[i];
+
+        if (src_sd->type != AV_PKT_DATA_REPLAYGAIN)
+            continue;
+
+        av_rgain = (AVReplayGain*)src_sd->data;
+        rgain    = talloc_ptrtype(demuxer, rgain);
+
+        rgain->track_gain = (av_rgain->track_gain != INT32_MIN) ?
+            av_rgain->track_gain / 100000.0f : 0.0;
+
+        rgain->track_peak = (av_rgain->track_peak != 0.0) ?
+            av_rgain->track_peak / 100000.0f : 1.0;
+
+        rgain->album_gain = (av_rgain->album_gain != INT32_MIN) ?
+            av_rgain->album_gain / 100000.0f : 0.0;
+
+        rgain->album_peak = (av_rgain->album_peak != 0.0) ?
+            av_rgain->album_peak / 100000.0f : 1.0;
+
+        demuxer->replaygain_data = rgain;
+    }
+#endif
+}
+
 static void handle_stream(demuxer_t *demuxer, int i)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -395,6 +430,8 @@ static void handle_stream(demuxer_t *demuxer, int i)
             mp_chmap_from_lavc(&sh_audio->channels, codec->channel_layout);
         sh_audio->samplerate = codec->sample_rate;
         sh_audio->i_bps = codec->bit_rate / 8;
+
+        export_replaygain(demuxer, st);
 
         break;
     }

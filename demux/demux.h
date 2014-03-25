@@ -143,6 +143,13 @@ struct matroska_data {
     int num_ordered_chapters;
 };
 
+struct replaygain_data {
+    float track_gain;
+    float track_peak;
+    float album_gain;
+    float album_peak;
+};
+
 typedef struct demux_attachment
 {
     char *name;
@@ -192,6 +199,8 @@ typedef struct demuxer {
     struct matroska_data matroska_data;
     // for trivial demuxers which just read the whole file for codec to use
     struct bstr file_contents;
+
+    struct replaygain_data *replaygain_data;
 
     // If the file is a playlist file
     struct playlist *playlist;
