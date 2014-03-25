@@ -237,6 +237,8 @@ void mp_nav_get_highlight(struct osd_state *osd, struct mp_osd_res res,
         talloc_free(sub->bitmap);
         sub->bitmap = talloc_array(sub, uint32_t, sizes[0] * sizes[1]);
         memset(sub->bitmap, 0x80, talloc_get_size(sub->bitmap));
+        nav->subsize[0] = sizes[0];
+        nav->subsize[1] = sizes[1];
     }
 
     sub->x = nav->highlight[0];
