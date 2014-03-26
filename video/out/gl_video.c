@@ -894,11 +894,12 @@ static void compile_shaders(struct gl_video *p)
 
     bool use_input_gamma = p->input_gamma != 1.0;
     bool use_conv_gamma = p->conv_gamma != 1.0;
+    bool use_const_luma = p->image_params.colorspace == MP_CSP_BT_2020_C;
 
     // Linear light scaling is only enabled when either color correction
     // option (3dlut or srgb) is enabled, otherwise scaling is done in the
-    // source space.
-    bool convert_to_linear_gamma = !p->is_linear_rgb && use_cms;
+    // source space. We also need to linearize for constant luminance systems.
+    bool convert_to_linear_gamma = !p->is_linear_rgb && use_cms || use_const_luma;
 
     if (p->image_format == IMGFMT_NV12 || p->image_format == IMGFMT_NV21) {
         shader_def(&header_conv, "USE_CONV", "CONV_NV12");
@@ -914,8 +915,11 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_conv, "USE_INPUT_GAMMA", use_input_gamma);
     shader_def_opt(&header_conv, "USE_COLORMATRIX", !p->is_rgb);
     shader_def_opt(&header_conv, "USE_CONV_GAMMA", use_conv_gamma);
-    shader_def_opt(&header_conv, "USE_LINEAR_LIGHT", convert_to_linear_gamma);
-    shader_def_opt(&header_conv, "USE_APPROX_GAMMA", p->opts.approx_gamma);
+    shader_def_opt(&header_conv, "USE_CONST_LUMA", use_const_luma);
+    shader_def_opt(&header_conv, "USE_LINEAR_LIGHT_APPROX",
+                   convert_to_linear_gamma && p->opts.approx_gamma);
+    shader_def_opt(&header_conv, "USE_LINEAR_LIGHT_BT2020",
+                   convert_to_linear_gamma && !p->opts.approx_gamma);
     if (p->opts.alpha_mode > 0 && p->has_alpha && p->plane_count > 3)
         shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
     if (p->opts.alpha_mode == 2 && p->has_alpha)
@@ -926,6 +930,10 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
     // 3DLUT overrides SRGB
     shader_def_opt(&header_final, "USE_SRGB", p->opts.srgb && !p->use_lut_3d);
+    shader_def_opt(&header_final, "USE_CONST_LUMA_INV_APPROX",
+                   use_const_luma && !use_cms && p->opts.approx_gamma);
+    shader_def_opt(&header_final, "USE_CONST_LUMA_INV_BT2020",
+                   use_const_luma && !use_cms && !p->opts.approx_gamma);
     shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
     shader_def_opt(&header_final, "USE_TEMPORAL_DITHER", p->opts.temporal_dither);
 
@@ -1339,7 +1347,7 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
     }
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
-    if (p->is_yuv)
+    if (p->is_yuv && p->image_params.colorspace != MP_CSP_BT_2020_C)
         eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
     p->video_eq.capabilities = eq_caps;
 

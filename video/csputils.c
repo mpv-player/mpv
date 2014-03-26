@@ -42,7 +42,8 @@ const char *const mp_csp_names[MP_CSP_COUNT] = {
     "BT.601 (SD)",
     "BT.709 (HD)",
     "SMPTE-240M",
-    "BT.2020-NC (UHD)",
+    "BT.2020-NCL (UHD)",
+    "BT.2020-CL (UHD)",
     "RGB",
     "XYZ",
     "YCgCo",
@@ -83,6 +84,7 @@ enum mp_csp avcol_spc_to_mp_csp(int avcolorspace)
         case AVCOL_SPC_BT470BG:    return MP_CSP_BT_601;
 #if HAVE_AVCOL_SPC_BT2020
         case AVCOL_SPC_BT2020_NCL: return MP_CSP_BT_2020_NC;
+        case AVCOL_SPC_BT2020_CL:  return MP_CSP_BT_2020_C;
 #endif
         case AVCOL_SPC_SMPTE170M:  return MP_CSP_BT_601;
         case AVCOL_SPC_SMPTE240M:  return MP_CSP_SMPTE_240M;
@@ -122,6 +124,7 @@ int mp_csp_to_avcol_spc(enum mp_csp colorspace)
         case MP_CSP_BT_601:     return AVCOL_SPC_BT470BG;
 #if HAVE_AVCOL_SPC_BT2020
         case MP_CSP_BT_2020_NC: return AVCOL_SPC_BT2020_NCL;
+        case MP_CSP_BT_2020_C:  return AVCOL_SPC_BT2020_CL;
 #endif
         case MP_CSP_SMPTE_240M: return AVCOL_SPC_SMPTE240M;
         case MP_CSP_RGB:        return AVCOL_SPC_RGB;
@@ -310,6 +313,15 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
     case MP_CSP_BT_709:     luma_coeffs(m, 0.2126, 0.7152, 0.0722); break;
     case MP_CSP_SMPTE_240M: luma_coeffs(m, 0.2122, 0.7013, 0.0865); break;
     case MP_CSP_BT_2020_NC: luma_coeffs(m, 0.2627, 0.6780, 0.0593); break;
+    case MP_CSP_BT_2020_C: {
+        // Note: This outputs into the [-0.5,0.5] range for chroma information.
+        // If this clips on any VO, a constant 0.5 coefficient can be added
+        // to the chroma channels to normalize them into [0,1]. This is not
+        // currently needed by anything, though.
+        static const float ycbcr_to_crycb[3][4] = {{0, 0, 1}, {1, 0, 0}, {0, 1, 0}};
+        memcpy(m, ycbcr_to_crycb, sizeof(ycbcr_to_crycb));
+        break;
+    }
     case MP_CSP_RGB: {
         static const float ident[3][4] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
         memcpy(m, ident, sizeof(ident));
