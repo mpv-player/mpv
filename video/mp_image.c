@@ -524,6 +524,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         if (params->colorspace != MP_CSP_BT_601 &&
             params->colorspace != MP_CSP_BT_709 &&
             params->colorspace != MP_CSP_BT_2020_NC &&
+            params->colorspace != MP_CSP_BT_2020_C &&
             params->colorspace != MP_CSP_SMPTE_240M &&
             params->colorspace != MP_CSP_YCGCO)
         {
@@ -539,7 +540,8 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
             // We assume BT.709 primaries for all untagged BT.609/BT.709
             // content, because it offers the minimal deviation from all three,
             // including both NTSC and PAL/SECAM.
-            if (params->colorspace == MP_CSP_BT_2020_NC) {
+            if (params->colorspace == MP_CSP_BT_2020_NC ||
+                params->colorspace == MP_CSP_BT_2020_C) {
                 params->primaries = MP_CSP_PRIM_BT_2020;
             } else {
                 params->primaries = MP_CSP_PRIM_BT_709;

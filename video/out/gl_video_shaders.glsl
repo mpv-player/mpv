@@ -45,7 +45,7 @@
 #if __VERSION__ >= 130
 vec3 srgb_compand(vec3 v)
 {
-    return mix(v * 12.92, 1.055 * pow(v, vec3(1.0/2.4)) - vec3(0.055),
+    return mix(v * 12.92, 1.055 * pow(v, vec3(1.0/2.4)) - 0.055,
                lessThanEqual(vec3(0.0031308), v));
 }
 
@@ -53,6 +53,12 @@ vec3 bt2020_expand(vec3 v)
 {
     return mix(v / 4.5, pow((v + vec3(0.0993))/1.0993, vec3(1/0.45)),
                lessThanEqual(vec3(0.08145), v));
+}
+
+vec3 bt2020_compand(vec3 v)
+{
+    return mix(v * 4.5, 1.0993 * pow(v, vec3(0.45)) - vec3(0.0993),
+               lessThanEqual(vec3(0.0181), v));
 }
 #endif
 
@@ -393,13 +399,30 @@ void main() {
 #ifdef USE_COLORMATRIX
     // Conversion from Y'CbCr or other spaces to RGB
     color = mat3(colormatrix) * color + colormatrix[3];
-    color = clamp(color, 0, 1);
 #endif
 #ifdef USE_CONV_GAMMA
     // Post-colormatrix converted gamma correction (eg. for MP_IMGFLAG_XYZ)
     color = pow(color, vec3(conv_gamma));
 #endif
-#ifdef USE_LINEAR_LIGHT
+#ifdef USE_CONST_LUMA
+    // Conversion from C'rcY'cC'bc to R'Y'cB' via the BT.2020 CL system:
+    // C'bc = (B'-Y'c) / 1.9404  | C'bc <= 0
+    //      = (B'-Y'c) / 1.5816  | C'bc >  0
+    //
+    // C'rc = (R'-Y'c) / 1.7184  | C'rc <= 0
+    //      = (R'-Y'c) / 0.9936  | C'rc >  0
+    //
+    // as per the BT.2020 specification, table 4. This is a non-linear
+    // transformation because (constant) luminance receives non-equal
+    // contributions from the three different channels.
+    color.br = color.br * mix(vec2(1.5816, 0.9936), vec2(1.9404, 1.7184),
+                              lessThanEqual(color.br, vec2(0))) + color.gg;
+#endif
+#ifdef USE_COLORMATRIX
+    // Clamp down here to avoid clipping CbCr details before CONST_LUMA
+    // has a chance to convert them.
+    color = clamp(color, 0, 1);
+#endif
     // If we are scaling in linear light (SRGB or 3DLUT option enabled), we
     // expand our source colors before scaling. This shader currently just
     // assumes everything uses the BT.2020 12-bit gamma function, since the
@@ -407,13 +430,18 @@ void main() {
     // below the rounding error threshold for both 8-bit and even 10-bit
     // content. It only makes a difference for 12-bit sources, so it should be
     // fine to use here.
-#ifdef USE_APPROX_GAMMA
+#ifdef USE_LINEAR_LIGHT_APPROX
     // We differentiate between approximate BT.2020 (gamma 1.95) ...
     color = pow(color, vec3(1.95));
-#else
+#endif
+#ifdef USE_LINEAR_LIGHT_BT2020
     // ... and actual BT.2020 (two-part function)
     color = bt2020_expand(color);
 #endif
+#ifdef USE_CONST_LUMA
+    // Calculate the green channel from the expanded RYcB
+    // The BT.2020 specification says Yc = 0.2627*R + 0.6780*G + 0.0593*B
+    color.g = (color.g - 0.2627*color.r - 0.0593*color.b)/0.6780;
 #endif
     // Image upscaling happens roughly here
 #ifdef USE_GAMMA_POW
@@ -442,6 +470,16 @@ void main() {
 #ifdef USE_SRGB
     // Adapt and compand from the linear BT2020 source to the sRGB output
     color = srgb_compand(clamp(srgb_matrix * color, 0, 1));
+#endif
+    // If none of these options took care of companding again, we have to do
+    // it manually here for the previously-expanded channels. This again
+    // comes in two flavours, one for the approximate gamma system and one
+    // for the actual gamma system.
+#ifdef USE_CONST_LUMA_INV_APPROX
+    color = pow(color, vec3(1/1.95));
+#endif
+#ifdef USE_CONST_LUMA_INV_BT2020
+    color = bt2020_compand(color);
 #endif
 #ifdef USE_DITHER
     vec2 dither_pos = gl_FragCoord.xy / dither_size;
