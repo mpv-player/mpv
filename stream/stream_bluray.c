@@ -64,6 +64,7 @@ struct bluray_priv_s {
     int num_titles;
     int current_angle;
     int current_title;
+    int current_playlist;
 
     int cfg_title;
     char *cfg_device;
@@ -106,6 +107,13 @@ static void handle_event(stream_t *s, const BD_EVENT *ev)
 {
     struct bluray_priv_s *b = s->priv;
     switch (ev->event) {
+    case BD_EVENT_PLAYLIST:
+        b->current_playlist = ev->param;
+        if (b->title_info)
+            bd_free_title_info(b->title_info);
+        b->title_info = bd_get_playlist_info(b->bd, b->current_playlist,
+                                             b->current_angle);
+        break;
     case BD_EVENT_TITLE:
         if (ev->param == BLURAY_TITLE_FIRST_PLAY)
             b->current_title = bd_get_current_title(b->bd);
@@ -115,15 +123,13 @@ static void handle_event(stream_t *s, const BD_EVENT *ev)
             bd_free_title_info(b->title_info);
             b->title_info = NULL;
         }
-        b->title_info = bd_get_title_info(b->bd, b->current_title,
-                                          b->current_angle);
         break;
     case BD_EVENT_ANGLE:
         b->current_angle = ev->param;
         if (b->title_info) {
             bd_free_title_info(b->title_info);
-            b->title_info = bd_get_title_info(b->bd, b->current_title,
-                                              b->current_angle);
+            b->title_info = bd_get_playlist_info(b->bd, b->current_playlist,
+                                                 b->current_angle);
         }
         break;
     case BD_EVENT_IDLE:
