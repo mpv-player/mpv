@@ -27,8 +27,7 @@ SOURCES_AUDIO_INPUT-$(ALSA)     += stream/ai_alsa1x.c
 SOURCES_AUDIO_INPUT-$(OSS)      += stream/ai_oss.c
 SOURCES_AUDIO_INPUT-$(SNDIO)    += stream/ai_sndio.c
 SOURCES-$(AUDIO_INPUT)          += $(SOURCES_AUDIO_INPUT-yes)
-SOURCES-$(CDDA)                 += stream/stream_cdda.c \
-                                   stream/cdinfo.c
+SOURCES-$(CDDA)                 += stream/stream_cdda.c
 SOURCES-$(DVBIN)                += stream/dvb_tune.c \
                                    stream/stream_dvb.c
 SOURCES-$(DVDREAD)              += stream/stream_dvd.c \

@@ -46,8 +46,6 @@
 #include "libavutil/common.h"
 #include "compat/mpbswap.h"
 
-#include "cdd.h"
-
 #include "common/msg.h"
 
 typedef struct {
@@ -56,7 +54,6 @@ typedef struct {
     int sector;
     int start_sector;
     int end_sector;
-    cd_info_t *cd_info;
 
     // options
     int speed;
@@ -151,17 +148,8 @@ static bool print_cdtext(stream_t *s, int track)
 
 static void print_track_info(stream_t *s, int track)
 {
-    cdda_priv* p = (cdda_priv*)s->priv;
-    cd_track_t *cd_track = cd_info_get_track(p->cd_info, track);
-    if( cd_track!=NULL ) {
-        MP_INFO(s, "\n%s\n", cd_track->name);
-        MP_INFO(s, "ID_CDDA_TRACK=%d\n",
-               cd_track->track_nb);
-    }
-    if (print_cdtext(s, track)) {
-        // hack for term OSD overwriting the last line of CDTEXT
-        MP_INFO(s, "\n");
-    }
+    MP_INFO(s, "Switched to track %d\n", track);
+    print_cdtext(s, track);
 }
 
 static void cdparanoia_callback(long int inpos, paranoia_cb_mode_t function)
@@ -242,7 +230,6 @@ static void close_cdda(stream_t *s)
     cdda_priv *p = (cdda_priv *)s->priv;
     paranoia_free(p->cdp);
     cdda_close(p->cd);
-    cd_info_free(p->cd_info);
     free(p);
 }
 
@@ -298,10 +285,7 @@ static int open_cdda(stream_t *st, int m)
     int mode = p->paranoia_mode;
     int offset = p->toc_offset;
     cdrom_drive_t *cdd = NULL;
-    cd_info_t *cd_info;
-    unsigned int audiolen = 0;
     int last_track;
-    int i;
 
     if (m != STREAM_READ) {
         return STREAM_UNSUPPORTED;
@@ -336,29 +320,9 @@ static int open_cdda(stream_t *st, int m)
         return STREAM_ERROR;
     }
 
-    cd_info = cd_info_new();
-    MP_INFO(st, "Found audio CD with %d tracks.\n",
-            (int)cdda_tracks(cdd));
-    for (i = 0; i < cdd->tracks; i++) {
-        char track_name[80];
-        long sec = cdda_track_firstsector(cdd, i + 1);
-        long off = cdda_track_lastsector(cdd, i + 1) - sec + 1;
-
-        sprintf(track_name, "Track %d", i + 1);
-        cd_info_add_track(cd_info, track_name, i + 1,
-                          (unsigned int)(off / (60 * 75)),
-                          (unsigned int)((off / 75) % 60),
-                          (unsigned int)(off % 75), sec, off);
-        audiolen += off;
-    }
-    cd_info->min  = (unsigned int)(audiolen / (60 * 75));
-    cd_info->sec  = (unsigned int)((audiolen / 75) % 60);
-    cd_info->msec = (unsigned int)(audiolen % 75);
-
     priv = malloc(sizeof(cdda_priv));
     memset(priv, 0, sizeof(cdda_priv));
     priv->cd = cdd;
-    priv->cd_info = cd_info;
 
     if (p->toc_bias)
         offset -= cdda_track_firstsector(cdd, 1);
@@ -392,7 +356,6 @@ static int open_cdda(stream_t *st, int m)
     if (priv->cdp == NULL) {
         cdda_close(cdd);
         free(priv);
-        cd_info_free(cd_info);
         return STREAM_ERROR;
     }
 
