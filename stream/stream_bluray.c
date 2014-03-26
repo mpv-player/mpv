@@ -42,6 +42,7 @@
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "stream.h"
+#include "osdep/timer.h"
 
 #define BLURAY_SECTOR_SIZE     6144
 
@@ -98,10 +99,25 @@ static int bluray_stream_seek(stream_t *s, int64_t pos)
     return 1;
 }
 
+static void handle_event(stream_t *s, const BD_EVENT *ev)
+{
+    switch (ev->event) {
+    case BD_EVENT_IDLE:
+        mp_sleep_us(5000);
+        break;
+    default:
+        MP_TRACE(s, "Unhandled event: %d %d\n", ev->event, ev->param);
+        break;
+    }
+}
+
 static int bluray_stream_fill_buffer(stream_t *s, char *buf, int len)
 {
     struct bluray_priv_s *b = s->priv;
 
+    BD_EVENT event;
+    while (bd_get_event(b->bd, &event))
+        handle_event(s, &event);
     return bd_read(b->bd, buf, len);
 }
 
@@ -344,6 +360,9 @@ static int bluray_stream_open(stream_t *s, int mode)
 
         bd_free_title_info(ti);
     }
+
+    // initialize libbluray event queue
+    bd_get_event(bd, NULL);
 
     /* Select current title */
     if (b->cfg_title != BLURAY_DEFAULT_TITLE)
