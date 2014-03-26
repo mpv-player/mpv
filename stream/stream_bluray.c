@@ -132,9 +132,6 @@ static void handle_event(stream_t *s, const BD_EVENT *ev)
                                                  b->current_angle);
         }
         break;
-    case BD_EVENT_IDLE:
-        mp_sleep_us(5000);
-        break;
     default:
         MP_TRACE(s, "Unhandled event: %d %d\n", ev->event, ev->param);
         break;
