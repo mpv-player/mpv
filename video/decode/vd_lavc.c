@@ -477,6 +477,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .d_h = d_h,
         .colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace),
         .colorlevels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
+        .primaries = avcol_pri_to_mp_csp_prim(ctx->avctx->color_primaries),
         .chroma_location =
             avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
         .rotate = vd->header->video->rotate,

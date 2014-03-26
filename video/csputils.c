@@ -42,7 +42,7 @@ const char *const mp_csp_names[MP_CSP_COUNT] = {
     "BT.601 (SD)",
     "BT.709 (HD)",
     "SMPTE-240M",
-    "BT.2020 (NC)",
+    "BT.2020-NC (UHD)",
     "RGB",
     "XYZ",
     "YCgCo",
@@ -52,6 +52,14 @@ const char *const mp_csp_levels_names[MP_CSP_LEVELS_COUNT] = {
     "Autoselect",
     "TV",
     "PC",
+};
+
+const char *const mp_csp_prim_names[MP_CSP_PRIM_COUNT] = {
+    "Autoselect",
+    "BT.601 (525-line SD)",
+    "BT.601 (625-line SD)",
+    "BT.709 (HD)",
+    "BT.2020 (UHD)",
 };
 
 const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
@@ -93,6 +101,20 @@ enum mp_csp_levels avcol_range_to_mp_csp_levels(int avrange)
     }
 }
 
+enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri)
+{
+    switch (avpri) {
+        case AVCOL_PRI_SMPTE240M: // Same as below
+        case AVCOL_PRI_SMPTE170M: return MP_CSP_PRIM_BT_601_525;
+        case AVCOL_PRI_BT470BG:   return MP_CSP_PRIM_BT_601_625;
+        case AVCOL_PRI_BT709:     return MP_CSP_PRIM_BT_709;
+#if HAVE_AVCOL_SPC_BT2020
+        case AVCOL_PRI_BT2020:    return MP_CSP_PRIM_BT_2020;
+#endif
+        default:                  return MP_CSP_PRIM_AUTO;
+    }
+}
+
 int mp_csp_to_avcol_spc(enum mp_csp colorspace)
 {
     switch (colorspace) {
@@ -114,6 +136,19 @@ int mp_csp_levels_to_avcol_range(enum mp_csp_levels range)
         case MP_CSP_LEVELS_TV: return AVCOL_RANGE_MPEG;
         case MP_CSP_LEVELS_PC: return AVCOL_RANGE_JPEG;
         default:               return AVCOL_RANGE_UNSPECIFIED;
+    }
+}
+
+int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim)
+{
+    switch (prim) {
+        case MP_CSP_PRIM_BT_601_525: return AVCOL_PRI_SMPTE170M;
+        case MP_CSP_PRIM_BT_601_625: return AVCOL_PRI_BT470BG;
+        case MP_CSP_PRIM_BT_709:     return AVCOL_PRI_BT709;
+#if HAVE_AVCOL_SPC_BT2020
+        case MP_CSP_PRIM_BT_2020:    return AVCOL_PRI_BT2020;
+#endif
+        default:                     return AVCOL_PRI_UNSPECIFIED;
     }
 }
 
@@ -206,6 +241,53 @@ static void luma_coeffs(float m[3][4], float lr, float lg, float lb)
     m[1][2] = -2 * (1-lr) * lr/lg;
     m[2][2] = 0;
     // Constant coefficients (m[x][3]) not set here
+}
+
+/**
+ * Get the coefficients of the source -> bt2020 gamut mapping matrix,
+ * given an identifier describing the source gamut primaries.
+ */
+void mp_get_cms_matrix(enum mp_csp_prim source, float m[3][3])
+{
+    // Conversion matrices to BT.2020 primaries
+    // These were computed using: http://lpaste.net/101796
+    switch (source) {
+        case MP_CSP_PRIM_BT_601_525: {
+            static const float from_525[3][3] = {
+                {0.5952542, 0.3493139, 0.0554319},
+                {0.0812437, 0.8915033, 0.0272530},
+                {0.0155123, 0.0819116, 0.9025760},
+            };
+            memcpy(m, from_525, sizeof(from_525));
+            break;
+        }
+        case MP_CSP_PRIM_BT_601_625: {
+            static const float from_625[3][3] = {
+                {0.6550368, 0.3021610, 0.0428023},
+                {0.0721406, 0.9166311, 0.0112283},
+                {0.0171134, 0.0978535, 0.8850332},
+            };
+            memcpy(m, from_625, sizeof(from_625));
+            break;
+        }
+        case MP_CSP_PRIM_BT_709: {
+            static const float from_709[3][3] = {
+                {0.6274039, 0.3292830, 0.0433131},
+                {0.0690973, 0.9195404, 0.0113623},
+                {0.0163914, 0.0880133, 0.8955953},
+            };
+            memcpy(m, from_709, sizeof(from_709));
+            break;
+        }
+        case MP_CSP_PRIM_BT_2020:
+        default: {
+            // No conversion necessary. This matrix should not even be used
+            // in this case, but assign it to the identity just to be safe.
+            static const float ident[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+            memcpy(m, ident, sizeof(ident));
+            break;
+        }
+    }
 }
 
 /**
