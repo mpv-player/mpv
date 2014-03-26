@@ -574,6 +574,24 @@ OPTIONS
         It is advisable to use your graphics driver's color range option
         instead, if available.
 
+``--colormatrix-primaries=<primaries>``
+    RGB primaries the source file was encoded with. Normally this should be set
+    in the file header, but when playing broken or mistagged files this can be
+    used to override the setting. By default, when unset, BT.709 is used for
+    all files except those tagged with a BT.2020 color matrix.
+
+    This option only affects video output drivers that perform color
+    management, for example ``opengl`` with the ``srgb`` or ``icc-profile``
+    suboptions set.
+
+    Available primaries are:
+
+    :auto:         automatic selection (default)
+    :BT.601-525:   ITU-R BT.601 (SD) 525-line systems (NTSC)
+    :BT.601-625:   ITU-R BT.601 (SD) 625-line systems (PAL, SECAM)
+    :BT.709:       ITU-R BT.709 (HD)
+    :BT.2020:      ITU-R BT.2020 (UHD)
+
 ``--config-dir=<path>``
     Force a different configuration directory. If this is set, the given
     directory is used to load configuration files, and all other configuration
