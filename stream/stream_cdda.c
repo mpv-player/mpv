@@ -282,9 +282,9 @@ static int control(stream_t *stream, int cmd, void *arg)
         if (track > end_track)
             return STREAM_ERROR;
         int64_t sector = p->cd->disc_toc[track].dwStartSector;
-        int64_t pos = sector * CDIO_CD_FRAMESIZE_RAW;
+        int64_t pos = sector * (CDIO_CD_FRAMESIZE_RAW + 1) - 1;
         // Assume standard audio CD: 44.1khz, 2 channels, s16 samples
-        *(double *)arg = pos / (44100 * 2 * 2);
+        *(double *)arg = pos / (44100.0 * 2 * 2);
         return STREAM_OK;
     }
     }
