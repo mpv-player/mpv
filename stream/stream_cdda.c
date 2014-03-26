@@ -129,8 +129,8 @@ static bool print_cdtext(stream_t *s, int track)
 #else
     cdtext_t *text = cdio_get_cdtext(p->cd->p_cdio);
 #endif
+    int header = 0;
     if (text) {
-        MP_INFO(s, "CD-Text (%s):\n", track ? "track" : "CD");
         for (int i = 0; i < sizeof(cdtext_name) / sizeof(cdtext_name[0]); i++) {
             const char *name = cdtext_name[i];
 #ifdef OLD_API
@@ -138,8 +138,12 @@ static bool print_cdtext(stream_t *s, int track)
 #else
             const char *value = cdtext_get_const(text, i, track);
 #endif
-            if (name && value)
+            if (name && value) {
+                if (!header)
+                    MP_INFO(s, "CD-Text (%s):\n", track ? "track" : "CD");
+                header = 1;
                 MP_INFO(s, "  %s: '%s'\n", name, value);
+            }
         }
         return true;
     }
