@@ -750,10 +750,8 @@ static int mp_property_chapter_metadata(m_option_t *prop, int action, void *arg,
 {
     struct demuxer *demuxer = mpctx->master_demuxer;
     int chapter = get_current_chapter(mpctx);
-    if (!demuxer || chapter < 0)
+    if (!demuxer || chapter < 0 || chapter >= demuxer->num_chapters)
         return M_PROPERTY_UNAVAILABLE;
-
-    assert(chapter < demuxer->num_chapters);
 
     return tag_property(prop, action, arg, demuxer->chapters[chapter].metadata);
 }
