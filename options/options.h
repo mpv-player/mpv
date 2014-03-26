@@ -97,6 +97,7 @@ typedef struct MPOpts {
     int requested_colorspace;
     int requested_input_range;
     int requested_output_range;
+    int requested_primaries;
 
     int video_rotate;
 

@@ -399,6 +399,12 @@ const m_option_t mp_opts[] = {
                ({"auto", MP_CSP_LEVELS_AUTO},
                 {"limited", MP_CSP_LEVELS_TV},
                 {"full", MP_CSP_LEVELS_PC})),
+    OPT_CHOICE("colormatrix-primaries", requested_primaries, 0,
+               ({"auto", MP_CSP_PRIM_AUTO},
+                {"BT.601-525", MP_CSP_PRIM_BT_601_525},
+                {"BT.601-625", MP_CSP_PRIM_BT_601_625},
+                {"BT.709", MP_CSP_PRIM_BT_709},
+                {"BT.2020", MP_CSP_PRIM_BT_2020})),
     OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 359,
                       ({"no", -1})),
 
