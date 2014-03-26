@@ -362,6 +362,12 @@ Available video output drivers are:
         LittleCMS 2. If both ``srgb`` and ``icc-profile`` are present, the
         latter takes precedence, as they are somewhat redundant.
 
+        Note: When playing back BT.2020 content with this option enabled, out
+        of gamut colors will be numerically clipped, which can potentially
+        change the hue and/or luminance. If this is not desired, it is
+        recommended to use ``icc-profile`` with an sRGB ICC profile instead,
+        when playing back wide-gamut BT.2020 content.
+
     ``pbo``
         Enable use of PBOs. This is slightly faster, but can sometimes lead to
         sporadic and temporary image corruption (in theory, because reupload
@@ -521,7 +527,7 @@ Available video output drivers are:
     ``3dlut-size=<r>x<g>x<b>``
         Size of the 3D LUT generated from the ICC profile in each dimension.
         Default is 128x256x64.
-        Sizes must be a power of two, and 256 at most.
+        Sizes must be a power of two, and 512 at most.
 
     ``alpha=<blend|yes|no>``
         Decides what to do if the input has an alpha component (default: blend).

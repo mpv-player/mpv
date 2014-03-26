@@ -639,6 +639,13 @@ static void update_uniforms(struct gl_video *p, GLuint program)
 
     gl->Uniform1i(gl->GetUniformLocation(program, "lut_3d"), TEXUNIT_3DLUT);
 
+    loc = gl->GetUniformLocation(program, "cms_matrix");
+    if (loc >= 0) {
+        float cms_matrix[3][3] = {{0}};
+        mp_get_cms_matrix(p->image_params.primaries, cms_matrix);
+        gl->UniformMatrix3fv(loc, 1, GL_TRUE, &cms_matrix[0][0]);
+    }
+
     for (int n = 0; n < 2; n++) {
         const char *lut = p->scalers[n].lut_name;
         if (lut)
@@ -840,6 +847,9 @@ static void compile_shaders(struct gl_video *p)
     char *header = talloc_asprintf(tmp, "#version %d\n%s%s", gl->glsl_version,
                                    shader_prelude, PRELUDE_END);
 
+    bool use_cms = p->opts.srgb || p->use_lut_3d;
+    bool use_cms_matrix = use_cms && (p->image_params.primaries != MP_CSP_PRIM_BT_2020);
+
     if (p->gl_target == GL_TEXTURE_RECTANGLE) {
         shader_def(&header, "VIDEO_SAMPLER", "sampler2DRect");
         shader_def_opt(&header, "USE_RECTANGLE", true);
@@ -852,8 +862,8 @@ static void compile_shaders(struct gl_video *p)
         shader_def_opt(&header, "USE_ALPHA", p->has_alpha);
 
     char *header_osd = talloc_strdup(tmp, header);
-    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", p->opts.srgb ||
-                                                       p->use_lut_3d);
+    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", use_cms);
+    shader_def_opt(&header_osd, "USE_OSD_CMS_MATRIX", use_cms_matrix);
     shader_def_opt(&header_osd, "USE_OSD_3DLUT", p->use_lut_3d);
     // 3DLUT overrides SRGB
     shader_def_opt(&header_osd, "USE_OSD_SRGB", !p->use_lut_3d && p->opts.srgb);
@@ -888,7 +898,7 @@ static void compile_shaders(struct gl_video *p)
     // Linear light scaling is only enabled when either color correction
     // option (3dlut or srgb) is enabled, otherwise scaling is done in the
     // source space.
-    bool convert_to_linear_gamma = !p->is_linear_rgb && (p->opts.srgb || p->use_lut_3d);
+    bool convert_to_linear_gamma = !p->is_linear_rgb && use_cms;
 
     if (p->image_format == IMGFMT_NV12 || p->image_format == IMGFMT_NV21) {
         shader_def(&header_conv, "USE_CONV", "CONV_NV12");
@@ -912,6 +922,7 @@ static void compile_shaders(struct gl_video *p)
         shader_def(&header_conv, "USE_ALPHA_BLEND", "1");
 
     shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma > 0);
+    shader_def_opt(&header_final, "USE_CMS_MATRIX", use_cms_matrix);
     shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
     // 3DLUT overrides SRGB
     shader_def_opt(&header_final, "USE_SRGB", p->opts.srgb && !p->use_lut_3d);
