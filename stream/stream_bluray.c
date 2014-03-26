@@ -60,6 +60,7 @@ int   bluray_angle   = 0;
 
 struct bluray_priv_s {
     BLURAY *bd;
+    BLURAY_TITLE_INFO *title_info;
     int num_titles;
     int current_angle;
     int current_title;
@@ -84,6 +85,8 @@ static void bluray_stream_close(stream_t *s)
 {
     struct bluray_priv_s *b = s->priv;
 
+    if (b->title_info)
+        bd_free_title_info(b->title_info);
     bd_close(b->bd);
 }
 
@@ -101,7 +104,28 @@ static int bluray_stream_seek(stream_t *s, int64_t pos)
 
 static void handle_event(stream_t *s, const BD_EVENT *ev)
 {
+    struct bluray_priv_s *b = s->priv;
     switch (ev->event) {
+    case BD_EVENT_TITLE:
+        if (ev->param == BLURAY_TITLE_FIRST_PLAY)
+            b->current_title = bd_get_current_title(b->bd);
+        else
+            b->current_title = ev->param;
+        if (b->title_info) {
+            bd_free_title_info(b->title_info);
+            b->title_info = NULL;
+        }
+        b->title_info = bd_get_title_info(b->bd, b->current_title,
+                                          b->current_angle);
+        break;
+    case BD_EVENT_ANGLE:
+        b->current_angle = ev->param;
+        if (b->title_info) {
+            bd_free_title_info(b->title_info);
+            b->title_info = bd_get_title_info(b->bd, b->current_title,
+                                              b->current_angle);
+        }
+        break;
     case BD_EVENT_IDLE:
         mp_sleep_us(5000);
         break;
@@ -128,31 +152,27 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     switch (cmd) {
 
     case STREAM_CTRL_GET_NUM_CHAPTERS: {
-        BLURAY_TITLE_INFO *ti;
+        const BLURAY_TITLE_INFO *ti = b->title_info;
 
-        ti = bd_get_title_info(b->bd, b->current_title, b->current_angle);
         if (!ti)
             return STREAM_UNSUPPORTED;
 
         *((unsigned int *) arg) = ti->chapter_count;
-        bd_free_title_info(ti);
 
         return 1;
     }
 
     case STREAM_CTRL_GET_CHAPTER_TIME: {
-        BLURAY_TITLE_INFO *ti;
+        const BLURAY_TITLE_INFO *ti = b->title_info;
         int chapter = *(double *)arg;
         double time = MP_NOPTS_VALUE;
 
-        ti = bd_get_title_info(b->bd, b->current_title, b->current_angle);
         if (!ti)
             return STREAM_UNSUPPORTED;
 
         if (chapter >= 0 || chapter < ti->chapter_count) {
             time = BD_TIME_TO_MP(ti->chapters[chapter].start);
         }
-        bd_free_title_info(ti);
 
         if (time != MP_NOPTS_VALUE) {
             *(double *)arg = time;
@@ -178,14 +198,12 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     }
 
     case STREAM_CTRL_GET_TIME_LENGTH: {
-        BLURAY_TITLE_INFO *ti;
+        const BLURAY_TITLE_INFO *ti = b->title_info;
 
-        ti = bd_get_title_info(b->bd, b->current_title, b->current_angle);
         if (!ti)
             return STREAM_UNSUPPORTED;
 
         *((double *) arg) = BD_TIME_TO_MP(ti->duration);
-        bd_free_title_info(ti);
         return STREAM_OK;
     }
 
@@ -204,14 +222,12 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     }
 
     case STREAM_CTRL_GET_NUM_ANGLES: {
-        BLURAY_TITLE_INFO *ti;
+        const BLURAY_TITLE_INFO *ti = b->title_info;
 
-        ti = bd_get_title_info(b->bd, b->current_title, b->current_angle);
         if (!ti)
             return STREAM_UNSUPPORTED;
 
         *((int *) arg) = ti->angle_count;
-        bd_free_title_info(ti);
 
         return 1;
     }
@@ -222,29 +238,26 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     }
 
     case STREAM_CTRL_SET_ANGLE: {
-        BLURAY_TITLE_INFO *ti;
+        const BLURAY_TITLE_INFO *ti = b->title_info;
         int angle = *((int *) arg);
 
-        ti = bd_get_title_info(b->bd, b->current_title, b->current_angle);
         if (!ti)
             return STREAM_UNSUPPORTED;
 
         if (angle < 0 || angle > ti->angle_count) {
-            bd_free_title_info(ti);
             return STREAM_UNSUPPORTED;
         }
 
         b->current_angle = angle;
         bd_seamless_angle_change(b->bd, angle);
-        bd_free_title_info(ti);
 
         return 1;
     }
 
     case STREAM_CTRL_GET_LANG: {
         struct stream_lang_req *req = arg;
-        BLURAY_TITLE_INFO *ti = bd_get_title_info(b->bd, b->current_title, b->current_angle);
-        if (ti->clip_count) {
+        const BLURAY_TITLE_INFO *ti = b->title_info;
+        if (ti && ti->clip_count) {
             BLURAY_STREAM_INFO *si = NULL;
             int count = 0;
             switch (req->type) {
@@ -261,12 +274,10 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
                 BLURAY_STREAM_INFO *i = &si[n];
                 if (i->pid == req->id) {
                     snprintf(req->name, sizeof(req->name), "%.4s", i->lang);
-                    bd_free_title_info(ti);
                     return STREAM_OK;
                 }
             }
         }
-        bd_free_title_info(ti);
         return STREAM_ERROR;
     }
     case STREAM_CTRL_GET_START_TIME:
