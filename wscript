@@ -386,6 +386,12 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'func': check_statement('libavcodec/avcodec.h',
                                 'enum AVPacketSideDataType type = AV_PKT_DATA_METADATA_UPDATE',
                                 use='libav')
+    }, {
+        'name': 'avcodec-replaygain-side-data',
+        'desc': 'libavcodec AV_PKT_DATA_REPLAYGAIN side data type',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'enum AVPacketSideDataType type = AV_PKT_DATA_REPLAYGAIN',
+                                use='libav')
     }
 ]
 
