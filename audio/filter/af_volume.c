@@ -115,6 +115,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
         if (af_fmt_is_planar(in->format))
             mp_audio_set_format(af->data, af_fmt_to_planar(af->data->format));
+        s->rgain = 1.0;
         if ((s->rgain_track || s->rgain_album) && af->metadata) {
             float gain, peak;
             char *gain_tag = NULL, *peak_tag = NULL;
@@ -137,7 +138,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                     s->rgain = MPMIN(s->rgain, 1.0 / peak);
             }
         }
-        if (s->detach && fabs(s->level + s->rgain - 1.0) < 0.00001)
+        if (s->detach && fabs(s->level + s->rgain - 2.0) < 0.00001)
             return AF_DETACH;
         return af_test_output(af, in);
     }
@@ -155,7 +156,7 @@ static void filter_plane(struct af_instance *af, void *ptr, int num_samples)
 {
     struct priv *s = af->priv;
 
-    float level = s->level + s->rgain;
+    float level = s->level + s->rgain - 1.0;
 
     if (af_fmt_from_planar(af->data->format) == AF_FORMAT_S16) {
         int16_t *a = ptr;
