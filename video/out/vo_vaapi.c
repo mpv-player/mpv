@@ -513,6 +513,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         arg->vaapi_ctx = p->mpvaapi;
         return true;
     }
+    case VOCTRL_GET_COLORSPACE: {
+        struct mp_image_params *params = data;
+        if (va_get_colorspace_flag(p->image_params.colorspace))
+            params->colorspace = p->image_params.colorspace;
+        return true;
+    }
     case VOCTRL_SET_EQUALIZER: {
         struct voctrl_set_equalizer_args *eq = data;
         return set_equalizer(p, eq->name, eq->value);

@@ -1481,9 +1481,9 @@ static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
 
     struct MPOpts *opts = mpctx->opts;
 
-    struct mp_csp_details vo_csp = {0};
+    struct mp_image_params vo_csp = {0};
     if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_GET_YUV_COLORSPACE, &vo_csp);
+        vo_control(mpctx->video_out, VOCTRL_GET_COLORSPACE, &vo_csp);
 
     struct mp_image_params vd_csp = {0};
     if (mpctx->d_video)
@@ -1492,7 +1492,7 @@ static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
     char *res = talloc_strdup(NULL, "");
     append_csp(&res, "*Requested", mp_csp_names, opts->requested_colorspace);
     append_csp(&res, "Video decoder", mp_csp_names, vd_csp.colorspace);
-    append_csp(&res, "Video output", mp_csp_names, vo_csp.format);
+    append_csp(&res, "Video output", mp_csp_names, vo_csp.colorspace);
     *(char **)arg = res;
     return M_PROPERTY_OK;
 }
@@ -1505,9 +1505,9 @@ static int mp_property_colormatrix_input_range(m_option_t *prop, int action,
 
     struct MPOpts *opts = mpctx->opts;
 
-    struct mp_csp_details vo_csp = {0};
+    struct mp_image_params vo_csp = {0};
     if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_GET_YUV_COLORSPACE, &vo_csp );
+        vo_control(mpctx->video_out, VOCTRL_GET_COLORSPACE, &vo_csp);
 
     struct mp_image_params vd_csp = {0};
     if (mpctx->d_video)
@@ -1517,7 +1517,7 @@ static int mp_property_colormatrix_input_range(m_option_t *prop, int action,
     append_csp(&res, "*Requested", mp_csp_levels_names,
                opts->requested_input_range);
     append_csp(&res, "Video decoder", mp_csp_levels_names, vd_csp.colorlevels);
-    append_csp(&res, "Video output", mp_csp_levels_names, vo_csp.levels_in);
+    append_csp(&res, "Video output", mp_csp_levels_names, vo_csp.colorlevels);
     *(char **)arg = res;
     return M_PROPERTY_OK;
 }
@@ -1530,14 +1530,14 @@ static int mp_property_colormatrix_output_range(m_option_t *prop, int action,
 
     struct MPOpts *opts = mpctx->opts;
 
-    struct mp_csp_details actual = {0};
+    struct mp_image_params actual = {0};
     if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_GET_YUV_COLORSPACE, &actual);
+        vo_control(mpctx->video_out, VOCTRL_GET_COLORSPACE, &actual);
 
     char *res = talloc_strdup(NULL, "");
     append_csp(&res, "*Requested", mp_csp_levels_names,
                opts->requested_output_range);
-    append_csp(&res, "Video output", mp_csp_levels_names, actual.levels_out);
+    append_csp(&res, "Video output", mp_csp_levels_names, actual.outputlevels);
     *(char **)arg = res;
     return M_PROPERTY_OK;
 }

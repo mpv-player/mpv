@@ -62,7 +62,6 @@ struct gl_priv {
 
     int use_ycbcr;
     int use_yuv;
-    struct mp_csp_details colorspace;
     int is_yuv;
     int lscale;
     int cscale;
@@ -1395,8 +1394,13 @@ static void update_yuvconv(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
+    if (!vo->params)
+        return;
 
-    struct mp_csp_params cparams = { .colorspace = p->colorspace };
+    struct mp_csp_params cparams = { .colorspace = MP_CSP_DETAILS_DEFAULTS };
+    cparams.colorspace.format = vo->params->colorspace;
+    cparams.colorspace.levels_in = vo->params->colorlevels;
+    cparams.colorspace.levels_out = vo->params->outputlevels;
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
     gl_conversion_params_t params = {
         p->target, p->yuvconvtype, cparams,
@@ -2121,18 +2125,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
             return VO_TRUE;
         }
         break;
-    case VOCTRL_SET_YUV_COLORSPACE: {
+    case VOCTRL_GET_COLORSPACE: {
+        struct mp_image_params *params = data;
         bool supports_csp = (1 << p->use_yuv) & MASK_NOT_COMBINERS;
-        if (vo->config_count && supports_csp) {
-            p->colorspace = *(struct mp_csp_details *)data;
-            update_yuvconv(vo);
-            vo->want_redraw = true;
+        if (vo->params && supports_csp) {
+            params->colorspace = vo->params->colorspace;
+            params->colorlevels = vo->params->colorlevels;
+            params->outputlevels = vo->params->outputlevels;
         }
         return VO_TRUE;
     }
-    case VOCTRL_GET_YUV_COLORSPACE:
-        *(struct mp_csp_details *)data = p->colorspace;
-        return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         do_render(vo);
         return true;
@@ -2173,7 +2175,6 @@ const struct vo_driver video_out_opengl_old = {
     .priv_defaults = &(const struct gl_priv) {
         .many_fmts = 1,
         .use_yuv = -1,
-        .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .filter_strength = 0.5,
         .use_rectangle = -1,
         .ati_hack = -1,

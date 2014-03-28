@@ -141,6 +141,7 @@ typedef struct d3d_priv {
     int src_height;             /**< Source (movie) heigth */
     struct mp_osd_res osd_res;
     int image_format;           /**< mplayer image format */
+    struct mp_image_params params;
     bool use_textures;          /**< use 3D texture rendering, instead of
                                 StretchRect */
     bool use_shaders;           /**< use shader for YUV color conversion
@@ -180,7 +181,6 @@ typedef struct d3d_priv {
     int max_texture_height;         /**< from the device capabilities */
 
     D3DMATRIX d3d_colormatrix;
-    struct mp_csp_details colorspace;
     struct mp_csp_equalizer video_eq;
 
     struct osdpart *osd[MAX_OSD_PARTS];
@@ -1126,7 +1126,10 @@ static int query_format(struct vo *vo, uint32_t movie_fmt)
 static void update_colorspace(d3d_priv *priv)
 {
     float coeff[3][4];
-    struct mp_csp_params csp = { .colorspace = priv->colorspace };
+    struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
+    csp.colorspace.format = priv->params.colorspace;
+    csp.colorspace.levels_in = priv->params.colorlevels;
+    csp.colorspace.levels_out = priv->params.outputlevels;
     mp_csp_copy_equalizer_values(&csp, &priv->video_eq);
 
     if (priv->use_shaders) {
@@ -1205,16 +1208,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         d3d_draw_frame(priv);
         return VO_TRUE;
-    case VOCTRL_SET_YUV_COLORSPACE:
-        priv->colorspace = *(struct mp_csp_details *)data;
-        update_colorspace(priv);
-        vo->want_redraw = true;
+    case VOCTRL_GET_COLORSPACE: {
+        struct mp_image_params *p = data;
+        if (priv->use_shaders) { // no idea what the heck D3D YUV uses
+            p->colorspace = priv->params.colorspace;
+            p->colorlevels = priv->params.colorlevels;
+            p->outputlevels = priv->params.outputlevels;
+        }
         return VO_TRUE;
-    case VOCTRL_GET_YUV_COLORSPACE:
-        if (!priv->use_shaders)
-            break; // no idea what the heck D3D YUV uses
-        *(struct mp_csp_details *)data = priv->colorspace;
-        return VO_TRUE;
+    }
     case VOCTRL_SET_EQUALIZER: {
         if (!priv->use_shaders)
             break;
@@ -1282,6 +1284,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
         priv->src_width = params->w;
         priv->src_height = params->h;
+        priv->params = params;
         init_rendering_mode(priv, params->imgfmt, true);
     }
 
@@ -1709,14 +1712,12 @@ static const struct m_option opts[] = {
 };
 
 static const d3d_priv defaults_noshaders = {
-    .colorspace = MP_CSP_DETAILS_DEFAULTS,
     .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
     .opt_disable_shaders = 1,
     .opt_disable_textures = 1,
 };
 
 static const d3d_priv defaults = {
-    .colorspace = MP_CSP_DETAILS_DEFAULTS,
     .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
 };
 

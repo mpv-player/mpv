@@ -74,8 +74,10 @@ enum mp_voctrl {
     VOCTRL_GET_WINDOW_SIZE,             // int[2] (w/h)
     VOCTRL_SET_WINDOW_SIZE,             // int[2] (w/h)
 
-    VOCTRL_SET_YUV_COLORSPACE,          // struct mp_csp_details*
-    VOCTRL_GET_YUV_COLORSPACE,          // struct mp_csp_details*
+    // The VO is supposed to set  "known" fields, and leave the others
+    // untouched or set to 0.
+    // imgfmt/w/h/d_w/d_h can be omitted for convenience.
+    VOCTRL_GET_COLORSPACE,              // struct mp_image_params*
 
     VOCTRL_SCREENSHOT,                  // struct voctrl_screenshot_args*
 

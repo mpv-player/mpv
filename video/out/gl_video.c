@@ -190,7 +190,6 @@ struct gl_video {
     // state for luma (0) and chroma (1) scalers
     struct scaler scalers[2];
 
-    struct mp_csp_details colorspace;
     struct mp_csp_equalizer video_eq;
     struct mp_image_params image_params;
 
@@ -535,8 +534,13 @@ static void update_uniforms(struct gl_video *p, GLuint program)
 
     gl->UseProgram(program);
 
+    struct mp_csp_details csp = MP_CSP_DETAILS_DEFAULTS;
+    csp.levels_in = p->image_params.colorlevels;
+    csp.levels_out = p->image_params.outputlevels;
+    csp.format = p->image_params.colorspace;
+
     struct mp_csp_params cparams = {
-        .colorspace = p->colorspace,
+        .colorspace = csp,
         .input_bits = p->plane_bits,
         .texture_bits = (p->plane_bits + 7) & ~7,
     };
@@ -1300,12 +1304,6 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
     p->image_dw = params->d_w;
     p->image_dh = params->d_h;
     p->image_params = *params;
-
-    struct mp_csp_details csp = MP_CSP_DETAILS_DEFAULTS;
-    csp.levels_in = params->colorlevels;
-    csp.levels_out = params->outputlevels;
-    csp.format = params->colorspace;
-    p->colorspace = csp;
 
     if (p->is_rgb && (p->opts.srgb || p->use_lut_3d)) {
         // If we're opening an RGB source like a png file or similar,
@@ -2215,10 +2213,9 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
     reinit_rendering(p);
 }
 
-bool gl_video_get_csp_override(struct gl_video *p, struct mp_csp_details *csp)
+void gl_video_get_colorspace(struct gl_video *p, struct mp_image_params *params)
 {
-    *csp = p->colorspace;
-    return true;
+    *params = p->image_params; // supports everything
 }
 
 bool gl_video_set_equalizer(struct gl_video *p, const char *name, int val)

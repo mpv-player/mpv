@@ -56,7 +56,7 @@ struct priv {
     AVRational worst_time_base;
     int worst_time_base_is_stream;
 
-    struct mp_csp_details colorspace;
+    struct mp_image_params real_colorspace;
 };
 
 static int preinit(struct vo *vo)
@@ -69,7 +69,6 @@ static int preinit(struct vo *vo)
     vo->priv = talloc_zero(vo, struct priv);
     vc = vo->priv;
     vc->harddup = vo->encode_lavc_ctx->options->harddup;
-    vc->colorspace = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
     vo->untimed = true;
     return 0;
 }
@@ -153,14 +152,16 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     vc->stream->codec->height = height;
     vc->stream->codec->pix_fmt = pix_fmt;
 
-    encode_lavc_set_csp(vo->encode_lavc_ctx, vc->stream, vc->colorspace.format);
-    encode_lavc_set_csp_levels(vo->encode_lavc_ctx, vc->stream, vc->colorspace.levels_out);
+    encode_lavc_set_csp(vo->encode_lavc_ctx, vc->stream, params->colorspace);
+    encode_lavc_set_csp_levels(vo->encode_lavc_ctx, vc->stream, params->colorlevels);
 
     if (encode_lavc_open_codec(vo->encode_lavc_ctx, vc->stream) < 0)
         goto error;
 
-    vc->colorspace.format = encode_lavc_get_csp(vo->encode_lavc_ctx, vc->stream);
-    vc->colorspace.levels_out = encode_lavc_get_csp_levels(vo->encode_lavc_ctx, vc->stream);
+    vc->real_colorspace.colorspace =
+        encode_lavc_get_csp(vo->encode_lavc_ctx, vc->stream);
+    vc->real_colorspace.colorlevels =
+        encode_lavc_get_csp_levels(vo->encode_lavc_ctx, vc->stream);
 
     vc->buffer_size = 6 * width * height + 200;
     if (vc->buffer_size < FF_MIN_BUFFER_SIZE)
@@ -502,8 +503,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     if (vc->lastimg && vc->lastimg_wants_osd && vo->params) {
         struct mp_osd_res dim = osd_res_from_image_params(vo->params);
 
-        mp_image_set_colorspace_details(vc->lastimg, &vc->colorspace);
-
         osd_draw_on_image(osd, dim, osd_get_vo_pts(osd), OSD_DRAW_SUB_ONLY,
                           vc->lastimg);
     }
@@ -517,18 +516,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     int r = VO_NOTIMPL;
     pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
     switch (request) {
-    case VOCTRL_SET_YUV_COLORSPACE:
-        vc->colorspace = *(struct mp_csp_details *)data;
-        if (vc->stream) {
-            encode_lavc_set_csp(vo->encode_lavc_ctx, vc->stream, vc->colorspace.format);
-            encode_lavc_set_csp_levels(vo->encode_lavc_ctx, vc->stream, vc->colorspace.levels_out);
-            vc->colorspace.format = encode_lavc_get_csp(vo->encode_lavc_ctx, vc->stream);
-            vc->colorspace.levels_out = encode_lavc_get_csp_levels(vo->encode_lavc_ctx, vc->stream);
-        }
-        r = 1;
-        break;
-    case VOCTRL_GET_YUV_COLORSPACE:
-        *(struct mp_csp_details *)data = vc->colorspace;
+    case VOCTRL_GET_COLORSPACE:
+        *(struct mp_image_params *)data = vc->real_colorspace;
         r = 1;
         break;
     }

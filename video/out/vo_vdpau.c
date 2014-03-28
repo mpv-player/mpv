@@ -100,7 +100,6 @@ struct vdpctx {
 
     int                                force_yuv;
     VdpVideoMixer                      video_mixer;
-    struct mp_csp_details              colorspace;
     int                                user_deint;
     int                                deint;
     int                                deint_type;
@@ -545,6 +544,8 @@ static int set_video_attribute(struct vo *vo, VdpVideoMixerAttribute attr,
 static void update_csc_matrix(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
+    if (!vo->params)
+        return;
 
     MP_VERBOSE(vo, "Updating CSC matrix\n");
 
@@ -552,8 +553,10 @@ static void update_csc_matrix(struct vo *vo)
     // both are float[3][4]
     VdpCSCMatrix matrix;
 
-    struct mp_csp_params cparams = {
-        .colorspace = vc->colorspace, .input_bits = 8, .texture_bits = 8 };
+    struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
+    cparams.colorspace.format = vo->params->colorspace;
+    cparams.colorspace.levels_in = vo->params->colorlevels;
+    cparams.colorspace.levels_out = vo->params->outputlevels;
     mp_csp_copy_equalizer_values(&cparams, &vc->video_eq);
     mp_get_yuv2rgb_coeffs(&cparams, matrix);
 
@@ -1224,9 +1227,12 @@ static struct mp_image *read_output_surface(struct vo *vo,
     struct vdpctx *vc = vo->priv;
     VdpStatus vdp_st;
     struct vdp_functions *vdp = vc->vdp;
+    if (!vo->params)
+        return NULL;
+
     struct mp_image *image = mp_image_alloc(IMGFMT_BGR32, width, height);
     image->colorspace = MP_CSP_RGB;
-    image->levels = vc->colorspace.levels_out; // hardcoded with conv. matrix
+    image->levels = vo->params->outputlevels; // hardcoded with conv. matrix
 
     void *dst_planes[] = { image->planes[0] };
     uint32_t dst_pitches[] = { image->stride[0] };
@@ -1358,7 +1364,6 @@ static int preinit(struct vo *vo)
     vc->vdp_device = vc->mpvdp->vdp_device;
     vc->vdp = &vc->mpvdp->vdp;
 
-    vc->colorspace = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
     vc->video_eq.capabilities = MP_CSP_EQ_CAPS_COLORMATRIX;
 
     vc->deint_type = vc->deint ? FFABS(vc->deint) : 3;
@@ -1457,19 +1462,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_get_equalizer_args *args = data;
         return get_equalizer(vo, args->name, args->valueptr);
     }
-    case VOCTRL_SET_YUV_COLORSPACE:
-        if (vc->rgb_mode)
-            break;
-        vc->colorspace = *(struct mp_csp_details *)data;
-        if (status_ok(vo))
-            update_csc_matrix(vo);
-        vo->want_redraw = true;
+    case VOCTRL_GET_COLORSPACE: {
+        struct mp_image_params *params = data;
+        if (vo->params && !vc->rgb_mode) {
+            params->colorspace = vo->params->colorspace;
+            params->colorlevels = vo->params->colorlevels;
+            params->outputlevels = vo->params->outputlevels;
+        }
         return true;
-    case VOCTRL_GET_YUV_COLORSPACE:
-        if (vc->rgb_mode)
-            break;
-        *(struct mp_csp_details *)data = vc->colorspace;
-        return true;
+    }
     case VOCTRL_NEWFRAME:
         vc->deint_queue_pos = next_deint_queue_pos(vo, true);
         if (status_ok(vo))
