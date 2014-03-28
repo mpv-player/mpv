@@ -35,7 +35,10 @@ enum mp_nav_event_type {
     MP_NAV_EVENT_HIGHLIGHT,     // highlight changed
     MP_NAV_EVENT_MENU_MODE,     // menu mode on/off
     MP_NAV_EVENT_EOF,           // it's over
+    MP_NAV_EVENT_OVERLAY,       // overlay changed
 };
+
+struct sub_bitmap;
 
 struct mp_nav_event {
     enum mp_nav_event_type event;
@@ -51,6 +54,9 @@ struct mp_nav_event {
         struct {
             bool enable;
         } menu_mode;
+        struct {
+            struct sub_bitmap *images[2];
+        } overlay;
     } u;
 };
 

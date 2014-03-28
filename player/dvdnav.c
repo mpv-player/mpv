@@ -46,6 +46,8 @@ struct mp_nav_state {
     int vidsize[2];
     int subsize[2];
     struct sub_bitmap *hi_elem;
+    struct sub_bitmap *overlays[2];
+    struct sub_bitmap outputs[3];
 };
 
 static inline bool is_valid_size(int size[2]) {
@@ -207,6 +209,17 @@ void mp_handle_nav(struct MPContext *mpctx)
             osd_set_nav_highlight(mpctx->osd, mpctx);
             break;
         }
+        case MP_NAV_EVENT_OVERLAY: {
+            osd_set_nav_highlight(mpctx->osd, NULL);
+            for (int i = 0; i < 2; i++) {
+                if (nav->overlays[i])
+                    talloc_free(nav->overlays[i]);
+                nav->overlays[i] = talloc_steal(nav, ev->u.overlay.images[i]);
+            }
+            update_resolution(mpctx);
+            osd_set_nav_highlight(mpctx->osd, mpctx);
+            break;
+        }
         default: ; // ignore
         }
         talloc_free(ev);
@@ -265,13 +278,26 @@ void mp_nav_get_highlight(void *priv, struct mp_osd_res res,
         nav->subsize[1] = sizes[1];
     }
 
-    sub->x = nav->highlight[0];
-    sub->y = nav->highlight[1];
-    sub->w = MPCLAMP(nav->highlight[2] - sub->x, 0, sizes[0]);
-    sub->h = MPCLAMP(nav->highlight[3] - sub->y, 0, sizes[1]);
-    sub->stride = sub->w * 4;
-    out_imgs->format = SUBBITMAP_RGBA;
-    out_imgs->parts = sub;
-    out_imgs->num_parts = sub->w > 0 && sub->h > 0 && nav->hi_visible;
-    osd_rescale_bitmaps(out_imgs, sizes[0], sizes[1], res, -1);
+    out_imgs->num_parts = 0;
+
+    if (nav->hi_visible) {
+        sub->x = nav->highlight[0];
+        sub->y = nav->highlight[1];
+        sub->w = MPCLAMP(nav->highlight[2] - sub->x, 0, sizes[0]);
+        sub->h = MPCLAMP(nav->highlight[3] - sub->y, 0, sizes[1]);
+        sub->stride = sub->w * 4;
+        if (sub->w > 0 && sub->h > 0)
+            nav->outputs[out_imgs->num_parts++] = *sub;
+    }
+
+    if (nav->overlays[0])
+        nav->outputs[out_imgs->num_parts++] = *nav->overlays[0];
+    if (nav->overlays[1])
+        nav->outputs[out_imgs->num_parts++] = *nav->overlays[1];
+
+    if (out_imgs->num_parts) {
+        out_imgs->parts = nav->outputs;
+        out_imgs->format = SUBBITMAP_RGBA;
+        osd_rescale_bitmaps(out_imgs, sizes[0], sizes[1], res, -1);
+    }
 }
