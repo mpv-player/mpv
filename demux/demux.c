@@ -25,6 +25,8 @@
 #include <assert.h>
 #include <unistd.h>
 
+#include <math.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -497,6 +499,81 @@ static const char *d_level(enum demux_check level)
     abort();
 }
 
+static int decode_float(char *str, float *out)
+{
+    char *rest;
+    float dec_val;
+
+    dec_val = strtod(str, &rest);
+    if (!rest || (rest == str) || !isfinite(dec_val))
+        return -1;
+
+    *out = dec_val;
+    return 0;
+}
+
+static int decode_gain(demuxer_t *demuxer, const char *tag, float *out)
+{
+    char *tag_val = NULL;
+    float dec_val;
+
+    tag_val = mp_tags_get_str(demuxer->metadata, tag);
+    if (!tag_val) {
+        mp_msg(demuxer->log, MSGL_V, "Replaygain tags not found\n");
+        return -1;
+    }
+
+    if (decode_float(tag_val, &dec_val)) {
+        mp_msg(demuxer->log, MSGL_ERR, "Invalid replaygain value\n");
+        return -1;
+    }
+
+    *out = dec_val;
+    return 0;
+}
+
+static int decode_peak(demuxer_t *demuxer, const char *tag, float *out)
+{
+    char *tag_val = NULL;
+    float dec_val;
+
+    *out = 1.0;
+
+    tag_val = mp_tags_get_str(demuxer->metadata, tag);
+    if (!tag_val)
+        return 0;
+
+    if (decode_float(tag_val, &dec_val))
+        return 0;
+
+    if (dec_val == 0.0)
+        return 0;
+
+    *out = dec_val;
+    return 0;
+}
+
+static void demux_export_replaygain(demuxer_t *demuxer)
+{
+    float tg, tp, ag, ap;
+
+    if (!demuxer->replaygain_data &&
+        !decode_gain(demuxer, "REPLAYGAIN_TRACK_GAIN", &tg) &&
+        !decode_peak(demuxer, "REPLAYGAIN_TRACK_PEAK", &tp) &&
+        !decode_gain(demuxer, "REPLAYGAIN_ALBUM_GAIN", &ag) &&
+        !decode_peak(demuxer, "REPLAYGAIN_ALBUM_PEAK", &ap))
+    {
+        struct replaygain_data *rgain = talloc_ptrtype(demuxer, rgain);
+
+        rgain->track_gain = tg;
+        rgain->track_peak = tp;
+        rgain->album_gain = ag;
+        rgain->album_peak = ap;
+
+        demuxer->replaygain_data = rgain;
+    }
+}
+
 static struct demuxer *open_given_type(struct mpv_global *global,
                                        struct mp_log *log,
                                        const struct demuxer_desc *desc,
@@ -546,6 +623,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         add_stream_chapters(demuxer);
         demuxer_sort_chapters(demuxer);
         demux_info_update(demuxer);
+        demux_export_replaygain(demuxer);
         // Pretend we can seek if we can't seek, but there's a cache.
         if (!demuxer->seekable && stream->uncached_stream) {
             mp_warn(log,

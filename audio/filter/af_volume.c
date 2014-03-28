@@ -43,60 +43,6 @@ struct priv {
     float cfg_volume;
 };
 
-static int decode_float(char *str, float *out)
-{
-    char *rest;
-    float dec_val;
-
-    dec_val = strtod(str, &rest);
-    if (!rest || (rest == str) || !isfinite(dec_val))
-        return -1;
-
-    *out = dec_val;
-    return 0;
-}
-
-static int decode_gain(struct af_instance *af, const char *tag, float *out)
-{
-    char *tag_val = NULL;
-    float dec_val;
-
-    tag_val = mp_tags_get_str(af->metadata, tag);
-    if (!tag_val) {
-        mp_msg(af->log, MSGL_V, "Replaygain tags not found\n");
-        return -1;
-    }
-
-    if (decode_float(tag_val, &dec_val)) {
-        mp_msg(af->log, MSGL_ERR, "Invalid replaygain value\n");
-        return -1;
-    }
-
-    *out = dec_val;
-    return 0;
-}
-
-static int decode_peak(struct af_instance *af, const char *tag, float *out)
-{
-    char *tag_val = NULL;
-    float dec_val;
-
-    *out = 1.0;
-
-    tag_val = mp_tags_get_str(af->metadata, tag);
-    if (!tag_val)
-        return 0;
-
-    if (decode_float(tag_val, &dec_val))
-        return 0;
-
-    if (dec_val == 0.0)
-        return 0;
-
-    *out = dec_val;
-    return 0;
-}
-
 static int control(struct af_instance *af, int cmd, void *arg)
 {
     struct priv *s = af->priv;
@@ -116,39 +62,22 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (af_fmt_is_planar(in->format))
             mp_audio_set_format(af->data, af_fmt_to_planar(af->data->format));
         s->rgain = 1.0;
-        if ((s->rgain_track || s->rgain_album) &&
-            (af->replaygain_data || af->metadata)) {
+        if ((s->rgain_track || s->rgain_album) && af->replaygain_data) {
             float gain, peak;
-            char *gain_tag = NULL, *peak_tag = NULL;
 
             if (s->rgain_track) {
-                if (af->replaygain_data) {
-                    gain = af->replaygain_data->track_gain;
-                    peak = af->replaygain_data->track_peak;
-                } else {
-                    gain_tag = "REPLAYGAIN_TRACK_GAIN";
-                    peak_tag = "REPLAYGAIN_TRACK_PEAK";
-                }
+                gain = af->replaygain_data->track_gain;
+                peak = af->replaygain_data->track_peak;
             } else if (s->rgain_album) {
-                if (af->replaygain_data) {
-                    gain = af->replaygain_data->album_gain;
-                    peak = af->replaygain_data->album_peak;
-                } else {
-                    gain_tag = "REPLAYGAIN_ALBUM_GAIN";
-                    peak_tag = "REPLAYGAIN_ALBUM_PEAK";
-                }
+                gain = af->replaygain_data->album_gain;
+                peak = af->replaygain_data->album_peak;
             }
 
-            if (af->replaygain_data ||
-                (!decode_gain(af, gain_tag, &gain) &&
-                 !decode_peak(af, peak_tag, &peak)))
-            {
-                gain += s->rgain_preamp;
-                af_from_dB(1, &gain, &s->rgain, 20.0, -200.0, 60.0);
+            gain += s->rgain_preamp;
+            af_from_dB(1, &gain, &s->rgain, 20.0, -200.0, 60.0);
 
-                if (!s->rgain_clip) // clipping prevention
-                    s->rgain = MPMIN(s->rgain, 1.0 / peak);
-            }
+            if (!s->rgain_clip) // clipping prevention
+                s->rgain = MPMIN(s->rgain, 1.0 / peak);
         }
         if (s->detach && fabs(s->level + s->rgain - 2.0) < 0.00001)
             return AF_DETACH;
