@@ -1468,8 +1468,7 @@ OPTIONS
     you can try ``--vo=null`` instead.
 
 ``--ontop``
-    Makes the player window stay on top of other windows. Supported by video
-    output drivers which use X11, as well as corevideo.
+    Makes the player window stay on top of other windows.
 
 ``--ordered-chapters``, ``--no-ordered-chapters``
     Enabled by default.
