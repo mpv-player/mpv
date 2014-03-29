@@ -1284,7 +1284,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
         priv->src_width = params->w;
         priv->src_height = params->h;
-        priv->params = params;
+        priv->params = *params;
         init_rendering_mode(priv, params->imgfmt, true);
     }
 

@@ -256,7 +256,6 @@ static void apply_csp(struct vo *vo, CVPixelBufferRef pbuf)
 
 static void get_colorspace(struct vo *vo, struct mp_image_params *p)
 {
-    struct priv *p = vo->priv;
     if (vo->params && get_cv_csp_matrix(vo->params->colorspace))
         p->colorspace = vo->params->colorspace;
 }
