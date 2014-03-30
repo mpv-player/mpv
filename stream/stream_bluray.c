@@ -629,6 +629,52 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
+static void select_initial_title(stream_t *s, int title_guess) {
+    struct bluray_priv_s *b = s->priv;
+
+    int title = -1;
+    if (b->use_nav) {
+        if (b->cfg_title == BLURAY_MENU_TITLE)
+            title = 0; // BLURAY_TITLE_TOP_MENU
+        else if (b->cfg_title == BLURAY_DEFAULT_TITLE)
+            title = b->num_titles - 1;
+        else
+            title = b->cfg_title;
+    } else {
+        if (b->cfg_title != BLURAY_DEFAULT_TITLE )
+            title = b->cfg_title;
+        else
+            title = title_guess;
+    }
+    if (title < 0)
+        return;
+
+    if (play_title(b, title))
+        b->current_title = title;
+    else {
+        MP_WARN(s, "Couldn't start title '%d'.\n", title);
+        if (!b->use_nav) // cannot query title info in nav
+            b->current_title = bd_get_current_title(b->bd);
+    }
+}
+
+static void select_initial_angle(stream_t *s) {
+    struct bluray_priv_s *b = s->priv;
+    if (!b->use_nav) // no way to figure out current title info
+        return;
+    BLURAY_TITLE_INFO *info = bd_get_title_info(b->bd, b->current_title, 0);
+    if (!info)
+        return;
+    /* Select angle */
+    unsigned int angle = 0;
+    angle = bluray_angle ? bluray_angle : BLURAY_DEFAULT_ANGLE;
+    angle = FFMIN(angle, info->angle_count);
+    if (angle)
+        bd_select_angle(b->bd, angle);
+    b->current_angle = bd_get_current_angle(b->bd);
+    bd_free_title_info(info);
+}
+
 static int bluray_stream_open(stream_t *s, int mode)
 {
     struct bluray_priv_s *b = s->priv;
@@ -730,49 +776,16 @@ static int bluray_stream_open(stream_t *s, int mode)
         bd_register_overlay_proc(bd, s, overlay_process);
     }
 
-    /* Select current title */
-    if (b->use_nav) {
-        if (b->cfg_title == BLURAY_MENU_TITLE)
-            title = 0; // BLURAY_TITLE_TOP_MENU
-        else if (b->cfg_title == BLURAY_DEFAULT_TITLE)
-            title = b->num_titles - 1;
-        else
-            title = b->cfg_title;
-    } else {
-        if (b->cfg_title != BLURAY_DEFAULT_TITLE )
-            title = b->cfg_title;
-        else
-            title = title_guess;
-    }
-    title = FFMIN(title, b->num_titles - 1);
+    select_initial_title(s, title_guess);
+    select_initial_angle(s);
 
-    if (title >= 0) {
-        if (!play_title(b, title))
-            MP_WARN(s, "Couldn't start title '%d'.\n", title);
-    }
+    if (b->current_title >= 0)
+        MP_SMODE(s, "ID_BLURAY_CURRENT_TITLE=%d\n", b->current_title);
+    if (b->current_angle >= 0)
+        MP_SMODE(s, "ID_BLURAY_CURRENT_ANGLE=%d\n", b->current_angle + 1);
 
     title_size = bd_get_title_size(bd);
-    MP_SMODE(s, "ID_BLURAY_CURRENT_TITLE=%d\n", title);
 
-    /* Get current title information */
-    if (b->cfg_title == BLURAY_MENU_TITLE || b->use_nav)
-        goto err_no_info;
-    info = bd_get_title_info(bd, title, angle);
-    if (!info)
-        goto err_no_info;
-
-    /* Select angle */
-    angle = bluray_angle ? bluray_angle : BLURAY_DEFAULT_ANGLE;
-    angle = FFMIN(angle, info->angle_count);
-
-    if (angle)
-        bd_select_angle(bd, angle);
-
-    MP_SMODE(s, "ID_BLURAY_CURRENT_ANGLE=%d\n", angle + 1);
-
-    bd_free_title_info(info);
-
-err_no_info:
     if (b->use_nav)
         s->fill_buffer = bdnav_stream_fill_buffer;
     else
