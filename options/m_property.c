@@ -232,6 +232,20 @@ int m_property_do(struct mp_log *log, const m_option_t *prop_list,
     }
 }
 
+bool m_property_split_path(const char *path, bstr *prefix, char **rem)
+{
+    char *next = strchr(path, '/');
+    if (next) {
+        *prefix = bstr_splice(bstr0(path), 0, next - path);
+        *rem = next + 1;
+        return true;
+    } else {
+        *prefix = bstr0(path);
+        *rem = "";
+        return false;
+    }
+}
+
 static int m_property_do_bstr(const m_option_t *prop_list, bstr name,
                               int action, void *arg, void *ctx)
 {

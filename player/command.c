@@ -853,16 +853,19 @@ static int tag_property(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
-        bstr key = bstr0(ka->key);
-        if (bstr_eatstart0(&key, "list/")) {
+        bstr key;
+        char *rem;
+        m_property_split_path(ka->key, &key, &rem);
+        if (bstr_equals0(key, "list")) {
             struct m_property_action_arg nka = *ka;
-            nka.key = key.start; // ok because slice ends with \0
+            nka.key = rem;
             return m_property_read_list(action, &nka, tags->num_keys,
                                         get_tag_entry, tags);
         }
         // Direct access without this prefix is allowed for compatibility.
-        bstr_eatstart0(&key, "by-key/");
-        char *meta = mp_tags_get_bstr(tags, key);
+        bstr k = bstr0(ka->key);
+        bstr_eatstart0(&k, "by-key/");
+        char *meta = mp_tags_get_bstr(tags, k);
         if (!meta)
             return M_PROPERTY_UNKNOWN;
         switch (ka->action) {
