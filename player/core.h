@@ -371,7 +371,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx);
 struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
                                                 struct playlist *playlist);
 
-// dvdnav.c
+// discnav.c
 void mp_nav_init(struct MPContext *mpctx);
 void mp_nav_reset(struct MPContext *mpctx);
 void mp_nav_destroy(struct MPContext *mpctx);
