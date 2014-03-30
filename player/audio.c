@@ -62,14 +62,8 @@ static int build_afilter_chain(struct MPContext *mpctx)
         new_srate = in_format.rate;
     else {
         new_srate = in_format.rate * opts->playback_speed;
-        if (new_srate != out_format.rate) {
-            // limits are taken from libaf/af_resample.c
-            if (new_srate < 8000)
-                new_srate = 8000;
-            if (new_srate > 192000)
-                new_srate = 192000;
+        if (new_srate != out_format.rate)
             opts->playback_speed = new_srate / (double)in_format.rate;
-        }
     }
     return audio_init_filters(d_audio, new_srate,
                 &out_format.rate, &out_format.channels, &out_format.format);
