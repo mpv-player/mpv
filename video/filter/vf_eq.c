@@ -469,7 +469,6 @@ int vf_open(vf_instance_t *vf)
   vf->filter = filter;
   vf->uninit = uninit;
 
-  vf->priv = malloc (sizeof (vf_eq2_t));
   eq2 = vf->priv;
   eq2->log = vf->log;
 
