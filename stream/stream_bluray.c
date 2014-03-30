@@ -23,7 +23,6 @@
  *  Use 'git clone git://git.videolan.org/libbluray' to get it.
  *
  * TODO:
- *  - Add AACS/BD+ protection detection
  *  - Add descrambled keys database support (KEYDB.cfg)
  *
  */
@@ -62,6 +61,16 @@
 #define BD_TIMEBASE (90000)
 #define BD_TIME_TO_MP(x) ((x) / (double)(BD_TIMEBASE))
 #define BD_TIME_FROM_MP(x) ((uint64_t)(x * BD_TIMEBASE))
+
+// copied from aacs.h in libaacs
+#define AACS_ERROR_CORRUPTED_DISC -1 /* opening or reading of AACS files failed */
+#define AACS_ERROR_NO_CONFIG      -2 /* missing config file */
+#define AACS_ERROR_NO_PK          -3 /* no matching processing key */
+#define AACS_ERROR_NO_CERT        -4 /* no valid certificate */
+#define AACS_ERROR_CERT_REVOKED   -5 /* certificate has been revoked */
+#define AACS_ERROR_MMC_OPEN       -6 /* MMC open failed (no MMC drive ?) */
+#define AACS_ERROR_MMC_FAILURE    -7 /* MMC failed */
+#define AACS_ERROR_NO_DK          -8 /* no matching device key */
 
 char *bluray_device  = NULL;
 int   bluray_angle   = 0;
@@ -604,6 +613,73 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
+static bool check_disc_info(stream_t *s)
+{
+    struct bluray_priv_s *b = s->priv;
+    const BLURAY_DISC_INFO *info = bd_get_disc_info(b->bd);
+
+    // check Blu-ray
+    if (!info->bluray_detected) {
+        MP_ERR(s, "Given stream is not a Blu-ray.\n");
+        return false;
+    }
+
+    // check AACS
+    if (info->aacs_detected) {
+        if (!info->libaacs_detected) {
+            MP_ERR(s, "AACS encryption detected but cannot find libaacs.\n");
+            return false;
+        }
+        if (!info->aacs_handled) {
+            const char *err = NULL;
+            switch (info->aacs_error_code) {
+            case AACS_ERROR_CORRUPTED_DISC:
+                err = "opening or reading of AACS files failed";
+                break;
+            case AACS_ERROR_NO_CONFIG:
+                err = "missing config file";
+                break;
+            case AACS_ERROR_NO_PK:
+                err = "no matching processing key";
+                break;
+            case AACS_ERROR_NO_CERT:
+                err = "no valid certificate";
+                break;
+            case AACS_ERROR_CERT_REVOKED:
+                err = "certificate has been revoked";
+                break;
+            case AACS_ERROR_MMC_OPEN:
+                err = "MMC open failed (maybe no MMC drive?)";
+                break;
+            case AACS_ERROR_MMC_FAILURE:
+                err = "MMC failed";
+                break;
+            case AACS_ERROR_NO_DK:
+                err = "no matching device key";
+                break;
+            default:
+                err = "unknown error";
+            }
+            MP_ERR(s, "AACS error: %s\n", err);
+            return false;
+        }
+    }
+
+    // check BD+
+    if (info->bdplus_detected) {
+        if (!info->libbdplus_detected) {
+            MP_ERR(s, "BD+ encryption detected but cannot find libbdplus.\n");
+            return false;
+        }
+        if (!info->bdplus_handled) {
+            MP_ERR(s, "Cannot decrypt BD+ encryption.\n");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 static void select_initial_title(stream_t *s, int title_guess) {
     struct bluray_priv_s *b = s->priv;
 
@@ -672,16 +748,16 @@ static int bluray_stream_open(stream_t *s, int mode)
         MP_ERR(s, "Couldn't open Blu-ray device: %s\n", device);
         return STREAM_UNSUPPORTED;
     }
+    b->bd = bd;
 
-    const BLURAY_DISC_INFO *disc_info = bd_get_disc_info(bd);
-    if (!disc_info->bluray_detected) {
-        MP_ERR(s, "Given stream is not a Blu-ray.\n");
+    if (!check_disc_info(s)) {
         destruct(b);
         return STREAM_UNSUPPORTED;
     }
 
     int title_guess = BLURAY_DEFAULT_TITLE;
     if (b->use_nav) {
+        const BLURAY_DISC_INFO *disc_info = bd_get_disc_info(b->bd);
         b->num_titles = disc_info->num_hdmv_titles + disc_info->num_bdj_titles;
         ++b->num_titles; // for BLURAY_TITLE_TOP_MENU
         ++b->num_titles; // for BLURAY_TITLE_FIRST_PLAY
@@ -722,7 +798,6 @@ static int bluray_stream_open(stream_t *s, int mode)
 
     // these should be set before any callback
     b->pool = mp_image_pool_new(6);
-    b->bd = bd;
     b->current_angle = -1;
     b->current_title = -1;
 
