@@ -662,9 +662,15 @@ an option at runtime.
     Current DVD angle.
 
 ``metadata``
-    Metadata key/value pairs. The raw property value will return a list of
-    key and value strings separated by ``,``. (If a key or value contains ``,``,
-    you're screwed.)
+    Metadata key/value pairs.
+
+    If the property is accessed with Lua's ``mp.get_property_native``, this
+    returns a table with metadata keys mapping to metadata values. If it is
+    accessed with the client API, this returns a ``MPV_FORMAT_NODE_MAP``,
+    with tag keys mapping to tag values.
+
+    For OSD, it returns a formatted list. Trying to retrieve this property as
+    a raw string doesn't work.
 
     This has a number of sub-properties:
 
