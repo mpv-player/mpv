@@ -613,6 +613,21 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
+static const char *aacs_strerr(int err)
+{
+    switch (err) {
+    case AACS_ERROR_CORRUPTED_DISC: return "opening or reading of AACS files failed";
+    case AACS_ERROR_NO_CONFIG:      return "missing config file";
+    case AACS_ERROR_NO_PK:          return "no matching processing key";
+    case AACS_ERROR_NO_CERT:        return "no valid certificate";
+    case AACS_ERROR_CERT_REVOKED:   return "certificate has been revoked";
+    case AACS_ERROR_MMC_OPEN:       return "MMC open failed (maybe no MMC drive?)";
+    case AACS_ERROR_MMC_FAILURE:    return "MMC failed";
+    case AACS_ERROR_NO_DK:          return "no matching device key";
+    default:                        return "unknown error";
+    }
+}
+
 static bool check_disc_info(stream_t *s)
 {
     struct bluray_priv_s *b = s->priv;
@@ -631,36 +646,7 @@ static bool check_disc_info(stream_t *s)
             return false;
         }
         if (!info->aacs_handled) {
-            const char *err = NULL;
-            switch (info->aacs_error_code) {
-            case AACS_ERROR_CORRUPTED_DISC:
-                err = "opening or reading of AACS files failed";
-                break;
-            case AACS_ERROR_NO_CONFIG:
-                err = "missing config file";
-                break;
-            case AACS_ERROR_NO_PK:
-                err = "no matching processing key";
-                break;
-            case AACS_ERROR_NO_CERT:
-                err = "no valid certificate";
-                break;
-            case AACS_ERROR_CERT_REVOKED:
-                err = "certificate has been revoked";
-                break;
-            case AACS_ERROR_MMC_OPEN:
-                err = "MMC open failed (maybe no MMC drive?)";
-                break;
-            case AACS_ERROR_MMC_FAILURE:
-                err = "MMC failed";
-                break;
-            case AACS_ERROR_NO_DK:
-                err = "no matching device key";
-                break;
-            default:
-                err = "unknown error";
-            }
-            MP_ERR(s, "AACS error: %s\n", err);
+            MP_ERR(s, "AACS error: %s\n", aacs_strerr(info->aacs_error_code));
             return false;
         }
     }
