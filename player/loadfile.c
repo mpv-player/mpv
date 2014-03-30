@@ -1272,6 +1272,9 @@ goto_reopen_demuxer: ;
         encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_VIDEO);
     if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_AUDIO])
         encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_AUDIO);
+    if (mpctx->encode_lavc_ctx)
+        encode_lavc_set_metadata(mpctx->encode_lavc_ctx,
+                                 mpctx->demuxer->metadata);
 #endif
 
     reinit_video_chain(mpctx);
