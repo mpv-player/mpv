@@ -1245,6 +1245,7 @@ function process_event(source, what)
                 end
             end
         end
+        tick()
     end
 end
 
