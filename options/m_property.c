@@ -246,6 +246,19 @@ bool m_property_split_path(const char *path, bstr *prefix, char **rem)
     }
 }
 
+// If *action is M_PROPERTY_KEY_ACTION, but the associated path is "", then
+// make this into a top-level action.
+static void m_property_unkey(int *action, void **arg)
+{
+    if (*action == M_PROPERTY_KEY_ACTION) {
+        struct m_property_action_arg *ka = *arg;
+        if (!ka->key[0]) {
+            *action = ka->action;
+            *arg = ka->arg;
+        }
+    }
+}
+
 static int m_property_do_bstr(const m_option_t *prop_list, bstr name,
                               int action, void *arg, void *ctx)
 {
@@ -524,6 +537,7 @@ int m_property_read_sub(const struct m_sub_property *props, int action, void *ar
 int m_property_read_list(int action, void *arg, int count,
                          m_get_item_cb get_item, void *ctx)
 {
+    m_property_unkey(&action, &arg);
     switch (action) {
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
