@@ -67,7 +67,7 @@ static const char av_desync_help_text[] =
 "     Experiment with different values for --autosync, 30 is a good start.\n"
 "     If you have PulseAudio, try --ao=alsa .\n"
 "- Slow video output.\n"
-"     Try a different -vo driver (-vo help for a list) or try -framedrop!\n"
+"     Try a different --vo driver (--vo help for a list) or try --framedrop!\n"
 "- Playing a video file with --vo=opengl with higher FPS than the monitor.\n"
 "     This is due to vsync limiting the framerate.\n"
 "- Playing from a slow network source.\n"
