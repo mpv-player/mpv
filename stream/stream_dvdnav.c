@@ -35,7 +35,7 @@
 #include "osdep/timer.h"
 #include "stream.h"
 #include "demux/demux.h"
-#include "stream_dvdnav.h"
+#include "discnav.h"
 #include "video/out/vo.h"
 #include "stream_dvd_common.h"
 

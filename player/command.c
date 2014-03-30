@@ -3333,7 +3333,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         mp_input_disable_section(mpctx->input, cmd->args[0].v.s);
         break;
 
-    case MP_CMD_DVDNAV:
+    case MP_CMD_DISCNAV:
         mp_nav_user_input(mpctx, cmd->args[0].v.s);
         break;
 

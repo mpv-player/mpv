@@ -24,7 +24,7 @@
 #include "common/common.h"
 #include "input/input.h"
 
-#include "stream/stream_dvdnav.h"
+#include "stream/discnav.h"
 
 #include "sub/dec_sub.h"
 #include "sub/osd.h"
@@ -86,12 +86,12 @@ void mp_nav_init(struct MPContext *mpctx)
         return;
 
     mpctx->nav_state = talloc_zero(NULL, struct mp_nav_state);
-    mpctx->nav_state->log = mp_log_new(mpctx->nav_state, mpctx->log, "dvdnav");
+    mpctx->nav_state->log = mp_log_new(mpctx->nav_state, mpctx->log, "discnav");
 
     MP_VERBOSE(mpctx->nav_state, "enabling\n");
 
-    mp_input_enable_section(mpctx->input, "dvdnav", 0);
-    mp_input_set_section_mouse_area(mpctx->input, "dvdnav-menu",
+    mp_input_enable_section(mpctx->input, "discnav", 0);
+    mp_input_set_section_mouse_area(mpctx->input, "discnav-menu",
                                     INT_MIN, INT_MIN, INT_MAX, INT_MAX);
 }
 
@@ -107,7 +107,7 @@ void mp_nav_reset(struct MPContext *mpctx)
     nav->nav_menu = false;
     nav->nav_draining = false;
     nav->nav_still_frame = 0;
-    mp_input_disable_section(mpctx->input, "dvdnav-menu");
+    mp_input_disable_section(mpctx->input, "discnav-menu");
     // Prevent demuxer init code to seek to the "start"
     mpctx->stream->start_pos = stream_tell(mpctx->stream);
     stream_control(mpctx->stream, STREAM_CTRL_RESUME_CACHE, NULL);
@@ -118,8 +118,8 @@ void mp_nav_destroy(struct MPContext *mpctx)
     osd_set_nav_highlight(mpctx->osd, NULL);
     if (!mpctx->nav_state)
         return;
-    mp_input_disable_section(mpctx->input, "dvdnav");
-    mp_input_disable_section(mpctx->input, "dvdnav-menu");
+    mp_input_disable_section(mpctx->input, "discnav");
+    mp_input_disable_section(mpctx->input, "discnav-menu");
     talloc_free(mpctx->nav_state);
     mpctx->nav_state = NULL;
 }
@@ -188,10 +188,10 @@ void mp_handle_nav(struct MPContext *mpctx)
         case MP_NAV_EVENT_MENU_MODE:
             nav->nav_menu = ev->u.menu_mode.enable;
             if (nav->nav_menu) {
-                mp_input_enable_section(mpctx->input, "dvdnav-menu",
+                mp_input_enable_section(mpctx->input, "discnav-menu",
                                         MP_INPUT_ON_TOP);
             } else {
-                mp_input_disable_section(mpctx->input, "dvdnav-menu");
+                mp_input_disable_section(mpctx->input, "discnav-menu");
             }
             break;
         case MP_NAV_EVENT_HIGHLIGHT: {

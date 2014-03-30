@@ -45,7 +45,7 @@
 #include "options/m_option.h"
 #include "stream.h"
 #include "osdep/timer.h"
-#include "stream_dvdnav.h"
+#include "discnav.h"
 #include "sub/osd.h"
 #include "sub/img_convert.h"
 #include "video/mp_image.h"
