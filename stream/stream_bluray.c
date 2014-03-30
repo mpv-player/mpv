@@ -240,12 +240,14 @@ static void overlay_process(void *data, const BD_OVERLAY *const bo)
             }
         }
         break;
-    } case BD_OVERLAY_WIPE: {
+    }
+    case BD_OVERLAY_WIPE: {
         uint32_t *const origin = overlay->image->bitmap;
         for (int y = 0; y < bo->h; y++)
             memset(origin + overlay->w * (y + bo->y) + bo->x, 0, 4 * bo->w);
         break;
-    } case BD_OVERLAY_HIDE:
+    }
+    case BD_OVERLAY_HIDE:
         priv->overlays[bo->plane].hidden = true;
         break;
     case BD_OVERLAY_FLUSH: {
@@ -297,7 +299,8 @@ static void fill_next_event(stream_t *s, struct mp_nav_event **ret)
             }
         }
         break;
-    } case MP_NAV_EVENT_MENU_MODE:
+    }
+    case MP_NAV_EVENT_MENU_MODE:
         e.u.menu_mode.enable = priv->in_menu;
         break;
     case MP_NAV_EVENT_STILL_FRAME:
@@ -469,42 +472,32 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     struct bluray_priv_s *b = s->priv;
 
     switch (cmd) {
-
     case STREAM_CTRL_GET_NUM_CHAPTERS: {
         const BLURAY_TITLE_INFO *ti = b->title_info;
         if (!ti)
             return STREAM_UNSUPPORTED;
-
         *((unsigned int *) arg) = ti->chapter_count;
-
         return STREAM_OK;
     }
-
     case STREAM_CTRL_GET_CHAPTER_TIME: {
         const BLURAY_TITLE_INFO *ti = b->title_info;
-        int chapter = *(double *)arg;
-        double time = MP_NOPTS_VALUE;
-
         if (!ti)
             return STREAM_UNSUPPORTED;
-
-        if (chapter >= 0 || chapter < ti->chapter_count) {
+        int chapter = *(double *)arg;
+        double time = MP_NOPTS_VALUE;
+        if (chapter >= 0 || chapter < ti->chapter_count)
             time = BD_TIME_TO_MP(ti->chapters[chapter].start);
-        }
-
-        if (time != MP_NOPTS_VALUE) {
-            *(double *)arg = time;
-            return STREAM_OK;
-        }
-        return STREAM_ERROR;
+        if (time == MP_NOPTS_VALUE)
+            return STREAM_ERROR;
+        *(double *)arg = time;
+        return STREAM_OK;
     }
     case STREAM_CTRL_SET_CURRENT_TITLE: {
         const uint32_t title = *((unsigned int*)arg);
-        if (title < b->num_titles && play_title(b, title)) {
-            b->current_title = title;
-            return STREAM_OK;
-        }
-        return STREAM_UNSUPPORTED;
+        if (title >= b->num_titles || !play_title(b, title))
+            return STREAM_UNSUPPORTED;
+        b->current_title = title;
+        return STREAM_OK;
     }
     case STREAM_CTRL_GET_CURRENT_TITLE: {
         *((unsigned int *) arg) = b->current_title;
@@ -514,22 +507,17 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         *((unsigned int *)arg) = b->num_titles;
         return STREAM_OK;
     }
-
     case STREAM_CTRL_GET_TIME_LENGTH: {
         const BLURAY_TITLE_INFO *ti = b->title_info;
-
         if (!ti)
             return STREAM_UNSUPPORTED;
-
         *((double *) arg) = BD_TIME_TO_MP(ti->duration);
         return STREAM_OK;
     }
-
     case STREAM_CTRL_GET_CURRENT_TIME: {
         *((double *) arg) = BD_TIME_TO_MP(bd_tell_time(b->bd));
         return STREAM_OK;
     }
-
     case STREAM_CTRL_SEEK_TO_TIME: {
         double pts = *((double *) arg);
         bd_seek_time(b->bd, BD_TIME_FROM_MP(pts));
@@ -537,43 +525,32 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         // API makes it hard to determine seeking success
         return STREAM_OK;
     }
-
     case STREAM_CTRL_GET_NUM_ANGLES: {
         const BLURAY_TITLE_INFO *ti = b->title_info;
         if (!ti)
             return STREAM_UNSUPPORTED;
-
         *((int *) arg) = ti->angle_count;
-
         return STREAM_OK;
     }
-
     case STREAM_CTRL_GET_ANGLE: {
         *((int *) arg) = b->current_angle;
         return STREAM_OK;
     }
-
     case STREAM_CTRL_SET_ANGLE: {
         const BLURAY_TITLE_INFO *ti = b->title_info;
-        int angle = *((int *) arg);
-
         if (!ti)
             return STREAM_UNSUPPORTED;
-
-        if (angle < 0 || angle > ti->angle_count) {
+        int angle = *((int *) arg);
+        if (angle < 0 || angle > ti->angle_count)
             return STREAM_UNSUPPORTED;
-        }
-
         b->current_angle = angle;
         bd_seamless_angle_change(b->bd, angle);
-
         return STREAM_OK;
     }
-
     case STREAM_CTRL_GET_LANG: {
-        struct stream_lang_req *req = arg;
         const BLURAY_TITLE_INFO *ti = b->title_info;
         if (ti && ti->clip_count) {
+            struct stream_lang_req *req = arg;
             BLURAY_STREAM_INFO *si = NULL;
             int count = 0;
             switch (req->type) {
@@ -596,15 +573,13 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         }
         return STREAM_ERROR;
     }
-    case STREAM_CTRL_GET_START_TIME:
-    {
+    case STREAM_CTRL_GET_START_TIME: {
         *((double *)arg) = 0;
         return STREAM_OK;
     }
     case STREAM_CTRL_MANAGES_TIMELINE:
         return STREAM_OK;
-    case STREAM_CTRL_GET_DISC_NAME:
-    {
+    case STREAM_CTRL_GET_DISC_NAME: {
         const struct meta_dl *meta = bd_get_meta(b->bd);
         if (!meta || !meta->di_name || !meta->di_name[0])
             break;
@@ -679,18 +654,7 @@ static int bluray_stream_open(stream_t *s, int mode)
 {
     struct bluray_priv_s *b = s->priv;
 
-    BLURAY_TITLE_INFO *info = NULL;
-    BLURAY *bd;
-
-    int title, title_guess = BLURAY_DEFAULT_TITLE;
-    uint64_t title_size;
-
-    unsigned int angle = 0;
-    uint64_t max_duration = 0;
-
-    char *device = NULL;
-    int i;
-
+    const char *device = NULL;
     /* find the requested device */
     if (b->cfg_device)
         device = b->cfg_device;
@@ -703,10 +667,9 @@ static int bluray_stream_open(stream_t *s, int mode)
     }
 
     /* open device */
-    bd = bd_open(device, NULL);
+    BLURAY *bd = bd_open(device, NULL);
     if (!bd) {
-        MP_ERR(s, "Couldn't open Blu-ray device: %s\n",
-               device);
+        MP_ERR(s, "Couldn't open Blu-ray device: %s\n", device);
         return STREAM_UNSUPPORTED;
     }
 
@@ -717,6 +680,7 @@ static int bluray_stream_open(stream_t *s, int mode)
         return STREAM_UNSUPPORTED;
     }
 
+    int title_guess = BLURAY_DEFAULT_TITLE;
     if (b->use_nav) {
         b->num_titles = disc_info->num_hdmv_titles + disc_info->num_bdj_titles;
         ++b->num_titles; // for BLURAY_TITLE_TOP_MENU
@@ -724,7 +688,7 @@ static int bluray_stream_open(stream_t *s, int mode)
         MP_SMODE(s, "ID_BLURAY_TITLES=%d\n", b->num_titles);
     } else {
         /* check for available titles on disc */
-        b->num_titles = bd_get_titles(bd, TITLES_RELEVANT, angle);
+        b->num_titles = bd_get_titles(bd, TITLES_RELEVANT, 0);
         MP_SMODE(s, "ID_BLURAY_TITLES=%d\n", b->num_titles);
         if (!b->num_titles) {
             MP_ERR(s, "Can't find any Blu-ray-compatible title here.\n");
@@ -733,17 +697,14 @@ static int bluray_stream_open(stream_t *s, int mode)
         }
 
         /* parse titles information */
-
-        for (i = 0; i < b->num_titles; i++) {
-            BLURAY_TITLE_INFO *ti;
-            int sec, msec;
-
-            ti = bd_get_title_info(bd, i, angle);
+        uint64_t max_duration = 0;
+        for (int i = 0; i < b->num_titles; i++) {
+            BLURAY_TITLE_INFO *ti = bd_get_title_info(bd, i, 0);
             if (!ti)
                 continue;
 
-            sec  = ti->duration / 90000;
-            msec = (ti->duration - sec) % 1000;
+            const int sec  = ti->duration / 90000;
+            const int msec = (ti->duration - sec) % 1000;
 
             MP_SMODE(s, "ID_BLURAY_TITLE_%d_CHAPTERS=%d\n", i, ti->chapter_count);
             MP_SMODE(s, "ID_BLURAY_TITLE_%d_ANGLE=%d\n", i, ti->angle_count);
@@ -784,8 +745,6 @@ static int bluray_stream_open(stream_t *s, int mode)
     if (b->current_angle >= 0)
         MP_SMODE(s, "ID_BLURAY_CURRENT_ANGLE=%d\n", b->current_angle + 1);
 
-    title_size = bd_get_title_size(bd);
-
     if (b->use_nav)
         s->fill_buffer = bdnav_stream_fill_buffer;
     else
@@ -793,7 +752,7 @@ static int bluray_stream_open(stream_t *s, int mode)
     s->close       = bluray_stream_close;
     s->control     = bluray_stream_control;
     s->type        = STREAMTYPE_BLURAY;
-    s->end_pos     = title_size;
+    s->end_pos     = bd_get_title_size(bd);
     s->sector_size = BLURAY_SECTOR_SIZE;
     s->flags       = MP_STREAM_SEEK;
     s->priv        = b;
