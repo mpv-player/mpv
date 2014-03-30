@@ -140,13 +140,19 @@ int reinit_video_filters(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
 
-    if (!d_video || !d_video->decoder_output.imgfmt)
-        return -2;
+    if (!d_video)
+        return 0;
+    bool need_reconfig = d_video->vfilter->initialized != 0;
 
     recreate_video_filters(mpctx);
-    reconfig_video(mpctx, &d_video->decoder_output, true);
 
-    return d_video->vfilter && d_video->vfilter->initialized > 0 ? 0 : -1;
+    if (need_reconfig)
+        reconfig_video(mpctx, &d_video->decoder_output, true);
+
+    if (!d_video->vfilter)
+        return 0;
+
+    return d_video->vfilter->initialized;
 }
 
 int reinit_video_chain(struct MPContext *mpctx)
@@ -246,6 +252,10 @@ no_video:
 void mp_force_video_refresh(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
+    struct dec_video *d_video = mpctx->d_video;
+
+    if (!d_video || !d_video->decoder_output.imgfmt)
+        return;
 
     // If not paused, the next frame should come soon enough.
     if (opts->pause && mpctx->last_vo_pts != MP_NOPTS_VALUE)

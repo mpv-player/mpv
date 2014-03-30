@@ -88,7 +88,7 @@ int reinit_audio_filters(struct MPContext *mpctx)
 {
     struct dec_audio *d_audio = mpctx->d_audio;
     if (!d_audio)
-        return -2;
+        return 0;
 
     af_uninit(mpctx->d_audio->afilter);
     if (af_init(mpctx->d_audio->afilter) < 0)
@@ -96,7 +96,7 @@ int reinit_audio_filters(struct MPContext *mpctx)
     if (recreate_audio_filters(mpctx) < 0)
         return -1;
 
-    return 0;
+    return 1;
 }
 
 void reinit_audio_chain(struct MPContext *mpctx)

@@ -332,6 +332,12 @@ Input Commands that are Possibly Subject to Change
     ``show_text ${vf}``. Note that auto-inserted filters for format conversion
     are not shown on the list, only what was requested by the user.
 
+    Normally, the commands will check whether the video chain is recreated
+    successfully, and will undo the operation on failure. If the command is run
+    before video is configured (can happen if the command is run immediately
+    after opening a file and before a video frame is decoded), this check can't
+    be run. Then it can happen that creating the video chain fails.
+
     .. admonition:: Example for input.conf
 
         - ``a vf set flip`` turn video upside-down on the ``a`` key
