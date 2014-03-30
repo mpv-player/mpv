@@ -576,9 +576,10 @@ int m_property_read_list(int action, void *arg, int count,
         // This is expected of the form "123" or "123/rest"
         char *next = strchr(ka->key, '/');
         char *end = NULL;
+        const char *key_end = ka->key + strlen(ka->key);
         long int item = strtol(ka->key, &end, 10);
         // not a number, trailing characters, etc.
-        if (end != ka->key + strlen(ka->key) && end != next)
+        if ((end != key_end || ka->key == key_end) && end != next)
             return M_PROPERTY_UNKNOWN;
         if (item < 0 || item >= count)
             return M_PROPERTY_UNKNOWN;
