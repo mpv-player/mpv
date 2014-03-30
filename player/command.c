@@ -825,11 +825,6 @@ static int get_tag_entry(int item, int action, void *arg, void *ctx)
 static int tag_property(m_option_t *prop, int action, void *arg,
                         struct mp_tags *tags)
 {
-    static const m_option_t key_type =
-    {
-        "tags", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL
-    };
-
     switch (action) {
     case M_PROPERTY_GET: {
         char **slist = NULL;
@@ -873,7 +868,9 @@ static int tag_property(m_option_t *prop, int action, void *arg,
             *(char **)ka->arg = talloc_strdup(NULL, meta);
             return M_PROPERTY_OK;
         case M_PROPERTY_GET_TYPE:
-            *(struct m_option *)ka->arg = key_type;
+            *(struct m_option *)ka->arg = (struct m_option){
+                .type = CONF_TYPE_STRING,
+            };
             return M_PROPERTY_OK;
         }
     }
