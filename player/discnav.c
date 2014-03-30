@@ -24,7 +24,7 @@
 #include "common/common.h"
 #include "input/input.h"
 
-#include "stream/stream_dvdnav.h"
+#include "stream/discnav.h"
 
 #include "sub/dec_sub.h"
 #include "sub/osd.h"
@@ -46,6 +46,8 @@ struct mp_nav_state {
     int vidsize[2];
     int subsize[2];
     struct sub_bitmap *hi_elem;
+    struct sub_bitmap *overlays[2];
+    struct sub_bitmap outputs[3];
 };
 
 static inline bool is_valid_size(int size[2]) {
@@ -84,12 +86,12 @@ void mp_nav_init(struct MPContext *mpctx)
         return;
 
     mpctx->nav_state = talloc_zero(NULL, struct mp_nav_state);
-    mpctx->nav_state->log = mp_log_new(mpctx->nav_state, mpctx->log, "dvdnav");
+    mpctx->nav_state->log = mp_log_new(mpctx->nav_state, mpctx->log, "discnav");
 
     MP_VERBOSE(mpctx->nav_state, "enabling\n");
 
-    mp_input_enable_section(mpctx->input, "dvdnav", 0);
-    mp_input_set_section_mouse_area(mpctx->input, "dvdnav-menu",
+    mp_input_enable_section(mpctx->input, "discnav", 0);
+    mp_input_set_section_mouse_area(mpctx->input, "discnav-menu",
                                     INT_MIN, INT_MIN, INT_MAX, INT_MAX);
 }
 
@@ -105,7 +107,7 @@ void mp_nav_reset(struct MPContext *mpctx)
     nav->nav_menu = false;
     nav->nav_draining = false;
     nav->nav_still_frame = 0;
-    mp_input_disable_section(mpctx->input, "dvdnav-menu");
+    mp_input_disable_section(mpctx->input, "discnav-menu");
     // Prevent demuxer init code to seek to the "start"
     mpctx->stream->start_pos = stream_tell(mpctx->stream);
     stream_control(mpctx->stream, STREAM_CTRL_RESUME_CACHE, NULL);
@@ -116,8 +118,8 @@ void mp_nav_destroy(struct MPContext *mpctx)
     osd_set_nav_highlight(mpctx->osd, NULL);
     if (!mpctx->nav_state)
         return;
-    mp_input_disable_section(mpctx->input, "dvdnav");
-    mp_input_disable_section(mpctx->input, "dvdnav-menu");
+    mp_input_disable_section(mpctx->input, "discnav");
+    mp_input_disable_section(mpctx->input, "discnav-menu");
     talloc_free(mpctx->nav_state);
     mpctx->nav_state = NULL;
 }
@@ -186,10 +188,10 @@ void mp_handle_nav(struct MPContext *mpctx)
         case MP_NAV_EVENT_MENU_MODE:
             nav->nav_menu = ev->u.menu_mode.enable;
             if (nav->nav_menu) {
-                mp_input_enable_section(mpctx->input, "dvdnav-menu",
+                mp_input_enable_section(mpctx->input, "discnav-menu",
                                         MP_INPUT_ON_TOP);
             } else {
-                mp_input_disable_section(mpctx->input, "dvdnav-menu");
+                mp_input_disable_section(mpctx->input, "discnav-menu");
             }
             break;
         case MP_NAV_EVENT_HIGHLIGHT: {
@@ -203,6 +205,17 @@ void mp_handle_nav(struct MPContext *mpctx)
             nav->highlight[2] = ev->u.highlight.ex;
             nav->highlight[3] = ev->u.highlight.ey;
             nav->hi_visible = ev->u.highlight.display;
+            update_resolution(mpctx);
+            osd_set_nav_highlight(mpctx->osd, mpctx);
+            break;
+        }
+        case MP_NAV_EVENT_OVERLAY: {
+            osd_set_nav_highlight(mpctx->osd, NULL);
+            for (int i = 0; i < 2; i++) {
+                if (nav->overlays[i])
+                    talloc_free(nav->overlays[i]);
+                nav->overlays[i] = talloc_steal(nav, ev->u.overlay.images[i]);
+            }
             update_resolution(mpctx);
             osd_set_nav_highlight(mpctx->osd, mpctx);
             break;
@@ -265,13 +278,26 @@ void mp_nav_get_highlight(void *priv, struct mp_osd_res res,
         nav->subsize[1] = sizes[1];
     }
 
-    sub->x = nav->highlight[0];
-    sub->y = nav->highlight[1];
-    sub->w = MPCLAMP(nav->highlight[2] - sub->x, 0, sizes[0]);
-    sub->h = MPCLAMP(nav->highlight[3] - sub->y, 0, sizes[1]);
-    sub->stride = sub->w * 4;
-    out_imgs->format = SUBBITMAP_RGBA;
-    out_imgs->parts = sub;
-    out_imgs->num_parts = sub->w > 0 && sub->h > 0 && nav->hi_visible;
-    osd_rescale_bitmaps(out_imgs, sizes[0], sizes[1], res, -1);
+    out_imgs->num_parts = 0;
+
+    if (nav->hi_visible) {
+        sub->x = nav->highlight[0];
+        sub->y = nav->highlight[1];
+        sub->w = MPCLAMP(nav->highlight[2] - sub->x, 0, sizes[0]);
+        sub->h = MPCLAMP(nav->highlight[3] - sub->y, 0, sizes[1]);
+        sub->stride = sub->w * 4;
+        if (sub->w > 0 && sub->h > 0)
+            nav->outputs[out_imgs->num_parts++] = *sub;
+    }
+
+    if (nav->overlays[0])
+        nav->outputs[out_imgs->num_parts++] = *nav->overlays[0];
+    if (nav->overlays[1])
+        nav->outputs[out_imgs->num_parts++] = *nav->overlays[1];
+
+    if (out_imgs->num_parts) {
+        out_imgs->parts = nav->outputs;
+        out_imgs->format = SUBBITMAP_RGBA;
+        osd_rescale_bitmaps(out_imgs, sizes[0], sizes[1], res, -1);
+    }
 }

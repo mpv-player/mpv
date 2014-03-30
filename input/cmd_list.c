@@ -159,7 +159,7 @@ const struct mp_cmd_def mp_cmds[] = {
   }},
   { MP_CMD_DISABLE_INPUT_SECTION, "disable_section", { ARG_STRING } },
 
-  { MP_CMD_DVDNAV, "dvdnav", { ARG_STRING } },
+  { MP_CMD_DISCNAV, "discnav", { ARG_STRING } },
 
   { MP_CMD_AF, "af", { ARG_STRING, ARG_STRING } },
 
@@ -234,6 +234,7 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"show_tracks",             "show_text ${track-list}"},
     {"show_playlist",           "show_text ${playlist}"},
     {"speed_mult",              "multiply speed"},
+    {"dvdnav",                  "discnav"},
 
     // Approximate (can fail if user added additional whitespace)
     {"pt_step 1",               "playlist_next"},
