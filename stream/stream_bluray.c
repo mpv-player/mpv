@@ -477,7 +477,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
 
         *((unsigned int *) arg) = ti->chapter_count;
 
-        return 1;
+        return STREAM_OK;
     }
 
     case STREAM_CTRL_GET_CHAPTER_TIME: {
@@ -504,15 +504,15 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             b->current_title = title;
             return STREAM_OK;
         }
-        return STREAM_ERROR;
+        return STREAM_UNSUPPORTED;
     }
     case STREAM_CTRL_GET_CURRENT_TITLE: {
         *((unsigned int *) arg) = b->current_title;
-        return 1;
+        return STREAM_OK;
     }
     case STREAM_CTRL_GET_NUM_TITLES: {
         *((unsigned int *)arg) = b->num_titles;
-        return 1;
+        return STREAM_OK;
     }
 
     case STREAM_CTRL_GET_TIME_LENGTH: {
@@ -545,12 +545,12 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
 
         *((int *) arg) = ti->angle_count;
 
-        return 1;
+        return STREAM_OK;
     }
 
     case STREAM_CTRL_GET_ANGLE: {
         *((int *) arg) = b->current_angle;
-        return 1;
+        return STREAM_OK;
     }
 
     case STREAM_CTRL_SET_ANGLE: {
@@ -567,7 +567,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         b->current_angle = angle;
         bd_seamless_angle_change(b->bd, angle);
 
-        return 1;
+        return STREAM_OK;
     }
 
     case STREAM_CTRL_GET_LANG: {
