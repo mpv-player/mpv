@@ -436,6 +436,36 @@ static void luma_coeffs(float m[3][4], float lr, float lg, float lb)
 }
 
 /**
+ * \brief get the coefficients of an xyz -> rgb conversion matrix
+ * \param params parameters for the conversion, only brightness is used
+ * \param prim primaries of the RGB space to transform to
+ * \param m array to store the coefficients into
+ */
+void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params, struct mp_csp_primaries prim, float m[3][4])
+{
+    float tmp[3][3], brightness = params->brightness;
+    mp_get_rgb2xyz_matrix(prim, tmp);
+    mp_invert_matrix3x3(tmp);
+
+    // Since this outputs linear RGB rather than companded RGB, we
+    // want to linearize any brightness additions. 2 is a reasonable
+    // approximation for any sort of gamma function that could be in use.
+    // As this is an aesthetic setting only, any exact values do not matter.
+    if (brightness < 0) {
+        brightness *= -brightness;
+    } else {
+        brightness *= brightness;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++)
+            m[i][j] = tmp[i][j];
+
+        m[i][COL_C] = brightness;
+    }
+}
+
+/**
  * \brief get the coefficients of the yuv -> rgb conversion matrix
  * \param params struct specifying the properties of the conversion like
  *  brightness, ...

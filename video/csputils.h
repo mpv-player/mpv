@@ -127,6 +127,7 @@ enum mp_csp_equalizer_param {
     | (1 << MP_CSP_EQ_SATURATION) )
 
 #define MP_CSP_EQ_CAPS_GAMMA (1 << MP_CSP_EQ_GAMMA)
+#define MP_CSP_EQ_CAPS_BRIGHTNESS (1 << MP_CSP_EQ_BRIGHTNESS)
 
 extern const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT];
 
@@ -188,6 +189,8 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim csp);
 
 void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest, float cms_matrix[3][3]);
 void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3]);
+
+void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params, struct mp_csp_primaries prim, float xyz2rgb[3][4]);
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]);
 void mp_gen_yuv2rgb_map(struct mp_csp_params *params, uint8_t *map, int size);
 

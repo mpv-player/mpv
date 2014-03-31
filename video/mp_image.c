@@ -566,7 +566,10 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         // since that's the most likely scenario. Proper VOs should ignore
         // this field as well as the matrix and treat XYZ input as absolute,
         // but for VOs which use the matrix (and hence, consult this field)
-        // this is the correct parameter.
+        // this is the correct parameter. This doubles as a reasonable output
+        // gamut for VOs which *do* use the specialized XYZ matrix but don't
+        // know any better output gamut other than whatever the source is
+        // tagged with.
         if (params->primaries == MP_CSP_PRIM_AUTO)
             params->primaries = MP_CSP_PRIM_BT_709;
     } else {
