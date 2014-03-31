@@ -577,7 +577,11 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     if (loc >= 0) {
         float m[3][4] = {{0}};
         if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
-            mp_get_xyz2rgb_coeffs(&cparams, p->csp_src, m);
+            // Hard-coded as relative colorimetric for now, since this transforms
+            // from the source file's D55 material to whatever color space our
+            // projector/display lives in, which should be D55 for a proper
+            // home cinema setup either way.
+            mp_get_xyz2rgb_coeffs(&cparams, p->csp_src, MP_INTENT_RELATIVE_COLORIMETRIC, m);
         } else {
             mp_get_yuv2rgb_coeffs(&cparams, m);
         }
@@ -649,7 +653,10 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     loc = gl->GetUniformLocation(program, "cms_matrix");
     if (loc >= 0) {
         float cms_matrix[3][3] = {{0}};
-        mp_get_cms_matrix(p->csp_src, p->csp_dest, cms_matrix);
+        // Hard-coded to relative colorimetric - for a BT.2020 3DLUT we expect
+        // the input to be actual BT.2020 and not something red- or blueshifted,
+        // and for sRGB monitors we most likely want relative scaling either way.
+        mp_get_cms_matrix(p->csp_src, p->csp_dest, MP_INTENT_RELATIVE_COLORIMETRIC, cms_matrix);
         gl->UniformMatrix3fv(loc, 1, GL_TRUE, &cms_matrix[0][0]);
     }
 

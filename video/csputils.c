@@ -342,60 +342,81 @@ void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
     }
 }
 
+// M := M * XYZd<-XYZs
+void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src, struct mp_csp_col_xy dest, float m[3][3])
+{
+    // If the white points are nearly identical, this is a wasteful identity
+    // operation.
+    if (fabs(src.x - dest.x) < 1e-6 && fabs(src.y - dest.y) < 1e-6)
+        return;
+
+    // XYZd<-XYZs = Ma^-1 * (I*[Cd/Cs]) * Ma
+    // http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
+    float C[3][2], tmp[3][3] = {{0}};
+
+    // Ma = Bradford matrix, arguably most popular method in use today.
+    // This is derived experimentally and thus hard-coded.
+    float bradford[3][3] = {
+        {  0.8951,  0.2664, -0.1614 },
+        { -0.7502,  1.7135,  0.0367 },
+        {  0.0389, -0.0685,  1.0296 },
+    };
+
+    for (int i = 0; i < 3; i++) {
+        // source cone
+        C[i][0] = bradford[i][0] * src.x / src.y
+                + bradford[i][1] * 1
+                + bradford[i][2] * (1 - src.x - src.y) / src.y;
+
+        // dest cone
+        C[i][1] = bradford[i][0] * dest.x / dest.y
+                + bradford[i][1] * 1
+                + bradford[i][2] * (1 - dest.x - dest.y) / dest.y;
+    }
+
+    // tmp := I * [Cd/Cs] * Ma
+    for (int i = 0; i < 3; i++)
+        tmp[i][i] = C[i][1] / C[i][0];
+
+    mp_mul_matrix3x3(tmp, bradford);
+
+    // M := M * Ma^-1 * tmp
+    mp_invert_matrix3x3(bradford);
+    mp_mul_matrix3x3(m, bradford);
+    mp_mul_matrix3x3(m, tmp);
+}
+
 /**
  * \brief get the coefficients of the source -> bt2020 cms matrix
  * \param src primaries of the source gamut
  * \param dest primaries of the destination gamut
+ * \param intent rendering intent for the transformation
  * \param m array to store coefficients into
  */
-void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest, float m[3][3])
+void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest, enum mp_render_intent intent, float m[3][3])
 {
+    float tmp[3][3];
+
+    // In saturation mapping, we don't care about accuracy and just want
+    // primaries to map to primaries, making this an identity transformation.
+    if (intent == MP_INTENT_SATURATION) {
+        for (int i = 0; i < 3; i++)
+            m[i][i] = 1;
+        return;
+    }
+
     // RGBd<-RGBs = RGBd<-XYZd * XYZd<-XYZs * XYZs<-RGBs
     // Equations from: http://www.brucelindbloom.com/index.html?Math.html
-    float tmp[3][3] = {{0}};
+    // Note: Perceptual is treated like relative colorimetric. There's no
+    // definition for perceptual other than "make it look good".
 
     // RGBd<-XYZd, inverted from XYZd<-RGBd
     mp_get_rgb2xyz_matrix(dest, m);
     mp_invert_matrix3x3(m);
 
-    // Chromatic adaptation, only needed if the white point differs
-    if (fabs(src.white.x - dest.white.x) > 1e-6 ||
-        fabs(src.white.y - dest.white.y) > 1e-6) {
-        // XYZd<-XYZs = Ma^-1 * (I*[Cd/Cs]) * Ma
-        // http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
-        float C[3][2];
-
-        // Ma = Bradford matrix, arguably most popular method in use today.
-        // This is derived experimentally and thus hard-coded.
-        float bradford[3][3] = {
-            {  0.8951,  0.2664, -0.1614 },
-            { -0.7502,  1.7135,  0.0367 },
-            {  0.0389, -0.0685,  1.0296 },
-        };
-
-        for (int i = 0; i < 3; i++) {
-            // source cone
-            C[i][0] = bradford[i][0] * src.white.x / src.white.y
-                    + bradford[i][1] * 1
-                    + bradford[i][2] * (1 - src.white.x - src.white.y) / src.white.y;
-
-            // dest cone
-            C[i][1] = bradford[i][0] * dest.white.x / dest.white.y
-                    + bradford[i][1] * 1
-                    + bradford[i][2] * (1 - dest.white.x - dest.white.y) / dest.white.y;
-        }
-
-        // tmp := I * [Cd/Cs] * Ma
-        for (int i = 0; i < 3; i++)
-            tmp[i][i] = C[i][1] / C[i][0];
-
-        mp_mul_matrix3x3(tmp, bradford);
-
-        // M := M * Ma^-1 * tmp
-        mp_invert_matrix3x3(bradford);
-        mp_mul_matrix3x3(m, bradford);
-        mp_mul_matrix3x3(m, tmp);
-    }
+    // Chromatic adaptation, except in absolute colorimetric intent
+    if (intent != MP_INTENT_ABSOLUTE_COLORIMETRIC)
+        mp_apply_chromatic_adaptation(src.white, dest.white, m);
 
     // XYZs<-RGBs
     mp_get_rgb2xyz_matrix(src, tmp);
@@ -436,16 +457,24 @@ static void luma_coeffs(float m[3][4], float lr, float lg, float lb)
 }
 
 /**
- * \brief get the coefficients of an xyz -> rgb conversion matrix
+ * \brief get the coefficients of an SMPTE 428-1 xyz -> rgb conversion matrix
  * \param params parameters for the conversion, only brightness is used
  * \param prim primaries of the RGB space to transform to
+ * \param intent the rendering intent used to convert to the target primaries
  * \param m array to store the coefficients into
  */
-void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params, struct mp_csp_primaries prim, float m[3][4])
+void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params, struct mp_csp_primaries prim, enum mp_render_intent intent, float m[3][4])
 {
     float tmp[3][3], brightness = params->brightness;
     mp_get_rgb2xyz_matrix(prim, tmp);
     mp_invert_matrix3x3(tmp);
+
+    // All non-absolute mappings want to map source white to target white
+    if (intent != MP_INTENT_ABSOLUTE_COLORIMETRIC) {
+        // SMPTE 428-1 defines the calibration white point as CIE xy (0.314, 0.351)
+        static const struct mp_csp_col_xy smpte428 = {0.314, 0.351};
+        mp_apply_chromatic_adaptation(smpte428, prim.white, tmp);
+    }
 
     // Since this outputs linear RGB rather than companded RGB, we
     // want to linearize any brightness additions. 2 is a reasonable
@@ -502,19 +531,10 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
     }
     case MP_CSP_XYZ: {
         // The vo should probably not be using a matrix generated by this
-        // function for XYZ sources, but if it does, let's just assume we
-        // want BT.709.
-        float xyz_to_rgb[3][3];
-        mp_get_rgb2xyz_matrix(mp_get_csp_primaries(MP_CSP_PRIM_BT_709), xyz_to_rgb);
-        mp_invert_matrix3x3(xyz_to_rgb);
-
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++)
-                m[i][j] = xyz_to_rgb[i][j];
-
-            m[i][3] = 0;
-        }
-
+        // function for XYZ sources, but if it does, let's just assume it
+        // wants BT.709 with D65 white point (virtually all other content).
+        mp_get_xyz2rgb_coeffs(params, mp_get_csp_primaries(MP_CSP_PRIM_BT_709),
+                              MP_INTENT_RELATIVE_COLORIMETRIC, m);
         levels_in = -1;
         break;
     }

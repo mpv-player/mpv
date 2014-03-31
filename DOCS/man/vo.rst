@@ -505,6 +505,10 @@ Available video output drivers are:
         Its size depends on the ``3dlut-size``, and can be very big.
 
     ``icc-intent=<value>``
+        Specifies the ICC Intent used for transformations between colorspaces.
+        This affects the rendering when using ``icc-profile`` or ``srgb`` and
+        also affects the way DCP XYZ content gets converted to RGB.
+
         0
             perceptual
         1
