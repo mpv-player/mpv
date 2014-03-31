@@ -235,6 +235,32 @@ function mp.register_event(name, cb)
     return mp.request_event(name, true)
 end
 
+function mp.unregister_event(cb)
+    for name, sub in pairs(event_handlers) do
+        local found = false
+        for i, e in ipairs(sub) do
+            if e == cb then
+                found = true
+                break
+            end
+        end
+        if found then
+            -- create a new array, just in case this function was called
+            -- from an event handler
+            local new = {}
+            for i = 1, #sub do
+                if sub[i] ~= cb then
+                    new[#new + 1] = sub[i]
+                end
+            end
+            event_handlers[name] = new
+            if #new == 0 then
+                mp.request_event(name, false)
+            end
+        end
+    end
+end
+
 -- default handlers
 mp.register_event("shutdown", function() mp.keep_running = false end)
 mp.register_event("script-input-dispatch", script_dispatch)

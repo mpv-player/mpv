@@ -235,6 +235,11 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     See `Events`_ and `List of events`_ for details.
 
+``mp.unregister_event(fn)``
+    Undo ``mp.register_event(..., fn)``. This removes all event handlers that
+    are equal to the ``fn`` parameter. This uses normal Lua ``==`` comparison,
+    so be careful when dealing with closures.
+
 ``mp.add_timeout(seconds, fn)``
     Call the given function fn when the given number of seconds has elapsed.
     Note that the number of seconds can be fractional. As of now, the timer
