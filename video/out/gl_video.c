@@ -575,9 +575,13 @@ static void update_uniforms(struct gl_video *p, GLuint program)
 
     loc = gl->GetUniformLocation(program, "colormatrix");
     if (loc >= 0) {
-        float yuv2rgb[3][4] = {{0}};
-        mp_get_yuv2rgb_coeffs(&cparams, yuv2rgb);
-        gl->UniformMatrix4x3fv(loc, 1, GL_TRUE, &yuv2rgb[0][0]);
+        float m[3][4] = {{0}};
+        if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+            mp_get_xyz2rgb_coeffs(&cparams, p->csp_src, m);
+        } else {
+            mp_get_yuv2rgb_coeffs(&cparams, m);
+        }
+        gl->UniformMatrix4x3fv(loc, 1, GL_TRUE, &m[0][0]);
     }
 
     gl->Uniform1f(gl->GetUniformLocation(program, "input_gamma"),
@@ -880,14 +884,28 @@ static void compile_shaders(struct gl_video *p)
     bool convert_to_linear_gamma = !p->is_linear_rgb && use_cms || use_const_luma;
 
     // Figure out the right color spaces we need to convert, if any
-    enum mp_csp_prim dest = p->opts.srgb ? MP_CSP_PRIM_BT_709 : MP_CSP_PRIM_BT_2020;
-    bool use_cms_matrix = false;
-
-    if (use_cms && p->image_params.primaries != dest) {
-        p->csp_src  = mp_get_csp_primaries(p->image_params.primaries);
-        p->csp_dest = mp_get_csp_primaries(dest);
-        use_cms_matrix = true;
+    enum mp_csp_prim prim_src = p->image_params.primaries, prim_dest;
+    if (use_cms) {
+        // sRGB mode wants sRGB aka BT.709 primaries, but the 3DLUT is
+        // always built against BT.2020.
+        prim_dest = p->opts.srgb ? MP_CSP_PRIM_BT_709 : MP_CSP_PRIM_BT_2020;
+    } else {
+        // If no CMS is being done we just want to output stuff as-is,
+        // in the native colorspace of the source.
+        prim_dest = prim_src;
     }
+
+    // XYZ input has no defined input color space, so we can directly convert
+    // it to whatever output space we actually need.
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ)
+        prim_src = prim_dest;
+
+    // Set the colorspace primaries and figure out whether we need to perform
+    // an extra conversion.
+    p->csp_src  = mp_get_csp_primaries(prim_src);
+    p->csp_dest = mp_get_csp_primaries(prim_dest);
+
+    bool use_cms_matrix = prim_src != prim_dest;
 
     if (p->gl_target == GL_TEXTURE_RECTANGLE) {
         shader_def(&header, "VIDEO_SAMPLER", "sampler2DRect");
@@ -1364,6 +1382,8 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
     if (p->is_yuv && p->image_params.colorspace != MP_CSP_BT_2020_C)
         eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ)
+        eq_caps |= MP_CSP_EQ_CAPS_BRIGHTNESS;
     p->video_eq.capabilities = eq_caps;
 
     debug_check_gl(p, "before video texture creation");
