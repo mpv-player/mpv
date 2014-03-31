@@ -70,6 +70,15 @@ enum mp_csp_prim {
 // Any enum mp_csp_prim value is a valid index (except MP_CSP_PRIM_COUNT)
 extern const char *const mp_csp_prim_names[MP_CSP_PRIM_COUNT];
 
+// These constants are based on the ICC specification (Table 23) and match
+// up with the API of LittleCMS, which treats them as integers.
+enum mp_render_intent {
+    MP_INTENT_PERCEPTUAL = 0,
+    MP_INTENT_RELATIVE_COLORIMETRIC = 1,
+    MP_INTENT_SATURATION = 2,
+    MP_INTENT_ABSOLUTE_COLORIMETRIC = 3
+};
+
 struct mp_csp_details {
     enum mp_csp format;
     enum mp_csp_levels levels_in;      // encoded video
@@ -187,10 +196,13 @@ void mp_gen_gamma_map(unsigned char *map, int size, float gamma);
 #define COL_C 3
 struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim csp);
 
-void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest, float cms_matrix[3][3]);
+void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src, struct mp_csp_col_xy dest, float m[3][3]);
+void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest,
+                       enum mp_render_intent intent, float cms_matrix[3][3]);
 void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3]);
 
-void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params, struct mp_csp_primaries prim, float xyz2rgb[3][4]);
+void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params, struct mp_csp_primaries prim,
+                           enum mp_render_intent intent, float xyz2rgb[3][4]);
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]);
 void mp_gen_yuv2rgb_map(struct mp_csp_params *params, uint8_t *map, int size);
 
