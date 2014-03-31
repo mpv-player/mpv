@@ -83,7 +83,7 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
 void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
 {
     if (opts->ass_styles_file && opts->ass_style_override)
-        ass_read_styles(track, opts->ass_styles_file, opts->sub_cp);
+        ass_read_styles(track, opts->ass_styles_file, NULL);
 
     if (track->n_styles == 0) {
         if (!track->PlayResY) {
