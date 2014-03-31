@@ -253,6 +253,11 @@ const struct m_sub_options mp_icc_conf = {
     .defaults = &(const struct mp_icc_opts) {0},
 };
 
+bool mp_icc_set_profile(struct mp_icc_opts *opts, char *profile)
+{
+    return false;
+}
+
 struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
                           struct mpv_global *global)
 {
