@@ -160,6 +160,25 @@ enum mp_csp mp_csp_guess_colorspace(int width, int height)
     return width >= 1280 || height > 576 ? MP_CSP_BT_709 : MP_CSP_BT_601;
 }
 
+enum mp_csp_prim mp_csp_guess_primaries(int width, int height)
+{
+    // HD content
+    if (width >= 1280 || height > 576)
+        return MP_CSP_PRIM_BT_709;
+
+    switch (height) {
+    case 576: // Typical PAL content, including anamorphic/squared
+        return MP_CSP_PRIM_BT_601_625;
+
+    case 480: // Typical NTSC content, including squared
+    case 486: // NTSC Pro or anamorphic NTSC
+        return MP_CSP_PRIM_BT_601_525;
+
+    default: // No good metric, just pick BT.709 to minimize damage
+        return MP_CSP_PRIM_BT_709;
+    }
+}
+
 enum mp_chroma_location avchroma_location_to_mp(int avloc)
 {
     switch (avloc) {
