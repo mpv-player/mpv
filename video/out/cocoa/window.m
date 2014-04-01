@@ -128,7 +128,7 @@
         return [super constrainFrameRect:nf toScreen:screen];
 
     NSRect of  = [self frame];
-    NSRect vf  = [[self screen] visibleFrame];
+    NSRect vf  = [screen ?: self.screen ?: [NSScreen mainScreen] visibleFrame];
     NSRect ncf = [self contentRectForFrameRect:nf];
 
     // Prevent the window's titlebar from exiting the screen on the top edge.
