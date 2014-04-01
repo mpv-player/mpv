@@ -180,6 +180,7 @@ int mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
 int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim);
 
 enum mp_csp mp_csp_guess_colorspace(int width, int height);
+enum mp_csp_prim mp_csp_guess_primaries(int width, int height);
 
 enum mp_chroma_location avchroma_location_to_mp(int avloc);
 int mp_chroma_location_to_av(enum mp_chroma_location mploc);

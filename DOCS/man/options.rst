@@ -585,12 +585,21 @@ OPTIONS
     management, for example ``opengl`` with the ``srgb`` or ``icc-profile``
     suboptions set.
 
+    If this option is set to ``auto`` (which is the default), the video's
+    primaries flag will be used. If that flag is unset, the color space will
+    be selected automatically, using the following heuristics: If the
+    ``--colormatrix`` is set or determined as BT.2020 or BT.709, the
+    corresponding primaries are used. Otherwise, if the video height is
+    exactly 576 (PAL), BT.601-625 is used. If it's exactly 480 or 486 (NTSC),
+    BT.601-525 is used. If the video resolution is anything else, BT.709 is
+    used.
+
     Available primaries are:
 
     :auto:         automatic selection (default)
-    :BT.601-525:   ITU-R BT.601 (SD) 525-line systems (NTSC)
+    :BT.601-525:   ITU-R BT.601 (SD) 525-line systems (NTSC, SMPTE-C)
     :BT.601-625:   ITU-R BT.601 (SD) 625-line systems (PAL, SECAM)
-    :BT.709:       ITU-R BT.709 (HD)
+    :BT.709:       ITU-R BT.709 (HD) (same primaries as sRGB)
     :BT.2020:      ITU-R BT.2020 (UHD)
 
 ``--config-dir=<path>``

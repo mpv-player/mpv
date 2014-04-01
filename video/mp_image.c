@@ -537,14 +537,15 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         if (params->colorlevels == MP_CSP_LEVELS_AUTO)
             params->colorlevels = MP_CSP_LEVELS_TV;
         if (params->primaries == MP_CSP_PRIM_AUTO) {
-            // We assume BT.709 primaries for all untagged BT.609/BT.709
-            // content, because it offers the minimal deviation from all three,
-            // including both NTSC and PAL/SECAM.
+            // Guess based on the colormatrix as a first priority
             if (params->colorspace == MP_CSP_BT_2020_NC ||
                 params->colorspace == MP_CSP_BT_2020_C) {
                 params->primaries = MP_CSP_PRIM_BT_2020;
-            } else {
+            } else if (params->colorspace == MP_CSP_BT_709) {
                 params->primaries = MP_CSP_PRIM_BT_709;
+            } else {
+                // Ambiguous colormatrix for BT.601, guess based on res
+                params->primaries = mp_csp_guess_primaries(params->w, params->h);
             }
         }
     } else if (fmt.flags & MP_IMGFLAG_RGB) {
