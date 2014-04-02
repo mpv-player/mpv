@@ -66,6 +66,7 @@
 #include "lua.h"
 #include "command.h"
 #include "screenshot.h"
+#include "slave.h"
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
@@ -125,6 +126,8 @@ static void shutdown_clients(struct MPContext *mpctx)
 
 void mp_destroy(struct MPContext *mpctx)
 {
+    struct MPOpts *opts = mpctx->opts;
+
     if (mpctx->initialized)
         uninit_player(mpctx, INITIALIZED_ALL);
 
@@ -152,6 +155,9 @@ void mp_destroy(struct MPContext *mpctx)
     if (mpctx->opts->use_terminal)
         getch2_disable();
     uninit_libav(mpctx->global);
+
+    if (opts->slave)
+        mpv_slave_disable(mpctx);
 
     mp_msg_uninit(mpctx->global);
     talloc_free(mpctx);
@@ -403,6 +409,9 @@ int mp_initialize(struct MPContext *mpctx)
         if (opts->consolecontrols)
             getch2_enable();
     }
+
+    if (opts->slave)
+        mpv_slave_enable(mpctx);
 
 #if HAVE_LIBASS
     mpctx->ass_log = mp_log_new(mpctx, mpctx->global->log, "!libass");
