@@ -144,6 +144,9 @@ end
 
 local timers = {}
 
+local timer_mt = {}
+timer_mt.__index = timer_mt
+
 function mp.add_timeout(seconds, cb)
     local t = mp.add_periodic_timer(seconds, cb)
     t.oneshot = true
@@ -155,15 +158,33 @@ function mp.add_periodic_timer(seconds, cb)
         timeout = seconds,
         cb = cb,
         oneshot = false,
-        next_deadline = mp.get_time() + seconds,
     }
-    timers[t] = t
+    setmetatable(t, timer_mt)
+    t:resume()
     return t
 end
 
-function mp.cancel_timer(t)
-    if t then
+function timer_mt.stop(t)
+    if timers[t] then
         timers[t] = nil
+        t.next_deadline = t.next_deadline - mp.get_time()
+    end
+end
+
+function timer_mt.kill(t)
+    timers[t] = nil
+    t.next_deadline = nil
+end
+mp.cancel_timer = timer_mt.kill
+
+function timer_mt.resume(t)
+    if not timers[t] then
+        local timeout = t.next_deadline
+        if timeout == nil then
+            timeout = t.timeout
+        end
+        t.next_deadline = mp.get_time() + timeout
+        timers[t] = t
     end
 end
 
@@ -186,17 +207,17 @@ local function process_timers()
         if not timer then
             return
         end
-        local wait = timer.next_deadline - mp.get_time()
+        local now = mp.get_time()
+        local wait = timer.next_deadline - now
         if wait > 0 then
             return wait
         else
             if timer.oneshot then
-                timers[timer] = nil
+                timer:kill()
+            else
+                timer.next_deadline = now + timer.timeout
             end
             timer.cb()
-            if not timer.oneshot then
-                timer.next_deadline = mp.get_time() + timer.timeout
-            end
         end
     end
 end

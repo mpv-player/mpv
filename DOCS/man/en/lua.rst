@@ -248,17 +248,29 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     This is a one-shot timer: it will be removed when it's fired.
 
-    Returns a timer handle. See ``mp.cancel_timer``.
+    Returns a timer object. See ``mp.add_periodic_timer`` for details.
 
 ``mp.add_periodic_timer(seconds, fn)``
     Call the given function periodically. This is like ``mp.add_timeout``, but
     the timer is re-added after the function fn is run.
 
-    Returns a timer handle. See ``mp.cancel_timer``.
+    Returns a timer object. The timer object provides the following methods:
 
-``mp.cancel_timer(t)``
-    Terminate the given timer. t is a timer handle (value returned by
-    ``mp.add_timeout`` or ``mp.add_periodic_timer``).
+        ``stop()``
+            Disable the timer. Does nothing if the timer is already disabled.
+            This will remember the current elapsed time when stopping, so that
+            ``resume()`` essentially unpauses the timer.
+
+        ``kill()``
+            Disable the timer. Resets the elapsed time.
+
+        ``resume()``
+            Restart the timer. If the timer was disabled with ``stop()``, this
+            will resume at the time it was stopped. If the timer was disabled
+            with ``kill()``, or if it's a previously fired one-shot timer (added
+            with ``add_timeout()``), this starts the timer from the beginning,
+            using the initially configured timeout.
+
 
 ``mp.get_opt(key)``
     Return a setting from the ``--lua-opts`` option. It's up to the user and
