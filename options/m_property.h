@@ -122,6 +122,12 @@ enum mp_property_return {
 int m_property_do(struct mp_log *log, const struct m_option* prop_list,
                   const char* property_name, int action, void* arg, void *ctx);
 
+// Given a path of the form "a/b/c", this function will set *prefix to "a",
+// and rem to "b/c", and return true.
+// If there is no '/' in the path, set prefix to path, and rem to "", and
+// return false.
+bool m_property_split_path(const char *path, bstr *prefix, char **rem);
+
 // Print a list of properties.
 void m_properties_print_help_list(struct mp_log *log,
                                   const struct m_option* list);

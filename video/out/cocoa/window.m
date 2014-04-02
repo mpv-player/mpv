@@ -54,8 +54,14 @@
     [self.adapter setNeedsResize];
 }
 
-- (void)windowDidChangeBackingProperties:(NSNotification *)notification {
+- (void)windowDidChangeBackingProperties:(NSNotification *)notification
+{
     [self.adapter setNeedsResize];
+}
+
+- (void)windowDidChangeScreenProfile:(NSNotification *)notification
+{
+    [self.adapter didChangeWindowedScreenProfile:[self screen]];
 }
 
 - (BOOL)isInFullScreenMode

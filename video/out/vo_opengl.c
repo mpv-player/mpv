@@ -275,6 +275,25 @@ static bool update_icc_profile(struct gl_priv *p, struct mp_icc_opts *opts)
     return true;
 }
 
+static bool get_and_update_icc_profile(struct vo *vo,
+                                       struct mp_icc_opts *opts)
+{
+    struct gl_priv *p = vo->priv;
+
+    if (!opts->profile_auto)
+        return update_icc_profile(p, opts);
+
+    char *icc = NULL;
+    int r = p->glctx->vo_control(vo, NULL, VOCTRL_GET_ICC_PROFILE_PATH, &icc);
+    if (r != VO_TRUE)
+        return false;
+
+    if (mp_icc_set_profile(opts, icc))
+        return update_icc_profile(p, opts);
+
+    return true;
+}
+
 static bool reparse_cmdline(struct gl_priv *p, char *args)
 {
     struct m_config *cfg = NULL;
@@ -377,6 +396,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(p);
     if (events & VO_EVENT_EXPOSE)
         vo->want_redraw = true;
+    if (events & VO_EVENT_ICC_PROFILE_PATH_CHANGED) {
+        get_and_update_icc_profile(vo, p->icc_opts);
+        vo->want_redraw = true;
+    }
     mpgl_unlock(p->glctx);
 
     return r;
@@ -416,7 +439,7 @@ static int preinit(struct vo *vo)
     gl_video_set_output_depth(p->renderer, p->glctx->depth_r, p->glctx->depth_g,
                               p->glctx->depth_b);
     gl_video_set_options(p->renderer, p->renderer_opts);
-    if (!update_icc_profile(p, p->icc_opts))
+    if (!get_and_update_icc_profile(vo, p->icc_opts))
         goto err_out;
 
     mpgl_unset_context(p->glctx);

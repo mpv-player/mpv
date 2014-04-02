@@ -26,6 +26,7 @@
 - (void)putCommand:(char*)cmd;
 - (void)performAsyncResize:(NSSize)size;
 - (void)handleFilesArray:(NSArray *)files;
+- (void)didChangeWindowedScreenProfile:(NSScreen *)screen;
 
 - (BOOL)isInFullScreenMode;
 - (NSScreen *)fsScreen;

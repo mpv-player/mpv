@@ -244,10 +244,15 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options,
     return ctx;
 }
 
+void encode_lavc_set_metadata(struct encode_lavc_context *ctx,
+                              struct mp_tags *metadata)
+{
+    ctx->metadata = metadata;
+}
+
 int encode_lavc_start(struct encode_lavc_context *ctx)
 {
     AVDictionaryEntry *de;
-    unsigned i;
 
     if (ctx->header_written < 0)
         return 0;
@@ -257,6 +262,7 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
     CHECK_FAIL(ctx, 0);
 
     if (ctx->expect_video) {
+        unsigned i;
         for (i = 0; i < ctx->avc->nb_streams; ++i)
             if (ctx->avc->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
                 break;
@@ -267,6 +273,7 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
         }
     }
     if (ctx->expect_audio) {
+        unsigned i;
         for (i = 0; i < ctx->avc->nb_streams; ++i)
             if (ctx->avc->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
                 break;
@@ -295,6 +302,13 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
 
     MP_INFO(ctx, "Opening muxer: %s [%s]\n",
             ctx->avc->oformat->long_name, ctx->avc->oformat->name);
+
+    if (ctx->metadata) {
+        for (int i = 0; i < ctx->metadata->num_keys; i++) {
+            av_dict_set(&ctx->avc->metadata,
+                ctx->metadata->keys[i], ctx->metadata->values[i], 0);
+        }
+    }
 
     if (avformat_write_header(ctx->avc, &ctx->foptions) < 0) {
         encode_lavc_fail(ctx, "could not write header\n");

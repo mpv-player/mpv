@@ -332,6 +332,12 @@ Input Commands that are Possibly Subject to Change
     ``show_text ${vf}``. Note that auto-inserted filters for format conversion
     are not shown on the list, only what was requested by the user.
 
+    Normally, the commands will check whether the video chain is recreated
+    successfully, and will undo the operation on failure. If the command is run
+    before video is configured (can happen if the command is run immediately
+    after opening a file and before a video frame is decoded), this check can't
+    be run. Then it can happen that creating the video chain fails.
+
     .. admonition:: Example for input.conf
 
         - ``a vf set flip`` turn video upside-down on the ``a`` key
@@ -662,9 +668,15 @@ an option at runtime.
     Current DVD angle.
 
 ``metadata``
-    Metadata key/value pairs. The raw property value will return a list of
-    key and value strings separated by ``,``. (If a key or value contains ``,``,
-    you're screwed.)
+    Metadata key/value pairs.
+
+    If the property is accessed with Lua's ``mp.get_property_native``, this
+    returns a table with metadata keys mapping to metadata values. If it is
+    accessed with the client API, this returns a ``MPV_FORMAT_NODE_MAP``,
+    with tag keys mapping to tag values.
+
+    For OSD, it returns a formatted list. Trying to retrieve this property as
+    a raw string doesn't work.
 
     This has a number of sub-properties:
 

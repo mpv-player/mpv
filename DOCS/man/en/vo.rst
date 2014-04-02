@@ -449,6 +449,13 @@ Available video output drivers are:
         property, as using both is somewhat redundant. It also enables linear
         light scaling.
 
+
+    ``icc-profile-auto``
+        Automatically select the ICC display profile currently specified by
+        the display settings of the operating system.
+
+        NOTE: Only implemented on OS X with Cocoa.
+
     ``icc-cache=<file>``
         Store and load the 3D LUT created from the ICC profile in this file.
         This can be used to speed up loading, since LittleCMS2 can take a while

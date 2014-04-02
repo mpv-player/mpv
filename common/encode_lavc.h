@@ -38,6 +38,7 @@ struct encode_lavc_context {
     struct mpv_global *global;
     struct encode_output_conf *options;
     struct mp_log *log;
+    struct mp_tags *metadata;
 
     // All entry points must be guarded with the lock. Functions called by
     // the playback core lock this automatically, but ao_lavc.c and vo_lavc.c

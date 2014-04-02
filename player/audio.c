@@ -62,14 +62,8 @@ static int build_afilter_chain(struct MPContext *mpctx)
         new_srate = in_format.rate;
     else {
         new_srate = in_format.rate * opts->playback_speed;
-        if (new_srate != out_format.rate) {
-            // limits are taken from libaf/af_resample.c
-            if (new_srate < 8000)
-                new_srate = 8000;
-            if (new_srate > 192000)
-                new_srate = 192000;
+        if (new_srate != out_format.rate)
             opts->playback_speed = new_srate / (double)in_format.rate;
-        }
     }
     return audio_init_filters(d_audio, new_srate,
                 &out_format.rate, &out_format.channels, &out_format.format);
@@ -94,7 +88,7 @@ int reinit_audio_filters(struct MPContext *mpctx)
 {
     struct dec_audio *d_audio = mpctx->d_audio;
     if (!d_audio)
-        return -2;
+        return 0;
 
     af_uninit(mpctx->d_audio->afilter);
     if (af_init(mpctx->d_audio->afilter) < 0)
@@ -102,7 +96,7 @@ int reinit_audio_filters(struct MPContext *mpctx)
     if (recreate_audio_filters(mpctx) < 0)
         return -1;
 
-    return 0;
+    return 1;
 }
 
 void reinit_audio_chain(struct MPContext *mpctx)

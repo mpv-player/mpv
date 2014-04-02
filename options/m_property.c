@@ -232,6 +232,33 @@ int m_property_do(struct mp_log *log, const m_option_t *prop_list,
     }
 }
 
+bool m_property_split_path(const char *path, bstr *prefix, char **rem)
+{
+    char *next = strchr(path, '/');
+    if (next) {
+        *prefix = bstr_splice(bstr0(path), 0, next - path);
+        *rem = next + 1;
+        return true;
+    } else {
+        *prefix = bstr0(path);
+        *rem = "";
+        return false;
+    }
+}
+
+// If *action is M_PROPERTY_KEY_ACTION, but the associated path is "", then
+// make this into a top-level action.
+static void m_property_unkey(int *action, void **arg)
+{
+    if (*action == M_PROPERTY_KEY_ACTION) {
+        struct m_property_action_arg *ka = *arg;
+        if (!ka->key[0]) {
+            *action = ka->action;
+            *arg = ka->arg;
+        }
+    }
+}
+
 static int m_property_do_bstr(const m_option_t *prop_list, bstr name,
                               int action, void *arg, void *ctx)
 {
@@ -510,6 +537,7 @@ int m_property_read_sub(const struct m_sub_property *props, int action, void *ar
 int m_property_read_list(int action, void *arg, int count,
                          m_get_item_cb get_item, void *ctx)
 {
+    m_property_unkey(&action, &arg);
     switch (action) {
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
@@ -576,9 +604,10 @@ int m_property_read_list(int action, void *arg, int count,
         // This is expected of the form "123" or "123/rest"
         char *next = strchr(ka->key, '/');
         char *end = NULL;
+        const char *key_end = ka->key + strlen(ka->key);
         long int item = strtol(ka->key, &end, 10);
         // not a number, trailing characters, etc.
-        if (end != ka->key + strlen(ka->key) && end != next)
+        if ((end != key_end || ka->key == key_end) && end != next)
             return M_PROPERTY_UNKNOWN;
         if (item < 0 || item >= count)
             return M_PROPERTY_UNKNOWN;

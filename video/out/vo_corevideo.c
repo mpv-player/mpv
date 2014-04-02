@@ -241,7 +241,6 @@ static CFStringRef get_cv_csp_matrix(enum mp_csp format)
 
 static void apply_csp(struct vo *vo, CVPixelBufferRef pbuf)
 {
-    struct priv *p = vo->priv;
     if (!vo->params)
         return;
     CFStringRef matrix = get_cv_csp_matrix(vo->params->colorspace);

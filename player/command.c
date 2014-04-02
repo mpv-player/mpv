@@ -825,21 +825,28 @@ static int get_tag_entry(int item, int action, void *arg, void *ctx)
 static int tag_property(m_option_t *prop, int action, void *arg,
                         struct mp_tags *tags)
 {
-    static const m_option_t key_type =
-    {
-        "tags", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL
-    };
-
     switch (action) {
     case M_PROPERTY_GET: {
-        char **slist = NULL;
-        int num = 0;
+        mpv_node_list *list = talloc_zero(NULL, mpv_node_list);
+        mpv_node node = {
+            .format = MPV_FORMAT_NODE_MAP,
+            .u.list = list,
+        };
+        list->num = tags->num_keys;
+        list->values = talloc_array(list, mpv_node, list->num);
+        list->keys = talloc_array(list, char*, list->num);
         for (int n = 0; n < tags->num_keys; n++) {
-            MP_TARRAY_APPEND(NULL, slist, num, talloc_strdup(NULL, tags->keys[n]));
-            MP_TARRAY_APPEND(NULL, slist, num, talloc_strdup(NULL, tags->values[n]));
+            list->keys[n] = talloc_strdup(list, tags->keys[n]);
+            list->values[n] = (struct mpv_node){
+                .format = MPV_FORMAT_STRING,
+                .u.string = talloc_strdup(list, tags->values[n]),
+            };
         }
-        MP_TARRAY_APPEND(NULL, slist, num, NULL);
-        *(char ***)arg = slist;
+        *(mpv_node*)arg = node;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE: {
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_PRINT: {
@@ -853,16 +860,19 @@ static int tag_property(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
-        bstr key = bstr0(ka->key);
-        if (bstr_eatstart0(&key, "list/")) {
+        bstr key;
+        char *rem;
+        m_property_split_path(ka->key, &key, &rem);
+        if (bstr_equals0(key, "list")) {
             struct m_property_action_arg nka = *ka;
-            nka.key = key.start; // ok because slice ends with \0
+            nka.key = rem;
             return m_property_read_list(action, &nka, tags->num_keys,
                                         get_tag_entry, tags);
         }
         // Direct access without this prefix is allowed for compatibility.
-        bstr_eatstart0(&key, "by-key/");
-        char *meta = mp_tags_get_bstr(tags, key);
+        bstr k = bstr0(ka->key);
+        bstr_eatstart0(&k, "by-key/");
+        char *meta = mp_tags_get_bstr(tags, k);
         if (!meta)
             return M_PROPERTY_UNKNOWN;
         switch (ka->action) {
@@ -870,7 +880,9 @@ static int tag_property(m_option_t *prop, int action, void *arg,
             *(char **)ka->arg = talloc_strdup(NULL, meta);
             return M_PROPERTY_OK;
         case M_PROPERTY_GET_TYPE:
-            *(struct m_option *)ka->arg = key_type;
+            *(struct m_option *)ka->arg = (struct m_option){
+                .type = CONF_TYPE_STRING,
+            };
             return M_PROPERTY_OK;
         }
     }
@@ -2133,8 +2145,8 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "editions", mp_property_editions, CONF_TYPE_INT },
     { "angle", mp_property_angle, &m_option_type_dummy },
-    { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST },
-    { "chapter-metadata", mp_property_chapter_metadata, CONF_TYPE_STRING_LIST },
+    M_PROPERTY("metadata", mp_property_metadata),
+    M_PROPERTY("chapter-metadata", mp_property_chapter_metadata),
     M_OPTION_PROPERTY_CUSTOM("pause", mp_property_pause),
     { "cache", mp_property_cache, CONF_TYPE_INT },
     M_OPTION_PROPERTY("pts-association-mode"),
@@ -3333,7 +3345,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         mp_input_disable_section(mpctx->input, cmd->args[0].v.s);
         break;
 
-    case MP_CMD_DVDNAV:
+    case MP_CMD_DISCNAV:
         mp_nav_user_input(mpctx, cmd->args[0].v.s);
         break;
 
