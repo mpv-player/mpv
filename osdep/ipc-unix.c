@@ -91,6 +91,8 @@ static void mpv_ipc_socket_exit(struct mpv_ipc_client_ctx *ipc_client)
 static void mpv_ipc_socket_close(struct mpv_ipc_ctx *ipc)
 {
     close(ipc->socket);
+    if (ipc->protocol == MPV_IPC_LOCAL)
+        unlink(ipc->local_path);
 }
 
 void mpv_ipc_open(struct mpv_ipc_ctx *ipc)
