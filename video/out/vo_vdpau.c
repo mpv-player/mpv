@@ -1019,6 +1019,15 @@ static int update_presentation_queue_status(struct vo *vo)
                                                               &status, &vtime);
         CHECK_VDP_WARNING(vo, "Error calling "
                          "presentation_queue_query_surface_status");
+        if (mp_msg_test(vo->log, MSGL_TRACE)) {
+            VdpTime current;
+            vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &current);
+            CHECK_VDP_WARNING(vo, "Error when calling "
+                              "vdp_presentation_queue_get_time");
+            MP_TRACE(vo, "Vdpau time: %"PRIu64"\n", (uint64_t)current);
+            MP_TRACE(vo, "Surface %d status: %d time: %"PRIu64"\n",
+                     (int)surface, (int)status, (uint64_t)vtime);
+        }
         if (status == VDP_PRESENTATION_QUEUE_STATUS_QUEUED)
             break;
         if (vc->vsync_interval > 1) {
@@ -1129,11 +1138,18 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     if (npts < vsync + vsync_interval)
         return;
     pts = vsync + (vsync_interval >> 2);
-    vdp_st =
-        vdp->presentation_queue_display(vc->flip_queue,
-                                        vc->output_surfaces[vc->surface_num],
-                                        vo->dwidth, vo->dheight, pts);
+    VdpOutputSurface frame = vc->output_surfaces[vc->surface_num];
+    vdp_st = vdp->presentation_queue_display(vc->flip_queue, frame,
+                                             vo->dwidth, vo->dheight, pts);
     CHECK_VDP_WARNING(vo, "Error when calling vdp_presentation_queue_display");
+
+    if (mp_msg_test(vo->log, MSGL_TRACE)) {
+        VdpTime vdp_time;
+        vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
+        CHECK_VDP_WARNING(vo, "Error when calling vdp_presentation_queue_display");
+        MP_TRACE(vo, "Queue new surface %d: current=%"PRIu64" int=%"PRIu64
+                 " pts=%"PRIu64"\n", (int)frame, (uint64_t)vdp_time, now, pts);
+    }
 
     vc->last_queue_time = pts;
     vc->queue_time[vc->surface_num] = pts;
