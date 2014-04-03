@@ -77,8 +77,8 @@ static char *get_raw_arg(char *command, char *arg, int n)
 
 static char *decode_arg(struct slave_handler_ctx *ctx, char *arg, int argn)
 {
-    talloc_free(ctx->arg[argn]);
-    ctx->arg[argn] = talloc_size(ctx, strlen(arg) + 1);
+    ctx->arg[argn] = talloc_realloc_size(ctx, ctx->arg[argn],
+            strlen(arg) + 1);
     char *a_ptr = arg;
     char *buf = ctx->arg[argn];
     char *b_ptr = buf;
@@ -110,18 +110,53 @@ static char *decode_arg(struct slave_handler_ctx *ctx, char *arg, int argn)
     decode_arg(ctx, get_raw_arg(command, arg, N), N); \
 })
 
-static void response(struct slave_handler_ctx *ctx,
-        struct mpv_ipc_client_ctx *ipc_client, const char *message)
+static void response(struct mpv_ipc_client_ctx *ipc_client,
+        const char *message)
 {
-    ctx->response = talloc_size(ctx, strlen(message) + 2);
-    strcpy(ctx->response, message);
-    strcat(ctx->response, "\r\n");
-    mpv_ipc_send(ipc_client, ctx->response, strlen(ctx->response));
-    talloc_free(ctx->response);
+    char *response = talloc_zero_array(NULL, char, strlen(message) + 3);
+    strcpy(response, message);
+    strcat(response, "\r\n");
+    mpv_ipc_send(ipc_client, response, strlen(response));
+    talloc_free(response);
+}
+
+#define HEX_FROM_CHAR(C) ({ \
+    static char hex[] = "0123456789abcdef"; \
+    hex[C & 15]; \
+})
+
+static char *encode_response(struct slave_handler_ctx *ctx,
+        const char *response)
+{
+    ctx->response = talloc_realloc_size(ctx, ctx->response,
+            strlen(response) * 3 + 1);
+    const char *r_ptr = response;
+    char *buf = ctx->response;
+    char *b_ptr = buf;
+
+    while (*r_ptr)
+    {
+        if (isalnum(*r_ptr) || *r_ptr == '-' || *r_ptr == '_' ||
+                *r_ptr == '.' || *r_ptr == '~')
+            *b_ptr++ = *r_ptr;
+        else
+            *b_ptr++ = '%',
+                *b_ptr++ = HEX_FROM_CHAR(*r_ptr >> 4),
+                *b_ptr++ = HEX_FROM_CHAR(*r_ptr & 15);
+        r_ptr++;
+    }
+    *b_ptr = '\0';
+
+    return buf;
 }
 
 #define RESPONSE(M) ({ \
-    response(ctx, ipc_client, M); \
+    response(ipc_client, encode_response(ctx, M)); \
+    continue; \
+})
+
+#define RESPONSE_RAW(M) ({ \
+    response(ipc_client, M); \
     continue; \
 })
 
@@ -136,6 +171,9 @@ static void slave_handler(struct mpv_ipc_client_ctx *ipc_client)
     struct slave_handler_ctx *ctx = talloc(NULL, struct slave_handler_ctx);
     ctx->command = talloc_size(ctx, MAX_COMMAND_LEN);
     char *command = ctx->command;
+    for (int n = 0; n < MAX_ARGS; n++)
+        ctx->arg[n] = talloc_size(ctx, 0);
+    ctx->response = talloc_size(ctx, 0);
 
     while (1)
     {
@@ -165,13 +203,13 @@ static void slave_handler(struct mpv_ipc_client_ctx *ipc_client)
         if (COMMAND("suspend"))
         {
             mpv_suspend(ipc_client->client);
-            RESPONSE("OK");
+            RESPONSE_RAW("[OK]");
         }
 
         if (COMMAND("resume"))
         {
             mpv_resume(ipc_client->client);
-            RESPONSE("OK");
+            RESPONSE_RAW("[OK]");
         }
 
         if (COMMAND("get_time_us"))
@@ -220,10 +258,10 @@ static void slave_handler(struct mpv_ipc_client_ctx *ipc_client)
             if (property)
                 RESPONSE(property);
             else
-                RESPONSE("NULL");
+                RESPONSE_RAW("[NULL]");
         }
 
-        RESPONSE("ERR invalid command");
+        RESPONSE_RAW("[ERR] invalid command");
     }
 
     talloc_free(ctx);
