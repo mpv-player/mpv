@@ -21,7 +21,7 @@ def __add_generic_flags__(ctx):
         ctx.env.CFLAGS += ['-g']
 
 def __add_gcc_flags__(ctx):
-    ctx.env.CFLAGS += ["-Wundef", "-Wmissing-prototypes",
+    ctx.env.CFLAGS += ["-Wundef", "-Wmissing-prototypes", "-Wempty-body",
                        "-Wno-switch", "-Wno-parentheses", "-Wpointer-arith",
                        "-Wredundant-decls", "-Wno-pointer-sign",
                        "-Werror=implicit-function-declaration",
@@ -30,7 +30,7 @@ def __add_gcc_flags__(ctx):
 
 def __add_clang_flags__(ctx):
     ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics",
-                       "-Wno-tautological-compare",
+                       "-Wno-tautological-compare", "-Wempty-body",
                        "-Wno-tautological-constant-out-of-range-compare" ]
 
 def __add_mingw_flags__(ctx):
