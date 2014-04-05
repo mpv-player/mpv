@@ -20,7 +20,6 @@
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "input/input.h"
-#include "misc/ring.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/m_property.h"
@@ -63,9 +62,11 @@ struct mpv_handle {
     void (*wakeup_cb)(void *d);
     void *wakeup_cb_ctx;
 
-    struct mp_ring *events;     // stores mpv_event
-    int max_events;             // allocated number of entries in events
-    int reserved_events;        // number of entries reserved for replies
+    mpv_event *events;      // ringbuffer of max_events entries
+    int max_events;         // allocated number of entries in events
+    int first_event;        // events[first_event] is the first readable event
+    int num_events;         // number of readable events
+    int reserved_events;    // number of entries reserved for replies
 
     struct mp_log_buffer *messages;
     int messages_level;
@@ -138,7 +139,7 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
         .mpctx = clients->mpctx,
         .clients = clients,
         .cur_event = talloc_zero(client, struct mpv_event),
-        .events = mp_ring_new(client, num_events * sizeof(struct mpv_event)),
+        .events = talloc_array(client, mpv_event, num_events),
         .max_events = num_events,
         .event_mask = ((uint64_t)-1) & ~(1ULL << MPV_EVENT_TICK),
     };
@@ -194,7 +195,7 @@ void mpv_destroy(mpv_handle *ctx)
 
     pthread_mutex_lock(&ctx->lock);
     // reserved_events equals the number of asynchronous requests that weren't
-    // yet replied. In order to avoid that trying to reply to a removed event
+    // yet replied. In order to avoid that trying to reply to a removed client
     // causes a crash, block until all asynchronous requests were served.
     ctx->event_mask = 0;
     while (ctx->reserved_events)
@@ -207,12 +208,10 @@ void mpv_destroy(mpv_handle *ctx)
     for (int n = 0; n < clients->num_clients; n++) {
         if (clients->clients[n] == ctx) {
             MP_TARRAY_REMOVE_AT(clients->clients, clients->num_clients, n);
-            while (mp_ring_buffered(ctx->events)) {
-                struct mpv_event event;
-                int r = mp_ring_read(ctx->events, (unsigned char *)&event,
-                                     sizeof(event));
-                assert(r == sizeof(event));
-                talloc_free(event.data);
+            while (ctx->num_events) {
+                talloc_free(ctx->events[ctx->first_event].data);
+                ctx->first_event = (ctx->first_event + 1) % ctx->max_events;
+                ctx->num_events--;
             }
             mp_msg_log_buffer_destroy(ctx->messages);
             pthread_cond_destroy(&ctx->wakeup);
@@ -281,12 +280,22 @@ static int reserve_reply(struct mpv_handle *ctx)
 {
     int res = MPV_ERROR_EVENT_QUEUE_FULL;
     pthread_mutex_lock(&ctx->lock);
-    if (ctx->reserved_events < ctx->max_events) {
+    if (ctx->reserved_events + ctx->num_events < ctx->max_events) {
         ctx->reserved_events++;
         res = 0;
     }
     pthread_mutex_unlock(&ctx->lock);
     return res;
+}
+
+static int append_event(struct mpv_handle *ctx, struct mpv_event *event)
+{
+    if (ctx->num_events + ctx->reserved_events >= ctx->max_events)
+        return -1;
+    ctx->events[(ctx->first_event + ctx->num_events) % ctx->max_events] = *event;
+    ctx->num_events++;
+    wakeup_client(ctx);
+    return 0;
 }
 
 static int send_event(struct mpv_handle *ctx, struct mpv_event *event)
@@ -296,20 +305,13 @@ static int send_event(struct mpv_handle *ctx, struct mpv_event *event)
         pthread_mutex_unlock(&ctx->lock);
         return 0;
     }
-    int num_events = mp_ring_available(ctx->events) / sizeof(*event);
-    int r = 0;
-    if (num_events > ctx->reserved_events) {
-        r = mp_ring_write(ctx->events, (unsigned char *)event, sizeof(*event));
-        if (r != sizeof(*event))
-            abort();
-        wakeup_client(ctx);
-    }
-    if (!r && !ctx->choke_warning) {
+    int r = append_event(ctx, event);
+    if (r < 0 && !ctx->choke_warning) {
         mp_err(ctx->log, "Too many events queued.\n");
         ctx->choke_warning = true;
     }
     pthread_mutex_unlock(&ctx->lock);
-    return r ? 0 : -1;
+    return r;
 }
 
 // Send a reply; the reply must have been previously reserved with
@@ -319,12 +321,11 @@ static void send_reply(struct mpv_handle *ctx, uint64_t userdata,
 {
     event->reply_userdata = userdata;
     pthread_mutex_lock(&ctx->lock);
+    // If this fails, reserve_reply() probably wasn't called.
     assert(ctx->reserved_events > 0);
     ctx->reserved_events--;
-    int r = mp_ring_write(ctx->events, (unsigned char *)event, sizeof(*event));
-    if (r != sizeof(*event))
+    if (append_event(ctx, event) < 0)
         abort();
-    wakeup_client(ctx);
     pthread_mutex_unlock(&ctx->lock);
 }
 
@@ -432,11 +433,10 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
     talloc_free_children(event);
 
     while (1) {
-        if (mp_ring_buffered(ctx->events)) {
-            int r =
-                mp_ring_read(ctx->events, (unsigned char*)event, sizeof(*event));
-            if (r != sizeof(*event))
-                abort();
+        if (ctx->num_events) {
+            *event = ctx->events[ctx->first_event];
+            ctx->first_event = (ctx->first_event + 1) % ctx->max_events;
+            ctx->num_events--;
             talloc_steal(event, event->data);
             break;
         }
