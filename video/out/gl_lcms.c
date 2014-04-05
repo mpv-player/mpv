@@ -213,13 +213,15 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
     cmsDeleteTransform(trafo);
 
     if (opts->cache) {
-        FILE *out = fopen(opts->cache, "wb");
+        char *fname = mp_get_user_path(NULL, global, opts->cache);
+        FILE *out = fopen(fname, "wb");
         if (out) {
             fprintf(out, "%s%s", LUT3D_CACHE_HEADER, cache_info);
             fwrite(iccdata.start, iccdata.len, 1, out);
             fwrite(output, talloc_get_size(output), 1, out);
             fclose(out);
         }
+        talloc_free(fname);
     }
 
 done: ;
