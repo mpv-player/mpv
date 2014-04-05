@@ -288,7 +288,7 @@ If you really mean to compile without libass support use --disable-libass."
     }, {
         'name': '--libbluray',
         'desc': 'Bluray support',
-        'func': check_pkg_config('libbluray', '>= 0.2.1'),
+        'func': check_pkg_config('libbluray', '>= 0.3.0'),
     }, {
         'name': '--dvdread',
         'desc': 'dvdread support',
