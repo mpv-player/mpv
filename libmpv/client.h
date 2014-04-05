@@ -725,6 +725,57 @@ char *mpv_get_property_osd_string(mpv_handle *ctx, const char *name);
 int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
                            const char *name, mpv_format format);
 
+/**
+ * Get a notification whenever the given property changes. You will receive
+ * updates as MPV_EVENT_PROPERTY_CHANGE. Note that this is not very precise:
+ * it can send updates even if the property in fact did not change, or (in
+ * some cases) not send updates even if the property changed - it usually
+ * depends on the property. It's a valid feature request to ask for better
+ * update handling of a specific property.
+ *
+ * Property changes are coalesced: the change events are returned only once the
+ * event queue becomes empty (e.g. mpv_wait_event() would block or return
+ * MPV_EVENT_NONE), and then only one event per changed property is returned.
+ *
+ * Keep in mind that you will get change notifications even if you change a
+ * property yourself. Try to avoid endless feedback loops, which could happen
+ * if you react to change notifications which you caused yourself.
+ *
+ * If the format parameter is set to something other than MPV_FORMAT_NONE, the
+ * current property value will be returned as part of mpv_event_property.
+ *
+ * Warning: if a property is unavailable or retrieving it caused an error,
+ *          MPV_FORMAT_NONE will be set in mpv_event_property, even if the
+ *          format parameter was set to a different value. In this case, the
+ *          mpv_event_property.data field is invalid.
+ *
+ * Observing a property that doesn't exist is allowed, although it may still
+ * cause some sporadic change events.
+ *
+ * @param reply_userdata This will be used for the mpv_event.reply_userdata
+ *                       field for the received MPV_EVENT_PROPERTY_CHANGE
+ *                       events. (Also see section about asynchronous calls,
+ *                       although this function is somewhat different from
+ *                       actual asynchronous calls.)
+ *                       Also see mpv_unobserve_property().
+ * @param name The property name.
+ * @param format see enum mpv_format. Can be MPV_FORMAT_NONE to omit values
+ *               from the change events.
+ * @return error code (usually fails only on OOM)
+ */
+int mpv_observe_property(mpv_handle *mpv, uint64_t reply_userdata,
+                         const char *name, mpv_format format);
+
+/**
+ * Undo mpv_observe_property(). This will remove all observed properties for
+ * which the given number was passed as reply_userdata to mpv_observe_property.
+ *
+ * @param registered_reply_userdata ID that was passed to mpv_observe_property
+ * @return negative value is an error code, number of removed properties on
+ *         success (includes the case when 0 were removed)
+ */
+int mpv_unobserve_property(mpv_handle *mpv, uint64_t registered_reply_userdata);
+
 typedef enum mpv_event_id {
     /**
      * Nothing happened. Happens on timeouts or sporadic wakeups.
@@ -843,7 +894,12 @@ typedef enum mpv_event_id {
      * segment switches. The main purpose is allowing the client to detect
      * when a seek request is finished.
      */
-    MPV_EVENT_PLAYBACK_RESTART  = 21
+    MPV_EVENT_PLAYBACK_RESTART  = 21,
+    /**
+     * Event sent due to mpv_observe_property().
+     * See also mpv_event and mpv_event_property.
+     */
+    MPV_EVENT_PROPERTY_CHANGE   = 22
 } mpv_event_id;
 
 /**
@@ -980,8 +1036,9 @@ typedef struct mpv_event {
      */
     uint64_t reply_userdata;
     /**
-     * The meaning and contents of data member depend on the event_id:
+     * The meaning and contents of the data member depend on the event_id:
      *  MPV_EVENT_GET_PROPERTY_REPLY:     mpv_event_property*
+     *  MPV_EVENT_PROPERTY_CHANGE:        mpv_event_property*
      *  MPV_EVENT_LOG_MESSAGE:            mpv_event_log_message*
      *  MPV_EVENT_PAUSE:                  mpv_event_pause_reason*
      *  MPV_EVENT_UNPAUSE:                mpv_event_pause_reason*

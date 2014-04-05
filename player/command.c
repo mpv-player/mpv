@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <time.h>
+#include <pthread.h>
 #include <sys/types.h>
 
 #include <libavutil/avstring.h>
@@ -2272,6 +2273,29 @@ static const m_option_t mp_properties[] = {
     {0},
 };
 
+// Each entry describes which properties an event (possibly) changes.
+#define E(x, ...) [x] = (const char*[]){__VA_ARGS__, NULL}
+const char **mp_event_property_change[] = {
+    E(MPV_EVENT_START_FILE, "*"),
+    E(MPV_EVENT_END_FILE, "*"),
+    E(MPV_EVENT_FILE_LOADED, "*"),
+    E(MPV_EVENT_TRACKS_CHANGED, "track-list"),
+    E(MPV_EVENT_TRACK_SWITCHED, "vid", "video", "aid", "audio", "sid", "sub",
+      "secondary-sid"),
+    E(MPV_EVENT_IDLE, "*"),
+    E(MPV_EVENT_PAUSE, "pause"),
+    E(MPV_EVENT_UNPAUSE, "pause"),
+    E(MPV_EVENT_TICK, "time-pos", "stream-pos", "stream-time-pos", "avsync",
+      "percent-pos", "time-remaining", "playtime-remaining"),
+    E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
+      "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
+      "width", "height", "fps", "aspect"),
+    E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
+      "samplerate", "channels", "audio"),
+    E(MPV_EVENT_METADATA_UPDATE, "metadata"),
+};
+#undef E
+
 const struct m_option *mp_get_property_list(void)
 {
     return mp_properties;
@@ -3468,4 +3492,11 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
         ctx->last_seek_pts = MP_NOPTS_VALUE;
 
     mp_client_broadcast_event(mpctx, event, arg);
+    if (event >= 0 && event < MP_ARRAY_SIZE(mp_event_property_change))
+        mp_client_property_change(mpctx, mp_event_property_change[event]);
+}
+
+void mp_notify_property(struct MPContext *mpctx, char *property)
+{
+    mp_client_property_change(mpctx, (const char*[]){property, NULL});
 }

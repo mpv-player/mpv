@@ -12,6 +12,7 @@
  */
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <assert.h>
@@ -30,6 +31,18 @@
 #include "core.h"
 #include "client.h"
 
+/*
+ * Locking hierarchy:
+ *
+ *  MPContext > mp_client_api.lock > mpv_handle.lock
+ *
+ * MPContext strictly speaking has no locks, and instead implicitly managed
+ * by MPContext.dispatch, which basically stops the playback thread at defined
+ * points in order to let clients access it in a synchronized manner. Since
+ * MPContext code accesses the client API, it's on top of the lock hierarchy.
+ *
+ */
+
 struct mp_client_api {
     struct MPContext *mpctx;
 
@@ -38,6 +51,19 @@ struct mp_client_api {
     // -- protected by lock
     struct mpv_handle **clients;
     int num_clients;
+};
+
+struct observe_property {
+    char *name;
+    int64_t reply_id;
+    mpv_format format;
+    bool changed;           // property change should be signaled to user
+    bool need_new_value;    // a new value should be retrieved
+    bool updating;          // a new value is being retrieved
+    bool dead;              // property unobserved while retrieving value
+    bool value_valid;
+    union m_option_value value;
+    struct mpv_handle *client;
 };
 
 struct mpv_handle {
@@ -49,6 +75,7 @@ struct mpv_handle {
 
     // -- not thread-safe
     struct mpv_event *cur_event;
+    struct mpv_event_property cur_property_event;
 
     pthread_mutex_t lock;
     pthread_cond_t wakeup;
@@ -68,9 +95,16 @@ struct mpv_handle {
     int num_events;         // number of readable events
     int reserved_events;    // number of entries reserved for replies
 
+    struct observe_property **properties;
+    int num_properties;
+    int lowest_changed;
+    int properties_updating;
+
     struct mp_log_buffer *messages;
     int messages_level;
 };
+
+static bool gen_property_change_event(struct mpv_handle *ctx);
 
 void mp_clients_init(struct MPContext *mpctx)
 {
@@ -198,7 +232,7 @@ void mpv_destroy(mpv_handle *ctx)
     // yet replied. In order to avoid that trying to reply to a removed client
     // causes a crash, block until all asynchronous requests were served.
     ctx->event_mask = 0;
-    while (ctx->reserved_events)
+    while (ctx->reserved_events || ctx->properties_updating)
         pthread_cond_wait(&ctx->wakeup, &ctx->lock);
     pthread_mutex_unlock(&ctx->lock);
 
@@ -440,6 +474,8 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
             talloc_steal(event, event->data);
             break;
         }
+        if (gen_property_change_event(ctx))
+            break;
         if (ctx->shutdown) {
             event->event_id = MPV_EVENT_SHUTDOWN;
             break;
@@ -941,6 +977,181 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t ud, const char *name,
     return run_async(ctx, getproperty_fn, req);
 }
 
+static void property_free(void *p)
+{
+    struct observe_property *prop = p;
+    const struct m_option *type = get_mp_type_get(prop->format);
+    if (type)
+        m_option_free(type, &prop->value);
+}
+
+int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
+                         const char *name, mpv_format format)
+{
+    if (format != MPV_FORMAT_NONE && !get_mp_type_get(format))
+        return MPV_ERROR_PROPERTY_FORMAT;
+    // Explicitly disallow this, because it would require a special code path.
+    if (format == MPV_FORMAT_OSD_STRING)
+        return MPV_ERROR_PROPERTY_FORMAT;
+
+    pthread_mutex_lock(&ctx->lock);
+    struct observe_property *prop = talloc_ptrtype(ctx, prop);
+    talloc_set_destructor(prop, property_free);
+    *prop = (struct observe_property){
+        .client = ctx,
+        .name = talloc_strdup(prop, name),
+        .reply_id = userdata,
+        .format = format,
+        .changed = true,
+        .need_new_value = true,
+    };
+    MP_TARRAY_APPEND(ctx, ctx->properties, ctx->num_properties, prop);
+    ctx->lowest_changed = 0;
+    pthread_mutex_unlock(&ctx->lock);
+    return 0;
+}
+
+int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
+{
+    pthread_mutex_lock(&ctx->lock);
+    int count = 0;
+    for (int n = ctx->num_properties - 1; n >= 0; n--) {
+        struct observe_property *prop = ctx->properties[n];
+        if (prop->reply_id == userdata) {
+            if (prop->updating) {
+                prop->dead = true;
+            } else {
+                // In case mpv_unobserve_property() is called after mpv_wait_event()
+                // returned, and the mpv_event still references the name somehow,
+                // make sure it's not freed while in use. The same can happen
+                // with the value update mechanism.
+                talloc_steal(ctx->cur_event, prop);
+            }
+            MP_TARRAY_REMOVE_AT(ctx->properties, ctx->num_properties, n);
+            count++;
+        }
+    }
+    ctx->lowest_changed = 0;
+    pthread_mutex_unlock(&ctx->lock);
+    return count;
+}
+
+static int prefix_len(const char *p)
+{
+    const char *end = strchr(p, '/');
+    return end ? end - p : strlen(p);
+}
+
+static bool match_property(const char *a, const char *b)
+{
+    if (strcmp(b, "*") == 0)
+        return true;
+    int len_a = prefix_len(a);
+    int len_b = prefix_len(b);
+    return strncmp(a, b, MPMIN(len_a, len_b)) == 0;
+}
+
+// Broadcast that properties have changed.
+void mp_client_property_change(struct MPContext *mpctx, const char **list)
+{
+    struct mp_client_api *clients = mpctx->clients;
+
+    pthread_mutex_lock(&clients->lock);
+
+    for (int n = 0; n < clients->num_clients; n++) {
+        struct mpv_handle *client = clients->clients[n];
+        pthread_mutex_lock(&client->lock);
+
+        client->lowest_changed = client->num_properties;
+        for (int i = 0; i < client->num_properties; i++) {
+            struct observe_property *prop = client->properties[i];
+            if (!prop->changed && !prop->need_new_value) {
+                for (int x = 0; list && list[x]; x++) {
+                    if (match_property(prop->name, list[x])) {
+                        prop->changed = prop->need_new_value = true;
+                        break;
+                    }
+                }
+            }
+            if ((prop->changed || prop->updating) && i < client->lowest_changed)
+                client->lowest_changed = i;
+        }
+        if (client->lowest_changed < client->num_properties)
+            wakeup_client(client);
+        pthread_mutex_unlock(&client->lock);
+    }
+
+    pthread_mutex_unlock(&clients->lock);
+}
+
+static void update_prop(void *p)
+{
+    struct observe_property *prop = p;
+    struct mpv_handle *ctx = prop->client;
+
+    const struct m_option *type = get_mp_type_get(prop->format);
+    union m_option_value val = {0};
+
+    struct getproperty_request req = {
+        .mpctx = ctx->mpctx,
+        .name = prop->name,
+        .format = prop->format,
+        .data = &val,
+    };
+
+    getproperty_fn(&req);
+
+    pthread_mutex_lock(&ctx->lock);
+    ctx->properties_updating--;
+    prop->updating = false;
+    prop->changed = true;
+    prop->value_valid = req.status >= 0;
+    if (prop->value_valid) {
+        m_option_free(type, &prop->value);
+        memcpy(&prop->value, &val, type->type->size);
+    }
+    if (prop->dead)
+        talloc_steal(ctx->cur_event, prop);
+    wakeup_client(ctx);
+    pthread_mutex_unlock(&ctx->lock);
+}
+
+// Set ctx->cur_event to a generated property change event, if there is any
+// outstanding property.
+static bool gen_property_change_event(struct mpv_handle *ctx)
+{
+    int start = ctx->lowest_changed;
+    ctx->lowest_changed = ctx->num_properties;
+    for (int n = start; n < ctx->num_properties; n++) {
+        struct observe_property *prop = ctx->properties[n];
+        if ((prop->changed || prop->updating) && n < ctx->lowest_changed)
+            ctx->lowest_changed = n;
+        if (prop->changed) {
+            bool new_val = prop->need_new_value;
+            prop->changed = prop->need_new_value = false;
+            if (prop->format && new_val) {
+                ctx->properties_updating++;
+                prop->updating = true;
+                mp_dispatch_enqueue(ctx->mpctx->dispatch, update_prop, prop);
+            } else {
+                ctx->cur_property_event = (struct mpv_event_property){
+                    .name = prop->name,
+                    .format = prop->value_valid ? prop->format : 0,
+                };
+                if (prop->value_valid)
+                    ctx->cur_property_event.data = &prop->value;
+                *ctx->cur_event = (struct mpv_event){
+                    .event_id = MPV_EVENT_PROPERTY_CHANGE,
+                    .reply_userdata = prop->reply_id,
+                    .data = &ctx->cur_property_event,
+                };
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
 {
     int level = -1;
@@ -1026,6 +1237,7 @@ static const char *event_table[] = {
     [MPV_EVENT_METADATA_UPDATE] = "metadata-update",
     [MPV_EVENT_SEEK] = "seek",
     [MPV_EVENT_PLAYBACK_RESTART] = "playback-restart",
+    [MPV_EVENT_PROPERTY_CHANGE] = "property-change",
 };
 
 const char *mpv_event_name(mpv_event_id event)
