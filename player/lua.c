@@ -414,6 +414,8 @@ static int script_resume_all(lua_State *L)
     return 0;
 }
 
+static bool pushnode(lua_State *L, mpv_node *node, int depth);
+
 static int script_wait_event(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -482,6 +484,30 @@ static int script_wait_event(lua_State *L)
         lua_setfield(L, -2, "by_cache");
         lua_pushboolean(L, msg->by_keep_open);
         lua_setfield(L, -2, "by_keep_open");
+        break;
+    }
+    case MPV_EVENT_PROPERTY_CHANGE: {
+        mpv_event_property *prop = event->data;
+        lua_pushstring(L, prop->name);
+        lua_setfield(L, -2, "name");
+        switch (prop->format) {
+        case MPV_FORMAT_NODE:
+            if (!pushnode(L, prop->data, 50))
+                luaL_error(L, "stack overflow");
+            break;
+        case MPV_FORMAT_DOUBLE:
+            lua_pushnumber(L, *(double *)prop->data);
+            break;
+        case MPV_FORMAT_FLAG:
+            lua_pushboolean(L, *(int *)prop->data);
+            break;
+        case MPV_FORMAT_STRING:
+            lua_pushstring(L, *(char **)prop->data);
+            break;
+        default:
+            lua_pushnil(L);
+        }
+        lua_setfield(L, -2, "data");
         break;
     }
     default: ;
@@ -852,6 +878,36 @@ static int script_get_property_native(lua_State *L)
     return 2;
 }
 
+static mpv_format check_property_format(lua_State *L, int arg)
+{
+    const char *fmts[] = {"none", "native", "bool", "string", "number", NULL};
+    switch (luaL_checkoption(L, arg, "none", fmts)) {
+    case 0: return MPV_FORMAT_NONE;
+    case 1: return MPV_FORMAT_NODE;
+    case 2: return MPV_FORMAT_FLAG;
+    case 3: return MPV_FORMAT_STRING;
+    case 4: return MPV_FORMAT_DOUBLE;
+    }
+    abort();
+}
+
+static int script_observe_property(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    uint64_t id = luaL_checknumber(L, 1);
+    const char *name = luaL_checkstring(L, 2);
+    mpv_format format = check_property_format(L, 3);
+    return check_error(L, mpv_observe_property(ctx->client, id, name, format));
+}
+
+static int script_unobserve_property(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    uint64_t id = luaL_checknumber(L, 1);
+    lua_pushnumber(L, mpv_unobserve_property(ctx->client, id));
+    return 1;
+}
+
 static int script_set_osd_ass(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
@@ -1007,6 +1063,8 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(set_property_bool),
     FN_ENTRY(set_property_number),
     FN_ENTRY(set_property_native),
+    FN_ENTRY(observe_property),
+    FN_ENTRY(unobserve_property),
     FN_ENTRY(property_list),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),
