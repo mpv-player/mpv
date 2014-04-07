@@ -76,8 +76,6 @@ struct vdpctx {
 
     VdpPresentationQueueTarget         flip_target;
     VdpPresentationQueue               flip_queue;
-    uint64_t                           last_vdp_time;
-    uint64_t                           last_sync_update;
 
     VdpOutputSurface                   output_surfaces[MAX_OUTPUT_SURFACES];
     VdpOutputSurface                   screenshot_surface;
@@ -158,53 +156,6 @@ struct vdpctx {
 };
 
 static bool status_ok(struct vo *vo);
-
-static int change_vdptime_sync(struct vo *vo, int64_t *t)
-{
-    struct vdpctx *vc = vo->priv;
-    struct vdp_functions *vdp = vc->vdp;
-    VdpStatus vdp_st;
-    VdpTime vdp_time;
-    vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
-    CHECK_VDP_ERROR(vo, "Error when calling vdp_presentation_queue_get_time");
-    uint64_t t1 = *t;
-    uint64_t t2 = mp_time_us();
-    uint64_t old = vc->last_vdp_time + (t1 - vc->last_sync_update) * 1000ULL;
-    if (vdp_time > old) {
-        if (vdp_time > old + (t2 - t1) * 1000ULL)
-            vdp_time -= (t2 - t1) * 1000ULL;
-        else
-            vdp_time = old;
-    } else if (!vdp_time) {
-        /* Some drivers do not return timestamps. */
-        vdp_time = old;
-    }
-    MP_DBG(vo, "adjusting VdpTime offset by %f µs\n",
-           (int64_t)(vdp_time - old) / 1000.);
-    vc->last_vdp_time = vdp_time;
-    vc->last_sync_update = t1;
-    *t = t2;
-    return 0;
-}
-
-static uint64_t sync_vdptime(struct vo *vo)
-{
-    struct vdpctx *vc = vo->priv;
-
-    uint64_t t = mp_time_us();
-    if (t - vc->last_sync_update > 5000000)
-        change_vdptime_sync(vo, &t);
-    uint64_t now = (t - vc->last_sync_update) * 1000ULL + vc->last_vdp_time;
-    // Make sure nanosecond inaccuracies don't make things inconsistent
-    now = FFMAX(now, vc->recent_vsync_time);
-    return now;
-}
-
-static uint64_t convert_to_vdptime(struct vo *vo, uint64_t t)
-{
-    struct vdpctx *vc = vo->priv;
-    return (t - vc->last_sync_update) * 1000LL + vc->last_vdp_time;
-}
 
 static int render_video_to_output_surface(struct vo *vo,
                                           VdpOutputSurface output_surface,
@@ -483,12 +434,6 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
                                                               &color);
         CHECK_VDP_WARNING(vo, "Error setting colorkey");
     }
-
-    VdpTime vdp_time;
-    vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
-    CHECK_VDP_ERROR(vo, "Error when calling vdp_presentation_queue_get_time");
-    vc->last_vdp_time = vdp_time;
-    vc->last_sync_update = mp_time_us();
 
     vc->vsync_interval = 1;
     if (vc->composite_detect && vo_x11_screen_is_composited(vo)) {
@@ -1076,12 +1021,16 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     if (vc->vsync_interval == 1)
         duration = -1;  // Make sure drop logic is disabled
 
-    /* If the presentation time may not be before our last timestamp sync. */
-    if (pts_us && pts_us < vc->last_sync_update)
-        pts_us = vc->last_sync_update;
+    VdpTime vdp_time = 0;
+    vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
+    CHECK_VDP_WARNING(vo, "Error when calling vdp_presentation_queue_get_time");
 
-    uint64_t now = sync_vdptime(vo);
-    uint64_t pts = pts_us ? convert_to_vdptime(vo, pts_us) : now;
+    int64_t rel_pts_ns = (pts_us - mp_time_us()) * 1000;
+    if (!pts_us || rel_pts_ns < 0)
+        rel_pts_ns = 0;
+
+    uint64_t now = vdp_time;
+    uint64_t pts = now + rel_pts_ns;
     uint64_t ideal_pts = pts;
     uint64_t npts = duration >= 0 ? pts + duration : UINT64_MAX;
 
@@ -1131,7 +1080,6 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 
     int num_flips = update_presentation_queue_status(vo);
     vsync = vc->recent_vsync_time + num_flips * vc->vsync_interval;
-    now = sync_vdptime(vo);
     pts = FFMAX(pts, now);
     pts = FFMAX(pts, vsync + (vsync_interval >> 2));
     vsync = PREV_VSYNC(pts);
@@ -1143,13 +1091,8 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
                                              vo->dwidth, vo->dheight, pts);
     CHECK_VDP_WARNING(vo, "Error when calling vdp_presentation_queue_display");
 
-    if (mp_msg_test(vo->log, MSGL_TRACE)) {
-        VdpTime vdp_time;
-        vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
-        CHECK_VDP_WARNING(vo, "Error when calling vdp_presentation_queue_display");
-        MP_TRACE(vo, "Queue new surface %d: current=%"PRIu64" int=%"PRIu64
-                 " pts=%"PRIu64"\n", (int)frame, (uint64_t)vdp_time, now, pts);
-    }
+    MP_TRACE(vo, "Queue new surface %d: Vdpau time: %"PRIu64" "
+             "pts: %"PRIu64"\n", (int)frame, now, pts);
 
     vc->last_queue_time = pts;
     vc->queue_time[vc->surface_num] = pts;
