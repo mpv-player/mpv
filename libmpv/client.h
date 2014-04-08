@@ -752,6 +752,10 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  * Observing a property that doesn't exist is allowed, although it may still
  * cause some sporadic change events.
  *
+ * If you set the format parameter to a value other than MPV_FORMAT_NONE, the
+ * API will suppress redundant change events by comparing the raw value against
+ * the previous value.
+ *
  * @param reply_userdata This will be used for the mpv_event.reply_userdata
  *                       field for the received MPV_EVENT_PROPERTY_CHANGE
  *                       events. (Also see section about asynchronous calls,

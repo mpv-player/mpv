@@ -562,6 +562,46 @@ static bool conv_node_to_format(void *dst, mpv_format dst_fmt, mpv_node *src)
     return false;
 }
 
+static bool compare_value(void *a, void *b, mpv_format format)
+{
+    switch (format) {
+    case MPV_FORMAT_NONE:
+        return false;
+    case MPV_FORMAT_STRING:
+    case MPV_FORMAT_OSD_STRING:
+        return strcmp(*(char **)a, *(char **)b) == 0;
+    case MPV_FORMAT_FLAG:
+        return *(int *)a == *(int *)b;
+    case MPV_FORMAT_INT64:
+        return *(int64_t *)a == *(int64_t *)b;
+    case MPV_FORMAT_DOUBLE:
+        return *(double *)a == *(double *)b;
+    case MPV_FORMAT_NODE: {
+        struct mpv_node *a_n = a, *b_n = b;
+        if (a_n->format != b_n->format)
+            return false;
+        return compare_value(&a_n->u, &b_n->u, a_n->format);
+    }
+    case MPV_FORMAT_NODE_ARRAY:
+    case MPV_FORMAT_NODE_MAP:
+    {
+        mpv_node_list *l_a = *(mpv_node_list **)a, *l_b = *(mpv_node_list **)b;
+        if (l_a->num != l_b->num)
+            return false;
+        for (int n = 0; n < l_a->num; n++) {
+            if (!compare_value(&l_a->values[n], &l_b->values[n], MPV_FORMAT_NODE))
+                return false;
+            if (format == MPV_FORMAT_NODE_MAP) {
+                if (strcmp(l_a->keys[n], l_b->keys[n]) != 0)
+                    return false;
+            }
+        }
+        return true;
+    }
+    }
+    abort();
+}
+
 void mpv_free_node_contents(mpv_node *node)
 {
     static const struct m_option type = { .type = CONF_TYPE_NODE };
@@ -1104,12 +1144,17 @@ static void update_prop(void *p)
     pthread_mutex_lock(&ctx->lock);
     ctx->properties_updating--;
     prop->updating = false;
-    prop->changed = true;
-    prop->value_valid = req.status >= 0;
-    if (prop->value_valid) {
-        m_option_free(type, &prop->value);
-        memcpy(&prop->value, &val, type->type->size);
+    bool new_value_valid = req.status >= 0;
+    if (prop->value_valid != new_value_valid) {
+        prop->changed = true;
+    } else if (prop->value_valid && new_value_valid) {
+        if (!compare_value(&prop->value, &val, prop->format))
+            prop->changed = true;
     }
+    m_option_free(type, &prop->value);
+    if (new_value_valid)
+        memcpy(&prop->value, &val, type->type->size);
+    prop->value_valid = new_value_valid;
     if (prop->dead)
         talloc_steal(ctx->cur_event, prop);
     wakeup_client(ctx);
