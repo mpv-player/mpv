@@ -50,6 +50,8 @@
 #include "osdep/timer.h"
 #include "bitmap_packer.h"
 
+// Returns x + a, but wrapped around to the range [0, m)
+// a must be within [-m, m], x within [0, m)
 #define WRAP_ADD(x, a, m) ((a) < 0 \
                            ? ((x)+(a)+(m) < (m) ? (x)+(a)+(m) : (x)+(a)) \
                            : ((x)+(a) < (m) ? (x)+(a) : (x)+(a)-(m)))
