@@ -1037,6 +1037,22 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     uint64_t ideal_pts = pts;
     uint64_t npts = duration >= 0 ? pts + duration : UINT64_MAX;
 
+    /* This should normally never happen.
+     * - The last queued frame can't have a PTS that goes more than 50ms in the
+     *   future. This is guaranteed by the playloop, which currently actually
+     *   roughly queues 50ms ahead, plus the flip queue offset. Just to be sure
+     *   give some additional room by doubling the time.
+     * - The last vsync can never be in the future.
+     */
+    int64_t max_pts_ahead = (vo->flip_queue_offset + 0.050) * 2 * 1e9;
+    if (vc->last_queue_time > now + max_pts_ahead ||
+        vc->recent_vsync_time > now)
+    {
+        vc->last_queue_time = 0;
+        vc->recent_vsync_time = 0;
+        MP_WARN(vo, "Inconsistent timing detected.\n");
+    }
+
 #define PREV_VSYNC(ts) prev_vsync(vc, ts)
 
     /* We hope to be here at least one vsync before the frame should be shown.
