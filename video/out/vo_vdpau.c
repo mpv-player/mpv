@@ -994,12 +994,13 @@ static int update_presentation_queue_status(struct vo *vo)
     return num_queued;
 }
 
-static inline uint64_t prev_vs2(struct vdpctx *vc, uint64_t ts, int shift)
+// Return the timestamp of the vsync that must have happened before ts.
+static inline uint64_t prev_vsync(struct vdpctx *vc, uint64_t ts)
 {
-    uint64_t offset = ts - vc->recent_vsync_time;
-    // Fix negative values for 1<<shift vsyncs before vc->recent_vsync_time
-    offset += (uint64_t)vc->vsync_interval << shift;
-    offset %= vc->vsync_interval;
+    int64_t diff = (int64_t)(ts - vc->recent_vsync_time);
+    int64_t offset = diff % vc->vsync_interval;
+    if (offset < 0)
+        offset += vc->vsync_interval;
     return ts - offset;
 }
 
@@ -1034,9 +1035,7 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     uint64_t ideal_pts = pts;
     uint64_t npts = duration >= 0 ? pts + duration : UINT64_MAX;
 
-#define PREV_VS2(ts, shift) prev_vs2(vc, ts, shift)
-    // Only gives accurate results for ts >= vc->recent_vsync_time
-#define PREV_VSYNC(ts) PREV_VS2(ts, 0)
+#define PREV_VSYNC(ts) prev_vsync(vc, ts)
 
     /* We hope to be here at least one vsync before the frame should be shown.
      * If we are running late then don't drop the frame unless there is
@@ -1065,7 +1064,7 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
      */
     uint64_t vsync = PREV_VSYNC(pts);
     if (pts < vsync + vsync_interval / 4
-        && (vsync - PREV_VS2(vc->last_queue_time, 16)
+        && (vsync - PREV_VSYNC(vc->last_queue_time)
             > pts - vc->last_ideal_time + vsync_interval / 2
             || vc->dropped_frame && vsync > vc->dropped_time))
         pts -= vsync_interval / 2;
