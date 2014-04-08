@@ -61,7 +61,8 @@ OPTIONS
     DTS-HD tracks can be sent over HDMI but not over the original
     coax/toslink S/PDIF system.
 
-    Note: this feature is broken.
+    Some receivers don't accept DTS core-only when ``--ad-spdif-dtshd=yes`` is
+    used, even though they accept DTS-HD.
 
     ``--dtshd`` and ``--no-dtshd`` are deprecated aliases.
 
