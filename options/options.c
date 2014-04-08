@@ -766,7 +766,7 @@ const struct MPOpts mp_default_opts = {
         .allow_mimetype = 1,
     },
     .lavc_param = {
-        .show_all = 1,
+        .show_all = 0,
         .check_hw_profile = 1,
     },
     .input = {

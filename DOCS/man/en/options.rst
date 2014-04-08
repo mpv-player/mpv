@@ -2708,7 +2708,7 @@ OPTIONS
         ``--vd--lavc-o=debug=pict``
 
 ``--vd-lavc-show-all=<yes|no>``
-    Show even broken/corrupt frames (default: yes). If this option is set to
+    Show even broken/corrupt frames (default: no). If this option is set to
     no, libavcodec won't output frames that were either decoded before an
     initial keyframe was decoded, or frames that are recognized as corrupted.
 
