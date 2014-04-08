@@ -2301,10 +2301,30 @@ const struct m_option *mp_get_property_list(void)
     return mp_properties;
 }
 
+static bool is_property_set(int action, void *val)
+{
+    switch (action) {
+    case M_PROPERTY_SET:
+    case M_PROPERTY_SWITCH:
+    case M_PROPERTY_SET_STRING:
+    case M_PROPERTY_SET_NODE:
+        return true;
+    case M_PROPERTY_KEY_ACTION: {
+        struct m_property_action_arg *key = val;
+        return is_property_set(key->action, key->arg);
+    }
+    default:
+        return false;
+    }
+}
+
 int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
-    return m_property_do(ctx->log, mp_properties, name, action, val, ctx);
+    int r = m_property_do(ctx->log, mp_properties, name, action, val, ctx);
+    if (r == M_PROPERTY_OK && is_property_set(action, val))
+        mp_notify_property(ctx, (char *)name);
+    return r;
 }
 
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
