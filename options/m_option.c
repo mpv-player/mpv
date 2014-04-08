@@ -50,6 +50,24 @@
 #define OPTION_PATH_SEPARATOR ':'
 #endif
 
+static const char *true_flag_strings[] = {
+	"yes",
+	"true",
+	"on",
+	"enabled",
+	"1",
+	""
+};
+
+static const char *false_flag_strings[] = {
+	"no",
+	"false",
+	"off",
+	"disabled",
+	"0",
+	""
+};
+
 const char m_option_path_separator = OPTION_PATH_SEPARATOR;
 
 char *m_option_strerror(int code)
@@ -120,16 +138,34 @@ static int clamp_flag(const m_option_t *opt, void *val)
     return M_OPT_OUT_OF_RANGE;
 }
 
+static int flag_istrue(struct bstr flag) {
+	for(int i = 0; true_flag_strings[i][0] != '\0'; i++) {
+		if(!bstrcmp0(flag, true_flag_strings[i]))
+			return 1;
+	}
+
+	return 0;
+}
+
+static int flag_isfalse(struct bstr flag) {
+	for(int i = 0; false_flag_strings[i][0] != '\0'; i++) {
+		if(!bstrcmp0(flag, false_flag_strings[i]))
+			return 1;
+	}
+
+	return 0;
+}
+
 static int parse_flag(struct mp_log *log, const m_option_t *opt,
                       struct bstr name, struct bstr param, void *dst)
 {
     if (param.len) {
-        if (!bstrcmp0(param, "yes")) {
+        if (flag_istrue(param)) {
             if (dst)
                 VAL(dst) = opt->max;
             return 1;
         }
-        if (!bstrcmp0(param, "no")) {
+        if (flag_isfalse(param)) {
             if (dst)
                 VAL(dst) = opt->min;
             return 1;
@@ -196,7 +232,7 @@ const m_option_type_t m_option_type_flag = {
 static int parse_store(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
-    if (param.len == 0 || bstrcmp0(param, "yes") == 0) {
+    if (param.len == 0 || !bstrcmp0(param, "yes") || !bstrcmp0(param, "true") || !bstrcmp0(param, "on")) {
         if (dst)
             VAL(dst) = opt->max;
         return 0;
