@@ -432,6 +432,11 @@ static int script_wait_event(lua_State *L)
     lua_pushstring(L, mpv_event_name(event->event_id)); // event name
     lua_setfield(L, -2, "event"); // event
 
+    if (event->reply_userdata) {
+        lua_pushnumber(L, event->reply_userdata);
+        lua_setfield(L, -2, "id");
+    }
+
     if (event->error < 0) {
         lua_pushstring(L, mpv_error_string(event->error)); // event err
         lua_setfield(L, -2, "error"); // event
@@ -880,6 +885,8 @@ static int script_get_property_native(lua_State *L)
 
 static mpv_format check_property_format(lua_State *L, int arg)
 {
+    if (lua_isnil(L, arg))
+        return MPV_FORMAT_NONE;
     const char *fmts[] = {"none", "native", "bool", "string", "number", NULL};
     switch (luaL_checkoption(L, arg, "none", fmts)) {
     case 0: return MPV_FORMAT_NONE;
@@ -891,7 +898,8 @@ static mpv_format check_property_format(lua_State *L, int arg)
     abort();
 }
 
-static int script_observe_property(lua_State *L)
+// It has a raw_ prefix, because there is a more high level API in defaults.lua.
+static int script_raw_observe_property(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     uint64_t id = luaL_checknumber(L, 1);
@@ -900,7 +908,7 @@ static int script_observe_property(lua_State *L)
     return check_error(L, mpv_observe_property(ctx->client, id, name, format));
 }
 
-static int script_unobserve_property(lua_State *L)
+static int script_raw_unobserve_property(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     uint64_t id = luaL_checknumber(L, 1);
@@ -1063,8 +1071,8 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(set_property_bool),
     FN_ENTRY(set_property_number),
     FN_ENTRY(set_property_native),
-    FN_ENTRY(observe_property),
-    FN_ENTRY(unobserve_property),
+    FN_ENTRY(raw_observe_property),
+    FN_ENTRY(raw_unobserve_property),
     FN_ENTRY(property_list),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),

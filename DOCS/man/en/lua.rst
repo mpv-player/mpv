@@ -240,6 +240,28 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     are equal to the ``fn`` parameter. This uses normal Lua ``==`` comparison,
     so be careful when dealing with closures.
 
+``mp.observe_property(name, type, fn)``
+    Watch a property for changes. If the property ``name`` is changed, then
+    the function ``fn(name)`` will be called. ``type`` can be ``nil``, or be
+    set to one of ``none``, ``native``, ``bool``, ``string``, or ``number``.
+    ``none`` is the same as ``nil``. For all other values, the new value of
+    the property will be passed as second argument to ``fn``, using
+    ``mp.get_property_<type>`` to retrieve it. This means if ``type`` is for
+    example ``string``, ``fn`` is roughly called as in
+    ``fn(name, mp.get_property_string(name))``.
+
+    Sporadic property change events are possible. This means the change function
+    ``fn`` can be called even if the property doesn't actually change. Likewise,
+    in some cases the function is not called even if the property changes. If
+    possible, change events are coalesced. If a property is changed a bunch of
+    times in a row, only the last change triggers the change function. (The
+    exact behavior depends on timing and other things.)
+
+``mp.unobserve_property(fn)``
+    Undo ``mp.observe_property(..., fn)``. This removes all property handlers
+    that are equal to the ``fn`` parameter. This uses normal Lua ``==``
+    comparison, so be careful when dealing with closures.
+
 ``mp.add_timeout(seconds, fn)``
     Call the given function fn when the given number of seconds has elapsed.
     Note that the number of seconds can be fractional. As of now, the timer

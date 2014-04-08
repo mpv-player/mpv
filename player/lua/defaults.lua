@@ -241,6 +241,31 @@ local function message_dispatch(ev)
     end
 end
 
+local property_id = 0
+local properties = {}
+
+function mp.observe_property(name, t, cb)
+    local id = property_id + 1
+    property_id = id
+    properties[id] = cb
+    mp.raw_observe_property(id, name, t)
+end
+
+function mp.unobserve_property(cb)
+    for prop_id, prop_cb in pairs(properties) do
+        if cb == prop_cb then
+            properties[prop_id] = nil
+        end
+    end
+end
+
+local function property_change(ev)
+    local prop = properties[ev.id]
+    if prop then
+        prop(ev.name, ev.data)
+    end
+end
+
 -- used by default event loop (mp_event_loop()) to decide when to quit
 mp.keep_running = true
 
@@ -286,6 +311,7 @@ end
 mp.register_event("shutdown", function() mp.keep_running = false end)
 mp.register_event("script-input-dispatch", script_dispatch)
 mp.register_event("client-message", message_dispatch)
+mp.register_event("property-change", property_change)
 
 mp.msg = {
     log = mp.log,
