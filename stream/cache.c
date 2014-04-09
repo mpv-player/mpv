@@ -233,7 +233,7 @@ static bool cache_fill(struct priv *s)
         cache_drop_contents(s);
     }
 
-    if (stream_tell(s->stream) != s->max_filepos) {
+    if (stream_tell(s->stream) != s->max_filepos && s->seekable) {
         MP_VERBOSE(s, "Seeking underlying stream: %"PRId64" -> %"PRId64"\n",
                    stream_tell(s->stream), s->max_filepos);
         stream_seek(s->stream, s->max_filepos);

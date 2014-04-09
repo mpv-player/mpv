@@ -305,38 +305,6 @@ read_next:
   return d->cur_pack-1;
 }
 
-static void dvd_seek(stream_t *stream, dvd_priv_t *d, int pos)
-{
-  d->packs_left=-1;
-  d->cur_pack=pos;
-
-  // check if we stay in current cell (speedup things, and avoid angle skip)
-  if(d->cur_pack>d->cell_last_pack ||
-     d->cur_pack<d->cur_pgc->cell_playback[ d->cur_cell ].first_sector) {
-
-    // ok, cell change, find the right cell!
-    cell_playback_t *cell;
-    for(d->cur_cell=0; d->cur_cell < d->cur_pgc->nr_of_cells; d->cur_cell++) {
-      cell = &(d->cur_pgc->cell_playback[d->cur_cell]);
-      if(cell->block_type == BLOCK_TYPE_ANGLE_BLOCK && cell->block_mode != BLOCK_MODE_FIRST_CELL)
-        continue;
-      d->cell_last_pack=cell->last_sector;
-      if(d->cur_pack<cell->first_sector) {
-        d->cur_pack=cell->first_sector;
-        break;
-      }
-      if(d->cur_pack<=d->cell_last_pack) break; // ok, we find it! :)
-    }
-  }
-
-  MP_VERBOSE(stream, "DVD Seek! lba=0x%X  cell=%d  packs: 0x%X-0x%X  \n",
-    d->cur_pack,d->cur_cell,d->cur_pgc->cell_playback[ d->cur_cell ].first_sector,d->cell_last_pack);
-
-  // if we're in interleaved multi-angle cell, find the right angle chain!
-  // (read Navi block, and use the seamless angle jump table)
-  d->angle_seek=1;
-}
-
 static int fill_buffer(stream_t *s, char *buf, int len)
 {
   int64_t pos;
@@ -345,14 +313,7 @@ static int fill_buffer(stream_t *s, char *buf, int len)
   pos = dvd_read_sector(s, s->priv, buf);
   if (pos < 0)
     return -1;
-  // dvd_read_sector() sometimes internally skips disk-level blocks
-  s->pos = 2048*(pos - 1);
   return 2048; // full sector
-}
-
-static int seek(stream_t *s, int64_t newpos) {
-  dvd_seek(s, s->priv,newpos/2048);
-  return 1;
 }
 
 static void stream_dvd_close(stream_t *s) {
@@ -976,7 +937,6 @@ static int open_s(stream_t *stream, int mode)
     stream->sector_size = 2048;
     stream->flags = MP_STREAM_SEEK;
     stream->fill_buffer = fill_buffer;
-    stream->seek = seek;
     stream->control = control;
     stream->close = stream_dvd_close;
     stream->start_pos = (int64_t)d->cur_pack*2048;
