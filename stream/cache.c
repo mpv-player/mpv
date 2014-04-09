@@ -183,26 +183,31 @@ static void cache_drop_contents(struct priv *s)
 static size_t read_buffer(struct priv *s, unsigned char *dst,
                           size_t dst_size, int64_t pos)
 {
-    if (pos >= s->max_filepos || pos < s->min_filepos)
-        return 0;
-    int64_t newb = s->max_filepos - pos; // new bytes in the buffer
+    size_t read = 0;
+    while (read < dst_size) {
+        if (pos >= s->max_filepos || pos < s->min_filepos)
+            break;
+        int64_t newb = s->max_filepos - pos; // new bytes in the buffer
 
-    pos = pos - s->offset; // file pos to buffer memory pos
-    if (pos < 0) {
-        pos += s->buffer_size;
-    } else if (pos >= s->buffer_size) {
-        pos -= s->buffer_size;
+        int64_t bpos = pos - s->offset; // file pos to buffer memory pos
+        if (bpos < 0) {
+            bpos += s->buffer_size;
+        } else if (bpos >= s->buffer_size) {
+            bpos -= s->buffer_size;
+        }
+
+        if (newb > s->buffer_size - bpos)
+            newb = s->buffer_size - bpos; // handle wrap...
+
+        newb = MPMIN(newb, dst_size - read);
+
+        assert(newb >= 0 && read + newb <= dst_size);
+        assert(bpos >= 0 && bpos + newb <= s->buffer_size);
+        memcpy(&dst[read], &s->buffer[bpos], newb);
+        read += newb;
+        pos += newb;
     }
-
-    if (newb > s->buffer_size - pos)
-        newb = s->buffer_size - pos; // handle wrap...
-
-    newb = MPMIN(newb, dst_size);
-
-    assert(newb >= 0 && newb <= dst_size);
-    assert(pos >= 0 && pos + newb <= s->buffer_size);
-    memcpy(&dst[0], &s->buffer[pos], newb);
-    return newb;
+    return read;
 }
 
 // Runs in the main thread
