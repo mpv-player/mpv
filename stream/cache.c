@@ -176,6 +176,35 @@ static void cache_drop_contents(struct priv *s)
     s->eof = false;
 }
 
+// Copy at most dst_size from the cache at the given absolute file position pos.
+// Return number of bytes that could actually be read.
+// Does not advance the file position, or change anything else.
+// Can be called from anywhere, as long as the mutex is held.
+static size_t read_buffer(struct priv *s, unsigned char *dst,
+                          size_t dst_size, int64_t pos)
+{
+    if (pos >= s->max_filepos || pos < s->min_filepos)
+        return 0;
+    int64_t newb = s->max_filepos - pos; // new bytes in the buffer
+
+    pos = pos - s->offset; // file pos to buffer memory pos
+    if (pos < 0) {
+        pos += s->buffer_size;
+    } else if (pos >= s->buffer_size) {
+        pos -= s->buffer_size;
+    }
+
+    if (newb > s->buffer_size - pos)
+        newb = s->buffer_size - pos; // handle wrap...
+
+    newb = MPMIN(newb, dst_size);
+
+    assert(newb >= 0 && newb <= dst_size);
+    assert(pos >= 0 && pos + newb <= s->buffer_size);
+    memcpy(&dst[0], &s->buffer[pos], newb);
+    return newb;
+}
+
 // Runs in the main thread
 // mutex must be held, but is sometimes temporarily dropped
 static int cache_read(struct priv *s, unsigned char *buf, int size)
@@ -194,23 +223,9 @@ static int cache_read(struct priv *s, unsigned char *buf, int size)
             return 0;
     }
 
-    int64_t newb = s->max_filepos - s->read_filepos; // new bytes in the buffer
-
-    int64_t pos = s->read_filepos - s->offset; // file pos to buffer memory pos
-    if (pos < 0)
-        pos += s->buffer_size;
-    else if (pos >= s->buffer_size)
-        pos -= s->buffer_size;
-
-    if (newb > s->buffer_size - pos)
-        newb = s->buffer_size - pos; // handle wrap...
-
-    newb = FFMIN(newb, size);
-
-    memcpy(buf, &s->buffer[pos], newb);
-
-    s->read_filepos += newb;
-    return newb;
+    int readb = read_buffer(s, buf, size, s->read_filepos);
+    s->read_filepos += readb;
+    return readb;
 }
 
 // Runs in the cache thread.
