@@ -659,14 +659,6 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
     if (size < 1)
         return -1;
 
-    MP_INFO(cache, "Cache size set to %" PRId64 " KiB\n",
-            size / 1024);
-
-    if (size > SIZE_MAX) {
-        MP_FATAL(cache, "Cache size larger than max. allocation size\n");
-        return -1;
-    }
-
     struct priv *s = talloc_zero(NULL, struct priv);
     s->log = cache->log;
 
@@ -677,6 +669,9 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
         talloc_free(s);
         return -1;
     }
+
+    MP_INFO(cache, "Cache size set to %" PRId64 " KiB\n",
+            s->buffer_size / 1024);
 
     pthread_mutex_init(&s->mutex, NULL);
     pthread_cond_init(&s->wakeup, NULL);
