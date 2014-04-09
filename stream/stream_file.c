@@ -43,8 +43,14 @@
 #include <sys/vfs.h>
 #endif
 
-#ifdef __MINGW32__
+#ifdef _WIN32
 #include <windows.h>
+#include <winternl.h>
+#include <io.h>
+
+#ifndef FILE_REMOTE_DEVICE
+#define FILE_REMOTE_DEVICE (0x10)
+#endif
 #endif
 
 struct priv {
@@ -158,18 +164,39 @@ static bool check_stream_network(stream_t *stream)
     return false;
 
 }
-#elif defined(__MINGW32__)
+#elif defined(_WIN32)
 static bool check_stream_network(stream_t *stream)
 {
-    wchar_t volume[MAX_PATH];
-    wchar_t *path = mp_from_utf8(NULL, stream->path);
-    bool remote = false;
+    static NTSTATUS (NTAPI *pNtQueryVolumeInformationFile)(HANDLE,
+        PIO_STATUS_BLOCK, PVOID, ULONG, FS_INFORMATION_CLASS) = NULL;
 
-    if (GetVolumePathNameW(path, volume, MAX_PATH))
-        remote = GetDriveTypeW(volume) == DRIVE_REMOTE;
+    // NtQueryVolumeInformationFile is an internal Windows function. It has
+    // been present since Windows XP, however this code should fail gracefully
+    // if it's removed from a future version of Windows.
+    if (!pNtQueryVolumeInformationFile) {
+        HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+        pNtQueryVolumeInformationFile = (NTSTATUS (NTAPI*)(HANDLE,
+            PIO_STATUS_BLOCK, PVOID, ULONG, FS_INFORMATION_CLASS))
+            GetProcAddress(ntdll, "NtQueryVolumeInformationFile");
 
-    talloc_free(path);
-    return remote;
+        if (!pNtQueryVolumeInformationFile)
+            return false;
+    }
+
+    struct priv *priv = stream->priv;
+    HANDLE h = (HANDLE)_get_osfhandle(priv->fd);
+    if (h == INVALID_HANDLE_VALUE)
+        return false;
+
+    FILE_FS_DEVICE_INFORMATION info = { 0 };
+    IO_STATUS_BLOCK io;
+    NTSTATUS status = pNtQueryVolumeInformationFile(h, &io, &info,
+        sizeof(info), FileFsDeviceInformation);
+    if (!NT_SUCCESS(status))
+        return false;
+
+    return info.DeviceType == FILE_DEVICE_NETWORK_FILE_SYSTEM ||
+           (info.Characteristics & FILE_REMOTE_DEVICE);
 }
 #else
 static bool check_stream_network(stream_t *stream)
