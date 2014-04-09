@@ -252,8 +252,13 @@ static bool cache_fill(struct priv *s)
                    "cached range: %"PRId64"-%"PRId64".\n", read,
                    s->min_filepos, s->max_filepos);
             cache_drop_contents(s);
-            stream_seek(s->stream, read);
         }
+    }
+
+    if (stream_tell(s->stream) != s->max_filepos) {
+        MP_VERBOSE(s, "Seeking underlying stream: %"PRId64" -> %"PRId64"\n",
+                   stream_tell(s->stream), s->max_filepos);
+        stream_seek(s->stream, s->max_filepos);
     }
 
     // number of buffer bytes which should be preserved in backwards direction
