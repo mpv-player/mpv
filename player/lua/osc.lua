@@ -756,13 +756,13 @@ function osc_init()
     -- playlist prev
     local eventresponder = {}
     eventresponder.mouse_btn0_up = function () mp.commandv("playlist_prev", "weak") end
-    eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.get_property("playlist"), 3) end
+    eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.get_property_osd("playlist"), 3) end
     register_button(posX - pos_offsetX, titlerowY, 7, 12, 12, osc_styles.vidtitle, "◀", eventresponder, metainfo)
 
     -- playlist next
     local eventresponder = {}
     eventresponder.mouse_btn0_up = function () mp.commandv("playlist_next", "weak") end
-    eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.get_property("playlist"), 3) end
+    eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.get_property_osd("playlist"), 3) end
     register_button(posX + pos_offsetX, titlerowY, 9, 12, 12, osc_styles.vidtitle, "▶", eventresponder, metainfo)
 
     --
