@@ -93,7 +93,7 @@ struct priv {
     int64_t min_filepos;    // range of file that is cached in the buffer
     int64_t max_filepos;    // ... max_filepos being the last read position
     bool eof;               // true if max_filepos = EOF
-    int64_t offset;         // buffer[offset] correponds to max_filepos
+    int64_t offset;         // buffer[offset] corresponds to max_filepos
 
     bool idle;              // cache thread has stopped reading
     int64_t reads;          // number of actual read attempts performed
