@@ -86,6 +86,9 @@ static char *term_smkx = NULL;
 #endif
 
 static keycode_st *keys_push(char *p, int code) {
+    if (strlen(p) > 8)
+        return NULL;
+
     if (getch2_keys.len == getch2_keys.cap) {
         getch2_keys.cap *= 2;
         if (getch2_keys.cap == 0)
