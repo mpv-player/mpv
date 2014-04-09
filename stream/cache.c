@@ -69,10 +69,10 @@ struct priv {
     pthread_cond_t wakeup;
 
     // Constants (as long as cache thread is running)
+    // Some of these might actually be changed by a synced cache resize.
     unsigned char *buffer;  // base pointer of the allocated buffer memory
     int64_t buffer_size;    // size of the allocated buffer memory
     int64_t back_size;      // keep back_size amount of old bytes for backward seek
-    int64_t fill_limit;     // we should fill buffer only if space>=fill_limit
     int64_t seek_limit;     // keep filling cache if distance is less that seek limit
     struct byte_meta *bm;   // additional per-byte metadata
     bool seekable;          // underlying stream is seekable
@@ -131,6 +131,9 @@ enum {
     CACHE_CTRL_QUIT = -1,
     CACHE_CTRL_PING = -2,
 };
+
+// we should fill buffer only if space>=FILL_LIMIT
+#define FILL_LIMIT (FFMAX(16 * 1024, BYTE_META_CHUNK_SIZE * 2))
 
 static int64_t mp_clipi64(int64_t val, int64_t min, int64_t max)
 {
@@ -271,7 +274,7 @@ static bool cache_fill(struct priv *s)
     if (pos >= s->buffer_size)
         pos -= s->buffer_size; // wrap-around
 
-    if (space < s->fill_limit) {
+    if (space < FILL_LIMIT) {
         s->idle = true;
         s->reads++; // don't stuck main thread
         return false;
@@ -316,6 +319,66 @@ static bool cache_fill(struct priv *s)
     pthread_cond_signal(&s->wakeup);
 
     return true;
+}
+
+// This is called both during init and at runtime.
+static int resize_cache(struct priv *s, int64_t size)
+{
+    int64_t min_size = FILL_LIMIT * 4;
+    int64_t max_size = ((size_t)-1) / 4;
+    int64_t buffer_size = MPMIN(MPMAX(size, min_size), max_size);
+
+    unsigned char *buffer = malloc(buffer_size);
+    struct byte_meta *bm = calloc(buffer_size / BYTE_META_CHUNK_SIZE + 2,
+                                  sizeof(struct byte_meta));
+    if (!buffer || !bm) {
+        free(buffer);
+        free(bm);
+        return STREAM_ERROR;
+    }
+
+    if (s->buffer) {
+        // Copy & free the old ringbuffer data.
+        // If the buffer is too small, prefer to copy these regions:
+        // 1. Data starting from read_filepos, until cache end
+        size_t read_1 = read_buffer(s, buffer, buffer_size, s->read_filepos);
+        // 2. then data from before read_filepos until cache start
+        //    (this one needs to be copied to the end of the ringbuffer)
+        size_t read_2 = 0;
+        if (s->min_filepos < s->read_filepos) {
+            size_t copy_len = buffer_size - read_1;
+            copy_len = MPMIN(copy_len, s->read_filepos - s->min_filepos);
+            assert(copy_len + read_1 <= buffer_size);
+            read_2 = read_buffer(s, buffer + buffer_size - copy_len, copy_len,
+                                 s->read_filepos - copy_len);
+            // This shouldn't happen, unless copy_len was computed incorrectly.
+            assert(read_2 == copy_len);
+        }
+        // Set it up such that read_1 is at buffer pos 0, and read_2 wraps
+        // around below it, so that it is located at the end of the buffer.
+        s->min_filepos = s->read_filepos - read_2;
+        s->max_filepos = s->read_filepos + read_1;
+        s->offset = s->max_filepos - read_1;
+    } else {
+        cache_drop_contents(s);
+    }
+
+    free(s->buffer);
+    free(s->bm);
+
+    s->buffer_size = buffer_size;
+    s->back_size = buffer_size / 2;
+    s->buffer = buffer;
+    s->bm = bm;
+    s->idle = false;
+    s->eof = false;
+
+    //make sure that we won't wait from cache_fill
+    //more data than it is allowed to fill
+    if (s->seek_limit > s->buffer_size - FILL_LIMIT)
+        s->seek_limit = s->buffer_size - FILL_LIMIT;
+
+    return STREAM_OK;
 }
 
 static void update_cached_controls(struct priv *s)
@@ -439,9 +502,15 @@ static bool control_needs_flush(int stream_ctrl)
 static void cache_execute_control(struct priv *s)
 {
     uint64_t old_pos = stream_tell(s->stream);
-
-    s->control_res = stream_control(s->stream, s->control, s->control_arg);
     s->control_flush = false;
+
+    switch (s->control) {
+    case STREAM_CTRL_SET_CACHE_SIZE:
+        s->control_res = resize_cache(s, *(int64_t *)s->control_arg);
+        break;
+    default:
+        s->control_res = stream_control(s->stream, s->control, s->control_arg);
+    }
 
     bool pos_changed = old_pos != stream_tell(s->stream);
     bool ok = s->control_res == STREAM_OK;
@@ -609,18 +678,10 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
     struct priv *s = talloc_zero(NULL, struct priv);
     s->log = cache->log;
 
-    //64kb min_size
-    s->fill_limit = FFMAX(16 * 1024, BYTE_META_CHUNK_SIZE * 2);
-    s->buffer_size = FFMAX(size, s->fill_limit * 4);
-    s->back_size = s->buffer_size / 2;
+    s->seek_limit = seek_limit;
 
-    s->buffer = malloc(s->buffer_size);
-    s->bm = malloc((s->buffer_size / BYTE_META_CHUNK_SIZE + 2) *
-                   sizeof(struct byte_meta));
-    if (!s->buffer || !s->bm) {
+    if (resize_cache(s, size) != STREAM_OK) {
         MP_ERR(s, "Failed to allocate cache buffer.\n");
-        free(s->buffer);
-        free(s->bm);
         talloc_free(s);
         return -1;
     }
@@ -637,13 +698,8 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
     cache->control = cache_control;
     cache->close = cache_uninit;
 
-    s->seek_limit = seek_limit;
-    //make sure that we won't wait from cache_fill
-    //more data than it is allowed to fill
-    if (s->seek_limit > s->buffer_size - s->fill_limit)
-        s->seek_limit = s->buffer_size - s->fill_limit;
-    if (min > s->buffer_size - s->fill_limit)
-        min = s->buffer_size - s->fill_limit;
+    if (min > s->buffer_size - FILL_LIMIT)
+        min = s->buffer_size - FILL_LIMIT;
 
     s->seekable = (stream->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK &&
                   stream->end_pos > 0;

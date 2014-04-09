@@ -715,6 +715,18 @@ an option at runtime.
 ``cache``
     Network cache fill state (0-100).
 
+``cache-size`` (RW)
+    Total network cache size in KB. This is similar to ``--cache``. This allows
+    to set the cache size at runtime. Currently, it's not possible to enable
+    or disable the cache at runtime using this property, just to resize an
+    existing cache.
+
+    Note that this tries to keep the cache contents as far as possible. To make
+    this easier, the cache resizing code will allocate the new cache while the
+    old cache is still allocated.
+
+    Don't use this when playing DVD or Bluray.
+
 ``pts-association-mode`` (RW)
     See ``--pts-association-mode``.
 

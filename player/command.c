@@ -939,6 +939,34 @@ static int mp_property_cache(m_option_t *prop, int action, void *arg,
     return m_property_int_ro(prop, action, arg, cache);
 }
 
+static int mp_property_cache_size(m_option_t *prop, int action, void *arg,
+                                  void *ctx)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->stream)
+        return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_GET: {
+        int64_t size = -1;
+        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_SIZE, &size);
+        if (size <= 0)
+            break;
+        *(int *)arg = size / 1024;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET: {
+        int64_t size = *(int *)arg * 1024LL;
+        int r = stream_control(mpctx->stream, STREAM_CTRL_SET_CACHE_SIZE, &size);
+        if (r == STREAM_UNSUPPORTED)
+            break;
+        if (r == STREAM_OK)
+            return M_PROPERTY_OK;
+        return M_PROPERTY_ERROR;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_clock(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
@@ -2150,6 +2178,7 @@ static const m_option_t mp_properties[] = {
     M_PROPERTY("chapter-metadata", mp_property_chapter_metadata),
     M_OPTION_PROPERTY_CUSTOM("pause", mp_property_pause),
     { "cache", mp_property_cache, CONF_TYPE_INT },
+    { "cache-size", mp_property_cache_size, CONF_TYPE_INT, M_OPT_MIN, 0 },
     M_OPTION_PROPERTY("pts-association-mode"),
     M_OPTION_PROPERTY("hr-seek"),
     { "clock", mp_property_clock, CONF_TYPE_STRING,
