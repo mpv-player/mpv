@@ -130,10 +130,10 @@ enum {
     CACHE_CTRL_NONE = 0,
     CACHE_CTRL_QUIT = -1,
     CACHE_CTRL_PING = -2,
-};
 
-// we should fill buffer only if space>=FILL_LIMIT
-#define FILL_LIMIT (FFMAX(16 * 1024, BYTE_META_CHUNK_SIZE * 2))
+    // we should fill buffer only if space>=FILL_LIMIT
+    FILL_LIMIT = FFMAX(16 * 1024, BYTE_META_CHUNK_SIZE * 2),
+};
 
 static int64_t mp_clipi64(int64_t val, int64_t min, int64_t max)
 {
