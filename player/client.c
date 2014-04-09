@@ -568,7 +568,7 @@ static bool compare_value(void *a, void *b, mpv_format format)
 {
     switch (format) {
     case MPV_FORMAT_NONE:
-        return false;
+        return true;
     case MPV_FORMAT_STRING:
     case MPV_FORMAT_OSD_STRING:
         return strcmp(*(char **)a, *(char **)b) == 0;
