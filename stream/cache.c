@@ -240,19 +240,15 @@ static bool cache_fill(struct priv *s)
     int64_t read = s->read_filepos;
     int len;
 
-    if (read < s->min_filepos || read > s->max_filepos) {
-        // seek...
-        MP_DBG(s, "Out of boundaries... seeking to %" PRId64 "  \n", read);
-        // drop cache contents only if seeking backward or too much fwd.
-        // This is also done for on-disk files, since it loses the backseek cache.
-        // That in turn can cause major bandwidth increase and performance
-        // issues with e.g. mov or badly interleaved files
-        if (read < s->min_filepos || read >= s->max_filepos + s->seek_limit) {
-            MP_VERBOSE(s, "Dropping cache at pos %"PRId64", "
+    // drop cache contents only if seeking backward or too much fwd.
+    // This is also done for on-disk files, since it loses the backseek cache.
+    // That in turn can cause major bandwidth increase and performance
+    // issues with e.g. mov or badly interleaved files
+    if (read < s->min_filepos || read > s->max_filepos + s->seek_limit) {
+        MP_VERBOSE(s, "Dropping cache at pos %"PRId64", "
                    "cached range: %"PRId64"-%"PRId64".\n", read,
                    s->min_filepos, s->max_filepos);
-            cache_drop_contents(s);
-        }
+        cache_drop_contents(s);
     }
 
     if (stream_tell(s->stream) != s->max_filepos) {
