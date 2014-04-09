@@ -562,6 +562,8 @@ static bool conv_node_to_format(void *dst, mpv_format dst_fmt, mpv_node *src)
     return false;
 }
 
+// Note: for MPV_FORMAT_NODE_MAP, this (incorrectly) takes the order into
+//       account, instead of treating it as set.
 static bool compare_value(void *a, void *b, mpv_format format)
 {
     switch (format) {
