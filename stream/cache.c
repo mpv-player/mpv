@@ -213,29 +213,6 @@ static size_t read_buffer(struct priv *s, unsigned char *dst,
     return read;
 }
 
-// Runs in the main thread
-// mutex must be held, but is sometimes temporarily dropped
-static int cache_read(struct priv *s, unsigned char *buf, int size)
-{
-    if (size <= 0)
-        return 0;
-
-    double retry = 0;
-    int64_t eof_retry = s->reads - 1; // try at least 1 read on EOF
-    while (s->read_filepos >= s->max_filepos ||
-           s->read_filepos < s->min_filepos)
-    {
-        if (s->eof && s->read_filepos >= s->max_filepos && s->reads >= eof_retry)
-            return 0;
-        if (cache_wakeup_and_wait(s, &retry) == CACHE_INTERRUPTED)
-            return 0;
-    }
-
-    int readb = read_buffer(s, buf, size, s->read_filepos);
-    s->read_filepos += readb;
-    return readb;
-}
-
 // Runs in the cache thread.
 // Returns true if reading was attempted, and the mutex was shortly unlocked.
 static bool cache_fill(struct priv *s)
@@ -568,11 +545,26 @@ static int cache_fill_buffer(struct stream *cache, char *buffer, int max_len)
     if (cache->pos != s->read_filepos)
         MP_ERR(s, "!!! read_filepos differs !!! report this bug...\n");
 
-    int t = cache_read(s, buffer, max_len);
+    int readb = 0;
+    if (max_len > 0) {
+        double retry_time = 0;
+        int64_t retry = s->reads - 1; // try at least 1 read on EOF
+        while (1) {
+            readb = read_buffer(s, buffer, max_len, s->read_filepos);
+            s->read_filepos += readb;
+            if (readb > 0)
+                break;
+            if (s->eof && s->read_filepos >= s->max_filepos && s->reads >= retry)
+                break;
+            if (cache_wakeup_and_wait(s, &retry_time) == CACHE_INTERRUPTED)
+                break;
+        }
+    }
+
     // wakeup the cache thread, possibly make it read more data ahead
     pthread_cond_signal(&s->wakeup);
     pthread_mutex_unlock(&s->mutex);
-    return t;
+    return readb;
 }
 
 static int cache_seek(stream_t *cache, int64_t pos)
