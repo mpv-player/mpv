@@ -97,49 +97,6 @@ static int mp_csp_to_sws_colorspace(enum mp_csp csp)
     }
 }
 
-// component_offset[]: byte index of each r (0), g (1), b (2), a (3) component
-static void planarize32(struct mp_image *dst, struct mp_image *src,
-                        int component_offset[4])
-{
-    for (int y = 0; y < dst->h; y++) {
-        for (int p = 0; p < 3; p++) {
-            uint8_t *d_line = dst->planes[p] + y * dst->stride[p];
-            uint8_t *s_line = src->planes[0] + y * src->stride[0];
-            s_line += component_offset[(p + 1) % 3]; // GBR => RGB
-            for (int x = 0; x < dst->w; x++) {
-                d_line[x] = s_line[x * 4];
-            }
-        }
-    }
-}
-
-#define SET_COMPS(comp, r, g, b, a) \
-    { (comp)[0] = (r); (comp)[1] = (g); (comp)[2] = (b); (comp)[3] = (a); }
-
-static int to_gbrp(struct mp_image *dst, struct mp_image *src,
-                   int my_sws_flags)
-{
-    struct mp_image *temp = NULL;
-    int comp[4];
-
-    switch (src->imgfmt) {
-    case IMGFMT_ABGR: SET_COMPS(comp, 3, 2, 1, 0); break;
-    case IMGFMT_BGRA: SET_COMPS(comp, 2, 1, 0, 3); break;
-    case IMGFMT_ARGB: SET_COMPS(comp, 1, 2, 3, 0); break;
-    case IMGFMT_RGBA: SET_COMPS(comp, 0, 1, 2, 3); break;
-    default:
-        temp = mp_image_alloc(IMGFMT_RGBA, dst->w, dst->h);
-        mp_image_swscale(temp, src, my_sws_flags);
-        src = temp;
-        SET_COMPS(comp, 0, 1, 2, 3);
-    }
-
-    planarize32(dst, src, comp);
-
-    talloc_free(temp);
-    return 0;
-}
-
 static bool cache_valid(struct mp_sws_context *ctx)
 {
     struct mp_sws_context *old = ctx->cached;
@@ -280,11 +237,6 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
 int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
                  struct mp_image *src)
 {
-    // Hack for older swscale versions which don't support this.
-    // We absolutely need this in the OSD rendering path.
-    if (dst->imgfmt == IMGFMT_GBRP && !sws_isSupportedOutput(AV_PIX_FMT_GBRP))
-        return to_gbrp(dst, src, ctx->flags);
-
     mp_image_params_from_image(&ctx->src, src);
     mp_image_params_from_image(&ctx->dst, dst);
 
