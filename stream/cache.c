@@ -434,6 +434,7 @@ static void cache_execute_control(struct priv *s)
         cache_drop_contents(s);
     }
 
+    update_cached_controls(s);
     s->control = CACHE_CTRL_NONE;
     pthread_cond_signal(&s->wakeup);
 }
