@@ -574,7 +574,7 @@ void mpv_free_node_contents(mpv_node *node);
  *
  * @param name Option name. This is the same as on the mpv command line, but
  *             without the leading "--".
- * @param format see enum mpv_format. Currently, only MPV_FORMAT_STRING is valid.
+ * @param format see enum mpv_format.
  * @param[in] data Option value (according to the format).
  * @return error code
  */
@@ -639,7 +639,7 @@ int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
  * usually invokes a string parser.
  *
  * @param name The property name. See input.rst for a list of properties.
- * @param format see enum mpv_format. Currently, only MPV_FORMAT_STRING is valid.
+ * @param format see enum mpv_format.
  * @param[in] data Option value.
  * @return error code
  */
@@ -661,7 +661,7 @@ int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
  *
  * @param reply_userdata see section about asynchronous calls
  * @param name The property name.
- * @param format see enum mpv_format. Currently, only MPV_FORMAT_STRING is valid.
+ * @param format see enum mpv_format.
  * @param[in] data Option value. The value will be copied by the function. It
  *                 will never be modified by the client API.
  * @return error code if sending the request failed
