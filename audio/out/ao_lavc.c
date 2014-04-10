@@ -189,7 +189,7 @@ static void uninit(struct ao *ao)
     pthread_mutex_lock(&ectx->lock);
 
     if (!encode_lavc_start(ectx)) {
-        MP_WARN(ao, "not even ready to encode audio at end -> dropped");
+        MP_WARN(ao, "not even ready to encode audio at end -> dropped\n");
         pthread_mutex_unlock(&ectx->lock);
         return;
     }
