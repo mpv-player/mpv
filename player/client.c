@@ -393,6 +393,9 @@ static void dup_event_data(struct mpv_event *ev)
         ev->data = msg;
         break;
     }
+    case MPV_EVENT_END_FILE:
+        ev->data = talloc_memdup(NULL, ev->data, sizeof(mpv_event_end_file));
+        break;
     default:
         // Doesn't use events with memory allocation.
         if (ev->data)

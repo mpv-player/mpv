@@ -817,6 +817,7 @@ typedef enum mpv_event_id {
     MPV_EVENT_START_FILE        = 6,
     /**
      * Notification after playback end (after the file was unloaded).
+     * See also mpv_event and mpv_event_end_file.
      */
     MPV_EVENT_END_FILE          = 7,
     /**
@@ -1000,6 +1001,18 @@ typedef struct mpv_event_pause_reason {
     int by_keep_open;
 } mpv_event_pause_reason;
 
+typedef struct mpv_event_end_file {
+    /**
+     * Identifies the reason why playback was stopped:
+     *  0: the end of the file was reached or initialization failed
+     *  1: the file is restarted (e.g. edition switching)
+     *  2: playback was aborted by an external action (e.g. playlist controls)
+     *  3: the player received the quit command
+     * Other values should be treated as unknown.
+     */
+    int reason;
+} mpv_event_end_file;
+
 typedef struct mpv_event_script_input_dispatch {
     /**
      * Arbitrary integer value that was provided as argument to the
@@ -1054,6 +1067,7 @@ typedef struct mpv_event {
      *  MPV_EVENT_UNPAUSE:                mpv_event_pause_reason*
      *  MPV_EVENT_SCRIPT_INPUT_DISPATCH:  mpv_event_script_input_dispatch*
      *  MPV_EVENT_CLIENT_MESSAGE:         mpv_event_client_message*
+     *  MPV_EVENT_END_FILE:               mpv_event_end_file*
      *  other: NULL
      *
      * Note: future enhancements might add new event structs for existing or new

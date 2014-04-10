@@ -1421,7 +1421,18 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     }
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
-    mp_notify(mpctx, MPV_EVENT_END_FILE, NULL);
+    struct mpv_event_end_file end_event = {0};
+    switch (mpctx->stop_play) {
+    case AT_END_OF_FILE:    end_event.reason = 0; break;
+    case PT_RESTART:
+    case PT_RELOAD_DEMUXER: end_event.reason = 1; break;
+    case PT_NEXT_ENTRY:
+    case PT_CURRENT_ENTRY:
+    case PT_STOP:           end_event.reason = 2; break;
+    case PT_QUIT:           end_event.reason = 3; break;
+    default:                end_event.reason = -1; break;
+    };
+    mp_notify(mpctx, MPV_EVENT_END_FILE, &end_event);
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,
