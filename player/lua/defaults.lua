@@ -373,4 +373,53 @@ function mp.osd_message(text, duration)
     mp.commandv("show_text", text, duration)
 end
 
+function mp.format_table(t, set)
+    if not set then
+        set = { [t] = true }
+    end
+    local res = "{"
+    -- pretty expensive but simple way to distinguish array and map parts of t
+    local keys = {}
+    local vals = {}
+    local arr = 0
+    for i = 1, #t do
+        if t[i] == nil then
+            break
+        end
+        keys[i] = i
+        vals[i] = t[i]
+        arr = i
+    end
+    for k, v in pairs(t) do
+        if not (type(k) == "number" and k >= 1 and k <= arr and keys[k]) then
+            keys[#keys + 1] = k
+            vals[#keys] = v
+        end
+    end
+    local function fmtval(v)
+        if type(v) == "string" then
+            return "\"" .. v .. "\""
+        elseif type(v) == "table" then
+            if set[v] then
+                return "[cycle]"
+            end
+            set[v] = true
+            return mp.format_table(v, set)
+        else
+            return tostring(v)
+        end
+    end
+    for i = 1, #keys do
+        if #res > 1 then
+            res = res .. ", "
+        end
+        if i > arr then
+            res = res .. fmtval(keys[i]) .. " = "
+        end
+        res = res .. fmtval(vals[i])
+    end
+    res = res .. "}"
+    return res
+end
+
 return {}
