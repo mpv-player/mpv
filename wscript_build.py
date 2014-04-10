@@ -162,6 +162,7 @@ def build(ctx):
         ( "common/cpudetect.c" ),
         ( "common/encode_lavc.c",                "encoding" ),
         ( "common/common.c" ),
+        ( "common/tags.c" ),
         ( "common/msg.c" ),
         ( "common/playlist.c" ),
         ( "common/playlist_parser.c" ),
