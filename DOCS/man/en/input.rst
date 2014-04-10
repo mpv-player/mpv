@@ -534,6 +534,9 @@ If an option is referenced, the property will normally take/return exactly the
 same values as the option. In these cases, properties are merely a way to change
 an option at runtime.
 
+Property list
+-------------
+
 ``osd-level`` (RW)
     See ``--osd-level``.
 
@@ -663,6 +666,17 @@ an option at runtime.
     ``edition-list/N/title``
         Edition title as stored in the file. Not always available.
 
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each edition)
+                "id"                MPV_FORMAT_INT64
+                "title"             MPV_FORMAT_STRING
+                "default"           MPV_FORMAT_FLAG
 
 ``angle`` (RW)
     Current DVD angle.
@@ -698,6 +712,15 @@ an option at runtime.
 
     The layout of this property might be subject to change. Suggestions are
     welcome how exactly this property should work.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            (key and string value for each metdata entry)
 
 ``chapter-metadata``
     Metadata of current chapter. Works similar to ``metadata`` property. IT
@@ -854,6 +877,25 @@ an option at runtime.
     ``video-params/chroma-location``
         Chroma location as string. (Exact values subject to change.)
 
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each track)
+                "pixelformat"       MPV_FORMAT_STRING
+                "w"                 MPV_FORMAT_INT64
+                "h"                 MPV_FORMAT_INT64
+                "dw"                MPV_FORMAT_INT64
+                "dh"                MPV_FORMAT_INT64
+                "aspect"            MPV_FORMAT_DOUBLE
+                "par"               MPV_FORMAT_DOUBLE
+                "colormatrix"       MPV_FORMAT_STRING
+                "colorlevels"       MPV_FORMAT_STRING
+                "chroma-location"   MPV_FORMAT_STRING
+
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling
     have been applied. The actual video window size can still be different
@@ -970,6 +1012,16 @@ an option at runtime.
     ``playlist/N/filename``
         Filename of the Nth entry.
 
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each playlist entry)
+                "filename"  MPV_FORMAT_STRING
+
 ``track-list``
     List of audio/video/sub tracks, current entry marked. Currently, the raw
     property value is useless.
@@ -1020,6 +1072,25 @@ an option at runtime.
     ``track-list/N/selected``
         ``yes`` if the track is currently decoded, ``no`` otherwise.
 
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each track)
+                "id"                MPV_FORMAT_INT64
+                "type"              MPV_FORMAT_STRING
+                "src-id"            MPV_FORMAT_INT64
+                "title"             MPV_FORMAT_STRING
+                "lang"              MPV_FORMAT_STRING
+                "albumart"          MPV_FORMAT_FLAG
+                "default"           MPV_FORMAT_FLAG
+                "external"          MPV_FORMAT_FLAG
+                "external-filename" MPV_FORMAT_STRING
+                "codec"             MPV_FORMAT_STRING
+
 ``chapter-list``
     List of chapters, current entry marked. Currently, the raw property value
     is useless.
@@ -1035,6 +1106,17 @@ an option at runtime.
 
     ``chapter-list/N/time``
         Chapter start time in seconds as float.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each chapter)
+                "title" MPV_FORMAT_STRING
+                "time"  MPV_FORMAT_DOUBLE
 
 ``quvi-format`` (RW)
     See ``--quvi-format``. Cycling this property (``cycle``) will attempt to
