@@ -175,12 +175,16 @@ struct m_sub_property {
 // Convenience macros which can be used as part of a sub_property entry.
 #define SUB_PROP_INT(i) \
     .type = CONF_TYPE_INT, .value = {.int_ = (i)}
+#define SUB_PROP_INT64(i) \
+    .type = CONF_TYPE_INT, .value = {.int64 = (i)}
 #define SUB_PROP_STR(s) \
     .type = CONF_TYPE_STRING, .value = {.string = (char *)(s)}
 #define SUB_PROP_FLOAT(f) \
     .type = CONF_TYPE_FLOAT, .value = {.float_ = (f)}
 #define SUB_PROP_FLAG(f) \
     .type = CONF_TYPE_FLAG, .value = {.flag = (f)}
+#define SUB_PROP_DOUBLE(f) \
+    .type = CONF_TYPE_DOUBLE, .value = {.double_ = (f)}
 
 int m_property_read_sub(const struct m_sub_property *props, int action, void *arg);
 
