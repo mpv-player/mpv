@@ -204,6 +204,25 @@ static void set_msg_color(FILE* stream, int lev)
     terminal_set_foreground_color(stream, v_colors[lev]);
 }
 
+static void pretty_print_module(FILE* stream, const char *prefix, bool use_color, int lev)
+{
+    // Use random color based on the name of the module
+    if (use_color) {
+        size_t prefix_len = strlen(prefix);
+        unsigned int mod = 0;
+        for (int i = 0; i < prefix_len; ++i)
+            mod = mod * 33 + prefix[i];
+        terminal_set_foreground_color(stream, (mod + 1) % 15 + 1);
+    }
+
+    fprintf(stream, "%10s", prefix);
+    if (use_color)
+        terminal_set_foreground_color(stream, -1);
+    fprintf(stream, ": ");
+    if (use_color)
+        set_msg_color(stream, lev);
+}
+
 static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
 {
     struct mp_log_root *root = log->root;
@@ -246,8 +265,13 @@ static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
         if (header) {
             if (root->show_time)
                 fprintf(stream, "[%" PRId64 "] ", mp_time_us());
-            if (prefix)
-                fprintf(stream, "[%s] ", prefix);
+
+            if (prefix) {
+                if (root->module)
+                    pretty_print_module(stream, prefix, root->color, lev);
+                else if (root->verbose)
+                    fprintf(stream, "[%s] ", prefix);
+            }
         }
 
         char *next = strchr(text, '\n');
