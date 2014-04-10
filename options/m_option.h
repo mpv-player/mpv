@@ -33,6 +33,7 @@ typedef struct m_option m_option_t;
 struct m_config;
 struct mp_log;
 struct mpv_node;
+struct mpv_node_list;
 
 ///////////////////////////// Options types declarations ////////////////////
 
@@ -514,6 +515,16 @@ static inline int m_option_get_node(const m_option_t *opt, void *ta_parent,
 }
 
 int m_option_required_params(const m_option_t *opt);
+
+// mpv_node stuff that is generally useful
+void dup_node(void *ta_parent, struct mpv_node *node);
+void steal_node_contents(void* ta_parent, struct mpv_node* node);
+struct mpv_node *node_map_get_key(struct mpv_node_list *node_map, const bstr key);
+struct mpv_node *node_map_create_key(struct mpv_node_list *node_map, const bstr key);
+struct mpv_node *node_map_get_or_create_key(struct mpv_node_list *node_map, const bstr key);
+bool node_map_update_item(struct mpv_node_list *node_map, const bstr key, const struct mpv_node *value);
+void node_map_add_item(struct mpv_node_list *node_map, const bstr key, const struct mpv_node *value);
+void node_map_update_or_add_item(struct mpv_node_list *node_map, const bstr key, const struct mpv_node *value);
 
 extern const char m_option_path_separator;
 
