@@ -56,9 +56,10 @@ extern "C" {
  * Event loop
  * ----------
  *
- * In general, the API user should run an event loop (with mpv_wait_event())
- * in order to receive events, although it also should be possible to integrate
- * client API usage in other event loops (e.g. GUI toolkits) with the
+ * In general, the API user should run an event loop in order to receive events.
+ * This even loop should call mpv_wait_event(), which will return once a new
+ * mpv client API is available. It should also be possible to integrate client
+ * API usage in other event loops (e.g. GUI toolkits) with the
  * mpv_set_wakeup_callback() function, and then polling for events by calling
  * mpv_wait_event() with a 0 timeout.
  *
@@ -352,8 +353,7 @@ void mpv_resume(mpv_handle *ctx);
 
 /**
  * Return the internal time in microseconds. This has an arbitrary start offset,
- * but will never wrap or go backwards (note: the latter is probably a lie in
- * the current implementation, it can go backwards on system clock changes).
+ * but will never wrap or go backwards.
  *
  * Note that this is always the real time, and doesn't necessarily have to do
  * with playback time. For example, playback could go faster or slower due to
@@ -369,7 +369,7 @@ int64_t mpv_get_time_us(mpv_handle *ctx);
  */
 typedef enum mpv_format {
     /**
-     * Invalid.
+     * Invalid. Sometimes used for empty values.
      */
     MPV_FORMAT_NONE             = 0,
     /**
@@ -487,7 +487,9 @@ typedef enum mpv_format {
  * Generic data storage.
  *
  * If mpv writes this struct (e.g. via mpv_get_property()), you must not change
- * the data. You have to free it with mpv_free_node_contents().
+ * the data. In some cases (mpv_get_property()), you have to free it with
+ * mpv_free_node_contents(). If you fill this struct yourself, you're also
+ * responsible for freeing it, and you must not call mpv_free_node_contents().
  */
 typedef struct mpv_node {
     union {
@@ -634,7 +636,7 @@ int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
  * usually will fail with MPV_ERROR_PROPERTY_FORMAT. In some cases, the data
  * is automatically converted and access succeeds. For example, MPV_FORMAT_INT64
  * is always converted to MPV_FORMAT_DOUBLE, and access using MPV_FORMAT_STRING
- * usually invokes a string formatter.
+ * usually invokes a string parser.
  *
  * @param name The property name. See input.rst for a list of properties.
  * @param format see enum mpv_format. Currently, only MPV_FORMAT_STRING is valid.
@@ -674,7 +676,7 @@ int mpv_set_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  * usually will fail with MPV_ERROR_PROPERTY_FORMAT. In some cases, the data
  * is automatically converted and access succeeds. For example, MPV_FORMAT_INT64
  * is always converted to MPV_FORMAT_DOUBLE, and access using MPV_FORMAT_STRING
- * usually invokes a string parser.
+ * usually invokes a string formatter.
  *
  * @param name The property name.
  * @param format see enum mpv_format.
@@ -737,12 +739,10 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  * event queue becomes empty (e.g. mpv_wait_event() would block or return
  * MPV_EVENT_NONE), and then only one event per changed property is returned.
  *
- * Keep in mind that you will get change notifications even if you change a
- * property yourself. Try to avoid endless feedback loops, which could happen
- * if you react to change notifications which you caused yourself.
- *
  * If the format parameter is set to something other than MPV_FORMAT_NONE, the
- * current property value will be returned as part of mpv_event_property.
+ * current property value will be returned as part of mpv_event_property. In
+ * this case, the API will also suppress redundant change events by comparing
+ * the raw value against the previous value.
  *
  * Warning: if a property is unavailable or retrieving it caused an error,
  *          MPV_FORMAT_NONE will be set in mpv_event_property, even if the
@@ -752,9 +752,9 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  * Observing a property that doesn't exist is allowed, although it may still
  * cause some sporadic change events.
  *
- * If you set the format parameter to a value other than MPV_FORMAT_NONE, the
- * API will suppress redundant change events by comparing the raw value against
- * the previous value.
+ * Keep in mind that you will get change notifications even if you change a
+ * property yourself. Try to avoid endless feedback loops, which could happen
+ * if you react to change notifications which you caused yourself.
  *
  * @param reply_userdata This will be used for the mpv_event.reply_userdata
  *                       field for the received MPV_EVENT_PROPERTY_CHANGE
@@ -765,7 +765,7 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  * @param name The property name.
  * @param format see enum mpv_format. Can be MPV_FORMAT_NONE to omit values
  *               from the change events.
- * @return error code (usually fails only on OOM)
+ * @return error code (usually fails only on OOM or unsupported format)
  */
 int mpv_observe_property(mpv_handle *mpv, uint64_t reply_userdata,
                          const char *name, mpv_format format);
@@ -775,8 +775,8 @@ int mpv_observe_property(mpv_handle *mpv, uint64_t reply_userdata,
  * which the given number was passed as reply_userdata to mpv_observe_property.
  *
  * @param registered_reply_userdata ID that was passed to mpv_observe_property
- * @return negative value is an error code, number of removed properties on
- *         success (includes the case when 0 were removed)
+ * @return negative value is an error code, >=0 is number of removed properties
+ *         on success (includes the case when 0 were removed)
  */
 int mpv_unobserve_property(mpv_handle *mpv, uint64_t registered_reply_userdata);
 
@@ -812,7 +812,7 @@ typedef enum mpv_event_id {
      */
     MPV_EVENT_COMMAND_REPLY     = 5,
     /**
-     * Notification before playback start of a file.
+     * Notification before playback start of a file (before the file is loaded).
      */
     MPV_EVENT_START_FILE        = 6,
     /**
@@ -825,7 +825,9 @@ typedef enum mpv_event_id {
      */
     MPV_EVENT_FILE_LOADED       = 8,
     /**
-     * The list of video/audio/subtitle tracks was changed.
+     * The list of video/audio/subtitle tracks was changed. (E.g. a new track
+     * was found. This doesn't necessarily indicate a track switch; for this,
+     * MPV_EVENT_TRACK_SWITCHED is used.)
      */
     MPV_EVENT_TRACKS_CHANGED    = 9,
     /**
@@ -856,6 +858,9 @@ typedef enum mpv_event_id {
      * Triggered by the script_dispatch input command. The command uses the
      * client name (see mpv_client_name()) to dispatch keyboard or mouse input
      * to a client.
+     * (This is pretty obscure and largely replaced by MPV_EVENT_CLIENT_MESSAGE,
+     * but still the only way to distinguish key down/up events when binding
+     * script_dispatch via input.conf.)
      */
     MPV_EVENT_SCRIPT_INPUT_DISPATCH = 15,
     /**
@@ -863,6 +868,7 @@ typedef enum mpv_event_id {
      * first argument of the command as client name (see mpv_client_name()) to
      * dispatch the message, and passes along the all arguments starting from
      * the seconand argument as strings.
+     * See also mpv_event and mpv_event_client_message.
      */
     MPV_EVENT_CLIENT_MESSAGE    = 16,
     /**
@@ -1013,7 +1019,7 @@ typedef struct mpv_event_client_message {
      * Arbitrary arguments chosen by the sender of the message. If num_args > 0,
      * you can access args[0] through args[num_args - 1] (inclusive). What
      * these arguments mean is up to the sender and receiver.
-     * None of the valid items is NULL.
+     * None of the valid items are NULL.
      */
     int num_args;
     const char **args;
@@ -1116,8 +1122,8 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout);
  *
  * mpv_wait_event() will receive a MPV_EVENT_NONE if it's woken up due to
  * this call. But note that this dummy event might be skipped if there are
- * already another events queued. All what counts is that the waiting thread
- * is woken up.
+ * already other events queued. All what counts is that the waiting thread
+ * is woken up at all.
  */
 void mpv_wakeup(mpv_handle *ctx);
 
