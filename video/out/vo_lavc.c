@@ -273,7 +273,8 @@ static int encode_video(struct vo *vo, AVFrame *frame, AVPacket *packet)
                    frame->pts * (double) vc->stream->codec->time_base.num /
                    (double) vc->stream->codec->time_base.den, size);
 
-        encode_lavc_write_stats(vo->encode_lavc_ctx, vc->stream);
+        if (got_packet)
+            encode_lavc_write_stats(vo->encode_lavc_ctx, vc->stream);
         return size;
     }
 }
