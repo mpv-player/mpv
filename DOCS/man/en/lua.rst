@@ -354,6 +354,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Undo a previous registration with ``mp.register_script_message``. Does
     nothing if the ``name`` wasn't registered.
 
+``mp.osd_message(text [,duration])``
+    Show an OSD message on the screen. ``duration`` is in seconds, and is
+    optional (uses ``--osd-duration`` by default).
+
 mp.msg functions
 ----------------
 

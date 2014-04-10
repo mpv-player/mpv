@@ -1,3 +1,5 @@
+
+-- these are used internally by lua.c
 mp.UNKNOWN_TYPE.info = "this value is inserted if the C type is not supported"
 mp.UNKNOWN_TYPE.type = "UNKNOWN_TYPE"
 
@@ -358,6 +360,17 @@ _G.mp_event_loop = function()
             end
         end
     end
+end
+
+-- additional helpers
+
+function mp.osd_message(text, duration)
+    if not duration then
+        duration = "-1"
+    else
+        duration = tostring(math.floor(duration * 1000))
+    end
+    mp.commandv("show_text", text, duration)
 end
 
 return {}
