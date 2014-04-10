@@ -366,27 +366,12 @@ char *m_properties_expand_string(const m_option_t *prop_list,
 void m_properties_print_help_list(struct mp_log *log,
                                   const struct m_option* list)
 {
-    char min[50], max[50];
-    int i, count = 0;
+    int count = 0;
 
-    mp_info(log,
-            "\n Name                 Type            Min        Max\n\n");
-    for (i = 0; list[i].name; i++) {
+    mp_info(log, "Name\n\n");
+    for (int i = 0; list[i].name; i++) {
         const m_option_t *opt = &list[i];
-        if (opt->flags & M_OPT_MIN)
-            sprintf(min, "%-8.0f", opt->min);
-        else
-            strcpy(min, "No");
-        if (opt->flags & M_OPT_MAX)
-            sprintf(max, "%-8.0f", opt->max);
-        else
-            strcpy(max, "No");
-        mp_info(log,
-               " %-20.20s %-15.15s %-10.10s %-10.10s\n",
-               opt->name,
-               opt->type->name,
-               min,
-               max);
+        mp_info(log, " %s\n", opt->name);
         count++;
     }
     mp_info(log, "\nTotal: %d properties\n", count);
