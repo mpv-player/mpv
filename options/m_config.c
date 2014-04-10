@@ -657,15 +657,26 @@ int m_config_option_requires_param(struct m_config *config, bstr name)
     return M_OPT_UNKNOWN;
 }
 
+static int sort_opt_compare(const void *pa, const void *pb)
+{
+    const struct m_config_option *a = pa;
+    const struct m_config_option *b = pb;
+    return strcasecmp(a->name, b->name);
+}
+
 void m_config_print_option_list(const struct m_config *config)
 {
     char min[50], max[50];
     int count = 0;
     const char *prefix = config->is_toplevel ? "--" : "";
 
+    struct m_config_option *sorted =
+        talloc_memdup(NULL, config->opts, config->num_opts * sizeof(sorted[0]));
+    qsort(sorted, config->num_opts, sizeof(sorted[0]), sort_opt_compare);
+
     MP_INFO(config, "Options:\n\n");
     for (int i = 0; i < config->num_opts; i++) {
-        struct m_config_option *co = &config->opts[i];
+        struct m_config_option *co = &sorted[i];
         const struct m_option *opt = co->opt;
         if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
             continue;
@@ -706,6 +717,7 @@ void m_config_print_option_list(const struct m_config *config)
         count++;
     }
     MP_INFO(config, "\nTotal: %d options\n", count);
+    talloc_free(sorted);
 }
 
 char **m_config_list_options(void *ta_parent, const struct m_config *config)
