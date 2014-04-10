@@ -179,7 +179,7 @@ static void uninit(struct ao *ao, bool cut_audio)
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
 
     if (!encode_lavc_start(ectx)) {
-        MP_WARN(ao, "not even ready to encode audio at end -> dropped");
+        MP_WARN(ao, "not even ready to encode audio at end -> dropped\n");
         return;
     }
 
