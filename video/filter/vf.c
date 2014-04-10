@@ -152,6 +152,39 @@ int vf_control_any(struct vf_chain *c, int cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
+int vf_control_all(struct vf_chain *c, int cmd, void *arg)
+{
+    int ret=CONTROL_UNKNOWN;
+    for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
+        if (cur->control) {
+            int r = cur->control(cur, cmd, arg);
+            if (r != CONTROL_UNKNOWN)
+		ret=r;
+        }
+    }
+    return ret;
+}
+
+int vf_control_by_name(struct vf_chain *c,int cmd, void *arg, bstr filtername)
+{
+    for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
+	if (bstrcmp0(filtername,cur->info->name)==0)
+            return cur->control(cur, cmd, arg);
+    }
+    return CONTROL_UNKNOWN;
+}
+
+int vf_control_by_label(struct vf_chain *c,int cmd, void *arg, bstr label)
+{
+    char *label_str = bstrdup0(NULL, label);
+    struct vf_instance *cur = vf_find_by_label(c, label_str);
+    talloc_free(label_str);
+    if (cur)
+	return cur->control(cur, cmd, arg);
+    else
+	return CONTROL_UNKNOWN;
+}
+
 static void vf_fix_img_params(struct mp_image *img, struct mp_image_params *p)
 {
     // Filters must absolutely set these correctly.
