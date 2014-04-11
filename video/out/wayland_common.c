@@ -960,7 +960,6 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         vo_wayland_fullscreen(vo);
-        *events |= VO_EVENT_RESIZE;
         return VO_TRUE;
     case VOCTRL_ONTOP:
         vo_wayland_ontop(vo);
