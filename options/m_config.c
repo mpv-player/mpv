@@ -672,7 +672,8 @@ void m_config_print_option_list(const struct m_config *config)
 
     struct m_config_option *sorted =
         talloc_memdup(NULL, config->opts, config->num_opts * sizeof(sorted[0]));
-    qsort(sorted, config->num_opts, sizeof(sorted[0]), sort_opt_compare);
+    if (config->is_toplevel)
+        qsort(sorted, config->num_opts, sizeof(sorted[0]), sort_opt_compare);
 
     MP_INFO(config, "Options:\n\n");
     for (int i = 0; i < config->num_opts; i++) {
