@@ -334,6 +334,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     long time, but doesn't really need access to the player (like a network
     operation). Note that you still can access the player at any time.
 
+``mp.get_wakeup_pipe()``
+    Calls ``mpv_get_wakeup_pipe()`` and returns the read end of the wakeup
+    pipe. (See ``client.h`` for details.)
+
 ``mp.enable_messages(level)``
     Set the minimum log level of which mpv message output to receive. These
     messages are normally printed to the terminal. By calling this function,

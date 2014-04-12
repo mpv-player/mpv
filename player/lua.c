@@ -1047,6 +1047,13 @@ static int script_format_time(lua_State *L)
     return 1;
 }
 
+static int script_get_wakeup_pipe(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    lua_pushinteger(L, mpv_get_wakeup_pipe(ctx->client));
+    return 1;
+}
+
 struct fn_entry {
     const char *name;
     int (*fn)(lua_State *L);
@@ -1085,6 +1092,7 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(input_set_section_mouse_area),
     FN_ENTRY(format_time),
     FN_ENTRY(enable_messages),
+    FN_ENTRY(get_wakeup_pipe),
 };
 
 // On stack: mp table
