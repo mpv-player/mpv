@@ -2849,7 +2849,54 @@ static int parse_node(struct mp_log *log, const m_option_t *opt,
 
 static char *print_node(const m_option_t *opt, const void *val)
 {
-    return NULL;
+    m_option_t subopt;
+    switch (VAL(val).format) {
+    case MPV_FORMAT_STRING:
+	subopt = (m_option_t){.type = CONF_TYPE_STRING};
+	return m_option_print(&subopt,&VAL(val).u.string);
+    case MPV_FORMAT_FLAG:
+	subopt = (m_option_t){.type = CONF_TYPE_FLAG};
+	return m_option_print(&subopt,&VAL(val).u.flag);
+    case MPV_FORMAT_INT64:
+	subopt = (m_option_t){.type = CONF_TYPE_INT64};
+	return m_option_print(&subopt,&VAL(val).u.int64);
+    case MPV_FORMAT_DOUBLE:
+	subopt = (m_option_t){.type = CONF_TYPE_DOUBLE};
+	return m_option_print(&subopt,&VAL(val).u.double_);
+    case MPV_FORMAT_NODE_ARRAY:{
+    	mpv_node_list *list=VAL(val).u.list;
+	char *result=NULL;
+	char *buffer;
+	char delim[3]={0};
+	result = talloc_asprintf_append(result, "[");
+    	for(int i = 0; i < list->num ; i++) {
+    	    buffer = print_node(opt, &list->values[i]);
+	    result = talloc_asprintf_append(result, "%s%s", delim, buffer);
+	    talloc_free(buffer);
+	    if (i == 0) strcpy(delim, ", ");
+    	}
+	result = talloc_asprintf_append(result,"]");
+	return result;
+    }
+    case MPV_FORMAT_NODE_MAP:{
+    	mpv_node_list *list=VAL(val).u.list;
+	char *result=NULL;
+	char *buffer;
+	char delim[3]={0};
+	result = talloc_asprintf_append(result, "{");
+    	for(int i = 0; i < list->num ; i++) {
+	    buffer = print_node(opt, &list->values[i]);
+    	    result = talloc_asprintf_append(result, "%s%s:%s", delim, list->keys[i], buffer);
+	    talloc_free(buffer);
+	    if (i == 0) strcpy(delim, ", ");
+    	}
+	result = talloc_asprintf_append(result,"}");
+	return result;
+    }
+    case MPV_FORMAT_NONE:
+    default:
+	return NULL;
+    }
 }
 
 void dup_node(void *ta_parent, struct mpv_node *node)
