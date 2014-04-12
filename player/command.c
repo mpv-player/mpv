@@ -355,6 +355,27 @@ static int mp_property_avsync(m_option_t *prop, int action, void *arg,
     return m_property_double_ro(prop, action, arg, mpctx->last_av_difference);
 }
 
+static int mp_property_total_avsync_change(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
+{
+    if (!mpctx->d_audio || !mpctx->d_video)
+        return M_PROPERTY_UNAVAILABLE;
+    if (mpctx->total_avsync_change == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(prop, action, arg, mpctx->total_avsync_change);
+}
+
+
+/// Late frames
+static int mp_property_drop_frame_cnt(m_option_t *prop, int action, void *arg,
+                                   MPContext *mpctx)
+{
+     if (!mpctx->d_video)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_int_ro(prop, action, arg, mpctx->drop_frame_cnt);
+}
+
 /// Current position in percent (RW)
 static int mp_property_percent_pos(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
@@ -965,6 +986,12 @@ static int mp_property_cache_size(m_option_t *prop, int action, void *arg,
     }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_paused_for_cache(m_option_t *prop, int action, void *arg,
+                            MPContext *mpctx)
+{
+    return m_property_int_ro(prop, action, arg, mpctx->paused_for_cache);
 }
 
 static int mp_property_clock(m_option_t *prop, int action, void *arg,
@@ -2155,6 +2182,10 @@ static const m_option_t mp_properties[] = {
     { "length", mp_property_length, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
     { "avsync", mp_property_avsync, CONF_TYPE_DOUBLE },
+    { "total-avsync-change", mp_property_total_avsync_change,
+      CONF_TYPE_DOUBLE },
+    { "drop-frame-count", mp_property_drop_frame_cnt, CONF_TYPE_INT,
+      0, 0, 0, NULL },
     { "percent-pos", mp_property_percent_pos, CONF_TYPE_DOUBLE,
       M_OPT_RANGE, 0, 100, NULL },
     { "time-start", mp_property_time_start, CONF_TYPE_TIME,
@@ -2179,6 +2210,8 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("pause", mp_property_pause),
     { "cache", mp_property_cache, CONF_TYPE_INT },
     { "cache-size", mp_property_cache_size, CONF_TYPE_INT, M_OPT_MIN, 0 },
+    { "paused-for-cache", mp_property_paused_for_cache, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
     M_OPTION_PROPERTY("pts-association-mode"),
     M_OPTION_PROPERTY("hr-seek"),
     { "clock", mp_property_clock, CONF_TYPE_STRING,

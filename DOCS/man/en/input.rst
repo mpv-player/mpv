@@ -602,6 +602,14 @@ Property list
     Last A/V synchronization difference. Unavailable if audio or video is
     disabled.
 
+``total-avsync-change``
+    Total A-V sync correction done. Unavailable if audio or video is
+    disabled.
+
+``drop-frame-count``
+    Frames dropped because they arrived to late. Unavailable if video
+    is disabled
+
 ``percent-pos`` (RW)
     Position in current file (0-100). The advantage over using this instead of
     calculating it out of other properties is that it properly falls back to
@@ -749,6 +757,9 @@ Property list
     old cache is still allocated.
 
     Don't use this when playing DVD or Bluray.
+
+``paused-for-cache``
+    Returns ``yes`` when playback is paused because of waiting for the cache.
 
 ``pts-association-mode`` (RW)
     See ``--pts-association-mode``.
