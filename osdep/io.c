@@ -29,7 +29,7 @@
 // On error, false is returned (and errno set).
 bool mp_set_cloexec(int fd)
 {
-#if defined(FD_CLOEXEC) && defined(F_SETFD)
+#if defined(F_SETFD)
     if (fd >= 0) {
         int flags = fcntl(fd, F_GETFD);
         if (flags == -1)

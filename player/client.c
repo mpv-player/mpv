@@ -14,6 +14,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -26,10 +28,13 @@
 #include "options/m_property.h"
 #include "osdep/threads.h"
 #include "osdep/timer.h"
+#include "osdep/io.h"
 
 #include "command.h"
 #include "core.h"
 #include "client.h"
+
+#include "config.h"
 
 /*
  * Locking hierarchy:
@@ -88,6 +93,7 @@ struct mpv_handle {
     bool choke_warning;
     void (*wakeup_cb)(void *d);
     void *wakeup_cb_ctx;
+    int wakeup_pipe[2];
 
     mpv_event *events;      // ringbuffer of max_events entries
     int max_events;         // allocated number of entries in events
@@ -176,6 +182,7 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
         .events = talloc_array(client, mpv_event, num_events),
         .max_events = num_events,
         .event_mask = ((uint64_t)-1) & ~(1ULL << MPV_EVENT_TICK),
+        .wakeup_pipe = {-1, -1},
     };
     pthread_mutex_init(&client->lock, NULL);
     pthread_cond_init(&client->wakeup, NULL);
@@ -202,6 +209,8 @@ static void wakeup_client(struct mpv_handle *ctx)
     pthread_cond_signal(&ctx->wakeup);
     if (ctx->wakeup_cb)
         ctx->wakeup_cb(ctx->wakeup_cb_ctx);
+    if (ctx->wakeup_pipe[0] == -1)
+        write(ctx->wakeup_pipe[0], &(char){0}, 1);
 }
 
 void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d)
@@ -250,6 +259,10 @@ void mpv_destroy(mpv_handle *ctx)
             mp_msg_log_buffer_destroy(ctx->messages);
             pthread_cond_destroy(&ctx->wakeup);
             pthread_mutex_destroy(&ctx->lock);
+            if (ctx->wakeup_pipe[0] != -1) {
+                close(ctx->wakeup_pipe[0]);
+                close(ctx->wakeup_pipe[1]);
+            }
             talloc_free(ctx);
             ctx = NULL;
             // shutdown_clients() sleeps to avoid wasting CPU
@@ -1231,6 +1244,25 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
 
     pthread_mutex_unlock(&ctx->lock);
     return 0;
+}
+
+int mpv_get_wakeup_pipe(mpv_handle *ctx)
+{
+    pthread_mutex_lock(&ctx->lock);
+#if defined(F_SETFL)
+    if (ctx->wakeup_pipe[0] == -1) {
+        if (pipe(ctx->wakeup_pipe) != 0)
+            goto fail;
+        for (int i = 0; i < 2; i++) {
+            mp_set_cloexec(ctx->wakeup_pipe[i]);
+            int ret = fcntl(ctx->wakeup_pipe[i], F_GETFL);
+            fcntl(ctx->wakeup_pipe[i], F_SETFL, ret | O_NONBLOCK);
+        }
+    }
+fail:
+#endif
+    pthread_mutex_unlock(&ctx->lock);
+    return ctx->wakeup_pipe[1];
 }
 
 unsigned long mpv_client_api_version(void)

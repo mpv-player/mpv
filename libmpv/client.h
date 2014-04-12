@@ -1010,7 +1010,7 @@ typedef struct mpv_event_end_file {
      *  3: the player received the quit command
      * Other values should be treated as unknown.
      */
-    int reason;
+  int reason;
 } mpv_event_end_file;
 
 typedef struct mpv_event_script_input_dispatch {
@@ -1158,8 +1158,39 @@ void mpv_wakeup(mpv_handle *ctx);
  * If you actually want to do processing in a callback, spawn a thread that
  * does nothing but call mpv_wait_event() in a loop and dispatches the result
  * to a callback.
+ *
+ * Only one wakeup callback can be set.
+ *
+ * @param cb function that should be called if a wakeup is required
+ * @param d arbitrary userdata passed to cb
  */
 void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
+
+/**
+ * Return a UNIX file descriptor referring to the read end of a pipe. This
+ * pipe can be used to wake up a poll() based processing loop. The purpose of
+ * this function is very similar to mpv_set_wakeup_callback(), and provides
+ * a primitive mechanism to handle coordinating a foreign event loop and the
+ * libmpv event loop.
+ *
+ * This is in fact implemented using mpv_set_wakeup_callback(), and each
+ * callback invocation writes a single 0 byte to the pipe. When the pipe
+ * becomes readable, the code calling poll() (or select()) on the pipe should
+ * read all contents of the pipe and then call mpv_wait_event(c, 0) until
+ * no new events are returned. The pipe contents do not matter and can just
+ * be discarded.
+ *
+ * Note that this call lazily creates the pipe, and always returns the same
+ * handle once it's created. The client API will destroy both the read and
+ * write ends of the pipe in mpv_destroy(). If you need something more
+ * complex, it's better to implement your own mechanisms using
+ * mpv_set_wakeup_callback().
+ *
+ * On Windows, this will always return -1.
+ *
+ * @return A UNIX FD of the read end of the wakeup pipe, -1 on error.
+ */
+int mpv_get_wakeup_pipe(mpv_handle *ctx);
 
 #ifdef __cplusplus
 }

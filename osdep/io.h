@@ -34,6 +34,9 @@
 #ifndef O_CLOEXEC
 #define O_CLOEXEC 0
 #endif
+#ifndef FD_CLOEXEC
+#define FD_CLOEXEC 0
+#endif
 
 bool mp_set_cloexec(int fd);
 
