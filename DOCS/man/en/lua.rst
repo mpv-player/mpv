@@ -313,6 +313,16 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
         The script ``/path/to/fooscript.lua`` becomes ``lua/fooscript``.
 
+``mp.osd_message(text [,duration])``
+    Show an OSD message on the screen. ``duration`` is in seconds, and is
+    optional (uses ``--osd-duration`` by default).
+
+Advanced mp functions
+---------------------
+
+These also live in the ``mp`` module, but are documented separately as they
+are useful only in special situations.
+
 ``mp.suspend()``
     Suspend the mpv main loop. There is a long-winded explanation of this in
     the C API function ``mpv_suspend()``. In short, this prevents the player
@@ -377,10 +387,6 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 ``mp.unregister_script_message(name)``
     Undo a previous registration with ``mp.register_script_message``. Does
     nothing if the ``name`` wasn't registered.
-
-``mp.osd_message(text [,duration])``
-    Show an OSD message on the screen. ``duration`` is in seconds, and is
-    optional (uses ``--osd-duration`` by default).
 
 mp.msg functions
 ----------------
