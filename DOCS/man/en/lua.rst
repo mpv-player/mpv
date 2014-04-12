@@ -338,6 +338,26 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Calls ``mpv_get_wakeup_pipe()`` and returns the read end of the wakeup
     pipe. (See ``client.h`` for details.)
 
+``mp.get_next_timeout()``
+    Return the relative time in seconds when the next timer (``mp.add_timeout``
+    and similar) expires. If there is no timer, return ``nil``.
+
+``mp.dispatch_events([allow_wait])``
+    This can be used to run custom event loops. If you want to have direct
+    control what the Lua script does (instead of being called by the default
+    event loop), you can set the global variable ``mp_event_loop`` to your
+    own function running the event loop. From your event loop, you should call
+    ``mp.dispatch_events()`` to unqueue and dispatch mpv events.
+
+    If the ``allow_wait`` parameter is set to ``true``, the function will block
+    until the next event is received or the next timer expires. Otherwise (and
+    this is the default behavior), it returns as soon as the event loop is
+    emptied. It's strongly recommended to use ``mp.get_next_timeout()`` and
+    ``mp.get_wakeup_pipe()`` if you're interested in properly working
+    notification of new events and working timers.
+
+    This function calls ``mp.suspend()`` and ``mp.resume_all()`` on its own.
+
 ``mp.enable_messages(level)``
     Set the minimum log level of which mpv message output to receive. These
     messages are normally printed to the terminal. By calling this function,

@@ -201,6 +201,15 @@ local function get_next_timer()
     return best
 end
 
+function mp.get_next_timeout()
+    local timer = get_next_timer()
+    if not timer then
+        return
+    end
+    local now = mp.get_time()
+    return timer.next_deadline - now
+end
+
 -- Run timers that have met their deadline.
 -- Return: next absolute time a timer expires as number, or nil if no timers
 local function process_timers()
@@ -331,6 +340,19 @@ package.loaded["mp"] = mp
 package.loaded["mp.msg"] = mp.msg
 
 _G.mp_event_loop = function()
+    mp.dispatch_events(true)
+end
+
+local function call_event_handlers(e)
+    local handlers = event_handlers[e.event]
+    if handlers then
+        for _, handler in ipairs(handlers) do
+            handler(e)
+        end
+    end
+end
+
+function mp.dispatch_events(allow_wait)
     local more_events = true
     mp.suspend()
     while mp.keep_running do
@@ -345,6 +367,9 @@ _G.mp_event_loop = function()
         -- suspended, and the error was handled, but no resume was done.
         if wait > 0 then
             mp.resume_all()
+            if allow_wait ~= true then
+                return
+            end
         end
         local e = mp.wait_event(wait)
         -- Empty the event queue while suspended; otherwise, each
@@ -352,12 +377,7 @@ _G.mp_event_loop = function()
         mp.suspend()
         more_events = (e.event ~= "none")
         if more_events then
-            local handlers = event_handlers[e.event]
-            if handlers then
-                for _, handler in ipairs(handlers) do
-                    handler(e)
-                end
-            end
+            call_event_handlers(e)
         end
     end
 end
