@@ -327,6 +327,7 @@ Optional features:
   --disable-libpostproc  disable postprocess filter (vf_pp) [autodetect]
   --disable-libavdevice  disable libavdevice demuxers [autodetect]
   --disable-libavfilter  disable libavfilter [autodetect]
+  --disable-vapoursynth  disable VapourSynth filter bridge [autodetect]
 
 Codecs:
   --enable-jpeg             enable JPEG input/output support [autodetect]
@@ -451,6 +452,7 @@ _bluray=auto
 _dvdread=auto
 _dvdnav=auto
 _lcms2=auto
+_vapoursynth=auto
 _xinerama=auto
 _vm=auto
 _xf86keysym=auto
@@ -639,6 +641,8 @@ for ac_option do
   --disable-dvdnav)     _dvdnav=no     ;;
   --enable-lcms2)       _lcms2=yes      ;;
   --disable-lcms2)      _lcms2=no       ;;
+  --enable-vapoursynth) _vapoursynth=yes ;;
+  --dsiable-vapoursynth)_vapoursynth=no ;;
   --enable-xinerama)    _xinerama=yes   ;;
   --disable-xinerama)   _xinerama=no    ;;
   --enable-vm)          _vm=yes         ;;
@@ -2648,6 +2652,21 @@ fi
 echores "$_lcms2"
 
 
+echocheck "VapurSynth support"
+if test "$_vapoursynth" = auto ; then
+    _vapoursynth=no
+    if pkg_config_add 'vapoursynth >= 23 vapoursynth-script >= 23' ; then
+        _vapoursynth=yes
+    fi
+fi
+if test "$_vapoursynth" = yes ; then
+    def_vapoursynth="#define HAVE_VAPOURSYNTH 1"
+else
+    def_vapoursynth="#define HAVE_VAPOURSYNTH 0"
+fi
+echores "$_vapoursynth"
+
+
 all_libav_libs="libavutil >= 52.48.101:libavcodec >= 55.34.1:libavformat >= 55.12.0:libswscale >= 2.1.2"
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
@@ -3213,6 +3232,7 @@ DUMMY_OSD = $_dummy_osd
 LIBBLURAY = $_bluray
 LIBBS2B = $_libbs2b
 LCMS2 = $_lcms2
+VAPOURSYNTH = $_vapoursynth
 LUA = $lua
 LIBPOSTPROC = $libpostproc
 LIBAVDEVICE = $libavdevice
@@ -3400,6 +3420,7 @@ $def_libquvi9
 $def_libguess
 
 $def_lcms2
+$def_vapoursynth
 $def_lua
 
 

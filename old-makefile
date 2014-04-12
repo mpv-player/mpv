@@ -133,7 +133,7 @@ SOURCES-$(LIBAVFILTER)          += video/filter/vf_lavfi.c \
                                    audio/filter/af_lavfi.c
 
 SOURCES-$(LUA)                  += player/lua.c
-
+SOURCES-$(VAPOURSYNTH)          += video/filter/vf_vapoursynth.c
 SOURCES-$(DLOPEN)               += video/filter/vf_dlopen.c
 
 SOURCES = audio/audio.c \

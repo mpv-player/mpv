@@ -320,6 +320,7 @@ def build(ctx):
         ( "video/filter/vf_sub.c" ),
         ( "video/filter/vf_swapuv.c" ),
         ( "video/filter/vf_unsharp.c" ),
+        ( "video/filter/vf_vapoursynth.c",       "vapoursynth" ),
         ( "video/filter/vf_vavpp.c",             "vaapi-vpp"),
         ( "video/filter/vf_yadif.c" ),
         ( "video/out/aspect.c" ),

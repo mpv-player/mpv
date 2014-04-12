@@ -322,6 +322,10 @@ If you really mean to compile without libass support use --disable-libass."
         'name': '--lcms2',
         'desc': 'LCMS2 support',
         'func': check_pkg_config('lcms2'),
+    }, {
+        'name': '--vapoursynth',
+        'desc': 'VapourSynth filter bridge',
+        'func': check_pkg_config('vapoursynth >= 23 vapoursynth-script >= 23'),
     }
 ]
 

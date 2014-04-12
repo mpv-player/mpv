@@ -69,6 +69,7 @@ extern const vf_info_t vf_info_stereo3d;
 extern const vf_info_t vf_info_dlopen;
 extern const vf_info_t vf_info_lavfi;
 extern const vf_info_t vf_info_vaapi;
+extern const vf_info_t vf_info_vapoursynth;
 
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
@@ -108,6 +109,9 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_stereo3d,
 #if HAVE_DLOPEN
     &vf_info_dlopen,
+#endif
+#if HAVE_VAPOURSYNTH
+    &vf_info_vapoursynth,
 #endif
 #if HAVE_VAAPI_VPP
     &vf_info_vaapi,
