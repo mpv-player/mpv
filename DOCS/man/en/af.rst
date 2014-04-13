@@ -281,8 +281,7 @@ Available filters are:
         gain of 1000 (default: 0).
     ``replaygain-track``
         Adjust volume gain according to the track-gain replaygain value stored
-        in the file metadata. Note that this only supports reading REPLAYGAIN_*
-        tags, as written by mp3gain, metaflac, etc...
+        in the file metadata.
     ``replaygain-album``
         Like replaygain-track, but using the album-gain value instead.
     ``replaygain-preamp``
