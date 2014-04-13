@@ -2849,10 +2849,57 @@ static int parse_node(struct mp_log *log, const m_option_t *opt,
 
 static char *print_node(const m_option_t *opt, const void *val)
 {
-    return NULL;
+    m_option_t subopt;
+    switch (VAL(val).format) {
+    case MPV_FORMAT_STRING:
+	subopt = (m_option_t){.type = CONF_TYPE_STRING};
+	return m_option_print(&subopt,&VAL(val).u.string);
+    case MPV_FORMAT_FLAG:
+	subopt = (m_option_t){.type = CONF_TYPE_FLAG};
+	return m_option_print(&subopt,&VAL(val).u.flag);
+    case MPV_FORMAT_INT64:
+	subopt = (m_option_t){.type = CONF_TYPE_INT64};
+	return m_option_print(&subopt,&VAL(val).u.int64);
+    case MPV_FORMAT_DOUBLE:
+	subopt = (m_option_t){.type = CONF_TYPE_DOUBLE};
+	return m_option_print(&subopt,&VAL(val).u.double_);
+    case MPV_FORMAT_NODE_ARRAY:{
+    	mpv_node_list *list=VAL(val).u.list;
+	char *result=NULL;
+	char *buffer;
+	char delim[3]={0};
+	result = talloc_asprintf_append(result, "[");
+    	for(int i = 0; i < list->num ; i++) {
+    	    buffer = print_node(opt, &list->values[i]);
+	    result = talloc_asprintf_append(result, "%s%s", delim, buffer);
+	    talloc_free(buffer);
+	    if (i == 0) strcpy(delim, ", ");
+    	}
+	result = talloc_asprintf_append(result,"]");
+	return result;
+    }
+    case MPV_FORMAT_NODE_MAP:{
+    	mpv_node_list *list=VAL(val).u.list;
+	char *result=NULL;
+	char *buffer;
+	char delim[3]={0};
+	result = talloc_asprintf_append(result, "{");
+    	for(int i = 0; i < list->num ; i++) {
+	    buffer = print_node(opt, &list->values[i]);
+    	    result = talloc_asprintf_append(result, "%s%s:%s", delim, list->keys[i], buffer);
+	    talloc_free(buffer);
+	    if (i == 0) strcpy(delim, ", ");
+    	}
+	result = talloc_asprintf_append(result,"}");
+	return result;
+    }
+    case MPV_FORMAT_NONE:
+    default:
+	return NULL;
+    }
 }
 
-static void dup_node(void *ta_parent, struct mpv_node *node)
+void dup_node(void *ta_parent, struct mpv_node *node)
 {
     switch (node->format) {
     case MPV_FORMAT_STRING:
@@ -2901,6 +2948,66 @@ static void copy_node(const m_option_t *opt, void *dst, const void *src)
     dup_node(NULL, &VAL(dst));
 }
 
+struct mpv_node *node_map_get_key(struct mpv_node_list *node_map, const bstr key)
+{
+    for (int n = 0; n < node_map->num; n++){
+        if (bstrcmp0(key, node_map->keys[n]) == 0)
+	    return &node_map->values[n];
+    }
+    return NULL;
+}
+
+struct mpv_node *node_map_create_key(struct mpv_node_list *node_map, const bstr key)
+{
+    MP_RESIZE_ARRAY(node_map, node_map->keys  , node_map->num + 1);
+    MP_RESIZE_ARRAY(node_map, node_map->values, node_map->num + 1);
+
+    node_map->keys[node_map->num] = talloc_strndup(node_map, key.start, key.len);
+    mpv_node* node = &node_map->values[node_map->num];
+    *node = (mpv_node) {{0}};
+    node_map->num++;
+    return node;
+}
+
+struct mpv_node *node_map_get_or_create_key(struct mpv_node_list *node_map, const bstr key)
+{
+    mpv_node* node;
+    if ( !(node = node_map_get_key(node_map,key)) )
+	node = node_map_create_key(node_map, key);
+    return node;
+}
+
+bool node_map_update_item(struct mpv_node_list *node_map,const bstr key,const struct mpv_node *value)
+{
+    for (int n = 0; n < node_map->num; n++){
+        if (bstrcmp0(key, node_map->keys[n]) == 0){
+	    mpv_free_node_contents( &node_map->values[n] );
+	    node_map->values[n] = *value;
+	    dup_node(node_map, &node_map->values[n]);
+	    return true;
+	}
+    }
+    return false;
+}
+
+void node_map_add_item(struct mpv_node_list *node_map, const bstr key, const struct mpv_node *value)
+{
+    MP_RESIZE_ARRAY(node_map, node_map->keys  , node_map->num + 1);
+    MP_RESIZE_ARRAY(node_map, node_map->values, node_map->num + 1);
+
+    node_map->keys[node_map->num] = talloc_strndup(node_map, key.start, key.len);
+    node_map->values[node_map->num] = *value;
+    dup_node(node_map, &node_map->values[node_map->num]);
+    node_map->num++;
+}
+
+// add/replace key value pair into the node_map
+void node_map_update_or_add_item(struct mpv_node_list *node_map, const bstr key, const struct mpv_node *value)
+{
+    if (!node_map_update_item(node_map, key, value))
+	node_map_add_item(node_map, key, value);
+}
+
 static void *node_get_alloc(struct mpv_node *node)
 {
     // Assume it was allocated with copy_node(), which allocates all
@@ -2914,6 +3021,11 @@ static void *node_get_alloc(struct mpv_node *node)
     default:
         return NULL;
     }
+}
+
+void steal_node_contents(void* ta_parent, struct mpv_node *node)
+{
+    talloc_steal(ta_parent,node_get_alloc(node));
 }
 
 static void free_node(void *src)

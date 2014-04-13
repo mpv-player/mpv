@@ -753,48 +753,6 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
     return 1;
 }
 
-void mp_tags_set_str(struct mp_tags *tags, const char *key, const char *value)
-{
-    mp_tags_set_bstr(tags, bstr0(key), bstr0(value));
-}
-
-void mp_tags_set_bstr(struct mp_tags *tags, bstr key, bstr value)
-{
-    for (int n = 0; n < tags->num_keys; n++) {
-        if (bstrcasecmp0(key, tags->keys[n]) == 0) {
-            talloc_free(tags->values[n]);
-            tags->values[n] = talloc_strndup(tags, value.start, value.len);
-            return;
-        }
-    }
-
-    MP_RESIZE_ARRAY(tags, tags->keys,   tags->num_keys + 1);
-    MP_RESIZE_ARRAY(tags, tags->values, tags->num_keys + 1);
-    tags->keys[tags->num_keys]   = talloc_strndup(tags, key.start,   key.len);
-    tags->values[tags->num_keys] = talloc_strndup(tags, value.start, value.len);
-    tags->num_keys++;
-}
-
-char *mp_tags_get_str(struct mp_tags *tags, const char *key)
-{
-    return mp_tags_get_bstr(tags, bstr0(key));
-}
-
-char *mp_tags_get_bstr(struct mp_tags *tags, bstr key)
-{
-    for (int n = 0; n < tags->num_keys; n++) {
-        if (bstrcasecmp0(key, tags->keys[n]) == 0)
-            return tags->values[n];
-    }
-    return NULL;
-}
-
-void mp_tags_clear(struct mp_tags *tags)
-{
-    *tags = (struct mp_tags){0};
-    talloc_free_children(tags);
-}
-
 static int demux_info_print(demuxer_t *demuxer)
 {
     struct mp_tags *info = demuxer->metadata;

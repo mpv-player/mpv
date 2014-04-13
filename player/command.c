@@ -617,7 +617,6 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-
 static int get_edition_entry(int item, int action, void *arg, void *ctx)
 {
     struct MPContext *mpctx = ctx;
@@ -933,6 +932,204 @@ static int mp_property_chapter_metadata(m_option_t *prop, int action, void *arg,
     return tag_property(prop, action, arg, demuxer->chapters[chapter].metadata);
 }
 
+static int get_node_map_entry_key_action(struct m_property_action_arg *ka, const char* key, mpv_node *node)
+{
+    // property/list/N/key
+    if (strcmp(ka->key, "key")==0) {
+	switch(ka->action){
+	case M_PROPERTY_GET_TYPE:
+	    *(struct m_option *)ka->arg = (struct m_option){.type = CONF_TYPE_STRING};
+	    return M_PROPERTY_OK;
+	case M_PROPERTY_GET:
+	    *(char **)(ka->arg) = talloc_strdup(NULL,key);
+	    return M_PROPERTY_OK;
+	default:
+	    return M_PROPERTY_NOT_IMPLEMENTED;
+	}
+    }
+    // property/list/N/value
+    if (strcmp(ka->key, "value")==0) {
+	switch(ka->action){
+	case M_PROPERTY_GET_TYPE:
+	    *(struct m_option *)ka->arg = (struct m_option){.type = CONF_TYPE_NODE};
+	    return M_PROPERTY_OK;
+	case M_PROPERTY_GET:
+	case M_PROPERTY_GET_NODE:
+	    *(mpv_node*)(ka->arg) = *node;
+	    dup_node(NULL,(mpv_node*)(ka->arg));
+	    return M_PROPERTY_OK;
+	default:
+	    return M_PROPERTY_NOT_IMPLEMENTED;
+	}
+    }
+    return M_PROPERTY_ERROR;
+}
+
+static int get_node_map_entry(int item, int action, void *arg, void *ctx)
+{
+    // property/list/
+    // property/list/N
+    // property/list/N/key
+    // property/list/N/value
+    mpv_node_list* node_map = ctx;
+    const char *key = node_map->keys  [item];
+    mpv_node *value = &node_map->values[item];
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE: {
+	mpv_node *return_node = (mpv_node*)arg;
+        *return_node = (mpv_node){
+	    .format = MPV_FORMAT_NODE_MAP,
+	    .u.list = talloc_zero(NULL, mpv_node_list),
+	};
+	mpv_node_list *list = return_node->u.list;
+
+	mpv_node *key_node = node_map_create_key(list,bstr0("key"));
+	*key_node = (mpv_node) {
+	    .format   = MPV_FORMAT_STRING,
+	    .u.string = talloc_strdup(list,key),
+	};
+
+	mpv_node *val_node = node_map_create_key(list,bstr0("value"));
+	*val_node = *value;
+	steal_node_contents(list,val_node);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_KEY_ACTION:
+	// property/list/N/key
+	// property/list/N/value
+	return get_node_map_entry_key_action(arg,key,value);
+    default:
+	return M_PROPERTY_UNAVAILABLE;
+    }
+}
+
+static int node_map_key_action(struct m_property_action_arg *ka, mpv_node *node)
+{
+    if (node->format != MPV_FORMAT_NODE_MAP)
+	return M_PROPERTY_ERROR;
+    mpv_node_list *node_map = node->u.list;
+
+    bstr key;
+    char* rem;
+    struct m_property_action_arg next_ka = *ka;
+    m_property_split_path(ka->key, &key, &rem);
+    next_ka.key=rem;
+
+    if (bstr_equals0(key, "list")) {
+	// property/list/
+	// property/list/count
+	// property/list/N
+	// property/list/N/key
+	// property/list/N/value
+   	int r=m_property_read_list(M_PROPERTY_KEY_ACTION, &next_ka, node_map->num,
+   				    get_node_map_entry, node_map);
+   	mpv_free_node_contents(node);
+   	return r;
+    } else if (bstr_equals0(key, "by-key")) {
+	// property/by-key
+   	m_property_split_path(next_ka.key, &key, &rem);
+	next_ka.key=rem;
+    }
+    // get the requested node
+    mpv_node *value;
+    mpv_node next_node;
+    if (key.len) {
+	if ( !(value = node_map_get_key(node_map, key)) ) {
+	    mpv_free_node_contents(node);
+	    return M_PROPERTY_UNKNOWN;
+	}
+	next_node = *value;
+	steal_node_contents(NULL, &next_node);
+	mpv_free_node_contents(node);
+    } else {
+	// zero length key means we access the root node directly
+	next_node = *node;
+	steal_node_contents(NULL, &next_node);
+    }
+
+    // handle multi-level paths of arbitrary depth
+    if (strlen(next_ka.key))
+	return node_map_key_action(&next_ka, &next_node);
+
+    switch (ka->action) {
+    case M_PROPERTY_GET_TYPE:
+   	*(struct m_option *)ka->arg = (struct m_option){ .type = CONF_TYPE_NODE };
+	mpv_free_node_contents(&next_node);
+   	return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE:
+	*(mpv_node*)ka->arg = next_node;
+   	return M_PROPERTY_OK;
+    default:
+	mpv_free_node_contents(&next_node);
+   	return M_PROPERTY_UNAVAILABLE;
+    }
+}
+
+static int mp_property_vf_metadata(m_option_t *prop, int action, void *arg,
+				   MPContext *mpctx)
+{
+    if(!(mpctx->d_video && mpctx->d_video->vfilter))
+	return M_PROPERTY_UNAVAILABLE;
+    struct vf_chain *vf=mpctx->d_video->vfilter;
+
+    mpv_node node, next_node;
+    switch(action){
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option) {.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE: {
+	mpv_node_list* vf_metadata = talloc_zero(NULL, mpv_node_list);
+	node = (struct mpv_node) {
+            .format = MPV_FORMAT_NODE_MAP,
+            .u.list = vf_metadata,
+        };
+
+	vf_control_all(vf, VFCTRL_GET_METADATA, vf_metadata);
+        *(mpv_node*)arg = node;
+	return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_KEY_ACTION:{
+	mpv_node_list* vf_metadata = talloc_zero(NULL, mpv_node_list);
+	node = (struct mpv_node) {
+            .format = MPV_FORMAT_NODE_MAP,
+            .u.list = vf_metadata,
+        };
+
+	struct m_property_action_arg *ka = arg;
+	struct m_property_action_arg next_ka = *ka;
+	bstr key;
+	char* rem;
+	m_property_split_path(ka->key, &key, &rem);
+	if (bstr_equals0(key, "by-label")) {
+	    m_property_split_path(rem, &key, &rem);
+	    vf_control_by_label(vf, VFCTRL_GET_METADATA, vf_metadata, key);
+	    if ( vf_metadata->num != 1 ){
+		mpv_free_node_contents(&node);
+		return M_PROPERTY_UNKNOWN;
+	    }
+	    next_node = vf_metadata->values[0];
+	    steal_node_contents(NULL, &next_node);
+	    mpv_free_node_contents(&node);
+	    next_ka.key=rem;
+	} else {
+	    vf_control_all(vf, VFCTRL_GET_METADATA, vf_metadata);
+	    next_node=node;
+	}
+
+	return node_map_key_action(&next_ka, &next_node);
+    }
+    default:
+	return M_PROPERTY_UNAVAILABLE;
+    }
+}
+
 static int mp_property_pause(m_option_t *prop, int action, void *arg,
                              void *ctx)
 {
@@ -1182,7 +1379,7 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
         mixer_getbalance(mpctx->mixer, &bal);
         if (bal == 0.f)
             *str = talloc_strdup(NULL, "center");
-        else if (bal == -1.f)
+	else if (bal == -1.f)
             *str = talloc_strdup(NULL, "left only");
         else if (bal == 1.f)
             *str = talloc_strdup(NULL, "right only");
@@ -2206,6 +2403,7 @@ static const m_option_t mp_properties[] = {
     { "angle", mp_property_angle, &m_option_type_dummy },
     M_PROPERTY("metadata", mp_property_metadata),
     M_PROPERTY("chapter-metadata", mp_property_chapter_metadata),
+    M_PROPERTY( "vf-metadata", mp_property_vf_metadata),
     M_OPTION_PROPERTY_CUSTOM("pause", mp_property_pause),
     { "cache", mp_property_cache, CONF_TYPE_INT },
     { "cache-size", mp_property_cache_size, CONF_TYPE_INT, M_OPT_MIN, 0 },

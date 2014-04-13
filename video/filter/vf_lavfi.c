@@ -39,6 +39,9 @@
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "common/av_opts.h"
+#include "bstr/bstr.h"
+#include "libmpv/client.h"
+
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -54,7 +57,7 @@
     avfilter_graph_parse(graph, filters, inputs, outputs, log_ctx)
 #else
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
-    avfilter_graph_parse(graph, filters, &(inputs), &(outputs), log_ctx)
+    avfilter_graph_parse_ptr(graph, filters, &(inputs), &(outputs), log_ctx)
 #endif
 
 struct vf_priv_s {
@@ -65,6 +68,8 @@ struct vf_priv_s {
     AVRational timebase_in;
     AVRational timebase_out;
     AVRational par_in;
+
+    mpv_node_list* metadata;
 
     // for the lw wrapper
     void *old_priv;
@@ -266,6 +271,23 @@ static struct mp_image *av_to_mp(struct vf_instance *vf, AVFrame *av_frame)
     return img;
 }
 
+static void get_metadata_from_av_frame(struct vf_instance *vf, AVFrame *frame)
+{
+#if HAVE_AVFRAME_METADATA
+  struct vf_priv_s *p = vf->priv;
+  talloc_free(p->metadata);
+  mpv_node_list* metadata = p->metadata = talloc_zero(p, mpv_node_list);
+
+  AVDictionary *av_frame_metadata=av_frame_get_metadata(frame);
+  AVDictionaryEntry *av_kv = NULL;
+  while ((av_kv = av_dict_get(av_frame_metadata, "", av_kv, AV_DICT_IGNORE_SUFFIX))){
+      mpv_node *node = node_map_create_key(metadata, bstr0(av_kv->key));
+      node->u.string = talloc_strdup(metadata, av_kv->value);
+      node->format   = MPV_FORMAT_STRING;
+  }
+#endif
+}
+
 static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 {
     struct vf_priv_s *p = vf->priv;
@@ -287,6 +309,8 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
             av_frame_free(&frame);
             break;
         }
+        get_metadata_from_av_frame(vf,frame);
+
         vf_add_output_frame(vf, av_to_mp(vf, frame));
     }
 
@@ -307,6 +331,21 @@ static int control(vf_instance_t *vf, int request, void *data)
     case VFCTRL_SEEK_RESET:
         reset(vf);
         return CONTROL_OK;
+    case VFCTRL_GET_METADATA:{
+	struct vf_priv_s *p = vf->priv;
+	if (!data)
+	    return CONTROL_ERROR;
+	if (!p->metadata)
+	    return CONTROL_FALSE;
+	mpv_node node = {
+            .format = MPV_FORMAT_NODE_MAP,
+            .u.list = p->metadata,
+	};
+	node_map_update_or_add_item((mpv_node_list*) data,
+				    bstr0(vf->info->name),
+				    &node);
+	return CONTROL_OK;
+    }
     }
     return CONTROL_UNKNOWN;
 }

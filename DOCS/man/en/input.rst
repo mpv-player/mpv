@@ -731,7 +731,7 @@ Property list
             (key and string value for each metdata entry)
 
 ``chapter-metadata``
-    Metadata of current chapter. Works similar to ``metadata`` property. IT
+    Metadata of current chapter. Works similar to ``metadata`` property. It
     also allows the same access methods (using sub-properties).
 
     Per-chapter metadata is very rare. Usually, only the chapter name
@@ -739,6 +739,23 @@ Property list
 
     For accessing other information, like chapter start, see the
     ``chapter-list`` property.
+
+``vf-metadata``
+    Metadata added by video filters. Works similar to ``metadata``
+    property. It allows the same access methods (using sub-properties).
+
+    In addition, it also supports accessing the metadata of individual
+    filters directly by name as sub-properties like
+
+    ``vf-metadata/filter-name/...``
+
+    and by filter label (specified using the @filter-label: syntax of the
+    vf command)
+
+    ``vf-metadata/by-label/filter-label/...``
+
+    An example of these kind of metadata are the cropping parameters
+    added by --vf=lavfi=cropdetect.
 
 ``pause`` (RW)
     Pause status. This is usually ``yes`` or ``no``. See ``--pause``.
