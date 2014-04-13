@@ -693,22 +693,6 @@ hwaccel_features = [
 
 radio_and_tv_features = [
     {
-        'name': '--radio',
-        'desc': 'Radio interface',
-        'func': check_true,
-        'default': 'disable'
-    }, {
-        'name': '--radio-capture',
-        'desc': 'Radio capture (through PCI/line-in)',
-        'func': check_true,
-        'deps': [ 'radio' ],
-        'deps_any': [ 'alsa', 'oss-audio', 'sndio'],
-    }, {
-        'name': '--radio-v4l2',
-        'desc': 'Video4Linux2 radio interface',
-        'func': check_cc(header_name='linux/videodev2.h'),
-        'default': 'disable'
-    }, {
         'name': '--tv',
         'desc': 'TV interface',
         'func': check_true,
@@ -727,7 +711,7 @@ radio_and_tv_features = [
     }, {
         'name': '--audio-input',
         'desc': 'audio input support',
-        'deps_any': [ 'radio-capture', 'tv-v4l2' ],
+        'deps_any': [ 'tv-v4l2' ],
         'func': check_true
     }
 ]
@@ -772,7 +756,7 @@ def options(opt):
     opt.parse_features('audio outputs',     audio_output_features)
     opt.parse_features('video outputs',     video_output_features)
     opt.parse_features('hwaccels',          hwaccel_features)
-    opt.parse_features('radio/tv features', radio_and_tv_features)
+    opt.parse_features('tv features',       radio_and_tv_features)
     opt.parse_features('scripting',         scripting_features)
 
     group = opt.get_option_group("scripting")

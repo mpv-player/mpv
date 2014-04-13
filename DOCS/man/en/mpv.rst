@@ -21,7 +21,6 @@ SYNOPSIS
 | **mpv** dvdnav://[longest|menu|title][/device] [options]
 | **mpv** \vcd://[/device]
 | **mpv** \tv://[channel][/input_id] [options]
-| **mpv** radio://[channel|frequency][/capture] [options]
 | **mpv** \pvr:// [options]
 | **mpv** \dvb://[card\_number@]channel [options]
 | **mpv** \mf://[filemask|\@listfile] [-mf options] [options]

@@ -1827,61 +1827,6 @@ OPTIONS
     functionality is limited to switching between ``best`` and ``default`` if
     the ``cycle`` input command is used.
 
-``--radio=<option1:option2:...>``
-    These options set various parameters of the radio capture module. For
-    listening to radio with mpv, use ``radio://<frequency>`` (if channels
-    option is not given) or ``radio://<channel_number>`` (if channels option
-    is given) as a movie URL. You can see allowed frequency range by running
-    mpv with ``-v``. To start the grabbing subsystem, use
-    ``radio://<frequency or channel>/capture``. If the capture keyword is not
-    given, you can listen to radio using the line-in cable only. Using capture
-    to listen is not recommended due to synchronization problems, which makes
-    this process uncomfortable.
-
-    Available options are:
-
-    ``device=<value>``
-        Radio device to use (default: ``/dev/radio0`` for Linux and
-        ``/dev/tuner0`` for \*BSD).
-
-    ``driver=<value>``
-        Radio driver to use (default: v4l2 if available, otherwise v4l).
-        Currently, v4l and v4l2 drivers are supported.
-
-    ``volume=<0..100>``
-        Sound volume for radio device (default 100).
-
-    ``channels=<frequency>-<name>,<frequency>-<name>,...``
-        Set channel list. Use _ for spaces in names (or play with quoting ;-) ).
-        The channel names will then be written using OSD, and the slave
-        commands ``radio_step_channel`` and ``radio_set_channel`` will be usable
-        for a remote control (see LIRC). If given, number in movie URL will be
-        treated as channel position in channel list.
-
-        .. admonition:: Example
-
-            ``radio://1``, ``radio://104.4``, ``radio_set_channel 1``
-
-    ``adevice=<value>`` (radio capture only)
-        Name of device to capture sound from. Without such a name, capture will
-        be disabled, even if the ``capture`` keyword appears in the URL.
-        For ALSA devices, use it in the form ``hw=<card>.<device>``. If the
-        device name contains a '=', the module will use ALSA to capture,
-        otherwise OSS.
-
-    ``arate=<value>`` (radio capture only)
-        Rate in samples per second (default: 44100).
-
-        .. note::
-
-            When using audio capture set also ``--rawaudio=rate=<value>`` option
-            with the same value as arate. If you have problems with sound speed
-            (runs too quickly), try to play with different rate values (e.g.
-            48000, 44100, 32000,...).
-
-    ``achannels=<value>`` (radio capture only)
-        Number of audio channels to capture.
-
 ``--really-quiet``
     Display even less output and status messages than with ``--quiet``.
 

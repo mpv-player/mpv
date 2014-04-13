@@ -32,8 +32,8 @@
 #include "m_config.h"
 #include "m_option.h"
 #include "common/common.h"
+#include "stream/stream.h"
 #include "stream/tv.h"
-#include "stream/stream_radio.h"
 #include "video/csputils.h"
 #include "sub/osd.h"
 #include "audio/mixer.h"
@@ -61,19 +61,6 @@ static void print_help(struct mp_log *log)
 {
     mp_info(log, "%s", mp_help_text);
 }
-
-#if HAVE_RADIO
-static const m_option_t radioopts_conf[]={
-    {"device", &stream_radio_defaults.device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    {"driver", &stream_radio_defaults.driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    {"channels", &stream_radio_defaults.channels, CONF_TYPE_STRING_LIST, 0, 0 ,0, NULL},
-    {"volume", &stream_radio_defaults.volume, CONF_TYPE_INT, CONF_RANGE, 0 ,100, NULL},
-    {"adevice", &stream_radio_defaults.adevice, CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    {"arate", &stream_radio_defaults.arate, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
-    {"achannels", &stream_radio_defaults.achannels, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
-#endif /* HAVE_RADIO */
 
 #if HAVE_TV
 static const m_option_t tvopts_conf[]={
@@ -338,9 +325,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
-#if HAVE_RADIO
-    {"radio", (void *) radioopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-#endif /* HAVE_RADIO */
 #if HAVE_TV
     {"tv", (void *) tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif /* HAVE_TV */

@@ -64,7 +64,6 @@ extern const stream_info_t stream_info_vcd;
 extern const stream_info_t stream_info_cdda;
 extern const stream_info_t stream_info_dvb;
 extern const stream_info_t stream_info_tv;
-extern const stream_info_t stream_info_radio;
 extern const stream_info_t stream_info_pvr;
 extern const stream_info_t stream_info_smb;
 extern const stream_info_t stream_info_null;
@@ -96,9 +95,6 @@ static const stream_info_t *const stream_list[] = {
 #endif
 #if HAVE_TV
     &stream_info_tv,
-#endif
-#if HAVE_RADIO
-    &stream_info_radio,
 #endif
 #if HAVE_PVR
     &stream_info_pvr,

@@ -304,9 +304,6 @@ Optional features:
   --enable-joystick      enable joystick support [disable]
   --disable-vm           disable X video mode extensions [autodetect]
   --disable-xf86keysym   disable support for multimedia keys [autodetect]
-  --enable-radio         enable radio interface [disable]
-  --enable-radio-capture enable radio capture (through PCI/line-in) [disable]
-  --disable-radio-v4l2   disable Video4Linux2 radio interface [autodetect]
   --disable-tv           disable TV interface (TV/DVB grabbers) [enable]
   --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
   --disable-libv4l2      disable libv4l2 [autodetect]
@@ -459,9 +456,6 @@ _xf86keysym=auto
 _sndio=auto
 _alsa=auto
 _select=yes
-_radio=no
-_radio_capture=no
-_radio_v4l2=auto
 _tv=yes
 _tv_v4l2=auto
 _libv4l2=auto
@@ -657,12 +651,6 @@ for ac_option do
   --disable-tv-v4l2)    _tv_v4l2=no     ;;
   --enable-libv4l2)     _libv4l2=yes   ;;
   --disable-libv4l2)    _libv4l2=no    ;;
-  --enable-radio)       _radio=yes      ;;
-  --enable-radio-capture)       _radio_capture=yes      ;;
-  --disable-radio-capture)      _radio_capture=no       ;;
-  --disable-radio)      _radio=no       ;;
-  --enable-radio-v4l2)  _radio_v4l2=yes ;;
-  --disable-radio-v4l2) _radio_v4l2=no  ;;
   --enable-pvr)         _pvr=yes        ;;
   --disable-pvr)        _pvr=no         ;;
   --enable-smb)         _smb=yes        ;;
@@ -2903,47 +2891,6 @@ else
 fi
 echores "$_libv4l2"
 
-echocheck "Radio interface"
-if test "$_radio" = yes ; then
-  def_radio='#define HAVE_RADIO 1'
-  inputmodules="radio $inputmodules"
-  if test "$_alsa" != yes -a "$_ossaudio" != yes ; then
-    _radio_capture=no
-  fi
-  if test "$_radio_capture" = yes ; then
-    _audio_input=yes
-    def_radio_capture="#define HAVE_RADIO_CAPTURE 1"
-  else
-    def_radio_capture="#define HAVE_RADIO_CAPTURE 0"
-  fi
-else
-  noinputmodules="radio $noinputmodules"
-  def_radio='#define HAVE_RADIO 0'
-  def_radio_capture="#define HAVE_RADIO_CAPTURE 0"
-  _radio_capture=no
-fi
-echores "$_radio"
-echocheck "Capture for Radio interface"
-echores "$_radio_capture"
-
-echocheck "Video 4 Linux 2 Radio interface"
-if test "$_radio_v4l2" = auto ; then
-  _radio_v4l2=no
-  if test "$_radio" = yes && (linux || freebsd) ; then
-    header_check linux/videodev2.h && _radio_v4l2=yes
-  fi
-fi
-if test "$_radio_v4l2" = yes ; then
-  def_radio_v4l2='#define HAVE_RADIO_V4L2 1'
-else
-  def_radio_v4l2='#define HAVE_RADIO_V4L2 0'
-fi
-echores "$_radio_v4l2"
-
-
-if test "$_radio_v4l2" = no && test "$_radio" = yes ; then
-    die "Radio driver requires V4L2!"
-fi
 
 echocheck "Video 4 Linux 2 MPEG PVR interface"
 if test "$_pvr" = auto ; then
@@ -3261,8 +3208,6 @@ PRIORITY = $_priority
 PULSE = $_pulse
 PORTAUDIO = $_portaudio
 PVR = $_pvr
-RADIO=$_radio
-RADIO_CAPTURE=$_radio_capture
 RSOUND = $_rsound
 SNDIO = $_sndio
 STREAM_CACHE = $_stream_cache
@@ -3413,9 +3358,6 @@ $def_libbs2b
 $def_joystick
 $def_lirc
 $def_pvr
-$def_radio
-$def_radio_capture
-$def_radio_v4l2
 $def_tv
 $def_tv_v4l2
 $def_libv4l2
