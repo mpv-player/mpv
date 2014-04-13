@@ -129,6 +129,7 @@ struct vf_chain *vf_new(struct mpv_global *global);
 void vf_destroy(struct vf_chain *c);
 int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params);
 int vf_control_any(struct vf_chain *c, int cmd, void *arg);
+int vf_control_by_label(struct vf_chain *c, int cmd, void *arg, bstr label);
 int vf_filter_frame(struct vf_chain *c, struct mp_image *img);
 struct mp_image *vf_output_queued_frame(struct vf_chain *c);
 void vf_seek_reset(struct vf_chain *c);
