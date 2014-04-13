@@ -307,8 +307,19 @@ int vf_append_filter_list(struct vf_chain *c, struct m_obj_settings *list)
         struct vf_instance *vf =
             vf_append_filter(c, list[n].name, list[n].attribs);
         if (vf) {
-            if (list[n].label)
+            if (list[n].label) {
                 vf->label = talloc_strdup(vf, list[n].label);
+            } else {
+                for (int i = 0; i < 100; i++) {
+                    char* label = talloc_asprintf(vf, "%s.%02d", list[n].name, i);
+                    if (vf_find_by_label(c, label)) {
+                        talloc_free(label);
+                    } else {
+                        vf->label = label;
+                        break;
+                    }
+                }
+            }
         }
     }
     return 0;
