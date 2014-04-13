@@ -390,6 +390,7 @@ static int config(struct vf_instance *vf, int width, int height,
     const VSVideoInfo *vi = p->vsapi->getVideoInfo(p->out_node);
     fmt = mp_from_vs(vi->format->id);
     if (!fmt) {
+        MP_FATAL(vf, "Unsupported output format.\n");
         destroy_vs(vf);
         return 0;
     }
