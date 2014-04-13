@@ -156,6 +156,17 @@ int vf_control_any(struct vf_chain *c, int cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
+int vf_control_by_label(struct vf_chain *c,int cmd, void *arg, bstr label)
+{
+    char *label_str = bstrdup0(NULL, label);
+    struct vf_instance *cur = vf_find_by_label(c, label_str);
+    talloc_free(label_str);
+    if (cur)
+	return cur->control(cur, cmd, arg);
+    else
+	return CONTROL_UNKNOWN;
+}
+
 static void vf_fix_img_params(struct mp_image *img, struct mp_image_params *p)
 {
     // Filters must absolutely set these correctly.
@@ -296,9 +307,21 @@ int vf_append_filter_list(struct vf_chain *c, struct m_obj_settings *list)
         struct vf_instance *vf =
             vf_append_filter(c, list[n].name, list[n].attribs);
         if (vf) {
-            if (list[n].label)
+            if (list[n].label) {
                 vf->label = talloc_strdup(vf, list[n].label);
-        }
+	    } else {
+		for (int i = 0; i < 100; i++) {
+		    char* label = talloc_asprintf(vf, "%s.%02d", list[n].name, i);
+		    if ( vf_find_by_label(c, label) ){
+			talloc_free(label);
+		    }else{
+			vf->label = label;
+			list[n].label = talloc_strdup(NULL,label);
+			break;
+		    }
+		}
+	    }
+	}
     }
     return 0;
 }

@@ -325,7 +325,9 @@ Input Commands that are Possibly Subject to Change
     You can assign labels to filter by prefixing them with ``@name:`` (where
     ``name`` is a user-chosen arbitrary identifier). Labels can be used to
     refer to filters by name in all of the filter chain modification commands.
-    For ``add``, using an already used label will replace the existing filter.
+    If no filter label is specified, then one will be generated using the template
+    ``<filter-name>NN``. For ``add``, using an already used label will replace the
+    existing filter.
 
     The ``vf`` command shows the list of requested filters on the OSD after
     changing the filter chain. This is roughly equivalent to
@@ -731,7 +733,7 @@ Property list
             (key and string value for each metdata entry)
 
 ``chapter-metadata``
-    Metadata of current chapter. Works similar to ``metadata`` property. IT
+    Metadata of current chapter. Works similar to ``metadata`` property. It
     also allows the same access methods (using sub-properties).
 
     Per-chapter metadata is very rare. Usually, only the chapter name
@@ -739,6 +741,17 @@ Property list
 
     For accessing other information, like chapter start, see the
     ``chapter-list`` property.
+
+``vf-metadata/<filter-label>``
+    Metadata added by video filters. Accessed by the filter label,
+    which if not explicitly specified using the ``@filter-label:`` syntax,
+    will be ``<filter-name>NN``.
+
+    Works similar to ``metadata`` property. It allows the same access
+    methods (using sub-properties).
+
+    An example of these kind of metadata are the cropping parameters
+    added by ``--vf=lavfi=cropdetect``.
 
 ``pause`` (RW)
     Pause status. This is usually ``yes`` or ``no``. See ``--pause``.
