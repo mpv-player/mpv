@@ -443,6 +443,10 @@ static int vf_open(vf_instance_t *vf)
     vf->control = control;
     vf->uninit = uninit;
     p->buffered = talloc_array(vf, struct mp_image *, p->cfg_maxbuffer);
+    if (!p->cfg_file || !p->cfg_file[0]) {
+        MP_FATAL(vf, "'file' parameter must be set.\n");
+        goto error;
+    }
     if (!vsscript_init())
         goto error;
     p->vs_initialized = true;
