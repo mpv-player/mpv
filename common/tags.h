@@ -1,7 +1,10 @@
 #ifndef MP_TAGS_H
 #define MP_TAGS_H
 
+#ifndef AVUTIL_DICT_H
 typedef struct AVDictionary AVDictionary;
+#endif
+
 #include "bstr/bstr.h"
 
 struct mp_tags {

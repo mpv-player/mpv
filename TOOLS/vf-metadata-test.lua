@@ -1,4 +1,4 @@
-mp.command('vf add @autocrop.cropdetect:lavfi=graph="cropdetect=limit=24:round=2:reset=0"')
+mp.command('vf add lavfi=graph="cropdetect=limit=24:round=2:reset=0"')
 
 function print_tree(prefix,tree)
    if(tree)then

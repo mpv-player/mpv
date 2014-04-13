@@ -157,6 +157,7 @@ int vf_control_all(struct vf_chain *c, int cmd, void *arg)
     int ret=CONTROL_UNKNOWN;
     for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
         if (cur->control) {
+	    printf("name=%s label=%s\n",cur->info->name,cur->label);
             int r = cur->control(cur, cmd, arg);
             if (r != CONTROL_UNKNOWN)
 		ret=r;
