@@ -325,7 +325,9 @@ Input Commands that are Possibly Subject to Change
     You can assign labels to filter by prefixing them with ``@name:`` (where
     ``name`` is a user-chosen arbitrary identifier). Labels can be used to
     refer to filters by name in all of the filter chain modification commands.
-    For ``add``, using an already used label will replace the existing filter.
+    If no filter label is specified, then one will be generated using the template
+    ``<filter-name>NN``. For ``add``, using an already used label will replace the
+    existing filter.
 
     The ``vf`` command shows the list of requested filters on the OSD after
     changing the filter chain. This is roughly equivalent to
