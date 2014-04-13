@@ -79,4 +79,7 @@ int playlist_entry_to_index(struct playlist *pl, struct playlist_entry *e);
 int playlist_entry_count(struct playlist *pl);
 struct playlist_entry *playlist_entry_from_index(struct playlist *pl, int index);
 
+struct mpv_global;
+struct playlist *playlist_parse_file(const char *file, struct mpv_global *global);
+
 #endif

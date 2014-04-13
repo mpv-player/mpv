@@ -47,7 +47,6 @@
 #include "options/parse_configfile.h"
 #include "options/parse_commandline.h"
 #include "common/playlist.h"
-#include "common/playlist_parser.h"
 #include "options/options.h"
 #include "input/input.h"
 

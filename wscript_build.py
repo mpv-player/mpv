@@ -154,7 +154,6 @@ def build(ctx):
         ( "bstr/bstr.c" ),
 
         ## Core
-        ( "common/asxparser.c" ),
         ( "common/av_common.c" ),
         ( "common/av_log.c" ),
         ( "common/av_opts.c" ),
@@ -164,7 +163,6 @@ def build(ctx):
         ( "common/common.c" ),
         ( "common/msg.c" ),
         ( "common/playlist.c" ),
-        ( "common/playlist_parser.c" ),
         ( "common/version.c" ),
 
         ## Demuxers

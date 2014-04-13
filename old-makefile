@@ -177,7 +177,6 @@ SOURCES = audio/audio.c \
           audio/out/pull.c \
           audio/out/push.c \
           bstr/bstr.c \
-          common/asxparser.c \
           common/av_common.c \
           common/av_log.c \
           common/av_opts.c \
@@ -186,7 +185,6 @@ SOURCES = audio/audio.c \
           common/common.c \
           common/msg.c \
           common/playlist.c \
-          common/playlist_parser.c \
           common/version.c \
           demux/codec_tags.c \
           demux/demux.c \

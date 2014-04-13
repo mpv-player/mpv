@@ -37,7 +37,6 @@
 #include "bstr/bstr.h"
 #include "common/common.h"
 #include "common/playlist.h"
-#include "common/playlist_parser.h"
 #include "stream/stream.h"
 
 struct find_entry {

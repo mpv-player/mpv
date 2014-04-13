@@ -43,7 +43,6 @@
 #include "demux/stheader.h"
 #include "stream/resolve/resolve.h"
 #include "common/playlist.h"
-#include "common/playlist_parser.h"
 #include "sub/osd.h"
 #include "sub/dec_sub.h"
 #include "options/m_option.h"

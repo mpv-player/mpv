@@ -32,7 +32,6 @@
 #include "m_config.h"
 #include "options.h"
 #include "common/playlist.h"
-#include "common/playlist_parser.h"
 #include "parse_commandline.h"
 
 #define GLOBAL 0

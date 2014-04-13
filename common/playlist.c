@@ -19,8 +19,13 @@
 #include "config.h"
 #include "playlist.h"
 #include "common/common.h"
+#include "common/global.h"
+#include "common/msg.h"
 #include "talloc.h"
 #include "options/path.h"
+
+#include "demux/demux.h"
+#include "stream/stream.h"
 
 struct playlist_entry *playlist_entry_new(const char *filename)
 {
@@ -239,3 +244,39 @@ struct playlist_entry *playlist_entry_from_index(struct playlist *pl, int index)
     }
 }
 
+struct playlist *playlist_parse_file(const char *file, struct mpv_global *global)
+{
+    struct mp_log *log = mp_log_new(NULL, global->log, "!playlist_parser");
+    mp_verbose(log, "Parsing playlist file %s...\n", file);
+
+    struct playlist *ret = NULL;
+    stream_t *stream = stream_open(file, global);
+    if(!stream) {
+        mp_err(log, "Error while opening playlist file %s\n", file);
+        talloc_free(log);
+        return NULL;
+    }
+
+    struct demuxer *pl_demux = demux_open(stream, "playlist", NULL, global);
+    if (pl_demux && pl_demux->playlist) {
+        ret = talloc_zero(NULL, struct playlist);
+        playlist_transfer_entries(ret, pl_demux->playlist);
+    }
+    free_demuxer(pl_demux);
+    free_stream(stream);
+
+    if (ret) {
+        mp_verbose(log, "Playlist successfully parsed\n");
+    } else {
+        mp_err(log, "Error while parsing playlist\n");
+    }
+
+    if (ret && !ret->first)
+        mp_warn(log, "Warning: empty playlist\n");
+
+    if (ret)
+        playlist_add_base_path(ret, mp_dirname(file));
+
+    talloc_free(log);
+    return ret;
+}
