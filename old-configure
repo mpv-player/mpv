@@ -2744,6 +2744,17 @@ fi
 echores "$_avcodec_has_replaygain_side_data"
 
 
+echocheck "libavutil AVFrame metadata"
+_avutil_has_avframe_metadata=no
+statement_check libavutil/frame.h 'av_frame_get_metadata(NULL)' && _avutil_has_avframe_metadata=yes
+if test "$_avutil_has_avframe_metadata" = yes ; then
+  def_avutil_has_avframe_metadata='#define HAVE_AVFRAME_METADATA 1'
+else
+  def_avutil_has_avframe_metadata='#define HAVE_AVFRAME_METADATA 0'
+fi
+echores "$_avutil_has_avframe_metadata"
+
+
 echocheck "libavutil QP API"
 _avutil_has_qp_api=no
 statement_check libavutil/frame.h 'av_frame_get_qp_table(NULL, NULL, NULL)' && _avutil_has_qp_api=yes
@@ -3373,6 +3384,7 @@ $def_avutil_has_qp_api
 $def_avcodec_has_chroma_pos_api
 $def_avcodec_has_metadata_update_side_data
 $def_avcodec_has_replaygain_side_data
+$def_avutil_has_avframe_metadata
 $def_libpostproc
 $def_libavdevice
 $def_libavfilter
