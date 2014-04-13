@@ -617,7 +617,6 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-
 static int get_edition_entry(int item, int action, void *arg, void *ctx)
 {
     struct MPContext *mpctx = ctx;
@@ -931,6 +930,41 @@ static int mp_property_chapter_metadata(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
 
     return tag_property(prop, action, arg, demuxer->chapters[chapter].metadata);
+}
+
+static int mp_property_vf_metadata(m_option_t *prop, int action, void *arg,
+				   MPContext *mpctx)
+{
+    if(!(mpctx->d_video && mpctx->d_video->vfilter))
+	return M_PROPERTY_UNAVAILABLE;
+    struct vf_chain *vf = mpctx->d_video->vfilter;
+
+    switch(action){
+    case M_PROPERTY_GET_TYPE:
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    case M_PROPERTY_KEY_ACTION:{
+        struct m_property_action_arg *ka = arg;
+        bstr key;
+        char *rem;
+        m_property_split_path(ka->key, &key, &rem);
+	struct mp_tags vf_metadata;
+	if (vf_control_by_label(vf, VFCTRL_GET_METADATA, &vf_metadata, key) == CONTROL_UNKNOWN)
+	    return M_PROPERTY_UNKNOWN;
+
+	if (strlen(rem)) {
+	    struct m_property_action_arg next_ka = *ka;
+	    next_ka.key = rem;
+	    return tag_property(prop, M_PROPERTY_KEY_ACTION, &next_ka, &vf_metadata);
+	} else {
+	    return tag_property(prop, ka->action, ka->arg, &vf_metadata);
+	}
+	return M_PROPERTY_OK;
+    }
+    default:
+	return M_PROPERTY_UNAVAILABLE;
+    }
 }
 
 static int mp_property_pause(m_option_t *prop, int action, void *arg,
@@ -2206,6 +2240,7 @@ static const m_option_t mp_properties[] = {
     { "angle", mp_property_angle, &m_option_type_dummy },
     M_PROPERTY("metadata", mp_property_metadata),
     M_PROPERTY("chapter-metadata", mp_property_chapter_metadata),
+    M_PROPERTY( "vf-metadata", mp_property_vf_metadata),
     M_OPTION_PROPERTY_CUSTOM("pause", mp_property_pause),
     { "cache", mp_property_cache, CONF_TYPE_INT },
     { "cache-size", mp_property_cache_size, CONF_TYPE_INT, M_OPT_MIN, 0 },
