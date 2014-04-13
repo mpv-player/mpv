@@ -39,6 +39,7 @@
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "common/av_opts.h"
+#include "common/tags.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -65,6 +66,8 @@ struct vf_priv_s {
     AVRational timebase_in;
     AVRational timebase_out;
     AVRational par_in;
+
+    struct mp_tags* metadata;
 
     // for the lw wrapper
     void *old_priv;
@@ -266,6 +269,17 @@ static struct mp_image *av_to_mp(struct vf_instance *vf, AVFrame *av_frame)
     return img;
 }
 
+static void get_metadata_from_av_frame(struct vf_instance *vf, AVFrame *frame)
+{
+#if HAVE_AVFRAME_METADATA
+  struct vf_priv_s *p = vf->priv;
+  if (!p->metadata)
+      p->metadata = talloc_zero(p,struct mp_tags);
+
+  mp_tags_copy_from_av_dictionary(p->metadata,av_frame_get_metadata(frame));
+#endif
+}
+
 static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 {
     struct vf_priv_s *p = vf->priv;
@@ -287,6 +301,8 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
             av_frame_free(&frame);
             break;
         }
+        get_metadata_from_av_frame(vf,frame);
+
         vf_add_output_frame(vf, av_to_mp(vf, frame));
     }
 
@@ -307,6 +323,10 @@ static int control(vf_instance_t *vf, int request, void *data)
     case VFCTRL_SEEK_RESET:
         reset(vf);
         return CONTROL_OK;
+    case VFCTRL_GET_METADATA:{
+	*(struct mp_tags*) data = *vf->priv->metadata;
+	return CONTROL_OK;
+    }
     }
     return CONTROL_UNKNOWN;
 }
