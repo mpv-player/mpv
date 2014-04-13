@@ -68,7 +68,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             if (s->rgain_track) {
                 gain = af->replaygain_data->track_gain;
                 peak = af->replaygain_data->track_peak;
-            } else if (s->rgain_album) {
+            } else {
                 gain = af->replaygain_data->album_gain;
                 peak = af->replaygain_data->album_peak;
             }
