@@ -185,6 +185,7 @@ SOURCES = audio/audio.c \
           common/common.c \
           common/msg.c \
           common/playlist.c \
+          common/tags.c \
           common/version.c \
           demux/codec_tags.c \
           demux/demux.c \
