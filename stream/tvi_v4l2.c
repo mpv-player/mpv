@@ -762,7 +762,7 @@ static int do_control(priv_t *priv, int cmd, void *arg)
         case TVI_CONTROL_VID_SET_GAIN:
         {
             //value==0 means automatic gain control
-	    int value=*(int*)arg;
+            int value=*(int*)arg;
 
             if (value < 0 || value>100)
                 return TVI_CONTROL_FALSE;
@@ -1407,10 +1407,10 @@ static inline void copy_frame(priv_t *priv, video_buffer_entry *dest, unsigned c
     if(priv->tv_param->automute>0){
         if (v4l2_ioctl(priv->video_fd, VIDIOC_G_TUNER, &priv->tuner) >= 0) {
             if(priv->tv_param->automute<<8>priv->tuner.signal){
-	        fill_blank_frame(dest->data,dest->framesize,fcc_vl2mp(priv->format.fmt.pix.pixelformat));
-	        set_mute(priv,1);
-	        return;
-	    }
+                fill_blank_frame(dest->data,dest->framesize,fcc_vl2mp(priv->format.fmt.pix.pixelformat));
+                set_mute(priv,1);
+                return;
+            }
         }
         set_mute(priv,0);
     }

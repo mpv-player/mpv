@@ -42,7 +42,7 @@ static const struct vf_priv_s {
 
 static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt)
+        unsigned int flags, unsigned int outfmt)
 {
     // calculate the missing parameters:
     if(vf->priv->crop_w<=0 || vf->priv->crop_w>width) vf->priv->crop_w=width;
@@ -59,8 +59,8 @@ static int config(struct vf_instance *vf,
     // check:
     if(vf->priv->crop_w+vf->priv->crop_x>width ||
        vf->priv->crop_h+vf->priv->crop_y>height){
-	MP_WARN(vf, "[CROP] Bad position/width/height - cropped area outside of the original!\n");
-	return 0;
+        MP_WARN(vf, "[CROP] Bad position/width/height - cropped area outside of the original!\n");
+        return 0;
     }
     vf_rescale_dsize(&d_width, &d_height, width, height,
                      vf->priv->crop_w, vf->priv->crop_h);

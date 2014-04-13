@@ -59,7 +59,7 @@ void af_window_triang(int n, FLOAT_TYPE* w)
   FLOAT_TYPE k1  = (FLOAT_TYPE)(n & 1);
   FLOAT_TYPE k2  = 1/((FLOAT_TYPE)n + k1);
   int      end = (n + 1) >> 1;
-  int	   i;
+  int      i;
 
   // Calculate window coefficients
   for (i=0 ; i<end ; i++)
@@ -77,7 +77,7 @@ void af_window_triang(int n, FLOAT_TYPE* w)
 */
 void af_window_hanning(int n, FLOAT_TYPE* w)
 {
-  int	   i;
+  int      i;
   FLOAT_TYPE k = 2*M_PI/((FLOAT_TYPE)(n+1)); // 2*pi/(N+1)
 
   // Calculate window coefficients
@@ -201,7 +201,7 @@ void af_window_kaiser(int n, FLOAT_TYPE* w, FLOAT_TYPE b)
 {
   FLOAT_TYPE tmp;
   FLOAT_TYPE k1  = 1.0/besselizero(b);
-  int	   k2  = 1 - (n & 1);
+  int      k2  = 1 - (n & 1);
   int      end = (n + 1) >> 1;
   int      i;
 

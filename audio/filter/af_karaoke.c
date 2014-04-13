@@ -32,50 +32,50 @@
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-	switch(cmd){
-		case AF_CONTROL_REINIT:
+        switch(cmd){
+                case AF_CONTROL_REINIT:
                 mp_audio_copy_config(af->data, (struct mp_audio*)arg);
                 mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
-		return af_test_output(af,(struct mp_audio*)arg);
-	}
-	return AF_UNKNOWN;
+                return af_test_output(af,(struct mp_audio*)arg);
+        }
+        return AF_UNKNOWN;
 }
 
 // Filter data through filter
 static int play(struct af_instance* af, struct mp_audio* data, int flags)
 {
-	struct mp_audio*	c	= data;		 // Current working data
-	float*		a	= c->planes[0];	 // Audio data
-	int			nch	= c->nch;	 // Number of channels
-	int			len	= c->samples*nch;	 // Number of samples in current audio block
-	register int  i;
+        struct mp_audio*        c       = data;          // Current working data
+        float*          a       = c->planes[0];  // Audio data
+        int                     nch     = c->nch;        // Number of channels
+        int                     len     = c->samples*nch;        // Number of samples in current audio block
+        register int  i;
 
-	/*
-		FIXME1 add a low band pass filter to avoid suppressing
-		centered bass/drums
-		FIXME2 better calculated* attenuation factor
-	*/
+        /*
+                FIXME1 add a low band pass filter to avoid suppressing
+                centered bass/drums
+                FIXME2 better calculated* attenuation factor
+        */
 
-	for(i=0;i<len;i+=nch)
-	{
-		a[i] = (a[i] - a[i+1]) * 0.7;
-		a[i+1]=a[i];
-	}
+        for(i=0;i<len;i+=nch)
+        {
+                a[i] = (a[i] - a[i+1]) * 0.7;
+                a[i+1]=a[i];
+        }
 
-	return 0;
+        return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
-	af->control	= control;
-	af->filter	= play;
-	return AF_OK;
+        af->control     = control;
+        af->filter      = play;
+        return AF_OK;
 }
 
 // Description of this filter
 struct af_info af_info_karaoke = {
-	.info = "Simple karaoke/voice-removal audio filter",
-	.name = "karaoke",
-	.flags = AF_FLAGS_NOT_REENTRANT,
-	.open = af_open,
+        .info = "Simple karaoke/voice-removal audio filter",
+        .name = "karaoke",
+        .flags = AF_FLAGS_NOT_REENTRANT,
+        .open = af_open,
 };

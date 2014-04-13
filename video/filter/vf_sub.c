@@ -74,7 +74,7 @@ static int config(struct vf_instance *vf,
     };
 
     return vf_next_config(vf, vf->priv->outw, vf->priv->outh, d_width,
-			  d_height, flags, outfmt);
+                          d_height, flags, outfmt);
 }
 
 static void prepare_image(struct vf_instance *vf, struct mp_image *dmpi,

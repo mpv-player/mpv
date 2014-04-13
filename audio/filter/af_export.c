@@ -47,7 +47,7 @@
 
 #define DEF_SZ 512 // default buffer size (in samples)
 #define SHARED_FILE "mpv-af_export" /* default file name
-					   (relative to ~/.mpv/ */
+                                           (relative to ~/.mpv/ */
 
 #define SIZE_HEADER (2 * sizeof(int) + sizeof(unsigned long long))
 
@@ -55,12 +55,12 @@
 typedef struct af_export_s
 {
   unsigned long long  count; // Used for sync
-  void* buf[AF_NCH]; 	// Buffers for storing the data before it is exported
-  int 	sz;	      	// Size of buffer in samples
-  int 	wi;  		// Write index
-  int	fd;           	// File descriptor to shared memory area
-  char* filename;      	// File to export data
-  uint8_t *mmap_area;  	// MMap shared area
+  void* buf[AF_NCH];    // Buffers for storing the data before it is exported
+  int   sz;             // Size of buffer in samples
+  int   wi;             // Write index
+  int   fd;             // File descriptor to shared memory area
+  char* filename;       // File to export data
+  uint8_t *mmap_area;   // MMap shared area
 } af_export_t;
 
 
@@ -109,7 +109,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     MP_INFO(af, "Exporting to file: %s\n", s->filename);
     if(s->fd < 0) {
       MP_FATAL(af, "Could not open/create file: %s\n",
-	     s->filename);
+             s->filename);
       return AF_ERROR;
     }
 
@@ -127,7 +127,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if(s->mmap_area == NULL)
       MP_FATAL(af, "Could not mmap file %s\n", s->filename);
     MP_INFO(af, "Memory mapped to file: %s (%p)\n",
-	   s->filename, s->mmap_area);
+           s->filename, s->mmap_area);
 
     // Initialize header
     *((int*)s->mmap_area) = af->data->nch;
@@ -164,27 +164,27 @@ static void uninit( struct af_instance* af )
 */
 static int filter( struct af_instance* af, struct mp_audio* data, int flags)
 {
-  struct mp_audio*   	c   = data;	     // Current working data
-  af_export_t* 	s   = af->priv;     // Setup for this instance
-  int16_t* 	a   = c->planes[0];	     // Incomming sound
-  int 		nch = c->nch;	     // Number of channels
-  int		len = c->samples*c->nch; // Number of sample in data chunk
-  int 		sz  = s->sz;         // buffer size (in samples)
-  int 		flag = 0;	     // Set to 1 if buffer is filled
+  struct mp_audio*      c   = data;          // Current working data
+  af_export_t*  s   = af->priv;     // Setup for this instance
+  int16_t*      a   = c->planes[0];          // Incomming sound
+  int           nch = c->nch;        // Number of channels
+  int           len = c->samples*c->nch; // Number of sample in data chunk
+  int           sz  = s->sz;         // buffer size (in samples)
+  int           flag = 0;            // Set to 1 if buffer is filled
 
-  int 		ch, i;
+  int           ch, i;
 
   // Fill all buffers
   for(ch = 0; ch < nch; ch++){
-    int 	wi = s->wi;    	 // Reset write index
-    int16_t* 	b  = s->buf[ch]; // Current buffer
+    int         wi = s->wi;      // Reset write index
+    int16_t*    b  = s->buf[ch]; // Current buffer
 
     // Copy data to export buffers
     for(i = ch; i < len; i += nch){
       b[wi++] = a[i];
       if(wi >= sz){ // Don't write outside the end of the buffer
-	flag = 1;
-	break;
+        flag = 1;
+        break;
       }
     }
     s->wi = wi % s->sz;
@@ -196,7 +196,7 @@ static int filter( struct af_instance* af, struct mp_audio* data, int flags)
     memcpy(s->mmap_area + SIZE_HEADER, s->buf[0], sz * c->bps * nch);
     s->count++; // increment counter (to sync)
     memcpy(s->mmap_area + SIZE_HEADER - sizeof(s->count),
-	   &(s->count), sizeof(s->count));
+           &(s->count), sizeof(s->count));
   }
 
   return 0;

@@ -30,11 +30,11 @@
 #include "video/memcpy_pic.h"
 
 struct vf_priv_s {
-	int state;
-	long long in;
-	long long out;
-	struct vf_detc_pts_buf ptsbuf;
-	int last_frame_duration;
+        int state;
+        long long in;
+        long long out;
+        struct vf_detc_pts_buf ptsbuf;
+        int last_frame_duration;
         struct mp_image *buffer;
 };
 
@@ -50,8 +50,8 @@ static void copy_pic_field(struct mp_image *dmpi, struct mp_image *mpi, int f)
 
 static int filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-	int flags = mpi->fields;
-	int state = vf->priv->state;
+        int flags = mpi->fields;
+        int state = vf->priv->state;
         struct vf_priv_s *p = vf->priv;
 
         if (!p->buffer || p->buffer->w != mpi->w || p->buffer->h != mpi->h ||
@@ -65,50 +65,50 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
 
         struct mp_image *dmpi = p->buffer;
 
-	vf->priv->in++;
+        vf->priv->in++;
 
-	if ((state == 0 &&
-	     !(flags & MP_IMGFIELD_TOP_FIRST)) ||
-	    (state == 1 &&
-	     flags & MP_IMGFIELD_TOP_FIRST)) {
-		MP_WARN(vf, "softpulldown: Unexpected field flags: state=%d top_field_first=%d repeat_first_field=%d\n",
-		       state,
-		       (flags & MP_IMGFIELD_TOP_FIRST) != 0,
-		       (flags & MP_IMGFIELD_REPEAT_FIRST) != 0);
-		state ^= 1;
-	}
+        if ((state == 0 &&
+             !(flags & MP_IMGFIELD_TOP_FIRST)) ||
+            (state == 1 &&
+             flags & MP_IMGFIELD_TOP_FIRST)) {
+                MP_WARN(vf, "softpulldown: Unexpected field flags: state=%d top_field_first=%d repeat_first_field=%d\n",
+                       state,
+                       (flags & MP_IMGFIELD_TOP_FIRST) != 0,
+                       (flags & MP_IMGFIELD_REPEAT_FIRST) != 0);
+                state ^= 1;
+        }
 
-	if (state == 0) {
+        if (state == 0) {
                 struct mp_image *new = mp_image_new_ref(mpi);
                 new->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, vf->priv->last_frame_duration);
                 vf_add_output_frame(vf, new);
-		vf->priv->out++;
-		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
-			copy_pic_field(dmpi, mpi, 0);
-			state=1;
-		}
-	} else {
-		copy_pic_field(dmpi, mpi, 1);
-		struct mp_image *new = mp_image_new_ref(mpi);
+                vf->priv->out++;
+                if (flags & MP_IMGFIELD_REPEAT_FIRST) {
+                        copy_pic_field(dmpi, mpi, 0);
+                        state=1;
+                }
+        } else {
+                copy_pic_field(dmpi, mpi, 1);
+                struct mp_image *new = mp_image_new_ref(mpi);
                 new->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, vf->priv->last_frame_duration);
-		vf_add_output_frame(vf, new);
-		vf->priv->out++;
-		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
+                vf_add_output_frame(vf, new);
+                vf->priv->out++;
+                if (flags & MP_IMGFIELD_REPEAT_FIRST) {
                         struct mp_image *new2 = mp_image_new_ref(mpi);
                         new2->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, 3);
                         vf_add_output_frame(vf, new2);
                         vf->priv->out++;
                         vf->priv->state=0;
-		} else {
+                } else {
                         copy_pic_field(dmpi, mpi, 0);
-		}
-	}
+                }
+        }
 
-	vf->priv->state = state;
-	if (flags & MP_IMGFIELD_REPEAT_FIRST)
-		vf->priv->last_frame_duration = 3;
-	else
-		vf->priv->last_frame_duration = 2;
+        vf->priv->state = state;
+        if (flags & MP_IMGFIELD_REPEAT_FIRST)
+                vf->priv->last_frame_duration = 3;
+        else
+                vf->priv->last_frame_duration = 2;
 
         talloc_free(mpi);
 
@@ -127,8 +127,8 @@ static int control(vf_instance_t *vf, int request, void *data)
 
 static void uninit(struct vf_instance *vf)
 {
-	MP_INFO(vf, "softpulldown: %lld frames in, %lld frames out\n", vf->priv->in, vf->priv->out);
-	free(vf->priv);
+        MP_INFO(vf, "softpulldown: %lld frames in, %lld frames out\n", vf->priv->in, vf->priv->out);
+        free(vf->priv);
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)

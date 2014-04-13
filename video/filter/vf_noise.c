@@ -50,20 +50,20 @@ static void (*lineNoise)(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int
 static void (*lineNoiseAvg)(uint8_t *dst, uint8_t *src, int len, int8_t **shift)= lineNoiseAvg_C;
 
 typedef struct FilterParam{
-	int strength;
-	int uniform;
-	int temporal;
-	int quality;
+        int strength;
+        int uniform;
+        int temporal;
+        int quality;
         int averaged;
         int pattern;
         int shiftptr;
-	int8_t *noise;
-	int8_t *prev_shift[MAX_RES][3];
+        int8_t *noise;
+        int8_t *prev_shift[MAX_RES][3];
 }FilterParam;
 
 struct vf_priv_s {
-	FilterParam lumaParam;
-	FilterParam chromaParam;
+        FilterParam lumaParam;
+        FilterParam chromaParam;
         int strength;
         int averaged;
         int pattern;
@@ -82,245 +82,245 @@ static int patt[4] = {
 
 #define RAND_N(range) ((int) ((double)range*rand()/(RAND_MAX+1.0)))
 static int8_t *initNoise(FilterParam *fp){
-	int strength= fp->strength;
-	int uniform= fp->uniform;
-	int averaged= fp->averaged;
-	int pattern= fp->pattern;
-	int8_t *noise= av_malloc(MAX_NOISE*sizeof(int8_t));
-	int i, j;
+        int strength= fp->strength;
+        int uniform= fp->uniform;
+        int averaged= fp->averaged;
+        int pattern= fp->pattern;
+        int8_t *noise= av_malloc(MAX_NOISE*sizeof(int8_t));
+        int i, j;
 
-	srand(123457);
+        srand(123457);
 
-	for(i=0,j=0; i<MAX_NOISE; i++,j++)
-	{
-		if(uniform) {
-			if (averaged) {
-		    		if (pattern) {
-					noise[i]= (RAND_N(strength) - strength/2)/6
-						+patt[j%4]*strength*0.25/3;
-				} else {
-					noise[i]= (RAND_N(strength) - strength/2)/3;
-		    		}
-			} else {
-		    		if (pattern) {
-				    noise[i]= (RAND_N(strength) - strength/2)/2
-					    + patt[j%4]*strength*0.25;
-				} else {
-					noise[i]= RAND_N(strength) - strength/2;
-		    		}
-			}
-	    	} else {
-			double x1, x2, w, y1;
-			do {
-				x1 = 2.0 * rand()/(float)RAND_MAX - 1.0;
-				x2 = 2.0 * rand()/(float)RAND_MAX - 1.0;
-				w = x1 * x1 + x2 * x2;
-			} while ( w >= 1.0 );
+        for(i=0,j=0; i<MAX_NOISE; i++,j++)
+        {
+                if(uniform) {
+                        if (averaged) {
+                                if (pattern) {
+                                        noise[i]= (RAND_N(strength) - strength/2)/6
+                                                +patt[j%4]*strength*0.25/3;
+                                } else {
+                                        noise[i]= (RAND_N(strength) - strength/2)/3;
+                                }
+                        } else {
+                                if (pattern) {
+                                    noise[i]= (RAND_N(strength) - strength/2)/2
+                                            + patt[j%4]*strength*0.25;
+                                } else {
+                                        noise[i]= RAND_N(strength) - strength/2;
+                                }
+                        }
+                } else {
+                        double x1, x2, w, y1;
+                        do {
+                                x1 = 2.0 * rand()/(float)RAND_MAX - 1.0;
+                                x2 = 2.0 * rand()/(float)RAND_MAX - 1.0;
+                                w = x1 * x1 + x2 * x2;
+                        } while ( w >= 1.0 );
 
-			w = sqrt( (-2.0 * log( w ) ) / w );
-			y1= x1 * w;
-			y1*= strength / sqrt(3.0);
-			if (pattern) {
-			    y1 /= 2;
-			    y1 += patt[j%4]*strength*0.35;
-			}
-			if     (y1<-128) y1=-128;
-			else if(y1> 127) y1= 127;
-			if (averaged) y1 /= 3.0;
-			noise[i]= (int)y1;
-		}
-		if (RAND_N(6) == 0) j--;
-	}
+                        w = sqrt( (-2.0 * log( w ) ) / w );
+                        y1= x1 * w;
+                        y1*= strength / sqrt(3.0);
+                        if (pattern) {
+                            y1 /= 2;
+                            y1 += patt[j%4]*strength*0.35;
+                        }
+                        if     (y1<-128) y1=-128;
+                        else if(y1> 127) y1= 127;
+                        if (averaged) y1 /= 3.0;
+                        noise[i]= (int)y1;
+                }
+                if (RAND_N(6) == 0) j--;
+        }
 
 
-	for (i = 0; i < MAX_RES; i++)
-	    for (j = 0; j < 3; j++)
-		fp->prev_shift[i][j] = noise + (rand()&(MAX_SHIFT-1));
+        for (i = 0; i < MAX_RES; i++)
+            for (j = 0; j < 3; j++)
+                fp->prev_shift[i][j] = noise + (rand()&(MAX_SHIFT-1));
 
-	if(!nonTempRandShift_init){
-		for(i=0; i<MAX_RES; i++){
-			nonTempRandShift[i]= rand()&(MAX_SHIFT-1);
-		}
-		nonTempRandShift_init = 1;
-	}
+        if(!nonTempRandShift_init){
+                for(i=0; i<MAX_RES; i++){
+                        nonTempRandShift[i]= rand()&(MAX_SHIFT-1);
+                }
+                nonTempRandShift_init = 1;
+        }
 
-	fp->noise= noise;
-	fp->shiftptr= 0;
-	return noise;
+        fp->noise= noise;
+        fp->shiftptr= 0;
+        return noise;
 }
 
 /***************************************************************************/
 
 #if HAVE_MMX
 static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
-	x86_reg mmx_len= len&(~7);
-	noise+=shift;
+        x86_reg mmx_len= len&(~7);
+        noise+=shift;
 
-	__asm__ volatile(
-		"mov %3, %%"REG_a"		\n\t"
-		"pcmpeqb %%mm7, %%mm7		\n\t"
-		"psllw $15, %%mm7		\n\t"
-		"packsswb %%mm7, %%mm7		\n\t"
-		".align 4                       \n\t"
-		"1:				\n\t"
-		"movq (%0, %%"REG_a"), %%mm0	\n\t"
-		"movq (%1, %%"REG_a"), %%mm1	\n\t"
-		"pxor %%mm7, %%mm0		\n\t"
-		"paddsb %%mm1, %%mm0		\n\t"
-		"pxor %%mm7, %%mm0		\n\t"
-		"movq %%mm0, (%2, %%"REG_a")	\n\t"
-		"add $8, %%"REG_a"		\n\t"
-		" js 1b				\n\t"
-		:: "r" (src+mmx_len), "r" (noise+mmx_len), "r" (dst+mmx_len), "g" (-mmx_len)
-		: "%"REG_a
-	);
-	if(mmx_len!=len)
-		lineNoise_C(dst+mmx_len, src+mmx_len, noise+mmx_len, len-mmx_len, 0);
+        __asm__ volatile(
+                "mov %3, %%"REG_a"              \n\t"
+                "pcmpeqb %%mm7, %%mm7           \n\t"
+                "psllw $15, %%mm7               \n\t"
+                "packsswb %%mm7, %%mm7          \n\t"
+                ".align 4                       \n\t"
+                "1:                             \n\t"
+                "movq (%0, %%"REG_a"), %%mm0    \n\t"
+                "movq (%1, %%"REG_a"), %%mm1    \n\t"
+                "pxor %%mm7, %%mm0              \n\t"
+                "paddsb %%mm1, %%mm0            \n\t"
+                "pxor %%mm7, %%mm0              \n\t"
+                "movq %%mm0, (%2, %%"REG_a")    \n\t"
+                "add $8, %%"REG_a"              \n\t"
+                " js 1b                         \n\t"
+                :: "r" (src+mmx_len), "r" (noise+mmx_len), "r" (dst+mmx_len), "g" (-mmx_len)
+                : "%"REG_a
+        );
+        if(mmx_len!=len)
+                lineNoise_C(dst+mmx_len, src+mmx_len, noise+mmx_len, len-mmx_len, 0);
 }
 #endif
 
 //duplicate of previous except movntq
 #if HAVE_MMX2
 static inline void lineNoise_MMX2(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
-	x86_reg mmx_len= len&(~7);
-	noise+=shift;
+        x86_reg mmx_len= len&(~7);
+        noise+=shift;
 
-	__asm__ volatile(
-		"mov %3, %%"REG_a"		\n\t"
-		"pcmpeqb %%mm7, %%mm7		\n\t"
-		"psllw $15, %%mm7		\n\t"
-		"packsswb %%mm7, %%mm7		\n\t"
-		".align 4                       \n\t"
-		"1:				\n\t"
-		"movq (%0, %%"REG_a"), %%mm0	\n\t"
-		"movq (%1, %%"REG_a"), %%mm1	\n\t"
-		"pxor %%mm7, %%mm0		\n\t"
-		"paddsb %%mm1, %%mm0		\n\t"
-		"pxor %%mm7, %%mm0		\n\t"
-		"movntq %%mm0, (%2, %%"REG_a")	\n\t"
-		"add $8, %%"REG_a"		\n\t"
-		" js 1b				\n\t"
-		:: "r" (src+mmx_len), "r" (noise+mmx_len), "r" (dst+mmx_len), "g" (-mmx_len)
-		: "%"REG_a
-	);
-	if(mmx_len!=len)
-		lineNoise_C(dst+mmx_len, src+mmx_len, noise+mmx_len, len-mmx_len, 0);
+        __asm__ volatile(
+                "mov %3, %%"REG_a"              \n\t"
+                "pcmpeqb %%mm7, %%mm7           \n\t"
+                "psllw $15, %%mm7               \n\t"
+                "packsswb %%mm7, %%mm7          \n\t"
+                ".align 4                       \n\t"
+                "1:                             \n\t"
+                "movq (%0, %%"REG_a"), %%mm0    \n\t"
+                "movq (%1, %%"REG_a"), %%mm1    \n\t"
+                "pxor %%mm7, %%mm0              \n\t"
+                "paddsb %%mm1, %%mm0            \n\t"
+                "pxor %%mm7, %%mm0              \n\t"
+                "movntq %%mm0, (%2, %%"REG_a")  \n\t"
+                "add $8, %%"REG_a"              \n\t"
+                " js 1b                         \n\t"
+                :: "r" (src+mmx_len), "r" (noise+mmx_len), "r" (dst+mmx_len), "g" (-mmx_len)
+                : "%"REG_a
+        );
+        if(mmx_len!=len)
+                lineNoise_C(dst+mmx_len, src+mmx_len, noise+mmx_len, len-mmx_len, 0);
 }
 #endif
 
 static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
-	int i;
-	noise+= shift;
-	for(i=0; i<len; i++)
-	{
-		int v= src[i]+ noise[i];
-		if(v>255) 	dst[i]=255; //FIXME optimize
-		else if(v<0) 	dst[i]=0;
-		else		dst[i]=v;
-	}
+        int i;
+        noise+= shift;
+        for(i=0; i<len; i++)
+        {
+                int v= src[i]+ noise[i];
+                if(v>255)       dst[i]=255; //FIXME optimize
+                else if(v<0)    dst[i]=0;
+                else            dst[i]=v;
+        }
 }
 
 /***************************************************************************/
 
 #if HAVE_MMX
 static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
-	x86_reg mmx_len= len&(~7);
-	uint8_t *src_mmx_len = src+mmx_len;
+        x86_reg mmx_len= len&(~7);
+        uint8_t *src_mmx_len = src+mmx_len;
 
-	__asm__ volatile(
-		"push %%"REG_BP"		\n\t"
-		"mov %0, %%"REG_BP"		\n\t"
-		"mov %5, %%"REG_a"		\n\t"
-		".align 4                       \n\t"
-		"1:				\n\t"
-		"movq (%1, %%"REG_a"), %%mm1	\n\t"
-		"movq (%%"REG_BP", %%"REG_a"), %%mm0	\n\t"
-		"paddb (%2, %%"REG_a"), %%mm1	\n\t"
-		"paddb (%3, %%"REG_a"), %%mm1	\n\t"
-		"movq %%mm0, %%mm2		\n\t"
-		"movq %%mm1, %%mm3		\n\t"
-		"punpcklbw %%mm0, %%mm0		\n\t"
-		"punpckhbw %%mm2, %%mm2		\n\t"
-		"punpcklbw %%mm1, %%mm1		\n\t"
-		"punpckhbw %%mm3, %%mm3		\n\t"
-		"pmulhw %%mm0, %%mm1		\n\t"
-		"pmulhw %%mm2, %%mm3		\n\t"
-		"paddw %%mm1, %%mm1		\n\t"
-		"paddw %%mm3, %%mm3		\n\t"
-		"paddw %%mm0, %%mm1		\n\t"
-		"paddw %%mm2, %%mm3		\n\t"
-		"psrlw $8, %%mm1		\n\t"
-		"psrlw $8, %%mm3		\n\t"
-                "packuswb %%mm3, %%mm1		\n\t"
-		"movq %%mm1, (%4, %%"REG_a")	\n\t"
-		"add $8, %%"REG_a"		\n\t"
-		" js 1b				\n\t"
-		"pop %%"REG_BP"			\n\t"
-		:: "g" (src_mmx_len), "r" (shift[0]+mmx_len),
-		   "r" (shift[1]+mmx_len), "r" (shift[2]+mmx_len),
+        __asm__ volatile(
+                "push %%"REG_BP"                \n\t"
+                "mov %0, %%"REG_BP"             \n\t"
+                "mov %5, %%"REG_a"              \n\t"
+                ".align 4                       \n\t"
+                "1:                             \n\t"
+                "movq (%1, %%"REG_a"), %%mm1    \n\t"
+                "movq (%%"REG_BP", %%"REG_a"), %%mm0    \n\t"
+                "paddb (%2, %%"REG_a"), %%mm1   \n\t"
+                "paddb (%3, %%"REG_a"), %%mm1   \n\t"
+                "movq %%mm0, %%mm2              \n\t"
+                "movq %%mm1, %%mm3              \n\t"
+                "punpcklbw %%mm0, %%mm0         \n\t"
+                "punpckhbw %%mm2, %%mm2         \n\t"
+                "punpcklbw %%mm1, %%mm1         \n\t"
+                "punpckhbw %%mm3, %%mm3         \n\t"
+                "pmulhw %%mm0, %%mm1            \n\t"
+                "pmulhw %%mm2, %%mm3            \n\t"
+                "paddw %%mm1, %%mm1             \n\t"
+                "paddw %%mm3, %%mm3             \n\t"
+                "paddw %%mm0, %%mm1             \n\t"
+                "paddw %%mm2, %%mm3             \n\t"
+                "psrlw $8, %%mm1                \n\t"
+                "psrlw $8, %%mm3                \n\t"
+                "packuswb %%mm3, %%mm1          \n\t"
+                "movq %%mm1, (%4, %%"REG_a")    \n\t"
+                "add $8, %%"REG_a"              \n\t"
+                " js 1b                         \n\t"
+                "pop %%"REG_BP"                 \n\t"
+                :: "g" (src_mmx_len), "r" (shift[0]+mmx_len),
+                   "r" (shift[1]+mmx_len), "r" (shift[2]+mmx_len),
                    "r" (dst+mmx_len), "g" (-mmx_len)
-		: "%"REG_a
-	);
+                : "%"REG_a
+        );
 
-	if(mmx_len!=len){
-		int8_t *shift2[3]={shift[0]+mmx_len, shift[1]+mmx_len, shift[2]+mmx_len};
-		lineNoiseAvg_C(dst+mmx_len, src+mmx_len, len-mmx_len, shift2);
-	}
+        if(mmx_len!=len){
+                int8_t *shift2[3]={shift[0]+mmx_len, shift[1]+mmx_len, shift[2]+mmx_len};
+                lineNoiseAvg_C(dst+mmx_len, src+mmx_len, len-mmx_len, shift2);
+        }
 }
 #endif
 
 static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
-	int i;
+        int i;
         int8_t *src2= (int8_t*)src;
 
-	for(i=0; i<len; i++)
-	{
-	    const int n= shift[0][i] + shift[1][i] + shift[2][i];
-	    dst[i]= src2[i]+((n*src2[i])>>7);
-	}
+        for(i=0; i<len; i++)
+        {
+            const int n= shift[0][i] + shift[1][i] + shift[2][i];
+            dst[i]= src2[i]+((n*src2[i])>>7);
+        }
 }
 
 /***************************************************************************/
 
 static void donoise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height, FilterParam *fp){
-	int8_t *noise= fp->noise;
-	int y;
-	int shift=0;
+        int8_t *noise= fp->noise;
+        int y;
+        int shift=0;
 
-	if(!noise)
-	{
-		if(src==dst) return;
+        if(!noise)
+        {
+                if(src==dst) return;
 
-		if(dstStride==srcStride) memcpy(dst, src, srcStride*height);
-		else
-		{
-			for(y=0; y<height; y++)
-			{
-				memcpy(dst, src, width);
-				dst+= dstStride;
-				src+= srcStride;
-			}
-		}
-		return;
-	}
+                if(dstStride==srcStride) memcpy(dst, src, srcStride*height);
+                else
+                {
+                        for(y=0; y<height; y++)
+                        {
+                                memcpy(dst, src, width);
+                                dst+= dstStride;
+                                src+= srcStride;
+                        }
+                }
+                return;
+        }
 
-	for(y=0; y<height; y++)
-	{
-		if(fp->temporal)	shift=  rand()&(MAX_SHIFT  -1);
-		else			shift= nonTempRandShift[y];
+        for(y=0; y<height; y++)
+        {
+                if(fp->temporal)        shift=  rand()&(MAX_SHIFT  -1);
+                else                    shift= nonTempRandShift[y];
 
-		if(fp->quality==0) shift&= ~7;
-		if (fp->averaged) {
-		    lineNoiseAvg(dst, src, width, fp->prev_shift[y]);
-		    fp->prev_shift[y][fp->shiftptr] = noise + shift;
-		} else {
-		    lineNoise(dst, src, noise, width, shift);
-		}
-		dst+= dstStride;
-		src+= srcStride;
-	}
-	fp->shiftptr++;
-	if (fp->shiftptr == 3) fp->shiftptr = 0;
+                if(fp->quality==0) shift&= ~7;
+                if (fp->averaged) {
+                    lineNoiseAvg(dst, src, width, fp->prev_shift[y]);
+                    fp->prev_shift[y][fp->shiftptr] = noise + shift;
+                } else {
+                    lineNoise(dst, src, noise, width, shift);
+                }
+                dst+= dstStride;
+                src+= srcStride;
+        }
+        fp->shiftptr++;
+        if (fp->shiftptr == 3) fp->shiftptr = 0;
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
@@ -331,52 +331,52 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
             mp_image_copy_attributes(dmpi, mpi);
         }
 
-	donoise(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, &vf->priv->lumaParam);
-	donoise(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
-	donoise(dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
+        donoise(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, &vf->priv->lumaParam);
+        donoise(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
+        donoise(dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
 
 #if HAVE_MMX
-	if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
+        if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
 #endif
 #if HAVE_MMX2
-	if(gCpuCaps.hasMMX2) __asm__ volatile ("sfence\n\t");
+        if(gCpuCaps.hasMMX2) __asm__ volatile ("sfence\n\t");
 #endif
 
         if (dmpi != mpi)
             talloc_free(mpi);
-	return dmpi;
+        return dmpi;
 }
 
 static void uninit(struct vf_instance *vf){
-	if(!vf->priv) return;
+        if(!vf->priv) return;
 
-	av_free(vf->priv->chromaParam.noise);
-	vf->priv->chromaParam.noise= NULL;
+        av_free(vf->priv->chromaParam.noise);
+        vf->priv->chromaParam.noise= NULL;
 
-	av_free(vf->priv->lumaParam.noise);
-	vf->priv->lumaParam.noise= NULL;
+        av_free(vf->priv->lumaParam.noise);
+        vf->priv->lumaParam.noise= NULL;
 }
 
 //===========================================================================//
 
 static int query_format(struct vf_instance *vf, unsigned int fmt){
-	switch(fmt)
-	{
-	case IMGFMT_420P:
-		return vf_next_query_format(vf,IMGFMT_420P);
-	}
-	return 0;
+        switch(fmt)
+        {
+        case IMGFMT_420P:
+                return vf_next_query_format(vf,IMGFMT_420P);
+        }
+        return 0;
 }
 
 static void parse(FilterParam *fp, struct vf_priv_s *p){
-	fp->strength= p->strength;
-	fp->uniform=p->uniform;
-	fp->temporal=p->temporal;
-	fp->quality=p->hq;
-	fp->pattern=p->pattern;
-	fp->averaged=p->averaged;
+        fp->strength= p->strength;
+        fp->uniform=p->uniform;
+        fp->temporal=p->temporal;
+        fp->quality=p->hq;
+        fp->pattern=p->pattern;
+        fp->averaged=p->averaged;
 
-	if(fp->strength) initNoise(fp);
+        if(fp->strength) initNoise(fp);
 }
 
 static int vf_open(vf_instance_t *vf){

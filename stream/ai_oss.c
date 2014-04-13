@@ -56,28 +56,28 @@ int ai_oss_set_channels(audio_in_t *ai)
 
     if (ai->req_channels > 2)
     {
-	ioctl_param = ai->req_channels;
-	MP_VERBOSE(ai, "ioctl dsp channels: %d\n",
-	       err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_CHANNELS, &ioctl_param));
-	if (err < 0) {
-	    MP_ERR(ai, "Unable to set channel count: %d\n",
-		   ai->req_channels);
-	    return -1;
-	}
-	ai->channels = ioctl_param;
+        ioctl_param = ai->req_channels;
+        MP_VERBOSE(ai, "ioctl dsp channels: %d\n",
+               err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_CHANNELS, &ioctl_param));
+        if (err < 0) {
+            MP_ERR(ai, "Unable to set channel count: %d\n",
+                   ai->req_channels);
+            return -1;
+        }
+        ai->channels = ioctl_param;
     }
     else
     {
-	ioctl_param = (ai->req_channels == 2);
-	MP_VERBOSE(ai, "ioctl dsp stereo: %d (req: %d)\n",
-	       err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_STEREO, &ioctl_param),
-	       ioctl_param);
-	if (err < 0) {
-	    MP_ERR(ai, "Unable to set stereo: %d\n",
-		   ai->req_channels == 2);
-	    return -1;
-	}
-	ai->channels = ioctl_param ? 2 : 1;
+        ioctl_param = (ai->req_channels == 2);
+        MP_VERBOSE(ai, "ioctl dsp stereo: %d (req: %d)\n",
+               err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_STEREO, &ioctl_param),
+               ioctl_param);
+        if (err < 0) {
+            MP_ERR(ai, "Unable to set stereo: %d\n",
+                   ai->req_channels == 2);
+            return -1;
+        }
+        ai->channels = ioctl_param ? 2 : 1;
     }
     return 0;
 }
@@ -90,65 +90,65 @@ int ai_oss_init(audio_in_t *ai)
     ai->oss.audio_fd = open(ai->oss.device, O_RDONLY | O_CLOEXEC);
     if (ai->oss.audio_fd < 0)
     {
-	MP_ERR(ai, "Unable to open '%s': %s\n",
-	       ai->oss.device, strerror(errno));
-	return -1;
+        MP_ERR(ai, "Unable to open '%s': %s\n",
+               ai->oss.device, strerror(errno));
+        return -1;
     }
 
     ioctl_param = 0 ;
     MP_VERBOSE(ai, "ioctl dsp getfmt: %d\n",
-	   ioctl(ai->oss.audio_fd, SNDCTL_DSP_GETFMTS, &ioctl_param));
+           ioctl(ai->oss.audio_fd, SNDCTL_DSP_GETFMTS, &ioctl_param));
 
     MP_VERBOSE(ai, "Supported formats: %x\n", ioctl_param);
     if (!(ioctl_param & AFMT_S16_LE))
-	MP_ERR(ai, "unsupported format\n");
+        MP_ERR(ai, "unsupported format\n");
 
     ioctl_param = AFMT_S16_LE;
     MP_VERBOSE(ai, "ioctl dsp setfmt: %d\n",
-	   err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_SETFMT, &ioctl_param));
+           err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_SETFMT, &ioctl_param));
     if (err < 0) {
-	MP_ERR(ai, "Unable to set audio format.");
-	return -1;
+        MP_ERR(ai, "Unable to set audio format.");
+        return -1;
     }
 
     if (ai_oss_set_channels(ai) < 0) return -1;
 
     ioctl_param = ai->req_samplerate;
     MP_VERBOSE(ai, "ioctl dsp speed: %d\n",
-	   err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_SPEED, &ioctl_param));
+           err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_SPEED, &ioctl_param));
     if (err < 0) {
-	MP_ERR(ai, "Unable to set samplerate: %d\n",
-	       ai->req_samplerate);
-	return -1;
+        MP_ERR(ai, "Unable to set samplerate: %d\n",
+               ai->req_samplerate);
+        return -1;
     }
     ai->samplerate = ioctl_param;
 
     MP_VERBOSE(ai, "ioctl dsp trigger: %d\n",
-	   ioctl(ai->oss.audio_fd, SNDCTL_DSP_GETTRIGGER, &ioctl_param));
+           ioctl(ai->oss.audio_fd, SNDCTL_DSP_GETTRIGGER, &ioctl_param));
     MP_VERBOSE(ai, "trigger: %x\n", ioctl_param);
     ioctl_param = PCM_ENABLE_INPUT;
     MP_VERBOSE(ai, "ioctl dsp trigger: %d\n",
-	   err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_SETTRIGGER, &ioctl_param));
+           err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_SETTRIGGER, &ioctl_param));
     if (err < 0) {
-	MP_ERR(ai, "Unable to set trigger: %d\n",
-	       PCM_ENABLE_INPUT);
+        MP_ERR(ai, "Unable to set trigger: %d\n",
+               PCM_ENABLE_INPUT);
     }
 
     ai->blocksize = 0;
     MP_VERBOSE(ai, "ioctl dsp getblocksize: %d\n",
-	   err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_GETBLKSIZE, &ai->blocksize));
+           err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_GETBLKSIZE, &ai->blocksize));
     if (err < 0) {
-	MP_ERR(ai, "Unable to get block size!\n");
+        MP_ERR(ai, "Unable to get block size!\n");
     }
     MP_VERBOSE(ai, "blocksize: %d\n", ai->blocksize);
 
     // correct the blocksize to a reasonable value
     if (ai->blocksize <= 0) {
-	ai->blocksize = 4096*ai->channels*2;
-	MP_ERR(ai, "Audio block size is zero, setting to %d!\n", ai->blocksize);
+        ai->blocksize = 4096*ai->channels*2;
+        MP_ERR(ai, "Audio block size is zero, setting to %d!\n", ai->blocksize);
     } else if (ai->blocksize < 4096*ai->channels*2) {
-	ai->blocksize *= 4096*ai->channels*2/ai->blocksize;
-	MP_ERR(ai, "Audio block size too low, setting to %d!\n", ai->blocksize);
+        ai->blocksize *= 4096*ai->channels*2/ai->blocksize;
+        MP_ERR(ai, "Audio block size too low, setting to %d!\n", ai->blocksize);
     }
 
     ai->samplesize = 16;

@@ -55,7 +55,7 @@ static char *col_dup(void *talloc_ctx, const char *src)
 {
     int length = 0;
     while (src[length] > 31)
-	length++;
+        length++;
 
     return talloc_strndup(talloc_ctx, src, length);
 }
@@ -67,13 +67,13 @@ static int parse_line(char **ptr, char *cols[7])
     cols[0] = *ptr;
 
     for (col = 1; col < 7; col++) {
-	for (; (**ptr) > 31; (*ptr)++);
-	if (**ptr == 0)
-	    return 0;
-	(*ptr)++;
-	if ((*ptr)[-1] != 9)
-	    return 0;
-	cols[col] = (*ptr);
+        for (; (**ptr) > 31; (*ptr)++);
+        if (**ptr == 0)
+            return 0;
+        (*ptr)++;
+        if ((*ptr)[-1] != 9)
+            return 0;
+        cols[col] = (*ptr);
     }
 
     return 1;
@@ -89,32 +89,32 @@ static char *load_file(struct mp_log *log, const char *filename, int64_t * lengt
 
     fd = open(filename, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
-	mp_verbose(log, "Could not open");
-	goto err_out;
+        mp_verbose(log, "Could not open");
+        goto err_out;
     }
 
     *length = lseek(fd, 0, SEEK_END);
 
     if (*length < 0) {
-	mp_verbose(log, "Could not find EOF");
-	goto err_out;
+        mp_verbose(log, "Could not find EOF");
+        goto err_out;
     }
 
     if (*length > SIZE_MAX - 1) {
-	mp_verbose(log, "File too big, could not malloc.");
-	goto err_out;
+        mp_verbose(log, "File too big, could not malloc.");
+        goto err_out;
     }
 
     lseek(fd, 0, SEEK_SET);
 
     if (!(buffer = malloc(*length + 1))) {
-	mp_verbose(log, "Could not malloc.");
-	goto err_out;
+        mp_verbose(log, "Could not malloc.");
+        goto err_out;
     }
 
     if (read(fd, buffer, *length) != *length) {
-	mp_verbose(log, "Read is behaving funny.");
-	goto err_out;
+        mp_verbose(log, "Read is behaving funny.");
+        goto err_out;
     }
     close(fd);
     buffer[*length] = 0;
@@ -137,22 +137,22 @@ static struct cookie_list_type *load_cookies_from(void *ctx,
 
     ptr = file = load_file(log, filename, &length);
     if (!ptr)
-	return NULL;
+        return NULL;
 
     struct cookie_list_type *list = NULL;
     while (*ptr) {
-	char *cols[7];
-	if (parse_line(&ptr, cols)) {
-	    struct cookie_list_type *new;
-	    new = talloc_zero(ctx, cookie_list_t);
-	    new->name = col_dup(new, cols[5]);
-	    new->value = col_dup(new, cols[6]);
-	    new->path = col_dup(new, cols[2]);
-	    new->domain = col_dup(new, cols[0]);
-	    new->secure = (*(cols[3]) == 't') || (*(cols[3]) == 'T');
-	    new->next = list;
-	    list = new;
-	}
+        char *cols[7];
+        if (parse_line(&ptr, cols)) {
+            struct cookie_list_type *new;
+            new = talloc_zero(ctx, cookie_list_t);
+            new->name = col_dup(new, cols[5]);
+            new->value = col_dup(new, cols[6]);
+            new->path = col_dup(new, cols[2]);
+            new->domain = col_dup(new, cols[0]);
+            new->secure = (*(cols[3]) == 't') || (*(cols[3]) == 'T');
+            new->next = list;
+            list = new;
+        }
     }
     free(file);
     return list;

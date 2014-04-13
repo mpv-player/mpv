@@ -18,11 +18,11 @@ int ai_sndio_setup(audio_in_t *ai)
     par.le = 1;
     par.rchan = ai->req_channels;
     par.rate = ai->req_samplerate;
-    par.appbufsz = ai->req_samplerate;	/* 1 sec */
+    par.appbufsz = ai->req_samplerate;  /* 1 sec */
 
    if (!sio_setpar(ai->sndio.hdl, &par) || !sio_getpar(ai->sndio.hdl, &par)) {
-	MP_ERR(ai, "could not configure sndio audio");
-	return -1;
+        MP_ERR(ai, "could not configure sndio audio");
+        return -1;
     }
 
     ai->channels = par.rchan;
@@ -39,8 +39,8 @@ int ai_sndio_init(audio_in_t *ai)
     int err;
 
     if ((ai->sndio.hdl = sio_open(ai->sndio.device, SIO_REC, 0)) == NULL) {
-	MP_ERR(ai, "could not open sndio audio");
-	return -1;
+        MP_ERR(ai, "could not open sndio audio");
+        return -1;
     }
 
     err = ai_sndio_setup(ai);

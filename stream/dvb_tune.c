@@ -52,225 +52,225 @@ int dvb_get_tuner_type(int fe_fd, struct mp_log *log)
   res = ioctl(fe_fd, FE_GET_INFO, &fe_info);
   if(res < 0)
   {
-  	mp_err(log, "FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
-	return 0;
+        mp_err(log, "FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
+        return 0;
   }
 
   switch(fe_info.type)
   {
-	case FE_OFDM:
+        case FE_OFDM:
       mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-T\n");
-	  return TUNER_TER;
+          return TUNER_TER;
 
-	case FE_QPSK:
+        case FE_QPSK:
       mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-S\n");
-	  return TUNER_SAT;
+          return TUNER_SAT;
 
-	case FE_QAM:
+        case FE_QAM:
       mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-C\n");
-	  return TUNER_CBL;
+          return TUNER_CBL;
 
 #ifdef DVB_ATSC
-	case FE_ATSC:
+        case FE_ATSC:
       mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-ATSC\n");
-	  return TUNER_ATSC;
+          return TUNER_ATSC;
 #endif
-	default:
-	  mp_err(log, "UNKNOWN TUNER TYPE\n");
-	  return 0;
+        default:
+          mp_err(log, "UNKNOWN TUNER TYPE\n");
+          return 0;
   }
 
 }
 
 int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 {
-	int i;
-	char frontend_dev[32], dvr_dev[32], demux_dev[32];
+        int i;
+        char frontend_dev[32], dvr_dev[32], demux_dev[32];
 
-	sprintf(frontend_dev, "/dev/dvb/adapter%d/frontend0", n);
-	sprintf(dvr_dev, "/dev/dvb/adapter%d/dvr0", n);
-	sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", n);
-	priv->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
-	if(priv->fe_fd < 0)
-	{
-		MP_ERR(priv, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n", frontend_dev, errno);
-		return 0;
-	}
-	priv->demux_fds_cnt = 0;
-	MP_VERBOSE(priv, "DVB_OPEN_DEVICES(%d)\n", demux_cnt);
-	for(i = 0; i < demux_cnt; i++)
-	{
-		priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
-		if(priv->demux_fds[i] < 0)
-		{
-			MP_ERR(priv, "ERROR OPENING DEMUX 0: %d\n", errno);
-			return 0;
-		}
-		else
-		{
-			MP_VERBOSE(priv, "OPEN(%d), file %s: FD=%d, CNT=%d\n", i, demux_dev, priv->demux_fds[i], priv->demux_fds_cnt);
-			priv->demux_fds_cnt++;
-		}
-	}
+        sprintf(frontend_dev, "/dev/dvb/adapter%d/frontend0", n);
+        sprintf(dvr_dev, "/dev/dvb/adapter%d/dvr0", n);
+        sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", n);
+        priv->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+        if(priv->fe_fd < 0)
+        {
+                MP_ERR(priv, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n", frontend_dev, errno);
+                return 0;
+        }
+        priv->demux_fds_cnt = 0;
+        MP_VERBOSE(priv, "DVB_OPEN_DEVICES(%d)\n", demux_cnt);
+        for(i = 0; i < demux_cnt; i++)
+        {
+                priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+                if(priv->demux_fds[i] < 0)
+                {
+                        MP_ERR(priv, "ERROR OPENING DEMUX 0: %d\n", errno);
+                        return 0;
+                }
+                else
+                {
+                        MP_VERBOSE(priv, "OPEN(%d), file %s: FD=%d, CNT=%d\n", i, demux_dev, priv->demux_fds[i], priv->demux_fds_cnt);
+                        priv->demux_fds_cnt++;
+                }
+        }
 
 
-	priv->dvr_fd = open(dvr_dev, O_RDONLY| O_NONBLOCK | O_CLOEXEC);
-	if(priv->dvr_fd < 0)
-	{
-		MP_ERR(priv, "ERROR OPENING DVR DEVICE %s: %d\n", dvr_dev, errno);
-		return 0;
-	}
+        priv->dvr_fd = open(dvr_dev, O_RDONLY| O_NONBLOCK | O_CLOEXEC);
+        if(priv->dvr_fd < 0)
+        {
+                MP_ERR(priv, "ERROR OPENING DVR DEVICE %s: %d\n", dvr_dev, errno);
+                return 0;
+        }
 
-	return 1;
+        return 1;
 }
 
 
 int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 {
-	int i;
-	char demux_dev[32];
+        int i;
+        char demux_dev[32];
 
-	sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", priv->card);
-	MP_VERBOSE(priv, "FIX %d -> %d\n", priv->demux_fds_cnt, cnt);
-	if(priv->demux_fds_cnt >= cnt)
-	{
-		for(i = priv->demux_fds_cnt-1; i >= cnt; i--)
-		{
-			MP_VERBOSE(priv, "FIX, CLOSE fd(%d): %d\n", i, priv->demux_fds[i]);
-			close(priv->demux_fds[i]);
-		}
-		priv->demux_fds_cnt = cnt;
-	}
-	else if(priv->demux_fds_cnt < cnt)
-	{
-		for(i = priv->demux_fds_cnt; i < cnt; i++)
-		{
-			priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
-			MP_VERBOSE(priv, "FIX, OPEN fd(%d): %d\n", i, priv->demux_fds[i]);
-			if(priv->demux_fds[i] < 0)
-			{
-				MP_ERR(priv, "ERROR OPENING DEMUX 0: %d\n", errno);
-				return 0;
-			}
-			else
-				priv->demux_fds_cnt++;
-		}
-	}
+        sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", priv->card);
+        MP_VERBOSE(priv, "FIX %d -> %d\n", priv->demux_fds_cnt, cnt);
+        if(priv->demux_fds_cnt >= cnt)
+        {
+                for(i = priv->demux_fds_cnt-1; i >= cnt; i--)
+                {
+                        MP_VERBOSE(priv, "FIX, CLOSE fd(%d): %d\n", i, priv->demux_fds[i]);
+                        close(priv->demux_fds[i]);
+                }
+                priv->demux_fds_cnt = cnt;
+        }
+        else if(priv->demux_fds_cnt < cnt)
+        {
+                for(i = priv->demux_fds_cnt; i < cnt; i++)
+                {
+                        priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+                        MP_VERBOSE(priv, "FIX, OPEN fd(%d): %d\n", i, priv->demux_fds[i]);
+                        if(priv->demux_fds[i] < 0)
+                        {
+                                MP_ERR(priv, "ERROR OPENING DEMUX 0: %d\n", errno);
+                                return 0;
+                        }
+                        else
+                                priv->demux_fds_cnt++;
+                }
+        }
 
-	return 1;
+        return 1;
 }
 
 int dvb_set_ts_filt(dvb_priv_t *priv, int fd, uint16_t pid, dmx_pes_type_t pestype)
 {
-	int i;
-	struct dmx_pes_filter_params pesFilterParams;
+        int i;
+        struct dmx_pes_filter_params pesFilterParams;
 
-	pesFilterParams.pid     = pid;
-	pesFilterParams.input   = DMX_IN_FRONTEND;
-	pesFilterParams.output  = DMX_OUT_TS_TAP;
-	pesFilterParams.pes_type = pestype;
-	pesFilterParams.flags   = DMX_IMMEDIATE_START;
+        pesFilterParams.pid     = pid;
+        pesFilterParams.input   = DMX_IN_FRONTEND;
+        pesFilterParams.output  = DMX_OUT_TS_TAP;
+        pesFilterParams.pes_type = pestype;
+        pesFilterParams.flags   = DMX_IMMEDIATE_START;
 
-	errno = 0;
-	if ((i = ioctl(fd, DMX_SET_PES_FILTER, &pesFilterParams)) < 0)
-	{
-		MP_ERR(priv, "ERROR IN SETTING DMX_FILTER %i for fd %d: ERRNO: %d", pid, fd, errno);
-		return 0;
-	}
+        errno = 0;
+        if ((i = ioctl(fd, DMX_SET_PES_FILTER, &pesFilterParams)) < 0)
+        {
+                MP_ERR(priv, "ERROR IN SETTING DMX_FILTER %i for fd %d: ERRNO: %d", pid, fd, errno);
+                return 0;
+        }
 
-	MP_VERBOSE(priv, "SET PES FILTER ON PID %d to fd %d, RESULT: %d, ERRNO: %d\n", pid, fd, i, errno);
-	return 1;
+        MP_VERBOSE(priv, "SET PES FILTER ON PID %d to fd %d, RESULT: %d, ERRNO: %d\n", pid, fd, i, errno);
+        return 1;
 }
 
 
 int dvb_demux_stop(int fd)
 {
-	int i;
-	i = ioctl(fd, DMX_STOP);
+        int i;
+        i = ioctl(fd, DMX_STOP);
 
-	return i == 0;
+        return i == 0;
 }
 
 
 int dvb_demux_start(int fd)
 {
-	int i;
-	i = ioctl(fd, DMX_START);
+        int i;
+        i = ioctl(fd, DMX_START);
 
-	return i == 0;
+        return i == 0;
 }
 
 
 static void print_status(dvb_priv_t *priv, fe_status_t festatus)
 {
-	MP_VERBOSE(priv, "FE_STATUS:");
-	if (festatus & FE_HAS_SIGNAL) MP_VERBOSE(priv, " FE_HAS_SIGNAL");
-	if (festatus & FE_TIMEDOUT) MP_VERBOSE(priv, " FE_TIMEDOUT");
-	if (festatus & FE_HAS_LOCK) MP_VERBOSE(priv, " FE_HAS_LOCK");
-	if (festatus & FE_HAS_CARRIER) MP_VERBOSE(priv, " FE_HAS_CARRIER");
-	if (festatus & FE_HAS_VITERBI) MP_VERBOSE(priv, " FE_HAS_VITERBI");
-	if (festatus & FE_HAS_SYNC) MP_VERBOSE(priv, " FE_HAS_SYNC");
-	MP_VERBOSE(priv, "\n");
+        MP_VERBOSE(priv, "FE_STATUS:");
+        if (festatus & FE_HAS_SIGNAL) MP_VERBOSE(priv, " FE_HAS_SIGNAL");
+        if (festatus & FE_TIMEDOUT) MP_VERBOSE(priv, " FE_TIMEDOUT");
+        if (festatus & FE_HAS_LOCK) MP_VERBOSE(priv, " FE_HAS_LOCK");
+        if (festatus & FE_HAS_CARRIER) MP_VERBOSE(priv, " FE_HAS_CARRIER");
+        if (festatus & FE_HAS_VITERBI) MP_VERBOSE(priv, " FE_HAS_VITERBI");
+        if (festatus & FE_HAS_SYNC) MP_VERBOSE(priv, " FE_HAS_SYNC");
+        MP_VERBOSE(priv, "\n");
 }
 
 
 static int check_status(dvb_priv_t *priv, int fd_frontend, int tmout)
 {
-	int32_t strength;
-	fe_status_t festatus;
-	struct pollfd pfd[1];
-	int ok=0, locks=0;
-	time_t tm1, tm2;
+        int32_t strength;
+        fe_status_t festatus;
+        struct pollfd pfd[1];
+        int ok=0, locks=0;
+        time_t tm1, tm2;
 
-	pfd[0].fd = fd_frontend;
-	pfd[0].events = POLLPRI;
+        pfd[0].fd = fd_frontend;
+        pfd[0].events = POLLPRI;
 
-	MP_VERBOSE(priv, "Getting frontend status\n");
-	tm1 = tm2 = time((time_t*) NULL);
-	while(!ok)
-	{
-		festatus = 0;
-		if(poll(pfd,1,tmout*1000) > 0)
-		{
-			if (pfd[0].revents & POLLPRI)
-			{
-				if(ioctl(fd_frontend, FE_READ_STATUS, &festatus) >= 0)
-					if(festatus & FE_HAS_LOCK)
-						locks++;
-			}
-		}
-		usleep(10000);
-		tm2 = time((time_t*) NULL);
-		if((festatus & FE_TIMEDOUT) || (locks >= 2) || (tm2 - tm1 >= tmout))
-			ok = 1;
-	}
+        MP_VERBOSE(priv, "Getting frontend status\n");
+        tm1 = tm2 = time((time_t*) NULL);
+        while(!ok)
+        {
+                festatus = 0;
+                if(poll(pfd,1,tmout*1000) > 0)
+                {
+                        if (pfd[0].revents & POLLPRI)
+                        {
+                                if(ioctl(fd_frontend, FE_READ_STATUS, &festatus) >= 0)
+                                        if(festatus & FE_HAS_LOCK)
+                                                locks++;
+                        }
+                }
+                usleep(10000);
+                tm2 = time((time_t*) NULL);
+                if((festatus & FE_TIMEDOUT) || (locks >= 2) || (tm2 - tm1 >= tmout))
+                        ok = 1;
+        }
 
-	if(festatus & FE_HAS_LOCK)
-	{
-		strength=0;
-		if(ioctl(fd_frontend,FE_READ_BER,&strength) >= 0)
-		MP_VERBOSE(priv, "Bit error rate: %d\n",strength);
+        if(festatus & FE_HAS_LOCK)
+        {
+                strength=0;
+                if(ioctl(fd_frontend,FE_READ_BER,&strength) >= 0)
+                MP_VERBOSE(priv, "Bit error rate: %d\n",strength);
 
-		strength=0;
-		if(ioctl(fd_frontend,FE_READ_SIGNAL_STRENGTH,&strength) >= 0)
-		MP_VERBOSE(priv, "Signal strength: %d\n",strength);
+                strength=0;
+                if(ioctl(fd_frontend,FE_READ_SIGNAL_STRENGTH,&strength) >= 0)
+                MP_VERBOSE(priv, "Signal strength: %d\n",strength);
 
-		strength=0;
-		if(ioctl(fd_frontend,FE_READ_SNR,&strength) >= 0)
-		MP_VERBOSE(priv, "SNR: %d\n",strength);
+                strength=0;
+                if(ioctl(fd_frontend,FE_READ_SNR,&strength) >= 0)
+                MP_VERBOSE(priv, "SNR: %d\n",strength);
 
-		strength=0;
-		if(ioctl(fd_frontend,FE_READ_UNCORRECTED_BLOCKS,&strength) >= 0)
-		MP_VERBOSE(priv, "UNC: %d\n",strength);
+                strength=0;
+                if(ioctl(fd_frontend,FE_READ_UNCORRECTED_BLOCKS,&strength) >= 0)
+                MP_VERBOSE(priv, "UNC: %d\n",strength);
 
-		print_status(priv, festatus);
-	}
-	else
-	{
-		MP_ERR(priv, "Not able to lock to the signal on the given frequency, timeout: %d\n", tmout);
-		return -1;
-	}
-	return 0;
+                print_status(priv, festatus);
+        }
+        else
+        {
+                MP_ERR(priv, "Not able to lock to the signal on the given frequency, timeout: %d\n", tmout);
+                return -1;
+        }
+        return 0;
 }
 
 
@@ -280,7 +280,7 @@ struct diseqc_cmd {
 };
 
 static int diseqc_send_msg(int fd, fe_sec_voltage_t v, struct diseqc_cmd *cmd,
-		     fe_sec_tone_mode_t t, fe_sec_mini_cmd_t b)
+                     fe_sec_tone_mode_t t, fe_sec_mini_cmd_t b)
 {
    if(ioctl(fd, FE_SET_TONE, SEC_TONE_OFF) == -1)
     return -1;
@@ -314,14 +314,14 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
        0xf0 | (((sat_no * 4) & 0x0f) | (hi_lo ? 1 : 0) | (polv ? 0 : 2));
 
    return diseqc_send_msg(secfd, polv ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18,
-		   &cmd, hi_lo ? SEC_TONE_ON : SEC_TONE_OFF,
-		   (sat_no / 4) % 2 ? SEC_MINI_B : SEC_MINI_A);
+                   &cmd, hi_lo ? SEC_TONE_ON : SEC_TONE_OFF,
+                   (sat_no / 4) % 2 ? SEC_MINI_B : SEC_MINI_A);
 }
 
 static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
-	fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
-	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
-	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
+        fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
+        fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
+        fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
   int hi_lo = 0, dfd;
   struct dvb_frontend_parameters feparams;
@@ -423,18 +423,18 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int f
 
 
 int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
-		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
-		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
-		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
+                fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
+                fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
+                fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
-	int ris;
+        int ris;
 
-	MP_INFO(priv, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
+        MP_INFO(priv, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
 
-		ris = tune_it(priv, priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier, timeout);
+                ris = tune_it(priv, priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier, timeout);
 
-	if(ris != 0)
-		MP_INFO(priv, "dvb_tune, TUNING FAILED\n");
+        if(ris != 0)
+                MP_INFO(priv, "dvb_tune, TUNING FAILED\n");
 
-	return ris == 0;
+        return ris == 0;
 }

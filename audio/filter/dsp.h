@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef	MPLAYER_DSP_H
-#define	MPLAYER_DSP_H
+#ifndef MPLAYER_DSP_H
+#define MPLAYER_DSP_H
 
 /* Implementation of routines used for DSP */
 

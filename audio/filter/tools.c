@@ -115,9 +115,9 @@ int af_test_output(struct af_instance* af, struct mp_audio* out)
 float af_softclip(float a)
 {
     if (a >= M_PI/2)
-	return 1.0;
+        return 1.0;
     else if (a <= -M_PI/2)
-	return -1.0;
+        return -1.0;
     else
-	return sin(a);
+        return sin(a);
 }

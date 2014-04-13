@@ -44,7 +44,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
     if(fmt==vf->priv->fmt) {
         if (vf->priv->outfmt)
             fmt = vf->priv->outfmt;
-	return vf_next_query_format(vf,fmt);
+        return vf_next_query_format(vf,fmt);
     }
     return 0;
 }

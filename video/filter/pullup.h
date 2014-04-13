@@ -31,55 +31,55 @@
 
 struct pullup_buffer
 {
-	int lock[2];
-	unsigned char **planes;
+        int lock[2];
+        unsigned char **planes;
 };
 
 struct pullup_field
 {
-	int parity;
-	double pts;
-	struct pullup_buffer *buffer;
-	unsigned int flags;
-	int breaks;
-	int affinity;
-	int *diffs;
-	int *comb;
-	int *var;
-	struct pullup_field *prev, *next;
+        int parity;
+        double pts;
+        struct pullup_buffer *buffer;
+        unsigned int flags;
+        int breaks;
+        int affinity;
+        int *diffs;
+        int *comb;
+        int *var;
+        struct pullup_field *prev, *next;
 };
 
 struct pullup_frame
 {
-	int lock;
-	int length;
-	int parity;
-	double pts;
-	struct pullup_buffer **ifields, *ofields[2];
-	struct pullup_buffer *buffer;
+        int lock;
+        int length;
+        int parity;
+        double pts;
+        struct pullup_buffer **ifields, *ofields[2];
+        struct pullup_buffer *buffer;
 };
 
 struct pullup_context
 {
-	/* Public interface */
-	int format;
-	int nplanes;
-	int *bpp, *w, *h, *stride, *background;
-	unsigned int cpu;
-	int junk_left, junk_right, junk_top, junk_bottom;
-	int verbose;
-	int metric_plane;
-	int strict_breaks;
-	int strict_pairs;
-	/* Internal data */
-	struct pullup_field *first, *last, *head;
-	struct pullup_buffer *buffers;
-	int nbuffers;
-	int (*diff)(unsigned char *, unsigned char *, int);
-	int (*comb)(unsigned char *, unsigned char *, int);
-	int (*var)(unsigned char *, unsigned char *, int);
-	int metric_w, metric_h, metric_len, metric_offset;
-	struct pullup_frame *frame;
+        /* Public interface */
+        int format;
+        int nplanes;
+        int *bpp, *w, *h, *stride, *background;
+        unsigned int cpu;
+        int junk_left, junk_right, junk_top, junk_bottom;
+        int verbose;
+        int metric_plane;
+        int strict_breaks;
+        int strict_pairs;
+        /* Internal data */
+        struct pullup_field *first, *last, *head;
+        struct pullup_buffer *buffers;
+        int nbuffers;
+        int (*diff)(unsigned char *, unsigned char *, int);
+        int (*comb)(unsigned char *, unsigned char *, int);
+        int (*var)(unsigned char *, unsigned char *, int);
+        int metric_w, metric_h, metric_len, metric_offset;
+        struct pullup_frame *frame;
 };
 
 

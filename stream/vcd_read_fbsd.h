@@ -44,14 +44,14 @@
 #include "common/msg.h"
 
 //=================== VideoCD ==========================
-#define	CDROM_LEADOUT	0xAA
+#define CDROM_LEADOUT   0xAA
 
 typedef struct {
-	uint8_t sync            [12];
-	uint8_t header          [4];
-	uint8_t subheader       [8];
-	uint8_t data            [2324];
-	uint8_t spare           [4];
+        uint8_t sync            [12];
+        uint8_t header          [4];
+        uint8_t subheader       [8];
+        uint8_t data            [2324];
+        uint8_t spare           [4];
 } cdsector_t;
 
 #ifdef VCD_NETBSD

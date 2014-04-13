@@ -27,11 +27,11 @@
 static tvi_handle_t *tvi_init_dummy(struct mp_log *log, tv_param_t* tv_param);
 /* information about this file */
 const tvi_info_t tvi_info_dummy = {
-	tvi_init_dummy,
-	"NULL-TV",
-	"dummy",
-	"alex",
-	NULL
+        tvi_init_dummy,
+        "NULL-TV",
+        "dummy",
+        "alex",
+        NULL
 };
 
 /* private data's */
@@ -71,36 +71,36 @@ static int do_control(priv_t *priv, int cmd, void *arg)
 {
     switch(cmd)
     {
-	case TVI_CONTROL_IS_VIDEO:
-	    return TVI_CONTROL_TRUE;
-	case TVI_CONTROL_VID_GET_FORMAT:
-	    *(int *)arg = MP_FOURCC_YV12;
-	    return TVI_CONTROL_TRUE;
-	case TVI_CONTROL_VID_SET_FORMAT:
-	{
-//	    int req_fmt = *(int *)arg;
-	    int req_fmt = *(int *)arg;
-	    if (req_fmt != MP_FOURCC_YV12)
-		return TVI_CONTROL_FALSE;
-	    return TVI_CONTROL_TRUE;
-	}
-	case TVI_CONTROL_VID_SET_WIDTH:
-	    priv->width = *(int *)arg;
-	    return TVI_CONTROL_TRUE;
-	case TVI_CONTROL_VID_GET_WIDTH:
-	    *(int *)arg = priv->width;
-	    return TVI_CONTROL_TRUE;
-	case TVI_CONTROL_VID_SET_HEIGHT:
-	    priv->height = *(int *)arg;
-	    return TVI_CONTROL_TRUE;
-	case TVI_CONTROL_VID_GET_HEIGHT:
-	    *(int *)arg = priv->height;
-	    return TVI_CONTROL_TRUE;
-	case TVI_CONTROL_VID_CHK_WIDTH:
-	case TVI_CONTROL_VID_CHK_HEIGHT:
-	    return TVI_CONTROL_TRUE;
-	case TVI_CONTROL_TUN_SET_NORM:
-	    return TVI_CONTROL_TRUE;
+        case TVI_CONTROL_IS_VIDEO:
+            return TVI_CONTROL_TRUE;
+        case TVI_CONTROL_VID_GET_FORMAT:
+            *(int *)arg = MP_FOURCC_YV12;
+            return TVI_CONTROL_TRUE;
+        case TVI_CONTROL_VID_SET_FORMAT:
+        {
+//          int req_fmt = *(int *)arg;
+            int req_fmt = *(int *)arg;
+            if (req_fmt != MP_FOURCC_YV12)
+                return TVI_CONTROL_FALSE;
+            return TVI_CONTROL_TRUE;
+        }
+        case TVI_CONTROL_VID_SET_WIDTH:
+            priv->width = *(int *)arg;
+            return TVI_CONTROL_TRUE;
+        case TVI_CONTROL_VID_GET_WIDTH:
+            *(int *)arg = priv->width;
+            return TVI_CONTROL_TRUE;
+        case TVI_CONTROL_VID_SET_HEIGHT:
+            priv->height = *(int *)arg;
+            return TVI_CONTROL_TRUE;
+        case TVI_CONTROL_VID_GET_HEIGHT:
+            *(int *)arg = priv->height;
+            return TVI_CONTROL_TRUE;
+        case TVI_CONTROL_VID_CHK_WIDTH:
+        case TVI_CONTROL_VID_CHK_HEIGHT:
+            return TVI_CONTROL_TRUE;
+        case TVI_CONTROL_TUN_SET_NORM:
+            return TVI_CONTROL_TRUE;
     }
     return TVI_CONTROL_UNKNOWN;
 }

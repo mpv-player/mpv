@@ -79,22 +79,22 @@ int mp_input_joystick_init(struct input_ctx *ictx, struct mp_log *log, char *dev
     while((unsigned int)l < sizeof(struct js_event)) {
       int r = read(fd,((char*)&ev)+l,sizeof(struct js_event)-l);
       if(r < 0) {
-	if(errno == EINTR)
-	  continue;
-	else if(errno == EAGAIN) {
-	  initialized = 1;
-	  break;
-	}
-	MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
-	close(fd);
+        if(errno == EINTR)
+          continue;
+        else if(errno == EAGAIN) {
+          initialized = 1;
+          break;
+        }
+        MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
+        close(fd);
         talloc_free(ctx);
-	return -1;
+        return -1;
       }
       l += r;
     }
     if((unsigned int)l < sizeof(struct js_event)) {
       if(l > 0)
-	MP_WARN(ctx, "Joystick: We lose %d bytes of data\n",l);
+        MP_WARN(ctx, "Joystick: We lose %d bytes of data\n",l);
       break;
     }
     if(ev.type == JS_EVENT_BUTTON)
@@ -116,13 +116,13 @@ static int mp_input_joystick_read(void *pctx, int fd) {
     int r = read(fd,((char*)&ev)+l,sizeof(struct js_event)-l);
     if(r <= 0) {
       if(errno == EINTR)
-	continue;
+        continue;
       else if(errno == EAGAIN)
-	return MP_INPUT_NOTHING;
+        return MP_INPUT_NOTHING;
       if( r < 0)
-	MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
+        MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
       else
-	MP_ERR(ctx, "Error while reading joystick device: %s\n","EOF");
+        MP_ERR(ctx, "Error while reading joystick device: %s\n","EOF");
       return MP_INPUT_DEAD;
     }
     l += r;
@@ -140,14 +140,14 @@ static int mp_input_joystick_read(void *pctx, int fd) {
     if(ev.type == JS_EVENT_BUTTON) {
       int s = (ctx->btns >> ev.number) & 1;
       if(s == ev.value) // State is the same : ignore
-	return MP_INPUT_NOTHING;
+        return MP_INPUT_NOTHING;
     }
     if(ev.type == JS_EVENT_AXIS) {
       if( ( ctx->axis[ev.number] == 1 && ev.value > JOY_AXIS_DELTA) ||
-	  (ctx->axis[ev.number] == -1 && ev.value < -JOY_AXIS_DELTA) ||
-	  (ctx->axis[ev.number] == 0 && ev.value >= -JOY_AXIS_DELTA && ev.value <= JOY_AXIS_DELTA)
-	  ) // State is the same : ignore
-	return MP_INPUT_NOTHING;
+          (ctx->axis[ev.number] == -1 && ev.value < -JOY_AXIS_DELTA) ||
+          (ctx->axis[ev.number] == 0 && ev.value >= -JOY_AXIS_DELTA && ev.value <= JOY_AXIS_DELTA)
+          ) // State is the same : ignore
+        return MP_INPUT_NOTHING;
     }
   }
 

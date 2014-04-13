@@ -60,39 +60,39 @@ static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
    {
    volatile short out[4];
    __asm__ (
-	"movl $8, %%ecx \n\t"
-	"pxor %%mm4, %%mm4 \n\t"
-	"pxor %%mm7, %%mm7 \n\t"
+        "movl $8, %%ecx \n\t"
+        "pxor %%mm4, %%mm4 \n\t"
+        "pxor %%mm7, %%mm7 \n\t"
 
-	".align 4 \n\t"
-	"1: \n\t"
+        ".align 4 \n\t"
+        "1: \n\t"
 
-	"movq (%%"REG_S"), %%mm0 \n\t"
-	"movq (%%"REG_S"), %%mm2 \n\t"
-	"add %%"REG_a", %%"REG_S" \n\t"
-	"movq (%%"REG_D"), %%mm1 \n\t"
-	"add %%"REG_b", %%"REG_D" \n\t"
-	"psubusb %%mm1, %%mm2 \n\t"
-	"psubusb %%mm0, %%mm1 \n\t"
-	"movq %%mm2, %%mm0 \n\t"
-	"movq %%mm1, %%mm3 \n\t"
-	"punpcklbw %%mm7, %%mm0 \n\t"
-	"punpcklbw %%mm7, %%mm1 \n\t"
-	"punpckhbw %%mm7, %%mm2 \n\t"
-	"punpckhbw %%mm7, %%mm3 \n\t"
-	"paddw %%mm0, %%mm4 \n\t"
-	"paddw %%mm1, %%mm4 \n\t"
-	"paddw %%mm2, %%mm4 \n\t"
-	"paddw %%mm3, %%mm4 \n\t"
+        "movq (%%"REG_S"), %%mm0 \n\t"
+        "movq (%%"REG_S"), %%mm2 \n\t"
+        "add %%"REG_a", %%"REG_S" \n\t"
+        "movq (%%"REG_D"), %%mm1 \n\t"
+        "add %%"REG_b", %%"REG_D" \n\t"
+        "psubusb %%mm1, %%mm2 \n\t"
+        "psubusb %%mm0, %%mm1 \n\t"
+        "movq %%mm2, %%mm0 \n\t"
+        "movq %%mm1, %%mm3 \n\t"
+        "punpcklbw %%mm7, %%mm0 \n\t"
+        "punpcklbw %%mm7, %%mm1 \n\t"
+        "punpckhbw %%mm7, %%mm2 \n\t"
+        "punpckhbw %%mm7, %%mm3 \n\t"
+        "paddw %%mm0, %%mm4 \n\t"
+        "paddw %%mm1, %%mm4 \n\t"
+        "paddw %%mm2, %%mm4 \n\t"
+        "paddw %%mm3, %%mm4 \n\t"
 
-	"decl %%ecx \n\t"
-	"jnz 1b \n\t"
-	"movq %%mm4, (%%"REG_d") \n\t"
-	"emms \n\t"
-	:
-	: "S" (old), "D" (new), "a" ((long)os), "b" ((long)ns), "d" (out)
-	: "%ecx", "memory"
-	);
+        "decl %%ecx \n\t"
+        "jnz 1b \n\t"
+        "movq %%mm4, (%%"REG_d") \n\t"
+        "emms \n\t"
+        :
+        : "S" (old), "D" (new), "a" ((long)os), "b" ((long)ns), "d" (out)
+        : "%ecx", "memory"
+        );
    return out[0]+out[1]+out[2]+out[3];
    }
 #endif
@@ -103,7 +103,7 @@ static int diff_C(unsigned char *old, unsigned char *new, int os, int ns)
 
    for(y=8; y; y--, new+=ns, old+=os)
       for(x=8; x; x--)
-	 d+=abs(new[x]-old[x]);
+         d+=abs(new[x]-old[x]);
 
    return d;
    }
@@ -111,19 +111,19 @@ static int diff_C(unsigned char *old, unsigned char *new, int os, int ns)
 static int (*diff)(unsigned char *, unsigned char *, int, int);
 
 static int diff_plane(unsigned char *old, unsigned char *new,
-		      int w, int h, int os, int ns, int arg)
+                      int w, int h, int os, int ns, int arg)
    {
    int x, y, d, max=0, sum=0, n=0;
 
    for(y=0; y<h-7; y+=8)
       {
       for(x=0; x<w-7; x+=8)
-	 {
-	 d=diff(old+x+y*os, new+x+y*ns, os, ns);
-	 if(d>max) max=d;
-	 sum+=d;
-	 n++;
-	 }
+         {
+         d=diff(old+x+y*os, new+x+y*ns, os, ns);
+         if(d>max) max=d;
+         sum+=d;
+         n++;
+         }
       }
 
    return (sum+n*max)/2;
@@ -131,21 +131,21 @@ static int diff_plane(unsigned char *old, unsigned char *new,
 
 /*
 static unsigned int checksum_plane(unsigned char *p, unsigned char *z,
-				   int w, int h, int s, int zs, int arg)
+                                   int w, int h, int s, int zs, int arg)
    {
    unsigned int shift, sum;
    unsigned char *e;
 
    for(sum=0; h; h--, p+=s-w)
       for(e=p+w, shift=32; p<e;)
-	 sum^=(*p++)<<(shift=(shift-8)&31);
+         sum^=(*p++)<<(shift=(shift-8)&31);
 
    return sum;
    }
 */
 
 static unsigned int checksum_plane(unsigned char *p, unsigned char *z,
-				   int w, int h, int s, int zs, int arg)
+                                   int w, int h, int s, int zs, int arg)
    {
    unsigned int shift;
    uint32_t sum, t;
@@ -160,10 +160,10 @@ static unsigned int checksum_plane(unsigned char *p, unsigned char *z,
    for(sum=0; h; h--, p+=s-w)
       {
       for(shift=0, e=p+w; (size_t)p&(sizeof(wsum_t)-1) && p<e;)
-	 sum^=*p++<<(shift=(shift-8)&31);
+         sum^=*p++<<(shift=(shift-8)&31);
 
       for(wsum=0, e2=e-sizeof(wsum_t)+1; p<e2; p+=sizeof(wsum_t))
-	 wsum^=*(wsum_t *)p;
+         wsum^=*(wsum_t *)p;
 
 #if HAVE_FAST_64BIT
       t=be2me_32((uint32_t)(wsum>>32^wsum));
@@ -172,22 +172,22 @@ static unsigned int checksum_plane(unsigned char *p, unsigned char *z,
 #endif
 
       for(sum^=(t<<shift|t>>(32-shift)); p<e;)
-	 sum^=*p++<<(shift=(shift-8)&31);
+         sum^=*p++<<(shift=(shift-8)&31);
       }
 
    return sum;
    }
 
 static int deghost_plane(unsigned char *d, unsigned char *s,
-			 int w, int h, int ds, int ss, int threshold)
+                         int w, int h, int ds, int ss, int threshold)
    {
    int t;
    unsigned char *e;
 
    for(; h; h--, s+=ss-w, d+=ds-w)
       for(e=d+w; d<e; d++, s++)
-	 if(abs(*d-*s)>=threshold)
-	    *d=(t=(*d<<1)-*s)<0?0:t>255?255:t;
+         if(abs(*d-*s)>=threshold)
+            *d=(t=(*d<<1)-*s)<0?0:t>255?255:t;
 
    return 0;
    }
@@ -198,8 +198,8 @@ static int copyop(unsigned char *d, unsigned char *s, int bpl, int h, int dstrid
 }
 
 static int imgop(int(*planeop)(unsigned char *, unsigned char *,
-			       int, int, int, int, int),
-		 mp_image_t *dst, mp_image_t *src, int arg)
+                               int, int, int, int, int),
+                 mp_image_t *dst, mp_image_t *src, int arg)
    {
        int sum = 0;
        for (int p = 0; p < dst->num_planes; p++) {
@@ -220,7 +220,7 @@ static int imgop(int(*planeop)(unsigned char *, unsigned char *,
  */
 
 static int match(struct vf_priv_s *p, int *diffs,
-		 int phase1, int phase2, double *strength)
+                 int phase1, int phase2, double *strength)
    {
    const int pattern1[]={ -4,  1, 1, 1, 1 },
       pattern2[]={ -2, -3, 4, 4, -3 }, *pattern;
@@ -231,12 +231,12 @@ static int match(struct vf_priv_s *p, int *diffs,
    for(f=0; f<5; f++)
       {
       if(phase1<0 || phase2<0 || f==phase1 || f==phase2)
-	 {
-	 for(n=t[f]=0; n<5; n++)
-	    t[f]+=diffs[n]*pattern[(n-f+5)%5];
-	 }
+         {
+         for(n=t[f]=0; n<5; n++)
+            t[f]+=diffs[n]*pattern[(n-f+5)%5];
+         }
       else
-	 t[f]=INT_MIN;
+         t[f]=INT_MIN;
       }
 
    /* find the best match */
@@ -247,7 +247,7 @@ static int match(struct vf_priv_s *p, int *diffs,
       {
       /* the second best match */
       for(f=m?0:1, n=f+1; n<5; n++)
-	 if(n!=m && t[n]>t[f]) f=n;
+         if(n!=m && t[n]>t[f]) f=n;
 
       *strength=(t[m]>0?(double)(t[m]-t[f])/t[m]:0.0);
       }
@@ -278,70 +278,70 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
    switch(p->pass)
       {
       case 1:
-	 fprintf(p->file, "%08x %d\n",
-		 (unsigned int)imgop((void *)checksum_plane, mpi, 0, 0),
-		 p->frameno?imgop(diff_plane, dmpi, mpi, 0):0);
-	 break;
+         fprintf(p->file, "%08x %d\n",
+                 (unsigned int)imgop((void *)checksum_plane, mpi, 0, 0),
+                 p->frameno?imgop(diff_plane, dmpi, mpi, 0):0);
+         break;
 
       case 2:
-	 if(p->frameno/5>p->bcount)
-	    {
-	    MP_ERR(vf, "\n%s: Log file ends prematurely! "
-		   "Switching to one pass mode.\n", vf->info->name);
-	    p->pass=0;
-	    break;
-	    }
+         if(p->frameno/5>p->bcount)
+            {
+            MP_ERR(vf, "\n%s: Log file ends prematurely! "
+                   "Switching to one pass mode.\n", vf->info->name);
+            p->pass=0;
+            break;
+            }
 
-	 checksum=(unsigned int)imgop((void *)checksum_plane, mpi, 0, 0);
+         checksum=(unsigned int)imgop((void *)checksum_plane, mpi, 0, 0);
 
-	 if(checksum!=p->csdata[p->frameno])
-	    {
-	    for(f=0; f<100; f++)
-	       if(p->frameno+f<p->fcount && p->csdata[p->frameno+f]==checksum)
-		  break;
-	       else if(p->frameno-f>=0 && p->csdata[p->frameno-f]==checksum)
-		  {
-		  f=-f;
-		  break;
-		  }
+         if(checksum!=p->csdata[p->frameno])
+            {
+            for(f=0; f<100; f++)
+               if(p->frameno+f<p->fcount && p->csdata[p->frameno+f]==checksum)
+                  break;
+               else if(p->frameno-f>=0 && p->csdata[p->frameno-f]==checksum)
+                  {
+                  f=-f;
+                  break;
+                  }
 
-	    if(f<100)
-	       {
-	       MP_INFO(vf, "\n%s: Mismatch with pass-1: %+d frame(s).\n",
-		      vf->info->name, f);
+            if(f<100)
+               {
+               MP_INFO(vf, "\n%s: Mismatch with pass-1: %+d frame(s).\n",
+                      vf->info->name, f);
 
-	       p->frameno+=f;
-	       p->misscount=0;
-	       }
-	    else if(p->misscount++>=30)
-	       {
-	       MP_ERR(vf, "\n%s: Sync with pass-1 lost! "
-		      "Switching to one pass mode.\n", vf->info->name);
-	       p->pass=0;
-	       break;
-	       }
-	    }
+               p->frameno+=f;
+               p->misscount=0;
+               }
+            else if(p->misscount++>=30)
+               {
+               MP_ERR(vf, "\n%s: Sync with pass-1 lost! "
+                      "Switching to one pass mode.\n", vf->info->name);
+               p->pass=0;
+               break;
+               }
+            }
 
-	 n=(p->frameno)/5;
-	 if(n>=p->bcount) n=p->bcount-1;
+         n=(p->frameno)/5;
+         if(n>=p->bcount) n=p->bcount-1;
 
-	 newphase=p->bdata[n];
-	 break;
+         newphase=p->bdata[n];
+         break;
 
       default:
-	 if(p->frameno)
-	    {
-	    int *sump=p->sum+p->frameno%5,
-	       *histp=p->history+p->frameno%p->window;
+         if(p->frameno)
+            {
+            int *sump=p->sum+p->frameno%5,
+               *histp=p->history+p->frameno%p->window;
 
-	    *sump-=*histp;
-	    *sump+=(*histp=imgop(diff_plane, dmpi, mpi, 0));
-	    }
+            *sump-=*histp;
+            *sump+=(*histp=imgop(diff_plane, dmpi, mpi, 0));
+            }
 
-	 m=match(p, p->sum, -1, -1, &d);
+         m=match(p, p->sum, -1, -1, &d);
 
-	 if(d>=p->threshold)
-	    newphase=m;
+         if(d>=p->threshold)
+            newphase=m;
       }
 
    n=p->ocount++%5;
@@ -355,21 +355,21 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
    switch((p->frameno++-p->phase+10)%5)
       {
       case 0:
-	 imgop(copyop, dmpi, mpi, 0);
+         imgop(copyop, dmpi, mpi, 0);
          vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 1);
          talloc_free(mpi);
-	 return 0;
+         return 0;
 
       case 4:
-	 if(p->deghost>0)
-	    {
+         if(p->deghost>0)
+            {
             imgop(copyop, dmpi, mpi, 0);
             vf_make_out_image_writeable(vf, mpi);
 
-	    imgop(deghost_plane, mpi, dmpi, p->deghost);
+            imgop(deghost_plane, mpi, dmpi, p->deghost);
             mpi->pts = vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0);
-	    return mpi;
-	    }
+            return mpi;
+            }
       }
 
    imgop(copyop, dmpi, mpi, 0);
@@ -393,20 +393,20 @@ static int analyze(struct vf_instance *vf)
    while(fgets(lbuf, 256, p->file))
       {
       if(n>=bufsize-19)
-	 {
-	 bufsize=bufsize?bufsize*2:30000;
-	 if((bp=realloc(buf, bufsize*sizeof *buf))) buf=bp;
-	 if((cp=realloc(cbuf, bufsize*sizeof *cbuf))) cbuf=cp;
+         {
+         bufsize=bufsize?bufsize*2:30000;
+         if((bp=realloc(buf, bufsize*sizeof *buf))) buf=bp;
+         if((cp=realloc(cbuf, bufsize*sizeof *cbuf))) cbuf=cp;
 
-	 if(!bp || !cp)
-	    {
-	    MP_FATAL(vf, "%s: Not enough memory.\n",
-		   vf_info_divtc.name);
-	    free(buf);
-	    free(cbuf);
-	    return 0;
-	    }
-	 }
+         if(!bp || !cp)
+            {
+            MP_FATAL(vf, "%s: Not enough memory.\n",
+                   vf_info_divtc.name);
+            free(buf);
+            free(cbuf);
+            return 0;
+            }
+         }
       sscanf(lbuf, "%x %d", cbuf+n, buf+n);
       n++;
       }
@@ -414,7 +414,7 @@ static int analyze(struct vf_instance *vf)
    if(n <= 15)
       {
       MP_FATAL(vf, "%s: Empty 2-pass log file.\n",
-	     vf_info_divtc.name);
+             vf_info_divtc.name);
       free(buf);
       free(cbuf);
       return 0;
@@ -450,35 +450,35 @@ static int analyze(struct vf_instance *vf)
       double s0=0.0, s1=0.0;
 
       for(f=0; f<n; f+=5)
-	 {
-	 p->deghost=0; match(p, buf+f, -1, -1, &d); s0+=d;
-	 p->deghost=1; match(p, buf+f, -1, -1, &d); s1+=d;
-	 }
+         {
+         p->deghost=0; match(p, buf+f, -1, -1, &d); s0+=d;
+         p->deghost=1; match(p, buf+f, -1, -1, &d); s1+=d;
+         }
 
       p->deghost=s1>s0?deghost:0;
 
       MP_INFO(vf, "%s: Deghosting %-3s (relative pattern strength %+.2fdB).\n",
-	     vf_info_divtc.name,
-	     p->deghost?"ON":"OFF",
-	     10.0*log10(s1/s0));
+             vf_info_divtc.name,
+             p->deghost?"ON":"OFF",
+             10.0*log10(s1/s0));
       }
 
    /* analyze the data */
 
    for(f=0; f<5; f++)
       for(sum[f]=0, n=-15; n<20; n+=5)
-	 sum[f]+=buf[n+f];
+         sum[f]+=buf[n+f];
 
    for(f=0; f<b; f++)
       {
       m=match(p, sum, -1, -1, &d);
 
       if(d>=p->threshold)
-	 pbuf[f]=m;
+         pbuf[f]=m;
 
       if(f<b-1)
-	 for(n=0; n<5; n++)
-	    sum[n]=sum[n]-buf[5*(f-3)+n]+buf[5*(f+4)+n];
+         for(n=0; n<5; n++)
+            sum[n]=sum[n]-buf[5*(f-3)+n]+buf[5*(f+4)+n];
       }
 
    /* fill in the gaps */
@@ -490,7 +490,7 @@ static int analyze(struct vf_instance *vf)
       {
       free(buf-15);
       MP_FATAL(vf, "%s: No telecine pattern found!\n",
-	     vf_info_divtc.name);
+             vf_info_divtc.name);
       return 0;
       }
 
@@ -508,56 +508,56 @@ static int analyze(struct vf_instance *vf)
       for(n=f; pbuf[n]==-1; n++);
 
       if(pbuf[f-1]==pbuf[n])
-	 {
-	 /* just a gap */
-	 while(f<n) pbuf[f++]=pbuf[n];
-	 }
+         {
+         /* just a gap */
+         while(f<n) pbuf[f++]=pbuf[n];
+         }
       else
-	 {
-	 /* phase change, reanalyze the original data in the gap with zero
-	    threshold for only the two phases that appear at the ends */
+         {
+         /* phase change, reanalyze the original data in the gap with zero
+            threshold for only the two phases that appear at the ends */
 
-	 for(i=0; i<5; i++)
-	    for(sum[i]=0, j=5*f-15; j<5*f; j+=5)
-	       sum[i]+=buf[i+j];
+         for(i=0; i<5; i++)
+            for(sum[i]=0, j=5*f-15; j<5*f; j+=5)
+               sum[i]+=buf[i+j];
 
-	 for(i=f; i<n; i++)
-	    {
-	    pbuf[i]=match(p, sum, pbuf[f-1], pbuf[n], 0);
+         for(i=f; i<n; i++)
+            {
+            pbuf[i]=match(p, sum, pbuf[f-1], pbuf[n], 0);
 
-	    for(j=0; j<5; j++)
-	       sum[j]=sum[j]-buf[5*(i-3)+j]+buf[5*(i+4)+j];
-	    }
+            for(j=0; j<5; j++)
+               sum[j]=sum[j]-buf[5*(i-3)+j]+buf[5*(i+4)+j];
+            }
 
-	 /* estimate the transition point by dividing the gap
-	    in the same proportion as the number of matches of each kind */
+         /* estimate the transition point by dividing the gap
+            in the same proportion as the number of matches of each kind */
 
-	 for(i=f, m=f; i<n; i++)
-	    if(pbuf[i]==pbuf[f-1]) m++;
+         for(i=f, m=f; i<n; i++)
+            if(pbuf[i]==pbuf[f-1]) m++;
 
-	 /* find the transition of the right direction nearest to the
-	    estimated point */
+         /* find the transition of the right direction nearest to the
+            estimated point */
 
-	 if(m>f && m<n)
-	    {
-	    for(j=m; j>f; j--)
-	       if(pbuf[j-1]==pbuf[f-1] && pbuf[j]==pbuf[n]) break;
-	    for(s=m; s<n; s++)
-	       if(pbuf[s-1]==pbuf[f-1] && pbuf[s]==pbuf[n]) break;
+         if(m>f && m<n)
+            {
+            for(j=m; j>f; j--)
+               if(pbuf[j-1]==pbuf[f-1] && pbuf[j]==pbuf[n]) break;
+            for(s=m; s<n; s++)
+               if(pbuf[s-1]==pbuf[f-1] && pbuf[s]==pbuf[n]) break;
 
-	    m=(s-m<m-j)?s:j;
-	    }
+            m=(s-m<m-j)?s:j;
+            }
 
-	 /* and rewrite the data to allow only this one transition */
+         /* and rewrite the data to allow only this one transition */
 
-	 for(i=f; i<m; i++)
-	    pbuf[i]=pbuf[f-1];
+         for(i=f; i<m; i++)
+            pbuf[i]=pbuf[f-1];
 
-	 for(; i<n; i++)
-	    pbuf[i]=pbuf[n];
+         for(; i<n; i++)
+            pbuf[i]=pbuf[n];
 
-	 f=n;
-	 }
+         f=n;
+         }
       }
 
    free(buf-15);
@@ -573,7 +573,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
       case IMGFMT_422P: case IMGFMT_UYVY: case IMGFMT_BGR24:
       case IMGFMT_411P: case IMGFMT_YUYV: case IMGFMT_410P:
       case IMGFMT_420P: case IMGFMT_Y8:
-	 return vf_next_query_format(vf,fmt);
+         return vf_next_query_format(vf,fmt);
       }
 
    return 0;
@@ -617,27 +617,27 @@ static int vf_open(vf_instance_t *vf)
       switch(p->pass)
       {
       case 1:
-	 if(!(p->file=fopen(p->filename, "w")))
-	    {
-	    MP_FATAL(vf, "%s: Can't create file %s.\n", vf->info->name, p->filename);
-	    goto fail;
-	    }
+         if(!(p->file=fopen(p->filename, "w")))
+            {
+            MP_FATAL(vf, "%s: Can't create file %s.\n", vf->info->name, p->filename);
+            goto fail;
+            }
 
-	 break;
+         break;
 
       case 2:
-	 if(!(p->file=fopen(p->filename, "r")))
-	    {
-	    MP_FATAL(vf, "%s: Can't open file %s.\n", vf->info->name, p->filename);
-	    goto fail;
-	    }
+         if(!(p->file=fopen(p->filename, "r")))
+            {
+            MP_FATAL(vf, "%s: Can't open file %s.\n", vf->info->name, p->filename);
+            goto fail;
+            }
 
-	 if(!analyze(vf))
-	    goto fail;
+         if(!analyze(vf))
+            goto fail;
 
-	 fclose(p->file);
-	 p->file=0;
-	 break;
+         fclose(p->file);
+         p->file=0;
+         break;
       }
 
    if(!(p->history=calloc(sizeof *p->history, p->window)))

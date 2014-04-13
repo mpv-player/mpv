@@ -33,7 +33,7 @@ struct priv {
 
 static void smb_auth_fn(const char *server, const char *share,
              char *workgroup, int wgmaxlen, char *username, int unmaxlen,
-	     char *password, int pwmaxlen)
+             char *password, int pwmaxlen)
 {
   strncpy(workgroup, "LAN", wgmaxlen - 1);
 }

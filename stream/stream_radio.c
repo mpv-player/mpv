@@ -633,7 +633,7 @@ int radio_get_freq(struct stream *stream, float *frequency){
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
 
     if (!frequency)
-	return 0;
+        return 0;
     if (get_frequency(priv,frequency)!=STREAM_OK){
         return 0;
     }

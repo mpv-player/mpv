@@ -24,38 +24,38 @@
 #define HRTF_MIX_MATRIX2CH 2
 
 /* Amplitude scaling factors */
-#define M17_0DB		0.1414213562
-#define M9_03DB		0.3535533906
-#define M6_99DB		0.4472135955
-#define M4_77DB		0.5773502692
-#define M3_01DB		0.7071067812
-#define M1_76DB		0.8164965809
+#define M17_0DB         0.1414213562
+#define M9_03DB         0.3535533906
+#define M6_99DB         0.4472135955
+#define M4_77DB         0.5773502692
+#define M3_01DB         0.7071067812
+#define M1_76DB         0.8164965809
 
-#define DELAYBUFLEN	1024	/* Length of the delay buffer */
-#define HRTFFILTLEN	64	/* HRTF filter length */
-#define IRTHRESH	0.001	/* Impulse response pruning thresh. */
+#define DELAYBUFLEN     1024    /* Length of the delay buffer */
+#define HRTFFILTLEN     64      /* HRTF filter length */
+#define IRTHRESH        0.001   /* Impulse response pruning thresh. */
 
-#define AMPLNORM	M6_99DB	/* Overall amplitude renormalization */
+#define AMPLNORM        M6_99DB /* Overall amplitude renormalization */
 
-#define BASSFILTFREQ	180	/* Bass compensation filter cut (Hz) */
-#define BASSFILTLEN	193	/* Bass compensation filter length */
-#define BASSGAIN	M_SQRT2	/* Bass compensation gain */
-#define BASSCROSS	0.35	/* Bass cross talk */
+#define BASSFILTFREQ    180     /* Bass compensation filter cut (Hz) */
+#define BASSFILTLEN     193     /* Bass compensation filter length */
+#define BASSGAIN        M_SQRT2 /* Bass compensation gain */
+#define BASSCROSS       0.35    /* Bass cross talk */
 
-#define FWRDURATION	240	/* FWR average duration (samples) */
-#define MATREARDELAY	720	/* Matrix mode rear delay (samples) */
+#define FWRDURATION     240     /* FWR average duration (samples) */
+#define MATREARDELAY    720     /* Matrix mode rear delay (samples) */
 
-#define MATAGCTRIG	8.0	/* (Fuzzy) AGC trigger */
-#define MATAGCDECAY	1.0	/* AGC baseline decay rate (1/samp.) */
-#define MATAGCLOCK	0.2	/* AGC range (around 1) where the
-				   matrix behaves passively */
-#define MATCOMPGAIN	0.37	/* Cross talk compensation gain,
-				   0.50 - 0.55 is full cancellation. */
+#define MATAGCTRIG      8.0     /* (Fuzzy) AGC trigger */
+#define MATAGCDECAY     1.0     /* AGC baseline decay rate (1/samp.) */
+#define MATAGCLOCK      0.2     /* AGC range (around 1) where the
+                                   matrix behaves passively */
+#define MATCOMPGAIN     0.37    /* Cross talk compensation gain,
+                                   0.50 - 0.55 is full cancellation. */
 
-#define CFECHODELAY	360	/* Center front echo delay (samples) */
-#define CFECHOAMPL	M17_0DB	/* Center front echo amplitude */
+#define CFECHODELAY     360     /* Center front echo delay (samples) */
+#define CFECHOAMPL      M17_0DB /* Center front echo amplitude */
 
-#define STEXPAND2	0.07	/* Stereo expansion / 2 */
+#define STEXPAND2       0.07    /* Stereo expansion / 2 */
 
 /* Head related impulse response (HRIR) derived from KEMAR measurement
    data by Bill Gardner <billg@media.mit.edu> and Keith Martin

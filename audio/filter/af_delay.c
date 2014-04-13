@@ -37,10 +37,10 @@
 // Data for specific instances of this filter
 typedef struct af_delay_s
 {
-  void* q[AF_NCH];   	// Circular queues used for delaying audio signal
-  int 	wi[AF_NCH];  	// Write index
-  int 	ri;		// Read index
-  float	d[AF_NCH];   	// Delay [ms]
+  void* q[AF_NCH];      // Circular queues used for delaying audio signal
+  int   wi[AF_NCH];     // Write index
+  int   ri;             // Read index
+  float d[AF_NCH];      // Delay [ms]
   char *delaystr;
 }af_delay_t;
 
@@ -69,7 +69,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     for(i=0;i<af->data->nch;i++){
       s->q[i] = calloc(L,af->data->bps);
       if(NULL == s->q[i])
-	MP_FATAL(af, "Out of memory\n");
+        MP_FATAL(af, "Out of memory\n");
     }
 
     if(AF_OK != af_from_ms(AF_NCH, s->d, s->wi, af->data->rate, 0.0, 1000.0))
@@ -99,12 +99,12 @@ static void uninit(struct af_instance* af)
 // Filter data through filter
 static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 {
-  struct mp_audio*   	c   = data;	 // Current working data
-  af_delay_t*  	s   = af->priv; // Setup for this instance
-  int 		nch = c->nch;	 // Number of channels
-  int		len = mp_audio_psize(c)/c->bps; // Number of sample in data chunk
-  int		ri  = 0;
-  int 		ch,i;
+  struct mp_audio*      c   = data;      // Current working data
+  af_delay_t*   s   = af->priv; // Setup for this instance
+  int           nch = c->nch;    // Number of channels
+  int           len = mp_audio_psize(c)/c->bps; // Number of sample in data chunk
+  int           ri  = 0;
+  int           ch,i;
   for(ch=0;ch<nch;ch++){
     switch(c->bps){
     case 1:{
@@ -113,10 +113,10 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
       int wi = s->wi[ch];
       ri = s->ri;
       for(i=ch;i<len;i+=nch){
-	q[wi] = a[i];
-	a[i]  = q[ri];
-	UPDATEQI(wi);
-	UPDATEQI(ri);
+        q[wi] = a[i];
+        a[i]  = q[ri];
+        UPDATEQI(wi);
+        UPDATEQI(ri);
       }
       s->wi[ch] = wi;
       break;
@@ -127,10 +127,10 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
       int wi = s->wi[ch];
       ri = s->ri;
       for(i=ch;i<len;i+=nch){
-	q[wi] = a[i];
-	a[i]  = q[ri];
-	UPDATEQI(wi);
-	UPDATEQI(ri);
+        q[wi] = a[i];
+        a[i]  = q[ri];
+        UPDATEQI(wi);
+        UPDATEQI(ri);
       }
       s->wi[ch] = wi;
       break;
@@ -141,10 +141,10 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
       int wi = s->wi[ch];
       ri = s->ri;
       for(i=ch;i<len;i+=nch){
-	q[wi] = a[i];
-	a[i]  = q[ri];
-	UPDATEQI(wi);
-	UPDATEQI(ri);
+        q[wi] = a[i];
+        a[i]  = q[ri];
+        UPDATEQI(wi);
+        UPDATEQI(ri);
       }
       s->wi[ch] = wi;
       break;

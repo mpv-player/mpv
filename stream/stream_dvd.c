@@ -47,7 +47,7 @@
 static char* dvd_device_current;
 int dvd_angle=1;
 
-#define	LIBDVDREAD_VERSION(maj,min,micro)	((maj)*10000 + (min)*100 + (micro))
+#define LIBDVDREAD_VERSION(maj,min,micro)       ((maj)*10000 + (min)*100 + (micro))
 /*
  * Try to autodetect the libdvd-0.9.0 library
  * (0.9.0 removed the <dvdread/dvd_udf.h> header, and moved the two defines
@@ -56,9 +56,9 @@ int dvd_angle=1;
  */
 #ifndef DVDREAD_VERSION
 #if defined(DVD_VIDEO_LB_LEN) && defined(MAX_UDF_FILE_NAME_LEN)
-#define	DVDREAD_VERSION	LIBDVDREAD_VERSION(0,9,0)
+#define DVDREAD_VERSION LIBDVDREAD_VERSION(0,9,0)
 #else
-#define	DVDREAD_VERSION	LIBDVDREAD_VERSION(0,8,0)
+#define DVDREAD_VERSION LIBDVDREAD_VERSION(0,8,0)
 #endif
 #endif
 
@@ -266,7 +266,7 @@ read_next:
 
       if(d->angle_seek) {
         int i,skip=0;
-        for(i=0;i<9;i++)	// check if all values zero:
+        for(i=0;i<9;i++)        // check if all values zero:
           if((skip=d->dsi_pack.sml_agli.data[i].address)!=0) break;
         if(skip && skip!=0x7fffffff) {
           // sml_agli table has valid data (at least one non-zero):

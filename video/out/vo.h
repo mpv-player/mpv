@@ -120,13 +120,13 @@ struct voctrl_screenshot_args {
 
 #define VO_TRUE         true
 #define VO_FALSE        false
-#define VO_ERROR	-1
-#define VO_NOTAVAIL	-2
-#define VO_NOTIMPL	-3
+#define VO_ERROR        -1
+#define VO_NOTAVAIL     -2
+#define VO_NOTIMPL      -3
 
-#define VOFLAG_FLIPPING		0x08
-#define VOFLAG_HIDDEN		0x10  //< Use to create a hidden window
-#define VOFLAG_STEREO		0x20  //< Use to create a stereo-capable window
+#define VOFLAG_FLIPPING         0x08
+#define VOFLAG_HIDDEN           0x10  //< Use to create a hidden window
+#define VOFLAG_STEREO           0x20  //< Use to create a stereo-capable window
 #define VOFLAG_GL_DEBUG         0x40  // Hint to request debug OpenGL context
 #define VOFLAG_ALPHA            0x80  // Hint to request alpha framebuffer
 

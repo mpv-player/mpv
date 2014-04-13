@@ -70,7 +70,7 @@ static inline void fill_blank_frame(char* buffer,int len,int fmt){
             buffer[i+1]=0;
             buffer[i+2]=0;
             buffer[i+3]=0;
-	}
+        }
         break;
     case MP_FOURCC_YUY2:
         for(i=0;i<len;i+=4){
@@ -78,13 +78,13 @@ static inline void fill_blank_frame(char* buffer,int len,int fmt){
             buffer[i+1]=0xFF;
             buffer[i+2]=0;
             buffer[i+3]=0;
-	}
+        }
         break;
     case MP_FOURCC_MJPEG:
         /*
-	This is compressed format. I don't know yet how to fill such frame with blue color.
-	Keeping frame unchanged.
-	*/
+        This is compressed format. I don't know yet how to fill such frame with blue color.
+        Keeping frame unchanged.
+        */
         break;
     default:
         memset(buffer,0xC0,len);

@@ -34,8 +34,8 @@
 #include "vf_lavfi.h"
 
 enum mode { PROGRESSIVE, TOP_FIRST, BOTTOM_FIRST,
-	    TOP_FIRST_ANALYZE, BOTTOM_FIRST_ANALYZE,
-	    ANALYZE, FULL_ANALYZE, AUTO, AUTO_ANALYZE };
+            TOP_FIRST_ANALYZE, BOTTOM_FIRST_ANALYZE,
+            ANALYZE, FULL_ANALYZE, AUTO, AUTO_ANALYZE };
 
 #define fixed_mode(p) ((p)<=BOTTOM_FIRST)
 
@@ -53,8 +53,8 @@ struct vf_priv_s
  */
 
 static void do_plane(unsigned char *to, unsigned char *from,
-		     int w, int h, int ts, int fs,
-		     unsigned char **bufp, enum mode mode)
+                     int w, int h, int ts, int fs,
+                     unsigned char **bufp, enum mode mode)
    {
    unsigned char *buf, *end;
    int top;
@@ -90,8 +90,8 @@ static void do_plane(unsigned char *to, unsigned char *from,
 
 static enum mode analyze_plane(struct vf_instance *vf,
                                unsigned char *old, unsigned char *new,
-			       int w, int h, int os, int ns, enum mode mode,
-			       int unused, int fields)
+                               int w, int h, int os, int ns, enum mode mode,
+                               int unused, int fields)
    {
    double bdiff, pdiff, tdiff, scale;
    int bdif, tdif, pdif;
@@ -100,10 +100,10 @@ static enum mode analyze_plane(struct vf_instance *vf,
 
    if(mode==AUTO)
       mode=fields&MP_IMGFIELD_ORDERED?fields&MP_IMGFIELD_TOP_FIRST?
-	 TOP_FIRST:BOTTOM_FIRST:PROGRESSIVE;
+         TOP_FIRST:BOTTOM_FIRST:PROGRESSIVE;
    else if(mode==AUTO_ANALYZE)
       mode=fields&MP_IMGFIELD_ORDERED?fields&MP_IMGFIELD_TOP_FIRST?
-	 TOP_FIRST_ANALYZE:BOTTOM_FIRST_ANALYZE:FULL_ANALYZE;
+         TOP_FIRST_ANALYZE:BOTTOM_FIRST_ANALYZE:FULL_ANALYZE;
 
    if(fixed_mode(mode))
       bdiff=pdiff=tdiff=65536.0;
@@ -112,62 +112,62 @@ static enum mode analyze_plane(struct vf_instance *vf,
       bdiff=pdiff=tdiff=0.0;
 
       for(end=new+(h-2)*ns, new+=ns, old+=os, top=0;
-	  new<end; new+=ns-w, old+=os-w, top^=1)
-	 {
-	 pdif=tdif=bdif=0;
+          new<end; new+=ns-w, old+=os-w, top^=1)
+         {
+         pdif=tdif=bdif=0;
 
-	 switch(mode)
-	    {
-	    case TOP_FIRST_ANALYZE:
-	       if(top)
-		  for(rend=new+w; new<rend; new++, old++)
-		     pdif+=diff(new, ns, new, ns),
-		     tdif+=diff(new, ns, old, os);
-	       else
-		  for(rend=new+w; new<rend; new++, old++)
-		     pdif+=diff(new, ns, new, ns),
-		     tdif+=diff(old, os, new, ns);
-	       break;
-
-	    case BOTTOM_FIRST_ANALYZE:
-	       if(top)
-		  for(rend=new+w; new<rend; new++, old++)
-		     pdif+=diff(new, ns, new, ns),
-		     bdif+=diff(old, os, new, ns);
-	       else
-		  for(rend=new+w; new<rend; new++, old++)
-		     pdif+=diff(new, ns, new, ns),
-		     bdif+=diff(new, ns, old, os);
-	       break;
-
-	    case ANALYZE:
-	       if(top)
-		  for(rend=new+w; new<rend; new++, old++)
-		     tdif+=diff(new, ns, old, os),
-		     bdif+=diff(old, os, new, ns);
-	       else
-		  for(rend=new+w; new<rend; new++, old++)
-		     bdif+=diff(new, ns, old, os),
+         switch(mode)
+            {
+            case TOP_FIRST_ANALYZE:
+               if(top)
+                  for(rend=new+w; new<rend; new++, old++)
+                     pdif+=diff(new, ns, new, ns),
+                     tdif+=diff(new, ns, old, os);
+               else
+                  for(rend=new+w; new<rend; new++, old++)
+                     pdif+=diff(new, ns, new, ns),
                      tdif+=diff(old, os, new, ns);
-	       break;
+               break;
 
-	    default: /* FULL_ANALYZE */
-	       if(top)
-		  for(rend=new+w; new<rend; new++, old++)
-		     pdif+=diff(new, ns, new, ns),
-		     tdif+=diff(new, ns, old, os),
-		     bdif+=diff(old, os, new, ns);
-	       else
-		  for(rend=new+w; new<rend; new++, old++)
-		     pdif+=diff(new, ns, new, ns),
-		     bdif+=diff(new, ns, old, os),
-		     tdif+=diff(old, os, new, ns);
-	    }
+            case BOTTOM_FIRST_ANALYZE:
+               if(top)
+                  for(rend=new+w; new<rend; new++, old++)
+                     pdif+=diff(new, ns, new, ns),
+                     bdif+=diff(old, os, new, ns);
+               else
+                  for(rend=new+w; new<rend; new++, old++)
+                     pdif+=diff(new, ns, new, ns),
+                     bdif+=diff(new, ns, old, os);
+               break;
 
-	 pdiff+=(double)pdif;
-	 tdiff+=(double)tdif;
-	 bdiff+=(double)bdif;
-	 }
+            case ANALYZE:
+               if(top)
+                  for(rend=new+w; new<rend; new++, old++)
+                     tdif+=diff(new, ns, old, os),
+                     bdif+=diff(old, os, new, ns);
+               else
+                  for(rend=new+w; new<rend; new++, old++)
+                     bdif+=diff(new, ns, old, os),
+                     tdif+=diff(old, os, new, ns);
+               break;
+
+            default: /* FULL_ANALYZE */
+               if(top)
+                  for(rend=new+w; new<rend; new++, old++)
+                     pdif+=diff(new, ns, new, ns),
+                     tdif+=diff(new, ns, old, os),
+                     bdif+=diff(old, os, new, ns);
+               else
+                  for(rend=new+w; new<rend; new++, old++)
+                     pdif+=diff(new, ns, new, ns),
+                     bdif+=diff(new, ns, old, os),
+                     tdif+=diff(old, os, new, ns);
+            }
+
+         pdiff+=(double)pdif;
+         tdiff+=(double)tdif;
+         bdiff+=(double)bdif;
+         }
 
       scale=1.0/(w*(h-3))/25.0;
       pdiff*=scale;
@@ -175,18 +175,18 @@ static enum mode analyze_plane(struct vf_instance *vf,
       bdiff*=scale;
 
       if(mode==TOP_FIRST_ANALYZE)
-	 bdiff=65536.0;
+         bdiff=65536.0;
       else if(mode==BOTTOM_FIRST_ANALYZE)
-	 tdiff=65536.0;
+         tdiff=65536.0;
       else if(mode==ANALYZE)
-	 pdiff=65536.0;
+         pdiff=65536.0;
 
       if(bdiff<pdiff && bdiff<tdiff)
-	 mode=BOTTOM_FIRST;
+         mode=BOTTOM_FIRST;
       else if(tdiff<pdiff && tdiff<bdiff)
-	 mode=TOP_FIRST;
+         mode=TOP_FIRST;
       else
-	 mode=PROGRESSIVE;
+         mode=PROGRESSIVE;
       }
 
       MP_INFO(vf, "%c", mode==BOTTOM_FIRST?'b':mode==TOP_FIRST?'t':'p');
@@ -215,8 +215,8 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
       mode=PROGRESSIVE;
    else
       mode=analyze_plane(vf, vf->priv->buf[0], mpi->planes[0],
-			 pw[0], dmpi->h, pw[0], mpi->stride[0], mode,
-			 vf->priv->verbose, mpi->fields);
+                         pw[0], dmpi->h, pw[0], mpi->stride[0], mode,
+                         vf->priv->verbose, mpi->fields);
 
    for (int p = 0; p < mpi->num_planes; p++) {
       do_plane(dmpi->planes[p], mpi->planes[p], pw[p], dmpi->plane_h[p],

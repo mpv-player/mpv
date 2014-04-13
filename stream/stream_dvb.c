@@ -63,7 +63,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 
 static dvb_priv_t stream_defaults = {
-	.cfg_prog = "",
+        .cfg_prog = "",
         .cfg_card = 1,
         .cfg_timeout = 30,
 };
@@ -78,11 +78,11 @@ static const m_option_t stream_params[] = {
 };
 
 const m_option_t dvbin_opts_conf[] = {
-	{"prog", &stream_defaults.cfg_prog, CONF_TYPE_STRING, 0, 0 ,0, NULL},
-	{"card", &stream_defaults.cfg_card, CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
-	{"timeout",  &stream_defaults.cfg_timeout,  CONF_TYPE_INT, M_OPT_RANGE, 1, 30, NULL},
+        {"prog", &stream_defaults.cfg_prog, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+        {"card", &stream_defaults.cfg_card, CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
+        {"timeout",  &stream_defaults.cfg_timeout,  CONF_TYPE_INT, M_OPT_RANGE, 1, 30, NULL},
 
-	{NULL, NULL, 0, 0, 0, 0, NULL}
+        {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 
@@ -90,469 +90,469 @@ const m_option_t dvbin_opts_conf[] = {
 
 static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, int type)
 {
-	dvb_channels_list  *list;
-	FILE *f;
-	char line[CHANNEL_LINE_LEN], *colon;
+        dvb_channels_list  *list;
+        FILE *f;
+        char line[CHANNEL_LINE_LEN], *colon;
 
         if (!filename)
             return NULL;
 
-	int fields, cnt, pcnt, k;
-	int has8192, has0;
-	dvb_channel_t *ptr, *tmp, chn;
-	char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256];
-	const char *cbl_conf = "%d:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
-	const char *sat_conf = "%d:%c:%d:%d:%255[^:]:%255[^:]\n";
-	const char *ter_conf = "%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
-	const char *atsc_conf = "%d:%255[^:]:%255[^:]:%255[^:]\n";
+        int fields, cnt, pcnt, k;
+        int has8192, has0;
+        dvb_channel_t *ptr, *tmp, chn;
+        char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256];
+        const char *cbl_conf = "%d:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
+        const char *sat_conf = "%d:%c:%d:%d:%255[^:]:%255[^:]\n";
+        const char *ter_conf = "%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
+        const char *atsc_conf = "%d:%255[^:]:%255[^:]:%255[^:]\n";
 
-	mp_verbose(log, "CONFIG_READ FILE: %s, type: %d\n", filename, type);
-	if((f=fopen(filename, "r"))==NULL)
-	{
-		mp_fatal(log, "CAN'T READ CONFIG FILE %s\n", filename);
-		return NULL;
-	}
+        mp_verbose(log, "CONFIG_READ FILE: %s, type: %d\n", filename, type);
+        if((f=fopen(filename, "r"))==NULL)
+        {
+                mp_fatal(log, "CAN'T READ CONFIG FILE %s\n", filename);
+                return NULL;
+        }
 
-	list = malloc(sizeof(dvb_channels_list));
-	if(list == NULL)
-	{
-		fclose(f);
-		mp_verbose(log, "DVB_GET_CHANNELS: couldn't malloc enough memory\n");
-		return NULL;
-	}
+        list = malloc(sizeof(dvb_channels_list));
+        if(list == NULL)
+        {
+                fclose(f);
+                mp_verbose(log, "DVB_GET_CHANNELS: couldn't malloc enough memory\n");
+                return NULL;
+        }
 
-	ptr = &chn;
-	list->NUM_CHANNELS = 0;
-	list->channels = NULL;
-	while(! feof(f))
-	{
-		if( fgets(line, CHANNEL_LINE_LEN, f) == NULL )
-			continue;
+        ptr = &chn;
+        list->NUM_CHANNELS = 0;
+        list->channels = NULL;
+        while(! feof(f))
+        {
+                if( fgets(line, CHANNEL_LINE_LEN, f) == NULL )
+                        continue;
 
-		if((line[0] == '#') || (strlen(line) == 0))
-			continue;
+                if((line[0] == '#') || (strlen(line) == 0))
+                        continue;
 
-		colon = strchr(line, ':');
-		if(colon)
-		{
-			k = colon - line;
-			if(!k)
-				continue;
-			ptr->name = malloc(k+1);
-			if(! ptr->name)
-				continue;
-			av_strlcpy(ptr->name, line, k+1);
-		}
-		else
-			continue;
-		k++;
-		apid_str[0] = vpid_str[0] = 0;
-		ptr->pids_cnt = 0;
-		ptr->freq = 0;
-		if(type == TUNER_TER)
-		{
-			fields = sscanf(&line[k], ter_conf,
-				&ptr->freq, inv, bw, cr, tmp_lcr, mod,
-				transm, gi, tmp_hier, vpid_str, apid_str);
-			mp_verbose(log, "TER, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d",
-				list->NUM_CHANNELS, fields, ptr->name, ptr->freq);
-		}
-		else if(type == TUNER_CBL)
-		{
-			fields = sscanf(&line[k], cbl_conf,
-				&ptr->freq, inv, &ptr->srate,
-				cr, mod, vpid_str, apid_str);
-			mp_verbose(log, "CBL, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d",
-				list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate);
-		}
+                colon = strchr(line, ':');
+                if(colon)
+                {
+                        k = colon - line;
+                        if(!k)
+                                continue;
+                        ptr->name = malloc(k+1);
+                        if(! ptr->name)
+                                continue;
+                        av_strlcpy(ptr->name, line, k+1);
+                }
+                else
+                        continue;
+                k++;
+                apid_str[0] = vpid_str[0] = 0;
+                ptr->pids_cnt = 0;
+                ptr->freq = 0;
+                if(type == TUNER_TER)
+                {
+                        fields = sscanf(&line[k], ter_conf,
+                                &ptr->freq, inv, bw, cr, tmp_lcr, mod,
+                                transm, gi, tmp_hier, vpid_str, apid_str);
+                        mp_verbose(log, "TER, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d",
+                                list->NUM_CHANNELS, fields, ptr->name, ptr->freq);
+                }
+                else if(type == TUNER_CBL)
+                {
+                        fields = sscanf(&line[k], cbl_conf,
+                                &ptr->freq, inv, &ptr->srate,
+                                cr, mod, vpid_str, apid_str);
+                        mp_verbose(log, "CBL, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d",
+                                list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate);
+                }
 #ifdef DVB_ATSC
-		else if(type == TUNER_ATSC)
-		{
-			fields = sscanf(&line[k], atsc_conf,
-				 &ptr->freq, mod, vpid_str, apid_str);
-			mp_verbose(log, "ATSC, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d\n",
-				list->NUM_CHANNELS, fields, ptr->name, ptr->freq);
-		}
+                else if(type == TUNER_ATSC)
+                {
+                        fields = sscanf(&line[k], atsc_conf,
+                                 &ptr->freq, mod, vpid_str, apid_str);
+                        mp_verbose(log, "ATSC, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d\n",
+                                list->NUM_CHANNELS, fields, ptr->name, ptr->freq);
+                }
 #endif
-		else //SATELLITE
-		{
-			fields = sscanf(&line[k], sat_conf,
-				&ptr->freq, &ptr->pol, &ptr->diseqc, &ptr->srate, vpid_str, apid_str);
-			ptr->pol = toupper(ptr->pol);
-			ptr->freq *=  1000UL;
-			ptr->srate *=  1000UL;
-			ptr->tone = -1;
-			ptr->inv = INVERSION_AUTO;
-			ptr->cr = FEC_AUTO;
-			if((ptr->diseqc > 4) || (ptr->diseqc < 0))
-			    continue;
-			if(ptr->diseqc > 0)
-			    ptr->diseqc--;
-			mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d",
-				list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->diseqc);
-		}
+                else //SATELLITE
+                {
+                        fields = sscanf(&line[k], sat_conf,
+                                &ptr->freq, &ptr->pol, &ptr->diseqc, &ptr->srate, vpid_str, apid_str);
+                        ptr->pol = toupper(ptr->pol);
+                        ptr->freq *=  1000UL;
+                        ptr->srate *=  1000UL;
+                        ptr->tone = -1;
+                        ptr->inv = INVERSION_AUTO;
+                        ptr->cr = FEC_AUTO;
+                        if((ptr->diseqc > 4) || (ptr->diseqc < 0))
+                            continue;
+                        if(ptr->diseqc > 0)
+                            ptr->diseqc--;
+                        mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d",
+                                list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->diseqc);
+                }
 
-		if(vpid_str[0])
-		{
-			pcnt = sscanf(vpid_str, "%d+%d+%d+%d+%d+%d+%d", &ptr->pids[0], &ptr->pids[1], &ptr->pids[2], &ptr->pids[3],
-				&ptr->pids[4], &ptr->pids[5], &ptr->pids[6]);
-			if(pcnt > 0)
-			{
-				ptr->pids_cnt = pcnt;
-				fields++;
-			}
-		}
+                if(vpid_str[0])
+                {
+                        pcnt = sscanf(vpid_str, "%d+%d+%d+%d+%d+%d+%d", &ptr->pids[0], &ptr->pids[1], &ptr->pids[2], &ptr->pids[3],
+                                &ptr->pids[4], &ptr->pids[5], &ptr->pids[6]);
+                        if(pcnt > 0)
+                        {
+                                ptr->pids_cnt = pcnt;
+                                fields++;
+                        }
+                }
 
-		if(apid_str[0])
-		{
-			cnt = ptr->pids_cnt;
-			pcnt = sscanf(apid_str, "%d+%d+%d+%d+%d+%d+%d+%d", &ptr->pids[cnt], &ptr->pids[cnt+1], &ptr->pids[cnt+2],
-				&ptr->pids[cnt+3], &ptr->pids[cnt+4], &ptr->pids[cnt+5], &ptr->pids[cnt+6], &ptr->pids[cnt+7]);
-			if(pcnt > 0)
-			{
-				ptr->pids_cnt += pcnt;
-				fields++;
-			}
-		}
+                if(apid_str[0])
+                {
+                        cnt = ptr->pids_cnt;
+                        pcnt = sscanf(apid_str, "%d+%d+%d+%d+%d+%d+%d+%d", &ptr->pids[cnt], &ptr->pids[cnt+1], &ptr->pids[cnt+2],
+                                &ptr->pids[cnt+3], &ptr->pids[cnt+4], &ptr->pids[cnt+5], &ptr->pids[cnt+6], &ptr->pids[cnt+7]);
+                        if(pcnt > 0)
+                        {
+                                ptr->pids_cnt += pcnt;
+                                fields++;
+                        }
+                }
 
-		if((fields < 2) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) || (strlen(ptr->name) == 0))
-			continue;
+                if((fields < 2) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) || (strlen(ptr->name) == 0))
+                        continue;
 
-		has8192 = has0 = 0;
-		for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
-		{
-			if(ptr->pids[cnt] == 8192)
-				has8192 = 1;
-			if(ptr->pids[cnt] == 0)
-				has0 = 1;
-		}
-		if(has8192)
-		{
-			ptr->pids[0] = 8192;
-			ptr->pids_cnt = 1;
-		}
-		else if(! has0)
-		{
-			ptr->pids[ptr->pids_cnt] = 0;	//PID 0 is the PAT
-			ptr->pids_cnt++;
-		}
-		mp_verbose(log, " PIDS: ");
-		for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
-			mp_verbose(log, " %d ", ptr->pids[cnt]);
-		mp_verbose(log, "\n");
+                has8192 = has0 = 0;
+                for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
+                {
+                        if(ptr->pids[cnt] == 8192)
+                                has8192 = 1;
+                        if(ptr->pids[cnt] == 0)
+                                has0 = 1;
+                }
+                if(has8192)
+                {
+                        ptr->pids[0] = 8192;
+                        ptr->pids_cnt = 1;
+                }
+                else if(! has0)
+                {
+                        ptr->pids[ptr->pids_cnt] = 0;   //PID 0 is the PAT
+                        ptr->pids_cnt++;
+                }
+                mp_verbose(log, " PIDS: ");
+                for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
+                        mp_verbose(log, " %d ", ptr->pids[cnt]);
+                mp_verbose(log, "\n");
 
-		if((type == TUNER_TER) || (type == TUNER_CBL))
-		{
-			if(! strcmp(inv, "INVERSION_ON"))
-				ptr->inv = INVERSION_ON;
-			else if(! strcmp(inv, "INVERSION_OFF"))
-				ptr->inv = INVERSION_OFF;
-			else
-				ptr->inv = INVERSION_AUTO;
-
-
-			if(! strcmp(cr, "FEC_1_2"))
-				ptr->cr =FEC_1_2;
-			else if(! strcmp(cr, "FEC_2_3"))
-				ptr->cr =FEC_2_3;
-			else if(! strcmp(cr, "FEC_3_4"))
-				ptr->cr =FEC_3_4;
-			else if(! strcmp(cr, "FEC_4_5"))
-				ptr->cr =FEC_4_5;
-			else if(! strcmp(cr, "FEC_6_7"))
-				ptr->cr =FEC_6_7;
-			else if(! strcmp(cr, "FEC_8_9"))
-				ptr->cr =FEC_8_9;
-			else if(! strcmp(cr, "FEC_5_6"))
-				ptr->cr =FEC_5_6;
-			else if(! strcmp(cr, "FEC_7_8"))
-				ptr->cr =FEC_7_8;
-			else if(! strcmp(cr, "FEC_NONE"))
-				ptr->cr =FEC_NONE;
-			else ptr->cr =FEC_AUTO;
-		}
+                if((type == TUNER_TER) || (type == TUNER_CBL))
+                {
+                        if(! strcmp(inv, "INVERSION_ON"))
+                                ptr->inv = INVERSION_ON;
+                        else if(! strcmp(inv, "INVERSION_OFF"))
+                                ptr->inv = INVERSION_OFF;
+                        else
+                                ptr->inv = INVERSION_AUTO;
 
 
-		if((type == TUNER_TER) || (type == TUNER_CBL) || (type == TUNER_ATSC))
-		{
-			if(! strcmp(mod, "QAM_128"))
-				ptr->mod = QAM_128;
-			else if(! strcmp(mod, "QAM_256"))
-				ptr->mod = QAM_256;
-			else if(! strcmp(mod, "QAM_64"))
-				ptr->mod = QAM_64;
-			else if(! strcmp(mod, "QAM_32"))
-				ptr->mod = QAM_32;
-			else if(! strcmp(mod, "QAM_16"))
-				ptr->mod = QAM_16;
+                        if(! strcmp(cr, "FEC_1_2"))
+                                ptr->cr =FEC_1_2;
+                        else if(! strcmp(cr, "FEC_2_3"))
+                                ptr->cr =FEC_2_3;
+                        else if(! strcmp(cr, "FEC_3_4"))
+                                ptr->cr =FEC_3_4;
+                        else if(! strcmp(cr, "FEC_4_5"))
+                                ptr->cr =FEC_4_5;
+                        else if(! strcmp(cr, "FEC_6_7"))
+                                ptr->cr =FEC_6_7;
+                        else if(! strcmp(cr, "FEC_8_9"))
+                                ptr->cr =FEC_8_9;
+                        else if(! strcmp(cr, "FEC_5_6"))
+                                ptr->cr =FEC_5_6;
+                        else if(! strcmp(cr, "FEC_7_8"))
+                                ptr->cr =FEC_7_8;
+                        else if(! strcmp(cr, "FEC_NONE"))
+                                ptr->cr =FEC_NONE;
+                        else ptr->cr =FEC_AUTO;
+                }
+
+
+                if((type == TUNER_TER) || (type == TUNER_CBL) || (type == TUNER_ATSC))
+                {
+                        if(! strcmp(mod, "QAM_128"))
+                                ptr->mod = QAM_128;
+                        else if(! strcmp(mod, "QAM_256"))
+                                ptr->mod = QAM_256;
+                        else if(! strcmp(mod, "QAM_64"))
+                                ptr->mod = QAM_64;
+                        else if(! strcmp(mod, "QAM_32"))
+                                ptr->mod = QAM_32;
+                        else if(! strcmp(mod, "QAM_16"))
+                                ptr->mod = QAM_16;
 #ifdef DVB_ATSC
-			else if(! strcmp(mod, "VSB_8") || ! strcmp(mod, "8VSB"))
-				ptr->mod = VSB_8;
-			else if(! strcmp(mod, "VSB_16") || !strcmp(mod, "16VSB"))
-				ptr->mod = VSB_16;
-			else if(! strcmp(mod, "QAM_AUTO"))
-				ptr->mod = QAM_AUTO;
+                        else if(! strcmp(mod, "VSB_8") || ! strcmp(mod, "8VSB"))
+                                ptr->mod = VSB_8;
+                        else if(! strcmp(mod, "VSB_16") || !strcmp(mod, "16VSB"))
+                                ptr->mod = VSB_16;
+                        else if(! strcmp(mod, "QAM_AUTO"))
+                                ptr->mod = QAM_AUTO;
 
 #endif
-		}
+                }
 
-		if(type == TUNER_TER)
-		{
-			if(! strcmp(bw, "BANDWIDTH_6_MHZ"))
-				ptr->bw = BANDWIDTH_6_MHZ;
-			else if(! strcmp(bw, "BANDWIDTH_7_MHZ"))
-				ptr->bw = BANDWIDTH_7_MHZ;
-			else if(! strcmp(bw, "BANDWIDTH_8_MHZ"))
-				ptr->bw = BANDWIDTH_8_MHZ;
-
-
-			if(! strcmp(transm, "TRANSMISSION_MODE_2K"))
-				ptr->trans = TRANSMISSION_MODE_2K;
-			else if(! strcmp(transm, "TRANSMISSION_MODE_8K"))
-				ptr->trans = TRANSMISSION_MODE_8K;
-			else if(! strcmp(transm, "TRANSMISSION_MODE_AUTO"))
-				ptr->trans = TRANSMISSION_MODE_AUTO;
-
-			if(! strcmp(gi, "GUARD_INTERVAL_1_32"))
-				ptr->gi = GUARD_INTERVAL_1_32;
-			else if(! strcmp(gi, "GUARD_INTERVAL_1_16"))
-				ptr->gi = GUARD_INTERVAL_1_16;
-			else if(! strcmp(gi, "GUARD_INTERVAL_1_8"))
-				ptr->gi = GUARD_INTERVAL_1_8;
-			else if(! strcmp(gi, "GUARD_INTERVAL_1_4"))
-				ptr->gi = GUARD_INTERVAL_1_4;
-			else ptr->gi = GUARD_INTERVAL_AUTO;
-
-			if(! strcmp(tmp_lcr, "FEC_1_2"))
-				ptr->cr_lp =FEC_1_2;
-			else if(! strcmp(tmp_lcr, "FEC_2_3"))
-				ptr->cr_lp =FEC_2_3;
-			else if(! strcmp(tmp_lcr, "FEC_3_4"))
-				ptr->cr_lp =FEC_3_4;
-			else if(! strcmp(tmp_lcr, "FEC_4_5"))
-				ptr->cr_lp =FEC_4_5;
-			else if(! strcmp(tmp_lcr, "FEC_6_7"))
-				ptr->cr_lp =FEC_6_7;
-			else if(! strcmp(tmp_lcr, "FEC_8_9"))
-				ptr->cr_lp =FEC_8_9;
-			else if(! strcmp(tmp_lcr, "FEC_5_6"))
-				ptr->cr_lp =FEC_5_6;
-			else if(! strcmp(tmp_lcr, "FEC_7_8"))
-				ptr->cr_lp =FEC_7_8;
-			else if(! strcmp(tmp_lcr, "FEC_NONE"))
-				ptr->cr_lp =FEC_NONE;
-			else ptr->cr_lp =FEC_AUTO;
+                if(type == TUNER_TER)
+                {
+                        if(! strcmp(bw, "BANDWIDTH_6_MHZ"))
+                                ptr->bw = BANDWIDTH_6_MHZ;
+                        else if(! strcmp(bw, "BANDWIDTH_7_MHZ"))
+                                ptr->bw = BANDWIDTH_7_MHZ;
+                        else if(! strcmp(bw, "BANDWIDTH_8_MHZ"))
+                                ptr->bw = BANDWIDTH_8_MHZ;
 
 
-			if(! strcmp(tmp_hier, "HIERARCHY_1"))
-				ptr->hier = HIERARCHY_1;
-			else if(! strcmp(tmp_hier, "HIERARCHY_2"))
-				ptr->hier = HIERARCHY_2;
-			else if(! strcmp(tmp_hier, "HIERARCHY_4"))
-				ptr->hier = HIERARCHY_4;
-			else if(! strcmp(tmp_hier, "HIERARCHY_AUTO"))
-				ptr->hier = HIERARCHY_AUTO;
-			else	ptr->hier = HIERARCHY_NONE;
-		}
+                        if(! strcmp(transm, "TRANSMISSION_MODE_2K"))
+                                ptr->trans = TRANSMISSION_MODE_2K;
+                        else if(! strcmp(transm, "TRANSMISSION_MODE_8K"))
+                                ptr->trans = TRANSMISSION_MODE_8K;
+                        else if(! strcmp(transm, "TRANSMISSION_MODE_AUTO"))
+                                ptr->trans = TRANSMISSION_MODE_AUTO;
 
-		tmp = realloc(list->channels, sizeof(dvb_channel_t) * (list->NUM_CHANNELS + 1));
-		if(tmp == NULL)
-			break;
+                        if(! strcmp(gi, "GUARD_INTERVAL_1_32"))
+                                ptr->gi = GUARD_INTERVAL_1_32;
+                        else if(! strcmp(gi, "GUARD_INTERVAL_1_16"))
+                                ptr->gi = GUARD_INTERVAL_1_16;
+                        else if(! strcmp(gi, "GUARD_INTERVAL_1_8"))
+                                ptr->gi = GUARD_INTERVAL_1_8;
+                        else if(! strcmp(gi, "GUARD_INTERVAL_1_4"))
+                                ptr->gi = GUARD_INTERVAL_1_4;
+                        else ptr->gi = GUARD_INTERVAL_AUTO;
 
-		list->channels = tmp;
-		memcpy(&(list->channels[list->NUM_CHANNELS]), ptr, sizeof(dvb_channel_t));
-		list->NUM_CHANNELS++;
-		if(sizeof(dvb_channel_t) * list->NUM_CHANNELS >= 1024*1024)
-		{
-			mp_verbose(log, "dvbin.c, > 1MB allocated for channels struct, dropping the rest of the file\r\n");
-			break;
-		}
-	}
+                        if(! strcmp(tmp_lcr, "FEC_1_2"))
+                                ptr->cr_lp =FEC_1_2;
+                        else if(! strcmp(tmp_lcr, "FEC_2_3"))
+                                ptr->cr_lp =FEC_2_3;
+                        else if(! strcmp(tmp_lcr, "FEC_3_4"))
+                                ptr->cr_lp =FEC_3_4;
+                        else if(! strcmp(tmp_lcr, "FEC_4_5"))
+                                ptr->cr_lp =FEC_4_5;
+                        else if(! strcmp(tmp_lcr, "FEC_6_7"))
+                                ptr->cr_lp =FEC_6_7;
+                        else if(! strcmp(tmp_lcr, "FEC_8_9"))
+                                ptr->cr_lp =FEC_8_9;
+                        else if(! strcmp(tmp_lcr, "FEC_5_6"))
+                                ptr->cr_lp =FEC_5_6;
+                        else if(! strcmp(tmp_lcr, "FEC_7_8"))
+                                ptr->cr_lp =FEC_7_8;
+                        else if(! strcmp(tmp_lcr, "FEC_NONE"))
+                                ptr->cr_lp =FEC_NONE;
+                        else ptr->cr_lp =FEC_AUTO;
 
-	fclose(f);
-	if(list->NUM_CHANNELS == 0)
-	{
-		free(list->channels);
-		free(list);
-		return NULL;
-	}
 
-	list->current = 0;
-	return list;
+                        if(! strcmp(tmp_hier, "HIERARCHY_1"))
+                                ptr->hier = HIERARCHY_1;
+                        else if(! strcmp(tmp_hier, "HIERARCHY_2"))
+                                ptr->hier = HIERARCHY_2;
+                        else if(! strcmp(tmp_hier, "HIERARCHY_4"))
+                                ptr->hier = HIERARCHY_4;
+                        else if(! strcmp(tmp_hier, "HIERARCHY_AUTO"))
+                                ptr->hier = HIERARCHY_AUTO;
+                        else    ptr->hier = HIERARCHY_NONE;
+                }
+
+                tmp = realloc(list->channels, sizeof(dvb_channel_t) * (list->NUM_CHANNELS + 1));
+                if(tmp == NULL)
+                        break;
+
+                list->channels = tmp;
+                memcpy(&(list->channels[list->NUM_CHANNELS]), ptr, sizeof(dvb_channel_t));
+                list->NUM_CHANNELS++;
+                if(sizeof(dvb_channel_t) * list->NUM_CHANNELS >= 1024*1024)
+                {
+                        mp_verbose(log, "dvbin.c, > 1MB allocated for channels struct, dropping the rest of the file\r\n");
+                        break;
+                }
+        }
+
+        fclose(f);
+        if(list->NUM_CHANNELS == 0)
+        {
+                free(list->channels);
+                free(list);
+                return NULL;
+        }
+
+        list->current = 0;
+        return list;
 }
 
 void dvb_free_config(dvb_config_t *config)
 {
-	int i, j;
+        int i, j;
 
-	for(i=0; i<config->count; i++)
-	{
-		free(config->cards[i].name);
-		if(!config->cards[i].list)
-			continue;
-		if(config->cards[i].list->channels)
-		{
-			for(j=0; j<config->cards[i].list->NUM_CHANNELS; j++)
-				free(config->cards[i].list->channels[j].name);
-			free(config->cards[i].list->channels);
-		}
-		free(config->cards[i].list);
-	}
-	free(config);
+        for(i=0; i<config->count; i++)
+        {
+                free(config->cards[i].name);
+                if(!config->cards[i].list)
+                        continue;
+                if(config->cards[i].list->channels)
+                {
+                        for(j=0; j<config->cards[i].list->NUM_CHANNELS; j++)
+                                free(config->cards[i].list->channels[j].name);
+                        free(config->cards[i].list->channels);
+                }
+                free(config->cards[i].list);
+        }
+        free(config);
 }
 
 static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 {
-	struct pollfd pfds[1];
-	int pos=0, tries, rk, fd;
-	dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
+        struct pollfd pfds[1];
+        int pos=0, tries, rk, fd;
+        dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
 
-	MP_TRACE(stream, "dvb_streaming_read(%d)\n", size);
+        MP_TRACE(stream, "dvb_streaming_read(%d)\n", size);
 
-	tries = priv->retry + 1;
+        tries = priv->retry + 1;
 
-	fd = priv->fd;
-	while(pos < size)
-	{
-		pfds[0].fd = fd;
-		pfds[0].events = POLLIN | POLLPRI;
+        fd = priv->fd;
+        while(pos < size)
+        {
+                pfds[0].fd = fd;
+                pfds[0].events = POLLIN | POLLPRI;
 
-		rk = size - pos;
-		if(poll(pfds, 1, 500) <= 0)
-		{
-			MP_ERR(stream, "dvb_streaming_read, attempt N. %d failed with errno %d when reading %d bytes\n", tries, errno, size-pos);
-			errno = 0;
-			if(--tries > 0)
-				continue;
-			else
-				break;
-		}
-		if((rk = read(fd, &buffer[pos], rk)) > 0)
-		{
-			pos += rk;
-			MP_TRACE(stream, "ret (%d) bytes\n", pos);
-		}
-	}
+                rk = size - pos;
+                if(poll(pfds, 1, 500) <= 0)
+                {
+                        MP_ERR(stream, "dvb_streaming_read, attempt N. %d failed with errno %d when reading %d bytes\n", tries, errno, size-pos);
+                        errno = 0;
+                        if(--tries > 0)
+                                continue;
+                        else
+                                break;
+                }
+                if((rk = read(fd, &buffer[pos], rk)) > 0)
+                {
+                        pos += rk;
+                        MP_TRACE(stream, "ret (%d) bytes\n", pos);
+                }
+        }
 
 
-	if(! pos)
-		MP_ERR(stream, "dvb_streaming_read, return %d bytes\n", pos);
+        if(! pos)
+                MP_ERR(stream, "dvb_streaming_read, return %d bytes\n", pos);
 
-	return pos;
+        return pos;
 }
 
 static void dvbin_close(stream_t *stream);
 
 int dvb_set_channel(stream_t *stream, int card, int n)
 {
-	dvb_channels_list *new_list;
-	dvb_channel_t *channel;
-	dvb_priv_t *priv = stream->priv;
-	char buf[4096];
-	dvb_config_t *conf = (dvb_config_t *) priv->config;
-	int devno;
-	int i;
+        dvb_channels_list *new_list;
+        dvb_channel_t *channel;
+        dvb_priv_t *priv = stream->priv;
+        char buf[4096];
+        dvb_config_t *conf = (dvb_config_t *) priv->config;
+        int devno;
+        int i;
 
-	if((card < 0) || (card > conf->count))
-	{
-		MP_ERR(stream, "dvb_set_channel: INVALID CARD NUMBER: %d vs %d, abort\n", card, conf->count);
-		return 0;
-	}
+        if((card < 0) || (card > conf->count))
+        {
+                MP_ERR(stream, "dvb_set_channel: INVALID CARD NUMBER: %d vs %d, abort\n", card, conf->count);
+                return 0;
+        }
 
-	devno = conf->cards[card].devno;
-	new_list = conf->cards[card].list;
-	if((n > new_list->NUM_CHANNELS) || (n < 0))
-	{
-		MP_ERR(stream, "dvb_set_channel: INVALID CHANNEL NUMBER: %d, for card %d, abort\n", n, card);
-		return 0;
-	}
-	channel = &(new_list->channels[n]);
+        devno = conf->cards[card].devno;
+        new_list = conf->cards[card].list;
+        if((n > new_list->NUM_CHANNELS) || (n < 0))
+        {
+                MP_ERR(stream, "dvb_set_channel: INVALID CHANNEL NUMBER: %d, for card %d, abort\n", n, card);
+                return 0;
+        }
+        channel = &(new_list->channels[n]);
 
-	if(priv->is_on)	//the fds are already open and we have to stop the demuxers
-	{
-		for(i = 0; i < priv->demux_fds_cnt; i++)
-			dvb_demux_stop(priv->demux_fds[i]);
+        if(priv->is_on) //the fds are already open and we have to stop the demuxers
+        {
+                for(i = 0; i < priv->demux_fds_cnt; i++)
+                        dvb_demux_stop(priv->demux_fds[i]);
 
-		priv->retry = 0;
-		while(dvb_streaming_read(stream, buf, 4096) > 0);	//empty both the stream's and driver's buffer
-		if(priv->card != card)
-		{
-			dvbin_close(stream);
-			if(! dvb_open_devices(priv, devno, channel->pids_cnt))
-			{
-				MP_ERR(stream, "DVB_SET_CHANNEL, COULDN'T OPEN DEVICES OF CARD: %d, EXIT\n", card);
-				return 0;
-			}
-		}
-		else	//close all demux_fds with pos > pids required for the new channel or open other demux_fds if we have too few
-		{
-			if(! dvb_fix_demuxes(priv, channel->pids_cnt))
-				return 0;
-		}
-	}
-	else
-	{
-		if(! dvb_open_devices(priv, devno, channel->pids_cnt))
-		{
-			MP_ERR(stream, "DVB_SET_CHANNEL2, COULDN'T OPEN DEVICES OF CARD: %d, EXIT\n", card);
-			return 0;
-		}
-	}
+                priv->retry = 0;
+                while(dvb_streaming_read(stream, buf, 4096) > 0);       //empty both the stream's and driver's buffer
+                if(priv->card != card)
+                {
+                        dvbin_close(stream);
+                        if(! dvb_open_devices(priv, devno, channel->pids_cnt))
+                        {
+                                MP_ERR(stream, "DVB_SET_CHANNEL, COULDN'T OPEN DEVICES OF CARD: %d, EXIT\n", card);
+                                return 0;
+                        }
+                }
+                else    //close all demux_fds with pos > pids required for the new channel or open other demux_fds if we have too few
+                {
+                        if(! dvb_fix_demuxes(priv, channel->pids_cnt))
+                                return 0;
+                }
+        }
+        else
+        {
+                if(! dvb_open_devices(priv, devno, channel->pids_cnt))
+                {
+                        MP_ERR(stream, "DVB_SET_CHANNEL2, COULDN'T OPEN DEVICES OF CARD: %d, EXIT\n", card);
+                        return 0;
+                }
+        }
 
-	priv->card = card;
-	priv->list = new_list;
-	priv->retry = 5;
-	new_list->current = n;
-	priv->fd = priv->dvr_fd;
-	MP_VERBOSE(stream, "DVB_SET_CHANNEL: new channel name=%s, card: %d, channel %d\n", channel->name, card, n);
+        priv->card = card;
+        priv->list = new_list;
+        priv->retry = 5;
+        new_list->current = n;
+        priv->fd = priv->dvr_fd;
+        MP_VERBOSE(stream, "DVB_SET_CHANNEL: new channel name=%s, card: %d, channel %d\n", channel->name, card, n);
 
-	stream->buf_pos = stream->buf_len = 0;
-	stream->pos = 0;
+        stream->buf_pos = stream->buf_len = 0;
+        stream->pos = 0;
 
-	if(channel->freq != priv->last_freq)
-		if (! dvb_tune(priv, channel->freq, channel->pol, channel->srate, channel->diseqc, channel->tone,
-			channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier, priv->cfg_timeout))
-			return 0;
+        if(channel->freq != priv->last_freq)
+                if (! dvb_tune(priv, channel->freq, channel->pol, channel->srate, channel->diseqc, channel->tone,
+                        channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier, priv->cfg_timeout))
+                        return 0;
 
-	priv->last_freq = channel->freq;
-	priv->is_on = 1;
+        priv->last_freq = channel->freq;
+        priv->is_on = 1;
 
-	//sets demux filters and restart the stream
-	for(i = 0; i < channel->pids_cnt; i++)
-	{
-		if(! dvb_set_ts_filt(priv,priv->demux_fds[i], channel->pids[i], DMX_PES_OTHER))
-			return 0;
-	}
+        //sets demux filters and restart the stream
+        for(i = 0; i < channel->pids_cnt; i++)
+        {
+                if(! dvb_set_ts_filt(priv,priv->demux_fds[i], channel->pids[i], DMX_PES_OTHER))
+                        return 0;
+        }
 
-	return 1;
+        return 1;
 }
 
 
 
 int dvb_step_channel(stream_t *stream, int dir)
 {
-	int new_current;
-	dvb_channels_list *list;
-	dvb_priv_t *priv = stream->priv;
+        int new_current;
+        dvb_channels_list *list;
+        dvb_priv_t *priv = stream->priv;
 
-	MP_VERBOSE(stream, "DVB_STEP_CHANNEL dir %d\n", dir);
+        MP_VERBOSE(stream, "DVB_STEP_CHANNEL dir %d\n", dir);
 
-	if(priv == NULL)
-	{
-		MP_ERR(stream, "dvb_step_channel: NULL priv_ptr, quit\n");
-		return 0;
-	}
+        if(priv == NULL)
+        {
+                MP_ERR(stream, "dvb_step_channel: NULL priv_ptr, quit\n");
+                return 0;
+        }
 
-	list = priv->list;
-	if(list == NULL)
-	{
-		MP_ERR(stream, "dvb_step_channel: NULL list_ptr, quit\n");
-		return 0;
-	}
+        list = priv->list;
+        if(list == NULL)
+        {
+                MP_ERR(stream, "dvb_step_channel: NULL list_ptr, quit\n");
+                return 0;
+        }
 
-	new_current = (list->NUM_CHANNELS + list->current + (dir == DVB_CHANNEL_HIGHER ? 1 : -1)) % list->NUM_CHANNELS;
+        new_current = (list->NUM_CHANNELS + list->current + (dir == DVB_CHANNEL_HIGHER ? 1 : -1)) % list->NUM_CHANNELS;
 
-	return dvb_set_channel(stream, priv->card, new_current);
+        return dvb_set_channel(stream, priv->card, new_current);
 }
 
 
@@ -560,68 +560,68 @@ int dvb_step_channel(stream_t *stream, int dir)
 
 static void dvbin_close(stream_t *stream)
 {
-	int i;
-	dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
+        int i;
+        dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
 
-	for(i = priv->demux_fds_cnt-1; i >= 0; i--)
-	{
-		priv->demux_fds_cnt--;
-		MP_VERBOSE(stream, "DVBIN_CLOSE, close(%d), fd=%d, COUNT=%d\n", i, priv->demux_fds[i], priv->demux_fds_cnt);
-		close(priv->demux_fds[i]);
-	}
-	close(priv->dvr_fd);
+        for(i = priv->demux_fds_cnt-1; i >= 0; i--)
+        {
+                priv->demux_fds_cnt--;
+                MP_VERBOSE(stream, "DVBIN_CLOSE, close(%d), fd=%d, COUNT=%d\n", i, priv->demux_fds[i], priv->demux_fds_cnt);
+                close(priv->demux_fds[i]);
+        }
+        close(priv->dvr_fd);
 
-	close(priv->fe_fd);
-	priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
+        close(priv->fe_fd);
+        priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
 
-	priv->is_on = 0;
-	dvb_free_config(priv->config);
+        priv->is_on = 0;
+        dvb_free_config(priv->config);
 }
 
 
 static int dvb_streaming_start(stream_t *stream, int tuner_type, char *progname)
 {
-	int i;
-	dvb_channel_t *channel = NULL;
-	dvb_priv_t *priv = stream->priv;
+        int i;
+        dvb_channel_t *channel = NULL;
+        dvb_priv_t *priv = stream->priv;
         dvb_priv_t *opts = priv;
 
-	MP_VERBOSE(stream, "\r\ndvb_streaming_start(PROG: %s, CARD: %d)\r\n",
-	    opts->cfg_prog, opts->cfg_card);
+        MP_VERBOSE(stream, "\r\ndvb_streaming_start(PROG: %s, CARD: %d)\r\n",
+            opts->cfg_prog, opts->cfg_card);
 
-	priv->is_on = 0;
+        priv->is_on = 0;
 
-	i = 0;
-	while((channel == NULL) && i < priv->list->NUM_CHANNELS)
-	{
-		if(! strcmp(priv->list->channels[i].name, progname))
-			channel = &(priv->list->channels[i]);
+        i = 0;
+        while((channel == NULL) && i < priv->list->NUM_CHANNELS)
+        {
+                if(! strcmp(priv->list->channels[i].name, progname))
+                        channel = &(priv->list->channels[i]);
 
-		i++;
-	}
+                i++;
+        }
 
-	if(channel != NULL)
-	{
-		priv->list->current = i-1;
-		MP_VERBOSE(stream, "PROGRAM NUMBER %d: name=%s, freq=%u\n", i-1, channel->name, channel->freq);
-	}
-	else
-	{
-		MP_ERR(stream, "\n\nDVBIN: no such channel \"%s\"\n\n", progname);
-		return 0;
-	}
+        if(channel != NULL)
+        {
+                priv->list->current = i-1;
+                MP_VERBOSE(stream, "PROGRAM NUMBER %d: name=%s, freq=%u\n", i-1, channel->name, channel->freq);
+        }
+        else
+        {
+                MP_ERR(stream, "\n\nDVBIN: no such channel \"%s\"\n\n", progname);
+                return 0;
+        }
 
 
-	if(!dvb_set_channel(stream, priv->card, priv->list->current))
-	{
-		MP_ERR(stream, "ERROR, COULDN'T SET CHANNEL  %i: ", priv->list->current);
-		dvbin_close(stream);
-		return 0;
-	}
+        if(!dvb_set_channel(stream, priv->card, priv->list->current))
+        {
+                MP_ERR(stream, "ERROR, COULDN'T SET CHANNEL  %i: ", priv->list->current);
+                dvbin_close(stream);
+                return 0;
+        }
 
-	MP_VERBOSE(stream, "SUCCESSFUL EXIT from dvb_streaming_start\n");
+        MP_VERBOSE(stream, "SUCCESSFUL EXIT from dvb_streaming_start\n");
 
-	return 1;
+        return 1;
 }
 
 
@@ -629,78 +629,78 @@ static int dvb_streaming_start(stream_t *stream, int tuner_type, char *progname)
 
 static int dvb_open(stream_t *stream, int mode)
 {
-	// I don't force  the file format bacause, although it's almost always TS,
-	// there are some providers that stream an IP multicast with M$ Mpeg4 inside
-	dvb_priv_t *priv = stream->priv;
+        // I don't force  the file format bacause, although it's almost always TS,
+        // there are some providers that stream an IP multicast with M$ Mpeg4 inside
+        dvb_priv_t *priv = stream->priv;
         priv->log = stream->log;
         dvb_priv_t *p = priv;
-	char *progname;
-	int tuner_type = 0, i;
+        char *progname;
+        int tuner_type = 0, i;
 
 
-	if(mode != STREAM_READ)
-		return STREAM_UNSUPPORTED;
+        if(mode != STREAM_READ)
+                return STREAM_UNSUPPORTED;
 
-	priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
-	priv->config = dvb_get_config(stream);
-	if(priv->config == NULL)
-	{
-		MP_ERR(stream, "DVB CONFIGURATION IS EMPTY, exit\n");
-		return STREAM_ERROR;
-	}
+        priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
+        priv->config = dvb_get_config(stream);
+        if(priv->config == NULL)
+        {
+                MP_ERR(stream, "DVB CONFIGURATION IS EMPTY, exit\n");
+                return STREAM_ERROR;
+        }
 
-	priv->card = -1;
-	for(i=0; i<priv->config->count; i++)
-	{
-		if(priv->config->cards[i].devno+1 == p->cfg_card)
-		{
-			priv->card = i;
-			break;
-		}
-	}
+        priv->card = -1;
+        for(i=0; i<priv->config->count; i++)
+        {
+                if(priv->config->cards[i].devno+1 == p->cfg_card)
+                {
+                        priv->card = i;
+                        break;
+                }
+        }
 
-	if(priv->card == -1)
- 	{
-		MP_ERR(stream, "NO CONFIGURATION FOUND FOR CARD N. %d, exit\n", p->cfg_card);
- 		return STREAM_ERROR;
- 	}
-	priv->timeout = p->cfg_timeout;
+        if(priv->card == -1)
+        {
+                MP_ERR(stream, "NO CONFIGURATION FOUND FOR CARD N. %d, exit\n", p->cfg_card);
+                return STREAM_ERROR;
+        }
+        priv->timeout = p->cfg_timeout;
 
-	tuner_type = priv->config->cards[priv->card].type;
+        tuner_type = priv->config->cards[priv->card].type;
 
-	if(tuner_type == 0)
-	{
-		MP_VERBOSE(stream, "OPEN_DVB: UNKNOWN OR UNDETECTABLE TUNER TYPE, EXIT\n");
-		return STREAM_ERROR;
-	}
-
-
-	priv->tuner_type = tuner_type;
-
-	MP_VERBOSE(stream, "OPEN_DVB: prog=%s, card=%d, type=%d\n",
-		p->cfg_prog, priv->card+1, priv->tuner_type);
-
-	priv->list = priv->config->cards[priv->card].list;
-
-	if((! strcmp(p->cfg_prog, "")) && (priv->list != NULL))
-		progname = priv->list->channels[0].name;
-	else
-		progname = p->cfg_prog;
+        if(tuner_type == 0)
+        {
+                MP_VERBOSE(stream, "OPEN_DVB: UNKNOWN OR UNDETECTABLE TUNER TYPE, EXIT\n");
+                return STREAM_ERROR;
+        }
 
 
-	if(! dvb_streaming_start(stream, tuner_type, progname))
-	{
-		return STREAM_ERROR;
-	}
+        priv->tuner_type = tuner_type;
 
-	stream->type = STREAMTYPE_DVB;
-	stream->fill_buffer = dvb_streaming_read;
-	stream->close = dvbin_close;
+        MP_VERBOSE(stream, "OPEN_DVB: prog=%s, card=%d, type=%d\n",
+                p->cfg_prog, priv->card+1, priv->tuner_type);
 
-	stream->demuxer = "lavf";
+        priv->list = priv->config->cards[priv->card].list;
+
+        if((! strcmp(p->cfg_prog, "")) && (priv->list != NULL))
+                progname = priv->list->channels[0].name;
+        else
+                progname = p->cfg_prog;
+
+
+        if(! dvb_streaming_start(stream, tuner_type, progname))
+        {
+                return STREAM_ERROR;
+        }
+
+        stream->type = STREAMTYPE_DVB;
+        stream->fill_buffer = dvb_streaming_read;
+        stream->close = dvbin_close;
+
+        stream->demuxer = "lavf";
         stream->lavf_type = "mpegts";
 
-	return STREAM_OK;
+        return STREAM_OK;
 }
 
 #define MAX_CARDS 4
@@ -708,37 +708,37 @@ dvb_config_t *dvb_get_config(stream_t *stream)
 {
         struct mp_log *log = stream->log;
         struct mpv_global *global = stream->global;
-	int i, fd, type, size;
-	char filename[30], *conf_file, *name;
-	dvb_channels_list *list;
-	dvb_card_config_t *cards = NULL, *tmp;
-	dvb_config_t *conf = NULL;
+        int i, fd, type, size;
+        char filename[30], *conf_file, *name;
+        dvb_channels_list *list;
+        dvb_card_config_t *cards = NULL, *tmp;
+        dvb_config_t *conf = NULL;
 
 
-	conf = malloc(sizeof(dvb_config_t));
-	if(conf == NULL)
-		return NULL;
+        conf = malloc(sizeof(dvb_config_t));
+        if(conf == NULL)
+                return NULL;
 
-	conf->priv = NULL;
-	conf->count = 0;
-	conf->cards = NULL;
-	for(i=0; i<MAX_CARDS; i++)
-	{
-		snprintf(filename, sizeof(filename), "/dev/dvb/adapter%d/frontend0", i);
-		fd = open(filename, O_RDONLY|O_NONBLOCK|O_CLOEXEC);
-		if(fd < 0)
-		{
-			mp_verbose(log, "DVB_CONFIG, can't open device %s, skipping\n", filename);
-			continue;
-		}
+        conf->priv = NULL;
+        conf->count = 0;
+        conf->cards = NULL;
+        for(i=0; i<MAX_CARDS; i++)
+        {
+                snprintf(filename, sizeof(filename), "/dev/dvb/adapter%d/frontend0", i);
+                fd = open(filename, O_RDONLY|O_NONBLOCK|O_CLOEXEC);
+                if(fd < 0)
+                {
+                        mp_verbose(log, "DVB_CONFIG, can't open device %s, skipping\n", filename);
+                        continue;
+                }
 
-		type = dvb_get_tuner_type(fd, log);
-		close(fd);
-		if(type != TUNER_SAT && type != TUNER_TER && type != TUNER_CBL && type != TUNER_ATSC)
-		{
-			mp_verbose(log, "DVB_CONFIG, can't detect tuner type of card %d, skipping\n", i);
-			continue;
-		}
+                type = dvb_get_tuner_type(fd, log);
+                close(fd);
+                if(type != TUNER_SAT && type != TUNER_TER && type != TUNER_CBL && type != TUNER_ATSC)
+                {
+                        mp_verbose(log, "DVB_CONFIG, can't detect tuner type of card %d, skipping\n", i);
+                        continue;
+                }
 
         void *talloc_ctx = talloc_new(NULL);
         conf_file = mp_find_user_config_file(talloc_ctx, global, "channels.conf");
@@ -768,42 +768,42 @@ dvb_config_t *dvb_get_config(stream_t *stream)
         list = dvb_get_channels(log, conf_file, type);
         talloc_free(talloc_ctx);
 
-		if(list == NULL)
-			continue;
+                if(list == NULL)
+                        continue;
 
-		size = sizeof(dvb_card_config_t) * (conf->count + 1);
-		tmp = realloc(conf->cards, size);
+                size = sizeof(dvb_card_config_t) * (conf->count + 1);
+                tmp = realloc(conf->cards, size);
 
-		if(tmp == NULL)
-		{
-			fprintf(stderr, "DVB_CONFIG, can't realloc %d bytes, skipping\n", size);
-			continue;
-		}
-		cards = tmp;
+                if(tmp == NULL)
+                {
+                        fprintf(stderr, "DVB_CONFIG, can't realloc %d bytes, skipping\n", size);
+                        continue;
+                }
+                cards = tmp;
 
-		name = malloc(20);
-		if(name==NULL)
-		{
-			fprintf(stderr, "DVB_CONFIG, can't realloc 20 bytes, skipping\n");
-			continue;
-		}
+                name = malloc(20);
+                if(name==NULL)
+                {
+                        fprintf(stderr, "DVB_CONFIG, can't realloc 20 bytes, skipping\n");
+                        continue;
+                }
 
-		conf->cards = cards;
-		conf->cards[conf->count].devno = i;
-		conf->cards[conf->count].list = list;
-		conf->cards[conf->count].type = type;
-		snprintf(name, 20, "DVB-%c card n. %d", type==TUNER_TER ? 'T' : (type==TUNER_CBL ? 'C' : 'S'), conf->count+1);
-		conf->cards[conf->count].name = name;
-		conf->count++;
-	}
+                conf->cards = cards;
+                conf->cards[conf->count].devno = i;
+                conf->cards[conf->count].list = list;
+                conf->cards[conf->count].type = type;
+                snprintf(name, 20, "DVB-%c card n. %d", type==TUNER_TER ? 'T' : (type==TUNER_CBL ? 'C' : 'S'), conf->count+1);
+                conf->cards[conf->count].name = name;
+                conf->count++;
+        }
 
-	if(conf->count == 0)
-	{
-		free(conf);
-		conf = NULL;
-	}
+        if(conf->count == 0)
+        {
+                free(conf);
+                conf = NULL;
+        }
 
-	return conf;
+        return conf;
 }
 
 

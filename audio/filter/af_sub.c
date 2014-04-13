@@ -41,22 +41,22 @@
 
 // Analog domain biquad section
 typedef struct{
-  float a[3];		// Numerator coefficients
-  float b[3];		// Denominator coefficients
+  float a[3];           // Numerator coefficients
+  float b[3];           // Denominator coefficients
 } biquad_t;
 
 // S-parameters for designing 4th order Butterworth filter
 static biquad_t sp[2] = {{{1.0,0.0,0.0},{1.0,0.765367,1.0}},
-			 {{1.0,0.0,0.0},{1.0,1.847759,1.0}}};
+                         {{1.0,0.0,0.0},{1.0,1.847759,1.0}}};
 
 // Data for specific instances of this filter
 typedef struct af_sub_s
 {
-  float w[2][4];	// Filter taps for low-pass filter
-  float q[2][2];	// Circular queues
-  float	fc;		// Cutoff frequency [Hz] for low-pass filter
-  float k;		// Filter gain;
-  int ch;		// Channel number which to insert the filtered data
+  float w[2][4];        // Filter taps for low-pass filter
+  float q[2][2];        // Circular queues
+  float fc;             // Cutoff frequency [Hz] for low-pass filter
+  float k;              // Filter gain;
+  int ch;               // Channel number which to insert the filtered data
 
 }af_sub_t;
 
@@ -92,7 +92,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
   float h0 = (q)[0]; \
   float h1 = (q)[1]; \
   float hn = (in) - h0 * (w)[0] - h1 * (w)[1];  \
-  out = hn + h0 * (w)[2] + h1 * (w)[3];	 \
+  out = hn + h0 * (w)[2] + h1 * (w)[3];  \
   (q)[1] = h0; \
   (q)[0] = hn; \
 }
@@ -101,12 +101,12 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Filter data through filter
 static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 {
-  struct mp_audio*    c   = data;	 // Current working data
-  af_sub_t*  	s   = af->priv; // Setup for this instance
-  float*   	a   = c->planes[0];	 // Audio data
-  int		len = c->samples*c->nch;	 // Number of samples in current audio block
-  int		nch = c->nch;	 // Number of channels
-  int		ch  = s->ch;	 // Channel in which to insert the sub audio
+  struct mp_audio*    c   = data;        // Current working data
+  af_sub_t*     s   = af->priv; // Setup for this instance
+  float*        a   = c->planes[0];      // Audio data
+  int           len = c->samples*c->nch;         // Number of samples in current audio block
+  int           nch = c->nch;    // Number of channels
+  int           ch  = s->ch;     // Channel in which to insert the sub audio
   register int  i;
 
   // Run filter

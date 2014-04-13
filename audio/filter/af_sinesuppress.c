@@ -57,14 +57,14 @@ static int control(struct af_instance* af, int cmd, void* arg)
 #if 0
     if (((struct mp_audio*)arg)->format == AF_FORMAT_FLOAT)
     {
-	af->data->format = AF_FORMAT_FLOAT;
-	af->data->bps = 4;
-	af->play = play_float;
+        af->data->format = AF_FORMAT_FLOAT;
+        af->data->bps = 4;
+        af->play = play_float;
     }// else
 #endif
     {
         mp_audio_set_format(af->data, AF_FORMAT_S16);
-	af->filter = play_s16;
+        af->filter = play_s16;
     }
 
     return af_test_output(af,(struct mp_audio*)arg);
@@ -78,8 +78,8 @@ static int play_s16(struct af_instance* af, struct mp_audio* data, int f)
 {
   af_sinesuppress_t *s = af->priv;
   register int i = 0;
-  int16_t *a = (int16_t*)data->planes[0];	// Audio data
-  int len = data->samples*data->nch;		// Number of samples
+  int16_t *a = (int16_t*)data->planes[0];       // Audio data
+  int len = data->samples*data->nch;            // Number of samples
 
   for (i = 0; i < len; i++)
   {
@@ -109,8 +109,8 @@ static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data
 {
   af_sinesuppress_t *s = af->setup;
   register int i = 0;
-  float *a = (float*)data->audio;	// Audio data
-  int len = data->len/4;		// Number of samples
+  float *a = (float*)data->audio;       // Audio data
+  int len = data->len/4;                // Number of samples
   float avg, l, r;
 
   for (i = 0; i < len; i+=2)

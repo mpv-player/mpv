@@ -249,12 +249,12 @@ static int demux_tv_fill_buffer(demuxer_t *demux)
     if (want_video && tvh->functions->control(tvh->priv,
                             TVI_CONTROL_IS_VIDEO, 0) == TVI_CONTROL_TRUE)
         {
-		len = tvh->functions->get_video_framesize(tvh->priv);
-       	dp=new_demux_packet(len);
+                len = tvh->functions->get_video_framesize(tvh->priv);
+        dp=new_demux_packet(len);
         dp->keyframe = true;
-  		dp->pts=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
-   		demuxer_add_packet(demux, want_video, dp);
-	 }
+                dp->pts=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
+                demuxer_add_packet(demux, want_video, dp);
+         }
 
     if (tvh->tv_param->scan) tv_scan(tvh);
     return 1;
@@ -387,8 +387,8 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
 
     MP_VERBOSE(tvh, "Selected norm : %s\n", norm);
     if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
-	MP_ERR(tvh, "Error: Cannot set norm!\n");
-	return 0;
+        MP_ERR(tvh, "Error: Cannot set norm!\n");
+        return 0;
     }
     return 1;
 }
@@ -431,8 +431,8 @@ static int open_tv(tvi_handle_t *tvh)
 
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_VIDEO, 0) != TVI_CONTROL_TRUE)
     {
-	MP_ERR(tvh, "Error: No video input present!\n");
-	return 0;
+        MP_ERR(tvh, "Error: No video input present!\n");
+        return 0;
     }
 
     if (tvh->tv_param->outfmt == -1)
@@ -447,25 +447,25 @@ static int open_tv(tvi_handle_t *tvh)
     {
     switch(tvh->tv_param->outfmt)
     {
-	case MP_FOURCC_YV12:
-	case MP_FOURCC_I420:
-	case MP_FOURCC_UYVY:
-	case MP_FOURCC_YUY2:
-	case MP_FOURCC_RGB32:
-	case MP_FOURCC_RGB24:
-	case MP_FOURCC_BGR32:
-	case MP_FOURCC_BGR24:
-	case MP_FOURCC_BGR16:
-	case MP_FOURCC_BGR15:
-	    break;
-	default:
-	    MP_ERR(tvh, "==================================================================\n"\
-			" WARNING: UNTESTED OR UNKNOWN OUTPUT IMAGE FORMAT REQUESTED (0x%x)\n"\
-			" This may cause buggy playback or program crash! Bug reports will\n"\
-			" be ignored! You should try again with YV12 (which is the default\n"\
-			" colorspace) and read the documentation!\n"\
-			"==================================================================\n"
-		,tvh->tv_param->outfmt);
+        case MP_FOURCC_YV12:
+        case MP_FOURCC_I420:
+        case MP_FOURCC_UYVY:
+        case MP_FOURCC_YUY2:
+        case MP_FOURCC_RGB32:
+        case MP_FOURCC_RGB24:
+        case MP_FOURCC_BGR32:
+        case MP_FOURCC_BGR24:
+        case MP_FOURCC_BGR16:
+        case MP_FOURCC_BGR15:
+            break;
+        default:
+            MP_ERR(tvh, "==================================================================\n"\
+                        " WARNING: UNTESTED OR UNKNOWN OUTPUT IMAGE FORMAT REQUESTED (0x%x)\n"\
+                        " This may cause buggy playback or program crash! Bug reports will\n"\
+                        " be ignored! You should try again with YV12 (which is the default\n"\
+                        " colorspace) and read the documentation!\n"\
+                        "==================================================================\n"
+                ,tvh->tv_param->outfmt);
     }
     funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &tvh->tv_param->outfmt);
     }
@@ -488,155 +488,155 @@ static int open_tv(tvi_handle_t *tvh)
     /* set width */
     if (tvh->tv_param->width != -1)
     {
-	if (funcs->control(tvh->priv, TVI_CONTROL_VID_CHK_WIDTH, &tvh->tv_param->width) == TVI_CONTROL_TRUE)
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_WIDTH, &tvh->tv_param->width);
-	else
-	{
-	    MP_ERR(tvh, "Unable to set requested width: %d\n", tvh->tv_param->width);
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &tvh->tv_param->width);
-	}
+        if (funcs->control(tvh->priv, TVI_CONTROL_VID_CHK_WIDTH, &tvh->tv_param->width) == TVI_CONTROL_TRUE)
+            funcs->control(tvh->priv, TVI_CONTROL_VID_SET_WIDTH, &tvh->tv_param->width);
+        else
+        {
+            MP_ERR(tvh, "Unable to set requested width: %d\n", tvh->tv_param->width);
+            funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &tvh->tv_param->width);
+        }
     }
 
     /* set height */
     if (tvh->tv_param->height != -1)
     {
-	if (funcs->control(tvh->priv, TVI_CONTROL_VID_CHK_HEIGHT, &tvh->tv_param->height) == TVI_CONTROL_TRUE)
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HEIGHT, &tvh->tv_param->height);
-	else
-	{
-	    MP_ERR(tvh, "Unable to set requested height: %d\n", tvh->tv_param->height);
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &tvh->tv_param->height);
-	}
+        if (funcs->control(tvh->priv, TVI_CONTROL_VID_CHK_HEIGHT, &tvh->tv_param->height) == TVI_CONTROL_TRUE)
+            funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HEIGHT, &tvh->tv_param->height);
+        else
+        {
+            MP_ERR(tvh, "Unable to set requested height: %d\n", tvh->tv_param->height);
+            funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &tvh->tv_param->height);
+        }
     }
 
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) != TVI_CONTROL_TRUE)
     {
-	MP_WARN(tvh, "Selected input hasn't got a tuner!\n");
-	goto done;
+        MP_WARN(tvh, "Selected input hasn't got a tuner!\n");
+        goto done;
     }
 
     /* select channel list */
     for (i = 0; chanlists[i].name != NULL; i++)
     {
-	if (!strcasecmp(chanlists[i].name, tvh->tv_param->chanlist))
-	{
-	    tvh->chanlist = i;
-	    tvh->chanlist_s = chanlists[i].list;
-	    break;
-	}
+        if (!strcasecmp(chanlists[i].name, tvh->tv_param->chanlist))
+        {
+            tvh->chanlist = i;
+            tvh->chanlist_s = chanlists[i].list;
+            break;
+        }
     }
 
     if (tvh->chanlist == -1) {
-	MP_WARN(tvh, "Unable to find selected channel list! (%s)\n",
-	    tvh->tv_param->chanlist);
+        MP_WARN(tvh, "Unable to find selected channel list! (%s)\n",
+            tvh->tv_param->chanlist);
         return 0;
     } else
-	MP_VERBOSE(tvh, "Selected channel list: %s (including %d channels)\n",
-	    chanlists[tvh->chanlist].name, chanlists[tvh->chanlist].count);
+        MP_VERBOSE(tvh, "Selected channel list: %s (including %d channels)\n",
+            chanlists[tvh->chanlist].name, chanlists[tvh->chanlist].count);
 
     if (tvh->tv_param->freq && tvh->tv_param->channel)
     {
-	MP_WARN(tvh, "You can't set frequency and channel simultaneously!\n");
-	goto done;
+        MP_WARN(tvh, "You can't set frequency and channel simultaneously!\n");
+        goto done;
     }
 
     /* Handle channel names */
     if (tvh->tv_param->channels) {
         parse_channels(tvh);
     } else
-	    tv_channel_last_real = malloc(5);
+            tv_channel_last_real = malloc(5);
 
     if (tv_channel_list) {
-	int channel = 0;
-	if (tvh->tv_param->channel)
-	 {
-	   if (isdigit(*tvh->tv_param->channel))
-		/* if tvh->tv_param->channel begins with a digit interpret it as a number */
-		channel = atoi(tvh->tv_param->channel);
-	   else
-	      {
-		/* if tvh->tv_param->channel does not begin with a digit
-		   set the first channel that contains tvh->tv_param->channel in its name */
+        int channel = 0;
+        if (tvh->tv_param->channel)
+         {
+           if (isdigit(*tvh->tv_param->channel))
+                /* if tvh->tv_param->channel begins with a digit interpret it as a number */
+                channel = atoi(tvh->tv_param->channel);
+           else
+              {
+                /* if tvh->tv_param->channel does not begin with a digit
+                   set the first channel that contains tvh->tv_param->channel in its name */
 
-		tv_channel_current = tv_channel_list;
-		while ( tv_channel_current ) {
-			if ( strstr(tv_channel_current->name, tvh->tv_param->channel) )
-			  break;
-			tv_channel_current = tv_channel_current->next;
-			}
-		if ( !tv_channel_current ) tv_channel_current = tv_channel_list;
-	      }
-	 }
-	else
-		channel = 1;
+                tv_channel_current = tv_channel_list;
+                while ( tv_channel_current ) {
+                        if ( strstr(tv_channel_current->name, tvh->tv_param->channel) )
+                          break;
+                        tv_channel_current = tv_channel_current->next;
+                        }
+                if ( !tv_channel_current ) tv_channel_current = tv_channel_list;
+              }
+         }
+        else
+                channel = 1;
 
-	if ( channel ) {
-	tv_channel_current = tv_channel_list;
-	for (int n = 1; n < channel; n++)
-		if (tv_channel_current->next)
-			tv_channel_current = tv_channel_current->next;
-	}
+        if ( channel ) {
+        tv_channel_current = tv_channel_list;
+        for (int n = 1; n < channel; n++)
+                if (tv_channel_current->next)
+                        tv_channel_current = tv_channel_current->next;
+        }
 
-	set_norm_and_freq(tvh, tv_channel_current);
-	tv_channel_last = tv_channel_current;
+        set_norm_and_freq(tvh, tv_channel_current);
+        tv_channel_last = tv_channel_current;
     } else {
     /* we need to set frequency */
     if (tvh->tv_param->freq)
     {
-	unsigned long freq = atof(tvh->tv_param->freq)*16;
+        unsigned long freq = atof(tvh->tv_param->freq)*16;
 
         /* set freq in MHz */
-	funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
+        funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
 
-	funcs->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
-	MP_VERBOSE(tvh, "Selected frequency: %lu (%.3f)\n",
-	    freq, freq/16.0);
+        funcs->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
+        MP_VERBOSE(tvh, "Selected frequency: %lu (%.3f)\n",
+            freq, freq/16.0);
     }
 
-	    if (tvh->tv_param->channel) {
-	struct CHANLIST cl;
+            if (tvh->tv_param->channel) {
+        struct CHANLIST cl;
 
-	MP_VERBOSE(tvh, "Requested channel: %s\n", tvh->tv_param->channel);
-	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
-	{
-	    cl = tvh->chanlist_s[i];
-		    //  printf("count%d: name: %s, freq: %d\n",
-		    //	i, cl.name, cl.freq);
-	    if (!strcasecmp(cl.name, tvh->tv_param->channel))
-	    {
-			strcpy(tv_channel_last_real, cl.name);
-		tvh->channel = i;
-		MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
-		    cl.name, cl.freq/1000.0);
-		tv_set_freq_float(tvh, cl.freq);
-		break;
-	    }
-	}
+        MP_VERBOSE(tvh, "Requested channel: %s\n", tvh->tv_param->channel);
+        for (i = 0; i < chanlists[tvh->chanlist].count; i++)
+        {
+            cl = tvh->chanlist_s[i];
+                    //  printf("count%d: name: %s, freq: %d\n",
+                    //  i, cl.name, cl.freq);
+            if (!strcasecmp(cl.name, tvh->tv_param->channel))
+            {
+                        strcpy(tv_channel_last_real, cl.name);
+                tvh->channel = i;
+                MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
+                    cl.name, cl.freq/1000.0);
+                tv_set_freq_float(tvh, cl.freq);
+                break;
+            }
+        }
     }
     }
 
     /* grep frequency in chanlist */
     {
-	unsigned long i2;
-	int freq;
+        unsigned long i2;
+        int freq;
 
-	tv_get_freq(tvh, &i2);
+        tv_get_freq(tvh, &i2);
 
-	freq = (int) (((float)(i2/16))*1000)+250;
+        freq = (int) (((float)(i2/16))*1000)+250;
 
-	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
-	{
-	    if (tvh->chanlist_s[i].freq == freq)
-	    {
-		tvh->channel = i+1;
-		break;
-	    }
-	}
+        for (i = 0; i < chanlists[tvh->chanlist].count; i++)
+        {
+            if (tvh->chanlist_s[i].freq == freq)
+            {
+                tvh->channel = i+1;
+                break;
+            }
+        }
     }
 
 done:
     /* also start device! */
-	return 1;
+        return 1;
 }
 
 static tvi_handle_t *tv_begin(tv_param_t* tv_param, struct mp_log *log)
@@ -646,12 +646,12 @@ static tvi_handle_t *tv_begin(tv_param_t* tv_param, struct mp_log *log)
     if(tv_param->driver && !strcmp(tv_param->driver,"help")){
         mp_info(log, "Available drivers:\n");
         for(i=0;tvi_driver_list[i];i++){
-	    mp_info(log, " %s\t%s",tvi_driver_list[i]->short_name,tvi_driver_list[i]->name);
-	    if(tvi_driver_list[i]->comment)
-	        mp_info(log, " (%s)",tvi_driver_list[i]->comment);
-	    mp_info(log, "\n");
-	}
-	return NULL;
+            mp_info(log, " %s\t%s",tvi_driver_list[i]->short_name,tvi_driver_list[i]->name);
+            if(tvi_driver_list[i]->comment)
+                mp_info(log, " (%s)",tvi_driver_list[i]->comment);
+            mp_info(log, "\n");
+        }
+        return NULL;
     }
 
     for(i=0;tvi_driver_list[i];i++){
@@ -711,8 +711,8 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     tvh->demuxer = demuxer;
 
     if (!open_tv(tvh)){
-	tv_uninit(tvh);
-	return -1;
+        tv_uninit(tvh);
+        return -1;
     }
     funcs = tvh->functions;
     demuxer->priv=tvh;
@@ -761,71 +761,71 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     /* here comes audio init */
     if (tvh->tv_param->noaudio == 0 && funcs->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
     {
-	int audio_format;
+        int audio_format;
 
-	/* yeah, audio is present */
+        /* yeah, audio is present */
 
-	funcs->control(tvh->priv, TVI_CONTROL_AUD_SET_SAMPLERATE,
-				  &tvh->tv_param->audiorate);
+        funcs->control(tvh->priv, TVI_CONTROL_AUD_SET_SAMPLERATE,
+                                  &tvh->tv_param->audiorate);
 
-	if (funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_FORMAT, &audio_format) != TVI_CONTROL_TRUE)
-	    goto no_audio;
+        if (funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_FORMAT, &audio_format) != TVI_CONTROL_TRUE)
+            goto no_audio;
 
-	switch(audio_format)
-	{
-	    case AF_FORMAT_U8:
-	    case AF_FORMAT_S8:
-	    case AF_FORMAT_U16_LE:
-	    case AF_FORMAT_U16_BE:
-	    case AF_FORMAT_S16_LE:
-	    case AF_FORMAT_S16_BE:
-	    case AF_FORMAT_S32_LE:
-	    case AF_FORMAT_S32_BE:
-		break;
-	    case AF_FORMAT_MPEG2:
-	    default:
-		MP_ERR(tvh, "Audio type '%s' unsupported!\n",
-		    af_fmt_to_str(audio_format));
-		goto no_audio;
-	}
+        switch(audio_format)
+        {
+            case AF_FORMAT_U8:
+            case AF_FORMAT_S8:
+            case AF_FORMAT_U16_LE:
+            case AF_FORMAT_U16_BE:
+            case AF_FORMAT_S16_LE:
+            case AF_FORMAT_S16_BE:
+            case AF_FORMAT_S32_LE:
+            case AF_FORMAT_S32_BE:
+                break;
+            case AF_FORMAT_MPEG2:
+            default:
+                MP_ERR(tvh, "Audio type '%s' unsupported!\n",
+                    af_fmt_to_str(audio_format));
+                goto no_audio;
+        }
 
-	struct sh_stream *sh_a = new_sh_stream(demuxer, STREAM_AUDIO);
-	sh_audio = sh_a->audio;
+        struct sh_stream *sh_a = new_sh_stream(demuxer, STREAM_AUDIO);
+        sh_audio = sh_a->audio;
 
-	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLERATE,
+        funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLERATE,
                    &sh_audio->samplerate);
         int nchannels = sh_audio->channels.num;
-	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_CHANNELS,
+        funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_CHANNELS,
                    &nchannels);
         mp_chmap_from_channels(&sh_audio->channels, nchannels);
 
         sh_a->codec = "mp-pcm";
-	sh_a->format = audio_format;
+        sh_a->format = audio_format;
 
         int samplesize = af_fmt2bits(audio_format) / 8;
 
-	sh_audio->i_bps =
-	    sh_audio->samplerate * samplesize * sh_audio->channels.num;
+        sh_audio->i_bps =
+            sh_audio->samplerate * samplesize * sh_audio->channels.num;
 
-	// emulate WF for win32 codecs:
-	sh_audio->wf = talloc_zero(sh_audio, MP_WAVEFORMATEX);
-	sh_audio->wf->wFormatTag = sh_a->format;
-	sh_audio->wf->nChannels = sh_audio->channels.num;
-	sh_audio->wf->wBitsPerSample = samplesize * 8;
-	sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;
-	sh_audio->wf->nBlockAlign = samplesize * sh_audio->channels.num;
-	sh_audio->wf->nAvgBytesPerSec = sh_audio->i_bps;
+        // emulate WF for win32 codecs:
+        sh_audio->wf = talloc_zero(sh_audio, MP_WAVEFORMATEX);
+        sh_audio->wf->wFormatTag = sh_a->format;
+        sh_audio->wf->nChannels = sh_audio->channels.num;
+        sh_audio->wf->wBitsPerSample = samplesize * 8;
+        sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;
+        sh_audio->wf->nBlockAlign = samplesize * sh_audio->channels.num;
+        sh_audio->wf->nAvgBytesPerSec = sh_audio->i_bps;
 
-	MP_VERBOSE(tvh, "  TV audio: %d channels, %d bits, %d Hz\n",
+        MP_VERBOSE(tvh, "  TV audio: %d channels, %d bits, %d Hz\n",
           sh_audio->wf->nChannels, sh_audio->wf->wBitsPerSample,
           sh_audio->wf->nSamplesPerSec);
     }
 no_audio:
 
     if(!(funcs->start(tvh->priv))){
-	// start failed :(
-	tv_uninit(tvh);
-	return -1;
+        // start failed :(
+        tv_uninit(tvh);
+        return -1;
     }
 
     /* set color eq */
@@ -856,16 +856,16 @@ int tv_set_color_options(tvi_handle_t *tvh, int opt, int value)
 
     switch(opt)
     {
-	case TV_COLOR_BRIGHTNESS:
-	    return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_BRIGHTNESS, &value);
-	case TV_COLOR_HUE:
-	    return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HUE, &value);
-	case TV_COLOR_SATURATION:
-	    return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_SATURATION, &value);
-	case TV_COLOR_CONTRAST:
-	    return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_CONTRAST, &value);
-	default:
-	    MP_WARN(tvh, "Unknown color option (%d) specified!\n", opt);
+        case TV_COLOR_BRIGHTNESS:
+            return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_BRIGHTNESS, &value);
+        case TV_COLOR_HUE:
+            return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HUE, &value);
+        case TV_COLOR_SATURATION:
+            return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_SATURATION, &value);
+        case TV_COLOR_CONTRAST:
+            return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_CONTRAST, &value);
+        default:
+            MP_WARN(tvh, "Unknown color option (%d) specified!\n", opt);
     }
 
     return TVI_CONTROL_UNKNOWN;
@@ -877,16 +877,16 @@ int tv_get_color_options(tvi_handle_t *tvh, int opt, int* value)
 
     switch(opt)
     {
-	case TV_COLOR_BRIGHTNESS:
-	    return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_BRIGHTNESS, value);
-	case TV_COLOR_HUE:
-	    return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HUE, value);
-	case TV_COLOR_SATURATION:
-	    return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_SATURATION, value);
-	case TV_COLOR_CONTRAST:
-	    return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_CONTRAST, value);
-	default:
-	    MP_WARN(tvh, "Unknown color option (%d) specified!\n", opt);
+        case TV_COLOR_BRIGHTNESS:
+            return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_BRIGHTNESS, value);
+        case TV_COLOR_HUE:
+            return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HUE, value);
+        case TV_COLOR_SATURATION:
+            return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_SATURATION, value);
+        case TV_COLOR_CONTRAST:
+            return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_CONTRAST, value);
+        default:
+            MP_WARN(tvh, "Unknown color option (%d) specified!\n", opt);
     }
 
     return TVI_CONTROL_UNKNOWN;
@@ -896,9 +896,9 @@ int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq)
 {
     if (tvh->functions->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) == TVI_CONTROL_TRUE)
     {
-	tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, freq);
-	MP_VERBOSE(tvh, "Current frequency: %lu (%.3f)\n",
-	    *freq, *freq/16.0);
+        tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, freq);
+        MP_VERBOSE(tvh, "Current frequency: %lu (%.3f)\n",
+            *freq, *freq/16.0);
     }
     return 1;
 }
@@ -907,14 +907,14 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 {
     if (tvh->functions->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) == TVI_CONTROL_TRUE)
     {
-//	unsigned long freq = atof(tvh->tv_param->freq)*16;
+//      unsigned long freq = atof(tvh->tv_param->freq)*16;
 
         /* set freq in MHz */
-	tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
+        tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
 
-	tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
-	MP_VERBOSE(tvh, "Current frequency: %lu (%.3f)\n",
-	    freq, freq/16.0);
+        tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
+        MP_VERBOSE(tvh, "Current frequency: %lu (%.3f)\n",
+            freq, freq/16.0);
     }
     return 1;
 }
@@ -952,123 +952,123 @@ int tv_step_channel_real(tvi_handle_t *tvh, int direction)
     tvh->tv_param->scan=0;
     if (direction == TV_CHANNEL_LOWER)
     {
-	if (tvh->channel-1 >= 0)
-	{
-	    strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
-	    cl = tvh->chanlist_s[--tvh->channel];
-	    MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
-		cl.name, cl.freq/1000.0);
-	    tv_set_freq_float(tvh, cl.freq);
-	}
+        if (tvh->channel-1 >= 0)
+        {
+            strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
+            cl = tvh->chanlist_s[--tvh->channel];
+            MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
+                cl.name, cl.freq/1000.0);
+            tv_set_freq_float(tvh, cl.freq);
+        }
     }
 
     if (direction == TV_CHANNEL_HIGHER)
     {
-	if (tvh->channel+1 < chanlists[tvh->chanlist].count)
-	{
-	    strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
-	    cl = tvh->chanlist_s[++tvh->channel];
-	    MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
-		cl.name, cl.freq/1000.0);
-	    tv_set_freq_float(tvh, cl.freq);
-	}
+        if (tvh->channel+1 < chanlists[tvh->chanlist].count)
+        {
+            strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
+            cl = tvh->chanlist_s[++tvh->channel];
+            MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
+                cl.name, cl.freq/1000.0);
+            tv_set_freq_float(tvh, cl.freq);
+        }
     }
     return 1;
 }
 
 int tv_step_channel(tvi_handle_t *tvh, int direction) {
-	tvh->tv_param->scan=0;
-	if (tv_channel_list) {
-		if (direction == TV_CHANNEL_HIGHER) {
-			tv_channel_last = tv_channel_current;
-			if (tv_channel_current->next)
-				tv_channel_current = tv_channel_current->next;
-			else
-				tv_channel_current = tv_channel_list;
-			set_norm_and_freq(tvh, tv_channel_current);
-		}
-		if (direction == TV_CHANNEL_LOWER) {
-			tv_channel_last = tv_channel_current;
-			if (tv_channel_current->prev)
-				tv_channel_current = tv_channel_current->prev;
-			else
-				while (tv_channel_current->next)
-					tv_channel_current = tv_channel_current->next;
-			set_norm_and_freq(tvh, tv_channel_current);
-		}
-	} else tv_step_channel_real(tvh, direction);
-	return 1;
+        tvh->tv_param->scan=0;
+        if (tv_channel_list) {
+                if (direction == TV_CHANNEL_HIGHER) {
+                        tv_channel_last = tv_channel_current;
+                        if (tv_channel_current->next)
+                                tv_channel_current = tv_channel_current->next;
+                        else
+                                tv_channel_current = tv_channel_list;
+                        set_norm_and_freq(tvh, tv_channel_current);
+                }
+                if (direction == TV_CHANNEL_LOWER) {
+                        tv_channel_last = tv_channel_current;
+                        if (tv_channel_current->prev)
+                                tv_channel_current = tv_channel_current->prev;
+                        else
+                                while (tv_channel_current->next)
+                                        tv_channel_current = tv_channel_current->next;
+                        set_norm_and_freq(tvh, tv_channel_current);
+                }
+        } else tv_step_channel_real(tvh, direction);
+        return 1;
 }
 
 int tv_set_channel_real(tvi_handle_t *tvh, char *channel) {
-	int i;
-	struct CHANLIST cl;
+        int i;
+        struct CHANLIST cl;
 
         tvh->tv_param->scan=0;
         strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
-	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
-	{
-	    cl = tvh->chanlist_s[i];
-//	    printf("count%d: name: %s, freq: %d\n",
-//		i, cl.name, cl.freq);
-	    if (!strcasecmp(cl.name, channel))
-	    {
-		tvh->channel = i;
-		MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
-		    cl.name, cl.freq/1000.0);
-		tv_set_freq_float(tvh, cl.freq);
-		break;
-	    }
-	}
-	return 1;
+        for (i = 0; i < chanlists[tvh->chanlist].count; i++)
+        {
+            cl = tvh->chanlist_s[i];
+//          printf("count%d: name: %s, freq: %d\n",
+//              i, cl.name, cl.freq);
+            if (!strcasecmp(cl.name, channel))
+            {
+                tvh->channel = i;
+                MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
+                    cl.name, cl.freq/1000.0);
+                tv_set_freq_float(tvh, cl.freq);
+                break;
+            }
+        }
+        return 1;
 }
 
 int tv_set_channel(tvi_handle_t *tvh, char *channel) {
-	int i, channel_int;
+        int i, channel_int;
 
-	tvh->tv_param->scan=0;
-	if (tv_channel_list) {
-		tv_channel_last = tv_channel_current;
-		channel_int = atoi(channel);
-		tv_channel_current = tv_channel_list;
-		for (i = 1; i < channel_int; i++)
-			if (tv_channel_current->next)
-				tv_channel_current = tv_channel_current->next;
-		set_norm_and_freq(tvh, tv_channel_current);
-	} else tv_set_channel_real(tvh, channel);
-	return 1;
+        tvh->tv_param->scan=0;
+        if (tv_channel_list) {
+                tv_channel_last = tv_channel_current;
+                channel_int = atoi(channel);
+                tv_channel_current = tv_channel_list;
+                for (i = 1; i < channel_int; i++)
+                        if (tv_channel_current->next)
+                                tv_channel_current = tv_channel_current->next;
+                set_norm_and_freq(tvh, tv_channel_current);
+        } else tv_set_channel_real(tvh, channel);
+        return 1;
 }
 
 int tv_last_channel(tvi_handle_t *tvh) {
 
-	tvh->tv_param->scan=0;
-	if (tv_channel_list) {
-		tv_channels_t *tmp;
+        tvh->tv_param->scan=0;
+        if (tv_channel_list) {
+                tv_channels_t *tmp;
 
-		tmp = tv_channel_last;
-		tv_channel_last = tv_channel_current;
-		tv_channel_current = tmp;
+                tmp = tv_channel_last;
+                tv_channel_last = tv_channel_current;
+                tv_channel_current = tmp;
 
-		set_norm_and_freq(tvh, tv_channel_current);
-	} else {
-		int i;
-		struct CHANLIST cl;
+                set_norm_and_freq(tvh, tv_channel_current);
+        } else {
+                int i;
+                struct CHANLIST cl;
 
-		for (i = 0; i < chanlists[tvh->chanlist].count; i++)
-		{
-		    cl = tvh->chanlist_s[i];
-		    if (!strcasecmp(cl.name, tv_channel_last_real))
-		    {
-			strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
-			tvh->channel = i;
-			MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
-			    cl.name, cl.freq/1000.0);
-			tv_set_freq_float(tvh, cl.freq);
-			break;
-		    }
-		}
-	}
-	return 1;
+                for (i = 0; i < chanlists[tvh->chanlist].count; i++)
+                {
+                    cl = tvh->chanlist_s[i];
+                    if (!strcasecmp(cl.name, tv_channel_last_real))
+                    {
+                        strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
+                        tvh->channel = i;
+                        MP_INFO(tvh, "Selected channel: %s (freq: %.3f)\n",
+                            cl.name, cl.freq/1000.0);
+                        tv_set_freq_float(tvh, cl.freq);
+                        break;
+                    }
+                }
+        }
+        return 1;
 }
 
 int tv_step_norm(tvi_handle_t *tvh)

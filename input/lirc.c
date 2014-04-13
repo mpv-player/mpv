@@ -61,7 +61,7 @@ int mp_input_lirc_init(struct input_ctx *ictx, struct mp_log *log,
   struct lirc_config *lirc_config = NULL;
   if(lirc_readconfig( lirc_configfile,&lirc_config,NULL )!=0 ){
     mp_err(log, "Failed to read LIRC config file %s.\n",
-		    lirc_configfile == NULL ? "~/.lircrc" : lirc_configfile);
+                    lirc_configfile == NULL ? "~/.lircrc" : lirc_configfile);
     lirc_deinit();
     return -1;
   }

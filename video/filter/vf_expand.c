@@ -60,7 +60,7 @@ static struct vf_priv_s {
 
 static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt)
+        unsigned int flags, unsigned int outfmt)
 {
     vf->priv->exp_x = vf->priv->cfg_exp_x;
     vf->priv->exp_y = vf->priv->cfg_exp_y;

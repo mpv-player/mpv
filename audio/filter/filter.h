@@ -49,7 +49,7 @@
 #define WINDOW_MASK 0x0000001F
 
 // Parallel filter design
-#define	FWD   	    0x00000001 // Forward indexing of polyphase filter
+#define FWD         0x00000001 // Forward indexing of polyphase filter
 #define REW         0x00000002 // Reverse indexing of polyphase filter
 #define ODD         0x00000010 // Make filter HP
 

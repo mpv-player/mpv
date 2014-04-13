@@ -35,7 +35,7 @@
 // Data for specific instances of this filter
 typedef struct af_center_s
 {
-  int ch;		// Channel number which to insert the filtered data
+  int ch;               // Channel number which to insert the filtered data
 }af_center_t;
 
 // Initialization and runtime control
@@ -61,12 +61,12 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Filter data through filter
 static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 {
-  struct mp_audio*    c   = data;	 // Current working data
+  struct mp_audio*    c   = data;        // Current working data
   af_center_t*  s   = af->priv; // Setup for this instance
-  float*   	a   = c->planes[0];	 // Audio data
-  int		nch = c->nch;	 // Number of channels
-  int		len = c->samples*c->nch;	 // Number of samples in current audio block
-  int		ch  = s->ch;	 // Channel in which to insert the center audio
+  float*        a   = c->planes[0];      // Audio data
+  int           nch = c->nch;    // Number of channels
+  int           len = c->samples*c->nch;         // Number of samples in current audio block
+  int           ch  = s->ch;     // Channel in which to insert the center audio
   register int  i;
 
   // Run filter

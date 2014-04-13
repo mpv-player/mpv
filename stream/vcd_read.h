@@ -100,8 +100,8 @@ static mp_vcd_priv_t* vcd_read_toc(stream_t *stream, int fd){
       tocentry.cdte_format = CDROM_MSF;
 
       if (ioctl(fd,CDROMREADTOCENTRY,&tocentry)==-1) {
-	MP_ERR(stream, "read CDROM toc entry: %s\n",strerror(errno));
-	return NULL;
+        MP_ERR(stream, "read CDROM toc entry: %s\n",strerror(errno));
+        return NULL;
       }
 
       if (i<=tochdr.cdth_trk1)
@@ -155,10 +155,10 @@ static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
 #include <sys/scsi/generic/commands.h>
 #include <sys/scsi/impl/uscsi.h>
 
-#define	SUN_XAREAD	1	/*fails on atapi drives*/
-#define	SUN_MODE2READ	2	/*fails on atapi drives*/
-#define	SUN_SCSIREAD	3
-#define	SUN_VCDREAD	SUN_SCSIREAD
+#define SUN_XAREAD      1       /*fails on atapi drives*/
+#define SUN_MODE2READ   2       /*fails on atapi drives*/
+#define SUN_SCSIREAD    3
+#define SUN_VCDREAD     SUN_SCSIREAD
 
 static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
 {
@@ -220,6 +220,6 @@ static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
 #error SUN_VCDREAD
 #endif
 }
-#endif	/*sun*/
+#endif  /*sun*/
 
 #endif /* MPLAYER_VCD_READ_H */
