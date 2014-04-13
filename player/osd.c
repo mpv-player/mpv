@@ -135,7 +135,7 @@ static void add_term_osd_bar(struct MPContext *mpctx, char **line, int width)
     for (int n = 0; n < 5; n++)
         parts[n] = bstr_split_utf8(chars, &chars);
 
-    saddf(line, "%.*s", BSTR_P(parts[0]));
+    saddf(line, "\r%.*s", BSTR_P(parts[0]));
     for (int n = 0; n < pos; n++)
         saddf(line, "%.*s", BSTR_P(parts[1]));
     saddf(line, "%.*s", BSTR_P(parts[2]));
