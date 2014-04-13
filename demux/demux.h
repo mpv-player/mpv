@@ -27,6 +27,7 @@
 
 #include "bstr/bstr.h"
 #include "common/common.h"
+#include "common/tags.h"
 #include "packet.h"
 #include "stheader.h"
 
@@ -103,12 +104,6 @@ typedef struct demuxer_desc {
     void (*seek)(struct demuxer *demuxer, float rel_seek_secs, int flags);
     int (*control)(struct demuxer *demuxer, int cmd, void *arg);
 } demuxer_desc_t;
-
-struct mp_tags {
-    char **keys;
-    char **values;
-    int num_keys;
-};
 
 typedef struct demux_chapter
 {
@@ -291,12 +286,6 @@ void demux_packet_list_seek(struct demux_packet **pkts, int num_pkts,
 double demux_packet_list_duration(struct demux_packet **pkts, int num_pkts);
 struct demux_packet *demux_packet_list_fill(struct demux_packet **pkts,
                                             int num_pkts, int *current);
-
-void mp_tags_set_str(struct mp_tags *tags, const char *key, const char *value);
-void mp_tags_set_bstr(struct mp_tags *tags, bstr key, bstr value);
-char *mp_tags_get_str(struct mp_tags *tags, const char *key);
-char *mp_tags_get_bstr(struct mp_tags *tags, bstr key);
-void mp_tags_clear(struct mp_tags *tags);
 
 bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
                             struct matroska_segment_uid *b);

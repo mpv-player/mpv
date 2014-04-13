@@ -396,6 +396,12 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'func': check_statement('libavcodec/avcodec.h',
                                 'enum AVPacketSideDataType type = AV_PKT_DATA_REPLAYGAIN',
                                 use='libav')
+    },{
+        'name': 'avframe-metadata',
+        'desc': 'libavutil AVFrame metadata',
+        'func': check_statement('libavutil/frame.h',
+                                'av_frame_get_metadata(NULL)',
+                                use='libav')
     }
 ]
 
