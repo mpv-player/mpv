@@ -879,6 +879,14 @@ Available filters are:
                 core = vs.get_core()
                 core.std.AddBorders(video_in, 10, 10, 20, 20).set_output()
 
+        .. warning::
+
+            The script will be reloaded on every seek. This is done to reset
+            the filter properly on discontinuities. One problem with that is
+            that VapourSynth's ``LoadPlugin`` is documented to error when a
+            plugin is already loaded, so if you use this function, you'll have
+            to add a workaround to ignore the error.
+
     ``maxbuffer``
         Maximum number of decoded video frames that should be buffered before
         the filter (default: 5). This specifies the maximum number of frames
