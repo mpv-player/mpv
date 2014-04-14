@@ -332,16 +332,10 @@ static inline bool IMGFMT_IS_RGB(int fmt)
 #define IMGFMT_IS_HWACCEL(fmt) \
     ((fmt) == IMGFMT_VDPAU || (fmt) == IMGFMT_VAAPI || (fmt) == IMGFMT_VDA)
 
-
-struct mp_imgfmt_entry {
-    const char *name;
-    int fmt;
-};
-
-extern struct mp_imgfmt_entry mp_imgfmt_list[];
-
 int mp_imgfmt_from_name(bstr name, bool allow_hwaccel);
 const char *mp_imgfmt_to_name(int fmt);
+
+char **mp_imgfmt_name_list(void);
 
 #define vo_format_name mp_imgfmt_to_name
 

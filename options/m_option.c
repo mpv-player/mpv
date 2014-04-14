@@ -1924,9 +1924,11 @@ static int parse_imgfmt(struct mp_log *log, const m_option_t *opt,
 
     if (!bstrcmp0(param, "help")) {
         mp_info(log, "Available formats:");
-        for (int i = 0; mp_imgfmt_list[i].name; i++)
-            mp_info(log, " %s", mp_imgfmt_list[i].name);
+        char **list = mp_imgfmt_name_list();
+        for (int i = 0; list[i]; i++)
+            mp_info(log, " %s", list[i]);
         mp_info(log, "\n");
+        talloc_free(list);
         return M_OPT_EXIT - 1;
     }
 
