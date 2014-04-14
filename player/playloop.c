@@ -204,6 +204,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
     mpctx->drop_frame_cnt = 0;
     mpctx->dropped_frames = 0;
     mpctx->playback_pts = MP_NOPTS_VALUE;
+    mpctx->eof_reached = false;
 
 #if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
@@ -834,6 +835,7 @@ static void handle_keep_open(struct MPContext *mpctx)
     if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
         mpctx->playback_pts = mpctx->last_vo_pts;
+        mpctx->eof_reached = true;
         pause_player(mpctx, PAUSE_BY_KEEP_OPEN);
     }
 }
@@ -1306,6 +1308,7 @@ void idle_loop(struct MPContext *mpctx)
     while (mpctx->opts->player_idle_mode && !mpctx->playlist->current
            && mpctx->stop_play != PT_QUIT)
     {
+        mpctx->eof_reached = true;
         if (need_reinit) {
             mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
             handle_force_window(mpctx, true);

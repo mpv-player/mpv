@@ -777,6 +777,13 @@ Property list
 ``paused-for-cache``
     Returns ``yes`` when playback is paused because of waiting for the cache.
 
+``eof-reached``
+    Returns ``yes`` if end of playback was reached, ``no`` otherwise. Note
+    that this is usually interesting only if ``--keep-open`` is enabled,
+    since otherwise the player will immediately play the next file (or exit
+    or enter idle mode), and in these cases the ``eof-reached`` property will
+    logically be cleared immediately after it's set.
+
 ``pts-association-mode`` (RW)
     See ``--pts-association-mode``.
 

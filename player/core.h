@@ -335,6 +335,7 @@ typedef struct MPContext {
     int last_dvb_step;
 
     bool paused;
+    bool eof_reached;
     // step this many frames, then pause
     int step_frames;
     // Counted down each frame, stop playback if 0 is reached. (-1 = disable)

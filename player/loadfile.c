@@ -1332,6 +1332,7 @@ goto_reopen_demuxer: ;
     mpctx->playing_msg_shown = false;
     mpctx->paused = false;
     mpctx->paused_for_cache = false;
+    mpctx->eof_reached = false;
     mpctx->seek = (struct seek_params){ 0 };
 
     // If there's a timeline force an absolute seek to initialize state
