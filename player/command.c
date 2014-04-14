@@ -965,7 +965,7 @@ static int mp_property_vf_metadata(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     }
-    return M_PROPERTY_UNAVAILABLE;
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static int mp_property_pause(m_option_t *prop, int action, void *arg,
