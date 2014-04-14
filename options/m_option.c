@@ -196,7 +196,7 @@ const m_option_type_t m_option_type_flag = {
 static int parse_store(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
-    if (param.len == 0 || bstrcmp0(param, "yes") == 0) {
+    if (param.len == 0) {
         if (dst)
             VAL(dst) = opt->max;
         return 0;
@@ -235,7 +235,7 @@ const m_option_type_t m_option_type_store = {
 static int parse_store_float(struct mp_log *log, const m_option_t *opt,
                              struct bstr name, struct bstr param, void *dst)
 {
-    if (param.len == 0 || bstrcmp0(param, "yes") == 0) {
+    if (param.len == 0) {
         if (dst)
             VAL(dst) = opt->max;
         return 0;
