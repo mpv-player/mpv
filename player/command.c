@@ -984,6 +984,13 @@ static int mp_property_pause(m_option_t *prop, int action, void *arg,
     return mp_property_generic_option(prop, action, arg, ctx);
 }
 
+static int mp_property_core_idle(m_option_t *prop, int action, void *arg,
+                                 void *ctx)
+{
+    MPContext *mpctx = ctx;
+    return m_property_int_ro(prop, action, arg, mpctx->paused);
+}
+
 static int mp_property_cache(m_option_t *prop, int action, void *arg,
                              void *ctx)
 {
@@ -2243,6 +2250,8 @@ static const m_option_t mp_properties[] = {
     M_PROPERTY("chapter-metadata", mp_property_chapter_metadata),
     M_PROPERTY( "vf-metadata", mp_property_vf_metadata),
     M_OPTION_PROPERTY_CUSTOM("pause", mp_property_pause),
+    { "core-idle", mp_property_core_idle, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
     { "cache", mp_property_cache, CONF_TYPE_INT },
     { "cache-size", mp_property_cache_size, CONF_TYPE_INT, M_OPT_MIN, 0 },
     { "paused-for-cache", mp_property_paused_for_cache, CONF_TYPE_FLAG,
@@ -2380,8 +2389,8 @@ const char **mp_event_property_change[] = {
     E(MPV_EVENT_TRACK_SWITCHED, "vid", "video", "aid", "audio", "sid", "sub",
       "secondary-sid"),
     E(MPV_EVENT_IDLE, "*"),
-    E(MPV_EVENT_PAUSE, "pause"),
-    E(MPV_EVENT_UNPAUSE, "pause"),
+    E(MPV_EVENT_PAUSE,   "pause", "paused-on-cache", "core-idle"),
+    E(MPV_EVENT_UNPAUSE, "pause", "paused-on-cache", "core-idle"),
     E(MPV_EVENT_TICK, "time-pos", "stream-pos", "stream-time-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",

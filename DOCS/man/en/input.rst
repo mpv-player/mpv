@@ -754,6 +754,11 @@ Property list
 ``pause`` (RW)
     Pause status. This is usually ``yes`` or ``no``. See ``--pause``.
 
+``core-idle``
+    Return ``yes`` if the playback core is paused, otherwise ``no``. This can
+    be different ``pause`` in special situations, such as when the player
+    pauses itself due to low network cache.
+
 ``cache``
     Network cache fill state (0-100).
 
