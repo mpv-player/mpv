@@ -149,3 +149,7 @@ You can encode files from one format/codec to another using this facility.
     container formats, e.g. AVI). In this mode, discontinuities are not fixed
     and all pts are passed through as-is. Never seek backwards or use multiple
     input files in this mode!
+
+``--no-ometadata``
+    Turns off copying of metadata from input files to output files when
+    encoding (which is enabled by default).

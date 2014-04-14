@@ -247,7 +247,8 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options,
 void encode_lavc_set_metadata(struct encode_lavc_context *ctx,
                               struct mp_tags *metadata)
 {
-    ctx->metadata = metadata;
+    if (ctx->options->metadata)
+        ctx->metadata = metadata;
 }
 
 int encode_lavc_start(struct encode_lavc_context *ctx)

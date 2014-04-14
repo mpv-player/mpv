@@ -635,6 +635,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("oneverdrop", encode_output.neverdrop, CONF_GLOBAL),
     OPT_FLAG("ovfirst", encode_output.video_first, CONF_GLOBAL),
     OPT_FLAG("oafirst", encode_output.audio_first, CONF_GLOBAL),
+    OPT_FLAG("ometadata", encode_output.metadata, CONF_GLOBAL),
 #endif
 
     {NULL, NULL, 0, 0, 0, 0, NULL}
@@ -765,6 +766,9 @@ const struct MPOpts mp_default_opts = {
         .use_media_keys = 1,
 #endif
         .default_bindings = 1,
+    },
+    .encode_output = {
+        .metadata = 1,
     },
 };
 

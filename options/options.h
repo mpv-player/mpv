@@ -302,6 +302,7 @@ typedef struct MPOpts {
         int neverdrop;
         int video_first;
         int audio_first;
+        int metadata;
     } encode_output;
 } MPOpts;
 
