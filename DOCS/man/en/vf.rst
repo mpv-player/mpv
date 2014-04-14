@@ -882,10 +882,7 @@ Available filters are:
         .. warning::
 
             The script will be reloaded on every seek. This is done to reset
-            the filter properly on discontinuities. One problem with that is
-            that VapourSynth's ``LoadPlugin`` is documented to error when a
-            plugin is already loaded, so if you use this function, you'll have
-            to add a workaround to ignore the error.
+            the filter properly on discontinuities.
 
     ``maxbuffer``
         Maximum number of decoded video frames that should be buffered before

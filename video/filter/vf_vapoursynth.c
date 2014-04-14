@@ -37,14 +37,13 @@
 #include "vf.h"
 
 struct vf_priv_s {
-    bool vs_initialized;        // if true, must call vsscript_finalize()
     VSCore *vscore;
     const VSAPI *vsapi;
     VSScript *se;
     VSNodeRef *out_node;
     VSNodeRef *in_node;
 
-    VSVideoInfo fmt_in;
+    struct mp_image_params fmt_in;
 
     pthread_mutex_t lock;
     pthread_cond_t wakeup;
@@ -229,7 +228,18 @@ static void VS_CC infiltInit(VSMap *in, VSMap *out, void **instanceData,
 
     // Note: this is called from createFilter, so no need for locking.
 
-    p->vsapi->setVideoInfo(&p->fmt_in, 1, node);
+    VSVideoInfo fmt = {
+        .format = p->vsapi->getFormatPreset(mp_to_vs(p->fmt_in.imgfmt), p->vscore),
+        .width = p->fmt_in.w,
+        .height = p->fmt_in.h,
+    };
+    if (!fmt.format) {
+        p->vsapi->setError(out, "Unsupported input format.\n");
+        return;
+    }
+
+    p->vsapi->setVideoInfo(&fmt, 1, node);
+    p->in_node_active = true;
 }
 
 static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
@@ -303,21 +313,30 @@ static void destroy_vs(struct vf_instance *vf)
         p->vsapi->freeNode(p->out_node);
     p->in_node = p->out_node = NULL;
 
-    // Wait until the frame callback has returned and the filter dies
     pthread_mutex_lock(&p->lock);
     p->shutdown = true;
     pthread_cond_broadcast(&p->wakeup);
-    while (p->getting_frame || p->in_node_active)
-        pthread_cond_wait(&p->wakeup, &p->lock);
+    pthread_mutex_unlock(&p->lock);
+
+    // Expect that this properly waits until all filters return etc.
+    if (p->se)
+        vsscript_freeScript(p->se);
+
+    p->se = NULL;
+    p->vsapi = NULL;
+    p->vscore = NULL;
+
+    assert(!p->getting_frame);
+    assert(!p->in_node_active);
+
     p->shutdown = false;
     talloc_free(p->got_frame);
     p->got_frame = NULL;
     // Kill queued frames too
     for (int n = 0; n < p->num_buffered; n++)
         talloc_free(p->buffered[n]);
-    p->num_buffered = false;
+    p->num_buffered = 0;
     p->out_frameno = p->in_frameno = 0;
-    pthread_mutex_unlock(&p->lock);
 }
 
 static int reinit_vs(struct vf_instance *vf)
@@ -327,6 +346,15 @@ static int reinit_vs(struct vf_instance *vf)
     int res = -1;
 
     destroy_vs(vf);
+
+    // First load an empty script to get a VSScript, so that we get the vsapi
+    // and vscore.
+    if (vsscript_evaluateScript(&p->se, "", NULL, 0))
+        goto error;
+    p->vsapi = vsscript_getVSApi();
+    p->vscore = vsscript_getCore(p->se);
+    if (!p->vsapi || !p->vscore)
+        goto error;
 
     in = p->vsapi->createMap();
     out = p->vsapi->createMap();
@@ -362,9 +390,11 @@ static int reinit_vs(struct vf_instance *vf)
 
     res = 0;
 error:
-    p->vsapi->freeMap(in);
-    p->vsapi->freeMap(out);
-    p->vsapi->freeMap(vars);
+    if (p->vsapi) {
+        p->vsapi->freeMap(in);
+        p->vsapi->freeMap(out);
+        p->vsapi->freeMap(vars);
+    }
     if (res < 0)
         destroy_vs(vf);
     return res;
@@ -376,13 +406,11 @@ static int config(struct vf_instance *vf, int width, int height,
 {
     struct vf_priv_s *p = vf->priv;
 
-    p->fmt_in = (VSVideoInfo){
-        .format = p->vsapi->getFormatPreset(mp_to_vs(fmt), p->vscore),
-        .width = width,
-        .height = height,
+    p->fmt_in = (struct mp_image_params){
+        .imgfmt = fmt,
+        .w = width,
+        .h = height,
     };
-    if (!p->fmt_in.format)
-        return 0;
 
     if (reinit_vs(vf) < 0)
         return 0;
@@ -421,11 +449,7 @@ static void uninit(struct vf_instance *vf)
     struct vf_priv_s *p = vf->priv;
 
     destroy_vs(vf);
-
-    if (p->se)
-        vsscript_freeScript(p->se);
-    if (p->vs_initialized)
-        vsscript_finalize();
+    vsscript_finalize();
 
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);
@@ -434,6 +458,15 @@ static void uninit(struct vf_instance *vf)
 static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
+    if (!vsscript_init()) {
+        MP_FATAL(vf, "Could not initialize VapourSynth scripting.\n");
+        return 0;
+    }
+    if (!p->cfg_file || !p->cfg_file[0]) {
+        MP_FATAL(vf, "'file' parameter must be set.\n");
+        return 0;
+    }
+
     pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
     vf->reconfig = NULL;
@@ -444,25 +477,7 @@ static int vf_open(vf_instance_t *vf)
     vf->control = control;
     vf->uninit = uninit;
     p->buffered = talloc_array(vf, struct mp_image *, p->cfg_maxbuffer);
-    if (!p->cfg_file || !p->cfg_file[0]) {
-        MP_FATAL(vf, "'file' parameter must be set.\n");
-        goto error;
-    }
-    if (!vsscript_init())
-        goto error;
-    p->vs_initialized = true;
-    // First load an empty script to get a VSScript, so that we get the vsapi
-    // and vscore.
-    if (vsscript_evaluateScript(&p->se, "", NULL, 0))
-        goto error;
-    p->vsapi = vsscript_getVSApi();
-    p->vscore = vsscript_getCore(p->se);
-    if (!p->vsapi || !p->vscore)
-        goto error;
     return 1;
-error:
-    uninit(vf);
-    return 0;
 }
 
 #define OPT_BASE_STRUCT struct vf_priv_s
