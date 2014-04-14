@@ -78,7 +78,7 @@ static const char av_desync_help_text[] =
 "If none of this helps you, file a bug report.\n\n";
 
 
-void pause_player(struct MPContext *mpctx, mpv_event_pause_reason reason)
+void pause_player(struct MPContext *mpctx)
 {
     mpctx->opts->pause = 1;
 
@@ -107,12 +107,10 @@ void pause_player(struct MPContext *mpctx, mpv_event_pause_reason reason)
         MP_SMODE(mpctx, "ID_PAUSED\n");
 
 end:
-    reason.user_paused = !!mpctx->opts->pause;
-    reason.real_paused = !!mpctx->paused;
-    mp_notify(mpctx, MPV_EVENT_PAUSE, &reason);
+    mp_notify(mpctx, mpctx->opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
 }
 
-void unpause_player(struct MPContext *mpctx, mpv_event_pause_reason reason)
+void unpause_player(struct MPContext *mpctx)
 {
     mpctx->opts->pause = 0;
 
@@ -134,9 +132,7 @@ void unpause_player(struct MPContext *mpctx, mpv_event_pause_reason reason)
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 
 end:
-    reason.user_paused = !!mpctx->opts->pause;
-    reason.real_paused = !!mpctx->paused;
-    mp_notify(mpctx, MPV_EVENT_UNPAUSE, &reason);
+    mp_notify(mpctx, mpctx->opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
 }
 
 static void draw_osd(struct MPContext *mpctx)
@@ -165,12 +161,12 @@ void add_step_frame(struct MPContext *mpctx, int dir)
         return;
     if (dir > 0) {
         mpctx->step_frames += 1;
-        unpause_player(mpctx, PAUSE_BY_COMMAND);
+        unpause_player(mpctx);
     } else if (dir < 0) {
         if (!mpctx->backstep_active && !mpctx->hrseek_active) {
             mpctx->backstep_active = true;
             mpctx->backstep_start_seek_ts = mpctx->vo_pts_history_seek_ts;
-            pause_player(mpctx, PAUSE_BY_COMMAND);
+            pause_player(mpctx);
         }
     }
 }
@@ -662,14 +658,14 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
         if (cache < 0 || cache >= opts->stream_cache_min_percent || idle) {
             mpctx->paused_for_cache = false;
             if (!opts->pause)
-                unpause_player(mpctx, PAUSE_BY_CACHE);
+                unpause_player(mpctx);
         }
     } else {
         if (cache >= 0 && cache <= opts->stream_cache_pause && !idle &&
             opts->stream_cache_pause < opts->stream_cache_min_percent)
         {
             bool prev_paused_user = opts->pause;
-            pause_player(mpctx, PAUSE_BY_CACHE);
+            pause_player(mpctx);
             mpctx->paused_for_cache = true;
             opts->pause = prev_paused_user;
         }
@@ -836,7 +832,7 @@ static void handle_keep_open(struct MPContext *mpctx)
         mpctx->stop_play = KEEP_PLAYING;
         mpctx->playback_pts = mpctx->last_vo_pts;
         mpctx->eof_reached = true;
-        pause_player(mpctx, PAUSE_BY_KEEP_OPEN);
+        pause_player(mpctx);
     }
 }
 
@@ -1248,7 +1244,7 @@ void run_playloop(struct MPContext *mpctx)
             if (new_frame_shown)
                 mpctx->step_frames--;
             if (mpctx->step_frames == 0)
-                pause_player(mpctx, PAUSE_BY_COMMAND);
+                pause_player(mpctx);
         }
 
     }

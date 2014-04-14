@@ -464,29 +464,13 @@ List of events
     when the ``start-file`` or ``shutdown`` events happen.
 
 ``pause``
-    Playback was paused.
-
-    Has the following event fields:
-
-    ``real_paused``
-        Current playback pause state as boolean.
-
-    ``user_paused``
-        User requested pause state.
-
-    ``by_command``
-        If the action was triggered by an input command (or via an user key
-        binding). It's false if it was an automatic action.
-
-    ``by_cache``
-        If the action was triggered by a low (or recovering) cache state.
-
-    ``by_keep_open``
-        If the pausing was triggered because the end of playback was reached,
-        and the "keep-open" option is enabled, 0 otherwise.
+    Playback was paused. This also happens when for example the player is
+    paused on low network cache. Then the event type indicates the pause state
+    (like the property "pause" as opposed to the "core-idle" propetty), and you
+    might be multiple ``pause`` events in a row.
 
 ``unpause``
-    Playback was unpaused.
+    Playback was unpaused. See above for details.
 
 ``tick``
     Called after a video frame was displayed. This is a hack, and you should

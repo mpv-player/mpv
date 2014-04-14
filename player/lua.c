@@ -475,22 +475,6 @@ static int script_wait_event(lua_State *L)
         lua_setfield(L, -2, "args"); // event
         break;
     }
-    case MPV_EVENT_PAUSE:
-    case MPV_EVENT_UNPAUSE:
-    {
-        mpv_event_pause_reason *msg = event->data;
-        lua_pushboolean(L, msg->real_paused);
-        lua_setfield(L, -2, "real_paused");
-        lua_pushboolean(L, msg->user_paused);
-        lua_setfield(L, -2, "user_paused");
-        lua_pushboolean(L, msg->by_command);
-        lua_setfield(L, -2, "by_command");
-        lua_pushboolean(L, msg->by_cache);
-        lua_setfield(L, -2, "by_cache");
-        lua_pushboolean(L, msg->by_keep_open);
-        lua_setfield(L, -2, "by_keep_open");
-        break;
-    }
     case MPV_EVENT_PROPERTY_CHANGE: {
         mpv_event_property *prop = event->data;
         lua_pushstring(L, prop->name);

@@ -843,11 +843,14 @@ typedef enum mpv_event_id {
      */
     MPV_EVENT_IDLE              = 11,
     /**
-     * Playback was paused.
+     * Playback was paused. This indicates the logical pause state (like the
+     * property "pause" as opposed to the "core-idle" propetty). This event
+     * is sent whenever any pause state changes, not only the logical state,
+     * so you might get multiple MPV_EVENT_PAUSE events in a row.
      */
     MPV_EVENT_PAUSE             = 12,
     /**
-     * Playback was unpaused.
+     * Playback was unpaused. See MPV_EVENT_PAUSE for not so obvious details.
      */
     MPV_EVENT_UNPAUSE           = 13,
     /**
@@ -975,32 +978,6 @@ typedef struct mpv_event_log_message {
     const char *text;
 } mpv_event_log_message;
 
-typedef struct mpv_event_pause_reason {
-    /**
-     * Actual pause state (0 or 1)
-     */
-    int real_paused;
-    /**
-     * User requested pause state (0 or 1)
-     */
-    int user_paused;
-    /**
-     * 1 if the action was triggered by an input command (or via an user key
-     * binding), 0 otherwise.
-     */
-    int by_command;
-    /**
-     * 1 if the action was triggered by a low (or recovering) cache state,
-     * 0 otherwise.
-     */
-    int by_cache;
-    /**
-     * 1 if the pausing was triggered because the end of playback was reached,
-     * and the "keep-open" option is enabled, 0 otherwise.
-     */
-    int by_keep_open;
-} mpv_event_pause_reason;
-
 typedef struct mpv_event_end_file {
     /**
      * Identifies the reason why playback was stopped:
@@ -1063,8 +1040,6 @@ typedef struct mpv_event {
      *  MPV_EVENT_GET_PROPERTY_REPLY:     mpv_event_property*
      *  MPV_EVENT_PROPERTY_CHANGE:        mpv_event_property*
      *  MPV_EVENT_LOG_MESSAGE:            mpv_event_log_message*
-     *  MPV_EVENT_PAUSE:                  mpv_event_pause_reason*
-     *  MPV_EVENT_UNPAUSE:                mpv_event_pause_reason*
      *  MPV_EVENT_SCRIPT_INPUT_DISPATCH:  mpv_event_script_input_dispatch*
      *  MPV_EVENT_CLIENT_MESSAGE:         mpv_event_client_message*
      *  MPV_EVENT_END_FILE:               mpv_event_end_file*

@@ -391,10 +391,6 @@ static void status_reply(struct mpv_handle *ctx, int event,
 static void dup_event_data(struct mpv_event *ev)
 {
     switch (ev->event_id) {
-    case MPV_EVENT_PAUSE:
-    case MPV_EVENT_UNPAUSE:
-        ev->data = talloc_memdup(NULL, ev->data, sizeof(mpv_event_pause_reason));
-        break;
     case MPV_EVENT_CLIENT_MESSAGE: {
         struct mpv_event_client_message *src = ev->data;
         struct mpv_event_client_message *msg =
