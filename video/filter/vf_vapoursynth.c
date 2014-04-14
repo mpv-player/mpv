@@ -307,18 +307,20 @@ static void destroy_vs(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
+    // Wait until our frame callback returns.
+    pthread_mutex_lock(&p->lock);
+    p->shutdown = true;
+    pthread_cond_broadcast(&p->wakeup);
+    while (p->getting_frame)
+        pthread_cond_wait(&p->wakeup, &p->lock);
+    pthread_mutex_unlock(&p->lock);
+
     if (p->in_node)
         p->vsapi->freeNode(p->in_node);
     if (p->out_node)
         p->vsapi->freeNode(p->out_node);
     p->in_node = p->out_node = NULL;
 
-    pthread_mutex_lock(&p->lock);
-    p->shutdown = true;
-    pthread_cond_broadcast(&p->wakeup);
-    pthread_mutex_unlock(&p->lock);
-
-    // Expect that this properly waits until all filters return etc.
     if (p->se)
         vsscript_freeScript(p->se);
 
@@ -326,7 +328,6 @@ static void destroy_vs(struct vf_instance *vf)
     p->vsapi = NULL;
     p->vscore = NULL;
 
-    assert(!p->getting_frame);
     assert(!p->in_node_active);
 
     p->shutdown = false;
