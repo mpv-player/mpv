@@ -30,9 +30,9 @@
 #include "config.h"
 #include "audio/format.h"
 #include "common/msg.h"
+#include "options/m_option.h"
 #include "ao.h"
 #include "internal.h"
-#include "input/input.h"
 
 #define PULSE_CLIENT_NAME "mpv"
 
@@ -94,7 +94,7 @@ static void stream_request_cb(pa_stream *s, size_t length, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
-    mp_input_wakeup(ao->input_ctx);
+    ao_need_data(ao);
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
