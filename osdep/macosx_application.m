@@ -23,16 +23,20 @@
 #include "common/msg.h"
 #include "input/input.h"
 #include "input/event.h"
-#include "input/keycodes.h"
 
-#include "osdep/macosx_application_objc.h"
+#import "osdep/macosx_application_objc.h"
 #include "osdep/macosx_compat.h"
+#import "osdep/macosx_events_objc.h"
 
 #define MPV_PROTOCOL @"mpv://"
 
 static pthread_t playback_thread_id;
 
-@interface Application (PrivateMethods)
+@interface Application ()
+{
+    EventsResponder *_eventsResponder;
+}
+
 - (NSMenuItem *)menuItemWithParent:(NSMenu *)parent
                              title:(NSString *)title
                             action:(SEL)selector
@@ -61,17 +65,14 @@ Application *mpv_shared_app(void)
 @synthesize argumentsList = _arguments_list;
 @synthesize willStopOnOpenEvent = _will_stop_on_open_event;
 
-@synthesize inputContext = _input_context;
-@synthesize eventsResponder = _events_responder;
 @synthesize menuItems = _menu_items;
-@synthesize input_ready = _input_ready;
 
 - (void)sendEvent:(NSEvent *)event
 {
     [super sendEvent:event];
 
-    if (self.inputContext)
-        mp_input_wakeup(self.inputContext);
+    if (_eventsResponder.inputContext)
+        mp_input_wakeup(_eventsResponder.inputContext);
 }
 
 - (id)init
@@ -80,19 +81,8 @@ Application *mpv_shared_app(void)
         self.menuItems = [[[NSMutableDictionary alloc] init] autorelease];
         self.files = nil;
         self.argumentsList = [[[NSMutableArray alloc] init] autorelease];
-        self.eventsResponder = [[[EventsResponder alloc] init] autorelease];
+        _eventsResponder = [EventsResponder sharedInstance];
         self.willStopOnOpenEvent = NO;
-        self.input_ready = [[[NSCondition alloc] init] autorelease];
-
-        [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask|NSKeyUpMask
-                                              handler:^(NSEvent *event) {
-            BOOL equivalent = [[NSApp mainMenu] performKeyEquivalent:event];
-            if (equivalent) {
-                return (NSEvent *)nil;
-            } else {
-                return [self.eventsResponder handleKey:event];
-            }
-        }];
 
         NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
         [em setEventHandler:self
@@ -174,9 +164,10 @@ Application *mpv_shared_app(void)
 
 - (void)stopMPV:(char *)cmd
 {
-    if (self.inputContext) {
-        mp_cmd_t *cmdt = mp_input_parse_cmd(self.inputContext, bstr0(cmd), "");
-        mp_input_queue_cmd(self.inputContext, cmdt);
+    struct input_ctx *inputContext = _eventsResponder.inputContext;
+    if (inputContext) {
+        mp_cmd_t *cmdt = mp_input_parse_cmd(inputContext, bstr0(cmd), "");
+        mp_input_queue_cmd(inputContext, cmdt);
     } else {
         terminate_cocoa_application();
     }
@@ -289,7 +280,7 @@ Application *mpv_shared_app(void)
         size_t bytes   = [obj lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
         files_utf8[i]  = talloc_memdup(files_utf8, filename, bytes + 1);
     }];
-    mp_event_drop_files(self.inputContext, num_files, files_utf8);
+    mp_event_drop_files(_eventsResponder.inputContext, num_files, files_utf8);
     talloc_free(files_utf8);
 }
 
@@ -327,10 +318,10 @@ int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
         macosx_finder_args_preinit(&argc, &argv);
         pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
 
-        [mpv_shared_app().input_ready lock];
-        while (!mpv_shared_app().inputContext)
-            [mpv_shared_app().input_ready wait];
-        [mpv_shared_app().input_ready unlock];
+        [_eventsResponder.input_ready lock];
+        while (!_eventsResponder.inputContext)
+            [_eventsResponder.input_ready wait];
+        [_eventsResponder.input_ready unlock];
 
         cocoa_run_runloop();
 
@@ -387,10 +378,10 @@ void cocoa_stop_runloop(void)
 
 void cocoa_set_input_context(struct input_ctx *input_context)
 {
-    [mpv_shared_app().input_ready lock];
-    mpv_shared_app().inputContext = input_context;
-    [mpv_shared_app().input_ready signal];
-    [mpv_shared_app().input_ready unlock];
+    [_eventsResponder.input_ready lock];
+    _eventsResponder.inputContext = input_context;
+    [_eventsResponder.input_ready signal];
+    [_eventsResponder.input_ready unlock];
 }
 
 void cocoa_post_fake_event(void)
