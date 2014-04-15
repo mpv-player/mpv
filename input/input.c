@@ -118,6 +118,7 @@ struct cmd_queue {
 
 struct input_ctx {
     pthread_mutex_t mutex;
+    pthread_cond_t wakeup;
     struct mp_log *log;
     struct mpv_global *global;
 
@@ -1054,8 +1055,10 @@ static void input_wait_read(struct input_ctx *ictx, int time)
 
 static void input_wait_read(struct input_ctx *ictx, int time)
 {
-    if (time > 0)
-        mp_sleep_us(time * 1000);
+    if (time > 0) {
+        struct timespec deadline = mpthread_get_deadline(time / 1000.0);
+        pthread_cond_timedwait(&ictx->wakeup, &ictx->mutex, &deadline);
+    }
 
     for (int i = 0; i < ictx->num_fds; i++)
         read_fd(ictx, &ictx->fds[i]);
@@ -1507,6 +1510,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     };
 
     mpthread_mutex_init_recursive(&ictx->mutex);
+    pthread_cond_init(&ictx->wakeup, NULL);
 
     // Setup default section, so that it does nothing.
     mp_input_enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |
@@ -1639,6 +1643,7 @@ void mp_input_uninit(struct input_ctx *ictx)
     clear_queue(&ictx->cmd_queue);
     talloc_free(ictx->current_down_cmd);
     pthread_mutex_destroy(&ictx->mutex);
+    pthread_cond_destroy(&ictx->wakeup);
     talloc_free(ictx);
 }
 
@@ -1647,6 +1652,7 @@ void mp_input_wakeup(struct input_ctx *ictx)
     input_lock(ictx);
     bool send_wakeup = ictx->in_select;
     ictx->got_new_events = true;
+    pthread_cond_signal(&ictx->wakeup);
     input_unlock(ictx);
     // Safe without locking
     if (send_wakeup && ictx->wakeup_pipe[1] >= 0)
@@ -1655,8 +1661,13 @@ void mp_input_wakeup(struct input_ctx *ictx)
 
 void mp_input_wakeup_nolock(struct input_ctx *ictx)
 {
-    if (ictx->wakeup_pipe[1] >= 0)
+    if (ictx->wakeup_pipe[1] >= 0) {
         write(ictx->wakeup_pipe[1], &(char){0}, 1);
+    } else {
+        // Not race condition free. Done for the sake of jackaudio+windows.
+        ictx->got_new_events = true;
+        pthread_cond_signal(&ictx->wakeup);
+    }
 }
 
 static bool test_abort(struct input_ctx *ictx)
