@@ -562,10 +562,6 @@ void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
 
 #if HAVE_AVUTIL_QP_API
     dst->qscale = av_frame_get_qp_table(src, &dst->qstride, &dst->qscale_type);
-#else
-    dst->qscale = src->qscale_table;
-    dst->qstride = src->qstride;
-    dst->qscale_type = src->qscale_type;
 #endif
 }
 
