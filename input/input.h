@@ -206,6 +206,8 @@ void mp_input_uninit(struct input_ctx *ictx);
 // Wake up sleeping input loop from another thread.
 void mp_input_wakeup(struct input_ctx *ictx);
 
+void mp_input_wakeup_nolock(struct input_ctx *ictx);
+
 // Interruptible usleep:  (used by demux)
 int mp_input_check_interrupt(struct input_ctx *ictx, int time);
 

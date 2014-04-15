@@ -1653,6 +1653,12 @@ void mp_input_wakeup(struct input_ctx *ictx)
         write(ictx->wakeup_pipe[1], &(char){0}, 1);
 }
 
+void mp_input_wakeup_nolock(struct input_ctx *ictx)
+{
+    if (ictx->wakeup_pipe[1] >= 0)
+        write(ictx->wakeup_pipe[1], &(char){0}, 1);
+}
+
 static bool test_abort(struct input_ctx *ictx)
 {
     if (async_quit_request || queue_has_abort_cmds(&ictx->cmd_queue)) {

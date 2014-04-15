@@ -26,6 +26,8 @@
 #include "common/msg.h"
 #include "common/common.h"
 
+#include "input/input.h"
+
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 #include "compat/atomics.h"
@@ -110,8 +112,8 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
 
     // Since the writer will write the first plane last, its buffered amount
     // of data is the minimum amount across all planes.
-    int bytes = mp_ring_buffered(p->buffers[0]);
-    bytes = MPMIN(bytes, full_bytes);
+    int buffered_bytes = mp_ring_buffered(p->buffers[0]);
+    int bytes = MPMIN(buffered_bytes, full_bytes);
 
     if (bytes > 0)
         p->end_time_us = out_time_us;
@@ -128,6 +130,11 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
         if (silence)
             af_fill_silence((char *)data[n] + bytes, silence, ao->format);
     }
+
+    // Half of the buffer played -> request more.
+    if (buffered_bytes - bytes <= mp_ring_size(p->buffers[0]) / 2)
+        mp_input_wakeup_nolock(ao->input_ctx);
+
     return bytes / ao->sstride;
 }
 
