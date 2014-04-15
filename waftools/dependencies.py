@@ -192,16 +192,22 @@ def filtered_sources(ctx, sources):
         if isinstance(source, basestring):
             return source
 
-        # may be followed by one dependency, optional ! negation
-        source_file, dependency = source
-        is_wanted = True
-        if dependency.find('!') == 0:
-            dependency = dependency.lstrip('!')
-            is_wanted = False
+        # may be followed by multiple dependencies, optional ! negation
+        source_file, deps = source[0], source[1:]
+        satisified = True
+        for dependency in deps:
+            this_dep_is_wanted = True
+            if dependency.find('!') == 0:
+                dependency = dependency.lstrip('!')
+                this_dep_is_wanted = False
 
-        ctx.ensure_dependency_is_known(dependency)
-        if (dependency in ctx.satisfied_deps) == is_wanted:
-            return source_file
+            ctx.ensure_dependency_is_known(dependency)
+            if (dependency in ctx.satisfied_deps) != this_dep_is_wanted:
+                # don't short-circuit return false here so that we get around
+                # to ensuring all listed dependencies are known
+                satisified = False
+
+        return satisified and source_file
 
     return filter(None, (check_source(s) for s in sources))
 
