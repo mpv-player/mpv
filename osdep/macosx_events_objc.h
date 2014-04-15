@@ -1,4 +1,6 @@
 /*
+ * Cocoa Application Event Handling
+ *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or modify
@@ -12,23 +14,20 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with mpv; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #import <Cocoa/Cocoa.h>
-#include "osdep/macosx_application.h"
+#import "ar/HIDRemote.h"
+#include "osdep/macosx_events.h"
 
-@interface Application : NSApplication
-- (void)initialize_menu;
-- (void)registerSelector:(SEL)selector forKey:(MPMenuKey)key;
-- (void)stopPlayback;
-- (void)handleFilesArray:(NSArray *)files;
+struct input_ctx;
 
-@property(nonatomic, retain) NSMutableDictionary *menuItems;
-@property(nonatomic, retain) NSArray *files;
-@property(nonatomic, retain) NSMutableArray *argumentsList;
-@property(nonatomic, assign) BOOL willStopOnOpenEvent;
+@interface EventsResponder : NSObject <HIDRemoteDelegate>
+
++ (EventsResponder *)sharedInstance;
+
+@property(nonatomic, assign) struct input_ctx *inputContext;
+@property(nonatomic, retain) NSCondition *input_ready;
+
 @end
-
-Application *mpv_shared_app(void);

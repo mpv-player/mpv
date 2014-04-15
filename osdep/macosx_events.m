@@ -27,12 +27,30 @@
 
 #include "talloc.h"
 #include "input/input.h"
+#include "input/keycodes.h"
 // doesn't make much sense, but needed to access keymap functionality
 #include "video/out/vo.h"
 
-#import  "osdep/macosx_application_objc.h"
-#include "osdep/macosx_events.h"
 #include "osdep/macosx_compat.h"
+#import "osdep/macosx_events_objc.h"
+
+@interface EventsResponder ()
+{
+    CFMachPortRef _mk_tap_port;
+    HIDRemote *_remote;
+}
+
+- (BOOL)handleMediaKey:(NSEvent *)event;
+- (NSEvent *)handleKey:(NSEvent *)event;
+- (void)startAppleRemote;
+- (void)stopAppleRemote;
+- (void)startMediaKeys;
+- (void)restartMediaKeys;
+- (void)stopMediaKeys;
+- (int)mapKeyModifiers:(int)cocoaModifiers;
+- (int)keyModifierMask:(NSEvent *)event;
+@end
+
 
 #define NSLeftAlternateKeyMask  (0x000020 | NSAlternateKeyMask)
 #define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
@@ -93,14 +111,12 @@ static int convert_key(unsigned key, unsigned charcode)
 
 void cocoa_init_apple_remote(void)
 {
-    Application *app = mpv_shared_app();
-    [app.eventsResponder startAppleRemote];
+    [[EventsResponder sharedInstance] startAppleRemote];
 }
 
 void cocoa_uninit_apple_remote(void)
 {
-    Application *app = mpv_shared_app();
-    [app.eventsResponder stopAppleRemote];
+    [[EventsResponder sharedInstance] stopAppleRemote];
 }
 
 static int mk_code(NSEvent *event)
@@ -150,34 +166,64 @@ static CGEventRef tap_event_callback(CGEventTapProxy proxy, CGEventType type,
 }
 
 void cocoa_init_media_keys(void) {
-    [mpv_shared_app().eventsResponder startMediaKeys];
+    [[EventsResponder sharedInstance] startMediaKeys];
 }
 
 void cocoa_uninit_media_keys(void) {
-    [mpv_shared_app().eventsResponder stopMediaKeys];
+    [[EventsResponder sharedInstance] stopMediaKeys];
 }
 
 void cocoa_put_key(int keycode)
 {
-    if (mpv_shared_app().inputContext)
-        mp_input_put_key(mpv_shared_app().inputContext, keycode);
+    struct input_ctx *inputContext = [EventsResponder sharedInstance].inputContext;
+    if (inputContext)
+        mp_input_put_key(inputContext, keycode);
 }
 
 void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 {
-    keycode |= [mpv_shared_app().eventsResponder mapKeyModifiers:modifiers];
+    keycode |= [[EventsResponder sharedInstance] mapKeyModifiers:modifiers];
     cocoa_put_key(keycode);
 }
 
-@implementation EventsResponder {
-    CFMachPortRef _mk_tap_port;
-    HIDRemote *_remote;
+@implementation EventsResponder
+
+@synthesize inputContext = _input_context;
+@synthesize input_ready = _input_ready;
+
++ (EventsResponder *)sharedInstance
+{
+    static EventsResponder *responder = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        responder = [EventsResponder new];
+    });
+    return responder;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _input_ready = [NSCondition new];
+
+        [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask|NSKeyUpMask
+                                              handler:^(NSEvent *event) {
+            BOOL equivalent = [[NSApp mainMenu] performKeyEquivalent:event];
+            if (equivalent) {
+                return (NSEvent *)nil;
+            } else {
+                return [self handleKey:event];
+            }
+        }];
+    }
+    return self;
 }
 
 - (BOOL)useAltGr
 {
-    if (mpv_shared_app().inputContext)
-        return mp_input_use_alt_gr(mpv_shared_app().inputContext);
+    if (self.inputContext)
+        return mp_input_use_alt_gr(self.inputContext);
     else
         return YES;
 }
