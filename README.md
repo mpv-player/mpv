@@ -46,6 +46,8 @@ Essential dependencies (incomplete list):
 - X development headers (xlib, X extensions, libvdpau, libGL, libXv, ...)
 - Audio output development headers (libasound, pulseaudio)
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavresample)
+  At least FFmpeg 1.2.4 or Libav 9.10 is required. (If FFmpeg was compiled
+  without libavresample, at least FFmpeg 2.0 is required.)
 - libjpeg (for screenshots)
 - libquvi if you want to play Youtube videos directly
 
