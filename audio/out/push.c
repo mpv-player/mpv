@@ -28,6 +28,8 @@
 #include "common/msg.h"
 #include "common/common.h"
 
+#include "input/input.h"
+
 #include "osdep/threads.h"
 #include "compat/atomics.h"
 
@@ -37,7 +39,12 @@
 struct ao_push_state {
     pthread_t thread;
     pthread_mutex_t lock;
+
+    // uses a separate lock to avoid lock order issues with ao_need_data()
+    pthread_mutex_t wakeup_lock;
     pthread_cond_t wakeup;
+
+    // --- protected by lock
 
     struct mp_audio_buffer *buffer;
 
@@ -46,7 +53,19 @@ struct ao_push_state {
 
     // Whether the current buffer contains the complete audio.
     bool final_chunk;
+
+    // -- protected by wakeup_lock
+    bool need_wakeup;
 };
+
+static void wakeup_playthread(struct ao *ao)
+{
+    struct ao_push_state *p = ao->api_priv;
+    pthread_mutex_lock(&p->wakeup_lock);
+    p->need_wakeup = true;
+    pthread_cond_signal(&p->wakeup);
+    pthread_mutex_unlock(&p->wakeup_lock);
+}
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
@@ -80,7 +99,7 @@ static void reset(struct ao *ao)
         ao->driver->reset(ao);
     mp_audio_buffer_clear(p->buffer);
     p->playing = false;
-    pthread_cond_signal(&p->wakeup);
+    wakeup_playthread(ao);
     pthread_mutex_unlock(&p->lock);
 }
 
@@ -91,7 +110,7 @@ static void pause(struct ao *ao)
     if (ao->driver->pause)
         ao->driver->pause(ao);
     p->playing = false;
-    pthread_cond_signal(&p->wakeup);
+    wakeup_playthread(ao);
     pthread_mutex_unlock(&p->lock);
 }
 
@@ -102,7 +121,7 @@ static void resume(struct ao *ao)
     if (ao->driver->resume)
         ao->driver->resume(ao);
     p->playing = true; // tentatively
-    pthread_cond_signal(&p->wakeup);
+    wakeup_playthread(ao);
     pthread_mutex_unlock(&p->lock);
 }
 
@@ -160,7 +179,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     p->final_chunk = !!(flags & AOPLAY_FINAL_CHUNK);
     p->playing = true;
 
-    pthread_cond_signal(&p->wakeup);
+    wakeup_playthread(ao);
     pthread_mutex_unlock(&p->lock);
     return write_samples;
 }
@@ -196,8 +215,12 @@ static void *playthread(void *arg)
 {
     struct ao *ao = arg;
     struct ao_push_state *p = ao->api_priv;
-    pthread_mutex_lock(&p->lock);
-    while (!p->terminate) {
+    while (1) {
+        pthread_mutex_lock(&p->lock);
+        if (p->terminate) {
+            pthread_mutex_unlock(&p->lock);
+            return NULL;
+        }
         double timeout = 2.0;
         if (p->playing) {
             double min_wait = ao->device_buffer / (double)ao->samplerate;
@@ -210,20 +233,28 @@ static void *playthread(void *arg)
             if (buffers_full && ao->driver->get_delay) {
                 float buffered_audio = ao->driver->get_delay(ao);
                 timeout = buffered_audio - 0.050;
-                if (timeout > 0.100) {
-                    // Keep extra safety margin if the buffers are large
+                // Keep extra safety margin if the buffers are large
+                if (timeout > 0.100)
                     timeout = MPMAX(timeout - 0.200, 0.100);
-                } else {
-                    timeout = MPMAX(timeout, min_wait);
-                }
             } else {
-                timeout = min_wait;
+                timeout = 0;
             }
+            // Half of the buffer played -> wakeup playback thread to get more.
+            if (timeout <= min_wait / 2 + 0.001)
+                mp_input_wakeup(ao->input_ctx);
+            // Avoid wasting CPU - this assumes ao_play_data() usually fills the
+            // audio buffer as far as possible, so even if the device buffer
+            // is not full, we can only wait for the core.
+            timeout = MPMAX(timeout, min_wait);
         }
+        pthread_mutex_unlock(&p->lock);
+        pthread_mutex_lock(&p->wakeup_lock);
         struct timespec deadline = mpthread_get_deadline(timeout);
-        pthread_cond_timedwait(&p->wakeup, &p->lock, &deadline);
+        if (!p->need_wakeup)
+            pthread_cond_timedwait(&p->wakeup, &p->wakeup_lock, &deadline);
+        p->need_wakeup = false;
+        pthread_mutex_unlock(&p->wakeup_lock);
     }
-    pthread_mutex_unlock(&p->lock);
     return NULL;
 }
 
@@ -233,7 +264,7 @@ static void uninit(struct ao *ao)
 
     pthread_mutex_lock(&p->lock);
     p->terminate = true;
-    pthread_cond_signal(&p->wakeup);
+    wakeup_playthread(ao);
     pthread_mutex_unlock(&p->lock);
 
     pthread_join(p->thread, NULL);
@@ -242,6 +273,7 @@ static void uninit(struct ao *ao)
 
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);
+    pthread_mutex_destroy(&p->wakeup_lock);
 }
 
 static int init(struct ao *ao)
@@ -249,6 +281,7 @@ static int init(struct ao *ao)
     struct ao_push_state *p = ao->api_priv;
 
     pthread_mutex_init(&p->lock, NULL);
+    pthread_mutex_init(&p->wakeup_lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
 
     p->buffer = mp_audio_buffer_create(ao);
@@ -276,6 +309,7 @@ const struct ao_driver ao_api_push = {
     .priv_size = sizeof(struct ao_push_state),
 };
 
+// Must be called locked.
 int ao_play_silence(struct ao *ao, int samples)
 {
     assert(ao->api == &ao_api_push);
@@ -289,4 +323,15 @@ int ao_play_silence(struct ao *ao, int samples)
     int r = ao->driver->play(ao, tmp, samples, 0);
     talloc_free(p);
     return r;
+}
+
+// Notify the core that new data should be sent to the AO. Normally, the core
+// uses a heuristic based on ao_delay() when to refill the buffers, but this
+// can be used to reduce wait times. Can be called from any thread.
+void ao_need_data(struct ao *ao)
+{
+    assert(ao->api == &ao_api_push);
+
+    // wakeup the play thread at least once
+    wakeup_playthread(ao);
 }
