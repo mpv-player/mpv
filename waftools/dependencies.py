@@ -187,30 +187,23 @@ def unpack_dependencies_lists(ctx):
     ctx.satisfied_deps = set(ctx.env.satisfied_deps)
 
 def filtered_sources(ctx, sources):
-    def __source_file__(source):
-        if isinstance(source, tuple):
-            return source[0]
-        else:
+    def check_source(source):
+        # just a filename with no dependency?
+        if isinstance(source, basestring):
             return source
 
-    def __check_filter__(dependency):
+        # may be followed by one dependency, optional ! negation
+        source_file, dependency = source
+        is_wanted = True
         if dependency.find('!') == 0:
             dependency = dependency.lstrip('!')
-            ctx.ensure_dependency_is_known(dependency)
-            return dependency not in ctx.satisfied_deps
-        else:
-            ctx.ensure_dependency_is_known(dependency)
-            return dependency in ctx.satisfied_deps
+            is_wanted = False
 
-    def __unpack_and_check_filter__(source):
-        try:
-            _, dependency = source
-            return __check_filter__(dependency)
-        except ValueError:
-            return True
+        ctx.ensure_dependency_is_known(dependency)
+        if (dependency in ctx.satisfied_deps) == is_wanted:
+            return source_file
 
-    return [__source_file__(source) for source in sources \
-            if __unpack_and_check_filter__(source)]
+    return filter(None, (check_source(s) for s in sources))
 
 def env_fetch(tx):
     def fn(ctx):
