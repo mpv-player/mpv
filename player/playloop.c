@@ -1250,24 +1250,8 @@ void run_playloop(struct MPContext *mpctx)
     }
 
     if (!mpctx->stop_play) {
-        double audio_sleep = 9;
         if (mpctx->restart_playback)
             sleeptime = 0;
-        if (mpctx->d_audio && !mpctx->paused) {
-            if (ao_untimed(mpctx->ao)) {
-                if (!video_left)
-                    audio_sleep = 0;
-            } else if (full_audio_buffers) {
-                audio_sleep = buffered_audio - 0.050;
-                // Keep extra safety margin if the buffers are large
-                if (audio_sleep > 0.100)
-                    audio_sleep = MPMAX(audio_sleep - 0.200, 0.100);
-                else
-                    audio_sleep = MPMAX(audio_sleep, 0.020);
-            } else
-                audio_sleep = 0.020;
-        }
-        sleeptime = MPMIN(sleeptime, audio_sleep);
         if (sleeptime > 0) {
             if (handle_osd_redraw(mpctx))
                 sleeptime = 0;
