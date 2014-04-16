@@ -274,10 +274,6 @@ int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
 // this correctly.
 double ao_get_delay(struct ao *ao)
 {
-    if (!ao->api->get_delay) {
-        assert(ao->untimed);
-        return 0;
-    }
     return ao->api->get_delay(ao);
 }
 
