@@ -27,7 +27,9 @@ struct input_ctx;
 
 + (EventsResponder *)sharedInstance;
 
+/// Blocks until inputContext is present.
+- (void)waitForInputContext;
+
 @property(nonatomic, assign) struct input_ctx *inputContext;
-@property(nonatomic, retain) NSCondition *input_ready;
 
 @end
