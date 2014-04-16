@@ -188,6 +188,11 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
     cocoa_put_key(keycode);
 }
 
+void cocoa_set_input_context(struct input_ctx *input_context)
+{
+    [EventsResponder sharedInstance].inputContext = input_context;
+}
+
 @implementation EventsResponder
 
 + (EventsResponder *)sharedInstance

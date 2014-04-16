@@ -73,6 +73,7 @@
 
 #if HAVE_COCOA
 #include "osdep/macosx_application.h"
+#include "osdep/macosx_events.h"
 #endif
 
 #ifdef PTW32_STATIC_LIB

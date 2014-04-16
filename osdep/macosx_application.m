@@ -373,11 +373,6 @@ void cocoa_stop_runloop(void)
     cocoa_post_fake_event();
 }
 
-void cocoa_set_input_context(struct input_ctx *input_context)
-{
-    [EventsResponder sharedInstance].inputContext = input_context;
-}
-
 void cocoa_post_fake_event(void)
 {
     NSEvent* event = [NSEvent otherEventWithType:NSApplicationDefined
