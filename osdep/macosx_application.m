@@ -318,10 +318,7 @@ int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
         macosx_finder_args_preinit(&argc, &argv);
         pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
 
-        [_eventsResponder.input_ready lock];
-        while (!_eventsResponder.inputContext)
-            [_eventsResponder.input_ready wait];
-        [_eventsResponder.input_ready unlock];
+        [[EventsResponder sharedInstance] waitForInputContext];
 
         cocoa_run_runloop();
 
@@ -378,10 +375,7 @@ void cocoa_stop_runloop(void)
 
 void cocoa_set_input_context(struct input_ctx *input_context)
 {
-    [_eventsResponder.input_ready lock];
-    _eventsResponder.inputContext = input_context;
-    [_eventsResponder.input_ready signal];
-    [_eventsResponder.input_ready unlock];
+    [EventsResponder sharedInstance].inputContext = input_context;
 }
 
 void cocoa_post_fake_event(void)

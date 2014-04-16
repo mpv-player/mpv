@@ -36,6 +36,8 @@
 
 @interface EventsResponder ()
 {
+    struct input_ctx *_inputContext;
+    NSCondition *_input_ready;
     CFMachPortRef _mk_tap_port;
     HIDRemote *_remote;
 }
@@ -188,9 +190,6 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 
 @implementation EventsResponder
 
-@synthesize inputContext = _input_context;
-@synthesize input_ready = _input_ready;
-
 + (EventsResponder *)sharedInstance
 {
     static EventsResponder *responder = nil;
@@ -218,6 +217,27 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
         }];
     }
     return self;
+}
+
+- (void)waitForInputContext
+{
+    [_input_ready lock];
+    while (!self.inputContext)
+        [_input_ready wait];
+    [_input_ready unlock];
+}
+
+- (void)setInputContext:(struct input_ctx *)ctx;
+{
+    [_input_ready lock];
+    _inputContext = ctx;
+    [_input_ready signal];
+    [_input_ready unlock];
+}
+
+- (struct input_ctx *)inputContext
+{
+    return _inputContext;
 }
 
 - (BOOL)useAltGr
