@@ -461,6 +461,44 @@ static double dvd_get_current_time(stream_t *stream, int cell)
     return (double)tm/1000.0;
 }
 
+static void dvd_seek(stream_t *stream, dvd_priv_t *d, int pos)
+{
+  d->packs_left=-1;
+  d->cur_pack=pos;
+
+  // check if we stay in current cell (speedup things, and avoid angle skip)
+  if(d->cur_pack>d->cell_last_pack ||
+     d->cur_pack<d->cur_pgc->cell_playback[ d->cur_cell ].first_sector) {
+
+    // ok, cell change, find the right cell!
+    cell_playback_t *cell;
+    for(d->cur_cell=0; d->cur_cell < d->cur_pgc->nr_of_cells; d->cur_cell++) {
+      cell = &(d->cur_pgc->cell_playback[d->cur_cell]);
+      if(cell->block_type == BLOCK_TYPE_ANGLE_BLOCK && cell->block_mode != BLOCK_MODE_FIRST_CELL)
+        continue;
+      d->cell_last_pack=cell->last_sector;
+      if(d->cur_pack<cell->first_sector) {
+        d->cur_pack=cell->first_sector;
+        break;
+      }
+      if(d->cur_pack<=d->cell_last_pack) break; // ok, we find it! :)
+    }
+  }
+
+  MP_VERBOSE(stream, "DVD Seek! lba=0x%X  cell=%d  packs: 0x%X-0x%X  \n",
+    d->cur_pack,d->cur_cell,d->cur_pgc->cell_playback[ d->cur_cell ].first_sector,d->cell_last_pack);
+
+  // if we're in interleaved multi-angle cell, find the right angle chain!
+  // (read Navi block, and use the seamless angle jump table)
+  d->angle_seek=1;
+}
+
+static int do_seek(stream_t *s, int64_t newpos) {
+  stream_drop_buffers(s);
+  dvd_seek(s, s->priv,newpos/2048);
+  return 1;
+}
+
 static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec)
 {
     unsigned int i, j, k, timeunit, ac_time, tmap_sector=0, cell_sector=0, vobu_sector=0;
@@ -494,23 +532,26 @@ static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec
     }
 
     pos = ((int64_t)cell_sector)<<11;
-    stream_seek(stream, pos);
+    do_seek(stream, pos);
     do {
-      stream_skip(stream, 2048);
+      char buf[2048];
+      dvd_read_sector(stream, stream->priv, buf); // skip
       t = mp_dvdtimetomsec(&d->dsi_pack.dsi_gi.c_eltm);
     } while(!t);
     tm = dvd_get_current_time(stream, -1);
 
     pos = ((int64_t)tmap_sector)<<11;
-    stream_seek(stream, pos);
+    do_seek(stream, pos);
     //now get current time in terms of the cell+cell time offset
     memset(&d->dsi_pack.dsi_gi.c_eltm, 0, sizeof(dvd_time_t));
     while(tm <= sec) {
-        if(!stream_skip(stream, 2048))
-          break;
+        char buf[2048];
+        if (dvd_read_sector(stream, stream->priv, buf) < 0) // skip
+            break;
+        pos += 2048;
         tm = dvd_get_current_time(stream, -1);
     };
-    tmap_sector = stream->pos >> 11;
+    tmap_sector = pos >> 11;
 
     //search closest VOBU sector
     k=(vts_file->vts_vobu_admap->last_byte + 1 - VOBU_ADMAP_SIZE)/4; //entries in the vobu admap
@@ -520,7 +561,7 @@ static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec
     }
     vobu_sector = vts_file->vts_vobu_admap->vobu_start_sectors[i-1];
     pos = ((int64_t)vobu_sector) << 11;
-    stream_seek(stream, pos);
+    do_seek(stream, pos);
 
     return 1;
 }
@@ -935,7 +976,6 @@ static int open_s(stream_t *stream, int mode)
     //    return NULL;
     stream->type = STREAMTYPE_DVD;
     stream->sector_size = 2048;
-    stream->flags = MP_STREAM_SEEK;
     stream->fill_buffer = fill_buffer;
     stream->control = control;
     stream->close = stream_dvd_close;
