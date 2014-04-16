@@ -295,7 +295,7 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
     struct mp_log_root *root = log->root;
     for (int n = 0; n < root->num_buffers; n++) {
         struct mp_log_buffer *buffer = root->buffers[n];
-        if (lev >= buffer->level) {
+        if (lev <= buffer->level) {
             // Assuming a single writer (serialized by msg lock)
             int avail = mp_ring_available(buffer->ring) / sizeof(void *);
             if (avail < 1)
