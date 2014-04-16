@@ -380,8 +380,12 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
             priv->next_event |= 1 << MP_NAV_EVENT_EOF;
             return 0;
         }
-        case DVDNAV_NAV_PACKET:
+        case DVDNAV_NAV_PACKET: {
+            pci_t *pnavpci = dvdnav_get_current_nav_pci(dvdnav);
+            uint32_t start_pts = pnavpci->pci_gi.vobu_s_ptm;
+            MP_TRACE(s, "start pts = %"PRIu32"\n", start_pts);
             break;
+        }
         case DVDNAV_STILL_FRAME: {
             dvdnav_still_event_t *still_event = (dvdnav_still_event_t *) buf;
             priv->still_length = still_event->length;
@@ -541,6 +545,7 @@ static int control(stream_t *stream, int cmd, void *arg)
     }
     case STREAM_CTRL_SEEK_TO_TIME: {
         uint64_t tm = (uint64_t) (*((double *)arg) * 90000);
+        MP_VERBOSE(stream, "seek to PTS %"PRId64"\n", tm);
         if (dvdnav_time_search(dvdnav, tm) != DVDNAV_STATUS_OK)
             break;
         stream_drop_buffers(stream);
