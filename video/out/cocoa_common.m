@@ -28,11 +28,14 @@
 #import "video/out/cocoa/mpvadapter.h"
 
 #include "osdep/macosx_compat.h"
-#include "osdep/macosx_application.h"
-#include "osdep/macosx_application_objc.h"
 #include "osdep/macosx_events_objc.h"
 
 #include "config.h"
+
+#if HAVE_COCOA_APPLICATION
+# include "osdep/macosx_application.h"
+# include "osdep/macosx_application_objc.h"
+#endif
 
 #include "options/options.h"
 #include "video/out/vo.h"
@@ -298,11 +301,13 @@ static void create_window(struct vo *vo, struct mp_rect *win, int geo_flags)
 
     [s->view setWantsBestResolutionOpenGLSurface:YES];
 
+#if HAVE_COCOA_APPLICATION
     cocoa_register_menu_item_action(MPM_H_SIZE,   @selector(halfSize));
     cocoa_register_menu_item_action(MPM_N_SIZE,   @selector(normalSize));
     cocoa_register_menu_item_action(MPM_D_SIZE,   @selector(doubleSize));
     cocoa_register_menu_item_action(MPM_MINIMIZE, @selector(performMiniaturize:));
     cocoa_register_menu_item_action(MPM_ZOOM,     @selector(performZoom:));
+#endif
 
     [s->window setRestorable:NO];
     [s->window setContentView:s->view];

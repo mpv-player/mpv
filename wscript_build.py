@@ -382,7 +382,7 @@ def build(ctx):
         ( "osdep/threads.c" ),
 
         ( "osdep/ar/HIDRemote.m",                "cocoa" ),
-        ( "osdep/macosx_application.m",          "cocoa" ),
+        ( "osdep/macosx_application.m",          "cocoa-application" ),
         ( "osdep/macosx_events.m",               "cocoa" ),
         ( "osdep/path-macosx.m",                 "cocoa" ),
 
