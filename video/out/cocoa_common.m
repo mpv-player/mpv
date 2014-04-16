@@ -30,7 +30,7 @@
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_application.h"
 #include "osdep/macosx_application_objc.h"
-#include "osdep/macosx_events.h"
+#include "osdep/macosx_events_objc.h"
 
 #include "config.h"
 
@@ -753,7 +753,7 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 
 - (void)handleFilesArray:(NSArray *)files
 {
-    [mpv_shared_app() handleFilesArray:files];
+    [[EventsResponder sharedInstance] handleFilesArray:files];
 }
 
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen

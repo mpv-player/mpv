@@ -30,6 +30,8 @@ struct input_ctx;
 /// Blocks until inputContext is present.
 - (void)waitForInputContext;
 
+- (void)handleFilesArray:(NSArray *)files;
+
 @property(nonatomic, assign) struct input_ctx *inputContext;
 
 @end
