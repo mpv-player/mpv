@@ -74,17 +74,6 @@ build_options = [
         'func': check_true,
         'default': 'disable',
     }, {
-        'name': '--macosx-bundle',
-        'desc': 'compilation of a Mac OS X Application bundle',
-        'deps': [ 'os-darwin' ],
-        'default': 'disable',
-        'func': check_true
-    }, {
-        'name': 'win32-executable',
-        'desc': 'w32 executable',
-        'deps_any': [ 'os-win32', 'os-cygwin'],
-        'func': check_ctx_vars('WINDRES')
-    }, {
         # does nothing - left for backward and forward compatibility
         'name': '--asm',
         'desc': 'inline assembly (currently without effect)',
@@ -737,6 +726,27 @@ scripting_features = [
     }
 ]
 
+standalone_features = [
+    {
+        'name': 'win32-executable',
+        'desc': 'w32 executable',
+        'deps_any': [ 'os-win32', 'os-cygwin'],
+        'func': check_ctx_vars('WINDRES')
+    }, {
+        'name': 'cocoa-application',
+        'desc': 'standalone Cocoa application',
+        'deps': [ 'cocoa' ],
+        'deps_neg': [ 'libmpv-shared', 'libmpv-static' ],
+        'func': check_true
+    }, {
+        'name': '--macosx-bundle',
+        'desc': 'compilation of a Mac OS X Application bundle',
+        'deps': [ 'os-darwin' ],
+        'default': 'disable',
+        'func': check_true
+    }
+]
+
 _INSTALL_DIRS_LIST = [
     ('bindir',  '${PREFIX}/bin',      'binary files'),
     ('libdir',  '${PREFIX}/lib',      'library files'),
@@ -771,6 +781,7 @@ def options(opt):
     opt.parse_features('hwaccels',          hwaccel_features)
     opt.parse_features('tv features',       radio_and_tv_features)
     opt.parse_features('scripting',         scripting_features)
+    opt.parse_features('standalone app',    standalone_features)
 
     group = opt.get_option_group("scripting")
     group.add_option('--lua',
@@ -829,6 +840,7 @@ def configure(ctx):
         ctx.options.enable_lua = True
 
     ctx.parse_dependencies(scripting_features)
+    ctx.parse_dependencies(standalone_features)
 
     ctx.define('HAVE_SYS_SOUNDCARD_H',
                '(HAVE_OSS_AUDIO_NATIVE || HAVE_OSS_AUDIO_4FRONT)',
