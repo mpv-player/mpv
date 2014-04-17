@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <pthread.h>
+#include <stdint.h>
 
 #include "talloc.h"
 
@@ -59,6 +60,7 @@ struct mp_log_root {
     bool force_stderr;
     struct mp_log_buffer **buffers;
     int num_buffers;
+    FILE *stats_file;
     // --- semi-atomic access
     bool mute;
     // --- must be accessed atomically
@@ -119,6 +121,8 @@ static void update_loglevel(struct mp_log *log)
     }
     for (int n = 0; n < log->root->num_buffers; n++)
         log->level = MPMAX(log->level, log->root->buffers[n]->level);
+    if (log->root->stats_file)
+        log->level = MPMAX(log->level, MSGL_STATS);
     log->reload_counter = log->root->reload_counter;
     pthread_mutex_unlock(&mp_msg_lock);
 }
@@ -200,7 +204,7 @@ bool mp_msg_has_status_line(struct mpv_global *global)
 
 static void set_msg_color(FILE* stream, int lev)
 {
-    static const int v_colors[] = {9, 1, 3, -1, -1, 2, 8, 8, -1};
+    static const int v_colors[] = {9, 1, 3, -1, -1, 2, 8, 8, 8, -1};
     terminal_set_foreground_color(stream, v_colors[lev]);
 }
 
@@ -256,6 +260,8 @@ static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
         flush_status_line(root);
         size_t len = strlen(text);
         root->header = len && text[len - 1] == '\n';
+        if (lev == MSGL_STATS)
+            terminate = "\n";
     }
 
     if (root->color)
@@ -320,6 +326,15 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
     }
 }
 
+static void dump_stats(struct mp_log *log, int lev, char *text)
+{
+    struct mp_log_root *root = log->root;
+    if (lev == MSGL_STATS && root->stats_file) {
+        fprintf(root->stats_file, "%"PRId64" %s #%s\n", mp_time_us(), text,
+                log->verbose_prefix);
+    }
+}
+
 void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 {
     if (!mp_msg_test(log, lev))
@@ -336,6 +351,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     print_msg_on_terminal(log, lev, text);
     write_msg_to_buffers(log, lev, text);
+    dump_stats(log, lev, text);
 
     pthread_mutex_unlock(&mp_msg_lock);
 }
@@ -438,7 +454,10 @@ void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr)
 
 void mp_msg_uninit(struct mpv_global *global)
 {
-    talloc_free(global->log->root);
+    struct mp_log_root *root = global->log->root;
+    if (root->stats_file)
+        fclose(root->stats_file);
+    talloc_free(root);
     global->log = NULL;
 }
 
@@ -514,6 +533,24 @@ struct mp_log_buffer_entry *mp_msg_log_buffer_read(struct mp_log_buffer *buffer)
     return ptr;
 }
 
+int mp_msg_open_stats_file(struct mpv_global *global, const char *path)
+{
+    struct mp_log_root *root = global->log->root;
+    int r;
+
+    pthread_mutex_lock(&mp_msg_lock);
+
+    if (root->stats_file)
+        fclose(root->stats_file);
+    root->stats_file = fopen(path, "wb");
+    r = root->stats_file ? 0 : -1;
+
+    pthread_mutex_unlock(&mp_msg_lock);
+
+    mp_msg_update_msglevels(global);
+    return r;
+}
+
 // Thread-safety: fully thread-safe, but keep in mind that the lifetime of
 //                log must be guaranteed during the call.
 //                Never call this from signal handlers.
@@ -534,6 +571,7 @@ char *mp_log_levels[MSGL_MAX + 1] = {
     [MSGL_V]            = "v",
     [MSGL_DEBUG]        = "debug",
     [MSGL_TRACE]        = "trace",
+    [MSGL_STATS]        = "stats",
 };
 
 int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level)

@@ -759,6 +759,14 @@ OPTIONS
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
 
+``--dump-stats=<filename>``
+    Write certain statistics to the given file. The file is truncated on
+    opening. The file will contain raw samples, each with a timestamp. To
+    make this file into a readable, the script ``TOOLS/stats-conv.py`` can be
+    used (which currently displays it as a graph).
+
+    This option is useful for debugging only.
+
 ``--dvbin=<options>``
     Pass the following parameters to the DVB input module, in order to
     override the default ones:

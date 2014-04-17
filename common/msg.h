@@ -41,6 +41,7 @@ enum {
     MSGL_V,         // -v
     MSGL_DEBUG,     // -v -v
     MSGL_TRACE,     // -v -v -v
+    MSGL_STATS,     // dumping fine grained stats (--dump-stats)
     MSGL_SMODE,     // old slave mode (-identify)
 
     MSGL_MAX = MSGL_SMODE,
@@ -77,5 +78,10 @@ bool mp_msg_test(struct mp_log *log, int lev);
 #define MP_DBG(obj, ...)        MP_MSG(obj, MSGL_DEBUG, __VA_ARGS__)
 #define MP_TRACE(obj, ...)      MP_MSG(obj, MSGL_TRACE, __VA_ARGS__)
 #define MP_SMODE(obj, ...)      MP_MSG(obj, MSGL_SMODE, __VA_ARGS__)
+
+// This is a bit special. See TOOLS/stats-conv.py what rules text passed
+// to these functions should follow. Also see --dump-stats.
+#define mp_stats(obj, ...)      mp_msg(obj, MSGL_STATS, __VA_ARGS__)
+#define MP_STATS(obj, ...)      MP_MSG(obj, MSGL_STATS, __VA_ARGS__)
 
 #endif /* MPLAYER_MP_MSG_H */

@@ -1030,6 +1030,7 @@ void run_playloop(struct MPContext *mpctx)
         }
 
         mpctx->time_frame -= get_relative_time(mpctx);
+        double audio_pts = playing_audio_pts(mpctx);
         if (full_audio_buffers && !mpctx->restart_playback) {
             buffered_audio = ao_get_delay(mpctx->ao);
             MP_TRACE(mpctx, "audio delay=%f\n", buffered_audio);
@@ -1076,13 +1077,20 @@ void run_playloop(struct MPContext *mpctx)
 
         //=================== FLIP PAGE (VIDEO BLT): ======================
 
+        MP_STATS(mpctx, "vo draw frame");
+
         vo_new_frame_imminent(vo);
         mpctx->video_pts = mpctx->video_next_pts;
         mpctx->last_vo_pts = mpctx->video_pts;
         mpctx->playback_pts = mpctx->video_pts;
+
         update_subtitles(mpctx);
         update_osd_msg(mpctx);
+
+        MP_STATS(mpctx, "draw OSD");
         draw_osd(mpctx);
+
+        MP_STATS(mpctx, "vo sleep");
 
         mpctx->time_frame -= get_relative_time(mpctx);
         mpctx->time_frame -= vo->flip_queue_offset;
@@ -1120,7 +1128,13 @@ void run_playloop(struct MPContext *mpctx)
         }
         if (mpctx->restart_playback)
             duration = -1;
+
+        MP_STATS(mpctx, "start flip");
         vo_flip_page(vo, pts_us | 1, duration);
+        MP_STATS(mpctx, "end flip");
+
+        if (audio_pts != MP_NOPTS_VALUE)
+            MP_STATS(mpctx, "value %f ptsdiff", mpctx->video_pts - audio_pts);
 
         mpctx->last_vo_flip_duration = (mp_time_us() - t2) * 0.000001;
         if (vo->driver->flip_page_timed) {
@@ -1256,8 +1270,11 @@ void run_playloop(struct MPContext *mpctx)
             if (handle_osd_redraw(mpctx))
                 sleeptime = 0;
         }
-        if (sleeptime > 0)
+        if (sleeptime > 0) {
+            MP_STATS(mpctx, "start sleep");
             mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
+            MP_STATS(mpctx, "end sleep");
+        }
     }
 
     handle_metadata_update(mpctx);

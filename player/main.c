@@ -366,6 +366,12 @@ int mp_initialize(struct MPContext *mpctx)
 
     assert(!mpctx->initialized);
 
+    if (opts->dump_stats && opts->dump_stats[0]) {
+        if (mp_msg_open_stats_file(mpctx->global, opts->dump_stats) < 0)
+            MP_ERR(mpctx, "Failed to open stats file '%s'\n", opts->dump_stats);
+    }
+    MP_STATS(mpctx, "start init");
+
     if (mpctx->opts->use_terminal && !terminal_initialized) {
         terminal_initialized = true;
         terminal_init();
@@ -451,6 +457,8 @@ int mp_initialize(struct MPContext *mpctx)
     mpctx->playlist->current = mp_check_playlist_resume(mpctx, mpctx->playlist);
     if (!mpctx->playlist->current)
         mpctx->playlist->current = mpctx->playlist->first;
+
+    MP_STATS(mpctx, "end init");
 
     return 0;
 }

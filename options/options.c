@@ -217,6 +217,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("terminal", use_terminal, CONF_GLOBAL | CONF_PRE_PARSE),
     OPT_GENERAL(char*, "msglevel", msglevels, CONF_GLOBAL|CONF_PRE_PARSE,
                 .type = &m_option_type_msglevels),
+    OPT_STRING("dump-stats", dump_stats, CONF_GLOBAL | CONF_PRE_PARSE),
     OPT_FLAG("msgcolor", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
     OPT_FLAG("msgmodule", msg_module, CONF_GLOBAL),
     OPT_FLAG("msgtime", msg_time, CONF_GLOBAL),

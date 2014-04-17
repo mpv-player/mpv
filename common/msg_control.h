@@ -24,6 +24,8 @@ struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
 void mp_msg_log_buffer_destroy(struct mp_log_buffer *buffer);
 struct mp_log_buffer_entry *mp_msg_log_buffer_read(struct mp_log_buffer *buffer);
 
+int mp_msg_open_stats_file(struct mpv_global *global, const char *path);
+
 struct bstr;
 int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level);
 

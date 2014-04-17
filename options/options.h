@@ -46,6 +46,7 @@ typedef struct mp_vo_opts {
 typedef struct MPOpts {
     int use_terminal;
     char *msglevels;
+    char *dump_stats;
     int verbose;
     int msg_identify;
     int msg_color;

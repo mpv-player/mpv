@@ -317,7 +317,9 @@ int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
     double filter_multiplier = af_calc_filter_multiplier(d_audio->afilter);
 
     int prev_buffered = -1;
-    while (minsamples >= 0) {
+    int res = 0;
+    MP_STATS(d_audio, "start audio");
+    while (res >= 0 && minsamples >= 0) {
         int buffered = mp_audio_buffer_samples(outbuf);
         if (minsamples < buffered || buffered == prev_buffered)
             break;
@@ -343,11 +345,10 @@ int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
          * of buffering in filters */
         huge_filter_buffer = 1;
 
-        int res = filter_n_bytes(d_audio, outbuf, decsamples);
-        if (res < 0)
-            return res;
+        res = filter_n_bytes(d_audio, outbuf, decsamples);
     }
-    return 0;
+    MP_STATS(d_audio, "end audio");
+    return res;
 }
 
 void audio_reset_decoding(struct dec_audio *d_audio)
