@@ -180,6 +180,13 @@ Available audio output drivers are:
         device will not go exactly as fast as the system clock. It will deviate
         just a little, and this option helps simulating this.
 
+    ``latency``
+        Simulated device latency. This is additional to EOF.
+
+    ``broken-eof``
+        Simulate broken audio drivers, which always add the fixed device
+        latency to the reported audio playback position.
+
 ``pcm``
     Raw PCM/WAVE file writer audio output
 
