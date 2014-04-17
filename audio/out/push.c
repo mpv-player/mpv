@@ -31,6 +31,7 @@
 #include "input/input.h"
 
 #include "osdep/threads.h"
+#include "osdep/timer.h"
 #include "compat/atomics.h"
 
 #include "audio/audio.h"
@@ -53,6 +54,7 @@ struct ao_push_state {
 
     // Whether the current buffer contains the complete audio.
     bool final_chunk;
+    double expected_end_time;
 
     // -- protected by wakeup_lock
     bool need_wakeup;
@@ -88,6 +90,13 @@ static float get_delay(struct ao *ao)
         driver_delay = ao->driver->get_delay(ao);
     double delay = driver_delay + mp_audio_buffer_seconds(p->buffer);
     pthread_mutex_unlock(&p->lock);
+    if (delay >= AO_EOF_DELAY && p->expected_end_time) {
+        if (mp_time_sec() > p->expected_end_time) {
+            MP_ERR(ao, "Audio device EOF reporting is broken!\n");
+            MP_ERR(ao, "Please report this problem.\n");
+            delay = 0;
+        }
+    }
     return delay;
 }
 
@@ -121,6 +130,7 @@ static void resume(struct ao *ao)
     if (ao->driver->resume)
         ao->driver->resume(ao);
     p->playing = true; // tentatively
+    p->expected_end_time = 0;
     wakeup_playthread(ao);
     pthread_mutex_unlock(&p->lock);
 }
@@ -178,6 +188,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     p->final_chunk = !!(flags & AOPLAY_FINAL_CHUNK);
     p->playing = true;
+    p->expected_end_time = 0;
 
     wakeup_playthread(ao);
     pthread_mutex_unlock(&p->lock);
@@ -206,8 +217,12 @@ static int ao_play_data(struct ao *ao)
     }
     if (r > 0)
         mp_audio_buffer_skip(p->buffer, r);
-    if (p->final_chunk && mp_audio_buffer_samples(p->buffer) == 0)
+    if (p->final_chunk && mp_audio_buffer_samples(p->buffer) == 0) {
         p->playing = false;
+        p->expected_end_time = mp_time_sec() + AO_EOF_DELAY + 0.25; // + margin
+        if (ao->driver->get_delay)
+            p->expected_end_time += ao->driver->get_delay(ao);
+    }
     return r;
 }
 
