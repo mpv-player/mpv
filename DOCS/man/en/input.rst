@@ -546,6 +546,9 @@ Property list
 ``loop`` (RW)
     See ``--loop``.
 
+``loop-file`` (RW)
+    See ``--loop-file`` (uses ``yes``/``no``).
+
 ``speed`` (RW)
     See ``--speed``.
 
