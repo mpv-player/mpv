@@ -292,7 +292,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .dither_size = 6,
     .fbo_format = GL_RGBA16,
     .scale_sep = 1,
-    .scalers = { "lanczos2", "bilinear" },
+    .scalers = { "spline36", "bilinear" },
     .scaler_params = {NAN, NAN},
     .alpha_mode = 2,
 };

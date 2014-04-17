@@ -260,10 +260,12 @@ Available video output drivers are:
 
         ``lanczos2``
             Lanczos scaling with radius=2. Provides good quality and speed.
-            This is the default when using ``opengl-hq``.
 
         ``lanczos3``
             Lanczos with radius=3.
+
+        ``spline36``
+            This is the default when using ``opengl-hq``.
 
         ``bicubic_fast``
             Bicubic filter. Has a blurring effect on the image, even if no
@@ -516,7 +518,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:lscale=lanczos2:dither-depth=auto:fbo-format=rgb16
+        --vo=opengl:lscale=spline36:dither-depth=auto:fbo-format=rgb16
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
