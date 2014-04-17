@@ -1223,7 +1223,7 @@ void run_playloop(struct MPContext *mpctx)
      * buffered.
      */
     if ((mpctx->d_audio || mpctx->d_video) && !audio_left && !video_left
-        && (opts->gapless_audio || (mpctx->d_audio && ao_eof_reached(mpctx->ao)))
+        && (opts->gapless_audio || !mpctx->d_audio || ao_eof_reached(mpctx->ao))
         && (!mpctx->paused || was_restart)) {
         if (end_is_chapter) {
             mp_seek(mpctx, (struct seek_params){
