@@ -2205,6 +2205,7 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY("osd-level"),
     M_OPTION_PROPERTY_CUSTOM("osd-scale", property_osd_helper),
     M_OPTION_PROPERTY("loop"),
+    M_OPTION_PROPERTY("loop-file"),
     M_OPTION_PROPERTY_CUSTOM("speed", mp_property_playback_speed),
     { "filename", mp_property_filename, CONF_TYPE_STRING,
       0, 0, 0, NULL },

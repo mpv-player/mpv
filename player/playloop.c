@@ -825,6 +825,15 @@ static void handle_sstep(struct MPContext *mpctx)
     }
 }
 
+static void handle_loop_file(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
+        set_osd_function(mpctx, OSD_FFW);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, get_start_time(mpctx), 0, true);
+    }
+}
+
 static void handle_keep_open(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -1281,6 +1290,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_backstep(mpctx);
 
     handle_sstep(mpctx);
+
+    handle_loop_file(mpctx);
 
     handle_keep_open(mpctx);
 

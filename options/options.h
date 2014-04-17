@@ -100,6 +100,7 @@ typedef struct MPOpts {
     char *stream_capture;
     char *stream_dump;
     int loop_times;
+    int loop_file;
     int shuffle;
     int ordered_chapters;
     char *ordered_chapters_files;

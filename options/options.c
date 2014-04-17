@@ -560,6 +560,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 2, 10000,
                       ({"no", -1}, {"1", -1},
                        {"inf", 0})),
+    OPT_FLAG("loop-file", loop_file, 0),
 
     OPT_FLAG("resume-playback", position_resume, 0),
     OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),

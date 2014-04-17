@@ -1331,6 +1331,12 @@ OPTIONS
     disables looping. If several files are specified on command line, the
     entire playlist is looped.
 
+``--loop-file``
+    Loop a single file. The difference to ``--loop=inf`` is that this doesn't
+    loop the playlist, just the file itself. If the playlist contains only a
+    single file, the difference between the two option is that this option
+    performs a seek on loop, instead of reloading the file.
+
 ``--lua=<filename>``
     Load a Lua script. You can load multiple scripts by separating them with
     commas (``,``).
