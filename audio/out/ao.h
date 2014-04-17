@@ -49,6 +49,11 @@ typedef struct ao_control_vol {
     float right;
 } ao_control_vol_t;
 
+// If ao_get_delay() reaches this value after ao_play() was called with the
+// AOPLAY_FINAL_CHUNK flag set, the playback core expects that the audio has
+// all been played.
+#define AO_EOF_DELAY 0.05
+
 struct ao;
 struct mpv_global;
 struct input_ctx;
