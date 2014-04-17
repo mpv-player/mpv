@@ -961,7 +961,6 @@ void run_playloop(struct MPContext *mpctx)
         handle_cursor_autohide(mpctx);
     }
 
-    double buffered_audio = -1;
     while (mpctx->d_video) {   // never loops, for "break;" only
         struct vo *vo = mpctx->video_out;
         update_fps(mpctx);
@@ -1032,7 +1031,7 @@ void run_playloop(struct MPContext *mpctx)
         mpctx->time_frame -= get_relative_time(mpctx);
         double audio_pts = playing_audio_pts(mpctx);
         if (full_audio_buffers && !mpctx->restart_playback) {
-            buffered_audio = ao_get_delay(mpctx->ao);
+            double buffered_audio = ao_get_delay(mpctx->ao);
             MP_TRACE(mpctx, "audio delay=%f\n", buffered_audio);
 
             if (opts->autosync) {
@@ -1184,17 +1183,13 @@ void run_playloop(struct MPContext *mpctx)
     }
     if (!video_left)
         mpctx->restart_playback = false;
-    if (mpctx->d_audio && buffered_audio == -1)
-        buffered_audio = mpctx->paused ? 0 : ao_get_delay(mpctx->ao);
 
     update_osd_msg(mpctx);
 
     if (!video_left && (!mpctx->paused || was_restart)) {
         double a_pos = 0;
-        if (mpctx->d_audio) {
-            a_pos = (written_audio_pts(mpctx) -
-                     mpctx->opts->playback_speed * buffered_audio);
-        }
+        if (mpctx->d_audio)
+            a_pos = playing_audio_pts(mpctx);
         mpctx->playback_pts = a_pos;
         if (was_restart)
             mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
@@ -1219,7 +1214,7 @@ void run_playloop(struct MPContext *mpctx)
      * buffered.
      */
     if ((mpctx->d_audio || mpctx->d_video) && !audio_left && !video_left
-        && (opts->gapless_audio || buffered_audio < AO_EOF_DELAY)
+        && (opts->gapless_audio || (mpctx->d_audio && ao_eof_reached(mpctx->ao)))
         && (!mpctx->paused || was_restart)) {
         if (end_is_chapter) {
             mp_seek(mpctx, (struct seek_params){
