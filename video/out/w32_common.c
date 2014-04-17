@@ -40,10 +40,6 @@
 
 static const wchar_t classname[] = L"mpv";
 
-enum mp_messages {
-    MPM_PUTKEY = WM_USER,
-};
-
 typedef struct tagDropTarget {
     IDropTarget iface;
     ULONG refCnt;
@@ -277,13 +273,174 @@ static bool key_state(struct vo *vo, int vk)
 static int mod_state(struct vo *vo)
 {
     int res = 0;
-    if (key_state(vo, VK_CONTROL))
+
+    // AltGr is represented as LCONTROL+RMENU on Windows
+    bool alt_gr = mp_input_use_alt_gr(vo->input_ctx) &&
+        key_state(vo, VK_RMENU) && key_state(vo, VK_LCONTROL);
+
+    if (key_state(vo, VK_RCONTROL) || (key_state(vo, VK_LCONTROL) && !alt_gr))
         res |= MP_KEY_MODIFIER_CTRL;
     if (key_state(vo, VK_SHIFT))
         res |= MP_KEY_MODIFIER_SHIFT;
-    if (key_state(vo, VK_MENU))
+    if (key_state(vo, VK_LMENU) || (key_state(vo, VK_RMENU) && !alt_gr))
         res |= MP_KEY_MODIFIER_ALT;
     return res;
+}
+
+static int decode_surrogate_pair(wchar_t lead, wchar_t trail)
+{
+    return 0x10000 + ((lead & 0x3ff) << 10) | (trail & 0x3ff);
+}
+
+static int decode_utf16(struct vo *vo, wchar_t c)
+{
+    struct vo_w32_state *w32 = vo->w32;
+
+    // Decode UTF-16, keeping state in w32->high_surrogate
+    if (IS_HIGH_SURROGATE(c)) {
+        w32->high_surrogate = c;
+        return 0;
+    }
+    if (IS_LOW_SURROGATE(c)) {
+        if (!w32->high_surrogate) {
+            MP_ERR(vo, "Invalid UTF-16 input\n");
+            return 0;
+        }
+        int codepoint = decode_surrogate_pair(w32->high_surrogate, c);
+        w32->high_surrogate = 0;
+        return codepoint;
+    }
+    if (w32->high_surrogate != 0) {
+        w32->high_surrogate = 0;
+        MP_ERR(vo, "Invalid UTF-16 input\n");
+        return 0;
+    }
+
+    return c;
+}
+
+static void clear_keyboard_buffer(void)
+{
+    static const UINT vkey = VK_DECIMAL;
+    static const BYTE keys[256] = { 0 };
+    UINT scancode = MapVirtualKey(vkey, MAPVK_VK_TO_VSC);
+    wchar_t buf[10];
+    int ret = 0;
+
+    // Use the method suggested by Michael Kaplan to clear any pending dead
+    // keys from the current keyboard layout. See:
+    // https://web.archive.org/web/20101004154432/http://blogs.msdn.com/b/michkap/archive/2006/04/06/569632.aspx
+    // https://web.archive.org/web/20100820152419/http://blogs.msdn.com/b/michkap/archive/2007/10/27/5717859.aspx
+    do {
+        ret = ToUnicode(vkey, scancode, keys, buf, MP_ARRAY_SIZE(buf), 0);
+    } while (ret < 0);
+}
+
+static int to_unicode(UINT vkey, UINT scancode, const BYTE keys[256])
+{
+    // This wraps ToUnicode to be stateless and to return only one character
+
+    // Make the buffer 10 code units long to be safe, same as here:
+    // https://web.archive.org/web/20101013215215/http://blogs.msdn.com/b/michkap/archive/2006/03/24/559169.aspx
+    wchar_t buf[10] = { 0 };
+
+    // Dead keys aren't useful for key shortcuts, so clear the keyboard state
+    clear_keyboard_buffer();
+
+    int len = ToUnicode(vkey, scancode, keys, buf, MP_ARRAY_SIZE(buf), 0);
+
+    // Return the last complete UTF-16 code point. A negative return value
+    // indicates a dead key, however there should still be a non-combining
+    // version of the key in the buffer.
+    if (len < 0)
+        len = -len;
+    if (len >= 2 && IS_SURROGATE_PAIR(buf[len - 2], buf[len - 1]))
+        return decode_surrogate_pair(buf[len - 2], buf[len - 1]);
+    if (len >= 1)
+        return buf[len - 1];
+
+    return 0;
+}
+
+static int decode_key(struct vo *vo, UINT vkey, UINT scancode)
+{
+    BYTE keys[256];
+    GetKeyboardState(keys);
+
+    // If mp_input_use_alt_gr is false, detect and remove AltGr so normal
+    // characters are generated. Note that AltGr is represented as
+    // LCONTROL+RMENU on Windows.
+    if ((keys[VK_RMENU] & 0x80) && (keys[VK_LCONTROL] & 0x80) &&
+        !mp_input_use_alt_gr(vo->input_ctx))
+    {
+        keys[VK_RMENU] = keys[VK_LCONTROL] = 0;
+        keys[VK_MENU] = keys[VK_LMENU];
+        keys[VK_CONTROL] = keys[VK_RCONTROL];
+    }
+
+    int c = to_unicode(vkey, scancode, keys);
+
+    // Some shift states prevent ToUnicode from working or cause it to produce
+    // control characters. If this is detected, remove modifiers until it
+    // starts producing normal characters.
+    if (c < 0x20 && (keys[VK_MENU] & 0x80)) {
+        keys[VK_LMENU] = keys[VK_RMENU] = keys[VK_MENU] = 0;
+        c = to_unicode(vkey, scancode, keys);
+    }
+    if (c < 0x20 && (keys[VK_CONTROL] & 0x80)) {
+        keys[VK_LCONTROL] = keys[VK_RCONTROL] = keys[VK_CONTROL] = 0;
+        c = to_unicode(vkey, scancode, keys);
+    }
+    if (c < 0x20)
+        return 0;
+
+    // Decode lone UTF-16 surrogates (VK_PACKET can generate these)
+    if (c < 0x10000)
+        return decode_utf16(vo, c);
+    return c;
+}
+
+static void handle_key_down(struct vo *vo, UINT vkey, UINT scancode)
+{
+    // Ignore key repeat
+    if (scancode & KF_REPEAT)
+        return;
+
+    int mpkey = mp_w32_vkey_to_mpkey(vkey, scancode & KF_EXTENDED);
+    if (!mpkey) {
+        mpkey = decode_key(vo, vkey, scancode & (0xff | KF_EXTENDED));
+        if (!mpkey)
+            return;
+    }
+
+    mp_input_put_key(vo->input_ctx, mpkey | mod_state(vo) | MP_KEY_STATE_DOWN);
+}
+
+static void handle_key_up(struct vo *vo, UINT vkey, UINT scancode)
+{
+    switch (vkey) {
+    case VK_MENU:
+    case VK_CONTROL:
+    case VK_SHIFT:
+        break;
+    default:
+        // Releasing all keys on key-up is simpler and ensures no keys can be
+        // get "stuck." This matches the behaviour of other VOs.
+        mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
+    }
+}
+
+static bool handle_char(struct vo *vo, wchar_t wc)
+{
+    int c = decode_utf16(vo, wc);
+
+    if (c == 0)
+        return true;
+    if (c < 0x20)
+        return false;
+
+    mp_input_put_key(vo->input_ctx, c | mod_state(vo));
+    return true;
 }
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
@@ -361,34 +518,26 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         }
         break;
-    case MPM_PUTKEY:
-        mp_input_put_key(vo->input_ctx, wParam | mod_state(vo));
-        break;
     case WM_SYSKEYDOWN:
+    case WM_KEYDOWN:
+        handle_key_down(vo, wParam, HIWORD(lParam));
+        if (wParam == VK_F10)
+            return 0;
+        break;
+    case WM_SYSKEYUP:
+    case WM_KEYUP:
+        handle_key_up(vo, wParam, HIWORD(lParam));
         if (wParam == VK_F10)
             return 0;
         break;
     case WM_CHAR:
-    case WM_SYSCHAR: {
-        int mods = mod_state(vo);
-        int code = wParam;
-        // Windows enables Ctrl+Alt when AltGr (VK_RMENU) is pressed.
-        // E.g. AltGr+9 on a German keyboard would yield Ctrl+Alt+[
-        // Warning: wine handles this differently. Don't test this on wine!
-        if (key_state(vo, VK_RMENU) && mp_input_use_alt_gr(vo->input_ctx))
-            mods &= ~(MP_KEY_MODIFIER_CTRL | MP_KEY_MODIFIER_ALT);
-        // Apparently Ctrl+A to Ctrl+Z is special cased, and produces
-        // character codes from 1-26. Work it around.
-        if ((mods & MP_KEY_MODIFIER_CTRL) && code >= 1 && code <= 26)
-            code = code - 1 + (mods & MP_KEY_MODIFIER_SHIFT ? 'A' : 'a');
-        if (code >= 32 && code < (1<<21)) {
-            mp_input_put_key(vo->input_ctx, code | mods);
-            // At least with Alt+char, not calling DefWindowProcW stops
-            // Windows from emitting a beep.
+    case WM_SYSCHAR:
+        if (handle_char(vo, wParam))
             return 0;
-        }
         break;
-    }
+    case WM_KILLFOCUS:
+        mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
+        break;
     case WM_SETCURSOR:
         if (LOWORD(lParam) == HTCLIENT && !w32->cursor_visible) {
             SetCursor(NULL);
@@ -477,24 +626,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
-static bool translate_key_input(MSG *msg)
+static bool is_key_message(UINT msg)
 {
-    if (msg->message != WM_KEYDOWN && msg->message != WM_SYSKEYDOWN &&
-        msg->message != WM_KEYUP && msg->message != WM_SYSKEYUP)
-        return false;
-
-    bool ext = HIWORD(msg->lParam) & KF_EXTENDED;
-    int mpkey = mp_w32_vkey_to_mpkey(msg->wParam, ext);
-
-    // If we don't want the key, return false so TranslateMessage can convert
-    // it to Unicode
-    if (!mpkey)
-        return false;
-
-    if (msg->message == WM_KEYDOWN || msg->message == WM_SYSKEYDOWN)
-        SendMessageW(msg->hwnd, MPM_PUTKEY, mpkey, 0);
-
-    return true;
+    return msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN ||
+           msg == WM_KEYUP || msg == WM_SYSKEYUP;
 }
 
 /**
@@ -517,13 +652,9 @@ int vo_w32_check_events(struct vo *vo)
     w32->event_flags = 0;
 
     while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
-        // Decode key messages and synthesize MPM_PUTKEY for keys in the
-        // keymap table
-        if (!translate_key_input(&msg)) {
-            // TranslateMessage only needs to generate WM_CHAR for keys that
-            // haven't already been decoded
+        // Only send IME messages to TranslateMessage
+        if (is_key_message(msg.message) && msg.wParam == VK_PROCESSKEY)
             TranslateMessage(&msg);
-        }
         DispatchMessageW(&msg);
     }
 

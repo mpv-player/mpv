@@ -55,6 +55,9 @@ struct vo_w32_state {
 
     int mouse_x;
     int mouse_y;
+
+    // UTF-16 decoding state for WM_CHAR and VK_PACKET
+    int high_surrogate;
 };
 
 struct vo;
