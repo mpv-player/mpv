@@ -222,11 +222,21 @@
     (MP_KEY_IS_MOUSE_BTN_SINGLE(code) || MP_KEY_IS_MOUSE_BTN_DBL(code) || \
      (code) == MP_KEY_MOUSE_MOVE)
 
+// Emit a command even on key-up (normally key-up is ignored). The command
+// handling code has to ignore unwanted commands specifically.
+// This is static part of the keycode, not a modifier than can change.
+#define MP_KEY_EMIT_ON_UP      (1<<22)
+
+// Use this when the key shouldn't be auto-repeated (like mouse buttons)
+// Also means both key-down key-up events produce emit bound commands.
+// This is static part of the keycode, not a modifier than can change.
+#define MP_NO_REPEAT_KEY       (1<<23)
+
 /* Modifiers added to individual keys */
-#define MP_KEY_MODIFIER_SHIFT  (1<<22)
-#define MP_KEY_MODIFIER_CTRL   (1<<23)
-#define MP_KEY_MODIFIER_ALT    (1<<24)
-#define MP_KEY_MODIFIER_META   (1<<25)
+#define MP_KEY_MODIFIER_SHIFT  (1<<24)
+#define MP_KEY_MODIFIER_CTRL   (1<<25)
+#define MP_KEY_MODIFIER_ALT    (1<<26)
+#define MP_KEY_MODIFIER_META   (1<<27)
 
 #define MP_KEY_MODIFIER_MASK (MP_KEY_MODIFIER_SHIFT | MP_KEY_MODIFIER_CTRL | \
                               MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_META | \
@@ -235,23 +245,13 @@
 // Flag for key events. Multiple down events are idempotent. Release keys by
 // sending the key code with KEY_STATE_UP set, or by sending
 // MP_INPUT_RELEASE_ALL as key code.
-#define MP_KEY_STATE_DOWN      (1<<26)
+#define MP_KEY_STATE_DOWN      (1<<28)
 
 // Flag for key events. Releases a key previously held down with
 // MP_KEY_STATE_DOWN. Do not sending redundant UP events and do not forget to
 // release keys at all with UP. If input is unreliable, use MP_INPUT_RELEASE_ALL
 // or don't use MP_KEY_STATE_DOWN in the first place.
-#define MP_KEY_STATE_UP        (1<<27)
-
-// The following flags are not modifiers, but are part of the keycode itself.
-
-// Emit a command even on key-up (normally key-up is ignored). The command
-// handling code has to ignore unwanted commands specifically.
-#define MP_KEY_EMIT_ON_UP      (1<<28)
-
-// Use this when the key shouldn't be auto-repeated (like mouse buttons)
-// Also means both key-down key-up events produce emit bound commands.
-#define MP_NO_REPEAT_KEY       (1<<29)
+#define MP_KEY_STATE_UP        (1<<29)
 
 // Get input key from its name.
 int mp_input_get_key_from_name(const char *name);
