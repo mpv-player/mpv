@@ -531,13 +531,6 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
     ictx->last_key_down = 0;
     ictx->last_key_down_time = 0;
     ictx->ar_state = -1;
-}
-
-static void release_all(struct input_ctx *ictx)
-{
-    ictx->last_key_down = 0;
-    ictx->last_key_down_time = 0;
-    release_down_cmd(ictx, false);
     update_mouse_section(ictx);
 }
 
@@ -596,7 +589,6 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
             return;
         // Cancel current down-event (there can be only one)
         release_down_cmd(ictx, true);
-        update_mouse_section(ictx);
         cmd = get_cmd_from_keys(ictx, NULL, code);
         key_buf_add(ictx->key_history, code);
         if (cmd && should_drop_cmd(ictx, cmd)) {
@@ -612,7 +604,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         ictx->current_down_cmd_need_release = false;
     } else if (state == MP_KEY_STATE_UP) {
         // Most VOs send RELEASE_ALL anyway
-        release_all(ictx);
+        release_down_cmd(ictx, false);
     } else {
         // Press of key with no separate down/up events
         if (ictx->last_key_down == code) {
@@ -650,7 +642,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
 {
     if (code == MP_INPUT_RELEASE_ALL) {
         MP_DBG(ictx, "release all\n");
-        release_all(ictx);
+        release_down_cmd(ictx, false);
         return;
     }
     if (code == MP_KEY_MOUSE_LEAVE) {
