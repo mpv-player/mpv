@@ -401,6 +401,7 @@ static int mpv_main(int argc, char *argv[])
         m_config_set_option0(mpctx->mconfig, "vo", "lavc");
         m_config_set_option0(mpctx->mconfig, "ao", "lavc");
         m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
+        m_config_set_option0(mpctx->mconfig, "keep-open", "no");
         m_config_set_option0(mpctx->mconfig, "force-window", "no");
         m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
         mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
