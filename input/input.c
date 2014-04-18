@@ -1012,7 +1012,7 @@ static void input_wait_read(struct input_ctx *ictx, int time)
  */
 static void read_events(struct input_ctx *ictx, int time)
 {
-    if (ictx->last_key_down && ictx->ar_rate > 0) {
+    if (ictx->last_key_down && ictx->ar_rate > 0 && ictx->ar_state >= 0) {
         time = FFMIN(time, 1000 / ictx->ar_rate);
         time = FFMIN(time, ictx->ar_delay);
     }
@@ -1057,8 +1057,10 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
 {
     // No input : autorepeat ?
-    if (ictx->ar_rate > 0 && ictx->ar_state >= 0 && ictx->last_key_down
-        && !(ictx->last_key_down & MP_NO_REPEAT_KEY)) {
+    if (ictx->ar_rate <= 0 || !ictx->current_down_cmd || !ictx->last_key_down ||
+        (ictx->last_key_down & MP_NO_REPEAT_KEY))
+        ictx->ar_state = -1; // disable
+    if (ictx->ar_state >= 0) {
         int64_t t = mp_time_us();
         if (ictx->last_ar + 2000000 < t)
             ictx->last_ar = t;
@@ -1066,10 +1068,6 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
         if (ictx->ar_state == 0
             && (t - ictx->last_key_down_time) >= ictx->ar_delay * 1000)
         {
-            if (!ictx->current_down_cmd) {
-                ictx->ar_state = -1;
-                return NULL;
-            }
             ictx->ar_state = 1;
             ictx->last_ar = ictx->last_key_down_time + ictx->ar_delay * 1000;
             return mp_cmd_clone(ictx->current_down_cmd);
