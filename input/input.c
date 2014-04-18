@@ -415,15 +415,6 @@ static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
     return NULL;
 }
 
-static bool any_mouse_buttons_down(int num_keys, int *keys)
-{
-    for (int n = 0; n < num_keys; n++) {
-        if (MP_KEY_IS_MOUSE_BTN_SINGLE(keys[n]))
-            return true;
-    }
-    return false;
-}
-
 static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
                                               char *force_section, int code)
 {
@@ -431,13 +422,10 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
         return find_bind_for_key_section(ictx, force_section, code);
 
     bool use_mouse = MP_KEY_DEPENDS_ON_MOUSE_POS(code);
-    // Check global state, because MOUSE_MOVE in particular does not include
-    // the global state in n/keys.
-    bool mouse_down = any_mouse_buttons_down(ictx->num_key_down, ictx->key_down);
 
     // First look whether a mouse section is capturing all mouse input
     // exclusively (regardless of the active section stack order).
-    if (use_mouse && mouse_down) {
+    if (use_mouse) {
         struct cmd_bind *bind =
             find_bind_for_key_section(ictx, ictx->mouse_section, code);
         if (bind)
