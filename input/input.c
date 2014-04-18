@@ -139,9 +139,8 @@ struct input_ctx {
 
     // history of key downs - the newest is in position 0
     int key_history[MP_MAX_KEY_DOWN];
-    // these are the keys currently down
-    int key_down[MP_MAX_KEY_DOWN];
-    unsigned int num_key_down;
+    // key code of the last key that triggered MP_KEY_STATE_DOWN
+    int last_key_down;
     int64_t last_key_down_time;
     bool current_down_cmd_need_release;
     struct mp_cmd *current_down_cmd;
@@ -529,28 +528,17 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
     }
     ictx->current_down_cmd = NULL;
     ictx->current_down_cmd_need_release = false;
+    ictx->last_key_down = 0;
     ictx->last_key_down_time = 0;
     ictx->ar_state = -1;
 }
 
-static int find_key_down(struct input_ctx *ictx, int code)
+static void release_all(struct input_ctx *ictx)
 {
-    code &= ~(MP_KEY_STATE_UP | MP_KEY_STATE_DOWN | MP_KEY_MODIFIER_MASK);
-    for (int j = 0; j < ictx->num_key_down; j++) {
-        if ((ictx->key_down[j] & ~MP_KEY_MODIFIER_MASK) == code)
-            return j;
-    }
-    return -1;
-}
-
-static void remove_key_down(struct input_ctx *ictx, int code)
-{
-    int index = find_key_down(ictx, code);
-    if (index >= 0) {
-        memmove(&ictx->key_down[index], &ictx->key_down[index + 1],
-                (ictx->num_key_down - (index + 1)) * sizeof(int));
-        ictx->num_key_down -= 1;
-    }
+    ictx->last_key_down = 0;
+    ictx->last_key_down_time = 0;
+    release_down_cmd(ictx, false);
+    update_mouse_section(ictx);
 }
 
 // Whether a command shall be sent on both key down and key up events.
@@ -585,58 +573,49 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
     if (unmod >= 32 && unmod < MP_KEY_BASE)
         code &= ~MP_KEY_MODIFIER_SHIFT;
 
-    if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
-        int noflags = code & ~(MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
-        char *key = mp_input_get_key_name(noflags);
-        MP_DBG(ictx, "key code=%#x '%s'%s%s\n",
-               code, key, (code & MP_KEY_STATE_DOWN) ? " down" : "",
-               (code & MP_KEY_STATE_UP) ? " up" : "");
-        talloc_free(key);
-    }
+    int state = code & (MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
+    code = code & ~(unsigned)state;
 
-    if (!(code & MP_KEY_STATE_UP) && ictx->num_key_down >= MP_MAX_KEY_DOWN) {
-        MP_ERR(ictx, "Too many key down events at the same time\n");
-        return;
+    if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
+        char *key = mp_input_get_key_name(code);
+        MP_DBG(ictx, "key code=%#x '%s'%s%s\n",
+               code, key, (state & MP_KEY_STATE_DOWN) ? " down" : "",
+               (state & MP_KEY_STATE_UP) ? " up" : "");
+        talloc_free(key);
     }
 
     if (MP_KEY_DEPENDS_ON_MOUSE_POS(unmod))
         ictx->mouse_event_counter++;
     ictx->got_new_events = true;
 
-    bool key_was_down = find_key_down(ictx, code) >= 0;
     struct mp_cmd *cmd = NULL;
 
-    if (code & MP_KEY_STATE_DOWN) {
-        // Check if we don't already have this key as pushed
-        if (key_was_down)
+    if (state == MP_KEY_STATE_DOWN) {
+        // Protect against VOs which send STATE_DOWN with autorepeat
+        if (ictx->last_key_down == code)
             return;
         // Cancel current down-event (there can be only one)
         release_down_cmd(ictx, true);
-        ictx->key_down[ictx->num_key_down] = code & ~MP_KEY_STATE_DOWN;
-        ictx->num_key_down++;
         update_mouse_section(ictx);
-        ictx->last_key_down_time = mp_time_us();
-        ictx->ar_state = 0;
-        cmd = get_cmd_from_keys(ictx, NULL, code & ~MP_KEY_STATE_DOWN);
-        key_buf_add(ictx->key_history, code & ~MP_KEY_STATE_DOWN);
+        cmd = get_cmd_from_keys(ictx, NULL, code);
+        key_buf_add(ictx->key_history, code);
         if (cmd && should_drop_cmd(ictx, cmd)) {
-            ictx->num_key_down--;
             talloc_free(cmd);
             return;
         }
+        ictx->last_key_down = code;
+        ictx->last_key_down_time = mp_time_us();
+        ictx->ar_state = 0;
         if (cmd && (code & MP_KEY_EMIT_ON_UP))
             cmd->key_up_follows = true;
         ictx->current_down_cmd = mp_cmd_clone(cmd);
         ictx->current_down_cmd_need_release = false;
-    } else if (code & MP_KEY_STATE_UP) {
-        if (key_was_down) {
-            remove_key_down(ictx, code & ~MP_KEY_STATE_DOWN);
-            release_down_cmd(ictx, false);
-        }
-        update_mouse_section(ictx);
+    } else if (state == MP_KEY_STATE_UP) {
+        // Most VOs send RELEASE_ALL anyway
+        release_all(ictx);
     } else {
         // Press of key with no separate down/up events
-        if (key_was_down) {
+        if (ictx->last_key_down == code) {
             // Mixing press events and up/down with the same key is not allowed
             MP_WARN(ictx, "Mixing key presses and up/down.\n");
         }
@@ -671,9 +650,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
 {
     if (code == MP_INPUT_RELEASE_ALL) {
         MP_DBG(ictx, "release all\n");
-        ictx->num_key_down = 0;
-        release_down_cmd(ictx, false);
-        update_mouse_section(ictx);
+        release_all(ictx);
         return;
     }
     if (code == MP_KEY_MOUSE_LEAVE) {
@@ -1043,7 +1020,7 @@ static void input_wait_read(struct input_ctx *ictx, int time)
  */
 static void read_events(struct input_ctx *ictx, int time)
 {
-    if (ictx->num_key_down && ictx->ar_rate > 0) {
+    if (ictx->last_key_down && ictx->ar_rate > 0) {
         time = FFMIN(time, 1000 / ictx->ar_rate);
         time = FFMIN(time, ictx->ar_delay);
     }
@@ -1088,8 +1065,8 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
 {
     // No input : autorepeat ?
-    if (ictx->ar_rate > 0 && ictx->ar_state >= 0 && ictx->num_key_down > 0
-        && !(ictx->key_down[ictx->num_key_down - 1] & MP_NO_REPEAT_KEY)) {
+    if (ictx->ar_rate > 0 && ictx->ar_state >= 0 && ictx->last_key_down
+        && !(ictx->last_key_down & MP_NO_REPEAT_KEY)) {
         int64_t t = mp_time_us();
         if (ictx->last_ar + 2000000 < t)
             ictx->last_ar = t;
