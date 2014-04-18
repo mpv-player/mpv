@@ -60,7 +60,8 @@ It's also possible to bind a command to a sequence of keys:
 
 If ``a`` or ``a-b`` or ``b`` are already bound, this will run all commands. It
 doesn't delay key bindings, and it simply considers the past key history on
-any key press.
+any key press. Intermediate keys can be mapped to ``ignore`` in order to avoid
+this issue.
 
 List of Input Commands
 ----------------------
