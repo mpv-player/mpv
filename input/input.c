@@ -311,6 +311,15 @@ static void append_bind_info(struct input_ctx *ictx, char **pmsg,
 
 static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
 {
+    if (code == MP_KEY_CLOSE_WIN) {
+        MP_WARN(ictx,
+            "CLOSE_WIN was received. This pseudo key can be remapped too,\n"
+            "but --input-test will always quit when receiving it.\n");
+        const char *args[] = {"quit", NULL};
+        mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, 0, args, "");
+        return res;
+    }
+
     char *key_buf = mp_input_get_key_combo_name(&code, 1);
     char *msg = talloc_asprintf(NULL, "Key %s is bound to:\n", key_buf);
     talloc_free(key_buf);
