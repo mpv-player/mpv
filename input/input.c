@@ -348,17 +348,6 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
     return res;
 }
 
-static bool bind_matches_key(struct cmd_bind *bind, int num_keys, const int *keys)
-{
-    if (bind->num_keys != num_keys)
-        return false;
-    for (int i = 0; i < num_keys; i++) {
-        if (bind->keys[i] != keys[i])
-            return false;
-    }
-    return true;
-}
-
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
                                                  bstr section)
 {
@@ -1321,6 +1310,17 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
         remove_binds(bs, builtin);
     }
     input_unlock(ictx);
+}
+
+static bool bind_matches_key(struct cmd_bind *bind, int num_keys, const int *keys)
+{
+    if (bind->num_keys != num_keys)
+        return false;
+    for (int i = 0; i < num_keys; i++) {
+        if (bind->keys[i] != keys[i])
+            return false;
+    }
+    return true;
 }
 
 static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
