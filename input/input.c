@@ -142,7 +142,7 @@ struct input_ctx {
     // these are the keys currently down
     int key_down[MP_MAX_KEY_DOWN];
     unsigned int num_key_down;
-    int64_t last_key_down;
+    int64_t last_key_down_time;
     bool current_down_cmd_need_release;
     struct mp_cmd *current_down_cmd;
 
@@ -529,7 +529,7 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
     }
     ictx->current_down_cmd = NULL;
     ictx->current_down_cmd_need_release = false;
-    ictx->last_key_down = 0;
+    ictx->last_key_down_time = 0;
     ictx->ar_state = -1;
 }
 
@@ -615,7 +615,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         ictx->key_down[ictx->num_key_down] = code & ~MP_KEY_STATE_DOWN;
         ictx->num_key_down++;
         update_mouse_section(ictx);
-        ictx->last_key_down = mp_time_us();
+        ictx->last_key_down_time = mp_time_us();
         ictx->ar_state = 0;
         cmd = get_cmd_from_keys(ictx, NULL, code & ~MP_KEY_STATE_DOWN);
         key_buf_add(ictx->key_history, code & ~MP_KEY_STATE_DOWN);
@@ -1095,14 +1095,14 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
             ictx->last_ar = t;
         // First time : wait delay
         if (ictx->ar_state == 0
-            && (t - ictx->last_key_down) >= ictx->ar_delay * 1000)
+            && (t - ictx->last_key_down_time) >= ictx->ar_delay * 1000)
         {
             if (!ictx->current_down_cmd) {
                 ictx->ar_state = -1;
                 return NULL;
             }
             ictx->ar_state = 1;
-            ictx->last_ar = ictx->last_key_down + ictx->ar_delay * 1000;
+            ictx->last_ar = ictx->last_key_down_time + ictx->ar_delay * 1000;
             return mp_cmd_clone(ictx->current_down_cmd);
             // Then send rate / sec event
         } else if (ictx->ar_state == 1
