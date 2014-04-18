@@ -173,10 +173,15 @@ void mp_audio_realloc(struct mp_audio *mpa, int samples)
 }
 
 // Like mp_audio_realloc(), but only reallocate if the audio grows in size.
+// If the buffer is reallocated, also preallocate.
 void mp_audio_realloc_min(struct mp_audio *mpa, int samples)
 {
-    if (samples > mp_audio_get_allocated_size(mpa))
-        mp_audio_realloc(mpa, samples);
+    if (samples > mp_audio_get_allocated_size(mpa)) {
+        size_t alloc = ta_calc_prealloc_elems(samples);
+        if (alloc > INT_MAX)
+            abort(); // oom
+        mp_audio_realloc(mpa, alloc);
+    }
 }
 
 /* Get the size allocated for the data, in number of samples. If the allocated
