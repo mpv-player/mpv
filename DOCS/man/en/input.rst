@@ -52,6 +52,16 @@ You can bind multiple commands to one key. For example:
 
 | a show_text "command 1" ; show_text "command 2"
 
+It's also possible to bind a command to a sequence of keys:
+
+| a-b-c show_text "command run after a, b, c have been pressed"
+
+(This is not shown in the general command syntax.)
+
+If ``a`` or ``a-b`` or ``b`` are already bound, this will run all commands. It
+doesn't delay key bindings, and it simply considers the past key history on
+any key press.
+
 List of Input Commands
 ----------------------
 
