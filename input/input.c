@@ -393,9 +393,13 @@ static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
     memcpy(keys, ictx->key_history, sizeof(keys));
     key_buf_add(keys, code);
 
+    struct cmd_bind *best = NULL;
+
     // Prefer user-defined keys over builtin bindings
     for (int builtin = 0; builtin < 2; builtin++) {
         if (builtin && !ictx->default_bindings)
+            break;
+        if (best)
             break;
         for (int n = 0; n < bs->num_binds; n++) {
             if (bs->binds[n].is_builtin == (bool)builtin) {
@@ -406,12 +410,13 @@ static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
                     if (b->keys[i] != keys[b->num_keys - 1 - i])
                         goto skip;
                 }
-                return b;
+                if (!best || b->num_keys >= best->num_keys)
+                    best = b;
             skip: ;
             }
         }
     }
-    return NULL;
+    return best;
 }
 
 static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
