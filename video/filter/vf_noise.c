@@ -26,7 +26,6 @@
 
 #include "config.h"
 #include "common/msg.h"
-#include "common/cpudetect.h"
 #include "options/m_option.h"
 
 #include "video/img_format.h"
@@ -43,11 +42,8 @@
 
 //===========================================================================//
 
-static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift);
-static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift);
-
-static void (*lineNoise)(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift)= lineNoise_C;
-static void (*lineNoiseAvg)(uint8_t *dst, uint8_t *src, int len, int8_t **shift)= lineNoiseAvg_C;
+static inline void lineNoise(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift);
+static inline void lineNoiseAvg(uint8_t *dst, uint8_t *src, int len, int8_t **shift);
 
 typedef struct FilterParam{
         int strength;
@@ -151,64 +147,7 @@ static int8_t *initNoise(FilterParam *fp){
 
 /***************************************************************************/
 
-#if HAVE_MMX
-static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
-        x86_reg mmx_len= len&(~7);
-        noise+=shift;
-
-        __asm__ volatile(
-                "mov %3, %%"REG_a"              \n\t"
-                "pcmpeqb %%mm7, %%mm7           \n\t"
-                "psllw $15, %%mm7               \n\t"
-                "packsswb %%mm7, %%mm7          \n\t"
-                ".align 4                       \n\t"
-                "1:                             \n\t"
-                "movq (%0, %%"REG_a"), %%mm0    \n\t"
-                "movq (%1, %%"REG_a"), %%mm1    \n\t"
-                "pxor %%mm7, %%mm0              \n\t"
-                "paddsb %%mm1, %%mm0            \n\t"
-                "pxor %%mm7, %%mm0              \n\t"
-                "movq %%mm0, (%2, %%"REG_a")    \n\t"
-                "add $8, %%"REG_a"              \n\t"
-                " js 1b                         \n\t"
-                :: "r" (src+mmx_len), "r" (noise+mmx_len), "r" (dst+mmx_len), "g" (-mmx_len)
-                : "%"REG_a
-        );
-        if(mmx_len!=len)
-                lineNoise_C(dst+mmx_len, src+mmx_len, noise+mmx_len, len-mmx_len, 0);
-}
-#endif
-
-//duplicate of previous except movntq
-#if HAVE_MMX2
-static inline void lineNoise_MMX2(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
-        x86_reg mmx_len= len&(~7);
-        noise+=shift;
-
-        __asm__ volatile(
-                "mov %3, %%"REG_a"              \n\t"
-                "pcmpeqb %%mm7, %%mm7           \n\t"
-                "psllw $15, %%mm7               \n\t"
-                "packsswb %%mm7, %%mm7          \n\t"
-                ".align 4                       \n\t"
-                "1:                             \n\t"
-                "movq (%0, %%"REG_a"), %%mm0    \n\t"
-                "movq (%1, %%"REG_a"), %%mm1    \n\t"
-                "pxor %%mm7, %%mm0              \n\t"
-                "paddsb %%mm1, %%mm0            \n\t"
-                "pxor %%mm7, %%mm0              \n\t"
-                "movntq %%mm0, (%2, %%"REG_a")  \n\t"
-                "add $8, %%"REG_a"              \n\t"
-                " js 1b                         \n\t"
-                :: "r" (src+mmx_len), "r" (noise+mmx_len), "r" (dst+mmx_len), "g" (-mmx_len)
-                : "%"REG_a
-        );
-        if(mmx_len!=len)
-                lineNoise_C(dst+mmx_len, src+mmx_len, noise+mmx_len, len-mmx_len, 0);
-}
-#endif
-
-static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
+static inline void lineNoise(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
         int i;
         noise+= shift;
         for(i=0; i<len; i++)
@@ -222,54 +161,7 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 
 /***************************************************************************/
 
-#if HAVE_MMX
-static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
-        x86_reg mmx_len= len&(~7);
-        uint8_t *src_mmx_len = src+mmx_len;
-
-        __asm__ volatile(
-                "push %%"REG_BP"                \n\t"
-                "mov %0, %%"REG_BP"             \n\t"
-                "mov %5, %%"REG_a"              \n\t"
-                ".align 4                       \n\t"
-                "1:                             \n\t"
-                "movq (%1, %%"REG_a"), %%mm1    \n\t"
-                "movq (%%"REG_BP", %%"REG_a"), %%mm0    \n\t"
-                "paddb (%2, %%"REG_a"), %%mm1   \n\t"
-                "paddb (%3, %%"REG_a"), %%mm1   \n\t"
-                "movq %%mm0, %%mm2              \n\t"
-                "movq %%mm1, %%mm3              \n\t"
-                "punpcklbw %%mm0, %%mm0         \n\t"
-                "punpckhbw %%mm2, %%mm2         \n\t"
-                "punpcklbw %%mm1, %%mm1         \n\t"
-                "punpckhbw %%mm3, %%mm3         \n\t"
-                "pmulhw %%mm0, %%mm1            \n\t"
-                "pmulhw %%mm2, %%mm3            \n\t"
-                "paddw %%mm1, %%mm1             \n\t"
-                "paddw %%mm3, %%mm3             \n\t"
-                "paddw %%mm0, %%mm1             \n\t"
-                "paddw %%mm2, %%mm3             \n\t"
-                "psrlw $8, %%mm1                \n\t"
-                "psrlw $8, %%mm3                \n\t"
-                "packuswb %%mm3, %%mm1          \n\t"
-                "movq %%mm1, (%4, %%"REG_a")    \n\t"
-                "add $8, %%"REG_a"              \n\t"
-                " js 1b                         \n\t"
-                "pop %%"REG_BP"                 \n\t"
-                :: "g" (src_mmx_len), "r" (shift[0]+mmx_len),
-                   "r" (shift[1]+mmx_len), "r" (shift[2]+mmx_len),
-                   "r" (dst+mmx_len), "g" (-mmx_len)
-                : "%"REG_a
-        );
-
-        if(mmx_len!=len){
-                int8_t *shift2[3]={shift[0]+mmx_len, shift[1]+mmx_len, shift[2]+mmx_len};
-                lineNoiseAvg_C(dst+mmx_len, src+mmx_len, len-mmx_len, shift2);
-        }
-}
-#endif
-
-static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
+static inline void lineNoiseAvg(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
         int i;
         int8_t *src2= (int8_t*)src;
 
@@ -335,13 +227,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
         donoise(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
         donoise(dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
 
-#if HAVE_MMX
-        if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
-#endif
-#if HAVE_MMX2
-        if(gCpuCaps.hasMMX2) __asm__ volatile ("sfence\n\t");
-#endif
-
         if (dmpi != mpi)
             talloc_free(mpi);
         return dmpi;
@@ -395,17 +280,6 @@ static int vf_open(vf_instance_t *vf){
 
     parse(&vf->priv->lumaParam, vf->priv);
     parse(&vf->priv->chromaParam, vf->priv);
-
-#if HAVE_MMX
-    if(gCpuCaps.hasMMX){
-        lineNoise= lineNoise_MMX;
-        lineNoiseAvg= lineNoiseAvg_MMX;
-    }
-#endif
-#if HAVE_MMX2
-    if(gCpuCaps.hasMMX2) lineNoise= lineNoise_MMX2;
-//    if(gCpuCaps.hasMMX) lineNoiseAvg= lineNoiseAvg_MMX2;
-#endif
 
     return 1;
 }
