@@ -58,10 +58,10 @@ It's also possible to bind a command to a sequence of keys:
 
 (This is not shown in the general command syntax.)
 
-If ``a`` or ``a-b`` or ``b`` are already bound, this will run all commands. It
-doesn't delay key bindings, and it simply considers the past key history on
-any key press. Intermediate keys can be mapped to ``ignore`` in order to avoid
-this issue.
+If ``a`` or ``a-b`` or ``b`` are already bound, this will run the first command
+that matches, and the multi-key command will never be called. Intermediate keys
+can be remapped to ``ignore`` in order to avoid this issue. The maximum number
+of (non-modifier) keys for combinations is currently 4.
 
 List of Input Commands
 ----------------------

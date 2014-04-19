@@ -559,12 +559,16 @@ static struct mp_cmd *resolve_key(struct input_ctx *ictx, int code)
 {
     update_mouse_section(ictx);
     struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, code);
-    key_buf_add(ictx->key_history, code);
-    if (cmd && should_drop_cmd(ictx, cmd)) {
+    if (cmd && cmd->id != MP_CMD_IGNORE) {
+        memset(ictx->key_history, 0, sizeof(ictx->key_history));
+        if (!should_drop_cmd(ictx, cmd))
+            return cmd;
         talloc_free(cmd);
         return NULL;
     }
-    return cmd;
+    talloc_free(cmd);
+    key_buf_add(ictx->key_history, code);
+    return NULL;
 }
 
 static void interpret_key(struct input_ctx *ictx, int code, double scale)
