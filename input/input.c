@@ -555,6 +555,18 @@ static bool should_drop_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
             (!mp_input_is_abort_cmd(cmd) || queue_has_abort_cmds(queue)));
 }
 
+static struct mp_cmd *resolve_key(struct input_ctx *ictx, int code)
+{
+    update_mouse_section(ictx);
+    struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, code);
+    key_buf_add(ictx->key_history, code);
+    if (cmd && should_drop_cmd(ictx, cmd)) {
+        talloc_free(cmd);
+        return NULL;
+    }
+    return cmd;
+}
+
 static void interpret_key(struct input_ctx *ictx, int code, double scale)
 {
     /* On normal keyboards shift changes the character code of non-special
@@ -589,17 +601,12 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
             return;
         // Cancel current down-event (there can be only one)
         release_down_cmd(ictx, true);
-        cmd = get_cmd_from_keys(ictx, NULL, code);
-        key_buf_add(ictx->key_history, code);
-        if (cmd && should_drop_cmd(ictx, cmd)) {
-            talloc_free(cmd);
-            return;
-        }
+        cmd = resolve_key(ictx, code);
+        if (cmd && (code & MP_KEY_EMIT_ON_UP))
+            cmd->key_up_follows = true;
         ictx->last_key_down = code;
         ictx->last_key_down_time = mp_time_us();
         ictx->ar_state = 0;
-        if (cmd && (code & MP_KEY_EMIT_ON_UP))
-            cmd->key_up_follows = true;
         ictx->current_down_cmd = mp_cmd_clone(cmd);
         ictx->current_down_cmd_need_release = false;
     } else if (state == MP_KEY_STATE_UP) {
@@ -611,13 +618,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
             // Mixing press events and up/down with the same key is not allowed
             MP_WARN(ictx, "Mixing key presses and up/down.\n");
         }
-        update_mouse_section(ictx);
-        cmd = get_cmd_from_keys(ictx, NULL, code);
-        key_buf_add(ictx->key_history, code);
-        if (cmd && should_drop_cmd(ictx, cmd)) {
-            talloc_free(cmd);
-            return;
-        }
+        cmd = resolve_key(ictx, code);
     }
 
     if (!cmd)
