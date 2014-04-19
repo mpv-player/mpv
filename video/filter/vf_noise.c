@@ -24,6 +24,8 @@
 #include <inttypes.h>
 #include <math.h>
 
+#include <libavutil/mem.h>
+
 #include "config.h"
 #include "common/msg.h"
 #include "options/m_option.h"
@@ -32,7 +34,6 @@
 #include "video/mp_image.h"
 #include "vf.h"
 #include "video/memcpy_pic.h"
-#include "libavutil/mem.h"
 
 #include "vf_lavfi.h"
 

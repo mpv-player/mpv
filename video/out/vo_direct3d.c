@@ -38,8 +38,8 @@
 #include "video/img_format.h"
 #include "video/memcpy_pic.h"
 #include "common/msg.h"
+#include "common/common.h"
 #include "w32_common.h"
-#include "libavutil/common.h"
 #include "sub/osd.h"
 #include "bitmap_packer.h"
 
@@ -303,8 +303,8 @@ static void d3d_fix_texture_size(d3d_priv *priv, int *width, int *height)
     int tex_height = *height;
 
     // avoid nasty special cases with 0-sized textures and texture sizes
-    tex_width = FFMAX(tex_width, 1);
-    tex_height = FFMAX(tex_height, 1);
+    tex_width = MPMAX(tex_width, 1);
+    tex_height = MPMAX(tex_height, 1);
 
     if (priv->device_caps_power2_only) {
         tex_width  = 1;
@@ -314,7 +314,7 @@ static void d3d_fix_texture_size(d3d_priv *priv, int *width, int *height)
     }
     if (priv->device_caps_square_only)
         /* device only supports square textures */
-        tex_width = tex_height = FFMAX(tex_width, tex_height);
+        tex_width = tex_height = MPMAX(tex_width, tex_height);
     // better round up to a multiple of 16
     if (!priv->opt_disable_texture_align) {
         tex_width  = (tex_width  + 15) & ~15;

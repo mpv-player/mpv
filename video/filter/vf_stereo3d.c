@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libavutil/common.h>
+
 #include "config.h"
 #include "common/msg.h"
 #include "options/options.h"
@@ -32,7 +34,6 @@
 #include "vf.h"
 #include "options/m_option.h"
 
-#include "libavutil/common.h"
 #include "video/memcpy_pic.h"
 
 #include "vf_lavfi.h"

@@ -31,6 +31,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/time.h>
+#include <libavutil/avstring.h>
 
 #include "config.h"
 
@@ -43,7 +44,6 @@
 
 #include "audio/format.h"
 #include "video/img_fourcc.h"
-#include "libavutil/avstring.h"
 #include "osdep/timer.h"
 
 #include "tv.h"

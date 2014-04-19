@@ -43,7 +43,6 @@
 
 #include "stream.h"
 #include "options/m_option.h"
-#include "libavutil/common.h"
 #include "compat/mpbswap.h"
 
 #include "common/msg.h"

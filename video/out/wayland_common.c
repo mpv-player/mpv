@@ -34,7 +34,6 @@
 #include "bstr/bstr.h"
 #include "options/options.h"
 #include "common/msg.h"
-#include "libavutil/common.h"
 #include "talloc.h"
 
 #include "wayland_common.h"

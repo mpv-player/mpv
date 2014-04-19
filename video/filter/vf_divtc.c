@@ -26,7 +26,6 @@
 #include "config.h"
 #include "common/msg.h"
 #include "options/m_option.h"
-#include "libavutil/common.h"
 #include "compat/mpbswap.h"
 
 #include "video/img_format.h"

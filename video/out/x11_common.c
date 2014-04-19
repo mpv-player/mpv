@@ -25,10 +25,10 @@
 #include "config.h"
 #include "bstr/bstr.h"
 #include "options/options.h"
+#include "common/common.h"
 #include "common/msg.h"
 #include "input/input.h"
 #include "input/event.h"
-#include "libavutil/common.h"
 #include "x11_common.h"
 #include "talloc.h"
 
@@ -1419,10 +1419,10 @@ static void fill_rect(struct vo *vo, GC gc, int x0, int y0, int x1, int y1)
 {
     struct vo_x11_state *x11 = vo->x11;
 
-    x0 = FFMAX(x0, 0);
-    y0 = FFMAX(y0, 0);
-    x1 = FFMIN(x1, x11->win_width);
-    y1 = FFMIN(y1, x11->win_height);
+    x0 = MPMAX(x0, 0);
+    y0 = MPMAX(y0, 0);
+    x1 = MPMIN(x1, x11->win_width);
+    y1 = MPMIN(y1, x11->win_height);
 
     if (x11->window && x1 > x0 && y1 > y0)
         XFillRectangle(x11->display, x11->window, gc, x0, y0, x1 - x0, y1 - y0);
