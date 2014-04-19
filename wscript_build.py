@@ -158,7 +158,6 @@ def build(ctx):
         ( "common/av_log.c" ),
         ( "common/av_opts.c" ),
         ( "common/codecs.c" ),
-        ( "common/cpudetect.c" ),
         ( "common/encode_lavc.c",                "encoding" ),
         ( "common/common.c" ),
         ( "common/tags.c" ),

@@ -35,7 +35,6 @@
 
 #include "common/av_log.h"
 #include "common/codecs.h"
-#include "common/cpudetect.h"
 #include "common/encode.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
@@ -307,7 +306,6 @@ static int cfg_include(void *ctx, char *filename, int flags)
 struct MPContext *mp_create(void)
 {
     mp_time_init();
-    GetCpuCaps(&gCpuCaps);
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){

@@ -129,14 +129,6 @@ EOF
   compile_check $TMPC $@
 }
 
-inline_asm_check() {
-  cat > $TMPC << EOF
-int main(void) { __asm__ volatile ($1); return 0; }
-EOF
-  shift
-  compile_check $TMPC $@
-}
-
 # The following checks are special and should only be used with broken and
 # non-selfsufficient headers that do not include all of their dependencies.
 
@@ -206,46 +198,6 @@ morphos()   { issystem "MorphOS"; }
 netbsd()    { issystem "NetBSD"; }
 openbsd()   { issystem "OpenBSD"; }
 win32()     { cygwin || mingw32; }
-
-# arch test boolean functions
-x86_32() {
-  case "$host_arch" in
-    i[3-9]86|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-x86_64() {
-  case "$host_arch" in
-    x86_64|amd64) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-x86() {
-  x86_32 || x86_64
-}
-
-ppc() {
-  case "$host_arch" in
-    ppc|ppc64|powerpc|powerpc64) return 0;;
-    *) return 1;;
-  esac
-}
-
-alpha() {
-  case "$host_arch" in
-    alpha*) return 0;;
-    *) return 1;;
-  esac
-}
-
-arm() {
-  case "$host_arch" in
-    arm*) return 0;;
-    *) return 1;;
-  esac
-}
 
 # Use this before starting a check
 echocheck() {
@@ -776,7 +728,7 @@ if test "$_cc" = auto ; then
     fi
 fi
 
-# Determine our OS name and CPU architecture
+# Determine our OS name
 if test -z "$_target" ; then
   # OS name
   system_name=$(uname -s 2>&1)
@@ -800,41 +752,6 @@ if test -z "$_target" ; then
     ;;
   esac
 
-
-  # host's CPU/instruction set
-   host_arch=$(uname -p 2>&1)
-   case "$host_arch" in
-   i386|sparc|ppc|alpha|arm|mips|vax)
-     ;;
-   powerpc) # Darwin returns 'powerpc'
-     host_arch=ppc
-     ;;
-   *) # uname -p on Linux returns 'unknown' for the processor type,
-      # OpenBSD returns 'Intel Pentium/MMX ("Genuine Intel" 586-class)'
-
-      # Maybe uname -m (machine hardware name) returns something we
-      # recognize.
-
-      case "$(uname -m 2>&1)" in
-      x86_64|amd64|i[3-9]86*|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686|BePC) host_arch=i386 ;;
-      ia64) host_arch=ia64 ;;
-      macppc|ppc) host_arch=ppc ;;
-      ppc64) host_arch=ppc64 ;;
-      alpha) host_arch=alpha ;;
-      sparc) host_arch=sparc ;;
-      sparc64) host_arch=sparc64 ;;
-      parisc*|hppa*|9000*) host_arch=hppa ;;
-      arm*|zaurus|cats) host_arch=arm ;;
-      sh3|sh4|sh4a) host_arch=sh ;;
-      s390) host_arch=s390 ;;
-      s390x) host_arch=s390x ;;
-      *mips*) host_arch=mips ;;
-      vax) host_arch=vax ;;
-      xtensa*) host_arch=xtensa ;;
-      *) host_arch=UNKNOWN ;;
-    esac
-    ;;
-  esac
 else # if test -z "$_target"
   for i in 2 3; do
     system_name=$(echo $_target | cut -d '-' -f $i)
@@ -851,11 +768,6 @@ else # if test -z "$_target"
     esac
     break
   done
-  # We need to convert underscores so that values like k6-2 and pentium-mmx can be passed
-  host_arch=$(echo $_target | cut -d '-' -f 1)
-  if test $(echo $host_arch) != "x86_64" ; then
-    host_arch=$(echo $host_arch | tr '_' '-')
-  fi
 fi
 
 extra_cflags="-I. -D_GNU_SOURCE $extra_cflags"
@@ -1019,114 +931,11 @@ echocheck "perl"
 command_check perl -Mv5.8 -e';' || die "Perl is not functioning correctly or is ancient. Install the latest perl available."
 echo yes
 
-if test -z "$_target" && x86 ; then
-  cat > $TMPC << EOF
-int main(void) {
-    int test[(int)sizeof(char *)-7];
-    return 0;
-}
-EOF
-  cc_check && host_arch=x86_64 || host_arch=i386
-fi
-
 echo "Detected operating system: $system_name"
-echo "Detected host architecture: $host_arch"
 
 # ---
 
-# now that we know what compiler should be used for compilation, try to find
-# out which assembler is used by the $_cc compiler
-if test "$_as" = auto ; then
-  _as=$($_cc -print-prog-name=as)
-  test -z "$_as" && _as=as
-fi
-
-def_fast_64bit='#define HAVE_FAST_64BIT 0'
-def_arch_x86='#define ARCH_X86 0'
-def_arch_x86_32='#define ARCH_X86_32 0'
-def_arch_x86_64='#define ARCH_X86_64 0'
-
-case "$host_arch" in
-  i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-    arch='x86'
-    subarch='x86_32'
-    def_arch_x86='#define ARCH_X86 1'
-    def_arch_x86_32='#define ARCH_X86_32 1'
-    ;;
-
-  ia64)
-    arch='ia64'
-    def_fast_64bit='#define HAVE_FAST_64BIT 1'
-    ;;
-
-  x86_64|amd64)
-    arch='x86'
-    subarch='x86_64'
-    def_arch_x86='#define ARCH_X86 1'
-    def_arch_x86_64='#define ARCH_X86_64 1'
-    def_fast_64bit='#define HAVE_FAST_64BIT 1'
-    ;;
-
-  sparc|sparc64)
-    arch='sparc'
-    ;;
-
-  arm*)
-    arch='arm'
-    ;;
-
-  avr32)
-    arch='avr32'
-    ;;
-
-  sh|sh4)
-    arch='sh4'
-    ;;
-
-  ppc|ppc64|powerpc|powerpc64)
-    arch='ppc'
-    ;;
-
-  alpha*)
-    arch='alpha'
-    ;;
-
-  mips*)
-    arch='mips'
-    ;;
-
-  hppa)
-    arch='pa_risc'
-    ;;
-
-  s390)
-    arch='s390'
-    ;;
-
-  s390x)
-    arch='s390x'
-    ;;
-
-  vax)
-    arch='vax'
-    ;;
-
-  xtensa)
-    arch='xtensa'
-    ;;
-
-  generic)
-    arch='generic'
-    ;;
-
-  *)
-    echo "The architecture of your CPU ($host_arch) is not supported by this configure script"
-    echo "It seems nobody has ported mpv to your OS or CPU type yet."
-    die "unsupported architecture $host_arch"
-    ;;
-esac # case "$host_arch" in
-
-echocheck "assembler support of -pipe option"
+echocheck "compiler support of -pipe option"
 # -I. helps to detect compilers that just misunderstand -pipe like Sun C
 cflag_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
 
@@ -1179,44 +988,6 @@ if test -n "$CPPFLAGS" ; then
   warn_cflags=yes
 fi
 
-
-echocheck "PIC"
-pic=no
-cat > $TMPC << EOF
-int main(void) {
-#if !(defined(__PIC__) || defined(__pic__) || defined(PIC))
-#error PIC not enabled
-#endif
-    return 0;
-}
-EOF
-cc_check && pic=yes && extra_cflags="$extra_cflags -DPIC"
-echores $pic
-
-
-if x86 ; then
-
-echocheck "ebx availability"
-ebx_available=no
-def_ebx_available='#define HAVE_EBX_AVAILABLE 0'
-cat > $TMPC << EOF
-int main(void) {
-    int x;
-    __asm__ volatile(
-        "xor %0, %0"
-        :"=b"(x)
-        // just adding ebx to clobber list seems unreliable with some
-        // compilers, e.g. Haiku's gcc 2.95
-    );
-    // and the above check does not work for OSX 64 bit...
-    __asm__ volatile("":::"%ebx");
-    return 0;
-}
-EOF
-cc_check && ebx_available=yes && def_ebx_available='#define HAVE_EBX_AVAILABLE 1'
-echores $ebx_available
-
-fi #if x86
 
 ######################
 # MAIN TESTS GO HERE #
@@ -3061,7 +2832,6 @@ fi
 
 extra_ldflags="$extra_ldflags $_ld_pthread"
 libs_mplayer="$libs_mplayer $_ld_dl"
-(netbsd || openbsd) && x86_32 && libs_mplayer="$libs_mplayer -li386"
 
 
 echocheck "joystick"
@@ -3297,20 +3067,6 @@ $def_priority
 /* configurable options */
 $def_stream_cache
 
-
-/* CPU stuff */
-$def_ebx_available
-
-$def_arch_x86
-$def_arch_x86_32
-$def_arch_x86_64
-
-#define HAVE_MMX ARCH_X86
-#define HAVE_MMX2 ARCH_X86
-#define HAVE_SSE ARCH_X86
-#define HAVE_SSE2 ARCH_X86
-#define HAVE_SSSE3 ARCH_X86
-
 /* Blu-ray/DVD/VCD/CD */
 #define DEFAULT_CDROM_DEVICE "$default_cdrom_device"
 #define DEFAULT_DVD_DEVICE   "$default_dvd_device"
@@ -3425,11 +3181,6 @@ $def_fast_64bit
 $def_pthreads
 $def_atomic
 $def_sync
-
-#define HAVE_INLINE_ASM 1
-
-/* Use these registers in x86 inline asm. No proper detection yet. */
-#define HAVE_EBP_AVAILABLE 1
 
 #endif /* MPLAYER_CONFIG_H */
 EOF

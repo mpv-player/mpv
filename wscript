@@ -69,8 +69,9 @@ build_options = [
         'deps_any': [ 'os-win32', 'os-cygwin'],
         'func': check_ctx_vars('WINDRES')
     }, {
+        # does nothing - left for backward and forward compatibility
         'name': '--asm',
-        'desc': 'inline assembly',
+        'desc': 'inline assembly (currently without effect)',
         'default': 'enable',
         'func': check_true,
     }
@@ -85,10 +86,6 @@ main_dependencies = [
         'name': 'noexecstack',
         'desc': 'linker support for --nxcompat --no-seh --dynamicbase',
         'func': check_cc(linkflags=['-Wl,--nxcompat', '-Wl,--no-seh', '-Wl,--dynamicbase'])
-    }, {
-        'name': 'ebx-available',
-        'desc': 'ebx availability',
-        'func': check_cc(fragment=load_fragment('ebx.c'))
     } , {
         'name': 'libm',
         'desc': '-lm',
@@ -798,7 +795,6 @@ def configure(ctx):
     ctx.load('waf_customizations')
     ctx.load('dependencies')
     ctx.load('detections.compiler')
-    ctx.load('detections.cpu')
     ctx.load('detections.devices')
 
     if ctx.env.DEST_OS in ('freebsd', 'openbsd'):

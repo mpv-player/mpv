@@ -179,7 +179,6 @@ SOURCES = audio/audio.c \
           common/av_log.c \
           common/av_opts.c \
           common/codecs.c \
-          common/cpudetect.c \
           common/common.c \
           common/msg.c \
           common/playlist.c \
