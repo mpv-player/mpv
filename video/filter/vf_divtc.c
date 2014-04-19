@@ -24,7 +24,6 @@
 
 #include "config.h"
 #include "common/msg.h"
-#include "common/cpudetect.h"
 #include "options/m_option.h"
 #include "libavutil/common.h"
 #include "compat/mpbswap.h"
@@ -50,52 +49,6 @@ struct vf_priv_s
    struct vf_detc_pts_buf ptsbuf;
    struct mp_image *buffer;
    };
-
-/*
- * diff_MMX and diff_C stolen from vf_decimate.c
- */
-
-#if HAVE_MMX && HAVE_EBX_AVAILABLE
-static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
-   {
-   volatile short out[4];
-   __asm__ (
-        "movl $8, %%ecx \n\t"
-        "pxor %%mm4, %%mm4 \n\t"
-        "pxor %%mm7, %%mm7 \n\t"
-
-        ".align 4 \n\t"
-        "1: \n\t"
-
-        "movq (%%"REG_S"), %%mm0 \n\t"
-        "movq (%%"REG_S"), %%mm2 \n\t"
-        "add %%"REG_a", %%"REG_S" \n\t"
-        "movq (%%"REG_D"), %%mm1 \n\t"
-        "add %%"REG_b", %%"REG_D" \n\t"
-        "psubusb %%mm1, %%mm2 \n\t"
-        "psubusb %%mm0, %%mm1 \n\t"
-        "movq %%mm2, %%mm0 \n\t"
-        "movq %%mm1, %%mm3 \n\t"
-        "punpcklbw %%mm7, %%mm0 \n\t"
-        "punpcklbw %%mm7, %%mm1 \n\t"
-        "punpckhbw %%mm7, %%mm2 \n\t"
-        "punpckhbw %%mm7, %%mm3 \n\t"
-        "paddw %%mm0, %%mm4 \n\t"
-        "paddw %%mm1, %%mm4 \n\t"
-        "paddw %%mm2, %%mm4 \n\t"
-        "paddw %%mm3, %%mm4 \n\t"
-
-        "decl %%ecx \n\t"
-        "jnz 1b \n\t"
-        "movq %%mm4, (%%"REG_d") \n\t"
-        "emms \n\t"
-        :
-        : "S" (old), "D" (new), "a" ((long)os), "b" ((long)ns), "d" (out)
-        : "%ecx", "memory"
-        );
-   return out[0]+out[1]+out[2]+out[3];
-   }
-#endif
 
 static int diff_C(unsigned char *old, unsigned char *new, int os, int ns)
    {
@@ -644,9 +597,6 @@ static int vf_open(vf_instance_t *vf)
       abort();
 
    diff = diff_C;
-#if HAVE_MMX && HAVE_EBX_AVAILABLE
-   if(gCpuCaps.hasMMX) diff = diff_MMX;
-#endif
 
    vf_detc_init_pts_buf(&p->ptsbuf);
    return 1;
