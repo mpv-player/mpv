@@ -25,7 +25,6 @@
 
 #include "config.h"
 #include "common/msg.h"
-#include "common/cpudetect.h"
 #include "options/m_option.h"
 
 #include "video/img_format.h"
@@ -45,10 +44,7 @@ struct vf_priv_s {
 static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
         unsigned int voflags, unsigned int outfmt){
-    int flags=
-          (gCpuCaps.hasMMX   ? PP_CPU_CAPS_MMX   : 0)
-        | (gCpuCaps.hasMMX2  ? PP_CPU_CAPS_MMX2  : 0);
-
+    int flags= PP_CPU_CAPS_AUTO;
     switch(outfmt){
     case IMGFMT_444P: flags|= PP_FORMAT_444; break;
     case IMGFMT_422P: flags|= PP_FORMAT_422; break;
