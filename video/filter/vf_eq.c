@@ -31,7 +31,6 @@
 
 #include "config.h"
 #include "common/msg.h"
-#include "common/cpudetect.h"
 #include "options/m_option.h"
 
 #include "video/img_format.h"
@@ -125,75 +124,6 @@ void create_lut (eq2_param_t *par)
 
   par->lut_clean = 1;
 }
-
-#if HAVE_MMX
-static
-void affine_1d_MMX (eq2_param_t *par, unsigned char *dst, unsigned char *src,
-  unsigned w, unsigned h, unsigned dstride, unsigned sstride)
-{
-  unsigned i;
-  int      contrast, brightness;
-  unsigned dstep, sstep;
-  int      pel;
-  short    brvec[4];
-  short    contvec[4];
-  unsigned wcount = w >> 3;
-
-//  printf("\nmmx: src=%p dst=%p w=%d h=%d ds=%d ss=%d\n",src,dst,w,h,dstride,sstride);
-
-  contrast = (int) (par->c * 256 * 16);
-  brightness = ((int) (100.0 * par->b + 100.0) * 511) / 200 - 128 - contrast / 32;
-
-  brvec[0] = brvec[1] = brvec[2] = brvec[3] = brightness;
-  contvec[0] = contvec[1] = contvec[2] = contvec[3] = contrast;
-
-  sstep = sstride - w;
-  dstep = dstride - w;
-
-  while (h-- > 0) {
-    __asm__ volatile (
-      "movq (%5), %%mm3 \n\t"
-      "movq (%6), %%mm4 \n\t"
-      "pxor %%mm0, %%mm0 \n\t"
-      "movl %4, %%eax\n\t"
-      ".align 4\n\t"
-      "1: \n\t"
-      "movq (%0), %%mm1 \n\t"
-      "movq (%0), %%mm2 \n\t"
-      "punpcklbw %%mm0, %%mm1 \n\t"
-      "punpckhbw %%mm0, %%mm2 \n\t"
-      "psllw $4, %%mm1 \n\t"
-      "psllw $4, %%mm2 \n\t"
-      "pmulhw %%mm4, %%mm1 \n\t"
-      "pmulhw %%mm4, %%mm2 \n\t"
-      "paddw %%mm3, %%mm1 \n\t"
-      "paddw %%mm3, %%mm2 \n\t"
-      "packuswb %%mm2, %%mm1 \n\t"
-      "add $8, %0 \n\t"
-      "movq %%mm1, (%1) \n\t"
-      "add $8, %1 \n\t"
-      "decl %%eax \n\t"
-      "jnz 1b \n\t"
-      : "=r" (src), "=r" (dst)
-      : "0" (src), "1" (dst), "g" (wcount), "r" (brvec), "r" (contvec)
-      : "%eax"
-    );
-
-    for (i = w & 7; i > 0; i--) {
-      pel = ((*src++ * contrast) >> 12) + brightness;
-      if (pel & 768) {
-        pel = (-pel) >> 31;
-      }
-      *dst++ = pel;
-    }
-
-    src += sstep;
-    dst += dstep;
-  }
-
-  __asm__ volatile ( "emms \n\t" ::: "memory" );
-}
-#endif
 
 static
 void apply_lut (eq2_param_t *par, unsigned char *dst, unsigned char *src,
@@ -301,11 +231,6 @@ void check_values (eq2_param_t *par)
   if ((par->c == 1.0) && (par->b == 0.0) && (par->g == 1.0)) {
     par->adjust = NULL;
   }
-#if HAVE_MMX
-  else if (par->g == 1.0 && gCpuCaps.hasMMX) {
-    par->adjust = &affine_1d_MMX;
-  }
-#endif
   else {
     par->adjust = &apply_lut;
   }
