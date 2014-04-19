@@ -640,12 +640,13 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 
 static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
 {
+    int unmod = code & ~MP_KEY_MODIFIER_MASK;
     if (code == MP_INPUT_RELEASE_ALL) {
         MP_DBG(ictx, "release all\n");
         release_down_cmd(ictx, false);
         return;
     }
-    if (code == MP_KEY_MOUSE_LEAVE) {
+    if (unmod == MP_KEY_MOUSE_LEAVE) {
         update_mouse_section(ictx);
         struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, code);
         if (cmd)
@@ -656,7 +657,6 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
     double now = mp_time_sec();
     int doubleclick_time = ictx->doubleclick_time;
     // ignore system-doubleclick if we generate these events ourselves
-    int unmod = code & ~MP_KEY_MODIFIER_MASK;
     if (doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
         return;
     interpret_key(ictx, code, scale);
