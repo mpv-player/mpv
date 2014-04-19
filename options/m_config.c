@@ -758,6 +758,8 @@ struct m_profile *m_config_get_profile0(const struct m_config *config,
 
 struct m_profile *m_config_add_profile(struct m_config *config, char *name)
 {
+    if (!name || !name[0] || strcmp(name, "default") == 0)
+        return NULL; // never a real profile
     struct m_profile *p = m_config_get_profile0(config, name);
     if (p)
         return p;

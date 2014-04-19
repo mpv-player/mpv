@@ -300,7 +300,7 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
 static int cfg_include(void *ctx, char *filename, int flags)
 {
     struct MPContext *mpctx = ctx;
-    return m_config_parse_config_file(mpctx->mconfig, filename, flags);
+    return m_config_parse_config_file(mpctx->mconfig, filename, NULL, flags);
 }
 
 struct MPContext *mp_create(void)

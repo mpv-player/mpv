@@ -44,6 +44,8 @@
 #include "core.h"
 #include "command.h"
 
+#define SECT_ENCODE "encoding"
+
 bool mp_parse_cfgfiles(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -54,26 +56,37 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
     void *tmp = talloc_new(NULL);
     bool r = true;
     char *conffile;
+    char *section = NULL;
+    bool encoding = opts->encode_output.file && *opts->encode_output.file;
+    // In encoding mode, we don't want to apply normal config options.
+    // So we "divert" normal options into a separate section, and the diverted
+    // section is never used - unless maybe it's explicitly referenced from an
+    // encoding profile.
+    if (encoding)
+        section = "playback-default";
 
     // The #if is a stupid hack to avoid errors if libavfilter is not available.
 #if HAVE_LIBAVFILTER && HAVE_ENCODING
     conffile = mp_find_config_file(tmp, mpctx->global, "encoding-profiles.conf");
     if (conffile && mp_path_exists(conffile))
-        m_config_parse_config_file(mpctx->mconfig, conffile, 0);
+        m_config_parse_config_file(mpctx->mconfig, conffile, SECT_ENCODE, 0);
 #endif
 
     conffile = mp_find_global_config_file(tmp, mpctx->global, "mpv.conf");
-    if (conffile && m_config_parse_config_file(conf, conffile, 0) < 0) {
+    if (conffile && m_config_parse_config_file(conf, conffile, section, 0) < 0) {
         r = false;
         goto done;
     }
     mp_mk_config_dir(mpctx->global, NULL);
     if (!(conffile = mp_find_user_config_file(tmp, mpctx->global, "config")))
         MP_ERR(mpctx, "mp_find_user_config_file(\"config\") problem\n");
-    else if (m_config_parse_config_file(conf, conffile, 0) < 0) {
+    else if (m_config_parse_config_file(conf, conffile, section, 0) < 0) {
         r = false;
         goto done;
     }
+
+    if (encoding)
+        m_config_set_profile(conf, m_config_add_profile(conf, SECT_ENCODE), 0);
 
 done:
     talloc_free(tmp);
@@ -85,7 +98,7 @@ static int try_load_config(struct MPContext *mpctx, const char *file, int flags)
     if (!mp_path_exists(file))
         return 0;
     MP_INFO(mpctx, "Loading config '%s'\n", file);
-    m_config_parse_config_file(mpctx->mconfig, file, flags);
+    m_config_parse_config_file(mpctx->mconfig, file, NULL, flags);
     return 1;
 }
 

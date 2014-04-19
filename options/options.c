@@ -619,7 +619,7 @@ const m_option_t mp_opts[] = {
     OPT_PRINT("V", print_version),
 
 #if HAVE_ENCODING
-    OPT_STRING("o", encode_output.file, CONF_GLOBAL),
+    OPT_STRING("o", encode_output.file, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
     OPT_STRING("of", encode_output.format, CONF_GLOBAL),
     OPT_STRINGLIST("ofopts*", encode_output.fopts, CONF_GLOBAL),
     OPT_FLOATRANGE("ofps", encode_output.fps, CONF_GLOBAL, 0.0, 1000000.0),

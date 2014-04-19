@@ -38,6 +38,11 @@ section::
   oac = aac
   oacopts-add = b=96k
 
+It's also possible to define default encoding options by putting them into
+the section named ``[encoding]``. (This behavior changed after mpv 0.3.x. In
+mpv 0.3.x, config options in the default section / no section were applied
+to encoding. This is not the case anymore.)
+
 One can then encode using this profile using the command::
 
   mpv infile -o outfile.mp4 -profile myencprofile

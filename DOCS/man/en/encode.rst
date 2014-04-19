@@ -3,7 +3,7 @@ ENCODING
 
 You can encode files from one format/codec to another using this facility.
 
-``-o <filename>``
+``--o=<filename>``
     Enables encoding mode and specifies the output file name.
 
 ``--of=<format>``
