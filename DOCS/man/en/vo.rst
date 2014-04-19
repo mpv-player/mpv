@@ -20,6 +20,9 @@ normal driver parameters.
 
     See ``--vo=help`` for a list of compiled-in video output drivers.
 
+    The recommended output drivers are ``--vo=vdpau`` and ``--vo=opengl-hq``.
+    All other drivers are just for compatibility or special purposes.
+
 .. admonition:: Example
 
     ``--vo=opengl,xv,``
@@ -31,6 +34,8 @@ Available video output drivers are:
     Uses the XVideo extension to enable hardware-accelerated display. This is
     the most compatible VO on X, but may be low-quality, and has issues with
     OSD and subtitle display.
+
+    .. note:: This driver is for compatibility with old systems.
 
     ``adaptor=<number>``
         Select a specific XVideo adaptor (check xvinfo results).
@@ -172,6 +177,9 @@ Available video output drivers are:
 ``direct3d_shaders`` (Windows only)
     Video output driver that uses the Direct3D interface.
 
+    .. note:: This driver is for compatibility with systems that don't provide
+              proper OpenGL drivers.
+
     ``prefer-stretchrect``
         Use ``IDirect3DDevice9::StretchRect`` over other methods if possible.
 
@@ -228,10 +236,14 @@ Available video output drivers are:
     Same as ``direct3d_shaders``, but with the options ``disable-textures``
     and ``disable-shaders`` forced.
 
+    .. note:: This driver is for compatibility with old systems.
+
 ``corevideo`` (Mac OS X 10.6 and later)
     Mac OS X CoreVideo video output driver. Uses the CoreVideo APIs to fill
     PixelBuffers and generate OpenGL textures from them (useful as a fallback
     for ``opengl``).
+
+    .. note:: This driver is for compatibility with old systems.
 
 ``opengl``
     OpenGL video output driver. It supports extended scaling methods, dithering
@@ -541,6 +553,8 @@ Available video output drivers are:
     implementation, even if you do not get any error message. Use ``glxinfo``
     or a similar tool to display the supported OpenGL extensions.
 
+    .. note:: This driver is for compatibility with old systems.
+
     ``(no-)ati-hack``
         ATI drivers may give a corrupted image when PBOs are used (when using
         ``force-pbo``). This option fixes this, at the expense of using a bit
@@ -714,6 +728,9 @@ Available video output drivers are:
     hardware acceleration. Should work on all platforms supported by SDL 2.0.
     For tuning, refer to your copy of the file ``SDL_hints.h``.
 
+    .. note:: This driver is for compatibility with systems that don't provide
+              proper graphics drivers, or which support GLES only.
+
     ``sw``
         Continue even if a software renderer is detected.
 
@@ -725,6 +742,9 @@ Available video output drivers are:
     that there is absolutely no reason to use this, other than wanting to use
     hardware decoding to save power on laptops, or possibly preventing video
     tearing with some setups.
+
+    .. note:: This driver is for compatibility with crappy systems. You can
+              use vaapi hardware decoding with ``--vo=opengl`` too.
 
     ``scaling=<algorithm>``
         default
@@ -765,6 +785,8 @@ Available video output drivers are:
 
 ``caca``
     Color ASCII art video output driver that works on a text console.
+
+    .. note:: This driver is a joke.
 
 ``image``
     Output each frame into an image file in the current directory. Each file
@@ -810,6 +832,9 @@ Available video output drivers are:
 
 ``wayland`` (Wayland only)
     Wayland shared memory video output as fallback for ``opengl``.
+
+    .. note:: This driver is for compatibility with systems that don't provide
+              working OpenGL drivers.
 
     ``alpha``
         Use a buffer format that supports videos and images with alpha

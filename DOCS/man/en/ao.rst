@@ -18,7 +18,12 @@ normal driver parameters.
 
 .. note::
 
-    See ``--ao=help`` for a list of compiled-in audio output drivers.
+    See ``--ao=help`` for a list of compiled-in audio output drivers. The
+    driver ``--ao=alsa`` is preferred. ``--ao=pulse`` is preferred on systems
+    where PulseAudio is forced. On Windows, ``--ao=wasapi`` is preferred,
+    though it might cause trouble sometimes, in which case ``--ao=dsound``
+    should be used. On BSD systems, ``--ao=oss`` or `--ao=sndio`` may work
+    (the latter being experimental). On OSX systems, use ``--ao=coreaudio``.
 
 .. admonition:: Examples
 
@@ -115,6 +120,9 @@ Available audio output drivers are:
 ``openal``
     Experimental OpenAL audio output driver
 
+    .. note:: This driver is not very useful. Playing multi-channel audio with
+              it is slow.
+
 ``pulse``
     PulseAudio audio output driver
 
@@ -133,6 +141,10 @@ Available audio output drivers are:
     PortAudio audio output driver. This works on all platforms, and has
     extensive MS Windows support.
 
+    .. note:: This driver is not very useful. It was added in the hope of
+              providing portable audio API across all platforms, but turned
+              our semi-broken and underfeatured.
+
     ``device``
         Specify the subdevice to use. Giving ``help`` as device name lists all
         devices found by PortAudio. Devices can be given as numeric values,
@@ -140,6 +152,8 @@ Available audio output drivers are:
 
 ``dsound`` (Windows only)
     DirectX DirectSound audio output driver
+
+    .. note:: This driver is for compatibility with old systems.
 
     ``device=<devicenum>``
         Sets the device number to use. Playing a file with ``-v`` will show a
@@ -149,6 +163,10 @@ Available audio output drivers are:
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL
     1.2, but may require the ``SDL_AUDIODRIVER`` environment variable to be set
     appropriately for your system.
+
+    .. note:: This driver is for compatibility with extremely foreign
+              environments, such as systems where none of the other drivers
+              are available.
 
     ``buflen=<length>``
         Sets the audio buffer length in seconds. Is used only as a hint by the
@@ -201,6 +219,10 @@ Available audio output drivers are:
 ``rsound``
     Audio output to an RSound daemon
 
+    .. note:: Completely useless, unless you intend to run RSound. Not to be
+              confused with RoarAudio, which is something completely
+              differently.
+
     ``host=<name/path>``
         Set the address of the server (default: localhost).  Can be either a
         network hostname for TCP connections or a Unix domain socket path
@@ -211,6 +233,8 @@ Available audio output drivers are:
 
 ``sndio``
     Audio output to the OpenBSD sndio sound system
+
+    .. note:: Experimental. There are known bugs and issues.
 
     (Note: only supports mono, stereo, 4.0, 5.1 and 7.1 channel
     layouts.)
