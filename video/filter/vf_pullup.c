@@ -22,7 +22,6 @@
 
 #include "config.h"
 #include "common/msg.h"
-#include "common/cpudetect.h"
 #include "options/m_option.h"
 
 #include "video/img_format.h"
@@ -84,11 +83,6 @@ static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
                 c->stride[1] = c->stride[2] = mpi->chroma_width;
                 c->stride[3] = c->w[3];
                 c->background[1] = c->background[2] = 128;
-
-        if (gCpuCaps.hasMMX) c->cpu |= PULLUP_CPU_MMX;
-        if (gCpuCaps.hasMMX2) c->cpu |= PULLUP_CPU_MMX2;
-        if (gCpuCaps.hasSSE) c->cpu |= PULLUP_CPU_SSE;
-        if (gCpuCaps.hasSSE2) c->cpu |= PULLUP_CPU_SSE2;
 
         pullup_init_context(c);
 

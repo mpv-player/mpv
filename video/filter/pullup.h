@@ -19,11 +19,6 @@
 #ifndef MPLAYER_PULLUP_H
 #define MPLAYER_PULLUP_H
 
-#define PULLUP_CPU_MMX 1
-#define PULLUP_CPU_MMX2 2
-#define PULLUP_CPU_SSE 16
-#define PULLUP_CPU_SSE2 32
-
 #define PULLUP_FMT_Y 1
 #define PULLUP_FMT_YUY2 2
 #define PULLUP_FMT_UYVY 3
@@ -65,7 +60,6 @@ struct pullup_context
         int format;
         int nplanes;
         int *bpp, *w, *h, *stride, *background;
-        unsigned int cpu;
         int junk_left, junk_right, junk_top, junk_bottom;
         int verbose;
         int metric_plane;
