@@ -22,6 +22,7 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <assert.h>
+#include <libpostproc/postprocess.h>
 
 #include "config.h"
 #include "common/msg.h"
@@ -30,7 +31,6 @@
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
-#include "libpostproc/postprocess.h"
 
 struct vf_priv_s {
     int pp;
