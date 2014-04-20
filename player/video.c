@@ -27,6 +27,8 @@
 
 #include "common/msg.h"
 #include "options/options.h"
+#include "options/m_config.h"
+#include "options/m_option.h"
 #include "common/common.h"
 #include "common/encode.h"
 #include "options/m_property.h"
@@ -61,14 +63,34 @@ static void set_allowed_vo_formats(struct vf_chain *c, struct vo *vo)
     }
 }
 
+static int try_filter(struct MPContext *mpctx, struct mp_image_params params,
+                      char *name, char *label, char **args)
+{
+    struct dec_video *d_video = mpctx->d_video;
+
+    struct vf_instance *vf = vf_append_filter(d_video->vfilter, name, args);
+    if (!vf)
+        return -1;
+
+    vf->label = talloc_strdup(vf, label);
+
+    if (video_reconfig_filters(d_video, &params) < 0) {
+        vf_remove_filter(d_video->vfilter, vf);
+        // restore
+        video_reconfig_filters(d_video, &params);
+        return -1;
+    }
+    return 0;
+}
+
 static void reconfig_video(struct MPContext *mpctx,
-                           const struct mp_image_params *params,
+                           struct mp_image_params params,
                            bool probe_only)
 {
     struct MPOpts *opts = mpctx->opts;
     struct dec_video *d_video = mpctx->d_video;
 
-    d_video->decoder_output = *params;
+    d_video->decoder_output = params;
 
     set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
 
@@ -76,7 +98,7 @@ static void reconfig_video(struct MPContext *mpctx,
     // have any fine grained locking, this is just as good.
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 
-    if (video_reconfig_filters(d_video, params) < 0) {
+    if (video_reconfig_filters(d_video, &params) < 0) {
         // Most video filters don't work with hardware decoding, so this
         // might be the reason filter reconfig failed.
         if (!probe_only &&
@@ -87,6 +109,23 @@ static void reconfig_video(struct MPContext *mpctx,
             d_video->vfilter->initialized = 0;
         }
         return;
+    }
+
+    if (d_video->vfilter->initialized < 1)
+        return;
+
+    if (params.rotate && (params.rotate % 90 == 0)) {
+        if (!(mpctx->video_out->driver->caps & VO_CAP_ROTATE90)) {
+            // Try to insert a rotation filter.
+            char deg[10];
+            snprintf(deg, sizeof(deg), "%d", params.rotate);
+            char *args[] = {"angle", deg, NULL, NULL};
+            if (try_filter(mpctx, params, "rotate", "autorotate", args) >= 0) {
+                params.rotate = 0;
+            } else {
+                MP_ERR(mpctx, "Can't insert rotation filter.\n");
+            }
+        }
     }
 
     if (d_video->vfilter->initialized < 1)
@@ -147,7 +186,7 @@ int reinit_video_filters(struct MPContext *mpctx)
     recreate_video_filters(mpctx);
 
     if (need_reconfig)
-        reconfig_video(mpctx, &d_video->decoder_output, true);
+        reconfig_video(mpctx, d_video->decoder_output, true);
 
     if (!d_video->vfilter)
         return 0;
@@ -315,7 +354,7 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame,
             return;
         }
 
-        reconfig_video(mpctx, &params, false);
+        reconfig_video(mpctx, params, false);
         if (d_video->vfilter->initialized > 0)
             init_filter_params(mpctx);
     }
