@@ -268,7 +268,7 @@ static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
         set_msg_color(stream, lev);
 
     do {
-        if (header) {
+        if (header && text[0] != '\n') {
             if (root->show_time)
                 fprintf(stream, "[%" PRId64 "] ", mp_time_us());
 
