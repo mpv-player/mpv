@@ -27,18 +27,18 @@
 #include "sub/osd.h"
 
 static void aspect_calc_panscan(struct mp_log *log, struct mp_vo_opts *opts,
-                                struct mp_image_params *video,
+                                int w, int h, int d_w, int d_h,
                                 int window_w, int window_h, double monitor_par,
                                 int *out_w, int *out_h)
 {
     mp_dbg(log, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
            window_w, window_h, monitor_par);
     int fwidth = window_w;
-    int fheight = (float)window_w / video->d_w * video->d_h / monitor_par;
+    int fheight = (float)window_w / d_w * d_h / monitor_par;
     mp_dbg(log, "aspect(1) wh: %dx%d (org: %dx%d)\n",
-           fwidth, fheight, video->d_w, video->d_h);
-    if (fheight > window_h || fheight < video->h) {
-        int tmpw = (float)window_h / video->d_h * video->d_w * monitor_par;
+           fwidth, fheight, d_w, d_h);
+    if (fheight > window_h || fheight < h) {
+        int tmpw = (float)window_h / d_h * d_w * monitor_par;
         if (tmpw <= window_w) {
             fheight = window_h;
             fwidth = tmpw;
@@ -47,7 +47,7 @@ static void aspect_calc_panscan(struct mp_log *log, struct mp_vo_opts *opts,
         }
     }
     mp_dbg(log, "aspect(2) wh: %dx%d (org: %dx%d)\n",
-           fwidth, fheight, video->d_w, video->d_h);
+           fwidth, fheight, d_w, d_h);
 
     int vo_panscan_area = window_h - fheight;
     if (!vo_panscan_area)
@@ -127,7 +127,7 @@ static void src_dst_split_scaling(int src_size, int dst_size,
 }
 
 void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
-                          struct mp_image_params *video,
+                          int vo_caps, struct mp_image_params *video,
                           int window_w, int window_h, double monitor_par,
                           struct mp_rect *out_src,
                           struct mp_rect *out_dst,
@@ -135,6 +135,12 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
 {
     int src_w = video->w;
     int src_h = video->h;
+    int src_dw = video->d_w;
+    int src_dh = video->d_h;
+    if (video->rotate % 180 == 90 && (vo_caps & VO_CAP_ROTATE90)) {
+        MPSWAP(int, src_w, src_h);
+        MPSWAP(int, src_dw, src_dh);
+    }
     window_w = MPMAX(1, window_w);
     window_h = MPMAX(1, window_h);
     struct mp_rect dst = {0, 0, window_w, window_h};
@@ -146,7 +152,8 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
     };
     if (opts->keepaspect) {
         int scaled_width, scaled_height;
-        aspect_calc_panscan(log, opts, video, window_w, window_h, monitor_par,
+        aspect_calc_panscan(log, opts, src_w, src_h, src_dw, src_dh,
+                            window_w, window_h, monitor_par,
                             &scaled_width, &scaled_height);
         src_dst_split_scaling(src_w, window_w, scaled_width, opts->unscaled,
                               opts->zoom, opts->align_x, opts->pan_x,

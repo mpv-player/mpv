@@ -130,6 +130,9 @@ struct voctrl_screenshot_args {
 #define VOFLAG_GL_DEBUG         0x40  // Hint to request debug OpenGL context
 #define VOFLAG_ALPHA            0x80  // Hint to request alpha framebuffer
 
+// VO does handle mp_image_params.rotate in 90 degree steps
+#define VO_CAP_ROTATE90 1
+
 struct vo;
 struct osd_state;
 struct mp_image;
@@ -142,6 +145,9 @@ struct vo_driver {
 
     // Encoding functionality, which can be invoked via --o only.
     bool encode;
+
+    // VO_CAP_* bits
+    int caps;
 
     const char *name;
     const char *description;

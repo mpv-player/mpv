@@ -424,7 +424,11 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     int d_height = params->d_h;
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
-        determine_window_geometry(vo, params->d_w, params->d_h);
+        int w = params->d_w, h = params->d_h;
+        if ((vo->driver->caps & VO_CAP_ROTATE90) &&
+            params->rotate % 180 == 90)
+            MPSWAP(int, w, h);
+        determine_window_geometry(vo, w, h);
         d_width = vo->dwidth;
         d_height = vo->dheight;
     }
@@ -472,8 +476,9 @@ int lookup_keymap_table(const struct mp_keymap *map, int key) {
 void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
                           struct mp_rect *out_dst, struct mp_osd_res *out_osd)
 {
-    mp_get_src_dst_rects(vo->log, vo->opts, vo->params, vo->dwidth, vo->dheight,
-                         vo->monitor_par, out_src, out_dst, out_osd);
+    mp_get_src_dst_rects(vo->log, vo->opts, vo->driver->caps, vo->params,
+                         vo->dwidth, vo->dheight, vo->monitor_par,
+                         out_src, out_dst, out_osd);
 }
 
 // Return the window title the VO should set. Always returns a null terminated
