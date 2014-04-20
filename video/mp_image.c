@@ -454,7 +454,8 @@ bool mp_image_params_equals(const struct mp_image_params *p1,
            p1->colorspace == p2->colorspace &&
            p1->colorlevels == p2->colorlevels &&
            p1->outputlevels == p2->outputlevels &&
-           p1->chroma_location == p2->chroma_location;
+           p1->chroma_location == p2->chroma_location &&
+           p1->rotate == p2->rotate;
 }
 
 void mp_image_params_from_image(struct mp_image_params *params,

@@ -52,6 +52,8 @@ struct mp_image_params {
     // does not describe the current state of the image. (Somewhat similar to
     // d_w/d_h vs. w/h.)
     enum mp_csp_levels outputlevels;
+    // The image should be rotated clockwise (0-359 degrees).
+    int rotate;
 };
 
 /* Memory management:
