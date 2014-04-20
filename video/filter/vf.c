@@ -119,6 +119,8 @@ static const vf_info_t *const filter_list[] = {
     NULL
 };
 
+static void vf_uninit_filter(vf_instance_t *vf);
+
 static bool get_desc(struct m_obj_desc *dst, int index)
 {
     if (index >= MP_ARRAY_SIZE(filter_list) - 1)
@@ -280,6 +282,17 @@ static vf_instance_t *vf_open_filter(struct vf_chain *c, const char *name,
         p += sprintf(p, " %s=%s", args[2 * i], args[2 * i + 1]);
     MP_INFO(c, "Opening video filter: [%s]\n", str);
     return vf_open(c, name, args);
+}
+
+void vf_remove_filter(struct vf_chain *c, struct vf_instance *vf)
+{
+    assert(vf != c->first && vf != c->last); // these are sentinels
+    struct vf_instance *prev = c->first;
+    while (prev && prev->next != vf)
+        prev = prev->next;
+    assert(prev); // not inserted
+    prev->next = vf->next;
+    vf_uninit_filter(vf);
 }
 
 struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
