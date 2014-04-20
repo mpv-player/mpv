@@ -1416,49 +1416,87 @@ static void change_dither_trafo(struct gl_video *p)
     gl->UseProgram(0);
 }
 
-static void render_to_fbo(struct gl_video *p, struct fbotex *fbo,
-                          int x, int y, int w, int h, int tex_w, int tex_h)
-{
-    GL *gl = p->gl;
-
-    gl->Viewport(fbo->vp_x, fbo->vp_y, fbo->vp_w, fbo->vp_h);
-    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
-
-    struct vertex vb[VERTICES_PER_QUAD];
-    write_quad(vb, -1, -1, 1, 1,
-               x, y, x + w, y + h,
-               tex_w, tex_h,
-               NULL, p->gl_target, false);
-    draw_triangles(p, vb, VERTICES_PER_QUAD);
-
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-    gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
-
-}
+struct pass {
+    // Not necessarily a FBO; we just abuse this struct because it's convenient.
+    // It specifies the source texture/sub-rectangle for the next pass.
+    struct fbotex f;
+    // If true, render source (f) to dst, instead of the full dest. fbo viewport
+    bool use_dst;
+    struct mp_rect dst;
+    bool flip;
+    bool render_stereo;
+};
 
 // *chain contains the source, and is overwritten with a copy of the result
-static void handle_pass(struct gl_video *p, struct fbotex *chain,
+// fbo is used as destination texture/render target.
+static void handle_pass(struct gl_video *p, struct pass *chain,
                         struct fbotex *fbo, GLuint program)
 {
+    struct vertex vb[VERTICES_PER_QUAD];
     GL *gl = p->gl;
 
     if (!program)
         return;
 
-    gl->BindTexture(p->gl_target, chain->texture);
+    gl->BindTexture(p->gl_target, chain->f.texture);
     gl->UseProgram(program);
-    render_to_fbo(p, fbo, chain->vp_x, chain->vp_y,
-                  chain->vp_w, chain->vp_h,
-                  chain->tex_w, chain->tex_h);
-    *chain = *fbo;
+
+    gl->Viewport(fbo->vp_x, fbo->vp_y, fbo->vp_w, fbo->vp_h);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+
+    int tex_w = chain->f.tex_w;
+    int tex_h = chain->f.tex_h;
+    struct mp_rect src = {
+        .x0 = chain->f.vp_x,
+        .y0 = chain->f.vp_y,
+        .x1 = chain->f.vp_x + chain->f.vp_w,
+        .y1 = chain->f.vp_y + chain->f.vp_h,
+    };
+
+    struct mp_rect dst = {-1, -1, 1, 1};
+    if (chain->use_dst)
+        dst = chain->dst;
+
+    if (chain->render_stereo && p->opts.stereo_mode) {
+        int w = src.x1 - src.x0;
+        int imgw = p->image_w;
+
+        glEnable3DLeft(gl, p->opts.stereo_mode);
+
+        write_quad(vb,
+                   dst.x0, dst.y0, dst.x1, dst.y1,
+                   src.x0 / 2, src.y0,
+                   src.x0 / 2 + w / 2, src.y1,
+                   tex_w, tex_h, NULL, p->gl_target, chain->flip);
+        draw_triangles(p, vb, VERTICES_PER_QUAD);
+
+        glEnable3DRight(gl, p->opts.stereo_mode);
+
+        write_quad(vb,
+                   dst.x0, dst.y0, dst.x1, dst.y1,
+                   src.x0 / 2 + imgw / 2, src.y0,
+                   src.x0 / 2 + imgw / 2 + w / 2, src.y1,
+                   tex_w, tex_h, NULL, p->gl_target, chain->flip);
+        draw_triangles(p, vb, VERTICES_PER_QUAD);
+
+        glDisable3D(gl, p->opts.stereo_mode);
+    } else {
+        write_quad(vb,
+                   dst.x0, dst.y0, dst.x1, dst.y1,
+                   src.x0, src.y0, src.x1, src.y1,
+                   tex_w, tex_h, NULL, p->gl_target, chain->flip);
+        draw_triangles(p, vb, VERTICES_PER_QUAD);
+    }
+
+    *chain = (struct pass){
+        .f = *fbo,
+    };
 }
 
 void gl_video_render_frame(struct gl_video *p)
 {
     GL *gl = p->gl;
-    struct vertex vb[VERTICES_PER_QUAD];
     struct video_image *vimg = &p->image;
-    bool is_flipped = vimg->image_flipped;
 
     if (p->opts.temporal_dither)
         change_dither_trafo(p);
@@ -1481,12 +1519,14 @@ void gl_video_render_frame(struct gl_video *p)
     GLuint imgtex[4] = {0};
     set_image_textures(p, vimg, imgtex);
 
-    struct fbotex chain = {
-        .vp_w = p->image_w,
-        .vp_h = p->image_h,
-        .tex_w = p->texture_w,
-        .tex_h = p->texture_h,
-        .texture = imgtex[0],
+    struct pass chain = {
+        .f = {
+            .vp_w = p->image_w,
+            .vp_h = p->image_h,
+            .tex_w = p->texture_w,
+            .tex_h = p->texture_h,
+            .texture = imgtex[0],
+        },
     };
 
     handle_pass(p, &chain, &p->indirect_fbo, p->indirect_program);
@@ -1494,58 +1534,36 @@ void gl_video_render_frame(struct gl_video *p)
     // Clip to visible height so that separate scaling scales the visible part
     // only (and the target FBO texture can have a bounded size).
     // Don't clamp width; too hard to get correct final scaling on l/r borders.
-    chain.vp_y = p->src_rect.y0,
-    chain.vp_h = p->src_rect.y1 - p->src_rect.y0,
+    chain.f.vp_y = p->src_rect.y0;
+    chain.f.vp_h = p->src_rect.y1 - p->src_rect.y0;
 
     handle_pass(p, &chain, &p->scale_sep_fbo, p->scale_sep_program);
 
-    gl->BindTexture(p->gl_target, chain.texture);
-    gl->UseProgram(p->final_program);
+    struct fbotex screen = {
+        .vp_x = p->vp_x,
+        .vp_y = p->vp_y,
+        .vp_w = p->vp_w,
+        .vp_h = p->vp_h,
+        .texture = 0, //makes BindFramebuffer select the screen backbuffer
+    };
 
-    struct mp_rect src = {p->src_rect.x0, chain.vp_y,
-                          p->src_rect.x1, chain.vp_y + chain.vp_h};
-    int src_texw = chain.tex_w;
-    int src_texh = chain.tex_h;
+    // For Y direction, use the whole source viewport; it has been fit to the
+    // correct origin/height before.
+    // For X direction, assume the texture wasn't scaled yet, so we can
+    // select the correct portion, which will be scaled to screen.
+    chain.f.vp_x = p->src_rect.x0;
+    chain.f.vp_w = p->src_rect.x1 - p->src_rect.x0;
 
-    if (p->opts.stereo_mode) {
-        int w = src.x1 - src.x0;
-        int imgw = p->image_w;
+    chain.use_dst = true;
+    chain.dst = p->dst_rect;
+    chain.flip = vimg->image_flipped;
+    chain.render_stereo = true;
 
-        glEnable3DLeft(gl, p->opts.stereo_mode);
-
-        write_quad(vb,
-                   p->dst_rect.x0, p->dst_rect.y0,
-                   p->dst_rect.x1, p->dst_rect.y1,
-                   src.x0 / 2, src.y0,
-                   src.x0 / 2 + w / 2, src.y1,
-                   src_texw, src_texh,
-                   NULL, p->gl_target, is_flipped);
-        draw_triangles(p, vb, VERTICES_PER_QUAD);
-
-        glEnable3DRight(gl, p->opts.stereo_mode);
-
-        write_quad(vb,
-                   p->dst_rect.x0, p->dst_rect.y0,
-                   p->dst_rect.x1, p->dst_rect.y1,
-                   src.x0 / 2 + imgw / 2, src.y0,
-                   src.x0 / 2 + imgw / 2 + w / 2, src.y1,
-                   src_texw, src_texh,
-                   NULL, p->gl_target, is_flipped);
-        draw_triangles(p, vb, VERTICES_PER_QUAD);
-
-        glDisable3D(gl, p->opts.stereo_mode);
-    } else {
-        write_quad(vb,
-                   p->dst_rect.x0, p->dst_rect.y0,
-                   p->dst_rect.x1, p->dst_rect.y1,
-                   src.x0, src.y0,
-                   src.x1, src.y1,
-                   src_texw, src_texh,
-                   NULL, p->gl_target, is_flipped);
-        draw_triangles(p, vb, VERTICES_PER_QUAD);
-    }
+    handle_pass(p, &chain, &screen, p->final_program);
 
     gl->UseProgram(0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
 
     unset_image_textures(p);
 
