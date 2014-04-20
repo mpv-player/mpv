@@ -72,9 +72,11 @@ struct mp_image_params {
  */
 typedef struct mp_image {
     unsigned int flags; // same as fmt.flags
-    struct mp_imgfmt_desc fmt;
 
-    // fields redundant to fmt, for convenience or compatibility
+    struct mp_image_params params;
+
+    // fields redundant to params.imgfmt, for convenience or compatibility
+    struct mp_imgfmt_desc fmt;
     enum mp_imgfmt imgfmt;
     int num_planes;
     int chroma_x_shift; // horizontal
@@ -96,10 +98,6 @@ typedef struct mp_image {
     int chroma_height;
     int plane_w[MP_MAX_PLANES];
     int plane_h[MP_MAX_PLANES];
-
-    enum mp_csp colorspace;
-    enum mp_csp_levels levels;
-    enum mp_chroma_location chroma_location;
 
     /* only inside filter chain */
     double pts;
@@ -138,10 +136,6 @@ struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
                                            void (*unref)(void *arg),
                                            bool (*is_unique)(void *arg),
                                            void (*free)(void *arg));
-
-struct mp_csp_details;
-void mp_image_set_colorspace_details(struct mp_image *image,
-                                     struct mp_csp_details *csp);
 
 void mp_image_params_guess_csp(struct mp_image_params *params);
 

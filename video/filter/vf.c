@@ -176,10 +176,7 @@ static void vf_fix_img_params(struct mp_image *img, struct mp_image_params *p)
     // If --colormatrix is used, decoder and filter chain disagree too.
     // In general, it's probably more convenient to force these here,
     // instead of requiring filters to set these correctly.
-    img->colorspace = p->colorspace;
-    img->levels = p->colorlevels;
-    img->chroma_location = p->chroma_location;
-    mp_image_set_display_size(img, p->d_w, p->d_h);
+    img->params = *p;
 }
 
 // Get a new image for filter output, with size and pixel format according to
@@ -411,17 +408,12 @@ int vf_next_config(struct vf_instance *vf,
                    int width, int height, int d_width, int d_height,
                    unsigned int voflags, unsigned int outfmt)
 {
-    vf->fmt_out = (struct mp_image_params) {
-        .imgfmt = outfmt,
-        .w = width,
-        .h = height,
-        .d_w = d_width,
-        .d_h = d_height,
-        .colorspace = vf->fmt_in.colorspace,
-        .colorlevels = vf->fmt_in.colorlevels,
-        .chroma_location = vf->fmt_in.chroma_location,
-        .outputlevels = vf->fmt_in.outputlevels,
-    };
+    vf->fmt_out = vf->fmt_in;
+    vf->fmt_out.imgfmt = outfmt;
+    vf->fmt_out.w = width;
+    vf->fmt_out.h = height;
+    vf->fmt_out.d_w = d_width;
+    vf->fmt_out.d_h = d_height;
     return 1;
 }
 
