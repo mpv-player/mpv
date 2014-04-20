@@ -75,6 +75,7 @@ typedef struct vf_instance {
     void (*uninit)(struct vf_instance *vf);
 
     char *label;
+    bool autoinserted;
 
     struct mp_image_params fmt_in, fmt_out;
 
