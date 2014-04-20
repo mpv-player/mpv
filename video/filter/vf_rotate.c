@@ -21,107 +21,32 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "config.h"
 #include "common/msg.h"
 #include "options/m_option.h"
 
-#include "video/img_format.h"
-#include "video/mp_image.h"
 #include "vf.h"
+#include "vf_lavfi.h"
 
 struct vf_priv_s {
-    int direction;
+    int angle;
+    struct vf_lw_opts *lw_opts;
 };
 
-static void rotate(unsigned char* dst,unsigned char* src,int dststride,int srcstride,int w,int h,int bpp,int dir){
-    int y;
-    if(dir&1){
-        src+=srcstride*(w-1);
-        srcstride*=-1;
-    }
-    if(dir&2){
-        dst+=dststride*(h-1);
-        dststride*=-1;
-    }
-
-    for(y=0;y<h;y++){
-        int x;
-        switch(bpp){
-        case 1:
-            for(x=0;x<w;x++) dst[x]=src[y+x*srcstride];
-            break;
-        case 2:
-            for(x=0;x<w;x++) *((short*)(dst+x*2))=*((short*)(src+y*2+x*srcstride));
-            break;
-        case 4:
-            for(x=0;x<w;x++) *((int*)(dst+x*4))=*((int*)(src+y*4+x*srcstride));
-        default:
-            for(x=0;x<w;x++){
-                for (int b=0;b<bpp;b++)
-                    dst[x*bpp+b]=src[b+y*bpp+x*srcstride];
-            }
-            break;
-        }
-        dst+=dststride;
-    }
-}
-
-static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
-                    struct mp_image_params *out)
+static int vf_open(vf_instance_t *vf)
 {
-    *out = *in;
-    if (vf->priv->direction & 4) {
-        if (in->w < in->h)
-            vf->priv->direction &= 3;
-    }
-    if (vf->priv->direction & 4)
-        return 0;
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(in->imgfmt);
-    int a_w = MP_ALIGN_DOWN(in->w, desc.align_x);
-    int a_h = MP_ALIGN_DOWN(in->h, desc.align_y);
-    vf_rescale_dsize(&out->d_w, &out->d_h, in->w, in->h, a_w, a_h);
-    out->w = a_h;
-    out->h = a_w;
-    int t = out->d_w;
-    out->d_w = out->d_h;
-    out->d_h = t;
-    return 0;
-}
+    struct vf_priv_s *p = vf->priv;
 
-static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
-{
-    if (vf->priv->direction & 4)
-        return mpi;
+    static const char *rot[] = {
+        "null",
+        "transpose=clock",
+        "vflip,hflip",
+        "transpose=cclock",
+    };
 
-    struct mp_image *dmpi = vf_alloc_out_image(vf);
-    mp_image_copy_attributes(dmpi, mpi);
+    if (vf_lw_set_graph(vf, p->lw_opts, NULL, "%s", rot[p->angle]) >= 0)
+        return 1;
 
-    for (int p = 0; p < mpi->num_planes; p++) {
-        rotate(dmpi->planes[p],mpi->planes[p], dmpi->stride[p],mpi->stride[p],
-               dmpi->plane_w[p], dmpi->plane_h[p], mpi->fmt.bytes[p],
-               vf->priv->direction);
-    }
-
-    talloc_free(mpi);
-    return dmpi;
-}
-
-static int query_format(struct vf_instance *vf, unsigned int fmt)
-{
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
-    if (!(desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
-        return 0;
-    if (desc.chroma_xs != desc.chroma_ys)
-        return 0;
-    if (desc.num_planes == 1 && (desc.chroma_xs || desc.chroma_ys))
-        return 0;
-    return vf_next_query_format(vf, fmt);
-}
-
-static int vf_open(vf_instance_t *vf){
-    vf->reconfig=reconfig;
-    vf->filter=filter;
-    vf->query_format=query_format;
+    MP_FATAL(vf, "Requires libavfilter.\n");
     return 1;
 }
 
@@ -132,7 +57,12 @@ const vf_info_t vf_info_rotate = {
     .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .options = (const struct m_option[]){
-        OPT_INTRANGE("direction", direction, 0, 0, 7),
+        OPT_CHOICE("angle", angle, 0,
+                   ({"0", 0},
+                    {"90", 1},
+                    {"180", 2},
+                    {"270", 3})),
+        OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
         {0}
     },
 };

@@ -450,7 +450,7 @@ int vf_lw_set_graph(struct vf_instance *vf, struct vf_lw_opts *lavfi_opts,
 {
     if (!lavfi_opts)
         lavfi_opts = (struct vf_lw_opts *)vf_lw_conf.defaults;
-    if (!lavfi_opts->enable || !have_filter(filter))
+    if (!lavfi_opts->enable || (filter && !have_filter(filter)))
         return -1;
     MP_VERBOSE(vf, "Using libavfilter for '%s'\n", vf->info->name);
     void *old_priv = vf->priv;
@@ -462,7 +462,8 @@ int vf_lw_set_graph(struct vf_instance *vf, struct vf_lw_opts *lavfi_opts,
     va_list ap;
     va_start(ap, opts);
     char *s = talloc_vasprintf(vf, opts, ap);
-    p->cfg_graph = talloc_asprintf(vf, "%s=%s", filter, s);
+    p->cfg_graph = filter ? talloc_asprintf(vf, "%s=%s", filter, s)
+                          : talloc_strdup(vf, s);
     talloc_free(s);
     va_end(ap);
     p->old_priv = old_priv;

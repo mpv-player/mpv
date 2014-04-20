@@ -88,15 +88,8 @@ Available filters are:
 ``mirror``
     Mirrors the image on the Y axis.
 
-``rotate[=<0-7>]``
-    Rotates the image by 90 degrees and optionally flips it. For values
-    between 4-7 rotation is only done if the movie geometry is portrait and
-    not landscape.
-
-    :0: Rotate by 90 degrees clockwise and flip (default).
-    :1: Rotate by 90 degrees clockwise.
-    :2: Rotate by 90 degrees counterclockwise.
-    :3: Rotate by 90 degrees counterclockwise and flip.
+``rotate[=0|90|180|270]``
+    Rotates the image by a multiple of 90 degrees clock-wise.
 
 ``scale[=w:h[:interlaced[:chr-drop[:param[:param2[:noup[:arnd]]]]]]]``
     Scales the image with the software scaler (slow) and performs a YUV<->RGB
