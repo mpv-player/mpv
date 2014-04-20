@@ -81,6 +81,7 @@ typedef struct sh_video {
     float aspect;         // aspect ratio stored in the file (for prescaling)
     int i_bps;            // == bitrate  (compressed bytes/sec)
     int disp_w, disp_h;   // display size
+    int rotate;           // intended display rotation, in degrees, [0, 359]
     MP_BITMAPINFOHEADER *bih;
 } sh_video_t;
 

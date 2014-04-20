@@ -444,6 +444,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .colorlevels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
         .chroma_location =
             avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
+        .rotate = vd->header->video->rotate,
     };
 }
 

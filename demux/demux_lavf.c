@@ -478,6 +478,14 @@ static void handle_stream(demuxer_t *demuxer, int i)
                     / (float)(codec->height * codec->sample_aspect_ratio.den);
         sh_video->i_bps = codec->bit_rate / 8;
 
+        AVDictionaryEntry *rot = av_dict_get(st->metadata, "rotate", NULL, 0);
+        if (rot && rot->value) {
+            char *end = NULL;
+            long int r = strtol(rot->value, &end, 10);
+            if (end && !end[0])
+                sh_video->rotate = ((r % 360) + 360) % 360;
+        }
+
         // This also applies to vfw-muxed mkv, but we can't detect these easily.
         sh_video->avi_dts = matches_avinputformat_name(priv, "avi");
 
