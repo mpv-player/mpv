@@ -464,9 +464,12 @@ const struct m_option options[] = {
     {0},
 };
 
+#define CAPS VO_CAP_ROTATE90
+
 const struct vo_driver video_out_opengl = {
     .description = "Extended OpenGL Renderer",
     .name = "opengl",
+    .caps = CAPS,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
@@ -482,6 +485,7 @@ const struct vo_driver video_out_opengl = {
 const struct vo_driver video_out_opengl_hq = {
     .description = "Extended OpenGL Renderer (high quality rendering preset)",
     .name = "opengl-hq",
+    .caps = CAPS,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

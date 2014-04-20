@@ -194,6 +194,7 @@ struct gl_video {
     struct mp_image_params image_params;
 
     struct mp_rect src_rect;    // displayed part of the source video
+    struct mp_rect src_rect_rot;// compensated for optional rotation
     struct mp_rect dst_rect;    // video rectangle on output window
     struct mp_osd_res osd_rect; // OSD size/margins
     int vp_x, vp_y, vp_w, vp_h; // GL viewport
@@ -423,12 +424,12 @@ static void draw_triangles(struct gl_video *p, struct vertex *vb, int vert_count
 // tx0, ty0, tx1, ty1 = source texture coordinates (usually in pixels)
 // texture_w, texture_h = size of the texture, or an inverse factor
 // color = optional color for all vertices, NULL for opaque white
-// flip = flip vertically
+// flags = bits 0-1: rotate, bits 2: flip vertically
 static void write_quad(struct vertex *va,
                        float x0, float y0, float x1, float y1,
                        float tx0, float ty0, float tx1, float ty1,
                        float texture_w, float texture_h,
-                       const uint8_t color[4], GLenum target, bool flip)
+                       const uint8_t color[4], GLenum target, int flags)
 {
     static const uint8_t white[4] = { 255, 255, 255, 255 };
 
@@ -442,7 +443,7 @@ static void write_quad(struct vertex *va,
         ty1 /= texture_h;
     }
 
-    if (flip) {
+    if (flags & 4) {
         float tmp = ty0;
         ty0 = ty1;
         ty1 = tmp;
@@ -456,6 +457,14 @@ static void write_quad(struct vertex *va,
     va[4] = va[2];
     va[5] = va[1];
 #undef COLOR_INIT
+    int rot = flags & 3;
+    while (rot--) {
+        static const int perm[6] = {1, 3, 0, 2, 0, 3};
+        struct vertex vb[6];
+        memcpy(vb, va, sizeof(vb));
+        for (int n = 0; n < 6; n++)
+            memcpy(va[n].texcoord, vb[perm[n]].texcoord, sizeof(float[2]));
+    }
 }
 
 static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
@@ -1190,9 +1199,11 @@ static void reinit_rendering(struct gl_video *p)
     compile_shaders(p);
     update_all_uniforms(p);
 
+    int w = p->image_w;
+    int h = p->image_h;
+
     if (p->indirect_program && !p->indirect_fbo.fbo)
-        fbotex_init(p, &p->indirect_fbo, p->image_w, p->image_h,
-                    p->opts.fbo_format);
+        fbotex_init(p, &p->indirect_fbo, w, h, p->opts.fbo_format);
 
     recreate_osd(p);
 }
@@ -1417,13 +1428,14 @@ static void change_dither_trafo(struct gl_video *p)
 }
 
 struct pass {
+    int num;
     // Not necessarily a FBO; we just abuse this struct because it's convenient.
     // It specifies the source texture/sub-rectangle for the next pass.
     struct fbotex f;
     // If true, render source (f) to dst, instead of the full dest. fbo viewport
     bool use_dst;
     struct mp_rect dst;
-    bool flip;
+    int flags; // for write_quad
     bool render_stereo;
 };
 
@@ -1457,6 +1469,12 @@ static void handle_pass(struct gl_video *p, struct pass *chain,
     if (chain->use_dst)
         dst = chain->dst;
 
+    MP_TRACE(p, "Pass %d: [%d,%d,%d,%d] -> [%d,%d,%d,%d][%d,%d@%dx%d/%dx%d] (%d)\n",
+             chain->num, src.x0, src.y0, src.x1, src.y1,
+             dst.x0, dst.y0, dst.x1, dst.y1,
+             fbo->vp_x, fbo->vp_y, fbo->vp_w, fbo->vp_h,
+             fbo->tex_w, fbo->tex_h, chain->flags);
+
     if (chain->render_stereo && p->opts.stereo_mode) {
         int w = src.x1 - src.x0;
         int imgw = p->image_w;
@@ -1467,7 +1485,7 @@ static void handle_pass(struct gl_video *p, struct pass *chain,
                    dst.x0, dst.y0, dst.x1, dst.y1,
                    src.x0 / 2, src.y0,
                    src.x0 / 2 + w / 2, src.y1,
-                   tex_w, tex_h, NULL, p->gl_target, chain->flip);
+                   tex_w, tex_h, NULL, p->gl_target, chain->flags);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
 
         glEnable3DRight(gl, p->opts.stereo_mode);
@@ -1476,7 +1494,7 @@ static void handle_pass(struct gl_video *p, struct pass *chain,
                    dst.x0, dst.y0, dst.x1, dst.y1,
                    src.x0 / 2 + imgw / 2, src.y0,
                    src.x0 / 2 + imgw / 2 + w / 2, src.y1,
-                   tex_w, tex_h, NULL, p->gl_target, chain->flip);
+                   tex_w, tex_h, NULL, p->gl_target, chain->flags);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
 
         glDisable3D(gl, p->opts.stereo_mode);
@@ -1484,11 +1502,12 @@ static void handle_pass(struct gl_video *p, struct pass *chain,
         write_quad(vb,
                    dst.x0, dst.y0, dst.x1, dst.y1,
                    src.x0, src.y0, src.x1, src.y1,
-                   tex_w, tex_h, NULL, p->gl_target, chain->flip);
+                   tex_w, tex_h, NULL, p->gl_target, chain->flags);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
     }
 
     *chain = (struct pass){
+        .num = chain->num + 1,
         .f = *fbo,
     };
 }
@@ -1534,8 +1553,8 @@ void gl_video_render_frame(struct gl_video *p)
     // Clip to visible height so that separate scaling scales the visible part
     // only (and the target FBO texture can have a bounded size).
     // Don't clamp width; too hard to get correct final scaling on l/r borders.
-    chain.f.vp_y = p->src_rect.y0;
-    chain.f.vp_h = p->src_rect.y1 - p->src_rect.y0;
+    chain.f.vp_y = p->src_rect_rot.y0;
+    chain.f.vp_h = p->src_rect_rot.y1 - p->src_rect_rot.y0;
 
     handle_pass(p, &chain, &p->scale_sep_fbo, p->scale_sep_program);
 
@@ -1551,12 +1570,13 @@ void gl_video_render_frame(struct gl_video *p)
     // correct origin/height before.
     // For X direction, assume the texture wasn't scaled yet, so we can
     // select the correct portion, which will be scaled to screen.
-    chain.f.vp_x = p->src_rect.x0;
-    chain.f.vp_w = p->src_rect.x1 - p->src_rect.x0;
+    chain.f.vp_x = p->src_rect_rot.x0;
+    chain.f.vp_w = p->src_rect_rot.x1 - p->src_rect_rot.x0;
 
     chain.use_dst = true;
     chain.dst = p->dst_rect;
-    chain.flip = vimg->image_flipped;
+    chain.flags = (p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90)
+                | (vimg->image_flipped ? 4 : 0);
     chain.render_stereo = true;
 
     handle_pass(p, &chain, &screen, p->final_program);
@@ -1575,7 +1595,10 @@ void gl_video_render_frame(struct gl_video *p)
 static void update_window_sized_objects(struct gl_video *p)
 {
     if (p->scale_sep_program) {
+        int w = p->dst_rect.x1 - p->dst_rect.x0;
         int h = p->dst_rect.y1 - p->dst_rect.y0;
+        if ((p->image_params.rotate % 180) == 90)
+            MPSWAP(int, w, h);
         if (h > p->scale_sep_fbo.tex_h) {
             fbotex_uninit(p, &p->scale_sep_fbo);
             // Round up to an arbitrary alignment to make window resizing or
@@ -1628,8 +1651,14 @@ void gl_video_resize(struct gl_video *p, struct mp_rect *window,
                      struct mp_osd_res *osd)
 {
     p->src_rect = *src;
+    p->src_rect_rot = *src;
     p->dst_rect = *dst;
     p->osd_rect = *osd;
+
+    if ((p->image_params.rotate % 180) == 90) {
+        MPSWAP(int, p->src_rect_rot.x0, p->src_rect_rot.y0);
+        MPSWAP(int, p->src_rect_rot.x1, p->src_rect_rot.y1);
+    }
 
     p->vp_x = window->x0;
     p->vp_y = window->y0;
@@ -1788,7 +1817,7 @@ static void draw_osd_cb(void *ctx, struct mpgl_osd_part *osd,
             write_quad(&va[osd->num_vertices],
                     b->x, b->y, b->x + b->dw, b->y + b->dh,
                     pos.x, pos.y, pos.x + b->w, pos.y + b->h,
-                    osd->w, osd->h, color, GL_TEXTURE_2D, false);
+                    osd->w, osd->h, color, GL_TEXTURE_2D, 0);
             osd->num_vertices += VERTICES_PER_QUAD;
         }
     }
