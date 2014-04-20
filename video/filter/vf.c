@@ -470,6 +470,7 @@ static void update_formats(struct vf_chain *c, struct vf_instance *vf,
         MP_INFO(c, "Using conversion filter.\n");
         struct vf_instance *conv = vf_open(c, "scale", NULL);
         if (conv) {
+            conv->autoinserted = true;
             conv->next = vf->next;
             vf->next = conv;
             update_formats(c, conv, vf->last_outfmts);
@@ -523,6 +524,12 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
 {
     struct mp_image_params cur = *params;
     int r = 0;
+    for (struct vf_instance *vf = c->first; vf; ) {
+        struct vf_instance *next = vf->next;
+        if (vf->autoinserted)
+            vf_remove_filter(c, vf);
+        vf = next;
+    }
     c->first->fmt_in = *params;
     uint8_t unused[IMGFMT_END - IMGFMT_START];
     update_formats(c, c->first, unused);
