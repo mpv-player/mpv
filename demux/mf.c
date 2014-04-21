@@ -26,7 +26,6 @@
 #include <limits.h>
 #include <sys/types.h>
 
-#include "config.h"
 #include "osdep/io.h"
 #include "talloc.h"
 #include "common/msg.h"
@@ -46,7 +45,6 @@ static void mf_add(mf_t *mf, const char *fname)
 
 mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filename)
 {
-#if defined(HAVE_GLOB) || defined(__MINGW32__)
     int error_count = 0;
     int count = 0;
 
@@ -138,10 +136,6 @@ mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filename)
 
 exit_mf:
     return mf;
-#else
-    mp_fatal(log, "mf support is disabled on your os\n");
-    return 0;
-#endif
 }
 
 mf_t *open_mf_single(void *talloc_ctx, struct mp_log *log, char *filename)
