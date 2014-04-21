@@ -925,6 +925,9 @@ Property list
     ``video-params/chroma-location``
         Chroma location as string. (Exact values subject to change.)
 
+    ``video-params/rotate``
+        Intended display rotation in degrees (clockwise).
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -943,6 +946,7 @@ Property list
                 "colormatrix"       MPV_FORMAT_STRING
                 "colorlevels"       MPV_FORMAT_STRING
                 "chroma-location"   MPV_FORMAT_STRING
+                "rotate"            MPV_FORMAT_INT64
 
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling

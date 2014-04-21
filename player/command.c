@@ -1789,6 +1789,7 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"colormatrix",     SUB_PROP_STR(mp_csp_names[p.colorspace])},
         {"colorlevels",     SUB_PROP_STR(mp_csp_levels_names[p.colorlevels])},
         {"chroma-location", SUB_PROP_STR(mp_chroma_names[p.chroma_location])},
+        {"rotate",          SUB_PROP_INT(p.rotate)},
         {0}
     };
 
