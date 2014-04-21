@@ -218,6 +218,11 @@ static void print_fmt(struct mp_log *log, int msglevel, struct mp_image_params *
         mp_msg(log, msglevel, " %s", mp_imgfmt_to_name(p->imgfmt));
         mp_msg(log, msglevel, " %s/%s", mp_csp_names[p->colorspace],
                    mp_csp_levels_names[p->colorlevels]);
+        mp_msg(log, msglevel, " CL=%d", (int)p->chroma_location);
+        if (p->outputlevels)
+            mp_msg(log, msglevel, " out=%s", mp_csp_levels_names[p->outputlevels]);
+        if (p->rotate)
+            mp_msg(log, msglevel, " rot=%d", p->rotate);
     } else {
         mp_msg(log, msglevel, "???");
     }
