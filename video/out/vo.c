@@ -418,6 +418,18 @@ static int event_fd_callback(void *ctx, int fd)
     return MP_INPUT_NOTHING;
 }
 
+static void check_vo_caps(struct vo *vo)
+{
+    int rot = vo->params->rotate;
+    if (rot) {
+        bool ok = rot % 90 ? false : (vo->driver->caps & VO_CAP_ROTATE90);
+        if (!ok) {
+           MP_WARN(vo, "Video is flagged as rotated by %d degrees, but the "
+                   "video output does not support this.\n", rot);
+        }
+    }
+}
+
 int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     int d_width = params->d_w;
@@ -441,7 +453,9 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     int ret = vo->driver->reconfig(vo, vo->params, flags);
     vo->config_ok = ret >= 0;
     vo->config_count += vo->config_ok;
-    if (!vo->config_ok) {
+    if (vo->config_ok) {
+        check_vo_caps(vo);
+    } else {
         talloc_free(vo->params);
         vo->params = NULL;
     }
