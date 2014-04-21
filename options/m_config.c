@@ -609,31 +609,34 @@ int m_config_set_option(struct m_config *config, struct bstr name,
 }
 
 int m_config_set_option_node(struct m_config *config, bstr name,
-                             struct mpv_node *data, int flags)
+                             struct mpv_node *data)
 {
-    char *value = NULL;
-    if (data->format == MPV_FORMAT_STRING) {
-        value = *(char **)data;
-    } else {
-        // This is pretty lame, but the simplest for now. It will fail very
-        // hard for string lists with items that contain ',' characters.
-        union m_option_value val = {0};
-        const struct m_option *opt = m_config_get_option(config, name);
-        if (!opt)
-            return M_OPT_UNKNOWN;
-        if (m_option_set_node(opt, &val, data) < 0)
-            return M_OPT_INVALID;
-        value = m_option_print(opt, &val);
-        m_option_free(opt, &val);
-    }
+    struct m_config_option *co = m_config_get_co(config, name);
+    if (!co)
+        return M_OPT_UNKNOWN;
+
+    // This affects some special options like "include", "profile". Maybe these
+    // should work, or maybe not. For now they would require special code.
+    if (!co->data)
+        return M_OPT_UNKNOWN;
+
     int r;
-    if (value) {
-        r = m_config_set_option_ext(config, name, bstr0(value), flags);
+
+    // Do this on an "empty" type to make setting the option strictly overwrite
+    // the old value, as opposed to e.g. appending to lists.
+    union m_option_value val = {0};
+
+    if (data->format == MPV_FORMAT_STRING) {
+        bstr param = bstr0(data->u.string);
+        r = m_option_parse(mp_null_log, co->opt, name, param, &val);
     } else {
-        r = M_OPT_OUT_OF_RANGE;
+        r = m_option_set_node(co->opt, &val, data);
     }
-    if (data->format != MPV_FORMAT_STRING)
-        talloc_free(value);
+
+    if (r >= 0)
+        m_option_copy(co->opt, co->data, &val);
+
+    m_option_free(co->opt, &val);
     return r;
 }
 

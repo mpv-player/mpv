@@ -652,7 +652,7 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
             data = &tmp;
         }
         int err = m_config_set_option_node(ctx->mpctx->mconfig, bstr0(name),
-                                           data, 0);
+                                           data);
         switch (err) {
         case M_OPT_MISSING_PARAM:
         case M_OPT_INVALID:
