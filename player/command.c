@@ -1473,6 +1473,38 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_hwdec(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct dec_video *vd = mpctx->d_video;
+    if (!vd)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int current = 0;
+    video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
+
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(int *)arg = current;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET: {
+        int new = *(int *)arg;
+        if (current == new)
+            return M_PROPERTY_OK;
+        if (!(mpctx->initialized_flags & INITIALIZED_VCODEC))
+            return M_PROPERTY_ERROR;
+        double last_pts = mpctx->last_vo_pts;
+        uninit_player(mpctx, INITIALIZED_VCODEC);
+        opts->hwdec_api = new;
+        reinit_video_chain(mpctx);
+        if (last_pts != MP_NOPTS_VALUE)
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, 1, true);
+        return M_PROPERTY_OK;
+    }
+    }
+    return mp_property_generic_option(prop, action, arg, mpctx);
+}
 
 /// Fullscreen state (RW)
 static int mp_property_fullscreen(m_option_t *prop,
@@ -2348,6 +2380,7 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("vid", mp_property_video),
     { "program", mp_property_program, CONF_TYPE_INT,
       CONF_RANGE, -1, 65535, NULL },
+    M_OPTION_PROPERTY_CUSTOM("hwdec", mp_property_hwdec),
 
     { "osd-width", mp_property_osd_w, CONF_TYPE_INT },
     { "osd-height", mp_property_osd_h, CONF_TYPE_INT },

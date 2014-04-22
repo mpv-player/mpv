@@ -879,6 +879,16 @@ Property list
 ``hue`` (RW)
     See ``--hue``.
 
+``hwdec`` (RW)
+    Return the current hardware decoder that is used. This uses the same values
+    as the ``--hwdec`` option. If software decoding is active, this returns
+    ``no``. You can write this property. Then the ``--hwdec`` option is set to
+    the new value, and video decoding will be reinitialized (internally, the
+    player will perform a seek to refresh the video properly).
+
+    Note that you don't know the success of the operation immediately after
+    writing this property. It happens with a delay as video is reinitialized.
+
 ``panscan`` (RW)
     See ``--panscan``.
 
