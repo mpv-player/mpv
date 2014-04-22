@@ -185,131 +185,6 @@ error:
     return NULL;
 }
 
-int vo_control(struct vo *vo, uint32_t request, void *data)
-{
-    return vo->driver->control(vo, request, data);
-}
-
-void vo_queue_image(struct vo *vo, struct mp_image *mpi)
-{
-    if (!vo->config_ok)
-        return;
-    if (vo->driver->buffer_frames) {
-        vo->driver->draw_image(vo, mpi);
-        return;
-    }
-    vo->frame_loaded = true;
-    vo->next_pts = mpi->pts;
-    vo->next_pts2 = MP_NOPTS_VALUE;
-    assert(!vo->waiting_mpi);
-    vo->waiting_mpi = mp_image_new_ref(mpi);
-}
-
-int vo_redraw_frame(struct vo *vo)
-{
-    if (!vo->config_ok)
-        return -1;
-    if (vo_control(vo, VOCTRL_REDRAW_FRAME, NULL) == true) {
-        vo->want_redraw = false;
-        vo->redrawing = true;
-        return 0;
-    }
-    return -1;
-}
-
-bool vo_get_want_redraw(struct vo *vo)
-{
-    if (!vo->config_ok)
-        return false;
-    return vo->want_redraw;
-}
-
-int vo_get_buffered_frame(struct vo *vo, bool eof)
-{
-    if (!vo->config_ok)
-        return -1;
-    if (vo->frame_loaded)
-        return 0;
-    if (!vo->driver->buffer_frames)
-        return -1;
-    vo->driver->get_buffered_frame(vo, eof);
-    return vo->frame_loaded ? 0 : -1;
-}
-
-void vo_skip_frame(struct vo *vo)
-{
-    vo_control(vo, VOCTRL_SKIPFRAME, NULL);
-    vo->frame_loaded = false;
-    mp_image_unrefp(&vo->waiting_mpi);
-}
-
-void vo_new_frame_imminent(struct vo *vo)
-{
-    if (vo->driver->buffer_frames)
-        vo_control(vo, VOCTRL_NEWFRAME, NULL);
-    else {
-        assert(vo->frame_loaded);
-        assert(vo->waiting_mpi);
-        assert(vo->waiting_mpi->pts == vo->next_pts);
-        vo->driver->draw_image(vo, vo->waiting_mpi);
-        mp_image_unrefp(&vo->waiting_mpi);
-    }
-}
-
-void vo_draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    if (vo->config_ok && vo->driver->draw_osd)
-        vo->driver->draw_osd(vo, osd);
-}
-
-void vo_flip_page(struct vo *vo, int64_t pts_us, int duration)
-{
-    if (!vo->config_ok)
-        return;
-    if (!vo->redrawing) {
-        vo->frame_loaded = false;
-        vo->next_pts = MP_NOPTS_VALUE;
-        vo->next_pts2 = MP_NOPTS_VALUE;
-    }
-    vo->want_redraw = false;
-    vo->redrawing = false;
-    if (vo->driver->flip_page_timed)
-        vo->driver->flip_page_timed(vo, pts_us, duration);
-    else
-        vo->driver->flip_page(vo);
-    vo->hasframe = true;
-}
-
-void vo_check_events(struct vo *vo)
-{
-    if (!vo->config_ok) {
-        if (vo->registered_fd != -1)
-            mp_input_rm_key_fd(vo->input_ctx, vo->registered_fd);
-        vo->registered_fd = -1;
-        return;
-    }
-    vo_control(vo, VOCTRL_CHECK_EVENTS, NULL);
-}
-
-void vo_seek_reset(struct vo *vo)
-{
-    vo_control(vo, VOCTRL_RESET, NULL);
-    vo->frame_loaded = false;
-    vo->next_pts = MP_NOPTS_VALUE;
-    vo->next_pts2 = MP_NOPTS_VALUE;
-    vo->hasframe = false;
-    mp_image_unrefp(&vo->waiting_mpi);
-}
-
-void vo_destroy(struct vo *vo)
-{
-    if (vo->registered_fd != -1)
-        mp_input_rm_key_fd(vo->input_ctx, vo->registered_fd);
-    mp_image_unrefp(&vo->waiting_mpi);
-    vo->driver->uninit(vo);
-    talloc_free(vo);
-}
-
 struct vo *init_best_video_out(struct mpv_global *global,
                                struct input_ctx *input_ctx,
                                struct encode_lavc_context *encode_lavc_ctx)
@@ -337,6 +212,15 @@ autoprobe:
             return vo;
     }
     return NULL;
+}
+
+void vo_destroy(struct vo *vo)
+{
+    if (vo->registered_fd != -1)
+        mp_input_rm_key_fd(vo->input_ctx, vo->registered_fd);
+    mp_image_unrefp(&vo->waiting_mpi);
+    vo->driver->uninit(vo);
+    talloc_free(vo);
 }
 
 static void calc_monitor_aspect(struct mp_vo_opts *opts, int scr_w, int scr_h,
@@ -470,15 +354,120 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     return ret;
 }
 
-/**
- * \brief lookup an integer in a table, table must have 0 as the last key
- * \param key key to search for
- * \result translation corresponding to key or "to" value of last mapping
- *         if not found.
- */
-int lookup_keymap_table(const struct mp_keymap *map, int key) {
-  while (map->from && map->from != key) map++;
-  return map->to;
+int vo_control(struct vo *vo, uint32_t request, void *data)
+{
+    return vo->driver->control(vo, request, data);
+}
+
+void vo_queue_image(struct vo *vo, struct mp_image *mpi)
+{
+    if (!vo->config_ok)
+        return;
+    if (vo->driver->buffer_frames) {
+        vo->driver->draw_image(vo, mpi);
+        return;
+    }
+    vo->frame_loaded = true;
+    vo->next_pts = mpi->pts;
+    vo->next_pts2 = MP_NOPTS_VALUE;
+    assert(!vo->waiting_mpi);
+    vo->waiting_mpi = mp_image_new_ref(mpi);
+}
+
+int vo_redraw_frame(struct vo *vo)
+{
+    if (!vo->config_ok)
+        return -1;
+    if (vo_control(vo, VOCTRL_REDRAW_FRAME, NULL) == true) {
+        vo->want_redraw = false;
+        vo->redrawing = true;
+        return 0;
+    }
+    return -1;
+}
+
+bool vo_get_want_redraw(struct vo *vo)
+{
+    if (!vo->config_ok)
+        return false;
+    return vo->want_redraw;
+}
+
+int vo_get_buffered_frame(struct vo *vo, bool eof)
+{
+    if (!vo->config_ok)
+        return -1;
+    if (vo->frame_loaded)
+        return 0;
+    if (!vo->driver->buffer_frames)
+        return -1;
+    vo->driver->get_buffered_frame(vo, eof);
+    return vo->frame_loaded ? 0 : -1;
+}
+
+void vo_skip_frame(struct vo *vo)
+{
+    vo_control(vo, VOCTRL_SKIPFRAME, NULL);
+    vo->frame_loaded = false;
+    mp_image_unrefp(&vo->waiting_mpi);
+}
+
+void vo_new_frame_imminent(struct vo *vo)
+{
+    if (vo->driver->buffer_frames)
+        vo_control(vo, VOCTRL_NEWFRAME, NULL);
+    else {
+        assert(vo->frame_loaded);
+        assert(vo->waiting_mpi);
+        assert(vo->waiting_mpi->pts == vo->next_pts);
+        vo->driver->draw_image(vo, vo->waiting_mpi);
+        mp_image_unrefp(&vo->waiting_mpi);
+    }
+}
+
+void vo_draw_osd(struct vo *vo, struct osd_state *osd)
+{
+    if (vo->config_ok && vo->driver->draw_osd)
+        vo->driver->draw_osd(vo, osd);
+}
+
+void vo_flip_page(struct vo *vo, int64_t pts_us, int duration)
+{
+    if (!vo->config_ok)
+        return;
+    if (!vo->redrawing) {
+        vo->frame_loaded = false;
+        vo->next_pts = MP_NOPTS_VALUE;
+        vo->next_pts2 = MP_NOPTS_VALUE;
+    }
+    vo->want_redraw = false;
+    vo->redrawing = false;
+    if (vo->driver->flip_page_timed)
+        vo->driver->flip_page_timed(vo, pts_us, duration);
+    else
+        vo->driver->flip_page(vo);
+    vo->hasframe = true;
+}
+
+void vo_check_events(struct vo *vo)
+{
+    if (!vo->config_ok) {
+        if (vo->registered_fd != -1)
+            mp_input_rm_key_fd(vo->input_ctx, vo->registered_fd);
+        vo->registered_fd = -1;
+        return;
+    }
+    vo_control(vo, VOCTRL_CHECK_EVENTS, NULL);
+}
+
+void vo_seek_reset(struct vo *vo)
+{
+    vo_control(vo, VOCTRL_RESET, NULL);
+    vo->frame_loaded = false;
+    vo->next_pts = MP_NOPTS_VALUE;
+    vo->next_pts2 = MP_NOPTS_VALUE;
+    vo->hasframe = false;
+    mp_image_unrefp(&vo->waiting_mpi);
 }
 
 // Calculate the appropriate source and destination rectangle to
@@ -518,4 +507,17 @@ void vo_mouse_movement(struct vo *vo, int posx, int posy)
     float p[2] = {posx, posy};
     vo_control(vo, VOCTRL_WINDOW_TO_OSD_COORDS, p);
     mp_input_set_mouse_pos(vo->input_ctx, p[0], p[1]);
+}
+
+/**
+ * \brief lookup an integer in a table, table must have 0 as the last key
+ * \param key key to search for
+ * \result translation corresponding to key or "to" value of last mapping
+ *         if not found.
+ */
+int lookup_keymap_table(const struct mp_keymap *map, int key)
+{
+    while (map->from && map->from != key)
+        map++;
+    return map->to;
 }
