@@ -142,6 +142,13 @@ const struct m_obj_list vo_obj_list = {
     .allow_trailer = true,
 };
 
+static int event_fd_callback(void *ctx, int fd)
+{
+    struct vo *vo = ctx;
+    vo_check_events(vo);
+    return MP_INPUT_NOTHING;
+}
+
 static struct vo *vo_create(struct mpv_global *global,
                             struct input_ctx *input_ctx,
                             struct encode_lavc_context *encode_lavc_ctx,
@@ -163,7 +170,6 @@ static struct vo *vo_create(struct mpv_global *global,
         .encode_lavc_ctx = encode_lavc_ctx,
         .input_ctx = input_ctx,
         .event_fd = -1,
-        .registered_fd = -1,
         .monitor_par = 1,
         .next_pts = MP_NOPTS_VALUE,
         .next_pts2 = MP_NOPTS_VALUE,
@@ -179,6 +185,10 @@ static struct vo *vo_create(struct mpv_global *global,
     vo->priv = config->optstruct;
     if (vo->driver->preinit(vo))
         goto error;
+    if (vo->event_fd != -1) {
+        mp_input_add_fd(vo->input_ctx, vo->event_fd, 1, NULL, event_fd_callback,
+                        NULL, vo);
+    }
     return vo;
 error:
     talloc_free(vo);
@@ -216,8 +226,8 @@ autoprobe:
 
 void vo_destroy(struct vo *vo)
 {
-    if (vo->registered_fd != -1)
-        mp_input_rm_key_fd(vo->input_ctx, vo->registered_fd);
+    if (vo->event_fd != -1)
+        mp_input_rm_key_fd(vo->input_ctx, vo->event_fd);
     mp_image_unrefp(&vo->waiting_mpi);
     vo->driver->uninit(vo);
     talloc_free(vo);
@@ -295,13 +305,6 @@ static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
     vo->dheight = d_h;
 }
 
-static int event_fd_callback(void *ctx, int fd)
-{
-    struct vo *vo = ctx;
-    vo_check_events(vo);
-    return MP_INPUT_NOTHING;
-}
-
 static void check_vo_caps(struct vo *vo)
 {
     int rot = vo->params->rotate;
@@ -341,11 +344,6 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     } else {
         talloc_free(vo->params);
         vo->params = NULL;
-    }
-    if (vo->registered_fd == -1 && vo->event_fd != -1 && vo->config_ok) {
-        mp_input_add_fd(vo->input_ctx, vo->event_fd, 1, NULL, event_fd_callback,
-                        NULL, vo);
-        vo->registered_fd = vo->event_fd;
     }
     vo->frame_loaded = false;
     vo->waiting_mpi = NULL;
@@ -451,12 +449,6 @@ void vo_flip_page(struct vo *vo, int64_t pts_us, int duration)
 
 void vo_check_events(struct vo *vo)
 {
-    if (!vo->config_ok) {
-        if (vo->registered_fd != -1)
-            mp_input_rm_key_fd(vo->input_ctx, vo->registered_fd);
-        vo->registered_fd = -1;
-        return;
-    }
     vo_control(vo, VOCTRL_CHECK_EVENTS, NULL);
 }
 

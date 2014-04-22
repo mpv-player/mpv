@@ -249,7 +249,6 @@ struct vo {
     struct encode_lavc_context *encode_lavc_ctx;
     struct input_ctx *input_ctx;
     int event_fd;  // check_events() should be called when this has input
-    int registered_fd;  // set to event_fd when registered in input system
 
     // requested position/resolution (usually window position/window size)
     int dx;
