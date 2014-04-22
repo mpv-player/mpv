@@ -437,8 +437,7 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
         int w = params->d_w, h = params->d_h;
-        if ((vo->driver->caps & VO_CAP_ROTATE90) &&
-            params->rotate % 180 == 90)
+        if ((vo->driver->caps & VO_CAP_ROTATE90) && params->rotate % 180 == 90)
             MPSWAP(int, w, h);
         determine_window_geometry(vo, w, h);
         d_width = vo->dwidth;
