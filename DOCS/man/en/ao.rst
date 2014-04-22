@@ -143,7 +143,7 @@ Available audio output drivers are:
 
     .. note:: This driver is not very useful. It was added in the hope of
               providing portable audio API across all platforms, but turned
-              our semi-broken and underfeatured.
+              out semi-broken and underfeatured.
 
     ``device``
         Specify the subdevice to use. Giving ``help`` as device name lists all
