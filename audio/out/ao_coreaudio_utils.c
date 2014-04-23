@@ -440,6 +440,11 @@ void ca_bitmaps_from_layouts(struct ao *ao,
 
     for (int i=0; i < n_layouts; i++) {
         uint32_t bitmap = 0;
+        MP_VERBOSE(ao, "device layout %i: tag: <%d>, bitmap: <%d>, "
+                       "descriptions number <%d>\n", i,
+                       layouts[i].mChannelLayoutTag,
+                       layouts[i].mChannelBitmap,
+                       layouts[i].mNumberChannelDescriptions);
 
         switch (layouts[i].mChannelLayoutTag) {
         case kAudioChannelLayoutTag_UseChannelBitmap:
