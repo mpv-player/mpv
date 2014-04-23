@@ -514,7 +514,7 @@ static int cache_control(stream_t *cache, int cmd, void *arg)
     if (r != STREAM_ERROR)
         goto done;
 
-    MP_VERBOSE(s, "[cache] blocking for STREAM_CTRL %d\n", cmd);
+    MP_VERBOSE(s, "blocking for STREAM_CTRL %d\n", cmd);
 
     s->control = cmd;
     s->control_arg = arg;
