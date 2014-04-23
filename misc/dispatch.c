@@ -238,9 +238,11 @@ void mp_dispatch_suspend(struct mp_dispatch_queue *queue)
 void mp_dispatch_resume(struct mp_dispatch_queue *queue)
 {
     pthread_mutex_lock(&queue->lock);
+    assert(queue->suspended);
     assert(queue->suspend_requested > 0);
     queue->suspend_requested--;
-    pthread_cond_broadcast(&queue->cond);
+    if (queue->suspend_requested == 0)
+        pthread_cond_broadcast(&queue->cond);
     pthread_mutex_unlock(&queue->lock);
 }
 
