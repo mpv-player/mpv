@@ -110,12 +110,12 @@ static void mp_dispatch_append(struct mp_dispatch_queue *queue,
         queue->wakeup_fn(queue->wakeup_ctx);
 }
 
-// Let the dispatch item process asynchronously. item->fn will be run in the
-// target thread's context, but note that mp_dispatch_enqueue() will usually
-// return long before that happens. It's up to the user to signal completion
-// of the callback. It's also up to the user to guarantee that the context
-// (fn_data) has correct lifetime, i.e. lives until the callback is run, and
-// is freed after that.
+// Enqueue a callback to run it on the target thread asynchronously. The target
+// thread will run fn(fn_data) as soon as it enter mp_dispatch_queue_process.
+// Note that mp_dispatch_enqueue() will usually return long before that happens.
+// It's up to the user to signal completion of the callback. It's also up to
+// the user to guarantee that the context fn_data has correct lifetime, i.e.
+// lives until the callback is run, and is freed after that.
 void mp_dispatch_enqueue(struct mp_dispatch_queue *queue,
                          mp_dispatch_fn fn, void *fn_data)
 {
@@ -144,8 +144,10 @@ void mp_dispatch_enqueue_autofree(struct mp_dispatch_queue *queue,
     mp_dispatch_append(queue, item);
 }
 
-// Run the dispatch item synchronously. item->fn will be run in the target
-// thread's context, and this function will wait until it's done.
+// Run fn(fn_data) on the target thread synchronously. This function enqueues
+// the callback and waits until the target thread is done doing this.
+// This is redundant to calling the function inside mp_dispatch_[un]lock(),
+// but can be helpful with code that relies on TLS (such as OpenGL).
 void mp_dispatch_run(struct mp_dispatch_queue *queue,
                      mp_dispatch_fn fn, void *fn_data)
 {
