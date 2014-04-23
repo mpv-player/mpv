@@ -202,8 +202,15 @@ void mp_dispatch_suspend(struct mp_dispatch_queue *queue)
 {
     pthread_mutex_lock(&queue->lock);
     queue->suspend_requested++;
-    while (!queue->suspended)
+    while (!queue->suspended) {
+        pthread_mutex_unlock(&queue->lock);
+        if (queue->wakeup_fn)
+            queue->wakeup_fn(queue->wakeup_ctx);
+        pthread_mutex_lock(&queue->lock);
+        if (queue->suspended)
+            break;
         pthread_cond_wait(&queue->cond, &queue->lock);
+    }
     pthread_mutex_unlock(&queue->lock);
 }
 
@@ -232,6 +239,14 @@ void mp_dispatch_lock(struct mp_dispatch_queue *queue)
         if (queue->suspended && !queue->locked) {
             queue->locked = true;
             break;
+        }
+        if (!queue->suspended) {
+            pthread_mutex_unlock(&queue->lock);
+            if (queue->wakeup_fn)
+                queue->wakeup_fn(queue->wakeup_ctx);
+            pthread_mutex_lock(&queue->lock);
+            if (queue->suspended)
+                continue;
         }
         pthread_cond_wait(&queue->cond, &queue->lock);
     }
