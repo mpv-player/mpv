@@ -190,8 +190,9 @@ def build(ctx):
         ( "input/lirc.c",                        "lirc" ),
 
         ## Misc
-        ( "misc/ring.c" ),
         ( "misc/charset_conv.c" ),
+        ( "misc/dispatch.c" ),
+        ( "misc/ring.c" ),
 
         ## Options
         ( "options/m_config.c" ),

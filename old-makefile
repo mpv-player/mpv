@@ -202,6 +202,7 @@ SOURCES = audio/audio.c \
           input/input.c \
           input/keycodes.c \
           misc/charset_conv.c \
+          misc/dispatch.c \
           misc/ring.c \
           options/m_config.c \
           options/m_option.c \

@@ -23,6 +23,7 @@
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "input/input.h"
+#include "misc/dispatch.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/m_property.h"

@@ -33,8 +33,8 @@
 #include "common/playlist.h"
 #include "input/input.h"
 
+#include "misc/dispatch.h"
 #include "osdep/terminal.h"
-#include "osdep/threads.h"
 #include "osdep/timer.h"
 
 #include "audio/mixer.h"

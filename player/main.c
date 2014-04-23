@@ -27,11 +27,11 @@
 #include "config.h"
 #include "talloc.h"
 
+#include "misc/dispatch.h"
 #include "osdep/io.h"
 #include "osdep/priority.h"
 #include "osdep/terminal.h"
 #include "osdep/timer.h"
-#include "osdep/threads.h"
 
 #include "common/av_log.h"
 #include "common/codecs.h"
