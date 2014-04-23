@@ -264,9 +264,8 @@ static void *playthread(void *arg)
         }
         pthread_mutex_unlock(&p->lock);
         pthread_mutex_lock(&p->wakeup_lock);
-        struct timespec deadline = mpthread_get_deadline(timeout);
         if (!p->need_wakeup)
-            pthread_cond_timedwait(&p->wakeup, &p->wakeup_lock, &deadline);
+            mpthread_cond_timedwait(&p->wakeup, &p->wakeup_lock, timeout);
         p->need_wakeup = false;
         pthread_mutex_unlock(&p->wakeup_lock);
     }
