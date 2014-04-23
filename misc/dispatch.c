@@ -198,7 +198,7 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
             }
         } else {
             if (timeout > 0) {
-                mpthread_cond_timed_wait(&queue->cond, &queue->lock, timeout);
+                mpthread_cond_timedwait(&queue->cond, &queue->lock, timeout);
             } else {
                 pthread_cond_wait(&queue->cond, &queue->lock);
             }

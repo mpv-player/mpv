@@ -62,8 +62,8 @@ struct timespec mpthread_get_deadline(double timeout)
 }
 
 // Call pthread_cond_timedwait() with a relative timeout in seconds
-int mpthread_cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
-                             double timeout)
+int mpthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
+                            double timeout)
 {
     struct timespec ts = mpthread_get_deadline(timeout);
     return pthread_cond_timedwait(cond, mutex, &ts);

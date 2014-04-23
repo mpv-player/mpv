@@ -5,8 +5,8 @@
 
 struct timespec mpthread_get_deadline(double timeout);
 
-int mpthread_cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
-                             double timeout);
+int mpthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
+                            double timeout);
 
 int mpthread_mutex_init_recursive(pthread_mutex_t *mutex);
 
