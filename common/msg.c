@@ -273,10 +273,11 @@ static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
                 fprintf(stream, "[%" PRId64 "] ", mp_time_us());
 
             if (prefix) {
-                if (root->module)
+                if (root->module) {
                     pretty_print_module(stream, prefix, root->color, lev);
-                else if (root->verbose)
+                } else {
                     fprintf(stream, "[%s] ", prefix);
+                }
             }
         }
 
