@@ -28,6 +28,7 @@ struct mp_dispatch_queue {
     pthread_mutex_t lock;
     pthread_cond_t cond;
     int suspend_requested;
+    int lock_requested;
     bool suspended;
     bool locked;
     void (*wakeup_fn)(void *wakeup_ctx);
@@ -173,9 +174,11 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
             item->next = NULL;
             // Unlock, because we want to allow other threads to queue items
             // while the dispatch item is processed.
+            queue->locked = true;
             pthread_mutex_unlock(&queue->lock);
             item->fn(item->fn_data);
             pthread_mutex_lock(&queue->lock);
+            queue->locked = false;
             if (item->asynchronous) {
                 talloc_free(item);
             } else {
@@ -184,6 +187,8 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
                 pthread_cond_broadcast(&queue->cond);
             }
         } else {
+            if (!queue->locked && queue->lock_requested)
+                pthread_cond_broadcast(&queue->cond);
             pthread_cond_wait(&queue->cond, &queue->lock);
         }
     }
@@ -235,6 +240,7 @@ void mp_dispatch_lock(struct mp_dispatch_queue *queue)
     //       dispatch items to guarantee minimum fairness.
     pthread_mutex_lock(&queue->lock);
     queue->suspend_requested++;
+    queue->lock_requested++;
     while (1) {
         if (queue->suspended && !queue->locked) {
             queue->locked = true;
@@ -250,6 +256,7 @@ void mp_dispatch_lock(struct mp_dispatch_queue *queue)
         }
         pthread_cond_wait(&queue->cond, &queue->lock);
     }
+    queue->lock_requested--;
     pthread_mutex_unlock(&queue->lock);
 }
 
