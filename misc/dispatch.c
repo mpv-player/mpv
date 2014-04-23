@@ -163,17 +163,17 @@ void mp_dispatch_run(struct mp_dispatch_queue *queue,
 
 // Process any outstanding dispatch items in the queue. This also handles
 // suspending or locking the target thread.
-// The timeout specifies the maximum wait time, but the actual time spent in
-// this function can be much higher if the suspending/locking functions are
-// used, or if executing the dispatch items takes time.
-// TODO: implement timeout
+// The timeout specifies the minimum wait time. The actual time spent in this
+// function can be much higher if the suspending/locking functions are used, or
+// if executing the dispatch items takes time. On the other hand, this function
+// can return much earlier than the timeout due to sporadic wakeups.
 void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
 {
     pthread_mutex_lock(&queue->lock);
     queue->suspended = true;
     // Wake up thread which called mp_dispatch_suspend().
     pthread_cond_broadcast(&queue->cond);
-    while (queue->head || queue->suspend_requested) {
+    while (queue->head || queue->suspend_requested || timeout > 0) {
         if (queue->head) {
             struct mp_dispatch_item *item = queue->head;
             queue->head = item->next;
@@ -197,8 +197,13 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
                 pthread_cond_broadcast(&queue->cond);
             }
         } else {
-            pthread_cond_wait(&queue->cond, &queue->lock);
+            if (timeout > 0) {
+                mpthread_cond_timed_wait(&queue->cond, &queue->lock, timeout);
+            } else {
+                pthread_cond_wait(&queue->cond, &queue->lock);
+            }
         }
+        timeout = 0;
     }
     queue->suspended = false;
     pthread_mutex_unlock(&queue->lock);
