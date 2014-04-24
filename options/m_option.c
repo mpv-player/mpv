@@ -2828,6 +2828,105 @@ static char *print_obj_settings_list(const m_option_t *opt, const void *val)
     return res;
 }
 
+static int set_obj_settings_list(const m_option_t *opt, void *dst,
+                                 struct mpv_node *src)
+{
+    if (src->format != MPV_FORMAT_NODE_ARRAY)
+        return M_OPT_INVALID;
+    m_obj_settings_t *entries =
+        talloc_zero_array(NULL, m_obj_settings_t, src->u.list->num + 1);
+    for (int n = 0; n < src->u.list->num; n++) {
+        m_obj_settings_t *entry = &entries[n];
+        if (src->u.list->values[n].format != MPV_FORMAT_NODE_MAP)
+            goto error;
+        struct mpv_node_list *src_entry = src->u.list->values[n].u.list;
+        for (int i = 0; i < src_entry->num; i++) {
+            const char *key = src_entry->keys[i];
+            struct mpv_node *val = &src_entry->values[i];
+            if (strcmp(key, "name") == 0) {
+                if (val->format != MPV_FORMAT_STRING)
+                    goto error;
+                entry->name = talloc_strdup(NULL, val->u.string);
+            } else if (strcmp(key, "label") == 0) {
+                if (val->format != MPV_FORMAT_STRING)
+                    goto error;
+                entry->label = talloc_strdup(NULL, val->u.string);
+            } else if (strcmp(key, "params") == 0) {
+                if (val->format != MPV_FORMAT_NODE_MAP)
+                    goto error;
+                struct mpv_node_list *src_params = val->u.list;
+                entry->attribs =
+                    talloc_zero_array(NULL, char*, (src_params->num + 1) * 2);
+                for (int x = 0; x < src_params->num; x++) {
+                    if (src_params->values[x].format != MPV_FORMAT_STRING)
+                        goto error;
+                    entry->attribs[x * 2 + 0] =
+                        talloc_strdup(NULL, src_params->keys[x]);
+                    entry->attribs[x * 2 + 1] =
+                        talloc_strdup(NULL, src_params->values[x].u.string);
+                }
+            }
+        }
+    }
+    free_obj_settings_list(dst);
+    VAL(dst) = entries;
+    return 0;
+error:
+    free_obj_settings_list(&entries);
+    return M_OPT_INVALID;
+}
+
+static struct mpv_node *add_array_entry(struct mpv_node *dst)
+{
+    struct mpv_node_list *list = dst->u.list;
+    assert(dst->format == MPV_FORMAT_NODE_ARRAY&& dst->u.list);
+    MP_TARRAY_GROW(list, list->values, list->num);
+    return &list->values[list->num++];
+}
+
+static struct mpv_node *add_map_entry(struct mpv_node *dst, const char *key)
+{
+    struct mpv_node_list *list = dst->u.list;
+    assert(dst->format == MPV_FORMAT_NODE_MAP && dst->u.list);
+    MP_TARRAY_GROW(list, list->values, list->num);
+    MP_TARRAY_GROW(list, list->keys, list->num);
+    list->keys[list->num] = talloc_strdup(list, key);
+    return &list->values[list->num++];
+}
+
+static void add_map_string(struct mpv_node *dst, const char *key, const char *val)
+{
+    struct mpv_node *entry = add_map_entry(dst, key);
+    entry->format = MPV_FORMAT_STRING;
+    entry->u.string = talloc_strdup(dst->u.list, val);
+}
+
+static int get_obj_settings_list(const m_option_t *opt, void *ta_parent,
+                                 struct mpv_node *dst, void *val)
+{
+    m_obj_settings_t *list = VAL(val);
+    dst->format = MPV_FORMAT_NODE_ARRAY;
+    dst->u.list = talloc_zero(ta_parent, struct mpv_node_list);
+    ta_parent = dst->u.list;
+    for (int n = 0; list && list[n].name; n++) {
+        m_obj_settings_t *entry = &list[n];
+        struct mpv_node *nentry = add_array_entry(dst);
+        nentry->format = MPV_FORMAT_NODE_MAP;
+        nentry->u.list = talloc_zero(ta_parent, struct mpv_node_list);
+        add_map_string(nentry, "name", entry->name);
+        if (entry->label && entry->label[0])
+            add_map_string(nentry, "label", entry->label);
+        struct mpv_node *params = add_map_entry(nentry, "params");
+        params->format = MPV_FORMAT_NODE_MAP;
+        params->u.list = talloc_zero(ta_parent, struct mpv_node_list);
+        for (int i = 0; entry->attribs && entry->attribs[i * 2 + 0]; i++) {
+            add_map_string(params, entry->attribs[i * 2 + 0],
+                                   entry->attribs[i * 2 + 1]);
+        }
+    }
+    return 1;
+}
+
 const m_option_type_t m_option_type_obj_settings_list = {
     .name  = "Object settings list",
     .size  = sizeof(m_obj_settings_t *),
@@ -2836,6 +2935,8 @@ const m_option_type_t m_option_type_obj_settings_list = {
     .print = print_obj_settings_list,
     .copy  = copy_obj_settings_list,
     .free  = free_obj_settings_list,
+    .set   = set_obj_settings_list,
+    .get   = get_obj_settings_list,
 };
 
 #undef VAL

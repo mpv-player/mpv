@@ -1191,6 +1191,22 @@ Property list
 ``vf`` (RW)
     See ``--vf`` and the ``vf`` command.
 
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each filter entry)
+                "name"      MPV_FORMAT_STRING
+                "label"     MPV_FORMAT_STRING [optional]
+                "params"    MPV_FORMAT_NODE_MAP [optional]
+                    "key"   MPV_FORMAT_STRING
+                    "value" MPV_FORMAT_STRING
+
+    It's also possible to write the property using this format.
+
 ``seekable``
     Return whether it's generally possible to seek in the current file.
 
