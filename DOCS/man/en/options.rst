@@ -97,22 +97,6 @@ OPTIONS
     configuration files specifying a list of fallbacks may make sense. See
     `AUDIO OUTPUT DRIVERS`_ for details and descriptions of available drivers.
 
-``--aspect=<ratio>``
-    Override movie aspect ratio, in case aspect information is incorrect or
-    missing in the file being played. See also ``--no-aspect``.
-
-    Two values have special meaning:
-
-    :0:  disable aspect ratio handling, pretend the video has square pixels
-    :-1: use the video stream or container aspect (default)
-
-    But note that handling of these special values might change in the future.
-
-    .. admonition:: Examples
-
-        - ``--aspect=4:3``  or ``--aspect=1.3333``
-        - ``--aspect=16:9`` or ``--aspect=1.7777``
-
 ``--sub-ass``, ``--no-sub-ass``
     Render ASS subtitles natively (enabled by default).
 
@@ -896,8 +880,8 @@ OPTIONS
 
         This option does not work properly with all window managers.
         ``all`` in particular will usually only work with
-        ``--fstype=-fullscreen`` or ``--fstype=none``, and even then only with
-        some window managers.
+        ``--x11-fstype=-fullscreen`` or ``--x11-fstype=none``, and even then
+        only with some window managers.
 
     .. admonition:: Note (OS X)
 
@@ -909,7 +893,7 @@ OPTIONS
     *OBSOLETE*, use the ``--fs`` option.
     Try this option if you still experience fullscreen problems.
 
-``--fstype=<type1,type2,...>``
+``--x11-fstype=<type1,type2,...>``
     (X11 only)
     Specify a priority list of fullscreen modes to be used. You can negate the
     modes by prefixing them with '-'. If you experience problems like the
@@ -918,7 +902,7 @@ OPTIONS
 
     .. note::
 
-        See ``--fstype=help`` for a full list of available modes.
+        See ``--x11-fstype=help`` for a full list of available modes.
 
     The available types are:
 
@@ -941,13 +925,13 @@ OPTIONS
 
     .. admonition:: Examples
 
-        ``--fstype=layer,stays_on_top,above,fullscreen``
+        ``--x11-fstype=layer,stays_on_top,above,fullscreen``
             Default order, will be used as a fallback if incorrect or
             unsupported modes are specified.
-        ``--fstype=fullscreen``
+        ``--x11-fstype=fullscreen``
             Fixes fullscreen switching on OpenBox 1.x.
 
-``--native-fs``
+``--fs-missioncontrol``
     (OS X only)
     Use OS X Mission Control's fullscreen feature instead of the custom one
     provided by mpv. This can potentially break a lot of stuff like
@@ -1377,7 +1361,7 @@ OPTIONS
     previous setting (e.g. in the config file). Overrides the
     ``--monitorpixelaspect`` setting if enabled.
 
-    See also ``--monitorpixelaspect`` and ``--aspect``.
+    See also ``--monitorpixelaspect`` and ``--video-aspect``.
 
     .. admonition:: Examples
 
@@ -1387,7 +1371,7 @@ OPTIONS
 ``--monitorpixelaspect=<ratio>``
     Set the aspect of a single pixel of your monitor or TV screen (default:
     1). A value of 1 means square pixels (correct for (almost?) all LCDs). See
-    also ``--monitoraspect`` and ``--aspect``.
+    also ``--monitoraspect`` and ``--video-aspect``.
 
 ``--no-msgcolor``
     Disable colorful console output on terminals.
@@ -1429,7 +1413,7 @@ OPTIONS
     Set startup audio mute status. ``auto`` (default) will not change the mute
     status. Also see ``--volume``.
 
-``--name``
+``--x11-name``
     Set the window class name for X11-based video output methods.
 
 ``--native-keyrepeat``
@@ -1437,10 +1421,6 @@ OPTIONS
     ``--input-ar-delay`` and ``--input-ar-rate``. (Whether this applies
     depends on the VO backend and how it handles keyboard input. Does not
     apply to terminal input.)
-
-``--no-aspect``
-    Ignore aspect ratio information from video file and assume the video has
-    square pixels. See also ``--aspect``.
 
 ``--no-cache``
     Turn off input stream caching. See ``--cache``.
@@ -2726,6 +2706,26 @@ OPTIONS
     If video and screen aspect match perfectly, these options do nothing.
 
     This option is disabled if the ``--no-keepaspect`` option is used.
+
+``--video-aspect=<ratio>``
+    Override movie aspect ratio, in case aspect information is incorrect or
+    missing in the file being played. See also ``--no-video-aspect``.
+
+    Two values have special meaning:
+
+    :0:  disable aspect ratio handling, pretend the video has square pixels
+    :-1: use the video stream or container aspect (default)
+
+    But note that handling of these special values might change in the future.
+
+    .. admonition:: Examples
+
+        - ``--video-aspect=4:3``  or ``--video-aspect=1.3333``
+        - ``--video-aspect=16:9`` or ``--video-aspect=1.7777``
+
+``--no-video-aspect``
+    Ignore aspect ratio information from video file and assume the video has
+    square pixels. See also ``--video-aspect``.
 
 ``--video-pan-x=<value>``, ``--video-pan-y=<value>``
     Moves the displayed video rectangle by the given value in the X or Y

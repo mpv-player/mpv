@@ -40,7 +40,7 @@ typedef struct mp_vo_opts {
     float monitor_pixel_aspect;
     int force_window_position;
 
-    int native_fs;
+    int fs_missioncontrol;
 } mp_vo_opts;
 
 typedef struct MPOpts {

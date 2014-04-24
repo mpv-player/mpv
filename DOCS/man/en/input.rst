@@ -982,8 +982,8 @@ Property list
     (or to be exactly, the size the video filters output). ``2`` will set the
     double size, ``0.5`` halves the size.
 
-``aspect`` (RW)
-    Video aspect, see ``--aspect``.
+``video-aspect`` (RW)
+    Video aspect, see ``--video-aspect``.
 
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the

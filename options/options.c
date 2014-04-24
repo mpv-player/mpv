@@ -384,8 +384,8 @@ const m_option_t mp_opts[] = {
     {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
-    OPT_FLOATRANGE("aspect", movie_aspect, 0, -1.0, 10.0),
-    OPT_FLOAT_STORE("no-aspect", movie_aspect, 0, 0.0),
+    OPT_FLOATRANGE("video-aspect", movie_aspect, 0, -1.0, 10.0),
+    OPT_FLOAT_STORE("no-video-aspect", movie_aspect, 0, 0.0),
 
     OPT_CHOICE("field-dominance", field_dominance, 0,
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),
@@ -472,7 +472,7 @@ const m_option_t mp_opts[] = {
     OPT_SIZE_BOX("autofit-larger", vo.autofit_larger, 0),
     OPT_FLAG("force-window-position", vo.force_window_position, 0),
     // vo name (X classname) and window title strings
-    OPT_STRING("name", vo.winname, 0),
+    OPT_STRING("x11-name", vo.winname, 0),
     OPT_STRING("title", wintitle, 0),
     // set aspect ratio of monitor - useful for 16:9 TV-out
     OPT_FLOATRANGE("monitoraspect", vo.force_monitor_aspect, 0, 0.0, 9.0),
@@ -513,7 +513,7 @@ const m_option_t mp_opts[] = {
 
     OPT_INT64("wid", vo.WinID, CONF_GLOBAL),
 #if HAVE_X11
-    OPT_STRINGLIST("fstype", vo.fstype_list, 0),
+    OPT_STRINGLIST("x11-fstype", vo.fstype_list, 0),
 #endif
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
@@ -525,7 +525,7 @@ const m_option_t mp_opts[] = {
                       ({"all", -2}, {"current", -1})),
 
 #if HAVE_COCOA
-    OPT_FLAG("native-fs", vo.native_fs, 0),
+    OPT_FLAG("fs-missioncontrol", vo.fs_missioncontrol, 0),
 #endif
 
     OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),

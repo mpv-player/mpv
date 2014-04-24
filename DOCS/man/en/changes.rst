@@ -148,6 +148,7 @@ Command Line Switches
     ``-af volnorm``             ``--af=drc`` (renamed)
     ``-afm hwac3``              ``--ad=spdif:ac3,spdif:dts``
     ``-ao alsa:device=hw=0.3``  ``--ao=alsa:device=[hw:0,3]``
+    ``-aspect``                 ``--video-aspect``
     ``-ass-bottom-margin``      ``--vf=sub=bottom:top``
     ``-ass``                    ``--sub-ass``
     ``-audiofile-cache``        ``--audio-file-cache``
@@ -162,6 +163,7 @@ Command Line Switches
     ``-font``                   ``--osd-font``
     ``-forcedsubsonly``         ``--sub-forced-only``
     ``-format``                 ``--audio-format``
+    ``-fstype``                 ``--x11-fstype``
     ``-hardframedrop``          ``--framedrop=hard``
     ``-lavdopts ...``           ``--vd-lavc-...``
     ``-lavfdopts``              ``--demuxer-lavf-...``
@@ -170,6 +172,7 @@ Command Line Switches
     ``-mixer-channel``          AO suboptions (``alsa``, ``oss``)
     ``-mixer``                  AO suboptions (``alsa``, ``oss``)
     ``-mouse-movements``        ``--input-cursor``
+    ``-name``                   ``--x11-name``
     ``-noar``                   ``--no-input-appleremote``
     ``-noautosub``              ``--no-sub-auto``
     ``-noconsolecontrols``      ``--no-input-terminal``
@@ -240,9 +243,9 @@ input.conf and Slave Commands
     +--------------------------------+----------------------------------------+
     | ``pt_step -1 [0|1]``           | ``playlist_prev [weak|force] (same)``  |
     +--------------------------------+----------------------------------------+
-    | ``switch_ratio [<ratio>]``     | ``set aspect <ratio>``                 |
+    | ``switch_ratio [<ratio>]``     | ``set video-aspect <ratio>``           |
     |                                |                                        |
-    |                                | ``set aspect 0`` (to reset aspect)     |
+    |                                | ``set video-aspect 0`` (reset aspect)  |
     +--------------------------------+----------------------------------------+
     | ``step_property_osd <prop>``   | ``cycle <prop> <step>`` (wraps),       |
     | ``<step> <dir>``               | ``add <prop> <step>`` (clamps).        |

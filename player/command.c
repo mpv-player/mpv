@@ -2405,7 +2405,7 @@ static const m_option_t mp_properties[] = {
       CONF_RANGE, 0.125, 8 },
     { "fps", mp_property_fps, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
-    { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
+    { "video-aspect", mp_property_aspect, CONF_TYPE_FLOAT,
       CONF_RANGE, -1, 10, NULL },
     M_OPTION_PROPERTY_CUSTOM("vid", mp_property_video),
     { "program", mp_property_program, CONF_TYPE_INT,
