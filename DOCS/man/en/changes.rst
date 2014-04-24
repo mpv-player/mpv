@@ -159,6 +159,7 @@ Command Line Switches
     ``-cursor-autohide-delay``  ``--cursor-autohide``
     ``-delay``                  ``--audio-delay``
     ``-dumpstream``             ``--stream-dump=<filename>``
+    ``-dvdangle``               ``--dvd-angle``
     ``-endpos``                 ``--length``
     ``-font``                   ``--osd-font``
     ``-forcedsubsonly``         ``--sub-forced-only``
@@ -202,6 +203,7 @@ Command Line Switches
     ``-subfont``                ``--sub-text-font``
     ``-subfps``                 ``--sub-fps``
     ``-subpos``                 ``--sub-pos``
+    ``-tvscan``                 ``--tv-scan``
     ``-use-filename-title``     ``--title='${filename}'``
     ``-vc ffh264vdpau`` (etc.)  ``--hwdec=vdpau``
     ``-vobsub``                 ``--sub`` (pass the .idx file)

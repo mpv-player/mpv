@@ -256,7 +256,7 @@ const m_option_t mp_opts[] = {
 #if HAVE_DVDREAD || HAVE_DVDNAV
     {"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"dvd-speed", &dvd_speed, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
+    {"dvd-angle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 #endif /* HAVE_DVDREAD */
     OPT_INTPAIR("chapter", chapterrange, 0),
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
@@ -605,7 +605,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
     OPT_FLAG("input-cursor", vo.enable_mouse_movements, CONF_GLOBAL),
 #if HAVE_TV
-    {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    {"tv-scan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif /* HAVE_TV */
 
     {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG},

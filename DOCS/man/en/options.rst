@@ -771,7 +771,7 @@ OPTIONS
 
         You need write access to the DVD device to change the speed.
 
-``--dvdangle=<ID>``
+``--dvd-angle=<ID>``
     Some DVDs contain scenes that can be viewed from multiple angles.
     This option tells mpv which angle to use (default: 1).
 
@@ -2577,7 +2577,7 @@ OPTIONS
         Choose the quality of the JPEG compression (< 60 recommended for full
         size).
 
-``--tvscan=<option1:option2:...>``
+``--tv-scan=<option1:option2:...>``
     Tune the TV channel scanner. mpv will also print value for
     ``--tv=channels=`` option, including existing and just found channels.
 

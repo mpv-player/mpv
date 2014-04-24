@@ -622,7 +622,7 @@ Play only titles 5, 6, 7:
     ``mpv dvd://5-7``
 
 Play a multiangle DVD:
-    ``mpv dvd://1 --dvdangle=2``
+    ``mpv dvd://1 --dvd-angle=2``
 
 Play from a different DVD device:
     ``mpv dvd://1 --dvd-device=/dev/dvd2``
