@@ -480,8 +480,6 @@ const m_option_t mp_opts[] = {
     // start in fullscreen mode:
     OPT_FLAG("fullscreen", vo.fullscreen, M_OPT_FIXED),
     OPT_FLAG("fs", vo.fullscreen, M_OPT_FIXED),
-    // set fullscreen switch method (workaround for buggy WMs)
-    OPT_INTRANGE("fsmode-dontuse", vo.fsmode, 0, 31, 4096),
     OPT_FLAG("native-keyrepeat", vo.native_keyrepeat, M_OPT_FIXED),
     OPT_FLOATRANGE("panscan", vo.panscan, 0, 0.0, 1.0),
     OPT_FLOATRANGE("video-zoom", vo.zoom, 0, -20.0, 20.0),
@@ -662,7 +660,6 @@ const struct MPOpts mp_default_opts = {
         .screen_id = -1,
         .fsscreen_id = -1,
         .enable_mouse_movements = 1,
-        .fsmode = 0,
         .panscan = 0.0f,
         .keepaspect = 1,
         .border = 1,

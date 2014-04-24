@@ -889,10 +889,6 @@ OPTIONS
 
     See also ``--screen``.
 
-``--fsmode-dontuse=<0-31>``
-    *OBSOLETE*, use the ``--fs`` option.
-    Try this option if you still experience fullscreen problems.
-
 ``--x11-fstype=<type1,type2,...>``
     (X11 only)
     Specify a priority list of fullscreen modes to be used. You can negate the

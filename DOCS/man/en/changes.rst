@@ -164,6 +164,7 @@ Command Line Switches
     ``-font``                   ``--osd-font``
     ``-forcedsubsonly``         ``--sub-forced-only``
     ``-format``                 ``--audio-format``
+    ``-fsmode-dontuse``         (removed)
     ``-fstype``                 ``--x11-fstype``
     ``-hardframedrop``          ``--framedrop=hard``
     ``-lavdopts ...``           ``--vd-lavc-...``

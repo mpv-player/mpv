@@ -28,7 +28,6 @@ typedef struct mp_vo_opts {
     struct m_geometry autofit;
     struct m_geometry autofit_larger;
 
-    int fsmode;
     int keepaspect;
     int border;
 
