@@ -431,6 +431,32 @@ static bool ca_bitmap_from_ch_tag(struct ao *ao, AudioChannelLayout *layout,
     }
 }
 
+static void ca_log_layout(struct ao *ao, AudioChannelLayout layout)
+{
+    if (!mp_msg_test(ao->log, MSGL_V))
+        return;
+
+    AudioChannelDescription *descs = layout.mChannelDescriptions;
+
+    MP_VERBOSE(ao, "layout: tag: <%d>, bitmap: <%d>, "
+                   "descriptions <%d>\n",
+                   layout.mChannelLayoutTag,
+                   layout.mChannelBitmap,
+                   layout.mNumberChannelDescriptions);
+
+    for (int i = 0; i < layout.mNumberChannelDescriptions; i++) {
+        AudioChannelDescription d = descs[i];
+        MP_VERBOSE(ao, " - description %d: label <%d, %d>, flags: <%u>, "
+                       "coords: <%f, %f, %f>\n", i,
+                       d.mChannelLabel,
+                       ca_label_to_mp_speaker_id(d.mChannelLabel),
+                       d.mChannelFlags,
+                       d.mCoordinates[0],
+                       d.mCoordinates[1],
+                       d.mCoordinates[2]);
+    }
+}
+
 void ca_bitmaps_from_layouts(struct ao *ao,
                              AudioChannelLayout *layouts, size_t n_layouts,
                              uint32_t **bitmaps, size_t *n_bitmaps)
@@ -440,11 +466,7 @@ void ca_bitmaps_from_layouts(struct ao *ao,
 
     for (int i=0; i < n_layouts; i++) {
         uint32_t bitmap = 0;
-        MP_VERBOSE(ao, "device layout %i: tag: <%d>, bitmap: <%d>, "
-                       "descriptions number <%d>\n", i,
-                       layouts[i].mChannelLayoutTag,
-                       layouts[i].mChannelBitmap,
-                       layouts[i].mNumberChannelDescriptions);
+        ca_log_layout(ao, layouts[i]);
 
         switch (layouts[i].mChannelLayoutTag) {
         case kAudioChannelLayoutTag_UseChannelBitmap:
