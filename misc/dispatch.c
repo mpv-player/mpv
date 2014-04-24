@@ -169,6 +169,10 @@ void mp_dispatch_run(struct mp_dispatch_queue *queue,
 // function can be much higher if the suspending/locking functions are used, or
 // if executing the dispatch items takes time. On the other hand, this function
 // can return much earlier than the timeout due to sporadic wakeups.
+// It is also guaranteed that if at least one queue item was processed, the
+// function will return as soon as possible, ignoring the timeout. This
+// simplifies users, such as re-checking conditions before waiting. (It will
+// still process the remaining queue items, and wait for unsuspend.)
 void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
 {
     pthread_mutex_lock(&queue->lock);
