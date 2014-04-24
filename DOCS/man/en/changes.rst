@@ -149,6 +149,7 @@ Command Line Switches
     ``-afm hwac3``              ``--ad=spdif:ac3,spdif:dts``
     ``-ao alsa:device=hw=0.3``  ``--ao=alsa:device=[hw:0,3]``
     ``-ass-bottom-margin``      ``--vf=sub=bottom:top``
+    ``-ass``                    ``--sub-ass``
     ``-benchmark``              ``--untimed`` (no stats)
     ``-capture``                ``--stream-capture=<filename>``
     ``-channels``               ``--channels`` (changed semantics)
@@ -167,6 +168,7 @@ Command Line Switches
     ``-mixer``                  AO suboptions (``alsa``, ``oss``)
     ``-mouse-movements``        ``--input-cursor``
     ``-noar``                   ``--no-input-appleremote``
+    ``-noautosub``              ``--no-sub-auto``
     ``-noconsolecontrols``      ``--no-input-terminal``
     ``-nojoystick``             ``--no-input-joystick``
     ``-nosound``                ``--no-audio``
@@ -179,12 +181,15 @@ Command Line Switches
     ``-spugauss``               ``--sub-gauss``
     ``-ss``                     ``--start``
     ``-stop-xscreensaver``      ``--stop-screensaver``
-    ``-sub-fuzziness``          ``--autosub-match``
+    ``-sub-fuzziness``          ``--sub-auto-match``
+    ``-sub``                    ``--sub-file``
+    ``-subcp``                  ``--sub-codepage``
     ``-subdelay``               ``--sub-delay``
     ``-subfile``                ``--sub``
     ``-subfont-*``              ``--sub-text-*``, ``--osd-*``
     ``-subfont-text-scale``     ``--sub-scale``
     ``-subfont``                ``--sub-text-font``
+    ``-subfps``                 ``--sub-fps``
     ``-subpos``                 ``--sub-pos``
     ``-use-filename-title``     ``--title='${filename}'``
     ``-vc ffh264vdpau`` (etc.)  ``--hwdec=vdpau``

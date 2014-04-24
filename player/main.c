@@ -95,7 +95,7 @@ const char mp_help_text[] =
 " --no-audio        do not play sound\n"
 " --no-video        do not play video\n"
 " --fs              fullscreen playback\n"
-" --sub=<file>      specify subtitle file to use\n"
+" --sub-file=<file> specify subtitle file to use\n"
 " --playlist=<file> specify playlist file\n"
 "\n"
 " --list-options    list all mpv options\n"

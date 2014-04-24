@@ -113,18 +113,18 @@ OPTIONS
         - ``--aspect=4:3``  or ``--aspect=1.3333``
         - ``--aspect=16:9`` or ``--aspect=1.7777``
 
-``--ass``, ``--no-ass``
+``--sub-ass``, ``--no-sub-ass``
     Render ASS subtitles natively (enabled by default).
 
-    If ``--no-ass`` is specified, all tags and style declarations are stripped
-    and ignored on display. The subtitle renderer uses the font style as
-    specified by the ``--sub-text-`` options instead.
+    If ``--no-sub-ass`` is specified, all tags and style declarations are
+    stripped and ignored on display. The subtitle renderer uses the font style
+    as specified by the ``--sub-text-`` options instead.
 
     .. note::
 
-        Using ``--no-ass`` may lead to incorrect or completely broken rendering
-        of ASS/SSA subtitles. It can sometimes be useful to forcibly override
-        the styling of ASS subtitles, but should be avoided in general.
+        Using ``--no-sub-ass`` may lead to incorrect or completely broken
+        rendering of ASS/SSA subtitles. It can sometimes be useful to forcibly
+        override the styling of ASS subtitles, but should be avoided in general.
 
 ``--ass-force-style=<[Style.]Param=Value[,...]>``
     Override some style or script info parameters.
@@ -313,19 +313,6 @@ OPTIONS
             If the video is larger than 90% of the screen width or 80% of the
             screen height, make the window smaller until either its width is 90%
             of the screen, or its height is 80% of the screen.
-
-``--autosub``, ``--no-autosub``
-    Load additional subtitle files matching the video filename. Enabled by
-    default. See also ``--autosub-match``.
-
-``--autosub-match=<exact|fuzzy|all>``
-    Adjust matching fuzziness when searching for subtitles:
-
-    :exact: exact match
-    :fuzzy: Load all subs containing movie name.
-    :all:   Load all subs in the current and ``--sub-paths`` directories.
-
-    (default: exact)
 
 ``--autosync=<factor>``
     Gradually adjusts the A/V sync based on audio delay measurements.
@@ -801,8 +788,7 @@ OPTIONS
 
 ``--embeddedfonts``, ``--no-embeddedfonts``
     Use fonts embedded in Matroska container files and ASS scripts (default:
-    enabled). These fonts can be used for SSA/ASS subtitle rendering
-    (``--ass`` option).
+    enabled). These fonts can be used for SSA/ASS subtitle rendering.
 
 ``--end=<time>``
     Stop at given absolute time. Use ``--length`` if the time should be relative
@@ -1599,7 +1585,7 @@ OPTIONS
 
         The ``--sub-text-font`` option (and most other ``--sub-text-``
         options) are ignored when ASS-subtitles are rendered, unless the
-        ``--no-ass`` option is specified.
+        ``--no-sub-ass`` option is specified.
 
 ``--osd-font-size=<size>``, ``--sub-text-font-size=<size>``
     Specify the OSD/sub font size. The unit is the size in scaled pixels at a
@@ -2049,14 +2035,14 @@ OPTIONS
     .. note::
 
         Styling and interpretation of any formatting tags is disabled for the
-        secondary subtitle. Internally, the same mechanism as ``--no-ass`` is
-        used to strip the styling.
+        secondary subtitle. Internally, the same mechanism as ``--no-sub-ass``
+        is used to strip the styling.
 
     .. note::
 
         If the main subtitle stream contains formatting tags which display the
         subtitle at the top of the screen, it will overlap with the secondary
-        subtitle. To prevent this, you could use ``--no-ass`` to disable
+        subtitle. To prevent this, you could use ``--no-sub-ass`` to disable
         styling in the main subtitle stream.
 
 ``--show-profile=<profile>``
@@ -2215,19 +2201,22 @@ OPTIONS
     implemented, but does not work (happens often on GNOME). You might be able
     to to work this around using ``--heartbeat-cmd`` instead.
 
-``--sub=<subtitlefile1,subtitlefile2,...>``
+``--sub-file=<subtitlefile1,subtitlefile2,...>``
     Use/display these subtitle files. Only one file can be displayed at the
     same time.
 
-``--sub-fix-timing``, ``--no-sub-fix-timing``
-    By default, external text subtitles are preprocessed to remove minor gaps
-    or overlaps between subtitles (if the difference is smaller than 200 ms,
-    the gap or overlap is removed). This does not affect image subtitles,
-    subtitles muxed with audio/video, or subtitles in the ASS format.
+``--sub-auto``, ``--no-sub-auto``
+    Load additional subtitle files matching the video filename. Enabled by
+    default. See also ``--sub-auto-match``.
 
-``--sub-demuxer=<[+]name>``
-    Force subtitle demuxer type for ``--sub``. Give the demuxer name as
-    printed by ``--sub-demuxer=help``.
+``--sub-auto-match=<exact|fuzzy|all>``
+    Adjust matching fuzziness when searching for subtitles:
+
+    :exact: exact match
+    :fuzzy: Load all subs containing movie name.
+    :all:   Load all subs in the current and ``--sub-paths`` directories.
+
+    (default: exact)
 
 ``--sub-paths=<path1:path2:...>``
     Specify extra directories to search for subtitles matching the video.
@@ -2247,7 +2236,11 @@ OPTIONS
         - ``/tmp/subs/``
         - ``~/.mpv/sub/``
 
-``--subcp=<codepage>``
+``--sub-demuxer=<[+]name>``
+    Force subtitle demuxer type for ``--sub-file``. Give the demuxer name as
+    printed by ``--sub-demuxer=help``.
+
+``--sub-codepage=<codepage>``
     If your system supports ``iconv(3)``, you can use this option to specify
     the subtitle codepage. By default, ENCA will be used to guess the charset.
     If mpv is not compiled with ENCA, ``UTF-8:UTF-8-BROKEN`` is the default,
@@ -2263,9 +2256,9 @@ OPTIONS
 
     .. admonition:: Examples
 
-        - ``--subcp=utf8:latin2`` Use Latin 2 if input is not UTF-8.
-        - ``--subcp=utf8:cp1250`` Use CP1250 if input is not UTF-8.
-        - ``--subcp=cp1250`` Always force recoding to cp1250.
+        - ``--sub-codepage=utf8:latin2`` Use Latin 2 if input is not UTF-8.
+        - ``--sub-codepage=utf8:cp1250`` Use CP1250 if input is not UTF-8.
+        - ``--sub-codepage=cp1250`` Always force recoding to cp1250.
 
     The pseudo codepage ``UTF-8-BROKEN`` is used internally. If this is used
     as codepage, the subtitle will be interpreted as UTF-8, but with "Latin 1"
@@ -2275,7 +2268,7 @@ OPTIONS
     If the player was compiled with ENCA support, you can control it with the
     following syntax::
 
-        ``--subcp=enca:<language>:<fallback codepage>``
+        ``--sub-codepage=enca:<language>:<fallback codepage>``
 
     You can specify your language using a two letter language code to make
     ENCA detect the codepage automatically. If unsure, enter anything (if the
@@ -2285,26 +2278,32 @@ OPTIONS
 
     .. admonition:: Examples
 
-        - ``--subcp=enca:cs:latin2`` guess the encoding, assuming the subtitles
+        - ``--sub-codepage=enca:cs:latin2`` guess the encoding, assuming the subtitles
           are Czech, fall back on latin 2, if the detection fails.
-        - ``--subcp=enca:pl:cp1250`` guess the encoding for Polish, fall back on
+        - ``--sub-codepage=enca:pl:cp1250`` guess the encoding for Polish, fall back on
           cp1250.
-        - ``--subcp=enca:pl`` guess the encoding for Polish, fall back on UTF-8.
-        - ``--subcp=enca`` try universal detection, fall back on UTF-8.
+        - ``--sub-codepage=enca:pl`` guess the encoding for Polish, fall back on UTF-8.
+        - ``--sub-codepage=enca`` try universal detection, fall back on UTF-8.
 
     If the player was compiled with libguess support, you can use it with:
 
-    ``--subcp=guess:<language>:<fallback codepage>``
+    ``--sub-codepage=guess:<language>:<fallback codepage>``
 
     Note that libguess always needs a language. There is no universal detection
-    mode. Use ``--subcp=guess:help`` to get a list of languages (like with ENCA,
+    mode. Use ``--sub-codepage=guess:help`` to get a list of languages (like with ENCA,
     it will be printed only if the conversion code is somehow called, for
     example when loading an external subtitle).
+
+``--sub-fix-timing``, ``--no-sub-fix-timing``
+    By default, external text subtitles are preprocessed to remove minor gaps
+    or overlaps between subtitles (if the difference is smaller than 200 ms,
+    the gap or overlap is removed). This does not affect image subtitles,
+    subtitles muxed with audio/video, or subtitles in the ASS format.
 
 ``--sub-delay=<sec>``
     Delays subtitles by ``<sec>`` seconds. Can be negative.
 
-``--subfps=<rate>``
+``--sub-fps=<rate>``
     Specify the framerate of the subtitle file (default: movie fps).
 
     .. note::

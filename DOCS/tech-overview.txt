@@ -222,7 +222,7 @@ sub/:
     .ass subtitles via libass. demux_lavf.c loads most subtitle types via
     FFmpeg. demux_subreader.c is the old MPlayer code. It's used as last
     fallback, or to handle some text subtitle types on Libav. (It also can
-    load UTF-16 encoded subtitles without requiring the use of -subcp.)
+    load UTF-16 encoded subtitles without requiring the use of -sub-codepage.)
     demux_subreader.c should eventually go away (maybe).
 
     The subtitles are passed to dec_sub.c and the subtitle decoders in sd_*.c
