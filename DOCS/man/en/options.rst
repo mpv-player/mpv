@@ -242,9 +242,39 @@ OPTIONS
     a subtitle script with another video file. The ``--ass-style-override``
     option doesn't affect how this option is interpreted.
 
+``--audio-channels=<number|layout>``
+    Request a channel layout for audio output (default: stereo). This  will ask
+    the AO to open a device with the given channel layout. It's up to the AO
+    to accept this layout, or to pick a fallback or to error out if the
+    requested layout is not supported.
+
+    The ``--audio-channels`` option either takes a channel number or an explicit
+    channel layout. Channel numbers refer to default layouts, e.g. 2 channels
+    refer to stereo, 6 refers to 5.1.
+
+    See ``--audio-channels=help`` output for defined default layouts. This also
+    lists speaker names, which can be used to express arbitrary channel
+    layouts (e.g. ``fl-fr-lfe`` is 2.1).
+
+    You can use ``--audio-channels=empty`` to disable this. In this case, the AO
+    use the channel layout as the audio filter chain indicates.
+
+    This will also request the channel layout from the decoder. If the decoder
+    does not support the layout, it will fall back to its native channel layout.
+    (You can use ``--ad-lavc-downmix=no`` to make the decoder always output
+    its native layout.) Note that only some decoders support remixing audio.
+    Some that do include AC-3, AAC or DTS audio.
+
+    If the channel layout of the media file (i.e. the decoder) and the AO's
+    channel layout don't match, mpv will attempt to insert a conversion filter.
+
+``--audio-delay=<sec>``
+    Audio delay in seconds (positive or negative float value). Positive values
+    delay the audio, and negative values delay the video.
+
 ``--audio-demuxer=<[+]name>``
-    Use this audio demuxer type when using ``--audiofile``. Use a '+' before the
-    name to force it; this will skip some checks. Give the demuxer name as
+    Use this audio demuxer type when using ``--audio-file``. Use a '+' before
+    the name to force it; this will skip some checks. Give the demuxer name as
     printed by ``--audio-demuxer=help``.
 
 ``--audio-display=<no|attachment>``
@@ -257,13 +287,24 @@ OPTIONS
 
     This option has no influence on files with normal video tracks.
 
-``--audiofile=<filename>``
+``--audio-file=<filename>``
     Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
     movie.
 
-``--audiofile-cache=<kBytes>``
-    Enables caching for the stream used by ``--audiofile``, using the
+``--audio-file-cache=<kBytes>``
+    Enables caching for the stream used by ``--audio-file``, using the
     specified amount of memory.
+
+``--audio-format=<format>``
+    Select the sample format used for output from the audio filter layer to
+    the sound card. The values that ``<format>`` can adopt are listed below in
+    the description of the ``format`` audio filter.
+
+``--audio-samplerate=<Hz>``
+    Select the output sample rate to be used (of course sound cards have
+    limits on this). If the sample frequency selected is different from that
+    of the current media, the lavrresample audio filter will be inserted into
+    the audio filter layer to compensate for the difference.
 
 ``--autofit=<[W[xH]]>``
     Set the initial window size to a maximum size specified by ``WxH``, without
@@ -439,32 +480,6 @@ OPTIONS
 ``--cdrom-device=<path>``
     Specify the CD-ROM device (default: ``/dev/cdrom``).
 
-``--channels=<number|layout>``
-    Request a channel layout for audio output (default: stereo). This  will ask
-    the AO to open a device with the given channel layout. It's up to the AO
-    to accept this layout, or to pick a fallback or to error out if the
-    requested layout is not supported.
-
-    The ``--channels`` option either takes a channel number or an explicit
-    channel layout. Channel numbers refer to default layouts, e.g. 2 channels
-    refer to stereo, 6 refers to 5.1.
-
-    See ``--channels=help`` output for defined default layouts. This also
-    lists speaker names, which can be used to express arbitrary channel
-    layouts (e.g. ``fl-fr-lfe`` is 2.1).
-
-    You can use ``--channels=empty`` to disable this. In this case, the AO
-    use the channel layout as the audio filter chain indicates.
-
-    This will also request the channel layout from the decoder. If the decoder
-    does not support the layout, it will fall back to its native channel layout.
-    (You can use ``--ad-lavc-downmix=no`` to make the decoder always output
-    its native layout.) Note that only some decoders support remixing audio.
-    Some that do include AC-3, AAC or DTS audio.
-
-    If the channel layout of the media file (i.e. the decoder) and the AO's
-    channel layout don't match, mpv will attempt to insert a conversion filter.
-
 ``--chapter=<start[-end]>``
     Specify which chapter to start playing at. Optionally specify which
     chapter to end playing at. Also see ``--start``.
@@ -589,10 +604,6 @@ OPTIONS
     If this option is given, the cursor is always visible in windowed mode. In
     fullscreen mode, the cursor is shown or hidden according to
     ``--cursor-autohide``.
-
-``--audio-delay=<sec>``
-    Audio delay in seconds (positive or negative float value). Positive values
-    delay the audio, and negative values delay the video.
 
 ``--deinterlace=<yes|no|auto>``
     Enable or disable interlacing (default: auto, which usually means no).
@@ -847,11 +858,6 @@ OPTIONS
         This option only works if the underlying media supports seeking
         (i.e. not with stdin, pipe, etc).
 
-``--format=<format>``
-    Select the sample format used for output from the audio filter layer to
-    the sound card. The values that ``<format>`` can adopt are listed below in
-    the description of the ``format`` audio filter.
-
 ``--fps=<float>``
     Override video framerate. Useful if the original value is wrong or missing.
 
@@ -969,8 +975,9 @@ OPTIONS
         that if the first file for example has a low sample rate, then the
         following files may get resampled to the same low sample rate, resulting
         in reduced sound quality. If you play files with different parameters,
-        consider using options such as ``--srate`` and ``--format`` to
-        explicitly select what the shared output format will be.
+        consider using options such as ``--audio-samplerate`` and
+        ``--audio-format`` to explicitly select what the shared output format
+        will be.
 
 ``--geometry=<[W[xH]][+-x+-y]>``, ``--geometry=<x:y>``
     Adjust the initial window position or size. ``W`` and ``H`` set the window
@@ -2125,12 +2132,6 @@ OPTIONS
 
 ``--speed=<0.01-100>``
     Slow down or speed up playback by the factor given as parameter.
-
-``--srate=<Hz>``
-    Select the output sample rate to be used (of course sound cards have
-    limits on this). If the sample frequency selected is different from that
-    of the current media, the lavrresample audio filter will be
-    inserted into the audio filter layer to compensate for the difference.
 
 ``--start=<relative time>``
     Seek to given time position.

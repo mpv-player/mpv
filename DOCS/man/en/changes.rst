@@ -150,15 +150,18 @@ Command Line Switches
     ``-ao alsa:device=hw=0.3``  ``--ao=alsa:device=[hw:0,3]``
     ``-ass-bottom-margin``      ``--vf=sub=bottom:top``
     ``-ass``                    ``--sub-ass``
+    ``-audiofile-cache``        ``--audio-file-cache``
+    ``-audiofile``              ``--audio-file``
     ``-benchmark``              ``--untimed`` (no stats)
     ``-capture``                ``--stream-capture=<filename>``
-    ``-channels``               ``--channels`` (changed semantics)
+    ``-channels``               ``--audio-channels`` (changed semantics)
     ``-cursor-autohide-delay``  ``--cursor-autohide``
     ``-delay``                  ``--audio-delay``
     ``-dumpstream``             ``--stream-dump=<filename>``
     ``-endpos``                 ``--length``
     ``-font``                   ``--osd-font``
     ``-forcedsubsonly``         ``--sub-forced-only``
+    ``-format``                 ``--audio-format``
     ``-hardframedrop``          ``--framedrop=hard``
     ``-lavdopts ...``           ``--vd-lavc-...``
     ``-lavfdopts``              ``--demuxer-lavf-...``
@@ -179,6 +182,7 @@ Command Line Switches
     ``-rawaudio ...``           ``--demuxer-rawaudio-...``
     ``-rawvideo ...``           ``--demuxer-rawvideo-...``
     ``-spugauss``               ``--sub-gauss``
+    ``-srate``                  ``--audio-samplerate``
     ``-ss``                     ``--start``
     ``-stop-xscreensaver``      ``--stop-screensaver``
     ``-sub-fuzziness``          ``--sub-auto-match``

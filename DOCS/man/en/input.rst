@@ -822,10 +822,10 @@ Property list
 ``audio-bitrate``
     Audio bitrate. This is probably a very bad guess in most cases.
 
-``samplerate``
+``audio-samplerate``
     Audio samplerate.
 
-``channels``
+``audio-channels``
     Number of audio channels. The OSD value of this property is actually the
     channel layout, while the raw value returns the number of channels only.
 
