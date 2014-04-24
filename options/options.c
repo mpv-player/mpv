@@ -602,8 +602,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
     OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
-    OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
-    OPT_FLAG("mouse-movements", vo.enable_mouse_movements, CONF_GLOBAL),
+    OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
+    OPT_FLAG("input-cursor", vo.enable_mouse_movements, CONF_GLOBAL),
 #if HAVE_TV
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif /* HAVE_TV */
@@ -764,7 +764,7 @@ const struct MPOpts mp_default_opts = {
         .use_lirc = 1,
         .use_alt_gr = 1,
 #if HAVE_COCOA
-        .use_ar = 1,
+        .use_appleremote = 1,
         .use_media_keys = 1,
 #endif
         .default_bindings = 1,

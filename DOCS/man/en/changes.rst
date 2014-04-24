@@ -161,9 +161,14 @@ Command Line Switches
     ``-hardframedrop``          ``--framedrop=hard``
     ``-lavdopts ...``           ``--vd-lavc-...``
     ``-lavfdopts``              ``--demuxer-lavf-...``
+    ``-lircconf``               ``--input-lirc-conf``
     ``-loop 0``                 ``--loop=inf``
     ``-mixer-channel``          AO suboptions (``alsa``, ``oss``)
     ``-mixer``                  AO suboptions (``alsa``, ``oss``)
+    ``-mouse-movements``        ``--input-cursor``
+    ``-noar``                   ``--no-input-appleremote``
+    ``-noconsolecontrols``      ``--no-input-terminal``
+    ``-nojoystick``             ``--no-input-joystick``
     ``-nosound``                ``--no-audio``
     ``-osdlevel``               ``--osd-level``
     ``-panscanrange``           ``--video-zoom``, ``--video-pan-x/y``

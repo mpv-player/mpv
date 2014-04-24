@@ -279,7 +279,7 @@ typedef struct MPOpts {
         char *lirc_configfile;
         int use_lircc;
         int use_alt_gr;
-        int use_ar;
+        int use_appleremote;
         int use_media_keys;
         int default_bindings;
         int test;

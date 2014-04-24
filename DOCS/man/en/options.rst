@@ -97,9 +97,6 @@ OPTIONS
     configuration files specifying a list of fallbacks may make sense. See
     `AUDIO OUTPUT DRIVERS`_ for details and descriptions of available drivers.
 
-``--ar``, ``--no-ar``
-    Enable/disable AppleIR remote support. Enabled by default.
-
 ``--aspect=<ratio>``
     Override movie aspect ratio, in case aspect information is incorrect or
     missing in the file being played. See also ``--no-aspect``.
@@ -574,15 +571,6 @@ OPTIONS
     environment variables (``MPV_HOME``) are also ignored.
 
     Note that the ``--no-config`` option takes precedence over this option.
-
-``--consolecontrols``, ``--no-consolecontrols``
-    ``--no-consolecontrols`` prevents the player from reading key events from
-    standard input. Useful when reading data from standard input. This is
-    automatically enabled when ``-`` is found on the command line. There are
-    situations where you have to set it manually, e.g. if you open
-    ``/dev/stdin`` (or the equivalent on your system), use stdin in a playlist
-    or intend to read from stdin later on via the loadfile or loadlist slave
-    commands.
 
 ``--contrast=<-100-100>``
     Adjust the contrast of the video signal (default: 0). Not supported by all
@@ -1225,23 +1213,21 @@ OPTIONS
     Specify input configuration file other than the default
     ``~/.mpv/input.conf``.
 
-``--input-ar-delay``
-    Delay in milliseconds before we start to autorepeat a key (0 to disable).
-
-``--input-ar-rate``
-    Number of key presses to generate per second on autorepeat.
-
 ``--no-input-default-bindings``
     Disable mpv default (builtin) key bindings.
-
-``--input-keylist``
-    Prints all keys that can be bound to commands.
 
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
 
-``--input-js-dev``
-    Specifies the joystick device to use (default: ``/dev/input/js0``).
+``--input-keylist``
+    Prints all keys that can be bound to commands.
+
+``--input-test``
+    Input test mode. Instead of executing commands on key presses, mpv
+    will show the keys and the bound commands on the OSD. Has to be used
+    with a dummy video, and the normal ways to quit the player will not
+    work (key bindings that normally quit will be shown on OSD only, just
+    like any other binding). See `INPUT.CONF`_.
 
 ``--input-file=<filename>``
     Read commands from the given file. Mostly useful with a FIFO.
@@ -1252,15 +1238,49 @@ OPTIONS
         When the given file is a FIFO mpv opens both ends, so you can do several
         `echo "seek 10" > mp_pipe` and the pipe will stay valid.
 
-``--input-test``
-    Input test mode. Instead of executing commands on key presses, mpv
-    will show the keys and the bound commands on the OSD. Has to be used
-    with a dummy video, and the normal ways to quit the player will not
-    work (key bindings that normally quit will be shown on OSD only, just
-    like any other binding). See `INPUT.CONF`_.
+``--input-terminal``, ``--no-input-terminal``
+    ``--no-input-terminal`` prevents the player from reading key events from
+    standard input. Useful when reading data from standard input. This is
+    automatically enabled when ``-`` is found on the command line. There are
+    situations where you have to set it manually, e.g. if you open
+    ``/dev/stdin`` (or the equivalent on your system), use stdin in a playlist
+    or intend to read from stdin later on via the loadfile or loadlist slave
+    commands.
 
-``--joystick``, ``--no-joystick``
+``--input-appleremote``, ``--no-input-appleremote``
+    Enable/disable AppleIR remote support. Enabled by default.
+
+``--input-ar-delay``
+    Delay in milliseconds before we start to autorepeat a key (0 to disable).
+
+``--input-ar-rate``
+    Number of key presses to generate per second on autorepeat.
+
+``--input-cursor``, ``--no-input-cursor``
+    Permit mpv to receive pointer events reported by the video output
+    driver. Necessary to select the buttons in DVD menus. Supported for
+    X11-based VOs (x11, xv, etc) and the gl, direct3d and corevideo VOs.
+
+``--input-joystick``, ``--no-input-joystick``
     Enable/disable joystick support. Disabled by default.
+
+``--input-js-dev``
+    Specifies the joystick device to use (default: ``/dev/input/js0``).
+
+``--input-lirc``, ``--no-input-lirc``
+    Enable/disable LIRC support. Enabled by default.
+
+``--input-lirc-conf=<filename>``
+    (LIRC only)
+    Specifies a configuration file for LIRC (default: ``~/.lircrc``).
+
+``--input-media-keys``, ``--no-input-media-keys``
+    OSX only: Enabled by default. Enables/disable media keys support.
+
+``--input-right-alt-gr``, ``--no-input-right-alt-gr``
+    (Cocoa and Windows only)
+    Use the right Alt key as Alt Gr to produce special characters. If disabled,
+    count the right Alt as an Alt modifier key. Enabled by default.
 
 ``--no-keepaspect``, ``--keepaspect``
     ``--no-keepaspect`` will always stretch the video to window size, and will
@@ -1291,13 +1311,6 @@ OPTIONS
 ``--length=<relative time>``
     Stop after a given time relative to the start time.
     See ``--start`` for valid option values and examples.
-
-``--lirc``, ``--no-lirc``
-    Enable/disable LIRC support. Enabled by default.
-
-``--lircconf=<filename>``
-    (LIRC only)
-    Specifies a configuration file for LIRC (default: ``~/.lircrc``).
 
 ``--list-options``
     Prints all available options.
@@ -1349,9 +1362,6 @@ OPTIONS
 ``--mc=<seconds/frame>``
     Maximum A-V sync correction per frame (in seconds)
 
-``--media-keys``, ``--no-media-keys``
-      OSX only: Enabled by default. Enables/disable media keys support.
-
 ``--merge-files``
     Pretend that all files passed to mpv are concatenated into a single, big
     file. This uses timeline/EDL support internally. Note that this won't work
@@ -1385,11 +1395,6 @@ OPTIONS
     Set the aspect of a single pixel of your monitor or TV screen (default:
     1). A value of 1 means square pixels (correct for (almost?) all LCDs). See
     also ``--monitoraspect`` and ``--aspect``.
-
-``--mouse-movements``, ``--no-mouse-movements``
-    Permit mpv to receive pointer events reported by the video output
-    driver. Necessary to select the buttons in DVD menus. Supported for
-    X11-based VOs (x11, xv, etc) and the gl, direct3d and corevideo VOs.
 
 ``--no-msgcolor``
     Disable colorful console output on terminals.
@@ -1875,11 +1880,6 @@ OPTIONS
           during playback.
         - ``--reset-on-next-file=all``
           Try to reset all settings that were changed during playback.
-
-``--right-alt-gr``, ``--no-right-alt-gr``
-    (Cocoa and Windows only)
-    Use the right Alt key as Alt Gr to produce special characters. If disabled,
-    count the right Alt as an Alt modifier key. Enabled by default.
 
 ``--rtsp-transport=<lavf|udp|tcp|http>``
     Select RTSP transport method (default: tcp). This selects the underlying
