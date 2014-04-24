@@ -380,7 +380,7 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
     }, {
         'name': '--libpostproc',
         'desc': 'libpostproc',
-        'func': check_pkg_config('libpostproc', '>= 52.0.0'),
+        'func': check_pkg_config('libpostproc', '>= 52.2.100'),
     }, {
         'name': 'avcodec-metadata-update-side-data',
         'desc': 'libavcodec AV_PKT_DATA_METADATA_UPDATE side data type',
