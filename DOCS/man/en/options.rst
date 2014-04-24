@@ -1373,21 +1373,21 @@ OPTIONS
     1). A value of 1 means square pixels (correct for (almost?) all LCDs). See
     also ``--monitoraspect`` and ``--video-aspect``.
 
-``--no-msgcolor``
+``--no-msg-color``
     Disable colorful console output on terminals.
 
-``--msglevel=<module1=level1:module2=level2:...>``
+``--msg-level=<module1=level1:module2=level2:...>``
     Control verbosity directly for each module. The ``all`` module changes the
     verbosity of all the modules not explicitly specified on the command line.
 
-    Run mpv with ``--msglevel=all=trace`` to see all messages mpv outputs. You
+    Run mpv with ``--msg-level=all=trace`` to see all messages mpv outputs. You
     can use the module names printed in the output (prefixed to each line in
     ``[...]``) to limit the output to interesting modules.
 
     .. note::
 
         Some messages are printed before the command line is parsed and are
-        therefore not affected by ``--msglevel``. To control these messages,
+        therefore not affected by ``--msg-level``. To control these messages,
         you have to use the ``MPV_VERBOSE`` environment variable; see
         `ENVIRONMENT VARIABLES`_ for details.
 
@@ -1406,8 +1406,11 @@ OPTIONS
     One special case is the ``identify`` module name. This is silenced by
     default, and can be enabled with the ``-identify`` option.
 
-``--msgmodule``
-    Prepend module name in front of each console message.
+``--msg-module``
+    Prepend module name to each console message.
+
+``--msg-time``
+    Prepend timing information to each console message.
 
 ``--mute=<auto|yes|no>``
     Set startup audio mute status. ``auto`` (default) will not change the mute
@@ -1653,17 +1656,6 @@ OPTIONS
 ``--pause``
     Start the player in paused state.
 
-``--playing-msg=<string>``
-    Print out a string after starting playback. The string is expanded for
-    properties, e.g. ``--playing-msg='file: ${filename}'`` will print the string
-    ``file:`` followed by a space and the currently played filename.
-
-    See `Property Expansion`_.
-
-``--status-msg=<string>``
-    Print out a custom string during playback instead of the standard status
-    line. Expands properties. See `Property Expansion`_.
-
 ``--stream-capture=<filename>``
     Allows capturing the primary stream (not additional audio tracks or other
     kind of streams) into the given file. Capturing can also be started and
@@ -1783,7 +1775,7 @@ OPTIONS
     Particularly useful on slow terminals or broken ones which do not properly
     handle carriage return (i.e. ``\r``).
 
-    Also see ``--really-quiet`` and ``--msglevel``.
+    Also see ``--really-quiet`` and ``--msg-level``.
 
 ``--quvi-fetch-subtitles=<yes|no>``
     Toggles fetching of subtitles from streaming sites with libquvi. Disabled
@@ -2379,6 +2371,17 @@ OPTIONS
     width characters will not be treated correctly.
 
     Default: ``[-+-]``.
+
+``--term-playing-msg=<string>``
+    Print out a string after starting playback. The string is expanded for
+    properties, e.g. ``--playing-msg='file: ${filename}'`` will print the string
+    ``file:`` followed by a space and the currently played filename.
+
+    See `Property Expansion`_.
+
+``--term-status-msg=<string>``
+    Print out a custom string during playback instead of the standard status
+    line. Expands properties. See `Property Expansion`_.
 
 ``--no-terminal``, ``--terminal``
     Disable any use of the terminal and stdin/stdout/stderr. This completely

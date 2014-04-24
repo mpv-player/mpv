@@ -172,6 +172,9 @@ Command Line Switches
     ``-mixer-channel``          AO suboptions (``alsa``, ``oss``)
     ``-mixer``                  AO suboptions (``alsa``, ``oss``)
     ``-mouse-movements``        ``--input-cursor``
+    ``-msgcolor``               ``--msg-color``
+    ``-msglevel``               ``--msg-level`` (changed semantics)
+    ``-msgmodule``              ``--msg-module``
     ``-name``                   ``--x11-name``
     ``-noar``                   ``--no-input-appleremote``
     ``-noautosub``              ``--no-sub-auto``
@@ -180,6 +183,7 @@ Command Line Switches
     ``-nosound``                ``--no-audio``
     ``-osdlevel``               ``--osd-level``
     ``-panscanrange``           ``--video-zoom``, ``--video-pan-x/y``
+    ``-playing-msg``            ``--term-playing-msg``
     ``-pp ...``                 ``'--vf=pp=[...]'``
     ``-pphelp``                 ``--vf=pp:help``
     ``-rawaudio ...``           ``--demuxer-rawaudio-...``

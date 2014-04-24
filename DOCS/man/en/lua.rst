@@ -490,7 +490,7 @@ List of events
     ``prefix``
         The module prefix, identifies the sender of the message. This is what
         the terminal player puts in front of the message text when using the
-        ``--v`` option, and is also what is used for ``--msglevel``.
+        ``--v`` option, and is also what is used for ``--msg-level``.
 
     ``level``
         The log level as string. See ``msg.log`` for possible log level names.

@@ -215,12 +215,12 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),
     OPT_FLAG_STORE("really-quiet", verbose, CONF_GLOBAL | CONF_PRE_PARSE, -10),
     OPT_FLAG("terminal", use_terminal, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_GENERAL(char*, "msglevel", msglevels, CONF_GLOBAL|CONF_PRE_PARSE,
+    OPT_GENERAL(char*, "msg-level", msglevels, CONF_GLOBAL|CONF_PRE_PARSE,
                 .type = &m_option_type_msglevels),
     OPT_STRING("dump-stats", dump_stats, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_FLAG("msgcolor", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_FLAG("msgmodule", msg_module, CONF_GLOBAL),
-    OPT_FLAG("msgtime", msg_time, CONF_GLOBAL),
+    OPT_FLAG("msg-color", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
+    OPT_FLAG("msg-module", msg_module, CONF_GLOBAL),
+    OPT_FLAG("msg-time", msg_time, CONF_GLOBAL),
     OPT_FLAG("identify", msg_identify, CONF_GLOBAL),
 #if HAVE_PRIORITY
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -595,8 +595,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("term-osd-bar", term_osd_bar, 0),
     OPT_STRING("term-osd-bar-chars", term_osd_bar_chars, 0),
 
-    OPT_STRING("playing-msg", playing_msg, 0),
-    OPT_STRING("status-msg", status_msg, 0),
+    OPT_STRING("term-playing-msg", playing_msg, 0),
+    OPT_STRING("term-status-msg", status_msg, 0),
     OPT_STRING("osd-status-msg", osd_status_msg, 0),
 
     OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
