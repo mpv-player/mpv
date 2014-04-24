@@ -659,8 +659,7 @@ static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
     if (dvdnav_set_PGC_positioning_flag(priv->dvdnav, 1) != DVDNAV_STATUS_OK)
         MP_ERR(stream, "stream_dvdnav, failed to set PGC positioning\n");
     /* report the title?! */
-    if (dvdnav_get_title_string(priv->dvdnav, &title_str) == DVDNAV_STATUS_OK)
-        MP_SMODE(stream, "ID_DVD_VOLUME_ID=%s\n", title_str);
+    dvdnav_get_title_string(priv->dvdnav, &title_str);
 
     return priv;
 }
@@ -712,7 +711,6 @@ static int open_s(stream_t *stream, int mode)
                    p->track, dvdnav_err_to_string(priv->dvdnav));
             return STREAM_UNSUPPORTED;
         }
-        MP_SMODE(stream, "ID_DVD_CURRENT_TITLE=%d\n", p->track);
     } else {
         if (dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root) != DVDNAV_STATUS_OK)
             dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);

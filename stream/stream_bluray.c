@@ -747,11 +747,9 @@ static int bluray_stream_open(stream_t *s, int mode)
         b->num_titles = disc_info->num_hdmv_titles + disc_info->num_bdj_titles;
         ++b->num_titles; // for BLURAY_TITLE_TOP_MENU
         ++b->num_titles; // for BLURAY_TITLE_FIRST_PLAY
-        MP_SMODE(s, "ID_BLURAY_TITLES=%d\n", b->num_titles);
     } else {
         /* check for available titles on disc */
         b->num_titles = bd_get_titles(bd, TITLES_RELEVANT, 0);
-        MP_SMODE(s, "ID_BLURAY_TITLES=%d\n", b->num_titles);
         if (!b->num_titles) {
             MP_ERR(s, "Can't find any Blu-ray-compatible title here.\n");
             destruct(b);
@@ -767,10 +765,6 @@ static int bluray_stream_open(stream_t *s, int mode)
 
             const int sec  = ti->duration / 90000;
             const int msec = (ti->duration - sec) % 1000;
-
-            MP_SMODE(s, "ID_BLURAY_TITLE_%d_CHAPTERS=%d\n", i, ti->chapter_count);
-            MP_SMODE(s, "ID_BLURAY_TITLE_%d_ANGLE=%d\n", i, ti->angle_count);
-            MP_SMODE(s, "ID_BLURAY_TITLE_%d_LENGTH=%d.%03d\n", i, sec, msec);
 
             /* try to guess which title may contain the main movie */
             if (ti->duration > max_duration) {
@@ -800,11 +794,6 @@ static int bluray_stream_open(stream_t *s, int mode)
 
     select_initial_title(s, title_guess);
     select_initial_angle(s);
-
-    if (b->current_title >= 0)
-        MP_SMODE(s, "ID_BLURAY_CURRENT_TITLE=%d\n", b->current_title);
-    if (b->current_angle >= 0)
-        MP_SMODE(s, "ID_BLURAY_CURRENT_ANGLE=%d\n", b->current_angle + 1);
 
     if (b->use_nav)
         s->fill_buffer = bdnav_stream_fill_buffer;

@@ -1151,9 +1151,6 @@ OPTIONS
         ``mpv --hwdec=vdpau --vo=vdpau --hwdec-codecs=h264,mpeg2video``
             Enable vdpau decoding for h264 and mpeg2 only.
 
-``--identify``
-    Deprecated. Use ``TOOLS/mpv_identify.sh``.
-
 ``--idle``
     Makes mpv wait idly instead of quitting when there is no file to play.
     Mostly useful in slave mode, where mpv can be controlled through input
@@ -1389,18 +1386,15 @@ OPTIONS
 
     Available levels:
 
-    :no:        complete silence
-    :fatal:     fatal messages only
-    :error:     error messages
-    :warn:      warning messages
-    :info:      informational messages
-    :status:    status messages (default)
-    :v:         verbose messages
-    :debug:     debug messages
-    :trace:     very noisy debug messages
-
-    One special case is the ``identify`` module name. This is silenced by
-    default, and can be enabled with the ``-identify`` option.
+        :no:        complete silence
+        :fatal:     fatal messages only
+        :error:     error messages
+        :warn:      warning messages
+        :info:      informational messages
+        :status:    status messages (default)
+        :v:         verbose messages
+        :debug:     debug messages
+        :trace:     very noisy debug messages
 
 ``--msg-module``
     Prepend module name to each console message.

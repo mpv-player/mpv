@@ -410,7 +410,6 @@ int video_reconfig_filters(struct dec_video *d_video,
     if (abs(p.d_w - p.w) >= 4 || abs(p.d_h - p.h) >= 4) {
         MP_VERBOSE(d_video, "Aspect ratio is %.2f:1 - "
                    "scaling to correct movie aspect.\n", sh->aspect);
-        MP_SMODE(d_video, "ID_VIDEO_ASPECT=%1.4f\n", sh->aspect);
     } else {
         p.d_w = p.w;
         p.d_h = p.h;

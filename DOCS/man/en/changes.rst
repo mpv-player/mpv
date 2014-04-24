@@ -167,6 +167,7 @@ Command Line Switches
     ``-fsmode-dontuse``         (removed)
     ``-fstype``                 ``--x11-fstype``
     ``-hardframedrop``          ``--framedrop=hard``
+    ``-identify``               (removed; use TOOLS/mpv_identify.sh)
     ``-lavdopts ...``           ``--vd-lavc-...``
     ``-lavfdopts``              ``--demuxer-lavf-...``
     ``-lircconf``               ``--input-lirc-conf``

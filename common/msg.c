@@ -48,7 +48,6 @@ struct mp_log_root {
     // --- protected by mp_msg_lock
     char *msglevels;
     bool use_terminal;  // make accesses to stderr/stdout
-    bool smode;         // slave mode compatibility glue
     bool module;
     bool show_time;
     bool termosd;       // use terminal control codes for status line
@@ -107,9 +106,6 @@ static void update_loglevel(struct mp_log *log)
     log->terminal_level = -1;
     if (log->root->use_terminal) {
         log->level = MSGL_STATUS + log->root->verbose; // default log level
-        // Stupid exception for the remains of -identify
-        if (match_mod(log->verbose_prefix, bstr0("identify")))
-            log->level = -1;
         bstr s = bstr0(log->root->msglevels);
         bstr mod;
         int level;
@@ -136,7 +132,7 @@ bool mp_msg_test(struct mp_log *log, int lev)
         return false;
     if (log->reload_counter != log->root->reload_counter)
         update_loglevel(log);
-    return lev <= log->level || (log->root->smode && lev == MSGL_SMODE);
+    return lev <= log->level;
 }
 
 // Reposition cursor and clear lines for outputting the status line. In certain
@@ -232,14 +228,14 @@ static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
     struct mp_log_root *root = log->root;
     FILE *stream = (root->force_stderr || lev == MSGL_STATUS) ? stderr : stdout;
 
-    if (!(lev <= log->terminal_level || (root->smode && lev == MSGL_SMODE)))
+    if (!(lev <= log->terminal_level))
         return;
 
     bool header = root->header;
     const char *prefix = log->prefix;
     char *terminate = NULL;
 
-    if ((lev >= MSGL_V && lev != MSGL_SMODE) || root->verbose || root->module)
+    if ((lev >= MSGL_V) || root->verbose || root->module)
         prefix = log->verbose_prefix;
 
     if (lev == MSGL_STATUS) {
@@ -423,7 +419,6 @@ void mp_msg_update_msglevels(struct mpv_global *global)
 
     root->verbose = opts->verbose;
     root->module = opts->msg_module;
-    root->smode = opts->msg_identify;
     root->use_terminal = opts->use_terminal;
     root->show_time = opts->msg_time;
     if (root->use_terminal) {

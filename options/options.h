@@ -47,7 +47,6 @@ typedef struct MPOpts {
     char *msglevels;
     char *dump_stats;
     int verbose;
-    int msg_identify;
     int msg_color;
     int msg_module;
     int msg_time;

@@ -42,9 +42,8 @@ enum {
     MSGL_DEBUG,     // -v -v
     MSGL_TRACE,     // -v -v -v
     MSGL_STATS,     // dumping fine grained stats (--dump-stats)
-    MSGL_SMODE,     // old slave mode (-identify)
 
-    MSGL_MAX = MSGL_SMODE,
+    MSGL_MAX = MSGL_STATS,
 };
 
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
@@ -77,7 +76,6 @@ bool mp_msg_test(struct mp_log *log, int lev);
 #define MP_VERBOSE(obj, ...)    MP_MSG(obj, MSGL_V, __VA_ARGS__)
 #define MP_DBG(obj, ...)        MP_MSG(obj, MSGL_DEBUG, __VA_ARGS__)
 #define MP_TRACE(obj, ...)      MP_MSG(obj, MSGL_TRACE, __VA_ARGS__)
-#define MP_SMODE(obj, ...)      MP_MSG(obj, MSGL_SMODE, __VA_ARGS__)
 
 // This is a bit special. See TOOLS/stats-conv.py what rules text passed
 // to these functions should follow. Also see --dump-stats.
