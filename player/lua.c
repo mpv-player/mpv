@@ -638,6 +638,7 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
                     format = MPV_FORMAT_NODE_ARRAY;
                 }
             }
+            lua_pop(L, 2);
         }
         if (format == MPV_FORMAT_NONE) {
             // If all keys are integers, and they're in sequence, take it
