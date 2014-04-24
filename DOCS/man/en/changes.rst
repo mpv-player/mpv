@@ -1,10 +1,14 @@
 CHANGES FROM OTHER VERSIONS OF MPLAYER
 ======================================
 
-**mpv** is based on mplayer2, which in turn is based on the original
-MPlayer (also called mplayer, mplayer-svn, mplayer1). Many changes
-have been made. Some changes are incompatible, or completely change how the
-player behaves.
+**mpv** is based on mplayer2, which in turn is based on the original MPlayer
+(also called mplayer, mplayer-svn, mplayer1). Many changes have been made, a
+large part of which is incompatible or completely changes how the player
+behaves. Although there are still many similarities to its ancestors, **mpv**
+should generally be treated as a completely different program.
+
+.. note::
+    These lists are incomplete.
 
 General Changes for MPlayer to mplayer2
 ---------------------------------------
@@ -129,57 +133,61 @@ Command Line Switches
   ``-no-opt``, or better ``--no-opt``.
 * Per-file options are not the default anymore. You can explicitly specify
   file-local options. See ``Usage`` section.
+* Many options have been renamed, removed or changed semantics. Some options
+  that are required for a good playback experience with MPlayer are now
+  superfluous or even worse than the defaults, so make sure to read the manual
+  before trying to use your existing configuration with **mpv**.
 * Table of renamed/replaced switches:
 
     =========================== ========================================
     Old                         New
     =========================== ========================================
     ``-no<opt>``                ``--no-<opt>`` (add a dash)
-    ``-nosound``                ``--no-audio``
-    ``-use-filename-title``     ``--title='${filename}'``
-    ``-loop 0``                 ``--loop=inf``
-    ``-hardframedrop``          ``--framedrop=hard``
-    ``-osdlevel``               ``--osd-level``
-    ``-delay``                  ``--audio-delay``
-    ``-subdelay``               ``--sub-delay``
-    ``-subpos``                 ``--sub-pos``
-    ``-forcedsubsonly``         ``--sub-forced-only``
-    ``-benchmark``              ``--untimed`` (no stats)
-    ``-xineramascreen``         ``--screen`` (different values)
-    ``-ss``                     ``--start``
-    ``-endpos``                 ``--length``
-    ``-cursor-autohide-delay``  ``--cursor-autohide``
-    ``-sub-fuzziness``          ``--autosub-match``
-    ``-subfont``                ``--sub-text-font``
-    ``-font``                   ``--osd-font``
-    ``-subfont-*``              ``--sub-text-*``, ``--osd-*``
-    ``-subfont-text-scale``     ``--sub-scale``
-    ``-spugauss``               ``--sub-gauss``
-    ``-vobsub``                 ``--sub`` (pass the .idx file)
-    ``-ass-bottom-margin``      ``--vf=sub=bottom:top``
-    ``-vc ffh264vdpau`` (etc.)  ``--hwdec=vdpau``
-    ``-ac spdifac3``            ``--ad=spdif:ac3`` (see ``--ad=help``)
-    ``-afm hwac3``              ``--ad=spdif:ac3,spdif:dts``
-    ``-x W``, ``-y H``          ``--geometry=WxH`` + ``--no-keepaspect``
-    ``-xy W``                   ``--autofit=W``
     ``-a52drc level``           ``--ad-lavc-ac3drc=level``
-    ``-dumpstream``             ``--stream-dump=<filename>``
+    ``-ac spdifac3``            ``--ad=spdif:ac3`` (see ``--ad=help``)
+    ``-af volnorm``             ``--af=drc`` (renamed)
+    ``-afm hwac3``              ``--ad=spdif:ac3,spdif:dts``
+    ``-ao alsa:device=hw=0.3``  ``--ao=alsa:device=[hw:0,3]``
+    ``-ass-bottom-margin``      ``--vf=sub=bottom:top``
+    ``-benchmark``              ``--untimed`` (no stats)
     ``-capture``                ``--stream-capture=<filename>``
-    ``-stop-xscreensaver``      ``--stop-screensaver``
-    ``-subfile``                ``--sub``
+    ``-channels``               ``--channels`` (changed semantics)
+    ``-cursor-autohide-delay``  ``--cursor-autohide``
+    ``-delay``                  ``--audio-delay``
+    ``-dumpstream``             ``--stream-dump=<filename>``
+    ``-endpos``                 ``--length``
+    ``-font``                   ``--osd-font``
+    ``-forcedsubsonly``         ``--sub-forced-only``
+    ``-hardframedrop``          ``--framedrop=hard``
     ``-lavdopts ...``           ``--vd-lavc-...``
     ``-lavfdopts``              ``--demuxer-lavf-...``
-    ``-rawaudio ...``           ``--demuxer-rawaudio-...``
-    ``-rawvideo ...``           ``--demuxer-rawvideo-...``
-    ``-mixer``                  AO suboptions (``alsa``, ``oss``)
+    ``-loop 0``                 ``--loop=inf``
     ``-mixer-channel``          AO suboptions (``alsa``, ``oss``)
-    ``-ao alsa:device=hw=0.3``  ``--ao=alsa:device=[hw:0,3]``
-    ``-af volnorm``             ``--af=drc`` (renamed)
-    ``-zoom``                   Inverse available as ``--video-unscaled``
+    ``-mixer``                  AO suboptions (``alsa``, ``oss``)
+    ``-nosound``                ``--no-audio``
+    ``-osdlevel``               ``--osd-level``
     ``-panscanrange``           ``--video-zoom``, ``--video-pan-x/y``
     ``-pp ...``                 ``'--vf=pp=[...]'``
     ``-pphelp``                 ``--vf=pp:help``
-    ``-channels``               ``--channels`` (changed semantics)
+    ``-rawaudio ...``           ``--demuxer-rawaudio-...``
+    ``-rawvideo ...``           ``--demuxer-rawvideo-...``
+    ``-spugauss``               ``--sub-gauss``
+    ``-ss``                     ``--start``
+    ``-stop-xscreensaver``      ``--stop-screensaver``
+    ``-sub-fuzziness``          ``--autosub-match``
+    ``-subdelay``               ``--sub-delay``
+    ``-subfile``                ``--sub``
+    ``-subfont-*``              ``--sub-text-*``, ``--osd-*``
+    ``-subfont-text-scale``     ``--sub-scale``
+    ``-subfont``                ``--sub-text-font``
+    ``-subpos``                 ``--sub-pos``
+    ``-use-filename-title``     ``--title='${filename}'``
+    ``-vc ffh264vdpau`` (etc.)  ``--hwdec=vdpau``
+    ``-vobsub``                 ``--sub`` (pass the .idx file)
+    ``-x W``, ``-y H``          ``--geometry=WxH`` + ``--no-keepaspect``
+    ``-xineramascreen``         ``--screen`` (different values)
+    ``-xy W``                   ``--autofit=W``
+    ``-zoom``                   Inverse available as ``--video-unscaled``
     ``dvdnav://``               ``dvdnav://menu``
     ``dvd://1``                 ``dvd://0`` (0-based offset)
     =========================== ========================================
