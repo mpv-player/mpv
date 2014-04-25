@@ -1290,7 +1290,7 @@ static struct mkv_audio_tag {
     bool parse;
 } mkv_audio_tags[] = {
     { MKV_A_MP2,       0, 0x0055 },
-    { MKV_A_MP3,       0, 0x0055 },
+    { MKV_A_MP3,       0, 0x0055, true },
     { MKV_A_AC3,       1, 0x2000 },
     { MKV_A_EAC3,      1, MP_FOURCC('E', 'A', 'C', '3') },
     { MKV_A_DTS,       0, 0x2001 },
