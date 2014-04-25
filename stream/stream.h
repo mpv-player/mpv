@@ -194,30 +194,6 @@ inline static int stream_read_char(stream_t *s)
            (stream_fill_buffer(s) ? s->buffer[s->buf_pos++] : -256);
 }
 
-inline static unsigned int stream_read_dword(stream_t *s)
-{
-    unsigned int y;
-    y = stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    return y;
-}
-
-inline static uint64_t stream_read_qword(stream_t *s)
-{
-    uint64_t y;
-    y = stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    return y;
-}
-
 unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
                                 int utf16);
 int stream_skip_bom(struct stream *s);
@@ -250,7 +226,6 @@ struct stream *stream_create(const char *url, int flags, struct mpv_global *glob
 struct stream *stream_open(const char *filename, struct mpv_global *global);
 stream_t *open_output_stream(const char *filename, struct mpv_global *global);
 stream_t *open_memory_stream(void *data, int len);
-struct demux_stream;
 
 /// Set the callback to be used by libstream to check for user
 /// interruption during long blocking operations (cache filling, etc).
