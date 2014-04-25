@@ -449,7 +449,9 @@ void vo_flip_page(struct vo *vo, int64_t pts_us, int duration)
 
 void vo_check_events(struct vo *vo)
 {
-    vo_control(vo, VOCTRL_CHECK_EVENTS, NULL);
+    if (vo->config_ok) {
+        vo_control(vo, VOCTRL_CHECK_EVENTS, NULL);
+    }
 }
 
 void vo_seek_reset(struct vo *vo)
