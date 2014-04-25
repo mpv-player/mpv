@@ -1488,6 +1488,7 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 // Return if all done.
 void mp_play_files(struct MPContext *mpctx)
 {
+    mp_input_set_main_thread(mpctx->input);
     mpctx->quit_player_rc = EXIT_NONE;
     for (;;) {
         idle_loop(mpctx);

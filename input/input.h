@@ -219,6 +219,8 @@ bool mp_input_use_alt_gr(struct input_ctx *ictx);
 void mp_input_run_cmd(struct input_ctx *ictx, int def_flags, const char **cmd,
                       const char *location);
 
+void mp_input_set_main_thread(struct input_ctx *ictx);
+
 extern int async_quit_request;
 
 #endif /* MPLAYER_INPUT_H */

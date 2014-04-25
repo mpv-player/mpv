@@ -119,6 +119,8 @@ struct cmd_queue {
 struct input_ctx {
     pthread_mutex_t mutex;
     pthread_cond_t wakeup;
+    pthread_t mainthread;
+    bool mainthread_set;
     struct mp_log *log;
     struct mpv_global *global;
 
@@ -1640,13 +1642,20 @@ static bool test_abort(struct input_ctx *ictx)
     return false;
 }
 
+void mp_input_set_main_thread(struct input_ctx *ictx)
+{
+    ictx->mainthread = pthread_self();
+    ictx->mainthread_set = true;
+}
+
 bool mp_input_check_interrupt(struct input_ctx *ictx)
 {
     input_lock(ictx);
     bool res = test_abort(ictx);
-    if (!res) {
+    if (!res && ictx->mainthread_set &&
+        pthread_equal(ictx->mainthread, pthread_self()) == 0)
+    {
         read_events(ictx, 0);
-        res = test_abort(ictx);
     }
     input_unlock(ictx);
     return res;
