@@ -119,6 +119,12 @@ static int control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
+static int interrupt_cb(void *ctx)
+{
+    struct stream *stream = ctx;
+    return stream_check_interrupt(stream);
+}
+
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
 static int open_f(stream_t *stream, int mode)
@@ -200,7 +206,12 @@ static int open_f(stream_t *stream, int mode)
         av_dict_set(&dict, "headers", cust_headers, 0);
     av_dict_set(&dict, "icy", "1", 0);
 
-    int err = avio_open2(&avio, filename, flags, NULL, &dict);
+    AVIOInterruptCB cb = {
+        .callback = interrupt_cb,
+        .opaque = stream,
+    };
+
+    int err = avio_open2(&avio, filename, flags, &cb, &dict);
     if (err < 0) {
         if (err == AVERROR_PROTOCOL_NOT_FOUND)
             MP_ERR(stream, "[ffmpeg] Protocol not found. Make sure"
