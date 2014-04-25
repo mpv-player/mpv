@@ -101,11 +101,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
                     (mpi->w+7)&(~7),mpi->h,
                     mpi->qscale, mpi->qstride,
                     vf->priv->ppMode[ vf->priv->pp ], vf->priv->context,
-#ifdef PP_PICT_TYPE_QP2
                     mpi->pict_type | (mpi->qscale_type ? PP_PICT_TYPE_QP2 : 0));
-#else
-                    mpi->pict_type);
-#endif
 
     if (dmpi != mpi)
         talloc_free(mpi);
