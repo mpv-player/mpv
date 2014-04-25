@@ -1640,15 +1640,12 @@ static bool test_abort(struct input_ctx *ictx)
     return false;
 }
 
-/**
- * \param time time to wait for an interruption in milliseconds
- */
-int mp_input_check_interrupt(struct input_ctx *ictx, int time)
+bool mp_input_check_interrupt(struct input_ctx *ictx)
 {
     input_lock(ictx);
     bool res = test_abort(ictx);
     if (!res) {
-        read_events(ictx, time);
+        read_events(ictx, 0);
         res = test_abort(ictx);
     }
     input_unlock(ictx);

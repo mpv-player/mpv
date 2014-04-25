@@ -227,14 +227,7 @@ struct stream *stream_open(const char *filename, struct mpv_global *global);
 stream_t *open_output_stream(const char *filename, struct mpv_global *global);
 stream_t *open_memory_stream(void *data, int len);
 
-/// Set the callback to be used by libstream to check for user
-/// interruption during long blocking operations (cache filling, etc).
-struct input_ctx;
-void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
-                                   struct input_ctx *ctx);
-/// Call the interrupt checking callback if there is one and
-/// wait for time milliseconds
-int stream_check_interrupt(int time);
+bool stream_check_interrupt(struct stream *s);
 
 bool stream_manages_timeline(stream_t *s);
 

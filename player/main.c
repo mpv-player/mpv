@@ -347,6 +347,12 @@ struct MPContext *mp_create(void)
     return mpctx;
 }
 
+static int check_stream_interrupt(void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+    return mp_input_check_interrupt(mpctx->input);
+}
+
 static void wakeup_playloop(void *ctx)
 {
     struct MPContext *mpctx = ctx;
@@ -376,7 +382,8 @@ int mp_initialize(struct MPContext *mpctx)
     }
 
     mpctx->input = mp_input_init(mpctx->global);
-    stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+    mpctx->global->stream_interrupt_cb = check_stream_interrupt;
+    mpctx->global->stream_interrupt_cb_ctx = mpctx;
 
     mp_dispatch_set_wakeup_fn(mpctx->dispatch, wakeup_playloop, mpctx);
 

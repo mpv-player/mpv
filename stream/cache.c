@@ -150,7 +150,7 @@ static int64_t mp_clipi64(int64_t val, int64_t min, int64_t max)
 // Returns CACHE_INTERRUPTED if the caller is supposed to abort.
 static int cache_wakeup_and_wait(struct priv *s, double *retry_time)
 {
-    if (stream_check_interrupt(0))
+    if (stream_check_interrupt(s->cache))
         return CACHE_INTERRUPTED;
 
     double start = mp_time_sec();
@@ -702,7 +702,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
 
     // wait until cache is filled at least prefill_init %
     for (;;) {
-        if (stream_check_interrupt(0))
+        if (stream_check_interrupt(cache))
             return 0;
         int64_t fill;
         int idle;

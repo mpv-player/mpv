@@ -209,7 +209,7 @@ void mp_input_wakeup(struct input_ctx *ictx);
 void mp_input_wakeup_nolock(struct input_ctx *ictx);
 
 // Interruptible usleep:  (used by demux)
-int mp_input_check_interrupt(struct input_ctx *ictx, int time);
+bool mp_input_check_interrupt(struct input_ctx *ictx);
 
 // If this returns true, use Right Alt key as Alt Gr to produce special
 // characters. If false, count Right Alt as the modifier Alt key.

@@ -56,10 +56,6 @@ char *cdrom_device = NULL;
 char *dvd_device = NULL;
 int dvd_title = 0;
 
-struct input_ctx;
-static int (*stream_check_interrupt_cb)(struct input_ctx *ctx, int time);
-static struct input_ctx *stream_check_interrupt_ctx;
-
 extern const stream_info_t stream_info_vcd;
 extern const stream_info_t stream_info_cdda;
 extern const stream_info_t stream_info_dvb;
@@ -409,7 +405,7 @@ static int stream_reconnect(stream_t *s)
             sleep_ms = MPMIN(sleep_ms * 2, RECONNECT_SLEEP_MAX_MS);
         }
 
-        if (stream_check_interrupt(0))
+        if (stream_check_interrupt(s))
             return 0;
 
         s->eof = 1;
@@ -757,20 +753,11 @@ void free_stream(stream_t *s)
     talloc_free(s);
 }
 
-void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
-                                   struct input_ctx *ctx)
+bool stream_check_interrupt(struct stream *s)
 {
-    stream_check_interrupt_cb = cb;
-    stream_check_interrupt_ctx = ctx;
-}
-
-int stream_check_interrupt(int time)
-{
-    if (!stream_check_interrupt_cb) {
-        mp_sleep_us(time * 1000);
-        return 0;
-    }
-    return stream_check_interrupt_cb(stream_check_interrupt_ctx, time);
+    if (!s->global || !s->global->stream_interrupt_cb)
+        return false;
+    return s->global->stream_interrupt_cb(s->global->stream_interrupt_cb_ctx);
 }
 
 stream_t *open_memory_stream(void *data, int len)
