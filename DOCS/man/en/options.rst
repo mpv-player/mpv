@@ -1610,10 +1610,10 @@ OPTIONS
 ``--osd-level=<0-3>``
     Specifies which mode the OSD should start in.
 
-    :0: subtitles only
-    :1: volume + seek (default)
-    :2: volume + seek + timer + percentage
-    :3: volume + seek + timer + percentage + total time
+    :0: OSD completely disabled (subtitles only)
+    :1: enabled (shows up only on user interaction)
+    :2: enabled + current time visible by default
+    :3: enabled + ``--osd-status-msg`` (current time and status by default)
 
 ``--osd-margin-x=<size>, --sub-text-margin-x=<size>``
     Left and right screen margin for the OSD/subs in scaled pixels (see
