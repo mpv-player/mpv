@@ -1810,7 +1810,7 @@ static void draw_osd_cb(void *ctx, struct mpgl_osd_part *osd,
 
             // NOTE: the blend color is used with SUBBITMAP_LIBASS only, so it
             //       doesn't matter that we upload garbage for the other formats
-            uint32_t c = b->libass.color;
+            uint32_t c = b->data.libass.color;
             uint8_t color[4] = { c >> 24, (c >> 16) & 0xff,
                                 (c >> 8) & 0xff, 255 - (c & 0xff) };
 

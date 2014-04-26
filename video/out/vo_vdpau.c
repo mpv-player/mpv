@@ -908,7 +908,7 @@ osd_skip_upload:
         target->dest = (VdpRect){b->x, b->y, b->x + b->dw, b->y + b->dh};
         target->color = (VdpColor){1, 1, 1, 1};
         if (imgs->format == SUBBITMAP_LIBASS) {
-            uint32_t color = b->libass.color;
+            uint32_t color = b->data.libass.color;
             target->color.alpha = 1.0 - ((color >> 0) & 0xff) / 255.0;
             target->color.blue  = ((color >>  8) & 0xff) / 255.0;
             target->color.green = ((color >> 16) & 0xff) / 255.0;

@@ -325,7 +325,7 @@ static void draw_legacy_cb(void *pctx, struct sub_bitmaps *imgs)
             struct pos p = osd->packer->result[n];
 
             uint32_t c = imgs->format == SUBBITMAP_LIBASS
-                         ? b->libass.color : 0xFFFFFF00;
+                         ? b->data.libass.color : 0xFFFFFF00;
             uint8_t color[4] = { c >> 24, (c >> 16) & 0xff,
                                  (c >> 8) & 0xff, 255 - (c & 0xff) };
 
