@@ -1622,7 +1622,7 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
             struct pos p = osd->packer->result[n];
 
             D3DCOLOR color = imgs->format == SUBBITMAP_LIBASS
-                             ? ass_to_d3d_color(b->libass.color)
+                             ? ass_to_d3d_color(b->data.libass.color)
                              : D3DCOLOR_ARGB(255, 255, 255, 255);
 
             float x0 = b->x;

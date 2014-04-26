@@ -192,7 +192,7 @@ void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
         struct sub_bitmap *p = &res->parts[res->num_parts];
         p->bitmap = img->bitmap;
         p->stride = img->stride;
-        p->libass.color = img->color;
+        p->data.libass.color = img->color;
         p->dw = p->w = img->w;
         p->dh = p->h = img->h;
         p->x = img->dst_x;

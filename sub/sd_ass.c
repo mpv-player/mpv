@@ -442,7 +442,7 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
 
     for (int n = 0; n < parts->num_parts; n++) {
         struct sub_bitmap *sb = &parts->parts[n];
-        uint32_t color = sb->libass.color;
+        uint32_t color = sb->data.libass.color;
         int r = (color >> 24u) & 0xff;
         int g = (color >> 16u) & 0xff;
         int b = (color >>  8u) & 0xff;
@@ -450,6 +450,6 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
         int c[3] = {r, g, b};
         mp_map_int_color(vs_rgb2yuv, 8, c);
         mp_map_int_color(vs2rgb, 8, c);
-        sb->libass.color = (c[0] << 24u) | (c[1] << 16) | (c[2] << 8) | a;
+        sb->data.libass.color = (c[0] << 24u) | (c[1] << 16) | (c[2] << 8) | a;
     }
 }

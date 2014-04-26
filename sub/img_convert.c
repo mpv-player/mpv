@@ -300,7 +300,7 @@ bool osd_conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
             draw_ass_rgba(s->bitmap, s->w, s->h, s->stride,
                           bmp->bitmap, bmp->stride,
                           s->x - bb.x0, s->y - bb.y0,
-                          s->libass.color);
+                          s->data.libass.color);
         }
     }
 

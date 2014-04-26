@@ -56,7 +56,7 @@ struct sub_bitmap {
         struct {
             uint32_t color;
         } libass;
-    };
+    } data;
 };
 
 struct sub_bitmaps {

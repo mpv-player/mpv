@@ -300,10 +300,10 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
         if (!get_sub_area(bb, temp, sb, &dst, &src_x, &src_y))
             continue;
 
-        int r = (sb->libass.color >> 24) & 0xFF;
-        int g = (sb->libass.color >> 16) & 0xFF;
-        int b = (sb->libass.color >> 8) & 0xFF;
-        int a = 255 - (sb->libass.color & 0xFF);
+        int r = (sb->data.libass.color >> 24) & 0xFF;
+        int g = (sb->data.libass.color >> 16) & 0xFF;
+        int b = (sb->data.libass.color >> 8) & 0xFF;
+        int a = 255 - (sb->data.libass.color & 0xFF);
         int color_yuv[3] = {r, g, b};
         if (dst.flags & MP_IMGFLAG_YUV) {
             mp_map_int_color(rgb2yuv, bits, color_yuv);
