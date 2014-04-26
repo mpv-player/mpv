@@ -1,34 +1,12 @@
 #!/usr/bin/env python
 
 import os
-import re
 import shutil
 import sys
 from optparse import OptionParser
-from textwrap import dedent
 
 def sh(command):
     return os.popen(command).read()
-
-def dylib_lst(input_file):
-    return sh("otool -L %s | grep -e '\t' | awk '{ print $1 }'" % input_file)
-
-sys_re = re.compile("/System")
-exe_re = re.compile("@executable_path")
-binary_name = sys.argv[1]
-
-def is_user_lib(libname, input_file):
-    return not sys_re.match(libname) and \
-           not exe_re.match(libname) and \
-           not "libobjc" in libname and \
-           not "libSystem" in libname and \
-           not "libgcc" in libname and \
-           not os.path.basename(input_file) in libname and \
-           not libname == ''
-
-def user_dylib_lst(input_file):
-    return [lib for lib in dylib_lst(input_file).split("\n") if
-            is_user_lib(lib, input_file)]
 
 def bundle_path(binary_name):
     return "%s.app" % binary_name
@@ -56,51 +34,8 @@ def copy_bundle(binary_name):
 def copy_binary(binary_name):
     shutil.copy(binary_name, target_binary(binary_name))
 
-def run_install_name_tool(target_file, dylib_path, dest_dir, root=True):
-    new_dylib_path = os.path.join("@executable_path", "lib",
-        os.path.basename(dylib_path))
-
-    sh("install_name_tool -change %s %s %s" % \
-        (dylib_path, new_dylib_path, target_file))
-    if root:
-        sh("install_name_tool -id %s %s" % \
-            (new_dylib_path, os.path.join(dest_dir,
-                os.path.basename(dylib_path))))
-
-def cp_dylibs(target_file, dest_dir):
-    for dylib_path in user_dylib_lst(target_file):
-        dylib_dest_path = os.path.join(dest_dir, os.path.basename(dylib_path))
-
-        try:
-            shutil.copy(dylib_path, dylib_dest_path)
-        except IOError:
-            if re.match("dylib$", target_file):
-                reinstall_what = target_file
-            else:
-                reinstall_what = dylib_path
-
-            sys.exit(dedent("""\
-                %s uses library %s which is not available anymore.
-                This is most likely because you uninstalled %s.
-                Please reinstall %s to fix it's dependencies.""" % \
-                   (target_file, dylib_path, dylib_path, reinstall_what) ))
-
-        os.chmod(dylib_dest_path, 0o755)
-        cp_dylibs(dylib_dest_path, dest_dir)
-
-def fix_dylibs_paths(target_file, dest_dir, root=True):
-    for dylib_path in user_dylib_lst(target_file):
-        dylib_dest_path = os.path.join(dest_dir, os.path.basename(dylib_path))
-        run_install_name_tool(target_file, dylib_path, dest_dir, root)
-        fix_dylibs_paths(dylib_dest_path, dest_dir, False)
-
 def apply_plist_template(plist_file, version):
     sh("sed -i -e 's/${VERSION}/%s/g' %s" % (version, plist_file))
-
-def bundle_dependencies(binary_name):
-    lib_bundle_directory = os.path.join(target_directory(binary_name), "lib")
-    cp_dylibs(binary_name, lib_bundle_directory)
-    fix_dylibs_paths(target_binary(binary_name), lib_bundle_directory)
 
 def main():
     version = sh("./version.sh --print").strip()
@@ -128,7 +63,7 @@ def main():
 
     if options.deps:
         print("> bundling dependencies")
-        bundle_dependencies(binary_name)
+        sh(" ".join(["TOOLS/dylib-unhell.py", target_binary(binary_name)]))
 
     print("done.")
 
