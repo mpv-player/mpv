@@ -20,7 +20,7 @@ normal driver parameters.
 
     See ``--ao=help`` for a list of compiled-in audio output drivers. The
     driver ``--ao=alsa`` is preferred. ``--ao=pulse`` is preferred on systems
-    where PulseAudio is forced. On Windows, ``--ao=wasapi`` is preferred,
+    where PulseAudio is used. On Windows, ``--ao=wasapi`` is preferred,
     though it might cause trouble sometimes, in which case ``--ao=dsound``
     should be used. On BSD systems, ``--ao=oss`` or `--ao=sndio`` may work
     (the latter being experimental). On OSX systems, use ``--ao=coreaudio``.
