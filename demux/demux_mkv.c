@@ -1173,6 +1173,7 @@ typedef struct {
     char *id;
     int fourcc;
     int extradata;
+    bool parse;
 } videocodec_info_t;
 
 static const videocodec_info_t vinfo[] = {
@@ -1185,11 +1186,11 @@ static const videocodec_info_t vinfo[] = {
     {MKV_V_MPEG4_AVC, MP_FOURCC('a', 'v', 'c', '1'), 1},
     {MKV_V_THEORA,    MP_FOURCC('t', 'h', 'e', 'o'), 1},
     {MKV_V_VP8,       MP_FOURCC('V', 'P', '8', '0'), 0},
-    {MKV_V_VP9,       MP_FOURCC('V', 'P', '9', '0'), 0},
+    {MKV_V_VP9,       MP_FOURCC('V', 'P', '9', '0'), 0, true},
     {MKV_V_DIRAC,     MP_FOURCC('d', 'r', 'a', 'c'), 0},
     {MKV_V_PRORES,    MP_FOURCC('p', 'r', '0', '0'), 0},
     {MKV_V_HEVC,      MP_FOURCC('H', 'E', 'V', 'C'), 1},
-    {NULL, 0, 0}
+    {0}
 };
 
 static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
@@ -1273,6 +1274,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
                 extradata = track->private_data;
                 extradata_size = track->private_size;
             }
+            track->parse = vi->parse;
             if (!vi->id) {
                 MP_WARN(demuxer, "Unknown/unsupported "
                         "CodecID (%s) or missing/bad CodecPrivate\n"
