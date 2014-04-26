@@ -52,11 +52,9 @@ struct sub_bitmap {
     int x, y;
     int dw, dh;
 
-    union {
-        struct {
-            uint32_t color;
-        } libass;
-    };
+    struct {
+        uint32_t color;
+    } libass;
 };
 
 struct sub_bitmaps {
