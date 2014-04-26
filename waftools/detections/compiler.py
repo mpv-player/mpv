@@ -11,6 +11,11 @@ def __get_cc_env_vars__(cc):
     except Exception:
         return ""
 
+def __test_and_add_flags__(ctx, flags):
+    for flag in flags:
+        ctx.check_cc(cflags=flag, uselib_store="compiler", mandatory=False)
+    ctx.env.CFLAGS += ctx.env.CFLAGS_compiler
+
 def __add_generic_flags__(ctx):
     ctx.env.CFLAGS += ["-D_ISOC99_SOURCE", "-D_GNU_SOURCE",
                        "-D_LARGEFILE_SOURCE", "-D_FILE_OFFSET_BITS=64",
@@ -21,16 +26,17 @@ def __add_generic_flags__(ctx):
         ctx.env.CFLAGS += ['-g']
 
 def __add_gcc_flags__(ctx):
-    ctx.env.CFLAGS += ["-Wundef", "-Wmissing-prototypes", "-Wempty-body",
+    ctx.env.CFLAGS += ["-Wundef", "-Wmissing-prototypes",
                        "-Wno-switch", "-Wno-parentheses", "-Wpointer-arith",
                        "-Wredundant-decls", "-Wno-pointer-sign",
                        "-Werror=implicit-function-declaration",
                        "-Wno-error=deprecated-declarations",
                        "-Wno-error=unused-function" ]
+    __test_and_add_flags__(ctx, ["-Wempty-body"])
 
 def __add_clang_flags__(ctx):
     ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics",
-                       "-Wno-tautological-compare", "-Wempty-body",
+                       "-Wno-tautological-compare",
                        "-Wno-tautological-constant-out-of-range-compare" ]
 
 def __add_mingw_flags__(ctx):
