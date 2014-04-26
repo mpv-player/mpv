@@ -1653,7 +1653,7 @@ bool mp_input_check_interrupt(struct input_ctx *ictx)
     input_lock(ictx);
     bool res = test_abort(ictx);
     if (!res && ictx->mainthread_set &&
-        pthread_equal(ictx->mainthread, pthread_self()) == 0)
+        pthread_equal(ictx->mainthread, pthread_self()))
     {
         read_events(ictx, 0);
     }
