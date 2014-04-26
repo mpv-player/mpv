@@ -206,7 +206,7 @@ Available audio output drivers are:
 
     .. note:: Completely useless, unless you intend to run RSound. Not to be
               confused with RoarAudio, which is something completely
-              differently.
+              different.
 
     ``host=<name/path>``
         Set the address of the server (default: localhost).  Can be either a
