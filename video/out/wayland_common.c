@@ -112,43 +112,6 @@ static const struct mp_keymap keymap[] = {
 
 /** Wayland listeners **/
 
-static void display_handle_error(void *data,
-                                 struct wl_display *display,
-                                 void *object_id,
-                                 uint32_t code,
-                                 const char *message)
-{
-    struct vo_wayland_state *wl = data;
-    const char * error_type_msg = "";
-
-    switch (code) {
-    case WL_DISPLAY_ERROR_INVALID_OBJECT:
-        error_type_msg = "Invalid object";
-        break;
-    case WL_DISPLAY_ERROR_INVALID_METHOD:
-        error_type_msg = "Invalid method";
-        break;
-    case WL_DISPLAY_ERROR_NO_MEMORY:
-        error_type_msg = "No memory";
-        break;
-    }
-
-    MP_ERR(wl, "%s: %s\n", error_type_msg, message);
-}
-
-static void display_handle_delete_id(void *data,
-                                     struct wl_display *display,
-                                     uint32_t id)
-{
-    struct vo_wayland_state *wl = data;
-    MP_DBG(wl, "Object %u deleted\n", id);
-}
-
-static const struct wl_display_listener display_listener = {
-    display_handle_error,
-    display_handle_delete_id
-};
-
 static void ssurface_handle_ping(void *data,
                                  struct wl_shell_surface *shell_surface,
                                  uint32_t serial)
@@ -752,8 +715,6 @@ static bool create_display (struct vo_wayland_state *wl)
 
         return false;
     }
-
-    wl_display_add_listener(wl->display.display, &display_listener, wl);
 
     wl->display.registry = wl_display_get_registry(wl->display.display);
     wl_registry_add_listener(wl->display.registry, &registry_listener, wl);
