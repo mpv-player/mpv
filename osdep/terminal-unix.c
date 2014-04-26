@@ -518,7 +518,7 @@ static int setsigaction(int signo, void (*handler) (int),
     else
         sigemptyset(&sa.sa_mask);
 
-    sa.sa_flags = flags;
+    sa.sa_flags = flags | SA_RESTART;
     return sigaction(signo, &sa, NULL);
 }
 
