@@ -511,6 +511,7 @@ static void macosx_finder_args_preinit(int *argc, char ***argv)
         static char *cocoa_argv[] = {
             "mpv",
             "--quiet",
+            "--keep-open",
             "--idle",
         };
 
