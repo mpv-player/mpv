@@ -379,7 +379,10 @@ static NSApplicationActivationPolicy activation_policy_from_app_style(int app_st
                             "Please report this issue to a developer.\n");
             // Fall through to auto case
         case 0: // --app-style=auto
-            return NSApplicationActivationPolicyRegular;
+            if(mpv_shared_app().bundleStartedFromFinder)
+                return NSApplicationActivationPolicyRegular;
+            else
+                return NSApplicationActivationPolicyAccessory;
     }
 }
 
