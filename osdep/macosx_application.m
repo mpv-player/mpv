@@ -177,7 +177,6 @@ Application *mpv_shared_app(void)
     }
 }
 
-
 - (void)registerMenuItem:(NSMenuItem*)menuItem forKey:(MPMenuKey)key
 {
     [self.menuItems setObject:menuItem forKey:[NSNumber numberWithInt:key]];
@@ -214,10 +213,6 @@ Application *mpv_shared_app(void)
     [item setSubmenu:child];
     [parent addItem:item];
     return [item autorelease];
-}
-
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)theApp {
-    return NSTerminateNow;
 }
 
 - (void)handleQuitEvent:(NSAppleEventDescriptor*)e
@@ -277,6 +272,8 @@ Application *mpv_shared_app(void)
 
 - (void)handleFilesArray:(NSArray *)files
 {
+    if(!self.inputContext)
+        return;
     size_t num_files  = [files count];
     char **files_utf8 = talloc_array(NULL, char*, num_files);
     [files enumerateObjectsUsingBlock:^(id obj, NSUInteger i, BOOL *_){
@@ -310,6 +307,7 @@ static void *playback_thread(void *ctx_obj)
     }
 }
 
+static void macosx_finder_args_preinit(int *argc, char ***argv);
 int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
 {
     @autoreleasepool {
@@ -339,9 +337,19 @@ int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
     }
 }
 
-void cocoa_register_menu_item_action(MPMenuKey key, void* action)
+static const char macosx_icon[] =
+#include "osdep/macosx_icon.inc"
+;
+
+static void set_application_icon()
 {
-    [NSApp registerSelector:(SEL)action forKey:key];
+    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
+                                             length:sizeof(macosx_icon)
+                                       freeWhenDone:NO];
+    NSImage *icon = [[NSImage alloc] initWithData:icon_data];
+    [NSApp setApplicationIconImage:icon];
+    [icon release];
+    [icon_data release];
 }
 
 void init_cocoa_application(void)
@@ -420,11 +428,10 @@ static void macosx_redirect_output_to_logfile(const char *filename)
 
 static void get_system_version(int* major, int* minor, int* bugfix)
 {
-    static dispatch_once_t once_token;
     static int s_major  = 0;
     static int s_minor  = 0;
     static int s_bugfix = 0;
-    dispatch_once(&once_token, ^{
+    if (!s_major && !s_minor && !s_bugfix) {
         NSString *version_plist =
             @"/System/Library/CoreServices/SystemVersion.plist";
         NSString *version_string =
@@ -438,7 +445,7 @@ static void get_system_version(int* major, int* minor, int* bugfix)
             s_minor = [versions[1] intValue];
         if (count >= 3)
             s_bugfix = [versions[2] intValue];
-    });
+    }
     *major  = s_major;
     *minor  = s_minor;
     *bugfix = s_bugfix;
@@ -446,8 +453,7 @@ static void get_system_version(int* major, int* minor, int* bugfix)
 
 static bool is_psn_argument(char *psn_arg_to_check)
 {
-    NSString *psn_arg = [NSString stringWithUTF8String:psn_arg_to_check];
-    return [psn_arg hasPrefix:@"-psn_"];
+    return strncmp(psn_arg_to_check, "-psn_", 5) == 0;
 }
 
 static bool bundle_started_from_finder(int argc, char **argv)
@@ -467,22 +473,7 @@ static bool bundle_started_from_finder(int argc, char **argv)
     }
 }
 
-static const char macosx_icon[] =
-#include "osdep/macosx_icon.inc"
-;
-
-static void set_application_icon(NSApplication *app)
-{
-    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
-                                             length:sizeof(macosx_icon)
-                                       freeWhenDone:NO];
-    NSImage *icon = [[NSImage alloc] initWithData:icon_data];
-    [app setApplicationIconImage:icon];
-    [icon release];
-    [icon_data release];
-}
-
-void macosx_finder_args_preinit(int *argc, char ***argv)
+static void macosx_finder_args_preinit(int *argc, char ***argv)
 {
     Application *app = mpv_shared_app();
 
@@ -509,4 +500,9 @@ void macosx_finder_args_preinit(int *argc, char ***argv)
             [app.argumentsList addObject:arg];
         }
     }
+}
+
+void cocoa_register_menu_item_action(MPMenuKey key, void* action)
+{
+    [NSApp registerSelector:(SEL)action forKey:key];
 }

@@ -48,6 +48,4 @@ void cocoa_post_fake_event(void);
 
 void cocoa_set_input_context(struct input_ctx *input_context);
 
-void macosx_finder_args_preinit(int *argc, char ***argv);
-
 #endif /* MPV_MACOSX_APPLICATION */
