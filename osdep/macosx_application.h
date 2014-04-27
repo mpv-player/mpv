@@ -19,7 +19,8 @@
 #ifndef MPV_MACOSX_APPLICATION
 #define MPV_MACOSX_APPLICATION
 
-struct input_ctx;
+#include "options/options.h"
+#include "input/input.h"
 
 typedef int (*mpv_main_fn)(int, char**);
 
@@ -35,17 +36,19 @@ typedef enum {
 // multithreaded wrapper for mpv_main
 int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[]);
 
-void cocoa_register_menu_item_action(MPMenuKey key, void* action);
+// Initialization that comes after mpv's initialization.
+// Note that inputCtx needs to remain valid up until terminate_cocoa_application()
+// is called, but the reference to *opts is not kept.
+void init_cocoa_application(const struct MPOpts *opts, struct input_ctx *inputCtx);
 
-// initializes Cocoa application
-void init_cocoa_application(void);
+// Ends the application (if its running)
+// * App will no longer use the inputCtx provided with init_cocoa_application()
+// * mpv should exit via cocoa_exit soon afterwards.
 void terminate_cocoa_application(void);
 
-// Runs the Cocoa Main Event Loop
-void cocoa_run_runloop(void);
-void cocoa_stop_runloop(void);
-void cocoa_post_fake_event(void);
+// mpv should use this instead of exit() when running wrapped by cocoa_main()
+void MP_NORETURN cocoa_exit(int);
 
-void cocoa_set_input_context(struct input_ctx *input_context);
+void cocoa_register_menu_item_action(MPMenuKey key, void* action);
 
 #endif /* MPV_MACOSX_APPLICATION */

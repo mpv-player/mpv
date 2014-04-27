@@ -161,7 +161,8 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     int rc;
 
 #if HAVE_COCOA
-    cocoa_set_input_context(NULL);
+    if (mpctx->is_cplayer)
+        terminate_cocoa_application();
 #endif
 
     if (how != EXIT_NONE) {
@@ -201,10 +202,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     mp_destroy(mpctx);
 
 #if HAVE_COCOA
-    terminate_cocoa_application();
-    // never reach here:
-    // terminate calls exit itself, just silence compiler warning
-    exit(0);
+    cocoa_exit(rc);
 #else
     exit(rc);
 #endif
@@ -429,7 +427,7 @@ int mp_initialize(struct MPContext *mpctx)
 
 #if HAVE_COCOA
     if (mpctx->is_cplayer)
-        cocoa_set_input_context(mpctx->input);
+        init_cocoa_application(mpctx->opts, mpctx->input);
 #endif
 
     if (opts->force_vo) {

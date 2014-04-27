@@ -32,6 +32,30 @@
 
 static pthread_t playback_thread_id;
 
+// Give the cocoa thread and explicit state WRT the mpv thread.
+// The app state passes monotonically through these states.
+enum ApplicationState {
+    ApplicationInitialState = 0, // Before cocoa_main
+    ApplicationMPVInitState,     // Waiting for MPV to call init_cocoa_application.
+    ApplicationInitializedState, // cocoa_main can call [NSApp run] now.
+    ApplicationLaunchingState,   // cocoa_main has called/will call [NSApp run].
+    ApplicationRunningState,     // applicationDidFinishLaunching was received
+    ApplicationMPVTermState,     // terminate_cocoa_application called, waiting for cocoa_exit
+    ApplicationExitingState,     // Exit is imminent.
+} application_state = 0;
+
+static pthread_mutex_t app_state_mutex;
+static pthread_cond_t  app_state_cond;
+
+// Caller should almost certainly be holding app_state_mutex.
+static void stepAppState(enum ApplicationState currentState,
+                         enum ApplicationState targetState)
+{
+    assert(application_state == currentState);
+    application_state = targetState;
+    pthread_cond_broadcast(&app_state_cond);
+}
+
 @interface Application (PrivateMethods)
 - (NSMenuItem *)menuItemWithParent:(NSMenu *)parent
                              title:(NSString *)title
@@ -44,7 +68,6 @@ static pthread_t playback_thread_id;
 - (NSMenu *)appleMenuWithMainMenu:(NSMenu *)mainMenu;
 - (NSMenu *)movieMenu;
 - (NSMenu *)windowMenu;
-- (void)handleFiles;
 @end
 
 @interface NSApplication (NiblessAdditions)
@@ -57,14 +80,6 @@ Application *mpv_shared_app(void)
 }
 
 @implementation Application
-@synthesize files = _files;
-@synthesize argumentsList = _arguments_list;
-@synthesize willStopOnOpenEvent = _will_stop_on_open_event;
-
-@synthesize inputContext = _input_context;
-@synthesize eventsResponder = _events_responder;
-@synthesize menuItems = _menu_items;
-@synthesize input_ready = _input_ready;
 
 - (void)sendEvent:(NSEvent *)event
 {
@@ -77,12 +92,8 @@ Application *mpv_shared_app(void)
 - (id)init
 {
     if (self = [super init]) {
-        self.menuItems = [[[NSMutableDictionary alloc] init] autorelease];
-        self.files = nil;
-        self.argumentsList = [[[NSMutableArray alloc] init] autorelease];
-        self.eventsResponder = [[[EventsResponder alloc] init] autorelease];
-        self.willStopOnOpenEvent = NO;
-        self.input_ready = [[[NSCondition alloc] init] autorelease];
+        self.menuItems = [NSMutableDictionary dictionary];
+        self.eventsResponder = [EventsResponder new];
 
         [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask|NSKeyUpMask
                                               handler:^(NSEvent *event) {
@@ -104,7 +115,17 @@ Application *mpv_shared_app(void)
     NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
     [em removeEventHandlerForEventClass:kInternetEventClass
                              andEventID:kAEGetURL];
+
+    self.eventsResponder = nil;
+    self.menuItems = nil;
     [super dealloc];
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+{
+    pthread_mutex_lock(&app_state_mutex);
+    stepAppState(ApplicationLaunchingState, ApplicationRunningState);
+    pthread_mutex_unlock(&app_state_mutex);
 }
 
 #define _R(P, T, E, K) \
@@ -232,43 +253,21 @@ Application *mpv_shared_app(void)
                    options:NSAnchoredSearch
                      range:NSMakeRange(0, [MPV_PROTOCOL length])];
 
-    self.files = @[url];
-
-    if (self.willStopOnOpenEvent) {
-        self.willStopOnOpenEvent = NO;
-        cocoa_stop_runloop();
-    } else {
-        [self handleFiles];
-    }
+    [self handleFilesArray:@[url]];
 }
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
 {
-    Application *app = mpv_shared_app();
-    NSMutableArray *filesToOpen = [[[NSMutableArray alloc] init] autorelease];
+    if(application_state >= ApplicationMPVTermState)
+        return;
 
-    [filenames enumerateObjectsUsingBlock:^(id obj, NSUInteger i, BOOL *_) {
-        NSInteger place = [app.argumentsList indexOfObject:obj];
-        if (place == NSNotFound) {
-            // Proper new event ^_^
-            [filesToOpen addObject:obj];
-        } else {
-            // This file was already opened from the CLI. Cocoa is trying to
-            // open it again using events. Ignore it!
-            [app.argumentsList removeObjectAtIndex:place];
-        }
-    }];
+    // Cocoa likes to re-send events for CLI arguments. Ignore them!
+    if(!self.bundleStartedFromFinder && application_state < ApplicationRunningState)
+        return;
 
-    SEL cmpsel = @selector(localizedStandardCompare:);
-    self.files = [filesToOpen sortedArrayUsingSelector:cmpsel];
-    if (self.willStopOnOpenEvent) {
-        self.willStopOnOpenEvent = NO;
-        cocoa_stop_runloop();
-    } else {
-        [self handleFiles];
-    }
+    NSArray *files = [filenames sortedArrayUsingSelector:@selector(localizedStandardCompare:)];
+    [self handleFilesArray:files];
 }
-
 
 - (void)handleFilesArray:(NSArray *)files
 {
@@ -285,10 +284,6 @@ Application *mpv_shared_app(void)
     talloc_free(files_utf8);
 }
 
-- (void)handleFiles
-{
-    [self handleFilesArray:self.files];
-}
 @end
 
 struct playback_thread_ctx {
@@ -301,40 +296,62 @@ static void *playback_thread(void *ctx_obj)
 {
     @autoreleasepool {
         struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
-        ctx->mpv_main(*ctx->argc, *ctx->argv);
-        cocoa_stop_runloop();
-        pthread_exit(NULL);
+        int status = ctx->mpv_main(*ctx->argc, *ctx->argv);
+        cocoa_exit(status);
     }
 }
 
 static void macosx_finder_args_preinit(int *argc, char ***argv);
 int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
 {
+    pthread_mutex_init(&app_state_mutex, NULL);
+    pthread_cond_init(&app_state_cond, NULL);
+
     @autoreleasepool {
-        struct playback_thread_ctx ctx = {0};
-        ctx.mpv_main = mpv_main;
-        ctx.argc     = &argc;
-        ctx.argv     = &argv;
+        NSApp = mpv_shared_app();
+        [NSApp setDelegate:NSApp];
+        [NSApp initialize_menu];
 
-        init_cocoa_application();
         macosx_finder_args_preinit(&argc, &argv);
-        pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
-
-        [mpv_shared_app().input_ready lock];
-        while (!mpv_shared_app().inputContext)
-            [mpv_shared_app().input_ready wait];
-        [mpv_shared_app().input_ready unlock];
-
-        cocoa_run_runloop();
-
-        // This should never be reached: cocoa_run_runloop blocks until the
-        // process is quit
-        fprintf(stderr, "There was either a problem "
-                "initializing Cocoa or the Runloop was stopped unexpectedly. "
-                "Please report this issues to a developer.\n");
-        pthread_join(playback_thread_id, NULL);
-        return 1;
     }
+
+    struct playback_thread_ctx ctx = {
+        .mpv_main = mpv_main,
+        .argc     = &argc,
+        .argv     = &argv,
+    };
+
+    stepAppState(ApplicationInitialState, ApplicationMPVInitState);
+    pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
+
+    pthread_mutex_lock(&app_state_mutex);
+    while (application_state < ApplicationInitializedState)
+        pthread_cond_wait(&app_state_cond, &app_state_mutex);
+
+    if(application_state == ApplicationExitingState) {
+        // cocoa_exit was called before we've even really started
+        pthread_mutex_unlock(&app_state_mutex);
+        pthread_join(playback_thread_id, NULL);
+
+        // This is unreachable, since the playback thread that we're joining
+        // with has called cocoa_exit, which at this point in time* certainly
+        // results in an exit() call.
+        // * i.e. before the "stepAppState()" below has been run.
+        fprintf(stderr, "The main Cocoa thread expected to be terminated and wasn't.\n"
+                        "Please report this issue to a developer.\n");
+        exit(1);
+    }
+
+    stepAppState(ApplicationInitializedState, ApplicationLaunchingState);
+    pthread_mutex_unlock(&app_state_mutex);
+
+    @autoreleasepool {
+        [NSApp run];
+    }
+
+    fprintf(stderr, "The Cocoa runloop was stopped unexpectedly.\n"
+                    "Please report this issue to a developer.\n");
+    exit(1);
 }
 
 static const char macosx_icon[] =
@@ -351,68 +368,77 @@ static void set_application_icon()
     [icon release];
 }
 
-void init_cocoa_application(void)
+void init_cocoa_application(const struct MPOpts *opts, struct input_ctx *inputCtx)
 {
-    NSApp = mpv_shared_app();
-    [NSApp setDelegate:NSApp];
-    [NSApp initialize_menu];
-    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-
-    atexit_b(^{
-        // Because activation policy has just been set to behave like a real
-        // application, that policy must be reset on exit to prevent, among
-        // other things, the menubar created here from remaining on screen.
-        [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
-    });
+    // *opts does not persist for the whole cocoa lifetime, so the opts pointer
+    // must not be kept past the scope of this function! Any information from it
+    // that is needed later should be copied out.
+    @autoreleasepool {
+        mpv_shared_app().inputContext = inputCtx;
+        [NSApp setActivationPolicy: NSApplicationActivationPolicyRegular];
+        set_application_icon();
+    }
+    pthread_mutex_lock(&app_state_mutex);
+    stepAppState(ApplicationMPVInitState, ApplicationInitializedState);
+    pthread_mutex_unlock(&app_state_mutex);
 }
 
-void terminate_cocoa_application(void)
+void terminate_cocoa_application()
 {
-    [NSApp hide:NSApp];
-    [NSApp terminate:NSApp];
+    pthread_mutex_lock(&app_state_mutex);
+    if (application_state < ApplicationInitializedState) {
+        pthread_mutex_unlock(&app_state_mutex);
+        return;
+    }
+
+    // If terminate is called right after init, the cocoa app may not have started yet.
+    while (application_state < ApplicationRunningState)
+        pthread_cond_wait(&app_state_cond, &app_state_mutex);
+
+    @autoreleasepool {
+        Application *app = mpv_shared_app();
+        app.inputContext = NULL;
+        [app hide:nil];
+    }
+
+    stepAppState(ApplicationRunningState, ApplicationMPVTermState);
+    pthread_mutex_unlock(&app_state_mutex);
 }
 
-void cocoa_run_runloop()
+void cocoa_exit(int status)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    [NSApp run];
-    [pool drain];
-}
+    if (application_state == ApplicationInitialState) {
+        exit(status);
+    }
 
-void cocoa_stop_runloop(void)
-{
-    [NSApp performSelectorOnMainThread:@selector(stop:)
-                            withObject:nil
-                         waitUntilDone:true];
-    cocoa_post_fake_event();
-}
+    pthread_mutex_lock(&app_state_mutex);
+    if (application_state < ApplicationLaunchingState) {
+        application_state = ApplicationExitingState;
+        pthread_cond_broadcast(&app_state_cond);
+        pthread_mutex_unlock(&app_state_mutex);
+        exit(status);
+    }
 
-void cocoa_set_input_context(struct input_ctx *input_context)
-{
-    [mpv_shared_app().input_ready lock];
-    mpv_shared_app().inputContext = input_context;
-    [mpv_shared_app().input_ready signal];
-    [mpv_shared_app().input_ready unlock];
-}
+    if (application_state < ApplicationMPVTermState) {
+        pthread_mutex_unlock(&app_state_mutex);
+        terminate_cocoa_application();
+        pthread_mutex_lock(&app_state_mutex);
+    }
 
-void cocoa_post_fake_event(void)
-{
-    NSEvent* event = [NSEvent otherEventWithType:NSApplicationDefined
-                                        location:NSMakePoint(0,0)
-                                   modifierFlags:0
-                                       timestamp:0.0
-                                    windowNumber:0
-                                         context:nil
-                                         subtype:0
-                                           data1:0
-                                           data2:0];
-    [NSApp postEvent:event atStart:NO];
-}
+    if (application_state < ApplicationExitingState) {
+        stepAppState(ApplicationMPVTermState, ApplicationExitingState);
+    }
+    pthread_mutex_unlock(&app_state_mutex);
 
-static void macosx_wait_fileopen_events()
-{
-    mpv_shared_app().willStopOnOpenEvent = YES;
-    cocoa_run_runloop(); // block until done
+    @autoreleasepool {
+        Application *app = mpv_shared_app();
+        if (app.bundleStartedFromFinder) {
+            [app terminate:app];
+            pthread_exit(NULL);
+        }
+    }
+
+    exit(status);
 }
 
 static void macosx_redirect_output_to_logfile(const char *filename)
@@ -476,28 +502,20 @@ static void macosx_finder_args_preinit(int *argc, char ***argv)
 {
     Application *app = mpv_shared_app();
 
-    if (bundle_started_from_finder(*argc, *argv)) {
-        macosx_redirect_output_to_logfile("mpv");
-        macosx_wait_fileopen_events();
-
-        char **cocoa_argv = talloc_zero_array(NULL, char*, [app.files count] + 2);
-        cocoa_argv[0]     = "mpv";
-        cocoa_argv[1]     = "--quiet";
-        int  cocoa_argc   = 2;
-
-        for (NSString *filename in app.files) {
-            cocoa_argv[cocoa_argc] = (char*)[filename UTF8String];
-            cocoa_argc++;
-        }
-
-        *argc = cocoa_argc;
-        *argv = cocoa_argv;
+    if (!bundle_started_from_finder(*argc, *argv)) {
+        app.bundleStartedFromFinder = NO;
     } else {
-        set_application_icon(app);
-        for (int i = 0; i < *argc; i++ ) {
-            NSString *arg = [NSString stringWithUTF8String:(*argv)[i]];
-            [app.argumentsList addObject:arg];
-        }
+        app.bundleStartedFromFinder = YES;
+        macosx_redirect_output_to_logfile("mpv");
+
+        static char *cocoa_argv[] = {
+            "mpv",
+            "--quiet",
+            "--idle",
+        };
+
+        *argc = sizeof(cocoa_argv)/sizeof(*cocoa_argv);
+        *argv = cocoa_argv;
     }
 }
 

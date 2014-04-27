@@ -38,13 +38,10 @@
 - (void)stopPlayback;
 - (void)handleFilesArray:(NSArray *)files;
 
-@property(nonatomic, assign) struct input_ctx *inputContext;
+@property(nonatomic, assign) void *inputContext;
 @property(nonatomic, retain) EventsResponder *eventsResponder;
 @property(nonatomic, retain) NSMutableDictionary *menuItems;
-@property(nonatomic, retain) NSArray *files;
-@property(nonatomic, retain) NSMutableArray *argumentsList;
-@property(nonatomic, assign) BOOL willStopOnOpenEvent;
-@property(nonatomic, retain) NSCondition *input_ready;
+@property(nonatomic, assign) BOOL bundleStartedFromFinder;
 @end
 
 Application *mpv_shared_app(void);
