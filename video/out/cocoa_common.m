@@ -315,7 +315,6 @@ static void create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     if (opts->native_fs) {
         [s->window setCollectionBehavior:
             NSWindowCollectionBehaviorFullScreenPrimary];
-        [NSApp setPresentationOptions:NSFullScreenWindowMask];
     }
 }
 
@@ -552,8 +551,6 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     if (s->icc_fs_profile_path != s->icc_wnd_profile_path)
         s->icc_profile_path_changed = true;
 
-    [s->window didChangeFullScreenState];
-
     // Make the core aware of the view size change.
     resize_window(vo);
 }
@@ -685,22 +682,22 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
         int *s = arg;
-        vo->cocoa->inside_sync_section = true;
         dispatch_sync(dispatch_get_main_queue(), ^{
+            vo->cocoa->inside_sync_section = true;
             NSSize size = [vo->cocoa->view frame].size;
             s[0] = size.width;
             s[1] = size.height;
+            vo->cocoa->inside_sync_section = false;
         });
-        vo->cocoa->inside_sync_section = false;
         return VO_TRUE;
     }
     case VOCTRL_SET_WINDOW_SIZE: {
-        vo->cocoa->inside_sync_section = true;
         dispatch_sync(dispatch_get_main_queue(), ^{
+            vo->cocoa->inside_sync_section = true;
             int *s = arg;
-            [vo->cocoa->window queueNewVideoSize:(NSSize){s[0], s[1]}];
+            [vo->cocoa->window queueNewVideoSize:NSMakeSize(s[0], s[1])];
+            vo->cocoa->inside_sync_section = false;
         });
-        vo->cocoa->inside_sync_section = false;
         return VO_TRUE;
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:
@@ -791,9 +788,10 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (void)putCommand:(char*)cmd
 {
-    mp_cmd_t *cmdt = mp_input_parse_cmd(self.vout->input_ctx, bstr0(cmd), "");
+    char *cmd_ = ta_strdup(NULL, cmd);
+    mp_cmd_t *cmdt = mp_input_parse_cmd(self.vout->input_ctx, bstr0(cmd_), "");
     mp_input_queue_cmd(self.vout->input_ctx, cmdt);
-    ta_free(cmd);
+    ta_free(cmd_);
 }
 
 - (void)performAsyncResize:(NSSize)size {
