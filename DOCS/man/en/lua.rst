@@ -533,3 +533,6 @@ List of events
 
 ``metadata-update``
     Metadata (like file tags) was updated.
+
+``chapter-change``
+    The current chapter possibly changed.

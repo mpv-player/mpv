@@ -1317,6 +1317,7 @@ static const char *event_table[] = {
     [MPV_EVENT_SEEK] = "seek",
     [MPV_EVENT_PLAYBACK_RESTART] = "playback-restart",
     [MPV_EVENT_PROPERTY_CHANGE] = "property-change",
+    [MPV_EVENT_CHAPTER_CHANGE] = "chapter-change",
 };
 
 const char *mpv_event_name(mpv_event_id event)

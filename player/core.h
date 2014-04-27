@@ -276,6 +276,8 @@ typedef struct MPContext {
     // Video PTS, or audio PTS if video has ended.
     double playback_pts;
 
+    int last_chapter;
+
     // History of video frames timestamps that were queued in the VO
     // This includes even skipped frames during hr-seek
     double vo_pts_history_pts[MAX_NUM_VO_PTS];

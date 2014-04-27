@@ -2443,6 +2443,7 @@ const char **mp_event_property_change[] = {
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata"),
+    E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
 };
 #undef E
 

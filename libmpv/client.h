@@ -913,7 +913,11 @@ typedef enum mpv_event_id {
      * Event sent due to mpv_observe_property().
      * See also mpv_event and mpv_event_property.
      */
-    MPV_EVENT_PROPERTY_CHANGE   = 22
+    MPV_EVENT_PROPERTY_CHANGE   = 22,
+    /**
+     * Happens when the current chapter changes.
+     */
+    MPV_EVENT_CHAPTER_CHANGE = 23
 } mpv_event_id;
 
 /**

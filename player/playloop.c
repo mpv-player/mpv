@@ -845,6 +845,15 @@ static void handle_keep_open(struct MPContext *mpctx)
     }
 }
 
+static void handle_chapter_change(struct MPContext *mpctx)
+{
+    int chapter = get_current_chapter(mpctx);
+    if (chapter != mpctx->last_chapter) {
+        mpctx->last_chapter = chapter;
+        mp_notify(mpctx, MPV_EVENT_CHAPTER_CHANGE, NULL);
+    }
+}
+
 // Execute a forceful refresh of the VO window, if it hasn't had a valid frame
 // for a while. The problem is that a VO with no valid frame (vo->hasframe==0)
 // doesn't redraw video and doesn't OSD interaction. So screw it, hard.
@@ -1294,6 +1303,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_loop_file(mpctx);
 
     handle_keep_open(mpctx);
+
+    handle_chapter_change(mpctx);
 
     handle_force_window(mpctx, false);
 

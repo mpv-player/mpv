@@ -310,6 +310,7 @@ struct MPContext *mp_create(void)
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
         .last_dvb_step = 1,
+        .last_chapter = -2,
         .term_osd_contents = talloc_strdup(mpctx, ""),
         .osd_progbar = { .type = -1 },
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
