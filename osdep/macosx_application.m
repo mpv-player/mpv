@@ -349,7 +349,6 @@ static void set_application_icon()
     NSImage *icon = [[NSImage alloc] initWithData:icon_data];
     [NSApp setApplicationIconImage:icon];
     [icon release];
-    [icon_data release];
 }
 
 void init_cocoa_application(void)
