@@ -423,10 +423,10 @@ static int config(struct vf_instance *vf, int width, int height,
         destroy_vs(vf);
         return 0;
     }
-    width = vi->width;
-    height = vi->height;
 
-    return vf_next_config(vf, width, height, width, height, flags, fmt);
+    vf_rescale_dsize(&d_width, &d_height, width, height, vi->width, vi->height);
+
+    return vf_next_config(vf, vi->width, vi->height, d_width, d_height, flags, fmt);
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
