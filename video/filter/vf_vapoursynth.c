@@ -156,7 +156,7 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
         const VSMap *map = p->vsapi->getFramePropsRO(f);
         if (map) {
             int err;
-            double t = p->vsapi->propGetFloat(map, "AbsoluteTime", 0, &err);
+            double t = p->vsapi->propGetFloat(map, "_AbsoluteTime", 0, &err);
             if (!err)
                 img.pts = t;
         }
@@ -283,7 +283,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             mp_image_copy(&vsframe, img);
             VSMap *map = p->vsapi->getFramePropsRW(ret);
             if (map)
-                p->vsapi->propSetFloat(map, "AbsoluteTime", img->pts, 0);
+                p->vsapi->propSetFloat(map, "_AbsoluteTime", img->pts, 0);
             break;
         }
         pthread_cond_wait(&p->wakeup, &p->lock);
