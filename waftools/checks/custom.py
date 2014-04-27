@@ -8,7 +8,20 @@ __all__ = ["check_pthreads", "check_iconv", "check_lua", "check_oss_4front",
 
 pthreads_program = load_fragment('pthreads.c')
 
+def check_pthread_flag(ctx, dependency_identifier):
+    checks = [
+        check_cc(fragment = pthreads_program, cflags = '-pthread'),
+        check_cc(fragment = pthreads_program, cflags = '-pthread',
+                                            linkflags = '-pthread') ]
+
+    for fn in checks:
+        if fn(ctx, dependency_identifier):
+            return True
+    return False
+
 def check_pthreads(ctx, dependency_identifier):
+    if check_pthread_flag(ctx, dependency_identifier):
+        return True
     platform_cflags = {
         'linux':   '-D_REENTRANT',
         'freebsd': '-D_THREAD_SAFE',
