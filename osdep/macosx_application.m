@@ -368,6 +368,21 @@ static void set_application_icon()
     [icon release];
 }
 
+// Map a struct MPOpts app_style to a NSApplicationActivationPolicy
+static NSApplicationActivationPolicy activation_policy_from_app_style(int app_style) {
+    switch(app_style) {
+        case -1: return NSApplicationActivationPolicyProhibited; // --app-style=disabled
+        case  1: return NSApplicationActivationPolicyRegular;    // --app-style=normal
+        case  2: return NSApplicationActivationPolicyAccessory;  // --app-style=accessory
+        default:
+            fprintf(stderr, "init_cocoa_application() found an unknown option value for opts->app_style.\n"
+                            "Please report this issue to a developer.\n");
+            // Fall through to auto case
+        case 0: // --app-style=auto
+            return NSApplicationActivationPolicyRegular;
+    }
+}
+
 void init_cocoa_application(const struct MPOpts *opts, struct input_ctx *inputCtx)
 {
     // *opts does not persist for the whole cocoa lifetime, so the opts pointer
@@ -375,8 +390,16 @@ void init_cocoa_application(const struct MPOpts *opts, struct input_ctx *inputCt
     // that is needed later should be copied out.
     @autoreleasepool {
         mpv_shared_app().inputContext = inputCtx;
-        [NSApp setActivationPolicy: NSApplicationActivationPolicyRegular];
-        set_application_icon();
+
+        NSApplicationActivationPolicy policy = activation_policy_from_app_style(opts->app_style);
+        if ([NSApp activationPolicy] != policy) {
+            [NSApp setActivationPolicy: policy];
+
+            // The icon needs to be set only when a command-line launched mpv switches
+            // from ActivationPolicyProhibited to ActivationPolicyRegular
+            if (policy == NSApplicationActivationPolicyRegular)
+                set_application_icon();
+        }
     }
     pthread_mutex_lock(&app_state_mutex);
     stepAppState(ApplicationMPVInitState, ApplicationInitializedState);

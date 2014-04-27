@@ -130,6 +130,11 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("load-scripts", auto_load_scripts, CONF_GLOBAL),
 #endif
 
+#if HAVE_COCOA
+    OPT_CHOICE("app-style", app_style, 0,
+               ({"disabled", -1}, {"auto", 0}, {"normal", 1}, {"accessory", 2})),
+#endif
+
 // ------------------------- stream options --------------------
 
     OPT_CHOICE_OR_INT("cache", stream_cache.size, 0, 32, 0x7fffffff,

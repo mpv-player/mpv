@@ -319,8 +319,12 @@ static void create_window(struct vo *vo, struct mp_rect *win, int geo_flags)
     [s->window setDelegate:s->window];
     [s->window makeMainWindow];
 
-    [s->window makeKeyAndOrderFront:nil];
-    [NSApp activateIgnoringOtherApps:YES];
+    // The documentation suggests that windows can't be shown in ActivationPolicyProhibited,
+    // but apparently that's up to us.
+    if([NSApp activationPolicy] != NSApplicationActivationPolicyProhibited) {
+        [s->window makeKeyAndOrderFront:nil];
+        [NSApp activateIgnoringOtherApps:YES];
+    }
 
     vo_set_level(vo, opts->ontop);
 
