@@ -47,8 +47,10 @@ struct vf_priv_s {
     pthread_cond_t wakeup;
 
     // --- the following members are all protected by lock
+    struct mp_image *next_image;// used to compute frame duration of oldest image
     struct mp_image **buffered; // oldest image first
     int num_buffered;
+    double prev_pts;            // pts of last frame returned
     int in_frameno;             // frame number of buffered[0] (the oldest)
     int out_frameno;            // frame number of last requested frame
     bool getting_frame;         // getAsyncFrame is in progress
@@ -153,10 +155,13 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
         img.pts = MP_NOPTS_VALUE;
         const VSMap *map = p->vsapi->getFramePropsRO(f);
         if (map) {
-            int err;
-            double t = p->vsapi->propGetFloat(map, "_AbsoluteTime", 0, &err);
-            if (!err)
-                img.pts = t;
+            int err1, err2;
+            int num = p->vsapi->propGetInt(map, "_DurationNum", 0, &err1);
+            int den = p->vsapi->propGetInt(map, "_DurationDen", 0, &err2);
+            if (!err1 && !err2 && p->prev_pts != MP_NOPTS_VALUE) {
+                img.pts = p->prev_pts;
+                p->prev_pts += num / (double)den;
+            }
         }
         if (img.pts == MP_NOPTS_VALUE)
             MP_ERR(vf, "No PTS after filter!\n");
@@ -180,8 +185,15 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
         return -1;
     }
 
+    MPSWAP(struct mp_image *, p->next_image, mpi);
+
     if (!mpi)
         return 0;
+
+    // Turn PTS into frame duration (the pts field is abused for storing it)
+    if (p->prev_pts == MP_NOPTS_VALUE)
+        p->prev_pts = mpi->pts;
+    mpi->pts = p->next_image ? p->next_image->pts - mpi->pts : 0;
 
     // Try to get new frames until we get rid of the input mpi.
     pthread_mutex_lock(&p->lock);
@@ -285,8 +297,12 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             struct mp_image vsframe = map_vs_frame(p, ret, true);
             mp_image_copy(&vsframe, img);
             VSMap *map = p->vsapi->getFramePropsRW(ret);
-            if (map)
-                p->vsapi->propSetFloat(map, "_AbsoluteTime", img->pts, 0);
+            if (map) {
+                int res = 1e6;
+                int dur = img->pts * res + 0.5;
+                p->vsapi->propSetInt(map, "_DurationNum", dur, 0);
+                p->vsapi->propSetInt(map, "_DurationDen", res, 0);
+            }
             break;
         }
         pthread_cond_wait(&p->wakeup, &p->lock);
@@ -340,6 +356,9 @@ static void destroy_vs(struct vf_instance *vf)
     for (int n = 0; n < p->num_buffered; n++)
         talloc_free(p->buffered[n]);
     p->num_buffered = 0;
+    talloc_free(p->next_image);
+    p->next_image = NULL;
+    p->prev_pts = MP_NOPTS_VALUE;
     p->out_frameno = p->in_frameno = 0;
 }
 

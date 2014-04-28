@@ -861,8 +861,8 @@ Available filters are:
         and it is expected that the script reads video from it. (Otherwise,
         mpv will decode no video, and the video packet queue will overflow,
         eventually leading to audio being stopped.) The script is also
-        expected to pass through timestamps using the ``AbsoluteTime`` frame
-        property.
+        expected to pass through timestamps using the ``_DurationNum`` and
+        ``_DurationDen`` frame properties.
 
         .. admonition:: Example:
 
