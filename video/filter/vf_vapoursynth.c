@@ -106,6 +106,31 @@ static int mp_from_vs(VSPresetFormat vs)
     return pfNone;
 }
 
+static void copy_mp_to_vs_frame_props(struct vf_priv_s *p, VSMap *map,
+                                      struct mp_image *img)
+{
+    struct mp_image_params *params = &img->params;
+    if (params->d_w > 0 && params->d_h > 0) {
+        p->vsapi->propSetInt(map, "_SARNum", params->d_w, 0);
+        p->vsapi->propSetInt(map, "_SARDen", params->d_h, 0);
+    }
+    if (params->colorlevels) {
+        p->vsapi->propSetInt(map, "_ColorRange",
+                params->colorlevels == MP_CSP_LEVELS_TV, 0);
+    }
+    // The docs explicitly say it uses libavcodec values.
+    p->vsapi->propSetInt(map, "_ColorSpace",
+            mp_csp_to_avcol_spc(params->colorspace), 0);
+    char pict_type = 0;
+    switch (img->pict_type) {
+    case 1: pict_type = 'I'; break;
+    case 2: pict_type = 'P'; break;
+    case 3: pict_type = 'B'; break;
+    }
+    if (pict_type)
+        p->vsapi->propSetData(map, "_PictType", &pict_type, 1, 0);
+}
+
 static struct mp_image map_vs_frame(struct vf_priv_s *p, const VSFrameRef *ref,
                                     bool w)
 {
@@ -302,6 +327,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
                 int dur = img->pts * res + 0.5;
                 p->vsapi->propSetInt(map, "_DurationNum", dur, 0);
                 p->vsapi->propSetInt(map, "_DurationDen", res, 0);
+                copy_mp_to_vs_frame_props(p, map, img);
             }
             break;
         }
