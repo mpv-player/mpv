@@ -268,9 +268,9 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
 ``mp.add_timeout(seconds, fn)``
     Call the given function fn when the given number of seconds has elapsed.
-    Note that the number of seconds can be fractional. As of now, the timer
-    precision may be as worse as 50 ms, though. (This will be improved in the
-    future.)
+    Note that the number of seconds can be fractional. For now, the timer's
+    resolution may be as low as 50 ms, although this will be improved in the
+    future.
 
     This is a one-shot timer: it will be removed when it's fired.
 
