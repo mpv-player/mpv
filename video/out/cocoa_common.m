@@ -84,6 +84,20 @@ struct vo_cocoa_state {
     id   fs_icc_changed_ns_observer;
 };
 
+static void dispatch_on_main_thread(struct vo *vo, void(^block)(void))
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    if (!s->inside_sync_section) {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            s->inside_sync_section = true;
+            block();
+            s->inside_sync_section = false;
+        });
+    } else {
+        block();
+    }
+}
+
 void *vo_cocoa_glgetaddr(const char *s)
 {
     void *ret = NULL;
@@ -422,8 +436,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t width, uint32_t height,
     struct vo_cocoa_state *s = vo->cocoa;
     __block int ctxok = 0;
 
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        s->inside_sync_section  = true;
+    dispatch_on_main_thread(vo, ^{
         s->enable_resize_redraw = false;
 
         bool reset_size = s->old_dwidth != width || s->old_dheight != height;
@@ -461,7 +474,6 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t width, uint32_t height,
             cocoa_add_fs_screen_profile_observer(vo);
         }
 
-        s->inside_sync_section  = false;
         s->enable_resize_redraw = true;
     });
 
@@ -524,14 +536,10 @@ int vo_cocoa_check_events(struct vo *vo)
 
 static void vo_cocoa_fullscreen_sync(struct vo *vo)
 {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        vo->cocoa->inside_sync_section  = true;
+    dispatch_on_main_thread(vo, ^{
         vo->cocoa->enable_resize_redraw = false;
-
         vo_cocoa_fullscreen(vo);
-
         vo->cocoa->enable_resize_redraw = true;
-        vo->cocoa->inside_sync_section  = false;
     });
 }
 
@@ -682,21 +690,17 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
         int *s = arg;
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            vo->cocoa->inside_sync_section = true;
+        dispatch_on_main_thread(vo, ^{
             NSSize size = [vo->cocoa->view frame].size;
             s[0] = size.width;
             s[1] = size.height;
-            vo->cocoa->inside_sync_section = false;
         });
         return VO_TRUE;
     }
     case VOCTRL_SET_WINDOW_SIZE: {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            vo->cocoa->inside_sync_section = true;
+        dispatch_on_main_thread(vo, ^{
             int *s = arg;
             [vo->cocoa->window queueNewVideoSize:NSMakeSize(s[0], s[1])];
-            vo->cocoa->inside_sync_section = false;
         });
         return VO_TRUE;
     }
