@@ -87,7 +87,7 @@ else:
             pass
         else:
             raise e
-    os.mkfifo(FIFO, 0600)
+    os.mkfifo(FIFO, int("0600", 8))
 
     subprocess.check_call(["mpv", "--really-quiet", "--force-window",
                            "--input-file=" + FIFO, "--"] + files)
