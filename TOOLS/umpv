@@ -23,6 +23,11 @@ Note that you can control the mpv instance by writing to the command fifo:
 
     echo "cycle fullscreen" > /tmp/umpv-fifo-*
 
+Note: you can supply custom options with the UMPV_OPTIONS environment variable.
+      The environment variable will be split on whitespace, and each item is
+      passed as option to mpv _if_ the script starts mpv. If mpv is not started
+      by the script (i.e. mpv is already running), the options will be ignored.
+
 Warning:
 
 The script attempts to make sure the FIFO is safely created (i.e. not world-
@@ -45,6 +50,9 @@ if len(sys.argv) < 2:
 files = sys.argv[1:]
 # make them absolute; also makes them safe against interpretation as options
 files = [os.path.abspath(f) for f in files]
+
+opts_env = os.getenv("UMPV_OPTIONS")
+opts_env = opts_env.split() if opts_env else []
 
 FIFO = "/tmp/umpv-fifo-" + os.getenv("USER")
 
@@ -89,5 +97,9 @@ else:
             raise e
     os.mkfifo(FIFO, int("0600", 8))
 
-    subprocess.check_call(["mpv", "--really-quiet", "--force-window",
-                           "--input-file=" + FIFO, "--"] + files)
+    opts = ["mpv", "--really-quiet", "--force-window", "--input-file=" + FIFO]
+    opts.extend(opts_env)
+    opts.append("--")
+    opts.extend(files)
+
+    subprocess.check_call(opts)
