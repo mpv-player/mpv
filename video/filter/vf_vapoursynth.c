@@ -175,8 +175,10 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
     struct vf_priv_s *p = vf->priv;
     int ret = 0;
 
-    if (!p->out_node)
+    if (!p->out_node) {
+        talloc_free(mpi);
         return -1;
+    }
 
     if (!mpi)
         return 0;
