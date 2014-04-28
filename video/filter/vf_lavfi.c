@@ -30,6 +30,7 @@
 #include <libavutil/rational.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/time.h>
+#include <libavutil/error.h>
 #include <libswscale/swscale.h>
 #include <libavfilter/avfilter.h>
 #include <libavfilter/avfiltergraph.h>
@@ -298,13 +299,21 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 
     for (;;) {
         frame = av_frame_alloc();
-        if (av_buffersink_get_frame(p->out, frame) < 0) {
+        int err = av_buffersink_get_frame(p->out, frame);
+        if (err == AVERROR(EAGAIN) || err == AVERROR_EOF) {
             // Not an error situation - no more output buffers in queue.
+            // AVERROR_EOF means we shouldn't even give the filter more
+            // input, but we don't handle that.
             av_frame_free(&frame);
             break;
         }
-        get_metadata_from_av_frame(vf,frame);
+        if (err < 0) {
+            av_frame_free(&frame);
+            MP_ERR(vf, "libavfilter error: %d\n", err);
+            return -1;
+        }
 
+        get_metadata_from_av_frame(vf, frame);
         vf_add_output_frame(vf, av_to_mp(vf, frame));
     }
 
