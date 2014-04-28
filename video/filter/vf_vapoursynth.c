@@ -180,6 +180,9 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
     if (!p->out_node)
         return -1;
 
+    if (!mpi)
+        return 0;
+
     // Try to get new frames until we get rid of the input mpi.
     pthread_mutex_lock(&p->lock);
     while (1) {

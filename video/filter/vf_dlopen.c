@@ -225,6 +225,9 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     int i, k;
 
+    if (!mpi)
+        return 0;
+
     set_imgprop(&vf->priv->filter.inpic, mpi);
     if (mpi->qscale) {
         if (mpi->qscale_type != 0) {

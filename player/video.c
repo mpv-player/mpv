@@ -301,12 +301,12 @@ void mp_force_video_refresh(struct MPContext *mpctx)
         queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->last_vo_pts, 1, true);
 }
 
-static bool filter_output_queued_frame(struct MPContext *mpctx)
+static bool filter_output_queued_frame(struct MPContext *mpctx, bool eof)
 {
     struct dec_video *d_video = mpctx->d_video;
     struct vo *video_out = mpctx->video_out;
 
-    struct mp_image *img = vf_output_queued_frame(d_video->vfilter);
+    struct mp_image *img = vf_output_queued_frame(d_video->vfilter, eof);
     if (img)
         vo_queue_image(video_out, img);
     talloc_free(img);
@@ -316,9 +316,11 @@ static bool filter_output_queued_frame(struct MPContext *mpctx)
 
 static bool load_next_vo_frame(struct MPContext *mpctx, bool eof)
 {
-    if (vo_get_buffered_frame(mpctx->video_out, eof) >= 0)
+    if (vo_get_buffered_frame(mpctx->video_out, false) >= 0)
         return true;
-    if (filter_output_queued_frame(mpctx))
+    if (filter_output_queued_frame(mpctx, eof))
+        return true;
+    if (eof && vo_get_buffered_frame(mpctx->video_out, true) >= 0)
         return true;
     return false;
 }
@@ -366,7 +368,7 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame,
 
     mp_image_set_params(frame, &d_video->vf_input); // force csp/aspect overrides
     vf_filter_frame(d_video->vfilter, frame);
-    filter_output_queued_frame(mpctx);
+    filter_output_queued_frame(mpctx, false);
 }
 
 // Reconfigure the video chain and the VO on a format change. This is separate,

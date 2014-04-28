@@ -363,14 +363,17 @@ static struct mp_image *vf_dequeue_output_frame(struct vf_instance *vf)
 static int vf_do_filter(struct vf_instance *vf, struct mp_image *img)
 {
     assert(vf->fmt_in.imgfmt);
-    vf_fix_img_params(img, &vf->fmt_in);
+    if (img)
+        vf_fix_img_params(img, &vf->fmt_in);
 
     if (vf->filter_ext) {
         return vf->filter_ext(vf, img);
     } else {
-        if (vf->filter)
-            img = vf->filter(vf, img);
-        vf_add_output_frame(vf, img);
+        if (img) {
+            if (vf->filter)
+                img = vf->filter(vf, img);
+            vf_add_output_frame(vf, img);
+        }
         return 0;
     }
 }
@@ -379,6 +382,7 @@ static int vf_do_filter(struct vf_instance *vf, struct mp_image *img)
 // Return >= 0 on success, < 0 on failure (even if output frames were produced)
 int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
 {
+    assert(img);
     if (c->initialized < 1) {
         talloc_free(img);
         return -1;
@@ -387,13 +391,19 @@ int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
 }
 
 // Output the next queued image (if any) from the full filter chain.
-struct mp_image *vf_output_queued_frame(struct vf_chain *c)
+//  eof: if set, assume there's no more input i.e. vf_filter_frame() will
+//       not be called (until reset) - flush all internally delayed frames
+struct mp_image *vf_output_queued_frame(struct vf_chain *c, bool eof)
 {
     if (c->initialized < 1)
         return NULL;
     while (1) {
         struct vf_instance *last = NULL;
         for (struct vf_instance * cur = c->first; cur; cur = cur->next) {
+            // Flush remaining frames on EOF, but do that only if the previous
+            // filters have been flushed (i.e. they have no more output).
+            if (eof && !last)
+                vf_do_filter(cur, NULL);
             if (cur->num_out_queued)
                 last = cur;
         }

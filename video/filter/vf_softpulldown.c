@@ -54,6 +54,9 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
         int state = vf->priv->state;
         struct vf_priv_s *p = vf->priv;
 
+        if (!mpi)
+            return 0;
+
         if (!p->buffer || p->buffer->w != mpi->w || p->buffer->h != mpi->h ||
             p->buffer->imgfmt != mpi->imgfmt)
         {

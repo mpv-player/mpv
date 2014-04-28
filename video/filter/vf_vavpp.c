@@ -222,6 +222,8 @@ static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
 static int filter_ext(struct vf_instance *vf, struct mp_image *in)
 {
     struct vf_priv_s *p = vf->priv;
+    if (!in)
+        return 0;
     int rt_format = in->imgfmt == IMGFMT_VAAPI ? va_surface_rt_format(in)
                                                : VA_RT_FORMAT_YUV420;
     if (!p->pool || p->current_rt_format != rt_format) {

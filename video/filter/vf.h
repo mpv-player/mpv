@@ -70,6 +70,9 @@ typedef struct vf_instance {
     // Like filter(), but can return an error code ( >= 0 means success). This
     // callback is also more practical when the filter can return multiple
     // output images. Use vf_add_output_frame() to queue output frames.
+    // Warning: this is called with mpi==NULL if there is no more input at
+    //          all (i.e. the video has reached end of file condition). This
+    //          can be used to output delayed or otherwise remaining images.
     int (*filter_ext)(struct vf_instance *vf, struct mp_image *mpi);
 
     void (*uninit)(struct vf_instance *vf);
@@ -133,7 +136,7 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params);
 int vf_control_any(struct vf_chain *c, int cmd, void *arg);
 int vf_control_by_label(struct vf_chain *c, int cmd, void *arg, bstr label);
 int vf_filter_frame(struct vf_chain *c, struct mp_image *img);
-struct mp_image *vf_output_queued_frame(struct vf_chain *c);
+struct mp_image *vf_output_queued_frame(struct vf_chain *c, bool eof);
 void vf_seek_reset(struct vf_chain *c);
 struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
                                      char **args);

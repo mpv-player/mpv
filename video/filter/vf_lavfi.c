@@ -251,6 +251,8 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 static AVFrame *mp_to_av(struct vf_instance *vf, struct mp_image *img)
 {
     struct vf_priv_s *p = vf->priv;
+    if (!img)
+        return NULL;
     uint64_t pts = img->pts == MP_NOPTS_VALUE ?
                    AV_NOPTS_VALUE : img->pts * av_q2d(av_inv_q(p->timebase_in));
     AVFrame *frame = mp_image_to_av_frame_and_unref(img);
