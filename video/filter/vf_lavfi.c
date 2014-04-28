@@ -323,10 +323,13 @@ static int control(vf_instance_t *vf, int request, void *data)
     case VFCTRL_SEEK_RESET:
         reset(vf);
         return CONTROL_OK;
-    case VFCTRL_GET_METADATA:{
+    case VFCTRL_GET_METADATA:
+      if (vf->priv && vf->priv->metadata) {
         *(struct mp_tags*) data = *vf->priv->metadata;
         return CONTROL_OK;
-    }
+      } else {
+	return CONTROL_NA;
+      }
     }
     return CONTROL_UNKNOWN;
 }
