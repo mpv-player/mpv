@@ -44,8 +44,7 @@ import subprocess
 import fcntl
 import stat
 
-if len(sys.argv) < 2:
-    print("error: needs at least one file as argument.")
+if len(sys.argv) < 1:
     sys.exit(1)
 files = sys.argv[1:]
 # make them absolute; also makes them safe against interpretation as options
