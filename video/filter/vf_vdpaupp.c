@@ -48,6 +48,8 @@ struct vf_priv_s {
 
     int prev_pos;           // last field that was output
 
+    int def_deintmode;
+    int deint_enabled;
     struct mp_vdpau_mixer_opts opts;
 };
 
@@ -166,7 +168,7 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
             return -1;
         }
 
-        if (p->num_buffered == maxbuffer) {
+        while (p->num_buffered >= maxbuffer) {
             talloc_free(p->buffered[p->num_buffered - 1]);
             p->num_buffered--;
         }
@@ -214,10 +216,19 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static int control(vf_instance_t *vf, int request, void *data)
 {
+    struct vf_priv_s *p = vf->priv;
+
     switch (request) {
     case VFCTRL_SEEK_RESET:
         forget_frames(vf);
         return CONTROL_OK;
+    case VFCTRL_GET_DEINTERLACE:
+        *(int *)data = !!p->deint_enabled;
+        return true;
+    case VFCTRL_SET_DEINTERLACE:
+        p->deint_enabled = !!*(int *)data;
+        p->opts.deint = p->deint_enabled ? p->def_deintmode : 0;
+        return true;
     }
     return CONTROL_UNKNOWN;
 }
@@ -243,18 +254,22 @@ static int vf_open(vf_instance_t *vf)
     if (!p->ctx)
         return 0;
 
+    p->def_deintmode = p->opts.deint;
+    if (!p->deint_enabled)
+        p->opts.deint = 0;
+
     return 1;
 }
 
 #define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-    OPT_CHOICE("deint", opts.deint, 0,
-               ({"no", 0},
-                {"first-field", 1},
+    OPT_CHOICE("deint-mode", opts.deint, 0,
+               ({"first-field", 1},
                 {"bob", 2},
                 {"temporal", 3},
                 {"temporal-spatial", 4}),
                OPTDEF_INT(3)),
+    OPT_FLAG("deint", deint_enabled, 0),
     OPT_FLAG("chroma-deint", opts.chroma_deint, 0, OPTDEF_INT(1)),
     OPT_FLAG("pullup", opts.pullup, 0),
     OPT_FLOATRANGE("denoise", opts.denoise, 0, 0, 1),
