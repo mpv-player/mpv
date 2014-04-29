@@ -43,12 +43,27 @@ import errno
 import subprocess
 import fcntl
 import stat
+import string
 
 if len(sys.argv) < 1:
     sys.exit(1)
 files = sys.argv[1:]
+
+# this is about the same method mpv uses to decide this
+def is_url(filename):
+    parts = filename.split(":", 1)
+    if len(parts) < 2:
+        return False
+    # protocol prefix has no special characters => it's an URL
+    prefix = parts[0]
+    return len(prefix.translate(None, string.letters)) == 0
+
 # make them absolute; also makes them safe against interpretation as options
-files = [os.path.abspath(f) for f in files]
+def make_abs(filename):
+    if not is_url(filename):
+        return os.path.abspath(f)
+    return f
+files = [make_abs(f) for f in files]
 
 opts_env = os.getenv("UMPV_OPTIONS")
 opts_env = opts_env.split() if opts_env else []
