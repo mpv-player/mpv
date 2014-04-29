@@ -950,19 +950,24 @@ static int mp_property_vf_metadata(m_option_t *prop, int action, void *arg,
         char *rem;
         m_property_split_path(ka->key, &key, &rem);
         struct mp_tags vf_metadata;
-        if (vf_control_by_label(vf, VFCTRL_GET_METADATA, &vf_metadata, key)
-                == CONTROL_UNKNOWN)
+        switch (vf_control_by_label(vf, VFCTRL_GET_METADATA, &vf_metadata, key)) {
+        case CONTROL_NA:
+            return M_PROPERTY_UNAVAILABLE;
+        case CONTROL_UNKNOWN:
             return M_PROPERTY_UNKNOWN;
-
-        if (strlen(rem)) {
-            struct m_property_action_arg next_ka = *ka;
-            next_ka.key = rem;
-            return tag_property(prop, M_PROPERTY_KEY_ACTION, &next_ka,
-                                &vf_metadata);
-        } else {
-            return tag_property(prop, ka->action, ka->arg, &vf_metadata);
+        case CONTROL_OK:
+            if (strlen(rem)) {
+                struct m_property_action_arg next_ka = *ka;
+                next_ka.key = rem;
+                return tag_property(prop, M_PROPERTY_KEY_ACTION, &next_ka,
+                                    &vf_metadata);
+            } else {
+                return tag_property(prop, ka->action, ka->arg, &vf_metadata);
+            }
+            return M_PROPERTY_OK;
+        default:
+            return M_PROPERTY_ERROR;
         }
-        return M_PROPERTY_OK;
     }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
