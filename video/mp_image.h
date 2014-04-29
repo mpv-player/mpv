@@ -85,7 +85,6 @@ typedef struct mp_image {
     int chroma_y_shift; // vertical
 
     int w,h;  // visible dimensions
-    int display_w,display_h; // if set (!= 0), anamorphic size
     uint8_t *planes[MP_MAX_PLANES];
     int stride[MP_MAX_PLANES];
 
@@ -125,7 +124,6 @@ void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc);
 void mp_image_vflip(struct mp_image *img);
 
 void mp_image_set_size(struct mp_image *mpi, int w, int h);
-void mp_image_set_display_size(struct mp_image *mpi, int dw, int dh);
 
 void mp_image_setfmt(mp_image_t* mpi, int out_fmt);
 void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);

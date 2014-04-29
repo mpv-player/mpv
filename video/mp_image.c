@@ -180,23 +180,14 @@ void mp_image_set_size(struct mp_image *mpi, int w, int h)
     if (w >= (1 << 14) || h >= (1 << 14) || w < 0 || h < 0)
         abort();
 
-    mpi->w = mpi->params.w = w;
-    mpi->h = mpi->params.h = h;
-    mp_image_set_display_size(mpi, mpi->w, mpi->h);
+    mpi->w = mpi->params.w = mpi->params.d_w = w;
+    mpi->h = mpi->params.h = mpi->params.d_h = h;
     for (int n = 0; n < mpi->num_planes; n++) {
         mpi->plane_w[n] = mp_chroma_div_up(mpi->w, mpi->fmt.xs[n]);
         mpi->plane_h[n] = mp_chroma_div_up(mpi->h, mpi->fmt.ys[n]);
     }
     mpi->chroma_width = mpi->plane_w[1];
     mpi->chroma_height = mpi->plane_h[1];
-}
-
-void mp_image_set_display_size(struct mp_image *mpi, int dw, int dh)
-{
-    mpi->params.d_w = dw;
-    mpi->params.d_h = dh;
-    mpi->display_w = dw;
-    mpi->display_h = dh;
 }
 
 void mp_image_set_params(struct mp_image *image,
@@ -206,7 +197,6 @@ void mp_image_set_params(struct mp_image *image,
     // possibly reinitialize stuff
     mp_image_setfmt(image, params->imgfmt);
     mp_image_set_size(image, params->w, params->h);
-    mp_image_set_display_size(image, params->d_w, params->d_h);
 }
 
 struct mp_image *mp_image_alloc(int imgfmt, int w, int h)
@@ -359,8 +349,8 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->qscale_type = src->qscale_type;
     dst->pts = src->pts;
     if (dst->w == src->w && dst->h == src->h) {
-        dst->display_w = src->display_w;
-        dst->display_h = src->display_h;
+        dst->params.d_w = src->params.d_w;
+        dst->params.d_h = src->params.d_h;
     }
     if ((dst->flags & MP_IMGFLAG_YUV) == (src->flags & MP_IMGFLAG_YUV)) {
         dst->params.colorspace = src->params.colorspace;
