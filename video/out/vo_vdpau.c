@@ -1237,15 +1237,11 @@ static struct mp_image *get_screenshot(struct vo *vo)
         CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_create");
     }
 
-    VdpRect rc = { .x1 = vc->vid_width, .y1 = vc->vid_height };
-    render_video_to_output_surface(vo, vc->screenshot_surface, &rc, &rc);
+    VdpRect in = { .x1 = vo->params->w, .y1 = vo->params->h };
+    VdpRect out = { .x1 = vo->params->d_w, .y1 = vo->params->d_h };
+    render_video_to_output_surface(vo, vc->screenshot_surface, &out, &in);
 
-    struct mp_image *image = read_output_surface(vo, vc->screenshot_surface,
-                                                 vc->vid_width, vc->vid_height);
-
-    mp_image_set_display_size(image, vo->params->d_w, vo->params->d_h);
-
-    return image;
+    return read_output_surface(vo, vc->screenshot_surface, out.x1, out.y1);
 }
 
 static struct mp_image *get_window_screenshot(struct vo *vo)
