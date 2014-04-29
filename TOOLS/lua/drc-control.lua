@@ -1,3 +1,22 @@
+-- This script enables live control of the dynamic range compression
+-- (drc) audio filter while the video is playing back. This can be
+-- useful to avoid having to stop and restart mpv to adjust filter
+-- parameters. See the entry for "drc" under the "AUDIO FILTERS"
+-- section of the man page for a complete description of the filter.
+--
+-- This script registers the key-binding "\" to toggle the filter between 
+--
+-- * off
+-- * method=1 (single-sample smoothing)
+-- * method=2 (multi-sample smoothing)
+--
+-- It registers the keybindings ctrl+9/ctrl+0 to decrease/increase the
+-- target ampltiude. These keys will insert the filter at the default
+-- target amplitude of 0.25 if it was not previously present.
+--
+-- OSD feedback of the current filter state is displayed on pressing
+-- each bound key.
+
 script_name=mp.get_script_name():gsub("lua/","",1)
 
 function print_state(params)

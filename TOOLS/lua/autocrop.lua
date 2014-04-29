@@ -1,3 +1,31 @@
+-- This script uses the lavfi cropdetect filter to automatically
+-- insert a crop filter with appropriate parameters for the currently
+-- playing video.
+--
+-- It registers the key-binding "C" (shift+c), which when pressed,
+-- inserts the filter vf=lavfi=cropdetect. After 1 second, it then
+-- inserts the filter vf=crop=w:h:x:y, where w,h,x,y are determined
+-- from the vf-metadata gathered by cropdetect. The cropdetect filter
+-- is removed immediately after the crop filter is inserted as it is
+-- no longer needed.
+--
+-- If the "C" key is pressed again, the crop filter is removed
+-- restoring playback to its original state.
+--
+-- Since the crop parameters are determined from the 1 second of video
+-- between inserting the cropdetect and crop filters, the "C" key
+-- should be pressed at a position in the video where the crop region
+-- is unambiguous (i.e., not a black frame, black background title
+-- card, or dark scene).
+--
+-- The default delay between insertion of the cropdetect and
+-- crop filters may be overridden by adding
+--
+-- --lua-opts=autocrop.detect_seconds=<number of seconds>
+--
+-- to mpv's arguments. This may be desirable to allow cropdetect more
+-- time to collect data.
+
 script_name=string.gsub(mp.get_script_name(),"lua/","")
 cropdetect_label=string.format("%s-cropdetect",script_name)
 crop_label=string.format("%s-crop",script_name)
