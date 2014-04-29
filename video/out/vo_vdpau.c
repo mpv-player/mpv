@@ -84,13 +84,9 @@ struct vdpctx {
     VdpOutputSurface                   screenshot_surface;
     int                                num_output_surfaces;
     VdpOutputSurface                   rgb_surfaces[NUM_BUFFERED_VIDEO];
+    bool                               rgb_surfaces_used[NUM_BUFFERED_VIDEO];
     VdpOutputSurface                   black_pixel;
-    struct buffered_video_surface {
-        // Either mpi or rgb_surface is used (never both)
-        VdpOutputSurface rgb_surface;
-        double pts;
-        mp_image_t *mpi;
-    } buffered_video[NUM_BUFFERED_VIDEO];
+    struct mp_image                   *buffered_video[NUM_BUFFERED_VIDEO];
     int                                buffer_pos;
 
     // State for redrawing the screen after seek-reset
@@ -165,7 +161,6 @@ static int render_video_to_output_surface(struct vo *vo,
     struct vdp_functions *vdp = vc->vdp;
     VdpTime dummy;
     VdpStatus vdp_st;
-    struct buffered_video_surface *bv = vc->buffered_video;
     int dp = vc->buffer_pos;
 
     // Redraw frame from before seek reset?
@@ -181,6 +176,8 @@ static int render_video_to_output_surface(struct vo *vo,
         return -1;
     }
 
+    struct mp_image *mpi = vc->buffered_video[dp];
+
     vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
                                                               output_surface,
                                                               &dummy);
@@ -188,6 +185,7 @@ static int render_video_to_output_surface(struct vo *vo,
                       "vdp_presentation_queue_block_until_surface_idle");
 
     if (vc->rgb_mode) {
+        VdpOutputSurface surface = (uintptr_t)mpi->planes[0];
         int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
         vdp_st = vdp->output_surface_render_output_surface(output_surface,
                                                            NULL, vc->black_pixel,
@@ -196,7 +194,7 @@ static int render_video_to_output_surface(struct vo *vo,
         CHECK_VDP_WARNING(vo, "Error clearing screen");
         vdp_st = vdp->output_surface_render_output_surface(output_surface,
                                                            output_rect,
-                                                           bv[dp].rgb_surface,
+                                                           surface,
                                                            video_rect,
                                                            NULL, NULL, flags);
         CHECK_VDP_WARNING(vo, "Error when calling "
@@ -204,7 +202,7 @@ static int render_video_to_output_surface(struct vo *vo,
         return 0;
     }
 
-    struct mp_image *mpi = bv[dp].mpi;
+
     struct mp_vdpau_mixer_frame *frame = mp_vdpau_mixed_frame_get(mpi);
     struct mp_vdpau_mixer_opts opts = {0};
     if (frame)
@@ -257,31 +255,26 @@ static void set_next_frame_info(struct vo *vo, bool eof)
     vo->frame_loaded = true;
 
     // Set pts values
-    struct buffered_video_surface *bv = vc->buffered_video;
+    struct mp_image **bv = &vc->buffered_video[0];
     if (dqp == 0) {  // no future frame/pts available
-        vo->next_pts = bv[0].pts;
+        vo->next_pts = bv[0]->pts;
         vo->next_pts2 = MP_NOPTS_VALUE;
     } else {
-        vo->next_pts = bv[dqp].pts;
-        vo->next_pts2 = bv[dqp - 1].pts;
+        vo->next_pts = bv[dqp]->pts;
+        vo->next_pts2 = bv[dqp - 1]->pts;
     }
 }
 
-static void add_new_video_surface(struct vo *vo, VdpOutputSurface rgb_surface,
-                                  struct mp_image *reserved_mpi, double pts)
+static void add_new_video_surface(struct vo *vo, struct mp_image *mpi)
 {
     struct vdpctx *vc = vo->priv;
-    struct buffered_video_surface *bv = vc->buffered_video;
+    struct mp_image **bv = vc->buffered_video;
 
-    mp_image_unrefp(&bv[NUM_BUFFERED_VIDEO - 1].mpi);
+    mp_image_unrefp(&bv[NUM_BUFFERED_VIDEO - 1]);
 
     for (int i = NUM_BUFFERED_VIDEO - 1; i > 0; i--)
         bv[i] = bv[i - 1];
-    bv[0] = (struct buffered_video_surface){
-        .mpi = reserved_mpi,
-        .rgb_surface = rgb_surface,
-        .pts = pts,
-    };
+    bv[0] = mpi;
 
     vc->buffer_pos = FFMIN(vc->buffer_pos + 1, NUM_BUFFERED_VIDEO - 2);
     set_next_frame_info(vo, false);
@@ -301,13 +294,8 @@ static void forget_frames(struct vo *vo, bool seek_reset)
     vc->buffer_pos = -1001;
     vc->dropped_frame = false;
     if (vc->prev_buffer_pos < 0) {
-        for (int i = 0; i < NUM_BUFFERED_VIDEO; i++) {
-            struct buffered_video_surface *p = vc->buffered_video + i;
-            mp_image_unrefp(&p->mpi);
-            *p = (struct buffered_video_surface){
-                .rgb_surface = VDP_INVALID_HANDLE,
-            };
-        }
+        for (int i = 0; i < NUM_BUFFERED_VIDEO; i++)
+            mp_image_unrefp(&vc->buffered_video[i]);
     }
 }
 
@@ -459,6 +447,7 @@ static void free_video_specific(struct vo *vo)
     vc->screenshot_surface = VDP_INVALID_HANDLE;
 
     for (int n = 0; n < NUM_BUFFERED_VIDEO; n++) {
+        assert(!vc->rgb_surfaces_used[n]);
         if (vc->rgb_surfaces[n] != VDP_INVALID_HANDLE) {
             vdp_st = vdp->output_surface_destroy(vc->rgb_surfaces[n]);
             CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_destroy");
@@ -960,28 +949,30 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     vc->surface_num = WRAP_ADD(vc->surface_num, 1, vc->num_output_surfaces);
 }
 
-static VdpOutputSurface get_rgb_surface(struct vo *vo)
+static void free_rgb_surface(void *ptr)
+{
+    bool *entry = ptr;
+    *entry = false;
+}
+
+static struct mp_image *get_rgb_surface(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
     assert(vc->rgb_mode);
 
     for (int n = 0; n < NUM_BUFFERED_VIDEO; n++) {
-        VdpOutputSurface surface = vc->rgb_surfaces[n];
-        // Note: we expect to be called before add_new_video_surface(), which
-        //       will lead to vc->buffered_video[NUM_BUFFERED_VIDEO - 1] to be
-        //       marked unused. So this entries rgb_surface can be reused
-        //       freely.
-        for (int i = 0; i < NUM_BUFFERED_VIDEO - 1; i++) {
-            if (vc->buffered_video[i].rgb_surface == surface)
-                goto in_use;
+        bool *used = &vc->rgb_surfaces_used[n];
+        if (!*used) {
+            *used = true;
+            struct mp_image mpi = {0};
+            mpi.planes[0] = (void *)(uintptr_t)vc->rgb_surfaces[n];
+            return mp_image_new_custom_ref(&mpi, used, free_rgb_surface);
         }
-        return surface;
-    in_use:;
     }
 
     MP_ERR(vo, "no surfaces available in get_rgb_surface\n");
-    return VDP_INVALID_HANDLE;
+    return NULL;
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -989,16 +980,19 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     struct mp_image *reserved_mpi = NULL;
-    VdpOutputSurface rgb_surface = VDP_INVALID_HANDLE;
     VdpStatus vdp_st;
 
     // Forget previous frames, as we can display a new one now.
     vc->prev_buffer_pos = -1001;
+    mp_image_unrefp(&vc->buffered_video[NUM_BUFFERED_VIDEO - 1]);
 
     if (vc->image_format == IMGFMT_VDPAU) {
         reserved_mpi = mp_image_new_ref(mpi);
     } else if (vc->rgb_mode) {
-        rgb_surface = get_rgb_surface(vo);
+        reserved_mpi = get_rgb_surface(vo);
+        if (!reserved_mpi)
+            return;
+        VdpOutputSurface rgb_surface = (uintptr_t)reserved_mpi->planes[0];
         if (rgb_surface != VDP_INVALID_HANDLE) {
             vdp_st = vdp->output_surface_put_bits_native(rgb_surface,
                                             &(const void *){mpi->planes[0]},
@@ -1025,7 +1019,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         }
     }
 
-    add_new_video_surface(vo, rgb_surface, reserved_mpi, mpi->pts);
+    reserved_mpi->pts = mpi->pts;
+    add_new_video_surface(vo, reserved_mpi);
 
     return;
 }
