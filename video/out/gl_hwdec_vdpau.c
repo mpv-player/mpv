@@ -23,6 +23,7 @@
 #include "gl_common.h"
 #include "video/vdpau.h"
 #include "video/hwdec.h"
+#include "video/vdpau_mixer.h"
 
 // This is a GL_NV_vdpau_interop specification bug, and headers (unfortunately)
 // follow it. I'm not sure about the original nvidia headers.
@@ -38,7 +39,7 @@ struct priv {
     GLuint gl_texture;
     GLvdpauSurfaceNV vdpgl_surface;
     VdpOutputSurface vdp_surface;
-    VdpVideoMixer video_mixer;
+    struct mp_vdpau_mixer *mixer;
 };
 
 static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
@@ -46,7 +47,7 @@ static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
     struct priv *p = hw->priv;
 
     p->vdp_surface = VDP_INVALID_HANDLE;
-    p->video_mixer = VDP_INVALID_HANDLE;
+    p->mixer->video_mixer = VDP_INVALID_HANDLE;
 }
 
 static int handle_preemption(struct gl_hwdec *hw)
@@ -89,11 +90,7 @@ static void destroy_objects(struct gl_hwdec *hw)
         vdp_st = vdp->output_surface_destroy(p->vdp_surface);
         CHECK_VDP_WARNING(p, "Error when calling vdp_output_surface_destroy");
     }
-
-    if (p->video_mixer != VDP_INVALID_HANDLE) {
-        vdp_st = vdp->video_mixer_destroy(p->video_mixer);
-        CHECK_VDP_WARNING(p, "Error when calling vdp_video_mixer_destroy");
-    }
+    p->vdp_surface = VDP_INVALID_HANDLE;
 
     glCheckError(gl, hw->log, "Before uninitializing OpenGL interop");
 
@@ -104,8 +101,6 @@ static void destroy_objects(struct gl_hwdec *hw)
         if (gl->GetError() == GL_NO_ERROR)
             break;
     }
-
-    mark_vdpau_objects_uninitialized(hw);
 }
 
 static void destroy(struct gl_hwdec *hw)
@@ -113,6 +108,7 @@ static void destroy(struct gl_hwdec *hw)
     struct priv *p = hw->priv;
 
     destroy_objects(hw);
+    mp_vdpau_mixer_destroy(p->mixer);
     mp_vdpau_destroy(p->ctx);
 }
 
@@ -132,7 +128,8 @@ static int create(struct gl_hwdec *hw)
     if (!p->ctx)
         return -1;
     p->preemption_counter = p->ctx->preemption_counter;
-    mark_vdpau_objects_uninitialized(hw);
+    p->vdp_surface = VDP_INVALID_HANDLE;
+    p->mixer = mp_vdpau_mixer_create(p->ctx, hw->log);
     hw->info->vdpau_ctx = p->ctx;
     hw->converted_imgfmt = IMGFMT_RGB0;
     return 0;
@@ -153,36 +150,6 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
         return -1;
 
     gl->VDPAUInitNV(BRAINDEATH(p->ctx->vdp_device), p->ctx->get_proc_address);
-
-#define VDP_NUM_MIXER_PARAMETER 3
-    static const VdpVideoMixerParameter parameters[VDP_NUM_MIXER_PARAMETER] = {
-        VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_WIDTH,
-        VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_HEIGHT,
-        VDP_VIDEO_MIXER_PARAMETER_CHROMA_TYPE,
-    };
-
-    const void *const parameter_values[VDP_NUM_MIXER_PARAMETER] = {
-        &(uint32_t){params->w},
-        &(uint32_t){params->h},
-        &(VdpChromaType){VDP_CHROMA_TYPE_420},
-    };
-    vdp_st = vdp->video_mixer_create(p->ctx->vdp_device, 0, NULL,
-                                     VDP_NUM_MIXER_PARAMETER,
-                                     parameters, parameter_values,
-                                     &p->video_mixer);
-    CHECK_VDP_ERROR(p, "Error when calling vdp_video_mixer_create");
-
-    struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
-    cparams.colorspace.levels_in = params->colorlevels;
-    cparams.colorspace.format = params->colorspace;
-    // VdpCSCMatrix happens to be compatible with mpv's CSC matrix type
-    // both are float[3][4]
-    VdpCSCMatrix matrix;
-    mp_get_yuv2rgb_coeffs(&cparams, matrix);
-    VdpVideoMixerAttribute csc_attr = VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX;
-    vdp_st = vdp->video_mixer_set_attribute_values(p->video_mixer, 1, &csc_attr,
-                                                   &(const void *){matrix});
-    CHECK_VDP_WARNING(p, "Error when setting vdpau colorspace conversion matrix");
 
     vdp_st = vdp->output_surface_create(p->ctx->vdp_device,
                                         VDP_RGBA_FORMAT_B8G8R8A8,
@@ -215,11 +182,8 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 {
     struct priv *p = hw->priv;
     GL *gl = hw->mpgl->gl;
-    struct vdp_functions *vdp = &p->ctx->vdp;
-    VdpStatus vdp_st;
 
     assert(hw_image && hw_image->imgfmt == IMGFMT_VDPAU);
-    VdpVideoSurface video_surface = (intptr_t)hw_image->planes[3];
 
     if (handle_preemption(hw) < 0)
         return -1;
@@ -227,13 +191,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!p->vdpgl_surface)
         return -1;
 
-    VdpRect *video_rect = NULL;
-    vdp_st = vdp->video_mixer_render(p->video_mixer, VDP_INVALID_HANDLE,
-                                     0, VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME,
-                                     0, NULL, video_surface, 0, NULL,
-                                     video_rect, p->vdp_surface,
-                                     NULL, NULL, 0, NULL);
-    CHECK_VDP_ERROR(p, "Error when calling vdp_video_mixer_render");
+    mp_vdpau_mixer_render(p->mixer, p->vdp_surface, NULL, hw_image, NULL);
 
     gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
     out_textures[0] = p->gl_texture;
