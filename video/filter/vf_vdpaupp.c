@@ -51,6 +51,35 @@ struct vf_priv_s {
     struct mp_vdpau_mixer_opts opts;
 };
 
+static struct mp_image *upload(struct vf_instance *vf, struct mp_image *mpi)
+{
+    struct vf_priv_s *p = vf->priv;
+    struct vdp_functions *vdp = &p->ctx->vdp;
+    VdpStatus vdp_st;
+
+    VdpChromaType chroma_type = (VdpChromaType)-1;
+    VdpYCbCrFormat pixel_format = (VdpYCbCrFormat)-1;
+    mp_vdpau_get_format(mpi->imgfmt, &chroma_type, &pixel_format);
+
+    struct mp_image *hwmpi =
+        mp_vdpau_get_video_surface(p->ctx, chroma_type, mpi->w, mpi->h);
+    if (!hwmpi)
+        return mpi;
+
+    VdpVideoSurface surface = (intptr_t)hwmpi->planes[3];
+    const void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
+    if (mpi->imgfmt == IMGFMT_NV12)
+        destdata[1] = destdata[2];
+    vdp_st = vdp->video_surface_put_bits_y_cb_cr(surface,
+                pixel_format, destdata, mpi->stride);
+    CHECK_VDP_WARNING(vf, "Error when calling vdp_video_surface_put_bits_y_cb_cr");
+
+    mp_image_copy_attributes(hwmpi, mpi);
+
+    talloc_free(mpi);
+    return hwmpi;
+}
+
 static void forget_frames(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
@@ -122,13 +151,21 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
     int maxbuffer = p->opts.deint ? MP_ARRAY_SIZE(p->buffered) : 1;
     bool eof = !mpi;
 
-    if (mpi->planes[2]) {
-        MP_ERR(vf, "Can't apply vdpaupp filter multiple times.\n");
-        vf_add_output_frame(vf, mpi);
-        return -1;
+    if (mpi && mpi->imgfmt != IMGFMT_VDPAU) {
+        mpi = upload(vf, mpi);
+        if (mpi->imgfmt != IMGFMT_VDPAU) {
+            talloc_free(mpi);
+            return -1;
+        }
     }
 
     if (mpi) {
+        if (mpi->planes[2]) {
+            MP_ERR(vf, "Can't apply vdpaupp filter multiple times.\n");
+            vf_add_output_frame(vf, mpi);
+            return -1;
+        }
+
         if (p->num_buffered == maxbuffer) {
             talloc_free(p->buffered[p->num_buffered - 1]);
             p->num_buffered--;
@@ -170,7 +207,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    if (fmt == IMGFMT_VDPAU)
+    if (fmt == IMGFMT_VDPAU || mp_vdpau_get_format(fmt, NULL, NULL))
         return vf_next_query_format(vf, IMGFMT_VDPAU);
     return 0;
 }
