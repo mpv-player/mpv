@@ -56,13 +56,16 @@ def is_url(filename):
         return False
     # protocol prefix has no special characters => it's an URL
     prefix = parts[0]
-    return len(prefix.translate(None, string.letters)) == 0
+    for c in prefix:
+        if string.ascii_letters.find(c) < 0:
+            return False
+    return True
 
 # make them absolute; also makes them safe against interpretation as options
 def make_abs(filename):
     if not is_url(filename):
-        return os.path.abspath(f)
-    return f
+        return os.path.abspath(filename)
+    return filename
 files = [make_abs(f) for f in files]
 
 opts_env = os.getenv("UMPV_OPTIONS")
