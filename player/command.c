@@ -1533,27 +1533,36 @@ static int mp_property_fullscreen(m_option_t *prop,
 
 #define VF_DEINTERLACE_LABEL "deinterlace"
 
-static const char *deint_filters[] = {
-    "yadif",
+static bool probe_deint_filter(struct MPContext *mpctx, const char *filt)
+{
+    char filter[80];
+    // add a label so that removing the filter is easier
+    snprintf(filter, sizeof(filter), "@%s:%s", VF_DEINTERLACE_LABEL, filt);
+    return edit_filters(mpctx, STREAM_VIDEO, "pre", filter) >= 0;
+}
+
+static bool check_output_format(struct MPContext *mpctx, int imgfmt)
+{
+    struct dec_video *vd = mpctx->d_video;
+    if (!vd)
+        return false;
+    return vd->vfilter->allowed_output_formats[imgfmt - IMGFMT_START];
+}
+
+static int probe_deint_filters(struct MPContext *mpctx)
+{
 #if HAVE_VDPAU
-    "vdpaupp:deint=yes",
+    if (check_output_format(mpctx, IMGFMT_VDPAU) &&
+        probe_deint_filter(mpctx, "vdpaupp:deint=yes"))
+        return 0;
 #endif
 #if HAVE_VAAPI_VPP
-    "vavpp",
+    if (check_output_format(mpctx, IMGFMT_VAAPI) &&
+        probe_deint_filter(mpctx, "vavpp"))
+        return 0;
 #endif
-    NULL
-};
-
-static int probe_deint_filters(struct MPContext *mpctx, const char *cmd)
-{
-    for (int n = 0; deint_filters[n]; n++) {
-        char filter[80];
-        // add a label so that removing the filter is easier
-        snprintf(filter, sizeof(filter), "@%s:%s", VF_DEINTERLACE_LABEL,
-                 deint_filters[n]);
-        if (edit_filters(mpctx, STREAM_VIDEO, cmd, filter) >= 0)
-            return 0;
-    }
+    if (probe_deint_filter(mpctx, "yadif"))
+        return 0;
     return -1;
 }
 
@@ -1581,7 +1590,7 @@ static void set_deinterlacing(struct MPContext *mpctx, bool enable)
         if ((get_deinterlacing(mpctx) > 0) != enable) {
             int arg = enable;
             if (video_vf_vo_control(vd, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
-                probe_deint_filters(mpctx, "pre");
+                probe_deint_filters(mpctx);
         }
     }
     mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
