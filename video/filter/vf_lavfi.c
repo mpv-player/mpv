@@ -326,6 +326,10 @@ static void reset(vf_instance_t *vf)
     struct mp_image_params *f = &vf->fmt_in;
     if (p->graph && f->imgfmt)
         recreate_graph(vf, f->w, f->h, f->d_w, f->d_h, f->imgfmt);
+    if (p->metadata) {
+      talloc_free(p->metadata);
+      p->metadata = NULL;
+    }
 }
 
 static int control(vf_instance_t *vf, int request, void *data)
@@ -334,10 +338,13 @@ static int control(vf_instance_t *vf, int request, void *data)
     case VFCTRL_SEEK_RESET:
         reset(vf);
         return CONTROL_OK;
-    case VFCTRL_GET_METADATA:{
+    case VFCTRL_GET_METADATA:
+      if (vf->priv && vf->priv->metadata) {
         *(struct mp_tags*) data = *vf->priv->metadata;
         return CONTROL_OK;
-    }
+      } else {
+	return CONTROL_NA;
+      }
     }
     return CONTROL_UNKNOWN;
 }
