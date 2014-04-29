@@ -204,8 +204,22 @@ static int render_video_to_output_surface(struct vo *vo,
         return 0;
     }
 
-    mp_vdpau_mixer_render(vc->video_mixer, NULL, output_surface, output_rect,
-                          bv[dp].mpi, video_rect);
+    struct mp_image *mpi = bv[dp].mpi;
+    struct mp_vdpau_mixer_frame *frame = mp_vdpau_mixed_frame_get(mpi);
+    struct mp_vdpau_mixer_opts opts = {0};
+    if (frame)
+        opts = frame->opts;
+
+    // Apply custom vo_vdpau suboptions.
+    opts.chroma_deint |= vc->chroma_deint;
+    opts.pullup |= vc->pullup;
+    opts.denoise = MPCLAMP(opts.denoise + vc->denoise, 0, 1);
+    opts.sharpen = MPCLAMP(opts.sharpen + vc->sharpen, -1, 1);
+    if (vc->hqscaling)
+        opts.hqscaling = vc->hqscaling;
+
+    mp_vdpau_mixer_render(vc->video_mixer, &opts, output_surface, output_rect,
+                          mpi, video_rect);
     return 0;
 }
 
