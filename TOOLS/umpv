@@ -96,7 +96,7 @@ else:
             raise e
     os.mkfifo(FIFO, int("0600", 8))
 
-    opts = ["mpv", "--really-quiet", "--force-window", "--input-file=" + FIFO]
+    opts = ["mpv", "--no-terminal", "--force-window", "--input-file=" + FIFO]
     opts.extend(opts_env)
     opts.append("--")
     opts.extend(files)
