@@ -204,7 +204,7 @@ static int render_video_to_output_surface(struct vo *vo,
         return 0;
     }
 
-    mp_vdpau_mixer_render(vc->video_mixer, output_surface, output_rect,
+    mp_vdpau_mixer_render(vc->video_mixer, NULL, output_surface, output_rect,
                           bv[dp].mpi, video_rect);
     return 0;
 }

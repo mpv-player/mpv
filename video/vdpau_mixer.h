@@ -51,6 +51,7 @@ struct mp_vdpau_mixer *mp_vdpau_mixer_create(struct mp_vdpau_ctx *vdp_ctx,
 void mp_vdpau_mixer_destroy(struct mp_vdpau_mixer *mixer);
 
 int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
+                          struct mp_vdpau_mixer_opts *opts,
                           VdpOutputSurface output, VdpRect *output_rect,
                           struct mp_image *video, VdpRect *video_rect);
 

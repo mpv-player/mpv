@@ -204,7 +204,9 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer)
     return 0;
 }
 
+// If opts is NULL, use the opts as implied by the video image.
 int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
+                          struct mp_vdpau_mixer_opts *opts,
                           VdpOutputSurface output, VdpRect *output_rect,
                           struct mp_image *video, VdpRect *video_rect)
 {
@@ -223,13 +225,16 @@ int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
         frame->field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
     }
 
+    if (!opts)
+        opts = &frame->opts;
+
     if (mixer->video_mixer == VDP_INVALID_HANDLE)
         mixer->initialized = false;
 
-    if (!mixer->initialized || !opts_equal(&frame->opts, &mixer->opts) ||
+    if (!mixer->initialized || !opts_equal(opts, &mixer->opts) ||
         !mp_image_params_equals(&video->params, &mixer->image_params))
     {
-        mixer->opts = frame->opts;
+        mixer->opts = *opts;
         mixer->image_params = video->params;
         if (mixer->video_mixer != VDP_INVALID_HANDLE) {
             vdp_st = vdp->video_mixer_destroy(mixer->video_mixer);

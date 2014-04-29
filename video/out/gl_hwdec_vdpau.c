@@ -191,7 +191,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!p->vdpgl_surface)
         return -1;
 
-    mp_vdpau_mixer_render(p->mixer, p->vdp_surface, NULL, hw_image, NULL);
+    mp_vdpau_mixer_render(p->mixer, NULL, p->vdp_surface, NULL, hw_image, NULL);
 
     gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
     out_textures[0] = p->gl_texture;
