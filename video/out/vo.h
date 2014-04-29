@@ -85,6 +85,8 @@ enum mp_voctrl {
     VOCTRL_SET_COMMAND_LINE,            // char**
 
     VOCTRL_GET_ICC_PROFILE_PATH,        // char**
+
+    VOCTRL_GET_PREF_DEINT,              // int*
 };
 
 // VOCTRL_SET_EQUALIZER

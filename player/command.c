@@ -1552,9 +1552,22 @@ static bool check_output_format(struct MPContext *mpctx, int imgfmt)
 static int probe_deint_filters(struct MPContext *mpctx)
 {
 #if HAVE_VDPAU
-    if (check_output_format(mpctx, IMGFMT_VDPAU) &&
-        probe_deint_filter(mpctx, "vdpaupp:deint=yes"))
+    if (check_output_format(mpctx, IMGFMT_VDPAU)) {
+        char filter[80] = "vdpaupp:deint=yes";
+        int pref = 0;
+        if (mpctx->video_out)
+            vo_control(mpctx->video_out, VOCTRL_GET_PREF_DEINT, &pref);
+        pref = pref < 0 ? -pref : pref;
+        if (pref > 0 && pref <= 4) {
+            const char *types[] =
+                {"", "first-field", "bob", "temporal", "temporal-spatial"};
+            mp_snprintf_append(filter, sizeof(filter), ":deint-mode=%s",
+                               types[pref]);
+        }
+
+        probe_deint_filter(mpctx, filter);
         return 0;
+    }
 #endif
 #if HAVE_VAAPI_VPP
     if (check_output_format(mpctx, IMGFMT_VAAPI) &&

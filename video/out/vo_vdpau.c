@@ -1278,6 +1278,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
             args->out_image = get_screenshot(vo);
         return true;
     }
+    case VOCTRL_GET_PREF_DEINT:
+        *(int *)data = vc->deint;
+        return true;
     }
 
     int events = 0;
