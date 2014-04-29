@@ -899,6 +899,7 @@ static struct mp_image *get_rgb_surface(struct vo *vo)
         if (!*used) {
             *used = true;
             struct mp_image mpi = {0};
+            mp_image_setfmt(&mpi, IMGFMT_VDPAU); // not really, but keep csp flags
             mpi.planes[0] = (void *)(uintptr_t)vc->rgb_surfaces[n];
             return mp_image_new_custom_ref(&mpi, used, free_rgb_surface);
         }
@@ -958,7 +959,7 @@ static struct mp_image *filter_image(struct vo *vo, struct mp_image *mpi)
         }
     }
 
-    reserved_mpi->pts = mpi->pts;
+    mp_image_copy_attributes(reserved_mpi, mpi);
 
 end:
     talloc_free(mpi);
