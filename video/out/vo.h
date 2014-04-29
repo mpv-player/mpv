@@ -54,8 +54,6 @@ enum mp_voctrl {
     /* for hardware decoding */
     VOCTRL_GET_HWDEC_INFO,              // struct mp_hwdec_info*
 
-    VOCTRL_NEWFRAME,
-    VOCTRL_SKIPFRAME,
     VOCTRL_REDRAW_FRAME,
 
     VOCTRL_ONTOP,
@@ -135,16 +133,14 @@ struct voctrl_screenshot_args {
 // VO does handle mp_image_params.rotate in 90 degree steps
 #define VO_CAP_ROTATE90 1
 
+#define VO_MAX_QUEUE 5
+
 struct vo;
 struct osd_state;
 struct mp_image;
 struct mp_image_params;
 
 struct vo_driver {
-    // Driver buffers or adds (deinterlace) frames and will keep track
-    // of pts values itself
-    bool buffer_frames;
-
     // Encoding functionality, which can be invoked via --o only.
     bool encode;
 
@@ -167,6 +163,20 @@ struct vo_driver {
     int (*query_format)(struct vo *vo, uint32_t format);
 
     /*
+     * Optional. Can be used to convert the input image into something VO
+     * internal, such as GPU surfaces. Ownership of mpi is passed to the
+     * function, and the returned image is owned by the caller.
+     * The following guarantees are given:
+     * - mpi has the format with which the VO was configured
+     * - the returned image can be arbitrary, and the VO merely manages its
+     *   lifetime
+     * - images passed to draw_image are always passed through this function
+     * - the maximum number of images kept alive is not over vo->max_video_queue
+     * - if vo->max_video_queue is large enough, some images may be buffered ahead
+     */
+    struct mp_image *(*filter_image)(struct vo *vo, struct mp_image *mpi);
+
+    /*
      * Initialize or reconfigure the display driver.
      *   params: video parameters, like pixel format and frame size
      *   flags: combination of VOFLAG_ values
@@ -186,14 +196,6 @@ struct vo_driver {
      * a new reference to mpi.
      */
     void (*draw_image)(struct vo *vo, struct mp_image *mpi);
-
-    /*
-     * Get extra frames from the VO, such as those added by VDPAU
-     * deinterlace. Preparing the next such frame if any could be done
-     * automatically by the VO after a previous flip_page(), but having
-     * it as a separate step seems to allow making code more robust.
-     */
-    void (*get_buffered_frame)(struct vo *vo, bool eof);
 
     /*
      * Draws OSD to the screen buffer
@@ -236,15 +238,18 @@ struct vo {
     bool untimed;       // non-interactive, don't do sleep calls in playloop
 
     bool frame_loaded;  // Is there a next frame the VO could flip to?
-    struct mp_image *waiting_mpi;
     double next_pts;    // pts value of the next frame if any
     double next_pts2;   // optional pts of frame after that
     bool want_redraw;   // visible frame wrong (window resize), needs refresh
-    bool redrawing;     // between redrawing frame and flipping it
     bool hasframe;      // >= 1 frame has been drawn, so redraw is possible
     double wakeup_period; // if > 0, this sets the maximum wakeup period for event polling
 
     double flip_queue_offset; // queue flip events at most this much in advance
+    int max_video_queue; // queue this many decoded video frames (<=VO_MAX_QUEUE)
+
+    // Frames to display; the next (i.e. oldest, lowest PTS) image has index 0.
+    struct mp_image *video_queue[VO_MAX_QUEUE];
+    int num_video_queue;
 
     const struct vo_driver *driver;
     void *priv;

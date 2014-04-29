@@ -86,11 +86,8 @@ struct vdpctx {
     VdpOutputSurface                   rgb_surfaces[NUM_BUFFERED_VIDEO];
     bool                               rgb_surfaces_used[NUM_BUFFERED_VIDEO];
     VdpOutputSurface                   black_pixel;
-    struct mp_image                   *buffered_video[NUM_BUFFERED_VIDEO];
-    int                                buffer_pos;
 
-    // State for redrawing the screen after seek-reset
-    int                                prev_buffer_pos;
+    struct mp_image                   *current_image;
 
     int                                output_surface_width, output_surface_height;
 
@@ -161,12 +158,9 @@ static int render_video_to_output_surface(struct vo *vo,
     struct vdp_functions *vdp = vc->vdp;
     VdpTime dummy;
     VdpStatus vdp_st;
-    int dp = vc->buffer_pos;
+    struct mp_image *mpi = vc->current_image;
 
-    // Redraw frame from before seek reset?
-    if (dp < 0)
-        dp = vc->prev_buffer_pos;
-    if (dp < 0) {
+    if (!mpi) {
         // At least clear the screen if there is nothing to render
         int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
         vdp_st = vdp->output_surface_render_output_surface(output_surface,
@@ -175,8 +169,6 @@ static int render_video_to_output_surface(struct vo *vo,
                                                            flags);
         return -1;
     }
-
-    struct mp_image *mpi = vc->buffered_video[dp];
 
     vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
                                                               output_surface,
@@ -230,73 +222,14 @@ static int video_to_output_surface(struct vo *vo)
                                           &vc->out_rect_vid, &vc->src_rect_vid);
 }
 
-static int next_buffer_pos(struct vo *vo, bool eof)
-{
-    struct vdpctx *vc = vo->priv;
-
-    int dqp = vc->buffer_pos;
-    if (dqp < 0)
-        dqp += 1000;
-    else
-        dqp -= 1;
-    if (dqp < (eof ? 0 : 1))
-        return -1;
-    return dqp;
-}
-
-static void set_next_frame_info(struct vo *vo, bool eof)
-{
-    struct vdpctx *vc = vo->priv;
-
-    vo->frame_loaded = false;
-    int dqp = next_buffer_pos(vo, eof);
-    if (dqp < 0)
-        return;
-    vo->frame_loaded = true;
-
-    // Set pts values
-    struct mp_image **bv = &vc->buffered_video[0];
-    if (dqp == 0) {  // no future frame/pts available
-        vo->next_pts = bv[0]->pts;
-        vo->next_pts2 = MP_NOPTS_VALUE;
-    } else {
-        vo->next_pts = bv[dqp]->pts;
-        vo->next_pts2 = bv[dqp - 1]->pts;
-    }
-}
-
-static void add_new_video_surface(struct vo *vo, struct mp_image *mpi)
-{
-    struct vdpctx *vc = vo->priv;
-    struct mp_image **bv = vc->buffered_video;
-
-    mp_image_unrefp(&bv[NUM_BUFFERED_VIDEO - 1]);
-
-    for (int i = NUM_BUFFERED_VIDEO - 1; i > 0; i--)
-        bv[i] = bv[i - 1];
-    bv[0] = mpi;
-
-    vc->buffer_pos = FFMIN(vc->buffer_pos + 1, NUM_BUFFERED_VIDEO - 2);
-    set_next_frame_info(vo, false);
-}
-
 static void forget_frames(struct vo *vo, bool seek_reset)
 {
     struct vdpctx *vc = vo->priv;
 
-    if (seek_reset) {
-        if (vc->buffer_pos >= 0)
-            vc->prev_buffer_pos = vc->buffer_pos;
-    } else {
-        vc->prev_buffer_pos = -1001;
-    }
+    if (!seek_reset)
+        mp_image_unrefp(&vc->current_image);
 
-    vc->buffer_pos = -1001;
     vc->dropped_frame = false;
-    if (vc->prev_buffer_pos < 0) {
-        for (int i = 0; i < NUM_BUFFERED_VIDEO; i++)
-            mp_image_unrefp(&vc->buffered_video[i]);
-    }
 }
 
 static void resize(struct vo *vo)
@@ -975,23 +908,29 @@ static struct mp_image *get_rgb_surface(struct vo *vo)
     return NULL;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image(struct vo *vo, struct mp_image *mpi)
+{
+    struct vdpctx *vc = vo->priv;
+
+    mp_image_setrefp(&vc->current_image, mpi);
+
+    if (status_ok(vo))
+        video_to_output_surface(vo);
+}
+
+static struct mp_image *filter_image(struct vo *vo, struct mp_image *mpi)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     struct mp_image *reserved_mpi = NULL;
     VdpStatus vdp_st;
 
-    // Forget previous frames, as we can display a new one now.
-    vc->prev_buffer_pos = -1001;
-    mp_image_unrefp(&vc->buffered_video[NUM_BUFFERED_VIDEO - 1]);
-
     if (vc->image_format == IMGFMT_VDPAU) {
         reserved_mpi = mp_image_new_ref(mpi);
     } else if (vc->rgb_mode) {
         reserved_mpi = get_rgb_surface(vo);
         if (!reserved_mpi)
-            return;
+            goto end;
         VdpOutputSurface rgb_surface = (uintptr_t)reserved_mpi->planes[0];
         if (rgb_surface != VDP_INVALID_HANDLE) {
             vdp_st = vdp->output_surface_put_bits_native(rgb_surface,
@@ -1005,7 +944,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         reserved_mpi = mp_vdpau_get_video_surface(vc->mpvdp, vc->vdp_chroma_type,
                                                   mpi->w, mpi->h);
         if (!reserved_mpi)
-            return;
+            goto end;
         VdpVideoSurface surface = (VdpVideoSurface)(intptr_t)reserved_mpi->planes[3];
         if (handle_preemption(vo) >= 0) {
             const void *destdata[3] = {mpi->planes[0], mpi->planes[2],
@@ -1020,9 +959,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 
     reserved_mpi->pts = mpi->pts;
-    add_new_video_surface(vo, reserved_mpi);
 
-    return;
+end:
+    talloc_free(mpi);
+    return reserved_mpi;
 }
 
 // warning: the size and pixel format of surface must match that of the
@@ -1175,6 +1115,8 @@ static int preinit(struct vo *vo)
 
     vc->video_eq.capabilities = MP_CSP_EQ_CAPS_COLORMATRIX;
 
+    vo->max_video_queue = 2;
+
     return 0;
 }
 
@@ -1248,14 +1190,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         }
         return true;
     }
-    case VOCTRL_NEWFRAME:
-        vc->buffer_pos = next_buffer_pos(vo, true);
-        if (status_ok(vo))
-            video_to_output_surface(vo);
-        return true;
-    case VOCTRL_SKIPFRAME:
-        vc->buffer_pos = next_buffer_pos(vo, true);
-        return true;
     case VOCTRL_REDRAW_FRAME:
         if (status_ok(vo))
             video_to_output_surface(vo);
@@ -1293,7 +1227,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 #define OPT_BASE_STRUCT struct vdpctx
 
 const struct vo_driver video_out_vdpau = {
-    .buffer_frames = true,
     .description = "VDPAU with X11",
     .name = "vdpau",
     .preinit = preinit,
@@ -1301,7 +1234,7 @@ const struct vo_driver video_out_vdpau = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
-    .get_buffered_frame = set_next_frame_info,
+    .filter_image = filter_image,
     .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
     .uninit = uninit,

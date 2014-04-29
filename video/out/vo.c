@@ -112,6 +112,8 @@ const struct vo_driver *video_out_drivers[] =
         NULL
 };
 
+static void forget_frames(struct vo *vo);
+
 static bool get_desc(struct m_obj_desc *dst, int index)
 {
     if (index >= MP_ARRAY_SIZE(video_out_drivers) - 1)
@@ -171,6 +173,7 @@ static struct vo *vo_create(struct mpv_global *global,
         .input_ctx = input_ctx,
         .event_fd = -1,
         .monitor_par = 1,
+        .max_video_queue = 1,
         .next_pts = MP_NOPTS_VALUE,
         .next_pts2 = MP_NOPTS_VALUE,
     };
@@ -228,7 +231,7 @@ void vo_destroy(struct vo *vo)
 {
     if (vo->event_fd != -1)
         mp_input_rm_key_fd(vo->input_ctx, vo->event_fd);
-    mp_image_unrefp(&vo->waiting_mpi);
+    forget_frames(vo);
     vo->driver->uninit(vo);
     talloc_free(vo);
 }
@@ -345,9 +348,7 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
         talloc_free(vo->params);
         vo->params = NULL;
     }
-    vo->frame_loaded = false;
-    vo->waiting_mpi = NULL;
-    vo->redrawing = false;
+    forget_frames(vo);
     vo->hasframe = false;
     return ret;
 }
@@ -357,19 +358,45 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
     return vo->driver->control(vo, request, data);
 }
 
+static void update_video_queue_state(struct vo *vo, bool eof)
+{
+    int num = vo->num_video_queue;
+    // Normally, buffer 1 image ahead, except if the queue is limited to less
+    // than 2 entries, or if EOF is reached and there aren't enough images left.
+    int min = 2;
+    if (vo->max_video_queue < 2 || (vo->num_video_queue < 2 && eof))
+        min = 1;
+    vo->frame_loaded = num >= min;
+    if (!vo->frame_loaded)
+        num = -1;
+    vo->next_pts = num > 0 ? vo->video_queue[0]->pts : MP_NOPTS_VALUE;
+    vo->next_pts2 = num > 1 ? vo->video_queue[1]->pts : MP_NOPTS_VALUE;
+}
+
+static void forget_frames(struct vo *vo)
+{
+    for (int n = 0; n < vo->num_video_queue; n++)
+        talloc_free(vo->video_queue[n]);
+    vo->num_video_queue = 0;
+    update_video_queue_state(vo, false);
+}
+
 void vo_queue_image(struct vo *vo, struct mp_image *mpi)
 {
+    assert(mpi);
     if (!vo->config_ok)
         return;
-    if (vo->driver->buffer_frames) {
-        vo->driver->draw_image(vo, mpi);
+    mpi = mp_image_new_ref(mpi);
+    if (vo->driver->filter_image)
+        mpi = vo->driver->filter_image(vo, mpi);
+    if (!mpi) {
+        MP_ERR(vo, "Could not upload image.\n");
         return;
     }
-    vo->frame_loaded = true;
-    vo->next_pts = mpi->pts;
-    vo->next_pts2 = MP_NOPTS_VALUE;
-    assert(!vo->waiting_mpi);
-    vo->waiting_mpi = mp_image_new_ref(mpi);
+    assert(vo->max_video_queue <= VO_MAX_QUEUE);
+    assert(vo->num_video_queue < vo->max_video_queue);
+    vo->video_queue[vo->num_video_queue++] = mpi;
+    update_video_queue_state(vo, false);
 }
 
 int vo_redraw_frame(struct vo *vo)
@@ -378,7 +405,6 @@ int vo_redraw_frame(struct vo *vo)
         return -1;
     if (vo_control(vo, VOCTRL_REDRAW_FRAME, NULL) == true) {
         vo->want_redraw = false;
-        vo->redrawing = true;
         return 0;
     }
     return -1;
@@ -395,32 +421,33 @@ int vo_get_buffered_frame(struct vo *vo, bool eof)
 {
     if (!vo->config_ok)
         return -1;
-    if (vo->frame_loaded)
-        return 0;
-    if (!vo->driver->buffer_frames)
-        return -1;
-    vo->driver->get_buffered_frame(vo, eof);
+    update_video_queue_state(vo, eof);
     return vo->frame_loaded ? 0 : -1;
+}
+
+// Remove vo->video_queue[0]
+static void shift_queue(struct vo *vo)
+{
+    if (!vo->num_video_queue)
+        return;
+    talloc_free(vo->video_queue[0]);
+    vo->num_video_queue--;
+    for (int n = 0; n < vo->num_video_queue; n++)
+        vo->video_queue[n] = vo->video_queue[n + 1];
 }
 
 void vo_skip_frame(struct vo *vo)
 {
-    vo_control(vo, VOCTRL_SKIPFRAME, NULL);
+    shift_queue(vo);
     vo->frame_loaded = false;
-    mp_image_unrefp(&vo->waiting_mpi);
 }
 
 void vo_new_frame_imminent(struct vo *vo)
 {
-    if (vo->driver->buffer_frames)
-        vo_control(vo, VOCTRL_NEWFRAME, NULL);
-    else {
-        assert(vo->frame_loaded);
-        assert(vo->waiting_mpi);
-        assert(vo->waiting_mpi->pts == vo->next_pts);
-        vo->driver->draw_image(vo, vo->waiting_mpi);
-        mp_image_unrefp(&vo->waiting_mpi);
-    }
+    assert(vo->frame_loaded);
+    assert(vo->num_video_queue > 0);
+    vo->driver->draw_image(vo, vo->video_queue[0]);
+    shift_queue(vo);
 }
 
 void vo_draw_osd(struct vo *vo, struct osd_state *osd)
@@ -433,18 +460,13 @@ void vo_flip_page(struct vo *vo, int64_t pts_us, int duration)
 {
     if (!vo->config_ok)
         return;
-    if (!vo->redrawing) {
-        vo->frame_loaded = false;
-        vo->next_pts = MP_NOPTS_VALUE;
-        vo->next_pts2 = MP_NOPTS_VALUE;
-    }
     vo->want_redraw = false;
-    vo->redrawing = false;
     if (vo->driver->flip_page_timed)
         vo->driver->flip_page_timed(vo, pts_us, duration);
     else
         vo->driver->flip_page(vo);
     vo->hasframe = true;
+    update_video_queue_state(vo, false);
 }
 
 void vo_check_events(struct vo *vo)
@@ -457,11 +479,8 @@ void vo_check_events(struct vo *vo)
 void vo_seek_reset(struct vo *vo)
 {
     vo_control(vo, VOCTRL_RESET, NULL);
-    vo->frame_loaded = false;
-    vo->next_pts = MP_NOPTS_VALUE;
-    vo->next_pts2 = MP_NOPTS_VALUE;
+    forget_frames(vo);
     vo->hasframe = false;
-    mp_image_unrefp(&vo->waiting_mpi);
 }
 
 // Calculate the appropriate source and destination rectangle to
