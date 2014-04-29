@@ -70,6 +70,7 @@ extern const vf_info_t vf_info_dlopen;
 extern const vf_info_t vf_info_lavfi;
 extern const vf_info_t vf_info_vaapi;
 extern const vf_info_t vf_info_vapoursynth;
+extern const vf_info_t vf_info_vdpaupp;
 
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
@@ -115,6 +116,9 @@ static const vf_info_t *const filter_list[] = {
 #endif
 #if HAVE_VAAPI_VPP
     &vf_info_vaapi,
+#endif
+#if HAVE_VDPAU
+    &vf_info_vdpaupp,
 #endif
     NULL
 };
