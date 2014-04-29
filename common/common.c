@@ -16,6 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdarg.h>
+#include <assert.h>
+
 #include <libavutil/common.h>
 
 #include "talloc.h"
@@ -102,6 +105,22 @@ bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2)
     rc->y1 = FFMIN(rc->y1, rc2->y1);
 
     return rc->x1 > rc->x0 && rc->y1 > rc->y0;
+}
+
+// This works like snprintf(), except that it starts writing the first output
+// character to str[strlen(str)]. This returns the number of characters the
+// string would have assuming a large enough buffer, will make sure str is
+// null-terminated, and will never write to str[size] or past.
+int mp_snprintf_append(char *str, size_t size, const char *format, ...)
+{
+    size_t len = strnlen(str, size);
+    assert(!size || len < size); // str with no 0-termination is not allowed
+    int r;
+    va_list ap;
+    va_start(ap, format);
+    r = len + vsnprintf(str + len, size - len, format, ap);
+    va_end(ap);
+    return r;
 }
 
 // Encode the unicode codepoint as UTF-8, and append to the end of the

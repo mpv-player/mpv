@@ -19,6 +19,7 @@
 #ifndef MPLAYER_MPCOMMON_H
 #define MPLAYER_MPCOMMON_H
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -75,6 +76,9 @@ struct mp_rect {
 
 void mp_rect_union(struct mp_rect *rc, const struct mp_rect *src);
 bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2);
+
+int mp_snprintf_append(char *str, size_t size, const char *format, ...)
+    PRINTF_ATTRIBUTE(3, 4);
 
 struct bstr;
 
