@@ -170,6 +170,7 @@ typedef struct demuxer {
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
     bool warned_queue_overflow;
+    bool initializing;
 
     struct sh_stream **streams;
     int num_streams;

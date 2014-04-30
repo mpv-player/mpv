@@ -522,6 +522,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .glog = log,
         .filename = talloc_strdup(demuxer, stream->url),
         .metadata = talloc_zero(demuxer, struct mp_tags),
+        .initializing = true,
     };
     demuxer->params = params; // temporary during open()
     stream_seek(stream, stream->start_pos);
@@ -554,6 +555,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                     "File is not seekable, but there's a cache: enabling seeking.\n");
             demuxer->seekable = true;
         }
+        demuxer->initializing = false;
         return demuxer;
     }
 
@@ -724,6 +726,8 @@ int demux_info_add_bstr(demuxer_t *demuxer, struct bstr opt, struct bstr param)
     if (oldval) {
         if (bstrcmp0(param, oldval) == 0)
             return 0;
+    }
+    if (!demuxer->initializing) {
         MP_INFO(demuxer, "Demuxer info %.*s changed to %.*s\n",
                 BSTR_P(opt), BSTR_P(param));
     }
@@ -739,6 +743,8 @@ int demux_info_print(demuxer_t *demuxer)
 
     if (!info || !info->num_keys)
         return 0;
+
+    demux_info_update(demuxer);
 
     mp_info(demuxer->glog, "Clip info:\n");
     for (n = 0; n < info->num_keys; n++) {
