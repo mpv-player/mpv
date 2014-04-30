@@ -1011,8 +1011,7 @@ void run_playloop(struct MPContext *mpctx)
             MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
             if (mpctx->d_video->vfilter && mpctx->d_video->vfilter->initialized < 0)
             {
-                MP_FATAL(mpctx, "\nFATAL: Could not initialize video filters "
-                         "(-vf) or video output (-vo).\n");
+                MP_FATAL(mpctx, "Could not initialize video chain.\n");
                 int uninit = INITIALIZED_VCODEC;
                 if (!opts->force_vo)
                     uninit |= INITIALIZED_VO;

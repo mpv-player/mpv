@@ -432,7 +432,7 @@ int video_reconfig_filters(struct dec_video *d_video,
                p.w, p.h, p.d_w, p.d_h, p.imgfmt);
 
     if (vf_reconfig(d_video->vfilter, &p) < 0) {
-        MP_WARN(d_video, "FATAL: Cannot initialize video driver.\n");
+        MP_FATAL(d_video, "Cannot initialize video filters.\n");
         return -1;
     }
 
