@@ -177,6 +177,12 @@ struct vo_driver {
      */
     int (*control)(struct vo *vo, uint32_t request, void *data);
 
+    /*
+     * Render the given frame to the VO's backbuffer. This operation will be
+     * followed by a draw_osd and a flip_page[_timed] call.
+     * mpi belongs to the caller; if the VO needs it longer, it has to create
+     * a new reference to mpi.
+     */
     void (*draw_image)(struct vo *vo, struct mp_image *mpi);
 
     /*
