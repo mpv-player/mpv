@@ -367,7 +367,10 @@ static int vf_do_filter(struct vf_instance *vf, struct mp_image *img)
         vf_fix_img_params(img, &vf->fmt_in);
 
     if (vf->filter_ext) {
-        return vf->filter_ext(vf, img);
+        int r = vf->filter_ext(vf, img);
+        if (r < 0)
+            MP_ERR(vf, "Error filtering frame.\n");
+        return r;
     } else {
         if (img) {
             if (vf->filter)
