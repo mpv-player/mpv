@@ -150,7 +150,7 @@ static bool output_field(struct vf_instance *vf, int pos)
 static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 {
     struct vf_priv_s *p = vf->priv;
-    int maxbuffer = p->opts.deint ? MP_ARRAY_SIZE(p->buffered) : 1;
+    int maxbuffer = p->opts.deint ? MP_ARRAY_SIZE(p->buffered) : 2;
     bool eof = !mpi;
 
     if (mpi && mpi->imgfmt != IMGFMT_VDPAU) {
