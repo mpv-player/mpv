@@ -377,60 +377,6 @@ static int ca_label_to_mp_speaker_id(AudioChannelLabel label)
     return -1;
 }
 
-static bool ca_bitmap_from_ch_desc(struct ao *ao, AudioChannelLayout *layout,
-                                   uint32_t *bitmap)
-{
-    // If the channel layout uses channel descriptions, from my
-    // exepriments there are there three possibile cases:
-    // * The description has a label kAudioChannelLabel_Unknown:
-    //   Can't do anything about this (looks like non surround
-    //   layouts are like this).
-    // * The description uses positional information: this in
-    //   theory could be used but one would have to map spatial
-    //   positions to labels which is not really feasible.
-    // * The description has a well known label which can be mapped
-    //   to the waveextensible definition: this is the kind of
-    //   descriptions we process here.
-    size_t ch_num = layout->mNumberChannelDescriptions;
-    bool all_channels_valid = true;
-
-    for (int j=0; j < ch_num && all_channels_valid; j++) {
-        AudioChannelLabel label = layout->mChannelDescriptions[j].mChannelLabel;
-        const int mp_speaker_id = ca_label_to_mp_speaker_id(label);
-        if (mp_speaker_id < 0) {
-            MP_VERBOSE(ao, "channel label=%d unusable to build channel "
-                           "bitmap, skipping layout\n", label);
-            all_channels_valid = false;
-        } else {
-            *bitmap |= 1ULL << mp_speaker_id;
-        }
-    }
-
-    return all_channels_valid;
-}
-
-static bool ca_bitmap_from_ch_tag(struct ao *ao, AudioChannelLayout *layout,
-                                  uint32_t *bitmap)
-{
-    // This layout is defined exclusively by it's tag. Use the Audio
-    // Format Services API to try and convert it to a bitmap that
-    // mpv can use.
-    uint32_t bitmap_size = sizeof(uint32_t);
-
-    AudioChannelLayoutTag tag = layout->mChannelLayoutTag;
-    OSStatus err = AudioFormatGetProperty(
-        kAudioFormatProperty_BitmapForLayoutTag,
-        sizeof(AudioChannelLayoutTag), &tag,
-        &bitmap_size, bitmap);
-    if (err != noErr) {
-        MP_VERBOSE(ao, "channel layout tag=%d unusable to build channel "
-                       "bitmap, skipping layout\n", tag);
-        return false;
-    } else {
-        return true;
-    }
-}
-
 static void ca_log_layout(struct ao *ao, AudioChannelLayout *layout)
 {
     if (!mp_msg_test(ao->log, MSGL_V))
@@ -457,30 +403,57 @@ static void ca_log_layout(struct ao *ao, AudioChannelLayout *layout)
     }
 }
 
-void ca_bitmaps_from_layouts(struct ao *ao,
-                             AudioChannelLayout *layouts, size_t n_layouts,
-                             uint32_t **bitmaps, size_t *n_bitmaps)
+bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
+                           struct mp_chmap *chmap)
 {
-    *n_bitmaps = 0;
-    *bitmaps = talloc_array_size(NULL, sizeof(uint32_t), n_layouts);
+    AudioChannelLayoutTag tag  = layout->mChannelLayoutTag;
+    uint32_t layout_size       = sizeof(layout);
+    OSStatus err;
 
-    for (int i=0; i < n_layouts; i++) {
-        uint32_t bitmap = 0;
-        ca_log_layout(ao, &layouts[i]);
+    if (tag == kAudioChannelLayoutTag_UseChannelBitmap) {
+        err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForBitmap,
+                                     sizeof(uint32_t),
+                                     &layout->mChannelBitmap,
+                                     &layout_size,
+                                     layout);
+        CHECK_CA_ERROR("failed to convert channel bitmap to descriptions");
+    } else if (tag != kAudioChannelLayoutTag_UseChannelDescriptions) {
+        err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForTag,
+                                     sizeof(AudioChannelLayoutTag),
+                                     &layout->mChannelLayoutTag,
+                                     &layout_size,
+                                     layout);
+        CHECK_CA_ERROR("failed to convert channel tag to descriptions");
+    }
 
-        switch (layouts[i].mChannelLayoutTag) {
-        case kAudioChannelLayoutTag_UseChannelBitmap:
-            (*bitmaps)[(*n_bitmaps)++] = layouts[i].mChannelBitmap;
-            break;
+    ca_log_layout(ao, layout);
 
-        case kAudioChannelLayoutTag_UseChannelDescriptions:
-            if (ca_bitmap_from_ch_desc(ao, &layouts[i], &bitmap))
-                (*bitmaps)[(*n_bitmaps)++] = bitmap;
-            break;
+    // If the channel layout uses channel descriptions, from my
+    // experiments there are there three possibile cases:
+    // * The description has a label kAudioChannelLabel_Unknown:
+    //   Can't do anything about this (looks like non surround
+    //   layouts are like this).
+    // * The description uses positional information: this in
+    //   theory could be used but one would have to map spatial
+    //   positions to labels which is not really feasible.
+    // * The description has a well known label which can be mapped
+    //   to the waveextensible definition: this is the kind of
+    //   descriptions we process here.
 
-        default:
-            if (ca_bitmap_from_ch_tag(ao, &layouts[i], &bitmap))
-                (*bitmaps)[(*n_bitmaps)++] = bitmap;
+    for (int n = 0; n < layout->mNumberChannelDescriptions; n++) {
+        AudioChannelLabel label = layout->mChannelDescriptions[n].mChannelLabel;
+        uint8_t speaker = ca_label_to_mp_speaker_id(label);
+        if (speaker < 0) {
+            MP_VERBOSE(ao, "channel label=%d unusable to build channel "
+                           "bitmap, skipping layout\n", label);
+        } else {
+            chmap->speaker[n] = speaker;
+            chmap->num = n + 1;
         }
     }
+
+    return chmap->num > 0;
+coreaudio_error:
+    ca_log_layout(ao, layout);
+    return false;
 }

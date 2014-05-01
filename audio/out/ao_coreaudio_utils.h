@@ -77,8 +77,7 @@ OSStatus ca_disable_device_listener(AudioDeviceID device, void *flag);
 bool ca_change_format(struct ao *ao, AudioStreamID stream,
                       AudioStreamBasicDescription change_format);
 
-void ca_bitmaps_from_layouts(struct ao *ao,
-                             AudioChannelLayout *layouts, size_t n_layouts,
-                             uint32_t **bitmaps, size_t *n_bitmaps);
+bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
+                           struct mp_chmap *chmap);
 
 #endif /* MPV_COREAUDIO_UTILS_H */
