@@ -103,6 +103,7 @@ struct vf_chain {
     struct vf_instance *first, *last;
 
     struct mp_image_params input_params;
+    struct mp_image_params override_params; // input to first filter
     struct mp_image_params output_params;
     uint8_t allowed_output_formats[IMGFMT_END - IMGFMT_START];
 
@@ -135,7 +136,8 @@ enum vf_ctrl {
 
 struct vf_chain *vf_new(struct mpv_global *global);
 void vf_destroy(struct vf_chain *c);
-int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params);
+int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params,
+                const struct mp_image_params *override_params);
 int vf_control_any(struct vf_chain *c, int cmd, void *arg);
 int vf_control_by_label(struct vf_chain *c, int cmd, void *arg, bstr label);
 int vf_filter_frame(struct vf_chain *c, struct mp_image *img);

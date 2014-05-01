@@ -34,6 +34,7 @@
 #include "demux/demux.h"
 #include "video/mp_image.h"
 #include "video/decode/dec_video.h"
+#include "video/filter/vf.h"
 
 #include "core.h"
 
@@ -92,7 +93,7 @@ static void update_subtitle(struct MPContext *mpctx, int order)
     int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
 
     if (mpctx->d_video) {
-        struct mp_image_params params = mpctx->d_video->vf_input;
+        struct mp_image_params params = mpctx->d_video->vfilter->override_params;
         if (params.imgfmt)
             sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
     }

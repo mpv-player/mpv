@@ -1880,8 +1880,8 @@ static int mp_property_vd_imgparams(m_option_t *prop, int action, void *arg,
     if (!vd)
         return M_PROPERTY_UNAVAILABLE;
     struct sh_video *sh = vd->header->video;
-    if (vd->vf_input.imgfmt) {
-        return property_imgparams(vd->vf_input, action, arg);
+    if (vd->vfilter->override_params.imgfmt) {
+        return property_imgparams(vd->vfilter->override_params, action, arg);
     } else if (sh->disp_w && sh->disp_h) {
         // Simplistic fallback for stupid scripts querying "width"/"height"
         // before the first frame is decoded.
@@ -1976,7 +1976,7 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_GET: {
         float aspect = -1;
-        struct mp_image_params *params = &d_video->vf_input;
+        struct mp_image_params *params = &d_video->vfilter->override_params;
         if (params && params->d_w && params->d_h) {
             aspect = (float)params->d_w / params->d_h;
         } else if (sh_video->disp_w && sh_video->disp_h) {

@@ -245,6 +245,9 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel)
     if (!mp_msg_test(c->log, msglevel))
         return;
 
+    mp_msg(c->log, msglevel, " [vd] ");
+    print_fmt(c->log, msglevel, &c->input_params);
+    mp_msg(c->log, msglevel, "\n");
     for (vf_instance_t *f = c->first; f; f = f->next) {
         mp_msg(c->log, msglevel, " [%s] ", f->info->name);
         print_fmt(c->log, msglevel, &f->fmt_out);
@@ -404,7 +407,8 @@ int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
         talloc_free(img);
         return -1;
     }
-    vf_fix_img_params(img, &c->input_params);
+    assert(mp_image_params_equals(&img->params, &c->input_params));
+    vf_fix_img_params(img, &c->override_params);
     return vf_do_filter(c->first, img);
 }
 
@@ -583,9 +587,11 @@ static int vf_reconfig_wrapper(struct vf_instance *vf,
     return r;
 }
 
-int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
+// override_params is used to forcibly change the parameters of input images,
+// while params has to match the input images exactly.
+int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params,
+                const struct mp_image_params *override_params)
 {
-    struct mp_image_params cur = *params;
     int r = 0;
     vf_chain_forget_frames(c);
     for (struct vf_instance *vf = c->first; vf; ) {
@@ -594,7 +600,11 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
             vf_remove_filter(c, vf);
         vf = next;
     }
-    c->first->fmt_in = *params;
+    c->input_params = *params;
+    c->first->fmt_in = *override_params;
+    c->override_params = *override_params;
+    struct mp_image_params cur = c->override_params;
+
     uint8_t unused[IMGFMT_END - IMGFMT_START];
     update_formats(c, c->first, unused);
     for (struct vf_instance *vf = c->first; vf; vf = vf->next) {
@@ -603,14 +613,17 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
             break;
         cur = vf->fmt_out;
     }
-    c->input_params  = r < 0 ? (struct mp_image_params){0} : *params;
-    c->output_params = r < 0 ? (struct mp_image_params){0} : cur;
+    c->output_params = cur;
     c->initialized = r < 0 ? -1 : 1;
     int loglevel = r < 0 ? MSGL_WARN : MSGL_V;
     if (r == -2)
         MP_ERR(c, "Image formats incompatible.\n");
     mp_msg(c->log, loglevel, "Video filter chain:\n");
     vf_print_filter_chain(c, loglevel);
+    if (r < 0) {
+        c->input_params = c->override_params = c->output_params =
+            (struct mp_image_params){0};
+    }
     return r;
 }
 

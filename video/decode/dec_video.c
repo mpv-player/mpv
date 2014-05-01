@@ -431,12 +431,12 @@ int video_reconfig_filters(struct dec_video *d_video,
     MP_VERBOSE(d_video, "VO Config (%dx%d->%dx%d,0x%X)\n",
                p.w, p.h, p.d_w, p.d_h, p.imgfmt);
 
-    if (vf_reconfig(d_video->vfilter, &p) < 0) {
+    if (vf_reconfig(d_video->vfilter, params, &p) < 0) {
         MP_FATAL(d_video, "Cannot initialize video filters.\n");
         return -1;
     }
 
-    d_video->vf_input = p;
+    d_video->vf_input = *params;
 
     return 0;
 }

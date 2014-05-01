@@ -366,7 +366,6 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame,
         return;
     }
 
-    mp_image_set_params(frame, &d_video->vf_input); // force csp/aspect overrides
     vf_filter_frame(d_video->vfilter, frame);
     filter_output_queued_frame(mpctx, false);
 }
