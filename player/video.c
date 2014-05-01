@@ -95,10 +95,6 @@ static void filter_reconfig(struct MPContext *mpctx,
 
     set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
 
-    // The event should happen _after_ filter and VO reconfig. Since we don't
-    // have any fine grained locking, this is just as good.
-    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
-
     if (video_reconfig_filters(d_video, &params) < 0) {
         // Most video filters don't work with hardware decoding, so this
         // might be the reason why filter reconfig failed.
@@ -421,6 +417,8 @@ static void init_vo(struct MPContext *mpctx)
         video_set_colors(d_video, "saturation", opts->gamma_saturation);
     if (opts->gamma_hue != 1000)
         video_set_colors(d_video, "hue", opts->gamma_hue);
+
+    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
 // Fill the VO buffer with a newly filtered or decoded image.
