@@ -436,8 +436,6 @@ int video_reconfig_filters(struct dec_video *d_video,
         return -1;
     }
 
-    d_video->vf_input = *params;
-
     return 0;
 }
 

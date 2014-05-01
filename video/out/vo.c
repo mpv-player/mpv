@@ -174,8 +174,6 @@ static struct vo *vo_create(struct mpv_global *global,
         .event_fd = -1,
         .monitor_par = 1,
         .max_video_queue = 1,
-        .next_pts = MP_NOPTS_VALUE,
-        .next_pts2 = MP_NOPTS_VALUE,
     };
     talloc_steal(vo, log);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
@@ -358,27 +356,11 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
     return vo->driver->control(vo, request, data);
 }
 
-static void update_video_queue_state(struct vo *vo, bool eof)
-{
-    int num = vo->num_video_queue;
-    // Normally, buffer 1 image ahead, except if the queue is limited to less
-    // than 2 entries, or if EOF is reached and there aren't enough images left.
-    int min = 2;
-    if (vo->max_video_queue < 2 || (vo->num_video_queue < 2 && eof))
-        min = 1;
-    vo->frame_loaded = num >= min;
-    if (!vo->frame_loaded)
-        num = -1;
-    vo->next_pts = num > 0 ? vo->video_queue[0]->pts : MP_NOPTS_VALUE;
-    vo->next_pts2 = num > 1 ? vo->video_queue[1]->pts : MP_NOPTS_VALUE;
-}
-
 static void forget_frames(struct vo *vo)
 {
     for (int n = 0; n < vo->num_video_queue; n++)
         talloc_free(vo->video_queue[n]);
     vo->num_video_queue = 0;
-    update_video_queue_state(vo, false);
 }
 
 void vo_queue_image(struct vo *vo, struct mp_image *mpi)
@@ -397,7 +379,34 @@ void vo_queue_image(struct vo *vo, struct mp_image *mpi)
     assert(vo->max_video_queue <= VO_MAX_QUEUE);
     assert(vo->num_video_queue < vo->max_video_queue);
     vo->video_queue[vo->num_video_queue++] = mpi;
-    update_video_queue_state(vo, false);
+}
+
+// Return whether vo_queue_image() should be called.
+bool vo_needs_new_image(struct vo *vo)
+{
+    if (!vo->config_ok)
+        return false;
+    return vo->num_video_queue < vo->max_video_queue;
+}
+
+// Return whether a frame can be displayed.
+//  eof==true: return true if at least one frame is queued
+//  eof==false: return true if "enough" frames are queued
+bool vo_has_next_frame(struct vo *vo, bool eof)
+{
+    if (!vo->config_ok)
+        return false;
+    // Normally, buffer 1 image ahead, except if the queue is limited to less
+    // than 2 entries, or if EOF is reached and there aren't enough images left.
+    return eof ? vo->num_video_queue : vo->num_video_queue == vo->max_video_queue;
+}
+
+// Return the PTS of a future frame (where index==0 is the next frame)
+double vo_get_next_pts(struct vo *vo, int index)
+{
+    if (index < 0 || index >= vo->num_video_queue)
+        return MP_NOPTS_VALUE;
+    return vo->video_queue[index]->pts;
 }
 
 int vo_redraw_frame(struct vo *vo)
@@ -418,14 +427,6 @@ bool vo_get_want_redraw(struct vo *vo)
     return vo->want_redraw;
 }
 
-int vo_get_buffered_frame(struct vo *vo, bool eof)
-{
-    if (!vo->config_ok)
-        return -1;
-    update_video_queue_state(vo, eof);
-    return vo->frame_loaded ? 0 : -1;
-}
-
 // Remove vo->video_queue[0]
 static void shift_queue(struct vo *vo)
 {
@@ -440,12 +441,10 @@ static void shift_queue(struct vo *vo)
 void vo_skip_frame(struct vo *vo)
 {
     shift_queue(vo);
-    vo->frame_loaded = false;
 }
 
 void vo_new_frame_imminent(struct vo *vo)
 {
-    assert(vo->frame_loaded);
     assert(vo->num_video_queue > 0);
     vo->driver->draw_image(vo, vo->video_queue[0]);
     shift_queue(vo);
@@ -467,7 +466,6 @@ void vo_flip_page(struct vo *vo, int64_t pts_us, int duration)
     else
         vo->driver->flip_page(vo);
     vo->hasframe = true;
-    update_video_queue_state(vo, false);
 }
 
 void vo_check_events(struct vo *vo)

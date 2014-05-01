@@ -237,9 +237,6 @@ struct vo {
 
     bool untimed;       // non-interactive, don't do sleep calls in playloop
 
-    bool frame_loaded;  // Is there a next frame the VO could flip to?
-    double next_pts;    // pts value of the next frame if any
-    double next_pts2;   // optional pts of frame after that
     bool want_redraw;   // visible frame wrong (window resize), needs refresh
     bool hasframe;      // >= 1 frame has been drawn, so redraw is possible
     double wakeup_period; // if > 0, this sets the maximum wakeup period for event polling
@@ -288,7 +285,9 @@ int vo_control(struct vo *vo, uint32_t request, void *data);
 void vo_queue_image(struct vo *vo, struct mp_image *mpi);
 int vo_redraw_frame(struct vo *vo);
 bool vo_get_want_redraw(struct vo *vo);
-int vo_get_buffered_frame(struct vo *vo, bool eof);
+bool vo_has_next_frame(struct vo *vo, bool eof);
+double vo_get_next_pts(struct vo *vo, int index);
+bool vo_needs_new_image(struct vo *vo);
 void vo_skip_frame(struct vo *vo);
 void vo_new_frame_imminent(struct vo *vo);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);

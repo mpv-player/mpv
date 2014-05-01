@@ -983,34 +983,35 @@ void run_playloop(struct MPContext *mpctx)
         struct vo *vo = mpctx->video_out;
         update_fps(mpctx);
 
-        video_left = vo->hasframe || vo->frame_loaded || mpctx->playing_last_frame;
-        if (!vo->frame_loaded && (!mpctx->paused || mpctx->restart_playback)) {
-
-            double frame_time = update_video(mpctx, endpts);
-            if (frame_time < 0) {
+        int r = 1; // like update_video return value
+        video_left = vo->hasframe || mpctx->playing_last_frame;
+        if (!mpctx->paused || mpctx->restart_playback) {
+            double frame_time = 0;
+            r = update_video(mpctx, endpts, false, &frame_time);
+            MP_VERBOSE(mpctx, "update_video: %d\n", r);
+            if (r == 0) {
                 if (!mpctx->playing_last_frame && mpctx->last_frame_duration > 0) {
                     mpctx->time_frame += mpctx->last_frame_duration;
                     mpctx->last_frame_duration = 0;
                     mpctx->playing_last_frame = true;
+                    MP_VERBOSE(mpctx, "showing last frame\n");
                 }
                 if (mpctx->playing_last_frame) {
-                    frame_time = 0; // don't stop playback yet
-                } else if (mpctx->d_video->waiting_decoded_mpi) {
+                    r = 1; // don't stop playback yet
+                    MP_VERBOSE(mpctx, "still showing last frame\n");
+                } else if (r == 0) {
+                    // We just displayed the previous frame, so display the
+                    // new frame (if there's one) immediately.
+                    mpctx->video_next_pts = MP_NOPTS_VALUE;
                     // Format changes behave like EOF, and this call "unstucks"
                     // the EOF condition (after waiting for the previous frame
                     // to finish displaying).
-                    video_execute_format_change(mpctx);
-                    frame_time = update_video(mpctx, endpts);
-                    // We just displayed the previous frame, so display the
-                    // new frame immediately.
-                    if (frame_time > 0)
-                        frame_time = 0;
+                    r = update_video(mpctx, endpts, true, &frame_time);
+                    MP_VERBOSE(mpctx, "second update_video: %d\n", r);
                 }
             }
 
-            MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
-            if (mpctx->d_video->vfilter && mpctx->d_video->vfilter->initialized < 0)
-            {
+            if (r < 0) {
                 MP_FATAL(mpctx, "Could not initialize video chain.\n");
                 int uninit = INITIALIZED_VCODEC;
                 if (!opts->force_vo)
@@ -1022,8 +1023,9 @@ void run_playloop(struct MPContext *mpctx)
                 handle_force_window(mpctx, true);
                 break;
             }
-            video_left = frame_time >= 0;
-            if (video_left && !mpctx->restart_playback) {
+            MP_VERBOSE(mpctx, "frametime=%5.3f\n", frame_time);
+            video_left = r >= 1;
+            if (r == 2 && !mpctx->restart_playback) {
                 mpctx->time_frame += frame_time / opts->playback_speed;
                 adjust_sync(mpctx, frame_time);
             }
@@ -1040,7 +1042,7 @@ void run_playloop(struct MPContext *mpctx)
 
         if (!video_left || (mpctx->paused && !mpctx->restart_playback))
             break;
-        if (!vo->frame_loaded && !mpctx->playing_last_frame) {
+        if (r != 2 && !mpctx->playing_last_frame) {
             sleeptime = 0;
             break;
         }
@@ -1088,7 +1090,7 @@ void run_playloop(struct MPContext *mpctx)
         mpctx->playing_last_frame = false;
 
         // last frame case (don't set video_left - consider format changes)
-        if (!vo->frame_loaded)
+        if (r != 2)
             break;
 
         //=================== FLIP PAGE (VIDEO BLT): ======================
@@ -1121,7 +1123,7 @@ void run_playloop(struct MPContext *mpctx)
         double time_frame = MPMAX(mpctx->time_frame, -1);
         int64_t pts_us = mpctx->last_time + time_frame * 1e6;
         int duration = -1;
-        double pts2 = vo->next_pts2;
+        double pts2 = vo_get_next_pts(vo, 0); // this is the next frame PTS
         if (mpctx->video_pts != MP_NOPTS_VALUE && pts2 == MP_NOPTS_VALUE) {
             // Make up a frame duration. Using the frame rate is not a good
             // choice, since the frame rate could be unset/broken/random.

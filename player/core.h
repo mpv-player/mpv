@@ -466,7 +466,8 @@ void build_cue_timeline(struct MPContext *mpctx);
 // video.c
 int reinit_video_chain(struct MPContext *mpctx);
 int reinit_video_filters(struct MPContext *mpctx);
-double update_video(struct MPContext *mpctx, double endpts);
+int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
+                 double *frame_duration);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void update_fps(struct MPContext *mpctx);
 void video_execute_format_change(struct MPContext *mpctx);
