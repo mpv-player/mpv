@@ -193,10 +193,10 @@ void mp_image_set_size(struct mp_image *mpi, int w, int h)
 void mp_image_set_params(struct mp_image *image,
                          const struct mp_image_params *params)
 {
-    image->params = *params;
-    // possibly reinitialize stuff
+    // possibly initialize other stuff
     mp_image_setfmt(image, params->imgfmt);
     mp_image_set_size(image, params->w, params->h);
+    image->params = *params;
 }
 
 struct mp_image *mp_image_alloc(int imgfmt, int w, int h)
