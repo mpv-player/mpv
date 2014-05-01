@@ -563,8 +563,8 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
             break;
         cur = vf->fmt_out;
     }
-    if (r >= 0)
-        c->output_params = cur;
+    c->input_params  = r < 0 ? (struct mp_image_params){0} : *params;
+    c->output_params = r < 0 ? (struct mp_image_params){0} : cur;
     c->initialized = r < 0 ? -1 : 1;
     int loglevel = r < 0 ? MSGL_WARN : MSGL_V;
     if (r == -2)

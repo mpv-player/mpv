@@ -102,6 +102,7 @@ struct vf_chain {
 
     struct vf_instance *first, *last;
 
+    struct mp_image_params input_params;
     struct mp_image_params output_params;
     uint8_t allowed_output_formats[IMGFMT_END - IMGFMT_START];
 
