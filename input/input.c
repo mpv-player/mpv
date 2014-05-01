@@ -105,7 +105,7 @@ struct input_fd {
     int pos, size;
 };
 
-#define MAX_ACTIVE_SECTIONS 5
+#define MAX_ACTIVE_SECTIONS 50
 
 struct active_section {
     char *name;
