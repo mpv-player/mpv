@@ -158,7 +158,7 @@ static char *script_name_from_filename(void *talloc_ctx, const char *fname)
             !(c >= '0' && c <= '9'))
             name[n] = '_';
     }
-    return talloc_asprintf(talloc_ctx, "lua/%s", name);
+    return talloc_asprintf(talloc_ctx, "%s", name);
 }
 
 static int load_file(struct script_ctx *ctx, const char *fname)

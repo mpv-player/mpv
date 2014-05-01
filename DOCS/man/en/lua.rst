@@ -203,7 +203,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     ::
 
-        y script_message_to lua/fooscript something
+        y script_message_to fooscript something
 
 ``mp.add_forced_key_binding(...)``
     This works almost the same as ``mp.add_key_binding``, but registers the
@@ -305,13 +305,13 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
 ``mp.get_script_name()``
     Return the name of the current script. The name is usually made of the
-    filename of the script, with directory and file extension removed, and
-    prefixed with ``lua/``. If there are several script which would have the
-    same name, it's made unique by appending a number.
+    filename of the script, with directory and file extension removed. If
+    there are several script which would have the same name, it's made unique
+    by appending a number.
 
     .. admonition:: Example
 
-        The script ``/path/to/fooscript.lua`` becomes ``lua/fooscript``.
+        The script ``/path/to/fooscript.lua`` becomes ``fooscript``.
 
 ``mp.osd_message(text [,duration])``
     Show an OSD message on the screen. ``duration`` is in seconds, and is
