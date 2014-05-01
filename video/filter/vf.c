@@ -173,6 +173,14 @@ int vf_control_by_label(struct vf_chain *c,int cmd, void *arg, bstr label)
         return CONTROL_UNKNOWN;
 }
 
+static void vf_control_all(struct vf_chain *c, int cmd, void *arg)
+{
+    for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
+        if (cur->control)
+            cur->control(cur, cmd, arg);
+    }
+}
+
 static void vf_fix_img_params(struct mp_image *img, struct mp_image_params *p)
 {
     // Filters must absolutely set these correctly.
@@ -400,29 +408,55 @@ int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
 }
 
 // Output the next queued image (if any) from the full filter chain.
+// The frame can be retrieved with vf_read_output_frame().
 //  eof: if set, assume there's no more input i.e. vf_filter_frame() will
 //       not be called (until reset) - flush all internally delayed frames
-struct mp_image *vf_output_queued_frame(struct vf_chain *c, bool eof)
+//  returns: -1: error, 0: no output, 1: output available
+int vf_output_frame(struct vf_chain *c, bool eof)
 {
+    if (c->output)
+        return 1;
     if (c->initialized < 1)
-        return NULL;
+        return -1;
     while (1) {
         struct vf_instance *last = NULL;
         for (struct vf_instance * cur = c->first; cur; cur = cur->next) {
             // Flush remaining frames on EOF, but do that only if the previous
             // filters have been flushed (i.e. they have no more output).
-            if (eof && !last)
-                vf_do_filter(cur, NULL);
+            if (eof && !last) {
+                int r = vf_do_filter(cur, NULL);
+                if (r < 0)
+                    return r;
+            }
             if (cur->num_out_queued)
                 last = cur;
         }
         if (!last)
-            return NULL;
+            return 0;
         struct mp_image *img = vf_dequeue_output_frame(last);
-        if (!last->next)
-            return img;
-        vf_do_filter(last->next, img);
+        if (!last->next) {
+            c->output = img;
+            return !!c->output;
+        }
+        int r = vf_do_filter(last->next, img);
+        if (r < 0)
+            return r;
     }
+}
+
+struct mp_image *vf_read_output_frame(struct vf_chain *c)
+{
+    if (!c->output)
+        vf_output_frame(c, false);
+    struct mp_image *res = c->output;
+    c->output = NULL;
+    return res;
+}
+
+struct mp_image *vf_output_queued_frame(struct vf_chain *c, bool eof)
+{
+    vf_output_frame(c, eof);
+    return vf_read_output_frame(c);
 }
 
 static void vf_forget_frames(struct vf_instance *vf)
@@ -432,13 +466,17 @@ static void vf_forget_frames(struct vf_instance *vf)
     vf->num_out_queued = 0;
 }
 
+static void vf_chain_forget_frames(struct vf_chain *c)
+{
+    for (struct vf_instance *cur = c->first; cur; cur = cur->next)
+        vf_forget_frames(cur);
+    mp_image_unrefp(&c->output);
+}
+
 void vf_seek_reset(struct vf_chain *c)
 {
-    for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
-        if (cur->control)
-            cur->control(cur, VFCTRL_SEEK_RESET, NULL);
-        vf_forget_frames(cur);
-    }
+    vf_control_all(c, VFCTRL_SEEK_RESET, NULL);
+    vf_chain_forget_frames(c);
 }
 
 int vf_next_config(struct vf_instance *vf,
@@ -548,6 +586,7 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
 {
     struct mp_image_params cur = *params;
     int r = 0;
+    vf_chain_forget_frames(c);
     for (struct vf_instance *vf = c->first; vf; ) {
         struct vf_instance *next = vf->next;
         if (vf->autoinserted)
@@ -642,6 +681,7 @@ void vf_destroy(struct vf_chain *c)
         c->first = vf->next;
         vf_uninit_filter(vf);
     }
+    vf_chain_forget_frames(c);
     talloc_free(c);
 }
 

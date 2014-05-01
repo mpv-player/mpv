@@ -110,6 +110,8 @@ struct vf_chain {
     struct MPOpts *opts;
     struct mpv_global *global;
     struct mp_hwdec_info *hwdec;
+
+    struct mp_image *output;
 };
 
 typedef struct vf_seteq {
@@ -137,6 +139,8 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params);
 int vf_control_any(struct vf_chain *c, int cmd, void *arg);
 int vf_control_by_label(struct vf_chain *c, int cmd, void *arg, bstr label);
 int vf_filter_frame(struct vf_chain *c, struct mp_image *img);
+int vf_output_frame(struct vf_chain *c, bool eof);
+struct mp_image *vf_read_output_frame(struct vf_chain *c);
 struct mp_image *vf_output_queued_frame(struct vf_chain *c, bool eof);
 void vf_seek_reset(struct vf_chain *c);
 struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
