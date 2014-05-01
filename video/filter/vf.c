@@ -378,7 +378,7 @@ static int vf_do_filter(struct vf_instance *vf, struct mp_image *img)
 {
     assert(vf->fmt_in.imgfmt);
     if (img)
-        vf_fix_img_params(img, &vf->fmt_in);
+        assert(mp_image_params_equals(&img->params, &vf->fmt_in));
 
     if (vf->filter_ext) {
         int r = vf->filter_ext(vf, img);
@@ -404,6 +404,7 @@ int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
         talloc_free(img);
         return -1;
     }
+    vf_fix_img_params(img, &c->input_params);
     return vf_do_filter(c->first, img);
 }
 
