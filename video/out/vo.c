@@ -386,6 +386,7 @@ void vo_queue_image(struct vo *vo, struct mp_image *mpi)
     assert(mpi);
     if (!vo->config_ok)
         return;
+    assert(mp_image_params_equals(vo->params, &mpi->params));
     mpi = mp_image_new_ref(mpi);
     if (vo->driver->filter_image)
         mpi = vo->driver->filter_image(vo, mpi);
