@@ -63,6 +63,7 @@ struct vf_priv_s {
     AVFilterGraph *graph;
     AVFilterContext *in;
     AVFilterContext *out;
+    bool eof;
 
     AVRational timebase_in;
     AVRational timebase_out;
@@ -89,6 +90,13 @@ static void destroy_graph(struct vf_instance *vf)
     struct vf_priv_s *p = vf->priv;
     avfilter_graph_free(&p->graph);
     p->in = p->out = NULL;
+
+    if (p->metadata) {
+        talloc_free(p->metadata);
+        p->metadata = NULL;
+    }
+
+    p->eof = false;
 }
 
 static AVRational par_from_sar_dar(int width, int height,
@@ -214,6 +222,14 @@ error:
     return false;
 }
 
+static void reset(vf_instance_t *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+    struct mp_image_params *f = &vf->fmt_in;
+    if (p->graph && f->imgfmt)
+        recreate_graph(vf, f->w, f->h, f->d_w, f->d_h, f->imgfmt);
+}
+
 static int config(struct vf_instance *vf, int width, int height,
                   int d_width, int d_height, unsigned int flags,
                   unsigned int fmt)
@@ -287,6 +303,13 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 {
     struct vf_priv_s *p = vf->priv;
 
+    if (p->eof && mpi) {
+        // Once EOF is reached, libavfilter is "stuck" in the EOF state, and
+        // won't accept new input. Forcefully override it. This helps e.g.
+        // with cover art, where we always want to generate new output.
+        reset(vf);
+    }
+
     if (!p->graph)
         return -1;
 
@@ -303,8 +326,9 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
         if (err == AVERROR(EAGAIN) || err == AVERROR_EOF) {
             // Not an error situation - no more output buffers in queue.
             // AVERROR_EOF means we shouldn't even give the filter more
-            // input, but we don't handle that.
+            // input, but we don't handle that completely correctly.
             av_frame_free(&frame);
+            p->eof |= err == AVERROR_EOF;
             break;
         }
         if (err < 0) {
@@ -318,18 +342,6 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
     }
 
     return 0;
-}
-
-static void reset(vf_instance_t *vf)
-{
-    struct vf_priv_s *p = vf->priv;
-    struct mp_image_params *f = &vf->fmt_in;
-    if (p->graph && f->imgfmt)
-        recreate_graph(vf, f->w, f->h, f->d_w, f->d_h, f->imgfmt);
-    if (p->metadata) {
-        talloc_free(p->metadata);
-        p->metadata = NULL;
-    }
 }
 
 static int control(vf_instance_t *vf, int request, void *data)
