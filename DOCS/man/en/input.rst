@@ -587,7 +587,7 @@ Property list
 
 ``stream-path``
     Filename (full path) of the stream layer filename. (This is probably
-    useless. It looks like this can be different from ``filename`` only when
+    useless. It looks like this can be different from ``path`` only when
     using e.g. ordered chapters.)
 
 ``stream-pos`` (RW)
