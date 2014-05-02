@@ -210,7 +210,7 @@ static void wakeup_client(struct mpv_handle *ctx)
     pthread_cond_signal(&ctx->wakeup);
     if (ctx->wakeup_cb)
         ctx->wakeup_cb(ctx->wakeup_cb_ctx);
-    if (ctx->wakeup_pipe[0] == -1)
+    if (ctx->wakeup_pipe[0] != -1)
         write(ctx->wakeup_pipe[0], &(char){0}, 1);
 }
 
