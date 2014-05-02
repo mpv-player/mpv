@@ -99,14 +99,16 @@ Available video output drivers are:
     ``deint=<-4-4>``
         (Deprecated. See note about ``vdpaupp``.)
 
-        Select deinterlacing mode (default: -3). Positive values choose mode
-        and enable deinterlacing. Corresponding negative values select the
-        same deinterlacing mode, but do not enable deinterlacing on startup
-        (useful in configuration files to specify which mode will be enabled by
-        the "D" key). All modes respect ``--field-dominance``.
+        Select deinterlacing mode (default: 0). In older versions (as well as
+        MPlayer/mplayer2) you could use this option to enable deinterlacing.
+        This doesn't work anymore, and deinterlacing is enabled with either
+        the ``D`` key (by default mapped to the command ``cycle deinterlace``),
+        or the ``--deinterlace`` option. Also, to select the default deint mode,
+        you should use something like ``--vf-defaults=vdpaupp:deint-mode=temporal``
+        instead of this sub-option.
 
         0
-            Same as -3.
+            Pick the ``vdpaupp`` video filter default, which corresponds to 3.
         1
             Show only first field.
         2
