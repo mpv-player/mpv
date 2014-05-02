@@ -326,9 +326,10 @@ static int decode_image(struct MPContext *mpctx)
                          1 : check_framedrop(mpctx, -1);
     d_video->waiting_decoded_mpi =
         video_decode(d_video, pkt, framedrop_type);
+    bool had_packet = !!pkt;
     talloc_free(pkt);
 
-    return !!pkt;
+    return had_packet;
 }
 
 
