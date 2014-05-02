@@ -906,3 +906,52 @@ Available filters are:
         bob
             bob deinterlacing (default).
 
+``vdpaupp``
+    VDPAU video post processing. Works with ``--vo=vdpau`` and ``--vo=opengl``
+    only. This filter is automatically inserted if deinterlacing is requested
+    (either using the ``D`` key, by default mapped to the command
+    ``cycle deinterlace``, or the ``--deinterlace`` option). When enabling
+    deinterlacing, it is always preferred over software deinterlacer filters
+    if the ``vdpau`` VO is used, and also if ``opengl`` is used and hardware
+    decoding was activated at least once (i.e. vdpau was loaded).
+
+    ``sharpen=<-1-1>``
+        For positive values, apply a sharpening algorithm to the video, for
+        negative values a blurring algorithm (default: 0).
+    ``denoise=<0-1>``
+        Apply a noise reduction algorithm to the video (default: 0; no noise
+        reduction).
+    ``deint=<yes|no>``
+        Whether deinterlacing is enabled (default: no). If enabled, it will use
+        the mode selected with ``deint-mode``.
+    ``deint-mode=<first-field|bob|temporal|temporal-spatial>``
+        Select deinterlacing mode (default: temporal).
+        All modes respect ``--field-dominance``.
+
+        Note that there's currently a mechanism that allows the ``vdpau`` VO to
+        change the ``deint-mode`` of auto-inserted ``vdpaupp`` filters. To avoid
+        confusion, it's recommended not to use the ``--vo=vdpau`` suboptions
+        related to filtering.
+
+        first-field
+            Show only first field.
+        bob
+            Bob deinterlacing.
+        temporal
+            Motion-adaptive temporal deinterlacing. May lead to A/V desync
+            with slow video hardware and/or high resolution.
+        temporal-spatial
+            Motion-adaptive temporal deinterlacing with edge-guided spatial
+            interpolation. Needs fast video hardware.
+    ``chroma-deint``
+        Makes temporal deinterlacers operate both on luma and chroma (default).
+        Use no-chroma-deint to solely use luma and speed up advanced
+        deinterlacing. Useful with slow video memory.
+    ``pullup``
+        Try to apply inverse telecine, needs motion adaptive temporal
+        deinterlacing.
+    ``hqscaling=<0-9>``
+        0
+            Use default VDPAU scaling (default).
+        1-9
+            Apply high quality VDPAU scaling (needs capable hardware).
