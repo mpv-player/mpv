@@ -79,13 +79,26 @@ Available video output drivers are:
     Uses the VDPAU interface to display and optionally also decode video.
     Hardware decoding is used with ``--hwdec=vdpau``.
 
+    .. note::
+
+        Earlier versions of mpv (and MPlayer, mplayer2) provided sub-options
+        to tune vdpau postprocessing, like ``deint``, ``sharpen``, ``denoise``,
+        ``chroma-deint``, ``pullup``, ``hqscaling``. These sub-options are
+        deprecated, and you should use the ``vdpaupp`` video filter instead.
+
     ``sharpen=<-1-1>``
+        (Deprecated. See note about ``vdpaupp``.)
+
         For positive values, apply a sharpening algorithm to the video, for
         negative values a blurring algorithm (default: 0).
     ``denoise=<0-1>``
+        (Deprecated. See note about ``vdpaupp``.)
+
         Apply a noise reduction algorithm to the video (default: 0; no noise
         reduction).
     ``deint=<-4-4>``
+        (Deprecated. See note about ``vdpaupp``.)
+
         Select deinterlacing mode (default: -3). Positive values choose mode
         and enable deinterlacing. Corresponding negative values select the
         same deinterlacing mode, but do not enable deinterlacing on startup
@@ -105,13 +118,19 @@ Available video output drivers are:
             Motion-adaptive temporal deinterlacing with edge-guided spatial
             interpolation. Needs fast video hardware.
     ``chroma-deint``
+        (Deprecated. See note about ``vdpaupp``.)
+
         Makes temporal deinterlacers operate both on luma and chroma (default).
         Use no-chroma-deint to solely use luma and speed up advanced
         deinterlacing. Useful with slow video memory.
     ``pullup``
+        (Deprecated. See note about ``vdpaupp``.)
+
         Try to apply inverse telecine, needs motion adaptive temporal
         deinterlacing.
     ``hqscaling=<0-9>``
+        (Deprecated. See note about ``vdpaupp``.)
+
         0
             Use default VDPAU scaling (default).
         1-9
