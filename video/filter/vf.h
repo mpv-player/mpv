@@ -143,7 +143,6 @@ int vf_control_by_label(struct vf_chain *c, int cmd, void *arg, bstr label);
 int vf_filter_frame(struct vf_chain *c, struct mp_image *img);
 int vf_output_frame(struct vf_chain *c, bool eof);
 struct mp_image *vf_read_output_frame(struct vf_chain *c);
-struct mp_image *vf_output_queued_frame(struct vf_chain *c, bool eof);
 void vf_seek_reset(struct vf_chain *c);
 struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
                                      char **args);

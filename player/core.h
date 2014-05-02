@@ -470,6 +470,5 @@ int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
                  double *frame_duration);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void update_fps(struct MPContext *mpctx);
-void video_execute_format_change(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

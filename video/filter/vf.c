@@ -458,12 +458,6 @@ struct mp_image *vf_read_output_frame(struct vf_chain *c)
     return res;
 }
 
-struct mp_image *vf_output_queued_frame(struct vf_chain *c, bool eof)
-{
-    vf_output_frame(c, eof);
-    return vf_read_output_frame(c);
-}
-
 static void vf_forget_frames(struct vf_instance *vf)
 {
     for (int n = 0; n < vf->num_out_queued; n++)
