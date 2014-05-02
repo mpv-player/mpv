@@ -271,7 +271,7 @@ bool mp_input_is_abort_cmd(struct mp_cmd *cmd)
     if (cmd->id == MP_CMD_COMMAND_LIST) {
         for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next)
         {
-            if (mp_input_is_abort_cmd(cmd))
+            if (mp_input_is_abort_cmd(sub))
                 return true;
         }
     }
