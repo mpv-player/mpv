@@ -26,6 +26,8 @@
 #include <VSScript.h>
 #include <VSHelper.h>
 
+#include <libavutil/rational.h>
+
 #include "common/msg.h"
 #include "options/m_option.h"
 
@@ -111,8 +113,12 @@ static void copy_mp_to_vs_frame_props(struct vf_priv_s *p, VSMap *map,
 {
     struct mp_image_params *params = &img->params;
     if (params->d_w > 0 && params->d_h > 0) {
-        p->vsapi->propSetInt(map, "_SARNum", params->d_w, 0);
-        p->vsapi->propSetInt(map, "_SARDen", params->d_h, 0);
+        AVRational dar = {params->d_w, params->d_h};
+        AVRational asp = {params->w, params->h};
+        AVRational par = av_div_q(dar, asp);
+
+        p->vsapi->propSetInt(map, "_SARNum", par.num, 0);
+        p->vsapi->propSetInt(map, "_SARDen", par.den, 0);
     }
     if (params->colorlevels) {
         p->vsapi->propSetInt(map, "_ColorRange",
