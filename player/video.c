@@ -463,13 +463,12 @@ static int video_output_image(struct MPContext *mpctx, bool reconfig_ok)
                 info->name, p.w, p.h, p.d_w, p.d_h, vo_format_name(p.imgfmt));
         MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
-        r = vo_reconfig(vo, &p, 0);
-        if (r < 0) {
+        int vo_r = vo_reconfig(vo, &p, 0);
+        if (vo_r < 0) {
             vf->initialized = -1;
             return -1;
         }
         init_vo(mpctx);
-        return 1;
     }
 
     // Queue new frame, if there's one.
