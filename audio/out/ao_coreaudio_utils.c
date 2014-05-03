@@ -431,20 +431,20 @@ static bool ca_bitmap_from_ch_tag(struct ao *ao, AudioChannelLayout *layout,
     }
 }
 
-static void ca_log_layout(struct ao *ao, AudioChannelLayout layout)
+static void ca_log_layout(struct ao *ao, AudioChannelLayout *layout)
 {
     if (!mp_msg_test(ao->log, MSGL_V))
         return;
 
-    AudioChannelDescription *descs = layout.mChannelDescriptions;
+    AudioChannelDescription *descs = layout->mChannelDescriptions;
 
     MP_VERBOSE(ao, "layout: tag: <%d>, bitmap: <%d>, "
                    "descriptions <%d>\n",
-                   layout.mChannelLayoutTag,
-                   layout.mChannelBitmap,
-                   layout.mNumberChannelDescriptions);
+                   layout->mChannelLayoutTag,
+                   layout->mChannelBitmap,
+                   layout->mNumberChannelDescriptions);
 
-    for (int i = 0; i < layout.mNumberChannelDescriptions; i++) {
+    for (int i = 0; i < layout->mNumberChannelDescriptions; i++) {
         AudioChannelDescription d = descs[i];
         MP_VERBOSE(ao, " - description %d: label <%d, %d>, flags: <%u>, "
                        "coords: <%f, %f, %f>\n", i,
@@ -466,7 +466,7 @@ void ca_bitmaps_from_layouts(struct ao *ao,
 
     for (int i=0; i < n_layouts; i++) {
         uint32_t bitmap = 0;
-        ca_log_layout(ao, layouts[i]);
+        ca_log_layout(ao, &layouts[i]);
 
         switch (layouts[i].mChannelLayoutTag) {
         case kAudioChannelLayoutTag_UseChannelBitmap:
