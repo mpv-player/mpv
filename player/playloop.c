@@ -983,12 +983,11 @@ void run_playloop(struct MPContext *mpctx)
         struct vo *vo = mpctx->video_out;
         update_fps(mpctx);
 
-        int r = 1; // like update_video return value
-        video_left = vo->hasframe || mpctx->playing_last_frame;
+        double frame_time = 0;
+        int r = update_video(mpctx, endpts, false, &frame_time);
+        MP_VERBOSE(mpctx, "update_video: %d\n", r);
+        video_left = r > 0 || vo->hasframe || mpctx->playing_last_frame;
         if (!mpctx->paused || mpctx->restart_playback) {
-            double frame_time = 0;
-            r = update_video(mpctx, endpts, false, &frame_time);
-            MP_VERBOSE(mpctx, "update_video: %d\n", r);
             if (r == 0) {
                 if (!mpctx->playing_last_frame && mpctx->last_frame_duration > 0) {
                     mpctx->time_frame += mpctx->last_frame_duration;
