@@ -1128,8 +1128,8 @@ void run_playloop(struct MPContext *mpctx)
             // Make up a frame duration. Using the frame rate is not a good
             // choice, since the frame rate could be unset/broken/random.
             float fps = mpctx->d_video->fps;
-            double frame_time = fps > 0 ? 1.0 / fps : 0;
-            pts2 = mpctx->video_pts + frame_time;
+            double frame_duration = fps > 0 ? 1.0 / fps : 0;
+            pts2 = mpctx->video_pts + frame_duration;
         }
         if (pts2 != MP_NOPTS_VALUE) {
             // expected A/V sync correction is ignored
