@@ -26,7 +26,7 @@
 -- to mpv's arguments. This may be desirable to allow cropdetect more
 -- time to collect data.
 
-script_name=string.gsub(mp.get_script_name(),"lua/","")
+script_name=mp.get_script_name()
 cropdetect_label=string.format("%s-cropdetect",script_name)
 crop_label=string.format("%s-crop",script_name)
 

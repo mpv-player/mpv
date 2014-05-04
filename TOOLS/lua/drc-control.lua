@@ -17,7 +17,7 @@
 -- OSD feedback of the current filter state is displayed on pressing
 -- each bound key.
 
-script_name=mp.get_script_name():gsub("lua/","",1)
+script_name=mp.get_script_name()
 
 function print_state(params)
     if params then
