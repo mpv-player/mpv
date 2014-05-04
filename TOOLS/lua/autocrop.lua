@@ -40,11 +40,11 @@ end
 function del_filter_if_present(label)
     -- necessary because mp.command('vf del @label:filter') raises an
     -- error if the filter doesn't exist
-    local vfs = mp.get_property_native('vf')
+    local vfs = mp.get_property_native("vf")
     for i,vf in pairs(vfs) do
-	if vf['label'] == label then
+	if vf["label"] == label then
 	    table.remove(vfs, i)
-	    mp.set_property_native('vf', vfs)
+	    mp.set_property_native("vf", vfs)
 	    return true
 	end
     end
@@ -77,21 +77,21 @@ end
 function do_crop()
     -- get the metadata
     local cropdetect_metadata = mp.get_property_native(
-	string.format('vf-metadata/%s', cropdetect_label)
+	string.format("vf-metadata/%s", cropdetect_label)
     )
     -- use it to crop if its valid
     if cropdetect_metadata then
-	if cropdetect_metadata['lavfi.cropdetect.w']
-	    and cropdetect_metadata['lavfi.cropdetect.h']
-	    and cropdetect_metadata['lavfi.cropdetect.x']
-	    and cropdetect_metadata['lavfi.cropdetect.y']
+	if cropdetect_metadata["lavfi.cropdetect.w"]
+	    and cropdetect_metadata["lavfi.cropdetect.h"]
+	    and cropdetect_metadata["lavfi.cropdetect.x"]
+	    and cropdetect_metadata["lavfi.cropdetect.y"]
 	then
-            mp.command(string.format('vf add @%s:crop=%s:%s:%s:%s',
+            mp.command(string.format("vf add @%s:crop=%s:%s:%s:%s",
                                      crop_label,
-                                     cropdetect_metadata['lavfi.cropdetect.w'],
-                                     cropdetect_metadata['lavfi.cropdetect.h'],
-                                     cropdetect_metadata['lavfi.cropdetect.x'],
-                                     cropdetect_metadata['lavfi.cropdetect.y']))
+                                     cropdetect_metadata["lavfi.cropdetect.w"],
+                                     cropdetect_metadata["lavfi.cropdetect.h"],
+                                     cropdetect_metadata["lavfi.cropdetect.x"],
+                                     cropdetect_metadata["lavfi.cropdetect.y"]))
         else
             mp.msg.error(
 		"Got empty crop data. You might need to increase detect_seconds."
