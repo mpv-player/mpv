@@ -221,36 +221,10 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     // legacy compatibility
     if (!iid)
         return;
-    int id = t->user_tid;
-    MP_SMODE(mpctx, "ID_%s_ID=%d\n", iid, id);
-    if (t->title)
-        MP_SMODE(mpctx, "ID_%s_%d_NAME=%s\n", iid, id, t->title);
-    if (t->lang)
-        MP_SMODE(mpctx, "ID_%s_%d_LANG=%s\n", iid, id, t->lang);
 }
 
 static void print_file_properties(struct MPContext *mpctx)
 {
-    MP_SMODE(mpctx, "ID_FILENAME=%s\n", mpctx->filename);
-    MP_SMODE(mpctx,
-           "ID_LENGTH=%.2f\n", get_time_length(mpctx));
-    int chapter_count = get_chapter_count(mpctx);
-    if (chapter_count >= 0) {
-        MP_SMODE(mpctx, "ID_CHAPTERS=%d\n", chapter_count);
-        for (int i = 0; i < chapter_count; i++) {
-            MP_SMODE(mpctx, "ID_CHAPTER_ID=%d\n", i);
-            // print in milliseconds
-            double time = chapter_start_time(mpctx, i) * 1000.0;
-            MP_SMODE(mpctx, "ID_CHAPTER_%d_START=%"PRId64"\n",
-                   i, (int64_t)(time < 0 ? -1 : time));
-            char *name = chapter_name(mpctx, i);
-            if (name) {
-                MP_SMODE(mpctx, "ID_CHAPTER_%d_NAME=%s\n", i,
-                       name);
-                talloc_free(name);
-            }
-        }
-    }
     struct demuxer *demuxer = mpctx->master_demuxer;
     if (demuxer->num_editions > 1) {
         for (int n = 0; n < demuxer->num_editions; n++) {

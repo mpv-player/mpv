@@ -168,9 +168,6 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
         MP_VERBOSE(d_audio, "AUDIO: %d Hz, %d ch, %s\n",
                    d_audio->decoded.rate, d_audio->decoded.channels.num,
                    af_fmt_to_str(d_audio->decoded.format));
-        MP_SMODE(d_audio, "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
-                 d_audio->i_bps * 8, d_audio->decoded.rate,
-                 d_audio->decoded.channels.num);
     } else {
         MP_ERR(d_audio, "Failed to initialize an audio decoder for codec '%s'.\n",
                d_audio->header->codec ? d_audio->header->codec : "<unknown>");

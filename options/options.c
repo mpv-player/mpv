@@ -215,13 +215,12 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),
     OPT_FLAG_STORE("really-quiet", verbose, CONF_GLOBAL | CONF_PRE_PARSE, -10),
     OPT_FLAG("terminal", use_terminal, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_GENERAL(char*, "msglevel", msglevels, CONF_GLOBAL|CONF_PRE_PARSE,
+    OPT_GENERAL(char*, "msg-level", msglevels, CONF_GLOBAL|CONF_PRE_PARSE,
                 .type = &m_option_type_msglevels),
     OPT_STRING("dump-stats", dump_stats, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_FLAG("msgcolor", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_FLAG("msgmodule", msg_module, CONF_GLOBAL),
-    OPT_FLAG("msgtime", msg_time, CONF_GLOBAL),
-    OPT_FLAG("identify", msg_identify, CONF_GLOBAL),
+    OPT_FLAG("msg-color", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
+    OPT_FLAG("msg-module", msg_module, CONF_GLOBAL),
+    OPT_FLAG("msg-time", msg_time, CONF_GLOBAL),
 #if HAVE_PRIORITY
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
@@ -256,7 +255,7 @@ const m_option_t mp_opts[] = {
 #if HAVE_DVDREAD || HAVE_DVDNAV
     {"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"dvd-speed", &dvd_speed, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
+    {"dvd-angle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 #endif /* HAVE_DVDREAD */
     OPT_INTPAIR("chapter", chapterrange, 0),
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
@@ -319,8 +318,8 @@ const m_option_t mp_opts[] = {
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
-    OPT_STRING("audiofile", audio_stream, 0),
-    OPT_INTRANGE("audiofile-cache", audio_stream_cache, 0, 50, 65536),
+    OPT_STRING("audio-file", audio_stream, 0),
+    OPT_INTRANGE("audio-file-cache", audio_stream_cache, 0, 50, 65536),
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
@@ -343,9 +342,9 @@ const m_option_t mp_opts[] = {
 
     // force video/audio rate:
     OPT_DOUBLE("fps", force_fps, CONF_MIN | M_OPT_FIXED),
-    OPT_INTRANGE("srate", force_srate, 0, 1000, 8*48000),
-    OPT_CHMAP("channels", audio_output_channels, CONF_MIN, .min = 0),
-    OPT_AUDIOFORMAT("format", audio_output_format, 0),
+    OPT_INTRANGE("audio-samplerate", force_srate, 0, 1000, 8*48000),
+    OPT_CHMAP("audio-channels", audio_output_channels, CONF_MIN, .min = 0),
+    OPT_AUDIOFORMAT("audio-format", audio_output_format, 0),
     OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE | M_OPT_FIXED,
                .min = 0.01, .max = 100.0),
 
@@ -384,8 +383,8 @@ const m_option_t mp_opts[] = {
     {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
-    OPT_FLOATRANGE("aspect", movie_aspect, 0, -1.0, 10.0),
-    OPT_FLOAT_STORE("no-aspect", movie_aspect, 0, 0.0),
+    OPT_FLOATRANGE("video-aspect", movie_aspect, 0, -1.0, 10.0),
+    OPT_FLOAT_STORE("no-video-aspect", movie_aspect, 0, 0.0),
 
     OPT_CHOICE("field-dominance", field_dominance, 0,
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),
@@ -402,23 +401,23 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- subtitles options --------------------
 
-    OPT_STRINGLIST("sub", sub_name, 0),
+    OPT_STRINGLIST("sub-file", sub_name, 0),
     OPT_PATHLIST("sub-paths", sub_paths, 0),
-    OPT_STRING("subcp", sub_cp, 0),
+    OPT_STRING("sub-codepage", sub_cp, 0),
     OPT_FLOAT("sub-delay", sub_delay, 0),
-    OPT_FLOAT("subfps", sub_fps, 0),
+    OPT_FLOAT("sub-fps", sub_fps, 0),
     OPT_FLOAT("sub-speed", sub_speed, 0),
-    OPT_FLAG("autosub", sub_auto, 0),
+    OPT_FLAG("sub-auto", sub_auto, 0),
     OPT_FLAG("sub-visibility", sub_visibility, 0),
     OPT_FLAG("sub-forced-only", forced_subs_only, 0),
     OPT_FLAG("stretch-dvd-subs", stretch_dvd_subs, 0),
     OPT_FLAG_CONSTANTS("sub-fix-timing", suboverlap_enabled, 0, 1, 0),
-    OPT_CHOICE("autosub-match", sub_match_fuzziness, 0,
+    OPT_CHOICE("sub-auto-match", sub_match_fuzziness, 0,
                ({"exact", 0}, {"fuzzy", 1}, {"all", 2})),
     OPT_INTRANGE("sub-pos", sub_pos, 0, 0, 100),
     OPT_FLOATRANGE("sub-gauss", sub_gauss, 0, 0.0, 3.0),
     OPT_FLAG("sub-gray", sub_gray, 0),
-    OPT_FLAG("ass", ass_enabled, 0),
+    OPT_FLAG("sub-ass", ass_enabled, 0),
     OPT_FLOATRANGE("sub-scale", sub_scale, 0, 0, 100),
     OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, 0, -1000, 1000),
     OPT_FLAG("ass-use-margins", ass_use_margins, 0),
@@ -472,7 +471,7 @@ const m_option_t mp_opts[] = {
     OPT_SIZE_BOX("autofit-larger", vo.autofit_larger, 0),
     OPT_FLAG("force-window-position", vo.force_window_position, 0),
     // vo name (X classname) and window title strings
-    OPT_STRING("name", vo.winname, 0),
+    OPT_STRING("x11-name", vo.winname, 0),
     OPT_STRING("title", wintitle, 0),
     // set aspect ratio of monitor - useful for 16:9 TV-out
     OPT_FLOATRANGE("monitoraspect", vo.force_monitor_aspect, 0, 0.0, 9.0),
@@ -480,8 +479,6 @@ const m_option_t mp_opts[] = {
     // start in fullscreen mode:
     OPT_FLAG("fullscreen", vo.fullscreen, M_OPT_FIXED),
     OPT_FLAG("fs", vo.fullscreen, M_OPT_FIXED),
-    // set fullscreen switch method (workaround for buggy WMs)
-    OPT_INTRANGE("fsmode-dontuse", vo.fsmode, 0, 31, 4096),
     OPT_FLAG("native-keyrepeat", vo.native_keyrepeat, M_OPT_FIXED),
     OPT_FLOATRANGE("panscan", vo.panscan, 0, 0.0, 1.0),
     OPT_FLOATRANGE("video-zoom", vo.zoom, 0, -20.0, 20.0),
@@ -513,7 +510,7 @@ const m_option_t mp_opts[] = {
 
     OPT_INT64("wid", vo.WinID, CONF_GLOBAL),
 #if HAVE_X11
-    OPT_STRINGLIST("fstype", vo.fstype_list, 0),
+    OPT_STRINGLIST("x11-fstype", vo.fstype_list, 0),
 #endif
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
@@ -525,7 +522,7 @@ const m_option_t mp_opts[] = {
                       ({"all", -2}, {"current", -1})),
 
 #if HAVE_COCOA
-    OPT_FLAG("native-fs", vo.native_fs, 0),
+    OPT_FLAG("fs-missioncontrol", vo.fs_missioncontrol, 0),
 #endif
 
     OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),
@@ -595,17 +592,17 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("term-osd-bar", term_osd_bar, 0),
     OPT_STRING("term-osd-bar-chars", term_osd_bar_chars, 0),
 
-    OPT_STRING("playing-msg", playing_msg, 0),
-    OPT_STRING("status-msg", status_msg, 0),
+    OPT_STRING("term-playing-msg", playing_msg, 0),
+    OPT_STRING("term-status-msg", status_msg, 0),
     OPT_STRING("osd-status-msg", osd_status_msg, 0),
 
     OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
     OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
-    OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
-    OPT_FLAG("mouse-movements", vo.enable_mouse_movements, CONF_GLOBAL),
+    OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
+    OPT_FLAG("input-cursor", vo.enable_mouse_movements, CONF_GLOBAL),
 #if HAVE_TV
-    {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    {"tv-scan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif /* HAVE_TV */
 
     {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG},
@@ -662,7 +659,6 @@ const struct MPOpts mp_default_opts = {
         .screen_id = -1,
         .fsscreen_id = -1,
         .enable_mouse_movements = 1,
-        .fsmode = 0,
         .panscan = 0.0f,
         .keepaspect = 1,
         .border = 1,
@@ -764,7 +760,7 @@ const struct MPOpts mp_default_opts = {
         .use_lirc = 1,
         .use_alt_gr = 1,
 #if HAVE_COCOA
-        .use_ar = 1,
+        .use_appleremote = 1,
         .use_media_keys = 1,
 #endif
         .default_bindings = 1,

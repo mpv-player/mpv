@@ -481,9 +481,9 @@ behavior of mpv.
     Directory where mpv looks for user settings. Overrides ``HOME``, and mpv
     will try to load the config file as ``$MPV_HOME/config``.
 
-``MPV_VERBOSE`` (see also ``-v`` and ``--msglevel``)
+``MPV_VERBOSE`` (see also ``-v`` and ``--msg-level``)
     Set the initial verbosity level across all message modules (default: 0).
-    The resulting verbosity corresponds to that of ``--msglevel=5`` plus the
+    The resulting verbosity corresponds to that of ``--msg-level=5`` plus the
     value of ``MPV_VERBOSE``.
 
 ``MPV_LEAK_REPORT``
@@ -622,7 +622,7 @@ Play only titles 5, 6, 7:
     ``mpv dvd://5-7``
 
 Play a multiangle DVD:
-    ``mpv dvd://1 --dvdangle=2``
+    ``mpv dvd://1 --dvd-angle=2``
 
 Play from a different DVD device:
     ``mpv dvd://1 --dvd-device=/dev/dvd2``

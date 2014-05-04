@@ -338,8 +338,9 @@ Available video output drivers are:
         disabled.
 
     ``stereo=<value>``
-        Select a method for stereo display. You may have to use ``--aspect`` to
-        fix the aspect value. Experimental, do not expect too much from it.
+        Select a method for stereo display. You may have to use
+        ``--video-aspect`` to fix the aspect value. Experimental, do not expect
+        too much from it.
 
         no
             Normal 2D display
@@ -684,8 +685,9 @@ Available video output drivers are:
         Set the effect strength for the ``lscale``/``cscale`` filters that
         support it.
     ``stereo=<value>``
-        Select a method for stereo display. You may have to use ``--aspect`` to
-        fix the aspect value. Experimental, do not expect too much from it.
+        Select a method for stereo display. You may have to use
+        ``--video-aspect`` to fix the aspect value. Experimental, do not expect
+        too much from it.
 
         0
             Normal 2D display

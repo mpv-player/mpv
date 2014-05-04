@@ -86,7 +86,7 @@ __midentify__allprops="
     video-bitrate
     video-codec
     video-format
-    aspect
+    video-aspect
     fps
     width
     height

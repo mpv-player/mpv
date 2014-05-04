@@ -250,8 +250,9 @@ Available filters are:
 
     ``<out-channels>``
 
-    See also ``--format``, ``--srate``, and ``--channels`` for related options.
-    Keep in mind that ``--channels`` does not actually force the number of
+    See also ``--audio-format``, ``--audio-samplerate``, and
+    ``--audio-channels`` for related options. Keep in mind that
+    ``--audio-channels`` does not actually force the number of
     channels in most cases, while this filter can do this.
 
     *NOTE*: this filter used to be named ``force``. Also, unlike the old

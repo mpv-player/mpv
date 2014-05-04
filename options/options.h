@@ -28,7 +28,6 @@ typedef struct mp_vo_opts {
     struct m_geometry autofit;
     struct m_geometry autofit_larger;
 
-    int fsmode;
     int keepaspect;
     int border;
 
@@ -40,7 +39,7 @@ typedef struct mp_vo_opts {
     float monitor_pixel_aspect;
     int force_window_position;
 
-    int native_fs;
+    int fs_missioncontrol;
 } mp_vo_opts;
 
 typedef struct MPOpts {
@@ -48,7 +47,6 @@ typedef struct MPOpts {
     char *msglevels;
     char *dump_stats;
     int verbose;
-    int msg_identify;
     int msg_color;
     int msg_module;
     int msg_time;
@@ -279,7 +277,7 @@ typedef struct MPOpts {
         char *lirc_configfile;
         int use_lircc;
         int use_alt_gr;
-        int use_ar;
+        int use_appleremote;
         int use_media_keys;
         int default_bindings;
         int test;

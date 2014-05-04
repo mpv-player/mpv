@@ -34,7 +34,7 @@ function update_status_line()
     atsl(mp.get_property_osd("percent-pos", -1))
     atsl("%)")
 
-    local r = mp.get_property_number("speed", -1)   
+    local r = mp.get_property_number("speed", -1)
     if r ~= 1 then
         atsl(string.format(" x%4.2f", r))
     end
@@ -54,14 +54,14 @@ function update_status_line()
         atsl(" Late: ")
         atsl(r)
     end
-    
+
     r = mp.get_property_number("cache", 0)
     if r > 0 then
         atsl(string.format(" Cache: %d%% ", r))
     end
 
     -- Set the new status line
-    mp.set_property("options/status-msg", newStatus)
+    mp.set_property("options/term-status-msg", newStatus)
 end
 
 -- Register the event

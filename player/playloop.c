@@ -103,9 +103,6 @@ void pause_player(struct MPContext *mpctx)
     if (mpctx->num_sources)
         print_status(mpctx);
 
-    if (!mpctx->opts->quiet)
-        MP_SMODE(mpctx, "ID_PAUSED\n");
-
 end:
     mp_notify(mpctx, mpctx->opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
 }

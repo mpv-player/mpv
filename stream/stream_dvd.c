@@ -345,32 +345,6 @@ static int mp_get_titleset_length(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, in
 }
 
 
-static int mp_describe_titleset(stream_t *stream, dvd_reader_t *dvd, tt_srpt_t *tt_srpt, int vts_no)
-{
-    ifo_handle_t *vts_file;
-    int title_no, msec=0;
-
-    vts_file = ifoOpen(dvd, vts_no);
-    if(!vts_file)
-        return 0;
-
-    if(!vts_file->vtsi_mat || !vts_file->vts_pgcit)
-    {
-        ifoClose(vts_file);
-        return 0;
-    }
-
-    for(title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
-    {
-        if (tt_srpt->title[title_no].title_set_nr != vts_no)
-            continue;
-        msec = mp_get_titleset_length(vts_file, tt_srpt, title_no);
-        MP_SMODE(stream, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no, msec / 1000, msec % 1000);
-    }
-    ifoClose(vts_file);
-    return 1;
-}
-
 static int get_num_chapter(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no)
 {
     if(!vts_file || !tt_srpt)
@@ -768,34 +742,6 @@ static int open_s(stream_t *stream, int mode)
       return STREAM_UNSUPPORTED;
     }
     tt_srpt = vmg_file->tt_srpt;
-    if (mp_msg_test(stream->log, MSGL_SMODE))
-    {
-      int title_no; ///< title number
-      MP_SMODE(stream, "ID_DVD_TITLES=%d\n", tt_srpt->nr_of_srpts);
-      for (title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
-      {
-        MP_SMODE(stream, "ID_DVD_TITLE_%d_CHAPTERS=%d\n", title_no, tt_srpt->title[title_no].nr_of_ptts);
-        MP_SMODE(stream, "ID_DVD_TITLE_%d_ANGLES=%d\n", title_no, tt_srpt->title[title_no].nr_of_angles);
-      }
-    }
-    if (mp_msg_test(stream->log, MSGL_SMODE))
-    {
-      char volid[32];
-      unsigned char discid [16]; ///< disk ID, a 128 bit MD5 sum
-      int vts_no;   ///< video title set number
-      for (vts_no = 1; vts_no <= vmg_file->vts_atrt->nr_of_vtss; vts_no++)
-        mp_describe_titleset(stream, dvd, tt_srpt, vts_no);
-      if (DVDDiscID(dvd, discid) >= 0)
-      {
-        int i;
-        MP_SMODE(stream, "ID_DVD_DISC_ID=");
-        for (i = 0; i < 16; i ++)
-          MP_SMODE(stream, "%02X", discid[i]);
-        MP_SMODE(stream, "\n");
-      }
-      if (DVDUDFVolumeInfo(dvd, volid, sizeof(volid), NULL, 0) >= 0 || DVDISOVolumeInfo(dvd, volid, sizeof(volid), NULL, 0) >= 0)
-        MP_SMODE(stream, "ID_DVD_VOLUME_ID=%s\n", volid);
-    }
     /**
      * Make sure our title number is valid.
      */
@@ -806,7 +752,6 @@ static int open_s(stream_t *stream, int mode)
       DVDClose( dvd );
       return STREAM_UNSUPPORTED;
     }
-    MP_SMODE(stream, "ID_DVD_CURRENT_TITLE=%d\n", dvd_title);
     --dvd_title; // remap 1.. -> 0..
     /**
      * Make sure the angle number is valid for this title.
@@ -897,9 +842,6 @@ static int open_s(stream_t *stream, int mode)
              tmp,
              audio_stream->id
            );
-           MP_SMODE(stream, "ID_AUDIO_ID=%d\n", audio_stream->id);
-           if(language && tmp[0])
-             MP_SMODE(stream, "ID_AID_%d_LANG=%s\n", audio_stream->id, tmp);
 
            d->nr_of_channels++;
          }
@@ -937,9 +879,6 @@ static int open_s(stream_t *stream, int mode)
           sub_stream->id = pgc->subp_control[i] >> 8 & 31;
 
         MP_INFO(stream, "subtitle ( sid ): %d language: %s\n", sub_stream->id, tmp);
-        MP_SMODE(stream, "ID_SUBTITLE_ID=%d\n", sub_stream->id);
-        if(language && tmp[0])
-          MP_SMODE(stream, "ID_SID_%d_LANG=%s\n", sub_stream->id, tmp);
         d->nr_of_subtitles++;
       }
       MP_INFO(stream, "number of subtitles on disk: %d\n",d->nr_of_subtitles);

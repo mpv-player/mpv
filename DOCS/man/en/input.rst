@@ -33,7 +33,7 @@ General Input Command Syntax
 
 Note that by default, the right Alt key can be used to create special
 characters, and thus does not register as a modifier. The option
-``--no-right-alt-gr`` changes this behavior.
+``--no-input-right-alt-gr`` changes this behavior.
 
 Newlines always start a new binding. ``#`` starts a comment (outside of quoted
 string arguments). To bind commands to the ``#`` key, ``SHARP`` can be used.
@@ -822,10 +822,10 @@ Property list
 ``audio-bitrate``
     Audio bitrate. This is probably a very bad guess in most cases.
 
-``samplerate``
+``audio-samplerate``
     Audio samplerate.
 
-``channels``
+``audio-channels``
     Number of audio channels. The OSD value of this property is actually the
     channel layout, while the raw value returns the number of channels only.
 
@@ -982,8 +982,8 @@ Property list
     (or to be exactly, the size the video filters output). ``2`` will set the
     double size, ``0.5`` halves the size.
 
-``aspect`` (RW)
-    Video aspect, see ``--aspect``.
+``video-aspect`` (RW)
+    Video aspect, see ``--video-aspect``.
 
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the

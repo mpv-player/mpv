@@ -633,11 +633,6 @@ static void vo_x11_decoration(struct vo *vo, int d)
     if (!vo->opts->WinID)
         return;
 
-    if (vo->opts->fsmode & 8) {
-        XSetTransientForHint(x11->display, x11->window,
-                             RootWindow(x11->display, x11->screen));
-    }
-
     vo_MotifHints = XInternAtom(x11->display, "_MOTIF_WM_HINTS", 0);
     if (vo_MotifHints != None) {
         if (!x11->got_motif_hints) {
@@ -664,13 +659,12 @@ static void vo_x11_decoration(struct vo *vo, int d)
             vo_MotifWmHints.functions = x11->oldfuncs;
             d = x11->olddecor;
         }
-        vo_MotifWmHints.decorations =
-            d | ((vo->opts->fsmode & 2) ? MWM_DECOR_MENU : 0);
+        vo_MotifWmHints.decorations = d;
         XChangeProperty(x11->display, x11->window, vo_MotifHints,
                         vo_MotifHints, 32,
                         PropModeReplace,
                         (unsigned char *) &vo_MotifWmHints,
-                        (vo->opts->fsmode & 4) ? 4 : 5);
+                        5);
     }
 }
 

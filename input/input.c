@@ -208,15 +208,15 @@ static const m_option_t input_config[] = {
 const m_option_t mp_input_opts[] = {
     { "input", (void *)&input_config, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     OPT_INTRANGE("doubleclick-time", input.doubleclick_time, 0, 0, 1000),
-    OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
-    OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
-    OPT_FLAG("right-alt-gr", input.use_alt_gr, CONF_GLOBAL),
+    OPT_FLAG("input-joystick", input.use_joystick, CONF_GLOBAL),
+    OPT_FLAG("input-lirc", input.use_lirc, CONF_GLOBAL),
+    OPT_FLAG("input-right-alt-gr", input.use_alt_gr, CONF_GLOBAL),
 #if HAVE_LIRC
-    OPT_STRING("lircconf", input.lirc_configfile, CONF_GLOBAL),
+    OPT_STRING("input-lirc-conf", input.lirc_configfile, CONF_GLOBAL),
 #endif
 #if HAVE_COCOA
-    OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
-    OPT_FLAG("media-keys", input.use_media_keys, CONF_GLOBAL),
+    OPT_FLAG("input-appleremote", input.use_appleremote, CONF_GLOBAL),
+    OPT_FLAG("input-media-keys", input.use_media_keys, CONF_GLOBAL),
 #endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -1537,7 +1537,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     }
 
 #if HAVE_COCOA
-    if (input_conf->use_ar) {
+    if (input_conf->use_appleremote) {
         cocoa_init_apple_remote();
         ictx->using_ar = true;
     }

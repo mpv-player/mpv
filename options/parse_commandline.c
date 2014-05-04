@@ -262,7 +262,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
 
             // Lock stdin if it will be used as input
             if (bstrcmp0(file, "-") == 0)
-                m_config_set_option0(config, "consolecontrols", "no");
+                m_config_set_option0(config, "input-console", "no");
         }
     }
 
