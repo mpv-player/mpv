@@ -714,7 +714,7 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
         for (int i = 0; mpctx->opts->sub_name[i] != NULL; ++i)
             mp_add_subtitles(mpctx, mpctx->opts->sub_name[i]);
     }
-    if (mpctx->opts->sub_auto) { // auto load sub file ...
+    if (mpctx->opts->sub_auto >= 0) { // auto load sub file ...
         void *tmp = talloc_new(NULL);
         char *base_filename = mpctx->filename;
         char *stream_filename = NULL;

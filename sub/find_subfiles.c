@@ -156,12 +156,12 @@ static void append_dir_subtitles(struct mpv_global *global,
         if (!prio && bstrcmp(tmp_fname_trim, f_fname_trim) == 0)
             prio = 3; // matches the movie name
         if (!prio && bstr_find(tmp_fname_trim, f_fname_trim) >= 0
-            && opts->sub_match_fuzziness >= 1)
+            && opts->sub_auto >= 1)
             prio = 2; // contains the movie name
         if (!prio) {
             // doesn't contain the movie name
             // don't try in the mplayer subtitle directory
-            if (!limit_fuzziness && opts->sub_match_fuzziness >= 2) {
+            if (!limit_fuzziness && opts->sub_auto >= 2) {
                 prio = 1;
             }
         }

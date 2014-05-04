@@ -196,7 +196,6 @@ typedef struct MPOpts {
     char **sub_name;
     char **sub_paths;
     int sub_auto;
-    int sub_match_fuzziness;
     int osd_bar_visible;
     float osd_bar_align_x;
     float osd_bar_align_y;

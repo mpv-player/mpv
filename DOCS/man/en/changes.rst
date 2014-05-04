@@ -195,7 +195,7 @@ Command Line Switches
     ``-srate``                  ``--audio-samplerate``
     ``-ss``                     ``--start``
     ``-stop-xscreensaver``      ``--stop-screensaver``
-    ``-sub-fuzziness``          ``--sub-auto-match``
+    ``-sub-fuzziness``          ``--sub-auto``
     ``-sub``                    ``--sub-file``
     ``-subcp``                  ``--sub-codepage``
     ``-subdelay``               ``--sub-delay``

@@ -2168,18 +2168,15 @@ OPTIONS
     Use/display these subtitle files. Only one file can be displayed at the
     same time.
 
-``--sub-auto``, ``--no-sub-auto``
-    Load additional subtitle files matching the video filename. Enabled by
-    default. See also ``--sub-auto-match``.
+``--sub-auto=<no|exact|fuzzy|all>``, ``--no-sub-auto``
+    Load additional subtitle files matching the video filename. The parameter
+    specifies how external subtitle files are matched. ``exact`` is enabled by
+    default.
 
-``--sub-auto-match=<exact|fuzzy|all>``
-    Adjust matching fuzziness when searching for subtitles:
-
-    :exact: exact match
+    :no:    Don't automatically load external subtitle files.
+    :exact: Load the media filename with subtitle file extension (default).
     :fuzzy: Load all subs containing movie name.
     :all:   Load all subs in the current and ``--sub-paths`` directories.
-
-    (default: exact)
 
 ``--sub-paths=<path1:path2:...>``
     Specify extra directories to search for subtitles matching the video.
