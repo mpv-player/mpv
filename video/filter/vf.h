@@ -149,7 +149,8 @@ struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
 void vf_remove_filter(struct vf_chain *c, struct vf_instance *vf);
 int vf_append_filter_list(struct vf_chain *c, struct m_obj_settings *list);
 struct vf_instance *vf_find_by_label(struct vf_chain *c, const char *label);
-void vf_print_filter_chain(struct vf_chain *c, int msglevel);
+void vf_print_filter_chain(struct vf_chain *c, int msglevel,
+                           struct vf_instance *vf);
 
 // Filter internal API
 struct mp_image *vf_alloc_out_image(struct vf_instance *vf);

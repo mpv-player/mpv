@@ -240,7 +240,8 @@ static void print_fmt(struct mp_log *log, int msglevel, struct mp_image_params *
     }
 }
 
-void vf_print_filter_chain(struct vf_chain *c, int msglevel)
+void vf_print_filter_chain(struct vf_chain *c, int msglevel,
+                           struct vf_instance *vf)
 {
     if (!mp_msg_test(c->log, msglevel))
         return;
@@ -253,6 +254,8 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel)
         print_fmt(c->log, msglevel, &f->fmt_out);
         if (f->autoinserted)
             mp_msg(c->log, msglevel, " [a]");
+        if (f == vf)
+            mp_msg(c->log, msglevel, "   <---");
         mp_msg(c->log, msglevel, "\n");
     }
 }
@@ -601,10 +604,13 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params,
 
     uint8_t unused[IMGFMT_END - IMGFMT_START];
     update_formats(c, c->first, unused);
+    struct vf_instance *failing = NULL;
     for (struct vf_instance *vf = c->first; vf; vf = vf->next) {
         r = vf_reconfig_wrapper(vf, &cur);
-        if (r < 0)
+        if (r < 0) {
+            failing = vf;
             break;
+        }
         cur = vf->fmt_out;
     }
     c->output_params = cur;
@@ -613,7 +619,7 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params,
     if (r == -2)
         MP_ERR(c, "Image formats incompatible.\n");
     mp_msg(c->log, loglevel, "Video filter chain:\n");
-    vf_print_filter_chain(c, loglevel);
+    vf_print_filter_chain(c, loglevel, failing);
     if (r < 0) {
         c->input_params = c->override_params = c->output_params =
             (struct mp_image_params){0};
