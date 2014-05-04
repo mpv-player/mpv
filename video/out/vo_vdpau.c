@@ -926,9 +926,9 @@ static struct mp_image *filter_image(struct vo *vo, struct mp_image *mpi)
     struct mp_image *reserved_mpi = NULL;
     VdpStatus vdp_st;
 
-    if (vc->image_format == IMGFMT_VDPAU) {
-        reserved_mpi = mp_image_new_ref(mpi);
-    } else if (vc->rgb_mode) {
+    handle_preemption(vo);
+
+    if (vc->rgb_mode) {
         reserved_mpi = get_rgb_surface(vo);
         if (!reserved_mpi)
             goto end;
@@ -942,22 +942,11 @@ static struct mp_image *filter_image(struct vo *vo, struct mp_image *mpi)
                               "output_surface_put_bits_native");
         }
     } else {
-        reserved_mpi = mp_vdpau_get_video_surface(vc->mpvdp, vc->vdp_chroma_type,
-                                                  mpi->w, mpi->h);
-        if (!reserved_mpi)
-            goto end;
-        VdpVideoSurface surface = (VdpVideoSurface)(intptr_t)reserved_mpi->planes[3];
-        if (handle_preemption(vo) >= 0) {
-            const void *destdata[3] = {mpi->planes[0], mpi->planes[2],
-                                       mpi->planes[1]};
-            if (vc->image_format == IMGFMT_NV12)
-                destdata[1] = destdata[2];
-            vdp_st = vdp->video_surface_put_bits_y_cb_cr(surface,
-                    vc->vdp_pixel_format, destdata, mpi->stride);
-            CHECK_VDP_WARNING(vo, "Error when calling "
-                              "vdp_video_surface_put_bits_y_cb_cr");
-        }
+        reserved_mpi = mp_vdpau_upload_video_surface(vc->mpvdp, mpi);
     }
+
+    if (!reserved_mpi)
+        goto end;
 
     mp_image_copy_attributes(reserved_mpi, mpi);
 

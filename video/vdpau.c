@@ -273,3 +273,36 @@ bool mp_vdpau_get_format(int imgfmt, VdpChromaType *out_chroma_type,
         *out_pixel_format = ycbcr;
     return true;
 }
+
+// Use mp_vdpau_get_video_surface, and upload mpi to it. Return NULL on failure.
+// If the image is already a vdpau video surface, just return a reference.
+struct mp_image *mp_vdpau_upload_video_surface(struct mp_vdpau_ctx *ctx,
+                                               struct mp_image *mpi)
+{
+    struct vdp_functions *vdp = &ctx->vdp;
+    VdpStatus vdp_st;
+
+    if (mpi->imgfmt == IMGFMT_VDPAU)
+        return mp_image_new_ref(mpi);
+
+    VdpChromaType chroma_type;
+    VdpYCbCrFormat pixel_format;
+    if (!mp_vdpau_get_format(mpi->imgfmt, &chroma_type, &pixel_format))
+        return NULL;
+
+    struct mp_image *hwmpi =
+        mp_vdpau_get_video_surface(ctx, chroma_type, mpi->w, mpi->h);
+    if (!hwmpi)
+        return NULL;
+
+    VdpVideoSurface surface = (intptr_t)hwmpi->planes[3];
+    const void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
+    if (mpi->imgfmt == IMGFMT_NV12)
+        destdata[1] = destdata[2];
+    vdp_st = vdp->video_surface_put_bits_y_cb_cr(surface,
+                pixel_format, destdata, mpi->stride);
+    CHECK_VDP_WARNING(ctx, "Error when calling vdp_video_surface_put_bits_y_cb_cr");
+
+    mp_image_copy_attributes(hwmpi, mpi);
+    return hwmpi;
+}

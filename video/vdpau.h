@@ -69,4 +69,7 @@ struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
 bool mp_vdpau_get_format(int imgfmt, VdpChromaType *out_chroma_type,
                          VdpYCbCrFormat *out_pixel_format);
 
+struct mp_image *mp_vdpau_upload_video_surface(struct mp_vdpau_ctx *ctx,
+                                               struct mp_image *mpi);
+
 #endif
