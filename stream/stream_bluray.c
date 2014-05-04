@@ -763,9 +763,6 @@ static int bluray_stream_open(stream_t *s, int mode)
             if (!ti)
                 continue;
 
-            const int sec  = ti->duration / 90000;
-            const int msec = (ti->duration - sec) % 1000;
-
             /* try to guess which title may contain the main movie */
             if (ti->duration > max_duration) {
                 max_duration = ti->duration;
