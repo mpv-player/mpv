@@ -238,8 +238,6 @@ static void *playthread(void *arg)
         }
         double timeout = 2.0;
         if (p->playing) {
-            double min_wait = ao->device_buffer / (double)ao->samplerate;
-            min_wait *= 0.75;
             int r = ao_play_data(ao);
             // The device buffers are not necessarily full, but writing to the
             // AO buffer will wake up this thread anyway.
@@ -255,12 +253,13 @@ static void *playthread(void *arg)
                 timeout = 0;
             }
             // Half of the buffer played -> wakeup playback thread to get more.
+            double min_wait = ao->device_buffer / (double)ao->samplerate;
             if (timeout <= min_wait / 2 + 0.001)
                 mp_input_wakeup(ao->input_ctx);
             // Avoid wasting CPU - this assumes ao_play_data() usually fills the
             // audio buffer as far as possible, so even if the device buffer
             // is not full, we can only wait for the core.
-            timeout = MPMAX(timeout, min_wait);
+            timeout = MPMAX(timeout, min_wait * 0.75);
         }
         pthread_mutex_unlock(&p->lock);
         pthread_mutex_lock(&p->wakeup_lock);
