@@ -98,9 +98,11 @@ Available filters are:
     :2: Rotate by 90 degrees counterclockwise.
     :3: Rotate by 90 degrees counterclockwise and flip.
 
-``scale[=w:h[:interlaced[:chr-drop[:param[:param2[:noup[:arnd]]]]]]]``
+``scale[=w:h:param:param2:chr-drop:noup:arnd``
     Scales the image with the software scaler (slow) and performs a YUV<->RGB
     colorspace conversion (see also ``--sws``).
+
+    All parameters are optional.
 
     ``<w>,<h>``
         scaled width/height (default: original width/height)
@@ -113,14 +115,6 @@ Available filters are:
                  aspect ratio.
         :-(n+8): Like -n above, but rounding the dimension to the closest
                  multiple of 16.
-
-    ``<chr-drop>``
-        chroma skipping
-
-        :0: Use all available input lines for chroma.
-        :1: Use only every 2. input line for chroma.
-        :2: Use only every 4. input line for chroma.
-        :3: Use only every 8. input line for chroma.
 
     ``<param>[:<param2>]`` (see also ``--sws``)
         Set some scaling parameters depending on the type of scaler selected
@@ -136,6 +130,14 @@ Available filters are:
             --sws=7 (gaussian): sharpness (0 (soft) - 100 (sharp))
 
             --sws=9 (lanczos):  filter length (1-10)
+
+    ``<chr-drop>``
+        chroma skipping
+
+        :0: Use all available input lines for chroma (default).
+        :1: Use only every 2. input line for chroma.
+        :2: Use only every 4. input line for chroma.
+        :3: Use only every 8. input line for chroma.
 
     ``<noup>``
         Disallow upscaling past the original dimensions.
