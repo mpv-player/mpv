@@ -47,7 +47,8 @@ struct priv {
     int untimed;
     float bufferlen;    // seconds
     float speed;        // multiplier
-    float latency;      // seconds
+    float latency_sec;  // seconds
+    float latency;      // samples
     int broken_eof;
 
     // Minimal unit of audio samples that can be written at once. If play() is
@@ -90,6 +91,8 @@ static int init(struct ao *ao)
     mp_chmap_sel_add_any(&sel);
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
+
+    priv->latency = priv->latency_sec * ao->samplerate;
 
     // A "buffer" for this many seconds of audio
     int bursts = (int)(ao->samplerate * priv->bufferlen + 1) / priv->outburst;
@@ -180,14 +183,14 @@ static float get_delay(struct ao *ao)
 
     // Note how get_delay returns the delay in audio device time (instead of
     // adjusting for speed), since most AOs seem to also do that.
-    double delay = priv->buffered / (double)ao->samplerate;
+    double delay = priv->buffered;
 
     // Drivers with broken EOF handling usually always report the same device-
     // level delay that is additional to the buffer time.
     if (priv->broken_eof && priv->buffered < priv->latency)
         delay = priv->latency;
 
-    return delay;
+    return delay  / (double)ao->samplerate;
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -207,7 +210,7 @@ const struct ao_driver audio_out_null = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .bufferlen = 0.2,
-        .latency = 0.5,
+        .latency_sec = 0.5,
         .outburst = 256,
         .speed = 1,
     },
@@ -216,7 +219,7 @@ const struct ao_driver audio_out_null = {
         OPT_FLOATRANGE("buffer", bufferlen, 0, 0, 100),
         OPT_INTRANGE("outburst", outburst, 0, 1, 100000),
         OPT_FLOATRANGE("speed", speed, 0, 0, 10000),
-        OPT_FLOATRANGE("latency", latency, 0, 0, 100),
+        OPT_FLOATRANGE("latency", latency_sec, 0, 0, 100),
         OPT_FLAG("broken-eof", broken_eof, 0),
         {0}
     },
