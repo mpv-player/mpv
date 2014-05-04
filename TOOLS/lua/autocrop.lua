@@ -25,6 +25,7 @@
 --
 -- to mpv's arguments. This may be desirable to allow cropdetect more
 -- time to collect data.
+require "mp.msg"
 
 script_name=mp.get_script_name()
 cropdetect_label=string.format("%s-cropdetect",script_name)
@@ -51,10 +52,17 @@ function del_filter_if_present(label)
 end
 
 function autocrop_start()
-    -- if there's a crop filter, just remove it and exit
+    -- exit if cropdetection is already in progress
+    if timer then
+        mp.msg.warn("already cropdetecting!")
+        return
+    end
+
+    -- if there's a crop filter, remove it and exit
     if del_filter_if_present(crop_label) then
         return
     end
+
     -- insert the cropdetect filter
     ret=mp.command(
 	string.format(
@@ -63,11 +71,10 @@ function autocrop_start()
 	)
     )
     -- wait to gather data
-    mp.add_timeout(detect_seconds, do_crop)
+    timer=mp.add_timeout(detect_seconds, do_crop)
 end
 
 function do_crop()
-    require 'mp.msg'
     -- get the metadata
     local cropdetect_metadata = mp.get_property_native(
 	string.format('vf-metadata/%s', cropdetect_label)
@@ -100,6 +107,7 @@ function do_crop()
     end
     -- remove the cropdetect filter
     del_filter_if_present(cropdetect_label)
+    timer=nil
 end
 
 mp.add_key_binding("C","auto_crop",autocrop_start)
