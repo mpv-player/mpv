@@ -1228,8 +1228,8 @@ OPTIONS
 
 ``--input-cursor``, ``--no-input-cursor``
     Permit mpv to receive pointer events reported by the video output
-    driver. Necessary to select the buttons in DVD menus. Supported for
-    X11-based VOs (x11, xv, etc) and the gl, direct3d and corevideo VOs.
+    driver. Necessary to use the OSC, or to select the buttons in DVD menus.
+    Support depends on the VO in use.
 
 ``--input-joystick``, ``--no-input-joystick``
     Enable/disable joystick support. Disabled by default.
