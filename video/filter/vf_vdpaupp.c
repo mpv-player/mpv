@@ -121,7 +121,7 @@ static bool output_field(struct vf_instance *vf, int pos)
 static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 {
     struct vf_priv_s *p = vf->priv;
-    int maxbuffer = p->opts.deint ? MP_ARRAY_SIZE(p->buffered) : 2;
+    int maxbuffer = p->opts.deint >= 2 ? 3 : 2;
     bool eof = !mpi;
 
     if (mpi) {
@@ -131,7 +131,7 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
             return -1;
         mpi = new;
 
-        if (mpi->planes[2]) {
+        if (mp_vdpau_mixed_frame_get(mpi)) {
             MP_ERR(vf, "Can't apply vdpaupp filter multiple times.\n");
             vf_add_output_frame(vf, mpi);
             return -1;
@@ -150,14 +150,14 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 
     while (1) {
         int current = p->prev_pos - 1;
-        if (current < 0)
-            break;
-        // Wait for enough future frames being buffered.
-        // (Past frames should be around if available at all.)
-        if (p->opts.deint && !eof && !FIELD_VALID(p, current - 1))
+        if (!FIELD_VALID(p, current))
             break;
         // No field-splitting deinterlace -> only output first field (odd index)
-        if (p->opts.deint >= 2 || (current & 1)) {
+        if ((current & 1) || p->opts.deint >= 2) {
+            // Wait for enough future frames being buffered.
+            // (Past frames are always around if available at all.)
+            if (!eof && !FIELD_VALID(p, current - 1))
+                break;
             if (!output_field(vf, current))
                 break;
         }
