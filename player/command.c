@@ -1561,8 +1561,8 @@ static int probe_deint_filters(struct MPContext *mpctx)
         if (pref > 0 && pref <= 4) {
             const char *types[] =
                 {"", "first-field", "bob", "temporal", "temporal-spatial"};
-            mp_snprintf_append(filter, sizeof(filter), ":deint-mode=%s",
-                               types[pref]);
+            mp_snprintf_cat(filter, sizeof(filter), ":deint-mode=%s",
+                            types[pref]);
         }
 
         probe_deint_filter(mpctx, filter);
