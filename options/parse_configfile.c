@@ -228,13 +228,12 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
             goto nextline;
         }
 
-        tmp = m_config_option_requires_param(config, bopt);
-        if (tmp > 0 && !param_set)
-            tmp = M_OPT_MISSING_PARAM;
-        if (tmp < 0) {
+        bool need_param = m_config_option_requires_param(config, bopt) > 0;
+        if (need_param && !param_set) {
             PRINT_LINENUM;
             MP_ERR(config, "error parsing option %.*s=%.*s: %s\n",
-                   BSTR_P(bopt), BSTR_P(bparam), m_option_strerror(tmp));
+                   BSTR_P(bopt), BSTR_P(bparam),
+                   m_option_strerror(M_OPT_MISSING_PARAM));
             continue;
         }
 
