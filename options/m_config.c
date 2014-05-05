@@ -38,6 +38,8 @@
 
 static const union m_option_value default_value;
 
+static const char *replaced_opts;
+
 // Profiles allow to predefine some sets of options that can then
 // be applied later on with the internal -profile option.
 #define MAX_PROFILE_DEPTH 20
@@ -480,8 +482,18 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
     bool set = !(flags & M_SETOPT_CHECK_ONLY);
 
     struct m_config_option *co = m_config_get_co(config, name);
-    if (!co)
+    if (!co) {
+        char s[80];
+        snprintf(s, sizeof(s), "|%.*s#", BSTR_P(name));
+        char *msg = strstr(replaced_opts, s);
+        if (msg) {
+            msg += strlen(s);
+            char *end = strchr(msg, '|');
+            MP_FATAL(config, "The --%.*s option was renamed or replaced: %.*s\n",
+                     BSTR_P(name), (int)(end - msg), msg);
+        }
         return M_OPT_UNKNOWN;
+    }
 
     // This is the only mandatory function
     assert(co->opt->type->parse);
@@ -820,3 +832,77 @@ void *m_config_alloc_struct(void *talloc_ctx,
         memcpy(substruct, subopts->defaults, subopts->size);
     return substruct;
 }
+
+// This is used for printing error messages on unknown options.
+static const char *replaced_opts =
+    "|a52drc#--ad-lavc-ac3drc=level"
+    "|afm#--ad"
+    "|aspect#--video-aspect"
+    "|ass-bottom-margin#--vf=sub=bottom:top"
+    "|ass#--sub-ass"
+    "|audiofile-cache#--audio-file-cache"
+    "|audiofile#--audio-file"
+    "|benchmark#--untimed (no stats)"
+    "|capture#--stream-capture=<filename>"
+    "|channels#--audio-channels (changed semantics)"
+    "|cursor-autohide-delay#--cursor-autohide"
+    "|delay#--audio-delay"
+    "|dumpstream#--stream-dump=<filename>"
+    "|dvdangle#--dvd-angle"
+    "|endpos#--length"
+    "|font#--osd-font"
+    "|forcedsubsonly#--sub-forced-only"
+    "|format#--audio-format"
+    "|fstype#--x11-fstype"
+    "|hardframedrop#--framedrop=hard"
+    "|identify#removed; use TOOLS/mpv_identify.sh"
+    "|lavdopts#--vd-lavc-..."
+    "|lavfdopts#--demuxer-lavf-..."
+    "|lircconf#--input-lirc-conf"
+    "|mixer-channel#AO suboptions (alsa, oss)"
+    "|mixer#AO suboptions (alsa, oss)"
+    "|mouse-movements#--input-cursor"
+    "|msgcolor#--msg-color"
+    "|msglevel#--msg-level (changed semantics)"
+    "|msgmodule#--msg-module"
+    "|name#--x11-name"
+    "|noar#--no-input-appleremote"
+    "|noautosub#--no-sub-auto"
+    "|noconsolecontrols#--no-input-terminal"
+    "|nojoystick#--no-input-joystick"
+    "|nosound#--no-audio"
+    "|osdlevel#--osd-level"
+    "|panscanrange#--video-zoom, --video-pan-x/y"
+    "|playing-msg#--term-playing-msg"
+    "|pp#'--vf=pp=[...]'"
+    "|pphelp#--vf=pp:help"
+    "|rawaudio#--demuxer-rawaudio-..."
+    "|rawvideo#--demuxer-rawvideo-..."
+    "|spugauss#--sub-gauss"
+    "|srate#--audio-samplerate"
+    "|ss#--start"
+    "|stop-xscreensaver#--stop-screensaver"
+    "|sub-fuzziness#--sub-auto"
+    "|sub#--sub-file"
+    "|subcp#--sub-codepage"
+    "|subdelay#--sub-delay"
+    "|subfile#--sub"
+    "|subfont-text-scale#--sub-scale"
+    "|subfont#--sub-text-font"
+    "|subfps#--sub-fps"
+    "|subpos#--sub-pos"
+    "|tvscan#--tv-scan"
+    "|use-filename-title#--title='${filename}'"
+    "|vc#--vd=..., --hwdec=..."
+    "|vobsub#--sub (pass the .idx file)"
+    "|xineramascreen#--screen (different values)"
+    "|xy#--autofit"
+    "|zoom#Inverse available as ``--video-unscaled"
+    "|media-keys#--input-media-keys"
+    "|lirc#--input-lirc"
+    "|right-alt-gr#--input-right-alt-gr"
+    "|autosub#--sub-auto"
+    "|native-fs#--fs-missioncontrol"
+    "|status-msg#--term-status-msg"
+    "|"
+;
