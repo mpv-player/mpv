@@ -1551,7 +1551,6 @@ static bool check_output_format(struct MPContext *mpctx, int imgfmt)
 
 static int probe_deint_filters(struct MPContext *mpctx)
 {
-#if HAVE_VDPAU
     if (check_output_format(mpctx, IMGFMT_VDPAU)) {
         char filter[80] = "vdpaupp:deint=yes";
         int pref = 0;
@@ -1568,12 +1567,9 @@ static int probe_deint_filters(struct MPContext *mpctx)
         probe_deint_filter(mpctx, filter);
         return 0;
     }
-#endif
-#if HAVE_VAAPI_VPP
     if (check_output_format(mpctx, IMGFMT_VAAPI) &&
         probe_deint_filter(mpctx, "vavpp"))
         return 0;
-#endif
     if (probe_deint_filter(mpctx, "yadif"))
         return 0;
     return -1;
