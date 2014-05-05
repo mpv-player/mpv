@@ -3260,10 +3260,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SHOW_TEXT: {
+        struct mp_image_params p = mpctx->d_video->vfilter->output_params;
         // if no argument supplied use default osd_duration, else <arg> ms.
         set_osd_msg(mpctx, cmd->args[2].v.i,
                     (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
-                    "%s", cmd->args[0].v.s);
+                    "%s [%dx%d@%.2f]", cmd->args[0].v.s, p.w, p.h, mpctx->d_video->fps);
         break;
     }
 
