@@ -569,6 +569,9 @@ Property list
     looks better for display purposes. Use the ``path`` property to get an
     unmodified filename.)
 
+``file-size``
+    Length in bytes of the source file/stream.
+
 ``path``
     Full path of the currently played file.
 
@@ -598,9 +601,6 @@ Property list
 
 ``stream-end``
     Raw end position in bytes in source stream.
-
-``stream-length``
-    Length in bytes of the source stream (``${stream-end} - ${stream-start}``).
 
 ``stream-time-pos`` (RW)
     Time position in source stream. This only works for DVD and Bluray. This
