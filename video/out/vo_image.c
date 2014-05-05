@@ -69,10 +69,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     struct priv *p = vo->priv;
     mp_image_unrefp(&p->current);
 
-    if (p->outdir && vo->config_count < 1)
-        if (!checked_mkdir(vo, p->outdir))
-            return -1;
-
     return 0;
 }
 
@@ -127,6 +123,9 @@ static void uninit(struct vo *vo)
 
 static int preinit(struct vo *vo)
 {
+    struct priv *p = vo->priv;
+    if (p->outdir && !checked_mkdir(vo, p->outdir))
+        return -1;
     vo->untimed = true;
     return 0;
 }

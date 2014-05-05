@@ -1731,8 +1731,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     p->vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
-    if (vo->config_count)
-        uninitGl(vo);
+    uninitGl(vo);
 
     if (!config_window(vo, vo->dwidth, vo->dheight, flags))
         return -1;

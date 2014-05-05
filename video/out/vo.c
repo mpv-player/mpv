@@ -339,7 +339,6 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     int ret = vo->driver->reconfig(vo, vo->params, flags);
     vo->config_ok = ret >= 0;
-    vo->config_count += vo->config_ok;
     if (vo->config_ok) {
         check_vo_caps(vo);
     } else {
