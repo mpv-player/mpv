@@ -127,9 +127,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     return true;
 }
 
-static void egl_create_window(struct vo_wayland_state *wl,
-                              uint32_t width,
-                              uint32_t height)
+static void egl_create_window(struct vo_wayland_state *wl)
 {
     wl->egl_context.egl_window = wl_egl_window_create(wl->window.video_surface,
                                                       wl->window.width,
@@ -157,7 +155,7 @@ static bool config_window_wayland(struct MPGLContext *ctx,
     bool enable_alpha = !!(flags & VOFLAG_ALPHA);
     bool ret = false;
 
-    if (!vo_wayland_config(ctx->vo, d_width, d_height, flags))
+    if (!vo_wayland_config(ctx->vo, flags))
         return false;
 
     if (!wl->egl_context.egl.ctx) {
@@ -167,7 +165,7 @@ static bool config_window_wayland(struct MPGLContext *ctx,
         /* If successfully created the context and we don't want to hide the
          * window than also create the window immediately */
         if (ret && !(VOFLAG_HIDDEN & flags))
-            egl_create_window(wl, d_width, d_height);
+            egl_create_window(wl);
 
         return ret;
     }
@@ -176,7 +174,7 @@ static bool config_window_wayland(struct MPGLContext *ctx,
             /* If the context exists and the hidden flag is unset then
              * create the window */
             if (!(VOFLAG_HIDDEN & flags))
-                egl_create_window(wl, d_width, d_height);
+                egl_create_window(wl);
         }
         return true;
     }

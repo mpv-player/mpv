@@ -39,7 +39,7 @@
 #include "wayland_common.h"
 
 #include "vo.h"
-#include "aspect.h"
+#include "win_state.h"
 #include "osdep/timer.h"
 
 #include "input/input.h"
@@ -1039,7 +1039,7 @@ static int vo_wayland_check_events (struct vo *vo)
     return wl->window.events;
 }
 
-static void vo_wayland_update_screeninfo (struct vo *vo)
+static void vo_wayland_update_screeninfo(struct vo *vo, struct mp_rect *screenrc)
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct mp_vo_opts *opts = vo->opts;
@@ -1047,7 +1047,7 @@ static void vo_wayland_update_screeninfo (struct vo *vo)
 
     wl_display_roundtrip(wl->display.display);
 
-    vo->xinerama_x = vo->xinerama_y = 0;
+    *screenrc = (struct mp_rect){0};
 
     int screen_id = 0;
 
@@ -1077,20 +1077,20 @@ static void vo_wayland_update_screeninfo (struct vo *vo)
 
     if (fsscreen_output) {
         wl->display.fs_output = fsscreen_output->output;
-        opts->screenwidth = fsscreen_output->width;
-        opts->screenheight = fsscreen_output->height;
+        screenrc->x1 = fsscreen_output->width;
+        screenrc->y1 = fsscreen_output->height;
     }
     else {
         wl->display.fs_output = NULL; /* current output is always 0 */
 
         if (first_output) {
-            opts->screenwidth = first_output->width;
-            opts->screenheight = first_output->height;
+            screenrc->x1 = first_output->width;
+            screenrc->y1 = first_output->height;
         }
     }
 
-    wl->window.fs_width = opts->screenwidth;
-    wl->window.fs_height = opts->screenheight;
+    wl->window.fs_width = screenrc->x1;
+    wl->window.fs_height = screenrc->y1;
 }
 
 int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
@@ -1111,9 +1111,6 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_BORDER:
         vo_wayland_border(vo);
         *events |= VO_EVENT_RESIZE;
-        return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        vo_wayland_update_screeninfo(vo);
         return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
         int *s = arg;
@@ -1145,19 +1142,25 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-bool vo_wayland_config (struct vo *vo, uint32_t d_width,
-                        uint32_t d_height, uint32_t flags)
+bool vo_wayland_config (struct vo *vo, uint32_t flags)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
-    wl->window.p_width = d_width;
-    wl->window.p_height = d_height;
-    wl->window.aspect = d_width / (float) MPMAX(d_height, 1);
+    struct mp_rect screenrc;
+    vo_wayland_update_screeninfo(vo, &screenrc);
+
+    struct vo_win_geometry geo;
+    vo_calc_window_geometry(vo, &screenrc, &geo);
+    vo_apply_window_geometry(vo, &geo);
+
+    wl->window.p_width = vo->dwidth;
+    wl->window.p_height = vo->dheight;
+    wl->window.aspect = vo->dwidth / (float) MPMAX(vo->dheight, 1);
 
     if (!(flags & VOFLAG_HIDDEN)) {
         if (!wl->window.is_init) {
-            wl->window.width = d_width;
-            wl->window.height = d_height;
+            wl->window.width = vo->dwidth;
+            wl->window.height = vo->dheight;
         }
 
         if (vo->opts->fullscreen) {

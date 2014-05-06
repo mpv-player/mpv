@@ -805,7 +805,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
     buffer_pool_reinit(p, &p->osd_bufpool, MAX_OSD_PARTS, p->width, p->height,
             &fmttable[DEFAULT_ALPHA_FORMAT_ENTRY], p->wl->display.shm);
 
-    vo_wayland_config(vo, vo->dwidth, vo->dheight, flags);
+    vo_wayland_config(vo, flags);
 
     if (p->wl->window.events & VO_EVENT_RESIZE)
         resize(p);
