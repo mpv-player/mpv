@@ -807,8 +807,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
 
     vo_wayland_config(vo, flags);
 
-    if (p->wl->window.events & VO_EVENT_RESIZE)
-        resize(p);
+    resize(p);
 
     return 0;
 }
