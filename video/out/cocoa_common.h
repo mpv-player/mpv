@@ -29,9 +29,7 @@ void *vo_cocoa_glgetaddr(const char *s);
 int vo_cocoa_init(struct vo *vo);
 void vo_cocoa_uninit(struct vo *vo);
 
-int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
-                           uint32_t d_height, uint32_t flags,
-                           int gl3profile);
+int vo_cocoa_config_window(struct vo *vo, uint32_t flags, int gl3profile);
 
 void vo_cocoa_set_current_context(struct vo *vo, bool current);
 void vo_cocoa_swap_buffers(struct vo *vo);

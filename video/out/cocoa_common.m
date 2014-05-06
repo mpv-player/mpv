@@ -36,7 +36,7 @@
 
 #include "options/options.h"
 #include "video/out/vo.h"
-#include "video/out/aspect.h"
+#include "win_state.h"
 
 #include "input/input.h"
 #include "talloc.h"
@@ -233,17 +233,16 @@ static void vo_cocoa_update_screens_pointers(struct vo *vo)
     get_screen_handle(vo, opts->fsscreen_id, s->window, &s->fs_screen);
 }
 
-static void vo_cocoa_update_screen_info(struct vo *vo)
+static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    struct mp_vo_opts *opts = vo->opts;
 
     vo_cocoa_update_screens_pointers(vo);
 
-    NSRect r = [s->current_screen frame];
-
-    opts->screenwidth  = r.size.width;
-    opts->screenheight = r.size.height;
+    if (out_rc) {
+        NSRect r = [s->current_screen frame];
+        *out_rc = (struct mp_rect){0, 0, r.size.width, r.size.height};
+    }
 }
 
 static void resize_window(struct vo *vo)
@@ -277,13 +276,13 @@ static void vo_cocoa_ontop(struct vo *vo)
     vo_set_level(vo, opts->ontop);
 }
 
-static void create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
-                         uint32_t flags)
+static void create_window(struct vo *vo, struct mp_rect *win, int geo_flags)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts  = vo->opts;
 
-    const NSRect contentRect = NSMakeRect(vo->dx, vo->dy, d_width, d_height);
+    const NSRect contentRect =
+        NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
 
     int window_mask = 0;
     if (opts->border) {
@@ -430,14 +429,23 @@ static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
                 usingBlock:nblock];
 }
 
-int vo_cocoa_config_window(struct vo *vo, uint32_t width, uint32_t height,
-                           uint32_t flags, int gl3profile)
+int vo_cocoa_config_window(struct vo *vo, uint32_t flags, int gl3profile)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     __block int ctxok = 0;
 
     dispatch_on_main_thread(vo, ^{
         s->enable_resize_redraw = false;
+
+        struct mp_rect screenrc;
+        vo_cocoa_update_screen_info(vo, &screenrc);
+
+        struct vo_win_geometry geo;
+        vo_calc_window_geometry(vo, &screenrc, &geo);
+        vo_apply_window_geometry(vo, &geo);
+
+        uint32_t width = vo->dwidth;
+        uint32_t height = vo->dheight;
 
         bool reset_size = s->old_dwidth != width || s->old_dheight != height;
         s->old_dwidth  = width;
@@ -462,7 +470,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t width, uint32_t height,
             }
 
             if (!s->window)
-                create_window(vo, width, height, flags);
+                create_window(vo, &geo.win, geo.flags);
         }
 
         if (s->window) {
@@ -548,7 +556,7 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts  = vo->opts;
 
-    vo_cocoa_update_screen_info(vo);
+    vo_cocoa_update_screen_info(vo, NULL);
 
     if (opts->fs_missioncontrol) {
         [s->window setFullScreen:opts->fullscreen];
@@ -655,7 +663,7 @@ static void vo_cocoa_control_get_icc_profile_path(struct vo *vo, void *arg)
     struct vo_cocoa_state *s = vo->cocoa;
     char **p = arg;
 
-    vo_cocoa_update_screen_info(vo);
+    vo_cocoa_update_screen_info(vo, NULL);
 
     NSScreen *screen;
     char **path;
@@ -684,9 +692,6 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_ONTOP:
         vo_cocoa_ontop(vo);
-        return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        vo_cocoa_update_screen_info(vo);
         return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
         int *s = arg;

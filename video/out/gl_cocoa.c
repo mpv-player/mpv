@@ -32,7 +32,7 @@ static void gl_clear(void *ctx)
 static bool config_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
                                 uint32_t d_height, uint32_t flags)
 {
-    int rv = vo_cocoa_config_window(ctx->vo, d_width, d_height, flags,
+    int rv = vo_cocoa_config_window(ctx->vo, flags,
                                     ctx->requested_gl_version >= MPGL_VER(3, 0));
     if (rv != 0)
         return false;
