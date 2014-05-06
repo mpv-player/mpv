@@ -30,7 +30,7 @@
 #include "common/msg.h"
 #include "common/common.h"
 #include "vo.h"
-#include "aspect.h"
+#include "win_state.h"
 #include "w32_common.h"
 #include "osdep/io.h"
 #include "osdep/w32_keyboard.h"
@@ -695,10 +695,7 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
     struct vo *vo = (void*)p;
     struct vo_w32_state *w32 = vo->w32;
     // this defaults to the last screen if specified number does not exist
-    vo->xinerama_x = r->left;
-    vo->xinerama_y = r->top;
-    vo->opts->screenwidth = r->right - r->left;
-    vo->opts->screenheight = r->bottom - r->top;
+    w32->screenrc = (struct mp_rect){r->left, r->top, r->right, r->bottom};
 
     if (w32->mon_cnt == w32->mon_id)
         return FALSE;
@@ -707,49 +704,35 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
     return TRUE;
 }
 
-/**
- * \brief Update screen information.
- *
- * This function should be called in libvo's "control" callback
- * with parameter VOCTRL_UPDATE_SCREENINFO.
- * Note that this also enables the new API where geometry and aspect
- * calculations are done in video_out.c:config_video_out
- *
- * Global libvo variables changed:
- * xinerama_x
- * xinerama_y
- * vo_screenwidth
- * vo_screenheight
- */
 static void w32_update_xinerama_info(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     struct mp_vo_opts *opts = vo->opts;
     int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
-    vo->xinerama_x = vo->xinerama_y = 0;
 
     if (opts->fullscreen && screen == -2) {
-        int tmp;
-        vo->xinerama_x = GetSystemMetrics(SM_XVIRTUALSCREEN);
-        vo->xinerama_y = GetSystemMetrics(SM_YVIRTUALSCREEN);
-        tmp = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-
-        if (tmp)
-            vo->opts->screenwidth = tmp;
-
-        tmp = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-
-        if (tmp)
-            vo->opts->screenheight = tmp;
+        struct mp_rect rc = {
+            GetSystemMetrics(SM_XVIRTUALSCREEN),
+            GetSystemMetrics(SM_YVIRTUALSCREEN),
+            GetSystemMetrics(SM_CXVIRTUALSCREEN),
+            GetSystemMetrics(SM_CYVIRTUALSCREEN),
+        };
+        if (!rc.x1 || !rc.y1) {
+            rc.x1 = w32->screenrc.x1; // assume screenrc.x0==y0==0
+            rc.x1 = w32->screenrc.y1;
+        }
+        rc.x1 += rc.x0;
+        rc.y1 += rc.y0;
+        w32->screenrc = rc;
     } else if (screen == -1) {
         MONITORINFO mi;
         HMONITOR m = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
         mi.cbSize = sizeof(mi);
         GetMonitorInfoW(m, &mi);
-        vo->xinerama_x = mi.rcMonitor.left;
-        vo->xinerama_y = mi.rcMonitor.top;
-        vo->opts->screenwidth = mi.rcMonitor.right - mi.rcMonitor.left;
-        vo->opts->screenheight = mi.rcMonitor.bottom - mi.rcMonitor.top;
+        w32->screenrc = (struct mp_rect){
+            mi.rcMonitor.left, mi.rcMonitor.top,
+            mi.rcMonitor.right, mi.rcMonitor.bottom,
+        };
     } else if (screen >= 0) {
         w32->mon_cnt = 0;
         w32->mon_id = screen;
@@ -759,6 +742,8 @@ static void w32_update_xinerama_info(struct vo *vo)
 
 static void updateScreenProperties(struct vo *vo)
 {
+    struct vo_w32_state *w32 = vo->w32;
+
     DEVMODE dm;
     dm.dmSize = sizeof dm;
     dm.dmDriverExtra = 0;
@@ -769,8 +754,7 @@ static void updateScreenProperties(struct vo *vo)
         return;
     }
 
-    vo->opts->screenwidth = dm.dmPelsWidth;
-    vo->opts->screenheight = dm.dmPelsHeight;
+    w32->screenrc = (struct mp_rect){0, 0, dm.dmPelsWidth, dm.dmPelsHeight};
     w32_update_xinerama_info(vo);
 }
 
@@ -815,10 +799,10 @@ static int reinit_window_state(struct vo *vo)
                    w32->prev_x, w32->prev_y, w32->prev_width, w32->prev_height);
         }
 
-        vo->dwidth = vo->opts->screenwidth;
-        vo->dheight = vo->opts->screenheight;
-        w32->window_x = vo->xinerama_x;
-        w32->window_y = vo->xinerama_y;
+        w32->window_x = w32->screenrc.x0;
+        w32->window_y = w32->screenrc.y0;
+        vo->dwidth = w32->screenrc.x1 - w32->screenrc.x0;
+        vo->dheight = w32->screenrc.y1 - w32->screenrc.y0;
         style &= ~WS_OVERLAPPEDWINDOW;
     } else {
         if (toggle_fs) {
@@ -865,8 +849,7 @@ static int reinit_window_state(struct vo *vo)
  *
  * \return 1 - Success, 0 - Failure
  */
-int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t flags)
+int vo_w32_config(struct vo *vo, uint32_t flags)
 {
     struct vo_w32_state *w32 = vo->w32;
     PIXELFORMATDESCRIPTOR pfd;
@@ -899,10 +882,14 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
     if (flags & VOFLAG_HIDDEN)
         return 1;
 
-    bool reset_size = !(w32->o_dwidth == width && w32->o_dheight == height);
+    struct vo_win_geometry geo;
+    vo_calc_window_geometry(vo, &w32->screenrc, &geo);
+    vo_apply_window_geometry(vo, &geo);
 
-    w32->o_dwidth = width;
-    w32->o_dheight = height;
+    bool reset_size = w32->o_dwidth != vo->dwidth || w32->o_dheight != vo->dheight;
+
+    w32->o_dwidth = vo->dwidth;
+    w32->o_dheight = vo->dheight;
 
     // the desired size is ignored in wid mode, it always matches the window size.
     if (vo->opts->WinID < 0) {
@@ -914,20 +901,15 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
             vo->dwidth = r.right;
             vo->dheight = r.bottom;
         } else {
-            // first vo_config call; vo_config() will always set vo_dx/dy so
-            // that the window is centered on the screen, and this is the only
-            // time we actually want to use vo_dy/dy (this is not sane, and
-            // vo.h should provide a function to query the initial
-            // window position instead)
             w32->window_bounds_initialized = true;
             reset_size = true;
-            w32->window_x = w32->prev_x = vo->dx;
-            w32->window_y = w32->prev_y = vo->dy;
+            w32->window_x = w32->prev_x = geo.win.x0;
+            w32->window_y = w32->prev_y = geo.win.y0;
         }
 
         if (reset_size) {
-            w32->prev_width = vo->dwidth = width;
-            w32->prev_height = vo->dheight = height;
+            w32->prev_width = vo->dwidth = w32->o_dwidth;
+            w32->prev_height = vo->dheight = w32->o_dheight;
         }
     } else {
         RECT r;
@@ -947,11 +929,6 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
  * It also initializes the framework's internal variables. The function should
  * be called after your own preinit initialization and you shouldn't do any
  * window management on your own.
- *
- * Global libvo variables changed:
- * vo_w32_window
- * vo_screenwidth
- * vo_screenheight
  *
  * \return 1 = Success, 0 = Failure
  */
@@ -1026,9 +1003,6 @@ int vo_w32_init(struct vo *vo)
 
     updateScreenProperties(vo);
 
-    MP_VERBOSE(vo, "win32: running at %dx%d\n",
-           vo->opts->screenwidth, vo->opts->screenheight);
-
     return 1;
 }
 
@@ -1093,9 +1067,6 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_BORDER:
         vo_w32_border(vo);
         *events |= VO_EVENT_RESIZE;
-        return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        w32_update_xinerama_info(vo);
         return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
         int *s = arg;

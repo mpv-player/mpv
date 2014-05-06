@@ -1271,7 +1271,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     /* w32_common framework call. Creates window on the screen with
      * the given coordinates.
      */
-    if (!vo_w32_config(vo, vo->dwidth, vo->dheight, flags)) {
+    if (!vo_w32_config(vo, flags)) {
         MP_VERBOSE(priv, "Creating window failed.\n");
         return VO_ERROR;
     }
