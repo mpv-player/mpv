@@ -452,7 +452,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     if (!ctx->xv_format)
         return -1;
 
-    vo_x11_config_vo_window(vo, NULL, vo->dwidth, vo->dheight, flags, "xv");
+    vo_x11_config_vo_window(vo, NULL, flags, "xv");
 
     if (ctx->xv_ck_info.method == CK_METHOD_BACKGROUND)
         XSetWindowBackground(x11->display, x11->window, ctx->xv_colorkey);

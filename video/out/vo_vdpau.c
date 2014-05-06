@@ -516,7 +516,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     free_video_specific(vo);
 
-    vo_x11_config_vo_window(vo, NULL, vo->dwidth, vo->dheight, flags, "vdpau");
+    vo_x11_config_vo_window(vo, NULL, flags, "vdpau");
 
     if (initialize_vdpau_objects(vo) < 0)
         return -1;

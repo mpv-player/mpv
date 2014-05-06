@@ -206,7 +206,7 @@ static bool config_window_x11(struct MPGLContext *ctx, uint32_t d_width,
     if (glx_ctx->context) {
         // GL context and window already exist.
         // Only update window geometry etc.
-        vo_x11_config_vo_window(vo, glx_ctx->vinfo, d_width, d_height, flags, "gl");
+        vo_x11_config_vo_window(vo, glx_ctx->vinfo, flags, "gl");
         return true;
     }
 
@@ -271,7 +271,7 @@ static bool config_window_x11(struct MPGLContext *ctx, uint32_t d_width,
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->depth_g);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->depth_b);
 
-    vo_x11_config_vo_window(vo, glx_ctx->vinfo, d_width, d_height, flags, "gl");
+    vo_x11_config_vo_window(vo, glx_ctx->vinfo, flags, "gl");
 
     bool success = false;
     if (ctx->requested_gl_version >= MPGL_VER(3, 0))

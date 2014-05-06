@@ -24,8 +24,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "common/common.h"
+
 struct vo;
-struct mp_rect;
 struct mp_log;
 
 struct vo_x11_state {
@@ -37,6 +38,7 @@ struct vo_x11_state {
     int display_is_local;
     int ws_width;
     int ws_height;
+    struct mp_rect screenrc;
 
     int screensaver_off;
     int dpms_disabled;
@@ -147,8 +149,7 @@ void vo_x11_uninit(struct vo *vo);
 int vo_x11_check_events(struct vo *vo);
 bool vo_x11_screen_is_composited(struct vo *vo);
 void fstype_help(struct mp_log *log);
-void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis,
-                             unsigned int width, unsigned int height, int flags,
+void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
                              const char *classname);
 void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);

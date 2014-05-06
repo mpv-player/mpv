@@ -308,7 +308,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
                           TrueColor, &p->vinfo))
         return -1;
 
-    vo_x11_config_vo_window(vo, &p->vinfo, vo->dwidth, vo->dheight, flags, "x11");
+    vo_x11_config_vo_window(vo, &p->vinfo, flags, "x11");
 
     if (!resize(vo))
         return -1;

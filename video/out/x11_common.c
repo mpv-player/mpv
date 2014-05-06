@@ -37,7 +37,7 @@
 #include <assert.h>
 
 #include "vo.h"
-#include "aspect.h"
+#include "win_state.h"
 #include "osdep/timer.h"
 
 #include <X11/Xmd.h>
@@ -434,11 +434,7 @@ static void vo_x11_update_screeninfo(struct vo *vo)
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     bool all_screens = opts->fullscreen && opts->fsscreen_id == -2;
-    vo->xinerama_x = vo->xinerama_y = 0;
-    if (all_screens) {
-        opts->screenwidth = x11->ws_width;
-        opts->screenheight = x11->ws_height;
-    }
+    x11->screenrc = (struct mp_rect){.x1 = x11->ws_width, .y1 = x11->ws_height};
 #if HAVE_XINERAMA
     if (opts->screen_id >= -1 && XineramaIsActive(x11->display) && !all_screens)
     {
@@ -463,10 +459,12 @@ static void vo_x11_update_screeninfo(struct vo *vo)
         }
         if (screen < 0)
             screen = 0;
-        opts->screenwidth = screens[screen].width;
-        opts->screenheight = screens[screen].height;
-        vo->xinerama_x = screens[screen].x_org;
-        vo->xinerama_y = screens[screen].y_org;
+        x11->screenrc = (struct mp_rect){
+            .x0 = screens[screen].x_org,
+            .y0 = screens[screen].y_org,
+            .x1 = screens[screen].x_org + screens[screen].width,
+            .y1 = screens[screen].y_org + screens[screen].height,
+        };
 
         XFree(screens);
     }
@@ -528,16 +526,13 @@ int vo_x11_init(struct vo *vo)
     x11->ws_width = DisplayWidth(x11->display, x11->screen);
     x11->ws_height = DisplayHeight(x11->display, x11->screen);
 
-    opts->screenwidth = x11->ws_width;
-    opts->screenheight = x11->ws_height;
-
     if (strncmp(dispName, "unix:", 5) == 0)
         dispName += 4;
     else if (strncmp(dispName, "localhost:", 10) == 0)
         dispName += 9;
     x11->display_is_local = dispName[0] == ':' && atoi(dispName + 1) < 10;
     MP_VERBOSE(x11, "X11 running at %dx%d (\"%s\" => %s display)\n",
-               opts->screenwidth, opts->screenheight, dispName,
+               x11->ws_width, x11->ws_height, dispName,
                x11->display_is_local ? "local" : "remote");
 
     x11->wm_type = vo_wm_detect(vo);
@@ -1350,14 +1345,22 @@ static void vo_x11_highlevel_resize(struct vo *vo, int x, int y, int w, int h)
  *
  * If the window already exists, it just moves and resizes it.
  */
-void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis,
-                             unsigned int width, unsigned int height, int flags,
+void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
                              const char *classname)
 {
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
-    int x = vo->dx;
-    int y = vo->dy;
+
+    vo_x11_update_screeninfo(vo);
+
+    struct vo_win_geometry geo;
+    vo_calc_window_geometry(vo, &x11->screenrc, &geo);
+    vo_apply_window_geometry(vo, &geo);
+
+    int x = geo.win.x0;
+    int y = geo.win.y0;
+    int width = geo.win.x1 - geo.win.x0;
+    int height = geo.win.y1 - geo.win.y0;
 
     if (opts->WinID >= 0) {
         if (opts->WinID == 0)
@@ -1442,11 +1445,9 @@ void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc)
 void vo_x11_clearwindow(struct vo *vo, Window vo_window)
 {
     struct vo_x11_state *x11 = vo->x11;
-    struct mp_vo_opts *opts = vo->opts;
     if (x11->f_gc == None)
         return;
-    XFillRectangle(x11->display, vo_window, x11->f_gc, 0, 0,
-                   opts->screenwidth, opts->screenheight);
+    XFillRectangle(x11->display, vo_window, x11->f_gc, 0, 0, INT_MAX, INT_MAX);
     XFlush(x11->display);
 }
 
@@ -1580,10 +1581,10 @@ static void vo_x11_fullscreen(struct vo *vo)
 
         vo_x11_update_screeninfo(vo);
 
-        x = vo->xinerama_x;
-        y = vo->xinerama_y;
-        w = opts->screenwidth;
-        h = opts->screenheight;
+        x = x11->screenrc.x0;
+        y = x11->screenrc.y0;
+        w = x11->screenrc.x1 - x;
+        h = x11->screenrc.y1 - y;
 
         if ((x11->fs_type & vo_wm_FULLSCREEN) && opts->fsscreen_id != -1) {
             // The EWMH fullscreen hint always works on the current screen, so
@@ -1663,8 +1664,6 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         vo_x11_border(vo);
         *events |= VO_EVENT_RESIZE;
         return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        vo_x11_update_screeninfo(vo);
         return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
         int *s = arg;
