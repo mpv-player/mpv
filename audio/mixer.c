@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 #include <libavutil/common.h>
 
@@ -245,8 +246,9 @@ char *mixer_get_volume_restore_data(struct mixer *mixer)
 {
     if (!mixer->driver[0])
         return NULL;
-    return talloc_asprintf(NULL, "%s:%f:%f:%d", mixer->driver, mixer->vol_l,
-                           mixer->vol_r, mixer->muted_by_us);
+    return talloc_asprintf(NULL, "%s:%f:%f:%d:%f", mixer->driver, mixer->vol_l,
+                           mixer->vol_r, mixer->muted_by_us,
+                           mixer->opts->softvol_max);
 }
 
 static void probe_softvol(struct mixer *mixer)
@@ -307,19 +309,20 @@ static void restore_volume(struct mixer *mixer)
         force_mute = opts->mixer_init_mute;
 
     // Set parameters from playback resume.
-    char *restore_data = mixer->opts->mixer_restore_volume_data;
-    if (restore && restore_data && restore_data[0]) {
+    char *data = mixer->opts->mixer_restore_volume_data;
+    if (restore && data && data[0]) {
         char drv[40];
-        float v_l, v_r;
+        float v_l, v_r, s;
         int m;
-        if (sscanf(restore_data, "%39[^:]:%f:%f:%d", drv, &v_l, &v_r, &m) == 4) {
-            if (strcmp(mixer->driver, drv) == 0) {
+        if (sscanf(data, "%39[^:]:%f:%f:%d:%f", drv, &v_l, &v_r, &m, &s) == 5) {
+            float diff = fabs(mixer->opts->softvol_max - s);
+            if (strcmp(mixer->driver, drv) == 0 && diff < 0.01) {
                 force_vol_l = v_l;
                 force_vol_r = v_r;
                 force_mute = !!m;
             }
         }
-        talloc_free(restore_data);
+        talloc_free(mixer->opts->mixer_restore_volume_data);
         mixer->opts->mixer_restore_volume_data = NULL;
     }
 
