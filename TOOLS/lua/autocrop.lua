@@ -27,9 +27,9 @@
 -- time to collect data.
 require "mp.msg"
 
-script_name=mp.get_script_name()
-cropdetect_label=string.format("%s-cropdetect",script_name)
-crop_label=string.format("%s-crop",script_name)
+script_name = mp.get_script_name()
+cropdetect_label = string.format("%s-cropdetect", script_name)
+crop_label = string.format("%s-crop", script_name)
 
 -- number of seconds to gather cropdetect data
 detect_seconds = tonumber(mp.get_opt(string.format("%s.detect_seconds", script_name)))
@@ -110,4 +110,4 @@ function do_crop()
     timer=nil
 end
 
-mp.add_key_binding("C","auto_crop",autocrop_start)
+mp.add_key_binding("C", "auto_crop", autocrop_start)
