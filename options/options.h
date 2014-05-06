@@ -8,8 +8,6 @@
 typedef struct mp_vo_opts {
     struct m_obj_settings *video_driver_list, *vo_defs;
 
-    int screenwidth;
-    int screenheight;
     int ontop;
     int fullscreen;
     int screen_id;

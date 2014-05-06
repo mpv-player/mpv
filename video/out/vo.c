@@ -36,7 +36,6 @@
 #include "bstr/bstr.h"
 #include "vo.h"
 #include "aspect.h"
-#include "win_state.h"
 #include "input/input.h"
 #include "options/m_config.h"
 #include "common/msg.h"
@@ -254,21 +253,6 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     talloc_free(vo->params);
     vo->params = talloc_memdup(vo, params, sizeof(*params));
-
-    // Emulate the old way of calculating the window geometry settings.
-    if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
-        struct mp_rect rc = {
-            vo->xinerama_x,
-            vo->xinerama_y,
-            vo->xinerama_x + vo->opts->screenwidth,
-            vo->xinerama_y + vo->opts->screenheight,
-        };
-        struct vo_win_geometry geo;
-        vo_calc_window_geometry(vo, &rc, &geo);
-        vo_apply_window_geometry(vo, &geo);
-        vo->dx = geo.win.x0;
-        vo->dy = geo.win.y0;
-    }
 
     int ret = vo->driver->reconfig(vo, vo->params, flags);
     vo->config_ok = ret >= 0;

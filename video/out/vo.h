@@ -68,7 +68,6 @@ enum mp_voctrl {
     VOCTRL_SET_DEINTERLACE,
     VOCTRL_GET_DEINTERLACE,
 
-    VOCTRL_UPDATE_SCREENINFO,
     VOCTRL_WINDOW_TO_OSD_COORDS,        // float[2] (x/y)
     VOCTRL_GET_WINDOW_SIZE,             // int[2] (w/h)
     VOCTRL_SET_WINDOW_SIZE,             // int[2] (w/h)
@@ -258,13 +257,6 @@ struct vo {
     struct encode_lavc_context *encode_lavc_ctx;
     struct input_ctx *input_ctx;
     int event_fd;  // check_events() should be called when this has input
-
-    // requested position/resolution (usually window position/window size)
-    int dx;
-    int dy;
-
-    int xinerama_x;
-    int xinerama_y;
 
     // current window state
     int dwidth;
