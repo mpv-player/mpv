@@ -36,6 +36,7 @@
 #include "bstr/bstr.h"
 #include "vo.h"
 #include "aspect.h"
+#include "win_state.h"
 #include "input/input.h"
 #include "options/m_config.h"
 #include "common/msg.h"
@@ -234,78 +235,6 @@ void vo_destroy(struct vo *vo)
     talloc_free(vo);
 }
 
-static void calc_monitor_aspect(struct mp_vo_opts *opts, int scr_w, int scr_h,
-                                float *pixelaspect, int *w, int *h)
-{
-    *pixelaspect = 1.0 / opts->monitor_pixel_aspect;
-
-    if (scr_w > 0 && scr_h > 0 && opts->force_monitor_aspect)
-        *pixelaspect = opts->force_monitor_aspect * scr_h / scr_w;
-
-    if (*pixelaspect < 1) {
-        *h /= *pixelaspect;
-    } else {
-        *w *= *pixelaspect;
-    }
-}
-
-// Fit *w/*h into the size specified by geo.
-static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
-                          struct m_geometry *geo, bool allow_upscale)
-{
-    if (!geo->wh_valid)
-        return;
-
-    int dummy;
-    int n_w = *w, n_h = *h;
-    m_geometry_apply(&dummy, &dummy, &n_w, &n_h, scr_w, scr_h, geo);
-
-    if (!allow_upscale && *w <= n_w && *h <= n_h)
-        return;
-
-    // If aspect mismatches, always make the window smaller than the fit box
-    double asp = (double)*w / *h;
-    double n_asp = (double)n_w / n_h;
-    if (n_asp <= asp) {
-        *w = n_w;
-        *h = n_w / asp;
-    } else {
-        *w = n_h * asp;
-        *h = n_h;
-    }
-}
-
-// Set window size (vo->dwidth/dheight) and position (vo->dx/dy) according to
-// the video display size d_w/d_h.
-// NOTE: currently, all GUI backends do their own handling of window geometry
-//       additional to this code. This is to deal with initial window placement,
-//       fullscreen handling, avoiding resize on config() with no size change,
-//       multi-monitor stuff, and possibly more.
-static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
-{
-    struct mp_vo_opts *opts = vo->opts;
-
-    int scr_w = opts->screenwidth;
-    int scr_h = opts->screenheight;
-
-    MP_DBG(vo, "screen size: %dx%d\n", scr_w, scr_h);
-
-    calc_monitor_aspect(opts, scr_w, scr_h, &vo->monitor_par, &d_w, &d_h);
-
-    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit, true);
-    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_larger, false);
-
-    vo->dx = (int)(opts->screenwidth - d_w) / 2;
-    vo->dy = (int)(opts->screenheight - d_h) / 2;
-    m_geometry_apply(&vo->dx, &vo->dy, &d_w, &d_h, scr_w, scr_h,
-                     &opts->geometry);
-
-    vo->dx += vo->xinerama_x;
-    vo->dy += vo->xinerama_y;
-    vo->dwidth = d_w;
-    vo->dheight = d_h;
-}
-
 static void check_vo_caps(struct vo *vo)
 {
     int rot = vo->params->rotate;
@@ -320,22 +249,26 @@ static void check_vo_caps(struct vo *vo)
 
 int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
-    int d_width = params->d_w;
-    int d_height = params->d_h;
-
-    if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
-        int w = params->d_w, h = params->d_h;
-        if ((vo->driver->caps & VO_CAP_ROTATE90) && params->rotate % 180 == 90)
-            MPSWAP(int, w, h);
-        determine_window_geometry(vo, w, h);
-        d_width = vo->dwidth;
-        d_height = vo->dheight;
-    }
-    vo->dwidth = d_width;
-    vo->dheight = d_height;
+    vo->dwidth = params->d_w;
+    vo->dheight = params->d_h;
 
     talloc_free(vo->params);
     vo->params = talloc_memdup(vo, params, sizeof(*params));
+
+    // Emulate the old way of calculating the window geometry settings.
+    if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
+        struct mp_rect rc = {
+            vo->xinerama_x,
+            vo->xinerama_y,
+            vo->xinerama_x + vo->opts->screenwidth,
+            vo->xinerama_y + vo->opts->screenheight,
+        };
+        struct vo_win_geometry geo;
+        vo_calc_window_geometry(vo, &rc, &geo);
+        vo_apply_window_geometry(vo, &geo);
+        vo->dx = geo.win.x0;
+        vo->dy = geo.win.y0;
+    }
 
     int ret = vo->driver->reconfig(vo, vo->params, flags);
     vo->config_ok = ret >= 0;
