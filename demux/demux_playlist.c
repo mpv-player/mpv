@@ -162,10 +162,12 @@ struct pl_format {
     .mime_types = (const char*[]){__VA_ARGS__, NULL}
 
 static const struct pl_format formats[] = {
-    {"m3u", parse_m3u},
+    {"m3u", parse_m3u,
+     MIME_TYPES("audio/mpegurl", "audio/x-mpegurl", "application/x-mpegurl")},
     {"ini", parse_ref_init},
     {"mov", parse_mov_rtsptext},
-    {"pls", parse_pls},
+    {"pls", parse_pls,
+     MIME_TYPES("audio/x-scpls")},
     {"txt", parse_txt},
 };
 
