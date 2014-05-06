@@ -155,7 +155,11 @@ static int parse_txt(struct pl_parser *p)
 struct pl_format {
     const char *name;
     int (*parse)(struct pl_parser *p);
+    const char **mime_types;
 };
+
+#define MIME_TYPES(...) \
+    .mime_types = (const char*[]){__VA_ARGS__, NULL}
 
 static const struct pl_format formats[] = {
     {"m3u", parse_m3u},
@@ -165,12 +169,28 @@ static const struct pl_format formats[] = {
     {"txt", parse_txt},
 };
 
+static bool check_mimetype(struct stream *s, const char **list)
+{
+    if (s->mime_type) {
+        for (int n = 0; list && list[n]; n++) {
+            if (strcmp(s->mime_type, list[n]) == 0)
+                return true;
+        }
+    }
+    return false;
+}
+
 static const struct pl_format *probe_pl(struct pl_parser *p)
 {
     int64_t start = stream_tell(p->s);
     for (int n = 0; n < MP_ARRAY_SIZE(formats); n++) {
         const struct pl_format *fmt = &formats[n];
         stream_seek(p->s, start);
+        if (check_mimetype(p->s, fmt->mime_types)) {
+            MP_VERBOSE(p, "forcing format by mime-type.\n");
+            p->force = true;
+            return fmt;
+        }
         if (fmt->parse(p) >= 0)
             return fmt;
     }
@@ -187,6 +207,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
 
     bstr probe_buf = stream_peek(demuxer->stream, PROBE_SIZE);
     p->s = open_memory_stream(probe_buf.start, probe_buf.len);
+    p->s->mime_type = demuxer->stream->mime_type;
     p->utf16 = stream_skip_bom(p->s);
     p->force = force;
     p->probing = true;
