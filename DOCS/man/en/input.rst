@@ -570,7 +570,9 @@ Property list
     unmodified filename.)
 
 ``file-size``
-    Length in bytes of the source file/stream.
+    Length in bytes of the source file/stream. (This is the sasme as
+    ``${stream-end} - ${stream-start}``. For ordered chapters and such, the
+    size of the currently played segment is returned.)
 
 ``path``
     Full path of the currently played file.
