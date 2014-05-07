@@ -318,7 +318,8 @@ static int decode_image(struct MPContext *mpctx)
     if (pkt && pkt->pts != MP_NOPTS_VALUE)
         pkt->pts += mpctx->video_offset;
     if ((pkt && pkt->pts >= mpctx->hrseek_pts - .005) ||
-        d_video->has_broken_packet_pts)
+        d_video->has_broken_packet_pts ||
+        !mpctx->opts->hr_seek_framedrop)
     {
         mpctx->hrseek_framedrop = false;
     }

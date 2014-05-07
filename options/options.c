@@ -578,6 +578,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("hr-seek", hr_seek, 0,
                ({"no", -1}, {"absolute", 0}, {"always", 1}, {"yes", 1})),
     OPT_FLOATRANGE("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0, -9, 99),
+    OPT_FLAG("hr-seek-framedrop", hr_seek_framedrop, 0),
     OPT_CHOICE_OR_INT("autosync", autosync, 0, 0, 10000,
                       ({"no", -1})),
 
@@ -685,6 +686,7 @@ const struct MPOpts mp_default_opts = {
     .ordered_chapters = 1,
     .chapter_merge_threshold = 100,
     .chapter_seek_threshold = 5.0,
+    .hr_seek_framedrop = 1,
     .load_config = 1,
     .position_resume = 1,
     .stream_cache_min_percent = 20.0,

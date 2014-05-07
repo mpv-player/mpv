@@ -1078,6 +1078,15 @@ OPTIONS
     the earlier demuxer position and the real target may be unnecessarily
     decoded.
 
+``--hr-seek-framedrop=<yes|no>``
+    Allow the video decoder to drop frames during seek, if these frames are
+    before the seek target. If this is enabled, precise seeking can be faster,
+    but if you're using video filters which modify timestamps or add new
+    frames, it can lead to precise seeking skipping the target frame. This
+    e.g. can break frame backstepping when deinterlacing is enabled.
+
+    Default: ``yes``
+
 ``--http-header-fields=<field1,field2>``
     Set custom HTTP fields when accessing HTTP stream.
 

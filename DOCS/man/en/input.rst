@@ -110,7 +110,8 @@ List of Input Commands
     see the ``--hr-seek-demuxer-offset`` option). Video filters or other video
     postprocessing that modifies timing of frames (e.g. deinterlacing) should
     usually work, but might make backstepping silently behave incorrectly in
-    corner cases.
+    corner cases. Using ``--hr-seek-framedrop=no`` should help, although it
+    might make precise seeking slower.
 
     This does not work with audio-only playback.
 
