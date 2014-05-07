@@ -978,6 +978,14 @@ Property list
     Container FPS. This can easily contain bogus values. For videos that use
     modern container formats or video codecs, this will often be incorrect.
 
+``estimated-vf-fps``
+    Estimated/measured FPS of the video filter chain output. (If no filters
+    are used, this corresponds to decoder output.) This uses the average of
+    the 10 past frame durations to calculate the FPS. It will be inaccurate
+    if framedropping is involved (such as when framedrop is explicitly
+    enabled, or after precise seeking). Files with imprecise timestamps (such
+    as Matroska) might lead to unstable results.
+
 ``window-scale`` (RW)
     Window size multiplier. Setting this will resize the video window to the
     values contained in ``dwidth`` and ``dheight`` multiplied with the value

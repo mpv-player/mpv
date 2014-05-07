@@ -1986,6 +1986,32 @@ static int mp_property_fps(m_option_t *prop, int action, void *arg,
     return m_property_float_ro(prop, action, arg, mpctx->d_video->fps);
 }
 
+static int mp_property_vf_fps(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
+{
+    if (!mpctx->d_video)
+        return M_PROPERTY_UNAVAILABLE;
+    double next_pts = mpctx->vo_pts_history_pts[0];
+    if (mpctx->vo_pts_history_seek[0] != mpctx->vo_pts_history_seek_ts)
+        return M_PROPERTY_UNAVAILABLE;
+    if (next_pts == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+    int num_samples = 10;
+    assert(num_samples + 1 <= MAX_NUM_VO_PTS);
+    double duration = 0;
+    for (int n = 1; n < 1 + num_samples; n++) {
+        double frame_pts = mpctx->vo_pts_history_pts[n];
+        // Discontinuity -> refuse to return a value.
+        if (mpctx->vo_pts_history_seek[n] != mpctx->vo_pts_history_seek_ts)
+            return M_PROPERTY_UNAVAILABLE;
+        if (frame_pts == MP_NOPTS_VALUE)
+            return M_PROPERTY_UNAVAILABLE;
+        duration += next_pts - frame_pts;
+        next_pts = frame_pts;
+    }
+    return m_property_double_ro(prop, action, arg, num_samples / duration);
+}
+
 /// Video aspect (RO)
 static int mp_property_aspect(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
@@ -2432,6 +2458,7 @@ static const m_option_t mp_properties[] = {
       CONF_RANGE, 0.125, 8 },
     { "fps", mp_property_fps, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
+    { "estimated-vf-fps", mp_property_vf_fps, CONF_TYPE_DOUBLE },
     { "video-aspect", mp_property_aspect, CONF_TYPE_FLOAT,
       CONF_RANGE, -1, 10, NULL },
     M_OPTION_PROPERTY_CUSTOM("vid", mp_property_video),
