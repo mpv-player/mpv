@@ -1798,6 +1798,36 @@ static int mp_property_border(m_option_t *prop, int action, void *arg,
                                &mpctx->opts->vo.border, mpctx);
 }
 
+static int mp_property_frame_number(m_option_t *prop, int action,
+                                 void *arg, MPContext *mpctx)
+{
+    if (!mpctx->d_video)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int frame_number = (int)(get_current_pos_ratio(mpctx, false) * (get_time_length(mpctx) * mpctx->d_video->fps));
+
+    if (action == M_PROPERTY_PRINT) {
+        *(char **)arg = talloc_asprintf(NULL, "%d", frame_number);
+        return M_PROPERTY_OK;
+    }
+    return m_property_int_ro(prop, action, arg, frame_number);
+}
+
+static int mp_property_frame_count(m_option_t *prop, int action,
+                                 void *arg, MPContext *mpctx)
+{
+    if (!mpctx->d_video)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int frame_count = (int)(get_time_length(mpctx) * mpctx->d_video->fps);
+
+    if (action == M_PROPERTY_PRINT) {
+        *(char **)arg = talloc_asprintf(NULL, "%d", frame_count);
+        return M_PROPERTY_OK;
+    }
+    return m_property_int_ro(prop, action, arg, frame_count);
+}
+
 static int mp_property_framedrop(m_option_t *prop, int action,
                                  void *arg, MPContext *mpctx)
 {
@@ -2438,6 +2468,11 @@ static const m_option_t mp_properties[] = {
     { "program", mp_property_program, CONF_TYPE_INT,
       CONF_RANGE, -1, 65535, NULL },
     M_OPTION_PROPERTY_CUSTOM("hwdec", mp_property_hwdec),
+
+    { "frame-count", mp_property_frame_count, CONF_TYPE_INT,
+      M_OPT_MIN, 0 },
+    { "frame-number", mp_property_frame_number, CONF_TYPE_INT,
+      M_OPT_MIN, 0 },
 
     { "osd-width", mp_property_osd_w, CONF_TYPE_INT },
     { "osd-height", mp_property_osd_h, CONF_TYPE_INT },

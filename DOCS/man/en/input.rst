@@ -574,6 +574,12 @@ Property list
     ``${stream-end} - ${stream-start}``. For ordered chapters and such, the
     size of the currently played segment is returned.)
 
+``frame-count``
+    Amount of frames.
+
+``frame-number``
+    Number of current frame in current stream.
+
 ``path``
     Full path of the currently played file.
 
