@@ -354,11 +354,6 @@ static void shift_queue(struct vo *vo)
         vo->video_queue[n] = vo->video_queue[n + 1];
 }
 
-void vo_skip_frame(struct vo *vo)
-{
-    shift_queue(vo);
-}
-
 void vo_new_frame_imminent(struct vo *vo)
 {
     assert(vo->num_video_queue > 0);

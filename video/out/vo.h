@@ -279,7 +279,6 @@ bool vo_get_want_redraw(struct vo *vo);
 bool vo_has_next_frame(struct vo *vo, bool eof);
 double vo_get_next_pts(struct vo *vo, int index);
 bool vo_needs_new_image(struct vo *vo);
-void vo_skip_frame(struct vo *vo);
 void vo_new_frame_imminent(struct vo *vo);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
 void vo_flip_page(struct vo *vo, int64_t pts_us, int duration);

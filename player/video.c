@@ -424,7 +424,8 @@ static void init_vo(struct MPContext *mpctx)
 
 // Fill the VO buffer with a newly filtered or decoded image.
 // Returns: -1: error, 0: EOF, 1: ok or progress was made
-static int video_output_image(struct MPContext *mpctx, bool reconfig_ok)
+static int video_output_image(struct MPContext *mpctx, double endpts,
+                              bool reconfig_ok)
 {
     struct vf_chain *vf = mpctx->d_video->vfilter;
     struct vo *vo = mpctx->video_out;
@@ -438,6 +439,27 @@ static int video_output_image(struct MPContext *mpctx, bool reconfig_ok)
     int r = video_decode_and_filter(mpctx);
     if (r < 0)
         return r; // error
+
+    vf_output_frame(vf, false);
+    if (vf->output) {
+        double pts = vf->output->pts;
+
+        // Always add these; they make backstepping after seeking faster.
+        add_frame_pts(mpctx, pts);
+
+        bool drop = false;
+        if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005)
+            drop = true;
+        if (endpts != MP_NOPTS_VALUE && pts >= endpts) {
+            drop = true;
+            r = 0; // EOF
+        }
+        if (drop) {
+            talloc_free(vf->output);
+            vf->output = NULL;
+            return r;
+        }
+    }
 
     // Filter output is different from VO input?
     bool need_vo_reconfig = !vo->params  ||
@@ -496,7 +518,7 @@ int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
             return 0;
     }
 
-    int r = video_output_image(mpctx, reconfig_ok);
+    int r = video_output_image(mpctx, endpts, reconfig_ok);
     if (r < 0)
         return r;
 
@@ -512,12 +534,6 @@ int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
     }
 
     double pts = vo_get_next_pts(video_out, 0);
-    if (endpts == MP_NOPTS_VALUE || pts < endpts)
-        add_frame_pts(mpctx, pts);
-    if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005) {
-        vo_skip_frame(video_out);
-        return 1;
-    }
     mpctx->hrseek_active = false;
     double last_pts = mpctx->video_next_pts;
     if (last_pts == MP_NOPTS_VALUE)

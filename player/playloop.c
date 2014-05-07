@@ -736,6 +736,8 @@ void add_frame_pts(struct MPContext *mpctx, double pts)
         mpctx->vo_pts_history_seek_ts++; // mark discontinuity
         return;
     }
+    if (mpctx->vo_pts_history_pts[0] == pts) // may be called multiple times
+        return;
     for (int n = MAX_NUM_VO_PTS - 1; n >= 1; n--) {
         mpctx->vo_pts_history_seek[n] = mpctx->vo_pts_history_seek[n - 1];
         mpctx->vo_pts_history_pts[n] = mpctx->vo_pts_history_pts[n - 1];
@@ -1020,9 +1022,6 @@ void run_playloop(struct MPContext *mpctx)
         }
 
         video_left = r > 0;
-
-        if (mpctx->video_next_pts != MP_NOPTS_VALUE && endpts != MP_NOPTS_VALUE)
-            video_left &= mpctx->video_next_pts < endpts;
 
         if (r == 2)
             MP_VERBOSE(mpctx, "frametime=%5.3f\n", frame_time);
