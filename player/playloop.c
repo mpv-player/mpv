@@ -974,6 +974,7 @@ void run_playloop(struct MPContext *mpctx)
     if (mpctx->video_out) {
         vo_check_events(mpctx->video_out);
         handle_cursor_autohide(mpctx);
+        handle_heartbeat_cmd(mpctx);
     }
 
     while (mpctx->d_video) {   // never loops, for "break;" only
@@ -1002,45 +1003,46 @@ void run_playloop(struct MPContext *mpctx)
                 mpctx->stop_play = PT_NEXT_ENTRY;
             mpctx->error_playing = true;
             handle_force_window(mpctx, true);
-            video_left = false;
             break;
         }
 
-        video_left = r > 0 || vo->hasframe || still_playing;
-
-        if (!mpctx->paused || mpctx->restart_playback) {
-            if (r == 0) {
-                if (!mpctx->playing_last_frame && mpctx->last_frame_duration > 0) {
-                    mpctx->time_frame += mpctx->last_frame_duration;
-                    mpctx->last_frame_duration = 0;
-                    mpctx->playing_last_frame = true;
-                    MP_VERBOSE(mpctx, "showing last frame\n");
-                }
-                if (mpctx->playing_last_frame) {
-                    r = 1; // don't stop playback yet
-                    MP_VERBOSE(mpctx, "still showing last frame\n");
-                }
+        if (r == 0) {
+            if (!mpctx->playing_last_frame && mpctx->last_frame_duration > 0) {
+                mpctx->time_frame += mpctx->last_frame_duration;
+                mpctx->last_frame_duration = 0;
+                mpctx->playing_last_frame = true;
+                MP_VERBOSE(mpctx, "showing last frame\n");
             }
-
-            MP_VERBOSE(mpctx, "frametime=%5.3f\n", frame_time);
-            video_left = r >= 1;
-            if (r == 2 && !mpctx->restart_playback) {
-                mpctx->time_frame += frame_time / opts->playback_speed;
-                adjust_sync(mpctx, frame_time);
-            }
-            if (!video_left) {
-                mpctx->delay = 0;
-                mpctx->last_av_difference = 0;
+            if (mpctx->playing_last_frame) {
+                r = 1; // don't stop playback yet
+                MP_VERBOSE(mpctx, "still showing last frame\n");
             }
         }
 
-        if (endpts != MP_NOPTS_VALUE)
+        video_left = r > 0;
+
+        if (mpctx->video_next_pts != MP_NOPTS_VALUE && endpts != MP_NOPTS_VALUE)
             video_left &= mpctx->video_next_pts < endpts;
 
-        handle_heartbeat_cmd(mpctx);
+        if (r == 2)
+            MP_VERBOSE(mpctx, "frametime=%5.3f\n", frame_time);
 
-        if (!video_left || (mpctx->paused && !mpctx->restart_playback))
+        if (r == 2 && !mpctx->restart_playback) {
+            mpctx->time_frame += frame_time / opts->playback_speed;
+            adjust_sync(mpctx, frame_time);
+        }
+
+        if (!video_left) {
+            mpctx->delay = 0;
+            mpctx->last_av_difference = 0;
+        }
+
+        if (!video_left || (mpctx->paused && !mpctx->restart_playback)) {
+            if (mpctx->paused)
+                video_left |= vo->hasframe;
             break;
+        }
+
         if (r != 2 && !mpctx->playing_last_frame) {
             sleeptime = 0;
             break;
