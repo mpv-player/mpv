@@ -1295,6 +1295,7 @@ goto_reopen_demuxer: ;
     mpctx->restart_playback = true;
     mpctx->video_pts = 0;
     mpctx->last_vo_pts = MP_NOPTS_VALUE;
+    mpctx->last_frame_duration = 0;
     mpctx->last_seek_pts = 0;
     mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->hrseek_active = false;
