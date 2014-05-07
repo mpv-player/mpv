@@ -980,10 +980,34 @@ void run_playloop(struct MPContext *mpctx)
         struct vo *vo = mpctx->video_out;
         update_fps(mpctx);
 
+        // Whether there's still at least 1 video frame that can be shown.
+        // If false, it means we can reconfig the VO if needed (normally, this
+        // would disrupt playback, so only do it on !still_playing).
+        bool still_playing = vo_has_next_frame(vo, true);
+        // For the last frame case (frame is being displayed).
+        still_playing |= mpctx->playing_last_frame;
+        still_playing |= mpctx->last_frame_duration > 0;
+
         double frame_time = 0;
-        int r = update_video(mpctx, endpts, false, &frame_time);
+        int r = update_video(mpctx, endpts, !still_playing, &frame_time);
+
         MP_VERBOSE(mpctx, "update_video: %d\n", r);
-        video_left = r > 0 || vo->hasframe || mpctx->playing_last_frame;
+        if (r < 0) {
+            MP_FATAL(mpctx, "Could not initialize video chain.\n");
+            int uninit = INITIALIZED_VCODEC;
+            if (!opts->force_vo)
+                uninit |= INITIALIZED_VO;
+            uninit_player(mpctx, uninit);
+            if (!mpctx->current_track[STREAM_AUDIO])
+                mpctx->stop_play = PT_NEXT_ENTRY;
+            mpctx->error_playing = true;
+            handle_force_window(mpctx, true);
+            video_left = false;
+            break;
+        }
+
+        video_left = r > 0 || vo->hasframe || still_playing;
+
         if (!mpctx->paused || mpctx->restart_playback) {
             if (r == 0) {
                 if (!mpctx->playing_last_frame && mpctx->last_frame_duration > 0) {
@@ -995,30 +1019,9 @@ void run_playloop(struct MPContext *mpctx)
                 if (mpctx->playing_last_frame) {
                     r = 1; // don't stop playback yet
                     MP_VERBOSE(mpctx, "still showing last frame\n");
-                } else if (r == 0) {
-                    // We just displayed the previous frame, so display the
-                    // new frame (if there's one) immediately.
-                    mpctx->video_next_pts = MP_NOPTS_VALUE;
-                    // Format changes behave like EOF, and this call "unstucks"
-                    // the EOF condition (after waiting for the previous frame
-                    // to finish displaying).
-                    r = update_video(mpctx, endpts, true, &frame_time);
-                    MP_VERBOSE(mpctx, "second update_video: %d\n", r);
                 }
             }
 
-            if (r < 0) {
-                MP_FATAL(mpctx, "Could not initialize video chain.\n");
-                int uninit = INITIALIZED_VCODEC;
-                if (!opts->force_vo)
-                    uninit |= INITIALIZED_VO;
-                uninit_player(mpctx, uninit);
-                if (!mpctx->current_track[STREAM_AUDIO])
-                    mpctx->stop_play = PT_NEXT_ENTRY;
-                mpctx->error_playing = true;
-                handle_force_window(mpctx, true);
-                break;
-            }
             MP_VERBOSE(mpctx, "frametime=%5.3f\n", frame_time);
             video_left = r >= 1;
             if (r == 2 && !mpctx->restart_playback) {

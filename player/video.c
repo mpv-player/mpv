@@ -469,6 +469,9 @@ static int video_output_image(struct MPContext *mpctx, bool reconfig_ok)
             return -1;
         }
         init_vo(mpctx);
+        // Display the frame queued after this immediately.
+        // (Neutralizes frame time calculation in update_video.)
+        mpctx->video_next_pts = MP_NOPTS_VALUE;
     }
 
     // Queue new frame, if there's one.
