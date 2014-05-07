@@ -471,7 +471,8 @@ static int video_output_image(struct MPContext *mpctx, double endpts,
             return 0; // EOF so that caller displays remaining VO frames
 
         // There was no decoded image yet - must not signal fake EOF.
-        if (!vf->output_params.imgfmt)
+        // Likewise, if there's no filtered frame yet, don't reconfig yet.
+        if (!vf->output_params.imgfmt || !vf->output)
             return r;
 
         // Force draining.
