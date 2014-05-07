@@ -29,8 +29,7 @@ static void gl_clear(void *ctx)
     gl->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-static bool config_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
-                                uint32_t d_height, uint32_t flags)
+static bool config_window_cocoa(struct MPGLContext *ctx, int flags)
 {
     int rv = vo_cocoa_config_window(ctx->vo, flags,
                                     ctx->requested_gl_version >= MPGL_VER(3, 0));

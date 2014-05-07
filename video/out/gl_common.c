@@ -957,15 +957,14 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name)
     return ctx;
 }
 
-bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
-                        uint32_t d_height, uint32_t flags)
+bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, int flags)
 {
     gl_caps |= MPGL_CAP_GL;
 
     ctx->requested_gl_version = (gl_caps & MPGL_CAP_GL_LEGACY)
                                 ? MPGL_VER(2, 1) : MPGL_VER(3, 0);
 
-    if (ctx->config_window(ctx, d_width, d_height, flags)) {
+    if (ctx->config_window(ctx, flags)) {
         int missing = (ctx->gl->mpgl_caps & gl_caps) ^ gl_caps;
         if (!missing)
             return true;

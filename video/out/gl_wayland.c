@@ -146,10 +146,7 @@ static void egl_create_window(struct vo_wayland_state *wl)
     wl_display_dispatch_pending(wl->display.display);
 }
 
-static bool config_window_wayland(struct MPGLContext *ctx,
-                                  uint32_t d_width,
-                                  uint32_t d_height,
-                                  uint32_t flags)
+static bool config_window_wayland(struct MPGLContext *ctx, int flags)
 {
     struct vo_wayland_state * wl = ctx->vo->wayland;
     bool enable_alpha = !!(flags & VOFLAG_ALPHA);

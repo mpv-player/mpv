@@ -144,8 +144,7 @@ static int query_format(struct vo *vo, uint32_t format)
     return caps;
 }
 
-static bool config_window(struct gl_priv *p, uint32_t d_width,
-                          uint32_t d_height, uint32_t flags)
+static bool config_window(struct gl_priv *p, int flags)
 {
     if (p->renderer_opts->stereo_mode == GL_3D_QUADBUFFER)
         flags |= VOFLAG_STEREO;
@@ -159,7 +158,7 @@ static bool config_window(struct gl_priv *p, uint32_t d_width,
     int mpgl_caps = MPGL_CAP_GL21 | MPGL_CAP_TEX_RG;
     if (!p->allow_sw)
         mpgl_caps |= MPGL_CAP_NO_SW;
-    return mpgl_config_window(p->glctx, mpgl_caps, d_width, d_height, flags);
+    return mpgl_config_window(p->glctx, mpgl_caps, flags);
 }
 
 static void video_resize_redraw_callback(struct vo *vo, int w, int h)
@@ -175,7 +174,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     mpgl_lock(p->glctx);
 
-    if (!config_window(p, vo->dwidth, vo->dheight, flags)) {
+    if (!config_window(p, flags)) {
         mpgl_unlock(p->glctx);
         return -1;
     }
@@ -427,7 +426,7 @@ static int preinit(struct vo *vo)
         goto err_out;
     p->gl = p->glctx->gl;
 
-    if (!config_window(p, 320, 200, VOFLAG_HIDDEN))
+    if (!config_window(p, VOFLAG_HIDDEN))
         goto err_out;
 
     mpgl_set_context(p->glctx);

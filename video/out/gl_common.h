@@ -123,8 +123,7 @@ typedef struct MPGLContext {
     // GL context. (The caller must check if the created GL version is ok. The
     // callee must try to fall back to an older version if the requested
     // version is not available, and newer versions are incompatible.)
-    bool (*config_window)(struct MPGLContext *ctx, uint32_t d_width,
-                          uint32_t d_height, uint32_t flags);
+    bool (*config_window)(struct MPGLContext *ctx, int flags);
 
     // An optional function to register a resize callback in the backend that
     // can be called on separate thread to handle resize events immediately
@@ -151,8 +150,7 @@ bool mpgl_is_thread_safe(MPGLContext *ctx);
 // gl_caps: bitfield of MPGL_CAP_* (required GL version and feature set)
 // flags: passed to the backend's create window function
 // Returns success.
-bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
-                        uint32_t d_height, uint32_t flags);
+bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, int flags);
 
 int mpgl_find_backend(const char *name);
 

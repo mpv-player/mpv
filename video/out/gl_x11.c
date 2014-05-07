@@ -197,8 +197,7 @@ static void set_glx_attrib(int *attribs, int name, int value)
     }
 }
 
-static bool config_window_x11(struct MPGLContext *ctx, uint32_t d_width,
-                              uint32_t d_height, uint32_t flags)
+static bool config_window_x11(struct MPGLContext *ctx, int flags)
 {
     struct vo *vo = ctx->vo;
     struct glx_context *glx_ctx = ctx->priv;

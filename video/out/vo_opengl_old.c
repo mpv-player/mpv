@@ -1699,8 +1699,7 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     return 1;
 }
 
-static bool config_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
-                          uint32_t flags)
+static bool config_window(struct vo *vo, int flags)
 {
     struct gl_priv *p = vo->priv;
 
@@ -1710,7 +1709,7 @@ static bool config_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     int mpgl_caps = MPGL_CAP_GL_LEGACY;
     if (!p->allow_sw)
         mpgl_caps |= MPGL_CAP_NO_SW;
-    return mpgl_config_window(p->glctx, mpgl_caps, d_width, d_height, flags);
+    return mpgl_config_window(p->glctx, mpgl_caps, flags);
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
@@ -1733,7 +1732,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     uninitGl(vo);
 
-    if (!config_window(vo, vo->dwidth, vo->dheight, flags))
+    if (!config_window(vo, flags))
         return -1;
 
     initGl(vo, vo->dwidth, vo->dheight);
@@ -2083,7 +2082,7 @@ static int preinit(struct vo *vo)
     p->gl = p->glctx->gl;
 
     if (p->use_yuv == -1) {
-        if (!config_window(vo, 320, 200, VOFLAG_HIDDEN))
+        if (!config_window(vo, VOFLAG_HIDDEN))
             goto err_out;
         autodetectGlExtensions(vo);
     }

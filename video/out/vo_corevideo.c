@@ -543,8 +543,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     p->image_height = params->h;
 
     int mpgl_caps = MPGL_CAP_GL_LEGACY;
-    if (!mpgl_config_window(
-            p->mpglctx, mpgl_caps, vo->dwidth, vo->dheight, flags))
+    if (!mpgl_config_window(p->mpglctx, mpgl_caps, flags))
         return -1;
 
     init_gl(vo, vo->dwidth, vo->dheight);
