@@ -477,7 +477,12 @@ static void handle_stream(demuxer_t *demuxer, int i)
         else
             sh_video->aspect = codec->width  * codec->sample_aspect_ratio.num
                     / (float)(codec->height * codec->sample_aspect_ratio.den);
+
         sh_video->bitrate = codec->bit_rate;
+
+        if (sh_video->bitrate == 0) {
+            sh_video->bitrate = avfc->bit_rate;
+        }
 
         AVDictionaryEntry *rot = av_dict_get(st->metadata, "rotate", NULL, 0);
         if (rot && rot->value) {
