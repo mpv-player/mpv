@@ -105,7 +105,10 @@ static void mark_seek(struct MPContext *mpctx)
 
 static char *format_bitrate(int rate)
 {
-    return talloc_asprintf(NULL, "%d kbps", rate / 1000);
+    if (rate < 1024 * 1024)
+        return talloc_asprintf(NULL, "%.3f kbps", rate * 8.0 / 1000.0);
+
+    return talloc_asprintf(NULL, "%.3f mbps", rate * 8.0 / 1000000.0);
 }
 
 static char *format_file_size(int64_t size)
