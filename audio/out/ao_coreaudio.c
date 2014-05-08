@@ -407,21 +407,6 @@ static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd)
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "can't link audio unit to selected device");
 
-    if (ao->channels.num > 2) {
-        // No need to set a channel layout for mono and stereo inputs
-        AudioChannelLayout acl = (AudioChannelLayout) {
-            .mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelBitmap,
-            .mChannelBitmap    = mp_chmap_to_waveext(&ao->channels)
-        };
-
-        err = AudioUnitSetProperty(p->audio_unit,
-                                   kAudioUnitProperty_AudioChannelLayout,
-                                   kAudioUnitScope_Input, 0, &acl,
-                                   sizeof(AudioChannelLayout));
-        CHECK_CA_ERROR_L(coreaudio_error_audiounit,
-                         "can't set channel layout bitmap into audio unit");
-    }
-
     p->buffer = mp_ring_new(p, get_ring_size(ao));
     print_buffer(ao, p->buffer);
 
