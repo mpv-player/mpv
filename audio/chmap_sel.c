@@ -18,21 +18,21 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "common/common.h"
 #include "chmap_sel.h"
 
-// 5.1 and 5.1(side) are practically the same. It doesn't make much sense to
-// reject either of them.
-static const int replaceable_speakers[][2] = {
-    {MP_SPEAKER_ID_SL, MP_SPEAKER_ID_BL},
-    {MP_SPEAKER_ID_SR, MP_SPEAKER_ID_BR},
-    {-1},
+static struct mp_chmap speaker_replacements[][2] = {
+    // 5.1 <-> 5.1 (side)
+    { MP_CHMAP2(SL, SR), MP_CHMAP2(BL, BR) },
+    // 7.1 <-> 7.1 (rear ext)
+    { MP_CHMAP2(SL, SR), MP_CHMAP2(SDL, SDR) },
 };
 
-// list[] contains a list of speaker pairs, with each pair indicating how
-// a speaker can be swapped for another speaker. Try to replace speakers from
-// the left of the list with the ones on the right, or the other way around.
-static bool replace_speakers(struct mp_chmap *map, const int list[][2])
+// Try to replace speakers from the left of the list with the ones on the
+// right, or the other way around.
+static bool replace_speakers(struct mp_chmap *map, struct mp_chmap list[2])
 {
+    assert(list[0].num == list[1].num);
     if (!mp_chmap_is_valid(map))
         return false;
     for (int dir = 0; dir < 2; dir++) {
@@ -41,9 +41,9 @@ static bool replace_speakers(struct mp_chmap *map, const int list[][2])
         bool replaced = false;
         struct mp_chmap t = *map;
         for (int n = 0; n < t.num; n++) {
-            for (int i = 0; list[i][0] != -1; i++) {
-                if (t.speaker[n] == list[i][from]) {
-                    t.speaker[n] = list[i][to];
+            for (int i = 0; i < list[0].num; i++) {
+                if (t.speaker[n] == list[from].speaker[i]) {
+                    t.speaker[n] = list[to].speaker[i];
                     replaced = true;
                     break;
                 }
@@ -168,9 +168,14 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
             return true;
         }
     }
-    // 5.1 <-> 5.1(side)
-    if (replace_speakers(map, replaceable_speakers) && test_layout(s, map))
-        return true;
+    for (int i = 0; i < MP_ARRAY_SIZE(speaker_replacements); i++) {
+        struct mp_chmap  t = *map;
+        struct mp_chmap *r = speaker_replacements[i];
+        if (replace_speakers(&t, r) && test_layout(s, &t)) {
+            *map = t;
+            return true;
+        }
+    }
     // Fallback to mono/stereo as last resort
     if (map->num == 1) {
         *map = (struct mp_chmap) MP_CHMAP_INIT_MONO;
