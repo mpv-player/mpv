@@ -312,10 +312,11 @@ static int init(struct ao *ao)
 
         talloc_free(layouts);
 
-        if (ao->channels.num < 3)
-            // If the input is not surround or we could not get any usable
-            // bitmap from the hardware, default to waveext...
-            mp_chmap_sel_add_waveext(&chmap_sel);
+        if (ao->channels.num < 3) {
+            struct mp_chmap chmap;
+            mp_chmap_from_channels(&chmap, ao->channels.num);
+            mp_chmap_sel_add_map(&chmap_sel, &chmap);
+        }
 
         if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels)) {
             MP_ERR(ao, "could not select a suitable channel map among the "
