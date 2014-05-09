@@ -813,7 +813,7 @@ def configure(ctx):
     ctx.load('detections.devices')
 
     if ctx.env.DEST_OS in ('freebsd', 'openbsd'):
-        ctx.env.CFLAGS += ['-I/usr/local/include']
+        ctx.env.CFLAGS += ['-I.', '-I..', '-I/usr/local/include']
         ctx.env.LINKFLAGS += ['-L/usr/local/lib']
 
     if ctx.env.DEST_OS == 'netbsd':
