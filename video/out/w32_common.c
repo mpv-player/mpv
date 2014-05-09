@@ -718,8 +718,9 @@ static void w32_update_xinerama_info(struct vo *vo)
             GetSystemMetrics(SM_CYVIRTUALSCREEN),
         };
         if (!rc.x1 || !rc.y1) {
-            rc.x1 = w32->screenrc.x1; // assume screenrc.x0==y0==0
-            rc.x1 = w32->screenrc.y1;
+            rc.x0 = rc.y0 = 0;
+            rc.x1 = w32->screenrc.x1;
+            rc.y1 = w32->screenrc.y1;
         }
         rc.x1 += rc.x0;
         rc.y1 += rc.y0;
