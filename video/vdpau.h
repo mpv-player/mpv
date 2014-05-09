@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
+#include <pthread.h>
+
 #include <vdpau/vdpau.h>
 #include <vdpau/vdpau_x11.h>
 
@@ -35,26 +37,31 @@ struct vdp_functions {
 // Shared state. Objects created from different VdpDevices are often (always?)
 // incompatible to each other, so all code must use a shared VdpDevice.
 struct mp_vdpau_ctx {
+    struct mp_log *log;
+    struct vo_x11_state *x11;
+
+    // These are mostly immutable, except on preemption. We don't really care
+    // to synchronize the preemption case fully correctly, because it's an
+    // extremely obscure corner case, and basically a vdpau API design bug.
+    // What we do will sort-of work anyway (no memory errors are possible).
     struct vdp_functions vdp;
     VdpGetProcAddress *get_proc_address;
     VdpDevice vdp_device;
+
+    pthread_mutex_t preempt_lock;
     bool is_preempted;                  // set to true during unavailability
     uint64_t preemption_counter;        // incremented after _restoring_
-
     bool preemption_user_notified;
     double last_preemption_retry_fail;
 
-    struct vo_x11_state *x11;
-
     // Surface pool
+    pthread_mutex_t pool_lock;
     struct surface_entry {
         VdpVideoSurface surface;
         int w, h;
         VdpChromaType chroma;
         bool in_use;
     } video_surfaces[MAX_VIDEO_SURFACES];
-
-    struct mp_log *log;
 };
 
 struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log,
