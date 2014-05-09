@@ -200,13 +200,9 @@ struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
             e->chroma = chroma;
             e->w = w;
             e->h = h;
-            if (ctx->is_preempted) {
-                MP_WARN(ctx, "Preempted, no surface.\n");
-            } else {
-                vdp_st = vdp->video_surface_create(ctx->vdp_device, chroma,
-                                                   w, h, &e->surface);
-                CHECK_VDP_WARNING(ctx, "Error when calling vdp_video_surface_create");
-            }
+            vdp_st = vdp->video_surface_create(ctx->vdp_device, chroma,
+                                               w, h, &e->surface);
+            CHECK_VDP_WARNING(ctx, "Error when calling vdp_video_surface_create");
             return create_ref(e);
         }
     }
