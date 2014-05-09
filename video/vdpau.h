@@ -62,6 +62,7 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log,
 void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx);
 
 bool mp_vdpau_status_ok(struct mp_vdpau_ctx *ctx);
+int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter);
 
 struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
                                             VdpChromaType chroma, int w, int h);

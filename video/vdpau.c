@@ -127,6 +127,30 @@ bool mp_vdpau_status_ok(struct mp_vdpau_ctx *ctx)
     return handle_preemption(ctx) >= 0;
 }
 
+// Check whether vdpau display preemption happened. The caller provides a
+// preemption counter, which contains the logical timestamp of the last
+// preemption handled by the caller. The counter can be 0 for init.
+// Return values:
+//  -1: the display is currently preempted, and vdpau can't be used
+//   0: a preemption event happened, and the caller must recover
+//      (*counter is updated, and a second call will report status ok)
+//   1: everything is fine, no preemption happened
+int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter)
+{
+    // First time init
+    if (!*counter)
+        *counter = ctx->preemption_counter;
+
+    if (handle_preemption(ctx) < 0)
+        return -1;
+
+    if (*counter < ctx->preemption_counter) {
+        *counter = ctx->preemption_counter;
+        return 0; // signal recovery after preemption
+    }
+    return 1;
+}
+
 static void release_decoder_surface(void *ptr)
 {
     bool *in_use_ptr = ptr;
@@ -205,6 +229,7 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log,
     *ctx = (struct mp_vdpau_ctx) {
         .log = log,
         .x11 = x11,
+        .preemption_counter = 1,
     };
 
     mark_vdpau_objects_uninitialized(ctx);
