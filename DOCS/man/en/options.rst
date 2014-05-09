@@ -2226,31 +2226,30 @@ OPTIONS
     .. admonition:: Examples
 
         - ``--sub-codepage=utf8:latin2`` Use Latin 2 if input is not UTF-8.
-        - ``--sub-codepage=utf8:cp1250`` Use CP1250 if input is not UTF-8.
         - ``--sub-codepage=cp1250`` Always force recoding to cp1250.
 
-    The pseudo codepage ``UTF-8-BROKEN`` is used internally. If this is used
-    as codepage, the subtitle will be interpreted as UTF-8, but with "Latin 1"
-    as fallback for bytes which are not valid UTF-8 sequences. iconv is never
-    involved in this mode.
+    The pseudo codepage ``UTF-8-BROKEN`` is used internally. When it
+    is the codepage, subtitles are interpreted as UTF-8 with "Latin 1" as
+    fallback for bytes which are not valid UTF-8 sequences. iconv is
+    never involved in this mode.
 
     If the player was compiled with ENCA support, you can control it with the
-    following syntax::
+    following syntax:
 
-        ``--sub-codepage=enca:<language>:<fallback codepage>``
+    ``--sub-codepage=enca:<language>:<fallback codepage>``
 
-    You can specify your language using a two letter language code to make
-    ENCA detect the codepage automatically. If unsure, enter anything (if the
-    language is invalid, mpv will complain and list valid languages).
-    Fallback codepage specifies the codepage to use if autodetection fails.
-    If no fallback is specified, ``UTF-8-BROKEN`` is used.
+    Language is specified using a two letter code to help ENCA detect
+    the codepage automatically. If an invalid language code is
+    entered, mpv will complain and list valid languages.  (Note
+    however that this list will only be printed when the conversion code is actually
+    called, for example when loading an external subtitle). The
+    fallback codepage is used if autodetection fails.  If no fallback
+    is specified, ``UTF-8-BROKEN`` is used.
 
     .. admonition:: Examples
 
-        - ``--sub-codepage=enca:cs:latin2`` guess the encoding, assuming the subtitles
-          are Czech, fall back on latin 2, if the detection fails.
-        - ``--sub-codepage=enca:pl:cp1250`` guess the encoding for Polish, fall back on
-          cp1250.
+        - ``--sub-codepage=enca:pl:cp1250`` guess the encoding, assuming the subtitles
+          are Polish, fall back on cp1250
         - ``--sub-codepage=enca:pl`` guess the encoding for Polish, fall back on UTF-8.
         - ``--sub-codepage=enca`` try universal detection, fall back on UTF-8.
 
@@ -2258,10 +2257,9 @@ OPTIONS
 
     ``--sub-codepage=guess:<language>:<fallback codepage>``
 
-    Note that libguess always needs a language. There is no universal detection
-    mode. Use ``--sub-codepage=guess:help`` to get a list of languages (like with ENCA,
-    it will be printed only if the conversion code is somehow called, for
-    example when loading an external subtitle).
+    libguess always needs a language. There is no universal detection
+    mode. Use ``--sub-codepage=guess:help`` to get a list of
+    languages subject to the same caveat as with ENCA above.
 
 ``--sub-fix-timing``, ``--no-sub-fix-timing``
     By default, external text subtitles are preprocessed to remove minor gaps
