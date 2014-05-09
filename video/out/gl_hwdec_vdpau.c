@@ -48,28 +48,6 @@ static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
     p->mixer->video_mixer = VDP_INVALID_HANDLE;
 }
 
-static int handle_preemption(struct gl_hwdec *hw)
-{
-    struct priv *p = hw->priv;
-
-    if (!mp_vdpau_status_ok(p->ctx)) {
-        mark_vdpau_objects_uninitialized(hw);
-        return -1;
-    }
-
-    if (p->preemption_counter == p->ctx->preemption_counter)
-        return 0;
-
-    mark_vdpau_objects_uninitialized(hw);
-
-    p->preemption_counter = p->ctx->preemption_counter;
-
-    if (reinit(hw, &p->image_params) < 0)
-        return -1;
-
-    return 1;
-}
-
 static void destroy_objects(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
@@ -125,7 +103,8 @@ static int create(struct gl_hwdec *hw)
     p->ctx = mp_vdpau_create_device_x11(hw->log, hw->mpgl->vo->x11);
     if (!p->ctx)
         return -1;
-    p->preemption_counter = p->ctx->preemption_counter;
+    if (mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter) < 1)
+        return -1;
     p->vdp_surface = VDP_INVALID_HANDLE;
     p->mixer = mp_vdpau_mixer_create(p->ctx, hw->log);
     hw->info->vdpau_ctx = p->ctx;
@@ -144,7 +123,7 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
 
     p->image_params = *params;
 
-    if (!mp_vdpau_status_ok(p->ctx))
+    if (mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter) < 1)
         return -1;
 
     gl->VDPAUInitNV(BRAINDEATH(p->ctx->vdp_device), p->ctx->get_proc_address);
@@ -183,8 +162,14 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     assert(hw_image && hw_image->imgfmt == IMGFMT_VDPAU);
 
-    if (handle_preemption(hw) < 0)
-        return -1;
+    int pe = mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter);
+    if (pe < 1) {
+        mark_vdpau_objects_uninitialized(hw);
+        if (pe < 0)
+            return -1;
+        if (reinit(hw, &p->image_params) < 0)
+            return -1;
+    }
 
     if (!p->vdpgl_surface)
         return -1;

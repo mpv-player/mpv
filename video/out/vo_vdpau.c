@@ -307,18 +307,12 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
      * try to reinit after preemption while the user is still switched
      * from X to a virtual terminal (creating the vdp_device initially
      * succeeds, as does creating the flip_target above). This is
-     * probably not guaranteed behavior, but we'll assume it as a simple
-     * way to reduce warnings while trying to recover from preemption.
+     * probably not guaranteed behavior.
      */
     if (vc->flip_queue == VDP_INVALID_HANDLE) {
         vdp_st = vdp->presentation_queue_create(vc->vdp_device, vc->flip_target,
                                                 &vc->flip_queue);
-        if (vc->mpvdp->is_preempted && vdp_st != VDP_STATUS_OK) {
-            MP_DBG(vo, "Failed to create flip queue while preempted: %s\n",
-                   vdp->get_error_string(vdp_st));
-            return -1;
-        } else
-            CHECK_VDP_ERROR(vo, "Error when calling vdp_presentation_queue_create");
+        CHECK_VDP_ERROR(vo, "Error when calling vdp_presentation_queue_create");
     }
 
     if (vc->colorkey.a > 0) {
@@ -468,32 +462,25 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     vc->output_surface_width = vc->output_surface_height = -1;
 }
 
-static int handle_preemption(struct vo *vo)
+static bool check_preemption(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
-    if (!mp_vdpau_status_ok(vc->mpvdp)) {
+    int r = mp_vdpau_handle_preemption(vc->mpvdp, &vc->preemption_counter);
+    if (r < 1) {
         mark_vdpau_objects_uninitialized(vo);
-        return -1;
+        if (r < 0)
+            return false;
+        vc->vdp_device = vc->mpvdp->vdp_device;
+        if (initialize_vdpau_objects(vo) < 0)
+            return false;
     }
-
-    if (vc->preemption_counter == vc->mpvdp->preemption_counter)
-        return 0;
-
-    mark_vdpau_objects_uninitialized(vo);
-
-    vc->preemption_counter = vc->mpvdp->preemption_counter;
-    vc->vdp_device = vc->mpvdp->vdp_device;
-
-    if (initialize_vdpau_objects(vo) < 0)
-        return -1;
-
-    return 1;
+    return true;
 }
 
 static bool status_ok(struct vo *vo)
 {
-    return vo->config_ok && handle_preemption(vo) >= 0;
+    return vo->config_ok && check_preemption(vo);
 }
 
 /*
@@ -504,7 +491,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct vdpctx *vc = vo->priv;
 
-    if (handle_preemption(vo) < 0)
+    if (!check_preemption(vo))
         return -1;
 
     vc->flip = flags & VOFLAG_FLIPPING;
@@ -777,7 +764,7 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     VdpStatus vdp_st;
     uint32_t vsync_interval = vc->vsync_interval;
 
-    if (handle_preemption(vo) < 0)
+    if (!check_preemption(vo))
         return;
 
     if (duration > INT_MAX / 1000)
@@ -926,7 +913,7 @@ static struct mp_image *filter_image(struct vo *vo, struct mp_image *mpi)
     struct mp_image *reserved_mpi = NULL;
     VdpStatus vdp_st;
 
-    handle_preemption(vo);
+    check_preemption(vo);
 
     if (vc->rgb_mode) {
         reserved_mpi = get_rgb_surface(vo);
@@ -1099,7 +1086,8 @@ static int preinit(struct vo *vo)
     // allocated
     mark_vdpau_objects_uninitialized(vo);
 
-    vc->preemption_counter = vc->mpvdp->preemption_counter;
+    mp_vdpau_handle_preemption(vc->mpvdp, &vc->preemption_counter);
+
     vc->vdp_device = vc->mpvdp->vdp_device;
     vc->vdp = &vc->mpvdp->vdp;
 
@@ -1145,7 +1133,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct vdpctx *vc = vo->priv;
 
-    handle_preemption(vo);
+    check_preemption(vo);
 
     switch (request) {
     case VOCTRL_PAUSE:

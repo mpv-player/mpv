@@ -120,13 +120,6 @@ static int handle_preemption(struct mp_vdpau_ctx *ctx)
     return 1;
 }
 
-// Check whether vdpau initialization and preemption status is ok and we can
-// proceed normally.
-bool mp_vdpau_status_ok(struct mp_vdpau_ctx *ctx)
-{
-    return handle_preemption(ctx) >= 0;
-}
-
 // Check whether vdpau display preemption happened. The caller provides a
 // preemption counter, which contains the logical timestamp of the last
 // preemption handled by the caller. The counter can be 0 for init.
