@@ -1054,9 +1054,9 @@ static void vo_x11_set_wm_icon(struct vo_x11_state *x11)
     for (int n = 0; n < num_icons; n++) {
         *cur++ = icon_w[n];
         *cur++ = icon_h[n];
-        uint32_t *src = icon_data[n];
-        for (int i = 0; i < icon_h[n] * icon_w[n]; i++)
-            *cur++ = src[i];
+        uint8_t *s = icon_data[n];
+        for (int i = 0; i < icon_h[n] * icon_w[n]; i++, s += 4)
+            *cur++ = s[0] | (s[1] << 8) | (s[2] << 16) | ((unsigned)s[3] << 24);
     }
 
     XChangeProperty(x11->display, x11->window, x11->XA_NET_WM_ICON,
