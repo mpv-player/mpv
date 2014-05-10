@@ -31,7 +31,7 @@
 #define MP_ASS_FONT_PLAYRESY 288
 
 #define MP_ASS_RGBA(r, g, b, a) \
-    (((r) << 24U) | ((g) << 16) | ((b) << 8) | (0xFF - (a)))
+    (((unsigned)(r) << 24) | ((g) << 16) | ((b) << 8) | (0xFF - (a)))
 
 // m_color argument
 #define MP_ASS_COLOR(c) MP_ASS_RGBA((c).r, (c).g, (c).b, (c).a)
