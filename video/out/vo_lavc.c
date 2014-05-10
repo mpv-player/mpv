@@ -134,9 +134,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
         goto error;
     }
 
-    vc->lastipts = MP_NOPTS_VALUE;
-    vc->lastframeipts = MP_NOPTS_VALUE;
-    vc->lastencodedipts = MP_NOPTS_VALUE;
+    vc->lastipts = AV_NOPTS_VALUE;
+    vc->lastframeipts = AV_NOPTS_VALUE;
+    vc->lastencodedipts = AV_NOPTS_VALUE;
 
     if (pix_fmt == AV_PIX_FMT_NONE) {
         MP_FATAL(vo, "Format %s not supported by lavc.\n",
@@ -407,7 +407,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
         }
     }
 
-    if (vc->lastipts != MP_NOPTS_VALUE) {
+    if (vc->lastipts != AV_NOPTS_VALUE) {
 
         // we have a valid image in lastimg
         while (vc->lastipts < frameipts) {
@@ -417,7 +417,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
             // we will ONLY encode this frame if it can be encoded at at least
             // vc->mindeltapts after the last encoded frame!
             int64_t skipframes =
-                (vc->lastencodedipts == MP_NOPTS_VALUE)
+                (vc->lastencodedipts == AV_NOPTS_VALUE)
                     ? 0
                     : vc->lastencodedipts + vc->mindeltapts - vc->lastipts;
             if (skipframes < 0)
@@ -464,7 +464,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
         } while (size > 0);
     } else {
         if (frameipts >= vc->lastframeipts) {
-            if (vc->lastframeipts != MP_NOPTS_VALUE && vc->lastdisplaycount != 1)
+            if (vc->lastframeipts != AV_NOPTS_VALUE && vc->lastdisplaycount != 1)
                 MP_INFO(vo, "Frame at pts %d got displayed %d times\n",
                         (int) vc->lastframeipts, vc->lastdisplaycount);
             mp_image_setrefp(&vc->lastimg, mpi);

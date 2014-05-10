@@ -166,8 +166,8 @@ static int init(struct ao *ao)
     // but at least one!
     ac->framecount = FFMAX(ac->framecount, 1);
 
-    ac->savepts = MP_NOPTS_VALUE;
-    ac->lastpts = MP_NOPTS_VALUE;
+    ac->savepts = AV_NOPTS_VALUE;
+    ac->lastpts = AV_NOPTS_VALUE;
 
     ao->untimed = true;
 
@@ -251,7 +251,7 @@ static int encode(struct ao *ao, double apts, void **data)
         }
 
         int64_t frame_pts = av_rescale_q(frame->pts, ac->stream->codec->time_base, ac->worst_time_base);
-        if (ac->lastpts != MP_NOPTS_VALUE && frame_pts <= ac->lastpts) {
+        if (ac->lastpts != AV_NOPTS_VALUE && frame_pts <= ac->lastpts) {
             // this indicates broken video
             // (video pts failing to increase fast enough to match audio)
             MP_WARN(ao, "audio frame pts went backwards (%d <- %d), autofixed\n",
@@ -265,7 +265,7 @@ static int encode(struct ao *ao, double apts, void **data)
         status = avcodec_encode_audio2(ac->stream->codec, &packet, frame, &gotpacket);
 
         if (!status) {
-            if (ac->savepts == MP_NOPTS_VALUE)
+            if (ac->savepts == AV_NOPTS_VALUE)
                 ac->savepts = frame->pts;
         }
 
@@ -310,7 +310,7 @@ static int encode(struct ao *ao, double apts, void **data)
         packet.duration = av_rescale_q(packet.duration, ac->stream->codec->time_base,
                 ac->stream->time_base);
 
-    ac->savepts = MP_NOPTS_VALUE;
+    ac->savepts = AV_NOPTS_VALUE;
 
     if (encode_lavc_write_frame(ao->encode_lavc_ctx, &packet) < 0) {
         MP_ERR(ao, "error writing at %f %f/%f\n",
