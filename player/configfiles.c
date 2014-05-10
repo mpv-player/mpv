@@ -114,8 +114,8 @@ static void mp_load_per_file_config(struct MPContext *mpctx)
     const char *file = mpctx->filename;
 
     if (snprintf(cfg, sizeof(cfg), "%s.conf", file) >= sizeof(cfg)) {
-        MP_WARN(mpctx, "Filename is too long, "
-               "can not load file or directory specific config files\n");
+        MP_VERBOSE(mpctx, "Filename is too long, "
+                   "can not load file or directory specific config files\n");
         return;
     }
 
