@@ -317,8 +317,12 @@ static int init(struct ao *ao)
             // bitmap from the hardware, default to waveext...
             mp_chmap_sel_add_waveext(&chmap_sel);
 
-        if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels))
+        if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels)) {
+            MP_ERR(ao, "could not select a suitable channel map among the "
+                       "hardware supported ones. Make sure to configure your "
+                       "output device correctly in 'Audio MIDI Setup.app'\n");
             goto coreaudio_error;
+        }
 
     } // closes if (!supports_digital)
 
