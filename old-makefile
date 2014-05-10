@@ -339,6 +339,7 @@ DIRS =  . \
         player/timeline \
         demux \
         misc \
+        options \
         osdep \
         osdep/ar \
         player \
