@@ -27,8 +27,8 @@
 #include "compat/compiler.h"
 #include "talloc.h"
 
-// both int64_t and double should be able to represent this exactly
-#define MP_NOPTS_VALUE (-1LL<<63)
+// double should be able to represent this exactly
+#define MP_NOPTS_VALUE (-0x1p+63)
 
 #define MP_CONCAT_(a, b) a ## b
 #define MP_CONCAT(a, b) MP_CONCAT_(a, b)
