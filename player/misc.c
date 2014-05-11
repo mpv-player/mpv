@@ -139,7 +139,7 @@ void update_window_title(struct MPContext *mpctx, bool force)
 {
     if (!mpctx->video_out && !mpctx->ao) {
         talloc_free(mpctx->last_window_title);
-        mpctx->last_window_title = false;
+        mpctx->last_window_title = NULL;
         return;
     }
     char *title = mp_property_expand_string(mpctx, mpctx->opts->wintitle);
