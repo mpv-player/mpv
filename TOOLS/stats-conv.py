@@ -45,6 +45,9 @@ def get_event(event):
     return G.events[event]
 
 for line in [line.split("#")[0].strip() for line in open(filename, "r")]:
+    line = line.strip()
+    if not line:
+        continue
     ts, event = line.split(" ", 1)
     ts = int(ts) / 1000 # milliseconds
     if G.start is None:
