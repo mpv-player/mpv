@@ -69,7 +69,7 @@ static bool pl_eof(struct pl_parser *p)
 static int parse_m3u(struct pl_parser *p)
 {
     bstr line = bstr_strip(pl_get_line(p));
-    if (!p->force && !bstr_equals0(line, "#EXTM3U"))
+    if (p->probing && !bstr_equals0(line, "#EXTM3U"))
         return -1;
     if (p->probing)
         return 0;
