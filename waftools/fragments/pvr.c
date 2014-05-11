@@ -3,5 +3,5 @@
 int main(void)
 {
     struct v4l2_ext_controls ext;
-    return ext.controls->value;
+    return !!&ext.controls->value;
 }
