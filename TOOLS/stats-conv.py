@@ -71,6 +71,11 @@ for line in [line.split("#")[0].strip() for line in open(filename, "r")]:
         e.type = "event-signal"
         e.vals.append((ts, 1))
 
+ao_events = ["ao fill", "audio wait"]
+for e in G.sevents:
+    if e.name in ao_events:
+        e.vals = [(x, y * 0.5) for (x, y) in e.vals]
+
 plot.hold(True)
 mainpl = plot.subplot(2, 1, 1)
 legend = []
