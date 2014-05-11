@@ -198,9 +198,6 @@ void mixer_getbalance(struct mixer *mixer, float *val)
 
 void mixer_setbalance(struct mixer *mixer, float val)
 {
-    float level[AF_NCH];
-    int i;
-    af_control_ext_t arg_ext = { .arg = level };
     struct af_instance *af_pan_balance;
 
     mixer->balance = val;
@@ -220,13 +217,12 @@ void mixer_setbalance(struct mixer *mixer, float val)
     }
 
     /* make all other channels pass thru since by default pan blocks all */
-    memset(level, 0, sizeof(level));
-    for (i = 2; i < AF_NCH; i++) {
-        arg_ext.ch = i;
+    for (int i = 2; i < AF_NCH; i++) {
+        float level[AF_NCH] = {0};
         level[i] = 1.f;
+        af_control_ext_t arg_ext = { .ch = i, .arg = level };
         af_pan_balance->control(af_pan_balance, AF_CONTROL_SET_PAN_LEVEL,
                                 &arg_ext);
-        level[i] = 0.f;
     }
 
     af_pan_balance->control(af_pan_balance, AF_CONTROL_SET_PAN_BALANCE, &val);
