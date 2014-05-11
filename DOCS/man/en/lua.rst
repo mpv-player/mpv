@@ -57,7 +57,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Run the given command. This is similar to the commands used in input.conf.
     See `List of Input Commands`_.
 
-    Returns true on success, or ``nil, error`` on error.
+    Returns ``true`` on success, or ``nil, error`` on error.
 
 ``mp.commandv(arg1, arg2, ...)``
     Similar to ``mp.command``, but pass each command argument as separate
@@ -145,7 +145,8 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     or a map, this would fail with empty tables. Also, there are not many
     properties for which it makes sense to use this, instead of
     ``set_property``, ``set_property_bool``, ``set_property_number``.
-    For these reasons, this function should probably be avoided for now.
+    For these reasons, this function should probably be avoided for now, except
+    for properties that use tables natively.
 
 ``mp.get_time()``
     Return the current mpv internal time in seconds as a number. This is
@@ -288,7 +289,8 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             ``resume()`` essentially unpauses the timer.
 
         ``kill()``
-            Disable the timer. Resets the elapsed time.
+            Disable the timer. Resets the elapsed time. ``resume()`` will
+            restart the timer.
 
         ``resume()``
             Restart the timer. If the timer was disabled with ``stop()``, this
@@ -466,8 +468,8 @@ List of events
 ``pause``
     Playback was paused. This also happens when for example the player is
     paused on low network cache. Then the event type indicates the pause state
-    (like the property "pause" as opposed to the "core-idle" propetty), and you
-    might be multiple ``pause`` events in a row.
+    (like the property "pause" as opposed to the "core-idle" property), and you
+    might receive multiple ``pause`` events in a row.
 
 ``unpause``
     Playback was unpaused. See above for details.

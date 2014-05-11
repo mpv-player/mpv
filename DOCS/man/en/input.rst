@@ -224,7 +224,7 @@ List of Input Commands
     mpv (0.2.x and older), this doesn't call the shell. Instead, the command
     is run directly, with each argument passed separately. Each argument is
     expanded like in `Property Expansion`_. Note that there is a static limit
-    of (as of this writing) 10 arguments (this limit could be raised on demand).
+    of (as of this writing) 9 arguments (this limit could be raised on demand).
 
     The program is run in a detached way. mpv doesn't wait until the command
     is completed, but continues playback right after spawning it.

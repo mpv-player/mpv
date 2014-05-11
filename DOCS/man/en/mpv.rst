@@ -483,8 +483,8 @@ behavior of mpv.
 
 ``MPV_VERBOSE`` (see also ``-v`` and ``--msg-level``)
     Set the initial verbosity level across all message modules (default: 0).
-    The resulting verbosity corresponds to that of ``--msg-level=5`` plus the
-    value of ``MPV_VERBOSE``.
+    This is an integer, and the resulting verbosity corresponds to the number
+    of ``--v`` options passed to the command line.
 
 ``MPV_LEAK_REPORT``
     If set to ``1``, enable internal talloc leak reporting. Note that this can
