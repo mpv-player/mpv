@@ -49,7 +49,6 @@ struct ao_push_state {
 
     struct mp_audio_buffer *buffer;
 
-    bool newdata;
     bool terminate;
     bool playing;
 
@@ -148,10 +147,9 @@ static void drain(struct ao *ao)
     }
 }
 
-static int get_space(struct ao *ao)
+static int unlocked_get_space(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
-    pthread_mutex_lock(&p->lock);
     int space = mp_audio_buffer_get_write_available(p->buffer);
     if (ao->driver->get_space) {
         // The following code attempts to keep the total buffered audio to
@@ -167,6 +165,14 @@ static int get_space(struct ao *ao)
         space = MPMIN(space, missing);
         space = MPMAX(0, space);
     }
+    return space;
+}
+
+static int get_space(struct ao *ao)
+{
+    struct ao_push_state *p = ao->api_priv;
+    pthread_mutex_lock(&p->lock);
+    int space = unlocked_get_space(ao);
     pthread_mutex_unlock(&p->lock);
     return space;
 }
@@ -186,8 +192,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         audio.planes[n] = data[n];
     audio.samples = write_samples;
     mp_audio_buffer_append(p->buffer, &audio);
-    if (write_samples > 0)
-        p->newdata = true;
 
     p->final_chunk = !!(flags & AOPLAY_FINAL_CHUNK);
     p->playing = true;
@@ -219,10 +223,8 @@ static int ao_play_data(struct ao *ao)
         MP_WARN(ao, "Audio device returned non-sense value.\n");
         r = data.samples;
     }
-    if (r > 0) {
+    if (r > 0)
         mp_audio_buffer_skip(p->buffer, r);
-        p->newdata = false;
-    }
     if (p->final_chunk && mp_audio_buffer_samples(p->buffer) == 0) {
         p->playing = false;
         p->expected_end_time = mp_time_sec() + AO_EOF_DELAY + 0.25; // + margin
@@ -261,7 +263,7 @@ static void *playthread(void *arg)
             }
             // Half of the buffer played -> wakeup playback thread to get more.
             double min_wait = ao->device_buffer / (double)ao->samplerate;
-            if (timeout <= min_wait / 2 + 0.001 && !p->newdata)
+            if (timeout <= min_wait / 2 + 0.001 && unlocked_get_space(ao) > 0)
                 mp_input_wakeup(ao->input_ctx);
             // Avoid wasting CPU - this assumes ao_play_data() usually fills the
             // audio buffer as far as possible, so even if the device buffer
