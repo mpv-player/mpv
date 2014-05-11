@@ -207,12 +207,13 @@ static int ao_play_data(struct ao *ao)
         data.samples = space;
     if (data.samples <= 0)
         return 0;
+    MP_STATS(ao, "start ao fill");
     int flags = 0;
     if (p->final_chunk && data.samples == max)
         flags |= AOPLAY_FINAL_CHUNK;
     int r = ao->driver->play(ao, data.planes, data.samples, flags);
     if (r > data.samples) {
-        MP_WARN(ao, "Audio device returned non-sense value.");
+        MP_WARN(ao, "Audio device returned non-sense value.\n");
         r = data.samples;
     }
     if (r > 0)
@@ -223,6 +224,7 @@ static int ao_play_data(struct ao *ao)
         if (ao->driver->get_delay)
             p->expected_end_time += ao->driver->get_delay(ao);
     }
+    MP_STATS(ao, "end ao fill");
     return r;
 }
 
@@ -262,11 +264,13 @@ static void *playthread(void *arg)
             timeout = MPMAX(timeout, min_wait * 0.75);
         }
         pthread_mutex_unlock(&p->lock);
+        MP_STATS(ao, "start audio wait");
         pthread_mutex_lock(&p->wakeup_lock);
         if (!p->need_wakeup)
             mpthread_cond_timedwait(&p->wakeup, &p->wakeup_lock, timeout);
         p->need_wakeup = false;
         pthread_mutex_unlock(&p->wakeup_lock);
+        MP_STATS(ao, "end audio wait");
     }
     return NULL;
 }
