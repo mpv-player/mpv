@@ -1006,26 +1006,32 @@ static int vo_wayland_check_events (struct vo *vo)
                 size_t str_len = 0;
                 int has_read = 0;
 
+                if (!buffer)
+                    goto fail;
+
                 while (0 < (has_read = read(fd.fd, buffer+str_len, to_read))) {
                     if (buffer_len + to_read < buffer_len) {
                         MP_ERR(wl, "Integer overflow while reading from fd\n");
-                        free(buffer);
                         break;
                     }
 
                     str_len += has_read;
                     buffer_len += to_read;
-                    buffer = realloc(buffer, buffer_len);
+                    void *ptr = realloc(buffer, buffer_len);
+                    if (!ptr)
+                        break;
+                    buffer = ptr;
 
                     if (has_read < to_read) {
                         buffer[str_len] = 0;
                         struct bstr file_list = bstr0(buffer);
                         mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
                                                 file_list);
-                        free(buffer);
                         break;
                     }
                 }
+            fail:
+                free(buffer);
             }
 
             if (fd.revents & POLLHUP) {
