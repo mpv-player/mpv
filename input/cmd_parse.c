@@ -108,8 +108,6 @@ struct flag {
 };
 
 static const struct flag cmd_flags[] = {
-    {"pausing",             MP_PAUSING_FLAGS, MP_PAUSING},
-    {"pausing-toggle",      MP_PAUSING_FLAGS, MP_PAUSING_TOGGLE},
     {"no-osd",              MP_ON_OSD_FLAGS, MP_ON_OSD_NO},
     {"osd-bar",             MP_ON_OSD_FLAGS, MP_ON_OSD_BAR},
     {"osd-msg",             MP_ON_OSD_FLAGS, MP_ON_OSD_MSG},

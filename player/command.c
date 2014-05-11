@@ -3714,15 +3714,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     default:
         MP_VERBOSE(mpctx, "Received unknown cmd %s\n", cmd->name);
     }
-
-    if (cmd->flags & MP_PAUSING)
-        pause_player(mpctx);
-    if (cmd->flags & MP_PAUSING_TOGGLE) {
-        if (opts->pause)
-            unpause_player(mpctx);
-        else
-            pause_player(mpctx);
-    }
 }
 
 void command_uninit(struct MPContext *mpctx)
