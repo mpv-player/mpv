@@ -1648,20 +1648,25 @@ OPTIONS
     file is dumped.
 
 ``--playlist=<filename>``
-    Play files according to a playlist file (ASX, Winamp, SMIL, or
-    one-file-per-line format).
+    Play files according to a playlist file (Supports some common formats.If
+    no format is detected, t will be treated as list of files, separated by
+    newline characters. Note that XML playlist formats are not supported.)
 
     .. warning::
 
-        The way mpv parses and uses playlist files is not safe against
-        maliciously constructed files. Such files may trigger harmful actions.
+        The way mpv uses playlist files is not safe against maliciously
+        constructed files. Such files may trigger harmful actions.
         This has been the case for all mpv and MPlayer versions, but
         unfortunately this fact was not well documented earlier, and some people
         have even misguidedly recommended use of ``--playlist`` with untrusted
         sources. Do NOT use ``--playlist`` with random internet sources or files
         you do not trust!
 
-        FIXME: This needs to be clarified and documented thoroughly.
+        The main problem is that playlists can point to arbitrary network
+        addresses (including local addresses inside of your LAN), and thus
+        can't be considered secure. Playlists also can contain entries using
+        other protocols, such as local files, or (most severely), special
+        protocols like ``avdevice://``, which are inherently unsafe.
 
 ``--priority=<prio>``
     (Windows only.)
