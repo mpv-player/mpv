@@ -3032,6 +3032,7 @@ cat > $TMPH << EOF
 /* we didn't bother to add actual config checks for this */
 #define HAVE_BSD_FSTATFS 0
 #define HAVE_LINUX_FSTATFS 0
+#define HAVE_VDA_AV_VDA_ALLOC_CONTEXT 0
 
 /* system headers */
 $def_mman_h
