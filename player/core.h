@@ -449,6 +449,13 @@ void idle_loop(struct MPContext *mpctx);
 void handle_force_window(struct MPContext *mpctx, bool reconfig);
 void add_frame_pts(struct MPContext *mpctx, double pts);
 
+// scripting.c
+struct mp_scripting {
+    const char *file_ext;   // e.g. "lua"
+    int (*load)(struct mpv_handle *client, const char *filename);
+};
+void mp_load_scripts(struct MPContext *mpctx);
+
 // sub.c
 void reset_subtitles(struct MPContext *mpctx, int order);
 void uninit_subs(struct demuxer *demuxer);

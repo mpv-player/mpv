@@ -44,7 +44,6 @@
 #include "command.h"
 #include "client.h"
 #include "libmpv/client.h"
-#include "lua.h"
 
 // List of builtin modules and their contents as strings.
 // All these are generated from player/lua/*.lua
@@ -55,7 +54,7 @@ static const char *builtin_lua_scripts[][2] = {
     {"mp.assdraw",
 #   include "player/lua/assdraw.inc"
     },
-    {"@osc",
+    {"@osc.lua",
 #   include "player/lua/osc.inc"
     },
     {0}
@@ -140,27 +139,6 @@ static int run_event_loop(lua_State *L)
 
 static void add_functions(struct script_ctx *ctx);
 
-static char *script_name_from_filename(void *talloc_ctx, const char *fname)
-{
-    fname = mp_basename(fname);
-    if (fname[0] == '@')
-        fname += 1;
-    char *name = talloc_strdup(talloc_ctx, fname);
-    // Drop .lua extension
-    char *dot = strrchr(name, '.');
-    if (dot)
-        *dot = '\0';
-    // Turn it into a safe identifier - this is used with e.g. dispatching
-    // input via: "send scriptname ..."
-    for (int n = 0; name[n]; n++) {
-        char c = name[n];
-        if (!(c >= 'A' && c <= 'Z') && !(c >= 'a' && c <= 'z') &&
-            !(c >= '0' && c <= '9'))
-            name[n] = '_';
-    }
-    return talloc_asprintf(talloc_ctx, "%s", name);
-}
-
 static int load_file(struct script_ctx *ctx, const char *fname)
 {
     int r = 0;
@@ -206,20 +184,10 @@ static bool require(lua_State *L, const char *name)
     return true;
 }
 
-struct thread_arg {
-    struct MPContext *mpctx;
-    mpv_handle *client;
-    const char *fname;
-};
-
-static void *lua_thread(void *p)
+static int load_lua(struct mpv_handle *client, const char *fname)
 {
-    pthread_detach(pthread_self());
-
-    struct thread_arg *arg = p;
-    struct MPContext *mpctx = arg->mpctx;
-    const char *fname = arg->fname;
-    mpv_handle *client = arg->client;
+    struct MPContext *mpctx = mp_client_get_core(client);
+    int r = -1;
 
     struct script_ctx *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct script_ctx) {
@@ -301,40 +269,15 @@ static void *lua_thread(void *p)
     if (mp_cpcall(L, run_event_loop, 0) != 0)
         report_error(L);
 
+    r = 0;
+
 error_out:
-    MP_VERBOSE(ctx, "exiting.\n");
     if (ctx->suspended)
         mpv_resume(ctx->client);
     if (ctx->state)
         lua_close(ctx->state);
-    mpv_destroy(ctx->client);
     talloc_free(ctx);
-    talloc_free(arg);
-    return NULL;
-}
-
-static void mp_lua_load_script(struct MPContext *mpctx, const char *fname)
-{
-    struct thread_arg *arg = talloc_ptrtype(NULL, arg);
-    char *name = script_name_from_filename(arg, fname);
-    *arg = (struct thread_arg){
-        .mpctx = mpctx,
-        .fname = talloc_strdup(arg, fname),
-        // Create the client before creating the thread; otherwise a race
-        // condition could happen, where MPContext is destroyed while the
-        // thread tries to create the client.
-        .client = mp_new_client(mpctx->clients, name),
-    };
-    if (!arg->client) {
-        talloc_free(arg);
-        return;
-    }
-
-    pthread_t thread;
-    if (pthread_create(&thread, NULL, lua_thread, arg))
-        talloc_free(arg);
-
-    return;
+    return r;
 }
 
 static int check_loglevel(lua_State *L, int arg)
@@ -1099,53 +1042,7 @@ static void add_functions(struct script_ctx *ctx)
     lua_setfield(L, -2, "get_property_osd");
 }
 
-static int compare_filename(const void *pa, const void *pb)
-{
-    char *a = (char *)pa;
-    char *b = (char *)pb;
-    return strcmp(a, b);
-}
-
-static char **list_lua_files(void *talloc_ctx, char *path)
-{
-    char **files = NULL;
-    int count = 0;
-    DIR *dp = opendir(path);
-    if (!dp)
-        return NULL;
-    struct dirent *ep;
-    while ((ep = readdir(dp))) {
-        char *ext = mp_splitext(ep->d_name, NULL);
-        if (!ext || strcasecmp(ext, "lua") != 0)
-            continue;
-        char *fname = mp_path_join(talloc_ctx, bstr0(path), bstr0(ep->d_name));
-        MP_TARRAY_APPEND(talloc_ctx, files, count, fname);
-    }
-    closedir(dp);
-    qsort(files, count, sizeof(char *), compare_filename);
-    MP_TARRAY_APPEND(talloc_ctx, files, count, NULL);
-    return files;
-}
-
-void mp_lua_init(struct MPContext *mpctx)
-{
-    // Load scripts from options
-    if (mpctx->opts->lua_load_osc)
-        mp_lua_load_script(mpctx, "@osc");
-    char **files = mpctx->opts->lua_files;
-    for (int n = 0; files && files[n]; n++) {
-        if (files[n][0])
-            mp_lua_load_script(mpctx, files[n]);
-    }
-    if (!mpctx->opts->auto_load_scripts)
-        return;
-    // Load ~/.mpv/lua/*
-    void *tmp = talloc_new(NULL);
-    char *lua_path = mp_find_user_config_file(tmp, mpctx->global, "lua");
-    if (lua_path) {
-        files = list_lua_files(tmp, lua_path);
-        for (int n = 0; files && files[n]; n++)
-            mp_lua_load_script(mpctx, files[n]);
-    }
-    talloc_free(tmp);
-}
+const struct mp_scripting mp_scripting_lua = {
+    .file_ext = "lua",
+    .load = load_lua,
+};

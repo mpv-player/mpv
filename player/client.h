@@ -21,5 +21,6 @@ void mp_client_property_change(struct MPContext *mpctx, const char **list);
 
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name);
 struct mp_log *mp_client_get_log(struct mpv_handle *ctx);
+struct MPContext *mp_client_get_core(struct mpv_handle *ctx);
 
 #endif

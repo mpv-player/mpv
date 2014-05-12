@@ -216,6 +216,7 @@ def build(ctx):
         ( "player/osd.c" ),
         ( "player/playloop.c" ),
         ( "player/screenshot.c" ),
+        ( "player/scripting.c" ),
         ( "player/sub.c" ),
         ( "player/timeline/tl_cue.c" ),
         ( "player/timeline/tl_mpv_edl.c" ),

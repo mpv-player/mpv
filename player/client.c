@@ -205,6 +205,11 @@ struct mp_log *mp_client_get_log(struct mpv_handle *ctx)
     return ctx->log;
 }
 
+struct MPContext *mp_client_get_core(struct mpv_handle *ctx)
+{
+    return ctx->mpctx;
+}
+
 static void wakeup_client(struct mpv_handle *ctx)
 {
     pthread_cond_signal(&ctx->wakeup);

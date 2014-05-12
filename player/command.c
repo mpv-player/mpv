@@ -75,7 +75,6 @@
 #include "osdep/io.h"
 
 #include "core.h"
-#include "lua.h"
 
 struct command_ctx {
     double last_seek_time;

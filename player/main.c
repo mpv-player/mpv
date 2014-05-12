@@ -61,7 +61,6 @@
 
 #include "core.h"
 #include "client.h"
-#include "lua.h"
 #include "command.h"
 #include "screenshot.h"
 
@@ -450,11 +449,9 @@ int mp_initialize(struct MPContext *mpctx)
         mpctx->initialized_flags |= INITIALIZED_VO;
     }
 
-#if HAVE_LUA
-    // Lua user scripts can call arbitrary functions. Load them at a point
+    // Lua user scripts (etc.) can call arbitrary functions. Load them at a point
     // where this is safe.
-    mp_lua_init(mpctx);
-#endif
+    mp_load_scripts(mpctx);
 
     if (opts->shuffle)
         playlist_shuffle(mpctx->playlist);

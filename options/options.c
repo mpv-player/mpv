@@ -680,7 +680,9 @@ const struct MPOpts mp_default_opts = {
     .osd_bar_h = 3.125,
     .osd_scale = 1,
     .osd_scale_by_window = 1,
+#if HAVE_LUA
     .lua_load_osc = 1,
+#endif
     .auto_load_scripts = 1,
     .loop_times = -1,
     .ordered_chapters = 1,
