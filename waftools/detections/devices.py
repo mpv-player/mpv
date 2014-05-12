@@ -3,7 +3,7 @@ __cdrom_devices_map__ = {
     'cygwin':  'D:',
     'darwin':  '/dev/disk1',
     'freebsd': '/dev/cd0',
-    'openbsd': '/dev/rcd0r',
+    'openbsd': '/dev/rcd0c',
     'default': '/dev/cdrom'
 }
 
@@ -12,7 +12,7 @@ __dvd_devices_map__ = {
     'cygwin':  'D:',
     'darwin':  '/dev/rdiskN',
     'freebsd': '/dev/cd0',
-    'openbsd': '/dev/rcd0r',
+    'openbsd': '/dev/rcd0c',
     'default': '/dev/dvd'
 }
 
