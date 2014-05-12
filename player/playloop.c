@@ -225,11 +225,12 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         mpctx->stop_play = KEEP_PLAYING;
 
     double hr_seek_offset = opts->hr_seek_demuxer_offset;
+    bool hr_seek_very_exact = seek.exact > 1;
     // Always try to compensate for possibly bad demuxers in "special"
     // situations where we need more robustness from the hr-seek code, even
     // if the user doesn't use --hr-seek-demuxer-offset.
     // The value is arbitrary, but should be "good enough" in most situations.
-    if (seek.exact > 1)
+    if (hr_seek_very_exact)
         hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
 
     bool hr_seek = mpctx->demuxer->accurate_seek && opts->correct_pts;
@@ -349,7 +350,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     // seeking past the chapter is handled elsewhere.
     if (hr_seek || mpctx->timeline) {
         mpctx->hrseek_active = true;
-        mpctx->hrseek_framedrop = true;
+        mpctx->hrseek_framedrop = !hr_seek_very_exact;
         mpctx->hrseek_pts = hr_seek ? seek.amount
                                  : mpctx->timeline[mpctx->timeline_part].start;
     }
