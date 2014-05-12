@@ -26,32 +26,52 @@
 #include "video/decode/lavc.h"
 #include "config.h"
 
+
+static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+                 const char *decoder)
+{
+    hwdec_request_api(info, "vda");
+
+    if (mp_codec_to_av_codec_id(decoder) != AV_CODEC_ID_H264)
+        return HWDEC_ERR_NO_CODEC;
+    return 0;
+}
+
+#if HAVE_VDA_AV_VDA_ALLOC_CONTEXT
+
+static int init(struct lavc_ctx *ctx)
+{
+    return 0;
+}
+
+static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
+{
+    av_vda_default_free(ctx->avctx);
+
+    if (av_vda_default_init(ctx->avctx) < 0)
+        return -1;
+    return 0;
+}
+
+static void uninit(struct lavc_ctx *ctx)
+{
+    if (ctx->avctx)
+        av_vda_default_free(ctx->avctx);
+}
+
+const struct vd_lavc_hwdec mp_vd_lavc_vda = {
+    .type = HWDEC_VDA,
+    .image_format = IMGFMT_VDA,
+    .probe = probe,
+    .init = init,
+    .uninit = uninit,
+    .init_decoder = init_decoder,
+};
+
+#else
 struct priv {
     struct vda_context vda_ctx;
 };
-
-struct profile_entry {
-    enum AVCodecID av_codec;
-    int ff_profile;
-    uint32_t vda_codec;
-};
-
-static const struct profile_entry profiles[] = {
-    { AV_CODEC_ID_H264, FF_PROFILE_UNKNOWN, 'avc1' },
-};
-
-static const struct profile_entry *find_codec(enum AVCodecID id, int ff_profile)
-{
-    for (int n = 0; n < MP_ARRAY_SIZE(profiles); n++) {
-        if (profiles[n].av_codec == id &&
-            (profiles[n].ff_profile == ff_profile ||
-             profiles[n].ff_profile == FF_PROFILE_UNKNOWN))
-        {
-            return &profiles[n];
-        }
-    }
-    return NULL;
-}
 
 struct vda_error {
     int  code;
@@ -86,16 +106,6 @@ static void print_vda_error(struct mp_log *log, int lev, char *message,
     mp_msg(log, lev, "%s: %d\n", message, error_code);
 }
 
-static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                 const char *decoder)
-{
-    hwdec_request_api(info, "vda");
-
-    if (!find_codec(mp_codec_to_av_codec_id(decoder), FF_PROFILE_UNKNOWN))
-        return HWDEC_ERR_NO_CODEC;
-    return 0;
-}
-
 static int init_vda_decoder(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
@@ -103,13 +113,10 @@ static int init_vda_decoder(struct lavc_ctx *ctx)
     if (p->vda_ctx.decoder)
         ff_vda_destroy_decoder(&p->vda_ctx);
 
-    const struct profile_entry *pe =
-        find_codec(ctx->avctx->codec_id, ctx->avctx->profile);
-
     p->vda_ctx = (struct vda_context) {
         .width             = ctx->avctx->width,
         .height            = ctx->avctx->height,
-        .format            = pe->vda_codec,
+        .format            = 'avc1',
         // equals to k2vuyPixelFormat (= YUY2/UYVY)
         .cv_pix_fmt_type   = kCVPixelFormatType_422YpCbCr8,
 
@@ -156,6 +163,30 @@ static void uninit(struct lavc_ctx *ctx) {
         ff_vda_destroy_decoder(&p->vda_ctx);
 }
 
+// This actually returns dummy images, since vda_264 creates it's own AVFrames
+// to wrap CVPixelBuffers in planes[3].
+static struct mp_image *allocate_image(struct lavc_ctx *ctx, int fmt,
+                                       int w, int h)
+{
+    struct priv *p = ctx->hwdec_priv;
+
+    if (fmt != IMGFMT_VDA)
+         return NULL;
+
+    if (w != p->vda_ctx.width || h != p->vda_ctx.height)
+        init_vda_decoder(ctx);
+
+    struct mp_image img = {0};
+    mp_image_setfmt(&img, fmt);
+    mp_image_set_size(&img, w, h);
+
+    // There is an `assert(!dst->f.buf[0])` in libavcodec/h264.c
+    // Setting the first plane to some dummy value allows to satisfy it
+    img.planes[0] = (void*)"dummy";
+
+    return mp_image_new_custom_ref(&img, NULL, NULL);
+}
+
 static void cv_retain(void *pbuf)
 {
     CVPixelBufferRetain((CVPixelBufferRef)pbuf);
@@ -188,30 +219,6 @@ static struct mp_image *process_image(struct lavc_ctx *ctx, struct mp_image *mpi
     return cv_mpi;
 }
 
-// This actually returns dummy images, since vda_264 creates it's own AVFrames
-// to wrap CVPixelBuffers in planes[3].
-static struct mp_image *allocate_image(struct lavc_ctx *ctx, int fmt,
-                                       int w, int h)
-{
-    struct priv *p = ctx->hwdec_priv;
-
-    if (fmt != IMGFMT_VDA)
-         return NULL;
-
-    if (w != p->vda_ctx.width || h != p->vda_ctx.height)
-        init_vda_decoder(ctx);
-
-    struct mp_image img = {0};
-    mp_image_setfmt(&img, fmt);
-    mp_image_set_size(&img, w, h);
-
-    // There is an `assert(!dst->f.buf[0])` in libavcodec/h264.c
-    // Setting the first plane to some dummy value allows to satisfy it
-    img.planes[0] = (void*)"dummy";
-
-    return mp_image_new_custom_ref(&img, NULL, NULL);
-}
-
 const struct vd_lavc_hwdec mp_vd_lavc_vda = {
     .type = HWDEC_VDA,
     .image_format = IMGFMT_VDA,
@@ -221,3 +228,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_vda = {
     .allocate_image = allocate_image,
     .process_image = process_image,
 };
+
+#endif

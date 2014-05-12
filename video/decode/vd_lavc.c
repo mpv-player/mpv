@@ -395,6 +395,9 @@ static void uninit_avctx(struct dec_video *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
 
+    if (ctx->hwdec && ctx->hwdec->uninit)
+        ctx->hwdec->uninit(ctx);
+
     if (avctx) {
         if (avctx->codec && avcodec_close(avctx) < 0)
             MP_ERR(vd, "Could not close codec.\n");
@@ -404,9 +407,6 @@ static void uninit_avctx(struct dec_video *vd)
     }
 
     av_freep(&ctx->avctx);
-
-    if (ctx->hwdec && ctx->hwdec->uninit)
-        ctx->hwdec->uninit(ctx);
 
     av_frame_free(&ctx->pic);
 }
@@ -590,7 +590,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     av_frame_unref(ctx->pic);
     if (!mpi)
         return 0;
-    assert(mpi->planes[0]);
+    assert(mpi->planes[0] || mpi->planes[3]);
     mp_image_set_params(mpi, &params);
 
     if (ctx->hwdec && ctx->hwdec->process_image)

@@ -21,6 +21,7 @@
 
 #include "video/img_format.h"
 #include "fmt-conversion.h"
+#include "config.h"
 
 static const struct {
     int fmt;
@@ -172,7 +173,11 @@ static const struct {
 #endif
 
     {IMGFMT_VDPAU,           AV_PIX_FMT_VDPAU},
+#if HAVE_VDA_AV_VDA_ALLOC_CONTEXT
+    {IMGFMT_VDA,             AV_PIX_FMT_VDA},
+#else
     {IMGFMT_VDA,             AV_PIX_FMT_VDA_VLD},
+#endif
     {IMGFMT_VAAPI,           AV_PIX_FMT_VAAPI_VLD},
 
     {0, AV_PIX_FMT_NONE}
