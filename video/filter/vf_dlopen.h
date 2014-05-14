@@ -23,11 +23,12 @@
     } while (0)
 #endif
 
-// valid pixel format names:
-// "yv12": planar YUV, U and V planes have an xshift and yshift of 1
+// some common valid pixel format names:
+// "gray": 8 bit grayscale
+// "yuv420p": planar YUV, U and V planes have an xshift and yshift of 1
 // "rgb24": packed RGB24
 struct vf_dlopen_formatpair {
-    const char *from; // (LATER) can also be a name of a format class
+    const char *from;
     const char *to; // if NULL, this means identical format as source
 };
 

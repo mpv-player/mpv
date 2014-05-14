@@ -76,31 +76,7 @@ struct fmtname {
     enum mp_imgfmt fmt;
 };
 
-// This table defines the pixel format names that are guaranteed to work.
-static const struct fmtname format_names[] = {
-    {"yv12", IMGFMT_420P},
-    {0}
-};
-
 //===========================================================================//
-
-static const char *imgfmt_to_name(int fmt)
-{
-    for (int n = 0; format_names[n].name; n++) {
-        if (format_names[n].fmt == fmt)
-            return format_names[n].name;
-    }
-    return mp_imgfmt_to_name(fmt);
-}
-
-static int name_to_imgfmt(const char *name)
-{
-    for (int n = 0; format_names[n].name; n++) {
-        if (strcasecmp(format_names[n].name, name) == 0)
-            return format_names[n].fmt;
-    }
-    return mp_imgfmt_from_name(bstr0(name), false);
-}
 
 static void set_imgprop(struct vf_dlopen_picdata *out, const mp_image_t *mpi)
 {
@@ -126,7 +102,7 @@ static int config(struct vf_instance *vf,
     vf->priv->filter.in_height = height;
     vf->priv->filter.in_d_width = d_width;
     vf->priv->filter.in_d_height = d_height;
-    vf->priv->filter.in_fmt = imgfmt_to_name(fmt);
+    vf->priv->filter.in_fmt = mp_imgfmt_to_name(fmt);
     vf->priv->filter.out_width = width;
     vf->priv->filter.out_height = height;
     vf->priv->filter.out_d_width = d_width;
@@ -149,7 +125,7 @@ static int config(struct vf_instance *vf,
     vf->priv->out_height = vf->priv->filter.out_height;
 
     if (vf->priv->filter.out_fmt)
-        vf->priv->outfmt = name_to_imgfmt(vf->priv->filter.out_fmt);
+        vf->priv->outfmt = mp_imgfmt_from_name(bstr0(vf->priv->filter.out_fmt), false);
     else {
         struct vf_dlopen_formatpair *p = vf->priv->filter.format_mapping;
         vf->priv->outfmt = 0;
@@ -157,13 +133,16 @@ static int config(struct vf_instance *vf,
             for (; p->from; ++p) {
                 // TODO support pixel format classes in matching
                 if (!strcmp(p->from, vf->priv->filter.in_fmt)) {
-                    vf->priv->outfmt = name_to_imgfmt(p->to);
+                    if(p->to)
+                        vf->priv->outfmt = mp_imgfmt_from_name(bstr0(p->to), false);
+                    else
+                        vf->priv->outfmt = mp_imgfmt_from_name(bstr0(p->from), false);
                     break;
                 }
             }
         } else
             vf->priv->outfmt = fmt;
-        vf->priv->filter.out_fmt = imgfmt_to_name(vf->priv->outfmt);
+        vf->priv->filter.out_fmt = mp_imgfmt_to_name(vf->priv->outfmt);
     }
 
     if (!vf->priv->outfmt) {
@@ -285,7 +264,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
         return 0;  // these can't really be filtered
     if (fmt == IMGFMT_PAL8)
         return 0;  // we don't have palette support, sorry
-    const char *fmtname = imgfmt_to_name(fmt);
+    const char *fmtname = mp_imgfmt_to_name(fmt);
     if (!fmtname)
         return 0;
     struct vf_dlopen_formatpair *p = vf->priv->filter.format_mapping;
@@ -294,12 +273,16 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
         for (; p->from; ++p) {
             // TODO support pixel format classes in matching
             if (!strcmp(p->from, fmtname)) {
-                outfmt = name_to_imgfmt(p->to);
+                if (p->to)
+                    outfmt = mp_imgfmt_from_name(bstr0(p->to), false);
+                else
+                    outfmt = mp_imgfmt_from_name(bstr0(p->from), false);
                 break;
             }
         }
-    } else
+    } else {
         outfmt = fmt;
+    }
     if (!outfmt)
         return 0;
     return vf_next_query_format(vf, outfmt);
