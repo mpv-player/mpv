@@ -30,17 +30,17 @@
 /*
  * tile filter
  *
- * usage: -vf dlopen=./tile.so:4:3
+ * usage: --vf=dlopen=/path/to/tile.so:4:3
  *
- * only supports rgb24 and yv12 for now
+ * only supports rgb24 and yuv420p for now
  * in theory can support any format where rows are a multiple of bytes, and the
  * multiple is known
  */
 
 #define ALLFORMATS \
-    /*     format   bytes   xmul   ymul */ \
-    FORMAT("rgb24", 3,      1,     1) \
-    FORMAT("yv12",  1,      2,     2)
+    /*     format    bytes   xmul   ymul */ \
+    FORMAT("rgb24"  ,    3,     1,     1) \
+    FORMAT("yuv420p",    1,     2,     2)
 
 typedef struct {
     int rows, cols;

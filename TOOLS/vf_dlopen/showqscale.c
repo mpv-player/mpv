@@ -29,7 +29,7 @@
 /*
  * qscale visualizer
  *
- * usage: -vf dlopen=./showqscale.so
+ * usage: --vf=dlopen=/path/to/showqscale.so
  *
  * uses reddish colors for high QPs, and greenish colors for low QPs
  */
@@ -111,7 +111,7 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
     (void) argc;
     (void) argv;
     static struct vf_dlopen_formatpair map[] = {
-        { "yv12", "yv12" },
+        { "yuv420p", "yuv420p" },
         { NULL, NULL }
     };
     ctx->format_mapping = map;

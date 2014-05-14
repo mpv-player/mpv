@@ -284,7 +284,7 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
     il->tc_decision_threshold = A(10, 0.2);
 
     static struct vf_dlopen_formatpair map[] = {
-        { "y8", "y8" },
+        { "gray", "gray" },
         { NULL, NULL }
     };
     ctx->format_mapping = map;
