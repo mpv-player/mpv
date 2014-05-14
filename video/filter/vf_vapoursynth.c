@@ -261,7 +261,7 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
             pthread_cond_broadcast(&p->wakeup);
         }
 
-        if (p->requested[0] && p->requested[0] != &dummy_img) {
+        while (p->requested[0] && p->requested[0] != &dummy_img) {
             struct mp_image *out = p->requested[0];
             if (out->pts != MP_NOPTS_VALUE) {
                 double duration = out->pts;
