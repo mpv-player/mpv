@@ -292,7 +292,7 @@ static int vf_open(vf_instance_t *vf)
 {
     int i;
     if (!vf->priv->cfg_dllname) {
-        MP_ERR(vf, "usage: -vf dlopen=filename.so:function:args\n");
+        MP_ERR(vf, "usage: --vf=dlopen=/path/to/filename.so:args\n");
         return 0;
     }
 
