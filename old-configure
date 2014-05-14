@@ -71,10 +71,6 @@ cc_check() {
   compile_check $TMPC $@
 }
 
-cxx_check() {
-  compile_check $TMPCPP $@ -lstdc++
-}
-
 cflag_check() {
   cat > $TMPC << EOF
 int main(void) { return 0; }
@@ -183,22 +179,6 @@ die () {
   exit 1
 }
 
-# OS test booleans functions
-issystem() {
-  test "$(echo $system_name | tr A-Z a-z)" = "$(echo $1 | tr A-Z a-z)"
-}
-cygwin()    { issystem "CYGWIN"; }
-darwin()    { issystem "Darwin"; }
-dragonfly() { issystem "DragonFly"; }
-freebsd()   { issystem "FreeBSD" || issystem "GNU/kFreeBSD"; }
-gnu()       { issystem "GNU"; }
-linux()     { issystem "Linux"; }
-mingw32()   { issystem "MINGW32"; }
-morphos()   { issystem "MorphOS"; }
-netbsd()    { issystem "NetBSD"; }
-openbsd()   { issystem "OpenBSD"; }
-win32()     { cygwin || mingw32; }
-
 # Use this before starting a check
 echocheck() {
   echo "============ Checking for $@ ============" >> "$TMPLOG"
@@ -269,7 +249,6 @@ Optional features:
   --disable-dvdread      disable libdvdread [autodetect]
   --disable-dvdnav       disable libdvdnav [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
-  --disable-pthreads     disable Posix threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
   --disable-libass-osd   disable OSD rendering with libass [autodetect]
   --enable-rpath         enable runtime linker path for extra libs [disabled]
@@ -292,20 +271,16 @@ Resampler:
 Video output:
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-caca            enable CACA  video output [autodetect]
-  --enable-direct3d        enable Direct3D video output [autodetect]
   --enable-sdl             enable SDL audio output [disable]
   --enable-sdl2            enable SDL 2.0+ audio and video output [disable]
   --enable-xv              enable Xv video output [autodetect]
   --enable-vdpau           enable VDPAU acceleration [autodetect]
-  --enable-vda             enable VDA acceleration [autodetect]
   --enable-vaapi           enable VAAPI acceleration [autodetect]
   --enable-vm              enable XF86VidMode support [autodetect]
   --enable-xinerama        enable Xinerama support [autodetect]
   --enable-x11             enable X11 video output [autodetect]
   --enable-wayland         enable Wayland video output [autodetect]
   --disable-xss            disable screensaver support via xss [autodetect]
-  --disable-corevideo      disable CoreVideo video output [autodetect]
-  --disable-cocoa          disable Cocoa OpenGL backend [autodetect]
 
 Audio output:
   --disable-alsa         disable ALSA audio output [autodetect]
@@ -316,16 +291,12 @@ Audio output:
   --disable-portaudio    disable PortAudio audio output [autodetect]
   --disable-jack         disable JACK audio output [autodetect]
   --enable-openal        enable OpenAL audio output [disable]
-  --disable-coreaudio    disable CoreAudio audio output [autodetect]
-  --disable-dsound       disable DirectSound audio output [autodetect]
-  --disable-wasapi       disable WASAPI (event mode) audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
 
 Miscellaneous options:
   --enable-cross-compile enable cross-compilation [disable]
   --cc=COMPILER          C compiler to build mpv [gcc]
   --pkg-config=PKGCONFIG pkg-config to find some libraries [pkg-config]
-  --windres=WINDRES      windres to build mpv [windres]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
   --with-install=PATH    path to a custom install program
@@ -357,7 +328,6 @@ exit 0
 # If autodetection is available then the third state is: auto
 _install=install
 _pkg_config=auto
-_windres=auto
 _cc=auto
 test "$CC" && _cc="$CC"
 _debug=-g
@@ -372,14 +342,9 @@ _wayland=auto
 _xss=auto
 _xv=auto
 _vdpau=auto
-_vda=auto
-_vda_refcounting=auto
 _vaapi=auto
-_direct3d=auto
 _sdl=no
 _sdl2=no
-_dsound=auto
-_wasapi=auto
 _jpeg=auto
 _gl=auto
 _aa=auto
@@ -423,22 +388,14 @@ _termcap=auto
 _termios=auto
 _shm=auto
 _cdda=auto
-_coreaudio=auto
-_corevideo=auto
-_cocoa=auto
 _enca=auto
-_pthreads=auto
 _ass=auto
 _libass_osd=auto
-_rpath=no
 lua=auto
 libpostproc=auto
 libavfilter=auto
 libavdevice=auto
 _stream_cache=yes
-_priority=no
-def_dos_paths="#define HAVE_DOS_PATHS 0"
-def_priority="#define HAVE_PRIORITY 0"
 _build_man=auto
 _build_pdf=auto
 _build_date=yes
@@ -489,9 +446,6 @@ for ac_option do
   --pkg-config=*)
     _pkg_config=$(echo $ac_option | cut -d '=' -f 2)
     ;;
-  --windres=*)
-    _windres=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
 
   --enable-static)
     _ld_static='-static'
@@ -531,20 +485,12 @@ for ac_option do
   --disable-xv)         _xv=no          ;;
   --enable-vdpau)       _vdpau=yes      ;;
   --disable-vdpau)      _vdpau=no       ;;
-  --enable-vda)         _vda=yes        ;;
-  --disable-vda)        _vda=no         ;;
   --enable-vaapi)       _vaapi=yes      ;;
   --disable-vaapi)      _vaapi=no       ;;
-  --enable-direct3d)    _direct3d=yes   ;;
-  --disable-direct3d)   _direct3d=no    ;;
   --enable-sdl)         _sdl=yes       ;;
   --disable-sdl)        _sdl=no        ;;
   --enable-sdl2)        _sdl2=yes       ;;
   --disable-sdl2)       _sdl2=no        ;;
-  --enable-dsound)      _dsound=yes     ;;
-  --disable-dsound)     _dsound=no      ;;
-  --enable-wasapi)      _wasapi=yes     ;;
-  --disable-wasapi)     _wasapi=no      ;;
   --enable-jpeg)        _jpeg=yes       ;;
   --disable-jpeg)       _jpeg=no        ;;
   --enable-gl)          _gl=yes         ;;
@@ -634,14 +580,10 @@ for ac_option do
   --disable-shm)        _shm=no         ;;
   --enable-select)      _select=yes     ;;
   --disable-select)     _select=no      ;;
-  --enable-pthreads)    _pthreads=yes   ;;
-  --disable-pthreads)   _pthreads=no    ;;
   --enable-libass)      _ass=yes        ;;
   --disable-libass)     _ass=no         ;;
   --enable-libass-osd)  _libass_osd=yes ;;
   --disable-libass-osd) _libass_osd=no  ;;
-  --enable-rpath)       _rpath=yes      ;;
-  --disable-rpath)      _rpath=no       ;;
   --enable-libpostproc) libpostproc=yes ;;
   --disable-libpostproc) libpostproc=no ;;
   --enable-libavdevice) libavdevice=auto ;;
@@ -651,13 +593,6 @@ for ac_option do
 
   --enable-enca)        _enca=yes       ;;
   --disable-enca)       _enca=no        ;;
-
-  --enable-coreaudio) _coreaudio=yes ;;
-  --disable-coreaudio) _coreaudio=no ;;
-  --enable-corevideo) _corevideo=yes ;;
-  --disable-corevideo) _corevideo=no ;;
-  --enable-cocoa) _cocoa=yes ;;
-  --disable-cocoa) _cocoa=no ;;
 
   --enable-manpage) _build_man=yes ;;
   --disable-manpage) _build_man=no ;;
@@ -717,7 +652,6 @@ if test $_cross_compile = yes ; then
     test -n "$_target" && tool_prefix="$_target"-
 fi
 
-test "$_windres" = auto && _windres="$tool_prefix"windres
 test "$_pkg_config" = auto && _pkg_config="$tool_prefix"pkg-config
 
 if test "$_cc" = auto ; then
@@ -728,93 +662,7 @@ if test "$_cc" = auto ; then
     fi
 fi
 
-# Determine our OS name
-if test -z "$_target" ; then
-  # OS name
-  system_name=$(uname -s 2>&1)
-  case "$system_name" in
-  Linux|FreeBSD|NetBSD|OpenBSD|DragonFly|Darwin|GNU|MorphOS)
-    ;;
-  Haiku)
-    system_name=Haiku
-    ;;
-  GNU/kFreeBSD)
-    system_name=FreeBSD
-    ;;
-  [cC][yY][gG][wW][iI][nN]*)
-    system_name=CYGWIN
-    ;;
-  MINGW32*)
-    system_name=MINGW32
-    ;;
-  *)
-    system_name="$system_name-UNKNOWN"
-    ;;
-  esac
-
-else # if test -z "$_target"
-  for i in 2 3; do
-    system_name=$(echo $_target | cut -d '-' -f $i)
-    case "$(echo $system_name | tr A-Z a-z)" in
-      linux) system_name=Linux ;;
-      freebsd) system_name=FreeBSD ;;
-      gnu/kfreebsd) system_name=FreeBSD ;;
-      netbsd) system_name=NetBSD ;;
-      openbsd) system_name=OpenBSD ;;
-      dragonfly) system_name=DragonFly ;;
-      morphos) system_name=MorphOS ;;
-      mingw32*) system_name=MINGW32 ;;
-      *) continue ;;
-    esac
-    break
-  done
-fi
-
 extra_cflags="-I. -D_GNU_SOURCE $extra_cflags"
-_timer=timer-linux.c
-_getch=terminal-unix.c
-
-if freebsd || openbsd ; then
-  extra_ldflags="$extra_ldflags -L/usr/local/lib"
-  extra_cflags="$extra_cflags -I/usr/local/include"
-fi
-
-if netbsd || dragonfly ; then
-  extra_ldflags="$extra_ldflags -L/usr/pkg/lib"
-  extra_cflags="$extra_cflags -I/usr/pkg/include"
-fi
-
-if darwin; then
-  extra_cflags="-mdynamic-no-pic $extra_cflags"
-  _timer=timer-darwin.c
-fi
-
-_win32=no
-if win32 ; then
-  _win32=yes
-  _exesuf=".exe"
-  extra_cflags="$extra_cflags -fno-common"
-  # -lwinmm is always needed for osdep/timer-win2.c
-  libs_mplayer="$libs_mplayer -lwinmm"
-  _pe_executable=yes
-  _timer=timer-win2.c
-  _priority=yes
-  def_dos_paths="#define HAVE_DOS_PATHS 1"
-  def_priority="#define HAVE_PRIORITY 1"
-fi
-
-if mingw32 ; then
-  _getch=terminal-win.c
-  extra_cflags="$extra_cflags -D__USE_MINGW_ANSI_STDIO=1"
-  # Hack for missing BYTE_ORDER declarations in <sys/types.h>.
-  # (For some reason, they are in <sys/param.h>, but we don't bother switching
-  # the includes based on whether we're compiling for MinGW.)
-  extra_cflags="$extra_cflags -DBYTE_ORDER=1234 -DLITTLE_ENDIAN=1234 -DBIG_ENDIAN=4321"
-fi
-
-if cygwin ; then
-  extra_cflags="$extra_cflags -mwin32"
-fi
 
 _rst2man=rst2man
 if [ -f "$(which rst2man.py)" ] ; then
@@ -861,67 +709,9 @@ echores "$_build_date"
 
 TMPC="$mplayer_tmpdir/tmp.c"
 TMPCPP="$mplayer_tmpdir/tmp.cpp"
-TMPEXE="$mplayer_tmpdir/tmp$_exesuf"
+TMPEXE="$mplayer_tmpdir/tmp"
 TMPH="$mplayer_tmpdir/tmp.h"
 TMPS="$mplayer_tmpdir/tmp.S"
-
-# Checking CC version...
-# Intel C++ Compilers (no autoselect, use CC=/some/binary ./configure)
-if test "$(basename $_cc)" = "icc" || test "$(basename $_cc)" = "ecc"; then
-  echocheck "$_cc version"
-  cc_vendor=intel
-  cc_name=$($_cc -V 2>&1 | head -n 1 | cut -d ',' -f 1)
-  cc_version=$($_cc -V 2>&1 | head -n 1 | cut -d ',' -f 2 | cut -d ' ' -f 3)
-  _cc_major=$(echo $cc_version | cut -d '.' -f 1)
-  _cc_minor=$(echo $cc_version | cut -d '.' -f 2)
-  # TODO verify older icc/ecc compatibility
-  case $cc_version in
-    '')
-      cc_version="v. ?.??, bad"
-      cc_fail=yes
-      ;;
-    10.1|11.0|11.1)
-      cc_version="$cc_version, ok"
-      ;;
-    *)
-      cc_version="$cc_version, bad"
-      cc_fail=yes
-      ;;
-  esac
-  echores "$cc_version"
-else
-  for _cc in "$_cc" gcc cc ; do
-    cc_name_tmp=$($_cc -v 2>&1 | tail -n 1 | cut -d ' ' -f 1)
-    if test "$cc_name_tmp" = "gcc"; then
-      cc_name=$cc_name_tmp
-      echocheck "$_cc version"
-      cc_vendor=gnu
-      cc_version=$($_cc -dumpversion 2>&1)
-      case $cc_version in
-        2.96*)
-          cc_fail=yes
-          ;;
-        *)
-          _cc_major=$(echo $cc_version | cut -d '.' -f 1)
-          _cc_minor=$(echo $cc_version | cut -d '.' -f 2)
-          _cc_mini=$(echo $cc_version | cut -d '.' -f 3)
-          ;;
-      esac
-      echores "$cc_version"
-      break
-    fi
-    if $_cc -v 2>&1 | grep -q "clang"; then
-      echocheck "$_cc version"
-      cc_vendor=clang
-      cc_version=$($_cc -dumpversion 2>&1)
-      res_comment="experimental support only"
-      echores "clang $cc_version"
-      break
-    fi
-    cc_name_tmp=$($_cc -V 2>&1 | head -n 1 | cut -d ' ' -f 2,3)
-  done
-fi # icc
-test "$cc_fail" = yes && die "unsupported compiler version"
 
 echocheck "working compiler"
 cflag_check "" || die "Compiler is not functioning correctly. Check your installation and custom CFLAGS $CFLAGS ."
@@ -931,63 +721,27 @@ echocheck "perl"
 command_check perl -Mv5.8 -e';' || die "Perl is not functioning correctly or is ancient. Install the latest perl available."
 echo yes
 
-echo "Detected operating system: $system_name"
 
 # ---
 
 echocheck "compiler support of -pipe option"
-# -I. helps to detect compilers that just misunderstand -pipe like Sun C
 cflag_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
 
-# Checking for CFLAGS
-if test -z "$CFLAGS" ; then
-  if test "$cc_vendor" = "intel" ; then
-    CFLAGS="$_opt $_debug $_pipe"
-    WARNFLAGS="-wd167 -wd556 -wd144"
-  elif test "$cc_vendor" = "clang"; then
-    CFLAGS="$_opt $_debug $_pipe"
-    WARNFLAGS="-Wall -Wno-switch -Wno-logical-op-parentheses -Wpointer-arith -Wundef -Wno-pointer-sign -Wmissing-prototypes -Wshadow -Wempty-body"
-    ERRORFLAGS="-Werror=implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function"
-  elif test "$cc_vendor" != "gnu" ; then
-    CFLAGS="$_opt $_debug $_pipe"
-  else
-    CFLAGS="$_opt $_debug $_pipe"
-    WARNFLAGS="-Wall -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls"
-    ERRORFLAGS="-Werror-implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function -Wshadow -Wempty-body"
-    extra_ldflags="$extra_ldflags"
-  fi
-else
-  warn_cflags=yes
-fi
+OURCFLAGS="-std=c99 -Wall"
 
-if test "$cc_vendor" = "gnu" ; then
-  cflag_check -Wundef && WARNFLAGS="-Wundef $WARNFLAGS"
-  # -std=c99 is not a warning flag but is placed in WARN_CFLAGS because
-  # that's the only variable specific to C now, and this option is not valid
-  # for C++.
-  cflag_check -std=c99 && WARN_CFLAGS="-std=c99 $WARN_CFLAGS"
-  cflag_check -Wno-pointer-sign && WARN_CFLAGS="-Wno-pointer-sign $WARN_CFLAGS"
-  cflag_check -Wdisabled-optimization && WARN_CFLAGS="-Wdisabled-optimization $WARN_CFLAGS"
-  cflag_check -Wmissing-prototypes && WARN_CFLAGS="-Wmissing-prototypes $WARN_CFLAGS"
-  cflag_check -Wstrict-prototypes && WARN_CFLAGS="-Wstrict-prototypes $WARN_CFLAGS"
-else
-  CFLAGS="-D_ISOC99_SOURCE -D_BSD_SOURCE $CFLAGS"
-fi
+addcflags() {
+    cflag_check "$@" && OURCFLAGS="$OURCFLAGS $@"
+}
+
+addcflags "-Wundef -Wmissing-prototypes -Wshadow -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls -Wno-pointer-sign -Werror=implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function"
+addcflags "-Wempty-body"
+# clang
+addcflags "-Wno-logical-op-parentheses -fcolor-diagnostics -Wno-tautological-compare -Wno-tautological-constant-out-of-range-compare"
 
 cflag_check -MD -MP && DEPFLAGS="-MD -MP"
 
-
-if test -n "$LDFLAGS" ; then
-  extra_ldflags="$extra_ldflags $LDFLAGS"
-  warn_cflags=yes
-elif test "$cc_vendor" = "intel" ; then
-  extra_ldflags="$extra_ldflags -i-static"
-fi
-if test -n "$CPPFLAGS" ; then
-  extra_cflags="$extra_cflags $CPPFLAGS"
-  warn_cflags=yes
-fi
-
+extra_ldflags="$extra_ldflags $LDFLAGS"
+extra_cflags="$extra_cflags $CPPFLAGS"
 
 ######################
 # MAIN TESTS GO HERE #
@@ -1015,17 +769,6 @@ fi
 echores "$_nanosleep"
 
 
-echocheck "mman.h"
-_mman=no
-statement_check sys/mman.h 'mmap(0, 0, 0, 0, 0, 0)' && _mman=yes
-if test "$_mman" = yes ; then
-  def_mman_h='#define HAVE_SYS_MMAN_H 1'
-else
-  def_mman_h='#define HAVE_SYS_MMAN_H 0'
-fi
-echores "$_mman"
-
-
 echocheck "dynamic loader"
 _dl=no
 for _ld_tmp in "" "-ldl"; do
@@ -1040,46 +783,22 @@ echores "$_dl"
 
 
 echocheck "pthread"
-def_pthreads='#define HAVE_PTHREADS 0'
-if linux ; then
-  THREAD_CFLAGS=-D_REENTRANT
-elif freebsd || netbsd || openbsd ; then
-  THREAD_CFLAGS=-D_THREAD_SAFE
-fi
-if test "$_pthreads" = auto ; then
+cflag_check -pthread && _ld_pthread="$_ld_pthread -pthread"
+cflag_check -lpthread && _ld_pthread="$_ld_pthread -lpthread"
+extra_cflags="$extra_cflags -D_REENTRANT -D_THREAD_SAFE"
 cat > $TMPC << EOF
 #include <pthread.h>
 static void *func(void *arg) { return arg; }
 int main(void) {
  pthread_t tid;
-#ifdef PTW32_STATIC_LIB
- pthread_win32_process_attach_np();
- pthread_win32_thread_attach_np();
-#endif
  return pthread_create (&tid, 0, func, 0) != 0;
 }
 EOF
 _pthreads=no
-for _ld_tmp in "-lpthreadGC2" "" "-lpthread" "-pthread" ; do
-# for crosscompilation, we cannot execute the program, be happy if we can link statically
-cc_check $THREAD_CFLAGS $_ld_tmp && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
-done
-if test "$_pthreads" = no && mingw32 ; then
-_ld_tmp="-lpthreadGC2 -lws2_32"
-cc_check $_ld_tmp -DPTW32_STATIC_LIB && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && CFLAGS="$CFLAGS -DPTW32_STATIC_LIB"
-fi
-fi
-if test "$_pthreads" = yes ; then
-  test "$_ld_pthread" && res_comment="using $_ld_pthread"
-  def_pthreads='#define HAVE_PTHREADS 1'
-  extra_cflags="$extra_cflags $THREAD_CFLAGS"
-else
-  res_comment="v4l2 disabled"
-  def_pthreads='#define HAVE_PTHREADS 0'
-  _tv_v4l2=no
+if cc_check "$_ld_pthread" ; then
+    _pthreads=yes
 fi
 echores "$_pthreads"
-
 if test "$_pthreads" = no ; then
   die "Unable to find pthreads support."
 fi
@@ -1140,15 +859,6 @@ else
   def_stream_cache='#define HAVE_STREAM_CACHE 0'
 fi
 echores "$_stream_cache"
-
-echocheck "rpath"
-if test "$_rpath" = yes ; then
-  for I in $(echo $extra_ldflags | sed 's/-L//g') ; do
-    tmp="$tmp $(echo $I | sed 's/.*/ -L& -Wl,-R&/')"
-  done
-extra_ldflags=$tmp
-fi
-echores "$_rpath"
 
 echocheck "iconv"
 if test "$_iconv" = auto ; then
@@ -1313,23 +1023,6 @@ fi
 echores "$_shm"
 
 
-echocheck "POSIX select()"
-cat > $TMPC << EOF
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
-int main(void) {int nfds = 1; fd_set readfds; struct timeval timeout; select(nfds, &readfds, NULL, NULL, &timeout); return 0; }
-EOF
-_posix_select=no
-def_posix_select='#define HAVE_POSIX_SELECT 0'
-cc_check && _posix_select=yes &&
-    def_posix_select='#define HAVE_POSIX_SELECT 1'
-echores "$_posix_select"
-
-
 echocheck "audio select()"
 if test "$_select" = no ; then
   def_select='#define HAVE_AUDIO_SELECT 0'
@@ -1337,29 +1030,6 @@ elif test  "$_select" = yes ; then
   def_select='#define HAVE_AUDIO_SELECT 1'
 fi
 echores "$_select"
-
-
-echocheck "glob()"
-_glob=no
-statement_check glob.h 'glob("filename", 0, 0, 0)' && _glob=yes
-need_glob=no
-if test "$_glob" = yes ; then
-  def_glob='#define HAVE_GLOB 1'
-else
-  def_glob='#define HAVE_GLOB 0'
-  # HACK! need_glob currently enables compilation of a
-  # win32-specific glob()-replacement.
-  # Other OS neither need it nor can they use it (mf:// is disabled for them).
-  win32 && need_glob=yes
-fi
-echores "$_glob"
-
-
-echocheck "setmode()"
-_setmode=no
-def_setmode='#define HAVE_SETMODE 0'
-statement_check io.h 'setmode(0, 0)' && _setmode=yes && def_setmode='#define HAVE_SETMODE 1'
-echores "$_setmode"
 
 
 echocheck "sys/sysinfo.h"
@@ -1409,10 +1079,8 @@ if test "$_smb" = auto ; then
 fi
 if test "$_smb" = yes; then
     def_smb="#define HAVE_LIBSMBCLIENT 1"
-    inputmodules="smb $inputmodules"
 else
     def_smb="#define HAVE_LIBSMBCLIENT 0"
-    noinputmodules="smb $noinputmodules"
 fi
 echores "$_smb"
 
@@ -1449,58 +1117,6 @@ fi
 # VIDEO #
 #########
 
-
-if darwin; then
-
-echocheck "Cocoa"
-if test "$_cocoa" = auto ; then
-  cat > $TMPC <<EOF
-#include <CoreServices/CoreServices.h>
-#include <OpenGL/OpenGL.h>
-int main(void) {
-  NSApplicationLoad();
-}
-EOF
-  _cocoa=no
-  cc_check -framework IOKit -framework Cocoa -framework OpenGL && _cocoa=yes
-fi
-if test "$_cocoa" = yes ; then
-  libs_mplayer="$libs_mplayer -framework IOKit -framework Cocoa -framework OpenGL"
-  extra_ldflags="$extra_ldflags -fobjc-arc" # needed for OS X 10.7
-  def_cocoa='#define HAVE_COCOA 1'
-else
-  def_cocoa='#define HAVE_COCOA 0'
-fi
-echores "$_cocoa"
-
-echocheck "CoreVideo"
-if test "$_cocoa" = yes && test "$_corevideo" = auto ; then
-  cat > $TMPC <<EOF
-#include <QuartzCore/CoreVideo.h>
-int main(void) { return 0; }
-EOF
-  _corevideo=no
-  cc_check -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
-fi
-if test "$_corevideo" = yes ; then
-  vomodules="corevideo $vomodules"
-  libs_mplayer="$libs_mplayer -framework QuartzCore"
-  def_corevideo='#define HAVE_COREVIDEO 1'
-else
-  novomodules="corevideo $novomodules"
-  def_corevideo='#define HAVE_COREVIDEO 0'
-fi
-echores "$_corevideo"
-
-depends_on_application_services(){
-  test "$_corevideo" = yes
-}
-
-else
-  def_cocoa='#define HAVE_COCOA 0'
-  def_corevideo='#define HAVE_COREVIDEO 0'
-fi #if darwin
-
 _wlver="1.2.0"
 echocheck "Wayland"
 if test "$_wayland" = yes || test "$_wayland" = auto; then
@@ -1511,11 +1127,9 @@ fi
 if test "$_wayland" = yes; then
   res_comment=""
   def_wayland='#define HAVE_WAYLAND 1'
-  vomodules="wayland $vomodules"
 else
   res_comment="version >= $_wlver"
   def_wayland='#define HAVE_WAYLAND 0'
-  novomodules="wayland $novomodules"
 fi
 echores "$_wayland"
 unset _wlver
@@ -1527,11 +1141,9 @@ if test "$_x11" = auto ; then
 fi
 if test "$_x11" = yes ; then
   def_x11='#define HAVE_X11 1'
-  vomodules="x11 $vomodules"
 else
   _x11=no
   def_x11='#define HAVE_X11 0'
-  novomodules="x11 $novomodules"
   res_comment="check if the dev(el) packages are installed"
 fi
 echores "$_x11"
@@ -1571,10 +1183,8 @@ fi
 if test "$_xv" = yes ; then
   def_xv='#define HAVE_XV 1'
   libs_mplayer="$libs_mplayer -lXv"
-  vomodules="xv $vomodules"
 else
   def_xv='#define HAVE_XV 0'
-  novomodules="xv $novomodules"
 fi
 echores "$_xv"
 
@@ -1589,11 +1199,9 @@ fi
 if test "$_vdpau" = yes ; then
   def_vdpau='#define HAVE_VDPAU 1'
   def_vdpau_hwaccel='#define HAVE_VDPAU_HWACCEL 1'
-  vomodules="vdpau $vomodules"
 else
   def_vdpau='#define HAVE_VDPAU 0'
   def_vdpau_hwaccel='#define HAVE_VDPAU_HWACCEL 0'
-  novomodules="vdpau $novomodules"
 fi
 echores "$_vdpau"
 
@@ -1612,11 +1220,9 @@ fi
 if test "$_vaapi" = yes ; then
   def_vaapi='#define HAVE_VAAPI 1'
   def_vaapi_hwaccel='#define HAVE_VAAPI_HWACCEL 1'
-  vomodules="vaapi $vomodules"
 else
   def_vaapi='#define HAVE_VAAPI 0'
   def_vaapi_hwaccel='#define HAVE_VAAPI_HWACCEL 0'
-  novomodules="vaapi $novomodules"
 fi
 echores "$_vaapi"
 
@@ -1693,10 +1299,8 @@ if test "$_caca" = auto ; then
 fi
 if test "$_caca" = yes ; then
   def_caca='#define HAVE_CACA 1'
-  vomodules="caca $vomodules"
 else
   def_caca='#define HAVE_CACA 0'
-  novomodules="caca $novomodules"
 fi
 echores "$_caca"
 
@@ -1724,12 +1328,10 @@ fi
 echores "$_dvb"
 if test "$_dvb" = yes ; then
   _dvbin=yes
-  inputmodules="dvb $inputmodules"
   def_dvb='#define HAVE_DVB 1'
   def_dvbin='#define HAVE_DVBIN 1'
 else
   _dvbin=no
-  noinputmodules="dvb $noinputmodules"
   def_dvb='#define HAVE_DVB 0'
   def_dvbin='#define HAVE_DVBIN 0 '
 fi
@@ -1755,15 +1357,11 @@ fi
 #################
 
 
-# make sure this stays below CoreVideo to avoid issues due to namespace
-# conflicts between -lGL and -framework OpenGL
 echocheck "OpenGL"
 #Note: this test is run even with --enable-gl since we autodetect linker flags
-if (test "$_x11" = yes || test "$_wayland" = yes || test "$_cocoa" = yes || win32) && test "$_gl" != no ; then
+if (test "$_x11" = yes || test "$_wayland" = yes) && test "$_gl" != no ; then
   cat > $TMPC << EOF
-#ifdef GL_WIN32
-#include <windows.h>
-#elif defined(GL_WAYLAND)
+#if defined(GL_WAYLAND)
 #include <EGL/egl.h>
 #else
 #include <X11/Xlib.h>
@@ -1771,10 +1369,7 @@ if (test "$_x11" = yes || test "$_wayland" = yes || test "$_cocoa" = yes || win3
 #endif
 #include <GL/gl.h>
 int main(int argc, char *argv[]) {
-#ifdef GL_WIN32
-  HDC dc;
-  wglCreateContext(dc);
-#elif defined(GL_WAYLAND)
+#if defined(GL_WAYLAND)
   eglCreateContext(NULL, NULL, EGL_NO_CONTEXT, NULL);
 #else
   glXCreateContext(NULL, NULL, NULL, True);
@@ -1800,15 +1395,6 @@ EOF
     _gl_wayland=yes
     libs_mplayer="$libs_mplayer -lGL -lEGL"
   fi
-  if win32 && cc_check -DGL_WIN32 -lopengl32 ; then
-    _gl=yes
-    _gl_win32=yes
-    libs_mplayer="$libs_mplayer -lopengl32 -lgdi32"
-  fi
-  if test "$_cocoa" = yes ; then
-    _gl=yes
-    _gl_cocoa=yes
-  fi
 
   cat > $TMPC << EOF
 #ifdef __APPLE__
@@ -1826,30 +1412,18 @@ EOF
     _gl=no
     _gl_x11=no
     _gl_wayland=no
-    _gl_win32=no
-    _gl_cocoa=no
     res_comment="missing glext.h, get from http://www.opengl.org/registry/api/glext.h"
   fi
 else
   _gl=no
 fi
 
-def_gl_cocoa='#define HAVE_GL_COCOA 0'
-def_gl_win32='#define HAVE_GL_WIN32 0'
 def_gl_x11='#define HAVE_GL_X11 0'
 def_gl_wayland='#define HAVE_GL_WAYLAND 0'
 
 if test "$_gl" = yes ; then
   def_gl='#define HAVE_GL 1'
   res_comment="backends:"
-  if test "$_gl_cocoa" = yes ; then
-    def_gl_cocoa='#define HAVE_GL_COCOA 1'
-    res_comment="$res_comment cocoa"
-  fi
-  if test "$_gl_win32" = yes ; then
-    def_gl_win32='#define HAVE_GL_WIN32 1'
-    res_comment="$res_comment win32"
-  fi
   if test "$_gl_x11" = yes ; then
     def_gl_x11='#define HAVE_GL_X11 1'
     res_comment="$res_comment x11"
@@ -1858,10 +1432,8 @@ if test "$_gl" = yes ; then
     def_gl_wayland='#define HAVE_GL_WAYLAND 1'
     res_comment="$res_comment wayland"
   fi
-  vomodules="opengl $vomodules"
 else
   def_gl='#define HAVE_GL 0'
-  novomodules="opengl $novomodules"
 fi
 echores "$_gl"
 
@@ -1877,86 +1449,6 @@ fi
 echores "$_vdpau_gl_x11"
 
 
-if win32; then
-
-
-echocheck "Direct3D"
-if test "$_direct3d" = auto ; then
-  _direct3d=no
-  header_check d3d9.h && _direct3d=yes
-fi
-if test "$_direct3d" = yes ; then
-  def_direct3d='#define HAVE_DIRECT3D 1'
-  vomodules="direct3d $vomodules"
-else
-  def_direct3d='#define HAVE_DIRECT3D 0'
-  novomodules="direct3d $novomodules"
-fi
-echores "$_direct3d"
-
-
-echocheck "DirectSound"
-if test "$_dsound" = auto ; then
-  _dsound=no
-  header_check dsound.h && _dsound=yes
-fi
-if test "$_dsound" = yes ; then
-  def_dsound='#define HAVE_DSOUND 1'
-  aomodules="dsound $aomodules"
-else
-  def_dsound='#define HAVE_DSOUND 0'
-  noaomodules="dsound $noaomodules"
-fi
-echores "$_dsound"
-
-echocheck "WASAPI"
-if test "$_wasapi" = auto ; then
-  _wasapi=no
-
-cat > $TMPC << EOF
-#define COBJMACROS 1
-#define _WIN32_WINNT 0x600
-#include <malloc.h>
-#include <stdlib.h>
-#include <process.h>
-#include <initguid.h>
-#include <audioclient.h>
-#include <endpointvolume.h>
-#include <mmdeviceapi.h>
-#include <avrt.h>
-    const GUID *check1[] = {
-      &IID_IAudioClient,
-      &IID_IAudioRenderClient,
-      &IID_IAudioClient,
-      &IID_IAudioEndpointVolume,
-    };
-int main(void) {
-    return 0;
-}
-EOF
-
-if cc_check "-lole32"; then
-  _wasapi="yes"
-fi
-
-fi
-if test "$_wasapi" = yes ; then
-  def_wasapi='#define HAVE_WASAPI 1'
-  aomodules="wasapi $aomodules"
-  libs_mplayer="$libs_mplayer -lole32"
-else
-  def_wasapi='#define HAVE_WASAPI 0'
-  noaomodules="wasapi $noaomodules"
-fi
-echores "$_wasapi"
-
-else
-  def_direct3d='#define HAVE_DIRECT3D 0'
-  def_dsound='#define HAVE_DSOUND 0'
-  def_wasapi='#define HAVE_WASAPI 0'
-fi #if win32; then
-
-
 echocheck "SDL 2.0"
 if test "$_sdl2" = yes ; then
   pkg_config_add 'sdl2' && _sdl2=yes
@@ -1965,8 +1457,6 @@ if test "$_sdl2" = yes ; then
   _sdl=yes # sdl2 implies sdl
   def_sdl='#define HAVE_SDL1 1'
   def_sdl2='#define HAVE_SDL2 1'
-  vomodules="sdl $vomodules"
-  aomodules="sdl $aomodules"
   echores "$_sdl2"
 else
   def_sdl2='#define HAVE_SDL2 0'
@@ -1977,12 +1467,8 @@ else
   fi
   if test "$_sdl" = yes ; then
     def_sdl='#define HAVE_SDL1 1'
-    novomodules="sdl $novomodules"
-    aomodules="sdl $aomodules"
   else
     def_sdl='#define HAVE_SDL1 0'
-    novomodules="sdl $novomodules"
-    noaomodules="sdl $noaomodules"
   fi
   echores "$_sdl"
 fi
@@ -2002,40 +1488,12 @@ if test "$_ossaudio" = auto ; then
 fi
 if test "$_ossaudio" = yes ; then
   def_ossaudio='#define HAVE_OSS_AUDIO 1'
-  aomodules="oss $aomodules"
-  cat > $TMPC << EOF
-#include <$_soundcard_header>
-#ifdef OPEN_SOUND_SYSTEM
-int main(void) { return 0; }
-#else
-#error Not the real thing
-#endif
-EOF
-   _real_ossaudio=no
-   cc_check && _real_ossaudio=yes
-   if test "$_real_ossaudio" = yes; then
-     def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
-     # Check for OSS4 headers (override default headers)
-     # Does not apply to systems where OSS4 is native (e.g. FreeBSD)
-     if test -f /etc/oss.conf; then
-       . /etc/oss.conf
-       _ossinc="$OSSLIBDIR/include"
-       if test -f "$_ossinc/sys/soundcard.h"; then
-         extra_cflags="-I$_ossinc $extra_cflags"
-       fi
-     fi
-   elif netbsd || openbsd ; then
-     def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound"'
-     libs_mplayer="$libs_mplayer -lossaudio"
-   else
-     def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
-   fi
+  def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
   def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/mixer"'
 else
   def_ossaudio='#define HAVE_OSS_AUDIO 0'
   def_ossaudio_devdsp='#define PATH_DEV_DSP ""'
   def_ossaudio_devmixer='#define PATH_DEV_MIXER ""'
-  noaomodules="oss $noaomodules"
 fi
 echores "$_ossaudio"
 
@@ -2049,11 +1507,9 @@ echores "$_rsound"
 
 if test "$_rsound" = yes ; then
    def_rsound='#define HAVE_RSOUND 1'
-   aomodules="rsound $aomodules"
    libs_mplayer="$libs_mplayer -lrsound"
 else
    def_rsound='#define HAVE_RSOUND 0'
-   noaomodules="rsound $noaomodules"
 fi
 
 
@@ -2066,11 +1522,9 @@ echores "$_sndio"
 
 if test "$_sndio" = yes ; then
   def_sndio='#define HAVE_SNDIO 1'
-  aomodules="sndio $_aomodules"
   libs_mplayer="$libs_mplayer -lsndio"
 else
   def_sndio='#define HAVE_SNDIO 0'
-  noaomodules="sndio $_noaomodules"
 fi
 
 
@@ -2085,10 +1539,8 @@ echores "$_pulse"
 
 if test "$_pulse" = yes ; then
   def_pulse='#define HAVE_PULSE 1'
-  aomodules="pulse $aomodules"
 else
   def_pulse='#define HAVE_PULSE 0'
-  noaomodules="pulse $noaomodules"
 fi
 
 
@@ -2107,10 +1559,8 @@ echores "$_portaudio"
 
 if test "$_portaudio" = yes ; then
   def_portaudio='#define HAVE_PORTAUDIO 1'
-  aomodules="portaudio $aomodules"
 else
   def_portaudio='#define HAVE_PORTAUDIO 0'
-  noaomodules="portaudio $noaomodules"
 fi
 
 
@@ -2124,10 +1574,8 @@ fi
 
 if test "$_jack" = yes ; then
   def_jack='#define HAVE_JACK 1'
-  aomodules="jack $aomodules"
 else
   def_jack='#define HAVE_JACK 0'
-  noaomodules="jack $noaomodules"
 fi
 echores "$_jack"
 
@@ -2143,10 +1591,8 @@ echores "$_openal"
 
 if test "$_openal" = yes ; then
   def_openal='#define HAVE_OPENAL 1'
-  aomodules="openal $aomodules"
 else
   def_openal='#define HAVE_OPENAL 0'
-  noaomodules="openal $noaomodules"
 fi
 
 
@@ -2159,79 +1605,24 @@ if test "$_alsa" = auto ; then
 fi
 def_alsa='#define HAVE_ALSA 0'
 if test "$_alsa" = yes ; then
-    aomodules="alsa $aomodules"
     def_alsa='#define HAVE_ALSA 1'
-else
-    noaomodules="alsa $noaomodules"
 fi
 echores "$_alsa"
 
 
-def_coreaudio='#define HAVE_COREAUDIO 0'
-if darwin; then
-echocheck "CoreAudio"
-if test "$_coreaudio" = auto ; then
-  cat > $TMPC <<EOF
-#include <CoreAudio/CoreAudio.h>
-#include <AudioToolbox/AudioToolbox.h>
-#include <AudioUnit/AudioUnit.h>
-int main(void) { return 0; }
-EOF
-  _coreaudio=no
-  cc_check -framework CoreAudio -framework AudioUnit -framework AudioToolbox && _coreaudio=yes
-fi
-if test "$_coreaudio" = yes ; then
-  libs_mplayer="$libs_mplayer -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
-  def_coreaudio='#define HAVE_COREAUDIO 1'
-  aomodules="coreaudio $aomodules"
-else
-  def_coreaudio='#define HAVE_COREAUDIO 0'
-  noaomodules="coreaudio $noaomodules"
-fi
-echores $_coreaudio
-fi #if darwin
-
-
 # set default CD/DVD devices
-if win32 ; then
-  default_cdrom_device="D:"
-elif darwin ; then
-  default_cdrom_device="/dev/disk1"
-elif dragonfly ; then
-  default_cdrom_device="/dev/cd0"
-elif freebsd ; then
-  default_cdrom_device="/dev/cd0"
-elif openbsd ; then
-  default_cdrom_device="/dev/rcd0c"
-else
-  default_cdrom_device="/dev/cdrom"
-fi
-
-if win32 || dragonfly || freebsd || openbsd ; then
-  default_dvd_device=$default_cdrom_device
-elif darwin ; then
-  default_dvd_device="/dev/rdiskN"
-else
-  default_dvd_device="/dev/dvd"
-fi
+default_cdrom_device="/dev/cdrom"
+default_dvd_device="/dev/dvd"
 
 
 echocheck "VCD support"
 if test "$_vcd" = auto; then
-  _vcd=no
-  if linux || freebsd || netbsd || openbsd || dragonfly || darwin ; then
-    _vcd=yes
-  elif mingw32; then
-  header_check_broken windows.h ntddcdrm.h && _vcd=yes
-  fi
+  _vcd=yes
 fi
 if test "$_vcd" = yes; then
-  inputmodules="vcd $inputmodules"
   def_vcd='#define HAVE_VCD 1'
 else
   def_vcd='#define HAVE_VCD 0'
-  noinputmodules="vcd $noinputmodules"
-  res_comment="not supported on this OS"
 fi
 echores "$_vcd"
 
@@ -2244,10 +1635,8 @@ if test "$_bluray" = auto ; then
 fi
 if test "$_bluray" = yes ; then
   def_bluray='#define HAVE_LIBBLURAY 1'
-  inputmodules="bluray $inputmodules"
 else
   def_bluray='#define HAVE_LIBBLURAY 0'
-  noinputmodules="bluray $noinputmodules"
 fi
 echores "$_bluray"
 
@@ -2259,10 +1648,8 @@ if test "$_dvdread" = auto ; then
 fi
 if test "$_dvdread" = yes ; then
   def_dvdread='#define HAVE_DVDREAD 1'
-  inputmodules="dvdread $inputmodules"
 else
   def_dvdread='#define HAVE_DVDREAD 0'
-  noinputmodules="dvdread $noinputmodules"
 fi
 echores "$_dvdread"
 
@@ -2274,10 +1661,8 @@ if test "$_dvdnav" = auto ; then
 fi
 if test "$_dvdnav" = yes ; then
   def_dvdnav='#define HAVE_DVDNAV 1'
-  inputmodules="dvdnav $inputmodules"
 else
   def_dvdnav='#define HAVE_DVDNAV 0'
-  noinputmodules="dvdnav $noinputmodules"
 fi
 echores "$_dvdnav"
 
@@ -2292,12 +1677,10 @@ fi
 if test "$_libcdio" = yes ; then
     _cdda='yes'
     def_cdda='#define HAVE_CDDA 1'
-    inputmodules="cdda $inputmodules"
 else
     _libcdio=no
     _cdda='no'
     def_cdda='#define HAVE_CDDA 0'
-    noinputmodules="cdda $noinputmodules"
 fi
 echores "$_libcdio"
 
@@ -2362,9 +1745,6 @@ if test "$_mpg123" = auto; then
 fi
 if test "$_mpg123" = yes ; then
   def_mpg123='#define HAVE_MPG123 1'
-  codecmodules="mpg123 $codecmodules"
-else
-  nocodecmodules="mpg123 $nocodecmodules"
 fi
 echores "$_mpg123"
 
@@ -2411,7 +1791,7 @@ fi
 echores "$_lcms2"
 
 
-echocheck "VapurSynth support"
+echocheck "VapourSynth support"
 if test "$_vapoursynth" = auto ; then
     _vapoursynth=no
     if pkg_config_add 'vapoursynth >= 23 vapoursynth-script >= 23' ; then
@@ -2569,59 +1949,11 @@ else
 fi
 echores "$libpostproc"
 
-if darwin ; then
-
-echocheck "VDA"
-if test "$_vda" = auto ; then
- _vda=no
- header_check VideoDecodeAcceleration/VDADecoder.h &&
- statement_check libavcodec/vda.h 'ff_vda_create_decoder(NULL, NULL, NULL)' &&
- _vda=yes
-fi
-if test "$_vda" = yes ; then
-  def_vda='#define HAVE_VDA_HWACCEL 1'
-  libs_mplayer="$libs_mplayer -framework VideoDecodeAcceleration -framework QuartzCore -framework IOSurface"
-else
-  def_vda='#define HAVE_VDA_HWACCEL 0'
-fi
-echores "$_vda"
-
-echocheck "VDA libavcodec refcounting"
-_vda_refcounting=no
-if test "$_vda" = yes ; then
-  statement_check libavcodec/vda.h 'struct vda_context a = (struct vda_context) { .use_ref_buffer = 1 }' &&
-    _vda_refcounting=yes
-fi
-if test "$_vda_refcounting" = "yes" ; then
-  def_vda_refcounting='#define HAVE_VDA_LIBAVCODEC_REFCOUNTING 1'
-else
-  def_vda_refcounting='#define HAVE_VDA_LIBAVCODEC_REFCOUNTING 0'
-fi
-echores "$_vda_refcounting"
-
-echocheck "VDA with OpenGL"
-if test "$_gl_cocoa" = yes && test "$_vda" = yes ; then
-  def_vda_gl='#define HAVE_VDA_GL 1'
-  _vda_gl=yes
-else
-  def_vda_gl='#define HAVE_VDA_GL 0'
-  _vda_gl=no
-fi
-echores "$_vda_gl"
-
-else
-  def_vda='#define HAVE_VDA_HWACCEL 0'
-  def_vda_refcounting='#define HAVE_VDA_LIBAVCODEC_REFCOUNTING 0'
-  def_vda_gl='#define HAVE_VDA_GL 0'
-fi
-
 
 echocheck "TV interface"
 if test "$_tv" = yes ; then
   def_tv='#define HAVE_TV 1'
-  inputmodules="tv $inputmodules"
 else
-  noinputmodules="tv $noinputmodules"
   def_tv='#define HAVE_TV 0'
 fi
 echores "$_tv"
@@ -2630,20 +1962,14 @@ echores "$_tv"
 echocheck "Video 4 Linux 2 TV interface"
 if test "$_tv_v4l2" = auto ; then
   _tv_v4l2=no
-  if test "$_tv" = yes && linux ; then
+  if test "$_tv" = yes ; then
     header_check_broken sys/time.h linux/videodev2.h && _tv_v4l2=yes
-  elif test "$_tv" = yes && freebsd ; then
-    header_check linux/videodev2.h && _tv_v4l2=yes
-  elif test "$_tv" = yes && test "$sys_videoio_h" = "yes" ; then
-    _tv_v4l2=yes
   fi
 fi
 if test "$_tv_v4l2" = yes ; then
   _audio_input=yes
   def_tv_v4l2='#define HAVE_TV_V4L2 1'
-  inputmodules="tv-v4l2 $inputmodules"
 else
-  noinputmodules="tv-v4l2 $noinputmodules"
   def_tv_v4l2='#define HAVE_TV_V4L2 0'
 fi
 echores "$_tv_v4l2"
@@ -2677,9 +2003,7 @@ EOF
 fi
 if test "$_pvr" = yes ; then
   def_pvr='#define HAVE_PVR 1'
-  inputmodules="pvr $inputmodules"
 else
-  noinputmodules="pvr $noinputmodules"
   def_pvr='#define HAVE_PVR 0'
 fi
 echores "$_pvr"
@@ -2799,11 +2123,8 @@ fi
 echores "$_encoding"
 
 
-# needs dlopen on unix, uses winapi on windows
+# needs dlopen on unix
 _dlopen="$_dl"
-if win32 ; then
-  _dlopen=yes
-fi
 
 if test "$_dlopen" = yes ; then
   def_dlopen='#define HAVE_DLOPEN 1'
@@ -2821,29 +2142,13 @@ else
   echores "no"
 fi
 
-echocheck "linker support for --nxcompat --no-seh --dynamicbase"
-if cflag_check "-Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase" ; then
-  extra_ldflags="-Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase $extra_ldflags"
-  echores "yes"
-else
-  echores "no"
-fi
-
-
 extra_ldflags="$extra_ldflags $_ld_pthread"
 libs_mplayer="$libs_mplayer $_ld_dl"
-
 
 echocheck "joystick"
 def_joystick='#define HAVE_JOYSTICK 0'
 if test "$_joystick" = yes ; then
-  if linux || freebsd ; then
-    # TODO add some check
-    def_joystick='#define HAVE_JOYSTICK 1'
-  else
-    _joystick="no"
-    res_comment="unsupported under $system_name"
-  fi
+  def_joystick='#define HAVE_JOYSTICK 1'
 fi
 echores "$_joystick"
 
@@ -2862,16 +2167,8 @@ echores "$_lirc"
 
 #############################################################################
 
-if mingw32 ; then
-  # add this last, so that --libs from pkg-config can't override it
-  end_ldflags="$end_ldflags -mconsole"
-fi
-
 CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE"
 
-CXXFLAGS=" $CFLAGS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS"
-
-# DO NOT ADD ANY TESTS THAT USE LINKER FLAGS HERE (like cc_check).
 
 # This is done so waf builds won't conflict with this. In fact, waf and old
 # build system can coexist in parallel, at the same time. This is because
@@ -2903,52 +2200,33 @@ DOCDIR  = \$(DESTDIR)$_docdir
 CONFDIR = \$(DESTDIR)$_confdir
 
 CC      = $_cc
-CXX     = $_cc
 INSTALL = $_install
-WINDRES = $_windres
 
-CFLAGS   = $BUILDCFLAGS $WARNFLAGS $ERRORFLAGS $WARN_CFLAGS $CFLAGS $extra_cflags
-CXXFLAGS = $BUILDCFLAGS $WARNFLAGS $ERRORFLAGS $CXXFLAGS $extra_cflags $extra_cxxflags
+CFLAGS   = $BUILDCFLAGS $OURCFLAGS $CFLAGS $extra_cflags
 DEPFLAGS = $DEPFLAGS
 
 EXTRALIBS = $extra_ldflags $_ld_static $_ld_lm $extra_libs $libs_mplayer $end_ldflags
 
-GETCH = $_getch
-TIMER = $_timer
 RST2MAN = $_rst2man
 BUILD_MAN = $_build_man
 RST2PDF = $_rst2pdf
 BUILD_PDF = $_build_pdf
-
-EXESUF      = $_exesuf
-EXESUFS_ALL = .exe
-
-NEED_GLOB         = $need_glob
 
 # features
 ALSA = $_alsa
 AUDIO_INPUT = $_audio_input
 CACA = $_caca
 CDDA = $_cdda
-COCOA = $_cocoa
-COREAUDIO = $_coreaudio
-COREVIDEO = $_corevideo
-DIRECT3D = $_direct3d
 DL = $_dl
 DLOPEN = $_dlopen
 SDL = $_sdl
 SDL2 = $_sdl2
-DSOUND = $_dsound
-WASAPI = $_wasapi
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
 DVDNAV = $_dvdnav
 GL = $_gl
-GL_COCOA = $_gl_cocoa
-GL_WIN32 = $_gl_win32
 GL_X11 = $_gl_x11
 GL_WAYLAND = $_gl_wayland
-HAVE_POSIX_SELECT = $_posix_select
 HAVE_SYS_MMAN_H = $_mman
 JACK = $_jack
 JOYSTICK = $_joystick
@@ -2973,8 +2251,6 @@ LIRC = $_lirc
 MPG123 = $_mpg123
 OPENAL = $_openal
 OSS = $_ossaudio
-PE_EXECUTABLE = $_pe_executable
-PRIORITY = $_priority
 PULSE = $_pulse
 PORTAUDIO = $_portaudio
 PVR = $_pvr
@@ -2987,13 +2263,9 @@ LIBV4L2 = $_libv4l2
 VCD = $_vcd
 VDPAU = $_vdpau
 VDPAU_GL_X11 = $_vdpau_gl_x11
-VDA = $_vda
-VDA_REFCOUNTING = $_vda_refcounting
-VDA_GL = $_vda_gl
 VAAPI = $_vaapi
 VAAPI_VPP = $_vaapi_vpp
 VAAPI_GLX = $_vaapi_glx
-WIN32 = $_win32
 X11 = $_x11
 WAYLAND = $_wayland
 XV = $_xv
@@ -3002,7 +2274,6 @@ XV = $_xv
 ENCODING = $_encoding
 
 CONFIG_VDPAU    = $_vdpau
-CONFIG_VDA      = $_vda
 CONFIG_VAAPI    = $_vaapi
 CONFIG_ZLIB     = $_zlib
 
@@ -3029,13 +2300,30 @@ cat > $TMPH << EOF
 
 #define MPLAYER_CONFDIR "$_confdir"
 
-/* we didn't bother to add actual config checks for this */
+/* we didn't bother to add actual config checks for this, or they are
+   for platforms not supported by this configure script */
 #define HAVE_BSD_FSTATFS 0
 #define HAVE_LINUX_FSTATFS 0
 #define HAVE_VDA_AV_VDA_ALLOC_CONTEXT 0
+#define HAVE_VDA_HWACCEL 0
+#define HAVE_VDA_LIBAVCODEC_REFCOUNTING 0
+#define HAVE_VDA_GL 0
+#define HAVE_GL_COCOA 0
+#define HAVE_COCOA 0
+#define HAVE_COREVIDEO 0
+#define HAVE_COREAUDIO 0
+#define HAVE_GL_WIN32 0
+#define HAVE_DIRECT3D 0
+#define HAVE_DSOUND 0
+#define HAVE_WASAPI 0
+#define HAVE_DOS_PATHS 0
+#define HAVE_PRIORITY 0
+#define HAVE_GLOB 1
+#define HAVE_SETMODE 0
+#define HAVE_POSIX_SELECT 1
+#define HAVE_SYS_MMAN_H 1
 
 /* system headers */
-$def_mman_h
 $def_mman_has_map_failed
 $def_soundcard_h
 $def_sys_soundcard_h
@@ -3043,15 +2331,11 @@ $def_sys_sysinfo_h
 $def_sys_videoio_h
 $def_termios_h
 $def_termios_sys_h
-$def_winsock2_h
 
 
 /* system functions */
-$def_glob
 $def_nanosleep
-$def_posix_select
 $def_select
-$def_setmode
 $def_shm
 $def_terminfo
 $def_termcap
@@ -3060,9 +2344,7 @@ $def_termios
 
 /* system-specific features */
 $def_dl
-$def_dos_paths
 $def_iconv
-$def_priority
 
 
 /* configurable options */
@@ -3095,7 +2377,6 @@ $def_dlopen
 
 /* Audio output drivers */
 $def_alsa
-$def_coreaudio
 $def_jack
 $def_openal
 $def_openal_h
@@ -3137,18 +2418,11 @@ $def_lua
 
 /* libvo options */
 $def_caca
-$def_corevideo
-$def_cocoa
-$def_direct3d
 $def_sdl
 $def_sdl2
-$def_dsound
-$def_wasapi
 $def_dvb
 $def_dvbin
 $def_gl
-$def_gl_cocoa
-$def_gl_win32
 $def_gl_x11
 $def_gl_wayland
 $def_jpeg
@@ -3156,9 +2430,6 @@ $def_v4l2
 $def_vdpau
 $def_vdpau_gl_x11
 $def_vdpau_hwaccel
-$def_vda
-$def_vda_gl
-$def_vda_refcounting
 $def_vaapi
 $def_vaapi_vpp
 $def_vaapi_glx
@@ -3178,8 +2449,6 @@ $def_encoding
 $def_libavresample
 $def_libswresample
 
-$def_fast_64bit
-$def_pthreads
 $def_atomic
 $def_sync
 
@@ -3202,24 +2471,9 @@ Config files successfully generated by ./configure $configuration !
   Install prefix: $_prefix
   Config direct.: $_confdir
 
-  Enabled optional drivers:
-    Input: $inputmodules
-    Codecs: libavcodecs $codecmodules
-    Audio output: $aomodules
-    Video output: $vomodules
-
-  Disabled optional drivers:
-    Input: $noinputmodules
-    Codecs: $nocodecmodules
-    Audio output: $noaomodules
-    Video output: $novomodules
-
 'config.h' and 'config.mak' contain your configuration options.
-Note: If you alter theses files (for instance CFLAGS) mpv may no longer
-      compile *** DO NOT REPORT BUGS if you tweak these files ***
 
 'make' will now compile mpv and 'make install' will install it.
-Note: On non-Linux systems you might need to use 'gmake' instead of 'make'.
 
 EOF
 
@@ -3242,19 +2496,6 @@ favour of waf and will be removed in a future version of mpv. Check the
 README for instructions on how to build mpv with the new build system.
 
 EOF
-
-if test "$warn_cflags" = yes; then
-  cat <<EOF
-
-mpv compilation will use the CPPFLAGS/CFLAGS/LDFLAGS set by you, but:
-
-    *** ***  DO NOT REPORT BUGS IF IT DOES NOT COMPILE/WORK!  *** ***
-
-It is strongly recommended to let mpv choose the correct CFLAGS!
-To do so, execute 'CFLAGS= ./configure <options>'
-
-EOF
-fi
 
 # Last move:
 rm -rf "$mplayer_tmpdir"

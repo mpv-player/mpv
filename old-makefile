@@ -35,7 +35,6 @@ SOURCES-$(DVDREAD)              += stream/stream_dvd.c \
 SOURCES-$(DVDNAV)               += stream/stream_dvdnav.c \
                                    stream/stream_dvd_common.c
 
-SOURCES-$(HAVE_SYS_MMAN_H)      += audio/filter/af_export.c
 SOURCES-$(LADSPA)               += audio/filter/af_ladspa.c
 SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c \
                                    demux/demux_libass.c
@@ -46,23 +45,8 @@ SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
 SOURCES-$(LIBPOSTPROC)          += video/filter/vf_pp.c
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
-SOURCES-$(COCOA)                += video/out/cocoa/view.m \
-                                   video/out/cocoa/window.m \
-                                   video/out/cocoa/additions.m \
-                                   video/out/cocoa_common.m \
-                                   osdep/macosx_application.m \
-                                   osdep/macosx_events.m \
-                                   osdep/ar/HIDRemote.m \
-                                   osdep/path-macosx.m
-
 SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 
-SOURCES-$(NEED_GETTIMEOFDAY)    += osdep/gettimeofday.c
-SOURCES-$(NEED_GLOB)            += osdep/glob-win.c
-SOURCES-$(WIN32)                += osdep/path-win.c \
-                                   osdep/w32_keyboard.c
-
-SOURCES-$(PRIORITY)             += osdep/priority.c
 SOURCES-$(PVR)                  += stream/stream_pvr.c
 SOURCES-$(STREAM_CACHE)         += stream/cache.c
 
@@ -78,14 +62,6 @@ SOURCES-$(ALSA)                 += audio/out/ao_alsa.c
 SOURCES-$(CACA)                 += video/out/vo_caca.c
 SOURCES-$(SDL)                  += audio/out/ao_sdl.c
 SOURCES-$(SDL2)                 += video/out/vo_sdl.c
-SOURCES-$(COREAUDIO)            += audio/out/ao_coreaudio.c \
-                                   audio/out/ao_coreaudio_utils.c \
-                                   audio/out/ao_coreaudio_properties.c
-SOURCES-$(COREVIDEO)            += video/out/vo_corevideo.c
-SOURCES-$(DIRECT3D)             += video/out/vo_direct3d.c \
-                                   video/out/w32_common.c
-SOURCES-$(DSOUND)               += audio/out/ao_dsound.c
-SOURCES-$(WASAPI)               += audio/out/ao_wasapi.c
 SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
                                    video/out/vo_opengl.c video/out/gl_lcms.c \
                                    video/out/gl_video.c video/out/dither.c \
@@ -95,9 +71,7 @@ SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
 SOURCES-$(ENCODING)             += video/out/vo_lavc.c audio/out/ao_lavc.c \
                                    common/encode_lavc.c
 
-SOURCES-$(GL_WIN32)             += video/out/w32_common.c video/out/gl_w32.c
 SOURCES-$(GL_X11)               += video/out/x11_common.c video/out/gl_x11.c
-SOURCES-$(GL_COCOA)             += video/out/gl_cocoa.c
 SOURCES-$(GL_WAYLAND)           += video/out/wayland_common.c \
                                    video/out/gl_wayland.c
 
@@ -116,8 +90,6 @@ SOURCES-$(VDPAU)                += video/vdpau.c video/vdpau_mixer.c \
                                    video/out/vo_vdpau.c video/decode/vdpau.c \
                                    video/filter/vf_vdpaupp.c
 SOURCES-$(VDPAU_GL_X11)         += video/out/gl_hwdec_vdpau.c
-SOURCES-$(VDA)                  += video/decode/vda.c
-SOURCES-$(VDA_GL)               += video/out/gl_hwdec_vda.c
 SOURCES-$(VAAPI)                += video/out/vo_vaapi.c \
                                    video/decode/vaapi.c \
                                    video/vaapi.c
@@ -153,6 +125,7 @@ SOURCES = audio/audio.c \
           audio/filter/af_delay.c \
           audio/filter/af_dummy.c \
           audio/filter/af_equalizer.c \
+          audio/filter/af_export.c \
           audio/filter/af_extrastereo.c \
           audio/filter/af_format.c \
           audio/filter/af_hrtf.c \
@@ -214,7 +187,9 @@ SOURCES = audio/audio.c \
           options/path.c \
           osdep/io.c \
           osdep/numcores.c \
+          osdep/terminal-unix.c \
           osdep/timer.c \
+          osdep/timer-linux.c \
           osdep/threads.c \
           player/audio.c \
           player/client.c \
@@ -301,8 +276,6 @@ SOURCES = audio/audio.c \
           video/out/vo_null.c \
           video/out/vo_image.c \
           video/out/win_state.c \
-          osdep/$(GETCH) \
-          osdep/$(TIMER) \
           $(SOURCES-yes)
 
 OBJECTS         += $(addsuffix .o, $(basename $(SOURCES)))
@@ -311,7 +284,7 @@ OBJECTS         += $(OBJECTS-yes)
 
 DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SOURCES:.m=.d) $(SOURCES:.m=.d))))
 
-ALL_TARGETS     += mpv$(EXESUF)
+ALL_TARGETS     += mpv
 
 INSTALL_BIN     += install-mpv
 INSTALL_BIN_STRIP += install-mpv-strip
@@ -356,7 +329,6 @@ DIRS =  . \
 
 ADDSUFFIXES     = $(foreach suf,$(1),$(addsuffix $(suf),$(2)))
 ADD_ALL_DIRS    = $(call ADDSUFFIXES,$(1),$(DIRS))
-ADD_ALL_EXESUFS = $(1) $(call ADDSUFFIXES,$(EXESUFS_ALL),$(1))
 
 ###### brief build output #######
 
@@ -387,11 +359,7 @@ all: $(ALL_TARGETS)
 %.o: %.m
 	$(CC) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
 
-%-rc.o: %.rc
-	$(WINDRES) -I. $< $@
-
-mpv$(EXESUF): $(OBJECTS) player/main_fn.o
-mpv$(EXESUF):
+mpv: $(OBJECTS) player/main_fn.o
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
 input/input.c: input/input_conf.h
@@ -452,7 +420,7 @@ version.h .version: version.sh
 # Force version.sh to run to potentially regenerate version.h
 -include .version
 
-%$(EXESUF): %.c
+%: %.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 
@@ -481,10 +449,10 @@ install-strip-no-man:  $(INSTALL_BIN_STRIP) install-data
 install-dirs:
 	if test ! -d $(BINDIR) ; then $(INSTALL) -d $(BINDIR) ; fi
 
-install-%: %$(EXESUF) install-dirs
+install-%: % install-dirs
 	$(INSTALL) -m 755 $< $(BINDIR)
 
-install-%-strip: %$(EXESUF) install-dirs
+install-%-strip: % install-dirs
 	$(INSTALL) -m 755 -s $< $(BINDIR)
 
 install-mpv-man:  install-mpv-man-en
@@ -522,7 +490,7 @@ install-mpv-config: etc/encoding-profiles.conf
 install-data: install-mpv-icons install-mpv-desktop install-mpv-config
 
 uninstall:
-	$(RM) $(BINDIR)/mpv$(EXESUF)
+	$(RM) $(BINDIR)/mpv
 	$(RM) $(MANDIR)/man1/mpv.1
 	$(RM) $(MANDIR)/en/man1/mpv.1
 	$(RM) $(DOCDIR)/mpv.pdf
@@ -532,7 +500,7 @@ uninstall:
 clean:
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
-	-$(RM) $(call ADD_ALL_EXESUFS,mpv)
+	-$(RM) mpv
 	-$(RM) $(call ADDSUFFIXES,.pdf,DOCS/man/*/mpv)
 	-$(RM) DOCS/man/*/mpv.1
 	-$(RM) version.h
