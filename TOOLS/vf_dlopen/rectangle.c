@@ -35,7 +35,7 @@
 /*
  * rectangle
  *
- * usage: -vf dlopen=./rectangle.so
+ * usage: --vf=dlopen=/path/to/rectangle.so
  *
  * provides an editable rectangle
  * NOTE: unix only, and requires xterm to be installed. Don't ask.
@@ -345,7 +345,7 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
     (void) argc;
     (void) argv;
     static struct vf_dlopen_formatpair map[] = {
-        { "yv12", "yv12" },
+        { "yuv420p", "yuv420p" },
         { NULL, NULL }
     };
     privdata *priv = malloc(sizeof(privdata));

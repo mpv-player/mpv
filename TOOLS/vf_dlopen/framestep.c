@@ -32,11 +32,11 @@
 /*
  * frame stepping filter
  *
- * usage: -vf dlopen=./framestep.so:5
+ * usage: --vf=dlopen=/path/to/framestep.so:5
  *
  * outputs every 5th frame
  *
- * usage: -vf dlopen=./framestep.so:5:3
+ * usage: --vf=dlopen=/path/to/framestep.so:5:3
  *
  * outputs every 5th frame, starting with frame index 3 (default: 0)
  */
