@@ -1,12 +1,8 @@
 #! /bin/sh
 #
-# Original version (C) 2000 Pontscho/fresh!mindworkz
-#                      pontscho@makacs.poliod.hu
-#
-# History / Contributors: Check the Subversion log.
-#
+# Original version (C) 2000 Pontscho/fresh!mindworkz pontscho@makacs.poliod.hu
 # Cleanups all over the place (c) 2001 pl
-#
+# Rewritten for mpv in 2014.
 #
 # This configure script is *not* autoconf-based and has different semantics.
 # It attempts to autodetect all settings and options where possible. It is
@@ -21,18 +17,6 @@
 #
 # If you want to add a new check for $feature, look at the existing checks
 # and try to use helper functions where you can.
-#
-# Furthermore you need to add the variable _feature to the list of default
-# settings and set it to one of yes/no/auto. Also add appropriate
-# --enable-feature/--disable-feature command line options.
-# The results of the check should be written to config.h and config.mak
-# at the end of this script. The variable names used for this should be
-# uniform, i.e. if the option is named 'feature':
-#
-# _feature     : should have a value of yes/no/auto
-# def_feature  : '#define ... 1' or '#undef ...' for conditional compilation
-# _ld_feature  : '-L/path/dir -lfeature' GCC options
-#
 #############################################################################
 
 # Prevent locale nonsense from breaking basic text processing utils
@@ -58,99 +42,29 @@ compile_check() {
   echo >> "$TMPLOG"
   cat "$source" >> "$TMPLOG"
   echo >> "$TMPLOG"
-  echo "$_cc $WARNFLAGS $WARN_CFLAGS $CFLAGS $source $extra_cflags $_ld_static $extra_ldflags $libs_mplayer -o $TMPEXE $@" >> "$TMPLOG"
+  echo "$_cc $OURCFLAGS $CFLAGS $source $extra_cflags $_ld_static $extra_ldflags $libs_mplayer -o $TMPEXE $@" >> "$TMPLOG"
   rm -f "$TMPEXE"
-  $_cc $WARNFLAGS $WARN_CFLAGS $CFLAGS "$source" $extra_cflags $_ld_static $extra_ldflags $libs_mplayer -o "$TMPEXE" "$@" >> "$TMPLOG" 2>&1
+  $_cc $OURCFLAGS $CFLAGS "$source" $extra_cflags $_ld_static $extra_ldflags $libs_mplayer -o "$TMPEXE" $@ >> "$TMPLOG" 2>&1
   TMPRES="$?"
   echo >> "$TMPLOG"
   echo >> "$TMPLOG"
   return "$TMPRES"
 }
 
-cc_check() {
-  compile_check $TMPC $@
-}
-
 cflag_check() {
-  cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
-  compile_check $TMPC $@
-}
-
-header_check() {
-  cat > $TMPC << EOF
-#include <$1>
-int main(void) { return 0; }
-EOF
-  shift
-  compile_check $TMPC $@
-}
-
-return_check() {
-  cat > $TMPC << EOF
-#include <$1>
-int main(void) { return $2; }
-EOF
-  shift 2
-  compile_check $TMPC $@
+    echo "int main(void) { return 0; }" > $TMPC
+    compile_check $TMPC $@
 }
 
 statement_check() {
-  cat > $TMPC << EOF
-#include <$1>
-int main(void) { $2; return 0; }
-EOF
-  shift
-  shift
-  compile_check $TMPC $@
-}
-
-define_statement_check() {
-  cat > $TMPC << EOF
-#define $1
-#include <$2>
-int main(void) { $3; return 0; }
-EOF
-  shift 3
-  compile_check $TMPC $@
-}
-
-return_statement_check() {
-  cat > $TMPC << EOF
-#include <$1>
-int main(void) { $2; return $3; }
-EOF
-  shift 3
-  compile_check $TMPC $@
-}
-
-# The following checks are special and should only be used with broken and
-# non-selfsufficient headers that do not include all of their dependencies.
-
-header_check_broken() {
-  cat > $TMPC << EOF
-#include <$1>
-#include <$2>
-int main(void) { return 0; }
-EOF
-  shift
-  shift
-  compile_check $TMPC $@
-}
-
-statement_check_broken() {
-  cat > $TMPC << EOF
-#include <$1>
-#include <$2>
-int main(void) { $3; return 0; }
-EOF
-  shift 3
-  compile_check $TMPC $@
+    echo "" > $TMPC
+    for _header in $1 ; do echo "#include <$_header>" >> $TMPC ; done
+    echo "int main(void) { $2; return 0; }" >> $TMPC
+    shift 2
+    compile_check $TMPC $@
 }
 
 pkg_config_add() {
-  unset IFS  # shell should not be used for programming
   echo >> "$TMPLOG"
   echo "$_pkg_config --cflags $@" >> "$TMPLOG"
   ctmp=$($_pkg_config --cflags "$@" 2>> "$TMPLOG") || return $?
@@ -165,16 +79,12 @@ pkg_config_add() {
   libs_mplayer="$libs_mplayer $ltmp"
 }
 
-tmp_run() {
-  "$TMPEXE" >> "$TMPLOG" 2>&1
-}
-
 # Display error message, flushes tempfile, exit
 die () {
   echo
   echo "Error: $@" >&2
   echo >&2
-  rm -f "$TMPEXE" "$TMPC" "$TMPS" "$TMPCPP"
+  rm -f "$TMPEXE" "$TMPC"
   echo "Check \"$TMPLOG\" if you do not understand why it failed."
   exit 1
 }
@@ -187,16 +97,13 @@ echocheck() {
 
 # Use this to echo the results of a check
 echores() {
-  if test "$res_comment" ; then
-    res_comment="($res_comment)"
-  fi
+  test "$res_comment" && res_comment="($res_comment)"
   echo "Result is: $@ $res_comment" >> "$TMPLOG"
   echo "##########################################" >> "$TMPLOG"
   echo "" >> "$TMPLOG"
   echo "$@ $res_comment"
   res_comment=""
 }
-#############################################################################
 
 # Check how echo works in this /bin/sh
 case $(echo -n) in
@@ -204,6 +111,116 @@ case $(echo -n) in
   *)    _echo_n='-n '   _echo_c=        ;;      # BSD echo
 esac
 
+# setind $a b sets the variable named by the value of the variable a to b
+setind() { eval "$1=\"\$2\"" ; }
+
+# Generate --enable-NAME/--disable-NAME options, set $1 to the option value.
+# Since shell has no data structures, do a weird statemachine thing.
+# Arguments: "_name"($1) "description"($2) "default"($3)
+# If "default"($3) is empty, use "auto"
+# Option name: a leading "_" in name is stripped, further "_" are changed to "-"
+opt_yes_no() {
+    _name=$(echo "$1" | sed 's/^_//' | tr _ -)
+    _defval="$3"
+    test -z "$_defval" && _defval=auto
+
+    case "$_opt_state_mode" in
+    init)
+        setind "$1" "$_defval"
+        ;;
+    help)
+        if test "$_defval" = yes || test "$_defval" = auto ; then
+            _defdesc=enable
+            test "$_defval" = auto && _defdesc=auto
+            printf "  %-21s  disable $2 [$_defdesc]\n" "--disable-$_name"
+            unset _defdesc
+        else
+            printf "  %-21s  enable $2 [disable]\n" "--enable-$_name"
+        fi
+        ;;
+    parse)
+        if test "$_opt_state_name" = "--enable-$_name" ; then
+            setind "$1" yes
+            _opt_state_known=yes
+        elif test "$_opt_state_name" = "--disable-$_name" ; then
+            setind "$1" no
+            _opt_state_known=yes
+        elif test "$_opt_state_name" = "--auto-$_name" ; then
+            setind "$1" auto
+            _opt_state_known=yes
+        fi
+        ;;
+    esac
+    unset _name
+    unset _defval
+}
+
+options_state_machine() {
+    _opt_state_mode=$1
+    _opt_state_name=$2
+    _opt_state_known=no
+
+    opt_yes_no _gl          "OpenGL video output"
+    opt_yes_no _libguess    "libguess"
+    opt_yes_no _terminfo    "terminfo database for key codes"
+    opt_yes_no _termcap     "termcap database for key codes"
+    opt_yes_no _termios     "termios database for key codes"
+    opt_yes_no _iconv       "iconv for encoding conversion"
+    opt_yes_no _lirc        "LIRC (remote control) support"
+    opt_yes_no _joystick    "joystick support" no
+    opt_yes_no _vm          "X video mode extensions"
+    opt_yes_no _xf86keysym  "support for multimedia keys"
+    opt_yes_no _dvb         "DVB input"
+    opt_yes_no _tv          "TV interface (TV/DVB grabbers)" yes
+    opt_yes_no _tv_v4l2     "Video4Linux2 TV interface"
+    opt_yes_no _libv4l2     "libv4l2"
+    opt_yes_no _pvr         "Video4Linux2 MPEG PVR"
+    opt_yes_no _smb         "Samba (SMB) input"
+    opt_yes_no _libquvi4    "libquvi 0.4.x"
+    opt_yes_no _libquvi9    "libquvi 0.9.x"
+    opt_yes_no _lcms2       "LCMS2 support"
+    opt_yes_no _vcd         "VCD support" yes
+    opt_yes_no _bluray      "Blu-ray support"
+    opt_yes_no _dvdread     "libdvdread"
+    opt_yes_no _dvdnav      "libdvdnav"
+    opt_yes_no _enca        "ENCA charset oracle library"
+    opt_yes_no _libass      "subtitle rendering with libass"
+    opt_yes_no _libpostproc "postprocess filter (vf_pp)"
+    opt_yes_no _libavdevice "libavdevice demuxers"
+    opt_yes_no _libavfilter "libavfilter"
+    opt_yes_no _vapoursynth "VapourSynth filter bridge"
+    opt_yes_no _jpeg        "support for writing JPEG screenshots"
+    opt_yes_no _libcdio     "libcdio support"
+    opt_yes_no _ffmpeg      "skip FFmpeg/Libav autodetection"
+    opt_yes_no _ladspa      "LADSPA plugin support"
+    opt_yes_no _libbs2b     "libbs2b audio filter support"
+    opt_yes_no _mpg123      " libmpg123 MP3 decoding support"
+    opt_yes_no _libavresample "libavresample (preferred over libswresample)"
+    opt_yes_no _libswresample "libswresample"
+    opt_yes_no _caca        "CACA  video output"
+    opt_yes_no _sdl2        "SDL2 video and audio outputs" no
+    opt_yes_no _xv          "Xv video output"
+    opt_yes_no _vdpau       "VDPAU acceleration"
+    opt_yes_no _vaapi       "VAAPI acceleration"
+    opt_yes_no _vm          "XF86VidMode support (used for monitor FPS detection)"
+    opt_yes_no _xinerama    "Xinerama support"
+    opt_yes_no _x11         "X11 video output"
+    opt_yes_no _wayland     "Wayland video output"
+    opt_yes_no _xss         "support for disabling screensaver via xss"
+    opt_yes_no _alsa        "ALSA audio output"
+    opt_yes_no _ossaudio    "OSS audio output"
+    opt_yes_no _rsound      "RSound audio output"
+    opt_yes_no _sndio       "sndio audio output"
+    opt_yes_no _pulse       "Pulseaudio audio output"
+    opt_yes_no _portaudio   "PortAudio audio output"
+    opt_yes_no _jack        "JACK audio output"
+    opt_yes_no _openal      "OpenAL audio output"
+    opt_yes_no _select      "using select() on the audio device" yes
+    opt_yes_no _shm         "X11/Xv shared memory"
+    opt_yes_no _lua         "Lua scripting"
+    opt_yes_no _encoding    "encoding functionality" yes
+    opt_yes_no _build_man   "building manpage"
+}
 
 show_help(){
 cat << EOF
@@ -218,102 +235,25 @@ Installation directories:
   --datadir=DIR          directory for installing machine independent
                          data files (skins, etc) [PREFIX/share/mpv]
   --mandir=DIR           directory for installing man pages [PREFIX/share/man]
-  --docdir=DIR           directory for installing docs [PREFIX/share/doc/mpv]
   --confdir=DIR          directory for installing configuration files
                          [PREFIX/etc/mpv]
 
-Optional features:
-  --disable-encoding     disable encoding functionality [enable]
-  --disable-lua          disable Lua scripting support [autodetect]
-  --lua=LUA              select Lua package which should be autodetected
-                         Choices: 51 51deb 52 52deb luajit
-  --disable-libguess     disable libguess [autodetect]
-  --enable-terminfo      use terminfo database for key codes [autodetect]
-  --enable-termcap       use termcap database for key codes [autodetect]
-  --enable-termios       use termios database for key codes [autodetect]
-  --disable-iconv        disable iconv for encoding conversion [autodetect]
-  --enable-lirc          enable LIRC (remote control) support [autodetect]
-  --enable-joystick      enable joystick support [disable]
-  --disable-vm           disable X video mode extensions [autodetect]
-  --disable-xf86keysym   disable support for multimedia keys [autodetect]
-  --disable-tv           disable TV interface (TV/DVB grabbers) [enable]
-  --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
-  --disable-libv4l2      disable libv4l2 [autodetect]
-  --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
-  --enable-smb           enable Samba (SMB) input [autodetect]
-  --disable-libquvi4     disable libquvi 0.4.x [autodetect]
-  --disable-libquvi9     disable libquvi 0.9.x [autodetect]
-  --enable-lcms2         enable LCMS2 support [autodetect]
-  --disable-vcd          disable VCD support [autodetect]
-  --disable-bluray       disable Blu-ray support [autodetect]
-  --disable-dvdread      disable libdvdread [autodetect]
-  --disable-dvdnav       disable libdvdnav [autodetect]
-  --disable-enca         disable ENCA charset oracle library [autodetect]
-  --disable-libass       disable subtitle rendering with libass [autodetect]
-  --disable-libass-osd   disable OSD rendering with libass [autodetect]
-  --enable-rpath         enable runtime linker path for extra libs [disabled]
-  --disable-libpostproc  disable postprocess filter (vf_pp) [autodetect]
-  --disable-libavdevice  disable libavdevice demuxers [autodetect]
-  --disable-libavfilter  disable libavfilter [autodetect]
-  --disable-vapoursynth  disable VapourSynth filter bridge [autodetect]
-
-Codecs:
-  --enable-jpeg             enable JPEG input/output support [autodetect]
-  --enable-libcdio          enable libcdio support [autodetect]
-  --enable-libav            skip Libav autodetection [autodetect]
-  --disable-ladspa          disable LADSPA plugin support [autodetect]
-  --disable-libbs2b         disable libbs2b audio filter support [autodetect]
-  --disable-mpg123          disable libmpg123 MP3 decoding support [autodetect]
-
-Resampler:
-  --disable-libavresample   check for libswresample only [autodetect]
-
-Video output:
-  --enable-gl              enable OpenGL video output [autodetect]
-  --enable-caca            enable CACA  video output [autodetect]
-  --enable-sdl             enable SDL audio output [disable]
-  --enable-sdl2            enable SDL 2.0+ audio and video output [disable]
-  --enable-xv              enable Xv video output [autodetect]
-  --enable-vdpau           enable VDPAU acceleration [autodetect]
-  --enable-vaapi           enable VAAPI acceleration [autodetect]
-  --enable-vm              enable XF86VidMode support [autodetect]
-  --enable-xinerama        enable Xinerama support [autodetect]
-  --enable-x11             enable X11 video output [autodetect]
-  --enable-wayland         enable Wayland video output [autodetect]
-  --disable-xss            disable screensaver support via xss [autodetect]
-
-Audio output:
-  --disable-alsa         disable ALSA audio output [autodetect]
-  --disable-ossaudio     disable OSS audio output [autodetect]
-  --disable-rsound       disable RSound audio output [autodetect]
-  --disable-sndio        disable sndio audio output [autodetect]
-  --disable-pulse        disable Pulseaudio audio output [autodetect]
-  --disable-portaudio    disable PortAudio audio output [autodetect]
-  --disable-jack         disable JACK audio output [autodetect]
-  --enable-openal        enable OpenAL audio output [disable]
-  --disable-select       disable using select() on the audio device [enable]
-
-Miscellaneous options:
-  --enable-cross-compile enable cross-compilation [disable]
+Compilation options:
   --cc=COMPILER          C compiler to build mpv [gcc]
   --pkg-config=PKGCONFIG pkg-config to find some libraries [pkg-config]
-  --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
-  --with-install=PATH    path to a custom install program
-  --disable-manpage      do not build and install manpage [auto]
-  --disable-pdf          do not build and install PDF manual [auto]
-  --disable-build-date   do not include binary compile time
-
-Advanced options:
-  --enable-shm              enable shm [autodetect]
-  --disable-debug           compile-in debugging information [enable]
-  --disable-optimization    compile without -O2 [enable]
+  --disable-debug        compile-in debugging information [enable]
+  --disable-optimization compile without -O2 [enable]
 
 Use these options if autodetection fails:
-  --extra-cflags=FLAGS        extra CFLAGS
-  --extra-ldflags=FLAGS       extra LDFLAGS
-  --extra-libs=FLAGS          extra linker flags
-  --extra-libs-mpv=FLAGS      extra linker flags for mpv
+  --extra-cflags=FLAGS   extra CFLAGS
+  --extra-ldflags=FLAGS  extra LDFLAGS
+  --extra-libs=FLAGS     extra linker flags
+
+Features:
+EOF
+options_state_machine help
+cat << EOF
 
 This configure script is NOT autoconf-based, even though its output is similar.
 It will try to autodetect all configuration options. If you --enable an option
@@ -326,79 +266,12 @@ exit 0
 # GOTCHA: the variables below defines the default behavior for autodetection
 # and have - unless stated otherwise - at least 2 states : yes no
 # If autodetection is available then the third state is: auto
-_install=install
 _pkg_config=auto
 _cc=auto
 test "$CC" && _cc="$CC"
-_debug=-g
 _opt=-O2
-_cross_compile=no
 _prefix="/usr/local"
-ffmpeg=auto
-_encoding=yes
-_disable_avresample=no
-_x11=auto
-_wayland=auto
-_xss=auto
-_xv=auto
-_vdpau=auto
-_vaapi=auto
-_sdl=no
-_sdl2=no
-_jpeg=auto
-_gl=auto
-_aa=auto
-_caca=auto
-_dvb=auto
-_iconv=auto
-_ossaudio=auto
-_rsound=auto
-_pulse=auto
-_portaudio=auto
-_jack=auto
-_openal=no
-_libcdio=auto
-_mpg123=auto
-_ladspa=auto
-_libbs2b=auto
-_vcd=auto
-_bluray=auto
-_dvdread=auto
-_dvdnav=auto
-_lcms2=auto
-_vapoursynth=auto
-_xinerama=auto
-_vm=auto
-_xf86keysym=auto
-_sndio=auto
-_alsa=auto
-_select=yes
-_tv=yes
-_tv_v4l2=auto
-_libv4l2=auto
-_pvr=auto
-_smb=auto
-_libquvi4=auto
-_libquvi9=auto
-_libguess=auto
-_joystick=no
-_lirc=auto
-_terminfo=auto
-_termcap=auto
-_termios=auto
-_shm=auto
-_cdda=auto
-_enca=auto
-_ass=auto
-_libass_osd=auto
-lua=auto
-libpostproc=auto
-libavfilter=auto
-libavdevice=auto
-_stream_cache=yes
-_build_man=auto
-_build_pdf=auto
-_build_date=yes
+options_state_machine init
 for ac_option do
   case "$ac_option" in
   --help|-help|-h)
@@ -413,17 +286,9 @@ for ac_option do
   --mandir=*)
     _mandir=$(echo $ac_option | cut -d '=' -f 2)
     ;;
-  --docdir=*)
-    _docdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
   --confdir=*)
     _confdir=$(echo $ac_option | cut -d '=' -f 2)
     ;;
-
-  --with-install=*)
-    _install=$(echo $ac_option | cut -d '=' -f 2 )
-    ;;
-
   --extra-cflags=*)
     extra_cflags="$extra_cflags $(echo $ac_option | cut -d '=' -f 2-)"
     ;;
@@ -431,14 +296,7 @@ for ac_option do
     extra_ldflags="$extra_ldflags $(echo $ac_option | cut -d '=' -f 2-)"
     ;;
   --extra-libs=*)
-    extra_libs=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --extra-libs-mpv=*)
     libs_mplayer=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-
-  --target=*)
-    _target=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --cc=*)
     _cc=$(echo $ac_option | cut -d '=' -f 2)
@@ -446,21 +304,11 @@ for ac_option do
   --pkg-config=*)
     _pkg_config=$(echo $ac_option | cut -d '=' -f 2)
     ;;
-
   --enable-static)
     _ld_static='-static'
     ;;
   --disable-static)
     _ld_static=''
-    ;;
-  --enable-debug)
-    _debug='-g'
-    ;;
-  --enable-debug=*)
-    _debug=$(echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --disable-debug)
-    _debug=
     ;;
   --enable-optimization)
     _opt='-O2'
@@ -471,577 +319,220 @@ for ac_option do
   --disable-optimization)
     _opt=
     ;;
-  --enable-cross-compile)           _cross_compile=yes          ;;
-  --disable-cross-compile)          _cross_compile=no           ;;
-  --enable-encoding)    _encoding=yes   ;;
-  --disable-encoding)   _encoding=no    ;;
-  --enable-wayland)     _wayland=yes    ;;
-  --disable-wayland)    _wayland=no     ;;
-  --enable-x11)         _x11=yes        ;;
-  --disable-x11)        _x11=no         ;;
-  --enable-xss)         _xss=yes        ;;
-  --disable-xss)        _xss=no         ;;
-  --enable-xv)          _xv=yes         ;;
-  --disable-xv)         _xv=no          ;;
-  --enable-vdpau)       _vdpau=yes      ;;
-  --disable-vdpau)      _vdpau=no       ;;
-  --enable-vaapi)       _vaapi=yes      ;;
-  --disable-vaapi)      _vaapi=no       ;;
-  --enable-sdl)         _sdl=yes       ;;
-  --disable-sdl)        _sdl=no        ;;
-  --enable-sdl2)        _sdl2=yes       ;;
-  --disable-sdl2)       _sdl2=no        ;;
-  --enable-jpeg)        _jpeg=yes       ;;
-  --disable-jpeg)       _jpeg=no        ;;
-  --enable-gl)          _gl=yes         ;;
-  --disable-gl)         _gl=no          ;;
-  --enable-caca)        _caca=yes       ;;
-  --disable-caca)       _caca=no        ;;
-  --enable-dvb)         _dvb=yes        ;;
-  --disable-dvb)        _dvb=no         ;;
-  --enable-iconv)       _iconv=yes      ;;
-  --disable-iconv)      _iconv=no       ;;
-  --enable-ossaudio)    _ossaudio=yes   ;;
-  --disable-ossaudio)   _ossaudio=no    ;;
-  --enable-rsound)      _rsound=yes     ;;
-  --disable-rsound)     _rsound=no      ;;
-  --enable-sndio)       _sndio=yes      ;;
-  --disable-sndio)      _sndio=no       ;;
-  --enable-pulse)       _pulse=yes      ;;
-  --disable-pulse)      _pulse=no       ;;
-  --enable-portaudio)   _portaudio=yes  ;;
-  --disable-portaudio)  _portaudio=no   ;;
-  --enable-jack)        _jack=yes       ;;
-  --disable-jack)       _jack=no        ;;
-  --enable-openal)      _openal=auto    ;;
-  --disable-openal)     _openal=no      ;;
-  --enable-libcdio)     _libcdio=yes    ;;
-  --disable-libcdio)    _libcdio=no     ;;
-  --enable-mpg123)      _mpg123=yes     ;;
-  --disable-mpg123)     _mpg123=no      ;;
-  --enable-ladspa)      _ladspa=yes     ;;
-  --disable-ladspa)     _ladspa=no      ;;
-  --enable-libbs2b)     _libbs2b=yes    ;;
-  --disable-libbs2b)    _libbs2b=no     ;;
-  --enable-vcd)         _vcd=yes        ;;
-  --disable-vcd)        _vcd=no         ;;
-  --enable-bluray)      _bluray=yes     ;;
-  --disable-bluray)     _bluray=no      ;;
-  --enable-dvdread)     _dvdread=yes    ;;
-  --disable-dvdread)    _dvdread=no     ;;
-  --enable-dvdnav)      _dvdnav=yes    ;;
-  --disable-dvdnav)     _dvdnav=no     ;;
-  --enable-lcms2)       _lcms2=yes      ;;
-  --disable-lcms2)      _lcms2=no       ;;
-  --enable-vapoursynth) _vapoursynth=yes ;;
-  --dsiable-vapoursynth)_vapoursynth=no ;;
-  --enable-xinerama)    _xinerama=yes   ;;
-  --disable-xinerama)   _xinerama=no    ;;
-  --enable-vm)          _vm=yes         ;;
-  --disable-vm)         _vm=no          ;;
-  --enable-xf86keysym)  _xf86keysym=yes ;;
-  --disable-xf86keysym) _xf86keysym=no  ;;
-  --enable-alsa)        _alsa=yes       ;;
-  --disable-alsa)       _alsa=no        ;;
-  --enable-tv)          _tv=yes         ;;
-  --disable-tv)         _tv=no          ;;
-  --enable-tv-v4l2)     _tv_v4l2=yes    ;;
-  --disable-tv-v4l2)    _tv_v4l2=no     ;;
-  --enable-libv4l2)     _libv4l2=yes   ;;
-  --disable-libv4l2)    _libv4l2=no    ;;
-  --enable-pvr)         _pvr=yes        ;;
-  --disable-pvr)        _pvr=no         ;;
-  --enable-smb)         _smb=yes        ;;
-  --disable-smb)        _smb=no ;;
-  --enable-libquvi4)    _libquvi4=yes    ;;
-  --disable-libquvi4)   _libquvi4=no     ;;
-  --enable-libquvi9)    _libquvi9=yes    ;;
-  --disable-libquvi9)   _libquvi9=no     ;;
-  --enable-libguess)    _libguess=yes   ;;
-  --disable-libguess)   _libguess=no    ;;
-  --enable-joystick)    _joystick=yes   ;;
-  --disable-joystick)   _joystick=no    ;;
-  --enable-libav)       ffmpeg=yes      ;;
-  --disable-libavresample) _disable_avresample=yes ;;
-  --enable-libavresample) _disable_avresample=no   ;;
-
-  --enable-lua)         lua=yes         ;;
-  --disable-lua)        lua=no          ;;
-  --lua=*)              lua_pkg=$(echo $ac_option | cut -d '=' -f 2) ;;
-  --enable-lirc)        _lirc=yes       ;;
-  --disable-lirc)       _lirc=no        ;;
-  --enable-terminfo)    _terminfo=yes   ;;
-  --disable-terminfo)   _terminfo=no    ;;
-  --enable-termcap)     _termcap=yes    ;;
-  --disable-termcap)    _termcap=no     ;;
-  --enable-termios)     _termios=yes    ;;
-  --disable-termios)    _termios=no     ;;
-  --enable-shm)         _shm=yes        ;;
-  --disable-shm)        _shm=no         ;;
-  --enable-select)      _select=yes     ;;
-  --disable-select)     _select=no      ;;
-  --enable-libass)      _ass=yes        ;;
-  --disable-libass)     _ass=no         ;;
-  --enable-libass-osd)  _libass_osd=yes ;;
-  --disable-libass-osd) _libass_osd=no  ;;
-  --enable-libpostproc) libpostproc=yes ;;
-  --disable-libpostproc) libpostproc=no ;;
-  --enable-libavdevice) libavdevice=auto ;;
-  --disable-libavdevice) libavdevice=no ;;
-  --enable-libavfilter) libavfilter=auto ;;
-  --disable-libavfilter) libavfilter=no ;;
-
-  --enable-enca)        _enca=yes       ;;
-  --disable-enca)       _enca=no        ;;
-
-  --enable-manpage) _build_man=yes ;;
-  --disable-manpage) _build_man=no ;;
-  --enable-pdf) _build_pdf=yes ;;
-  --disable-pdf) _build_pdf=no ;;
-
-  --enable-build-date) _build_date=yes ;;
-  --disable-build-date) _build_date=no ;;
   *)
-    echo "Unknown parameter: $ac_option" >&2
-    exit 1
+    options_state_machine parse "$ac_option"
+    if test "$_opt_state_known" != yes ; then
+        echo "Unknown parameter: $ac_option" >&2
+        exit 1
+    fi
     ;;
 
   esac
 done
 
-# Atmos: moved this here, to be correct, if --prefix is specified
 test -z "$_bindir"  && _bindir="$_prefix/bin"
 test -z "$_mandir"  && _mandir="$_prefix/share/man"
-test -z "$_docdir"  && _docdir="$_prefix/share/doc/mpv"
 test -z "$_confdir" && _confdir="$_prefix/etc/mpv"
 
-for tmpdir in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
-  test "$tmpdir" && break
-done
-
-mplayer_tmpdir="$tmpdir/mpv-configure-$RANDOM-$$"
-mkdir $mplayer_tmpdir || die "Unable to create tmpdir."
+mplayer_tmpdir=$(mktemp -d --tmpdir mpv-configure-XXXX)
+test -n "$mplayer_tmpdir" || die "Unable to create tmpdir."
 
 TMPLOG="config.log"
 
 rm -f "$TMPLOG"
 echo Parameters configure was run with: > "$TMPLOG"
-if test -n "$CFLAGS" ; then
-    echo ${_echo_n} CFLAGS="'$CFLAGS' ${_echo_c}" >> "$TMPLOG"
-fi
-if test -n "$PKG_CONFIG_PATH" ; then
-    echo ${_echo_n} PKG_CONFIG_PATH="'$PKG_CONFIG_PATH' ${_echo_c}" >> "$TMPLOG"
-fi
-echo ./configure $configuration >> "$TMPLOG"
+echo CFLAGS="'$CFLAGS'" PKG_CONFIG_PATH="'$PKG_CONFIG_PATH'" ./configure $configuration >> "$TMPLOG"
 echo >> "$TMPLOG"
 
+TMPC="$mplayer_tmpdir/tmp.c"
+TMPEXE="$mplayer_tmpdir/tmp"
+CONFIG_MAK="$mplayer_tmpdir/config.mak"
+CONFIG_H="$mplayer_tmpdir/config.h"
 
-echocheck "cross compilation"
-echores $_cross_compile
+echo > $CONFIG_MAK
+echo > $CONFIG_H
 
-if test $_cross_compile = yes; then
-  tmp_run() {
-    return 0
-  }
-fi
-
-tool_prefix=""
-
-if test $_cross_compile = yes ; then
-    # Usually cross-compiler prefixes match with the target triplet
-    test -n "$_target" && tool_prefix="$_target"-
-fi
-
-test "$_pkg_config" = auto && _pkg_config="$tool_prefix"pkg-config
-
-if test "$_cc" = auto ; then
-    if test -n "$tool_prefix" ; then
-        _cc="$tool_prefix"gcc
-    else
-        _cc=cc
-    fi
-fi
+test "$_pkg_config" = auto && _pkg_config=pkg-config
+test "$_cc" = auto && _cc=cc
 
 extra_cflags="-I. -D_GNU_SOURCE $extra_cflags"
 
 _rst2man=rst2man
-if [ -f "$(which rst2man.py)" ] ; then
-  _rst2man=rst2man.py
-fi
+test -f "$(which rst2man.py)" && _rst2man=rst2man.py
 
 echocheck "whether to build manpages with rst2man"
 if test "$_build_man" = auto ; then
     _build_man=no
     command_check "$_rst2man" --version && _build_man=yes
-else
-    _build_man=no
 fi
 echores "$_build_man"
 
-_rst2pdf=rst2pdf
-if [ -f "$(which rst2pdf.py)" ] ; then
-  _rst2pdf=rst2pdf.py
-fi
-
-echocheck "whether to build manual PDFs with rst2pdf"
-pdfcheck() {
-    echo test | $_rst2pdf -c --repeat-table-rows -o "$mplayer_tmpdir/test.pdf"
-}
-
-if test "$_build_pdf" = auto ; then
-    _build_pdf=no
-    command_check pdfcheck && _build_pdf=yes
-else
-    _build_pdf=no
-fi
-echores "$_build_pdf"
-
-echocheck "whether to print binary build date"
-if test "$_build_date" = yes ; then
-    _build_yes=yes
-else
-    _build_date=no
-    extra_cflags="$extra_cflags -DNO_BUILD_TIMESTAMPS"
-fi
-echores "$_build_date"
-
-
-
-TMPC="$mplayer_tmpdir/tmp.c"
-TMPCPP="$mplayer_tmpdir/tmp.cpp"
-TMPEXE="$mplayer_tmpdir/tmp"
-TMPH="$mplayer_tmpdir/tmp.h"
-TMPS="$mplayer_tmpdir/tmp.S"
-
 echocheck "working compiler"
 cflag_check "" || die "Compiler is not functioning correctly. Check your installation and custom CFLAGS $CFLAGS ."
-echo "yes"
+echores "yes"
 
 echocheck "perl"
 command_check perl -Mv5.8 -e';' || die "Perl is not functioning correctly or is ancient. Install the latest perl available."
-echo yes
-
-
-# ---
+echores yes
 
 echocheck "compiler support of -pipe option"
 cflag_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
 
-OURCFLAGS="-std=c99 -Wall"
+addcflags() { cflag_check "$@" && OURCFLAGS="$OURCFLAGS $@" ; }
 
-addcflags() {
-    cflag_check "$@" && OURCFLAGS="$OURCFLAGS $@"
-}
+OURCFLAGS="-std=c99 -Wall $_opt"
 
-addcflags "-Wundef -Wmissing-prototypes -Wshadow -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls -Wno-pointer-sign -Werror=implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function"
-addcflags "-Wempty-body"
+addcflags -g -g3 -ggdb
+addcflags -Wundef -Wmissing-prototypes -Wshadow -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls -Wno-pointer-sign -Werror=implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function -Wempty-body
 # clang
-addcflags "-Wno-logical-op-parentheses -fcolor-diagnostics -Wno-tautological-compare -Wno-tautological-constant-out-of-range-compare"
+addcflags -Wno-logical-op-parentheses -fcolor-diagnostics -Wno-tautological-compare -Wno-tautological-constant-out-of-range-compare
 
 cflag_check -MD -MP && DEPFLAGS="-MD -MP"
+cflag_check -lm && _ld_lm="-lm"
 
 extra_ldflags="$extra_ldflags $LDFLAGS"
 extra_cflags="$extra_cflags $CPPFLAGS"
 
-######################
-# MAIN TESTS GO HERE #
-######################
+# If $1 is "yes", define $2 as 1 in config.h, else define it as 0
+define_yes_no() {
+    if test "$1" = yes ; then
+        echo "#define $2 1" >> $CONFIG_H
+    else
+        echo "#define $2 0" >> $CONFIG_H
+    fi
+}
 
+# Write the results of a check to config.mak/.h.
+# Arguments: "yes/no"($1) "name"($2)
+check_yes_no() {
+    define_yes_no $1 "HAVE_$2"
+    echo "$2 = $1" >> $CONFIG_MAK
+}
 
-echocheck "-lm"
-if cflag_check -lm ; then
-  _ld_lm="-lm"
-  echores "yes"
-else
-  _ld_lm=""
-  echores "no"
-fi
+check_trivial() {
+    echocheck "$1"
+    check_yes_no $2 $3
+    echores "$2"
+}
 
+# Arguments: "message"($1) "setting"($2) "name"($3) "code"($4)
+# Also, $5 - $N can be libraries needed - it'll try each separately.
+# Use " " as first entry if you want to try with no libraries too.
+check_compile() {
+    _res="$2"
+    _name="$3"
+    _code="$4"
+    echocheck "$1"
+    if test $_res = auto ; then
+        _res=no
+        shift 4
+        while true ; do
+            compile_check "$_code" "$1" && libs_mplayer="$libs_mplayer $1" && _res=yes && break
+            test -z "$1" && break
+            shift
+        done
+    fi
+    check_yes_no $_res $_name
+    echores $_res
+    test $_res = yes && return 0 || return 1
+}
 
-echocheck "nanosleep"
-_nanosleep=no
-statement_check time.h 'nanosleep(0, 0)' && _nanosleep=yes
-if test "$_nanosleep" = yes ; then
-  def_nanosleep='#define HAVE_NANOSLEEP 1'
-else
-  def_nanosleep='#define HAVE_NANOSLEEP 0'
-fi
-echores "$_nanosleep"
+# Arguments: "message"($1) "setting"($2) "name"($3) "include"($4) "statement"($5)
+# Also, $6 - $N can be libraries needed - it'll try each separately.
+# Use " " as first entry if you want to try with no libraries too.
+check_statement_libs() {
+    _res="$2"
+    _name="$3"
+    _inc="$4"
+    _st="$5"
+    echocheck "$1"
+    if test $_res = auto ; then
+        _res=no
+        shift 5
+        while true ; do
+            statement_check "$_inc" "$_st" "$1" && libs_mplayer="$libs_mplayer $1" && _res=yes && break
+            test -z "$1" && break
+            shift
+        done
+    fi
+    check_yes_no $_res $_name
+    echores $_res
+    test $_res = yes && return 0 || return 1
+}
 
+# Print "yes" if previous command succeeded, else "no"
+defretval() { # shell is retarded?
+    if test $? == 0 ; then
+        echo "yes"
+    else
+        echo "no"
+    fi
+}
 
 echocheck "dynamic loader"
 _dl=no
 for _ld_tmp in "" "-ldl"; do
   statement_check dlfcn.h 'dlopen("", 0)' $_ld_tmp && _ld_dl="$_ld_tmp" && _dl=yes && break
 done
-if test "$_dl" = yes ; then
-  def_dl='#define HAVE_LIBDL 1'
-else
-  def_dl='#define HAVE_LIBDL 0'
-fi
+define_yes_no $_dl HAVE_LIBDL
 echores "$_dl"
-
 
 echocheck "pthread"
 cflag_check -pthread && _ld_pthread="$_ld_pthread -pthread"
 cflag_check -lpthread && _ld_pthread="$_ld_pthread -lpthread"
+cflag_check -lrt && _ld_pthread="$_ld_pthread -lrt"
 extra_cflags="$extra_cflags -D_REENTRANT -D_THREAD_SAFE"
-cat > $TMPC << EOF
-#include <pthread.h>
-static void *func(void *arg) { return arg; }
-int main(void) {
- pthread_t tid;
- return pthread_create (&tid, 0, func, 0) != 0;
-}
-EOF
-_pthreads=no
-if cc_check "$_ld_pthread" ; then
-    _pthreads=yes
-fi
-echores "$_pthreads"
-if test "$_pthreads" = no ; then
-  die "Unable to find pthreads support."
-fi
+compile_check waftools/fragments/pthreads.c "$_ld_pthread" || die "Unable to find pthreads support."
+echores "yes"
 
+check_statement_libs "compiler support for __atomic built-ins" auto ATOMIC_BUILTINS \
+    stdint.h 'int64_t test = 0; test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)' \
+    " " "-latomic"
+_atomic=$(defretval)
 
-echocheck "compiler support for __atomic built-ins"
-_atomic=no
-for _ld_tmp in "" "-latomic" ; do
-  statement_check stdint.h 'int64_t test = 0; test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)' $_ld_tmp &&
-    libs_mplayer="$libs_mplayer $_ld_tmp" && _atomic=yes && break
-done
-if test "$_atomic" = yes ; then
-  def_atomic="#define HAVE_ATOMIC_BUILTINS 1"
-else
-  def_atomic="#define HAVE_ATOMIC_BUILTINS 0"
-fi
-echores "$_atomic"
-
-if test "$_atomic" = no ; then
-  echocheck "compiler support for __sync built-ins"
-  _sync=no
-  statement_check stdint.h 'int64_t test = 0; test = __sync_add_and_fetch(&test, 1)' && _sync=yes
-  if test "$_sync" = yes ; then
-    def_sync="#define HAVE_SYNC_BUILTINS 1"
-  else
-    def_sync="#define HAVE_SYNC_BUILTINS 0"
-  fi
-  echores "$_sync"
-else
-  def_sync="#define HAVE_SYNC_BUILTINS 0"
-fi
+_sync=auto
+test "$_atomic" = yes && _sync=no
+check_statement_libs "compiler support for __sync built-ins" $_sync SYNC_BUILTINS \
+    stdint.h 'int64_t test = 0; test = __sync_add_and_fetch(&test, 1)'
+_sync=$(defretval)
 
 if test "$_atomic" = no && test "$_sync" = no ; then
   die "your compiler must support either __atomic or __sync built-ins."
 fi
 
-if test "$_pthreads" = yes ; then
-
-# Cargo-cult for -lrt, which is needed on not so recent glibc version for
-# clock_gettime. It's documented as required before before glibc 2.17, which
-# was released in december 2012. On newer glibc versions or on other systems,
-# this will hopefully do nothing.
-echocheck "linking with -lrt"
-_rt=no
-cc_check "$_ld_pthread -lrt" && _rt=yes
-if test "$_rt" = yes ; then
-  _ld_pthread="$_ld_pthread -lrt"
-fi
-echores "$_rt"
-
-fi
-
-echocheck "stream cache"
-_stream_cache="$_pthreads"
-if test "$_stream_cache" = yes ; then
-  def_stream_cache='#define HAVE_STREAM_CACHE 1'
-else
-  def_stream_cache='#define HAVE_STREAM_CACHE 0'
-fi
-echores "$_stream_cache"
-
-echocheck "iconv"
-if test "$_iconv" = auto ; then
-  cat > $TMPC << EOF
-#include <stdio.h>
-#include <unistd.h>
-#include <iconv.h>
-#define INBUFSIZE 1024
-#define OUTBUFSIZE 4096
-
-char inbuffer[INBUFSIZE];
-char outbuffer[OUTBUFSIZE];
-
-int main(void) {
-  size_t numread;
-  iconv_t icdsc;
-  char *tocode="UTF-8";
-  char *fromcode="cp1250";
-  if ((icdsc = iconv_open(tocode, fromcode)) != (iconv_t)(-1)) {
-    while ((numread = read(0, inbuffer, INBUFSIZE))) {
-      char *iptr=inbuffer;
-      char *optr=outbuffer;
-      size_t inleft=numread;
-      size_t outleft=OUTBUFSIZE;
-      if (iconv(icdsc, &iptr, &inleft, &optr, &outleft)
-          != (size_t)(-1)) {
-        write(1, outbuffer, OUTBUFSIZE - outleft);
-      }
-    }
-    if (iconv_close(icdsc) == -1)
-      ;
-  }
-  return 0;
-}
-EOF
-  _iconv=no
-  for _ld_tmp in "" "-liconv" "-liconv $_ld_dl" ; do
-    cc_check $_ld_lm $_ld_tmp && libs_mplayer="$libs_mplayer $_ld_tmp" &&
-      _iconv=yes && break
-  done
-  if test "$_iconv" != yes ; then
+check_compile "iconv" $_iconv ICONV waftools/fragments/iconv.c " " "-liconv" "-liconv $_ld_dl"
+_iconv=$(defretval)
+if test "$_iconv" != yes ; then
     die "Unable to find iconv which should be part of standard compilation environment. Aborting. If you really mean to compile without iconv support use --disable-iconv."
-  fi
-fi
-if test "$_iconv" = yes ; then
-  def_iconv='#define HAVE_ICONV 1'
-else
-  def_iconv='#define HAVE_ICONV 0'
-fi
-echores "$_iconv"
-
-
-echocheck "soundcard.h"
-_soundcard_h=no
-def_soundcard_h='#define HAVE_SOUNDCARD_H 0'
-def_sys_soundcard_h='#define HAVE_SYS_SOUNDCARD_H 0'
-for _soundcard_header in "sys/soundcard.h" "soundcard.h"; do
-  header_check $_soundcard_header && _soundcard_h=yes &&
-    res_comment="$_soundcard_header" && break
-done
-
-if test "$_soundcard_h" = yes ; then
-  if test $_soundcard_header = "sys/soundcard.h"; then
-    def_sys_soundcard_h='#define HAVE_SYS_SOUNDCARD_H 1'
-  else
-    def_soundcard_h='#define HAVE_SOUNDCARD_H 1'
-  fi
-fi
-echores "$_soundcard_h"
-
-
-echocheck "sys/videoio.h"
-sys_videoio_h=no
-def_sys_videoio_h='#define HAVE_SYS_VIDEOIO_H 0'
-header_check sys/videoio.h && sys_videoio_h=yes &&
-    def_sys_videoio_h='#define HAVE_SYS_VIDEOIO_H 1'
-echores "$sys_videoio_h"
-
-
-echocheck "terminfo"
-if test "$_terminfo" = auto ; then
-  _terminfo=no
-  for _ld_tmp in "-lncurses" "-lncursesw"; do
-    statement_check term.h 'setupterm(0, 1, 0)' $_ld_tmp &&
-      libs_mplayer="$libs_mplayer $_ld_tmp" && _terminfo=yes && break
-  done
-fi
-if test "$_terminfo" = yes ; then
-  def_terminfo='#define HAVE_TERMINFO 1'
-  test $_ld_tmp && res_comment="using $_ld_tmp"
-
-  if test "$_termcap" = auto ; then
-    _termcap=yes # terminfo provides termcap
-  fi
-else
-  def_terminfo='#define HAVE_TERMINFO 0'
-fi
-echores "$_terminfo"
-
-
-echocheck "termcap"
-if test "$_termcap" = auto ; then
-  _termcap=no
-  for _ld_tmp in "-lncurses" "-ltinfo" "-ltermcap"; do
-    statement_check term.h 'tgetent(0, 0)' $_ld_tmp &&
-      libs_mplayer="$libs_mplayer $_ld_tmp" && _termcap=yes && break
-  done
-fi
-if test "$_termcap" = yes ; then
-  def_termcap='#define HAVE_TERMCAP 1'
-  test $_ld_tmp && res_comment="using $_ld_tmp"
-else
-  def_termcap='#define HAVE_TERMCAP 0'
-fi
-echores "$_termcap"
-
-
-echocheck "termios"
-def_termios='#define HAVE_TERMIOS 0'
-def_termios_h='#define HAVE_TERMIOS_H 0'
-def_termios_sys_h='#define HAVE_SYS_TERMIOS_H 0'
-if test "$_termios" = auto ; then
-  _termios=no
-  for _termios_header in "termios.h" "sys/termios.h"; do
-  header_check $_termios_header && _termios=yes &&
-    res_comment="using $_termios_header" && break
-done
 fi
 
-if test "$_termios" = yes ; then
-  def_termios='#define HAVE_TERMIOS 1'
-  if test "$_termios_header" = "termios.h" ; then
-    def_termios_h='#define HAVE_TERMIOS_H 1'
-  else
-    def_termios_sys_h='#define HAVE_SYS_TERMIOS_H 1'
-  fi
-fi
-echores "$_termios"
+_soundcard_header=sys/soundcard.h
+_check_snd=yes
+check_statement_libs "sys/soundcard.h" auto SYS_SOUNDCARD_H sys/soundcard.h
+test $(defretval) = yes && _soundcard_header=sys/soundcard.h && _check_snd=no
+check_statement_libs "soundcard.h" $_check_snd SOUNDCARD_H soundcard.h
+test $(defretval) = yes && _soundcard_header=soundcard.h
 
+check_statement_libs "sys/videoio.h" auto SYS_VIDEOIO_H sys/videoio.h
 
-echocheck "shm"
-if test "$_shm" = auto ; then
-  cat > $TMPC << EOF
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-int main(void) {
-  shmget(0, 0, 0);
-  shmat(0, 0, 0);
-  shmctl(0, 0, 0);
-  return 0;
-}
-EOF
-  _shm=no
-  cc_check && _shm=yes
-fi
-if test "$_shm" = yes ; then
-  def_shm='#define HAVE_SHM 1'
-else
-  def_shm='#define HAVE_SHM 0'
-fi
-echores "$_shm"
+check_statement_libs "terminfo" $_terminfo TERMINFO term.h 'setupterm(0, 1, 0)' "-lncurses" "-lncursesw"
 
+check_statement_libs "termcap" $_termcap TERMCAP term.h 'tgetent(0, 0)' " " "-lncurses" "-ltinfo" "-ltermcap"
 
-echocheck "audio select()"
-if test "$_select" = no ; then
-  def_select='#define HAVE_AUDIO_SELECT 0'
-elif test  "$_select" = yes ; then
-  def_select='#define HAVE_AUDIO_SELECT 1'
-fi
-echores "$_select"
+_termios_ok=no
+check_statement_libs "termios.h" $_termios TERMIOS_H termios.h
+test $(defretval) = yes && _termios_ok=yes && _termios=no
+check_statement_libs "sys/termios.h" $_termios SYS_TERMIOS_H 'sys/termios.h'
+test $(defretval) = yes && _termios_ok=yes
+define_yes_no $_termios_ok HAVE_TERMIOS
 
+check_statement_libs "shm" $_shm SHM "sys/types.h sys/ipc.h sys/shm.h" \
+    "shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0);"
 
-echocheck "sys/sysinfo.h"
-_sys_sysinfo=no
-statement_check sys/sysinfo.h 'struct sysinfo s_info; s_info.mem_unit=0; sysinfo(&s_info)' && _sys_sysinfo=yes
-if test "$_sys_sysinfo" = yes ; then
-  def_sys_sysinfo_h='#define HAVE_SYS_SYSINFO_H 1'
-else
-  def_sys_sysinfo_h='#define HAVE_SYS_SYSINFO_H 0'
-fi
-echores "$_sys_sysinfo"
+check_trivial "audio select()" $_select AUDIO_SELECT
 
+check_statement_libs "sys/sysinfo.h" auto SYS_SYSINFO_H \
+    sys/sysinfo.h 'struct sysinfo s_info; s_info.mem_unit=0; sysinfo(&s_info)'
 
 echocheck "pkg-config"
 if $($_pkg_config --version > /dev/null 2>&1); then
@@ -1054,312 +545,105 @@ else
   echores "no"
 fi
 
-
-echocheck "libguess support"
-if test "$_libguess" = auto ; then
-    _libguess=no
-    if pkg_config_add 'libguess >= 1.0' ; then
-        _libguess=yes
+# Arguments: "message"($1) "setting"($2) "name"($3) "pkg-config string"($4)
+# The name will be used as "#define HAVE_$name 1/0" in config.h, and as
+# "$name = yes/no" in config.mak
+# "setting"($2) is yes/no/auto and represents the --enable/--disable option
+check_pkg_config() {
+    echocheck "$1"
+    _res=$2
+    if test "$2" = auto ; then
+        _res=no
+        if pkg_config_add "$4" ; then
+            _res=yes
+        fi
     fi
-fi
-if test "$_libguess" = yes; then
-    def_libguess="#define HAVE_LIBGUESS 1"
-else
-    def_libguess="#define HAVE_LIBGUESS 0"
-fi
-echores "$_libguess"
+    check_yes_no $_res $3
+    echores "$_res"
+    test $_res = yes && return 0 || return 1
+}
 
+check_pkg_config "libguess support" $_libguess LIBGUESS 'libguess >= 1.0'
 
-echocheck "Samba support (libsmbclient)"
-if test "$_smb" = auto ; then
-    _smb=no
-    if pkg_config_add 'smbclient >= 0.2.0' ; then
-        _smb=yes
-    fi
-fi
-if test "$_smb" = yes; then
-    def_smb="#define HAVE_LIBSMBCLIENT 1"
-else
-    def_smb="#define HAVE_LIBSMBCLIENT 0"
-fi
-echores "$_smb"
+check_pkg_config "Samba support (libsmbclient)" $_smb LIBSMBCLIENT 'smbclient >= 0.2.0'
 
+check_pkg_config "libquvi 0.4.x support" $_libquvi4 LIBQUVI4 'libquvi >= 0.4.1'
+_libquvi4=$(defretval)
 
-echocheck "libquvi 0.4.x support"
-if test "$_libquvi4" = auto ; then
-    _libquvi4=no
-    if pkg_config_add 'libquvi >= 0.4.1' ; then
-        _libquvi4=yes
-    fi
-fi
-echores "$_libquvi4"
+test $_libquvi4 = yes && _libquvi9=no
+check_pkg_config "libquvi 0.9.x support" $_libquvi9 LIBQUVI9 'libquvi-0.9 >= 0.9.0'
+_libquvi9=$(defretval)
 
-echocheck "libquvi 0.9.x support"
-if test "$_libquvi4" = yes ; then
-    _libquvi9=no
-    res_comment="using libquvi 0.4.x"
-fi
-if test "$_libquvi9" = auto ; then
-    _libquvi9=no
-    if pkg_config_add 'libquvi-0.9 >= 0.9.0' ; then
-        _libquvi9=yes
-    fi
-fi
-echores "$_libquvi9"
-
-if test "$_libquvi9" = yes || test "$_libquvi4" = yes; then
-    def_libquvi9="#define HAVE_LIBQUVI 1"
-else
-    def_libquvi9="#define HAVE_LIBQUVI 0"
-fi
-
-#########
-# VIDEO #
-#########
+_libquvi=no
+test "$_libquvi9" = yes || test "$_libquvi4" = yes && _libquvi=yes
+define_yes_no $_libquvi HAVE_LIBQUVI
 
 _wlver="1.2.0"
-echocheck "Wayland"
-if test "$_wayland" = yes || test "$_wayland" = auto; then
- _wayland="no"
- pkg_config_add "wayland-client >= $_wlver wayland-cursor >= $_wlver xkbcommon >= 0.3.0" \
-     && _wayland="yes"
-fi
-if test "$_wayland" = yes; then
-  res_comment=""
-  def_wayland='#define HAVE_WAYLAND 1'
-else
-  res_comment="version >= $_wlver"
-  def_wayland='#define HAVE_WAYLAND 0'
-fi
-echores "$_wayland"
-unset _wlver
+check_pkg_config "Wayland" $_wayland WAYLAND "wayland-client >= $_wlver wayland-cursor >= $_wlver xkbcommon >= 0.3.0"
+_wayland=$(defretval)
 
-echocheck "X11"
-if test "$_x11" = auto ; then
- _x11="no"
- pkg_config_add "x11" && _x11="yes"
-fi
-if test "$_x11" = yes ; then
-  def_x11='#define HAVE_X11 1'
-else
-  _x11=no
-  def_x11='#define HAVE_X11 0'
-  res_comment="check if the dev(el) packages are installed"
-fi
-echores "$_x11"
+check_pkg_config "X11" $_x11 X11 "x11"
+_x11=$(defretval)
 
-echocheck "Xss screensaver extensions"
-if test "$_xss" = auto ; then
-  _xss=no
-  statement_check "X11/extensions/scrnsaver.h" 'XScreenSaverSuspend(NULL, True)' -lXss && _xss=yes
-fi
-if test "$_xss" = yes ; then
-  def_xss='#define HAVE_XSS 1'
-  libs_mplayer="$libs_mplayer -lXss"
-else
-  def_xss='#define HAVE_XSS 0'
-fi
-echores "$_xss"
-
-echocheck "X extensions"
-_xext=no
-if test "$_x11" = yes ; then
- pkg_config_add "xext" && _xext="yes"
-fi
-if test "$_xext" = yes ; then
-  def_xext='#define HAVE_XEXT 1'
-  echores "yes"
-else
-  def_xext='#define HAVE_XEXT 0'
-  echores "no"
+# Disable X11 dependencies
+_xext=auto
+if test "$_x11" = no ; then
+    _xss=no
+    _xext=no
+    _xv=no
+    _vdpau=no
+    _vaapi=no
+    _xinerama=no
+    _vm=no
 fi
 
-echocheck "Xv"
-if test "$_xv" = auto && test "$_x11" = yes ; then
-  _xv=no
-  statement_check_broken X11/Xlib.h X11/extensions/Xvlib.h 'XvGetPortAttribute(0, 0, 0, 0)' -lXv && _xv=yes
-fi
+check_pkg_config "Xss screensaver extensions" $_xss XSS "xscrnsaver"
 
-if test "$_xv" = yes ; then
-  def_xv='#define HAVE_XV 1'
-  libs_mplayer="$libs_mplayer -lXv"
-else
-  def_xv='#define HAVE_XV 0'
-fi
-echores "$_xv"
+check_pkg_config "X extensions" $_xext XEXT "xext"
 
+check_pkg_config "Xv" $_xv XV "xv"
 
-echocheck "VDPAU"
-if test "$_vdpau" = auto && test "$_x11" = yes ; then
-  _vdpau=no
-  if test "$_dl" = yes ; then
-    pkg_config_add 'vdpau >= 0.2' && _vdpau=yes
-  fi
-fi
-if test "$_vdpau" = yes ; then
-  def_vdpau='#define HAVE_VDPAU 1'
-  def_vdpau_hwaccel='#define HAVE_VDPAU_HWACCEL 1'
-else
-  def_vdpau='#define HAVE_VDPAU 0'
-  def_vdpau_hwaccel='#define HAVE_VDPAU_HWACCEL 0'
-fi
-echores "$_vdpau"
+check_pkg_config "VDPAU" $_vdpau VDPAU "vdpau >= 0.2"
+_vdpau=$(defretval)
+define_yes_no $_vdpau HAVE_VDPAU_HWACCEL
 
-
-echocheck "VAAPI"
-_vaapi_vpp=no
-def_vaapi_vpp='#define HAVE_VAAPI_VPP 0'
-_vaapi_glx=no
-def_vaapi_glx='#define HAVE_VAAPI_GLX 0'
-if test "$_vaapi" = auto && test "$_x11" = yes ; then
-  _vaapi=no
-  if test "$_dl" = yes ; then
-    pkg_config_add 'libva >= 0.32.0 libva-x11 >= 0.32.0' && _vaapi=yes
-  fi
-fi
-if test "$_vaapi" = yes ; then
-  def_vaapi='#define HAVE_VAAPI 1'
-  def_vaapi_hwaccel='#define HAVE_VAAPI_HWACCEL 1'
-else
-  def_vaapi='#define HAVE_VAAPI 0'
-  def_vaapi_hwaccel='#define HAVE_VAAPI_HWACCEL 0'
-fi
-echores "$_vaapi"
+check_pkg_config "VAAPI" $_vaapi VAAPI 'libva >= 0.32.0 libva-x11 >= 0.32.0'
+_vaapi=$(defretval)
+define_yes_no $_vaapi HAVE_VAAPI_HWACCEL
 
 if test "$_vaapi" = yes ; then
-  echocheck "VAAPI VPP"
-  if pkg-config 'libva >= 0.34.0' ; then
-    _vaapi_vpp=yes
-    def_vaapi_vpp='#define HAVE_VAAPI_VPP 1'
-  fi
-  echores "$_vaapi_glx"
-  echocheck "VAAPI GLX"
-  if pkg_config_add 'libva-glx >= 0.32.0' ; then
-    _vaapi_glx=yes
-    def_vaapi_glx='#define HAVE_VAAPI_GLX 1'
-  fi
-  echores "$_vaapi_glx"
-fi
+    check_pkg_config "VAAPI VPP" auto VAAPI_VPP 'libva >= 0.34.0'
 
-
-echocheck "Xinerama"
-if test "$_xinerama" = auto && test "$_x11" = yes ; then
-  _xinerama=no
-  statement_check X11/extensions/Xinerama.h 'XineramaIsActive(0)' -lXinerama && _xinerama=yes
-fi
-
-if test "$_xinerama" = yes ; then
-  def_xinerama='#define HAVE_XINERAMA 1'
-  libs_mplayer="$libs_mplayer -lXinerama"
+    check_pkg_config "VAAPI GLX" auto VAAPI_GLX 'libva-glx >= 0.32.0'
+    _vaapi_glx=$(defretval)
 else
-  def_xinerama='#define HAVE_XINERAMA 0'
+    check_yes_no no VAAPI_VPP
+    check_yes_no no VAAPI_GLX
+    _vaapi_glx=no
 fi
-echores "$_xinerama"
 
+check_pkg_config "Xinerama" $_xinerama XINERAMA 'xinerama'
 
-# Note: the -lXxf86vm library is the VideoMode extension and though it's not
-# needed for DGA, AFAIK every distribution packages together with DGA stuffs
-# named 'X extensions' or something similar.
-# This check may be useful for future mplayer versions (to change resolution)
-# If you run into problems, remove '-lXxf86vm'.
-echocheck "Xxf86vm"
-if test "$_vm" = auto && test "$_x11" = yes ; then
-  _vm=no
-  statement_check_broken X11/Xlib.h X11/extensions/xf86vmode.h 'XF86VidModeQueryExtension(0, 0, 0)' -lXxf86vm && _vm=yes
-fi
-if test "$_vm" = yes ; then
-  def_vm='#define HAVE_XF86VM 1'
-  libs_mplayer="$libs_mplayer -lXxf86vm"
-else
-  def_vm='#define HAVE_XF86VM 0'
-fi
-echores "$_vm"
+check_pkg_config "Xxf86vm" $_vm XF86VM 'xxf86vm'
 
 # Check for the presence of special keycodes, like audio control buttons
 # that XFree86 might have.  Used to be bundled with the xf86vm check, but
 # has nothing to do with xf86vm and XFree 3.x has xf86vm but does NOT
 # have these new keycodes.
-echocheck "XF86keysym"
-if test "$_xf86keysym" = auto && test "$_x11" = yes ; then
-  _xf86keysym=no
-  return_check X11/XF86keysym.h XF86XK_AudioPause && _xf86keysym=yes
-fi
-if test "$_xf86keysym" = yes ; then
-  def_xf86keysym='#define HAVE_XF86XK 1'
-else
-  def_xf86keysym='#define HAVE_XF86XK 0'
-fi
-echores "$_xf86keysym"
+check_statement_libs "XF86keysym" auto XF86XK X11/XF86keysym.h 'int x = XF86XK_AudioPause;'
 
+check_pkg_config "CACA" $_caca CACA 'caca >= 0.99.beta18'
 
-echocheck "CACA"
-if test "$_caca" = auto ; then
-  _caca=no
-  pkg_config_add 'caca >= 0.99.beta18' && _caca=yes
-fi
-if test "$_caca" = yes ; then
-  def_caca='#define HAVE_CACA 1'
-else
-  def_caca='#define HAVE_CACA 0'
-fi
-echores "$_caca"
+check_compile "DVB" $_dvb DVB waftools/fragments/dvb.c
+_dvbin=$(defretval)
+check_yes_no $_dvbin DVBIN
 
+check_statement_libs "JPEG support" $_jpeg JPEG "stdio.h jpeglib.h" "" "-ljpeg $_ld_lm"
 
-echocheck "DVB"
-if test "$_dvb" = auto ; then
-  _dvb=no
-cat >$TMPC << EOF
-#include <poll.h>
-#include <sys/ioctl.h>
-#include <stdio.h>
-#include <time.h>
-#include <unistd.h>
-#include <linux/dvb/dmx.h>
-#include <linux/dvb/frontend.h>
-#include <linux/dvb/video.h>
-#include <linux/dvb/audio.h>
-int main(void) {return 0;}
-EOF
-  for _inc_tmp in "" "-I/usr/src/DVB/include" ; do
-    cc_check $_inc_tmp && _dvb=yes &&
-      extra_cflags="$extra_cflags $_inc_tmp" && break
-  done
-fi
-echores "$_dvb"
-if test "$_dvb" = yes ; then
-  _dvbin=yes
-  def_dvb='#define HAVE_DVB 1'
-  def_dvbin='#define HAVE_DVBIN 1'
-else
-  _dvbin=no
-  def_dvb='#define HAVE_DVB 0'
-  def_dvbin='#define HAVE_DVBIN 0 '
-fi
-
-
-echocheck "JPEG support"
-if test "$_jpeg" = auto ; then
-  _jpeg=no
-  header_check_broken stdio.h jpeglib.h -ljpeg $_ld_lm && _jpeg=yes
-fi
-echores "$_jpeg"
-
-if test "$_jpeg" = yes ; then
-  def_jpeg='#define HAVE_JPEG 1'
-  libs_mplayer="$libs_mplayer -ljpeg"
-else
-  def_jpeg='#define HAVE_JPEG 0'
-fi
-
-
-#################
-# VIDEO + AUDIO #
-#################
-
-
+(test "$_x11" = no && test "$_wayland" = no) && _gl=no
 echocheck "OpenGL"
 #Note: this test is run even with --enable-gl since we autodetect linker flags
-if (test "$_x11" = yes || test "$_wayland" = yes) && test "$_gl" != no ; then
+if test "$_gl" != no ; then
   cat > $TMPC << EOF
 #if defined(GL_WAYLAND)
 #include <EGL/egl.h>
@@ -1368,6 +652,7 @@ if (test "$_x11" = yes || test "$_wayland" = yes) && test "$_gl" != no ; then
 #include <GL/glx.h>
 #endif
 #include <GL/gl.h>
+#include <GL/glext.h>
 int main(int argc, char *argv[]) {
 #if defined(GL_WAYLAND)
   eglCreateContext(NULL, NULL, EGL_NO_CONTEXT, NULL);
@@ -1375,800 +660,208 @@ int main(int argc, char *argv[]) {
   glXCreateContext(NULL, NULL, NULL, True);
 #endif
   glFinish();
-  return 0;
+  return !GL_INVALID_FRAMEBUFFER_OPERATION; // check correct glext.h
 }
 EOF
   _gl=no
   if test "$_x11" = yes ; then
     for _ld_tmp in "" -lGL "-lGL -lXdamage" "-lGL $_ld_pthread" ; do
-      if cc_check $_ld_tmp $_ld_lm ; then
+      if compile_check $TMPC $_ld_tmp $_ld_lm ; then
         _gl=yes
         _gl_x11=yes
         libs_mplayer="$libs_mplayer $_ld_tmp $_ld_dl"
+        test "$_gl_x11" = yes && res_comment="$res_comment x11"
         break
       fi
     done
   fi
-  if test "$_wayland" = yes && cc_check -DGL_WAYLAND -lGL -lEGL &&
+  if test "$_wayland" = yes && compile_check $TMPC -DGL_WAYLAND -lGL -lEGL &&
       pkg_config_add "wayland-egl >= 9.0.0"; then
     _gl=yes
     _gl_wayland=yes
     libs_mplayer="$libs_mplayer -lGL -lEGL"
-  fi
-
-  cat > $TMPC << EOF
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glext.h>
-#else
-#include <GL/gl.h>
-#include <GL/glext.h>
-#endif
-int main(int argc, char *argv[]) {
-  return !GL_INVALID_FRAMEBUFFER_OPERATION;
-}
-EOF
-  if ! cc_check; then
-    _gl=no
-    _gl_x11=no
-    _gl_wayland=no
-    res_comment="missing glext.h, get from http://www.opengl.org/registry/api/glext.h"
+    test "$_gl_wayland" = yes && res_comment="$res_comment wayland"
   fi
 else
   _gl=no
 fi
 
-def_gl_x11='#define HAVE_GL_X11 0'
-def_gl_wayland='#define HAVE_GL_WAYLAND 0'
-
-if test "$_gl" = yes ; then
-  def_gl='#define HAVE_GL 1'
-  res_comment="backends:"
-  if test "$_gl_x11" = yes ; then
-    def_gl_x11='#define HAVE_GL_X11 1'
-    res_comment="$res_comment x11"
-  fi
-  if test "$_gl_wayland" = yes ; then
-    def_gl_wayland='#define HAVE_GL_WAYLAND 1'
-    res_comment="$res_comment wayland"
-  fi
-else
-  def_gl='#define HAVE_GL 0'
+if test "$_gl" = no ; then
+    _gl_x11=no
+    _gl_wayland=no
 fi
+check_yes_no $_gl GL
+check_yes_no $_gl_x11 GL_X11
+check_yes_no $_gl_wayland GL_WAYLAND
 echores "$_gl"
 
-
 echocheck "VDPAU with OpenGL/X11"
-if test "$_gl_x11" = yes && test "$_vdpau" = yes ; then
-  def_vdpau_gl_x11='#define HAVE_VDPAU_GL_X11 1'
-  _vdpau_gl_x11=yes
-else
-  def_vdpau_gl_x11='#define HAVE_VDPAU_GL_X11 0'
-  _vdpau_gl_x11=no
-fi
+_vdpau_gl_x11=no
+(test "$_gl_x11" = yes && test "$_vdpau" = yes) && _vdpau_gl_x11=yes
+check_yes_no $_vdpau_gl_x11 VDPAU_GL_X11
 echores "$_vdpau_gl_x11"
 
+check_pkg_config "SDL 2.0" $_sdl2 SDL2 'sdl2'
 
-echocheck "SDL 2.0"
-if test "$_sdl2" = yes ; then
-  pkg_config_add 'sdl2' && _sdl2=yes
-fi
-if test "$_sdl2" = yes ; then
-  _sdl=yes # sdl2 implies sdl
-  def_sdl='#define HAVE_SDL1 1'
-  def_sdl2='#define HAVE_SDL2 1'
-  echores "$_sdl2"
-else
-  def_sdl2='#define HAVE_SDL2 0'
-  echores "$_sdl2"
-  echocheck "SDL"
-  if test "$_sdl" = yes ; then
-    pkg_config_add 'sdl' && _sdl=yes
-  fi
-  if test "$_sdl" = yes ; then
-    def_sdl='#define HAVE_SDL1 1'
-  else
-    def_sdl='#define HAVE_SDL1 0'
-  fi
-  echores "$_sdl"
-fi
+check_statement_libs "OSS Audio" $_ossaudio OSS_AUDIO $_soundcard_header "int x = SNDCTL_DSP_SETFRAGMENT;"
 
+check_statement_libs "RSound" $_rsound RSOUND rsound.h 'rsd_init(NULL);' -lrsound
 
+check_statement_libs "sndio" $_sndio SNDIO sndio.h 'struct sio_par par; sio_initpar(&par); const char *s = SIO_DEVANY' -lsndio
 
+check_pkg_config "PulseAudio" $_pulse PULSE 'libpulse >= 0.9'
 
-#########
-# AUDIO #
-#########
+check_pkg_config "PortAudio" $_portaudio PORTAUDIO 'portaudio-2.0 >= 19'
 
+check_pkg_config "JACK" $_jack JACK 'jack'
 
-echocheck "OSS Audio"
-if test "$_ossaudio" = auto ; then
-  _ossaudio=no
-  return_check $_soundcard_header SNDCTL_DSP_SETFRAGMENT && _ossaudio=yes
-fi
-if test "$_ossaudio" = yes ; then
-  def_ossaudio='#define HAVE_OSS_AUDIO 1'
-  def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
-  def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/mixer"'
-else
-  def_ossaudio='#define HAVE_OSS_AUDIO 0'
-  def_ossaudio_devdsp='#define PATH_DEV_DSP ""'
-  def_ossaudio_devmixer='#define PATH_DEV_MIXER ""'
-fi
-echores "$_ossaudio"
+check_pkg_config "OpenAL" $_openal OPENAL 'openal >= 1.13'
 
+check_pkg_config "ALSA audio" $_alsa ALSA 'alsa >= 1.0.9'
 
-echocheck "RSound"
-if test "$_rsound" = auto ; then
-   _rsound=no
-   statement_check rsound.h 'rsd_init(NULL);' -lrsound && _rsound=yes
-fi
-echores "$_rsound"
+check_trivial "VCD support" $_vcd VCD
 
-if test "$_rsound" = yes ; then
-   def_rsound='#define HAVE_RSOUND 1'
-   libs_mplayer="$libs_mplayer -lrsound"
-else
-   def_rsound='#define HAVE_RSOUND 0'
+check_pkg_config "Blu-ray support" $_bluray LIBBLURAY 'libbluray >= 0.2.1'
+
+check_pkg_config "dvdread" $_dvdread DVDREAD 'dvdread >= 4.1.0'
+
+check_pkg_config "dvdnav" $_dvdnav DVDNAV 'dvdnav >= 4.2.0'
+
+check_pkg_config "libcdio" $_libcdio CDDA 'libcdio_paranoia'
+
+_oldass=$_libass
+check_pkg_config "SSA/ASS support" $_libass LIBASS 'libass'
+_libass=$(defretval)
+if test $_oldass != no && test $_libass = no ; then
+    die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-libass."
 fi
 
-
-echocheck "sndio"
-if test "$_sndio" = auto ; then
-   _sndio=no
-   statement_check sndio.h 'struct sio_par par; sio_initpar(&par); const char *s = SIO_DEVANY' -lsndio && _sndio=yes
-fi
-echores "$_sndio"
-
-if test "$_sndio" = yes ; then
-  def_sndio='#define HAVE_SNDIO 1'
-  libs_mplayer="$libs_mplayer -lsndio"
-else
-  def_sndio='#define HAVE_SNDIO 0'
-fi
-
-
-echocheck "pulse"
-if test "$_pulse" = auto ; then
-  _pulse=no
-  if pkg_config_add 'libpulse >= 0.9' ; then
-      _pulse=yes
-  fi
-fi
-echores "$_pulse"
-
-if test "$_pulse" = yes ; then
-  def_pulse='#define HAVE_PULSE 1'
-else
-  def_pulse='#define HAVE_PULSE 0'
-fi
-
-
-echocheck "PortAudio"
-if test "$_portaudio" = auto && test "$_pthreads" != yes ; then
-    _portaudio=no
-    res_comment="pthreads not enabled"
-fi
-if test "$_portaudio" = auto ; then
-  _portaudio=no
-  if pkg_config_add 'portaudio-2.0 >= 19' ; then
-      _portaudio=yes
-  fi
-fi
-echores "$_portaudio"
-
-if test "$_portaudio" = yes ; then
-  def_portaudio='#define HAVE_PORTAUDIO 1'
-else
-  def_portaudio='#define HAVE_PORTAUDIO 0'
-fi
-
-
-echocheck "JACK"
-if test "$_jack" = auto ; then
-  _jack=no
-  if pkg_config_add jack ; then
-      _jack=yes
-  fi
-fi
-
-if test "$_jack" = yes ; then
-  def_jack='#define HAVE_JACK 1'
-else
-  def_jack='#define HAVE_JACK 0'
-fi
-echores "$_jack"
-
-
-echocheck "OpenAL"
-if test "$_openal" = auto ; then
-  _openal=no
-  if pkg_config_add 'openal >= 1.13' ; then
-      _openal=yes
-  fi
-fi
-echores "$_openal"
-
-if test "$_openal" = yes ; then
-  def_openal='#define HAVE_OPENAL 1'
-else
-  def_openal='#define HAVE_OPENAL 0'
-fi
-
-
-echocheck "ALSA audio"
-if test "$_alsa" = auto ; then
-    _alsa=no
-    if pkg_config_add "alsa >= 1.0.9" ; then
-        _alsa=yes
-    fi
-fi
-def_alsa='#define HAVE_ALSA 0'
-if test "$_alsa" = yes ; then
-    def_alsa='#define HAVE_ALSA 1'
-fi
-echores "$_alsa"
-
-
-# set default CD/DVD devices
-default_cdrom_device="/dev/cdrom"
-default_dvd_device="/dev/dvd"
-
-
-echocheck "VCD support"
-if test "$_vcd" = auto; then
-  _vcd=yes
-fi
-if test "$_vcd" = yes; then
-  def_vcd='#define HAVE_VCD 1'
-else
-  def_vcd='#define HAVE_VCD 0'
-fi
-echores "$_vcd"
-
-
-
-echocheck "Blu-ray support"
-if test "$_bluray" = auto ; then
-  _bluray=no
-  pkg_config_add 'libbluray >= 0.2.1' && _bluray=yes
-fi
-if test "$_bluray" = yes ; then
-  def_bluray='#define HAVE_LIBBLURAY 1'
-else
-  def_bluray='#define HAVE_LIBBLURAY 0'
-fi
-echores "$_bluray"
-
-
-echocheck "dvdread"
-if test "$_dvdread" = auto ; then
-  _dvdread=no
-  pkg_config_add 'dvdread >= 4.1.0' && _dvdread=yes
-fi
-if test "$_dvdread" = yes ; then
-  def_dvdread='#define HAVE_DVDREAD 1'
-else
-  def_dvdread='#define HAVE_DVDREAD 0'
-fi
-echores "$_dvdread"
-
-
-echocheck "dvdnav"
-if test "$_dvdnav" = auto ; then
-  _dvdnav=no
-  pkg_config_add 'dvdnav >= 4.2.0' && _dvdnav=yes
-fi
-if test "$_dvdnav" = yes ; then
-  def_dvdnav='#define HAVE_DVDNAV 1'
-else
-  def_dvdnav='#define HAVE_DVDNAV 0'
-fi
-echores "$_dvdnav"
-
-
-echocheck "libcdio"
-if test "$_libcdio" = auto ; then
-    _libcdio=no
-    if pkg_config_add 'libcdio_paranoia' ; then
-        _libcdio=yes
-    fi
-fi
-if test "$_libcdio" = yes ; then
-    _cdda='yes'
-    def_cdda='#define HAVE_CDDA 1'
-else
-    _libcdio=no
-    _cdda='no'
-    def_cdda='#define HAVE_CDDA 0'
-fi
-echores "$_libcdio"
-
-
-echocheck "SSA/ASS support"
-if test "$_ass" = auto ; then
-    if pkg_config_add libass ; then
-        _ass=yes
-        def_ass='#define HAVE_LIBASS 1'
-    else
-        die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-libass."
-    fi
-else
-    def_ass='#define HAVE_LIBASS 0'
-fi
-echores "$_ass"
-
-
-echocheck "libass OSD support"
 _dummy_osd=yes
-if test "$_libass_osd" = auto ; then
-    _libass_osd=no
-    if test "$_ass" = yes ; then
-        _libass_osd=yes
-        _dummy_osd=no
-    fi
-fi
-echores "$_libass_osd"
+test $_libass = yes && _dummy_osd=no
+echo "LIBASS_OSD = $_libass" >> $CONFIG_MAK
+echo "DUMMY_OSD = $_dummy_osd" >> $CONFIG_MAK
 
+check_pkg_config "ENCA" $_enca ENCA 'enca'
 
-echocheck "ENCA"
-if test "$_enca" = auto ; then
-    _enca=no
-    statement_check enca.h 'enca_get_languages(NULL)' -lenca $_ld_lm && _enca=yes
-fi
-    if test "$_enca" = yes ; then
-        def_enca='#define HAVE_ENCA 1'
-        libs_mplayer="$libs_mplayer -lenca"
-    else
-        def_enca='#define HAVE_ENCA 0'
-    fi
-echores "$_enca"
+check_pkg_config "zlib" auto ZLIB 'zlib'
+test $(defretval) = no && die "Unable to find development files for zlib."
 
+check_pkg_config "mpg123 support" $_mpg123 MPG123 'libmpg123 >= 1.14.0'
 
-echocheck "zlib"
-_zlib=no
-statement_check zlib.h 'inflate(0, Z_NO_FLUSH)' -lz && _zlib=yes
-if test "$_zlib" = yes ; then
-  def_zlib='#define HAVE_ZLIB 1'
-  libs_mplayer="$libs_mplayer -lz"
-else
-  die "Unable to find development files for zlib."
-fi
-echores "$_zlib"
+test "$_dl" = no && _ladspa=no
+check_statement_libs "LADSPA plugin support" $_ladspa LADSPA ladspa.h 'LADSPA_Descriptor ld = {0}'
 
+check_pkg_config "libbs2b audio filter support" $_libbs2b LIBBS2B 'libbs2b'
 
-echocheck "mpg123 support"
-def_mpg123='#define HAVE_MPG123 0'
-if test "$_mpg123" = auto; then
-  _mpg123=no
-  pkg_config_add 'libmpg123 >= 1.14.0' && _mpg123=yes
-fi
-if test "$_mpg123" = yes ; then
-  def_mpg123='#define HAVE_MPG123 1'
-fi
-echores "$_mpg123"
+check_pkg_config "LCMS2 support" $_lcms2 LCMS2 'lcms2'
 
+check_pkg_config "VapourSynth support" $_vapoursynth VAPOURSYNTH 'vapoursynth >= 23 vapoursynth-script >= 23'
 
-echocheck "LADSPA plugin support"
-if test "$_ladspa" = auto ; then
-  _ladspa=no
-  if test "$_dl" = yes ; then
-    statement_check ladspa.h 'LADSPA_Descriptor ld = {0}' && _ladspa=yes
-  fi
-fi
-if test "$_ladspa" = yes; then
-  def_ladspa="#define HAVE_LADSPA 1"
-else
-  def_ladspa="#define HAVE_LADSPA 0"
-fi
-echores "$_ladspa"
+check_pkg_config "FFmpeg/Libav" $_ffmpeg FFMPEG \
+    "libavutil >= 52.48.101 libavcodec >= 55.34.1 libavformat >= 55.12.0 libswscale >= 2.1.2"
+test $(defretval) = no && die "Unable to find development files for some of the required Libav libraries above. Aborting."
 
+check_pkg_config "Libavresample" $_libavresample LIBAVRESAMPLE 'libavresample >= 1.1.0'
+_libavresample=$(defretval)
 
-echocheck "libbs2b audio filter support"
-if test "$_libbs2b" = auto ; then
-    _libbs2b=no
-    if pkg_config_add libbs2b ; then
-        _libbs2b=yes
-    fi
-fi
-def_libbs2b="#define HAVE_LIBBS2B 0"
-test "$_libbs2b" = yes && def_libbs2b="#define HAVE_LIBBS2B 1"
-echores "$_libbs2b"
+_libswresample=auto
+test $_libavresample = yes && _libswresample=no
+check_pkg_config "Libswresample" $_libswresample LIBSWRESAMPLE 'libswresample >= 0.17.104'
+_libswresample=$(defretval)
 
-
-echocheck "LCMS2 support"
-if test "$_lcms2" = auto ; then
-    _lcms2=no
-    if pkg_config_add lcms2 ; then
-        _lcms2=yes
-    fi
-fi
-if test "$_lcms2" = yes; then
-    def_lcms2="#define HAVE_LCMS2 1"
-else
-    def_lcms2="#define HAVE_LCMS2 0"
-fi
-echores "$_lcms2"
-
-
-echocheck "VapourSynth support"
-if test "$_vapoursynth" = auto ; then
-    _vapoursynth=no
-    if pkg_config_add 'vapoursynth >= 23 vapoursynth-script >= 23' ; then
-        _vapoursynth=yes
-    fi
-fi
-if test "$_vapoursynth" = yes ; then
-    def_vapoursynth="#define HAVE_VAPOURSYNTH 1"
-else
-    def_vapoursynth="#define HAVE_VAPOURSYNTH 0"
-fi
-echores "$_vapoursynth"
-
-
-all_libav_libs="libavutil >= 52.48.101:libavcodec >= 55.34.1:libavformat >= 55.12.0:libswscale >= 2.1.2"
-echocheck "Libav ($all_libav_libs)"
-if test "$ffmpeg" = auto ; then
-  IFS=":"   # shell should not be used for programming
-  if ! pkg_config_add $all_libav_libs ; then
-    die "Unable to find development files for some of the required Libav libraries above. Aborting."
-  fi
-fi
-echores "yes"
-
-
-_resampler=no
-_avresample=no
-
-
-def_libswresample='#define HAVE_LIBSWRESAMPLE 0'
-def_libavresample='#define HAVE_LIBAVRESAMPLE 0'
-
-echocheck "libavresample >= 1.1.0"
-if test "$_disable_avresample" = no ; then
-  if pkg_config_add "libavresample >= 1.1.0" ; then
-    _resampler=yes
-    _avresample=yes
-    def_libavresample='#define HAVE_LIBAVRESAMPLE 1'
-  fi
-fi
-echores "$_resampler"
-
-
-if test "$_resampler" = no ; then
-  echocheck "libswresample >= 0.17.104"
-  if pkg_config_add "libswresample >= 0.17.104" ; then
-    _resampler=yes
-    def_libswresample='#define HAVE_LIBSWRESAMPLE 1'
-  fi
-  echores "$_resampler"
-fi
-
-
-if test "$_resampler" = no ; then
+if test "$_libswresample" = no && test "$_libavresample" = no ; then
   die "No resampler found. Install libavresample or libswresample (FFmpeg)."
 fi
 
+# Arguments: "message"($1) "define"($2) "header"($3) "code"($4)
+api_statement_check() {
+    echocheck "$1"
+    _res=no
+    statement_check "$3" "$4" && _res=yes
+    define_yes_no $_res "$2"
+    echores "$_res"
+}
 
-echocheck "libavcodec avcodec_enum_to_chroma_pos API"
-_avcodec_has_chroma_pos_api=no
-statement_check libavcodec/avcodec.h 'int x, y; avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)' && _avcodec_has_chroma_pos_api=yes
-if test "$_avcodec_has_chroma_pos_api" = yes ; then
-  def_avcodec_has_chroma_pos_api='#define HAVE_AVCODEC_CHROMA_POS_API 1'
-else
-  def_avcodec_has_chroma_pos_api='#define HAVE_AVCODEC_CHROMA_POS_API 0'
-fi
-echores "$_avcodec_has_chroma_pos_api"
+api_statement_check \
+    "libavcodec avcodec_enum_to_chroma_pos API" \
+    HAVE_AVCODEC_CHROMA_POS_API \
+    libavcodec/avcodec.h \
+    'int x, y; avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)'
 
+api_statement_check \
+    "libavcodec metadata update side data" \
+    HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA \
+    libavcodec/avcodec.h \
+    'enum AVPacketSideDataType type = AV_PKT_DATA_METADATA_UPDATE'
 
-echocheck "libavcodec metadata update side data"
-_avcodec_has_metadata_update_side_data=no
-statement_check libavcodec/avcodec.h 'enum AVPacketSideDataType type = AV_PKT_DATA_METADATA_UPDATE' && _avcodec_has_metadata_update_side_data=yes
-if test "$_avcodec_has_metadata_update_side_data" = yes ; then
-  def_avcodec_has_metadata_update_side_data='#define HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA 1'
-else
-  def_avcodec_has_metadata_update_side_data='#define HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA 0'
-fi
-echores "$_avcodec_has_metadata_update_side_data"
+api_statement_check \
+    "libavcodec replaygain side data" \
+    HAVE_AVCODEC_REPLAYGAIN_SIDE_DATA \
+    libavcodec/avcodec.h \
+    'enum AVPacketSideDataType type = AV_PKT_DATA_REPLAYGAIN'
 
+api_statement_check \
+    "libavutil AVFrame metadata" \
+    HAVE_AVFRAME_METADATA \
+    libavutil/frame.h \
+    'av_frame_get_metadata(NULL)'
 
-echocheck "libavcodec replaygain side data"
-_avcodec_has_replaygain_side_data=no
-statement_check libavcodec/avcodec.h 'enum AVPacketSideDataType type = AV_PKT_DATA_REPLAYGAIN' && _avcodec_has_replaygain_side_data=yes
-if test "$_avcodec_has_replaygain_side_data" = yes ; then
-  def_avcodec_has_replaygain_side_data='#define HAVE_AVCODEC_REPLAYGAIN_SIDE_DATA 1'
-else
-  def_avcodec_has_replaygain_side_data='#define HAVE_AVCODEC_REPLAYGAIN_SIDE_DATA 0'
-fi
-echores "$_avcodec_has_replaygain_side_data"
+api_statement_check \
+    "libavutil QP API" \
+    HAVE_AVUTIL_QP_API \
+    libavutil/frame.h \
+    'av_frame_get_qp_table(NULL, NULL, NULL)'
 
+check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 3.90.100'
 
-echocheck "libavutil AVFrame metadata"
-_avutil_has_avframe_metadata=no
-statement_check libavutil/frame.h 'av_frame_get_metadata(NULL)' && _avutil_has_avframe_metadata=yes
-if test "$_avutil_has_avframe_metadata" = yes ; then
-  def_avutil_has_avframe_metadata='#define HAVE_AVFRAME_METADATA 1'
-else
-  def_avutil_has_avframe_metadata='#define HAVE_AVFRAME_METADATA 0'
-fi
-echores "$_avutil_has_avframe_metadata"
+check_pkg_config "libavdevice" $_libavdevice LIBAVDEVICE 'libavdevice >= 54.0.0'
 
+check_pkg_config "libpostproc" $_libpostproc LIBPOSTPROC 'libpostproc >= 52.0.0'
 
-echocheck "libavutil QP API"
-_avutil_has_qp_api=no
-statement_check libavutil/frame.h 'av_frame_get_qp_table(NULL, NULL, NULL)' && _avutil_has_qp_api=yes
-if test "$_avutil_has_qp_api" = yes ; then
-  def_avutil_has_qp_api='#define HAVE_AVUTIL_QP_API 1'
-else
-  def_avutil_has_qp_api='#define HAVE_AVUTIL_QP_API 0'
-fi
-echores "$_avutil_has_qp_api"
+check_trivial "TV interface" $_tv TV
 
+check_statement_libs "Video 4 Linux 2 TV interface" $_tv_v4l2 TV_V4L2 \
+    "sys/time.h linux/videodev2.h"
+_tv_v4l2=$(defretval)
+check_trivial "TV audio input" $_tv_v4l2 AUDIO_INPUT
 
-echocheck "libavfilter"
-if test "$libavfilter" = auto ; then
-    libavfilter=no
-    if pkg_config_add "libavfilter >= 3.90.100" ; then
-        libavfilter=yes
-    fi
-fi
-if test "$libavfilter" = yes ; then
-    def_libavfilter='#define HAVE_LIBAVFILTER 1'
-else
-    def_libavfilter='#define HAVE_LIBAVFILTER 0'
-fi
-echores "$libavfilter"
+test $_tv_v4l2 = no && _libv4l2=no
+check_pkg_config "libv4l2 support" $_libv4l2 LIBV4L2 'libv4l2'
 
-
-echocheck "libavdevice >= 54.0.0"
-if test "$libavdevice" = auto ; then
-    libavdevice=no
-    if pkg_config_add "libavdevice >= 54.0.0" ; then
-        libavdevice=yes
-    fi
-fi
-if test "$libavdevice" = yes ; then
-    def_libavdevice='#define HAVE_LIBAVDEVICE 1'
-else
-    def_libavdevice='#define HAVE_LIBAVDEVICE 0'
-fi
-echores "$libavdevice"
-
-
-echocheck "libpostproc >= 52.0.0"
-if test "$libpostproc" = auto ; then
-    libpostproc=no
-    if pkg_config_add "libpostproc >= 52.0.0" ; then
-        libpostproc=yes
-    fi
-fi
-if test "$libpostproc" = yes ; then
-    def_libpostproc='#define HAVE_LIBPOSTPROC 1'
-else
-    def_libpostproc='#define HAVE_LIBPOSTPROC 0'
-fi
-echores "$libpostproc"
-
-
-echocheck "TV interface"
-if test "$_tv" = yes ; then
-  def_tv='#define HAVE_TV 1'
-else
-  def_tv='#define HAVE_TV 0'
-fi
-echores "$_tv"
-
-
-echocheck "Video 4 Linux 2 TV interface"
-if test "$_tv_v4l2" = auto ; then
-  _tv_v4l2=no
-  if test "$_tv" = yes ; then
-    header_check_broken sys/time.h linux/videodev2.h && _tv_v4l2=yes
-  fi
-fi
-if test "$_tv_v4l2" = yes ; then
-  _audio_input=yes
-  def_tv_v4l2='#define HAVE_TV_V4L2 1'
-else
-  def_tv_v4l2='#define HAVE_TV_V4L2 0'
-fi
-echores "$_tv_v4l2"
-
-echocheck "libv4l2 support"
-if test "$_libv4l2" = auto ; then
-    _libv4l2=no
-    if pkg_config_add "libv4l2" ; then
-        _libv4l2=yes
-    fi
-fi
-if test "$_libv4l2" = yes; then
-    def_libv4l2="#define HAVE_LIBV4L2 1"
-else
-    def_libv4l2="#define HAVE_LIBV4L2 0"
-fi
-echores "$_libv4l2"
-
-
-echocheck "Video 4 Linux 2 MPEG PVR interface"
-if test "$_pvr" = auto ; then
- _pvr=no
- if test "$_tv_v4l2" = yes ; then
-  cat > $TMPC <<EOF
-#include <sys/time.h>
-#include <linux/videodev2.h>
-int main(void) { struct v4l2_ext_controls ext; return ext.controls->value; }
-EOF
-  cc_check && _pvr=yes
- fi
-fi
-if test "$_pvr" = yes ; then
-  def_pvr='#define HAVE_PVR 1'
-else
-  def_pvr='#define HAVE_PVR 0'
-fi
-echores "$_pvr"
-
+test "$_tv_v4l2" = no && _pvr=no
+check_compile "Video 4 Linux 2 MPEG PVR interface" $_pvr PVR waftools/fragments/pvr.c
 
 # Note: Lua has no official .pc file, so there are different OS-specific ones.
 # Also, we support luajit, which is compatible to 5.1.
-# The situation is further complicated by distros supporting multiple Lua
-# versions, without ensuring libraries linking to conflicting Lua libs don't
-# cause issues. This is a real problem with libquvi.
-
-cat > $TMPC << EOF
-#include <stdlib.h>
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
-EOF
-# abuse $TMPH file as second temp file
-cat > $TMPH << EOF
-void test_lua(void) {
-    lua_State *L = luaL_newstate();
-    lua_pushstring(L, "test");
-    lua_setglobal(L, "test");
-}
-void test_other(void) {
-EOF
-
-# test all other Lua using packages (hack that gives us time)
-if test "$_libquvi4" = yes ; then
-
-echo "#include <quvi/quvi.h>" >> $TMPC
-cat >> $TMPH << EOF
-    quvi_t q;
-    if (quvi_init(&q) == QUVI_OK)
-        quvi_supported(q, "http://nope");
-EOF
-
-fi
-
-if test "$_libquvi9" = yes ; then
-
-echo "#include <quvi.h>" >> $TMPC
-cat >> $TMPH << EOF
-    quvi_t q = quvi_new();
-    if (quvi_ok(q))
-        quvi_supports(q, "http://nope", QUVI_SUPPORTS_MODE_OFFLINE, QUVI_SUPPORTS_TYPE_MEDIA);
-EOF
-
-fi
-
-cat >> $TMPH << EOF
-}
-int main(void) {
-    test_lua();
-    test_other();
-    return 0;
-}
-EOF
-
-cat $TMPH >> $TMPC
 
 test_lua() {
-    # changed by pkg_config_add
-    old_extra_cflags="$extra_cflags"
-    old_libs_mplayer="$libs_mplayer"
-    echocheck "Lua $2 ($1)"
-    if test "$lua" = yes ; then
-        echores "no"
-        return 1
+    if test "$_lua" = auto && $_pkg_config "$1" ; then
+        check_pkg_config "Lua ($1)" $_lua LUA "$1"
     fi
-    if test "x$lua_pkg" != "x" && test "$lua_pkg" != "$1" ; then
-        echores "no"
-        return 1
-    fi
-    if pkg_config_add "$2" ; then
-        if test $_cross_compile = no ; then
-            if cc_check && tmp_run ; then
-                echo > /dev/null # idiot NOP
-            else
-                extra_cflags="$old_extra_cflags"
-                libs_mplayer="$old_libs_mplayer"
-                echores "no - does not run"
-                return 1
-            fi
-        fi
-        lua=yes
-    fi
-    echores "$lua"
-    test "$lua" = yes
-    return $?
 }
 
-if test "$lua" = auto ; then
+test_lua "lua >= 5.1.0 lua < 5.2.0"
+test_lua "lua5.1 >= 5.1.0" # debian
+test_lua "luajit >= 2.0.0"
+test_lua "lua >= 5.2.0"
+test_lua "lua5.2 >= 5.2.0" # debian
 
-lua=no
-test_lua 51 "lua >= 5.1.0 lua < 5.2.0"
-test_lua 51deb "lua5.1 >= 5.1.0" # debian
-test_lua luajit "luajit >= 2.0.0"
-# assume all our dependencies (libquvi in particular) link with 5.1
-test_lua 52 "lua >= 5.2.0"
-test_lua 52deb "lua5.2 >= 5.2.0" # debian
+test "$_lua" = no && check_yes_no $lua LUA
 
-fi
+check_trivial "joystick" $_joystick JOYSTICK
 
-if test "$lua" = yes ; then
-    def_lua='#define HAVE_LUA 1'
-else
-    def_lua='#define HAVE_LUA 0'
-fi
+check_statement_libs "lirc" $_lirc LIRC lirc/lirc_client.h "" -llirc_client
 
-echocheck "encoding"
-if test "$_encoding" = yes ; then
-    def_encoding="#define HAVE_ENCODING 1"
-else
-    def_encoding="#define HAVE_ENCODING 0"
-fi
-echores "$_encoding"
-
+check_trivial "encoding" $_encoding ENCODING
 
 # needs dlopen on unix
 _dlopen="$_dl"
-
-if test "$_dlopen" = yes ; then
-  def_dlopen='#define HAVE_DLOPEN 1'
-else
-  def_dlopen='#define HAVE_DLOPEN 0'
-fi
-
-#############################################################################
-
-echocheck "compiler support for noexecstack"
-if cflag_check -Wl,-z,noexecstack ; then
-  extra_ldflags="-Wl,-z,noexecstack $extra_ldflags"
-  echores "yes"
-else
-  echores "no"
-fi
+check_yes_no $_dlopen DLOPEN
 
 extra_ldflags="$extra_ldflags $_ld_pthread"
 libs_mplayer="$libs_mplayer $_ld_dl"
 
-echocheck "joystick"
-def_joystick='#define HAVE_JOYSTICK 0'
-if test "$_joystick" = yes ; then
-  def_joystick='#define HAVE_JOYSTICK 1'
-fi
-echores "$_joystick"
-
-echocheck "lirc"
-if test "$_lirc" = auto ; then
-  _lirc=no
-  header_check lirc/lirc_client.h -llirc_client && _lirc=yes
-fi
-if test "$_lirc" = yes ; then
-  def_lirc='#define HAVE_LIRC 1'
-  libs_mplayer="$libs_mplayer -llirc_client"
-else
-  def_lirc='#define HAVE_LIRC 0'
-fi
-echores "$_lirc"
-
-#############################################################################
-
 CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE"
-
 
 # This is done so waf builds won't conflict with this. In fact, waf and old
 # build system can coexist in parallel, at the same time. This is because
@@ -2178,17 +871,10 @@ CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
 if test ! -f Makefile ; then
     ln -s old-makefile Makefile
 fi
-rm -rf old_build
-mkdir old_build
+mkdir old_build 2> /dev/null
 
-BUILDCFLAGS="-Iold_build"
-
-#############################################################################
-echo "Creating config.mak"
 cat > old_build/config.mak << EOF
 # -------- Generated by configure -----------
-
-# Ensure that locale settings do not interfere with shell commands.
 export LC_ALL = C
 
 CONFIGURATION = $configuration
@@ -2196,96 +882,24 @@ CONFIGURATION = $configuration
 prefix  = \$(DESTDIR)$_prefix
 BINDIR  = \$(DESTDIR)$_bindir
 MANDIR  = \$(DESTDIR)$_mandir
-DOCDIR  = \$(DESTDIR)$_docdir
 CONFDIR = \$(DESTDIR)$_confdir
 
 CC      = $_cc
-INSTALL = $_install
+INSTALL = install
 
-CFLAGS   = $BUILDCFLAGS $OURCFLAGS $CFLAGS $extra_cflags
+CFLAGS   = -Iold_build $OURCFLAGS $CFLAGS $extra_cflags
 DEPFLAGS = $DEPFLAGS
 
-EXTRALIBS = $extra_ldflags $_ld_static $_ld_lm $extra_libs $libs_mplayer $end_ldflags
+EXTRALIBS = $extra_ldflags $_ld_static $_ld_lm $libs_mplayer $end_ldflags
 
 RST2MAN = $_rst2man
 BUILD_MAN = $_build_man
-RST2PDF = $_rst2pdf
-BUILD_PDF = $_build_pdf
 
 # features
-ALSA = $_alsa
-AUDIO_INPUT = $_audio_input
-CACA = $_caca
-CDDA = $_cdda
-DL = $_dl
-DLOPEN = $_dlopen
-SDL = $_sdl
-SDL2 = $_sdl2
-DVBIN = $_dvbin
-DVDREAD = $_dvdread
-DVDNAV = $_dvdnav
-GL = $_gl
-GL_X11 = $_gl_x11
-GL_WAYLAND = $_gl_wayland
-HAVE_SYS_MMAN_H = $_mman
-JACK = $_jack
-JOYSTICK = $_joystick
-JPEG = $_jpeg
-LADSPA = $_ladspa
-LIBASS = $_ass
-LIBASS_OSD = $_libass_osd
-DUMMY_OSD = $_dummy_osd
-LIBBLURAY = $_bluray
-LIBBS2B = $_libbs2b
-LCMS2 = $_lcms2
-VAPOURSYNTH = $_vapoursynth
-LUA = $lua
-LIBPOSTPROC = $libpostproc
-LIBAVDEVICE = $libavdevice
-LIBAVFILTER = $libavfilter
-LIBSMBCLIENT = $_smb
-LIBQUVI = $_libquvi4
-LIBQUVI9 = $_libquvi9
-LIBGUESS = $_libguess
-LIRC = $_lirc
-MPG123 = $_mpg123
-OPENAL = $_openal
-OSS = $_ossaudio
-PULSE = $_pulse
-PORTAUDIO = $_portaudio
-PVR = $_pvr
-RSOUND = $_rsound
-SNDIO = $_sndio
-STREAM_CACHE = $_stream_cache
-TV = $_tv
-TV_V4L2 = $_tv_v4l2
-LIBV4L2 = $_libv4l2
-VCD = $_vcd
-VDPAU = $_vdpau
-VDPAU_GL_X11 = $_vdpau_gl_x11
-VAAPI = $_vaapi
-VAAPI_VPP = $_vaapi_vpp
-VAAPI_GLX = $_vaapi_glx
-X11 = $_x11
-WAYLAND = $_wayland
-XV = $_xv
-
-# FFmpeg
-ENCODING = $_encoding
-
-CONFIG_VDPAU    = $_vdpau
-CONFIG_VAAPI    = $_vaapi
-CONFIG_ZLIB     = $_zlib
-
-HAVE_PTHREADS   = $_pthreads
-HAVE_SHM        = $_shm
-
 EOF
+cat $CONFIG_MAK >> old_build/config.mak
 
-#############################################################################
-
-echo "Creating config.h"
-cat > $TMPH << EOF
+cat > $TMPC << EOF
 /*----------------------------------------------------------------------------
 ** This file has been automatically generated by configure any changes in it
 ** will be lost when you run configure again.
@@ -2293,8 +907,8 @@ cat > $TMPH << EOF
 ** of the configure script! See ./configure --help for details.
 *---------------------------------------------------------------------------*/
 
-#ifndef MPLAYER_CONFIG_H
-#define MPLAYER_CONFIG_H
+#ifndef MPV_CONFIG_H
+#define MPV_CONFIG_H
 
 #define CONFIGURATION "$configuration"
 
@@ -2322,165 +936,24 @@ cat > $TMPH << EOF
 #define HAVE_SETMODE 0
 #define HAVE_POSIX_SELECT 1
 #define HAVE_SYS_MMAN_H 1
+#define HAVE_NANOSLEEP 1
+#define HAVE_SDL1 0
 
-/* system headers */
-$def_mman_has_map_failed
-$def_soundcard_h
-$def_sys_soundcard_h
-$def_sys_sysinfo_h
-$def_sys_videoio_h
-$def_termios_h
-$def_termios_sys_h
+#define DEFAULT_CDROM_DEVICE "/dev/cdrom"
+#define DEFAULT_DVD_DEVICE   "/dev/dvd"
+#define PATH_DEV_DSP "/dev/dsp"
+#define PATH_DEV_MIXER "/dev/mixer"
 
-
-/* system functions */
-$def_nanosleep
-$def_select
-$def_shm
-$def_terminfo
-$def_termcap
-$def_termios
-
-
-/* system-specific features */
-$def_dl
-$def_iconv
-
-
-/* configurable options */
-$def_stream_cache
-
-/* Blu-ray/DVD/VCD/CD */
-#define DEFAULT_CDROM_DEVICE "$default_cdrom_device"
-#define DEFAULT_DVD_DEVICE   "$default_dvd_device"
-$def_bluray
-$def_cdda
-$def_dvdread
-$def_dvdnav
-$def_vcd
-
-
-/* codec libraries */
-$def_mpg123
-$def_zlib
-
-$def_avutil_has_qp_api
-$def_avcodec_has_chroma_pos_api
-$def_avcodec_has_metadata_update_side_data
-$def_avcodec_has_replaygain_side_data
-$def_avutil_has_avframe_metadata
-$def_libpostproc
-$def_libavdevice
-$def_libavfilter
-
-$def_dlopen
-
-/* Audio output drivers */
-$def_alsa
-$def_jack
-$def_openal
-$def_openal_h
-$def_ossaudio
-$def_ossaudio_devdsp
-$def_ossaudio_devmixer
-$def_pulse
-$def_portaudio
-$def_rsound
-$def_sndio
-
-$def_ladspa
-$def_libbs2b
-
-
-/* input */
-$def_joystick
-$def_lirc
-$def_pvr
-$def_tv
-$def_tv_v4l2
-$def_libv4l2
-
-
-/* font stuff */
-$def_ass
-$def_enca
-
-/* networking */
-$def_smb
-$def_libquvi4
-$def_libquvi9
-$def_libguess
-
-$def_lcms2
-$def_vapoursynth
-$def_lua
-
-
-/* libvo options */
-$def_caca
-$def_sdl
-$def_sdl2
-$def_dvb
-$def_dvbin
-$def_gl
-$def_gl_x11
-$def_gl_wayland
-$def_jpeg
-$def_v4l2
-$def_vdpau
-$def_vdpau_gl_x11
-$def_vdpau_hwaccel
-$def_vaapi
-$def_vaapi_vpp
-$def_vaapi_glx
-$def_vaapi_hwaccel
-$def_vm
-$def_x11
-$def_wayland
-$def_xext
-$def_xf86keysym
-$def_xinerama
-$def_xss
-$def_xv
-
-
-/* FFmpeg */
-$def_encoding
-$def_libavresample
-$def_libswresample
-
-$def_atomic
-$def_sync
-
-#endif /* MPLAYER_CONFIG_H */
 EOF
+cat $CONFIG_H >> $TMPC
+echo '#endif /* MPV_CONFIG_H */' >> $TMPC
 
 # Do not overwrite an unchanged config.h to avoid superfluous rebuilds.
-cmp -s "$TMPH" old_build/config.h || mv -f "$TMPH" old_build/config.h
-
-# Kill old config.h, as it might interfere with the build. Also get rid of
-# old config.mak, which might be confusing.
-rm -f config.h config.mak
-
-#############################################################################
-
-cat << EOF
-
-Config files successfully generated by ./configure $configuration !
-
-  Install prefix: $_prefix
-  Config direct.: $_confdir
-
-'config.h' and 'config.mak' contain your configuration options.
-
-'make' will now compile mpv and 'make install' will install it.
-
-EOF
-
+cmp -s "$TMPC" old_build/config.h || mv -f "$TMPC" old_build/config.h
 
 cat <<EOF
-Check $TMPLOG if you wonder why an autodetection failed (make sure
-development headers/packages are installed).
+
+Configuration successful. See $TMPLOG for details.
 
 NOTE: The --enable-* parameters unconditionally force options on, completely
 skipping autodetection. This behavior is unlike what you may be used to from
@@ -2494,6 +967,7 @@ to configure.
 WARNING: The ./old-configure + make build system you are using is deprecated in
 favour of waf and will be removed in a future version of mpv. Check the
 README for instructions on how to build mpv with the new build system.
+This will not work correctly on MinGW, Cygwin, OSX, and other systems.
 
 EOF
 

@@ -24,7 +24,7 @@ include old_build/config.mak
 ###### variable declarations #######
 
 SOURCES_AUDIO_INPUT-$(ALSA)     += stream/ai_alsa1x.c
-SOURCES_AUDIO_INPUT-$(OSS)      += stream/ai_oss.c
+SOURCES_AUDIO_INPUT-$(OSS_AUDIO)+= stream/ai_oss.c
 SOURCES_AUDIO_INPUT-$(SNDIO)    += stream/ai_sndio.c
 SOURCES-$(AUDIO_INPUT)          += $(SOURCES_AUDIO_INPUT-yes)
 SOURCES-$(CDDA)                 += stream/stream_cdda.c
@@ -48,7 +48,6 @@ SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 
 SOURCES-$(PVR)                  += stream/stream_pvr.c
-SOURCES-$(STREAM_CACHE)         += stream/cache.c
 
 SOURCES-$(TV)                   += stream/stream_tv.c stream/tv.c \
                                    stream/frequencies.c stream/tvi_dummy.c
@@ -60,8 +59,7 @@ SOURCES-$(LIBASS_OSD)           += sub/osd_libass.c
 
 SOURCES-$(ALSA)                 += audio/out/ao_alsa.c
 SOURCES-$(CACA)                 += video/out/vo_caca.c
-SOURCES-$(SDL)                  += audio/out/ao_sdl.c
-SOURCES-$(SDL2)                 += video/out/vo_sdl.c
+SOURCES-$(SDL2)                 += audio/out/ao_sdl.c video/out/vo_sdl.c
 SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
                                    video/out/vo_opengl.c video/out/gl_lcms.c \
                                    video/out/gl_video.c video/out/dither.c \
@@ -81,7 +79,7 @@ SOURCES-$(LIBQUVI)              += stream/resolve/resolve_quvi.c
 SOURCES-$(LIBQUVI9)             += stream/resolve/resolve_quvi9.c
 SOURCES-$(LIRC)                 += input/lirc.c
 SOURCES-$(OPENAL)               += audio/out/ao_openal.c
-SOURCES-$(OSS)                  += audio/out/ao_oss.c
+SOURCES-$(OSS_AUDIO)            += audio/out/ao_oss.c
 SOURCES-$(PULSE)                += audio/out/ao_pulse.c
 SOURCES-$(PORTAUDIO)            += audio/out/ao_portaudio.c
 SOURCES-$(RSOUND)               += audio/out/ao_rsound.c
@@ -208,6 +206,7 @@ SOURCES = audio/audio.c \
           player/timeline/tl_matroska.c \
           player/timeline/tl_mpv_edl.c \
           player/timeline/tl_cue.c \
+          stream/cache.c \
           stream/cookies.c \
           stream/rar.c \
           stream/stream.c \
@@ -279,7 +278,6 @@ SOURCES = audio/audio.c \
           $(SOURCES-yes)
 
 OBJECTS         += $(addsuffix .o, $(basename $(SOURCES)))
-OBJECTS-$(PE_EXECUTABLE) += osdep/mpv-rc.o
 OBJECTS         += $(OBJECTS-yes)
 
 DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SOURCES:.m=.d) $(SOURCES:.m=.d))))
@@ -289,16 +287,10 @@ ALL_TARGETS     += mpv
 INSTALL_BIN     += install-mpv
 INSTALL_BIN_STRIP += install-mpv-strip
 INSTALL_MAN      =
-INSTALL_PDF      =
 
 ifeq ($(BUILD_MAN),yes)
     INSTALL_MAN += install-mpv-man
     ALL_TARGETS += DOCS/man/en/mpv.1
-endif
-
-ifeq ($(BUILD_PDF),yes)
-    INSTALL_PDF += install-mpv-pdf
-    ALL_TARGETS += DOCS/man/en/mpv.pdf
 endif
 
 DIRS =  . \
@@ -341,22 +333,10 @@ endif
 
 all: $(ALL_TARGETS)
 
-%.pdf: %.rst
-	$(RST2PDF) -c --repeat-table-rows $< -o $@
-
 %.1: %.rst
 	$(RST2MAN) $< $@
 
-%.o: %.S
-	$(CC) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
-
 %.o: %.c
-	$(CC) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
-
-%.o: %.cpp
-	$(CC) $(DEPFLAGS) $(CXXFLAGS) -c -o $@ $<
-
-%.o: %.m
 	$(CC) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
 
 mpv: $(OBJECTS) player/main_fn.o
@@ -382,10 +362,6 @@ demux/ebml_defs.c: TOOLS/matroska.pl $(MKVLIB_DEPS)
 
 video/out/gl_video.c: video/out/gl_video_shaders.h
 video/out/gl_video_shaders.h: TOOLS/file2string.pl video/out/gl_video_shaders.glsl
-	./$^ >$@
-
-osdep/macosx_application.m: osdep/macosx_icon.inc
-osdep/macosx_icon.inc: TOOLS/file2string.pl TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns
 	./$^ >$@
 
 video/out/x11_common.c: video/out/x11_icon.inc
@@ -426,24 +402,22 @@ version.h .version: version.sh
 
 ###### dependency declarations / specific CFLAGS ######
 
-common/version.c osdep/mpv-rc.o: version.h
+common/version.c: version.h
 
-osdep/mpv-rc.o: osdep/mpv.exe.manifest etc/mpv-icon.ico
-
-DOCS/man/en/mpv.1 DOCS/man/en/mpv.pdf: DOCS/man/en/af.rst \
-                                       DOCS/man/en/ao.rst \
-                                       DOCS/man/en/changes.rst \
-                                       DOCS/man/en/encode.rst \
-                                       DOCS/man/en/input.rst \
-                                       DOCS/man/en/options.rst \
-                                       DOCS/man/en/vf.rst \
-                                       DOCS/man/en/vo.rst
+DOCS/man/en/mpv.1: DOCS/man/en/af.rst \
+                   DOCS/man/en/ao.rst \
+                   DOCS/man/en/changes.rst \
+                   DOCS/man/en/encode.rst \
+                   DOCS/man/en/input.rst \
+                   DOCS/man/en/options.rst \
+                   DOCS/man/en/vf.rst \
+                   DOCS/man/en/vo.rst
 
 ###### installation / clean / generic rules #######
 
-install:               $(INSTALL_BIN)       install-data $(INSTALL_MAN) $(INSTALL_PDF)
+install:               $(INSTALL_BIN)       install-data $(INSTALL_MAN)
 install-no-man:        $(INSTALL_BIN)       install-data
-install-strip:         $(INSTALL_BIN_STRIP) install-data $(INSTALL_MAN) $(INSTALL_PDF)
+install-strip:         $(INSTALL_BIN_STRIP) install-data $(INSTALL_MAN)
 install-strip-no-man:  $(INSTALL_BIN_STRIP) install-data
 
 install-dirs:
@@ -460,12 +434,6 @@ install-mpv-man:  install-mpv-man-en
 install-mpv-man-en: DOCS/man/en/mpv.1
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
 	$(INSTALL) -m 644 DOCS/man/en/mpv.1 $(MANDIR)/man1/
-
-install-mpv-pdf:  install-mpv-pdf-en
-
-install-mpv-pdf-en: DOCS/man/en/mpv.pdf
-	if test ! -d $(DOCDIR) ; then $(INSTALL) -d $(DOCDIR) ; fi
-	$(INSTALL) -m 644 DOCS/man/en/mpv.pdf $(DOCDIR)/
 
 ICONSIZES = 16x16 32x32 64x64
 
@@ -491,9 +459,7 @@ install-data: install-mpv-icons install-mpv-desktop install-mpv-config
 
 uninstall:
 	$(RM) $(BINDIR)/mpv
-	$(RM) $(MANDIR)/man1/mpv.1
-	$(RM) $(MANDIR)/en/man1/mpv.1
-	$(RM) $(DOCDIR)/mpv.pdf
+	$(RM) $(MANDIR)/man1/mpv.1 $(MANDIR)/en/man1/mpv.1
 	$(RM) $(prefix)/share/applications/mpv.desktop
 	$(RM) $(foreach size,$(ICONSIZES),$(prefix)/share/icons/hicolor/$(size)/apps/mpv.png)
 
@@ -501,7 +467,6 @@ clean:
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
 	-$(RM) mpv
-	-$(RM) $(call ADDSUFFIXES,.pdf,DOCS/man/*/mpv)
 	-$(RM) DOCS/man/*/mpv.1
 	-$(RM) version.h
 	-$(RM) input/input_conf.h
@@ -509,27 +474,14 @@ clean:
 	-$(RM) demux/ebml_types.h demux/ebml_defs.c
 	-$(RM) video/out/gl_video_shaders.h
 	-$(RM) video/out/x11_icon.inc
-	-$(RM) osdep/macosx_icon.inc
 	-$(RM) sub/osd_font.h
 	-$(RM) player/lua/defaults.inc
 	-$(RM) player/lua/assdraw.inc
 	-$(RM) player/lua/osc.inc
 
 distclean: clean
-	-$(RM) config.log old_build/config.h old_build/config.mak Makefile config.mak config.h TAGS tags
+	-$(RM) config.log old_build/config.h old_build/config.mak Makefile
 	-rmdir old_build/
-
-TAGS:
-	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs etags -a
-
-tags:
-	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
-
-osxbundle:
-	@TOOLS/osxbundle.py mpv
-
-osxbundle-skip-deps:
-	@TOOLS/osxbundle.py --skip-deps mpv
 
 -include $(DEP_FILES)
 
