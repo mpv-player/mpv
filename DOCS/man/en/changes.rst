@@ -10,10 +10,16 @@ should generally be treated as a completely different program.
 .. note::
     These lists are incomplete.
 
-General Changes for MPlayer to mplayer2
----------------------------------------
+General Changes for MPlayer to mpv
+----------------------------------
 
-* Removal of the internal GUI, MEncoder, OSD menu
+* Switch to GPLv2+. (Technically speaking, MPlayer as a whole seems to be
+  GPLv2-only, while mplayer is GPLv3+ - see ``Copyright`` file for details.)
+* Removal of the internal GUI, MEncoder, OSD menu, video drivers for Linux 2.4
+  (including VIDIX)
+* Large internal cleanups
+* Removal of support for dead platforms
+* New buildsystem
 * Better pause handling (do not unpause on a command)
 * Better MKV support (such as ordered chapters)
 * vo_vdpau improvements
@@ -34,18 +40,6 @@ General Changes for MPlayer to mplayer2
 * Screenshot improvements (instant screenshots without 1-frame delay, allow
   taking screenshots even with hardware decoding)
 * Improved support for PulseAudio
-* General code cleanups
-* Many more changes
-
-General Changes for mplayer2 to mpv
------------------------------------
-
-* Switch back to GPLv2+.
-* Removal of lots of unneeded code to encourage developer activity (less
-  obscure scary zombie code that kills any desire for hacking the codebase)
-* Removal of dust and dead bodies (code-wise), such as kernel drivers for
-  decades old hardware
-* Removal of support for dead platforms
 * Generally improved MS Windows support (dealing with unicode filenames,
   improved ``--vo=direct3d``, improved window handling)
 * Better OSD rendering (using libass). This has full unicode support, and
@@ -108,6 +102,9 @@ General Changes for mplayer2 to mpv
 * OSX: VDA support using libavcodec hwaccel API insted of FFmpeg's decoder. Up
   to 2-2.5x reduction in CPU usage.
 * Make hardware decoding in general work with the ``opengl`` video output.
+* Lua scripting (see `LUA SCRIPTING`_)
+* A client API, that allows embedding **mpv** into applications
+  (see ``libmpv/client.h`` in the sources)
 * General bug fixes and removal of long-standing issues
 * General code cleanups (including refactoring or rewrites of many parts)
 * Many more changes
@@ -124,13 +121,11 @@ Command Line Switches
 * There is a new command line syntax, which is generally preferred over the old
   syntax. ``-optname optvalue`` becomes ``--optname=optvalue``.
 
-  The old syntax will not be removed in the near future. However, the new
-  syntax is mentioned in all documentation and so on, so it is a good thing to
-  know about this change.
-
-  (The new syntax was introduced in mplayer2.)
+  The old syntax will not be removed. However, the new syntax is mentioned in
+  all documentation and so on, and unlike the old syntax is not ambiguous,
+  so it is a good thing to know about this change.
 * In general, negating switches like ``-noopt`` now have to be written as
-  ``-no-opt``, or better ``--no-opt``.
+  ``-no-opt`` or ``--no-opt``.
 * Per-file options are not the default anymore. You can explicitly specify
   file-local options. See ``Usage`` section.
 * Many options have been renamed, removed or changed semantics. Some options
@@ -280,12 +275,9 @@ input.conf and Slave Commands
     | ``af_switch``, ``af_add``, ... | ``af set|add|...``                     |
     +--------------------------------+----------------------------------------+
 
-Other
-~~~~~
+Slave mode
+~~~~~~~~~~
 
-* The playtree has been removed. **mpv**'s internal playlist is a simple and
-  flat list now. This simplifies the code and makes **mpv** usage less
-  confusing.
 * Slave mode is broken. This mode is entirely insane in the ``old`` versions of
   MPlayer. A proper slave mode application needed tons of code and hacks to get
   it right. The main problem is that slave mode is a bad and incomplete
@@ -298,31 +290,52 @@ Other
   compatible. If you are a developer of a slave mode application, contact us,
   and a new and better protocol can be developed.
 
+  ``--identify`` was already removed (``TOOLS/mpv_identify.sh`` is provided
+  instead), and ``--slave-broken`` might be removed in the future.
+
+* **mpv** also provides a client API, which can be used to embed the player
+  by loading it as shared library. (See ``libmpv/client.h`` in the sources.)
+  It might also be possible to implement a custom slave mode-like protocol
+  using Lua scripting.
+
+* A slave protocol is planned, but nothing has emerged yet.
+
 Policy for Removed Features
 ---------------------------
 
-Features are a good thing, because they make users happy. As such, it is
-attempted to preserve useful features as far as possible. But if a feature is
-likely to be not used by many, and causes problems otherwise, it will be
-removed. Developers should not be burdened with fixing or cleaning up code that
-has no actual use.
+**mpv** is in active development. If something is in the way of more important
+development (such as fixing bugs or implementing new features), we sometimes
+remove features. Usually this happens only with old features that either seem
+to be useless, or are not used by anyone. Often these are obscure, or
+"inherited", or were marked experimental, but never received any particular
+praise by any users.
 
-It is always possible to add back removed features. File a feature request if a
-feature you relied on has been removed, and you want it back. Though it might be
-rejected in the worst case, it is much more likely that it will be either added
-back, or that a better solution will be implemented.
+Sometimes, features are replaced by something new. The new code will be either
+simpler or more powerful, but doesn't necessarily provide everything the old
+feature did.
+
+We can not exclude that we accidentally remove features that are actually
+popular. Generally, we do not know how much a specific functionality is used.
+If you miss a feature and think it should be re-added, please open an issue
+on the mpv bug tracker. Hopefully, a solution can be found. Often, it turns
+out that re-adding something is not much of a problem, or that there are
+better alternatives.
 
 Why this Fork?
 --------------
 
-* MPlayer wants to maintain old code, even if it is very bad code. It seems
-  mplayer2 was forked because MPlayer developers refused to get rid of all the
-  cruft. The mplayer2 and MPlayer codebases also deviated enough to make a
-  reunification unlikely.
-* mplayer2 development is slow, and it is hard to get in changes. Details
-  withheld as to not turn this into a rant.
-* MPlayer rarely merged from mplayer2, and mplayer2 practically stopped
-  merging from MPlayer (not even code cleanups or new features are merged)
-* **mpv** intends to continuously merge from mplayer-svn and mplayer2, while
-  speeding up development. There is willingness for significant changes, even
-  if this means breaking compatibility.
+mplayer2 is practically dead, and mpv started out as a branch containing
+new/experimental development. (Some of it was merged right *after* the fork
+was made public, seemingly as an acknowledgment that development, or at
+least merging, should have been more active.)
+
+MPlayer is focused on not breaking anything, but is left with a horrible
+codebase resistant to cleanup. (Unless you do what mpv did - merciless and
+consequent pruning of bad, old code.) Cleanup and keeping broken things
+conflict, so the kind of development mpv strives for can't be done within
+MPlayer due to clashing development policies.
+
+Additionally, mplayer2 already had lots of changes over MPlayer, which would
+have needed to be backported to the MPlayer codebase. This would not only
+have been hard (several years of diverging development), but also would have
+been impossible due to the aforementioned MPlayer development policy.
