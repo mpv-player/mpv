@@ -54,10 +54,10 @@ static int lookupkey(int key);
 
 static void hide_cursor(struct vo_wayland_state * wl);
 static void show_cursor(struct vo_wayland_state * wl);
-static void shedule_resize(struct vo_wayland_state *wl,
-                           uint32_t edges,
-                           int32_t width,
-                           int32_t height);
+static void schedule_resize(struct vo_wayland_state *wl,
+                            uint32_t edges,
+                            int32_t width,
+                            int32_t height);
 
 static void vo_wayland_fullscreen (struct vo *vo);
 
@@ -126,7 +126,7 @@ static void ssurface_handle_configure(void *data,
                                       int32_t height)
 {
     struct vo_wayland_state *wl = data;
-    shedule_resize(wl, edges, width, height);
+    schedule_resize(wl, edges, width, height);
 }
 
 static void ssurface_handle_popup_done(void *data,
@@ -529,16 +529,16 @@ static void show_cursor (struct vo_wayland_state *wl)
     wl_surface_commit(wl->cursor.surface);
 }
 
-static void shedule_resize(struct vo_wayland_state *wl,
-                           uint32_t edges,
-                           int32_t width,
-                           int32_t height)
+static void schedule_resize(struct vo_wayland_state *wl,
+                            uint32_t edges,
+                            int32_t width,
+                            int32_t height)
 {
     int32_t minimum_size = 150;
     int32_t x, y;
     float temp_aspect = width / (float) MPMAX(height, 1);
 
-    MP_DBG(wl, "shedule resize: %dx%d\n", width, height);
+    MP_DBG(wl, "schedule resize: %dx%d\n", width, height);
 
     if (width < minimum_size)
         width = minimum_size;
@@ -778,7 +778,7 @@ static void vo_wayland_ontop (struct vo *vo)
     MP_DBG(wl, "going ontop\n");
     vo->opts->ontop = 1;
     wl_shell_surface_set_toplevel(wl->window.shell_surface);
-    shedule_resize(wl, 0, wl->window.width, wl->window.height);
+    schedule_resize(wl, 0, wl->window.width, wl->window.height);
 }
 
 static void vo_wayland_border (struct vo *vo)
@@ -814,7 +814,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
         MP_DBG(wl, "leaving fullscreen\n");
         wl->window.is_fullscreen = false;
         wl_shell_surface_set_toplevel(wl->window.shell_surface);
-        shedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
+        schedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
     }
 }
 
@@ -941,7 +941,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_SET_WINDOW_SIZE: {
         int *s = arg;
         if (!wl->window.is_fullscreen)
-            shedule_resize(wl, 0, s[0], s[1]);
+            schedule_resize(wl, 0, s[0], s[1]);
         return VO_TRUE;
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:
@@ -979,7 +979,7 @@ bool vo_wayland_config (struct vo *vo, uint32_t d_width,
 
         if (vo->opts->fullscreen) {
             if (wl->window.is_fullscreen)
-                shedule_resize(wl, 0, wl->window.fs_width, wl->window.fs_height);
+                schedule_resize(wl, 0, wl->window.fs_width, wl->window.fs_height);
             else
                 vo_wayland_fullscreen(vo);
         }
