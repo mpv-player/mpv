@@ -13,7 +13,7 @@ typedef struct mp_vo_opts {
     int screen_id;
     int fsscreen_id;
     char *winname;
-    char** fstype_list;
+    int x11_netwm;
     int native_keyrepeat;
 
     float panscan;

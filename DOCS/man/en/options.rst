@@ -889,44 +889,6 @@ OPTIONS
 
     See also ``--screen``.
 
-``--x11-fstype=<type1,type2,...>``
-    (X11 only)
-    Specify a priority list of fullscreen modes to be used. You can negate the
-    modes by prefixing them with '-'. If you experience problems like the
-    fullscreen window being covered by other windows, try using a different
-    order.
-
-    .. note::
-
-        See ``--x11-fstype=help`` for a full list of available modes.
-
-    The available types are:
-
-    above
-        Use the ``_NETWM_STATE_ABOVE`` hint if available.
-    below
-        Use the ``_NETWM_STATE_BELOW`` hint if available.
-    fullscreen
-        Use the ``_NETWM_STATE_FULLSCREEN`` hint if available.
-    layer
-        Use the ``_WIN_LAYER`` hint with the default layer.
-    layer=<0...15>
-        Use the ``_WIN_LAYER`` hint with the given layer number.
-    netwm
-        Force NETWM style.
-    none
-        Clear the list of modes; you can add modes to enable afterward.
-    stays_on_top
-        Use ``_NETWM_STATE_STAYS_ON_TOP`` hint if available.
-
-    .. admonition:: Examples
-
-        ``--x11-fstype=layer,stays_on_top,above,fullscreen``
-            Default order, will be used as a fallback if incorrect or
-            unsupported modes are specified.
-        ``--x11-fstype=fullscreen``
-            Fixes fullscreen switching on OpenBox 1.x.
-
 ``--fs-missioncontrol``
     (OS X only)
     Use OS X Mission Control's fullscreen feature instead of the custom one
@@ -2802,3 +2764,15 @@ OPTIONS
     fully, and will add black bars to compensate for the video aspect ratio.
 
     See also ``--slave-broken``.
+
+``--x11-netwm=no``
+    (X11 only)
+    Disable use of the NetWM protocol when switching to or from fullscreen.
+    This may or may not help with broken window managers. This provides some
+    functionality that was implemented by the now removed ``--fstype`` option.
+    Actually, it is not known to the developers to which degree this option
+    was needed, so feedback is welcome.
+
+    By default, NetWM support is autodetected, and using this option forces
+    autodetection to fail.
+

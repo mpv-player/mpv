@@ -160,7 +160,7 @@ Command Line Switches
     ``-forcedsubsonly``         ``--sub-forced-only``
     ``-format``                 ``--audio-format``
     ``-fsmode-dontuse``         (removed)
-    ``-fstype``                 ``--x11-fstype``
+    ``-fstype``                 ``--x11-netwm`` (changed semantics)
     ``-hardframedrop``          ``--framedrop=hard``
     ``-identify``               (removed; use TOOLS/mpv_identify.sh)
     ``-lavdopts ...``           ``--vd-lavc-...``

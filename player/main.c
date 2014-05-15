@@ -72,10 +72,6 @@
 #endif
 #endif
 
-#if HAVE_X11
-#include "video/out/x11_common.h"
-#endif
-
 #if HAVE_COCOA
 #include "osdep/macosx_application.h"
 #endif
@@ -226,13 +222,6 @@ static bool handle_help_options(struct MPContext *mpctx)
         talloc_free(list);
         opt_exit = 1;
     }
-#if HAVE_X11
-    if (opts->vo.fstype_list && strcmp(opts->vo.fstype_list[0], "help") == 0) {
-        fstype_help(log);
-        MP_INFO(mpctx, "\n");
-        opt_exit = 1;
-    }
-#endif
     if ((opts->demuxer_name && strcmp(opts->demuxer_name, "help") == 0) ||
         (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name, "help") == 0) ||
         (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name, "help") == 0)) {

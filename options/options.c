@@ -509,7 +509,7 @@ const m_option_t mp_opts[] = {
 
     OPT_INT64("wid", vo.WinID, CONF_GLOBAL),
 #if HAVE_X11
-    OPT_STRINGLIST("x11-fstype", vo.fstype_list, 0),
+    OPT_FLAG("x11-netwm", vo.x11_netwm, 0),
 #endif
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
@@ -663,6 +663,7 @@ const struct MPOpts mp_default_opts = {
         .keepaspect = 1,
         .border = 1,
         .WinID = -1,
+        .x11_netwm = 1,
     },
     .wintitle = "mpv - ${media-title}",
     .heartbeat_interval = 30.0,

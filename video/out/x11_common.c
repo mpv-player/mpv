@@ -125,7 +125,6 @@ static struct mp_log *x11_error_output;
 
 static void vo_x11_update_geometry(struct vo *vo);
 static void vo_x11_fullscreen(struct vo *vo);
-static int vo_x11_get_fs_type(struct vo *vo);
 static void xscreensaver_heartbeat(struct vo_x11_state *x11);
 static void saver_on(struct vo_x11_state *x11);
 static void saver_off(struct vo_x11_state *x11);
@@ -145,7 +144,7 @@ static void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
     assert(action == _NET_WM_STATE_REMOVE || action == _NET_WM_STATE_ADD ||
            action == _NET_WM_STATE_TOGGLE);
 
-    if (x11->fs_type & vo_wm_FULLSCREEN) {
+    if (x11->wm_type & vo_wm_FULLSCREEN) {
         XEvent xev;
 
         /* init X event structure for _NET_WM_FULLSCREEN client message */
@@ -223,92 +222,6 @@ static int x11_errorhandler(Display *display, XErrorEvent *event)
     return 0;
 }
 
-struct fstype {
-    int type;
-    const char *sym;
-    const char *help;
-};
-
-static const struct fstype fstypes[] = {
-    {0,             "none",     "don't set fullscreen window layer"},
-    {vo_wm_LAYER,   "layer",    "use _WIN_LAYER, set layer with layer=<0..15>"},
-    {vo_wm_ABOVE,   "above",    "use _NETWM_STATE_ABOVE"},
-    {vo_wm_FULLSCREEN,   "fullscreen",   "use _NETWM_STATE_FULLSCREEN"},
-    {vo_wm_STAYS_ON_TOP, "stays_on_top", "use _NETWM_STATE_STAYS_ON_TOP"},
-    {vo_wm_BELOW,   "below",    "use _NETWM_STATE_BELOW"},
-    {vo_wm_NETWM,   "netwm",    "force NETWM style"},
-    {0},
-};
-
-void fstype_help(struct mp_log *log)
-{
-    mp_info(log, "Available fullscreen layer change modes:\n");
-    for (int n = 0; fstypes[n].sym; n++)
-        mp_info(log, "    %-15s %s\n", fstypes[n].sym, fstypes[n].help);
-    mp_info(log,
-            "You can also negate the settings with simply putting '-' in the beginning\n");
-}
-
-static void fstype_dump(struct vo_x11_state *x11)
-{
-    int fstype = x11->fs_type;
-    if (fstype) {
-        MP_VERBOSE(x11, "Current fstype setting honours:");
-        for (int n = 0; fstypes[n].sym; n++) {
-            if (fstypes[n].type & fstype)
-                MP_VERBOSE(x11, " %s", fstypes[n].sym);
-        }
-        MP_VERBOSE(x11, "\n");
-    } else {
-        MP_VERBOSE(x11, "Current fstype setting doesn't honour any X atoms\n");
-    }
-}
-
-static int vo_x11_get_fs_type(struct vo *vo)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    unsigned int type = x11->wm_type;
-    char **fstype_list = vo->opts->fstype_list;
-
-    if (fstype_list) {
-        for (int i = 0; fstype_list[i]; i++) {
-            int neg = 0;
-            char *arg = fstype_list[i];
-            unsigned int flag = 0xFF;
-
-            if (arg[0] == '-') {
-                neg = 1;
-                arg = arg + 1;
-            }
-
-            for (int n = 0; fstypes[n].sym; n++) {
-                if (strcmp(arg, fstypes[n].sym) == 0)
-                    flag = fstypes[n].type;
-            }
-
-            if (strncmp(arg, "layer=", 6) == 0) {
-                char *endptr = NULL;
-                int layer = strtol(arg + 6, &endptr, 10);
-
-                if (endptr && *endptr == '\0' && layer >= 0 && layer <= 15)
-                    x11->fs_layer = layer;
-
-                flag = vo_wm_LAYER;
-            }
-
-            if (flag == 0xFF) {
-                MP_ERR(x11, "fstype '%s' unknown\n", arg);
-            } else if (flag == 0) {
-                type = 0;
-            } else {
-                type = neg ? (type & ~flag) : (type | flag);
-            }
-        }
-    }
-
-    return type;
-}
-
 static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
 {
 #define NET_WM_STATE_TEST(x) { \
@@ -362,8 +275,12 @@ static int vo_wm_detect(struct vo *vo)
 // --- netwm
     if (x11_get_property(x11, win, x11->XA_NET_SUPPORTED, &args, &nitems)) {
         MP_VERBOSE(x11, "Detected wm supports NetWM.\n");
-        for (i = 0; i < nitems; i++)
-            wm |= net_wm_support_state_test(vo->x11, args[i]);
+        if (vo->opts->x11_netwm) {
+            for (i = 0; i < nitems; i++)
+                wm |= net_wm_support_state_test(vo->x11, args[i]);
+        } else {
+            MP_VERBOSE(x11, "NetWM usage disabled by user.\n");
+        }
         XFree(args);
     }
 
@@ -465,7 +382,6 @@ int vo_x11_init(struct vo *vo)
         .oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
                     MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
         .old_gravity = NorthWestGravity,
-        .fs_layer = WIN_LAYER_ABOVE_DOCK,
     };
     vo->x11 = x11;
 
@@ -516,10 +432,6 @@ int vo_x11_init(struct vo *vo)
                x11->display_is_local ? "local" : "remote");
 
     x11->wm_type = vo_wm_detect(vo);
-
-    x11->fs_type = vo_x11_get_fs_type(vo);
-
-    fstype_dump(x11);
 
     vo->event_fd = ConnectionNumber(x11->display);
 
@@ -1281,7 +1193,7 @@ static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
     if (!vo->opts->border)
         vo_x11_decoration(vo, 0);
 
-    if (vo->opts->fullscreen && (x11->fs_type & vo_wm_FULLSCREEN)) {
+    if (vo->opts->fullscreen && (x11->wm_type & vo_wm_FULLSCREEN)) {
         Atom state = x11->XA_NET_WM_STATE_FULLSCREEN;
         XChangeProperty(x11->display, x11->window, x11->XA_NET_WM_STATE, XA_ATOM,
                         32, PropModeAppend, (unsigned char *)&state, 1);
@@ -1459,7 +1371,7 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
     if (vo->opts->WinID >= 0)
         return;
 
-    if (x11->fs_type & vo_wm_LAYER) {
+    if (x11->wm_type & vo_wm_LAYER) {
         XClientMessageEvent xev;
 
         if (!x11->orig_layer)
@@ -1472,13 +1384,13 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
         xev.message_type = x11->XA_WIN_LAYER;
         xev.format = 32;
         // if not fullscreen, stay on default layer
-        xev.data.l[0] = layer ? x11->fs_layer : x11->orig_layer;
+        xev.data.l[0] = layer ? WIN_LAYER_ABOVE_DOCK : x11->orig_layer;
         xev.data.l[1] = CurrentTime;
         MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n",
                    xev.data.l[0]);
         XSendEvent(x11->display, x11->rootwin, False, SubstructureNotifyMask,
                    (XEvent *) &xev);
-    } else if (x11->fs_type & vo_wm_NETWM) {
+    } else if (x11->wm_type & vo_wm_NETWM) {
         XClientMessageEvent xev;
         char *state;
 
@@ -1490,13 +1402,13 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
         xev.format = 32;
         xev.data.l[0] = layer;
 
-        if (x11->fs_type & vo_wm_STAYS_ON_TOP) {
+        if (x11->wm_type & vo_wm_STAYS_ON_TOP) {
             xev.data.l[1] = x11->XA_NET_WM_STATE_STAYS_ON_TOP;
-        } else if (x11->fs_type & vo_wm_ABOVE) {
+        } else if (x11->wm_type & vo_wm_ABOVE) {
             xev.data.l[1] = x11->XA_NET_WM_STATE_ABOVE;
-        } else if (x11->fs_type & vo_wm_FULLSCREEN) {
+        } else if (x11->wm_type & vo_wm_FULLSCREEN) {
             xev.data.l[1] = x11->XA_NET_WM_STATE_FULLSCREEN;
-        } else if (x11->fs_type & vo_wm_BELOW) {
+        } else if (x11->wm_type & vo_wm_BELOW) {
             // This is not fallback. We can safely assume that the situation
             // where only NETWM_STATE_BELOW is supported doesn't exist.
             xev.data.l[1] = x11->XA_NET_WM_STATE_BELOW;
@@ -1559,12 +1471,12 @@ static void vo_x11_fullscreen(struct vo *vo)
         h = x11->nofs_height;
 
         vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
-        if ((x11->fs_type & vo_wm_FULLSCREEN) && opts->fsscreen_id != -1) {
+        if ((x11->wm_type & vo_wm_FULLSCREEN) && opts->fsscreen_id != -1) {
             x11->size_changed_during_fs = true;
             x11->pos_changed_during_fs = true;
         }
 
-        if (x11->fs_type & vo_wm_FULLSCREEN) {
+        if (x11->wm_type & vo_wm_FULLSCREEN) {
             vo_x11_move_resize(vo, x11->pos_changed_during_fs,
                                x11->size_changed_during_fs, x, y, w, h);
         }
@@ -1585,7 +1497,7 @@ static void vo_x11_fullscreen(struct vo *vo)
         w = x11->screenrc.x1 - x;
         h = x11->screenrc.y1 - y;
 
-        if ((x11->fs_type & vo_wm_FULLSCREEN) && opts->fsscreen_id != -1) {
+        if ((x11->wm_type & vo_wm_FULLSCREEN) && opts->fsscreen_id != -1) {
             // The EWMH fullscreen hint always works on the current screen, so
             // change the current screen forcibly.
             // This was observed to work under IceWM, but not Unity/Compiz and
@@ -1603,7 +1515,7 @@ static void vo_x11_fullscreen(struct vo *vo)
     else
         x11->old_gravity = x11->vo_hint.win_gravity;
 
-    if (!(x11->fs_type & vo_wm_FULLSCREEN)) {  // not needed with EWMH fs
+    if (!(x11->wm_type & vo_wm_FULLSCREEN)) {  // not needed with EWMH fs
         vo_x11_decoration(vo, opts->border && !x11->fs);
         vo_x11_sizehint(vo, x, y, w, h, true);
         vo_x11_setlayer(vo, x11->window, x11->fs);
@@ -1616,7 +1528,7 @@ static void vo_x11_fullscreen(struct vo *vo)
         vo_x11_setlayer(vo, x11->window, opts->ontop);
 
     XMapRaised(x11->display, x11->window);
-    if (!(x11->fs_type & vo_wm_FULLSCREEN))    // some WMs change window pos on map
+    if (!(x11->wm_type & vo_wm_FULLSCREEN))    // some WMs change window pos on map
         XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
     XRaiseWindow(x11->display, x11->window);
     XFlush(x11->display);
