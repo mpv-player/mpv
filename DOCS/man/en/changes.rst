@@ -14,17 +14,17 @@ General Changes for MPlayer to mpv
 ----------------------------------
 
 * Switch to GPLv2+. (Technically speaking, MPlayer as a whole seems to be
-  GPLv2-only, while mplayer is GPLv3+ - see ``Copyright`` file for details.)
-* Removal of the internal GUI, MEncoder, OSD menu, video drivers for Linux 2.4
-  (including VIDIX)
+  GPLv2-only, while mplayer2 is GPLv3+ - see ``Copyright`` file for details.)
+* Removal of the internal GUI, MEncoder, OSD menu, video kernel drivers for
+  Linux 2.4 (including VIDIX)
 * Large internal cleanups
 * Removal of support for dead platforms
 * New buildsystem
+* No embedded copy of ffmpeg and other libraries
 * Better pause handling (do not unpause on a command)
 * Better MKV support (such as ordered chapters)
 * vo_vdpau improvements
 * Precise seeking support
-* No embedded copy of ffmpeg and other libraries
 * Native OpenGL backend for OSX
 * General OSX improvements
 * Improvements in audio/video sync handling
@@ -329,7 +329,7 @@ new/experimental development. (Some of it was merged right *after* the fork
 was made public, seemingly as an acknowledgment that development, or at
 least merging, should have been more active.)
 
-MPlayer is focused on not breaking anything, but is left with a horrible
+MPlayer is focused on not breaking anything, but is stuck with a horrible
 codebase resistant to cleanup. (Unless you do what mpv did - merciless and
 consequent pruning of bad, old code.) Cleanup and keeping broken things
 conflict, so the kind of development mpv strives for can't be done within
