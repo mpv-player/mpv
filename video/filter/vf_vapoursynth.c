@@ -175,16 +175,6 @@ static void drain_oldest_buffered_frame(struct vf_priv_s *p)
     p->in_frameno++;
 }
 
-// number of getAsyncFrame calls in progress
-// must be called with p->lock held
-static int num_requested(struct vf_priv_s *p)
-{
-    int r = 0;
-    for (int n = 0; n < p->max_requests; n++)
-        r += p->requested[n] == &dummy_img;
-    return r;
-}
-
 static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
                                 VSNodeRef *node, const char *errorMsg)
 {
@@ -193,11 +183,11 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
 
     pthread_mutex_lock(&p->lock);
 
-    // If these assertions fail, n is an unrequested frame.
+    // If these assertions fail, n is an unrequested frame (or filtered twice).
     assert(n >= p->out_frameno && n < p->out_frameno + p->max_requests);
     int index = n - p->out_frameno;
-    assert(p->requested[index] == &dummy_img);
     MP_DBG(vf, "filtered frame %d (%d)\n", n, index);
+    assert(p->requested[index] == &dummy_img);
 
     struct mp_image *res = NULL;
     if (f) {
@@ -328,19 +318,19 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
     VSFrameRef *ret = NULL;
 
     pthread_mutex_lock(&p->lock);
-    MP_DBG(vf, "VS requesting frame %d (at %d)\n", frameno, p->in_frameno);
+    MP_DBG(vf, "VS asking for frame %d (at %d)\n", frameno, p->in_frameno);
     while (1) {
         if (p->shutdown) {
-            p->vsapi->setFilterError("EOF or filter reinit/uninit\n", frameCtx);
+            p->vsapi->setFilterError("EOF or filter reinit/uninit", frameCtx);
             break;
         }
         if (frameno < p->in_frameno) {
             char msg[180];
             snprintf(msg, sizeof(msg),
-                "Frame %d requested, but only have frames starting from %d.\n"
-                "Try increasing the buffered-frames suboption.\n",
+                "Frame %d requested, but only have frames starting from %d. "
+                "Try increasing the buffered-frames suboption.",
                 frameno, p->in_frameno);
-            MP_FATAL(vf, "%s", msg);
+            MP_FATAL(vf, "%s\n", msg);
             p->vsapi->setFilterError(msg, frameCtx);
             break;
         }
@@ -359,7 +349,6 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
                 vsapi->getFormatPreset(mp_to_vs(img->imgfmt), core);
             ret = vsapi->newVideoFrame(vsfmt, img->w, img->h, NULL, core);
             if (!ret) {
-                assert(0);
                 p->vsapi->setFilterError("Could not allocate VS frame", frameCtx);
                 break;
             }
@@ -392,9 +381,21 @@ static void VS_CC infiltFree(void *instanceData, VSCore *core, const VSAPI *vsap
     pthread_mutex_unlock(&p->lock);
 }
 
+// number of getAsyncFrame calls in progress
+// must be called with p->lock held
+static int num_requested(struct vf_priv_s *p)
+{
+    int r = 0;
+    for (int n = 0; n < p->max_requests; n++)
+        r += p->requested[n] == &dummy_img;
+    return r;
+}
+
 static void destroy_vs(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
+
+    MP_DBG(vf, "destroying VS filters\n");
 
     // Wait until our frame callbacks return.
     pthread_mutex_lock(&p->lock);
@@ -432,6 +433,8 @@ static void destroy_vs(struct vf_instance *vf)
     p->next_image = NULL;
     p->out_pts = MP_NOPTS_VALUE;
     p->out_frameno = p->in_frameno = 0;
+
+    MP_DBG(vf, "initialized.\n");
 }
 
 static int reinit_vs(struct vf_instance *vf)
