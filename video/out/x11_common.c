@@ -1301,6 +1301,17 @@ static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
     vo_x11_move_resize(vo, true, true, x, y, w, h);
     if (!vo->opts->border)
         vo_x11_decoration(vo, 0);
+
+    if (vo->opts->fullscreen && (x11->fs_type & vo_wm_FULLSCREEN)) {
+        Atom state = x11->XA_NET_WM_STATE_FULLSCREEN;
+        XChangeProperty(x11->display, x11->window, x11->XA_NET_WM_STATE, XA_ATOM,
+                        32, PropModeAppend, (unsigned char *)&state, 1);
+        x11->fs = 1;
+        // The "saved" positions are bogus, so reset them when leaving FS again.
+        x11->size_changed_during_fs = true;
+        x11->pos_changed_during_fs = true;
+    }
+
     // map window
     vo_x11_selectinput_witherr(vo, x11->display, x11->window,
                                StructureNotifyMask | ExposureMask |
