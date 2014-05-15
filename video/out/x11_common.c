@@ -982,6 +982,7 @@ int vo_x11_check_events(struct vo *vo)
             break;
         case MapNotify:
             x11->window_hidden = false;
+            vo_x11_clearwindow(vo, x11->window);
             vo_x11_update_geometry(vo);
             x11->vo_hint.win_gravity = x11->old_gravity;
             XSetWMNormalHints(display, x11->window, &x11->vo_hint);
@@ -1307,7 +1308,6 @@ static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
                                ButtonPressMask | ButtonReleaseMask |
                                PointerMotionMask | LeaveWindowMask);
     XMapWindow(x11->display, x11->window);
-    vo_x11_clearwindow(vo, x11->window);
 }
 
 static void vo_x11_highlevel_resize(struct vo *vo, int x, int y, int w, int h)
