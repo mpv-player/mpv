@@ -434,7 +434,7 @@ static void destroy_vs(struct vf_instance *vf)
     p->out_pts = MP_NOPTS_VALUE;
     p->out_frameno = p->in_frameno = 0;
 
-    MP_DBG(vf, "initialized.\n");
+    MP_DBG(vf, "uninitialized.\n");
 }
 
 static int reinit_vs(struct vf_instance *vf)
@@ -444,6 +444,8 @@ static int reinit_vs(struct vf_instance *vf)
     int res = -1;
 
     destroy_vs(vf);
+
+    MP_DBG(vf, "initializing...\n");
 
     // First load an empty script to get a VSScript, so that we get the vsapi
     // and vscore.
@@ -486,6 +488,7 @@ static int reinit_vs(struct vf_instance *vf)
         goto error;
     }
 
+    MP_DBG(vf, "initialized.\n");
     res = 0;
 error:
     if (p->vsapi) {
