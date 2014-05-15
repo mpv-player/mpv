@@ -79,7 +79,6 @@
 #define vo_wm_STAYS_ON_TOP 4
 #define vo_wm_ABOVE 8
 #define vo_wm_BELOW 16
-#define vo_wm_MWM 32
 #define vo_wm_NETWM (vo_wm_FULLSCREEN | vo_wm_STAYS_ON_TOP | vo_wm_ABOVE | \
                      vo_wm_BELOW)
 
@@ -238,7 +237,6 @@ static const struct fstype fstypes[] = {
     {vo_wm_STAYS_ON_TOP, "stays_on_top", "use _NETWM_STATE_STAYS_ON_TOP"},
     {vo_wm_BELOW,   "below",    "use _NETWM_STATE_BELOW"},
     {vo_wm_NETWM,   "netwm",    "force NETWM style"},
-    {vo_wm_MWM,     "mwm_hack", "enable MWM hack"},
     {0},
 };
 
@@ -968,7 +966,6 @@ int vo_x11_check_events(struct vo *vo)
             vo_x11_update_geometry(vo);
             x11->vo_hint.win_gravity = x11->old_gravity;
             XSetWMNormalHints(display, x11->window, &x11->vo_hint);
-            x11->fs_flip = 0;
             break;
         case DestroyNotify:
             MP_WARN(x11, "Our window was destroyed, exiting\n");
@@ -1551,8 +1548,6 @@ static void vo_x11_fullscreen(struct vo *vo)
         x11->fs = opts->fullscreen;
         return;
     }
-    if (x11->fs_flip)
-        return;
 
     if (!opts->fullscreen) {
         // fs->win
@@ -1607,12 +1602,6 @@ static void vo_x11_fullscreen(struct vo *vo)
         x11->old_gravity = NorthWestGravity;
     else
         x11->old_gravity = x11->vo_hint.win_gravity;
-
-    if (x11->fs_type & vo_wm_MWM) {
-        XUnmapWindow(x11->display, x11->window);      // required for MWM
-        XWithdrawWindow(x11->display, x11->window, x11->screen);
-        x11->fs_flip = 1;
-    }
 
     if (!(x11->fs_type & vo_wm_FULLSCREEN)) {  // not needed with EWMH fs
         vo_x11_decoration(vo, opts->border && !x11->fs);
