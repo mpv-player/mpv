@@ -1336,6 +1336,16 @@ static void vo_x11_highlevel_resize(struct vo *vo, int x, int y, int w, int h)
     update_vo_size(vo);
 }
 
+static void wait_until_mapped(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    while (x11->window_hidden) {
+        XEvent unused;
+        XPeekEvent(x11->display, &unused);
+        vo_x11_check_events(vo);
+    }
+}
+
 /* Create and setup a window suitable for display
  * vis: Visual to use for creating the window (NULL for default)
  * x, y: position of window (might be ignored)
@@ -1408,6 +1418,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
         x11->win_width = width;
         x11->win_height = height;
     }
+    wait_until_mapped(vo);
     update_vo_size(vo);
     x11->pending_vo_events &= ~VO_EVENT_RESIZE; // implicitly done by the VO
 }
