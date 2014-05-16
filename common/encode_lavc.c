@@ -268,9 +268,12 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
             if (ctx->avc->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
                 break;
         if (i >= ctx->avc->nb_streams) {
-            encode_lavc_fail(ctx,
-                    "video stream missing, invalid codec?\n");
-            return 0;
+            if (ctx->avc->oformat->video_codec != AV_CODEC_ID_NONE ||
+                ctx->options->vcodec) {
+                encode_lavc_fail(ctx,
+                    "no video stream succeeded - invalid codec?\n");
+                return 0;
+            }
         }
     }
     if (ctx->expect_audio) {
@@ -279,9 +282,12 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
             if (ctx->avc->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
                 break;
         if (i >= ctx->avc->nb_streams) {
-            encode_lavc_fail(ctx,
-                    "audio stream missing, invalid codec?\n");
-            return 0;
+            if (ctx->avc->oformat->audio_codec != AV_CODEC_ID_NONE ||
+                ctx->options->acodec) {
+                encode_lavc_fail(ctx,
+                    "no audio stream succeeded - invalid codec?\n");
+                return 0;
+            }
         }
     }
 
@@ -545,7 +551,10 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
     switch (mt) {
     case AVMEDIA_TYPE_VIDEO:
         if (!ctx->vc) {
-            encode_lavc_fail(ctx, "vo-lavc: encoder not found\n");
+            if (ctx->avc->oformat->video_codec != AV_CODEC_ID_NONE ||
+                ctx->options->vcodec) {
+                encode_lavc_fail(ctx, "vo-lavc: encoder not found\n");
+            }
             return NULL;
         }
         avcodec_get_context_defaults3(stream->codec, ctx->vc);
@@ -578,7 +587,10 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
 
     case AVMEDIA_TYPE_AUDIO:
         if (!ctx->ac) {
-            encode_lavc_fail(ctx, "ao-lavc: encoder not found\n");
+            if (ctx->avc->oformat->audio_codec != AV_CODEC_ID_NONE ||
+                ctx->options->acodec) {
+                encode_lavc_fail(ctx, "ao-lavc: encoder not found\n");
+            }
             return NULL;
         }
         avcodec_get_context_defaults3(stream->codec, ctx->ac);
