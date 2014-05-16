@@ -878,10 +878,8 @@ OPTIONS
 
     .. admonition:: Note (X11)
 
-        This option does not work properly with all window managers.
-        ``all`` in particular will usually only work with
-        ``--x11-fstype=-fullscreen`` or ``--x11-fstype=none``, and even then
-        only with some window managers.
+        This option does works properly only with window managers which
+        understand the EWMH ``_NET_WM_FULLSCREEN_MONITORS`` hint.
 
     .. admonition:: Note (OS X)
 

@@ -333,6 +333,29 @@ static void vo_x11_update_screeninfo(struct vo *vo)
 #endif
 }
 
+// Get the monitors for the 4 edges of the rectangle spanning all screens.
+static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
+{
+    //top  bottom left   right
+    b[0] = b[1] = b[2] = b[3] = 0;
+    int num_screens = 0;
+    XineramaScreenInfo *screens = XineramaQueryScreens(x11->display, &num_screens);
+    if (!screens)
+        return;
+    for (int n = 0; n < num_screens; n++) {
+        XineramaScreenInfo *s = &screens[n];
+        if (s->y_org < screens[b[0]].y_org)
+            b[0] = n;
+        if (s->y_org + s->height > screens[b[1]].y_org + screens[b[1]].height)
+            b[1] = n;
+        if (s->x_org < screens[b[2]].x_org)
+            b[2] = n;
+        if (s->x_org + s->width > screens[b[3]].x_org + screens[b[3]].width)
+            b[3] = n;
+    }
+    XFree(screens);
+}
+
 int vo_x11_init(struct vo *vo)
 {
     struct mp_vo_opts *opts = vo->opts;
@@ -1159,6 +1182,33 @@ static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
         x11->pos_changed_during_fs = true;
     }
 
+    if (vo->opts->fsscreen_id != -1) {
+        XEvent xev;
+
+        /* init X event structure for _NET_WM_FULLSCREEN client message */
+        xev.xclient.type = ClientMessage;
+        xev.xclient.serial = 0;
+        xev.xclient.send_event = True;
+        xev.xclient.message_type = XA(x11, _NET_WM_FULLSCREEN_MONITORS);
+        xev.xclient.window = x11->window;
+        xev.xclient.format = 32;
+        if (vo->opts->fsscreen_id >= 0) {
+            for (int n = 0; n < 4; n++)
+                xev.xclient.data.l[n] = vo->opts->fsscreen_id;
+        } else {
+            vo_x11_get_bounding_monitors(x11, &xev.xclient.data.l[0]);
+        }
+        xev.xclient.data.l[4] = 1; // source indication: normal
+
+        /* finally send that damn thing */
+        if (!XSendEvent(x11->display, DefaultRootWindow(x11->display), False,
+                        SubstructureRedirectMask | SubstructureNotifyMask,
+                        &xev))
+        {
+            MP_ERR(x11, "Couldn't send EWMH fullscreen event!\n");
+        }
+    }
+
     // map window
     vo_x11_selectinput_witherr(vo, x11->display, x11->window,
                                StructureNotifyMask | ExposureMask |
@@ -1266,17 +1316,8 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
 
     vo_x11_fullscreen(vo);
 
-    XSync(x11->display, False);
-
-    vo_x11_update_geometry(vo);
-    if (x11->window_hidden) {
-        // The real size is only known when the window is mapped, which
-        // unfortunately happens asynchronous to VO initialization. At least
-        // vdpau needs a _some_ window size, though.
-        x11->win_width = width;
-        x11->win_height = height;
-    }
     wait_until_mapped(vo);
+    vo_x11_update_geometry(vo);
     update_vo_size(vo);
     x11->pending_vo_events &= ~VO_EVENT_RESIZE; // implicitly done by the VO
 }
@@ -1408,80 +1449,62 @@ static void vo_x11_fullscreen(struct vo *vo)
 {
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
-    int x, y, w, h;
 
     if (opts->fullscreen == x11->fs)
         return;
-    if (opts->WinID >= 0) {
-        x11->fs = opts->fullscreen;
+    x11->fs = opts->fullscreen; // x11->fs now contains the new state
+    if (opts->WinID >= 0)
         return;
-    }
 
-    if (!opts->fullscreen) {
-        // fs->win
-        opts->fullscreen = x11->fs = 0;
-
-        x = x11->nofs_x;
-        y = x11->nofs_y;
-        w = x11->nofs_width;
-        h = x11->nofs_height;
-
-        vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
-        if ((x11->wm_type & vo_wm_FULLSCREEN) && opts->fsscreen_id != -1) {
-            x11->size_changed_during_fs = true;
-            x11->pos_changed_during_fs = true;
-        }
-
-        if (x11->wm_type & vo_wm_FULLSCREEN) {
-            vo_x11_move_resize(vo, x11->pos_changed_during_fs,
-                               x11->size_changed_during_fs, x, y, w, h);
-        }
-    } else {
-        // win->fs
-        opts->fullscreen = x11->fs = 1;
-
+    // Save old state before entering fullscreen
+    if (x11->fs) {
         vo_x11_update_geometry(vo);
         x11->nofs_x = x11->win_x;
         x11->nofs_y = x11->win_y;
         x11->nofs_width = x11->win_width;
         x11->nofs_height = x11->win_height;
-
-        vo_x11_update_screeninfo(vo);
-
-        x = x11->screenrc.x0;
-        y = x11->screenrc.y0;
-        w = x11->screenrc.x1 - x;
-        h = x11->screenrc.y1 - y;
-
-        if ((x11->wm_type & vo_wm_FULLSCREEN) && opts->fsscreen_id != -1) {
-            // The EWMH fullscreen hint always works on the current screen, so
-            // change the current screen forcibly.
-            // This was observed to work under IceWM, but not Unity/Compiz and
-            // awesome (but --screen etc. doesn't really work on these either).
-            XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
-        }
-
-        // sends fullscreen state to be added if wm supports EWMH
-        vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);
     }
 
-    if (!(x11->wm_type & vo_wm_FULLSCREEN)) {  // not needed with EWMH fs
+    if (x11->wm_type & vo_wm_FULLSCREEN) {
+        if (x11->fs) {
+            vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);
+        } else {
+            vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);
+            vo_x11_move_resize(vo,
+                               x11->pos_changed_during_fs,
+                               x11->size_changed_during_fs,
+                               x11->nofs_x, x11->nofs_y,
+                               x11->nofs_width, x11->nofs_height);
+        }
+    } else {
+        int x, y, w, h;
+        if (x11->fs) {
+            vo_x11_update_screeninfo(vo);
+
+            x = x11->screenrc.x0;
+            y = x11->screenrc.y0;
+            w = x11->screenrc.x1 - x;
+            h = x11->screenrc.y1 - y;
+        } else {
+            x = x11->nofs_x;
+            y = x11->nofs_y;
+            w = x11->nofs_width;
+            h = x11->nofs_height;
+        }
+
         vo_x11_decoration(vo, opts->border && !x11->fs);
         vo_x11_sizehint(vo, x, y, w, h, true);
         vo_x11_setlayer(vo, x11->window, x11->fs);
 
-
         XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
+
+        /* some WMs lose ontop after fullscreen */
+        if (!x11->fs && opts->ontop)
+            vo_x11_setlayer(vo, x11->window, opts->ontop);
+
+        XRaiseWindow(x11->display, x11->window);
+        XFlush(x11->display);
     }
-    /* some WMs lose ontop after fullscreen */
-    if ((!(x11->fs)) & opts->ontop)
-        vo_x11_setlayer(vo, x11->window, opts->ontop);
-
-    XMapRaised(x11->display, x11->window);
-    if (!(x11->wm_type & vo_wm_FULLSCREEN))    // some WMs change window pos on map
-        XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
-    XRaiseWindow(x11->display, x11->window);
-    XFlush(x11->display);
 
     x11->size_changed_during_fs = false;
     x11->pos_changed_during_fs = false;
