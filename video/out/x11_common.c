@@ -914,7 +914,7 @@ static void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height,
     x11->vo_hint.base_height = 0 /*height*/;
 
     x11->vo_hint.flags |= PWinGravity;
-    x11->vo_hint.win_gravity = StaticGravity;
+    x11->vo_hint.win_gravity = CenterGravity;
     XSetWMNormalHints(x11->display, x11->window, &x11->vo_hint);
 }
 
