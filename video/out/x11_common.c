@@ -1125,14 +1125,6 @@ static void vo_x11_set_wm_icon(struct vo_x11_state *x11)
     talloc_free(uncompressed.start);
 }
 
-static void find_default_visual(struct vo_x11_state *x11, XVisualInfo *vis)
-{
-    Display *display = x11->display;
-    XWindowAttributes attribs;
-    XGetWindowAttributes(display, DefaultRootWindow(display), &attribs);
-    XMatchVisualInfo(display, x11->screen, attribs.depth, TrueColor, vis);
-}
-
 static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                                  unsigned int w, unsigned int h)
 {
@@ -1144,7 +1136,9 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     XVisualInfo vinfo_storage;
     if (!vis) {
         vis = &vinfo_storage;
-        find_default_visual(x11, vis);
+        XWindowAttributes att;
+        XGetWindowAttributes(x11->display, x11->rootwin, &att);
+        XMatchVisualInfo(x11->display, x11->screen, att.depth, TrueColor, vis);
     }
 
     if (x11->colormap == None) {
