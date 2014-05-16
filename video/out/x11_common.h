@@ -59,7 +59,6 @@ struct vo_x11_state {
     int fs_layer;
     int fs;     // whether we assume the window is in fullscreen mode
 
-    XSizeHints vo_hint;
     bool mouse_cursor_hidden;
     int orig_layer;
 

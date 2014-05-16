@@ -908,37 +908,41 @@ static void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height,
                      opts->WinID >= 0 ||            // force to fill parent
                      override_pos;                  // for fullscreen and such
 
-    x11->vo_hint.flags = 0;
+    XSizeHints *hint = XAllocSizeHints();
+    if (!hint)
+        return; // OOM
+
     if (opts->keepaspect) {
-        x11->vo_hint.flags |= PAspect;
-        x11->vo_hint.min_aspect.x = width;
-        x11->vo_hint.min_aspect.y = height;
-        x11->vo_hint.max_aspect.x = width;
-        x11->vo_hint.max_aspect.y = height;
+        hint->flags |= PAspect;
+        hint->min_aspect.x = width;
+        hint->min_aspect.y = height;
+        hint->max_aspect.x = width;
+        hint->max_aspect.y = height;
     }
 
-    x11->vo_hint.flags |= PSize | (force_pos ? PPosition : 0);
-    x11->vo_hint.x = x;
-    x11->vo_hint.y = y;
-    x11->vo_hint.width = width;
-    x11->vo_hint.height = height;
-    x11->vo_hint.max_width = 0;
-    x11->vo_hint.max_height = 0;
+    hint->flags |= PSize | (force_pos ? PPosition : 0);
+    hint->x = x;
+    hint->y = y;
+    hint->width = width;
+    hint->height = height;
+    hint->max_width = 0;
+    hint->max_height = 0;
 
     // Set minimum height/width to 4 to avoid off-by-one errors.
-    x11->vo_hint.flags |= PMinSize;
-    x11->vo_hint.min_width = x11->vo_hint.min_height = 4;
+    hint->flags |= PMinSize;
+    hint->min_width = hint->min_height = 4;
 
     // Set the base size. A window manager might display the window
     // size to the user relative to this.
     // Setting these to width/height might be nice, but e.g. fluxbox can't handle it.
-    x11->vo_hint.flags |= PBaseSize;
-    x11->vo_hint.base_width = 0 /*width*/;
-    x11->vo_hint.base_height = 0 /*height*/;
+    hint->flags |= PBaseSize;
+    hint->base_width = 0 /*width*/;
+    hint->base_height = 0 /*height*/;
 
-    x11->vo_hint.flags |= PWinGravity;
-    x11->vo_hint.win_gravity = CenterGravity;
-    XSetWMNormalHints(x11->display, x11->window, &x11->vo_hint);
+    hint->flags |= PWinGravity;
+    hint->win_gravity = CenterGravity;
+    XSetWMNormalHints(x11->display, x11->window, hint);
+    XFree(hint);
 }
 
 static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
