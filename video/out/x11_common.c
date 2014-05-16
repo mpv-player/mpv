@@ -346,7 +346,6 @@ int vo_x11_init(struct vo *vo)
         .olddecor = MWM_DECOR_ALL,
         .oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
                     MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
-        .old_gravity = NorthWestGravity,
     };
     vo->x11 = x11;
 
@@ -840,8 +839,6 @@ int vo_x11_check_events(struct vo *vo)
             x11->window_hidden = false;
             vo_x11_clearwindow(vo, x11->window);
             vo_x11_update_geometry(vo);
-            x11->vo_hint.win_gravity = x11->old_gravity;
-            XSetWMNormalHints(display, x11->window, &x11->vo_hint);
             break;
         case DestroyNotify:
             MP_WARN(x11, "Our window was destroyed, exiting\n");
@@ -1467,12 +1464,6 @@ static void vo_x11_fullscreen(struct vo *vo)
         // sends fullscreen state to be added if wm supports EWMH
         vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);
     }
-
-    XGetWMNormalHints(x11->display, x11->window, &x11->vo_hint, &(long){0});
-    if (!(x11->vo_hint.flags & PWinGravity))
-        x11->old_gravity = NorthWestGravity;
-    else
-        x11->old_gravity = x11->vo_hint.win_gravity;
 
     if (!(x11->wm_type & vo_wm_FULLSCREEN)) {  // not needed with EWMH fs
         vo_x11_decoration(vo, opts->border && !x11->fs);

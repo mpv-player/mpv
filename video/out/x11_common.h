@@ -62,7 +62,6 @@ struct vo_x11_state {
     XSizeHints vo_hint;
     bool mouse_cursor_hidden;
     int orig_layer;
-    int old_gravity;
 
     // Current actual window position (updated on window move/resize events).
     int win_x;
