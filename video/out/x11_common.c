@@ -1494,13 +1494,10 @@ static void vo_x11_fullscreen(struct vo *vo)
 
         vo_x11_decoration(vo, opts->border && !x11->fs);
         vo_x11_sizehint(vo, x, y, w, h, true);
-        vo_x11_setlayer(vo, x11->window, x11->fs);
 
         XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
 
-        /* some WMs lose ontop after fullscreen */
-        if (!x11->fs && opts->ontop)
-            vo_x11_setlayer(vo, x11->window, opts->ontop);
+        vo_x11_setlayer(vo, x11->window, x11->fs || opts->ontop);
 
         XRaiseWindow(x11->display, x11->window);
         XFlush(x11->display);
