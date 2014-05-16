@@ -111,37 +111,6 @@ struct vo_x11_state {
 
     /* dragging the window */
     bool win_drag_button1_down;
-
-    Atom XA_NET_SUPPORTED;
-    Atom XA_NET_WM_STATE;
-    Atom XA_NET_WM_STATE_FULLSCREEN;
-    Atom XA_NET_WM_STATE_ABOVE;
-    Atom XA_NET_WM_STATE_STAYS_ON_TOP;
-    Atom XA_NET_WM_STATE_BELOW;
-    Atom XA_NET_WM_PID;
-    Atom XA_NET_WM_NAME;
-    Atom XA_NET_WM_ICON_NAME;
-    Atom XA_NET_WM_ICON;
-    Atom XA_NET_WM_MOVERESIZE;
-    Atom XA_WIN_PROTOCOLS;
-    Atom XA_WIN_LAYER;
-    Atom XA_WIN_HINTS;
-    Atom XAWM_PROTOCOLS;
-    Atom XAWM_DELETE_WINDOW;
-    Atom XAUTF8_STRING;
-    Atom XA_NET_WM_CM;
-    Atom XATARGETS;
-    Atom XAXdndAware;
-    Atom XAXdndEnter;
-    Atom XAXdndLeave;
-    Atom XAXdndPosition;
-    Atom XAXdndStatus;
-    Atom XAXdndActionCopy;
-    Atom XAXdndTypeList;
-    Atom XAXdndDrop;
-    Atom XAXdndSelection;
-    Atom XAXdndFinished;
-    Atom XA_uri_list;
 };
 
 int vo_x11_init(struct vo *vo);
