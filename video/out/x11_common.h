@@ -60,26 +60,19 @@ struct vo_x11_state {
     int orig_layer;
 
     // Current actual window position (updated on window move/resize events).
-    int win_x;
-    int win_y;
-    unsigned int win_width;
-    unsigned int win_height;
+    struct mp_rect winrc;
 
     int pending_vo_events;
 
     // last non-fullscreen extends (updated on fullscreen or reinitialization)
-    int nofs_width;
-    int nofs_height;
-    int nofs_x;
-    int nofs_y;
+    struct mp_rect nofsrc;
 
     /* Keep track of original video width/height to determine when to
      * resize window when reconfiguring. Resize window when video size
      * changes, but don't force window size changes as long as video size
      * stays the same (even if that size is different from the current
      * window size after the user modified the latter). */
-    int old_dwidth;
-    int old_dheight;
+    int old_dw, old_dh;
     /* Video size changed during fullscreen when we couldn't tell the new
      * size to the window manager. Must set window size when turning
      * fullscreen off. */
