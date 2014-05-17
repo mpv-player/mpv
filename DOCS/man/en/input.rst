@@ -300,6 +300,20 @@ List of Input Commands
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD.
 
+``discnav "<command>"``
+    Send a menu control command to the DVD/BD menu implementation. The following
+    commands are defined: ``up``, ``down``, ``left``, ``right``,
+    ``menu`` (request to enter menu), ``prev`` (previous screen),
+    ``select`` (activate current button), ``mouse`` (the mouse was clicked),
+    ``mouse_move`` (the mouse cursor changed position).
+
+    ``menu`` and ``prev`` are DVD-only. ``mouse_move`` will use the current
+    mouse position.
+
+    Note that while the menu is active, the input section ``discnav-menu`` will
+    be enabled, so different key bindings can be mapped for menu mode.
+
+
 Input Commands that are Possibly Subject to Change
 --------------------------------------------------
 
