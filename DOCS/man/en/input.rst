@@ -661,6 +661,12 @@ Property list
     Current BD/DVD title number. Writing works only for ``dvdnav://`` and
     ``bd://`` (and aliases for these).
 
+``disc-menu-active``
+    Return ``yes`` if the BD/DVD menu is active, or ``no`` on normal video
+    playback. The property is unavailable when playing something that is not
+    a BD or DVD. Use the ``discnav menu`` command to actually enter or leave
+    menu mode.
+
 ``chapters``
     Number of chapters.
 

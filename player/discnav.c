@@ -19,6 +19,7 @@
 #include <assert.h>
 
 #include "core.h"
+#include "command.h"
 
 #include "common/msg.h"
 #include "common/common.h"
@@ -69,6 +70,18 @@ static void update_resolution(struct MPContext *mpctx) {
     }
 }
 
+// Send update events and such.
+static void update_state(struct MPContext *mpctx)
+{
+    mp_notify_property(mpctx, "disc-menu-active");
+}
+
+// Return 1 if in menu, 0 if in video, or <0 if no navigation possible.
+int mp_nav_in_menu(struct MPContext *mpctx)
+{
+    return mpctx->nav_state ? mpctx->nav_state->nav_menu : -1;
+}
+
 // Allocate state and enable navigation features. Must happen before
 // initializing cache, because the cache would read data. Since stream_dvdnav is
 // in a mode which skips all transitions on reading data (before enabling
@@ -93,6 +106,8 @@ void mp_nav_init(struct MPContext *mpctx)
     mp_input_enable_section(mpctx->input, "discnav", 0);
     mp_input_set_section_mouse_area(mpctx->input, "discnav-menu",
                                     INT_MIN, INT_MIN, INT_MAX, INT_MAX);
+
+    update_state(mpctx);
 }
 
 void mp_nav_reset(struct MPContext *mpctx)
@@ -111,6 +126,7 @@ void mp_nav_reset(struct MPContext *mpctx)
     // Prevent demuxer init code to seek to the "start"
     mpctx->stream->start_pos = stream_tell(mpctx->stream);
     stream_control(mpctx->stream, STREAM_CTRL_RESUME_CACHE, NULL);
+    update_state(mpctx);
 }
 
 void mp_nav_destroy(struct MPContext *mpctx)
@@ -122,6 +138,7 @@ void mp_nav_destroy(struct MPContext *mpctx)
     mp_input_disable_section(mpctx->input, "discnav-menu");
     talloc_free(mpctx->nav_state);
     mpctx->nav_state = NULL;
+    update_state(mpctx);
 }
 
 void mp_nav_user_input(struct MPContext *mpctx, char *command)
@@ -193,6 +210,7 @@ void mp_handle_nav(struct MPContext *mpctx)
             } else {
                 mp_input_disable_section(mpctx->input, "discnav-menu");
             }
+            update_state(mpctx);
             break;
         case MP_NAV_EVENT_HIGHLIGHT: {
             MP_VERBOSE(nav, "highlight: %d %d %d - %d %d\n",
