@@ -53,10 +53,7 @@ struct vo_x11_state {
     Colormap colormap;
 
     int wm_type;
-    int fs_type;
     bool window_hidden;
-    int fs_flip;
-    int fs_layer;
     int fs;     // whether we assume the window is in fullscreen mode
 
     bool mouse_cursor_hidden;
