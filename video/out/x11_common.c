@@ -137,6 +137,50 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
 #define RC_W(rc) ((rc).x1 - (rc).x0)
 #define RC_H(rc) ((rc).y1 - (rc).y0)
 
+// format = 8 (unsigned char), 16 (short), 32 (long, even on LP64 systems)
+// *out_nitems = returned number of items of requested format
+static void *x11_get_property(struct vo_x11_state *x11, Window w, Atom property,
+                              Atom type, int format, int *out_nitems)
+{
+    assert(format == 8 || format == 16 || format == 32);
+    *out_nitems = 0;
+    long max_len = 64 * 1024; // static maximum limit
+    Atom ret_type = 0;
+    int ret_format = 0;
+    unsigned long ret_nitems = 0;
+    unsigned long ret_bytesleft = 0;
+    unsigned char *ret_prop = NULL;
+    if (XGetWindowProperty(x11->display, w, property, 0, max_len, False, type,
+                           &ret_type, &ret_format, &ret_nitems, &ret_bytesleft,
+                           &ret_prop) != Success)
+        return NULL;
+    if (ret_format != format || ret_nitems < 1 || ret_bytesleft) {
+        XFree(ret_prop);
+        ret_prop = NULL;
+        ret_nitems = 0;
+    }
+    *out_nitems = ret_nitems;
+    return ret_prop;
+}
+
+static bool x11_get_property_copy(struct vo_x11_state *x11, Window w,
+                                  Atom property, Atom type, int format,
+                                  void *dst, size_t dst_size)
+{
+    bool ret = false;
+    int len;
+    void *ptr = x11_get_property(x11, w, property, type, format, &len);
+    if (ptr) {
+        size_t ib = format == 32 ? sizeof(long) : format / 8;
+        if (dst_size / ib >= len) {
+            memcpy(dst, ptr, dst_size);
+            ret = true;
+        }
+        XFree(ptr);
+    }
+    return ret;
+}
+
 /*
  * Sends the EWMH fullscreen state event.
  *
@@ -243,25 +287,12 @@ static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
     return 0;
 }
 
-static bool x11_get_property(struct vo_x11_state *x11, Window wnd, Atom type,
-                             Atom **args, unsigned long *nitems)
-{
-    int format;
-    unsigned long bytesafter;
-
-    return Success ==
-           XGetWindowProperty(x11->display, wnd, type, 0, 16384, False,
-                              AnyPropertyType, &type, &format, nitems,
-                              &bytesafter, (unsigned char **) args)
-           && *nitems > 0 && bytesafter == 0;
-}
-
 static int vo_wm_detect(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     int i;
     int wm = 0;
-    unsigned long nitems;
+    int nitems;
     Atom *args = NULL;
     Window win = x11->rootwin;
 
@@ -269,16 +300,21 @@ static int vo_wm_detect(struct vo *vo)
         return 0;
 
 // -- supports layers
-    if (x11_get_property(x11, win, XA(x11, _WIN_PROTOCOLS), &args, &nitems)) {
-        MP_VERBOSE(x11, "Detected wm supports layers.\n");
+    args = x11_get_property(x11, win, XA(x11, _WIN_PROTOCOLS), XA_ATOM, 32,
+                            &nitems);
+    if (args) {
         for (i = 0; i < nitems; i++) {
-            if (args[i] == XA(x11, _WIN_LAYER))
+            if (args[i] == XA(x11, _WIN_LAYER)) {
+                MP_VERBOSE(x11, "Detected wm supports layers.\n");
                 wm |= vo_wm_LAYER;
+            }
         }
         XFree(args);
     }
 // --- netwm
-    if (x11_get_property(x11, win, XA(x11, _NET_SUPPORTED), &args, &nitems)) {
+    args = x11_get_property(x11, win, XA(x11, _NET_SUPPORTED), XA_ATOM, 32,
+                            &nitems);
+    if (args) {
         MP_VERBOSE(x11, "Detected wm supports NetWM.\n");
         if (vo->opts->x11_netwm) {
             for (i = 0; i < nitems; i++)
@@ -499,9 +535,6 @@ static int vo_x11_lookupkey(int key)
 static void vo_x11_decoration(struct vo *vo, int d)
 {
     struct vo_x11_state *x11 = vo->x11;
-    Atom mtype;
-    int mformat;
-    unsigned long mn, mb;
     Atom vo_MotifHints;
     MotifWmHints vo_MotifWmHints;
 
@@ -511,19 +544,13 @@ static void vo_x11_decoration(struct vo *vo, int d)
     vo_MotifHints = XInternAtom(x11->display, "_MOTIF_WM_HINTS", 0);
     if (vo_MotifHints != None) {
         if (!x11->got_motif_hints) {
-            MotifWmHints *mhints = NULL;
-
-            XGetWindowProperty(x11->display, x11->window,
-                               vo_MotifHints, 0, 20, False,
-                               vo_MotifHints, &mtype, &mformat, &mn,
-                               &mb, (unsigned char **) &mhints);
-            if (mhints) {
-                if (mhints->flags & MWM_HINTS_DECORATIONS)
-                    x11->olddecor = mhints->decorations;
-                if (mhints->flags & MWM_HINTS_FUNCTIONS)
-                    x11->oldfuncs = mhints->functions;
-                XFree(mhints);
-            }
+            MotifWmHints mhints = {0};
+            x11_get_property_copy(x11, x11->window, vo_MotifHints,
+                                  vo_MotifHints, 32, &mhints, sizeof(mhints));
+            if (mhints.flags & MWM_HINTS_DECORATIONS)
+                x11->olddecor = mhints.decorations;
+            if (mhints.flags & MWM_HINTS_FUNCTIONS)
+                x11->oldfuncs = mhints.functions;
         }
         x11->got_motif_hints = true;
 
@@ -640,10 +667,10 @@ static void vo_x11_dnd_handle_message(struct vo *vo, XClientMessageEvent *ce)
 
         Window src = ce->data.l[0];
         if (ce->data.l[1] & 1) {
-            unsigned long nitems = 0;
-            Atom *args = NULL;
-            if (x11_get_property(x11, src, XA(x11, XdndTypeList), &args, &nitems))
-            {
+            int nitems;
+            Atom *args = x11_get_property(x11, src, XA(x11, XdndTypeList),
+                                          XA_ATOM, 32, &nitems);
+            if (args) {
                 dnd_select_format(x11, args, nitems);
                 XFree(args);
             }
@@ -693,22 +720,13 @@ static void vo_x11_dnd_handle_selection(struct vo *vo, XSelectionEvent *se)
         se->property == x11->dnd_property &&
         se->target == x11->dnd_requested_format)
     {
-        Atom type;
-        int format;
-        unsigned long nitems;
-        unsigned long bytes_left;
-        unsigned char *prop;
-        if (XGetWindowProperty(x11->display, x11->window, x11->dnd_property,
-                              0, 64 * 1024, False, x11->dnd_requested_format,
-                              &type, &format, &nitems, &bytes_left, &prop)
-                == Success)
-        {
-            if (!bytes_left && type == x11->dnd_requested_format && format == 8)
-            {
-                // No idea if this is guaranteed to be \0-padded, so use bstr.
-                success = mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
-                                                  (bstr){prop, nitems}) > 0;
-            }
+        int nitems;
+        void *prop = x11_get_property(x11, x11->window, x11->dnd_property,
+                                      x11->dnd_requested_format, 8, &nitems);
+        if (prop) {
+            // No idea if this is guaranteed to be \0-padded, so use bstr.
+            success = mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
+                                              (bstr){prop, nitems}) > 0;
             XFree(prop);
         }
     }
@@ -956,22 +974,11 @@ static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
 
 static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
 {
-    Atom type;
-    int format;
-    unsigned long nitems;
-    unsigned long bytesafter;
-    unsigned short *args = NULL;
-
-    if (XGetWindowProperty(x11->display, win, XA(x11, _WIN_LAYER), 0, 16384,
-                           False, AnyPropertyType, &type, &format, &nitems,
-                           &bytesafter,
-                           (unsigned char **) &args) == Success
-        && nitems > 0 && args)
-    {
-        MP_VERBOSE(x11, "original window layer is %d.\n", *args);
-        return *args;
-    }
-    return WIN_LAYER_NORMAL;
+    long layer = WIN_LAYER_NORMAL;
+    if (x11_get_property_copy(x11, win, XA(x11, _WIN_LAYER), XA_CARDINAL,
+                              32, &layer, sizeof(layer)))
+        MP_VERBOSE(x11, "original window layer is %ld.\n", layer);
+    return layer;
 }
 
 // set a X text property that expects a UTF8_STRING type
