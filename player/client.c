@@ -67,8 +67,8 @@ struct observe_property {
     bool need_new_value;    // a new value should be retrieved
     bool updating;          // a new value is being retrieved
     bool dead;              // property unobserved while retrieving value
-    bool value_valid;
-    union m_option_value value;
+    bool new_value_valid, user_value_valid;
+    union m_option_value new_value, user_value;
     struct mpv_handle *client;
 };
 
@@ -1041,8 +1041,10 @@ static void property_free(void *p)
 {
     struct observe_property *prop = p;
     const struct m_option *type = get_mp_type_get(prop->format);
-    if (type)
-        m_option_free(type, &prop->value);
+    if (type) {
+        m_option_free(type, &prop->new_value);
+        m_option_free(type, &prop->user_value);
+    }
 }
 
 int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
@@ -1128,7 +1130,8 @@ void mp_client_property_change(struct MPContext *mpctx, const char **list)
             if (!prop->changed && !prop->need_new_value) {
                 for (int x = 0; list && list[x]; x++) {
                     if (match_property(prop->name, list[x])) {
-                        prop->changed = prop->need_new_value = true;
+                        prop->changed = true;
+                        prop->need_new_value = prop->format != 0;
                         break;
                     }
                 }
@@ -1164,17 +1167,16 @@ static void update_prop(void *p)
     pthread_mutex_lock(&ctx->lock);
     ctx->properties_updating--;
     prop->updating = false;
-    bool new_value_valid = req.status >= 0;
-    if (prop->value_valid != new_value_valid) {
+    m_option_free(type, &prop->new_value);
+    prop->new_value_valid = req.status >= 0;
+    if (prop->new_value_valid)
+        memcpy(&prop->new_value, &val, type->type->size);
+    if (prop->user_value_valid != prop->new_value_valid) {
         prop->changed = true;
-    } else if (prop->value_valid && new_value_valid) {
-        if (!compare_value(&prop->value, &val, prop->format))
+    } else if (prop->user_value_valid && prop->new_value_valid) {
+        if (!compare_value(&prop->user_value, &prop->new_value, prop->format))
             prop->changed = true;
     }
-    m_option_free(type, &prop->value);
-    if (new_value_valid)
-        memcpy(&prop->value, &val, type->type->size);
-    prop->value_valid = new_value_valid;
     if (prop->dead)
         talloc_steal(ctx->cur_event, prop);
     wakeup_client(ctx);
@@ -1192,19 +1194,23 @@ static bool gen_property_change_event(struct mpv_handle *ctx)
         if ((prop->changed || prop->updating) && n < ctx->lowest_changed)
             ctx->lowest_changed = n;
         if (prop->changed) {
-            bool new_val = prop->need_new_value;
-            prop->changed = prop->need_new_value = false;
-            if (prop->format && new_val) {
+            prop->changed = false;
+            if (prop->format && prop->need_new_value) {
+                prop->need_new_value = false;
                 ctx->properties_updating++;
                 prop->updating = true;
                 mp_dispatch_enqueue(ctx->mpctx->dispatch, update_prop, prop);
             } else {
+                const struct m_option *type = get_mp_type_get(prop->format);
+                prop->user_value_valid = prop->new_value_valid;
+                if (prop->new_value_valid)
+                    m_option_copy(type, &prop->user_value, &prop->new_value);
                 ctx->cur_property_event = (struct mpv_event_property){
                     .name = prop->name,
-                    .format = prop->value_valid ? prop->format : 0,
+                    .format = prop->user_value_valid ? prop->format : 0,
                 };
-                if (prop->value_valid)
-                    ctx->cur_property_event.data = &prop->value;
+                if (prop->user_value_valid)
+                    ctx->cur_property_event.data = &prop->user_value;
                 *ctx->cur_event = (struct mpv_event){
                     .event_id = MPV_EVENT_PROPERTY_CHANGE,
                     .reply_userdata = prop->reply_id,
