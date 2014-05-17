@@ -181,6 +181,27 @@ static bool x11_get_property_copy(struct vo_x11_state *x11, Window w,
     return ret;
 }
 
+static void x11_send_ewmh_msg(struct vo_x11_state *x11, char *message_type,
+                              long params[5])
+{
+    XEvent xev = {
+        .xclient = {
+            .type = ClientMessage,
+            .send_event = True,
+            .message_type = XInternAtom(x11->display, message_type, False),
+            .window = x11->window,
+            .format = 32,
+        },
+    };
+    for (int n = 0; n < 5; n++)
+        xev.xclient.data.l[n] = params[n];
+
+    if (!XSendEvent(x11->display, x11->rootwin, False,
+                    SubstructureRedirectMask | SubstructureNotifyMask,
+                    &xev))
+        MP_ERR(x11, "Couldn't send EWMH %s message!\n", message_type);
+}
+
 /*
  * Sends the EWMH fullscreen state event.
  *
@@ -194,28 +215,8 @@ static void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
            action == _NET_WM_STATE_TOGGLE);
 
     if (x11->wm_type & vo_wm_FULLSCREEN) {
-        XEvent xev;
-
-        /* init X event structure for _NET_WM_FULLSCREEN client message */
-        xev.xclient.type = ClientMessage;
-        xev.xclient.serial = 0;
-        xev.xclient.send_event = True;
-        xev.xclient.message_type = XA(x11, _NET_WM_STATE);
-        xev.xclient.window = x11->window;
-        xev.xclient.format = 32;
-        xev.xclient.data.l[0] = action;
-        xev.xclient.data.l[1] = XA(x11, _NET_WM_STATE_FULLSCREEN);
-        xev.xclient.data.l[2] = 0;
-        xev.xclient.data.l[3] = 0;
-        xev.xclient.data.l[4] = 0;
-
-        /* finally send that damn thing */
-        if (!XSendEvent(x11->display, DefaultRootWindow(x11->display), False,
-                        SubstructureRedirectMask | SubstructureNotifyMask,
-                        &xev))
-        {
-            MP_ERR(x11, "Couldn't send EWMH fullscreen event!\n");
-        }
+        long params[5] = {action, XA(x11, _NET_WM_STATE_FULLSCREEN)};
+        x11_send_ewmh_msg(x11, "_NET_WM_STATE", params);
     }
 }
 
@@ -840,22 +841,13 @@ int vo_x11_check_events(struct vo *vo)
                 mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
                 XUngrabPointer(x11->display, CurrentTime);
 
-                XEvent xev;
-                xev.xclient.type = ClientMessage;
-                xev.xclient.serial = 0;
-                xev.xclient.send_event = True;
-                xev.xclient.message_type = XA(x11, _NET_WM_MOVERESIZE);
-                xev.xclient.window = x11->window;
-                xev.xclient.format = 32;
-                xev.xclient.data.l[0] = Event.xmotion.x_root;
-                xev.xclient.data.l[1] = Event.xmotion.y_root;
-                xev.xclient.data.l[2] = 8; // _NET_WM_MOVERESIZE_MOVE
-                xev.xclient.data.l[3] = 1; // button 1
-                xev.xclient.data.l[4] = 1; // source indication: normal
-
-                XSendEvent(x11->display, x11->rootwin, False,
-                           SubstructureRedirectMask | SubstructureNotifyMask,
-                           &xev);
+                long params[5] = {
+                    Event.xmotion.x_root, Event.xmotion.y_root,
+                    8, // _NET_WM_MOVERESIZE_MOVE
+                    1, // button 1
+                    1, // source indication: normal
+                };
+                x11_send_ewmh_msg(x11, "_NET_WM_MOVERESIZE", params);
             } else {
                 vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
             }
@@ -1193,30 +1185,15 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     }
 
     if (vo->opts->fsscreen_id != -1) {
-        XEvent xev;
-
-        /* init X event structure for _NET_WM_FULLSCREEN client message */
-        xev.xclient.type = ClientMessage;
-        xev.xclient.serial = 0;
-        xev.xclient.send_event = True;
-        xev.xclient.message_type = XA(x11, _NET_WM_FULLSCREEN_MONITORS);
-        xev.xclient.window = x11->window;
-        xev.xclient.format = 32;
+        long params[5] = {0};
         if (vo->opts->fsscreen_id >= 0) {
             for (int n = 0; n < 4; n++)
-                xev.xclient.data.l[n] = vo->opts->fsscreen_id;
+                params[n] = vo->opts->fsscreen_id;
         } else {
-            vo_x11_get_bounding_monitors(x11, &xev.xclient.data.l[0]);
+            vo_x11_get_bounding_monitors(x11, &params[0]);
         }
-        xev.xclient.data.l[4] = 1; // source indication: normal
-
-        /* finally send that damn thing */
-        if (!XSendEvent(x11->display, DefaultRootWindow(x11->display), False,
-                        SubstructureRedirectMask | SubstructureNotifyMask,
-                        &xev))
-        {
-            MP_ERR(x11, "Couldn't send EWMH fullscreen event!\n");
-        }
+        params[4] = 1; // source indication: normal
+        x11_send_ewmh_msg(x11, "_NET_WM_FULLSCREEN_MONITORS", params);
     }
 
     // map window
@@ -1370,54 +1347,36 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
         return;
 
     if (x11->wm_type & vo_wm_LAYER) {
-        XClientMessageEvent xev;
-
         if (!x11->orig_layer)
             x11->orig_layer = vo_x11_get_gnome_layer(x11, vo_window);
 
-        memset(&xev, 0, sizeof(xev));
-        xev.type = ClientMessage;
-        xev.display = x11->display;
-        xev.window = vo_window;
-        xev.message_type = XA(x11, _WIN_LAYER);
-        xev.format = 32;
+        long params[5] = {0};
         // if not fullscreen, stay on default layer
-        xev.data.l[0] = layer ? WIN_LAYER_ABOVE_DOCK : x11->orig_layer;
-        xev.data.l[1] = CurrentTime;
-        MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n",
-                   xev.data.l[0]);
-        XSendEvent(x11->display, x11->rootwin, False, SubstructureNotifyMask,
-                   (XEvent *) &xev);
+        params[0] = layer ? WIN_LAYER_ABOVE_DOCK : x11->orig_layer;
+        params[1] = CurrentTime;
+        MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n", params[0]);
+        x11_send_ewmh_msg(x11, "_WIN_LAYER", params);
     } else if (x11->wm_type & vo_wm_NETWM) {
-        XClientMessageEvent xev;
-        char *state;
-
-        memset(&xev, 0, sizeof(xev));
-        xev.type = ClientMessage;
-        xev.message_type = XA(x11, _NET_WM_STATE);
-        xev.display = x11->display;
-        xev.window = vo_window;
-        xev.format = 32;
-        xev.data.l[0] = layer;
+        long params[5] = {layer};
 
         if (x11->wm_type & vo_wm_STAYS_ON_TOP) {
-            xev.data.l[1] = XA(x11, _NET_WM_STATE_STAYS_ON_TOP);
+            params[1] = XA(x11, _NET_WM_STATE_STAYS_ON_TOP);
         } else if (x11->wm_type & vo_wm_ABOVE) {
-            xev.data.l[1] = XA(x11, _NET_WM_STATE_ABOVE);
+            params[1] = XA(x11, _NET_WM_STATE_ABOVE);
         } else if (x11->wm_type & vo_wm_FULLSCREEN) {
-            xev.data.l[1] = XA(x11, _NET_WM_STATE_FULLSCREEN);
+            params[1] = XA(x11, _NET_WM_STATE_FULLSCREEN);
         } else if (x11->wm_type & vo_wm_BELOW) {
             // This is not fallback. We can safely assume that the situation
             // where only NETWM_STATE_BELOW is supported doesn't exist.
-            xev.data.l[1] = XA(x11, _NET_WM_STATE_BELOW);
+            params[1] = XA(x11, _NET_WM_STATE_BELOW);
         }
+        x11_send_ewmh_msg(x11, "_WIN_LAYER", params);
 
-        XSendEvent(x11->display, x11->rootwin, False, SubstructureRedirectMask,
-                   (XEvent *) &xev);
-        state = XGetAtomName(x11->display, xev.data.l[1]);
+        char *state = XGetAtomName(x11->display, params[1]);
         MP_VERBOSE(x11, "NET style stay on top (layer %d). Using state %s.\n",
-                   layer, state);
+                   layer, state ? state : "?");
         XFree(state);
+        MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n", params[0]);
     }
 }
 
