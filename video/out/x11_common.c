@@ -126,8 +126,7 @@ static struct mp_log *x11_error_output;
 static void vo_x11_update_geometry(struct vo *vo);
 static void vo_x11_fullscreen(struct vo *vo);
 static void xscreensaver_heartbeat(struct vo_x11_state *x11);
-static void saver_on(struct vo_x11_state *x11);
-static void saver_off(struct vo_x11_state *x11);
+static void set_screensaver(struct vo_x11_state *x11, bool enabled);
 static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
                                        Window w, long event_mask);
 static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
@@ -409,6 +408,7 @@ int vo_x11_init(struct vo *vo)
         .olddecor = MWM_DECOR_ALL,
         .oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
                     MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
+        .screensaver_enabled = true,
     };
     vo->x11 = x11;
 
@@ -592,7 +592,8 @@ void vo_x11_uninit(struct vo *vo)
 
     mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
-    saver_on(x11);
+    set_screensaver(x11, true);
+
     if (x11->window != None)
         vo_set_cursor_hidden(vo, false);
 
@@ -1505,10 +1506,10 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         vo_set_cursor_hidden(vo, !(*(bool *)arg));
         return VO_TRUE;
     case VOCTRL_KILL_SCREENSAVER:
-        saver_off(x11);
+        set_screensaver(x11, false);
         return VO_TRUE;
     case VOCTRL_RESTORE_SCREENSAVER:
-        saver_on(x11);
+        set_screensaver(x11, true);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
         vo_x11_update_window_title(vo);
@@ -1521,7 +1522,7 @@ static void xscreensaver_heartbeat(struct vo_x11_state *x11)
 {
     double time = mp_time_sec();
 
-    if (x11->display && x11->screensaver_off &&
+    if (x11->display && !x11->screensaver_enabled &&
         (time - x11->screensaver_time_last) >= 10)
     {
         x11->screensaver_time_last = time;
@@ -1546,62 +1547,31 @@ static int xss_suspend(Display *mDisplay, Bool suspend)
 #endif
 }
 
-static void saver_on(struct vo_x11_state *x11)
+static void set_screensaver(struct vo_x11_state *x11, bool enabled)
 {
     Display *mDisplay = x11->display;
-    if (!x11->screensaver_off)
+    if (x11->screensaver_enabled == enabled)
         return;
-    x11->screensaver_off = 0;
-    if (xss_suspend(mDisplay, False))
+    MP_VERBOSE(x11, "%s screensaver.\n", enabled ? "Enabling" : "Disabling");
+    x11->screensaver_enabled = enabled;
+    if (xss_suspend(mDisplay, !enabled))
         return;
 #if HAVE_XEXT
-    if (x11->dpms_disabled) {
-        int nothing;
-        if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
-            if (!DPMSEnable(mDisplay)) {    // restoring power saving settings
-                MP_WARN(x11, "DPMS not available?\n");
-            } else {
-                // DPMS does not seem to be enabled unless we call DPMSInfo
-                BOOL onoff;
-                CARD16 state;
-
-                DPMSForceLevel(mDisplay, DPMSModeOn);
-                DPMSInfo(mDisplay, &state, &onoff);
-                if (onoff) {
-                    MP_VERBOSE(x11, "Successfully enabled DPMS\n");
-                } else {
-                    MP_WARN(x11, "Could not enable DPMS\n");
-                }
-            }
-        }
-        x11->dpms_disabled = 0;
-    }
-#endif
-}
-
-static void saver_off(struct vo_x11_state *x11)
-{
-    Display *mDisplay = x11->display;
     int nothing;
-
-    if (x11->screensaver_off)
-        return;
-    x11->screensaver_off = 1;
-    if (xss_suspend(mDisplay, True))
-        return;
-#if HAVE_XEXT
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
-        BOOL onoff;
+        BOOL onoff = 0;
         CARD16 state;
-
         DPMSInfo(mDisplay, &state, &onoff);
-        if (onoff) {
-            Status stat;
-
-            MP_VERBOSE(x11, "Disabling DPMS\n");
-            x11->dpms_disabled = 1;
-            stat = DPMSDisable(mDisplay);       // monitor powersave off
-            MP_VERBOSE(x11, "DPMSDisable stat: %d\n", stat);
+        if (enabled != !!onoff) {
+            MP_VERBOSE(x11, "Setting DMPS: %s.\n", enabled ? "on" : "off");
+            if (enabled) {
+                DPMSEnable(mDisplay);
+            } else {
+                DPMSDisable(mDisplay);
+            }
+            DPMSInfo(mDisplay, &state, &onoff);
+            if (enabled != !!onoff)
+                MP_WARN(x11, "DPMS state could not be set.\n");
         }
     }
 #endif

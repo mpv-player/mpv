@@ -40,8 +40,7 @@ struct vo_x11_state {
     int ws_height;
     struct mp_rect screenrc;
 
-    int screensaver_off;
-    int dpms_disabled;
+    bool screensaver_enabled;
     double screensaver_time_last;
 
     XIM xim;
