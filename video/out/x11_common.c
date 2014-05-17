@@ -642,7 +642,7 @@ static void dnd_select_format(struct vo_x11_state *x11, Atom *args, int items)
 {
     for (int n = 0; n < items; n++) {
         // There are other types; possibly not worth supporting.
-        if (args[n] == XA(x11, _uri_list))
+        if (args[n] == XInternAtom(x11->display, "text/uri-list", False))
             x11->dnd_requested_format = args[n];
     }
 }
