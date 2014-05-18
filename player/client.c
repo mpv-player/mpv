@@ -477,7 +477,7 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
 {
     mpv_event *event = ctx->cur_event;
 
-    struct timespec deadline = mpthread_get_deadline(timeout);
+    int64_t deadline = mp_add_timeout(mp_time_us(), timeout);
 
     pthread_mutex_lock(&ctx->lock);
 
@@ -519,7 +519,7 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
             break;
         if (timeout <= 0)
             break;
-        int r = pthread_cond_timedwait(&ctx->wakeup, &ctx->lock, &deadline);
+        int r = mpthread_cond_timedwait(&ctx->wakeup, &ctx->lock, deadline);
         if (r == ETIMEDOUT)
             break;
     }

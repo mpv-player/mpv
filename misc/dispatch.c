@@ -20,6 +20,7 @@
 
 #include "common/common.h"
 #include "osdep/threads.h"
+#include "osdep/timer.h"
 
 #include "dispatch.h"
 
@@ -175,11 +176,12 @@ void mp_dispatch_run(struct mp_dispatch_queue *queue,
 // still process the remaining queue items, and wait for unsuspend.)
 void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
 {
+    int64_t wait = timeout > 0 ? mp_add_timeout(mp_time_us(), timeout) : 0;
     pthread_mutex_lock(&queue->lock);
     queue->suspended = true;
     // Wake up thread which called mp_dispatch_suspend().
     pthread_cond_broadcast(&queue->cond);
-    while (queue->head || queue->suspend_requested || timeout > 0) {
+    while (queue->head || queue->suspend_requested || wait > 0) {
         if (queue->head) {
             struct mp_dispatch_item *item = queue->head;
             queue->head = item->next;
@@ -203,13 +205,13 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
                 pthread_cond_broadcast(&queue->cond);
             }
         } else {
-            if (timeout > 0) {
-                mpthread_cond_timedwait(&queue->cond, &queue->lock, timeout);
+            if (wait > 0) {
+                mpthread_cond_timedwait(&queue->cond, &queue->lock, wait);
             } else {
                 pthread_cond_wait(&queue->cond, &queue->lock);
             }
         }
-        timeout = 0;
+        wait = 0;
     }
     queue->suspended = false;
     pthread_mutex_unlock(&queue->lock);

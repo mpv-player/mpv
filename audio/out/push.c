@@ -274,7 +274,7 @@ static void *playthread(void *arg)
         MP_STATS(ao, "start audio wait");
         pthread_mutex_lock(&p->wakeup_lock);
         if (!p->need_wakeup)
-            mpthread_cond_timedwait(&p->wakeup, &p->wakeup_lock, timeout);
+            mpthread_cond_timedwait_rel(&p->wakeup, &p->wakeup_lock, timeout);
         p->need_wakeup = false;
         pthread_mutex_unlock(&p->wakeup_lock);
         MP_STATS(ao, "end audio wait");

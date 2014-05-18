@@ -44,4 +44,11 @@ void mp_sleep_us(int64_t us);
 // first call will return 0, instead of the absolute current time.)
 int64_t mp_time_relative_us(int64_t *t);
 
+// Add a time in seconds to the given time in microseconds, and return it.
+// Takes care of possible overflows. Never returns a negative or 0 time.
+int64_t mp_add_timeout(int64_t time_us, double timeout_sec);
+
+// Convert the mp time in microseconds to a timespec using CLOCK_REALTIME.
+struct timespec mp_time_us_to_timespec(int64_t time_us);
+
 #endif /* MPLAYER_TIMER_H */
