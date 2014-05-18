@@ -34,6 +34,7 @@ struct priv {
     struct mp_vdpau_ctx        *mpvdp;
     struct vdp_functions       *vdp;
     uint64_t                    preemption_counter;
+    int                         fmt, w, h;
 
     AVVDPAUContext              context;
 };
@@ -67,8 +68,13 @@ static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
     VdpDevice vdp_device = p->mpvdp->vdp_device;
     VdpStatus vdp_st;
 
-    if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) < 1)
-        goto fail;
+    p->fmt = fmt;
+    p->w = w;
+    p->h = h;
+
+    // During preemption, pretend everything is ok.
+    if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) < 0)
+        return 0;
 
     if (p->context.decoder != VDP_INVALID_HANDLE)
         vdp->decoder_destroy(p->context.decoder);
@@ -114,11 +120,10 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int fmt,
 {
     struct priv *p = ctx->hwdec_priv;
 
-    // Trigger software fallback, but only _after_ recovery. This way,
-    // vo_reconfig will not fail (which it will during preemption on systems
-    // with nvidia binary drivers).
-    if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) == 0)
-        return NULL;
+    if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) == 0) {
+        if (init_decoder(ctx, p->fmt, p->w, p->h) < 0)
+            return NULL;
+    }
 
     VdpChromaType chroma;
     mp_vdpau_get_format(IMGFMT_VDPAU, &chroma, NULL);
