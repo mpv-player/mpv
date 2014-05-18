@@ -27,6 +27,8 @@
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/m_property.h"
+#include "options/path.h"
+#include "options/parse_configfile.h"
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
@@ -1219,6 +1221,19 @@ static bool gen_property_change_event(struct mpv_handle *ctx)
         }
     }
     return false;
+}
+
+int mpv_load_config_file(mpv_handle *ctx, const char *filename)
+{
+    int flags = ctx->mpctx->initialized ? M_SETOPT_RUNTIME : 0;
+    lock_core(ctx);
+    int r = m_config_parse_config_file(ctx->mpctx->mconfig, filename, NULL, flags);
+    unlock_core(ctx);
+    if (r == 0)
+        return MPV_ERROR_INVALID_PARAMETER;
+    if (r < 0)
+        return MPV_ERROR_OPTION_ERROR;
+    return 0;
 }
 
 int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)

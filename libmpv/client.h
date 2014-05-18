@@ -312,6 +312,30 @@ int mpv_initialize(mpv_handle *ctx);
 void mpv_destroy(mpv_handle *ctx);
 
 /**
+ * Load a config file. This loads and parses the file, and sets every entry in
+ * the config file's default section as if mpv_set_option_string() is called.
+ *
+ * The filename should be an absolute path. If it isn't, the actual path used
+ * is unspecified. (Note: an absolute path starts with '/' on UNIX.) If the
+ * file wasn't found, MPV_ERROR_INVALID_PARAMETER is returned.
+ *
+ * If a fatal error happens when parsing a config file, MPV_ERROR_OPTION_ERROR
+ * is returned. Errors when setting options as well as other types or errors
+ * are ignored (even if options do not exist). You can still try to capture
+ * the resulting error messages with mpv_request_log_messages(). Note that it's
+ * possible that some options were successfully set even if any of these errors
+ * happen.
+ *
+ * The same restrictions as with mpv_set_option() apply: some options can't
+ * be set outside of idle or uninitialized state, and many options don't
+ * take effect immediately.
+ *
+ * @param filename absolute path to the config file on the local filesystem
+ * @return error code
+ */
+int mpv_load_config_file(mpv_handle *ctx, const char *filename);
+
+/**
  * Stop the playback thread. Normally, the client API stops the playback thread
  * automatically in order to process requests. However, the playback thread is
  * restarted again after the request was processed. Then the playback thread
