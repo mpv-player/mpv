@@ -143,6 +143,8 @@ static void *x11_get_property(struct vo_x11_state *x11, Window w, Atom property,
 {
     assert(format == 8 || format == 16 || format == 32);
     *out_nitems = 0;
+    if (!w)
+        return NULL;
     long max_len = 64 * 1024; // static maximum limit
     Atom ret_type = 0;
     int ret_format = 0;
@@ -183,6 +185,9 @@ static bool x11_get_property_copy(struct vo_x11_state *x11, Window w,
 static void x11_send_ewmh_msg(struct vo_x11_state *x11, char *message_type,
                               long params[5])
 {
+    if (!x11->window)
+        return;
+
     XEvent xev = {
         .xclient = {
             .type = ClientMessage,
@@ -235,7 +240,7 @@ static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
 
     x11->mouse_cursor_hidden = cursor_hidden;
 
-    if (vo->opts->WinID == 0 || win == 0)
+    if (vo->opts->WinID == 0 || !win)
         return;                 // do not hide if playing on the root window
 
     if (x11->mouse_cursor_hidden) {
@@ -539,7 +544,7 @@ static void vo_x11_decoration(struct vo *vo, int d)
     Atom vo_MotifHints;
     MotifWmHints vo_MotifWmHints;
 
-    if (!vo->opts->WinID)
+    if (vo->opts->WinID >= 0 || !x11->window)
         return;
 
     vo_MotifHints = XInternAtom(x11->display, "_MOTIF_WM_HINTS", 0);
@@ -883,6 +888,7 @@ int vo_x11_check_events(struct vo *vo)
         case DestroyNotify:
             MP_WARN(x11, "Our window was destroyed, exiting\n");
             mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
+            x11->window = 0;
             break;
         case ClientMessage:
             if (Event.xclient.message_type == XA(x11, WM_PROTOCOLS) &&
@@ -912,6 +918,9 @@ static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
 {
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
+
+    if (!x11->window)
+        return;
 
     bool force_pos = opts->geometry.xy_valid ||     // explicitly forced by user
                      opts->force_window_position || // resize -> reset position
@@ -956,6 +965,8 @@ static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
 static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
                                struct mp_rect rc)
 {
+    if (!vo->x11->window)
+        return;
     int w = RC_W(rc), h = RC_H(rc);
     XWindowChanges req = {.x = rc.x0, .y = rc.y0, .width = w, .height = h};
     unsigned mask = (move ? CWX | CWY : 0) | (resize ? CWWidth | CWHeight : 0);
@@ -1233,7 +1244,7 @@ static void vo_x11_highlevel_resize(struct vo *vo, struct mp_rect rc)
 static void wait_until_mapped(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
-    while (x11->window_hidden) {
+    while (x11->window_hidden && x11->window) {
         XEvent unused;
         XPeekEvent(x11->display, &unused);
         vo_x11_check_events(vo);
@@ -1346,7 +1357,7 @@ void vo_x11_clearwindow(struct vo *vo, Window vo_window)
 static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
 {
     struct vo_x11_state *x11 = vo->x11;
-    if (vo->opts->WinID >= 0)
+    if (vo->opts->WinID >= 0 || !x11->window)
         return;
 
     if (x11->wm_type & vo_wm_LAYER) {
@@ -1383,7 +1394,7 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
     }
 }
 
-// update x11->winrc with current values of vo->x11->window
+// update x11->winrc with current boundaries of vo->x11->window
 static void vo_x11_update_geometry(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1392,7 +1403,7 @@ static void vo_x11_update_geometry(struct vo *vo)
     int dummy_int;
     Window dummy_win;
     Window win = vo->opts->WinID > 0 ? vo->opts->WinID : x11->window;
-    if (x11->window_hidden)
+    if (x11->window_hidden || !win)
         return;
     XGetGeometry(x11->display, win, &dummy_win, &dummy_int, &dummy_int,
                  &w, &h, &dummy_int, &dummy_uint);
@@ -1413,7 +1424,7 @@ static void vo_x11_fullscreen(struct vo *vo)
     if (opts->fullscreen == x11->fs)
         return;
     x11->fs = opts->fullscreen; // x11->fs now contains the new state
-    if (opts->WinID >= 0)
+    if (opts->WinID >= 0 || !x11->window)
         return;
 
     // Save old state before entering fullscreen
@@ -1497,6 +1508,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_SET_WINDOW_SIZE: {
         int *s = arg;
+        if (!x11->window)
+            return VO_FALSE;
         struct mp_rect rc = x11->winrc;
         rc.x1 = rc.x0 + s[0];
         rc.y1 = rc.y0 + s[1];
