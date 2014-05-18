@@ -41,6 +41,7 @@ struct vo_x11_state {
     struct mp_rect screenrc;
 
     bool screensaver_enabled;
+    bool dpms_touched;
     double screensaver_time_last;
 
     XIM xim;
