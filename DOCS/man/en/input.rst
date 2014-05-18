@@ -307,8 +307,7 @@ List of Input Commands
     ``select`` (activate current button), ``mouse`` (the mouse was clicked),
     ``mouse_move`` (the mouse cursor changed position).
 
-    ``menu`` and ``prev`` are DVD-only. ``mouse_move`` will use the current
-    mouse position.
+    ``mouse_move`` will use the current mouse position.
 
     Note that while the menu is active, the input section ``discnav-menu`` will
     be enabled, so different key bindings can be mapped for menu mode.
