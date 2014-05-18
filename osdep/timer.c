@@ -72,7 +72,7 @@ int64_t mp_add_timeout(int64_t time_us, double timeout_sec)
     double t = timeout_sec * 1000 * 1000;
     if (t >= (double)(INT64_MAX - time_us))
         return INT64_MAX;
-    if (t <= (double)time_us)
+    if (t <= -(double)time_us)
         return 1;
     return time_us + (int64_t)t;
 }
@@ -99,7 +99,11 @@ struct timespec mp_time_us_to_timespec(int64_t time_us)
     int64_t unow = mp_time_us();
     int64_t diff_us = time_us - unow;
     long diff_secs = diff_us / (1000L * 1000L);
-    unsigned long diff_nsecs = (diff_us - diff_secs * (1000L * 1000L)) * 1000UL;
+    long diff_nsecs = (diff_us - diff_secs * (1000L * 1000L)) * 1000L;
+    if (diff_nsecs < 0) {
+        diff_secs -= 1;
+        diff_nsecs += 1000000000L;
+    }
     if (diff_nsecs + ts.tv_nsec >= 1000000000UL) {
         diff_secs += 1;
         diff_nsecs -= 1000000000UL;
