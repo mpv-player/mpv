@@ -19,13 +19,6 @@
 #ifndef MPV_LIBAV_COMPAT_H
 #define MPV_LIBAV_COMPAT_H
 
-#include <libavutil/avutil.h>
-#include <libavutil/cpu.h>
-#include <libavcodec/version.h>
-#include <libavformat/version.h>
-
-#ifndef AV_CPU_FLAG_MMX2
-#define AV_CPU_FLAG_MMX2 AV_CPU_FLAG_MMXEXT
-#endif
+// There's nothing here. But for how long?
 
 #endif /* MPV_LIBAV_COMPAT_H */
