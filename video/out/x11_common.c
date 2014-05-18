@@ -785,8 +785,6 @@ int vo_x11_check_events(struct vo *vo)
 
     xscreensaver_heartbeat(vo->x11);
 
-    if (vo->opts->WinID > 0)
-        vo_x11_update_geometry(vo);
     while (XPending(display)) {
         XNextEvent(display, &Event);
         switch (Event.type) {
@@ -797,6 +795,11 @@ int vo_x11_check_events(struct vo *vo)
             if (x11->window == None)
                 break;
             vo_x11_update_geometry(vo);
+            if (Event.xconfigure.window == vo->opts->WinID) {
+                XMoveResizeWindow(x11->display, x11->window,
+                                  x11->winrc.x0, x11->winrc.y0,
+                                  RC_W(x11->winrc), RC_H(x11->winrc));
+            }
             break;
         case KeyPress: {
             char buf[100];
@@ -900,10 +903,6 @@ int vo_x11_check_events(struct vo *vo)
     }
 
     update_vo_size(vo);
-    if (vo->opts->WinID >= 0 && (x11->pending_vo_events & VO_EVENT_RESIZE)) {
-        XMoveResizeWindow(x11->display, x11->window, x11->winrc.x0, x11->winrc.y0,
-                          RC_W(x11->winrc), RC_H(x11->winrc));
-    }
     int ret = x11->pending_vo_events;
     x11->pending_vo_events = 0;
     return ret;
@@ -1265,9 +1264,12 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
     struct mp_rect rc = geo.win;
 
     if (opts->WinID >= 0) {
-        if (opts->WinID == 0)
+        if (opts->WinID == 0) {
             x11->window = x11->rootwin;
-        XSelectInput(x11->display, opts->WinID, StructureNotifyMask);
+            XSelectInput(x11->display, x11->window, StructureNotifyMask);
+        } else {
+            XSelectInput(x11->display, opts->WinID, StructureNotifyMask);
+        }
         vo_x11_update_geometry(vo);
         rc = x11->winrc;
     }
