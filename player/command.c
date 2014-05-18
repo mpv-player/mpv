@@ -2273,12 +2273,11 @@ static int access_options(struct m_property_action_arg *ka, MPContext *mpctx)
     case M_PROPERTY_GET:
         m_option_copy(opt->opt, ka->arg, opt->data);
         return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
-        if (!(opt->opt->flags & (M_OPT_PRE_PARSE | M_OPT_FIXED))) {
-            m_option_copy(opt->opt, opt->data, ka->arg);
-            return M_PROPERTY_OK;
-        }
-        return M_PROPERTY_ERROR;
+    case M_PROPERTY_SET: {
+        int r = m_config_set_option_raw(mpctx->mconfig, opt, ka->arg,
+                                        M_SETOPT_RUNTIME);
+        return r < 0 ? M_PROPERTY_ERROR : M_PROPERTY_OK;
+    }
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)ka->arg = *opt->opt;
         return M_PROPERTY_OK;

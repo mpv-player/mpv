@@ -116,7 +116,12 @@ enum {
     M_SETOPT_FROM_CMDLINE = 8,      // Mark as set by command line
     M_SETOPT_BACKUP = 16,           // Call m_config_backup_opt() before
     M_SETOPT_PRESERVE_CMDLINE = 32, // Don't set if already marked as FROM_CMDLINE
+    M_SETOPT_NO_FIXED = 64,         // Reject M_OPT_FIXED options
+    M_SETOPT_NO_PRE_PARSE = 128,    // Reject M_OPT_PREPARSE options
 };
+
+// Flags for safe option setting during runtime.
+#define M_SETOPT_RUNTIME (M_SETOPT_NO_FIXED | M_SETOPT_NO_PRE_PARSE)
 
 // Set the named option to the given string.
 // flags: combination of M_SETOPT_* flags (0 for normal operation)
@@ -139,10 +144,15 @@ static inline int m_config_set_option0(struct m_config *config,
     return m_config_set_option(config, bstr0(name), bstr0(param));
 }
 
+// Similar to m_config_set_option_ext(), but set as data in its native format.
+// The type data points to is as in co->opt
+int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
+                            void *data, int flags);
+
 // Similar to m_config_set_option_ext(), but set as data using mpv_node.
 struct mpv_node;
 int m_config_set_option_node(struct m_config *config, bstr name,
-                             struct mpv_node *data);
+                             struct mpv_node *data, int flags);
 
 
 int m_config_parse_suboptions(struct m_config *config, char *name,

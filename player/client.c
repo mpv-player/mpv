@@ -237,6 +237,18 @@ void mpv_resume(mpv_handle *ctx)
     mp_dispatch_resume(ctx->mpctx->dispatch);
 }
 
+static void lock_core(mpv_handle *ctx)
+{
+    if (ctx->mpctx->initialized)
+        mp_dispatch_lock(ctx->mpctx->dispatch);
+}
+
+static void unlock_core(mpv_handle *ctx)
+{
+    if (ctx->mpctx->initialized)
+        mp_dispatch_unlock(ctx->mpctx->dispatch);
+}
+
 void mpv_destroy(mpv_handle *ctx)
 {
     if (!ctx)
@@ -631,47 +643,33 @@ void mpv_free_node_contents(mpv_node *node)
 int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
                    void *data)
 {
-    if (ctx->mpctx->initialized) {
-        char prop[100];
-        snprintf(prop, sizeof(prop), "options/%s", name);
-        int err = mpv_set_property(ctx, prop, format, data);
-        switch (err) {
-        case MPV_ERROR_PROPERTY_UNAVAILABLE:
-        case MPV_ERROR_PROPERTY_ERROR:
-            return MPV_ERROR_OPTION_ERROR;
-        case MPV_ERROR_PROPERTY_FORMAT:
-            return MPV_ERROR_OPTION_FORMAT;
-        case MPV_ERROR_PROPERTY_NOT_FOUND:
-            return MPV_ERROR_OPTION_NOT_FOUND;
-        default:
-            return err;
-        }
-    } else {
-        const struct m_option *type = get_mp_type(format);
-        if (!type)
-            return MPV_ERROR_OPTION_FORMAT;
-        struct mpv_node tmp;
-        if (format != MPV_FORMAT_NODE) {
-            tmp.format = format;
-            memcpy(&tmp.u, data, type->type->size);
-            format = MPV_FORMAT_NODE;
-            data = &tmp;
-        }
-        int err = m_config_set_option_node(ctx->mpctx->mconfig, bstr0(name),
-                                           data);
-        switch (err) {
-        case M_OPT_MISSING_PARAM:
-        case M_OPT_INVALID:
-            return MPV_ERROR_OPTION_ERROR;
-        case M_OPT_OUT_OF_RANGE:
-            return MPV_ERROR_OPTION_FORMAT;
-        case M_OPT_UNKNOWN:
-            return MPV_ERROR_OPTION_NOT_FOUND;
-        default:
-            if (err >= 0)
-                return 0;
-            return MPV_ERROR_OPTION_ERROR;
-        }
+    int flags = ctx->mpctx->initialized ? M_SETOPT_RUNTIME : 0;
+    const struct m_option *type = get_mp_type(format);
+    if (!type)
+        return MPV_ERROR_OPTION_FORMAT;
+    struct mpv_node tmp;
+    if (format != MPV_FORMAT_NODE) {
+        tmp.format = format;
+        memcpy(&tmp.u, data, type->type->size);
+        format = MPV_FORMAT_NODE;
+        data = &tmp;
+    }
+    lock_core(ctx);
+    int err = m_config_set_option_node(ctx->mpctx->mconfig, bstr0(name),
+                                       data, flags);
+    unlock_core(ctx);
+    switch (err) {
+    case M_OPT_MISSING_PARAM:
+    case M_OPT_INVALID:
+        return MPV_ERROR_OPTION_ERROR;
+    case M_OPT_OUT_OF_RANGE:
+        return MPV_ERROR_OPTION_FORMAT;
+    case M_OPT_UNKNOWN:
+        return MPV_ERROR_OPTION_NOT_FOUND;
+    default:
+        if (err >= 0)
+            return 0;
+        return MPV_ERROR_OPTION_ERROR;
     }
 }
 

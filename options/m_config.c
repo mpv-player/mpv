@@ -471,6 +471,80 @@ const char *m_config_get_positional_option(const struct m_config *config, int p)
     return NULL;
 }
 
+// return: <0: M_OPT_ error, 0: skip, 1: check, 2: set
+static int handle_set_opt_flags(struct m_config *config,
+                                struct m_config_option *co, int flags)
+{
+    int optflags = co->opt->flags;
+    bool set = !(flags & M_SETOPT_CHECK_ONLY);
+
+    if ((flags & M_SETOPT_PRE_PARSE_ONLY) && !(optflags & M_OPT_PRE_PARSE))
+        return 0;
+
+    if ((flags & M_SETOPT_PRESERVE_CMDLINE) && co->is_set_from_cmdline)
+        set = false;
+
+    if ((flags & M_SETOPT_NO_FIXED) && (optflags & M_OPT_FIXED))
+        return M_OPT_INVALID;
+
+    if ((flags & M_SETOPT_NO_PRE_PARSE) && (optflags & M_OPT_PRE_PARSE))
+        return M_OPT_INVALID;
+
+    // Check if this option isn't forbidden in the current mode
+    if ((flags & M_SETOPT_FROM_CONFIG_FILE) && (optflags & M_OPT_NOCFG)) {
+        MP_ERR(config, "The %s option can't be used in a config file.\n",
+               co->name);
+        return M_OPT_INVALID;
+    }
+    if (flags & M_SETOPT_BACKUP) {
+        if (optflags & M_OPT_GLOBAL) {
+            MP_ERR(config, "The %s option is global and can't be set per-file.\n",
+                   co->name);
+            return M_OPT_INVALID;
+        }
+        if (set)
+            ensure_backup(config, co);
+    }
+
+    return set ? 2 : 1;
+}
+
+static void handle_set_from_cmdline(struct m_config *config,
+                                    struct m_config_option *co)
+{
+    co->is_set_from_cmdline = true;
+    // Mark aliases too
+    if (co->data) {
+        for (int n = 0; n < config->num_opts; n++) {
+            struct m_config_option *co2 = &config->opts[n];
+            if (co2->data == co->data)
+                co2->is_set_from_cmdline = true;
+        }
+    }
+}
+
+// The type data points to is as in: m_config_get_co(config, name)->opt
+int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
+                            void *data, int flags)
+{
+    if (!co)
+        return M_OPT_UNKNOWN;
+
+    // This affects some special options like "include", "profile". Maybe these
+    // should work, or maybe not. For now they would require special code.
+    if (!co->data)
+        return M_OPT_UNKNOWN;
+
+    int r = handle_set_opt_flags(config, co, flags);
+    if (r <= 1)
+        return r;
+
+    m_option_copy(co->opt, co->data, data);
+    if (flags & M_SETOPT_FROM_CMDLINE)
+        handle_set_from_cmdline(config, co);
+    return 0;
+}
+
 static int parse_subopts(struct m_config *config, char *name, char *prefix,
                          struct bstr param, int flags);
 
@@ -479,7 +553,6 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 {
     assert(config != NULL);
     assert(name.len != 0);
-    bool set = !(flags & M_SETOPT_CHECK_ONLY);
 
     struct m_config_option *co = m_config_get_co(config, name);
     if (!co) {
@@ -498,31 +571,14 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
     // This is the only mandatory function
     assert(co->opt->type->parse);
 
-    if ((flags & M_SETOPT_PRE_PARSE_ONLY) && !(co->opt->flags & M_OPT_PRE_PARSE))
-        return 0;
-
-    if ((flags & M_SETOPT_PRESERVE_CMDLINE) && co->is_set_from_cmdline)
-        set = false;
+    int r = handle_set_opt_flags(config, co, flags);
+    if (r <= 0)
+        return r;
+    bool set = r == 2;
 
     if (set) {
         MP_VERBOSE(config, "Setting option '%.*s' = '%.*s' (flags = %d)\n",
                    BSTR_P(name), BSTR_P(param), flags);
-    }
-
-    // Check if this option isn't forbidden in the current mode
-    if ((flags & M_SETOPT_FROM_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
-        MP_ERR(config, "The %.*s option can't be used in a config file.\n",
-                BSTR_P(name));
-        return M_OPT_INVALID;
-    }
-    if (flags & M_SETOPT_BACKUP) {
-        if (co->opt->flags & M_OPT_GLOBAL) {
-            MP_ERR(config, "The %.*s option is global and can't be set per-file.\n",
-                    BSTR_P(name));
-            return M_OPT_INVALID;
-        }
-        if (set)
-            ensure_backup(config, co);
     }
 
     if (config->includefunc && bstr_equals0(name, "include"))
@@ -542,20 +598,10 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
         return parse_subopts(config, (char *)co->name, prefix, param, flags);
     }
 
-    int r = m_option_parse(config->log, co->opt, name, param,
-                           set ? co->data : NULL);
+    r = m_option_parse(config->log, co->opt, name, param, set ? co->data : NULL);
 
-    if (r >= 0 && set && (flags & M_SETOPT_FROM_CMDLINE)) {
-        co->is_set_from_cmdline = true;
-        // Mark aliases too
-        if (co->data) {
-            for (int n = 0; n < config->num_opts; n++) {
-                struct m_config_option *co2 = &config->opts[n];
-                if (co2->data == co->data)
-                    co2->is_set_from_cmdline = true;
-            }
-        }
-    }
+    if (r >= 0 && set && (flags & M_SETOPT_FROM_CMDLINE))
+        handle_set_from_cmdline(config, co);
 
     return r;
 }
@@ -621,15 +667,10 @@ int m_config_set_option(struct m_config *config, struct bstr name,
 }
 
 int m_config_set_option_node(struct m_config *config, bstr name,
-                             struct mpv_node *data)
+                             struct mpv_node *data, int flags)
 {
     struct m_config_option *co = m_config_get_co(config, name);
     if (!co)
-        return M_OPT_UNKNOWN;
-
-    // This affects some special options like "include", "profile". Maybe these
-    // should work, or maybe not. For now they would require special code.
-    if (!co->data)
         return M_OPT_UNKNOWN;
 
     int r;
@@ -646,7 +687,7 @@ int m_config_set_option_node(struct m_config *config, bstr name,
     }
 
     if (r >= 0)
-        m_option_copy(co->opt, co->data, &val);
+        r = m_config_set_option_raw(config, co, &val, flags);
 
     m_option_free(co->opt, &val);
     return r;
