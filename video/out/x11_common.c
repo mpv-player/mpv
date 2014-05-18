@@ -1485,7 +1485,6 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         vo_x11_border(vo);
         *events |= VO_EVENT_RESIZE;
         return VO_TRUE;
-        return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
         int *s = arg;
         if (!x11->window)
