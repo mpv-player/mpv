@@ -204,6 +204,8 @@ corresponding adjustment, or the software equalizer (``--vf=eq``).)
 
 command + 0
     Resize movie window to half its original size.
+    (On other platforms, you can bind keys to change the ``window-scale``
+    property.)
 
 command + 1
     Resize movie window to its original size.
