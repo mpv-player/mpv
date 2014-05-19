@@ -1438,10 +1438,12 @@ static void vo_x11_fullscreen(struct vo *vo)
             vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);
         } else {
             vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);
-            vo_x11_move_resize(vo,
-                               x11->pos_changed_during_fs,
-                               x11->size_changed_during_fs,
-                               x11->nofsrc);
+            if (x11->pos_changed_during_fs || x11->size_changed_during_fs) {
+                vo_x11_move_resize(vo,
+                                   x11->pos_changed_during_fs,
+                                   x11->size_changed_during_fs,
+                                   x11->nofsrc);
+            }
         }
     } else {
         struct mp_rect rc = x11->nofsrc;
