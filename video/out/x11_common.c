@@ -382,6 +382,7 @@ static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
 {
     //top  bottom left   right
     b[0] = b[1] = b[2] = b[3] = 0;
+#if HAVE_XINERAMA
     int num_screens = 0;
     XineramaScreenInfo *screens = XineramaQueryScreens(x11->display, &num_screens);
     if (!screens)
@@ -398,6 +399,7 @@ static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
             b[3] = n;
     }
     XFree(screens);
+#endif
 }
 
 int vo_x11_init(struct vo *vo)
