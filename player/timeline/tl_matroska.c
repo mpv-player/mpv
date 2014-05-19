@@ -119,7 +119,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
 {
     struct MPOpts *opts = mpctx->opts;
 
-    if (opts->stream_cache_size <= 0)
+    if (!stream_wants_cache(*stream, &opts->stream_cache))
         return 0;
 
     char *filename = talloc_strdup(NULL, (*demuxer)->filename);
@@ -132,11 +132,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
         return -1;
     }
 
-    stream_enable_cache_percent(stream,
-                                opts->stream_cache_size,
-                                opts->stream_cache_def_size,
-                                opts->stream_cache_min_percent,
-                                opts->stream_cache_seek_min_percent);
+    stream_enable_cache(stream, &opts->stream_cache);
 
     *demuxer = demux_open(*stream, "mkv", params, mpctx->global);
     if (!*demuxer) {

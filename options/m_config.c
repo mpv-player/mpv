@@ -881,7 +881,6 @@ static const char *replaced_opts =
     "|aspect#--video-aspect"
     "|ass-bottom-margin#--vf=sub=bottom:top"
     "|ass#--sub-ass"
-    "|audiofile-cache#--audio-file-cache"
     "|audiofile#--audio-file"
     "|benchmark#--untimed (no stats)"
     "|capture#--stream-capture=<filename>"

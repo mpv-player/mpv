@@ -743,7 +743,7 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
 }
 
 static struct track *open_external_file(struct MPContext *mpctx, char *filename,
-                                        char *demuxer_name, int stream_cache,
+                                        char *demuxer_name,
                                         enum stream_type filter)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -755,10 +755,8 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     struct stream *stream = stream_open(filename, mpctx->global);
     if (!stream)
         goto err_out;
-    stream_enable_cache_percent(&stream, stream_cache,
-                                opts->stream_cache_def_size,
-                                opts->stream_cache_min_percent,
-                                opts->stream_cache_seek_min_percent);
+    if (filter != STREAM_SUB)
+        stream_enable_cache(&stream, &opts->stream_cache);
     struct demuxer_params params = {
         .expect_subtitle = filter == STREAM_SUB,
     };
@@ -799,13 +797,13 @@ static void open_audiofiles_from_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     open_external_file(mpctx, opts->audio_stream, opts->audio_demuxer_name,
-                       opts->audio_stream_cache, STREAM_AUDIO);
+                       STREAM_AUDIO);
 }
 
 struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename)
 {
     struct MPOpts *opts = mpctx->opts;
-    return open_external_file(mpctx, filename, opts->sub_demuxer_name, 0,
+    return open_external_file(mpctx, filename, opts->sub_demuxer_name,
                               STREAM_SUB);
 }
 
@@ -821,7 +819,7 @@ static void open_subtitles_from_resolve(struct MPContext *mpctx)
         if (!s)
             s = talloc_asprintf(NULL, "memory://%s", sub->data);
         struct track *t =
-            open_external_file(mpctx, s, opts->sub_demuxer_name, 0, STREAM_SUB);
+            open_external_file(mpctx, s, opts->sub_demuxer_name, STREAM_SUB);
         talloc_free(s);
         if (t) {
             t->lang = talloc_strdup(t, sub->lang);
@@ -1125,12 +1123,7 @@ static void play_current_file(struct MPContext *mpctx)
     // Must be called before enabling cache.
     mp_nav_init(mpctx);
 
-    // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
-    int res = stream_enable_cache_percent(&mpctx->stream,
-                                          opts->stream_cache_size,
-                                          opts->stream_cache_def_size,
-                                          opts->stream_cache_min_percent,
-                                          opts->stream_cache_seek_min_percent);
+    int res = stream_enable_cache(&mpctx->stream, &opts->stream_cache);
     if (res == 0)
         if (demux_was_interrupted(mpctx))
             goto terminate_playback;

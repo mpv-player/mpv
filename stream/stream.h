@@ -177,14 +177,13 @@ int stream_fill_buffer(stream_t *s);
 
 void stream_set_capture_file(stream_t *s, const char *filename);
 
-int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
-                                int64_t stream_cache_def_size,
-                                float stream_cache_min_percent,
-                                float stream_cache_seek_min_percent);
+struct mp_cache_opts;
+bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts);
+int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts);
 
 // Internal
-int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
-                      int64_t min, int64_t seek_limit);
+int stream_cache_init(stream_t *cache, stream_t *stream,
+                      struct mp_cache_opts *opts);
 
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len);
 

@@ -56,6 +56,7 @@
 #include "osdep/threads.h"
 
 #include "common/msg.h"
+#include "options/options.h"
 
 #include "stream.h"
 #include "common/common.h"
@@ -655,18 +656,18 @@ static void cache_uninit(stream_t *cache)
 
 // return 1 on success, 0 if the function was interrupted and -1 on error, or
 // if the cache is disabled
-int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
-                      int64_t min, int64_t seek_limit)
+int stream_cache_init(stream_t *cache, stream_t *stream,
+                      struct mp_cache_opts *opts)
 {
-    if (size < 1)
+    if (opts->size < 1)
         return -1;
 
     struct priv *s = talloc_zero(NULL, struct priv);
     s->log = cache->log;
 
-    s->seek_limit = seek_limit;
+    s->seek_limit = opts->seek_min * 1024ULL;
 
-    if (resize_cache(s, size) != STREAM_OK) {
+    if (resize_cache(s, opts->size * 1024ULL) != STREAM_OK) {
         MP_ERR(s, "Failed to allocate cache buffer.\n");
         talloc_free(s);
         return -1;
@@ -687,6 +688,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
     cache->control = cache_control;
     cache->close = cache_uninit;
 
+    int64_t min = opts->initial * 1024ULL;
     if (min > s->buffer_size - FILL_LIMIT)
         min = s->buffer_size - FILL_LIMIT;
 

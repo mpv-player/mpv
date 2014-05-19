@@ -40,6 +40,13 @@ typedef struct mp_vo_opts {
     int fs_missioncontrol;
 } mp_vo_opts;
 
+struct mp_cache_opts {
+    int size;
+    int def_size;
+    int initial;
+    int seek_min;
+};
+
 typedef struct MPOpts {
     int use_terminal;
     char *msglevels;
@@ -108,12 +115,10 @@ typedef struct MPOpts {
     int load_config;
     char *force_configdir;
     int use_filedir_conf;
-    int stream_cache_size;
-    int stream_cache_def_size;
-    float stream_cache_min_percent;
-    float stream_cache_seek_min_percent;
     int network_rtsp_transport;
+    struct mp_cache_opts stream_cache;
     int stream_cache_pause;
+    int stream_cache_unpause;
     int chapterrange[2];
     int edition_id;
     int correct_pts;
@@ -170,7 +175,6 @@ typedef struct MPOpts {
     char *sub_cp;
 
     char *audio_stream;
-    int audio_stream_cache;
     char *demuxer_name;
     char *audio_demuxer_name;
     char *sub_demuxer_name;

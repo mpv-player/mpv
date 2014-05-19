@@ -275,10 +275,6 @@ OPTIONS
     Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
     movie.
 
-``--audio-file-cache=<kBytes>``
-    Enables caching for the stream used by ``--audio-file``, using the
-    specified amount of memory.
-
 ``--audio-format=<format>``
     Select the sample format used for output from the audio filter layer to
     the sound card. The values that ``<format>`` can adopt are listed below in
@@ -395,28 +391,33 @@ OPTIONS
     because no space is reserved for seeking back yet.
 
 ``--cache-default=<kBytes|no>``
-    Set the size of the cache in kilobytes (default: 320 KB). Using ``no``
+    Set the size of the cache in kilobytes (default: 25000 KB). Using ``no``
     will not automatically enable the cache e.g. when playing from a network
     stream. Note that using ``--cache`` will always override this option.
 
-``--cache-pause=<no|percentage>``
-    If the cache percentage goes below the specified value, pause and wait
-    until the percentage set by ``--cache-min`` is reached, then resume
-    playback (default: 10). If ``no`` is specified, this behavior is disabled.
+``--cache-pause-below=<kBytes|no>``
+    If the cache size goes below the specified value (in KB), pause and wait
+    until the size set by ``--cache-pause-restart`` is reached, then  resume
+    playback (default: 500). If ``no`` is specified, this behavior is disabled.
 
     When the player is paused this way, the status line shows ``Buffering``
     instead of ``Paused``, and the OSD uses a clock symbol instead of the
     normal paused symbol.
 
-``--cache-min=<percentage>``
-    Playback will start when the cache has been filled up to ``<percentage>`` of
-    the total (default: 20).
+``--cache-pause-restart=<kBytes>``
+    If the cache is paused due to the ``--cache-pause-below`` functionality,
+    then the player unpauses as soon as the cache has this much data (in KB).
+    (Default: 1000)
 
-``--cache-seek-min=<percentage>``
-    If a seek is to be made to a position within ``<percentage>`` of the cache
+``--cache-initial=<kBytes>``
+    Playback will start when the cache has been filled up with this many
+    kilobytes of data (default: 0).
+
+``--cache-seek-min=<kBytes>``
+    If a seek is to be made to a position within ``<kBytes>`` of the cache
     size from the current position, mpv will wait for the cache to be
     filled to this position rather than performing a stream seek (default:
-    50).
+    500).
 
     This matters for small forward seeks. With slow streams (especially http
     streams) there is a tradeoff between skipping the data between current

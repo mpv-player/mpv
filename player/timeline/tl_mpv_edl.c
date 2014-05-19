@@ -129,11 +129,7 @@ static struct demuxer *open_file(char *filename, struct MPContext *mpctx)
     struct demuxer *d = NULL;
     struct stream *s = stream_open(filename, mpctx->global);
     if (s) {
-        stream_enable_cache_percent(&s,
-                                    opts->stream_cache_size,
-                                    opts->stream_cache_def_size,
-                                    opts->stream_cache_min_percent,
-                                    opts->stream_cache_seek_min_percent);
+        stream_enable_cache(&s, &opts->stream_cache);
         d = demux_open(s, NULL, NULL, mpctx->global);
     }
     if (!d) {

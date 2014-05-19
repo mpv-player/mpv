@@ -41,6 +41,7 @@
 #include "common/global.h"
 #include "bstr/bstr.h"
 #include "common/msg.h"
+#include "options/options.h"
 #include "options/path.h"
 #include "osdep/timer.h"
 #include "stream.h"
@@ -772,36 +773,33 @@ stream_t *open_memory_stream(void *data, int len)
     return s;
 }
 
-static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
-                               int64_t seek_limit);
-
-/**
- * \return 1 on success, 0 if the function was interrupted and -1 on error, or
- *         if the cache is disabled
- */
-int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
-                                int64_t stream_cache_def_size,
-                                float stream_cache_min_percent,
-                                float stream_cache_seek_min_percent)
+static struct mp_cache_opts check_cache_opts(stream_t *stream,
+                                             struct mp_cache_opts *opts)
 {
-    if (stream_cache_size == -1)
-        stream_cache_size = (*stream)->streaming ? stream_cache_def_size : 0;
+    struct mp_cache_opts use_opts = *opts;
+    if (use_opts.size == -1)
+        use_opts.size = stream->streaming ? use_opts.def_size : 0;
 
-    stream_cache_size = stream_cache_size * 1024; // input is in KiB
-    return stream_enable_cache(stream, stream_cache_size,
-                               stream_cache_size *
-                               (stream_cache_min_percent / 100.0),
-                               stream_cache_size *
-                               (stream_cache_seek_min_percent / 100.0));
+    if (stream->mode != STREAM_READ || !stream->allow_caching || use_opts.size < 1)
+        use_opts.size = 0;
+    return use_opts;
 }
 
-static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
-                               int64_t seek_limit)
+bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts)
+{
+    struct mp_cache_opts use_opts = check_cache_opts(stream, opts);
+    return use_opts.size > 0;
+}
+
+// return: 1 on success, 0 if the function was interrupted and -1 on error, or
+//         if the cache is disabled
+int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
 {
     stream_t *orig = *stream;
+    struct mp_cache_opts use_opts = check_cache_opts(*stream, opts);
 
-    if (orig->mode != STREAM_READ || !orig->allow_caching)
-        return 1;
+    if (use_opts.size < 1)
+        return -1;
 
     stream_t *cache = new_stream();
     cache->uncached_type = orig->type;
@@ -822,7 +820,7 @@ static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
 
     cache->log = mp_log_new(cache, cache->global->log, "cache");
 
-    int res = stream_cache_init(cache, orig, size, min, seek_limit);
+    int res = stream_cache_init(cache, orig, &use_opts);
     if (res <= 0) {
         cache->uncached_stream = NULL; // don't free original stream
         free_stream(cache);

@@ -146,7 +146,7 @@ Command Line Switches
     ``-aspect``                 ``--video-aspect``
     ``-ass-bottom-margin``      ``--vf=sub=bottom:top``
     ``-ass``                    ``--sub-ass``
-    ``-audiofile-cache``        ``--audio-file-cache``
+    ``-audiofile-cache``        (removed; the main cache settings are used)
     ``-audiofile``              ``--audio-file``
     ``-benchmark``              ``--untimed`` (no stats)
     ``-capture``                ``--stream-capture=<filename>``

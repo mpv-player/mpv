@@ -650,17 +650,21 @@ static void handle_metadata_update(struct MPContext *mpctx)
 static void handle_pause_on_low_cache(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    int cache = mp_get_cache_percent(mpctx);
+    if (!mpctx->stream)
+        return;
+    int64_t fill = -1;
+    stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &fill);
+    int cache_kb = fill > 0 ? (fill + 1023) / 1024 : -1;
     bool idle = mp_get_cache_idle(mpctx);
     if (mpctx->paused && mpctx->paused_for_cache) {
-        if (cache < 0 || cache >= opts->stream_cache_min_percent || idle) {
+        if (cache_kb < 0 || cache_kb >= opts->stream_cache_unpause || idle) {
             mpctx->paused_for_cache = false;
             if (!opts->pause)
                 unpause_player(mpctx);
         }
     } else {
-        if (cache >= 0 && cache <= opts->stream_cache_pause && !idle &&
-            opts->stream_cache_pause < opts->stream_cache_min_percent)
+        if (cache_kb >= 0 && cache_kb <= opts->stream_cache_pause && !idle &&
+            opts->stream_cache_pause < opts->stream_cache_unpause)
         {
             bool prev_paused_user = opts->pause;
             pause_player(mpctx);
