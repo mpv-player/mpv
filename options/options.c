@@ -448,6 +448,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
     OPT_FLAG("border", vo.border, M_OPT_FIXED),
 
+    OPT_FLAG("window-dragging", allow_win_drag, CONF_GLOBAL),
+
     OPT_CHOICE("softvol", softvol, 0,
                ({"no", SOFTVOL_NO},
                 {"yes", SOFTVOL_YES},
@@ -662,6 +664,7 @@ const struct MPOpts mp_default_opts = {
         .WinID = -1,
         .x11_netwm = 1,
     },
+    .allow_win_drag = 1,
     .wintitle = "mpv - ${media-title}",
     .heartbeat_interval = 30.0,
     .stop_screensaver = 1,

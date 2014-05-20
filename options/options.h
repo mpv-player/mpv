@@ -74,6 +74,7 @@ typedef struct MPOpts {
     int gapless_audio;
 
     mp_vo_opts vo;
+    int allow_win_drag;
 
     char *wintitle;
     int force_rgba_osd;

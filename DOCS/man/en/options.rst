@@ -2764,6 +2764,9 @@ OPTIONS
 
     See also ``--slave-broken``.
 
+``--no-window-dragging``
+    Don't move the window when clicking on it and moving the mouse pointer.
+
 ``--x11-netwm=no``
     (X11 only)
     Disable use of the NetWM protocol when switching to or from fullscreen.
