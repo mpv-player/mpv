@@ -28,6 +28,8 @@
 #include <mmdeviceapi.h>
 #include <avrt.h>
 
+#include "compat/atomics.h"
+
 typedef struct wasapi_state {
     struct mp_log *log;
     HANDLE threadLoop;
@@ -85,7 +87,7 @@ typedef struct wasapi_state {
     /* WASAPI internal clock information, for estimating delay */
     IAudioClock *pAudioClock;
     UINT64 clock_frequency; /* scale for the "samples" returned by the clock */
-    UINT64 sample_count; /* the amount of samples per channel written to a GetBuffer buffer */
+    atomic_ullong sample_count; /* the amount of samples per channel written to a GetBuffer buffer */
     LARGE_INTEGER qpc_frequency; /* frequency of windows' high resolution timer */
 
     int opt_exclusive;

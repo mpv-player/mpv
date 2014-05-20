@@ -105,24 +105,32 @@ main_dependencies = [
         'req': True,
         'fmsg': 'Unable to find pthreads support.'
     }, {
+        'name': 'stdatomic',
+        'desc': 'stdatomic.h',
+        'func':
+            check_statement('stdatomic.h',
+                '_Atomic int test = ATOMIC_VAR_INIT(123);'
+                'int test2 = atomic_load(&test)')
+    }, {
         'name': 'atomic-builtins',
         'desc': 'compiler support for __atomic built-ins',
         'func': check_libs(['atomic'],
             check_statement('stdint.h',
                 'int64_t test = 0;'
-                'test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)'))
+                'test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)')),
+        'deps_neg': [ 'stdatomic' ],
     }, {
         'name': 'sync-builtins',
         'desc': 'compiler support for __sync built-ins',
         'func': check_statement('stdint.h',
                     'int64_t test = 0;'
                     'test = __sync_add_and_fetch(&test, 1)'),
-        'deps_neg': [ 'atomic-builtins' ],
+        'deps_neg': [ 'stdatomic', 'atomic-builtins' ],
     }, {
         'name': 'thread-synchronization-builtins',
         'desc': 'compiler support for usable thread synchronization built-ins',
         'func': check_true,
-        'deps_any': ['atomic-builtins', 'sync-builtins'],
+        'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins'],
         'req': True,
         'fmsg': 'your compiler must support either __atomic or __sync built-ins',
     }, {

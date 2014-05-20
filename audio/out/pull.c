@@ -45,13 +45,13 @@ struct ao_pull_state {
     struct mp_ring *buffers[MP_NUM_CHANNELS];
 
     // AO_STATE_*
-    int state;
+    atomic_int state;
 
     // Whether buffers[] can be accessed.
-    int ready;
+    atomic_bool ready;
 
     // Device delay of the last written sample, in realtime.
-    int64_t end_time_us;
+    atomic_llong end_time_us;
 };
 
 static int get_space(struct ao *ao)
@@ -77,10 +77,9 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         int r = mp_ring_write(p->buffers[n], data[n], write_bytes);
         assert(r == write_bytes);
     }
-    if (p->state != AO_STATE_PLAY) {
-        p->end_time_us = 0;
-        p->state = AO_STATE_PLAY;
-        mp_memory_barrier();
+    if (atomic_load(&p->state) != AO_STATE_PLAY) {
+        atomic_store(&p->end_time_us, 0);
+        atomic_store(&p->state, AO_STATE_PLAY);
         if (ao->driver->resume)
             ao->driver->resume(ao);
     }
@@ -103,8 +102,7 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
     struct ao_pull_state *p = ao->api_priv;
     int full_bytes = samples * ao->sstride;
 
-    mp_memory_barrier();
-    if (!p->ready) {
+    if (!atomic_load(&p->ready)) {
         for (int n = 0; n < ao->num_planes; n++)
             af_fill_silence(data[n], full_bytes, ao->format);
         return 0;
@@ -116,10 +114,9 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
     int bytes = MPMIN(buffered_bytes, full_bytes);
 
     if (bytes > 0)
-        p->end_time_us = out_time_us;
+        atomic_store(&p->end_time_us, out_time_us);
 
-    mp_memory_barrier();
-    if (p->state == AO_STATE_PAUSE)
+    if (atomic_load(&p->state) == AO_STATE_PAUSE)
         bytes = 0;
 
     for (int n = 0; n < ao->num_planes; n++) {
@@ -154,8 +151,7 @@ static float get_delay(struct ao *ao)
 {
     struct ao_pull_state *p = ao->api_priv;
 
-    mp_memory_barrier();
-    int64_t end = p->end_time_us;
+    int64_t end = atomic_load(&p->end_time_us);
     int64_t now = mp_time_us();
     double driver_delay = MPMAX(0, (end - now) / (1000.0 * 1000.0));
     return mp_ring_buffered(p->buffers[0]) / (double)ao->bps + driver_delay;
@@ -168,15 +164,12 @@ static void reset(struct ao *ao)
         ao->driver->reset(ao);
     // Not like this is race-condition free. It will work if ->reset
     // stops the audio callback, though.
-    p->ready = 0;
-    p->state = AO_STATE_NONE;
-    mp_memory_barrier();
+    atomic_store(&p->ready, false);
+    atomic_store(&p->state, AO_STATE_NONE);
     for (int n = 0; n < ao->num_planes; n++)
         mp_ring_reset(p->buffers[n]);
-    p->end_time_us = 0;
-    mp_memory_barrier();
-    p->ready = 1;
-    mp_memory_barrier();
+    atomic_store(&p->end_time_us, 0);
+    atomic_store(&p->ready, true);
 }
 
 static void pause(struct ao *ao)
@@ -184,15 +177,13 @@ static void pause(struct ao *ao)
     struct ao_pull_state *p = ao->api_priv;
     if (ao->driver->pause)
         ao->driver->pause(ao);
-    p->state = AO_STATE_PAUSE;
-    mp_memory_barrier();
+    atomic_store(&p->state, AO_STATE_PAUSE);
 }
 
 static void resume(struct ao *ao)
 {
     struct ao_pull_state *p = ao->api_priv;
-    p->state = AO_STATE_PLAY;
-    mp_memory_barrier();
+    atomic_store(&p->state, AO_STATE_PLAY);
     if (ao->driver->resume)
         ao->driver->resume(ao);
 }
@@ -207,8 +198,7 @@ static int init(struct ao *ao)
     struct ao_pull_state *p = ao->api_priv;
     for (int n = 0; n < ao->num_planes; n++)
             p->buffers[n] = mp_ring_new(ao, ao->buffer * ao->sstride);
-    p->ready = 1;
-    mp_memory_barrier();
+    atomic_store(&p->ready, true);
     return 0;
 }
 

@@ -268,7 +268,7 @@ exit 0
 # If autodetection is available then the third state is: auto
 _pkg_config=auto
 _cc=auto
-test "$CC" && _cc="$CC"
+test -n "$CC" && _cc="$CC"
 _opt=-O2
 _prefix="/usr/local"
 options_state_machine init
@@ -485,19 +485,25 @@ extra_cflags="$extra_cflags -D_REENTRANT -D_THREAD_SAFE"
 compile_check waftools/fragments/pthreads.c "$_ld_pthread" || die "Unable to find pthreads support."
 echores "yes"
 
-check_statement_libs "compiler support for __atomic built-ins" auto ATOMIC_BUILTINS \
+check_statement_libs "support for stdatomic.h" auto STDATOMIC \
+    stdatomic.h '_Atomic int test = ATOMIC_VAR_INIT(123); int test2 = atomic_load(&test)'
+_stdatomic=$(defretval)
+
+_atomic=auto
+test "$_stdatomic" = yes && _atomic=no
+check_statement_libs "compiler support for __atomic built-ins" $_atomic ATOMIC_BUILTINS \
     stdint.h 'int64_t test = 0; test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)' \
     " " "-latomic"
 _atomic=$(defretval)
 
 _sync=auto
-test "$_atomic" = yes && _sync=no
+(test "$_atomic" = yes || test "$_stdatomic" = yes ) && _sync=no
 check_statement_libs "compiler support for __sync built-ins" $_sync SYNC_BUILTINS \
     stdint.h 'int64_t test = 0; test = __sync_add_and_fetch(&test, 1)'
 _sync=$(defretval)
 
-if test "$_atomic" = no && test "$_sync" = no ; then
-  die "your compiler must support either __atomic or __sync built-ins."
+if test "$_atomic" = no && test "$_sync" = no && test "$_stdatomic" = no ; then
+  die "your compiler must support either stdatomic.h, or __atomic, or __sync built-ins."
 fi
 
 check_compile "iconv" $_iconv ICONV waftools/fragments/iconv.c " " "-liconv" "-liconv $_ld_dl"
