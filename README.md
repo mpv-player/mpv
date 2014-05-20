@@ -81,6 +81,22 @@ Generally, mpv should work with the latest release as well as the git version
 of both FFmpeg and Libav. But FFmpeg is preferred, and some mpv features work
 with FFmpeg only. See the [wiki article][ffmpeg_vs_libav] about the issue.
 
+
+Release cycle
+-------------
+
+Every few months, a new release is cut off of the master branch. Currently,
+these releases are assigned a version number ``0.X.0``. Only the latest release
+is maintained. As part of the maintenance process, minor releases are made,
+which are assigned ``0.X.Y`` version numbers. Minor releases contain bug fixes
+only. They never merge the master branch, and no features are added to it. The
+goal of releases is to provide stability and an unchanged base for the sake of
+Linux distributions. If you want the newest features, just use the master
+branch. (The master branch is stable most of the time, except sometimes, when
+it's not.)
+
+Releases other than the latest release are unsupported and unmaintained.
+
 Bug reports
 -----------
 
@@ -94,8 +110,8 @@ For small changes you can just send us pull requests through GitHub. For bigger
 changes come and talk to us on IRC before you start working on them. It will
 make code review easier for both parties later on.
 
-Contacts
---------
+Contact
+-------
 
 These forms of contact are meant to ask questions about mpv usage, give
 feedback on mpv and discuss it's development.
