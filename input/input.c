@@ -1008,10 +1008,8 @@ static void input_wait_read(struct input_ctx *ictx, int time)
 
 static void input_wait_read(struct input_ctx *ictx, int time)
 {
-    if (time > 0) {
-        struct timespec deadline = mpthread_get_deadline(time / 1000.0);
-        pthread_cond_timedwait(&ictx->wakeup, &ictx->mutex, &deadline);
-    }
+    if (time > 0)
+        mpthread_cond_timedwait_rel(&ictx->wakeup, &ictx->mutex, time / 1000.0);
 
     for (int i = 0; i < ictx->num_fds; i++)
         read_fd(ictx, &ictx->fds[i]);
