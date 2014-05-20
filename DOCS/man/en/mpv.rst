@@ -15,8 +15,8 @@ SYNOPSIS
 | **mpv** [options] [file|URL|-]
 | **mpv** [options] --playlist=PLAYLIST
 | **mpv** [options] files
-| **mpv** [options] {group of files and options}
-| **mpv** [bd]://[title][/device] [options]
+| **mpv** bd://[title][/device] [options]
+| **mpv** bdnav://[title][/device] [options]
 | **mpv** dvd://[title|[start\_title]-end\_title][/device] [options]
 | **mpv** dvdnav://[longest|menu|title][/device] [options]
 | **mpv** \vcd://[/device]
