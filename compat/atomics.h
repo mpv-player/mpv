@@ -38,21 +38,25 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
 
 #define ATOMIC_VAR_INIT(x) \
     {.v = (x)}
-#define atomic_load(p) \
-    (mp_memory_barrier(), (p)->v)
-#define atomic_store(p, val) \
-    ((p)->v = (val), mp_memory_barrier())
 
 #if HAVE_ATOMIC_BUILTINS
-# define mp_memory_barrier() \
-    __atomic_thread_fence(__ATOMIC_SEQ_CST)
-# define atomic_fetch_add(a, b) \
-    __atomic_add_fetch(&(a)->v, b, __ATOMIC_SEQ_CST)
+
+#define atomic_load(p) \
+    __atomic_load_n(&(p)->v, __ATOMIC_SEQ_CST)
+#define atomic_store(p, val) \
+    __atomic_store_n(&(p)->v, val, __ATOMIC_SEQ_CST)
+#define atomic_fetch_add(a, b) \
+    __atomic_fetch_add(&(a)->v, b, __ATOMIC_SEQ_CST)
+
 #elif HAVE_SYNC_BUILTINS
-# define mp_memory_barrier() \
-    __sync_synchronize()
-# define atomic_fetch_add(a, b) \
-    (__sync_add_and_fetch(&(a)->v, b), mp_memory_barrier())
+
+#define atomic_load(p) \
+    (__sync_synchronize(), (p)->v)
+#define atomic_store(p, val) \
+    ((p)->v = (val), __sync_synchronize())
+#define atomic_fetch_add(a, b) \
+    (__sync_add_and_fetch(&(a)->v, b), __sync_synchronize())
+
 #else
 # error "this should have been a configuration error, report a bug please"
 #endif
