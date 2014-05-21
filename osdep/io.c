@@ -156,9 +156,9 @@ static int mp_vfprintf(FILE *stream, const char *format, va_list args)
         if (buf) {
             vsnprintf(buf, len, format, args);
             wchar_t *out = mp_from_utf8(NULL, buf);
-            size_t len = wcslen(out);
+            size_t out_len = wcslen(out);
             talloc_free(buf);
-            done = WriteConsoleW(wstream, out, len, NULL, NULL);
+            done = WriteConsoleW(wstream, out, out_len, NULL, NULL);
             talloc_free(out);
         }
     } else {
