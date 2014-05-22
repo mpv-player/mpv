@@ -230,7 +230,7 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
                    part->filename);
         }
 
-        // Unkown length => use rest of the file. If duration is unknown, make
+        // Unknown length => use rest of the file. If duration is unknown, make
         // something up.
         if (part->length < 0)
             part->length = (len < 0 ? 1 : len) - part->offset;
