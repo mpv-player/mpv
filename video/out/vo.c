@@ -300,9 +300,7 @@ void vo_queue_image(struct vo *vo, struct mp_image *mpi)
 // Return whether vo_queue_image() should be called.
 bool vo_needs_new_image(struct vo *vo)
 {
-    if (!vo->config_ok)
-        return false;
-    return vo->num_video_queue < vo->max_video_queue;
+    return vo->config_ok && vo->num_video_queue < vo->max_video_queue;
 }
 
 // Return whether a frame can be displayed.
@@ -310,8 +308,6 @@ bool vo_needs_new_image(struct vo *vo)
 //  eof==false: return true if "enough" frames are queued
 bool vo_has_next_frame(struct vo *vo, bool eof)
 {
-    if (!vo->config_ok)
-        return false;
     // Normally, buffer 1 image ahead, except if the queue is limited to less
     // than 2 entries, or if EOF is reached and there aren't enough images left.
     return eof ? vo->num_video_queue : vo->num_video_queue == vo->max_video_queue;
@@ -327,9 +323,7 @@ double vo_get_next_pts(struct vo *vo, int index)
 
 int vo_redraw_frame(struct vo *vo)
 {
-    if (!vo->config_ok)
-        return -1;
-    if (vo_control(vo, VOCTRL_REDRAW_FRAME, NULL) == true) {
+    if (vo->config_ok && vo_control(vo, VOCTRL_REDRAW_FRAME, NULL) == true) {
         vo->want_redraw = false;
         return 0;
     }
@@ -338,9 +332,7 @@ int vo_redraw_frame(struct vo *vo)
 
 bool vo_get_want_redraw(struct vo *vo)
 {
-    if (!vo->config_ok)
-        return false;
-    return vo->want_redraw;
+    return vo->config_ok && vo->want_redraw;
 }
 
 // Remove vo->video_queue[0]
