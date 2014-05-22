@@ -70,7 +70,7 @@ int64_t mp_add_timeout(int64_t time_us, double timeout_sec)
 {
     assert(time_us > 0); // mp_time_us() returns strictly positive values
     double t = MPCLAMP(timeout_sec * (1000 * 1000), -0x1p63, 0x1p63);
-    int64_t ti = t == 0x1p63 ? INT64_MAX : t;
+    int64_t ti = t == 0x1p63 ? INT64_MAX : (int64_t)t;
     if (ti > INT64_MAX - time_us)
         return INT64_MAX;
     if (ti <= -time_us)
