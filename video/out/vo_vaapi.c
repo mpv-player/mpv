@@ -301,12 +301,6 @@ static struct mp_image *get_screenshot(struct priv *p)
     return img;
 }
 
-static bool redraw_frame(struct priv *p)
-{
-    p->output_surface = p->visible_surface;
-    return render_to_screen(p, p->output_surfaces[p->output_surface]);
-}
-
 static void free_subpicture(struct priv *p, struct vaapi_osd_image *img)
 {
     if (img->image.image_id != VA_INVALID_ID)
@@ -528,7 +522,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return get_equalizer(p, eq->name, eq->valueptr);
     }
     case VOCTRL_REDRAW_FRAME:
-        redraw_frame(p);
+        p->output_surface = p->visible_surface;
         return true;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
