@@ -119,6 +119,7 @@ struct timespec mp_time_us_to_timespec(int64_t time_us)
         diff_secs += 1;
         diff_nsecs -= 1000000000UL;
     }
+    diff_secs = MPMIN(diff_secs, 10000000);
     if (diff_secs > MAX_TIME_T - ts.tv_sec)
         diff_secs = MAX_TIME_T - ts.tv_sec;
     ts.tv_sec += diff_secs;
