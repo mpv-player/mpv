@@ -655,6 +655,12 @@ static int initialize_vdpau_objects(struct vo *vo)
                                                 &vc->rgb_surfaces[n]);
             CHECK_VDP_ERROR(vo, "Allocating RGB surface");
         }
+    } else {
+        if (create_vdp_mixer(vo, vc->vdp_chroma_type) < 0)
+            return -1;
+    }
+
+    if (vc->black_pixel == VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_create(vc->vdp_device, OUTPUT_RGBA_FORMAT,
                                             1, 1, &vc->black_pixel);
         CHECK_VDP_ERROR(vo, "Allocating clearing surface");
@@ -663,9 +669,6 @@ static int initialize_vdpau_objects(struct vo *vo)
                                                      (const void*[]){data},
                                                      (uint32_t[]){4}, NULL);
         CHECK_VDP_ERROR(vo, "Initializing clearing surface");
-    } else {
-        if (create_vdp_mixer(vo, vc->vdp_chroma_type) < 0)
-            return -1;
     }
 
     forget_frames(vo, false);
