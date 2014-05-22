@@ -421,6 +421,9 @@ static int initialize_vdpau_objects(struct vo *vo)
                                                 &vc->rgb_surfaces[n]);
             CHECK_VDP_ERROR(vo, "Allocating RGB surface");
         }
+    }
+
+    if (vc->black_pixel == VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_create(vc->vdp_device, OUTPUT_RGBA_FORMAT,
                                             1, 1, &vc->black_pixel);
         CHECK_VDP_ERROR(vo, "Allocating clearing surface");
