@@ -42,6 +42,8 @@ struct mp_imgfmt_entry {
 };
 
 static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
+    // not in ffmpeg
+    FMT("vdpau_output",         IMGFMT_VDPAU_OUTPUT)
     // these formats are pretty common, and the "le"/"be" suffixes enforced
     // by FFmpeg are annoying
     FMT("yuv420p10",            IMGFMT_420P10)
@@ -128,12 +130,26 @@ const char *mp_imgfmt_to_name(int fmt)
     return "unknown";
 }
 
+static struct mp_imgfmt_desc mp_only_imgfmt_desc(int mpfmt)
+{
+    switch (mpfmt) {
+    case IMGFMT_VDPAU_OUTPUT:
+        return (struct mp_imgfmt_desc) {
+            .id = mpfmt,
+            .avformat = AV_PIX_FMT_NONE,
+            .name = mp_imgfmt_to_name(mpfmt),
+            .flags = MP_IMGFLAG_BE | MP_IMGFLAG_LE | MP_IMGFLAG_RGB,
+        };
+    }
+    return (struct mp_imgfmt_desc) {0};
+}
+
 struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 {
     enum AVPixelFormat fmt = imgfmt2pixfmt(mpfmt);
     const AVPixFmtDescriptor *pd = av_pix_fmt_desc_get(fmt);
     if (!pd || fmt == AV_PIX_FMT_NONE)
-        return (struct mp_imgfmt_desc) {0};
+        return mp_only_imgfmt_desc(mpfmt);
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,

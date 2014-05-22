@@ -58,8 +58,12 @@ struct mp_vdpau_ctx {
     pthread_mutex_t pool_lock;
     struct surface_entry {
         VdpVideoSurface surface;
+        VdpOutputSurface osurface;
+        bool allocated;
         int w, h;
+        VdpRGBAFormat rgb_format;
         VdpChromaType chroma;
+        bool rgb;
         bool in_use;
     } video_surfaces[MAX_VIDEO_SURFACES];
 };
@@ -75,6 +79,7 @@ struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
 
 bool mp_vdpau_get_format(int imgfmt, VdpChromaType *out_chroma_type,
                          VdpYCbCrFormat *out_pixel_format);
+bool mp_vdpau_get_rgb_format(int imgfmt, VdpRGBAFormat *out_rgba_format);
 
 struct mp_image *mp_vdpau_upload_video_surface(struct mp_vdpau_ctx *ctx,
                                                struct mp_image *mpi);

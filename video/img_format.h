@@ -252,7 +252,8 @@ enum mp_imgfmt {
 
     // Hardware accelerated formats. Plane data points to special data
     // structures, instead of pixel data.
-    IMGFMT_VDPAU,
+    IMGFMT_VDPAU,           // VdpVideoSurface
+    IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
     IMGFMT_VDA,
     IMGFMT_VAAPI,
 
@@ -330,7 +331,8 @@ static inline bool IMGFMT_IS_RGB(int fmt)
 #define IMGFMT_RGB_DEPTH(fmt) (mp_imgfmt_get_desc(fmt).plane_bits)
 
 #define IMGFMT_IS_HWACCEL(fmt) \
-    ((fmt) == IMGFMT_VDPAU || (fmt) == IMGFMT_VAAPI || (fmt) == IMGFMT_VDA)
+    ((fmt) == IMGFMT_VDPAU || (fmt) == IMGFMT_VDPAU_OUTPUT || \
+     (fmt) == IMGFMT_VAAPI || (fmt) == IMGFMT_VDA)
 
 int mp_imgfmt_from_name(bstr name, bool allow_hwaccel);
 const char *mp_imgfmt_to_name(int fmt);

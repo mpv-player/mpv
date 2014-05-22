@@ -60,7 +60,6 @@
 
 /* number of video and output surfaces */
 #define MAX_OUTPUT_SURFACES                15
-#define NUM_BUFFERED_VIDEO                 5
 
 /* Pixelformat used for output surfaces */
 #define OUTPUT_RGBA_FORMAT VDP_RGBA_FORMAT_B8G8R8A8
@@ -83,8 +82,6 @@ struct vdpctx {
     VdpOutputSurface                   output_surfaces[MAX_OUTPUT_SURFACES];
     VdpOutputSurface                   screenshot_surface;
     int                                num_output_surfaces;
-    VdpOutputSurface                   rgb_surfaces[NUM_BUFFERED_VIDEO];
-    bool                               rgb_surfaces_used[NUM_BUFFERED_VIDEO];
     VdpOutputSurface                   black_pixel;
 
     struct mp_image                   *current_image;
@@ -177,7 +174,7 @@ static int render_video_to_output_surface(struct vo *vo,
                       "vdp_presentation_queue_block_until_surface_idle");
 
     if (vc->rgb_mode) {
-        VdpOutputSurface surface = (uintptr_t)mpi->planes[0];
+        VdpOutputSurface surface = (uintptr_t)mpi->planes[3];
         int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
         vdp_st = vdp->output_surface_render_output_surface(output_surface,
                                                            NULL, vc->black_pixel,
@@ -373,28 +370,11 @@ static void free_video_specific(struct vo *vo)
     }
     vc->screenshot_surface = VDP_INVALID_HANDLE;
 
-    for (int n = 0; n < NUM_BUFFERED_VIDEO; n++) {
-        assert(!vc->rgb_surfaces_used[n]);
-        if (vc->rgb_surfaces[n] != VDP_INVALID_HANDLE) {
-            vdp_st = vdp->output_surface_destroy(vc->rgb_surfaces[n]);
-            CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_destroy");
-        }
-        vc->rgb_surfaces[n] = VDP_INVALID_HANDLE;
-    }
-
     if (vc->black_pixel != VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_destroy(vc->black_pixel);
         CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_destroy");
     }
     vc->black_pixel = VDP_INVALID_HANDLE;
-}
-
-static int get_rgb_format(int imgfmt)
-{
-    switch (imgfmt) {
-    case IMGFMT_BGR32: return VDP_RGBA_FORMAT_B8G8R8A8;
-    default:           return -1;
-    }
 }
 
 static int initialize_vdpau_objects(struct vo *vo)
@@ -411,17 +391,6 @@ static int initialize_vdpau_objects(struct vo *vo)
 
     if (win_x11_init_vdpau_flip_queue(vo) < 0)
         return -1;
-
-    if (vc->rgb_mode) {
-        int format = get_rgb_format(vc->image_format);
-        for (int n = 0; n < NUM_BUFFERED_VIDEO; n++) {
-            vdp_st = vdp->output_surface_create(vc->vdp_device,
-                                                format,
-                                                vc->vid_width, vc->vid_height,
-                                                &vc->rgb_surfaces[n]);
-            CHECK_VDP_ERROR(vo, "Allocating RGB surface");
-        }
-    }
 
     if (vc->black_pixel == VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_create(vc->vdp_device, OUTPUT_RGBA_FORMAT,
@@ -443,8 +412,6 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
-    for (int i = 0; i < NUM_BUFFERED_VIDEO; i++)
-        vc->rgb_surfaces[i] = VDP_INVALID_HANDLE;
     forget_frames(vo, false);
     vc->black_pixel = VDP_INVALID_HANDLE;
     vc->video_mixer->video_mixer = VDP_INVALID_HANDLE;
@@ -502,7 +469,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     vc->vid_width    = params->w;
     vc->vid_height   = params->h;
 
-    vc->rgb_mode = get_rgb_format(params->imgfmt) >= 0;
+    vc->rgb_mode = mp_vdpau_get_rgb_format(params->imgfmt, NULL);
 
     free_video_specific(vo);
 
@@ -872,33 +839,6 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     vc->surface_num = WRAP_ADD(vc->surface_num, 1, vc->num_output_surfaces);
 }
 
-static void free_rgb_surface(void *ptr)
-{
-    bool *entry = ptr;
-    *entry = false;
-}
-
-static struct mp_image *get_rgb_surface(struct vo *vo)
-{
-    struct vdpctx *vc = vo->priv;
-
-    assert(vc->rgb_mode);
-
-    for (int n = 0; n < NUM_BUFFERED_VIDEO; n++) {
-        bool *used = &vc->rgb_surfaces_used[n];
-        if (!*used) {
-            *used = true;
-            struct mp_image mpi = {0};
-            mp_image_setfmt(&mpi, IMGFMT_VDPAU); // not really, but keep csp flags
-            mpi.planes[0] = (void *)(uintptr_t)vc->rgb_surfaces[n];
-            return mp_image_new_custom_ref(&mpi, used, free_rgb_surface);
-        }
-    }
-
-    MP_ERR(vo, "no surfaces available in get_rgb_surface\n");
-    return NULL;
-}
-
 static void draw_image(struct vo *vo, struct mp_image *mpi)
 {
     struct vdpctx *vc = vo->priv;
@@ -912,29 +852,10 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
 static struct mp_image *filter_image(struct vo *vo, struct mp_image *mpi)
 {
     struct vdpctx *vc = vo->priv;
-    struct vdp_functions *vdp = vc->vdp;
-    struct mp_image *reserved_mpi = NULL;
-    VdpStatus vdp_st;
 
     check_preemption(vo);
 
-    if (vc->rgb_mode) {
-        reserved_mpi = get_rgb_surface(vo);
-        if (!reserved_mpi)
-            goto end;
-        VdpOutputSurface rgb_surface = (uintptr_t)reserved_mpi->planes[0];
-        if (rgb_surface != VDP_INVALID_HANDLE) {
-            vdp_st = vdp->output_surface_put_bits_native(rgb_surface,
-                                            &(const void *){mpi->planes[0]},
-                                            &(uint32_t){mpi->stride[0]},
-                                            NULL);
-            CHECK_VDP_WARNING(vo, "Error when calling "
-                              "output_surface_put_bits_native");
-        }
-    } else {
-        reserved_mpi = mp_vdpau_upload_video_surface(vc->mpvdp, mpi);
-    }
-
+    struct mp_image *reserved_mpi = mp_vdpau_upload_video_surface(vc->mpvdp, mpi);
     if (!reserved_mpi)
         goto end;
 
@@ -1014,8 +935,7 @@ static int query_format(struct vo *vo, uint32_t format)
     int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     if (mp_vdpau_get_format(format, NULL, NULL))
         return flags;
-    int rgb_format = get_rgb_format(format);
-    if (!vc->force_yuv && rgb_format >= 0)
+    if (!vc->force_yuv && mp_vdpau_get_rgb_format(format, NULL))
         return flags;
     return 0;
 }
