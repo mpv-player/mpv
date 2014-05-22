@@ -90,6 +90,16 @@ static void get_realtime(struct timespec *out_ts)
 #endif
 }
 
+// Calculate the maximum of type T, assuming it's a signed integer type and
+// represented in 2's complement.
+// Works like: (1 << 14) + ((1 << 14) - 1) == (1 << 15) - 1 (but no overflow)
+#define SIGNED_MAX(T) ((((T)1) << (sizeof(T) * 8 - 2)) + \
+                       ((((T)1) << (sizeof(T) * 8 - 2)) - 1))
+
+// If you don't like this, go fix POSIX. tv_sec is time_t, but time_t is
+// an unknown integer type, and the limits are unknown to the application.
+#define MAX_TIME_T SIGNED_MAX(time_t)
+
 struct timespec mp_time_us_to_timespec(int64_t time_us)
 {
     struct timespec ts;
@@ -98,7 +108,7 @@ struct timespec mp_time_us_to_timespec(int64_t time_us)
     // CLOCK_REALTIME - so we have to remap the times.
     int64_t unow = mp_time_us();
     int64_t diff_us = time_us - unow;
-    long diff_secs = diff_us / (1000L * 1000L);
+    int64_t diff_secs = diff_us / (1000L * 1000L);
     long diff_nsecs = (diff_us - diff_secs * (1000L * 1000L)) * 1000L;
     if (diff_nsecs < 0) {
         diff_secs -= 1;
@@ -108,6 +118,8 @@ struct timespec mp_time_us_to_timespec(int64_t time_us)
         diff_secs += 1;
         diff_nsecs -= 1000000000UL;
     }
+    if (diff_secs > MAX_TIME_T - ts.tv_sec)
+        diff_secs = MAX_TIME_T - ts.tv_sec;
     ts.tv_sec += diff_secs;
     ts.tv_nsec += diff_nsecs;
     return ts;
