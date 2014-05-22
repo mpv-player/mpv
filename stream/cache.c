@@ -702,7 +702,9 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
     }
     s->cache_thread_running = true;
 
-    // wait until cache is filled at least prefill_init %
+    // wait until cache is filled with at least min bytes
+    if (min < 1)
+        return 1;
     for (;;) {
         if (stream_check_interrupt(cache))
             return 0;
