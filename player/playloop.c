@@ -1054,7 +1054,9 @@ void run_playloop(struct MPContext *mpctx)
 
         mpctx->time_frame -= get_relative_time(mpctx);
         double audio_pts = playing_audio_pts(mpctx);
-        if (full_audio_buffers && !mpctx->restart_playback) {
+        if (!mpctx->sync_audio_to_video) {
+            mpctx->time_frame = 0;
+        } else if (full_audio_buffers && !mpctx->restart_playback) {
             double buffered_audio = ao_get_delay(mpctx->ao);
             MP_TRACE(mpctx, "audio delay=%f\n", buffered_audio);
 
