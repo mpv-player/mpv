@@ -425,7 +425,11 @@ check_compile() {
     echocheck "$1"
     if test $_res = auto ; then
         _res=no
-        shift 4
+        if test $# -gt 4 ; then
+            shift 4
+        else
+            shift $#
+        fi
         while true ; do
             compile_check "$_code" "$1" && libs_mplayer="$libs_mplayer $1" && _res=yes && break
             test -z "$1" && break
@@ -448,7 +452,11 @@ check_statement_libs() {
     echocheck "$1"
     if test $_res = auto ; then
         _res=no
-        shift 5
+        if test $# -gt 5 ; then
+            shift 5
+        else
+            shift $#
+        fi
         while true ; do
             statement_check "$_inc" "$_st" "$1" && libs_mplayer="$libs_mplayer $1" && _res=yes && break
             test -z "$1" && break
@@ -462,7 +470,7 @@ check_statement_libs() {
 
 # Print "yes" if previous command succeeded, else "no"
 defretval() { # shell is retarded?
-    if test $? == 0 ; then
+    if test $? = 0 ; then
         echo "yes"
     else
         echo "no"
