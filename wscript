@@ -716,6 +716,7 @@ radio_and_tv_features = [
     }, {
         'name': '--tv-v4l2',
         'desc': 'Video4Linux2 TV interface',
+        'deps': [ 'tv' ],
         'func': check_cc(header_name=['sys/time.h', 'linux/videodev2.h'])
     }, {
         'name': '--libv4l2',
