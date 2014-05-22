@@ -242,11 +242,12 @@ List of Input Commands
         shell script, and call that with ``run``.
 
 ``quit [<code>]``
-    Exit the player using the given exit code.
+    Exit the player. If an argument is given, it's used as process exit code.
 
-``quit_watch_later``
+``quit_watch_later [<code>]``
     Exit player, and store current playback position. Playing that file later
-    will seek to the previous position on start.
+    will seek to the previous position on start. The (optional) argument is
+    exactly as in the ``quit`` command.
 
 ``sub_add "<file>"``
     Load the given subtitle file. It is not selected as current subtitle after
