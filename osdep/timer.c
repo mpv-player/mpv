@@ -69,12 +69,13 @@ int64_t mp_time_relative_us(int64_t *t)
 int64_t mp_add_timeout(int64_t time_us, double timeout_sec)
 {
     assert(time_us > 0); // mp_time_us() returns strictly positive values
-    double t = timeout_sec * 1000 * 1000;
-    if (t >= (double)(INT64_MAX - time_us))
+    double t = MPCLAMP(timeout_sec * (1000 * 1000), -0x1p63, 0x1p63);
+    int64_t ti = t == 0x1p63 ? INT64_MAX : t;
+    if (ti > INT64_MAX - time_us)
         return INT64_MAX;
-    if (t <= -(double)time_us)
+    if (ti <= -time_us)
         return 1;
-    return time_us + (int64_t)t;
+    return time_us + ti;
 }
 
 static void get_realtime(struct timespec *out_ts)
