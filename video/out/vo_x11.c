@@ -228,8 +228,8 @@ shmemerror:
 
 static void freeMyXImage(struct priv *p, int foo)
 {
-    struct vo *vo = p->vo;
 #if HAVE_SHM && HAVE_XEXT
+    struct vo *vo = p->vo;
     if (p->Shmem_Flag) {
         XShmDetach(vo->x11->display, &p->Shminfo[foo]);
         XDestroyImage(p->myximage[foo]);
