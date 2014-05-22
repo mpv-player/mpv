@@ -35,8 +35,9 @@
 struct tl_part {
     char *filename;             // what is stream_open()ed
     double offset;              // offset into the source file
-    double length;              // length of the part (-1 if rest of the file)
+    bool offset_set;
     bool chapter_ts;
+    double length;              // length of the part (-1 if rest of the file)
 };
 
 struct tl_parts {
@@ -100,6 +101,7 @@ static struct tl_parts *parse_edl(bstr str)
             } else if (bstr_equals0(name, "start")) {
                 if (!parse_time(val, &p.offset))
                     goto error;
+                p.offset_set = true;
             } else if (bstr_equals0(name, "length")) {
                 if (!parse_time(val, &p.length))
                     goto error;
@@ -201,6 +203,8 @@ static void resolve_timestamps(struct tl_part *part, struct demuxer *demuxer)
         part->offset = start;
         part->length = length;
     }
+    if (!part->offset_set)
+        part->offset = demuxer_get_start_time(demuxer);
 }
 
 static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
@@ -219,7 +223,9 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
         resolve_timestamps(part, source);
 
         double len = source_get_length(source);
-        if (len <= 0) {
+        if (len > 0) {
+            len += demuxer_get_start_time(source);
+        } else {
             MP_WARN(mpctx, "EDL: source file '%s' has unknown duration.\n",
                    part->filename);
         }
