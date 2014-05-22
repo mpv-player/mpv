@@ -260,7 +260,7 @@ function update_tracklist()
     tracks_mpv = {}
     tracks_mpv.video, tracks_mpv.audio, tracks_mpv.sub = {}, {}, {}
     for n = 1, #tracktable do
-        if not (tracktable[n].type == "unkown") then
+        if not (tracktable[n].type == "unknown") then
             local type = tracktable[n].type
             local mpv_id = tonumber(tracktable[n].id)
 
@@ -283,7 +283,7 @@ function get_tracklist(type)
     else
         for n = 1, #tracks_osc[type] do
             local track = tracks_osc[type][n]
-            local lang, title, selected = "unkown", "", "{\\fscx" .. select_scale .. "\\fscy" .. select_scale .. "}○{\\fscx100\\fscy100}"
+            local lang, title, selected = "unknown", "", "{\\fscx" .. select_scale .. "\\fscy" .. select_scale .. "}○{\\fscx100\\fscy100}"
             if not(track.lang == nil) then lang = track.lang end
             if not(track.title == nil) then title = track.title end
             if (track.id == tonumber(mp.get_property(type))) then
@@ -318,7 +318,7 @@ function set_track(type, next)
         show_message(nicetypes[type] .. " Track: none")
     else
         show_message(nicetypes[type]  .. " Track: " .. new_track_osc .. "/" .. #tracks_osc[type]
-            .. " [" .. (tracks_osc[type][new_track_osc].lang or "unkown") .. "] " .. (tracks_osc[type][new_track_osc].title or ""))
+            .. " [" .. (tracks_osc[type][new_track_osc].lang or "unknown") .. "] " .. (tracks_osc[type][new_track_osc].title or ""))
     end
 end
 
