@@ -311,7 +311,7 @@ static int decode_image(struct MPContext *mpctx)
     if (d_video->header->attached_picture) {
         d_video->waiting_decoded_mpi =
                     video_decode(d_video, d_video->header->attached_picture, 0);
-        return 1;
+        return 0;
     }
 
     struct demux_packet *pkt = demux_read_packet(d_video->header);
@@ -516,8 +516,10 @@ int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
     struct vo *video_out = mpctx->video_out;
 
     if (mpctx->d_video->header->attached_picture) {
-        if (video_out->hasframe || vo_has_next_frame(video_out, true))
+        if (video_out->hasframe)
             return 0;
+        if (vo_has_next_frame(video_out, true))
+            return 2;
     }
 
     int r = video_output_image(mpctx, endpts, reconfig_ok);
