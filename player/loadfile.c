@@ -1231,6 +1231,13 @@ goto_reopen_demuxer: ;
     }
     reselect_demux_streams(mpctx);
 
+    if (mpctx->current_track[0][STREAM_VIDEO] &&
+        mpctx->current_track[0][STREAM_VIDEO]->attached_picture)
+    {
+        MP_INFO(mpctx,
+            "Displaying attached picture. Use --no-audio-display to prevent this.\n");
+    }
+
     demux_info_update(mpctx->master_demuxer);
     print_file_properties(mpctx);
 
