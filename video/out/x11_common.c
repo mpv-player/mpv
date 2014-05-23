@@ -206,22 +206,14 @@ static void x11_send_ewmh_msg(struct vo_x11_state *x11, char *message_type,
         MP_ERR(x11, "Couldn't send EWMH %s message!\n", message_type);
 }
 
-/*
- * Sends the EWMH fullscreen state event.
- *
- * action: could be one of _NET_WM_STATE_REMOVE -- remove state
- *                         _NET_WM_STATE_ADD    -- add state
- *                         _NET_WM_STATE_TOGGLE -- toggle
- */
-static void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
+// change the _NET_WM_STATE hint. Remove or add the state according to "set".
+static void x11_set_ewmh_state(struct vo_x11_state *x11, char *state, bool set)
 {
-    assert(action == _NET_WM_STATE_REMOVE || action == _NET_WM_STATE_ADD ||
-           action == _NET_WM_STATE_TOGGLE);
-
-    if (x11->wm_type & vo_wm_FULLSCREEN) {
-        long params[5] = {action, XA(x11, _NET_WM_STATE_FULLSCREEN)};
-        x11_send_ewmh_msg(x11, "_NET_WM_STATE", params);
-    }
+    long params[5] = {
+        set ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE,
+        XInternAtom(x11->display, state, False),
+    };
+    x11_send_ewmh_msg(x11, "_NET_WM_STATE", params);
 }
 
 static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
@@ -1436,16 +1428,12 @@ static void vo_x11_fullscreen(struct vo *vo)
     }
 
     if (x11->wm_type & vo_wm_FULLSCREEN) {
-        if (x11->fs) {
-            vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);
-        } else {
-            vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);
-            if (x11->pos_changed_during_fs || x11->size_changed_during_fs) {
-                vo_x11_move_resize(vo,
-                                   x11->pos_changed_during_fs,
+        x11_set_ewmh_state(x11, "_NET_WM_STATE_FULLSCREEN", x11->fs);
+        if (x11->fs && (x11->pos_changed_during_fs || x11->size_changed_during_fs))
+        {
+            vo_x11_move_resize(vo, x11->pos_changed_during_fs,
                                    x11->size_changed_during_fs,
                                    x11->nofsrc);
-            }
         }
     } else {
         struct mp_rect rc = x11->nofsrc;
