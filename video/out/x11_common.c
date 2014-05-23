@@ -127,7 +127,7 @@ static void xscreensaver_heartbeat(struct vo_x11_state *x11);
 static void set_screensaver(struct vo_x11_state *x11, bool enabled);
 static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
                                        Window w, long event_mask);
-static void vo_x11_setlayer(struct vo *vo, Window vo_window, bool ontop);
+static void vo_x11_setlayer(struct vo *vo, bool ontop);
 
 #define XA(x11, s) (XInternAtom((x11)->display, # s, False))
 
@@ -967,15 +967,6 @@ static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
     vo_x11_sizehint(vo, rc, false);
 }
 
-static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
-{
-    long layer = WIN_LAYER_NORMAL;
-    if (x11_get_property_copy(x11, win, XA(x11, _WIN_LAYER), XA_CARDINAL,
-                              32, &layer, sizeof(layer)))
-        MP_VERBOSE(x11, "original window layer is %ld.\n", layer);
-    return layer;
-}
-
 // set a X text property that expects a UTF8_STRING type
 static void vo_x11_set_property_utf8(struct vo *vo, Atom name, const char *t)
 {
@@ -1297,7 +1288,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
     }
 
     if (opts->ontop)
-        vo_x11_setlayer(vo, x11->window, opts->ontop);
+        vo_x11_setlayer(vo, opts->ontop);
 
     vo_x11_fullscreen(vo);
 
@@ -1346,7 +1337,7 @@ void vo_x11_clearwindow(struct vo *vo, Window vo_window)
     XFlush(x11->display);
 }
 
-static void vo_x11_setlayer(struct vo *vo, Window vo_window, bool ontop)
+static void vo_x11_setlayer(struct vo *vo, bool ontop)
 {
     struct vo_x11_state *x11 = vo->x11;
     if (vo->opts->WinID >= 0 || !x11->window)
@@ -1364,8 +1355,12 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, bool ontop)
         MP_VERBOSE(x11, "NET style stay on top (%d). Using state %s.\n",
                    ontop, state);
     } else if (x11->wm_type & vo_wm_LAYER) {
-        if (!x11->orig_layer)
-            x11->orig_layer = vo_x11_get_gnome_layer(x11, vo_window);
+        if (!x11->orig_layer) {
+            x11->orig_layer = WIN_LAYER_NORMAL;
+            x11_get_property_copy(x11, x11->window, XA(x11, _WIN_LAYER),
+                                  XA_CARDINAL, 32, &x11->orig_layer, sizeof(long));
+            MP_VERBOSE(x11, "original window layer is %ld.\n", x11->orig_layer);
+        }
 
         long params[5] = {0};
         // if not fullscreen, stay on default layer
@@ -1436,7 +1431,7 @@ static void vo_x11_fullscreen(struct vo *vo)
         XMoveResizeWindow(x11->display, x11->window, rc.x0, rc.y0,
                           RC_W(rc), RC_H(rc));
 
-        vo_x11_setlayer(vo, x11->window, x11->fs || opts->ontop);
+        vo_x11_setlayer(vo, x11->fs || opts->ontop);
 
         XRaiseWindow(x11->display, x11->window);
         XFlush(x11->display);
@@ -1451,7 +1446,7 @@ static void vo_x11_ontop(struct vo *vo)
     struct mp_vo_opts *opts = vo->opts;
     opts->ontop = !opts->ontop;
 
-    vo_x11_setlayer(vo, vo->x11->window, opts->ontop);
+    vo_x11_setlayer(vo, opts->ontop);
 }
 
 static void vo_x11_border(struct vo *vo)

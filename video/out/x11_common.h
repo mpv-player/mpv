@@ -57,7 +57,7 @@ struct vo_x11_state {
     int fs;     // whether we assume the window is in fullscreen mode
 
     bool mouse_cursor_hidden;
-    int orig_layer;
+    long orig_layer;
 
     // Current actual window position (updated on window move/resize events).
     struct mp_rect winrc;
