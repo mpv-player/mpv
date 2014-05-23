@@ -65,6 +65,10 @@ def build(ctx):
         target = "player/lua/assdraw.inc")
 
     ctx.file2string(
+        source = "player/lua/options.lua",
+        target = "player/lua/options.inc")
+
+    ctx.file2string(
         source = "player/lua/osc.lua",
         target = "player/lua/osc.inc")
 

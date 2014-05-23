@@ -79,7 +79,7 @@ function read_options(options, identifier)
         io.close(f)
     end
 
-    --parse commandline options
+    --parse command-line options
     for key, val in pairs(mp.get_property_native("options/lua-opts")) do
         local prefix = identifier.."-"
         if not (string.find(key, prefix, 1, true) == nil) then

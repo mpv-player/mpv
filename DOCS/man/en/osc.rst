@@ -122,18 +122,24 @@ time remaining
     left-click      toggle between total and remaining time
     =============   ================================================
 
-hide
-    | Hide the OSC permanently until mpv is restarted.
+Keybindings
+~~~~~~~~~~~
 
-    =============   ================================================
-    del             hide the OSC
-    =============   ================================================
+These keybindings are active by default if nothing else is already bound to
+these keys. In case of collosision, the function needs to be bound to a
+different key. See `Script Commands`_ section.
+
+=============   ================================================
+del             Hide the OSC permanently until mpv is restarted.
+=============   ================================================
 
 Configuration
 -------------
 
-The OSC offers limited configuration through a config file ``plugin_osc.conf``
-placed in mpv's user dir.
+The OSC offers limited configuration through a config file
+``lua-settings/osc.conf`` placed in mpv's user dir and through the
+``--lua-opts`` command-line option. Options provided through the command-line
+will override those from the config file.
 
 Config Syntax
 ~~~~~~~~~~~~~
@@ -141,14 +147,25 @@ Config Syntax
 The config file must exactly follow the following syntax::
 
     # this is a comment
-    parameter1=value1
-    parameter2=value2
+    optionA=value1
+    optionB=value2
 
 ``#`` can only be used at the beginning of a line and there may be no
 spaces around the ``=`` or anywhere else.
 
-Configurable parameters
-~~~~~~~~~~~~~~~~~~~~~~~
+Command-line Syntax
+~~~~~~~~~~~~~~~~~~~
+
+To avoid collisions with other scripts, all options need to be prefixed with
+``osc-``.
+
+Example::
+
+    --lua-opts=osc-optionA=value1:osc-optionB=value2
+
+
+Configurable Options
+~~~~~~~~~~~~~~~~~~~~
 
 ``showwindowed``
     | Default: yes
@@ -199,14 +216,20 @@ Configurable parameters
     | Default: 0
     | Size of the deadzone. The deadzone is an area that makes the mouse act
       like leaving the window. Movement there won't make the OSC show up and
-      it will hide immediately if the mouse enters it.
+      it will hide immediately if the mouse enters it. The deadzone starts
+      at the window border opposite to the OSC and the size controls how much
+      of the window it will span. Values between 0 and 1.
 
 ``minmousemove``
     | Default: 3
     | Minimum amount of pixels the mouse has to move between ticks to make
       the OSC show up
 
-Script commands
+``seektooltip``
+    | Default: yes
+    | Display a tooltip over the seekbar indicating time at mouse position.
+
+Script Commands
 ~~~~~~~~~~~~~~~
 
 The OSC script listens to certain script commands. These commands can bound
@@ -219,11 +242,11 @@ in ``input.conf``, or sent by other scripts.
     Hide the OSC permanently. This is also what the ``del`` key does.
 
 
-.. admonition:: Example
+Example
 
-    You could out this into ``input.conf`` to hide the OSC with the ``a`` key
-    and to unhide it with ``b``:
+You could put this into ``input.conf`` to hide the OSC with the ``a`` key and
+to unhide it with ``b``::
 
-    | a script_message disable-osc
-    | b script_message enable-osc
+    a script_message disable-osc
+    b script_message enable-osc
 

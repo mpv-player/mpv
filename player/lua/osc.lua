@@ -1,14 +1,13 @@
--- osc.lua
-
 local assdraw = require 'mp.assdraw'
 local msg = require 'mp.msg'
+local opt = require 'mp.options'
 
 --
 -- Parameters
 --
 
 -- default user option values
--- do not touch, change them in plugin_osc.conf
+-- do not touch, change them in osc.conf
 local user_opts = {
     showwindowed = true,                    -- show OSC when windowed?
     showfullscreen = true,                  -- show OSC when fullscreen?
@@ -23,9 +22,12 @@ local user_opts = {
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
     deadzonesize = 0,                       -- size of deadzone
     minmousemove = 3,                       -- minimum amount of pixels the mouse has to move between ticks to make the OSC show up
-    seektooltip = false,                    -- display tooltip over the seekbar indicating time at mouse position
+    seektooltip = true,                     -- display tooltip over the seekbar indicating time at mouse position
     iamaprogrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
 }
+
+-- read options from config and command-line
+read_options(user_opts, "osc")
 
 local osc_param = {
     osc_w = 550,                            -- width, height, corner-radius, padding of the OSC box
@@ -72,93 +74,7 @@ local state = {
     message_timeout,
 }
 
---
--- User Settings Management
---
 
-function val2str(val)
-    local strval = val
-    if type(val) == "boolean" then
-        if val then strval = "yes" else strval = "no" end
-    end
-
-    return strval
-end
-
--- converts val to type of desttypeval
-function typeconv(desttypeval, val)
-    if type(desttypeval) == "boolean" then
-        if val == "yes" then
-            val = true
-        elseif val == "no" then
-            val = false
-        else
-            msg.error("Error: Can't convert " .. val .. " to boolean!")
-            val = nil
-        end
-    elseif type(desttypeval) == "number" then
-        if not (tonumber(val) == nil) then
-            val = tonumber(val)
-        else
-            msg.error("Error: Can't convert " .. val .. " to number!")
-            val = nil
-        end
-    end
-    return val
-end
-
--- Automagical config handling
--- options:     A table with options setable via config with assigned default values. The type of the default values is important for
---              converting the values read from the config file back. Do not use "nil" as a default value!
--- identifier:  A simple indentifier string for the config file. Make sure this doesn't collide with other scripts.
-
--- How does it work:
--- Existance of the configfile will be checked, if it doesn't exist, the default values from the options table will be written in a new
--- file, commented out. If it exits, the key/value pairs will be read, and values of keys that exist in the options table will overwrite
--- their value. Keys that don't exist in the options table will be ignored, keys that don't exits in the config will keep their default
--- value. The value's types will automatically be converted to the type used in the options table.
-function read_config(options, identifier)
-
-    local conffilename = "plugin_" .. identifier .. ".conf"
-    local conffile = mp.find_config_file(conffilename)
-    local f = conffile and io.open(conffile,"r")
-    if f == nil then
-        -- config not found
-    else
-        -- config exists, read values
-        local linecounter = 1
-        for line in f:lines() do
-            if string.find(line, "#") == 1 then
-
-            else
-                local eqpos = string.find(line, "=")
-                if eqpos == nil then
-
-                else
-                    local key = string.sub(line, 1, eqpos-1)
-                    local val = string.sub(line, eqpos+1)
-
-                    -- match found values with defaults
-                    if options[key] == nil then
-                        msg.warn(conffilename..":"..linecounter.." unknown key " .. key .. ", ignoring")
-                    else
-                        local convval = typeconv(options[key], val)
-                        if convval == nil then
-                            msg.error(conffilename..":"..linecounter.." error converting value '" .. val .. "' for key '" .. key .. "'")
-                        else
-                            options[key] = convval
-                        end
-                    end
-                end
-            end
-            linecounter = linecounter + 1
-        end
-        io.close(f)
-    end
-end
-
--- read configfile
-read_config(user_opts, "osc")
 
 
 --
@@ -260,7 +176,7 @@ function update_tracklist()
     tracks_mpv = {}
     tracks_mpv.video, tracks_mpv.audio, tracks_mpv.sub = {}, {}, {}
     for n = 1, #tracktable do
-        if not (tracktable[n].type == "unkown") then
+        if not (tracktable[n].type == "unknown") then
             local type = tracktable[n].type
             local mpv_id = tonumber(tracktable[n].id)
 
@@ -283,7 +199,7 @@ function get_tracklist(type)
     else
         for n = 1, #tracks_osc[type] do
             local track = tracks_osc[type][n]
-            local lang, title, selected = "unkown", "", "{\\fscx" .. select_scale .. "\\fscy" .. select_scale .. "}○{\\fscx100\\fscy100}"
+            local lang, title, selected = "unknown", "", "{\\fscx" .. select_scale .. "\\fscy" .. select_scale .. "}○{\\fscx100\\fscy100}"
             if not(track.lang == nil) then lang = track.lang end
             if not(track.title == nil) then title = track.title end
             if (track.id == tonumber(mp.get_property(type))) then
@@ -318,7 +234,7 @@ function set_track(type, next)
         show_message(nicetypes[type] .. " Track: none")
     else
         show_message(nicetypes[type]  .. " Track: " .. new_track_osc .. "/" .. #tracks_osc[type]
-            .. " [" .. (tracks_osc[type][new_track_osc].lang or "unkown") .. "] " .. (tracks_osc[type][new_track_osc].title or ""))
+            .. " [" .. (tracks_osc[type][new_track_osc].lang or "unknown") .. "] " .. (tracks_osc[type][new_track_osc].title or ""))
     end
 end
 
@@ -579,9 +495,9 @@ function render_elements(master_ass)
                     local s_min, s_max = element.metainfo.slider.min, element.metainfo.slider.max
 
                     local an = 2
-                    if (sliderpos < (s_min + 10)) then
+                    if (sliderpos < (s_min + 5)) then
                         an = 1
-                    elseif (sliderpos > (s_max - 10)) then
+                    elseif (sliderpos > (s_max - 5)) then
                         an = 3
                     end
 
@@ -659,6 +575,8 @@ end
 
 -- OSC INIT
 function osc_init()
+    msg.debug("osc_init")
+
     -- kill old Elements
     elements = {}
 
@@ -1045,7 +963,7 @@ end
 
 
 function show_osc()
-
+    msg.debug("show_osc")
     --remember last time of invocation (mouse move)
     state.showtime = mp.get_time()
 
@@ -1058,6 +976,7 @@ function show_osc()
 end
 
 function hide_osc()
+    msg.debug("hide_osc")
     if (user_opts.fadeduration > 0) then
         if not(state.osc_visible == false) then
             state.anitype = "out"
@@ -1078,6 +997,7 @@ function request_init()
 end
 
 function render()
+    msg.debug("rendering")
     local current_screen_sizeX, current_screen_sizeY = mp.get_screen_size()
     local mouseX, mouseY = mp.get_mouse_pos()
     local now = mp.get_time()

@@ -188,8 +188,8 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     This will print the message ``the key was pressed`` when ``x`` was pressed.
 
-    The user can remap these key bindings. Then the user has to put the following
-    into his input.conf to remap the command to the ``y`` key:
+    The user can remap these key bindings. Then the user has to put the
+    following into his input.conf to remap the command to the ``y`` key:
 
     ::
 
@@ -410,6 +410,57 @@ with ``require 'mp.msg'``.
 ``msg.fatal(...)``, ``msg.error(...)``, ``msg.warn(...)``, ``msg.info(...)``, ``msg.verbose(...)``, ``msg.debug(...)``
     All of these are shortcuts and equivalent to the corresponding
     ``msg.log(level, ...)`` call.
+
+mp.option
+---------
+
+mpv comes with a built-in module to manage options from config-files and the
+command-line. All you have to do is to supply a table with default options to
+the read_options function. The function will overwrite the default values
+with values found in the config-file and the command-line (in that order).
+
+``read_options(table, identifier)``
+    A ``table`` with key-value pairs. The type of the default values is
+    important for converting the values read from the config file or
+    command-line back. Do not use ``nil`` as a default value!
+
+    The ``identifier`` is used to identify the config-file and the command-line
+    options. These needs to unique to avoid collisions with other scripts.
+    Defaults to ``mp.get_script_name()``.
+
+
+Example implementation::
+
+    local opt = require 'mp.options'
+    local options = {
+        optionA = "defaultvalueA",
+        optionB = -0.5,
+        optionC = true,
+    }
+    read_options(options, "myscript")
+    print(option.optionA)
+
+
+The config file will be stored in ``lua-settings/identifier.conf`` in mpv's user
+folder. Comment lines can be started with # and stray spaces are not removed.
+Boolean values will be represented with yes/no.
+
+Example config::
+
+    # comment
+    optionA=Hello World
+    optionB=9999
+    optionC=no
+
+
+Command-line options are read from the ``--lua-opts`` parameter. To avoid
+collisions, all keys have to be prefixed with ``identifier-``.
+
+Example command-line::
+
+     --lua-opts=myscript-optionA=TEST:myscript-optionB=0:myscript-optionC=yes
+
+
 
 Events
 ------

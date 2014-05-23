@@ -54,6 +54,9 @@ static const char *builtin_lua_scripts[][2] = {
     {"mp.assdraw",
 #   include "player/lua/assdraw.inc"
     },
+    {"mp.options",
+#   include "player/lua/options.inc"
+    },
     {"@osc.lua",
 #   include "player/lua/osc.inc"
     },
