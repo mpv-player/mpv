@@ -79,14 +79,12 @@
 #define vo_wm_STAYS_ON_TOP 4
 #define vo_wm_ABOVE 8
 #define vo_wm_BELOW 16
-#define vo_wm_NETWM (vo_wm_FULLSCREEN | vo_wm_STAYS_ON_TOP | vo_wm_ABOVE | \
-                     vo_wm_BELOW)
 
 /* EWMH state actions, see
          http://freedesktop.org/Standards/wm-spec/index.html#id2768769 */
-#define _NET_WM_STATE_REMOVE        0    /* remove/unset property */
-#define _NET_WM_STATE_ADD           1    /* add/set property */
-#define _NET_WM_STATE_TOGGLE        2    /* toggle property  */
+#define NET_WM_STATE_REMOVE        0    /* remove/unset property */
+#define NET_WM_STATE_ADD           1    /* add/set property */
+#define NET_WM_STATE_TOGGLE        2    /* toggle property  */
 
 #define WIN_LAYER_ONBOTTOM               2
 #define WIN_LAYER_NORMAL                 4
@@ -210,7 +208,7 @@ static void x11_send_ewmh_msg(struct vo_x11_state *x11, char *message_type,
 static void x11_set_ewmh_state(struct vo_x11_state *x11, char *state, bool set)
 {
     long params[5] = {
-        set ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE,
+        set ? NET_WM_STATE_ADD : NET_WM_STATE_REMOVE,
         XInternAtom(x11->display, state, False),
     };
     x11_send_ewmh_msg(x11, "_NET_WM_STATE", params);
@@ -1631,6 +1629,6 @@ bool vo_x11_screen_is_composited(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     char buf[50];
     sprintf(buf, "_NET_WM_CM_S%d", x11->screen);
-    Atom _NET_WM_CM = XInternAtom(x11->display, buf, False);
-    return XGetSelectionOwner(x11->display, _NET_WM_CM) != None;
+    Atom NET_WM_CM = XInternAtom(x11->display, buf, False);
+    return XGetSelectionOwner(x11->display, NET_WM_CM) != None;
 }
