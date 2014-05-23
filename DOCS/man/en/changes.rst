@@ -194,7 +194,7 @@ Command Line Switches
     ``-sub``                    ``--sub-file``
     ``-subcp``                  ``--sub-codepage``
     ``-subdelay``               ``--sub-delay``
-    ``-subfile``                ``--sub``
+    ``-subfile``                ``--sub-file``
     ``-subfont-*``              ``--sub-text-*``, ``--osd-*``
     ``-subfont-text-scale``     ``--sub-scale``
     ``-subfont``                ``--sub-text-font``
@@ -203,7 +203,7 @@ Command Line Switches
     ``-tvscan``                 ``--tv-scan``
     ``-use-filename-title``     ``--title='${filename}'``
     ``-vc ffh264vdpau`` (etc.)  ``--hwdec=vdpau``
-    ``-vobsub``                 ``--sub`` (pass the .idx file)
+    ``-vobsub``                 ``--sub-file`` (pass the .idx file)
     ``-x W``, ``-y H``          ``--geometry=WxH`` + ``--no-keepaspect``
     ``-xineramascreen``         ``--screen`` (different values)
     ``-xy W``                   ``--autofit=W``

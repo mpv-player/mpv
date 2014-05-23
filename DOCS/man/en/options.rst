@@ -39,7 +39,7 @@ OPTIONS
 ``--ad-lavc-downmix=<yes|no>``
     Whether to request audio channel downmixing from the decoder (default: yes).
     Some decoders, like AC-3, AAC and DTS, can remix audio on decoding. The
-    requested number of output channels is set with the ``--channels`` option.
+    requested number of output channels is set with the ``--audio-channels`` option.
     Useful for playing surround audio on a stereo system.
 
 ``--ad-lavc-threads=<0-16>``
@@ -2334,7 +2334,7 @@ OPTIONS
 
 ``--term-playing-msg=<string>``
     Print out a string after starting playback. The string is expanded for
-    properties, e.g. ``--playing-msg='file: ${filename}'`` will print the string
+    properties, e.g. ``--term-playing-msg='file: ${filename}'`` will print the string
     ``file:`` followed by a space and the currently played filename.
 
     See `Property Expansion`_.

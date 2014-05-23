@@ -1248,7 +1248,7 @@ Property Expansion
 ------------------
 
 All string arguments to input commands as well as certain options (like
-``--playing-msg``) are subject to property expansion.
+``--term-playing-msg``) are subject to property expansion.
 
 .. admonition:: Example for input.conf
 

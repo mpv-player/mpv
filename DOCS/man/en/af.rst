@@ -241,7 +241,7 @@ Available filters are:
         48000 for example.
 
     ``<channels>``
-        Force mixing to a specific channel layout. See ``--channels`` option
+        Force mixing to a specific channel layout. See ``--audio-channels`` option
         for possible values.
 
     ``<out-format>``
@@ -351,7 +351,7 @@ Available filters are:
 
         If you just want to force remixing to a certain output channel layout,
         it is easier to use the ``format`` filter. For example,
-        ``mpv '--af=format=channels=5.1' '--channels=5.1'`` would always force
+        ``mpv '--af=format=channels=5.1' '--audio-channels=5.1'`` would always force
         remixing audio to 5.1 and output it like this.
 
 ``sub[=fc:ch]``
@@ -380,7 +380,7 @@ Available filters are:
 
     .. admonition:: Example
 
-        ``mpv --af=sub=100:4 --channels=5 media.avi``
+        ``mpv --af=sub=100:4 --audio-channels=5 media.avi``
             Would add a subwoofer channel with a cutoff frequency of 100Hz to
             output channel 4.
 
@@ -408,7 +408,7 @@ Available filters are:
 
     .. admonition:: Example
 
-        ``mpv --af=surround=15 --channels=4 media.avi``
+        ``mpv --af=surround=15 --audio-channels=4 media.avi``
             Would add surround sound decoding with 15ms delay for the sound to
             the rear speakers.
 
