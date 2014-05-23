@@ -589,7 +589,7 @@ check_pkg_config "libquvi 0.9.x support" $_libquvi9 LIBQUVI9 'libquvi-0.9 >= 0.9
 _libquvi9=$(defretval)
 
 _libquvi=no
-test "$_libquvi9" = yes || test "$_libquvi4" = yes && _libquvi=yes
+(test "$_libquvi9" = yes || test "$_libquvi4" = yes) && _libquvi=yes
 define_yes_no $_libquvi HAVE_LIBQUVI
 
 _wlver="1.2.0"
