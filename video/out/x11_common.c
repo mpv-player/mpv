@@ -129,7 +129,7 @@ static void xscreensaver_heartbeat(struct vo_x11_state *x11);
 static void set_screensaver(struct vo_x11_state *x11, bool enabled);
 static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
                                        Window w, long event_mask);
-static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
+static void vo_x11_setlayer(struct vo *vo, Window vo_window, bool ontop);
 
 #define XA(x11, s) (XInternAtom((x11)->display, # s, False))
 
@@ -1348,7 +1348,7 @@ void vo_x11_clearwindow(struct vo *vo, Window vo_window)
     XFlush(x11->display);
 }
 
-static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
+static void vo_x11_setlayer(struct vo *vo, Window vo_window, bool ontop)
 {
     struct vo_x11_state *x11 = vo->x11;
     if (vo->opts->WinID >= 0 || !x11->window)
@@ -1360,31 +1360,21 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
 
         long params[5] = {0};
         // if not fullscreen, stay on default layer
-        params[0] = layer ? WIN_LAYER_ABOVE_DOCK : x11->orig_layer;
+        params[0] = ontop ? WIN_LAYER_ABOVE_DOCK : x11->orig_layer;
         params[1] = CurrentTime;
         MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n", params[0]);
         x11_send_ewmh_msg(x11, "_WIN_LAYER", params);
-    } else if (x11->wm_type & vo_wm_NETWM) {
-        long params[5] = {layer};
+    } else if (x11->wm_type & (vo_wm_STAYS_ON_TOP | vo_wm_ABOVE)) {
+        char *state = "_NET_WM_STATE_ABOVE";
 
-        if (x11->wm_type & vo_wm_STAYS_ON_TOP) {
-            params[1] = XA(x11, _NET_WM_STATE_STAYS_ON_TOP);
-        } else if (x11->wm_type & vo_wm_ABOVE) {
-            params[1] = XA(x11, _NET_WM_STATE_ABOVE);
-        } else if (x11->wm_type & vo_wm_FULLSCREEN) {
-            params[1] = XA(x11, _NET_WM_STATE_FULLSCREEN);
-        } else if (x11->wm_type & vo_wm_BELOW) {
-            // This is not fallback. We can safely assume that the situation
-            // where only NETWM_STATE_BELOW is supported doesn't exist.
-            params[1] = XA(x11, _NET_WM_STATE_BELOW);
-        }
-        x11_send_ewmh_msg(x11, "_WIN_LAYER", params);
+        // Not in EWMH - but the old code preferred this (maybe it is "better")
+        if (x11->wm_type & vo_wm_STAYS_ON_TOP)
+            state = "_NET_WM_STATE_STAYS_ON_TOP";
 
-        char *state = XGetAtomName(x11->display, params[1]);
-        MP_VERBOSE(x11, "NET style stay on top (layer %d). Using state %s.\n",
-                   layer, state ? state : "?");
-        XFree(state);
-        MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n", params[0]);
+        x11_set_ewmh_state(x11, state, ontop);
+
+        MP_VERBOSE(x11, "NET style stay on top (%d). Using state %s.\n",
+                   ontop, state);
     }
 }
 
