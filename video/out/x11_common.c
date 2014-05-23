@@ -1352,17 +1352,7 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, bool ontop)
     if (vo->opts->WinID >= 0 || !x11->window)
         return;
 
-    if (x11->wm_type & vo_wm_LAYER) {
-        if (!x11->orig_layer)
-            x11->orig_layer = vo_x11_get_gnome_layer(x11, vo_window);
-
-        long params[5] = {0};
-        // if not fullscreen, stay on default layer
-        params[0] = ontop ? WIN_LAYER_ABOVE_DOCK : x11->orig_layer;
-        params[1] = CurrentTime;
-        MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n", params[0]);
-        x11_send_ewmh_msg(x11, "_WIN_LAYER", params);
-    } else if (x11->wm_type & (vo_wm_STAYS_ON_TOP | vo_wm_ABOVE)) {
+    if (x11->wm_type & (vo_wm_STAYS_ON_TOP | vo_wm_ABOVE)) {
         char *state = "_NET_WM_STATE_ABOVE";
 
         // Not in EWMH - but the old code preferred this (maybe it is "better")
@@ -1373,6 +1363,16 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, bool ontop)
 
         MP_VERBOSE(x11, "NET style stay on top (%d). Using state %s.\n",
                    ontop, state);
+    } else if (x11->wm_type & vo_wm_LAYER) {
+        if (!x11->orig_layer)
+            x11->orig_layer = vo_x11_get_gnome_layer(x11, vo_window);
+
+        long params[5] = {0};
+        // if not fullscreen, stay on default layer
+        params[0] = ontop ? WIN_LAYER_ABOVE_DOCK : x11->orig_layer;
+        params[1] = CurrentTime;
+        MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n", params[0]);
+        x11_send_ewmh_msg(x11, "_WIN_LAYER", params);
     }
 }
 
