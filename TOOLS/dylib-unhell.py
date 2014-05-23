@@ -61,7 +61,7 @@ def lib_name(lib):
 def process_libraries(libs_dict, binary, processed = []):
     ls   = leafs(libs_dict, processed)
     diff = set(ls) - set(processed)
-    if diff == set():
+    if diff == set([binary]):
         return
 
     for src in diff:
