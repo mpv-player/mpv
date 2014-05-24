@@ -1354,6 +1354,9 @@ terminate_playback:
 
     if (opts->position_save_on_quit && mpctx->stop_play == PT_QUIT)
         mp_write_watch_later_conf(mpctx);
+    
+    if (opts->position_save_always && mpctx->stop_play == PT_QUIT || mpctx->stop_play == PT_NEXT_ENTRY)
+        mp_write_watch_later_conf(mpctx);
 
     if (mpctx->step_frames)
         opts->pause = 1;
