@@ -285,7 +285,8 @@ If you really mean to compile without libass support use --disable-libass."
             'os-win32': {
                 'func': check_cc(fragment=load_fragment('vcd_windows.c'))
             }
-        }
+        },
+        'default': 'disable',
     }, {
         'name': '--libbluray',
         'desc': 'Bluray support',
@@ -303,6 +304,7 @@ If you really mean to compile without libass support use --disable-libass."
         'name': '--cdda',
         'desc': 'cdda support (libcdio)',
         'func': check_pkg_config('libcdio_paranoia'),
+        'default': 'disable',
     }, {
         'name': '--enca',
         'desc': 'ENCA support',
