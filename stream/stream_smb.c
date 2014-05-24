@@ -98,7 +98,8 @@ static int open_f (stream_t *stream)
 
   filename = stream->url;
 
-  mode_t m = stream->mode == STREAM_WRITE ? O_RDWR|O_CREAT|O_TRUNC : O_RDONLY;
+  bool write = stream->mode == STREAM_WRITE;
+  mode_t m = write ? O_RDWR|O_CREAT|O_TRUNC : O_RDONLY;
 
   if(!filename) {
     MP_ERR(stream, "[smb] Bad url\n");
@@ -117,13 +118,12 @@ static int open_f (stream_t *stream)
     return STREAM_ERROR;
   }
 
-  stream->flags = mode;
   len = 0;
-  if(mode == STREAM_READ) {
+  if(!write) {
     len = smbc_lseek(fd,0,SEEK_END);
     smbc_lseek (fd, 0, SEEK_SET);
   }
-  if(len > 0 || mode == STREAM_WRITE) {
+  if(len > 0 || write) {
     stream->seekable = true;
     stream->seek = seek;
   }
