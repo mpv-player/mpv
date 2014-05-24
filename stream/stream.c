@@ -306,7 +306,6 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
         }
     }
 
-    s->flags = 0;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
     int r = sinfo->open(s, s->mode);
     if (r != STREAM_OK) {
@@ -317,13 +316,7 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     if (!s->read_chunk)
         s->read_chunk = 4 * (s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE);
 
-    if (!s->seek)
-        s->flags &= ~MP_STREAM_SEEK;
-    if (s->seek && !(s->flags & MP_STREAM_SEEK))
-        s->flags |= MP_STREAM_SEEK;
-
-    if (!(s->flags & MP_STREAM_SEEK))
-        s->end_pos = 0;
+    assert(s->seekable == !!s->seek);
 
     s->uncached_type = s->type;
 
@@ -394,7 +387,7 @@ static int stream_reconnect(stream_t *s)
 #define RECONNECT_SLEEP_MAX_MS 500
     if (!s->streaming)
         return 0;
-    if (!(s->flags & MP_STREAM_SEEK_FW))
+    if (!s->seekable)
         return 0;
     int64_t pos = s->pos;
     int sleep_ms = 5;
@@ -468,7 +461,9 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
         len = 0;
     if (len == 0) {
         // do not retry if this looks like proper eof
-        if (s->eof || (s->end_pos && s->pos == s->end_pos))
+        int64_t size = -1;
+        stream_control(s, STREAM_CTRL_GET_SIZE, &size);
+        if (s->eof || s->pos == size)
             goto eof_out;
 
         // just in case this is an error e.g. due to network
@@ -622,11 +617,11 @@ void stream_drop_buffers(stream_t *s)
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
     if (newpos != s->pos) {
-        if (newpos > s->pos && !(s->flags & MP_STREAM_SEEK_FW)) {
-            MP_ERR(s, "Can not seek in this stream\n");
+        if (newpos > s->pos && !s->seekable) {
+            MP_ERR(s, "Cannot seek forward in this stream\n");
             return 0;
         }
-        if (newpos < s->pos && !(s->flags & MP_STREAM_SEEK_BW)) {
+        if (newpos < s->pos && !s->seekable) {
             MP_ERR(s, "Cannot seek backward in linear streams!\n");
             return 1;
         }
@@ -647,7 +642,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     stream_drop_buffers(s);
 
     if (s->mode == STREAM_WRITE) {
-        if (!(s->flags & MP_STREAM_SEEK) || !s->seek(s, pos))
+        if (!s->seekable || !s->seek(s, pos))
             return 0;
         return 1;
     }
@@ -659,9 +654,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     MP_TRACE(s, "Seek from %" PRId64 " to %" PRId64
              " (with offset %d)\n", s->pos, pos, (int)(pos - newpos));
 
-    if (pos >= s->pos && !(s->flags & MP_STREAM_SEEK) &&
-        (s->flags & MP_STREAM_FAST_SKIPPING))
-    {
+    if (pos >= s->pos && !s->seekable && s->fast_skip) {
         // skipping is handled by generic code below
     } else if (stream_seek_unbuffered(s, newpos) >= 0) {
         return 0;
@@ -708,7 +701,7 @@ int stream_skip(stream_t *s, int64_t len)
     int64_t target = stream_tell(s) + len;
     if (len < 0)
         return stream_seek(s, target);
-    if (len > 2 * STREAM_BUFFER_SIZE && (s->flags & MP_STREAM_SEEK_FW)) {
+    if (len > 2 * STREAM_BUFFER_SIZE && s->seekable) {
         // Seek to 1 byte before target - this is the only way to distinguish
         // skip-to-EOF and skip-past-EOF in general. Successful seeking means
         // absolutely nothing, so test by doing a real read of the last byte.
@@ -726,18 +719,19 @@ int stream_control(stream_t *s, int cmd, void *arg)
 {
     if (!s->control)
         return STREAM_UNSUPPORTED;
-    return s->control(s, cmd, arg);
-}
-
-void stream_update_size(stream_t *s)
-{
-    if (!(s->flags & MP_STREAM_SEEK))
-        return;
-    uint64_t size;
-    if (stream_control(s, STREAM_CTRL_GET_SIZE, &size) == STREAM_OK) {
-        if (size > s->end_pos)
-            s->end_pos = size;
+    int r = s->control(s, cmd, arg);
+    if (r == STREAM_UNSUPPORTED) {
+        // Fallbacks
+        switch (cmd) {
+        case STREAM_CTRL_GET_SIZE:
+            if (s->end_pos > 0) {
+                *(int64_t *)arg = s->end_pos;
+                return STREAM_OK;
+            }
+            break;
+        }
     }
+    return r;
 }
 
 void free_stream(stream_t *s)
@@ -804,7 +798,7 @@ int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
     stream_t *cache = new_stream();
     cache->uncached_type = orig->type;
     cache->uncached_stream = orig;
-    cache->flags |= MP_STREAM_SEEK;
+    cache->seekable = true;
     cache->mode = STREAM_READ;
     cache->read_chunk = 4 * STREAM_BUFFER_SIZE;
 
@@ -815,7 +809,6 @@ int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
     cache->safe_origin = orig->safe_origin;
     cache->opts = orig->opts;
     cache->global = orig->global;
-    cache->end_pos = orig->end_pos;
 
     cache->log = mp_log_new(cache, cache->global->log, "cache");
 
@@ -935,10 +928,12 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
     int total_read = 0;
     int padding = 1;
     char *buf = NULL;
-    if (s->end_pos > max_size)
+    int64_t size = 0;
+    stream_control(s, STREAM_CTRL_GET_SIZE, &size);
+    if (size > max_size)
         return (struct bstr){NULL, 0};
-    if (s->end_pos > 0)
-        bufsize = s->end_pos + padding;
+    if (size > 0)
+        bufsize = size + padding;
     else
         bufsize = 1000;
     while (1) {

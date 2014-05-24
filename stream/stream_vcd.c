@@ -169,6 +169,7 @@ static int open_s(stream_t *stream,int mode)
 
   stream->fill_buffer = fill_buffer;
   stream->seek = seek;
+  stream->seekable = true;
   stream->close = close_s;
   stream->demuxer = "lavf"; // mpegps ( or "vcd"?)
 

@@ -364,6 +364,7 @@ static int resize_cache(struct priv *s, int64_t size)
 static void update_cached_controls(struct priv *s)
 {
     unsigned int ui;
+    int64_t i64;
     double d;
     char **m;
     char *t;
@@ -388,8 +389,9 @@ static void update_cached_controls(struct priv *s)
         talloc_free(s->disc_name);
         s->disc_name = talloc_steal(s, t);
     }
-    stream_update_size(s->stream);
-    s->stream_size = s->stream->end_pos;
+    s->stream_size = -1;
+    if (stream_control(s->stream, STREAM_CTRL_GET_SIZE, &i64) == STREAM_OK)
+        s->stream_size = i64;
 }
 
 // the core might call these every frame, so cache them...
@@ -410,10 +412,13 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         *(double *)arg = s->stream_time_length;
         return s->stream_time_length ? STREAM_OK : STREAM_UNSUPPORTED;
     case STREAM_CTRL_GET_START_TIME:
+        if (s->stream_start_time == MP_NOPTS_VALUE)
+            return STREAM_UNSUPPORTED;
         *(double *)arg = s->stream_start_time;
-        return s->stream_start_time !=
-               MP_NOPTS_VALUE ? STREAM_OK : STREAM_UNSUPPORTED;
+        return STREAM_OK;
     case STREAM_CTRL_GET_SIZE:
+        if (s->stream_size < 0)
+            return STREAM_UNSUPPORTED;
         *(int64_t *)arg = s->stream_size;
         return STREAM_OK;
     case STREAM_CTRL_MANAGES_TIMELINE:
@@ -692,8 +697,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
     if (min > s->buffer_size - FILL_LIMIT)
         min = s->buffer_size - FILL_LIMIT;
 
-    s->seekable = (stream->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK &&
-                  stream->end_pos > 0;
+    s->seekable = stream->seekable;
 
     if (pthread_create(&s->cache_thread, NULL, cache_thread, s) != 0) {
         MP_ERR(s, "Starting cache process/thread failed: %s.\n",

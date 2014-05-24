@@ -57,12 +57,6 @@ enum streamtype {
 // flags for stream_open_ext (this includes STREAM_READ and STREAM_WRITE)
 #define STREAM_NO_FILTERS 2
 
-// stream->flags
-#define MP_STREAM_FAST_SKIPPING 1 // allow forward seeks by skipping
-#define MP_STREAM_SEEK_BW  2
-#define MP_STREAM_SEEK_FW  4
-#define MP_STREAM_SEEK  (MP_STREAM_SEEK_BW | MP_STREAM_SEEK_FW)
-
 #define STREAM_NO_MATCH -2
 #define STREAM_UNSUPPORTED -1
 #define STREAM_ERROR 0
@@ -143,11 +137,11 @@ typedef struct stream {
 
     enum streamtype type; // see STREAMTYPE_*
     enum streamtype uncached_type; // if stream is cache, type of wrapped str.
-    int flags; // MP_STREAM_SEEK_* or'ed flags
     int sector_size; // sector size (seek will be aligned on this size if non 0)
     int read_chunk; // maximum amount of data to read at once to limit latency
     unsigned int buf_pos, buf_len;
-    int64_t pos, end_pos;
+    int64_t pos;
+    uint64_t end_pos; // static size; use STREAM_CTRL_GET_SIZE instead
     int eof;
     int mode; //STREAM_READ or STREAM_WRITE
     bool streaming;     // known to be a network stream if true
@@ -157,8 +151,10 @@ typedef struct stream {
     char *mime_type; // when HTTP streaming is used
     char *demuxer; // request demuxer to be used
     char *lavf_type; // name of expected demuxer type for lavf
-    bool safe_origin; // used for playlists that can be opened safely
-    bool allow_caching; // stream cache makes sense
+    bool seekable : 1; // presence of general byte seeking support
+    bool fast_skip : 1; // consider stream fast enough to fw-seek by skipping
+    bool safe_origin : 1; // used for playlists that can be opened safely
+    bool allow_caching : 1; // stream cache makes sense
     struct mp_log *log;
     struct MPOpts *opts;
     struct mpv_global *global;
@@ -219,7 +215,6 @@ struct mpv_global;
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size);
 int stream_control(stream_t *s, int cmd, void *arg);
-void stream_update_size(stream_t *s);
 void free_stream(stream_t *s);
 struct stream *stream_create(const char *url, int flags, struct mpv_global *global);
 struct stream *stream_open(const char *filename, struct mpv_global *global);

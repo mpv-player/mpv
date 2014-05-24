@@ -719,7 +719,6 @@ static int open_s(stream_t *stream, int mode)
         dvdnav_angle_change(priv->dvdnav, dvd_angle);
 
     stream->sector_size = 2048;
-    stream->flags = STREAM_READ;
     stream->fill_buffer = fill_buffer;
     stream->control = control;
     stream->close = stream_dvdnav_close;

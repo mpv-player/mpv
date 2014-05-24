@@ -45,10 +45,11 @@ static int control(stream_t *s, int cmd, void *arg) {
       off_t size = smbc_lseek(p->fd,0,SEEK_END);
       smbc_lseek(p->fd,s->pos,SEEK_SET);
       if(size != (off_t)-1) {
-        *(uint64_t *)arg = size;
+        *(int64_t *)arg = size;
         return 1;
       }
     }
+    break;
   }
   return STREAM_UNSUPPORTED;
 }
@@ -131,9 +132,8 @@ static int open_f (stream_t *stream, int mode)
     smbc_lseek (fd, 0, SEEK_SET);
   }
   if(len > 0 || mode == STREAM_WRITE) {
-    stream->flags |= MP_STREAM_SEEK;
+    stream->seekable = true;
     stream->seek = seek;
-    if(mode == STREAM_READ) stream->end_pos = len;
   }
   priv->fd = fd;
   stream->fill_buffer = fill_buffer;

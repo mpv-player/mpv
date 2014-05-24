@@ -396,6 +396,7 @@ static int open_cdda(stream_t *st, int m)
 
     st->fill_buffer = fill_buffer;
     st->seek = seek;
+    st->seekable = true;
     st->control = control;
     st->close = close_cdda;
 

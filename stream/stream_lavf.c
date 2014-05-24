@@ -89,8 +89,8 @@ static int control(stream_t *s, int cmd, void *arg)
     switch(cmd) {
     case STREAM_CTRL_GET_SIZE:
         size = avio_size(avio);
-        if(size >= 0) {
-            *(uint64_t *)arg = size;
+        if (size >= 0) {
+            *(int64_t *)arg = size;
             return 1;
         }
         break;
@@ -136,6 +136,9 @@ static int open_f(stream_t *stream, int mode)
     AVDictionary *dict = NULL;
     void *temp = talloc_new(NULL);
 
+    stream->seek = NULL;
+    stream->seekable = false;
+
     if (mode == STREAM_READ)
         flags = AVIO_FLAG_READ;
     else if (mode == STREAM_WRITE)
@@ -161,7 +164,6 @@ static int open_f(stream_t *stream, int mode)
          * this (the rtsp demuxer's probe function checks for a "rtsp:"
          * filename prefix), so it has to be handled specially here.
          */
-        stream->seek = NULL;
         stream->demuxer = "lavf";
         stream->lavf_type = "rtsp";
         talloc_free(temp);
@@ -238,12 +240,8 @@ static int open_f(stream_t *stream, int mode)
         stream->lavf_type = "flv";
     }
     stream->priv = avio;
-    int64_t size = avio_size(avio);
-    if (size >= 0)
-        stream->end_pos = size;
-    stream->seek = seek;
-    if (!avio->seekable)
-        stream->seek = NULL;
+    stream->seekable = avio->seekable;
+    stream->seek = stream->seekable ? seek : NULL;
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
     stream->control = control;

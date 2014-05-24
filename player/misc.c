@@ -169,14 +169,16 @@ void stream_dump(struct MPContext *mpctx)
     stream_t *stream = mpctx->stream;
     assert(stream && filename);
 
+    int64_t size = 0;
+    stream_control(stream, STREAM_CTRL_GET_SIZE, &size);
+
     stream_set_capture_file(stream, filename);
 
     while (mpctx->stop_play == KEEP_PLAYING && !stream->eof) {
         if (!opts->quiet && ((stream->pos / (1024 * 1024)) % 2) == 1) {
             uint64_t pos = stream->pos;
-            uint64_t end = stream->end_pos;
             MP_MSG(mpctx, MSGL_STATUS, "Dumping %lld/%lld...",
-                   (long long int)pos, (long long int)end);
+                   (long long int)pos, (long long int)size);
         }
         stream_fill_buffer(stream);
         for (;;) {

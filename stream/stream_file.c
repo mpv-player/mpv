@@ -96,9 +96,10 @@ static int control(stream_t *s, int cmd, void *arg)
         size = lseek(p->fd, 0, SEEK_END);
         lseek(p->fd, s->pos, SEEK_SET);
         if (size != (off_t)-1) {
-            *(uint64_t *)arg = size;
+            *(int64_t *)arg = size;
             return 1;
         }
+        break;
     }
     }
     return STREAM_UNSUPPORTED;
@@ -276,10 +277,10 @@ static int open_f(stream_t *stream, int mode)
         len = -1;
 #endif
     stream->type = STREAMTYPE_FILE;
-    stream->flags = MP_STREAM_FAST_SKIPPING;
+    stream->fast_skip = true;
     if (len >= 0) {
         stream->seek = seek;
-        stream->end_pos = len;
+        stream->seekable = true;
     }
 
     MP_VERBOSE(stream, "File size is %" PRId64 " bytes\n", len);

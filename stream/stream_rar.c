@@ -133,6 +133,7 @@ static int rar_entry_open(stream_t *stream, int mode)
     stream->end_pos = file->size;
     stream->fill_buffer = rar_entry_fill_buffer;
     stream->seek = rar_entry_seek;
+    stream->seekable = true;
     stream->close = rar_entry_close;
     stream->control = rar_entry_control;
 
@@ -190,6 +191,7 @@ static int rar_filter_open(stream_t *stream, int mode)
     stream->end_pos = m->end_pos;
     stream->fill_buffer = rar_filter_fill_buffer;
     stream->seek = rar_filter_seek;
+    stream->seekable = true;
     stream->close = rar_filter_close;
     stream->safe_origin = true;
 

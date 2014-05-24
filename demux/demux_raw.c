@@ -214,8 +214,8 @@ static void raw_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     struct priv *p = demuxer->priv;
     stream_t *s = demuxer->stream;
-    stream_update_size(s);
-    int64_t end = s->end_pos;
+    int64_t end = 0;
+    stream_control(s, STREAM_CTRL_GET_SIZE, &end);
     int64_t pos = (flags & SEEK_ABSOLUTE) ? 0 : stream_tell(s);
     if (flags & SEEK_FACTOR)
         pos += end * rel_seek_secs;
@@ -235,9 +235,8 @@ static int raw_control(demuxer_t *demuxer, int cmd, void *arg)
     switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH: {
         stream_t *s = demuxer->stream;
-        stream_update_size(s);
-        int64_t end = s->end_pos;
-        if (!end)
+        int64_t end = 0;
+        if (stream_control(s, STREAM_CTRL_GET_SIZE, &end) != STREAM_OK)
             return DEMUXER_CTRL_DONTKNOW;
 
         *((double *) arg) = (end / p->frame_size) / p->frame_rate;

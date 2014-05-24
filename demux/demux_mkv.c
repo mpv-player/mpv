@@ -1058,7 +1058,9 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
                    (unsigned)seek->seek_id, pos);
         get_header_element(demuxer, seek->seek_id, pos);
         // This is nice to warn against incomplete files.
-        if (pos >= s->end_pos)
+        int64_t end = 0;
+        stream_control(s, STREAM_CTRL_GET_SIZE, &end);
+        if (pos >= end)
             MP_WARN(demuxer, "SeekHead position beyond "
                     "end of file - incomplete file?\n");
     }
@@ -1723,7 +1725,9 @@ static int read_mkv_segment_header(demuxer_t *demuxer, int64_t *segment_end)
         MP_VERBOSE(demuxer, "  (skipping)\n");
         if (*segment_end <= 0)
             break;
-        if (*segment_end >= s->end_pos)
+        int64_t end = 0;
+        stream_control(s, STREAM_CTRL_GET_SIZE, &end);
+        if (*segment_end >= end)
             return 0;
         if (!stream_seek(s, *segment_end)) {
             MP_WARN(demuxer, "Failed to seek in file\n");
@@ -1794,7 +1798,9 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         }
         MP_VERBOSE(demuxer, "Seeking to %"PRIu64" to read header element 0x%x.\n",
                    elem->pos, (unsigned)elem->id);
-        if (elem->pos >= s->end_pos) {
+        int64_t end = 0;
+        stream_control(s, STREAM_CTRL_GET_SIZE, &end);
+        if (elem->pos >= end) {
             MP_WARN(demuxer, "SeekHead position beyond "
                     "end of file - incomplete file?\n");
             continue;
@@ -2748,7 +2754,10 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
             return;
         }
 
-        target_filepos = (uint64_t) (s->end_pos * rel_seek_secs);
+        int64_t size = 0;
+        stream_control(s, STREAM_CTRL_GET_SIZE, &size);
+
+        target_filepos = (uint64_t) (size * rel_seek_secs);
         for (i = 0; i < mkv_d->num_indexes; i++)
             if (mkv_d->indexes[i].tnum == v_tnum)
                 if ((index == NULL)

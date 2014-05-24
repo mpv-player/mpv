@@ -206,12 +206,12 @@ static int mp_property_file_size(m_option_t *prop, int action, void *arg,
     if (!mpctx->stream)
         return M_PROPERTY_UNAVAILABLE;
 
-    int64_t size = mpctx->stream->end_pos;
+    int64_t size;
+    if (stream_control(mpctx->stream, STREAM_CTRL_GET_SIZE, &size) != STREAM_OK)
+        return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_GET: {
-        if (size <= 0)
-            break;
         *(int64_t *)arg = size;
         return M_PROPERTY_OK;
     }
@@ -301,10 +301,7 @@ static int mp_property_stream_pos(m_option_t *prop, int action, void *arg,
 static int mp_property_stream_end(m_option_t *prop, int action, void *arg,
                                   MPContext *mpctx)
 {
-    struct stream *stream = mpctx->stream;
-    if (!stream)
-        return M_PROPERTY_UNAVAILABLE;
-    return m_property_int64_ro(prop, action, arg, stream->end_pos);
+    return mp_property_file_size(prop, action, arg, mpctx);
 }
 
 // Does some magic to handle "<name>/full" as time formatted with milliseconds.
