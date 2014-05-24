@@ -411,8 +411,8 @@ with ``require 'mp.msg'``.
     All of these are shortcuts and equivalent to the corresponding
     ``msg.log(level, ...)`` call.
 
-mp.option
----------
+mp.options
+----------
 
 mpv comes with a built-in module to manage options from config-files and the
 command-line. All you have to do is to supply a table with default options to
