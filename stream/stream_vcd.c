@@ -78,7 +78,7 @@ static void close_s(stream_t *stream) {
   free(stream->priv);
 }
 
-static int open_s(stream_t *stream,int mode)
+static int open_s(stream_t *stream)
 {
   int ret,ret2,f,sect,tmp;
   mp_vcd_priv_t* vcd;
@@ -89,14 +89,6 @@ static int open_s(stream_t *stream,int mode)
   HANDLE hd;
   char device[20] = "\\\\.\\?:";
 #endif
-
-  if(mode != STREAM_READ
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-      || GetVersion() > 0x80000000 // Win9x
-#endif
-      ) {
-    return STREAM_UNSUPPORTED;
-  }
 
   char *dev = stream->url;
   if (strncmp("vcd://", dev, 6) != 0)

@@ -1510,14 +1510,11 @@ pvr_stream_read (stream_t *stream, char *buffer, int size)
 }
 
 static int
-pvr_stream_open (stream_t *stream, int mode)
+pvr_stream_open (stream_t *stream)
 {
   struct v4l2_capability vcap;
   struct v4l2_ext_controls ctrls;
   struct pvr_t *pvr = NULL;
-
-  if (mode != STREAM_READ)
-    return STREAM_UNSUPPORTED;
 
   pvr = pvr_init ();
   pvr->log = stream->log;

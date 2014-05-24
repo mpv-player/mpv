@@ -87,10 +87,9 @@ static void close_f(stream_t *s){
   smbc_close(p->fd);
 }
 
-static int open_f (stream_t *stream, int mode)
+static int open_f (stream_t *stream)
 {
   char *filename;
-  mode_t m = 0;
   int64_t len;
   int fd, err;
 
@@ -99,14 +98,7 @@ static int open_f (stream_t *stream, int mode)
 
   filename = stream->url;
 
-  if(mode == STREAM_READ)
-    m = O_RDONLY;
-  else if (mode == STREAM_WRITE) //who's gonna do that ?
-    m = O_RDWR|O_CREAT|O_TRUNC;
-  else {
-    MP_ERR(stream, "[smb] Unknown open mode %d\n", mode);
-    return STREAM_UNSUPPORTED;
-  }
+  mode_t m = stream->mode == STREAM_WRITE ? O_RDWR|O_CREAT|O_TRUNC : O_RDONLY;
 
   if(!filename) {
     MP_ERR(stream, "[smb] Bad url\n");
@@ -149,4 +141,5 @@ const stream_info_t stream_info_smb = {
     .name = "smb",
     .open = open_f,
     .protocols = (const char*[]){"smb", NULL},
+    .can_write = true, //who's gonna do that?
 };

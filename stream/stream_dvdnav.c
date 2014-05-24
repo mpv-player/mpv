@@ -664,7 +664,7 @@ static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
     return priv;
 }
 
-static int open_s(stream_t *stream, int mode)
+static int open_s(stream_t *stream)
 {
     struct priv *priv, *p;
     priv = p = stream->priv;

@@ -204,7 +204,7 @@ static bool check_stream_network(stream_t *stream)
 }
 #endif
 
-static int open_f(stream_t *stream, int mode)
+static int open_f(stream_t *stream)
 {
     int fd;
     struct priv *priv = talloc_ptrtype(stream, priv);
@@ -213,15 +213,8 @@ static int open_f(stream_t *stream, int mode)
     };
     stream->priv = priv;
 
-    int m = O_CLOEXEC;
-    if (mode == STREAM_READ)
-        m |= O_RDONLY;
-    else if (mode == STREAM_WRITE)
-        m |= O_RDWR | O_CREAT | O_TRUNC;
-    else {
-        MP_ERR(stream, "Unknown open mode %d\n", mode);
-        return STREAM_UNSUPPORTED;
-    }
+    bool write = stream->mode == STREAM_WRITE;
+    int m = O_CLOEXEC | (write ? O_RDWR | O_CREAT | O_TRUNC : O_RDONLY);
 
     char *filename = mp_file_url_to_filename(stream, bstr0(stream->url));
     if (filename) {
@@ -231,7 +224,7 @@ static int open_f(stream_t *stream, int mode)
     }
 
     if (!strcmp(filename, "-")) {
-        if (mode == STREAM_READ) {
+        if (!write) {
             MP_INFO(stream, "Reading from stdin...\n");
             fd = 0;
 #if HAVE_SETMODE
@@ -301,4 +294,5 @@ const stream_info_t stream_info_file = {
     .name = "file",
     .open = open_f,
     .protocols = (const char*[]){ "file", "", NULL },
+    .can_write = true,
 };

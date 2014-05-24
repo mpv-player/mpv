@@ -663,7 +663,7 @@ static int control(stream_t *stream,int cmd,void* arg)
 }
 
 
-static int open_s(stream_t *stream, int mode)
+static int open_s(stream_t *stream)
 {
   int k;
   dvd_priv_t *d = stream->priv;
@@ -932,7 +932,7 @@ fail:
   return STREAM_UNSUPPORTED;
 }
 
-static int ifo_stream_open (stream_t *stream, int mode)
+static int ifo_stream_open (stream_t *stream)
 {
     char* filename;
     dvd_priv_t *priv = talloc_ptrtype(stream, priv);
@@ -963,7 +963,7 @@ static int ifo_stream_open (stream_t *stream, int mode)
     free(filename);
     stream->url=talloc_strdup(stream, "dvd://");
 
-    return open_s(stream, mode);
+    return open_s(stream);
 }
 
 const stream_info_t stream_info_dvd = {

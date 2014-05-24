@@ -3,11 +3,8 @@
 
 #include "stream.h"
 
-static int s_open (struct stream *stream, int mode)
+static int s_open (struct stream *stream)
 {
-    if (mode != STREAM_READ)
-        return STREAM_ERROR;
-
     stream->type = STREAMTYPE_EDL;
     stream->demuxer = "edl";
 

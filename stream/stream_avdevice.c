@@ -20,11 +20,8 @@
 
 #include "stream.h"
 
-static int open_f(stream_t *stream, int mode)
+static int open_f(stream_t *stream)
 {
-    if (mode != STREAM_READ)
-        return STREAM_ERROR;
-
     stream->type = STREAMTYPE_AVDEVICE;
     stream->demuxer = "lavf";
 

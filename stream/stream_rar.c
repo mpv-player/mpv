@@ -86,7 +86,7 @@ static int rar_entry_control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int rar_entry_open(stream_t *stream, int mode)
+static int rar_entry_open(stream_t *stream)
 {
     if (!strchr(stream->path, '|'))
         return STREAM_ERROR;
@@ -158,11 +158,8 @@ static void rar_filter_close(stream_t *s)
     free_stream(m);
 }
 
-static int rar_filter_open(stream_t *stream, int mode)
+static int rar_filter_open(stream_t *stream)
 {
-    if (mode != STREAM_READ)
-        return STREAM_UNSUPPORTED;
-
     struct stream *rar = stream->source;
     if (!rar)
         return STREAM_UNSUPPORTED;

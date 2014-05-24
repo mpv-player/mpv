@@ -29,7 +29,7 @@
 #include "stream.h"
 
 static int
-mf_stream_open (stream_t *stream, int mode)
+mf_stream_open (stream_t *stream)
 {
   stream->type = STREAMTYPE_MF;
   stream->demuxer = "mf";

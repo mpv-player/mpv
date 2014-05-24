@@ -627,7 +627,7 @@ static int dvb_streaming_start(stream_t *stream, int tuner_type, char *progname)
 
 
 
-static int dvb_open(stream_t *stream, int mode)
+static int dvb_open(stream_t *stream)
 {
         // I don't force  the file format bacause, although it's almost always TS,
         // there are some providers that stream an IP multicast with M$ Mpeg4 inside
@@ -636,10 +636,6 @@ static int dvb_open(stream_t *stream, int mode)
         dvb_priv_t *p = priv;
         char *progname;
         int tuner_type = 0, i;
-
-
-        if(mode != STREAM_READ)
-                return STREAM_UNSUPPORTED;
 
         priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
         priv->config = dvb_get_config(stream);

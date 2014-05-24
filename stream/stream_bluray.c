@@ -712,7 +712,7 @@ static void select_initial_angle(stream_t *s) {
     bd_free_title_info(info);
 }
 
-static int bluray_stream_open(stream_t *s, int mode)
+static int bluray_stream_open(stream_t *s)
 {
     struct bluray_priv_s *b = s->priv;
 

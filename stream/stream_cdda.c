@@ -283,7 +283,7 @@ static int control(stream_t *stream, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int open_cdda(stream_t *st, int m)
+static int open_cdda(stream_t *st)
 {
     cdda_priv *priv = st->priv;
     cdda_priv *p = priv;
@@ -291,10 +291,6 @@ static int open_cdda(stream_t *st, int m)
     int offset = p->toc_offset;
     cdrom_drive_t *cdd = NULL;
     int last_track;
-
-    if (m != STREAM_READ) {
-        return STREAM_UNSUPPORTED;
-    }
 
     if (!p->device) {
         if (cdrom_device)

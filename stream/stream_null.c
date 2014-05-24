@@ -25,14 +25,14 @@
 
 #include "stream.h"
 
-static int open_s(stream_t *stream,int mode)
+static int open_s(stream_t *stream)
 {
   return 1;
 }
-
 
 const stream_info_t stream_info_null = {
     .name = "null",
     .open = open_s,
     .protocols = (const char*[]){ "null", NULL },
+    .can_write = true,
 };

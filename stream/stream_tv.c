@@ -86,7 +86,7 @@ tv_stream_close (stream_t *stream)
 {
 }
 static int
-tv_stream_open (stream_t *stream, int mode)
+tv_stream_open (stream_t *stream)
 {
 
   stream->type = STREAMTYPE_TV;

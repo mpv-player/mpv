@@ -289,6 +289,13 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     s->path = talloc_strdup(s, path);
     s->source = underlying;
     s->allow_caching = true;
+    s->mode = flags & (STREAM_READ | STREAM_WRITE);
+
+    if ((s->mode & STREAM_WRITE) && !sinfo->can_write) {
+        MP_ERR(s, "No write access implemented.\n");
+        talloc_free(s);
+        return STREAM_ERROR;
+    }
 
     // Parse options
     if (sinfo->priv_size) {
@@ -306,8 +313,7 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
         }
     }
 
-    s->mode = flags & (STREAM_READ | STREAM_WRITE);
-    int r = sinfo->open(s, s->mode);
+    int r = sinfo->open(s);
     if (r != STREAM_OK) {
         talloc_free(s);
         return r;

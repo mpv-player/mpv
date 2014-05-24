@@ -32,7 +32,7 @@
 #include "bstr/bstr.h"
 #include "talloc.h"
 
-static int open_f(stream_t *stream, int mode);
+static int open_f(stream_t *stream);
 static char **read_icy(stream_t *stream);
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
@@ -113,7 +113,7 @@ static int control(stream_t *s, int cmd, void *arg)
         // avio doesn't seem to support this - emulate it by reopening
         close_f(s);
         s->priv = NULL;
-        return open_f(s, STREAM_READ);
+        return open_f(s);
     }
     }
     return STREAM_UNSUPPORTED;
@@ -127,10 +127,9 @@ static int interrupt_cb(void *ctx)
 
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
-static int open_f(stream_t *stream, int mode)
+static int open_f(stream_t *stream)
 {
     struct MPOpts *opts = stream->opts;
-    int flags = 0;
     AVIOContext *avio = NULL;
     int res = STREAM_ERROR;
     AVDictionary *dict = NULL;
@@ -139,15 +138,7 @@ static int open_f(stream_t *stream, int mode)
     stream->seek = NULL;
     stream->seekable = false;
 
-    if (mode == STREAM_READ)
-        flags = AVIO_FLAG_READ;
-    else if (mode == STREAM_WRITE)
-        flags = AVIO_FLAG_WRITE;
-    else {
-        MP_ERR(stream, "Unknown open mode %d\n", mode);
-        res = STREAM_UNSUPPORTED;
-        goto out;
-    }
+    int flags = stream->mode == STREAM_WRITE ? AVIO_FLAG_WRITE : AVIO_FLAG_READ;
 
     const char *filename = stream->url;
     if (!filename) {
@@ -330,4 +321,5 @@ const stream_info_t stream_info_ffmpeg = {
      "rtmpt", "rtmpte", "rtmpts", "srtp", "tcp", "udp", "tls", "unix", "sftp",
      "md5",
      NULL },
+  .can_write = true,
 };
