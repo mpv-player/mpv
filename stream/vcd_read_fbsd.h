@@ -61,6 +61,7 @@ typedef struct ioc_read_toc_single_entry vcd_tocentry;
 #endif
 
 typedef struct mp_vcd_priv_st {
+  int start;
   int fd;
   vcd_tocentry entry;
 #ifdef VCD_NETBSD

@@ -918,7 +918,6 @@ static int open_s(stream_t *stream, int mode)
     stream->fill_buffer = fill_buffer;
     stream->control = control;
     stream->close = stream_dvd_close;
-    stream->start_pos = (int64_t)d->cur_pack*2048;
     stream->end_pos = (int64_t)(d->cur_pgc->cell_playback[d->last_cell-1].last_sector)*2048;
     MP_VERBOSE(stream, "DVD start=%d end=%d  \n",d->cur_pack,d->cur_pgc->cell_playback[d->last_cell-1].last_sector);
     stream->priv = (void*)d;

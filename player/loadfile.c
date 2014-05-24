@@ -1110,8 +1110,6 @@ static void play_current_file(struct MPContext *mpctx)
     }
     mpctx->initialized_flags |= INITIALIZED_STREAM;
 
-    mpctx->stream->start_pos += opts->seek_to_byte;
-
     if (opts->stream_dump && opts->stream_dump[0]) {
         stream_dump(mpctx);
         goto terminate_playback;
@@ -1267,10 +1265,8 @@ goto_reopen_demuxer: ;
             else
                 dir = DVB_CHANNEL_LOWER;
 
-            if (dvb_step_channel(mpctx->stream, dir)) {
+            if (dvb_step_channel(mpctx->stream, dir))
                 mpctx->stop_play = PT_RELOAD_DEMUXER;
-                mpctx->stream->start_pos = stream_tell(mpctx->stream);
-            }
         }
 #endif
         goto terminate_playback;

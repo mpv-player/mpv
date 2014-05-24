@@ -281,8 +281,6 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("frames", play_frames, M_OPT_FIXED, 0, INT_MAX,
                       ({"all", -1})),
 
-    // seek to byte/seconds position
-    OPT_INT64("sb", seek_to_byte, 0),
     OPT_REL_TIME("start", play_start, 0),
     OPT_REL_TIME("end", play_end, 0),
     OPT_REL_TIME("length", play_length, 0),

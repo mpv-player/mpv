@@ -200,7 +200,7 @@ static int raw_fill_buffer(demuxer_t *demuxer)
         return 0;
 
     struct demux_packet *dp = new_demux_packet(p->frame_size * p->read_frames);
-    dp->pos = stream_tell(demuxer->stream) - demuxer->stream->start_pos;
+    dp->pos = stream_tell(demuxer->stream);
     dp->pts = (dp->pos  / p->frame_size) / p->frame_rate;
 
     int len = stream_read(demuxer->stream, dp->buffer, dp->len);
@@ -215,11 +215,10 @@ static void raw_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
     struct priv *p = demuxer->priv;
     stream_t *s = demuxer->stream;
     stream_update_size(s);
-    int64_t start = s->start_pos;
     int64_t end = s->end_pos;
-    int64_t pos = (flags & SEEK_ABSOLUTE) ? start : stream_tell(s);
+    int64_t pos = (flags & SEEK_ABSOLUTE) ? 0 : stream_tell(s);
     if (flags & SEEK_FACTOR)
-        pos += (end - start) * rel_seek_secs;
+        pos += end * rel_seek_secs;
     else
         pos += rel_seek_secs * p->frame_rate * p->frame_size;
     if (pos < 0)
@@ -237,12 +236,11 @@ static int raw_control(demuxer_t *demuxer, int cmd, void *arg)
     case DEMUXER_CTRL_GET_TIME_LENGTH: {
         stream_t *s = demuxer->stream;
         stream_update_size(s);
-        int64_t start = s->start_pos;
         int64_t end = s->end_pos;
         if (!end)
             return DEMUXER_CTRL_DONTKNOW;
 
-        *((double *) arg) = ((end - start) / p->frame_size) / p->frame_rate;
+        *((double *) arg) = (end / p->frame_size) / p->frame_rate;
         return DEMUXER_CTRL_OK;
     }
     default:

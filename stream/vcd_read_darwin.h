@@ -50,6 +50,7 @@ typedef struct
 
 typedef struct mp_vcd_priv_st
 {
+        int start;
         stream_t *stream;
         int fd;
         cdsector_t buf;

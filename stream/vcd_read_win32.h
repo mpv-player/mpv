@@ -34,6 +34,7 @@ typedef struct mp_vcd_priv_st mp_vcd_priv_t;
    we cache the information in mp_vcd_priv_st.
 */
 struct mp_vcd_priv_st {
+    int start;
     HANDLE hd;
     CDROM_TOC toc;
     unsigned sect;

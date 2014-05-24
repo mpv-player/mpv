@@ -140,10 +140,10 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     else if (whence == SEEK_END && stream->end_pos > 0)
         pos += stream->end_pos;
     else if (whence == SEEK_SET)
-        pos += stream->start_pos;
+        /* ok */;
     else if (whence == AVSEEK_SIZE && stream->end_pos > 0) {
         stream_update_size(stream);
-        return stream->end_pos - stream->start_pos;
+        return stream->end_pos;
     } else
         return -1;
 
@@ -155,7 +155,7 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
         return -1;
     }
 
-    return pos - stream->start_pos;
+    return pos;
 }
 
 static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
@@ -828,7 +828,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags)
             !(priv->avif->flags & AVFMT_NO_BYTE_SEEK))
         {
             avsflags |= AVSEEK_FLAG_BYTE;
-            priv->last_pts = (s->end_pos - s->start_pos) * rel_seek_secs;
+            priv->last_pts = s->end_pos * rel_seek_secs;
         } else if (priv->avfc->duration != 0 &&
                    priv->avfc->duration != AV_NOPTS_VALUE)
         {

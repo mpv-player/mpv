@@ -1832,10 +1832,6 @@ OPTIONS
     This behavior is disabled by default, but is always available when quitting
     the player with Shift+Q.
 
-``--sb=<n>``
-    Seek to byte position. Useful for playback from CD-ROM images or VOB files
-    with junk at the beginning. See also ``--start``.
-
 ``--screen=<default|0-32>``
     In multi-monitor configurations (i.e. a single desktop that spans across
     multiple displays), this option tells mpv which screen to display the

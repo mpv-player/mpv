@@ -206,7 +206,7 @@ static int mp_property_file_size(m_option_t *prop, int action, void *arg,
     if (!mpctx->stream)
         return M_PROPERTY_UNAVAILABLE;
 
-    int64_t size = mpctx->stream->end_pos - mpctx->stream->start_pos;
+    int64_t size = mpctx->stream->end_pos;
 
     switch (action) {
     case M_PROPERTY_GET: {
@@ -295,16 +295,6 @@ static int mp_property_stream_pos(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-/// Stream start offset (RO)
-static int mp_property_stream_start(m_option_t *prop, int action,
-                                    void *arg, MPContext *mpctx)
-{
-    struct stream *stream = mpctx->stream;
-    if (!stream)
-        return M_PROPERTY_UNAVAILABLE;
-    return m_property_int64_ro(prop, action, arg, stream->start_pos);
 }
 
 /// Stream end offset (RO)
@@ -2344,8 +2334,6 @@ static const m_option_t mp_properties[] = {
     { "demuxer", mp_property_demuxer, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "stream-pos", mp_property_stream_pos, CONF_TYPE_INT64,
-      M_OPT_MIN, 0, 0, NULL },
-    { "stream-start", mp_property_stream_start, CONF_TYPE_INT64,
       M_OPT_MIN, 0, 0, NULL },
     { "stream-end", mp_property_stream_end, CONF_TYPE_INT64,
       M_OPT_MIN, 0, 0, NULL },

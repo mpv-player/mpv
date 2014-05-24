@@ -42,6 +42,7 @@ static int sun_vcd_read(mp_vcd_priv_t*, int*);
 #endif
 
 struct mp_vcd_priv_st {
+  int start;
   stream_t *stream;
   int fd;
   struct cdrom_tocentry entry;

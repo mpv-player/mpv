@@ -583,7 +583,7 @@ Property list
 
 ``file-size``
     Length in bytes of the source file/stream. (This is the same as
-    ``${stream-end} - ${stream-start}``. For ordered chapters and such, the
+    ``${stream-end}``. For ordered chapters and such, the
     size of the currently played segment is returned.)
 
 ``path``
@@ -609,9 +609,6 @@ Property list
 
 ``stream-pos`` (RW)
     Raw byte position in source stream.
-
-``stream-start``
-    Raw start byte offset in source stream (rarely different from 0).
 
 ``stream-end``
     Raw end position in bytes in source stream.

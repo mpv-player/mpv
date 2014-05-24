@@ -59,7 +59,7 @@
 #include "osdep/io.h"
 
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
-  if(s->pos > s->end_pos) /// don't past end of current track
+  if(s->pos > s->end_pos) /// don't read past end of current track
     return 0;
   if (max_len < VCD_SECTOR_DATA)
     return -1;
@@ -67,7 +67,9 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
 }
 
 static int seek(stream_t *s,int64_t newpos) {
-  vcd_set_msf(s->priv,newpos/VCD_SECTOR_DATA);
+  mp_vcd_priv_t *vcd = s->priv;
+  newpos += vcd->start;
+  vcd_set_msf(vcd,newpos/VCD_SECTOR_DATA);
   return 1;
 }
 
@@ -162,14 +164,16 @@ static int open_s(stream_t *stream,int mode)
 #endif
 
   stream->sector_size = VCD_SECTOR_DATA;
-  stream->start_pos=ret;
-  stream->end_pos=ret2;
+  stream->end_pos=ret2-ret;
   stream->priv = vcd;
 
   stream->fill_buffer = fill_buffer;
   stream->seek = seek;
   stream->close = close_s;
   stream->demuxer = "lavf"; // mpegps ( or "vcd"?)
+
+  vcd->start = ret;
+  seek(stream, 0);
 
   return STREAM_OK;
 }

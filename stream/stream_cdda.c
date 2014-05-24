@@ -202,6 +202,8 @@ static int seek(stream_t *s, int64_t newpos)
     int seek_to_track = 0;
     int i;
 
+    newpos += priv->start_sector * CDIO_CD_FRAMESIZE_RAW;
+
     sec = newpos / CDIO_CD_FRAMESIZE_RAW;
     if (newpos < 0 || sec > p->end_sector) {
         p->sector = p->end_sector + 1;
@@ -388,8 +390,8 @@ static int open_cdda(stream_t *st, int m)
     priv->sector = priv->start_sector;
 
     st->priv = priv;
-    st->start_pos = priv->start_sector * CDIO_CD_FRAMESIZE_RAW;
-    st->end_pos = (priv->end_sector + 1) * CDIO_CD_FRAMESIZE_RAW;
+    st->end_pos =
+        (priv->end_sector + 1 - priv->start_sector) * CDIO_CD_FRAMESIZE_RAW;
     st->sector_size = CDIO_CD_FRAMESIZE_RAW;
 
     st->fill_buffer = fill_buffer;

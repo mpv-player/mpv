@@ -147,7 +147,7 @@ typedef struct stream {
     int sector_size; // sector size (seek will be aligned on this size if non 0)
     int read_chunk; // maximum amount of data to read at once to limit latency
     unsigned int buf_pos, buf_len;
-    int64_t pos, start_pos, end_pos;
+    int64_t pos, end_pos;
     int eof;
     int mode; //STREAM_READ or STREAM_WRITE
     bool streaming;     // known to be a network stream if true

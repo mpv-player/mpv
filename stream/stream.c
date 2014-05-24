@@ -815,7 +815,6 @@ int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
     cache->safe_origin = orig->safe_origin;
     cache->opts = orig->opts;
     cache->global = orig->global;
-    cache->start_pos = orig->start_pos;
     cache->end_pos = orig->end_pos;
 
     cache->log = mp_log_new(cache, cache->global->log, "cache");

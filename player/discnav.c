@@ -123,8 +123,6 @@ void mp_nav_reset(struct MPContext *mpctx)
     nav->nav_draining = false;
     nav->nav_still_frame = 0;
     mp_input_disable_section(mpctx->input, "discnav-menu");
-    // Prevent demuxer init code to seek to the "start"
-    mpctx->stream->start_pos = stream_tell(mpctx->stream);
     stream_control(mpctx->stream, STREAM_CTRL_RESUME_CACHE, NULL);
     update_state(mpctx);
 }
