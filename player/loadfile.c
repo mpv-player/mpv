@@ -1076,9 +1076,6 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
                           mpctx->playlist->current->num_params);
 
-    if (opts->use_terminal && !opts->consolecontrols)
-        getch2_disable();
-
 #if HAVE_LIBASS
     if (opts->ass_style_override)
         ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
@@ -1349,7 +1346,7 @@ goto_reopen_demuxer: ;
         goto goto_reopen_demuxer;
     }
 
-terminate_playback:  // don't jump here after ao/vo/getch initialization!
+terminate_playback:
 
     mp_nav_destroy(mpctx);
 
@@ -1379,9 +1376,6 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     // xxx handle this as INITIALIZED_CONFIG?
     if (mpctx->stop_play != PT_RESTART)
         m_config_restore_backups(mpctx->mconfig);
-
-    if (opts->use_terminal && opts->consolecontrols)
-        getch2_enable();
 
     mpctx->filename = NULL;
     mpctx->resolve_result = NULL;
