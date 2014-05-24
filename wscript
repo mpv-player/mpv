@@ -198,10 +198,6 @@ iconv support use --disable-iconv.",
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_true
     }, {
-        'name': 'setmode',
-        'desc': 'setmode()',
-        'func': check_statement('io.h', 'setmode(0, 0)')
-    }, {
         'name': 'bsd-fstatfs',
         'desc': "BSD's fstatfs()",
         'func': check_statement(['sys/param.h', 'sys/mount.h'],

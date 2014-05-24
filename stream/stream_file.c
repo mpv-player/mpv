@@ -91,9 +91,7 @@ static int control(stream_t *s, int cmd, void *arg)
     struct priv *p = s->priv;
     switch (cmd) {
     case STREAM_CTRL_GET_SIZE: {
-        off_t size;
-
-        size = lseek(p->fd, 0, SEEK_END);
+        off_t size = lseek(p->fd, 0, SEEK_END);
         lseek(p->fd, s->pos, SEEK_SET);
         if (size != (off_t)-1) {
             *(int64_t *)arg = size;
@@ -227,16 +225,13 @@ static int open_f(stream_t *stream)
         if (!write) {
             MP_INFO(stream, "Reading from stdin...\n");
             fd = 0;
-#if HAVE_SETMODE
-            setmode(fileno(stdin), O_BINARY);
-#endif
         } else {
-            MP_INFO(stream, "Writing to stdout\n");
+            MP_INFO(stream, "Writing to stdout...\n");
             fd = 1;
-#if HAVE_SETMODE
-            setmode(fileno(stdout), O_BINARY);
-#endif
         }
+#ifdef __MINGW32__
+        setmode(fd, O_BINARY);
+#endif
         priv->fd = fd;
         priv->close = false;
     } else {
@@ -250,34 +245,25 @@ static int open_f(stream_t *stream)
                     filename, strerror(errno));
             return STREAM_ERROR;
         }
-#ifndef __MINGW32__
         struct stat st;
         if (fstat(fd, &st) == 0 && S_ISDIR(st.st_mode)) {
             MP_ERR(stream, "File is a directory: '%s'\n", filename);
             close(fd);
             return STREAM_ERROR;
         }
-#endif
         priv->fd = fd;
         priv->close = true;
     }
 
-    int64_t len = lseek(fd, 0, SEEK_END);
+    off_t len = lseek(fd, 0, SEEK_END);
     lseek(fd, 0, SEEK_SET);
-#ifdef __MINGW32__
-    // seeks on stdin incorrectly succeed on MinGW
-    if (fd == 0)
-        len = -1;
-#endif
-    stream->type = STREAMTYPE_FILE;
-    stream->fast_skip = true;
-    if (len >= 0) {
+    if (len != (off_t)-1) {
         stream->seek = seek;
         stream->seekable = true;
     }
 
-    MP_VERBOSE(stream, "File size is %" PRId64 " bytes\n", len);
-
+    stream->type = STREAMTYPE_FILE;
+    stream->fast_skip = true;
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
     stream->control = control;

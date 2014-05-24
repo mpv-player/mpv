@@ -947,7 +947,6 @@ cat > $TMPC << EOF
 #define HAVE_DOS_PATHS 0
 #define HAVE_PRIORITY 0
 #define HAVE_GLOB 1
-#define HAVE_SETMODE 0
 #define HAVE_POSIX_SELECT 1
 #define HAVE_SYS_MMAN_H 1
 #define HAVE_NANOSLEEP 1
