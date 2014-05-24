@@ -144,14 +144,14 @@ static int open_f(stream_t *stream, int mode)
     else if (mode == STREAM_WRITE)
         flags = AVIO_FLAG_WRITE;
     else {
-        MP_ERR(stream, "[ffmpeg] Unknown open mode %d\n", mode);
+        MP_ERR(stream, "Unknown open mode %d\n", mode);
         res = STREAM_UNSUPPORTED;
         goto out;
     }
 
     const char *filename = stream->url;
     if (!filename) {
-        MP_ERR(stream, "[ffmpeg] No URL\n");
+        MP_ERR(stream, "No URL\n");
         goto out;
     }
     for (int i = 0; i < sizeof(prefix) / sizeof(prefix[0]); i++)
@@ -169,7 +169,7 @@ static int open_f(stream_t *stream, int mode)
         talloc_free(temp);
         return STREAM_OK;
     }
-    MP_VERBOSE(stream, "[ffmpeg] Opening %s\n", filename);
+    MP_VERBOSE(stream, "Opening %s\n", filename);
 
     // Replace "mms://" with "mmsh://", so that most mms:// URLs just work.
     bstr b_filename = bstr0(filename);
@@ -216,15 +216,15 @@ static int open_f(stream_t *stream, int mode)
     int err = avio_open2(&avio, filename, flags, &cb, &dict);
     if (err < 0) {
         if (err == AVERROR_PROTOCOL_NOT_FOUND)
-            MP_ERR(stream, "[ffmpeg] Protocol not found. Make sure"
+            MP_ERR(stream, "Protocol not found. Make sure"
                    " ffmpeg/Libav is compiled with networking support.\n");
         goto out;
     }
 
     AVDictionaryEntry *t = NULL;
     while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        MP_VERBOSE(stream, "[ffmpeg] Could not set stream option %s=%s\n",
-               t->key, t->value);
+        MP_VERBOSE(stream, "Could not set stream option %s=%s\n",
+                   t->key, t->value);
     }
 
     if (avio->av_class) {
