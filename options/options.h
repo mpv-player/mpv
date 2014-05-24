@@ -94,6 +94,8 @@ typedef struct MPOpts {
     int requested_input_range;
     int requested_output_range;
 
+    int video_rotate;
+
     char *audio_decoders;
     char *video_decoders;
 

@@ -498,6 +498,8 @@ const m_option_t mp_opts[] = {
                ({"auto", MP_CSP_LEVELS_AUTO},
                 {"limited", MP_CSP_LEVELS_TV},
                 {"full", MP_CSP_LEVELS_PC})),
+    OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 359,
+                      ({"no", -1})),
 
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),

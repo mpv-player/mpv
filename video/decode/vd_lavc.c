@@ -420,6 +420,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
                                 struct mp_image_params *out_params)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
+    struct MPOpts *opts = ctx->opts;
     int width = frame->width;
     int height = frame->height;
     float aspect = av_q2d(frame->sample_aspect_ratio) * width / height;
@@ -448,6 +449,12 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
             avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
         .rotate = vd->header->video->rotate,
     };
+
+    if (opts->video_rotate < 0) {
+        out_params->rotate = 0;
+    } else {
+        out_params->rotate = (out_params->rotate + opts->video_rotate) % 360;
+    }
 }
 
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,

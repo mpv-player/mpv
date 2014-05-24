@@ -2698,6 +2698,13 @@ OPTIONS
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
+``--video-rotate=<0-359|no>``
+    Rotate the video clockwise, in degrees. Currently supports 90° steps only.
+    If ``no`` is given, the video is never rotated, even if the file has
+    rotation metadata. (The rotation value is added to the rotation metadata,
+    which means the value ``0`` would rotate the video according to the
+    rotation metadata.)
+
 ``--video-unscaled``
     Disable scaling of the video. If the window is larger than the video,
     black bars are added. Otherwise, the video is cropped. The video still
