@@ -91,16 +91,6 @@ static void get_realtime(struct timespec *out_ts)
 #endif
 }
 
-// Calculate the maximum of type T, assuming it's a signed integer type and
-// represented in 2's complement.
-// Works like: (1 << 14) + ((1 << 14) - 1) == (1 << 15) - 1 (but no overflow)
-#define SIGNED_MAX(T) ((((T)1) << (sizeof(T) * 8 - 2)) + \
-                       ((((T)1) << (sizeof(T) * 8 - 2)) - 1))
-
-// If you don't like this, go fix POSIX. tv_sec is time_t, but time_t is
-// an unknown integer type, and the limits are unknown to the application.
-#define MAX_TIME_T SIGNED_MAX(time_t)
-
 struct timespec mp_time_us_to_timespec(int64_t time_us)
 {
     struct timespec ts;
@@ -119,9 +109,8 @@ struct timespec mp_time_us_to_timespec(int64_t time_us)
         diff_secs += 1;
         diff_nsecs -= 1000000000UL;
     }
+    // OSX can't deal with large timeouts. Also handles tv_sec/time_t overflows.
     diff_secs = MPMIN(diff_secs, 10000000);
-    if (diff_secs > MAX_TIME_T - ts.tv_sec)
-        diff_secs = MAX_TIME_T - ts.tv_sec;
     ts.tv_sec += diff_secs;
     ts.tv_nsec += diff_nsecs;
     return ts;
