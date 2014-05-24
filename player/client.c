@@ -1194,9 +1194,10 @@ static bool gen_property_change_event(struct mpv_handle *ctx)
         if ((prop->changed || prop->updating) && n < ctx->lowest_changed)
             ctx->lowest_changed = n;
         if (prop->changed) {
+            bool get_value = prop->need_new_value;
+            prop->need_new_value = false;
             prop->changed = false;
-            if (prop->format && prop->need_new_value) {
-                prop->need_new_value = false;
+            if (prop->format && get_value) {
                 ctx->properties_updating++;
                 prop->updating = true;
                 mp_dispatch_enqueue(ctx->mpctx->dispatch, update_prop, prop);
