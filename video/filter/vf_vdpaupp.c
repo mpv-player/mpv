@@ -64,7 +64,7 @@ static void forget_frames(struct vf_instance *vf)
 
 #define FIELD_VALID(p, f) ((f) >= 0 && (f) < (p)->num_buffered * 2)
 
-static VdpVideoSurface ref_frame(struct vf_priv_s *p,
+static VdpVideoSurface ref_field(struct vf_priv_s *p,
                                  struct mp_vdpau_mixer_frame *frame, int pos)
 {
     if (!FIELD_VALID(p, pos))
@@ -96,10 +96,10 @@ static bool output_field(struct vf_instance *vf, int pos)
             VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD;
     }
 
-    frame->future[0] = ref_frame(p, frame, pos - 1);
-    frame->current = ref_frame(p, frame, pos);
-    frame->past[0] = ref_frame(p, frame, pos + 1);
-    frame->past[1] = ref_frame(p, frame, pos + 2);
+    frame->future[0] = ref_field(p, frame, pos - 1);
+    frame->current = ref_field(p, frame, pos);
+    frame->past[0] = ref_field(p, frame, pos + 1);
+    frame->past[1] = ref_field(p, frame, pos + 2);
 
     frame->opts = p->opts;
 
