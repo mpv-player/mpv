@@ -52,7 +52,7 @@ function find_and_add_entries()
                 end
             end
             if dir == -1 then
-                if current == 1 then -- never add additional entries in the middle
+                if pl_current == 1 then -- never add additional entries in the middle
                     mp.msg.info("Prepending " .. file)
                     table.insert(append[-1], 1, file)
                 end
