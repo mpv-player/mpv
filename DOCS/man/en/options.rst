@@ -1828,10 +1828,15 @@ OPTIONS
     way than quitting. For example, going to the next file in the playlist
     will not save the position, and start playback at beginning the next time
     the file is played.
+    
+    See ``--save-position-always`` if you always want to save playback position.
 
     This behavior is disabled by default, but is always available when quitting
     the player with Shift+Q.
-
+    
+``--save-position-always``
+    Always save the current playback position.
+    
 ``--screen=<default|0-32>``
     In multi-monitor configurations (i.e. a single desktop that spans across
     multiple displays), this option tells mpv which screen to display the
