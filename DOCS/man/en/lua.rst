@@ -411,15 +411,15 @@ with ``require 'mp.msg'``.
     All of these are shortcuts and equivalent to the corresponding
     ``msg.log(level, ...)`` call.
 
-mp.options
-----------
+mp.options functions
+--------------------
 
 mpv comes with a built-in module to manage options from config-files and the
 command-line. All you have to do is to supply a table with default options to
 the read_options function. The function will overwrite the default values
 with values found in the config-file and the command-line (in that order).
 
-``read_options(table, identifier)``
+``options.read_options(table [, identifier])``
     A ``table`` with key-value pairs. The type of the default values is
     important for converting the values read from the config file or
     command-line back. Do not use ``nil`` as a default value!
@@ -431,7 +431,7 @@ with values found in the config-file and the command-line (in that order).
 
 Example implementation::
 
-    local opt = require 'mp.options'
+    require 'mp.options'
     local options = {
         optionA = "defaultvalueA",
         optionB = -0.5,
