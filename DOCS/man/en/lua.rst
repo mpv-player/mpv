@@ -461,6 +461,48 @@ Example command-line::
      --lua-opts=myscript-optionA=TEST:myscript-optionB=0:myscript-optionC=yes
 
 
+mp.utils options
+----------------
+
+This built-in module provides generic helper functions for Lua, and have
+strictly speaking nothing to do with mpv or video/audio playback. They are
+provided for convenience. Most compensate for Lua's scarce standard library.
+
+``utils.readdir(path [, filter])``
+    Enumerate all entries at the given path on the filesystem, and return them
+    as array. Each entry is a directory entry (without the path).
+    The list is unsorted (in whatever order the operating system returns it).
+
+    If the ``filter`` argument is given, it must be one of the following
+    strings:
+
+        ``files``
+            List regular files only. This excludes directories, special files
+            (like UNIX device files or FIFOs), and dead symlinks. It includes
+            UNIX symlinks to regular files.
+
+        ``dirs``
+            List directories only, or symlinks to directories. ``.`` and ``..``
+            are not included.
+
+        ``normal``
+            Include the results of both ``files`` and ``dirs``. (This is the
+            default.)
+
+        ``all``
+            List all entries, even device files, dead symlinks, FIFOs, and the
+            ``.`` and ``..`` entries.
+
+    On error, ``nil, error`` is returned.
+
+``utils.split_path(path)``
+    Split a path into directory component and filename component, and return
+    them. The first return value is always the directory. The second return
+    value is the trailing part of the path, the directory entry.
+
+``utils.join_path(p1, p2)``
+    Return the concatenation of the 2 paths. Tries to be clever. For example,
+    if ```p2`` is an absolute path, p2 is returned without change.
 
 Events
 ------
