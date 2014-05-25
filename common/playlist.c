@@ -114,10 +114,13 @@ void playlist_clear(struct playlist *pl)
     pl->current_was_replaced = false;
 }
 
-// Moves entry such that entry->prev = at (even if at is NULL)
+// Moves the entry so that it takes "at"'s place (or move to end, if at==NULL).
 void playlist_move(struct playlist *pl, struct playlist_entry *entry,
                    struct playlist_entry *at)
 {
+    if (entry == at)
+        return;
+
     struct playlist_entry *save_current = pl->current;
     bool save_replaced = pl->current_was_replaced;
 
