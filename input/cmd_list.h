@@ -106,6 +106,8 @@ enum mp_command_type {
     MP_CMD_OVERLAY_ADD,
     MP_CMD_OVERLAY_REMOVE,
 
+    MP_CMD_WRITE_WATCH_LATER_CONFIG,
+
     // Internal
     MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
 };

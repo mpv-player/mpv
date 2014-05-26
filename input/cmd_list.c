@@ -177,6 +177,8 @@ const struct mp_cmd_def mp_cmds[] = {
         ARG_INT, ARG_INT }},
   { MP_CMD_OVERLAY_REMOVE, "overlay_remove", { ARG_INT } },
 
+  { MP_CMD_WRITE_WATCH_LATER_CONFIG, "write_watch_later_config", },
+
   {0}
 };
 
