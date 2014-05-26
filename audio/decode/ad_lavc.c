@@ -229,7 +229,7 @@ static int init(struct dec_audio *da, const char *decoder)
 
     lavc_context->codec_tag = sh->format;
     lavc_context->sample_rate = sh_audio->samplerate;
-    lavc_context->bit_rate = sh_audio->i_bps * 8;
+    lavc_context->bit_rate = sh_audio->i_bps;
     lavc_context->channel_layout = mp_chmap_to_lavc(&sh_audio->channels);
 
     if (sh_audio->wf)
@@ -270,9 +270,9 @@ static int init(struct dec_audio *da, const char *decoder)
         }
     }
 
-    da->i_bps = lavc_context->bit_rate / 8;
+    da->i_bps = lavc_context->bit_rate;
     if (sh_audio->wf && sh_audio->wf->nAvgBytesPerSec)
-        da->i_bps = sh_audio->wf->nAvgBytesPerSec;
+        da->i_bps = sh_audio->wf->nAvgBytesPerSec * 8;
 
     return 1;
 }
