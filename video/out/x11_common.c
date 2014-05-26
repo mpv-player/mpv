@@ -668,7 +668,7 @@ static void vo_x11_classhint(struct vo *vo, Window window, const char *name)
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     XClassHint wmClass;
-    pid_t pid = getpid();
+    long pid = getpid();
 
     wmClass.res_name = opts->winname ? opts->winname : (char *)name;
     wmClass.res_class = "mpv";
