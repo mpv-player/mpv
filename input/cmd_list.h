@@ -110,6 +110,8 @@ enum mp_command_type {
 
     // Internal
     MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
+    
+    MP_CMD_WRITE_WATCH_LATER_CONFIG,
 };
 
 // Executing this command will abort playback (play something else, or quit).
