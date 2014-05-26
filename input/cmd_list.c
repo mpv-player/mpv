@@ -57,8 +57,6 @@
 const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_IGNORE, "ignore", },
     
-  { MP_CMD_WRITE_WATCH_LATER_CONF, "write_watch_later_conf", },
-
   { MP_CMD_SEEK, "seek", {
       ARG_TIME,
       OARG_CHOICE(0, ({"relative", 0},          {"0", 0}, {"-", 0},
@@ -178,6 +176,8 @@ const struct mp_cmd_def mp_cmds[] = {
       { ARG_INT, ARG_INT, ARG_INT, ARG_STRING, ARG_INT, ARG_STRING, ARG_INT,
         ARG_INT, ARG_INT }},
   { MP_CMD_OVERLAY_REMOVE, "overlay_remove", { ARG_INT } },
+
+  { MP_CMD_WRITE_WATCH_LATER_CONFIG, "write_watch_later_config", },
 
   {0}
 };
