@@ -128,6 +128,13 @@ Application *mpv_shared_app(void)
     return [menu autorelease];
 }
 
+- (NSMenu *)fileMenu
+{
+    NSMenu *menu = [[NSMenu alloc] initWithTitle:@"File"];
+    _R(menu, @"Open",   @"3", MPM_H_SIZE)
+    return [menu autorelease];
+}
+
 - (NSMenu *)movieMenu
 {
     NSMenu *menu = [[NSMenu alloc] initWithTitle:@"Movie"];
@@ -151,6 +158,7 @@ Application *mpv_shared_app(void)
     [NSApp setMainMenu:main_menu];
     [NSApp setAppleMenu:[self appleMenuWithMainMenu:main_menu]];
 
+    [NSApp mainMenuItemWithParent:main_menu child:[self fileMenu]];
     [NSApp mainMenuItemWithParent:main_menu child:[self movieMenu]];
     [NSApp mainMenuItemWithParent:main_menu child:[self windowMenu]];
 }
