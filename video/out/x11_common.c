@@ -1412,7 +1412,8 @@ static void vo_x11_fullscreen(struct vo *vo)
 
     if (x11->wm_type & vo_wm_FULLSCREEN) {
         x11_set_ewmh_state(x11, "_NET_WM_STATE_FULLSCREEN", x11->fs);
-        if (x11->fs && (x11->pos_changed_during_fs || x11->size_changed_during_fs))
+        if (!x11->fs && (x11->pos_changed_during_fs ||
+                         x11->size_changed_during_fs))
         {
             vo_x11_move_resize(vo, x11->pos_changed_during_fs,
                                    x11->size_changed_during_fs,
