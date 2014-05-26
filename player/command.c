@@ -3705,6 +3705,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_WRITE_WATCH_LATER_CONF
     {
         mp_write_watch_later_conf(mpctx);
+        break;
     }
             
             
