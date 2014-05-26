@@ -39,7 +39,6 @@ extern const struct mp_cmd_def mp_cmds[];
 // All command IDs
 enum mp_command_type {
     MP_CMD_IGNORE,
-    MP_CMD_WRITE_WATCH_LATER_CONF,
     MP_CMD_SEEK,
     MP_CMD_REVERT_SEEK,
     MP_CMD_QUIT,
@@ -109,6 +108,8 @@ enum mp_command_type {
 
     // Internal
     MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
+    
+    MP_CMD_WRITE_WATCH_LATER_CONFIG,
 };
 
 // Executing this command will abort playback (play something else, or quit).
