@@ -44,10 +44,8 @@ static bool create_context_w32_old(struct MPGLContext *ctx)
     struct w32_context *w32_ctx = ctx->priv;
     HGLRC *context = &w32_ctx->context;
 
-    if (*context) {
-        gl->Finish();   // supposedly to prevent flickering
+    if (*context)
         return true;
-    }
 
     HWND win = ctx->vo->w32->window;
     HDC windc = GetDC(win);
