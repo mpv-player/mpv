@@ -134,6 +134,8 @@ Sending patches
   Important: put an empty line between the subject line and the commit message.
   If this is missing, it will break display in common git tools.
 - Try to separate cosmetic and functional changes. It's ok to make a few
-  additional cosmetic changes in the same file you're working on, but don't do
-  something like reformatting a whole file and hiding an actual functional
+  additional cosmetic changes in the same file you're working on. But don't do
+  something like reformatting a whole file, and hiding an actual functional
   change in the same commit.
+- If you add a new command line option, document it in options.rst. If you
+  add a new input property, document it in input.rst.

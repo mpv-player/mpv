@@ -153,7 +153,6 @@ typedef struct MPOpts {
     double step_sec;
     int position_resume;
     int position_save_on_quit;
-    int position_save_always;
     int pause;
     int keep_open;
     int audio_id;

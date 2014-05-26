@@ -411,15 +411,15 @@ with ``require 'mp.msg'``.
     All of these are shortcuts and equivalent to the corresponding
     ``msg.log(level, ...)`` call.
 
-mp.option
----------
+mp.options functions
+--------------------
 
 mpv comes with a built-in module to manage options from config-files and the
 command-line. All you have to do is to supply a table with default options to
 the read_options function. The function will overwrite the default values
 with values found in the config-file and the command-line (in that order).
 
-``read_options(table, identifier)``
+``options.read_options(table [, identifier])``
     A ``table`` with key-value pairs. The type of the default values is
     important for converting the values read from the config file or
     command-line back. Do not use ``nil`` as a default value!
@@ -431,7 +431,7 @@ with values found in the config-file and the command-line (in that order).
 
 Example implementation::
 
-    local opt = require 'mp.options'
+    require 'mp.options'
     local options = {
         optionA = "defaultvalueA",
         optionB = -0.5,
@@ -461,6 +461,48 @@ Example command-line::
      --lua-opts=myscript-optionA=TEST:myscript-optionB=0:myscript-optionC=yes
 
 
+mp.utils options
+----------------
+
+This built-in module provides generic helper functions for Lua, and have
+strictly speaking nothing to do with mpv or video/audio playback. They are
+provided for convenience. Most compensate for Lua's scarce standard library.
+
+``utils.readdir(path [, filter])``
+    Enumerate all entries at the given path on the filesystem, and return them
+    as array. Each entry is a directory entry (without the path).
+    The list is unsorted (in whatever order the operating system returns it).
+
+    If the ``filter`` argument is given, it must be one of the following
+    strings:
+
+        ``files``
+            List regular files only. This excludes directories, special files
+            (like UNIX device files or FIFOs), and dead symlinks. It includes
+            UNIX symlinks to regular files.
+
+        ``dirs``
+            List directories only, or symlinks to directories. ``.`` and ``..``
+            are not included.
+
+        ``normal``
+            Include the results of both ``files`` and ``dirs``. (This is the
+            default.)
+
+        ``all``
+            List all entries, even device files, dead symlinks, FIFOs, and the
+            ``.`` and ``..`` entries.
+
+    On error, ``nil, error`` is returned.
+
+``utils.split_path(path)``
+    Split a path into directory component and filename component, and return
+    them. The first return value is always the directory. The second return
+    value is the trailing part of the path, the directory entry.
+
+``utils.join_path(p1, p2)``
+    Return the concatenation of the 2 paths. Tries to be clever. For example,
+    if ```p2`` is an absolute path, p2 is returned without change.
 
 Events
 ------

@@ -727,13 +727,13 @@ function osc_init()
     --prev
     local eventresponder = {}
     eventresponder.mouse_btn0_up = function () mp.commandv("osd-msg", "add", "chapter", -1) end
-    eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.get_property("chapter-list"), 3) end
+    eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.get_property_osd("chapter-list"), 3) end
     register_button(posX - (bigbuttondistance * 2), bigbuttonrowY, 5, 40, 40, osc_styles.bigButtons, "\238\132\132", eventresponder, metainfo)
 
     --next
     local eventresponder = {}
     eventresponder.mouse_btn0_up = function () mp.commandv("osd-msg", "add", "chapter", 1) end
-    eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.get_property("chapter-list"), 3) end
+    eventresponder["shift+mouse_btn0_up"] = function () show_message(mp.get_property_osd("chapter-list"), 3) end
     register_button(posX + (bigbuttondistance * 2), bigbuttonrowY, 5, 40, 40, osc_styles.bigButtons, "\238\132\133", eventresponder, metainfo)
 
 

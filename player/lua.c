@@ -985,14 +985,67 @@ static int script_get_wakeup_pipe(lua_State *L)
     return 1;
 }
 
-struct fn_entry {
-    const char *name;
-    int (*fn)(lua_State *L);
-};
+static int script_readdir(lua_State *L)
+{
+    //                    0      1        2       3
+    const char *fmts[] = {"all", "files", "dirs", "normal", NULL};
+    const char *path = luaL_checkstring(L, 1);
+    int t = luaL_checkoption(L, 2, "normal", fmts);
+    DIR *dir = opendir(path);
+    if (!dir) {
+        lua_pushnil(L);
+        lua_pushstring(L, "error");
+        return 2;
+    }
+    lua_newtable(L); // list
+    char *fullpath = NULL;
+    struct dirent *e;
+    int n = 0;
+    while ((e = readdir(dir))) {
+        char *name = e->d_name;
+        if (t) {
+            if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
+                continue;
+            if (fullpath)
+                fullpath[0] = '\0';
+            fullpath = talloc_asprintf_append(fullpath, "%s/%s", path, name);
+            struct stat st;
+            if (mp_stat(fullpath, &st))
+                continue;
+            if (!(((t & 1) && S_ISREG(st.st_mode)) ||
+                  ((t & 2) && S_ISDIR(st.st_mode))))
+                continue;
+        }
+        lua_pushinteger(L, ++n); // list index
+        lua_pushstring(L, name); // list index name
+        lua_settable(L, -3); // list
+    }
+    talloc_free(fullpath);
+    return 1;
+}
+
+static int script_split_path(lua_State *L)
+{
+    const char *p = luaL_checkstring(L, 1);
+    bstr fname = mp_dirname(p);
+    lua_pushlstring(L, fname.start, fname.len);
+    lua_pushstring(L, mp_basename(p));
+    return 2;
+}
+
+static int script_join_path(lua_State *L)
+{
+    const char *p1 = luaL_checkstring(L, 1);
+    const char *p2 = luaL_checkstring(L, 2);
+    char *r = mp_path_join(NULL, bstr0(p1), bstr0(p2));
+    lua_pushstring(L, r);
+    talloc_free(r);
+    return 1;
+}
 
 #define FN_ENTRY(name) {#name, script_ ## name}
 
-static struct fn_entry fn_list[] = {
+static struct luaL_Reg main_fns[] = {
     FN_ENTRY(log),
     FN_ENTRY(suspend),
     FN_ENTRY(resume),
@@ -1024,17 +1077,21 @@ static struct fn_entry fn_list[] = {
     FN_ENTRY(format_time),
     FN_ENTRY(enable_messages),
     FN_ENTRY(get_wakeup_pipe),
+    {0}
 };
 
-// On stack: mp table
+static struct luaL_Reg utils_fns[] = {
+    FN_ENTRY(readdir),
+    FN_ENTRY(split_path),
+    FN_ENTRY(join_path),
+    {0}
+};
+
 static void add_functions(struct script_ctx *ctx)
 {
     lua_State *L = ctx->state;
 
-    for (int n = 0; n < MP_ARRAY_SIZE(fn_list); n++) {
-        lua_pushcfunction(L, fn_list[n].fn);
-        lua_setfield(L, -2, fn_list[n].name);
-    }
+    luaL_register(L, "mp", main_fns); // mp
 
     lua_pushinteger(L, 0);
     lua_pushcclosure(L, script_get_property, 1);
@@ -1043,6 +1100,11 @@ static void add_functions(struct script_ctx *ctx)
     lua_pushinteger(L, 1);
     lua_pushcclosure(L, script_get_property, 1);
     lua_setfield(L, -2, "get_property_osd");
+
+    lua_pop(L, 1); // -
+
+    luaL_register(L, "mp.utils", utils_fns);
+    lua_pop(L, 1);
 }
 
 const struct mp_scripting mp_scripting_lua = {
