@@ -803,9 +803,10 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         sh_a->format = audio_format;
 
         int samplesize = af_fmt2bits(audio_format) / 8;
+        int block_align = samplesize * sh_audio->channels.num;
+        int bytes_per_second = sh_audio->samplerate * block_align;
 
-        sh_audio->i_bps =
-            sh_audio->samplerate * samplesize * sh_audio->channels.num;
+        sh_audio->i_bps = bytes_per_second * 8;
 
         // emulate WF for win32 codecs:
         sh_audio->wf = talloc_zero(sh_audio, MP_WAVEFORMATEX);
@@ -813,8 +814,8 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         sh_audio->wf->nChannels = sh_audio->channels.num;
         sh_audio->wf->wBitsPerSample = samplesize * 8;
         sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;
-        sh_audio->wf->nBlockAlign = samplesize * sh_audio->channels.num;
-        sh_audio->wf->nAvgBytesPerSec = sh_audio->i_bps;
+        sh_audio->wf->nBlockAlign = block_align;
+        sh_audio->wf->nAvgBytesPerSec = bytes_per_second;
 
         MP_VERBOSE(tvh, "  TV audio: %d channels, %d bits, %d Hz\n",
           sh_audio->wf->nChannels, sh_audio->wf->wBitsPerSample,

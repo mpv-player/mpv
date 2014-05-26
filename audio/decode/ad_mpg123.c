@@ -254,7 +254,7 @@ static int compute_bitrate(struct mpg123_frameinfo *i)
         {-1, 384, 1152,  576},  /* MPEG 2.5 */
         {-1,  -1,   -1,   -1},  /* Unknown */
     };
-    return (int) ((i->framesize + 4) * 8 * i->rate * 0.001 /
+    return (int) ((i->framesize + 4) * 8 * i->rate /
                   samples_per_frame[i->version][i->layer] + 0.5);
 }
 
@@ -267,6 +267,9 @@ static void update_info(struct dec_audio *da)
     if (mpg123_info(con->handle, &finfo) != MPG123_OK)
         return;
 
+    /* finfo.bitrate is expressed in kilobits */
+    const int bitrate = finfo.bitrate * 1000;
+
     if (finfo.vbr != MPG123_CBR) {
         if (--con->delay < 1) {
             if (++con->mean_count > ((unsigned int) -1) / 2)
@@ -274,14 +277,13 @@ static void update_info(struct dec_audio *da)
 
             /* Might not be numerically optimal, but works fine enough. */
             con->mean_rate = ((con->mean_count - 1) * con->mean_rate +
-                              finfo.bitrate) / con->mean_count;
-            da->i_bps = (int) (con->mean_rate * 1000 / 8);
+                              bitrate) / con->mean_count;
+            da->i_bps = (int) (con->mean_rate + 0.5);
 
             con->delay = 10;
         }
     } else {
-        da->i_bps = (finfo.bitrate ? finfo.bitrate : compute_bitrate(&finfo))
-                    * 1000 / 8;
+        da->i_bps = bitrate ? bitrate : compute_bitrate(&finfo);
         con->delay      = 1;
         con->mean_rate  = 0.;
         con->mean_count = 0;

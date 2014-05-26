@@ -67,7 +67,7 @@ struct sh_stream {
 typedef struct sh_audio {
     int samplerate;
     struct mp_chmap channels;
-    int i_bps; // == bitrate  (compressed bytes/sec)
+    int i_bps; // == bitrate  (compressed bits/sec)
     // win32-compatible codec parameters:
     MP_WAVEFORMATEX *wf;
     // note codec extradata may be either under "wf" or "codecdata"
@@ -79,7 +79,7 @@ typedef struct sh_video {
     bool avi_dts;         // use DTS timing; first frame and DTS is 0
     float fps;            // frames per second (set only if constant fps)
     float aspect;         // aspect ratio stored in the file (for prescaling)
-    int i_bps;            // == bitrate  (compressed bytes/sec)
+    int i_bps;            // == bitrate  (compressed bits/sec)
     int disp_w, disp_h;   // display size
     int rotate;           // intended display rotation, in degrees, [0, 359]
     MP_BITMAPINFOHEADER *bih;
