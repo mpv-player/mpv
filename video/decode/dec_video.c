@@ -388,8 +388,8 @@ int video_reconfig_filters(struct dec_video *d_video,
     struct sh_video *sh = d_video->header->video;
 
     MP_VERBOSE(d_video, "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",
-               p.w, p.h, sh->fps, sh->i_bps / 1000.0,
-               sh->i_bps / 8000.0);
+               p.w, p.h, sh->fps, sh->bitrate / 1000.0,
+               sh->bitrate / 8000.0);
 
     MP_VERBOSE(d_video, "VDec: vo config request - %d x %d (%s)\n",
                p.w, p.h, vo_format_name(p.imgfmt));

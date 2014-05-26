@@ -806,7 +806,7 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         int block_align = samplesize * sh_audio->channels.num;
         int bytes_per_second = sh_audio->samplerate * block_align;
 
-        sh_audio->i_bps = bytes_per_second * 8;
+        sh_audio->bitrate = bytes_per_second * 8;
 
         // emulate WF for win32 codecs:
         sh_audio->wf = talloc_zero(sh_audio, MP_WAVEFORMATEX);

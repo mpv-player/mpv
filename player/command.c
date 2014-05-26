@@ -1198,10 +1198,10 @@ static int mp_property_audio_bitrate(m_option_t *prop, int action,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **)arg = format_bitrate(mpctx->d_audio->i_bps);
+        *(char **)arg = format_bitrate(mpctx->d_audio->bitrate);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = mpctx->d_audio->i_bps;
+        *(int *)arg = mpctx->d_audio->bitrate;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1848,10 +1848,10 @@ static int mp_property_video_bitrate(m_option_t *prop, int action,
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = format_bitrate(mpctx->d_video->i_bps);
+        *(char **)arg = format_bitrate(mpctx->d_video->bitrate);
         return M_PROPERTY_OK;
     }
-    return m_property_int_ro(prop, action, arg, mpctx->d_video->i_bps);
+    return m_property_int_ro(prop, action, arg, mpctx->d_video->bitrate);
 }
 
 static int property_imgparams(struct mp_image_params p, int action, void *arg)

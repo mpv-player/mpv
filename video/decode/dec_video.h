@@ -73,7 +73,7 @@ struct dec_video {
     double decoded_pts;
 
     float stream_aspect;  // aspect ratio in media headers (DVD IFO files)
-    int i_bps;            // == bitrate  (compressed bits/sec)
+    int bitrate;          // compressed bits/sec
     float fps;            // FPS from demuxer or from user override
     float initial_decoder_aspect;
 
