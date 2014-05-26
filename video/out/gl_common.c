@@ -159,17 +159,12 @@ void *mp_getdladdr(const char *s)
 
 #define FN_OFFS(name) offsetof(GL, name)
 
-// Define the function with a "hard" reference to the function as fallback.
-// (This requires linking with a compatible OpenGL library.)
-#define DEF_FN_HARD(name)       {FN_OFFS(name), {"gl" # name}, gl ## name}
-
 #define DEF_FN(name)            {FN_OFFS(name), {"gl" # name}}
 #define DEF_FN_NAMES(name, ...) {FN_OFFS(name), {__VA_ARGS__}}
 
 struct gl_function {
     ptrdiff_t offset;
     char *funcnames[7];
-    void *fallback;
 };
 
 struct gl_functions {
@@ -189,36 +184,36 @@ struct gl_functions gl_functions[] = {
         .ver_core = MPGL_VER(1, 1),
         .provides = MPGL_CAP_GL,
         .functions = (struct gl_function[]) {
-            DEF_FN_HARD(Viewport),
-            DEF_FN_HARD(Clear),
-            DEF_FN_HARD(GenTextures),
-            DEF_FN_HARD(DeleteTextures),
-            DEF_FN_HARD(TexEnvi),
-            DEF_FN_HARD(ClearColor),
-            DEF_FN_HARD(Enable),
-            DEF_FN_HARD(Disable),
-            DEF_FN_HARD(DrawBuffer),
-            DEF_FN_HARD(DepthMask),
-            DEF_FN_HARD(BlendFunc),
-            DEF_FN_HARD(Flush),
-            DEF_FN_HARD(Finish),
-            DEF_FN_HARD(PixelStorei),
-            DEF_FN_HARD(TexImage1D),
-            DEF_FN_HARD(TexImage2D),
-            DEF_FN_HARD(TexSubImage2D),
-            DEF_FN_HARD(GetTexImage),
-            DEF_FN_HARD(TexParameteri),
-            DEF_FN_HARD(TexParameterf),
-            DEF_FN_HARD(TexParameterfv),
-            DEF_FN_HARD(GetIntegerv),
-            DEF_FN_HARD(GetBooleanv),
-            DEF_FN_HARD(ColorMask),
-            DEF_FN_HARD(ReadPixels),
-            DEF_FN_HARD(ReadBuffer),
-            DEF_FN_HARD(DrawArrays),
-            DEF_FN_HARD(GetString),
-            DEF_FN_HARD(GetError),
-            DEF_FN_HARD(GetTexLevelParameteriv),
+            DEF_FN(Viewport),
+            DEF_FN(Clear),
+            DEF_FN(GenTextures),
+            DEF_FN(DeleteTextures),
+            DEF_FN(TexEnvi),
+            DEF_FN(ClearColor),
+            DEF_FN(Enable),
+            DEF_FN(Disable),
+            DEF_FN(DrawBuffer),
+            DEF_FN(DepthMask),
+            DEF_FN(BlendFunc),
+            DEF_FN(Flush),
+            DEF_FN(Finish),
+            DEF_FN(PixelStorei),
+            DEF_FN(TexImage1D),
+            DEF_FN(TexImage2D),
+            DEF_FN(TexSubImage2D),
+            DEF_FN(GetTexImage),
+            DEF_FN(TexParameteri),
+            DEF_FN(TexParameterf),
+            DEF_FN(TexParameterfv),
+            DEF_FN(GetIntegerv),
+            DEF_FN(GetBooleanv),
+            DEF_FN(ColorMask),
+            DEF_FN(ReadPixels),
+            DEF_FN(ReadBuffer),
+            DEF_FN(DrawArrays),
+            DEF_FN(GetString),
+            DEF_FN(GetError),
+            DEF_FN(GetTexLevelParameteriv),
             {0}
         },
     },
@@ -368,31 +363,31 @@ struct gl_functions gl_functions[] = {
         .ver_removed = MPGL_VER(3, 0),
         .provides = MPGL_CAP_GL_LEGACY,
         .functions = (struct gl_function[]) {
-            DEF_FN_HARD(Begin),
-            DEF_FN_HARD(End),
-            DEF_FN_HARD(MatrixMode),
-            DEF_FN_HARD(LoadIdentity),
-            DEF_FN_HARD(Translated),
-            DEF_FN_HARD(Scaled),
-            DEF_FN_HARD(Ortho),
-            DEF_FN_HARD(PushMatrix),
-            DEF_FN_HARD(PopMatrix),
-            DEF_FN_HARD(GenLists),
-            DEF_FN_HARD(DeleteLists),
-            DEF_FN_HARD(NewList),
-            DEF_FN_HARD(EndList),
-            DEF_FN_HARD(CallList),
-            DEF_FN_HARD(CallLists),
-            DEF_FN_HARD(Color4ub),
-            DEF_FN_HARD(Color4f),
-            DEF_FN_HARD(TexCoord2f),
-            DEF_FN_HARD(TexCoord2fv),
-            DEF_FN_HARD(Vertex2f),
-            DEF_FN_HARD(VertexPointer),
-            DEF_FN_HARD(ColorPointer),
-            DEF_FN_HARD(TexCoordPointer),
-            DEF_FN_HARD(EnableClientState),
-            DEF_FN_HARD(DisableClientState),
+            DEF_FN(Begin),
+            DEF_FN(End),
+            DEF_FN(MatrixMode),
+            DEF_FN(LoadIdentity),
+            DEF_FN(Translated),
+            DEF_FN(Scaled),
+            DEF_FN(Ortho),
+            DEF_FN(PushMatrix),
+            DEF_FN(PopMatrix),
+            DEF_FN(GenLists),
+            DEF_FN(DeleteLists),
+            DEF_FN(NewList),
+            DEF_FN(EndList),
+            DEF_FN(CallList),
+            DEF_FN(CallLists),
+            DEF_FN(Color4ub),
+            DEF_FN(Color4f),
+            DEF_FN(TexCoord2f),
+            DEF_FN(TexCoord2fv),
+            DEF_FN(Vertex2f),
+            DEF_FN(VertexPointer),
+            DEF_FN(ColorPointer),
+            DEF_FN(TexCoordPointer),
+            DEF_FN(EnableClientState),
+            DEF_FN(DisableClientState),
             {0}
         },
     },
@@ -499,8 +494,10 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
         getProcAddress = (void *)mp_getdladdr;
 
     gl->GetString = getProcAddress("glGetString");
-    if (!gl->GetString)
-        gl->GetString = glGetString;
+    if (!gl->GetString) {
+        mp_err(log, "Can't load OpenGL functions.\n");
+        return;
+    }
 
     GLint major = 0, minor = 0;
     const char *version = gl->GetString(GL_VERSION);
@@ -589,8 +586,6 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                 if (ptr)
                     break;
             }
-            if (!ptr)
-                ptr = fn->fallback;
             if (!ptr) {
                 all_loaded = false;
                 if (!section->partial_ok) {
