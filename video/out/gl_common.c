@@ -499,7 +499,7 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
         return;
     }
 
-    GLint major = 0, minor = 0;
+    int major = 0, minor = 0;
     const char *version = gl->GetString(GL_VERSION);
     sscanf(version, "%d.%d", &major, &minor);
     gl->version = MPGL_VER(major, minor);
