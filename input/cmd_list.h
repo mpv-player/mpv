@@ -116,6 +116,8 @@ enum mp_command_type {
 struct mp_cmd;
 bool mp_input_is_abort_cmd(struct mp_cmd *cmd);
 
+bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd);
+
 struct bstr;
 bool mp_replace_legacy_cmd(void *talloc_ctx, struct bstr *s);
 

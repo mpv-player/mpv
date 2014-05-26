@@ -515,7 +515,7 @@ static void update_mouse_section(struct input_ctx *ictx)
 }
 
 // Called when the currently held-down key is released. This (usually) sends
-// the a key-up versiob of the command associated with the keys that were held
+// the a key-up version of the command associated with the keys that were held
 // down.
 // If the drop_current parameter is set to true, then don't send the key-up
 // command. Unless we've already sent a key-down event, in which case the
@@ -1112,7 +1112,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
         struct mp_cmd *repeated = check_autorepeat(ictx);
         if (repeated) {
             repeated->repeated = true;
-            if (repeated->def && repeated->def->allow_auto_repeat) {
+            if (mp_input_is_repeatable_cmd(repeated)) {
                 queue_add_tail(queue, repeated);
             } else {
                 talloc_free(repeated);
