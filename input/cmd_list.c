@@ -278,6 +278,12 @@ bool mp_input_is_abort_cmd(struct mp_cmd *cmd)
     return false;
 }
 
+bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
+{
+    return (cmd->def && cmd->def->allow_auto_repeat) ||
+           cmd->id == MP_CMD_COMMAND_LIST;
+}
+
 void mp_print_cmd_list(struct mp_log *out)
 {
     for (int i = 0; mp_cmds[i].name; i++) {
