@@ -187,6 +187,23 @@ static bool require(lua_State *L, const char *name)
     return true;
 }
 
+// Push the table of a module. If it doesn't exist, it's created.
+// The Lua script can call "require(module)" to "load" it.
+static void push_module_table(lua_State *L, const char *module)
+{
+    lua_getglobal(L, "package"); // package
+    lua_getfield(L, -1, "loaded"); // package loaded
+    lua_remove(L, -2); // loaded
+    lua_getfield(L, -1, module); // loaded module
+    if (lua_isnil(L, -1)) {
+        lua_pop(L, 1); // loaded
+        lua_newtable(L); // loaded module
+        lua_pushvalue(L, -1); // loaded module module
+        lua_setfield(L, -3, module); // loaded module
+    }
+    lua_remove(L, -2); // module
+}
+
 static int load_lua(struct mpv_handle *client, const char *fname)
 {
     struct MPContext *mpctx = mp_client_get_core(client);
@@ -212,12 +229,13 @@ static int load_lua(struct mpv_handle *client, const char *fname)
     lua_setfield(L, LUA_REGISTRYINDEX, "wrap_cpcall"); // -
 
     luaL_openlibs(L);
+    add_functions(ctx); // mp
 
-    lua_newtable(L); // mp
+    push_module_table(L, "mp"); // mp
+
+    // "mp" is available by default, and no "require 'mp'" is needed
     lua_pushvalue(L, -1); // mp mp
     lua_setglobal(L, "mp"); // mp
-
-    add_functions(ctx); // mp
 
     lua_pushstring(L, ctx->name); // mp name
     lua_setfield(L, -2, "script_name"); // mp
@@ -1044,8 +1062,12 @@ static int script_join_path(lua_State *L)
 }
 
 #define FN_ENTRY(name) {#name, script_ ## name}
+struct fn_entry {
+    const char *name;
+    int (*fn)(lua_State *L);
+};
 
-static struct luaL_Reg main_fns[] = {
+static const struct fn_entry main_fns[] = {
     FN_ENTRY(log),
     FN_ENTRY(suspend),
     FN_ENTRY(resume),
@@ -1080,18 +1102,31 @@ static struct luaL_Reg main_fns[] = {
     {0}
 };
 
-static struct luaL_Reg utils_fns[] = {
+static struct fn_entry utils_fns[] = {
     FN_ENTRY(readdir),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
     {0}
 };
 
+static void register_package_fns(lua_State *L, char *module,
+                                 const struct fn_entry *e)
+{
+    push_module_table(L, module); // modtable
+    for (int n = 0; e[n].name; n++) {
+        lua_pushcclosure(L, e[n].fn, 0); // modtable fn
+        lua_setfield(L, -2, e[n].name); // modtable
+    }
+    lua_pop(L, 1); // -
+}
+
 static void add_functions(struct script_ctx *ctx)
 {
     lua_State *L = ctx->state;
 
-    luaL_register(L, "mp", main_fns); // mp
+    register_package_fns(L, "mp", main_fns);
+
+    push_module_table(L, "mp"); // mp
 
     lua_pushinteger(L, 0);
     lua_pushcclosure(L, script_get_property, 1);
@@ -1103,8 +1138,7 @@ static void add_functions(struct script_ctx *ctx)
 
     lua_pop(L, 1); // -
 
-    luaL_register(L, "mp.utils", utils_fns);
-    lua_pop(L, 1);
+    register_package_fns(L, "mp.utils", utils_fns);
 }
 
 const struct mp_scripting mp_scripting_lua = {

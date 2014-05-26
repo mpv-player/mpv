@@ -7,6 +7,8 @@
 -- Add at most 5 * 2 files when starting a file (before + after).
 MAXENTRIES = 5
 
+mputils = require 'mp.utils'
+
 function add_files_at(index, files)
     index = index - 1
     local oldcount = mp.get_property_number("playlist-count", 1)
@@ -18,11 +20,11 @@ end
 
 function find_and_add_entries()
     local path = mp.get_property("path", "")
-    local dir, filename = mp.utils.split_path(path)
+    local dir, filename = mputils.split_path(path)
     if #dir == 0 then
         return
     end
-    local files = mp.utils.readdir(dir, "files")
+    local files = mputils.readdir(dir, "files")
     table.sort(files)
     local pl = mp.get_property_native("playlist", {})
     local pl_current = mp.get_property_number("playlist-pos", 0) + 1
