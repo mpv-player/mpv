@@ -71,6 +71,9 @@ List of Input Commands
     disabling default bindings, without disabling all bindings with
     ``--no-input-default-bindings``.
 
+``write_watch_later_conf``
+    Saves current playback position.
+
 ``seek <seconds> [relative|absolute|absolute-percent|- [default-precise|exact|keyframes]]``
     Change the playback position. By default, seeks by a relative amount of
     seconds.
