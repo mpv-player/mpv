@@ -56,6 +56,8 @@
 
 const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_IGNORE, "ignore", },
+    
+  { MP_CMD_WRITE_WATCH_LATER_CONF, "write_watch_later_conf", },
 
   { MP_CMD_SEEK, "seek", {
       ARG_TIME,

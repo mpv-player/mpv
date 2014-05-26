@@ -39,6 +39,7 @@ extern const struct mp_cmd_def mp_cmds[];
 // All command IDs
 enum mp_command_type {
     MP_CMD_IGNORE,
+    MP_CMD_WRITE_WATCH_LATER_CONF,
     MP_CMD_SEEK,
     MP_CMD_REVERT_SEEK,
     MP_CMD_QUIT,
