@@ -433,7 +433,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
         if (codec->channel_layout)
             mp_chmap_from_lavc(&sh_audio->channels, codec->channel_layout);
         sh_audio->samplerate = codec->sample_rate;
-        sh_audio->i_bps = codec->bit_rate;
+        sh_audio->bitrate = codec->bit_rate;
 
         export_replaygain(demuxer, st);
 
@@ -477,7 +477,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
         else
             sh_video->aspect = codec->width  * codec->sample_aspect_ratio.num
                     / (float)(codec->height * codec->sample_aspect_ratio.den);
-        sh_video->i_bps = codec->bit_rate;
+        sh_video->bitrate = codec->bit_rate;
 
         AVDictionaryEntry *rot = av_dict_get(st->metadata, "rotate", NULL, 0);
         if (rot && rot->value) {

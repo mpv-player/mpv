@@ -42,7 +42,7 @@ struct dec_audio {
     struct mp_audio decoded;    // format of decoded audio (no data, temporarily
                                 // different from decode_buffer during format
                                 // changes)
-    int i_bps;                  // input bitrate, can change with VBR sources
+    int bitrate;                // input bitrate, can change with VBR sources
     // last known pts value in output from decoder
     double pts;
     // number of samples output by decoder after last known pts
