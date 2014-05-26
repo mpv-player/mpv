@@ -503,13 +503,13 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     const char *version = gl->GetString(GL_VERSION);
     sscanf(version, "%d.%d", &major, &minor);
     gl->version = MPGL_VER(major, minor);
-    mp_msg(log, MSGL_V, "Detected OpenGL %d.%d.\n", major, minor);
+    mp_verbose(log, "Detected OpenGL %d.%d.\n", major, minor);
 
-    mp_msg(log, MSGL_V, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
-    mp_msg(log, MSGL_V, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
-    mp_msg(log, MSGL_V, "GL_VERSION='%s'\n",  gl->GetString(GL_VERSION));
-    mp_msg(log, MSGL_V, "GL_SHADING_LANGUAGE_VERSION='%s'\n",
-                            gl->GetString(GL_SHADING_LANGUAGE_VERSION));
+    mp_verbose(log, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
+    mp_verbose(log, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
+    mp_verbose(log, "GL_VERSION='%s'\n",  gl->GetString(GL_VERSION));
+    mp_verbose(log, "GL_SHADING_LANGUAGE_VERSION='%s'\n",
+                    gl->GetString(GL_SHADING_LANGUAGE_VERSION));
 
     // Note: This code doesn't handle CONTEXT_FORWARD_COMPATIBLE_BIT_ARB
     //       on OpenGL 3.0 correctly. Apparently there's no way to detect this
@@ -545,9 +545,8 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     }
 
     if (has_legacy)
-        mp_msg(log, MSGL_V, "OpenGL legacy compat. found.\n");
-    mp_msg(log, MSGL_DEBUG, "Combined OpenGL extensions string:\n%s\n",
-           gl->extensions);
+        mp_verbose(log, "OpenGL legacy compat. found.\n");
+    mp_dbg(log, "Combined OpenGL extensions string:\n%s\n", gl->extensions);
 
     for (int n = 0; n < sizeof(gl_functions) / sizeof(gl_functions[0]); n++) {
         struct gl_functions *section = &gl_functions[n];
@@ -627,7 +626,7 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     if (!is_software_gl(gl))
         gl->mpgl_caps |= MPGL_CAP_NO_SW;
 
-    mp_msg(log, MSGL_V, "Detected OpenGL features:");
+    mp_verbose(log, "Detected OpenGL features:");
     list_features(gl->mpgl_caps, log, MSGL_V, false);
 }
 
