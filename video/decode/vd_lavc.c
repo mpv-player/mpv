@@ -281,6 +281,10 @@ static int init(struct dec_video *vd, const char *decoder)
             return 0;
         }
     }
+
+    if (ctx->avctx->bit_rate != 0)
+        vd->bitrate = ctx->avctx->bit_rate;
+
     return 1;
 }
 
@@ -321,6 +325,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     ctx->hwdec_fmt = 0;
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
     AVCodecContext *avctx = ctx->avctx;
+    avctx->bit_rate = 0;
     avctx->opaque = vd;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
