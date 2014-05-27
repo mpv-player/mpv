@@ -125,13 +125,12 @@ const char *wasapi_explain_err(const HRESULT hr)
 static void set_format(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
                        DWORD samplerate, WORD channels, DWORD chanmask)
 {
+    int block_align = channels * bytepersample;
     wformat->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE; /* Only PCM is supported */
     wformat->Format.nChannels = channels;
     wformat->Format.nSamplesPerSec = samplerate;
-    wformat->Format.nAvgBytesPerSec = wformat->Format.nChannels *
-                                      bytepersample *
-                                      wformat->Format.nSamplesPerSec;
-    wformat->Format.nBlockAlign = wformat->Format.nChannels * bytepersample;
+    wformat->Format.nAvgBytesPerSec = samplerate * block_align;
+    wformat->Format.nBlockAlign = block_align;
     wformat->Format.wBitsPerSample = bytepersample * 8;
     wformat->Format.cbSize =
         22; /* must be at least 22 for WAVE_FORMAT_EXTENSIBLE */
