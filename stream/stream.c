@@ -292,9 +292,9 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
 
     if ((s->mode & STREAM_WRITE) && !sinfo->can_write) {
-        MP_ERR(s, "No write access implemented.\n");
+        MP_VERBOSE(s, "No write access implemented.\n");
         talloc_free(s);
-        return STREAM_ERROR;
+        return STREAM_NO_MATCH;
     }
 
     // Parse options
