@@ -571,16 +571,17 @@ static int preinit(struct vo *vo)
     VAStatus status;
 
     if (!vo_x11_init(vo))
-        return -1;
+        goto fail;
 
     p->display = vaGetDisplay(vo->x11->display);
     if (!p->display)
-        return -1;
+        goto fail;
 
     p->mpvaapi = va_initialize(p->display, p->log);
     if (!p->mpvaapi) {
         vaTerminate(p->display);
-        return -1;
+        p->display = NULL;
+        goto fail;
     }
 
     p->pool = mp_image_pool_new(MAX_OUTPUT_SURFACES + 3);
@@ -631,6 +632,10 @@ static int preinit(struct vo *vo)
             p->va_num_display_attrs = 0;
     }
     return 0;
+
+fail:
+    uninit(vo);
+    return -1;
 }
 
 #define OPT_BASE_STRUCT struct priv

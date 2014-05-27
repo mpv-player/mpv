@@ -585,7 +585,8 @@ static void vo_x11_classhint(struct vo *vo, Window window, const char *name)
 void vo_x11_uninit(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
-    assert(x11);
+    if (!x11)
+        return;
 
     mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
