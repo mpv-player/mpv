@@ -128,7 +128,7 @@ function limit_range(min, max, val)
 end
 
 function get_slider_value(element)
-    local fill_offsetV = element.metainfo.slider.border + element.metainfo.slider.gap
+    local fill_offsetV = element.metainfo.slider.border
     local paddingH = (element.h - (2*fill_offsetV)) / 2
 
     local b_x1, b_x2 = element.hitbox.x1 + paddingH, element.hitbox.x2 - paddingH
