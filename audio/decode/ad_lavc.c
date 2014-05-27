@@ -270,8 +270,9 @@ static int init(struct dec_audio *da, const char *decoder)
         }
     }
 
-    da->bitrate = lavc_context->bit_rate;
-    if (sh_audio->wf && sh_audio->wf->nAvgBytesPerSec)
+    if (lavc_context->bit_rate != 0)
+        da->bitrate = lavc_context->bit_rate;
+    else if (sh_audio->wf && sh_audio->wf->nAvgBytesPerSec)
         da->bitrate = sh_audio->wf->nAvgBytesPerSec * 8;
 
     return 1;
