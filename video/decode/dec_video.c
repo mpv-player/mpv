@@ -290,6 +290,14 @@ struct mp_image *video_decode(struct dec_video *d_video,
     bool sort_pts =
         (opts->user_pts_assoc_mode != 1 || d_video->header->video->avi_dts)
         && opts->correct_pts;
+
+    struct demux_packet packet_copy;
+    if (packet && packet->dts == MP_NOPTS_VALUE) {
+        packet_copy = *packet;
+        packet = &packet_copy;
+        packet->dts = packet->pts;
+    }
+
     double pkt_pts = packet ? packet->pts : MP_NOPTS_VALUE;
     double pkt_dts = packet ? packet->dts : MP_NOPTS_VALUE;
 
@@ -325,7 +333,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
 
     if (pts == MP_NOPTS_VALUE) {
         d_video->codec_pts = prev_codec_pts;
-    } else if (pts <= prev_codec_pts) {
+    } else if (pts < prev_codec_pts) {
         d_video->num_codec_pts_problems++;
     }
 
