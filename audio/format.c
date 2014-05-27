@@ -28,19 +28,24 @@
 #include "common/common.h"
 #include "audio/filter/af.h"
 
-int af_fmt2bits(int format)
+int af_fmt2bps(int format)
 {
-    if (AF_FORMAT_IS_AC3(format)) return 16;
+    if (AF_FORMAT_IS_AC3(format)) return 2;
     if (format == AF_FORMAT_UNKNOWN)
         return 0;
     switch (format & AF_FORMAT_BITS_MASK) {
-    case AF_FORMAT_8BIT:  return 8;
-    case AF_FORMAT_16BIT: return 16;
-    case AF_FORMAT_24BIT: return 24;
-    case AF_FORMAT_32BIT: return 32;
-    case AF_FORMAT_64BIT: return 64;
+    case AF_FORMAT_8BIT:  return 1;
+    case AF_FORMAT_16BIT: return 2;
+    case AF_FORMAT_24BIT: return 3;
+    case AF_FORMAT_32BIT: return 4;
+    case AF_FORMAT_64BIT: return 8;
     }
     return 0;
+}
+
+int af_fmt2bits(int format)
+{
+    return af_fmt2bps(format) * 8;
 }
 
 static int bits_to_mask(int bits)
@@ -159,7 +164,7 @@ const char *af_fmt_to_str(int format)
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate)
 {
     assert(!af_fmt_is_planar(format));
-    int bps      = (af_fmt2bits(format) / 8);
+    int bps      = af_fmt2bps(format);
     int framelen = channels * bps;
     int bytes    = seconds  * bps * samplerate;
     if (bytes % framelen)

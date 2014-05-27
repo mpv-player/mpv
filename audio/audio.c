@@ -31,7 +31,7 @@ static void update_redundant_info(struct mp_audio *mpa)
     assert(mp_chmap_is_empty(&mpa->channels) ||
            mp_chmap_is_valid(&mpa->channels));
     mpa->nch = mpa->channels.num;
-    mpa->bps = af_fmt2bits(mpa->format) / 8;
+    mpa->bps = af_fmt2bps(mpa->format);
     if (af_fmt_is_planar(mpa->format)) {
         mpa->spf = 1;
         mpa->num_planes = mpa->nch;

@@ -171,7 +171,7 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     if (ao->driver->init(ao) < 0)
         goto error;
 
-    ao->sstride = af_fmt2bits(ao->format) / 8;
+    ao->sstride = af_fmt2bps(ao->format);
     ao->num_planes = 1;
     if (af_fmt_is_planar(ao->format)) {
         ao->num_planes = ao->channels.num;

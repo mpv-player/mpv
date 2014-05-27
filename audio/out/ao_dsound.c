@@ -402,7 +402,7 @@ static int init(struct ao *ao)
     //set our audio parameters
     ao->samplerate = rate;
     ao->format = format;
-    ao->bps = ao->channels.num * rate * (af_fmt2bits(format) >> 3);
+    ao->bps = ao->channels.num * rate * af_fmt2bps(format);
     int buffersize = ao->bps; // space for 1 sec
     MP_VERBOSE(ao, "Samplerate:%iHz Channels:%i Format:%s\n", rate,
                ao->channels.num, af_fmt_to_str(format));
@@ -422,9 +422,9 @@ static int init(struct ao *ao)
     } else {
         wformat.Format.wFormatTag = (ao->channels.num > 2)
                                     ? WAVE_FORMAT_EXTENSIBLE : WAVE_FORMAT_PCM;
-        wformat.Format.wBitsPerSample = af_fmt2bits(format);
-        wformat.Format.nBlockAlign = wformat.Format.nChannels *
-                                     (wformat.Format.wBitsPerSample >> 3);
+        int bps = af_fmt2bps(format);
+        wformat.Format.wBitsPerSample = bps * 8;
+        wformat.Format.nBlockAlign = wformat.Format.nChannels * bps;
     }
 
     // fill in primary sound buffer descriptor
