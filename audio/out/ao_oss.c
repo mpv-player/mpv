@@ -419,7 +419,7 @@ ac3_retry:
 #endif
     }
 
-    ao->bps = ao->channels.num * (af_fmt2bits(ao->format) / 8);
+    ao->bps = ao->channels.num * af_fmt2bps(ao->format);
     p->outburst -= p->outburst % ao->bps; // round down
     ao->bps *= ao->samplerate;
 

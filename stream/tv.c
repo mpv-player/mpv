@@ -802,7 +802,7 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         sh_a->codec = "mp-pcm";
         sh_a->format = audio_format;
 
-        int samplesize = af_fmt2bits(audio_format) / 8;
+        int samplesize = af_fmt2bps(audio_format);
         int block_align = samplesize * sh_audio->channels.num;
         int bytes_per_second = sh_audio->samplerate * block_align;
 

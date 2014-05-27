@@ -160,7 +160,7 @@ static int set_format(struct dec_audio *da)
             return MPG123_ERR;
         }
         mp_audio_set_format(&da->decoded, af);
-        con->sample_size = channels * (af_fmt2bits(af) / 8);
+        con->sample_size = channels * af_fmt2bps(af);
         con->new_format = 0;
     }
     return ret;

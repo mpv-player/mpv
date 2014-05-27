@@ -137,7 +137,7 @@ static int init(struct ao *ao)
 
     select_format(ao, codec);
 
-    ac->sample_size = af_fmt2bits(ao->format) / 8;
+    ac->sample_size = af_fmt2bps(ao->format);
     ac->stream->codec->sample_fmt = af_to_avformat(ao->format);
     ac->stream->codec->bits_per_raw_sample = ac->sample_size * 8;
 

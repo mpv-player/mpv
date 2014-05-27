@@ -35,7 +35,7 @@ struct mp_audio {
     int nch;            // number of channels (redundant with chmap)
     int spf;            // sub-samples per sample on each plane
     int num_planes;     // number of planes
-    int bps;            // size of sub-samples (af_fmt2bits(format) / 8)
+    int bps;            // size of sub-samples (af_fmt2bps(format))
 
     // private
     int allocated[MP_NUM_CHANNELS]; // use mp_audio_get_allocated_size()

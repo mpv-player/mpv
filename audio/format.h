@@ -151,6 +151,7 @@ extern const struct af_fmt_entry af_fmtstr_table[];
 int af_str2fmt_short(bstr str);
 const char *af_fmt_to_str(int format);
 
+int af_fmt2bps(int format);
 int af_fmt2bits(int format);
 int af_fmt_change_bits(int format, int bits);
 
