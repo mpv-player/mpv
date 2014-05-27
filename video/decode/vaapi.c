@@ -409,6 +409,8 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
         return HWDEC_ERR_NO_CTX;
     if (!hwdec_check_codec_support(decoder, profiles))
         return HWDEC_ERR_NO_CODEC;
+    if (va_guess_if_emulated(info->vaapi_ctx))
+        return HWDEC_ERR_EMULATED;
     return 0;
 }
 
@@ -418,9 +420,12 @@ static int probe_copy(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
     struct priv dummy = {mp_null_log};
     if (!create_va_dummy_ctx(&dummy))
         return HWDEC_ERR_NO_CTX;
+    bool emulated = va_guess_if_emulated(dummy.ctx);
     destroy_va_dummy_ctx(&dummy);
     if (!hwdec_check_codec_support(decoder, profiles))
         return HWDEC_ERR_NO_CODEC;
+    if (emulated)
+        return HWDEC_ERR_EMULATED;
     return 0;
 }
 

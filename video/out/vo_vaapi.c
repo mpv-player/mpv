@@ -584,6 +584,11 @@ static int preinit(struct vo *vo)
         goto fail;
     }
 
+    if (va_guess_if_emulated(p->mpvaapi)) {
+        MP_WARN(vo, "VA-API is most likely emulated via VDPAU.\n"
+                    "It's better to use VDPAU directly with: --vo=vdpau\n");
+    }
+
     p->pool = mp_image_pool_new(MAX_OUTPUT_SURFACES + 3);
     va_pool_set_allocator(p->pool, p->mpvaapi, VA_RT_FORMAT_YUV420);
     p->va_image_formats = p->mpvaapi->image_formats;

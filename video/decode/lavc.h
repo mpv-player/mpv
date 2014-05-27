@@ -65,6 +65,7 @@ struct vd_lavc_hwdec {
 enum {
     HWDEC_ERR_NO_CTX = -2,
     HWDEC_ERR_NO_CODEC = -3,
+    HWDEC_ERR_EMULATED = -4,    // probing successful, but emulated API detected
 };
 
 struct hwdec_profile_entry {

@@ -426,3 +426,13 @@ struct mp_image *mp_vdpau_upload_video_surface(struct mp_vdpau_ctx *ctx,
     mp_image_copy_attributes(hwmpi, mpi);
     return hwmpi;
 }
+
+bool mp_vdpau_guess_if_emulated(struct mp_vdpau_ctx *ctx)
+{
+    struct vdp_functions *vdp = &ctx->vdp;
+    VdpStatus vdp_st;
+    char const* info = NULL;
+    vdp_st = vdp->get_information_string(&info);
+    CHECK_VDP_WARNING(ctx, "Error when calling vdp_get_information_string");
+    return vdp_st == VDP_STATUS_OK && info && strstr(info, "VAAPI");
+}

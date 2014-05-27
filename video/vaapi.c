@@ -448,3 +448,9 @@ void va_pool_set_allocator(struct mp_image_pool *pool, struct mp_vaapi_ctx *ctx,
     mp_image_pool_set_allocator(pool, alloc_pool, alloc_ctx);
     mp_image_pool_set_lru(pool);
 }
+
+bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx)
+{
+    const char *s = vaQueryVendorString(ctx->display);
+    return s && strstr(s, "VDPAU backend");
+}

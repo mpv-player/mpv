@@ -175,6 +175,8 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
         return HWDEC_ERR_NO_CTX;
     if (!hwdec_check_codec_support(decoder, profiles))
         return HWDEC_ERR_NO_CODEC;
+    if (mp_vdpau_guess_if_emulated(info->vdpau_ctx))
+        return HWDEC_ERR_EMULATED;
     return 0;
 }
 
