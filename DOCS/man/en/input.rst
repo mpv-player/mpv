@@ -313,6 +313,9 @@ List of Input Commands
     Note that while the menu is active, the input section ``discnav-menu`` will
     be enabled, so different key bindings can be mapped for menu mode.
 
+``write_watch_later_config``
+    Write the resume config file that the ``quit_watch_later`` command writes,
+    but continue playback normally.
 
 Input Commands that are Possibly Subject to Change
 --------------------------------------------------
