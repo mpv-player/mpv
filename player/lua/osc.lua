@@ -296,7 +296,7 @@ function register_element(type, x, y, an, w, h, style, content, eventresponder, 
         local hitbox
         if type == "slider" then
             -- if it's a slider, cut the border and gap off, as those aren't of interest for eventhandling
-            local fill_offset = metainfo.slider.border + metainfo.slider.gap
+            local fill_offset = metainfo.slider.border
             hitbox = {x1 = bX1 + fill_offset, y1 = bY1 + fill_offset, x2 = bX2 - fill_offset, y2 = bY2 - fill_offset}
         else
             hitbox = {x1 = bX1, y1 = bY1, x2 = bX2, y2 = bY2}
