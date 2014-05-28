@@ -317,11 +317,12 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
 
 static void destroy_va_dummy_ctx(struct priv *p)
 {
+    va_destroy(p->ctx);
+    p->ctx = NULL;
+    p->display = NULL;
     if (p->x11_display)
         XCloseDisplay(p->x11_display);
     p->x11_display = NULL;
-    va_destroy(p->ctx);
-    p->ctx = NULL;
 }
 
 // Creates a "private" VADisplay, disconnected from the VO. We just create a
@@ -354,6 +355,9 @@ static void uninit(struct lavc_ctx *ctx)
         return;
 
     destroy_decoder(ctx);
+
+    talloc_free(p->pool);
+    p->pool = NULL;
 
     if (p->x11_display)
         destroy_va_dummy_ctx(p);
