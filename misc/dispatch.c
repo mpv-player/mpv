@@ -66,9 +66,9 @@ static void queue_dtor(void *p)
 // The target thread is the thread which created the queue and which calls
 // mp_dispatch_queue_process().
 // Free the dispatch queue with talloc_free(). (It must be empty.)
-struct mp_dispatch_queue *mp_dispatch_create(void *talloc_parent)
+struct mp_dispatch_queue *mp_dispatch_create(void *ta_parent)
 {
-    struct mp_dispatch_queue *queue = talloc_ptrtype(talloc_parent, queue);
+    struct mp_dispatch_queue *queue = talloc_ptrtype(ta_parent, queue);
     *queue = (struct mp_dispatch_queue){0};
     talloc_set_destructor(queue, queue_dtor);
     pthread_mutex_init(&queue->exclusive_lock, NULL);
