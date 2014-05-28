@@ -51,11 +51,11 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
 #elif HAVE_SYNC_BUILTINS
 
 #define atomic_load(p) \
-    (__sync_synchronize(), (p)->v)
+    __sync_fetch_and_add(&(p)->v, 0)
 #define atomic_store(p, val) \
-    ((p)->v = (val), __sync_synchronize())
+    (__sync_synchronize(), (p)->v = (val), __sync_synchronize())
 #define atomic_fetch_add(a, b) \
-    (__sync_add_and_fetch(&(a)->v, b), __sync_synchronize())
+    __sync_fetch_and_add(&(a)->v, b)
 
 #else
 # error "this should have been a configuration error, report a bug please"
