@@ -72,6 +72,7 @@ local state = {
     last_mouseX, last_mouseY,                -- last mouse position, to detect siginificant mouse movement
     message_text,
     message_timeout,
+    fullscreen = false,
 }
 
 
@@ -587,7 +588,7 @@ function osc_init()
 
     if (mp.get_property("video") == "no") then -- dummy/forced window
         scale = user_opts.scaleforcedwindow
-    elseif (mp.get_property("fullscreen") == "yes") then
+    elseif state.fullscreen then
         scale = user_opts.scalefullscreen
     else
         scale = user_opts.scalewindowed
@@ -820,7 +821,7 @@ function osc_init()
 
     --toggle FS
     local contentF = function (ass)
-        if mp.get_property("fullscreen") == "yes" then
+        if state.fullscreen then
             ass:append("\238\132\137")
         else
             ass:append("\238\132\136")
@@ -1171,7 +1172,7 @@ end
 
 -- called by mpv on every frame
 function tick()
-    if (mp.get_property("fullscreen") == "yes" and user_opts.showfullscreen) or (mp.get_property("fullscreen") == "no" and user_opts.showwindowed) then
+    if (state.fullscreen and user_opts.showfullscreen) or (not state.fullscreen and user_opts.showwindowed) then
         render()
     else
         mp.set_osd_ass(osc_param.playresy, osc_param.playresy, "")
@@ -1194,6 +1195,8 @@ mp.register_event("tracks-changed", request_init)
 
 mp.register_script_message("enable-osc", function() enable_osc(true) end)
 mp.register_script_message("disable-osc", function() enable_osc(false) end)
+
+mp.observe_property("fullscreen", "bool", function(name, val) state.fullscreen = val end)
 
 -- mouse show/hide bindings
 mp.set_key_bindings({
