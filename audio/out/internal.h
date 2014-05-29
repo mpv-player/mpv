@@ -160,6 +160,10 @@ struct ao_driver {
 int ao_play_silence(struct ao *ao, int samples);
 void ao_wait_drain(struct ao *ao);
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us);
+struct pollfd;
+int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
+                 pthread_mutex_t *lock);
+void ao_wakeup_poll(struct ao *ao);
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);

@@ -18,8 +18,11 @@
 #include <stddef.h>
 #include <pthread.h>
 #include <inttypes.h>
-#include <limits.h>
+#include <unistd.h>
+#include <errno.h>
 #include <assert.h>
+
+#include "osdep/io.h"
 
 #include "ao.h"
 #include "internal.h"
@@ -56,6 +59,8 @@ struct ao_push_state {
     // Whether the current buffer contains the complete audio.
     bool final_chunk;
     double expected_end_time;
+
+    int wakeup_pipe[2];
 };
 
 // lock must be held
@@ -111,7 +116,7 @@ static void reset(struct ao *ao)
     pthread_mutex_unlock(&p->lock);
 }
 
-static void pause(struct ao *ao)
+static void audio_pause(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
     pthread_mutex_lock(&p->lock);
@@ -321,6 +326,9 @@ static void uninit(struct ao *ao)
 
     ao->driver->uninit(ao);
 
+    for (int n = 0; n < 2; n++)
+        close(p->wakeup_pipe[n]);
+
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);
 }
@@ -331,6 +339,7 @@ static int init(struct ao *ao)
 
     pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
+    mp_make_wakeup_pipe(p->wakeup_pipe);
 
     p->buffer = mp_audio_buffer_create(ao);
     mp_audio_buffer_reinit_fmt(p->buffer, ao->format,
@@ -351,7 +360,7 @@ const struct ao_driver ao_api_push = {
     .get_space = get_space,
     .play = play,
     .get_delay = get_delay,
-    .pause = pause,
+    .pause = audio_pause,
     .resume = resume,
     .drain = drain,
     .priv_size = sizeof(struct ao_push_state),
@@ -372,3 +381,55 @@ int ao_play_silence(struct ao *ao, int samples)
     talloc_free(p);
     return r;
 }
+
+#ifndef __MINGW32__
+
+#include <poll.h>
+
+#define MAX_POLL_FDS 20
+
+// Call poll() for the given fds. This will extend the given fds with the
+// wakeup pipe, so ao_wakeup_poll() will basically interrupt this function.
+// Unlocks the lock temporarily.
+// Returns <0 on error, 0 on success.
+int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
+                 pthread_mutex_t *lock)
+{
+    struct ao_push_state *p = ao->api_priv;
+    assert(ao->api == &ao_api_push);
+    assert(&p->lock == lock);
+
+    if (num_fds > MAX_POLL_FDS || p->wakeup_pipe[0] < 0)
+        return -1;
+
+    struct pollfd p_fds[MAX_POLL_FDS];
+    memcpy(p_fds, fds, num_fds * sizeof(p_fds[0]));
+    p_fds[num_fds] = (struct pollfd){
+        .fd = p->wakeup_pipe[0],
+        .events = POLLIN,
+    };
+
+    pthread_mutex_unlock(&p->lock);
+    int r = poll(p_fds, num_fds + 1, -1);
+    r = r < 0 ? -errno : 0;
+    pthread_mutex_lock(&p->lock);
+
+    memcpy(fds, p_fds, num_fds * sizeof(fds[0]));
+    if (p_fds[num_fds].revents & POLLIN) {
+        // flush the wakeup pipe contents - might "drown" some wakeups, but
+        // that's ok for our use-case
+        char buf[100];
+        read(p->wakeup_pipe[0], buf, sizeof(buf));
+    }
+    return (r >= 0 || r == -EINTR) ? 0 : -1;
+}
+
+void ao_wakeup_poll(struct ao *ao)
+{
+    assert(ao->api == &ao_api_push);
+    struct ao_push_state *p = ao->api_priv;
+
+    write(p->wakeup_pipe[1], &(char){0}, 1);
+}
+
+#endif
