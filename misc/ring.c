@@ -55,18 +55,8 @@ struct mp_ring *mp_ring_new(void *talloc_ctx, int size)
     return ringbuffer;
 }
 
-int mp_ring_drain(struct mp_ring *buffer, int len)
-{
-    int buffered  = mp_ring_buffered(buffer);
-    int drain_len = FFMIN(len, buffered);
-    atomic_fetch_add(&buffer->rpos, drain_len);
-    return drain_len;
-}
-
 int mp_ring_read(struct mp_ring *buffer, unsigned char *dest, int len)
 {
-    if (!dest) return mp_ring_drain(buffer, len);
-
     int size     = mp_ring_size(buffer);
     int buffered = mp_ring_buffered(buffer);
     int read_len = FFMIN(len, buffered);
@@ -75,12 +65,19 @@ int mp_ring_read(struct mp_ring *buffer, unsigned char *dest, int len)
     int len1 = FFMIN(size - read_ptr, read_len);
     int len2 = read_len - len1;
 
-    memcpy(dest, buffer->buffer + read_ptr, len1);
-    memcpy(dest + len1, buffer->buffer, len2);
+    if (dest) {
+        memcpy(dest, buffer->buffer + read_ptr, len1);
+        memcpy(dest + len1, buffer->buffer, len2);
+    }
 
     atomic_fetch_add(&buffer->rpos, read_len);
 
     return read_len;
+}
+
+int mp_ring_drain(struct mp_ring *buffer, int len)
+{
+    return mp_ring_read(buffer, NULL, len);
 }
 
 int mp_ring_write(struct mp_ring *buffer, unsigned char *src, int len)
