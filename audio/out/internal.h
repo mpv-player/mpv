@@ -73,10 +73,9 @@ extern const struct ao_driver ao_api_pull;
  * that the driver uses a callback based audio API, otherwise push based.
  *
  * Requirements:
- *  a) Most functions (except ->control) must be provided. ->play is called to
- *     queue audio. ao.c creates a thread to regularly refill audio device
- *     buffers with ->play, but all driver functions are always called under
- *     an exclusive lock.
+ *  a) ->play is called to queue audio. push.c creates a thread to regularly
+ *     refill audio device buffers with ->play, but all driver functions are
+ *     always called under an exclusive lock.
  *     Mandatory:
  *          init
  *          uninit
@@ -89,11 +88,11 @@ extern const struct ao_driver ao_api_pull;
  *     Optional:
  *          control
  *          drain
- *  b) ->play must be NULL. The driver can start the audio API in init(). The
- *     audio API in turn will start a thread and call a callback provided by the
- *     driver. That callback calls ao_read_data() to get audio data. Most
- *     functions are optional and will be emulated if missing (e.g. pausing
- *     is emulated as silence). ->get_delay and ->get_space are never called.
+ *  b) ->play must be NULL. ->resume must be provided, and should make the
+ *     audio API start calling the audio callback. Your audio callback should
+ *     in turn call ao_read_data() to get audio data. Most functions are
+ *     optional and will be emulated if missing (e.g. pausing is emulated as
+ *     silence). ->get_delay and ->get_space are never called.
  *     Mandatory:
  *          init
  *          uninit
@@ -116,12 +115,21 @@ struct ao_driver {
     // Optional. See ao_control() etc. in ao.c
     int (*control)(struct ao *ao, enum aocontrol cmd, void *arg);
     void (*uninit)(struct ao *ao);
+    // push based: see ao_reset()
+    // pull based: stop the audio callback
     void (*reset)(struct ao*ao);
-    int (*get_space)(struct ao *ao);
-    int (*play)(struct ao *ao, void **data, int samples, int flags);
-    float (*get_delay)(struct ao *ao);
+    // push based: see ao_pause()
     void (*pause)(struct ao *ao);
+    // push based: see ao_resume()
+    // pull based: start the audio callback
     void (*resume)(struct ao *ao);
+    // push based: see ao_play()
+    int (*get_space)(struct ao *ao);
+    // push based: see ao_play()
+    int (*play)(struct ao *ao, void **data, int samples, int flags);
+    // push based: see ao_get_delay()
+    float (*get_delay)(struct ao *ao);
+    // push based: block until all queued audio is played (optional)
     void (*drain)(struct ao *ao);
 
     // For option parsing (see vo.h)
