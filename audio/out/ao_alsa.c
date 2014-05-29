@@ -698,6 +698,34 @@ static float get_delay(struct ao *ao)
     return (float)delay / (float)ao->samplerate;
 }
 
+#define MAX_POLL_FDS 20
+static int audio_wait(struct ao *ao, pthread_mutex_t *lock)
+{
+    struct priv *p = ao->priv;
+    int err;
+
+    int num_fds = snd_pcm_poll_descriptors_count(p->alsa);
+    if (num_fds <= 0 || num_fds >= MAX_POLL_FDS)
+        goto alsa_error;
+
+    struct pollfd fds[MAX_POLL_FDS];
+    err = snd_pcm_poll_descriptors(p->alsa, fds, num_fds);
+    CHECK_ALSA_ERROR("cannot get pollfds");
+
+    int r = ao_wait_poll(ao, fds, num_fds, lock);
+    if (r < 0)
+        return r;
+
+    unsigned short revents;
+    snd_pcm_poll_descriptors_revents(p->alsa, fds, num_fds, &revents);
+    CHECK_ALSA_ERROR("cannot read poll events");
+
+    return 0;
+
+alsa_error:
+    return -1;
+}
+
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_alsa = {
@@ -713,6 +741,8 @@ const struct ao_driver audio_out_alsa = {
     .resume    = audio_resume,
     .reset     = reset,
     .drain     = drain,
+    .wait      = audio_wait,
+    .wakeup    = ao_wakeup_poll,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .cfg_block = 1,
