@@ -51,6 +51,8 @@ struct priv {
 
     int num_ports;
     jack_port_t *ports[MP_NUM_CHANNELS];
+
+    int activated;
 };
 
 static int process(jack_nframes_t nframes, void *arg)
@@ -134,6 +136,20 @@ err_port_register:
     return -1;
 }
 
+static void resume(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    if (!p->activated) {
+        p->activated = true;
+
+        if (jack_activate(p->client))
+            MP_FATAL(ao, "activate failed\n");
+
+        if (p->connect)
+            connect_to_outports(ao);
+    }
+}
+
 static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -173,16 +189,7 @@ static int init(struct ao *ao)
 
     jack_set_process_callback(p->client, process, ao);
 
-    if (jack_activate(p->client)) {
-        MP_FATAL(ao, "activate failed\n");
-        goto err_activate;
-    }
-
     ao->samplerate = jack_get_sample_rate(p->client);
-
-    if (p->connect)
-        if (connect_to_outports(ao))
-            goto err_connect;
 
     jack_latency_range_t jack_latency_range;
     jack_port_get_latency_range(p->ports[0], JackPlaybackLatency,
@@ -196,9 +203,6 @@ static int init(struct ao *ao)
     return 0;
 
 err_chmap_sel_get_def:
-err_connect:
-    jack_deactivate(p->client);
-err_activate:
 err_create_ports:
     jack_client_close(p->client);
 err_client_open:
@@ -221,6 +225,7 @@ const struct ao_driver audio_out_jack = {
     .name        = "jack",
     .init      = init,
     .uninit    = uninit,
+    .resume    = resume,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .cfg_client_name = "mpv",

@@ -310,7 +310,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 }
 
 
-static void audio_pause(struct ao *ao)
+static void audio_reset(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
 
@@ -328,11 +328,6 @@ static void audio_resume(struct ao *ao)
     IAudioClient_Start(state->pAudioClientProxy);
 }
 
-static void audio_reset(struct ao *ao)
-{
-    audio_pause(ao);
-}
-
 #define OPT_BASE_STRUCT struct wasapi_state
 
 const struct ao_driver audio_out_wasapi = {
@@ -341,9 +336,8 @@ const struct ao_driver audio_out_wasapi = {
     .init      = init,
     .uninit    = uninit,
     .control   = control,
-    .pause     = audio_pause,
+    //.reset     = audio_reset, <- doesn't wait for audio callback to return
     .resume    = audio_resume,
-    .reset     = audio_reset,
     .priv_size = sizeof(wasapi_state),
     .options   = (const struct m_option[]) {
         OPT_FLAG("exclusive", opt_exclusive, 0),

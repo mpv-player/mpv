@@ -86,6 +86,9 @@ extern const struct ao_driver ao_api_pull;
  *          get_delay
  *          pause
  *          resume
+ *     Optional:
+ *          control
+ *          drain
  *  b) ->play must be NULL. The driver can start the audio API in init(). The
  *     audio API in turn will start a thread and call a callback provided by the
  *     driver. That callback calls ao_read_data() to get audio data. Most
@@ -94,6 +97,10 @@ extern const struct ao_driver ao_api_pull;
  *     Mandatory:
  *          init
  *          uninit
+ *          resume      (starts the audio callback)
+ *     Also, the following optional callbacks can be provided:
+ *          reset       (stops the audio callback, resume() restarts it)
+ *          control
  */
 struct ao_driver {
     // If true, use with encoding only.

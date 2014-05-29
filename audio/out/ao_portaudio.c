@@ -245,7 +245,6 @@ const struct ao_driver audio_out_portaudio = {
     .init      = init,
     .uninit    = uninit,
     .reset     = reset,
-    .pause     = reset,
     .resume    = resume,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {

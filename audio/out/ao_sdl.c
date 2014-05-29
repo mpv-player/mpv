@@ -194,7 +194,7 @@ static int init(struct ao *ao)
     return 1;
 }
 
-static void pause(struct ao *ao)
+static void reset(struct ao *ao)
 {
     struct priv *priv = ao->priv;
     if (!priv->paused)
@@ -217,7 +217,7 @@ const struct ao_driver audio_out_sdl = {
     .name      = "sdl",
     .init      = init,
     .uninit    = uninit,
-    .pause     = pause,
+    .reset     = reset,
     .resume    = resume,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
