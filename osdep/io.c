@@ -19,6 +19,7 @@
  */
 
 #include <unistd.h>
+#include <errno.h>
 
 #include "talloc.h"
 
@@ -40,6 +41,30 @@ bool mp_set_cloexec(int fd)
 #endif
     return true;
 }
+
+#ifdef __MINGW32__
+int mp_make_wakeup_pipe(int pipes[2])
+{
+    pipes[0] = pipes[1] = -1;
+    return -ENOSYS;
+}
+#else
+// create a pipe, and set it to non-blocking (and also set FD_CLOEXEC)
+int mp_make_wakeup_pipe(int pipes[2])
+{
+    if (pipe(pipes) != 0) {
+        pipes[0] = pipes[1] = -1;
+        return -errno;
+    }
+
+    for (int i = 0; i < 2; i++) {
+        mp_set_cloexec(pipes[i]);
+        int val = fcntl(pipes[i], F_GETFL) | O_NONBLOCK;
+        fcntl(pipes[i], F_SETFL, val);
+    }
+    return 0;
+}
+#endif
 
 #ifdef _WIN32
 

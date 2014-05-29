@@ -44,6 +44,7 @@
 #endif
 
 bool mp_set_cloexec(int fd);
+int mp_make_wakeup_pipe(int pipes[2]);
 
 #ifdef _WIN32
 #include <wchar.h>
