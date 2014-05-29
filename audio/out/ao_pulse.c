@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdint.h>
+#include <pthread.h>
 
 #include <pulse/pulseaudio.h>
 
@@ -54,6 +55,11 @@ struct priv {
 
     bool broken_pause;
     int retval;
+
+    // for wakeup handling
+    pthread_mutex_t wakeup_lock;
+    pthread_cond_t wakeup;
+    int wakeup_status;
 
     char *cfg_host;
     char *cfg_sink;
@@ -90,12 +96,36 @@ static void stream_state_cb(pa_stream *s, void *userdata)
     }
 }
 
+static void wakeup(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
+    pthread_mutex_lock(&priv->wakeup_lock);
+    priv->wakeup_status = 1;
+    pthread_cond_signal(&priv->wakeup);
+    pthread_mutex_unlock(&priv->wakeup_lock);
+}
+
 static void stream_request_cb(pa_stream *s, size_t length, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
-    ao_need_data(ao);
+    wakeup(ao);
     pa_threaded_mainloop_signal(priv->mainloop, 0);
+}
+
+static int wait(struct ao *ao, pthread_mutex_t *lock)
+{
+    struct priv *priv = ao->priv;
+    // We don't use this mutex, because pulse like to call stream_request_cb
+    // while we have the central mutex held.
+    pthread_mutex_unlock(lock);
+    pthread_mutex_lock(&priv->wakeup_lock);
+    while (!priv->wakeup_status)
+        pthread_cond_wait(&priv->wakeup, &priv->wakeup_lock);
+    priv->wakeup_status = 0;
+    pthread_mutex_unlock(&priv->wakeup_lock);
+    pthread_mutex_lock(lock);
+    return 0;
 }
 
 static void stream_latency_update_cb(pa_stream *s, void *userdata)
@@ -237,6 +267,9 @@ static void uninit(struct ao *ao)
         pa_threaded_mainloop_free(priv->mainloop);
         priv->mainloop = NULL;
     }
+
+    pthread_cond_destroy(&priv->wakeup);
+    pthread_mutex_destroy(&priv->wakeup_lock);
 }
 
 static int init(struct ao *ao)
@@ -248,6 +281,9 @@ static int init(struct ao *ao)
     char *host = priv->cfg_host && priv->cfg_host[0] ? priv->cfg_host : NULL;
     char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : NULL;
     const char *version = pa_get_library_version();
+
+    pthread_mutex_init(&priv->wakeup_lock, NULL);
+    pthread_cond_init(&priv->wakeup, NULL);
 
     ao->per_application_mixer = true;
 
@@ -626,6 +662,8 @@ const struct ao_driver audio_out_pulse = {
     .pause     = pause,
     .resume    = resume,
     .drain     = drain,
+    .wait      = wait,
+    .wakeup    = wakeup,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .cfg_buffer = 250,

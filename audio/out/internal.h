@@ -20,6 +20,7 @@
 #define MP_AO_INTERNAL_H_
 
 #include <stdbool.h>
+#include <pthread.h>
 
 #include "audio/chmap.h"
 #include "audio/chmap_sel.h"
@@ -88,6 +89,8 @@ extern const struct ao_driver ao_api_pull;
  *     Optional:
  *          control
  *          drain
+ *          wait
+ *          wakeup
  *  b) ->play must be NULL. ->resume must be provided, and should make the
  *     audio API start calling the audio callback. Your audio callback should
  *     in turn call ao_read_data() to get audio data. Most functions are
@@ -131,6 +134,20 @@ struct ao_driver {
     float (*get_delay)(struct ao *ao);
     // push based: block until all queued audio is played (optional)
     void (*drain)(struct ao *ao);
+    // Wait until the audio buffer needs to be refilled. The lock is the
+    // internal mutex usually protecting the internal AO state (and used to
+    // protect driver calls), and must be temporarily unlocked while waiting.
+    // ->wakeup will be called (with lock held) if the wait should be canceled.
+    // Returns 0 on success, -1 on error.
+    // Optional; if this is not provided, generic code using audio timing is
+    // used to estimate when the AO needs to be refilled.
+    // Warning: it's only called if the feed thread truly needs to know when
+    //          the audio thread takes data again. Often, it will just copy
+    //          the complete soft-buffer to the AO, and then wait for the
+    //          decoder instead. Don't do necessary work in this callback.
+    int (*wait)(struct ao *ao, pthread_mutex_t *lock);
+    // In combination with wait(). Lock may or may not be held.
+    void (*wakeup)(struct ao *ao);
 
     // For option parsing (see vo.h)
     int priv_size;
@@ -141,7 +158,6 @@ struct ao_driver {
 // These functions can be called by AOs.
 
 int ao_play_silence(struct ao *ao, int samples);
-void ao_need_data(struct ao *ao);
 void ao_wait_drain(struct ao *ao);
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us);
 
