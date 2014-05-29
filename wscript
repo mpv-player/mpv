@@ -473,6 +473,7 @@ audio_output_features = [
         'desc': 'PortAudio audio output',
         'deps': [ 'pthreads' ],
         'func': check_pkg_config('portaudio-2.0', '>= 19'),
+        'default': 'disable',
     }, {
         'name': '--jack',
         'desc': 'JACK audio output',
