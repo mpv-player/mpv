@@ -44,12 +44,14 @@ struct ao_push_state {
     pthread_t thread;
     pthread_mutex_t lock;
     pthread_cond_t wakeup;
+    pthread_cond_t wakeup_drain;
 
     // --- protected by lock
 
     struct mp_audio_buffer *buffer;
 
     bool terminate;
+    bool drain;
     bool buffers_full;
     bool avoid_ao_wait;
     bool need_wakeup;
@@ -141,14 +143,18 @@ static void resume(struct ao *ao)
 
 static void drain(struct ao *ao)
 {
-    if (ao->driver->drain) {
-        struct ao_push_state *p = ao->api_priv;
-        pthread_mutex_lock(&p->lock);
-        ao->driver->drain(ao);
-        pthread_mutex_unlock(&p->lock);
-    } else {
+    struct ao_push_state *p = ao->api_priv;
+
+    pthread_mutex_lock(&p->lock);
+    p->final_chunk = true;
+    p->drain = true;
+    wakeup_playthread(ao);
+    while (p->drain)
+        pthread_cond_wait(&p->wakeup_drain, &p->lock);
+    pthread_mutex_unlock(&p->lock);
+
+    if (!ao->driver->drain)
         ao_wait_drain(ao);
-    }
 }
 
 static int unlocked_get_space(struct ao *ao)
@@ -290,6 +296,13 @@ static void *playthread(void *arg)
             p->requested_data = true;
         }
 
+        if (p->drain && p->avoid_ao_wait) {
+            if (ao->driver->drain)
+                ao->driver->drain(ao);
+            p->drain = false;
+            pthread_cond_signal(&p->wakeup_drain);
+        }
+
         if (!p->need_wakeup) {
             MP_STATS(ao, "start audio wait");
             if (p->avoid_ao_wait) {
@@ -334,6 +347,7 @@ static void uninit(struct ao *ao)
         close(p->wakeup_pipe[n]);
 
     pthread_cond_destroy(&p->wakeup);
+    pthread_cond_destroy(&p->wakeup_drain);
     pthread_mutex_destroy(&p->lock);
 }
 
@@ -343,6 +357,7 @@ static int init(struct ao *ao)
 
     pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
+    pthread_cond_init(&p->wakeup_drain, NULL);
     mp_make_wakeup_pipe(p->wakeup_pipe);
 
     p->buffer = mp_audio_buffer_create(ao);
