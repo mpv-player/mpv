@@ -545,9 +545,6 @@ check_statement_libs "shm" $_shm SHM "sys/types.h sys/ipc.h sys/shm.h" \
 
 check_trivial "audio select()" $_select AUDIO_SELECT
 
-check_statement_libs "sys/sysinfo.h" auto SYS_SYSINFO_H \
-    sys/sysinfo.h 'struct sysinfo s_info; s_info.mem_unit=0; sysinfo(&s_info)'
-
 echocheck "pkg-config"
 if $($_pkg_config --version > /dev/null 2>&1); then
   if test "$_ld_static"; then

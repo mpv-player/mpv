@@ -46,9 +46,6 @@ known issues:
 #include <sys/types.h>
 #include <unistd.h>
 #include <math.h>
-#if HAVE_SYS_SYSINFO_H
-#include <sys/sysinfo.h>
-#endif
 #if HAVE_SYS_VIDEOIO_H
 #include <sys/videoio.h>
 #else
@@ -1230,13 +1227,6 @@ static int get_capture_buffer_size(priv_t *priv)
     if (priv->tv_param->buffer_size >= 0) {
         bufsize = priv->tv_param->buffer_size*1024*1024;
     } else {
-#if HAVE_SYS_SYSINFO_H
-        struct sysinfo si;
-
-        sysinfo(&si);
-        bufsize = (si.freeram/2)*si.mem_unit;
-        if ( bufsize < 16*1024*1024)
-#endif
         bufsize = 16*1024*1024;
     }
 

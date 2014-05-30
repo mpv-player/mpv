@@ -209,11 +209,6 @@ iconv support use --disable-iconv.",
         'func': check_statement('sys/vfs.h',
                                 'struct statfs fs; fstatfs(0, &fs); fs.f_namelen')
     }, {
-        'name': 'sys-sysinfo-h',
-        'desc': 'sys/sysinfo.h',
-        'func': check_statement('sys/sysinfo.h',
-            'struct sysinfo s_info; s_info.mem_unit=0; sysinfo(&s_info)')
-    }, {
         'name': '--libguess',
         'desc': 'libguess support',
         'func': check_pkg_config('libguess', '>= 1.0'),
