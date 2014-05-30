@@ -410,7 +410,7 @@ int ao_play_silence(struct ao *ao, int samples)
 // Call poll() for the given fds. This will extend the given fds with the
 // wakeup pipe, so ao_wakeup_poll() will basically interrupt this function.
 // Unlocks the lock temporarily.
-// Returns <0 on error, 0 on success.
+// Returns <0 on error, 0 on success, 1 if the caller should return immediately.
 int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
                  pthread_mutex_t *lock)
 {
@@ -434,13 +434,15 @@ int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
     pthread_mutex_lock(&p->lock);
 
     memcpy(fds, p_fds, num_fds * sizeof(fds[0]));
+    bool wakeup = false;
     if (p_fds[num_fds].revents & POLLIN) {
+        wakeup = true;
         // flush the wakeup pipe contents - might "drown" some wakeups, but
         // that's ok for our use-case
         char buf[100];
         read(p->wakeup_pipe[0], buf, sizeof(buf));
     }
-    return (r >= 0 || r == -EINTR) ? 0 : -1;
+    return (r >= 0 || r == -EINTR) ? wakeup : -1;
 }
 
 void ao_wakeup_poll(struct ao *ao)
