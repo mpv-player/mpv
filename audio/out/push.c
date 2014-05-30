@@ -240,7 +240,14 @@ static void ao_play_data(struct ao *ao)
         MP_WARN(ao, "Audio device returned non-sense value.\n");
         r = data.samples;
     }
-    mp_audio_buffer_skip(p->buffer, MPMAX(r, 0));
+    r = MPMAX(r, 0);
+    // Probably can't copy the rest of the buffer due to period alignment.
+    bool stuck = r <= 0 && space >= max && data.samples > 0;
+    if ((flags & AOPLAY_FINAL_CHUNK) && stuck) {
+        MP_ERR(ao, "Audio output driver seems to ignore AOPLAY_FINAL_CHUNK.\n");
+        r = max;
+    }
+    mp_audio_buffer_skip(p->buffer, r);
     if (p->final_chunk && mp_audio_buffer_samples(p->buffer) == 0) {
         p->expected_end_time = mp_time_sec() + AO_EOF_DELAY + 0.25; // + margin
         if (ao->driver->get_delay)
@@ -249,10 +256,7 @@ static void ao_play_data(struct ao *ao)
     // In both cases, we have to account for space!=0, but the AO not accepting
     // any new data (due to rounding to period boundaries).
     p->buffers_full = max >= space && r <= 0;
-    p->avoid_ao_wait = (max == 0 && space > 0) || p->paused;
-    // Probably can't copy the rest of the buffer due to period alignment.
-    if (!p->final_chunk && r <= 0 && space >= max && data.samples > 0)
-        p->avoid_ao_wait = true;
+    p->avoid_ao_wait = (max == 0 && space > 0) || p->paused || stuck;
 }
 
 // Estimate when the AO needs data again.

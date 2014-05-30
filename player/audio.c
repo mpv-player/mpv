@@ -459,13 +459,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     int played = write_to_ao(mpctx, &data, playflags, written_audio_pts(mpctx));
     assert(played >= 0 && played <= data.samples);
 
-    if (played > 0) {
-        mp_audio_buffer_skip(mpctx->ao_buffer, played);
-    } else if (!mpctx->paused && audio_eof && ao_get_delay(ao) < .04) {
-        // Sanity check to avoid hanging in case current ao doesn't output
-        // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
-        signal_eof = true;
-    }
+    mp_audio_buffer_skip(mpctx->ao_buffer, played);
 
     return signal_eof ? -2 : -partial_fill;
 }
