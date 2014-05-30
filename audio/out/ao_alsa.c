@@ -757,8 +757,8 @@ const struct ao_driver audio_out_alsa = {
         .cfg_mixer_index = 0,
     },
     .options = (const struct m_option[]) {
-        OPT_FLAG("resample", cfg_resample, 0),
         OPT_STRING("device", cfg_device, 0),
+        OPT_FLAG("resample", cfg_resample, 0),
         OPT_FLAG("block", cfg_block, 0),
         OPT_STRING("mixer-device", cfg_mixer_device, 0),
         OPT_STRING("mixer-name", cfg_mixer_name, 0),
