@@ -347,6 +347,7 @@ static int create_gl_context(struct vo *vo, int gl3profile)
         NSOpenGLPFAOpenGLProfile,
         get_nsopengl_profile(gl3profile),
         NSOpenGLPFADoubleBuffer,
+        NSOpenGLPFAAllowOfflineRenderers,
         0
     };
 
