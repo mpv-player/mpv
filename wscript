@@ -188,11 +188,6 @@ iconv support use --disable-iconv.",
         'desc': 'setmode()',
         'func': check_statement('io.h', 'setmode(0, 0)')
     }, {
-        'name': 'sys-sysinfo-h',
-        'desc': 'sys/sysinfo.h',
-        'func': check_statement('sys/sysinfo.h',
-            'struct sysinfo s_info; s_info.mem_unit=0; sysinfo(&s_info)')
-    }, {
         'name': '--libguess',
         'desc': 'libguess support',
         'func': check_pkg_config('libguess', '>= 1.0'),
