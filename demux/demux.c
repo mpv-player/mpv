@@ -607,10 +607,10 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     if (ret >= 0) {
         demuxer->params = NULL;
         if (demuxer->filetype)
-            mp_info(log, "Detected file format: %s (%s)\n",
-                    demuxer->filetype, desc->desc);
+            mp_verbose(log, "Detected file format: %s (%s)\n",
+                       demuxer->filetype, desc->desc);
         else
-            mp_info(log, "Detected file format: %s\n", desc->desc);
+            mp_verbose(log, "Detected file format: %s\n", desc->desc);
         if (stream_manages_timeline(demuxer->stream)) {
             // Incorrect, but fixes some behavior with DVD/BD
             demuxer->ts_resets_possible = false;

@@ -195,8 +195,7 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
         d_video->decoder_desc =
             talloc_asprintf(d_video, "%s [%s:%s]", decoder->desc, decoder->family,
                             decoder->decoder);
-        MP_INFO(d_video, "Selected video codec: %s\n",
-                d_video->decoder_desc);
+        MP_VERBOSE(d_video, "Selected video codec: %s\n", d_video->decoder_desc);
     } else {
         MP_ERR(d_video, "Failed to initialize a video decoder for codec '%s'.\n",
                d_video->header->codec ? d_video->header->codec : "<unknown>");

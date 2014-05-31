@@ -163,8 +163,7 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
         d_audio->decoder_desc =
             talloc_asprintf(d_audio, "%s [%s:%s]", decoder->desc, decoder->family,
                             decoder->decoder);
-        MP_INFO(d_audio, "Selected audio codec: %s\n",
-                d_audio->decoder_desc);
+        MP_VERBOSE(d_audio, "Selected audio codec: %s\n", d_audio->decoder_desc);
         MP_VERBOSE(d_audio, "AUDIO: %d Hz, %d ch, %s\n",
                    d_audio->decoded.rate, d_audio->decoded.channels.num,
                    af_fmt_to_str(d_audio->decoded.format));
