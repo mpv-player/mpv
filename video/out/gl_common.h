@@ -208,8 +208,6 @@ struct gl_hwdec_driver {
 
 extern const struct gl_hwdec_driver *mpgl_hwdec_drivers[];
 
-void *mp_getdladdr(const char *s);
-
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);
 

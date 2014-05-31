@@ -144,7 +144,7 @@ static bool is_software_gl(GL *gl)
 #include <dlfcn.h>
 #endif
 
-void *mp_getdladdr(const char *s)
+static void *mp_getdladdr(const char *s)
 {
     void *ret = NULL;
 #if HAVE_LIBDL

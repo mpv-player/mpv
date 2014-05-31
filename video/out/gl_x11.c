@@ -62,18 +62,9 @@ static bool create_context_x11_old(struct MPGLContext *ctx)
         return false;
     }
 
-    void *(*getProcAddress)(const GLubyte *);
-    getProcAddress = mp_getdladdr("glXGetProcAddress");
-    if (!getProcAddress)
-        getProcAddress = mp_getdladdr("glXGetProcAddressARB");
+    const char *glxstr = glXQueryExtensionsString(display, ctx->vo->x11->screen);
 
-    const char *glxstr = "";
-    const char *(*glXExtStr)(Display *, int)
-        = mp_getdladdr("glXQueryExtensionsString");
-    if (glXExtStr)
-        glxstr = glXExtStr(display, ctx->vo->x11->screen);
-
-    mpgl_load_functions(gl, getProcAddress, glxstr, vo->log);
+    mpgl_load_functions(gl, (void *)glXGetProcAddressARB, glxstr, vo->log);
     if (!gl->GenPrograms && gl->GetString &&
         gl->version < MPGL_VER(3, 0) &&
         strstr(gl->GetString(GL_EXTENSIONS), "GL_ARB_vertex_program"))
@@ -105,11 +96,8 @@ static bool create_context_x11_gl3(struct MPGLContext *ctx, bool debug)
         (glXCreateContextAttribsARBProc)
             glXGetProcAddressARB((const GLubyte *)"glXCreateContextAttribsARB");
 
-    const char *glxstr = "";
-    const char *(*glXExtStr)(Display *, int)
-        = mp_getdladdr("glXQueryExtensionsString");
-    if (glXExtStr)
-        glxstr = glXExtStr(vo->x11->display, vo->x11->screen);
+    const char *glxstr =
+        glXQueryExtensionsString(vo->x11->display, vo->x11->screen);
     bool have_ctx_ext = glxstr && !!strstr(glxstr, "GLX_ARB_create_context");
 
     if (!(have_ctx_ext && glXCreateContextAttribsARB)) {
