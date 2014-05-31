@@ -65,13 +65,6 @@ static bool create_context_x11_old(struct MPGLContext *ctx)
     const char *glxstr = glXQueryExtensionsString(display, ctx->vo->x11->screen);
 
     mpgl_load_functions(gl, (void *)glXGetProcAddressARB, glxstr, vo->log);
-    if (!gl->GenPrograms && gl->GetString &&
-        gl->version < MPGL_VER(3, 0) &&
-        strstr(gl->GetString(GL_EXTENSIONS), "GL_ARB_vertex_program"))
-    {
-        MP_WARN(vo, "Broken glXGetProcAddress detected, trying workaround\n");
-        mpgl_load_functions(gl, NULL, glxstr, vo->log);
-    }
 
     glx_ctx->context = new_context;
 
