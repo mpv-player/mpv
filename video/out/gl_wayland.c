@@ -121,8 +121,6 @@ static bool egl_create_context(struct vo_wayland_state *wl,
 
     mpgl_load_functions(gl, (void*(*)(const GLubyte*))eglGetProcAddress, eglstr,
                         wl->log);
-    if (!gl->BindProgram)
-        mpgl_load_functions(gl, NULL, eglstr, wl->log);
 
     return true;
 }
