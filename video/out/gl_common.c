@@ -140,23 +140,6 @@ static bool is_software_gl(GL *gl)
            strcmp(renderer, "Mesa X11") == 0;
 }
 
-#if HAVE_LIBDL
-#include <dlfcn.h>
-#endif
-
-static void *mp_getdladdr(const char *s)
-{
-    void *ret = NULL;
-#if HAVE_LIBDL
-    void *handle = dlopen(NULL, RTLD_LAZY);
-    if (!handle)
-        return NULL;
-    ret = dlsym(handle, s);
-    dlclose(handle);
-#endif
-    return ret;
-}
-
 #define FN_OFFS(name) offsetof(GL, name)
 
 #define DEF_FN(name)            {FN_OFFS(name), {"gl" # name}}
@@ -490,10 +473,7 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
         .extensions = talloc_strdup(gl, ext2 ? ext2 : ""),
     };
 
-    if (!getProcAddress)
-        getProcAddress = (void *)mp_getdladdr;
-
-    gl->GetString = getProcAddress("glGetString");
+    gl->GetString = getProcAddress ? getProcAddress("glGetString") : NULL;
     if (!gl->GetString) {
         mp_err(log, "Can't load OpenGL functions.\n");
         return;
