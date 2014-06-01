@@ -481,7 +481,7 @@ def build(ctx):
         # This assumes all examples are single-file (as examples should be)
         for f in ["simple"]:
             ctx(
-                target       = f,
+                target       = f + "_mpv",
                 source       = "DOCS/client_api_examples/" + f + ".c",
                 includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()],
                 use          = "mpv",
