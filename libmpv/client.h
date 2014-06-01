@@ -207,7 +207,7 @@ typedef enum mpv_error {
     /**
      * Trying to set or get a property using an unsupported MPV_FORMAT.
      */
-    MPV_ERROR_PROPERTY_FORMAT    = -9,
+    MPV_ERROR_PROPERTY_FORMAT   = -9,
     /**
      * The property exists, but is not available. This usually happens when the
      * associated subsystem is not active, e.g. querying audio parameters while
@@ -217,7 +217,11 @@ typedef enum mpv_error {
     /**
      * Error setting or getting a property.
      */
-    MPV_ERROR_PROPERTY_ERROR    = -11
+    MPV_ERROR_PROPERTY_ERROR    = -11,
+    /**
+     * General error when running a command with mpv_command and similar.
+     */
+    MPV_ERROR_COMMAND           = -12
 } mpv_error;
 
 /**
@@ -619,10 +623,6 @@ int mpv_set_option_string(mpv_handle *ctx, const char *name, const char *data);
  * form.
  *
  * The commands and their parameters are documented in input.rst.
- *
- * Caveat: currently, commands do not report whether they run successfully. If
- *         the command exists and its arguments are not broken, always success
- *         will be returned.
  *
  * @param[in] args NULL-terminated list of strings. Usually, the first item
  *                 is the command, and the following items are arguments.

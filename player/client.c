@@ -717,8 +717,8 @@ struct cmd_request {
 static void cmd_fn(void *data)
 {
     struct cmd_request *req = data;
-    run_command(req->mpctx, req->cmd);
-    req->status = 0;
+    int r = run_command(req->mpctx, req->cmd);
+    req->status = r >= 0 ? 0 : MPV_ERROR_COMMAND;
     talloc_free(req->cmd);
     if (req->reply_ctx) {
         status_reply(req->reply_ctx, MPV_EVENT_COMMAND_REPLY,
@@ -1305,6 +1305,7 @@ static const char *err_table[] = {
     [-MPV_ERROR_PROPERTY_FORMAT] = "unsupported format for accessing property",
     [-MPV_ERROR_PROPERTY_UNAVAILABLE] = "property unavailable",
     [-MPV_ERROR_PROPERTY_ERROR] = "error accessing property",
+    [-MPV_ERROR_COMMAND] = "error running command",
 };
 
 const char *mpv_error_string(int error)
