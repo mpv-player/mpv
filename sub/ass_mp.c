@@ -57,6 +57,16 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->FontSize = opts->font_size * scale;
     style->PrimaryColour = MP_ASS_COLOR(opts->color);
     style->SecondaryColour = style->PrimaryColour;
+#if LIBASS_VERSION >= 0x01102001
+    style->OutlineColour = MP_ASS_COLOR(opts->border_color);
+    if (opts->back_color.a) {
+        style->BackColour = MP_ASS_COLOR(opts->back_color);
+        style->BorderStyle = 4; // opaque box
+    } else {
+        style->BackColour = MP_ASS_COLOR(opts->shadow_color);
+        style->BorderStyle = 1; // outline
+    }
+#else
     if (opts->back_color.a) {
         style->OutlineColour = MP_ASS_COLOR(opts->back_color);
         style->BorderStyle = 3; // opaque box
@@ -65,6 +75,7 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
         style->BorderStyle = 1; // outline
     }
     style->BackColour = MP_ASS_COLOR(opts->shadow_color);
+#endif
     style->Outline = opts->border_size * scale;
     style->Shadow = opts->shadow_offset * scale;
     style->Spacing = opts->spacing * scale;
