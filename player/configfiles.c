@@ -298,6 +298,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     FILE *file = fopen(conffile, "wb");
     if (!file)
         goto exit;
+    if (mpctx->opts->write_filename_in_watch_later_config)
+        fprintf(file, "# %s\n", mpctx->filename);
     fprintf(file, "start=%f\n", pos);
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];

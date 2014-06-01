@@ -1832,6 +1832,15 @@ OPTIONS
     This behavior is disabled by default, but is always available when quitting
     the player with Shift+Q.
 
+``--write-filename-in-watch-later-config``
+    Prepend the watch later config files with the name of the file they refer
+    to. This is simply written as comment on the top of the file.
+
+    .. warning::
+
+        This option may expose privacy-sensitive information and is thus
+        disabled by default.
+
 ``--screen=<default|0-32>``
     In multi-monitor configurations (i.e. a single desktop that spans across
     multiple displays), this option tells mpv which screen to display the
