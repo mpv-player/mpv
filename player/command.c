@@ -105,7 +105,13 @@ static void mark_seek(struct MPContext *mpctx)
 
 static char *format_bitrate(int rate)
 {
-    return talloc_asprintf(NULL, "%d kbps", rate / 1000);
+    double r = rate;
+    if (rate < 1024 * 1024)
+    {
+        return talloc_asprintf(NULL, "%.3f kbps", (double)r * 8.0 / 1000.0);
+    }
+
+    return talloc_asprintf(NULL, "%.3f mbps", (double)r * 8.0 / 1000000.0);
 }
 
 static char *format_file_size(int64_t size)
@@ -1847,6 +1853,7 @@ static int mp_property_video_bitrate(m_option_t *prop, int action,
 {
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
+
     if (action == M_PROPERTY_PRINT) {
         *(char **)arg = format_bitrate(mpctx->d_video->bitrate);
         return M_PROPERTY_OK;
