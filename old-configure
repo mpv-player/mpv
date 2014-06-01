@@ -179,7 +179,6 @@ options_state_machine() {
     opt_yes_no _libquvi4    "libquvi 0.4.x"
     opt_yes_no _libquvi9    "libquvi 0.9.x"
     opt_yes_no _lcms2       "LCMS2 support"
-    opt_yes_no _vcd         "VCD support" yes
     opt_yes_no _bluray      "Blu-ray support"
     opt_yes_no _dvdread     "libdvdread"
     opt_yes_no _dvdnav      "libdvdnav"
@@ -729,8 +728,6 @@ check_pkg_config "JACK" $_jack JACK 'jack'
 check_pkg_config "OpenAL" $_openal OPENAL 'openal >= 1.13'
 
 check_pkg_config "ALSA audio" $_alsa ALSA 'alsa >= 1.0.9'
-
-check_trivial "VCD support" $_vcd VCD
 
 check_pkg_config "Blu-ray support" $_bluray LIBBLURAY 'libbluray >= 0.2.1'
 

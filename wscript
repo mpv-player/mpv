@@ -272,17 +272,6 @@ If you really mean to compile without libass support use --disable-libass."
         'desc' : 'lirc',
         'func': check_cc(header_name='lirc/lirc_client.h', lib='lirc_client'),
     }, {
-        'name' : '--vcd',
-        'desc' : 'VCD support',
-        'deps_any': [ 'os-linux', 'os-freebsd', 'os-netbsd', 'os-openbsd', 'os-darwin' ],
-        'func': check_true,
-        'os_specific_checks': {
-            'os-win32': {
-                'func': check_cc(fragment=load_fragment('vcd_windows.c'))
-            }
-        },
-        'default': 'disable',
-    }, {
         'name': '--libbluray',
         'desc': 'Bluray support',
         'func': check_pkg_config('libbluray', '>= 0.3.0'),

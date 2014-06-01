@@ -57,7 +57,6 @@ char *cdrom_device = NULL;
 char *dvd_device = NULL;
 int dvd_title = 0;
 
-extern const stream_info_t stream_info_vcd;
 extern const stream_info_t stream_info_cdda;
 extern const stream_info_t stream_info_dvb;
 extern const stream_info_t stream_info_tv;
@@ -79,9 +78,6 @@ extern const stream_info_t stream_info_rar_entry;
 extern const stream_info_t stream_info_edl;
 
 static const stream_info_t *const stream_list[] = {
-#if HAVE_VCD
-    &stream_info_vcd,
-#endif
 #if HAVE_CDDA
     &stream_info_cdda,
 #endif
