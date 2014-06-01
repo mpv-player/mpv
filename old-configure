@@ -809,6 +809,12 @@ api_statement_check \
     'enum AVPacketSideDataType type = AV_PKT_DATA_REPLAYGAIN'
 
 api_statement_check \
+    "libavutil/libavcodec display matrix side data" \
+    HAVE_AV_DISPLAYMATRIX \
+    libavutil/frame.h \
+    'enum AVFrameSideDataType type = AV_FRAME_DATA_DISPLAYMATRIX'
+
+api_statement_check \
     "libavutil AVFrame metadata" \
     HAVE_AVFRAME_METADATA \
     libavutil/frame.h \
