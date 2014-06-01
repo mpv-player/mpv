@@ -37,6 +37,6 @@ const struct m_option *mp_get_property_list(void);
 int mp_find_property_index(const char *property);
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg);
-void mp_notify_property(struct MPContext *mpctx, char *property);
+void mp_notify_property(struct MPContext *mpctx, const char *property);
 
 #endif /* MPLAYER_COMMAND_H */

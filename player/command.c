@@ -3738,7 +3738,7 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
         mp_client_property_change(mpctx, mp_event_property_change[event]);
 }
 
-void mp_notify_property(struct MPContext *mpctx, char *property)
+void mp_notify_property(struct MPContext *mpctx, const char *property)
 {
     mp_client_property_change(mpctx, (const char*[]){property, NULL});
 }
