@@ -391,8 +391,11 @@ void vo_seek_reset(struct vo *vo)
 void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
                           struct mp_rect *out_dst, struct mp_osd_res *out_osd)
 {
-    if (!vo->params)
+    if (!vo->params) {
+        *out_src = *out_dst = (struct mp_rect){0};
+        *out_osd = (struct mp_osd_res){0};
         return;
+    }
     mp_get_src_dst_rects(vo->log, vo->opts, vo->driver->caps, vo->params,
                          vo->dwidth, vo->dheight, vo->monitor_par,
                          out_src, out_dst, out_osd);
