@@ -1707,7 +1707,7 @@ static int parse_color(struct mp_log *log, const m_option_t *opt,
         for (int n = 0; n < num; n++) {
             bstr rest;
             double d = bstrtod(comp_str[n], &rest);
-            if (rest.len || !comp_str[n].len || d < 0 || d > 1 || !isnormal(d))
+            if (rest.len || !comp_str[n].len || d < 0 || d > 1 || !isfinite(d))
                 goto error;
             comp[n] = d;
         }
