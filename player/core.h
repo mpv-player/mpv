@@ -349,6 +349,7 @@ typedef struct MPContext {
     struct command_ctx *command_ctx;
     struct encode_lavc_context *encode_lavc_ctx;
     struct mp_nav_state *nav_state;
+    struct slave_ctx *slave_ctx;
 } MPContext;
 
 // audio.c

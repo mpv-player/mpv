@@ -89,6 +89,10 @@ def build(ctx):
         'darwin': 'osdep/timer-darwin.c',
     }.get(ctx.env.DEST_OS, "osdep/timer-linux.c")
 
+    ipc_c = {
+        'win32':  'osdep/ipc-win.c',
+    }.get(ctx.env.DEST_OS, "osdep/ipc-unix.c")
+
     sources = [
         ## Audio
         ( "audio/audio.c" ),
@@ -226,6 +230,7 @@ def build(ctx):
         ( "player/timeline/tl_mpv_edl.c" ),
         ( "player/timeline/tl_matroska.c" ),
         ( "player/video.c" ),
+        ( "player/slave.c" ),
 
         ## Streams
         ( "stream/ai_alsa1x.c",                  "alsa" ),
@@ -373,6 +378,8 @@ def build(ctx):
         ( "osdep/numcores.c"),
         ( "osdep/timer.c" ),
         ( timer_c ),
+        ( "osdep/ipc.c" ),
+        ( ipc_c ),
         ( "osdep/threads.c" ),
 
         ( "osdep/ar/HIDRemote.m",                "cocoa" ),

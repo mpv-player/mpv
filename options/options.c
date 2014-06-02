@@ -42,6 +42,7 @@
 #include "player/core.h"
 #include "player/command.h"
 #include "osdep/priority.h"
+#include "player/slave.h"
 
 /* defined in demux: */
 extern const m_option_t demux_rawaudio_opts[];
@@ -596,6 +597,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("term-status-msg", status_msg, 0),
     OPT_STRING("osd-status-msg", osd_status_msg, 0),
 
+    OPT_FLAG("slave", slave, 0),
+    OPT_SUBSTRUCT("slave-opts", slave_opts, slave_opts_conf, 0),
     OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
     OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
