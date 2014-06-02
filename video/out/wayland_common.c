@@ -915,17 +915,6 @@ static void vo_wayland_ontop (struct vo *vo)
     schedule_resize(wl, 0, wl->window.width, wl->window.height);
 }
 
-static void vo_wayland_border (struct vo *vo)
-{
-    /* wayland clienst have to do the decorations themself
-     * (client side decorations) but there is no such code implement nor
-     * do I plan on implementing something like client side decorations
-     *
-     * The only exception would be resizing on when clicking and dragging
-     * on the border region of the window but this should be discussed at first
-     */
-}
-
 static void vo_wayland_fullscreen (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
@@ -1113,10 +1102,6 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_ONTOP:
         vo_wayland_ontop(vo);
-        return VO_TRUE;
-    case VOCTRL_BORDER:
-        vo_wayland_border(vo);
-        *events |= VO_EVENT_RESIZE;
         return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
         int *s = arg;
