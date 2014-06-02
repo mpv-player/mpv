@@ -348,6 +348,9 @@ static int create_gl_context(struct vo *vo, int gl3profile)
         (CGLPixelFormatAttribute) cgl_profile(gl3profile),
         kCGLPFADoubleBuffer,
         kCGLPFAAccelerated,
+        #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
+        kCGLPFASupportsAutomaticGraphicsSwitching,
+        #endif
         0
     };
 
