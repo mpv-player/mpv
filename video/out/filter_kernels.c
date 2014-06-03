@@ -106,6 +106,11 @@ void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array)
 
 typedef struct filter_kernel kernel;
 
+static double nearest(kernel *k, double x)
+{
+    return 1.0;
+}
+
 static double bilinear(kernel *k, double x)
 {
     return 1.0 - x;
@@ -254,6 +259,7 @@ static double blackman(kernel *k, double x)
 }
 
 const struct filter_kernel mp_filter_kernels[] = {
+    {"nearest",        0.5, nearest},
     {"bilinear_slow",  1,   bilinear},
     {"hanning",        1,   hanning},
     {"hamming",        1,   hamming},
