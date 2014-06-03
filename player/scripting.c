@@ -102,7 +102,7 @@ static void mp_load_script(struct MPContext *mpctx, const char *fname)
     }
 
     if (!backend) {
-        MP_WARN(mpctx, "Can't load unknown script: %s\n", fname);
+        MP_VERBOSE(mpctx, "Can't load unknown script: %s\n", fname);
         return;
     }
 
