@@ -283,7 +283,8 @@ static void *playthread(void *arg)
     struct ao_push_state *p = ao->api_priv;
     pthread_mutex_lock(&p->lock);
     while (!p->terminate) {
-        ao_play_data(ao);
+        if (!p->paused)
+            ao_play_data(ao);
 
         // Request new data from decoder if buffer goes below "full".
         // Allow a small margin of missing data for AOs that use timeouts.
@@ -303,7 +304,7 @@ static void *playthread(void *arg)
 
         if (!p->need_wakeup) {
             MP_STATS(ao, "start audio wait");
-            if (p->avoid_ao_wait) {
+            if (p->avoid_ao_wait || p->paused) {
                 // Avoid busy waiting, because the audio API will still report
                 // that it needs new data, even if we're not ready yet, or if
                 // get_space() decides that the amount of audio buffered in the
