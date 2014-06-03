@@ -108,7 +108,7 @@ typedef struct filter_kernel kernel;
 
 static double nearest(kernel *k, double x)
 {
-    return 1.0;
+    return x > 0.5 ? 0.0 : 1.0;
 }
 
 static double bilinear(kernel *k, double x)
