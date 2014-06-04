@@ -221,7 +221,7 @@ static size_t read_buffer(struct priv *s, unsigned char *dst,
 static bool cache_fill(struct priv *s)
 {
     int64_t read = s->read_filepos;
-    int len;
+    int len = 0;
 
     // drop cache contents only if seeking backward or too much fwd.
     // This is also done for on-disk files, since it loses the backseek cache.
@@ -238,6 +238,8 @@ static bool cache_fill(struct priv *s)
         MP_VERBOSE(s, "Seeking underlying stream: %"PRId64" -> %"PRId64"\n",
                    stream_tell(s->stream), s->max_filepos);
         stream_seek(s->stream, s->max_filepos);
+        if (stream_tell(s->stream) != s->max_filepos)
+            goto done;
     }
 
     // number of buffer bytes which should be preserved in backwards direction
@@ -290,6 +292,7 @@ static bool cache_fill(struct priv *s)
     if (pos + len == s->buffer_size)
         s->offset += s->buffer_size; // wrap...
 
+done:
     s->eof = len <= 0;
     s->idle = s->eof;
     s->reads++;
