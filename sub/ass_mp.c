@@ -139,6 +139,7 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
     float set_line_spacing = 0;
     float set_font_scale = 1;
     int set_hinting = 0;
+    int set_force_override = 0;
     if (opts->ass_style_override) {
         set_use_margins = opts->ass_use_margins;
 #if LIBASS_VERSION >= 0x01010000
@@ -147,6 +148,7 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
         set_line_spacing = opts->ass_line_spacing;
         set_font_scale = opts->sub_scale;
         set_hinting = opts->ass_hinting;
+        set_force_override = opts->ass_style_override == 3;
     }
 
     ass_set_use_margins(priv, set_use_margins);
@@ -155,6 +157,13 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
 #endif
 #if LIBASS_VERSION >= 0x01000000
     ass_set_shaper(priv, opts->ass_shaper);
+#endif
+#if LIBASS_VERSION >= 0x01103000
+    ass_set_selective_style_override_enabled(priv, set_force_override);
+    ASS_Style style = {0};
+    mp_ass_set_style(&style, 288, opts->sub_text_style);
+    ass_set_selective_style_override(priv, &style);
+    free(style.FontName);
 #endif
     ass_set_font_scale(priv, set_font_scale);
     ass_set_hinting(priv, set_hinting);
