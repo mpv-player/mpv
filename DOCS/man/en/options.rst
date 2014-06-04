@@ -162,18 +162,13 @@ OPTIONS
 
         Using this option may lead to incorrect subtitle rendering.
 
-``--ass-style-override=<yes|no|force|force-default>``
+``--ass-style-override=<yes|no|force>``
     Control whether user style overrides should be applied.
 
     :yes:   Apply all the ``--ass-*`` style override options. Changing the default
             for any of these options can lead to incorrect subtitle rendering
             (default).
     :no:    Render subtitles as forced by subtitle scripts.
-    :force-default: Like ``yes``, but also override the style named ``Default``
-            to make it look like the like text subtitle style implied by the
-            ``--sub-text-...`` option. This won't always work, because the
-            dialogue style doesn't necessary use this name, and it might break
-            other advanced uses of the ASS format.
     :force: Try to force the font style as defined by the ``--sub-text-*``
             options. Requires a modified libass, can break rendering easily.
             Probably more reliable than ``force``.

@@ -124,16 +124,6 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     event->Text = strdup(text);
 }
 
-static ASS_Style *find_style(ASS_Track *track, const char *name)
-{
-    for (int n = track->n_styles - 1; n >= 0; n--) {
-        const char *style_name = track->styles[n].Name;
-        if (style_name && strcasecmp(style_name, name) == 0)
-            return &track->styles[n];
-    }
-    return NULL;
-}
-
 static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res)
 {
@@ -142,18 +132,6 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 
     if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
         return;
-
-    ASS_Style prev_default_style;
-    ASS_Style *default_style = NULL;
-    if (opts->ass_style_override == 2) {
-        default_style = find_style(ctx->ass_track, "Default");
-        if (default_style) {
-            prev_default_style = *default_style;
-            default_style->FontName = NULL; // don't free this
-            mp_ass_set_style(default_style, ctx->ass_track->PlayResY,
-                             opts->sub_text_style);
-        }
-    }
 
     ASS_Renderer *renderer = sd->ass_renderer;
     double scale = dim.display_par;
@@ -184,11 +162,6 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 
     if (!ctx->is_converted)
         mangle_colors(sd, res);
-
-    if (default_style) {
-        free(default_style->FontName);
-        *default_style = prev_default_style;
-    }
 }
 
 struct buf {
