@@ -88,13 +88,14 @@ void main() {
     gl_Position = vec4(position, 1);
     color = vertex_color;
 
-#ifdef USE_OSD_LINEAR_CONV
     // Although we are not scaling in linear light, both 3DLUT and SRGB still
     // operate on linear light inputs so we have to convert to it before
     // either step can be applied.
+#ifdef USE_OSD_LINEAR_CONV_APPROX
+    color.rgb = pow(color.rgb, vec3(1.95));
+#endif
+#ifdef USE_OSD_LINEAR_CONV_BT2020
     color.rgb = bt2020_expand(color.rgb);
-    // NOTE: This always applies the true BT2020, maybe we need to use
-    // approx-gamma here too?
 #endif
 #ifdef USE_OSD_CMS_MATRIX
     // Convert to the right target gamut first (to BT.709 for sRGB,
