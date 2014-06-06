@@ -402,9 +402,6 @@ int vo_x11_init(struct vo *vo)
     struct vo_x11_state *x11 = talloc_ptrtype(NULL, x11);
     *x11 = (struct vo_x11_state){
         .log = mp_log_new(x11, vo->log, "x11"),
-        .olddecor = MWM_DECOR_ALL,
-        .oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
-                    MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
         .screensaver_enabled = true,
     };
     vo->x11 = x11;
@@ -530,42 +527,29 @@ static int vo_x11_lookupkey(int key)
     return mpkey;
 }
 
-static void vo_x11_decoration(struct vo *vo, int d)
+static void vo_x11_decoration(struct vo *vo, bool d)
 {
     struct vo_x11_state *x11 = vo->x11;
-    Atom vo_MotifHints;
-    MotifWmHints vo_MotifWmHints;
 
     if (vo->opts->WinID >= 0 || !x11->window)
         return;
 
-    vo_MotifHints = XInternAtom(x11->display, "_MOTIF_WM_HINTS", 0);
-    if (vo_MotifHints != None) {
-        if (!x11->got_motif_hints) {
-            MotifWmHints mhints = {0};
-            x11_get_property_copy(x11, x11->window, vo_MotifHints,
-                                  vo_MotifHints, 32, &mhints, sizeof(mhints));
-            if (mhints.flags & MWM_HINTS_DECORATIONS)
-                x11->olddecor = mhints.decorations;
-            if (mhints.flags & MWM_HINTS_FUNCTIONS)
-                x11->oldfuncs = mhints.functions;
-        }
-        x11->got_motif_hints = true;
-
-        memset(&vo_MotifWmHints, 0, sizeof(MotifWmHints));
-        vo_MotifWmHints.flags =
-            MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
-        if (d) {
-            vo_MotifWmHints.functions = x11->oldfuncs;
-            d = x11->olddecor;
-        }
-        vo_MotifWmHints.decorations = d;
-        XChangeProperty(x11->display, x11->window, vo_MotifHints,
-                        vo_MotifHints, 32,
-                        PropModeReplace,
-                        (unsigned char *) &vo_MotifWmHints,
-                        5);
+    Atom motif_hints = XA(x11, _MOTIF_WM_HINTS);
+    MotifWmHints mhints = {0};
+    bool got = x11_get_property_copy(x11, x11->window, motif_hints,
+                                     motif_hints, 32, &mhints, sizeof(mhints));
+    // hints weren't set, and decorations requested -> assume WM displays them
+    if (!got && d)
+        return;
+    if (!got) {
+        mhints.flags = MWM_HINTS_FUNCTIONS;
+        mhints.functions = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
+                           MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE;
     }
+    mhints.flags |= MWM_HINTS_DECORATIONS;
+    mhints.decorations = d ? MWM_DECOR_ALL : 0;
+    XChangeProperty(x11->display, x11->window, motif_hints, motif_hints, 32,
+                    PropModeReplace, (unsigned char *) &mhints, 5);
 }
 
 static void vo_x11_classhint(struct vo *vo, Window window, const char *name)
@@ -1166,8 +1150,7 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     struct vo_x11_state *x11 = vo->x11;
 
     vo_x11_move_resize(vo, true, true, rc);
-    if (!vo->opts->border)
-        vo_x11_decoration(vo, 0);
+    vo_x11_decoration(vo, vo->opts->border);
 
     if (vo->opts->fullscreen && (x11->wm_type & vo_wm_FULLSCREEN)) {
         Atom state = XA(x11, _NET_WM_STATE_FULLSCREEN);
