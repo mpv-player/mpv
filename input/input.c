@@ -1627,12 +1627,7 @@ void mp_input_wakeup_nolock(struct input_ctx *ictx)
 
 static bool test_abort(struct input_ctx *ictx)
 {
-    if (async_quit_request || queue_has_abort_cmds(&ictx->cmd_queue)) {
-        MP_WARN(ictx, "Received command to move to another file. "
-                "Aborting current processing.\n");
-        return true;
-    }
-    return false;
+    return async_quit_request || queue_has_abort_cmds(&ictx->cmd_queue);
 }
 
 void mp_input_set_main_thread(struct input_ctx *ictx)
