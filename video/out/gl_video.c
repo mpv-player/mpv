@@ -926,7 +926,8 @@ static void compile_shaders(struct gl_video *p)
         shader_def_opt(&header, "USE_ALPHA", p->has_alpha);
 
     char *header_osd = talloc_strdup(tmp, header);
-    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", use_cms);
+    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV_APPROX", use_cms && p->opts.approx_gamma);
+    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV_BT2020", use_cms && !p->opts.approx_gamma);
     shader_def_opt(&header_osd, "USE_OSD_CMS_MATRIX", use_cms_matrix);
     shader_def_opt(&header_osd, "USE_OSD_3DLUT", p->use_lut_3d);
     // 3DLUT overrides SRGB
