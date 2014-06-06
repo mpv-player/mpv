@@ -1271,18 +1271,8 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
 int mpv_get_wakeup_pipe(mpv_handle *ctx)
 {
     pthread_mutex_lock(&ctx->lock);
-#if defined(F_SETFL)
-    if (ctx->wakeup_pipe[0] == -1) {
-        if (pipe(ctx->wakeup_pipe) != 0)
-            goto fail;
-        for (int i = 0; i < 2; i++) {
-            mp_set_cloexec(ctx->wakeup_pipe[i]);
-            int ret = fcntl(ctx->wakeup_pipe[i], F_GETFL);
-            fcntl(ctx->wakeup_pipe[i], F_SETFL, ret | O_NONBLOCK);
-        }
-    }
-fail:
-#endif
+    if (ctx->wakeup_pipe[0] == -1)
+        mp_make_wakeup_pipe(ctx->wakeup_pipe);
     pthread_mutex_unlock(&ctx->lock);
     return ctx->wakeup_pipe[0];
 }
