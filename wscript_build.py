@@ -486,6 +486,7 @@ def build(ctx):
                 includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()],
                 use          = "mpv",
                 features     = "c cprogram",
+                install_path = None
             )
 
     if ctx.env.DEST_OS == 'win32':
