@@ -302,6 +302,7 @@ mpv_handle *mpv_create(void)
     mpv_handle *ctx = mp_new_client(mpctx->clients, "main");
     if (ctx) {
         // Set some defaults.
+        mpv_set_option_string(ctx, "config", "no");
         mpv_set_option_string(ctx, "idle", "yes");
         mpv_set_option_string(ctx, "terminal", "no");
         mpv_set_option_string(ctx, "osc", "no");
