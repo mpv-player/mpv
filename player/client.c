@@ -1188,6 +1188,8 @@ static void update_prop(void *p)
 // outstanding property.
 static bool gen_property_change_event(struct mpv_handle *ctx)
 {
+    if (!ctx->mpctx->initialized)
+        return false;
     int start = ctx->lowest_changed;
     ctx->lowest_changed = ctx->num_properties;
     for (int n = start; n < ctx->num_properties; n++) {
