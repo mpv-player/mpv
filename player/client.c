@@ -114,6 +114,7 @@ struct mpv_handle {
 };
 
 static bool gen_property_change_event(struct mpv_handle *ctx);
+static void recreate_message_buffer(mpv_handle *ctx);
 
 void mp_clients_init(struct MPContext *mpctx)
 {
@@ -226,6 +227,8 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d)
     pthread_mutex_lock(&ctx->lock);
     ctx->wakeup_cb = cb;
     ctx->wakeup_cb_ctx = d;
+    // Update the message callback
+    recreate_message_buffer(ctx);
     pthread_mutex_unlock(&ctx->lock);
 }
 
@@ -1240,6 +1243,18 @@ int mpv_load_config_file(mpv_handle *ctx, const char *filename)
     return 0;
 }
 
+// called locked
+static void recreate_message_buffer(mpv_handle *ctx)
+{
+    mp_msg_log_buffer_destroy(ctx->messages);
+    ctx->messages = NULL;
+    if (ctx->messages_level >= 0) {
+        ctx->messages =
+            mp_msg_log_buffer_new(ctx->mpctx->global, 1000, ctx->messages_level,
+                                  ctx->wakeup_cb, ctx->wakeup_cb_ctx);
+    }
+}
+
 int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
 {
     int level = -1;
@@ -1253,19 +1268,8 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
         return MPV_ERROR_INVALID_PARAMETER;
 
     pthread_mutex_lock(&ctx->lock);
-
-    if (!ctx->messages)
-        ctx->messages_level = -1;
-
-    if (ctx->messages_level != level) {
-        mp_msg_log_buffer_destroy(ctx->messages);
-        ctx->messages = NULL;
-        if (level >= 0) {
-            ctx->messages =
-                mp_msg_log_buffer_new(ctx->mpctx->global, 1000, level);
-        }
-        ctx->messages_level = level;
-    }
+    ctx->messages_level = level;
+    recreate_message_buffer(ctx);
 
     pthread_mutex_unlock(&ctx->lock);
     return 0;

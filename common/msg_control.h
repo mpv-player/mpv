@@ -20,7 +20,9 @@ struct mp_log_buffer_entry {
 
 struct mp_log_buffer;
 struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
-                                            int size, int level);
+                                            int size, int level,
+                                            void (*wakeup_cb)(void *ctx),
+                                            void *wakeup_cb_ctx);
 void mp_msg_log_buffer_destroy(struct mp_log_buffer *buffer);
 struct mp_log_buffer_entry *mp_msg_log_buffer_read(struct mp_log_buffer *buffer);
 

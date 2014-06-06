@@ -82,6 +82,8 @@ struct mp_log_buffer {
     struct mp_log_root *root;
     struct mp_ring *ring;
     int level;
+    void (*wakeup_cb)(void *ctx);
+    void *wakeup_cb_ctx;
 };
 
 // Protects some (not all) state in mp_log_root
@@ -319,6 +321,8 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
                 };
             }
             mp_ring_write(buffer->ring, (unsigned char *)&entry, sizeof(entry));
+            if (buffer->wakeup_cb)
+                buffer->wakeup_cb(buffer->wakeup_cb_ctx);
         }
     }
 }
@@ -459,7 +463,9 @@ void mp_msg_uninit(struct mpv_global *global)
 }
 
 struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
-                                            int size, int level)
+                                            int size, int level,
+                                            void (*wakeup_cb)(void *ctx),
+                                            void *wakeup_cb_ctx)
 {
     struct mp_log_root *root = global->log->root;
 
@@ -470,6 +476,8 @@ struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
         .root = root,
         .level = level,
         .ring = mp_ring_new(buffer, sizeof(void *) * size),
+        .wakeup_cb = wakeup_cb,
+        .wakeup_cb_ctx = wakeup_cb_ctx,
     };
     if (!buffer->ring)
         abort();
