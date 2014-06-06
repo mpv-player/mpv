@@ -1249,8 +1249,9 @@ static void recreate_message_buffer(mpv_handle *ctx)
     mp_msg_log_buffer_destroy(ctx->messages);
     ctx->messages = NULL;
     if (ctx->messages_level >= 0) {
+        int size = ctx->messages_level >= MSGL_V ? 10000 : 1000;
         ctx->messages =
-            mp_msg_log_buffer_new(ctx->mpctx->global, 1000, ctx->messages_level,
+            mp_msg_log_buffer_new(ctx->mpctx->global, size, ctx->messages_level,
                                   ctx->wakeup_cb, ctx->wakeup_cb_ctx);
     }
 }
