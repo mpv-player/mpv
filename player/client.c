@@ -218,7 +218,7 @@ static void wakeup_client(struct mpv_handle *ctx)
     if (ctx->wakeup_cb)
         ctx->wakeup_cb(ctx->wakeup_cb_ctx);
     if (ctx->wakeup_pipe[0] != -1)
-        write(ctx->wakeup_pipe[0], &(char){0}, 1);
+        write(ctx->wakeup_pipe[1], &(char){0}, 1);
 }
 
 void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d)
@@ -1284,7 +1284,7 @@ int mpv_get_wakeup_pipe(mpv_handle *ctx)
 fail:
 #endif
     pthread_mutex_unlock(&ctx->lock);
-    return ctx->wakeup_pipe[1];
+    return ctx->wakeup_pipe[0];
 }
 
 unsigned long mpv_client_api_version(void)
