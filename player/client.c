@@ -255,7 +255,7 @@ static void unlock_core(mpv_handle *ctx)
         mp_dispatch_unlock(ctx->mpctx->dispatch);
 }
 
-void mpv_destroy(mpv_handle *ctx)
+void mpv_detach_destroy(mpv_handle *ctx)
 {
     if (!ctx)
         return;
@@ -292,7 +292,6 @@ void mpv_destroy(mpv_handle *ctx)
             // shutdown_clients() sleeps to avoid wasting CPU
             if (clients->mpctx->input)
                 mp_input_wakeup(clients->mpctx->input);
-            // TODO: make core quit if there are no clients
             break;
         }
     }
@@ -310,7 +309,7 @@ void mpv_terminate_destroy(mpv_handle *ctx)
     mpv_command(ctx, (const char*[]){"quit", NULL});
 
     if (!ctx->owner) {
-        mpv_destroy(ctx);
+        mpv_detach_destroy(ctx);
         return;
     }
 
@@ -322,7 +321,7 @@ void mpv_terminate_destroy(mpv_handle *ctx)
     pthread_t playthread;
     mp_dispatch_run(ctx->mpctx->dispatch, get_thread, &playthread);
 
-    mpv_destroy(ctx);
+    mpv_detach_destroy(ctx);
 
     // And this is also the reason why we only allow 1 thread (the owner) to
     // call this function.

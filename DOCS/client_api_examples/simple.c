@@ -39,6 +39,6 @@ int main(int argc, char *argv[])
             break;
     }
 
-    mpv_destroy(ctx);
+    mpv_terminate_destroy(ctx);
     return 0;
 }

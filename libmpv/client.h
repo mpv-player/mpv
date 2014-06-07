@@ -252,8 +252,8 @@ void mpv_free(void *data);
  * Return the name of this client handle. Every client has its own unique
  * name, which is mostly used for user interface purposes.
  *
- * @return The client name. The string is read-only and is valid until
- *         mpv_destroy() is called.
+ * @return The client name. The string is read-only and is valid until the
+ *         mpv_handle is destroyed.
  */
 const char *mpv_client_name(mpv_handle *ctx);
 
@@ -313,27 +313,27 @@ mpv_handle *mpv_create(void);
 int mpv_initialize(mpv_handle *ctx);
 
 /**
- * Disconnect and destroy the client context. ctx will be deallocated with this
+ * Disconnect and destroy the mpv_handle. ctx will be deallocated with this
  * API call. This leaves the player running. If you want to be sure that the
  * player is terminated, send a "quit" command, and wait until the
  * MPV_EVENT_SHUTDOWN event is received, or use mpv_terminate_destroy().
  */
-void mpv_destroy(mpv_handle *ctx);
+void mpv_detach_destroy(mpv_handle *ctx);
 
 /**
- * Similar to mpv_destroy(), but brings the player and all clients down as well,
- * and waits until all of them are destroyed. This function blocks. The
- * advantage over mpv_destroy() is that while mpv_destroy() merely detaches
- * the client handle from the player, this function quits the player, waits
- * until all other clients are destroyed (i.e. all mpv_handles are detached),
- * and also waits for the final termination of the player.
+ * Similar to mpv_detach_destroy(), but brings the player and all clients down
+ * as well, and waits until all of them are destroyed. This function blocks. The
+ * advantage over mpv_detach_destroy() is that while mpv_detach_destroy() merely
+ * detaches the client handle from the player, this function quits the player,
+ * waits until all other clients are destroyed (i.e. all mpv_handles are
+ * detached), and also waits for the final termination of the player.
  *
- * Since mpv_destroy() is called somewhere on the way, it's not safe to call
- * other functions concurrently on the same context.
+ * Since mpv_detach_destroy() is called somewhere on the way, it's not safe to
+ * call other functions concurrently on the same context.
  *
  * If this is called on a mpv_handle that was not created with mpv_create(),
- * this function will merely send a quit command and then call mpv_destroy(),
- * without waiting for the actual shutdown.
+ * this function will merely send a quit command and then call
+ * mpv_detach_destroy(), without waiting for the actual shutdown.
  */
 void mpv_terminate_destroy(mpv_handle *ctx);
 
@@ -836,7 +836,7 @@ typedef enum mpv_event_id {
      * to disconnect all clients. Most requests to the player will fail, and
      * mpv_wait_event() will always return instantly (returning new shutdown
      * events if no other events are queued). The client should react to this
-     * and quit with mpv_destroy() as soon as possible.
+     * and quit with mpv_detach_destroy() as soon as possible.
      */
     MPV_EVENT_SHUTDOWN          = 1,
     /**
@@ -1148,7 +1148,7 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
  *                will wait with an infinite timeout.
  * @return A struct containing the event ID and other data. The pointer (and
  *         fields in the struct) stay valid until the next mpv_wait_event()
- *         call, or until mpv_destroy() is called. You must not write to
+ *         call, or until the mpv_handle is destroyed. You must not write to
  *         the struct, and all memory referenced by it will be automatically
  *         released by the API. The return value is never NULL.
  */
