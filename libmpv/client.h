@@ -316,9 +316,26 @@ int mpv_initialize(mpv_handle *ctx);
  * Disconnect and destroy the client context. ctx will be deallocated with this
  * API call. This leaves the player running. If you want to be sure that the
  * player is terminated, send a "quit" command, and wait until the
- * MPV_EVENT_SHUTDOWN event is received.
+ * MPV_EVENT_SHUTDOWN event is received, or use mpv_terminate_destroy().
  */
 void mpv_destroy(mpv_handle *ctx);
+
+/**
+ * Similar to mpv_destroy(), but brings the player and all clients down as well,
+ * and waits until all of them are destroyed. This function blocks. The
+ * advantage over mpv_destroy() is that while mpv_destroy() merely detaches
+ * the client handle from the player, this function quits the player, waits
+ * until all other clients are destroyed (i.e. all mpv_handles are detached),
+ * and also waits for the final termination of the player.
+ *
+ * Since mpv_destroy() is called somewhere on the way, it's not safe to call
+ * other functions concurrently on the same context.
+ *
+ * If this is called on a mpv_handle that was not created with mpv_create(),
+ * this function will merely send a quit command and then call mpv_destroy(),
+ * without waiting for the actual shutdown.
+ */
+void mpv_terminate_destroy(mpv_handle *ctx);
 
 /**
  * Load a config file. This loads and parses the file, and sets every entry in

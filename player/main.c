@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "config.h"
 #include "talloc.h"
@@ -147,6 +148,9 @@ void mp_destroy(struct MPContext *mpctx)
         terminal_initialized = false;
     }
     uninit_libav(mpctx->global);
+
+    if (mpctx->autodetach)
+        pthread_detach(pthread_self());
 
     mp_msg_uninit(mpctx->global);
     talloc_free(mpctx);

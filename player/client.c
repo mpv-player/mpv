@@ -77,6 +77,7 @@ struct observe_property {
 struct mpv_handle {
     // -- immmutable
     char *name;
+    bool owner;
     struct mp_log *log;
     struct MPContext *mpctx;
     struct mp_client_api *clients;
@@ -299,11 +300,41 @@ void mpv_destroy(mpv_handle *ctx)
     assert(!ctx);
 }
 
+static void get_thread(void *ptr)
+{
+    *(pthread_t *)ptr = pthread_self();
+}
+
+void mpv_terminate_destroy(mpv_handle *ctx)
+{
+    mpv_command(ctx, (const char*[]){"quit", NULL});
+
+    if (!ctx->owner) {
+        mpv_destroy(ctx);
+        return;
+    }
+
+    mp_dispatch_lock(ctx->mpctx->dispatch);
+    assert(ctx->mpctx->autodetach);
+    ctx->mpctx->autodetach = false;
+    mp_dispatch_unlock(ctx->mpctx->dispatch);
+
+    pthread_t playthread;
+    mp_dispatch_run(ctx->mpctx->dispatch, get_thread, &playthread);
+
+    mpv_destroy(ctx);
+
+    // And this is also the reason why we only allow 1 thread (the owner) to
+    // call this function.
+    pthread_join(playthread, NULL);
+}
+
 mpv_handle *mpv_create(void)
 {
     struct MPContext *mpctx = mp_create();
     mpv_handle *ctx = mp_new_client(mpctx->clients, "main");
     if (ctx) {
+        ctx->owner = true;
         // Set some defaults.
         mpv_set_option_string(ctx, "config", "no");
         mpv_set_option_string(ctx, "idle", "yes");
@@ -319,8 +350,7 @@ mpv_handle *mpv_create(void)
 static void *playback_thread(void *p)
 {
     struct MPContext *mpctx = p;
-
-    pthread_detach(pthread_self());
+    mpctx->autodetach = true;
 
     mp_play_files(mpctx);
 
