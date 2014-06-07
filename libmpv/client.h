@@ -118,8 +118,11 @@ extern "C" {
  * - If a X11 based VO is used, mpv will set the xlib error handler. This error
  *   handler is process-wide, and there's no proper way to share it with other
  *   xlib users within the same process. This might confuse GUI toolkits.
+ * - mpv uses some other libraries that are not library-safe, such as Fribidi
+ *   (used through libass), LittleCMS, ALSA, FFmpeg, and possibly more.
  * - The FPU precision must be set at least to double precision.
  * - On Windows, mpv will call timeBeginPeriod(1).
+ * - On memory exhaustion, mpv will kill the process.
  *
  * Embedding the video window
  * --------------------------
@@ -131,6 +134,8 @@ extern "C" {
  * Both on X11 and win32, the player will fill the window referenced by the
  * "wid" option fully and letterbox the video (i.e. add black bars if the
  * aspect ratio of the window and the video mismatch).
+ *
+ * On OSX, embedding is not yet possible, because Cocoa makes this non-trivial.
  */
 
 /**
@@ -1177,7 +1182,8 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
  * a primitive mechanism to handle coordinating a foreign event loop and the
  * libmpv event loop.
  *
- * This is in fact implemented using mpv_set_wakeup_callback(), and each
+ * This is in fact implemented using the same underlying code as for
+ * mpv_set_wakeup_callback() (though they don't conflict), and it is as if each
  * callback invocation writes a single 0 byte to the pipe. When the pipe
  * becomes readable, the code calling poll() (or select()) on the pipe should
  * read all contents of the pipe and then call mpv_wait_event(c, 0) until
