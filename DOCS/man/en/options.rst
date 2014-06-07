@@ -2146,9 +2146,17 @@ OPTIONS
     implemented, but does not work (happens often on GNOME). You might be able
     to to work this around using ``--heartbeat-cmd`` instead.
 
-``--sub-file=<subtitlefile1,subtitlefile2,...>``
-    Use/display these subtitle files. Only one file can be displayed at the
-    same time.
+``--sub-file=subtitlefile``
+    Add a subtitle file to the list of external subtitles.
+
+    If you use ``--sub-file`` only once, this subtitle file is displayed by
+    default.
+
+    If ``--sub-file`` is used multiple times, the subtitle to use can be
+    switched at runtime by cycling subtitle tracks. It's possible to show
+    two subtitles at once: use ``--sid`` to select the first subtitle index,
+    and ``--secondary-sid`` to select the second index. (The index is printed
+    on the terminal output after the ``--sid=`` in the list of streams.)
 
 ``--sub-auto=<no|exact|fuzzy|all>``, ``--no-sub-auto``
     Load additional subtitle files matching the video filename. The parameter
