@@ -87,17 +87,21 @@ struct mpv_handle {
     struct mpv_event_property cur_property_event;
 
     pthread_mutex_t lock;
+
+    pthread_mutex_t wakeup_lock;
     pthread_cond_t wakeup;
+
+    // -- protected by wakeup_lock
+    bool need_wakeup;
+    void (*wakeup_cb)(void *d);
+    void *wakeup_cb_ctx;
+    int wakeup_pipe[2];
 
     // -- protected by lock
 
     uint64_t event_mask;
     bool queued_wakeup;
-    bool shutdown;
     bool choke_warning;
-    void (*wakeup_cb)(void *d);
-    void *wakeup_cb_ctx;
-    int wakeup_pipe[2];
 
     mpv_event *events;      // ringbuffer of max_events entries
     int max_events;         // allocated number of entries in events
@@ -111,11 +115,9 @@ struct mpv_handle {
     int properties_updating;
 
     struct mp_log_buffer *messages;
-    int messages_level;
 };
 
 static bool gen_property_change_event(struct mpv_handle *ctx);
-static void recreate_message_buffer(mpv_handle *ctx);
 
 void mp_clients_init(struct MPContext *mpctx)
 {
@@ -190,6 +192,7 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
         .wakeup_pipe = {-1, -1},
     };
     pthread_mutex_init(&client->lock, NULL);
+    pthread_mutex_init(&client->wakeup_lock, NULL);
     pthread_cond_init(&client->wakeup, NULL);
 
     MP_TARRAY_APPEND(clients, clients->clients, clients->num_clients, client);
@@ -216,21 +219,39 @@ struct MPContext *mp_client_get_core(struct mpv_handle *ctx)
 
 static void wakeup_client(struct mpv_handle *ctx)
 {
-    pthread_cond_signal(&ctx->wakeup);
-    if (ctx->wakeup_cb)
-        ctx->wakeup_cb(ctx->wakeup_cb_ctx);
-    if (ctx->wakeup_pipe[0] != -1)
-        write(ctx->wakeup_pipe[1], &(char){0}, 1);
+    pthread_mutex_lock(&ctx->wakeup_lock);
+    if (!ctx->need_wakeup) {
+        ctx->need_wakeup = true;
+        pthread_cond_signal(&ctx->wakeup);
+        if (ctx->wakeup_cb)
+            ctx->wakeup_cb(ctx->wakeup_cb_ctx);
+        if (ctx->wakeup_pipe[0] != -1)
+            write(ctx->wakeup_pipe[1], &(char){0}, 1);
+    }
+    pthread_mutex_unlock(&ctx->wakeup_lock);
+}
+
+// Note: the caller has to deal with sporadic wakeups.
+static int wait_wakeup(struct mpv_handle *ctx, int64_t end)
+{
+    int r = 0;
+    pthread_mutex_unlock(&ctx->lock);
+    pthread_mutex_lock(&ctx->wakeup_lock);
+    if (!ctx->need_wakeup)
+        r = mpthread_cond_timedwait(&ctx->wakeup, &ctx->wakeup_lock, end);
+    if (r == 0)
+        ctx->need_wakeup = false;
+    pthread_mutex_unlock(&ctx->wakeup_lock);
+    pthread_mutex_lock(&ctx->lock);
+    return r;
 }
 
 void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d)
 {
-    pthread_mutex_lock(&ctx->lock);
+    pthread_mutex_lock(&ctx->wakeup_lock);
     ctx->wakeup_cb = cb;
     ctx->wakeup_cb_ctx = d;
-    // Update the message callback
-    recreate_message_buffer(ctx);
-    pthread_mutex_unlock(&ctx->lock);
+    pthread_mutex_unlock(&ctx->wakeup_lock);
 }
 
 void mpv_suspend(mpv_handle *ctx)
@@ -266,7 +287,7 @@ void mpv_detach_destroy(mpv_handle *ctx)
     // causes a crash, block until all asynchronous requests were served.
     ctx->event_mask = 0;
     while (ctx->reserved_events || ctx->properties_updating)
-        pthread_cond_wait(&ctx->wakeup, &ctx->lock);
+        wait_wakeup(ctx, INT64_MAX);
     pthread_mutex_unlock(&ctx->lock);
 
     struct mp_client_api *clients = ctx->clients;
@@ -282,6 +303,7 @@ void mpv_detach_destroy(mpv_handle *ctx)
             }
             mp_msg_log_buffer_destroy(ctx->messages);
             pthread_cond_destroy(&ctx->wakeup);
+            pthread_mutex_destroy(&ctx->wakeup_lock);
             pthread_mutex_destroy(&ctx->lock);
             if (ctx->wakeup_pipe[0] != -1) {
                 close(ctx->wakeup_pipe[0]);
@@ -524,12 +546,14 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
 {
     mpv_event *event = ctx->cur_event;
 
+    pthread_mutex_lock(&ctx->lock);
+
     if (timeout < 0)
         timeout = 1e20;
+    if (ctx->queued_wakeup)
+        timeout = 0;
 
     int64_t deadline = mp_add_timeout(mp_time_us(), timeout);
-
-    pthread_mutex_lock(&ctx->lock);
 
     *event = (mpv_event){0};
     talloc_free_children(event);
@@ -544,10 +568,6 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
         }
         if (gen_property_change_event(ctx))
             break;
-        if (ctx->shutdown) {
-            event->event_id = MPV_EVENT_SHUTDOWN;
-            break;
-        }
         if (ctx->messages) {
             // Poll the log message queue. Currently we can't/don't do better.
             struct mp_log_buffer_entry *msg =
@@ -565,11 +585,7 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
                 break;
             }
         }
-        if (ctx->queued_wakeup)
-            break;
-        if (timeout == 0)
-            break;
-        int r = mpthread_cond_timedwait(&ctx->wakeup, &ctx->lock, deadline);
+        int r = wait_wakeup(ctx, deadline);
         if (r == ETIMEDOUT)
             break;
     }
@@ -1275,17 +1291,10 @@ int mpv_load_config_file(mpv_handle *ctx, const char *filename)
     return 0;
 }
 
-// called locked
-static void recreate_message_buffer(mpv_handle *ctx)
+static void msg_wakeup(void *p)
 {
-    mp_msg_log_buffer_destroy(ctx->messages);
-    ctx->messages = NULL;
-    if (ctx->messages_level >= 0) {
-        int size = ctx->messages_level >= MSGL_V ? 10000 : 1000;
-        ctx->messages =
-            mp_msg_log_buffer_new(ctx->mpctx->global, size, ctx->messages_level,
-                                  ctx->wakeup_cb, ctx->wakeup_cb_ctx);
-    }
+    mpv_handle *ctx = p;
+    wakeup_client(ctx);
 }
 
 int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
@@ -1301,19 +1310,23 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
         return MPV_ERROR_INVALID_PARAMETER;
 
     pthread_mutex_lock(&ctx->lock);
-    ctx->messages_level = level;
-    recreate_message_buffer(ctx);
-
+    mp_msg_log_buffer_destroy(ctx->messages);
+    ctx->messages = NULL;
+    if (level >= 0) {
+        int size = level >= MSGL_V ? 10000 : 1000;
+        ctx->messages = mp_msg_log_buffer_new(ctx->mpctx->global, size, level,
+                                              msg_wakeup, ctx);
+    }
     pthread_mutex_unlock(&ctx->lock);
     return 0;
 }
 
 int mpv_get_wakeup_pipe(mpv_handle *ctx)
 {
-    pthread_mutex_lock(&ctx->lock);
+    pthread_mutex_lock(&ctx->wakeup_lock);
     if (ctx->wakeup_pipe[0] == -1)
         mp_make_wakeup_pipe(ctx->wakeup_pipe);
-    pthread_mutex_unlock(&ctx->lock);
+    pthread_mutex_unlock(&ctx->wakeup_lock);
     return ctx->wakeup_pipe[0];
 }
 

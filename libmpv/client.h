@@ -1175,7 +1175,9 @@ void mpv_wakeup(mpv_handle *ctx);
  * must not make any assumptions of the environment, and you must return as
  * soon as possible. You are not allowed to call any client API functions
  * inside of the callback. In particular, you should not do any processing in
- * the callback, but wake up another thread that does all the work.
+ * the callback, but wake up another thread that does all the work. It's also
+ * possible that the callback is called from a thread while a mpv API function
+ * is called (i.e. it can be reentrant).
  *
  * In general, the client API expects you to call mpv_wait_event() to receive
  * notifications, and the wakeup callback is merely a helper utility to make
