@@ -1179,7 +1179,10 @@ void mpv_wakeup(mpv_handle *ctx);
  *
  * In general, the client API expects you to call mpv_wait_event() to receive
  * notifications, and the wakeup callback is merely a helper utility to make
- * this easier in certain situations.
+ * this easier in certain situations. Note that it's possible that there's
+ * only one wakeup callback invocation for multiple events. You should call
+ * mpv_wait_event() with no timeout until MPV_EVENT_NONE is reached, at which
+ * point the event queue is empty.
  *
  * If you actually want to do processing in a callback, spawn a thread that
  * does nothing but call mpv_wait_event() in a loop and dispatches the result
@@ -1197,7 +1200,8 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
  * pipe can be used to wake up a poll() based processing loop. The purpose of
  * this function is very similar to mpv_set_wakeup_callback(), and provides
  * a primitive mechanism to handle coordinating a foreign event loop and the
- * libmpv event loop.
+ * libmpv event loop. The pipe is non-blocking. It's closed when the mpv_handle
+ * is destroyed. This function always returns the same value (on success).
  *
  * This is in fact implemented using the same underlying code as for
  * mpv_set_wakeup_callback() (though they don't conflict), and it is as if each
@@ -1205,17 +1209,43 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
  * becomes readable, the code calling poll() (or select()) on the pipe should
  * read all contents of the pipe and then call mpv_wait_event(c, 0) until
  * no new events are returned. The pipe contents do not matter and can just
- * be discarded.
+ * be discarded. There is not necessarily one byte per readable event in the
+ * pipe. For example, the pipes are non-blocking, and mpv won't block if the
+ * pipe is full. Pipes are normally limited to 4096 bytes, so if there are
+ * more than 4096 events, the number of readable bytes can not equal the number
+ * of events queued. Also, it's possible that mpv does not write to the pipe
+ * once it's guaranteed that the client was already signaled. See the example
+ * below how to do it correctly.
  *
- * Note that this call lazily creates the pipe, and always returns the same
- * handle once it's created. The client API will destroy both the read and
- * write ends of the pipe in mpv_destroy(). If you need something more
- * complex, it's better to implement your own mechanisms using
- * mpv_set_wakeup_callback().
+ * Example:
  *
- * On Windows, this will always return -1.
+ *  int pipefd = mpv_get_wakeup_pipe(mpv);
+ *  if (pipefd < 0)
+ *      error();
+ *  while (1) {
+ *      struct pollfd pfds[1] = {
+ *          { .fd = pipefd, .events = POLLIN },
+ *      };
+ *      // Wait until there are possibly a new mpv events.
+ *      poll(pfds, 1, -1);
+ *      if (pfds[0].revents & POLLIN) {
+ *          // Empty the pipe. Doing this before calling mpv_wait_event()
+ *          // ensures that no wakeups get missed.
+ *          char unused[256];
+ *          read(pipefd, unused, sizeof(unused));
+ *          while (1) {
+ *              mpv_event *ev = mpv_wait_event(mpv, 0);
+ *              // If MPV_EVENT_NONE is received, the event queue is empty.
+ *              if (ev->event_id == MPV_EVENT_NONE)
+ *                  break;
+ *              // Process the event.
+ *              ...
+ *          }
+ *      }
+ *  }
  *
- * @return A UNIX FD of the read end of the wakeup pipe, -1 on error.
+ * @return A UNIX FD of the read end of the wakeup pipe, or -1 on error.
+ *         On MS Windows/MinGW, this will always return -1.
  */
 int mpv_get_wakeup_pipe(mpv_handle *ctx);
 
