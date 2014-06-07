@@ -396,7 +396,7 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- subtitles options --------------------
 
-    OPT_STRINGLIST("sub-file", sub_name, 0),
+    OPT_STRING_APPEND_LIST("sub-file", sub_name, 0),
     OPT_PATHLIST("sub-paths", sub_paths, 0),
     OPT_STRING("sub-codepage", sub_cp, 0),
     OPT_FLOAT("sub-delay", sub_delay, 0),
