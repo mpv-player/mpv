@@ -495,6 +495,9 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
 {
     mpv_event *event = ctx->cur_event;
 
+    if (timeout < 0)
+        timeout = 1e20;
+
     int64_t deadline = mp_add_timeout(mp_time_us(), timeout);
 
     pthread_mutex_lock(&ctx->lock);
@@ -535,7 +538,7 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
         }
         if (ctx->queued_wakeup)
             break;
-        if (timeout <= 0)
+        if (timeout == 0)
             break;
         int r = mpthread_cond_timedwait(&ctx->wakeup, &ctx->lock, deadline);
         if (r == ETIMEDOUT)

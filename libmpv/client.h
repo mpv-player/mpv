@@ -1122,7 +1122,8 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
  *
  * @param timeout Timeout in seconds, after which the function returns even if
  *                no event was received. A MPV_EVENT_NONE is returned on
- *                timeout. Values <= 0 will disable waiting.
+ *                timeout. A value of 0 will disable waiting. Negative values
+ *                will wait with an infinite timeout.
  * @return A struct containing the event ID and other data. The pointer (and
  *         fields in the struct) stay valid until the next mpv_wait_event()
  *         call, or until mpv_destroy() is called. You must not write to

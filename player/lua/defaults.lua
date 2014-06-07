@@ -360,7 +360,7 @@ function mp.dispatch_events(allow_wait)
         if wait == nil then
             wait = 1e20 -- infinity for all practical purposes
         end
-        if more_events then
+        if more_events or wait < 0 then
             wait = 0
         end
         -- Resume playloop - important especially if an error happened while
