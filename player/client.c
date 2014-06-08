@@ -251,6 +251,8 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d)
     pthread_mutex_lock(&ctx->wakeup_lock);
     ctx->wakeup_cb = cb;
     ctx->wakeup_cb_ctx = d;
+    if (ctx->wakeup_cb)
+        ctx->wakeup_cb(ctx->wakeup_cb_ctx);
     pthread_mutex_unlock(&ctx->wakeup_lock);
 }
 
@@ -1324,8 +1326,10 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
 int mpv_get_wakeup_pipe(mpv_handle *ctx)
 {
     pthread_mutex_lock(&ctx->wakeup_lock);
-    if (ctx->wakeup_pipe[0] == -1)
+    if (ctx->wakeup_pipe[0] == -1) {
         mp_make_wakeup_pipe(ctx->wakeup_pipe);
+        write(ctx->wakeup_pipe[1], &(char){0}, 1);
+    }
     pthread_mutex_unlock(&ctx->wakeup_lock);
     return ctx->wakeup_pipe[0];
 }
