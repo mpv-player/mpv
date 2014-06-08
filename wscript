@@ -58,6 +58,10 @@ build_options = [
         'default': 'disable',
         'func': check_true
     }, {
+        'name': '--zsh-comp',
+        'desc': 'zsh completion',
+        'func': check_true,
+    }, {
         'name': '--macosx-bundle',
         'desc': 'compilation of a Mac OS X Application bundle',
         'deps': [ 'os-darwin' ],
