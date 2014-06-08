@@ -351,6 +351,7 @@ void vo_new_frame_imminent(struct vo *vo)
     assert(vo->num_video_queue > 0);
     vo->driver->draw_image(vo, vo->video_queue[0]);
     shift_queue(vo);
+    vo->hasframe = true;
 }
 
 void vo_draw_osd(struct vo *vo, struct osd_state *osd)
@@ -368,7 +369,6 @@ void vo_flip_page(struct vo *vo, int64_t pts_us, int duration)
         vo->driver->flip_page_timed(vo, pts_us, duration);
     else
         vo->driver->flip_page(vo);
-    vo->hasframe = true;
 }
 
 void vo_check_events(struct vo *vo)
