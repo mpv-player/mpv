@@ -42,9 +42,9 @@
 /*
  * Locking hierarchy:
  *
- *  MPContext > mp_client_api.lock > mpv_handle.lock
+ *  MPContext > mp_client_api.lock > mpv_handle.lock > * > mpv_handle.wakeup_lock
  *
- * MPContext strictly speaking has no locks, and instead implicitly managed
+ * MPContext strictly speaking has no locks, and instead is implicitly managed
  * by MPContext.dispatch, which basically stops the playback thread at defined
  * points in order to let clients access it in a synchronized manner. Since
  * MPContext code accesses the client API, it's on top of the lock hierarchy.

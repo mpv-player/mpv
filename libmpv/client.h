@@ -1228,11 +1228,13 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
  *      struct pollfd pfds[1] = {
  *          { .fd = pipefd, .events = POLLIN },
  *      };
- *      // Wait until there are possibly a new mpv events.
+ *      // Wait until there are possibly new mpv events.
  *      poll(pfds, 1, -1);
  *      if (pfds[0].revents & POLLIN) {
  *          // Empty the pipe. Doing this before calling mpv_wait_event()
- *          // ensures that no wakeups get missed.
+ *          // ensures that no wakeups are missed. It's not so important to
+ *          // make sure the pipe is really empty (it will just cause some
+ *          // additional wakeups in unlikely corner cases).
  *          char unused[256];
  *          read(pipefd, unused, sizeof(unused));
  *          while (1) {
