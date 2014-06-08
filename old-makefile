@@ -379,6 +379,9 @@ player/lua.c: player/lua/defaults.inc \
               player/lua/osc.inc \
               player/lua/options.inc
 
+etc/_mpv: TOOLS/zsh.pl ./mpv
+	./$< > $@
+
 # ./configure must be rerun if it changed
 config.mak: configure
 	@echo "############################################################"
@@ -450,12 +453,17 @@ install-mpv-config: etc/encoding-profiles.conf
 	$(INSTALL) -d $(CONFDIR)
 	$(INSTALL) -m 644 etc/encoding-profiles.conf $(CONFDIR)
 
-install-data: install-mpv-icons install-mpv-desktop install-mpv-config
+install-mpv-zsh: etc/_mpv
+	$(INSTALL) -d $(prefix)/share/zsh/vendor-completions
+	$(INSTALL) -m 644 etc/_mpv $(prefix)/share/zsh/vendor-completions/
+
+install-data: install-mpv-icons install-mpv-desktop install-mpv-config install-mpv-zsh
 
 uninstall:
 	$(RM) $(BINDIR)/mpv
 	$(RM) $(MANDIR)/man1/mpv.1 $(MANDIR)/en/man1/mpv.1
 	$(RM) $(prefix)/share/applications/mpv.desktop
+	$(RM) $(prefix)/share/zsh/vendor-completions/_mpv
 	$(RM) $(foreach size,$(ICONSIZES),$(prefix)/share/icons/hicolor/$(size)/apps/mpv.png)
 
 clean:

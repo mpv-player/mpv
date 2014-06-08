@@ -524,6 +524,12 @@ def build(ctx):
     if ctx.dependency_satisfied('pdf-build'):
         _build_pdf(ctx)
 
+    if ctx.dependency_satisfied('zsh-comp'):
+        ctx.zshcomp(target = "etc/_mpv")
+        ctx.install_files(
+            ctx.env.DATADIR + '/zsh/vendor-completions',
+            ['etc/_mpv'])
+
     ctx.install_files(
         ctx.env.DATADIR + '/applications',
         ['etc/mpv.desktop'] )
