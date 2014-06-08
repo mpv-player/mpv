@@ -1104,6 +1104,9 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_GET:
         mixer_getbothvolume(mpctx->mixer, arg);
         return M_PROPERTY_OK;
+    case M_PROPERTY_GET_NEUTRAL:
+        *(float *)arg = mixer_getneutralvolume(mpctx->mixer);
+        return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
         float val;
         mixer_getbothvolume(mpctx->mixer, &val);
@@ -1822,6 +1825,9 @@ static int mp_property_video_color(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_UNAVAILABLE;
         // Write new value to option variable
         mp_property_generic_option(prop, M_PROPERTY_SET, arg, mpctx);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_NEUTRAL:
+        *(int *)arg = 0;
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -2724,15 +2730,19 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
     if (osd_progbar && (prop.flags & CONF_RANGE) == CONF_RANGE) {
         bool ok = false;
         if (prop.type == CONF_TYPE_INT) {
+            int n = prop.min;
+            mp_property_do(name, M_PROPERTY_GET_NEUTRAL, &n, mpctx);
             int i;
             ok = mp_property_do(name, M_PROPERTY_GET, &i, mpctx) > 0;
             if (ok)
-                set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, i);
+                set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, n, i);
         } else if (prop.type == CONF_TYPE_FLOAT) {
+            float n = prop.min;
+            mp_property_do(name, M_PROPERTY_GET_NEUTRAL, &n, mpctx);
             float f;
             ok = mp_property_do(name, M_PROPERTY_GET, &f, mpctx) > 0;
             if (ok)
-                set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, f);
+                set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, n, f);
         }
         if (ok && osd_mode == MP_ON_OSD_AUTO && opts->osd_bar_visible)
             msg = NULL;

@@ -79,6 +79,11 @@ enum mp_property_action {
     // Pass down an action to a sub-property.
     //  arg: struct m_property_action_arg*
     M_PROPERTY_KEY_ACTION,
+
+    // Get the (usually constant) value that indicates no change. Obscure
+    // special functionality for things like the volume property.
+    // Otherwise works like M_PROPERTY_GET.
+    M_PROPERTY_GET_NEUTRAL,
 };
 
 // Argument for M_PROPERTY_SWITCH

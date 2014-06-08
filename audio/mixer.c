@@ -68,6 +68,12 @@ bool mixer_audio_initialized(struct mixer *mixer)
     return !!mixer->ao;
 }
 
+float mixer_getneutralvolume(struct mixer *mixer)
+{
+    // gain == 1
+    return 1.0 / mixer->opts->softvol_max * 100.0 * 100.0;
+}
+
 static void checkvolume(struct mixer *mixer)
 {
     if (!mixer->ao)

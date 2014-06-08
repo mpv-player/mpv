@@ -423,7 +423,7 @@ void stream_dump(struct MPContext *mpctx);
 // osd.c
 void print_status(struct MPContext *mpctx);
 void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
-                 double min, double max, double val);
+                 double min, double max, double neutral, double val);
 void set_osd_msg(struct MPContext *mpctx, int level, int time,
                  const char* fmt, ...) PRINTF_ATTRIBUTE(4,5);
 void set_osd_function(struct MPContext *mpctx, int osd_function);
