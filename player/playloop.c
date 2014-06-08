@@ -1000,7 +1000,7 @@ void run_playloop(struct MPContext *mpctx)
         double frame_time = 0;
         int r = update_video(mpctx, endpts, !still_playing, &frame_time);
 
-        MP_VERBOSE(mpctx, "update_video: %d\n", r);
+        MP_TRACE(mpctx, "update_video: %d\n", r);
         if (r < 0) {
             MP_FATAL(mpctx, "Could not initialize video chain.\n");
             int uninit = INITIALIZED_VCODEC;
@@ -1023,14 +1023,14 @@ void run_playloop(struct MPContext *mpctx)
             }
             if (mpctx->playing_last_frame) {
                 r = 1; // don't stop playback yet
-                MP_VERBOSE(mpctx, "still showing last frame\n");
+                MP_TRACE(mpctx, "still showing last frame\n");
             }
         }
 
         video_left = r > 0;
 
         if (r == 2)
-            MP_VERBOSE(mpctx, "frametime=%5.3f\n", frame_time);
+            MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 
         if (r == 2 && !mpctx->restart_playback) {
             mpctx->time_frame += frame_time / opts->playback_speed;
