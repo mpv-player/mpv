@@ -179,6 +179,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
             ao_uninit(ao);
         }
         mpctx->ao = NULL;
+        talloc_free(mpctx->ao_decoder_fmt);
+        mpctx->ao_decoder_fmt = NULL;
     }
 
     if (mask & INITIALIZED_PLAYBACK)

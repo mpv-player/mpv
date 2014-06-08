@@ -129,6 +129,13 @@ void reinit_audio_chain(struct MPContext *mpctx)
     struct mp_audio in_format;
     mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &in_format);
 
+    if (mpctx->ao_decoder_fmt && (mpctx->initialized_flags & INITIALIZED_AO) &&
+        !mp_audio_config_equals(mpctx->ao_decoder_fmt, &in_format) &&
+        opts->gapless_audio < 0)
+    {
+        uninit_player(mpctx, INITIALIZED_AO);
+    }
+
     int ao_srate = opts->force_srate;
     int ao_format = opts->audio_output_format;
     struct mp_chmap ao_channels = {0};
@@ -173,6 +180,9 @@ void reinit_audio_chain(struct MPContext *mpctx)
 
         mpctx->ao_buffer = mp_audio_buffer_create(ao);
         mp_audio_buffer_reinit(mpctx->ao_buffer, &fmt);
+
+        mpctx->ao_decoder_fmt = talloc(NULL, struct mp_audio);
+        *mpctx->ao_decoder_fmt = in_format;
 
         char *s = mp_audio_config_to_str(&fmt);
         MP_INFO(mpctx, "AO: [%s] %s\n", ao_get_name(ao), s);
@@ -413,7 +423,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
              * implementation would require draining buffered old-format audio
              * while displaying video, then doing the output format switch.
              */
-            if (!mpctx->opts->gapless_audio)
+            if (mpctx->opts->gapless_audio < 1)
                 uninit_player(mpctx, INITIALIZED_AO);
             reinit_audio_chain(mpctx);
             return -1;

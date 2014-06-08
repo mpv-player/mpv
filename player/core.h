@@ -218,6 +218,7 @@ typedef struct MPContext {
     struct mixer *mixer;
     struct ao *ao;
     double ao_pts;
+    struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
     struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
 
     struct vo *video_out;

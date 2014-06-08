@@ -460,7 +460,10 @@ const m_option_t mp_opts[] = {
                 {"no", 0},
                 {"yes", 1}, {"", 1})),
     OPT_STRING("volume-restore-data", mixer_restore_volume_data, 0),
-    OPT_FLAG("gapless-audio", gapless_audio, M_OPT_FIXED),
+    OPT_CHOICE("gapless-audio", gapless_audio, M_OPT_FIXED | M_OPT_OPTIONAL_PARAM,
+               ({"no", 0},
+                {"yes", 1}, {"", 1},
+                {"weak", -1})),
 
     OPT_GEOMETRY("geometry", vo.geometry, 0),
     OPT_SIZE_BOX("autofit", vo.autofit, 0),

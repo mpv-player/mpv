@@ -901,26 +901,37 @@ OPTIONS
     Adjust the gamma of the video signal (default: 0). Not supported by all
     video output drivers.
 
-``--gapless-audio``
+``--gapless-audio=<no|yes|weak``
     Try to play consecutive audio files with no silence or disruption at the
-    point of file change. This feature is implemented in a simple manner and
-    relies on audio output device buffering to continue playback while moving
-    from one file to another. If playback of the new file starts slowly, for
-    example because it is played from a remote network location or because you
-    have specified cache settings that require time for the initial cache
-    fill, then the buffered audio may run out before playback of the new file
-    can start.
+    point of file change. Default: ``weak``.
+
+    :no:    Disable gapless audio.
+    :yes:   The audio device is opened using parameters chosen according to the
+            first file played and is then kept open for gapless playback. This
+            means that if the first file for example has a low sample rate, then
+            the following files may get resampled to the same low sample rate,
+            resulting in reduced sound quality. If you play files with different
+            parameters, consider using options such as ``--audio-samplerate``
+            and ``--audio-format`` to explicitly select what the shared output
+            format will be.
+    :weak:  Normally, the audio device is kept open (using the format it was
+            first initialized with). If the audio format the decoder output
+            changes, the audio device is closed and reopened. This means that
+            you will normally get gapless audio with files that were encoded
+            using the same settings, but might not be gapless in other cases.
+            (Unlike with ``yes``, you don't have to worry about corner cases
+            like the first file setting a very low quality output format, and
+            ruining the playback of higher quality files that follow.)
 
     .. note::
 
-        The audio device is opened using parameters chosen according to the
-        first file played and is then kept open for gapless playback. This means
-        that if the first file for example has a low sample rate, then the
-        following files may get resampled to the same low sample rate, resulting
-        in reduced sound quality. If you play files with different parameters,
-        consider using options such as ``--audio-samplerate`` and
-        ``--audio-format`` to explicitly select what the shared output format
-        will be.
+        This feature is implemented in a simple manner and relies on audio
+        output device buffering to continue playback while moving from one file
+        to another. If playback of the new file starts slowly, for example
+        because it is played from a remote network location or because you have
+        specified cache settings that require time for the initial cache fill,
+        then the buffered audio may run out before playback of the new file
+        can start.
 
 ``--geometry=<[W[xH]][+-x+-y]>``, ``--geometry=<x:y>``
     Adjust the initial window position or size. ``W`` and ``H`` set the window
