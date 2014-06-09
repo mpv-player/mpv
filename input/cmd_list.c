@@ -93,17 +93,7 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_SUB_REMOVE, "sub_remove", { OARG_INT(-1) } },
   { MP_CMD_SUB_RELOAD, "sub_reload", { OARG_INT(-1) } },
 
-  { MP_CMD_TV_START_SCAN, "tv_start_scan", },
-  { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", { ARG_INT } },
-  { MP_CMD_TV_STEP_NORM, "tv_step_norm", },
-  { MP_CMD_TV_STEP_CHANNEL_LIST, "tv_step_chanlist", },
-  { MP_CMD_TV_SET_CHANNEL, "tv_set_channel", { ARG_STRING } },
   { MP_CMD_TV_LAST_CHANNEL, "tv_last_channel", },
-  { MP_CMD_TV_SET_FREQ, "tv_set_freq", { ARG_FLOAT } },
-  { MP_CMD_TV_STEP_FREQ, "tv_step_freq", { ARG_FLOAT } },
-  { MP_CMD_TV_SET_NORM, "tv_set_norm", { ARG_STRING } },
-
-  { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", { ARG_INT, ARG_INT } },
 
   { MP_CMD_SCREENSHOT, "screenshot", {
       OARG_CHOICE(2, ({"video", 0},

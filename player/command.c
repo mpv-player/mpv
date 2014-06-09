@@ -59,11 +59,6 @@
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
 #include "options/path.h"
-#include "stream/tv.h"
-#include "stream/pvr.h"
-#if HAVE_DVBIN
-#include "stream/dvbin.h"
-#endif
 #include "screenshot.h"
 #if HAVE_SYS_MMAN_H
 #include <sys/mman.h>
@@ -2102,33 +2097,120 @@ static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
     return property_osd_helper(prop, action, arg, mpctx);
 }
 
-#if HAVE_TV
-
-static tvi_handle_t *get_tvh(struct MPContext *mpctx)
+static int demux_stream_control(struct MPContext *mpctx, int ctrl, void *arg)
 {
-    if (!(mpctx->master_demuxer && mpctx->master_demuxer->type == DEMUXER_TYPE_TV))
-        return NULL;
-    return mpctx->master_demuxer->priv;
+    int r = STREAM_UNSUPPORTED;
+    if (mpctx->stream)
+        r = stream_control(mpctx->stream, ctrl, arg);
+    if (r == STREAM_UNSUPPORTED && mpctx->demuxer) {
+        struct demux_ctrl_stream_ctrl c = {ctrl, arg, STREAM_UNSUPPORTED};
+        demux_control(mpctx->demuxer, DEMUXER_CTRL_STREAM_CTRL, &c);
+        r = c.res;
+    }
+    return r;
+}
+
+static int prop_stream_ctrl(struct MPContext *mpctx, int ctrl, void *arg)
+{
+    int r = demux_stream_control(mpctx, ctrl, arg);
+    switch (r) {
+    case STREAM_OK: return M_PROPERTY_OK;
+    case STREAM_UNSUPPORTED: return M_PROPERTY_UNAVAILABLE;
+    default: return M_PROPERTY_ERROR;
+    }
+}
+
+static int mp_property_tv_norm(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    switch (action) {
+    case M_PROPERTY_SET:
+        return prop_stream_ctrl(mpctx, STREAM_CTRL_TV_SET_NORM, *(char **)arg);
+    case M_PROPERTY_SWITCH:
+        return prop_stream_ctrl(mpctx, STREAM_CTRL_TV_STEP_NORM, NULL);
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_tv_scan(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    switch (action) {
+    case M_PROPERTY_SET:
+        return prop_stream_ctrl(mpctx, STREAM_CTRL_TV_SET_SCAN, arg);
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 /// TV color settings (RW)
 static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
-    tvi_handle_t *tvh = get_tvh(mpctx);
-    if (!tvh)
-        return M_PROPERTY_UNAVAILABLE;
-
+    int req[2] = {prop->offset};
     switch (action) {
     case M_PROPERTY_SET:
-        return tv_set_color_options(tvh, prop->offset, *(int *) arg);
-    case M_PROPERTY_GET:
-        return tv_get_color_options(tvh, prop->offset, arg);
+        req[1] = *(int *)arg;
+        return prop_stream_ctrl(mpctx, STREAM_CTRL_SET_TV_COLORS, req);
+    case M_PROPERTY_GET: {
+        int r = prop_stream_ctrl(mpctx, STREAM_CTRL_GET_TV_COLORS, req);
+        if (r == M_PROPERTY_OK)
+            *(int *)arg = req[1];
+        return r;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-#endif
+static int mp_property_tv_freq(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    switch (action) {
+    case M_PROPERTY_SET:
+        return prop_stream_ctrl(mpctx, STREAM_CTRL_SET_TV_FREQ, arg);
+    case M_PROPERTY_GET:
+        return prop_stream_ctrl(mpctx, STREAM_CTRL_GET_TV_FREQ, arg);
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_tv_channel(m_option_t *prop, int action, void *arg,
+                                  MPContext *mpctx)
+{
+    switch (action) {
+    case M_PROPERTY_SET:
+        return prop_stream_ctrl(mpctx, STREAM_CTRL_TV_SET_CHAN, *(char **)arg);
+    case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sa = arg;
+        int dir = sa->inc >= 0 ? 1 : -1;
+        return prop_stream_ctrl(mpctx, STREAM_CTRL_TV_STEP_CHAN, &dir);
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_dvb_channel(m_option_t *prop, int action, void *arg,
+                                   MPContext *mpctx)
+{
+    int r;
+    switch (action) {
+    case M_PROPERTY_SET:
+        mpctx->last_dvb_step = 1;
+        r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_SET_CHANNEL, arg);
+        if (r == M_PROPERTY_OK)
+            mpctx->stop_play = PT_RELOAD_DEMUXER;
+        return r;
+    case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sa = arg;
+        int dir = sa->inc >= 0 ? 1 : -1;
+        mpctx->last_dvb_step = dir;
+        r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_STEP_CHANNEL, &dir);
+        if (r == M_PROPERTY_OK)
+            mpctx->stop_play = PT_RELOAD_DEMUXER;
+        return r;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
 
 static int mp_property_playlist_pos(m_option_t *prop, int action, void *arg,
                                     MPContext *mpctx)
@@ -2490,7 +2572,6 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("vf", mp_property_vf),
     M_OPTION_PROPERTY_CUSTOM("af", mp_property_af),
 
-#if HAVE_TV
     { "tv-brightness", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_BRIGHTNESS },
     { "tv-contrast", mp_property_tv_color, CONF_TYPE_INT,
@@ -2499,7 +2580,12 @@ static const m_option_t mp_properties[] = {
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_SATURATION },
     { "tv-hue", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_HUE },
-#endif
+    { "tv-freq", mp_property_tv_freq, CONF_TYPE_FLOAT, },
+    { "tv-norm", mp_property_tv_norm, CONF_TYPE_STRING, },
+    { "tv-scan", mp_property_tv_scan, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1 },
+    { "tv-channel", mp_property_tv_channel, CONF_TYPE_STRING, },
+    { "dvb-channel", mp_property_dvb_channel, &m_option_type_intpair, },
 
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),
@@ -3432,142 +3518,10 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 (bar_osd ? OSD_SEEK_INFO_BAR : 0);
         break;
 
-#if HAVE_TV
-    case MP_CMD_TV_START_SCAN:
-        if (get_tvh(mpctx))
-            tv_start_scan(get_tvh(mpctx), 1);
+    case MP_CMD_TV_LAST_CHANNEL: {
+        demux_stream_control(mpctx, STREAM_CTRL_TV_LAST_CHAN, NULL);
         break;
-    case MP_CMD_TV_SET_FREQ:
-        if (get_tvh(mpctx))
-            tv_set_freq(get_tvh(mpctx), cmd->args[0].v.f * 16.0);
-#if HAVE_PVR
-        else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
-            pvr_set_freq(mpctx->stream, ROUND(cmd->args[0].v.f));
-            set_osd_msg(mpctx, osdl, osd_duration, "%s: %s",
-                        pvr_get_current_channelname(mpctx->stream),
-                        pvr_get_current_stationname(mpctx->stream));
-        }
-#endif /* HAVE_PVR */
-        break;
-
-    case MP_CMD_TV_STEP_FREQ:
-        if (get_tvh(mpctx))
-            tv_step_freq(get_tvh(mpctx), cmd->args[0].v.f * 16.0);
-#if HAVE_PVR
-        else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
-            pvr_force_freq_step(mpctx->stream, ROUND(cmd->args[0].v.f));
-            set_osd_msg(mpctx, osdl, osd_duration, "%s: f %d",
-                        pvr_get_current_channelname(mpctx->stream),
-                        pvr_get_current_frequency(mpctx->stream));
-        }
-#endif /* HAVE_PVR */
-        break;
-
-    case MP_CMD_TV_SET_NORM:
-        if (get_tvh(mpctx))
-            tv_set_norm(get_tvh(mpctx), cmd->args[0].v.s);
-        break;
-
-    case MP_CMD_TV_STEP_CHANNEL:
-        if (get_tvh(mpctx)) {
-            int v = cmd->args[0].v.i;
-            if (v > 0) {
-                tv_step_channel(get_tvh(mpctx), TV_CHANNEL_HIGHER);
-            } else {
-                tv_step_channel(get_tvh(mpctx), TV_CHANNEL_LOWER);
-            }
-            if (tv_channel_list) {
-                set_osd_msg(mpctx, osdl, osd_duration,
-                             "Channel: %s", tv_channel_current->name);
-            }
-        }
-#if HAVE_PVR
-        else if (mpctx->stream &&
-                 mpctx->stream->type == STREAMTYPE_PVR) {
-            pvr_set_channel_step(mpctx->stream, cmd->args[0].v.i);
-            set_osd_msg(mpctx, osdl, osd_duration, "%s: %s",
-                        pvr_get_current_channelname(mpctx->stream),
-                        pvr_get_current_stationname(mpctx->stream));
-        }
-#endif /* HAVE_PVR */
-#if HAVE_DVBIN
-        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_DVB) {
-            int dir;
-            int v = cmd->args[0].v.i;
-
-            mpctx->last_dvb_step = v;
-            if (v > 0)
-                dir = DVB_CHANNEL_HIGHER;
-            else
-                dir = DVB_CHANNEL_LOWER;
-
-
-            if (dvb_step_channel(mpctx->stream, dir)) {
-                mpctx->stop_play = PT_RELOAD_DEMUXER;
-            }
-        }
-#endif /* HAVE_DVBIN */
-        break;
-
-    case MP_CMD_TV_SET_CHANNEL:
-        if (get_tvh(mpctx)) {
-            tv_set_channel(get_tvh(mpctx), cmd->args[0].v.s);
-            if (tv_channel_list) {
-                set_osd_msg(mpctx, osdl, osd_duration,
-                             "Channel: %s", tv_channel_current->name);
-            }
-        }
-#if HAVE_PVR
-        else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
-            pvr_set_channel(mpctx->stream, cmd->args[0].v.s);
-            set_osd_msg(mpctx, osdl, osd_duration, "%s: %s",
-                        pvr_get_current_channelname(mpctx->stream),
-                        pvr_get_current_stationname(mpctx->stream));
-        }
-#endif /* HAVE_PVR */
-        break;
-
-#if HAVE_DVBIN
-    case MP_CMD_DVB_SET_CHANNEL:
-        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_DVB) {
-            mpctx->last_dvb_step = 1;
-
-            if (dvb_set_channel(mpctx->stream, cmd->args[1].v.i,
-                                cmd->args[0].v.i)) {
-                mpctx->stop_play = PT_RELOAD_DEMUXER;
-            }
-        }
-        break;
-#endif /* HAVE_DVBIN */
-
-    case MP_CMD_TV_LAST_CHANNEL:
-        if (get_tvh(mpctx)) {
-            tv_last_channel(get_tvh(mpctx));
-            if (tv_channel_list) {
-                set_osd_msg(mpctx, osdl, osd_duration,
-                             "Channel: %s", tv_channel_current->name);
-            }
-        }
-#if HAVE_PVR
-        else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
-            pvr_set_lastchannel(mpctx->stream);
-            set_osd_msg(mpctx, osdl, osd_duration, "%s: %s",
-                        pvr_get_current_channelname(mpctx->stream),
-                        pvr_get_current_stationname(mpctx->stream));
-        }
-#endif /* HAVE_PVR */
-        break;
-
-    case MP_CMD_TV_STEP_NORM:
-        if (get_tvh(mpctx))
-            tv_step_norm(get_tvh(mpctx));
-        break;
-
-    case MP_CMD_TV_STEP_CHANNEL_LIST:
-        if (get_tvh(mpctx))
-            tv_step_chanlist(get_tvh(mpctx));
-        break;
-#endif /* HAVE_TV */
+    }
 
     case MP_CMD_SUB_ADD: {
         struct track *sub = mp_add_subtitles(mpctx, cmd->args[0].v.s);

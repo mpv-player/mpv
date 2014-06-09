@@ -1087,9 +1087,58 @@ int tv_step_norm(tvi_handle_t *tvh)
     return 1;
 }
 
-int tv_step_chanlist(tvi_handle_t *tvh)
+static int tv_stream_control(tvi_handle_t *tvh, int cmd, void *arg)
 {
-    return 1;
+    switch (cmd) {
+    case STREAM_CTRL_TV_SET_SCAN:
+        tv_start_scan(tvh, *(int *)arg);
+        return STREAM_OK;
+    case STREAM_CTRL_SET_TV_FREQ:
+        tv_set_freq(tvh, *(float *)arg * 16.0f);
+        return STREAM_OK;
+    case STREAM_CTRL_GET_TV_FREQ: {
+        unsigned long tmp = 0;
+        tv_get_freq(tvh, &tmp);
+        *(float *)arg = tmp / 16.0f;
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_SET_TV_COLORS:
+        tv_set_color_options(tvh, ((int *)arg)[0], ((int *)arg)[1]);
+        return STREAM_OK;
+    case STREAM_CTRL_GET_TV_COLORS:
+        tv_get_color_options(tvh, ((int *)arg)[0], &((int *)arg)[1]);
+        return STREAM_OK;
+    case STREAM_CTRL_TV_SET_NORM:
+        tv_set_norm(tvh, (char *)arg);
+        return STREAM_OK;
+    case STREAM_CTRL_TV_STEP_NORM:
+        tv_step_norm(tvh);
+        return STREAM_OK;
+    case STREAM_CTRL_TV_SET_CHAN:
+        tv_set_channel(tvh, (char *)arg);
+        return STREAM_OK;
+    case STREAM_CTRL_TV_STEP_CHAN:
+        if (*(int *)arg >= 0) {
+            tv_step_channel(tvh, TV_CHANNEL_HIGHER);
+        } else {
+            tv_step_channel(tvh, TV_CHANNEL_LOWER);
+        }
+        return STREAM_OK;
+    case STREAM_CTRL_TV_LAST_CHAN:
+        tv_last_channel(tvh);
+        return STREAM_OK;
+    }
+    return STREAM_UNSUPPORTED;
+}
+
+static int demux_tv_control(demuxer_t *demuxer, int cmd, void *arg)
+{
+    tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
+    if (cmd != DEMUXER_CTRL_STREAM_CTRL)
+        return DEMUXER_CTRL_NOTIMPL;
+    struct demux_ctrl_stream_ctrl *ctrl = arg;
+    ctrl->res = tv_stream_control(tvh, ctrl->ctrl, ctrl->arg);
+    return DEMUXER_CTRL_OK;
 }
 
 demuxer_desc_t demuxer_desc_tv = {
@@ -1097,6 +1146,7 @@ demuxer_desc_t demuxer_desc_tv = {
     .desc = "TV card demuxer",
     .type = DEMUXER_TYPE_TV,
     .fill_buffer = demux_tv_fill_buffer,
+    .control = demux_tv_control,
     .open = demux_open_tv,
     .close = demux_close_tv,
 };

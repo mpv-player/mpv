@@ -1257,20 +1257,13 @@ goto_reopen_demuxer: ;
     //==================== START PLAYING =======================
 
     if (!mpctx->d_video && !mpctx->d_audio) {
+        struct stream *s = mpctx->stream;
         MP_FATAL(mpctx, "No video or audio streams selected.\n");
-#if HAVE_DVBIN
-        if (mpctx->stream->type == STREAMTYPE_DVB) {
-            int dir;
-            int v = mpctx->last_dvb_step;
-            if (v > 0)
-                dir = DVB_CHANNEL_HIGHER;
-            else
-                dir = DVB_CHANNEL_LOWER;
-
-            if (dvb_step_channel(mpctx->stream, dir))
+        if (s->uncached_type == STREAMTYPE_DVB) {
+            int dir = mpctx->last_dvb_step;
+            if (stream_control(s, STREAM_CTRL_DVB_STEP_CHANNEL, &dir) > 0)
                 mpctx->stop_play = PT_RELOAD_DEMUXER;
         }
-#endif
         goto terminate_playback;
     }
 

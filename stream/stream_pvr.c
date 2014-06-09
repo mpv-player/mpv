@@ -142,6 +142,8 @@ struct pvr_t {
   int stream_type;
 };
 
+static int pvr_stream_control(struct stream *s, int cmd, void *arg);
+
 static struct pvr_t *
 pvr_init (void)
 {
@@ -1608,6 +1610,7 @@ pvr_stream_open (stream_t *stream)
   stream->type = STREAMTYPE_PVR;
   stream->fill_buffer = pvr_stream_read;
   stream->close = pvr_stream_close;
+  stream->control = pvr_stream_control;
 
   return STREAM_OK;
 }
@@ -1696,6 +1699,28 @@ pvr_force_freq_step (stream_t *stream, int step)
   struct pvr_t *pvr = (struct pvr_t *) stream->priv;
 
   return force_freq_step (pvr, step);
+}
+
+static int pvr_stream_control(struct stream *s, int cmd, void *arg)
+{
+    switch (cmd) {
+    case STREAM_CTRL_SET_TV_FREQ:
+        pvr_set_freq(s, (int)(*(float *)arg + 0.5f));
+        return STREAM_OK;
+    case STREAM_CTRL_GET_TV_FREQ:
+        *(float *)arg = pvr_get_current_frequency(s);
+        return STREAM_OK;
+    case STREAM_CTRL_TV_SET_CHAN:
+        pvr_set_channel(s, (char *)arg);
+        return STREAM_OK;
+    case STREAM_CTRL_TV_STEP_CHAN:
+        pvr_set_channel_step(s, *(int *)arg);
+        return STREAM_OK;
+    case STREAM_CTRL_TV_LAST_CHAN:
+        pvr_set_lastchannel(s);
+        return STREAM_OK;
+    }
+    return STREAM_UNSUPPORTED;
 }
 
 const stream_info_t stream_info_pvr = {

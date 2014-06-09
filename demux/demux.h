@@ -56,6 +56,13 @@ enum demux_ctrl {
     DEMUXER_CTRL_GET_START_TIME,
     DEMUXER_CTRL_RESYNC,
     DEMUXER_CTRL_IDENTIFY_PROGRAM,
+    DEMUXER_CTRL_STREAM_CTRL,       // stupid workaround for legacy TV code
+};
+
+struct demux_ctrl_stream_ctrl {
+    int ctrl;
+    void *arg;
+    int res;
 };
 
 #define SEEK_ABSOLUTE (1 << 0)

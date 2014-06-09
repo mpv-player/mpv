@@ -493,11 +493,8 @@ Input Commands that are Possibly Subject to Change
     be used in input.conf to reassign such bindings.)
 
 
-Undocumented commands: ``tv_start_scan``, ``tv_step_channel``, ``tv_step_norm``,
-``tv_step_chanlist``, ``tv_set_channel``, ``tv_last_channel``, ``tv_set_freq``,
-``tv_step_freq``, ``tv_set_norm``, ``dvb_set_channel`` (all of these
-should be replaced by properties), ``stop`` (questionable use), ``get_property``
-(?), ``vo_cmdline`` (experimental).
+Undocumented commands: ``tv_last_channel`` (TV/DVB only), ``stop`` (questionable
+use), ``get_property`` (?), ``vo_cmdline`` (experimental).
 
 Input Command Prefixes
 ----------------------

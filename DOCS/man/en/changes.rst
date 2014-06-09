@@ -274,6 +274,32 @@ input.conf and Slave Commands
     +--------------------------------+----------------------------------------+
     | ``af_switch``, ``af_add``, ... | ``af set|add|...``                     |
     +--------------------------------+----------------------------------------+
+    | ``tv_start_scan``              | ``set tv-scan yes``                    |
+    +--------------------------------+----------------------------------------+
+    | ``tv_set_channel <val>``       | ``set tv-channel <val>``               |
+    +--------------------------------+----------------------------------------+
+    | ``tv_step_channel``            | ``cycle tv-channel``                   |
+    +--------------------------------+----------------------------------------+
+    | ``dvb_set_channel <v1> <v2>``  | ``set dvb-channel <v1>-<v2>``          |
+    +--------------------------------+----------------------------------------+
+    | ``dvb_step_channel``           | ``cycle dvb-channel``                  |
+    +--------------------------------+----------------------------------------+
+    | ``tv_set_freq <val>``          | ``set tv-freq <val>``                  |
+    +--------------------------------+----------------------------------------+
+    | ``tv_step_freq``               | ``cycle tv-freq``                      |
+    +--------------------------------+----------------------------------------+
+    | ``tv_set_norm <norm>``         | ``set tv-norm <norm>``                 |
+    +--------------------------------+----------------------------------------+
+    | ``tv_step_norm``               | ``cycle tv-norm``                      |
+    +--------------------------------+----------------------------------------+
+
+    .. note::
+
+        Due to lack of hardware and users using the TV/DVB/PVR features, and
+        due to the need to cleanup the related command code, it's possible
+        that the new commands are buggy or behave worse. This can be improved
+        if testers are available. Otherwise, some of the TV code will be
+        removed at some point.
 
 Slave mode
 ~~~~~~~~~~

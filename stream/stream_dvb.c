@@ -550,13 +550,26 @@ int dvb_step_channel(stream_t *stream, int dir)
                 return 0;
         }
 
-        new_current = (list->NUM_CHANNELS + list->current + (dir == DVB_CHANNEL_HIGHER ? 1 : -1)) % list->NUM_CHANNELS;
+        new_current = (list->NUM_CHANNELS + list->current + (dir >= 0 ? 1 : -1)) % list->NUM_CHANNELS;
 
         return dvb_set_channel(stream, priv->card, new_current);
 }
 
-
-
+static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
+{
+    int r;
+    switch (cmd) {
+    case STREAM_CTRL_DVB_SET_CHANNEL: {
+        int *iarg = arg;
+        r = dvb_set_channel(s, iarg[1], iarg[0]);
+        return r ? STREAM_OK : STREAM_ERROR;
+    }
+    case STREAM_CTRL_DVB_STEP_CHANNEL:
+        r = dvb_step_channel(s, *(int *)arg);
+        return r ? STREAM_OK : STREAM_ERROR;
+    }
+    return STREAM_UNSUPPORTED;
+}
 
 static void dvbin_close(stream_t *stream)
 {
@@ -692,6 +705,7 @@ static int dvb_open(stream_t *stream)
         stream->type = STREAMTYPE_DVB;
         stream->fill_buffer = dvb_streaming_read;
         stream->close = dvbin_close;
+        stream->control = dvbin_stream_control;
 
         stream->demuxer = "lavf";
         stream->lavf_type = "mpegts";

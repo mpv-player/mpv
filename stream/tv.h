@@ -201,10 +201,6 @@ typedef struct {
 
 int tv_set_color_options(tvi_handle_t *tvh, int opt, int val);
 int tv_get_color_options(tvi_handle_t *tvh, int opt, int* val);
-#define TV_COLOR_BRIGHTNESS     1
-#define TV_COLOR_HUE            2
-#define TV_COLOR_SATURATION     3
-#define TV_COLOR_CONTRAST       4
 
 int tv_step_channel_real(tvi_handle_t *tvh, int direction);
 int tv_step_channel(tvi_handle_t *tvh, int direction);
