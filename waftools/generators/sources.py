@@ -38,8 +38,8 @@ def __matroska_definitions__(ctx, **kwargs):
 
 def __zshcomp__(ctx, **kwargs):
     ctx(
-        rule   = __zshcomp_cmd__(ctx, './mpv'),
-        before = ("c",),
+        rule   = __zshcomp_cmd__(ctx, ctx.bldnode.abspath() + '/mpv'),
+        after = ("c", "cprogram",),
         name   = os.path.basename(kwargs['target']),
         **kwargs
     )
