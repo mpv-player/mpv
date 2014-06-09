@@ -32,49 +32,7 @@
 
 #include <stdio.h>
 
-tv_param_t stream_tv_defaults = {
-    NULL,          //freq
-    NULL,          //channel
-    "europe-east", //chanlist
-    "pal",         //norm
-    0,             //automute
-    -1,            //normid
-    NULL,          //device
-    NULL,          //driver
-    -1,            //width
-    -1,            //height
-    0,             //input, used in v4l and bttv
-    -1,            //outfmt
-    -1.0,          //fps
-    NULL,          //channels
-    0,             //noaudio;
-    1,             //immediate;
-    44100,         //audiorate;
-    0,             //audio_id
-    -1,            //amode
-    -1,            //volume
-    -1,            //bass
-    -1,            //treble
-    -1,            //balance
-    -1,            //forcechan
-    0,             //force_audio
-    -1,            //buffer_size
-    0,             //mjpeg
-    2,             //decimation
-    90,            //quality
-    0,             //alsa
-    NULL,          //adevice
-    0,             //brightness
-    0,             //contrast
-    0,             //hue
-    0,             //saturation
-    -1,            //gain
-    0,             //scan_autostart
-    50,            //scan_threshold
-    0.5,           //scan_period
-};
-
-#define OPT_BASE_STRUCT tv_param_t
+#define OPT_BASE_STRUCT struct tv_stream_params
 static const m_option_t stream_opts_fields[] = {
     OPT_STRING("channel", channel, 0),
     OPT_INT("input", input, 0),
@@ -102,7 +60,9 @@ const stream_info_t stream_info_tv = {
   .open = tv_stream_open,
   .protocols = (const char*[]){ "tv", NULL },
   .priv_size = sizeof(tv_param_t),
-  .priv_defaults = &stream_tv_defaults,
+  .priv_defaults = &(const struct tv_stream_params){
+      .input = -1,
+  },
   .options = stream_opts_fields,
   .url_options = (const char*[]){
         "hostname=channel",

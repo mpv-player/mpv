@@ -401,7 +401,7 @@ static void init_audio(priv_t *priv)
 {
     if (priv->audio_initialized) return;
 
-    if (!priv->tv_param->noaudio) {
+    if (priv->tv_param->audio) {
 #if HAVE_ALSA
         if (priv->tv_param->alsa)
             audio_in_init(&priv->audio_in, priv->log, AUDIO_IN_ALSA);
@@ -995,7 +995,7 @@ static int uninit(priv_t *priv)
     }
 
     /* stop audio thread */
-    if (!priv->tv_param->noaudio && priv->audio_grabber_thread) {
+    if (priv->tv_param->audio && priv->audio_grabber_thread) {
         pthread_join(priv->audio_grabber_thread, NULL);
         pthread_mutex_destroy(&priv->skew_mutex);
         pthread_mutex_destroy(&priv->audio_mutex);
@@ -1015,7 +1015,7 @@ static int uninit(priv_t *priv)
         }
         free(priv->video_ringbuffer);
     }
-    if (!priv->tv_param->noaudio) {
+    if (priv->tv_param->audio) {
         free(priv->audio_ringbuffer);
         free(priv->audio_skew_buffer);
         free(priv->audio_skew_delta_buffer);
@@ -1245,7 +1245,7 @@ static int start(priv_t *priv)
     /* setup audio parameters */
 
     init_audio(priv);
-    if (!priv->tv_param->noaudio && !priv->audio_initialized) return 0;
+    if (priv->tv_param->audio && !priv->audio_initialized) return 0;
 
     /* we need this to size the audio buffer properly */
     if (priv->immediate_mode) {
@@ -1254,7 +1254,7 @@ static int start(priv_t *priv)
         priv->video_buffer_size_max = get_capture_buffer_size(priv);
     }
 
-    if (!priv->tv_param->noaudio) {
+    if (priv->tv_param->audio) {
         setup_audio_buffer_sizes(priv);
         priv->audio_skew_buffer = calloc(priv->aud_skew_cnt, sizeof(long long));
         if (!priv->audio_skew_buffer) {
@@ -1296,7 +1296,7 @@ static int start(priv_t *priv)
     }
 
     /* setup video parameters */
-    if (!priv->tv_param->noaudio) {
+    if (priv->tv_param->audio) {
         if (priv->video_buffer_size_max < 3*getfps(priv)*priv->audio_secs_per_block) {
             MP_ERR(priv, "Video buffer shorter than 3 times audio frame duration.\n"
                    "You will probably experience heavy framedrops.\n");
@@ -1433,7 +1433,7 @@ static void *video_grabber(void *data)
     }
     priv->streamon = 1;
 
-    if (!priv->tv_param->noaudio) {
+    if (priv->tv_param->audio) {
         pthread_create(&priv->audio_grabber_thread, NULL, audio_grabber, priv);
     }
 
@@ -1510,9 +1510,9 @@ static void *video_grabber(void *data)
 
         /* store the timestamp of the very first frame as reference */
         if (!priv->frames++) {
-            if (!priv->tv_param->noaudio) pthread_mutex_lock(&priv->skew_mutex);
+            if (priv->tv_param->audio) pthread_mutex_lock(&priv->skew_mutex);
             priv->first_frame = (long long)1e6*buf.timestamp.tv_sec + buf.timestamp.tv_usec;
-            if (!priv->tv_param->noaudio) pthread_mutex_unlock(&priv->skew_mutex);
+            if (priv->tv_param->audio) pthread_mutex_unlock(&priv->skew_mutex);
         }
         priv->curr_frame = (long long)buf.timestamp.tv_sec*1e6+buf.timestamp.tv_usec;
 //        fprintf(stderr, "idx = %d, ts = %f\n", buf.index, (double)(priv->curr_frame) / 1e6);
@@ -1522,9 +1522,9 @@ static void *video_grabber(void *data)
 
         if (!priv->immediate_mode) {
             // interpolate the skew in time
-            if (!priv->tv_param->noaudio) pthread_mutex_lock(&priv->skew_mutex);
+            if (priv->tv_param->audio) pthread_mutex_lock(&priv->skew_mutex);
             xskew = priv->audio_skew + (interval - priv->audio_skew_measure_time)*priv->audio_skew_factor;
-            if (!priv->tv_param->noaudio) pthread_mutex_unlock(&priv->skew_mutex);
+            if (priv->tv_param->audio) pthread_mutex_unlock(&priv->skew_mutex);
              // correct extreme skew changes to avoid (especially) moving backwards in time
             if (xskew - prev_skew > delta*MAX_SKEW_DELTA) {
                 skew = prev_skew + delta*MAX_SKEW_DELTA;

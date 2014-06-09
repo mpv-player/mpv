@@ -2395,192 +2395,184 @@ OPTIONS
     Verify peer certificates when using TLS (e.g. with ``https://...``).
      (Silently fails with older ffmpeg or libav versions.)
 
-``--tv=<option1:option2:...>``
-    This option tunes various properties of the TV capture module. For
+``--tv-...``
+    These options tune various properties of the TV capture module. For
     watching TV with mpv, use ``tv://`` or ``tv://<channel_number>`` or
-    even ``tv://<channel_name>`` (see option ``channels`` for ``channel_name``
+    even ``tv://<channel_name>`` (see option ``tv-channels`` for ``channel_name``
     below) as a movie URL. You can also use ``tv:///<input_id>`` to start
     watching a movie from a composite or S-Video input (see option ``input`` for
     details).
 
-    Available options are:
+``--no-tv-audio``
+    no sound
 
-    ``noaudio``
-        no sound
+``--tv-automute=<0-255> (v4l and v4l2 only)``
+    If signal strength reported by device is less than this value, audio
+    and video will be muted. In most cases automute=100 will be enough.
+    Default is 0 (automute disabled).
 
-    ``automute=<0-255> (v4l and v4l2 only)``
-        If signal strength reported by device is less than this value, audio
-        and video will be muted. In most cases automute=100 will be enough.
-        Default is 0 (automute disabled).
+``--tv-driver=<value>``
+    See ``--tv=driver=help`` for a list of compiled-in TV input drivers.
+    available: dummy, v4l2 (default: autodetect)
 
-    ``driver=<value>``
-        See ``--tv=driver=help`` for a list of compiled-in TV input drivers.
-        available: dummy, v4l2 (default: autodetect)
+``--tv-device=<value>``
+    Specify TV device (default: ``/dev/video0``).
 
-    ``device=<value>``
-        Specify TV device (default: ``/dev/video0``).
+``--tv-input=<value>``
+    Specify input (default: 0 (TV), see console output for available
+    inputs).
 
-    ``input=<value>``
-        Specify input (default: 0 (TV), see console output for available
-        inputs).
+``--tv-freq=<value>``
+    Specify the frequency to set the tuner to (e.g. 511.250). Not
+    compatible with the channels parameter.
 
-    ``freq=<value>``
-        Specify the frequency to set the tuner to (e.g. 511.250). Not
-        compatible with the channels parameter.
+``--tv-outfmt=<value>``
+    Specify the output format of the tuner with a preset value supported
+    by the V4L driver (YV12, UYVY, YUY2, I420) or an arbitrary format given
+    as hex value.
 
-    ``outfmt=<value>``
-        Specify the output format of the tuner with a preset value supported
-        by the V4L driver (YV12, UYVY, YUY2, I420) or an arbitrary format given
-        as hex value.
+``--tv-width=<value>``
+    output window width
 
-    ``width=<value>``
-        output window width
+``--tv-height=<value>``
+    output window height
 
-    ``height=<value>``
-        output window height
+``--tv-fps=<value>``
+    framerate at which to capture video (frames per second)
 
-    ``fps=<value>``
-        framerate at which to capture video (frames per second)
+``--tv-buffersize=<value>``
+    maximum size of the capture buffer in megabytes (default: dynamical)
 
-    ``buffersize=<value>``
-        maximum size of the capture buffer in megabytes (default: dynamical)
+``--tv-norm=<value>``
+    See the console output for a list of all available norms, also see the
+    ``normid`` option below.
 
-    ``norm=<value>``
-        See the console output for a list of all available norms, also see the
-        ``normid`` option below.
+``--tv-normid=<value> (v4l2 only)``
+    Sets the TV norm to the given numeric ID. The TV norm depends on the
+    capture card. See the console output for a list of available TV norms.
 
-    ``normid=<value> (v4l2 only)``
-        Sets the TV norm to the given numeric ID. The TV norm depends on the
-        capture card. See the console output for a list of available TV norms.
+``--tv-channel=<value>``
+    Set tuner to <value> channel.
 
-    ``channel=<value>``
-        Set tuner to <value> channel.
+``--tv-chanlist=<value>``
+    available: argentina, australia, china-bcast, europe-east,
+    europe-west, france, ireland, italy, japan-bcast, japan-cable,
+    newzealand, russia, southafrica, us-bcast, us-cable, us-cable-hrc
 
-    ``chanlist=<value>``
-        available: argentina, australia, china-bcast, europe-east,
-        europe-west, france, ireland, italy, japan-bcast, japan-cable,
-        newzealand, russia, southafrica, us-bcast, us-cable, us-cable-hrc
+``--tv-channels=<chan>-<name>[=<norm>],<chan>-<name>[=<norm>],...``
+    Set names for channels.
 
-    ``channels=<chan>-<name>[=<norm>],<chan>-<name>[=<norm>],...``
-        Set names for channels.
+    .. note::
 
-        .. note::
+        If <chan> is an integer greater than 1000, it will be treated as
+        frequency (in kHz) rather than channel name from frequency table.
+        Use _ for spaces in names (or play with quoting ;-) ). The channel
+        names will then be written using OSD, and the slave commands
+        ``tv_step_channel``, ``tv_set_channel`` and ``tv_last_channel``
+        will be usable for a remote control (see LIRC). Not compatible with
+        the ``frequency`` parameter.
 
-            If <chan> is an integer greater than 1000, it will be treated as
-            frequency (in kHz) rather than channel name from frequency table.
-            Use _ for spaces in names (or play with quoting ;-) ). The channel
-            names will then be written using OSD, and the slave commands
-            ``tv_step_channel``, ``tv_set_channel`` and ``tv_last_channel``
-            will be usable for a remote control (see LIRC). Not compatible with
-            the ``frequency`` parameter.
+    .. note::
 
-        .. note::
+        The channel number will then be the position in the 'channels'
+        list, beginning with 1.
 
-            The channel number will then be the position in the 'channels'
-            list, beginning with 1.
+    .. admonition:: Examples
 
-        .. admonition:: Examples
+        ``tv://1``, ``tv://TV1``, ``tv_set_channel 1``,
+        ``tv_set_channel TV1``
 
-            ``tv://1``, ``tv://TV1``, ``tv_set_channel 1``,
-            ``tv_set_channel TV1``
+``--tv-[brightness|contrast|hue|saturation]=<-100-100>``
+    Set the image equalizer on the card.
 
-    ``[brightness|contrast|hue|saturation]=<-100-100>``
-        Set the image equalizer on the card.
+``--tv-audiorate=<value>``
+    Set input audio sample rate.
 
-    ``audiorate=<value>``
-        Set input audio sample rate.
+``--tv-forceaudio``
+    Capture audio even if there are no audio sources reported by v4l.
 
-    ``forceaudio``
-        Capture audio even if there are no audio sources reported by v4l.
+``--tv-alsa``
+    Capture from ALSA.
 
-    ``alsa``
-        Capture from ALSA.
+``--tv-amode=<0-3>``
+    Choose an audio mode:
 
-    ``amode=<0-3>``
-        Choose an audio mode:
+    :0: mono
+    :1: stereo
+    :2: language 1
+    :3: language 2
 
-        :0: mono
-        :1: stereo
-        :2: language 1
-        :3: language 2
+``--tv-forcechan=<1-2>``
+    By default, the count of recorded audio channels is determined
+    automatically by querying the audio mode from the TV card. This option
+    allows forcing stereo/mono recording regardless of the amode option
+    and the values returned by v4l. This can be used for troubleshooting
+    when the TV card is unable to report the current audio mode.
 
-    ``forcechan=<1-2>``
-        By default, the count of recorded audio channels is determined
-        automatically by querying the audio mode from the TV card. This option
-        allows forcing stereo/mono recording regardless of the amode option
-        and the values returned by v4l. This can be used for troubleshooting
-        when the TV card is unable to report the current audio mode.
+``--tv-adevice=<value>``
+    Set an audio device. <value> should be ``/dev/xxx`` for OSS and a
+    hardware ID for ALSA. You must replace any ':' by a '.' in the
+    hardware ID for ALSA.
 
-    ``adevice=<value>``
-        Set an audio device. <value> should be ``/dev/xxx`` for OSS and a
-        hardware ID for ALSA. You must replace any ':' by a '.' in the
-        hardware ID for ALSA.
+``--tv-audioid=<value>``
+    Choose an audio output of the capture card, if it has more than one.
 
-    ``audioid=<value>``
-        Choose an audio output of the capture card, if it has more than one.
+``--tv-[volume|bass|treble|balance]=<0-100>``
+    These options set parameters of the mixer on the video capture card.
+    They will have no effect, if your card does not have one. For v4l2 50
+    maps to the default value of the control, as reported by the driver.
 
-    ``[volume|bass|treble|balance]=<0-100>``
-        These options set parameters of the mixer on the video capture card.
-        They will have no effect, if your card does not have one. For v4l2 50
-        maps to the default value of the control, as reported by the driver.
+``--tv-gain=<0-100>``
+    Set gain control for video devices (usually webcams) to the desired
+    value and switch off automatic control. A value of 0 enables automatic
+    control. If this option is omitted, gain control will not be modified.
 
-    ``gain=<0-100>``
-        Set gain control for video devices (usually webcams) to the desired
-        value and switch off automatic control. A value of 0 enables automatic
-        control. If this option is omitted, gain control will not be modified.
+``--tv-immediatemode=<bool>``
+    A value of 0 means capture and buffer audio and video together. A
+    value of 1 (default) means to do video capture only and let the audio
+    go through a loopback cable from the TV card to the sound card.
 
-    ``immediatemode=<bool>``
-        A value of 0 means capture and buffer audio and video together. A
-        value of 1 (default) means to do video capture only and let the audio
-        go through a loopback cable from the TV card to the sound card.
+``--tv-mjpeg``
+    Use hardware MJPEG compression (if the card supports it). When using
+    this option, you do not need to specify the width and height of the
+    output window, because mpv will determine it automatically from
+    the decimation value (see below).
 
-    ``mjpeg``
-        Use hardware MJPEG compression (if the card supports it). When using
-        this option, you do not need to specify the width and height of the
-        output window, because mpv will determine it automatically from
-        the decimation value (see below).
+``--tv-decimation=<1|2|4>``
+    choose the size of the picture that will be compressed by hardware
+    MJPEG compression:
 
-    ``decimation=<1|2|4>``
-        choose the size of the picture that will be compressed by hardware
-        MJPEG compression:
+    :1: full size
 
-        :1: full size
+        - 704x576 PAL
+        - 704x480 NTSC
 
-            - 704x576 PAL
-            - 704x480 NTSC
+    :2: medium size
 
-        :2: medium size
+        - 352x288 PAL
+        - 352x240 NTSC
 
-            - 352x288 PAL
-            - 352x240 NTSC
+    :4: small size
 
-        :4: small size
+        - 176x144 PAL
+        - 176x120 NTSC
 
-            - 176x144 PAL
-            - 176x120 NTSC
+``--tv-quality=<0-100>``
+    Choose the quality of the JPEG compression (< 60 recommended for full
+    size).
 
-    ``quality=<0-100>``
-        Choose the quality of the JPEG compression (< 60 recommended for full
-        size).
+``--tv-scan-autostart``
+    Begin channel scanning immediately after startup (default: disabled).
 
-``--tv-scan=<option1:option2:...>``
-    Tune the TV channel scanner. mpv will also print value for
-    ``--tv=channels=`` option, including existing and just found channels.
+``--tv-scan-period=<0.1-2.0>``
+    Specify delay in seconds before switching to next channel (default:
+    0.5). Lower values will cause faster scanning, but can detect inactive
+    TV channels as active.
 
-    Available suboptions are:
-
-    ``autostart``
-        Begin channel scanning immediately after startup (default: disabled).
-
-    ``period=<0.1-2.0>``
-        Specify delay in seconds before switching to next channel (default:
-        0.5). Lower values will cause faster scanning, but can detect inactive
-        TV channels as active.
-
-    ``threshold=<1-100>``
-        Threshold value for the signal strength (in percent), as reported by
-        the device (default: 50). A signal strength higher than this value will
-        indicate that the currently scanning channel is active.
+``--tv-scan-threshold=<1-100>``
+    Threshold value for the signal strength (in percent), as reported by
+    the device (default: 50). A signal strength higher than this value will
+    indicate that the currently scanning channel is active.
 
 ``--use-filedir-conf``
     Look for a file-specific configuration file in the same directory as the

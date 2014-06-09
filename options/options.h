@@ -238,6 +238,8 @@ typedef struct MPOpts {
     int network_tls_verify;
     char *network_tls_ca_file;
 
+    struct tv_params *tv_params;
+
     struct lavc_param {
         int fast;
         int show_all;

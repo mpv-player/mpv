@@ -27,7 +27,7 @@
 
 struct mp_log;
 
-typedef struct tv_param_s {
+typedef struct tv_params {
     char *freq;
     char *channel;
     char *chanlist;
@@ -42,7 +42,7 @@ typedef struct tv_param_s {
     int outfmt;
     float fps;
     char **channels;
-    int noaudio;
+    int audio;
     int immediate;
     int audiorate;
     int audio_id;
@@ -68,14 +68,12 @@ typedef struct tv_param_s {
     int scan;
     int scan_threshold;
     float scan_period;
-    /**
-      Terminate stream with video renderer instead of Null renderer
-      Will help if video freezes but audio does not.
-      May not work with -vo directx and -vf crop combination.
-    */
 } tv_param_t;
 
-extern tv_param_t stream_tv_defaults;
+struct tv_stream_params {
+    char *channel;
+    int input;
+};
 
 typedef struct tvi_info_s
 {
@@ -115,6 +113,10 @@ typedef struct tvi_handle_s {
     int                 channel;
     tv_param_t          * tv_param;
     void                * scan;
+
+    struct tv_channels_s *tv_channel_list;
+    struct tv_channels_s *tv_channel_current, *tv_channel_last;
+    char *tv_channel_last_real;
 } tvi_handle_t;
 
 typedef struct tv_channels_s {
@@ -126,10 +128,6 @@ typedef struct tv_channels_s {
     struct tv_channels_s *next;
     struct tv_channels_s *prev;
 } tv_channels_t;
-
-extern tv_channels_t *tv_channel_list;
-extern tv_channels_t *tv_channel_current, *tv_channel_last;
-extern char *tv_channel_last_real;
 
 typedef struct {
     unsigned int     scan_timer;
