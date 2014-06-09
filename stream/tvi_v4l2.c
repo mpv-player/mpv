@@ -75,8 +75,6 @@ const tvi_info_t tvi_info_v4l2 = {
     tvi_init_v4l2,
     "Video 4 Linux 2 input",
     "v4l2",
-    "Martin Olschewski <olschewski@zpr.uni-koeln.de>",
-    "first try, more to come ;-)"
 };
 
 struct map {

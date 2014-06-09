@@ -724,10 +724,7 @@ static tvi_handle_t *tv_begin(tv_param_t* tv_param, struct mp_log *log)
     if(tv_param->driver && !strcmp(tv_param->driver,"help")){
         mp_info(log, "Available drivers:\n");
         for(i=0;tvi_driver_list[i];i++){
-            mp_info(log, " %s\t%s",tvi_driver_list[i]->short_name,tvi_driver_list[i]->name);
-            if(tvi_driver_list[i]->comment)
-                mp_info(log, " (%s)",tvi_driver_list[i]->comment);
-            mp_info(log, "\n");
+            mp_info(log, " %s\t%s\n",tvi_driver_list[i]->short_name,tvi_driver_list[i]->name);
         }
         return NULL;
     }
@@ -743,10 +740,8 @@ static tvi_handle_t *tv_begin(tv_param_t* tv_param, struct mp_log *log)
                 continue;
 
             h->tv_param=tv_param;
-            MP_INFO(h, "Selected driver: %s\n name: %s\n author: %s\n comment: %s\n", tvi_driver_list[i]->short_name,
-            tvi_driver_list[i]->name,
-            tvi_driver_list[i]->author,
-            tvi_driver_list[i]->comment?tvi_driver_list[i]->comment:"");
+            MP_INFO(h, "Selected driver: %s\n name: %s\n", tvi_driver_list[i]->short_name,
+            tvi_driver_list[i]->name);
             talloc_free(tv_param->driver);
             tv_param->driver=talloc_strdup(NULL, tvi_driver_list[i]->short_name);
             return h;

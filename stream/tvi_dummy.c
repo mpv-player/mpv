@@ -30,8 +30,6 @@ const tvi_info_t tvi_info_dummy = {
         tvi_init_dummy,
         "NULL-TV",
         "dummy",
-        "alex",
-        NULL
 };
 
 /* private data's */

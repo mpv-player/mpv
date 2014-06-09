@@ -80,8 +80,6 @@ typedef struct tvi_info_s
     struct tvi_handle_s * (*tvi_init)(struct mp_log *log, tv_param_t* tv_param);
     const char *name;
     const char *short_name;
-    const char *author;
-    const char *comment;
 } tvi_info_t;
 
 
