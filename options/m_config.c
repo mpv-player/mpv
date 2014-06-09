@@ -874,6 +874,43 @@ void *m_config_alloc_struct(void *talloc_ctx,
     return substruct;
 }
 
+struct dtor_info {
+    const struct m_sub_options *opts;
+    void *ptr;
+};
+
+static void free_substruct(void *ptr)
+{
+    struct dtor_info *d = ptr;
+    for (int n = 0; d->opts->opts && d->opts->opts[n].type; n++) {
+        const struct m_option *opt = &d->opts->opts[n];
+        void *dst = (char *)d->ptr + opt->offset;
+        m_option_free(opt, dst);
+    }
+}
+
+void *m_sub_options_copy(void *talloc_ctx, const struct m_sub_options *opts,
+                         const void *ptr)
+{
+    void *new = talloc_zero_size(talloc_ctx, opts->size);
+    struct dtor_info *dtor = talloc_ptrtype(new, dtor);
+    *dtor = (struct dtor_info){opts, new};
+    talloc_set_destructor(dtor, free_substruct);
+    // also fill/initialize members not described by opts
+    if (opts->defaults)
+        memcpy(new, opts->defaults, opts->size);
+    for (int n = 0; opts->opts && opts->opts[n].type; n++) {
+        const struct m_option *opt = &opts->opts[n];
+        // not implemented, because it adds lots of complexity
+        assert(!(opt->type->flags  & M_OPT_TYPE_HAS_CHILD));
+        void *src = (char *)ptr + opt->offset;
+        void *dst = (char *)new + opt->offset;
+        memset(dst, 0, opt->type->size);
+        m_option_copy(opt, dst, src);
+    }
+    return new;
+}
+
 // This is used for printing error messages on unknown options.
 static const char *replaced_opts =
     "|a52drc#--ad-lavc-ac3drc=level"
