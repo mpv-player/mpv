@@ -24,14 +24,19 @@
 #include <string.h>
 #include <unistd.h>
 #include <string.h>
+#include <libgen.h>
+#include <errno.h>
+#include <stdint.h>
+
+#include <dvdread/dvd_reader.h>
+#include <dvdread/ifo_types.h>
+#include <dvdread/ifo_read.h>
+#include <dvdread/nav_read.h>
 
 #include "config.h"
 #include "talloc.h"
 #include "common/common.h"
 #include "common/msg.h"
-
-#include <libgen.h>
-#include <errno.h>
 
 #define FIRST_AC3_AID 128
 #define FIRST_DTS_AID 136
@@ -42,7 +47,6 @@
 #include "options/m_option.h"
 #include "options/options.h"
 
-#include "stream_dvd.h"
 #include "stream_dvd_common.h"
 
 #define LIBDVDREAD_VERSION(maj,min,micro)       ((maj)*10000 + (min)*100 + (micro))
@@ -60,6 +64,41 @@
 #endif
 #endif
 
+typedef struct {
+  dvd_reader_t *dvd;
+  dvd_file_t *title;
+  ifo_handle_t *vmg_file;
+  tt_srpt_t *tt_srpt;
+  ifo_handle_t *vts_file;
+  vts_ptt_srpt_t *vts_ptt_srpt;
+  pgc_t *cur_pgc;
+//
+  int cur_title;
+  int cur_cell;
+  int last_cell;
+  int cur_pack;
+  int cell_last_pack;
+  int cur_pgc_idx;
+// Navi:
+  int packs_left;
+  dsi_t dsi_pack;
+  int angle_seek;
+  unsigned int *cell_times_table;
+// audio datas
+  int nr_of_channels;
+  stream_language_t audio_streams[32];
+// subtitles
+  int nr_of_subtitles;
+  stream_language_t subtitles[32];
+
+  int dvd_angle;
+  char *dvd_device_current;
+  int dvd_speed;
+  int dvd_title;
+
+  int cfg_title;
+  char *cfg_device;
+} dvd_priv_t;
 
 static const dvd_priv_t stream_priv_dflts = {
   .cfg_title = 0,
@@ -72,35 +111,6 @@ static const m_option_t stream_opts_fields[] = {
     OPT_STRING("device", cfg_device, 0),
     {0}
 };
-
-int dvd_chapter_from_cell(dvd_priv_t* dvd,int title,int cell)
-{
-  pgc_t * cur_pgc;
-  ptt_info_t* ptt;
-  int chapter = cell;
-  int pgc_id,pgn;
-  if(title < 0 || cell < 0){
-    return 0;
-  }
-  /* for most DVD's chapter == cell */
-  /* but there are more complecated cases... */
-  if(chapter >= dvd->vmg_file->tt_srpt->title[title].nr_of_ptts) {
-    chapter = dvd->vmg_file->tt_srpt->title[title].nr_of_ptts-1;
-  }
-  title = dvd->tt_srpt->title[title].vts_ttn-1;
-  ptt = dvd->vts_file->vts_ptt_srpt->title[title].ptt;
-  while(chapter >= 0) {
-    pgc_id = ptt[chapter].pgcn;
-    pgn = ptt[chapter].pgn;
-    cur_pgc = dvd->vts_file->vts_pgcit->pgci_srp[pgc_id-1].pgc;
-    if(cell >= cur_pgc->program_map[pgn-1]-1) {
-      return chapter;
-    }
-    --chapter;
-  }
-  /* didn't find a chapter ??? */
-  return chapter;
-}
 
 static int dvd_lang_from_aid(stream_t *stream, int id) {
   dvd_priv_t *d;
@@ -115,25 +125,7 @@ static int dvd_lang_from_aid(stream_t *stream, int id) {
   return 0;
 }
 
-int dvd_aid_from_lang(stream_t *stream, char **lang) {
-  dvd_priv_t *d=stream->priv;
-  int code,i;
-  for (int n = 0; lang[n]; n++) {
-      code = lang[n][1] | (lang[n][0] << 8);
-      for(i=0;i<d->nr_of_channels;i++) {
-        if(d->audio_streams[i].language==code) {
-          MP_INFO(stream, "Selected DVD audio channel: %d language: %c%c\n",
-          d->audio_streams[i].id, lang[n][0], lang[n][1]);
-          return d->audio_streams[i].id;
-        }
-        //printf("%X != %X  (%c%c)\n",code,d->audio_streams[i].language,lang[0],lang[1]);
-      }
-  }
-  MP_WARN(stream, "No matching DVD audio language found!\n");
-  return -1;
-}
-
-int dvd_number_of_subs(stream_t *stream) {
+static int dvd_number_of_subs(stream_t *stream) {
   int i;
   int maxid = -1;
   dvd_priv_t *d;
@@ -154,22 +146,6 @@ static int dvd_lang_from_sid(stream_t *stream, int id) {
   for (i = 0; i < d->nr_of_subtitles; i++)
     if (d->subtitles[i].id == id && d->subtitles[i].language) return d->subtitles[i].language;
   return 0;
-}
-
-int dvd_sid_from_lang(stream_t *stream, char **lang) {
-  dvd_priv_t *d=stream->priv;
-  int code,i;
-  for (int n = 0; lang[n]; n++) {
-    code = lang[n][1] | (lang[n][0] << 8);
-    for(i=0;i<d->nr_of_subtitles;i++) {
-      if(d->subtitles[i].language==code) {
-        MP_INFO(stream, "Selected DVD subtitle channel: %d language: %c%c\n", i, lang[n][0], lang[n][1]);
-        return d->subtitles[i].id;
-      }
-    }
-  }
-  MP_WARN(stream, "No matching DVD subtitle language found!\n");
-  return -1;
 }
 
 static int dvd_next_cell(stream_t *stream, dvd_priv_t *d) {
