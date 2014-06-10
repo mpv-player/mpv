@@ -56,6 +56,7 @@ typedef struct FilterParam{
         int shiftptr;
         int8_t *noise;
         int8_t *prev_shift[MAX_RES][3];
+        int nonTempRandShift[MAX_RES];
 }FilterParam;
 
 struct vf_priv_s {
@@ -69,9 +70,6 @@ struct vf_priv_s {
         int hq;
         struct vf_lw_opts *lw_opts;
 };
-
-static int nonTempRandShift_init;
-static int nonTempRandShift[MAX_RES];
 
 static const int patt[4] = {
     -1,0,1,0
@@ -134,11 +132,8 @@ static int8_t *initNoise(FilterParam *fp){
             for (j = 0; j < 3; j++)
                 fp->prev_shift[i][j] = noise + (rand()&(MAX_SHIFT-1));
 
-        if(!nonTempRandShift_init){
-                for(i=0; i<MAX_RES; i++){
-                        nonTempRandShift[i]= rand()&(MAX_SHIFT-1);
-                }
-                nonTempRandShift_init = 1;
+        for(i=0; i<MAX_RES; i++){
+                fp->nonTempRandShift[i]= rand()&(MAX_SHIFT-1);
         }
 
         fp->noise= noise;
@@ -200,7 +195,7 @@ static void donoise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, in
         for(y=0; y<height; y++)
         {
                 if(fp->temporal)        shift=  rand()&(MAX_SHIFT  -1);
-                else                    shift= nonTempRandShift[y];
+                else                    shift= fp->nonTempRandShift[y];
 
                 if(fp->quality==0) shift&= ~7;
                 if (fp->averaged) {
