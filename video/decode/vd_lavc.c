@@ -68,19 +68,38 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
 
 static void uninit(struct dec_video *vd);
 
-#define OPT_BASE_STRUCT struct MPOpts
+#define OPT_BASE_STRUCT struct vd_lavc_params
 
-const m_option_t lavc_decode_opts_conf[] = {
-    OPT_FLAG_CONSTANTS("fast", lavc_param.fast, 0, 0, CODEC_FLAG2_FAST),
-    OPT_FLAG("show-all", lavc_param.show_all, 0),
-    OPT_STRING("skiploopfilter", lavc_param.skip_loop_filter_str, 0),
-    OPT_STRING("skipidct", lavc_param.skip_idct_str, 0),
-    OPT_STRING("skipframe", lavc_param.skip_frame_str, 0),
-    OPT_INTRANGE("threads", lavc_param.threads, 0, 0, 16),
-    OPT_FLAG_CONSTANTS("bitexact", lavc_param.bitexact, 0, 0, CODEC_FLAG_BITEXACT),
-    OPT_FLAG("check-hw-profile", lavc_param.check_hw_profile, 0),
-    OPT_STRING("o", lavc_param.avopt, 0),
-    {NULL, NULL, 0, 0, 0, 0, NULL}
+struct vd_lavc_params {
+    int fast;
+    int show_all;
+    char *skip_loop_filter_str;
+    char *skip_idct_str;
+    char *skip_frame_str;
+    int threads;
+    int bitexact;
+    int check_hw_profile;
+    char *avopt;
+};
+
+const struct m_sub_options vd_lavc_conf = {
+    .opts = (const m_option_t[]){
+        OPT_FLAG_CONSTANTS("fast", fast, 0, 0, CODEC_FLAG2_FAST),
+        OPT_FLAG("show-all", show_all, 0),
+        OPT_STRING("skiploopfilter", skip_loop_filter_str, 0),
+        OPT_STRING("skipidct", skip_idct_str, 0),
+        OPT_STRING("skipframe", skip_frame_str, 0),
+        OPT_INTRANGE("threads", threads, 0, 0, 16),
+        OPT_FLAG_CONSTANTS("bitexact", bitexact, 0, 0, CODEC_FLAG_BITEXACT),
+        OPT_FLAG("check-hw-profile", check_hw_profile, 0),
+        OPT_STRING("o", avopt, 0),
+        {0}
+    },
+    .size = sizeof(struct vd_lavc_params),
+    .defaults = &(const struct vd_lavc_params){
+        .show_all = 0,
+        .check_hw_profile = 1,
+    },
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
@@ -142,7 +161,7 @@ const struct hwdec_profile_entry *hwdec_find_profile(
     struct lavc_ctx *ctx, const struct hwdec_profile_entry *table)
 {
     assert(AV_CODEC_ID_NONE == 0);
-    struct lavc_param *lavc_param = &ctx->opts->lavc_param;
+    struct vd_lavc_params *lavc_param = ctx->opts->vd_lavc_params;
     enum AVCodecID codec = ctx->avctx->codec_id;
     int profile = ctx->avctx->profile;
     // Assume nobody cares about these aspects of the profile
@@ -303,7 +322,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
                        struct vd_lavc_hwdec *hwdec)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    struct lavc_param *lavc_param = &vd->opts->lavc_param;
+    struct vd_lavc_params *lavc_param = vd->opts->vd_lavc_params;
     bool mp_rawvideo = false;
     struct sh_stream *sh = vd->header;
 

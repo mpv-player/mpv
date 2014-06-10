@@ -62,6 +62,7 @@ extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
 extern const struct m_sub_options demux_rawvideo_conf;
+extern const struct m_sub_options vd_lavc_conf;
 
 extern const m_option_t lavfdopts_conf[];
 
@@ -80,7 +81,6 @@ static const m_option_t screenshot_conf[] = {
     {0},
 };
 
-extern const m_option_t lavc_decode_opts_conf[];
 extern const m_option_t ad_lavc_decode_opts_conf[];
 
 extern const m_option_t mp_input_opts[];
@@ -277,7 +277,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("field-dominance", field_dominance, 0,
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),
 
-    {"vd-lavc", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG},
+    OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
     {"ad-lavc", (void *) ad_lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG},
 
     {"demuxer-lavf", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG},
@@ -654,10 +654,6 @@ const struct MPOpts mp_default_opts = {
     },
     .lavfdopts = {
         .allow_mimetype = 1,
-    },
-    .lavc_param = {
-        .show_all = 0,
-        .check_hw_profile = 1,
     },
     .input = {
         .key_fifo_size = 7,

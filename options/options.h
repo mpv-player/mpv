@@ -259,17 +259,7 @@ typedef struct MPOpts {
     struct demux_rawaudio_opts *demux_rawaudio;
     struct demux_rawvideo_opts *demux_rawvideo;
 
-    struct lavc_param {
-        int fast;
-        int show_all;
-        char *skip_loop_filter_str;
-        char *skip_idct_str;
-        char *skip_frame_str;
-        int threads;
-        int bitexact;
-        int check_hw_profile;
-        char *avopt;
-    } lavc_param;
+    struct vd_lavc_params *vd_lavc_params;
 
     struct ad_lavc_param {
         float ac3drc;
