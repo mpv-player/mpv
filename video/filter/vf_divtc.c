@@ -50,7 +50,7 @@ struct vf_priv_s
    struct mp_image *buffer;
    };
 
-static int diff_C(unsigned char *old, unsigned char *new, int os, int ns)
+static int diff(unsigned char *old, unsigned char *new, int os, int ns)
    {
    int x, y, d=0;
 
@@ -60,8 +60,6 @@ static int diff_C(unsigned char *old, unsigned char *new, int os, int ns)
 
    return d;
    }
-
-static int (*diff)(unsigned char *, unsigned char *, int, int);
 
 static int diff_plane(unsigned char *old, unsigned char *new,
                       int w, int h, int os, int ns, int arg)
@@ -597,8 +595,6 @@ static int vf_open(vf_instance_t *vf)
 
    if(!(p->history=calloc(sizeof *p->history, p->window)))
       abort();
-
-   diff = diff_C;
 
    vf_detc_init_pts_buf(&p->ptsbuf);
    return 1;
