@@ -35,9 +35,6 @@
 /// Maximal include depth.
 #define MAX_RECURSION_DEPTH 8
 
-/// Current include depth.
-static int recursion_depth = 0;
-
 // Load options and profiles from from a config file.
 //  conffile: path to the config file
 //  initial_section: default section where to add normal options
@@ -68,7 +65,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
 
     MP_VERBOSE(config, "Reading config file %s", conffile);
 
-    if (recursion_depth > MAX_RECURSION_DEPTH) {
+    if (config->recursion_depth > MAX_RECURSION_DEPTH) {
         MP_ERR(config, ": too deep 'include'. check your configfiles\n");
         ret = -1;
         goto out;
@@ -257,7 +254,7 @@ out:
     free(line);
     if (fp)
         fclose(fp);
-    --recursion_depth;
+    config->recursion_depth -= 1;
     if (ret < 0) {
         MP_FATAL(config, "Error loading config file %s.\n",
                conffile);

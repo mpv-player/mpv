@@ -67,6 +67,9 @@ typedef struct m_config {
     int (*includefunc)(void *ctx, char *filename, int flags);
     void *includefunc_ctx;
 
+    // For the command line parser
+    int recursion_depth;
+
     void *optstruct; // struct mpopts or other
 } m_config_t;
 
