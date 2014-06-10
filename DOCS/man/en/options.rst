@@ -427,42 +427,37 @@ OPTIONS
     on the situation, either of these might be slower than the other method.
     This option allows control over this.
 
-``--cdda=<option1:option2>``
-    This option can be used to tune the CD Audio reading feature of mpv.
+``--cdda-...``
+    These options can be used to tune the CD Audio reading feature of mpv.
 
-    Available options are:
+``--cdda-speed=<value>``
+    Set CD spin speed.
 
-    ``speed=<value>``
-        Set CD spin speed.
+``--cdda-paranoia=<0-2>``
+    Set paranoia level. Values other than 0 seem to break playback of
+    anything but the first track.
 
-    ``paranoia=<0-2>``
-        Set paranoia level. Values other than 0 seem to break playback of
-        anything but the first track.
+    :0: disable checking (default)
+    :1: overlap checking only
+    :2: full data correction and verification
 
-        :0: disable checking (default)
-        :1: overlap checking only
-        :2: full data correction and verification
+``--cdda-sector-size=<value>``
+    Set atomic read size.
 
-    ``generic-dev=<value>``
-        Use specified generic SCSI device.
+``--cdda-overlap=<value>``
+    Force minimum overlap search during verification to <value> sectors.
 
-    ``sector-size=<value>``
-        Set atomic read size.
+``--cdda-toc-bias``
+    Assume that the beginning offset of track 1 as reported in the TOC
+    will be addressed as LBA 0. Some discs need this for getting track
+    boundaries correctly.
 
-    ``overlap=<value>``
-        Force minimum overlap search during verification to <value> sectors.
+``--cdda-toc-offset=<value>``
+    Add ``<value>`` sectors to the values reported when addressing tracks.
+    May be negative.
 
-    ``toc-bias``
-        Assume that the beginning offset of track 1 as reported in the TOC
-        will be addressed as LBA 0. Some discs need this for getting track
-        boundaries correctly.
-
-    ``toc-offset=<value>``
-        Add ``<value>`` sectors to the values reported when addressing tracks.
-        May be negative.
-
-    ``(no-)skip``
-        (Never) accept imperfect data reconstruction.
+``--cdda-skip=<es|no``
+    (Never) accept imperfect data reconstruction.
 
 ``--cdrom-device=<path>``
     Specify the CD-ROM device (default: ``/dev/cdrom``).

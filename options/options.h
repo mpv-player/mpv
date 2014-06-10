@@ -240,6 +240,9 @@ typedef struct MPOpts {
 
     struct tv_params *tv_params;
     struct pvr_params *stream_pvr_opts;
+    struct cdda_params *stream_cdda_opts;
+
+    char *cdrom_device;
 
     struct lavc_param {
         int fast;

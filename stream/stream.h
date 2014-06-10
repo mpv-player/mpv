@@ -249,7 +249,7 @@ bool stream_manages_timeline(stream_t *s);
 extern int dvd_title;
 extern int dvd_angle;
 extern int dvd_speed;
-extern char *dvd_device, *cdrom_device;
+extern char *dvd_device;
 
 extern int bluray_angle;
 extern char *bluray_device;

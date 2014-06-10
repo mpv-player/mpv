@@ -46,7 +46,6 @@
 /* defined in demux: */
 extern const m_option_t demux_rawaudio_opts[];
 extern const m_option_t demux_rawvideo_opts[];
-extern const m_option_t cdda_opts[];
 
 extern int sws_flags;
 
@@ -64,6 +63,7 @@ static void print_help(struct mp_log *log)
 
 extern const struct m_sub_options tv_params_conf;
 extern const struct m_sub_options stream_pvr_conf;
+extern const struct m_sub_options stream_cdda_conf;
 
 extern const m_option_t dvbin_opts_conf[];
 extern const m_option_t lavfdopts_conf[];
@@ -170,7 +170,6 @@ const m_option_t mp_opts[] = {
                       ({"no", 0})),
     OPT_INTRANGE("cache-pause-restart", stream_cache_unpause, 0, 0, 0x7fffffff),
 
-    {"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #if HAVE_DVDREAD || HAVE_DVDNAV
     {"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"dvd-speed", &dvd_speed, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -231,7 +230,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("quvi-fetch-subtitles", quvi_fetch_subtitles, 0),
 
 #if HAVE_CDDA
-    { "cdda", (void *)&cdda_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    OPT_SUBSTRUCT("cdda", stream_cdda_opts, stream_cdda_conf, 0),
+    OPT_STRING("cdrom-device", cdrom_device, 0),
 #endif
 
     // demuxer.c - select audio/sub file/demuxer

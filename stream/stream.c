@@ -53,7 +53,6 @@
 #define TOTAL_BUFFER_SIZE (STREAM_MAX_BUFFER_SIZE + STREAM_MAX_SECTOR_SIZE)
 
 /// We keep these 2 for the gui atm, but they will be removed.
-char *cdrom_device = NULL;
 char *dvd_device = NULL;
 int dvd_title = 0;
 
