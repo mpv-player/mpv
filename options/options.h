@@ -256,6 +256,9 @@ typedef struct MPOpts {
     double mf_fps;
     char *mf_type;
 
+    struct demux_rawaudio_opts *demux_rawaudio;
+    struct demux_rawvideo_opts *demux_rawvideo;
+
     struct lavc_param {
         int fast;
         int show_all;

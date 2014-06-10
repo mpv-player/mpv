@@ -43,10 +43,6 @@
 #include "player/command.h"
 #include "osdep/priority.h"
 
-/* defined in demux: */
-extern const m_option_t demux_rawaudio_opts[];
-extern const m_option_t demux_rawvideo_opts[];
-
 extern const char mp_help_text[];
 
 static void print_version(struct mp_log *log)
@@ -64,6 +60,8 @@ extern const struct m_sub_options stream_pvr_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options sws_conf;
+extern const struct m_sub_options demux_rawaudio_conf;
+extern const struct m_sub_options demux_rawvideo_conf;
 
 extern const m_option_t lavfdopts_conf[];
 
@@ -283,8 +281,8 @@ const m_option_t mp_opts[] = {
     {"ad-lavc", (void *) ad_lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG},
 
     {"demuxer-lavf", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG},
-    {"demuxer-rawaudio", (void *)&demux_rawaudio_opts, CONF_TYPE_SUBCONFIG},
-    {"demuxer-rawvideo", (void *)&demux_rawvideo_opts, CONF_TYPE_SUBCONFIG},
+    OPT_SUBSTRUCT("demuxer-rawaudio", demux_rawaudio, demux_rawaudio_conf, 0),
+    OPT_SUBSTRUCT("demuxer-rawvideo", demux_rawvideo, demux_rawvideo_conf, 0),
 
     OPT_FLAG("demuxer-mkv-subtitle-preroll", mkv_subtitle_preroll, 0),
     OPT_FLAG("mkv-subtitle-preroll", mkv_subtitle_preroll, 0), // old alias
