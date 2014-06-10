@@ -55,6 +55,11 @@ typedef struct {
   int nr_of_subtitles;
   stream_language_t subtitles[32];
 
+  int dvd_angle;
+  char *dvd_device_current;
+  int dvd_speed;
+  int dvd_title;
+
   int cfg_title;
   char *cfg_device;
 } dvd_priv_t;

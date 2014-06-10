@@ -40,12 +40,10 @@
 
 #include "stream.h"
 #include "options/m_option.h"
+#include "options/options.h"
 
 #include "stream_dvd.h"
 #include "stream_dvd_common.h"
-
-static char* dvd_device_current;
-int dvd_angle=1;
 
 #define LIBDVDREAD_VERSION(maj,min,micro)       ((maj)*10000 + (min)*100 + (micro))
 /*
@@ -191,7 +189,7 @@ static int dvd_next_cell(stream_t *stream, dvd_priv_t *d) {
   if(next_cell>=d->last_cell)
     return -1; // EOF
   if(d->cur_pgc->cell_playback[next_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK ) {
-    next_cell+=dvd_angle-1;
+    next_cell+=d->dvd_angle-1;
     if(next_cell>=d->last_cell)
       return -1; // EOF
   }
@@ -271,7 +269,7 @@ read_next:
         if(skip && skip!=0x7fffffff) {
           // sml_agli table has valid data (at least one non-zero):
          d->cur_pack=d->dsi_pack.dsi_gi.nv_pck_lbn+
-         d->dsi_pack.sml_agli.data[dvd_angle-1].address;
+         d->dsi_pack.sml_agli.data[d->dvd_angle-1].address;
          d->angle_seek=0;
          d->cur_pack--;
          MP_VERBOSE(stream, "Angle-seek synced using sml_agli map!  new_lba=0x%X  \n",d->cur_pack);
@@ -322,7 +320,8 @@ static void stream_dvd_close(stream_t *s) {
   ifoClose(d->vmg_file);
   DVDCloseFile(d->title);
   DVDClose(d->dvd);
-  dvd_set_speed(s,dvd_device_current, -1); /* -1 => restore default */
+  if (d->dvd_speed)
+    dvd_set_speed(s,d->dvd_device_current, -1); /* -1 => restore default */
 }
 
 static int mp_get_titleset_length(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no)
@@ -603,20 +602,20 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_GET_NUM_ANGLES:
         {
-            *((int *)arg) = d->vmg_file->tt_srpt->title[dvd_title].nr_of_angles;
+            *((int *)arg) = d->vmg_file->tt_srpt->title[d->dvd_title].nr_of_angles;
             return 1;
         }
         case STREAM_CTRL_GET_ANGLE:
         {
-            *((int *)arg) = dvd_angle;
+            *((int *)arg) = d->dvd_angle;
             return 1;
         }
         case STREAM_CTRL_SET_ANGLE:
         {
             int ang = *((int *)arg);
-            if(ang>d->vmg_file->tt_srpt->title[dvd_title].nr_of_angles || ang<=0)
+            if(ang>d->vmg_file->tt_srpt->title[d->dvd_title].nr_of_angles || ang<=0)
                 break;
-            dvd_angle = ang;
+            d->dvd_angle = ang;
             d->angle_seek = 1;
             return 1;
         }
@@ -668,8 +667,10 @@ static int open_s(stream_t *stream)
   int k;
   dvd_priv_t *d = stream->priv;
 
+  d->dvd_angle = stream->opts->dvd_angle;
+
   MP_VERBOSE(stream, "URL: %s\n", stream->url);
-  dvd_title = d->cfg_title + 1;
+  d->dvd_title = d->cfg_title + 1;
   if(1){
     //int ret,ret2;
     int ttn,pgc_id,pgn;
@@ -682,18 +683,19 @@ static int open_s(stream_t *stream)
     /**
      * Open the disc.
      */
-    if(d->cfg_device)
-      dvd_device_current = d->cfg_device;
-    else if(dvd_device)
-      dvd_device_current = dvd_device;
+    if(d->cfg_device && d->cfg_device[0])
+      d->dvd_device_current = d->cfg_device;
+    else if(stream->opts->dvd_device && stream->opts->dvd_device[0])
+      d->dvd_device_current = talloc_strdup(stream, stream->opts->dvd_device);
     else
-      dvd_device_current = DEFAULT_DVD_DEVICE;
-    dvd_set_speed(stream,dvd_device_current, dvd_speed);
+      d->dvd_device_current = DEFAULT_DVD_DEVICE;
+    d->dvd_speed = stream->opts->dvd_speed;
+    dvd_set_speed(stream,d->dvd_device_current, d->dvd_speed);
 #if defined(__APPLE__) || defined(__DARWIN__)
     /* Dynamic DVD drive selection on Darwin */
-    if(!strcmp(dvd_device_current, "/dev/rdiskN")) {
+    if(!strcmp(d->dvd_device_current, "/dev/rdiskN")) {
       int i;
-      size_t len = strlen(dvd_device_current)+1;
+      size_t len = strlen(d->dvd_device_current)+1;
       char *temp_device = malloc(len);
 
       for (i = 1; i < 10; i++) {
@@ -703,7 +705,7 @@ static int open_s(stream_t *stream)
           MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",temp_device, strerror(errno));
         } else {
 #if DVDREAD_VERSION <= LIBDVDREAD_VERSION(0,9,4)
-          dvd_file_t *dvdfile = DVDOpenFile(dvd,dvd_title,DVD_READ_INFO_FILE);
+          dvd_file_t *dvdfile = DVDOpenFile(dvd,d->dvd_title,DVD_READ_INFO_FILE);
           if(!dvdfile) {
             MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",temp_device, strerror(errno));
             DVDClose(dvd);
@@ -722,9 +724,9 @@ static int open_s(stream_t *stream)
     } else
 #endif /* defined(__APPLE__) || defined(__DARWIN__) */
     {
-        dvd = DVDOpen(dvd_device_current);
+        dvd = DVDOpen(d->dvd_device_current);
         if(!dvd) {
-          MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",dvd_device_current, strerror(errno));
+          MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",d->dvd_device_current, strerror(errno));
           return STREAM_UNSUPPORTED;
         }
     }
@@ -746,37 +748,37 @@ static int open_s(stream_t *stream)
      * Make sure our title number is valid.
      */
     MP_INFO(stream, "There are %d titles on this DVD.\n", tt_srpt->nr_of_srpts );
-    if(dvd_title < 1 || dvd_title > tt_srpt->nr_of_srpts) {
-      MP_ERR(stream, "Invalid DVD title number: %d\n", dvd_title);
+    if(d->dvd_title < 1 || d->dvd_title > tt_srpt->nr_of_srpts) {
+      MP_ERR(stream, "Invalid DVD title number: %d\n", d->dvd_title);
       ifoClose( vmg_file );
       DVDClose( dvd );
       return STREAM_UNSUPPORTED;
     }
-    --dvd_title; // remap 1.. -> 0..
+    --(d->dvd_title); // remap 1.. -> 0..
     /**
      * Make sure the angle number is valid for this title.
      */
-    MP_INFO(stream, "There are %d angles in this DVD title.\n", tt_srpt->title[dvd_title].nr_of_angles);
-    if(dvd_angle<1 || dvd_angle>tt_srpt->title[dvd_title].nr_of_angles) {
-      MP_ERR(stream, "Invalid DVD angle number: %d\n", dvd_angle);
+    MP_INFO(stream, "There are %d angles in this DVD title.\n", tt_srpt->title[d->dvd_title].nr_of_angles);
+    if(d->dvd_angle<1 || d->dvd_angle>tt_srpt->title[d->dvd_title].nr_of_angles) {
+      MP_ERR(stream, "Invalid DVD angle number: %d\n", d->dvd_angle);
       goto fail;
     }
 
-    ttn = tt_srpt->title[dvd_title].vts_ttn - 1;
+    ttn = tt_srpt->title[d->dvd_title].vts_ttn - 1;
     /**
      * Load the VTS information for the title set our title is in.
      */
-    vts_file = ifoOpen( dvd, tt_srpt->title[dvd_title].title_set_nr );
+    vts_file = ifoOpen( dvd, tt_srpt->title[d->dvd_title].title_set_nr );
     if(!vts_file) {
-      MP_ERR(stream, "Cannot open the IFO file for DVD title %d.\n", tt_srpt->title[dvd_title].title_set_nr );
+      MP_ERR(stream, "Cannot open the IFO file for DVD title %d.\n", tt_srpt->title[d->dvd_title].title_set_nr );
       goto fail;
     }
     /**
      * We've got enough info, time to open the title set data.
      */
-    title = DVDOpenFile(dvd, tt_srpt->title[dvd_title].title_set_nr, DVD_READ_TITLE_VOBS);
+    title = DVDOpenFile(dvd, tt_srpt->title[d->dvd_title].title_set_nr, DVD_READ_TITLE_VOBS);
     if(!title) {
-      MP_ERR(stream, "Cannot open title VOBS (VTS_%02d_1.VOB).\n", tt_srpt->title[dvd_title].title_set_nr);
+      MP_ERR(stream, "Cannot open title VOBS (VTS_%02d_1.VOB).\n", tt_srpt->title[d->dvd_title].title_set_nr);
       ifoClose( vts_file );
       goto fail;
     }
@@ -788,7 +790,7 @@ static int open_s(stream_t *stream)
     d->vmg_file=vmg_file;
     d->tt_srpt=tt_srpt;
     d->vts_file=vts_file;
-    d->cur_title = dvd_title;
+    d->cur_title = d->dvd_title;
 
     pgc = vts_file->vts_pgcit ? vts_file->vts_pgcit->pgci_srp[ttn].pgc : NULL;
     /**
@@ -898,7 +900,7 @@ static int open_s(stream_t *stream)
       d->last_cell=d->cur_pgc->nr_of_cells;
 
     if(d->cur_pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK )
-      d->cur_cell+=dvd_angle-1;
+      d->cur_cell+=d->dvd_angle-1;
     d->cur_pack = d->cur_pgc->cell_playback[ d->cur_cell ].first_sector;
     d->cell_last_pack=d->cur_pgc->cell_playback[ d->cur_cell ].last_sector;
     MP_VERBOSE(stream, "DVD start cell: %d  pack: 0x%X-0x%X  \n",d->cur_cell,d->cur_pack,d->cell_last_pack);
@@ -909,7 +911,7 @@ static int open_s(stream_t *stream)
       return STREAM_UNSUPPORTED;
     for(k=0; k<d->cur_pgc->nr_of_cells; k++)
       d->cell_times_table[k] = mp_dvdtimetomsec(&d->cur_pgc->cell_playback[k].playback_time);
-    list_chapters(stream, vts_file,tt_srpt,dvd_title);
+    list_chapters(stream, vts_file,tt_srpt,d->dvd_title);
 
     // ... (unimplemented)
     //    return NULL;

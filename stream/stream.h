@@ -245,15 +245,6 @@ bool stream_check_interrupt(struct stream *s);
 
 bool stream_manages_timeline(stream_t *s);
 
-/* stream/stream_dvd.c */
-extern int dvd_title;
-extern int dvd_angle;
-extern int dvd_speed;
-extern char *dvd_device;
-
-extern int bluray_angle;
-extern char *bluray_device;
-
 typedef struct {
     int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm
     int language;

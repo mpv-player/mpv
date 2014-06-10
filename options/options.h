@@ -244,6 +244,12 @@ typedef struct MPOpts {
     struct dvb_params *stream_dvb_opts;
 
     char *cdrom_device;
+    int dvd_title;
+    int dvd_angle;
+    int dvd_speed;
+    char *dvd_device;
+    int bluray_angle;
+    char *bluray_device;
 
     struct lavc_param {
         int fast;

@@ -52,10 +52,6 @@
 // Includes additional padding in case sizes get rounded up by sector size.
 #define TOTAL_BUFFER_SIZE (STREAM_MAX_BUFFER_SIZE + STREAM_MAX_SECTOR_SIZE)
 
-/// We keep these 2 for the gui atm, but they will be removed.
-char *dvd_device = NULL;
-int dvd_title = 0;
-
 extern const stream_info_t stream_info_cdda;
 extern const stream_info_t stream_info_dvb;
 extern const stream_info_t stream_info_tv;

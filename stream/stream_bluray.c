@@ -42,6 +42,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "options/m_option.h"
+#include "options/options.h"
 #include "stream.h"
 #include "osdep/timer.h"
 #include "discnav.h"
@@ -71,9 +72,6 @@
 #define AACS_ERROR_MMC_OPEN       -6 /* MMC open failed (no MMC drive ?) */
 #define AACS_ERROR_MMC_FAILURE    -7 /* MMC failed */
 #define AACS_ERROR_NO_DK          -8 /* no matching device key */
-
-char *bluray_device  = NULL;
-int   bluray_angle   = 0;
 
 struct bluray_overlay {
     struct sub_bitmap *image;
@@ -703,8 +701,9 @@ static void select_initial_angle(stream_t *s) {
     if (!info)
         return;
     /* Select angle */
-    unsigned int angle = 0;
-    angle = bluray_angle ? bluray_angle : BLURAY_DEFAULT_ANGLE;
+    unsigned int angle = s->opts->bluray_angle;
+    if (!angle)
+        angle = BLURAY_DEFAULT_ANGLE;
     angle = FFMIN(angle, info->angle_count);
     if (angle)
         bd_select_angle(b->bd, angle);
@@ -718,10 +717,10 @@ static int bluray_stream_open(stream_t *s)
 
     const char *device = NULL;
     /* find the requested device */
-    if (b->cfg_device)
+    if (b->cfg_device && b->cfg_device[0])
         device = b->cfg_device;
-    else if (bluray_device)
-        device = bluray_device;
+    else if (s->opts->bluray_device && s->opts->bluray_device[0])
+        device = s->opts->bluray_device;
 
     if (!device) {
         MP_ERR(s, "No Blu-ray device/location was specified ...\n");
