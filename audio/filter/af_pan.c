@@ -177,7 +177,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_pan_t
-struct af_info af_info_pan = {
+const struct af_info af_info_pan = {
     .info = "Panning audio filter",
     .name = "pan",
     .open = af_open,

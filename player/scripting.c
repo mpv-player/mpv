@@ -36,7 +36,7 @@
 
 extern const struct mp_scripting mp_scripting_lua;
 
-static const struct mp_scripting *scripting_backends[] = {
+static const struct mp_scripting *const scripting_backends[] = {
 #if HAVE_LUA
     &mp_scripting_lua,
 #endif

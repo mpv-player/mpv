@@ -131,7 +131,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 }
 
 // The beginnings of an active matrix...
-static float steering_matrix[][12] = {
+static const float steering_matrix[][12] = {
 //      LL      RL      LR      RR      LS      RS
 //      LLs     RLs     LRs     RRs     LC      RC
        {.707,   .0,     .0,     .707,   .5,     -.5,
@@ -144,7 +144,7 @@ static float steering_matrix[][12] = {
 // Filter data through filter
 static int filter(struct af_instance* af, struct mp_audio* data, int flags){
   af_surround_t* s   = (af_surround_t*)af->priv;
-  float*         m   = steering_matrix[0];
+  const float*   m   = steering_matrix[0];
   float*         in  = data->planes[0];         // Input audio data
   float*         out = NULL;            // Output audio data
   float*         end = in + data->samples * data->nch;
@@ -229,7 +229,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_surround_t
-struct af_info af_info_surround =
+const struct af_info af_info_surround =
 {
     .info = "Surround decoder filter",
     .name = "surround",

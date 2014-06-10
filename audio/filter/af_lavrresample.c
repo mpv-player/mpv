@@ -382,7 +382,7 @@ static int af_open(struct af_instance *af)
 
 #define OPT_BASE_STRUCT struct af_resample
 
-struct af_info af_info_lavrresample = {
+const struct af_info af_info_lavrresample = {
     .info = "Sample frequency conversion using libavresample",
     .name = "lavrresample",
     .open = af_open,

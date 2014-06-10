@@ -136,7 +136,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_sinesuppress_t
-struct af_info af_info_sinesuppress = {
+const struct af_info af_info_sinesuppress = {
     .info = "Sine Suppress",
     .name = "sinesuppress",
     .open = af_open,

@@ -60,7 +60,7 @@ extern const tvi_info_t tvi_info_dummy;
 extern const tvi_info_t tvi_info_v4l2;
 
 /** List of drivers in autodetection order */
-static const tvi_info_t* tvi_driver_list[]={
+static const tvi_info_t *const tvi_driver_list[]={
 #if HAVE_TV_V4L2
     &tvi_info_v4l2,
 #endif
@@ -1225,7 +1225,7 @@ static int demux_tv_control(demuxer_t *demuxer, int cmd, void *arg)
     return DEMUXER_CTRL_OK;
 }
 
-demuxer_desc_t demuxer_desc_tv = {
+const demuxer_desc_t demuxer_desc_tv = {
     .name = "tv",
     .desc = "TV card demuxer",
     .type = DEMUXER_TYPE_TV,

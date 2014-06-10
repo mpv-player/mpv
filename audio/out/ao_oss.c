@@ -65,7 +65,7 @@ struct priv {
     char *cfg_oss_mixer_channel;
 };
 
-static const char *mixer_channels[SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
+static const char *const mixer_channels[SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
 
 /* like alsa except for 6.1 and 7.1, from pcm/matrix_map.h */
 static const struct mp_chmap oss_layouts[MP_NUM_CHANNELS + 1] = {
@@ -80,7 +80,7 @@ static const struct mp_chmap oss_layouts[MP_NUM_CHANNELS + 1] = {
     MP_CHMAP8(FL, FR, BL, BR, FC, LFE, SL, SR), // 7.1
 };
 
-static int format_table[][2] = {
+static const int format_table[][2] = {
     {AFMT_U8,           AF_FORMAT_U8},
     {AFMT_S8,           AF_FORMAT_S8},
     {AFMT_U16_LE,       AF_FORMAT_U16_LE},

@@ -279,6 +279,6 @@ static int open_f(stream_t *stream)
 const stream_info_t stream_info_file = {
     .name = "file",
     .open = open_f,
-    .protocols = (const char*[]){ "file", "", NULL },
+    .protocols = (const char*const[]){ "file", "", NULL },
     .can_write = true,
 };

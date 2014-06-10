@@ -97,7 +97,7 @@ const struct m_sub_options stream_cdda_conf = {
     },
 };
 
-static const char *cdtext_name[] = {
+static const char *const cdtext_name[] = {
 #ifdef OLD_API
     [CDTEXT_ARRANGER] = "Arranger",
     [CDTEXT_COMPOSER] = "Composer",
@@ -411,11 +411,11 @@ static void *get_defaults(stream_t *st)
 const stream_info_t stream_info_cdda = {
     .name = "cdda",
     .open = open_cdda,
-    .protocols = (const char*[]){"cdda", NULL },
+    .protocols = (const char*const[]){"cdda", NULL },
     .priv_size = sizeof(cdda_priv),
     .get_defaults = get_defaults,
     .options = cdda_params_fields,
-    .url_options = (const char*[]){
+    .url_options = (const char*const[]){
         "hostname=span",
         "port=speed",
         "filename=device",

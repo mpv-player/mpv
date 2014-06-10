@@ -69,7 +69,7 @@ static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
 
 #define OPT_BASE_STRUCT struct mp_icc_opts
 const struct m_sub_options mp_icc_conf = {
-    .opts = (m_option_t[]) {
+    .opts = (const m_option_t[]) {
         OPT_STRING("icc-profile", profile, 0),
         OPT_FLAG("icc-profile-auto", profile_auto, 0),
         OPT_STRING("icc-cache", cache, 0),
@@ -250,7 +250,7 @@ error_exit:
 #else /* HAVE_LCMS2 */
 
 const struct m_sub_options mp_icc_conf = {
-    .opts = (m_option_t[]) { {0} },
+    .opts = (const m_option_t[]) { {0} },
     .size = sizeof(struct mp_icc_opts),
     .defaults = &(const struct mp_icc_opts) {0},
 };

@@ -55,7 +55,7 @@ static const struct osd_style_opts osd_style_opts_def = {
 
 #define OPT_BASE_STRUCT struct osd_style_opts
 const struct m_sub_options osd_style_conf = {
-    .opts = (m_option_t[]) {
+    .opts = (const m_option_t[]) {
         OPT_STRING("font", font, 0),
         OPT_FLOATRANGE("font-size", font_size, 0, 1, 9000),
         OPT_COLOR("color", color, 0),

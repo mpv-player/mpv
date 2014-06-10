@@ -31,34 +31,34 @@
 #include "af.h"
 
 // Static list of filters
-extern struct af_info af_info_dummy;
-extern struct af_info af_info_delay;
-extern struct af_info af_info_channels;
-extern struct af_info af_info_format;
-extern struct af_info af_info_force;
-extern struct af_info af_info_volume;
-extern struct af_info af_info_equalizer;
-extern struct af_info af_info_pan;
-extern struct af_info af_info_surround;
-extern struct af_info af_info_sub;
-extern struct af_info af_info_export;
-extern struct af_info af_info_drc;
-extern struct af_info af_info_extrastereo;
-extern struct af_info af_info_lavcac3enc;
-extern struct af_info af_info_lavrresample;
-extern struct af_info af_info_sweep;
-extern struct af_info af_info_hrtf;
-extern struct af_info af_info_ladspa;
-extern struct af_info af_info_center;
-extern struct af_info af_info_sinesuppress;
-extern struct af_info af_info_karaoke;
-extern struct af_info af_info_scaletempo;
-extern struct af_info af_info_bs2b;
-extern struct af_info af_info_lavfi;
-extern struct af_info af_info_convert24;
-extern struct af_info af_info_convertsignendian;
+extern const struct af_info af_info_dummy;
+extern const struct af_info af_info_delay;
+extern const struct af_info af_info_channels;
+extern const struct af_info af_info_format;
+extern const struct af_info af_info_force;
+extern const struct af_info af_info_volume;
+extern const struct af_info af_info_equalizer;
+extern const struct af_info af_info_pan;
+extern const struct af_info af_info_surround;
+extern const struct af_info af_info_sub;
+extern const struct af_info af_info_export;
+extern const struct af_info af_info_drc;
+extern const struct af_info af_info_extrastereo;
+extern const struct af_info af_info_lavcac3enc;
+extern const struct af_info af_info_lavrresample;
+extern const struct af_info af_info_sweep;
+extern const struct af_info af_info_hrtf;
+extern const struct af_info af_info_ladspa;
+extern const struct af_info af_info_center;
+extern const struct af_info af_info_sinesuppress;
+extern const struct af_info af_info_karaoke;
+extern const struct af_info af_info_scaletempo;
+extern const struct af_info af_info_bs2b;
+extern const struct af_info af_info_lavfi;
+extern const struct af_info af_info_convert24;
+extern const struct af_info af_info_convertsignendian;
 
-static struct af_info* filter_list[] = {
+static const struct af_info *const filter_list[] = {
     &af_info_dummy,
     &af_info_delay,
     &af_info_channels,
@@ -389,7 +389,7 @@ static char *af_find_conversion_filter(int srcfmt, int *dstfmt)
         }
 
         for (int n = 0; filter_list[n]; n++) {
-            struct af_info *af = filter_list[n];
+            const struct af_info *af = filter_list[n];
             if (!af->test_conversion)
                 continue;
             for (int i = 0; af_fmtstr_table[i].format; i++) {
@@ -589,7 +589,7 @@ void af_uninit(struct af_stream *s)
 struct af_stream *af_new(struct mpv_global *global)
 {
     struct af_stream *s = talloc_zero(NULL, struct af_stream);
-    static struct af_info in = { .name = "in" };
+    static const struct af_info in = { .name = "in" };
     s->first = talloc(s, struct af_instance);
     *s->first = (struct af_instance) {
         .info = &in,
@@ -599,7 +599,7 @@ struct af_stream *af_new(struct mpv_global *global)
         .data = &s->input,
         .mul = 1.0,
     };
-    static struct af_info out = { .name = "out" };
+    static const struct af_info out = { .name = "out" };
     s->last = talloc(s, struct af_instance);
     *s->last = (struct af_instance) {
         .info = &out,

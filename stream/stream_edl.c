@@ -14,5 +14,5 @@ static int s_open (struct stream *stream)
 const stream_info_t stream_info_edl = {
     .name = "edl",
     .open = s_open,
-    .protocols = (const char*[]){"edl", NULL},
+    .protocols = (const char*const[]){"edl", NULL},
 };

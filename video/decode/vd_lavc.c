@@ -88,7 +88,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vda;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy;
 
-static const struct vd_lavc_hwdec *hwdec_list[] = {
+static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_VDPAU_HWACCEL
     &mp_vd_lavc_vdpau,
 #endif

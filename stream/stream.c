@@ -893,7 +893,7 @@ unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
     return mem;
 }
 
-static const char *bom[3] = {"\xEF\xBB\xBF", "\xFF\xFE", "\xFE\xFF"};
+static const char *const bom[3] = {"\xEF\xBB\xBF", "\xFF\xFE", "\xFE\xFF"};
 
 // Return utf16 argument for stream_read_line
 int stream_skip_bom(struct stream *s)

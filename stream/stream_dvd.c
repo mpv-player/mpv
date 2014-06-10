@@ -947,11 +947,11 @@ static int ifo_stream_open (stream_t *stream)
 const stream_info_t stream_info_dvd = {
   .name = "dvd",
   .open = open_s,
-  .protocols = (const char*[]){ "dvd", NULL },
+  .protocols = (const char*const[]){ "dvd", NULL },
   .priv_size = sizeof(dvd_priv_t),
   .priv_defaults = &stream_priv_dflts,
   .options = stream_opts_fields,
-  .url_options = (const char*[]){
+  .url_options = (const char*const[]){
         "hostname=title",
         "filename=device",
         NULL
@@ -961,5 +961,5 @@ const stream_info_t stream_info_dvd = {
 const stream_info_t stream_info_ifo = {
     .name = "ifo",
     .open = ifo_stream_open,
-    .protocols = (const char*[]){ "file", "", NULL },
+    .protocols = (const char*const[]){ "file", "", NULL },
 };

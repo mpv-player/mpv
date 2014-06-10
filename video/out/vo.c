@@ -47,24 +47,24 @@
 //
 // Externally visible list of all vo drivers
 //
-extern struct vo_driver video_out_x11;
-extern struct vo_driver video_out_vdpau;
-extern struct vo_driver video_out_xv;
-extern struct vo_driver video_out_opengl;
-extern struct vo_driver video_out_opengl_hq;
-extern struct vo_driver video_out_opengl_old;
-extern struct vo_driver video_out_null;
-extern struct vo_driver video_out_image;
-extern struct vo_driver video_out_lavc;
-extern struct vo_driver video_out_caca;
-extern struct vo_driver video_out_direct3d;
-extern struct vo_driver video_out_direct3d_shaders;
-extern struct vo_driver video_out_sdl;
-extern struct vo_driver video_out_corevideo;
-extern struct vo_driver video_out_vaapi;
-extern struct vo_driver video_out_wayland;
+extern const struct vo_driver video_out_x11;
+extern const struct vo_driver video_out_vdpau;
+extern const struct vo_driver video_out_xv;
+extern const struct vo_driver video_out_opengl;
+extern const struct vo_driver video_out_opengl_hq;
+extern const struct vo_driver video_out_opengl_old;
+extern const struct vo_driver video_out_null;
+extern const struct vo_driver video_out_image;
+extern const struct vo_driver video_out_lavc;
+extern const struct vo_driver video_out_caca;
+extern const struct vo_driver video_out_direct3d;
+extern const struct vo_driver video_out_direct3d_shaders;
+extern const struct vo_driver video_out_sdl;
+extern const struct vo_driver video_out_corevideo;
+extern const struct vo_driver video_out_vaapi;
+extern const struct vo_driver video_out_wayland;
 
-const struct vo_driver *video_out_drivers[] =
+const struct vo_driver *const video_out_drivers[] =
 {
 #if HAVE_VDPAU
         &video_out_vdpau,

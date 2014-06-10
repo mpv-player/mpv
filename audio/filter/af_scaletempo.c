@@ -467,7 +467,7 @@ static int af_open(struct af_instance *af)
 
 #define OPT_BASE_STRUCT af_scaletempo_t
 
-struct af_info af_info_scaletempo = {
+const struct af_info af_info_scaletempo = {
     .info = "Scale audio tempo while maintaining pitch",
     .name = "scaletempo",
     .open = af_open,

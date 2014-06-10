@@ -154,11 +154,11 @@ static int parse_txt(struct pl_parser *p)
 struct pl_format {
     const char *name;
     int (*parse)(struct pl_parser *p);
-    const char **mime_types;
+    const char *const *mime_types;
 };
 
 #define MIME_TYPES(...) \
-    .mime_types = (const char*[]){__VA_ARGS__, NULL}
+    .mime_types = (const char*const[]){__VA_ARGS__, NULL}
 
 static const struct pl_format formats[] = {
     {"m3u", parse_m3u,
@@ -170,7 +170,7 @@ static const struct pl_format formats[] = {
     {"txt", parse_txt},
 };
 
-static bool check_mimetype(struct stream *s, const char **list)
+static bool check_mimetype(struct stream *s, const char *const *list)
 {
     if (s->mime_type) {
         for (int n = 0; list && list[n]; n++) {

@@ -58,13 +58,13 @@ tv_stream_open (stream_t *stream)
 const stream_info_t stream_info_tv = {
   .name = "tv",
   .open = tv_stream_open,
-  .protocols = (const char*[]){ "tv", NULL },
+  .protocols = (const char*const[]){ "tv", NULL },
   .priv_size = sizeof(tv_param_t),
   .priv_defaults = &(const struct tv_stream_params){
       .input = -1,
   },
   .options = stream_opts_fields,
-  .url_options = (const char*[]){
+  .url_options = (const char*const[]){
         "hostname=channel",
         "filename=input",
         NULL

@@ -1169,7 +1169,7 @@ static bool match_property(const char *a, const char *b)
 }
 
 // Broadcast that properties have changed.
-void mp_client_property_change(struct MPContext *mpctx, const char **list)
+void mp_client_property_change(struct MPContext *mpctx, const char *const *list)
 {
     struct mp_client_api *clients = mpctx->clients;
 
@@ -1340,7 +1340,7 @@ unsigned long mpv_client_api_version(void)
     return MPV_CLIENT_API_VERSION;
 }
 
-static const char *err_table[] = {
+static const char *const err_table[] = {
     [-MPV_ERROR_SUCCESS] = "success",
     [-MPV_ERROR_EVENT_QUEUE_FULL] = "event queue full",
     [-MPV_ERROR_NOMEM] = "memory allocation failed",
@@ -1367,7 +1367,7 @@ const char *mpv_error_string(int error)
     return name ? name : "unknown error";
 }
 
-static const char *event_table[] = {
+static const char *const event_table[] = {
     [MPV_EVENT_NONE] = "none",
     [MPV_EVENT_SHUTDOWN] = "shutdown",
     [MPV_EVENT_LOG_MESSAGE] = "log-message",

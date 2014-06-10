@@ -140,6 +140,6 @@ static int open_f (stream_t *stream)
 const stream_info_t stream_info_smb = {
     .name = "smb",
     .open = open_f,
-    .protocols = (const char*[]){"smb", NULL},
+    .protocols = (const char*const[]){"smb", NULL},
     .can_write = true, //who's gonna do that?
 };

@@ -38,7 +38,7 @@
 
 static const union m_option_value default_value;
 
-static const char *replaced_opts;
+static const char *const replaced_opts;
 
 // Profiles allow to predefine some sets of options that can then
 // be applied later on with the internal -profile option.
@@ -912,7 +912,7 @@ void *m_sub_options_copy(void *talloc_ctx, const struct m_sub_options *opts,
 }
 
 // This is used for printing error messages on unknown options.
-static const char *replaced_opts =
+static const char *const replaced_opts =
     "|a52drc#--ad-lavc-ac3drc=level"
     "|afm#--ad"
     "|aspect#--video-aspect"

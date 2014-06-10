@@ -73,7 +73,7 @@ struct vf_priv_s {
 static int nonTempRandShift_init;
 static int nonTempRandShift[MAX_RES];
 
-static int patt[4] = {
+static const int patt[4] = {
     -1,0,1,0
 };
 

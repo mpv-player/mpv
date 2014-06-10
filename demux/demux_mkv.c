@@ -1289,7 +1289,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     return 0;
 }
 
-static struct mkv_audio_tag {
+static const struct mkv_audio_tag {
     char *id;   bool prefix;   uint32_t formattag;
     bool parse;
 } mkv_audio_tags[] = {
@@ -1376,7 +1376,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     } else {
         sh_a->wf = talloc_zero(sh_a, MP_WAVEFORMATEX);
         for (int i = 0; ; i++) {
-            struct mkv_audio_tag *t = mkv_audio_tags + i;
+            const struct mkv_audio_tag *t = mkv_audio_tags + i;
             if (t->id == NULL)
                 goto error;
             if (t->prefix) {
@@ -1606,7 +1606,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     return 1;
 }
 
-static const char *mkv_sub_tag[][2] = {
+static const char *const mkv_sub_tag[][2] = {
     { MKV_S_VOBSUB,     "dvd_subtitle" },
     { MKV_S_TEXTSSA,    "ass"},
     { MKV_S_TEXTASS,    "ass"},

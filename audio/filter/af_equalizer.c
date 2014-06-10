@@ -194,7 +194,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_equalizer_t
-struct af_info af_info_equalizer = {
+const struct af_info af_info_equalizer = {
   .info = "Equalizer audio filter",
   .name = "equalizer",
   .flags = AF_FLAGS_NOT_REENTRANT,

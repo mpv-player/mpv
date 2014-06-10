@@ -596,8 +596,7 @@ static const struct wl_registry_listener registry_listener = {
 
 static int lookupkey(int key)
 {
-    static const char *passthrough_keys
-        = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
+    const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
 
     int mpkey = 0;
     if ((key >= 'a' && key <= 'z') ||

@@ -23,7 +23,7 @@
 
 // Names taken from libavutil/channel_layout.c (Not accessible by API.)
 // Use of these names is hard-coded in some places (e.g. ao_alsa.c)
-static const char *speaker_names[MP_SPEAKER_ID_COUNT][2] = {
+static const char *const speaker_names[MP_SPEAKER_ID_COUNT][2] = {
     [MP_SPEAKER_ID_FL]          = {"fl",   "front left"},
     [MP_SPEAKER_ID_FR]          = {"fr",   "front right"},
     [MP_SPEAKER_ID_FC]          = {"fc",   "front center"},
@@ -53,7 +53,7 @@ static const char *speaker_names[MP_SPEAKER_ID_COUNT][2] = {
 
 // Names taken from libavutil/channel_layout.c (Not accessible by API.)
 // Channel order corresponds to lavc/waveex, except for the alsa entries.
-static const char *std_layout_names[][2] = {
+static const char *const std_layout_names[][2] = {
     {"empty",           ""}, // not in lavc
     {"mono",            "fc"},
     {"stereo",          "fl-fr"},
@@ -105,7 +105,7 @@ static const struct mp_chmap default_layouts[MP_NUM_CHANNELS + 1] = {
 // channels. 3 and 7 channels were likely undefined (no ALSA support).
 // I'm not sure about the 4 channel case: ALSA uses "quad", while the ffmpeg
 // default layout is "4.0".
-static const char *mplayer_layouts[MP_NUM_CHANNELS + 1] = {
+static const char *const mplayer_layouts[MP_NUM_CHANNELS + 1] = {
     [1] = "mono",
     [2] = "stereo",
     [4] = "quad",

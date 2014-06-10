@@ -207,7 +207,7 @@ exit:
     return res;
 }
 
-static const char *backup_properties[] = {
+static const char *const backup_properties[] = {
     "options/osd-level",
     //"loop",
     "options/speed",

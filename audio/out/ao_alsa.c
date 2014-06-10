@@ -244,7 +244,7 @@ static int find_alsa_format(int af_format)
 // The second item must be resolvable with mp_chmap_from_str().
 // Source: http://www.alsa-project.org/main/index.php/DeviceNames
 // (Speaker names are slightly different from mpv's.)
-static const char *device_channel_layouts[][2] = {
+static const char *const device_channel_layouts[][2] = {
     {"default",         "fc"},
     {"default",         "fl-fr"},
     {"rear",            "bl-br"},

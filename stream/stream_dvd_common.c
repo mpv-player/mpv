@@ -125,7 +125,7 @@ void dvd_set_speed(stream_t *stream, char *device, unsigned speed)
 */
 int mp_dvdtimetomsec(dvd_time_t *dt)
 {
-  static int framerates[4] = {0, 2500, 0, 2997};
+  int framerates[4] = {0, 2500, 0, 2997};
   int framerate = framerates[(dt->frame_u & 0xc0) >> 6];
   int msec = (((dt->hour & 0xf0) >> 3) * 5 + (dt->hour & 0x0f)) * 3600000;
   msec += (((dt->minute & 0xf0) >> 3) * 5 + (dt->minute & 0x0f)) * 60000;

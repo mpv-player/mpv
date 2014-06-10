@@ -13,9 +13,9 @@
 #include "common/common.h"
 #include "sub/find_subfiles.h"
 
-static const char *sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",
-                                 "smi", "rt", "txt", "ssa", "aqt", "jss",
-                                 "js", "ass", NULL};
+static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",
+                                       "smi", "rt", "txt", "ssa", "aqt", "jss",
+                                       "js", "ass", NULL};
 
 static bool is_sub_ext(bstr ext)
 {

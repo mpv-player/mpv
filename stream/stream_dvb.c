@@ -823,11 +823,11 @@ static void *get_defaults(stream_t *st)
 const stream_info_t stream_info_dvb = {
     .name = "dvbin",
     .open = dvb_open,
-    .protocols = (const char*[]){ "dvb", NULL },
+    .protocols = (const char*const[]){ "dvb", NULL },
     .priv_size = sizeof(dvb_priv_t),
     .get_defaults = get_defaults,
     .options = stream_params,
-    .url_options = (const char*[]){
+    .url_options = (const char*const[]){
         "hostname=prog",
         "username=card",
         NULL

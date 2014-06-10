@@ -55,7 +55,7 @@ static const char vo_opengl_shaders[] =
 
 // lscale/cscale arguments that map directly to shader filter routines.
 // Note that the convolution filters are not included in this list.
-static const char *fixed_scale_filters[] = {
+static const char *const fixed_scale_filters[] = {
     "bilinear",
     "bicubic_fast",
     "sharpen3",
@@ -73,7 +73,7 @@ struct lut_tex_format {
 // This must match the weightsN functions in the shader.
 // Each entry uses (size+3)/4 pixels per LUT entry, and size/pixels components
 // per pixel.
-struct lut_tex_format lut_tex_formats[] = {
+const struct lut_tex_format lut_tex_formats[] = {
     [2] =  {1, GL_RG16F,   GL_RG},
     [4] =  {1, GL_RGBA16F, GL_RGBA},
     [6] =  {2, GL_RGB16F,  GL_RGB},
@@ -271,7 +271,7 @@ static const struct packed_fmt_entry mp_packed_formats[] = {
     {0},
 };
 
-static const char *osd_shaders[SUBBITMAP_COUNT] = {
+static const char *const osd_shaders[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = "frag_osd_libass",
     [SUBBITMAP_RGBA] =   "frag_osd_rgba",
 };
@@ -303,7 +303,7 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
-    .opts = (m_option_t[]) {
+    .opts = (const m_option_t[]) {
         OPT_FLOATRANGE("gamma", gamma, 0, 0.0, 10.0),
         OPT_FLAG("srgb", srgb, 0),
         OPT_FLAG("approx-gamma", approx_gamma, 0),
@@ -1046,7 +1046,7 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
 
     int size = scaler->kernel->size;
     assert(size < FF_ARRAY_ELEMS(lut_tex_formats));
-    struct lut_tex_format *fmt = &lut_tex_formats[size];
+    const struct lut_tex_format *fmt = &lut_tex_formats[size];
     bool use_2d = fmt->pixels > 1;
     bool is_luma = scaler->index == 0;
     scaler->lut_name = use_2d
@@ -1854,7 +1854,7 @@ static bool test_fbo(struct gl_video *p, GLenum format)
         0xFFFFFF / (float)(1 << 25),    // float mantissa
         2,                              // out of range value
     };
-    static const char *val_names[] = {
+    static const char *const val_names[] = {
         "8-bit precision",
         "16-bit precision",
         "full float",
@@ -2237,7 +2237,7 @@ static const char* handle_scaler_opt(const char *name)
         if (can_use_filter_kernel(kernel))
             return kernel->name;
 
-        for (const char **filter = fixed_scale_filters; *filter; filter++) {
+        for (const char *const *filter = fixed_scale_filters; *filter; filter++) {
             if (strcmp(*filter, name) == 0)
                 return *filter;
         }
@@ -2289,7 +2289,7 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
 {
     if (bstr_equals0(param, "help")) {
         mp_info(log, "Available scalers:\n");
-        for (const char **filter = fixed_scale_filters; *filter; filter++)
+        for (const char *const *filter = fixed_scale_filters; *filter; filter++)
             mp_info(log, "    %s\n", *filter);
         for (int n = 0; mp_filter_kernels[n].name; n++)
             mp_info(log, "    %s\n", mp_filter_kernels[n].name);

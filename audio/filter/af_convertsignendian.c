@@ -123,7 +123,7 @@ static int af_open(struct af_instance *af)
     return AF_OK;
 }
 
-struct af_info af_info_convertsignendian = {
+const struct af_info af_info_convertsignendian = {
     .info = "Convert between sample format sign/endian",
     .name = "convertsignendian",
     .open = af_open,

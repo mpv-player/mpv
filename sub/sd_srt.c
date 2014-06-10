@@ -439,7 +439,7 @@ static void convert_subrip(struct sd *sd, const char *orig,
     new_line.buf[new_line.len] = 0;
 }
 
-static const char *srt_ass_extradata =
+static const char *const srt_ass_extradata =
     "[Script Info]\n"
     "ScriptType: v4.00+\n"
     "PlayResX: 384\n"

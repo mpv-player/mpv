@@ -74,7 +74,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_sweept
-struct af_info af_info_sweep = {
+const struct af_info af_info_sweep = {
     .info = "sine sweep",
     .name = "sweep",
     .open = af_open,

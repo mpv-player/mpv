@@ -57,7 +57,7 @@ const struct image_writer_opts image_writer_opts_defaults = {
 #define OPT_BASE_STRUCT struct image_writer_opts
 
 const struct m_sub_options image_writer_conf = {
-    .opts = (m_option_t[]) {
+    .opts = (const m_option_t[]) {
         OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
         OPT_INTRANGE("jpeg-optimize", jpeg_optimize, 0, 0, 100),
         OPT_INTRANGE("jpeg-smooth", jpeg_smooth, 0, 0, 100),
@@ -82,7 +82,7 @@ struct image_writer_ctx {
 struct img_writer {
     const char *file_ext;
     int (*write)(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp);
-    int *pixfmts;
+    const int *pixfmts;
     int lavc_codec;
 };
 
@@ -219,16 +219,16 @@ static const struct img_writer img_writers[] = {
     { "ppm", write_lavc, .lavc_codec = AV_CODEC_ID_PPM },
     { "pgm", write_lavc,
       .lavc_codec = AV_CODEC_ID_PGM,
-      .pixfmts = (int[]) { IMGFMT_Y8, 0 },
+      .pixfmts = (const int[]) { IMGFMT_Y8, 0 },
     },
     { "pgmyuv", write_lavc,
       .lavc_codec = AV_CODEC_ID_PGMYUV,
-      .pixfmts = (int[]) { IMGFMT_420P, 0 },
+      .pixfmts = (const int[]) { IMGFMT_420P, 0 },
     },
     { "tga", write_lavc,
       .lavc_codec = AV_CODEC_ID_TARGA,
-      .pixfmts = (int[]) { IMGFMT_BGR24, IMGFMT_BGRA, IMGFMT_BGR15_LE,
-                           IMGFMT_Y8, 0},
+      .pixfmts = (const int[]) { IMGFMT_BGR24, IMGFMT_BGRA, IMGFMT_BGR15_LE,
+                                 IMGFMT_Y8, 0},
     },
 #if HAVE_JPEG
     { "jpg", write_jpeg },
@@ -277,7 +277,7 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
 
     if (writer->pixfmts) {
         destfmt = writer->pixfmts[0];   // default to first pixel format
-        for (int *fmt = writer->pixfmts; *fmt; fmt++) {
+        for (const int *fmt = writer->pixfmts; *fmt; fmt++) {
             if (*fmt == image->imgfmt) {
                 destfmt = *fmt;
                 break;

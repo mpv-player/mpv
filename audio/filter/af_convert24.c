@@ -108,7 +108,7 @@ static int af_open(struct af_instance *af)
     return AF_OK;
 }
 
-struct af_info af_info_convert24 = {
+const struct af_info af_info_convert24 = {
     .info = "Convert between 24 and 32 bit sample format",
     .name = "convert24",
     .open = af_open,

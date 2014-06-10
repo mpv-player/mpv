@@ -315,7 +315,7 @@ done:
 const stream_info_t stream_info_ffmpeg = {
   .name = "ffmpeg",
   .open = open_f,
-  .protocols = (const char*[]){
+  .protocols = (const char *const[]){
      "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh",
      "mmshttp", "udp", "ftp", "rtp", "httpproxy", "hls", "rtmpe", "rtmps",
      "rtmpt", "rtmpte", "rtmpts", "srtp", "tcp", "udp", "tls", "unix", "sftp",

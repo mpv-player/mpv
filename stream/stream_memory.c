@@ -77,5 +77,5 @@ static int open_f(stream_t *stream)
 const stream_info_t stream_info_memory = {
     .name = "memory",
     .open = open_f,
-    .protocols = (const char*[]){ "memory", NULL },
+    .protocols = (const char*const[]){ "memory", NULL },
 };

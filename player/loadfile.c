@@ -826,7 +826,7 @@ static void open_subtitles_from_resolve(struct MPContext *mpctx)
     }
 }
 
-static const char *font_mimetypes[] = {
+static const char *const font_mimetypes[] = {
     "application/x-truetype-font",
     "application/vnd.ms-opentype",
     "application/x-font-ttf",
@@ -834,7 +834,7 @@ static const char *font_mimetypes[] = {
     NULL
 };
 
-static const char *font_exts[] = {".ttf", ".ttc", ".otf", NULL};
+static const char *const font_exts[] = {".ttf", ".ttc", ".otf", NULL};
 
 static bool attachment_is_font(struct mp_log *log, struct demux_attachment *att)
 {

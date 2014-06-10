@@ -222,7 +222,7 @@ static int af_open( struct af_instance* af )
 }
 
 #define OPT_BASE_STRUCT af_export_t
-struct af_info af_info_export = {
+const struct af_info af_info_export = {
     .info = "Sound export filter",
     .name = "export",
     .open = af_open,

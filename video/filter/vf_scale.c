@@ -137,7 +137,7 @@ static const unsigned int outfmt_list[] = {
  * or to stop vf_scale from choosing a conversion that has no
  * fast assembler implementation.
  */
-static int preferred_conversions[][2] = {
+static const int preferred_conversions[][2] = {
     {IMGFMT_YUYV, IMGFMT_UYVY},
     {IMGFMT_YUYV, IMGFMT_422P},
     {IMGFMT_UYVY, IMGFMT_YUYV},

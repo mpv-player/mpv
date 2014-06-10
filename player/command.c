@@ -2597,8 +2597,8 @@ static const m_option_t mp_properties[] = {
 };
 
 // Each entry describes which properties an event (possibly) changes.
-#define E(x, ...) [x] = (const char*[]){__VA_ARGS__, NULL}
-const char **mp_event_property_change[] = {
+#define E(x, ...) [x] = (const char*const[]){__VA_ARGS__, NULL}
+static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_START_FILE, "*"),
     E(MPV_EVENT_END_FILE, "*"),
     E(MPV_EVENT_FILE_LOADED, "*"),
@@ -2690,7 +2690,7 @@ void property_print_help(struct mp_log *log)
  * terminal output if there is no video; it'll be a label shown together with
  * percentage.
  */
-static struct property_osd_display {
+static const struct property_osd_display {
     // property name
     const char *name;
     // name used on OSD
@@ -2763,7 +2763,7 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
 {
     struct MPOpts *opts = mpctx->opts;
     struct m_option prop = {0};
-    struct property_osd_display *p;
+    const struct property_osd_display *p;
     const char *name = pname;
 
     if (mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0)
@@ -2875,7 +2875,7 @@ static bool reinit_filters(MPContext *mpctx, enum stream_type mediatype)
     return false;
 }
 
-static const char *filter_opt[STREAM_TYPE_COUNT] = {
+static const char *const filter_opt[STREAM_TYPE_COUNT] = {
     [STREAM_VIDEO] = "vf",
     [STREAM_AUDIO] = "af",
 };

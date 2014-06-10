@@ -111,7 +111,7 @@ static const struct format_hack format_hacks[] = {
     {0}
 };
 
-static const char *format_blacklist[] = {
+static const char *const format_blacklist[] = {
     "tty",      // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
     0
 };
@@ -184,7 +184,7 @@ static void list_formats(struct demuxer *demuxer)
         MP_INFO(demuxer, "%15s : %s\n", fmt->name, fmt->long_name);
 }
 
-static char *remove_prefix(char *s, const char **prefixes)
+static char *remove_prefix(char *s, const char *const *prefixes)
 {
     for (int n = 0; prefixes[n]; n++) {
         int len = strlen(prefixes[n]);
@@ -194,7 +194,7 @@ static char *remove_prefix(char *s, const char **prefixes)
     return s;
 }
 
-static const char *prefixes[] =
+static const char *const prefixes[] =
     {"ffmpeg://", "lavf://", "avdevice://", "av://", NULL};
 
 static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)

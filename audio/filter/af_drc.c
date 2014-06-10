@@ -313,7 +313,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_drc_t
-struct af_info af_info_drc = {
+const struct af_info af_info_drc = {
     .info = "Dynamic range compression filter",
     .name = "drc",
     .flags = AF_FLAGS_NOT_REENTRANT,

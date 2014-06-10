@@ -86,7 +86,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_center_t
-struct af_info af_info_center = {
+const struct af_info af_info_center = {
     .info = "Audio filter for adding a center channel",
     .name = "center",
     .flags = AF_FLAGS_NOT_REENTRANT,

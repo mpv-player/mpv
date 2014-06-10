@@ -33,6 +33,6 @@ static int open_s(stream_t *stream)
 const stream_info_t stream_info_null = {
     .name = "null",
     .open = open_s,
-    .protocols = (const char*[]){ "null", NULL },
+    .protocols = (const char*const[]){ "null", NULL },
     .can_write = true,
 };

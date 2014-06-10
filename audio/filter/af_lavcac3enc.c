@@ -305,7 +305,7 @@ static int af_open(struct af_instance* af){
 
 #define OPT_BASE_STRUCT struct af_ac3enc_s
 
-struct af_info af_info_lavcac3enc = {
+const struct af_info af_info_lavcac3enc = {
     .info = "runtime encode to ac3 using libavcodec",
     .name = "lavcac3enc",
     .open = af_open,

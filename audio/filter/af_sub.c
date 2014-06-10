@@ -46,8 +46,8 @@ typedef struct{
 } biquad_t;
 
 // S-parameters for designing 4th order Butterworth filter
-static biquad_t sp[2] = {{{1.0,0.0,0.0},{1.0,0.765367,1.0}},
-                         {{1.0,0.0,0.0},{1.0,1.847759,1.0}}};
+static const biquad_t sp[2] = {{{1.0,0.0,0.0},{1.0,0.765367,1.0}},
+                               {{1.0,0.0,0.0},{1.0,1.847759,1.0}}};
 
 // Data for specific instances of this filter
 typedef struct af_sub_s
@@ -128,7 +128,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_sub_t
-struct af_info af_info_sub = {
+const struct af_info af_info_sub = {
     .info = "Audio filter for adding a sub-base channel",
     .name = "sub",
     .flags = AF_FLAGS_NOT_REENTRANT,

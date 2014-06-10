@@ -1722,5 +1722,5 @@ static int pvr_stream_control(struct stream *s, int cmd, void *arg)
 const stream_info_t stream_info_pvr = {
     .name = "pvr",
     .open = pvr_stream_open,
-    .protocols = (const char*[]){ "pvr", NULL },
+    .protocols = (const char*const[]){ "pvr", NULL },
 };

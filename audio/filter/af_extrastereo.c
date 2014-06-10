@@ -118,7 +118,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_extrastereo_t
-struct af_info af_info_extrastereo = {
+const struct af_info af_info_extrastereo = {
     .info = "Increase difference between audio channels",
     .name = "extrastereo",
     .flags = AF_FLAGS_NOT_REENTRANT,

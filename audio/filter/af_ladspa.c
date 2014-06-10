@@ -104,7 +104,7 @@ static int af_ladspa_malloc_failed(char*);
 /* ------------------------------------------------------------------------- */
 
 #define OPT_BASE_STRUCT af_ladspa_t
-struct af_info af_info_ladspa = {
+const struct af_info af_info_ladspa = {
     .info = "LADSPA plugin loader",
     .name = "ladspa",
     .open = af_open,

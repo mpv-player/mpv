@@ -49,7 +49,7 @@
 
 // List of builtin modules and their contents as strings.
 // All these are generated from player/lua/*.lua
-static const char *builtin_lua_scripts[][2] = {
+static const char * const builtin_lua_scripts[][2] = {
     {"mp.defaults",
 #   include "player/lua/defaults.inc"
     },
@@ -1106,7 +1106,7 @@ static const struct fn_entry main_fns[] = {
     {0}
 };
 
-static struct fn_entry utils_fns[] = {
+static const struct fn_entry utils_fns[] = {
     FN_ENTRY(readdir),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),

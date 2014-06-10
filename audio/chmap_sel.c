@@ -21,7 +21,7 @@
 #include "common/common.h"
 #include "chmap_sel.h"
 
-static struct mp_chmap speaker_replacements[][2] = {
+static const struct mp_chmap speaker_replacements[][2] = {
     // 5.1 <-> 5.1 (side)
     { MP_CHMAP2(SL, SR), MP_CHMAP2(BL, BR) },
     // 7.1 <-> 7.1 (rear ext)
@@ -170,7 +170,7 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
     }
     for (int i = 0; i < MP_ARRAY_SIZE(speaker_replacements); i++) {
         struct mp_chmap  t = *map;
-        struct mp_chmap *r = speaker_replacements[i];
+        struct mp_chmap *r = (struct mp_chmap *)speaker_replacements[i];
         if (replace_speakers(&t, r) && test_layout(s, &t)) {
             *map = t;
             return true;

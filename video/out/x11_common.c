@@ -513,7 +513,7 @@ static const struct mp_keymap keymap[] = {
 
 static int vo_x11_lookupkey(int key)
 {
-    static const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
+    const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
     int mpkey = 0;
     if ((key >= 'a' && key <= 'z') ||
         (key >= 'A' && key <= 'Z') ||

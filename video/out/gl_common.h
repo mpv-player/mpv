@@ -206,7 +206,7 @@ struct gl_hwdec_driver {
     void (*destroy)(struct gl_hwdec *hw);
 };
 
-extern const struct gl_hwdec_driver *mpgl_hwdec_drivers[];
+extern const struct gl_hwdec_driver *const mpgl_hwdec_drivers[];
 
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);

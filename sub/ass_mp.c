@@ -222,7 +222,7 @@ void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
     *parts = res->parts;
 }
 
-static int map_ass_level[] = {
+static const int map_ass_level[] = {
     MSGL_ERR,           // 0 "FATAL errors"
     MSGL_WARN,
     MSGL_INFO,

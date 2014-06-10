@@ -77,7 +77,7 @@ static const m_option_t stream_opts_fields[] = {
 };
 
 #define DNE(e) [e] = # e
-static char *mp_dvdnav_events[] = {
+static const char *const mp_dvdnav_events[] = {
     DNE(DVDNAV_BLOCK_OK),
     DNE(DVDNAV_NOP),
     DNE(DVDNAV_STILL_FRAME),
@@ -93,7 +93,7 @@ static char *mp_dvdnav_events[] = {
     DNE(DVDNAV_WAIT),
 };
 
-static char *mp_nav_cmd_types[] = {
+static const char *const mp_nav_cmd_types[] = {
     DNE(MP_NAV_CMD_NONE),
     DNE(MP_NAV_CMD_ENABLE),
     DNE(MP_NAV_CMD_DRAIN_OK),
@@ -103,7 +103,7 @@ static char *mp_nav_cmd_types[] = {
     DNE(MP_NAV_CMD_MOUSE_POS),
 };
 
-static char *mp_nav_event_types[] = {
+static const char *const mp_nav_event_types[] = {
     DNE(MP_NAV_EVENT_NONE),
     DNE(MP_NAV_EVENT_RESET),
     DNE(MP_NAV_EVENT_RESET_CLUT),
@@ -737,11 +737,11 @@ static int open_s(stream_t *stream)
 const stream_info_t stream_info_dvdnav = {
     .name = "dvdnav",
     .open = open_s,
-    .protocols = (const char*[]){ "dvdnav", NULL },
+    .protocols = (const char*const[]){ "dvdnav", NULL },
     .priv_size = sizeof(struct priv),
     .priv_defaults = &stream_priv_dflts,
     .options = stream_opts_fields,
-    .url_options = (const char*[]){
+    .url_options = (const char*const[]){
         "hostname=title",
         "filename=device",
         NULL

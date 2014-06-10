@@ -189,7 +189,7 @@ static int af_open(struct af_instance *af)
 #define OPT_BASE_STRUCT struct af_bs2b
 
 /// Description of this filter
-struct af_info af_info_bs2b = {
+const struct af_info af_info_bs2b = {
     .info = "Bauer stereophonic-to-binaural audio filter",
     .name = "bs2b",
     .open = af_open,

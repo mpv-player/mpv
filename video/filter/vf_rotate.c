@@ -36,7 +36,7 @@ static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
-    static const char *rot[] = {
+    static const char *const rot[] = {
         "null",
         "transpose=clock",
         "vflip,hflip",

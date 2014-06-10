@@ -199,7 +199,7 @@ static int rar_filter_open(stream_t *stream)
 const stream_info_t stream_info_rar_entry = {
     .name = "rar_entry",
     .open = rar_entry_open,
-    .protocols = (const char*[]){ "rar", NULL },
+    .protocols = (const char*const[]){ "rar", NULL },
 };
 
 const stream_info_t stream_info_rar_filter = {

@@ -299,7 +299,7 @@ static int af_open(struct af_instance *af)
 
 #define OPT_BASE_STRUCT struct priv
 
-struct af_info af_info_lavfi = {
+const struct af_info af_info_lavfi = {
     .info = "libavfilter bridge",
     .name = "lavfi",
     .open = af_open,

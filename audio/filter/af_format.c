@@ -114,7 +114,7 @@ static int af_open(struct af_instance *af)
 
 #define OPT_BASE_STRUCT struct priv
 
-struct af_info af_info_format = {
+const struct af_info af_info_format = {
     .info = "Force audio format",
     .name = "format",
     .open = af_open,

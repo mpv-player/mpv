@@ -631,7 +631,7 @@ static int af_open(struct af_instance* af)
 }
 
 #define OPT_BASE_STRUCT af_hrtf_t
-struct af_info af_info_hrtf = {
+const struct af_info af_info_hrtf = {
     .info = "HRTF Headphone",
     .name = "hrtf",
     .open = af_open,

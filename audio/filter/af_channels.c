@@ -238,7 +238,7 @@ static int af_open(struct af_instance* af){
 }
 
 #define OPT_BASE_STRUCT af_channels_t
-struct af_info af_info_channels = {
+const struct af_info af_info_channels = {
     .info = "Insert or remove channels",
     .name = "channels",
     .open = af_open,
