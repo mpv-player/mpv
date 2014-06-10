@@ -263,24 +263,7 @@ typedef struct MPOpts {
     struct vd_lavc_params *vd_lavc_params;
     struct ad_lavc_params *ad_lavc_params;
 
-    struct input_conf {
-        char *config_file;
-        int doubleclick_time;
-        int key_fifo_size;
-        int ar_delay;
-        int ar_rate;
-        char *js_dev;
-        char *in_file;
-        int use_joystick;
-        int use_lirc;
-        char *lirc_configfile;
-        int use_lircc;
-        int use_alt_gr;
-        int use_appleremote;
-        int use_media_keys;
-        int default_bindings;
-        int test;
-    } input;
+    struct input_opts *input_opts;
 
     struct encode_output_conf {
         char *file;

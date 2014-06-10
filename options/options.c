@@ -65,6 +65,7 @@ extern const struct m_sub_options demux_rawvideo_conf;
 extern const struct m_sub_options demux_lavf_conf;
 extern const struct m_sub_options vd_lavc_conf;
 extern const struct m_sub_options ad_lavc_conf;
+extern const struct m_sub_options input_config;
 
 extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
@@ -81,7 +82,6 @@ static const m_option_t screenshot_conf[] = {
     {0},
 };
 
-extern const m_option_t mp_input_opts[];
 
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
@@ -492,13 +492,12 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
     OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
-    OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
     OPT_FLAG("input-cursor", vo.enable_mouse_movements, CONF_GLOBAL),
 
     {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG},
 
-    {"", (void *) mp_input_opts, CONF_TYPE_SUBCONFIG},
+    OPT_SUBSTRUCT("input", input_opts, input_config, 0),
 
     OPT_PRINT("list-properties", property_print_help),
     OPT_PRINT("help", print_help),
@@ -645,19 +644,6 @@ const struct MPOpts mp_default_opts = {
 
     .mf_fps = 1.0,
 
-    .input = {
-        .key_fifo_size = 7,
-        .doubleclick_time = 300,
-        .ar_delay = 200,
-        .ar_rate = 40,
-        .use_lirc = 1,
-        .use_alt_gr = 1,
-#if HAVE_COCOA
-        .use_appleremote = 1,
-        .use_media_keys = 1,
-#endif
-        .default_bindings = 1,
-    },
     .encode_output = {
         .metadata = 1,
     },

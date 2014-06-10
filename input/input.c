@@ -190,36 +190,65 @@ int async_quit_request;
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
                         const char *location, const char *restrict_section);
 
-#define OPT_BASE_STRUCT struct MPOpts
-
-// Our command line options
-static const m_option_t input_config[] = {
-    OPT_STRING("conf", input.config_file, CONF_GLOBAL),
-    OPT_INT("ar-delay", input.ar_delay, CONF_GLOBAL),
-    OPT_INT("ar-rate", input.ar_rate, CONF_GLOBAL),
-    OPT_PRINT("keylist", mp_print_key_list),
-    OPT_PRINT("cmdlist", mp_print_cmd_list),
-    OPT_STRING("js-dev", input.js_dev, CONF_GLOBAL),
-    OPT_STRING("file", input.in_file, CONF_GLOBAL),
-    OPT_FLAG("default-bindings", input.default_bindings, CONF_GLOBAL),
-    OPT_FLAG("test", input.test, CONF_GLOBAL),
-    { NULL, NULL, 0, 0, 0, 0, NULL}
+#define OPT_BASE_STRUCT struct input_opts
+struct input_opts {
+    char *config_file;
+    int doubleclick_time;
+    int key_fifo_size;
+    int ar_delay;
+    int ar_rate;
+    char *js_dev;
+    char *in_file;
+    int use_joystick;
+    int use_lirc;
+    char *lirc_configfile;
+    int use_lircc;
+    int use_alt_gr;
+    int use_appleremote;
+    int use_media_keys;
+    int default_bindings;
+    int test;
 };
 
-const m_option_t mp_input_opts[] = {
-    { "input", (void *)&input_config, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    OPT_INTRANGE("doubleclick-time", input.doubleclick_time, 0, 0, 1000),
-    OPT_FLAG("input-joystick", input.use_joystick, CONF_GLOBAL),
-    OPT_FLAG("input-lirc", input.use_lirc, CONF_GLOBAL),
-    OPT_FLAG("input-right-alt-gr", input.use_alt_gr, CONF_GLOBAL),
-#if HAVE_LIRC
-    OPT_STRING("input-lirc-conf", input.lirc_configfile, CONF_GLOBAL),
-#endif
+const struct m_sub_options input_config = {
+    .opts = (const m_option_t[]) {
+        OPT_STRING("conf", config_file, CONF_GLOBAL),
+        OPT_INT("ar-delay", ar_delay, CONF_GLOBAL),
+        OPT_INT("ar-rate", ar_rate, CONF_GLOBAL),
+        OPT_PRINT("keylist", mp_print_key_list),
+        OPT_PRINT("cmdlist", mp_print_cmd_list),
+        OPT_STRING("js-dev", js_dev, CONF_GLOBAL),
+        OPT_STRING("file", in_file, CONF_GLOBAL),
+        OPT_FLAG("default-bindings", default_bindings, CONF_GLOBAL),
+        OPT_FLAG("test", test, CONF_GLOBAL),
+        OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
+        OPT_FLAG("joystick", use_joystick, CONF_GLOBAL),
+        OPT_FLAG("lirc", use_lirc, CONF_GLOBAL),
+        OPT_FLAG("right-alt-gr", use_alt_gr, CONF_GLOBAL),
+        OPT_INTRANGE("key-fifo-size", key_fifo_size, CONF_GLOBAL, 2, 65000),
+    #if HAVE_LIRC
+        OPT_STRING("lirc-conf", lirc_configfile, CONF_GLOBAL),
+    #endif
+    #if HAVE_COCOA
+        OPT_FLAG("appleremote", use_appleremote, CONF_GLOBAL),
+        OPT_FLAG("media-keys", use_media_keys, CONF_GLOBAL),
+    #endif
+        {0}
+    },
+    .size = sizeof(struct input_opts),
+    .defaults = &(const struct input_opts){
+        .key_fifo_size = 7,
+        .doubleclick_time = 300,
+        .ar_delay = 200,
+        .ar_rate = 40,
+        .use_lirc = 1,
+        .use_alt_gr = 1,
 #if HAVE_COCOA
-    OPT_FLAG("input-appleremote", input.use_appleremote, CONF_GLOBAL),
-    OPT_FLAG("input-media-keys", input.use_media_keys, CONF_GLOBAL),
+        .use_appleremote = 1,
+        .use_media_keys = 1,
 #endif
-    { NULL, NULL, 0, 0, 0, 0, NULL}
+        .default_bindings = 1,
+    },
 };
 
 static const char builtin_input_conf[] =
@@ -1456,7 +1485,7 @@ static int read_wakeup(void *ctx, int fd)
 
 struct input_ctx *mp_input_init(struct mpv_global *global)
 {
-    struct input_conf *input_conf = &global->opts->input;
+    struct input_opts *input_conf = global->opts->input_opts;
 
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
     *ictx = (struct input_ctx){

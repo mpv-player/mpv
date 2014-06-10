@@ -723,10 +723,6 @@ OPTIONS
 ``--demuxer-rawvideo-size=<value>``
     Frame size in bytes when using ``--demuxer=rawvideo``.
 
-``--doubleclick-time=<milliseconds>``
-    Time in milliseconds to recognize two consecutive button presses as a
-    double-click (default: 300).
-
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To
@@ -1166,8 +1162,19 @@ OPTIONS
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
 
+``--input-doubleclick-time=<milliseconds>``
+    Time in milliseconds to recognize two consecutive button presses as a
+    double-click (default: 300).
+
 ``--input-keylist``
     Prints all keys that can be bound to commands.
+
+``--input-key-fifo-size=<2-65000>``
+    Specify the size of the FIFO that buffers key events (default: 7). If it
+    is too small some events may be lost. The main disadvantage of setting it
+    to a very large value is that if you hold down a key triggering some
+    particularly slow command then the player may be unresponsive while it
+    processes all the queued commands.
 
 ``--input-test``
     Input test mode. Instead of executing commands on key presses, mpv
@@ -1247,13 +1254,6 @@ OPTIONS
         Explicitly skipping to the next file or skipping beyond the last
         chapter will terminate playback as well, even if ``--keep-open`` is
         given.
-
-``--key-fifo-size=<2-65000>``
-    Specify the size of the FIFO that buffers key events (default: 7). If it
-    is too small some events may be lost. The main disadvantage of setting it
-    to a very large value is that if you hold down a key triggering some
-    particularly slow command then the player may be unresponsive while it
-    processes all the queued commands.
 
 ``--length=<relative time>``
     Stop after a given time relative to the start time.
