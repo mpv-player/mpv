@@ -63,31 +63,7 @@ static void print_help(struct mp_log *log)
 }
 
 extern const struct m_sub_options tv_params_conf;
-
-extern int pvr_param_aspect_ratio;
-extern int pvr_param_sample_rate;
-extern int pvr_param_audio_layer;
-extern int pvr_param_audio_bitrate;
-extern char *pvr_param_audio_mode;
-extern int pvr_param_bitrate;
-extern char *pvr_param_bitrate_mode;
-extern int pvr_param_bitrate_peak;
-extern char *pvr_param_stream_type;
-
-#if HAVE_PVR
-static const m_option_t pvropts_conf[]={
-    {"aspect", &pvr_param_aspect_ratio, CONF_TYPE_INT, 0, 1, 4, NULL},
-    {"arate", &pvr_param_sample_rate, CONF_TYPE_INT, 0, 32000, 48000, NULL},
-    {"alayer", &pvr_param_audio_layer, CONF_TYPE_INT, 0, 1, 2, NULL},
-    {"abitrate", &pvr_param_audio_bitrate, CONF_TYPE_INT, 0, 32, 448, NULL},
-    {"amode", &pvr_param_audio_mode, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"vbitrate", &pvr_param_bitrate, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"vmode", &pvr_param_bitrate_mode, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"vpeak", &pvr_param_bitrate_peak, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"fmt", &pvr_param_stream_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
-#endif /* HAVE_PVR */
+extern const struct m_sub_options stream_pvr_conf;
 
 extern const m_option_t dvbin_opts_conf[];
 extern const m_option_t lavfdopts_conf[];
@@ -269,7 +245,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("tv", tv_params, tv_params_conf, 0),
 #endif /* HAVE_TV */
 #if HAVE_PVR
-    {"pvr", (void *) pvropts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    OPT_SUBSTRUCT("pvr", stream_pvr_opts, stream_pvr_conf, 0),
 #endif /* HAVE_PVR */
 #if HAVE_DVBIN
     {"dvbin", (void *) dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

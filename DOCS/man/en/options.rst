@@ -1691,8 +1691,8 @@ OPTIONS
     You can also try to use ``--no-correct-pts`` for files with completely
     broken timestamps.
 
-``--pvr=<option1:option2:...>``
-    This option tunes various encoding properties of the PVR capture module.
+``--pvr-...``
+    These options tune various encoding properties of the PVR capture module.
     It has to be used with any hardware MPEG encoder based card supported by
     the V4L2 driver. The Hauppauge WinTV PVR-150/250/350/500 and all IVTV
     based cards are known as PVR capture cards. Be aware that only Linux
@@ -1700,52 +1700,51 @@ OPTIONS
     For hardware capture of an MPEG stream and watching it with mpv, use
     ``pvr://`` as a movie URL.
 
-    Available options are:
 
-    ``aspect=<0-3>``
-        Specify input aspect ratio:
+``--pvr-aspect=<0-3>``
+    Specify input aspect ratio:
 
-        :0: 1:1
-        :1: 4:3 (default)
-        :2: 16:9
-        :3: 2.21:1
+    :0: 1:1
+    :1: 4:3 (default)
+    :2: 16:9
+    :3: 2.21:1
 
-    ``arate=<32000-48000>``
-        Specify encoding audio rate (default: 48000 Hz, available: 32000,
-        44100 and 48000 Hz).
+``--pvr-arate=<32000-48000>``
+    Specify encoding audio rate (default: 48000 Hz, available: 32000,
+    44100 and 48000 Hz).
 
-    ``alayer=<1-3>``
-        Specify MPEG audio layer encoding (default: 2).
+``--pvr-alayer=<1-3>``
+    Specify MPEG audio layer encoding (default: 2).
 
-    ``abitrate=<32-448>``
-        Specify audio encoding bitrate in kbps (default: 384).
+``--pvr-abitrate=<32-448>``
+    Specify audio encoding bitrate in kbps (default: 384).
 
-    ``amode=<value>``
-        Specify audio encoding mode. Available preset values are 'stereo',
-        'joint_stereo', 'dual' and 'mono' (default: stereo).
+``--pvr-amode=<value>``
+    Specify audio encoding mode. Available preset values are 'stereo',
+    'joint_stereo', 'dual' and 'mono' (default: stereo).
 
-    ``vbitrate=<value>``
-        Specify average video bitrate encoding in Mbps (default: 6).
+``--pvr-vbitrate=<value>``
+    Specify average video bitrate encoding in Mbps (default: 6).
 
-    ``vmode=<value>``
-        Specify video encoding mode:
+``--pvr-vmode=<value>``
+    Specify video encoding mode:
 
-        :vbr: Variable BitRate (default)
-        :cbr: Constant BitRate
+    :vbr: Variable BitRate (default)
+    :cbr: Constant BitRate
 
-    ``vpeak=<value>``
-        Specify peak video bitrate encoding in Mbps (only useful for VBR
-        encoding, default: 9.6).
+``--pvr-vpeak=<value>``
+    Specify peak video bitrate encoding in Mbps (only useful for VBR
+    encoding, default: 9.6).
 
-    ``fmt=<value>``
-        Choose an MPEG format for encoding:
+``--pvr-fmt=<value>``
+    Choose an MPEG format for encoding:
 
-        :ps:    MPEG-2 Program Stream (default)
-        :ts:    MPEG-2 Transport Stream
-        :mpeg1: MPEG-1 System Stream
-        :vcd:   Video CD compatible stream
-        :svcd:  Super Video CD compatible stream
-        :dvd:   DVD compatible stream
+    :ps:    MPEG-2 Program Stream (default)
+    :ts:    MPEG-2 Transport Stream
+    :mpeg1: MPEG-1 System Stream
+    :vcd:   Video CD compatible stream
+    :svcd:  Super Video CD compatible stream
+    :dvd:   DVD compatible stream
 
 ``--quiet``
     Make console output less verbose; in particular, prevents the status line

@@ -239,6 +239,7 @@ typedef struct MPOpts {
     char *network_tls_ca_file;
 
     struct tv_params *tv_params;
+    struct pvr_params *stream_pvr_opts;
 
     struct lavc_param {
         int fast;

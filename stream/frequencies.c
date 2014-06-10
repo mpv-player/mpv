@@ -1210,6 +1210,4 @@ const struct CHANLISTS chanlists[] = {
     { NULL, NULL, 0 } /* EOF */
 };
 
-int                chantab   = 5;
-const struct CHANLIST *chanlist  = europe_west;
-int                chancount = CHAN_COUNT(europe_west);
+const int                chancount = CHAN_COUNT(europe_west);

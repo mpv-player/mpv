@@ -124,10 +124,6 @@ struct CHANLISTS {
 /* --------------------------------------------------------------------- */
 
 extern const struct CHANLISTS   chanlists[];
-//extern struct STRTAB chanlist_names[];
-
-extern int                chantab;
-extern const struct CHANLIST *chanlist;
-extern int                chancount;
+extern const int                chancount;
 
 #endif /* MPLAYER_FREQUENCIES_H */

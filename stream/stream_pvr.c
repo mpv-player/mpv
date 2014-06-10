@@ -48,8 +48,7 @@
 #include "options/options.h"
 
 #include "stream.h"
-#include "pvr.h"
-
+#include "tv.h"
 #include "frequencies.h"
 
 #define PVR_DEFAULT_DEVICE "/dev/video0"
@@ -81,15 +80,34 @@
 #define PVR_STATION_NAME_SIZE 256
 
 /* command line arguments */
-int pvr_param_aspect_ratio = 0;
-int pvr_param_sample_rate = 0;
-int pvr_param_audio_layer = 0;
-int pvr_param_audio_bitrate = 0;
-char *pvr_param_audio_mode = NULL;
-int pvr_param_bitrate = 0;
-char *pvr_param_bitrate_mode = NULL;
-int pvr_param_bitrate_peak = 0;
-char *pvr_param_stream_type = NULL;
+struct pvr_params {
+    int aspect_ratio;
+    int sample_rate;
+    int audio_layer;
+    int audio_bitrate;
+    char *audio_mode;
+    int bitrate;
+    char *bitrate_mode;
+    int bitrate_peak;
+    char *stream_type;
+};
+
+#define OPT_BASE_STRUCT struct pvr_params
+const struct m_sub_options stream_pvr_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_INT("aspect", aspect_ratio, 0),
+        OPT_INT("arate", sample_rate, 0),
+        OPT_INT("alayer", audio_layer, 0),
+        OPT_INT("abitrate", audio_bitrate, 0),
+        OPT_STRING("amode", audio_mode, 0),
+        OPT_INT("vbitrate", bitrate, 0),
+        OPT_STRING("vmode", bitrate_mode, 0),
+        OPT_INT("vpeak", bitrate_peak, 0),
+        OPT_STRING("fmt", stream_type, 0),
+        {0}
+    },
+    .size = sizeof(struct pvr_params),
+};
 
 #define BUFSTRCPY(d, s) av_strlcpy(d, s, sizeof(d))
 #define BUFPRINTF(d, ...) snprintf(d, sizeof(d), __VA_ARGS__)
@@ -112,8 +130,10 @@ typedef struct stationlist_s {
 struct pvr_t {
   struct mp_log *log;
   tv_param_t *tv_params;
+  struct pvr_params *params;
   int dev_fd;
   char *video_dev;
+  int chantab;
 
   /* v4l2 params */
   int mute;
@@ -154,6 +174,7 @@ pvr_init (void)
   pvr = calloc (1, sizeof (struct pvr_t));
   pvr->dev_fd = -1;
   pvr->video_dev = strdup (PVR_DEFAULT_DEVICE);
+  pvr->chantab = 5;
 
   /* v4l2 params */
   pvr->mute = 0;
@@ -213,10 +234,10 @@ copycreate_stationlist (struct pvr_t *pvr, stationlist_t *stationlist, int num)
 {
   int i;
 
-  if (chantab < 0 || !stationlist)
+  if (pvr->chantab < 0 || !stationlist)
     return -1;
 
-  num = FFMAX (num, chanlists[chantab].count);
+  num = FFMAX (num, chanlists[pvr->chantab].count);
 
   free (stationlist->list);
   stationlist->list = NULL;
@@ -235,13 +256,13 @@ copycreate_stationlist (struct pvr_t *pvr, stationlist_t *stationlist, int num)
 
   /* transport the channel list data to our extented struct */
   stationlist->total = num;
-  BUFSTRCPY(stationlist->name, chanlists[chantab].name);
+  BUFSTRCPY(stationlist->name, chanlists[pvr->chantab].name);
 
-  for (i = 0; i < chanlists[chantab].count; i++)
+  for (i = 0; i < chanlists[pvr->chantab].count; i++)
   {
     stationlist->list[i].station[0]= '\0'; /* no station name yet */
-    BUFSTRCPY(stationlist->list[i].name, chanlists[chantab].list[i].name);
-    stationlist->list[i].freq = chanlists[chantab].list[i].freq;
+    BUFSTRCPY(stationlist->list[i].name, chanlists[pvr->chantab].list[i].name);
+    stationlist->list[i].freq = chanlists[pvr->chantab].list[i].freq;
     stationlist->list[i].enabled = 1; /* default enabled */
     stationlist->enabled++;
     stationlist->used++;
@@ -417,23 +438,23 @@ parse_setup_stationlist (struct pvr_t *pvr)
     {
       if (!strcasecmp (chanlists[i].name, pvr->tv_params->chanlist))
       {
-        chantab = i;
+        pvr->chantab = i;
         break;
       }
     }
     if (!chanlists[i].name)
     {
       MP_ERR(pvr, "%s unable to find channel list %s, using default %s\n",
-              LOG_LEVEL_V4L2, pvr->tv_params->chanlist, chanlists[chantab].name);
+              LOG_LEVEL_V4L2, pvr->tv_params->chanlist, chanlists[pvr->chantab].name);
     }
     else
     {
       MP_INFO(pvr, "%s select channel list %s, entries %d\n", LOG_LEVEL_V4L2,
-              chanlists[chantab].name, chanlists[chantab].count);
+              chanlists[pvr->chantab].name, chanlists[pvr->chantab].count);
     }
   }
 
-  if (0 > chantab)
+  if (0 > pvr->chantab)
   {
     MP_FATAL(pvr, "%s No channel list selected, giving up\n", LOG_LEVEL_V4L2);
     return -1;
@@ -733,29 +754,6 @@ set_station_by_channelname_or_freq (struct pvr_t *pvr, const char *channel,
   return (pvr->freq > 0) ? 0 : -1;
 }
 
-static int
-force_freq_step (struct pvr_t *pvr, int step)
-{
-  int freq;
-
-  if (!pvr)
-    return -1;
-
-  freq = pvr->freq+step;
-
-  if (freq)
-  {
-    MP_INFO(pvr, "%s Force Frequency %d + %d = %d \n", LOG_LEVEL_V4L2,
-            pvr->freq, step, freq);
-
-    pvr->freq = freq;
-
-    return set_v4l2_freq (pvr);
-  }
-
-  return -1;
-}
-
 static void
 parse_encoder_options (struct pvr_t *pvr)
 {
@@ -763,13 +761,13 @@ parse_encoder_options (struct pvr_t *pvr)
     return;
 
   /* -pvr aspect=digit */
-  if (pvr_param_aspect_ratio >= 0 && pvr_param_aspect_ratio <= 3)
-    pvr->aspect = pvr_param_aspect_ratio;
+  if (pvr->params->aspect_ratio >= 0 && pvr->params->aspect_ratio <= 3)
+    pvr->aspect = pvr->params->aspect_ratio;
 
   /* -pvr arate=x */
-  if (pvr_param_sample_rate != 0)
+  if (pvr->params->sample_rate != 0)
   {
-    switch (pvr_param_sample_rate)
+    switch (pvr->params->sample_rate)
     {
     case 32000:
       pvr->samplerate = V4L2_MPEG_AUDIO_SAMPLING_FREQ_32000;
@@ -786,19 +784,19 @@ parse_encoder_options (struct pvr_t *pvr)
   }
 
   /* -pvr alayer=x */
-  if (pvr_param_audio_layer == 1)
+  if (pvr->params->audio_layer == 1)
     pvr->layer = V4L2_MPEG_AUDIO_ENCODING_LAYER_1;
-  else if (pvr_param_audio_layer == 2)
+  else if (pvr->params->audio_layer == 2)
     pvr->layer = V4L2_MPEG_AUDIO_ENCODING_LAYER_2;
-  else if (pvr_param_audio_layer == 3)
+  else if (pvr->params->audio_layer == 3)
     pvr->layer = V4L2_MPEG_AUDIO_ENCODING_LAYER_3;
 
   /* -pvr abitrate=x */
-  if (pvr_param_audio_bitrate != 0)
+  if (pvr->params->audio_bitrate != 0)
   {
     if (pvr->layer == V4L2_MPEG_AUDIO_ENCODING_LAYER_1)
     {
-      switch (pvr_param_audio_bitrate)
+      switch (pvr->params->audio_bitrate)
       {
       case 32:
         pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_32K;
@@ -849,7 +847,7 @@ parse_encoder_options (struct pvr_t *pvr)
 
     else if (pvr->layer == V4L2_MPEG_AUDIO_ENCODING_LAYER_2)
     {
-      switch (pvr_param_audio_bitrate)
+      switch (pvr->params->audio_bitrate)
       {
       case 32:
         pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_32K;
@@ -900,7 +898,7 @@ parse_encoder_options (struct pvr_t *pvr)
 
     else if (pvr->layer == V4L2_MPEG_AUDIO_ENCODING_LAYER_3)
     {
-      switch (pvr_param_audio_bitrate)
+      switch (pvr->params->audio_bitrate)
       {
       case 32:
         pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_32K;
@@ -951,49 +949,49 @@ parse_encoder_options (struct pvr_t *pvr)
   }
 
   /* -pvr amode=x */
-  if (pvr_param_audio_mode)
+  if (pvr->params->audio_mode)
   {
-    if (!strcmp (pvr_param_audio_mode, PVR_AUDIO_MODE_ARG_STEREO))
+    if (!strcmp (pvr->params->audio_mode, PVR_AUDIO_MODE_ARG_STEREO))
       pvr->audio_mode = V4L2_MPEG_AUDIO_MODE_STEREO;
-    else if (!strcmp (pvr_param_audio_mode, PVR_AUDIO_MODE_ARG_JOINT_STEREO))
+    else if (!strcmp (pvr->params->audio_mode, PVR_AUDIO_MODE_ARG_JOINT_STEREO))
       pvr->audio_mode = V4L2_MPEG_AUDIO_MODE_JOINT_STEREO;
-    else if (!strcmp (pvr_param_audio_mode, PVR_AUDIO_MODE_ARG_DUAL))
+    else if (!strcmp (pvr->params->audio_mode, PVR_AUDIO_MODE_ARG_DUAL))
       pvr->audio_mode = V4L2_MPEG_AUDIO_MODE_DUAL;
-    else if (!strcmp (pvr_param_audio_mode, PVR_AUDIO_MODE_ARG_MONO))
+    else if (!strcmp (pvr->params->audio_mode, PVR_AUDIO_MODE_ARG_MONO))
       pvr->audio_mode = V4L2_MPEG_AUDIO_MODE_MONO;
   }
 
   /* -pvr vbitrate=x */
-  if (pvr_param_bitrate)
-    pvr->bitrate = pvr_param_bitrate;
+  if (pvr->params->bitrate)
+    pvr->bitrate = pvr->params->bitrate;
 
   /* -pvr vmode=x */
-  if (pvr_param_bitrate_mode)
+  if (pvr->params->bitrate_mode)
   {
-    if (!strcmp (pvr_param_bitrate_mode, PVR_VIDEO_BITRATE_MODE_ARG_VBR))
+    if (!strcmp (pvr->params->bitrate_mode, PVR_VIDEO_BITRATE_MODE_ARG_VBR))
       pvr->bitrate_mode = V4L2_MPEG_VIDEO_BITRATE_MODE_VBR;
-    else if (!strcmp (pvr_param_bitrate_mode, PVR_VIDEO_BITRATE_MODE_ARG_CBR))
+    else if (!strcmp (pvr->params->bitrate_mode, PVR_VIDEO_BITRATE_MODE_ARG_CBR))
       pvr->bitrate_mode = V4L2_MPEG_VIDEO_BITRATE_MODE_CBR;
   }
 
   /* -pvr vpeak=x */
-  if (pvr_param_bitrate_peak)
-    pvr->bitrate_peak = pvr_param_bitrate_peak;
+  if (pvr->params->bitrate_peak)
+    pvr->bitrate_peak = pvr->params->bitrate_peak;
 
   /* -pvr fmt=x */
-  if (pvr_param_stream_type)
+  if (pvr->params->stream_type)
   {
-    if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_PS))
+    if (!strcmp (pvr->params->stream_type, PVR_VIDEO_STREAM_TYPE_PS))
       pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG2_PS;
-    else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_TS))
+    else if (!strcmp (pvr->params->stream_type, PVR_VIDEO_STREAM_TYPE_TS))
       pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG2_TS;
-    else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_MPEG1))
+    else if (!strcmp (pvr->params->stream_type, PVR_VIDEO_STREAM_TYPE_MPEG1))
       pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG1_SS;
-    else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_DVD))
+    else if (!strcmp (pvr->params->stream_type, PVR_VIDEO_STREAM_TYPE_DVD))
       pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG2_DVD;
-    else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_VCD))
+    else if (!strcmp (pvr->params->stream_type, PVR_VIDEO_STREAM_TYPE_VCD))
       pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG1_VCD;
-    else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_SVCD))
+    else if (!strcmp (pvr->params->stream_type, PVR_VIDEO_STREAM_TYPE_SVCD))
       pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG2_SVCD;
   }
 }
@@ -1523,6 +1521,7 @@ pvr_stream_open (stream_t *stream)
   pvr = pvr_init ();
   pvr->tv_params = stream->opts->tv_params;
   pvr->log = stream->log;
+  pvr->params = stream->opts->stream_pvr_opts;
 
   /**
    * if the url, i.e. 'pvr://8', contains the channel, use it,
@@ -1620,7 +1619,8 @@ pvr_stream_open (stream_t *stream)
 
 /* PVR Public API access */
 
-const char *
+#if 0
+static const char *
 pvr_get_current_stationname (stream_t *stream)
 {
   struct pvr_t *pvr;
@@ -1638,7 +1638,7 @@ pvr_get_current_stationname (stream_t *stream)
   return NULL;
 }
 
-const char *
+static const char *
 pvr_get_current_channelname (stream_t *stream)
 {
   struct pvr_t *pvr = (struct pvr_t *) stream->priv;
@@ -1650,8 +1650,9 @@ pvr_get_current_channelname (stream_t *stream)
 
   return NULL;
 }
+#endif
 
-int
+static int
 pvr_get_current_frequency (stream_t *stream)
 {
   struct pvr_t *pvr = (struct pvr_t *) stream->priv;
@@ -1659,7 +1660,7 @@ pvr_get_current_frequency (stream_t *stream)
   return pvr->freq;
 }
 
-int
+static int
 pvr_set_channel (stream_t *stream, const char * channel)
 {
   struct pvr_t *pvr = (struct pvr_t *) stream->priv;
@@ -1667,7 +1668,7 @@ pvr_set_channel (stream_t *stream, const char * channel)
   return set_station_by_channelname_or_freq (pvr, channel, -1, 1);
 }
 
-int
+static int
 pvr_set_lastchannel (stream_t *stream)
 {
   struct pvr_t *pvr = (struct pvr_t *) stream->priv;
@@ -1680,7 +1681,7 @@ pvr_set_lastchannel (stream_t *stream)
   return -1;
 }
 
-int
+static int
 pvr_set_freq (stream_t *stream, int freq)
 {
   struct pvr_t *pvr = (struct pvr_t *) stream->priv;
@@ -1688,20 +1689,12 @@ pvr_set_freq (stream_t *stream, int freq)
   return set_station_by_channelname_or_freq (pvr, NULL, freq, 1);
 }
 
-int
+static int
 pvr_set_channel_step (stream_t *stream, int step)
 {
   struct pvr_t *pvr = (struct pvr_t *) stream->priv;
 
   return set_station_by_step (pvr, step, 1);
-}
-
-int
-pvr_force_freq_step (stream_t *stream, int step)
-{
-  struct pvr_t *pvr = (struct pvr_t *) stream->priv;
-
-  return force_freq_step (pvr, step);
 }
 
 static int pvr_stream_control(struct stream *s, int cmd, void *arg)
