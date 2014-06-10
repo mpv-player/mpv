@@ -26,8 +26,8 @@
 #include "osdep/io.h"
 
 #include "talloc.h"
-#include "config.h"
 #include "common/msg.h"
+#include "options/options.h"
 
 #include "stream/stream.h"
 #include "demux.h"
@@ -142,11 +142,11 @@ static const struct {
     {0}
 };
 
-static const char *probe_format(mf_t *mf, enum demux_check check)
+static const char *probe_format(mf_t *mf, char *type, enum demux_check check)
 {
     if (check > DEMUX_CHECK_REQUEST)
         return NULL;
-    char *type = mf_type;
+    char *org_type = type;
     if (!type || !type[0]) {
         char *p = strrchr(mf->names[0], '.');
         if (p)
@@ -157,7 +157,7 @@ static const char *probe_format(mf_t *mf, enum demux_check check)
             return type2format[i].codec;
     }
     if (check == DEMUX_CHECK_REQUEST) {
-        if (!mf_type) {
+        if (!org_type) {
             MP_ERR(mf, "file type was not set! (try --mf-type=ext)\n");
         } else {
             MP_ERR(mf, "--mf-type set to an unknown codec!\n");
@@ -183,7 +183,7 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     if (!mf || mf->nr_of_files < 1)
         goto error;
 
-    const char *codec = probe_format(mf, check);
+    const char *codec = probe_format(mf, demuxer->opts->mf_type, check);
     if (!codec)
         goto error;
 
@@ -196,7 +196,7 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     sh->codec = codec;
     sh_video->disp_w = 0;
     sh_video->disp_h = 0;
-    sh_video->fps = mf_fps;
+    sh_video->fps = demuxer->opts->mf_fps;
 
     mf->sh = sh_video;
     demuxer->priv = (void *)mf;

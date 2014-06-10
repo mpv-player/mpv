@@ -67,18 +67,10 @@ extern const struct m_sub_options sws_conf;
 
 extern const m_option_t lavfdopts_conf[];
 
-extern double mf_fps;
-extern char * mf_type;
 extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
 extern const struct m_obj_list ao_obj_list;
-
-static const m_option_t mfopts_conf[]={
-    {"fps", &mf_fps, CONF_TYPE_DOUBLE, 0, 0, 0, NULL},
-    {"type", &mf_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
 
 #define OPT_BASE_STRUCT struct MPOpts
 
@@ -222,7 +214,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
 
-    {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
+    OPT_DOUBLE("mf-fps", mf_fps, 0),
+    OPT_STRING("mf-type", mf_type, 0),
 #if HAVE_TV
     OPT_SUBSTRUCT("tv", tv_params, tv_params_conf, 0),
 #endif /* HAVE_TV */
@@ -653,6 +646,8 @@ const struct MPOpts mp_default_opts = {
     .index_mode = -1,
 
     .dvd_angle = 1,
+
+    .mf_fps = 1.0,
 
     .ad_lavc_param = {
         .ac3drc = 1.,

@@ -253,6 +253,9 @@ typedef struct MPOpts {
     int bluray_angle;
     char *bluray_device;
 
+    double mf_fps;
+    char *mf_type;
+
     struct lavc_param {
         int fast;
         int show_all;
