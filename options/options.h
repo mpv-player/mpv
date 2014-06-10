@@ -258,21 +258,10 @@ typedef struct MPOpts {
 
     struct demux_rawaudio_opts *demux_rawaudio;
     struct demux_rawvideo_opts *demux_rawvideo;
+    struct demux_lavf_opts *demux_lavf;
 
     struct vd_lavc_params *vd_lavc_params;
     struct ad_lavc_params *ad_lavc_params;
-
-    struct lavfdopts {
-        int probesize;
-        int probescore;
-        float analyzeduration;
-        int buffersize;
-        int allow_mimetype;
-        char *format;
-        char *cryptokey;
-        char *avopt;
-        int genptsmode;
-    } lavfdopts;
 
     struct input_conf {
         char *config_file;

@@ -57,25 +57,43 @@
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
 #define PROBE_BUF_SIZE FFMIN(STREAM_MAX_BUFFER_SIZE, 2 * 1024 * 1024)
 
-#define OPT_BASE_STRUCT struct MPOpts
 
 // Should correspond to IO_BUFFER_SIZE in libavformat/aviobuf.c (not public)
 // libavformat (almost) always reads data in blocks of this size.
 #define BIO_BUFFER_SIZE 32768
 
-const m_option_t lavfdopts_conf[] = {
-    OPT_INTRANGE("probesize", lavfdopts.probesize, 0, 32, INT_MAX),
-    OPT_STRING("format", lavfdopts.format, 0),
-    OPT_FLOATRANGE("analyzeduration", lavfdopts.analyzeduration, 0, 0, 3600),
-    OPT_INTRANGE("buffersize", lavfdopts.buffersize, 0, 1, 10 * 1024 * 1024,
-                 OPTDEF_INT(BIO_BUFFER_SIZE)),
-    OPT_FLAG("allow-mimetype", lavfdopts.allow_mimetype, 0),
-    OPT_INTRANGE("probescore", lavfdopts.probescore, 0, 0, 100),
-    OPT_STRING("cryptokey", lavfdopts.cryptokey, 0),
-    OPT_CHOICE("genpts-mode", lavfdopts.genptsmode, 0,
-               ({"lavf", 1}, {"no", 0})),
-    OPT_STRING("o", lavfdopts.avopt, 0),
-    {NULL, NULL, 0, 0, 0, 0, NULL}
+#define OPT_BASE_STRUCT struct demux_lavf_opts
+struct demux_lavf_opts {
+    int probesize;
+    int probescore;
+    float analyzeduration;
+    int buffersize;
+    int allow_mimetype;
+    char *format;
+    char *cryptokey;
+    char *avopt;
+    int genptsmode;
+};
+
+const struct m_sub_options demux_lavf_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_INTRANGE("probesize", probesize, 0, 32, INT_MAX),
+        OPT_STRING("format", format, 0),
+        OPT_FLOATRANGE("analyzeduration", analyzeduration, 0, 0, 3600),
+        OPT_INTRANGE("buffersize", buffersize, 0, 1, 10 * 1024 * 1024,
+                     OPTDEF_INT(BIO_BUFFER_SIZE)),
+        OPT_FLAG("allow-mimetype", allow_mimetype, 0),
+        OPT_INTRANGE("probescore", probescore, 0, 0, 100),
+        OPT_STRING("cryptokey", cryptokey, 0),
+        OPT_CHOICE("genpts-mode", genptsmode, 0,
+                   ({"lavf", 1}, {"no", 0})),
+        OPT_STRING("o", avopt, 0),
+        {0}
+    },
+    .size = sizeof(struct demux_lavf_opts),
+    .defaults = &(const struct demux_lavf_opts){
+        .allow_mimetype = 1,
+    },
 };
 
 #define MAX_PKT_QUEUE 50
@@ -200,7 +218,7 @@ static const char *const prefixes[] =
 static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 {
     struct MPOpts *opts = demuxer->opts;
-    struct lavfdopts *lavfdopts = &opts->lavfdopts;
+    struct demux_lavf_opts *lavfdopts = opts->demux_lavf;
     struct stream *s = demuxer->stream;
     lavf_priv_t *priv;
 
@@ -604,7 +622,7 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
     struct MPOpts *opts = demuxer->opts;
-    struct lavfdopts *lavfdopts = &opts->lavfdopts;
+    struct demux_lavf_opts *lavfdopts = opts->demux_lavf;
     AVFormatContext *avfc;
     AVDictionaryEntry *t = NULL;
     float analyze_duration = 0;
