@@ -45,77 +45,82 @@
 #include "common/msg.h"
 #include "input/input.h"
 
-/* caca stuff */
-static caca_canvas_t  *canvas;
-static caca_display_t *display;
-static caca_dither_t  *dither           = NULL;
-static uint8_t        *dither_buffer    = NULL;
-static const char     *dither_antialias = "default";
-static const char     *dither_charset   = "default";
-static const char     *dither_color     = "default";
-static const char     *dither_algo      = "none";
+struct priv {
+    caca_canvas_t  *canvas;
+    caca_display_t *display;
+    caca_dither_t  *dither;
+    uint8_t        *dither_buffer;
+    const char     *dither_antialias;
+    const char     *dither_charset;
+    const char     *dither_color;
+    const char     *dither_algo;
 
-/* image infos */
-static int image_format;
-static int image_width;
-static int image_height;
+    /* image infos */
+    int image_format;
+    int image_width;
+    int image_height;
 
-static int screen_w, screen_h;
+    int screen_w, screen_h;
+};
 
 /* We want 24bpp always for now */
-static unsigned int bpp   = 24;
-static unsigned int depth = 3;
-static unsigned int rmask = 0xff0000;
-static unsigned int gmask = 0x00ff00;
-static unsigned int bmask = 0x0000ff;
-static unsigned int amask = 0;
+static const unsigned int bpp   = 24;
+static const unsigned int depth = 3;
+static const unsigned int rmask = 0xff0000;
+static const unsigned int gmask = 0x00ff00;
+static const unsigned int bmask = 0x0000ff;
+static const unsigned int amask = 0;
 
 static int resize(struct vo *vo)
 {
-    screen_w = caca_get_canvas_width(canvas);
-    screen_h = caca_get_canvas_height(canvas);
+    struct priv *priv = vo->priv;
+    priv->screen_w = caca_get_canvas_width(priv->canvas);
+    priv->screen_h = caca_get_canvas_height(priv->canvas);
 
-    caca_free_dither(dither);
-    talloc_free(dither_buffer);
+    caca_free_dither(priv->dither);
+    talloc_free(priv->dither_buffer);
 
-    dither = caca_create_dither(bpp, image_width, image_height,
-                                depth * image_width,
+    priv->dither = caca_create_dither(bpp, priv->image_width, priv->image_height,
+                                depth * priv->image_width,
                                 rmask, gmask, bmask, amask);
-    if (dither == NULL) {
+    if (priv->dither == NULL) {
         MP_FATAL(vo, "caca_create_dither failed!\n");
         return -1;
     }
-    dither_buffer =
-        talloc_array(NULL, uint8_t, depth * image_width * image_height);
+    priv->dither_buffer =
+        talloc_array(NULL, uint8_t, depth * priv->image_width * priv->image_height);
 
     /* Default libcaca features */
-    caca_set_dither_antialias(dither, dither_antialias);
-    caca_set_dither_charset(dither, dither_charset);
-    caca_set_dither_color(dither, dither_color);
-    caca_set_dither_algorithm(dither, dither_algo);
+    caca_set_dither_antialias(priv->dither, priv->dither_antialias);
+    caca_set_dither_charset(priv->dither, priv->dither_charset);
+    caca_set_dither_color(priv->dither, priv->dither_color);
+    caca_set_dither_algorithm(priv->dither, priv->dither_algo);
 
     return 0;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
-    image_height = params->h;
-    image_width  = params->w;
-    image_format = params->imgfmt;
+    struct priv *priv = vo->priv;
+    priv->image_height = params->h;
+    priv->image_width  = params->w;
+    priv->image_format = params->imgfmt;
 
     return resize(vo);
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
-    memcpy_pic(dither_buffer, mpi->planes[0], image_width * depth, image_height,
-               image_width * depth, mpi->stride[0]);
-    caca_dither_bitmap(canvas, 0, 0, screen_w, screen_h, dither, dither_buffer);
+    struct priv *priv = vo->priv;
+    memcpy_pic(priv->dither_buffer, mpi->planes[0], priv->image_width * depth, priv->image_height,
+               priv->image_width * depth, mpi->stride[0]);
+    caca_dither_bitmap(priv->canvas, 0, 0, priv->screen_w, priv->screen_h, priv->dither, priv->dither_buffer);
 }
 
 static void flip_page(struct vo *vo)
 {
-    caca_refresh_display(display);
+    struct priv *priv = vo->priv;
+    caca_refresh_display(priv->display);
 }
 
 static void set_next_str(const char * const *list, const char **str,
@@ -158,12 +163,14 @@ static const struct mp_keymap keysym_map[] = {
 
 static void check_events(struct vo *vo)
 {
+    struct priv *priv = vo->priv;
+
     caca_event_t cev;
-    while (caca_get_event(display, CACA_EVENT_ANY, &cev, 0)) {
+    while (caca_get_event(priv->display, CACA_EVENT_ANY, &cev, 0)) {
 
         switch (cev.type) {
         case CACA_EVENT_RESIZE:
-            caca_refresh_display(display);
+            caca_refresh_display(priv->display);
             resize(vo);
             break;
         case CACA_EVENT_QUIT:
@@ -195,33 +202,33 @@ static void check_events(struct vo *vo)
             case 'd':
             case 'D':
                 /* Toggle dithering algorithm */
-                set_next_str(caca_get_dither_algorithm_list(dither),
-                             &dither_algo, &msg_name);
-                caca_set_dither_algorithm(dither, dither_algo);
+                set_next_str(caca_get_dither_algorithm_list(priv->dither),
+                             &priv->dither_algo, &msg_name);
+                caca_set_dither_algorithm(priv->dither, priv->dither_algo);
                 break;
 
             case 'a':
             case 'A':
                 /* Toggle antialiasing method */
-                set_next_str(caca_get_dither_antialias_list(dither),
-                             &dither_antialias, &msg_name);
-                caca_set_dither_antialias(dither, dither_antialias);
+                set_next_str(caca_get_dither_antialias_list(priv->dither),
+                             &priv->dither_antialias, &msg_name);
+                caca_set_dither_antialias(priv->dither, priv->dither_antialias);
                 break;
 
             case 'h':
             case 'H':
                 /* Toggle charset method */
-                set_next_str(caca_get_dither_charset_list(dither),
-                             &dither_charset, &msg_name);
-                caca_set_dither_charset(dither, dither_charset);
+                set_next_str(caca_get_dither_charset_list(priv->dither),
+                             &priv->dither_charset, &msg_name);
+                caca_set_dither_charset(priv->dither, priv->dither_charset);
                 break;
 
             case 'c':
             case 'C':
                 /* Toggle color method */
-                set_next_str(caca_get_dither_color_list(dither),
-                             &dither_color, &msg_name);
-                caca_set_dither_color(dither, dither_color);
+                set_next_str(caca_get_dither_color_list(priv->dither),
+                             &priv->dither_color, &msg_name);
+                caca_set_dither_color(priv->dither, priv->dither_color);
                 break;
 
             default:
@@ -236,31 +243,39 @@ static void check_events(struct vo *vo)
 
 static void uninit(struct vo *vo)
 {
-    caca_free_dither(dither);
-    dither = NULL;
-    talloc_free(dither_buffer);
-    dither_buffer = NULL;
-    caca_free_display(display);
-    caca_free_canvas(canvas);
+    struct priv *priv = vo->priv;
+    caca_free_dither(priv->dither);
+    priv->dither = NULL;
+    talloc_free(priv->dither_buffer);
+    priv->dither_buffer = NULL;
+    caca_free_display(priv->display);
+    caca_free_canvas(priv->canvas);
 }
 
 static int preinit(struct vo *vo)
 {
-    canvas = caca_create_canvas(0, 0);
-    if (canvas == NULL) {
+    struct priv *priv = vo->priv;
+
+    priv->dither_antialias = "default";
+    priv->dither_charset   = "default";
+    priv->dither_color     = "default";
+    priv->dither_algo      = "none";
+
+    priv->canvas = caca_create_canvas(0, 0);
+    if (priv->canvas == NULL) {
         MP_ERR(vo, "failed to create canvas\n");
         return ENOSYS;
     }
 
-    display = caca_create_display(canvas);
+    priv->display = caca_create_display(priv->canvas);
 
-    if (display == NULL) {
+    if (priv->display == NULL) {
         MP_ERR(vo, "failed to create display\n");
-        caca_free_canvas(canvas);
+        caca_free_canvas(priv->canvas);
         return ENOSYS;
     }
 
-    caca_set_display_title(display, "mpv");
+    caca_set_display_title(priv->display, "mpv");
 
     return 0;
 }
@@ -293,4 +308,5 @@ const struct vo_driver video_out_caca = {
     .draw_image = draw_image,
     .flip_page = flip_page,
     .uninit = uninit,
+    .priv_size = sizeof(struct priv),
 };
