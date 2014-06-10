@@ -75,7 +75,7 @@ typedef struct {
         void *priv;
 } dvb_config_t;
 
-typedef struct {
+typedef struct dvb_params {
         struct mp_log *log;
         int fd;
         int card;

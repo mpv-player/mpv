@@ -735,18 +735,17 @@ OPTIONS
 
     This option is useful for debugging only.
 
-``--dvbin=<options>``
-    Pass the following parameters to the DVB input module, in order to
-    override the default ones:
+``--dvbin-card=<1-4>``
+    Specifies using card number 1-4 (default: 1).
 
-    :card=<1-4>:      Specifies using card number 1-4 (default: 1).
-    :file=<filename>: Instructs mpv to read the channels list from
-                      ``<filename>``. Default is
-                      ``~/.mpv/channels.conf.{sat,ter,cbl,atsc}`` (based
-                      on your card type) or ``~/.mpv/channels.conf`` as a
-                      last resort.
-    :timeout=<1-30>:  Maximum number of seconds to wait when trying to tune a
-                      frequency before giving up (default: 30).
+``--dvbin-file=<filename>``
+    Instructs mpv to read the channels list from ``<filename>``. Default is
+    ``~/.mpv/channels.conf.{sat,ter,cbl,atsc}`` (based on your card type) or
+    ``~/.mpv/channels.conf`` as a last resort.
+
+``--dvbin-timeout=<1-30>``
+    Maximum number of seconds to wait when trying to tune a frequency before
+    giving up (default: 30).
 
 ``--dvd-device=<path>``
     Specify the DVD device or .iso filename (default: ``/dev/dvd``). You can

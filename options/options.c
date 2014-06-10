@@ -64,8 +64,8 @@ static void print_help(struct mp_log *log)
 extern const struct m_sub_options tv_params_conf;
 extern const struct m_sub_options stream_pvr_conf;
 extern const struct m_sub_options stream_cdda_conf;
+extern const struct m_sub_options stream_dvb_conf;
 
-extern const m_option_t dvbin_opts_conf[];
 extern const m_option_t lavfdopts_conf[];
 
 extern int sws_chr_vshift;
@@ -248,7 +248,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("pvr", stream_pvr_opts, stream_pvr_conf, 0),
 #endif /* HAVE_PVR */
 #if HAVE_DVBIN
-    {"dvbin", (void *) dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    OPT_SUBSTRUCT("dvbin", stream_dvb_opts, stream_dvb_conf, 0),
 #endif
 
 // ------------------------- a-v sync options --------------------

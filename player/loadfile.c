@@ -59,10 +59,6 @@
 #include "command.h"
 #include "libmpv/client.h"
 
-#if HAVE_DVBIN
-#include "stream/dvbin.h"
-#endif
-
 static void uninit_sub(struct MPContext *mpctx, int order)
 {
     if (mpctx->d_sub[order])
