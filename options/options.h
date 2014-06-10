@@ -38,6 +38,8 @@ typedef struct mp_vo_opts {
     int force_window_position;
 
     int fs_missioncontrol;
+
+    struct sws_opts *sws_opts;
 } mp_vo_opts;
 
 struct mp_cache_opts {

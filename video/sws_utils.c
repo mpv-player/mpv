@@ -27,6 +27,7 @@
 #include "sws_utils.h"
 
 #include "common/common.h"
+#include "options/m_option.h"
 #include "video/mp_image.h"
 #include "video/img_format.h"
 #include "fmt-conversion.h"
@@ -35,14 +36,44 @@
 #include "video/filter/vf.h"
 
 //global sws_flags from the command line
-int sws_flags = 2;
+struct sws_opts {
+    int scaler;
+    float lum_gblur;
+    float chr_gblur;
+    int chr_vshift;
+    int chr_hshift;
+    float chr_sharpen;
+    float lum_sharpen;
+};
 
-float sws_lum_gblur = 0.0;
-float sws_chr_gblur = 0.0;
-int sws_chr_vshift = 0;
-int sws_chr_hshift = 0;
-float sws_chr_sharpen = 0.0;
-float sws_lum_sharpen = 0.0;
+#define OPT_BASE_STRUCT struct sws_opts
+const struct m_sub_options sws_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_CHOICE("scaler", scaler, 0,
+                   ({"fast-bilinear",   SWS_FAST_BILINEAR},
+                    {"bilinear",        SWS_BILINEAR},
+                    {"bicubic",         SWS_BICUBIC},
+                    {"x",               SWS_X},
+                    {"point",           SWS_POINT},
+                    {"area",            SWS_AREA},
+                    {"bicublin",        SWS_BICUBLIN},
+                    {"gauss",           SWS_GAUSS},
+                    {"sinc",            SWS_SINC},
+                    {"lanczos",         SWS_LANCZOS},
+                    {"spline",          SWS_SPLINE})),
+        OPT_FLOATRANGE("lgb", lum_gblur, 0, 0, 100.0),
+        OPT_FLOATRANGE("cgb", chr_gblur, 0, 0, 100.0),
+        OPT_INT("cvs", chr_vshift, 0),
+        OPT_INT("chs", chr_hshift, 0),
+        OPT_FLOATRANGE("ls", lum_sharpen, 0, -100.0, 100.0),
+        OPT_FLOATRANGE("cs", chr_sharpen, 0, -100.0, 100.0),
+        {0}
+    },
+    .size = sizeof(struct sws_opts),
+    .defaults = &(const struct sws_opts){
+        .scaler = SWS_BICUBIC,
+    },
+};
 
 // Highest quality, but also slowest.
 const int mp_sws_hq_flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT |
@@ -53,30 +84,16 @@ const int mp_sws_hq_flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT |
 const int mp_sws_fast_flags = SWS_BILINEAR;
 
 // Set ctx parameters to global command line flags.
-void mp_sws_set_from_cmdline(struct mp_sws_context *ctx)
+void mp_sws_set_from_cmdline(struct mp_sws_context *ctx, struct sws_opts *opts)
 {
     sws_freeFilter(ctx->src_filter);
-    ctx->src_filter = sws_getDefaultFilter(sws_lum_gblur, sws_chr_gblur,
-                                           sws_lum_sharpen, sws_chr_sharpen,
-                                           sws_chr_hshift, sws_chr_vshift, 0);
+    ctx->src_filter = sws_getDefaultFilter(opts->lum_gblur, opts->chr_gblur,
+                                           opts->lum_sharpen, opts->chr_sharpen,
+                                           opts->chr_hshift, opts->chr_vshift, 0);
     ctx->force_reload = true;
 
     ctx->flags = SWS_PRINT_INFO;
-
-    switch (sws_flags) {
-    case 0:  ctx->flags |= SWS_FAST_BILINEAR;   break;
-    case 1:  ctx->flags |= SWS_BILINEAR;        break;
-    case 2:  ctx->flags |= SWS_BICUBIC;         break;
-    case 3:  ctx->flags |= SWS_X;               break;
-    case 4:  ctx->flags |= SWS_POINT;           break;
-    case 5:  ctx->flags |= SWS_AREA;            break;
-    case 6:  ctx->flags |= SWS_BICUBLIN;        break;
-    case 7:  ctx->flags |= SWS_GAUSS;           break;
-    case 8:  ctx->flags |= SWS_SINC;            break;
-    case 9:  ctx->flags |= SWS_LANCZOS;         break;
-    case 10: ctx->flags |= SWS_SPLINE;          break;
-    default: ctx->flags |= SWS_BILINEAR;        break;
-    }
+    ctx->flags |= opts->scaler;
 }
 
 bool mp_sws_supported_format(int imgfmt)

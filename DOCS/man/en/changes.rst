@@ -189,6 +189,7 @@ Command Line Switches
     ``-spugauss``               ``--sub-gauss``
     ``-srate``                  ``--audio-samplerate``
     ``-ss``                     ``--start``
+    ``-ssf <sub>``              ``--sws-...``
     ``-stop-xscreensaver``      ``--stop-screensaver``
     ``-sub-fuzziness``          ``--sub-auto``
     ``-sub``                    ``--sub-file``
@@ -200,6 +201,7 @@ Command Line Switches
     ``-subfont``                ``--sub-text-font``
     ``-subfps``                 ``--sub-fps``
     ``-subpos``                 ``--sub-pos``
+    ``-sws``                    ``--sws-scaler``
     ``-tvscan``                 ``--tv-scan``
     ``-use-filename-title``     ``--title='${filename}'``
     ``-vc ffh264vdpau`` (etc.)  ``--hwdec=vdpau``

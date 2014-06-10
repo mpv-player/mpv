@@ -47,8 +47,6 @@
 extern const m_option_t demux_rawaudio_opts[];
 extern const m_option_t demux_rawvideo_opts[];
 
-extern int sws_flags;
-
 extern const char mp_help_text[];
 
 static void print_version(struct mp_log *log)
@@ -65,25 +63,9 @@ extern const struct m_sub_options tv_params_conf;
 extern const struct m_sub_options stream_pvr_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
+extern const struct m_sub_options sws_conf;
 
 extern const m_option_t lavfdopts_conf[];
-
-extern int sws_chr_vshift;
-extern int sws_chr_hshift;
-extern float sws_chr_gblur;
-extern float sws_lum_gblur;
-extern float sws_chr_sharpen;
-extern float sws_lum_sharpen;
-
-static const m_option_t scaler_filter_conf[]={
-    {"lgb", &sws_lum_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
-    {"cgb", &sws_chr_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
-    {"cvs", &sws_chr_vshift, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"chs", &sws_chr_hshift, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"ls", &sws_lum_sharpen, CONF_TYPE_FLOAT, 0, -100.0, 100.0, NULL},
-    {"cs", &sws_chr_sharpen, CONF_TYPE_FLOAT, 0, -100.0, 100.0, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
 
 extern double mf_fps;
 extern char * mf_type;
@@ -294,9 +276,8 @@ const m_option_t mp_opts[] = {
                 {"vaapi-copy", 5})),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 
-    // scaling:
-    {"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
-    {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    OPT_SUBSTRUCT("sws", vo.sws_opts, sws_conf, 0),
+
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
     OPT_FLOATRANGE("video-aspect", movie_aspect, 0, -1.0, 10.0),

@@ -370,7 +370,7 @@ static bool resize(struct vo *vo)
     }
     p->bpp = p->myximage[0]->bits_per_pixel;
 
-    mp_sws_set_from_cmdline(p->sws);
+    mp_sws_set_from_cmdline(p->sws, vo->opts->sws_opts);
     p->sws->src = p->in_format;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = fmte->mpfmt,

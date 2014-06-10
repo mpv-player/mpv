@@ -510,7 +510,7 @@ static bool resize(struct priv *p)
     if (y != 0)
         y = wl->window.height - p->dst_h;
 
-    mp_sws_set_from_cmdline(p->sws);
+    mp_sws_set_from_cmdline(p->sws, p->vo->opts->sws_opts);
     p->sws->src = p->in_format;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = p->video_format->mp_fmt,

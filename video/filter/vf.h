@@ -93,6 +93,7 @@ typedef struct vf_instance {
     // Caches valid output formats.
     uint8_t last_outfmts[IMGFMT_END - IMGFMT_START];
 
+    struct vf_chain *chain;
     struct vf_instance *next;
 } vf_instance_t;
 

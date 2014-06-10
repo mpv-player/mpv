@@ -2120,20 +2120,6 @@ OPTIONS
 
     Disabled by default.
 
-``--ssf=<mode>``
-    Specifies software scaler parameters.
-
-    :lgb=<0-100>:   gaussian blur filter (luma)
-    :cgb=<0-100>:   gaussian blur filter (chroma)
-    :ls=<-100-100>: sharpen filter (luma)
-    :cs=<-100-100>: sharpen filter (chroma)
-    :chs=<h>:       chroma horizontal shifting
-    :cvs=<v>:       chroma vertical shifting
-
-    .. admonition:: Example
-
-        ``--vf=scale --ssf=lgb=3.0``
-
 ``--sstep=<sec>``
     Skip <sec> seconds after every frame.
 
@@ -2309,29 +2295,32 @@ OPTIONS
         `--sub-speed=25/23.976`` plays frame based subtitles which have been
         loaded assuming a framerate of 23.976 at 25 FPS.
 
-``--sws=<n>``
+``--sws-scaler=<name>``
     Specify the software scaler algorithm to be used with ``--vf=scale``. This
     also affects video output drivers which lack hardware acceleration,
     e.g. ``x11``. See also ``--vf=scale``.
 
-    Available types are:
+    To get a list of available scalers, run ``--sws-scaler=help``.
 
-    :0:  fast bilinear
-    :1:  bilinear
-    :2:  bicubic (good quality) (default)
-    :3:  experimental
-    :4:  nearest neighbor (bad quality)
-    :5:  area
-    :6:  luma bicubic / chroma bilinear
-    :7:  gauss
-    :8:  sincR
-    :9:  lanczos
-    :10: natural bicubic spline
+    Default: ``bicubic``.
 
-    .. note::
+``--sws-lgb=<0-100>``
+    Software scaler gaussian blur filter (luma). See ``--sws-scaler``.
 
-        Some ``--sws`` options are tunable. The description of the ``scale``
-        video filter has further information.
+``--sws-cgb=<0-100>``
+    Software scaler gaussian blur filter (chroma). See ``--sws-scaler``.
+
+``--sws-ls=<-100-100>``
+    Software scaler sharpen filter (luma). See ``--sws-scaler``.
+
+``--sws-cs=<-100-100>``
+    Software scaler sharpen filter (chroma). See ``--sws-scaler``.
+
+``--sws-chs=<h>``
+    Software scaler chroma horizontal shifting. See ``--sws-scaler``.
+
+``--sws-cvs=<v>``
+    Software scaler chroma vertical shifting. See ``--sws-scaler``.
 
 ``--term-osd, --no-term-osd``, ``--term-osd=force``
     Display OSD messages on the console when no video output is available.
