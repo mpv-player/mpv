@@ -132,6 +132,7 @@ typedef struct stream_info_st {
     const char **protocols;
     int priv_size;
     const void *priv_defaults;
+    void *(*get_defaults)(struct stream *st);
     const struct m_option *options;
     const char **url_options;
     bool stream_filter;

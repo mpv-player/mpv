@@ -300,6 +300,8 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
             .priv_defaults = sinfo->priv_defaults,
             .options = sinfo->options,
         };
+        if (sinfo->get_defaults)
+            desc.priv_defaults = sinfo->get_defaults(s);
         struct m_config *config = m_config_from_obj_desc(s, s->log, &desc);
         s->priv = config->optstruct;
         if (s->info->url_options && !parse_url(s, config)) {
