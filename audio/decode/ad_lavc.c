@@ -51,14 +51,28 @@ struct priv {
 static void uninit(struct dec_audio *da);
 static int decode_new_packet(struct dec_audio *da);
 
-#define OPT_BASE_STRUCT struct MPOpts
+#define OPT_BASE_STRUCT struct ad_lavc_params
+struct ad_lavc_params {
+    float ac3drc;
+    int downmix;
+    int threads;
+    char *avopt;
+};
 
-const m_option_t ad_lavc_decode_opts_conf[] = {
-    OPT_FLOATRANGE("ac3drc", ad_lavc_param.ac3drc, 0, 0, 2),
-    OPT_FLAG("downmix", ad_lavc_param.downmix, 0),
-    OPT_INTRANGE("threads", ad_lavc_param.threads, 0, 1, 16),
-    OPT_STRING("o", ad_lavc_param.avopt, 0),
-    {0}
+const struct m_sub_options ad_lavc_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_FLOATRANGE("ac3drc", ac3drc, 0, 0, 2),
+        OPT_FLAG("downmix", downmix, 0),
+        OPT_INTRANGE("threads", threads, 0, 1, 16),
+        OPT_STRING("o", avopt, 0),
+        {0}
+    },
+    .size = sizeof(struct ad_lavc_params),
+    .defaults = &(const struct ad_lavc_params){
+        .ac3drc = 1.,
+        .downmix = 1,
+        .threads = 1,
+    },
 };
 
 struct pcm_map
@@ -179,7 +193,7 @@ static void set_from_wf(AVCodecContext *avctx, MP_WAVEFORMATEX *wf)
 static int init(struct dec_audio *da, const char *decoder)
 {
     struct MPOpts *mpopts = da->opts;
-    struct ad_lavc_param *opts = &mpopts->ad_lavc_param;
+    struct ad_lavc_params *opts = mpopts->ad_lavc_params;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
     struct sh_stream *sh = da->header;

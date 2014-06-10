@@ -63,6 +63,7 @@ extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
 extern const struct m_sub_options demux_rawvideo_conf;
 extern const struct m_sub_options vd_lavc_conf;
+extern const struct m_sub_options ad_lavc_conf;
 
 extern const m_option_t lavfdopts_conf[];
 
@@ -80,8 +81,6 @@ static const m_option_t screenshot_conf[] = {
     OPT_STRING("template", screenshot_template, 0),
     {0},
 };
-
-extern const m_option_t ad_lavc_decode_opts_conf[];
 
 extern const m_option_t mp_input_opts[];
 
@@ -278,7 +277,7 @@ const m_option_t mp_opts[] = {
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),
 
     OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
-    {"ad-lavc", (void *) ad_lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG},
+    OPT_SUBSTRUCT("ad-lavc", ad_lavc_params, ad_lavc_conf, 0),
 
     {"demuxer-lavf", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG},
     OPT_SUBSTRUCT("demuxer-rawaudio", demux_rawaudio, demux_rawaudio_conf, 0),
@@ -647,11 +646,6 @@ const struct MPOpts mp_default_opts = {
 
     .mf_fps = 1.0,
 
-    .ad_lavc_param = {
-        .ac3drc = 1.,
-        .downmix = 1,
-        .threads = 1,
-    },
     .lavfdopts = {
         .allow_mimetype = 1,
     },
