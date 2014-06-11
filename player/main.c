@@ -397,6 +397,8 @@ int mp_initialize(struct MPContext *mpctx)
         m_config_set_option0(mpctx->mconfig, "force-window", "no");
         m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
         m_config_set_option0(mpctx->mconfig, "resume-playback", "no");
+        m_config_set_option0(mpctx->mconfig, "load-scripts", "no");
+        m_config_set_option0(mpctx->mconfig, "osc", "no");
         mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
     }
 #endif
