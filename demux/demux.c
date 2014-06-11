@@ -46,10 +46,6 @@
 
 #include <libavcodec/avcodec.h>
 
-#if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE
-#error MP_INPUT_BUFFER_PADDING_SIZE is too small!
-#endif
-
 // Demuxer list
 extern const struct demuxer_desc demuxer_desc_edl;
 extern const struct demuxer_desc demuxer_desc_cue;
@@ -146,12 +142,12 @@ static struct demux_packet *create_packet(size_t len)
 struct demux_packet *new_demux_packet(size_t len)
 {
     struct demux_packet *dp = create_packet(len);
-    dp->buffer = malloc(len + MP_INPUT_BUFFER_PADDING_SIZE);
+    dp->buffer = malloc(len + FF_INPUT_BUFFER_PADDING_SIZE);
     if (!dp->buffer) {
         fprintf(stderr, "Memory allocation failure!\n");
         abort();
     }
-    memset(dp->buffer + len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
+    memset(dp->buffer + len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
     dp->allocation = dp->buffer;
     return dp;
 }
@@ -178,12 +174,12 @@ void resize_demux_packet(struct demux_packet *dp, size_t len)
         abort();
     }
     assert(dp->allocation);
-    dp->buffer = realloc(dp->buffer, len + MP_INPUT_BUFFER_PADDING_SIZE);
+    dp->buffer = realloc(dp->buffer, len + FF_INPUT_BUFFER_PADDING_SIZE);
     if (!dp->buffer) {
         fprintf(stderr, "Memory allocation failure!\n");
         abort();
     }
-    memset(dp->buffer + len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
+    memset(dp->buffer + len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
     dp->len = len;
     dp->allocation = dp->buffer;
 }

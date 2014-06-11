@@ -87,9 +87,6 @@ enum demux_check {
     DEMUX_CHECK_NORMAL, // normal, safe detection
 };
 
-// demux_lavf can pass lavf buffers using FF_INPUT_BUFFER_PADDING_SIZE instead
-#define MP_INPUT_BUFFER_PADDING_SIZE 16
-
 #define MAX_SH_STREAMS 256
 
 struct demuxer;
