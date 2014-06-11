@@ -681,8 +681,8 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
         return -1;
     }
 
-    MP_INFO(cache, "Cache size set to %" PRId64 " KiB\n",
-            s->buffer_size / 1024);
+    MP_VERBOSE(cache, "Cache size set to %" PRId64 " KiB\n",
+               s->buffer_size / 1024);
 
     pthread_mutex_init(&s->mutex, NULL);
     pthread_cond_init(&s->wakeup, NULL);
