@@ -295,7 +295,7 @@ static void *playthread(void *arg)
             p->requested_data = true;
         }
 
-        if (p->drain && p->avoid_ao_wait) {
+        if (p->drain && (p->avoid_ao_wait || p->paused)) {
             if (ao->driver->drain)
                 ao->driver->drain(ao);
             p->drain = false;
