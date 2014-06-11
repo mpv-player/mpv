@@ -265,10 +265,8 @@ static int fcc_vl2mp(int fcc)
 ** Translate a video4linux2 fourcc aka pixel format
 ** to a human readable string.
 */
-static const char *pixfmt2name(int pixfmt)
+static const char *pixfmt2name(char *buf, int pixfmt)
 {
-    static char unknown[24];
-
     switch (pixfmt) {
     case V4L2_PIX_FMT_RGB332:       return "RGB332";
     case V4L2_PIX_FMT_RGB555:       return "RGB555";
@@ -298,8 +296,8 @@ static const char *pixfmt2name(int pixfmt)
     case V4L2_PIX_FMT_WNVA:         return "WNVA";
     case V4L2_PIX_FMT_MJPEG:        return "MJPEG";
     }
-    sprintf(unknown, "unknown (0x%x)", pixfmt);
-    return unknown;
+    sprintf(buf, "unknown (0x%x)", pixfmt);
+    return buf;
 }
 
 
@@ -639,6 +637,7 @@ static int do_control(priv_t *priv, int cmd, void *arg)
 {
     struct v4l2_control control;
     struct v4l2_frequency frequency;
+    char buf[80];
 
     switch(cmd) {
     case TVI_CONTROL_IS_VIDEO:
@@ -667,7 +666,7 @@ static int do_control(priv_t *priv, int cmd, void *arg)
         if (getfmt(priv) < 0) return TVI_CONTROL_FALSE;
         *(int *)arg = fcc_vl2mp(priv->format.fmt.pix.pixelformat);
         MP_VERBOSE(priv, "%s: get format: %s\n", info.short_name,
-               pixfmt2name(priv->format.fmt.pix.pixelformat));
+               pixfmt2name(buf, priv->format.fmt.pix.pixelformat));
         return TVI_CONTROL_TRUE;
     case TVI_CONTROL_VID_SET_FORMAT:
         if (getfmt(priv) < 0) return TVI_CONTROL_FALSE;
@@ -676,7 +675,7 @@ static int do_control(priv_t *priv, int cmd, void *arg)
 
         priv->mp_format = *(int *)arg;
         MP_VERBOSE(priv, "%s: set format: %s\n", info.short_name,
-               pixfmt2name(priv->format.fmt.pix.pixelformat));
+               pixfmt2name(buf, priv->format.fmt.pix.pixelformat));
         if (v4l2_ioctl(priv->video_fd, VIDIOC_S_FMT, &priv->format) < 0) {
             MP_ERR(priv, "%s: ioctl set format failed: %s\n",
                    info.short_name, strerror(errno));
@@ -1179,6 +1178,7 @@ static int init(priv_t *priv)
         MP_ERR(priv, "%s: ioctl get input failed: %s\n",
                info.short_name, strerror(errno));
     }
+    char buf[80];
     MP_INFO(priv, "\n Current input: %d\n", i);
     for (i = 0; ; i++) {
         struct v4l2_fmtdesc fmtdesc;
@@ -1189,11 +1189,11 @@ static int init(priv_t *priv)
             break;
         }
         MP_VERBOSE(priv, " Format %-6s (%2d bits, %s)\n",
-               pixfmt2name(fmtdesc.pixelformat), pixfmt2depth(fmtdesc.pixelformat),
+               pixfmt2name(buf, fmtdesc.pixelformat), pixfmt2depth(fmtdesc.pixelformat),
                fmtdesc.description);
     }
     MP_INFO(priv, " Current format: %s\n",
-           pixfmt2name(priv->format.fmt.pix.pixelformat));
+           pixfmt2name(buf, priv->format.fmt.pix.pixelformat));
 
     /* set some nice defaults */
     if (getfmt(priv) < 0) return 0;
