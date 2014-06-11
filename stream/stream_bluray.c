@@ -101,11 +101,11 @@ struct bluray_priv_s {
     bool in_menu, use_nav, nav_enabled, popup_enabled;
 };
 
-static struct bluray_priv_s bluray_stream_priv_dflts = {
+static const struct bluray_priv_s bluray_stream_priv_dflts = {
     .cfg_title = BLURAY_DEFAULT_TITLE,
 };
 
-static struct bluray_priv_s bdnav_stream_priv_dflts = {
+static const struct bluray_priv_s bdnav_stream_priv_dflts = {
     .cfg_title = BLURAY_DEFAULT_TITLE,
     .use_nav = true,
 };
@@ -810,11 +810,11 @@ static int bluray_stream_open(stream_t *s)
 const stream_info_t stream_info_bluray = {
     .name = "bd",
     .open = bluray_stream_open,
-    .protocols = (const char*[]){ "bd", "br", "bluray", NULL },
+    .protocols = (const char*const[]){ "bd", "br", "bluray", NULL },
     .priv_defaults = &bluray_stream_priv_dflts,
     .priv_size = sizeof(struct bluray_priv_s),
     .options = bluray_stream_opts_fields,
-    .url_options = (const char*[]){
+    .url_options = (const char*const[]){
         "hostname=title",
         "filename=device",
         NULL
@@ -824,11 +824,11 @@ const stream_info_t stream_info_bluray = {
 const stream_info_t stream_info_bdnav = {
     .name = "bdnav",
     .open = bluray_stream_open,
-    .protocols = (const char*[]){ "bdnav", "brnav", "bluraynav", NULL },
+    .protocols = (const char*const[]){ "bdnav", "brnav", "bluraynav", NULL },
     .priv_defaults = &bdnav_stream_priv_dflts,
     .priv_size = sizeof(struct bluray_priv_s),
     .options = bdnav_stream_opts_fields,
-    .url_options = (const char*[]){
+    .url_options = (const char*const[]){
         "hostname=title",
         "filename=device",
         NULL
