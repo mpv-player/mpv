@@ -265,27 +265,8 @@ typedef struct MPOpts {
 
     struct input_opts *input_opts;
 
-    struct encode_output_conf {
-        char *file;
-        char *format;
-        char **fopts;
-        float fps;
-        float maxfps;
-        char *vcodec;
-        char **vopts;
-        char *acodec;
-        char **aopts;
-        int harddup;
-        float voffset;
-        float aoffset;
-        int copyts;
-        int rawts;
-        int autofps;
-        int neverdrop;
-        int video_first;
-        int audio_first;
-        int metadata;
-    } encode_output;
+    // may be NULL if encoding is not compiled-in
+    struct encode_opts *encode_opts;
 } MPOpts;
 
 extern const m_option_t mp_opts[];

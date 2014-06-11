@@ -27,11 +27,42 @@
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "video/vfcap.h"
+#include "options/m_option.h"
 #include "options/options.h"
 #include "osdep/timer.h"
 #include "video/out/vo.h"
 #include "talloc.h"
 #include "stream/stream.h"
+
+#define OPT_BASE_STRUCT struct encode_opts
+const struct m_sub_options encode_config = {
+    .opts = (const m_option_t[]) {
+        OPT_STRING("o", file, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
+        OPT_STRING("of", format, CONF_GLOBAL),
+        OPT_STRINGLIST("ofopts*", fopts, CONF_GLOBAL),
+        OPT_FLOATRANGE("ofps", fps, CONF_GLOBAL, 0.0, 1000000.0),
+        OPT_FLOATRANGE("omaxfps", maxfps, CONF_GLOBAL, 0.0, 1000000.0),
+        OPT_STRING("ovc", vcodec, CONF_GLOBAL),
+        OPT_STRINGLIST("ovcopts*", vopts, CONF_GLOBAL),
+        OPT_STRING("oac", acodec, CONF_GLOBAL),
+        OPT_STRINGLIST("oacopts*", aopts, CONF_GLOBAL),
+        OPT_FLAG("oharddup", harddup, CONF_GLOBAL),
+        OPT_FLOATRANGE("ovoffset", voffset, CONF_GLOBAL, -1000000.0, 1000000.0),
+        OPT_FLOATRANGE("oaoffset", aoffset, CONF_GLOBAL, -1000000.0, 1000000.0),
+        OPT_FLAG("ocopyts", copyts, CONF_GLOBAL),
+        OPT_FLAG("orawts", rawts, CONF_GLOBAL),
+        OPT_FLAG("oautofps", autofps, CONF_GLOBAL),
+        OPT_FLAG("oneverdrop", neverdrop, CONF_GLOBAL),
+        OPT_FLAG("ovfirst", video_first, CONF_GLOBAL),
+        OPT_FLAG("oafirst", audio_first, CONF_GLOBAL),
+        OPT_FLAG("ometadata", metadata, CONF_GLOBAL),
+        {0}
+    },
+    .size = sizeof(struct encode_opts),
+    .defaults = &(const struct encode_opts){
+        .metadata = 1,
+    },
+};
 
 static int set_to_avdictionary(struct encode_lavc_context *ctx,
                                AVDictionary **dictp,
@@ -124,7 +155,7 @@ int encode_lavc_oformat_flags(struct encode_lavc_context *ctx)
     return ctx->avc ? ctx->avc->oformat->flags : 0;
 }
 
-struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options,
+struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
                                              struct mpv_global *global)
 {
     struct encode_lavc_context *ctx;
@@ -905,7 +936,7 @@ static void encode_lavc_printoptions(struct mp_log *log, void *obj,
     }
 }
 
-bool encode_lavc_showhelp(struct mp_log *log, struct encode_output_conf *opts)
+bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
 {
     bool help_output = false;
     if (av_codec_next(NULL) == NULL)

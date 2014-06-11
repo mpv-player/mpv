@@ -32,6 +32,7 @@
 #include "osdep/io.h"
 
 #include "common/global.h"
+#include "common/encode.h"
 #include "common/msg.h"
 #include "options/path.h"
 #include "options/m_config.h"
@@ -58,7 +59,8 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
     bool r = true;
     char *conffile;
     char *section = NULL;
-    bool encoding = opts->encode_output.file && *opts->encode_output.file;
+    bool encoding = opts->encode_opts &&
+        opts->encode_opts->file && opts->encode_opts->file[0];
     // In encoding mode, we don't want to apply normal config options.
     // So we "divert" normal options into a separate section, and the diverted
     // section is never used - unless maybe it's explicitly referenced from an

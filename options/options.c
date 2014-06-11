@@ -66,6 +66,7 @@ extern const struct m_sub_options demux_lavf_conf;
 extern const struct m_sub_options vd_lavc_conf;
 extern const struct m_sub_options ad_lavc_conf;
 extern const struct m_sub_options input_config;
+extern const struct m_sub_options encode_config;
 
 extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
@@ -505,29 +506,11 @@ const m_option_t mp_opts[] = {
     OPT_PRINT("version", print_version),
     OPT_PRINT("V", print_version),
 
-#if HAVE_ENCODING
-    OPT_STRING("o", encode_output.file, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
-    OPT_STRING("of", encode_output.format, CONF_GLOBAL),
-    OPT_STRINGLIST("ofopts*", encode_output.fopts, CONF_GLOBAL),
-    OPT_FLOATRANGE("ofps", encode_output.fps, CONF_GLOBAL, 0.0, 1000000.0),
-    OPT_FLOATRANGE("omaxfps", encode_output.maxfps, CONF_GLOBAL, 0.0, 1000000.0),
-    OPT_STRING("ovc", encode_output.vcodec, CONF_GLOBAL),
-    OPT_STRINGLIST("ovcopts*", encode_output.vopts, CONF_GLOBAL),
-    OPT_STRING("oac", encode_output.acodec, CONF_GLOBAL),
-    OPT_STRINGLIST("oacopts*", encode_output.aopts, CONF_GLOBAL),
-    OPT_FLAG("oharddup", encode_output.harddup, CONF_GLOBAL),
-    OPT_FLOATRANGE("ovoffset", encode_output.voffset, CONF_GLOBAL, -1000000.0, 1000000.0),
-    OPT_FLOATRANGE("oaoffset", encode_output.aoffset, CONF_GLOBAL, -1000000.0, 1000000.0),
-    OPT_FLAG("ocopyts", encode_output.copyts, CONF_GLOBAL),
-    OPT_FLAG("orawts", encode_output.rawts, CONF_GLOBAL),
-    OPT_FLAG("oautofps", encode_output.autofps, CONF_GLOBAL),
-    OPT_FLAG("oneverdrop", encode_output.neverdrop, CONF_GLOBAL),
-    OPT_FLAG("ovfirst", encode_output.video_first, CONF_GLOBAL),
-    OPT_FLAG("oafirst", encode_output.audio_first, CONF_GLOBAL),
-    OPT_FLAG("ometadata", encode_output.metadata, CONF_GLOBAL),
+#ifdef HAVE_ENCODING
+    OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
 
-    {NULL, NULL, 0, 0, 0, 0, NULL}
+    {0}
 };
 
 const struct MPOpts mp_default_opts = {
@@ -643,10 +626,6 @@ const struct MPOpts mp_default_opts = {
     .dvd_angle = 1,
 
     .mf_fps = 1.0,
-
-    .encode_output = {
-        .metadata = 1,
-    },
 };
 
 #endif /* MPLAYER_CFG_MPLAYER_H */

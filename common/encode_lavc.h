@@ -36,7 +36,7 @@
 
 struct encode_lavc_context {
     struct mpv_global *global;
-    struct encode_output_conf *options;
+    struct encode_opts *options;
     struct mp_log *log;
     struct mp_tags *metadata;
 
