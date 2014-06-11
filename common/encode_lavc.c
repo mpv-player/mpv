@@ -30,6 +30,7 @@
 #include "options/m_option.h"
 #include "options/options.h"
 #include "osdep/timer.h"
+#include "osdep/threads.h"
 #include "video/out/vo.h"
 #include "talloc.h"
 #include "stream/stream.h"
@@ -174,7 +175,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_opts *options,
         mp_msg_force_stderr(global, true);
 
     ctx = talloc_zero(NULL, struct encode_lavc_context);
-    pthread_mutex_init(&ctx->lock, NULL);
+    mpthread_mutex_init_recursive(&ctx->lock);
     ctx->log = mp_log_new(ctx, global->log, "encode-lavc");
     ctx->global = global;
     encode_lavc_discontinuity(ctx);
