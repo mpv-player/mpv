@@ -506,7 +506,7 @@ const m_option_t mp_opts[] = {
     OPT_PRINT("version", print_version),
     OPT_PRINT("V", print_version),
 
-#ifdef HAVE_ENCODING
+#if HAVE_ENCODING
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
 
