@@ -30,7 +30,6 @@
 
 #include "misc/dispatch.h"
 #include "osdep/io.h"
-#include "osdep/priority.h"
 #include "osdep/terminal.h"
 #include "osdep/timer.h"
 
@@ -521,7 +520,8 @@ int mpv_main(int argc, char *argv[])
     }
 
 #if HAVE_PRIORITY
-    set_priority();
+    if (opts->w32_priority > 0)
+        SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
 #endif
 
     if (mp_initialize(mpctx) < 0)

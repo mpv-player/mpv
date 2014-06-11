@@ -232,6 +232,8 @@ typedef struct MPOpts {
     int hwdec_api;
     char *hwdec_codecs;
 
+    int w32_priority;
+
     int network_cookies_enabled;
     char *network_cookies_file;
     char *network_useragent;

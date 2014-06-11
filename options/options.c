@@ -27,8 +27,13 @@
 #include <sys/types.h>
 #include <limits.h>
 
-#include "options.h"
 #include "config.h"
+
+#if HAVE_PRIORITY
+#include <windows.h>
+#endif
+
+#include "options.h"
 #include "m_config.h"
 #include "m_option.h"
 #include "common/common.h"
@@ -41,7 +46,6 @@
 #include "audio/decode/dec_audio.h"
 #include "player/core.h"
 #include "player/command.h"
-#include "osdep/priority.h"
 
 extern const char mp_help_text[];
 
@@ -67,6 +71,7 @@ extern const struct m_sub_options vd_lavc_conf;
 extern const struct m_sub_options ad_lavc_conf;
 extern const struct m_sub_options input_config;
 extern const struct m_sub_options encode_config;
+extern const struct m_sub_options image_writer_conf;
 
 extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
@@ -75,14 +80,11 @@ extern const struct m_obj_list ao_obj_list;
 
 #define OPT_BASE_STRUCT struct MPOpts
 
-extern const struct m_sub_options image_writer_conf;
-
 static const m_option_t screenshot_conf[] = {
     OPT_SUBSTRUCT("", screenshot_image_opts, image_writer_conf, 0),
     OPT_STRING("template", screenshot_template, 0),
     {0},
 };
-
 
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
@@ -114,7 +116,12 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("msg-module", msg_module, CONF_GLOBAL),
     OPT_FLAG("msg-time", msg_time, CONF_GLOBAL),
 #if HAVE_PRIORITY
-    {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_CHOICE("priority", w32_priority, 0,
+               ({"no",          0},
+                {"abovenormal", ABOVE_NORMAL_PRIORITY_CLASS},
+                {"normal",      NORMAL_PRIORITY_CLASS},
+                {"belownormal", BELOW_NORMAL_PRIORITY_CLASS},
+                {"idle",        IDLE_PRIORITY_CLASS})),
 #endif
     OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
     OPT_STRING("config-dir", force_configdir,
