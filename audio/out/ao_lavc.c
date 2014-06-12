@@ -331,6 +331,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     int bufpos = 0;
     double nextpts;
     double outpts;
+    int orig_samples = samples;
 
     pthread_mutex_lock(&ectx->lock);
 
@@ -346,28 +347,20 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
 
-    if (flags & AOPLAY_FINAL_CHUNK) {
-        int written = 0;
-        if (samples > 0) {
-            void *tmp = talloc_new(NULL);
-            size_t bytelen = samples * ao->sstride;
-            size_t extralen = (ac->aframesize - 1) * ao->sstride;
-            void *padded[MP_NUM_CHANNELS];
-            for (int n = 0; n < num_planes; n++) {
-                padded[n] = talloc_size(tmp, bytelen + extralen);
-                memcpy(padded[n], data[n], bytelen);
-                af_fill_silence((char *)padded[n] + bytelen, extralen, ao->format);
-            }
-            // No danger of recursion, because AOPLAY_FINAL_CHUNK not set
-            written = play(ao, padded, (bytelen + extralen) / ao->sstride, 0);
-            if (written < samples) {
-                MP_ERR(ao, "did not write enough data at the end\n");
-            }
-            talloc_free(tmp);
-        }
+    void *tempdata = NULL;
 
-        pthread_mutex_unlock(&ectx->lock);
-        return FFMIN(written, samples);
+    if ((flags & AOPLAY_FINAL_CHUNK) && (samples % ac->aframesize)) {
+       tempdata = talloc_new(NULL);
+       size_t bytelen = samples * ao->sstride;
+       size_t extralen = (ac->aframesize - 1) * ao->sstride;
+       void *padded[MP_NUM_CHANNELS];
+       for (int n = 0; n < num_planes; n++) {
+           padded[n] = talloc_size(tempdata, bytelen + extralen);
+           memcpy(padded[n], data[n], bytelen);
+           af_fill_silence((char *)padded[n] + bytelen, extralen, ao->format);
+       }
+       data = padded;
+       samples = (bytelen + extralen) / ao->sstride;
     }
 
     if (pts == MP_NOPTS_VALUE) {
@@ -457,8 +450,20 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             ectx->next_in_pts = nextpts;
     }
 
+    talloc_free(tempdata);
     pthread_mutex_unlock(&ectx->lock);
-    return bufpos;
+
+    if (flags & AOPLAY_FINAL_CHUNK) {
+        if (bufpos < orig_samples) {
+            MP_ERR(ao, "did not write enough data at the end\n");
+        }
+    } else {
+        if (bufpos > orig_samples) {
+            MP_ERR(ao, "audio buffer overflow (should never happen)\n");
+        }
+    }
+
+    return FFMIN(bufpos, orig_samples);
 }
 
 static void drain(struct ao *ao)
