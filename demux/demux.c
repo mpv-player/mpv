@@ -113,7 +113,7 @@ static void packet_destroy(void *ptr)
 {
     struct demux_packet *dp = ptr;
     talloc_free(dp->avpacket);
-    free(dp->allocation);
+    av_free(dp->allocation);
 }
 
 static struct demux_packet *create_packet(size_t len)
@@ -139,7 +139,7 @@ static struct demux_packet *create_packet(size_t len)
 struct demux_packet *new_demux_packet(size_t len)
 {
     struct demux_packet *dp = create_packet(len);
-    dp->buffer = malloc(len + FF_INPUT_BUFFER_PADDING_SIZE);
+    dp->buffer = av_malloc(len + FF_INPUT_BUFFER_PADDING_SIZE);
     if (!dp->buffer) {
         fprintf(stderr, "Memory allocation failure!\n");
         abort();
