@@ -80,12 +80,6 @@ extern const struct m_obj_list ao_obj_list;
 
 #define OPT_BASE_STRUCT struct MPOpts
 
-static const m_option_t screenshot_conf[] = {
-    OPT_SUBSTRUCT("", screenshot_image_opts, image_writer_conf, 0),
-    OPT_STRING("template", screenshot_template, 0),
-    {0},
-};
-
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
     {"v", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, .offset = -1},
@@ -502,8 +496,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
     OPT_FLAG("input-cursor", vo.enable_mouse_movements, CONF_GLOBAL),
 
-    {"screenshot", CONF_TYPE_SUBCONFIG, .priv = (void *)screenshot_conf,
-     .offset = -1},
+    OPT_SUBSTRUCT("screenshot", screenshot_image_opts, image_writer_conf, 0),
+    OPT_STRING("screenshot-template", screenshot_template, 0),
 
     OPT_SUBSTRUCT("input", input_opts, input_config, 0),
 

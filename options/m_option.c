@@ -1616,15 +1616,8 @@ static int parse_subconf(struct mp_log *log, const m_option_t *opt,
 }
 
 const m_option_type_t m_option_type_subconfig = {
-    // The syntax is -option opt1=foo:flag:opt2=blah
     .name = "Subconfig",
     .flags = M_OPT_TYPE_HAS_CHILD,
-    .parse = parse_subconf,
-};
-
-const m_option_type_t m_option_type_subconfig_struct = {
-    .name = "Subconfig",
-    .flags = M_OPT_TYPE_HAS_CHILD | M_OPT_TYPE_USE_SUBSTRUCT,
     .parse = parse_subconf,
 };
 

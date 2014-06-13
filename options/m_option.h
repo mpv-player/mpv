@@ -55,7 +55,6 @@ extern const m_option_type_t m_option_type_choice;
 extern const m_option_type_t m_option_type_msglevels;
 extern const m_option_type_t m_option_type_print_fn;
 extern const m_option_type_t m_option_type_subconfig;
-extern const m_option_type_t m_option_type_subconfig_struct;
 extern const m_option_type_t m_option_type_imgfmt;
 extern const m_option_type_t m_option_type_fourcc;
 extern const m_option_type_t m_option_type_afmt;
@@ -164,7 +163,7 @@ struct m_opt_choice_alternatives {
 typedef int (*m_opt_string_validate_fn)(struct mp_log *log, const m_option_t *opt,
                                         struct bstr name, struct bstr param);
 
-// m_option.priv points to this if M_OPT_TYPE_USE_SUBSTRUCT is used
+// m_option.priv points to this if OPT_SUBSTRUCT is used
 struct m_sub_options {
     const struct m_option *opts;
     size_t size;
@@ -178,7 +177,6 @@ struct m_sub_options {
 #define CONF_TYPE_FLOAT         (&m_option_type_float)
 #define CONF_TYPE_DOUBLE        (&m_option_type_double)
 #define CONF_TYPE_STRING        (&m_option_type_string)
-#define CONF_TYPE_SUBCONFIG     (&m_option_type_subconfig)
 #define CONF_TYPE_STRING_LIST   (&m_option_type_string_list)
 #define CONF_TYPE_IMGFMT        (&m_option_type_imgfmt)
 #define CONF_TYPE_FOURCC        (&m_option_type_fourcc)
@@ -397,10 +395,6 @@ struct m_option {
 // assume that the argument takes no parameter. In config files, these
 // options can be used without "=" and value.
 #define M_OPT_TYPE_OPTIONAL_PARAM       (1 << 3)
-
-// modify M_OPT_TYPE_HAS_CHILD so that m_option::p points to
-// struct m_sub_options, instead of a direct m_option array.
-#define M_OPT_TYPE_USE_SUBSTRUCT        (1 << 4)
 
 ///////////////////////////// Parser flags /////////////////////////////////
 
@@ -675,7 +669,7 @@ extern const char m_option_path_separator;
 // the subconf struct.
 #define OPT_SUBSTRUCT(name, varname, subconf, flagv)            \
     OPT_GENERAL_NOTYPE(name, varname, flagv,                    \
-                       .type = &m_option_type_subconfig_struct, \
+                       .type = &m_option_type_subconfig,        \
                        .priv = (void*)&subconf)
 
 #endif /* MPLAYER_M_OPTION_H */

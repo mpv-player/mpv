@@ -391,25 +391,20 @@ static void m_config_add_option(struct m_config *config,
 
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
-        if (arg->type->flags & M_OPT_TYPE_USE_SUBSTRUCT) {
-            const struct m_sub_options *subopts = arg->priv;
+        const struct m_sub_options *subopts = arg->priv;
 
-            void *new_optstruct = NULL;
-            if (co.data) {
-                new_optstruct = m_config_alloc_struct(config, subopts);
-                substruct_write_ptr(co.data, new_optstruct);
-            }
-
-            const void *new_optstruct_def = substruct_read_ptr(co.default_data);
-            if (!new_optstruct_def)
-                new_optstruct_def = subopts->defaults;
-
-            add_options(config, co.name, new_optstruct,
-                        new_optstruct_def, subopts->opts);
-        } else {
-            const struct m_option *sub = arg->priv;
-            add_options(config, co.name, optstruct, optstruct_def, sub);
+        void *new_optstruct = NULL;
+        if (co.data) {
+            new_optstruct = m_config_alloc_struct(config, subopts);
+            substruct_write_ptr(co.data, new_optstruct);
         }
+
+        const void *new_optstruct_def = substruct_read_ptr(co.default_data);
+        if (!new_optstruct_def)
+            new_optstruct_def = subopts->defaults;
+
+        add_options(config, co.name, new_optstruct,
+                    new_optstruct_def, subopts->opts);
     } else {
         // Initialize options
         if (co.data && co.default_data) {
