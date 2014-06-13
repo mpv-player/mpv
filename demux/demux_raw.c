@@ -204,7 +204,7 @@ static int raw_fill_buffer(demuxer_t *demuxer)
     dp->pts = (dp->pos  / p->frame_size) / p->frame_rate;
 
     int len = stream_read(demuxer->stream, dp->buffer, dp->len);
-    resize_demux_packet(dp, len);
+    demux_packet_shorten(dp, len);
     demuxer_add_packet(demuxer, demuxer->streams[0], dp);
 
     return 1;
