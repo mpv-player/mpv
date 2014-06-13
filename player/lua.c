@@ -692,7 +692,7 @@ static int script_set_property_native(lua_State *L)
 
 static int script_property_list(lua_State *L)
 {
-    const struct m_option *props = mp_get_property_list();
+    const struct m_property *props = mp_get_property_list();
     lua_newtable(L);
     for (int i = 0; props[i].name; i++) {
         lua_pushinteger(L, i + 1);

@@ -33,7 +33,7 @@ void property_print_help(struct mp_log *log);
 int mp_property_do(const char* name, int action, void* val,
                    struct MPContext *mpctx);
 
-const struct m_option *mp_get_property_list(void);
+const struct m_property *mp_get_property_list(void);
 int mp_find_property_index(const char *property);
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg);

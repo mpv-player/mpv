@@ -37,10 +37,6 @@
 #include "common/msg.h"
 #include "common/common.h"
 
-const struct m_option_type m_option_type_dummy = {
-    .name = "Unknown",
-};
-
 struct legacy_prop {
     const char *old, *new;
 };
@@ -84,18 +80,28 @@ static bool translate_legacy_property(struct mp_log *log, const char *name,
     return true;
 }
 
-static int do_action(const m_option_t *prop_list, const char *name,
+static struct m_property *m_property_list_find(const struct m_property *list,
+                                                     const char *name)
+{
+    for (int n = 0; list && list[n].name; n++) {
+        if (strcmp(list[n].name, name) == 0)
+            return (struct m_property *)&list[n];
+    }
+    return NULL;
+}
+
+static int do_action(const struct m_property *prop_list, const char *name,
                      int action, void *arg, void *ctx)
 {
     const char *sep;
-    const m_option_t *prop;
+    struct m_property *prop;
     struct m_property_action_arg ka;
     if ((sep = strchr(name, '/')) && sep[1]) {
         int len = sep - name;
         char base[len + 1];
         memcpy(base, name, len);
         base[len] = 0;
-        prop = m_option_list_find(prop_list, base);
+        prop = m_property_list_find(prop_list, base);
         ka = (struct m_property_action_arg) {
             .key = sep + 1,
             .action = action,
@@ -104,22 +110,14 @@ static int do_action(const m_option_t *prop_list, const char *name,
         action = M_PROPERTY_KEY_ACTION;
         arg = &ka;
     } else
-        prop = m_option_list_find(prop_list, name);
+        prop = m_property_list_find(prop_list, name);
     if (!prop)
         return M_PROPERTY_UNKNOWN;
-    int (*control)(const m_option_t*, int, void*, void*) = prop->p;
-    int r = control(prop, action, arg, ctx);
-    if (action == M_PROPERTY_GET_TYPE && r < 0 &&
-        prop->type != &m_option_type_dummy)
-    {
-        *(struct m_option *)arg = *prop;
-        return M_PROPERTY_OK;
-    }
-    return r;
+    return prop->call(ctx, prop, action, arg);
 }
 
 // (as a hack, log can be NULL on read-only paths)
-int m_property_do(struct mp_log *log, const m_option_t *prop_list,
+int m_property_do(struct mp_log *log, const struct m_property *prop_list,
                   const char *in_name, int action, void *arg, void *ctx)
 {
     union m_option_value val = {0};
@@ -259,7 +257,7 @@ static void m_property_unkey(int *action, void **arg)
     }
 }
 
-static int m_property_do_bstr(const m_option_t *prop_list, bstr name,
+static int m_property_do_bstr(const struct m_property *prop_list, bstr name,
                               int action, void *arg, void *ctx)
 {
     char name0[64];
@@ -276,8 +274,8 @@ static void append_str(char **s, int *len, bstr append)
     *len = *len + append.len;
 }
 
-static int expand_property(const m_option_t *prop_list, char **ret, int *ret_len,
-                           bstr prop, bool silent_error, void *ctx)
+static int expand_property(const struct m_property *prop_list, char **ret,
+                           int *ret_len, bstr prop, bool silent_error, void *ctx)
 {
     bool cond_yes = bstr_eatstart0(&prop, "?");
     bool cond_no = !cond_yes && bstr_eatstart0(&prop, "!");
@@ -307,7 +305,7 @@ static int expand_property(const m_option_t *prop_list, char **ret, int *ret_len
     return skip;
 }
 
-char *m_properties_expand_string(const m_option_t *prop_list,
+char *m_properties_expand_string(const struct m_property *prop_list,
                                  const char *str0, void *ctx)
 {
     char *ret = NULL;
@@ -364,66 +362,92 @@ char *m_properties_expand_string(const m_option_t *prop_list,
 }
 
 void m_properties_print_help_list(struct mp_log *log,
-                                  const struct m_option* list)
+                                  const struct m_property *list)
 {
     int count = 0;
 
     mp_info(log, "Name\n\n");
     for (int i = 0; list[i].name; i++) {
-        const m_option_t *opt = &list[i];
-        mp_info(log, " %s\n", opt->name);
+        const struct m_property *p = &list[i];
+        mp_info(log, " %s\n", p->name);
         count++;
     }
     mp_info(log, "\nTotal: %d properties\n", count);
 }
 
-int m_property_int_ro(const m_option_t *prop, int action,
-                      void *arg, int var)
+int m_property_flag_ro(int action, void* arg, int var)
 {
-    if (action == M_PROPERTY_GET) {
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(int *)arg = !!var;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+int m_property_int_ro(int action, void *arg, int var)
+{
+    switch (action) {
+    case M_PROPERTY_GET:
         *(int *)arg = var;
         return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_INT};
+        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-int m_property_int64_ro(const struct m_option* prop, int action, void* arg,
-                        int64_t var)
+int m_property_int64_ro(int action, void* arg, int64_t var)
 {
-    if (action == M_PROPERTY_GET) {
+    switch (action) {
+    case M_PROPERTY_GET:
         *(int64_t *)arg = var;
         return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_INT64};
+        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-int m_property_float_ro(const m_option_t *prop, int action,
-                        void *arg, float var)
+int m_property_float_ro(int action, void *arg, float var)
 {
-    if (action == M_PROPERTY_GET) {
+    switch (action) {
+    case M_PROPERTY_GET:
         *(float *)arg = var;
         return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-int m_property_double_ro(const m_option_t *prop, int action,
-                         void *arg, double var)
-{
-    if (action == M_PROPERTY_GET) {
-        *(double *)arg = var;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLOAT};
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-int m_property_strdup_ro(const struct m_option* prop, int action, void* arg,
-                         const char *var)
+int m_property_double_ro(int action, void *arg, double var)
 {
-    if (action == M_PROPERTY_GET) {
-        if (!var)
-            return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(double *)arg = var;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_DOUBLE};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+int m_property_strdup_ro(int action, void* arg, const char *var)
+{
+    switch (action) {
+    case M_PROPERTY_GET:
         *(char **)arg = talloc_strdup(NULL, var);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;

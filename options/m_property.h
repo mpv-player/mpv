@@ -26,8 +26,6 @@
 
 struct mp_log;
 
-extern const struct m_option_type m_option_type_dummy;
-
 enum mp_property_action {
     // Get the property type. This defines the fundamental data type read from
     // or written to the property.
@@ -120,11 +118,22 @@ enum mp_property_return {
     M_PROPERTY_INVALID_FORMAT = -4,
 };
 
+struct m_property {
+    const char *name;
+    // ctx: opaque caller context, which the property might use
+    // prop: pointer to this struct
+    // action: one of enum mp_property_action
+    // arg: specific to the action
+    // returns: one of enum mp_property_return
+    int (*call)(void *ctx, struct m_property *prop, int action, void *arg);
+    void *priv;
+};
+
 // Access a property.
 // action: one of m_property_action
 // ctx: opaque value passed through to property implementation
 // returns: one of mp_property_return
-int m_property_do(struct mp_log *log, const struct m_option* prop_list,
+int m_property_do(struct mp_log *log, const struct m_property* prop_list,
                   const char* property_name, int action, void* arg, void *ctx);
 
 // Given a path of the form "a/b/c", this function will set *prefix to "a",
@@ -135,7 +144,7 @@ bool m_property_split_path(const char *path, bstr *prefix, char **rem);
 
 // Print a list of properties.
 void m_properties_print_help_list(struct mp_log *log,
-                                  const struct m_option* list);
+                                  const struct m_property *list);
 
 // Expand a property string.
 // This function allows to print strings containing property values.
@@ -149,20 +158,16 @@ void m_properties_print_help_list(struct mp_log *log,
 // STR is recursively expanded using the same rules.
 // "$$" can be used to escape "$", and "$}" to escape "}".
 // "$>" disables parsing of "$" for the rest of the string.
-char* m_properties_expand_string(const struct m_option* prop_list,
+char* m_properties_expand_string(const struct m_property *prop_list,
                                  const char *str, void *ctx);
 
 // Trivial helpers for implementing properties.
-int m_property_int_ro(const struct m_option* prop, int action, void* arg,
-                      int var);
-int m_property_int64_ro(const struct m_option* prop, int action, void* arg,
-                        int64_t var);
-int m_property_float_ro(const struct m_option* prop, int action, void* arg,
-                        float var);
-int m_property_double_ro(const struct m_option* prop, int action, void* arg,
-                         double var);
-int m_property_strdup_ro(const struct m_option* prop, int action, void* arg,
-                         const char *var);
+int m_property_flag_ro(int action, void* arg, int var);
+int m_property_int_ro(int action, void* arg, int var);
+int m_property_int64_ro(int action, void* arg, int64_t var);
+int m_property_float_ro(int action, void* arg, float var);
+int m_property_double_ro(int action, void* arg, double var);
+int m_property_strdup_ro(int action, void* arg, const char *var);
 
 struct m_sub_property {
     // Name of the sub-property - this will be prefixed with the parent
