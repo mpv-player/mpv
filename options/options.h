@@ -175,8 +175,7 @@ typedef struct MPOpts {
     char *quvi_format;
     int quvi_fetch_subtitles;
 
-    // subreader.c
-    int suboverlap_enabled;
+    int sub_fix_timing;
     char *sub_cp;
 
     char *audio_stream;

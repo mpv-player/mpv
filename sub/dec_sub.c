@@ -474,7 +474,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
     if (sub_speed != 1.0)
         multiply_timings(subs, sub_speed);
 
-    if (!opts->suboverlap_enabled)
+    if (opts->sub_fix_timing)
         fix_overlaps_and_gaps(subs);
 
     if (sh->codec && strcmp(sh->codec, "microdvd") == 0) {
