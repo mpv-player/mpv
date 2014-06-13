@@ -323,8 +323,6 @@ static void add_negation_option(struct m_config *config,
         .name = opt->name,
         .type = CONF_TYPE_STORE,
         .flags = opt->flags & (M_OPT_NOCFG | M_OPT_GLOBAL | M_OPT_PRE_PARSE),
-        .is_new_option = opt->is_new_option,
-        .p = opt->p,
         .offset = opt->offset,
         .max = value,
     };
@@ -371,14 +369,11 @@ static void m_config_add_option(struct m_config *config,
         .name = arg->name,
     };
 
-    if (arg->is_new_option) {
+    if (arg->offset >= 0) {
         if (optstruct)
             co.data = (char *)optstruct + arg->offset;
         if (optstruct_def)
             co.default_data = (char *)optstruct_def + arg->offset;
-    } else {
-        co.data = arg->p;
-        co.default_data = arg->p;
     }
 
     if (arg->defval)
@@ -412,7 +407,7 @@ static void m_config_add_option(struct m_config *config,
             add_options(config, co.name, new_optstruct,
                         new_optstruct_def, subopts->opts);
         } else {
-            const struct m_option *sub = arg->p;
+            const struct m_option *sub = arg->priv;
             add_options(config, co.name, optstruct, optstruct_def, sub);
         }
     } else {

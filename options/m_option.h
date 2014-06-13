@@ -307,14 +307,13 @@ struct m_option {
     // Option name.
     const char *name;
 
-    // Deprecated field for "old" options which mutate global state.
-    void *p;
-
     // Option type.
     const m_option_type_t *type;
 
     // See \ref OptionFlags.
     unsigned int flags;
+
+    int offset;
 
     // \brief Mostly useful for numeric types, the \ref M_OPT_MIN flags must
     // also be set.
@@ -326,10 +325,6 @@ struct m_option {
 
     // Type dependent data (for all kinds of extended settings).
     void *priv;
-
-    int is_new_option;
-
-    int offset;
 
     // Initialize variable to given default before parsing options
     const void *defval;
@@ -538,12 +533,12 @@ extern const char m_option_path_separator;
 #define OPTDEF_DOUBLE(d)  .defval = (void *)&(const double){d}
 
 #define OPT_GENERAL(ctype, optname, varname, flagv, ...)                \
-    {.name = optname, .flags = flagv, .is_new_option = 1,               \
+    {.name = optname, .flags = flagv,                                   \
     .offset = MP_CHECKED_OFFSETOF(OPT_BASE_STRUCT, varname, ctype),     \
     __VA_ARGS__}
 
 #define OPT_GENERAL_NOTYPE(optname, varname, flagv, ...)                \
-    {.name = optname, .flags = flagv, .is_new_option = 1,               \
+    {.name = optname, .flags = flagv,                                   \
     .offset = offsetof(OPT_BASE_STRUCT, varname),                       \
     __VA_ARGS__}
 
@@ -669,7 +664,8 @@ extern const char m_option_path_separator;
     {.name = optname,                                                       \
      .flags = M_OPT_FIXED | M_OPT_GLOBAL | M_OPT_NOCFG | M_OPT_PRE_PARSE,   \
      .type = &m_option_type_print_fn,                                       \
-     .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn)}
+     .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn),                            \
+     .offset = -1}
 
 // subconf must have the type struct m_sub_options.
 // All sub-options are prefixed with "name-" and are added to the current

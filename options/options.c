@@ -88,20 +88,21 @@ static const m_option_t screenshot_conf[] = {
 
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
-    {"v", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
-    {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED,
-     1, 0, NULL},
-    {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, 0, 0, NULL},
-    {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, 0, 0, NULL},
+    {"v", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, .offset = -1},
+    {"playlist", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED,
+     .min = 1, .offset = -1},
+    {"{", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+    {"}", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
 
     // handled in m_config.c
-    { "include", NULL, CONF_TYPE_STRING, M_OPT_FIXED },
-    { "profile", NULL, CONF_TYPE_STRING_LIST, M_OPT_FIXED },
-    { "show-profile", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED },
-    { "list-options", NULL, CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED },
+    { "include", CONF_TYPE_STRING, M_OPT_FIXED, .offset = -1},
+    { "profile", CONF_TYPE_STRING_LIST, M_OPT_FIXED, .offset = -1},
+    { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+    { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
 
     // handled in main.c (looks at the raw argv[])
-    {"leak-report", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG | M_OPT_FIXED },
+    { "leak-report", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG | M_OPT_FIXED,
+      .offset = -1 },
 
     OPT_FLAG("shuffle", shuffle, CONF_GLOBAL | CONF_NOCFG),
 
@@ -501,7 +502,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
     OPT_FLAG("input-cursor", vo.enable_mouse_movements, CONF_GLOBAL),
 
-    {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG},
+    {"screenshot", CONF_TYPE_SUBCONFIG, .priv = (void *)screenshot_conf,
+     .offset = -1},
 
     OPT_SUBSTRUCT("input", input_opts, input_config, 0),
 
