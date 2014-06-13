@@ -4,9 +4,11 @@ def __get_version__(ctx):
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                cwd=ctx.srcnode.abspath())
-    process.wait()
     (version, err) = process.communicate()
-    return version.strip().decode('utf-8').encode('ascii', 'ignore')
+    version = version.strip()
+    if not isinstance(version, str):
+        version = version.decode('utf-8')
+    return version
 
 def __get_build_date__():
     import time
