@@ -302,7 +302,7 @@ static void add_negation_option(struct m_config *config,
     const struct m_option *opt = orig->opt;
     int value;
     if (opt->type == CONF_TYPE_FLAG) {
-        value = opt->min;
+        value = 0;
     } else if (opt->type == CONF_TYPE_CHOICE) {
         // Find out whether there's a "no" choice.
         // m_option_parse() should be used for this, but it prints

@@ -97,13 +97,13 @@ static const struct m_opt_choice_alternatives discard_names[] = {
 
 const struct m_sub_options vd_lavc_conf = {
     .opts = (const m_option_t[]){
-        OPT_FLAG_CONSTANTS("fast", fast, 0, 0, CODEC_FLAG2_FAST),
+        OPT_FLAG("fast", fast, 0),
         OPT_FLAG("show-all", show_all, 0),
         OPT_DISCARD("skiploopfilter", skip_loop_filter, 0),
         OPT_DISCARD("skipidct", skip_idct, 0),
         OPT_DISCARD("skipframe", skip_frame, 0),
         OPT_INTRANGE("threads", threads, 0, 0, 16),
-        OPT_FLAG_CONSTANTS("bitexact", bitexact, 0, 0, CODEC_FLAG_BITEXACT),
+        OPT_FLAG("bitexact", bitexact, 0),
         OPT_FLAG("check-hw-profile", check_hw_profile, 0),
         OPT_STRING("o", avopt, 0),
         {0}
@@ -367,9 +367,9 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         mp_set_avcodec_threads(avctx, lavc_param->threads);
     }
 
-    avctx->flags |= lavc_param->bitexact;
+    avctx->flags |= lavc_param->bitexact ? CODEC_FLAG_BITEXACT : 0;
+    avctx->flags2 |= lavc_param->fast ? CODEC_FLAG2_FAST : 0;
 
-    avctx->flags2 |= lavc_param->fast;
     if (lavc_param->show_all) {
 #ifdef CODEC_FLAG2_SHOW_ALL
         avctx->flags2 |= CODEC_FLAG2_SHOW_ALL; // ffmpeg only?

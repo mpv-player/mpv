@@ -549,21 +549,15 @@ extern const char m_option_path_separator;
 
 #define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
 
-/* The OPT_FLAG_CONSTANTS->OPT_FLAG_CONSTANTS_ kind of redirection exists to
+/* The OPT_SOMETHING->OPT_SOMETHING_ kind of redirection exists to
  * make the code fully standard-conforming: the C standard requires that
  * __VA_ARGS__ has at least one argument (though GCC for example would accept
- * 0). Thus the first OPT_FLAG_CONSTANTS is a wrapper which just adds one
+ * 0). Thus the first OPT_SOMETHING is a wrapper which just adds one
  * argument to ensure __VA_ARGS__ is not empty when calling the next macro.
  */
 
 #define OPT_FLAG(...) \
-    OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_flag, .max = 1)
-
-#define OPT_FLAG_CONSTANTS_(optname, varname, flags, offvalue, value, ...) \
-    OPT_GENERAL(int, optname, varname, flags,                              \
-                .min = offvalue, .max = value, __VA_ARGS__)
-#define OPT_FLAG_CONSTANTS(...) \
-    OPT_FLAG_CONSTANTS_(__VA_ARGS__, .type = &m_option_type_flag)
+    OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_flag)
 
 #define OPT_FLAG_STORE(optname, varname, flags, value)          \
     OPT_GENERAL(int, optname, varname, flags, .max = value,     \
@@ -675,7 +669,7 @@ extern const char m_option_path_separator;
     {.name = optname,                                                       \
      .flags = M_OPT_FIXED | M_OPT_GLOBAL | M_OPT_NOCFG | M_OPT_PRE_PARSE,   \
      .type = &m_option_type_print_fn,                                       \
-     .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn) }
+     .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn)}
 
 // subconf must have the type struct m_sub_options.
 // All sub-options are prefixed with "name-" and are added to the current

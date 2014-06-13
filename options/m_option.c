@@ -114,9 +114,9 @@ static void copy_opt(const m_option_t *opt, void *dst, const void *src)
 
 static int clamp_flag(const m_option_t *opt, void *val)
 {
-    if (VAL(val) == opt->min || VAL(val) == opt->max)
+    if (VAL(val) == 0 || VAL(val) == 1)
         return 0;
-    VAL(val) = opt->min;
+    VAL(val) = 0;
     return M_OPT_OUT_OF_RANGE;
 }
 
@@ -126,12 +126,12 @@ static int parse_flag(struct mp_log *log, const m_option_t *opt,
     if (param.len) {
         if (!bstrcmp0(param, "yes")) {
             if (dst)
-                VAL(dst) = opt->max;
+                VAL(dst) = 1;
             return 1;
         }
         if (!bstrcmp0(param, "no")) {
             if (dst)
-                VAL(dst) = opt->min;
+                VAL(dst) = 0;
             return 1;
         }
         mp_err(log, "Invalid parameter for %.*s flag: %.*s\n",
@@ -139,33 +139,30 @@ static int parse_flag(struct mp_log *log, const m_option_t *opt,
         return M_OPT_INVALID;
     } else {
         if (dst)
-            VAL(dst) = opt->max;
+            VAL(dst) = 1;
         return 0;
     }
 }
 
 static char *print_flag(const m_option_t *opt, const void *val)
 {
-    if (VAL(val) == opt->min)
-        return talloc_strdup(NULL, "no");
-    else
-        return talloc_strdup(NULL, "yes");
+    return talloc_strdup(NULL, VAL(val) ? "yes" : "no");
 }
 
 static void add_flag(const m_option_t *opt, void *val, double add, bool wrap)
 {
     if (fabs(add) < 0.5)
         return;
-    bool state = VAL(val) != opt->min;
+    bool state = !!VAL(val);
     state = wrap ? !state : add > 0;
-    VAL(val) = state ? opt->max : opt->min;
+    VAL(val) = state ? 1 : 0;
 }
 
 static int flag_set(const m_option_t *opt, void *dst, struct mpv_node *src)
 {
     if (src->format != MPV_FORMAT_FLAG)
         return M_OPT_UNKNOWN;
-    VAL(dst) = src->u.flag ? opt->max : opt->min;
+    VAL(dst) = !!src->u.flag;
     return 1;
 }
 
@@ -173,7 +170,7 @@ static int flag_get(const m_option_t *opt, void *ta_parent,
                     struct mpv_node *dst, void *src)
 {
     dst->format = MPV_FORMAT_FLAG;
-    dst->u.flag = VAL(src) != opt->min;
+    dst->u.flag = !!VAL(src);
     return 1;
 }
 
