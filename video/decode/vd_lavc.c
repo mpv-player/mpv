@@ -73,22 +73,35 @@ static void uninit(struct dec_video *vd);
 struct vd_lavc_params {
     int fast;
     int show_all;
-    char *skip_loop_filter_str;
-    char *skip_idct_str;
-    char *skip_frame_str;
+    int skip_loop_filter;
+    int skip_idct;
+    int skip_frame;
     int threads;
     int bitexact;
     int check_hw_profile;
     char *avopt;
 };
 
+static const struct m_opt_choice_alternatives discard_names[] = {
+    {"none",        AVDISCARD_NONE},
+    {"default",     AVDISCARD_DEFAULT},
+    {"nonref",      AVDISCARD_NONREF},
+    {"bidir",       AVDISCARD_BIDIR},
+    {"nonkey",      AVDISCARD_NONKEY},
+    {"all",         AVDISCARD_ALL},
+    {0}
+};
+#define OPT_DISCARD(name, field, flags) \
+    OPT_GENERAL(int, name, field, flags, .type = CONF_TYPE_CHOICE, \
+                .priv = (void *)discard_names)
+
 const struct m_sub_options vd_lavc_conf = {
     .opts = (const m_option_t[]){
         OPT_FLAG_CONSTANTS("fast", fast, 0, 0, CODEC_FLAG2_FAST),
         OPT_FLAG("show-all", show_all, 0),
-        OPT_STRING("skiploopfilter", skip_loop_filter_str, 0),
-        OPT_STRING("skipidct", skip_idct_str, 0),
-        OPT_STRING("skipframe", skip_frame_str, 0),
+        OPT_DISCARD("skiploopfilter", skip_loop_filter, 0),
+        OPT_DISCARD("skipidct", skip_idct, 0),
+        OPT_DISCARD("skipframe", skip_frame, 0),
         OPT_INTRANGE("threads", threads, 0, 0, 16),
         OPT_FLAG_CONSTANTS("bitexact", bitexact, 0, 0, CODEC_FLAG_BITEXACT),
         OPT_FLAG("check-hw-profile", check_hw_profile, 0),
@@ -99,6 +112,9 @@ const struct m_sub_options vd_lavc_conf = {
     .defaults = &(const struct vd_lavc_params){
         .show_all = 0,
         .check_hw_profile = 1,
+        .skip_loop_filter = AVDISCARD_DEFAULT,
+        .skip_idct = AVDISCARD_DEFAULT,
+        .skip_frame = AVDISCARD_DEFAULT,
     },
 };
 
@@ -140,19 +156,6 @@ static bool hwdec_codec_allowed(struct dec_video *vd, const char *codec)
             return true;
     }
     return false;
-}
-
-static enum AVDiscard str2AVDiscard(struct dec_video *vd, char *str)
-{
-    if (!str)                               return AVDISCARD_DEFAULT;
-    if (strcasecmp(str, "none"   ) == 0)    return AVDISCARD_NONE;
-    if (strcasecmp(str, "default") == 0)    return AVDISCARD_DEFAULT;
-    if (strcasecmp(str, "nonref" ) == 0)    return AVDISCARD_NONREF;
-    if (strcasecmp(str, "bidir"  ) == 0)    return AVDISCARD_BIDIR;
-    if (strcasecmp(str, "nonkey" ) == 0)    return AVDISCARD_NONKEY;
-    if (strcasecmp(str, "all"    ) == 0)    return AVDISCARD_ALL;
-    MP_ERR(vd, "Unknown discard value %s\n", str);
-    return AVDISCARD_DEFAULT;
 }
 
 // Find the correct profile entry for the current codec and profile.
@@ -376,9 +379,9 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 #endif
     }
 
-    avctx->skip_loop_filter = str2AVDiscard(vd, lavc_param->skip_loop_filter_str);
-    avctx->skip_idct = str2AVDiscard(vd, lavc_param->skip_idct_str);
-    avctx->skip_frame = str2AVDiscard(vd, lavc_param->skip_frame_str);
+    avctx->skip_loop_filter = lavc_param->skip_loop_filter;
+    avctx->skip_idct = lavc_param->skip_idct;
+    avctx->skip_frame = lavc_param->skip_frame;
 
     if (lavc_param->avopt) {
         if (parse_avopts(avctx, lavc_param->avopt) < 0) {
