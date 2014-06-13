@@ -167,21 +167,11 @@ struct demux_packet *new_demux_packet_from(void *data, size_t len)
     return dp;
 }
 
-void resize_demux_packet(struct demux_packet *dp, size_t len)
+void demux_packet_shorten(struct demux_packet *dp, size_t len)
 {
-    if (len > 1000000000) {
-        fprintf(stderr, "Attempt to realloc demux packet over 1 GB!\n");
-        abort();
-    }
-    assert(dp->allocation);
-    dp->buffer = realloc(dp->buffer, len + FF_INPUT_BUFFER_PADDING_SIZE);
-    if (!dp->buffer) {
-        fprintf(stderr, "Memory allocation failure!\n");
-        abort();
-    }
-    memset(dp->buffer + len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+    assert(len <= dp->len);
     dp->len = len;
-    dp->allocation = dp->buffer;
+    memset(dp->buffer + dp->len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
 }
 
 void free_demux_packet(struct demux_packet *dp)
