@@ -981,5 +981,7 @@ static const char *const replaced_opts =
     "|autosub#--sub-auto"
     "|native-fs#--fs-missioncontrol"
     "|status-msg#--term-status-msg"
+    "|idx#--index"
+    "|forceidx#--index"
     "|"
 ;

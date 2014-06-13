@@ -690,7 +690,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
 
     mkv_d->deferred_cues = 0;
 
-    if (opts->index_mode == 0 || opts->index_mode == 2) {
+    if (opts->index_mode != 1) {
         ebml_read_skip(demuxer->log, -1, s);
         return 0;
     }

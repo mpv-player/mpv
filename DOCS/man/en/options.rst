@@ -826,15 +826,6 @@ OPTIONS
     Display only forced subtitles for the DVD subtitle stream selected by e.g.
     ``--slang``.
 
-``--forceidx``
-    Force index rebuilding. Useful for files with broken index (A/V desync,
-    etc). This will enable seeking in files where seeking was not possible.
-
-    .. note::
-
-        This option only works if the underlying media supports seeking
-        (i.e. not with stdin, pipe, etc).
-
 ``--fps=<float>``
     Override video framerate. Useful if the original value is wrong or missing.
 
@@ -1129,11 +1120,13 @@ OPTIONS
     Mostly useful in slave mode, where mpv can be controlled through input
     commands (see also ``--slave-broken``).
 
-``--idx``
-    Rebuilds index of files if no index was found, allowing seeking. Useful
-    with broken/incomplete downloads or badly created files. Now this is done
-    automatically by the demuxers used for most video formats, meaning that
-    this switch has no effect in the typical case. See also ``--forceidx``.
+``--index=<mode>``
+    Controls how to seek in files. Note that if the index is missing from a
+    file, it will be built on the fly by default, so you don't need to change
+    this. But it might help with some broken files.
+
+    :default:   use an index if the file has one, or build it if missing
+    :recreate:  don't read or use the file's index
 
     .. note::
 

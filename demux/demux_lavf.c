@@ -641,7 +641,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         parse_cryptokey(avfc, lavfdopts->cryptokey);
     if (lavfdopts->genptsmode)
         avfc->flags |= AVFMT_FLAG_GENPTS;
-    if (opts->index_mode == 0)
+    if (opts->index_mode != 1)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
 #if LIBAVFORMAT_VERSION_MICRO >= 100

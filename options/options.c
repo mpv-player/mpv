@@ -186,9 +186,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("pause", pause, M_OPT_FIXED),
     OPT_FLAG("keep-open", keep_open, 0),
 
-    // AVI and Ogg only: (re)build index at startup
-    OPT_FLAG_CONSTANTS("idx", index_mode, 0, -1, 1),
-    OPT_FLAG_STORE("forceidx", index_mode, 0, 2),
+    OPT_CHOICE("index", index_mode, 0, ({"default", 1}, {"recreate", 0})),
 
     // select audio/video/subtitle stream
     OPT_TRACKCHOICE("aid", audio_id),
@@ -628,7 +626,7 @@ const struct MPOpts mp_default_opts = {
 
     .hwdec_codecs = "h264,vc1,wmv3",
 
-    .index_mode = -1,
+    .index_mode = 1,
 
     .dvd_angle = 1,
 

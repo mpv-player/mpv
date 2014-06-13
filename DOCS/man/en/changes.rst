@@ -158,11 +158,13 @@ Command Line Switches
     ``-endpos``                 ``--length``
     ``-font``                   ``--osd-font``
     ``-forcedsubsonly``         ``--sub-forced-only``
+    ``-forceidx``               ``--index``
     ``-format``                 ``--audio-format``
     ``-fsmode-dontuse``         (removed)
     ``-fstype``                 ``--x11-netwm`` (changed semantics)
     ``-hardframedrop``          ``--framedrop=hard``
     ``-identify``               (removed; use TOOLS/mpv_identify.sh)
+    ``-idx``                    ``--index``
     ``-lavdopts ...``           ``--vd-lavc-...``
     ``-lavfdopts``              ``--demuxer-lavf-...``
     ``-lircconf``               ``--input-lirc-conf``

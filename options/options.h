@@ -189,7 +189,7 @@ typedef struct MPOpts {
     char *screenshot_template;
 
     double force_fps;
-    int index_mode; // -1=untouched  0=don't use index  1=use (generate) index
+    int index_mode;
 
     struct mp_chmap audio_output_channels;
     int audio_output_format;
