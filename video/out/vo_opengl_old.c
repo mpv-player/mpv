@@ -279,11 +279,11 @@ static int glFindFormat(uint32_t fmt, int have_texture_rg, int *dummy,
         *gl_type = GL_UNSIGNED_BYTE_2_3_3_REV;
         break;
 #endif
-    case IMGFMT_RGB15:
+    case IMGFMT_BGR555:
         *gl_format = GL_RGBA;
         *gl_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
         break;
-    case IMGFMT_RGB16:
+    case IMGFMT_BGR565:
         *gl_format = GL_RGB;
         *gl_type = GL_UNSIGNED_SHORT_5_6_5_REV;
         break;
@@ -297,11 +297,11 @@ static int glFindFormat(uint32_t fmt, int have_texture_rg, int *dummy,
         *gl_type = GL_UNSIGNED_BYTE_3_3_2;
         break;
 #endif
-    case IMGFMT_BGR15:
+    case IMGFMT_RGB555:
         *gl_format = GL_BGRA;
         *gl_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
         break;
-    case IMGFMT_BGR16:
+    case IMGFMT_RGB565:
         *gl_format = GL_RGB;
         *gl_type = GL_UNSIGNED_SHORT_5_6_5;
         break;

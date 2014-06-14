@@ -227,7 +227,7 @@ static const struct img_writer img_writers[] = {
     },
     { "tga", write_lavc,
       .lavc_codec = AV_CODEC_ID_TARGA,
-      .pixfmts = (const int[]) { IMGFMT_BGR24, IMGFMT_BGRA, IMGFMT_BGR15_LE,
+      .pixfmts = (const int[]) { IMGFMT_BGR24, IMGFMT_BGRA, IMGFMT_RGB555_LE,
                                  IMGFMT_Y8, 0},
     },
 #if HAVE_JPEG

@@ -44,20 +44,6 @@ struct mp_imgfmt_entry {
 static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // not in ffmpeg
     FMT("vdpau_output",         IMGFMT_VDPAU_OUTPUT)
-    // these names are weirdly different from FFmpeg's
-    FMT_ENDIAN("rgb12",         IMGFMT_RGB12)
-    FMT_ENDIAN("rgb15",         IMGFMT_RGB15)
-    FMT_ENDIAN("rgb16",         IMGFMT_RGB16)
-    FMT_ENDIAN("bgr12",         IMGFMT_BGR12)
-    FMT_ENDIAN("bgr15",         IMGFMT_BGR15)
-    FMT_ENDIAN("bgr16",         IMGFMT_BGR16)
-    // the MPlayer derived names have components in reverse order
-    FMT("rgb8",                 IMGFMT_RGB8)
-    FMT("bgr8",                 IMGFMT_BGR8)
-    FMT("rgb4_byte",            IMGFMT_RGB4_BYTE)
-    FMT("bgr4_byte",            IMGFMT_BGR4_BYTE)
-    FMT("rgb4",                 IMGFMT_RGB4)
-    FMT("bgr4",                 IMGFMT_BGR4)
     // FFmpeg names have an annoying "_vld" suffix
     FMT("vda",                  IMGFMT_VDA)
     FMT("vaapi",                IMGFMT_VAAPI)
@@ -183,7 +169,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     // Packed RGB formats are the only formats that have less than 8 bits per
     // component, and still require endian dependent access.
     if (pd->comp[0].depth_minus1 + 1 <= 8 &&
-        !(mpfmt >= IMGFMT_RGB12_LE && mpfmt <= IMGFMT_BGR16_BE))
+        !(mpfmt >= IMGFMT_RGB444_LE && mpfmt <= IMGFMT_BGR565_BE))
     {
         desc.flags |= MP_IMGFLAG_LE | MP_IMGFLAG_BE;
     } else {

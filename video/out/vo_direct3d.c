@@ -207,9 +207,9 @@ static const struct fmt_entry fmt_table[] = {
     {IMGFMT_BGR32, D3DFMT_X8R8G8B8},
     {IMGFMT_RGB32, D3DFMT_X8B8G8R8},
     {IMGFMT_BGR24, D3DFMT_R8G8B8}, //untested
-    {IMGFMT_BGR16, D3DFMT_R5G6B5},
-    {IMGFMT_BGR15, D3DFMT_X1R5G5B5},
-    {IMGFMT_BGR8 , D3DFMT_R3G3B2}, //untested
+    {IMGFMT_RGB565, D3DFMT_R5G6B5},
+    {IMGFMT_RGB555, D3DFMT_X1R5G5B5},
+    {IMGFMT_RGB8,  D3DFMT_R3G3B2}, //untested
     // grayscale (can be considered both packed and planar)
     {IMGFMT_Y8,    D3DFMT_L8},
     {IMGFMT_Y16,   D3DFMT_L16},

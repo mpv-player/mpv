@@ -203,29 +203,29 @@ enum mp_imgfmt {
     IMGFMT_RGB0_START = IMGFMT_0RGB,
     IMGFMT_RGB0_END = IMGFMT_RGB0,
 
-    // Accessed with bit-shifts (components ordered from LSB to MSB)
-    IMGFMT_RGB8,                // r3 g3 b2
-    IMGFMT_BGR8,
-    IMGFMT_RGB4_BYTE,           // r1 g2 b1 with 1 pixel per byte
-    IMGFMT_BGR4_BYTE,
-    IMGFMT_RGB4,                // r1 g2 b1, bit-packed
-    IMGFMT_BGR4,
+    // Accessed with bit-shifts (components ordered from MSB to LSB)
+    IMGFMT_BGR8,                // r3 g3 b2
+    IMGFMT_RGB8,
+    IMGFMT_BGR4_BYTE,           // r1 g2 b1 with 1 pixel per byte
+    IMGFMT_RGB4_BYTE,
+    IMGFMT_BGR4,                // r1 g2 b1, bit-packed
+    IMGFMT_RGB4,
     IMGFMT_MONO,                // 1 bit per pixel, bit-packed
     IMGFMT_MONO_W,              // like IMGFMT_MONO, but inverted (white pixels)
 
     // Accessed with bit-shifts after endian-swapping the uint16_t pixel
-    IMGFMT_RGB12_LE,            // 4r 4g 4b 4a  (LSB to MSB)
-    IMGFMT_RGB12_BE,
-    IMGFMT_RGB15_LE,            // 5r 5g 5b 1a
-    IMGFMT_RGB15_BE,
-    IMGFMT_RGB16_LE,            // 5r 6g 5b
-    IMGFMT_RGB16_BE,
-    IMGFMT_BGR12_LE,            // 4b 4r 4g 4a
-    IMGFMT_BGR12_BE,
-    IMGFMT_BGR15_LE,            // 5b 5g 5r 1a
-    IMGFMT_BGR15_BE,
-    IMGFMT_BGR16_LE,            // 5b 6g 5r
-    IMGFMT_BGR16_BE,
+    IMGFMT_RGB444_LE,           // 4r 4g 4b 4a  (MSB to LSB)
+    IMGFMT_RGB444_BE,
+    IMGFMT_RGB555_LE,           // 5r 5g 5b 1a
+    IMGFMT_RGB555_BE,
+    IMGFMT_RGB565_LE,           // 5r 6g 5b
+    IMGFMT_RGB565_BE,
+    IMGFMT_BGR444_LE,           // 4b 4r 4g 4a
+    IMGFMT_BGR444_BE,
+    IMGFMT_BGR555_LE,           // 5b 5g 5r 1a
+    IMGFMT_BGR555_BE,
+    IMGFMT_BGR565_LE,           // 5b 6g 5r
+    IMGFMT_BGR565_BE,
 
     // The first plane has 1 byte per pixel. The second plane is a palette with
     // 256 entries, with each entry encoded like in IMGFMT_BGR32.
@@ -270,12 +270,12 @@ enum mp_imgfmt {
     IMGFMT_RGB32   = MP_SELECT_LE_BE(IMGFMT_RGBA, IMGFMT_ABGR),
     IMGFMT_BGR32   = MP_SELECT_LE_BE(IMGFMT_BGRA, IMGFMT_ARGB),
 
-    IMGFMT_RGB12   = MP_SELECT_LE_BE(IMGFMT_RGB12_LE, IMGFMT_RGB12_BE),
-    IMGFMT_RGB15   = MP_SELECT_LE_BE(IMGFMT_RGB15_LE, IMGFMT_RGB15_BE),
-    IMGFMT_RGB16   = MP_SELECT_LE_BE(IMGFMT_RGB16_LE, IMGFMT_RGB16_BE),
-    IMGFMT_BGR12   = MP_SELECT_LE_BE(IMGFMT_BGR12_LE, IMGFMT_BGR12_BE),
-    IMGFMT_BGR15   = MP_SELECT_LE_BE(IMGFMT_BGR15_LE, IMGFMT_BGR15_BE),
-    IMGFMT_BGR16   = MP_SELECT_LE_BE(IMGFMT_BGR16_LE, IMGFMT_BGR16_BE),
+    IMGFMT_RGB444  = MP_SELECT_LE_BE(IMGFMT_RGB444_LE, IMGFMT_RGB444_BE),
+    IMGFMT_RGB555  = MP_SELECT_LE_BE(IMGFMT_RGB555_LE, IMGFMT_RGB555_BE),
+    IMGFMT_RGB565  = MP_SELECT_LE_BE(IMGFMT_RGB565_LE, IMGFMT_RGB565_BE),
+    IMGFMT_BGR444  = MP_SELECT_LE_BE(IMGFMT_BGR444_LE, IMGFMT_BGR444_BE),
+    IMGFMT_BGR555  = MP_SELECT_LE_BE(IMGFMT_BGR555_LE, IMGFMT_BGR555_BE),
+    IMGFMT_BGR565  = MP_SELECT_LE_BE(IMGFMT_BGR565_LE, IMGFMT_BGR565_BE),
     IMGFMT_RGB48   = MP_SELECT_LE_BE(IMGFMT_RGB48_LE, IMGFMT_RGB48_BE),
     IMGFMT_RGBA64  = MP_SELECT_LE_BE(IMGFMT_RGBA64_LE, IMGFMT_RGBA64_BE),
     IMGFMT_BGRA64  = MP_SELECT_LE_BE(IMGFMT_BGRA64_LE, IMGFMT_BGRA64_BE),
