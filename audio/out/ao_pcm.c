@@ -149,8 +149,8 @@ static int init(struct ao *ao)
             priv->outputfilename,
             priv->waveheader ? "WAVE" : "RAW PCM", ao->samplerate,
             ao->channels.num, af_fmt_to_str(ao->format));
-    MP_INFO(ao, "Info: Faster dumping is achieved with -no-video\n");
-    MP_INFO(ao, "Info: To write WAVE files use -ao pcm:waveheader (default).\n");
+    MP_INFO(ao, "Info: Faster dumping is achieved with --no-video\n");
+    MP_INFO(ao, "Info: To write WAVE files use --ao pcm:waveheader (default).\n");
 
     priv->fp = fopen(priv->outputfilename, "wb");
     if (!priv->fp) {
