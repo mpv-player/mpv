@@ -56,6 +56,7 @@ known issues:
 #include <libv4l2.h>
 #endif
 #include "common/msg.h"
+#include "common/common.h"
 #include "video/img_fourcc.h"
 #include "audio/format.h"
 #include "tv.h"
@@ -1609,7 +1610,7 @@ static void *video_grabber(void *data)
             }
         } else {
             if (priv->immediate_mode) {
-                priv->video_ringbuffer[priv->video_tail].timestamp = 0;
+                priv->video_ringbuffer[priv->video_tail].timestamp = -1;
             } else {
                 // compensate for audio skew
                 // negative skew => there are more audio samples, increase interval
@@ -1640,7 +1641,6 @@ static void *video_grabber(void *data)
 #define MAX_LOOP 50
 static double grab_video_frame(priv_t *priv, char *buffer, int len)
 {
-    double interval;
     int loop_cnt = 0;
 
     if (priv->first) {
@@ -1654,13 +1654,13 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
     }
 
     pthread_mutex_lock(&priv->video_buffer_mutex);
-    interval = (double)priv->video_ringbuffer[priv->video_head].timestamp*1e-6;
+    long long interval = priv->video_ringbuffer[priv->video_head].timestamp;
     memcpy(buffer, priv->video_ringbuffer[priv->video_head].data, len);
     priv->video_cnt--;
     priv->video_head = (priv->video_head+1)%priv->video_buffer_size_current;
     pthread_mutex_unlock(&priv->video_buffer_mutex);
 
-    return interval;
+    return interval == -1 ? MP_NOPTS_VALUE : interval*1e-6;
 }
 
 static int get_video_framesize(priv_t *priv)
