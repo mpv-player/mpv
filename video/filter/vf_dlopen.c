@@ -102,7 +102,7 @@ static int config(struct vf_instance *vf,
     vf->priv->filter.in_height = height;
     vf->priv->filter.in_d_width = d_width;
     vf->priv->filter.in_d_height = d_height;
-    vf->priv->filter.in_fmt = mp_imgfmt_to_name(fmt);
+    vf->priv->filter.in_fmt = talloc_strdup(vf, mp_imgfmt_to_name(fmt));
     vf->priv->filter.out_width = width;
     vf->priv->filter.out_height = height;
     vf->priv->filter.out_d_width = d_width;
@@ -142,7 +142,8 @@ static int config(struct vf_instance *vf,
             }
         } else
             vf->priv->outfmt = fmt;
-        vf->priv->filter.out_fmt = mp_imgfmt_to_name(vf->priv->outfmt);
+        vf->priv->filter.out_fmt =
+            talloc_strdup(vf, mp_imgfmt_to_name(vf->priv->outfmt));
     }
 
     if (!vf->priv->outfmt) {

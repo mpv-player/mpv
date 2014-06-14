@@ -71,7 +71,6 @@
 struct mp_imgfmt_desc {
     int id;                 // IMGFMT_*
     int avformat;           // AV_PIX_FMT_* (or AV_PIX_FMT_NONE)
-    const char *name;       // e.g. "420p16"
     int flags;              // MP_IMGFLAG_* bitfield
     int8_t num_planes;
     int8_t chroma_xs, chroma_ys; // chroma shift (i.e. log2 of chroma pixel size)
@@ -335,7 +334,8 @@ static inline bool IMGFMT_IS_RGB(int fmt)
      (fmt) == IMGFMT_VAAPI || (fmt) == IMGFMT_VDA)
 
 int mp_imgfmt_from_name(bstr name, bool allow_hwaccel);
-const char *mp_imgfmt_to_name(int fmt);
+char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt);
+#define mp_imgfmt_to_name(fmt) mp_imgfmt_to_name_buf((char[16]){0}, 16, (fmt))
 
 char **mp_imgfmt_name_list(void);
 
