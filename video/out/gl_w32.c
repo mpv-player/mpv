@@ -39,8 +39,6 @@ static void *w32gpa(const GLubyte *procName)
 
 static bool create_context_w32_old(struct MPGLContext *ctx)
 {
-    GL *gl = ctx->gl;
-
     struct w32_context *w32_ctx = ctx->priv;
     HGLRC *context = &w32_ctx->context;
 
