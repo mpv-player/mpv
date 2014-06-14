@@ -28,14 +28,6 @@
 #include "video/mp_image.h"
 #include "video/fmt-conversion.h"
 
-#define FMT(string, id)                                 \
-    {string,            id},
-
-#define FMT_ENDIAN(string, id)                          \
-    {string,            id},                            \
-    {string "le",       MP_CONCAT(id, _LE)},            \
-    {string "be",       MP_CONCAT(id, _BE)},            \
-
 struct mp_imgfmt_entry {
     const char *name;
     int fmt;
@@ -43,28 +35,28 @@ struct mp_imgfmt_entry {
 
 static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // not in ffmpeg
-    FMT("vdpau_output",         IMGFMT_VDPAU_OUTPUT)
+    {"vdpau_output",    IMGFMT_VDPAU_OUTPUT},
     // FFmpeg names have an annoying "_vld" suffix
-    FMT("vda",                  IMGFMT_VDA)
-    FMT("vaapi",                IMGFMT_VAAPI)
+    {"vda",             IMGFMT_VDA},
+    {"vaapi",           IMGFMT_VAAPI},
     // names below this are not preferred over the FFmpeg names
     // the "none" entry makes mp_imgfmt_to_name prefer FFmpeg names
-    FMT("none",                 0)
+    {"none",            0},
     // endian-specific aliases (not in FFmpeg)
-    FMT("rgb32",                IMGFMT_RGB32)
-    FMT("bgr32",                IMGFMT_BGR32)
+    {"rgb32",           IMGFMT_RGB32},
+    {"bgr32",           IMGFMT_BGR32},
     // old names we keep around
-    FMT("y8",                   IMGFMT_Y8)
-    FMT("420p",                 IMGFMT_420P)
-    FMT("yv12",                 IMGFMT_420P)
-    FMT("420p16",               IMGFMT_420P16)
-    FMT("420p10",               IMGFMT_420P10)
-    FMT("444p",                 IMGFMT_444P)
-    FMT("444p9",                IMGFMT_444P9)
-    FMT("444p10",               IMGFMT_444P10)
-    FMT("422p",                 IMGFMT_422P)
-    FMT("422p9",                IMGFMT_422P9)
-    FMT("422p10",               IMGFMT_422P10)
+    {"y8",              IMGFMT_Y8},
+    {"420p",            IMGFMT_420P},
+    {"yv12",            IMGFMT_420P},
+    {"420p16",          IMGFMT_420P16},
+    {"420p10",          IMGFMT_420P10},
+    {"444p",            IMGFMT_444P},
+    {"444p9",           IMGFMT_444P9},
+    {"444p10",          IMGFMT_444P10},
+    {"422p",            IMGFMT_422P},
+    {"422p9",           IMGFMT_422P9},
+    {"422p10",          IMGFMT_422P10},
     {0}
 };
 
