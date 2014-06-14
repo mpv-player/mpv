@@ -27,8 +27,7 @@
 #include <ass/ass.h>
 #include <ass/ass_types.h>
 
-#include <libavutil/common.h>
-
+#include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
 #include "options/path.h"
@@ -146,9 +145,13 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
         set_sub_pos = 100 - opts->sub_pos;
 #endif
         set_line_spacing = opts->ass_line_spacing;
-        set_font_scale = opts->sub_scale;
         set_hinting = opts->ass_hinting;
         set_force_override = opts->ass_style_override == 3;
+        set_font_scale = opts->sub_scale;
+        if (opts->sub_scale_with_window) {
+            int vidh = dim->h - (dim->mt + dim->mb);
+            set_font_scale *= dim->h / (float)MPMAX(vidh, 1);
+        }
     }
 
     ass_set_use_margins(priv, set_use_margins);
@@ -205,7 +208,7 @@ void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
         if (img->w == 0 || img->h == 0)
             continue;
         if (res->num_parts >= num_parts_alloc) {
-            num_parts_alloc = FFMAX(num_parts_alloc * 2, 32);
+            num_parts_alloc = MPMAX(num_parts_alloc * 2, 32);
             res->parts = talloc_realloc(NULL, res->parts, struct sub_bitmap,
                                         num_parts_alloc);
         }

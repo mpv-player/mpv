@@ -2278,6 +2278,14 @@ OPTIONS
         This affects ASS subtitles as well, and may lead to incorrect subtitle
         rendering. Use with care, or use ``--sub-text-font-size`` instead.
 
+``--sub-scale-with-window=yes|no``
+    Make the subtitle font size relative to the window, instead of the video.
+    This is useful if you always want the same font size, even if the video
+    doesn't covert the window fully, e.g. because screen aspect and window
+    aspect mismatch (and the player adds black bars).
+
+    Like ``--sub-scale``, this can break ASS subtitles.
+
 ``--sub-speed=<0.1-10.0>``
     Multiply the subtitle event timestamps with the given value. Can be used
     to fix the playback speed for frame-based subtitle formats. Works for

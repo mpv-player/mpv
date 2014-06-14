@@ -227,6 +227,7 @@ typedef struct MPOpts {
     int ass_style_override;
     int ass_hinting;
     int ass_shaper;
+    int sub_scale_with_window;
 
     int hwdec_api;
     char *hwdec_codecs;
