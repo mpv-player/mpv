@@ -1550,10 +1550,10 @@ static void *video_grabber(void *data)
         /* store the timestamp of the very first frame as reference */
         if (!priv->frames++) {
             if (priv->tv_param->audio) pthread_mutex_lock(&priv->skew_mutex);
-            priv->first_frame = (long long)1e6*buf.timestamp.tv_sec + buf.timestamp.tv_usec;
+            priv->first_frame = buf.timestamp.tv_sec * 1000000LL + buf.timestamp.tv_usec;
             if (priv->tv_param->audio) pthread_mutex_unlock(&priv->skew_mutex);
         }
-        priv->curr_frame = (long long)buf.timestamp.tv_sec*1e6+buf.timestamp.tv_usec;
+        priv->curr_frame = buf.timestamp.tv_sec * 1000000LL + buf.timestamp.tv_usec;
 //        fprintf(stderr, "idx = %d, ts = %f\n", buf.index, (double)(priv->curr_frame) / 1e6);
 
         interval = priv->curr_frame - priv->first_frame;
