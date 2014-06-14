@@ -1405,7 +1405,7 @@ static int start(priv_t *priv)
                            ? CLOCK_MONOTONIC : CLOCK_REALTIME;
 #else
         if (priv->map[i].buf.flags & V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC)
-            mp_msg(MSGT_TV, MSGL_WARN, "MPlayer compiled without clock_gettime() that is needed to handle monotone video timestamps from the kernel. Expect desync.\n");
+            MP_WARN(priv, "compiled without clock_gettime() that is needed to handle monotone video timestamps from the kernel. Expect desync.\n");
 #endif
         /* count up to make sure this is correct everytime */
         priv->mapcount++;
