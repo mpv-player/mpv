@@ -340,7 +340,7 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
     if (stream->type != STREAM_VIDEO && dp->pts == MP_NOPTS_VALUE)
         dp->pts = dp->dts;
 
-    MP_DBG(demuxer, "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIu64" "
+    MP_DBG(demuxer, "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIi64" "
            "[packs: A=%d V=%d S=%d]\n", stream_type_name(stream->type),
            dp->len, dp->pts, dp->pos, count_packs(demuxer, STREAM_AUDIO),
            count_packs(demuxer, STREAM_VIDEO), count_packs(demuxer, STREAM_SUB));
