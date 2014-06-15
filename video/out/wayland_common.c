@@ -771,13 +771,16 @@ static bool create_window (struct vo_wayland_state *wl)
     for (int i = 0; i < MAX_OSD_PARTS; ++i) {
         wl->window.osd_surfaces[i] =
             wl_compositor_create_surface(wl->display.compositor);
+        wl_surface_attach(wl->window.osd_surfaces[i], NULL, 0, 0);
         wl_surface_set_input_region(wl->window.osd_surfaces[i], input);
         wl->window.osd_subsurfaces[i] =
             wl_subcompositor_get_subsurface(wl->display.subcomp,
                                             wl->window.osd_surfaces[i],
                                             wl->window.video_surface); // parent
+        wl_surface_commit(wl->window.osd_surfaces[i]);
         wl_subsurface_set_sync(wl->window.osd_subsurfaces[i]);
     }
+
     wl_region_destroy(input);
 
     if (!wl->window.shell_surface) {
