@@ -48,9 +48,9 @@ static const struct sd_functions *const sd_list[] = {
     &sd_lavc,
     &sd_movtext,
     &sd_srt,
-    &sd_microdvd,
     &sd_lavf_srt,
     &sd_lavc_conv,
+    &sd_microdvd,
     NULL
 };
 
