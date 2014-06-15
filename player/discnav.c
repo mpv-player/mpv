@@ -16,6 +16,7 @@
  */
 
 #include <limits.h>
+#include <pthread.h>
 #include <assert.h>
 
 #include "core.h"
@@ -42,6 +43,8 @@ struct mp_nav_state {
     bool nav_draining;
 
     // Accessed by OSD (possibly separate thread)
+    // Protected by the given lock
+    pthread_mutex_t osd_lock;
     int hi_visible;
     int highlight[4]; // x0 y0 x1 y1
     int vidsize[2];
@@ -51,23 +54,28 @@ struct mp_nav_state {
     struct sub_bitmap outputs[3];
 };
 
-static inline bool is_valid_size(int size[2]) {
+static inline bool is_valid_size(int size[2])
+{
     return size[0] >= 1 && size[1] >= 1;
 }
 
-static void update_resolution(struct MPContext *mpctx) {
+static void update_resolution(struct MPContext *mpctx)
+{
     struct mp_nav_state *nav = mpctx->nav_state;
-    if (!nav)
-        return;
+    int size[2] = {0};
     if (mpctx->d_sub[0])
-        sub_control(mpctx->d_sub[0], SD_CTRL_GET_RESOLUTION, nav->vidsize);
-    if (!is_valid_size(nav->vidsize)) {
+        sub_control(mpctx->d_sub[0], SD_CTRL_GET_RESOLUTION, size);
+    if (!is_valid_size(size)) {
         struct mp_image_params vid = {0};
         if (mpctx->d_video)
             vid = mpctx->d_video->decoder_output;
-        nav->vidsize[0] = vid.w;
-        nav->vidsize[1] = vid.h;
+        size[0] = vid.w;
+        size[1] = vid.h;
     }
+    pthread_mutex_lock(&nav->osd_lock);
+    nav->vidsize[0] = size[0];
+    nav->vidsize[1] = size[1];
+    pthread_mutex_unlock(&nav->osd_lock);
 }
 
 // Send update events and such.
@@ -100,6 +108,7 @@ void mp_nav_init(struct MPContext *mpctx)
 
     mpctx->nav_state = talloc_zero(NULL, struct mp_nav_state);
     mpctx->nav_state->log = mp_log_new(mpctx->nav_state, mpctx->log, "discnav");
+    pthread_mutex_init(&mpctx->nav_state->osd_lock, NULL);
 
     MP_VERBOSE(mpctx->nav_state, "enabling\n");
 
@@ -134,6 +143,7 @@ void mp_nav_destroy(struct MPContext *mpctx)
         return;
     mp_input_disable_section(mpctx->input, "discnav");
     mp_input_disable_section(mpctx->input, "discnav-menu");
+    pthread_mutex_destroy(&mpctx->nav_state->osd_lock);
     talloc_free(mpctx->nav_state);
     mpctx->nav_state = NULL;
     update_state(mpctx);
@@ -211,27 +221,29 @@ void mp_handle_nav(struct MPContext *mpctx)
             update_state(mpctx);
             break;
         case MP_NAV_EVENT_HIGHLIGHT: {
+            pthread_mutex_lock(&nav->osd_lock);
             MP_VERBOSE(nav, "highlight: %d %d %d - %d %d\n",
                        ev->u.highlight.display,
                        ev->u.highlight.sx, ev->u.highlight.sy,
                        ev->u.highlight.ex, ev->u.highlight.ey);
-            osd_set_nav_highlight(mpctx->osd, NULL);
             nav->highlight[0] = ev->u.highlight.sx;
             nav->highlight[1] = ev->u.highlight.sy;
             nav->highlight[2] = ev->u.highlight.ex;
             nav->highlight[3] = ev->u.highlight.ey;
             nav->hi_visible = ev->u.highlight.display;
+            pthread_mutex_unlock(&nav->osd_lock);
             update_resolution(mpctx);
             osd_set_nav_highlight(mpctx->osd, mpctx);
             break;
         }
         case MP_NAV_EVENT_OVERLAY: {
-            osd_set_nav_highlight(mpctx->osd, NULL);
+            pthread_mutex_lock(&nav->osd_lock);
             for (int i = 0; i < 2; i++) {
                 if (nav->overlays[i])
                     talloc_free(nav->overlays[i]);
                 nav->overlays[i] = talloc_steal(nav, ev->u.overlay.images[i]);
             }
+            pthread_mutex_unlock(&nav->osd_lock);
             update_resolution(mpctx);
             osd_set_nav_highlight(mpctx->osd, mpctx);
             break;
@@ -240,6 +252,7 @@ void mp_handle_nav(struct MPContext *mpctx)
         }
         talloc_free(ev);
     }
+    update_resolution(mpctx);
     if (mpctx->stop_play == AT_END_OF_FILE) {
         if (nav->nav_still_frame > 0) {
             // gross hack
@@ -272,18 +285,18 @@ void mp_nav_get_highlight(void *priv, struct mp_osd_res res,
                           struct sub_bitmaps *out_imgs)
 {
     struct MPContext *mpctx = priv;
-    struct mp_nav_state *nav = mpctx ? mpctx->nav_state : NULL;
-    if (!nav)
-        return;
+    struct mp_nav_state *nav = mpctx->nav_state;
+
+    pthread_mutex_lock(&nav->osd_lock);
+
     struct sub_bitmap *sub = nav->hi_elem;
     if (!sub)
         sub = talloc_zero(nav, struct sub_bitmap);
 
     nav->hi_elem = sub;
     if (!is_valid_size(nav->vidsize)) {
-        update_resolution(mpctx);
-        if (!is_valid_size(nav->vidsize))
-            return;
+        pthread_mutex_unlock(&nav->osd_lock);
+        return;
     }
     int sizes[2] = {nav->vidsize[0], nav->vidsize[1]};
     if (sizes[0] != nav->subsize[0] || sizes[1] != nav->subsize[1]) {
@@ -316,4 +329,6 @@ void mp_nav_get_highlight(void *priv, struct mp_osd_res res,
         out_imgs->format = SUBBITMAP_RGBA;
         osd_rescale_bitmaps(out_imgs, sizes[0], sizes[1], res, -1);
     }
+
+    pthread_mutex_unlock(&nav->osd_lock);
 }
