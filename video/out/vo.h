@@ -54,6 +54,9 @@ enum mp_voctrl {
     /* for hardware decoding */
     VOCTRL_GET_HWDEC_INFO,              // struct mp_hwdec_info*
 
+    // Redraw the image previously passed to draw_image() (basically, repeat
+    // the previous draw_image call). If this is handled, the OSD should also
+    // be updated and redrawn.
     VOCTRL_REDRAW_FRAME,
 
     VOCTRL_ONTOP,
@@ -193,13 +196,10 @@ struct vo_driver {
      * followed by a draw_osd and a flip_page[_timed] call.
      * mpi belongs to the caller; if the VO needs it longer, it has to create
      * a new reference to mpi.
+     *
+     * This also should draw the OSD.
      */
     void (*draw_image)(struct vo *vo, struct mp_image *mpi);
-
-    /*
-     * Draws OSD to the screen buffer
-     */
-    void (*draw_osd)(struct vo *vo, struct osd_state *osd);
 
     /*
      * Blit/Flip buffer to the screen. Must be called after each frame!
@@ -256,6 +256,7 @@ struct vo {
     struct vo_wayland_state *wayland;
     struct encode_lavc_context *encode_lavc_ctx;
     struct input_ctx *input_ctx;
+    struct osd_state *osd;
     int event_fd;  // check_events() should be called when this has input
 
     // current window state
@@ -269,19 +270,19 @@ struct vo {
 struct mpv_global;
 struct vo *init_best_video_out(struct mpv_global *global,
                                struct input_ctx *input_ctx,
+                               struct osd_state *osd,
                                struct encode_lavc_context *encode_lavc_ctx);
 int vo_reconfig(struct vo *vo, struct mp_image_params *p, int flags);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
 void vo_queue_image(struct vo *vo, struct mp_image *mpi);
-int vo_redraw_frame(struct vo *vo);
 bool vo_get_want_redraw(struct vo *vo);
 bool vo_has_next_frame(struct vo *vo, bool eof);
 double vo_get_next_pts(struct vo *vo, int index);
 bool vo_needs_new_image(struct vo *vo);
 void vo_new_frame_imminent(struct vo *vo);
-void vo_draw_osd(struct vo *vo, struct osd_state *osd);
 void vo_flip_page(struct vo *vo, int64_t pts_us, int duration);
+void vo_redraw(struct vo *vo);
 void vo_check_events(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);

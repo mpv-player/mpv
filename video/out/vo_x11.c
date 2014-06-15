@@ -421,15 +421,6 @@ static struct mp_image get_x_buffer(struct priv *p, int buf_index)
     return img;
 }
 
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    struct priv *p = vo->priv;
-
-    struct mp_image img = get_x_buffer(p, p->current_buf);
-
-    osd_draw_on_image(osd, p->osd, osd_get_vo_pts(osd), 0, &img);
-}
-
 static mp_image_t *get_screenshot(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -489,6 +480,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     } else {
         mp_image_clear(&img, 0, 0, img.w, img.h);
     }
+
+    osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, &img);
 
     mp_image_setrefp(&p->original_image, mpi);
 }
@@ -666,7 +659,6 @@ const struct vo_driver video_out_x11 = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
 };

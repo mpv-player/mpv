@@ -486,29 +486,20 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
+    struct priv *vc = vo->priv;
     pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
     draw_image_unlocked(vo, mpi);
+    if (vc->lastimg && vc->lastimg_wants_osd && vo->params) {
+        struct mp_osd_res dim = osd_res_from_image_params(vo->params);
+
+        osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY,
+                          vc->lastimg);
+    }
     pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
 }
 
 static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 {
-}
-
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    struct priv *vc = vo->priv;
-
-    pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
-
-    if (vc->lastimg && vc->lastimg_wants_osd && vo->params) {
-        struct mp_osd_res dim = osd_res_from_image_params(vo->params);
-
-        osd_draw_on_image(osd, dim, osd_get_vo_pts(osd), OSD_DRAW_SUB_ONLY,
-                          vc->lastimg);
-    }
-
-    pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -536,7 +527,6 @@ const struct vo_driver video_out_lavc = {
     .control = control,
     .uninit = uninit,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
 };
 

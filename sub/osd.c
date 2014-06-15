@@ -423,21 +423,6 @@ bool osd_query_and_reset_want_redraw(struct osd_state *osd)
     return r;
 }
 
-double osd_get_vo_pts(struct osd_state *osd)
-{
-    pthread_mutex_lock(&osd->lock);
-    double r = osd->vo_pts;
-    pthread_mutex_unlock(&osd->lock);
-    return r;
-}
-
-void osd_set_vo_pts(struct osd_state *osd, double vo_pts)
-{
-    pthread_mutex_lock(&osd->lock);
-    osd->vo_pts = vo_pts;
-    pthread_mutex_unlock(&osd->lock);
-}
-
 // Scale factor to translate OSD coordinates to what the obj uses internally.
 // osd_coordinates * (sw, sh) = obj_coordinates
 void osd_object_get_scale_factor(struct osd_state *osd, int obj,

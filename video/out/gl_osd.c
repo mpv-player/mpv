@@ -47,7 +47,7 @@ static const struct osd_fmt_entry osd_to_gl_legacy_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_BGRA,  GL_UNSIGNED_BYTE},
 };
 
-struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, bool legacy)
+struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd)
 {
     GLint max_texture_size;
     gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
@@ -55,8 +55,9 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, bool legacy)
     struct mpgl_osd *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct mpgl_osd) {
         .log = log,
+        .osd = osd,
         .gl = gl,
-        .fmt_table = legacy ? osd_to_gl_legacy_formats : osd_to_gl3_formats,
+        .fmt_table = osd_to_gl3_formats,
         .scratch = talloc_zero_size(ctx, 1),
     };
 
@@ -79,6 +80,9 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, bool legacy)
 
 void mpgl_osd_destroy(struct mpgl_osd *ctx)
 {
+    if (!ctx)
+        return;
+
     GL *gl = ctx->gl;
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
@@ -274,7 +278,7 @@ static void draw_cb(void *pctx, struct sub_bitmaps *imgs)
 }
 
 void mpgl_osd_draw_cb(struct mpgl_osd *ctx,
-                      struct osd_state *osd,
+                      double pts,
                       struct mp_osd_res res,
                       void (*cb)(void *ctx, struct mpgl_osd_part *part,
                                  struct sub_bitmaps *imgs),
@@ -282,7 +286,7 @@ void mpgl_osd_draw_cb(struct mpgl_osd *ctx,
 {
     struct draw_cb_closure c = {ctx, cb, cb_ctx};
     reset(ctx);
-    osd_draw(osd, res, osd_get_vo_pts(osd), 0, ctx->formats, draw_cb, &c);
+    osd_draw(ctx->osd, res, pts, 0, ctx->formats, draw_cb, &c);
 }
 
 void mpgl_osd_redraw_cb(struct mpgl_osd *ctx,
@@ -373,8 +377,11 @@ static void draw_legacy_cb(void *pctx, struct sub_bitmaps *imgs)
     gl->DisableClientState(GL_COLOR_ARRAY);
 }
 
-void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, struct osd_state *osd,
+void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, double pts,
                           struct mp_osd_res res)
 {
-    osd_draw(osd, res, osd_get_vo_pts(osd), 0, ctx->formats, draw_legacy_cb, ctx);
+    ctx->fmt_table = osd_to_gl_legacy_formats;
+    for (int n = 0; n < SUBBITMAP_COUNT; n++)
+        ctx->formats[n] = ctx->fmt_table[n].type != 0;
+    osd_draw(ctx->osd, res, pts, 0, ctx->formats, draw_legacy_cb, ctx);
 }

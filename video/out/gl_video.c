@@ -153,7 +153,9 @@ struct gl_video {
     GLuint osd_programs[SUBBITMAP_COUNT];
     GLuint indirect_program, scale_sep_program, final_program;
 
+    struct osd_state *osd_state;
     struct mpgl_osd *osd;
+    double osd_pts;
 
     GLuint lut_3d_texture;
     bool use_lut_3d;
@@ -1157,7 +1159,7 @@ static void recreate_osd(struct gl_video *p)
 {
     if (p->osd)
         mpgl_osd_destroy(p->osd);
-    p->osd = mpgl_osd_init(p->gl, p->log, false);
+    p->osd = mpgl_osd_init(p->gl, p->log, p->osd_state);
     p->osd->use_pbo = p->opts.pbo;
 }
 
@@ -1710,6 +1712,8 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 
     struct video_image *vimg = &p->image;
 
+    p->osd_pts = mpi->pts;
+
     if (p->hwdec_active) {
         mp_image_setrefp(&vimg->hwimage, mpi);
         p->have_image = true;
@@ -1833,12 +1837,12 @@ static void draw_osd_cb(void *ctx, struct mpgl_osd_part *osd,
     debug_check_gl(p, "after drawing osd");
 }
 
-void gl_video_draw_osd(struct gl_video *p, struct osd_state *osd)
+void gl_video_draw_osd(struct gl_video *p)
 {
     GL *gl = p->gl;
     assert(p->osd);
 
-    mpgl_osd_draw_cb(p->osd, osd, p->osd_rect, draw_osd_cb, p);
+    mpgl_osd_draw_cb(p->osd, p->osd_pts, p->osd_rect, draw_osd_cb, p);
 
     // The playloop calls this last before waiting some time until it decides
     // to call flip_page(). Tell OpenGL to start execution of the GPU commands
@@ -2201,12 +2205,13 @@ void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
     p->depth_g = g;
 }
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd)
 {
     struct gl_video *p = talloc_ptrtype(NULL, p);
     *p = (struct gl_video) {
         .gl = gl,
         .log = log,
+        .osd_state = osd,
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
         .gl_debug = true,

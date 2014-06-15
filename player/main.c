@@ -435,6 +435,7 @@ int mp_initialize(struct MPContext *mpctx)
     if (opts->force_vo) {
         opts->fixed_vo = 1;
         mpctx->video_out = init_best_video_out(mpctx->global, mpctx->input,
+                                               mpctx->osd,
                                                mpctx->encode_lavc_ctx);
         if (!mpctx->video_out) {
             MP_FATAL(mpctx, "Error opening/initializing "

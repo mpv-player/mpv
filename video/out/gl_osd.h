@@ -21,6 +21,7 @@ struct mpgl_osd_part {
 
 struct mpgl_osd {
     struct mp_log *log;
+    struct osd_state *osd;
     GL *gl;
     bool use_pbo;
     bool scaled;
@@ -30,16 +31,16 @@ struct mpgl_osd {
     void *scratch;
 };
 
-struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, bool legacy);
+struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd);
 void mpgl_osd_destroy(struct mpgl_osd *ctx);
 
 void mpgl_osd_set_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p);
 void mpgl_osd_unset_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p);
 
-void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, struct osd_state *osd,
+void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, double pts,
                           struct mp_osd_res res);
 void mpgl_osd_draw_cb(struct mpgl_osd *ctx,
-                      struct osd_state *osd,
+                      double pts,
                       struct mp_osd_res res,
                       void (*cb)(void *ctx, struct mpgl_osd_part *part,
                                  struct sub_bitmaps *imgs),

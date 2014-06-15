@@ -59,6 +59,7 @@ struct gl_priv {
     int scaled_osd;
     struct mpgl_osd *osd;
     int osd_color;
+    double osd_pts;
 
     int use_ycbcr;
     int use_yuv;
@@ -1451,7 +1452,7 @@ static void update_yuvconv(struct vo *vo)
     }
 }
 
-static void draw_osd(struct vo *vo, struct osd_state *osd)
+static void draw_osd(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
@@ -1475,7 +1476,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     gl->Color4ub((p->osd_color >> 16) & 0xff, (p->osd_color >> 8) & 0xff,
                  p->osd_color & 0xff, 0xff - (p->osd_color >> 24));
 
-    mpgl_osd_draw_legacy(p->osd, osd, res);
+    mpgl_osd_draw_legacy(p->osd, p->osd_pts, res);
 
     if (p->scaled_osd)
         gl->PopMatrix();
@@ -1686,7 +1687,7 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     }
 
     if (gl->BindTexture) {
-        p->osd = mpgl_osd_init(gl, vo->log, true);
+        p->osd = mpgl_osd_init(gl, vo->log, vo->osd);
         p->osd->scaled = p->scaled_osd;
     }
 
@@ -1782,6 +1783,8 @@ static void do_render(struct vo *vo)
     }
     if (p->is_yuv || p->custom_prog)
         glDisableYUVConversion(gl, p->target, p->yuvconvtype);
+
+    draw_osd(vo);
 }
 
 static void flip_page(struct vo *vo)
@@ -1905,6 +1908,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
+
+    p->osd_pts = mpi->pts;
 
     int slice = p->slice_height;
     int stride[3];
@@ -2166,7 +2171,6 @@ const struct vo_driver video_out_opengl_old = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),

@@ -149,9 +149,6 @@ void osd_free(struct osd_state *osd);
 
 bool osd_query_and_reset_want_redraw(struct osd_state *osd);
 
-double osd_get_vo_pts(struct osd_state *osd);
-void osd_set_vo_pts(struct osd_state *osd, double vo_pts);
-
 void osd_set_text(struct osd_state *osd, int obj, const char *text);
 
 struct osd_sub_state {

@@ -93,6 +93,7 @@ struct priv {
 
     struct quad *quad;
     struct mpgl_osd *osd;
+    double vo_pts;
 
     // functions to to deal with the the OpenGL texture for containing the
     // video frame (behaviour changes depending on the rendering path).
@@ -129,7 +130,7 @@ static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     if (!p->osd)
-        p->osd = mpgl_osd_init(gl, vo->log, true);
+        p->osd = mpgl_osd_init(gl, vo->log, vo->osd);
 
     resize(vo);
 
@@ -179,6 +180,8 @@ static void do_render(struct vo *vo)
     gl->End();
 
     p->fns.unbind_texture(vo);
+
+    mpgl_osd_draw_legacy(p->osd, p->vo_pts, p->osd_res);
 }
 
 static void flip_page(struct vo *vo)
@@ -191,6 +194,7 @@ static void flip_page(struct vo *vo)
 static void draw_image(struct vo *vo, struct mp_image *mpi)
 {
     struct priv *p = vo->priv;
+    p->vo_pts = mpi->pts;
     p->fns.prepare_texture(vo, mpi);
     do_render(vo);
 }
@@ -198,8 +202,7 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    if (p->osd)
-        mpgl_osd_destroy(p->osd);
+    mpgl_osd_destroy(p->osd);
     p->fns.uninit(vo);
     mpgl_uninit(p->mpglctx);
 }
@@ -215,14 +218,6 @@ static int preinit(struct vo *vo)
     };
 
     return 0;
-}
-
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    struct priv *p = vo->priv;
-    assert(p->osd);
-
-    mpgl_osd_draw_legacy(p->osd, osd, p->osd_res);
 }
 
 static CFStringRef get_cv_csp_matrix(enum mp_csp format)
@@ -569,7 +564,6 @@ const struct vo_driver video_out_corevideo = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),

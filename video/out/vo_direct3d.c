@@ -131,6 +131,7 @@ typedef struct d3d_priv {
     struct vo *vo;
 
     bool have_image;
+    double osd_pts;
 
     D3DLOCKED_RECT locked_rect; /**< The locked offscreen surface */
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
@@ -233,7 +234,7 @@ static void uninit(struct vo *vo);
 static void flip_page(struct vo *vo);
 static mp_image_t *get_screenshot(d3d_priv *priv);
 static mp_image_t *get_window_screenshot(d3d_priv *priv);
-
+static void draw_osd(struct vo *vo);
 
 static void d3d_matrix_identity(D3DMATRIX *m)
 {
@@ -911,6 +912,8 @@ static uint32_t d3d_draw_frame(d3d_priv *priv)
         }
     }
 
+    draw_osd(priv->vo);
+
     return VO_TRUE;
 }
 
@@ -1411,6 +1414,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 
     priv->have_image = true;
+    priv->osd_pts = mpi->pts;
 
     d3d_draw_frame(priv);
 }
@@ -1685,13 +1689,13 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 }
 
 
-static void draw_osd(struct vo *vo, struct osd_state *osd)
+static void draw_osd(struct vo *vo)
 {
     d3d_priv *priv = vo->priv;
     if (!priv->d3d_device)
         return;
 
-    osd_draw(osd, priv->osd_res, osd_get_vo_pts(osd), 0, osd_fmt_supported,
+    osd_draw(vo->osd, priv->osd_res, priv->osd_pts, 0, osd_fmt_supported,
              draw_osd_cb, priv);
 }
 
@@ -1729,7 +1733,6 @@ const struct vo_driver video_out_direct3d = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(d3d_priv),
@@ -1745,7 +1748,6 @@ const struct vo_driver video_out_direct3d_shaders = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(d3d_priv),

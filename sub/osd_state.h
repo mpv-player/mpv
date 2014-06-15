@@ -52,8 +52,6 @@ struct osd_state {
 
     struct osd_object *objs[MAX_OSD_PARTS];
 
-    double vo_pts;
-
     bool render_subs_in_filter;
 
     bool want_redraw;

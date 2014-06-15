@@ -145,6 +145,7 @@ struct vdpctx {
 };
 
 static bool status_ok(struct vo *vo);
+static void draw_osd(struct vo *vo);
 
 static int render_video_to_output_surface(struct vo *vo,
                                           VdpOutputSurface output_surface,
@@ -214,9 +215,11 @@ static int video_to_output_surface(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
-    return render_video_to_output_surface(vo,
-                                          vc->output_surfaces[vc->surface_num],
-                                          &vc->out_rect_vid, &vc->src_rect_vid);
+    int r = render_video_to_output_surface(vo,
+                                           vc->output_surfaces[vc->surface_num],
+                                           &vc->out_rect_vid, &vc->src_rect_vid);
+    draw_osd(vo);
+    return r;
 }
 
 static void forget_frames(struct vo *vo, bool seek_reset)
@@ -657,7 +660,7 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
     draw_osd_part(vo, imgs->render_index);
 }
 
-static void draw_osd(struct vo *vo, struct osd_state *osd)
+static void draw_osd(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
@@ -669,7 +672,8 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         [SUBBITMAP_RGBA] = true,
     };
 
-    osd_draw(osd, vc->osd_rect, osd_get_vo_pts(osd), 0, formats, draw_osd_cb, vo);
+    double pts = vc->current_image ? vc->current_image->pts : 0;
+    osd_draw(vo->osd, vc->osd_rect, pts, 0, formats, draw_osd_cb, vo);
 }
 
 static int update_presentation_queue_status(struct vo *vo)
@@ -1141,7 +1145,6 @@ const struct vo_driver video_out_vdpau = {
     .control = control,
     .draw_image = draw_image,
     .filter_image = filter_image,
-    .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
     .uninit = uninit,
     .priv_size = sizeof(struct vdpctx),

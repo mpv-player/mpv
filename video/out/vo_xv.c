@@ -615,16 +615,6 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
     return img;
 }
 
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    struct xvctx *ctx = vo->priv;
-
-    struct mp_image img = get_xv_buffer(vo, ctx->current_buf);
-
-    struct mp_osd_res res = osd_res_from_image_params(vo->params);
-    osd_draw_on_image(osd, res, osd_get_vo_pts(osd), 0, &img);
-}
-
 static void wait_for_completion(struct vo *vo, int max_outstanding)
 {
 #if HAVE_SHM && HAVE_XEXT
@@ -678,6 +668,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     } else {
         mp_image_clear(&xv_buffer, 0, 0, xv_buffer.w, xv_buffer.h);
     }
+
+    struct mp_osd_res res = osd_res_from_image_params(vo->params);
+    osd_draw_on_image(vo->osd, res, mpi ? mpi->pts : 0, 0, &xv_buffer);
 
     mp_image_setrefp(&ctx->original_image, mpi);
 }
@@ -891,7 +884,6 @@ const struct vo_driver video_out_xv = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct xvctx),

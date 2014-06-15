@@ -166,6 +166,8 @@ struct priv {
     int use_triplebuffering;
 };
 
+static void draw_osd(struct vo *vo);
+
 /* copied from weston clients */
 static int set_cloexec_or_close(int fd)
 {
@@ -678,6 +680,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     mp_image_setrefp(&p->original_image, mpi);
     buffer_finalise_back(buf);
+
+    draw_osd(vo);
 }
 
 static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
@@ -724,7 +728,7 @@ static const bool osd_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_RGBA] = true,
 };
 
-static void draw_osd(struct vo *vo, struct osd_state *osd)
+static void draw_osd(struct vo *vo)
 {
     struct priv *p = vo->priv;
     // deattach all buffers and attach all needed buffers in osd_draw
@@ -737,7 +741,8 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         wl_surface_commit(s);
     }
 
-    osd_draw(osd, p->osd, osd_get_vo_pts(osd), 0, osd_formats, draw_osd_cb, p);
+    double pts = p->original_image ? p->original_image->pts : 0;
+    osd_draw(vo->osd, p->osd, pts, 0, osd_formats, draw_osd_cb, p);
 }
 
 static void flip_page(struct vo *vo)
@@ -923,7 +928,6 @@ const struct vo_driver video_out_wayland = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
     .options = (const struct m_option[]) {
