@@ -129,7 +129,8 @@ static void free_video_specific(struct priv *p)
     for (int n = 0; n < MAX_OUTPUT_SURFACES; n++)
         mp_image_unrefp(&p->swdec_surfaces[n]);
 
-    mp_image_pool_clear(p->pool);
+    if (p->pool)
+        mp_image_pool_clear(p->pool);
 }
 
 static bool alloc_swdec_surfaces(struct priv *p, int w, int h, int imgfmt)
