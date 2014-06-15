@@ -10,7 +10,6 @@
 struct mpgl_osd_part {
     enum sub_bitmap_format format;
     int bitmap_id, bitmap_pos_id;
-    bool active;
     GLuint texture;
     int w, h;
     GLuint buffer;
@@ -34,20 +33,13 @@ struct mpgl_osd {
 struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd);
 void mpgl_osd_destroy(struct mpgl_osd *ctx);
 
+struct mpgl_osd_part *mpgl_osd_generate(struct mpgl_osd *ctx,
+                                        struct sub_bitmaps *b);
+
 void mpgl_osd_set_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p);
 void mpgl_osd_unset_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p);
 
 void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, double pts,
                           struct mp_osd_res res);
-void mpgl_osd_draw_cb(struct mpgl_osd *ctx,
-                      double pts,
-                      struct mp_osd_res res,
-                      void (*cb)(void *ctx, struct mpgl_osd_part *part,
-                                 struct sub_bitmaps *imgs),
-                      void *cb_ctx);
-void mpgl_osd_redraw_cb(struct mpgl_osd *ctx,
-                        void (*cb)(void *ctx, struct mpgl_osd_part *part,
-                                   struct sub_bitmaps *imgs),
-                        void *cb_ctx);
 
 #endif

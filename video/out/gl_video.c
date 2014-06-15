@@ -302,6 +302,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, struct bstr param);
+static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
@@ -1592,6 +1593,16 @@ void gl_video_render_frame(struct gl_video *p)
     p->frames_rendered++;
 
     debug_check_gl(p, "after video rendering");
+
+    assert(p->osd);
+
+    osd_draw(p->osd_state, p->osd_rect, p->osd_pts, 0, p->osd->formats,
+             draw_osd_cb, p);
+
+    // The playloop calls this last before waiting some time until it decides
+    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
+    // while we sleep (this happens asynchronously).
+    gl->Flush();
 }
 
 static void update_window_sized_objects(struct gl_video *p)
@@ -1794,15 +1805,18 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
     return image;
 }
 
-static void draw_osd_cb(void *ctx, struct mpgl_osd_part *osd,
-                        struct sub_bitmaps *imgs)
+static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 {
     struct gl_video *p = ctx;
     GL *gl = p->gl;
 
+    struct mpgl_osd_part *osd = mpgl_osd_generate(p->osd, imgs);
+    if (!osd)
+        return;
+
     assert(osd->format != SUBBITMAP_EMPTY);
 
-    if (!osd->num_vertices && imgs) {
+    if (!osd->num_vertices) {
         osd->vertices = talloc_realloc(osd, osd->vertices, struct vertex,
                                        osd->packer->count * VERTICES_PER_QUAD);
 
@@ -1835,19 +1849,6 @@ static void draw_osd_cb(void *ctx, struct mpgl_osd_part *osd,
     gl->UseProgram(0);
 
     debug_check_gl(p, "after drawing osd");
-}
-
-void gl_video_draw_osd(struct gl_video *p)
-{
-    GL *gl = p->gl;
-    assert(p->osd);
-
-    mpgl_osd_draw_cb(p->osd, p->osd_pts, p->osd_rect, draw_osd_cb, p);
-
-    // The playloop calls this last before waiting some time until it decides
-    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
-    // while we sleep (this happens asynchronously).
-    gl->Flush();
 }
 
 static bool test_fbo(struct gl_video *p, GLenum format)
@@ -2315,7 +2316,6 @@ void gl_video_resize_redraw(struct gl_video *p, int w, int h)
     p->vp_w = w;
     p->vp_h = h;
     gl_video_render_frame(p);
-    mpgl_osd_redraw_cb(p->osd, draw_osd_cb, p);
 }
 
 void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)

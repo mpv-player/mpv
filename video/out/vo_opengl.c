@@ -121,7 +121,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     mpgl_lock(p->glctx);
     gl_video_upload_image(p->renderer, mpi);
     gl_video_render_frame(p->renderer);
-    gl_video_draw_osd(p->renderer);
     mpgl_unlock(p->glctx);
 }
 
@@ -370,7 +369,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         mpgl_lock(p->glctx);
         gl_video_render_frame(p->renderer);
-        gl_video_draw_osd(p->renderer);
         mpgl_unlock(p->glctx);
         return true;
     case VOCTRL_SET_COMMAND_LINE: {
