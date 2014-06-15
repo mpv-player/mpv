@@ -130,6 +130,9 @@ struct priv {
     struct vo *vo;
     struct vo_wayland_state *wl;
 
+    struct wl_surface *osd_surfaces[MAX_OSD_PARTS];
+    struct wl_subsurface *osd_subsurfaces[MAX_OSD_PARTS];
+
     struct wl_list format_list;
     const struct fmtentry *video_format;
 
@@ -536,12 +539,12 @@ static bool resize(struct priv *p)
 
     // attach NULL buffers to the surfaces to avoid artifacts
     for (int i = 0; i < MAX_OSD_PARTS; ++i) {
-        wl_subsurface_set_desync(p->wl->window.osd_subsurfaces[i]);
-        struct wl_surface *s = p->wl->window.osd_surfaces[i];
+        wl_subsurface_set_desync(p->osd_subsurfaces[i]);
+        struct wl_surface *s = p->osd_surfaces[i];
         wl_surface_attach(s, NULL, 0, 0);
         wl_surface_damage(s, 0, 0, p->dst_w, p->dst_h);
         wl_surface_commit(s);
-        wl_subsurface_set_sync(p->wl->window.osd_subsurfaces[i]);
+        wl_subsurface_set_sync(p->osd_subsurfaces[i]);
     }
 
     wl->window.width = p->dst_w;
@@ -682,7 +685,7 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
     struct priv *p = ctx;
     int id = imgs->render_index;
 
-    struct wl_surface *s = p->wl->window.osd_surfaces[id];
+    struct wl_surface *s = p->osd_surfaces[id];
     struct buffer * buf = buffer_pool_get_no(&p->osd_bufpool, id);
     if (!buf)
         return;
@@ -706,7 +709,7 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
             memcpy_pic(wlimg.planes[0] + dst, sub->bitmap, sub->w * 4, sub->h,
                        wlimg.stride[0], sub->stride);
         }
-        wl_subsurface_set_position(p->wl->window.osd_subsurfaces[id], 0, 0);
+        wl_subsurface_set_position(p->osd_subsurfaces[id], 0, 0);
         wl_surface_attach(s, buf->wlbuf, 0, 0);
         wl_surface_damage(s, bb.x0, bb.y0, bb.x1, bb.y1);
         wl_surface_commit(s);
@@ -728,7 +731,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     // only the most recent attach & commit is applied once the parent surface
     // is committed
     for (int i = 0; i < MAX_OSD_PARTS; ++i) {
-        struct wl_surface *s = p->wl->window.osd_surfaces[i];
+        struct wl_surface *s = p->osd_surfaces[i];
         wl_surface_attach(s, NULL, 0, 0);
         wl_surface_damage(s, 0, 0, p->dst_w, p->dst_h);
         wl_surface_commit(s);
@@ -823,24 +826,52 @@ static void uninit(struct vo *vo)
 
     talloc_free(p->original_image);
 
+    for (int i = 0; i < MAX_OSD_PARTS; ++i) {
+        wl_subsurface_destroy(p->osd_subsurfaces[i]);
+        wl_surface_destroy(p->osd_surfaces[i]);
+    }
+
     vo_wayland_uninit(vo);
 }
 
 static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
+    struct vo_wayland_state *wl = NULL;
 
     if (!vo_wayland_init(vo))
         return -1;
 
+    wl = vo->wayland;
+
     p->vo = vo;
-    p->wl = vo->wayland;
+    p->wl = wl;
     p->sws = mp_sws_alloc(vo);
 
     wl_list_init(&p->format_list);
 
-    wl_shm_add_listener(p->wl->display.shm, &shm_listener, p);
-    wl_display_dispatch(p->wl->display.display);
+    wl_shm_add_listener(wl->display.shm, &shm_listener, p);
+    wl_display_dispatch(wl->display.display);
+
+    // Commits on surfaces bound to a subsurface are cached until the parent
+    // surface is commited, in this case the video surface.
+    // Which means we can call commit anywhere.
+    struct wl_region *input =
+        wl_compositor_create_region(wl->display.compositor);
+    for (int i = 0; i < MAX_OSD_PARTS; ++i) {
+        p->osd_surfaces[i] =
+            wl_compositor_create_surface(wl->display.compositor);
+        wl_surface_attach(p->osd_surfaces[i], NULL, 0, 0);
+        wl_surface_set_input_region(p->osd_surfaces[i], input);
+        p->osd_subsurfaces[i] =
+            wl_subcompositor_get_subsurface(wl->display.subcomp,
+                                            p->osd_surfaces[i],
+                                            wl->window.video_surface); // parent
+        wl_surface_commit(p->osd_surfaces[i]);
+        wl_subsurface_set_sync(p->osd_subsurfaces[i]);
+    }
+    wl_region_destroy(input);
+
 
     return 0;
 }

@@ -27,8 +27,6 @@
 
 #include "config.h"
 
-#include "sub/osd.h"
-
 #if HAVE_GL_WAYLAND
 #include <wayland-egl.h>
 #include <EGL/egl.h>
@@ -104,9 +102,6 @@ struct vo_wayland_state {
         int32_t mouse_y;
         struct wl_shell_surface *shell_surface;
         int events; /* mplayer events (VO_EVENT_RESIZE) */
-
-        struct wl_surface *osd_surfaces[MAX_OSD_PARTS];
-        struct wl_subsurface *osd_subsurfaces[MAX_OSD_PARTS];
     } window;
 
     struct {
