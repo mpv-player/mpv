@@ -567,6 +567,7 @@ static int cache_fill_buffer(struct stream *cache, char *buffer, int max_len)
                 break;
             if (s->eof && s->read_filepos >= s->max_filepos && s->reads >= retry)
                 break;
+            s->idle = false;
             if (cache_wakeup_and_wait(s, &retry_time) == CACHE_INTERRUPTED)
                 break;
         }
