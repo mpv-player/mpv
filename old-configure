@@ -761,7 +761,7 @@ check_statement_libs "LADSPA plugin support" $_ladspa LADSPA ladspa.h 'LADSPA_De
 
 check_pkg_config "libbs2b audio filter support" $_libbs2b LIBBS2B 'libbs2b'
 
-check_pkg_config "LCMS2 support" $_lcms2 LCMS2 'lcms2'
+check_pkg_config "LCMS2 support" $_lcms2 LCMS2 'lcms2 >= 2.6'
 
 check_pkg_config "VapourSynth support" $_vapoursynth VAPOURSYNTH 'vapoursynth >= 23 vapoursynth-script >= 23'
 
