@@ -451,30 +451,28 @@ def build(ctx):
         libversion = (str(vnum >> 24) + '.' +
                       str((vnum >> 16) & 0xff) + '.' +
                       str(vnum & 0xffff))
+        
+        def _build_libmpv(shared):
+            features = "c "
+            if shared:
+                features += "cshlib syms"
+            else:
+                features += "cstlib"
+            ctx(
+                target       = "mpv",
+                source       = ctx.filtered_sources(sources),
+                use          = ctx.dependencies_use(),
+                includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
+                                ctx.dependencies_includes(),
+                features     = features,
+                export_symbols_regex = 'mpv_.*',
+                install_path = ctx.env.LIBDIR,
+                vnum         = libversion,
+            )
         if build_shared:
-            ctx(
-                target       = "mpv",
-                source       = ctx.filtered_sources(sources),
-                use          = ctx.dependencies_use(),
-                includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
-                                ctx.dependencies_includes(),
-                features     = "c cshlib syms",
-                export_symbols_regex = 'mpv_.*',
-                install_path = ctx.env.LIBDIR,
-                vnum         = libversion,
-            )
+            _build_libmpv(True)
         if build_static:
-            ctx(
-                target       = "mpv",
-                source       = ctx.filtered_sources(sources),
-                use          = ctx.dependencies_use(),
-                includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
-                                ctx.dependencies_includes(),
-                features     = "c cstlib",
-                export_symbols_regex = 'mpv_.*',
-                install_path = ctx.env.LIBDIR,
-                vnum         = libversion,
-            )
+            _build_libmpv(False)
 
         ctx(
             target       = 'libmpv/mpv.pc',
