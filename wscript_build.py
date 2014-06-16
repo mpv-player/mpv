@@ -439,8 +439,11 @@ def build(ctx):
         **cprog_kwargs
     )
 
-    if ctx.dependency_satisfied('libmpv-shared'):
-        ctx.load("syms")
+    build_shared = ctx.dependency_satisfied('libmpv-shared')
+    build_static = ctx.dependency_satisfied('libmpv-static')
+    if build_shared or build_static:
+        if build_shared:
+            ctx.load("syms")
         vnum = int(re.search('^#define MPV_CLIENT_API_VERSION 0x(.*)UL$',
                              ctx.path.find_node("libmpv/client.h").read(),
                              re.M)
@@ -448,17 +451,30 @@ def build(ctx):
         libversion = (str(vnum >> 24) + '.' +
                       str((vnum >> 16) & 0xff) + '.' +
                       str(vnum & 0xffff))
-        ctx(
-            target       = "mpv",
-            source       = ctx.filtered_sources(sources),
-            use          = ctx.dependencies_use(),
-            includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
-                            ctx.dependencies_includes(),
-            features     = "c cshlib syms",
-            export_symbols_regex = 'mpv_.*',
-            install_path = ctx.env.LIBDIR,
-            vnum         = libversion,
-        )
+        if build_shared:
+            ctx(
+                target       = "mpv",
+                source       = ctx.filtered_sources(sources),
+                use          = ctx.dependencies_use(),
+                includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
+                                ctx.dependencies_includes(),
+                features     = "c cshlib syms",
+                export_symbols_regex = 'mpv_.*',
+                install_path = ctx.env.LIBDIR,
+                vnum         = libversion,
+            )
+        if build_static:
+            ctx(
+                target       = "mpv",
+                source       = ctx.filtered_sources(sources),
+                use          = ctx.dependencies_use(),
+                includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
+                                ctx.dependencies_includes(),
+                features     = "c cstlib",
+                export_symbols_regex = 'mpv_.*',
+                install_path = ctx.env.LIBDIR,
+                vnum         = libversion,
+            )
 
         ctx(
             target       = 'libmpv/mpv.pc',

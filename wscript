@@ -15,9 +15,14 @@ build_options = [
         'default': 'disable',
         'func': check_true
     }, {
+        'name': '--libmpv-static',
+        'desc': 'static library',
+        'default': 'disable',
+        'func': check_true
+    }, {
         'name': '--client-api-examples',
         'desc': 'build client API examples',
-        'deps': ['libmpv-shared'],
+        'deps_any': [ 'libmpv-shared', 'libmpv-static' ],
         'func': check_true
     }, {
         'name': '--static-build',
