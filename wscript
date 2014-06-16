@@ -18,6 +18,7 @@ build_options = [
         'name': '--libmpv-static',
         'desc': 'static library',
         'default': 'disable',
+        'deps_neg': [ 'libmpv-shared' ],
         'func': check_true
     }, {
         'name': '--client-api-examples',
