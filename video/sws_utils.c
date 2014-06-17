@@ -254,8 +254,8 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
 int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
                  struct mp_image *src)
 {
-    mp_image_params_from_image(&ctx->src, src);
-    mp_image_params_from_image(&ctx->dst, dst);
+    ctx->src = src->params;
+    ctx->dst = dst->params;
 
     int r = mp_sws_reinit(ctx);
     if (r < 0) {

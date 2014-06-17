@@ -143,9 +143,6 @@ bool mp_image_params_valid(const struct mp_image_params *p);
 bool mp_image_params_equals(const struct mp_image_params *p1,
                             const struct mp_image_params *p2);
 
-void mp_image_params_from_image(struct mp_image_params *params,
-                                const struct mp_image *image);
-
 void mp_image_set_params(struct mp_image *image,
                          const struct mp_image_params *params);
 

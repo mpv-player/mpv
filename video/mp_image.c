@@ -490,12 +490,6 @@ bool mp_image_params_equals(const struct mp_image_params *p1,
            p1->rotate == p2->rotate;
 }
 
-void mp_image_params_from_image(struct mp_image_params *params,
-                                const struct mp_image *image)
-{
-    *params = image->params;
-}
-
 // Set most image parameters, but not image format or size.
 // Display size is used to set the PAR.
 void mp_image_set_attributes(struct mp_image *image,
