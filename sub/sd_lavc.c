@@ -32,17 +32,26 @@
 #include "sd.h"
 #include "dec_sub.h"
 
-struct sd_lavc_priv {
-    AVCodecContext *avctx;
-    AVSubtitle sub;
-    bool have_sub;
+#define MAX_QUEUE 4
+
+struct sub {
+    bool valid;
+    AVSubtitle avsub;
     int count;
     struct sub_bitmap *inbitmaps;
-    struct sub_bitmap *outbitmaps;
     struct osd_bmp_indexed *imgs;
-    bool bitmaps_changed;
     double pts;
     double endpts;
+    int64_t id;
+};
+
+struct sd_lavc_priv {
+    AVCodecContext *avctx;
+    struct sub subs[MAX_QUEUE]; // lowest pts first
+    struct sub_bitmap *outbitmaps;
+    int64_t displayed_id;
+    int64_t new_id;
+    bool unknown_pts;           // at least one sub with MP_NOPTS_VALUE start
     struct mp_image_params video_params;
 };
 
@@ -143,6 +152,7 @@ static int init(struct sd *sd)
         goto error;
     priv->avctx = ctx;
     sd->priv = priv;
+    priv->displayed_id = -1;
     return 0;
 
  error:
@@ -152,20 +162,25 @@ static int init(struct sd *sd)
     return -1;
 }
 
-static void clear(struct sd_lavc_priv *priv)
+static void clear_sub(struct sub *sub)
 {
-    priv->count = 0;
-    talloc_free(priv->inbitmaps);
-    talloc_free(priv->outbitmaps);
-    priv->inbitmaps = priv->outbitmaps = NULL;
-    talloc_free(priv->imgs);
-    priv->imgs = NULL;
-    priv->bitmaps_changed = true;
-    priv->pts = MP_NOPTS_VALUE;
-    priv->endpts = MP_NOPTS_VALUE;
-    if (priv->have_sub)
-        avsubtitle_free(&priv->sub);
-    priv->have_sub = false;
+    sub->count = 0;
+    sub->pts = MP_NOPTS_VALUE;
+    sub->endpts = MP_NOPTS_VALUE;
+    if (sub->valid)
+        avsubtitle_free(&sub->avsub);
+    sub->valid = false;
+}
+
+static void alloc_sub(struct sd_lavc_priv *priv)
+{
+    clear_sub(&priv->subs[MAX_QUEUE - 1]);
+    for (int n = MAX_QUEUE - 1; n > 0; n--)
+        priv->subs[n] = priv->subs[n - 1];
+    // clear only some fields; the memory allocs can be reused
+    priv->subs[0].valid = false;
+    priv->subs[0].count = 0;
+    priv->subs[0].id = priv->new_id++;
 }
 
 static void decode(struct sd *sd, struct demux_packet *packet)
@@ -184,19 +199,22 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     if (duration == 0)
         duration = -1;
 
-    clear(priv);
+    if (pts == MP_NOPTS_VALUE) {
+        MP_WARN(sd, "Subtitle with unknown start time.\n");
+        priv->unknown_pts = true;
+    }
+
     av_init_packet(&pkt);
     pkt.data = packet->buffer;
     pkt.size = packet->len;
-    pkt.pts = pts * 1000;
+    pkt.pts = AV_NOPTS_VALUE;
     if (duration >= 0)
         pkt.convergence_duration = duration * 1000;
     int got_sub;
     int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, &pkt);
     if (res < 0 || !got_sub)
         return;
-    priv->sub = sub;
-    priv->have_sub = true;
+
     if (pts != MP_NOPTS_VALUE) {
         if (sub.end_display_time > sub.start_display_time)
             duration = (sub.end_display_time - sub.start_display_time) / 1000.0;
@@ -205,42 +223,44 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     double endpts = MP_NOPTS_VALUE;
     if (pts != MP_NOPTS_VALUE && duration >= 0)
         endpts = pts + duration;
-    if (sub.num_rects > 0) {
-        switch (sub.rects[0]->type) {
-        case SUBTITLE_BITMAP:
-            priv->count = 0;
-            priv->pts = pts;
-            priv->endpts = endpts;
-            priv->inbitmaps = talloc_array(priv, struct sub_bitmap,
-                                           sub.num_rects);
-            priv->imgs = talloc_array(priv, struct osd_bmp_indexed,
-                                      sub.num_rects);
-            for (int i = 0; i < sub.num_rects; i++) {
-                struct AVSubtitleRect *r = sub.rects[i];
-                struct sub_bitmap *b = &priv->inbitmaps[priv->count];
-                struct osd_bmp_indexed *img = &priv->imgs[priv->count];
-                if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) &&
-                    opts->forced_subs_only)
-                    continue;
-                if (r->w == 0 || r->h == 0)
-                    continue;
-                img->bitmap = r->pict.data[0];
-                assert(r->nb_colors > 0);
-                assert(r->nb_colors * 4 <= sizeof(img->palette));
-                memcpy(img->palette, r->pict.data[1], r->nb_colors * 4);
-                b->bitmap = img;
-                b->stride = r->pict.linesize[0];
-                b->w = r->w;
-                b->h = r->h;
-                b->x = r->x;
-                b->y = r->y;
-                priv->count++;
-            }
-            break;
-        default:
+
+    // set end time of previous sub
+    if (priv->subs[0].endpts == MP_NOPTS_VALUE || priv->subs[0].endpts > pts)
+        priv->subs[0].endpts = pts;
+
+    alloc_sub(priv);
+    struct sub *current = &priv->subs[0];
+
+    current->valid = true;
+    current->pts = pts;
+    current->endpts = endpts;
+    current->avsub = sub;
+
+    for (int i = 0; i < sub.num_rects; i++) {
+        struct AVSubtitleRect *r = sub.rects[i];
+        MP_TARRAY_GROW(priv, current->inbitmaps, current->count);
+        MP_TARRAY_GROW(priv, current->imgs, current->count);
+        struct sub_bitmap *b = &current->inbitmaps[current->count];
+        struct osd_bmp_indexed *img = &current->imgs[current->count];
+        if (r->type != SUBTITLE_BITMAP) {
             MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
-            break;
+            continue;
         }
+        if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && opts->forced_subs_only)
+            continue;
+        if (r->w <= 0 || r->h <= 0)
+            continue;
+        img->bitmap = r->pict.data[0];
+        assert(r->nb_colors > 0);
+        assert(r->nb_colors * 4 <= sizeof(img->palette));
+        memcpy(img->palette, r->pict.data[1], r->nb_colors * 4);
+        b->bitmap = img;
+        b->stride = r->pict.linesize[0];
+        b->w = r->w;
+        b->h = r->h;
+        b->x = r->x;
+        b->y = r->y;
+        current->count++;
     }
 }
 
@@ -250,21 +270,29 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     struct sd_lavc_priv *priv = sd->priv;
     struct MPOpts *opts = sd->opts;
 
-    if (priv->pts != MP_NOPTS_VALUE && pts < priv->pts)
+    struct sub *current = NULL;
+    for (int n = 0; n < MAX_QUEUE; n++) {
+        struct sub *sub = &priv->subs[n];
+        if (pts == MP_NOPTS_VALUE ||
+            ((sub->pts == MP_NOPTS_VALUE || pts >= sub->pts) &&
+             (sub->endpts == MP_NOPTS_VALUE || pts < sub->endpts)))
+        {
+            current = sub;
+            break;
+        }
+    }
+    if (!current)
         return;
-    if (priv->endpts != MP_NOPTS_VALUE && (pts >= priv->endpts ||
-                                           pts < priv->endpts - 300))
-        clear(priv);
-    size_t size = talloc_get_size(priv->inbitmaps);
-    if (!priv->outbitmaps)
-        priv->outbitmaps = talloc_size(priv, size);
-    memcpy(priv->outbitmaps, priv->inbitmaps, size);
+
+    MP_TARRAY_GROW(priv, priv->outbitmaps, current->count);
+    for (int n = 0; n < current->count; n++)
+        priv->outbitmaps[n] = current->inbitmaps[n];
 
     res->parts = priv->outbitmaps;
-    res->num_parts = priv->count;
-    if (priv->bitmaps_changed)
+    res->num_parts = current->count;
+    if (priv->displayed_id != current->id)
         res->bitmap_id = ++res->bitmap_pos_id;
-    priv->bitmaps_changed = false;
+    priv->displayed_id = current->id;
     res->format = SUBBITMAP_INDEXED;
 
     double video_par = -1;
@@ -286,8 +314,11 @@ static void reset(struct sd *sd)
 {
     struct sd_lavc_priv *priv = sd->priv;
 
-    if (priv->pts == MP_NOPTS_VALUE)
-        clear(priv);
+    if (priv->unknown_pts) {
+        for (int n = 0; n < MAX_QUEUE; n++)
+            clear_sub(&priv->subs[n]);
+        priv->unknown_pts = false;
+    }
     // lavc might not do this right for all codecs; may need close+reopen
     avcodec_flush_buffers(priv->avctx);
 }
@@ -296,7 +327,8 @@ static void uninit(struct sd *sd)
 {
     struct sd_lavc_priv *priv = sd->priv;
 
-    clear(priv);
+    for (int n = 0; n < MAX_QUEUE; n++)
+        clear_sub(&priv->subs[n]);
     avcodec_close(priv->avctx);
     av_free(priv->avctx->extradata);
     av_free(priv->avctx);
