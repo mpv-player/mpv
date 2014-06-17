@@ -118,10 +118,10 @@ main_dependencies = [
     }, {
         'name': 'stdatomic',
         'desc': 'stdatomic.h',
-        'func':
+        'func': check_libs(['atomic'],
             check_statement('stdatomic.h',
-                '_Atomic int test = ATOMIC_VAR_INIT(123);'
-                'int test2 = atomic_load(&test)')
+                'atomic_int_least64_t test = ATOMIC_VAR_INIT(123);'
+                'int test2 = atomic_load(&test)'))
     }, {
         'name': 'atomic-builtins',
         'desc': 'compiler support for __atomic built-ins',
