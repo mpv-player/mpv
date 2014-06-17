@@ -94,5 +94,6 @@
 #define MKV_S_ASS        "S_ASS" // Deprecated
 #define MKV_S_WEBVTT_S   "D_WEBVTT/SUBTITLES"
 #define MKV_S_WEBVTT_C   "D_WEBVTT/CAPTIONS"
+#define MKV_S_DVB        "S_DVBSUB"
 
 #endif /* MPLAYER_MATROSKA_H */
