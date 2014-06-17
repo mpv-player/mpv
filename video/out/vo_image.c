@@ -76,9 +76,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
 
-    mp_image_setrefp(&p->current, mpi);
-    if (!p->current)
-        return;
+    p->current = mpi;
 
     struct mp_osd_res dim = osd_res_from_image_params(vo->params);
     osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, p->current);

@@ -32,6 +32,7 @@
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
+    talloc_free(mpi);
 }
 
 static void flip_page(struct vo *vo)

@@ -287,7 +287,6 @@ void vo_queue_image(struct vo *vo, struct mp_image *mpi)
     if (!vo->config_ok)
         return;
     assert(mp_image_params_equals(vo->params, &mpi->params));
-    mpi = mp_image_new_ref(mpi);
     if (vo->driver->filter_image && mpi)
         mpi = vo->driver->filter_image(vo, mpi);
     if (!mpi) {
@@ -333,7 +332,6 @@ static void shift_queue(struct vo *vo)
 {
     if (!vo->num_video_queue)
         return;
-    talloc_free(vo->video_queue[0]);
     vo->num_video_queue--;
     for (int n = 0; n < vo->num_video_queue; n++)
         vo->video_queue[n] = vo->video_queue[n + 1];
@@ -342,8 +340,9 @@ static void shift_queue(struct vo *vo)
 void vo_new_frame_imminent(struct vo *vo)
 {
     assert(vo->num_video_queue > 0);
-    vo->driver->draw_image(vo, vo->video_queue[0]);
+    struct mp_image *img = vo->video_queue[0];
     shift_queue(vo);
+    vo->driver->draw_image(vo, img);
     vo->hasframe = true;
 }
 

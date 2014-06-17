@@ -2003,6 +2003,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 
     do_render(vo);
+
+    talloc_free(mpi);
 }
 
 static mp_image_t *get_screenshot(struct vo *vo)

@@ -503,7 +503,6 @@ static int video_output_image(struct MPContext *mpctx, double endpts,
     struct mp_image *img = vf_read_output_frame(vf);
     if (img) {
         vo_queue_image(vo, img);
-        talloc_free(img);
         return 1;
     }
 

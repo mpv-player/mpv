@@ -197,6 +197,7 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
     p->vo_pts = mpi->pts;
     p->fns.prepare_texture(vo, mpi);
     do_render(vo);
+    talloc_free(mpi);
 }
 
 static void uninit(struct vo *vo)

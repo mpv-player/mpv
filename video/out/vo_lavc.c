@@ -291,10 +291,10 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
     double pts = mpi ? mpi->pts : MP_NOPTS_VALUE;
 
     if (!vc)
-        return;
+        goto done;
     if (!encode_lavc_start(ectx)) {
         MP_WARN(vo, "NOTE: skipped initial video frame (probably because audio is not there yet)\n");
-        return;
+        goto done;
     }
     if (pts == MP_NOPTS_VALUE) {
         if (mpi)
@@ -467,9 +467,9 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
             if (vc->lastframeipts != AV_NOPTS_VALUE && vc->lastdisplaycount != 1)
                 MP_INFO(vo, "Frame at pts %d got displayed %d times\n",
                         (int) vc->lastframeipts, vc->lastdisplaycount);
-            mp_image_setrefp(&vc->lastimg, mpi);
-            if (!vc->lastimg)
-                MP_ERR(vo, "Out of memory\n");
+            talloc_free(vc->lastimg);
+            vc->lastimg = mpi;
+            mpi = NULL;
             vc->lastimg_wants_osd = true;
 
             vc->lastframeipts = vc->lastipts = frameipts;
@@ -484,19 +484,22 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
             vc->lastimg_wants_osd = false;
         }
     }
+
+    if (vc->lastimg && vc->lastimg_wants_osd && vo->params) {
+        struct mp_osd_res dim = osd_res_from_image_params(vo->params);
+
+        osd_draw_on_image(vo->osd, dim, vc->lastimg->pts, OSD_DRAW_SUB_ONLY,
+                          vc->lastimg);
+    }
+
+done:
+    talloc_free(mpi);
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
-    struct priv *vc = vo->priv;
     pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
     draw_image_unlocked(vo, mpi);
-    if (vc->lastimg && vc->lastimg_wants_osd && vo->params) {
-        struct mp_osd_res dim = osd_res_from_image_params(vo->params);
-
-        osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY,
-                          vc->lastimg);
-    }
     pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
 }
 

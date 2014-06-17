@@ -280,13 +280,15 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
         struct mp_image *dst = p->swdec_surfaces[p->output_surface];
         if (!dst || va_surface_upload(dst, mpi) < 0) {
             MP_WARN(vo, "Could not upload surface.\n");
+            talloc_free(mpi);
             return;
         }
         mp_image_copy_attributes(dst, mpi);
         mpi = dst;
     }
 
-    mp_image_setrefp(&p->output_surfaces[p->output_surface], mpi);
+    talloc_free(p->output_surfaces[p->output_surface]);
+    p->output_surfaces[p->output_surface] = mpi;
 
     draw_osd(vo);
 }

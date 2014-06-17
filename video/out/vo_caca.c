@@ -115,6 +115,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     memcpy_pic(priv->dither_buffer, mpi->planes[0], priv->image_width * depth, priv->image_height,
                priv->image_width * depth, mpi->stride[0]);
     caca_dither_bitmap(priv->canvas, 0, 0, priv->screen_w, priv->screen_h, priv->dither, priv->dither_buffer);
+    talloc_free(mpi);
 }
 
 static void flip_page(struct vo *vo)

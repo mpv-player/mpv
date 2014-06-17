@@ -672,7 +672,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct mp_osd_res res = osd_res_from_image_params(vo->params);
     osd_draw_on_image(vo->osd, res, mpi ? mpi->pts : 0, 0, &xv_buffer);
 
-    mp_image_setrefp(&ctx->original_image, mpi);
+    if (mpi != ctx->original_image) {
+        talloc_free(ctx->original_image);
+        ctx->original_image = mpi;
+    }
 }
 
 static int redraw_frame(struct vo *vo)

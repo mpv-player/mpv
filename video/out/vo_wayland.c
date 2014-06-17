@@ -658,6 +658,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     if (!buf) {
         MP_VERBOSE(p->wl, "can't draw, back buffer is busy\n");
+        talloc_free(mpi);
         return;
     }
 
@@ -678,7 +679,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct mp_image img = buffer_get_mp_image(p, &p->video_bufpool, buf);
     mp_sws_scale(p->sws, &img, &src);
 
-    mp_image_setrefp(&p->original_image, mpi);
+    if (mpi != p->original_image) {
+        talloc_free(p->original_image);
+        p->original_image = mpi;
+    }
     buffer_finalise_back(buf);
 
     draw_osd(vo);

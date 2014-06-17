@@ -1397,11 +1397,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     d3d_priv *priv = vo->priv;
     if (!priv->d3d_device)
-        return;
+        goto done;
 
     struct mp_image buffer;
     if (!get_video_buffer(priv, &buffer))
-        return;
+        goto done;
 
     mp_image_copy(&buffer, mpi);
 
@@ -1417,6 +1417,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     priv->osd_pts = mpi->pts;
 
     d3d_draw_frame(priv);
+
+done:
+    talloc_free(mpi);
 }
 
 static mp_image_t *get_screenshot(d3d_priv *priv)

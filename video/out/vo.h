@@ -194,8 +194,7 @@ struct vo_driver {
     /*
      * Render the given frame to the VO's backbuffer. This operation will be
      * followed by a draw_osd and a flip_page[_timed] call.
-     * mpi belongs to the caller; if the VO needs it longer, it has to create
-     * a new reference to mpi.
+     * mpi belongs to the VO; the VO must free it eventually.
      *
      * This also should draw the OSD.
      */

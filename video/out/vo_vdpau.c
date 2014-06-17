@@ -847,7 +847,8 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
 {
     struct vdpctx *vc = vo->priv;
 
-    mp_image_setrefp(&vc->current_image, mpi);
+    talloc_free(vc->current_image);
+    vc->current_image = mpi;
 
     if (status_ok(vo))
         video_to_output_surface(vo);

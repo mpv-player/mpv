@@ -853,6 +853,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         vc->osd_pts = mpi->pts;
         if (SDL_LockTexture(vc->tex, NULL, &pixels, &pitch)) {
             MP_ERR(vo, "SDL_LockTexture failed\n");
+            talloc_free(mpi);
             return;
         }
 
@@ -880,7 +881,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
         SDL_UnlockTexture(vc->tex);
 
-        mp_image_setrefp(&vc->ssmpi, mpi);
+        talloc_free(vc->ssmpi);
+        vc->ssmpi = mpi;
     }
 
     SDL_Rect src, dst;

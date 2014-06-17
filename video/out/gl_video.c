@@ -1726,8 +1726,8 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     p->osd_pts = mpi->pts;
 
     if (p->hwdec_active) {
-        mp_image_setrefp(&vimg->hwimage, mpi);
-        p->have_image = !!vimg->hwimage;
+        vimg->hwimage = mpi;
+        p->have_image = true;
         return;
     }
 
@@ -1765,6 +1765,7 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     p->have_image = true;
+    talloc_free(mpi);
 }
 
 struct mp_image *gl_video_download_image(struct gl_video *p)
