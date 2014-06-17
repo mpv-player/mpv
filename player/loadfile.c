@@ -794,8 +794,10 @@ err_out:
 static void open_audiofiles_from_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    open_external_file(mpctx, opts->audio_stream, opts->audio_demuxer_name,
-                       STREAM_AUDIO);
+    for (int n = 0; opts->audio_files && opts->audio_files[n]; n++) {
+        open_external_file(mpctx, opts->audio_files[n], opts->audio_demuxer_name,
+                           STREAM_AUDIO);
+    }
 }
 
 struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename)

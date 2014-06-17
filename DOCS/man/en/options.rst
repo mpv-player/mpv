@@ -274,8 +274,9 @@ OPTIONS
     This option has no influence on files with normal video tracks.
 
 ``--audio-file=<filename>``
-    Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
-    movie.
+    Play audio from an external file while viewing a video. Each use of this
+    option will add a new audio track. The details are similar to how
+    ``--sub-file`` works.
 
 ``--audio-format=<format>``
     Select the sample format used for output from the audio filter layer to

@@ -178,7 +178,7 @@ typedef struct MPOpts {
     int sub_fix_timing;
     char *sub_cp;
 
-    char *audio_stream;
+    char **audio_files;
     char *demuxer_name;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
