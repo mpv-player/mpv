@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <pthread.h>
 #include <assert.h>
 
@@ -121,6 +122,9 @@ static bool mp_image_alloc_planes(struct mp_image *mpi)
 {
     assert(!mpi->planes[0]);
 
+    if (!mp_image_params_valid(&mpi->params))
+        return false;
+
     // Note: for non-mod-2 4:2:0 YUV frames, we have to allocate an additional
     //       top/right border. This is needed for correct handling of such
     //       images in filter and VO code (e.g. vo_vdpau or vo_opengl).
@@ -177,10 +181,7 @@ static int mp_chroma_div_up(int size, int shift)
 // Caller has to make sure this doesn't exceed the allocated plane data/strides.
 void mp_image_set_size(struct mp_image *mpi, int w, int h)
 {
-    // av_image_check_size has similar checks and triggers around 16000*16000
-    if (w >= (1 << 14) || h >= (1 << 14) || w < 0 || h < 0)
-        abort();
-
+    assert(w >= 0 && h >= 0);
     mpi->w = mpi->params.w = mpi->params.d_w = w;
     mpi->h = mpi->params.h = mpi->params.d_h = h;
     for (int n = 0; n < mpi->num_planes; n++) {
@@ -448,6 +449,32 @@ void mp_image_vflip(struct mp_image *img)
         img->planes[p] = img->planes[p] + img->stride[p] * (img->plane_h[p] - 1);
         img->stride[p] = -img->stride[p];
     }
+}
+
+// Return whether the image parameters are valid.
+// Some non-essential fields are allowed to be unset (like colorspace flags).
+bool mp_image_params_valid(const struct mp_image_params *p)
+{
+    // av_image_check_size has similar checks and triggers around 16000*16000
+    // It's mostly needed to deal with the fact that offsets are sometimes
+    // ints. We also should (for now) do the same as FFmpeg, to be sure large
+    // images don't crash with libswscale or when wrapping with AVFrame and
+    // passing the result to filters.
+    // Unlike FFmpeg, consider 0x0 valid (might be needed for OSD/screenshots).
+    if (p->w < 0 || p->h < 0 || (p->w + 128LL) * (p->h + 128LL) >= INT_MAX / 8)
+        return false;
+
+    if (p->d_w < 0 || p->d_h < 0)
+        return false;
+
+    if (p->rotate < 0 || p->rotate >= 360)
+        return false;
+
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->imgfmt);
+    if (!desc.id)
+        return false;
+
+    return true;
 }
 
 bool mp_image_params_equals(const struct mp_image_params *p1,

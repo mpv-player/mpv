@@ -568,6 +568,9 @@ static int vf_reconfig_wrapper(struct vf_instance *vf,
 
     vf->fmt_out = vf->fmt_in = *p;
 
+    if (!mp_image_params_valid(&vf->fmt_in))
+        return -2;
+
     int r;
     if (vf->reconfig) {
         r = vf->reconfig(vf, &vf->fmt_in, &vf->fmt_out);
@@ -578,6 +581,9 @@ static int vf_reconfig_wrapper(struct vf_instance *vf,
     }
 
     if (!mp_image_params_equals(&vf->fmt_in, p))
+        r = -2;
+
+    if (!mp_image_params_valid(&vf->fmt_out))
         r = -2;
 
     // Fix csp in case of pixel format change
