@@ -367,7 +367,7 @@ static int video_decode_and_filter(struct MPContext *mpctx)
 
     // Decoder output is different from filter input?
     bool need_vf_reconfig = !vf->input_params.imgfmt || vf->initialized < 1 ||
-        !mp_image_params_equals(&d_video->decoder_output, &vf->input_params);
+        !mp_image_params_equal(&d_video->decoder_output, &vf->input_params);
 
     // (If imgfmt==0, nothing was decoded yet, and the format is unknown.)
     if (need_vf_reconfig && d_video->decoder_output.imgfmt) {
@@ -465,7 +465,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts,
 
     // Filter output is different from VO input?
     bool need_vo_reconfig = !vo->params  ||
-        !mp_image_params_equals(&vf->output_params, vo->params);
+        !mp_image_params_equal(&vf->output_params, vo->params);
 
     if (need_vo_reconfig) {
         // Draining VO buffers.

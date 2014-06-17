@@ -234,7 +234,7 @@ int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
         mixer->initialized = false;
 
     if (!mixer->initialized || !opts_equal(opts, &mixer->opts) ||
-        !mp_image_params_equals(&video->params, &mixer->image_params))
+        !mp_image_params_equal(&video->params, &mixer->image_params))
     {
         mixer->opts = *opts;
         mixer->image_params = video->params;

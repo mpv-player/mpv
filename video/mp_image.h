@@ -140,8 +140,8 @@ struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
 void mp_image_params_guess_csp(struct mp_image_params *params);
 
 bool mp_image_params_valid(const struct mp_image_params *p);
-bool mp_image_params_equals(const struct mp_image_params *p1,
-                            const struct mp_image_params *p2);
+bool mp_image_params_equal(const struct mp_image_params *p1,
+                           const struct mp_image_params *p2);
 
 void mp_image_set_params(struct mp_image *image,
                          const struct mp_image_params *params);

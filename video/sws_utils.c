@@ -119,8 +119,8 @@ static bool cache_valid(struct mp_sws_context *ctx)
     struct mp_sws_context *old = ctx->cached;
     if (ctx->force_reload)
         return false;
-    return mp_image_params_equals(&ctx->src, &old->src) &&
-           mp_image_params_equals(&ctx->dst, &old->dst) &&
+    return mp_image_params_equal(&ctx->src, &old->src) &&
+           mp_image_params_equal(&ctx->dst, &old->dst) &&
            ctx->flags == old->flags &&
            ctx->brightness == old->brightness &&
            ctx->contrast == old->contrast &&

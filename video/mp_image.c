@@ -477,8 +477,8 @@ bool mp_image_params_valid(const struct mp_image_params *p)
     return true;
 }
 
-bool mp_image_params_equals(const struct mp_image_params *p1,
-                            const struct mp_image_params *p2)
+bool mp_image_params_equal(const struct mp_image_params *p1,
+                           const struct mp_image_params *p2)
 {
     return p1->imgfmt == p2->imgfmt &&
            p1->w == p2->w && p1->h == p2->h &&
