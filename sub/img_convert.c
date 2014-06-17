@@ -77,6 +77,12 @@ bool osd_conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
         *d = *s;
         struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, s->w, s->h);
         talloc_steal(c->parts, image);
+        if (!image) {
+            // on OOM, skip the region by making it 0 sized
+            d->w = d->h = d->dw = d->dh = 0;
+            continue;
+        }
+
         d->stride = image->stride[0];
         d->bitmap = image->planes[0];
 
@@ -108,6 +114,8 @@ bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
         int pad = 5;
         struct mp_image *temp = mp_image_alloc(IMGFMT_BGRA, s->w + pad * 2,
                                                             s->h + pad * 2);
+        if (!temp)
+            continue; // on OOM, skip region
         memset_pic(temp->planes[0], 0, temp->w * 4, temp->h, temp->stride[0]);
         uint8_t *p0 = temp->planes[0] + pad * 4 + pad * temp->stride[0];
         memcpy_pic(p0, s->bitmap, s->w * 4, s->h, temp->stride[0], s->stride);
@@ -121,10 +129,15 @@ bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
         d->h = d->dh = s->dh + pad * 2 * sy;
         struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
         talloc_steal(c->parts, image);
-        d->stride = image->stride[0];
-        d->bitmap = image->planes[0];
+        if (image) {
+            d->stride = image->stride[0];
+            d->bitmap = image->planes[0];
 
-        mp_image_sw_blur_scale(image, temp, gblur);
+            mp_image_sw_blur_scale(image, temp, gblur);
+        } else {
+            // on OOM, skip region
+            *d = *s;
+        }
 
         talloc_free(temp);
     }
@@ -168,10 +181,15 @@ bool osd_scale_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
         d->h = d->dh = s->dh;
         struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
         talloc_steal(c->parts, image);
-        d->stride = image->stride[0];
-        d->bitmap = image->planes[0];
+        if (image) {
+            d->stride = image->stride[0];
+            d->bitmap = image->planes[0];
 
-        mp_image_swscale(image, &src_image, mp_sws_fast_flags);
+            mp_image_swscale(image, &src_image, mp_sws_fast_flags);
+        } else {
+            // on OOM, skip the region; just don't scale it
+            *d = *s;
+        }
     }
     return true;
 }

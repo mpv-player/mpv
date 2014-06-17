@@ -679,6 +679,9 @@ static int redraw_frame(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
 
+    if (!ctx->original_image)
+        return false;
+
     draw_image(vo, ctx->original_image);
     return true;
 }

@@ -204,6 +204,8 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
         //       safe thing and always copy. Code outside the filter might
         //       hold a buffer reference even if the filter chain is destroyed.
         dmpi = vf_alloc_out_image(vf);
+        if (!dmpi)
+            return NULL;
         mp_image_copy_attributes(dmpi, mpi);
 
         struct mp_image data = *dmpi;

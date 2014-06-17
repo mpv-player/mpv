@@ -216,6 +216,8 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
         struct mp_image *dmpi = mpi;
         if (!mp_image_is_writeable(mpi)) {
             dmpi = vf_alloc_out_image(vf);
+            if (!dmpi)
+                return NULL;
             mp_image_copy_attributes(dmpi, mpi);
         }
 

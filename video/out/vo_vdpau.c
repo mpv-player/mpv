@@ -883,6 +883,9 @@ static struct mp_image *read_output_surface(struct vo *vo,
         return NULL;
 
     struct mp_image *image = mp_image_alloc(IMGFMT_BGR32, width, height);
+    if (!image)
+        return NULL;
+
     image->params.colorspace = MP_CSP_RGB;
     // hardcoded with conv. matrix
     image->params.colorlevels = vo->params->outputlevels;

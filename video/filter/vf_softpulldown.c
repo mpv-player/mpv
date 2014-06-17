@@ -63,6 +63,8 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
             mp_image_unrefp(&p->buffer);
             p->buffer = mp_image_alloc(mpi->imgfmt, mpi->w, mpi->h);
             talloc_steal(vf, p->buffer);
+            if (!p->buffer)
+                goto failed; // OOM
         }
         mp_image_copy_attributes(p->buffer, mpi);
 
@@ -83,6 +85,8 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
 
         if (state == 0) {
                 struct mp_image *new = mp_image_new_ref(mpi);
+                if (!new)
+                    goto failed;
                 new->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, vf->priv->last_frame_duration);
                 vf_add_output_frame(vf, new);
                 vf->priv->out++;
@@ -93,13 +97,17 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
         } else {
                 copy_pic_field(dmpi, mpi, 1);
                 struct mp_image *new = mp_image_new_ref(mpi);
+                if (!new)
+                    goto failed;
                 new->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, vf->priv->last_frame_duration);
                 vf_add_output_frame(vf, new);
                 vf->priv->out++;
                 if (flags & MP_IMGFIELD_REPEAT_FIRST) {
                         struct mp_image *new2 = mp_image_new_ref(mpi);
-                        new2->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, 3);
-                        vf_add_output_frame(vf, new2);
+                        if (new2) {
+                            new2->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, 3);
+                            vf_add_output_frame(vf, new2);
+                        }
                         vf->priv->out++;
                         vf->priv->state=0;
                 } else {
@@ -116,6 +124,9 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
         talloc_free(mpi);
 
         return 0;
+failed:
+        talloc_free(mpi);
+        return -1;
 }
 
 static int control(vf_instance_t *vf, int request, void *data)

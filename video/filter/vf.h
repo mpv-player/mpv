@@ -155,7 +155,7 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel,
 
 // Filter internal API
 struct mp_image *vf_alloc_out_image(struct vf_instance *vf);
-void vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img);
+bool vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img);
 void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img);
 
 // default wrappers:

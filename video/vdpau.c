@@ -184,10 +184,12 @@ static struct mp_image *create_ref(struct mp_vdpau_ctx *ctx, int index)
     struct mp_image *res =
         mp_image_new_custom_ref(&(struct mp_image){0}, ref,
                                 release_decoder_surface);
-    mp_image_setfmt(res, e->rgb ? IMGFMT_VDPAU_OUTPUT : IMGFMT_VDPAU);
-    mp_image_set_size(res, e->w, e->h);
-    res->planes[0] = (void *)"dummy"; // must be non-NULL, otherwise arbitrary
-    res->planes[3] = (void *)(intptr_t)(e->rgb ? e->osurface : e->surface);
+    if (res) {
+        mp_image_setfmt(res, e->rgb ? IMGFMT_VDPAU_OUTPUT : IMGFMT_VDPAU);
+        mp_image_set_size(res, e->w, e->h);
+        res->planes[0] = (void *)"dummy"; // must be non-NULL, otherwise arbitrary
+        res->planes[3] = (void *)(intptr_t)(e->rgb ? e->osurface : e->surface);
+    }
     return res;
 }
 

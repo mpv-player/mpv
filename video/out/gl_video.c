@@ -1727,7 +1727,7 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 
     if (p->hwdec_active) {
         mp_image_setrefp(&vimg->hwimage, mpi);
-        p->have_image = true;
+        p->have_image = !!vimg->hwimage;
         return;
     }
 
@@ -1791,14 +1791,15 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
 
     mp_image_t *image = mp_image_alloc(p->image_format, p->texture_w,
                                                         p->texture_h);
-
-    for (int n = 0; n < p->plane_count; n++) {
-        struct texplane *plane = &vimg->planes[n];
-        gl->ActiveTexture(GL_TEXTURE0 + n);
-        glDownloadTex(gl, p->gl_target, plane->gl_format, plane->gl_type,
-                      image->planes[n], image->stride[n]);
+    if (image) {
+        for (int n = 0; n < p->plane_count; n++) {
+            struct texplane *plane = &vimg->planes[n];
+            gl->ActiveTexture(GL_TEXTURE0 + n);
+            glDownloadTex(gl, p->gl_target, plane->gl_format, plane->gl_type,
+                          image->planes[n], image->stride[n]);
+        }
+        mp_image_set_attributes(image, &p->image_params);
     }
-    mp_image_set_attributes(image, &p->image_params);
 
     unset_image_textures(p);
 

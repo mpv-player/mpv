@@ -468,6 +468,8 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
                 MP_INFO(vo, "Frame at pts %d got displayed %d times\n",
                         (int) vc->lastframeipts, vc->lastdisplaycount);
             mp_image_setrefp(&vc->lastimg, mpi);
+            if (!vc->lastimg)
+                MP_ERR(vo, "Out of memory\n");
             vc->lastimg_wants_osd = true;
 
             vc->lastframeipts = vc->lastipts = frameipts;

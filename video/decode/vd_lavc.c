@@ -628,7 +628,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     struct mp_image *mpi = mp_image_from_av_frame(ctx->pic);
     av_frame_unref(ctx->pic);
     if (!mpi)
-        return 0;
+        return 0; // mpi==NULL, or OOM
     assert(mpi->planes[0] || mpi->planes[3]);
     mp_image_set_params(mpi, &params);
 

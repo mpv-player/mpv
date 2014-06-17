@@ -353,11 +353,8 @@ static void draw_on_image(void *ctx, struct sub_bitmaps *imgs)
 {
     struct draw_on_image_closure *closure = ctx;
     struct osd_state *osd = closure->osd;
-    if (closure->pool) {
-        mp_image_pool_make_writeable(closure->pool, closure->dest);
-    } else {
-        mp_image_make_writeable(closure->dest);
-    }
+    if (!mp_image_pool_make_writeable(closure->pool, closure->dest))
+        return; // on OOM, skip
     mp_draw_sub_bitmaps(&osd->draw_cache, closure->dest, imgs);
     talloc_steal(osd, osd->draw_cache);
     closure->changed = true;

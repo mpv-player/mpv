@@ -221,6 +221,8 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
        mp_image_unrefp(&p->buffer);
        p->buffer = mp_image_alloc(mpi->imgfmt, mpi->w, mpi->h);
        talloc_steal(vf, p->buffer);
+       if (!p->buffer)
+           return NULL; // skip on OOM
    }
 
    struct mp_image *dmpi = p->buffer;
@@ -317,7 +319,8 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
          if(p->deghost>0)
             {
             imgop(copyop, dmpi, mpi, 0);
-            vf_make_out_image_writeable(vf, mpi);
+            if (!vf_make_out_image_writeable(vf, mpi))
+                return NULL; // oom: eof
 
             imgop(deghost_plane, mpi, dmpi, p->deghost);
             mpi->pts = vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0);

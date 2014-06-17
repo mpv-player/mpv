@@ -200,17 +200,19 @@ struct mp_image *vf_alloc_out_image(struct vf_instance *vf)
     struct mp_image_params *p = &vf->fmt_out;
     assert(p->imgfmt);
     struct mp_image *img = mp_image_pool_get(vf->out_pool, p->imgfmt, p->w, p->h);
-    vf_fix_img_params(img, p);
+    if (img)
+        vf_fix_img_params(img, p);
     return img;
 }
 
-void vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img)
+// Returns false on failure; then the image can't be written to.
+bool vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img)
 {
     struct mp_image_params *p = &vf->fmt_out;
     assert(p->imgfmt);
     assert(p->imgfmt == img->imgfmt);
     assert(p->w == img->w && p->h == img->h);
-    mp_image_pool_make_writeable(vf->out_pool, img);
+    return mp_image_pool_make_writeable(vf->out_pool, img);
 }
 
 //============================================================================

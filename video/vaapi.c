@@ -384,7 +384,8 @@ static struct mp_image *try_download(struct mp_image *src,
     if (va_image_map(p->ctx, image, &tmp)) {
         dst = pool ? mp_image_pool_get(pool, tmp.imgfmt, tmp.w, tmp.h)
                    : mp_image_alloc(tmp.imgfmt, tmp.w, tmp.h);
-        mp_image_copy(dst, &tmp);
+        if (dst)
+            mp_image_copy(dst, &tmp);
         va_image_unmap(p->ctx, image);
     }
     return dst;

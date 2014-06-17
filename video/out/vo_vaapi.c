@@ -196,10 +196,12 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
             p->black_surface = mp_image_pool_get(p->pool, IMGFMT_VAAPI, w, h);
             if (p->black_surface) {
                 struct mp_image *img = mp_image_alloc(fmt, w, h);
-                mp_image_clear(img, 0, 0, w, h);
-                if (va_surface_upload(p->black_surface, img) < 0)
-                    mp_image_unrefp(&p->black_surface);
-                talloc_free(img);
+                if (img) {
+                    mp_image_clear(img, 0, 0, w, h);
+                    if (va_surface_upload(p->black_surface, img) < 0)
+                        mp_image_unrefp(&p->black_surface);
+                    talloc_free(img);
+                }
             }
         }
         surface = va_surface_id(p->black_surface);

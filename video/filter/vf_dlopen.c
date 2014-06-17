@@ -160,8 +160,10 @@ static int config(struct vf_instance *vf,
         vf->priv->outpic[i] =
             mp_image_alloc(vf->priv->out_width, vf->priv->out_height,
                            vf->priv->outfmt);
-        set_imgprop(&vf->priv->filter.outpic[i], vf->priv->outpic[i]);
+        if (!vf->priv->outpic[i])
+            return 0; // OOM
         talloc_steal(vf, vf->priv->outpic[i]);
+        set_imgprop(&vf->priv->filter.outpic[i], vf->priv->outpic[i]);
     }
 
     return vf_next_config(vf, vf->priv->out_width,
@@ -235,6 +237,10 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
 
     for (int n = 0; n < vf->priv->out_cnt; n++) {
         out[n] = vf_alloc_out_image(vf);
+        if (!out[n]) {
+            talloc_free(mpi);
+            return -1;
+        }
         mp_image_copy_attributes(out[n], mpi);
         set_imgprop(&vf->priv->filter.outpic[n], out[n]);
     }

@@ -289,6 +289,10 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
     //         it's unclear what colorspace/levels the target wants
     if (image->imgfmt != destfmt || is_anamorphic) {
         struct mp_image *dst = mp_image_alloc(destfmt, d_w, d_h);
+        if (!dst) {
+            mp_err(log, "Out of memory.\n");
+            return 0;
+        }
         mp_image_copy_attributes(dst, image);
 
         mp_image_swscale(dst, image, mp_sws_hq_flags);

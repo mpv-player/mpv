@@ -114,7 +114,7 @@ struct voctrl_screenshot_args {
     // The caller has to free the image with talloc_free().
     // It is not specified whether the image data is a copy or references the
     // image data directly.
-    // Is never NULL. (Failure has to be indicated by returning VO_FALSE.)
+    // Can be NULL on failure.
     struct mp_image *out_image;
     // Whether the VO rendered OSD/subtitles into out_image
     bool has_osd;

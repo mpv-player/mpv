@@ -223,12 +223,18 @@ static void scale_sb_rgba(struct sub_bitmap *sb, struct mp_image *dst_format,
     sbisrc.planes[0] = sb->bitmap;
     sbisrc.stride[0] = sb->stride;
     struct mp_image *sbisrc2 = mp_image_alloc(IMGFMT_BGR32, sb->dw, sb->dh);
-    mp_image_swscale(sbisrc2, &sbisrc, SWS_BILINEAR);
-
     struct mp_image *sba = mp_image_alloc(IMGFMT_Y8, sb->dw, sb->dh);
+    struct mp_image *sbi = mp_image_alloc(dst_format->imgfmt, sb->dw, sb->dh);
+    if (!sbisrc2 || !sba || !sbi) {
+        talloc_free(sbisrc2);
+        talloc_free(sba);
+        talloc_free(sbi);
+        return;
+    }
+
+    mp_image_swscale(sbisrc2, &sbisrc, SWS_BILINEAR);
     unpremultiply_and_split_BGR32(sbisrc2, sba);
 
-    struct mp_image *sbi = mp_image_alloc(dst_format->imgfmt, sb->dw, sb->dh);
     sbi->params.colorspace = dst_format->params.colorspace;
     sbi->params.colorlevels = dst_format->params.colorlevels;
     mp_image_swscale(sbi, sbisrc2, SWS_BILINEAR);
@@ -262,6 +268,9 @@ static void draw_rgba(struct mp_draw_sub_cache *cache, struct mp_rect bb,
 
         if (!(sbi && sba))
             scale_sb_rgba(sb, temp, &sbi, &sba);
+        // on OOM, skip drawing
+        if (!(sbi && sba))
+            continue;
 
         int bytes = (bits + 7) / 8;
         uint8_t *alpha_p = sba->planes[0] + src_y * sba->stride[0] + src_x;
@@ -452,6 +461,8 @@ static struct mp_image *chroma_up(struct mp_draw_sub_cache *cache, int imgfmt,
         talloc_free(cache->upsample_img);
         cache->upsample_img = mp_image_alloc(imgfmt, src->w, src->h);
         talloc_steal(cache, cache->upsample_img);
+        if (!cache->upsample_img)
+            return NULL;
     }
 
     cache->upsample_temp = *cache->upsample_img;
@@ -547,6 +558,8 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
         struct mp_image dst_region = *dst;
         mp_image_crop_rc(&dst_region, bb);
         struct mp_image *temp = chroma_up(cache_, format, &dst_region);
+        if (!temp)
+            continue; // on OOM, skip region
 
         if (sbs->format == SUBBITMAP_RGBA) {
             draw_rgba(cache_, bb, temp, bits, sbs);

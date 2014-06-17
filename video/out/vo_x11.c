@@ -490,6 +490,9 @@ static int redraw_frame(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
+    if (!p->original_image)
+        return false;
+
     draw_image(vo, p->original_image);
     return true;
 }

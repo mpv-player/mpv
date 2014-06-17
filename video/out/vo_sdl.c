@@ -917,6 +917,8 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     struct priv *vc = vo->priv;
     struct mp_image *image = mp_image_alloc(vc->osd_format.mpv, vo->dwidth,
                                                                 vo->dheight);
+    if (!image)
+        return NULL;
     if (SDL_RenderReadPixels(vc->renderer, NULL, vc->osd_format.sdl,
                              image->planes[0], image->stride[0])) {
         MP_ERR(vo, "SDL_RenderReadPixels failed\n");

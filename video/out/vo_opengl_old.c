@@ -2015,6 +2015,8 @@ static mp_image_t *get_screenshot(struct vo *vo)
 
     mp_image_t *image = mp_image_alloc(p->image_format, p->texture_width,
                                                         p->texture_height);
+    if (!image)
+        return NULL;
 
     glDownloadTex(gl, p->target, p->gl_format, p->gl_type, image->planes[0],
                   image->stride[0]);

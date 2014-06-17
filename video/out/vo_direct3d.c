@@ -1435,7 +1435,8 @@ static mp_image_t *get_screenshot(d3d_priv *priv)
         return NULL;
 
     struct mp_image *image = mp_image_new_copy(&buffer);
-    mp_image_set_attributes(image, priv->vo->params);
+    if (image)
+        mp_image_set_attributes(image, priv->vo->params);
 
     d3d_unlock_video_objects(priv);
     return image;
@@ -1491,6 +1492,8 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
         goto error_exit;
 
     image = mp_image_alloc(IMGFMT_BGR32, width, height);
+    if (!image)
+        goto error_exit;
 
     IDirect3DSurface9_LockRect(surface, &locked_rect, NULL, 0);
 

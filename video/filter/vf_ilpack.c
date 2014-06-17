@@ -116,6 +116,8 @@ static void ilpack(unsigned char *dst, unsigned char *src[3],
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     mp_image_t *dmpi = vf_alloc_out_image(vf);
+    if (!dmpi)
+        return NULL;
     mp_image_copy_attributes(dmpi, mpi);
 
 

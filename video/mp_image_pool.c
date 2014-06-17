@@ -147,6 +147,7 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
 // mp_image_alloc() is that there is a transparent mechanism to recycle image
 // data allocations through this pool.
 // The image can be free'd with talloc_free().
+// Returns NULL on OOM.
 struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, int fmt,
                                    int w, int h)
 {
@@ -171,24 +172,35 @@ struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, int fmt,
 }
 
 // Like mp_image_new_copy(), but allocate the image out of the pool.
+// Returns NULL on OOM.
 struct mp_image *mp_image_pool_new_copy(struct mp_image_pool *pool,
                                         struct mp_image *img)
 {
     struct mp_image *new = mp_image_pool_get(pool, img->imgfmt, img->w, img->h);
-    mp_image_copy(new, img);
-    mp_image_copy_attributes(new, img);
+    if (new) {
+        mp_image_copy(new, img);
+        mp_image_copy_attributes(new, img);
+    }
     return new;
 }
 
 // Like mp_image_make_writeable(), but if a copy has to be made, allocate it
 // out of the pool.
-void mp_image_pool_make_writeable(struct mp_image_pool *pool,
+// If pool==NULL, mp_image_make_writeable() is called (for convenience).
+// Returns false on failure (see mp_image_make_writeable()).
+bool mp_image_pool_make_writeable(struct mp_image_pool *pool,
                                   struct mp_image *img)
 {
     if (mp_image_is_writeable(img))
-        return;
-    mp_image_steal_data(img, mp_image_pool_new_copy(pool, img));
+        return true;
+    if (!pool)
+        return mp_image_make_writeable(img);
+    struct mp_image *new = mp_image_pool_new_copy(pool, img);
+    if (!new)
+        return false;
+    mp_image_steal_data(img, new);
     assert(mp_image_is_writeable(img));
+    return true;
 }
 
 void mp_image_pool_set_allocator(struct mp_image_pool *pool,

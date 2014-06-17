@@ -117,7 +117,7 @@ static bool m_refcount_is_unique(struct m_refcount *ref)
     return true;
 }
 
-static void mp_image_alloc_planes(struct mp_image *mpi)
+static bool mp_image_alloc_planes(struct mp_image *mpi)
 {
     assert(!mpi->planes[0]);
 
@@ -141,12 +141,13 @@ static void mp_image_alloc_planes(struct mp_image *mpi)
 
     uint8_t *data = av_malloc(FFMAX(sum, 1));
     if (!data)
-        abort(); //out of memory
+        return false;
 
     for (int n = 0; n < MP_MAX_PLANES; n++) {
         mpi->planes[n] = plane_size[n] ? data : NULL;
         data += plane_size[n];
     }
+    return true;
 }
 
 void mp_image_setfmt(struct mp_image *mpi, int out_fmt)
@@ -203,11 +204,14 @@ struct mp_image *mp_image_alloc(int imgfmt, int w, int h)
 {
     struct mp_image *mpi = talloc_zero(NULL, struct mp_image);
     talloc_set_destructor(mpi, mp_image_destructor);
+    mpi->refcount = m_refcount_new();
+
     mp_image_set_size(mpi, w, h);
     mp_image_setfmt(mpi, imgfmt);
-    mp_image_alloc_planes(mpi);
-
-    mpi->refcount = m_refcount_new();
+    if (!mp_image_alloc_planes(mpi)) {
+        talloc_free(mpi);
+        return NULL;
+    }
     mpi->refcount->free = av_free;
     mpi->refcount->arg = mpi->planes[0];
     return mpi;
@@ -216,6 +220,8 @@ struct mp_image *mp_image_alloc(int imgfmt, int w, int h)
 struct mp_image *mp_image_new_copy(struct mp_image *img)
 {
     struct mp_image *new = mp_image_alloc(img->imgfmt, img->w, img->h);
+    if (!new)
+        return NULL;
     mp_image_copy(new, img);
     mp_image_copy_attributes(new, img);
 
@@ -265,6 +271,7 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
 // Return a reference counted reference to img. If the reference count reaches
 // 0, call free(free_arg). The data passed by img must not be free'd before
 // that. The new reference will be writeable.
+// On allocation failure, unref the frame and return NULL.
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *free_arg,
                                          void (*free)(void *arg))
 {
@@ -275,6 +282,7 @@ struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *free_arg,
 // connect to an external refcounting API. It is assumed that the new object
 // has an initial reference to that external API. If free is given, that is
 // called after the last unref. All function pointers are optional.
+// On allocation failure, unref the frame and return NULL.
 struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
                                            void (*ref)(void *arg),
                                            void (*unref)(void *arg),
@@ -304,15 +312,22 @@ bool mp_image_is_writeable(struct mp_image *img)
 // Make the image data referenced by img writeable. This allocates new data
 // if the data wasn't already writeable, and img->planes[] and img->stride[]
 // will be set to the copy.
-void mp_image_make_writeable(struct mp_image *img)
+// Returns success; if false is returned, the image could not be made writeable.
+bool mp_image_make_writeable(struct mp_image *img)
 {
     if (mp_image_is_writeable(img))
-        return;
+        return true;
 
-    mp_image_steal_data(img, mp_image_new_copy(img));
+    struct mp_image *new = mp_image_new_copy(img);
+    if (!new)
+        return false;
+    mp_image_steal_data(img, new);
     assert(mp_image_is_writeable(img));
+    return true;
 }
 
+// Helper function: unrefs *p_img, and sets *p_img to a new ref of new_value.
+// Only unrefs *p_img and sets it to NULL if out of memory.
 void mp_image_setrefp(struct mp_image **p_img, struct mp_image *new_value)
 {
     if (*p_img != new_value) {
@@ -586,7 +601,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
 {
     AVFrame *new_ref = av_frame_clone(av_frame);
     if (!new_ref)
-        abort(); // OOM
+        return NULL;
     struct mp_image t = {0};
     mp_image_copy_fields_from_av_frame(&t, new_ref);
     return mp_image_new_external_ref(&t, new_ref, NULL, NULL, frame_is_unique,
@@ -604,10 +619,13 @@ static void free_img(void *opaque, uint8_t *data)
 //          mp_image_from_av_frame(). It's done this way to allow marking the
 //          resulting AVFrame as writeable if img is the only reference (in
 //          other words, it's an optimization).
+// On failure, img is only unreffed.
 struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
 {
     struct mp_image *new_ref = mp_image_new_ref(img); // ensure it's refcounted
     talloc_free(img);
+    if (!new_ref)
+        return NULL;
     AVFrame *frame = av_frame_alloc();
     mp_image_copy_fields_to_av_frame(frame, new_ref);
     // Caveat: if img has shared references, and all other references disappear
@@ -619,6 +637,8 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
         // Make it so that the actual image data is freed only if _all_ buffers
         // are unreferenced.
         struct mp_image *dummy_ref = mp_image_new_ref(new_ref);
+        if (!dummy_ref)
+            abort(); // out of memory (for the ref, not real image data)
         void *ptr = new_ref->planes[n];
         size_t size = new_ref->stride[n] * new_ref->h;
         frame->buf[n] = av_buffer_create(ptr, size, free_img, dummy_ref, flags);

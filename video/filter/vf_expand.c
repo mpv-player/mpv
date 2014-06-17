@@ -115,6 +115,8 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
         return mpi;
 
     struct mp_image *dmpi = vf_alloc_out_image(vf);
+    if (!dmpi)
+        return NULL;
     mp_image_copy_attributes(dmpi, mpi);
 
     struct mp_image cropped = *dmpi;

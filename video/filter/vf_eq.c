@@ -216,8 +216,10 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *src)
   }
 
   struct mp_image *new = vf_alloc_out_image(vf);
-  mp_image_copy(new, &dst);
-  mp_image_copy_attributes(new, &dst);
+  if (new) {
+    mp_image_copy(new, &dst);
+    mp_image_copy_attributes(new, &dst);
+  }
 
   talloc_free(src);
   return new;

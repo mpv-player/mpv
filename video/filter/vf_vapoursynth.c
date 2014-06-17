@@ -205,7 +205,8 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
             MP_ERR(vf, "No PTS after filter at frame %d!\n", n);
         res = mp_image_new_copy(&img);
         p->vsapi->freeFrame(f);
-    } else {
+    }
+    if (!res) {
         p->failed = true;
         MP_ERR(vf, "Filter error at frame %d: %s\n", n, errorMsg);
     }

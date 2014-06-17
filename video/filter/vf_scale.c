@@ -334,6 +334,8 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     struct mp_image *dmpi = vf_alloc_out_image(vf);
+    if (!dmpi)
+        return NULL;
     mp_image_copy_attributes(dmpi, mpi);
 
     mp_sws_scale(vf->priv->sws, dmpi, mpi);

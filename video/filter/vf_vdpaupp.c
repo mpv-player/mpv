@@ -70,6 +70,8 @@ static VdpVideoSurface ref_field(struct vf_priv_s *p,
     if (!FIELD_VALID(p, pos))
         return VDP_INVALID_HANDLE;
     struct mp_image *mpi = mp_image_new_ref(p->buffered[pos / 2]);
+    if (!mpi)
+        return VDP_INVALID_HANDLE;
     talloc_steal(frame, mpi);
     return (uintptr_t)mpi->planes[3];
 }
@@ -84,6 +86,8 @@ static bool output_field(struct vf_instance *vf, int pos)
         return false;
 
     struct mp_image *mpi = mp_vdpau_mixed_frame_create(p->buffered[pos / 2]);
+    if (!mpi)
+        return false; // skip output on OOM
     struct mp_vdpau_mixer_frame *frame = mp_vdpau_mixed_frame_get(mpi);
 
     frame->field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
