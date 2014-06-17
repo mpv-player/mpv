@@ -493,7 +493,8 @@ compile_check waftools/fragments/pthreads.c "$_ld_pthread" || die "Unable to fin
 echores "yes"
 
 check_statement_libs "support for stdatomic.h" auto STDATOMIC \
-    stdatomic.h '_Atomic int test = ATOMIC_VAR_INIT(123); int test2 = atomic_load(&test)'
+    stdatomic.h 'atomic_int_least64_t test = ATOMIC_VAR_INIT(123); int test2 = atomic_load(&test)' \
+    " " "-latomic"
 _stdatomic=$(defretval)
 
 _atomic=auto
