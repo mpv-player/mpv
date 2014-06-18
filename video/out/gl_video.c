@@ -1742,13 +1742,12 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
             memcpy_pic(mpi2.planes[n], mpi->planes[n], line_bytes, mpi->plane_h[n],
                        mpi2.stride[n], mpi->stride[n]);
         }
-        mpi = &mpi2;
         pbo = true;
     }
-    vimg->image_flipped = mpi->stride[0] < 0;
+    vimg->image_flipped = mpi2.stride[0] < 0;
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
-        void *plane_ptr = mpi->planes[n];
+        void *plane_ptr = mpi2.planes[n];
         if (pbo) {
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
             if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
@@ -1760,7 +1759,7 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         gl->ActiveTexture(GL_TEXTURE0 + n);
         gl->BindTexture(p->gl_target, plane->gl_texture);
         glUploadTex(gl, p->gl_target, plane->gl_format, plane->gl_type,
-                    plane_ptr, mpi->stride[n], 0, 0, plane->w, plane->h, 0);
+                    plane_ptr, mpi2.stride[n], 0, 0, plane->w, plane->h, 0);
     }
     gl->ActiveTexture(GL_TEXTURE0);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
