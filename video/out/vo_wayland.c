@@ -667,20 +667,19 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         buffer_resize(&p->video_bufpool, buf, p->dst_w, p->dst_h);
     }
 
-    if (!mpi) {
-        // TODO: clear screen
-        draw_osd(vo);
-        return;
-    }
-
-    struct mp_image src = *mpi;
-    struct mp_rect src_rc = p->src;
-    src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, src.fmt.align_x);
-    src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
-    mp_image_crop_rc(&src, src_rc);
-
     struct mp_image img = buffer_get_mp_image(p, &p->video_bufpool, buf);
-    mp_sws_scale(p->sws, &img, &src);
+
+    if (mpi) {
+        struct mp_image src = *mpi;
+        struct mp_rect src_rc = p->src;
+        src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, src.fmt.align_x);
+        src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
+        mp_image_crop_rc(&src, src_rc);
+
+        mp_sws_scale(p->sws, &img, &src);
+    } else {
+        mp_image_clear(&img, 0, 0, img.w, img.h);
+    }
 
     if (mpi != p->original_image) {
         talloc_free(p->original_image);
