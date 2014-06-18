@@ -24,55 +24,48 @@
 
 // Warning: do not use PATH_MAX. Cygwin messed it up.
 
-static void get_exe_dir(wchar_t path[MAX_PATH + 1])
+char *mp_get_win_exe_dir(void *talloc_ctx)
 {
-    int len = (int)GetModuleFileNameW(NULL, path, MAX_PATH);
+    wchar_t w_exedir[MAX_PATH + 1] = {0};
+
+    int len = (int)GetModuleFileNameW(NULL, w_exedir, MAX_PATH);
     int imax = 0;
     for (int i = 0; i < len; i++) {
-        if (path[i] == '\\') {
-            path[i] = '/';
+        if (w_exedir[i] == '\\') {
+            w_exedir[i] = '/';
             imax = i;
         }
     }
 
-    path[imax] = '\0';
+    w_exedir[imax] = '\0';
+
+    return mp_to_utf8(talloc_ctx, w_exedir);
+}
+char *mp_get_win_exe_subdir(void *talloc_ctx)
+{
+    return talloc_asprintf(talloc_ctx, "%s/mpv", mp_get_win_exe_dir(talloc_ctx));
 }
 
-char *mp_get_win_config_path(const char *filename)
+char *mp_get_win_app_dir(void *talloc_ctx)
 {
     wchar_t w_appdir[MAX_PATH + 1] = {0};
-    wchar_t w_exedir[MAX_PATH + 1] = {0};
-    char *res = NULL;
-    void *tmp = talloc_new(NULL);
 
-#ifndef __CYGWIN__
     if (SHGetFolderPathW(NULL, CSIDL_APPDATA|CSIDL_FLAG_CREATE, NULL,
         SHGFP_TYPE_CURRENT, w_appdir) != S_OK)
-        w_appdir[0] = '\0';
-#endif
+        return NULL;
 
-    get_exe_dir(w_exedir);
+    return talloc_asprintf(talloc_ctx, "%s/mpv", mp_to_utf8(talloc_ctx, w_appdir));
+}
 
-    if (filename && filename[0] && w_exedir[0]) {
-        char *dir = mp_to_utf8(tmp, w_exedir);
-        char *temp = mp_path_join(tmp, bstr0(dir), bstr0("mpv"));
-        res = mp_path_join(NULL, bstr0(temp), bstr0(filename));
-        if (!mp_path_exists(res) || mp_path_isdir(res)) {
-            talloc_free(res);
-            res = mp_path_join(NULL, bstr0(dir), bstr0(filename));
-            if (!mp_path_exists(res) || mp_path_isdir(res)) {
-                talloc_free(res);
-                res = NULL;
-            }
-        }
-    }
 
-    if (!res && w_appdir[0]) {
-        char *dir = mp_to_utf8(tmp, w_appdir);
-        char *temp = mp_path_join(tmp, bstr0(dir), bstr0("mpv"));
-        res = mp_path_join(NULL, bstr0(temp), bstr0(filename));
-    }
 
-    talloc_free(tmp);
-    return res;
+void mp_add_win_config_dirs(void *talloc_ctx, struct mpv_global *global,
+                            char **dirs, int i)
+{
+    if ((dirs[i] = mp_get_win_exe_subdir(talloc_ctx)))
+        i++;
+    if ((dirs[i] = mp_get_win_exe_dir(talloc_ctx)))
+        i++;
+    if ((dirs[i] = mp_get_win_app_dir(talloc_ctx)))
+        i++;
 }
