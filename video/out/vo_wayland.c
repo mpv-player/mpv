@@ -474,9 +474,6 @@ static struct buffer * buffer_pool_get_no(struct buffer_pool *pool, uint32_t no)
 
 static bool redraw_frame(struct priv *p)
 {
-    if (!p->original_image)
-        return false;
-
     draw_image(p->vo, p->original_image);
     return true;
 }
@@ -668,6 +665,12 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             buf->is_attached = false;
         }
         buffer_resize(&p->video_bufpool, buf, p->dst_w, p->dst_h);
+    }
+
+    if (!mpi) {
+        // TODO: clear screen
+        draw_osd(vo);
+        return;
     }
 
     struct mp_image src = *mpi;

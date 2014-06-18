@@ -846,7 +846,7 @@ static uint32_t d3d_draw_frame(d3d_priv *priv)
     IDirect3DDevice9_Clear(priv->d3d_device, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);
 
     if (!priv->have_image)
-        return VO_TRUE;
+        goto render_osd;
 
     if (priv->use_textures) {
 
@@ -911,6 +911,8 @@ static uint32_t d3d_draw_frame(d3d_priv *priv)
             return VO_ERROR;
         }
     }
+
+render_osd:
 
     draw_osd(priv->vo);
 

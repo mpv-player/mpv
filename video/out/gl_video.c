@@ -1532,7 +1532,7 @@ void gl_video_render_frame(struct gl_video *p)
 
     if (!p->have_image) {
         gl->Clear(GL_COLOR_BUFFER_BIT);
-        return;
+        goto draw_osd;
     }
 
     // Order of processing:
@@ -1594,6 +1594,7 @@ void gl_video_render_frame(struct gl_video *p)
 
     debug_check_gl(p, "after video rendering");
 
+draw_osd:
     assert(p->osd);
 
     osd_draw(p->osd_state, p->osd_rect, p->osd_pts, 0, p->osd->formats,

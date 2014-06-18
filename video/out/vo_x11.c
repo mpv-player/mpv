@@ -460,7 +460,7 @@ static void flip_page(struct vo *vo)
         XSync(vo->x11->display, False);
 }
 
-// Note: redraw_frame() can call this with NULL.
+// Note: REDRAW_FRAME can call this with NULL.
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
@@ -487,17 +487,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         talloc_free(p->original_image);
         p->original_image = mpi;
     }
-}
-
-static int redraw_frame(struct vo *vo)
-{
-    struct priv *p = vo->priv;
-
-    if (!p->original_image)
-        return false;
-
-    draw_image(vo, p->original_image);
-    return true;
 }
 
 static int query_format(struct vo *vo, uint32_t format)
@@ -631,7 +620,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(vo);
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
-        redraw_frame(vo);
+        draw_image(vo, p->original_image);
         return true;
     case VOCTRL_WINDOW_TO_OSD_COORDS: {
         // OSD is rendered into the scaled image
