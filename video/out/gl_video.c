@@ -1726,6 +1726,7 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     p->osd_pts = mpi->pts;
 
     if (p->hwdec_active) {
+        talloc_free(vimg->hwimage);
         vimg->hwimage = mpi;
         p->have_image = true;
         return;
