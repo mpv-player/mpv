@@ -750,29 +750,24 @@ dvb_config_t *dvb_get_config(stream_t *stream)
                 }
 
         void *talloc_ctx = talloc_new(NULL);
-        conf_file = mp_find_user_config_file(talloc_ctx, global, "channels.conf");
+        conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf");
         switch(type) {
             case TUNER_TER:
-                conf_file = mp_find_user_config_file(talloc_ctx, global, "channels.conf.ter");
+                conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf.ter");
                 break;
             case TUNER_CBL:
-                conf_file = mp_find_user_config_file(talloc_ctx, global, "channels.conf.cbl");
+                conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf.cbl");
                 break;
             case TUNER_SAT:
-                conf_file = mp_find_user_config_file(talloc_ctx, global, "channels.conf.sat");
+                conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf.sat");
                 break;
             case TUNER_ATSC:
-                conf_file = mp_find_user_config_file(talloc_ctx, global, "channels.conf.atsc");
+                conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf.atsc");
                 break;
         }
 
-        if(conf_file && (access(conf_file, F_OK | R_OK) != 0)) {
-            conf_file = mp_find_user_config_file(talloc_ctx, global, "channels.conf");
-
-            if(conf_file && (access(conf_file, F_OK | R_OK) != 0)) {
-                conf_file = mp_find_global_config_file(talloc_ctx, global, "channels.conf");
-            }
-        }
+        if(conf_file && (access(conf_file, F_OK | R_OK) != 0))
+            conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf");
 
         list = dvb_get_channels(log, conf_file, type);
         talloc_free(talloc_ctx);

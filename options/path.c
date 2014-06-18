@@ -43,17 +43,30 @@
 #include "osdep/io.h"
 #include "osdep/path.h"
 
-typedef char *(*lookup_fun)(void *tctx, struct mpv_global *global, const char *);
-static const lookup_fun config_lookup_functions[] = {
-    mp_find_user_config_file,
-#if HAVE_COCOA
-    mp_get_macosx_bundled_path,
-#endif
-    mp_find_global_config_file,
-    NULL
-};
-
 #define STRNULL(s) ((s) ? (s) : "(NULL)")
+
+
+static const char *mp_getenvd(void *talloc_ctx, const char *name,
+                              const char *default_val)
+{
+    const char *var = getenv(name);
+    return var ? talloc_strdup(talloc_ctx, var) : default_val;
+}
+
+//Return colon separated list of config directories
+static char *mp_config_dirs(void *talloc_ctx)
+{
+//ifdef spaghetti goes here
+    const char *local = talloc_asprintf(talloc_ctx, "%s/.config", getenv("HOME"));
+    local = mp_getenvd(talloc_ctx, "XDG_CONFIG_HOME", local);
+
+    const char *global = mp_getenvd(talloc_ctx, "XDG_CONFIG_DIRS", "/etc/xdg");
+
+    return talloc_asprintf(talloc_ctx, "%s:%s", local, global);
+//endif
+}
+
+
 
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename)
@@ -62,79 +75,26 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
 
     char *res = NULL;
     if (opts->load_config) {
-        if (opts->force_configdir && opts->force_configdir[0]) {
-            // Always force the local config dir.
-            res = mp_find_user_config_file(talloc_ctx, global, filename);
-        } else {
-            for (int i = 0; config_lookup_functions[i] != NULL; i++) {
-                res = config_lookup_functions[i](talloc_ctx, global, filename);
-                if (!res)
-                    continue;
+        char *dirs = mp_config_dirs(talloc_ctx);
 
-                if (mp_path_exists(res))
-                    break;
+        while (dirs) {
+            res = dirs;
 
-                talloc_free(res);
-                res = NULL;
-            }
+            dirs = strchr(dirs, ':');
+            if (dirs)
+                *dirs++ = 0;
+
+            res = talloc_asprintf(talloc_ctx, "%s/mpv/%s",
+                                  res, filename);
+
+            if (mp_path_exists(res))
+                break;
+
+            talloc_free(res);
+            res = NULL;
         }
     }
-    MP_VERBOSE(global, "any config path: '%s' -> '%s'\n", STRNULL(filename),
-               STRNULL(res));
-    return res;
-}
-
-char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
-                               const char *filename)
-{
-    struct MPOpts *opts = global->opts;
-
-    char *res = NULL;
-    if (opts->load_config) {
-        if (opts->force_configdir && opts->force_configdir[0]) {
-            res = mp_path_join(talloc_ctx, bstr0(opts->force_configdir),
-                               bstr0(filename));
-        } else {
-            char *homedir = getenv("MPV_HOME");
-            char *configdir = NULL;
-
-            if (!homedir) {
-#ifdef _WIN32
-                res = talloc_steal(talloc_ctx, mp_get_win_config_path(filename));
-#endif
-                homedir = getenv("HOME");
-                configdir = ".mpv";
-            }
-
-            if (!res && homedir) {
-                char *temp = mp_path_join(NULL, bstr0(homedir), bstr0(configdir));
-                res = mp_path_join(talloc_ctx, bstr0(temp), bstr0(filename));
-                talloc_free(temp);
-            }
-        }
-    }
-
-    MP_VERBOSE(global, "user config path: '%s' -> '%s'\n", STRNULL(filename),
-               STRNULL(res));
-    return res;
-}
-
-char *mp_find_global_config_file(void *talloc_ctx, struct mpv_global *global,
-                                 const char *filename)
-{
-    struct MPOpts *opts = global->opts;
-    char *res = NULL;
-
-    if (opts->load_config && !(opts->force_configdir && opts->force_configdir[0]))
-    {
-        if (filename) {
-            res = mp_path_join(talloc_ctx, bstr0(MPLAYER_CONFDIR), bstr0(filename));
-        } else {
-            res = talloc_strdup(talloc_ctx, MPLAYER_CONFDIR);
-        }
-    }
-
-    MP_VERBOSE(global, "global config path: '%s' -> '%s'\n", STRNULL(filename),
+    MP_VERBOSE(global, "config path: '%s' -> '%s'\n", STRNULL(filename),
                STRNULL(res));
     return res;
 }
@@ -152,7 +112,7 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
         if (bstr_split_tok(bpath, "/", &prefix, &rest)) {
             const char *rest0 = rest.start; // ok in this case
             if (bstr_equals0(prefix, "~")) {
-                res = mp_find_user_config_file(talloc_ctx, global, rest0);
+                res = mp_find_config_file(talloc_ctx, global, rest0);
             } else if (bstr_equals0(prefix, "")) {
                 res = mp_path_join(talloc_ctx, bstr0(getenv("HOME")), rest);
             }
@@ -284,7 +244,7 @@ bstr mp_split_proto(bstr path, bstr *out_url)
 void mp_mk_config_dir(struct mpv_global *global, char *subdir)
 {
     void *tmp = talloc_new(NULL);
-    char *confdir = mp_find_user_config_file(tmp, global, "");
+    char *confdir = mp_find_config_file(tmp, global, "");
     if (confdir) {
         if (subdir)
             confdir = mp_path_join(tmp, bstr0(confdir), bstr0(subdir));

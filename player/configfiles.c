@@ -71,19 +71,12 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
     // The #if is a stupid hack to avoid errors if libavfilter is not available.
 #if HAVE_LIBAVFILTER && HAVE_ENCODING
     conffile = mp_find_config_file(tmp, mpctx->global, "encoding-profiles.conf");
-    if (conffile && mp_path_exists(conffile))
+    if (conffile)
         m_config_parse_config_file(mpctx->mconfig, conffile, SECT_ENCODE, 0);
 #endif
 
-    conffile = mp_find_global_config_file(tmp, mpctx->global, "mpv.conf");
+    conffile = mp_find_config_file(tmp, mpctx->global, "mpv.conf");
     if (conffile && m_config_parse_config_file(conf, conffile, section, 0) < 0) {
-        r = false;
-        goto done;
-    }
-    mp_mk_config_dir(mpctx->global, NULL);
-    if (!(conffile = mp_find_user_config_file(tmp, mpctx->global, "config")))
-        MP_ERR(mpctx, "mp_find_user_config_file(\"config\") problem\n");
-    else if (m_config_parse_config_file(conf, conffile, section, 0) < 0) {
         r = false;
         goto done;
     }
@@ -134,7 +127,7 @@ static void mp_load_per_file_config(struct MPContext *mpctx)
             return;
     }
 
-    if ((confpath = mp_find_user_config_file(NULL, mpctx->global, name))) {
+    if ((confpath = mp_find_config_file(NULL, mpctx->global, name))) {
         try_load_config(mpctx, confpath, FILE_LOCAL_FLAGS);
 
         talloc_free(confpath);
@@ -202,7 +195,7 @@ static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
 
     conf = talloc_asprintf(tmp, "%s/%s", MP_WATCH_LATER_CONF, conf);
 
-    res = mp_find_user_config_file(NULL, global, conf);
+    res = mp_find_config_file(NULL, global, conf);
 
 exit:
     talloc_free(tmp);
