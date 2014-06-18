@@ -2377,7 +2377,7 @@ OPTIONS
 
 ``--tls-verify``
     Verify peer certificates when using TLS (e.g. with ``https://...``).
-     (Silently fails with older ffmpeg or libav versions.)
+    (Silently fails with older ffmpeg or libav versions.)
 
 ``--tv-...``
     These options tune various properties of the TV capture module. For
