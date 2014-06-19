@@ -158,8 +158,8 @@ static int config(struct vf_instance *vf,
     for (int i = 0; i < vf->priv->out_cnt; ++i) {
         talloc_free(vf->priv->outpic[i]);
         vf->priv->outpic[i] =
-            mp_image_alloc(vf->priv->out_width, vf->priv->out_height,
-                           vf->priv->outfmt);
+            mp_image_alloc(vf->priv->outfmt,
+                           vf->priv->out_width, vf->priv->out_height);
         if (!vf->priv->outpic[i])
             return 0; // OOM
         talloc_steal(vf, vf->priv->outpic[i]);
