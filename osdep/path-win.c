@@ -38,12 +38,10 @@ static void get_exe_dir(wchar_t path[MAX_PATH + 1])
     path[imax] = '\0';
 }
 
-char *mp_get_win_config_path(const char *filename)
+char *mp_get_win_config_dirs(void *talloc_ctx)
 {
     wchar_t w_appdir[MAX_PATH + 1] = {0};
     wchar_t w_exedir[MAX_PATH + 1] = {0};
-    char *res = NULL;
-    void *tmp = talloc_new(NULL);
 
 #ifndef __CYGWIN__
     if (SHGetFolderPathW(NULL, CSIDL_APPDATA|CSIDL_FLAG_CREATE, NULL,
@@ -53,26 +51,6 @@ char *mp_get_win_config_path(const char *filename)
 
     get_exe_dir(w_exedir);
 
-    if (filename && filename[0] && w_exedir[0]) {
-        char *dir = mp_to_utf8(tmp, w_exedir);
-        char *temp = mp_path_join(tmp, bstr0(dir), bstr0("mpv"));
-        res = mp_path_join(NULL, bstr0(temp), bstr0(filename));
-        if (!mp_path_exists(res) || mp_path_isdir(res)) {
-            talloc_free(res);
-            res = mp_path_join(NULL, bstr0(dir), bstr0(filename));
-            if (!mp_path_exists(res) || mp_path_isdir(res)) {
-                talloc_free(res);
-                res = NULL;
-            }
-        }
-    }
-
-    if (!res && w_appdir[0]) {
-        char *dir = mp_to_utf8(tmp, w_appdir);
-        char *temp = mp_path_join(tmp, bstr0(dir), bstr0("mpv"));
-        res = mp_path_join(NULL, bstr0(temp), bstr0(filename));
-    }
-
-    talloc_free(tmp);
-    return res;
+    return talloc_asprintf(talloc_ctx, "%s:%s/mpv:",
+                           mp_to_utf8(w_exedir), mp_to_utf8(w_appdir));
 }

@@ -46,24 +46,49 @@
 #define STRNULL(s) ((s) ? (s) : "(NULL)")
 
 
-static const char *mp_getenvd(void *talloc_ctx, const char *name,
-                              const char *default_val)
-{
-    const char *var = getenv(name);
-    return var ? talloc_strdup(talloc_ctx, var) : default_val;
-}
 
 //Return colon separated list of config directories
-static char *mp_config_dirs(void *talloc_ctx)
+static char *mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 {
-//ifdef spaghetti goes here
-    const char *local = talloc_asprintf(talloc_ctx, "%s/.config", getenv("HOME"));
-    local = mp_getenvd(talloc_ctx, "XDG_CONFIG_HOME", local);
+    if (global->opts->force_configdir && global->opts->force_configdir[0])
+        return global->opts->force_configdir;
 
-    const char *global = mp_getenvd(talloc_ctx, "XDG_CONFIG_DIRS", "/etc/xdg");
+    const char *tmp = NULL;
+    char *ret = "";
 
-    return talloc_asprintf(talloc_ctx, "%s:%s", local, global);
-//endif
+    tmp = getenv("MPV_HOME");
+    if (tmp)
+        ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, tmp);
+
+#ifdef _WIN32
+    tmp = mp_get_win_config_dir(talloc_ctx);
+    ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, tmp);
+#endif
+
+    tmp = getenv("XDG_CONFIG_HOME");
+    if (tmp)
+        ret = talloc_asprintf(talloc_ctx, "%s%s/mpv:", ret, tmp);
+    else
+        ret = talloc_asprintf(talloc_ctx, "%s%s/.config/mpv:", ret, getenv("HOME"));
+
+//Backwards compatibility
+    ret = talloc_asprintf(talloc_ctx, "%s%s/.mpv:", ret, getenv("HOME"));
+
+#if HAVE_COCOA
+    tmp = mp_get_macosx_bundle_dir(talloc_ctx);
+    ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, tmp);
+#endif
+
+    tmp = getenv("XDG_CONFIG_DIRS");
+    if (tmp)
+//TODO:  s/:/mpv:/
+        ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, tmp);
+    else
+        ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, MPLAYER_CONFDIR);
+
+//    MP_VERBOSE(global, "search dirs: %s\n", ret);
+
+    return ret;
 }
 
 
@@ -75,7 +100,7 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
 
     char *res = NULL;
     if (opts->load_config) {
-        char *dirs = mp_config_dirs(talloc_ctx);
+        char *dirs = mp_config_dirs(talloc_ctx, global);
 
         while (dirs) {
             res = dirs;
@@ -84,8 +109,13 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
             if (dirs)
                 *dirs++ = 0;
 
-            res = talloc_asprintf(talloc_ctx, "%s/mpv/%s",
-                                  res, filename);
+            if (!*res)
+            {
+                res = NULL;
+                continue;
+            }
+
+            res = talloc_asprintf(talloc_ctx, "%s/%s", res, filename);
 
             if (mp_path_exists(res))
                 break;
