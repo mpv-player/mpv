@@ -236,10 +236,11 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     current->endpts = endpts;
     current->avsub = sub;
 
+    MP_TARRAY_GROW(priv, current->inbitmaps, sub.num_rects);
+    MP_TARRAY_GROW(priv, current->imgs, sub.num_rects);
+
     for (int i = 0; i < sub.num_rects; i++) {
         struct AVSubtitleRect *r = sub.rects[i];
-        MP_TARRAY_GROW(priv, current->inbitmaps, current->count);
-        MP_TARRAY_GROW(priv, current->imgs, current->count);
         struct sub_bitmap *b = &current->inbitmaps[current->count];
         struct osd_bmp_indexed *img = &current->imgs[current->count];
         if (r->type != SUBTITLE_BITMAP) {
@@ -273,6 +274,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     struct sub *current = NULL;
     for (int n = 0; n < MAX_QUEUE; n++) {
         struct sub *sub = &priv->subs[n];
+        if (!sub->valid)
+            continue;
         if (pts == MP_NOPTS_VALUE ||
             ((sub->pts == MP_NOPTS_VALUE || pts >= sub->pts) &&
              (sub->endpts == MP_NOPTS_VALUE || pts < sub->endpts)))
