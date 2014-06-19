@@ -47,6 +47,31 @@
 
 
 
+static char *mp_append_all(void* talloc_ctx, const char *_dirs,
+                           const char *suffix)
+{
+    char *ret = "";
+    char *dirs = talloc_strdup(talloc_ctx, _dirs);
+
+    while (dirs) {
+        char *res = dirs;
+
+        dirs = strchr(dirs, ':');
+        if (dirs)
+            *dirs++ = 0;
+
+        if (!*res)
+        {
+            res = NULL;
+            continue;
+        }
+
+        ret = talloc_asprintf(talloc_ctx, "%s:%s%s", ret, res, suffix);
+    }
+
+    return ret;
+}
+
 //Return colon separated list of config directories
 static char *mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 {
@@ -81,8 +106,8 @@ static char *mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 
     tmp = getenv("XDG_CONFIG_DIRS");
     if (tmp)
-//TODO:  s/:/mpv:/
-        ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, tmp);
+        ret = talloc_asprintf(talloc_ctx, "%s%s:", ret,
+                              mp_append_all(talloc_ctx, tmp, "/mpv"));
     else
         ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, MPLAYER_CONFDIR);
 
