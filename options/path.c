@@ -132,32 +132,32 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
 {
     struct MPOpts *opts = global->opts;
 
+    void *tmp = talloc_new(NULL);
     char *res = NULL;
     if (opts->load_config) {
-        char *dirs = talloc_strdup(talloc_ctx, mp_config_dirs(global));
+        char *dirs = talloc_strdup(tmp, mp_config_dirs(global));
 
         while (dirs) {
-            res = dirs;
+            char *dir = dirs;
 
             dirs = strchr(dirs, ':');
             if (dirs)
                 *dirs++ = 0;
 
-            if (!*res)
-            {
-                res = NULL;
+            if (!*dir)
                 continue;
-            }
 
-            res = talloc_asprintf(talloc_ctx, "%s/%s", res, filename);
+            dir = talloc_asprintf(tmp, "%s/%s", dir, filename);
 
-            if (mp_path_exists(res))
+            if (mp_path_exists(dir)) {
+                res = talloc_strdup(talloc_ctx, dir);
                 break;
-
-            talloc_free(res);
-            res = NULL;
+            }
         }
     }
+
+    talloc_free(tmp);
+
     MP_VERBOSE(global, "config path: '%s' -> '%s'\n", STRNULL(filename),
                STRNULL(res));
     return res;
