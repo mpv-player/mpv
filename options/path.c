@@ -162,6 +162,43 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                STRNULL(res));
     return res;
 }
+char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
+                                const char *filename)
+{
+    struct MPOpts *opts = global->opts;
+    //Pray that there's less than 31 config files
+    char **ret = &((char**)talloc_zero_size(talloc_ctx, sizeof(char*) * 32))[31];
+
+    if (opts->load_config) {
+        char *dirs = talloc_strdup(talloc_ctx, mp_config_dirs(global));
+
+        while (dirs) {
+            char* res = dirs;
+
+            dirs = strchr(dirs, ':');
+            if (dirs)
+                *dirs++ = 0;
+
+            if (!*res)
+                continue;
+
+            res = talloc_asprintf(talloc_ctx, "%s/%s", res, filename);
+
+            if (!mp_path_exists(res))
+                continue;
+
+            *(--ret) = res;
+        }
+    }
+
+    MP_VERBOSE(global, "config file: '%s'\n", STRNULL(filename));
+
+    char **c;
+    for (c = ret; *c; c++)
+        MP_VERBOSE(global, "    -> '%s'\n", STRNULL(*c));
+
+    return ret;
+}
 
 char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
                        const char *path)

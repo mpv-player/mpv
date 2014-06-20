@@ -32,6 +32,10 @@ struct mpv_global;
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename);
 
+// Find all instances of the config file, with user config last.
+char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
+                                const char *filename);
+
 // Normally returns a talloc_strdup'ed copy of the path, except for special
 // paths starting with '~'. Used to allow the user explicitly reference a
 // file from the user's home or mpv config directory.
