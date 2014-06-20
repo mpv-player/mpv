@@ -73,11 +73,17 @@ static char *mp_append_all(void* talloc_ctx, const char *_dirs,
 }
 
 //Return colon separated list of config directories
-static char *mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
+static const char *config_dirs = NULL;
+
+static const char *mp_config_dirs(struct mpv_global *global)
 {
     if (global->opts->force_configdir && global->opts->force_configdir[0])
         return global->opts->force_configdir;
 
+    if (config_dirs)
+        return config_dirs;
+
+    void *talloc_ctx = talloc_new(NULL);
     const char *tmp = NULL;
     char *ret = "";
 
@@ -111,9 +117,12 @@ static char *mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
     else
         ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, MPLAYER_CONFDIR);
 
-//    MP_VERBOSE(global, "search dirs: %s\n", ret);
+    config_dirs = strdup(ret);
+    talloc_free(talloc_ctx);
 
-    return ret;
+    MP_VERBOSE(global, "search dirs: %s\n", config_dirs);
+
+    return config_dirs;
 }
 
 
@@ -125,7 +134,7 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
 
     char *res = NULL;
     if (opts->load_config) {
-        char *dirs = mp_config_dirs(talloc_ctx, global);
+        char *dirs = talloc_strdup(talloc_ctx, mp_config_dirs(global));
 
         while (dirs) {
             res = dirs;
