@@ -289,7 +289,7 @@ INSTALL_MAN      =
 
 ifeq ($(BUILD_MAN),yes)
     INSTALL_MAN += install-mpv-man
-    ALL_TARGETS += DOCS/man/en/mpv.1
+    ALL_TARGETS += DOCS/man/mpv.1
 endif
 
 DIRS =  . \
@@ -402,14 +402,14 @@ version.h .version: version.sh
 
 common/version.c: version.h
 
-DOCS/man/en/mpv.1: DOCS/man/en/af.rst \
-                   DOCS/man/en/ao.rst \
-                   DOCS/man/en/changes.rst \
-                   DOCS/man/en/encode.rst \
-                   DOCS/man/en/input.rst \
-                   DOCS/man/en/options.rst \
-                   DOCS/man/en/vf.rst \
-                   DOCS/man/en/vo.rst
+DOCS/man/mpv.1: DOCS/man/af.rst \
+                   DOCS/man/ao.rst \
+                   DOCS/man/changes.rst \
+                   DOCS/mancode.rst \
+                   DOCS/man/input.rst \
+                   DOCS/man/options.rst \
+                   DOCS/man/vf.rst \
+                   DOCS/man/vo.rst
 
 ###### installation / clean / generic rules #######
 
@@ -429,9 +429,9 @@ install-%-strip: % install-dirs
 
 install-mpv-man:  install-mpv-man-en
 
-install-mpv-man-en: DOCS/man/en/mpv.1
+install-mpv-man-en: DOCS/man/mpv.1
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
-	$(INSTALL) -m 644 DOCS/man/en/mpv.1 $(MANDIR)/man1/
+	$(INSTALL) -m 644 DOCS/man/mpv.1 $(MANDIR)/man1/
 
 ICONSIZES = 16x16 32x32 64x64
 
@@ -461,7 +461,7 @@ install-data: install-mpv-icons install-mpv-desktop install-mpv-config install-m
 
 uninstall:
 	$(RM) $(BINDIR)/mpv
-	$(RM) $(MANDIR)/man1/mpv.1 $(MANDIR)/en/man1/mpv.1
+	$(RM) $(MANDIR)/man1/mpv.1 $(MANDIR)/man1/mpv.1
 	$(RM) $(prefix)/share/applications/mpv.desktop
 	$(RM) $(prefix)/share/zsh/vendor-completions/_mpv
 	$(RM) $(foreach size,$(ICONSIZES),$(prefix)/share/icons/hicolor/$(size)/apps/mpv.png)

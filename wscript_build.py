@@ -5,18 +5,18 @@ def _add_rst_manual_dependencies(ctx):
         options.rst ao.rst vo.rst af.rst vf.rst encode.rst
         input.rst osc.rst lua.rst changes.rst""".split()
 
-    manpage_sources = ['DOCS/man/en/'+x for x in manpage_sources_basenames]
+    manpage_sources = ['DOCS/man/'+x for x in manpage_sources_basenames]
 
     for manpage_source in manpage_sources:
         ctx.add_manual_dependency(
-            ctx.path.find_node('DOCS/man/en/mpv.rst'),
+            ctx.path.find_node('DOCS/man/mpv.rst'),
             ctx.path.find_node(manpage_source))
 
 def _build_man(ctx):
     ctx(
         name         = 'rst2man',
-        target       = 'DOCS/man/en/mpv.1',
-        source       = 'DOCS/man/en/mpv.rst',
+        target       = 'DOCS/man/mpv.1',
+        source       = 'DOCS/man/mpv.rst',
         rule         = '${RST2MAN} ${SRC} ${TGT}',
         install_path = ctx.env.MANDIR + '/man1')
 
@@ -25,8 +25,8 @@ def _build_man(ctx):
 def _build_pdf(ctx):
     ctx(
         name         = 'rst2pdf',
-        target       = 'DOCS/man/en/mpv.pdf',
-        source       = 'DOCS/man/en/mpv.rst',
+        target       = 'DOCS/man/mpv.pdf',
+        source       = 'DOCS/man/mpv.rst',
         rule         = '${RST2PDF} -c --repeat-table-rows ${SRC} -o ${TGT}',
         install_path = ctx.env.DOCDIR)
 

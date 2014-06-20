@@ -125,7 +125,7 @@ instead.
 
 To contact the `mpv` team in private write to `mpv-team@googlegroups.com`.
 
-[changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/man/en/changes.rst
+[changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/man/changes.rst
 [mpv-build]: https://github.com/mpv-player/mpv-build
 [homebrew-mpv]: https://github.com/mpv-player/homebrew-mpv
 [issue-tracker]:  https://github.com/mpv-player/mpv/issues
