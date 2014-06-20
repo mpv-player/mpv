@@ -789,17 +789,9 @@ static int preinit(struct vo *vo)
     }
     if (!ctx->xv_port) {
         if (busy_ports)
-            MP_ERR(vo,
-                   "Could not find free Xvideo port - maybe another process is already\n"\
-                   "using it. Close all video applications, and try again. If that does\n"\
-                   "not help, see 'mpv -vo help' for other (non-xv) video out drivers.\n");
+            MP_ERR(vo, "Xvideo ports busy.\n");
         else
-            MP_ERR(vo,
-                   "It seems there is no Xvideo support for your video card available.\n"\
-                   "Run 'xvinfo' to verify its Xv support and read\n"\
-                   "DOCS/HTML/en/video.html#xv!\n"\
-                   "See 'mpv -vo help' for other (non-xv) video out drivers.\n"\
-                   "Try -vo x11.\n");
+            MP_ERR(vo, "No Xvideo support found.\n");
         goto error;
     }
 
