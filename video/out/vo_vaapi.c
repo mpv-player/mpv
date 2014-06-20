@@ -284,7 +284,8 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
             return;
         }
         mp_image_copy_attributes(dst, mpi);
-        mpi = dst;
+        talloc_free(mpi);
+        mpi = mp_image_new_ref(dst);
     }
 
     talloc_free(p->output_surfaces[p->output_surface]);
