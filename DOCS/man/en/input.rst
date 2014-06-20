@@ -1240,7 +1240,7 @@ Property list
     changed at runtime by writing to this property. Note that many options
     require reloading the file for changes to take effect. If there is an
     equivalent property, prefer setting the property instead.
-    
+
 ``write_watch_later_config``
     Saves current playback position.
 
