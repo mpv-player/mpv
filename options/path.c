@@ -167,7 +167,8 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
 {
     struct MPOpts *opts = global->opts;
     //Pray that there's less than 31 config files
-    char **ret = &((char**)talloc_zero_size(talloc_ctx, sizeof(char*) * 32))[31];
+    char **front = (char**)talloc_zero_size(talloc_ctx, sizeof(char*) * 32);
+    char **ret = front + 31;
 
     if (opts->load_config) {
         char *dirs = talloc_strdup(talloc_ctx, mp_config_dirs(global));
@@ -188,6 +189,12 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
                 continue;
 
             *(--ret) = res;
+
+            if (front == ret)
+            {
+                MP_WARN(global, "Too many config files, not reading any more\n");
+                break;
+            }
         }
     }
 
