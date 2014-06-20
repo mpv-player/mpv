@@ -813,14 +813,6 @@ def configure(ctx):
     ctx.load('detections.compiler')
     ctx.load('detections.devices')
 
-    if ctx.env.DEST_OS in ('freebsd', 'openbsd'):
-        ctx.env.CFLAGS += ['-I.', '-I..', '-I/usr/local/include']
-        ctx.env.LINKFLAGS += ['-L/usr/local/lib']
-
-    if ctx.env.DEST_OS == 'netbsd':
-        ctx.env.CFLAGS += ['-I/usr/pkg/include']
-        ctx.env.LINKFLAGS += ['-L/usr/pkg/lib']
-
     ctx.parse_dependencies(build_options)
     ctx.parse_dependencies(main_dependencies)
     ctx.parse_dependencies(audio_output_features)
