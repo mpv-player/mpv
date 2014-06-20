@@ -451,7 +451,7 @@ def build(ctx):
         libversion = (str(vnum >> 24) + '.' +
                       str((vnum >> 16) & 0xff) + '.' +
                       str(vnum & 0xffff))
-        
+
         def _build_libmpv(shared):
             features = "c "
             if shared:
