@@ -308,11 +308,15 @@ bstr mp_split_proto(bstr path, bstr *out_url)
 void mp_mk_config_dir(struct mpv_global *global, char *subdir)
 {
     void *tmp = talloc_new(NULL);
-    char *confdir = mp_find_config_file(tmp, global, "");
-    if (confdir) {
-        if (subdir)
-            confdir = mp_path_join(tmp, bstr0(confdir), bstr0(subdir));
-        mkdir(confdir, 0777);
-    }
+    char *dirs = talloc_strdup(tmp, mp_config_dirs(global));
+    char *end = strchr(dirs, ':');
+
+    if (end)
+        *end = 0;
+
+    mkdir(dirs, 0777);
+    dirs = mp_path_join(tmp, bstr0(dirs), bstr0(subdir));
+    mkdir(dirs, 0777);
+
     talloc_free(tmp);
 }
