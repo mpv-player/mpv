@@ -31,11 +31,6 @@ extern "C" {
 #endif
 
 /**
- * Warning: this API is still work in progress. This notice will be removed
- * once the API is considered reasonably stable.
- */
-
-/**
  * Mechanisms provided by this API
  * -------------------------------
  *
@@ -139,12 +134,13 @@ extern "C" {
  */
 
 /**
- * The version is incremented on each change. The 16 lower bits are incremented
- * if something in mpv is changed that might affect the client API, but doesn't
- * change C API itself (like the removal of an option or a property). The higher
- * 16 bits are incremented if the C API itself changes.
+ * The version is incremented on each API change. The 16 lower bits form the
+ * minor version number, and the 16 higher bits the major version number. If
+ * the API becomes incompatible to previous versions, the major version
+ * number is incremented. This affects only C part, and not properties and
+ * options.
  */
-#define MPV_CLIENT_API_VERSION 0x00000000UL
+#define MPV_CLIENT_API_VERSION 0x00010000UL
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.

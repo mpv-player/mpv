@@ -448,9 +448,7 @@ def build(ctx):
                              ctx.path.find_node("libmpv/client.h").read(),
                              re.M)
                    .group(1), 16)
-        libversion = (str(vnum >> 24) + '.' +
-                      str((vnum >> 16) & 0xff) + '.' +
-                      str(vnum & 0xffff))
+        libversion = str(vnum >> 16) + '.' + str(vnum & 0xffff) + '.0'
 
         def _build_libmpv(shared):
             features = "c "
