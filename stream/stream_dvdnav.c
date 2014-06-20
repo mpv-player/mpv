@@ -737,7 +737,7 @@ static int open_s(stream_t *stream)
 const stream_info_t stream_info_dvdnav = {
     .name = "dvdnav",
     .open = open_s,
-    .protocols = (const char*const[]){ "dvdnav", NULL },
+    .protocols = (const char*const[]){ "dvd", "dvdnav", NULL },
     .priv_size = sizeof(struct priv),
     .priv_defaults = &stream_priv_dflts,
     .options = stream_opts_fields,

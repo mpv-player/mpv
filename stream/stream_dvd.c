@@ -940,7 +940,7 @@ static int ifo_stream_open (stream_t *stream)
         priv->cfg_title = 0;
 
     free(filename);
-    stream->url=talloc_strdup(stream, "dvd://");
+    stream->url=talloc_strdup(stream, "dvdread://");
 
     return open_s(stream);
 }
@@ -948,7 +948,7 @@ static int ifo_stream_open (stream_t *stream)
 const stream_info_t stream_info_dvd = {
   .name = "dvd",
   .open = open_s,
-  .protocols = (const char*const[]){ "dvd", NULL },
+  .protocols = (const char*const[]){ "dvdread", NULL },
   .priv_size = sizeof(dvd_priv_t),
   .priv_defaults = &stream_priv_dflts,
   .options = stream_opts_fields,
