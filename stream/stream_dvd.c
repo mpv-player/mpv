@@ -484,7 +484,8 @@ static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec
     do_seek(stream, pos);
     do {
       char buf[2048];
-      dvd_read_sector(stream, stream->priv, buf); // skip
+      if (dvd_read_sector(stream, stream->priv, buf) < 0) // skip
+          break;
       t = mp_dvdtimetomsec(&d->dsi_pack.dsi_gi.c_eltm);
     } while(!t);
     tm = dvd_get_current_time(stream, -1);
