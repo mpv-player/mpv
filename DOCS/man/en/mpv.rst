@@ -15,18 +15,6 @@ SYNOPSIS
 | **mpv** [options] [file|URL|-]
 | **mpv** [options] --playlist=PLAYLIST
 | **mpv** [options] files
-| **mpv** bd://[title][/device] [options]
-| **mpv** bdnav://[title][/device] [options]
-| **mpv** dvd://[title|[start\_title]-end\_title][/device] [options]
-| **mpv** dvdnav://[longest|menu|title][/device] [options]
-| **mpv** \tv://[channel][/input_id] [options]
-| **mpv** \pvr:// [options]
-| **mpv** \dvb://[card\_number@]channel [options]
-| **mpv** \mf://[filemask|\@listfile] [-mf options] [options]
-| **mpv** cdda://track[-endtrack][:speed][/device] [options]
-| **mpv** [file|mms[t]|http|httpproxy|rt[s]p|ftp|udp|smb]://[user:pass\@]URL[:port] [options]
-| **mpv** edl://[edl specification as in edl-mpv.rst]
-
 
 DESCRIPTION
 ===========
@@ -445,6 +433,85 @@ video output driver. It should normally not be added to the config file, as
 taking screenshots is handled by the VOs, and adding the screenshot filter will
 break hardware decoding. (The filter may still be useful for taking screenshots
 at a certain point within the video chain when using multiple video filters.)
+
+PROTOCOLS
+=========
+
+``http://...``, ``https://``, ...
+    Many network protocols are supported, but the protocol prefix must always
+    be specified. mpv will never attempt to guess whether a filename is
+    actually a network address. A protocol prefix is always required.
+
+``-``
+    Play data from stdin.
+
+``smb://PATH``
+    Play a path from  Samba share.
+
+``bd://[title][/device]`` ``--bluray-device=PATH``
+    Play a Blu-Ray disc. Currently, this does not accept iso files. Instead,
+    you must mount the iso file as filesystem, and point ``--bluray-device``
+    to the mounted directly.
+
+``bdnav://[title][/device]``
+    Play a Blu-Ray disc, with navigation features enabled. This feature is
+    permanently experimental.
+
+``dvd://[title|[starttitle]-endtitle][/device]`` ``--dvd-device=PATH``
+    Play a DVD. If you want dvdnav menus, use ``dvd://menu``. If no title
+    is given, the longest title is auto-selected.
+
+    ``dvdnav://`` is an old alias for ``dvd://`` and does exactly the same
+    thing.
+
+``dvdread://...:``
+    Play a DVD using the old libdvdread code. This is what MPlayer and older
+    mpv versions use for ``dvd://``. Use is discouraged. It's provided only
+    for compatibility and for transition.
+
+``tv://[channel][/input_id]`` ``--tv-...``
+    Analogue TV via V4L. Also useful for webcams. (Linux only.)
+
+``pvr://`` ``--pvr-...``
+    PVR. (Linux only.)
+
+``dvb://[cardnumber@]channel`` ``--dvbin-...``
+    Digital TV via DVB. (Linux only.)
+
+``mf://[filemask|@listfile]`` ``--mf-...``
+    Play a series of images as video.
+
+``cdda://track[-endtrack][:speed][/device]`` ``--cdrom-device=PATH`` ``--cdda-...``
+    Play CD.
+
+``lavf://...``
+    Access any FFmpeg/Libav libavformat protocol. Basically, this passed the
+    string after the ``//`` directly to libavformat.
+
+``av://type:options``
+    This is intended for using libavdevice inputs. ``type`` is the libavdevice
+    demuxer name, and ``options`` is the (pseudo-)filename passed to the
+    demuxer.
+
+    For example, ``mpv av://lavfi:mandelbrot`` makes use of the libavfilter
+    wrapper included in libavdevice, and will use the ``mandelbrot`` source
+    filter to generate input data.
+
+    ``avdevice://`` is an alias.
+
+``file://PATH``
+    A local path as URL. Might be useful in some special use-cases. Note that
+    ``PATH`` itself should start with a third ``/`` to make the path an
+    absolute path.
+
+``edl://[edl specification as in edl-mpv.rst]``
+    Stitch together parts of multiple files and play them.
+
+``null://``
+    Simulate an empty file.
+
+``memory://data``
+    Use the ``data`` part as source data.
 
 .. include:: options.rst
 
