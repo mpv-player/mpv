@@ -69,20 +69,13 @@ static char *mp_append_all(void* talloc_ctx, const char *c_dirs,
     return ret;
 }
 
-// TODO: static __thread const char *config_dirs = NULL; ?
-static const char *config_dirs = NULL;
-
 // Return colon separated list of config directories, from highest to lowest
 // priority
-static const char *mp_config_dirs(struct mpv_global *global)
+static char *mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 {
     if (global->opts->force_configdir && global->opts->force_configdir[0])
-        return global->opts->force_configdir;
+        return talloc_strdup(talloc_ctx, global->opts->force_configdir);
 
-    if (config_dirs)
-        return config_dirs;
-
-    void *talloc_ctx = talloc_new(NULL);
     const char *home = getenv("HOME");
     const char *tmp = NULL;
     char *ret = "";
@@ -118,12 +111,9 @@ static const char *mp_config_dirs(struct mpv_global *global)
     else
         ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, MPLAYER_CONFDIR);
 
-    config_dirs = strdup(ret);
-    talloc_free(talloc_ctx);
+    MP_VERBOSE(global, "search dirs: %s\n", STRNULL(ret));
 
-    MP_VERBOSE(global, "search dirs: %s\n", STRNULL(config_dirs));
-
-    return config_dirs;
+    return ret;
 }
 
 
@@ -136,7 +126,7 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
     void *tmp = talloc_new(NULL);
     char *res = NULL;
     if (opts->load_config) {
-        char *dirs = talloc_strdup(tmp, mp_config_dirs(global));
+        char *dirs = mp_config_dirs(tmp, global);
 
         while (dirs) {
             char *dir = dirs;
@@ -172,7 +162,7 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
     char **ret = front + 31;
 
     if (opts->load_config) {
-        char *dirs = talloc_strdup(talloc_ctx, mp_config_dirs(global));
+        char *dirs = mp_config_dirs(talloc_ctx, global);
 
         while (dirs) {
             char* res = dirs;
@@ -201,7 +191,7 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
     MP_VERBOSE(global, "config file: '%s'\n", STRNULL(filename));
 
     for (char** c = ret; *c; c++)
-        MP_VERBOSE(global, "    -> '%s'\n", STRNULL(*c));
+        MP_VERBOSE(global, "    -> '%s'\n", *c);
 
     return ret;
 }
@@ -371,7 +361,7 @@ void mp_mkdirp(const char *dir)
 void mp_mk_config_dir(struct mpv_global *global, char *subdir)
 {
     void *tmp = talloc_new(NULL);
-    char *dirs = talloc_strdup(tmp, mp_config_dirs(global));
+    char *dirs = mp_config_dirs(tmp, global);
 
     if (dirs) {
         char *end = strchr(dirs, ':');
