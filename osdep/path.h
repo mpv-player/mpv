@@ -3,7 +3,9 @@
 
 struct mpv_global;
 
-char *mp_get_win_config_dirs(void *talloc_ctx);
+// Windows config directories
+char *mp_get_win_exe_dir(void *talloc_ctx);
+char *mp_get_win_app_dir(void *talloc_ctx);
 
 // Returns Mac OS X application bundle directory.
 char *mp_get_macosx_bundle_dir(void *talloc_ctx);

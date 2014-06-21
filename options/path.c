@@ -45,73 +45,77 @@
 
 #define STRNULL(s) ((s) ? (s) : "(NULL)")
 
+#define MAX_CONFIG_PATHS 32
 
 
-static char *mp_append_all(void* talloc_ctx, const char *c_dirs,
-                           const char *suffix)
-{
-    char *ret = talloc_strdup(talloc_ctx, "");
-    char *dirs = talloc_strdup(talloc_ctx, c_dirs);
 
-    while (dirs) {
-        char *dir = dirs;
-
-        dirs = strchr(dirs, ':');
-        if (dirs)
-            *dirs++ = 0;
-
-        if (!*dir)
-            continue;
-
-        ret = talloc_asprintf(talloc_ctx, "%s:%s%s", ret, dir, suffix);
-    }
-
-    return ret;
-}
-
-// Return colon separated list of config directories, from highest to lowest
+// Return NULL-terminated array of config directories, from highest to lowest
 // priority
-static char *mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
+static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 {
-    if (global->opts->force_configdir && global->opts->force_configdir[0])
-        return talloc_strdup(talloc_ctx, global->opts->force_configdir);
+    char **ret = talloc_zero_array(talloc_ctx, char*, MAX_CONFIG_PATHS);
+
+    if (global->opts->force_configdir && global->opts->force_configdir[0]) {
+        ret[0] = talloc_strdup(talloc_ctx, global->opts->force_configdir);
+        return ret;
+    }
 
     const char *home = getenv("HOME");
     const char *tmp = NULL;
-    char *ret = "";
+    int i = 0;
 
     tmp = getenv("MPV_HOME");
     if (tmp)
-        ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, tmp);
+        ret[i++] = talloc_strdup(talloc_ctx, tmp);
 
 #ifdef _WIN32
-    tmp = mp_get_win_config_dir(talloc_ctx);
-    ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, tmp);
+    ret[i++] = mp_get_win_exe_dir(talloc_ctx);
+    ret[i++] = mp_get_win_app_dir(talloc_ctx);
 #endif
 
     tmp = getenv("XDG_CONFIG_HOME");
     if (tmp)
-        ret = talloc_asprintf(talloc_ctx, "%s%s/mpv:", ret, tmp);
+        ret[i++] = talloc_asprintf(talloc_ctx, "%s/mpv", tmp);
     else if (home)
-        ret = talloc_asprintf(talloc_ctx, "%s%s/.config/mpv:", ret, home);
+        ret[i++] = talloc_asprintf(talloc_ctx, "%s/.config/mpv", home);
 
-//Backwards compatibility
+    // Maintain compatibility with old ~/.mpv
     if (home)
-        ret = talloc_asprintf(talloc_ctx, "%s%s/.mpv:", ret, home);
+        ret[i++] = talloc_asprintf(talloc_ctx, "%s/.mpv", home);
 
 #if HAVE_COCOA
-    tmp = mp_get_macosx_bundle_dir(talloc_ctx);
-    ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, tmp);
+    ret[i++] = mp_get_macosx_bundle_dir(talloc_ctx);
 #endif
 
     tmp = getenv("XDG_CONFIG_DIRS");
-    if (tmp)
-        ret = talloc_asprintf(talloc_ctx, "%s%s:", ret,
-                              mp_append_all(talloc_ctx, tmp, "/mpv"));
-    else
-        ret = talloc_asprintf(talloc_ctx, "%s%s:", ret, MPLAYER_CONFDIR);
+    if (tmp) {
+        char *dirs = talloc_strdup(talloc_ctx, tmp);
+        while (dirs) {
+            char *dir = dirs;
 
-    MP_VERBOSE(global, "search dirs: %s\n", STRNULL(ret));
+            dirs = strchr(dirs, ':');
+            if (dirs)
+                *dirs++ = 0;
+
+            if (!*dir)
+                continue;
+
+            ret[i++] = talloc_asprintf(talloc_ctx, "%s%s", dir, "/mpv");
+
+            if ((i + 1) >= MAX_CONFIG_PATHS) {
+                MP_WARN(global, "Too many config files, not reading any more\n");
+                break;
+            }
+        }
+    }
+    else {
+        ret[i++] = MPLAYER_CONFDIR;
+    }
+
+    MP_VERBOSE(global, "search dirs:");
+    for (char **c = ret; *c; c++)
+        MP_VERBOSE(global, " %s", *c);
+    MP_VERBOSE(global, "\n");
 
     return ret;
 }
@@ -126,22 +130,11 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
     void *tmp = talloc_new(NULL);
     char *res = NULL;
     if (opts->load_config) {
-        char *dirs = mp_config_dirs(tmp, global);
+        for (char **dir = mp_config_dirs(tmp, global); *dir; dir++) {
+            char *config_file = talloc_asprintf(tmp, "%s/%s", *dir, filename);
 
-        while (dirs) {
-            char *dir = dirs;
-
-            dirs = strchr(dirs, ':');
-            if (dirs)
-                *dirs++ = 0;
-
-            if (!*dir)
-                continue;
-
-            dir = talloc_asprintf(tmp, "%s/%s", dir, filename);
-
-            if (mp_path_exists(dir)) {
-                res = talloc_strdup(talloc_ctx, dir);
+            if (mp_path_exists(config_file)) {
+                res = talloc_strdup(talloc_ctx, config_file);
                 break;
             }
         }
@@ -157,34 +150,18 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
                                 const char *filename)
 {
     struct MPOpts *opts = global->opts;
-    //Pray that there's less than 31 config files
-    char **front = talloc_zero_array(talloc_ctx, char*, 32);
-    char **ret = front + 31;
+
+    char **front = talloc_zero_array(talloc_ctx, char*, MAX_CONFIG_PATHS);
+    char **ret = front + (MAX_CONFIG_PATHS - 1);
 
     if (opts->load_config) {
-        char *dirs = mp_config_dirs(talloc_ctx, global);
+        for (char **dir = mp_config_dirs(talloc_ctx, global); *dir; dir++) {
+            char *config_file = talloc_asprintf(talloc_ctx, "%s/%s", *dir, filename);
 
-        while (dirs) {
-            char* res = dirs;
-
-            dirs = strchr(dirs, ':');
-            if (dirs)
-                *dirs++ = 0;
-
-            if (!*res)
+            if (!mp_path_exists(config_file))
                 continue;
 
-            res = talloc_asprintf(talloc_ctx, "%s/%s", res, filename);
-
-            if (!mp_path_exists(res))
-                continue;
-
-            *(--ret) = res;
-
-            if (front == ret) {
-                MP_WARN(global, "Too many config files, not reading any more\n");
-                break;
-            }
+            *(--ret) = config_file;
         }
     }
 
@@ -361,15 +338,11 @@ void mp_mkdirp(const char *dir)
 void mp_mk_config_dir(struct mpv_global *global, char *subdir)
 {
     void *tmp = talloc_new(NULL);
-    char *dirs = mp_config_dirs(tmp, global);
+    char *dir = mp_config_dirs(tmp, global)[0];
 
-    if (dirs) {
-        char *end = strchr(dirs, ':');
-        if (end)
-            *end = 0;
-
-        dirs = talloc_asprintf(tmp, "%s/%s", dirs, subdir);
-        mp_mkdirp(dirs);
+    if (dir) {
+        dir = talloc_asprintf(tmp, "%s/%s", dir, subdir);
+        mp_mkdirp(dir);
     }
 
     talloc_free(tmp);

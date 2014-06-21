@@ -75,7 +75,7 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
         m_config_parse_config_file(mpctx->mconfig, conffile, SECT_ENCODE, 0);
 #endif
 
-//Backwards compatibility
+    // Maintain compatibility with /config
     for (char** cf = mp_find_all_config_files(tmp, mpctx->global, "config"); *cf; cf++) {
         if (m_config_parse_config_file(conf, *cf, section, 0) < 0) {
             r = false;

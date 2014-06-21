@@ -24,8 +24,10 @@
 
 // Warning: do not use PATH_MAX. Cygwin messed it up.
 
-static void get_exe_dir(wchar_t path[MAX_PATH + 1])
+char *mp_get_win_exe_dir(void *talloc_ctx)
 {
+    wchar_t w_exedir[MAX_PATH + 1] = {0};
+
     int len = (int)GetModuleFileNameW(NULL, path, MAX_PATH);
     int imax = 0;
     for (int i = 0; i < len; i++) {
@@ -36,12 +38,13 @@ static void get_exe_dir(wchar_t path[MAX_PATH + 1])
     }
 
     path[imax] = '\0';
+
+    return mp_to_utf8(talloc_ctx, w_exedir);
 }
 
-char *mp_get_win_config_dirs(void *talloc_ctx)
+char *mp_get_win_app_dir(void *talloc_ctx)
 {
     wchar_t w_appdir[MAX_PATH + 1] = {0};
-    wchar_t w_exedir[MAX_PATH + 1] = {0};
 
 #ifndef __CYGWIN__
     if (SHGetFolderPathW(NULL, CSIDL_APPDATA|CSIDL_FLAG_CREATE, NULL,
@@ -49,9 +52,5 @@ char *mp_get_win_config_dirs(void *talloc_ctx)
         w_appdir[0] = '\0';
 #endif
 
-    get_exe_dir(w_exedir);
-
-    return talloc_asprintf(talloc_ctx, "%s:%s/mpv:",
-                           mp_to_utf8(talloc_ctx, w_exedir),
-                           mp_to_utf8(talloc_ctx, w_appdir));
+    return mp_to_utf8(talloc_ctx, w_appdir);
 }
