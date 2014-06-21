@@ -348,21 +348,39 @@ bstr mp_split_proto(bstr path, bstr *out_url)
     return r;
 }
 
+void mp_mkdirp(const char *dir)
+{
+    void *tmp = talloc_new(NULL);
+    char *path = talloc_strdup(tmp, dir);
+    char *cdir = path + 1;
 
-//TODO: Needs fixing
+    while (cdir) {
+        cdir = strchr(cdir, '/');
+        if (cdir)
+            *cdir = 0;
+
+        mkdir(path, 0700);
+
+        if (cdir)
+            *cdir++ = '/';
+    }
+
+    talloc_free(tmp);
+}
+
 void mp_mk_config_dir(struct mpv_global *global, char *subdir)
 {
     void *tmp = talloc_new(NULL);
     char *dirs = talloc_strdup(tmp, mp_config_dirs(global));
-    char *end = strchr(dirs, ':');
 
-    if (end)
-        *end = 0;
+    if (dirs) {
+        char *end = strchr(dirs, ':');
+        if (end)
+            *end = 0;
 
-//TODO: system("mkdir -p " + dirs);
-    mkdir(dirs, 0777);
-    dirs = mp_path_join(tmp, bstr0(dirs), bstr0(subdir));
-    mkdir(dirs, 0777);
+        dirs = talloc_asprintf(tmp, "%s/%s", dirs, subdir);
+        mp_mkdirp(dirs);
+    }
 
     talloc_free(tmp);
 }

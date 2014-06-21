@@ -74,6 +74,7 @@ bool mp_is_url(bstr path);
 
 bstr mp_split_proto(bstr path, bstr *out_url);
 
+void mp_mkdirp(const char *dir);
 void mp_mk_config_dir(struct mpv_global *global, char *subdir);
 
 #endif /* MPLAYER_PATH_H */
