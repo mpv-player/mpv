@@ -69,10 +69,11 @@ static char *mp_append_all(void* talloc_ctx, const char *c_dirs,
     return ret;
 }
 
-// Return colon separated list of config directories, from highest to lowest
-// priority
+// TODO: static __thread const char *config_dirs = NULL; ?
 static const char *config_dirs = NULL;
 
+// Return colon separated list of config directories, from highest to lowest
+// priority
 static const char *mp_config_dirs(struct mpv_global *global)
 {
     if (global->opts->force_configdir && global->opts->force_configdir[0])
@@ -120,7 +121,7 @@ static const char *mp_config_dirs(struct mpv_global *global)
     config_dirs = strdup(ret);
     talloc_free(talloc_ctx);
 
-    MP_VERBOSE(global, "search dirs: %s\n", config_dirs);
+    MP_VERBOSE(global, "search dirs: %s\n", STRNULL(config_dirs));
 
     return config_dirs;
 }
@@ -347,6 +348,8 @@ bstr mp_split_proto(bstr path, bstr *out_url)
     return r;
 }
 
+
+//TODO: Needs fixing
 void mp_mk_config_dir(struct mpv_global *global, char *subdir)
 {
     void *tmp = talloc_new(NULL);
@@ -356,6 +359,7 @@ void mp_mk_config_dir(struct mpv_global *global, char *subdir)
     if (end)
         *end = 0;
 
+//TODO: system("mkdir -p " + dirs);
     mkdir(dirs, 0777);
     dirs = mp_path_join(tmp, bstr0(dirs), bstr0(subdir));
     mkdir(dirs, 0777);

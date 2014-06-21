@@ -51,6 +51,7 @@ char *mp_get_win_config_dirs(void *talloc_ctx)
 
     get_exe_dir(w_exedir);
 
+//TODO: May not even compile
     return talloc_asprintf(talloc_ctx, "%s:%s/mpv:",
                            mp_to_utf8(w_exedir), mp_to_utf8(w_appdir));
 }
