@@ -65,6 +65,13 @@
 #endif
 
 typedef struct {
+    int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm
+    int language;
+    int type;
+    int channels;
+} stream_language_t;
+
+typedef struct {
   dvd_reader_t *dvd;
   dvd_file_t *title;
   ifo_handle_t *vmg_file;

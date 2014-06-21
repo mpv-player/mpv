@@ -32,11 +32,9 @@
 enum streamtype {
     STREAMTYPE_GENERIC = 0,
     STREAMTYPE_FILE,
-    STREAMTYPE_RADIO,
     STREAMTYPE_DVB,
     STREAMTYPE_DVD,
     STREAMTYPE_BLURAY,
-    STREAMTYPE_PVR,
     STREAMTYPE_TV,
     STREAMTYPE_MF,
     STREAMTYPE_EDL,
@@ -244,13 +242,6 @@ stream_t *open_memory_stream(void *data, int len);
 bool stream_check_interrupt(struct stream *s);
 
 bool stream_manages_timeline(stream_t *s);
-
-typedef struct {
-    int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm
-    int language;
-    int type;
-    int channels;
-} stream_language_t;
 
 void mp_url_unescape_inplace(char *buf);
 char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok);

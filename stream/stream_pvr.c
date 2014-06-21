@@ -1609,7 +1609,6 @@ pvr_stream_open (stream_t *stream)
   }
 
   stream->priv = pvr;
-  stream->type = STREAMTYPE_PVR;
   stream->fill_buffer = pvr_stream_read;
   stream->close = pvr_stream_close;
   stream->control = pvr_stream_control;
