@@ -47,26 +47,23 @@
 
 
 
-static char *mp_append_all(void* talloc_ctx, const char *_dirs,
+static char *mp_append_all(void* talloc_ctx, const char *c_dirs,
                            const char *suffix)
 {
-    char *ret = "";
-    char *dirs = talloc_strdup(talloc_ctx, _dirs);
+    char *ret = talloc_strdup(talloc_ctx, "");
+    char *dirs = talloc_strdup(talloc_ctx, c_dirs);
 
     while (dirs) {
-        char *res = dirs;
+        char *dir = dirs;
 
         dirs = strchr(dirs, ':');
         if (dirs)
             *dirs++ = 0;
 
-        if (!*res)
-        {
-            res = NULL;
+        if (!*dir)
             continue;
-        }
 
-        ret = talloc_asprintf(talloc_ctx, "%s:%s%s", ret, res, suffix);
+        ret = talloc_asprintf(talloc_ctx, "%s:%s%s", ret, dir, suffix);
     }
 
     return ret;
@@ -84,6 +81,7 @@ static const char *mp_config_dirs(struct mpv_global *global)
         return config_dirs;
 
     void *talloc_ctx = talloc_new(NULL);
+    const char *home = getenv("HOME");
     const char *tmp = NULL;
     char *ret = "";
 
@@ -99,11 +97,12 @@ static const char *mp_config_dirs(struct mpv_global *global)
     tmp = getenv("XDG_CONFIG_HOME");
     if (tmp)
         ret = talloc_asprintf(talloc_ctx, "%s%s/mpv:", ret, tmp);
-    else
-        ret = talloc_asprintf(talloc_ctx, "%s%s/.config/mpv:", ret, getenv("HOME"));
+    else if (home)
+        ret = talloc_asprintf(talloc_ctx, "%s%s/.config/mpv:", ret, home);
 
 //Backwards compatibility
-    ret = talloc_asprintf(talloc_ctx, "%s%s/.mpv:", ret, getenv("HOME"));
+    if (home)
+        ret = talloc_asprintf(talloc_ctx, "%s%s/.mpv:", ret, home);
 
 #if HAVE_COCOA
     tmp = mp_get_macosx_bundle_dir(talloc_ctx);
