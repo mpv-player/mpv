@@ -32,7 +32,8 @@ struct mpv_global;
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename);
 
-// Find all instances of the config file, with user config last.
+// Find all instances of the given config file. Paths are returned in order
+// from lowest to highest priority.
 char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
                                 const char *filename);
 

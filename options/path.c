@@ -69,7 +69,8 @@ static char *mp_append_all(void* talloc_ctx, const char *c_dirs,
     return ret;
 }
 
-//Return colon separated list of config directories
+// Return colon separated list of config directories, from highest to lowest
+// priority
 static const char *config_dirs = NULL;
 
 static const char *mp_config_dirs(struct mpv_global *global)
@@ -166,7 +167,7 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
 {
     struct MPOpts *opts = global->opts;
     //Pray that there's less than 31 config files
-    char **front = (char**)talloc_zero_size(talloc_ctx, sizeof(char*) * 32);
+    char **front = talloc_zero_array(talloc_ctx, char*, 32);
     char **ret = front + 31;
 
     if (opts->load_config) {
@@ -189,8 +190,7 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
 
             *(--ret) = res;
 
-            if (front == ret)
-            {
+            if (front == ret) {
                 MP_WARN(global, "Too many config files, not reading any more\n");
                 break;
             }
@@ -199,8 +199,7 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
 
     MP_VERBOSE(global, "config file: '%s'\n", STRNULL(filename));
 
-    char **c;
-    for (c = ret; *c; c++)
+    for (char** c = ret; *c; c++)
         MP_VERBOSE(global, "    -> '%s'\n", STRNULL(*c));
 
     return ret;
