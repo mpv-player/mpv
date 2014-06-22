@@ -365,6 +365,12 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
             avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)""",
             use='libav')
     }, {
+        'name': 'avcol-spc-bt2020',
+        'desc': 'libavcodec avcol_spc_bt2020 available',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'int x = AVCOL_SPC_BT2020_NCL',
+                                use='libav')
+    }, {
         'name': 'avutil-qp-api',
         'desc': 'libavutil QP API',
         'func': check_statement('libavutil/frame.h',

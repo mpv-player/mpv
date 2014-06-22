@@ -362,6 +362,12 @@ Available video output drivers are:
         LittleCMS 2. If both ``srgb`` and ``icc-profile`` are present, the
         latter takes precedence, as they are somewhat redundant.
 
+        Note: When playing back BT.2020 content with this option enabled, out
+        of gamut colors will be numerically clipped, which can potentially
+        change the hue and/or luminance. If this is not desired, it is
+        recommended to use ``icc-profile`` with an sRGB ICC profile instead,
+        when playing back wide-gamut BT.2020 content.
+
     ``pbo``
         Enable use of PBOs. This is slightly faster, but can sometimes lead to
         sporadic and temporary image corruption (in theory, because reupload
@@ -499,6 +505,10 @@ Available video output drivers are:
         Its size depends on the ``3dlut-size``, and can be very big.
 
     ``icc-intent=<value>``
+        Specifies the ICC Intent used for transformations between colorspaces.
+        This affects the rendering when using ``icc-profile`` or ``srgb`` and
+        also affects the way DCP XYZ content gets converted to RGB.
+
         0
             perceptual
         1
@@ -509,19 +519,19 @@ Available video output drivers are:
             absolute colorimetric
 
     ``approx-gamma``
-        Approximate the actual BT.709 gamma function as a pure power curve of
+        Approximate the actual gamma function as a pure power curve of
         1.95. A number of video editing programs and studios apparently use this
         for mastering instead of the true curve. Most notably, anything in the
         Apple ecosystem uses this approximation - including all programs
         compatible with it. It's a sound idea to try enabling this flag first
         when watching movies and shows to see if things look better that way.
 
-        This only affects the output when using either ``icc-profile`` or``srgb``.
+        This only affects the output when using either ``icc-profile`` or ``srgb``.
 
     ``3dlut-size=<r>x<g>x<b>``
         Size of the 3D LUT generated from the ICC profile in each dimension.
         Default is 128x256x64.
-        Sizes must be a power of two, and 256 at most.
+        Sizes must be a power of two, and 512 at most.
 
     ``alpha=<blend|yes|no>``
         Decides what to do if the input has an alpha component (default: blend).

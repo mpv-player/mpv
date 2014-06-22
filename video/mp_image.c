@@ -371,6 +371,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     if ((dst->flags & MP_IMGFLAG_YUV) == (src->flags & MP_IMGFLAG_YUV)) {
         dst->params.colorspace = src->params.colorspace;
         dst->params.colorlevels = src->params.colorlevels;
+        dst->params.primaries = src->params.primaries;
         dst->params.chroma_location = src->params.chroma_location;
     }
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
@@ -486,6 +487,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            p1->colorspace == p2->colorspace &&
            p1->colorlevels == p2->colorlevels &&
            p1->outputlevels == p2->outputlevels &&
+           p1->primaries == p2->primaries &&
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate;
 }
@@ -521,6 +523,8 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     if (fmt.flags & MP_IMGFLAG_YUV) {
         if (params->colorspace != MP_CSP_BT_601 &&
             params->colorspace != MP_CSP_BT_709 &&
+            params->colorspace != MP_CSP_BT_2020_NC &&
+            params->colorspace != MP_CSP_BT_2020_C &&
             params->colorspace != MP_CSP_SMPTE_240M &&
             params->colorspace != MP_CSP_YCGCO)
         {
@@ -532,16 +536,48 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
             params->colorspace = mp_csp_guess_colorspace(params->w, params->h);
         if (params->colorlevels == MP_CSP_LEVELS_AUTO)
             params->colorlevels = MP_CSP_LEVELS_TV;
+        if (params->primaries == MP_CSP_PRIM_AUTO) {
+            // Guess based on the colormatrix as a first priority
+            if (params->colorspace == MP_CSP_BT_2020_NC ||
+                params->colorspace == MP_CSP_BT_2020_C) {
+                params->primaries = MP_CSP_PRIM_BT_2020;
+            } else if (params->colorspace == MP_CSP_BT_709) {
+                params->primaries = MP_CSP_PRIM_BT_709;
+            } else {
+                // Ambiguous colormatrix for BT.601, guess based on res
+                params->primaries = mp_csp_guess_primaries(params->w, params->h);
+            }
+        }
     } else if (fmt.flags & MP_IMGFLAG_RGB) {
         params->colorspace = MP_CSP_RGB;
         params->colorlevels = MP_CSP_LEVELS_PC;
+
+        // The majority of RGB content is either sRGB or (rarely) some other
+        // color space which we don't even handle, like AdobeRGB or
+        // ProPhotoRGB. The only reasonable thing we can do is assume it's
+        // sRGB and hope for the best, which should usually just work out fine.
+        // Note: sRGB primaries = BT.709 primaries
+        if (params->primaries == MP_CSP_PRIM_AUTO)
+            params->primaries = MP_CSP_PRIM_BT_709;
     } else if (fmt.flags & MP_IMGFLAG_XYZ) {
         params->colorspace = MP_CSP_XYZ;
         params->colorlevels = MP_CSP_LEVELS_PC;
+
+        // The default XYZ matrix converts it to BT.709 color space
+        // since that's the most likely scenario. Proper VOs should ignore
+        // this field as well as the matrix and treat XYZ input as absolute,
+        // but for VOs which use the matrix (and hence, consult this field)
+        // this is the correct parameter. This doubles as a reasonable output
+        // gamut for VOs which *do* use the specialized XYZ matrix but don't
+        // know any better output gamut other than whatever the source is
+        // tagged with.
+        if (params->primaries == MP_CSP_PRIM_AUTO)
+            params->primaries = MP_CSP_PRIM_BT_709;
     } else {
         // We have no clue.
         params->colorspace = MP_CSP_AUTO;
         params->colorlevels = MP_CSP_LEVELS_AUTO;
+        params->primaries = MP_CSP_PRIM_AUTO;
     }
 }
 

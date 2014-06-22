@@ -195,6 +195,9 @@ struct gl_video {
     struct mp_csp_equalizer video_eq;
     struct mp_image_params image_params;
 
+    // Source and destination color spaces for the CMS matrix
+    struct mp_csp_primaries csp_src, csp_dest;
+
     struct mp_rect src_rect;    // displayed part of the source video
     struct mp_rect src_rect_rot;// compensated for optional rotation
     struct mp_rect dst_rect;    // video rectangle on output window
@@ -572,9 +575,17 @@ static void update_uniforms(struct gl_video *p, GLuint program)
 
     loc = gl->GetUniformLocation(program, "colormatrix");
     if (loc >= 0) {
-        float yuv2rgb[3][4] = {{0}};
-        mp_get_yuv2rgb_coeffs(&cparams, yuv2rgb);
-        gl->UniformMatrix4x3fv(loc, 1, GL_TRUE, &yuv2rgb[0][0]);
+        float m[3][4] = {{0}};
+        if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+            // Hard-coded as relative colorimetric for now, since this transforms
+            // from the source file's D55 material to whatever color space our
+            // projector/display lives in, which should be D55 for a proper
+            // home cinema setup either way.
+            mp_get_xyz2rgb_coeffs(&cparams, p->csp_src, MP_INTENT_RELATIVE_COLORIMETRIC, m);
+        } else {
+            mp_get_yuv2rgb_coeffs(&cparams, m);
+        }
+        gl->UniformMatrix4x3fv(loc, 1, GL_TRUE, &m[0][0]);
     }
 
     gl->Uniform1f(gl->GetUniformLocation(program, "input_gamma"),
@@ -638,6 +649,16 @@ static void update_uniforms(struct gl_video *p, GLuint program)
                   p->dither_size, p->dither_size);
 
     gl->Uniform1i(gl->GetUniformLocation(program, "lut_3d"), TEXUNIT_3DLUT);
+
+    loc = gl->GetUniformLocation(program, "cms_matrix");
+    if (loc >= 0) {
+        float cms_matrix[3][3] = {{0}};
+        // Hard-coded to relative colorimetric - for a BT.2020 3DLUT we expect
+        // the input to be actual BT.2020 and not something red- or blueshifted,
+        // and for sRGB monitors we most likely want relative scaling either way.
+        mp_get_cms_matrix(p->csp_src, p->csp_dest, MP_INTENT_RELATIVE_COLORIMETRIC, cms_matrix);
+        gl->UniformMatrix3fv(loc, 1, GL_TRUE, &cms_matrix[0][0]);
+    }
 
     for (int n = 0; n < 2; n++) {
         const char *lut = p->scalers[n].lut_name;
@@ -840,6 +861,59 @@ static void compile_shaders(struct gl_video *p)
     char *header = talloc_asprintf(tmp, "#version %d\n%s%s", gl->glsl_version,
                                    shader_prelude, PRELUDE_END);
 
+    bool use_cms = p->opts.srgb || p->use_lut_3d;
+
+    float input_gamma = 1.0;
+    float conv_gamma = 1.0;
+
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+        input_gamma *= 2.6;
+
+        // If we're using cms, we can treat it as proper linear input,
+        // otherwise we just scale back to 1.95 as a reasonable approximation.
+        if (use_cms) {
+            p->is_linear_rgb = true;
+        } else {
+            conv_gamma *= 1.0 / 1.95;
+        }
+    }
+
+    p->input_gamma = input_gamma;
+    p->conv_gamma = conv_gamma;
+
+    bool use_input_gamma = p->input_gamma != 1.0;
+    bool use_conv_gamma = p->conv_gamma != 1.0;
+    bool use_const_luma = p->image_params.colorspace == MP_CSP_BT_2020_C;
+
+    // Linear light scaling is only enabled when either color correction
+    // option (3dlut or srgb) is enabled, otherwise scaling is done in the
+    // source space. We also need to linearize for constant luminance systems.
+    bool convert_to_linear_gamma = !p->is_linear_rgb && use_cms || use_const_luma;
+
+    // Figure out the right color spaces we need to convert, if any
+    enum mp_csp_prim prim_src = p->image_params.primaries, prim_dest;
+    if (use_cms) {
+        // sRGB mode wants sRGB aka BT.709 primaries, but the 3DLUT is
+        // always built against BT.2020.
+        prim_dest = p->opts.srgb ? MP_CSP_PRIM_BT_709 : MP_CSP_PRIM_BT_2020;
+    } else {
+        // If no CMS is being done we just want to output stuff as-is,
+        // in the native colorspace of the source.
+        prim_dest = prim_src;
+    }
+
+    // XYZ input has no defined input color space, so we can directly convert
+    // it to whatever output space we actually need.
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ)
+        prim_src = prim_dest;
+
+    // Set the colorspace primaries and figure out whether we need to perform
+    // an extra conversion.
+    p->csp_src  = mp_get_csp_primaries(prim_src);
+    p->csp_dest = mp_get_csp_primaries(prim_dest);
+
+    bool use_cms_matrix = prim_src != prim_dest;
+
     if (p->gl_target == GL_TEXTURE_RECTANGLE) {
         shader_def(&header, "VIDEO_SAMPLER", "sampler2DRect");
         shader_def_opt(&header, "USE_RECTANGLE", true);
@@ -852,8 +926,9 @@ static void compile_shaders(struct gl_video *p)
         shader_def_opt(&header, "USE_ALPHA", p->has_alpha);
 
     char *header_osd = talloc_strdup(tmp, header);
-    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", p->opts.srgb ||
-                                                       p->use_lut_3d);
+    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV_APPROX", use_cms && p->opts.approx_gamma);
+    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV_BT2020", use_cms && !p->opts.approx_gamma);
+    shader_def_opt(&header_osd, "USE_OSD_CMS_MATRIX", use_cms_matrix);
     shader_def_opt(&header_osd, "USE_OSD_3DLUT", p->use_lut_3d);
     // 3DLUT overrides SRGB
     shader_def_opt(&header_osd, "USE_OSD_SRGB", !p->use_lut_3d && p->opts.srgb);
@@ -871,25 +946,6 @@ static void compile_shaders(struct gl_video *p)
     char *header_final = talloc_strdup(tmp, "");
     char *header_sep = NULL;
 
-    float input_gamma = 1.0;
-    float conv_gamma = 1.0;
-
-    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
-        input_gamma *= 2.6;
-        conv_gamma *= 1.0 / 2.2;
-    }
-
-    p->input_gamma = input_gamma;
-    p->conv_gamma = conv_gamma;
-
-    bool use_input_gamma = p->input_gamma != 1.0;
-    bool use_conv_gamma = p->conv_gamma != 1.0;
-
-    // Linear light scaling is only enabled when either color correction
-    // option (3dlut or srgb) is enabled, otherwise scaling is done in the
-    // source space.
-    bool convert_to_linear_gamma = !p->is_linear_rgb && (p->opts.srgb || p->use_lut_3d);
-
     if (p->image_format == IMGFMT_NV12 || p->image_format == IMGFMT_NV21) {
         shader_def(&header_conv, "USE_CONV", "CONV_NV12");
     } else if (p->plane_count > 1) {
@@ -904,17 +960,21 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_conv, "USE_INPUT_GAMMA", use_input_gamma);
     shader_def_opt(&header_conv, "USE_COLORMATRIX", !p->is_rgb);
     shader_def_opt(&header_conv, "USE_CONV_GAMMA", use_conv_gamma);
-    shader_def_opt(&header_conv, "USE_LINEAR_LIGHT", convert_to_linear_gamma);
-    shader_def_opt(&header_conv, "USE_APPROX_GAMMA", p->opts.approx_gamma);
+    shader_def_opt(&header_conv, "USE_CONST_LUMA", use_const_luma);
+    shader_def_opt(&header_conv, "USE_LINEAR_LIGHT_APPROX", convert_to_linear_gamma && p->opts.approx_gamma);
+    shader_def_opt(&header_conv, "USE_LINEAR_LIGHT_BT2020", convert_to_linear_gamma && !p->opts.approx_gamma);
     if (p->opts.alpha_mode > 0 && p->has_alpha && p->plane_count > 3)
         shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
     if (p->opts.alpha_mode == 2 && p->has_alpha)
         shader_def(&header_conv, "USE_ALPHA_BLEND", "1");
 
     shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma > 0);
+    shader_def_opt(&header_final, "USE_CMS_MATRIX", use_cms_matrix);
     shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
     // 3DLUT overrides SRGB
     shader_def_opt(&header_final, "USE_SRGB", p->opts.srgb && !p->use_lut_3d);
+    shader_def_opt(&header_final, "USE_CONST_LUMA_INV_APPROX", use_const_luma && !use_cms && p->opts.approx_gamma);
+    shader_def_opt(&header_final, "USE_CONST_LUMA_INV_BT2020", use_const_luma && !use_cms && !p->opts.approx_gamma);
     shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
     shader_def_opt(&header_final, "USE_TEMPORAL_DITHER", p->opts.temporal_dither);
 
@@ -1328,8 +1388,10 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
     }
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
-    if (p->is_yuv)
+    if (p->is_yuv && p->image_params.colorspace != MP_CSP_BT_2020_C)
         eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ)
+        eq_caps |= MP_CSP_EQ_CAPS_BRIGHTNESS;
     p->video_eq.capabilities = eq_caps;
 
     debug_check_gl(p, "before video texture creation");

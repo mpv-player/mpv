@@ -47,6 +47,7 @@ struct mp_image_params {
     int d_w, d_h;               // define display aspect ratio (never 0/0)
     enum mp_csp colorspace;
     enum mp_csp_levels colorlevels;
+    enum mp_csp_prim primaries;
     enum mp_chroma_location chroma_location;
     // The image should be converted to these levels. Unlike colorlevels, it
     // does not describe the current state of the image. (Somewhat similar to

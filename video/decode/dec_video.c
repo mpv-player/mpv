@@ -428,6 +428,8 @@ int video_reconfig_filters(struct dec_video *d_video,
     if (opts->requested_input_range != MP_CSP_LEVELS_AUTO)
         p.colorlevels = opts->requested_input_range;
     p.outputlevels = opts->requested_output_range;
+    if (opts->requested_primaries != MP_CSP_PRIM_AUTO)
+        p.primaries = opts->requested_primaries;
 
     // Detect colorspace from resolution.
     // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).

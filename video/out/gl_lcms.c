@@ -46,7 +46,7 @@ static bool parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
         return false;
     for (int n = 0; n < 3; n++) {
         int s = ((int[]) { *p1, *p2, *p3 })[n];
-        if (s < 2 || s > 256 || ((s - 1) & s))
+        if (s < 2 || s > 512 || ((s - 1) & s))
             return false;
     }
     return true;
@@ -135,8 +135,8 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
     char *cache_info =
         // Gamma is included in the header to help uniquely identify it,
         // because we may change the parameter in the future or make it
-        // customizable.
-        talloc_asprintf(tmp, "intent=%d, size=%dx%dx%d, gamma=2.4",
+        // customizable, same for the primaries.
+        talloc_asprintf(tmp, "intent=%d, size=%dx%dx%d, gamma=2.4, prim=bt2020\n",
                         opts->intent, s_r, s_g, s_b);
 
     // check cache
@@ -165,17 +165,21 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
     if (!profile)
         goto error_exit;
 
-    cmsCIExyY d65 = {0.3127, 0.3290, 1.0};
-    static const cmsCIExyYTRIPLE bt709prim = {
-        .Red   = {0.64, 0.33, 1.0},
-        .Green = {0.30, 0.60, 1.0},
-        .Blue  = {0.15, 0.06, 1.0},
+    // We always generate the 3DLUT against BT.2020, and transform into this
+    // space inside the shader if the source differs.
+    struct mp_csp_primaries csp = mp_get_csp_primaries(MP_CSP_PRIM_BT_2020);
+
+    cmsCIExyY wp = {csp.white.x, csp.white.y, 1.0};
+    cmsCIExyYTRIPLE prim = {
+        .Red   = {csp.red.x,   csp.red.y,   1.0},
+        .Green = {csp.green.x, csp.green.y, 1.0},
+        .Blue  = {csp.blue.x,  csp.blue.y,  1.0},
     };
 
     // 2.4 is arbitrarily used as a gamma compression factor for the 3DLUT,
     // reducing artifacts due to rounding errors on wide gamut profiles
     cmsToneCurve *tonecurve = cmsBuildGamma(cms, 2.4);
-    cmsHPROFILE vid_profile = cmsCreateRGBProfileTHR(cms, &d65, &bt709prim,
+    cmsHPROFILE vid_profile = cmsCreateRGBProfileTHR(cms, &wp, &prim,
                         (cmsToneCurve*[3]){tonecurve, tonecurve, tonecurve});
     cmsFreeToneCurve(tonecurve);
     cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_profile, TYPE_RGB_16,

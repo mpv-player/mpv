@@ -872,6 +872,9 @@ Property list
 ``colormatrix-output-range`` (RW)
     See ``--colormatrix-output-range``.
 
+``colormatrix-primaries`` (RW)
+    See ``--colormatrix-primaries``.
+
 ``ontop`` (RW)
     See ``--ontop``.
 
@@ -948,6 +951,9 @@ Property list
 
     ``video-params/colorlevels``
         The colorlevels as string. (Exact values subject to change.)
+
+    ``video-params/primaries``
+        The primaries in use as string. (Exact values subject to change.)
 
     ``video-params/chroma-location``
         Chroma location as string. (Exact values subject to change.)
