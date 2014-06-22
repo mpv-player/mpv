@@ -140,6 +140,13 @@ struct mp_csp_equalizer {
     int values[MP_CSP_EQ_COUNT];
 };
 
+struct mp_csp_col_xy {
+    float x, y;
+};
+
+struct mp_csp_primaries {
+    struct mp_csp_col_xy red, green, blue, white;
+};
 
 void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
                                   const struct mp_csp_equalizer *eq);
@@ -177,11 +184,15 @@ void mp_gen_gamma_map(unsigned char *map, int size, float gamma);
 #define COL_U 1
 #define COL_V 2
 #define COL_C 3
-void mp_get_cms_matrix(enum mp_csp_prim source, float m[3][3]);
+struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim csp);
 
+void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest, float cms_matrix[3][3]);
+void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3]);
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]);
 void mp_gen_yuv2rgb_map(struct mp_csp_params *params, uint8_t *map, int size);
 
+void mp_mul_matrix3x3(float a[3][3], float b[3][3]);
+void mp_invert_matrix3x3(float m[3][3]);
 void mp_invert_yuv2rgb(float out[3][4], float in[3][4]);
 void mp_map_int_color(float matrix[3][4], int clip_bits, int c[3]);
 

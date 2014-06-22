@@ -195,6 +195,9 @@ struct gl_video {
     struct mp_csp_equalizer video_eq;
     struct mp_image_params image_params;
 
+    // Source and destination color spaces for the CMS matrix
+    struct mp_csp_primaries csp_src, csp_dest;
+
     struct mp_rect src_rect;    // displayed part of the source video
     struct mp_rect src_rect_rot;// compensated for optional rotation
     struct mp_rect dst_rect;    // video rectangle on output window
@@ -642,7 +645,7 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     loc = gl->GetUniformLocation(program, "cms_matrix");
     if (loc >= 0) {
         float cms_matrix[3][3] = {{0}};
-        mp_get_cms_matrix(p->image_params.primaries, cms_matrix);
+        mp_get_cms_matrix(p->csp_src, p->csp_dest, cms_matrix);
         gl->UniformMatrix3fv(loc, 1, GL_TRUE, &cms_matrix[0][0]);
     }
 
@@ -848,7 +851,43 @@ static void compile_shaders(struct gl_video *p)
                                    shader_prelude, PRELUDE_END);
 
     bool use_cms = p->opts.srgb || p->use_lut_3d;
-    bool use_cms_matrix = use_cms && (p->image_params.primaries != MP_CSP_PRIM_BT_2020);
+
+    float input_gamma = 1.0;
+    float conv_gamma = 1.0;
+
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+        input_gamma *= 2.6;
+
+        // If we're using cms, we can treat it as proper linear input,
+        // otherwise we just scale back to 1.95 as a reasonable approximation.
+        if (use_cms) {
+            p->is_linear_rgb = true;
+        } else {
+            conv_gamma *= 1.0 / 1.95;
+        }
+    }
+
+    p->input_gamma = input_gamma;
+    p->conv_gamma = conv_gamma;
+
+    bool use_input_gamma = p->input_gamma != 1.0;
+    bool use_conv_gamma = p->conv_gamma != 1.0;
+    bool use_const_luma = p->image_params.colorspace == MP_CSP_BT_2020_C;
+
+    // Linear light scaling is only enabled when either color correction
+    // option (3dlut or srgb) is enabled, otherwise scaling is done in the
+    // source space. We also need to linearize for constant luminance systems.
+    bool convert_to_linear_gamma = !p->is_linear_rgb && use_cms || use_const_luma;
+
+    // Figure out the right color spaces we need to convert, if any
+    enum mp_csp_prim dest = p->opts.srgb ? MP_CSP_PRIM_BT_709 : MP_CSP_PRIM_BT_2020;
+    bool use_cms_matrix = false;
+
+    if (use_cms && p->image_params.primaries != dest) {
+        p->csp_src  = mp_get_csp_primaries(p->image_params.primaries);
+        p->csp_dest = mp_get_csp_primaries(dest);
+        use_cms_matrix = true;
+    }
 
     if (p->gl_target == GL_TEXTURE_RECTANGLE) {
         shader_def(&header, "VIDEO_SAMPLER", "sampler2DRect");
@@ -880,26 +919,6 @@ static void compile_shaders(struct gl_video *p)
     char *header_conv = talloc_strdup(tmp, "");
     char *header_final = talloc_strdup(tmp, "");
     char *header_sep = NULL;
-
-    float input_gamma = 1.0;
-    float conv_gamma = 1.0;
-
-    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
-        input_gamma *= 2.6;
-        conv_gamma *= 1.0 / 2.2;
-    }
-
-    p->input_gamma = input_gamma;
-    p->conv_gamma = conv_gamma;
-
-    bool use_input_gamma = p->input_gamma != 1.0;
-    bool use_conv_gamma = p->conv_gamma != 1.0;
-    bool use_const_luma = p->image_params.colorspace == MP_CSP_BT_2020_C;
-
-    // Linear light scaling is only enabled when either color correction
-    // option (3dlut or srgb) is enabled, otherwise scaling is done in the
-    // source space. We also need to linearize for constant luminance systems.
-    bool convert_to_linear_gamma = !p->is_linear_rgb && use_cms || use_const_luma;
 
     if (p->image_format == IMGFMT_NV12 || p->image_format == IMGFMT_NV21) {
         shader_def(&header_conv, "USE_CONV", "CONV_NV12");

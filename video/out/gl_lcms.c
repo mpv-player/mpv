@@ -167,17 +167,19 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
 
     // We always generate the 3DLUT against BT.2020, and transform into this
     // space inside the shader if the source differs.
-    static const cmsCIExyY d65 = {0.3127, 0.3290, 1.0};
-    static const cmsCIExyYTRIPLE bt2020prim = {
-        .Red   = {0.708, 0.292, 1.0},
-        .Green = {0.170, 0.797, 1.0},
-        .Blue  = {0.131, 0.046, 1.0},
+    struct mp_csp_primaries csp = mp_get_csp_primaries(MP_CSP_PRIM_BT_2020);
+
+    cmsCIExyY wp = {csp.white.x, csp.white.y, 1.0};
+    cmsCIExyYTRIPLE prim = {
+        .Red   = {csp.red.x,   csp.red.y,   1.0},
+        .Green = {csp.green.x, csp.green.y, 1.0},
+        .Blue  = {csp.blue.x,  csp.blue.y,  1.0},
     };
 
     // 2.4 is arbitrarily used as a gamma compression factor for the 3DLUT,
     // reducing artifacts due to rounding errors on wide gamut profiles
     cmsToneCurve *tonecurve = cmsBuildGamma(cms, 2.4);
-    cmsHPROFILE vid_profile = cmsCreateRGBProfileTHR(cms, &d65, &bt2020prim,
+    cmsHPROFILE vid_profile = cmsCreateRGBProfileTHR(cms, &wp, &prim,
                         (cmsToneCurve*[3]){tonecurve, tonecurve, tonecurve});
     cmsFreeToneCurve(tonecurve);
     cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_profile, TYPE_RGB_16,
