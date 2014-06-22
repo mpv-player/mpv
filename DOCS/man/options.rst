@@ -401,7 +401,7 @@ OPTIONS
 ``--cache-pause-below=<kBytes|no>``
     If the cache size goes below the specified value (in KB), pause and wait
     until the size set by ``--cache-pause-restart`` is reached, then  resume
-    playback (default: 500). If ``no`` is specified, this behavior is disabled.
+    playback (default: 50). If ``no`` is specified, this behavior is disabled.
 
     When the player is paused this way, the status line shows ``Buffering``
     instead of ``Paused``, and the OSD uses a clock symbol instead of the
@@ -410,7 +410,7 @@ OPTIONS
 ``--cache-pause-restart=<kBytes>``
     If the cache is paused due to the ``--cache-pause-below`` functionality,
     then the player unpauses as soon as the cache has this much data (in KB).
-    (Default: 1000)
+    (Default: 100)
 
 ``--cache-initial=<kBytes>``
     Playback will start when the cache has been filled up with this many
