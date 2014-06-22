@@ -45,7 +45,6 @@
 #include "osdep/path.h"
 
 #define STRNULL(s) ((s) ? (s) : "(NULL)")
-#define NOTEMPTY(s) ((s) && *(s) && !isspace(*(s)))
 
 #define MAX_CONFIG_PATHS 32
 
@@ -67,7 +66,7 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
     int i = 0;
 
     tmp = getenv("MPV_HOME");
-    if (NOTEMPTY(tmp))
+    if (tmp && *tmp)
         ret[i++] = talloc_strdup(talloc_ctx, tmp);
 
 #ifdef _WIN32
@@ -76,13 +75,13 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 #endif
 
     tmp = getenv("XDG_CONFIG_HOME");
-    if (NOTEMPTY(tmp))
+    if (tmp && *tmp)
         ret[i++] = talloc_asprintf(talloc_ctx, "%s/mpv", tmp);
-    else if (NOTEMPTY(home))
+    else if (home && *home)
         ret[i++] = talloc_asprintf(talloc_ctx, "%s/.config/mpv", home);
 
     // Maintain compatibility with old ~/.mpv
-    if (NOTEMPTY(home))
+    if (home && *home)
         ret[i++] = talloc_asprintf(talloc_ctx, "%s/.mpv", home);
 
 #if HAVE_COCOA
@@ -90,7 +89,7 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 #endif
 
     tmp = getenv("XDG_CONFIG_DIRS");
-    if (NOTEMPTY(tmp)) {
+    if (tmp && *tmp) {
         char *dirs = talloc_strdup(talloc_ctx, tmp);
         while (dirs) {
             char *dir = dirs;
