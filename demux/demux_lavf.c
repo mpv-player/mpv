@@ -96,8 +96,6 @@ const struct m_sub_options demux_lavf_conf = {
     },
 };
 
-#define MAX_PKT_QUEUE 50
-
 typedef struct lavf_priv {
     char *filename;
     const struct format_hack *format_hack;
