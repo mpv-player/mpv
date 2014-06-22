@@ -113,6 +113,8 @@ const m_option_t mp_opts[] = {
 #if HAVE_PRIORITY
     OPT_CHOICE("priority", w32_priority, 0,
                ({"no",          0},
+                {"realtime",    REALTIME_PRIORITY_CLASS},
+                {"high",        HIGH_PRIORITY_CLASS},
                 {"abovenormal", ABOVE_NORMAL_PRIORITY_CLASS},
                 {"normal",      NORMAL_PRIORITY_CLASS},
                 {"belownormal", BELOW_NORMAL_PRIORITY_CLASS},
