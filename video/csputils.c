@@ -213,6 +213,195 @@ void mp_gen_gamma_map(uint8_t *map, int size, float gamma)
     }
 }
 
+void mp_invert_matrix3x3(float m[3][3])
+{
+    float m00 = m[0][0], m01 = m[0][1], m02 = m[0][2],
+          m10 = m[1][0], m11 = m[1][1], m12 = m[1][2],
+          m20 = m[2][0], m21 = m[2][1], m22 = m[2][2];
+
+    // calculate the adjoint
+    m[0][0] =  (m11 * m22 - m21 * m12);
+    m[0][1] = -(m01 * m22 - m21 * m02);
+    m[0][2] =  (m01 * m12 - m11 * m02);
+    m[1][0] = -(m10 * m22 - m20 * m12);
+    m[1][1] =  (m00 * m22 - m20 * m02);
+    m[1][2] = -(m00 * m12 - m10 * m02);
+    m[2][0] =  (m10 * m21 - m20 * m11);
+    m[2][1] = -(m00 * m21 - m20 * m01);
+    m[2][2] =  (m00 * m11 - m10 * m01);
+
+    // calculate the determinant (as inverse == 1/det * adjoint,
+    // adjoint * m == identity * det, so this calculates the det)
+    float det = m00 * m[0][0] + m10 * m[0][1] + m20 * m[0][2];
+    det = 1.0f / det;
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++)
+            m[i][j] *= det;
+    }
+}
+
+// A := A * B
+void mp_mul_matrix3x3(float a[3][3], float b[3][3])
+{
+    float a00 = a[0][0], a01 = a[0][1], a02 = a[0][2],
+          a10 = a[1][0], a11 = a[1][1], a12 = a[1][2],
+          a20 = a[2][0], a21 = a[2][1], a22 = a[2][2];
+
+    for (int i = 0; i < 3; i++) {
+        a[0][i] = a00 * b[0][i] + a01 * b[1][i] + a02 * b[2][i];
+        a[1][i] = a10 * b[0][i] + a11 * b[1][i] + a12 * b[2][i];
+        a[2][i] = a20 * b[0][i] + a21 * b[1][i] + a22 * b[2][i];
+    }
+}
+
+/**
+ * \brief return the primaries associated with a certain mp_csp_primaries val
+ * \param csp the colorspace for which to return the primaries
+ */
+struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
+{
+    /*
+    Values from: ITU-R Recommendations BT.601-7, BT.709-5, BT.2020-0
+
+    https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.601-7-201103-I!!PDF-E.pdf
+    https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-5-200204-I!!PDF-E.pdf
+    https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2020-0-201208-I!!PDF-E.pdf
+    */
+
+    static const struct mp_csp_col_xy d65 = {0.3127, 0.3290};
+
+    switch (spc) {
+        case MP_CSP_PRIM_BT_601_525:
+            return (struct mp_csp_primaries) {
+                .red   = {0.630, 0.340},
+                .green = {0.310, 0.595},
+                .blue  = {0.155, 0.070},
+                .white = d65
+            };
+        case MP_CSP_PRIM_BT_601_625:
+            return (struct mp_csp_primaries) {
+                .red   = {0.640, 0.330},
+                .green = {0.290, 0.600},
+                .blue  = {0.150, 0.060},
+                .white = d65
+            };
+        case MP_CSP_PRIM_BT_709:
+            return (struct mp_csp_primaries) {
+                .red   = {0.640, 0.330},
+                .green = {0.300, 0.600},
+                .blue  = {0.150, 0.060},
+                .white = d65
+            };
+        case MP_CSP_PRIM_BT_2020:
+            return (struct mp_csp_primaries) {
+                .red   = {0.708, 0.292},
+                .green = {0.170, 0.797},
+                .blue  = {0.131, 0.046},
+                .white = d65
+            };
+        default:
+            return (struct mp_csp_primaries) {{0}};
+    }
+}
+
+// Compute the RGB/XYZ matrix as described here:
+// http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
+{
+    float S[3], X[4], Z[4];
+
+    // Convert from CIE xyY to XYZ. Note that Y=1 holds true for all primaries
+    X[0] = space.red.x   / space.red.y;
+    X[1] = space.green.x / space.green.y;
+    X[2] = space.blue.x  / space.blue.y;
+    X[3] = space.white.x / space.white.y;
+
+    Z[0] = (1 - space.red.x   - space.red.y)   / space.red.y;
+    Z[1] = (1 - space.green.x - space.green.y) / space.green.y;
+    Z[2] = (1 - space.blue.x  - space.blue.y)  / space.blue.y;
+    Z[3] = (1 - space.white.x - space.white.y) / space.white.y;
+
+    // S = XYZ^-1 * W
+    for (int i = 0; i < 3; i++) {
+        m[0][i] = X[i];
+        m[1][i] = 1;
+        m[2][i] = Z[i];
+    }
+
+    mp_invert_matrix3x3(m);
+
+    for (int i = 0; i < 3; i++)
+        S[i] = m[i][0] * X[3] + m[i][1] * 1 + m[i][2] * Z[3];
+
+    // M = [Sc * XYZc]
+    for (int i = 0; i < 3; i++) {
+        m[0][i] = S[i] * X[i];
+        m[1][i] = S[i] * 1;
+        m[2][i] = S[i] * Z[i];
+    }
+}
+
+/**
+ * \brief get the coefficients of the source -> bt2020 cms matrix
+ * \param src primaries of the source gamut
+ * \param dest primaries of the destination gamut
+ * \param m array to store coefficients into
+ */
+void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest, float m[3][3])
+{
+    // RGBd<-RGBs = RGBd<-XYZd * XYZd<-XYZs * XYZs<-RGBs
+    // Equations from: http://www.brucelindbloom.com/index.html?Math.html
+    float tmp[3][3] = {{0}};
+
+    // RGBd<-XYZd, inverted from XYZd<-RGBd
+    mp_get_rgb2xyz_matrix(dest, m);
+    mp_invert_matrix3x3(m);
+
+    // Chromatic adaptation, only needed if the white point differs
+    if (fabs(src.white.x - dest.white.x) > 1e-6 ||
+        fabs(src.white.y - dest.white.y) > 1e-6) {
+        // XYZd<-XYZs = Ma^-1 * (I*[Cd/Cs]) * Ma
+        // http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
+        float C[3][2];
+
+        // Ma = Bradford matrix, arguably most popular method in use today.
+        // This is derived experimentally and thus hard-coded.
+        float bradford[3][3] = {
+            {  0.8951,  0.2664, -0.1614 },
+            { -0.7502,  1.7135,  0.0367 },
+            {  0.0389, -0.0685,  1.0296 },
+        };
+
+        for (int i = 0; i < 3; i++) {
+            // source cone
+            C[i][0] = bradford[i][0] * src.white.x / src.white.y
+                    + bradford[i][1] * 1
+                    + bradford[i][2] * (1 - src.white.x - src.white.y) / src.white.y;
+
+            // dest cone
+            C[i][1] = bradford[i][0] * dest.white.x / dest.white.y
+                    + bradford[i][1] * 1
+                    + bradford[i][2] * (1 - dest.white.x - dest.white.y) / dest.white.y;
+        }
+
+        // tmp := I * [Cd/Cs] * Ma
+        for (int i = 0; i < 3; i++)
+            tmp[i][i] = C[i][1] / C[i][0];
+
+        mp_mul_matrix3x3(tmp, bradford);
+
+        // M := M * Ma^-1 * tmp
+        mp_invert_matrix3x3(bradford);
+        mp_mul_matrix3x3(m, bradford);
+        mp_mul_matrix3x3(m, tmp);
+    }
+
+    // XYZs<-RGBs
+    mp_get_rgb2xyz_matrix(src, tmp);
+    mp_mul_matrix3x3(m, tmp);
+}
+
 /* Fill in the Y, U, V vectors of a yuv2rgb conversion matrix
  * based on the given luma weights of the R, G and B components (lr, lg, lb).
  * lr+lg+lb is assumed to equal 1.
@@ -244,53 +433,6 @@ static void luma_coeffs(float m[3][4], float lr, float lg, float lb)
     m[1][2] = -2 * (1-lr) * lr/lg;
     m[2][2] = 0;
     // Constant coefficients (m[x][3]) not set here
-}
-
-/**
- * Get the coefficients of the source -> bt2020 gamut mapping matrix,
- * given an identifier describing the source gamut primaries.
- */
-void mp_get_cms_matrix(enum mp_csp_prim source, float m[3][3])
-{
-    // Conversion matrices to BT.2020 primaries
-    // These were computed using: http://lpaste.net/101796
-    switch (source) {
-        case MP_CSP_PRIM_BT_601_525: {
-            static const float from_525[3][3] = {
-                {0.5952542, 0.3493139, 0.0554319},
-                {0.0812437, 0.8915033, 0.0272530},
-                {0.0155123, 0.0819116, 0.9025760},
-            };
-            memcpy(m, from_525, sizeof(from_525));
-            break;
-        }
-        case MP_CSP_PRIM_BT_601_625: {
-            static const float from_625[3][3] = {
-                {0.6550368, 0.3021610, 0.0428023},
-                {0.0721406, 0.9166311, 0.0112283},
-                {0.0171134, 0.0978535, 0.8850332},
-            };
-            memcpy(m, from_625, sizeof(from_625));
-            break;
-        }
-        case MP_CSP_PRIM_BT_709: {
-            static const float from_709[3][3] = {
-                {0.6274039, 0.3292830, 0.0433131},
-                {0.0690973, 0.9195404, 0.0113623},
-                {0.0163914, 0.0880133, 0.8955953},
-            };
-            memcpy(m, from_709, sizeof(from_709));
-            break;
-        }
-        case MP_CSP_PRIM_BT_2020:
-        default: {
-            // No conversion necessary. This matrix should not even be used
-            // in this case, but assign it to the identity just to be safe.
-            static const float ident[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-            memcpy(m, ident, sizeof(ident));
-            break;
-        }
-    }
 }
 
 /**
@@ -329,12 +471,20 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
         break;
     }
     case MP_CSP_XYZ: {
-        static const float xyz_to_rgb[3][4] = {
-            {3.2404542,  -1.5371385, -0.4985314},
-            {-0.9692660,  1.8760108,  0.0415560},
-            {0.0556434,  -0.2040259,  1.0572252},
-        };
-        memcpy(m, xyz_to_rgb, sizeof(xyz_to_rgb));
+        // The vo should probably not be using a matrix generated by this
+        // function for XYZ sources, but if it does, let's just assume we
+        // want BT.709.
+        float xyz_to_rgb[3][3];
+        mp_get_rgb2xyz_matrix(mp_get_csp_primaries(MP_CSP_PRIM_BT_709), xyz_to_rgb);
+        mp_invert_matrix3x3(xyz_to_rgb);
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++)
+                m[i][j] = xyz_to_rgb[i][j];
+
+            m[i][3] = 0;
+        }
+
         levels_in = -1;
         break;
     }
@@ -512,44 +662,28 @@ int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
 
 void mp_invert_yuv2rgb(float out[3][4], float in[3][4])
 {
-    float m00 = in[0][0], m01 = in[0][1], m02 = in[0][2], m03 = in[0][3],
-          m10 = in[1][0], m11 = in[1][1], m12 = in[1][2], m13 = in[1][3],
-          m20 = in[2][0], m21 = in[2][1], m22 = in[2][2], m23 = in[2][3];
+    float tmp[3][3];
 
-    // calculate the adjoint
-    out[0][0] =  (m11 * m22 - m21 * m12);
-    out[0][1] = -(m01 * m22 - m21 * m02);
-    out[0][2] =  (m01 * m12 - m11 * m02);
-    out[1][0] = -(m10 * m22 - m20 * m12);
-    out[1][1] =  (m00 * m22 - m20 * m02);
-    out[1][2] = -(m00 * m12 - m10 * m02);
-    out[2][0] =  (m10 * m21 - m20 * m11);
-    out[2][1] = -(m00 * m21 - m20 * m01);
-    out[2][2] =  (m00 * m11 - m10 * m01);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++)
+            tmp[i][j] = in[i][j];
+    }
 
-    // calculate the determinant (as inverse == 1/det * adjoint,
-    // adjoint * m == identity * det, so this calculates the det)
-    float det = m00 * out[0][0] + m10 * out[0][1] + m20 * out[0][2];
-    det = 1.0f / det;
+    mp_invert_matrix3x3(tmp);
 
-    out[0][0] *= det;
-    out[0][1] *= det;
-    out[0][2] *= det;
-    out[1][0] *= det;
-    out[1][1] *= det;
-    out[1][2] *= det;
-    out[2][0] *= det;
-    out[2][1] *= det;
-    out[2][2] *= det;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++)
+            out[i][j] = tmp[i][j];
+    }
 
     // fix the constant coefficient
     // rgb = M * yuv + C
     // M^-1 * rgb = yuv + M^-1 * C
     // yuv = M^-1 * rgb - M^-1 * C
     //                  ^^^^^^^^^^
-    out[0][3] = -(out[0][0] * m03 + out[0][1] * m13 + out[0][2] * m23);
-    out[1][3] = -(out[1][0] * m03 + out[1][1] * m13 + out[1][2] * m23);
-    out[2][3] = -(out[2][0] * m03 + out[2][1] * m13 + out[2][2] * m23);
+    out[0][3] = -(out[0][0] * in[0][3] + out[0][1] * in[1][3] + out[0][2] * in[2][3]);
+    out[1][3] = -(out[1][0] * in[0][3] + out[1][1] * in[1][3] + out[1][2] * in[2][3]);
+    out[2][3] = -(out[2][0] * in[0][3] + out[2][1] * in[1][3] + out[2][2] * in[2][3]);
 }
 
 // Multiply the color in c with the given matrix.

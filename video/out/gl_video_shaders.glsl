@@ -62,13 +62,6 @@ vec3 bt2020_compand(vec3 v)
 }
 #endif
 
-// Constant matrix for conversion from BT.2020 to sRGB
-const mat3 srgb_matrix = mat3(
-     1.6604910, -0.1245505, -0.0181508,
-    -0.5876411,  1.1328999, -0.1005789,
-    -0.0728499, -0.0083494,  1.1187297
-);
-
 #!section vertex_all
 
 #if __VERSION__ < 130
@@ -105,7 +98,9 @@ void main() {
 #endif
 #ifdef USE_OSD_CMS_MATRIX
     // Convert to the right target gamut first (to BT.709 for sRGB,
-    // and to BT.2020 for 3DLUT).
+    // and to BT.2020 for 3DLUT). Normal clamping here as perceptually
+    // accurate colorimetry is probably not worth the performance trade-off
+    // here.
     color.rgb = clamp(cms_matrix * color.rgb, 0, 1);
 #endif
 #ifdef USE_OSD_3DLUT
@@ -113,7 +108,7 @@ void main() {
     color = vec4(texture3D(lut_3d, color.rgb).rgb, color.a);
 #endif
 #ifdef USE_OSD_SRGB
-    color.rgb = srgb_compand(clamp(srgb_matrix * color.rgb, 0, 1));
+    color.rgb = srgb_compand(color.rgb);
 #endif
 
     texcoord = vertex_texcoord;
@@ -452,24 +447,24 @@ void main() {
     // Convert to the right target gamut first (to BT.709 for sRGB,
     // and to BT.2020 for 3DLUT).
     color = cms_matrix * color;
+
+    // Clamp to the target gamut. This clamp is needed because the gamma
+    // functions are not well-defined outside this range, which is related to
+    // the fact that they're not representable on the target device.
+    // TODO: Desaturate colorimetrically; this happens automatically for
+    // 3dlut targets but not for sRGB mode. Not sure if this is a requirement.
+    color = clamp(color, 0, 1);
 #endif
 #ifdef USE_3DLUT
     // For the 3DLUT we are arbitrarily using 2.4 as input gamma to reduce
     // the amount of rounding errors, so we pull up to that space first and
     // then pass it through the 3D texture.
-    //
-    // The value is clamped to [0,1] first because the gamma function is not
-    // well-defined outside it. This should not be a problem because the 3dlut
-    // is not defined for values outside its boundaries either way, and no
-    // media can possibly exceed its BT.2020 source gamut either way due to
-    // that being the biggest taggable color space. This is just to avoid
-    // numerical quirks like -1e-30 turning into NaN.
-    color = pow(clamp(color, 0, 1), vec3(1/2.4));
+    color = pow(color, vec3(1/2.4));
     color = texture3D(lut_3d, color).rgb;
 #endif
 #ifdef USE_SRGB
     // Adapt and compand from the linear BT2020 source to the sRGB output
-    color = srgb_compand(clamp(srgb_matrix * color, 0, 1));
+    color = srgb_compand(color);
 #endif
     // If none of these options took care of companding again, we have to do
     // it manually here for the previously-expanded channels. This again
