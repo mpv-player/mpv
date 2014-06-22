@@ -198,6 +198,8 @@ int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts);
 // Internal
 int stream_cache_init(stream_t *cache, stream_t *stream,
                       struct mp_cache_opts *opts);
+int stream_file_cache_init(stream_t *cache, stream_t *stream,
+                           struct mp_cache_opts *opts);
 
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len);
 

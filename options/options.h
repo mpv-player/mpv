@@ -47,6 +47,8 @@ struct mp_cache_opts {
     int def_size;
     int initial;
     int seek_min;
+    char *file;
+    int file_max;
 };
 
 typedef struct MPOpts {

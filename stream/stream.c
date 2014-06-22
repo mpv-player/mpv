@@ -766,6 +766,28 @@ stream_t *open_memory_stream(void *data, int len)
     return s;
 }
 
+static stream_t *open_cache(stream_t *orig, const char *name)
+{
+    stream_t *cache = new_stream();
+    cache->uncached_type = orig->type;
+    cache->uncached_stream = orig;
+    cache->seekable = true;
+    cache->mode = STREAM_READ;
+    cache->read_chunk = 4 * STREAM_BUFFER_SIZE;
+
+    cache->url = talloc_strdup(cache, orig->url);
+    cache->mime_type = talloc_strdup(cache, orig->mime_type);
+    cache->demuxer = talloc_strdup(cache, orig->demuxer);
+    cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
+    cache->safe_origin = orig->safe_origin;
+    cache->opts = orig->opts;
+    cache->global = orig->global;
+
+    cache->log = mp_log_new(cache, cache->global->log, name);
+
+    return cache;
+}
+
 static struct mp_cache_opts check_cache_opts(stream_t *stream,
                                              struct mp_cache_opts *opts)
 {
@@ -794,27 +816,21 @@ int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
     if (use_opts.size < 1)
         return -1;
 
-    stream_t *cache = new_stream();
-    cache->uncached_type = orig->type;
-    cache->uncached_stream = orig;
-    cache->seekable = true;
-    cache->mode = STREAM_READ;
-    cache->read_chunk = 4 * STREAM_BUFFER_SIZE;
+    stream_t *fcache = open_cache(orig, "file-cache");
+    if (stream_file_cache_init(fcache, orig, &use_opts) <= 0) {
+        fcache->uncached_stream = NULL; // don't free original stream
+        free_stream(fcache);
+        fcache = orig;
+    }
 
-    cache->url = talloc_strdup(cache, orig->url);
-    cache->mime_type = talloc_strdup(cache, orig->mime_type);
-    cache->demuxer = talloc_strdup(cache, orig->demuxer);
-    cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
-    cache->safe_origin = orig->safe_origin;
-    cache->opts = orig->opts;
-    cache->global = orig->global;
+    stream_t *cache = open_cache(fcache, "cache");
 
-    cache->log = mp_log_new(cache, cache->global->log, "cache");
-
-    int res = stream_cache_init(cache, orig, &use_opts);
+    int res = stream_cache_init(cache, fcache, &use_opts);
     if (res <= 0) {
         cache->uncached_stream = NULL; // don't free original stream
         free_stream(cache);
+        if (fcache != orig)
+            free_stream(fcache);
     } else {
         *stream = cache;
     }

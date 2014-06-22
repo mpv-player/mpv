@@ -428,6 +428,31 @@ OPTIONS
     on the situation, either of these might be slower than the other method.
     This option allows control over this.
 
+``--cache-file=<path>``
+    Create a cache file on the filesystem with the given name. The file is
+    always overwritten. When the general cache is enabled, this file cache
+    will be used to store whatever is read from the source stream.
+
+    This will always overwrite the cache file, and you can't use an existing
+    cache file to resume playback of a stream. (Technically, mpv wouldn't
+    even know which blocks in the file are valid and which not.)
+
+    The resulting file will not necessarily contain all data of the source
+    stream. For example, if you seek, the parts that were skipped over are
+    never read and consequently are not written to the cache. The skipped over
+    parts are filled with zeros. This means that the cache file doesn't
+    necessarily correspond to a full download of the source stream.
+
+    Both of these issues could be improved if there is any user interest.
+
+    Also see ``--cache-file-size``.
+
+``--cache-file-size=<kBytes>``
+    Maximum size of the file created with ``--cache-file``. For read accesses
+    above this size, the cache is simply not used.
+
+    (Default: 1048576, 1 GB.)
+
 ``--cdda-...``
     These options can be used to tune the CD Audio reading feature of mpv.
 

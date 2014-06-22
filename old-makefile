@@ -206,6 +206,7 @@ SOURCES = audio/audio.c \
           player/timeline/tl_mpv_edl.c \
           player/timeline/tl_cue.c \
           stream/cache.c \
+          stream/cache_file.c \
           stream/cookies.c \
           stream/rar.c \
           stream/stream.c \
