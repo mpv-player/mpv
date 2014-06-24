@@ -85,17 +85,21 @@ with FFmpeg only. See the [wiki article][ffmpeg_vs_libav] about the issue.
 Release cycle
 -------------
 
-Every few months, a new release is cut off of the master branch. Currently,
-these releases are assigned a version number ``0.X.0``. Only the latest release
-is maintained. As part of the maintenance process, minor releases are made,
-which are assigned ``0.X.Y`` version numbers. Minor releases contain bug fixes
-only. They never merge the master branch, and no features are added to it. The
-goal of releases is to provide stability and an unchanged base for the sake of
-Linux distributions. If you want the newest features, just use the master
-branch. (The master branch is stable most of the time, except sometimes, when
-it's not.)
+Every few months, a new release is cut off of the master branch and is assigned
+a 0.X.0 version number.
+
+As part of the maintenance process, minor releases are made, which are assigned
+0.X.Y version numbers. Minor releases contain bug fixes only. They never merge
+the master branch, and no features are added to it. Only the latest release is
+maintained.
+
+The goal of releases is to provide stability and an unchanged base for the sake
+of Linux distributions. If you want the newest features, just use the master
+branch, which is stable most of the time, except sometimes, when it's not.
 
 Releases other than the latest release are unsupported and unmaintained.
+
+See the [release policy document][release-policy] for more information.
 
 Bug reports
 -----------
@@ -132,3 +136,4 @@ To contact the `mpv` team in private write to `mpv-team@googlegroups.com`.
 [mpv-users]: https://groups.google.com/forum/?hl=en#!forum/mpv-users
 [mpv-devel]: https://groups.google.com/forum/?hl=en#!forum/mpv-devel
 [ffmpeg_vs_libav]: https://github.com/mpv-player/mpv/wiki/FFmpeg-versus-Libav
+[release-policy]: https://github.com/mpv-player/mpv/blob/master/release-policy.md
