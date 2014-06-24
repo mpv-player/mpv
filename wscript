@@ -738,15 +738,15 @@ scripting_features = [
 ]
 
 _INSTALL_DIRS_LIST = [
-    ('bindir',  '${PREFIX}/bin',         'binary files'),
-    ('libdir',  '${PREFIX}/lib',         'library files'),
-    ('confdir', '${PREFIX}/etc/xdg/mpv', 'configuration files'),
+    ('bindir',  '${PREFIX}/bin',      'binary files'),
+    ('libdir',  '${PREFIX}/lib',      'library files'),
+    ('confdir', '${PREFIX}/etc/mpv',  'configuration files'),
 
-    ('incdir',  '${PREFIX}/include',     'include files'),
+    ('incdir',  '${PREFIX}/include',  'include files'),
 
-    ('datadir', '${PREFIX}/share',       'data files'),
-    ('mandir',  '${DATADIR}/man',        'man pages '),
-    ('docdir',  '${DATADIR}/doc/mpv',    'documentation files'),
+    ('datadir', '${PREFIX}/share',    'data files'),
+    ('mandir',  '${DATADIR}/man',     'man pages '),
+    ('docdir',  '${DATADIR}/doc/mpv', 'documentation files'),
 ]
 
 def options(opt):
