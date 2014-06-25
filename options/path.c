@@ -60,7 +60,6 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
         return ret;
     }
 
-    const char *home = getenv("HOME");
     const char *tmp = NULL;
     int i = 0;
 
@@ -68,10 +67,14 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
     if (tmp && *tmp)
         ret[i++] = talloc_strdup(talloc_ctx, tmp);
 
-#ifdef _WIN32
-    ret[i++] = mp_get_win_exe_dir(talloc_ctx);
-    ret[i++] = mp_get_win_app_dir(talloc_ctx);
-#endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    if ((ret[i] = mp_get_win_app_dir(talloc_ctx)))
+        i++;
+    if ((ret[i] = mp_get_win_exe_dir(talloc_ctx)))
+        i++;
+
+#else
+    const char *home = getenv("HOME");
 
     tmp = getenv("XDG_CONFIG_HOME");
     if (tmp && *tmp)
@@ -111,6 +114,9 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
     else {
         ret[i++] = MPLAYER_CONFDIR;
     }
+
+//_WIN32 && !__CYGWIN__
+#endif
 
     MP_VERBOSE(global, "search dirs:");
     for (char **c = ret; *c; c++)

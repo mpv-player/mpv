@@ -28,29 +28,27 @@ char *mp_get_win_exe_dir(void *talloc_ctx)
 {
     wchar_t w_exedir[MAX_PATH + 1] = {0};
 
-    int len = (int)GetModuleFileNameW(NULL, path, MAX_PATH);
+    int len = (int)GetModuleFileNameW(NULL, w_exedir, MAX_PATH);
     int imax = 0;
     for (int i = 0; i < len; i++) {
-        if (path[i] == '\\') {
-            path[i] = '/';
+        if (w_exedir[i] == '\\') {
+            w_exedir[i] = '/';
             imax = i;
         }
     }
 
-    path[imax] = '\0';
+    w_exedir[imax] = '\0';
 
-    return mp_to_utf8(talloc_ctx, w_exedir);
+    return talloc_asprintf(talloc_ctx, "%s/mpv", mp_to_utf8(talloc_ctx, w_exedir));
 }
 
 char *mp_get_win_app_dir(void *talloc_ctx)
 {
     wchar_t w_appdir[MAX_PATH + 1] = {0};
 
-#ifndef __CYGWIN__
     if (SHGetFolderPathW(NULL, CSIDL_APPDATA|CSIDL_FLAG_CREATE, NULL,
         SHGFP_TYPE_CURRENT, w_appdir) != S_OK)
-        w_appdir[0] = '\0';
-#endif
+        return NULL;
 
-    return mp_to_utf8(talloc_ctx, w_appdir);
+    return talloc_asprintf(talloc_ctx, "%s/mpv", mp_to_utf8(talloc_ctx, w_appdir));
 }
