@@ -68,9 +68,9 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
         ret[i++] = talloc_strdup(talloc_ctx, tmp);
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    if ((ret[i] = mp_get_win_app_dir(talloc_ctx)))
-        i++;
     if ((ret[i] = mp_get_win_exe_dir(talloc_ctx)))
+        i++;
+    if ((ret[i] = mp_get_win_app_dir(talloc_ctx)))
         i++;
 
 #else
