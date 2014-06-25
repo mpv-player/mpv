@@ -1,0 +1,115 @@
+Changes
+-------
+
+- Drop support for Libav 9 and earlier FFmpeg releases. At least FFmpeg 2.1.4 or
+  Libav 10 are now required.
+- Change cache options to take kilobytes instead of percentages, and raise the
+  default values.
+- Lower --auto-pause/resume defaults values to improve web streams playback.
+- Use dvdnav support instead of the internal dvd implementation for dvd:// URLs
+  (the old implementation is available under dvdread://).
+- Rename some options to make them more consistent. Here's a partial list of
+  renamed options:
+
+  + Audio-related:
+
+    * --audiofile       → --audio-file
+    * --audiofile-cache → --audio-file-cache
+    * --channels        → --audio-channels
+    * --format          → --audio-format
+    * --srate           → --audio-samplerate
+
+  + Input-related:
+
+    * --ar              → --input-appleremote
+    * --consolecontrols → --input-terminal
+    * --media-keys      → --input-media-keys
+    * --joystick        → --input-joystick
+    * --lirc            → --input-lirc
+    * --lircconf        → --input-lirc-conf
+    * --mouse-movements → --input-cursor
+    * --right-alt-gr    → --input-right-alt-gr
+
+  + Terminal-related:
+
+    * --msgcolor    → --msg-color
+    * --msglevel    → --msg-level
+    * --msgmodule   → --msg-module
+    * --msgtime     → --msg-time
+    * --playing-msg → --term-playing-msg
+    * --status-msg  → --term-status-msg
+
+  + Subtitle-related:
+
+    * --ass           → --sub-ass
+    * --autosub       → --sub-auto
+    * --autosub-match → --sub-auto-match
+    * --sub           → --sub-file
+    * --subcp         → --sub-codepage
+    * --subfps        → --sub-fps
+
+  + Video-related:
+
+    * --aspect    → --video-aspect
+    * --fstype    → --x11-fstype
+    * --native-fs → --fs-missioncontrol
+    * --name      → --x11-name
+
+- Remove global options variables for --tv, --pvr, --dvb and --cdda.
+- Move post-processing support to a separate filter (vdpaupp) for the vdpau vo,
+  and deprecate the old vdpau post-processing options.
+- Remove radio:// support.
+- Remove support for ASX, SMIL and NSC playlist formats.
+- Re-introduce pretty-printing for module names with --msg-module.
+- Load Lua scripts under `$MPV_HOME/lua/` (default `~/.mpv/lua/`) automatically
+  (this can be disabled by using `--load-scripts=no`).
+- Corrupt/broken frames are not shown by default anymore (this can be re-enabled
+  by using --vd-lavc-show-all=yes).
+- Automatically copy metadata from the input file to the output when encoding
+  (this can be disabled by using --no-ometadata).
+- Change --sub-file semantics: if multiple --sub-file are used, the subtitle
+  tracks can be cycled at runtime and used with --sid and --secondary-sid.
+- Make the subtitle font size relative to the window, instead of the video, when
+  --sub-scale-with-window=yes is used.
+- Change default ao from wasapi to dsound on Windows.
+
+Bug fixes
+---------
+
+- Fix tv:// playback with missing timestamps.
+- Fix display of cover art inside audio files with the vdpau vo.
+
+New features
+------------
+
+- Add client API in the form of the libmpv library, which is intended to be a
+  stable API to get some rough control over the player (this is not supported on
+  Mac OS X).
+- Add option for approximating BT.709 gamma for the opengl vo (similarly to many
+  programs in the Apple ecosystem).
+- Add support for non-BT.709 primaries.
+- Add support for BT.2020 colorspace.
+- Generate and install zsh completion script (disabled by default since it may
+  interfere with cross-compilation).
+- Add support for looping a single file (instead of the whole playlist) with the
+  --loop-file option.
+- Add VapourSynth video filter (this has various restrictions, which are listed
+  in the manpage).
+- Add support for ReplayGain in the volume audio filter.
+- Add a --config-dir option to force config directory.
+- Add support for GPU switching on Mac OS X.
+- Add support for automatic selection of color profiles on Mac OS X.
+- Add support for binding commands to sequences of keys.
+- Add support for passing options to Lua scripts with --lua-opts.
+- Add some filesystem utility functions to the Lua API.
+- Add functions for observing property changes to the Lua API .
+- Add support for creating a cache file on the filesystem with --cache-file.
+- Add support for window dragging by grabbing with the x11 vo.
+- Add option to write file name to watch later file.
+- Add support for a "weak" gapless mode, and make it default (the old mode can
+  be enabled with --gapless-audio or --gapless-audio=yes).
+- Automatically detect network filesystems on Linux and Windows.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 56ce2a3..8bb7d42`` in
+the git repository.
