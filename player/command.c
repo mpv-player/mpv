@@ -2349,6 +2349,9 @@ static int mp_property_tv_channel(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
+        return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         return prop_stream_ctrl(ctx, STREAM_CTRL_TV_SET_CHAN, *(char **)arg);
     case M_PROPERTY_SWITCH: {
