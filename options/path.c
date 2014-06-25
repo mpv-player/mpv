@@ -68,6 +68,8 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
         ret[i++] = talloc_strdup(talloc_ctx, tmp);
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
+    if ((ret[i] = mp_get_win_exe_subdir(talloc_ctx)))
+        i++;
     if ((ret[i] = mp_get_win_exe_dir(talloc_ctx)))
         i++;
     if ((ret[i] = mp_get_win_app_dir(talloc_ctx)))
@@ -100,12 +102,12 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
             if (dirs)
                 *dirs++ = 0;
 
-            if (!*dir)
+            if (!dir[0])
                 continue;
 
             ret[i++] = talloc_asprintf(talloc_ctx, "%s%s", dir, "/mpv");
 
-            if ((i + 1) >= MAX_CONFIG_PATHS) {
+            if (i + 1 >= MAX_CONFIG_PATHS) {
                 MP_WARN(global, "Too many config files, not reading any more\n");
                 break;
             }

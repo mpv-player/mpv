@@ -39,7 +39,11 @@ char *mp_get_win_exe_dir(void *talloc_ctx)
 
     w_exedir[imax] = '\0';
 
-    return talloc_asprintf(talloc_ctx, "%s/mpv", mp_to_utf8(talloc_ctx, w_exedir));
+    return mp_to_utf8(talloc_ctx, w_exedir);
+}
+char *mp_get_win_exe_subdir(void *talloc_ctx)
+{
+    return talloc_asprintf(talloc_ctx, "%s/mpv", mp_get_win_exe_dir(talloc_ctx));
 }
 
 char *mp_get_win_app_dir(void *talloc_ctx)
