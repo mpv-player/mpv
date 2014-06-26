@@ -35,6 +35,7 @@
 
 #include "config.h"
 
+#include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
 #include "options/options.h"
@@ -43,11 +44,10 @@
 #include "osdep/io.h"
 #include "osdep/path.h"
 
-#define STRNULL(s) ((s) ? (s) : "(NULL)")
-
-static void mp_add_xdg_config_dirs(void *talloc_ctx, struct mpv_global *global,
-                                   char **dirs, int i)
+static void mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i)
 {
+    void *talloc_ctx = dirs;
+
     char *home = getenv("HOME");
     char *tmp = NULL;
 
@@ -106,7 +106,7 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
     char **ret = talloc_zero_array(talloc_ctx, char*, MAX_CONFIG_PATHS);
 
     if (global->opts->force_configdir && global->opts->force_configdir[0]) {
-        ret[0] = talloc_strdup(talloc_ctx, global->opts->force_configdir);
+        ret[0] = talloc_strdup(ret, global->opts->force_configdir);
         return ret;
     }
 
@@ -115,12 +115,12 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 
     tmp = getenv("MPV_HOME");
     if (tmp && *tmp)
-        ret[i++] = talloc_strdup(talloc_ctx, tmp);
+        ret[i++] = talloc_strdup(ret, tmp);
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    mp_add_win_config_dirs(talloc_ctx, global, ret, i);
+    mp_add_win_config_dirs(global, ret, i);
 #else
-    mp_add_xdg_config_dirs(talloc_ctx, global, ret, i);
+    mp_add_xdg_config_dirs(global, ret, i);
 #endif
 
     MP_VERBOSE(global, "search dirs:");
@@ -151,8 +151,8 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
 
     talloc_free(tmp);
 
-    MP_VERBOSE(global, "config path: '%s' -> '%s'\n", STRNULL(filename),
-               STRNULL(res));
+    MP_VERBOSE(global, "config path: '%s' -> '%s'\n", filename,
+               res ? res : "(NULL)");
     return res;
 }
 
@@ -161,21 +161,25 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
 {
     struct MPOpts *opts = global->opts;
 
-    char **front = talloc_zero_array(talloc_ctx, char*, MAX_CONFIG_PATHS);
-    char **ret = front + (MAX_CONFIG_PATHS - 1);
+    char **ret = talloc_zero_array(talloc_ctx, char*, MAX_CONFIG_PATHS + 1);
+    int num_ret = 0;
 
     if (opts->load_config) {
-        for (char **dir = mp_config_dirs(talloc_ctx, global); *dir; dir++) {
-            char *config_file = talloc_asprintf(talloc_ctx, "%s/%s", *dir, filename);
+        char **dir = mp_config_dirs(NULL, global);
+        for (int i = 0; dir && dir[i]; i++) {
+            char *file = talloc_asprintf(ret, "%s/%s", dir[i], filename);
 
-            if (!mp_path_exists(config_file))
+            if (!mp_path_exists(file) || num_ret >= MAX_CONFIG_PATHS)
                 continue;
 
-            *(--ret) = config_file;
+            ret[num_ret++] = file;
         }
     }
 
-    MP_VERBOSE(global, "config file: '%s'\n", STRNULL(filename));
+    for (int n = 0; n < num_ret / 2; n++)
+        MPSWAP(char*, ret[n], ret[num_ret - n - 1]);
+
+    MP_VERBOSE(global, "config file: '%s'\n", filename);
 
     for (char** c = ret; *c; c++)
         MP_VERBOSE(global, "    -> '%s'\n", *c);
