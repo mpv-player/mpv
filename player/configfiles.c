@@ -49,11 +49,10 @@
 static void load_all_cfgfiles(struct MPContext *mpctx, char *section,
                               char *filename)
 {
-    void *tmp = talloc_new(NULL);
-    char **cf = mp_find_all_config_files(tmp, mpctx->global, filename);
+    char **cf = mp_find_all_config_files(NULL, mpctx->global, filename);
     for (int i = 0; cf && cf[i]; i++)
         m_config_parse_config_file(mpctx->mconfig, cf[i], section, 0);
-    talloc_free(tmp);
+    talloc_free(cf);
 }
 
 #define SECT_ENCODE "encoding"
@@ -67,8 +66,6 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     mp_mk_config_dir(mpctx->global, "");
 
     m_config_t *conf = mpctx->mconfig;
-    void *tmp = talloc_new(NULL);
-    char *conffile;
     char *section = NULL;
     bool encoding = opts->encode_opts &&
         opts->encode_opts->file && opts->encode_opts->file[0];
@@ -81,9 +78,10 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
 
     // The #if is a stupid hack to avoid errors if libavfilter is not available.
 #if HAVE_LIBAVFILTER && HAVE_ENCODING
-    conffile = mp_find_config_file(tmp, mpctx->global, "encoding-profiles.conf");
-    if (conffile)
-        m_config_parse_config_file(mpctx->mconfig, conffile, SECT_ENCODE, 0);
+    char *cf = mp_find_config_file(NULL, mpctx->global, "encoding-profiles.conf");
+    if (cf)
+        m_config_parse_config_file(mpctx->mconfig, cf, SECT_ENCODE, 0);
+    talloc_free(cf);
 #endif
 
     load_all_cfgfiles(mpctx, section, "config");
@@ -91,8 +89,6 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
 
     if (encoding)
         m_config_set_profile(conf, m_config_add_profile(conf, SECT_ENCODE), 0);
-
-    talloc_free(tmp);
 }
 
 static int try_load_config(struct MPContext *mpctx, const char *file, int flags)
@@ -279,8 +275,8 @@ static bool needs_config_quoting(const char *s)
 
 void mp_write_watch_later_conf(struct MPContext *mpctx)
 {
-    void *tmp = talloc_new(NULL);
     char *filename = mpctx->filename;
+    char *conffile = NULL;
     if (!filename)
         goto exit;
 
@@ -290,9 +286,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
 
     mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
 
-    char *conffile = mp_get_playback_resume_config_filename(mpctx->global,
-                                                            mpctx->filename);
-    talloc_steal(tmp, conffile);
+    conffile = mp_get_playback_resume_config_filename(mpctx->global,
+                                                      mpctx->filename);
     if (!conffile)
         goto exit;
 
@@ -327,7 +322,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     fclose(file);
 
 exit:
-    talloc_free(tmp);
+    talloc_free(conffile);
 }
 
 void mp_load_playback_resume(struct MPContext *mpctx, const char *file)

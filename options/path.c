@@ -136,20 +136,21 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
 {
     struct MPOpts *opts = global->opts;
 
-    void *tmp = talloc_new(NULL);
     char *res = NULL;
     if (opts->load_config) {
-        for (char **dir = mp_config_dirs(tmp, global); *dir; dir++) {
-            char *config_file = talloc_asprintf(tmp, "%s/%s", *dir, filename);
+        char **dirs = mp_config_dirs(NULL, global);
+        for (int i = 0; dirs && dirs[i]; i++) {
+            char *file = talloc_asprintf(talloc_ctx, "%s/%s", dirs[i], filename);
 
-            if (mp_path_exists(config_file)) {
-                res = talloc_strdup(talloc_ctx, config_file);
+            if (mp_path_exists(file)) {
+                res = file;
                 break;
             }
-        }
-    }
 
-    talloc_free(tmp);
+            talloc_free(file);
+        }
+        talloc_free(dirs);
+    }
 
     MP_VERBOSE(global, "config path: '%s' -> '%s'\n", filename,
                res ? res : "(NULL)");
@@ -165,15 +166,16 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
     int num_ret = 0;
 
     if (opts->load_config) {
-        char **dir = mp_config_dirs(NULL, global);
-        for (int i = 0; dir && dir[i]; i++) {
-            char *file = talloc_asprintf(ret, "%s/%s", dir[i], filename);
+        char **dirs = mp_config_dirs(NULL, global);
+        for (int i = 0; dirs && dirs[i]; i++) {
+            char *file = talloc_asprintf(ret, "%s/%s", dirs[i], filename);
 
             if (!mp_path_exists(file) || num_ret >= MAX_CONFIG_PATHS)
                 continue;
 
             ret[num_ret++] = file;
         }
+        talloc_free(dirs);
     }
 
     for (int n = 0; n < num_ret / 2; n++)
@@ -331,8 +333,7 @@ bstr mp_split_proto(bstr path, bstr *out_url)
 
 void mp_mkdirp(const char *dir)
 {
-    void *tmp = talloc_new(NULL);
-    char *path = talloc_strdup(tmp, dir);
+    char *path = talloc_strdup(NULL, dir);
     char *cdir = path + 1;
 
     while (cdir) {
@@ -346,7 +347,7 @@ void mp_mkdirp(const char *dir)
             *cdir++ = '/';
     }
 
-    talloc_free(tmp);
+    talloc_free(path);
 }
 
 void mp_mk_config_dir(struct mpv_global *global, char *subdir)
