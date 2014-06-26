@@ -32,13 +32,10 @@ struct mpv_global;
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename);
 
-// Search for the input filename in the global configuration location.
-char *mp_find_global_config_file(void *talloc_ctx, struct mpv_global *global,
-                                 const char *filename);
-
-// Search for the input filename in the user configuration location.
-char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
-                               const char *filename);
+// Find all instances of the given config file. Paths are returned in order
+// from lowest to highest priority.
+char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
+                                const char *filename);
 
 // Normally returns a talloc_strdup'ed copy of the path, except for special
 // paths starting with '~'. Used to allow the user explicitly reference a
@@ -77,6 +74,7 @@ bool mp_is_url(bstr path);
 
 bstr mp_split_proto(bstr path, bstr *out_url);
 
+void mp_mkdirp(const char *dir);
 void mp_mk_config_dir(struct mpv_global *global, char *subdir);
 
 #endif /* MPLAYER_PATH_H */
