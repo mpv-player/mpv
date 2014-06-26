@@ -46,17 +46,26 @@
 #include "core.h"
 #include "command.h"
 
+static void load_all_cfgfiles(struct MPContext *mpctx, char *section,
+                              char *filename)
+{
+    void *tmp = talloc_new(NULL);
+    char **cf = mp_find_all_config_files(tmp, mpctx->global, filename);
+    for (int i = 0; cf && cf[i]; i++)
+        m_config_parse_config_file(mpctx->mconfig, cf[i], section, 0);
+    talloc_free(tmp);
+}
+
 #define SECT_ENCODE "encoding"
 
-bool mp_parse_cfgfiles(struct MPContext *mpctx)
+void mp_parse_cfgfiles(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     if (!opts->load_config)
-        return true;
+        return;
 
     m_config_t *conf = mpctx->mconfig;
     void *tmp = talloc_new(NULL);
-    bool r = true;
     char *conffile;
     char *section = NULL;
     bool encoding = opts->encode_opts &&
@@ -75,26 +84,13 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
         m_config_parse_config_file(mpctx->mconfig, conffile, SECT_ENCODE, 0);
 #endif
 
-    // Maintain compatibility with /config
-    for (char** cf = mp_find_all_config_files(tmp, mpctx->global, "config"); *cf; cf++) {
-        if (m_config_parse_config_file(conf, *cf, section, 0) < 0) {
-            r = false;
-            goto done;
-        }
-    }
-    for (char** cf = mp_find_all_config_files(tmp, mpctx->global, "mpv.conf"); *cf; cf++) {
-        if (m_config_parse_config_file(conf, *cf, section, 0) < 0) {
-            r = false;
-            goto done;
-        }
-    }
+    load_all_cfgfiles(mpctx, section, "config");
+    load_all_cfgfiles(mpctx, section, "mpv.conf");
 
     if (encoding)
         m_config_set_profile(conf, m_config_add_profile(conf, SECT_ENCODE), 0);
 
-done:
     talloc_free(tmp);
-    return r;
 }
 
 static int try_load_config(struct MPContext *mpctx, const char *file, int flags)

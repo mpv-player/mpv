@@ -363,7 +363,7 @@ void clear_audio_output_buffers(struct MPContext *mpctx);
 void clear_audio_decode_buffers(struct MPContext *mpctx);
 
 // configfiles.c
-bool mp_parse_cfgfiles(struct MPContext *mpctx);
+void mp_parse_cfgfiles(struct MPContext *mpctx);
 void mp_load_auto_profiles(struct MPContext *mpctx);
 void mp_get_resume_defaults(struct MPContext *mpctx);
 void mp_load_playback_resume(struct MPContext *mpctx, const char *file);

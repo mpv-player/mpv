@@ -491,8 +491,7 @@ int mpv_main(int argc, char *argv[])
 
     mp_print_version(mpctx->log, false);
 
-    if (!mp_parse_cfgfiles(mpctx))
-        exit_player(mpctx, EXIT_ERROR);
+    mp_parse_cfgfiles(mpctx);
 
     int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
                                            mpctx->global, argc, argv);
