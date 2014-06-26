@@ -56,3 +56,16 @@ char *mp_get_win_app_dir(void *talloc_ctx)
 
     return talloc_asprintf(talloc_ctx, "%s/mpv", mp_to_utf8(talloc_ctx, w_appdir));
 }
+
+
+
+void mp_add_win_config_dirs(void *talloc_ctx, struct mpv_global *global,
+                            char **dirs, int i)
+{
+    if ((dirs[i] = mp_get_win_exe_subdir(talloc_ctx)))
+        i++;
+    if ((dirs[i] = mp_get_win_exe_dir(talloc_ctx)))
+        i++;
+    if ((dirs[i] = mp_get_win_app_dir(talloc_ctx)))
+        i++;
+}

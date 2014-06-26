@@ -45,9 +45,53 @@
 
 #define STRNULL(s) ((s) ? (s) : "(NULL)")
 
-#define MAX_CONFIG_PATHS 32
 
 
+static void mp_add_xdg_config_dirs(void *talloc_ctx, struct mpv_global *global,
+                                   char **dirs, int i)
+{
+    const char *home = getenv("HOME");
+    const char *tmp = NULL;
+
+    tmp = getenv("XDG_CONFIG_HOME");
+    if (tmp && *tmp)
+        dirs[i++] = talloc_asprintf(talloc_ctx, "%s/mpv", tmp);
+    else if (home && *home)
+        dirs[i++] = talloc_asprintf(talloc_ctx, "%s/.config/mpv", home);
+
+    // Maintain compatibility with old ~/.mpv
+    if (home && *home)
+        dirs[i++] = talloc_asprintf(talloc_ctx, "%s/.mpv", home);
+
+#if HAVE_COCOA
+    dirs[i++] = mp_get_macosx_bundle_dir(talloc_ctx);
+#endif
+
+    tmp = getenv("XDG_CONFIG_DIRS");
+    if (tmp && *tmp) {
+        char *xdgdirs = talloc_strdup(talloc_ctx, tmp);
+        while (xdgdirs) {
+            char *dir = xdgdirs;
+
+            xdgdirs = strchr(xdgdirs, ':');
+            if (xdgdirs)
+                *xdgdirs++ = 0;
+
+            if (!dir[0])
+                continue;
+
+            dirs[i++] = talloc_asprintf(talloc_ctx, "%s%s", dir, "/mpv");
+
+            if (i + 1 >= MAX_CONFIG_PATHS) {
+                MP_WARN(global, "Too many config files, not reading any more\n");
+                break;
+            }
+        }
+    }
+    else {
+        dirs[i++] = MPLAYER_CONFDIR;
+    }
+}
 
 // Return NULL-terminated array of config directories, from highest to lowest
 // priority
@@ -68,56 +112,9 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
         ret[i++] = talloc_strdup(talloc_ctx, tmp);
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    if ((ret[i] = mp_get_win_exe_subdir(talloc_ctx)))
-        i++;
-    if ((ret[i] = mp_get_win_exe_dir(talloc_ctx)))
-        i++;
-    if ((ret[i] = mp_get_win_app_dir(talloc_ctx)))
-        i++;
-
+    mp_add_win_config_dirs(talloc_ctx, global, ret, i);
 #else
-    const char *home = getenv("HOME");
-
-    tmp = getenv("XDG_CONFIG_HOME");
-    if (tmp && *tmp)
-        ret[i++] = talloc_asprintf(talloc_ctx, "%s/mpv", tmp);
-    else if (home && *home)
-        ret[i++] = talloc_asprintf(talloc_ctx, "%s/.config/mpv", home);
-
-    // Maintain compatibility with old ~/.mpv
-    if (home && *home)
-        ret[i++] = talloc_asprintf(talloc_ctx, "%s/.mpv", home);
-
-#if HAVE_COCOA
-    ret[i++] = mp_get_macosx_bundle_dir(talloc_ctx);
-#endif
-
-    tmp = getenv("XDG_CONFIG_DIRS");
-    if (tmp && *tmp) {
-        char *dirs = talloc_strdup(talloc_ctx, tmp);
-        while (dirs) {
-            char *dir = dirs;
-
-            dirs = strchr(dirs, ':');
-            if (dirs)
-                *dirs++ = 0;
-
-            if (!dir[0])
-                continue;
-
-            ret[i++] = talloc_asprintf(talloc_ctx, "%s%s", dir, "/mpv");
-
-            if (i + 1 >= MAX_CONFIG_PATHS) {
-                MP_WARN(global, "Too many config files, not reading any more\n");
-                break;
-            }
-        }
-    }
-    else {
-        ret[i++] = MPLAYER_CONFDIR;
-    }
-
-//_WIN32 && !__CYGWIN__
+    mp_add_xdg_config_dirs(talloc_ctx, global, ret, i);
 #endif
 
     MP_VERBOSE(global, "search dirs:");
