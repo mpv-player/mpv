@@ -103,10 +103,15 @@ static void mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i
 // priority
 static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 {
+    struct MPOpts *opts = global->opts;
+
     char **ret = talloc_zero_array(talloc_ctx, char*, MAX_CONFIG_PATHS);
 
-    if (global->opts->force_configdir && global->opts->force_configdir[0]) {
-        ret[0] = talloc_strdup(ret, global->opts->force_configdir);
+    if (!opts->load_config)
+        return ret;
+
+    if (opts->force_configdir && opts->force_configdir[0]) {
+        ret[0] = talloc_strdup(ret, opts->force_configdir);
         return ret;
     }
 
@@ -134,23 +139,19 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename)
 {
-    struct MPOpts *opts = global->opts;
-
     char *res = NULL;
-    if (opts->load_config) {
-        char **dirs = mp_config_dirs(NULL, global);
-        for (int i = 0; dirs && dirs[i]; i++) {
-            char *file = talloc_asprintf(talloc_ctx, "%s/%s", dirs[i], filename);
+    char **dirs = mp_config_dirs(NULL, global);
+    for (int i = 0; dirs && dirs[i]; i++) {
+        char *file = talloc_asprintf(talloc_ctx, "%s/%s", dirs[i], filename);
 
-            if (mp_path_exists(file)) {
-                res = file;
-                break;
-            }
-
-            talloc_free(file);
+        if (mp_path_exists(file)) {
+            res = file;
+            break;
         }
-        talloc_free(dirs);
+
+        talloc_free(file);
     }
+    talloc_free(dirs);
 
     MP_VERBOSE(global, "config path: '%s' -> '%s'\n", filename,
                res ? res : "(NULL)");
@@ -160,23 +161,19 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
 char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
                                 const char *filename)
 {
-    struct MPOpts *opts = global->opts;
-
     char **ret = talloc_zero_array(talloc_ctx, char*, MAX_CONFIG_PATHS + 1);
     int num_ret = 0;
 
-    if (opts->load_config) {
-        char **dirs = mp_config_dirs(NULL, global);
-        for (int i = 0; dirs && dirs[i]; i++) {
-            char *file = talloc_asprintf(ret, "%s/%s", dirs[i], filename);
+    char **dirs = mp_config_dirs(NULL, global);
+    for (int i = 0; dirs && dirs[i]; i++) {
+        char *file = talloc_asprintf(ret, "%s/%s", dirs[i], filename);
 
-            if (!mp_path_exists(file) || num_ret >= MAX_CONFIG_PATHS)
-                continue;
+        if (!mp_path_exists(file) || num_ret >= MAX_CONFIG_PATHS)
+            continue;
 
-            ret[num_ret++] = file;
-        }
-        talloc_free(dirs);
+        ret[num_ret++] = file;
     }
+    talloc_free(dirs);
 
     for (int n = 0; n < num_ret / 2; n++)
         MPSWAP(char*, ret[n], ret[num_ret - n - 1]);
