@@ -44,7 +44,7 @@
 #include "osdep/io.h"
 #include "osdep/path.h"
 
-static void mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i)
+static int mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i)
 {
     void *talloc_ctx = dirs;
 
@@ -70,7 +70,7 @@ static void mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i
     dirs[i++] = old_home;
 
 #if HAVE_COCOA
-    dirs[i++] = mp_get_macosx_bundle_dir(talloc_ctx);
+    i = mp_add_macosx_bundle_dir(global, dirs, i);
 #endif
 
     tmp = getenv("XDG_CONFIG_DIRS");
@@ -93,10 +93,11 @@ static void mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i
                 break;
             }
         }
-    }
-    else {
+    } else {
         dirs[i++] = MPLAYER_CONFDIR;
     }
+
+    return i;
 }
 
 // Return NULL-terminated array of config directories, from highest to lowest
@@ -123,9 +124,9 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
         ret[i++] = talloc_strdup(ret, tmp);
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    mp_add_win_config_dirs(global, ret, i);
+    i = mp_add_win_config_dirs(global, ret, i);
 #else
-    mp_add_xdg_config_dirs(global, ret, i);
+    i = mp_add_xdg_config_dirs(global, ret, i);
 #endif
 
     MP_VERBOSE(global, "search dirs:");
