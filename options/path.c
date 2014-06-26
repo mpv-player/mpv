@@ -50,18 +50,26 @@
 static void mp_add_xdg_config_dirs(void *talloc_ctx, struct mpv_global *global,
                                    char **dirs, int i)
 {
-    const char *home = getenv("HOME");
-    const char *tmp = NULL;
+    char *home = getenv("HOME");
+    char *tmp = NULL;
 
+    char *xdg_home = NULL;
     tmp = getenv("XDG_CONFIG_HOME");
     if (tmp && *tmp)
-        dirs[i++] = talloc_asprintf(talloc_ctx, "%s/mpv", tmp);
+        xdg_home = talloc_asprintf(talloc_ctx, "%s/mpv", tmp);
     else if (home && *home)
-        dirs[i++] = talloc_asprintf(talloc_ctx, "%s/.config/mpv", home);
+        xdg_home = talloc_asprintf(talloc_ctx, "%s/.config/mpv", home);
 
     // Maintain compatibility with old ~/.mpv
+    char *old_home = NULL;
     if (home && *home)
-        dirs[i++] = talloc_asprintf(talloc_ctx, "%s/.mpv", home);
+        old_home = talloc_asprintf(talloc_ctx, "%s/.mpv", home);
+
+    // If the old ~/.mpv exists, and the XDG config dir doesn't, use the old
+    // config dir only.
+    if (mp_path_exists(xdg_home) || !mp_path_exists(old_home))
+        dirs[i++] = xdg_home;
+    dirs[i++] = old_home;
 
 #if HAVE_COCOA
     dirs[i++] = mp_get_macosx_bundle_dir(talloc_ctx);
@@ -284,7 +292,7 @@ char *mp_getcwd(void *talloc_ctx)
 bool mp_path_exists(const char *path)
 {
     struct stat st;
-    return mp_stat(path, &st) == 0;
+    return path && mp_stat(path, &st) == 0;
 }
 
 bool mp_path_isdir(const char *path)
