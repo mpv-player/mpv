@@ -170,8 +170,9 @@ void mp_load_scripts(struct MPContext *mpctx)
 
     // Load all lua scripts
     void *tmp = talloc_new(NULL);
-    for (char **luadir = mp_find_all_config_files(tmp, mpctx->global, "lua"); *luadir; luadir++) {
-        files = list_script_files(tmp, *luadir);
+    char **luadir = mp_find_all_config_files(tmp, mpctx->global, "lua");
+    for (int i = 0; luadir && luadir[i]; i++) {
+        files = list_script_files(tmp, luadir[i]);
         for (int n = 0; files && files[n]; n++)
             mp_load_script(mpctx, files[n]);
     }
