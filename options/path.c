@@ -45,8 +45,6 @@
 
 #define STRNULL(s) ((s) ? (s) : "(NULL)")
 
-
-
 static void mp_add_xdg_config_dirs(void *talloc_ctx, struct mpv_global *global,
                                    char **dirs, int i)
 {
@@ -133,8 +131,6 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
     return ret;
 }
 
-
-
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename)
 {
@@ -159,6 +155,7 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                STRNULL(res));
     return res;
 }
+
 char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
                                 const char *filename)
 {

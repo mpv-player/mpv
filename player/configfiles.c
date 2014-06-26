@@ -64,6 +64,8 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     if (!opts->load_config)
         return;
 
+    mp_mk_config_dir(mpctx->global, "");
+
     m_config_t *conf = mpctx->mconfig;
     void *tmp = talloc_new(NULL);
     char *conffile;
