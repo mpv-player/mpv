@@ -167,11 +167,11 @@ void mp_load_scripts(struct MPContext *mpctx)
     }
     if (!mpctx->opts->auto_load_scripts)
         return;
-    // Load ~/.mpv/lua/*
+
+    // Load all lua scripts
     void *tmp = talloc_new(NULL);
-    char *script_path = mp_find_config_file(tmp, mpctx->global, "lua");
-    if (script_path) {
-        files = list_script_files(tmp, script_path);
+    for (char **luadir = mp_find_all_config_files(tmp, mpctx->global, "lua"); *luadir; luadir++) {
+        files = list_script_files(tmp, *luadir);
         for (int n = 0; files && files[n]; n++)
             mp_load_script(mpctx, files[n]);
     }

@@ -201,8 +201,13 @@ static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
     for (int i = 0; i < 16; i++)
         conf = talloc_asprintf_append(conf, "%02X", md5[i]);
 
-    res = mp_find_config_file(tmp, global, MP_WATCH_LATER_CONF);
-    res = talloc_asprintf(NULL, "%s/%s", res, conf);
+    res = talloc_asprintf(tmp, MP_WATCH_LATER_CONF "/%s", conf);
+    res = mp_find_config_file(NULL, global, res);
+
+    if (!res) {
+        res = mp_find_config_file(tmp, global, MP_WATCH_LATER_CONF);
+        res = talloc_asprintf(NULL, "%s/%s", res, conf);
+    }
 
 exit:
     talloc_free(tmp);
