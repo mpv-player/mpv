@@ -79,7 +79,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             if (!s->rgain_clip) // clipping prevention
                 s->rgain = MPMIN(s->rgain, 1.0 / peak);
         }
-        if (s->detach && fabs(s->level + s->rgain - 2.0) < 0.00001)
+        if (s->detach && fabs(s->level * s->rgain - 1.0) < 0.00001)
             return AF_DETACH;
         return af_test_output(af, in);
     }
@@ -97,7 +97,7 @@ static void filter_plane(struct af_instance *af, void *ptr, int num_samples)
 {
     struct priv *s = af->priv;
 
-    float level = s->level + s->rgain - 1.0;
+    float level = s->level * s->rgain;
 
     if (af_fmt_from_planar(af->data->format) == AF_FORMAT_S16) {
         int16_t *a = ptr;
