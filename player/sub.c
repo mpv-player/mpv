@@ -189,7 +189,7 @@ static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st
         color = (c[2] << 16) | (c[1] << 8) | c[0];
 
         if (i != 0)
-            talloc_asprintf_append(s, ", ");
+            s = talloc_asprintf_append(s, ", ");
         s = talloc_asprintf_append(s, "%06x", color);
     }
     s = talloc_asprintf_append(s, "\n");
