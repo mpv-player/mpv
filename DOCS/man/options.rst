@@ -1202,7 +1202,7 @@ OPTIONS
 
 ``--input-conf=<filename>``
     Specify input configuration file other than the default
-    ``~/.mpv/input.conf``.
+    ``~/.config/mpv/input.conf``.
 
 ``--no-input-default-bindings``
     Disable mpv default (builtin) key bindings.
@@ -1445,9 +1445,9 @@ OPTIONS
 
 ``--no-config``
     Do not load default configuration files. This prevents loading of
-    ``~/.mpv/config`` and ``~/.mpv/input.conf``, as well as loading the
-    same files from system wide configuration directories. Other configuration
-    files are blocked as well, such as resume playback files.
+    ``~/.config/mpv/mpv.conf`` and ``~/.config/mpv/input.conf``, as well as
+    loading the same files from system wide configuration directories. Other
+    configuration files are blocked as well, such as resume playback files.
 
     .. note::
 

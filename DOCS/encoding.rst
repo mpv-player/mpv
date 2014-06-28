@@ -25,7 +25,7 @@ from the input video. Note that not all codecs and not all formats support VFR
 encoding, and some which do have bugs when a target bitrate is specified - use
 -ofps or -oautofps to force CFR encoding in these cases.
 
-Of course, the options can be stored in a profile, like this .mpv/config
+Of course, the options can be stored in a profile, like this .config/mpv/mpv.conf
 section::
 
   [myencprofile]

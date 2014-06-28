@@ -338,7 +338,7 @@ Location and Syntax
 You can put all of the options in configuration files which will be read every
 time mpv is run. The system-wide configuration file 'mpv.conf' is in your
 configuration directory (e.g. ``/etc/mpv`` or ``/usr/local/etc/mpv``), the
-user-specific one is ``~/.mpv/config``.
+user-specific one is ``~/.config/mpv/mpv.conf``.
 User-specific options override system-wide options and options given on the
 command line override either. The syntax of the configuration files is
 ``option=<value>``; everything after a *#* is considered a comment. Options
@@ -539,15 +539,23 @@ ENVIRONMENT VARIABLES
 There are a number of environment variables that can be used to control the
 behavior of mpv.
 
-``HOME``
-    Used to determine mpv config directory: ``$HOME/.mpv``
+``HOME``, ``XDG_CONFIG_HOME``
+    Used to determine mpv config directory. If ``XDG_CONFIG_HOME`` is not set,
+    ``$HOME/.config/mpv`` is used.
+
+    ``$HOME/.mpv`` is always added to the list of config search paths with a
+    lower priority.
+
+``XDG_CONFIG_DIRS``
+    If set, XDG-style system configuration directories are used. Otherwise,
+    the UNIX convention (``PREFIX/etc/mpv/``) is used.
 
 ``TERM``
     Used to determine terminal type.
 
 ``MPV_HOME``
     Directory where mpv looks for user settings. Overrides ``HOME``, and mpv
-    will try to load the config file as ``$MPV_HOME/config``.
+    will try to load the config file as ``$MPV_HOME/mpv.conf``.
 
 ``MPV_VERBOSE`` (see also ``-v`` and ``--msg-level``)
     Set the initial verbosity level across all message modules (default: 0).
@@ -660,18 +668,23 @@ FILES
 ``/usr/local/etc/mpv/mpv.conf``
     mpv system-wide settings (depends on ``--prefix`` passed to configure)
 
-``~/.mpv/config``
+``~/.config/mpv/mpv.conf``
     mpv user settings
 
-``~/.mpv/input.conf``
+``~/.config/mpv/input.conf``
     input bindings (see ``--input-keylist`` for the full list)
 
-``~/.mpv/lua/``
+``~/.config/mpv/lua/``
     All files in this directly are loaded as if they were passed to the
     ``--lua`` option. They are loaded in alphabetical order, and sub-directories
     and files with no ``.lua`` extension are ignored. The ``--load-scripts=no``
     option disables loading these files.
 
+Note that the environment variables ``$XDG_CONFIG_HOME`` and ``$MPV_HOME`` can
+override the standard directory ``~/.config/mpv/``.
+
+Also, the old config location at ``~/.mpv/`` is still read, and if the XDG
+variant does not exist, will still be preferred.
 
 EXAMPLES OF MPV USAGE
 =====================
