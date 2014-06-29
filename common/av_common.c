@@ -64,7 +64,6 @@ void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
     avctx->channels                 = st->channels;
     avctx->block_align              = st->block_align;
     avctx->channel_layout           = st->channel_layout;
-    avctx->audio_service_type       = st->audio_service_type;
     avctx->bits_per_coded_sample    = st->bits_per_coded_sample;
 }
 
