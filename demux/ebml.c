@@ -413,8 +413,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         continue;
 
     past_end_error:
-        MP_DBG(ctx, "Subelement headers go "
-               "past end of containing element\n");
+        MP_DBG(ctx, "Subelement headers go past end of containing element\n");
     other_error:
         ctx->has_errors = true;
         end = startp;
@@ -536,8 +535,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                 subelptr = (fieldtype *) fieldptr
             GETPTR(uintptr, uint64_t);
             if (length < 1 || length > 8) {
-                MP_DBG(ctx, "uint invalid length %"PRIu64
-                       "\n", length);
+                MP_DBG(ctx, "uint invalid length %"PRIu64"\n", length);
                 goto error;
             }
             *uintptr = ebml_parse_uint(data, length);
@@ -548,8 +546,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             int64_t *sintptr;
             GETPTR(sintptr, int64_t);
             if (length < 1 || length > 8) {
-                MP_DBG(ctx, "sint invalid length %"PRIu64
-                       "\n", length);
+                MP_DBG(ctx, "sint invalid length %"PRIu64"\n", length);
                 goto error;
             }
             *sintptr = ebml_parse_sint(data, length);
@@ -560,8 +557,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             double *floatptr;
             GETPTR(floatptr, double);
             if (length != 4 && length != 8) {
-                MP_DBG(ctx, "float invalid length %"PRIu64
-                       "\n", length);
+                MP_DBG(ctx, "float invalid length %"PRIu64"\n", length);
                 goto error;
             }
             *floatptr = ebml_parse_float(data, length);
@@ -579,11 +575,9 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             strptr->start = data;
             strptr->len = length;
             if (ed->type == EBML_TYPE_STR)
-                MP_DBG(ctx, "string \"%.*s\"\n",
-                       BSTR_P(*strptr));
+                MP_DBG(ctx, "string \"%.*s\"\n", BSTR_P(*strptr));
             else
-                MP_DBG(ctx, "binary %zd bytes\n",
-                       strptr->len);
+                MP_DBG(ctx, "binary %zd bytes\n", strptr->len);
             break;
 
         case EBML_TYPE_EBML_ID:;

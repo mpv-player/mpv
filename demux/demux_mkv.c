@@ -2060,30 +2060,30 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
                 int bs = sph * w * 2 / 96;      // nibbles per subpacket
                 // Perform reordering
                 for (n = 0; n < 38; n++) {
-                    int i = bs * sipr_swaps[n][0]; // 77 max
-                    int o = bs * sipr_swaps[n][1]; // 95 max
+                    unsigned int i = bs * sipr_swaps[n][0]; // 77 max
+                    unsigned int o = bs * sipr_swaps[n][1]; // 95 max
                     // swap nibbles of block 'i' with 'o'
                     for (int j = 0; j < bs; j++) {
                         if (i / 2 >= audiobuf_size || o / 2 >= audiobuf_size)
                             goto error;
                         int x = (i & 1) ?
-                            (track->audio_buf[i >> 1] >> 4) :
-                            (track->audio_buf[i >> 1] & 0x0F);
+                            (track->audio_buf[i / 2] >> 4) :
+                            (track->audio_buf[i / 2] & 0x0F);
                         int y = (o & 1) ?
-                            (track->audio_buf[o >> 1] >> 4) :
-                            (track->audio_buf[o >> 1] & 0x0F);
+                            (track->audio_buf[o / 2] >> 4) :
+                            (track->audio_buf[o / 2] & 0x0F);
                         if (o & 1)
-                            track->audio_buf[o >> 1] =
-                                (track->audio_buf[o >> 1] & 0x0F) | (x << 4);
+                            track->audio_buf[o / 2] =
+                                (track->audio_buf[o / 2] & 0x0F) | (x << 4);
                         else
-                            track->audio_buf[o >> 1] =
-                                (track->audio_buf[o >> 1] & 0xF0) | x;
+                            track->audio_buf[o / 2] =
+                                (track->audio_buf[o / 2] & 0xF0) | x;
                         if (i & 1)
-                            track->audio_buf[i >> 1] =
-                                (track->audio_buf[i >> 1] & 0x0F) | (y << 4);
+                            track->audio_buf[i / 2] =
+                                (track->audio_buf[i / 2] & 0x0F) | (y << 4);
                         else
-                            track->audio_buf[i >> 1] =
-                                (track->audio_buf[i >> 1] & 0xF0) | y;
+                            track->audio_buf[i / 2] =
+                                (track->audio_buf[i / 2] & 0xF0) | y;
                         ++i;
                         ++o;
                     }
