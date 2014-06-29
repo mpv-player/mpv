@@ -364,7 +364,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
     char *s = target;
     uint8_t *end = data + size;
     uint8_t *p = data;
-    int num_elems[MAX_EBML_SUBELEMENTS] = {};
+    int num_elems[MAX_EBML_SUBELEMENTS] = {0};
     while (p < end) {
         uint8_t *startp = p;
         int len;
@@ -390,6 +390,10 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             if (type->fields[i].id == id) {
                 field_idx = i;
                 num_elems[i]++;
+                if (num_elems[i] >= 0x70000000) {
+                    MP_ERR(ctx, "Too many EBML subelements.\n");
+                    goto other_error;
+                }
                 break;
             }
 
@@ -566,6 +570,10 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
 
         case EBML_TYPE_STR:
         case EBML_TYPE_BINARY:;
+            if (length > 0x80000000) {
+                MP_ERR(ctx, "Not reading overly long EBML element.\n");
+                break;
+            }
             struct bstr *strptr;
             GETPTR(strptr, struct bstr);
             strptr->start = data;
