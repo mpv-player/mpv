@@ -2133,7 +2133,8 @@ OPTIONS
     Seek to given time position.
 
     The general format for absolute times is ``[[hh:]mm:]ss[.ms]``. If the time
-    is negated with ``-``, the seek is relative from the end of the file.
+    is given with a prefix of ``+`` or ``-``, the seek is relative from the start
+    or end of the file.
 
     ``pp%`` seeks to percent position pp (0-100).
 
@@ -2141,8 +2142,10 @@ OPTIONS
 
     .. admonition:: Examples
 
-        ``--start=56``
-            Seeks to 56 seconds.
+        ``--start=+56``, ``--start=+00:56``
+            Seeks to the start time + 56 seconds.
+        ``--start=-56``, ``--start=-00:56``
+            Seeks to the end time - 56 seconds.
         ``--start=01:10:00``
             Seeks to 1 hour 10 min.
         ``--start=50%``
