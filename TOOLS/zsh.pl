@@ -112,7 +112,7 @@ sub parse_opts {
 
 		if (defined $2) {
 			my $desc = $2;
-			$desc =~ s/\:/\\:/;
+			$desc =~ s/\:/\\:/g;
 
 			$entry .= $desc;
 		}
