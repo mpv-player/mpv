@@ -70,7 +70,7 @@ typedef void (*m_opt_print_fn)(struct mp_log *log);
 enum m_rel_time_type {
     REL_TIME_NONE,
     REL_TIME_ABSOLUTE,
-    REL_TIME_NEGATIVE,
+    REL_TIME_RELATIVE,
     REL_TIME_PERCENT,
     REL_TIME_CHAPTER,
 };

@@ -53,12 +53,17 @@ double get_relative_time(struct MPContext *mpctx)
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
 {
     double length = get_time_length(mpctx);
+    double start = get_start_time(mpctx);
     switch (t.type) {
     case REL_TIME_ABSOLUTE:
         return t.pos;
-    case REL_TIME_NEGATIVE:
-        if (length != 0)
-            return MPMAX(length - t.pos, 0.0);
+    case REL_TIME_RELATIVE:
+        if (t.pos >= 0) {
+            return start + t.pos;
+        } else {
+            if (length != 0)
+                return MPMAX(start + length + t.pos, 0.0);
+        }
         break;
     case REL_TIME_PERCENT:
         if (length != 0)
