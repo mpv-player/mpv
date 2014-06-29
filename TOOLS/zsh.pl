@@ -133,5 +133,14 @@ sub parse_opts {
 		push @list, $entry
 	}
 
+	if ($parsing_main_options) {
+		@list = sort {
+			$a =~ /(.*?)\:/; my $ma = $1;
+			$b =~ /(.*?)\:/; my $mb = $1;
+
+			length($mb) <=> length($ma)
+		} @list;
+	}
+
 	return @list;
 }
