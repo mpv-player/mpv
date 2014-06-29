@@ -181,8 +181,7 @@ void print_status(struct MPContext *mpctx)
     saddf(&line, ": ");
 
     // Playback position
-    double cur = get_current_time(mpctx);
-    sadd_hhmmssff(&line, cur, mpctx->opts->osd_fractions);
+    sadd_hhmmssff(&line, get_playback_time(mpctx), mpctx->opts->osd_fractions);
 
     double len = get_time_length(mpctx);
     if (len >= 0) {
@@ -437,7 +436,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
         *buffer = talloc_strdup_append(*buffer, text);
         talloc_free(text);
     } else {
-        sadd_hhmmssff(buffer, get_current_time(mpctx), fractions);
+        sadd_hhmmssff(buffer, get_playback_time(mpctx), fractions);
         if (full) {
             saddf(buffer, " / ");
             sadd_hhmmssff(buffer, get_time_length(mpctx), fractions);

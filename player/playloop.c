@@ -426,6 +426,13 @@ double get_current_time(struct MPContext *mpctx)
     return 0;
 }
 
+double get_playback_time(struct MPContext *mpctx)
+{
+    double cur = get_current_time(mpctx);
+    double start = get_start_time(mpctx);
+    return cur >= start ? cur - start : cur;
+}
+
 // Return playback position in 0.0-1.0 ratio, or -1 if unknown.
 double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
 {

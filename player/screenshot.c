@@ -199,7 +199,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         }
         case 'p':
         case 'P': {
-            char *t = mp_format_time(get_current_time(mpctx), fmt == 'P');
+            char *t = mp_format_time(get_playback_time(mpctx), fmt == 'P');
             append_filename(&res, t);
             talloc_free(t);
             break;
@@ -210,7 +210,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
                 goto error_exit;
             template++;
             char fmtstr[] = {'%', tfmt, '\0'};
-            char *s = mp_format_time_fmt(fmtstr, get_current_time(mpctx));
+            char *s = mp_format_time_fmt(fmtstr, get_playback_time(mpctx));
             if (!s)
                 goto error_exit;
             append_filename(&res, s);
