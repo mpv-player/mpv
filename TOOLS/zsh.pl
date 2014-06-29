@@ -37,7 +37,7 @@ my $tmpl = <<"EOS";
 
 # mpv zsh completion
 
-_x_arguments -C -s \\
+_arguments -C -S \\
 $opts_str
   '*:files:->mfiles'
 
