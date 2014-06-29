@@ -7,7 +7,7 @@ use warnings;
 
 my $mpv = $ARGV[0] || 'mpv';
 
-my @opts = parse_opts("$mpv --list-options", '^ (\-\-[^\s\*]*)\*?\s*(.*)');
+my @opts = parse_opts("$mpv --list-options", '^ (\-\-[^\s\*]*)\*?\s*(.*)', 1);
 
 my @ao = parse_opts("$mpv --ao=help", '^  ([^\s\:]*)\s*: (.*)');
 my @vo = parse_opts("$mpv --vo=help", '^  ([^\s\:]*)\s*: (.*)');
@@ -17,7 +17,7 @@ my @vf = parse_opts("$mpv --vf=help", '^  ([^\s\:]*)\s*: (.*)');
 
 my ($opts_str, $ao_str, $vo_str, $af_str, $vf_str);
 
-$opts_str .= qq{  '$_': \\\n} foreach (@opts);
+$opts_str .= qq{  '$_' \\\n} foreach (@opts);
 chomp $opts_str;
 
 $ao_str .= qq{      '$_' \\\n} foreach (@ao);
@@ -98,7 +98,7 @@ EOS
 print $tmpl;
 
 sub parse_opts {
-	my ($cmd, $regex) = @_;
+	my ($cmd, $regex, $parsing_main_options) = @_;
 
 	my @list;
 	my @lines = split /\n/, `$cmd`;
@@ -108,21 +108,29 @@ sub parse_opts {
 			next;
 		}
 
-		my $entry = "$1:";
+		my $entry = $1;
+
+		if ($parsing_main_options) {
+			$entry .= '=-';
+		}
 
 		if (defined $2) {
 			my $desc = $2;
 			$desc =~ s/\:/\\:/g;
 
-			$entry .= $desc;
+			$entry .= ':' . $desc;
 		}
 
-		$entry .= ':->ao' if ($1 eq '--ao');
-		$entry .= ':->vo' if ($1 eq '--vo');
-		$entry .= ':->af' if ($1 eq '--af');
-		$entry .= ':->vf' if ($1 eq '--vf');
+		if ($parsing_main_options) {
+			$entry .= ':';
 
-		push @list, $entry if ($line =~ /^$regex/)
+			$entry .= '->ao' if ($1 eq '--ao');
+			$entry .= '->vo' if ($1 eq '--vo');
+			$entry .= '->af' if ($1 eq '--af');
+			$entry .= '->vf' if ($1 eq '--vf');
+		}
+
+		push @list, $entry
 	}
 
 	return @list;
