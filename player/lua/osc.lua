@@ -906,9 +906,9 @@ function osc_init()
 
     local contentF = function (ass)
         if state.tc_ms then
-            ass:append(mp.get_property_osd("time-pos/full"))
+            ass:append(mp.get_property_osd("playback-time/full"))
         else
-            ass:append(mp.get_property_osd("time-pos"))
+            ass:append(mp.get_property_osd("playback-time"))
         end
     end
 

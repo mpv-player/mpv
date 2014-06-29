@@ -462,10 +462,9 @@ static int mp_property_time_pos(void *ctx, struct m_property *prop,
 static bool time_remaining(MPContext *mpctx, double *remaining)
 {
     double len = get_time_length(mpctx);
-    double pos = get_current_time(mpctx);
-    double start = get_start_time(mpctx);
+    double playback = get_playback_time(mpctx);
 
-    *remaining = len - (pos - start);
+    *remaining = len - playback;
 
     return len > 0;
 }
@@ -490,6 +489,16 @@ static int mp_property_playtime_remaining(void *ctx, struct m_property *prop,
 
     double speed = mpctx->opts->playback_speed;
     return property_time(action, arg, remaining / speed);
+}
+
+static int mp_property_playback_time(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->num_sources)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return property_time(action, arg, get_playback_time(mpctx));
 }
 
 /// Current BD/DVD title (RW)
@@ -2594,6 +2603,7 @@ static const struct m_property mp_properties[] = {
     {"time-pos", mp_property_time_pos},
     {"time-remaining", mp_property_remaining},
     {"playtime-remaining", mp_property_playtime_remaining},
+    {"playback-time", mp_property_playback_time},
     {"disc-title", mp_property_disc_title},
     {"disc-menu-active", mp_property_disc_menu},
     {"chapter", mp_property_chapter},

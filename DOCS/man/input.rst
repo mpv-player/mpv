@@ -658,6 +658,9 @@ Property list
 ``playtime-remaining``
     ``time-remaining`` scaled by the the current ``speed``.
 
+``playback-time``
+    Return the playback time, which is the time difference between start PTS and current PTS.
+
 ``chapter`` (RW)
     Current chapter number. The number of the first chapter is 0.
 
