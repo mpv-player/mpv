@@ -136,4 +136,4 @@ To contact the `mpv` team in private write to `mpv-team@googlegroups.com`.
 [mpv-users]: https://groups.google.com/forum/?hl=en#!forum/mpv-users
 [mpv-devel]: https://groups.google.com/forum/?hl=en#!forum/mpv-devel
 [ffmpeg_vs_libav]: https://github.com/mpv-player/mpv/wiki/FFmpeg-versus-Libav
-[release-policy]: https://github.com/mpv-player/mpv/blob/master/release-policy.md
+[release-policy]: https://github.com/mpv-player/mpv/blob/master/DOCS/release-policy.md
