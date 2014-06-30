@@ -251,4 +251,6 @@ char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok);
 // stream_file.c
 char *mp_file_url_to_filename(void *talloc_ctx, bstr url);
 
+void stream_print_proto_list(struct mp_log *log);
+
 #endif /* MPLAYER_STREAM_H */

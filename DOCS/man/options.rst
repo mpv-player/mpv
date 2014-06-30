@@ -1313,6 +1313,9 @@ OPTIONS
 ``--list-properties``
     Print a list of the available properties.
 
+``--list-protocols``
+    Print a list of the supported protocols.
+
 ``--load-scripts=<yes|no>``
     If set to ``no``, don't auto-load scripts from ``~/.mpv/lua/``.
     (Default: ``yes``)
