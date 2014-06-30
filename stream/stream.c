@@ -972,3 +972,25 @@ bool stream_manages_timeline(struct stream *s)
 {
     return stream_control(s, STREAM_CTRL_MANAGES_TIMELINE, NULL) == STREAM_OK;
 }
+
+void stream_print_proto_list(struct mp_log *log)
+{
+    int count = 0;
+
+    mp_info(log, "Protocols:\n\n");
+    for (int i = 0; stream_list[i]; i++) {
+        const stream_info_t *stream_info = stream_list[i];
+
+        if (!stream_info->protocols)
+            continue;
+
+        for (int j = 0; stream_info->protocols[j]; j++) {
+            if (*stream_info->protocols[j] == '\0')
+               continue;
+
+            mp_info(log, " %s://\n", stream_info->protocols[j]);
+            count++;
+        }
+    }
+    mp_info(log, "\nTotal: %d protocols\n", count);
+}

@@ -46,6 +46,7 @@
 #include "audio/decode/dec_audio.h"
 #include "player/core.h"
 #include "player/command.h"
+#include "stream/stream.h"
 
 extern const char mp_help_text[];
 
@@ -515,6 +516,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("input", input_opts, input_config, 0),
 
     OPT_PRINT("list-properties", property_print_help),
+    OPT_PRINT("list-protocols", stream_print_proto_list),
     OPT_PRINT("help", print_help),
     OPT_PRINT("h", print_help),
     OPT_PRINT("version", print_version),
