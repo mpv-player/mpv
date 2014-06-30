@@ -540,6 +540,7 @@ const struct MPOpts mp_default_opts = {
     .mixer_init_volume = -1,
     .mixer_init_mute = -1,
     .volstep = 3,
+    .gapless_audio = -1,
     .vo = {
         .video_driver_list = NULL,
         .monitor_pixel_aspect = 1.0,
