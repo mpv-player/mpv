@@ -46,6 +46,9 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
         if (err != noErr) goto label; \
     } while (0)
 
+void ca_print_device_list(struct ao *ao);
+OSStatus ca_select_device(struct ao *ao, int selection, AudioDeviceID *device);
+
 void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd);
 

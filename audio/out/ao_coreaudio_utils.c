@@ -26,6 +26,68 @@
 #include "audio/out/ao_coreaudio_properties.h"
 #include "osdep/timer.h"
 
+void ca_print_device_list(struct ao *ao)
+{
+    char *help = talloc_strdup(NULL, "Available output devices:\n");
+
+    AudioDeviceID *devs;
+    size_t n_devs;
+
+    OSStatus err =
+        CA_GET_ARY(kAudioObjectSystemObject, kAudioHardwarePropertyDevices,
+                   &devs, &n_devs);
+
+    CHECK_CA_ERROR("Failed to get list of output devices.");
+
+    for (int i = 0; i < n_devs; i++) {
+        char *name;
+        err = CA_GET_STR(devs[i], kAudioObjectPropertyName, &name);
+
+        if (err == noErr)
+            talloc_steal(devs, name);
+        else
+            name = "Unknown";
+
+        help = talloc_asprintf_append(
+                help, "  * %s (id: %" PRIu32 ")\n", name, devs[i]);
+    }
+
+    talloc_free(devs);
+
+coreaudio_error:
+    MP_INFO(ao, "%s", help);
+    talloc_free(help);
+}
+
+OSStatus ca_select_device(struct ao *ao, int selection, AudioDeviceID *device)
+{
+    OSStatus err = noErr;
+    *device = 0;
+    if (selection < 0) {
+        // device not set by user, get the default one
+        err = CA_GET(kAudioObjectSystemObject,
+                     kAudioHardwarePropertyDefaultOutputDevice,
+                     device);
+        CHECK_CA_ERROR("could not get default audio device");
+    } else {
+        *device = selection;
+    }
+
+    if (mp_msg_test(ao->log, MSGL_V)) {
+        char *name;
+        err = CA_GET_STR(*device, kAudioObjectPropertyName, &name);
+        CHECK_CA_ERROR("could not get selected audio device name");
+
+        MP_VERBOSE(ao, "selected audio output device: %s (%" PRIu32 ")\n",
+                       name, *device);
+
+        talloc_free(name);
+    }
+
+coreaudio_error:
+    return err;
+}
+
 char *fourcc_repr(void *talloc_ctx, uint32_t code)
 {
     // Extract FourCC letters from the uint32_t and finde out if it's a valid
