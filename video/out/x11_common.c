@@ -128,6 +128,7 @@ static void set_screensaver(struct vo_x11_state *x11, bool enabled);
 static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
                                        Window w, long event_mask);
 static void vo_x11_setlayer(struct vo *vo, bool ontop);
+static void vo_x11_set_property_utf8(struct vo *vo, Atom name, const char *t);
 
 #define XA(x11, s) (XInternAtom((x11)->display, # s, False))
 
@@ -1143,6 +1144,8 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
     vo_x11_set_wm_icon(x11);
     vo_x11_update_window_title(vo);
     vo_x11_dnd_init_window(vo);
+
+    vo_x11_set_property_utf8(vo, XA(x11, _GTK_THEME_VARIANT), "dark");
 }
 
 static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
