@@ -4,6 +4,7 @@ __cdrom_devices_map__ = {
     'darwin':  '/dev/disk1',
     'freebsd': '/dev/cd0',
     'openbsd': '/dev/rcd0c',
+    'linux':   '/dev/sr0',
     'default': '/dev/cdrom'
 }
 
@@ -13,6 +14,7 @@ __dvd_devices_map__ = {
     'darwin':  '/dev/rdiskN',
     'freebsd': '/dev/cd0',
     'openbsd': '/dev/rcd0c',
+    'linux':   '/dev/sr0',
     'default': '/dev/dvd'
 }
 
