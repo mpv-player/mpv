@@ -297,14 +297,6 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
         return 0;
     }
 
-    if (stream->type == STREAM_VIDEO && !dp->len) {
-        /* Video packets with size 0 are assumed to not correspond to frames,
-         * but to indicate the absence of a frame in formats like AVI
-         * that must have packets at fixed timestamp intervals. */
-        talloc_free(dp);
-        return 1;
-    }
-
     dp->stream = stream->index;
     dp->next = NULL;
 
