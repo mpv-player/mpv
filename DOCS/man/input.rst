@@ -794,7 +794,7 @@ Property list
     pauses itself due to low network cache.
 
 ``cache``
-    Network cache fill state (0-100).
+    Network cache fill state (0-100.0).
 
 ``cache-size`` (RW)
     Total network cache size in KB. This is similar to ``--cache``. This allows
@@ -807,6 +807,12 @@ Property list
     old cache is still allocated.
 
     Don't use this when playing DVD or Bluray.
+
+``cache-free`` (R)
+    Total free cache size in KB. 
+
+``cache-used`` (R)
+    Total used cache size in KB. 
 
 ``paused-for-cache``
     Returns ``yes`` when playback is paused because of waiting for the cache.
