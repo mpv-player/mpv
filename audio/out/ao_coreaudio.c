@@ -68,34 +68,41 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     return noErr;
 }
 
-static int control(struct ao *ao, enum aocontrol cmd, void *arg)
-{
+static int get_volume(struct ao *ao, struct ao_control_vol *vol) {
     struct priv *p = ao->priv;
-    switch (cmd) {
-    case AOCONTROL_GET_VOLUME: {
-        ao_control_vol_t *control_vol = (ao_control_vol_t *)arg;
-        float vol;
-        OSStatus err =
-            AudioUnitGetParameter(p->audio_unit, kHALOutputParam_Volume,
-                                  kAudioUnitScope_Global, 0, &vol);
-        CHECK_CA_ERROR("could not get HAL output volume");
-        control_vol->left = control_vol->right = vol * 100.0;
-        return CONTROL_TRUE;
-    }
-    case AOCONTROL_SET_VOLUME: {
-        ao_control_vol_t *control_vol = (ao_control_vol_t *)arg;
-        float vol = (control_vol->left + control_vol->right) / 200.0;
-        OSStatus err =
-            AudioUnitSetParameter(p->audio_unit, kHALOutputParam_Volume,
-                                  kAudioUnitScope_Global, 0, vol, 0);
-        CHECK_CA_ERROR("could not set HAL output volume");
-        return CONTROL_TRUE;
-    }
-    } // end switch
-    return CONTROL_UNKNOWN;
+    float auvol;
+    OSStatus err =
+        AudioUnitGetParameter(p->audio_unit, kHALOutputParam_Volume,
+                              kAudioUnitScope_Global, 0, &auvol);
 
+    CHECK_CA_ERROR("could not get HAL output volume");
+    vol->left = vol->right = auvol * 100.0;
+    return CONTROL_TRUE;
 coreaudio_error:
     return CONTROL_ERROR;
+}
+
+static int set_volume(struct ao *ao, struct ao_control_vol *vol) {
+    struct priv *p = ao->priv;
+    float auvol = (vol->left + vol->right) / 200.0;
+    OSStatus err =
+        AudioUnitSetParameter(p->audio_unit, kHALOutputParam_Volume,
+                              kAudioUnitScope_Global, 0, auvol, 0);
+    CHECK_CA_ERROR("could not set HAL output volume");
+    return CONTROL_TRUE;
+coreaudio_error:
+    return CONTROL_ERROR;
+}
+
+static int control(struct ao *ao, enum aocontrol cmd, void *arg)
+{
+    switch (cmd) {
+    case AOCONTROL_GET_VOLUME:
+        return get_volume(ao, arg);
+    case AOCONTROL_SET_VOLUME:
+        return set_volume(ao, arg);
+    } // end switch
+    return CONTROL_UNKNOWN;
 }
 
 static bool init_chmap(struct ao *ao);
