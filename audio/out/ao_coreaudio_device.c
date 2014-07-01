@@ -197,8 +197,6 @@ static int init(struct ao *ao)
         asbd.mFramesPerPacket * asbd.mChannelsPerFrame *
         (asbd.mBitsPerChannel / 8);
 
-    ca_print_asbd(ao, "source format:", &asbd);
-
     return init_digital(ao, asbd);
 
 coreaudio_error:
