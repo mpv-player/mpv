@@ -18,7 +18,6 @@
 
 #include <string.h>
 #include <assert.h>
-#include <ctype.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -28,6 +27,7 @@
 #include "talloc.h"
 
 #include "common/common.h"
+#include "misc/ctype.h"
 #include "bstr/bstr.h"
 
 int bstrcmp(struct bstr str1, struct bstr str2)
@@ -104,7 +104,7 @@ int bstr_find(struct bstr haystack, struct bstr needle)
 
 struct bstr bstr_lstrip(struct bstr str)
 {
-    while (str.len && isspace(*str.start)) {
+    while (str.len && mp_isspace(*str.start)) {
         str.start++;
         str.len--;
     }
@@ -114,7 +114,7 @@ struct bstr bstr_lstrip(struct bstr str)
 struct bstr bstr_strip(struct bstr str)
 {
     str = bstr_lstrip(str);
-    while (str.len && isspace(str.start[str.len - 1]))
+    while (str.len && mp_isspace(str.start[str.len - 1]))
         str.len--;
     return str;
 }
@@ -242,7 +242,7 @@ bool bstr_eatstart(struct bstr *s, struct bstr prefix)
 void bstr_lower(struct bstr str)
 {
     for (int i = 0; i < str.len; i++)
-        str.start[i] = tolower(str.start[i]);
+        str.start[i] = mp_tolower(str.start[i]);
 }
 
 int bstr_sscanf(struct bstr str, const char *format, ...)

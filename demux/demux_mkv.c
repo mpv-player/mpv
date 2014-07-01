@@ -23,7 +23,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <ctype.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <assert.h>

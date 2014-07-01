@@ -28,12 +28,12 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
-#include <ctype.h>
 #include <assert.h>
 
 #include "config.h"
 #include "talloc.h"
 #include "common/msg.h"
+#include "misc/ctype.h"
 #include "options/m_option.h"
 #include "vo.h"
 #include "video/vfcap.h"
@@ -538,7 +538,7 @@ static void replace_var_str(char **text, const char *name, const char *replace)
         nextvar += namelen;
         // try not to replace prefixes of other vars (e.g. $foo vs. $foo_bar)
         char term = nextvar[0];
-        if (isalnum(term) || term == '_')
+        if (mp_isalnum(term) || term == '_')
             continue;
         int prelength = until - *text;
         int postlength = nextvar - *text;

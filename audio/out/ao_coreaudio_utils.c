@@ -30,7 +30,7 @@ char *fourcc_repr(void *talloc_ctx, uint32_t code)
 {
     // Extract FourCC letters from the uint32_t and finde out if it's a valid
     // code that is made of letters.
-    char fcc[4] = {
+    unsigned char fcc[4] = {
         (code >> 24) & 0xFF,
         (code >> 16) & 0xFF,
         (code >> 8)  & 0xFF,
@@ -39,7 +39,7 @@ char *fourcc_repr(void *talloc_ctx, uint32_t code)
 
     bool valid_fourcc = true;
     for (int i = 0; i < 4; i++)
-        if (!isprint(fcc[i]))
+        if (fcc[i] >= 32 && fcc[i] < 128)
             valid_fourcc = false;
 
     char *repr;

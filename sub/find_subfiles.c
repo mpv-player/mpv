@@ -1,16 +1,16 @@
 #include <dirent.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <assert.h>
 
 #include "osdep/io.h"
 
+#include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "misc/ctype.h"
 #include "options/options.h"
 #include "options/path.h"
-#include "common/common.h"
 #include "sub/find_subfiles.h"
 
 static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",
@@ -75,7 +75,7 @@ static struct bstr guess_lang_from_filename(struct bstr name)
 
     if (name.start[i] == ')' || name.start[i] == ']')
         i--;
-    while (i >= 0 && isalpha(name.start[i])) {
+    while (i >= 0 && mp_isalpha(name.start[i])) {
         n++;
         if (n > 3)
             return (struct bstr){NULL, 0};

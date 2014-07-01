@@ -31,7 +31,6 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <ctype.h>
 #include <math.h>
 #include <string.h>
 

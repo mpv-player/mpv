@@ -21,7 +21,6 @@
 #include <stdbool.h>
 #include <math.h>
 #include <assert.h>
-#include <ctype.h>
 #include <string.h>
 #include <pthread.h>
 

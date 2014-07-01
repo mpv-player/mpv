@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <poll.h>
@@ -45,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include <libavutil/avstring.h>
 
 #include "osdep/io.h"
+#include "misc/ctype.h"
 
 #include "stream.h"
 #include "options/m_config.h"
@@ -177,7 +177,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                 {
                         fields = sscanf(&line[k], sat_conf,
                                 &ptr->freq, &ptr->pol, &ptr->diseqc, &ptr->srate, vpid_str, apid_str);
-                        ptr->pol = toupper(ptr->pol);
+                        ptr->pol = mp_toupper(ptr->pol);
                         ptr->freq *=  1000UL;
                         ptr->srate *=  1000UL;
                         ptr->tone = -1;

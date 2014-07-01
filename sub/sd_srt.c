@@ -24,11 +24,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <ctype.h>
-#include <libavutil/common.h>
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "bstr/bstr.h"
+#include "misc/ctype.h"
 #include "sd.h"
 
 struct line {
@@ -259,7 +259,7 @@ static int read_attr(char **s, struct bstr *attr, struct bstr *val)
     attr->start = *s;
     attr->len = eq - *s;
     for (int i = 0; i < attr->len; i++)
-        if (!isalnum(attr->start[i]))
+        if (!mp_isalnum(attr->start[i]))
             return -1;
     val->start = eq + 1;
     bool quoted = val->start[0] == '"';
@@ -290,7 +290,7 @@ static void convert_subrip(struct sd *sd, const char *orig,
     while (*line && new_line.len < new_line.bufsize - 1) {
         char *orig_line = line;
 
-        for (int i = 0; i < FF_ARRAY_ELEMS(subrip_basic_tags); i++) {
+        for (int i = 0; i < MP_ARRAY_SIZE(subrip_basic_tags); i++) {
             const struct tag_conv *tag = &subrip_basic_tags[i];
             int from_len = strlen(tag->from);
             if (strncmp(line, tag->from, from_len) == 0) {
@@ -331,7 +331,7 @@ static void convert_subrip(struct sd *sd, const char *orig,
                 }
             }
         } else if (strncmp(line, "<font ", 6) == 0
-                   && sp + 1 < FF_ARRAY_ELEMS(font_stack)) {
+                   && sp + 1 < MP_ARRAY_SIZE(font_stack)) {
             /* Opening font tag */
             char *potential_font_tag_start = line;
             int len_backup = new_line.len;
@@ -360,7 +360,7 @@ static void convert_subrip(struct sd *sd, const char *orig,
                     int found = 0;
 
                     // Try to lookup the string in standard web colors
-                    for (int i = 0; i < FF_ARRAY_ELEMS(subrip_web_colors); i++) {
+                    for (int i = 0; i < MP_ARRAY_SIZE(subrip_web_colors); i++) {
                         char *color = subrip_web_colors[i].s;
                         if (bstrcasecmp(val, bstr0(color)) == 0) {
                             uint32_t xcolor = subrip_web_colors[i].v;

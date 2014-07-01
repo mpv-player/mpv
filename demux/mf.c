@@ -16,7 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +29,7 @@
 #include "talloc.h"
 #include "common/msg.h"
 #include "stream/stream.h"
+#include "misc/ctype.h"
 #include "options/path.h"
 
 #include "mf.h"
@@ -55,7 +55,7 @@ mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filename)
             while (fgets(fname, 512, lst_f)) {
                 /* remove spaces from end of fname */
                 char *t = fname + strlen(fname) - 1;
-                while (t > fname && isspace((unsigned char)*t))
+                while (t > fname && mp_isspace(*t))
                     *(t--) = 0;
                 if (!mp_path_exists(fname)) {
                     mp_verbose(log, "file not found: '%s'\n", fname);

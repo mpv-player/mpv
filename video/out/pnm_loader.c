@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <ctype.h>
+#include "misc/ctype.h"
 #include "pnm_loader.h"
 
 /**
@@ -48,7 +48,7 @@ static void ppm_skip(FILE *f) {
       comment = 1;
     if (c == '\n')
       comment = 0;
-  } while (c != EOF && (isspace(c) || comment));
+  } while (c != EOF && (mp_isspace(c) || comment));
   if (c != EOF)
     ungetc(c, f);
 }
@@ -77,7 +77,7 @@ uint8_t *read_pnm(FILE *f, int *width, int *height,
   if (fscanf(f, "%u", &m) != 1)
     return NULL;
   val = fgetc(f);
-  if (!isspace(val))
+  if (!mp_isspace(val))
     return NULL;
   if (w > MAXDIM || h > MAXDIM)
     return NULL;

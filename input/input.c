@@ -28,7 +28,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
-#include <ctype.h>
 #include <pthread.h>
 #include <assert.h>
 

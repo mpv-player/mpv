@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <ctype.h>
 
 #include <libavutil/md5.h>
 
@@ -34,6 +33,7 @@
 #include "common/global.h"
 #include "common/encode.h"
 #include "common/msg.h"
+#include "misc/ctype.h"
 #include "options/path.h"
 #include "options/m_config.h"
 #include "options/parse_configfile.h"
@@ -267,7 +267,7 @@ static bool needs_config_quoting(const char *s)
 {
     for (int i = 0; s && s[i]; i++) {
         unsigned char c = s[i];
-        if (!isprint(c) || isspace(c) || c == '#' || c == '\'' || c == '"')
+        if (!mp_isprint(c) || mp_isspace(c) || c == '#' || c == '\'' || c == '"')
             return true;
     }
     return false;

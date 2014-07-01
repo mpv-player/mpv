@@ -22,13 +22,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <ctype.h>
 #include <assert.h>
 
 #include "osdep/io.h"
 
 #include "parse_configfile.h"
 #include "common/msg.h"
+#include "misc/ctype.h"
 #include "m_option.h"
 #include "m_config.h"
 
@@ -95,7 +95,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
         line_pos = 0;
 
         /* skip whitespaces */
-        while (isspace(line[line_pos]))
+        while (mp_isspace(line[line_pos]))
             ++line_pos;
 
         /* EOL / comment */
@@ -103,7 +103,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
             continue;
 
         /* read option. */
-        for (opt_pos = 0; isprint(line[line_pos]) &&
+        for (opt_pos = 0; mp_isprint(line[line_pos]) &&
              line[line_pos] != ' ' &&
              line[line_pos] != '#' &&
              line[line_pos] != '='; /* NOTHING */) {
@@ -133,7 +133,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
         }
 
         /* skip whitespaces */
-        while (isspace(line[line_pos]))
+        while (mp_isspace(line[line_pos]))
             ++line_pos;
 
         param_pos = 0;
@@ -145,7 +145,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
             param_set = true;
 
             /* whitespaces... */
-            while (isspace(line[line_pos]))
+            while (mp_isspace(line[line_pos]))
                 ++line_pos;
 
             /* read the parameter */
@@ -187,8 +187,8 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
                 }
             }
 
-            for (param_pos = 0; isprint(line[line_pos])
-                    && !isspace(line[line_pos])
+            for (param_pos = 0; mp_isprint(line[line_pos])
+                    && !mp_isspace(line[line_pos])
                     && line[line_pos] != '#'; /* NOTHING */) {
                 param[param_pos++] = line[line_pos++];
                 if (param_pos >= MAX_PARAM_LEN) {
@@ -202,7 +202,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
 
         param_done:
 
-            while (isspace(line[line_pos]))
+            while (mp_isspace(line[line_pos]))
                 ++line_pos;
         }
         param[param_pos] = '\0';

@@ -25,7 +25,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <sys/ioctl.h>
 #include <poll.h>
 #include <unistd.h>

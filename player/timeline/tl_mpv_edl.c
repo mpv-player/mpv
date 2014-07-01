@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <inttypes.h>
-#include <ctype.h>
 #include <math.h>
 
 #include "talloc.h"
