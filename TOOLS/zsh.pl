@@ -15,7 +15,9 @@ my @vo = parse_opts("$mpv --vo=help", '^  ([^\s\:]*)\s*: (.*)');
 my @af = parse_opts("$mpv --af=help", '^  ([^\s\:]*)\s*: (.*)');
 my @vf = parse_opts("$mpv --vf=help", '^  ([^\s\:]*)\s*: (.*)');
 
-my ($opts_str, $ao_str, $vo_str, $af_str, $vf_str);
+my @protos = parse_opts("$mpv --list-protocols", '^ ([^\s]*)');
+
+my ($opts_str, $ao_str, $vo_str, $af_str, $vf_str, $protos_str);
 
 $opts_str .= qq{  '$_' \\\n} foreach (@opts);
 chomp $opts_str;
@@ -31,6 +33,9 @@ chomp $af_str;
 
 $vf_str .= qq{      '$_' \\\n} foreach (@vf);
 chomp $vf_str;
+
+$protos_str .= qq{$_ } foreach (@protos);
+chomp $protos_str;
 
 my $tmpl = <<"EOS";
 #compdef mpv
@@ -86,7 +91,7 @@ $vf_str
       if _requested urls; then
         while _next_label urls expl URL; do
           _urls "\$expl[@]" && ret=0
-          compadd -S '' "\$expl[@]" \{dvd,vcd,cdda,cddb,tv\}:// && ret=0
+          compadd -S '' "\$expl[@]" $protos_str && ret=0
         done
       fi
       (( ret )) || return 0
