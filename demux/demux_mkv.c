@@ -272,7 +272,8 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
         } else if (enc->comp_algo == 2) {
             /* lzo encoded track */
             int out_avail;
-            if (size > INT_MAX / 3 + AV_LZO_OUTPUT_PADDING)
+            int maxlen = INT_MAX - AV_LZO_OUTPUT_PADDING;
+            if (size >= maxlen / 3)
                 goto error;
             int dstlen = size * 3;
 
@@ -292,7 +293,7 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
                     goto error;
                 }
                 mp_dbg(log, "lzo decompression buffer too small.\n");
-                if (dstlen > INT_MAX / 2 + AV_LZO_OUTPUT_PADDING) {
+                if (dstlen >= maxlen / 2) {
                     talloc_free(dest);
                     dest = NULL;
                     goto error;
