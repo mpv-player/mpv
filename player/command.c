@@ -1147,7 +1147,7 @@ static int mp_property_cache_used(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET: {
         int64_t size = -1;
         stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size);
-        if (size <= 0)
+        if (size < 0)
             break;
         *(int *)arg = size / 1024;
         return M_PROPERTY_OK;
@@ -1162,7 +1162,7 @@ static int mp_property_cache_used(void *ctx, struct m_property *prop,
     case M_PROPERTY_PRINT: {
         int64_t size = -1;
         stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size);
-        if (size <= 0)
+        if (size < 0)
             break;
         *(char **)arg = format_file_size(size);
         return M_PROPERTY_OK;
@@ -1182,7 +1182,7 @@ static int mp_property_cache_free(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET: {
         int64_t size_used = -1;
         stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size_used);
-        if (size_used <= 0)
+        if (size_used < 0)
             break;
 
         int64_t size = -1;
@@ -1203,7 +1203,7 @@ static int mp_property_cache_free(void *ctx, struct m_property *prop,
     case M_PROPERTY_PRINT: {
         int64_t size_used = -1;
         stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size_used);
-        if (size_used <= 0)
+        if (size_used < 0)
             break;
 
         int64_t size = -1;
