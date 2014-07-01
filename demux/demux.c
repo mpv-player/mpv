@@ -1,6 +1,4 @@
 /*
- * DEMUXER v2.5
- *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -17,7 +15,6 @@
  * with MPlayer; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#define DEMUX_PRIV(x) x
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,9 +77,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_playlist,
     // Pretty aggressive, so should be last.
     &demuxer_desc_subreader,
-    /* Please do not add any new demuxers here. If you want to implement a new
-     * demuxer, add it to libavformat, except for wrappers around external
-     * libraries and demuxers requiring binary support. */
     NULL
 };
 

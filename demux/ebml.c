@@ -37,10 +37,6 @@
 #include "compat/mpbswap.h"
 #include "common/msg.h"
 
-#ifndef SIZE_MAX
-#define SIZE_MAX ((size_t)-1)
-#endif
-
 // Whether the id is a known Matroska level 1 element (allowed as element on
 // global file level, after the level 0 MATROSKA_ID_SEGMENT).
 // This (intentionally) doesn't include "global" elements.

@@ -28,7 +28,6 @@
 
 struct mp_log;
 
-
 /* EBML version supported */
 #define EBML_VERSION 1
 
@@ -69,7 +68,6 @@ struct ebml_parse_ctx {
 
 #define EBML_ID_INVALID 0xffffffff
 
-
 /* matroska track types */
 #define MATROSKA_TRACK_VIDEO    0x01 /* rectangle-shaped pictures aka video */
 #define MATROSKA_TRACK_AUDIO    0x02 /* anything you can hear */
@@ -78,18 +76,8 @@ struct ebml_parse_ctx {
 #define MATROSKA_TRACK_SUBTITLE 0x11 /* text-subtitles */
 #define MATROSKA_TRACK_CONTROL  0x20 /* control-codes for menu or other stuff*/
 
-#ifndef UINT64_MAX
-#define UINT64_MAX 18446744073709551615ULL
-#endif
-
-#ifndef INT64_MAX
-#define INT64_MAX 9223372036854775807LL
-#endif
-
 #define EBML_UINT_INVALID   UINT64_MAX
 #define EBML_INT_INVALID    INT64_MAX
-#define EBML_FLOAT_INVALID  -1000000000.0
-
 
 bool ebml_is_mkv_level1_id(uint32_t id);
 uint32_t ebml_read_id (stream_t *s);

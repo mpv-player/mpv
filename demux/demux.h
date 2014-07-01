@@ -227,10 +227,6 @@ void demux_packet_shorten(struct demux_packet *dp, size_t len);
 void free_demux_packet(struct demux_packet *dp);
 struct demux_packet *demux_copy_packet(struct demux_packet *dp);
 
-#ifndef SIZE_MAX
-#define SIZE_MAX ((size_t)-1)
-#endif
-
 void free_demuxer(struct demuxer *demuxer);
 
 int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
