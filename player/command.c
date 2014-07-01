@@ -1086,10 +1086,11 @@ static int mp_property_cache(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    int cache = mp_get_cache_percent(mpctx);
+    float cache = mp_get_cache_percent(mpctx);
     if (cache < 0)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(action, arg, cache);
+
+    return m_property_float_ro(action, arg, cache);
 }
 
 static int mp_property_cache_size(void *ctx, struct m_property *prop,
@@ -1123,9 +1124,101 @@ static int mp_property_cache_size(void *ctx, struct m_property *prop,
             return M_PROPERTY_OK;
         return M_PROPERTY_ERROR;
     }
+    case M_PROPERTY_PRINT: {
+        int64_t size = -1;
+        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_SIZE, &size);
+        if (size <= 0)
+            break;
+        *(char **)arg = format_file_size(size);
+        return M_PROPERTY_OK;
+    }
+
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
+
+static int mp_property_cache_used(void *ctx, struct m_property *prop,
+                                  int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->stream)
+        return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_GET: {
+        int64_t size = -1;
+        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size);
+        if (size <= 0)
+            break;
+        *(int *)arg = size / 1024;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){
+            .type = CONF_TYPE_INT,
+            .flags = M_OPT_MIN,
+            .min = 0,
+        };
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+        int64_t size = -1;
+        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size);
+        if (size <= 0)
+            break;
+        *(char **)arg = format_file_size(size);
+        return M_PROPERTY_OK;
+    }
+
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_cache_free(void *ctx, struct m_property *prop,
+                                  int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->stream)
+        return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_GET: {
+        int64_t size_used = -1;
+        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size_used);
+        if (size_used <= 0)
+            break;
+
+        int64_t size = -1;
+        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_SIZE, &size);
+        if (size <= 0)
+            break;
+
+        *(int *)arg = (size - size_used) / 1024;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){
+            .type = CONF_TYPE_INT,
+            .flags = M_OPT_MIN,
+            .min = 0,
+        };
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+        int64_t size_used = -1;
+        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size_used);
+        if (size_used <= 0)
+            break;
+
+        int64_t size = -1;
+        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_SIZE, &size);
+        if (size <= 0)
+            break;
+
+        *(char **)arg = format_file_size(size - size_used);
+        return M_PROPERTY_OK;
+    }
+
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 
 static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
                                         int action, void *arg)
@@ -2620,6 +2713,8 @@ static const struct m_property mp_properties[] = {
     {"core-idle", mp_property_core_idle},
     {"eof-reached", mp_property_eof_reached},
     {"cache", mp_property_cache},
+    {"cache-free", mp_property_cache_free},
+    {"cache-used", mp_property_cache_used},
     {"cache-size", mp_property_cache_size},
     {"paused-for-cache", mp_property_paused_for_cache},
     {"pts-association-mode", mp_property_generic_option},
