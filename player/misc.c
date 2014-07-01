@@ -119,7 +119,7 @@ double get_start_time(struct MPContext *mpctx)
     return demuxer_get_start_time(demuxer);
 }
 
-int mp_get_cache_percent(struct MPContext *mpctx)
+float mp_get_cache_percent(struct MPContext *mpctx)
 {
     if (mpctx->stream) {
         int64_t size = -1;
@@ -127,7 +127,7 @@ int mp_get_cache_percent(struct MPContext *mpctx)
         stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_SIZE, &size);
         stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &fill);
         if (size > 0 && fill >= 0)
-            return fill / (size / 100);
+            return fill / (size / 100.0);
     }
     return -1;
 }
