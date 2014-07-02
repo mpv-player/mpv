@@ -361,6 +361,9 @@ static int resize_cache(struct priv *s, int64_t size)
     if (s->seek_limit > s->buffer_size - FILL_LIMIT)
         s->seek_limit = s->buffer_size - FILL_LIMIT;
 
+    for (size_t n = 0; n < s->buffer_size / BYTE_META_CHUNK_SIZE + 2; n++)
+        s->bm[n] = (struct byte_meta){.stream_pts = MP_NOPTS_VALUE};
+
     return STREAM_OK;
 }
 
