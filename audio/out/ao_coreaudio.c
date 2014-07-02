@@ -26,45 +26,22 @@
 #include "audio/out/ao_coreaudio_properties.h"
 #include "audio/out/ao_coreaudio_utils.h"
 
-static void audio_pause(struct ao *ao);
-static void audio_resume(struct ao *ao);
-static void reset(struct ao *ao);
-
 struct priv {
     AudioDeviceID device;
     AudioUnit audio_unit;
-    bool paused;
-    struct mp_ring *buffer;
 
     // options
     int opt_device_id;
     int opt_list;
 };
 
-static int get_ring_size(struct ao *ao)
-{
-    return af_fmt_seconds_to_bytes(
-            ao->format, 0.5, ao->channels.num, ao->samplerate);
-}
-
 static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
                               const AudioTimeStamp *ts, UInt32 bus,
                               UInt32 frames, AudioBufferList *buffer_list)
 {
     struct ao *ao   = ctx;
-    struct priv *p  = ao->priv;
-
     AudioBuffer buf = buffer_list->mBuffers[0];
-    int requested   = buf.mDataByteSize;
-
-    if (mp_ring_buffered(p->buffer) < requested) {
-        MP_VERBOSE(ao, "buffer underrun\n");
-        audio_pause(ao);
-        memset(buf.mData, 0, requested);
-    } else {
-        mp_ring_read(p->buffer, buf.mData, requested);
-    }
-
+    ao_read_data(ao, &buf.mData, frames, ts->mSampleTime);
     return noErr;
 }
 
@@ -221,7 +198,6 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "can't link audio unit to selected device");
 
-    p->buffer = mp_ring_new(p, get_ring_size(ao));
     AURenderCallbackStruct render_cb = (AURenderCallbackStruct) {
         .inputProc       = render_cb_lpcm,
         .inputProcRefCon = ao,
@@ -235,7 +211,6 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "unable to set render callback on audio unit");
 
-    reset(ao);
     return true;
 
 coreaudio_error_audiounit:
@@ -246,38 +221,20 @@ coreaudio_error:
     return false;
 }
 
-static int play(struct ao *ao, void **data, int samples, int flags)
-{
-    struct priv *p       = ao->priv;
-    void *output_samples = data[0];
-    int num_bytes        = samples * ao->sstride;
-
-    int wrote = mp_ring_write(p->buffer, output_samples, num_bytes);
-    audio_resume(ao);
-
-    return wrote / ao->sstride;
-}
-
-static void reset(struct ao *ao)
+static void stop(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    audio_pause(ao);
-    mp_ring_reset(p->buffer);
+    OSStatus err = AudioOutputUnitStop(p->audio_unit);
+    CHECK_CA_WARN("can't stop audio unit");
 }
 
-static int get_space(struct ao *ao)
+static void start(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    return mp_ring_available(p->buffer) / ao->sstride;
+    OSStatus err = AudioOutputUnitStart(p->audio_unit);
+    CHECK_CA_WARN("can't start audio unit");
 }
 
-static float get_delay(struct ao *ao)
-{
-    // FIXME: should also report the delay of coreaudio itself (hardware +
-    // internal buffers)
-    struct priv *p = ao->priv;
-    return mp_ring_buffered(p->buffer) / (float)ao->bps;
-}
 
 static void uninit(struct ao *ao)
 {
@@ -287,32 +244,6 @@ static void uninit(struct ao *ao)
     AudioComponentInstanceDispose(p->audio_unit);
 }
 
-static void audio_pause(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-
-    if (p->paused)
-        return;
-
-    OSStatus err = AudioOutputUnitStop(p->audio_unit);
-    CHECK_CA_WARN("can't stop audio unit");
-
-    p->paused = true;
-}
-
-static void audio_resume(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-
-    if (!p->paused)
-        return;
-
-    OSStatus err = AudioOutputUnitStart(p->audio_unit);
-    CHECK_CA_WARN("can't start audio unit");
-
-    p->paused = false;
-}
-
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_coreaudio = {
@@ -320,13 +251,9 @@ const struct ao_driver audio_out_coreaudio = {
     .name      = "coreaudio",
     .uninit    = uninit,
     .init      = init,
-    .play      = play,
     .control   = control,
-    .get_space = get_space,
-    .get_delay = get_delay,
-    .reset     = reset,
-    .pause     = audio_pause,
-    .resume    = audio_resume,
+    .pause     = stop,
+    .resume    = start,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_INT("device_id", opt_device_id, 0, OPTDEF_INT(-1)),
