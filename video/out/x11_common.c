@@ -858,8 +858,9 @@ int vo_x11_check_events(struct vo *vo)
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_UP);
             break;
         case MapNotify:
+            if (x11->window_hidden)
+                vo_x11_clearwindow(vo, x11->window);
             x11->window_hidden = false;
-            vo_x11_clearwindow(vo, x11->window);
             vo_x11_update_geometry(vo);
             break;
         case DestroyNotify:
