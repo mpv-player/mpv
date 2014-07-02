@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "osdep/io.h"
+
 #include "common/common.h"
 #include "common/msg.h"
 
