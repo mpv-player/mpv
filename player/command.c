@@ -2795,7 +2795,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_PAUSE,   "pause", "paused-on-cache", "core-idle", "eof-reached"),
     E(MPV_EVENT_UNPAUSE, "pause", "paused-on-cache", "core-idle", "eof-reached"),
     E(MPV_EVENT_TICK, "time-pos", "stream-pos", "stream-time-pos", "avsync",
-      "percent-pos", "time-remaining", "playtime-remaining"),
+      "percent-pos", "time-remaining", "playtime-remaining", "playback-time"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect"),
