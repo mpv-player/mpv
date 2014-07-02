@@ -15,6 +15,8 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <CoreAudio/HostTime.h>
+
 #include "config.h"
 #include "ao.h"
 #include "internal.h"
@@ -38,13 +40,29 @@ struct priv {
 bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
                            struct mp_chmap *chmap);
 
+static int64_t ca_get_latency(const AudioTimeStamp *ts)
+{
+    uint64_t out = AudioConvertHostTimeToNanos(ts->mHostTime);
+    uint64_t now = AudioConvertHostTimeToNanos(AudioGetCurrentHostTime());
+
+    if (now > out)
+        return 0;
+
+    return (out - now) * 1e-3;
+}
+
 static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
                               const AudioTimeStamp *ts, UInt32 bus,
                               UInt32 frames, AudioBufferList *buffer_list)
 {
     struct ao *ao   = ctx;
     AudioBuffer buf = buffer_list->mBuffers[0];
-    ao_read_data(ao, &buf.mData, frames, ts->mSampleTime);
+
+    const int64_t playback_us = frames / (float) ao->samplerate * 1e6;
+    const int64_t latency_us  = ca_get_latency(ts);
+
+    const int64_t end = mp_time_us() + playback_us + latency_us;
+    ao_read_data(ao, &buf.mData, frames, end);
     return noErr;
 }
 
