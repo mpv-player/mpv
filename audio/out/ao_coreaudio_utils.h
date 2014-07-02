@@ -53,7 +53,4 @@ void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd);
 void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd);
 
-bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
-                           struct mp_chmap *chmap);
-
 #endif /* MPV_COREAUDIO_UTILS_H */
