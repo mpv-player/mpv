@@ -31,8 +31,8 @@ static void audio_resume(struct ao *ao);
 static void reset(struct ao *ao);
 
 struct priv {
-    AudioDeviceID device;   // selected device
-    AudioUnit audio_unit;   // AudioUnit for lpcm output
+    AudioDeviceID device;
+    AudioUnit audio_unit;
     bool paused;
     struct mp_ring *buffer;
 
@@ -101,7 +101,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         return get_volume(ao, arg);
     case AOCONTROL_SET_VOLUME:
         return set_volume(ao, arg);
-    } // end switch
+    }
     return CONTROL_UNKNOWN;
 }
 
@@ -202,7 +202,6 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
     err = AudioComponentInstanceNew(comp, &(p->audio_unit));
     CHECK_CA_ERROR("unable to open audio component");
 
-    // Initialize AudioUnit
     err = AudioUnitInitialize(p->audio_unit);
     CHECK_CA_ERROR_L(coreaudio_error_component,
                      "unable to initialize audio unit");
@@ -215,7 +214,6 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "unable to set the input format on the audio unit");
 
-    //Set the Current Device to the Default Output Unit.
     err = AudioUnitSetProperty(p->audio_unit,
                                kAudioOutputUnitProperty_CurrentDevice,
                                kAudioUnitScope_Global, 0, &p->device,
