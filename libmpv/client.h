@@ -114,7 +114,7 @@ extern "C" {
  *   handler is process-wide, and there's no proper way to share it with other
  *   xlib users within the same process. This might confuse GUI toolkits.
  * - mpv uses some other libraries that are not library-safe, such as Fribidi
- *   (used through libass), LittleCMS, ALSA, FFmpeg, and possibly more.
+ *   (used through libass), ALSA, FFmpeg, and possibly more.
  * - The FPU precision must be set at least to double precision.
  * - On Windows, mpv will call timeBeginPeriod(1).
  * - On memory exhaustion, mpv will kill the process.
@@ -131,6 +131,24 @@ extern "C" {
  * aspect ratio of the window and the video mismatch).
  *
  * On OSX, embedding is not yet possible, because Cocoa makes this non-trivial.
+ *
+ * Compatibility
+ * -------------
+ *
+ * mpv development doesn't stand still, and changes to mpv internals as well as
+ * to its interface can cause compatibility issues to client API users.
+ *
+ * The API is versioned (see MPV_CLIENT_API_VERSION), and changes to it are
+ * documented in DOCS/client-api-changes.rst. The C API itself will probably
+ * remain compatible for a long time, but the functionality exposed by it
+ * could change more rapidly. For example, it's possible that options are
+ * renamed, or change the set of allowed values.
+ *
+ * Defensive programming should be used to potentially deal with the fact that
+ * options, commands, and properties could disappear, change their value range,
+ * or change the underlying datatypes. It might be a good idea to prefer
+ * MPV_FORMAT_STRING over other types to decouple your code from potential
+ * mpv changes.
  */
 
 /**
@@ -139,8 +157,13 @@ extern "C" {
  * the API becomes incompatible to previous versions, the major version
  * number is incremented. This affects only C part, and not properties and
  * options.
+ *
+ * The version number is often converted into a human readable form by writing
+ * the major and minor version number in decimal. E.g.:
+ *      version 0x001001FF
+ *      becomes 16.511 (dec(0x0010) + "." + dec(0x01FF))
  */
-#define MPV_CLIENT_API_VERSION 0x00010000UL
+#define MPV_CLIENT_API_VERSION 0x00010001UL
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.

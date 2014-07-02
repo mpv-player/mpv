@@ -987,6 +987,7 @@ Property list
                 "par"               MPV_FORMAT_DOUBLE
                 "colormatrix"       MPV_FORMAT_STRING
                 "colorlevels"       MPV_FORMAT_STRING
+                "primaries"         MPV_FORMAT_STRING
                 "chroma-location"   MPV_FORMAT_STRING
                 "rotate"            MPV_FORMAT_INT64
 
