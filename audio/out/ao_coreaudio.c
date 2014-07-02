@@ -106,7 +106,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 }
 
 static bool init_chmap(struct ao *ao);
-static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd);
+static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd);
 
 static int init(struct ao *ao)
 {
@@ -125,10 +125,13 @@ static int init(struct ao *ao)
 
     ao->format = af_fmt_from_planar(ao->format);
 
-    // Build ASBD for the input format
     AudioStreamBasicDescription asbd;
     ca_fill_asbd(ao, &asbd);
-    return init_lpcm(ao, asbd);
+
+    if (!init_audiounit(ao, asbd))
+        goto coreaudio_error;
+
+    return CONTROL_OK;
 
 coreaudio_error:
     return CONTROL_ERROR;
@@ -174,7 +177,7 @@ coreaudio_error:
     return false;
 }
 
-static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd)
+static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
 {
     OSStatus err;
     uint32_t size;
@@ -235,14 +238,14 @@ static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd)
                      "unable to set render callback on audio unit");
 
     reset(ao);
-    return CONTROL_OK;
+    return true;
 
 coreaudio_error_audiounit:
     AudioUnitUninitialize(p->audio_unit);
 coreaudio_error_component:
     AudioComponentInstanceDispose(p->audio_unit);
 coreaudio_error:
-    return CONTROL_ERROR;
+    return false;
 }
 
 static int play(struct ao *ao, void **data, int samples, int flags)
