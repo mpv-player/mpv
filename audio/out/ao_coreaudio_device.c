@@ -432,25 +432,7 @@ static int init(struct ao *ao)
 
     // Build ASBD for the input format
     AudioStreamBasicDescription asbd;
-    asbd.mSampleRate       = ao->samplerate;
-    asbd.mFormatID         = kAudioFormat60958AC3;
-    asbd.mChannelsPerFrame = ao->channels.num;
-    asbd.mBitsPerChannel   = af_fmt2bits(ao->format);
-    asbd.mFormatFlags      = kAudioFormatFlagIsPacked;
-
-    if ((ao->format & AF_FORMAT_POINT_MASK) == AF_FORMAT_F)
-        asbd.mFormatFlags |= kAudioFormatFlagIsFloat;
-
-    if ((ao->format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_SI)
-        asbd.mFormatFlags |= kAudioFormatFlagIsSignedInteger;
-
-    if ((ao->format & AF_FORMAT_END_MASK) == AF_FORMAT_BE)
-        asbd.mFormatFlags |= kAudioFormatFlagIsBigEndian;
-
-    asbd.mFramesPerPacket = 1;
-    asbd.mBytesPerPacket = asbd.mBytesPerFrame =
-        asbd.mFramesPerPacket * asbd.mChannelsPerFrame *
-        (asbd.mBitsPerChannel / 8);
+    ca_fill_asbd(ao, &asbd);
 
     return init_digital(ao, asbd);
 

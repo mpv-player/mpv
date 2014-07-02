@@ -49,6 +49,7 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
 void ca_print_device_list(struct ao *ao);
 OSStatus ca_select_device(struct ao *ao, int selection, AudioDeviceID *device);
 
+void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd);
 void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd);
 

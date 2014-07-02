@@ -25,6 +25,7 @@
 #include "audio/out/ao_coreaudio_utils.h"
 #include "audio/out/ao_coreaudio_properties.h"
 #include "osdep/timer.h"
+#include "audio/format.h"
 
 void ca_print_device_list(struct ao *ao)
 {
@@ -123,6 +124,31 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
     talloc_free(error_string);
 
     return false;
+}
+
+void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd)
+{
+    asbd->mSampleRate       = ao->samplerate;
+    asbd->mFormatID         = AF_FORMAT_IS_AC3(ao->format) ?
+                              kAudioFormat60958AC3 :
+                              kAudioFormatLinearPCM;
+    asbd->mChannelsPerFrame = ao->channels.num;
+    asbd->mBitsPerChannel   = af_fmt2bits(ao->format);
+    asbd->mFormatFlags      = kAudioFormatFlagIsPacked;
+
+    if ((ao->format & AF_FORMAT_POINT_MASK) == AF_FORMAT_F)
+        asbd->mFormatFlags |= kAudioFormatFlagIsFloat;
+
+    if ((ao->format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_SI)
+        asbd->mFormatFlags |= kAudioFormatFlagIsSignedInteger;
+
+    if ((ao->format & AF_FORMAT_END_MASK) == AF_FORMAT_BE)
+        asbd->mFormatFlags |= kAudioFormatFlagIsBigEndian;
+
+    asbd->mFramesPerPacket = 1;
+    asbd->mBytesPerPacket = asbd->mBytesPerFrame =
+        asbd->mFramesPerPacket * asbd->mChannelsPerFrame *
+        (asbd->mBitsPerChannel / 8);
 }
 
 void ca_print_asbd(struct ao *ao, const char *description,
