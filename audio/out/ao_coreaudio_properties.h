@@ -37,6 +37,7 @@ OSStatus ca_set(AudioObjectID id, ca_scope scope, ca_sel selector,
 
 #define CA_GET(id, sel, data) ca_get(id, CA_GLOBAL, sel, sizeof(*(data)), data)
 #define CA_SET(id, sel, data) ca_set(id, CA_GLOBAL, sel, sizeof(*(data)), data)
+#define CA_GET_O(id, sel, data) ca_get(id, CA_OUTPUT, sel, sizeof(*(data)), data)
 
 OSStatus ca_get_ary(AudioObjectID id, ca_scope scope, ca_sel selector,
                     uint32_t element_size, void **data, size_t *elements);

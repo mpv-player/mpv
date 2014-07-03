@@ -32,6 +32,8 @@ struct priv {
     AudioDeviceID device;
     AudioUnit audio_unit;
 
+    uint64_t hw_latency_us;
+
     // options
     int opt_device_id;
     int opt_list;
@@ -39,6 +41,41 @@ struct priv {
 
 bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
                            struct mp_chmap *chmap);
+
+static int64_t ca_frames_to_us(struct ao *ao, uint32_t frames)
+{
+    return frames / (float) ao->samplerate * 1e6;
+}
+
+static int64_t ca_get_hardware_latency(struct ao *ao) {
+    struct priv *p = ao->priv;
+
+    double audiounit_latency_sec = 0.0;
+    uint32_t size = sizeof(audiounit_latency_sec);
+    OSStatus err = AudioUnitGetProperty(
+            p->audio_unit,
+            kAudioUnitProperty_Latency,
+            kAudioUnitScope_Global,
+            0,
+            &audiounit_latency_sec,
+            &size);
+    CHECK_CA_ERROR("cannot get audio unit latency");
+
+    uint32_t frames = 0;
+    err = CA_GET_O(p->device, kAudioDevicePropertyLatency, &frames);
+    CHECK_CA_ERROR("cannot get device latency");
+
+    uint64_t audiounit_latency_us = audiounit_latency_sec * 1e6;
+    uint64_t device_latency_us    = ca_frames_to_us(ao, frames);
+
+    MP_VERBOSE(ao, "audiounit latency [us]: %lld\n", audiounit_latency_us);
+    MP_VERBOSE(ao, "device latency [us]: %lld\n", device_latency_us);
+
+    return audiounit_latency_us + device_latency_us;
+
+coreaudio_error:
+    return 0;
+}
 
 static int64_t ca_get_latency(const AudioTimeStamp *ts)
 {
@@ -56,12 +93,12 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
                               UInt32 frames, AudioBufferList *buffer_list)
 {
     struct ao *ao   = ctx;
+    struct priv *p  = ao->priv;
     AudioBuffer buf = buffer_list->mBuffers[0];
 
-    const int64_t playback_us = frames / (float) ao->samplerate * 1e6;
-    const int64_t latency_us  = ca_get_latency(ts);
+    int64_t end = mp_time_us();
+    end += p->hw_latency_us + ca_get_latency(ts) + ca_frames_to_us(ao, frames);
 
-    const int64_t end = mp_time_us() + playback_us + latency_us;
     ao_read_data(ao, &buf.mData, frames, end);
     return noErr;
 }
@@ -218,6 +255,8 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
                                sizeof(p->device));
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "can't link audio unit to selected device");
+
+    p->hw_latency_us = ca_get_hardware_latency(ao);
 
     AURenderCallbackStruct render_cb = (AURenderCallbackStruct) {
         .inputProc       = render_cb_lpcm,
