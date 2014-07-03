@@ -638,6 +638,8 @@ static void stream_dvdnav_close(stream_t *s)
     priv->dvdnav = NULL;
     if (priv->dvd_speed)
         dvd_set_speed(s, priv->filename, -1);
+    if (priv->filename)
+        free(priv->filename);
 }
 
 static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
