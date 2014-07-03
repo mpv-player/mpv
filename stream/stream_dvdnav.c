@@ -698,7 +698,7 @@ static int open_s(stream_t *stream)
         int best_title = -1;
         int32_t num_titles;
         if (dvdnav_get_number_of_titles(dvdnav, &num_titles) == DVDNAV_STATUS_OK) {
-            for (int n = 1; n < num_titles; n++) {
+            for (int n = 1; n <= num_titles; n++) {
                 uint64_t *parts = NULL, duration = 0;
                 dvdnav_describe_title_chapters(dvdnav, n, &parts, &duration);
                 if (parts) {
