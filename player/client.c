@@ -330,6 +330,9 @@ static void get_thread(void *ptr)
 
 void mpv_terminate_destroy(mpv_handle *ctx)
 {
+    if (!ctx)
+        return;
+
     mpv_command(ctx, (const char*[]){"quit", NULL});
 
     if (!ctx->owner) {
