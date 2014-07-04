@@ -321,6 +321,8 @@ static int init(struct ao *ao)
         goto unlock_and_fail;
     }
     (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ROLE, "video");
+    (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ICON_NAME,
+                           PULSE_CLIENT_NAME);
 
     if (!(priv->stream = pa_stream_new_with_proplist(priv->context,
                                                      "audio stream", &ss,
