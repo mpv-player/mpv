@@ -777,7 +777,7 @@ int vo_x11_check_events(struct vo *vo)
             if (x11->window == None)
                 break;
             vo_x11_update_geometry(vo);
-            if (Event.xconfigure.window == vo->opts->WinID) {
+            if (Event.xconfigure.window == (Window)vo->opts->WinID) {
                 XMoveResizeWindow(x11->display, x11->window,
                                   x11->winrc.x0, x11->winrc.y0,
                                   RC_W(x11->winrc), RC_H(x11->winrc));
