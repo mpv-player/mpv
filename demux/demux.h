@@ -219,14 +219,6 @@ typedef struct {
     int aid, vid, sid; //audio, video and subtitle id
 } demux_program_t;
 
-struct demux_packet *new_demux_packet(size_t len);
-// data must already have suitable padding
-struct demux_packet *new_demux_packet_fromdata(void *data, size_t len);
-struct demux_packet *new_demux_packet_from(void *data, size_t len);
-void demux_packet_shorten(struct demux_packet *dp, size_t len);
-void free_demux_packet(struct demux_packet *dp);
-struct demux_packet *demux_copy_packet(struct demux_packet *dp);
-
 void free_demuxer(struct demuxer *demuxer);
 
 int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,

@@ -184,6 +184,7 @@ def build(ctx):
         ( "demux/demux_subreader.c" ),
         ( "demux/ebml.c" ),
         ( "demux/mf.c" ),
+        ( "demux/packet.c" ),
 
         ## Input
         ( "input/cmd_list.c" ),

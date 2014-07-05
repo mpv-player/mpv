@@ -29,7 +29,6 @@
 
 #include "config.h"
 #include "options/options.h"
-#include "common/av_common.h"
 #include "talloc.h"
 #include "common/msg.h"
 #include "common/global.h"
@@ -40,8 +39,6 @@
 #include "mf.h"
 
 #include "audio/format.h"
-
-#include <libavcodec/avcodec.h>
 
 // Demuxer list
 extern const struct demuxer_desc demuxer_desc_edl;
@@ -104,103 +101,6 @@ static void ds_free_packs(struct demux_stream *ds)
     ds->packs = 0; // !!!!!
     ds->bytes = 0;
     ds->eof = 0;
-}
-
-static void packet_destroy(void *ptr)
-{
-    struct demux_packet *dp = ptr;
-    talloc_free(dp->avpacket);
-    av_free(dp->allocation);
-}
-
-static struct demux_packet *create_packet(size_t len)
-{
-    if (len > 1000000000) {
-        fprintf(stderr, "Attempt to allocate demux packet over 1 GB!\n");
-        abort();
-    }
-    struct demux_packet *dp = talloc(NULL, struct demux_packet);
-    talloc_set_destructor(dp, packet_destroy);
-    *dp = (struct demux_packet) {
-        .len = len,
-        .pts = MP_NOPTS_VALUE,
-        .dts = MP_NOPTS_VALUE,
-        .duration = -1,
-        .stream_pts = MP_NOPTS_VALUE,
-        .pos = -1,
-        .stream = -1,
-    };
-    return dp;
-}
-
-struct demux_packet *new_demux_packet(size_t len)
-{
-    struct demux_packet *dp = create_packet(len);
-    dp->buffer = av_malloc(len + FF_INPUT_BUFFER_PADDING_SIZE);
-    if (!dp->buffer) {
-        fprintf(stderr, "Memory allocation failure!\n");
-        abort();
-    }
-    memset(dp->buffer + len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
-    dp->allocation = dp->buffer;
-    return dp;
-}
-
-// data must already have suitable padding, and does not copy the data
-struct demux_packet *new_demux_packet_fromdata(void *data, size_t len)
-{
-    struct demux_packet *dp = create_packet(len);
-    dp->buffer = data;
-    return dp;
-}
-
-struct demux_packet *new_demux_packet_from(void *data, size_t len)
-{
-    struct demux_packet *dp = new_demux_packet(len);
-    memcpy(dp->buffer, data, len);
-    return dp;
-}
-
-void demux_packet_shorten(struct demux_packet *dp, size_t len)
-{
-    assert(len <= dp->len);
-    dp->len = len;
-    memset(dp->buffer + dp->len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
-}
-
-void free_demux_packet(struct demux_packet *dp)
-{
-    talloc_free(dp);
-}
-
-static void destroy_avpacket(void *pkt)
-{
-    av_free_packet(pkt);
-}
-
-struct demux_packet *demux_copy_packet(struct demux_packet *dp)
-{
-    struct demux_packet *new = NULL;
-    if (dp->avpacket) {
-        assert(dp->buffer == dp->avpacket->data);
-        assert(dp->len == dp->avpacket->size);
-        AVPacket *newavp = talloc_zero(NULL, AVPacket);
-        talloc_set_destructor(newavp, destroy_avpacket);
-        av_init_packet(newavp);
-        if (av_packet_ref(newavp, dp->avpacket) < 0)
-            abort();
-        new = new_demux_packet_fromdata(newavp->data, newavp->size);
-        new->avpacket = newavp;
-    }
-    if (!new) {
-        new = new_demux_packet(dp->len);
-        memcpy(new->buffer, dp->buffer, new->len);
-    }
-    new->pts = dp->pts;
-    new->dts = dp->dts;
-    new->duration = dp->duration;
-    new->stream_pts = dp->stream_pts;
-    return new;
 }
 
 struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)

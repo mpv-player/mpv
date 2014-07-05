@@ -20,6 +20,7 @@
 #define MPLAYER_DEMUX_PACKET_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <inttypes.h>
 
 // Holds one packet/frame/whatever
@@ -37,5 +38,13 @@ typedef struct demux_packet {
     void *allocation;
     struct AVPacket *avpacket;   // original libavformat packet (demux_lavf)
 } demux_packet_t;
+
+struct demux_packet *new_demux_packet(size_t len);
+// data must already have suitable padding
+struct demux_packet *new_demux_packet_fromdata(void *data, size_t len);
+struct demux_packet *new_demux_packet_from(void *data, size_t len);
+void demux_packet_shorten(struct demux_packet *dp, size_t len);
+void free_demux_packet(struct demux_packet *dp);
+struct demux_packet *demux_copy_packet(struct demux_packet *dp);
 
 #endif /* MPLAYER_DEMUX_PACKET_H */
