@@ -140,8 +140,8 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
 
     ret = stream_read(stream, buf, size);
 
-    MP_DBG(demuxer, "%d=mp_read(%p, %p, %d), pos: %"PRId64", eof:%d\n",
-           ret, stream, buf, size, stream_tell(stream), stream->eof);
+    MP_TRACE(demuxer, "%d=mp_read(%p, %p, %d), pos: %"PRId64", eof:%d\n",
+             ret, stream, buf, size, stream_tell(stream), stream->eof);
     return ret;
 }
 
@@ -152,8 +152,7 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     int64_t current_pos;
     if (stream_manages_timeline(stream))
         return -1;
-    MP_DBG(demuxer, "mp_seek(%p, %"PRId64", %d)\n",
-           stream, pos, whence);
+    MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %d)\n", stream, pos, whence);
     if (whence == SEEK_END || whence == AVSEEK_SIZE) {
         int64_t end;
         if (stream_control(stream, STREAM_CTRL_GET_SIZE, &end) != STREAM_OK)
@@ -517,9 +516,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
         // This also applies to vfw-muxed mkv, but we can't detect these easily.
         sh_video->avi_dts = matches_avinputformat_name(priv, "avi");
 
-        MP_DBG(demuxer, "aspect= %d*%d/(%d*%d)\n",
-               codec->width, codec->sample_aspect_ratio.num,
-               codec->height, codec->sample_aspect_ratio.den);
         break;
     }
     case AVMEDIA_TYPE_SUBTITLE: {
@@ -649,7 +645,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (lavfdopts->probesize) {
         if (av_opt_set_int(avfc, "probesize", lavfdopts->probesize, 0) < 0)
-            MP_ERR(demuxer, "demux_lavf, couldn't set option probesize to %u\n",
+            MP_ERR(demuxer, "couldn't set option probesize to %u\n",
                    lavfdopts->probesize);
     }
 
@@ -706,26 +702,24 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     }
 
     if (avformat_open_input(&avfc, priv->filename, priv->avif, &dopts) < 0) {
-        MP_ERR(demuxer, "LAVF_header: avformat_open_input() failed\n");
+        MP_ERR(demuxer, "avformat_open_input() failed\n");
         av_dict_free(&dopts);
         return -1;
     }
 
     t = NULL;
-    while ((t = av_dict_get(dopts, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        MP_VERBOSE(demuxer, "[lavf] Could not set demux option %s=%s\n",
-               t->key, t->value);
-    }
+    while ((t = av_dict_get(dopts, "", t, AV_DICT_IGNORE_SUFFIX)))
+        MP_VERBOSE(demuxer, "Could not set demux option %s=%s\n", t->key, t->value);
     av_dict_free(&dopts);
 
     priv->avfc = avfc;
     if (avformat_find_stream_info(avfc, NULL) < 0) {
-        MP_ERR(demuxer, "LAVF_header: av_find_stream_info() failed\n");
+        MP_ERR(demuxer, "av_find_stream_info() failed\n");
         return -1;
     }
 
-    MP_VERBOSE(demuxer, "demux_lavf: avformat_find_stream_info() "
-           "finished after %"PRId64" bytes.\n", stream_tell(demuxer->stream));
+    MP_VERBOSE(demuxer, "avformat_find_stream_info() finished after %"PRId64
+               " bytes.\n", stream_tell(demuxer->stream));
 
     for (i = 0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
@@ -779,7 +773,6 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
 {
     lavf_priv_t *priv = demux->priv;
     demux_packet_t *dp;
-    MP_DBG(demux, "demux_lavf_fill_buffer()\n");
 
     AVPacket *pkt = talloc(NULL, AVPacket);
     if (av_read_frame(priv->avfc, pkt) < 0) {
@@ -837,8 +830,6 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     lavf_priv_t *priv = demuxer->priv;
     int avsflags = 0;
-    MP_DBG(demuxer, "demux_seek_lavf(%p, %f, %d)\n",
-           demuxer, rel_seek_secs, flags);
 
     if (flags & SEEK_ABSOLUTE)
         priv->last_pts = 0;
