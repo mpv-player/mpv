@@ -22,6 +22,8 @@
 #include <inttypes.h>
 #include "config.h"
 
+#define HAVE_ATOMICS 1
+
 #if HAVE_STDATOMIC
 #include <stdatomic.h>
 #else
@@ -58,8 +60,17 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
     __sync_fetch_and_add(&(a)->v, b)
 
 #else
-# error "this should have been a configuration error, report a bug please"
-#endif
+
+// This is extremely wrong. The build system actually disables code that has
+// a serious dependency on working atomics, so this is barely ok.
+#define atomic_load(p) ((p)->v)
+#define atomic_store(p, val) ((p)->v = (val))
+#define atomic_fetch_add(a, b) (((a)->v += (b)) - (b))
+
+#undef HAVE_ATOMICS
+#define HAVE_ATOMICS 0
+
+#endif /* no atomics */
 
 #endif /* else HAVE_STDATOMIC */
 
