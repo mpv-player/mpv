@@ -205,9 +205,6 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
      * appear. */
     ds->eof = 0;
 
-    if (dp->pos >= 0)
-        demuxer->filepos = dp->pos;
-
     // For video, PTS determination is not trivial, but for other media types
     // distinguishing PTS and DTS is not useful.
     if (stream->type != STREAM_VIDEO && dp->pts == MP_NOPTS_VALUE)
@@ -294,6 +291,8 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
 
             if (pkt->stream_pts != MP_NOPTS_VALUE)
                 sh->demuxer->stream_pts = pkt->stream_pts;
+            if (pkt && pkt->pos >= 0)
+                sh->demuxer->filepos = pkt->pos;
 
             return pkt;
         }
