@@ -187,9 +187,7 @@ static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
     AVStream *st = priv->avfc->streams[stream_idx];
     double pts = (double)ts * st->time_base.num / st->time_base.den;
     int ret = stream_control(stream, STREAM_CTRL_SEEK_TO_TIME, &pts);
-    if (ret < 0)
-        ret = AVERROR(ENOSYS);
-    return ret;
+    return ret < 1 ? AVERROR(ENOSYS) : 0;
 }
 
 static void list_formats(struct demuxer *demuxer)
