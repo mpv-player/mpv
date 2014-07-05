@@ -129,6 +129,9 @@ static const struct format_hack format_hacks[] = {
 
 static const char *const format_blacklist[] = {
     "tty",      // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
+    // Image demuxers, disabled in favor of demux_mf:
+    "image2", "image2pipe",
+    "bmp_pipe", "dpx_pipe", "exr_pipe", "j2k_pipe", "png_pipe", "tiff_pipe",
     0
 };
 
