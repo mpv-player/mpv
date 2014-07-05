@@ -627,6 +627,90 @@
       <dict>
         <key>UTTypeConformsTo</key>
         <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>AVC raw stream</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.h264</string>
+        <key>UTTypeReferenceURL</key>
+        <string>http://www.itu.int/rec/T-REC-H.264</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>264</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>HEVC raw stream</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.hevc</string>
+        <key>UTTypeReferenceURL</key>
+        <string>http://hevc.info</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>hevc</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>YUV stream</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.yuv</string>
+        <key>UTTypeReferenceURL</key>
+        <string>http://en.wikipedia.org/wiki/YUV</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>yuv</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>YUV4MPEG2 stream</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.y4m</string>
+        <key>UTTypeReferenceURL</key>
+        <string>http://wiki.multimedia.cx/index.php?title=YUV4MPEG2</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>y4m</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
           <string>public.plain-text</string>
         </array>
         <key>UTTypeDescription</key>
