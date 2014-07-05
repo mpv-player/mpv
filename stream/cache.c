@@ -56,6 +56,7 @@
 #include "osdep/threads.h"
 
 #include "common/msg.h"
+#include "common/tags.h"
 #include "options/options.h"
 
 #include "stream.h"
@@ -115,7 +116,7 @@ struct priv {
     unsigned int stream_num_chapters;
     int stream_cache_idle;
     int stream_cache_fill;
-    char **stream_metadata;
+    struct mp_tags *stream_metadata;
     char *disc_name;
 };
 
@@ -372,7 +373,7 @@ static void update_cached_controls(struct priv *s)
     unsigned int ui;
     int64_t i64;
     double d;
-    char **m;
+    struct mp_tags *tags;
     char *t;
     s->stream_time_length = 0;
     if (stream_control(s->stream, STREAM_CTRL_GET_TIME_LENGTH, &d) == STREAM_OK)
@@ -386,9 +387,9 @@ static void update_cached_controls(struct priv *s)
     s->stream_num_chapters = 0;
     if (stream_control(s->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &ui) == STREAM_OK)
         s->stream_num_chapters = ui;
-    if (stream_control(s->stream, STREAM_CTRL_GET_METADATA, &m) == STREAM_OK) {
+    if (stream_control(s->stream, STREAM_CTRL_GET_METADATA, &tags) == STREAM_OK) {
         talloc_free(s->stream_metadata);
-        s->stream_metadata = talloc_steal(s, m);
+        s->stream_metadata = talloc_steal(s, tags);
     }
     if (stream_control(s->stream, STREAM_CTRL_GET_DISC_NAME, &t) == STREAM_OK)
     {
@@ -450,16 +451,10 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         return STREAM_UNSUPPORTED;
     }
     case STREAM_CTRL_GET_METADATA: {
-        if (s->stream_metadata && s->stream_metadata[0]) {
-            char **m = talloc_new(NULL);
-            int num_m = 0;
-            for (int n = 0; s->stream_metadata[n]; n++) {
-                char *t = talloc_strdup(m, s->stream_metadata[n]);
-                MP_TARRAY_APPEND(NULL, m, num_m, t);
-            }
-            MP_TARRAY_APPEND(NULL, m, num_m, NULL);
-            MP_TARRAY_APPEND(NULL, m, num_m, NULL);
-            *(char ***)arg = m;
+        if (s->stream_metadata) {
+            ta_set_parent(s->stream_metadata, NULL);
+            *(struct mp_tags **)arg = s->stream_metadata;
+            s->stream_metadata = NULL;
             return STREAM_OK;
         }
         return STREAM_UNSUPPORTED;

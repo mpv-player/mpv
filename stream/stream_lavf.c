@@ -24,6 +24,7 @@
 #include "options/options.h"
 #include "options/path.h"
 #include "common/msg.h"
+#include "common/tags.h"
 #include "stream.h"
 #include "options/m_option.h"
 
@@ -33,7 +34,7 @@
 #include "talloc.h"
 
 static int open_f(stream_t *stream);
-static char **read_icy(stream_t *stream);
+static struct mp_tags *read_icy(stream_t *stream);
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
@@ -102,8 +103,8 @@ static int control(stream_t *s, int cmd, void *arg)
             return 1;
         break;
     case STREAM_CTRL_GET_METADATA: {
-        *(char ***)arg = read_icy(s);
-        if (!*(char ***)arg)
+        *(struct mp_tags **)arg = read_icy(s);
+        if (!*(struct mp_tags **)arg)
             break;
         return 1;
     }
@@ -247,17 +248,7 @@ out:
     return res;
 }
 
-static void append_meta(char ***info, int *num_info, bstr name, bstr val)
-{
-    if (name.len && val.len) {
-        char *cname = talloc_asprintf(*info, "icy-%.*s", BSTR_P(name));
-        char *cval = talloc_asprintf(*info, "%.*s", BSTR_P(val));
-        MP_TARRAY_APPEND(NULL, *info, *num_info, cname);
-        MP_TARRAY_APPEND(NULL, *info, *num_info, cval);
-    }
-}
-
-static char **read_icy(stream_t *s)
+static struct mp_tags *read_icy(stream_t *s)
 {
     AVIOContext *avio = s->priv;
 
@@ -274,37 +265,38 @@ static char **read_icy(stream_t *s)
                    &icy_packet) < 0)
         icy_packet = NULL;
 
-    char **res = NULL;
+    // Send a metadata update only 1. on start, and 2. on a new metadata packet.
+    // To detect new packages, set the icy_metadata_packet to "-" once we've
+    // read it (a bit hacky, but works).
 
+    struct mp_tags *res = NULL;
     if ((!icy_header || !icy_header[0]) && (!icy_packet || !icy_packet[0]))
         goto done;
 
-    res = talloc_new(NULL);
-    int num_res = 0;
+    bstr packet = bstr0(icy_packet);
+    if (bstr_equals0(packet, "-"))
+        goto done;
+
+    res = talloc_zero(NULL, struct mp_tags);
+
     bstr header = bstr0(icy_header);
     while (header.len) {
         bstr line = bstr_strip_linebreaks(bstr_getline(header, &header));
         bstr name, val;
-        if (bstr_split_tok(line, ": ", &name, &val)) {
-            bstr_eatstart0(&name, "icy-");
-            append_meta(&res, &num_res, name, val);
-        }
+        if (bstr_split_tok(line, ": ", &name, &val))
+            mp_tags_set_bstr(res, name, val);
     }
 
-    bstr packet = bstr0(icy_packet);
     bstr head = bstr0("StreamTitle='");
     int i = bstr_find(packet, head);
     if (i >= 0) {
         packet = bstr_cut(packet, i + head.len);
         int end = bstrchr(packet, '\'');
         packet = bstr_splice(packet, 0, end);
-        append_meta(&res, &num_res, bstr0("title"), packet);
+        mp_tags_set_bstr(res, bstr0("icy-title"), packet);
     }
 
-    if (res) {
-        MP_TARRAY_APPEND(NULL, res, num_res, NULL);
-        MP_TARRAY_APPEND(NULL, res, num_res, NULL);
-    }
+    av_opt_set(avio, "icy_metadata_packet", "-", AV_OPT_SEARCH_CHILDREN);
 
 done:
     av_free(icy_header);

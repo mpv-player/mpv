@@ -87,6 +87,10 @@ enum demux_check {
     DEMUX_CHECK_NORMAL, // normal, safe detection
 };
 
+enum demux_event {
+    DEMUX_EVENT_METADATA = (1 << 0),
+};
+
 #define MAX_SH_STREAMS 256
 
 struct demuxer;
@@ -181,6 +185,9 @@ typedef struct demuxer {
     bool ts_resets_possible;
     bool warned_queue_overflow;
 
+    // Bitmask of DEMUX_EVENT_*
+    int events;
+
     struct sh_stream **streams;
     int num_streams;
     bool stream_autoselect;
@@ -203,7 +210,8 @@ typedef struct demuxer {
     struct playlist *playlist;
 
     struct mp_tags *metadata;
-    char *previous_metadata;
+
+    struct mp_tags *stream_metadata;
 
     void *priv;   // demuxer-specific internal data
     struct MPOpts *opts;

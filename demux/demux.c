@@ -651,31 +651,22 @@ char *demux_info_get(demuxer_t *demuxer, const char *opt)
 
 bool demux_info_update(struct demuxer *demuxer)
 {
-    struct mp_tags *tags = demuxer->metadata;
+    bool r = false;
     // Take care of stream metadata as well
-    char **meta;
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_METADATA, &meta) > 0) {
-        for (int n = 0; meta[n + 0]; n += 2)
-            mp_tags_set_str(tags, meta[n + 0], meta[n + 1]);
-        talloc_free(meta);
+    struct mp_tags *s_meta = NULL;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_METADATA, &s_meta) > 0) {
+        talloc_free(demuxer->stream_metadata);
+        demuxer->stream_metadata = talloc_steal(demuxer, s_meta);
+        demuxer->events |= DEMUX_EVENT_METADATA;
     }
-    // Check for metadata changes the hard way.
-    char *data = talloc_strdup(demuxer, "");
-    for (int n = 0; n < tags->num_keys; n++) {
-        data = talloc_asprintf_append_buffer(data, "%s=%s\n", tags->keys[n],
-                                             tags->values[n]);
-    }
-    if (!demuxer->previous_metadata ||
-        strcmp(demuxer->previous_metadata, data) != 0)
-    {
-        talloc_free(demuxer->previous_metadata);
-        demuxer->previous_metadata = data;
+    if (demuxer->events & DEMUX_EVENT_METADATA) {
+        demuxer->events &= ~DEMUX_EVENT_METADATA;
+        if (demuxer->stream_metadata)
+            mp_tags_merge(demuxer->metadata, demuxer->stream_metadata);
         demux_info_print(demuxer);
-        return true;
-    } else {
-        talloc_free(data);
-        return false;
+        r = true;
     }
+    return r;
 }
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg)

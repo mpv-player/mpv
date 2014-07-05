@@ -616,6 +616,7 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
             mp_tags_clear(demuxer->metadata);
             mp_tags_copy_from_av_dictionary(demuxer->metadata, dict);
             av_dict_free(&dict);
+            demuxer->events |= DEMUX_EVENT_METADATA;
         }
     }
 #endif

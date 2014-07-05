@@ -61,6 +61,12 @@ void mp_tags_clear(struct mp_tags *tags)
     talloc_free_children(tags);
 }
 
+void mp_tags_merge(struct mp_tags *tags, struct mp_tags *src)
+{
+    for (int n = 0; n < src->num_keys; n++)
+        mp_tags_set_str(tags, src->keys[n], src->values[n]);
+}
+
 void mp_tags_copy_from_av_dictionary(struct mp_tags *tags,
                                      struct AVDictionary *av_dict)
 {
