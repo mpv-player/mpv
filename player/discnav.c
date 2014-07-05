@@ -277,7 +277,7 @@ void mp_handle_nav(struct MPContext *mpctx)
 }
 
 // Render "fake" highlights, because using actual dvd sub highlight elements
-// is too hard, and would require extra libavcodec to begin with.
+// is too hard, and would require changes to libavcodec's dvdsub decoder.
 // Note: a proper solution would introduce something like
 //       SD_CTRL_APPLY_DVDNAV, which would crop the vobsub frame,
 //       and apply the current CLUT.
