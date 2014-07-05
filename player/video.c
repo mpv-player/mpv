@@ -183,7 +183,6 @@ int reinit_video_chain(struct MPContext *mpctx)
                sh->video->disp_w, sh->video->disp_h,
                sh->video->fps);
 
-    double ar = -1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
         mpctx->video_out = init_best_video_out(mpctx->global, mpctx->input,
@@ -211,10 +210,6 @@ int reinit_video_chain(struct MPContext *mpctx)
     mpctx->initialized_flags |= INITIALIZED_VCODEC;
 
     vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &d_video->hwdec_info);
-
-    if (stream_control(sh->demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
-            != STREAM_UNSUPPORTED)
-        d_video->stream_aspect = ar;
 
     recreate_video_filters(mpctx);
 

@@ -174,6 +174,7 @@ def build(ctx):
         ( "demux/codec_tags.c" ),
         ( "demux/demux.c" ),
         ( "demux/demux_cue.c" ),
+        ( "demux/demux_disc.c" ),
         ( "demux/demux_edl.c" ),
         ( "demux/demux_lavf.c" ),
         ( "demux/demux_libass.c",                "libass"),

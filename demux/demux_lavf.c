@@ -54,6 +54,7 @@
 #include "stheader.h"
 #include "options/m_option.h"
 
+
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
 #define PROBE_BUF_SIZE FFMIN(STREAM_MAX_BUFFER_SIZE, 2 * 1024 * 1024)
 
@@ -153,8 +154,6 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     struct demuxer *demuxer = opaque;
     struct stream *stream = demuxer->stream;
     int64_t current_pos;
-    if (stream_manages_timeline(stream))
-        return -1;
     MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %d)\n", stream, pos, whence);
     if (whence == SEEK_END || whence == AVSEEK_SIZE) {
         int64_t end;
@@ -264,8 +263,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
             MP_FATAL(demuxer, "Unknown lavf format %s\n", format);
             return -1;
         }
-        MP_INFO(demuxer, "Forced lavf %s demuxer\n",
-               priv->avif->long_name);
+        MP_VERBOSE(demuxer, "Forced lavf %s demuxer\n", priv->avif->long_name);
         goto success;
     }
 
@@ -762,10 +760,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     demuxer->start_time = priv->avfc->start_time == AV_NOPTS_VALUE ?
                           0 : (double)priv->avfc->start_time / AV_TIME_BASE;
 
-    double time;
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_START_TIME, &time) > 0)
-        demuxer->start_time = time;
-
     return 0;
 }
 
@@ -816,12 +810,6 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
         dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
-    // Use only one stream for stream_pts, otherwise PTS might be jumpy.
-    if (stream->type == STREAM_VIDEO) {
-        double pts;
-        if (stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME, &pts) > 0)
-            dp->stream_pts = pts;
-    }
     if (dp->pts != MP_NOPTS_VALUE) {
         priv->last_pts = dp->pts * AV_TIME_BASE;
     } else if (dp->dts != MP_NOPTS_VALUE) {

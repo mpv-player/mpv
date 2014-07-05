@@ -158,46 +158,6 @@ void update_subtitles(struct MPContext *mpctx)
     update_subtitle(mpctx, 1);
 }
 
-static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st,
-                                      int width, int height)
-{
-    if (!st)
-        return;
-
-    struct stream_dvd_info_req info;
-    if (stream_control(st, STREAM_CTRL_GET_DVD_INFO, &info) < 0)
-        return;
-
-    struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
-    csp.int_bits_in = 8;
-    csp.int_bits_out = 8;
-    float cmatrix[3][4];
-    mp_get_yuv2rgb_coeffs(&csp, cmatrix);
-
-    if (width == 0 || height == 0) {
-        width = 720;
-        height = 480;
-    }
-
-    char *s = NULL;
-    s = talloc_asprintf_append(s, "size: %dx%d\n", width, height);
-    s = talloc_asprintf_append(s, "palette: ");
-    for (int i = 0; i < 16; i++) {
-        int color = info.palette[i];
-        int c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
-        mp_map_int_color(cmatrix, 8, c);
-        color = (c[2] << 16) | (c[1] << 8) | c[0];
-
-        if (i != 0)
-            s = talloc_asprintf_append(s, ", ");
-        s = talloc_asprintf_append(s, "%06x", color);
-    }
-    s = talloc_asprintf_append(s, "\n");
-
-    sub_set_extradata(dec_sub, s, strlen(s));
-    talloc_free(s);
-}
-
 static void reinit_subdec(struct MPContext *mpctx, struct track *track,
                           struct dec_sub *dec_sub)
 {
@@ -210,7 +170,6 @@ static void reinit_subdec(struct MPContext *mpctx, struct track *track,
     int h = sh_video ? sh_video->disp_h : 0;
     float fps = sh_video ? sh_video->fps : 25;
 
-    set_dvdsub_fake_extradata(dec_sub, track->demuxer->stream, w, h);
     sub_set_video_res(dec_sub, w, h);
     sub_set_video_fps(dec_sub, fps);
     sub_set_ass_renderer(dec_sub, mpctx->ass_library, mpctx->ass_renderer);

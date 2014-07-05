@@ -408,9 +408,6 @@ int video_reconfig_filters(struct dec_video *d_video,
     }
 
     float force_aspect = opts->movie_aspect;
-    if (force_aspect > 0.0 && d_video->stream_aspect != 0.0)
-        force_aspect = d_video->stream_aspect;
-
     if (force_aspect >= 0.0)
         vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, force_aspect);
 

@@ -1228,7 +1228,6 @@ static int demux_tv_control(demuxer_t *demuxer, int cmd, void *arg)
 const demuxer_desc_t demuxer_desc_tv = {
     .name = "tv",
     .desc = "TV card demuxer",
-    .type = DEMUXER_TYPE_TV,
     .fill_buffer = demux_tv_fill_buffer,
     .control = demux_tv_control,
     .open = demux_open_tv,

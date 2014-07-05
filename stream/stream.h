@@ -39,6 +39,7 @@ enum streamtype {
     STREAMTYPE_MF,
     STREAMTYPE_EDL,
     STREAMTYPE_AVDEVICE,
+    STREAMTYPE_CDDA,
 };
 
 #define STREAM_BUFFER_SIZE 2048
@@ -80,8 +81,6 @@ enum stream_ctrl {
     STREAM_CTRL_GET_CACHE_IDLE,
     STREAM_CTRL_RESUME_CACHE,
     STREAM_CTRL_RECONNECT,
-    // DVD/Bluray, signal general support for GET_CURRENT_TIME etc.
-    STREAM_CTRL_MANAGES_TIMELINE,
     STREAM_CTRL_GET_START_TIME,
     STREAM_CTRL_GET_CHAPTER_TIME,
     STREAM_CTRL_GET_DVD_INFO,
@@ -242,8 +241,6 @@ stream_t *open_output_stream(const char *filename, struct mpv_global *global);
 stream_t *open_memory_stream(void *data, int len);
 
 bool stream_check_interrupt(struct stream *s);
-
-bool stream_manages_timeline(stream_t *s);
 
 void mp_url_unescape_inplace(char *buf);
 char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok);

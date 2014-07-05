@@ -112,7 +112,6 @@ struct priv {
     double stream_time_length;
     double stream_start_time;
     int64_t stream_size;
-    bool stream_manages_timeline;
     unsigned int stream_num_chapters;
     int stream_cache_idle;
     int stream_cache_fill;
@@ -381,9 +380,6 @@ static void update_cached_controls(struct priv *s)
     s->stream_start_time = MP_NOPTS_VALUE;
     if (stream_control(s->stream, STREAM_CTRL_GET_START_TIME, &d) == STREAM_OK)
         s->stream_start_time = d;
-    s->stream_manages_timeline = false;
-    if (stream_control(s->stream, STREAM_CTRL_MANAGES_TIMELINE, NULL) == STREAM_OK)
-        s->stream_manages_timeline = true;
     s->stream_num_chapters = 0;
     if (stream_control(s->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &ui) == STREAM_OK)
         s->stream_num_chapters = ui;
@@ -428,8 +424,6 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
             return STREAM_UNSUPPORTED;
         *(int64_t *)arg = s->stream_size;
         return STREAM_OK;
-    case STREAM_CTRL_MANAGES_TIMELINE:
-        return s->stream_manages_timeline ? STREAM_OK : STREAM_UNSUPPORTED;
     case STREAM_CTRL_GET_NUM_CHAPTERS:
         *(unsigned int *)arg = s->stream_num_chapters;
         return STREAM_OK;

@@ -52,12 +52,14 @@ extern const demuxer_desc_t demuxer_desc_lavf;
 extern const demuxer_desc_t demuxer_desc_libass;
 extern const demuxer_desc_t demuxer_desc_subreader;
 extern const demuxer_desc_t demuxer_desc_playlist;
+extern const demuxer_desc_t demuxer_desc_disc;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
  * libraries and demuxers requiring binary support. */
 
 const demuxer_desc_t *const demuxer_list[] = {
+    &demuxer_desc_disc,
     &demuxer_desc_edl,
     &demuxer_desc_cue,
     &demuxer_desc_rawaudio,
@@ -86,7 +88,6 @@ struct demux_stream {
     struct demux_packet *tail;
 };
 
-static void add_stream_chapters(struct demuxer *demuxer);
 void demuxer_sort_chapters(demuxer_t *demuxer);
 
 static void ds_free_packs(struct demux_stream *ds)
@@ -130,8 +131,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
     case STREAM_AUDIO: sh->audio = talloc_zero(demuxer, struct sh_audio); break;
     case STREAM_SUB:   sh->sub = talloc_zero(demuxer, struct sh_sub); break;
     }
-
-    sh->ds->selected = demuxer->stream_autoselect;
 
     return sh;
 }
@@ -332,6 +331,18 @@ bool demux_stream_eof(struct sh_stream *sh)
     return !sh || sh->ds->eof;
 }
 
+// Read and return any packet we find.
+struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
+{
+    demux_fill_buffer(demuxer);
+    for (int n = 0; n < demuxer->num_streams; n++) {
+        struct sh_stream *sh = demuxer->streams[n];
+        if (sh->ds->head)
+            return demux_read_packet(sh);
+    }
+    return NULL;
+}
+
 // ====================================================================
 
 void demuxer_help(struct mp_log *log)
@@ -472,15 +483,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                        demuxer->filetype, desc->desc);
         else
             mp_verbose(log, "Detected file format: %s\n", desc->desc);
-        if (stream_manages_timeline(demuxer->stream)) {
-            // Incorrect, but fixes some behavior with DVD/BD
-            demuxer->ts_resets_possible = false;
-            // Doesn't work, because stream_pts is a "guess".
-            demuxer->accurate_seek = false;
-            // Can be seekable even if the stream isn't.
-            demuxer->seekable = true;
-        }
-        add_stream_chapters(demuxer);
         demuxer_sort_chapters(demuxer);
         demux_info_update(demuxer);
         demux_export_replaygain(demuxer);
@@ -572,42 +574,9 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
     if (rel_seek_secs == MP_NOPTS_VALUE && (flags & SEEK_ABSOLUTE))
         return 0;
 
-    // clear demux buffers:
+    // clear the packet queues
     demux_flush(demuxer);
 
-    /* Note: this is for DVD and BD playback. The stream layer has to do these
-     * seeks, and the demuxer has to react to DEMUXER_CTRL_RESYNC in order to
-     * deal with the suddenly changing stream position.
-     */
-    struct stream *stream = demuxer->stream;
-    if (stream_manages_timeline(stream)) {
-        double pts;
-
-        if (flags & SEEK_ABSOLUTE)
-            pts = 0.0f;
-        else {
-            if (demuxer->stream_pts == MP_NOPTS_VALUE)
-                goto dmx_seek;
-            pts = demuxer->stream_pts;
-        }
-
-        if (flags & SEEK_FACTOR) {
-            double tmp = 0;
-            if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH,
-                               &tmp) == STREAM_UNSUPPORTED)
-                goto dmx_seek;
-            pts += tmp * rel_seek_secs;
-        } else
-            pts += rel_seek_secs;
-
-        if (stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, &pts)
-            != STREAM_UNSUPPORTED) {
-            demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
-            return 1;
-        }
-    }
-
-  dmx_seek:
     if (demuxer->desc->seek)
         demuxer->desc->seek(demuxer, rel_seek_secs, flags);
 
@@ -698,11 +667,6 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
     }
 }
 
-void demuxer_enable_autoselect(struct demuxer *demuxer)
-{
-    demuxer->stream_autoselect = true;
-}
-
 bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream)
 {
     return stream && stream->ds->selected;
@@ -761,29 +725,9 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
     return demuxer->num_chapters - 1;
 }
 
-static void add_stream_chapters(struct demuxer *demuxer)
-{
-    if (demuxer->num_chapters)
-        return;
-    int num_chapters = 0;
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS,
-                          &num_chapters) != STREAM_OK)
-        return;
-    for (int n = 0; n < num_chapters; n++) {
-        double p = n;
-        if (stream_control(demuxer->stream, STREAM_CTRL_GET_CHAPTER_TIME, &p)
-                != STREAM_OK)
-            return;
-        demuxer_add_chapter(demuxer, bstr0(""), p * 1e9, 0, 0);
-    }
-}
-
 double demuxer_get_time_length(struct demuxer *demuxer)
 {
     double len;
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) > 0)
-        return len;
-    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
     if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH, &len) > 0)
         return len;
     return -1;

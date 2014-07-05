@@ -584,8 +584,6 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         *((double *)arg) = 0;
         return STREAM_OK;
     }
-    case STREAM_CTRL_MANAGES_TIMELINE:
-        return STREAM_OK;
     case STREAM_CTRL_GET_DISC_NAME: {
         const struct meta_dl *meta = bd_get_meta(b->bd);
         if (!meta || !meta->di_name || !meta->di_name[0])
@@ -801,6 +799,7 @@ static int bluray_stream_open(stream_t *s)
     s->end_pos     = bd_get_title_size(bd);
     s->sector_size = BLURAY_SECTOR_SIZE;
     s->priv        = b;
+    s->demuxer     = "+disc";
 
     MP_VERBOSE(s, "Blu-ray successfully opened.\n");
 

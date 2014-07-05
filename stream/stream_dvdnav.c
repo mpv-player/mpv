@@ -597,8 +597,6 @@ static int control(stream_t *stream, int cmd, void *arg)
         snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
         return STREAM_OK;
     }
-    case STREAM_CTRL_MANAGES_TIMELINE:
-        return STREAM_OK;
     case STREAM_CTRL_GET_DVD_INFO: {
         struct stream_dvd_info_req *req = arg;
         memset(req, 0, sizeof(*req));
@@ -733,7 +731,7 @@ static int open_s(stream_t *stream)
     stream->control = control;
     stream->close = stream_dvdnav_close;
     stream->type = STREAMTYPE_DVD;
-    stream->demuxer = "lavf";
+    stream->demuxer = "+disc";
     stream->lavf_type = "mpeg";
     stream->allow_caching = false;
 

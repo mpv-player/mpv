@@ -38,10 +38,10 @@ struct MPOpts;
 
 enum demuxer_type {
     DEMUXER_TYPE_GENERIC = 0,
-    DEMUXER_TYPE_TV,
     DEMUXER_TYPE_MATROSKA,
     DEMUXER_TYPE_EDL,
     DEMUXER_TYPE_CUE,
+    DEMUXER_TYPE_DISC,
 };
 
 // DEMUXER control commands/answers
@@ -190,7 +190,6 @@ typedef struct demuxer {
 
     struct sh_stream **streams;
     int num_streams;
-    bool stream_autoselect;
 
     struct demux_edition *editions;
     int num_editions;
@@ -234,6 +233,7 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh);
 double demux_get_next_pts(struct sh_stream *sh);
 bool demux_has_packet(struct sh_stream *sh);
 bool demux_stream_eof(struct sh_stream *sh);
+struct demux_packet *demux_read_any_packet(struct demuxer *demuxer);
 
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
@@ -253,7 +253,6 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
                           struct sh_stream *stream);
 void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           bool selected);
-void demuxer_enable_autoselect(struct demuxer *demuxer);
 
 void demuxer_help(struct mp_log *log);
 
