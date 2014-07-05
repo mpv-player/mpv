@@ -864,15 +864,20 @@ static int mp_property_angle(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct demuxer *demuxer = mpctx->master_demuxer;
-    int angle = -1;
-    int angles;
-
-    if (demuxer)
-        angle = demuxer_get_current_angle(demuxer);
-    if (angle < 0)
+    if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
-    angles = demuxer_angles_count(demuxer);
-    if (angles <= 1)
+
+    int ris, angles = -1, angle = 1;
+
+    ris = stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_ANGLES, &angles);
+    if (ris == STREAM_UNSUPPORTED)
+        return M_PROPERTY_UNAVAILABLE;
+
+    ris = stream_control(demuxer->stream, STREAM_CTRL_GET_ANGLE, &angle);
+    if (ris == STREAM_UNSUPPORTED)
+        return -1;
+
+    if (angle < 0 || angles <= 1)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -884,14 +889,23 @@ static int mp_property_angle(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        angle = demuxer_set_angle(demuxer, *(int *)arg);
-        if (angle >= 0) {
-            if (mpctx->d_video)
-                video_reset_decoding(mpctx->d_video);
+        angle = *(int *)arg;
+        if (angle < 0 || angle > angles)
+            return M_PROPERTY_ERROR;
+        demux_flush(demuxer);
 
-            if (mpctx->d_audio)
-                audio_reset_decoding(mpctx->d_audio);
-        }
+        ris = stream_control(demuxer->stream, STREAM_CTRL_SET_ANGLE, &angle);
+        if (ris != STREAM_OK)
+            return M_PROPERTY_ERROR;
+
+        demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
+
+        if (mpctx->d_video)
+            video_reset_decoding(mpctx->d_video);
+
+        if (mpctx->d_audio)
+            audio_reset_decoding(mpctx->d_audio);
+
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE: {
         struct m_option opt = {

@@ -263,13 +263,6 @@ int demuxer_add_chapter(struct demuxer *demuxer, struct bstr name,
 
 double demuxer_get_time_length(struct demuxer *demuxer);
 
-/// Get current angle index.
-int demuxer_get_current_angle(struct demuxer *demuxer);
-/// Set angle.
-int demuxer_set_angle(struct demuxer *demuxer, int angle);
-/// Get number of angles.
-int demuxer_angles_count(struct demuxer *demuxer);
-
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
 
