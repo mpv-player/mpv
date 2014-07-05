@@ -746,19 +746,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         }
     }
 
-    if (avfc->nb_programs) {
-        int p;
-        for (p = 0; p < avfc->nb_programs; p++) {
-            AVProgram *program = avfc->programs[p];
-            t = av_dict_get(program->metadata, "title", NULL, 0);
-            MP_INFO(demuxer, "LAVF: Program %d %s\n",
-                   program->id, t ? t->value : "");
-            MP_VERBOSE(demuxer, "PROGRAM_ID=%d\n", program->id);
-        }
-    }
-
-    MP_VERBOSE(demuxer, "LAVF: build %d\n", LIBAVFORMAT_BUILD);
-
     demuxer->ts_resets_possible = priv->avif->flags & AVFMT_TS_DISCONT;
 
     return 0;
