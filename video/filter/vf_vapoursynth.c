@@ -434,6 +434,7 @@ static void destroy_vs(struct vf_instance *vf)
     p->next_image = NULL;
     p->out_pts = MP_NOPTS_VALUE;
     p->out_frameno = p->in_frameno = 0;
+    p->failed = false;
 
     MP_DBG(vf, "uninitialized.\n");
 }
