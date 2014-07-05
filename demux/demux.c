@@ -126,22 +126,9 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
     };
     MP_TARRAY_APPEND(demuxer, demuxer->streams, demuxer->num_streams, sh);
     switch (sh->type) {
-        case STREAM_VIDEO: {
-            struct sh_video *sht = talloc_zero(demuxer, struct sh_video);
-            sh->video = sht;
-            break;
-        }
-        case STREAM_AUDIO: {
-            struct sh_audio *sht = talloc_zero(demuxer, struct sh_audio);
-            sh->audio = sht;
-            break;
-        }
-        case STREAM_SUB: {
-            struct sh_sub *sht = talloc_zero(demuxer, struct sh_sub);
-            sh->sub = sht;
-            break;
-        }
-        default: assert(false);
+    case STREAM_VIDEO: sh->video = talloc_zero(demuxer, struct sh_video); break;
+    case STREAM_AUDIO: sh->audio = talloc_zero(demuxer, struct sh_audio); break;
+    case STREAM_SUB:   sh->sub = talloc_zero(demuxer, struct sh_sub); break;
     }
 
     sh->ds->selected = demuxer->stream_autoselect;
