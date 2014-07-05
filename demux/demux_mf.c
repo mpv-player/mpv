@@ -79,7 +79,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
             memcpy(dp->buffer, data.start, data.len);
             dp->pts = mf->curr_frame / mf->sh->fps;
             dp->keyframe = true;
-            demuxer_add_packet(demuxer, demuxer->streams[0], dp);
+            demux_add_packet(demuxer->streams[0], dp);
         }
         talloc_free(data.start);
     }

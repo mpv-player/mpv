@@ -1984,7 +1984,7 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
     dp->pos = mkv_d->last_filepos;
     dp->keyframe = keyframe;
 
-    demuxer_add_packet(demuxer, track->stream, dp);
+    demux_add_packet(track->stream, dp);
 }
 
 static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
@@ -2094,7 +2094,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
                     track->audio_timestamp[x * apk_usize / w];
                 dp->pos = track->audio_filepos; // all equal
                 dp->keyframe = !x;   // Mark first packet as keyframe
-                demuxer_add_packet(demuxer, track->stream, dp);
+                demux_add_packet(track->stream, dp);
             }
         }
     } else { // Not a codec that requires reordering
@@ -2107,7 +2107,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
 
         dp->pos = mkv_d->last_filepos;
         dp->keyframe = keyframe;
-        demuxer_add_packet(demuxer, track->stream, dp);
+        demux_add_packet(track->stream, dp);
     }
     return;
 error:
@@ -2426,7 +2426,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                     if (track->ms_compat)
                         MPSWAP(double, dp->pts, dp->dts);
                     dp->duration = block_duration / 1e9;
-                    demuxer_add_packet(demuxer, stream, dp);
+                    demux_add_packet(stream, dp);
                 }
                 talloc_free_children(track->parser_tmp);
             }

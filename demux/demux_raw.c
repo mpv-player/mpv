@@ -232,7 +232,7 @@ static int raw_fill_buffer(demuxer_t *demuxer)
 
     int len = stream_read(demuxer->stream, dp->buffer, dp->len);
     demux_packet_shorten(dp, len);
-    demuxer_add_packet(demuxer, demuxer->streams[0], dp);
+    demux_add_packet(demuxer->streams[0], dp);
 
     return 1;
 }

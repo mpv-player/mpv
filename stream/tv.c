@@ -298,7 +298,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux)
 
     for (int n = 0; n < demux->num_streams; n++) {
         struct sh_stream *sh = demux->streams[n];
-        if (!demuxer_stream_has_packets_queued(demux, sh) &&
+        if (!demux_has_packet(sh) &&
             demuxer_stream_is_selected(demux, sh))
         {
             if (sh->type == STREAM_AUDIO)
@@ -319,7 +319,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux)
         dp=new_demux_packet(len);
         dp->keyframe = true;
         dp->pts=tvh->functions->grab_audio_frame(tvh->priv, dp->buffer,len);
-        demuxer_add_packet(demux, want_audio, dp);
+        demux_add_packet(want_audio, dp);
         }
 
     /* ================== ADD VIDEO PACKET =================== */
@@ -331,7 +331,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux)
         dp=new_demux_packet(len);
         dp->keyframe = true;
                 dp->pts=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
-                demuxer_add_packet(demux, want_video, dp);
+                demux_add_packet(want_video, dp);
          }
 
     if (tvh->tv_param->scan) tv_scan(tvh);

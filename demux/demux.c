@@ -80,6 +80,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 };
 
 struct demux_stream {
+    struct demuxer *demuxer;
     int selected;          // user wants packets from this stream
     int eof;               // end of demuxed stream? (true if all buffer empty)
     int packs;            // number of packets in buffer
@@ -125,6 +126,7 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
         .demuxer_id = demuxer_id, // may be overwritten by demuxer
         .ds = talloc_zero(sh, struct demux_stream),
     };
+    sh->ds->demuxer = demuxer;
     MP_TARRAY_APPEND(demuxer, demuxer->streams, demuxer->num_streams, sh);
     switch (sh->type) {
     case STREAM_VIDEO: sh->video = talloc_zero(demuxer, struct sh_video); break;
@@ -174,14 +176,14 @@ static int count_bytes(struct demuxer *demux, enum stream_type type)
 }
 
 // Returns the same value as demuxer->fill_buffer: 1 ok, 0 EOF/not selected.
-int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
-                       demux_packet_t *dp)
+int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
     if (!dp || !ds || !ds->selected) {
         talloc_free(dp);
         return 0;
     }
+    struct demuxer *demuxer = ds->demuxer;
 
     dp->stream = stream->index;
     dp->next = NULL;
@@ -196,12 +198,7 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
         // first packet in stream
         ds->head = ds->tail = dp;
     }
-    /* ds_get_packets() can set ds->eof to 1 when another stream runs out of
-     * buffer space. That makes sense because in that situation the calling
-     * code should not count on being able to demux more packets from this
-     * stream. (Can happen with e.g. badly interleaved files.)
-     * In this case, we didn't necessarily reach EOF, and new packet can
-     * appear. */
+    // obviously not true anymore
     ds->eof = 0;
 
     // For video, PTS determination is not trivial, but for other media types
@@ -209,10 +206,12 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
     if (stream->type != STREAM_VIDEO && dp->pts == MP_NOPTS_VALUE)
         dp->pts = dp->dts;
 
-    MP_DBG(demuxer, "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIi64" "
-           "[packs: A=%d V=%d S=%d]\n", stream_type_name(stream->type),
-           dp->len, dp->pts, dp->pos, count_packs(demuxer, STREAM_AUDIO),
-           count_packs(demuxer, STREAM_VIDEO), count_packs(demuxer, STREAM_SUB));
+    if (mp_msg_test(demuxer->log, MSGL_DEBUG)) {
+        MP_DBG(demuxer, "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos="
+               "%"PRIi64" [A=%d V=%d S=%d]\n", stream_type_name(stream->type),
+               dp->len, dp->pts, dp->pos, count_packs(demuxer, STREAM_AUDIO),
+               count_packs(demuxer, STREAM_VIDEO), count_packs(demuxer, STREAM_SUB));
+    }
     return 1;
 }
 
@@ -316,13 +315,6 @@ double demux_get_next_pts(struct sh_stream *sh)
 bool demux_has_packet(struct sh_stream *sh)
 {
     return sh && sh->ds->head;
-}
-
-// Same as demux_has_packet, but to be called internally by demuxers, as
-// opposed to the user of the demuxer.
-bool demuxer_stream_has_packets_queued(struct demuxer *d, struct sh_stream *stream)
-{
-    return demux_has_packet(stream);
 }
 
 // Return whether EOF was returned with an earlier packet read.

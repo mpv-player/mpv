@@ -193,7 +193,7 @@ static int d_fill_buffer(demuxer_t *demuxer)
             pkt->stream_pts = pts;
     }
 
-    demuxer_add_packet(demuxer, sh, pkt);
+    demux_add_packet(sh, pkt);
     return 1;
 }
 

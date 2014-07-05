@@ -815,7 +815,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     } else if (dp->dts != MP_NOPTS_VALUE) {
         priv->last_pts = dp->dts * AV_TIME_BASE;
     }
-    demuxer_add_packet(demux, stream, dp);
+    demux_add_packet(stream, dp);
     return 1;
 }
 
