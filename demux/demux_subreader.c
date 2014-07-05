@@ -111,6 +111,55 @@ struct readline_args {
 /* Maximal length of line of a subtitle */
 #define LINE_LEN 1000
 
+static double demux_packet_list_duration(struct demux_packet **pkts, int num_pkts)
+{
+    if (num_pkts > 0)
+        return pkts[num_pkts - 1]->pts + pkts[num_pkts - 1]->duration;
+    return 0;
+}
+
+static void demux_packet_list_seek(struct demux_packet **pkts, int num_pkts,
+                                   int *current, float rel_seek_secs, int flags)
+{
+    double ref_time = 0;
+    if (*current >= 0 && *current < num_pkts) {
+        ref_time = pkts[*current]->pts;
+    } else if (*current == num_pkts && num_pkts > 0) {
+        ref_time = pkts[num_pkts - 1]->pts + pkts[num_pkts - 1]->duration;
+    }
+
+    if (flags & SEEK_ABSOLUTE)
+        ref_time = 0;
+
+    if (flags & SEEK_FACTOR) {
+        ref_time += demux_packet_list_duration(pkts, num_pkts) * rel_seek_secs;
+    } else {
+        ref_time += rel_seek_secs;
+    }
+
+    // Could do binary search, but it's probably not worth the complexity.
+    int last_index = 0;
+    for (int n = 0; n < num_pkts; n++) {
+        if (pkts[n]->pts > ref_time)
+            break;
+        last_index = n;
+    }
+    *current = last_index;
+}
+
+static struct demux_packet *demux_packet_list_fill(struct demux_packet **pkts,
+                                                   int num_pkts, int *current)
+{
+    if (*current < 0)
+        *current = 0;
+    if (*current >= num_pkts)
+        return NULL;
+    struct demux_packet *new = talloc(NULL, struct demux_packet);
+    *new = *pkts[*current];
+    *current += 1;
+    return new;
+}
+
 static int eol(char p) {
         return p=='\r' || p=='\n' || p=='\0';
 }

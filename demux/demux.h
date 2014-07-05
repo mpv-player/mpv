@@ -280,13 +280,6 @@ struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
 bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream);
 bool demuxer_stream_has_packets_queued(struct demuxer *d, struct sh_stream *stream);
 
-void demux_packet_list_sort(struct demux_packet **pkts, int num_pkts);
-void demux_packet_list_seek(struct demux_packet **pkts, int num_pkts,
-                            int *current, float rel_seek_secs, int flags);
-double demux_packet_list_duration(struct demux_packet **pkts, int num_pkts);
-struct demux_packet *demux_packet_list_fill(struct demux_packet **pkts,
-                                            int num_pkts, int *current);
-
 bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
                             struct matroska_segment_uid *b);
 
