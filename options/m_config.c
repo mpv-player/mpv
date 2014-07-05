@@ -920,7 +920,6 @@ static const char *const replaced_opts =
     "|font#--osd-font"
     "|forcedsubsonly#--sub-forced-only"
     "|format#--audio-format"
-    "|fstype#--x11-fstype"
     "|hardframedrop#--framedrop=hard"
     "|identify#removed; use TOOLS/mpv_identify.sh"
     "|lavdopts#--vd-lavc-..."
