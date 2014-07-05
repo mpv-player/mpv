@@ -53,7 +53,6 @@ enum demuxer_type {
 enum demux_ctrl {
     DEMUXER_CTRL_SWITCHED_TRACKS = 1,
     DEMUXER_CTRL_GET_TIME_LENGTH,
-    DEMUXER_CTRL_GET_START_TIME,
     DEMUXER_CTRL_RESYNC,
     DEMUXER_CTRL_IDENTIFY_PROGRAM,
     DEMUXER_CTRL_STREAM_CTRL,       // stupid workaround for legacy TV code
@@ -178,6 +177,7 @@ typedef struct demuxer {
     char *filename;  // same as stream->url
     enum demuxer_type type;
     int seekable; // flag
+    double start_time;
     /* Set if using absolute seeks for small movements is OK (no pts resets
      * that would make pts ambigious, preferably supports back/forward flags */
     bool accurate_seek;
@@ -263,7 +263,6 @@ int demuxer_add_chapter(struct demuxer *demuxer, struct bstr name,
                         uint64_t start, uint64_t end, uint64_t demuxer_id);
 
 double demuxer_get_time_length(struct demuxer *demuxer);
-double demuxer_get_start_time(struct demuxer *demuxer);
 
 /// Get current angle index.
 int demuxer_get_current_angle(struct demuxer *demuxer);

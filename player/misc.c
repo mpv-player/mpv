@@ -116,7 +116,7 @@ double get_start_time(struct MPContext *mpctx)
     // timestamp it finds as start PTS.
     if (mpctx->nav_state)
         return 0;
-    return demuxer_get_start_time(demuxer);
+    return demuxer->start_time;
 }
 
 float mp_get_cache_percent(struct MPContext *mpctx)

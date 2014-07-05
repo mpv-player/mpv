@@ -803,16 +803,6 @@ double demuxer_get_time_length(struct demuxer *demuxer)
     return -1;
 }
 
-double demuxer_get_start_time(struct demuxer *demuxer)
-{
-    double time;
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_START_TIME, &time) > 0)
-        return time;
-    if (demux_control(demuxer, DEMUXER_CTRL_GET_START_TIME, &time) > 0)
-        return time;
-    return 0;
-}
-
 int demuxer_angles_count(demuxer_t *demuxer)
 {
     int ris, angles = -1;

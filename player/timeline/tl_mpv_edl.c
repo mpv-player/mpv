@@ -203,7 +203,7 @@ static void resolve_timestamps(struct tl_part *part, struct demuxer *demuxer)
         part->length = length;
     }
     if (!part->offset_set)
-        part->offset = demuxer_get_start_time(demuxer);
+        part->offset = demuxer->start_time;
 }
 
 static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
@@ -223,7 +223,7 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
 
         double len = source_get_length(source);
         if (len > 0) {
-            len += demuxer_get_start_time(source);
+            len += source->start_time;
         } else {
             MP_WARN(mpctx, "EDL: source file '%s' has unknown duration.\n",
                    part->filename);

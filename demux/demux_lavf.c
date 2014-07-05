@@ -759,6 +759,13 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     demuxer->ts_resets_possible = priv->avif->flags & AVFMT_TS_DISCONT;
 
+    demuxer->start_time = priv->avfc->start_time == AV_NOPTS_VALUE ?
+                          0 : (double)priv->avfc->start_time / AV_TIME_BASE;
+
+    double time;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_START_TIME, &time) > 0)
+        demuxer->start_time = time;
+
     return 0;
 }
 
@@ -911,11 +918,6 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
             return DEMUXER_CTRL_DONTKNOW;
 
         *((double *)arg) = (double)priv->avfc->duration / AV_TIME_BASE;
-        return DEMUXER_CTRL_OK;
-
-    case DEMUXER_CTRL_GET_START_TIME:
-        *((double *)arg) = priv->avfc->start_time == AV_NOPTS_VALUE ?
-                           0 : (double)priv->avfc->start_time / AV_TIME_BASE;
         return DEMUXER_CTRL_OK;
 
     case DEMUXER_CTRL_SWITCHED_TRACKS:
