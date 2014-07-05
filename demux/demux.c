@@ -429,8 +429,7 @@ static void demux_export_replaygain(demuxer_t *demuxer)
 {
     float tg, tp, ag, ap;
 
-    if (!demuxer->replaygain_data &&
-        !decode_gain(demuxer, "REPLAYGAIN_TRACK_GAIN", &tg) &&
+    if (!decode_gain(demuxer, "REPLAYGAIN_TRACK_GAIN", &tg) &&
         !decode_peak(demuxer, "REPLAYGAIN_TRACK_PEAK", &tp) &&
         !decode_gain(demuxer, "REPLAYGAIN_ALBUM_GAIN", &ag) &&
         !decode_peak(demuxer, "REPLAYGAIN_ALBUM_PEAK", &ap))
@@ -442,7 +441,11 @@ static void demux_export_replaygain(demuxer_t *demuxer)
         rgain->album_gain = ag;
         rgain->album_peak = ap;
 
-        demuxer->replaygain_data = rgain;
+        for (int n = 0; n < demuxer->num_streams; n++) {
+            struct sh_stream *sh = demuxer->streams[n];
+            if (sh->audio && !sh->audio->replaygain_data)
+                sh->audio->replaygain_data = rgain;
+        }
     }
 }
 

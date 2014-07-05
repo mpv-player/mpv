@@ -399,7 +399,7 @@ static void select_tracks(struct demuxer *demuxer, int start)
     }
 }
 
-static void export_replaygain(demuxer_t *demuxer, AVStream *st)
+static void export_replaygain(demuxer_t *demuxer, sh_audio_t *sh, AVStream *st)
 {
 #if HAVE_AVCODEC_REPLAYGAIN_SIDE_DATA
     for (int i = 0; i < st->nb_side_data; i++) {
@@ -425,7 +425,7 @@ static void export_replaygain(demuxer_t *demuxer, AVStream *st)
         rgain->album_peak = (av_rgain->album_peak != 0.0) ?
             av_rgain->album_peak / 100000.0f : 1.0;
 
-        demuxer->replaygain_data = rgain;
+        sh->replaygain_data = rgain;
     }
 #endif
 }
@@ -454,7 +454,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh_audio->samplerate = codec->sample_rate;
         sh_audio->bitrate = codec->bit_rate;
 
-        export_replaygain(demuxer, st);
+        export_replaygain(demuxer, sh_audio, st);
 
         break;
     }

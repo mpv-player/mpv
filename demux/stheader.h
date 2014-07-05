@@ -73,6 +73,7 @@ typedef struct sh_audio {
     // note codec extradata may be either under "wf" or "codecdata"
     unsigned char *codecdata;
     int codecdata_len;
+    struct replaygain_data *replaygain_data;
 } sh_audio_t;
 
 typedef struct sh_video {

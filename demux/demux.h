@@ -199,8 +199,6 @@ typedef struct demuxer {
     // for trivial demuxers which just read the whole file for codec to use
     struct bstr file_contents;
 
-    struct replaygain_data *replaygain_data;
-
     // If the file is a playlist file
     struct playlist *playlist;
 
