@@ -138,12 +138,10 @@ main_dependencies = [
                     'test = __sync_add_and_fetch(&test, 1)'),
         'deps_neg': [ 'stdatomic', 'atomic-builtins' ],
     }, {
-        'name': 'thread-synchronization-builtins',
+        'name': 'atomics',
         'desc': 'compiler support for usable thread synchronization built-ins',
         'func': check_true,
         'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins'],
-        'req': True,
-        'fmsg': 'your compiler must support either __atomic or __sync built-ins',
     }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
@@ -419,11 +417,13 @@ audio_output_features = [
     {
         'name': '--sdl2',
         'desc': 'SDL2',
+        'deps': ['atomics'],
         'func': check_pkg_config('sdl2'),
         'default': 'disable'
     }, {
         'name': '--sdl1',
         'desc': 'SDL (1.x)',
+        'deps': ['atomics'],
         'deps_neg': [ 'sdl2' ],
         'func': check_pkg_config('sdl'),
         'default': 'disable'
@@ -478,12 +478,13 @@ audio_output_features = [
     }, {
         'name': '--portaudio',
         'desc': 'PortAudio audio output',
-        'deps': [ 'pthreads' ],
+        'deps': [ 'atomics' ],
         'func': check_pkg_config('portaudio-2.0', '>= 19'),
         'default': 'disable',
     }, {
         'name': '--jack',
         'desc': 'JACK audio output',
+        'deps': ['atomics'],
         'func': check_pkg_config('jack'),
     }, {
         'name': '--openal',
@@ -497,6 +498,7 @@ audio_output_features = [
     }, {
         'name': '--coreaudio',
         'desc': 'CoreAudio audio output',
+        'deps': ['atomics'],
         'func': check_cc(
             fragment=load_fragment('coreaudio.c'),
             framework_name=['CoreFoundation', 'CoreAudio', 'AudioUnit', 'AudioToolbox'])
@@ -507,6 +509,7 @@ audio_output_features = [
     }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
+        'deps': ['atomics'],
         'func': check_cc(fragment=load_fragment('wasapi.c'), lib='ole32'),
     }
 ]
