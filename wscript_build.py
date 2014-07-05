@@ -183,6 +183,7 @@ def build(ctx):
         ( "demux/demux_playlist.c" ),
         ( "demux/demux_raw.c" ),
         ( "demux/demux_subreader.c" ),
+        ( "demux/demux_tv.c",                    "tv" ),
         ( "demux/ebml.c" ),
         ( "demux/mf.c" ),
         ( "demux/packet.c" ),

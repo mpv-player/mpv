@@ -50,7 +50,8 @@ SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 SOURCES-$(PVR)                  += stream/stream_pvr.c
 
 SOURCES-$(TV)                   += stream/stream_tv.c stream/tv.c \
-                                   stream/frequencies.c stream/tvi_dummy.c
+                                   stream/frequencies.c stream/tvi_dummy.c \
+                                   demux/demux_tv.c
 
 SOURCES-$(TV_V4L2)              += stream/tvi_v4l2.c stream/audio_in.c
 SOURCES-$(DUMMY_OSD)            += sub/osd_dummy.c

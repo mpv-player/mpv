@@ -231,4 +231,12 @@ void tv_free_handle(tvi_handle_t *h);
 #define TV_NORM_PALN            6
 #define TV_NORM_NTSCJP          7
 
+int tv_uninit(tvi_handle_t *tvh);
+void tv_scan(tvi_handle_t *tvh);
+int open_tv(tvi_handle_t *tvh);
+tvi_handle_t *tv_begin(tv_param_t* tv_param, struct mp_log *log);
+int tv_stream_control(tvi_handle_t *tvh, int cmd, void *arg);
+
+extern const struct m_sub_options tv_params_conf;
+
 #endif /* MPLAYER_TV_H */
