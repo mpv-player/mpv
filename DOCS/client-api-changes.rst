@@ -23,6 +23,7 @@ Also, read the section ``Compatibility`` in ``client.h``.
 API changes
 ===========
 
+```
  1.1    - remap dvdnav:// to dvd://
         - add "--cache-file", "--cache-file-size"
         - add "--colormatrix-primaries" (and property)
@@ -32,4 +33,6 @@ API changes
           insignificant is now significant
         - add "cache-free" and "cache-used" properties
         - OSX: the "coreaudio" AO spdif code is split into a separate AO
+--------- mpv 0.4.0 is released ---------
  1.0    - the API is declared stable
+```
