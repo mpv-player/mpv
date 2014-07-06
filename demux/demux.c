@@ -327,11 +327,14 @@ bool demux_stream_eof(struct sh_stream *sh)
 // Read and return any packet we find.
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
 {
-    demux_fill_buffer(demuxer);
-    for (int n = 0; n < demuxer->num_streams; n++) {
-        struct sh_stream *sh = demuxer->streams[n];
-        if (sh->ds->head)
-            return demux_read_packet(sh);
+    for (int retry = 0; retry < 2; retry++) {
+        for (int n = 0; n < demuxer->num_streams; n++) {
+            struct sh_stream *sh = demuxer->streams[n];
+            if (sh->ds->head)
+                return demux_read_packet(sh);
+        }
+        // retry after calling this
+        demux_fill_buffer(demuxer);
     }
     return NULL;
 }
