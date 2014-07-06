@@ -179,7 +179,6 @@ static int d_fill_buffer(demuxer_t *demuxer)
 
     add_streams(demuxer);
     if (pkt->stream >= p->num_streams) { // out of memory?
-        abort();
         talloc_free(pkt);
         return 0;
     }
@@ -224,6 +223,9 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     p->slave = demux_open(demuxer->stream, demux, NULL, demuxer->global);
     if (!p->slave)
         return -1;
+
+    // So that we don't miss initial packets of delayed subtitle streams.
+    p->slave->stream_select_default = true;
 
     // Incorrect, but fixes some behavior
     demuxer->ts_resets_possible = false;

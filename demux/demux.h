@@ -184,6 +184,7 @@ typedef struct demuxer {
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
     bool warned_queue_overflow;
+    bool stream_select_default; // initial selection status of a new stream
 
     // Bitmask of DEMUX_EVENT_*
     int events;

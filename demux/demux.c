@@ -127,6 +127,7 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
         .ds = talloc_zero(sh, struct demux_stream),
     };
     sh->ds->demuxer = demuxer;
+    sh->ds->selected = demuxer->stream_select_default;
     MP_TARRAY_APPEND(demuxer, demuxer->streams, demuxer->num_streams, sh);
     switch (sh->type) {
     case STREAM_VIDEO: sh->video = talloc_zero(demuxer, struct sh_video); break;
