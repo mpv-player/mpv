@@ -2362,7 +2362,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     uint32_t lace_size[MAX_NUM_LACES];
     bool use_this_block = tc >= mkv_d->skip_to_timecode;
 
-    if (!demuxer_stream_is_selected(demuxer, stream))
+    if (!demux_stream_is_selected(stream))
         return 0;
 
     if (demux_mkv_read_block_lacing(&data, &laces, lace_size)) {
@@ -2716,7 +2716,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
     mkv_seek_reset(demuxer);
     for (int i = 0; i < mkv_d->num_tracks; i++) {
         mkv_track_t *track = mkv_d->tracks[i];
-        if (demuxer_stream_is_selected(demuxer, track->stream)) {
+        if (demux_stream_is_selected(track->stream)) {
             st_active[track->stream->type] = true;
             if (track->type == MATROSKA_TRACK_VIDEO)
                 v_tnum = track->tnum;

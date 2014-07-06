@@ -229,6 +229,7 @@ void free_demuxer(struct demuxer *demuxer);
 int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp);
 
 struct demux_packet *demux_read_packet(struct sh_stream *sh);
+bool demux_stream_is_selected(struct sh_stream *stream);
 double demux_get_next_pts(struct sh_stream *sh);
 bool demux_has_packet(struct sh_stream *sh);
 bool demux_stream_eof(struct sh_stream *sh);
@@ -264,8 +265,6 @@ double demuxer_get_time_length(struct demuxer *demuxer);
 
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
-
-bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream);
 
 bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
                             struct matroska_segment_uid *b);

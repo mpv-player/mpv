@@ -391,7 +391,7 @@ static void select_tracks(struct demuxer *demuxer, int start)
     for (int n = start; n < priv->num_streams; n++) {
         struct sh_stream *stream = priv->streams[n];
         AVStream *st = priv->avfc->streams[n];
-        bool selected = stream && demuxer_stream_is_selected(demuxer, stream) &&
+        bool selected = stream && demux_stream_is_selected(stream) &&
                         !stream->attached_picture;
         st->discard = selected ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
     }
@@ -787,7 +787,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     struct sh_stream *stream = priv->streams[pkt->stream_index];
     AVStream *st = priv->avfc->streams[pkt->stream_index];
 
-    if (!demuxer_stream_is_selected(demux, stream)) {
+    if (!demux_stream_is_selected(stream)) {
         talloc_free(pkt);
         return 1; // don't signal EOF if skipping a packet
     }

@@ -659,7 +659,7 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
     }
 }
 
-bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream)
+bool demux_stream_is_selected(struct sh_stream *stream)
 {
     return stream && stream->ds->selected;
 }

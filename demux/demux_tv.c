@@ -191,9 +191,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux)
 
     for (int n = 0; n < demux->num_streams; n++) {
         struct sh_stream *sh = demux->streams[n];
-        if (!demux_has_packet(sh) &&
-            demuxer_stream_is_selected(demux, sh))
-        {
+        if (!demux_has_packet(sh) && demux_stream_is_selected(sh)) {
             if (sh->type == STREAM_AUDIO)
                 want_audio = sh;
             if (sh->type == STREAM_VIDEO)

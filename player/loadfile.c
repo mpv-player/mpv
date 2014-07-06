@@ -265,7 +265,7 @@ static void external_track_seek(struct MPContext *mpctx, struct track *track)
         for (int t = 0; t < mpctx->num_tracks; t++) {
             struct track *other = mpctx->tracks[t];
             if (other->demuxer == track->demuxer &&
-                demuxer_stream_is_selected(other->demuxer, other->stream))
+                demux_stream_is_selected(other->stream))
                 return;
         }
         double pts = get_main_demux_pts(mpctx);

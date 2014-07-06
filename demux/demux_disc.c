@@ -42,7 +42,7 @@ static void reselect_streams(demuxer_t *demuxer)
     for (int n = 0; n < MPMIN(p->slave->num_streams, p->num_streams); n++) {
         if (p->streams[n]) {
             demuxer_select_track(p->slave, p->slave->streams[n],
-                demuxer_stream_is_selected(demuxer, p->streams[n]));
+                demux_stream_is_selected(p->streams[n]));
         }
     }
 }
