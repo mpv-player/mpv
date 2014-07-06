@@ -163,7 +163,7 @@ extern "C" {
  *      version 0x001001FF
  *      becomes 16.511 (dec(0x0010) + "." + dec(0x01FF))
  */
-#define MPV_CLIENT_API_VERSION 0x00010001UL
+#define MPV_CLIENT_API_VERSION 0x00010002UL
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.

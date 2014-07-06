@@ -417,8 +417,6 @@ double get_current_time(struct MPContext *mpctx)
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return 0;
-    if (demuxer->stream_pts != MP_NOPTS_VALUE)
-        return demuxer->stream_pts;
     if (mpctx->playback_pts != MP_NOPTS_VALUE)
         return mpctx->playback_pts;
     if (mpctx->last_seek_pts != MP_NOPTS_VALUE)

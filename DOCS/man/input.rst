@@ -613,11 +613,6 @@ Property list
 ``stream-end``
     Raw end position in bytes in source stream.
 
-``stream-time-pos`` (RW)
-    Time position in source stream. This only works for DVD and Bluray. This
-    is probably never different from ``time-pos``, because ``time-pos`` is
-    forced to this value anyway.
-
 ``length``
     Length of the current file in seconds. If the length is unknown, the
     property is unavailable. Note that the file duration is not always exactly

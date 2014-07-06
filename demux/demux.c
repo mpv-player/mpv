@@ -288,8 +288,6 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
             ds->bytes -= pkt->len;
             ds->packs--;
 
-            if (pkt->stream_pts != MP_NOPTS_VALUE)
-                sh->demuxer->stream_pts = pkt->stream_pts;
             if (pkt && pkt->pos >= 0)
                 sh->demuxer->filepos = pkt->pos;
 
@@ -454,7 +452,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .desc = desc,
         .type = desc->type,
         .stream = stream,
-        .stream_pts = MP_NOPTS_VALUE,
         .seekable = stream->seekable,
         .accurate_seek = true,
         .filepos = -1,

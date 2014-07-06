@@ -335,22 +335,6 @@ static int property_time(int action, void *arg, double time)
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-/// Current stream position in seconds (RO)
-static int mp_property_stream_time_pos(void *ctx, struct m_property *prop,
-                                       int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer)
-        return M_PROPERTY_UNAVAILABLE;
-    double pts = demuxer->stream_pts;
-    if (pts == MP_NOPTS_VALUE)
-        return M_PROPERTY_UNAVAILABLE;
-
-    return property_time(action, arg, pts);
-}
-
-
 /// Media length in seconds (RO)
 static int mp_property_length(void *ctx, struct m_property *prop,
                               int action, void *arg)
@@ -2658,7 +2642,6 @@ static const struct m_property mp_properties[] = {
     {"demuxer", mp_property_demuxer},
     {"stream-pos", mp_property_stream_pos},
     {"stream-end", mp_property_stream_end},
-    {"stream-time-pos", mp_property_stream_time_pos},
     {"length", mp_property_length},
     {"avsync", mp_property_avsync},
     {"total-avsync-change", mp_property_total_avsync_change},

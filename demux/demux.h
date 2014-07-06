@@ -173,7 +173,6 @@ typedef struct demuxer {
     const char *filetype; // format name when not identified by demuxer (libavformat)
     int64_t filepos;  // input stream current pos.
     struct stream *stream;
-    double stream_pts;     // current stream pts, if applicable (e.g. dvd)
     char *filename;  // same as stream->url
     enum demuxer_type type;
     int seekable; // flag

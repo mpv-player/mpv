@@ -25,6 +25,7 @@ API changes
 
 ::
 
+ 1.2    - remove "stream-time-pos" property (no replacement)
  1.1    - remap dvdnav:// to dvd://
         - add "--cache-file", "--cache-file-size"
         - add "--colormatrix-primaries" (and property)

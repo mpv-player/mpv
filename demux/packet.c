@@ -46,7 +46,6 @@ static struct demux_packet *create_packet(size_t len)
         .pts = MP_NOPTS_VALUE,
         .dts = MP_NOPTS_VALUE,
         .duration = -1,
-        .stream_pts = MP_NOPTS_VALUE,
         .pos = -1,
         .stream = -1,
     };
@@ -119,6 +118,5 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
     new->pts = dp->pts;
     new->dts = dp->dts;
     new->duration = dp->duration;
-    new->stream_pts = dp->stream_pts;
     return new;
 }
