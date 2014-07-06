@@ -295,10 +295,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     p->slave->stream_select_default = true;
 
     demuxer->start_time = p->pts[STREAM_VIDEO].base_time;
-    // Incorrect, but fixes some behavior
-    demuxer->ts_resets_possible = false;
-    // Doesn't work, because stream_pts is a "guess".
-    demuxer->accurate_seek = false;
+
     // Can be seekable even if the stream isn't.
     demuxer->seekable = true;
 
