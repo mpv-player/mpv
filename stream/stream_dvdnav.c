@@ -546,15 +546,18 @@ static int control(stream_t *stream, int cmd, void *arg)
         return STREAM_OK;
     }
     case STREAM_CTRL_SEEK_TO_TIME: {
-        int64_t tm = (int64_t) (*((double *)arg) * 90000);
+        double d = *(double *)arg;
+        int64_t tm = (int64_t)(d * 90000);
         if (tm < 0)
             tm = 0;
         if (priv->duration && tm >= (priv->duration * 90))
             tm = priv->duration * 90 - 1;
-        MP_VERBOSE(stream, "seek to PTS %"PRId64"\n", tm);
+        MP_VERBOSE(stream, "seek to PTS %f (%"PRId64")\n", d, tm);
         if (dvdnav_time_search(dvdnav, tm) != DVDNAV_STATUS_OK)
             break;
         stream_drop_buffers(stream);
+        d = dvdnav_get_current_time(dvdnav) / 90000.0f;
+        MP_VERBOSE(stream, "landed at: %f\n", d);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_NUM_ANGLES: {
