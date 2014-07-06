@@ -32,8 +32,18 @@ struct priv {
     // streams[slave_stream_index] == our_stream
     struct sh_stream **streams;
     int num_streams;
-    // This contains each DVD sub stream, or NULL. Needed because
+    // This contains each DVD sub stream, or NULL. Needed because DVD packets
+    // can come arbitrarily late in the MPEG stream, so the slave demuxer
+    // might add the streams only later.
     struct sh_stream *dvd_subs[32];
+    // Used to rewrite the raw MPEG timestamps to playback time.
+    struct {
+        double base_time;   // playback display start time of current segment
+        double base_dts;    // packet DTS that maps to base_time
+        double last_dts;    // DTS of previously demuxed packet
+    } pts[STREAM_TYPE_COUNT];
+    double seek_pts;
+    bool seek_reinit;   // needs reinit after seek
 };
 
 static void reselect_streams(demuxer_t *demuxer)
@@ -148,14 +158,9 @@ static void d_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
         return;
     }
 
-    double pts;
+    double pts = p->seek_pts;
     if (flags & SEEK_ABSOLUTE)
         pts = 0.0f;
-    else {
-        if (demuxer->stream_pts == MP_NOPTS_VALUE)
-            return;
-        pts = demuxer->stream_pts;
-    }
 
     if (flags & SEEK_FACTOR) {
         double tmp = 0;
@@ -165,8 +170,31 @@ static void d_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
         pts += rel_seek_secs;
     }
 
+    MP_VERBOSE(demuxer, "seek to: %f\n", pts);
+
     stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, &pts);
     demux_control(p->slave, DEMUXER_CTRL_RESYNC, NULL);
+
+    p->seek_pts = pts;
+    p->seek_reinit = true;
+}
+
+static void reset_pts(demuxer_t *demuxer)
+{
+    struct priv *p = demuxer->priv;
+
+    double base;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME, &base) < 1)
+        base = 0;
+
+    MP_VERBOSE(demuxer, "reset to time: %f\n", base);
+
+    for (int n = 0; n < STREAM_TYPE_COUNT; n++) {
+        p->pts[n].base_dts = p->pts[n].last_dts = MP_NOPTS_VALUE;
+        p->pts[n].base_time = base;
+    }
+
+    p->seek_reinit = false;
 }
 
 static int d_fill_buffer(demuxer_t *demuxer)
@@ -177,6 +205,9 @@ static int d_fill_buffer(demuxer_t *demuxer)
     if (!pkt)
         return 0;
 
+    if (p->seek_reinit)
+        reset_pts(demuxer);
+
     add_streams(demuxer);
     if (pkt->stream >= p->num_streams) { // out of memory?
         talloc_free(pkt);
@@ -184,13 +215,47 @@ static int d_fill_buffer(demuxer_t *demuxer)
     }
 
     struct sh_stream *sh = p->streams[pkt->stream];
-
-    // Use only one stream for stream_pts, otherwise PTS might be jumpy.
-    if (sh->type == STREAM_VIDEO) {
-        double pts;
-        if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME, &pts) > 0)
-            pkt->stream_pts = pts;
+    if (!demux_stream_is_selected(sh)) {
+        talloc_free(pkt);
+        return 1;
     }
+
+    int t = sh->type;
+
+    // Subtitle timestamps are not continuous, so the heuristic below can't be
+    // applied. Instead, use the video stream as reference.
+    if (t == STREAM_SUB)
+        t = STREAM_VIDEO;
+
+    MP_TRACE(demuxer, "ipts: %d %f %f\n", sh->type, pkt->pts, pkt->dts);
+
+    if (sh->type == STREAM_SUB) {
+        if (p->pts[t].base_dts == MP_NOPTS_VALUE)
+            MP_WARN(demuxer, "subtitle packet along PTS reset, report a bug\n");
+    } else if (pkt->dts != MP_NOPTS_VALUE) {
+        if (p->pts[t].base_dts == MP_NOPTS_VALUE)
+            p->pts[t].base_dts = p->pts[t].last_dts = pkt->dts;
+
+        if (pkt->dts < p->pts[t].last_dts || pkt->dts > p->pts[t].last_dts + 0.5)
+        {
+            MP_VERBOSE(demuxer, "PTS discontinuity on stream %d\n", sh->type);
+            p->pts[t].base_time += p->pts[t].last_dts - p->pts[t].base_dts;
+            p->pts[t].base_dts = p->pts[t].last_dts = pkt->dts - pkt->duration;
+        }
+        p->pts[t].last_dts = pkt->dts;
+    }
+    if (p->pts[t].base_dts != MP_NOPTS_VALUE) {
+        double delta = -p->pts[t].base_dts + p->pts[t].base_time;
+        if (pkt->pts != MP_NOPTS_VALUE)
+            pkt->pts += delta;
+        if (pkt->dts != MP_NOPTS_VALUE)
+            pkt->dts += delta;
+    }
+
+    MP_TRACE(demuxer, "opts: %d %f %f\n", sh->type, pkt->pts, pkt->dts);
+
+    if (pkt->pts != MP_NOPTS_VALUE)
+        p->seek_pts = pkt->pts;
 
     demux_add_packet(sh, pkt);
     return 1;
@@ -220,6 +285,8 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     if (demuxer->stream->uncached_type == STREAMTYPE_CDDA)
         demux = "+rawaudio";
 
+    reset_pts(demuxer);
+
     p->slave = demux_open(demuxer->stream, demux, NULL, demuxer->global);
     if (!p->slave)
         return -1;
@@ -227,6 +294,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     // So that we don't miss initial packets of delayed subtitle streams.
     p->slave->stream_select_default = true;
 
+    demuxer->start_time = p->pts[STREAM_VIDEO].base_time;
     // Incorrect, but fixes some behavior
     demuxer->ts_resets_possible = false;
     // Doesn't work, because stream_pts is a "guess".
