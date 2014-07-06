@@ -917,7 +917,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     if (color_mod > 255) {
         SDL_SetTextureColorMod(vc->tex, color_mod / 2, color_mod / 2, color_mod / 2);
         SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
-        SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
     } else {
         SDL_SetTextureColorMod(vc->tex, color_mod, color_mod, color_mod);
         SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
