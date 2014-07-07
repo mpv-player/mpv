@@ -858,6 +858,7 @@ check_compile "Video 4 Linux 2 MPEG PVR interface" $_pvr PVR waftools/fragments/
 test_lua() {
     if test "$_lua" = auto && $_pkg_config "$1" ; then
         check_pkg_config "Lua ($1)" $_lua LUA "$1"
+        _lua=$(defretval)
     fi
 }
 
@@ -867,7 +868,7 @@ test_lua "luajit >= 2.0.0"
 test_lua "lua >= 5.2.0"
 test_lua "lua5.2 >= 5.2.0" # debian
 
-test "$_lua" = no && check_yes_no $lua LUA
+test "$_lua" != yes && check_yes_no no LUA
 
 check_trivial "joystick" $_joystick JOYSTICK
 
