@@ -864,7 +864,7 @@ function osc_init()
             possec = duration * (pos / 100)
             return mp.format_time(possec)
         else
-            return nil
+            return ""
         end
     end
 
