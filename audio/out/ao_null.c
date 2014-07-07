@@ -210,7 +210,6 @@ const struct ao_driver audio_out_null = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .bufferlen = 0.2,
-        .latency_sec = 0.5,
         .outburst = 256,
         .speed = 1,
     },
