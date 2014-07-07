@@ -557,6 +557,7 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
     if (!drop_current && ictx->current_down_cmd &&
         ictx->current_down_cmd->key_up_follows)
     {
+        memset(ictx->key_history, 0, sizeof(ictx->key_history));
         ictx->current_down_cmd->key_up_follows = false;
         queue_add_tail(&ictx->cmd_queue, ictx->current_down_cmd);
         ictx->got_new_events = true;
@@ -596,15 +597,10 @@ static struct mp_cmd *resolve_key(struct input_ctx *ictx, int code)
 {
     update_mouse_section(ictx);
     struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, code);
-    if (cmd && cmd->id != MP_CMD_IGNORE) {
-        memset(ictx->key_history, 0, sizeof(ictx->key_history));
-        if (!should_drop_cmd(ictx, cmd))
-            return cmd;
-        talloc_free(cmd);
-        return NULL;
-    }
-    talloc_free(cmd);
     key_buf_add(ictx->key_history, code);
+    if (cmd && cmd->id != MP_CMD_IGNORE && !should_drop_cmd(ictx, cmd))
+        return cmd;
+    talloc_free(cmd);
     return NULL;
 }
 
@@ -672,6 +668,8 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         talloc_free(cmd);
         return;
     }
+
+    memset(ictx->key_history, 0, sizeof(ictx->key_history));
 
     cmd->scale = scale;
 
