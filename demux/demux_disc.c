@@ -285,16 +285,12 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     if (demuxer->stream->uncached_type == STREAMTYPE_CDDA)
         demux = "+rawaudio";
 
-    reset_pts(demuxer);
-
     p->slave = demux_open(demuxer->stream, demux, NULL, demuxer->global);
     if (!p->slave)
         return -1;
 
     // So that we don't miss initial packets of delayed subtitle streams.
     p->slave->stream_select_default = true;
-
-    demuxer->start_time = p->pts[STREAM_VIDEO].base_time;
 
     // Can be seekable even if the stream isn't.
     demuxer->seekable = true;
