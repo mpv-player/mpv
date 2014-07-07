@@ -68,12 +68,26 @@ static const char * const builtin_lua_scripts[][2] = {
 // Represents a loaded script. Each has its own Lua state.
 struct script_ctx {
     const char *name;
+    const char *filename;
     lua_State *state;
     struct mp_log *log;
     struct mpv_handle *client;
     struct MPContext *mpctx;
     int suspended;
 };
+
+#if LUA_VERSION_NUM <= 501
+#define mp_cpcall lua_cpcall
+#else
+// Curse whoever had this stupid idea. Curse whoever thought it would be a good
+// idea not to include an emulated lua_cpcall() even more.
+static int mp_cpcall (lua_State *L, lua_CFunction func, void *ud)
+{
+    lua_pushcfunction(L, func); // doesn't allocate in 5.2 (but does in 5.1)
+    lua_pushlightuserdata(L, ud);
+    return lua_pcall(L, 1, 0, 0);
+}
+#endif
 
 static struct script_ctx *get_ctx(lua_State *L)
 {
@@ -89,34 +103,18 @@ static struct MPContext *get_mpctx(lua_State *L)
     return get_ctx(L)->mpctx;
 }
 
-static int wrap_cpcall(lua_State *L)
-{
-    lua_CFunction fn = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-    return fn(L);
-}
-
-// Call the given function fn under a Lua error handler (similar to lua_cpcall).
-// Pass the given number of args from the Lua stack to fn.
-// Returns 0 (and empty stack) on success.
-// Returns LUA_ERR[RUN|MEM|ERR] otherwise, with the error value on the stack.
-static int mp_cpcall(lua_State *L, lua_CFunction fn, int args)
-{
-    // Don't use lua_pushcfunction() - it allocates memory on Lua 5.1.
-    // Instead, emulate C closures by making wrap_cpcall call fn.
-    lua_pushlightuserdata(L, fn); // args... fn
-    // Will always succeed if mp_lua_init() set it up correctly.
-    lua_getfield(L, LUA_REGISTRYINDEX, "wrap_cpcall"); // args... fn wrap_cpcall
-    lua_insert(L, -(args + 2)); // wrap_cpcall args... fn
-    return lua_pcall(L, args + 1, 0, 0);
-}
-
-static void report_error(lua_State *L)
+static int error_handler(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
-    const char *err = lua_tostring(L, -1);
-    MP_WARN(ctx, "Error: %s\n", err ? err : "[unknown]");
-    lua_pop(L, 1);
+
+    if (luaL_loadstring(L, "return debug.traceback('', 3)") == 0) { // e fn|err
+        lua_call(L, 0, 1); // e backtrace
+        const char *tr = lua_tostring(L, -1);
+        MP_WARN(ctx, "%s\n", tr);
+    }
+    lua_pop(L, 1); // e
+
+    return 1;
 }
 
 // Check client API error code:
@@ -133,30 +131,18 @@ static int check_error(lua_State *L, int err)
     return 2;
 }
 
-static int run_event_loop(lua_State *L)
-{
-    lua_getglobal(L, "mp_event_loop");
-    if (lua_isnil(L, -1))
-        luaL_error(L, "no event loop function\n");
-    lua_call(L, 0, 0);
-    return 0;
-}
-
 static void add_functions(struct script_ctx *ctx);
 
-static int load_file(struct script_ctx *ctx, const char *fname)
+static void load_file(lua_State *L, const char *fname)
 {
-    int r = 0;
-    lua_State *L = ctx->state;
+    struct script_ctx *ctx = get_ctx(L);
     char *res_name = mp_get_user_path(NULL, ctx->mpctx->global, fname);
     MP_VERBOSE(ctx, "loading file %s\n", res_name);
-    if (luaL_loadfile(L, res_name) || lua_pcall(L, 0, 0, 0)) {
-        report_error(L);
-        r = -1;
-    }
-    assert(lua_gettop(L) == 0);
-    talloc_free(res_name);
-    return r;
+    int r = luaL_loadfile(L, res_name);
+    talloc_free(res_name); // careful to not leak this on Lua errors
+    if (r)
+        lua_error(L);
+    lua_call(L, 0, 0);
 }
 
 static int load_builtin(lua_State *L)
@@ -173,22 +159,21 @@ static int load_builtin(lua_State *L)
             return 1;
         }
     }
+    luaL_error(L, "builtin module '%s' not found\n", name);
     return 0;
 }
 
 // Execute "require " .. name
-static bool require(lua_State *L, const char *name)
+static void require(lua_State *L, const char *name)
 {
     struct script_ctx *ctx = get_ctx(L);
     MP_VERBOSE(ctx, "loading %s\n", name);
     // Lazy, but better than calling the "require" function manually
     char buf[80];
     snprintf(buf, sizeof(buf), "require '%s'", name);
-    if (luaL_loadstring(L, buf) || lua_pcall(L, 0, 0, 0)) {
-        report_error(L);
-        return false;
-    }
-    return true;
+    if (luaL_loadstring(L, buf))
+        lua_error(L);
+    lua_call(L, 0, 0);
 }
 
 // Push the table of a module. If it doesn't exist, it's created.
@@ -208,31 +193,38 @@ static void push_module_table(lua_State *L, const char *module)
     lua_remove(L, -2); // module
 }
 
-static int load_lua(struct mpv_handle *client, const char *fname)
+static int load_scripts(lua_State *L)
 {
-    struct MPContext *mpctx = mp_client_get_core(client);
-    int r = -1;
+    struct script_ctx *ctx = get_ctx(L);
+    const char *fname = ctx->filename;
 
-    struct script_ctx *ctx = talloc_ptrtype(NULL, ctx);
-    *ctx = (struct script_ctx) {
-        .mpctx = mpctx,
-        .client = client,
-        .name = mpv_client_name(client),
-        .log = mp_client_get_log(client),
-    };
+    require(L, "mp.defaults");
 
-    lua_State *L = ctx->state = luaL_newstate();
-    if (!L)
-        goto error_out;
+    if (fname[0] == '@') {
+        require(L, fname);
+    } else {
+        load_file(L, fname);
+    }
+
+    lua_getglobal(L, "mp_event_loop"); // fn
+    if (lua_isnil(L, -1))
+        luaL_error(L, "no event loop function\n");
+    lua_call(L, 0, 0); // -
+
+    return 0;
+}
+
+static int run_lua(lua_State *L)
+{
+    struct script_ctx *ctx = lua_touserdata(L, -1);
+    lua_pop(L, 1); // -
+
+    luaL_openlibs(L);
 
     // used by get_ctx()
     lua_pushlightuserdata(L, ctx); // ctx
     lua_setfield(L, LUA_REGISTRYINDEX, "ctx"); // -
 
-    lua_pushcfunction(L, wrap_cpcall); // closure
-    lua_setfield(L, LUA_REGISTRYINDEX, "wrap_cpcall"); // -
-
-    luaL_openlibs(L);
     add_functions(ctx); // mp
 
     push_module_table(L, "mp"); // mp
@@ -275,24 +267,40 @@ static int load_lua(struct mpv_handle *client, const char *fname)
 
     assert(lua_gettop(L) == 0);
 
-    if (!require(L, "mp.defaults")) {
-        report_error(L);
+    // run this under an error handler that can do backtraces
+    lua_pushcfunction(L, error_handler); // errf
+    lua_pushcfunction(L, load_scripts); // errf fn
+    if (lua_pcall(L, 0, 0, -2)) // errf [error]
+        MP_FATAL(ctx, "Lua error: %s\n", lua_tostring(L, -1));
+
+    return 0;
+}
+
+static int load_lua(struct mpv_handle *client, const char *fname)
+{
+    struct MPContext *mpctx = mp_client_get_core(client);
+    int r = -1;
+
+    struct script_ctx *ctx = talloc_ptrtype(NULL, ctx);
+    *ctx = (struct script_ctx) {
+        .mpctx = mpctx,
+        .client = client,
+        .name = mpv_client_name(client),
+        .log = mp_client_get_log(client),
+        .filename = fname,
+    };
+
+    lua_State *L = ctx->state = luaL_newstate();
+    if (!L)
+        goto error_out;
+
+    if (mp_cpcall(L, run_lua, ctx)) {
+        const char *err = "unknown error";
+        if (lua_type(L, -1) == LUA_TSTRING) // avoid allocation
+            err = lua_tostring(L, -1);
+        MP_FATAL(ctx, "Lua error: %s\n", err);
         goto error_out;
     }
-
-    assert(lua_gettop(L) == 0);
-
-    if (fname[0] == '@') {
-        if (!require(L, fname))
-            goto error_out;
-    } else {
-        if (load_file(ctx, fname) < 0)
-            goto error_out;
-    }
-
-    // Call the script's event loop runs until the script terminates and unloads.
-    if (mp_cpcall(L, run_event_loop, 0) != 0)
-        report_error(L);
 
     r = 0;
 
