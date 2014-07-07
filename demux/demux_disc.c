@@ -320,6 +320,9 @@ static int d_control(demuxer_t *demuxer, int cmd, void *arg)
         *(double *)arg = len;
         return DEMUXER_CTRL_OK;
     }
+    case DEMUXER_CTRL_RESYNC:
+        demux_flush(p->slave);
+        break; // relay to slave demuxer
     case DEMUXER_CTRL_SWITCHED_TRACKS:
         reselect_streams(demuxer);
         return DEMUXER_CTRL_OK;
