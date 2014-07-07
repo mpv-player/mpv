@@ -213,7 +213,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     if (hr_seek_very_exact)
         hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
 
-    bool hr_seek = mpctx->demuxer->accurate_seek && opts->correct_pts;
+    bool hr_seek = opts->correct_pts;
     hr_seek &= seek.exact >= 0 && seek.type != MPSEEK_FACTOR;
     hr_seek &= (opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE) ||
                opts->hr_seek > 0 || seek.exact > 0;
@@ -227,8 +227,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
             seek.type = MPSEEK_ABSOLUTE;
         }
     }
-    if ((mpctx->demuxer->accurate_seek || mpctx->timeline)
-        && seek.type == MPSEEK_RELATIVE) {
+    if (seek.type == MPSEEK_RELATIVE) {
         seek.type = MPSEEK_ABSOLUTE;
         seek.direction = seek.amount > 0 ? 1 : -1;
         seek.amount += get_current_time(mpctx);
@@ -761,8 +760,7 @@ static void handle_backstep(struct MPContext *mpctx)
 
     double current_pts = mpctx->last_vo_pts;
     mpctx->backstep_active = false;
-    bool demuxer_ok = mpctx->demuxer && mpctx->demuxer->accurate_seek;
-    if (demuxer_ok && mpctx->d_video && current_pts != MP_NOPTS_VALUE) {
+    if (mpctx->d_video && current_pts != MP_NOPTS_VALUE) {
         double seek_pts = find_previous_pts(mpctx, current_pts);
         if (seek_pts != MP_NOPTS_VALUE) {
             queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 2, true);

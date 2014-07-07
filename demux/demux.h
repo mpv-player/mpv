@@ -177,9 +177,6 @@ typedef struct demuxer {
     enum demuxer_type type;
     int seekable; // flag
     double start_time;
-    /* Set if using absolute seeks for small movements is OK (no pts resets
-     * that would make pts ambigious, preferably supports back/forward flags */
-    bool accurate_seek;
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
     bool warned_queue_overflow;
