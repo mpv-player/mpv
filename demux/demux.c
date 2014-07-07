@@ -461,6 +461,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .glog = log,
         .filename = talloc_strdup(demuxer, stream->url),
         .metadata = talloc_zero(demuxer, struct mp_tags),
+        .events = DEMUX_EVENT_METADATA,
     };
     demuxer->params = params; // temporary during open()
     int64_t start_pos = stream_tell(stream);
