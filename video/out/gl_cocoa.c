@@ -47,15 +47,7 @@ static int cgl_color_size(struct MPGLContext *ctx)
     struct cgl_context *p = ctx->priv;
     GLint value;
     CGLDescribePixelFormat(p->pix, 0, kCGLPFAColorSize, &value);
-    switch (value) {
-        case 32:
-        case 24:
-            return 8;
-        case 16:
-            return 5;
-        default:
-            return 8;
-    }
+    return value > 16 ? 8 : 5;
 }
 
 static bool create_gl_context(struct MPGLContext *ctx)
