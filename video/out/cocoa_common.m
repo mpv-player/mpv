@@ -177,9 +177,6 @@ void vo_cocoa_uninit(struct vo *vo)
         [s->window release];
         s->window = nil;
 
-        [s->gl_ctx release];
-        s->gl_ctx = nil;
-
         [s->lock release];
         s->lock = nil;
     });
@@ -330,66 +327,6 @@ static void create_window(struct vo *vo, struct mp_rect *win, int geo_flags)
     }
 }
 
-static CGLOpenGLProfile cgl_profile(int gl3profile) {
-    if (gl3profile) {
-        return kCGLOGLPVersion_3_2_Core;
-    } else {
-        return kCGLOGLPVersion_Legacy;
-    }
-}
-
-static int create_gl_context(struct vo *vo, int gl3profile)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    CGLError err;
-
-    CGLPixelFormatAttribute attrs[] = {
-        kCGLPFAOpenGLProfile,
-        (CGLPixelFormatAttribute) cgl_profile(gl3profile),
-        kCGLPFADoubleBuffer,
-        kCGLPFAAccelerated,
-        #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
-        // leave this as the last entry of the array to not break the fallback
-        // code
-        kCGLPFASupportsAutomaticGraphicsSwitching,
-        #endif
-        0
-    };
-
-    CGLPixelFormatObj pix;
-    GLint npix;
-
-    err = CGLChoosePixelFormat(attrs, &pix, &npix);
-    if (err == kCGLBadAttribute) {
-        // kCGLPFASupportsAutomaticGraphicsSwitching is probably not supported
-        // by the current hardware. Falling back to not using it.
-        MP_ERR(vo, "error creating CGL pixel format with automatic GPU "
-                   "switching. falling back\n");
-        attrs[MP_ARRAY_SIZE(attrs) - 2] = 0;
-        err = CGLChoosePixelFormat(attrs, &pix, &npix);
-    }
-
-    if (err != kCGLNoError) {
-        MP_FATAL(s, "error creating CGL pixel format: %s (%d)\n",
-                 CGLErrorString(err), err);
-    }
-
-    CGLContextObj ctx;
-    if ((err = CGLCreateContext(pix, 0, &ctx)) != kCGLNoError) {
-        MP_FATAL(s, "error creating CGL context: %s (%d)\n",
-                 CGLErrorString(err), err);
-        return -1;
-    }
-
-    s->gl_ctx = [[NSOpenGLContext alloc] initWithCGLContextObj:ctx];
-    [s->gl_ctx makeCurrentContext];
-
-    CGLReleasePixelFormat(pix);
-    CGLReleaseContext(ctx);
-
-    return 0;
-}
-
 static void cocoa_set_window_title(struct vo *vo, const char *title)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -452,7 +389,20 @@ static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
                 usingBlock:nblock];
 }
 
-int vo_cocoa_config_window(struct vo *vo, uint32_t flags, int gl3profile)
+void vo_cocoa_create_nsgl_ctx(struct vo *vo, void *ctx)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    s->gl_ctx = [[NSOpenGLContext alloc] initWithCGLContextObj:ctx];
+    [s->gl_ctx makeCurrentContext];
+}
+
+void vo_cocoa_release_nsgl_ctx(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    [s->gl_ctx release];
+}
+
+int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     __block int ctxok = 0;
@@ -474,30 +424,8 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, int gl3profile)
         s->old_dwidth  = width;
         s->old_dheight = height;
 
-        if (flags & VOFLAG_HIDDEN) {
-            // This is certainly the first execution of vo_config_window and
-            // is called in order for an OpenGL based VO to perform detection
-            // of OpenGL extensions. On OSX to accomplish this task we are
-            // allowed only create a OpenGL context without attaching it to
-            // a drawable.
-            ctxok = create_gl_context(vo, gl3profile);
-            if (ctxok < 0) return;
-        } else if (!s->gl_ctx || !s->window) {
-            // Either gl_ctx+window or window alone is not created.
-            // Handle each of them independently. This is to handle correctly
-            // both VOs like vo_corevideo who skip the the OpenGL detection
-            // phase completly and generic OpenGL VOs who use VOFLAG_HIDDEN.
-            if (!s->gl_ctx) {
-                ctxok = create_gl_context(vo, gl3profile);
-                if (ctxok < 0) return;
-            }
-
-            if (!s->window)
-                create_window(vo, &geo.win, geo.flags);
-        }
-
-        if (s->window) {
-            // Everything is properly initialized
+        if (!(flags & VOFLAG_HIDDEN) && !s->window) {
+            create_window(vo, &geo.win, geo.flags);
             if (reset_size)
                 [s->window queueNewVideoSize:NSMakeSize(width, height)];
             cocoa_set_window_title(vo, vo_get_window_title(vo));
@@ -751,13 +679,6 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-int vo_cocoa_swap_interval(int enabled)
-{
-    [[NSOpenGLContext currentContext] setValues:&enabled
-                                   forParameter:NSOpenGLCPSwapInterval];
-    return 0;
-}
-
 void *vo_cocoa_cgl_context(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -767,22 +688,6 @@ void *vo_cocoa_cgl_context(struct vo *vo)
 void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 {
     return CGLGetPixelFormat(vo_cocoa_cgl_context(vo));
-}
-
-int vo_cocoa_cgl_color_size(struct vo *vo)
-{
-    GLint value;
-    CGLDescribePixelFormat(vo_cocoa_cgl_pixel_format(vo), 0,
-                           kCGLPFAColorSize, &value);
-    switch (value) {
-        case 32:
-        case 24:
-            return 8;
-        case 16:
-            return 5;
-    }
-
-    return 8;
 }
 
 @implementation MpvCocoaAdapter

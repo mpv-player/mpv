@@ -29,7 +29,7 @@ void *vo_cocoa_glgetaddr(const char *s);
 int vo_cocoa_init(struct vo *vo);
 void vo_cocoa_uninit(struct vo *vo);
 
-int vo_cocoa_config_window(struct vo *vo, uint32_t flags, int gl3profile);
+int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx);
 
 void vo_cocoa_set_current_context(struct vo *vo, bool current);
 void vo_cocoa_swap_buffers(struct vo *vo);
@@ -42,11 +42,10 @@ void vo_cocoa_register_resize_callback(struct vo *vo,
 void vo_cocoa_register_gl_clear_callback(struct vo *vo, void *ctx,
                                          void (*cb)(void *ctx));
 
-// returns an int to conform to the gl extensions from other platforms
-int vo_cocoa_swap_interval(int enabled);
-
 void *vo_cocoa_cgl_context(struct vo *vo);
 void *vo_cocoa_cgl_pixel_format(struct vo *vo);
-int vo_cocoa_cgl_color_size(struct vo *vo);
+
+void vo_cocoa_create_nsgl_ctx(struct vo *vo, void *ctx);
+void vo_cocoa_release_nsgl_ctx(struct vo *vo);
 
 #endif /* MPLAYER_COCOA_COMMON_H */
