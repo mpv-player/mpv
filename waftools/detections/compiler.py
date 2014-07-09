@@ -44,9 +44,6 @@ def __add_clang_flags__(ctx):
 
 def __add_mingw_flags__(ctx):
     ctx.env.CFLAGS += ['-D__USE_MINGW_ANSI_STDIO=1']
-    ctx.env.CFLAGS += ['-DBYTE_ORDER=1234']
-    ctx.env.CFLAGS += ['-DLITLE_ENDIAN=1234']
-    ctx.env.CFLAGS += ['-DBIG_ENDIAN=4321']
     ctx.env.LAST_LINKFLAGS += ['-mwindows']
 
 def __add_cygwin_flags__(ctx):

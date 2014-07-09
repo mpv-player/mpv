@@ -1,7 +1,7 @@
 #ifndef MPV_IMG_FOURCC_H
 #define MPV_IMG_FOURCC_H
 
-#include <sys/types.h>
+#include "osdep/endian.h"
 
 #define MP_FOURCC(a,b,c,d) ((a) | ((b)<<8) | ((c)<<16) | ((unsigned)(d)<<24))
 

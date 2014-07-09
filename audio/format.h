@@ -24,8 +24,8 @@
 #define MPLAYER_AF_FORMAT_H
 
 #include <stdbool.h>
-#include <sys/types.h>
 
+#include "osdep/endian.h"
 #include "bstr/bstr.h"
 
 #if BYTE_ORDER == BIG_ENDIAN

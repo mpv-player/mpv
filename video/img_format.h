@@ -20,7 +20,8 @@
 #define MPLAYER_IMG_FORMAT_H
 
 #include <inttypes.h>
-#include <sys/types.h>
+
+#include "osdep/endian.h"
 #include "bstr/bstr.h"
 
 #if BYTE_ORDER == BIG_ENDIAN
