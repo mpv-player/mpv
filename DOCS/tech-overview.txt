@@ -17,12 +17,12 @@ player/*.c:
         * check help options etc. (call handle_help_options()), possibly exit
         * call play_files() function that works down the playlist:
             * run idle loop (idle_loop()), until there are files in the
-                playlist or an exit command was given (slave mode only)
+                playlist or an exit command was given (only if --idle it set)
             * actually load and play a file in play_current_file():
                 * run all the dozens of functions to load the file and
                   initialize playback
                 * run a small loop that does normal playback, until the file is
-                  done or a slave command terminates playback
+                  done or a command terminates playback
                   (on each iteration, run_playloop() is called, which is rather
                    big and complicated - it decodes some audio and video on
                    each frame, waits for input, etc.)
@@ -82,7 +82,7 @@ talloc.h & talloc.c:
              (See ta/README for details.)
 
 player/command.c:
-    This contains the implementation for slave commands and properties.
+    This contains the implementation for client API commands and properties.
     Properties are essentially dynamic variables changed by certain commands.
     This is basically responsible for all user commands, like initiating
     seeking, switching tracks, etc. It calls into other player/*.c files,
@@ -92,9 +92,10 @@ player/core.h:
     Data structures and function prototypes for most of player/*.c. They are
     usually not accessed by other parts of mpv for the sake of modularization.
 
-    Note that there are lots of global variables floating around everywhere
-    else. This is an ongoing transition, and eventually there should be no
-    global variables anymore.
+player/client.c:
+    This implements the client API (libmpv/client.h). For the most part, this
+    just calls into other parts of the player. This also manages a ringbuffer
+    of events from player to clients.
 
 options/options.h, options/options.c
     options.h contains the global option struct MPOpts. The option declarations
@@ -111,15 +112,14 @@ options/options.h, options/options.c
 
 input/input.c:
     This translates keyboard input comming from libvo and other sources (such
-    as remote control devices like Apple IR or slave mode commands) to the
+    as remote control devices like Apple IR or client API commands) to the
     key bindings listed in the user's (or the builtin) input.conf and turns
     them into items of type struct mp_cmd. These commands are queued, and read
     by playloop.c. They get pushed with run_command() to command.c.
 
-    Note that keyboard input and slave mode input are essentially the same
-    things. Just looking at input.conf should make this clear. (The other
-    direction of slave mode communication, mpv to application, consists of
-    random mp_msg() calls all over the code in all parts of the player.)
+    Note that keyboard input and commands used by the client API are the same.
+    The client API only uses the command parser though, and has its own queue
+    of input commands somewhere else.
 
 common/msg.h:
     All terminal output should go through mp_msg().
@@ -213,7 +213,7 @@ audio/out/:
 sub/:
     Contains subtitle and OSD rendering.
 
-    sub.c/.h is actually the OSD code. It queries dec_sub.c to retrieve
+    osd.c/.h is actually the OSD code. It queries dec_sub.c to retrieve
     decoded/rendered subtitles. osd_libass.c is the actual implementation of
     the OSD text renderer (which uses libass, and takes care of all the tricky
     fontconfig/freetype API usage and text layouting).
