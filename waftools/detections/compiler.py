@@ -17,7 +17,8 @@ def __test_and_add_flags__(ctx, flags):
     ctx.env.CFLAGS += ctx.env.CFLAGS_compiler
 
 def __add_generic_flags__(ctx):
-    ctx.env.CFLAGS += ["-D_ISOC99_SOURCE", "-D_GNU_SOURCE",
+    ctx.env.CFLAGS += ["-D_ISOC99_SOURCE", "-D_POSIX_C_SOURCE=200809L",
+                       "-D_BSD_SOURCE", "-D_XOPEN_SOURCE=700",
                        "-D_LARGEFILE_SOURCE", "-D_FILE_OFFSET_BITS=64",
                        "-D_LARGEFILE64_SOURCE",
                        "-std=c99", "-Wall"]
