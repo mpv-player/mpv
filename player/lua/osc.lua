@@ -920,12 +920,9 @@ function osc_init()
     local eventresponder = {}
 
     local contentF = function (ass)
-        local cache = mp.get_property_osd("cache")
-        if not (cache == nil) then
-            cache = tonumber(cache)
-            if (cache < 45) then
-                ass:append("Cache: " .. (math.floor(cache)) .."%")
-            end
+        local cache = mp.get_property_number("cache")
+        if not (cache == nil) and (cache < 45) then
+            ass:append("Cache: " .. (math.floor(cache)) .."%")
         end
     end
     register_button(posX, bottomrowY, 5, 110, 18, osc_styles.timecodes, contentF, eventresponder, metainfo)
