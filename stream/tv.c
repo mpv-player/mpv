@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/time.h>
 #include <assert.h>
 #include <libavutil/avstring.h>

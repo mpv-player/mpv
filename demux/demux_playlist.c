@@ -15,6 +15,8 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <strings.h>
+
 #include "common/common.h"
 #include "options/options.h"
 #include "common/msg.h"

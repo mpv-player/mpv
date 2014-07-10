@@ -40,6 +40,7 @@ known issues:
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>

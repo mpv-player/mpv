@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <errno.h>
+#include <strings.h>
 #include <assert.h>
 
 #include "config.h"

@@ -18,12 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// #include <stdio.h>
 #include <stdlib.h>
-// #include <unistd.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <string.h>
+#include <strings.h>
 #include <assert.h>
 
 #include "config.h"

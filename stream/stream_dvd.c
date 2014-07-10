@@ -23,6 +23,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <libgen.h>
 #include <errno.h>
 #include <stdint.h>

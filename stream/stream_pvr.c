@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/time.h>
 #include <errno.h>
 #include <sys/ioctl.h>

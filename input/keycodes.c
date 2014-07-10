@@ -18,6 +18,7 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <strings.h>
 
 #include "bstr/bstr.h"
 #include "common/common.h"

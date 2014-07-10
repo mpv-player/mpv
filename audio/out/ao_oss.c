@@ -33,6 +33,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <strings.h>
 
 #include "config.h"
 #include "options/options.h"
