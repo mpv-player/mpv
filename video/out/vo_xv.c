@@ -140,29 +140,29 @@ static int xv_find_atom(struct vo *vo, uint32_t xv_port, const char *name,
    then trigger it if it's ok so that the other values are at default upon query */
             if (atom != None) {
                 if (!strcmp(attributes[i].name, "XV_BRIGHTNESS") &&
-                    (!strcasecmp(name, "brightness")))
+                    (!strcmp(name, "brightness")))
                     break;
                 else if (!strcmp(attributes[i].name, "XV_CONTRAST") &&
-                         (!strcasecmp(name, "contrast")))
+                         (!strcmp(name, "contrast")))
                     break;
                 else if (!strcmp(attributes[i].name, "XV_SATURATION") &&
-                         (!strcasecmp(name, "saturation")))
+                         (!strcmp(name, "saturation")))
                     break;
                 else if (!strcmp(attributes[i].name, "XV_HUE") &&
-                         (!strcasecmp(name, "hue")))
+                         (!strcmp(name, "hue")))
                     break;
                 if (!strcmp(attributes[i].name, "XV_RED_INTENSITY") &&
-                    (!strcasecmp(name, "red_intensity")))
+                    (!strcmp(name, "red_intensity")))
                     break;
                 else if (!strcmp(attributes[i].name, "XV_GREEN_INTENSITY")
-                         && (!strcasecmp(name, "green_intensity")))
+                         && (!strcmp(name, "green_intensity")))
                     break;
                 else if (!strcmp(attributes[i].name, "XV_BLUE_INTENSITY")
-                         && (!strcasecmp(name, "blue_intensity")))
+                         && (!strcmp(name, "blue_intensity")))
                     break;
                 else if ((!strcmp(attributes[i].name, "XV_ITURBT_709") //NVIDIA
                           || !strcmp(attributes[i].name, "XV_COLORSPACE")) //ATI
-                         && (!strcasecmp(name, "bt_709")))
+                         && (!strcmp(name, "bt_709")))
                     break;
                 atom = None;
                 continue;

@@ -952,9 +952,9 @@ static int set_eq(struct vo *vo, const char *name, int value)
 {
     struct priv *vc = vo->priv;
 
-    if (!strcasecmp(name, "brightness"))
+    if (!strcmp(name, "brightness"))
         vc->brightness = value;
-    else if (!strcasecmp(name, "contrast"))
+    else if (!strcmp(name, "contrast"))
         vc->contrast = value;
     else
         return VO_NOTIMPL;
@@ -968,9 +968,9 @@ static int get_eq(struct vo *vo, const char *name, int *value)
 {
     struct priv *vc = vo->priv;
 
-    if (!strcasecmp(name, "brightness"))
+    if (!strcmp(name, "brightness"))
         *value = vc->brightness;
-    else if (!strcasecmp(name, "contrast"))
+    else if (!strcmp(name, "contrast"))
         *value = vc->contrast;
     else
         return VO_NOTIMPL;

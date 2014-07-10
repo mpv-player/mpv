@@ -442,13 +442,13 @@ static void draw_osd(struct vo *vo)
 
 static int get_displayattribtype(const char *name)
 {
-    if (!strcasecmp(name, "brightness"))
+    if (!strcmp(name, "brightness"))
         return VADisplayAttribBrightness;
-    else if (!strcasecmp(name, "contrast"))
+    else if (!strcmp(name, "contrast"))
         return VADisplayAttribContrast;
-    else if (!strcasecmp(name, "saturation"))
+    else if (!strcmp(name, "saturation"))
         return VADisplayAttribSaturation;
-    else if (!strcasecmp(name, "hue"))
+    else if (!strcmp(name, "hue"))
         return VADisplayAttribHue;
     return -1;
 }
