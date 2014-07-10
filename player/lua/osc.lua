@@ -920,11 +920,11 @@ function osc_init()
     local eventresponder = {}
 
     local contentF = function (ass)
-        local cache = mp.get_property("cache")
+        local cache = mp.get_property_osd("cache")
         if not (cache == nil) then
-            cache = tonumber(mp.get_property("cache"))
+            cache = tonumber(cache)
             if (cache < 45) then
-                ass:append("Cache: " .. (cache) .."%")
+                ass:append("Cache: " .. (math.floor(cache)) .."%")
             end
         end
     end
