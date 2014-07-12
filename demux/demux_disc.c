@@ -141,7 +141,7 @@ static void add_streams(demuxer_t *demuxer)
             double ar;
             if (stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
                                 == STREAM_OK)
-                src->video->aspect = ar;
+                sh->video->aspect = ar;
         }
         if (sh && src->audio)
             sh->audio = src->audio;
