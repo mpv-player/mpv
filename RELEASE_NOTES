@@ -11,6 +11,8 @@ Changes
 - Lower --auto-pause/resume defaults values to improve web streams playback.
 - Use dvdnav support instead of the internal dvd implementation for dvd:// URLs
   (the old implementation is available under dvdread://).
+- DVD (dvd://) tracks IDs now start from 0 instead of 1.
+- Play the longest track by default with dvd://.
 - Rename some options to make them more consistent. Here's a partial list of
   renamed options:
 
