@@ -28,7 +28,8 @@ Release procedure
 
 - Push branch and tag to GitHub.
 
-- Create a new GitHub release using the content of ``RELEASE_NOTES``.
+- Create a new GitHub release using the content of ``RELEASE_NOTES`` related to
+  the new version.
 
 Release notes template
 ----------------------
@@ -36,6 +37,9 @@ Release notes template
 Here is a template that can be used for writing the ``RELEASE_NOTES`` file.
 
 ```markdown
+Release 0.X.Y
+=============
+
 Changes
 -------
 
@@ -55,3 +59,11 @@ This listing is not complete. There are many more bug fixes and changes. The
 complete change log can be viewed by running ``git log <start>..<end>`` in
 the git repository.
 ```
+
+Note that the "Release 0.X.Y" title should be removed when creating a new GitHub
+release.
+
+When creating a new point release its changes should be added on top of the
+``RELEASE_NOTES`` file (with the appropriate title) so that all the changes in
+the current 0.X branch will be included. This way the ``RELEASE_NOTES`` file
+can be used by distributors as changelog for point releases too.
