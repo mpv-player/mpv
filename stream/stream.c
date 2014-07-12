@@ -388,6 +388,8 @@ static int stream_reconnect(stream_t *s)
         return 0;
     if (!s->seekable)
         return 0;
+    if (stream_check_interrupt(s))
+        return 0;
     int64_t pos = s->pos;
     int sleep_ms = 5;
     for (int retry = 0; retry < MAX_RECONNECT_RETRIES; retry++) {
