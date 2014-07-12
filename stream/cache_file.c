@@ -66,7 +66,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     if (s->pos >= p->size - BLOCK_SIZE) {
         int64_t new_size = -1;
         stream_control(s, STREAM_CTRL_GET_SIZE, &new_size);
-        if (new_size != p->size)
+        if (p->size >= 0 && new_size != p->size)
             set_bit(p, BLOCK_ALIGN(p->size), 0);
         p->size = MPMIN(p->max_size, new_size);
     }
@@ -94,7 +94,8 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     // align/limit to blocks
     max_len = MPMIN(max_len, BLOCK_SIZE - (s->pos % BLOCK_SIZE));
     // Limit to max. known file size
-    max_len = MPMIN(max_len, p->size - s->pos);
+    if (p->size >= 0)
+        max_len = MPMIN(max_len, p->size - s->pos);
     return fread(buffer, 1, max_len, p->cache_file);
 }
 
