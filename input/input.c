@@ -1450,6 +1450,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
         MP_ERR(ictx, "Can't open input config file %s.\n", file);
         goto done;
     }
+    stream_skip_bom(s);
     bstr data = stream_read_complete(s, tmp, 1000000);
     if (data.start) {
         MP_VERBOSE(ictx, "Parsing input config file %s\n", file);
