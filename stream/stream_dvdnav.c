@@ -364,7 +364,8 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
 
         int len = -1;
         int event = DVDNAV_NOP;
-        if (dvdnav_get_next_block(dvdnav, buf, &event, &len) != DVDNAV_STATUS_OK)
+        uint8_t *pkt = buf;
+        if (dvdnav_get_next_cache_block(dvdnav, &pkt, &event, &len) != DVDNAV_STATUS_OK)
         {
             MP_ERR(s, "Error getting next block from DVD %d (%s)\n",
                    event, dvdnav_err_to_string(dvdnav));
@@ -375,6 +376,8 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
             MP_VERBOSE(s, "DVDNAV: event %s (%d).\n", name, event);
             dvdnav_get_highlight(priv, 1);
         }
+        memmove(buf, pkt, len);
+        dvdnav_free_cache_block(dvdnav, pkt);
         switch (event) {
         case DVDNAV_BLOCK_OK:
             return len;
@@ -468,6 +471,7 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
             break;
         }
         }
+        dvdnav_free_cache_block(dvdnav, pkt);
     }
     return 0;
 }
