@@ -299,6 +299,8 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     add_streams(demuxer);
     add_stream_chapters(demuxer);
 
+    demux_control(p->slave, DEMUXER_CTRL_RESYNC, NULL);
+
     return 0;
 }
 
