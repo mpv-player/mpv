@@ -94,6 +94,10 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
         line_num++;
         line_pos = 0;
 
+        /* skip BOM */
+        if (strncmp(line, "\xEF\xBB\xBF", 3) == 0)
+            line_pos += 3;
+
         /* skip whitespaces */
         while (mp_isspace(line[line_pos]))
             ++line_pos;
