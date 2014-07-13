@@ -1,0 +1,83 @@
+def assert(name, &block)
+  @_tests ||= {}
+  @_tests[name] = block
+end
+
+def with_unbox(a, &block)
+  case [a.class]
+  when [M::Reply] then
+    a.unbox(&block)
+  else
+    yield(a)
+  end
+end
+
+def assert_equal(a, b)
+  raise "Expected #{a} to equal #{b}" unless with_unbox(a) {|v| v == b}
+end
+
+def assert_class(a, klass)
+  raise "Expected #{a} to be of class #{klass}" \
+    unless with_unbox(a) {|v| v.class == klass}
+end
+
+def assert_include(a, b)
+  raise "Expected:\n#{a}\nto include\n#{b}\n" unless a.include?(b)
+end
+
+def ok(s)
+  "\e[32m#{s}\e[0m"
+end
+
+def ko(s)
+  "\e[31m#{s}\e[0m"
+end
+
+def run
+  puts "\n\nRunning test suite..."
+  failed = false
+  @_tests.each do |name, block|
+    print name
+    begin
+      block.call
+      puts ok(" ~ ok")
+    rescue => e
+      puts ko(" ~ fail")
+      puts "\n"
+      puts e.inspect
+      puts "\n"
+      e.backtrace.map { |x| puts x }
+      failed = true
+      break
+    end
+  end
+  puts "\n done! All tests pass!\n\n" unless failed
+end
+
+assert ".property_list returns an array" do
+  assert_class(M.get_property('property-list').val, Array)
+end
+
+assert ".property_list contains options" do
+  assert_include(M.get_property('property-list'), "mute")
+end
+
+assert ".get_property returns proper values" do
+  assert_class(M.get_property("working-directory"),  String)
+  assert_class(M.get_property("volume"),    Float)
+  assert_class(M.get_property("osd-width"), Fixnum)
+  assert_class(M.get_property("vf"),        Array)
+  assert_include([true, false], M.get_property("mute").unbox!)
+end
+
+assert ".set_property works on complex types" do
+  assert_equal(M.get_property("vf"), [])
+  M.set_property("vf", [{ name: "crop", params: { w: "400", h: "400" }}])
+  assert_equal(M.get_property("vf"), [{
+    "name" => "crop",
+    "enabled" => true,
+    "params" => { "w" => "400", "h" => "400" }
+  }])
+end
+
+run

@@ -1,0 +1,27 @@
+M.puts.error "hello from mruby!"
+
+boxes = %w(mute mut).map {|p| M.get_property(p)}
+boxes.each do |box|
+  box.unbox do |value|
+    # only executed if no errors
+    M.puts.warn "got #{value}"
+  end
+end
+
+M.puts.warn M.find_config_file("config")
+
+# M.events.observe 'tick' do
+#   M.puts.error "tick"
+#   M.events.unobserve "tick"
+# end
+
+M.properties.observe 'mute' do |val|
+  M.puts.error "got mute notification mute = #{val.inspect}"
+end
+
+M.timers.add do |t|
+  t.cancel and next if t.executions > 2
+  M.puts.error "timer called!"
+end.every(2)
+
+M.commandv "seek", "30"

@@ -314,6 +314,10 @@ iconv support use --disable-iconv.",
         'desc' : 'Lua',
         'func': check_lua,
     }, {
+        'name' : '--mruby',
+        'desc' : 'mruby',
+        'func': check_cc(lib='mruby'),
+    }, {
         'name' : '--javascript',
         'desc' : 'Javascript (MuJS backend)',
         'func': check_pkg_config('mujs', '>= 1.0.0'),

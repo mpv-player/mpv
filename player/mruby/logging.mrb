@@ -1,0 +1,21 @@
+module M
+  class Logger
+    def initialize(suffix="")
+      @suffix = suffix
+    end
+
+    %w(fatal error warn info v debug).each do |level|
+      define_method(level) do |message|
+        M.log(level, [message.to_s, @suffix].join)
+      end
+    end
+  end
+
+  def self.msg
+    @_msg ||= Logger.new
+  end
+
+  def self.puts
+    @_puts ||= Logger.new("\n")
+  end
+end

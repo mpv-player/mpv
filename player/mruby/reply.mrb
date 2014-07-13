@@ -1,0 +1,37 @@
+module M
+  class ReplyError < StandardError; end
+  class Reply < Struct.new(:val, :status)
+    %w(b f i s).map{|type| "to_#{type}"}.map(&:intern).each do |method|
+      define_method(method) { unbox!.send(method) }
+    end
+
+    def unbox(default=nil, &block)
+      unbox!(&block)
+    rescue ReplyError
+      default
+    end
+
+    def unbox!(&block)
+      if success?
+        block_given? ? yield(val) : val
+      else
+        raise ReplyError, status
+      end
+    end
+
+    private :val
+
+    private
+    def success?
+      status == "success"
+    end
+
+    def method_missing(method, *args, &block)
+      if success? and val.respond_to?(method)
+        val.send(method, *args, &block)
+      else
+        super
+      end
+    end
+  end
+end

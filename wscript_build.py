@@ -101,9 +101,17 @@ def build(ctx):
 
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
                  "ytdl_hook.lua", "stats.lua"]
-
     for fn in lua_files:
         fn = "player/lua/" + fn
+        ctx(
+            features = "file2string",
+            source = fn,
+            target = os.path.splitext(fn)[0] + ".inc",
+        )
+
+    mruby_files = ['events.mrb', 'logging.mrb', 'reply.mrb']
+    for fn in mruby_files:
+        fn = "player/mruby/" + fn
         ctx(
             features = "file2string",
             source = fn,
@@ -294,6 +302,7 @@ def build(ctx):
         ( "player/lavfi.c" ),
         ( "player/lua.c",                        "lua" ),
         ( "player/javascript.c",                 "javascript" ),
+        ( "player/mruby.c",                      "mruby" ),
         ( "player/osd.c" ),
         ( "player/playloop.c" ),
         ( "player/screenshot.c" ),

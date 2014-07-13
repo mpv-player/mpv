@@ -1,0 +1,221 @@
+module M
+  class Event < Struct.new(:id, :type, :error, :data)
+    %w(shutdown property-change).each do |n|
+      mname = n.gsub('-', '_') + '?'
+      define_method(mname) do
+        type == n
+      end
+    end
+
+    def success?
+      error == "success"
+    end
+  end
+
+  class EventLoop
+    attr_reader :timers, :properties, :events
+
+    def initialize
+      @timers     = Timers.new
+      @properties = PropertyObservers.new
+      @events     = EventObservers.new
+    end
+
+    def run
+      loop do
+        timers.fire
+        wait_time = timers.wait_time || 1e20
+        event = M.wait_event(wait_time)
+        @properties.dispatch(event)
+        @events.dispatch(event)
+        break if event.shutdown?
+      end
+    end
+  end
+
+  class Timers
+    def initialize
+      @timers = []
+    end
+
+    def fire
+      @timers.each(&:fire)
+    end
+
+    def add(&block)
+      t = Timer.new(self, &block)
+      @timers.push(t)
+      t
+    end
+
+    def delete(t)
+      @timers.delete(t)
+    end
+
+    def wait_time
+      @timers.select(&:active?).map(&:wait_time).select{|t| t > 0}.min
+    end
+  end
+
+  class Timer
+    attr_accessor :executions
+
+    def initialize(timers, &block)
+      @timers = timers
+      @block  = block
+      @active = false
+      self.executions = 0
+    end
+
+    def fire
+      return unless active?
+      return if wait_time > 0
+
+      self.executions += 1
+      @block.call(self)
+      reschedule
+    end
+
+    def cancel
+      @active = false
+      @timers.delete(self)
+    end
+
+    def every(secs)
+      @interval = secs
+      once(secs)
+    end
+
+    def once(secs)
+      @expire_time = now + secs
+      @active = true
+    end
+
+    def wait_time
+      @expire_time - now
+    end
+
+    def active?
+      @active
+    end
+
+    private
+    def interval?
+      !! @interval
+    end
+
+    def reschedule
+      every(@interval) if interval?
+    end
+
+    def now
+      M.get_time
+    end
+  end
+
+  class Observers
+    def initialize
+      @observers = {}
+    end
+
+    def dispatch(event)
+      if handle?(event) and o = @observers[event_key(event)]
+        o.call(*observer_args(event))
+      end
+    end
+
+    def observe(k, &block)
+      id = get_key(k)
+      raw_observe(k, id).tap do |result|
+        if result.success?
+          @observers[id] = block
+        end
+      end
+    end
+
+    def unobserve(id)
+      raw_unobserve(id).tap do |result|
+        if result.success?
+          @observers.delete(id)
+        end
+      end
+    end
+
+    def handle?(event)
+      @observers.include?(event_key(event))
+    end
+  end
+
+  class EventObservers < Observers
+    def handle?(event)
+      super and event.id == 0
+    end
+
+    def observer_args(event)
+      []
+    end
+
+    def get_key(k)
+      k
+    end
+
+    def event_key(event)
+      event.type
+    end
+
+    def raw_observe(k, id)
+      M.request_event(k, true)
+    end
+
+    def raw_unobserve(k)
+      M.request_event(k, false)
+    end
+  end
+
+  class PropertyObservers < Observers
+    def get_key(k)
+      @_id ||= 1337
+      @_id += 1
+    end
+
+    def observer_args(event)
+      [ event.data['value'] ]
+    end
+
+    def event_key(event)
+      event.id
+    end
+
+    def handle?(event)
+      super and event.id > 0 and event.property_change?
+    end
+
+    def raw_observe(k, id)
+      M.observe_property_raw(id, k)
+    end
+
+    def raw_unobserve(id)
+      M.unobserve_property_raw(id)
+    end
+  end
+
+  def self.event_loop
+    @event_loop ||= EventLoop.new
+  end
+
+  def self.properties
+    event_loop.properties
+  end
+
+  def self.events
+    event_loop.events
+  end
+
+  def self.timers
+    event_loop.timers
+  end
+
+  def self.run
+    event_loop.run
+  end
+end
