@@ -1,3 +1,32 @@
+Release 0.4.1
+=============
+
+Bug fixes
+---------
+
+- Fix af_volume bug that caused negative ReplayGain values to increase volume
+  instead of decreasing it in some situations.
+- Actually use "weak" as --gapless-audio default value (as documented in the
+  0.4.0 release notes).
+- Fix cache resizing bug that caused seeking to not work anymore.
+- Escape all colons in the options descriptions in the zsh completion script.
+- Don't consume an extra argument with --ao/af and --vo/vf options in the zsh
+  completion script (as side effect, the completion now uses --opt=val instead
+  of --opt val).
+- Allow client applications to call mpv_terminate_destroy(NULL).
+- Make sure seeking bounds are within range with dvdnav://.
+- Check the length of the last title too with dvdnav://longest.
+- Properly flush buffers on DVD seek (this fixes some seeking problems when
+  playing DVDs).
+- Allow compilation without atomics (for compilers that don't support atomic
+  operations).
+- Disable ao_null latency emulation.
+- Restore ability to combine mouse buttons.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 0075f8e..b18c2d9`` in
+the git repository.
+
 Release 0.4.0
 =============
 
