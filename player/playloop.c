@@ -276,14 +276,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
 
     if (hr_seek)
         demuxer_amount -= hr_seek_offset;
-    int seekresult = demux_seek(mpctx->demuxer, demuxer_amount, demuxer_style);
-    if (seekresult == 0) {
-        if (need_reset) {
-            reinit_audio_chain(mpctx);
-            seek_reset(mpctx, !timeline_fallthrough, false);
-        }
-        return -1;
-    }
+    demux_seek(mpctx->demuxer, demuxer_amount, demuxer_style);
 
     // Seek external, extra files too:
     for (int t = 0; t < mpctx->num_tracks; t++) {
