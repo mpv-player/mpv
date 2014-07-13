@@ -285,6 +285,11 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     if (demuxer->stream->uncached_type == STREAMTYPE_CDDA)
         demux = "+rawaudio";
 
+    // Initialize the playback time. We need to read _some_ data to get the
+    // correct stream-layer time (at least with libdvdnav).
+    stream_peek(demuxer->stream, 1);
+    reset_pts(demuxer);
+
     p->slave = demux_open(demuxer->stream, demux, NULL, demuxer->global);
     if (!p->slave)
         return -1;
