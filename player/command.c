@@ -1845,7 +1845,6 @@ static int mp_property_colormatrix(void *ctx, struct m_property *prop,
     char *res = talloc_strdup(NULL, "");
     append_csp(&res, "*Requested", mp_csp_names, opts->requested_colorspace);
     append_csp(&res, "Video decoder", mp_csp_names, vd_csp.colorspace);
-    append_csp(&res, "Video output", mp_csp_names, vo_csp.colorspace);
     *(char **)arg = res;
     return M_PROPERTY_OK;
 }
@@ -1871,7 +1870,6 @@ static int mp_property_colormatrix_input_range(void *ctx, struct m_property *pro
     append_csp(&res, "*Requested", mp_csp_levels_names,
                opts->requested_input_range);
     append_csp(&res, "Video decoder", mp_csp_levels_names, vd_csp.colorlevels);
-    append_csp(&res, "Video output", mp_csp_levels_names, vo_csp.colorlevels);
     *(char **)arg = res;
     return M_PROPERTY_OK;
 }
@@ -2884,7 +2882,7 @@ static const struct property_osd_display {
     int seek_msg, seek_bar;
     // Free-form message (if NULL, osd_name or the property name is used)
     const char *msg;
-    // Extra free-from message (just for volume)
+    // Extra free-form message (just for volume)
     const char *extra_msg;
 } property_osd_display[] = {
     // general
