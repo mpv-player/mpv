@@ -443,7 +443,6 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
                 if (priv->title > 0 && tit != priv->title) {
                     priv->next_event |= 1 << MP_NAV_EVENT_EOF;;
                     MP_WARN(s, "Requested title not found\n");
-                    return 0;
                 }
             }
             if (priv->nav_enabled)
