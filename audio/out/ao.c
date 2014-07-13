@@ -31,7 +31,6 @@
 
 #include "options/options.h"
 #include "options/m_config.h"
-#include "osdep/timer.h"
 #include "common/msg.h"
 #include "common/common.h"
 #include "common/global.h"
@@ -313,22 +312,11 @@ void ao_resume(struct ao *ao)
         ao->api->resume(ao);
 }
 
-// Be careful with locking
-void ao_wait_drain(struct ao *ao)
-{
-    // This is probably not entirely accurate, but good enough.
-    mp_sleep_us(ao_get_delay(ao) * 1000000);
-    ao_reset(ao);
-}
-
 // Block until the current audio buffer has played completely.
 void ao_drain(struct ao *ao)
 {
-    if (ao->api->drain) {
+    if (ao->api->drain)
         ao->api->drain(ao);
-    } else {
-        ao_wait_drain(ao);
-    }
 }
 
 bool ao_eof_reached(struct ao *ao)

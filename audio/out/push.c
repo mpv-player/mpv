@@ -146,6 +146,10 @@ static void drain(struct ao *ao)
     struct ao_push_state *p = ao->api_priv;
 
     pthread_mutex_lock(&p->lock);
+    if (p->paused) {
+        pthread_mutex_unlock(&p->lock);
+        return;
+    }
     p->final_chunk = true;
     p->drain = true;
     wakeup_playthread(ao);
@@ -154,7 +158,8 @@ static void drain(struct ao *ao)
     pthread_mutex_unlock(&p->lock);
 
     if (!ao->driver->drain)
-        ao_wait_drain(ao);
+        mp_sleep_us(get_delay(ao) * 1000000);
+    reset(ao);
 }
 
 static int unlocked_get_space(struct ao *ao)

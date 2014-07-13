@@ -158,7 +158,6 @@ struct ao_driver {
 // These functions can be called by AOs.
 
 int ao_play_silence(struct ao *ao, int samples);
-void ao_wait_drain(struct ao *ao);
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us);
 struct pollfd;
 int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
