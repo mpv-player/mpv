@@ -598,6 +598,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
                 uninit |= mpctx->opts->fixed_vo && track ? 0 : INITIALIZED_VO;
             uninit_player(mpctx, uninit);
         } else if (type == STREAM_AUDIO) {
+            clear_audio_output_buffers(mpctx);
             uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
         } else if (type == STREAM_SUB) {
             uninit_player(mpctx, INITIALIZED_SUB);
