@@ -193,6 +193,14 @@ static void resume(struct ao *ao)
     ao->driver->resume(ao);
 }
 
+static void drain(struct ao *ao)
+{
+    struct ao_pull_state *p = ao->api_priv;
+    if (atomic_load(&p->state) == AO_STATE_PLAY)
+        mp_sleep_us(get_delay(ao) * 1000000);
+    reset(ao);
+}
+
 static void uninit(struct ao *ao)
 {
     ao->driver->uninit(ao);
@@ -212,6 +220,7 @@ const struct ao_driver ao_api_pull = {
     .init = init,
     .control = control,
     .uninit = uninit,
+    .drain = drain,
     .reset = reset,
     .get_space = get_space,
     .play = play,
