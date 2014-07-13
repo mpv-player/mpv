@@ -26,6 +26,7 @@
 
 #include "config.h"
 
+#include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
 #include "options/m_option.h"
@@ -223,22 +224,22 @@ static int vf_default_query_format(struct vf_instance *vf, unsigned int fmt)
     return vf_next_query_format(vf, fmt);
 }
 
-static void print_fmt(struct mp_log *log, int msglevel, struct mp_image_params *p)
+static void fmt_cat(char *b, size_t bs, struct mp_image_params *p)
 {
     if (p && p->imgfmt) {
-        mp_msg(log, msglevel, "%dx%d", p->w, p->h);
+        mp_snprintf_cat(b, bs, "%dx%d", p->w, p->h);
         if (p->w != p->d_w || p->h != p->d_h)
-            mp_msg(log, msglevel, "->%dx%d", p->d_w, p->d_h);
-        mp_msg(log, msglevel, " %s", mp_imgfmt_to_name(p->imgfmt));
-        mp_msg(log, msglevel, " %s/%s", mp_csp_names[p->colorspace],
-                   mp_csp_levels_names[p->colorlevels]);
-        mp_msg(log, msglevel, " CL=%d", (int)p->chroma_location);
+            mp_snprintf_cat(b, bs, "->%dx%d", p->d_w, p->d_h);
+        mp_snprintf_cat(b, bs, " %s", mp_imgfmt_to_name(p->imgfmt));
+        mp_snprintf_cat(b, bs, " %s/%s", mp_csp_names[p->colorspace],
+                        mp_csp_levels_names[p->colorlevels]);
+        mp_snprintf_cat(b, bs, " CL=%d", (int)p->chroma_location);
         if (p->outputlevels)
-            mp_msg(log, msglevel, " out=%s", mp_csp_levels_names[p->outputlevels]);
+            mp_snprintf_cat(b, bs, " out=%s", mp_csp_levels_names[p->outputlevels]);
         if (p->rotate)
-            mp_msg(log, msglevel, " rot=%d", p->rotate);
+            mp_snprintf_cat(b, bs, " rot=%d", p->rotate);
     } else {
-        mp_msg(log, msglevel, "???");
+        mp_snprintf_cat(b, bs, "???");
     }
 }
 
@@ -248,17 +249,20 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel,
     if (!mp_msg_test(c->log, msglevel))
         return;
 
-    mp_msg(c->log, msglevel, " [vd] ");
-    print_fmt(c->log, msglevel, &c->input_params);
-    mp_msg(c->log, msglevel, "\n");
+    char b[128] = {0};
+
+    fmt_cat(b, sizeof(b), &c->input_params);
+    mp_msg(c->log, msglevel, " [vd] %s\n", b);
+
     for (vf_instance_t *f = c->first; f; f = f->next) {
-        mp_msg(c->log, msglevel, " [%s] ", f->info->name);
-        print_fmt(c->log, msglevel, &f->fmt_out);
+        b[0] = '\0';
+        mp_snprintf_cat(b, sizeof(b), " [%s] ", f->info->name);
+        fmt_cat(b, sizeof(b), &f->fmt_out);
         if (f->autoinserted)
-            mp_msg(c->log, msglevel, " [a]");
+            mp_snprintf_cat(b, sizeof(b), " [a]");
         if (f == vf)
-            mp_msg(c->log, msglevel, "   <---");
-        mp_msg(c->log, msglevel, "\n");
+            mp_snprintf_cat(b, sizeof(b), "   <---");
+        mp_msg(c->log, msglevel, "%s\n", b);
     }
 }
 

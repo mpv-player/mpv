@@ -311,22 +311,22 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
 
     struct af_instance *af = s->first;
     while (af) {
-        MP_MSG(s, msg_level, "  [%s] ", af->info->name);
+        char b[128] = {0};
+        mp_snprintf_cat(b, sizeof(b), "  [%s] ", af->info->name);
         if (af->data) {
             char *info = mp_audio_config_to_str(af->data);
-            MP_MSG(s, msg_level, "%s", info);
+            mp_snprintf_cat(b, sizeof(b), "%s", info);
             talloc_free(info);
         }
         if (af == at)
-            MP_MSG(s, msg_level, " <-");
-        MP_MSG(s, msg_level, "\n");
+            mp_snprintf_cat(b, sizeof(b), " <-");
+        MP_MSG(s, msg_level, "%s\n", b);
 
         af = af->next;
     }
 
-    MP_MSG(s, msg_level, "  [ao] ");
     char *info = mp_audio_config_to_str(&s->output);
-    MP_MSG(s, msg_level, "%s\n", info);
+    MP_MSG(s, msg_level, "  [ao] %s\n", info);
     talloc_free(info);
 }
 

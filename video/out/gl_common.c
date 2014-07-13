@@ -41,6 +41,7 @@
 #include <assert.h>
 #include "talloc.h"
 #include "gl_common.h"
+#include "common/common.h"
 #include "options/options.h"
 #include "options/m_option.h"
 
@@ -120,11 +121,12 @@ static const struct feature features[] = {
 
 static void list_features(int set, struct mp_log *log, int msgl, bool invert)
 {
+    char b[128] = {0};
     for (const struct feature *f = &features[0]; f->id; f++) {
         if (invert == !(f->id & set))
-            mp_msg(log, msgl, " [%s]", f->name);
+            mp_snprintf_cat(b, sizeof(b), " [%s]", f->name);
     }
-    mp_msg(log, msgl, "\n");
+    mp_msg(log, msgl, "%s\n", b);
 }
 
 // This guesses if the current GL context is a suspected software renderer.

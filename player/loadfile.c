@@ -184,42 +184,41 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         mpctx->initialized_flags &= ~INITIALIZED_PLAYBACK;
 }
 
+#define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
+
 static void print_stream(struct MPContext *mpctx, struct track *t)
 {
     struct sh_stream *s = t->stream;
     const char *tname = "?";
     const char *selopt = "?";
     const char *langopt = "?";
-    const char *iid = NULL;
     switch (t->type) {
     case STREAM_VIDEO:
-        tname = "Video"; selopt = "vid"; langopt = NULL; iid = "VID";
+        tname = "Video"; selopt = "vid"; langopt = NULL;
         break;
     case STREAM_AUDIO:
-        tname = "Audio"; selopt = "aid"; langopt = "alang"; iid = "AID";
+        tname = "Audio"; selopt = "aid"; langopt = "alang";
         break;
     case STREAM_SUB:
-        tname = "Subs"; selopt = "sid"; langopt = "slang"; iid = "SID";
+        tname = "Subs"; selopt = "sid"; langopt = "slang";
         break;
     }
-    MP_INFO(mpctx, "[stream] %-5s %3s", tname, t->selected ? "(+)" : "");
-    MP_INFO(mpctx, " --%s=%d", selopt, t->user_tid);
+    char b[2048] = {0};
+    APPEND(b, "[stream] %-5s %3s", tname, t->selected ? "(+)" : "");
+    APPEND(b, " --%s=%d", selopt, t->user_tid);
     if (t->lang && langopt)
-        MP_INFO(mpctx, " --%s=%s", langopt, t->lang);
+        APPEND(b, " --%s=%s", langopt, t->lang);
     if (t->default_track)
-        MP_INFO(mpctx, " (*)");
+        APPEND(b, " (*)");
     if (t->attached_picture)
-        MP_INFO(mpctx, " [P]");
+        APPEND(b, " [P]");
     if (t->title)
-        MP_INFO(mpctx, " '%s'", t->title);
+        APPEND(b, " '%s'", t->title);
     const char *codec = s ? s->codec : NULL;
-    MP_INFO(mpctx, " (%s)", codec ? codec : "<unknown>");
+    APPEND(b, " (%s)", codec ? codec : "<unknown>");
     if (t->is_external)
-        MP_INFO(mpctx, " (external)");
-    MP_INFO(mpctx, "\n");
-    // legacy compatibility
-    if (!iid)
-        return;
+        APPEND(b, " (external)");
+    MP_INFO(mpctx, "%s\n", b);
 }
 
 static void print_file_properties(struct MPContext *mpctx)
@@ -228,14 +227,15 @@ static void print_file_properties(struct MPContext *mpctx)
     if (demuxer->num_editions > 1) {
         for (int n = 0; n < demuxer->num_editions; n++) {
             struct demux_edition *edition = &demuxer->editions[n];
-            MP_INFO(mpctx, "[edition] %3s --edition=%d",
-                    n == demuxer->edition ? "(+)" : "", n);
+            char b[128] = {0};
+            APPEND(b, "[edition] %3s --edition=%d",
+                   n == demuxer->edition ? "(+)" : "", n);
             char *name = mp_tags_get_str(edition->metadata, "title");
             if (name)
-                MP_INFO(mpctx, " '%s'", name);
+                APPEND(b, " '%s'", name);
             if (edition->default_edition)
-                MP_INFO(mpctx, " (*)");
-            MP_INFO(mpctx, "\n");
+                APPEND(b, " (*)");
+            MP_INFO(mpctx, "%s\n", b);
         }
     }
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
