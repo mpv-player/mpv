@@ -147,9 +147,18 @@ const m_option_t mp_opts[] = {
                       ({"no", 0})),
     OPT_INTRANGE("cache-pause-restart", stream_cache_unpause, 0, 0, 0x7fffffff),
 
+#if HAVE_DVDREAD || HAVE_DVDNAV
+    OPT_STRING("dvd-device", dvd_device, 0),
+    OPT_INT("dvd-speed", dvd_speed, 0),
+    OPT_INTRANGE("dvd-angle", dvd_angle, 0, 1, 99),
+#endif /* HAVE_DVDREAD */
     OPT_INTPAIR("chapter", chapterrange, 0),
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
                       ({"auto", -1})),
+#if HAVE_LIBBLURAY
+    OPT_STRING("bluray-device", bluray_device, 0),
+    OPT_INTRANGE("bluray-angle", bluray_angle, 0, 0, 999),
+#endif /* HAVE_LIBBLURAY */
 
     OPT_STRINGLIST("http-header-fields", network_http_header_fields, 0),
     OPT_STRING("user-agent", network_useragent, 0),
@@ -630,6 +639,8 @@ const struct MPOpts mp_default_opts = {
     .hwdec_codecs = "h264,vc1,wmv3",
 
     .index_mode = 1,
+
+    .dvd_angle = 1,
 
     .mf_fps = 1.0,
 };

@@ -114,6 +114,8 @@ struct priv {
     int stream_cache_idle;
     int stream_cache_fill;
     struct mp_tags *stream_metadata;
+    char *disc_name;
+    double start_pts;
 };
 
 enum {
@@ -169,6 +171,7 @@ static void cache_drop_contents(struct priv *s)
 {
     s->offset = s->min_filepos = s->max_filepos = s->read_filepos;
     s->eof = false;
+    s->start_pts = MP_NOPTS_VALUE;
 }
 
 // Copy at most dst_size from the cache at the given absolute file position pos.
@@ -268,6 +271,14 @@ static bool cache_fill(struct priv *s)
     len = stream_read_partial(s->stream, &s->buffer[pos], space);
     pthread_mutex_lock(&s->mutex);
 
+    // Do this after reading a block, because at least libdvdnav updates the
+    // stream position only after actually reading something after a seek.
+    if (s->start_pts == MP_NOPTS_VALUE) {
+        double pts;
+        if (stream_control(s->stream, STREAM_CTRL_GET_CURRENT_TIME, &pts) > 0)
+            s->start_pts = pts;
+    }
+
     s->max_filepos += len;
     if (pos + len == s->buffer_size)
         s->offset += s->buffer_size; // wrap...
@@ -345,6 +356,7 @@ static void update_cached_controls(struct priv *s)
     int64_t i64;
     double d;
     struct mp_tags *tags;
+    char *t;
     s->stream_time_length = 0;
     if (stream_control(s->stream, STREAM_CTRL_GET_TIME_LENGTH, &d) == STREAM_OK)
         s->stream_time_length = d;
@@ -354,6 +366,11 @@ static void update_cached_controls(struct priv *s)
     if (stream_control(s->stream, STREAM_CTRL_GET_METADATA, &tags) == STREAM_OK) {
         talloc_free(s->stream_metadata);
         s->stream_metadata = talloc_steal(s, tags);
+    }
+    if (stream_control(s->stream, STREAM_CTRL_GET_DISC_NAME, &t) == STREAM_OK)
+    {
+        talloc_free(s->disc_name);
+        s->disc_name = talloc_steal(s, t);
     }
     s->stream_size = -1;
     if (stream_control(s->stream, STREAM_CTRL_GET_SIZE, &i64) == STREAM_OK)
@@ -385,6 +402,12 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
     case STREAM_CTRL_GET_NUM_CHAPTERS:
         *(unsigned int *)arg = s->stream_num_chapters;
         return STREAM_OK;
+    case STREAM_CTRL_GET_CURRENT_TIME: {
+        if (s->start_pts == MP_NOPTS_VALUE)
+            return STREAM_UNSUPPORTED;
+        *(double *)arg = s->start_pts;
+        return STREAM_OK;
+    }
     case STREAM_CTRL_GET_METADATA: {
         if (s->stream_metadata) {
             ta_set_parent(s->stream_metadata, NULL);
@@ -393,6 +416,12 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
             return STREAM_OK;
         }
         return STREAM_UNSUPPORTED;
+    }
+    case STREAM_CTRL_GET_DISC_NAME: {
+        if (!s->disc_name)
+            return STREAM_UNSUPPORTED;
+        *(char **)arg = talloc_strdup(NULL, s->disc_name);
+        return STREAM_OK;
     }
     case STREAM_CTRL_RESUME_CACHE:
         s->idle = s->eof = false;
@@ -406,6 +435,7 @@ static bool control_needs_flush(int stream_ctrl)
 {
     switch (stream_ctrl) {
     case STREAM_CTRL_SEEK_TO_TIME:
+    case STREAM_CTRL_SET_ANGLE:
     case STREAM_CTRL_SET_CURRENT_TITLE:
         return true;
     }

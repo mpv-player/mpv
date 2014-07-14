@@ -1224,6 +1224,8 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->stop_play = AT_END_OF_FILE;
     }
 
+    mp_handle_nav(mpctx);
+
     if (!mpctx->stop_play && !mpctx->restart_playback) {
 
         // If no more video is available, one frame means one playloop iteration.

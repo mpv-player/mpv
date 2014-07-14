@@ -232,6 +232,13 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
         name = demux_info_get(mpctx->master_demuxer, "title");
         if (name && name[0])
             return m_property_strdup_ro(action, arg, name);
+        struct stream *stream = mpctx->master_demuxer->stream;
+        if (stream_control(stream, STREAM_CTRL_GET_DISC_NAME, &name) > 0
+                && name) {
+            int r = m_property_strdup_ro(action, arg, name);
+            talloc_free(name);
+            return r;
+        }
     }
     return mp_property_filename(ctx, prop, action, arg);
 }
@@ -476,6 +483,48 @@ static int mp_property_playback_time(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     return property_time(action, arg, get_playback_time(mpctx));
+}
+
+/// Current BD/DVD title (RW)
+static int mp_property_disc_title(void *ctx, struct m_property *prop,
+                                  int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer || !demuxer->stream)
+        return M_PROPERTY_UNAVAILABLE;
+    struct stream *stream = demuxer->stream;
+    unsigned int title = -1;
+    switch (action) {
+    case M_PROPERTY_GET:
+        if (stream_control(stream, STREAM_CTRL_GET_CURRENT_TITLE, &title) <= 0)
+            return M_PROPERTY_UNAVAILABLE;
+        *(int*)arg = title;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){
+            .type = CONF_TYPE_INT,
+            .flags = M_OPT_MIN,
+            .min = -1,
+        };
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+        title = *(int*)arg;
+        if (stream_control(stream, STREAM_CTRL_SET_CURRENT_TITLE, &title) <= 0)
+            return M_PROPERTY_NOT_IMPLEMENTED;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_disc_menu(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int state = mp_nav_in_menu(mpctx);
+    if (state < 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_flag_ro(action, arg, !!state);
 }
 
 /// Current chapter (RW)
@@ -757,6 +806,19 @@ static int mp_property_quvi_format(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+/// Number of titles in BD/DVD
+static int mp_property_disc_titles(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    unsigned int num_titles;
+    if (!demuxer || stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_TITLES,
+                                   &num_titles) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(action, arg, num_titles);
+}
+
 /// Number of chapters in file
 static int mp_property_chapters(void *ctx, struct m_property *prop,
                                 int action, void *arg)
@@ -778,6 +840,69 @@ static int mp_property_editions(void *ctx, struct m_property *prop,
     if (demuxer->num_editions <= 0)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(action, arg, demuxer->num_editions);
+}
+
+/// Current dvd angle (RW)
+static int mp_property_angle(void *ctx, struct m_property *prop,
+                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int ris, angles = -1, angle = 1;
+
+    ris = stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_ANGLES, &angles);
+    if (ris == STREAM_UNSUPPORTED)
+        return M_PROPERTY_UNAVAILABLE;
+
+    ris = stream_control(demuxer->stream, STREAM_CTRL_GET_ANGLE, &angle);
+    if (ris == STREAM_UNSUPPORTED)
+        return -1;
+
+    if (angle < 0 || angles <= 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(int *) arg = angle;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+        *(char **) arg = talloc_asprintf(NULL, "%d/%d", angle, angles);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET:
+        angle = *(int *)arg;
+        if (angle < 0 || angle > angles)
+            return M_PROPERTY_ERROR;
+        demux_flush(demuxer);
+
+        ris = stream_control(demuxer->stream, STREAM_CTRL_SET_ANGLE, &angle);
+        if (ris != STREAM_OK)
+            return M_PROPERTY_ERROR;
+
+        demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
+
+        if (mpctx->d_video)
+            video_reset_decoding(mpctx->d_video);
+
+        if (mpctx->d_audio)
+            audio_reset_decoding(mpctx->d_audio);
+
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE: {
+        struct m_option opt = {
+            .type = CONF_TYPE_INT,
+            .flags = CONF_RANGE,
+            .min = 1,
+            .max = angles,
+        };
+        *(struct m_option *)arg = opt;
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static int get_tag_entry(int item, int action, void *arg, void *ctx)
@@ -2525,11 +2650,15 @@ static const struct m_property mp_properties[] = {
     {"time-remaining", mp_property_remaining},
     {"playtime-remaining", mp_property_playtime_remaining},
     {"playback-time", mp_property_playback_time},
+    {"disc-title", mp_property_disc_title},
+    {"disc-menu-active", mp_property_disc_menu},
     {"chapter", mp_property_chapter},
     {"edition", mp_property_edition},
     {"quvi-format", mp_property_quvi_format},
+    {"disc-titles", mp_property_disc_titles},
     {"chapters", mp_property_chapters},
     {"editions", mp_property_editions},
+    {"angle", mp_property_angle},
     {"metadata", mp_property_metadata},
     {"chapter-metadata", mp_property_chapter_metadata},
     {"vf-metadata", mp_property_vf_metadata},
@@ -3649,6 +3778,10 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_DISABLE_INPUT_SECTION:
         mp_input_disable_section(mpctx->input, cmd->args[0].v.s);
+        break;
+
+    case MP_CMD_DISCNAV:
+        mp_nav_user_input(mpctx, cmd->args[0].v.s);
         break;
 
     case MP_CMD_VO_CMDLINE:

@@ -1050,6 +1050,9 @@ static void play_current_file(struct MPContext *mpctx)
         goto terminate_playback;
     }
 
+    // Must be called before enabling cache.
+    mp_nav_init(mpctx);
+
     int res = stream_enable_cache(&mpctx->stream, &opts->stream_cache);
     if (res == 0)
         if (demux_was_interrupted(mpctx))
@@ -1058,6 +1061,8 @@ static void play_current_file(struct MPContext *mpctx)
     stream_set_capture_file(mpctx->stream, opts->stream_capture);
 
 goto_reopen_demuxer: ;
+
+    mp_nav_reset(mpctx);
 
     //============ Open DEMUXERS --- DETECT file type =======================
 
@@ -1265,6 +1270,8 @@ goto_reopen_demuxer: ;
     }
 
 terminate_playback:
+
+    mp_nav_destroy(mpctx);
 
     if (mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;

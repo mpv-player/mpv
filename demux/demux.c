@@ -52,12 +52,14 @@ extern const demuxer_desc_t demuxer_desc_lavf;
 extern const demuxer_desc_t demuxer_desc_libass;
 extern const demuxer_desc_t demuxer_desc_subreader;
 extern const demuxer_desc_t demuxer_desc_playlist;
+extern const demuxer_desc_t demuxer_desc_disc;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
  * libraries and demuxers requiring binary support. */
 
 const demuxer_desc_t *const demuxer_list[] = {
+    &demuxer_desc_disc,
     &demuxer_desc_edl,
     &demuxer_desc_cue,
     &demuxer_desc_rawaudio,
