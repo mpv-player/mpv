@@ -107,6 +107,7 @@ typedef struct lavf_priv {
     int num_streams;
     int cur_program;
     char *mime_type;
+    bool merge_track_metadata;
 } lavf_priv_t;
 
 struct format_hack {
@@ -603,10 +604,11 @@ static void add_new_streams(demuxer_t *demuxer)
 static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
 {
 #if HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA
+    lavf_priv_t *priv = demuxer->priv;
     int md_size;
     const uint8_t *md;
     md = av_packet_get_side_data(pkt, AV_PKT_DATA_METADATA_UPDATE, &md_size);
-    if (md) {
+    if (md && priv->merge_track_metadata) {
         AVDictionary *dict = NULL;
         av_packet_unpack_dictionary(md, md_size, &dict);
         if (dict) {
@@ -748,6 +750,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     // Often useful with OGG audio-only files, which have metadata in the audio
     // track metadata instead of the main metadata.
     if (demuxer->num_streams == 1) {
+        priv->merge_track_metadata = true;
         for (int n = 0; n < priv->num_streams; n++) {
             if (priv->streams[n])
                 mp_tags_copy_from_av_dictionary(demuxer->metadata, avfc->streams[n]->metadata);
