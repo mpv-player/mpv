@@ -350,7 +350,6 @@ typedef struct MPContext {
     struct screenshot_ctx *screenshot_ctx;
     struct command_ctx *command_ctx;
     struct encode_lavc_context *encode_lavc_ctx;
-    struct mp_nav_state *nav_state;
 } MPContext;
 
 // audio.c
@@ -370,14 +369,6 @@ void mp_load_playback_resume(struct MPContext *mpctx, const char *file);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
 struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
                                                 struct playlist *playlist);
-
-// discnav.c
-void mp_nav_init(struct MPContext *mpctx);
-void mp_nav_reset(struct MPContext *mpctx);
-void mp_nav_destroy(struct MPContext *mpctx);
-void mp_nav_user_input(struct MPContext *mpctx, char *command);
-void mp_handle_nav(struct MPContext *mpctx);
-int mp_nav_in_menu(struct MPContext *mpctx);
 
 // loadfile.c
 void uninit_player(struct MPContext *mpctx, unsigned int mask);

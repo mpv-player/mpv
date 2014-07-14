@@ -173,7 +173,6 @@ void mp_load_auto_profiles(struct MPContext *mpctx)
 static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
                                                     const char *fname)
 {
-    struct MPOpts *opts = global->opts;
     char *res = NULL;
     void *tmp = talloc_new(NULL);
     const char *realpath = fname;
@@ -184,11 +183,6 @@ static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
             goto exit;
         realpath = mp_path_join(tmp, bstr0(cwd), bstr0(fname));
     }
-    if (bstr_startswith0(bfname, "dvd://"))
-        realpath = talloc_asprintf(tmp, "%s - %s", realpath, opts->dvd_device);
-    if (bstr_startswith0(bfname, "br://") || bstr_startswith0(bfname, "bd://") ||
-        bstr_startswith0(bfname, "bluray://"))
-        realpath = talloc_asprintf(tmp, "%s - %s", realpath, opts->bluray_device);
     uint8_t md5[16];
     av_md5_sum(md5, realpath, strlen(realpath));
     char *conf = talloc_strdup(tmp, "");

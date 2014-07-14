@@ -112,10 +112,6 @@ double get_start_time(struct MPContext *mpctx)
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return 0;
-    // We reload the demuxer on menu transitions; don't make it use the first
-    // timestamp it finds as start PTS.
-    if (mpctx->nav_state)
-        return 0;
     return demuxer->start_time;
 }
 

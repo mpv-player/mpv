@@ -179,9 +179,6 @@ options_state_machine() {
     opt_yes_no _libquvi4    "libquvi 0.4.x"
     opt_yes_no _libquvi9    "libquvi 0.9.x"
     opt_yes_no _lcms2       "LCMS2 support"
-    opt_yes_no _bluray      "Blu-ray support"
-    opt_yes_no _dvdread     "libdvdread"
-    opt_yes_no _dvdnav      "libdvdnav"
     opt_yes_no _enca        "ENCA charset oracle library"
     opt_yes_no _libass      "subtitle rendering with libass"
     opt_yes_no _libpostproc "postprocess filter (vf_pp)"
@@ -730,12 +727,6 @@ check_pkg_config "OpenAL" $_openal OPENAL 'openal >= 1.13'
 
 check_pkg_config "ALSA audio" $_alsa ALSA 'alsa >= 1.0.9'
 
-check_pkg_config "Blu-ray support" $_bluray LIBBLURAY 'libbluray >= 0.2.1'
-
-check_pkg_config "dvdread" $_dvdread DVDREAD 'dvdread >= 4.1.0'
-
-check_pkg_config "dvdnav" $_dvdnav DVDNAV 'dvdnav >= 4.2.0'
-
 check_pkg_config "libcdio" $_libcdio CDDA 'libcdio_paranoia'
 
 _oldass=$_libass
@@ -961,7 +952,6 @@ cat > $TMPC << EOF
 #define HAVE_SDL1 0
 
 #define DEFAULT_CDROM_DEVICE "/dev/cdrom"
-#define DEFAULT_DVD_DEVICE   "/dev/dvd"
 #define PATH_DEV_DSP "/dev/dsp"
 #define PATH_DEV_MIXER "/dev/mixer"
 

@@ -281,19 +281,6 @@ If you really mean to compile without libass support use --disable-libass."
         'desc' : 'lirc',
         'func': check_cc(header_name='lirc/lirc_client.h', lib='lirc_client'),
     }, {
-        'name': '--libbluray',
-        'desc': 'Bluray support',
-        'func': check_pkg_config('libbluray', '>= 0.3.0'),
-    }, {
-        'name': '--dvdread',
-        'desc': 'dvdread support',
-        'func': check_pkg_config('dvdread', '>= 4.1.0'),
-    }, {
-        'name': '--dvdnav',
-        'desc': 'dvdnav support',
-        'deps': [ 'dvdread' ],
-        'func': check_pkg_config('dvdnav', '>= 4.2.0'),
-    }, {
         'name': '--cdda',
         'desc': 'cdda support (libcdio)',
         'func': check_pkg_config('libcdio_paranoia'),
