@@ -21,6 +21,7 @@
 
 #include <OpenGL/OpenGL.h>
 #include "cocoa_common.h"
+#include "osdep/macosx_versions.h"
 #include "gl_common.h"
 
 struct cgl_context {
@@ -57,8 +58,12 @@ static bool create_gl_context(struct MPGLContext *ctx)
 
     CGLOpenGLProfile gl_vers_map[] = {
         [2] = kCGLOGLPVersion_Legacy,
+        #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
         [3] = kCGLOGLPVersion_GL3_Core,
         [4] = kCGLOGLPVersion_GL4_Core,
+        #else
+        [3] = kCGLOGLPVersion_3_2_Core,
+        #endif
     };
 
     int gl_major = MPGL_VER_GET_MAJOR(ctx->requested_gl_version);
