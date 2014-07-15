@@ -15,10 +15,10 @@ def is_user_lib(objfile, libname):
     return not sys_re.match(libname) and \
            not usr_re.match(libname) and \
            not exe_re.match(libname) and \
-           not "libobjc" in libname and \
-           not "libSystem" in libname and \
-           not "libc" in libname and \
-           not "libgcc" in libname and \
+           not "libobjc." in libname and \
+           not "libSystem." in libname and \
+           not "libc." in libname and \
+           not "libgcc." in libname and \
            not os.path.basename(objfile) in libname
 
 def otool(objfile):
