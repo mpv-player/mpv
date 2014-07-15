@@ -424,8 +424,10 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
         s->old_dwidth  = width;
         s->old_dheight = height;
 
-        if (!(flags & VOFLAG_HIDDEN) && !s->window) {
+        if (!(flags & VOFLAG_HIDDEN) && !s->window)
             create_window(vo, &geo.win, geo.flags);
+
+        if (s->window) {
             if (reset_size)
                 [s->window queueNewVideoSize:NSMakeSize(width, height)];
             cocoa_set_window_title(vo, vo_get_window_title(vo));
