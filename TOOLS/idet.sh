@@ -30,7 +30,7 @@ esac
 testfun()
 {
     $ILDETECT_MPV "$@" \
-        --vf=lavfi="[idet]" --msg-level ffmpeg=v \
+        --vf-add=lavfi="[idet]" --msg-level ffmpeg=v \
         --o= --vo=null --no-audio --untimed \
         $ILDETECT_MPVFLAGS \
         | { if [ -n "$ILDETECT_QUIET" ]; then cat; else tee /dev/stderr; fi } \
@@ -87,7 +87,7 @@ judge()
     echo "$verdict"
 }
 
-judge "$@"
+judge --vf-clr "$@"
 case "$verdict" in
     progressive)
         [ -n "$ILDETECT_DRY_RUN" ] || \
@@ -98,7 +98,7 @@ case "$verdict" in
         exit 0
         ;;
     interlaced-tff)
-        judge "$@" --vf-pre=pullup --field-dominance=top
+        judge "$@" --vf-clr --vf-pre=pullup --field-dominance=top
         case "$verdict" in
             progressive)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
@@ -117,7 +117,7 @@ case "$verdict" in
         esac
         ;;
     interlaced-bff)
-        judge "$@" --vf-pre=pullup --field-dominance=bottom
+        judge "$@" --vf-clr --vf-pre=pullup --field-dominance=bottom
         case "$verdict" in
             progressive)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
@@ -136,7 +136,7 @@ case "$verdict" in
         esac
         ;;
     interlaced)
-        judge "$@" --vf-pre=pullup
+        judge "$@" --vf-clr --vf-pre=pullup
         case "$verdict" in
             progressive)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
