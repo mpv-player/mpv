@@ -71,7 +71,7 @@ static void select_format(struct ao *ao, AVCodec *codec)
     {
         int fmt = af_from_avformat(*sampleformat);
         if (!fmt) {
-            MP_WARN(ao, "unsupported lavc format %s",
+            MP_WARN(ao, "unsupported lavc format %s\n",
                     av_get_sample_fmt_name(*sampleformat));
             continue;
         }
