@@ -780,7 +780,7 @@ OPTIONS
 
 ``--demuxer-thread=<yes|no>``
     Run the demuxer in a separate thread, and let it prefetch a certain amount
-    of packets (default: yes).
+    of packets (default: no).
 
 ``--demuxer-readahead-packets=N``
     If ``--demuxer-thread`` is enabled, this controls how much the demuxer
