@@ -343,7 +343,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     double pts = ectx->last_audio_in_pts;
     pts += ectx->samples_since_last_pts / (double)ao->samplerate;
-    ectx->samples_since_last_pts += samples;
 
     size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
 
@@ -451,6 +450,10 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     }
 
     talloc_free(tempdata);
+
+    int taken = FFMIN(bufpos, orig_samples);
+    ectx->samples_since_last_pts += taken;
+
     pthread_mutex_unlock(&ectx->lock);
 
     if (flags & AOPLAY_FINAL_CHUNK) {
@@ -463,7 +466,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         }
     }
 
-    return FFMIN(bufpos, orig_samples);
+    return taken;
 }
 
 static void drain(struct ao *ao)

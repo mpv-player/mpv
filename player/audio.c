@@ -264,7 +264,7 @@ static int write_to_ao(struct MPContext *mpctx, struct mp_audio *data, int flags
     ao_get_format(ao, &out_format);
     mpctx->ao_pts = pts;
 #if HAVE_ENCODING
-    encode_lavc_set_audio_pts(mpctx->encode_lavc_ctx, mpctx->ao_pts);
+    encode_lavc_set_audio_pts(mpctx->encode_lavc_ctx, playing_audio_pts(mpctx));
 #endif
     if (data->samples == 0)
         return 0;
