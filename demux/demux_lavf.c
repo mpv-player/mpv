@@ -502,7 +502,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
 #if HAVE_AV_DISPLAYMATRIX
         uint8_t *sd = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, NULL);
         if (sd)
-            sh_video->rotate = av_display_rotation_get((uint32_t *)sd);
+            sh_video->rotate = -av_display_rotation_get((uint32_t *)sd);
 #else
         AVDictionaryEntry *rot = av_dict_get(st->metadata, "rotate", NULL, 0);
         if (rot && rot->value) {
