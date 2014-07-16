@@ -87,7 +87,7 @@ judge()
     echo "$verdict"
 }
 
-judge --vf-clr "$@"
+judge "$@" --vf-clr
 case "$verdict" in
     progressive)
         [ -n "$ILDETECT_DRY_RUN" ] || \
