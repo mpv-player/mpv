@@ -778,6 +778,24 @@ OPTIONS
 ``--demuxer-rawvideo-size=<value>``
     Frame size in bytes when using ``--demuxer=rawvideo``.
 
+``--demuxer-thread=<yes|no>``
+    Run the demuxer in a separate thread, and let it prefetch a certain amount
+    of packets (default: yes).
+
+``--demuxer-readahead-packets=N``
+    If ``--demuxer-thread`` is enabled, this controls how much the demuxer
+    should buffer ahead. If the number of packets in the packet queue exceeds
+    ``--demuxer-readahead-packets``, or the total number of bytes exceeds
+    ``--demuxer-readahead-bytes``, the thread stops reading ahead.
+
+    Note that if you set these options near the maximum, you might get a
+    packet queue overflow warning.
+
+    See ``--list-options`` for defaults and value range.
+
+``--demuxer-readahead-bytes=N``
+    See ``--demuxer-readahead-packets``.
+
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To

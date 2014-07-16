@@ -448,10 +448,9 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     if (len > 0 && !demuxer->ts_resets_possible) {
         ans = MPCLAMP((pos - start) / len, 0, 1);
     } else {
-        struct stream *s = demuxer->stream;
         int64_t size;
-        if (stream_control(s, STREAM_CTRL_GET_SIZE, &size) > 0 && size > 0) {
-            if (demuxer->filepos >= 0)
+        if (demux_stream_control(demuxer, STREAM_CTRL_GET_SIZE, &size) > 0) {
+            if (size > 0 && demuxer->filepos >= 0)
                 ans = MPCLAMP(demuxer->filepos / (double)size, 0, 1);
         }
     }
@@ -613,22 +612,13 @@ static bool handle_osd_redraw(struct MPContext *mpctx)
     return true;
 }
 
-static void handle_metadata_update(struct MPContext *mpctx)
-{
-    if (mp_time_sec() > mpctx->last_metadata_update + 2) {
-        if (demux_info_update(mpctx->demuxer))
-            mp_notify(mpctx, MPV_EVENT_METADATA_UPDATE, NULL);
-        mpctx->last_metadata_update = mp_time_sec();
-    }
-}
-
 static void handle_pause_on_low_cache(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (!mpctx->stream)
+    if (!mpctx->demuxer)
         return;
     int64_t fill = -1;
-    stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &fill);
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &fill);
     int cache_kb = fill > 0 ? (fill + 1023) / 1024 : -1;
     bool idle = mp_get_cache_idle(mpctx);
     if (mpctx->paused && mpctx->paused_for_cache) {
@@ -927,9 +917,7 @@ void run_playloop(struct MPContext *mpctx)
     }
 #endif
 
-    // Add tracks that were added by the demuxer later (e.g. MPEG)
-    if (!mpctx->timeline && mpctx->demuxer)
-        add_demuxer_tracks(mpctx, mpctx->demuxer);
+    update_demuxer_properties(mpctx);
 
     if (mpctx->timeline) {
         double end = mpctx->timeline[mpctx->timeline_part + 1].start;
@@ -1270,8 +1258,6 @@ void run_playloop(struct MPContext *mpctx)
             MP_STATS(mpctx, "end sleep");
         }
     }
-
-    handle_metadata_update(mpctx);
 
     handle_pause_on_low_cache(mpctx);
 

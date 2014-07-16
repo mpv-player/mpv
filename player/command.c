@@ -205,11 +205,11 @@ static int mp_property_file_size(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->stream)
+    if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
     int64_t size;
-    if (stream_control(mpctx->stream, STREAM_CTRL_GET_SIZE, &size) != STREAM_OK)
+    if (demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_SIZE, &size) < 1)
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_PRINT) {
@@ -232,13 +232,6 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
         name = demux_info_get(mpctx->master_demuxer, "title");
         if (name && name[0])
             return m_property_strdup_ro(action, arg, name);
-        struct stream *stream = mpctx->master_demuxer->stream;
-        if (stream_control(stream, STREAM_CTRL_GET_DISC_NAME, &name) > 0
-                && name) {
-            int r = m_property_strdup_ro(action, arg, name);
-            talloc_free(name);
-            return r;
-        }
     }
     return mp_property_filename(ctx, prop, action, arg);
 }
@@ -247,7 +240,8 @@ static int mp_property_stream_path(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct stream *stream = mpctx->stream;
+    // demuxer->stream as well as stream->url are immutable -> ok to access
+    struct stream *stream = mpctx->demuxer ? mpctx->demuxer->stream : NULL;
     if (!stream || !stream->url)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_strdup_ro(action, arg, stream->url);
@@ -257,12 +251,14 @@ static int mp_property_stream_capture(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->stream)
+    if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
         char *filename = *(char **)arg;
-        stream_set_capture_file(mpctx->stream, filename);
+        demux_pause(mpctx->demuxer);
+        stream_set_capture_file(mpctx->demuxer->stream, filename);
+        demux_unpause(mpctx->demuxer);
         // fall through to mp_property_generic_option
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -284,14 +280,19 @@ static int mp_property_stream_pos(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct stream *stream = mpctx->stream;
-    if (!stream)
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
+    demux_pause(demuxer);
+    int r;
     if (action == M_PROPERTY_SET) {
-        stream_seek(stream, *(int64_t *) arg);
-        return M_PROPERTY_OK;
+        stream_seek(demuxer->stream, *(int64_t *) arg);
+        r = M_PROPERTY_OK;
+    } else {
+        r = m_property_int64_ro(action, arg, stream_tell(demuxer->stream));
     }
-    return m_property_int64_ro(action, arg, stream_tell(stream));
+    demux_unpause(demuxer);
+    return r;
 }
 
 /// Stream end offset (RO)
@@ -490,14 +491,13 @@ static int mp_property_disc_title(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
-    if (!demuxer || !demuxer->stream)
+    struct demuxer *d = mpctx->master_demuxer;
+    if (!d)
         return M_PROPERTY_UNAVAILABLE;
-    struct stream *stream = demuxer->stream;
     unsigned int title = -1;
     switch (action) {
     case M_PROPERTY_GET:
-        if (stream_control(stream, STREAM_CTRL_GET_CURRENT_TITLE, &title) <= 0)
+        if (demux_stream_control(d, STREAM_CTRL_GET_CURRENT_TITLE, &title) < 0)
             return M_PROPERTY_UNAVAILABLE;
         *(int*)arg = title;
         return M_PROPERTY_OK;
@@ -510,7 +510,7 @@ static int mp_property_disc_title(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         title = *(int*)arg;
-        if (stream_control(stream, STREAM_CTRL_SET_CURRENT_TITLE, &title) <= 0)
+        if (demux_stream_control(d, STREAM_CTRL_SET_CURRENT_TITLE, &title) < 0)
             return M_PROPERTY_NOT_IMPLEMENTED;
         return M_PROPERTY_OK;
     }
@@ -813,8 +813,8 @@ static int mp_property_disc_titles(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct demuxer *demuxer = mpctx->master_demuxer;
     unsigned int num_titles;
-    if (!demuxer || stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_TITLES,
-                                   &num_titles) < 1)
+    if (!demuxer || demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
+                                         &num_titles) < 1)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(action, arg, num_titles);
 }
@@ -853,11 +853,11 @@ static int mp_property_angle(void *ctx, struct m_property *prop,
 
     int ris, angles = -1, angle = 1;
 
-    ris = stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_ANGLES, &angles);
+    ris = demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_ANGLES, &angles);
     if (ris == STREAM_UNSUPPORTED)
         return M_PROPERTY_UNAVAILABLE;
 
-    ris = stream_control(demuxer->stream, STREAM_CTRL_GET_ANGLE, &angle);
+    ris = demux_stream_control(demuxer, STREAM_CTRL_GET_ANGLE, &angle);
     if (ris == STREAM_UNSUPPORTED)
         return -1;
 
@@ -878,7 +878,7 @@ static int mp_property_angle(void *ctx, struct m_property *prop,
             return M_PROPERTY_ERROR;
         demux_flush(demuxer);
 
-        ris = stream_control(demuxer->stream, STREAM_CTRL_SET_ANGLE, &angle);
+        ris = demux_stream_control(demuxer, STREAM_CTRL_SET_ANGLE, &angle);
         if (ris != STREAM_OK)
             return M_PROPERTY_ERROR;
 
@@ -1111,13 +1111,14 @@ static int mp_property_cache_size(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->stream)
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
     case M_PROPERTY_PRINT: {
         int64_t size = -1;
-        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_SIZE, &size);
+        demux_stream_control(demuxer, STREAM_CTRL_GET_CACHE_SIZE, &size);
         if (size <= 0)
             break;
         return property_int_kb_size(size / 1024, action, arg);
@@ -1131,7 +1132,7 @@ static int mp_property_cache_size(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     case M_PROPERTY_SET: {
         int64_t size = *(int *)arg * 1024LL;
-        int r = stream_control(mpctx->stream, STREAM_CTRL_SET_CACHE_SIZE, &size);
+        int r = demux_stream_control(demuxer, STREAM_CTRL_SET_CACHE_SIZE, &size);
         if (r == STREAM_UNSUPPORTED)
             break;
         if (r == STREAM_OK)
@@ -1146,11 +1147,11 @@ static int mp_property_cache_used(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->stream)
+    if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
     int64_t size = -1;
-    stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size);
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &size);
     if (size < 0)
         return M_PROPERTY_UNAVAILABLE;
     return property_int_kb_size(size / 1024, action, arg);
@@ -1160,16 +1161,16 @@ static int mp_property_cache_free(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->stream)
+    if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
     int64_t size_used = -1;
-    stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_FILL, &size_used);
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &size_used);
     if (size_used < 0)
         return M_PROPERTY_UNAVAILABLE;
 
     int64_t size = -1;
-    stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_SIZE, &size);
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_SIZE, &size);
     if (size <= 0)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -2308,22 +2309,11 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
     return property_osd_helper(mpctx, prop, action, arg);
 }
 
-static int demux_stream_control(struct MPContext *mpctx, int ctrl, void *arg)
-{
-    int r = STREAM_UNSUPPORTED;
-    if (mpctx->stream)
-        r = stream_control(mpctx->stream, ctrl, arg);
-    if (r == STREAM_UNSUPPORTED && mpctx->demuxer) {
-        struct demux_ctrl_stream_ctrl c = {ctrl, arg, STREAM_UNSUPPORTED};
-        demux_control(mpctx->demuxer, DEMUXER_CTRL_STREAM_CTRL, &c);
-        r = c.res;
-    }
-    return r;
-}
-
 static int prop_stream_ctrl(struct MPContext *mpctx, int ctrl, void *arg)
 {
-    int r = demux_stream_control(mpctx, ctrl, arg);
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+    int r = demux_stream_control(mpctx->demuxer, ctrl, arg);
     switch (r) {
     case STREAM_OK: return M_PROPERTY_OK;
     case STREAM_UNSUPPORTED: return M_PROPERTY_UNAVAILABLE;
@@ -3703,7 +3693,8 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_LAST_CHANNEL: {
-        demux_stream_control(mpctx, STREAM_CTRL_TV_LAST_CHAN, NULL);
+        if (mpctx->demuxer)
+            demux_stream_control(mpctx->demuxer, STREAM_CTRL_TV_LAST_CHAN, NULL);
         break;
     }
 

@@ -591,6 +591,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
     }
 
     select_tracks(demuxer, i);
+    demux_changed(demuxer, DEMUX_EVENT_STREAMS);
 }
 
 // Add any new streams that might have been added
@@ -615,7 +616,7 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
             mp_tags_clear(demuxer->metadata);
             mp_tags_copy_from_av_dictionary(demuxer->metadata, dict);
             av_dict_free(&dict);
-            demuxer->events |= DEMUX_EVENT_METADATA;
+            demux_changed(demuxer, DEMUX_EVENT_METADATA);
         }
     }
 #endif

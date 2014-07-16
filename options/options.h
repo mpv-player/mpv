@@ -183,6 +183,9 @@ typedef struct MPOpts {
 
     char **audio_files;
     char *demuxer_name;
+    int demuxer_thread;
+    int demuxer_min_packs;
+    int demuxer_min_bytes;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
     int mkv_subtitle_preroll;

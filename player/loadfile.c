@@ -221,10 +221,15 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     MP_INFO(mpctx, "%s\n", b);
 }
 
-static void print_file_properties(struct MPContext *mpctx)
+void update_demuxer_properties(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->master_demuxer;
-    if (demuxer->num_editions > 1) {
+    if (!demuxer)
+        return;
+    demux_update(demuxer);
+    int events = demuxer->events;
+    demuxer->events = 0;
+    if ((events & DEMUX_EVENT_INIT) && demuxer->num_editions > 1) {
         for (int n = 0; n < demuxer->num_editions; n++) {
             struct demux_edition *edition = &demuxer->editions[n];
             char b[128] = {0};
@@ -238,10 +243,20 @@ static void print_file_properties(struct MPContext *mpctx)
             MP_INFO(mpctx, "%s\n", b);
         }
     }
-    for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
-        for (int n = 0; n < mpctx->num_tracks; n++)
-            if (mpctx->tracks[n]->type == t)
-                print_stream(mpctx, mpctx->tracks[n]);
+    if (events & DEMUX_EVENT_STREAMS) {
+        add_demuxer_tracks(mpctx, demuxer);
+        for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
+            for (int n = 0; n < mpctx->num_tracks; n++)
+                if (mpctx->tracks[n]->type == t)
+                    print_stream(mpctx, mpctx->tracks[n]);
+        }
+    }
+    struct mp_tags *info = demuxer->metadata;
+    if ((events & DEMUX_EVENT_METADATA) && info->num_keys) {
+        MP_INFO(mpctx, "File tags:\n");
+        for (int n = 0; n < info->num_keys; n++)
+            MP_INFO(mpctx, " %s: %s\n", info->keys[n], info->values[n]);
+        mp_notify(mpctx, MPV_EVENT_METADATA_UPDATE, NULL);
     }
 }
 
@@ -311,6 +326,11 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts->fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts->gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB | INITIALIZED_SUB2);
     mpctx->stop_play = orig_stop_play;
 
+    if (mpctx->demuxer) {
+        demux_stop_thread(mpctx->demuxer);
+        demux_flush(mpctx->demuxer);
+    }
+
     mpctx->demuxer = n->source;
     mpctx->stream = mpctx->demuxer->stream;
 
@@ -332,6 +352,9 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
         }
     }
     reselect_demux_streams(mpctx);
+
+    if (mpctx->demuxer && mpctx->opts->demuxer_thread)
+        demux_start_thread(mpctx->demuxer);
 
     return true;
 }
@@ -364,6 +387,7 @@ static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
 }
 
 static struct track *add_stream_track(struct MPContext *mpctx,
+                                      struct demuxer *demuxer,
                                       struct sh_stream *stream,
                                       bool under_timeline)
 {
@@ -383,7 +407,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         .attached_picture = stream->attached_picture != NULL,
         .lang = stream->lang,
         .under_timeline = under_timeline,
-        .demuxer = stream->demuxer,
+        .demuxer = demuxer,
         .stream = stream,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
@@ -398,7 +422,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
 {
     for (int n = 0; n < demuxer->num_streams; n++)
-        add_stream_track(mpctx, demuxer->streams[n], !!mpctx->timeline);
+        add_stream_track(mpctx, demuxer, demuxer->streams[n], !!mpctx->timeline);
 }
 
 // Result numerically higher => better match. 0 == no match.
@@ -651,9 +675,11 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
         void *tmp = talloc_new(NULL);
         char *base_filename = mpctx->filename;
         char *stream_filename = NULL;
-        if (stream_control(mpctx->stream, STREAM_CTRL_GET_BASE_FILENAME,
-                           &stream_filename) > 0)
-            base_filename = talloc_steal(tmp, stream_filename);
+        if (mpctx->demuxer) {
+            if (demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_BASE_FILENAME,
+                                     &stream_filename) > 0)
+                base_filename = talloc_steal(tmp, stream_filename);
+        }
         struct subfn *list = find_text_subtitles(mpctx->global, base_filename);
         talloc_steal(tmp, list);
         for (int i = 0; list && list[i].fname; i++) {
@@ -703,7 +729,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     for (int n = 0; n < demuxer->num_streams; n++) {
         struct sh_stream *sh = demuxer->streams[n];
         if (sh->type == filter) {
-            struct track *t = add_stream_track(mpctx, sh, false);
+            struct track *t = add_stream_track(mpctx, demuxer, sh, false);
             t->is_external = true;
             t->title = talloc_strdup(t, disp_filename);
             t->external_filename = talloc_strdup(t, filename);
@@ -1160,15 +1186,17 @@ goto_reopen_demuxer: ;
     }
     reselect_demux_streams(mpctx);
 
+    update_demuxer_properties(mpctx);
+
+    if (mpctx->demuxer && opts->demuxer_thread)
+        demux_start_thread(mpctx->demuxer);
+
     if (mpctx->current_track[0][STREAM_VIDEO] &&
         mpctx->current_track[0][STREAM_VIDEO]->attached_picture)
     {
         MP_INFO(mpctx,
             "Displaying attached picture. Use --no-audio-display to prevent this.\n");
     }
-
-    demux_info_update(mpctx->master_demuxer);
-    print_file_properties(mpctx);
 
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_VIDEO])
@@ -1189,11 +1217,11 @@ goto_reopen_demuxer: ;
     //==================== START PLAYING =======================
 
     if (!mpctx->d_video && !mpctx->d_audio) {
-        struct stream *s = mpctx->stream;
+        struct demuxer *d = mpctx->demuxer;
         MP_FATAL(mpctx, "No video or audio streams selected.\n");
-        if (s->uncached_type == STREAMTYPE_DVB) {
+        if (d->stream->uncached_type == STREAMTYPE_DVB) {
             int dir = mpctx->last_dvb_step;
-            if (stream_control(s, STREAM_CTRL_DVB_STEP_CHANNEL, &dir) > 0)
+            if (demux_stream_control(d, STREAM_CTRL_DVB_STEP_CHANNEL, &dir) > 0)
                 mpctx->stop_play = PT_RELOAD_DEMUXER;
         }
         goto terminate_playback;

@@ -26,6 +26,7 @@
 #include "common/common.h"
 #include "input/input.h"
 
+#include "demux/demux.h"
 #include "stream/discnav.h"
 
 #include "sub/dec_sub.h"
@@ -90,6 +91,18 @@ int mp_nav_in_menu(struct MPContext *mpctx)
     return mpctx->nav_state ? mpctx->nav_state->nav_menu : -1;
 }
 
+// If a demuxer is accessing the stream, we have to use demux_stream_control()
+// to avoid synchronization issues; otherwise access it directly.
+static int run_stream_control(struct MPContext *mpctx, int cmd, void *arg)
+{
+    if (mpctx->demuxer) {
+        return demux_stream_control(mpctx->demuxer, cmd, arg);
+    } else if (mpctx->stream) {
+        return stream_control(mpctx->stream, cmd, arg);
+    }
+    return STREAM_ERROR;
+}
+
 // Allocate state and enable navigation features. Must happen before
 // initializing cache, because the cache would read data. Since stream_dvdnav is
 // in a mode which skips all transitions on reading data (before enabling
@@ -103,7 +116,7 @@ void mp_nav_init(struct MPContext *mpctx)
         return;
 
     struct mp_nav_cmd inp = {MP_NAV_CMD_ENABLE};
-    if (stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp) < 1)
+    if (run_stream_control(mpctx, STREAM_CTRL_NAV_CMD, &inp) < 1)
         return;
 
     mpctx->nav_state = talloc_zero(NULL, struct mp_nav_state);
@@ -125,14 +138,14 @@ void mp_nav_reset(struct MPContext *mpctx)
     if (!nav)
         return;
     struct mp_nav_cmd inp = {MP_NAV_CMD_RESUME};
-    stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+    run_stream_control(mpctx, STREAM_CTRL_NAV_CMD, &inp);
     osd_set_nav_highlight(mpctx->osd, NULL);
     nav->hi_visible = 0;
     nav->nav_menu = false;
     nav->nav_draining = false;
     nav->nav_still_frame = 0;
     mp_input_disable_section(mpctx->input, "discnav-menu");
-    stream_control(mpctx->stream, STREAM_CTRL_RESUME_CACHE, NULL);
+    run_stream_control(mpctx, STREAM_CTRL_RESUME_CACHE, NULL);
     update_state(mpctx);
 }
 
@@ -164,11 +177,11 @@ void mp_nav_user_input(struct MPContext *mpctx, char *command)
         osd_coords_to_video(mpctx->osd, vid.w, vid.h, &x, &y);
         inp.u.mouse_pos.x = x;
         inp.u.mouse_pos.y = y;
-        stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+        run_stream_control(mpctx, STREAM_CTRL_NAV_CMD, &inp);
     } else {
         struct mp_nav_cmd inp = {MP_NAV_CMD_MENU};
         inp.u.menu.action = command;
-        stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+        run_stream_control(mpctx, STREAM_CTRL_NAV_CMD, &inp);
     }
 }
 
@@ -179,7 +192,7 @@ void mp_handle_nav(struct MPContext *mpctx)
         return;
     while (1) {
         struct mp_nav_event *ev = NULL;
-        stream_control(mpctx->stream, STREAM_CTRL_GET_NAV_EVENT, &ev);
+        run_stream_control(mpctx, STREAM_CTRL_GET_NAV_EVENT, &ev);
         if (!ev)
             break;
         switch (ev->event) {
@@ -261,15 +274,15 @@ void mp_handle_nav(struct MPContext *mpctx)
             nav->nav_still_frame = -2;
         } else if (nav->nav_still_frame == -2) {
             struct mp_nav_cmd inp = {MP_NAV_CMD_SKIP_STILL};
-            stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+            run_stream_control(mpctx, STREAM_CTRL_NAV_CMD, &inp);
         }
     }
     if (nav->nav_draining && mpctx->stop_play == AT_END_OF_FILE) {
         MP_VERBOSE(nav, "execute drain\n");
         struct mp_nav_cmd inp = {MP_NAV_CMD_DRAIN_OK};
-        stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+        run_stream_control(mpctx, STREAM_CTRL_NAV_CMD, &inp);
         nav->nav_draining = false;
-        stream_control(mpctx->stream, STREAM_CTRL_RESUME_CACHE, NULL);
+        run_stream_control(mpctx, STREAM_CTRL_RESUME_CACHE, NULL);
     }
     // E.g. keep displaying still frames
     if (mpctx->stop_play == AT_END_OF_FILE && !nav->nav_eof)

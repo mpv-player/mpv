@@ -292,7 +292,6 @@ typedef struct MPContext {
     double audio_delay;
 
     double last_heartbeat;
-    double last_metadata_update;
     double last_idle_tick;
 
     double mouse_timer;
@@ -401,6 +400,7 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
                                     bool force);
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
+void update_demuxer_properties(struct MPContext *mpctx);
 
 // main.c
 int mpv_main(int argc, char *argv[]);

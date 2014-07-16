@@ -205,6 +205,8 @@ static int d_fill_buffer(demuxer_t *demuxer)
     if (!pkt)
         return 0;
 
+    demux_update(p->slave);
+
     if (p->seek_reinit)
         reset_pts(demuxer);
 
@@ -285,6 +287,13 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     if (demuxer->stream->uncached_type == STREAMTYPE_CDDA)
         demux = "+rawaudio";
 
+    char *t = NULL;
+    stream_control(demuxer->stream, STREAM_CTRL_GET_DISC_NAME, &t);
+    if (t) {
+        mp_tags_set_bstr(demuxer->metadata, bstr0("TITLE"), bstr0(t));
+        talloc_free(t);
+    }
+
     // Initialize the playback time. We need to read _some_ data to get the
     // correct stream-layer time (at least with libdvdnav).
     stream_peek(demuxer->stream, 1);
@@ -295,7 +304,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
         return -1;
 
     // So that we don't miss initial packets of delayed subtitle streams.
-    p->slave->stream_select_default = true;
+    demux_set_stream_autoselect(p->slave, true);
 
     // Can be seekable even if the stream isn't.
     demuxer->seekable = true;

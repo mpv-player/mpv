@@ -110,11 +110,7 @@ struct priv {
     // Cached STREAM_CTRLs
     double stream_time_length;
     int64_t stream_size;
-    unsigned int stream_num_chapters;
-    int stream_cache_idle;
-    int stream_cache_fill;
     struct mp_tags *stream_metadata;
-    char *disc_name;
     double start_pts;
 };
 
@@ -352,25 +348,15 @@ static int resize_cache(struct priv *s, int64_t size)
 
 static void update_cached_controls(struct priv *s)
 {
-    unsigned int ui;
     int64_t i64;
     double d;
     struct mp_tags *tags;
-    char *t;
     s->stream_time_length = 0;
     if (stream_control(s->stream, STREAM_CTRL_GET_TIME_LENGTH, &d) == STREAM_OK)
         s->stream_time_length = d;
-    s->stream_num_chapters = 0;
-    if (stream_control(s->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &ui) == STREAM_OK)
-        s->stream_num_chapters = ui;
     if (stream_control(s->stream, STREAM_CTRL_GET_METADATA, &tags) == STREAM_OK) {
         talloc_free(s->stream_metadata);
         s->stream_metadata = talloc_steal(s, tags);
-    }
-    if (stream_control(s->stream, STREAM_CTRL_GET_DISC_NAME, &t) == STREAM_OK)
-    {
-        talloc_free(s->disc_name);
-        s->disc_name = talloc_steal(s, t);
     }
     s->stream_size = -1;
     if (stream_control(s->stream, STREAM_CTRL_GET_SIZE, &i64) == STREAM_OK)
@@ -399,9 +385,6 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
             return STREAM_UNSUPPORTED;
         *(int64_t *)arg = s->stream_size;
         return STREAM_OK;
-    case STREAM_CTRL_GET_NUM_CHAPTERS:
-        *(unsigned int *)arg = s->stream_num_chapters;
-        return STREAM_OK;
     case STREAM_CTRL_GET_CURRENT_TIME: {
         if (s->start_pts == MP_NOPTS_VALUE)
             return STREAM_UNSUPPORTED;
@@ -416,12 +399,6 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
             return STREAM_OK;
         }
         return STREAM_UNSUPPORTED;
-    }
-    case STREAM_CTRL_GET_DISC_NAME: {
-        if (!s->disc_name)
-            return STREAM_UNSUPPORTED;
-        *(char **)arg = talloc_strdup(NULL, s->disc_name);
-        return STREAM_OK;
     }
     case STREAM_CTRL_RESUME_CACHE:
         s->idle = s->eof = false;

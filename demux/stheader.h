@@ -31,7 +31,6 @@ struct demuxer;
 
 struct sh_stream {
     enum stream_type type;
-    struct demuxer *demuxer;
     // Index into demuxer->streams.
     int index;
     // Demuxer/format specific ID. Corresponds to the stream IDs as encoded in
