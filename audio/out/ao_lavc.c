@@ -342,7 +342,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     }
 
     double pts = ectx->last_audio_in_pts;
-    pts += ectx->samples_since_last_pts / ao->samplerate;
+    pts += ectx->samples_since_last_pts / (double)ao->samplerate;
     ectx->samples_since_last_pts += samples;
 
     size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
