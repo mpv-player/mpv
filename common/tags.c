@@ -61,6 +61,19 @@ void mp_tags_clear(struct mp_tags *tags)
     talloc_free_children(tags);
 }
 
+struct mp_tags *mp_tags_dup(void *tparent, struct mp_tags *tags)
+{
+    struct mp_tags *new = talloc_zero(tparent, struct mp_tags);
+    MP_RESIZE_ARRAY(new, new->keys,   tags->num_keys);
+    MP_RESIZE_ARRAY(new, new->values, tags->num_keys);
+    new->num_keys = tags->num_keys;
+    for (int n = 0; n < tags->num_keys; n++) {
+        new->keys[n] = talloc_strdup(new, tags->keys[n]);
+        new->values[n] = talloc_strdup(new, tags->values[n]);
+    }
+    return new;
+}
+
 void mp_tags_merge(struct mp_tags *tags, struct mp_tags *src)
 {
     for (int n = 0; n < src->num_keys; n++)
