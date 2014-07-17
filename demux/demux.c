@@ -297,7 +297,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 
     MP_DBG(in, "append packet to %s: size=%d pts=%f dts=%f pos=%"PRIi64" "
            "[num=%zd size=%zd]\n", stream_type_name(stream->type),
-           dp->len, dp->pts, dp->pts, dp->pos, ds->packs, ds->bytes);
+           dp->len, dp->pts, dp->dts, dp->pos, ds->packs, ds->bytes);
 
     if (ds->in->wakeup_cb)
         ds->in->wakeup_cb(ds->in->wakeup_cb_ctx);
