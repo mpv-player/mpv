@@ -16,6 +16,7 @@
  */
 
 #include <string.h>
+#include <math.h>
 #include <assert.h>
 
 #include "common/common.h"
@@ -37,14 +38,17 @@ struct priv {
     // might add the streams only later.
     struct sh_stream *dvd_subs[32];
     // Used to rewrite the raw MPEG timestamps to playback time.
-    struct {
-        double base_time;   // playback display start time of current segment
-        double base_dts;    // packet DTS that maps to base_time
-        double last_dts;    // DTS of previously demuxed packet
-    } pts[STREAM_TYPE_COUNT];
+    double base_time;   // playback display start time of current segment
+    double base_dts;    // packet DTS that maps to base_time
+    double last_dts;    // DTS of previously demuxed packet
     double seek_pts;
     bool seek_reinit;   // needs reinit after seek
 };
+
+// If the timestamp difference between subsequent packets is this big, assume
+// a reset. It should be big enough to account for 1. low video framerates and
+// large audio frames, and 2. bad interleaving.
+#define DTS_RESET_THRESHOLD 5.0
 
 static void reselect_streams(demuxer_t *demuxer)
 {
@@ -189,11 +193,8 @@ static void reset_pts(demuxer_t *demuxer)
 
     MP_VERBOSE(demuxer, "reset to time: %f\n", base);
 
-    for (int n = 0; n < STREAM_TYPE_COUNT; n++) {
-        p->pts[n].base_dts = p->pts[n].last_dts = MP_NOPTS_VALUE;
-        p->pts[n].base_time = base;
-    }
-
+    p->base_dts = p->last_dts = MP_NOPTS_VALUE;
+    p->base_time = base;
     p->seek_reinit = false;
 }
 
@@ -222,32 +223,30 @@ static int d_fill_buffer(demuxer_t *demuxer)
         return 1;
     }
 
-    int t = sh->type;
-
-    // Subtitle timestamps are not continuous, so the heuristic below can't be
-    // applied. Instead, use the video stream as reference.
-    if (t == STREAM_SUB)
-        t = STREAM_VIDEO;
-
     MP_TRACE(demuxer, "ipts: %d %f %f\n", sh->type, pkt->pts, pkt->dts);
 
     if (sh->type == STREAM_SUB) {
-        if (p->pts[t].base_dts == MP_NOPTS_VALUE)
-            MP_WARN(demuxer, "subtitle packet along PTS reset, report a bug\n");
+        if (p->base_dts == MP_NOPTS_VALUE)
+            MP_WARN(demuxer, "subtitle packet along PTS reset\n");
     } else if (pkt->dts != MP_NOPTS_VALUE) {
-        if (p->pts[t].base_dts == MP_NOPTS_VALUE)
-            p->pts[t].base_dts = p->pts[t].last_dts = pkt->dts;
+        // Use the very first DTS to rebase the start time of the MPEG stream
+        // to the playback time.
+        if (p->base_dts == MP_NOPTS_VALUE)
+            p->base_dts = pkt->dts;
 
-        if (pkt->dts < p->pts[t].last_dts || pkt->dts > p->pts[t].last_dts + 0.5)
-        {
-            MP_VERBOSE(demuxer, "PTS discontinuity on stream %d\n", sh->type);
-            p->pts[t].base_time += p->pts[t].last_dts - p->pts[t].base_dts;
-            p->pts[t].base_dts = p->pts[t].last_dts = pkt->dts - pkt->duration;
+        if (p->last_dts == MP_NOPTS_VALUE)
+            p->last_dts = pkt->dts;
+
+        if (fabs(p->last_dts - pkt->dts) >= DTS_RESET_THRESHOLD) {
+            MP_WARN(demuxer, "PTS discontinuity: %f->%f\n", p->last_dts, pkt->dts);
+            p->base_time += p->last_dts - p->base_dts;
+            p->base_dts = pkt->dts - pkt->duration;
         }
-        p->pts[t].last_dts = pkt->dts;
+        p->last_dts = pkt->dts;
     }
-    if (p->pts[t].base_dts != MP_NOPTS_VALUE) {
-        double delta = -p->pts[t].base_dts + p->pts[t].base_time;
+
+    if (p->base_dts != MP_NOPTS_VALUE) {
+        double delta = -p->base_dts + p->base_time;
         if (pkt->pts != MP_NOPTS_VALUE)
             pkt->pts += delta;
         if (pkt->dts != MP_NOPTS_VALUE)
