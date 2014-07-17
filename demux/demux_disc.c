@@ -352,5 +352,4 @@ const demuxer_desc_t demuxer_desc_disc = {
     .close = d_close,
     .seek = d_seek,
     .control = d_control,
-    .type = DEMUXER_TYPE_DISC,
 };

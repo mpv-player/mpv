@@ -46,7 +46,6 @@ enum demuxer_type {
     DEMUXER_TYPE_MATROSKA,
     DEMUXER_TYPE_EDL,
     DEMUXER_TYPE_CUE,
-    DEMUXER_TYPE_DISC,
 };
 
 // DEMUXER control commands/answers
@@ -60,7 +59,6 @@ enum demux_ctrl {
     DEMUXER_CTRL_RESYNC,
     DEMUXER_CTRL_IDENTIFY_PROGRAM,
     DEMUXER_CTRL_STREAM_CTRL,
-    DEMUXER_CTRL_STREAM_AUTOSELECT,
 };
 
 struct demux_ctrl_stream_ctrl {
