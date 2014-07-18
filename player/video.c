@@ -299,9 +299,7 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
 }
 
 // Read a packet, store decoded image into d_video->waiting_decoded_mpi
-// Return 0 if EOF was reached (though the decoder still can have frames buffered)
-// Return 1 if a packet was read (i.e. progress made)
-// Return 3 if the demuxer will wake us up once a new packet is available.
+// returns VD_* code
 static int decode_image(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
@@ -309,12 +307,12 @@ static int decode_image(struct MPContext *mpctx)
     if (d_video->header->attached_picture) {
         d_video->waiting_decoded_mpi =
                     video_decode(d_video, d_video->header->attached_picture, 0);
-        return 0;
+        return VD_EOF;
     }
 
     struct demux_packet *pkt;
     if (demux_read_packet_async(d_video->header, &pkt) == 0)
-        return 3;
+        return VD_WAIT;
     if (pkt && pkt->pts != MP_NOPTS_VALUE)
         pkt->pts += mpctx->video_offset;
     if ((pkt && pkt->pts >= mpctx->hrseek_pts - .005) ||
@@ -330,7 +328,7 @@ static int decode_image(struct MPContext *mpctx)
     bool had_packet = !!pkt;
     talloc_free(pkt);
 
-    return had_packet ? 1 : 0;
+    return had_packet ? VD_PROGRESS : VD_EOF;
 }
 
 
@@ -349,20 +347,20 @@ static void init_filter_params(struct MPContext *mpctx)
 }
 
 // Make sure at least 1 filtered image is available.
-// Returns: -1: error, 0: EOF, 1: ok or progress was made, 3: ok but wait
-// A return value of 1 doesn't necessarily output a frame, but makes the promise
-// that calling this function again will eventually do something.
+// returns VD_* code
+// A return value of VD_PROGRESS doesn't necessarily output a frame, but makes
+// the promise that calling this function again will eventually do something.
 static int video_decode_and_filter(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
     struct vf_chain *vf = d_video->vfilter;
 
     if (vf->initialized < 0)
-        return -1;
+        return VD_ERROR;
 
     // There is already a filtered frame available.
     if (vf_output_frame(vf, false) > 0)
-        return 1;
+        return VD_PROGRESS;
 
     // Decoder output is different from filter input?
     bool need_vf_reconfig = !vf->input_params.imgfmt || vf->initialized < 1 ||
@@ -372,26 +370,26 @@ static int video_decode_and_filter(struct MPContext *mpctx)
     if (need_vf_reconfig && d_video->decoder_output.imgfmt) {
         // Drain the filter chain.
         if (vf_output_frame(vf, true) > 0)
-            return 1;
+            return VD_PROGRESS;
 
         // The filter chain is drained; execute the filter format change.
         filter_reconfig(mpctx, false);
         if (vf->initialized == 0)
-            return 1; // hw decoding fallback; try again
+            return VD_PROGRESS; // hw decoding fallback; try again
         if (vf->initialized < 1)
-            return -1;
+            return VD_ERROR;
         init_filter_params(mpctx);
-        return 1;
+        return VD_PROGRESS;
     }
 
     // If something was decoded, and the filter chain is ready, filter it.
     if (!need_vf_reconfig && d_video->waiting_decoded_mpi) {
         vf_filter_frame(vf, d_video->waiting_decoded_mpi);
         d_video->waiting_decoded_mpi = NULL;
-        return 1;
+        return VD_PROGRESS;
     }
 
-    int r = 1;
+    int r = VD_PROGRESS;
 
     if (!d_video->waiting_decoded_mpi) {
         // Decode a new image, or at least feed the decoder a packet.
@@ -399,7 +397,7 @@ static int video_decode_and_filter(struct MPContext *mpctx)
         if (d_video->waiting_decoded_mpi)
             d_video->decoder_output = d_video->waiting_decoded_mpi->params;
         if (!d_video->waiting_decoded_mpi && r < 1)
-            return 0; // true EOF
+            return VD_EOF; // true EOF
     }
 
     // Image will be filtered on the next iteration.
@@ -426,7 +424,7 @@ static void init_vo(struct MPContext *mpctx)
 }
 
 // Fill the VO buffer with a newly filtered or decoded image.
-// Returns: -1: error, 0: EOF, 1: ok or progress was made
+// returns VD_* code
 static int video_output_image(struct MPContext *mpctx, double endpts,
                               bool reconfig_ok)
 {
@@ -455,7 +453,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts,
             drop = true;
         if (endpts != MP_NOPTS_VALUE && pts >= endpts) {
             drop = true;
-            r = 0; // EOF
+            r = VD_EOF;
         }
         if (drop) {
             talloc_free(vf->output);
@@ -492,7 +490,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts,
         int vo_r = vo_reconfig(vo, &p, 0);
         if (vo_r < 0) {
             vf->initialized = -1;
-            return -1;
+            return VD_ERROR;
         }
         init_vo(mpctx);
         // Display the frame queued after this immediately.
@@ -504,13 +502,13 @@ static int video_output_image(struct MPContext *mpctx, double endpts,
     struct mp_image *img = vf_read_output_frame(vf);
     if (img) {
         vo_queue_image(vo, img);
-        return 1;
+        return VD_PROGRESS;
     }
 
     return r; // includes the true EOF case
 }
 
-// returns: <0 on error, 0: eof, 1: progress, but no output, 2: new frame
+// returns VD_* code
 int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
                  double *frame_duration)
 {
@@ -518,24 +516,24 @@ int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
 
     if (mpctx->d_video->header->attached_picture) {
         if (video_out->hasframe)
-            return 0;
+            return VD_EOF;
         if (vo_has_next_frame(video_out, true))
-            return 2;
+            return VD_NEW_FRAME;
     }
 
     int r = video_output_image(mpctx, endpts, reconfig_ok);
-    if (r < 0 || r == 3)
+    if (r < 0 || r == VD_WAIT)
         return r;
 
-    // On EOF (r==0), we always drain the VO; otherwise we must ensure that
+    // On EOF, we always drain the VO; otherwise we must ensure that
     // the VO will have enough frames buffered (matters especially for VO based
     // frame dropping).
-    if (!vo_has_next_frame(video_out, !r))
-        return !!r;
+    if (!vo_has_next_frame(video_out, r == VD_EOF))
+        return r ? VD_PROGRESS : VD_EOF;
 
     if (mpctx->d_video->header->attached_picture) {
         mpctx->video_next_pts = MP_NOPTS_VALUE;
-        return 2;
+        return VD_NEW_FRAME;
     }
 
     double pts = vo_get_next_pts(video_out, 0);
@@ -553,5 +551,5 @@ int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
     if (mpctx->d_audio)
         mpctx->delay -= frame_time;
     *frame_duration = frame_time;
-    return 2;
+    return VD_NEW_FRAME;
 }

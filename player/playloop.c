@@ -970,7 +970,7 @@ void run_playloop(struct MPContext *mpctx)
             break;
         }
 
-        if (r == 0) {
+        if (r == VD_EOF) {
             if (!mpctx->playing_last_frame && mpctx->last_frame_duration > 0) {
                 mpctx->time_frame += mpctx->last_frame_duration;
                 mpctx->last_frame_duration = 0;
@@ -978,23 +978,23 @@ void run_playloop(struct MPContext *mpctx)
                 MP_VERBOSE(mpctx, "showing last frame\n");
             }
             if (mpctx->playing_last_frame) {
-                r = 1; // don't stop playback yet
+                r = VD_PROGRESS; // don't stop playback yet
                 MP_TRACE(mpctx, "still showing last frame\n");
             }
         }
 
         video_left = r > 0;
 
-        if (r == 3)
+        if (r == VD_WAIT)
             break;
 
         if (mpctx->restart_playback)
             mpctx->sleeptime = 0;
 
-        if (r == 2)
+        if (r == VD_NEW_FRAME)
             MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 
-        if (r == 2 && !mpctx->restart_playback) {
+        if (r == VD_NEW_FRAME && !mpctx->restart_playback) {
             mpctx->time_frame += frame_time / opts->playback_speed;
             adjust_sync(mpctx, frame_time);
         }
@@ -1010,7 +1010,7 @@ void run_playloop(struct MPContext *mpctx)
             break;
         }
 
-        if (r != 2 && !mpctx->playing_last_frame) {
+        if (r != VD_NEW_FRAME && !mpctx->playing_last_frame) {
             mpctx->sleeptime = 0;
             break;
         }
@@ -1060,7 +1060,7 @@ void run_playloop(struct MPContext *mpctx)
         mpctx->playing_last_frame = false;
 
         // last frame case (don't set video_left - consider format changes)
-        if (r != 2)
+        if (r != VD_NEW_FRAME)
             break;
 
         //=================== FLIP PAGE (VIDEO BLT): ======================

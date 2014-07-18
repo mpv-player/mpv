@@ -137,6 +137,13 @@ struct track {
 
 enum {
     MAX_NUM_VO_PTS = 100,
+
+    // update_video() - code also uses: <0 error, 0 eof, >0 progress
+    VD_ERROR = -1,
+    VD_EOF = 0,         // end of file - no new output
+    VD_PROGRESS = 1,    // progress, but no output; repeat call with no waiting
+    VD_NEW_FRAME = 2,   // the call produced a new frame
+    VD_WAIT = 3,        // no EOF, but no output; wait until wakeup
 };
 
 #define NUM_PTRACKS 2
