@@ -300,6 +300,8 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
 
 // Read a packet, store decoded image into d_video->waiting_decoded_mpi
 // Return 0 if EOF was reached (though the decoder still can have frames buffered)
+// Return 1 if a packet was read (i.e. progress made)
+// Return 3 if the demuxer will wake us up once a new packet is available.
 static int decode_image(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
@@ -310,7 +312,9 @@ static int decode_image(struct MPContext *mpctx)
         return 0;
     }
 
-    struct demux_packet *pkt = demux_read_packet(d_video->header);
+    struct demux_packet *pkt;
+    if (demux_read_packet_async(d_video->header, &pkt) == 0)
+        return 3;
     if (pkt && pkt->pts != MP_NOPTS_VALUE)
         pkt->pts += mpctx->video_offset;
     if ((pkt && pkt->pts >= mpctx->hrseek_pts - .005) ||
@@ -326,7 +330,7 @@ static int decode_image(struct MPContext *mpctx)
     bool had_packet = !!pkt;
     talloc_free(pkt);
 
-    return had_packet;
+    return had_packet ? 1 : 0;
 }
 
 
@@ -345,7 +349,7 @@ static void init_filter_params(struct MPContext *mpctx)
 }
 
 // Make sure at least 1 filtered image is available.
-// Returns: -1: error, 0: EOF, 1: ok or progress was made
+// Returns: -1: error, 0: EOF, 1: ok or progress was made, 3: ok but wait
 // A return value of 1 doesn't necessarily output a frame, but makes the promise
 // that calling this function again will eventually do something.
 static int video_decode_and_filter(struct MPContext *mpctx)
@@ -387,9 +391,11 @@ static int video_decode_and_filter(struct MPContext *mpctx)
         return 1;
     }
 
+    int r = 1;
+
     if (!d_video->waiting_decoded_mpi) {
         // Decode a new image, or at least feed the decoder a packet.
-        int r = decode_image(mpctx);
+        r = decode_image(mpctx);
         if (d_video->waiting_decoded_mpi)
             d_video->decoder_output = d_video->waiting_decoded_mpi->params;
         if (!d_video->waiting_decoded_mpi && r < 1)
@@ -397,7 +403,7 @@ static int video_decode_and_filter(struct MPContext *mpctx)
     }
 
     // Image will be filtered on the next iteration.
-    return 1;
+    return r;
 }
 
 static void init_vo(struct MPContext *mpctx)
@@ -518,7 +524,7 @@ int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
     }
 
     int r = video_output_image(mpctx, endpts, reconfig_ok);
-    if (r < 0)
+    if (r < 0 || r == 3)
         return r;
 
     // On EOF (r==0), we always drain the VO; otherwise we must ensure that

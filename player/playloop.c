@@ -985,6 +985,12 @@ void run_playloop(struct MPContext *mpctx)
 
         video_left = r > 0;
 
+        if (r == 3)
+            break;
+
+        if (mpctx->restart_playback)
+            mpctx->sleeptime = 0;
+
         if (r == 2)
             MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 
@@ -1241,9 +1247,6 @@ void run_playloop(struct MPContext *mpctx)
     }
 
     if (mpctx->stop_play)
-        mpctx->sleeptime = 0;
-
-    if (mpctx->restart_playback)
         mpctx->sleeptime = 0;
 
     if (mpctx->sleeptime > 0 && handle_osd_redraw(mpctx))

@@ -312,6 +312,21 @@ static struct sh_stream *select_fallback_stream(struct demuxer *d,
     return best_stream;
 }
 
+// Called from the demuxer thread if a new packet is available.
+static void wakeup_demux(void *pctx)
+{
+    struct MPContext *mpctx = pctx;
+    mp_input_wakeup(mpctx->input);
+}
+
+static void enable_demux_thread(struct MPContext *mpctx)
+{
+    if (mpctx->demuxer && mpctx->opts->demuxer_thread) {
+        demux_set_wakeup_cb(mpctx->demuxer, wakeup_demux, mpctx);
+        demux_start_thread(mpctx->demuxer);
+    }
+}
+
 bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
 {
     struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
@@ -353,8 +368,7 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     }
     reselect_demux_streams(mpctx);
 
-    if (mpctx->demuxer && mpctx->opts->demuxer_thread)
-        demux_start_thread(mpctx->demuxer);
+    enable_demux_thread(mpctx);
 
     return true;
 }
@@ -1188,8 +1202,7 @@ goto_reopen_demuxer: ;
 
     update_demuxer_properties(mpctx);
 
-    if (mpctx->demuxer && opts->demuxer_thread)
-        demux_start_thread(mpctx->demuxer);
+    enable_demux_thread(mpctx);
 
     if (mpctx->current_track[0][STREAM_VIDEO] &&
         mpctx->current_track[0][STREAM_VIDEO]->attached_picture)
