@@ -291,8 +291,10 @@ typedef struct MPContext {
 
     double audio_delay;
 
-    double last_heartbeat;
+    double next_heartbeat;
     double last_idle_tick;
+
+    double sleeptime;      // number of seconds to sleep before next iteration
 
     double mouse_timer;
     unsigned int mouse_event_ts;

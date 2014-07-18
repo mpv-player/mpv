@@ -52,8 +52,6 @@
 #include "screenshot.h"
 #include "command.h"
 
-#define WAKEUP_PERIOD 0.5
-
 static const char av_desync_help_text[] =
 "\n\n"
 "           *************************************************\n"
@@ -644,10 +642,11 @@ static void handle_heartbeat_cmd(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     if (opts->heartbeat_cmd && !mpctx->paused) {
         double now = mp_time_sec();
-        if (now - mpctx->last_heartbeat > opts->heartbeat_interval) {
-            mpctx->last_heartbeat = now;
+        if (mpctx->next_heartbeat <= now) {
+            mpctx->next_heartbeat = now + opts->heartbeat_interval;
             system(opts->heartbeat_cmd);
         }
+        mpctx->sleeptime = MPMIN(mpctx->sleeptime, mpctx->next_heartbeat - now);
     }
 }
 
@@ -660,17 +659,20 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
         return;
 
     bool mouse_cursor_visible = mpctx->mouse_cursor_visible;
+    double now = mp_time_sec();
 
     unsigned mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
     if (mpctx->mouse_event_ts != mouse_event_ts) {
         mpctx->mouse_event_ts = mouse_event_ts;
-        mpctx->mouse_timer =
-            mp_time_sec() + opts->cursor_autohide_delay / 1000.0;
+        mpctx->mouse_timer = now + opts->cursor_autohide_delay / 1000.0;
         mouse_cursor_visible = true;
     }
 
-    if (mp_time_sec() >= mpctx->mouse_timer)
+    if (mpctx->mouse_timer > now) {
+        mpctx->sleeptime = MPMIN(mpctx->sleeptime, mpctx->mouse_timer - now);
+    } else {
         mouse_cursor_visible = false;
+    }
 
     if (opts->cursor_autohide_delay == -1)
         mouse_cursor_visible = true;
@@ -879,13 +881,7 @@ static double timing_sleep(struct MPContext *mpctx, double time_frame)
 
 static double get_wakeup_period(struct MPContext *mpctx)
 {
-    /* Even if we can immediately wake up in response to most input events,
-     * there are some timers which are not registered to the event loop
-     * and need to be checked periodically (like automatic mouse cursor hiding).
-     * OSD content updates behave similarly. Also some uncommon input devices
-     * may not have proper FD event support.
-     */
-    double sleeptime = WAKEUP_PERIOD;
+    double sleeptime = 100.0; // infinite for all practical purposes
 
 #if !HAVE_POSIX_SELECT
     // No proper file descriptor event handling; keep waking up to poll input
@@ -906,7 +902,6 @@ void run_playloop(struct MPContext *mpctx)
     bool audio_left = false, video_left = false;
     double endpts = get_play_end_pts(mpctx);
     bool end_is_chapter = false;
-    double sleeptime = get_wakeup_period(mpctx);
     bool was_restart = mpctx->restart_playback;
     bool new_frame_shown = false;
 
@@ -1010,7 +1005,7 @@ void run_playloop(struct MPContext *mpctx)
         }
 
         if (r != 2 && !mpctx->playing_last_frame) {
-            sleeptime = 0;
+            mpctx->sleeptime = 0;
             break;
         }
 
@@ -1052,10 +1047,10 @@ void run_playloop(struct MPContext *mpctx)
 
         double vsleep = mpctx->time_frame - vo->flip_queue_offset;
         if (vsleep > 0.050) {
-            sleeptime = MPMIN(sleeptime, vsleep - 0.040);
+            mpctx->sleeptime = MPMIN(mpctx->sleeptime, vsleep - 0.040);
             break;
         }
-        sleeptime = 0;
+        mpctx->sleeptime = 0;
         mpctx->playing_last_frame = false;
 
         // last frame case (don't set video_left - consider format changes)
@@ -1245,19 +1240,21 @@ void run_playloop(struct MPContext *mpctx)
 
     }
 
-    if (!mpctx->stop_play) {
-        if (mpctx->restart_playback)
-            sleeptime = 0;
-        if (sleeptime > 0) {
-            if (handle_osd_redraw(mpctx))
-                sleeptime = 0;
-        }
-        if (sleeptime > 0) {
-            MP_STATS(mpctx, "start sleep");
-            mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
-            MP_STATS(mpctx, "end sleep");
-        }
+    if (mpctx->stop_play)
+        mpctx->sleeptime = 0;
+
+    if (mpctx->restart_playback)
+        mpctx->sleeptime = 0;
+
+    if (mpctx->sleeptime > 0 && handle_osd_redraw(mpctx))
+        mpctx->sleeptime = 0;
+
+    if (mpctx->sleeptime > 0) {
+        MP_STATS(mpctx, "start sleep");
+        mp_input_get_cmd(mpctx->input, mpctx->sleeptime * 1000, true);
+        MP_STATS(mpctx, "end sleep");
     }
+    mpctx->sleeptime = get_wakeup_period(mpctx);
 
     handle_pause_on_low_cache(mpctx);
 

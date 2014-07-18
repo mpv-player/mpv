@@ -314,19 +314,21 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
     mp_osd_msg_t *msg = mpctx->osd_msg_stack;
     if (msg) {
         if (!msg->started || msg->time > diff) {
+            // display it
             if (msg->started)
                 msg->time -= diff;
             else
                 msg->started = 1;
-            // display it
-            return msg;
+        } else {
+            // kill the message
+            talloc_free(msg);
+            msg = NULL;
+            mpctx->osd_msg_stack = NULL;
         }
-        // kill the message
-        talloc_free(msg);
-        mpctx->osd_msg_stack = NULL;
     }
-    // Nothing found
-    return NULL;
+    if (msg)
+        mpctx->sleeptime = MPMIN(mpctx->sleeptime, msg->time);
+    return msg;
 }
 
 // type: mp_osd_font_codepoints, ASCII, or OSD_BAR_*
