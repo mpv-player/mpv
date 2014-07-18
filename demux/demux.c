@@ -415,6 +415,25 @@ static void *demux_thread(void *pctx)
     return NULL;
 }
 
+static struct demux_packet *dequeue_packet(struct demux_stream *ds)
+{
+    if (!ds->head)
+        return NULL;
+    struct demux_packet *pkt = ds->head;
+    ds->head = pkt->next;
+    pkt->next = NULL;
+    if (!ds->head)
+        ds->tail = NULL;
+    ds->bytes -= pkt->len;
+    ds->packs--;
+
+    // This implies this function is actually called from "the" user thread.
+    if (pkt && pkt->pos >= 0)
+        ds->in->d_user->filepos = pkt->pos;
+
+    return pkt;
+}
+
 // Read a packet from the given stream. The returned packet belongs to the
 // caller, who has to free it with talloc_free(). Might block. Returns NULL
 // on EOF.
@@ -425,24 +444,41 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
     if (ds) {
         pthread_mutex_lock(&ds->in->lock);
         ds_get_packets(ds);
-        if (ds->head) {
-            pkt = ds->head;
-            ds->head = pkt->next;
-            pkt->next = NULL;
-            if (!ds->head)
-                ds->tail = NULL;
-            ds->bytes -= pkt->len;
-            ds->packs--;
-
-            // This implies this function is actually called from "the" user
-            // thread.
-            if (pkt && pkt->pos >= 0)
-                ds->in->d_user->filepos = pkt->pos;
-        }
+        pkt = dequeue_packet(ds);
         pthread_cond_signal(&ds->in->wakeup); // possibly read more
         pthread_mutex_unlock(&ds->in->lock);
     }
     return pkt;
+}
+
+// Poll the demuxer queue, and if there's a packet, return it. Otherwise, just
+// make the demuxer thread read packets for this stream, and if there's at
+// least one packet, call the wakeup callback.
+// Returns:
+//   < 0: EOF was reached, *out_pkt=NULL
+//  == 0: no new packet yet, but maybe later, *out_pkt=NULL
+//   > 0: new packet read, *out_pkt is set
+int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
+{
+    struct demux_stream *ds = sh ? sh->ds : NULL;
+    int r = -1;
+    *out_pkt = NULL;
+    if (ds) {
+        if (ds->in->threading) {
+            pthread_mutex_lock(&ds->in->lock);
+            *out_pkt = dequeue_packet(ds);
+            r = *out_pkt ? 1 : (ds->eof ? -1 : 0);
+            if (r < 1 && ds->selected)
+                ds->active = true;
+            ds->in->eof = false; // force retry
+            pthread_cond_signal(&ds->in->wakeup); // possibly read more
+            pthread_mutex_unlock(&ds->in->lock);
+        } else {
+            *out_pkt = demux_read_packet(sh);
+            r = *out_pkt ? 1 : -1;
+        }
+    }
+    return r;
 }
 
 // Return the pts of the next packet that demux_read_packet() would return.
