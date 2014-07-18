@@ -107,7 +107,8 @@ struct demux_internal {
     void *wakeup_cb_ctx;
 
     bool warned_queue_overflow;
-    bool eof;                   // last global EOF status
+    bool last_eof;              // last actual global EOF status
+    bool eof;                   // whether we're in EOF state (reset for retry)
     bool autoselect;
     int min_packs;
     int min_bytes;
@@ -289,6 +290,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     }
     // obviously not true anymore
     ds->eof = false;
+    in->last_eof = in->eof = false;
 
     // For video, PTS determination is not trivial, but for other media types
     // distinguishing PTS and DTS is not useful.
@@ -359,15 +361,21 @@ static bool read_packet(struct demux_internal *in)
 
     update_cache(in);
 
-    in->eof = eof;
-    if (in->eof) {
+    if (eof) {
         for (int n = 0; n < in->d_buffer->num_streams; n++) {
             struct demux_stream *ds = in->d_buffer->streams[n]->ds;
             ds->eof = true;
+            ds->active = false;
         }
-        pthread_cond_signal(&in->wakeup);
-        MP_VERBOSE(in, "EOF reached.\n");
+        // If we had EOF previously, then donn't wakeup (avoids wakeup loop)
+        if (!in->last_eof) {
+            if (in->wakeup_cb)
+                in->wakeup_cb(in->wakeup_cb_ctx);
+            pthread_cond_signal(&in->wakeup);
+            MP_VERBOSE(in, "EOF reached.\n");
+        }
     }
+    in->eof = in->last_eof = eof;
     return true;
 }
 
@@ -851,6 +859,7 @@ void demux_flush(demuxer_t *demuxer)
         ds_flush(demuxer->streams[n]->ds);
     demuxer->in->warned_queue_overflow = false;
     demuxer->in->eof = false;
+    demuxer->in->last_eof = false;
     pthread_mutex_unlock(&demuxer->in->lock);
 }
 
