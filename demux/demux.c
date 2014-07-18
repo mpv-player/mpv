@@ -745,6 +745,11 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .filename = talloc_strdup(demuxer, stream->url),
         .events = DEMUX_EVENT_ALL,
     };
+    demuxer->seekable = stream->seekable;
+    if (demuxer->stream->uncached_stream &&
+        !demuxer->stream->uncached_stream->seekable)
+        demuxer->seekable = false;
+
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
     *in = (struct demux_internal){
         .log = demuxer->log,
