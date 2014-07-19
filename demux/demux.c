@@ -534,7 +534,8 @@ bool demux_stream_eof(struct sh_stream *sh)
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
 {
     assert(!demuxer->in->threading); // doesn't work with threading
-    for (int retry = 0; retry < 2; retry++) {
+    bool read_more = true;
+    while (read_more) {
         for (int n = 0; n < demuxer->num_streams; n++) {
             struct sh_stream *sh = demuxer->streams[n];
             sh->ds->active = sh->ds->selected; // force read_packet() to read
@@ -544,7 +545,8 @@ struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
         }
         // retry after calling this
         pthread_mutex_lock(&demuxer->in->lock);
-        read_packet(demuxer->in);
+        read_more = read_packet(demuxer->in);
+        read_more &= !demuxer->in->eof;
         pthread_mutex_unlock(&demuxer->in->lock);
     }
     return NULL;
