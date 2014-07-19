@@ -36,6 +36,11 @@ build_options = [
         'default': 'enable',
         'func': check_true
     }, {
+        'name': '--optimize',
+        'desc': 'whether to optimize',
+        'default': 'enable',
+        'func': check_true
+    }, {
         'name': '--debug-build',
         'desc': 'whether to compile-in debugging information',
         'default': 'enable',
@@ -786,6 +791,10 @@ def options(opt):
         type    = 'string',
         dest    = 'LUA_VER',
         help    = "select Lua package which should be autodetected. Choices: 51 51deb 51fbsd 52 52deb 52fbsd luajit")
+
+@conf
+def is_optimization(ctx):
+    return getattr(ctx.options, 'enable_optimize')
 
 @conf
 def is_debug_build(ctx):

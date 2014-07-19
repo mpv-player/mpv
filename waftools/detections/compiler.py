@@ -22,6 +22,9 @@ def __add_generic_flags__(ctx):
                        "-D_LARGEFILE64_SOURCE",
                        "-std=c99", "-Wall"]
 
+    if ctx.is_optimization():
+        ctx.env.CFLAGS += ['-O2']
+
     if ctx.is_debug_build():
         ctx.env.CFLAGS += ['-g']
 
