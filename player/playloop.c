@@ -625,6 +625,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
             if (!opts->pause)
                 unpause_player(mpctx);
         }
+        mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.2);
     } else {
         if (cache_kb >= 0 && cache_kb <= opts->stream_cache_pause && !idle &&
             opts->stream_cache_pause < opts->stream_cache_unpause)
