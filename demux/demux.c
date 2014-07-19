@@ -536,8 +536,10 @@ struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
     for (int retry = 0; retry < 2; retry++) {
         for (int n = 0; n < demuxer->num_streams; n++) {
             struct sh_stream *sh = demuxer->streams[n];
-            if (demux_has_packet(sh))
-                return demux_read_packet(sh);
+            sh->ds->active = sh->ds->selected; // force read_packet() to read
+            struct demux_packet *pkt = dequeue_packet(sh->ds);
+            if (pkt)
+                return pkt;
         }
         // retry after calling this
         pthread_mutex_lock(&demuxer->in->lock);
