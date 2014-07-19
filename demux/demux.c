@@ -462,6 +462,8 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
 // Poll the demuxer queue, and if there's a packet, return it. Otherwise, just
 // make the demuxer thread read packets for this stream, and if there's at
 // least one packet, call the wakeup callback.
+// Unlike demux_read_packet(), this always enables readahead (which means you
+// must not use it on interleaved subtitle streams).
 // Returns:
 //   < 0: EOF was reached, *out_pkt=NULL
 //  == 0: no new packet yet, but maybe later, *out_pkt=NULL
@@ -476,8 +478,7 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
             pthread_mutex_lock(&ds->in->lock);
             *out_pkt = dequeue_packet(ds);
             r = *out_pkt ? 1 : (ds->eof ? -1 : 0);
-            if (r < 1 && ds->selected)
-                ds->active = true;
+            ds->active = ds->selected; // enable readahead
             ds->in->eof = false; // force retry
             pthread_cond_signal(&ds->in->wakeup); // possibly read more
             pthread_mutex_unlock(&ds->in->lock);
