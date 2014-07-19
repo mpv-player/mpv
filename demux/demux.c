@@ -1105,6 +1105,7 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
     pthread_mutex_lock(&in->lock);
     if (!in->threading)
         update_cache(in);
+    pthread_cond_signal(&in->wakeup);
     int cr = cached_demux_control(in, cmd, arg);
     if (cr != DEMUXER_CTRL_DONTKNOW) {
         pthread_mutex_unlock(&in->lock);
