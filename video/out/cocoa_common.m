@@ -345,6 +345,9 @@ static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
     if (!s->resize_redraw)
         return;
 
+    if (!s->gl_ctx)
+        return;
+
     vo_cocoa_set_current_context(vo, true);
 
     [s->gl_ctx update];
@@ -400,6 +403,7 @@ void vo_cocoa_release_nsgl_ctx(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     [s->gl_ctx release];
+    s->gl_ctx = nil;
 }
 
 int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
@@ -454,7 +458,8 @@ void vo_cocoa_set_current_context(struct vo *vo, bool current)
         if (!s->inside_sync_section)
             [s->lock lock];
 
-        [s->gl_ctx makeCurrentContext];
+        if (s->gl_ctx)
+            [s->gl_ctx makeCurrentContext];
     } else {
         [NSOpenGLContext clearCurrentContext];
 
