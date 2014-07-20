@@ -228,7 +228,6 @@ void update_demuxer_properties(struct MPContext *mpctx)
         return;
     demux_update(demuxer);
     int events = demuxer->events;
-    demuxer->events = 0;
     if ((events & DEMUX_EVENT_INIT) && demuxer->num_editions > 1) {
         for (int n = 0; n < demuxer->num_editions; n++) {
             struct demux_edition *edition = &demuxer->editions[n];
@@ -243,13 +242,15 @@ void update_demuxer_properties(struct MPContext *mpctx)
             MP_INFO(mpctx, "%s\n", b);
         }
     }
-    if (events & DEMUX_EVENT_STREAMS) {
-        add_demuxer_tracks(mpctx, demuxer);
+    struct demuxer *tracks = mpctx->track_layout;
+    if (tracks->events & DEMUX_EVENT_STREAMS) {
+        add_demuxer_tracks(mpctx, tracks);
         for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
             for (int n = 0; n < mpctx->num_tracks; n++)
                 if (mpctx->tracks[n]->type == t)
                     print_stream(mpctx, mpctx->tracks[n]);
         }
+        tracks->events &= ~DEMUX_EVENT_STREAMS;
     }
     struct mp_tags *info = demuxer->metadata;
     if ((events & DEMUX_EVENT_METADATA) && info->num_keys) {
@@ -258,6 +259,7 @@ void update_demuxer_properties(struct MPContext *mpctx)
             MP_INFO(mpctx, " %s: %s\n", info->keys[n], info->values[n]);
         mp_notify(mpctx, MPV_EVENT_METADATA_UPDATE, NULL);
     }
+    demuxer->events = 0;
 }
 
 // Enable needed streams, disable others.
@@ -341,11 +343,6 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts->fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts->gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB | INITIALIZED_SUB2);
     mpctx->stop_play = orig_stop_play;
 
-    if (mpctx->demuxer) {
-        demux_stop_thread(mpctx->demuxer);
-        demux_flush(mpctx->demuxer);
-    }
-
     mpctx->demuxer = n->source;
     mpctx->stream = mpctx->demuxer->stream;
 
@@ -407,7 +404,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
 {
     for (int i = 0; i < mpctx->num_tracks; i++) {
         struct track *track = mpctx->tracks[i];
-        if (track->stream == stream)
+        if (track->original_stream == stream)
             return track;
     }
 
@@ -423,6 +420,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         .under_timeline = under_timeline,
         .demuxer = demuxer,
         .stream = stream,
+        .original_stream = stream,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
 
@@ -1146,18 +1144,20 @@ goto_reopen_demuxer: ;
     print_timeline(mpctx);
     load_chapters(mpctx);
 
+    mpctx->track_layout = mpctx->demuxer;
     if (mpctx->timeline) {
         // With Matroska, the "master" file usually dictates track layout etc.
         // On the contrary, the EDL and CUE demuxers are empty wrappers, as
         // well as Matroska ordered chapter playlist-like files.
+        mpctx->track_layout = mpctx->timeline[0].source;
         for (int n = 0; n < mpctx->num_timeline_parts; n++) {
-            if (mpctx->timeline[n].source == mpctx->demuxer)
-                goto main_is_ok;
+            if (mpctx->timeline[n].source == mpctx->demuxer) {
+                mpctx->track_layout = mpctx->demuxer;
+                break;
+            }
         }
-        mpctx->demuxer = mpctx->timeline[0].source;
-    main_is_ok: ;
     }
-    add_demuxer_tracks(mpctx, mpctx->demuxer);
+    add_demuxer_tracks(mpctx, mpctx->track_layout);
 
     mpctx->timeline_part = 0;
     if (mpctx->timeline)

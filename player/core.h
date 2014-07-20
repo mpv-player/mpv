@@ -125,6 +125,9 @@ struct track {
     // If the track's stream changes with the timeline (ordered chapters).
     bool under_timeline;
 
+    // Does not change with under_timeline, but it useless for most purposes.
+    struct sh_stream *original_stream;
+
     // Value can change if under_timeline==true.
     struct demuxer *demuxer;
     // Invariant: !stream || stream->demuxer == demuxer
@@ -221,6 +224,7 @@ typedef struct MPContext {
     // Uses: accessing metadata (consider ordered chapters case, where the main
     // demuxer defines metadata), or special purpose demuxers like TV.
     struct demuxer *master_demuxer;
+    struct demuxer *track_layout;   // complication for ordered chapters
 
     struct mixer *mixer;
     struct ao *ao;
