@@ -968,7 +968,7 @@ void run_playloop(struct MPContext *mpctx)
                 mpctx->stop_play = PT_NEXT_ENTRY;
             mpctx->error_playing = true;
             handle_force_window(mpctx, true);
-            break;
+            return; // restart loop
         }
 
         if (r == VD_EOF) {
