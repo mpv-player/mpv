@@ -1166,9 +1166,16 @@ void run_playloop(struct MPContext *mpctx)
                                                      !video_left)))
     {
         int status = fill_audio_out_buffers(mpctx, endpts);
-        full_audio_buffers = status >= 0 && !ao_untimed(mpctx->ao);
         // Not at audio stream EOF yet
         audio_left = status > -2;
+    }
+    if (mpctx->d_audio) {
+        /* When all audio has been written to output driver, stay in the
+         * main loop handling commands until it has been mostly consumed,
+         * except in the gapless case, where the next file will be started
+         * while audio from the current one still remains to be played.
+         */
+        audio_left |= !ao_eof_reached(mpctx->ao) && !opts->gapless_audio;
     }
     if (!video_left)
         mpctx->restart_playback = false;
@@ -1190,11 +1197,6 @@ void run_playloop(struct MPContext *mpctx)
      * and video streams to "disabled" at runtime. Handle this by waiting
      * rather than immediately stopping playback due to EOF.
      *
-     * When all audio has been written to output driver, stay in the
-     * main loop handling commands until it has been mostly consumed,
-     * except in the gapless case, where the next file will be started
-     * while audio from the current one still remains to be played.
-     *
      * We want this check to trigger if we seeked to this position,
      * but not if we paused at it with audio possibly still buffered in
      * the AO. There's currently no working way to check buffered audio
@@ -1203,7 +1205,6 @@ void run_playloop(struct MPContext *mpctx)
      * buffered.
      */
     if ((mpctx->d_audio || mpctx->d_video) && !audio_left && !video_left
-        && (opts->gapless_audio || !mpctx->d_audio || ao_eof_reached(mpctx->ao))
         && (!mpctx->paused || was_restart)) {
         if (end_is_chapter) {
             mp_seek(mpctx, (struct seek_params){
