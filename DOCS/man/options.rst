@@ -74,8 +74,9 @@ OPTIONS
     should not need these for typical use.
 
 ``--aid=<ID|auto|no>``
-    Select audio channel. ``auto`` selects the default, ``no`` disables audio.
-    See also ``--alang``.
+    Select audio track. ``auto`` selects the default, ``no`` disables audio.
+    See also ``--alang``. mpv normally prints available audio tracks on the
+    terminal when starting playback of a file.
 
 ``--alang=<languagecode[,languagecode,...]>``
     Specify a priority list of audio languages to use. Different container
