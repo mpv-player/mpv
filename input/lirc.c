@@ -71,7 +71,7 @@ int mp_input_lirc_init(struct input_ctx *ictx, struct mp_log *log,
       .log = log,
       .lirc_config = lirc_config,
   };
-  mp_input_add_fd(ictx, lirc_sock, 0, mp_input_lirc_read, NULL, mp_input_lirc_close, ctx);
+  mp_input_add_fd(ictx, lirc_sock, 1, mp_input_lirc_read, NULL, mp_input_lirc_close, ctx);
 
   return lirc_sock;
 }
