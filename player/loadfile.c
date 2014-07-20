@@ -343,6 +343,11 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts->fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts->gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB | INITIALIZED_SUB2);
     mpctx->stop_play = orig_stop_play;
 
+    if (mpctx->demuxer) {
+        demux_stop_thread(mpctx->demuxer);
+        demux_flush(mpctx->demuxer);
+    }
+
     mpctx->demuxer = n->source;
     mpctx->stream = mpctx->demuxer->stream;
 
