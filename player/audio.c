@@ -297,7 +297,6 @@ static int write_silence_to_ao(struct MPContext *mpctx, int samples, int flags,
     return r;
 }
 
-#define ASYNC_PLAY_DONE -3
 static int audio_start_sync(struct MPContext *mpctx, int playsize)
 {
     struct ao *ao = mpctx->ao;
@@ -374,7 +373,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
          * in playsize. */
         write_silence_to_ao(mpctx, playsize, 0,
                             written_pts - samples / real_samplerate);
-        return ASYNC_PLAY_DONE;
+        return AD_ASYNC_PLAY_DONE;
     }
     mpctx->syncing_audio = false;
     mp_audio_buffer_prepend_silence(mpctx->ao_buffer, samples);
@@ -418,7 +417,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         res = audio_decode(d_audio, mpctx->ao_buffer, playsize);
 
     if (res < 0) {  // EOF, error or format change
-        if (res == -2) {
+        if (res == AD_NEW_FMT) {
             /* The format change isn't handled too gracefully. A more precise
              * implementation would require draining buffered old-format audio
              * while displaying video, then doing the output format switch.
@@ -427,7 +426,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
                 uninit_player(mpctx, INITIALIZED_AO);
             reinit_audio_chain(mpctx);
             return -1;
-        } else if (res == ASYNC_PLAY_DONE)
+        } else if (res == AD_ASYNC_PLAY_DONE)
             return 0;
         else if (demux_stream_eof(d_audio->header))
             audio_eof = true;

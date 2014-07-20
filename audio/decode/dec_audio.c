@@ -260,7 +260,7 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
             // first, and don't signal a format change to the caller yet.
             if (mp_audio_buffer_samples(da->decode_buffer) > 0)
                 break;
-            error = -2;
+            error = AD_NEW_FMT;
             break;
         }
     }
@@ -274,7 +274,7 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
     bool eof = filter_data.samples == 0 && error < 0;
 
     if (af_filter(da->afilter, &filter_data, eof ? AF_FILTER_FLAG_EOF : 0) < 0)
-        return -1;
+        return AD_ERR;
 
     mp_audio_buffer_append(outbuf, &filter_data);
     if (eof && filter_data.samples > 0)
@@ -285,9 +285,9 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
 
     // Assume the filter chain is drained from old data at this point.
     // (If not, the remaining old data is discarded.)
-    if (error == -2) {
+    if (error == AD_NEW_FMT) {
         if (!reinit_audio_buffer(da))
-            error = -1; // switch to invalid format
+            error = AD_ERR; // switch to invalid format
     }
 
     return error;
@@ -295,7 +295,7 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
 
 /* Try to get at least minsamples decoded+filtered samples in outbuf
  * (total length including possible existing data).
- * Return 0 on success, -1 on error/EOF (not distinguidaed).
+ * Return 0 on success, or negative AD_* error code.
  * In the former case outbuf has at least minsamples buffered on return.
  * In case of EOF/error it might or might not be. */
 int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,

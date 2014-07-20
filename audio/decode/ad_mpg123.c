@@ -309,7 +309,7 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
 
     if (con->need_data) {
         if (feed_new_packet(da) < 0)
-            return -1;
+            return AD_ERR;
     }
 
     if (!mp_audio_config_equals(&da->decoded, buffer))
@@ -338,9 +338,8 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
     return 0;
 
 mpg123_fail:
-    MP_ERR(da, "mpg123 decoding error: %s\n",
-           mpg123_strerror(con->handle));
-    return -1;
+    MP_ERR(da, "mpg123 decoding error: %s\n", mpg123_strerror(con->handle));
+    return AD_ERR;
 }
 
 static int control(struct dec_audio *da, int cmd, void *arg)

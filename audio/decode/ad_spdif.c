@@ -200,7 +200,7 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
 
     struct demux_packet *mpkt = demux_read_packet(da->header);
     if (!mpkt)
-        return -1;
+        return AD_ERR;
 
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt, NULL);
@@ -216,7 +216,7 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
     da->pts_offset += buffer->samples;
     talloc_free(mpkt);
     if (ret < 0)
-        return -1;
+        return AD_ERR;
 
     return 0;
 }

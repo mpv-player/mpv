@@ -398,7 +398,7 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
 
     if (!priv->frame.samples) {
         if (decode_new_packet(da) < 0)
-            return -1;
+            return AD_ERR;
     }
 
     if (!mp_audio_config_equals(buffer, &priv->frame))

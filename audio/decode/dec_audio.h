@@ -51,6 +51,13 @@ struct dec_audio {
     void *priv;
 };
 
+enum {
+    AD_OK = 0,
+    AD_ERR = -1,
+    AD_NEW_FMT = -2,
+    AD_ASYNC_PLAY_DONE = -3,
+};
+
 struct mp_decoder_list *audio_decoder_list(void);
 int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders);
 int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
