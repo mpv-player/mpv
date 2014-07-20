@@ -320,7 +320,7 @@ static bool read_packet(struct demux_internal *in)
     size_t packs = 0, bytes = 0;
     for (int n = 0; n < in->d_buffer->num_streams; n++) {
         struct demux_stream *ds = in->d_buffer->streams[n]->ds;
-        active |= ds->selected;
+        active |= ds->selected && ds->active;
         read_more |= ds->active && !ds->head;
         packs += ds->packs;
         bytes += ds->bytes;
