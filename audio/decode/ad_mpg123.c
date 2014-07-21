@@ -35,9 +35,7 @@
 
 struct ad_mpg123_context {
     mpg123_handle *handle;
-    bool new_format;
     int sample_size;
-    bool need_data;
     /* Running mean for bit rate, stream length estimation. */
     float mean_rate;
     unsigned int mean_count;
@@ -58,7 +56,7 @@ static void uninit(struct dec_audio *da)
 
 /* This initializes libmpg123 and prepares the handle, including funky
  * parameters. */
-static int preinit(struct dec_audio *da)
+static int init(struct dec_audio *da, const char *decoder)
 {
     int err;
     struct ad_mpg123_context *con;
@@ -111,15 +109,18 @@ static int preinit(struct dec_audio *da)
      * We need at least 1152 samples. dec_audio.c normally guarantees this. */
     mpg123_param(con->handle, MPG123_REMOVE_FLAGS, MPG123_AUTO_RESAMPLE, 0.);
 
+    err = mpg123_open_feed(con->handle);
+    if (err != MPG123_OK)
+        goto bad_end;
+
     return 1;
 
   bad_end:
-    if (!con->handle)
-        MP_ERR(da, "mpg123 preinit error: %s\n",
-               mpg123_plain_strerror(err));
-    else
-        MP_ERR(da, "mpg123 preinit error: %s\n",
-               mpg123_strerror(con->handle));
+    if (!con->handle) {
+        MP_ERR(da, "mpg123 preinit error: %s\n", mpg123_plain_strerror(err));
+    } else {
+        MP_ERR(da, "mpg123 preinit error: %s\n", mpg123_strerror(con->handle));
+    }
 
     uninit(da);
     return 0;
@@ -137,111 +138,6 @@ static int mpg123_format_to_af(int mpg123_encoding)
     case MPG123_ENC_SIGNED_32:  return AF_FORMAT_S32;
     case MPG123_ENC_FLOAT_32:   return AF_FORMAT_FLOAT;
     }
-    return 0;
-}
-
-/* libmpg123 has a new format ready; query and store, return return value
-   of mpg123_getformat() */
-static int set_format(struct dec_audio *da)
-{
-    struct ad_mpg123_context *con = da->priv;
-    int ret;
-    long rate;
-    int channels;
-    int encoding;
-    ret = mpg123_getformat(con->handle, &rate, &channels, &encoding);
-    if (ret == MPG123_OK) {
-        mp_audio_set_num_channels(&da->decoded, channels);
-        da->decoded.rate = rate;
-        int af = mpg123_format_to_af(encoding);
-        if (!af) {
-            /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */
-            MP_ERR(da, "Bad encoding from mpg123: %i.\n", encoding);
-            return MPG123_ERR;
-        }
-        mp_audio_set_format(&da->decoded, af);
-        con->sample_size = channels * af_fmt2bps(af);
-        con->new_format = 0;
-    }
-    return ret;
-}
-
-static int feed_new_packet(struct dec_audio *da)
-{
-    struct ad_mpg123_context *con = da->priv;
-    int ret;
-
-    struct demux_packet *pkt = demux_read_packet(da->header);
-    if (!pkt)
-        return -1; /* EOF. */
-
-    /* Next bytes from that presentation time. */
-    if (pkt->pts != MP_NOPTS_VALUE) {
-        da->pts        = pkt->pts;
-        da->pts_offset = 0;
-    }
-
-    /* Have to use mpg123_feed() to avoid decoding here. */
-    ret = mpg123_feed(con->handle, pkt->buffer, pkt->len);
-    talloc_free(pkt);
-
-    if (ret == MPG123_ERR)
-        return -1;
-
-    if (ret == MPG123_NEW_FORMAT)
-        con->new_format = 1;
-
-    return 0;
-}
-
-/* Now we really start accessing some data and determining file format.
- * Format now is allowed to change on-the-fly. Here is the only point
- * that has MPlayer react to errors. We have to pray that exceptional
- * erros in other places simply cannot occur. */
-static int init(struct dec_audio *da, const char *decoder)
-{
-    if (!preinit(da))
-        return 0;
-
-    struct ad_mpg123_context *con = da->priv;
-    int ret;
-
-    ret = mpg123_open_feed(con->handle);
-    if (ret != MPG123_OK)
-        goto fail;
-
-    for (int n = 0; ; n++) {
-        if (feed_new_packet(da) < 0) {
-            ret = MPG123_NEED_MORE;
-            goto fail;
-        }
-        size_t got_now = 0;
-        ret = mpg123_decode_frame(con->handle, NULL, NULL, &got_now);
-        if (ret == MPG123_OK || ret == MPG123_NEW_FORMAT) {
-            ret = set_format(da);
-            if (ret == MPG123_OK)
-                break;
-        }
-        if (ret != MPG123_NEED_MORE)
-            goto fail;
-        // max. 16 retries (randomly chosen number)
-        if (n > 16) {
-            ret = MPG123_NEED_MORE;
-            goto fail;
-        }
-    }
-
-    return 1;
-
-fail:
-    if (ret == MPG123_NEED_MORE) {
-        MP_ERR(da, "Could not find mp3 stream.\n");
-    } else {
-        MP_ERR(da, "mpg123 init error: %s\n",
-               mpg123_strerror(con->handle));
-    }
-
-    uninit(da);
     return 0;
 }
 
@@ -290,49 +186,78 @@ static void update_info(struct dec_audio *da)
     }
 }
 
-static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxlen)
+/* libmpg123 has a new format ready; query and store, return return value
+   of mpg123_getformat() */
+static int set_format(struct dec_audio *da)
 {
     struct ad_mpg123_context *con = da->priv;
-    void *buf = buffer->planes[0];
+    int ret;
+    long rate;
+    int channels;
+    int encoding;
+    ret = mpg123_getformat(con->handle, &rate, &channels, &encoding);
+    if (ret == MPG123_OK) {
+        mp_audio_set_num_channels(&da->decoded, channels);
+        da->decoded.rate = rate;
+        int af = mpg123_format_to_af(encoding);
+        if (!af) {
+            /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */
+            MP_ERR(da, "Bad encoding from mpg123: %i.\n", encoding);
+            return MPG123_ERR;
+        }
+        mp_audio_set_format(&da->decoded, af);
+        con->sample_size = channels * af_fmt2bps(af);
+    }
+    return ret;
+}
+
+static int decode_packet(struct dec_audio *da)
+{
+    struct ad_mpg123_context *con = da->priv;
     int ret;
 
-    if (con->new_format) {
-        ret = set_format(da);
-        if (ret == MPG123_OK) {
-            return 0; // let caller handle format change
-        } else if (ret == MPG123_NEED_MORE) {
-            con->need_data = true;
-        } else {
-            goto mpg123_fail;
-        }
+    mp_audio_set_null_data(&da->decoded);
+
+    struct demux_packet *pkt = demux_read_packet(da->header);
+    if (!pkt)
+        return AD_EOF;
+
+    /* Next bytes from that presentation time. */
+    if (pkt->pts != MP_NOPTS_VALUE) {
+        da->pts        = pkt->pts;
+        da->pts_offset = 0;
     }
 
-    if (con->need_data) {
-        if (feed_new_packet(da) < 0)
-            return AD_ERR;
-    }
+    /* Have to use mpg123_feed() to avoid decoding here. */
+    ret = mpg123_feed(con->handle, pkt->buffer, pkt->len);
+    talloc_free(pkt);
 
-    if (!mp_audio_config_equals(&da->decoded, buffer))
-        return 0;
-
-    size_t got_now = 0;
-    ret = mpg123_replace_buffer(con->handle, buf, maxlen * con->sample_size);
     if (ret != MPG123_OK)
         goto mpg123_fail;
 
-    ret = mpg123_decode_frame(con->handle, NULL, NULL, &got_now);
+    unsigned char *audio = NULL;
+    size_t bytes = 0;
+    ret = mpg123_decode_frame(con->handle, NULL, &audio, &bytes);
 
-    int got_samples = got_now / con->sample_size;
-    buffer->samples += got_samples;
-    da->pts_offset += got_samples;
+    if (ret == MPG123_NEED_MORE)
+        return 0;
 
-    if (ret == MPG123_NEW_FORMAT) {
-        con->new_format = true;
-    } else if (ret == MPG123_NEED_MORE) {
-        con->need_data = true;
-    } else if (ret != MPG123_OK && ret != MPG123_DONE) {
+    if (ret != MPG123_OK && ret != MPG123_DONE && ret != MPG123_NEW_FORMAT)
         goto mpg123_fail;
+
+    ret = set_format(da);
+    if (ret != MPG123_OK)
+        goto mpg123_fail;
+
+    if (con->sample_size < 1) {
+        MP_ERR(da, "no sample size\n");
+        return AD_ERR;
     }
+
+    int got_samples = bytes / con->sample_size;
+    da->decoded.planes[0] = audio;
+    da->decoded.samples = got_samples;
+    da->pts_offset += got_samples;
 
     update_info(da);
     return 0;
@@ -348,6 +273,7 @@ static int control(struct dec_audio *da, int cmd, void *arg)
 
     switch (cmd) {
     case ADCTRL_RESET:
+        mp_audio_set_null_data(&da->decoded);
         mpg123_close(con->handle);
 
         if (mpg123_open_feed(con->handle) != MPG123_OK) {
@@ -372,5 +298,5 @@ const struct ad_functions ad_mpg123 = {
     .init = init,
     .uninit = uninit,
     .control = control,
-    .decode_audio = decode_audio,
+    .decode_packet = decode_packet,
 };

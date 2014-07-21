@@ -38,9 +38,7 @@ struct dec_audio {
     char *decoder_desc;
     struct replaygain_data *replaygain_data;
     // set by decoder
-    struct mp_audio decoded;    // format of decoded audio (no data, temporarily
-                                // different from decode_buffer during format
-                                // changes)
+    struct mp_audio decoded;    // decoded audio set by last decode_packet() call
     int bitrate;                // input bitrate, can change with VBR sources
     // last known pts value in output from decoder
     double pts;
@@ -53,6 +51,7 @@ struct dec_audio {
 enum {
     AD_OK = 0,
     AD_ERR = -1,
+    AD_EOF = -1, // same as AD_ERR for now
     AD_NEW_FMT = -2,
     AD_ASYNC_PLAY_DONE = -3,
 };

@@ -56,13 +56,6 @@ static const struct ad_functions * const ad_drivers[] = {
     NULL
 };
 
-// ad_mpg123 needs to be able to decode 1152 samples at once
-// ad_spdif needs up to 8192
-#define DECODE_MAX_UNIT MPMAX(8192, 1152)
-
-// At least 8192 samples, plus hack for ad_mpg123 and ad_spdif
-#define DECODE_BUFFER_SAMPLES (8192 + DECODE_MAX_UNIT)
-
 // Drop audio buffer and reinit it (after format change)
 // Returns whether the format was valid at all.
 static bool reinit_audio_buffer(struct dec_audio *da)
@@ -73,7 +66,6 @@ static bool reinit_audio_buffer(struct dec_audio *da)
         return false;
     }
     mp_audio_buffer_reinit(da->decode_buffer, &da->decoded);
-    mp_audio_buffer_preallocate_min(da->decode_buffer, DECODE_BUFFER_SAMPLES);
     return true;
 }
 
@@ -95,6 +87,21 @@ static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
         d_audio->ad_driver = NULL;
         uninit_decoder(d_audio);
         return 0;
+    }
+
+    // Decode enough until we know the audio format.
+    for (int tries = 1; ; tries++) {
+        if (mp_audio_config_valid(&d_audio->decoded))  {
+            MP_VERBOSE(d_audio, "Initial decode succeeded after %d packets.\n",
+                       tries);
+            break;
+        }
+        if (tries >= 50) {
+            MP_ERR(d_audio, "initial decode failed\n");
+            uninit_decoder(d_audio);
+            return 0;
+        }
+        d_audio->ad_driver->decode_packet(d_audio);
     }
 
     d_audio->decode_buffer = mp_audio_buffer_create(NULL);
@@ -241,26 +248,28 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
     mp_audio_buffer_get_format(da->decode_buffer, &config);
 
     while (mp_audio_buffer_samples(da->decode_buffer) < len) {
-        int maxlen = mp_audio_buffer_get_write_available(da->decode_buffer);
-        if (maxlen < DECODE_MAX_UNIT)
-            break;
-        struct mp_audio buffer;
-        mp_audio_buffer_get_write_buffer(da->decode_buffer, maxlen, &buffer);
-        buffer.samples = 0;
-        error = da->ad_driver->decode_audio(da, &buffer, maxlen);
-        if (error < 0)
-            break;
-        // Commit the data just read as valid data
-        mp_audio_buffer_finish_write(da->decode_buffer, buffer.samples);
         // Format change
         if (!mp_audio_config_equals(&da->decoded, &config)) {
             // If there are still samples left in the buffer, let them drain
             // first, and don't signal a format change to the caller yet.
-            if (mp_audio_buffer_samples(da->decode_buffer) > 0)
-                break;
-            error = AD_NEW_FMT;
+            if (mp_audio_buffer_samples(da->decode_buffer) == 0)
+                error = AD_NEW_FMT;
             break;
         }
+        if (da->decoded.samples > 0) {
+            int copy = MPMIN(da->decoded.samples, len);
+            struct mp_audio append = da->decoded;
+            append.samples = copy;
+            mp_audio_buffer_append(da->decode_buffer, &append);
+            mp_audio_skip_samples(&da->decoded, copy);
+            continue;
+        }
+        error = da->ad_driver->decode_packet(da);
+        if (error < 0)
+            break;
+        // No progress means the decoder is buffering input data.
+        if (!da->decoded.samples)
+            break;
     }
 
     // Filter

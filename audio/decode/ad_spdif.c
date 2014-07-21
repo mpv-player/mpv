@@ -38,8 +38,7 @@ struct spdifContext {
     AVFormatContext *lavf_ctx;
     int              iec61937_packet_size;
     int              out_buffer_len;
-    int              out_buffer_size;
-    uint8_t         *out_buffer;
+    uint8_t          out_buffer[OUTBUF_SIZE];
     bool             need_close;
 };
 
@@ -47,7 +46,7 @@ static int write_packet(void *p, uint8_t *buf, int buf_size)
 {
     struct spdifContext *ctx = p;
 
-    int buffer_left = ctx->out_buffer_size - ctx->out_buffer_len;
+    int buffer_left = OUTBUF_SIZE - ctx->out_buffer_len;
     if (buf_size > buffer_left) {
         MP_ERR(ctx, "spdif packet too large.\n");
         buf_size = buffer_left;
@@ -183,24 +182,18 @@ fail:
     return 0;
 }
 
-static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxlen)
+static int decode_packet(struct dec_audio *da)
 {
     struct spdifContext *spdif_ctx = da->priv;
     AVFormatContext     *lavf_ctx  = spdif_ctx->lavf_ctx;
 
-    int sstride = 2 * da->decoded.channels.num;
-    assert(sstride == buffer->sstride);
-
-    if (maxlen * sstride < spdif_ctx->iec61937_packet_size)
-        return 0;
+    mp_audio_set_null_data(&da->decoded);
 
     spdif_ctx->out_buffer_len  = 0;
-    spdif_ctx->out_buffer_size = maxlen * sstride;
-    spdif_ctx->out_buffer      = buffer->planes[0];
 
     struct demux_packet *mpkt = demux_read_packet(da->header);
     if (!mpkt)
-        return AD_ERR;
+        return AD_EOF;
 
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt, NULL);
@@ -211,12 +204,14 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
         da->pts_offset = 0;
     }
     int ret = av_write_frame(lavf_ctx, &pkt);
-    avio_flush(lavf_ctx->pb);
-    buffer->samples = spdif_ctx->out_buffer_len / sstride;
-    da->pts_offset += buffer->samples;
     talloc_free(mpkt);
+    avio_flush(lavf_ctx->pb);
     if (ret < 0)
         return AD_ERR;
+
+    da->decoded.planes[0] = spdif_ctx->out_buffer;
+    da->decoded.samples = spdif_ctx->out_buffer_len / da->decoded.sstride;
+    da->pts_offset += da->decoded.samples;
 
     return 0;
 }
@@ -253,5 +248,5 @@ const struct ad_functions ad_spdif = {
     .init = init,
     .uninit = uninit,
     .control = control,
-    .decode_audio = decode_audio,
+    .decode_packet = decode_packet,
 };
