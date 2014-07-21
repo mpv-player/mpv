@@ -295,10 +295,15 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
     double now = mp_time_sec();
     double diff;
 
-    if (mpctx->osd_visible && now >= mpctx->osd_visible) {
-        mpctx->osd_visible = 0;
-        mpctx->osd_progbar.type = -1; // disable
-        osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
+    if (mpctx->osd_visible) {
+        double sleep = mpctx->osd_visible - now;
+        if (sleep > 0) {
+            mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+        } else {
+            mpctx->osd_visible = 0;
+            mpctx->osd_progbar.type = -1; // disable
+            osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
+        }
     }
     if (mpctx->osd_function_visible && now >= mpctx->osd_function_visible) {
         mpctx->osd_function_visible = 0;
@@ -342,6 +347,7 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
 
     if (mpctx->video_out && opts->term_osd != 1) {
         mpctx->osd_visible = mp_time_sec() + opts->osd_duration / 1000.0;
+        mpctx->sleeptime = 0;
         mpctx->osd_progbar.type = type;
         mpctx->osd_progbar.value = (val - min) / (max - min);
         mpctx->osd_progbar.num_stops = 0;
