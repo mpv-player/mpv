@@ -37,7 +37,7 @@
 
 #define MF_MAX_FILE_SIZE (1024 * 1024 * 256)
 
-static void demux_seek_mf(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void demux_seek_mf(demuxer_t *demuxer, double rel_seek_secs, int flags)
 {
     mf_t *mf = demuxer->priv;
     int newpos = (flags & SEEK_ABSOLUTE) ? 0 : mf->curr_frame - 1;

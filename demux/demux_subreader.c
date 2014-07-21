@@ -119,7 +119,7 @@ static double demux_packet_list_duration(struct demux_packet **pkts, int num_pkt
 }
 
 static void demux_packet_list_seek(struct demux_packet **pkts, int num_pkts,
-                                   int *current, float rel_seek_secs, int flags)
+                                   int *current, double rel_seek_secs, int flags)
 {
     double ref_time = 0;
     if (*current >= 0 && *current < num_pkts) {
@@ -803,7 +803,7 @@ static int d_fill_buffer(struct demuxer *demuxer)
     return demux_add_packet(p->sh, dp);
 }
 
-static void d_seek(struct demuxer *demuxer, float secs, int flags)
+static void d_seek(struct demuxer *demuxer, double secs, int flags)
 {
     struct priv *p = demuxer->priv;
     demux_packet_list_seek(p->pkts, p->num_pkts, &p->current, secs, flags);

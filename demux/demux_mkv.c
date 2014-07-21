@@ -2706,7 +2706,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
     return index;
 }
 
-static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 {
     mkv_demuxer_t *mkv_d = demuxer->priv;
     int64_t old_pos = stream_tell(demuxer->stream);

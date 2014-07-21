@@ -822,7 +822,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     return 1;
 }
 
-static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
 {
     lavf_priv_t *priv = demuxer->priv;
     int avsflags = 0;

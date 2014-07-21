@@ -153,7 +153,7 @@ static void add_streams(demuxer_t *demuxer)
     reselect_streams(demuxer);
 }
 
-static void d_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void d_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 {
     struct priv *p = demuxer->priv;
 

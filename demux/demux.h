@@ -114,7 +114,7 @@ typedef struct demuxer_desc {
     // The following functions are all optional
     int (*fill_buffer)(struct demuxer *demuxer); // 0 on EOF, otherwise 1
     void (*close)(struct demuxer *demuxer);
-    void (*seek)(struct demuxer *demuxer, float rel_seek_secs, int flags);
+    void (*seek)(struct demuxer *demuxer, double rel_seek_secs, int flags);
     int (*control)(struct demuxer *demuxer, int cmd, void *arg);
 } demuxer_desc_t;
 
