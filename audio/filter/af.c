@@ -204,7 +204,6 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         .mul = 1,
         .data = talloc_zero(af, struct mp_audio),
         .log = mp_log_new(af, s->log, name),
-        .metadata = s->metadata,
         .replaygain_data = s->replaygain_data,
     };
     struct m_config *config = m_config_from_obj_desc(af, s->log, &desc);

@@ -36,7 +36,6 @@ struct dec_audio {
     struct mp_audio_buffer *decode_buffer;
     struct af_stream *afilter;
     char *decoder_desc;
-    struct mp_tags *metadata;
     struct replaygain_data *replaygain_data;
     // set by decoder
     struct mp_audio decoded;    // format of decoded audio (no data, temporarily
