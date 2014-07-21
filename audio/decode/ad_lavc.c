@@ -157,12 +157,6 @@ static int setup_format(struct dec_audio *da)
         MP_FATAL(da, "unsupported lavc format %s", av_get_sample_fmt_name(fmt));
 
     da->decoded.rate = lavc_context->sample_rate;
-    if (!da->decoded.rate && sh_audio->wf) {
-        // If not set, try container samplerate.
-        // (Maybe this can't happen, and it's an artifact from the past.)
-        da->decoded.rate = sh_audio->wf->nSamplesPerSec;
-        MP_WARN(da, "using container rate.\n");
-    }
 
     struct mp_chmap lavc_chmap;
     mp_chmap_from_lavc(&lavc_chmap, lavc_context->channel_layout);
