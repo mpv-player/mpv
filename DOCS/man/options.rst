@@ -1366,13 +1366,13 @@ OPTIONS
     example files or playlists loaded with the ``loadfile`` or ``loadlist``
     commands.
 
-``--mf=<option1:option2:...>``
-    Used when decoding from multiple PNG or JPEG files with ``mf://``.
+``--mf-fps=<value>``
+    Framerate used when decoding from multiple PNG or JPEG files with ``mf://``
+    (default: 1).
 
-    Available options are:
-
-    :fps=<value>:  output fps (default: 1)
-    :type=<value>: input file type (available: jpeg, png, tga, sgi)
+``--mf-type=<value>``
+    Input file type for ``mf://`` (available: jpeg, png, tga, sgi). By default,
+    this is guessed from the file extension.
 
 ``--monitoraspect=<ratio>``
     Set the aspect ratio of your monitor or TV screen. A value of 0 disables a
