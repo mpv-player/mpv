@@ -113,6 +113,10 @@ struct demux_internal {
     int min_packs;
     int min_bytes;
 
+    bool seeking;               // there's a seek queued
+    int seek_flags;             // flags for next seek (if seeking==true)
+    double seek_pts;
+
     // Cached state.
     double time_length;
     struct mp_tags *stream_metadata;
@@ -269,7 +273,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     }
     struct demux_internal *in = ds->in;
     pthread_mutex_lock(&in->lock);
-    if (!ds->selected) {
+    if (!ds->selected || in->seeking) {
         pthread_mutex_unlock(&in->lock);
         talloc_free(dp);
         return 0;
@@ -400,6 +404,20 @@ static void ds_get_packets(struct demux_stream *ds)
     }
 }
 
+static void execute_seek(struct demux_internal *in)
+{
+    int flags = in->seek_flags;
+    double pts = in->seek_pts;
+    in->seeking = false;
+
+    pthread_mutex_unlock(&in->lock);
+
+    if (in->d_thread->desc->seek)
+        in->d_thread->desc->seek(in->d_thread, pts, flags);
+
+    pthread_mutex_lock(&in->lock);
+}
+
 static void *demux_thread(void *pctx)
 {
     struct demux_internal *in = pctx;
@@ -409,6 +427,10 @@ static void *demux_thread(void *pctx)
         if (in->thread_paused) {
             pthread_cond_signal(&in->wakeup);
             pthread_cond_wait(&in->wakeup, &in->lock);
+            continue;
+        }
+        if (in->seeking) {
+            execute_seek(in);
             continue;
         }
         if (!in->eof) {
@@ -862,19 +884,28 @@ done:
     return demuxer;
 }
 
-void demux_flush(demuxer_t *demuxer)
+static void flush_locked(demuxer_t *demuxer)
 {
-    pthread_mutex_lock(&demuxer->in->lock);
     for (int n = 0; n < demuxer->num_streams; n++)
         ds_flush(demuxer->streams[n]->ds);
     demuxer->in->warned_queue_overflow = false;
     demuxer->in->eof = false;
     demuxer->in->last_eof = false;
+}
+
+// clear the packet queues
+void demux_flush(demuxer_t *demuxer)
+{
+    pthread_mutex_lock(&demuxer->in->lock);
+    flush_locked(demuxer);
     pthread_mutex_unlock(&demuxer->in->lock);
 }
 
 int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
+
     if (!demuxer->seekable) {
         MP_WARN(demuxer, "Cannot seek in this file.\n");
         return 0;
@@ -883,15 +914,18 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
     if (rel_seek_secs == MP_NOPTS_VALUE && (flags & SEEK_ABSOLUTE))
         return 0;
 
-    demux_pause(demuxer);
+    pthread_mutex_lock(&in->lock);
 
-    // clear the packet queues
-    demux_flush(demuxer);
+    flush_locked(demuxer);
+    in->seeking = true;
+    in->seek_flags = flags;
+    in->seek_pts = rel_seek_secs;
 
-    if (demuxer->desc->seek)
-        demuxer->desc->seek(demuxer->in->d_thread, rel_seek_secs, flags);
+    if (!in->threading)
+        execute_seek(in);
 
-    demux_unpause(demuxer);
+    pthread_cond_signal(&in->wakeup);
+    pthread_mutex_unlock(&in->lock);
 
     return 1;
 }
