@@ -1,5 +1,8 @@
 language: c
 
+os:
+  - linux
+  - osx
 env:
   - LIBAV=libav-stable
   - LIBAV=libav-git
@@ -7,10 +10,20 @@ env:
   - LIBAV=ffmpeg-git
 compiler:
   - clang
+
 branches:
   only:
     - master
     - ci
+
+matrix:
+  exclude:
+    - os: osx
+      env: LIBAV=libav-stable
+    - os: osx
+      env: LIBAV=libav-git
+    - os: osx
+      env: LIBAV=ffmpeg-git
 
 before_install: ./travis-deps libass-stable $LIBAV
 script:
@@ -18,13 +31,10 @@ script:
   - ./waf configure
   - ./waf build
 
-notifications-policy: &notifications-policy
-  on_success: change
-  on_failure: always
-
 notifications:
   email: false
   irc:
     channels:
       - "irc.freenode.org#mpv-player-dev"
-    <<: *notifications-policy
+    on_success: change
+    on_failure: always
