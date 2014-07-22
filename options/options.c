@@ -636,11 +636,7 @@ const struct MPOpts mp_default_opts = {
     .ass_shaper = 1,
     .use_embedded_fonts = 1,
     .sub_fix_timing = 1,
-#if HAVE_ENCA
-    .sub_cp = "enca",
-#else
-    .sub_cp = "UTF-8:UTF-8-BROKEN",
-#endif
+    .sub_cp = "auto",
 
     .hwdec_codecs = "h264,vc1,wmv3",
 

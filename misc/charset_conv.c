@@ -81,9 +81,22 @@ bool mp_charset_requires_guess(const char *user_cp)
     // Note that "utf8" is the UTF-8 codepage, while "utf8:..." specifies UTF-8
     // by default, plus a codepage that is used if the input is not UTF-8.
     return bstrcasecmp0(res[0], "enca") == 0 ||
+           bstrcasecmp0(res[0], "auto") == 0 ||
            bstrcasecmp0(res[0], "guess") == 0 ||
            (r > 1 && bstrcasecmp0(res[0], "utf-8") == 0) ||
            (r > 1 && bstrcasecmp0(res[0], "utf8") == 0);
+}
+
+static const char *const utf_bom[3] = {"\xEF\xBB\xBF", "\xFF\xFE", "\xFE\xFF"};
+static const char *const utf_enc[3] = {"utf-8",        "utf-16le", "utf-16be"};
+
+static const char *ms_bom_guess(bstr buf)
+{
+    for (int n = 0; n < 3; n++) {
+        if (bstr_startswith0(buf, utf_bom[n]))
+            return utf_enc[n];
+    }
+    return NULL;
 }
 
 #if HAVE_ENCA
@@ -103,8 +116,7 @@ static const char *enca_guess(struct mp_log *log, bstr buf, const char *language
             detected_cp = tmp;
         enca_analyser_free(analyser);
     } else {
-        mp_err(log, "ENCA doesn't know language '%s'\n",
-               language);
+        mp_err(log, "ENCA doesn't know language '%s'\n", language);
         size_t langcnt;
         const char **languages = enca_get_languages(&langcnt);
         mp_err(log, "ENCA supported languages:");
@@ -144,6 +156,15 @@ const char *mp_charset_guess(struct mp_log *log, bstr buf, const char *user_cp,
     if (!mp_charset_requires_guess(user_cp))
         return user_cp;
 
+    bool use_auto = strcasecmp(user_cp, "auto") == 0;
+    if (use_auto) {
+#if HAVE_ENCA
+        user_cp = "enca";
+#else
+        user_cp = "UTF-8:UTF-8-BROKEN";
+#endif
+    }
+
     // Do our own UTF-8 detection, because at least ENCA seems to get it
     // wrong sometimes (suggested by divVerent).
     int r = bstr_validate_utf8(buf);
@@ -160,6 +181,12 @@ const char *mp_charset_guess(struct mp_log *log, bstr buf, const char *user_cp,
 
     const char *res = NULL;
 
+    if (use_auto) {
+        res = ms_bom_guess(buf);
+        if (res)
+            type = bstr0("auto");
+    }
+
 #if HAVE_ENCA
     if (bstrcasecmp0(type, "enca") == 0)
         res = enca_guess(log, buf, lang);
@@ -174,8 +201,7 @@ const char *mp_charset_guess(struct mp_log *log, bstr buf, const char *user_cp,
     }
 
     if (res) {
-        mp_dbg(log, "%.*s detected charset: '%s'\n",
-               BSTR_P(type), res);
+        mp_dbg(log, "%.*s detected charset: '%s'\n", BSTR_P(type), res);
     } else {
         res = fallback;
         mp_dbg(log, "Detection with %.*s failed: fallback to %s\n",
