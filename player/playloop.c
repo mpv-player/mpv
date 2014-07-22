@@ -1307,9 +1307,9 @@ void idle_loop(struct MPContext *mpctx)
             vo_check_events(mpctx->video_out);
         update_osd_msg(mpctx);
         handle_osd_redraw(mpctx);
-        mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input,
-                                         get_wakeup_period(mpctx) * 1000,
+        mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, mpctx->sleeptime * 1000,
                                          false);
+        mpctx->sleeptime = get_wakeup_period(mpctx);
         if (cmd)
             run_command(mpctx, cmd);
         mp_cmd_free(cmd);
