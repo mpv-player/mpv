@@ -389,19 +389,19 @@ static int video_decode_and_filter(struct MPContext *mpctx)
         return VD_PROGRESS;
     }
 
-    int r = VD_PROGRESS;
-
     if (!d_video->waiting_decoded_mpi) {
         // Decode a new image, or at least feed the decoder a packet.
-        r = decode_image(mpctx);
+        int r = decode_image(mpctx);
+        if (r == VD_WAIT)
+            return r;
         if (d_video->waiting_decoded_mpi)
             d_video->decoder_output = d_video->waiting_decoded_mpi->params;
-        if (!d_video->waiting_decoded_mpi && r < 1)
+        if (!d_video->waiting_decoded_mpi && (r == VD_EOF || r < 0))
             return VD_EOF; // true EOF
     }
 
     // Image will be filtered on the next iteration.
-    return r;
+    return VD_PROGRESS;
 }
 
 static void init_vo(struct MPContext *mpctx)
