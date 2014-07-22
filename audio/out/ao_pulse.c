@@ -113,7 +113,7 @@ static void stream_request_cb(pa_stream *s, size_t length, void *userdata)
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-static int wait(struct ao *ao, pthread_mutex_t *lock)
+static int wait_audio(struct ao *ao, pthread_mutex_t *lock)
 {
     struct priv *priv = ao->priv;
     // We don't use this mutex, because pulse like to call stream_request_cb
@@ -664,7 +664,7 @@ const struct ao_driver audio_out_pulse = {
     .pause     = pause,
     .resume    = resume,
     .drain     = drain,
-    .wait      = wait,
+    .wait      = wait_audio,
     .wakeup    = wakeup,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
