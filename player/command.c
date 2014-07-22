@@ -3597,7 +3597,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_LOADFILE: {
         char *filename = cmd->args[0].v.s;
-        bool append = cmd->args[1].v.i;
+        int append = cmd->args[1].v.i;
 
         if (!append)
             playlist_clear(mpctx->playlist);
@@ -3612,7 +3612,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         playlist_add(mpctx->playlist, entry);
 
-        if (!append)
+        if (!append || (append == 2 && !mpctx->playlist->current))
             mp_set_playlist_entry(mpctx, mpctx->playlist->first);
         break;
     }

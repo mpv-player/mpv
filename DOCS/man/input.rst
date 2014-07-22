@@ -193,6 +193,8 @@ List of Input Commands
         Stop playback of the current file, and play the new file immediately.
     <append>
         Append the file to the playlist.
+    <append-play>
+        Append the file, and if nothing is currently playing, start playback.
 
     The third argument is a list of options and values which should be set
     while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.

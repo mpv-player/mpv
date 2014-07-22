@@ -111,7 +111,8 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_LOADFILE, "loadfile", {
       ARG_STRING,
       OARG_CHOICE(0, ({"replace", 0},          {"0", 0},
-                      {"append", 1},           {"1", 1})),
+                      {"append", 1},           {"1", 1},
+                      {"append-play", 2})),
       OPT_KEYVALUELIST(ARG(str_list), MP_CMD_OPT_ARG),
   }},
   { MP_CMD_LOADLIST, "loadlist", {
