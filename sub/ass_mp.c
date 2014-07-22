@@ -138,7 +138,9 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
     float set_line_spacing = 0;
     float set_font_scale = 1;
     int set_hinting = 0;
+#if LIBASS_VERSION >= 0x01103000
     int set_force_override = 0;
+#endif
     if (opts->ass_style_override) {
         set_use_margins = opts->ass_use_margins;
 #if LIBASS_VERSION >= 0x01010000
@@ -146,7 +148,9 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
 #endif
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
+#if LIBASS_VERSION >= 0x01103000
         set_force_override = opts->ass_style_override == 3;
+#endif
         set_font_scale = opts->sub_scale;
         if (opts->sub_scale_with_window) {
             int vidh = dim->h - (dim->mt + dim->mb);
