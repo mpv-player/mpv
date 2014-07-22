@@ -590,11 +590,8 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
         }
         avcodec_get_context_defaults3(stream->codec, ctx->vc);
 
-        // stream->time_base = ctx->timebase;
-        // doing this breaks mpeg2ts in ffmpeg
-        // which doesn't properly force the time base to be 90000
-        // furthermore, ffmpeg.c doesn't do this either and works
-
+        // Using codec->time_base is deprecated, but needed for older lavf.
+        stream->time_base = ctx->timebase;
         stream->codec->time_base = ctx->timebase;
 
         ctx->voptions = NULL;
@@ -626,6 +623,8 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
         }
         avcodec_get_context_defaults3(stream->codec, ctx->ac);
 
+        // Using codec->time_base is deprecated, but needed for older lavf.
+        stream->time_base = ctx->timebase;
         stream->codec->time_base = ctx->timebase;
 
         ctx->aoptions = NULL;
