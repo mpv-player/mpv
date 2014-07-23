@@ -114,12 +114,11 @@ static int init(struct ao *ao)
 
     codec = encode_lavc_get_codec(ao->encode_lavc_ctx, ac->stream);
 
-    // ac->stream->time_base.num = 1;
-    // ac->stream->time_base.den = ao->samplerate;
-    // doing this breaks mpeg2ts in ffmpeg
-    // which doesn't properly force the time base to be 90000
-    // furthermore, ffmpeg.c doesn't do this either and works
-
+    // TODO: Remove this redundancy with encode_lavc_alloc_stream also
+    // setting the time base.
+    // Using codec->time_bvase is deprecated, but needed for older lavf.
+    ac->stream->time_base.num = 1;
+    ac->stream->time_base.den = ao->samplerate;
     ac->stream->codec->time_base.num = 1;
     ac->stream->codec->time_base.den = ao->samplerate;
 
