@@ -26,6 +26,9 @@ static void egl_resize(struct vo_wayland_state *wl)
     int32_t width = wl->window.sh_width;
     int32_t height = wl->window.sh_height;
 
+    if (!wl->egl_context.egl_window)
+        return;
+
     // get the real size of the window
     // this improves moving the window while resizing it
     wl_egl_window_get_attached_size(wl->egl_context.egl_window,
