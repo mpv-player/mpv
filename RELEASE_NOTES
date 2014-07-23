@@ -1,3 +1,36 @@
+Release 0.4.2
+=============
+
+Bug fixes
+---------
+
+- Include changes from point releases in the release notes.
+- Fix --cache-file operation when file size is unknown (e.g. when playing from
+  a pipe).
+- Don't sleep if playback is stopped when reconnecting for remote stream.
+- Suspend read on vts change even if the requested title is not found when
+  using dvdnav (dvd://) (this fixes a bug where the DVD menu was not shown
+  properly after a DVD track ended).
+- Avoid draining if the audio output is paused (this fixes a bug where mpv would
+  hang when switching tracks when paused).
+- Drop buffered audio when switching tracks or filters (this fixes a possible
+  regression when using gapless audio).
+- Reverse video rotation direction.
+- Fix initialization of the input when playing from a pipe.
+- Fix description of the --mf option in the manpage (the --mf syntax changed a
+  while ago, but was not documented).
+- Actually append entries to the end of the playlist instead of after the
+  current entry with the "loadlist append" command.
+
+New features
+------------
+
+- Add "append-play" mode for the loadfile command.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log bb00774..d50be0a`` in
+the git repository.
+
 Release 0.4.1
 =============
 
