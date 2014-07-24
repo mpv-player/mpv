@@ -262,6 +262,7 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
             append.samples = copy;
             mp_audio_buffer_append(da->decode_buffer, &append);
             mp_audio_skip_samples(&da->decoded, copy);
+            da->pts_offset += copy;
             continue;
         }
         error = da->ad_driver->decode_packet(da);

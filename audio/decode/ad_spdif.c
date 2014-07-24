@@ -211,7 +211,6 @@ static int decode_packet(struct dec_audio *da)
 
     da->decoded.planes[0] = spdif_ctx->out_buffer;
     da->decoded.samples = spdif_ctx->out_buffer_len / da->decoded.sstride;
-    da->pts_offset += da->decoded.samples;
 
     return 0;
 }

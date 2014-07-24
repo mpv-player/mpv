@@ -257,7 +257,6 @@ static int decode_packet(struct dec_audio *da)
     int got_samples = bytes / con->sample_size;
     da->decoded.planes[0] = audio;
     da->decoded.samples = got_samples;
-    da->pts_offset += got_samples;
 
     update_info(da);
     return 0;
