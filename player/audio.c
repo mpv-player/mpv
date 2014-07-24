@@ -42,13 +42,12 @@
 #include "core.h"
 #include "command.h"
 
-static int build_afilter_chain(struct MPContext *mpctx)
+static int recreate_audio_filters(struct MPContext *mpctx)
 {
     struct dec_audio *d_audio = mpctx->d_audio;
     struct MPOpts *opts = mpctx->opts;
 
-    if (!d_audio)
-        return 0;
+    assert(d_audio);
 
     struct mp_audio in_format;
     mp_audio_buffer_get_format(d_audio->decode_buffer, &in_format);
@@ -65,16 +64,9 @@ static int build_afilter_chain(struct MPContext *mpctx)
         if (new_srate != out_format.rate)
             opts->playback_speed = new_srate / (double)in_format.rate;
     }
-    return audio_init_filters(d_audio, new_srate,
-                &out_format.rate, &out_format.channels, &out_format.format);
-}
-
-static int recreate_audio_filters(struct MPContext *mpctx)
-{
-    assert(mpctx->d_audio);
-
-    // init audio filters:
-    if (!build_afilter_chain(mpctx)) {
+    if (!audio_init_filters(d_audio, new_srate,
+                &out_format.rate, &out_format.channels, &out_format.format))
+    {
         MP_ERR(mpctx, "Couldn't find matching filter/ao format!\n");
         return -1;
     }
@@ -149,7 +141,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
             ao_channels = opts->audio_output_channels; // automatic downmix
     }
 
-    // Determine what the filter chain outputs. build_afilter_chain() also
+    // Determine what the filter chain outputs. recreate_audio_filters() also
     // needs this for testing whether playback speed is changed by resampling
     // or using a special filter.
     if (!audio_init_filters(mpctx->d_audio,  // preliminary init
