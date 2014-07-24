@@ -267,9 +267,6 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
         error = da->ad_driver->decode_packet(da);
         if (error < 0)
             break;
-        // No progress means the decoder is buffering input data.
-        if (!da->decoded.samples)
-            break;
     }
 
     // Filter
