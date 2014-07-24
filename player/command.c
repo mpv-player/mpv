@@ -3577,7 +3577,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (pl) {
             if (!append)
                 playlist_clear(mpctx->playlist);
-            playlist_transfer_entries(mpctx->playlist, pl);
+            playlist_append_entries(mpctx->playlist, pl);
             talloc_free(pl);
 
             if (!append && mpctx->playlist->first) {
