@@ -2260,7 +2260,7 @@ OPTIONS
     which means it will try to use UTF-8, otherwise the ``UTF-8-BROKEN``
     pseudo codepage (see below).
 
-    The default value for this optino is ``auto``, whose actual effect depends
+    The default value for this option is ``auto``, whose actual effect depends
     on whether ENCA is compiled.
 
     .. admonition:: Warning
