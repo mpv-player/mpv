@@ -51,9 +51,9 @@ struct dec_audio {
 enum {
     AD_OK = 0,
     AD_ERR = -1,
-    AD_EOF = -1, // same as AD_ERR for now
     AD_NEW_FMT = -2,
     AD_ASYNC_PLAY_DONE = -3,
+    AD_EOF = -4,
 };
 
 struct mp_decoder_list *audio_decoder_list(void);

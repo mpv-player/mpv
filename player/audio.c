@@ -427,7 +427,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             return -1;
         } else if (res == AD_ASYNC_PLAY_DONE)
             return 0;
-        else if (demux_stream_eof(d_audio->header))
+        else if (res == AD_EOF)
             audio_eof = true;
     }
 

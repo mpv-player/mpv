@@ -274,13 +274,13 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
     filter_data.rate = da->afilter->input.rate; // due to playback speed change
     len = MPMIN(filter_data.samples, len);
     filter_data.samples = len;
-    bool eof = filter_data.samples == 0 && error < 0;
+    bool eof = error == AD_EOF && filter_data.samples == 0;
 
     if (af_filter(da->afilter, &filter_data, eof ? AF_FILTER_FLAG_EOF : 0) < 0)
         return AD_ERR;
 
     mp_audio_buffer_append(outbuf, &filter_data);
-    if (eof && filter_data.samples > 0)
+    if (error == AD_EOF && filter_data.samples > 0)
         error = 0; // don't end playback yet
 
     // remove processed data from decoder buffer:
