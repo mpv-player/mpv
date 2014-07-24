@@ -242,17 +242,18 @@ int audio_init_filters(struct dec_audio *d_audio, int in_samplerate,
 static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
                           int len)
 {
+    bool format_change = false;
     int error = 0;
+
+    assert(len > 0); // would break EOF logic below
 
     while (mp_audio_buffer_samples(da->decode_buffer) < len) {
         // Check for a format change
         struct mp_audio config;
         mp_audio_buffer_get_format(da->decode_buffer, &config);
-        if (!mp_audio_config_equals(&da->decoded, &config)) {
-            // If there are still samples left in the buffer, let them drain
-            // first, and don't signal a format change to the caller yet.
-            if (mp_audio_buffer_samples(da->decode_buffer) == 0)
-                error = AD_NEW_FMT;
+        format_change = !mp_audio_config_equals(&da->decoded, &config);
+        if (format_change) {
+            error = AD_EOF; // drain remaining data left in the current buffer
             break;
         }
         if (da->decoded.samples > 0) {
@@ -286,9 +287,9 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
     // remove processed data from decoder buffer:
     mp_audio_buffer_skip(da->decode_buffer, len);
 
-    // Assume the filter chain is drained from old data at this point.
-    // (If not, the remaining old data is discarded.)
-    if (error == AD_NEW_FMT) {
+    // if format was changed, and all data was drained, execute the format change
+    if (format_change && eof) {
+        error = AD_NEW_FMT;
         if (!reinit_audio_buffer(da))
             error = AD_ERR; // switch to invalid format
     }
