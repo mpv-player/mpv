@@ -244,11 +244,10 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
 {
     int error = 0;
 
-    struct mp_audio config;
-    mp_audio_buffer_get_format(da->decode_buffer, &config);
-
     while (mp_audio_buffer_samples(da->decode_buffer) < len) {
-        // Format change
+        // Check for a format change
+        struct mp_audio config;
+        mp_audio_buffer_get_format(da->decode_buffer, &config);
         if (!mp_audio_config_equals(&da->decoded, &config)) {
             // If there are still samples left in the buffer, let them drain
             // first, and don't signal a format change to the caller yet.
@@ -307,9 +306,6 @@ int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
 {
     // Indicates that a filter seems to be buffering large amounts of data
     int huge_filter_buffer = 0;
-    // Decoded audio must be cut at boundaries of this many samples
-    // (Note: the reason for this is unknown, possibly a refactoring artifact)
-    int unitsize = 16;
 
     /* Filter output size will be about filter_multiplier times input size.
      * If some filter buffers audio in big blocks this might only hold
@@ -326,8 +322,8 @@ int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
         prev_buffered = buffered;
 
         int decsamples = (minsamples - buffered) / filter_multiplier;
-        // + some extra for possible filter buffering
-        decsamples += unitsize << 5;
+        // + some extra for possible filter buffering, and avoid 0
+        decsamples += 512;
 
         if (huge_filter_buffer) {
             /* Some filter must be doing significant buffering if the estimated
