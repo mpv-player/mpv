@@ -215,6 +215,15 @@ void playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl)
     }
 }
 
+void playlist_append_entries(struct playlist *pl, struct playlist *source_pl)
+{
+    while (source_pl->first) {
+        struct playlist_entry *e = source_pl->first;
+        playlist_unlink(source_pl, e);
+        playlist_add(pl, e);
+    }
+}
+
 // Return number of entries between list start and e.
 // Return -1 if e is not on the list, or if e is NULL.
 int playlist_entry_to_index(struct playlist *pl, struct playlist_entry *e)

@@ -74,6 +74,7 @@ void playlist_shuffle(struct playlist *pl);
 struct playlist_entry *playlist_get_next(struct playlist *pl, int direction);
 void playlist_add_base_path(struct playlist *pl, bstr base_path);
 void playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl);
+void playlist_append_entries(struct playlist *pl, struct playlist *source_pl);
 
 int playlist_entry_to_index(struct playlist *pl, struct playlist_entry *e);
 int playlist_entry_count(struct playlist *pl);
