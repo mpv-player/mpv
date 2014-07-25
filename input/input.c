@@ -1521,7 +1521,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
 #ifndef __MINGW32__
     int ret = mp_make_wakeup_pipe(ictx->wakeup_pipe);
     if (ret < 0)
-        MP_ERR(ictx, "Failed to initialize wakeup pipe: %s\n", strerror(-ret));
+        MP_ERR(ictx, "Failed to initialize wakeup pipe.\n");
     else
         mp_input_add_fd(ictx, ictx->wakeup_pipe[0], true, NULL, read_wakeup,
                         NULL, NULL);

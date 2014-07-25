@@ -46,7 +46,7 @@ bool mp_set_cloexec(int fd)
 int mp_make_wakeup_pipe(int pipes[2])
 {
     pipes[0] = pipes[1] = -1;
-    return -ENOSYS;
+    return -1;
 }
 #else
 // create a pipe, and set it to non-blocking (and also set FD_CLOEXEC)
@@ -54,7 +54,7 @@ int mp_make_wakeup_pipe(int pipes[2])
 {
     if (pipe(pipes) != 0) {
         pipes[0] = pipes[1] = -1;
-        return -errno;
+        return -1;
     }
 
     for (int i = 0; i < 2; i++) {
