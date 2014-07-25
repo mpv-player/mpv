@@ -364,17 +364,19 @@ static int init(struct ao *ao)
     pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
     pthread_cond_init(&p->wakeup_drain, NULL);
-    mp_make_wakeup_pipe(p->wakeup_pipe);
+    if (mp_make_wakeup_pipe(p->wakeup_pipe) < 0)
+        goto err;
 
     p->buffer = mp_audio_buffer_create(ao);
     mp_audio_buffer_reinit_fmt(p->buffer, ao->format,
                                &ao->channels, ao->samplerate);
     mp_audio_buffer_preallocate_min(p->buffer, ao->buffer);
-    if (pthread_create(&p->thread, NULL, playthread, ao)) {
-        ao->driver->uninit(ao);
-        return -1;
-    }
+    if (pthread_create(&p->thread, NULL, playthread, ao))
+        goto err;
     return 0;
+err:
+    ao->driver->uninit(ao);
+    return -1;
 }
 
 const struct ao_driver ao_api_push = {

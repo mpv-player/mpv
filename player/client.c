@@ -1331,11 +1331,12 @@ int mpv_get_wakeup_pipe(mpv_handle *ctx)
 {
     pthread_mutex_lock(&ctx->wakeup_lock);
     if (ctx->wakeup_pipe[0] == -1) {
-        mp_make_wakeup_pipe(ctx->wakeup_pipe);
-        write(ctx->wakeup_pipe[1], &(char){0}, 1);
+        if (mp_make_wakeup_pipe(ctx->wakeup_pipe) >= 0)
+            write(ctx->wakeup_pipe[1], &(char){0}, 1);
     }
+    int fd = ctx->wakeup_pipe[0];
     pthread_mutex_unlock(&ctx->wakeup_lock);
-    return ctx->wakeup_pipe[0];
+    return fd;
 }
 
 unsigned long mpv_client_api_version(void)
