@@ -78,9 +78,12 @@ struct command_ctx {
     struct cycle_counter *cycle_counters;
     int num_cycle_counters;
 
-#define OVERLAY_MAX_ID 64
-    void *overlay_map[OVERLAY_MAX_ID];
-    struct sub_bitmaps external2;
+    struct sub_bitmap *overlays;
+    int num_overlays;
+    // One of these is in use by the OSD; the other one exists so that the
+    // bitmap list can be manipulated without additional synchronization.
+    struct sub_bitmaps overlay_osd[2];
+    struct sub_bitmaps *overlay_osd_current;
 };
 
 static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
@@ -3126,29 +3129,23 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
 
 #if HAVE_SYS_MMAN_H
 
-static int ext2_sub_find(struct MPContext *mpctx, int id)
+static void recreate_overlays(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
-    struct sub_bitmaps *sub = &cmd->external2;
-    void *p = NULL;
-    if (id >= 0 && id < OVERLAY_MAX_ID)
-        p = cmd->overlay_map[id];
-    if (sub && p) {
-        for (int n = 0; n < sub->num_parts; n++) {
-            if (sub->parts[n].bitmap == p)
-                return n;
-        }
+    struct sub_bitmaps *new = &cmd->overlay_osd[0];
+    if (new == cmd->overlay_osd_current)
+        new += 1; // pick the unused one
+    new->format = SUBBITMAP_RGBA;
+    new->bitmap_id = new->bitmap_pos_id = 1;
+    // overlay array can have unused entries, but parts list must be "packed"
+    new->num_parts = 0;
+    for (int n = 0; n < cmd->num_overlays; n++) {
+        struct sub_bitmap *s = &cmd->overlays[n];
+        if (s->bitmap)
+            MP_TARRAY_APPEND(cmd, new->parts, new->num_parts, *s);
     }
-    return -1;
-}
-
-static int ext2_sub_alloc(struct MPContext *mpctx)
-{
-    struct command_ctx *cmd = mpctx->command_ctx;
-    struct sub_bitmaps *sub = &cmd->external2;
-    struct sub_bitmap b = {0};
-    MP_TARRAY_APPEND(cmd, sub->parts, sub->num_parts, b);
-    return sub->num_parts - 1;
+    cmd->overlay_osd_current = new;
+    osd_set_external2(mpctx->osd, cmd->overlay_osd_current);
 }
 
 static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
@@ -3157,13 +3154,11 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
 {
     struct command_ctx *cmd = mpctx->command_ctx;
     int r = -1;
-    // Temporarily unmap them to avoid race condition with concurrent access.
-    osd_set_external2(mpctx->osd, NULL);
     if (strcmp(fmt, "bgra") != 0) {
         MP_ERR(mpctx, "overlay_add: unsupported OSD format '%s'\n", fmt);
         goto error;
     }
-    if (id < 0 || id >= OVERLAY_MAX_ID) {
+    if (id < 0 || id >= 64) { // arbitrary upper limit
         MP_ERR(mpctx, "overlay_add: invalid id %d\n", id);
         goto error;
     }
@@ -3185,50 +3180,49 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
         MP_ERR(mpctx, "overlay_add: could not open or map '%s'\n", file);
         goto error;
     }
-    int index = ext2_sub_find(mpctx, id);
-    if (index < 0)
-        index = ext2_sub_alloc(mpctx);
-    if (index < 0) {
-        munmap(p, h * stride);
-        goto error;
-    }
-    cmd->overlay_map[id] = p;
-    cmd->external2.parts[index] = (struct sub_bitmap) {
+    MP_TARRAY_GROW(cmd, cmd->overlays, id);
+    while (cmd->num_overlays <= id)
+        cmd->overlays[cmd->num_overlays++].bitmap = NULL;
+    struct sub_bitmap *overlay = &cmd->overlays[id];
+    void *prev = overlay->bitmap;
+    size_t prev_size = overlay->stride * overlay->h;
+    *overlay = (struct sub_bitmap) {
         .bitmap = p,
         .stride = stride,
         .x = x, .y = y,
         .w = w, .h = h,
         .dw = w, .dh = h,
     };
-    cmd->external2.bitmap_id = cmd->external2.bitmap_pos_id = 1;
-    cmd->external2.format = SUBBITMAP_RGBA;
+    recreate_overlays(mpctx);
+    // unmap afterwards, to avoid unmapping while OSD uses the memory
+    if (prev)
+        munmap(prev, prev_size);
     r = 0;
 error:
-    osd_set_external2(mpctx->osd, &cmd->external2);
     return r;
 }
 
 static void overlay_remove(struct MPContext *mpctx, int id)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
-    osd_set_external2(mpctx->osd, NULL);
-    int index = ext2_sub_find(mpctx, id);
-    if (index >= 0) {
-        struct sub_bitmaps *sub = &cmd->external2;
-        struct sub_bitmap *part = &sub->parts[index];
-        munmap(part->bitmap, part->h * part->stride);
-        MP_TARRAY_REMOVE_AT(sub->parts, sub->num_parts, index);
-        cmd->overlay_map[id] = NULL;
-        sub->bitmap_id = sub->bitmap_pos_id = 1;
+    if (id >= 0 && id < cmd->num_overlays) {
+        struct sub_bitmap *overlay = &cmd->overlays[id];
+        if (overlay->bitmap) {
+            void *ptr = overlay->bitmap;
+            size_t ptr_size = overlay->h * overlay->stride;
+            overlay->bitmap = NULL; // remove
+            recreate_overlays(mpctx);
+            munmap(ptr, ptr_size);
+        }
     }
-    osd_set_external2(mpctx->osd, &cmd->external2);
 }
 
 static void overlay_uninit(struct MPContext *mpctx)
 {
+    struct command_ctx *cmd = mpctx->command_ctx;
     if (!mpctx->osd)
         return;
-    for (int id = 0; id < OVERLAY_MAX_ID; id++)
+    for (int id = 0; id < cmd->num_overlays; id++)
         overlay_remove(mpctx, id);
     osd_set_external2(mpctx->osd, NULL);
 }
