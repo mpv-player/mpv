@@ -364,8 +364,7 @@ static int init(struct ao *ao)
     pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
     pthread_cond_init(&p->wakeup_drain, NULL);
-    if (mp_make_wakeup_pipe(p->wakeup_pipe) < 0)
-        goto err;
+    mp_make_wakeup_pipe(p->wakeup_pipe);
 
     p->buffer = mp_audio_buffer_create(ao);
     mp_audio_buffer_reinit_fmt(p->buffer, ao->format,
