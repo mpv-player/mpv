@@ -479,7 +479,7 @@ audio_output_features = [
     }, {
         'name': '--pulse',
         'desc': 'PulseAudio audio output',
-        'func': check_pkg_config('libpulse', '>= 0.9')
+        'func': check_pkg_config('libpulse', '>= 1.0')
     }, {
         'name': '--portaudio',
         'desc': 'PortAudio audio output',

@@ -720,7 +720,7 @@ check_statement_libs "RSound" $_rsound RSOUND rsound.h 'rsd_init(NULL);' -lrsoun
 
 check_statement_libs "sndio" $_sndio SNDIO sndio.h 'struct sio_par par; sio_initpar(&par); const char *s = SIO_DEVANY' -lsndio
 
-check_pkg_config "PulseAudio" $_pulse PULSE 'libpulse >= 0.9'
+check_pkg_config "PulseAudio" $_pulse PULSE 'libpulse >= 1.0'
 
 check_pkg_config "PortAudio" $_portaudio PORTAUDIO 'portaudio-2.0 >= 19'
 
