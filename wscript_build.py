@@ -201,6 +201,7 @@ def build(ctx):
         ( "misc/charset_conv.c" ),
         ( "misc/dispatch.c" ),
         ( "misc/ring.c" ),
+        ( "misc/rendezvous.c" ),
 
         ## Options
         ( "options/m_config.c" ),

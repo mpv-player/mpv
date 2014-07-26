@@ -177,6 +177,7 @@ SOURCES = audio/audio.c \
           input/keycodes.c \
           misc/charset_conv.c \
           misc/dispatch.c \
+          misc/rendezvous.c \
           misc/ring.c \
           options/m_config.c \
           options/m_option.c \
