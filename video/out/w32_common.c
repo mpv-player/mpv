@@ -1193,7 +1193,6 @@ void vo_w32_uninit(struct vo *vo)
     mp_dispatch_run(w32->dispatch, do_terminate, w32);
     pthread_join(w32->thread, NULL);
 
-    w32_thread_context = NULL;
     talloc_free(w32);
     vo->w32 = NULL;
 }
