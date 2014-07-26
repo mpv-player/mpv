@@ -63,6 +63,7 @@ struct priv {
     char *cfg_host;
     char *cfg_sink;
     int cfg_buffer;
+    int cfg_latency_hacks;
 };
 
 #define GENERIC_ERR_MSG(str) \
@@ -365,8 +366,13 @@ static int init(struct ao *ao)
         .minreq = -1,
         .fragsize = -1,
     };
+
+    int flags = PA_STREAM_NOT_MONOTONIC;
+    if (!priv->cfg_latency_hacks)
+        flags |= PA_STREAM_INTERPOLATE_TIMING|PA_STREAM_AUTO_TIMING_UPDATE;
+
     if (pa_stream_connect_playback(priv->stream, sink, &bufattr,
-                                   PA_STREAM_NOT_MONOTONIC, NULL, NULL) < 0)
+                                   flags, NULL, NULL) < 0)
         goto unlock_and_fail;
 
     /* Wait until the stream is ready */
@@ -463,8 +469,7 @@ static int get_space(struct ao *ao)
     return space / ao->sstride;
 }
 
-// Return the current latency in seconds
-static float get_delay(struct ao *ao)
+static float get_delay_hackfixed(struct ao *ao)
 {
     /* This code basically does what pa_stream_get_latency() _should_
      * do, but doesn't due to multiple known bugs in PulseAudio (at
@@ -517,6 +522,34 @@ static float get_delay(struct ao *ao)
         latency = 0;
     pa_threaded_mainloop_unlock(priv->mainloop);
     return latency / 1e6;
+}
+
+static float get_delay_pulse(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
+    pa_usec_t latency = (pa_usec_t) -1;
+    pa_threaded_mainloop_lock(priv->mainloop);
+    while (pa_stream_get_latency(priv->stream, &latency, NULL) < 0) {
+        if (pa_context_errno(priv->context) != PA_ERR_NODATA) {
+            GENERIC_ERR_MSG("pa_stream_get_latency() failed");
+            break;
+        }
+        /* Wait until latency data is available again */
+        pa_threaded_mainloop_wait(priv->mainloop);
+    }
+    pa_threaded_mainloop_unlock(priv->mainloop);
+    return latency == (pa_usec_t) -1 ? 0 : latency / 1000000.0;
+}
+
+// Return the current latency in seconds
+static float get_delay(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
+    if (priv->cfg_latency_hacks) {
+        return get_delay_hackfixed(ao);
+    } else {
+        return get_delay_pulse(ao);
+    }
 }
 
 /* A callback function that is called when the
@@ -648,11 +681,13 @@ const struct ao_driver audio_out_pulse = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .cfg_buffer = 250,
+        .cfg_latency_hacks = 1,
     },
     .options = (const struct m_option[]) {
         OPT_STRING("host", cfg_host, 0),
         OPT_STRING("sink", cfg_sink, 0),
         OPT_CHOICE_OR_INT("buffer", cfg_buffer, 0, 1, 2000, ({"native", -1})),
+        OPT_FLAG("latency-hacks", cfg_latency_hacks, 0),
         {0}
     },
 };

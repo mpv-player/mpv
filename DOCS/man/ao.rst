@@ -149,6 +149,12 @@ Available audio output drivers are:
         value makes the audio stream react faster, e.g. to playback speed
         changes. Default: 250.
 
+    ``latency-hacks=<yes|no>``
+        Enable hacks to workaround PulseAudio timing bugs (default: yes). If
+        enabled, mpv will do elaborate latency calculations on its own. If
+        disabled, it will use PulseAudio automatically updated timing
+        information. Disabling this might help with e.g. networked audio.
+
 ``portaudio``
     PortAudio audio output driver. This works on all platforms, and has
     extensive MS Windows support.
