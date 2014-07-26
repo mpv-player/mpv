@@ -344,7 +344,7 @@ OPTIONS
     Specifying ``--autosync=0``, the default, will cause frame timing to be
     based entirely on audio delay measurements. Specifying ``--autosync=1``
     will do the same, but will subtly change the A/V correction algorithm. An
-    uneven video framerate in a movie which plays fine with ``--no-audio`` can
+    uneven video framerate in a video which plays fine with ``--no-audio`` can
     often be helped by setting this to an integer value greater than 1. The
     higher the value, the closer the timing will be to ``--no-audio``. Try
     ``--autosync=30`` to smooth out problems with sound drivers which do not
@@ -371,7 +371,7 @@ OPTIONS
         ``mpv bd:// --bluray-device=/path/to/bd/``
 
 ``--border``, ``--no-border``
-    Play movie with window border and decorations. Since this is on by
+    Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.
 
 ``--brightness=<-100-100>``
@@ -1686,7 +1686,7 @@ OPTIONS
 
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
-    movie to make it fit a 4:3 display without black bands). The range
+    video to make it fit a 4:3 display without black bands). The range
     controls how much of the image is cropped. May not work with all video
     output drivers.
 
@@ -1762,7 +1762,7 @@ OPTIONS
     based cards are known as PVR capture cards. Be aware that only Linux
     2.6.18 kernel and above is able to handle MPEG stream through V4L2 layer.
     For hardware capture of an MPEG stream and watching it with mpv, use
-    ``pvr://`` as a movie URL.
+    ``pvr://`` as media URL.
 
 
 ``--pvr-aspect=<0-3>``
@@ -1920,7 +1920,7 @@ OPTIONS
 ``--screen=<default|0-32>``
     In multi-monitor configurations (i.e. a single desktop that spans across
     multiple displays), this option tells mpv which screen to display the
-    movie on.
+    video on.
 
     .. admonition:: Note (X11)
 
@@ -2228,7 +2228,7 @@ OPTIONS
 
     :no:    Don't automatically load external subtitle files.
     :exact: Load the media filename with subtitle file extension (default).
-    :fuzzy: Load all subs containing movie name.
+    :fuzzy: Load all subs containing media filename.
     :all:   Load all subs in the current and ``--sub-paths`` directories.
 
 ``--sub-paths=<path1:path2:...>``
@@ -2239,13 +2239,13 @@ OPTIONS
 
     .. admonition:: Example
 
-        Assuming that ``/path/to/movie/movie.avi`` is played and
+        Assuming that ``/path/to/video/video.avi`` is played and
         ``--sub-paths=sub:subtitles:/tmp/subs`` is specified, mpv searches for
         subtitle files in these directories:
 
-        - ``/path/to/movie/``
-        - ``/path/to/movie/sub/``
-        - ``/path/to/movie/subtitles/``
+        - ``/path/to/video/``
+        - ``/path/to/video/sub/``
+        - ``/path/to/video/subtitles/``
         - ``/tmp/subs/``
         - ``~/.mpv/sub/``
 
@@ -2318,11 +2318,11 @@ OPTIONS
     Delays subtitles by ``<sec>`` seconds. Can be negative.
 
 ``--sub-fps=<rate>``
-    Specify the framerate of the subtitle file (default: movie fps).
+    Specify the framerate of the subtitle file (default: video fps).
 
     .. note::
 
-        ``<rate>`` > movie fps speeds the subtitles up for frame-based
+        ``<rate>`` > video fps speeds the subtitles up for frame-based
         subtitle files and slows them down for time-based ones.
 
     Also see ``--sub-speed`` option.
@@ -2465,8 +2465,8 @@ OPTIONS
     These options tune various properties of the TV capture module. For
     watching TV with mpv, use ``tv://`` or ``tv://<channel_number>`` or
     even ``tv://<channel_name>`` (see option ``tv-channels`` for ``channel_name``
-    below) as a movie URL. You can also use ``tv:///<input_id>`` to start
-    watching a movie from a composite or S-Video input (see option ``input`` for
+    below) as a media URL. You can also use ``tv:///<input_id>`` to start
+    watching a video from a composite or S-Video input (see option ``input`` for
     details).
 
 ``--no-tv-audio``
@@ -2755,7 +2755,7 @@ OPTIONS
     This option is disabled if the ``--no-keepaspect`` option is used.
 
 ``--video-aspect=<ratio>``
-    Override movie aspect ratio, in case aspect information is incorrect or
+    Override video aspect ratio, in case aspect information is incorrect or
     missing in the file being played. See also ``--no-video-aspect``.
 
     Two values have special meaning:

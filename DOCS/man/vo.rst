@@ -524,7 +524,7 @@ Available video output drivers are:
         for mastering instead of the true curve. Most notably, anything in the
         Apple ecosystem uses this approximation - including all programs
         compatible with it. It's a sound idea to try enabling this flag first
-        when watching movies and shows to see if things look better that way.
+        when watching videos and shows to see if things look better that way.
 
         This only affects the output when using either ``icc-profile`` or ``srgb``.
 

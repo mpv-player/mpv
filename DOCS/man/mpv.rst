@@ -2,7 +2,7 @@ mpv
 ###
 
 ##############
-a movie player
+a media player
 ##############
 
 :Copyright: GPLv2+
@@ -19,7 +19,7 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-**mpv** is a movie player based on MPlayer and mplayer2. It supports a wide variety of video
+**mpv** is a media player based on MPlayer and mplayer2. It supports a wide variety of video
 file formats, audio and video codecs, and subtitle types. Special input URL
 types are available to read input from a variety of sources other than disk
 files. Depending on platform, a variety of different video and audio output
@@ -69,11 +69,11 @@ p / SPACE
     Pause (pressing again unpauses).
 
 \.
-    Step forward. Pressing once will pause movie, every consecutive press will
+    Step forward. Pressing once will pause, every consecutive press will
     play one frame and then go into pause mode again.
 
 ,
-    Step backward. Pressing once will pause movie, every consecutive press will
+    Step backward. Pressing once will pause, every consecutive press will
     play one frame in reverse and then go into pause mode again.
 
 q / ESC
@@ -190,21 +190,21 @@ corresponding adjustment, or the software equalizer (``--vf=eq``).)
 (The following keys are valid only on OSX.)
 
 command + 0
-    Resize movie window to half its original size.
+    Resize video window to half its original size.
     (On other platforms, you can bind keys to change the ``window-scale``
     property.)
 
 command + 1
-    Resize movie window to its original size.
+    Resize video window to its original size.
 
 command + 2
-    Resize movie window to double its original size.
+    Resize video window to double its original size.
 
 command + f
     Toggle fullscreen (see also ``--fs``).
 
 command + [ and command + ]
-    Set movie window alpha.
+    Set video window alpha.
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
 
@@ -373,8 +373,8 @@ File-specific Configuration Files
 ---------------------------------
 
 You can also write file-specific configuration files. If you wish to have a
-configuration file for a file called 'movie.avi', create a file named
-'movie.avi.conf' with the file-specific options in it and put it in
+configuration file for a file called 'video.avi', create a file named
+'video.avi.conf' with the file-specific options in it and put it in
 ``~/.mpv/``. You can also put the configuration file in the same directory
 as the file to be played, as long as you give the ``--use-filedir-conf``
 option (either on the command line or in your global config file). If a

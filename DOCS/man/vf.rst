@@ -47,7 +47,7 @@ Available filters are:
 
 ``crop[=w:h:x:y]``
     Crops the given part of the image and discards the rest. Useful to remove
-    black bands from widescreen movies.
+    black bands from widescreen videos.
 
     ``<w>,<h>``
         Cropped width and height, defaults to original width and height.
@@ -55,7 +55,7 @@ Available filters are:
         Position of the cropped picture, defaults to center.
 
 ``expand[=w:h:x:y:aspect:round]``
-    Expands (not scales) movie resolution to the given value and places the
+    Expands (not scales) video resolution to the given value and places the
     unscaled original at coordinates x, y.
 
     ``<w>,<h>``
@@ -617,7 +617,7 @@ Available filters are:
 
 ``phase[=t|b|p|a|u|T|B|A|U][:v]``
     Delay interlaced video by one field time so that the field order changes.
-    The intended use is to fix PAL movies that have been captured with the
+    The intended use is to fix PAL videos that have been captured with the
     opposite field order to the film-to-video transfer. The options are:
 
     ``t``
