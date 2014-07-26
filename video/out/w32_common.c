@@ -950,7 +950,7 @@ int vo_w32_init(struct vo *vo)
         w32->window = CreateWindowExW(0, classname,
                                       classname,
                                       update_style(w32, 0),
-                                      CW_USEDEFAULT, 0, 100, 100,
+                                      CW_USEDEFAULT, SW_HIDE, 100, 100,
                                       0, 0, hInstance, w32);
     }
 
