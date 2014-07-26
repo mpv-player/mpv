@@ -647,6 +647,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 const struct vo_driver video_out_x11 = {
     .description = "X11 ( XImage/Shm )",
     .name = "x11",
+    .caps = VO_CAP_EVIL_OSD,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option []){{0}},
     .preinit = preinit,

@@ -134,6 +134,8 @@ struct voctrl_screenshot_args {
 
 // VO does handle mp_image_params.rotate in 90 degree steps
 #define VO_CAP_ROTATE90 1
+// Requires VOCTRL_WINDOW_TO_OSD_COORDS to map mouse coords. to OSD coords.
+#define VO_CAP_EVIL_OSD 2
 
 #define VO_MAX_QUEUE 5
 
