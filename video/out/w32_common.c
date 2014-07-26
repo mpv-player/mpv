@@ -877,31 +877,6 @@ static int reinit_window_state(struct vo_w32_state *w32)
 int vo_w32_config(struct vo *vo, uint32_t flags)
 {
     struct vo_w32_state *w32 = vo->w32;
-    PIXELFORMATDESCRIPTOR pfd;
-    int pf;
-    HDC vo_hdc = GetDC(w32->window);
-
-    memset(&pfd, 0, sizeof pfd);
-    pfd.nSize = sizeof pfd;
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-
-    if (flags & VOFLAG_STEREO)
-        pfd.dwFlags |= PFD_STEREO;
-
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 24;
-    pfd.iLayerType = PFD_MAIN_PLANE;
-    pf = ChoosePixelFormat(vo_hdc, &pfd);
-
-    if (!pf) {
-        MP_ERR(w32, "unable to select a valid pixel format!\n");
-        ReleaseDC(w32->window, vo_hdc);
-        return 0;
-    }
-
-    SetPixelFormat(vo_hdc, pf, &pfd);
-    ReleaseDC(w32->window, vo_hdc);
 
     // we already have a fully initialized window, so nothing needs to be done
     if (flags & VOFLAG_HIDDEN)
@@ -966,7 +941,7 @@ int vo_w32_init(struct vo *vo)
 
     WNDCLASSEXW wcex = {
         .cbSize = sizeof wcex,
-        .style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW,
+        .style = CS_HREDRAW | CS_VREDRAW,
         .lpfnWndProc = WndProc,
         .hInstance = hInstance,
         .hIcon = LoadIconW(hInstance, L"IDI_ICON1"),

@@ -19,13 +19,59 @@
  * version 2.1 of the License, or (at your option) any later version.
  */
 
+#include <assert.h>
 #include <windows.h>
 #include "w32_common.h"
 #include "gl_common.h"
 
 struct w32_context {
     HGLRC context;
+    HDC hdc;
 };
+
+static bool create_dc(struct MPGLContext *ctx, int flags)
+{
+    struct w32_context *w32_ctx = ctx->priv;
+    HWND win = vo_w32_hwnd(ctx->vo);
+
+    assert(!w32_ctx->hdc);
+
+    HDC hdc = GetDC(win);
+    if (!hdc)
+        return false;
+
+    PIXELFORMATDESCRIPTOR pfd;
+    memset(&pfd, 0, sizeof pfd);
+    pfd.nSize = sizeof pfd;
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+
+    if (flags & VOFLAG_STEREO)
+        pfd.dwFlags |= PFD_STEREO;
+
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 24;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+    int pf = ChoosePixelFormat(hdc, &pfd);
+
+    if (!pf) {
+        MP_ERR(ctx->vo, "unable to select a valid pixel format!\n");
+        ReleaseDC(win, hdc);
+        return false;
+    }
+
+    SetPixelFormat(hdc, pf, &pfd);
+
+    int pfmt = GetPixelFormat(hdc);
+    if (DescribePixelFormat(hdc, pfmt, sizeof(PIXELFORMATDESCRIPTOR), &pfd)) {
+        ctx->depth_r = pfd.cRedBits;
+        ctx->depth_g = pfd.cGreenBits;
+        ctx->depth_b = pfd.cBlueBits;
+    }
+
+    w32_ctx->hdc = hdc;
+    return true;
+}
 
 static void *w32gpa(const GLubyte *procName)
 {
@@ -37,7 +83,7 @@ static void *w32gpa(const GLubyte *procName)
     return GetProcAddress(oglmod, procName);
 }
 
-static bool create_context_w32_old(struct MPGLContext *ctx)
+static bool create_context_w32_old(struct MPGLContext *ctx, int flags)
 {
     struct w32_context *w32_ctx = ctx->priv;
     HGLRC *context = &w32_ctx->context;
@@ -45,8 +91,10 @@ static bool create_context_w32_old(struct MPGLContext *ctx)
     if (*context)
         return true;
 
-    HWND win = vo_w32_hwnd(ctx->vo);
-    HDC windc = GetDC(win);
+    if (!create_dc(ctx, flags))
+        return false;
+
+    HDC windc = w32_ctx->hdc;
     bool res = false;
 
     HGLRC new_context = wglCreateContext(windc);
@@ -67,11 +115,10 @@ static bool create_context_w32_old(struct MPGLContext *ctx)
     res = true;
 
 out:
-    ReleaseDC(win, windc);
     return res;
 }
 
-static bool create_context_w32_gl3(struct MPGLContext *ctx)
+static bool create_context_w32_gl3(struct MPGLContext *ctx, int flags)
 {
     struct w32_context *w32_ctx = ctx->priv;
     HGLRC *context = &w32_ctx->context;
@@ -79,8 +126,10 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
     if (*context) // reuse existing context
         return true; // not reusing it breaks gl3!
 
-    HWND win = vo_w32_hwnd(ctx->vo);
-    HDC windc = GetDC(win);
+    if (!create_dc(ctx, flags))
+        return false;
+
+    HDC windc = w32_ctx->hdc;
     HGLRC new_context = 0;
 
     new_context = wglCreateContext(windc);
@@ -147,14 +196,6 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
     /* update function pointers */
     mpgl_load_functions(ctx->gl, w32gpa, NULL, ctx->vo->log);
 
-    int pfmt = GetPixelFormat(windc);
-    PIXELFORMATDESCRIPTOR pfd;
-    if (DescribePixelFormat(windc, pfmt, sizeof(PIXELFORMATDESCRIPTOR), &pfd)) {
-        ctx->depth_r = pfd.cRedBits;
-        ctx->depth_g = pfd.cGreenBits;
-        ctx->depth_b = pfd.cBlueBits;
-    }
-
     return true;
 
 unsupported:
@@ -171,9 +212,9 @@ static bool config_window_w32(struct MPGLContext *ctx, int flags)
 
     bool success = false;
     if (ctx->requested_gl_version >= MPGL_VER(3, 0))
-        success = create_context_w32_gl3(ctx);
+        success = create_context_w32_gl3(ctx, flags);
     if (!success)
-        success = create_context_w32_old(ctx);
+        success = create_context_w32_old(ctx, flags);
     return success;
 }
 
@@ -186,13 +227,15 @@ static void releaseGlContext_w32(MPGLContext *ctx)
         wglDeleteContext(*context);
     }
     *context = 0;
+    if (w32_ctx->hdc)
+        ReleaseDC(vo_w32_hwnd(ctx->vo), w32_ctx->hdc);
+    w32_ctx->hdc = NULL;
 }
 
 static void swapGlBuffers_w32(MPGLContext *ctx)
 {
-    HDC vo_hdc = GetDC(vo_w32_hwnd(ctx->vo));
-    SwapBuffers(vo_hdc);
-    ReleaseDC(vo_w32_hwnd(ctx->vo), vo_hdc);
+    struct w32_context *w32_ctx = ctx->priv;
+    SwapBuffers(w32_ctx->hdc);
 }
 
 void mpgl_set_backend_w32(MPGLContext *ctx)
