@@ -25,52 +25,12 @@
 
 #include "common/common.h"
 
-struct vo_w32_state {
-    HWND window;
-
-    // Size and virtual position of the current screen.
-    struct mp_rect screenrc;
-
-    // last non-fullscreen extends (updated only on fullscreen or on initialization)
-    int prev_width;
-    int prev_height;
-    int prev_x;
-    int prev_y;
-
-    // whether the window position and size were intialized
-    bool window_bounds_initialized;
-
-    bool current_fs;
-
-    int window_x;
-    int window_y;
-
-    // video size
-    uint32_t o_dwidth;
-    uint32_t o_dheight;
-
-    bool disable_screensaver;
-    bool cursor_visible;
-    int event_flags;
-    int mon_cnt;
-    int mon_id;
-
-    BOOL tracking;
-    TRACKMOUSEEVENT trackEvent;
-
-    int mouse_x;
-    int mouse_y;
-
-    // UTF-16 decoding state for WM_CHAR and VK_PACKET
-    int high_surrogate;
-};
-
 struct vo;
 
 int vo_w32_init(struct vo *vo);
 void vo_w32_uninit(struct vo *vo);
 int vo_w32_control(struct vo *vo, int *events, int request, void *arg);
-int vo_w32_check_events(struct vo *vo);
 int vo_w32_config(struct vo *vo, uint32_t);
+HWND vo_w32_hwnd(struct vo *vo);
 
 #endif /* MPLAYER_W32_COMMON_H */

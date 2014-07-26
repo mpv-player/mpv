@@ -674,7 +674,7 @@ static void fill_d3d_presentparams(d3d_priv *priv,
     present_params->SwapEffect             =
         priv->opt_swap_discard ? D3DSWAPEFFECT_DISCARD : D3DSWAPEFFECT_COPY;
     present_params->Flags                  = D3DPRESENTFLAG_VIDEO;
-    present_params->hDeviceWindow          = priv->vo->w32->window;
+    present_params->hDeviceWindow          = vo_w32_hwnd(priv->vo);
     present_params->BackBufferWidth        = priv->cur_backbuf_width;
     present_params->BackBufferHeight       = priv->cur_backbuf_height;
     present_params->MultiSampleType        = D3DMULTISAMPLE_NONE;
@@ -713,7 +713,7 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
     if (!priv->d3d_device) {
         if (FAILED(IDirect3D9_CreateDevice(priv->d3d_handle,
                                            D3DADAPTER_DEFAULT,
-                                           DEVTYPE, priv->vo->w32->window,
+                                           DEVTYPE, vo_w32_hwnd(priv->vo),
                                            D3DCREATE_SOFTWARE_VERTEXPROCESSING
                                            | D3DCREATE_FPU_PRESERVE,
                                            &present_params, &priv->d3d_device)))
@@ -1479,9 +1479,9 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
         goto error_exit;
     }
 
-    GetClientRect(priv->vo->w32->window, &window_rc);
+    GetClientRect(vo_w32_hwnd(priv->vo), &window_rc);
     pt = (POINT) { 0, 0 };
-    ClientToScreen(priv->vo->w32->window, &pt);
+    ClientToScreen(vo_w32_hwnd(priv->vo), &pt);
     window_rc.left = pt.x;
     window_rc.top = pt.y;
     window_rc.right += window_rc.left;

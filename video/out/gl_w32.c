@@ -45,7 +45,7 @@ static bool create_context_w32_old(struct MPGLContext *ctx)
     if (*context)
         return true;
 
-    HWND win = ctx->vo->w32->window;
+    HWND win = vo_w32_hwnd(ctx->vo);
     HDC windc = GetDC(win);
     bool res = false;
 
@@ -79,7 +79,7 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
     if (*context) // reuse existing context
         return true; // not reusing it breaks gl3!
 
-    HWND win = ctx->vo->w32->window;
+    HWND win = vo_w32_hwnd(ctx->vo);
     HDC windc = GetDC(win);
     HGLRC new_context = 0;
 
@@ -190,9 +190,9 @@ static void releaseGlContext_w32(MPGLContext *ctx)
 
 static void swapGlBuffers_w32(MPGLContext *ctx)
 {
-    HDC vo_hdc = GetDC(ctx->vo->w32->window);
+    HDC vo_hdc = GetDC(vo_w32_hwnd(ctx->vo));
     SwapBuffers(vo_hdc);
-    ReleaseDC(ctx->vo->w32->window, vo_hdc);
+    ReleaseDC(vo_w32_hwnd(ctx->vo), vo_hdc);
 }
 
 void mpgl_set_backend_w32(MPGLContext *ctx)
