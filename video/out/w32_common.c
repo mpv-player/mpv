@@ -677,19 +677,8 @@ static bool is_key_message(UINT msg)
            msg == WM_KEYUP || msg == WM_SYSKEYUP;
 }
 
-/**
- * \brief Dispatch incoming window events and handle them.
- *
- * This function should be placed inside libvo's function "check_events".
- *
- * \return int with these flags possibly set, take care to handle in the right order
- *         if it matters in your driver:
- *
- * VO_EVENT_RESIZE = The window was resized. If necessary reinit your
- *                   driver render context accordingly.
- * VO_EVENT_EXPOSE = The window was exposed. Call e.g. flip_frame() to redraw
- *                   the window if the movie is paused.
- */
+// Dispatch incoming window events and handle them.
+// Currently polls the message queue, until it's empty.
 static int vo_w32_check_events(struct vo_w32_state *w32)
 {
     MSG msg;
@@ -884,14 +873,7 @@ static int reinit_window_state(struct vo_w32_state *w32)
     return 1;
 }
 
-/**
- * \brief Configure and show window on the screen.
- *
- * This function should be called in libvo's "config" callback.
- * It configures a window and shows it on the screen.
- *
- * \return 1 - Success, 0 - Failure
- */
+// Resize the window. On the first non-VOFLAG_HIDDEN call, it's also made visible.
 int vo_w32_config(struct vo *vo, uint32_t flags)
 {
     struct vo_w32_state *w32 = vo->w32;
@@ -966,17 +948,7 @@ int vo_w32_config(struct vo *vo, uint32_t flags)
     return reinit_window_state(w32);
 }
 
-/**
- * \brief Initialize w32_common framework.
- *
- * The first function that should be called from the w32_common framework.
- * It handles window creation on the screen with proper title and attributes.
- * It also initializes the framework's internal variables. The function should
- * be called after your own preinit initialization and you shouldn't do any
- * window management on your own.
- *
- * \return 1 = Success, 0 = Failure
- */
+// Returns: 1 = Success, 0 = Failure
 int vo_w32_init(struct vo *vo)
 {
     assert(!vo->w32);
@@ -1138,13 +1110,6 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-/**
- * \brief Uninitialize w32_common framework.
- *
- * Should be called last in video driver's uninit function. First release
- * anything built on top of the created window e.g. rendering context inside
- * and call vo_w32_uninit at the end.
- */
 void vo_w32_uninit(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
