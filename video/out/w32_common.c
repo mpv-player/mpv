@@ -692,33 +692,16 @@ static int vo_w32_check_events(struct vo_w32_state *w32)
     }
 
     if (w32->opts->WinID >= 0) {
-        BOOL res;
-        RECT r;
-        POINT p;
-        res = GetClientRect(w32->window, &r);
+        HWND parent = WIN_ID_TO_HWND(w32->opts->WinID);
+        RECT r, rp;
+        BOOL res = GetClientRect(w32->window, &r);
+        res = res && GetClientRect(parent, &rp);
+        if (res && (r.right != rp.right || r.bottom != rp.bottom))
+            MoveWindow(w32->window, 0, 0, rp.right, rp.bottom, FALSE);
 
-        if (res && (r.right != w32->dw || r.bottom != w32->dh)) {
-            w32->dw = r.right; w32->dh = r.bottom;
-            w32->vo->dwidth = w32->dw; w32->vo->dheight = w32->dh;
-            w32->event_flags |= VO_EVENT_RESIZE;
-        }
-
-        p.x = 0; p.y = 0;
-        ClientToScreen(w32->window, &p);
-
-        if (p.x != w32->window_x || p.y != w32->window_y) {
-            w32->window_x = p.x; w32->window_y = p.y;
-        }
-
-        res = GetClientRect(WIN_ID_TO_HWND(w32->opts->WinID), &r);
-
-        if (res && (r.right != w32->dw || r.bottom != w32->dh))
-            MoveWindow(w32->window, 0, 0, r.right, r.bottom, FALSE);
-
-        if (!IsWindow(WIN_ID_TO_HWND(w32->opts->WinID))) {
-            // Window has probably been closed, e.g. due to program crash
+        // Window has probably been closed, e.g. due to parent program crash
+        if (!IsWindow(parent))
             mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
-        }
     }
 
     return w32->event_flags;
