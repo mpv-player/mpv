@@ -40,6 +40,8 @@
 
 static const wchar_t classname[] = L"mpv";
 
+static __thread struct vo_w32_state *w32_thread_context;
+
 struct vo_w32_state {
     struct mp_log *log;
     struct vo *vo;
@@ -492,14 +494,8 @@ static bool handle_char(struct vo_w32_state *w32, wchar_t wc)
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
-    if (message == WM_NCCREATE) {
-        CREATESTRUCT *cs = (void*)lParam;
-        SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)cs->lpCreateParams);
-    }
-    struct vo_w32_state *w32 = (void*)GetWindowLongPtrW(hWnd, GWLP_USERDATA);
-    // message before WM_NCCREATE, pray to Raymond Chen that it's not important
-    if (!w32)
-        return DefWindowProcW(hWnd, message, wParam, lParam);
+    assert(w32_thread_context);
+    struct vo_w32_state *w32 = w32_thread_context;
     int mouse_button = 0;
 
     switch (message) {
@@ -937,6 +933,8 @@ int vo_w32_init(struct vo *vo)
         return 0;
     }
 
+    w32_thread_context = w32;
+
     if (w32->opts->WinID >= 0) {
         RECT r;
         GetClientRect(WIN_ID_TO_HWND(w32->opts->WinID), &r);
@@ -945,13 +943,13 @@ int vo_w32_init(struct vo *vo)
                                       WS_CHILD | WS_VISIBLE,
                                       0, 0, r.right, r.bottom,
                                       WIN_ID_TO_HWND(w32->opts->WinID),
-                                      0, hInstance, w32);
+                                      0, hInstance, NULL);
     } else {
         w32->window = CreateWindowExW(0, classname,
                                       classname,
                                       update_style(w32, 0),
                                       CW_USEDEFAULT, SW_HIDE, 100, 100,
-                                      0, 0, hInstance, w32);
+                                      0, 0, hInstance, NULL);
     }
 
     if (!w32->window) {
@@ -1081,6 +1079,7 @@ void vo_w32_uninit(struct vo *vo)
     SetThreadExecutionState(ES_CONTINUOUS);
     DestroyWindow(w32->window);
     UnregisterClassW(classname, 0);
+    w32_thread_context = NULL;
     talloc_free(w32);
     vo->w32 = NULL;
 }
