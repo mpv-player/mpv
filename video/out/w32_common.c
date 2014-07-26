@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <limits.h>
+#include <pthread.h>
 #include <assert.h>
 #include <windows.h>
 #include <windowsx.h>
@@ -34,6 +35,8 @@
 #include "w32_common.h"
 #include "osdep/io.h"
 #include "osdep/w32_keyboard.h"
+#include "misc/dispatch.h"
+#include "misc/rendezvous.h"
 #include "talloc.h"
 
 #define WIN_ID_TO_HWND(x) ((HWND)(intptr_t)(x))
@@ -47,6 +50,10 @@ struct vo_w32_state {
     struct vo *vo;
     struct mp_vo_opts *opts;
     struct input_ctx *input_ctx;
+
+    pthread_t thread;
+    bool terminate;
+    struct mp_dispatch_queue *dispatch; // used to run stuff on the GUI thread
 
     HWND window;
 
@@ -491,6 +498,18 @@ static bool handle_char(struct vo_w32_state *w32, wchar_t wc)
     return true;
 }
 
+static void signal_events(struct vo_w32_state *w32, int events)
+{
+    w32->event_flags |= events;
+    mp_input_wakeup(w32->input_ctx);
+}
+
+static void wakeup_gui_thread(void *ctx)
+{
+    struct vo_w32_state *w32 = ctx;
+    PostMessage(w32->window, WM_USER, 0, 0);
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -499,10 +518,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     int mouse_button = 0;
 
     switch (message) {
+    case WM_USER:
+        // This message is used to wakeup the GUI thread, see wakeup_gui_thread.
+        mp_dispatch_queue_process(w32->dispatch, 0);
+        break;
     case WM_ERASEBKGND: // no need to erase background seperately
         return 1;
     case WM_PAINT:
-        w32->event_flags |= VO_EVENT_EXPOSE;
+        signal_events(w32, VO_EVENT_EXPOSE);
         break;
     case WM_MOVE: {
         POINT p = {0};
@@ -513,13 +536,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
     case WM_SIZE: {
-        w32->event_flags |= VO_EVENT_RESIZE;
         RECT r;
         GetClientRect(w32->window, &r);
         w32->dw = r.right;
         w32->dh = r.bottom;
-        w32->vo->dwidth = w32->dw;
-        w32->vo->dheight = w32->dh;
+        signal_events(w32, VO_EVENT_RESIZE);
         MP_VERBOSE(w32, "resize window: %d:%d\n", w32->dw, w32->dh);
         break;
     }
@@ -546,8 +567,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         }
         break;
     case WM_CLOSE:
+        // Don't actually allow it to destroy the window, or whatever else it
+        // is that will make us lose WM_USER wakeups.
         mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
-        break;
+        return 1;
     case WM_SYSCOMMAND:
         switch (wParam) {
         case SC_SCREENSAVE:
@@ -674,33 +697,34 @@ static bool is_key_message(UINT msg)
 }
 
 // Dispatch incoming window events and handle them.
-// Currently polls the message queue, until it's empty.
-static int vo_w32_check_events(struct vo_w32_state *w32)
+// This returns only when the thread is asked to terminate.
+static void run_message_loop(struct vo_w32_state *w32)
 {
     MSG msg;
-    w32->event_flags = 0;
-
-    while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
+    while (GetMessageW(&msg, 0, 0, 0) > 0) {
         // Only send IME messages to TranslateMessage
         if (is_key_message(msg.message) && msg.wParam == VK_PROCESSKEY)
             TranslateMessage(&msg);
         DispatchMessageW(&msg);
+
+        if (w32->opts->WinID >= 0) {
+            HWND parent = WIN_ID_TO_HWND(w32->opts->WinID);
+            RECT r, rp;
+            BOOL res = GetClientRect(w32->window, &r);
+            res = res && GetClientRect(parent, &rp);
+            if (res && (r.right != rp.right || r.bottom != rp.bottom))
+                MoveWindow(w32->window, 0, 0, rp.right, rp.bottom, FALSE);
+
+            // Window has probably been closed, e.g. due to parent program crash
+            if (!IsWindow(parent))
+                mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
+        }
     }
 
-    if (w32->opts->WinID >= 0) {
-        HWND parent = WIN_ID_TO_HWND(w32->opts->WinID);
-        RECT r, rp;
-        BOOL res = GetClientRect(w32->window, &r);
-        res = res && GetClientRect(parent, &rp);
-        if (res && (r.right != rp.right || r.bottom != rp.bottom))
-            MoveWindow(w32->window, 0, 0, rp.right, rp.bottom, FALSE);
-
-        // Window has probably been closed, e.g. due to parent program crash
-        if (!IsWindow(parent))
-            mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
-    }
-
-    return w32->event_flags;
+    // Even if the message loop somehow exits, we still have to respond to
+    // external requests until termination is requested.
+    while (!w32->terminate)
+        mp_dispatch_queue_process(w32->dispatch, 1000);
 }
 
 static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
@@ -824,8 +848,6 @@ static int reinit_window_state(struct vo_w32_state *w32)
             w32->window_y = w32->prev_y;
         }
     }
-    w32->vo->dwidth = w32->dw;
-    w32->vo->dheight = w32->dh;
 
     r.left = w32->window_x;
     r.right = r.left + w32->dw;
@@ -849,17 +871,25 @@ static int reinit_window_state(struct vo_w32_state *w32)
     SetWindowPos(w32->window, NULL, 0, 0, 0, 0,
                  SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
 
+    signal_events(w32, VO_EVENT_RESIZE);
+
     return 1;
 }
 
-// Resize the window. On the first non-VOFLAG_HIDDEN call, it's also made visible.
-int vo_w32_config(struct vo *vo, uint32_t flags)
+static void gui_thread_reconfig(void *ptr)
 {
-    struct vo_w32_state *w32 = vo->w32;
+    void **p = ptr;
+    struct vo_w32_state *w32 = p[0];
+    uint32_t flags = *(uint32_t *)p[1];
+    int *res = p[2];
+
+    struct vo *vo = w32->vo;
 
     // we already have a fully initialized window, so nothing needs to be done
-    if (flags & VOFLAG_HIDDEN)
-        return 1;
+    if (flags & VOFLAG_HIDDEN) {
+        *res = 1;
+        return;
+    }
 
     struct vo_win_geometry geo;
     vo_calc_window_geometry(vo, &w32->screenrc, &geo);
@@ -899,22 +929,24 @@ int vo_w32_config(struct vo *vo, uint32_t flags)
         vo->dheight = r.bottom;
     }
 
-    return reinit_window_state(w32);
+    *res = reinit_window_state(w32);
 }
 
-// Returns: 1 = Success, 0 = Failure
-int vo_w32_init(struct vo *vo)
+// Resize the window. On the first non-VOFLAG_HIDDEN call, it's also made visible.
+int vo_w32_config(struct vo *vo, uint32_t flags)
 {
-    assert(!vo->w32);
+    struct vo_w32_state *w32 = vo->w32;
+    int r;
+    void *p[] = {w32, &flags, &r};
+    mp_dispatch_run(w32->dispatch, gui_thread_reconfig, p);
+    return r;
+}
 
-    struct vo_w32_state *w32 = talloc_ptrtype(vo, w32);
-    vo->w32 = w32;
-    *w32 = (struct vo_w32_state){
-        .log = mp_log_new(w32, vo->log, "win32"),
-        .vo = vo,
-        .opts = vo->opts,
-        .input_ctx = vo->input_ctx,
-    };
+static void *gui_thread(void *ptr)
+{
+    struct vo_w32_state *w32 = ptr;
+    bool ole_ok = false;
+    int res = 0;
 
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 
@@ -930,7 +962,7 @@ int vo_w32_init(struct vo *vo)
 
     if (!RegisterClassExW(&wcex)) {
         MP_ERR(w32, "unable to register window class!\n");
-        return 0;
+        goto done;
     }
 
     w32_thread_context = w32;
@@ -954,7 +986,7 @@ int vo_w32_init(struct vo *vo)
 
     if (!w32->window) {
         MP_ERR(w32, "unable to create window!\n");
-        return 0;
+        goto done;
     }
 
     if (OleInitialize(NULL) == S_OK) {
@@ -962,6 +994,7 @@ int vo_w32_init(struct vo *vo)
         DropTarget* dropTarget = talloc(NULL, DropTarget);
         DropTarget_Init(dropTarget, w32);
         RegisterDragDrop(w32->window, &dropTarget->iface);
+        ole_ok = true;
     }
 
     w32->tracking   = FALSE;
@@ -976,12 +1009,66 @@ int vo_w32_init(struct vo *vo)
 
     w32->cursor_visible = true;
 
-    // we don't have proper event handling
-    vo->wakeup_period = 0.02;
-
     updateScreenProperties(w32);
 
+    mp_dispatch_set_wakeup_fn(w32->dispatch, wakeup_gui_thread, w32);
+
+    // Microsoft-recommended way to create a message queue.
+    // Needed so that initial WM_USER wakeups are not lost.
+    PeekMessage(&(MSG){0}, NULL, WM_USER, WM_USER, PM_NOREMOVE);
+
+    res = 1;
+done:
+
+    mp_rendezvous(w32, res); // init barrier
+
+    // This blocks until the GUI thread is to be exited.
+    if (res)
+        run_message_loop(w32);
+
+    MP_VERBOSE(w32, "uninit\n");
+
+    if (w32->window) {
+        RevokeDragDrop(w32->window);
+        DestroyWindow(w32->window);
+    }
+    if (ole_ok)
+        OleUninitialize();
+    SetThreadExecutionState(ES_CONTINUOUS);
+    UnregisterClassW(classname, 0);
+
+    w32_thread_context = NULL;
+    return NULL;
+}
+
+// Returns: 1 = Success, 0 = Failure
+int vo_w32_init(struct vo *vo)
+{
+    assert(!vo->w32);
+
+    struct vo_w32_state *w32 = talloc_ptrtype(vo, w32);
+    *w32 = (struct vo_w32_state){
+        .log = mp_log_new(w32, vo->log, "win32"),
+        .vo = vo,
+        .opts = vo->opts,
+        .input_ctx = vo->input_ctx,
+        .dispatch = mp_dispatch_create(w32),
+    };
+    vo->w32 = w32;
+
+    if (pthread_create(&w32->thread, NULL, gui_thread, w32))
+        goto fail;
+
+    if (!mp_rendezvous(w32, 0)) { // init barrier
+        pthread_join(w32->thread, NULL);
+        goto fail;
+    }
+
     return 1;
+fail:
+    talloc_free(w32);
+    vo->w32 = NULL;
+    return 0;
 }
 
 static bool vo_w32_is_cursor_in_client(struct vo_w32_state *w32)
@@ -990,13 +1077,12 @@ static bool vo_w32_is_cursor_in_client(struct vo_w32_state *w32)
     return SendMessage(w32->window, WM_NCHITTEST, 0, pos) == HTCLIENT;
 }
 
-int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
+static int gui_thread_control(struct vo_w32_state *w32, int *events,
+                              int request, void *arg)
 {
-    struct vo_w32_state *w32 = vo->w32;
+    *events |= w32->event_flags;
+    w32->event_flags = 0;
     switch (request) {
-    case VOCTRL_CHECK_EVENTS:
-        *events |= vo_w32_check_events(w32);
-        return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         if (w32->opts->fullscreen != w32->current_fs)
             reinit_window_state(w32);
@@ -1008,7 +1094,7 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_BORDER:
         w32->opts->border = !w32->opts->border;
-        reinit_window_state(vo->w32);
+        reinit_window_state(w32);
         *events |= VO_EVENT_RESIZE;
         return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
@@ -1066,19 +1152,47 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
+static void do_control(void *ptr)
+{
+    void **p = ptr;
+    struct vo_w32_state *w32 = p[0];
+    int *events = p[1];
+    int request = *(int *)p[2];
+    void *arg = p[3];
+    int *ret = p[4];
+    *ret = gui_thread_control(w32, events, request, arg);
+    // Safe access, since caller (owner of vo) is blocked.
+    if (*events & VO_EVENT_RESIZE) {
+        w32->vo->dwidth = w32->dw;
+        w32->vo->dheight = w32->dh;
+    }
+}
+
+int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
+{
+    struct vo_w32_state *w32 = vo->w32;
+    int r;
+    void *p[] = {w32, events, &request, arg, &r};
+    mp_dispatch_run(w32->dispatch, do_control, p);
+    return r;
+}
+
+static void do_terminate(void *ptr)
+{
+    struct vo_w32_state *w32 = ptr;
+    w32->terminate = true;
+    PostQuitMessage(0);
+}
+
 void vo_w32_uninit(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     if (!w32)
         return;
 
-    MP_VERBOSE(w32, "uninit\n");
+    mp_dispatch_run(w32->dispatch, do_terminate, w32);
+    pthread_join(w32->thread, NULL);
 
-    RevokeDragDrop(w32->window);
-    OleUninitialize();
-    SetThreadExecutionState(ES_CONTINUOUS);
-    DestroyWindow(w32->window);
-    UnregisterClassW(classname, 0);
     w32_thread_context = NULL;
     talloc_free(w32);
     vo->w32 = NULL;
@@ -1087,5 +1201,5 @@ void vo_w32_uninit(struct vo *vo)
 HWND vo_w32_hwnd(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
-    return w32->window;
+    return w32->window; // immutable, so no synchronization needed
 }
