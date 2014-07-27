@@ -29,8 +29,6 @@ typedef struct mp_vo_opts {
     int keepaspect;
     int border;
 
-    int enable_mouse_movements;
-
     int64_t WinID;
 
     float force_monitor_aspect;

@@ -716,7 +716,7 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 }
 
 - (void)signalMouseMovement:(NSPoint)point {
-    vo_mouse_movement(self.vout, point.x, point.y);
+    mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
     [self recalcMovableByWindowBackground:point];
 }
 

@@ -510,7 +510,6 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
     OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
-    OPT_FLAG("input-cursor", vo.enable_mouse_movements, CONF_GLOBAL),
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, image_writer_conf, 0),
     OPT_STRING("screenshot-template", screenshot_template, 0),
@@ -550,7 +549,6 @@ const struct MPOpts mp_default_opts = {
         .monitor_pixel_aspect = 1.0,
         .screen_id = -1,
         .fsscreen_id = -1,
-        .enable_mouse_movements = 1,
         .panscan = 0.0f,
         .keepaspect = 1,
         .border = 1,

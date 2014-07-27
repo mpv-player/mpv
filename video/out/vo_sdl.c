@@ -603,7 +603,7 @@ static void check_events(struct vo *vo)
             break;
         }
         case SDL_MOUSEMOTION:
-            vo_mouse_movement(vo, ev.motion.x, ev.motion.y);
+            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
             mp_input_put_key(vo->input_ctx,

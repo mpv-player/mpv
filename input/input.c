@@ -122,6 +122,7 @@ struct input_ctx {
     bool mainthread_set;
     struct mp_log *log;
     struct mpv_global *global;
+    struct input_opts *opts;
 
     bool using_alt_gr;
     bool using_ar;
@@ -209,6 +210,7 @@ struct input_opts {
     int use_appleremote;
     int use_media_keys;
     int default_bindings;
+    int enable_mouse_movements;
     int test;
 };
 
@@ -228,6 +230,7 @@ const struct m_sub_options input_config = {
         OPT_FLAG("lirc", use_lirc, CONF_GLOBAL),
         OPT_FLAG("right-alt-gr", use_alt_gr, CONF_GLOBAL),
         OPT_INTRANGE("key-fifo-size", key_fifo_size, CONF_GLOBAL, 2, 65000),
+        OPT_FLAG("cursor", enable_mouse_movements, CONF_GLOBAL),
     #if HAVE_LIRC
         OPT_STRING("lirc-conf", lirc_configfile, CONF_GLOBAL),
     #endif
@@ -245,6 +248,7 @@ const struct m_sub_options input_config = {
         .ar_rate = 40,
         .use_lirc = 1,
         .use_alt_gr = 1,
+        .enable_mouse_movements = 1,
 #if HAVE_COCOA
         .use_appleremote = 1,
         .use_media_keys = 1,
@@ -755,10 +759,23 @@ void mp_input_set_mouse_transform(struct input_ctx *ictx, struct mp_rect *dst,
     input_unlock(ictx);
 }
 
+bool mp_input_mouse_enabled(struct input_ctx *ictx)
+{
+    input_lock(ictx);
+    bool r = ictx->opts->enable_mouse_movements;
+    input_unlock(ictx);
+    return r;
+}
+
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 {
     input_lock(ictx);
     MP_DBG(ictx, "mouse move %d/%d\n", x, y);
+
+    if (!ictx->opts->enable_mouse_movements) {
+        input_unlock(ictx);
+        return;
+    }
 
     if (ictx->mouse_mangle) {
         struct mp_rect *src = &ictx->mouse_src;
@@ -1517,6 +1534,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
     *ictx = (struct input_ctx){
         .global = global,
+        .opts = input_conf,
         .log = mp_log_new(ictx, global->log, "input"),
         .key_fifo_size = input_conf->key_fifo_size,
         .doubleclick_time = input_conf->doubleclick_time,

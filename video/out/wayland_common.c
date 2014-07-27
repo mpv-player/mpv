@@ -340,8 +340,8 @@ static void pointer_handle_motion(void *data,
     wl->window.mouse_x = wl_fixed_to_int(sx_w);
     wl->window.mouse_y = wl_fixed_to_int(sy_w);
 
-    vo_mouse_movement(wl->vo, wl->window.mouse_x,
-                              wl->window.mouse_y);
+    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->window.mouse_x,
+                                              wl->window.mouse_y);
 }
 
 static void pointer_handle_button(void *data,

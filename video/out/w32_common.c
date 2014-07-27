@@ -623,7 +623,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (x != w32->mouse_x || y != w32->mouse_y) {
             w32->mouse_x = x;
             w32->mouse_y = y;
-            vo_mouse_movement(w32->vo, x, y);
+            mp_input_set_mouse_pos(w32->input_ctx, x, y);
         }
         break;
     }
@@ -664,7 +664,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         mouse_button |= mod_state(w32);
         mp_input_put_key(w32->input_ctx, mouse_button);
 
-        if (w32->opts->enable_mouse_movements) {
+        if (mp_input_mouse_enabled(w32->input_ctx)) {
             int x = GET_X_LPARAM(lParam);
             int y = GET_Y_LPARAM(lParam);
 

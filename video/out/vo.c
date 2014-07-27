@@ -406,20 +406,6 @@ const char *vo_get_window_title(struct vo *vo)
 }
 
 /**
- * Generates a mouse movement message if those are enable and sends it
- * to the "main" MPlayer.
- *
- * \param posx new x position of mouse
- * \param posy new y position of mouse
- */
-void vo_mouse_movement(struct vo *vo, int posx, int posy)
-{
-    if (!vo->opts->enable_mouse_movements)
-        return;
-    mp_input_set_mouse_pos(vo->input_ctx, posx, posy);
-}
-
-/**
  * \brief lookup an integer in a table, table must have 0 as the last key
  * \param key key to search for
  * \result translation corresponding to key or "to" value of last mapping
