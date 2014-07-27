@@ -177,6 +177,7 @@ static struct vo *vo_create(struct mpv_global *global,
         .max_video_queue = 1,
     };
     talloc_steal(vo, log);
+    mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
     struct m_config *config = m_config_from_obj_desc(vo, vo->log, &desc);
@@ -415,10 +416,7 @@ void vo_mouse_movement(struct vo *vo, int posx, int posy)
 {
     if (!vo->opts->enable_mouse_movements)
         return;
-    float p[2] = {posx, posy};
-    if (vo->driver->caps & VO_CAP_EVIL_OSD)
-        vo_control(vo, VOCTRL_WINDOW_TO_OSD_COORDS, p);
-    mp_input_set_mouse_pos(vo->input_ctx, p[0], p[1]);
+    mp_input_set_mouse_pos(vo->input_ctx, posx, posy);
 }
 
 /**

@@ -24,7 +24,6 @@
 #include <sys/types.h>
 
 #include <libswscale/swscale.h>
-#include <libavutil/common.h>
 
 #include "config.h"
 #include "vo.h"
@@ -53,10 +52,9 @@
 #include "video/fmt-conversion.h"
 
 #include "common/msg.h"
+#include "input/input.h"
 #include "options/options.h"
 #include "osdep/timer.h"
-
-extern int sws_flags;
 
 struct priv {
     struct vo *vo;
@@ -340,6 +338,8 @@ static bool resize(struct vo *vo)
     p->osd.mr = FFMIN(0, p->osd.mr);
     p->osd.ml = FFMIN(0, p->osd.ml);
 
+    mp_input_set_mouse_transform(vo->input_ctx, &p->dst, NULL);
+
     p->image_width = (p->dst_w + 7) & (~7);
     p->image_height = p->dst_h;
 
@@ -622,14 +622,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, p->original_image);
         return true;
-    case VOCTRL_WINDOW_TO_OSD_COORDS: {
-        // OSD is rendered into the scaled image
-        float *c = data;
-        struct mp_rect *dst = &p->dst;
-        c[0] = av_clipf(c[0], dst->x0, dst->x1) - dst->x0;
-        c[1] = av_clipf(c[1], dst->y0, dst->y1) - dst->y0;
-        return VO_TRUE;
-    }
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(vo);
@@ -647,7 +639,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 const struct vo_driver video_out_x11 = {
     .description = "X11 ( XImage/Shm )",
     .name = "x11",
-    .caps = VO_CAP_EVIL_OSD,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option []){{0}},
     .preinit = preinit,

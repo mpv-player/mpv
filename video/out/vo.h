@@ -71,7 +71,6 @@ enum mp_voctrl {
     VOCTRL_SET_DEINTERLACE,
     VOCTRL_GET_DEINTERLACE,
 
-    VOCTRL_WINDOW_TO_OSD_COORDS,        // float[2] (x/y)
     VOCTRL_GET_WINDOW_SIZE,             // int[2] (w/h)
     VOCTRL_SET_WINDOW_SIZE,             // int[2] (w/h)
 
@@ -134,8 +133,6 @@ struct voctrl_screenshot_args {
 
 // VO does handle mp_image_params.rotate in 90 degree steps
 #define VO_CAP_ROTATE90 1
-// Requires VOCTRL_WINDOW_TO_OSD_COORDS to map mouse coords. to OSD coords.
-#define VO_CAP_EVIL_OSD 2
 
 #define VO_MAX_QUEUE 5
 

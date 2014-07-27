@@ -57,6 +57,7 @@
 #include "sub/draw_bmp.h"
 #include "video/csputils.h"
 #include "options/m_option.h"
+#include "input/input.h"
 #include "osdep/timer.h"
 
 #define CK_METHOD_NONE       0 // no colorkey drawing
@@ -411,6 +412,8 @@ static void resize(struct vo *vo)
     vo_x11_clear_background(vo, &ctx->dst_rect);
     xv_draw_colorkey(vo, &ctx->dst_rect);
     read_xv_csp(vo);
+
+    mp_input_set_mouse_transform(vo->input_ctx, &ctx->dst_rect, &ctx->src_rect);
 
     vo->want_redraw = true;
 }
@@ -843,16 +846,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         args->out_image = get_screenshot(vo);
         return true;
     }
-    case VOCTRL_WINDOW_TO_OSD_COORDS: {
-        float *c = data;
-        struct mp_rect *src = &ctx->src_rect;
-        struct mp_rect *dst = &ctx->dst_rect;
-        c[0] = av_clipf(c[0], dst->x0, dst->x1) - dst->x0;
-        c[1] = av_clipf(c[1], dst->y0, dst->y1) - dst->y0;
-        c[0] = c[0] / (dst->x1 - dst->x0) * (src->x1 - src->x0) + src->x0;
-        c[1] = c[1] / (dst->y1 - dst->y0) * (src->y1 - src->y0) + src->y0;
-        return VO_TRUE;
-    }
     }
     int events = 0;
     int r = vo_x11_control(vo, &events, request, data);
@@ -866,7 +859,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 const struct vo_driver video_out_xv = {
     .description = "X11/Xv",
     .name = "xv",
-    .caps = VO_CAP_EVIL_OSD,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

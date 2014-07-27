@@ -159,6 +159,9 @@ struct input_ctx {
     // Unlike mouse_x/y, this can be used to resolve mouse click bindings.
     int mouse_vo_x, mouse_vo_y;
 
+    bool mouse_mangle, mouse_src_mangle;
+    struct mp_rect mouse_src, mouse_dst;
+
     bool test;
 
     bool default_bindings;
@@ -738,10 +741,36 @@ void mp_input_put_axis(struct input_ctx *ictx, int direction, double value)
     input_unlock(ictx);
 }
 
+void mp_input_set_mouse_transform(struct input_ctx *ictx, struct mp_rect *dst,
+                                  struct mp_rect *src)
+{
+    input_lock(ictx);
+    ictx->mouse_mangle = dst || src;
+    if (ictx->mouse_mangle) {
+        ictx->mouse_dst = *dst;
+        ictx->mouse_src_mangle = !!src;
+        if (ictx->mouse_src_mangle)
+            ictx->mouse_src = *src;
+    }
+    input_unlock(ictx);
+}
+
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 {
     input_lock(ictx);
     MP_DBG(ictx, "mouse move %d/%d\n", x, y);
+
+    if (ictx->mouse_mangle) {
+        struct mp_rect *src = &ictx->mouse_src;
+        struct mp_rect *dst = &ictx->mouse_dst;
+        x = MPCLAMP(x, dst->x0, dst->x1) - dst->x0;
+        y = MPCLAMP(y, dst->y0, dst->y1) - dst->y0;
+        if (ictx->mouse_src_mangle) {
+            x = x * 1.0 / (dst->x1 - dst->x0) * (src->x1 - src->x0) + src->x0;
+            y = y * 1.0 / (dst->y1 - dst->y0) * (src->y1 - src->y0) + src->y0;
+        }
+        MP_DBG(ictx, "-> %d/%d\n", x, y);
+    }
 
     ictx->mouse_event_counter++;
     ictx->mouse_vo_x = x;
