@@ -222,6 +222,9 @@
     (MP_KEY_IS_MOUSE_BTN_SINGLE(code) || MP_KEY_IS_MOUSE_BTN_DBL(code) || \
      (code) == MP_KEY_MOUSE_MOVE)
 
+#define MP_KEY_IS_MOUSE(code) \
+    (MP_KEY_DEPENDS_ON_MOUSE_POS(code) || (code) == MP_KEY_MOUSE_LEAVE)
+
 // Emit a command even on key-up (normally key-up is ignored). This means by
 // default they binding will be triggered on key-up instead of key-down.
 // This is a fixed part of the keycode, not a modifier than can change.

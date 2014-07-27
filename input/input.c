@@ -692,6 +692,8 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
         release_down_cmd(ictx, false);
         return;
     }
+    if (!ictx->opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod))
+        return;
     if (unmod == MP_KEY_MOUSE_LEAVE) {
         update_mouse_section(ictx);
         struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, code);
