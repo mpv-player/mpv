@@ -299,6 +299,20 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             with ``add_timeout()``), this starts the timer from the beginning,
             using the initially configured timeout.
 
+        ``timeout`` (RW)
+            This field contains the current timeout period. This value is not
+            updated as time progresses. It's only used to calculate when the
+            timer should fire next when the timer expires.
+
+            If you write this, you can call ``t:kill() ; t:resume()`` to reset
+            the current timeout to the new one. (``t:stop()`` won't use the
+            new timeout.)
+
+        ``oneshot`` (RW)
+            Whether the timer is periodic (``false``) or fires just once
+            (``true``). This value is used when the timer expires (but before
+            the timer calback function fn is run).
+
 
 ``mp.get_opt(key)``
     Return a setting from the ``--lua-opts`` option. It's up to the user and
