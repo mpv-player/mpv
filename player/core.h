@@ -336,8 +336,6 @@ typedef struct MPContext {
         double amount;
         int exact;  // -1 = disable, 0 = default, 1 = enable
         bool immediate; // disable seek delay logic
-        // currently not set by commands, only used internally by seek()
-        int direction; // -1 = backward, 0 = default, 1 = forward
     } seek;
 
     /* Heuristic for relative chapter seeks: keep track which chapter
