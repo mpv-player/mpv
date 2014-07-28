@@ -371,7 +371,7 @@ void execute_queued_seek(struct MPContext *mpctx)
         /* If the user seeks continuously (keeps arrow key down)
          * try to finish showing a frame from one location before doing
          * another seek (which could lead to unchanging display). */
-        if (!mpctx->seek.immediate && !mpctx->restart_complete &&
+        if (!mpctx->seek.immediate && mpctx->video_status < STATUS_READY &&
             mp_time_sec() - mpctx->start_timestamp < 0.3)
             return;
         mp_seek(mpctx, mpctx->seek, false);
