@@ -333,10 +333,10 @@ static bool resize(struct vo *vo)
     // between window and video rectangle (i.e. not into panscan borders).
     p->osd.w = p->dst_w;
     p->osd.h = p->dst_h;
-    p->osd.mt = FFMIN(0, p->osd.mt);
-    p->osd.mb = FFMIN(0, p->osd.mb);
-    p->osd.mr = FFMIN(0, p->osd.mr);
-    p->osd.ml = FFMIN(0, p->osd.ml);
+    p->osd.mt = MPMIN(0, p->osd.mt);
+    p->osd.mb = MPMIN(0, p->osd.mb);
+    p->osd.mr = MPMIN(0, p->osd.mr);
+    p->osd.ml = MPMIN(0, p->osd.ml);
 
     mp_input_set_mouse_transform(vo->input_ctx, &p->dst, NULL);
 
