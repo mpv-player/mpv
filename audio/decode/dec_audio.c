@@ -89,27 +89,7 @@ static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
         return 0;
     }
 
-    // Decode enough until we know the audio format.
-    for (int tries = 1; ; tries++) {
-        if (mp_audio_config_valid(&d_audio->decoded))  {
-            MP_VERBOSE(d_audio, "Initial decode succeeded after %d packets.\n",
-                       tries);
-            break;
-        }
-        if (tries >= 50) {
-            MP_ERR(d_audio, "initial decode failed\n");
-            uninit_decoder(d_audio);
-            return 0;
-        }
-        d_audio->ad_driver->decode_packet(d_audio);
-    }
-
     d_audio->decode_buffer = mp_audio_buffer_create(NULL);
-    if (!reinit_audio_buffer(d_audio)) {
-        uninit_decoder(d_audio);
-        return 0;
-    }
-
     return 1;
 }
 
@@ -171,9 +151,6 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
             talloc_asprintf(d_audio, "%s [%s:%s]", decoder->desc, decoder->family,
                             decoder->decoder);
         MP_VERBOSE(d_audio, "Selected audio codec: %s\n", d_audio->decoder_desc);
-        MP_VERBOSE(d_audio, "AUDIO: %d Hz, %d ch, %s\n",
-                   d_audio->decoded.rate, d_audio->decoded.channels.num,
-                   af_fmt_to_str(d_audio->decoded.format));
     } else {
         MP_ERR(d_audio, "Failed to initialize an audio decoder for codec '%s'.\n",
                d_audio->header->codec ? d_audio->header->codec : "<unknown>");
@@ -238,6 +215,24 @@ int audio_init_filters(struct dec_audio *d_audio, int in_samplerate,
     return 1;
 }
 
+/* Decode packets until we know the audio format. Then reinit the buffer.
+ * Returns AD_OK on success, negative AD_* code otherwise.
+ * Also returns AD_OK if already initialized (and does nothing).
+ */
+int initial_audio_decode(struct dec_audio *da)
+{
+    while (!mp_audio_config_valid(&da->decoded)) {
+        if (da->decoded.samples > 0)
+            return AD_ERR; // invalid format, rather than uninitialized
+        int ret = da->ad_driver->decode_packet(da);
+        if (ret < 0)
+            return ret;
+    }
+    if (mp_audio_buffer_samples(da->decode_buffer) > 0) // avoid accidental flush
+        return AD_OK;
+    return reinit_audio_buffer(da) ? AD_OK : AD_ERR;
+}
+
 // Filter len bytes of input, put result into outbuf.
 static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
                           int len)
@@ -269,6 +264,9 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
         if (error < 0)
             break;
     }
+
+    if (error == AD_WAIT)
+        return error;
 
     // Filter
     struct mp_audio filter_data;
@@ -306,6 +304,9 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
 int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
                  int minsamples)
 {
+    if (!d_audio->afilter)
+        return AD_ERR;
+
     // Indicates that a filter seems to be buffering large amounts of data
     int huge_filter_buffer = 0;
 

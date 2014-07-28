@@ -218,7 +218,9 @@ static int decode_packet(struct dec_audio *da)
 
     mp_audio_set_null_data(&da->decoded);
 
-    struct demux_packet *pkt = demux_read_packet(da->header);
+    struct demux_packet *pkt;
+    if (demux_read_packet_async(da->header, &pkt) == 0)
+        return AD_WAIT;
     if (!pkt)
         return AD_EOF;
 

@@ -309,8 +309,10 @@ static int decode_packet(struct dec_audio *da)
     mp_audio_set_null_data(&da->decoded);
 
     struct demux_packet *mpkt = priv->packet;
-    if (!mpkt)
-        mpkt = demux_read_packet(da->header);
+    if (!mpkt) {
+        if (demux_read_packet_async(da->header, &mpkt) == 0)
+            return AD_WAIT;
+    }
 
     priv->packet = talloc_steal(priv, mpkt);
 
@@ -343,7 +345,7 @@ static int decode_packet(struct dec_audio *da)
         }
         // LATM may need many packets to find mux info
         if (ret == AVERROR(EAGAIN))
-            return 0;
+            return AD_OK;
     }
     if (ret < 0) {
         MP_ERR(da, "Error decoding audio.\n");

@@ -84,6 +84,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         mixer_uninit_audio(mpctx->mixer);
         audio_uninit(mpctx->d_audio);
         mpctx->d_audio = NULL;
+        mpctx->audio_status = STATUS_EOF;
         reselect_demux_streams(mpctx);
     }
 
@@ -111,6 +112,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         if (mpctx->d_video)
             video_uninit(mpctx->d_video);
         mpctx->d_video = NULL;
+        mpctx->video_status = STATUS_EOF;
         mpctx->sync_audio_to_video = false;
         reselect_demux_streams(mpctx);
     }
@@ -1258,7 +1260,6 @@ goto_reopen_demuxer: ;
 
     mpctx->time_frame = 0;
     mpctx->drop_message_shown = 0;
-    mpctx->restart_playback = true;
     mpctx->video_pts = 0;
     mpctx->last_vo_pts = MP_NOPTS_VALUE;
     mpctx->last_frame_duration = 0;
@@ -1276,6 +1277,9 @@ goto_reopen_demuxer: ;
     mpctx->eof_reached = false;
     mpctx->last_chapter = -2;
     mpctx->seek = (struct seek_params){ 0 };
+    mpctx->video_status = mpctx->d_video ? STATUS_SYNCING : STATUS_EOF;
+    mpctx->audio_status = mpctx->d_audio ? STATUS_SYNCING : STATUS_EOF;
+    mpctx->restart_complete = false;
 
     // If there's a timeline force an absolute seek to initialize state
     double startpos = rel_time_to_abs(mpctx, opts->play_start);

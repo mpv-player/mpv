@@ -149,6 +149,22 @@ enum {
     VD_WAIT = 3,        // no EOF, but no output; wait until wakeup
 };
 
+/* Note that playback can be paused, stopped, etc. at any time. While paused,
+ * playback restart is still active, because you want seeking to work even
+ * if paused.
+ * The main purpose of distinguishing these states is proper reinitialization
+ * of A/V sync.
+ */
+enum playback_status {
+    // code may compare status values numerically
+    STATUS_SYNCING,     // seeking for a position to resume
+    STATUS_FILLING,     // decoding more data (so you start with full buffers)
+    STATUS_READY,       // buffers full, playback can be started any time
+    STATUS_PLAYING,     // normal playback
+    STATUS_DRAINING,    // decoding has ended; still playing out queued buffers
+    STATUS_EOF,         // playback has ended, or is disabled
+};
+
 #define NUM_PTRACKS 2
 
 typedef struct MPContext {
@@ -234,16 +250,11 @@ typedef struct MPContext {
 
     struct vo *video_out;
 
-    /* We're starting playback from scratch or after a seek. Show first
-     * video frame immediately and reinitialize sync. */
-    bool restart_playback;
+    enum playback_status video_status, audio_status;
+    bool restart_complete;
     /* Set if audio should be timed to start with video frame after seeking,
      * not set when e.g. playing cover art */
     bool sync_audio_to_video;
-    /* After playback restart (above) or audio stream change, adjust audio
-     * stream by cutting samples or adding silence at the beginning to make
-     * audio playback position match video position. */
-    bool syncing_audio;
     bool hrseek_active;
     bool hrseek_framedrop;
     double hrseek_pts;
@@ -465,6 +476,7 @@ void run_playloop(struct MPContext *mpctx);
 void idle_loop(struct MPContext *mpctx);
 void handle_force_window(struct MPContext *mpctx, bool reconfig);
 void add_frame_pts(struct MPContext *mpctx, double pts);
+void finish_playback_restart(struct MPContext *mpctx);
 
 // scripting.c
 struct mp_scripting {

@@ -223,13 +223,17 @@ int reinit_video_chain(struct MPContext *mpctx)
     vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE
                                                : VOCTRL_RESUME, NULL);
 
-    mpctx->restart_playback = true;
+    mpctx->video_status = STATUS_SYNCING;
     mpctx->sync_audio_to_video = !sh->attached_picture;
     mpctx->delay = 0;
     mpctx->video_next_pts = MP_NOPTS_VALUE;
     mpctx->playing_last_frame = false;
     mpctx->last_frame_duration = 0;
     mpctx->vo_pts_history_seek_ts++;
+
+    // If we switch on video again, ensure audio position matches up.
+    if (mpctx->d_audio)
+        mpctx->audio_status = STATUS_SYNCING;
 
     vo_seek_reset(mpctx->video_out);
     reset_subtitles(mpctx, 0);
@@ -277,7 +281,7 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
     struct track *t_audio = mpctx->current_track[0][STREAM_AUDIO];
     struct sh_stream *sh_audio = t_audio ? t_audio->stream : NULL;
     // check for frame-drop:
-    if (mpctx->d_audio && !ao_untimed(mpctx->ao) && sh_audio &&
+    if (mpctx->d_audio && mpctx->ao && !ao_untimed(mpctx->ao) && sh_audio &&
         !demux_stream_eof(sh_audio))
     {
         float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
@@ -288,7 +292,7 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
         // we should avoid dropping too many frames in sequence unless we
         // are too late. and we allow 100ms A-V delay here:
         if (d < -mpctx->dropped_frames * frame_time - 0.100 && !mpctx->paused
-            && !mpctx->restart_playback) {
+            && mpctx->video_status == STATUS_PLAYING) {
             mpctx->drop_frame_cnt++;
             mpctx->dropped_frames++;
             return mpctx->opts->frame_dropping;
@@ -321,7 +325,8 @@ static int decode_image(struct MPContext *mpctx)
     {
         mpctx->hrseek_framedrop = false;
     }
-    int framedrop_type = mpctx->hrseek_active && mpctx->hrseek_framedrop ?
+    bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
+    int framedrop_type = hrseek && mpctx->hrseek_framedrop ?
                          1 : check_framedrop(mpctx, -1);
     d_video->waiting_decoded_mpi =
         video_decode(d_video, pkt, framedrop_type);
@@ -449,7 +454,8 @@ static int video_output_image(struct MPContext *mpctx, double endpts,
         add_frame_pts(mpctx, pts);
 
         bool drop = false;
-        if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005)
+        bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
+        if (hrseek && pts < mpctx->hrseek_pts - .005)
             drop = true;
         if (endpts != MP_NOPTS_VALUE && pts >= endpts) {
             drop = true;
@@ -537,7 +543,6 @@ int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
     }
 
     double pts = vo_get_next_pts(video_out, 0);
-    mpctx->hrseek_active = false;
     double last_pts = mpctx->video_next_pts;
     if (last_pts == MP_NOPTS_VALUE)
         last_pts = pts;

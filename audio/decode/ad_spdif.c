@@ -191,7 +191,10 @@ static int decode_packet(struct dec_audio *da)
 
     spdif_ctx->out_buffer_len  = 0;
 
-    struct demux_packet *mpkt = demux_read_packet(da->header);
+    struct demux_packet *mpkt;
+    if (demux_read_packet_async(da->header, &mpkt) == 0)
+        return AD_WAIT;
+
     if (!mpkt)
         return AD_EOF;
 
