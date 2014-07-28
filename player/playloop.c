@@ -324,6 +324,8 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     mpctx->start_timestamp = mp_time_sec();
     mpctx->sleeptime = 0;
 
+    mp_notify(mpctx, MPV_EVENT_TICK, NULL);
+
     return 0;
 }
 
