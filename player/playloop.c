@@ -213,8 +213,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     if (hr_seek_very_exact)
         hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
 
-    bool hr_seek = opts->correct_pts;
-    hr_seek &= seek.exact >= 0 && seek.type != MPSEEK_FACTOR;
+    bool hr_seek = opts->correct_pts && seek.exact >= 0;
     hr_seek &= (opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE) ||
                opts->hr_seek > 0 || seek.exact > 0;
     if (seek.type == MPSEEK_FACTOR || seek.amount < 0 ||
