@@ -288,12 +288,6 @@ void vo_queue_image(struct vo *vo, struct mp_image *mpi)
     if (!vo->config_ok)
         return;
     assert(mp_image_params_equal(vo->params, &mpi->params));
-    if (vo->driver->filter_image && mpi)
-        mpi = vo->driver->filter_image(vo, mpi);
-    if (!mpi) {
-        MP_ERR(vo, "Could not upload image.\n");
-        return;
-    }
     assert(vo->max_video_queue <= VO_MAX_QUEUE);
     assert(vo->num_video_queue < vo->max_video_queue);
     vo->video_queue[vo->num_video_queue++] = mpi;

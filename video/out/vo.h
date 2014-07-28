@@ -164,20 +164,6 @@ struct vo_driver {
     int (*query_format)(struct vo *vo, uint32_t format);
 
     /*
-     * Optional. Can be used to convert the input image into something VO
-     * internal, such as GPU surfaces. Ownership of mpi is passed to the
-     * function, and the returned image is owned by the caller.
-     * The following guarantees are given:
-     * - mpi has the format with which the VO was configured
-     * - the returned image can be arbitrary, and the VO merely manages its
-     *   lifetime
-     * - images passed to draw_image are always passed through this function
-     * - the maximum number of images kept alive is not over vo->max_video_queue
-     * - if vo->max_video_queue is large enough, some images may be buffered ahead
-     */
-    struct mp_image *(*filter_image)(struct vo *vo, struct mp_image *mpi);
-
-    /*
      * Initialize or reconfigure the display driver.
      *   params: video parameters, like pixel format and frame size
      *   flags: combination of VOFLAG_ values
