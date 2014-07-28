@@ -231,6 +231,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         seek.direction = seek.amount > 0 ? 1 : -1;
         seek.amount += get_current_time(mpctx);
     }
+    hr_seek &= seek.type == MPSEEK_ABSOLUTE; // otherwise, no target PTS known
 
     double demuxer_amount = seek.amount;
     if (mpctx->timeline) {
