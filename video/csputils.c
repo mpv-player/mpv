@@ -305,6 +305,9 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
                 .blue  = {0.150, 0.060},
                 .white = d65
             };
+        // This is the default assumption if no colorspace information could
+        // be determined, eg. for files which have no video channel.
+        case MP_CSP_PRIM_AUTO:
         case MP_CSP_PRIM_BT_709:
             return (struct mp_csp_primaries) {
                 .red   = {0.640, 0.330},
