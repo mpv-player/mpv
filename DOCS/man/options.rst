@@ -1706,6 +1706,13 @@ OPTIONS
     Same as ``--stream-capture``, but do not start playback. Instead, the entire
     file is dumped.
 
+``--stream-lavf-o=opt1=value1,opt2=value2,...``
+    Set AVOptions on streams opened with libavformat. Unknown or misspelled
+    options are silently ignored. (They are mentioned in the terminal output
+    in verbose mode, i.e. ``--v``. In general we can't print errors, because
+    other options such as e.g. user agent are not available with all protocols,
+    and printing errors for unknown options would end up being too noisy.)
+
 ``--playlist=<filename>``
     Play files according to a playlist file (Supports some common formats.If
     no format is detected, t will be treated as list of files, separated by

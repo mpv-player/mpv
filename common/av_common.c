@@ -19,6 +19,7 @@
 
 #include <libavutil/common.h>
 #include <libavutil/log.h>
+#include <libavutil/dict.h>
 #include <libavcodec/avcodec.h>
 
 #include "common/common.h"
@@ -179,4 +180,12 @@ const char *mp_codec_from_av_codec_id(int codec_id)
             name = avcodec->name;
     }
     return name;
+}
+
+// kv is in the format as by OPT_KEYVALUELIST(): kv[0]=key0, kv[1]=val0, ...
+// Copy them to the dict.
+void mp_set_avdict(AVDictionary **dict, char **kv)
+{
+    for (int n = 0; kv && kv[n * 2]; n++)
+        av_dict_set(dict, kv[n * 2 + 0], kv[n * 2 + 1], 0);
 }

@@ -25,6 +25,7 @@
 #include "options/path.h"
 #include "common/msg.h"
 #include "common/tags.h"
+#include "common/av_common.h"
 #include "stream.h"
 #include "options/m_option.h"
 
@@ -32,6 +33,21 @@
 
 #include "bstr/bstr.h"
 #include "talloc.h"
+
+struct stream_lavf_params *stream_lavf_opts;
+
+#define OPT_BASE_STRUCT struct stream_lavf_params
+struct stream_lavf_params {
+    char **avopts;
+};
+
+const struct m_sub_options stream_lavf_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_KEYVALUELIST("stream-lavf-o", avopts, 0),
+        {0}
+    },
+    .size = sizeof(struct stream_lavf_params),
+};
 
 static int open_f(stream_t *stream);
 static struct mp_tags *read_icy(stream_t *stream);
@@ -199,6 +215,7 @@ static int open_f(stream_t *stream)
     if (strlen(cust_headers))
         av_dict_set(&dict, "headers", cust_headers, 0);
     av_dict_set(&dict, "icy", "1", 0);
+    mp_set_avdict(&dict, opts->stream_lavf_opts->avopts);
 
     AVIOInterruptCB cb = {
         .callback = interrupt_cb,
