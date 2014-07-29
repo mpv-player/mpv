@@ -414,8 +414,6 @@ struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
 bool timeline_set_part(struct MPContext *mpctx, int i, bool force);
 double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_reset);
-struct sh_stream *init_demux_stream(struct MPContext *mpctx, struct track *track);
-void reselect_demux_streams(struct MPContext *mpctx);
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,

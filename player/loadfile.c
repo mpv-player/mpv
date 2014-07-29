@@ -60,6 +60,8 @@
 #include "command.h"
 #include "libmpv/client.h"
 
+static void reselect_demux_streams(struct MPContext *mpctx);
+
 static void uninit_sub(struct MPContext *mpctx, int order)
 {
     if (mpctx->d_sub[order])
@@ -264,39 +266,39 @@ void update_demuxer_properties(struct MPContext *mpctx)
     demuxer->events = 0;
 }
 
+static bool need_init_seek(struct demuxer *demux)
+{
+    for (int n = 0; n < demux->num_streams; n++) {
+        struct sh_stream *stream = demux->streams[n];
+        // Subtitle streams are not properly interleaved -> force init. seek.
+        if (stream->type != STREAM_SUB && demux_stream_is_selected(stream))
+            return false;
+    }
+    return true;
+}
+
 // Enable needed streams, disable others.
 // Note that switching all tracks at once (instead when initializing something)
 // can be important, because reading from a demuxer stream (e.g. during init)
 // will implicitly discard interleaved packets from unselected streams.
-void reselect_demux_streams(struct MPContext *mpctx)
+// Also initializes position for external streams.
+static void reselect_demux_streams(struct MPContext *mpctx)
 {
     // Note: we assume that all demuxer streams are covered by the track list.
     for (int t = 0; t < mpctx->num_tracks; t++) {
         struct track *track = mpctx->tracks[t];
-        if (track->demuxer && track->stream)
+        if (track->demuxer && track->stream) {
+            bool need_init = track->selected &&
+                mpctx->demuxer != track->demuxer &&
+                need_init_seek(track->demuxer);
             demuxer_select_track(track->demuxer, track->stream, track->selected);
-    }
-}
-
-// External demuxers might need a seek to the current playback position.
-static void external_track_seek(struct MPContext *mpctx, struct track *track)
-{
-    if (track && track->demuxer && track->selected && track->is_external) {
-        for (int t = 0; t < mpctx->num_tracks; t++) {
-            struct track *other = mpctx->tracks[t];
-            if (other->demuxer == track->demuxer &&
-                demux_stream_is_selected(other->stream))
-                return;
+            if (need_init) {
+                double pts = get_main_demux_pts(mpctx);
+                if (pts != MP_NOPTS_VALUE)
+                    demux_seek(track->demuxer, pts, SEEK_ABSOLUTE);
+            }
         }
-        double pts = get_main_demux_pts(mpctx);
-        demux_seek(track->demuxer, pts, SEEK_ABSOLUTE);
     }
-}
-
-struct sh_stream *init_demux_stream(struct MPContext *mpctx, struct track *track)
-{
-    external_track_seek(mpctx, track);
-    return track ? track->stream : NULL;
 }
 
 static struct sh_stream *select_fallback_stream(struct demuxer *d,

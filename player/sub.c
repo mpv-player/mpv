@@ -194,10 +194,7 @@ void reinit_subs(struct MPContext *mpctx, int order)
 
     assert(!(mpctx->initialized_flags & init_flag));
 
-    struct sh_stream *sh = init_demux_stream(mpctx, track);
-
-    // No track selected, or lazily added DVD track (will actually be created
-    // on first sub packet)
+    struct sh_stream *sh = track ? track->stream : NULL;
     if (!sh)
         return;
 

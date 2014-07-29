@@ -174,7 +174,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     assert(!(mpctx->initialized_flags & INITIALIZED_VCODEC));
     assert(!mpctx->d_video);
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    struct sh_stream *sh = init_demux_stream(mpctx, track);
+    struct sh_stream *sh = track ? track->stream : NULL;
     if (!sh)
         goto no_video;
 

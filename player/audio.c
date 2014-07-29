@@ -96,7 +96,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct track *track = mpctx->current_track[0][STREAM_AUDIO];
-    struct sh_stream *sh = init_demux_stream(mpctx, track);
+    struct sh_stream *sh = track ? track->stream : NULL;
     if (!sh) {
         uninit_player(mpctx, INITIALIZED_AO);
         goto no_audio;
