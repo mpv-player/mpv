@@ -405,6 +405,15 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         }
     }
 
+    // If EOF was reached before, but now something can be decoded, try to
+    // restart audio properly. This helps with video files where audio starts
+    // later. Retrying is needed to get the correct sync PTS.
+    if (mpctx->audio_status == STATUS_EOF && status == AD_OK) {
+        mpctx->audio_status = STATUS_SYNCING;
+        mpctx->sleeptime = 0;
+        return; // retry on next iteration
+    }
+
     bool end_sync = status != AD_OK; // (on error/EOF, start playback immediately)
     if (skip >= 0) {
         int max = mp_audio_buffer_samples(mpctx->ao_buffer);
@@ -412,12 +421,13 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         // If something is left, we definitely reached the target time.
         end_sync |= sync_known && skip < max;
     } else if (skip < 0) {
-        if (-skip < 1000000) { // heuristic against making the buffer too large
-            mp_audio_buffer_prepend_silence(mpctx->ao_buffer, -skip);
-        } else {
-            MP_ERR(mpctx, "Audio starts too late: sync. failed.\n");
-            ao_reset(mpctx->ao);
+        if (-skip > playsize) { // heuristic against making the buffer too large
+            ao_reset(mpctx->ao); // some AOs repeat data on underflow
+            mpctx->audio_status = STATUS_EOF;
+            mpctx->delay = 0;
+            return;
         }
+        mp_audio_buffer_prepend_silence(mpctx->ao_buffer, -skip);
         end_sync = true;
     }
 
