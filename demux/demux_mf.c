@@ -49,7 +49,7 @@ static void demux_seek_mf(demuxer_t *demuxer, double rel_seek_secs, int flags)
     if (newpos < 0)
         newpos = 0;
     if (newpos >= mf->nr_of_files)
-        newpos = mf->nr_of_files - 1;
+        newpos = mf->nr_of_files;
     mf->curr_frame = newpos;
 }
 
