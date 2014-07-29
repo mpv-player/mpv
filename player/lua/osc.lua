@@ -68,7 +68,6 @@ local state = {
     tc_ms = false,                          -- Should the timecodes display their time with milliseconds
     mp_screen_sizeX, mp_screen_sizeY,       -- last screen-resolution, to detect resolution changes to issue reINITs
     initREQ = false,                        -- is a re-init request pending?
-    last_seek,                              -- last seek position, to avoid deadlocks by repeatedly seeking to the same position
     last_mouseX, last_mouseY,                -- last mouse position, to detect siginificant mouse movement
     message_text,
     message_timeout,
@@ -314,6 +313,7 @@ function register_element(type, x, y, an, w, h, style, content, eventresponder, 
             content = content,
             eventresponder = eventresponder,
             metainfo = metainfo,
+            state = {},
         }
 
         table.insert(elements, element)
@@ -882,16 +882,19 @@ function osc_init()
     end
 
     local eventresponder = {}
-    local sliderF = function (element)
-        local seek_to = get_slider_value(element)
-        -- ignore identical seeks
-        if not(state.last_seek == seek_to) then
-            mp.commandv("seek", seek_to, "absolute-percent", "keyframes")
-            state.last_seek = seek_to
-        end
+
+    -- Do keyframe seeking when mouse is dragged
+    local sliderFfast = function (element)
+        mp.commandv("seek", get_slider_value(element), "absolute-percent", "keyframes")
     end
-    eventresponder.render = sliderF
-    eventresponder.mouse_btn0_down = sliderF
+    eventresponder["mouse_move"] = sliderFfast
+
+    -- Do exact seeks on single clicks
+    local sliderFexact = function (element)
+        mp.commandv("seek", get_slider_value(element), "absolute-percent", "exact")
+    end
+    eventresponder.mouse_btn0_down = sliderFexact
+
     register_slider(posX, posY+pos_offsetY-22, 2, pos_offsetX*2, 15, osc_styles.timecodes, 0, 100, markerF, posF, eventresponder, metainfo)
 
     --
@@ -1136,10 +1139,15 @@ function process_event(source, what)
                     elements[n].eventresponder[source .. "_" .. what](elements[n])
                 end
             end
+
+            --reset active element
+            if not (elements[n].eventresponder["reset"] == nil) then
+                elements[n].eventresponder["reset"](elements[n])
+            end
+
         end
         state.active_element = nil
         state.mouse_down_counter = 0
-        state.last_seek = nil
 
     elseif source == "mouse_move" then
         local mouseX, mouseY = mp.get_mouse_pos()
