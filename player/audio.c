@@ -348,7 +348,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     return true;
 }
 
-int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
+void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 {
     struct MPOpts *opts = mpctx->opts;
     struct dec_audio *d_audio = mpctx->d_audio;
@@ -360,7 +360,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         // the format is already known.
         int r = initial_audio_decode(mpctx->d_audio);
         if (r == AD_WAIT)
-            return -1; // continue later when new data is available
+            return; // continue later when new data is available
         mpctx->d_audio->init_retries += 1;
         MP_VERBOSE(mpctx, "Initial audio packets read: %d\n",
                    mpctx->d_audio->init_retries);
@@ -368,10 +368,10 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             MP_ERR(mpctx, "Error initializing audio.\n");
             struct track *track = mpctx->current_track[0][STREAM_AUDIO];
             mp_deselect_track(mpctx, track);
-            return -2;
+            return;
         }
         reinit_audio_chain(mpctx);
-        return -1; // try again next iteration
+        return; // try again next iteration
     }
 
     // if paused, just initialize things (audio format & pts)
@@ -391,7 +391,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     if (playsize > mp_audio_buffer_samples(mpctx->ao_buffer)) {
         status = audio_decode(d_audio, mpctx->ao_buffer, playsize);
         if (status == AD_WAIT)
-            return -1;
+            return;
         if (status == AD_NEW_FMT) {
             /* The format change isn't handled too gracefully. A more precise
              * implementation would require draining buffered old-format audio
@@ -401,7 +401,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
                 uninit_player(mpctx, INITIALIZED_AO);
             reinit_audio_chain(mpctx);
             mpctx->sleeptime = 0;
-            return -1; // retry on next iteration
+            return; // retry on next iteration
         }
     }
 
@@ -425,7 +425,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         if (end_sync)
             mpctx->audio_status = STATUS_FILLING;
         mpctx->sleeptime = 0;
-        return -1; // continue on next iteration
+        return; // continue on next iteration
     }
 
     assert(mpctx->audio_status >= STATUS_FILLING);
@@ -436,7 +436,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         mpctx->video_status <= STATUS_READY)
     {
         mpctx->audio_status = STATUS_READY;
-        return -1;
+        return;
     }
 
     bool audio_eof = status == AD_EOF;
@@ -489,8 +489,6 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         if (ao_eof_reached(mpctx->ao) || opts->gapless_audio)
             mpctx->audio_status = STATUS_EOF;
     }
-
-    return 0;
 }
 
 // Drop data queued for output, or which the AO is currently outputting.

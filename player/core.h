@@ -377,7 +377,7 @@ typedef struct MPContext {
 void reinit_audio_chain(struct MPContext *mpctx);
 int reinit_audio_filters(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
-int fill_audio_out_buffers(struct MPContext *mpctx, double endpts);
+void fill_audio_out_buffers(struct MPContext *mpctx, double endpts);
 double written_audio_pts(struct MPContext *mpctx);
 void clear_audio_output_buffers(struct MPContext *mpctx);
 void clear_audio_decode_buffers(struct MPContext *mpctx);
