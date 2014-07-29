@@ -174,7 +174,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
     mpctx->drop_frame_cnt = 0;
     mpctx->dropped_frames = 0;
     mpctx->playback_pts = MP_NOPTS_VALUE;
-    mpctx->eof_reached = false;
     mpctx->video_status = mpctx->d_video ? STATUS_SYNCING : STATUS_EOF;
     mpctx->audio_status = mpctx->d_audio ? STATUS_SYNCING : STATUS_EOF;
     mpctx->restart_complete = false;
@@ -815,8 +814,8 @@ static void handle_keep_open(struct MPContext *mpctx)
     if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
         mpctx->playback_pts = mpctx->last_vo_pts;
-        mpctx->eof_reached = true;
-        pause_player(mpctx);
+        if (!mpctx->opts->pause)
+            pause_player(mpctx);
     }
 }
 
@@ -999,8 +998,6 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->delay = 0;
             mpctx->last_av_difference = 0;
             mpctx->video_status = STATUS_EOF;
-            if (mpctx->paused && vo->hasframe)
-                mpctx->video_status = STATUS_DRAINING;
             MP_VERBOSE(mpctx, "video EOF\n");
         } else {
             if (mpctx->video_status > STATUS_PLAYING)
@@ -1189,18 +1186,19 @@ void run_playloop(struct MPContext *mpctx)
     update_osd_msg(mpctx);
     update_subtitles(mpctx);
 
-    /* It's possible for the user to simultaneously switch both audio
+    /* If we're paused, don't end playback yet. But if video is enabled, is EOF,
+     * and we don't have a video frame, then the user probably seeked outside
+     * of the video, and we want to quit. */
+    bool prevent_eof = mpctx->paused;
+    if (mpctx->d_video && mpctx->video_status == STATUS_EOF)
+        prevent_eof &= mpctx->video_out && mpctx->video_out->hasframe;
+    /* Handles terminating on end of playback (or switching to next segment).
+     *
+     * It's possible for the user to simultaneously switch both audio
      * and video streams to "disabled" at runtime. Handle this by waiting
      * rather than immediately stopping playback due to EOF.
-     *
-     * We want this check to trigger if we seeked to this position,
-     * but not if we paused at it with audio possibly still buffered in
-     * the AO. There's currently no working way to check buffered audio
-     * inside AO while paused. Thus the "was_audio_restart" check below, which
-     * should trigger after seek only, when we know there's no audio
-     * buffered.
      */
-    if ((mpctx->d_audio || mpctx->d_video) && !mpctx->paused &&
+    if ((mpctx->d_audio || mpctx->d_video) && !prevent_eof &&
         mpctx->audio_status == STATUS_EOF &&
         mpctx->video_status == STATUS_EOF)
     {
@@ -1214,6 +1212,8 @@ void run_playloop(struct MPContext *mpctx)
     }
 
     mp_handle_nav(mpctx);
+
+    handle_keep_open(mpctx);
 
     if (!mpctx->stop_play && mpctx->restart_complete) {
 
@@ -1269,8 +1269,6 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_loop_file(mpctx);
 
-    handle_keep_open(mpctx);
-
     handle_chapter_change(mpctx);
 
     handle_force_window(mpctx, false);
@@ -1289,7 +1287,8 @@ void idle_loop(struct MPContext *mpctx)
     while (mpctx->opts->player_idle_mode && !mpctx->playlist->current
            && mpctx->stop_play != PT_QUIT)
     {
-        mpctx->eof_reached = true;
+        mpctx->video_status = STATUS_EOF;
+        mpctx->audio_status = STATUS_EOF;
         if (need_reinit) {
             mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
             handle_force_window(mpctx, true);

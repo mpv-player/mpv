@@ -1079,7 +1079,9 @@ static int mp_property_eof_reached(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg, mpctx->eof_reached);
+    bool eof = mpctx->video_status == STATUS_EOF &&
+               mpctx->audio_status == STATUS_EOF;
+    return m_property_flag_ro(action, arg, eof);
 }
 
 static int mp_property_cache(void *ctx, struct m_property *prop,

@@ -1276,7 +1276,6 @@ goto_reopen_demuxer: ;
     mpctx->playing_msg_shown = false;
     mpctx->paused = false;
     mpctx->paused_for_cache = false;
-    mpctx->eof_reached = false;
     mpctx->last_chapter = -2;
     mpctx->seek = (struct seek_params){ 0 };
     mpctx->video_status = mpctx->d_video ? STATUS_SYNCING : STATUS_EOF;
