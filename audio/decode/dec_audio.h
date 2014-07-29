@@ -37,6 +37,7 @@ struct dec_audio {
     struct af_stream *afilter;
     char *decoder_desc;
     struct replaygain_data *replaygain_data;
+    int init_retries;
     // set by decoder
     struct mp_audio decoded;    // decoded audio set by last decode_packet() call
     int bitrate;                // input bitrate, can change with VBR sources

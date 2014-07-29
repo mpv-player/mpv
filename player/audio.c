@@ -361,7 +361,10 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         int r = initial_audio_decode(mpctx->d_audio);
         if (r == AD_WAIT)
             return -1; // continue later when new data is available
-        if (r != AD_OK) {
+        mpctx->d_audio->init_retries += 1;
+        MP_VERBOSE(mpctx, "Initial audio packets read: %d\n",
+                   mpctx->d_audio->init_retries);
+        if (r != AD_OK && mpctx->d_audio->init_retries >= 50) {
             MP_ERR(mpctx, "Error initializing audio.\n");
             struct track *track = mpctx->current_track[0][STREAM_AUDIO];
             mp_deselect_track(mpctx, track);
