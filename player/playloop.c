@@ -371,6 +371,9 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
 void execute_queued_seek(struct MPContext *mpctx)
 {
     if (mpctx->seek.type) {
+        // Let explicitly imprecise seeks cancel precise seeks:
+        if (mpctx->hrseek_active && mpctx->seek.exact < 0)
+            mpctx->start_timestamp = -1e9;
         /* If the user seeks continuously (keeps arrow key down)
          * try to finish showing a frame from one location before doing
          * another seek (which could lead to unchanging display). */
