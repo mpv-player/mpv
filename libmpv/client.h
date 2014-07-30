@@ -935,8 +935,8 @@ typedef enum mpv_event_id {
     /**
      * Triggered by the script_message input command. The command uses the
      * first argument of the command as client name (see mpv_client_name()) to
-     * dispatch the message, and passes along the all arguments starting from
-     * the seconand argument as strings.
+     * dispatch the message, and passes along all arguments starting from the
+     * second argument as strings.
      * See also mpv_event and mpv_event_client_message.
      */
     MPV_EVENT_CLIENT_MESSAGE    = 16,
