@@ -53,6 +53,10 @@ Available audio output drivers are:
         Set the index of the mixer channel (default: 0). Consider the output of
         "``amixer scontrols``", then the index is the number that follows the
         name of the element.
+    ``non-interleaved``
+        Allow output of non-interleaved formats (if the audio decoder uses
+        this format). Currently disabled by default, because some popular
+        ALSA plugins are utterly broken with non-interleaved formats.
 
     .. note::
 

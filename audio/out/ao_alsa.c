@@ -63,6 +63,7 @@ struct priv {
     char *cfg_mixer_name;
     int cfg_mixer_index;
     int cfg_resample;
+    int cfg_ni;
 };
 
 #define BUFFER_TIME 250000  // 250ms
@@ -351,6 +352,9 @@ static int init(struct ao *ao)
     snd_pcm_uframes_t boundary;
 
     struct priv *p = ao->priv;
+
+    if (!p->cfg_ni)
+        ao->format = af_fmt_from_planar(ao->format);
 
     /* switch for spdif
      * sets opening sequence for SPDIF
@@ -754,6 +758,7 @@ const struct ao_driver audio_out_alsa = {
         .cfg_mixer_device = "default",
         .cfg_mixer_name = "Master",
         .cfg_mixer_index = 0,
+        .cfg_ni = 0,
     },
     .options = (const struct m_option[]) {
         OPT_STRING("device", cfg_device, 0),
@@ -762,6 +767,7 @@ const struct ao_driver audio_out_alsa = {
         OPT_STRING("mixer-device", cfg_mixer_device, 0),
         OPT_STRING("mixer-name", cfg_mixer_name, 0),
         OPT_INTRANGE("mixer-index", cfg_mixer_index, 0, 0, 99),
+        OPT_FLAG("non-interleaved", cfg_ni, 0),
         {0}
     },
 };
