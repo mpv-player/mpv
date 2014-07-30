@@ -786,7 +786,7 @@ void run_playloop(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     double endpts = get_play_end_pts(mpctx);
-    bool end_is_chapter = false;
+    bool end_is_new_segment = false;
     int64_t shown_vframes = mpctx->shown_vframes;
 
 #if HAVE_ENCODING
@@ -801,8 +801,8 @@ void run_playloop(struct MPContext *mpctx)
     if (mpctx->timeline) {
         double end = mpctx->timeline[mpctx->timeline_part + 1].start;
         if (endpts == MP_NOPTS_VALUE || end < endpts) {
+            end_is_new_segment = true;
             endpts = end;
-            end_is_chapter = true;
         }
     }
 
@@ -876,7 +876,7 @@ void run_playloop(struct MPContext *mpctx)
         mpctx->audio_status == STATUS_EOF &&
         mpctx->video_status == STATUS_EOF)
     {
-        if (end_is_chapter) {
+        if (end_is_new_segment) {
             mp_seek(mpctx, (struct seek_params){
                            .type = MPSEEK_ABSOLUTE,
                            .amount = mpctx->timeline[mpctx->timeline_part+1].start
