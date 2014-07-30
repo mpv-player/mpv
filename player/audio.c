@@ -414,7 +414,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         return; // retry on next iteration
     }
 
-    bool end_sync = status != AD_OK; // (on error/EOF, start playback immediately)
+    bool end_sync = false;
     if (skip >= 0) {
         int max = mp_audio_buffer_samples(mpctx->ao_buffer);
         mp_audio_buffer_skip(mpctx->ao_buffer, MPMIN(skip, max));
@@ -434,6 +434,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     if (mpctx->audio_status == STATUS_SYNCING) {
         if (end_sync)
             mpctx->audio_status = STATUS_FILLING;
+        if (status != AD_OK)
+            mpctx->audio_status = STATUS_EOF;
         mpctx->sleeptime = 0;
         return; // continue on next iteration
     }
