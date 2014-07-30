@@ -969,3 +969,9 @@ Available filters are:
             Use default VDPAU scaling (default).
         1-9
             Apply high quality VDPAU scaling (needs capable hardware).
+
+``buffer=<num>``
+    Buffer ``<num>`` frames in the filter chain. This filter is probably pretty
+    useless, except for debugging. (Note that this won't help smoothing out
+    latencies with decoding, because the filter will never output a frame if
+    the buffer isn't full, except on EOF.)
