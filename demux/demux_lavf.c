@@ -183,11 +183,14 @@ static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
 {
     struct demuxer *demuxer = opaque;
     struct stream *stream = demuxer->stream;
-    struct lavf_priv *priv = demuxer->priv;
 
-    AVStream *st = priv->avfc->streams[stream_idx];
-    double pts = (double)ts * st->time_base.num / st->time_base.den;
-    int ret = stream_control(stream, STREAM_CTRL_SEEK_TO_TIME, &pts);
+    struct stream_avseek cmd = {
+        .stream_index = stream_idx,
+        .timestamp = ts,
+        .flags = flags,
+    };
+
+    int ret = stream_control(stream, STREAM_CTRL_AVSEEK, &cmd);
     return ret < 1 ? AVERROR(ENOSYS) : 0;
 }
 

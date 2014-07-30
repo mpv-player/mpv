@@ -101,8 +101,7 @@ static int control(stream_t *s, int cmd, void *arg)
     AVIOContext *avio = s->priv;
     if (!avio && cmd != STREAM_CTRL_RECONNECT)
         return -1;
-    int64_t size, ts;
-    double pts;
+    int64_t size;
     switch(cmd) {
     case STREAM_CTRL_GET_SIZE:
         size = avio_size(avio);
@@ -111,13 +110,13 @@ static int control(stream_t *s, int cmd, void *arg)
             return 1;
         }
         break;
-    case STREAM_CTRL_SEEK_TO_TIME:
-        pts = *(double *)arg;
-        ts = pts * AV_TIME_BASE;
-        ts = avio_seek_time(avio, -1, ts, 0);
-        if (ts >= 0)
+    case STREAM_CTRL_AVSEEK: {
+        struct stream_avseek *c = arg;
+        int64_t r = avio_seek_time(avio, c->stream_index, c->timestamp, c->flags);
+        if (r >= 0)
             return 1;
         break;
+    }
     case STREAM_CTRL_GET_METADATA: {
         *(struct mp_tags **)arg = read_icy(s);
         if (!*(struct mp_tags **)arg)

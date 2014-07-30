@@ -412,6 +412,7 @@ static bool control_needs_flush(int stream_ctrl)
 {
     switch (stream_ctrl) {
     case STREAM_CTRL_SEEK_TO_TIME:
+    case STREAM_CTRL_AVSEEK:
     case STREAM_CTRL_SET_ANGLE:
     case STREAM_CTRL_SET_CURRENT_TITLE:
         return true;

@@ -101,6 +101,7 @@ enum stream_ctrl {
     STREAM_CTRL_TV_LAST_CHAN,
     STREAM_CTRL_DVB_SET_CHANNEL,
     STREAM_CTRL_DVB_STEP_CHANNEL,
+    STREAM_CTRL_AVSEEK,
 };
 
 struct stream_lang_req {
@@ -119,6 +120,13 @@ struct stream_dvd_info_req {
 #define TV_COLOR_HUE            2
 #define TV_COLOR_SATURATION     3
 #define TV_COLOR_CONTRAST       4
+
+// for STREAM_CTRL_AVSEEK
+struct stream_avseek {
+    int stream_index;
+    int64_t timestamp;
+    int flags;
+};
 
 struct stream;
 typedef struct stream_info_st {
