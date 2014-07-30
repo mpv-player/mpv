@@ -88,6 +88,8 @@ enum {
     MAX_TERM_OSD_LEVEL = 1,
     OSD_LEVEL_INVISIBLE = 4,
     OSD_BAR_SEEK = 256,
+
+    MAX_NUM_VO_PTS = 100,
 };
 
 enum seek_type {
@@ -136,17 +138,6 @@ struct track {
     // For external subtitles, which are read fully on init. Do not attempt
     // to read packets from them.
     bool preloaded;
-};
-
-enum {
-    MAX_NUM_VO_PTS = 100,
-
-    // update_video() - code also uses: <0 error, 0 eof, >0 progress
-    VD_ERROR = -1,
-    VD_EOF = 0,         // end of file - no new output
-    VD_PROGRESS = 1,    // progress, but no output; repeat call with no waiting
-    VD_NEW_FRAME = 2,   // the call produced a new frame
-    VD_WAIT = 3,        // no EOF, but no output; wait until wakeup
 };
 
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
@@ -501,8 +492,7 @@ void build_cue_timeline(struct MPContext *mpctx);
 void reset_video_state(struct MPContext *mpctx);
 int reinit_video_chain(struct MPContext *mpctx);
 int reinit_video_filters(struct MPContext *mpctx);
-int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,
-                 double *frame_duration);
+void write_video(struct MPContext *mpctx, double endpts);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void update_fps(struct MPContext *mpctx);
 

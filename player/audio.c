@@ -361,7 +361,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     struct MPOpts *opts = mpctx->opts;
     struct dec_audio *d_audio = mpctx->d_audio;
 
-    assert(d_audio);
+    if (!d_audio)
+        return;
 
     if (!d_audio->afilter || !mpctx->ao) {
         // Probe the initial audio format. Returns AD_OK (and does nothing) if
