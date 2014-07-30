@@ -168,6 +168,26 @@ int reinit_video_filters(struct MPContext *mpctx)
     return d_video->vfilter->initialized;
 }
 
+void reset_video_state(struct MPContext *mpctx)
+{
+    if (mpctx->d_video)
+        video_reset_decoding(mpctx->d_video);
+    if (mpctx->video_out)
+        vo_seek_reset(mpctx->video_out);
+
+    mpctx->delay = 0;
+    mpctx->time_frame = 0;
+    mpctx->video_next_pts = MP_NOPTS_VALUE;
+    mpctx->playing_last_frame = false;
+    mpctx->last_frame_duration = 0;
+    mpctx->total_avsync_change = 0;
+    mpctx->drop_frame_cnt = 0;
+    mpctx->dropped_frames = 0;
+    mpctx->drop_message_shown = 0;
+
+    mpctx->video_status = mpctx->d_video ? STATUS_SYNCING : STATUS_EOF;
+}
+
 int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -223,21 +243,15 @@ int reinit_video_chain(struct MPContext *mpctx)
     vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE
                                                : VOCTRL_RESUME, NULL);
 
-    mpctx->video_status = STATUS_SYNCING;
     mpctx->sync_audio_to_video = !sh->attached_picture;
-    mpctx->delay = 0;
-    mpctx->video_next_pts = MP_NOPTS_VALUE;
-    mpctx->playing_last_frame = false;
-    mpctx->last_frame_duration = 0;
     mpctx->vo_pts_history_seek_ts++;
 
     // If we switch on video again, ensure audio position matches up.
     if (mpctx->d_audio)
         mpctx->audio_status = STATUS_SYNCING;
 
-    vo_seek_reset(mpctx->video_out);
-    reset_subtitles(mpctx, 0);
-    reset_subtitles(mpctx, 1);
+    reset_video_state(mpctx);
+    reset_subtitle_state(mpctx);
 
     if (opts->force_fps) {
         d_video->fps = opts->force_fps;

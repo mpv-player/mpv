@@ -146,43 +146,22 @@ void add_step_frame(struct MPContext *mpctx, int dir)
     }
 }
 
-static void seek_reset(struct MPContext *mpctx, bool reset_ao)
+// Clear some playback-related fields on file loading or after seeks.
+void reset_playback_state(struct MPContext *mpctx)
 {
-    if (mpctx->d_video) {
-        video_reset_decoding(mpctx->d_video);
-        vo_seek_reset(mpctx->video_out);
-    }
+    reset_video_state(mpctx);
+    reset_audio_state(mpctx);
+    reset_subtitle_state(mpctx);
 
-    if (mpctx->d_audio) {
-        audio_reset_decoding(mpctx->d_audio);
-        if (reset_ao)
-            clear_audio_output_buffers(mpctx);
-    }
-
-    reset_subtitles(mpctx, 0);
-    reset_subtitles(mpctx, 1);
-
-    mpctx->video_pts = MP_NOPTS_VALUE;
-    mpctx->video_next_pts = MP_NOPTS_VALUE;
-    mpctx->playing_last_frame = false;
-    mpctx->last_frame_duration = 0;
-    mpctx->delay = 0;
-    mpctx->time_frame = 0;
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
-    mpctx->total_avsync_change = 0;
-    mpctx->drop_frame_cnt = 0;
-    mpctx->dropped_frames = 0;
     mpctx->playback_pts = MP_NOPTS_VALUE;
-    mpctx->video_status = mpctx->d_video ? STATUS_SYNCING : STATUS_EOF;
-    mpctx->audio_status = mpctx->d_audio ? STATUS_SYNCING : STATUS_EOF;
+    mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->restart_complete = false;
 
 #if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
 #endif
-
-    mp_notify(mpctx, MPV_EVENT_SEEK, NULL);
 }
 
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
@@ -290,7 +269,10 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         }
     }
 
-    seek_reset(mpctx, !timeline_fallthrough);
+    if (!timeline_fallthrough)
+        clear_audio_output_buffers(mpctx);
+
+    reset_playback_state(mpctx);
 
     if (timeline_fallthrough) {
         // Important if video reinit happens.
@@ -305,8 +287,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     if (seek.type == MPSEEK_ABSOLUTE) {
         mpctx->video_pts = seek.amount;
         mpctx->last_seek_pts = seek.amount;
-    } else
-        mpctx->last_seek_pts = MP_NOPTS_VALUE;
+    }
 
     // The hr_seek==false case is for skipping frames with PTS before the
     // current timeline chapter start. It's not really known where the demuxer
@@ -324,6 +305,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     mpctx->start_timestamp = mp_time_sec();
     mpctx->sleeptime = 0;
 
+    mp_notify(mpctx, MPV_EVENT_SEEK, NULL);
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
 
     return 0;

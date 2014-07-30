@@ -92,6 +92,13 @@ int reinit_audio_filters(struct MPContext *mpctx)
     return 1;
 }
 
+void reset_audio_state(struct MPContext *mpctx)
+{
+    if (mpctx->d_audio)
+        audio_reset_decoding(mpctx->d_audio);
+    mpctx->audio_status = mpctx->d_audio ? STATUS_SYNCING : STATUS_EOF;
+}
+
 void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -117,6 +124,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->d_audio->replaygain_data = sh->audio->replaygain_data;
         if (!audio_init_best_codec(mpctx->d_audio, opts->audio_decoders))
             goto init_error;
+        reset_audio_state(mpctx);
     }
     assert(mpctx->d_audio);
 

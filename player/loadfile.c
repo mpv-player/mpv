@@ -1251,8 +1251,6 @@ goto_reopen_demuxer: ;
 
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
-    mpctx->drop_frame_cnt = 0;
-    mpctx->dropped_frames = 0;
     mpctx->max_frames = opts->play_frames;
 
     if (mpctx->max_frames == 0) {
@@ -1260,27 +1258,18 @@ goto_reopen_demuxer: ;
         goto terminate_playback;
     }
 
-    mpctx->time_frame = 0;
-    mpctx->drop_message_shown = 0;
-    mpctx->video_pts = 0;
+    reset_playback_state(mpctx);
+
     mpctx->last_vo_pts = MP_NOPTS_VALUE;
-    mpctx->last_frame_duration = 0;
-    mpctx->last_seek_pts = 0;
-    mpctx->playback_pts = MP_NOPTS_VALUE;
-    mpctx->hrseek_active = false;
-    mpctx->hrseek_framedrop = false;
-    mpctx->step_frames = 0;
-    mpctx->backstep_active = false;
-    mpctx->total_avsync_change = 0;
     mpctx->last_chapter_seek = -2;
-    mpctx->playing_msg_shown = false;
+    mpctx->last_chapter_pts = MP_NOPTS_VALUE;
+    mpctx->last_chapter = -2;
     mpctx->paused = false;
     mpctx->paused_for_cache = false;
-    mpctx->last_chapter = -2;
+    mpctx->playing_msg_shown = false;
+    mpctx->step_frames = 0;
+    mpctx->backstep_active = false;
     mpctx->seek = (struct seek_params){ 0 };
-    mpctx->video_status = mpctx->d_video ? STATUS_SYNCING : STATUS_EOF;
-    mpctx->audio_status = mpctx->d_audio ? STATUS_SYNCING : STATUS_EOF;
-    mpctx->restart_complete = false;
 
     // If there's a timeline force an absolute seek to initialize state
     double startpos = rel_time_to_abs(mpctx, opts->play_start);

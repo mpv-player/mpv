@@ -374,6 +374,7 @@ typedef struct MPContext {
 } MPContext;
 
 // audio.c
+void reset_audio_state(struct MPContext *mpctx);
 void reinit_audio_chain(struct MPContext *mpctx);
 int reinit_audio_filters(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
@@ -450,6 +451,7 @@ void set_osd_function(struct MPContext *mpctx, int osd_function);
 void set_osd_subtitle(struct MPContext *mpctx, const char *text);
 
 // playloop.c
+void reset_playback_state(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx, int dir);
@@ -481,6 +483,7 @@ struct mp_scripting {
 void mp_load_scripts(struct MPContext *mpctx);
 
 // sub.c
+void reset_subtitle_state(struct MPContext *mpctx);
 void reset_subtitles(struct MPContext *mpctx, int order);
 void uninit_subs(struct demuxer *demuxer);
 void reinit_subs(struct MPContext *mpctx, int order);
@@ -495,6 +498,7 @@ void build_mpv_edl_timeline(struct MPContext *mpctx);
 void build_cue_timeline(struct MPContext *mpctx);
 
 // video.c
+void reset_video_state(struct MPContext *mpctx);
 int reinit_video_chain(struct MPContext *mpctx);
 int reinit_video_filters(struct MPContext *mpctx);
 int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok,

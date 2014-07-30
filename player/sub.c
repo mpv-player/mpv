@@ -76,6 +76,12 @@ void reset_subtitles(struct MPContext *mpctx, int order)
     osd_set_text(mpctx->osd, obj, NULL);
 }
 
+void reset_subtitle_state(struct MPContext *mpctx)
+{
+    reset_subtitles(mpctx, 0);
+    reset_subtitles(mpctx, 1);
+}
+
 static void update_subtitle(struct MPContext *mpctx, int order)
 {
     struct MPOpts *opts = mpctx->opts;
