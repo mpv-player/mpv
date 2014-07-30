@@ -233,21 +233,6 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
     });
 }
 
-- (NSArray *) keyEquivalents
-{
-    return @[@"h", @"q", @"Q", @"0", @"1", @"2"];
-}
-
-- (BOOL)isAppKeyEquivalent:(NSString *)eq withEvent:(NSEvent *)event
-{
-    if ([event modifierFlags] & NSCommandKeyMask)
-        for(NSString *c in [self keyEquivalents])
-            if ([eq isEqualToString:c])
-                return YES;
-
-    return NO;
-}
-
 - (BOOL)handleMediaKey:(NSEvent *)event
 {
     NSDictionary *keymapd = @{
@@ -349,13 +334,8 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 
     int key = convert_key([event keyCode], *[chars UTF8String]);
 
-    if (key > -1) {
-        if ([self isAppKeyEquivalent:chars withEvent:event])
-            // propagate the event in case this is a menu key equivalent
-            return event;
-
+    if (key > -1)
         [self handleMPKey:key withMask:[self keyModifierMask:event]];
-    }
 
     return nil;
 }

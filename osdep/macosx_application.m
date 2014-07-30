@@ -86,7 +86,12 @@ Application *mpv_shared_app(void)
 
         [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask|NSKeyUpMask
                                               handler:^(NSEvent *event) {
-            return [self.eventsResponder handleKey:event];
+            BOOL equivalent = [[NSApp mainMenu] performKeyEquivalent:event];
+            if (equivalent) {
+                return (NSEvent *)nil;
+            } else {
+                return [self.eventsResponder handleKey:event];
+            }
         }];
 
         NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
