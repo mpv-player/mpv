@@ -780,9 +780,10 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     demux_packet_t *dp;
 
     AVPacket *pkt = talloc(NULL, AVPacket);
-    if (av_read_frame(priv->avfc, pkt) < 0) {
+    int r = av_read_frame(priv->avfc, pkt);
+    if (r < 0) {
         talloc_free(pkt);
-        return 0; // eof
+        return r == AVERROR(EAGAIN) ? 1 : -1; // eof
     }
     talloc_set_destructor(pkt, destroy_avpacket);
 
