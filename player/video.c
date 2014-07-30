@@ -401,8 +401,11 @@ static int video_decode_and_filter(struct MPContext *mpctx)
             return r;
         if (d_video->waiting_decoded_mpi)
             d_video->decoder_output = d_video->waiting_decoded_mpi->params;
-        if (!d_video->waiting_decoded_mpi && (r == VD_EOF || r < 0))
+        if (!d_video->waiting_decoded_mpi && (r == VD_EOF || r < 0)) {
+            if (vf_output_frame(vf, true) > 0)
+                return VD_PROGRESS;
             return VD_EOF; // true EOF
+        }
     }
 
     // Image will be filtered on the next iteration.
