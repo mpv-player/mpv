@@ -383,6 +383,11 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         return; // try again next iteration
     }
 
+    // If audio is infinitely fast, somehow try keeping approximate A/V sync.
+    if (mpctx->audio_status == STATUS_PLAYING && ao_untimed(mpctx->ao) &&
+        !(mpctx->video_status == STATUS_EOF || mpctx->delay <= 0))
+        return;
+
     // if paused, just initialize things (audio format & pts)
     int playsize = 1;
     if (!mpctx->paused)
