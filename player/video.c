@@ -505,7 +505,8 @@ static int video_output_image(struct MPContext *mpctx, double endpts,
         add_frame_pts(mpctx, pts);
 
         bool drop = false;
-        bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
+        bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING
+                      && !mpctx->d_video->header->attached_picture;
         if (hrseek && pts < mpctx->hrseek_pts - .005)
             drop = true;
         if (endpts != MP_NOPTS_VALUE && pts >= endpts) {
@@ -751,6 +752,7 @@ void write_video(struct MPContext *mpctx, double endpts)
         mpctx->last_av_difference = 0;
         mpctx->video_status = STATUS_EOF;
         MP_VERBOSE(mpctx, "video EOF\n");
+        return;
     } else {
         if (mpctx->video_status > STATUS_PLAYING)
             mpctx->video_status = STATUS_PLAYING;
