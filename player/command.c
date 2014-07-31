@@ -1181,6 +1181,18 @@ static int mp_property_cache_free(void *ctx, struct m_property *prop,
     return property_int_kb_size((size - size_used) / 1024, action, arg);
 }
 
+static int mp_property_cache_idle(void *ctx, struct m_property *prop,
+                                  int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int idle = -1;
+    if (mpctx->demuxer)
+        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_IDLE, &idle);
+    if (idle < 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_flag_ro(action, arg, !!idle);
+}
+
 static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
@@ -2663,6 +2675,7 @@ static const struct m_property mp_properties[] = {
     {"cache-free", mp_property_cache_free},
     {"cache-used", mp_property_cache_used},
     {"cache-size", mp_property_cache_size},
+    {"cache-idle", mp_property_cache_idle},
     {"paused-for-cache", mp_property_paused_for_cache},
     {"pts-association-mode", mp_property_generic_option},
     {"hr-seek", mp_property_generic_option},
@@ -2792,7 +2805,7 @@ static const char *const *const mp_event_property_change[] = {
       "samplerate", "channels", "audio"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata"),
     E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
-    E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used"),
+    E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle"),
 };
 #undef E
 

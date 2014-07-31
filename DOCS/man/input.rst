@@ -806,10 +806,14 @@ Property list
     Don't use this when playing DVD or Bluray.
 
 ``cache-free`` (R)
-    Total free cache size in KB. 
+    Total free cache size in KB.
 
 ``cache-used`` (R)
-    Total used cache size in KB. 
+    Total used cache size in KB.
+
+``cache-idle`` (R)
+    Returns ``yes`` if the cache is idle, which means the cache is filled as
+    much as possible, and is currently not reading more data.
 
 ``paused-for-cache``
     Returns ``yes`` when playback is paused because of waiting for the cache.
