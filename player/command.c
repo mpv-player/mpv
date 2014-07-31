@@ -2792,6 +2792,7 @@ static const char *const *const mp_event_property_change[] = {
       "samplerate", "channels", "audio"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata"),
     E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
+    E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used"),
 };
 #undef E
 

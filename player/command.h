@@ -39,4 +39,7 @@ int mp_find_property_index(const char *property);
 void mp_notify(struct MPContext *mpctx, int event, void *arg);
 void mp_notify_property(struct MPContext *mpctx, const char *property);
 
+#define INTERNAL_EVENT_BASE 24
+#define MP_EVENT_CACHE_UPDATE (INTERNAL_EVENT_BASE + 0)
+
 #endif /* MPLAYER_COMMAND_H */

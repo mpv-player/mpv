@@ -983,6 +983,7 @@ typedef enum mpv_event_id {
      * Happens when the current chapter changes.
      */
     MPV_EVENT_CHAPTER_CHANGE = 23
+    // Internal note: adjust INTERNAL_EVENT_BASE when adding new events.
 } mpv_event_id;
 
 /**

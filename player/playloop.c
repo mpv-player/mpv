@@ -541,6 +541,18 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
             opts->pause = prev_paused_user;
         }
     }
+    // Also update cache properties.
+    if (cache_kb > 0 || mpctx->next_cache_update > 0) {
+        double now = mp_time_sec();
+        if (mpctx->next_cache_update <= now) {
+            mpctx->next_cache_update = cache_kb > 0 ? now + 0.25 : 0;
+            mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
+        }
+        if (mpctx->next_cache_update > 0) {
+            mpctx->sleeptime =
+                MPMIN(mpctx->sleeptime, mpctx->next_cache_update - now);
+        }
+    }
 }
 
 static void handle_heartbeat_cmd(struct MPContext *mpctx)

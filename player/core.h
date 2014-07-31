@@ -306,6 +306,7 @@ typedef struct MPContext {
 
     double next_heartbeat;
     double last_idle_tick;
+    double next_cache_update;
 
     double sleeptime;      // number of seconds to sleep before next iteration
 
