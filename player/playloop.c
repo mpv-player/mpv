@@ -432,7 +432,7 @@ int get_current_chapter(struct MPContext *mpctx)
         return -2;
     double current_pts = get_current_time(mpctx);
     int i;
-    for (i = 1; i < mpctx->num_chapters; i++)
+    for (i = 0; i < mpctx->num_chapters; i++)
         if (current_pts < mpctx->chapters[i].start)
             break;
     return MPMAX(mpctx->last_chapter_seek, i - 1);
