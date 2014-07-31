@@ -335,7 +335,7 @@ void mpv_terminate_destroy(mpv_handle *ctx)
 
     mpv_command(ctx, (const char*[]){"quit", NULL});
 
-    if (!ctx->owner) {
+    if (!ctx->owner || !ctx->mpctx->initialized) {
         mpv_detach_destroy(ctx);
         return;
     }
