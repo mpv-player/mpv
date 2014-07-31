@@ -3901,7 +3901,8 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
     if (event == MPV_EVENT_START_FILE)
         ctx->last_seek_pts = MP_NOPTS_VALUE;
 
-    mp_client_broadcast_event(mpctx, event, arg);
+    if (event < INTERNAL_EVENT_BASE)
+        mp_client_broadcast_event(mpctx, event, arg);
     if (event >= 0 && event < MP_ARRAY_SIZE(mp_event_property_change))
         mp_client_property_change(mpctx, mp_event_property_change[event]);
 }
