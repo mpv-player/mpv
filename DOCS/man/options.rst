@@ -1,34 +1,83 @@
 OPTIONS
 =======
 
+Access
+______
+
+``--aid=<ID|auto|no>``
+    Select audio track. ``auto`` selects the default, ``no`` disables audio.
+    See also ``--alang``. mpv normally prints available audio tracks on the
+    terminal when starting playback of a file.
+
+``--alang=<languagecode[,languagecode,...]>``
+    Specify a priority list of audio languages to use. Different container
+    formats employ different language codes. DVDs use ISO 639-1 two-letter
+    language codes, Matroska, MPEG-TS and NUT use ISO 639-2 three-letter
+    language codes, while OGM uses a free-form identifier. See also ``--aid``.
+
+    .. admonition:: Examples
+
+        ``mpv dvd://1 --alang=hu,en``
+            Chooses the Hungarian language track on a DVD and falls back on
+            English if Hungarian is not available.
+        ``mpv --alang=jpn example.mkv``
+            Plays a Matroska file in Japanese.
+
+``--edition=<ID|auto>``
+    (Matroska files only)
+    Specify the edition (set of chapters) to use, where 0 is the first. If set
+    to ``auto`` (the default), mpv will choose the first edition declared as a
+    default, or if there is no default, the first edition defined.
+
+``--sid=<ID|auto|no>``
+    Display the subtitle stream specified by ``<ID>``. ``auto`` selects
+    the default, ``no`` disables subtitles.
+
+    See also ``--slang``, ``--no-sub``.
+
+``--slang=<languagecode[,languagecode,...]>``
+    Specify a priority list of subtitle languages to use. Different container
+    formats employ different language codes. DVDs use ISO 639-1 two letter
+    language codes, Matroska uses ISO 639-2 three letter language codes while
+    OGM uses a free-form identifier. See also ``--sid``.
+
+    .. admonition:: Examples
+
+        - ``mpv dvd://1 --slang=hu,en`` chooses the Hungarian subtitle track on
+          a DVD and falls back on English if Hungarian is not available.
+        - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
+          subtitles.
+
+``--vid=<ID|auto|no>``
+    Select video channel. ``auto`` selects the default, ``no`` disables video.
 
 
-Unsorted
-_______
+Playback Control
+________________
 
-``--config-dir=<path>``
-    Force a different configuration directory. If this is set, the given
-    directory is used to load configuration files, and all other configuration
-    directories are ignored. This means the global mpv configuration directory
-    as well as per-user directories are ignored, and overrides through
-    environment variables (``MPV_HOME``) are also ignored.
+``--chapter=<start[-end]>``
+    Specify which chapter to start playing at. Optionally specify which
+    chapter to end playing at. Also see ``--start``.
 
-    Note that the ``--no-config`` option takes precedence over this option.
+``--chapter-merge-threshold=<number>``
+    Threshold for merging almost consecutive ordered chapter parts in
+    milliseconds (default: 100). Some Matroska files with ordered chapters
+    have inaccurate chapter end timestamps, causing a small gap between the
+    end of one chapter and the start of the next one when they should match.
+    If the end of one playback part is less than the given threshold away from
+    the start of the next one then keep playing video normally over the
+    chapter change instead of doing a seek.
 
-``--dump-stats=<filename>``
-    Write certain statistics to the given file. The file is truncated on
-    opening. The file will contain raw samples, each with a timestamp. To
-    make this file into a readable, the script ``TOOLS/stats-conv.py`` can be
-    used (which currently displays it as a graph).
-
-    This option is useful for debugging only.
+``--chapter-seek-threshold=<seconds>``
+    Distance in seconds from the beginning of a chapter within which a backward
+    chapter seek will go to the previous chapter (default: 5.0). Past this
+    threshold, a backward chapter seek will go to the beginning of the current
+    chapter instead. A negative value means always go back to the previous
+    chapter.
 
 ``--end=<time>``
     Stop at given absolute time. Use ``--length`` if the time should be relative
     to ``--start``. See ``--start`` for valid option values and examples.
-
-``--help``
-    Show short summary of options.
 
 ``--hr-seek=<no|absolute|yes>``
     Select when to use precise seeks that are not limited to keyframes. Such
@@ -66,11 +115,6 @@ _______
 
     Default: ``yes``
 
-``--idle``
-    Makes mpv wait idly instead of quitting when there is no file to play.
-    Mostly useful in slave mode, where mpv can be controlled through input
-    commands (see also ``--slave-broken``).
-
 ``--index=<mode>``
     Controls how to seek in files. Note that if the index is missing from a
     file, it will be built on the fly by default, so you don't need to change
@@ -84,9 +128,82 @@ _______
         This option only works if the underlying media supports seeking
         (i.e. not with stdin, pipe, etc).
 
-``--include=<configuration-file>``
-    Specify configuration file to be parsed after the default ones.
+``--length=<relative time>``
+    Stop after a given time relative to the start time.
+    See ``--start`` for valid option values and examples.
 
+``--load-unsafe-playlists``
+    Normally, something like ``mpv playlist.m3u`` won't load the playlist. This
+    is because the playlist code is unsafe. (This is the same in all other
+    variations of MPlayer.)
+
+    See ``--playlist`` for details.
+
+    Note: this option will allow opening playlists using the ``playlist``
+    special demuxer. The ``--playlist`` uses different code, and supports more
+    playlist formats than the playlist demuxer. This means that for now, the
+    ``--playlist`` option should always be used if you intend to open playlists.
+    Background: the special demuxer contains newly written code, while the
+    ``--playlist`` option uses the old MPlayer code. Adding support for more
+    playlist formats to the special demuxer is work in progress, and eventually
+    the old code should disappear.
+
+``--loop=<N|inf|no>``
+    Loops playback ``N`` times. A value of ``1`` plays it one time (default),
+    ``2`` two times, etc. ``inf`` means forever. ``no`` is the same as ``1`` and
+    disables looping. If several files are specified on command line, the
+    entire playlist is looped.
+
+``--loop-file``
+    Loop a single file. The difference to ``--loop=inf`` is that this doesn't
+    loop the playlist, just the file itself. If the playlist contains only a
+    single file, the difference between the two option is that this option
+    performs a seek on loop, instead of reloading the file.
+
+``--ordered-chapters``, ``--no-ordered-chapters``
+    Enabled by default.
+    Disable support for Matroska ordered chapters. mpv will not load or
+    search for video segments from other files, and will also ignore any
+    chapter order specified for the main file.
+
+``--ordered-chapters-files=<playlist-file>``
+    Loads the given file as playlist, and tries to use the files contained in
+    it as reference files when opening a Matroska file that uses ordered
+    chapters. This overrides the normal mechanism for loading referenced
+    files by scanning the same directory the main file is located in.
+
+    Useful for loading ordered chapter files that are not located on the local
+    filesystem, or if the referenced files are in different directories.
+
+    Note: a playlist can be as simple as a text file containing filenames
+    separated by newlines.
+
+``--pause``
+    Start the player in paused state.
+
+``--playlist=<filename>``
+    Play files according to a playlist file (Supports some common formats.If
+    no format is detected, t will be treated as list of files, separated by
+    newline characters. Note that XML playlist formats are not supported.)
+
+    .. warning::
+
+        The way mpv uses playlist files is not safe against maliciously
+        constructed files. Such files may trigger harmful actions.
+        This has been the case for all mpv and MPlayer versions, but
+        unfortunately this fact was not well documented earlier, and some people
+        have even misguidedly recommended use of ``--playlist`` with untrusted
+        sources. Do NOT use ``--playlist`` with random internet sources or files
+        you do not trust!
+
+        The main problem is that playlists can point to arbitrary network
+        addresses (including local addresses inside of your LAN), and thus
+        can't be considered secure. Playlists also can contain entries using
+        other protocols, such as local files, or (most severely), special
+        protocols like ``avdevice://``, which are inherently unsafe.
+
+``--shuffle``
+    Play files in random order.
 
 ``--speed=<0.01-100>``
     Slow down or speed up playback by the factor given as parameter.
@@ -120,10 +237,45 @@ _______
         ``--start='#2' --end='#4'``
             Plays chapters 2 and 3, and exits.
 
+``--sstep=<sec>``
+    Skip <sec> seconds after every frame.
 
-``--length=<relative time>``
-    Stop after a given time relative to the start time.
-    See ``--start`` for valid option values and examples.
+    .. note::
+
+        Without ``--hr-seek``, skipping will snap to keyframes.
+
+
+Program Behaviour
+_________________
+
+``--config-dir=<path>``
+    Force a different configuration directory. If this is set, the given
+    directory is used to load configuration files, and all other configuration
+    directories are ignored. This means the global mpv configuration directory
+    as well as per-user directories are ignored, and overrides through
+    environment variables (``MPV_HOME``) are also ignored.
+
+    Note that the ``--no-config`` option takes precedence over this option.
+
+``--dump-stats=<filename>``
+    Write certain statistics to the given file. The file is truncated on
+    opening. The file will contain raw samples, each with a timestamp. To
+    make this file into a readable, the script ``TOOLS/stats-conv.py`` can be
+    used (which currently displays it as a graph).
+
+    This option is useful for debugging only.
+
+``--help``
+    Show short summary of options.
+
+``--idle``
+    Makes mpv wait idly instead of quitting when there is no file to play.
+    Mostly useful in slave mode, where mpv can be controlled through input
+    commands (see also ``--slave-broken``).
+
+``--include=<configuration-file>``
+    Specify configuration file to be parsed after the default ones.
+
 
 ``--list-options``
     Prints all available options.
@@ -138,34 +290,6 @@ _______
     If set to ``no``, don't auto-load scripts from ``~/.mpv/lua/``.
     (Default: ``yes``)
 
-``--load-unsafe-playlists``
-    Normally, something like ``mpv playlist.m3u`` won't load the playlist. This
-    is because the playlist code is unsafe. (This is the same in all other
-    variations of MPlayer.)
-
-    See ``--playlist`` for details.
-
-    Note: this option will allow opening playlists using the ``playlist``
-    special demuxer. The ``--playlist`` uses different code, and supports more
-    playlist formats than the playlist demuxer. This means that for now, the
-    ``--playlist`` option should always be used if you intend to open playlists.
-    Background: the special demuxer contains newly written code, while the
-    ``--playlist`` option uses the old MPlayer code. Adding support for more
-    playlist formats to the special demuxer is work in progress, and eventually
-    the old code should disappear.
-
-``--loop=<N|inf|no>``
-    Loops playback ``N`` times. A value of ``1`` plays it one time (default),
-    ``2`` two times, etc. ``inf`` means forever. ``no`` is the same as ``1`` and
-    disables looping. If several files are specified on command line, the
-    entire playlist is looped.
-
-``--loop-file``
-    Loop a single file. The difference to ``--loop=inf`` is that this doesn't
-    loop the playlist, just the file itself. If the playlist contains only a
-    single file, the difference between the two option is that this option
-    performs a seek on loop, instead of reloading the file.
-
 ``--lua=<filename>``
     Load a Lua script. You can load multiple scripts by separating them with
     commas (``,``).
@@ -175,9 +299,6 @@ _______
     option is used and what semantics the option value has depends entirely on
     the loaded Lua scripts. Values not claimed by any scripts are ignored.
 
-``--mc=<seconds/frame>``
-    Maximum A-V sync correction per frame (in seconds)
-
 ``--merge-files``
     Pretend that all files passed to mpv are concatenated into a single, big
     file. This uses timeline/EDL support internally. Note that this won't work
@@ -186,14 +307,6 @@ _______
     This option is interpreted at program start, and doesn't affect for
     example files or playlists loaded with the ``loadfile`` or ``loadlist``
     commands.
-
-``--mf-fps=<value>``
-    Framerate used when decoding from multiple PNG or JPEG files with ``mf://``
-    (default: 1).
-
-``--mf-type=<value>``
-    Input file type for ``mf://`` (available: jpeg, png, tga, sgi). By default,
-    this is guessed from the file extension.
 
 ``--no-config``
     Do not load default configuration files. This prevents loading of
@@ -208,118 +321,16 @@ _______
 
     Also see ``--config-dir``.
 
-``--no-idx``
-    Do not use index present in the file even if one is present.
-
 ``--no-resume-playback``
     Do not restore playback position from ``~/.mpv/watch_later/``.
     See ``quit_watch_later`` input command.
 
-``--pause``
-    Start the player in paused state.
-
-``--stream-capture=<filename>``
-    Allows capturing the primary stream (not additional audio tracks or other
-    kind of streams) into the given file. Capturing can also be started and
-    stopped by changing the filename with the ``stream-capture`` slave property.
-    Generally this will not produce usable results for anything else than MPEG
-    or raw streams, unless capturing includes the file headers and is not
-    interrupted. Note that, due to cache latencies, captured data may begin and
-    end somewhat delayed compared to what you see displayed.
-
-``--stream-dump=<filename>``
-    Same as ``--stream-capture``, but do not start playback. Instead, the entire
-    file is dumped.
-
-``--stream-lavf-o=opt1=value1,opt2=value2,...``
-    Set AVOptions on streams opened with libavformat. Unknown or misspelled
-    options are silently ignored. (They are mentioned in the terminal output
-    in verbose mode, i.e. ``--v``. In general we can't print errors, because
-    other options such as e.g. user agent are not available with all protocols,
-    and printing errors for unknown options would end up being too noisy.)
-
-``--playlist=<filename>``
-    Play files according to a playlist file (Supports some common formats.If
-    no format is detected, t will be treated as list of files, separated by
-    newline characters. Note that XML playlist formats are not supported.)
-
-    .. warning::
-
-        The way mpv uses playlist files is not safe against maliciously
-        constructed files. Such files may trigger harmful actions.
-        This has been the case for all mpv and MPlayer versions, but
-        unfortunately this fact was not well documented earlier, and some people
-        have even misguidedly recommended use of ``--playlist`` with untrusted
-        sources. Do NOT use ``--playlist`` with random internet sources or files
-        you do not trust!
-
-        The main problem is that playlists can point to arbitrary network
-        addresses (including local addresses inside of your LAN), and thus
-        can't be considered secure. Playlists also can contain entries using
-        other protocols, such as local files, or (most severely), special
-        protocols like ``avdevice://``, which are inherently unsafe.
-
-``--priority=<prio>``
-    (Windows only.)
-    Set process priority for mpv according to the predefined priorities
-    available under Windows.
-
-    Possible values of ``<prio>``:
-    idle|belownormal|normal|abovenormal|high|realtime
-
-    .. warning:: Using realtime priority can cause system lockup.
+``--osc``, ``--no-osc``
+    Whether to load the on-screen-controller (default: yes).
 
 ``--profile=<profile1,profile2,...>``
     Use the given profile(s), ``--profile=help`` displays a list of the
     defined profiles.
-
-``--pts-association-mode=<decode|sort|auto>``
-    Select the method used to determine which container packet timestamp
-    corresponds to a particular output frame from the video decoder. Normally
-    you should not need to change this option.
-
-    :decoder: Use decoder reordering functionality. Unlike in classic MPlayer
-              and mplayer2, this includes a dTS fallback. (Default.)
-    :sort:    Maintain a buffer of unused pts values and use the lowest value
-              for the frame.
-    :auto:    Try to pick a working mode from the ones above automatically.
-
-    You can also try to use ``--no-correct-pts`` for files with completely
-    broken timestamps.
-
-``--quvi-fetch-subtitles=<yes|no>``
-    Toggles fetching of subtitles from streaming sites with libquvi. Disabled
-    by default, because it's unreliable and slow. Note that when enabled,
-    subtitles will always be fetched, even if subtitles are explicitly
-    disabled with ``--no-sub`` (because you might want to enable subtitles
-    at runtime).
-
-    Supported when using libquvi 0.9.x.
-
-``--quvi-format=<best|default|...>``
-    Video format/quality that is directly passed to libquvi (default: ``best``).
-    This is used when opening links to streaming sites like YouTube. The
-    interpretation of this value is highly specific to the streaming site and
-    the video.
-
-    libquvi 0.4.x:
-
-        The only well-defined values that work on all sites are ``best``
-        (best quality/highest bandwidth, default), and ``default`` (lowest
-        quality).
-
-        The quvi command line tool can be used to find out which formats are
-        supported for a given URL: ``quvi --query-formats URL``.
-
-    libquvi 0.9.x:
-
-        The following explanations are relevant:
-        `<http://quvi.sourceforge.net/r/api/0.9/glossary_termino.html#m_stream_id>`_
-
-    The ``quvi-format`` property can be used at runtime to cycle through the
-    list of formats. Unfortunately, this is slow. On libquvi 0.4.x, this
-    functionality is limited to switching between ``best`` and ``default`` if
-    the ``cycle`` input command is used.
 
 ``--reset-on-next-file=<all|option1,option2,...>``
     Normally, mpv will try to keep all settings when playing the next file on
@@ -373,41 +384,6 @@ _______
 ``--show-profile=<profile>``
     Show the description and content of a profile.
 
-``--shuffle``
-    Play files in random order.
-
-``--slave-broken``
-    Switches on the old slave mode. This is for testing only, and incompatible
-    to the removed ``--slave`` switch.
-
-    .. attention::
-        Changes incompatible to slave mode applications have been made. In
-        particular, the status line output was changed, which is used by some
-        applications to determine the current playback position. This switch
-        has been renamed to prevent these applications from working with this
-        version of mpv, because it would lead to buggy and confusing behavior
-        only. Moreover, the slave mode protocol is so horribly bad that it
-        should not be used for new programs, nor should existing programs
-        attempt to adapt to the changed output and use the ``--slave-broken``
-        switch. Instead, a new, saner protocol should be developed (and will be,
-        if there is enough interest).
-
-        This affects most third-party GUI frontends.
-
-``--softsleep``
-    Time frames by repeatedly checking the current time instead of asking
-    the kernel to wake up mpv at the correct time. Useful if your kernel
-    timing is imprecise and you cannot use the RTC either. Comes at the
-    price of higher CPU consumption.
-
-``--sstep=<sec>``
-    Skip <sec> seconds after every frame.
-
-    .. note::
-
-        Without ``--hr-seek``, skipping will snap to keyframes.
-
-
 ``--use-filedir-conf``
     Look for a file-specific configuration file in the same directory as the
     file that is being played. See `File-specific Configuration Files`_.
@@ -422,12 +398,6 @@ _______
 
 ``--version, -V``
     Print version string and exit.
-
-
-
-Access
-______
-
 
 
 Video
@@ -548,6 +518,31 @@ _____
     controls how much of the image is cropped. May not work with all video
     output drivers.
 
+``--quvi-format=<best|default|...>``
+    Video format/quality that is directly passed to libquvi (default: ``best``).
+    This is used when opening links to streaming sites like YouTube. The
+    interpretation of this value is highly specific to the streaming site and
+    the video.
+
+    libquvi 0.4.x:
+
+        The only well-defined values that work on all sites are ``best``
+        (best quality/highest bandwidth, default), and ``default`` (lowest
+        quality).
+
+        The quvi command line tool can be used to find out which formats are
+        supported for a given URL: ``quvi --query-formats URL``.
+
+    libquvi 0.9.x:
+
+        The following explanations are relevant:
+        `<http://quvi.sourceforge.net/r/api/0.9/glossary_termino.html#m_stream_id>`_
+
+    The ``quvi-format`` property can be used at runtime to cycle through the
+    list of formats. Unfortunately, this is slow. On libquvi 0.4.x, this
+    functionality is limited to switching between ``best`` and ``default`` if
+    the ``cycle`` input command is used.
+
 ``--vd=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>``
     Specify a priority list of video decoders to be used, according to their
     family and name. See ``--ad`` for further details. Both of these options
@@ -628,9 +623,6 @@ _____
     The option variants ``--vf-add``, ``--vf-pre``, ``--vf-del`` and
     ``--vf-clr`` exist to modify a previously specified list, but you
     should not need these for typical use.
-
-``--vid=<ID|auto|no>``
-    Select video channel. ``auto`` selects the default, ``no`` disables video.
 
 ``--video-align-x=<-1-1>``, ``--video-align-y=<-1-1>``
     Moves the video rectangle within the black borders, which are usually added
@@ -788,31 +780,12 @@ _____
 
     ``--dtshd`` and ``--no-dtshd`` are deprecated aliases.
 
-``--aid=<ID|auto|no>``
-    Select audio track. ``auto`` selects the default, ``no`` disables audio.
-    See also ``--alang``. mpv normally prints available audio tracks on the
-    terminal when starting playback of a file.
-
 ``--af=<filter1[=parameter1:parameter2:...],filter2,...>``
     Specify a list of audio filters to apply to the audio stream. See
     `AUDIO FILTERS`_ for details and descriptions of the available filters.
     The option variants ``--af-add``, ``--af-pre``, ``--af-del`` and
     ``--af-clr`` exist to modify a previously specified list, but you
     should not need these for typical use.
-
-``--alang=<languagecode[,languagecode,...]>``
-    Specify a priority list of audio languages to use. Different container
-    formats employ different language codes. DVDs use ISO 639-1 two-letter
-    language codes, Matroska, MPEG-TS and NUT use ISO 639-2 three-letter
-    language codes, while OGM uses a free-form identifier. See also ``--aid``.
-
-    .. admonition:: Examples
-
-        ``mpv dvd://1 --alang=hu,en``
-            Chooses the Hungarian language track on a DVD and falls back on
-            English if Hungarian is not available.
-        ``mpv --alang=jpn example.mkv``
-            Plays a Matroska file in Japanese.
 
 ``--ao=<driver1[:suboption1[=value]:...],driver2,...[,]>``
     Specify a priority list of audio output drivers to be used. For
@@ -1104,6 +1077,15 @@ _________
 ``--no-sub``
     Do not select any subtitle when the file is loaded.
 
+``--quvi-fetch-subtitles=<yes|no>``
+    Toggles fetching of subtitles from streaming sites with libquvi. Disabled
+    by default, because it's unreliable and slow. Note that when enabled,
+    subtitles will always be fetched, even if subtitles are explicitly
+    disabled with ``--no-sub`` (because you might want to enable subtitles
+    at runtime).
+
+    Supported when using libquvi 0.9.x.
+
 ``--secondary-sid=<ID|auto|no>``
     Select a secondary subtitle stream. This is similar to ``--sid``. If a
     secondary subtitle is selected, it will be rendered as toptitle (i.e. on
@@ -1127,25 +1109,6 @@ _________
         subtitle at the top of the screen, it will overlap with the secondary
         subtitle. To prevent this, you could use ``--no-sub-ass`` to disable
         styling in the main subtitle stream.
-
-``--sid=<ID|auto|no>``
-    Display the subtitle stream specified by ``<ID>``. ``auto`` selects
-    the default, ``no`` disables subtitles.
-
-    See also ``--slang``, ``--no-sub``.
-
-``--slang=<languagecode[,languagecode,...]>``
-    Specify a priority list of subtitle languages to use. Different container
-    formats employ different language codes. DVDs use ISO 639-1 two letter
-    language codes, Matroska uses ISO 639-2 three letter language codes while
-    OGM uses a free-form identifier. See also ``--sid``.
-
-    .. admonition:: Examples
-
-        - ``mpv dvd://1 --slang=hu,en`` chooses the Hungarian subtitle track on
-          a DVD and falls back on English if Hungarian is not available.
-        - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
-          subtitles.
 
 ``--stretch-dvd-subs=<yes|no>``
     Stretch DVD subtitles when playing anamorphic videos for better looking
@@ -1761,136 +1724,6 @@ ____________
     This option tells mpv which angle to use (default: 1).
 
 
-Cache
-_____
-
-``--cache=<kBytes|no|auto>``
-    Set the size of the cache in kilobytes, disable it with ``no``, or
-    automatically enable it if needed with ``auto`` (default: ``auto``).
-    With ``auto``, the cache will usually be enabled for network streams,
-    using the size set by ``--cache-default``.
-
-    May be useful when playing files from slow media, but can also have
-    negative effects, especially with file formats that require a lot of
-    seeking, such as mp4.
-
-    Note that half the cache size will be used to allow fast seeking back. This
-    is also the reason why a full cache is usually reported as 50% full. The
-    cache fill display does not include the part of the cache reserved for
-    seeking back. Likewise, when starting a file the cache will be at 100%,
-    because no space is reserved for seeking back yet.
-
-``--cache-default=<kBytes|no>``
-    Set the size of the cache in kilobytes (default: 25000 KB). Using ``no``
-    will not automatically enable the cache e.g. when playing from a network
-    stream. Note that using ``--cache`` will always override this option.
-
-``--cache-pause-below=<kBytes|no>``
-    If the cache size goes below the specified value (in KB), pause and wait
-    until the size set by ``--cache-pause-restart`` is reached, then  resume
-    playback (default: 50). If ``no`` is specified, this behavior is disabled.
-
-    When the player is paused this way, the status line shows ``Buffering``
-    instead of ``Paused``, and the OSD uses a clock symbol instead of the
-    normal paused symbol.
-
-``--cache-pause-restart=<kBytes>``
-    If the cache is paused due to the ``--cache-pause-below`` functionality,
-    then the player unpauses as soon as the cache has this much data (in KB).
-    (Default: 100)
-
-``--cache-initial=<kBytes>``
-    Playback will start when the cache has been filled up with this many
-    kilobytes of data (default: 0).
-
-``--cache-seek-min=<kBytes>``
-    If a seek is to be made to a position within ``<kBytes>`` of the cache
-    size from the current position, mpv will wait for the cache to be
-    filled to this position rather than performing a stream seek (default:
-    500).
-
-    This matters for small forward seeks. With slow streams (especially http
-    streams) there is a tradeoff between skipping the data between current
-    position and seek destination, or performing an actual seek. Depending
-    on the situation, either of these might be slower than the other method.
-    This option allows control over this.
-
-``--cache-file=<path>``
-    Create a cache file on the filesystem with the given name. The file is
-    always overwritten. When the general cache is enabled, this file cache
-    will be used to store whatever is read from the source stream.
-
-    This will always overwrite the cache file, and you can't use an existing
-    cache file to resume playback of a stream. (Technically, mpv wouldn't
-    even know which blocks in the file are valid and which not.)
-
-    The resulting file will not necessarily contain all data of the source
-    stream. For example, if you seek, the parts that were skipped over are
-    never read and consequently are not written to the cache. The skipped over
-    parts are filled with zeros. This means that the cache file doesn't
-    necessarily correspond to a full download of the source stream.
-
-    Both of these issues could be improved if there is any user interest.
-
-    Also see ``--cache-file-size``.
-
-``--cache-file-size=<kBytes>``
-    Maximum size of the file created with ``--cache-file``. For read accesses
-    above this size, the cache is simply not used.
-
-    (Default: 1048576, 1 GB.)
-
-``--no-cache``
-    Turn off input stream caching. See ``--cache``.
-
-
-Chapter Control
-_______________
-
-``--edition=<ID|auto>``
-    (Matroska files only)
-    Specify the edition (set of chapters) to use, where 0 is the first. If set
-    to ``auto`` (the default), mpv will choose the first edition declared as a
-    default, or if there is no default, the first edition defined.
-
-``--chapter=<start[-end]>``
-    Specify which chapter to start playing at. Optionally specify which
-    chapter to end playing at. Also see ``--start``.
-
-``--chapter-merge-threshold=<number>``
-    Threshold for merging almost consecutive ordered chapter parts in
-    milliseconds (default: 100). Some Matroska files with ordered chapters
-    have inaccurate chapter end timestamps, causing a small gap between the
-    end of one chapter and the start of the next one when they should match.
-    If the end of one playback part is less than the given threshold away from
-    the start of the next one then keep playing video normally over the
-    chapter change instead of doing a seek.
-
-``--chapter-seek-threshold=<seconds>``
-    Distance in seconds from the beginning of a chapter within which a backward
-    chapter seek will go to the previous chapter (default: 5.0). Past this
-    threshold, a backward chapter seek will go to the beginning of the current
-    chapter instead. A negative value means always go back to the previous
-    chapter.
-
-``--ordered-chapters``, ``--no-ordered-chapters``
-    Enabled by default.
-    Disable support for Matroska ordered chapters. mpv will not load or
-    search for video segments from other files, and will also ignore any
-    chapter order specified for the main file.
-
-``--ordered-chapters-files=<playlist-file>``
-    Loads the given file as playlist, and tries to use the files contained in
-    it as reference files when opening a Matroska file that uses ordered
-    chapters. This overrides the normal mechanism for loading referenced
-    files by scanning the same directory the main file is located in.
-
-    Useful for loading ordered chapter files that are not located on the local
-    filesystem, or if the referenced files are in different directories.
-
-    Note: a playlist can be as simple as a text file containing filenames
-    separated by newlines.
-
 
 Equalizer
 _________
@@ -2154,21 +1987,6 @@ _______
 ``--demuxer-readahead-bytes=N``
     See ``--demuxer-readahead-packets``.
 
-DVB
-___
-
-``--dvbin-card=<1-4>``
-    Specifies using card number 1-4 (default: 1).
-
-``--dvbin-file=<filename>``
-    Instructs mpv to read the channels list from ``<filename>``. Default is
-    ``~/.mpv/channels.conf.{sat,ter,cbl,atsc}`` (based on your card type) or
-    ``~/.mpv/channels.conf`` as a last resort.
-
-``--dvbin-timeout=<1-30>``
-    Maximum number of seconds to wait when trying to tune a frequency before
-    giving up (default: 30).
-
 
 Input
 _____
@@ -2266,9 +2084,6 @@ _____
 
 OSD
 ___
-
-``--osc``, ``--no-osc``
-    Whether to load the on-screen-controller (default: yes).
 
 ``--no-osd-bar``, ``--osd-bar``
     Disable display of the OSD bar. This will make some things (like seeking)
@@ -2429,65 +2244,6 @@ ___
     ``show_progress`` command (by default mapped to ``P``), or in some
     non-default cases when seeking. Expands properties. See
     `Property Expansion`_.
-
-PVR
-___
-
-``--pvr-...``
-    These options tune various encoding properties of the PVR capture module.
-    It has to be used with any hardware MPEG encoder based card supported by
-    the V4L2 driver. The Hauppauge WinTV PVR-150/250/350/500 and all IVTV
-    based cards are known as PVR capture cards. Be aware that only Linux
-    2.6.18 kernel and above is able to handle MPEG stream through V4L2 layer.
-    For hardware capture of an MPEG stream and watching it with mpv, use
-    ``pvr://`` as media URL.
-
-
-``--pvr-aspect=<0-3>``
-    Specify input aspect ratio:
-
-    :0: 1:1
-    :1: 4:3 (default)
-    :2: 16:9
-    :3: 2.21:1
-
-``--pvr-arate=<32000-48000>``
-    Specify encoding audio rate (default: 48000 Hz, available: 32000,
-    44100 and 48000 Hz).
-
-``--pvr-alayer=<1-3>``
-    Specify MPEG audio layer encoding (default: 2).
-
-``--pvr-abitrate=<32-448>``
-    Specify audio encoding bitrate in kbps (default: 384).
-
-``--pvr-amode=<value>``
-    Specify audio encoding mode. Available preset values are 'stereo',
-    'joint_stereo', 'dual' and 'mono' (default: stereo).
-
-``--pvr-vbitrate=<value>``
-    Specify average video bitrate encoding in Mbps (default: 6).
-
-``--pvr-vmode=<value>``
-    Specify video encoding mode:
-
-    :vbr: Variable BitRate (default)
-    :cbr: Constant BitRate
-
-``--pvr-vpeak=<value>``
-    Specify peak video bitrate encoding in Mbps (only useful for VBR
-    encoding, default: 9.6).
-
-``--pvr-fmt=<value>``
-    Choose an MPEG format for encoding:
-
-    :ps:    MPEG-2 Program Stream (default)
-    :ts:    MPEG-2 Transport Stream
-    :mpeg1: MPEG-1 System Stream
-    :vcd:   Video CD compatible stream
-    :svcd:  Super Video CD compatible stream
-    :dvd:   DVD compatible stream
-
 
 Screenshot
 __________
@@ -2909,6 +2665,89 @@ __
     indicate that the currently scanning channel is active.
 
 
+Cache
+_____
+
+``--cache=<kBytes|no|auto>``
+    Set the size of the cache in kilobytes, disable it with ``no``, or
+    automatically enable it if needed with ``auto`` (default: ``auto``).
+    With ``auto``, the cache will usually be enabled for network streams,
+    using the size set by ``--cache-default``.
+
+    May be useful when playing files from slow media, but can also have
+    negative effects, especially with file formats that require a lot of
+    seeking, such as mp4.
+
+    Note that half the cache size will be used to allow fast seeking back. This
+    is also the reason why a full cache is usually reported as 50% full. The
+    cache fill display does not include the part of the cache reserved for
+    seeking back. Likewise, when starting a file the cache will be at 100%,
+    because no space is reserved for seeking back yet.
+
+``--cache-default=<kBytes|no>``
+    Set the size of the cache in kilobytes (default: 25000 KB). Using ``no``
+    will not automatically enable the cache e.g. when playing from a network
+    stream. Note that using ``--cache`` will always override this option.
+
+``--cache-pause-below=<kBytes|no>``
+    If the cache size goes below the specified value (in KB), pause and wait
+    until the size set by ``--cache-pause-restart`` is reached, then  resume
+    playback (default: 50). If ``no`` is specified, this behavior is disabled.
+
+    When the player is paused this way, the status line shows ``Buffering``
+    instead of ``Paused``, and the OSD uses a clock symbol instead of the
+    normal paused symbol.
+
+``--cache-pause-restart=<kBytes>``
+    If the cache is paused due to the ``--cache-pause-below`` functionality,
+    then the player unpauses as soon as the cache has this much data (in KB).
+    (Default: 100)
+
+``--cache-initial=<kBytes>``
+    Playback will start when the cache has been filled up with this many
+    kilobytes of data (default: 0).
+
+``--cache-seek-min=<kBytes>``
+    If a seek is to be made to a position within ``<kBytes>`` of the cache
+    size from the current position, mpv will wait for the cache to be
+    filled to this position rather than performing a stream seek (default:
+    500).
+
+    This matters for small forward seeks. With slow streams (especially http
+    streams) there is a tradeoff between skipping the data between current
+    position and seek destination, or performing an actual seek. Depending
+    on the situation, either of these might be slower than the other method.
+    This option allows control over this.
+
+``--cache-file=<path>``
+    Create a cache file on the filesystem with the given name. The file is
+    always overwritten. When the general cache is enabled, this file cache
+    will be used to store whatever is read from the source stream.
+
+    This will always overwrite the cache file, and you can't use an existing
+    cache file to resume playback of a stream. (Technically, mpv wouldn't
+    even know which blocks in the file are valid and which not.)
+
+    The resulting file will not necessarily contain all data of the source
+    stream. For example, if you seek, the parts that were skipped over are
+    never read and consequently are not written to the cache. The skipped over
+    parts are filled with zeros. This means that the cache file doesn't
+    necessarily correspond to a full download of the source stream.
+
+    Both of these issues could be improved if there is any user interest.
+
+    Also see ``--cache-file-size``.
+
+``--cache-file-size=<kBytes>``
+    Maximum size of the file created with ``--cache-file``. For read accesses
+    above this size, the cache is simply not used.
+
+    (Default: 1048576, 1 GB.)
+
+``--no-cache``
+    Turn off input stream caching. See ``--cache``.
+
+
 Network
 _______
 
@@ -2959,4 +2798,162 @@ _______
 
 ``--user-agent=<string>``
     Use ``<string>`` as user agent for HTTP streaming.
+
+
+DVB
+___
+
+``--dvbin-card=<1-4>``
+    Specifies using card number 1-4 (default: 1).
+
+``--dvbin-file=<filename>``
+    Instructs mpv to read the channels list from ``<filename>``. Default is
+    ``~/.mpv/channels.conf.{sat,ter,cbl,atsc}`` (based on your card type) or
+    ``~/.mpv/channels.conf`` as a last resort.
+
+``--dvbin-timeout=<1-30>``
+    Maximum number of seconds to wait when trying to tune a frequency before
+    giving up (default: 30).
+
+
+PVR
+___
+
+``--pvr-...``
+    These options tune various encoding properties of the PVR capture module.
+    It has to be used with any hardware MPEG encoder based card supported by
+    the V4L2 driver. The Hauppauge WinTV PVR-150/250/350/500 and all IVTV
+    based cards are known as PVR capture cards. Be aware that only Linux
+    2.6.18 kernel and above is able to handle MPEG stream through V4L2 layer.
+    For hardware capture of an MPEG stream and watching it with mpv, use
+    ``pvr://`` as media URL.
+
+
+``--pvr-aspect=<0-3>``
+    Specify input aspect ratio:
+
+    :0: 1:1
+    :1: 4:3 (default)
+    :2: 16:9
+    :3: 2.21:1
+
+``--pvr-arate=<32000-48000>``
+    Specify encoding audio rate (default: 48000 Hz, available: 32000,
+    44100 and 48000 Hz).
+
+``--pvr-alayer=<1-3>``
+    Specify MPEG audio layer encoding (default: 2).
+
+``--pvr-abitrate=<32-448>``
+    Specify audio encoding bitrate in kbps (default: 384).
+
+``--pvr-amode=<value>``
+    Specify audio encoding mode. Available preset values are 'stereo',
+    'joint_stereo', 'dual' and 'mono' (default: stereo).
+
+``--pvr-vbitrate=<value>``
+    Specify average video bitrate encoding in Mbps (default: 6).
+
+``--pvr-vmode=<value>``
+    Specify video encoding mode:
+
+    :vbr: Variable BitRate (default)
+    :cbr: Constant BitRate
+
+``--pvr-vpeak=<value>``
+    Specify peak video bitrate encoding in Mbps (only useful for VBR
+    encoding, default: 9.6).
+
+``--pvr-fmt=<value>``
+    Choose an MPEG format for encoding:
+
+    :ps:    MPEG-2 Program Stream (default)
+    :ts:    MPEG-2 Transport Stream
+    :mpeg1: MPEG-1 System Stream
+    :vcd:   Video CD compatible stream
+    :svcd:  Super Video CD compatible stream
+    :dvd:   DVD compatible stream
+
+
+Miscellaneous
+_____________
+
+``--mc=<seconds/frame>``
+    Maximum A-V sync correction per frame (in seconds)
+
+``--mf-fps=<value>``
+    Framerate used when decoding from multiple PNG or JPEG files with ``mf://``
+    (default: 1).
+
+``--mf-type=<value>``
+    Input file type for ``mf://`` (available: jpeg, png, tga, sgi). By default,
+    this is guessed from the file extension.
+
+``--stream-capture=<filename>``
+    Allows capturing the primary stream (not additional audio tracks or other
+    kind of streams) into the given file. Capturing can also be started and
+    stopped by changing the filename with the ``stream-capture`` slave property.
+    Generally this will not produce usable results for anything else than MPEG
+    or raw streams, unless capturing includes the file headers and is not
+    interrupted. Note that, due to cache latencies, captured data may begin and
+    end somewhat delayed compared to what you see displayed.
+
+``--stream-dump=<filename>``
+    Same as ``--stream-capture``, but do not start playback. Instead, the entire
+    file is dumped.
+
+``--stream-lavf-o=opt1=value1,opt2=value2,...``
+    Set AVOptions on streams opened with libavformat. Unknown or misspelled
+    options are silently ignored. (They are mentioned in the terminal output
+    in verbose mode, i.e. ``--v``. In general we can't print errors, because
+    other options such as e.g. user agent are not available with all protocols,
+    and printing errors for unknown options would end up being too noisy.)
+
+``--priority=<prio>``
+    (Windows only.)
+    Set process priority for mpv according to the predefined priorities
+    available under Windows.
+
+    Possible values of ``<prio>``:
+    idle|belownormal|normal|abovenormal|high|realtime
+
+    .. warning:: Using realtime priority can cause system lockup.
+
+``--pts-association-mode=<decode|sort|auto>``
+    Select the method used to determine which container packet timestamp
+    corresponds to a particular output frame from the video decoder. Normally
+    you should not need to change this option.
+
+    :decoder: Use decoder reordering functionality. Unlike in classic MPlayer
+              and mplayer2, this includes a dTS fallback. (Default.)
+    :sort:    Maintain a buffer of unused pts values and use the lowest value
+              for the frame.
+    :auto:    Try to pick a working mode from the ones above automatically.
+
+    You can also try to use ``--no-correct-pts`` for files with completely
+    broken timestamps.
+
+``--slave-broken``
+    Switches on the old slave mode. This is for testing only, and incompatible
+    to the removed ``--slave`` switch.
+
+    .. attention::
+        Changes incompatible to slave mode applications have been made. In
+        particular, the status line output was changed, which is used by some
+        applications to determine the current playback position. This switch
+        has been renamed to prevent these applications from working with this
+        version of mpv, because it would lead to buggy and confusing behavior
+        only. Moreover, the slave mode protocol is so horribly bad that it
+        should not be used for new programs, nor should existing programs
+        attempt to adapt to the changed output and use the ``--slave-broken``
+        switch. Instead, a new, saner protocol should be developed (and will be,
+        if there is enough interest).
+
+        This affects most third-party GUI frontends.
+
+``--softsleep``
+    Time frames by repeatedly checking the current time instead of asking
+    the kernel to wake up mpv at the correct time. Useful if your kernel
+    timing is imprecise and you cannot use the RTC either. Comes at the
+    price of higher CPU consumption.
 
