@@ -34,7 +34,8 @@ static bool create_dc(struct MPGLContext *ctx, int flags)
     struct w32_context *w32_ctx = ctx->priv;
     HWND win = vo_w32_hwnd(ctx->vo);
 
-    assert(!w32_ctx->hdc);
+    if (w32_ctx->hdc)
+        return true;
 
     HDC hdc = GetDC(win);
     if (!hdc)
@@ -83,16 +84,13 @@ static void *w32gpa(const GLubyte *procName)
     return GetProcAddress(oglmod, procName);
 }
 
-static bool create_context_w32_old(struct MPGLContext *ctx, int flags)
+static bool create_context_w32_old(struct MPGLContext *ctx)
 {
     struct w32_context *w32_ctx = ctx->priv;
     HGLRC *context = &w32_ctx->context;
 
     if (*context)
         return true;
-
-    if (!create_dc(ctx, flags))
-        return false;
 
     HDC windc = w32_ctx->hdc;
     bool res = false;
@@ -118,16 +116,13 @@ out:
     return res;
 }
 
-static bool create_context_w32_gl3(struct MPGLContext *ctx, int flags)
+static bool create_context_w32_gl3(struct MPGLContext *ctx)
 {
     struct w32_context *w32_ctx = ctx->priv;
     HGLRC *context = &w32_ctx->context;
 
     if (*context) // reuse existing context
         return true; // not reusing it breaks gl3!
-
-    if (!create_dc(ctx, flags))
-        return false;
 
     HDC windc = w32_ctx->hdc;
     HGLRC new_context = 0;
@@ -199,7 +194,7 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx, int flags)
     return true;
 
 unsupported:
-    MP_ERR(ctx->vo, "The current OpenGL implementation does not support OpenGL 3.x \n");
+    MP_ERR(ctx->vo, "The OpenGL driver does not support OpenGL 3.x \n");
 out:
     wglDeleteContext(new_context);
     return false;
@@ -210,11 +205,14 @@ static bool config_window_w32(struct MPGLContext *ctx, int flags)
     if (!vo_w32_config(ctx->vo, flags))
         return false;
 
+    if (!create_dc(ctx, flags))
+        return false;
+
     bool success = false;
     if (ctx->requested_gl_version >= MPGL_VER(3, 0))
-        success = create_context_w32_gl3(ctx, flags);
+        success = create_context_w32_gl3(ctx);
     if (!success)
-        success = create_context_w32_old(ctx, flags);
+        success = create_context_w32_old(ctx);
     return success;
 }
 
