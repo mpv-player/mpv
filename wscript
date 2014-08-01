@@ -683,27 +683,13 @@ hwaccel_features = [
     } , {
         'name': '--vda-hwaccel',
         'desc': 'libavcodec VDA hwaccel',
-        'deps': [ 'corevideo'],
+        'deps': [ 'corevideo' ],
         'func': compose_checks(
             check_headers('VideoDecodeAcceleration/VDADecoder.h'),
             check_statement('libavcodec/vda.h',
-                            'ff_vda_create_decoder(NULL, NULL, NULL)',
+                            'av_vda_alloc_context()',
                             framework='IOSurface',
                             use='libav')),
-    } , {
-        'name': 'vda-libavcodec-refcounting',
-        'desc': "libavcodec VDA ref-counted CVPixelBuffers",
-        'deps': [ 'vda-hwaccel' ],
-        'func': check_statement ('libavcodec/vda.h',
-            """struct vda_context a = (struct vda_context) {
-                   .use_ref_buffer = 1 }""", use='libav')
-    }, {
-        'name': 'vda-av-vda-alloc-context',
-        'desc': "libavcodec VDA hwaccel 1.2",
-        'deps': [ 'vda-hwaccel' ],
-        'func': check_statement('libavcodec/vda.h',
-                                'av_vda_alloc_context()',
-                                use='libav')
     }, {
         'name': '--vda-gl',
         'desc': 'VDA with OpenGL',
