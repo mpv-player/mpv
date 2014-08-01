@@ -2,7 +2,7 @@ OPTIONS
 =======
 
 Access
-______
+------
 
 ``--aid=<ID|auto|no>``
     Select audio track. ``auto`` selects the default, ``no`` disables audio.
@@ -53,7 +53,7 @@ ______
 
 
 Playback Control
-________________
+----------------
 
 ``--chapter=<start[-end]>``
     Specify which chapter to start playing at. Optionally specify which
@@ -246,7 +246,7 @@ ________________
 
 
 Program Behaviour
-_________________
+-----------------
 
 ``--config-dir=<path>``
     Force a different configuration directory. If this is set, the given
@@ -401,7 +401,7 @@ _________________
 
 
 Video
-_____
+-----
 
 ``--deinterlace=<yes|no|auto>``
     Enable or disable interlacing (default: auto, which usually means no).
@@ -713,7 +713,7 @@ _____
 
 
 Audio
-_____
+-----
 
 ``--ad=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>``
     Specify a priority list of audio decoders to be used, according to their
@@ -954,7 +954,7 @@ _____
 
 
 Subtitles
-_________
+---------
 
 ``--ass-force-style=<[Style.]Param=Value[,...]>``
     Override some style or script info parameters.
@@ -1320,7 +1320,7 @@ _________
 
 
 Window
-______
+------
 
 ``--autofit=<[W[xH]]>``
     Set the initial window size to a maximum size specified by ``WxH``, without
@@ -1648,7 +1648,7 @@ ______
 
 
 Disc Devices
-____________
+------------
 
 ``--bluray-angle=<ID>``
     Some Blu-ray discs contain scenes that can be viewed from multiple angles.
@@ -1726,7 +1726,7 @@ ____________
 
 
 Equalizer
-_________
+---------
 
 ``--brightness=<-100-100>``
     Adjust the brightness of the video signal (default: 0). Not supported by
@@ -1846,7 +1846,7 @@ _________
 
 
 Demuxer
-_______
+-------
 
 ``--demuxer=<[+]name>``
     Force demuxer type. Use a '+' before the name to force it; this will skip
@@ -1989,7 +1989,7 @@ _______
 
 
 Input
-_____
+-----
 
 ``--input-conf=<filename>``
     Specify input configuration file other than the default
@@ -2083,7 +2083,7 @@ _____
 
 
 OSD
-___
+---
 
 ``--no-osd-bar``, ``--osd-bar``
     Disable display of the OSD bar. This will make some things (like seeking)
@@ -2246,7 +2246,7 @@ ___
     `Property Expansion`_.
 
 Screenshot
-__________
+----------
 
 ``--screenshot-format=<type>``
     Set the image file type used for saving screenshots.
@@ -2365,7 +2365,7 @@ __________
 
 
 Software Scaler
-_______________
+---------------
 
 ``--sws-scaler=<name>``
     Specify the software scaler algorithm to be used with ``--vf=scale``. This
@@ -2396,7 +2396,7 @@ _______________
 
 
 Terminal
-________
+--------
 
 ``--term-osd, --no-term-osd``, ``--term-osd=force``
     Display OSD messages on the console when no video output is available.
@@ -2483,7 +2483,7 @@ ________
 
 
 TV
-__
+--
 
 ``--tv-...``
     These options tune various properties of the TV capture module. For
@@ -2666,7 +2666,7 @@ __
 
 
 Cache
-_____
+-----
 
 ``--cache=<kBytes|no|auto>``
     Set the size of the cache in kilobytes, disable it with ``no``, or
@@ -2749,7 +2749,7 @@ _____
 
 
 Network
-_______
+-------
 
 ``--cookies``, ``--no-cookies``
     (network only)
@@ -2801,7 +2801,7 @@ _______
 
 
 DVB
-___
+---
 
 ``--dvbin-card=<1-4>``
     Specifies using card number 1-4 (default: 1).
@@ -2817,7 +2817,7 @@ ___
 
 
 PVR
-___
+---
 
 ``--pvr-...``
     These options tune various encoding properties of the PVR capture module.
@@ -2876,7 +2876,7 @@ ___
 
 
 Miscellaneous
-_____________
+-------------
 
 ``--mc=<seconds/frame>``
     Maximum A-V sync correction per frame (in seconds)
