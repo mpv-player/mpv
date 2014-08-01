@@ -2834,6 +2834,46 @@ static const char *const *const mp_event_property_change[] = {
 };
 #undef E
 
+static int prefix_len(const char *p)
+{
+    const char *end = strchr(p, '/');
+    return end ? end - p : strlen(p);
+}
+
+static bool match_property(const char *a, const char *b)
+{
+    if (strcmp(a, "*") == 0)
+        return true;
+    int len_a = prefix_len(a);
+    int len_b = prefix_len(b);
+    return strncmp(a, b, MPMIN(len_a, len_b)) == 0;
+}
+
+// Return a bitset of events which change the property.
+uint64_t mp_get_property_event_mask(const char *name)
+{
+    uint64_t mask = 0;
+    for (int n = 0; n < MP_ARRAY_SIZE(mp_event_property_change); n++) {
+        const char *const *const list = mp_event_property_change[n];
+        for (int i = 0; list && list[i]; i++) {
+            if (match_property(list[i], name))
+                mask |= 1ULL << n;
+        }
+    }
+    return mask;
+}
+
+// Return an ID for the property. It might not be unique, but is good enough
+// for property change handling. Return -1 if property unknown.
+int mp_get_property_id(const char *name)
+{
+    for (int n = 0; mp_properties[n].name; n++) {
+        if (match_property(mp_properties[n].name, name))
+            return n;
+    }
+    return -1;
+}
+
 static bool is_property_set(int action, void *val)
 {
     switch (action) {
@@ -3921,13 +3961,10 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
     if (event == MPV_EVENT_START_FILE)
         ctx->last_seek_pts = MP_NOPTS_VALUE;
 
-    if (event < INTERNAL_EVENT_BASE)
-        mp_client_broadcast_event(mpctx, event, arg);
-    if (event >= 0 && event < MP_ARRAY_SIZE(mp_event_property_change))
-        mp_client_property_change(mpctx, mp_event_property_change[event]);
+    mp_client_broadcast_event(mpctx, event, arg);
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)
 {
-    mp_client_property_change(mpctx, (const char*[]){property, NULL});
+    mp_client_property_change(mpctx, property);
 }

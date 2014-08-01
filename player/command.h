@@ -36,6 +36,10 @@ int mp_property_do(const char* name, int action, void* val,
 void mp_notify(struct MPContext *mpctx, int event, void *arg);
 void mp_notify_property(struct MPContext *mpctx, const char *property);
 
+int mp_get_property_id(const char *name);
+uint64_t mp_get_property_event_mask(const char *name);
+
+// Must start with the first unused positive value in enum mpv_event_id
 #define INTERNAL_EVENT_BASE 24
 #define MP_EVENT_CACHE_UPDATE (INTERNAL_EVENT_BASE + 0)
 

@@ -63,6 +63,8 @@ struct mp_client_api {
 
 struct observe_property {
     char *name;
+    int id;                 // ==mp_get_property_id(name)
+    uint64_t event_mask;    // ==mp_get_property_event_mask(name)
     int64_t reply_id;
     mpv_format format;
     bool changed;           // property change should be signaled to user
@@ -111,13 +113,15 @@ struct mpv_handle {
 
     struct observe_property **properties;
     int num_properties;
-    int lowest_changed;
+    int lowest_changed;     // attempt at making change processing incremental
     int properties_updating;
+    uint64_t property_event_masks; // or-ed together event masks of all properties
 
     struct mp_log_buffer *messages;
 };
 
 static bool gen_property_change_event(struct mpv_handle *ctx);
+static void notify_property_events(struct mpv_handle *ctx, uint64_t event_mask);
 
 void mp_clients_init(struct MPContext *mpctx)
 {
@@ -188,12 +192,14 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
         .cur_event = talloc_zero(client, struct mpv_event),
         .events = talloc_array(client, mpv_event, num_events),
         .max_events = num_events,
-        .event_mask = ((uint64_t)-1) & ~(1ULL << MPV_EVENT_TICK),
+        .event_mask = (1ULL << INTERNAL_EVENT_BASE) - 1, // exclude internal events
         .wakeup_pipe = {-1, -1},
     };
     pthread_mutex_init(&client->lock, NULL);
     pthread_mutex_init(&client->wakeup_lock, NULL);
     pthread_cond_init(&client->wakeup, NULL);
+
+    mpv_request_event(client, MPV_EVENT_TICK, 0);
 
     MP_TARRAY_APPEND(clients, clients->clients, clients->num_clients, client);
 
@@ -429,7 +435,10 @@ static int append_event(struct mpv_handle *ctx, struct mpv_event *event)
 static int send_event(struct mpv_handle *ctx, struct mpv_event *event)
 {
     pthread_mutex_lock(&ctx->lock);
-    if (!(ctx->event_mask & (1ULL << event->event_id))) {
+    uint64_t mask = 1ULL << event->event_id;
+    if (ctx->property_event_masks & mask)
+        notify_property_events(ctx, mask);
+    if (!(ctx->event_mask & mask)) {
         pthread_mutex_unlock(&ctx->lock);
         return 0;
     }
@@ -541,8 +550,9 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
 {
     if (!mpv_event_name(event) || enable < 0 || enable > 1)
         return MPV_ERROR_INVALID_PARAMETER;
+    assert(event < INTERNAL_EVENT_BASE); // excluded above; they have no name
     pthread_mutex_lock(&ctx->lock);
-    uint64_t bit = 1LLU << event;
+    uint64_t bit = 1ULL << event;
     ctx->event_mask = enable ? ctx->event_mask | bit : ctx->event_mask & ~bit;
     pthread_mutex_unlock(&ctx->lock);
     return 0;
@@ -1120,12 +1130,15 @@ int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
     *prop = (struct observe_property){
         .client = ctx,
         .name = talloc_strdup(prop, name),
+        .id = mp_get_property_id(name),
+        .event_mask = mp_get_property_event_mask(name),
         .reply_id = userdata,
         .format = format,
         .changed = true,
         .need_new_value = true,
     };
     MP_TARRAY_APPEND(ctx, ctx->properties, ctx->num_properties, prop);
+    ctx->property_event_masks |= prop->event_mask;
     ctx->lowest_changed = 0;
     pthread_mutex_unlock(&ctx->lock);
     return 0;
@@ -1134,6 +1147,7 @@ int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
 int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
 {
     pthread_mutex_lock(&ctx->lock);
+    ctx->property_event_masks = 0;
     int count = 0;
     for (int n = ctx->num_properties - 1; n >= 0; n--) {
         struct observe_property *prop = ctx->properties[n];
@@ -1150,52 +1164,38 @@ int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
             MP_TARRAY_REMOVE_AT(ctx->properties, ctx->num_properties, n);
             count++;
         }
+        if (!prop->dead)
+            ctx->property_event_masks |= prop->event_mask;
     }
     ctx->lowest_changed = 0;
     pthread_mutex_unlock(&ctx->lock);
     return count;
 }
 
-static int prefix_len(const char *p)
+static void mark_property_changed(struct mpv_handle *client, int index)
 {
-    const char *end = strchr(p, '/');
-    return end ? end - p : strlen(p);
+    struct observe_property *prop = client->properties[index];
+    if (!prop->changed && !prop->need_new_value) {
+        prop->changed = true;
+        prop->need_new_value = prop->format != 0;
+        client->lowest_changed = MPMIN(client->lowest_changed, index);
+    }
 }
 
-static bool match_property(const char *a, const char *b)
-{
-    if (strcmp(b, "*") == 0)
-        return true;
-    int len_a = prefix_len(a);
-    int len_b = prefix_len(b);
-    return strncmp(a, b, MPMIN(len_a, len_b)) == 0;
-}
-
-// Broadcast that properties have changed.
-void mp_client_property_change(struct MPContext *mpctx, const char *const *list)
+// Broadcast that a property has changed.
+void mp_client_property_change(struct MPContext *mpctx, const char *name)
 {
     struct mp_client_api *clients = mpctx->clients;
+    int id = mp_get_property_id(name);
 
     pthread_mutex_lock(&clients->lock);
 
     for (int n = 0; n < clients->num_clients; n++) {
         struct mpv_handle *client = clients->clients[n];
         pthread_mutex_lock(&client->lock);
-
-        client->lowest_changed = client->num_properties;
         for (int i = 0; i < client->num_properties; i++) {
-            struct observe_property *prop = client->properties[i];
-            if (!prop->changed && !prop->need_new_value) {
-                for (int x = 0; list && list[x]; x++) {
-                    if (match_property(prop->name, list[x])) {
-                        prop->changed = true;
-                        prop->need_new_value = prop->format != 0;
-                        break;
-                    }
-                }
-            }
-            if ((prop->changed || prop->updating) && i < client->lowest_changed)
-                client->lowest_changed = i;
+            if (client->properties[i]->id == id)
+                mark_property_changed(client, i);
         }
         if (client->lowest_changed < client->num_properties)
             wakeup_client(client);
@@ -1203,6 +1203,18 @@ void mp_client_property_change(struct MPContext *mpctx, const char *const *list)
     }
 
     pthread_mutex_unlock(&clients->lock);
+}
+
+// Mark properties as changed in reaction to specific events.
+// Called with ctx->lock held.
+static void notify_property_events(struct mpv_handle *ctx, uint64_t event_mask)
+{
+    for (int i = 0; i < ctx->num_properties; i++) {
+        if (ctx->properties[i]->event_mask & event_mask)
+            mark_property_changed(ctx, i);
+    }
+    if (ctx->lowest_changed < ctx->num_properties)
+        wakeup_client(ctx);
 }
 
 static void update_prop(void *p)
