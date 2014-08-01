@@ -699,18 +699,6 @@ static int script_set_property_native(lua_State *L)
 
 }
 
-static int script_property_list(lua_State *L)
-{
-    const struct m_property *props = mp_get_property_list();
-    lua_newtable(L);
-    for (int i = 0; props[i].name; i++) {
-        lua_pushinteger(L, i + 1);
-        lua_pushstring(L, props[i].name);
-        lua_settable(L, -3);
-    }
-    return 1;
-}
-
 static int script_get_property(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -1099,7 +1087,6 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(set_property_native),
     FN_ENTRY(raw_observe_property),
     FN_ENTRY(raw_unobserve_property),
-    FN_ENTRY(property_list),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),
     FN_ENTRY(get_screen_size),

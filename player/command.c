@@ -2623,6 +2623,30 @@ static int mp_property_options(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static const struct m_property mp_properties[];
+
+static int mp_property_list(void *ctx, struct m_property *prop,
+                            int action, void *arg)
+{
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET: {
+        char **list = NULL;
+        int num = 0;
+        for (int n = 0; mp_properties[n].name; n++) {
+            MP_TARRAY_APPEND(NULL, list, num,
+                                talloc_strdup(NULL, mp_properties[n].name));
+        }
+        MP_TARRAY_APPEND(NULL, list, num, NULL);
+        *(char ***)arg = list;
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 // Redirect a property name to another
 #define M_PROPERTY_ALIAS(name, real_property) \
     {(name), mp_property_alias, .priv = (real_property)}
@@ -2780,6 +2804,7 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("sub", "sid"),
 
     {"options", mp_property_options},
+    {"property-list", mp_property_list},
 
     {0},
 };
@@ -2808,11 +2833,6 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle"),
 };
 #undef E
-
-const struct m_property *mp_get_property_list(void)
-{
-    return mp_properties;
-}
 
 static bool is_property_set(int action, void *val)
 {

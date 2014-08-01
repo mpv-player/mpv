@@ -1258,6 +1258,8 @@ Property list
     require reloading the file for changes to take effect. If there is an
     equivalent property, prefer setting the property instead.
 
+``property-list``
+    Return the list of top-level properties.
 
 Property Expansion
 ------------------
