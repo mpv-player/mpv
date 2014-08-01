@@ -1,8 +1,8 @@
 OPTIONS
 =======
 
-Access
-------
+Track Selection
+---------------
 
 ``--aid=<ID|auto|no>``
     Select audio track. ``auto`` selects the default, ``no`` disables audio.
@@ -324,9 +324,6 @@ Program Behaviour
 ``--no-resume-playback``
     Do not restore playback position from ``~/.mpv/watch_later/``.
     See ``quit_watch_later`` input command.
-
-``--osc``, ``--no-osc``
-    Whether to load the on-screen-controller (default: yes).
 
 ``--profile=<profile1,profile2,...>``
     Use the given profile(s), ``--profile=help`` displays a list of the
@@ -2092,6 +2089,9 @@ OSD
     You can configure this on a per-command basis in input.conf using ``osd-``
     prefixes, see ``Input command prefixes``. If you want to disable the OSD
     completely, use ``--osd-level=0``.
+
+``--osc``, ``--no-osc``
+    Whether to load the on-screen-controller (default: yes).
 
 ``--osd-bar-align-x=<-1-1>``
     Position of the OSD bar. -1 is far left, 0 is centered, 1 is far right.
