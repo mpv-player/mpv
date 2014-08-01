@@ -1191,8 +1191,7 @@ OPTIONS
 
 ``--idle``
     Makes mpv wait idly instead of quitting when there is no file to play.
-    Mostly useful in slave mode, where mpv can be controlled through input
-    commands (see also ``--slave-broken``).
+    Useful with ``--force-window``, or for client API.
 
 ``--index=<mode>``
     Controls how to seek in files. Note that if the index is missing from a
@@ -1252,7 +1251,6 @@ OPTIONS
 
 ``--input-file=<filename>``
     Read commands from the given file. Mostly useful with a FIFO.
-    See also ``--slave-broken``.
 
     .. note::
 
@@ -2102,24 +2100,6 @@ OPTIONS
         - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
           subtitles.
 
-``--slave-broken``
-    Switches on the old slave mode. This is for testing only, and incompatible
-    to the removed ``--slave`` switch.
-
-    .. attention::
-        Changes incompatible to slave mode applications have been made. In
-        particular, the status line output was changed, which is used by some
-        applications to determine the current playback position. This switch
-        has been renamed to prevent these applications from working with this
-        version of mpv, because it would lead to buggy and confusing behavior
-        only. Moreover, the slave mode protocol is so horribly bad that it
-        should not be used for new programs, nor should existing programs
-        attempt to adapt to the changed output and use the ``--slave-broken``
-        switch. Instead, a new, saner protocol should be developed (and will be,
-        if there is enough interest).
-
-        This affects most third-party GUI frontends.
-
 ``--softsleep``
     Time frames by repeatedly checking the current time instead of asking
     the kernel to wake up mpv at the correct time. Useful if your kernel
@@ -2859,8 +2839,6 @@ OPTIONS
     this option, a new window will be created and the given window will be set
     as parent. The window will always be resized to cover the parent window
     fully, and will add black bars to compensate for the video aspect ratio.
-
-    See also ``--slave-broken``.
 
 ``--no-window-dragging``
     Don't move the window when clicking on it and moving the mouse pointer.

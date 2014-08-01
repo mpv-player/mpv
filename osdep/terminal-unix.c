@@ -466,6 +466,7 @@ static int read_keys(void *ctx, int fd)
 void terminal_setup_getch(struct input_ctx *ictx)
 {
     mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
+    getch2_enable();
 }
 
 static volatile int getch2_active  = 0;
@@ -622,11 +623,6 @@ void terminal_set_foreground_color(FILE *stream, int c)
     } else {
         fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
     }
-}
-
-void terminal_setup_stdin_cmd_input(struct input_ctx *ictx)
-{
-    mp_input_add_fd(ictx, 0, 1, input_default_read_cmd, NULL, NULL, NULL);
 }
 
 int terminal_init(void)

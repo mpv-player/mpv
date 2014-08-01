@@ -429,7 +429,7 @@ void mp_msg_update_msglevels(struct mpv_global *global)
     root->show_time = opts->msg_time;
     if (root->use_terminal) {
         root->color = opts->msg_color && isatty(fileno(stdout));
-        root->termosd = !opts->slave_mode && isatty(fileno(stderr));
+        root->termosd = isatty(fileno(stderr));
     }
 
     talloc_free(root->msglevels);

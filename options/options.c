@@ -509,7 +509,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("term-status-msg", status_msg, 0),
     OPT_STRING("osd-status-msg", osd_status_msg, 0),
 
-    OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
     OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
 

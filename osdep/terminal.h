@@ -39,9 +39,6 @@ extern char *terminal_cursor_up;
 /* Global initialization for terminal output. */
 int terminal_init(void);
 
-/* Setup ictx to read input commands from stdin (slave mode) */
-void terminal_setup_stdin_cmd_input(struct input_ctx *ictx);
-
 /* Setup ictx to read keys from the terminal */
 void terminal_setup_getch(struct input_ctx *ictx);
 

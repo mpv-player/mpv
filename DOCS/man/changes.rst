@@ -308,27 +308,27 @@ input.conf and Slave Commands
 Slave mode
 ~~~~~~~~~~
 
-* Slave mode is broken. This mode is entirely insane in the ``old`` versions of
-  MPlayer. A proper slave mode application needed tons of code and hacks to get
+* Slave mode was removed. A proper slave mode application needed tons of code
+  and hacks to get
   it right. The main problem is that slave mode is a bad and incomplete
   interface, and to get around that, applications parsed output messages
   intended for users. It is hard to know which messages exactly are parsed by
   slave mode applications. This makes it virtually impossible to improve
   terminal output intended for users without possibly breaking something.
 
-  This is absolutely insane, and **mpv** will not try to keep slave mode
-  compatible. If you are a developer of a slave mode application, contact us,
-  and a new and better protocol can be developed.
+  This is absolutely insane, and since initial improvements to **mpv** quickly
+  made slave mode incompatible to most applications, it was removed as useless
+  cruft. The client API (see below) is provided instead.
 
-  ``--identify`` was already removed (``TOOLS/mpv_identify.sh`` is provided
-  instead), and ``--slave-broken`` might be removed in the future.
+  ``--identify`` was replaced by the ``TOOLS/mpv_identify.sh`` wrapper script.
+
+* A JSON RPC protocol giving access to the client API is planned, but nothing
+  has emerged yet.
 
 * **mpv** also provides a client API, which can be used to embed the player
   by loading it as shared library. (See ``libmpv/client.h`` in the sources.)
   It might also be possible to implement a custom slave mode-like protocol
   using Lua scripting.
-
-* A slave protocol is planned, but nothing has emerged yet.
 
 Policy for Removed Features
 ---------------------------

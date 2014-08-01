@@ -402,15 +402,8 @@ int mp_initialize(struct MPContext *mpctx)
     }
 #endif
 
-    if (opts->use_terminal) {
-        if (mpctx->opts->slave_mode)
-            terminal_setup_stdin_cmd_input(mpctx->input);
-        else if (mpctx->opts->consolecontrols)
-            terminal_setup_getch(mpctx->input);
-
-        if (opts->consolecontrols)
-            getch2_enable();
-    }
+    if (opts->use_terminal && opts->consolecontrols)
+        terminal_setup_getch(mpctx->input);
 
 #if HAVE_LIBASS
     mpctx->ass_log = mp_log_new(mpctx, mpctx->global->log, "!libass");

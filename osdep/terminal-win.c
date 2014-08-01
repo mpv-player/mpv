@@ -54,30 +54,6 @@ static const unsigned char ansi2win32[8] = {
     FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
 };
 
-static int mp_input_slave_cmd_func(void *ctx, int fd, char *dest, int size)
-{
-    DWORD retval;
-    HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
-    if (PeekNamedPipe(in, NULL, size, &retval, NULL, NULL)) {
-        if (size > retval)
-            size = retval;
-    } else {
-        if (WaitForSingleObject(in, 0))
-            size = 0;
-    }
-    if (!size)
-        return MP_INPUT_NOTHING;
-    ReadFile(in, dest, size, &retval, NULL);
-    if (retval)
-        return retval;
-    return MP_INPUT_NOTHING;
-}
-
-void terminal_setup_stdin_cmd_input(struct input_ctx *ictx)
-{
-    mp_input_add_fd(ictx, 0, 0, mp_input_slave_cmd_func, NULL, NULL, NULL);
-}
-
 void get_screen_size(void)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
@@ -170,6 +146,7 @@ static int read_keys(void *ctx, int fd)
 void terminal_setup_getch(struct input_ctx *ictx)
 {
     mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
+    getch2_enable();
 }
 
 void getch2_poll(void)
