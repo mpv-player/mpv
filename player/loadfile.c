@@ -752,7 +752,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
         if (sh->type == filter) {
             struct track *t = add_stream_track(mpctx, demuxer, sh, false);
             t->is_external = true;
-            t->title = talloc_strdup(t, disp_filename);
+            t->title = talloc_strdup(t, mp_basename(disp_filename));
             t->external_filename = talloc_strdup(t, filename);
             first = t;
         }
