@@ -322,6 +322,16 @@ Slave mode
 
   ``--identify`` was replaced by the ``TOOLS/mpv_identify.sh`` wrapper script.
 
+* For some time (until including release 0.4.x), mpv supported a
+  ``--slave-broken`` option. The following options are equivalent:
+
+  ::
+
+        --input-file=/dev/stdin --input-terminal=no
+
+
+  Assuming the system supports ``/dev/stdin``.
+
 * A JSON RPC protocol giving access to the client API is planned, but nothing
   has emerged yet.
 
