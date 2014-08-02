@@ -672,7 +672,7 @@ FILES
     mpv user settings
 
 ``~/.config/mpv/input.conf``
-    input bindings (see ``--input-keylist`` for the full list)
+    key bindings (see `INPUT.CONF`_ section)
 
 ``~/.config/mpv/lua/``
     All files in this directly are loaded as if they were passed to the

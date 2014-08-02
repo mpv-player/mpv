@@ -10,6 +10,11 @@ value (upper case if combined with ``Shift``), or a name for special keys. For
 example, ``a`` maps to the ``a`` key without shift, and ``A`` maps to ``a``
 with shift.
 
+The file is normally located in ``~/.config/mpv/input.conf`` (some platforms
+may use different paths). The default bindings are defined here::
+
+    https://github.com/mpv-player/mpv/blob/master/etc/input.conf
+
 A list of special keys can be obtained with
 
     ``mpv --input-keylist``
