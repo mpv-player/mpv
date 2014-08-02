@@ -35,7 +35,6 @@
 #include "common/msg.h"
 #include "options/options.h"
 #include "bstr/bstr.h"
-#include "common/av_opts.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
 
@@ -79,7 +78,7 @@ struct vd_lavc_params {
     int threads;
     int bitexact;
     int check_hw_profile;
-    char *avopt;
+    char **avopts;
 };
 
 static const struct m_opt_choice_alternatives discard_names[] = {
@@ -105,7 +104,7 @@ const struct m_sub_options vd_lavc_conf = {
         OPT_INTRANGE("threads", threads, 0, 0, 16),
         OPT_FLAG("bitexact", bitexact, 0),
         OPT_FLAG("check-hw-profile", check_hw_profile, 0),
-        OPT_STRING("o", avopt, 0),
+        OPT_KEYVALUELIST("o", avopts, 0),
         {0}
     },
     .size = sizeof(struct vd_lavc_params),
@@ -383,14 +382,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->skip_idct = lavc_param->skip_idct;
     avctx->skip_frame = lavc_param->skip_frame;
 
-    if (lavc_param->avopt) {
-        if (parse_avopts(avctx, lavc_param->avopt) < 0) {
-            MP_ERR(vd, "Your options /%s/ look like gibberish to me pal\n",
-                   lavc_param->avopt);
-            uninit_avctx(vd);
-            return;
-        }
-    }
+    mp_set_avopts(vd->log, avctx, lavc_param->avopts);
 
     // Do this after the above avopt handling in case it changes values
     ctx->skip_frame = avctx->skip_frame;

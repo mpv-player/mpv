@@ -52,9 +52,9 @@
 #error "config.h broken or no resampler found"
 #endif
 
+#include "common/av_common.h"
 #include "common/msg.h"
 #include "options/m_option.h"
-#include "common/av_opts.h"
 #include "audio/filter/af.h"
 #include "audio/fmt-conversion.h"
 
@@ -74,7 +74,7 @@ struct af_resample_opts {
 
 struct af_resample {
     int allow_detach;
-    char *avopts;
+    char **avopts;
     struct AVAudioResampleContext *avrctx;
     struct AVAudioResampleContext *avrctx_out; // for output channel reordering
     struct af_resample_opts ctx;   // opts in the context
@@ -164,10 +164,8 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
 
     av_opt_set_double(s->avrctx, "cutoff",          s->ctx.cutoff, 0);
 
-    if (parse_avopts(s->avrctx, s->avopts) < 0) {
-        MP_FATAL(af, "af_lavrresample: could not set opts: '%s'\n", s->avopts);
+    if (mp_set_avopts(af->log, s->avrctx, s->avopts) < 0)
         return AF_ERROR;
-    }
 
     struct mp_chmap map_in = in->channels;
     struct mp_chmap map_out = out->channels;
@@ -402,7 +400,7 @@ const struct af_info af_info_lavrresample = {
         OPT_FLAG("linear", opts.linear, 0),
         OPT_DOUBLE("cutoff", opts.cutoff, M_OPT_RANGE, .min = 0, .max = 1),
         OPT_FLAG("detach", allow_detach, 0),
-        OPT_STRING("o", avopts, 0),
+        OPT_KEYVALUELIST("o", avopts, 0),
         {0}
     },
 };

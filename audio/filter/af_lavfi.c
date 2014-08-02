@@ -38,8 +38,9 @@
 #include "audio/fmt-conversion.h"
 #include "af.h"
 
+#include "common/av_common.h"
+
 #include "options/m_option.h"
-#include "common/av_opts.h"
 
 // FFmpeg and Libav have slightly different APIs, just enough to cause us
 // unnecessary pain. <Expletive deleted.>
@@ -62,7 +63,7 @@ struct priv {
 
     // options
     char *cfg_graph;
-    char *cfg_avopts;
+    char **cfg_avopts;
 };
 
 static void destroy_graph(struct af_instance *af)
@@ -90,11 +91,8 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     if (!graph)
         goto error;
 
-    if (parse_avopts(graph, p->cfg_avopts) < 0) {
-        MP_FATAL(af, "lavfi: could not set opts: '%s'\n",
-               p->cfg_avopts);
+    if (mp_set_avopts(af->log, graph, p->cfg_avopts) < 0)
         goto error;
-    }
 
     AVFilterInOut *outputs = avfilter_inout_alloc();
     AVFilterInOut *inputs  = avfilter_inout_alloc();
@@ -306,7 +304,7 @@ const struct af_info af_info_lavfi = {
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_STRING("graph", cfg_graph, 0),
-        OPT_STRING("o", cfg_avopts, 0),
+        OPT_KEYVALUELIST("o", cfg_avopts, 0),
         {0}
     },
 };

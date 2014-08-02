@@ -33,7 +33,6 @@
 #include "common/codecs.h"
 #include "common/msg.h"
 #include "options/options.h"
-#include "common/av_opts.h"
 
 #include "ad.h"
 #include "audio/fmt-conversion.h"
@@ -55,7 +54,7 @@ struct ad_lavc_params {
     float ac3drc;
     int downmix;
     int threads;
-    char *avopt;
+    char **avopts;
 };
 
 const struct m_sub_options ad_lavc_conf = {
@@ -63,7 +62,7 @@ const struct m_sub_options ad_lavc_conf = {
         OPT_FLOATRANGE("ac3drc", ac3drc, 0, 0, 2),
         OPT_FLAG("downmix", downmix, 0),
         OPT_INTRANGE("threads", threads, 0, 1, 16),
-        OPT_STRING("o", avopt, 0),
+        OPT_KEYVALUELIST("o", avopts, 0),
         {0}
     },
     .size = sizeof(struct ad_lavc_params),
@@ -228,13 +227,7 @@ static int init(struct dec_audio *da, const char *decoder)
     av_opt_set_double(lavc_context, "drc_scale", opts->ac3drc,
                       AV_OPT_SEARCH_CHILDREN);
 
-    if (opts->avopt) {
-        if (parse_avopts(lavc_context, opts->avopt) < 0) {
-            MP_ERR(da, "setting AVOptions '%s' failed.\n", opts->avopt);
-            uninit(da);
-            return 0;
-        }
-    }
+    mp_set_avopts(da->log, lavc_context, opts->avopts);
 
     lavc_context->codec_tag = sh->format;
     lavc_context->sample_rate = sh_audio->samplerate;

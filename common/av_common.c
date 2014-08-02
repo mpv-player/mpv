@@ -20,6 +20,8 @@
 #include <libavutil/common.h>
 #include <libavutil/log.h>
 #include <libavutil/dict.h>
+#include <libavutil/opt.h>
+#include <libavutil/error.h>
 #include <libavcodec/avcodec.h>
 
 #include "common/common.h"
@@ -188,4 +190,38 @@ void mp_set_avdict(AVDictionary **dict, char **kv)
 {
     for (int n = 0; kv && kv[n * 2]; n++)
         av_dict_set(dict, kv[n * 2 + 0], kv[n * 2 + 1], 0);
+}
+
+// For use with libav* APIs that take AVDictionaries of options.
+// Print options remaining in the dict as unset.
+void mp_avdict_print_unset(struct mp_log *log, int msgl, AVDictionary *dict)
+{
+    AVDictionaryEntry *t = NULL;
+    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX)))
+        mp_msg(log, msgl, "Could not set AVOption %s='%s'\n", t->key, t->value);
+}
+
+// kv is in the format as by OPT_KEYVALUELIST(): kv[0]=key0, kv[1]=val0, ...
+// Set these options on given avobj (using av_opt_set..., meaning avobj must
+// point to a struct that has AVClass as first member).
+// Options which fail to set (error or not found) are printed to log.
+// Returns: >=0 success, <0 failed to set an option
+int mp_set_avopts(struct mp_log *log, void *avobj, char **kv)
+{
+    int success = 0;
+    for (int n = 0; kv && kv[n * 2]; n++) {
+        char *k = kv[n * 2 + 0];
+        char *v = kv[n * 2 + 1];
+        int r = av_opt_set(avobj, k, v, AV_OPT_SEARCH_CHILDREN);
+        if (r == AVERROR_OPTION_NOT_FOUND) {
+            mp_err(log, "AVOption '%s' not found.\n", k);
+            success = -1;
+        } else if (r < 0) {
+            char errstr[80];
+            av_strerror(r, errstr, sizeof(errstr));
+            mp_err(log, "Could not set AVOption %s='%s' (%s)\n", k, v, errstr);
+            success = -1;
+        }
+    }
+    return success;
 }

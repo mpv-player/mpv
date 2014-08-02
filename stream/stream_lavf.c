@@ -229,11 +229,7 @@ static int open_f(stream_t *stream)
         goto out;
     }
 
-    AVDictionaryEntry *t = NULL;
-    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        MP_VERBOSE(stream, "Could not set stream option %s=%s\n",
-                   t->key, t->value);
-    }
+    mp_avdict_print_unset(stream->log, MSGL_V, dict);
 
     if (avio->av_class) {
         uint8_t *mt = NULL;

@@ -44,7 +44,6 @@
 #include "options/options.h"
 #include "common/msg.h"
 #include "common/tags.h"
-#include "common/av_opts.h"
 #include "common/av_common.h"
 #include "bstr/bstr.h"
 
@@ -71,7 +70,7 @@ struct demux_lavf_opts {
     int allow_mimetype;
     char *format;
     char *cryptokey;
-    char *avopt;
+    char **avopts;
     int genptsmode;
 };
 
@@ -87,7 +86,7 @@ const struct m_sub_options demux_lavf_conf = {
         OPT_STRING("cryptokey", cryptokey, 0),
         OPT_CHOICE("genpts-mode", genptsmode, 0,
                    ({"lavf", 1}, {"no", 0})),
-        OPT_STRING("o", avopt, 0),
+        OPT_KEYVALUELIST("o", avopts, 0),
         {0}
     },
     .size = sizeof(struct demux_lavf_opts),
@@ -674,14 +673,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                    "analyzeduration to %f\n", analyze_duration);
     }
 
-    if (lavfdopts->avopt) {
-        if (parse_avopts(avfc, lavfdopts->avopt) < 0) {
-            MP_ERR(demuxer, "Your options /%s/ look like gibberish to me pal\n",
-                   lavfdopts->avopt);
-            return -1;
-        }
-    }
-
     if ((priv->avif->flags & AVFMT_NOFILE) ||
         demuxer->stream->type == STREAMTYPE_AVDEVICE)
     {
@@ -715,15 +706,15 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
             av_dict_set(&dopts, "rtsp_transport", transport, 0);
     }
 
+    mp_set_avdict(&dopts, lavfdopts->avopts);
+
     if (avformat_open_input(&avfc, priv->filename, priv->avif, &dopts) < 0) {
         MP_ERR(demuxer, "avformat_open_input() failed\n");
         av_dict_free(&dopts);
         return -1;
     }
 
-    t = NULL;
-    while ((t = av_dict_get(dopts, "", t, AV_DICT_IGNORE_SUFFIX)))
-        MP_VERBOSE(demuxer, "Could not set demux option %s=%s\n", t->key, t->value);
+    mp_avdict_print_unset(demuxer->log, MSGL_V, dopts);
     av_dict_free(&dopts);
 
     priv->avfc = avfc;

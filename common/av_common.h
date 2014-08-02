@@ -27,6 +27,7 @@
 struct mp_decoder_list;
 struct demux_packet;
 struct AVDictionary;
+struct mp_log;
 
 int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size);
 void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st);
@@ -38,5 +39,7 @@ void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type);
 int mp_codec_to_av_codec_id(const char *codec);
 const char *mp_codec_from_av_codec_id(int codec_id);
 void mp_set_avdict(struct AVDictionary **dict, char **kv);
+void mp_avdict_print_unset(struct mp_log *log, int msgl, struct AVDictionary *d);
+int mp_set_avopts(struct mp_log *log, void *avobj, char **kv);
 
 #endif

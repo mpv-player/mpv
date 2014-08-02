@@ -37,9 +37,9 @@
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 
+#include "common/av_common.h"
 #include "common/msg.h"
 #include "options/m_option.h"
-#include "common/av_opts.h"
 #include "common/tags.h"
 
 #include "video/img_format.h"
@@ -78,7 +78,7 @@ struct vf_priv_s {
     // options
     char *cfg_graph;
     int64_t cfg_sws_flags;
-    char *cfg_avopts;
+    char **cfg_avopts;
 };
 
 static const struct vf_priv_s vf_priv_dflt = {
@@ -143,11 +143,8 @@ static bool recreate_graph(struct vf_instance *vf, int width, int height,
     if (!graph)
         goto error;
 
-    if (parse_avopts(graph, p->cfg_avopts) < 0) {
-        MP_FATAL(vf, "lavfi: could not set opts: '%s'\n",
-               p->cfg_avopts);
+    if (mp_set_avopts(vf->log, graph, p->cfg_avopts) < 0)
         goto error;
-    }
 
     AVFilterInOut *outputs = avfilter_inout_alloc();
     AVFilterInOut *inputs  = avfilter_inout_alloc();
@@ -426,7 +423,7 @@ static void print_help(struct mp_log *log)
 static const m_option_t vf_opts_fields[] = {
     OPT_STRING("graph", cfg_graph, M_OPT_MIN, .min = 1),
     OPT_INT64("sws-flags", cfg_sws_flags, 0),
-    OPT_STRING("o", cfg_avopts, 0),
+    OPT_KEYVALUELIST("o", cfg_avopts, 0),
     {0}
 };
 
@@ -445,7 +442,7 @@ const vf_info_t vf_info_lavfi = {
 struct vf_lw_opts {
     int enable;
     int64_t sws_flags;
-    char *avopts;
+    char **avopts;
 };
 
 #undef OPT_BASE_STRUCT
@@ -454,7 +451,7 @@ const struct m_sub_options vf_lw_conf = {
     .opts = (const m_option_t[]) {
         OPT_FLAG("lavfi", enable, 0),
         OPT_INT64("lavfi-sws-flags", sws_flags, 0),
-        OPT_STRING("lavfi-o", avopts, 0),
+        OPT_KEYVALUELIST("lavfi-o", avopts, 0),
         {0}
     },
     .defaults = &(const struct vf_lw_opts){

@@ -161,7 +161,6 @@ def build(ctx):
         ## Core
         ( "common/av_common.c" ),
         ( "common/av_log.c" ),
-        ( "common/av_opts.c" ),
         ( "common/codecs.c" ),
         ( "common/encode_lavc.c",                "encoding" ),
         ( "common/common.c" ),
