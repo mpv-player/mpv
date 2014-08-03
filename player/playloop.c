@@ -940,8 +940,10 @@ void run_playloop(struct MPContext *mpctx)
 
     }
 
+    handle_loop_file(mpctx);
+
     if (mpctx->stop_play)
-        mpctx->sleeptime = 0;
+        return;
 
     handle_osd_redraw(mpctx);
 
@@ -959,8 +961,6 @@ void run_playloop(struct MPContext *mpctx)
     handle_backstep(mpctx);
 
     handle_sstep(mpctx);
-
-    handle_loop_file(mpctx);
 
     handle_chapter_change(mpctx);
 
