@@ -919,8 +919,10 @@ typedef enum mpv_event_id {
      */
     MPV_EVENT_UNPAUSE           = 13,
     /**
-     * Sent every time after a video frame is displayed (or in lower frequency
-     * if there is no video, or playback is paused).
+     * Sent every time after a video frame is displayed. Note that currently,
+     * this will be sent in lower frequency if there is no video, or playback
+     * is paused - but that will be removed in the future, and it will be
+     * restricted to video frames only.
      */
     MPV_EVENT_TICK              = 14,
     /**

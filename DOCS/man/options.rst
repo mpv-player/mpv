@@ -919,11 +919,14 @@ OPTIONS
         Practical use of this feature is questionable. Disabled by default.
 
 ``--frames=<number>``
-    Play/convert only first ``<number>`` video frames, then quit. For audio
-    only, run ``<number>`` iteration of the playback loop, which is most likely
-    not what you want. (This behavior also applies to the corner case when there
-    are fewer video frames than ``<number>``, and audio is longer than the
-    video.)
+    Play/convert only first ``<number>`` video frames, then quit.
+
+    ``--frames=0`` loads the file, but immediately quits before initializing
+    playback. (Might be useful for scripts which just want to determine some
+    file properties.)
+
+    For audio-only playback, any value greater than 0 will quit playback
+    immediately after initialization. The value 0 works as with video.
 
 ``--fullscreen``, ``--fs``
     Fullscreen playback.

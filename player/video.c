@@ -896,4 +896,16 @@ void write_video(struct MPContext *mpctx, double endpts)
 
     if (!mpctx->sync_audio_to_video)
         mpctx->video_status = STATUS_EOF;
+
+    if (mpctx->video_status != STATUS_EOF) {
+        if (mpctx->step_frames > 0) {
+            mpctx->step_frames--;
+            if (!mpctx->step_frames && !opts->pause)
+                pause_player(mpctx);
+        }
+        if (mpctx->max_frames == 0)
+            mpctx->stop_play = PT_NEXT_ENTRY;
+        if (mpctx->max_frames > 0)
+            mpctx->max_frames--;
+    }
 }

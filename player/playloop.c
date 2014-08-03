@@ -712,11 +712,19 @@ static void handle_backstep(struct MPContext *mpctx)
 static void handle_sstep(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (opts->step_sec > 0 && !mpctx->stop_play && !mpctx->paused &&
-        mpctx->restart_complete)
-    {
+    if (mpctx->stop_play || !mpctx->restart_complete)
+        return;
+
+    if (opts->step_sec > 0 && !mpctx->paused) {
         set_osd_function(mpctx, OSD_FFW);
         queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, 0, true);
+    }
+
+    if (mpctx->video_status >= STATUS_DRAINING) {
+        if (mpctx->max_frames >= 0)
+            mpctx->stop_play = PT_NEXT_ENTRY;
+        if (mpctx->step_frames > 0 && !mpctx->paused)
+            pause_player(mpctx);
     }
 }
 
@@ -785,6 +793,17 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
     }
 }
 
+// Potentially needed by some Lua scripts, which assume TICK always comes.
+static void handle_dummy_ticks(struct MPContext *mpctx)
+{
+    if (mpctx->video_status == STATUS_EOF || mpctx->paused) {
+        if (mp_time_sec() - mpctx->last_idle_tick > 0.5) {
+            mpctx->last_idle_tick = mp_time_sec();
+            mp_notify(mpctx, MPV_EVENT_TICK, NULL);
+        }
+    }
+}
+
 static double get_wakeup_period(struct MPContext *mpctx)
 {
     double sleeptime = 100.0; // infinite for all practical purposes
@@ -806,7 +825,6 @@ void run_playloop(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     double endpts = get_play_end_pts(mpctx);
     bool end_is_new_segment = false;
-    int64_t shown_vframes = mpctx->shown_vframes;
 
 #if HAVE_ENCODING
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
@@ -840,13 +858,6 @@ void run_playloop(struct MPContext *mpctx)
     fill_audio_out_buffers(mpctx, endpts);
     write_video(mpctx, endpts);
 
-    if (mpctx->video_status == STATUS_EOF || mpctx->paused) {
-        if (mp_time_sec() - mpctx->last_idle_tick > 0.5) {
-            mpctx->last_idle_tick = mp_time_sec();
-            mp_notify(mpctx, MPV_EVENT_TICK, NULL);
-        }
-    }
-
     // We always make sure audio and video buffers are filled before actually
     // starting playback. This code handles starting them at the same time.
     if (mpctx->audio_status >= STATUS_READY &&
@@ -856,7 +867,6 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->video_status = STATUS_PLAYING;
             get_relative_time(mpctx);
             mpctx->sleeptime = 0;
-            shown_vframes -= 1; // make framestep think there was a new video frame
         }
         if (mpctx->audio_status == STATUS_READY)
             fill_audio_out_buffers(mpctx, endpts); // actually play prepared buffer
@@ -864,6 +874,13 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->hrseek_active = false;
             mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
             mpctx->restart_complete = true;
+            if (opts->playing_msg && !mpctx->playing_msg_shown) {
+                mpctx->playing_msg_shown = true;
+                char *msg =
+                    mp_property_expand_escaped_string(mpctx, opts->playing_msg);
+                MP_INFO(mpctx, "%s\n", msg);
+                talloc_free(msg);
+            }
         }
     }
 
@@ -875,6 +892,8 @@ void run_playloop(struct MPContext *mpctx)
             a_pos = playing_audio_pts(mpctx);
         mpctx->playback_pts = a_pos;
     }
+
+    handle_dummy_ticks(mpctx);
 
     update_osd_msg(mpctx);
     update_subtitles(mpctx);
@@ -908,37 +927,7 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_keep_open(mpctx);
 
-    if (!mpctx->stop_play && mpctx->restart_complete) {
-        bool new_frame_shown = shown_vframes < mpctx->shown_vframes;
-
-        // If no more video is available, one frame means one playloop iteration.
-        // Otherwise, one frame means one video frame.
-        if (mpctx->video_status == STATUS_EOF)
-            new_frame_shown = true;
-
-        if (opts->playing_msg && !mpctx->playing_msg_shown && new_frame_shown) {
-            mpctx->playing_msg_shown = true;
-            char *msg =
-                mp_property_expand_escaped_string(mpctx, opts->playing_msg);
-            MP_INFO(mpctx, "%s\n", msg);
-            talloc_free(msg);
-        }
-
-        if (mpctx->max_frames >= 0) {
-            if (new_frame_shown)
-                mpctx->max_frames--;
-            if (mpctx->max_frames <= 0)
-                mpctx->stop_play = PT_NEXT_ENTRY;
-        }
-
-        if (mpctx->step_frames > 0 && !mpctx->paused) {
-            if (new_frame_shown)
-                mpctx->step_frames--;
-            if (mpctx->step_frames == 0)
-                pause_player(mpctx);
-        }
-
-    }
+    handle_sstep(mpctx);
 
     handle_loop_file(mpctx);
 
@@ -959,8 +948,6 @@ void run_playloop(struct MPContext *mpctx)
     handle_input_and_seek_coalesce(mpctx);
 
     handle_backstep(mpctx);
-
-    handle_sstep(mpctx);
 
     handle_chapter_change(mpctx);
 
@@ -987,6 +974,7 @@ void idle_loop(struct MPContext *mpctx)
             handle_force_window(mpctx, true);
         }
         need_reinit = false;
+        handle_dummy_ticks(mpctx);
         int uninit = INITIALIZED_AO;
         if (!mpctx->opts->force_vo)
             uninit |= INITIALIZED_VO;

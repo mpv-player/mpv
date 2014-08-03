@@ -106,7 +106,7 @@ List of Input Commands
     ``revert_seek`` command itself.
 
 ``frame_step``
-    Play one frame, then pause.
+    Play one frame, then pause. Does nothing with audio-only playback.
 
 ``frame_back_step``
     Go back by one frame, then pause. Note that this can be very slow (it tries
