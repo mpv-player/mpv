@@ -503,16 +503,23 @@ bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
     return true;
 }
 
-static bool handle_osd_redraw(struct MPContext *mpctx)
+static void handle_osd_redraw(struct MPContext *mpctx)
 {
     if (!mpctx->video_out || !mpctx->video_out->config_ok)
-        return false;
+        return;
+    // If we're playing normally, let OSD be redrawn naturally as part of
+    // video display.
+    if (mpctx->sleeptime < 0.1 && mpctx->video_status == STATUS_PLAYING)
+        return;
+    // Don't redraw immediately during a seek (makes it significantly slower).
+    if (mp_time_sec() - mpctx->start_timestamp < 0.1)
+        return;
     bool want_redraw = vo_get_want_redraw(mpctx->video_out) |
                        osd_query_and_reset_want_redraw(mpctx->osd);
     if (!want_redraw)
-        return false;
+        return;
     vo_redraw(mpctx->video_out);
-    return true;
+    mpctx->sleeptime = 0;
 }
 
 static void handle_pause_on_low_cache(struct MPContext *mpctx)
@@ -936,8 +943,7 @@ void run_playloop(struct MPContext *mpctx)
     if (mpctx->stop_play)
         mpctx->sleeptime = 0;
 
-    if (mpctx->sleeptime > 0 && handle_osd_redraw(mpctx))
-        mpctx->sleeptime = 0;
+    handle_osd_redraw(mpctx);
 
     if (mpctx->sleeptime > 0) {
         MP_STATS(mpctx, "start sleep");
