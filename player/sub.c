@@ -107,8 +107,12 @@ static void update_subtitle(struct MPContext *mpctx, int order)
     struct osd_sub_state state;
     osd_get_sub(mpctx->osd, obj, &state);
 
-    state.video_offset =
-        track->under_timeline ? mpctx->video_offset : get_start_time(mpctx);
+    state.video_offset = 0;
+    if (track->under_timeline) {
+        state.video_offset += mpctx->video_offset;
+    } else if (track->is_external) {
+        state.video_offset += get_start_time(mpctx);
+    };
 
     osd_set_sub(mpctx->osd, obj, &state);
 
