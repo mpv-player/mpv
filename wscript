@@ -728,6 +728,10 @@ scripting_features = [
 
 standalone_features = [
     {
+        'name': '--cplayer',
+        'desc': 'mpv CLI player',
+        'func': check_true
+    }, {
         'name': 'win32-executable',
         'desc': 'w32 executable',
         'deps_any': [ 'os-win32', 'os-cygwin'],
