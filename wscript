@@ -773,6 +773,10 @@ def options(opt):
             help    = 'directory for installing {0} [{1}]' \
                       .format(desc, default))
 
+    group.add_option('--variant',
+        default = 'default',
+        help    = 'waf variant for multiple configuration and targets')
+
     opt.parse_features('build and install options', build_options)
     optional_features = main_dependencies + libav_dependencies
     opt.parse_features('optional feaures',  optional_features)
@@ -798,6 +802,7 @@ def is_debug_build(ctx):
     return getattr(ctx.options, 'enable_debug-build')
 
 def configure(ctx):
+    ctx.setenv(ctx.options.variant)
     ctx.check_waf_version(mini='1.7.15')
     target = os.environ.get('TARGET')
     (cc, pkg_config, windres) = ('cc', 'pkg-config', 'windres')
@@ -858,5 +863,16 @@ def configure(ctx):
     ctx.store_dependencies_lists()
 
 def build(ctx):
+    if ctx.options.variant not in ctx.all_envs:
+        from waflib import Errors
+        raise Errors.WafError(
+            'The project was not configured: run "waf --variant={0} configure" first!'
+                .format(ctx.options.variant))
     ctx.unpack_dependencies_lists()
     ctx.load('wscript_build')
+
+def init(ctx):
+    from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext
+    for y in (BuildContext, CleanContext, InstallContext, UninstallContext):
+        class tmp(y):
+            variant = ctx.options.variant
