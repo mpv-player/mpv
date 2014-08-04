@@ -35,7 +35,7 @@ class gen_sym(Task):
                                 kw['env'] = env
 
                 else:
-                        if self.env.DEST_BINFMT in ('pe', 'mac-o'): #gcc uses nm, and has a preceding _ on windows and osx
+                        if self.env.DEST_BINFMT in ('mac-o',): #gcc uses nm, and has a preceding _ on osx
                                 re_nm = re.compile(r'T\s+_(' + self.generator.export_symbols_regex + r')\b')
                         else:
                                 re_nm = re.compile(r'T\s+(' + self.generator.export_symbols_regex + r')\b')
