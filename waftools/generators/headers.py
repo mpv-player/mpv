@@ -1,3 +1,9 @@
+def __cp_to_variant__(ctx, variant, basename):
+    src = ctx.bldnode.search(basename).read()
+    node = ctx.bldnode.make_node("{0}/{1}".format(variant, basename))
+    node.parent.mkdir()
+    node.write(src)
+
 def __get_version__(ctx):
     import subprocess
     process = subprocess.Popen(["sh", "./version.sh", "--print"],
@@ -17,6 +23,7 @@ def __get_build_date__():
 def __write_config_h__(ctx):
     ctx.start_msg("Writing configuration header:")
     ctx.write_config_header('config.h')
+    __cp_to_variant__(ctx, ctx.options.variant, 'config.h')
     ctx.end_msg("config.h", "PINK")
 
 def __write_version_h__(ctx):
@@ -25,6 +32,7 @@ def __write_version_h__(ctx):
     ctx.define("VERSION",   ctx.env.VERSION)
     ctx.define("BUILDDATE", __get_build_date__())
     ctx.write_config_header("version.h")
+    __cp_to_variant__(ctx, ctx.options.variant, 'version.h')
     ctx.end_msg("version.h", "PINK")
 
 def __add_mplayer_defines__(ctx):
