@@ -789,12 +789,13 @@ def is_debug_build(ctx):
 def configure(ctx):
     ctx.check_waf_version(mini='1.7.15')
     target = os.environ.get('TARGET')
-    (cc, pkg_config, windres) = ('cc', 'pkg-config', 'windres')
+    (cc, pkg_config, windres, nm) = ('cc', 'pkg-config', 'windres', 'nm')
 
     if target:
         cc         = '-'.join([target, 'gcc'])
         pkg_config = '-'.join([target, pkg_config])
         windres    = '-'.join([target, windres])
+        nm         = '-'.join([target, nm])
 
     ctx.find_program(cc,          var='CC')
     ctx.find_program(pkg_config,  var='PKG_CONFIG')
@@ -802,6 +803,7 @@ def configure(ctx):
     ctx.find_program('rst2man',   var='RST2MAN',   mandatory=False)
     ctx.find_program('rst2pdf',   var='RST2PDF',   mandatory=False)
     ctx.find_program(windres,     var='WINDRES',   mandatory=False)
+    ctx.find_program(nm,          var='NM',        mandatory=False)
 
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()
