@@ -64,7 +64,7 @@ static bool is_interleaved(struct MPContext *mpctx, struct track *track)
             (other->type == STREAM_VIDEO || other->type == STREAM_AUDIO))
             return true;
     }
-    return false;
+    return track->demuxer == mpctx->demuxer;
 }
 
 void reset_subtitles(struct MPContext *mpctx, int order)
