@@ -409,21 +409,28 @@ struct mp_image *mp_vdpau_upload_video_surface(struct mp_vdpau_ctx *ctx,
     if (!hwmpi)
         return NULL;
 
+    struct mp_image *src = mpi;
+    if (mpi->stride[0] < 0)
+        src = mp_image_new_copy(mpi); // unflips it when copying
+
     if (hwmpi->imgfmt == IMGFMT_VDPAU) {
         VdpVideoSurface surface = (intptr_t)hwmpi->planes[3];
-        const void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
-        if (mpi->imgfmt == IMGFMT_NV12)
+        const void *destdata[3] = {src->planes[0], src->planes[2], src->planes[1]};
+        if (src->imgfmt == IMGFMT_NV12)
             destdata[1] = destdata[2];
         vdp_st = vdp->video_surface_put_bits_y_cb_cr(surface,
-            ycbcr, destdata, mpi->stride);
+            ycbcr, destdata, src->stride);
     } else {
         VdpOutputSurface rgb_surface = (intptr_t)hwmpi->planes[3];
         vdp_st = vdp->output_surface_put_bits_native(rgb_surface,
-                                    &(const void *){mpi->planes[0]},
-                                    &(uint32_t){mpi->stride[0]},
+                                    &(const void *){src->planes[0]},
+                                    &(uint32_t){src->stride[0]},
                                     NULL);
     }
     CHECK_VDP_WARNING(ctx, "Error when uploading surface");
+
+    if (src != mpi)
+        talloc_free(src);
 
     mp_image_copy_attributes(hwmpi, mpi);
     return hwmpi;
