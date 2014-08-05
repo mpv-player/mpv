@@ -28,7 +28,7 @@ class compile_sym(Task):
                 elif self.env.DEST_BINFMT == 'elf':
                         self.outputs[0].write('{ global:\n' + ';\n'.join(lsyms) + ";\nlocal: *; };\n")
                 elif self.env.DEST_BINFMT == 'mac-o':
-                        self.outputs[0].write('\n'.join("_"+sym for sym in lsyms))
+                        self.outputs[0].write('\n'.join("_"+sym for sym in lsyms) + '\n')
                 else:
                         raise WafError('NotImplemented')
 
