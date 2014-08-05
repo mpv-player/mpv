@@ -240,7 +240,6 @@ static void destroy_gl(void *ptr)
 
 static void releaseGlContext_w32(MPGLContext *ctx)
 {
-    struct MPGLContext *ctx = ptr;
     struct w32_context *w32_ctx = ctx->priv;
     if (w32_ctx->context)
         wglMakeCurrent(w32_ctx->hdc, 0);
