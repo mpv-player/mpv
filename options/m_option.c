@@ -1399,13 +1399,16 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
         r = read_subparam(log, name, &param, &val);
         if (r < 0)
             break;
-        MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, key));
-        MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, val));
+        if (dst) {
+            MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, key));
+            MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, val));
+        }
 
         if (!bstr_eatstart0(&param, ","))
             break;
     }
-    MP_TARRAY_APPEND(NULL, lst, num, NULL);
+    if (dst)
+        MP_TARRAY_APPEND(NULL, lst, num, NULL);
 
     if (param.len) {
         mp_err(log, "Unparseable garbage at end of option value: '%.*s'\n",
@@ -1413,9 +1416,11 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
         r = M_OPT_INVALID;
     }
 
-    VAL(dst) = lst;
-    if (r < 0)
-        free_str_list(dst);
+    if (dst) {
+        VAL(dst) = lst;
+        if (r < 0)
+            free_str_list(dst);
+    }
     return r;
 }
 
