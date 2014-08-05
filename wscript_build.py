@@ -469,7 +469,7 @@ def build(ctx):
                 includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
                                 ctx.dependencies_includes(),
                 features     = features,
-                export_symbols_regex = 'mpv_.*',
+                export_symbols_def = "etc/libmpv.def",
                 install_path = ctx.env.LIBDIR,
                 vnum         = libversion,
             )
