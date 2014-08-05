@@ -25,6 +25,7 @@ API changes
 
 ::
 
+ 1.3    - add MPV_MAKE_VERSION()
  1.2    - remove "stream-time-pos" property (no replacement)
  1.1    - remap dvdnav:// to dvd://
         - add "--cache-file", "--cache-file-size"

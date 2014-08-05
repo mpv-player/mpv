@@ -158,12 +158,11 @@ extern "C" {
  * number is incremented. This affects only C part, and not properties and
  * options.
  *
- * The version number is often converted into a human readable form by writing
- * the major and minor version number in decimal. E.g.:
- *      version 0x001001FF
- *      becomes 16.511 (dec(0x0010) + "." + dec(0x01FF))
+ * You can use MPV_MAKE_VERSION() and compare the result with integer
+ * relational operators (<, >, <=, >=).
  */
-#define MPV_CLIENT_API_VERSION 0x00010002UL
+#define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 3)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.

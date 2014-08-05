@@ -450,11 +450,10 @@ def build(ctx):
     if build_shared or build_static:
         if build_shared:
             ctx.load("syms")
-        vnum = int(re.search('^#define MPV_CLIENT_API_VERSION 0x(.*)UL$',
-                             ctx.path.find_node("libmpv/client.h").read(),
-                             re.M)
-                   .group(1), 16)
-        libversion = str(vnum >> 16) + '.' + str(vnum & 0xffff) + '.0'
+        vre = '^#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION\((.*), (.*)\)$'
+        libmpv_header = ctx.path.find_node("libmpv/client.h").read()
+        major, minor = re.search(vre, libmpv_header, re.M).groups()
+        libversion = major + '.' + minor + '.0'
 
         def _build_libmpv(shared):
             features = "c "
