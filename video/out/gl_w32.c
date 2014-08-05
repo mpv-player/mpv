@@ -27,6 +27,7 @@
 struct w32_context {
     HGLRC context;
     HDC hdc;
+    int flags;
 };
 
 static bool create_dc(struct MPGLContext *ctx, int flags)
@@ -193,6 +194,21 @@ out:
     return false;
 }
 
+static void create_ctx(void *ptr)
+{
+    struct MPGLContext *ctx = ptr;
+    struct w32_context *w32_ctx = ctx->priv;
+
+    if (!create_dc(ctx, w32_ctx->flags))
+        return;
+
+    if (ctx->requested_gl_version >= MPGL_VER(3, 0))
+        create_context_w32_gl3(ctx);
+    if (!w32_ctx->context)
+        create_context_w32_old(ctx);
+    wglMakeCurrent(w32_ctx->hdc, NULL);
+}
+
 static bool config_window_w32(struct MPGLContext *ctx, int flags)
 {
     struct w32_context *w32_ctx = ctx->priv;
@@ -202,28 +218,33 @@ static bool config_window_w32(struct MPGLContext *ctx, int flags)
     if (w32_ctx->context) // reuse existing context
         return true;
 
-    if (!create_dc(ctx, flags))
-        return false;
+    w32_ctx->flags = flags;
+    vo_w32_run_on_thread(ctx->vo, create_ctx, ctx);
 
-    bool success = false;
-    if (ctx->requested_gl_version >= MPGL_VER(3, 0))
-        success = create_context_w32_gl3(ctx);
-    if (!success)
-        success = create_context_w32_old(ctx);
-    return success;
+    if (w32_ctx->context)
+        wglMakeCurrent(w32_ctx->hdc, w32_ctx->context);
+    return !!w32_ctx->context;
 }
 
-static void releaseGlContext_w32(MPGLContext *ctx)
+static void destroy_gl(void *ptr)
 {
+    struct MPGLContext *ctx = ptr;
     struct w32_context *w32_ctx = ctx->priv;
-    if (w32_ctx->context) {
-        wglMakeCurrent(w32_ctx->hdc, 0);
+    if (w32_ctx->context)
         wglDeleteContext(w32_ctx->context);
-    }
     w32_ctx->context = 0;
     if (w32_ctx->hdc)
         ReleaseDC(vo_w32_hwnd(ctx->vo), w32_ctx->hdc);
     w32_ctx->hdc = NULL;
+}
+
+static void releaseGlContext_w32(MPGLContext *ctx)
+{
+    struct MPGLContext *ctx = ptr;
+    struct w32_context *w32_ctx = ctx->priv;
+    if (w32_ctx->context)
+        wglMakeCurrent(w32_ctx->hdc, 0);
+    vo_w32_run_on_thread(ctx->vo, destroy_gl, ctx);
 }
 
 static void swapGlBuffers_w32(MPGLContext *ctx)
