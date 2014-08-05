@@ -64,6 +64,8 @@ typedef struct MPOpts {
     int lua_load_osc;
     int auto_load_scripts;
 
+    int app_style;
+
     struct m_obj_settings *audio_driver_list, *ao_defs;
     int fixed_vo;
     int force_vo;
