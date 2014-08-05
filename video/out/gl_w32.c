@@ -87,54 +87,44 @@ static void *w32gpa(const GLubyte *procName)
 static bool create_context_w32_old(struct MPGLContext *ctx)
 {
     struct w32_context *w32_ctx = ctx->priv;
-    HGLRC *context = &w32_ctx->context;
-
-    if (*context)
-        return true;
 
     HDC windc = w32_ctx->hdc;
     bool res = false;
 
-    HGLRC new_context = wglCreateContext(windc);
-    if (!new_context) {
+    HGLRC context = wglCreateContext(windc);
+    if (!context) {
         MP_FATAL(ctx->vo, "Could not create GL context!\n");
-        goto out;
+        return res;
     }
 
-    if (!wglMakeCurrent(windc, new_context)) {
+    if (!wglMakeCurrent(windc, context)) {
         MP_FATAL(ctx->vo, "Could not set GL context!\n");
-        wglDeleteContext(new_context);
-        goto out;
+        wglDeleteContext(context);
+        return res;
     }
 
-    *context = new_context;
+    w32_ctx->context = context;
 
     mpgl_load_functions(ctx->gl, w32gpa, NULL, ctx->vo->log);
-    res = true;
-
-out:
-    return res;
+    return true;
 }
 
 static bool create_context_w32_gl3(struct MPGLContext *ctx)
 {
     struct w32_context *w32_ctx = ctx->priv;
-    HGLRC *context = &w32_ctx->context;
-
-    if (*context) // reuse existing context
-        return true; // not reusing it breaks gl3!
 
     HDC windc = w32_ctx->hdc;
-    HGLRC new_context = 0;
+    HGLRC context = 0;
 
-    new_context = wglCreateContext(windc);
-    if (!new_context) {
+    // A legacy context is needed to get access to the new functions.
+    HGLRC legacy_context = wglCreateContext(windc);
+    if (!legacy_context) {
         MP_FATAL(ctx->vo, "Could not create GL context!\n");
         return false;
     }
 
     // set context
-    if (!wglMakeCurrent(windc, new_context)) {
+    if (!wglMakeCurrent(windc, legacy_context)) {
         MP_FATAL(ctx->vo, "Could not set GL context!\n");
         goto out;
     }
@@ -165,28 +155,30 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
         0
     };
 
-    *context = wglCreateContextAttribsARB(windc, 0, attribs);
-    if (! *context) {
+    context = wglCreateContextAttribsARB(windc, 0, attribs);
+    if (!context) {
         // NVidia, instead of ignoring WGL_CONTEXT_FLAGS_ARB, will error out if
         // it's present on pre-3.2 contexts.
         // Remove it from attribs and retry the context creation.
         attribs[6] = attribs[7] = 0;
-        *context = wglCreateContextAttribsARB(windc, 0, attribs);
+        context = wglCreateContextAttribsARB(windc, 0, attribs);
     }
-    if (! *context) {
+    if (!context) {
         int err = GetLastError();
         MP_FATAL(ctx->vo, "Could not create an OpenGL 3.x context: error 0x%x\n", err);
         goto out;
     }
 
-    wglMakeCurrent(NULL, NULL);
-    wglDeleteContext(new_context);
+    wglMakeCurrent(windc, NULL);
+    wglDeleteContext(legacy_context);
 
-    if (!wglMakeCurrent(windc, *context)) {
+    if (!wglMakeCurrent(windc, context)) {
         MP_FATAL(ctx->vo, "Could not set GL3 context!\n");
-        wglDeleteContext(*context);
+        wglDeleteContext(context);
         return false;
     }
+
+    w32_ctx->context = context;
 
     /* update function pointers */
     mpgl_load_functions(ctx->gl, w32gpa, NULL, ctx->vo->log);
@@ -196,14 +188,19 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
 unsupported:
     MP_ERR(ctx->vo, "The OpenGL driver does not support OpenGL 3.x \n");
 out:
-    wglDeleteContext(new_context);
+    wglMakeCurrent(windc, NULL);
+    wglDeleteContext(legacy_context);
     return false;
 }
 
 static bool config_window_w32(struct MPGLContext *ctx, int flags)
 {
+    struct w32_context *w32_ctx = ctx->priv;
     if (!vo_w32_config(ctx->vo, flags))
         return false;
+
+    if (w32_ctx->context) // reuse existing context
+        return true;
 
     if (!create_dc(ctx, flags))
         return false;
@@ -219,12 +216,11 @@ static bool config_window_w32(struct MPGLContext *ctx, int flags)
 static void releaseGlContext_w32(MPGLContext *ctx)
 {
     struct w32_context *w32_ctx = ctx->priv;
-    HGLRC *context = &w32_ctx->context;
-    if (*context) {
-        wglMakeCurrent(0, 0);
-        wglDeleteContext(*context);
+    if (w32_ctx->context) {
+        wglMakeCurrent(w32_ctx->hdc, 0);
+        wglDeleteContext(w32_ctx->context);
     }
-    *context = 0;
+    w32_ctx->context = 0;
     if (w32_ctx->hdc)
         ReleaseDC(vo_w32_hwnd(ctx->vo), w32_ctx->hdc);
     w32_ctx->hdc = NULL;
