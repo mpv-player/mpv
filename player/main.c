@@ -71,8 +71,9 @@
 #endif
 #endif
 
-#if HAVE_COCOA
+#if HAVE_COCOA_APPLICATION
 #include "osdep/macosx_application.h"
+#include "osdep/macosx_events.h"
 #endif
 
 #ifdef PTW32_STATIC_LIB
@@ -159,7 +160,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 {
     int rc;
 
-#if HAVE_COCOA
+#if HAVE_COCOA_APPLICATION
     cocoa_set_input_context(NULL);
 #endif
 
@@ -199,7 +200,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 
     mp_destroy(mpctx);
 
-#if HAVE_COCOA
+#if HAVE_COCOA_APPLICATION
     terminate_cocoa_application();
     // never reach here:
     // terminate calls exit itself, just silence compiler warning
@@ -420,7 +421,7 @@ int mp_initialize(struct MPContext *mpctx)
 
     mp_get_resume_defaults(mpctx);
 
-#if HAVE_COCOA
+#if HAVE_COCOA_APPLICATION
     if (mpctx->is_cplayer)
         cocoa_set_input_context(mpctx->input);
 #endif

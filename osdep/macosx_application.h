@@ -19,8 +19,6 @@
 #ifndef MPV_MACOSX_APPLICATION
 #define MPV_MACOSX_APPLICATION
 
-struct input_ctx;
-
 typedef int (*mpv_main_fn)(int, char**);
 
 // Menu Keys identifing menu items
@@ -45,8 +43,6 @@ void terminate_cocoa_application(void);
 void cocoa_run_runloop(void);
 void cocoa_stop_runloop(void);
 void cocoa_post_fake_event(void);
-
-void cocoa_set_input_context(struct input_ctx *input_context);
 
 void macosx_finder_args_preinit(int *argc, char ***argv);
 

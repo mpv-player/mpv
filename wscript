@@ -74,17 +74,6 @@ build_options = [
         'func': check_true,
         'default': 'disable',
     }, {
-        'name': '--macosx-bundle',
-        'desc': 'compilation of a Mac OS X Application bundle',
-        'deps': [ 'os-darwin' ],
-        'default': 'disable',
-        'func': check_true
-    }, {
-        'name': 'win32-executable',
-        'desc': 'w32 executable',
-        'deps_any': [ 'os-win32', 'os-cygwin'],
-        'func': check_ctx_vars('WINDRES')
-    }, {
         # does nothing - left for backward and forward compatibility
         'name': '--asm',
         'desc': 'inline assembly (currently without effect)',
@@ -737,6 +726,31 @@ scripting_features = [
     }
 ]
 
+standalone_features = [
+    {
+        'name': '--cplayer',
+        'desc': 'mpv CLI player',
+        'func': check_true
+    }, {
+        'name': 'win32-executable',
+        'desc': 'w32 executable',
+        'deps_any': [ 'os-win32', 'os-cygwin'],
+        'func': check_ctx_vars('WINDRES')
+    }, {
+        'name': 'cocoa-application',
+        'desc': 'standalone Cocoa application',
+        'deps': [ 'cocoa' ],
+        'deps_neg': [ 'libmpv-shared', 'libmpv-static' ],
+        'func': check_true
+    }, {
+        'name': '--macosx-bundle',
+        'desc': 'compilation of a Mac OS X Application bundle',
+        'deps': [ 'os-darwin' ],
+        'default': 'disable',
+        'func': check_true
+    }
+]
+
 _INSTALL_DIRS_LIST = [
     ('bindir',  '${PREFIX}/bin',      'binary files'),
     ('libdir',  '${PREFIX}/lib',      'library files'),
@@ -763,6 +777,10 @@ def options(opt):
             help    = 'directory for installing {0} [{1}]' \
                       .format(desc, default))
 
+    group.add_option('--variant',
+        default = 'default',
+        help    = 'waf variant for multiple configuration and targets')
+
     opt.parse_features('build and install options', build_options)
     optional_features = main_dependencies + libav_dependencies
     opt.parse_features('optional feaures',  optional_features)
@@ -771,6 +789,7 @@ def options(opt):
     opt.parse_features('hwaccels',          hwaccel_features)
     opt.parse_features('tv features',       radio_and_tv_features)
     opt.parse_features('scripting',         scripting_features)
+    opt.parse_features('standalone app',    standalone_features)
 
     group = opt.get_option_group("scripting")
     group.add_option('--lua',
@@ -787,6 +806,7 @@ def is_debug_build(ctx):
     return getattr(ctx.options, 'enable_debug-build')
 
 def configure(ctx):
+    ctx.setenv(ctx.options.variant)
     ctx.check_waf_version(mini='1.7.15')
     target = os.environ.get('TARGET')
     (cc, pkg_config, windres) = ('cc', 'pkg-config', 'windres')
@@ -829,6 +849,7 @@ def configure(ctx):
         ctx.options.enable_lua = True
 
     ctx.parse_dependencies(scripting_features)
+    ctx.parse_dependencies(standalone_features)
 
     ctx.define('HAVE_SYS_SOUNDCARD_H',
                '(HAVE_OSS_AUDIO_NATIVE || HAVE_OSS_AUDIO_4FRONT)',
@@ -846,5 +867,16 @@ def configure(ctx):
     ctx.store_dependencies_lists()
 
 def build(ctx):
+    if ctx.options.variant not in ctx.all_envs:
+        from waflib import Errors
+        raise Errors.WafError(
+            'The project was not configured: run "waf --variant={0} configure" first!'
+                .format(ctx.options.variant))
     ctx.unpack_dependencies_lists()
     ctx.load('wscript_build')
+
+def init(ctx):
+    from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext
+    for y in (BuildContext, CleanContext, InstallContext, UninstallContext):
+        class tmp(y):
+            variant = ctx.options.variant

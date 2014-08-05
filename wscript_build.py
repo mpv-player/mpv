@@ -382,7 +382,7 @@ def build(ctx):
         ( "osdep/threads.c" ),
 
         ( "osdep/ar/HIDRemote.m",                "cocoa" ),
-        ( "osdep/macosx_application.m",          "cocoa" ),
+        ( "osdep/macosx_application.m",          "cocoa-application" ),
         ( "osdep/macosx_events.m",               "cocoa" ),
         ( "osdep/path-macosx.m",                 "cocoa" ),
 
@@ -434,16 +434,18 @@ def build(ctx):
             install_name = '/mpv.app/Contents/Resources/' + res_basename
             ctx.install_as(ctx.env.BINDIR + install_name, resource)
 
-    ctx(
-        target       = "mpv",
-        source       = ctx.filtered_sources(sources) + ["player/main_fn.c"],
-        use          = ctx.dependencies_use(),
-        includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
-                       ctx.dependencies_includes(),
-        features     = "c cprogram",
-        install_path = ctx.env.BINDIR,
-        **cprog_kwargs
-    )
+
+    if ctx.dependency_satisfied('cplayer'):
+        ctx(
+            target       = "mpv",
+            source       = ctx.filtered_sources(sources) + ["player/main_fn.c"],
+            use          = ctx.dependencies_use(),
+            includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
+                           ctx.dependencies_includes(),
+            features     = "c cprogram",
+            install_path = ctx.env.BINDIR,
+            **cprog_kwargs
+        )
 
     build_shared = ctx.dependency_satisfied('libmpv-shared')
     build_static = ctx.dependency_satisfied('libmpv-static')
