@@ -950,7 +950,6 @@ static void vo_wayland_fullscreen (struct vo *vo)
     else {
         MP_DBG(wl, "leaving fullscreen\n");
         wl->window.is_fullscreen = false;
-        wl_shell_surface_set_toplevel(wl->window.shell_surface);
         window_set_toplevel(wl);
         schedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
     }
