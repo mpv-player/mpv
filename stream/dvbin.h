@@ -95,6 +95,7 @@ typedef struct dvb_params {
         char *cfg_prog;
         int cfg_card;
         int cfg_timeout;
+        char *cfg_file;
 } dvb_priv_t;
 
 
