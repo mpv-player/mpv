@@ -373,7 +373,7 @@ static bool read_packet(struct demux_internal *in)
             ds->eof = true;
             ds->active = false;
         }
-        // If we had EOF previously, then donn't wakeup (avoids wakeup loop)
+        // If we had EOF previously, then don't wakeup (avoids wakeup loop)
         if (!in->last_eof) {
             if (in->wakeup_cb)
                 in->wakeup_cb(in->wakeup_cb_ctx);
@@ -763,6 +763,8 @@ void demux_update(demuxer_t *demuxer)
     struct demux_internal *in = demuxer->in;
 
     pthread_mutex_lock(&in->lock);
+    if (!in->threading)
+        update_cache(in);
     demux_copy(demuxer, in->d_buffer);
     if (in->stream_metadata && (demuxer->events & DEMUX_EVENT_METADATA))
         mp_tags_merge(demuxer->metadata, in->stream_metadata);
@@ -1157,16 +1159,14 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
 {
     struct demux_internal *in = demuxer->in;
 
-    pthread_mutex_lock(&in->lock);
-    if (!in->threading)
-        update_cache(in);
-    pthread_cond_signal(&in->wakeup);
-    int cr = cached_demux_control(in, cmd, arg);
-    if (cr != DEMUXER_CTRL_DONTKNOW) {
+    if (in->threading) {
+        pthread_mutex_lock(&in->lock);
+        pthread_cond_signal(&in->wakeup);
+        int cr = cached_demux_control(in, cmd, arg);
         pthread_mutex_unlock(&in->lock);
-        return cr;
+        if (cr != DEMUXER_CTRL_DONTKNOW)
+            return cr;
     }
-    pthread_mutex_unlock(&in->lock);
 
     int r = DEMUXER_CTRL_NOTIMPL;
     demux_pause(demuxer);
