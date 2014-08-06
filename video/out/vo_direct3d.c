@@ -793,7 +793,7 @@ static bool resize_d3d(d3d_priv *priv)
             return 0;
     }
 
-    if (!priv->d3d_device)
+    if (!priv->d3d_device || !priv->image_format)
         return 1;
 
     if (!create_d3d_surfaces(priv))
