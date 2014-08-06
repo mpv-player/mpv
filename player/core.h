@@ -465,7 +465,6 @@ void run_playloop(struct MPContext *mpctx);
 void idle_loop(struct MPContext *mpctx);
 void handle_force_window(struct MPContext *mpctx, bool reconfig);
 void add_frame_pts(struct MPContext *mpctx, double pts);
-void finish_playback_restart(struct MPContext *mpctx);
 
 // scripting.c
 struct mp_scripting {
