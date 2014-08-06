@@ -114,7 +114,8 @@ void MainWindow::on_file_open()
 {
     QString filename = QFileDialog::getOpenFileName(this, "Open file");
     if (mpv) {
-        const char *args[] = {"loadfile", filename.toUtf8().data(), NULL};
+        const QByteArray c_filename = filename.toUtf8();
+        const char *args[] = {"loadfile", c_filename.data(), NULL};
         mpv_command_async(mpv, 0, args);
     }
 }
