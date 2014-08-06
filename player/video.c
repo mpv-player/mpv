@@ -127,6 +127,8 @@ static void filter_reconfig(struct MPContext *mpctx,
 
     struct mp_image_params params = d_video->decoder_output;
 
+    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
+
     set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
 
     if (video_reconfig_filters(d_video, &params) < 0) {
