@@ -54,6 +54,8 @@ static int lookupkey(int key);
 
 static void hide_cursor(struct vo_wayland_state * wl);
 static void show_cursor(struct vo_wayland_state * wl);
+static void window_move(struct vo_wayland_state * wl, uint32_t serial);
+static void window_set_title(struct vo_wayland_state * wl, const char *title);
 static void schedule_resize(struct vo_wayland_state *wl,
                             uint32_t edges,
                             int32_t width,
@@ -359,7 +361,7 @@ static void pointer_handle_button(void *data,
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->window.mouse_x, wl->window.mouse_y) &&
         (button == BTN_LEFT) && (state == WL_POINTER_BUTTON_STATE_PRESSED))
-        wl_shell_surface_move(wl->window.shell_surface, wl->input.seat, serial);
+        window_move(wl, serial);
 }
 
 static void pointer_handle_axis(void *data,
@@ -638,6 +640,24 @@ static void show_cursor (struct vo_wayland_state *wl)
     wl_surface_commit(wl->cursor.surface);
 }
 
+static void window_move(struct vo_wayland_state *wl, uint32_t serial)
+{
+    if (wl->display.shell)
+        wl_shell_surface_move(wl->window.shell_surface, wl->input.seat, serial);
+}
+
+static void window_set_toplevel(struct vo_wayland_state *wl)
+{
+    if (wl->display.shell)
+        wl_shell_surface_set_toplevel(wl->window.shell_surface);
+}
+
+static void window_set_title(struct vo_wayland_state *wl, const char *title)
+{
+    if (wl->display.shell)
+        wl_shell_surface_set_title(wl->window.shell_surface, title);
+}
+
 static void schedule_resize(struct vo_wayland_state *wl,
                             uint32_t edges,
                             int32_t width,
@@ -763,19 +783,22 @@ static bool create_window (struct vo_wayland_state *wl)
 {
     wl->window.video_surface =
         wl_compositor_create_surface(wl->display.compositor);
-    wl->window.shell_surface =
-        wl_shell_get_shell_surface(wl->display.shell, wl->window.video_surface);
 
-    if (!wl->window.shell_surface) {
-        MP_ERR(wl, "creating shell surface failed\n");
-        return false;
+    if (wl->display.shell) {
+        wl->window.shell_surface = wl_shell_get_shell_surface(wl->display.shell,
+                                                              wl->window.video_surface);
+
+        if (!wl->window.shell_surface) {
+            MP_ERR(wl, "creating shell surface failed\n");
+            return false;
+        }
+
+        wl_shell_surface_add_listener(wl->window.shell_surface,
+                                      &shell_surface_listener, wl);
+
+        wl_shell_surface_set_toplevel(wl->window.shell_surface);
+        wl_shell_surface_set_class(wl->window.shell_surface, "mpv");
     }
-
-    wl_shell_surface_add_listener(wl->window.shell_surface,
-                                  &shell_surface_listener, wl);
-
-    wl_shell_surface_set_toplevel(wl->window.shell_surface);
-    wl_shell_surface_set_class(wl->window.shell_surface, "mpv");
 
     return true;
 }
@@ -796,15 +819,21 @@ static bool create_cursor (struct vo_wayland_state *wl)
         return false;
     }
 
-    wl->cursor.surface =
-        wl_compositor_create_surface(wl->display.compositor);
+    if (wl->cursor.pointer) {
+        // only create cursor surface if a pointer interface is available
+        // without this check it leads to problems with compositor which don't
+        // have pointer interfaces
+        wl->cursor.surface =
+            wl_compositor_create_surface(wl->display.compositor);
 
-    if (!wl->cursor.surface)
-        return false;
+        if (!wl->cursor.surface)
+            return false;
 
-    wl->cursor.theme = wl_cursor_theme_load(NULL, 32, wl->display.shm);
-    wl->cursor.default_cursor = wl_cursor_theme_get_cursor(wl->cursor.theme,
-                                                           "left_ptr");
+        wl->cursor.theme = wl_cursor_theme_load(NULL, 32, wl->display.shm);
+        wl->cursor.default_cursor = wl_cursor_theme_get_cursor(wl->cursor.theme,
+                                                               "left_ptr");
+    }
+
     return true;
 }
 
@@ -896,7 +925,7 @@ static void vo_wayland_ontop (struct vo *vo)
     struct vo_wayland_state *wl = vo->wayland;
     MP_DBG(wl, "going ontop\n");
     vo->opts->ontop = 1;
-    wl_shell_surface_set_toplevel(wl->window.shell_surface);
+    window_set_toplevel(wl);
     schedule_resize(wl, 0, wl->window.width, wl->window.height);
 }
 
@@ -922,6 +951,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
         MP_DBG(wl, "leaving fullscreen\n");
         wl->window.is_fullscreen = false;
         wl_shell_surface_set_toplevel(wl->window.shell_surface);
+        window_set_toplevel(wl);
         schedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
     }
 }
@@ -1112,7 +1142,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
         wl->cursor.visible = *(bool *)arg;
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
-        wl_shell_surface_set_title(wl->window.shell_surface, (char *) arg);
+        window_set_title(wl, (char*) arg);
         return VO_TRUE;
     }
     return VO_NOTIMPL;
