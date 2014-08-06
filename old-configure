@@ -946,6 +946,7 @@ cat > $TMPC << EOF
 #define HAVE_VDA_GL 0
 #define HAVE_GL_COCOA 0
 #define HAVE_COCOA 0
+#define HAVE_COCOA_APPLICATION 0
 #define HAVE_COREVIDEO 0
 #define HAVE_COREAUDIO 0
 #define HAVE_GL_WIN32 0
