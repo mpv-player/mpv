@@ -113,6 +113,8 @@ struct demux_internal {
     int min_packs;
     int min_bytes;
 
+    bool tracks_switched;       // thread needs to inform demuxer of this
+
     bool seeking;               // there's a seek queued
     int seek_flags;             // flags for next seek (if seeking==true)
     double seek_pts;
@@ -404,6 +406,18 @@ static void ds_get_packets(struct demux_stream *ds)
     }
 }
 
+static void execute_trackswitch(struct demux_internal *in)
+{
+    in->tracks_switched = false;
+
+    pthread_mutex_unlock(&in->lock);
+
+    if (in->d_thread->desc->control)
+        in->d_thread->desc->control(in->d_thread, DEMUXER_CTRL_SWITCHED_TRACKS, 0);
+
+    pthread_mutex_lock(&in->lock);
+}
+
 static void execute_seek(struct demux_internal *in)
 {
     int flags = in->seek_flags;
@@ -427,6 +441,10 @@ static void *demux_thread(void *pctx)
         if (in->thread_paused) {
             pthread_cond_signal(&in->wakeup);
             pthread_cond_wait(&in->wakeup, &in->lock);
+            continue;
+        }
+        if (in->tracks_switched) {
+            execute_trackswitch(in);
             continue;
         }
         if (in->seeking) {
@@ -1128,6 +1146,9 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         c->res = r;
         return DEMUXER_CTRL_OK;
     }
+    case DEMUXER_CTRL_SWITCHED_TRACKS:
+        in->tracks_switched = true;
+        return DEMUXER_CTRL_OK;
     }
     return DEMUXER_CTRL_DONTKNOW;
 }
