@@ -750,7 +750,6 @@ dvb_config_t *dvb_get_config(stream_t *stream)
                 }
 
         void *talloc_ctx = talloc_new(NULL);
-        conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf");
         switch(type) {
             case TUNER_TER:
                 conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf.ter");
@@ -765,9 +764,11 @@ dvb_config_t *dvb_get_config(stream_t *stream)
                 conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf.atsc");
                 break;
         }
-
-        if(conf_file && (access(conf_file, F_OK | R_OK) != 0))
+        if (conf_file) {
+            mp_verbose(log, "Ignoring other channels.conf files.\n");
+        } else {
             conf_file = mp_find_config_file(talloc_ctx, global, "channels.conf");
+        }
 
         list = dvb_get_channels(log, conf_file, type);
         talloc_free(talloc_ctx);
