@@ -490,12 +490,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 
     audio_eof &= partial_fill;
 
-    if (audio_eof) {
-        // With gapless audio, delay this to ao_uninit. There must be only
-        // 1 final chunk, and that is handled when calling ao_uninit().
-        if (opts->gapless_audio)
-            playflags |= AOPLAY_FINAL_CHUNK;
-    }
+    // With gapless audio, delay this to ao_uninit. There must be only
+    // 1 final chunk, and that is handled when calling ao_uninit().
+    if (audio_eof && !opts->gapless_audio)
+        playflags |= AOPLAY_FINAL_CHUNK;
 
     if (mpctx->paused)
         playsize = 0;
