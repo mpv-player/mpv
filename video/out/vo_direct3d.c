@@ -772,7 +772,8 @@ static bool resize_d3d(d3d_priv *priv)
 {
     D3DVIEWPORT9 vp = {0, 0, priv->vo->dwidth, priv->vo->dheight, 0, 1};
 
-    MP_VERBOSE(priv, "resize_d3d called.\n");
+    MP_VERBOSE(priv, "resize_d3d %dx%d called.\n",
+               priv->vo->dwidth, priv->vo->dheight);
 
     /* Make sure that backbuffer is large enough to accomodate the new
        viewport dimensions. Grow it if necessary. */

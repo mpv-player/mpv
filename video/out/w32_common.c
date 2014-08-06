@@ -515,6 +515,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 {
     assert(w32_thread_context);
     struct vo_w32_state *w32 = w32_thread_context;
+    if (!w32->window)
+        w32->window = hWnd; // can happen during CreateWindow*!
+    assert(w32->window == hWnd);
     int mouse_button = 0;
 
     switch (message) {
@@ -522,7 +525,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         // This message is used to wakeup the GUI thread, see wakeup_gui_thread.
         mp_dispatch_queue_process(w32->dispatch, 0);
         break;
-    case WM_ERASEBKGND: // no need to erase background seperately
+    case WM_ERASEBKGND: // no need to erase background separately
         return 1;
     case WM_PAINT:
         signal_events(w32, VO_EVENT_EXPOSE);
