@@ -16,7 +16,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "video/out/cocoa/mpvadapter.h"
+
+@class MpvCocoaAdapter;
 
 @interface MpvVideoWindow : NSWindow <NSWindowDelegate>
 @property(nonatomic, retain) MpvCocoaAdapter *adapter;

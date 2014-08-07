@@ -20,6 +20,7 @@
  */
 
 #include <OpenGL/OpenGL.h>
+#include "cocoa/adapter.h"
 #include "cocoa_common.h"
 #include "osdep/macosx_versions.h"
 #include "gl_common.h"

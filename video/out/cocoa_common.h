@@ -1,4 +1,6 @@
 /*
+ * Cocoa OpenGL common backend bits
+ *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or modify
@@ -15,20 +17,14 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#import <Cocoa/Cocoa.h>
-#include "video/out/vo.h"
+#ifndef MPLAYER_COCOA_COMMON_H
+#define MPLAYER_COCOA_COMMON_H
 
-@interface MpvCocoaAdapter : NSObject
-- (void)setNeedsResize;
-- (void)signalMouseMovement:(NSPoint)point;
-- (void)putKey:(int)mpkey withModifiers:(int)modifiers;
-- (void)putAxis:(int)mpkey delta:(float)delta;
-- (void)putCommand:(char*)cmd;
-- (void)performAsyncResize:(NSSize)size;
-- (void)handleFilesArray:(NSArray *)files;
-- (void)didChangeWindowedScreenProfile:(NSScreen *)screen;
+struct vo;
 
-- (BOOL)isInFullScreenMode;
-- (NSScreen *)fsScreen;
-@property(nonatomic, assign) struct vo *vout;
-@end
+void *vo_cocoa_glgetaddr(const char *s);
+
+void *vo_cocoa_cgl_context(struct vo *vo);
+void *vo_cocoa_cgl_pixel_format(struct vo *vo);
+
+#endif

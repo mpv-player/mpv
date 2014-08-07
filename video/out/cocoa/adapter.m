@@ -1,6 +1,4 @@
 /*
- * Cocoa OpenGL Backend
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or modify
@@ -20,12 +18,10 @@
 #import <Cocoa/Cocoa.h>
 #import <CoreServices/CoreServices.h> // for CGDisplayHideCursor
 #import <IOKit/pwr_mgt/IOPMLib.h>
-#include <dlfcn.h>
 
-#include "cocoa_common.h"
-#include "video/out/cocoa/window.h"
-#include "video/out/cocoa/view.h"
-#import "video/out/cocoa/mpvadapter.h"
+#import "adapter.h"
+#import "window.h"
+#import "view.h"
 
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_events_objc.h"
@@ -39,7 +35,7 @@
 
 #include "options/options.h"
 #include "video/out/vo.h"
-#include "win_state.h"
+#include "video/out/win_state.h"
 
 #include "input/input.h"
 #include "talloc.h"
@@ -98,19 +94,6 @@ static void dispatch_on_main_thread(struct vo *vo, void(^block)(void))
     } else {
         block();
     }
-}
-
-void *vo_cocoa_glgetaddr(const char *s)
-{
-    void *ret = NULL;
-    void *handle = dlopen(
-        "/System/Library/Frameworks/OpenGL.framework/OpenGL",
-        RTLD_LAZY | RTLD_LOCAL);
-    if (!handle)
-        return NULL;
-    ret = dlsym(handle, s);
-    dlclose(handle);
-    return ret;
 }
 
 static void enable_power_management(struct vo *vo)
@@ -411,6 +394,12 @@ void vo_cocoa_release_nsgl_ctx(struct vo *vo)
     s->gl_ctx = nil;
 }
 
+void *vo_cocoa_get_nsgl_ctx(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    return s->gl_ctx;
+}
+
 int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -689,17 +678,6 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     return VO_NOTIMPL;
-}
-
-void *vo_cocoa_cgl_context(struct vo *vo)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    return [s->gl_ctx CGLContextObj];
-}
-
-void *vo_cocoa_cgl_pixel_format(struct vo *vo)
-{
-    return CGLGetPixelFormat(vo_cocoa_cgl_context(vo));
 }
 
 @implementation MpvCocoaAdapter

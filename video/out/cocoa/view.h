@@ -16,7 +16,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "video/out/cocoa/mpvadapter.h"
+
+@class MpvCocoaAdapter;
 
 @interface MpvVideoView : NSView <NSDraggingDestination> {
     BOOL hasMouseDown;
