@@ -776,7 +776,8 @@ void write_video(struct MPContext *mpctx, double endpts)
     if (!mpctx->sync_audio_to_video || mpctx->video_status < STATUS_READY) {
         mpctx->time_frame = 0;
     } else if (mpctx->audio_status == STATUS_PLAYING &&
-               mpctx->video_status == STATUS_PLAYING)
+               mpctx->video_status == STATUS_PLAYING &&
+               !ao_untimed(mpctx->ao))
     {
         double buffered_audio = ao_get_delay(mpctx->ao);
         MP_TRACE(mpctx, "audio delay=%f\n", buffered_audio);
