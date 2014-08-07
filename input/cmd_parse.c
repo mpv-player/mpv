@@ -306,7 +306,7 @@ struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
     bstr args[MP_CMD_MAX_ARGS];
     int num = 0;
     for (; argv[num]; num++) {
-        if (num > MP_CMD_MAX_ARGS) {
+        if (num >= MP_CMD_MAX_ARGS) {
             mp_err(log, "%s: too many arguments.\n", location);
             return NULL;
         }
