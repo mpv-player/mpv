@@ -403,7 +403,7 @@ static int init(struct ao *ao)
     ao->samplerate = rate;
     ao->format = format;
     ao->bps = ao->channels.num * rate * af_fmt2bps(format);
-    int buffersize = ao->bps; // space for 1 sec
+    int buffersize = ao->bps * 0.100; // space for 100ms
     MP_VERBOSE(ao, "Samplerate:%iHz Channels:%i Format:%s\n", rate,
                ao->channels.num, af_fmt_to_str(format));
     MP_VERBOSE(ao, "Buffersize:%d bytes (%d msec)\n",
