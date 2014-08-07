@@ -830,6 +830,12 @@ Property list
     or enter idle mode), and in these cases the ``eof-reached`` property will
     logically be cleared immediately after it's set.
 
+``seeking``
+    Returns ``yes`` if the player is currently seeking, or otherwise trying
+    to restart playback. (It's possible that it returns ``yes`` while a file
+    is loaded, or when switching ordered chapter segments. This is because
+    the same underlying code is used for seeking and resyncing.)
+
 ``pts-association-mode`` (RW)
     See ``--pts-association-mode``.
 

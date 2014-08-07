@@ -1084,6 +1084,13 @@ static int mp_property_eof_reached(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, eof);
 }
 
+static int mp_property_seeking(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_flag_ro(action, arg, !mpctx->restart_complete);
+}
+
 static int mp_property_cache(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -2695,6 +2702,7 @@ static const struct m_property mp_properties[] = {
     {"pause", mp_property_pause},
     {"core-idle", mp_property_core_idle},
     {"eof-reached", mp_property_eof_reached},
+    {"seeking", mp_property_seeking},
     {"cache", mp_property_cache},
     {"cache-free", mp_property_cache_free},
     {"cache-used", mp_property_cache_used},
@@ -2828,6 +2836,8 @@ static const char *const *const mp_event_property_change[] = {
       "width", "height", "fps", "aspect"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio"),
+    E(MPV_EVENT_SEEK, "seeking"),
+    E(MPV_EVENT_PLAYBACK_RESTART, "seeking"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata"),
     E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
     E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle"),
