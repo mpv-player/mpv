@@ -479,6 +479,13 @@ def build(ctx):
         if build_static:
             _build_libmpv(False)
 
+        def get_deps():
+            res = ""
+            for k in ctx.env.keys():
+                if k.startswith("LIB_") and k != "LIB_ST":
+                    res += " ".join(["-l" + x for x in ctx.env[k]]) + " "
+            return res
+
         ctx(
             target       = 'libmpv/mpv.pc',
             source       = 'libmpv/mpv.pc.in',
@@ -487,6 +494,7 @@ def build(ctx):
             LIBDIR       = ctx.env.LIBDIR,
             INCDIR       = ctx.env.INCDIR,
             VERSION      = libversion,
+            PRIV_LIBS    = get_deps(),
         )
 
         headers = ["client.h"]
