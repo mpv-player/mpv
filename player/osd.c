@@ -168,7 +168,9 @@ void print_status(struct MPContext *mpctx)
     char *line = NULL;
 
     // Playback status
-    if (mpctx->paused_for_cache && !opts->pause) {
+    if (!mpctx->restart_complete && mp_time_sec() - mpctx->start_timestamp > 0.3) {
+        saddf(&line, "(...) ");
+    } else if (mpctx->paused_for_cache && !opts->pause) {
         saddf(&line, "(Buffering) ");
     } else if (mpctx->paused) {
         saddf(&line, "(Paused) ");
