@@ -430,12 +430,12 @@ Video
     Do not sleep when outputting video frames. Useful for benchmarks when used
     with ``--no-audio.``
 
-``--framedrop=<no|yes|hard>``
+``--framedrop=<no|yes>``
     Skip displaying some frames to maintain A/V sync on slow systems. Video
     filters are not applied to such frames. For B-frames even decoding is
-    skipped completely. May produce unwatchably choppy output. With ``hard``,
-    decoding and output of any frame can be skipped, and will lead to an even
-    worse playback experience.
+    skipped completely. May produce unwatchably choppy output.
+
+    The ``--vd-lavc-framedrop`` option controls what frames to drop.
 
     .. note::
 
@@ -704,6 +704,10 @@ Video
 ``--vd-lavc-skipframe=<skipvalue>``
     Skips decoding of frames completely. Big speedup, but jerky motion and
     sometimes bad artifacts (see skiploopfilter for available skip values).
+
+``--vd-lavc-framedrop=<skipvalue>``
+    Set framedropping mode used with ``--framedrop`` (see skiploopfilter for
+    available skip values).
 
 ``--vd-lavc-threads=<0-16>``
     Number of threads to use for decoding. Whether threading is actually

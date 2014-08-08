@@ -377,7 +377,7 @@ static int decode_image(struct MPContext *mpctx)
     }
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
     int framedrop_type = hrseek && mpctx->hrseek_framedrop ?
-                         1 : check_framedrop(mpctx, -1);
+                         2 : check_framedrop(mpctx, -1);
     d_video->waiting_decoded_mpi =
         video_decode(d_video, pkt, framedrop_type);
     bool had_packet = !!pkt;

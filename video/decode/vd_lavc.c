@@ -75,6 +75,7 @@ struct vd_lavc_params {
     int skip_loop_filter;
     int skip_idct;
     int skip_frame;
+    int framedrop;
     int threads;
     int bitexact;
     int check_hw_profile;
@@ -101,6 +102,7 @@ const struct m_sub_options vd_lavc_conf = {
         OPT_DISCARD("skiploopfilter", skip_loop_filter, 0),
         OPT_DISCARD("skipidct", skip_idct, 0),
         OPT_DISCARD("skipframe", skip_frame, 0),
+        OPT_DISCARD("framedrop", framedrop, 0),
         OPT_INTRANGE("threads", threads, 0, 0, 16),
         OPT_FLAG("bitexact", bitexact, 0),
         OPT_FLAG("check-hw-profile", check_hw_profile, 0),
@@ -114,6 +116,7 @@ const struct m_sub_options vd_lavc_conf = {
         .skip_loop_filter = AVDISCARD_DEFAULT,
         .skip_idct = AVDISCARD_DEFAULT,
         .skip_frame = AVDISCARD_DEFAULT,
+        .framedrop = AVDISCARD_NONREF,
     },
 };
 
@@ -592,14 +595,16 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     int ret;
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
+    struct vd_lavc_params *lavc_param = ctx->opts->vd_lavc_params;
     AVPacket pkt;
 
-    if (flags & 2)
-        avctx->skip_frame = AVDISCARD_ALL;
-    else if (flags & 1)
-        avctx->skip_frame = AVDISCARD_NONREF;
-    else
+    if (flags) {
+        // hr-seek framedrop vs. normal framedrop
+        avctx->skip_frame = flags == 2 ? AVDISCARD_NONREF : lavc_param->framedrop;
+    } else {
+        // normal playback
         avctx->skip_frame = ctx->skip_frame;
+    }
 
     mp_set_av_packet(&pkt, packet, NULL);
 
