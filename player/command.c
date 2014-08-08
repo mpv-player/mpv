@@ -3023,12 +3023,8 @@ static const struct property_osd_display {
 static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct m_option prop = {0};
     const struct property_osd_display *p;
     const char *name = pname;
-
-    if (mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0)
-        return;
 
     int osd_progbar = 0;
     const char *osd_name = NULL;
@@ -3074,6 +3070,8 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
     if (!msg && osd_name)
         msg = talloc_asprintf(tmp, "%s: ${%s}", osd_name, name);
 
+    struct m_option prop = {0};
+    mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx);
     if (osd_progbar && (prop.flags & CONF_RANGE) == CONF_RANGE) {
         bool ok = false;
         if (prop.type == CONF_TYPE_INT) {
