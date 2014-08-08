@@ -47,9 +47,6 @@ UP and DOWN
     Seek forward/backward 1 minute. Shift+arrow does a 5 second exact seek (see
     ``--hr-seek``).
 
-PGUP and PGDWN
-    Seek forward/backward 10 minutes.
-
 [ and ]
     Decrease/increase current playback speed by 10%.
 
@@ -83,20 +80,11 @@ Q
     Like ``q``, but store the current playback position. Playing the same file
     later will resume at the old playback position if possible.
 
-U
-    Stop playing (and quit if ``--idle`` is not used).
-
-\+ and -
-    Adjust audio delay by +/- 0.1 seconds.
-
 / and *
     Decrease/increase volume.
 
 9 and 0
     Decrease/increase volume.
-
-( and )
-    Adjust audio balance in favor of left/right channel.
 
 m
     Mute sound.
@@ -107,9 +95,6 @@ m
 \#
     Cycle through the available audio tracks.
 
-TAB (MPEG-TS and libavformat only)
-    Cycle through the available programs.
-
 f
     Toggle fullscreen (see also ``--fs``).
 
@@ -119,7 +104,10 @@ T
 w and e
     Decrease/increase pan-and-scan range.
 
-o
+o (also P)
+    Show progression bar, elapsed time and total duration on the OSD.
+
+O
     Toggle OSD states: none / seek / seek + timer / seek + timer + total time.
 
 d
@@ -131,9 +119,6 @@ v
 
 j and J
     Cycle through the available subtitles.
-
-F
-    Toggle displaying "forced subtitles".
 
 x and z
     Adjust subtitle delay by +/- 0.1 seconds.
@@ -155,22 +140,13 @@ S
 I
     Show filename on the OSD.
 
-P
-    Show progression bar, elapsed time and total duration on the OSD.
-
-! and @
+PGUP and PGDWN
     Seek to the beginning of the previous/next chapter. In most cases,
     "previous" will actually go to the beginning of the current chapter; see
     ``--chapter-seek-threshold``.
 
-D (``--vo=vdpau``, ``--vf=yadif`` only)
+D
     Activate/deactivate deinterlacer.
-
-A
-    Cycle through the available DVD angles.
-
-c
-    Change YUV colorspace.
 
 (The following keys are valid only when using a video output that supports the
 corresponding adjustment, or the software equalizer (``--vf=eq``).)
@@ -222,12 +198,6 @@ support.)
 
 h and k
     Select previous/next channel.
-
-n
-    Change norm.
-
-u
-    Change channel list.
 
 Mouse Control
 -------------
