@@ -509,8 +509,10 @@ static void handle_osd_redraw(struct MPContext *mpctx)
         return;
     // If we're playing normally, let OSD be redrawn naturally as part of
     // video display.
-    if (mpctx->sleeptime < 0.1 && mpctx->video_status == STATUS_PLAYING)
-        return;
+    if (!mpctx->paused) {
+        if (mpctx->sleeptime < 0.1 && mpctx->video_status == STATUS_PLAYING)
+            return;
+    }
     // Don't redraw immediately during a seek (makes it significantly slower).
     if (mp_time_sec() - mpctx->start_timestamp < 0.1)
         return;
