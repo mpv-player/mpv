@@ -825,7 +825,7 @@ static int preinit(struct vo *vo)
     vc->reinit_renderer = true;
 
     // we don't have proper event handling
-    vo->wakeup_period = 0.02;
+    vo->wakeup_period = 0.2;
 
     return 0;
 }
