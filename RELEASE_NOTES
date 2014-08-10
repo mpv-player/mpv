@@ -1,0 +1,83 @@
+Release 0.5.0
+=============
+
+Changes
+-------
+
+- Support setting the start time relative to the start PTS with --start.
+- Use /dev/sr0 as default cdrom/dvd device on Linux.
+- Change "cache" property representation to float.
+- Split the ao_coreaudio audio output into ao_coreaudio (which uses the
+  AudioUnits and the CoreAudio sound server) and ao_coreaudio_device (which uses
+  direct device access).
+- Complete supported URL schemes in the zsh completion script.
+- Enable compiler optimizations (-O2) during build.
+- Allow precise seeking with percent-based seeks too.
+- Do precise seeks when clicking on the OSC seekbar.
+- Remove support for older VDA hwaccel versions on Mac OS X (requires recent
+  versions of ffmpeg/libav).
+- Remove the last remains of slave mode (--slave-broken option). Support for
+  reading input commands from stdin can be emulated using: --input-terminal=no
+  --input-file=/dev/stdin.
+- Some key binding were remapped or removed:
+  + "LEFT" and "RIGHT" have been remapped to seek 5 seconds instead of 10.
+  + "c" for changing the YUV color space was unmapped.
+  + OSD level cycling has been remapped from "o" to "O".
+  + "o" is now mapped to the show_progress command (like "P").
+  + "PGUP" and "PGDWN" have been remapped to chapter-based seeks (the old
+    bindings "@" and "!" are still available). The old behvaiour has been
+    remapped to "Shift+PGUP" and "Shift+PGDWM".
+  + Increasing/decreasing audio delay have been remapped from "+" and "-" to
+    "Ctrl++" and "Ctrl+-".
+  + "(" and ")" for adjusting audio balance have been unmapped.
+  + "F" for toggling the "sub-forced-only" option has been unmapped.
+  + "TAB" for cycling TS programs has been unmapped.
+  + "A" for cycling DVD angle has been unmapped.
+  + "U" for stopping playback has been unmapped.
+  + "l" and "L" for cycling quvi format have been unmapped.
+- Make it possible to build the client API (libmpv) on Mac OS X.
+- Do necessary checks for nested Wayland compositors which only have limited
+  interfaces.
+- The options in the manpage have been re-organized into sections and ordered by
+  usage to make it easier to navigate.
+- The "hard" framedrop mode has been removed (this behaviour is still available
+  via the --vd-lavc-framedrop option).
+- Show the basename of a subtitle file only (without the directory part).
+
+Bug fixes
+---------
+
+- Use a default color space for files with no video (this fixes color managed
+  OSD messages when no video channel is present).
+- Fix key equivalent dispatching for Cocoa on Mac OS X.
+- Disable non-interleaved audio formats by default with ao_alsa, since some
+  ALSA plugins don't cope well with them (non-interleaved formats can still be
+  enabled using the "non-interleaved" ao_alsa option).
+- Fix deadlock in the client API when calling mpv_terminate_destroy() before
+  mpv_initialize().
+- Fix flushing of filter chain (this fixes a bug where the last frames would get
+  dropped on EOF, if buffered by filters).
+- Actually use the channels.conf configuration file for DVB.
+- Restore the --dvbin-file option.
+- Fix off by one error in the command parser which caused a segfault when using
+  the mp.commandv() Lua function with 10 or more arguments.
+
+New features
+------------
+
+- Search for config files in $XDG_CONFIG_HOME and $XDG_CONFIG_DIRS in addition
+  to ~/.mpv. The config file has also been renamed to mpv.conf (although the
+  old file still works and will be loaded even if the new one exists).
+- Add "playback-time" property that returns the current playback time always
+  starting at 0. This is now used to show the playback time in the OSD and the
+  status line, fixing the shown playback time for transport streams that start
+  at a completely random timestamp.
+- Add cache-related "cache-free", "cache-used" and "cache-idle" properties.
+- Add option to list supported protocols (--list-protocols).
+- Allow setting libavformat stream options with the --stream-lavf-o option.
+- Support running the demuxer in a separate thread and prefetch packets (this
+  can be enabled using the --demuxer-thread option).
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log cb250d4..52f2f67`` in
+the git repository.
