@@ -4,6 +4,7 @@ INPUT.CONF
 The input.conf file consists of a list of key bindings, for example::
 
     s screenshot      # take a screenshot with the s key
+    LEFT seek 15      # map the left-arrow key to seeking forward by 15 seconds
 
 Each line maps a key to an input command. Keys are specified with their literal
 value (upper case if combined with ``Shift``), or a name for special keys. For
