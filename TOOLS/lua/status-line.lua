@@ -1,4 +1,4 @@
--- Rebuild the status line as a lua script
+-- Rebuild the terminal status line as a lua script
 -- Be aware that this will require more cpu power!
 
 -- Add a string to the status line
