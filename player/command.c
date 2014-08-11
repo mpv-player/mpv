@@ -3894,7 +3894,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         *event = (mpv_event_client_message){0};
         for (int n = 1; n < cmd->nargs; n++) {
             MP_TARRAY_APPEND(event, event->args, event->num_args,
-                             cmd->args[n].v.s);
+                             talloc_strdup(event, cmd->args[n].v.s));
         }
         if (mp_client_send_event(mpctx, cmd->args[0].v.s,
                                  MPV_EVENT_CLIENT_MESSAGE, event) < 0)
