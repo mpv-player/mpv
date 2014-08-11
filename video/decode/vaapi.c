@@ -129,7 +129,7 @@ static int find_entrypoint(int format, VAEntrypoint *ep, int num_ep)
 
 static int is_direct_mapping(VADisplay display)
 {
-    VADisplayAttribute attr;
+    VADisplayAttribute attr = {0};
     VAStatus status;
 
 #if VA_CHECK_VERSION(0,34,0)
