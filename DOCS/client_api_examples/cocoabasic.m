@@ -11,8 +11,11 @@
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 {
     mpv_handle *mpv;
+    dispatch_queue_t queue;
 }
 @end
+
+static void wakeup(void *);
 
 @implementation AppDelegate
 
@@ -25,49 +28,78 @@
     }
     NSString *filename = args[1];
 
-    // Run MPV loop on its own queue
-    dispatch_async(dispatch_queue_create("mpv", DISPATCH_QUEUE_SERIAL), ^{
+    // Deal with MPV in the background.
+    queue = dispatch_queue_create("mpv", DISPATCH_QUEUE_SERIAL);
+    dispatch_async(queue, ^{
 
-        // Set up MPV
         mpv = mpv_create();
         if (!mpv) {
             printf("failed creating context\n");
             exit(1);
         }
+
+        // Maybe set some options here, like default key bindings.
+        // NOTE: Interaction with the window seems to be broken for now.
+        check_error(mpv_set_option_string(mpv, "input-default-bindings", "yes"));
+
         check_error(mpv_initialize(mpv));
 
+        // Register to be woken up whenever mpv generates new events.
+        mpv_set_wakeup_callback(mpv, wakeup, (__bridge void *) self);
+
+        // Load the indicated file
         const char *cmd[] = {"loadfile", filename.UTF8String, NULL};
         check_error(mpv_command(mpv, cmd));
-
-        // Listen for events
-        mpv_event *event;
-        do {
-            event = mpv_wait_event(mpv, -1);
-            switch (event->event_id) {
-                case MPV_EVENT_NONE:
-                    break;
-                default:
-                    printf("event: %s\n", mpv_event_name(event->event_id));
-            }
-        } while (event->event_id != MPV_EVENT_SHUTDOWN);
-
-        // Clean up and shut down
-        mpv_terminate_destroy(mpv);
-        mpv = nil;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSApplication sharedApplication] terminate:nil];
-        });
     });
+}
+
+- (void) handleEvent:(mpv_event *)event
+{
+    switch (event->event_id) {
+        case MPV_EVENT_SHUTDOWN:
+            // Clean up and shut down.
+            mpv_terminate_destroy(mpv);
+            mpv = NULL;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSApplication sharedApplication] terminate:nil];
+            });
+            break;
+
+        default:
+            printf("event: %s\n", mpv_event_name(event->event_id));
+    }
+}
+
+- (void) readEvents
+{
+    dispatch_async(queue, ^{
+        while (mpv) {
+            mpv_event *event = mpv_wait_event(mpv, 0);
+            if (event->event_id == MPV_EVENT_NONE)
+                break;
+            [self handleEvent:event];
+        }
+    });
+}
+
+static void wakeup(void *context) {
+    AppDelegate *a = (__bridge AppDelegate *) context;
+    [a readEvents];
 }
 
 // Ostensibly, mpv's window would be hooked up to this.
 - (BOOL) windowShouldClose:(id)sender
 {
+    [self shutdown];
+    return YES;
+}
+
+- (void) shutdown
+{
     if (mpv) {
         const char *args[] = {"quit", NULL};
         mpv_command(mpv, args);
     }
-    return YES;
 }
 @end
 
