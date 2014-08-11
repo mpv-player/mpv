@@ -40,7 +40,7 @@ Keyboard Control
 ----------------
 
 LEFT and RIGHT
-    Seek backward/forward 10 seconds. Shift+arrow does a 1 second exact seek
+    Seek backward/forward 5 seconds. Shift+arrow does a 1 second exact seek
     (see ``--hr-seek``).
 
 UP and DOWN
