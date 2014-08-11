@@ -173,7 +173,7 @@ static void recreate_video_filters(struct MPContext *mpctx)
 
     vf_destroy(d_video->vfilter);
     d_video->vfilter = vf_new(mpctx->global);
-    d_video->vfilter->hwdec = &d_video->hwdec_info;
+    d_video->vfilter->hwdec = d_video->hwdec_info;
 
     vf_append_filter_list(d_video->vfilter, opts->vf_settings);
 

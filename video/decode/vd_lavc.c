@@ -227,7 +227,7 @@ static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
         MP_VERBOSE(vd, "Requested hardware decoder not compiled.\n");
         return NULL;
     }
-    int r = hwdec_probe(hwdec, &vd->hwdec_info, decoder);
+    int r = hwdec_probe(hwdec, vd->hwdec_info, decoder);
     if (r == HWDEC_ERR_EMULATED) {
         if (autoprobe)
             return NULL;
@@ -342,7 +342,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     if (!lavc_codec)
         return;
 
-    ctx->hwdec_info = &vd->hwdec_info;
+    ctx->hwdec_info = vd->hwdec_info;
 
     ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->hwdec = hwdec;

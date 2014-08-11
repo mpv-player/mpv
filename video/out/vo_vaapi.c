@@ -70,6 +70,7 @@ struct priv {
     struct vo               *vo;
     VADisplay                display;
     struct mp_vaapi_ctx     *mpvaapi;
+    struct mp_hwdec_info     hwdec_info;
 
     struct mp_image_params   image_params;
     struct mp_rect           src_rect;
@@ -516,8 +517,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         p->deint = *(int*)data ? p->deint_type : 0;
         return VO_TRUE;
     case VOCTRL_GET_HWDEC_INFO: {
-        struct mp_hwdec_info *arg = data;
-        arg->vaapi_ctx = p->mpvaapi;
+        struct mp_hwdec_info **arg = data;
+        *arg = &p->hwdec_info;
         return true;
     }
     case VOCTRL_GET_COLORSPACE: {
@@ -597,6 +598,8 @@ static int preinit(struct vo *vo)
         p->display = NULL;
         goto fail;
     }
+
+    p->hwdec_info.vaapi_ctx = p->mpvaapi;
 
     if (va_guess_if_emulated(p->mpvaapi)) {
         MP_WARN(vo, "VA-API is most likely emulated via VDPAU.\n"

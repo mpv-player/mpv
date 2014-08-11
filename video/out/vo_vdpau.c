@@ -73,6 +73,7 @@ struct vdpctx {
     struct vdp_functions              *vdp;
     VdpDevice                          vdp_device;
     uint64_t                           preemption_counter;
+    struct mp_hwdec_info               hwdec_info;
 
     struct m_color                     colorkey;
 
@@ -1004,6 +1005,8 @@ static int preinit(struct vo *vo)
         return -1;
     }
 
+    vc->hwdec_info.vdpau_ctx = vc->mpvdp;
+
     vc->video_mixer = mp_vdpau_mixer_create(vc->mpvdp, vo->log);
 
     if (mp_vdpau_guess_if_emulated(vc->mpvdp)) {
@@ -1070,8 +1073,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
             vo->want_redraw = true;
         return true;
     case VOCTRL_GET_HWDEC_INFO: {
-        struct mp_hwdec_info *arg = data;
-        arg->vdpau_ctx = vc->mpvdp;
+        struct mp_hwdec_info **arg = data;
+        *arg = &vc->hwdec_info;
         return true;
     }
     case VOCTRL_GET_PANSCAN:

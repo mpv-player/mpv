@@ -60,6 +60,7 @@ struct gl_priv {
     struct gl_video *renderer;
 
     struct gl_hwdec *hwdec;
+    struct mp_hwdec_info hwdec_info;
 
     // Options
     struct gl_video_opts *renderer_opts;
@@ -183,7 +184,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     return 0;
 }
 
-
 static void load_hwdec_driver(struct gl_priv *p,
                               const struct gl_hwdec_driver *drv)
 {
@@ -193,7 +193,7 @@ static void load_hwdec_driver(struct gl_priv *p,
         .driver = drv,
         .log = mp_log_new(hwdec, p->vo->log, drv->api_name),
         .mpgl = p->glctx,
-        .info = talloc_zero(hwdec, struct mp_hwdec_info),
+        .info = &p->hwdec_info,
         .gl_texture_target = GL_TEXTURE_2D,
     };
     mpgl_lock(p->glctx);
@@ -208,9 +208,8 @@ static void load_hwdec_driver(struct gl_priv *p,
     mpgl_unlock(p->glctx);
 }
 
-static void request_hwdec_api(struct mp_hwdec_info *info, const char *api_name)
+static void request_hwdec_api(struct gl_priv *p, const char *api_name)
 {
-    struct gl_priv *p = info->load_api_ctx;
     // Load at most one hwdec API
     if (p->hwdec)
         return;
@@ -218,24 +217,18 @@ static void request_hwdec_api(struct mp_hwdec_info *info, const char *api_name)
         const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
         if (api_name && strcmp(drv->api_name, api_name) == 0) {
             load_hwdec_driver(p, drv);
-            if (p->hwdec) {
-                *info = *p->hwdec->info;
+            if (p->hwdec)
                 return;
-            }
         }
     }
 }
 
-static void get_hwdec_info(struct gl_priv *p, struct mp_hwdec_info *info)
+static void call_request_hwdec_api(struct mp_hwdec_info *info,
+                                   const char *api_name)
 {
-    if (p->hwdec) {
-        *info = *p->hwdec->info;
-    } else {
-        *info = (struct mp_hwdec_info) {
-            .load_api = request_hwdec_api,
-            .load_api_ctx = p,
-        };
-    }
+    struct vo *vo = info->load_api_ctx;
+    assert(&((struct gl_priv *)vo->priv)->hwdec_info == info);
+    request_hwdec_api(vo->priv, api_name);
 }
 
 static void unload_hwdec_driver(struct gl_priv *p)
@@ -363,7 +356,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
     case VOCTRL_GET_HWDEC_INFO: {
-        get_hwdec_info(p, data);
+        struct mp_hwdec_info **arg = data;
+        *arg = &p->hwdec_info;
         return true;
     }
     case VOCTRL_REDRAW_FRAME:
@@ -431,6 +425,9 @@ static int preinit(struct vo *vo)
         goto err_out;
 
     mpgl_unset_context(p->glctx);
+
+    p->hwdec_info.load_api = call_request_hwdec_api;
+    p->hwdec_info.load_api_ctx = vo;
 
     return 0;
 

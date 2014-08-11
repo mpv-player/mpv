@@ -52,7 +52,7 @@ enum mp_voctrl {
     VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args*
 
     /* for hardware decoding */
-    VOCTRL_GET_HWDEC_INFO,              // struct mp_hwdec_info*
+    VOCTRL_GET_HWDEC_INFO,              // struct mp_hwdec_info**
 
     // Redraw the image previously passed to draw_image() (basically, repeat
     // the previous draw_image call). If this is handled, the OSD should also
