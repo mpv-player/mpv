@@ -486,7 +486,6 @@ static void init_vo(struct MPContext *mpctx)
 static int video_output_image(struct MPContext *mpctx, double endpts,
                               bool reconfig_ok)
 {
-    struct vf_chain *vf = mpctx->d_video->vfilter;
     struct vo *vo = mpctx->video_out;
 
     // Already enough video buffered in VO?
@@ -499,6 +498,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts,
     if (r < 0)
         return r; // error
 
+    struct vf_chain *vf = mpctx->d_video->vfilter;
     vf_output_frame(vf, false);
     if (vf->output) {
         double pts = vf->output->pts;
