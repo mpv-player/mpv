@@ -173,10 +173,6 @@ struct input_ctx {
     struct active_section active_sections[MAX_ACTIVE_SECTIONS];
     int num_active_sections;
 
-    // Used to track whether we managed to read something while checking
-    // events sources. If yes, the sources may have more queued.
-    bool got_new_events;
-
     unsigned int mouse_event_counter;
 
     struct input_fd fds[MP_MAX_FDS];
@@ -184,6 +180,7 @@ struct input_ctx {
 
     struct cmd_queue cmd_queue;
 
+    bool need_wakeup;
     bool in_select;
     int wakeup_pipe[2];
 };
@@ -545,7 +542,7 @@ static void update_mouse_section(struct input_ctx *ictx)
         struct mp_cmd *cmd = get_cmd_from_keys(ictx, old, MP_KEY_MOUSE_LEAVE);
         if (cmd)
             queue_add_tail(&ictx->cmd_queue, cmd);
-        ictx->got_new_events = true;
+        mp_input_wakeup(ictx);
     }
 }
 
@@ -566,7 +563,7 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
         memset(ictx->key_history, 0, sizeof(ictx->key_history));
         ictx->current_down_cmd->key_up_follows = false;
         queue_add_tail(&ictx->cmd_queue, ictx->current_down_cmd);
-        ictx->got_new_events = true;
+        mp_input_wakeup(ictx);
     } else {
         talloc_free(ictx->current_down_cmd);
     }
@@ -634,7 +631,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 
     if (MP_KEY_DEPENDS_ON_MOUSE_POS(unmod))
         ictx->mouse_event_counter++;
-    ictx->got_new_events = true;
+    mp_input_wakeup(ictx);
 
     struct mp_cmd *cmd = NULL;
 
@@ -699,7 +696,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
         struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, code);
         if (cmd)
             queue_add_tail(&ictx->cmd_queue, cmd);
-        ictx->got_new_events = true;
+        mp_input_wakeup(ictx);
         return;
     }
     double now = mp_time_sec();
@@ -814,7 +811,7 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
                 talloc_free(tail);
             }
             queue_add_tail(&ictx->cmd_queue, cmd);
-            ictx->got_new_events = true;
+            mp_input_wakeup(ictx);
         }
     }
     input_unlock(ictx);
@@ -996,7 +993,7 @@ static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
     int r;
     char *text;
     while ((r = read_cmd(cmd_fd, &text)) >= 0) {
-        ictx->got_new_events = true;
+        mp_input_wakeup(ictx);
         struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0(text), "<pipe>");
         talloc_free(text);
         if (cmd)
@@ -1104,9 +1101,9 @@ static void read_events(struct input_ctx *ictx, int time)
     time = FFMAX(time, 0);
 
     while (1) {
-        if (ictx->got_new_events)
+        if (ictx->need_wakeup)
             time = 0;
-        ictx->got_new_events = false;
+        ictx->need_wakeup = false;
 
         remove_dead_fds(ictx);
 
@@ -1117,13 +1114,13 @@ static void read_events(struct input_ctx *ictx, int time)
             }
         }
 
-        if (ictx->got_new_events)
+        if (ictx->need_wakeup)
             time = 0;
 
         input_wait_read(ictx, time);
 
-        // Read until all input FDs are empty
-        if (!ictx->got_new_events)
+        // Read until no new wakeups happen.
+        if (!ictx->need_wakeup)
             break;
     }
 }
@@ -1131,7 +1128,6 @@ static void read_events(struct input_ctx *ictx, int time)
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 {
     input_lock(ictx);
-    ictx->got_new_events = true;
     if (cmd)
         queue_add_tail(&ictx->cmd_queue, cmd);
     input_unlock(ictx);
@@ -1682,7 +1678,7 @@ void mp_input_wakeup(struct input_ctx *ictx)
 {
     input_lock(ictx);
     bool send_wakeup = ictx->in_select;
-    ictx->got_new_events = true;
+    ictx->need_wakeup = true;
     pthread_cond_signal(&ictx->wakeup);
     input_unlock(ictx);
     // Safe without locking
@@ -1696,7 +1692,7 @@ void mp_input_wakeup_nolock(struct input_ctx *ictx)
         write(ictx->wakeup_pipe[1], &(char){0}, 1);
     } else {
         // Not race condition free. Done for the sake of jackaudio+windows.
-        ictx->got_new_events = true;
+        ictx->need_wakeup = true;
         pthread_cond_signal(&ictx->wakeup);
     }
 }
