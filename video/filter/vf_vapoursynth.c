@@ -455,8 +455,10 @@ static int reinit_vs(struct vf_instance *vf)
         goto error;
     p->vsapi = vsscript_getVSApi();
     p->vscore = vsscript_getCore(p->se);
-    if (!p->vsapi || !p->vscore)
+    if (!p->vsapi || !p->vscore) {
+        MP_FATAL(vf, "Could not get vapoursynth API handle.\n");
         goto error;
+    }
 
     in = p->vsapi->createMap();
     out = p->vsapi->createMap();
@@ -468,8 +470,10 @@ static int reinit_vs(struct vf_instance *vf)
                            infiltFree, fmSerial, 0, vf, p->vscore);
     int vserr;
     p->in_node = p->vsapi->propGetNode(out, "clip", 0, &vserr);
-    if (!p->in_node)
+    if (!p->in_node) {
+        MP_FATAL(vf, "Could not get our own input node.\n");
         goto error;
+    }
 
     if (p->vsapi->propSetNode(vars, "video_in", p->in_node, 0))
         goto error;
@@ -481,8 +485,10 @@ static int reinit_vs(struct vf_instance *vf)
         goto error;
     }
     p->out_node = vsscript_getOutput(p->se, 0);
-    if (!p->out_node)
+    if (!p->out_node) {
+        MP_FATAL(vf, "Could not get script output node.\n");
         goto error;
+    }
 
     const VSVideoInfo *vi = p->vsapi->getVideoInfo(p->out_node);
     if (!isConstantFormat(vi)) {
