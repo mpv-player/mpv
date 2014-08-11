@@ -1099,6 +1099,11 @@ static int mp_property_cache(void *ctx, struct m_property *prop,
     if (cache < 0)
         return M_PROPERTY_UNAVAILABLE;
 
+    if (action == M_PROPERTY_PRINT) {
+        *(char **)arg = talloc_asprintf(NULL, "%d %%", (int)cache);
+        return M_PROPERTY_OK;
+    }
+
     return m_property_float_ro(action, arg, cache);
 }
 
