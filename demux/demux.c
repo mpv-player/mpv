@@ -1172,13 +1172,15 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
     demux_pause(demuxer);
     if (cmd == DEMUXER_CTRL_STREAM_CTRL) {
         struct demux_ctrl_stream_ctrl *c = arg;
-        MP_VERBOSE(demuxer, "blocking for STREAM_CTRL %d\n", c->ctrl);
+        if (in->threading)
+            MP_VERBOSE(demuxer, "blocking for STREAM_CTRL %d\n", c->ctrl);
         c->res = stream_control(demuxer->stream, c->ctrl, c->arg);
         if (c->res != STREAM_UNSUPPORTED)
             r = DEMUXER_CTRL_OK;
     }
     if (r != DEMUXER_CTRL_OK) {
-        MP_VERBOSE(demuxer, "blocking for DEMUXER_CTRL %d\n", cmd);
+        if (in->threading)
+            MP_VERBOSE(demuxer, "blocking for DEMUXER_CTRL %d\n", cmd);
         if (demuxer->desc->control)
             r = demuxer->desc->control(demuxer->in->d_thread, cmd, arg);
     }
@@ -1201,12 +1203,15 @@ void demux_pause(demuxer_t *demuxer)
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
 
+    if (!in->threading)
+        return;
+
     MP_VERBOSE(in, "pause demux thread\n");
 
     pthread_mutex_lock(&in->lock);
     in->thread_request_pause++;
     pthread_cond_signal(&in->wakeup);
-    while (in->threading && !in->thread_paused)
+    while (!in->thread_paused)
         pthread_cond_wait(&in->wakeup, &in->lock);
     pthread_mutex_unlock(&in->lock);
 }
@@ -1215,6 +1220,9 @@ void demux_unpause(demuxer_t *demuxer)
 {
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
+
+    if (!in->threading)
+        return;
 
     pthread_mutex_lock(&in->lock);
     assert(in->thread_request_pause > 0);
