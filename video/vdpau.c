@@ -179,6 +179,7 @@ static struct mp_image *create_ref(struct mp_vdpau_ctx *ctx, int index)
     struct surface_entry *e = &ctx->video_surfaces[index];
     assert(!e->in_use);
     e->in_use = true;
+    e->age = ctx->age_counter++;
     struct surface_ref *ref = talloc_ptrtype(NULL, ref);
     *ref = (struct surface_ref){ctx, index};
     struct mp_image *res =
@@ -237,10 +238,17 @@ static struct mp_image *mp_vdpau_get_surface(struct mp_vdpau_ctx *ctx,
             assert(e->chroma == chroma);
             assert(e->rgb_format == rgb_format);
             assert(e->rgb == rgb);
+            if (surface_index >= 0) {
+                struct surface_entry *other = &ctx->video_surfaces[surface_index];
+                if (other->age < e->age)
+                    continue;
+            }
             surface_index = n;
-            goto done;
         }
     }
+
+    if (surface_index >= 0)
+        goto done;
 
     // Allocate new surface
     for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {

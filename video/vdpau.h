@@ -56,6 +56,7 @@ struct mp_vdpau_ctx {
 
     // Surface pool
     pthread_mutex_t pool_lock;
+    int64_t age_counter;
     struct surface_entry {
         VdpVideoSurface surface;
         VdpOutputSurface osurface;
@@ -65,6 +66,7 @@ struct mp_vdpau_ctx {
         VdpChromaType chroma;
         bool rgb;
         bool in_use;
+        int64_t age;
     } video_surfaces[MAX_VIDEO_SURFACES];
 };
 
