@@ -399,6 +399,8 @@ int vo_x11_init(struct vo *vo)
 
     assert(!vo->x11);
 
+    XInitThreads();
+
     struct vo_x11_state *x11 = talloc_ptrtype(NULL, x11);
     *x11 = (struct vo_x11_state){
         .log = mp_log_new(x11, vo->log, "x11"),
