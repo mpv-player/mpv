@@ -906,7 +906,7 @@ static struct mp_image *get_screenshot(struct vo *vo)
     if (vc->screenshot_surface == VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_create(vc->vdp_device,
                                             OUTPUT_RGBA_FORMAT,
-                                            vc->vid_width, vc->vid_height,
+                                            vo->params->d_w, vo->params->d_h,
                                             &vc->screenshot_surface);
         CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_create");
     }
