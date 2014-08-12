@@ -240,6 +240,9 @@ typedef struct MPContext {
     struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
 
     struct vo *video_out;
+    // next_frame[0] is the next frame, next_frame[1] the one after that.
+    // Invariant: if next_frame[1] is set, next_frame[0] also is.
+    struct mp_image *next_frame[2];
 
     enum playback_status video_status, audio_status;
     bool restart_complete;
@@ -257,8 +260,6 @@ typedef struct MPContext {
     double delay;
     // AV sync: time until next frame should be shown
     double time_frame;
-    // Display duration (as "intended") of the last flipped frame.
-    double last_frame_duration;
     // Set to true some time after a new frame has been shown, and it turns out
     // that this frame was the last one before video ends.
     bool playing_last_frame;

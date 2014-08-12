@@ -885,7 +885,7 @@ void run_playloop(struct MPContext *mpctx)
      * of the video, and we want to quit. */
     bool prevent_eof = mpctx->paused;
     if (mpctx->d_video && mpctx->video_status == STATUS_EOF)
-        prevent_eof &= mpctx->video_out && mpctx->video_out->hasframe;
+        prevent_eof &= mpctx->video_out && vo_has_frame(mpctx->video_out);
     /* Handles terminating on end of playback (or switching to next segment).
      *
      * It's possible for the user to simultaneously switch both audio

@@ -263,9 +263,6 @@ struct vo {
     int dwidth;
     int dheight;
     float monitor_par;
-
-    // --- Accessed by user-thread only.
-    bool hasframe;      // >= 1 frame has been drawn, so redraw is possible
 };
 
 struct mpv_global;
@@ -276,13 +273,12 @@ struct vo *init_best_video_out(struct mpv_global *global,
 int vo_reconfig(struct vo *vo, struct mp_image_params *p, int flags);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
-void vo_queue_image(struct vo *vo, struct mp_image *mpi);
-bool vo_has_next_frame(struct vo *vo, bool eof);
-double vo_get_next_pts(struct vo *vo, int index);
-bool vo_needs_new_image(struct vo *vo);
 bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts);
-void vo_queue_frame(struct vo *vo, int64_t pts_us, int64_t duration);
+void vo_queue_frame(struct vo *vo, struct mp_image *image,
+                    int64_t pts_us, int64_t duration);
 void vo_wait_frame(struct vo *vo);
+bool vo_still_displaying(struct vo *vo);
+bool vo_has_frame(struct vo *vo);
 void vo_redraw(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);

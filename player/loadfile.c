@@ -111,6 +111,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_VCODEC) {
         mpctx->initialized_flags &= ~INITIALIZED_VCODEC;
+        reset_video_state(mpctx);
         if (mpctx->d_video)
             video_uninit(mpctx->d_video);
         mpctx->d_video = NULL;

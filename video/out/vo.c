@@ -113,8 +113,6 @@ const struct vo_driver *const video_out_drivers[] =
         NULL
 };
 
-#define VO_MAX_QUEUE 2
-
 struct vo_internal {
     pthread_t thread;
     struct mp_dispatch_queue *dispatch;
@@ -130,13 +128,10 @@ struct vo_internal {
 
     char *window_title;
 
+    bool hasframe;
     bool request_redraw;
 
     int64_t flip_queue_offset; // queue flip events at most this much in advance
-
-    // Frames to display; the next (i.e. oldest, lowest PTS) image has index 0.
-    struct mp_image *video_queue[VO_MAX_QUEUE];
-    int num_video_queue;
 
     int64_t wakeup_pts;             // time at which to pull frame from decoder
 
@@ -329,7 +324,6 @@ static void run_reconfig(void *p)
         vo->params = NULL;
     }
     forget_frames(vo); // implicitly synchronized
-    vo->hasframe = false;
 }
 
 int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
@@ -364,50 +358,9 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
 static void forget_frames(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
-    for (int n = 0; n < in->num_video_queue; n++)
-        talloc_free(in->video_queue[n]);
-    in->num_video_queue = 0;
+    in->hasframe = false;
     in->frame_queued = false;
     mp_image_unrefp(&in->frame_image);
-}
-
-void vo_queue_image(struct vo *vo, struct mp_image *mpi)
-{
-    struct vo_internal *in = vo->in;
-    assert(mpi);
-    if (!vo->config_ok) {
-        talloc_free(mpi);
-        return;
-    }
-    pthread_mutex_lock(&in->lock);
-    assert(mp_image_params_equal(vo->params, &mpi->params));
-    assert(in->num_video_queue <= VO_MAX_QUEUE);
-    in->video_queue[in->num_video_queue++] = mpi;
-    pthread_mutex_unlock(&in->lock);
-}
-
-// Return whether vo_queue_image() should be called.
-bool vo_needs_new_image(struct vo *vo)
-{
-    return vo->config_ok && vo->in->num_video_queue < VO_MAX_QUEUE;
-}
-
-// Return whether a frame can be displayed.
-//  eof==true: return true if at least one frame is queued
-//  eof==false: return true if "enough" frames are queued
-bool vo_has_next_frame(struct vo *vo, bool eof)
-{
-    // Normally, buffer 1 image ahead, except if the queue is limited to less
-    // than 2 entries, or if EOF is reached and there aren't enough images left.
-    return eof ? vo->in->num_video_queue : vo->in->num_video_queue == VO_MAX_QUEUE;
-}
-
-// Return the PTS of a future frame (where index==0 is the next frame)
-double vo_get_next_pts(struct vo *vo, int index)
-{
-    if (index < 0 || index >= vo->in->num_video_queue)
-        return MP_NOPTS_VALUE;
-    return vo->in->video_queue[index]->pts;
 }
 
 #ifndef __MINGW32__
@@ -487,9 +440,9 @@ void vo_wakeup(struct vo *vo)
     pthread_mutex_unlock(&in->lock);
 }
 
-// Whether vo_queue_frame() can be called. If the VO is not ready yet (even
-// though an image is queued), the function will return false, and the VO will
-// call the wakeup callback once it's ready.
+// Whether vo_queue_frame() can be called. If the VO is not ready yet, the
+// function will return false, and the VO will call the wakeup callback once
+// it's ready.
 // next_pts is the exact time when the next frame should be displayed. If the
 // VO is ready, but the time is too "early", return false, and call the wakeup
 // callback once the time is right.
@@ -497,7 +450,7 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    bool r = vo->config_ok && in->num_video_queue && !in->frame_queued;
+    bool r = vo->config_ok && !in->frame_queued;
     if (r) {
         // Don't show the frame too early - it would basically freeze the
         // display by disallowing OSD redrawing or VO interaction.
@@ -518,20 +471,19 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
 
 // Direct the VO thread to put the currently queued image on the screen.
 // vo_is_ready_for_frame() must have returned true before this call.
-void vo_queue_frame(struct vo *vo, int64_t pts_us, int64_t duration)
+// Ownership of the image is handed to the vo.
+void vo_queue_frame(struct vo *vo, struct mp_image *image,
+                    int64_t pts_us, int64_t duration)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    assert(vo->config_ok && in->num_video_queue && !in->frame_queued);
-    vo->hasframe = true;
+    assert(vo->config_ok && !in->frame_queued);
+    in->hasframe = true;
     in->frame_queued = true;
     in->frame_pts = pts_us;
     in->frame_duration = duration;
-    in->frame_image = in->video_queue[0];
-    in->num_video_queue--;
-    for (int n = 0; n < in->num_video_queue; n++)
-        in->video_queue[n] = in->video_queue[n + 1];
-    in->wakeup_pts = 0;
+    in->frame_image = image;
+    in->wakeup_pts = in->frame_pts + MPMAX(duration, 0);
     wakeup_locked(vo);
     pthread_mutex_unlock(&in->lock);
 }
@@ -670,9 +622,27 @@ void vo_seek_reset(struct vo *vo)
 {
     pthread_mutex_lock(&vo->in->lock);
     forget_frames(vo);
-    vo->hasframe = false;
     pthread_mutex_unlock(&vo->in->lock);
     vo_control(vo, VOCTRL_RESET, NULL);
+}
+
+// Return true if there is still a frame being displayed (or queued).
+// If this returns true, a wakeup some time in the future is guaranteed.
+bool vo_still_displaying(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&vo->in->lock);
+    int64_t now = mp_time_us();
+    int64_t frame_end = in->frame_pts + MPMAX(in->frame_duration, 0);
+    bool working = now < frame_end || in->rendering || in->frame_queued;
+    pthread_mutex_unlock(&vo->in->lock);
+    return working && in->hasframe;
+}
+
+// Whether at least 1 frame was queued or rendered since last seek or reconfig.
+bool vo_has_frame(struct vo *vo)
+{
+    return vo->in->hasframe;
 }
 
 // Calculate the appropriate source and destination rectangle to
