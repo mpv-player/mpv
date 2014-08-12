@@ -94,7 +94,7 @@ Available filters are:
 
     ``minchn=<n>``
         If the input channel number is less than ``<minchn>``, the filter will
-        detach itself (default: 5).
+        detach itself (default: 3).
 
 ``sweep[=speed]``
     Produces a sine sweep.

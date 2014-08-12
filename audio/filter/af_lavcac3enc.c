@@ -313,7 +313,7 @@ const struct af_info af_info_lavcac3enc = {
     .priv_defaults = &(const struct af_ac3enc_s){
         .cfg_add_iec61937_header = 1,
         .cfg_bit_rate = 640,
-        .cfg_min_channel_num = 5,
+        .cfg_min_channel_num = 3,
     },
     .options = (const struct m_option[]) {
         OPT_FLAG("tospdif", cfg_add_iec61937_header, 0),
