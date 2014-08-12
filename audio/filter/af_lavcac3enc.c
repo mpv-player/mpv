@@ -312,12 +312,13 @@ const struct af_info af_info_lavcac3enc = {
     .priv_size = sizeof(struct af_ac3enc_s),
     .priv_defaults = &(const struct af_ac3enc_s){
         .cfg_add_iec61937_header = 1,
+        .cfg_bit_rate = 640,
         .cfg_min_channel_num = 5,
     },
     .options = (const struct m_option[]) {
         OPT_FLAG("tospdif", cfg_add_iec61937_header, 0),
         OPT_CHOICE_OR_INT("bitrate", cfg_bit_rate, 0, 32, 640,
-                          ({"default", 0})),
+                          ({"auto", 0}, {"default", 0})),
         OPT_INTRANGE("minch", cfg_min_channel_num, 0, 2, 6),
         {0}
     },
