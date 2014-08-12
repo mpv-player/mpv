@@ -148,10 +148,8 @@ void update_window_title(struct MPContext *mpctx, bool force)
         talloc_free(mpctx->last_window_title);
         mpctx->last_window_title = talloc_steal(mpctx, title);
 
-        if (mpctx->video_out) {
-            mpctx->video_out->window_title = talloc_strdup(mpctx->video_out, title);
+        if (mpctx->video_out)
             vo_control(mpctx->video_out, VOCTRL_UPDATE_WINDOW_TITLE, title);
-        }
 
         if (mpctx->ao) {
             ao_control(mpctx->ao, AOCONTROL_UPDATE_STREAM_TITLE, title);

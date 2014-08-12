@@ -96,12 +96,8 @@ static void resize(struct gl_priv *p)
 static void flip_page(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
-    GL *gl = p->gl;
 
     mpgl_lock(p->glctx);
-
-    if (p->use_glFinish)
-        gl->Finish();
 
     p->glctx->swapGlBuffers(p->glctx);
 
@@ -115,13 +111,24 @@ static void flip_page(struct vo *vo)
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct gl_priv *p = vo->priv;
+    GL *gl = p->gl;
 
     if (p->vo_flipped)
         mp_image_vflip(mpi);
 
     mpgl_lock(p->glctx);
+
     gl_video_upload_image(p->renderer, mpi);
     gl_video_render_frame(p->renderer);
+
+    // The playloop calls this last before waiting some time until it decides
+    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
+    // while we sleep (this happens asynchronously).
+    gl->Flush();
+
+    if (p->use_glFinish)
+        gl->Finish();
+
     mpgl_unlock(p->glctx);
 }
 
@@ -228,7 +235,9 @@ static void call_request_hwdec_api(struct mp_hwdec_info *info,
 {
     struct vo *vo = info->load_api_ctx;
     assert(&((struct gl_priv *)vo->priv)->hwdec_info == info);
-    request_hwdec_api(vo->priv, api_name);
+    // Roundabout way to run hwdec loading on the VO thread.
+    // Redirects to request_hwdec_api().
+    vo_control(vo, VOCTRL_LOAD_HWDEC_API, (void *)api_name);
 }
 
 static void unload_hwdec_driver(struct gl_priv *p)
@@ -360,6 +369,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         *arg = &p->hwdec_info;
         return true;
     }
+    case VOCTRL_LOAD_HWDEC_API:
+        request_hwdec_api(p, data);
+        return true;
     case VOCTRL_REDRAW_FRAME:
         mpgl_lock(p->glctx);
         gl_video_render_frame(p->renderer);

@@ -257,10 +257,6 @@ typedef struct MPContext {
     double delay;
     // AV sync: time until next frame should be shown
     double time_frame;
-    // How long the last vo flip() call took. Used to adjust timing with
-    // the goal of making flip() calls finish (rather than start) at the
-    // specified time.
-    double last_vo_flip_duration;
     // Display duration (as "intended") of the last flipped frame.
     double last_frame_duration;
     // Set to true some time after a new frame has been shown, and it turns out

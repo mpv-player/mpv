@@ -42,12 +42,12 @@
  * So, additionally to the maximum number of reference frames, we need
  * surfaces for:
  * - 1 decode frame
- * - decoding 1 frame ahead (done by generic playback code)
+ * - decoding 2 frames ahead (done by generic playback code)
  * - keeping the reference to the previous frame (done by vo_vaapi.c)
  * Note that redundant additional surfaces also might allow for some
  * buffering (i.e. not trying to reuse a surface while it's busy).
  */
-#define ADDTIONAL_SURFACES 3
+#define ADDTIONAL_SURFACES 4
 
 // Magic number taken from original MPlayer vaapi patch.
 #define MAX_DECODER_SURFACES 21

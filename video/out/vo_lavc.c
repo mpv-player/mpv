@@ -69,7 +69,6 @@ static int preinit(struct vo *vo)
     vo->priv = talloc_zero(vo, struct priv);
     vc = vo->priv;
     vc->harddup = vo->encode_lavc_ctx->options->harddup;
-    vo->untimed = true;
     return 0;
 }
 
@@ -526,6 +525,7 @@ const struct vo_driver video_out_lavc = {
     .encode = true,
     .description = "video encoding using libavcodec",
     .name = "lavc",
+    .untimed = true,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

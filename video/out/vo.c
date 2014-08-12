@@ -1,6 +1,4 @@
 /*
- * libvo common functions, variables used by many/all drivers.
- *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -23,8 +21,10 @@
 #include <string.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 #include <unistd.h>
+#include <poll.h>
 
 #include <libavutil/common.h>
 
@@ -32,6 +32,9 @@
 
 #include "config.h"
 #include "osdep/timer.h"
+#include "osdep/threads.h"
+#include "misc/dispatch.h"
+#include "misc/rendezvous.h"
 #include "options/options.h"
 #include "bstr/bstr.h"
 #include "vo.h"
@@ -43,10 +46,8 @@
 #include "video/mp_image.h"
 #include "video/vfcap.h"
 #include "sub/osd.h"
+#include "osdep/io.h"
 
-//
-// Externally visible list of all vo drivers
-//
 extern const struct vo_driver video_out_x11;
 extern const struct vo_driver video_out_vdpau;
 extern const struct vo_driver video_out_xv;
@@ -112,7 +113,42 @@ const struct vo_driver *const video_out_drivers[] =
         NULL
 };
 
+#define VO_MAX_QUEUE 2
+
+struct vo_internal {
+    pthread_t thread;
+    struct mp_dispatch_queue *dispatch;
+
+    // --- The following fields are protected by lock
+    pthread_mutex_t lock;
+    pthread_cond_t wakeup;
+
+    bool need_wakeup;
+    bool terminate;
+
+    int wakeup_pipe[2]; // used for VOs that use a unix FD for waiting
+
+    char *window_title;
+
+    bool request_redraw;
+
+    int64_t flip_queue_offset; // queue flip events at most this much in advance
+
+    // Frames to display; the next (i.e. oldest, lowest PTS) image has index 0.
+    struct mp_image *video_queue[VO_MAX_QUEUE];
+    int num_video_queue;
+
+    int64_t wakeup_pts;             // time at which to pull frame from decoder
+
+    bool rendering;                 // true if an image is being rendered
+    bool frame_queued;              // frame queued, with parameters below
+    int64_t frame_pts;              // realtime of intended display
+    int64_t frame_duration;         // realtime frame duration (for framedrop)
+    struct mp_image *frame_image;   // the image that should be rendered
+};
+
 static void forget_frames(struct vo *vo);
+static void *vo_thread(void *ptr);
 
 static bool get_desc(struct m_obj_desc *dst, int index)
 {
@@ -144,11 +180,21 @@ const struct m_obj_list vo_obj_list = {
     .allow_trailer = true,
 };
 
-static int event_fd_callback(void *ctx, int fd)
+static void dispatch_wakeup_cb(void *ptr)
 {
-    struct vo *vo = ctx;
-    vo_check_events(vo);
-    return MP_INPUT_NOTHING;
+    struct vo *vo = ptr;
+    vo_wakeup(vo);
+}
+
+// Does not include thread- and VO uninit.
+static void dealloc_vo(struct vo *vo)
+{
+    forget_frames(vo); // implicitly synchronized
+    pthread_mutex_destroy(&vo->in->lock);
+    pthread_cond_destroy(&vo->in->wakeup);
+    for (int n = 0; n < 2; n++)
+        close(vo->in->wakeup_pipe[n]);
+    talloc_free(vo);
 }
 
 static struct vo *vo_create(struct mpv_global *global,
@@ -174,9 +220,17 @@ static struct vo *vo_create(struct mpv_global *global,
         .osd = osd,
         .event_fd = -1,
         .monitor_par = 1,
-        .max_video_queue = 1,
+        .in = talloc(vo, struct vo_internal),
     };
     talloc_steal(vo, log);
+    *vo->in = (struct vo_internal) {
+        .dispatch = mp_dispatch_create(vo),
+    };
+    mp_make_wakeup_pipe(vo->in->wakeup_pipe);
+    mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
+    pthread_mutex_init(&vo->in->lock, NULL);
+    pthread_cond_init(&vo->in->wakeup, NULL);
+
     mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
@@ -186,15 +240,17 @@ static struct vo *vo_create(struct mpv_global *global,
     if (m_config_set_obj_params(config, args) < 0)
         goto error;
     vo->priv = config->optstruct;
-    if (vo->driver->preinit(vo))
+
+    if (pthread_create(&vo->in->thread, NULL, vo_thread, vo))
         goto error;
-    if (vo->event_fd != -1) {
-        mp_input_add_fd(vo->input_ctx, vo->event_fd, 1, NULL, event_fd_callback,
-                        NULL, vo);
+    if (mp_rendezvous(vo, 0) < 0) { // init barrier
+        pthread_join(vo->in->thread, NULL);
+        goto error;
     }
     return vo;
+
 error:
-    talloc_free(vo);
+    dealloc_vo(vo);
     return NULL;
 }
 
@@ -230,11 +286,12 @@ autoprobe:
 
 void vo_destroy(struct vo *vo)
 {
-    if (vo->event_fd != -1)
-        mp_input_rm_key_fd(vo->input_ctx, vo->event_fd);
-    forget_frames(vo);
-    vo->driver->uninit(vo);
-    talloc_free(vo);
+    struct vo_internal *in = vo->in;
+    mp_dispatch_lock(in->dispatch);
+    vo->in->terminate = true;
+    mp_dispatch_unlock(in->dispatch);
+    pthread_join(vo->in->thread, NULL);
+    dealloc_vo(vo);
 }
 
 static void check_vo_caps(struct vo *vo)
@@ -249,54 +306,90 @@ static void check_vo_caps(struct vo *vo)
     }
 }
 
-int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static void run_reconfig(void *p)
 {
+    void **pp = p;
+    struct vo *vo = pp[0];
+    struct mp_image_params *params = pp[1];
+    int flags = *(int *)pp[2];
+    int *ret = pp[3];
+
     vo->dwidth = params->d_w;
     vo->dheight = params->d_h;
 
     talloc_free(vo->params);
     vo->params = talloc_memdup(vo, params, sizeof(*params));
 
-    int ret = vo->driver->reconfig(vo, vo->params, flags);
-    vo->config_ok = ret >= 0;
+    *ret = vo->driver->reconfig(vo, vo->params, flags);
+    vo->config_ok = *ret >= 0;
     if (vo->config_ok) {
         check_vo_caps(vo);
     } else {
         talloc_free(vo->params);
         vo->params = NULL;
     }
-    forget_frames(vo);
+    forget_frames(vo); // implicitly synchronized
     vo->hasframe = false;
+}
+
+int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+{
+    int ret;
+    void *p[] = {vo, params, &flags, &ret};
+    mp_dispatch_run(vo->in->dispatch, run_reconfig, p);
     return ret;
+}
+
+static void run_control(void *p)
+{
+    void **pp = p;
+    struct vo *vo = pp[0];
+    uint32_t request = *(int *)pp[1];
+    void *data = pp[2];
+    if (request == VOCTRL_UPDATE_WINDOW_TITLE) // legacy fallback
+        vo->in->window_title = talloc_strdup(vo, data);
+    int ret = vo->driver->control(vo, request, data);
+    *(int *)pp[3] = ret;
 }
 
 int vo_control(struct vo *vo, uint32_t request, void *data)
 {
-    return vo->driver->control(vo, request, data);
+    int ret;
+    void *p[] = {vo, &request, data, &ret};
+    mp_dispatch_run(vo->in->dispatch, run_control, p);
+    return ret;
 }
 
+// must be called locked
 static void forget_frames(struct vo *vo)
 {
-    for (int n = 0; n < vo->num_video_queue; n++)
-        talloc_free(vo->video_queue[n]);
-    vo->num_video_queue = 0;
+    struct vo_internal *in = vo->in;
+    for (int n = 0; n < in->num_video_queue; n++)
+        talloc_free(in->video_queue[n]);
+    in->num_video_queue = 0;
+    in->frame_queued = false;
+    mp_image_unrefp(&in->frame_image);
 }
 
 void vo_queue_image(struct vo *vo, struct mp_image *mpi)
 {
+    struct vo_internal *in = vo->in;
     assert(mpi);
-    if (!vo->config_ok)
+    if (!vo->config_ok) {
+        talloc_free(mpi);
         return;
+    }
+    pthread_mutex_lock(&in->lock);
     assert(mp_image_params_equal(vo->params, &mpi->params));
-    assert(vo->max_video_queue <= VO_MAX_QUEUE);
-    assert(vo->num_video_queue < vo->max_video_queue);
-    vo->video_queue[vo->num_video_queue++] = mpi;
+    assert(in->num_video_queue <= VO_MAX_QUEUE);
+    in->video_queue[in->num_video_queue++] = mpi;
+    pthread_mutex_unlock(&in->lock);
 }
 
 // Return whether vo_queue_image() should be called.
 bool vo_needs_new_image(struct vo *vo)
 {
-    return vo->config_ok && vo->num_video_queue < vo->max_video_queue;
+    return vo->config_ok && vo->in->num_video_queue < VO_MAX_QUEUE;
 }
 
 // Return whether a frame can be displayed.
@@ -306,69 +399,280 @@ bool vo_has_next_frame(struct vo *vo, bool eof)
 {
     // Normally, buffer 1 image ahead, except if the queue is limited to less
     // than 2 entries, or if EOF is reached and there aren't enough images left.
-    return eof ? vo->num_video_queue : vo->num_video_queue == vo->max_video_queue;
+    return eof ? vo->in->num_video_queue : vo->in->num_video_queue == VO_MAX_QUEUE;
 }
 
 // Return the PTS of a future frame (where index==0 is the next frame)
 double vo_get_next_pts(struct vo *vo, int index)
 {
-    if (index < 0 || index >= vo->num_video_queue)
+    if (index < 0 || index >= vo->in->num_video_queue)
         return MP_NOPTS_VALUE;
-    return vo->video_queue[index]->pts;
+    return vo->in->video_queue[index]->pts;
 }
 
-bool vo_get_want_redraw(struct vo *vo)
+#ifndef __MINGW32__
+static void wait_event_fd(struct vo *vo, int64_t until_time)
 {
-    return vo->config_ok && vo->want_redraw;
+    struct vo_internal *in = vo->in;
+
+    struct pollfd fds[2] = {
+        { .fd = vo->event_fd, .events = POLLIN },
+        { .fd = in->wakeup_pipe[0], .events = POLLIN },
+    };
+    int64_t wait_us = until_time - mp_time_us();
+    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+
+    poll(fds, 2, timeout_ms);
+
+    if (fds[1].revents & POLLIN) {
+        char buf[100];
+        read(in->wakeup_pipe[0], buf, sizeof(buf)); // flush
+    }
+}
+static void wakeup_event_fd(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    write(in->wakeup_pipe[1], &(char){0}, 1);
+}
+#else
+static void wait_event_fd(struct vo *vo, int64_t until_time){}
+static void wakeup_event_fd(struct vo *vo){}
+#endif
+
+// Called unlocked.
+static void wait_vo(struct vo *vo, int64_t until_time)
+{
+    struct vo_internal *in = vo->in;
+
+    if (vo->event_fd >= 0) {
+        wait_event_fd(vo, until_time);
+        pthread_mutex_lock(&in->lock);
+        in->need_wakeup = false;
+        pthread_mutex_unlock(&in->lock);
+    } else if (vo->driver->wait_events) {
+        vo->driver->wait_events(vo, until_time);
+        pthread_mutex_lock(&in->lock);
+        in->need_wakeup = false;
+        pthread_mutex_unlock(&in->lock);
+    } else {
+        pthread_mutex_lock(&in->lock);
+        if (!in->need_wakeup)
+            mpthread_cond_timedwait(&in->wakeup, &in->lock, until_time);
+        in->need_wakeup = false;
+        pthread_mutex_unlock(&in->lock);
+    }
 }
 
-// Remove vo->video_queue[0]
-static void shift_queue(struct vo *vo)
+static void wakeup_locked(struct vo *vo)
 {
-    if (!vo->num_video_queue)
-        return;
-    vo->num_video_queue--;
-    for (int n = 0; n < vo->num_video_queue; n++)
-        vo->video_queue[n] = vo->video_queue[n + 1];
+    struct vo_internal *in = vo->in;
+
+    pthread_cond_signal(&in->wakeup);
+    if (vo->event_fd >= 0)
+        wakeup_event_fd(vo);
+    if (vo->driver->wakeup)
+        vo->driver->wakeup(vo);
+    in->need_wakeup = true;
 }
 
-void vo_new_frame_imminent(struct vo *vo)
+// Wakeup VO thread, and make it check for new events with VOCTRL_CHECK_EVENTS.
+// To be used by threaded VO backends.
+void vo_wakeup(struct vo *vo)
 {
-    assert(vo->num_video_queue > 0);
-    struct mp_image *img = vo->video_queue[0];
-    shift_queue(vo);
-    vo->driver->draw_image(vo, img);
+    struct vo_internal *in = vo->in;
+
+    pthread_mutex_lock(&in->lock);
+    wakeup_locked(vo);
+    pthread_mutex_unlock(&in->lock);
+}
+
+// Whether vo_queue_frame() can be called. If the VO is not ready yet (even
+// though an image is queued), the function will return false, and the VO will
+// call the wakeup callback once it's ready.
+// next_pts is the exact time when the next frame should be displayed. If the
+// VO is ready, but the time is too "early", return false, and call the wakeup
+// callback once the time is right.
+bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    bool r = vo->config_ok && in->num_video_queue && !in->frame_queued;
+    if (r) {
+        // Don't show the frame too early - it would basically freeze the
+        // display by disallowing OSD redrawing or VO interaction.
+        // Actually render the frame at earliest 50ms before target time.
+        next_pts -= 0.050 * 1e6;
+        next_pts -= in->flip_queue_offset;
+        int64_t now = mp_time_us();
+        if (next_pts > now)
+            r = false;
+        if (!in->wakeup_pts || next_pts < in->wakeup_pts) {
+            in->wakeup_pts = next_pts;
+            wakeup_locked(vo);
+        }
+    }
+    pthread_mutex_unlock(&in->lock);
+    return r;
+}
+
+// Direct the VO thread to put the currently queued image on the screen.
+// vo_is_ready_for_frame() must have returned true before this call.
+void vo_queue_frame(struct vo *vo, int64_t pts_us, int64_t duration)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    assert(vo->config_ok && in->num_video_queue && !in->frame_queued);
     vo->hasframe = true;
+    in->frame_queued = true;
+    in->frame_pts = pts_us;
+    in->frame_duration = duration;
+    in->frame_image = in->video_queue[0];
+    in->num_video_queue--;
+    for (int n = 0; n < in->num_video_queue; n++)
+        in->video_queue[n] = in->video_queue[n + 1];
+    in->wakeup_pts = 0;
+    wakeup_locked(vo);
+    pthread_mutex_unlock(&in->lock);
 }
 
-void vo_flip_page(struct vo *vo, int64_t pts_us, int duration)
+// If a frame is currently being rendered (or queued), wait until it's done.
+// Otherwise, return immediately.
+void vo_wait_frame(struct vo *vo)
 {
-    if (!vo->config_ok)
-        return;
-    vo->want_redraw = false;
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    while (in->frame_queued || in->rendering)
+        pthread_cond_wait(&in->wakeup, &in->lock);
+    pthread_mutex_unlock(&in->lock);
+}
+
+static bool render_frame(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    pthread_mutex_lock(&in->lock);
+
+    int64_t pts = in->frame_pts;
+    int64_t duration = in->frame_duration;
+    struct mp_image *img = in->frame_image;
+    if (!img) {
+        pthread_mutex_unlock(&in->lock);
+        return false;
+    }
+
+    assert(!!img == in->frame_queued);
+    in->rendering = true;
+    in->frame_queued = false;
+    in->frame_image = NULL;
+
+    pthread_mutex_unlock(&in->lock);
+
+    vo->driver->draw_image(vo, img);
+
+    int64_t target = pts - in->flip_queue_offset;
+    while (1) {
+        int64_t now = mp_time_us();
+        if (target <= now)
+            break;
+        mp_sleep_us(target - now);
+    }
+
     if (vo->driver->flip_page_timed)
-        vo->driver->flip_page_timed(vo, pts_us, duration);
+        vo->driver->flip_page_timed(vo, pts, duration);
+    else
+        vo->driver->flip_page(vo);
+
+    vo->want_redraw = false;
+
+    pthread_mutex_lock(&in->lock);
+    in->request_redraw = false;
+    in->rendering = false;
+    pthread_cond_signal(&in->wakeup); // for vo_wait_frame()
+    mp_input_wakeup(vo->input_ctx);
+    pthread_mutex_unlock(&in->lock);
+
+    return true;
+}
+
+static void do_redraw(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    pthread_mutex_lock(&in->lock);
+    in->request_redraw = false;
+    pthread_mutex_unlock(&in->lock);
+
+    vo->want_redraw = false;
+
+    if (!vo->config_ok || vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1)
+        return;
+
+    if (vo->driver->flip_page_timed)
+        vo->driver->flip_page_timed(vo, 0, -1);
     else
         vo->driver->flip_page(vo);
 }
 
-void vo_redraw(struct vo *vo)
+static void *vo_thread(void *ptr)
 {
-    vo->want_redraw = false;
-    if (vo->config_ok && vo_control(vo, VOCTRL_REDRAW_FRAME, NULL) == true)
-        vo_flip_page(vo, 0, -1);
+    struct vo *vo = ptr;
+    struct vo_internal *in = vo->in;
+
+    int r = vo->driver->preinit(vo) ? -1 : 0;
+    mp_rendezvous(vo, r); // init barrier
+    if (r < 0)
+        return NULL;
+
+    while (1) {
+        mp_dispatch_queue_process(vo->in->dispatch, 0);
+        if (in->terminate)
+            break;
+        vo->driver->control(vo, VOCTRL_CHECK_EVENTS, NULL);
+        bool frame_shown = render_frame(vo);
+        int64_t now = mp_time_us();
+        int64_t wait_until = now + (frame_shown ? 0 : (int64_t)1e9);
+        pthread_mutex_lock(&in->lock);
+        if (in->wakeup_pts) {
+            if (in->wakeup_pts > now) {
+                wait_until = MPMIN(wait_until, in->wakeup_pts);
+            } else {
+                in->wakeup_pts = 0;
+                mp_input_wakeup(vo->input_ctx);
+            }
+        }
+        vo->want_redraw |= in->request_redraw;
+        pthread_mutex_unlock(&in->lock);
+        if (wait_until > now && vo->want_redraw) {
+            do_redraw(vo); // now is a good time
+            continue;
+        }
+        wait_vo(vo, wait_until);
+    }
+    forget_frames(vo); // implicitly synchronized
+    vo->driver->uninit(vo);
+    return NULL;
 }
 
-void vo_check_events(struct vo *vo)
+// Make the VO redraw the OSD at some point in the future.
+void vo_redraw(struct vo *vo)
 {
-    vo_control(vo, VOCTRL_CHECK_EVENTS, NULL);
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    if (!in->request_redraw) {
+        in->request_redraw = true;
+        wakeup_locked(vo);
+    }
+    pthread_mutex_unlock(&in->lock);
 }
 
 void vo_seek_reset(struct vo *vo)
 {
-    vo_control(vo, VOCTRL_RESET, NULL);
+    pthread_mutex_lock(&vo->in->lock);
     forget_frames(vo);
     vo->hasframe = false;
+    pthread_mutex_unlock(&vo->in->lock);
+    vo_control(vo, VOCTRL_RESET, NULL);
 }
 
 // Calculate the appropriate source and destination rectangle to
@@ -376,6 +680,7 @@ void vo_seek_reset(struct vo *vo)
 // out_src: visible part of the video
 // out_dst: area of screen covered by the video source rectangle
 // out_osd: OSD size, OSD margins, etc.
+// Must be called from the VO thread only.
 void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
                           struct mp_rect *out_dst, struct mp_osd_res *out_osd)
 {
@@ -392,11 +697,23 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
 // Return the window title the VO should set. Always returns a null terminated
 // string. The string is valid until frontend code is invoked again. Copy it if
 // you need to keep the string for an extended period of time.
+// Must be called from the VO thread only.
+// Don't use for new code.
 const char *vo_get_window_title(struct vo *vo)
 {
-    if (!vo->window_title)
-        vo->window_title = talloc_strdup(vo, "");
-    return vo->window_title;
+    if (!vo->in->window_title)
+        vo->in->window_title = talloc_strdup(vo, "");
+    return vo->in->window_title;
+}
+
+// flip_page[_timed] will be called this many microseconds too early.
+// (For vo_vdpau, which does its own timing.)
+void vo_set_flip_queue_offset(struct vo *vo, int64_t us)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    in->flip_queue_offset = us;
+    pthread_mutex_unlock(&in->lock);
 }
 
 /**

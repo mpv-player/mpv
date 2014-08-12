@@ -2987,10 +2987,3 @@ Miscellaneous
         if there is enough interest).
 
         This affects most third-party GUI frontends.
-
-``--softsleep``
-    Time frames by repeatedly checking the current time instead of asking
-    the kernel to wake up mpv at the correct time. Useful if your kernel
-    timing is imprecise and you cannot use the RTC either. Comes at the
-    price of higher CPU consumption.
-

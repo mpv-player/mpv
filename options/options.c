@@ -494,8 +494,6 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("autosync", autosync, 0, 0, 10000,
                       ({"no", -1})),
 
-    OPT_FLAG("softsleep", softsleep, 0),
-
     OPT_CHOICE("term-osd", term_osd, 0,
                ({"force", 1},
                 {"auto", 2},

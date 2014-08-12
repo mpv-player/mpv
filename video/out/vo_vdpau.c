@@ -99,6 +99,7 @@ struct vdpctx {
     int                                chroma_deint;
     int                                flip_offset_window;
     int                                flip_offset_fs;
+    int                                flip_offset_ms;
     bool                               flip;
 
     VdpRect                            src_rect_vid;
@@ -250,11 +251,11 @@ static void resize(struct vo *vo)
     vc->src_rect_vid.y0 = vc->flip ? src_rect.y1 : src_rect.y0;
     vc->src_rect_vid.y1 = vc->flip ? src_rect.y0 : src_rect.y1;
 
-    int flip_offset_ms = vo->opts->fullscreen ?
+    vc->flip_offset_ms = vo->opts->fullscreen ?
                          vc->flip_offset_fs :
                          vc->flip_offset_window;
 
-    vo->flip_queue_offset = flip_offset_ms / 1000.;
+    vo_set_flip_queue_offset(vo, vc->flip_offset_ms * 1000);
 
     if (vc->output_surface_width < vo->dwidth
         || vc->output_surface_height < vo->dheight) {
@@ -765,12 +766,12 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 
     /* This should normally never happen.
      * - The last queued frame can't have a PTS that goes more than 50ms in the
-     *   future. This is guaranteed by the playloop, which currently actually
-     *   roughly queues 50ms ahead, plus the flip queue offset. Just to be sure
+     *   future. This is guaranteed by vo.c, which currently actually queues
+     *   ahead by roughly 50ms, plus the flip queue offset. Just to be sure
      *   give some additional room by doubling the time.
      * - The last vsync can never be in the future.
      */
-    int64_t max_pts_ahead = (vo->flip_queue_offset + 0.050) * 2 * 1e9;
+    int64_t max_pts_ahead = (vc->flip_offset_ms + 50) * 1000 * 1000 * 2;
     if (vc->last_queue_time > now + max_pts_ahead ||
         vc->recent_vsync_time > now)
     {
@@ -1024,8 +1025,6 @@ static int preinit(struct vo *vo)
     vc->vdp = &vc->mpvdp->vdp;
 
     vc->video_eq.capabilities = MP_CSP_EQ_CAPS_COLORMATRIX;
-
-    vo->max_video_queue = 2;
 
     return 0;
 }

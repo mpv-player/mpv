@@ -123,7 +123,6 @@ static int preinit(struct vo *vo)
     struct priv *p = vo->priv;
     if (p->outdir && !checked_mkdir(vo, p->outdir))
         return -1;
-    vo->untimed = true;
     return 0;
 }
 
@@ -138,6 +137,7 @@ const struct vo_driver video_out_image =
 {
     .description = "Write video frames to image files",
     .name = "image",
+    .untimed = true,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_SUBSTRUCT("", opts, image_writer_conf, 0),

@@ -1667,11 +1667,6 @@ draw_osd:
 
     osd_draw(p->osd_state, p->osd_rect, p->osd_pts, 0, p->osd->formats,
              draw_osd_cb, p);
-
-    // The playloop calls this last before waiting some time until it decides
-    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
-    // while we sleep (this happens asynchronously).
-    gl->Flush();
 }
 
 static void update_window_sized_objects(struct gl_video *p)

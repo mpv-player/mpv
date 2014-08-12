@@ -501,7 +501,7 @@ static bool handle_char(struct vo_w32_state *w32, wchar_t wc)
 static void signal_events(struct vo_w32_state *w32, int events)
 {
     w32->event_flags |= events;
-    mp_input_wakeup(w32->input_ctx);
+    vo_wakeup(w32->vo);
 }
 
 static void wakeup_gui_thread(void *ctx)

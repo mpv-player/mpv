@@ -613,25 +613,6 @@ static int update_video(struct MPContext *mpctx, double endpts, bool reconfig_ok
     return VD_NEW_FRAME;
 }
 
-static double timing_sleep(struct MPContext *mpctx, double time_frame)
-{
-    // assume kernel HZ=100 for softsleep, works with larger HZ but with
-    // unnecessarily high CPU usage
-    struct MPOpts *opts = mpctx->opts;
-    double margin = opts->softsleep ? 0.011 : 0;
-    while (time_frame > margin) {
-        mp_sleep_us(1000000 * (time_frame - margin));
-        time_frame -= get_relative_time(mpctx);
-    }
-    if (opts->softsleep) {
-        if (time_frame < 0)
-            MP_WARN(mpctx, "Warning! Softsleep underflow!\n");
-        while (time_frame > 0)
-            time_frame -= get_relative_time(mpctx);  // burn the CPU
-    }
-    return time_frame;
-}
-
 static void update_avsync(struct MPContext *mpctx)
 {
     if (mpctx->audio_status != STATUS_PLAYING ||
@@ -673,7 +654,6 @@ static void adjust_sync(struct MPContext *mpctx, double frame_time)
     double v_pts = mpctx->video_next_pts;
     double av_delay = a_pts - v_pts;
     // Try to sync vo_flip() so it will *finish* at given time
-    av_delay += mpctx->last_vo_flip_duration;
     av_delay += mpctx->audio_delay;   // This much pts difference is desired
 
     double change = av_delay * 0.1;
@@ -772,7 +752,6 @@ void write_video(struct MPContext *mpctx, double endpts)
         return;
 
     mpctx->time_frame -= get_relative_time(mpctx);
-    double audio_pts = playing_audio_pts(mpctx);
     if (!mpctx->sync_audio_to_video || mpctx->video_status < STATUS_READY) {
         mpctx->time_frame = 0;
     } else if (mpctx->audio_status == STATUS_PLAYING &&
@@ -806,24 +785,32 @@ void write_video(struct MPContext *mpctx, double endpts)
          * If untimed is set always output frames immediately
          * without sleeping.
          */
-        if (mpctx->time_frame < -0.2 || opts->untimed || vo->untimed)
+        if (mpctx->time_frame < -0.2 || opts->untimed || vo->driver->untimed)
             mpctx->time_frame = 0;
     }
 
-    double vsleep = mpctx->time_frame - vo->flip_queue_offset;
-    if (vsleep > 0.050) {
-        mpctx->sleeptime = MPMIN(mpctx->sleeptime, vsleep - 0.040);
-        return;
-    }
-    mpctx->sleeptime = 0;
-    mpctx->playing_last_frame = false;
-
     // last frame case
+    // TODO: should be _after_ wait
+    mpctx->playing_last_frame = false;
     if (r != VD_NEW_FRAME)
         return;
 
-    //=================== FLIP PAGE (VIDEO BLT): ======================
+    double time_frame = MPMAX(mpctx->time_frame, -1);
+    int64_t pts = mp_time_us() + (int64_t)(time_frame * 1e6);
 
+    if (!vo_is_ready_for_frame(vo, pts))
+        return; // wait until VO wakes us up to get more frames
+
+    int64_t duration = -1;
+    double vpts0 = vo_get_next_pts(vo, 0);
+    double vpts1 = vo_get_next_pts(vo, 1);
+    if (vpts0 != MP_NOPTS_VALUE && vpts1 != MP_NOPTS_VALUE) {
+        // expected A/V sync correction is ignored
+        double diff = (vpts1 - vpts0) / opts->playback_speed;
+        if (mpctx->time_frame < 0)
+            diff += mpctx->time_frame;
+        duration = MPCLAMP(diff, 0, 10) * 1e6;
+    }
 
     mpctx->video_pts = mpctx->video_next_pts;
     mpctx->last_vo_pts = mpctx->video_pts;
@@ -832,66 +819,17 @@ void write_video(struct MPContext *mpctx, double endpts)
     update_subtitles(mpctx);
     update_osd_msg(mpctx);
 
-    MP_STATS(mpctx, "vo draw frame");
+    vo_queue_frame(vo, pts, duration);
 
-    vo_new_frame_imminent(vo);
-
-    MP_STATS(mpctx, "vo sleep");
-
+    // For print_status - VO call finishing early is OK for sync
     mpctx->time_frame -= get_relative_time(mpctx);
-    mpctx->time_frame -= vo->flip_queue_offset;
-    if (mpctx->time_frame > 0.001)
-        mpctx->time_frame = timing_sleep(mpctx, mpctx->time_frame);
-    mpctx->time_frame += vo->flip_queue_offset;
 
-    int64_t t2 = mp_time_us();
-    /* Playing with playback speed it's possible to get pathological
-     * cases with mpctx->time_frame negative enough to cause an
-     * overflow in pts_us calculation, thus the MPMAX. */
-    double time_frame = MPMAX(mpctx->time_frame, -1);
-    int64_t pts_us = mpctx->last_time + time_frame * 1e6;
-    int duration = -1;
-    double pts2 = vo_get_next_pts(vo, 0); // this is the next frame PTS
-    if (mpctx->video_pts != MP_NOPTS_VALUE && pts2 == MP_NOPTS_VALUE) {
-        // Make up a frame duration. Using the frame rate is not a good
-        // choice, since the frame rate could be unset/broken/random.
-        float fps = mpctx->d_video->fps;
-        double frame_duration = fps > 0 ? 1.0 / fps : 0;
-        pts2 = mpctx->video_pts + MPCLAMP(frame_duration, 0.0, 5.0);
-    }
-    if (pts2 != MP_NOPTS_VALUE) {
-        // expected A/V sync correction is ignored
-        double diff = (pts2 - mpctx->video_pts);
-        diff /= opts->playback_speed;
-        if (mpctx->time_frame < 0)
-            diff += mpctx->time_frame;
-        if (diff < 0)
-            diff = 0;
-        if (diff > 10)
-            diff = 10;
-        duration = diff * 1e6;
-        mpctx->last_frame_duration = diff;
-    }
-    if (mpctx->video_status != STATUS_PLAYING)
-        duration = -1;
-
-    MP_STATS(mpctx, "start flip");
-    vo_flip_page(vo, pts_us | 1, duration);
-    MP_STATS(mpctx, "end flip");
-
-    if (audio_pts != MP_NOPTS_VALUE)
-        MP_STATS(mpctx, "value %f ptsdiff", mpctx->video_pts - audio_pts);
-
-    mpctx->last_vo_flip_duration = (mp_time_us() - t2) * 0.000001;
-    if (vo->driver->flip_page_timed) {
-        // No need to adjust sync based on flip speed
-        mpctx->last_vo_flip_duration = 0;
-        // For print_status - VO call finishing early is OK for sync
-        mpctx->time_frame -= get_relative_time(mpctx);
-    }
     mpctx->shown_vframes++;
-    if (mpctx->video_status < STATUS_PLAYING)
+    if (mpctx->video_status < STATUS_PLAYING) {
         mpctx->video_status = STATUS_READY;
+        // After a seek, make sure to wait until the first frame is visible.
+        vo_wait_frame(vo);
+    }
     update_avsync(mpctx);
     screenshot_flip(mpctx);
 

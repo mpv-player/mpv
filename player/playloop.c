@@ -516,8 +516,7 @@ static void handle_osd_redraw(struct MPContext *mpctx)
     // Don't redraw immediately during a seek (makes it significantly slower).
     if (mp_time_sec() - mpctx->start_timestamp < 0.1)
         return;
-    bool want_redraw = vo_get_want_redraw(mpctx->video_out) |
-                       osd_query_and_reset_want_redraw(mpctx->osd);
+    bool want_redraw = osd_query_and_reset_want_redraw(mpctx->osd);
     if (!want_redraw)
         return;
     vo_redraw(mpctx->video_out);
@@ -806,22 +805,6 @@ static void handle_dummy_ticks(struct MPContext *mpctx)
     }
 }
 
-static double get_wakeup_period(struct MPContext *mpctx)
-{
-    double sleeptime = 100.0; // infinite for all practical purposes
-
-#if !HAVE_POSIX_SELECT
-    // No proper file descriptor event handling; keep waking up to poll input
-    sleeptime = MPMIN(sleeptime, 0.02);
-#endif
-
-    if (mpctx->video_out)
-        if (mpctx->video_out->wakeup_period > 0)
-            sleeptime = MPMIN(sleeptime, mpctx->video_out->wakeup_period);
-
-    return sleeptime;
-}
-
 void run_playloop(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -850,9 +833,6 @@ void run_playloop(struct MPContext *mpctx)
         if (end != MP_NOPTS_VALUE && (endpts == MP_NOPTS_VALUE || end < endpts))
             endpts = end;
     }
-
-    if (mpctx->video_out)
-        vo_check_events(mpctx->video_out);
 
     handle_cursor_autohide(mpctx);
     handle_heartbeat_cmd(mpctx);
@@ -943,7 +923,7 @@ void run_playloop(struct MPContext *mpctx)
         mp_input_get_cmd(mpctx->input, mpctx->sleeptime * 1000, true);
         MP_STATS(mpctx, "end sleep");
     }
-    mpctx->sleeptime = get_wakeup_period(mpctx);
+    mpctx->sleeptime = 100.0; // infinite for all practical purposes
 
     handle_pause_on_low_cache(mpctx);
 
@@ -982,13 +962,11 @@ void idle_loop(struct MPContext *mpctx)
             uninit |= INITIALIZED_VO;
         uninit_player(mpctx, uninit);
         handle_force_window(mpctx, false);
-        if (mpctx->video_out)
-            vo_check_events(mpctx->video_out);
         update_osd_msg(mpctx);
         handle_osd_redraw(mpctx);
         mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, mpctx->sleeptime * 1000,
                                          false);
-        mpctx->sleeptime = get_wakeup_period(mpctx);
+        mpctx->sleeptime = 100.0;
         if (cmd)
             run_command(mpctx, cmd);
         mp_cmd_free(cmd);

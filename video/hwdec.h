@@ -9,6 +9,8 @@ struct mp_hwdec_info {
     // Can be used to lazily load a requested API.
     // api_name is e.g. "vdpau" (like the fields above, without "_ctx")
     // Can be NULL, is idempotent, caller checks _ctx fields for success/access.
+    // Due to threading, the callback is the only code that is allowed to
+    // change fields in this struct after initialization.
     void (*load_api)(struct mp_hwdec_info *info, const char *api_name);
     void *load_api_ctx;
 };

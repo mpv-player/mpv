@@ -53,6 +53,7 @@ enum mp_voctrl {
 
     /* for hardware decoding */
     VOCTRL_GET_HWDEC_INFO,              // struct mp_hwdec_info**
+    VOCTRL_LOAD_HWDEC_API,              // private to vo_opengl
 
     // Redraw the image previously passed to draw_image() (basically, repeat
     // the previous draw_image call). If this is handled, the OSD should also
@@ -134,8 +135,6 @@ struct voctrl_screenshot_args {
 // VO does handle mp_image_params.rotate in 90 degree steps
 #define VO_CAP_ROTATE90 1
 
-#define VO_MAX_QUEUE 5
-
 struct vo;
 struct osd_state;
 struct mp_image;
@@ -147,6 +146,9 @@ struct vo_driver {
 
     // VO_CAP_* bits
     int caps;
+
+    // Disable video timing, push frames as quickly as possible.
+    bool untimed;
 
     const char *name;
     const char *description;
@@ -195,6 +197,22 @@ struct vo_driver {
     void (*flip_page)(struct vo *vo);
     void (*flip_page_timed)(struct vo *vo, int64_t pts_us, int duration);
 
+    /* These optional callbacks can be provided if the GUI framework used by
+     * the VO requires entering a message loop for receiving events, does not
+     * provide event_fd, and does not call vo_wakeup() from a separate thread
+     * when there are new events.
+     *
+     * wait_events() will wait for new events, until the timeout expires, or the
+     * function is interrupted. wakeup() is used to possibly interrupt the
+     * event loop (wakeup() itself must be thread-safe, and not call any other
+     * VO functions; it's the only vo_driver function with this requirement).
+     * wakeup() should behave like a binary semaphore; if wait_events() is not
+     * being called while wakeup() is, the next wait_events() call should exit
+     * immediately.
+     */
+    void (*wakeup)(struct vo *vo);
+    int (*wait_events)(struct vo *vo, int64_t until_time_us);
+
     /*
      * Closes driver. Should restore the original state of the system.
      */
@@ -206,49 +224,48 @@ struct vo_driver {
     // If not NULL, it's copied into the newly allocated private struct.
     const void *priv_defaults;
 
-    // List of options to parse into priv struct (requires privsize to be set)
+    // List of options to parse into priv struct (requires priv_size to be set)
     const struct m_option *options;
 };
 
 struct vo {
-    struct mp_log *log; // Using e.g. "[vo/vdpau]" as prefix
-    int config_ok;      // Last config call was successful?
-    struct mp_image_params *params; // Configured parameters (as in vo_reconfig)
-
-    bool probing;
-
-    bool untimed;       // non-interactive, don't do sleep calls in playloop
-
-    bool want_redraw;   // visible frame wrong (window resize), needs refresh
-    bool hasframe;      // >= 1 frame has been drawn, so redraw is possible
-    double wakeup_period; // if > 0, this sets the maximum wakeup period for event polling
-
-    double flip_queue_offset; // queue flip events at most this much in advance
-    int max_video_queue; // queue this many decoded video frames (<=VO_MAX_QUEUE)
-
-    // Frames to display; the next (i.e. oldest, lowest PTS) image has index 0.
-    struct mp_image *video_queue[VO_MAX_QUEUE];
-    int num_video_queue;
-
     const struct vo_driver *driver;
+    struct mp_log *log; // Using e.g. "[vo/vdpau]" as prefix
     void *priv;
-    struct mp_vo_opts *opts;
     struct mpv_global *global;
     struct vo_x11_state *x11;
     struct vo_w32_state *w32;
     struct vo_cocoa_state *cocoa;
     struct vo_wayland_state *wayland;
-    struct encode_lavc_context *encode_lavc_ctx;
     struct input_ctx *input_ctx;
     struct osd_state *osd;
+    struct encode_lavc_context *encode_lavc_ctx;
+    struct vo_internal *in;
+    struct mp_vo_opts *opts;
+
+    // --- The following fields are generally only changed during initialization.
+
     int event_fd;  // check_events() should be called when this has input
+    bool probing;
+
+    // --- The following fields are only changed with vo_reconfig(), and can
+    //     be accessed unsynchronized (read-only).
+
+    int config_ok;      // Last config call was successful?
+    struct mp_image_params *params; // Configured parameters (as in vo_reconfig)
+
+    // --- The following fields can be accessed only by the VO thread, or from
+    //     anywhere _if_ the VO thread is suspended (use vo->dispatch).
+
+    bool want_redraw;   // redraw as soon as possible
 
     // current window state
     int dwidth;
     int dheight;
     float monitor_par;
 
-    char *window_title;
+    // --- Accessed by user-thread only.
+    bool hasframe;      // >= 1 frame has been drawn, so redraw is possible
 };
 
 struct mpv_global;
@@ -260,16 +277,18 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *p, int flags);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
 void vo_queue_image(struct vo *vo, struct mp_image *mpi);
-bool vo_get_want_redraw(struct vo *vo);
 bool vo_has_next_frame(struct vo *vo, bool eof);
 double vo_get_next_pts(struct vo *vo, int index);
 bool vo_needs_new_image(struct vo *vo);
-void vo_new_frame_imminent(struct vo *vo);
-void vo_flip_page(struct vo *vo, int64_t pts_us, int duration);
+bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts);
+void vo_queue_frame(struct vo *vo, int64_t pts_us, int64_t duration);
+void vo_wait_frame(struct vo *vo);
 void vo_redraw(struct vo *vo);
-void vo_check_events(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
+
+void vo_set_flip_queue_offset(struct vo *vo, int64_t us);
+void vo_wakeup(struct vo *vo);
 
 const char *vo_get_window_title(struct vo *vo);
 

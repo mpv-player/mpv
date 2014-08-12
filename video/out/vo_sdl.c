@@ -193,6 +193,7 @@ struct priv {
     double osd_pts;
     int mouse_hidden;
     int brightness, contrast;
+    Uint32 wakeup_event;
 
     // options
     int allow_sw;
@@ -392,6 +393,7 @@ static void resize(struct vo *vo, int w, int h)
                          &vc->osd_res);
     SDL_RenderSetLogicalSize(vc->renderer, w, h);
     vo->want_redraw = true;
+    vo_wakeup(vo);
 }
 
 static void force_resize(struct vo *vo)
@@ -535,11 +537,22 @@ static void flip_page(struct vo *vo)
     SDL_RenderPresent(vc->renderer);
 }
 
-static void check_events(struct vo *vo)
+static void wakeup(struct vo *vo)
 {
+    struct priv *vc = vo->priv;
+    SDL_Event event = {.type = vc->wakeup_event};
+    // Note that there is no context - SDL is a singleton.
+    SDL_PushEvent(&event);
+}
+
+static int wait_events(struct vo *vo, int64_t until_time_us)
+{
+    int64_t wait_us = until_time_us - mp_time_us();
+    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
     SDL_Event ev;
 
-    while (SDL_PollEvent(&ev)) {
+    while (SDL_WaitEventTimeout(&ev, timeout_ms)) {
+        timeout_ms = 0;
         switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
@@ -617,6 +630,8 @@ static void check_events(struct vo *vo)
             break;
         }
     }
+
+    return 0;
 }
 
 static void uninit(struct vo *vo)
@@ -824,8 +839,9 @@ static int preinit(struct vo *vo)
     // please reinitialize the renderer to proper size on config()
     vc->reinit_renderer = true;
 
-    // we don't have proper event handling
-    vo->wakeup_period = 0.2;
+    vc->wakeup_event = SDL_RegisterEvents(1);
+    if (vc->wakeup_event == (Uint32)-1)
+        MP_ERR(vo, "SDL_RegisterEvents() failed.\n");
 
     return 0;
 }
@@ -983,9 +999,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct priv *vc = vo->priv;
 
     switch (request) {
-    case VOCTRL_CHECK_EVENTS:
-        check_events(vo);
-        return 1;
     case VOCTRL_FULLSCREEN:
         set_fullscreen(vo);
         return 1;
@@ -1047,4 +1060,6 @@ const struct vo_driver video_out_sdl = {
     .draw_image = draw_image,
     .uninit = uninit,
     .flip_page = flip_page,
+    .wait_events = wait_events,
+    .wakeup = wakeup,
 };
