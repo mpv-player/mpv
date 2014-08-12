@@ -24,6 +24,8 @@ Release procedure
 
 - Create and/or update the ``VERSION`` file.
 
+- Update ``DOCS/client-api-changes.rst`` (on major releases).
+
 - Create tag v0.X.Y.
 
 - Push branch and tag to GitHub.
