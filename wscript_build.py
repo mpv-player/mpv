@@ -452,7 +452,7 @@ def build(ctx):
     if build_shared or build_static:
         if build_shared:
             import os
-            waftoolsdir = os.path.dirname(__file__) + os.sep + "waftools"
+            waftoolsdir = os.path.join(os.path.dirname(__file__), "waftools")
             ctx.load("syms", tooldir=waftoolsdir)
         vre = '^#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION\((.*), (.*)\)$'
         libmpv_header = ctx.path.find_node("libmpv/client.h").read()
