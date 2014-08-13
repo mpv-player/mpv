@@ -42,9 +42,11 @@ my $tmpl = <<"EOS";
 
 # mpv zsh completion
 
+local rc=1
+
 _arguments -C -S \\
 $opts_str
-  '*:files:->mfiles'
+  '*:files:->mfiles' && rc=0
 
 case \$state in
   ao)
@@ -53,7 +55,7 @@ case \$state in
 $ao_str
     )
 
-    _describe -t values 'audio outputs' values
+    _describe -t values 'audio outputs' values && rc=0
   ;;
 
   vo)
@@ -62,7 +64,7 @@ $ao_str
 $vo_str
     )
 
-    _describe -t values 'video outputs' values
+    _describe -t values 'video outputs' values && rc=0
   ;;
 
   af)
@@ -71,7 +73,7 @@ $vo_str
 $af_str
     )
 
-    _describe -t values 'audio filters' values
+    _describe -t values 'audio filters' values && rc=0
   ;;
 
   vf)
@@ -80,25 +82,26 @@ $af_str
 $vf_str
     )
 
-    _describe -t values 'video filters' values
+    _describe -t values 'video filters' values && rc=0
   ;;
 
   mfiles)
     _tags files urls
     while _tags; do
       _requested files expl 'media file' _files -g \\
-         "*.(#i)(asf|asx|avi|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|qt|rm|ts|vob|wav|webm|wma|wmv)(-.)" && ret=0
+         "*.(#i)(asf|asx|avi|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|qt|rm|ts|vob|wav|webm|wma|wmv)(-.)" && rc=0
       if _requested urls; then
         while _next_label urls expl URL; do
           _urls "\$expl[@]" && ret=0
-          compadd -S '' "\$expl[@]" $protos_str && ret=0
+          compadd -S '' "\$expl[@]" $protos_str && rc=0
         done
       fi
-      (( ret )) || return 0
+      (( rc )) || return 0
     done
   ;;
 esac
-return 1
+
+return rc
 EOS
 
 print $tmpl;
