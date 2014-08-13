@@ -606,10 +606,29 @@ static void add_new_streams(demuxer_t *demuxer)
 
 static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
 {
-#if HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA
+#if HAVE_AVFORMAT_METADATA_UPDATE_FLAG
+    lavf_priv_t *priv = demuxer->priv;
+    if (priv->avfc->event_flags & AVFMT_EVENT_FLAG_METADATA_UPDATED) {
+        mp_tags_copy_from_av_dictionary(demuxer->metadata, priv->avfc->metadata);
+        priv->avfc->event_flags = 0;
+        demux_changed(demuxer, DEMUX_EVENT_METADATA);
+    }
+    if (priv->merge_track_metadata) {
+        for (int n = 0; n < priv->num_streams; n++) {
+            AVStream *st = priv->streams[n] ? priv->avfc->streams[n] : NULL;
+            if (st->event_flags & AVSTREAM_EVENT_FLAG_METADATA_UPDATED) {
+                mp_tags_copy_from_av_dictionary(demuxer->metadata, st->metadata);
+                st->event_flags = 0;
+                demux_changed(demuxer, DEMUX_EVENT_METADATA);
+            }
+        }
+    }
+#elif HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA
     lavf_priv_t *priv = demuxer->priv;
     int md_size;
     const uint8_t *md;
+    if (!pkt)
+        return;
     md = av_packet_get_side_data(pkt, AV_PKT_DATA_METADATA_UPDATE, &md_size);
     if (md && priv->merge_track_metadata) {
         AVDictionary *dict = NULL;
@@ -740,8 +759,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     add_new_streams(demuxer);
 
-    mp_tags_copy_from_av_dictionary(demuxer->metadata, avfc->metadata);
-
     // Often useful with OGG audio-only files, which have metadata in the audio
     // track metadata instead of the main metadata.
     if (demuxer->num_streams == 1) {
@@ -751,6 +768,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                 mp_tags_copy_from_av_dictionary(demuxer->metadata, avfc->streams[n]->metadata);
         }
     }
+
+    mp_tags_copy_from_av_dictionary(demuxer->metadata, avfc->metadata);
+    update_metadata(demuxer, NULL);
 
     demuxer->ts_resets_possible = priv->avif->flags & AVFMT_TS_DISCONT;
 
