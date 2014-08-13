@@ -819,20 +819,15 @@ static bool create_cursor (struct vo_wayland_state *wl)
         return false;
     }
 
-    if (wl->cursor.pointer) {
-        // only create cursor surface if a pointer interface is available
-        // without this check it leads to problems with compositor which don't
-        // have pointer interfaces
-        wl->cursor.surface =
-            wl_compositor_create_surface(wl->display.compositor);
+    wl->cursor.surface =
+        wl_compositor_create_surface(wl->display.compositor);
 
-        if (!wl->cursor.surface)
-            return false;
+    if (!wl->cursor.surface)
+        return false;
 
-        wl->cursor.theme = wl_cursor_theme_load(NULL, 32, wl->display.shm);
-        wl->cursor.default_cursor = wl_cursor_theme_get_cursor(wl->cursor.theme,
-                                                               "left_ptr");
-    }
+    wl->cursor.theme = wl_cursor_theme_load(NULL, 32, wl->display.shm);
+    wl->cursor.default_cursor = wl_cursor_theme_get_cursor(wl->cursor.theme,
+                                                           "left_ptr");
 
     return true;
 }
