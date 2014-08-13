@@ -524,9 +524,41 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
     return r; // includes the true EOF case
 }
 
+
+/* Modify video timing to match the audio timeline. There are two main
+ * reasons this is needed. First, video and audio can start from different
+ * positions at beginning of file or after a seek (MPlayer starts both
+ * immediately even if they have different pts). Second, the file can have
+ * audio timestamps that are inconsistent with the duration of the audio
+ * packets, for example two consecutive timestamp values differing by
+ * one second but only a packet with enough samples for half a second
+ * of playback between them.
+ */
+static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time)
+{
+    struct MPOpts *opts = mpctx->opts;
+
+    if (mpctx->audio_status != STATUS_PLAYING)
+        return;
+
+    double a_pts = written_audio_pts(mpctx) - mpctx->delay;
+    double av_delay = a_pts - v_pts;
+    // Try to sync vo_flip() so it will *finish* at given time
+    av_delay += mpctx->audio_delay;   // This much pts difference is desired
+
+    double change = av_delay * 0.1;
+    double max_change = opts->default_max_pts_correction >= 0 ?
+                        opts->default_max_pts_correction : frame_time * 0.1;
+    if (change < -max_change)
+        change = -max_change;
+    else if (change > max_change)
+        change = max_change;
+    mpctx->delay += change;
+    mpctx->total_avsync_change += change;
+}
+
 // returns VD_* code
-static int update_video(struct MPContext *mpctx, double endpts,
-                        double *frame_duration)
+static int update_video(struct MPContext *mpctx, double endpts)
 {
     struct vo *vo = mpctx->video_out;
     bool eof = false;
@@ -571,7 +603,11 @@ static int update_video(struct MPContext *mpctx, double endpts,
     mpctx->video_next_pts = pts;
     if (mpctx->d_audio)
         mpctx->delay -= frame_time;
-    *frame_duration = frame_time;
+    if (mpctx->video_status >= STATUS_READY) {
+        mpctx->time_frame += frame_time / mpctx->opts->playback_speed;
+        adjust_sync(mpctx, pts, frame_time);
+    }
+    MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
     return VD_NEW_FRAME;
 }
 
@@ -596,39 +632,6 @@ static void update_avsync(struct MPContext *mpctx)
     }
 }
 
-/* Modify video timing to match the audio timeline. There are two main
- * reasons this is needed. First, video and audio can start from different
- * positions at beginning of file or after a seek (MPlayer starts both
- * immediately even if they have different pts). Second, the file can have
- * audio timestamps that are inconsistent with the duration of the audio
- * packets, for example two consecutive timestamp values differing by
- * one second but only a packet with enough samples for half a second
- * of playback between them.
- */
-static void adjust_sync(struct MPContext *mpctx, double frame_time)
-{
-    struct MPOpts *opts = mpctx->opts;
-
-    if (mpctx->audio_status != STATUS_PLAYING)
-        return;
-
-    double a_pts = written_audio_pts(mpctx) - mpctx->delay;
-    double v_pts = mpctx->video_next_pts;
-    double av_delay = a_pts - v_pts;
-    // Try to sync vo_flip() so it will *finish* at given time
-    av_delay += mpctx->audio_delay;   // This much pts difference is desired
-
-    double change = av_delay * 0.1;
-    double max_change = opts->default_max_pts_correction >= 0 ?
-                        opts->default_max_pts_correction : frame_time * 0.1;
-    if (change < -max_change)
-        change = -max_change;
-    else if (change > max_change)
-        change = max_change;
-    mpctx->delay += change;
-    mpctx->total_avsync_change += change;
-}
-
 void write_video(struct MPContext *mpctx, double endpts)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -646,8 +649,7 @@ void write_video(struct MPContext *mpctx, double endpts)
 
     update_fps(mpctx);
 
-    double frame_time = 0;
-    int r = update_video(mpctx, endpts, &frame_time);
+    int r = update_video(mpctx, endpts);
     MP_TRACE(mpctx, "update_video: %d\n", r);
 
     if (r == VD_WAIT) // Demuxer will wake us up for more packets to decode.
@@ -662,15 +664,8 @@ void write_video(struct MPContext *mpctx, double endpts)
     }
 
     if (r == VD_NEW_FRAME) {
-        MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
-
         if (mpctx->video_status > STATUS_PLAYING)
             mpctx->video_status = STATUS_PLAYING;
-
-        if (mpctx->video_status >= STATUS_READY) {
-            mpctx->time_frame += frame_time / opts->playback_speed;
-            adjust_sync(mpctx, frame_time);
-        }
     } else if (r <= 0) {
         // EOF or error
         mpctx->delay = 0;
