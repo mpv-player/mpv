@@ -564,16 +564,6 @@ static int update_video(struct MPContext *mpctx, double endpts)
     bool eof = false;
     int r = VD_PROGRESS;
 
-    // Already enough video buffered?
-    bool vo_framedrop = !!mpctx->video_out->driver->flip_page_timed;
-    int min_frames = vo_framedrop ? 2 : 1; // framedrop needs duration
-    if (!mpctx->next_frame[min_frames - 1]) {
-        r = video_output_image(mpctx, endpts);
-        if (r < 0 || r == VD_WAIT)
-            return r;
-        eof = r == VD_EOF;
-    }
-
     if (mpctx->d_video->header->attached_picture) {
         if (vo_has_frame(vo))
             return VD_EOF;
@@ -581,7 +571,20 @@ static int update_video(struct MPContext *mpctx, double endpts)
             mpctx->video_next_pts = MP_NOPTS_VALUE;
             return VD_NEW_FRAME;
         }
-        return VD_PROGRESS;
+        r = video_output_image(mpctx, MP_NOPTS_VALUE);
+        return r <= 0 ? VD_EOF: VD_PROGRESS;
+    }
+
+
+    bool vo_framedrop = !!mpctx->video_out->driver->flip_page_timed;
+    int min_frames = vo_framedrop ? 2 : 1; // framedrop needs duration
+
+    // Already enough video buffered?
+    if (!mpctx->next_frame[min_frames - 1]) {
+        r = video_output_image(mpctx, endpts);
+        if (r < 0 || r == VD_WAIT)
+            return r;
+        eof = r == VD_EOF;
     }
 
     // On EOF, we write the remaining frames; otherwise we must ensure that
