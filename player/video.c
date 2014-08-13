@@ -611,7 +611,53 @@ static int update_video(struct MPContext *mpctx, double endpts)
     return VD_NEW_FRAME;
 }
 
-static void update_avsync(struct MPContext *mpctx)
+/* Update avsync before a new video frame is displayed. Actually, this can be
+ * called arbitrarily often before the actual display.
+ * This adjusts the time of the next video frame */
+static void update_avsync_before_frame(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct vo *vo = mpctx->video_out;
+
+    if (!mpctx->sync_audio_to_video || mpctx->video_status < STATUS_READY) {
+        mpctx->time_frame = 0;
+    } else if (mpctx->audio_status == STATUS_PLAYING &&
+               mpctx->video_status == STATUS_PLAYING &&
+               !ao_untimed(mpctx->ao))
+    {
+        double buffered_audio = ao_get_delay(mpctx->ao);
+        MP_TRACE(mpctx, "audio delay=%f\n", buffered_audio);
+
+        if (opts->autosync) {
+            /* Smooth reported playback position from AO by averaging
+             * it with the value expected based on previus value and
+             * time elapsed since then. May help smooth video timing
+             * with audio output that have inaccurate position reporting.
+             * This is badly implemented; the behavior of the smoothing
+             * now undesirably depends on how often this code runs
+             * (mainly depends on video frame rate). */
+            float predicted = mpctx->delay / opts->playback_speed +
+                              mpctx->time_frame;
+            float difference = buffered_audio - predicted;
+            buffered_audio = predicted + difference / opts->autosync;
+        }
+
+        mpctx->time_frame = buffered_audio - mpctx->delay / opts->playback_speed;
+    } else {
+        /* If we're more than 200 ms behind the right playback
+         * position, don't try to speed up display of following
+         * frames to catch up; continue with default speed from
+         * the current frame instead.
+         * If untimed is set always output frames immediately
+         * without sleeping.
+         */
+        if (mpctx->time_frame < -0.2 || opts->untimed || vo->driver->untimed)
+            mpctx->time_frame = 0;
+    }
+}
+
+// Update the A/V sync difference after a video frame has been shown.
+static void update_avsync_after_frame(struct MPContext *mpctx)
 {
     if (mpctx->audio_status != STATUS_PLAYING ||
         mpctx->video_status != STATUS_PLAYING)
@@ -683,42 +729,7 @@ void write_video(struct MPContext *mpctx, double endpts)
     }
 
     mpctx->time_frame -= get_relative_time(mpctx);
-    if (!mpctx->sync_audio_to_video || mpctx->video_status < STATUS_READY) {
-        mpctx->time_frame = 0;
-    } else if (mpctx->audio_status == STATUS_PLAYING &&
-               mpctx->video_status == STATUS_PLAYING &&
-               !ao_untimed(mpctx->ao))
-    {
-        double buffered_audio = ao_get_delay(mpctx->ao);
-        MP_TRACE(mpctx, "audio delay=%f\n", buffered_audio);
-
-        if (opts->autosync) {
-            /* Smooth reported playback position from AO by averaging
-             * it with the value expected based on previus value and
-             * time elapsed since then. May help smooth video timing
-             * with audio output that have inaccurate position reporting.
-             * This is badly implemented; the behavior of the smoothing
-             * now undesirably depends on how often this code runs
-             * (mainly depends on video frame rate). */
-            float predicted = (mpctx->delay / opts->playback_speed +
-                                mpctx->time_frame);
-            float difference = buffered_audio - predicted;
-            buffered_audio = predicted + difference / opts->autosync;
-        }
-
-        mpctx->time_frame = (buffered_audio -
-                                mpctx->delay / opts->playback_speed);
-    } else {
-        /* If we're more than 200 ms behind the right playback
-         * position, don't try to speed up display of following
-         * frames to catch up; continue with default speed from
-         * the current frame instead.
-         * If untimed is set always output frames immediately
-         * without sleeping.
-         */
-        if (mpctx->time_frame < -0.2 || opts->untimed || vo->driver->untimed)
-            mpctx->time_frame = 0;
-    }
+    update_avsync_before_frame(mpctx);
 
     if (r != VD_NEW_FRAME)
         return;
@@ -785,7 +796,7 @@ void write_video(struct MPContext *mpctx, double endpts)
         // After a seek, make sure to wait until the first frame is visible.
         vo_wait_frame(vo);
     }
-    update_avsync(mpctx);
+    update_avsync_after_frame(mpctx);
     screenshot_flip(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
