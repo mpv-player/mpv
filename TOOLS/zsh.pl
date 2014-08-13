@@ -98,6 +98,7 @@ $vf_str
     done
   ;;
 esac
+return 1
 EOS
 
 print $tmpl;
