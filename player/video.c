@@ -637,6 +637,13 @@ void write_video(struct MPContext *mpctx, double endpts)
     if (!mpctx->d_video)
         return;
 
+    // Actual playback starts when both audio and video are ready.
+    if (mpctx->video_status == STATUS_READY)
+        return;
+
+    if (mpctx->paused && mpctx->video_status >= STATUS_READY)
+        return;
+
     update_fps(mpctx);
 
     double frame_time = 0;
@@ -679,13 +686,6 @@ void write_video(struct MPContext *mpctx, double endpts)
         mpctx->sleeptime = 0;
         MP_TRACE(mpctx, "filtering more video\n");
     }
-
-    // Actual playback starts when both audio and video are ready.
-    if (mpctx->video_status == STATUS_READY)
-        return;
-
-    if (mpctx->paused && mpctx->video_status >= STATUS_READY)
-        return;
 
     mpctx->time_frame -= get_relative_time(mpctx);
     if (!mpctx->sync_audio_to_video || mpctx->video_status < STATUS_READY) {
