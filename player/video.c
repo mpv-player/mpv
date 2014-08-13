@@ -327,24 +327,20 @@ void mp_force_video_refresh(struct MPContext *mpctx)
         queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->last_vo_pts, 2, true);
 }
 
-static int check_framedrop(struct MPContext *mpctx, double frame_time)
+static int check_framedrop(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct track *t_audio = mpctx->current_track[0][STREAM_AUDIO];
-    struct sh_stream *sh_audio = t_audio ? t_audio->stream : NULL;
     // check for frame-drop:
-    if (mpctx->d_audio && mpctx->ao && !ao_untimed(mpctx->ao) && sh_audio &&
-        !demux_stream_eof(sh_audio))
+    if (mpctx->video_status == STATUS_PLAYING && !mpctx->paused &&
+        mpctx->audio_status == STATUS_PLAYING && !ao_untimed(mpctx->ao))
     {
         float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
         float d = delay - mpctx->delay;
         float fps = mpctx->d_video->fps;
-        if (frame_time < 0)
-            frame_time = fps > 0 ? 1.0 / fps : 0;
+        double frame_time = fps > 0 ? 1.0 / fps : 0;
         // we should avoid dropping too many frames in sequence unless we
         // are too late. and we allow 100ms A-V delay here:
-        if (d < -mpctx->dropped_frames * frame_time - 0.100 && !mpctx->paused
-            && mpctx->video_status == STATUS_PLAYING) {
+        if (d < -mpctx->dropped_frames * frame_time - 0.100) {
             mpctx->drop_frame_cnt++;
             mpctx->dropped_frames++;
             return mpctx->opts->frame_dropping;
@@ -379,7 +375,7 @@ static int decode_image(struct MPContext *mpctx)
     }
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
     int framedrop_type = hrseek && mpctx->hrseek_framedrop ?
-                         2 : check_framedrop(mpctx, -1);
+                         2 : check_framedrop(mpctx);
     d_video->waiting_decoded_mpi =
         video_decode(d_video, pkt, framedrop_type);
     bool had_packet = !!pkt;
