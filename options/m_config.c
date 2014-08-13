@@ -764,6 +764,8 @@ void m_config_print_option_list(const struct m_config *config)
             MP_INFO(config, " [global]");
         if (opt->flags & M_OPT_NOCFG)
             MP_INFO(config, " [nocfg]");
+        if (opt->flags & M_OPT_FILE)
+            MP_INFO(config, " [file]");
         MP_INFO(config, "\n");
         count++;
     }

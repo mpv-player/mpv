@@ -84,13 +84,13 @@ extern const struct m_obj_list ao_obj_list;
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
     {"v", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, .offset = -1},
-    {"playlist", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED,
+    {"playlist", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED | M_OPT_FILE,
      .min = 1, .offset = -1},
     {"{", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
     {"}", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
 
     // handled in m_config.c
-    { "include", CONF_TYPE_STRING, M_OPT_FIXED, .offset = -1},
+    { "include", CONF_TYPE_STRING, M_OPT_FIXED | M_OPT_FILE, .offset = -1},
     { "profile", CONF_TYPE_STRING_LIST, M_OPT_FIXED, .offset = -1},
     { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
     { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
@@ -127,7 +127,7 @@ const m_option_t mp_opts[] = {
     OPT_STRINGLIST("reset-on-next-file", reset_options, M_OPT_GLOBAL),
 
 #if HAVE_LUA
-    OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL),
+    OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL | M_OPT_FILE),
     OPT_KEYVALUELIST("lua-opts", lua_opts, M_OPT_GLOBAL),
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
     OPT_FLAG("load-scripts", auto_load_scripts, CONF_GLOBAL),
@@ -142,11 +142,11 @@ const m_option_t mp_opts[] = {
                       ({"no", 0})),
     OPT_INTRANGE("cache-initial", stream_cache.initial, 0, 0, 0x7fffffff),
     OPT_INTRANGE("cache-seek-min", stream_cache.seek_min, 0, 0, 0x7fffffff),
-    OPT_STRING("cache-file", stream_cache.file, 0),
+    OPT_STRING("cache-file", stream_cache.file, M_OPT_FILE),
     OPT_INTRANGE("cache-file-size", stream_cache.file_max, 0, 0, 0x7fffffff),
 
 #if HAVE_DVDREAD || HAVE_DVDNAV
-    OPT_STRING("dvd-device", dvd_device, 0),
+    OPT_STRING("dvd-device", dvd_device, M_OPT_FILE),
     OPT_INT("dvd-speed", dvd_speed, 0),
     OPT_INTRANGE("dvd-angle", dvd_angle, 0, 1, 99),
 #endif /* HAVE_DVDREAD */
@@ -154,7 +154,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
                       ({"auto", -1})),
 #if HAVE_LIBBLURAY
-    OPT_STRING("bluray-device", bluray_device, 0),
+    OPT_STRING("bluray-device", bluray_device, M_OPT_FILE),
     OPT_INTRANGE("bluray-angle", bluray_angle, 0, 0, 999),
 #endif /* HAVE_LIBBLURAY */
 
@@ -162,14 +162,14 @@ const m_option_t mp_opts[] = {
     OPT_STRING("user-agent", network_useragent, 0),
     OPT_STRING("referrer", network_referrer, 0),
     OPT_FLAG("cookies", network_cookies_enabled, 0),
-    OPT_STRING("cookies-file", network_cookies_file, 0),
+    OPT_STRING("cookies-file", network_cookies_file, M_OPT_FILE),
     OPT_CHOICE("rtsp-transport", network_rtsp_transport, 0,
                ({"lavf", 0},
                 {"udp", 1},
                 {"tcp", 2},
                 {"http", 3})),
     OPT_FLAG("tls-verify", network_tls_verify, 0),
-    OPT_STRING("tls-ca-file", network_tls_ca_file, 0),
+    OPT_STRING("tls-ca-file", network_tls_ca_file, M_OPT_FILE),
 
 // ------------------------- demuxer options --------------------
 
@@ -207,11 +207,11 @@ const m_option_t mp_opts[] = {
 
 #if HAVE_CDDA
     OPT_SUBSTRUCT("cdda", stream_cdda_opts, stream_cdda_conf, 0),
-    OPT_STRING("cdrom-device", cdrom_device, 0),
+    OPT_STRING("cdrom-device", cdrom_device, M_OPT_FILE),
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
-    OPT_STRING_APPEND_LIST("audio-file", audio_files, 0),
+    OPT_STRING_APPEND_LIST("audio-file", audio_files, M_OPT_FILE),
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
@@ -301,7 +301,7 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- subtitles options --------------------
 
-    OPT_STRING_APPEND_LIST("sub-file", sub_name, 0),
+    OPT_STRING_APPEND_LIST("sub-file", sub_name, M_OPT_FILE),
     OPT_PATHLIST("sub-paths", sub_paths, 0),
     OPT_STRING("sub-codepage", sub_cp, 0),
     OPT_FLOAT("sub-delay", sub_delay, 0),
@@ -326,7 +326,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ass-vsfilter-blur-compat", ass_vsfilter_blur_compat, 0),
     OPT_FLAG("embeddedfonts", use_embedded_fonts, 0),
     OPT_STRINGLIST("ass-force-style", ass_force_style_list, 0),
-    OPT_STRING("ass-styles", ass_styles_file, 0),
+    OPT_STRING("ass-styles", ass_styles_file, M_OPT_FILE),
     OPT_CHOICE("ass-hinting", ass_hinting, 0,
                ({"none", 0}, {"light", 1}, {"normal", 2}, {"native", 3})),
     OPT_CHOICE("ass-shaper", ass_shaper, 0,
@@ -476,8 +476,8 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("untimed", untimed, M_OPT_FIXED),
 
-    OPT_STRING("stream-capture", stream_capture, M_OPT_FIXED),
-    OPT_STRING("stream-dump", stream_dump, M_OPT_FIXED),
+    OPT_STRING("stream-capture", stream_capture, M_OPT_FIXED | M_OPT_FILE),
+    OPT_STRING("stream-dump", stream_dump, M_OPT_FIXED | M_OPT_FILE),
 
     OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 2, 10000,
                       ({"no", -1}, {"1", -1},
@@ -489,7 +489,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("write-filename-in-watch-later-config", write_filename_in_watch_later_config, 0),
 
     OPT_FLAG("ordered-chapters", ordered_chapters, 0),
-    OPT_STRING("ordered-chapters-files", ordered_chapters_files, 0),
+    OPT_STRING("ordered-chapters-files", ordered_chapters_files, M_OPT_FILE),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),
 
     OPT_DOUBLE("chapter-seek-threshold", chapter_seek_threshold, 0),
