@@ -357,6 +357,9 @@ struct m_option {
 // See M_OPT_TYPE_OPTIONAL_PARAM.
 #define M_OPT_OPTIONAL_PARAM    (1 << 10)
 
+// The option expects a file name (or a list of file names)
+#define M_OPT_FILE              (1 << 11)
+
 // These are kept for compatibility with older code.
 #define CONF_MIN                M_OPT_MIN
 #define CONF_MAX                M_OPT_MAX
