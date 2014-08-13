@@ -518,7 +518,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
         int pos = mpctx->next_frame[0] ? 1 : 0;
         assert(!mpctx->next_frame[pos]);
         mpctx->next_frame[pos] = img;
-        return VD_PROGRESS;
+        return VD_NEW_FRAME;
     }
 
     return r; // includes the true EOF case
@@ -562,12 +562,13 @@ static int update_video(struct MPContext *mpctx, double endpts)
 {
     struct vo *vo = mpctx->video_out;
     bool eof = false;
+    int r = VD_PROGRESS;
 
     // Already enough video buffered?
     bool vo_framedrop = !!mpctx->video_out->driver->flip_page_timed;
     int min_frames = vo_framedrop ? 2 : 1; // framedrop needs duration
     if (!mpctx->next_frame[min_frames - 1]) {
-        int r = video_output_image(mpctx, endpts);
+        r = video_output_image(mpctx, endpts);
         if (r < 0 || r == VD_WAIT)
             return r;
         eof = r == VD_EOF;
@@ -590,24 +591,26 @@ static int update_video(struct MPContext *mpctx, double endpts)
     if (!mpctx->next_frame[min_frames - 1])
         return eof ? VD_EOF : VD_PROGRESS;
 
-    double pts = mpctx->next_frame[0]->pts;
-    double last_pts = mpctx->video_next_pts;
-    if (last_pts == MP_NOPTS_VALUE)
-        last_pts = pts;
-    double frame_time = pts - last_pts;
-    if (frame_time < 0 || frame_time >= 60) {
-        // Assume a PTS difference >= 60 seconds is a discontinuity.
-        MP_WARN(mpctx, "Jump in video pts: %f -> %f\n", last_pts, pts);
-        frame_time = 0;
+    if (r == VD_NEW_FRAME) {
+        double pts = mpctx->next_frame[0]->pts;
+        double last_pts = mpctx->video_next_pts;
+        if (last_pts == MP_NOPTS_VALUE)
+            last_pts = pts;
+        double frame_time = pts - last_pts;
+        if (frame_time < 0 || frame_time >= 60) {
+            // Assume a PTS difference >= 60 seconds is a discontinuity.
+            MP_WARN(mpctx, "Jump in video pts: %f -> %f\n", last_pts, pts);
+            frame_time = 0;
+        }
+        mpctx->video_next_pts = pts;
+        if (mpctx->d_audio)
+            mpctx->delay -= frame_time;
+        if (mpctx->video_status >= STATUS_READY) {
+            mpctx->time_frame += frame_time / mpctx->opts->playback_speed;
+            adjust_sync(mpctx, pts, frame_time);
+        }
+        MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
     }
-    mpctx->video_next_pts = pts;
-    if (mpctx->d_audio)
-        mpctx->delay -= frame_time;
-    if (mpctx->video_status >= STATUS_READY) {
-        mpctx->time_frame += frame_time / mpctx->opts->playback_speed;
-        adjust_sync(mpctx, pts, frame_time);
-    }
-    MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
     return VD_NEW_FRAME;
 }
 
