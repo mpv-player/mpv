@@ -170,6 +170,9 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer)
                                      VDP_NUM_MIXER_PARAMETER,
                                      parameters, parameter_values,
                                      &mixer->video_mixer);
+    if (vdp_st != VDP_STATUS_OK)
+        mixer->video_mixer = VDP_INVALID_HANDLE;
+
     CHECK_VDP_ERROR(mixer, "Error when calling vdp_video_mixer_create");
 
     mixer->initialized = true;
