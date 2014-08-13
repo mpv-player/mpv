@@ -23,8 +23,10 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#ifndef __MINGW32__
 #include <unistd.h>
 #include <poll.h>
+#endif
 
 #include <libavutil/common.h>
 
