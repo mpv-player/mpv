@@ -733,6 +733,7 @@ static void handle_loop_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
+        mpctx->stop_play = KEEP_PLAYING;
         set_osd_function(mpctx, OSD_FFW);
         queue_seek(mpctx, MPSEEK_ABSOLUTE, get_start_time(mpctx), 0, true);
     }
