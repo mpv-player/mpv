@@ -1322,6 +1322,13 @@ Subtitles
     Can be used to disable display of subtitles, but still select and decode
     them.
 
+``--sub-clear-on-seek``
+    (Obscure, rarely useful.) Can be used to play broken mkv files with
+    duplicate ReadOrder fields. ReadOrder is the first field in a
+    Matroska-style ASS subtitle packets. It should be unique, and libass
+    uses it for fast elimination of duplicates. This option disables caching
+    of subtitles across seeks, so after a seek libass can't eliminate subtitle
+    packets with the same ReadOrder as earlier packets.
 
 Window
 ------

@@ -270,7 +270,7 @@ static void fix_events(struct sd *sd)
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (ctx->flush_on_seek)
+    if (ctx->flush_on_seek || sd->opts->sub_clear_on_seek)
         ass_flush_events(ctx->ass_track);
     ctx->flush_on_seek = false;
 }

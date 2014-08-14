@@ -172,6 +172,8 @@ void update_subtitles(struct MPContext *mpctx)
 static void reinit_subdec(struct MPContext *mpctx, struct track *track,
                           struct dec_sub *dec_sub)
 {
+    struct MPOpts *opts = mpctx->opts;
+
     if (sub_is_initialized(dec_sub))
         return;
 
@@ -189,7 +191,7 @@ static void reinit_subdec(struct MPContext *mpctx, struct track *track,
     // Don't do this if the file has video/audio streams. Don't do it even
     // if it has only sub streams, because reading packets will change the
     // demuxer position.
-    if (!track->preloaded && track->is_external) {
+    if (!track->preloaded && track->is_external && !opts->sub_clear_on_seek) {
         demux_seek(track->demuxer, 0, SEEK_ABSOLUTE);
         track->preloaded = sub_read_all_packets(dec_sub, track->stream);
     }
