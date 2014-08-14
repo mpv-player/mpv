@@ -749,12 +749,11 @@ int mpv_set_option_string(mpv_handle *ctx, const char *name, const char *data)
 }
 
 // Run a command in the playback thread.
-// Note: once some things are fixed (like vo_opengl not being safe to be
-//       called from any thread other than the playback thread), this can
-//       be replaced by a simpler method.
 static void run_locked(mpv_handle *ctx, void (*fn)(void *fn_data), void *fn_data)
 {
-    mp_dispatch_run(ctx->mpctx->dispatch, fn, fn_data);
+    mp_dispatch_lock(ctx->mpctx->dispatch);
+    fn(fn_data);
+    mp_dispatch_unlock(ctx->mpctx->dispatch);
 }
 
 // Run a command asynchronously. It's the responsibility of the caller to
