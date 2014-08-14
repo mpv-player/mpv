@@ -380,27 +380,14 @@ void mpv_terminate_destroy(mpv_handle *ctx);
 int mpv_load_config_file(mpv_handle *ctx, const char *filename);
 
 /**
- * Stop the playback thread. Normally, the client API stops the playback thread
- * automatically in order to process requests. However, the playback thread is
- * restarted again after the request was processed. Then the playback thread
- * will continue to display the next video frame, during which it will not
- * reply to any requests. (This takes up to 50ms.)
- *
- * (Internally, it first renders the video and other things, and then blocks
- * until it can be displayed - and it won't react to anything else in that
- * time. The main reason for that is that the VO is in a "in between" state,
- * in which it can't process normal requests - for example, OSD redrawing or
- * screenshots would be broken.)
- *
- * This is usually a problem: only 1 request per video frame will be executed,
- * which will make the client API to appear extremely slow.
- *
- * Suspending the playback thread allows you to prevent the playback thread from
- * running, so that you can make multiple accesses without being blocked.
+ * Stop the playback thread. This means the core will stop doing anything, and
+ * only run and answer to client API requests. This is sometimes useful; for
+ * example, no new frame will be queued to the video output, so doing requests
+ * which have to wait on the video output can run instantly.
  *
  * Suspension is reentrant and recursive for convenience. Any thread can call
  * the suspend function multiple times, and the playback thread will remain
- * suspended until the last thread resumes it. Note that during suspension,
+ * suspended until the last thread resumes it. Note that during suspension, all
  * clients still have concurrent access to the core, which is serialized through
  * a single mutex.
  *
@@ -409,8 +396,6 @@ int mpv_load_config_file(mpv_handle *ctx, const char *filename);
  * mpv_suspend() is not allowed.
  *
  * Calling this on an uninitialized player (see mpv_create()) will deadlock.
- *
- * Note: the need for this call might go away at some point.
  */
 void mpv_suspend(mpv_handle *ctx);
 
