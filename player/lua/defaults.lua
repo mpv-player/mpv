@@ -352,9 +352,13 @@ local function call_event_handlers(e)
     end
 end
 
+mp.use_suspend = true
+
 function mp.dispatch_events(allow_wait)
     local more_events = true
-    mp.suspend()
+    if mp.use_suspend then
+        mp.suspend()
+    end
     while mp.keep_running do
         local wait = process_timers()
         if wait == nil then
@@ -374,7 +378,9 @@ function mp.dispatch_events(allow_wait)
         local e = mp.wait_event(wait)
         -- Empty the event queue while suspended; otherwise, each
         -- event will keep us waiting until the core suspends again.
-        mp.suspend()
+        if mp.use_suspend then
+            mp.suspend()
+        end
         more_events = (e.event ~= "none")
         if more_events then
             call_event_handlers(e)
