@@ -237,7 +237,5 @@ void reinit_subs(struct MPContext *mpctx, int order)
     if (order == 1 && sub_has_get_text(dec_sub))
         state.render_bitmap_subs = false;
 
-    reset_subtitles(mpctx, order);
-
     osd_set_sub(mpctx->osd, obj, &state);
 }
