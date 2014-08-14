@@ -122,6 +122,12 @@ $vf_str
 $profile_comp
   ;;
 
+  files)
+    compset -P '*,'
+    compset -S ',*'
+    _files -r ',/ \\t\\n\\-' && rc=0
+  ;;
+
   mfiles)
     local expl
     _tags files urls
@@ -177,6 +183,7 @@ sub parse_opts {
             $entry .= '->vf' if ($1 eq '--vf');
             $entry .= '->profiles' if ($1 eq '--profile');
             $entry .= '->profile' if ($1 eq '--show-profile');
+            $entry .= '->files' if ($line =~ /\[file\]/);
         }
 
         push @list, $entry
