@@ -341,6 +341,14 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    {
+        .extension = "GLX_SGI_video_sync",
+        .functions = (struct gl_function[]) {
+            DEF_FN_NAMES(GetVideoSync, "glXGetVideoSyncSGI"),
+            DEF_FN_NAMES(WaitVideoSync, "glXWaitVideoSyncSGI"),
+            {0},
+        },
+    },
     // GL legacy functions in GL 1.x - 2.x, removed from GL 3.x
     {
         .ver_core = MPGL_VER(1, 1),

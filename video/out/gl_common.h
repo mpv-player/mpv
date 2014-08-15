@@ -368,6 +368,9 @@ struct GL {
     void (GLAPIENTRY *VDPAUSurfaceAccessNV)(GLvdpauSurfaceNV, GLenum);
     void (GLAPIENTRY *VDPAUMapSurfacesNV)(GLsizei, const GLvdpauSurfaceNV *);
     void (GLAPIENTRY *VDPAUUnmapSurfacesNV)(GLsizei, const GLvdpauSurfaceNV *);
+
+    GLint (GLAPIENTRY *GetVideoSync)(GLuint *);
+    GLint (GLAPIENTRY *WaitVideoSync)(GLint, GLint, unsigned int *);
 };
 
 #endif /* MPLAYER_GL_COMMON_H */
