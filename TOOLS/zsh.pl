@@ -72,6 +72,9 @@ my $tmpl = <<"EOS";
 
 # mpv zsh completion
 
+local curcontext="\$curcontext" state state_descr line
+typeset -A opt_args
+
 local rc=1
 
 _arguments -C -S \\
@@ -120,6 +123,7 @@ $profile_comp
   ;;
 
   mfiles)
+    local expl
     _tags files urls
     while _tags; do
       _requested files expl 'media file' _files -g \\
