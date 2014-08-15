@@ -260,6 +260,8 @@ typedef struct MPContext {
     double delay;
     // AV sync: time until next frame should be shown
     double time_frame;
+    // Optional/additional AV sync compensation if video is too slow.
+    double insert_silence;
     // Set to true some time after a new frame has been shown, and it turns out
     // that this frame was the last one before video ends.
     bool playing_last_frame;

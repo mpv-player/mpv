@@ -384,6 +384,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         return; // try again next iteration
     }
 
+    struct mp_audio out_format = {0};
+    ao_get_format(mpctx->ao, &out_format);
+    double play_samplerate = out_format.rate / opts->playback_speed;
+
     // If audio is infinitely fast, somehow try keeping approximate A/V sync.
     if (mpctx->audio_status == STATUS_PLAYING && ao_untimed(mpctx->ao) &&
         mpctx->video_status != STATUS_EOF && mpctx->delay > 0)
@@ -400,6 +404,19 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         playsize = MPMIN(skip + 1, MPMAX(playsize, 2500)); // buffer extra data
     } else if (skip < 0) {
         playsize = MPMAX(1, playsize + skip); // silence will be prepended
+    }
+
+    if (opts->insert_silence) {
+        float S = 0.5;
+        if (!mpctx->paused && mpctx->audio_status == STATUS_PLAYING &&
+            mpctx->last_av_difference - mpctx->insert_silence > S)
+            mpctx->insert_silence += S;
+
+        if (mpctx->insert_silence > 0) {
+            int samples = MPMIN(playsize, play_samplerate * mpctx->insert_silence);
+            mp_audio_buffer_prepend_silence(mpctx->ao_buffer, samples);
+            mpctx->insert_silence -= samples / play_samplerate;
+        }
     }
 
     int status = AD_OK;
@@ -469,10 +486,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     bool audio_eof = status == AD_EOF;
     bool partial_fill = false;
     int playflags = 0;
-
-    struct mp_audio out_format = {0};
-    ao_get_format(mpctx->ao, &out_format);
-    double play_samplerate = out_format.rate / opts->playback_speed;
 
     if (endpts != MP_NOPTS_VALUE) {
         double samples = (endpts - written_audio_pts(mpctx) - mpctx->audio_delay)

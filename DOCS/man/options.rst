@@ -967,6 +967,11 @@ Audio
     Set the step size of mixer volume changes in percent of the full range
     (default: 3).
 
+``--audiodrop``
+    If video is by more than 500ms behind, insert 500ms of silence, to make up
+    for audio getting ahead. Might help if video decoding is too slow beyond
+    help.
+
 ``--volume-restore-data=<string>``
     Used internally for use by playback resume (e.g. with ``quit_watch_later``).
     Restoring value has to be done carefully, because different AOs as well as

@@ -462,6 +462,8 @@ const m_option_t mp_opts[] = {
                 {"decoder", 2},
                 {"decoder+vo", 3})),
 
+    OPT_FLAG("audiodrop", insert_silence, 0),
+
     OPT_FLAG("untimed", untimed, M_OPT_FIXED),
 
     OPT_STRING("stream-capture", stream_capture, M_OPT_FIXED),
