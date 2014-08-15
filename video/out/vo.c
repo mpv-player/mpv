@@ -136,10 +136,9 @@ struct vo_internal {
     int64_t wakeup_pts;             // time at which to pull frame from decoder
 
     bool rendering;                 // true if an image is being rendered
-    bool frame_queued;              // frame queued, with parameters below
+    struct mp_image *frame_queued;  // the image that should be rendered
     int64_t frame_pts;              // realtime of intended display
     int64_t frame_duration;         // realtime frame duration (for framedrop)
-    struct mp_image *frame_image;   // the image that should be rendered
 };
 
 static void forget_frames(struct vo *vo);
@@ -359,8 +358,7 @@ static void forget_frames(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     in->hasframe = false;
-    in->frame_queued = false;
-    mp_image_unrefp(&in->frame_image);
+    mp_image_unrefp(&in->frame_queued);
 }
 
 #ifndef __MINGW32__
@@ -479,10 +477,9 @@ void vo_queue_frame(struct vo *vo, struct mp_image *image,
     pthread_mutex_lock(&in->lock);
     assert(vo->config_ok && !in->frame_queued);
     in->hasframe = true;
-    in->frame_queued = true;
+    in->frame_queued = image;
     in->frame_pts = pts_us;
     in->frame_duration = duration;
-    in->frame_image = image;
     in->wakeup_pts = in->frame_pts + MPMAX(duration, 0);
     wakeup_locked(vo);
     pthread_mutex_unlock(&in->lock);
@@ -507,16 +504,14 @@ static bool render_frame(struct vo *vo)
 
     int64_t pts = in->frame_pts;
     int64_t duration = in->frame_duration;
-    struct mp_image *img = in->frame_image;
+    struct mp_image *img = in->frame_queued;
     if (!img) {
         pthread_mutex_unlock(&in->lock);
         return false;
     }
 
-    assert(!!img == in->frame_queued);
     in->rendering = true;
-    in->frame_queued = false;
-    in->frame_image = NULL;
+    in->frame_queued = NULL;
 
     pthread_mutex_unlock(&in->lock);
 
