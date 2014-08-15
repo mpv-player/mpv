@@ -439,7 +439,9 @@ Available video output drivers are:
         Borders will be distorted due to filtering.
 
     ``glfinish``
-        Call ``glFinish()`` before swapping buffers
+        Call ``glFinish()`` before and after swapping buffers (default: disabled).
+        Slower, but might help getting better results when doing framedropping.
+        The details depend entirely on the OpenGL driver.
 
     ``sw``
         Continue even if a software renderer is detected.

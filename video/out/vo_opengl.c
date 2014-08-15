@@ -105,6 +105,9 @@ static void flip_page(struct vo *vo)
     if (p->frames_rendered > 5)
         gl_video_set_debug(p->renderer, false);
 
+    if (p->use_glFinish)
+        p->gl->Finish();
+
     mpgl_unlock(p->glctx);
 }
 
