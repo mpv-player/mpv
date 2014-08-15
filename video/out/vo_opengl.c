@@ -66,6 +66,7 @@ struct gl_priv {
     struct gl_video_opts *renderer_opts;
     struct mp_icc_opts *icc_opts;
     int use_glFinish;
+    int waitvsync;
     int use_gl_debug;
     int allow_sw;
     int swap_interval;
@@ -74,6 +75,7 @@ struct gl_priv {
     int vo_flipped;
 
     int frames_rendered;
+    unsigned int prev_sgi_sync_count;
 };
 
 // Always called under mpgl_lock
@@ -96,6 +98,7 @@ static void resize(struct gl_priv *p)
 static void flip_page(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
+    GL *gl = p->gl;
 
     mpgl_lock(p->glctx);
 
@@ -106,7 +109,21 @@ static void flip_page(struct vo *vo)
         gl_video_set_debug(p->renderer, false);
 
     if (p->use_glFinish)
-        p->gl->Finish();
+        gl->Finish();
+
+    if (p->waitvsync) {
+        if (gl->GetVideoSync) {
+            unsigned int n1 = 0, n2 = 0;
+            gl->GetVideoSync(&n1);
+            gl->WaitVideoSync(2, (n1 + 1) % 2, &n2);
+            int step = n1 - p->prev_sgi_sync_count;
+            p->prev_sgi_sync_count = n1;
+            MP_DBG(vo, "Flip counts: %u->%u, step=%d\n", n1, n2, step);
+        } else {
+            MP_WARN(vo, "GLX_SGI_video_sync not available, disabling.\n");
+            p->waitvsync = 0;
+        }
+    }
 
     mpgl_unlock(p->glctx);
 }
@@ -454,6 +471,7 @@ err_out:
 #define OPT_BASE_STRUCT struct gl_priv
 const struct m_option options[] = {
     OPT_FLAG("glfinish", use_glFinish, 0),
+    OPT_FLAG("waitvsync", waitvsync, 0),
     OPT_INT("swapinterval", swap_interval, 0, OPTDEF_INT(1)),
     OPT_FLAG("debug", use_gl_debug, 0),
     OPT_STRING_VALIDATE("backend", backend, 0, mpgl_validate_backend_opt),

@@ -443,6 +443,13 @@ Available video output drivers are:
         Slower, but might help getting better results when doing framedropping.
         The details depend entirely on the OpenGL driver.
 
+    ``waitvsync``
+        Call ``glXWaitVideoSyncSGI`` after each buffer swap (default: disabled).
+        This may or may not help with video timing accuracy and frame drop. It's
+        possible that this makes video output slower, or has no effect at all.
+
+        X11 only.
+
     ``sw``
         Continue even if a software renderer is detected.
 
