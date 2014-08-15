@@ -126,7 +126,7 @@ $profile_comp
          "*.(#i)(asf|asx|avi|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|qt|rm|ts|vob|wav|webm|wma|wmv)(-.)" && rc=0
       if _requested urls; then
         while _next_label urls expl URL; do
-          _urls "\$expl[@]" && ret=0
+          _urls "\$expl[@]" && rc=0
           compadd -S '' "\$expl[@]" $protos_str && rc=0
         done
       fi
