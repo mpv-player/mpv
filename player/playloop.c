@@ -66,11 +66,10 @@ void pause_player(struct MPContext *mpctx)
     mpctx->osd_function = 0;
     mpctx->paused_for_cache = false;
 
-    if (mpctx->video_out && mpctx->d_video && mpctx->video_out->config_ok)
-        vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
-
     if (mpctx->ao && mpctx->d_audio)
-        ao_pause(mpctx->ao);    // pause audio, keep data if possible
+        ao_pause(mpctx->ao);
+    if (mpctx->video_out)
+        vo_set_paused(mpctx->video_out, true);
 
     // Only print status if there's actually a file being played.
     if (mpctx->num_sources)
@@ -97,8 +96,9 @@ void unpause_player(struct MPContext *mpctx)
 
     if (mpctx->ao && mpctx->d_audio)
         ao_resume(mpctx->ao);
-    if (mpctx->video_out && mpctx->d_video && mpctx->video_out->config_ok)
-        vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);      // resume video
+    if (mpctx->video_out)
+        vo_set_paused(mpctx->video_out, false);
+
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 
 end:

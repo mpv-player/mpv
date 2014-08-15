@@ -159,7 +159,9 @@ List of Input Commands
         Take a single screenshot.
     <each-frame>
         Take a screenshot each frame. Issue this command again to stop taking
-        screenshots.
+        screenshots. Note that you should disable framedropping when using
+        this mode - or you might receive duplicate images in cases when a
+        frame was dropped.
 
 ``screenshot_to_file "<filename>" [subtitles|video|window]``
     Take a screenshot and save it to a given file. The format of the file will
@@ -635,8 +637,12 @@ Property list
     disabled.
 
 ``drop-frame-count``
-    Frames dropped because they arrived to late. Unavailable if video
-    is disabled
+    Frames dropped because they arrived to late. Doesn't necessarily indicate
+    actual framedrops, just the number of times the decoder was asked to drop.
+    Unavailable if video is disabled
+
+``vo-drop-frame-count``
+    Frames dropped by VO (when using ``--framedrop=vo``).
 
 ``percent-pos`` (RW)
     Position in current file (0-100). The advantage over using this instead of

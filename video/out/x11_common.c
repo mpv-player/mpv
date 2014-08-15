@@ -1492,6 +1492,13 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         vo_x11_update_window_title(vo);
         return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_FPS: {
+        double fps = vo_x11_vm_get_fps(vo);
+        if (fps <= 0)
+            break;
+        *(double *)arg = fps;
+        return VO_TRUE;
+    }
     }
     return VO_NOTIMPL;
 }

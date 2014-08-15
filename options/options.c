@@ -458,7 +458,9 @@ const m_option_t mp_opts[] = {
 
     OPT_CHOICE("framedrop", frame_dropping, 0,
                ({"no", 0},
-                {"yes", 1})),
+                {"vo", 1},
+                {"decoder", 2},
+                {"decoder+vo", 3})),
 
     OPT_FLAG("untimed", untimed, M_OPT_FIXED),
 

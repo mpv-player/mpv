@@ -85,6 +85,7 @@ enum mp_voctrl {
     VOCTRL_SET_COMMAND_LINE,            // char**
 
     VOCTRL_GET_ICC_PROFILE_PATH,        // char**
+    VOCTRL_GET_DISPLAY_FPS,             // double*
 
     VOCTRL_GET_PREF_DEINT,              // int*
 };
@@ -134,6 +135,8 @@ struct voctrl_screenshot_args {
 
 // VO does handle mp_image_params.rotate in 90 degree steps
 #define VO_CAP_ROTATE90 1
+// VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
+#define VO_CAP_FRAMEDROP 2
 
 struct vo;
 struct osd_state;
@@ -282,6 +285,8 @@ bool vo_has_frame(struct vo *vo);
 void vo_redraw(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
+void vo_set_paused(struct vo *vo, bool paused);
+int64_t vo_get_drop_count(struct vo *vo);
 
 void vo_set_flip_queue_offset(struct vo *vo, int64_t us);
 void vo_wakeup(struct vo *vo);

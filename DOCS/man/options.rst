@@ -430,16 +430,39 @@ Video
     Do not sleep when outputting video frames. Useful for benchmarks when used
     with ``--no-audio.``
 
-``--framedrop=<no|yes>``
-    Skip displaying some frames to maintain A/V sync on slow systems. Video
-    filters are not applied to such frames. For B-frames even decoding is
-    skipped completely. May produce unwatchably choppy output.
+``--framedrop=<mode>``
+    Skip displaying some frames to maintain A/V sync on slow systems, or
+    playing high framerate video on video outputs that have an upper framerate
+    limit.
 
-    The ``--vd-lavc-framedrop`` option controls what frames to drop.
+    The argument selects the drop methods, and can be one of the following:
+
+    <no>
+        Disable any framedropping (default).
+    <vo>
+        Drop late frames on video output. This still decodes and filters all
+        frames, but doesn't render them on the VO. It tries to query the
+        display FPS (X11 only, not correct on multi-monitor systems), or
+        assumes infinite display FPS if that fails. Drops are indicated in
+        the terminal status line as ``D: `` field. If the decoder is too slow,
+        in theory all frames would have to be dropped (because all frames are
+        too late) - to avoid this, frame dropping stops if the effective
+        framerate is below 10 FPS.
+    <decoder>
+        Old, decoder-based framedrop mode. (This is the same as ``--framedrop=yes``
+        in mpv 0.5.x and before.) This tells the decoder to skip frames (unless
+        they are needed to decode future frames). May help with slow systems,
+        but can produce unwatchably choppy output, or even freeze the display
+        complete. Not recommended.
+        The ``--vd-lavc-framedrop`` option controls what frames to drop.
+    <decoder+vo>
+        Enable both modes. Not recommended.
 
     .. note::
 
-        Practical use of this feature is questionable. Disabled by default.
+        ``--vo=vdpau`` (also the default VO) always has the ``vo`` framedrop
+        mode enabled. It doesn't increment the ``D:`` field in the statusline
+        either.
 
 ``--hwdec=<api>``
     Specify the hardware video decoding API that should be used if possible.

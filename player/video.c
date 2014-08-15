@@ -278,8 +278,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     vo_control(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
                                              : VOCTRL_KILL_SCREENSAVER, NULL);
 
-    vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE
-                                               : VOCTRL_RESUME, NULL);
+    vo_set_paused(mpctx->video_out, mpctx->paused);
 
     mpctx->sync_audio_to_video = !sh->attached_picture;
     mpctx->vo_pts_history_seek_ts++;
@@ -343,7 +342,7 @@ static int check_framedrop(struct MPContext *mpctx)
         if (d < -mpctx->dropped_frames * frame_time - 0.100) {
             mpctx->drop_frame_cnt++;
             mpctx->dropped_frames++;
-            return mpctx->opts->frame_dropping;
+            return !!(mpctx->opts->frame_dropping & 2);
         } else
             mpctx->dropped_frames = 0;
     }
@@ -576,7 +575,8 @@ static int update_video(struct MPContext *mpctx, double endpts)
     }
 
 
-    bool vo_framedrop = !!mpctx->video_out->driver->flip_page_timed;
+    //bool vo_framedrop = !!mpctx->video_out->driver->flip_page_timed;
+    bool vo_framedrop = !!(mpctx->opts->frame_dropping & 1);
     int min_frames = vo_framedrop ? 2 : 1; // framedrop needs duration
 
     // Already enough video buffered?

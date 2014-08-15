@@ -386,6 +386,16 @@ static int mp_property_drop_frame_cnt(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, mpctx->drop_frame_cnt);
 }
 
+static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,
+                                           int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->d_video)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_int_ro(action, arg, vo_get_drop_count(mpctx->video_out));
+}
+
 /// Current position in percent (RW)
 static int mp_property_percent_pos(void *ctx, struct m_property *prop,
                                    int action, void *arg)
@@ -2686,6 +2696,7 @@ static const struct m_property mp_properties[] = {
     {"avsync", mp_property_avsync},
     {"total-avsync-change", mp_property_total_avsync_change},
     {"drop-frame-count", mp_property_drop_frame_cnt},
+    {"vo-drop-frame-count", mp_property_vo_drop_frame_count},
     {"percent-pos", mp_property_percent_pos},
     {"time-start", mp_property_time_start},
     {"time-pos", mp_property_time_pos},
