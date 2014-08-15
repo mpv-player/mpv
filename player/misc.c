@@ -113,6 +113,16 @@ double get_start_time(struct MPContext *mpctx)
     return mpctx->demuxer ? mpctx->demuxer->start_time : 0;
 }
 
+// Get the offset from the given track to the video.
+double get_track_video_offset(struct MPContext *mpctx, struct track *track)
+{
+    if (track && track->under_timeline)
+        return mpctx->video_offset;
+    if (track && track->is_external)
+        return get_start_time(mpctx);
+    return 0;
+}
+
 float mp_get_cache_percent(struct MPContext *mpctx)
 {
     if (mpctx->demuxer) {

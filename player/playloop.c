@@ -236,10 +236,11 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         if (track->selected && track->is_external && track->demuxer) {
             double main_new_pos;
             if (seek.type == MPSEEK_ABSOLUTE) {
-                main_new_pos = seek.amount - mpctx->video_offset;
+                main_new_pos = seek.amount;
             } else {
                 main_new_pos = get_main_demux_pts(mpctx);
             }
+            main_new_pos -= get_track_video_offset(mpctx, track);
             demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE);
         }
     }
