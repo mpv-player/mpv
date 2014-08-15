@@ -873,6 +873,7 @@ static int script_set_osd_ass(lua_State *L)
     int res_y = luaL_checkinteger(L, 2);
     const char *text = luaL_checkstring(L, 3);
     osd_set_external(mpctx->osd, res_x, res_y, (char *)text);
+    mp_input_wakeup(mpctx->input);
     return 0;
 }
 
