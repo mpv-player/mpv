@@ -332,8 +332,12 @@ static void run_reconfig(void *p)
     forget_frames(vo); // implicitly synchronized
 
     double display_fps = 1000.0; // assume infinite if unset
-    vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &display_fps);
-    vo->in->vsync_interval = 1e6 / display_fps;
+    if (vo->global->opts->frame_drop_fps > 0) {
+        display_fps = vo->global->opts->frame_drop_fps;
+    } else {
+        vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &display_fps);
+    }
+    vo->in->vsync_interval = MPMAX((int64_t)(1e6 / display_fps), 1);
     MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
 }
 
@@ -515,7 +519,7 @@ static int64_t prev_sync(struct vo *vo, int64_t ts)
     struct vo_internal *in = vo->in;
 
     int64_t diff = (int64_t)(ts - in->last_flip);
-    int64_t offset = diff % MPMAX(in->vsync_interval, 1);
+    int64_t offset = diff % in->vsync_interval;
     if (offset < 0)
         offset += in->vsync_interval;
     return ts - offset;

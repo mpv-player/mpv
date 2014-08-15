@@ -464,6 +464,13 @@ Video
         mode enabled. It doesn't increment the ``D:`` field in the statusline
         either.
 
+``--display-fps=<fps>``
+    Set the maximum assumed display FPS used with ``--framedrop``. By default
+    a detected value is used (X11 only, not correct on multi-monitor systems),
+    or infinite display FPS if that fails. Infinite FPS means only frames too
+    late are dropped. If a correct FPS is provided, frames that are predicted
+    to be too late are dropped too.
+
 ``--hwdec=<api>``
     Specify the hardware video decoding API that should be used if possible.
     Whether hardware decoding is actually done depends on the video codec. If

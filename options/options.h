@@ -137,6 +137,7 @@ typedef struct MPOpts {
     float default_max_pts_correction;
     int autosync;
     int frame_dropping;
+    double frame_drop_fps;
     int insert_silence;
     int term_osd;
     int term_osd_bar;
