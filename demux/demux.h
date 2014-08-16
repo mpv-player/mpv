@@ -239,7 +239,6 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
 bool demux_stream_is_selected(struct sh_stream *stream);
 double demux_get_next_pts(struct sh_stream *sh);
 bool demux_has_packet(struct sh_stream *sh);
-bool demux_stream_eof(struct sh_stream *sh);
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer);
 
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);

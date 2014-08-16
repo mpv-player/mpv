@@ -558,18 +558,6 @@ bool demux_has_packet(struct sh_stream *sh)
     return has_packet;
 }
 
-// Return whether EOF was returned with an earlier packet read.
-bool demux_stream_eof(struct sh_stream *sh)
-{
-    bool eof = false;
-    if (sh) {
-        pthread_mutex_lock(&sh->ds->in->lock);
-        eof = sh->ds->eof && !sh->ds->head;
-        pthread_mutex_unlock(&sh->ds->in->lock);
-    }
-    return eof;
-}
-
 // Read and return any packet we find.
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
 {
