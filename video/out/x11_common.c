@@ -59,12 +59,12 @@
 #include <X11/extensions/Xinerama.h>
 #endif
 
-#if HAVE_XF86VM
-#include <X11/extensions/xf86vmode.h>
-#endif
-
 #if HAVE_XF86XK
 #include <X11/XF86keysym.h>
+#endif
+
+#if HAVE_XRANDR
+#include <X11/extensions/Xrandr.h>
 #endif
 
 #if HAVE_ZLIB
@@ -325,6 +325,50 @@ static int vo_wm_detect(struct vo *vo)
     return wm;
 }
 
+static void xrandr_read(struct vo_x11_state *x11)
+{
+#ifdef HAVE_XRANDR
+    x11->num_displays = 0;
+
+    XRRScreenResources *r = XRRGetScreenResources(x11->display, x11->rootwin);
+    if (!r) {
+        MP_VERBOSE(x11, "Xrandr doesn't work.\n");
+        return;
+    }
+
+    for (int o = 0; o < r->noutput; o++) {
+        RROutput output = r->outputs[o];
+        XRROutputInfo *out = XRRGetOutputInfo(x11->display, r, output);
+        if (!out || !out->crtc)
+            continue;
+        XRRCrtcInfo *crtc = XRRGetCrtcInfo(x11->display, r, out->crtc);
+        if (!crtc)
+            continue;
+        for (int om = 0; om < out->nmode; om++) {
+            RRMode xm = out->modes[om];
+            for (int n = 0; n < r->nmode; n++) {
+                XRRModeInfo m = r->modes[n];
+                if (m.id != xm || crtc->mode != xm)
+                    continue;
+                if (x11->num_displays >= MAX_DISPLAYS)
+                    continue;
+                struct xrandr_display d = {
+                    .rc = { crtc->x, crtc->y,
+                            crtc->x + crtc->width, crtc->y + crtc->height },
+                    .fps = m.dotClock / (m.hTotal * (double)m.vTotal),
+                };
+                int num = x11->num_displays++;
+                MP_VERBOSE(x11, "Display %d: [%d, %d, %d, %d] @ %f FPS\n",
+                           num, d.rc.x0, d.rc.y0, d.rc.x1, d.rc.y1, d.fps);
+                x11->displays[num] = d;
+            }
+        }
+    }
+
+    XRRFreeScreenResources(r);
+#endif
+}
+
 static void vo_x11_update_screeninfo(struct vo *vo)
 {
     struct mp_vo_opts *opts = vo->opts;
@@ -455,6 +499,8 @@ int vo_x11_init(struct vo *vo)
     x11->wm_type = vo_wm_detect(vo);
 
     vo->event_fd = ConnectionNumber(x11->display);
+
+    xrandr_read(x11);
 
     return 1;
 }
@@ -1359,6 +1405,11 @@ static void vo_x11_setlayer(struct vo *vo, bool ontop)
     }
 }
 
+static bool rc_overlaps(struct mp_rect rc1, struct mp_rect rc2)
+{
+    return mp_rect_intersection(&rc1, &rc2); // changes the first argument
+}
+
 // update x11->winrc with current boundaries of vo->x11->window
 static void vo_x11_update_geometry(struct vo *vo)
 {
@@ -1379,6 +1430,16 @@ static void vo_x11_update_geometry(struct vo *vo)
                               &x, &y, &dummy_win);
     }
     x11->winrc = (struct mp_rect){x, y, x + w, y + h};
+    double fps = 1000.0;
+    for (int n = 0; n < x11->num_displays; n++) {
+        if (rc_overlaps(x11->displays[n].rc, x11->winrc))
+            fps = MPMIN(fps, x11->displays[n].fps);
+    }
+    double fallback = x11->num_displays > 0 ? x11->displays[0].fps : 0;
+    fps = fps < 1000.0 ? fps : fallback;
+    if (fps != x11->current_display_fps)
+        MP_VERBOSE(x11, "Current display FPS: %f\n", fps);
+    x11->current_display_fps = fps;
 }
 
 static void vo_x11_fullscreen(struct vo *vo)
@@ -1596,24 +1657,11 @@ static void vo_x11_selectinput_witherr(struct vo *vo,
     }
 }
 
-#if HAVE_XF86VM
 double vo_x11_vm_get_fps(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
-    int clock;
-    XF86VidModeModeLine modeline;
-    if (!XF86VidModeGetModeLine(x11->display, x11->screen, &clock, &modeline))
-        return 0;
-    if (modeline.privsize)
-        XFree(modeline.private);
-    return 1e3 * clock / modeline.htotal / modeline.vtotal;
+    return x11->current_display_fps;
 }
-#else /* HAVE_XF86VM */
-double vo_x11_vm_get_fps(struct vo *vo)
-{
-    return 0;
-}
-#endif
 
 bool vo_x11_screen_is_composited(struct vo *vo)
 {

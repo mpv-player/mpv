@@ -338,9 +338,8 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
         MP_INFO(vo, "Assuming user-specified display refresh rate of %.3f Hz.\n",
                 vc->user_fps);
     } else if (vc->user_fps == 0) {
-#if HAVE_XF86VM
         double fps = vo_x11_vm_get_fps(vo);
-        if (!fps)
+        if (fps < 1)
             MP_WARN(vo, "Failed to get display FPS\n");
         else {
             vc->vsync_interval = 1e9 / fps;
@@ -349,11 +348,6 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
             MP_INFO(vo, "If that value looks wrong give the "
                     "-vo vdpau:fps=X suboption manually.\n");
         }
-#else
-        MP_INFO(vo, "This binary has been compiled without XF86VidMode support.\n");
-        MP_INFO(vo, "Can't use vsync-aware timing without manually provided "
-                "-vo vdpau:fps=X suboption.\n");
-#endif
     } else
         MP_VERBOSE(vo, "framedrop/timing logic disabled by user.\n");
 

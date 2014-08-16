@@ -29,6 +29,13 @@
 struct vo;
 struct mp_log;
 
+#define MAX_DISPLAYS 32 // ought to be enough for everyone
+
+struct xrandr_display {
+    struct mp_rect rc;
+    double fps;
+};
+
 struct vo_x11_state {
     struct mp_log *log;
     Display *display;
@@ -39,6 +46,9 @@ struct vo_x11_state {
     int ws_width;
     int ws_height;
     struct mp_rect screenrc;
+
+    struct xrandr_display displays[MAX_DISPLAYS];
+    int num_displays;
 
     bool screensaver_enabled;
     bool dpms_touched;
@@ -61,6 +71,7 @@ struct vo_x11_state {
 
     // Current actual window position (updated on window move/resize events).
     struct mp_rect winrc;
+    double current_display_fps;
 
     int pending_vo_events;
 

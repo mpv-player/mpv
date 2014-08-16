@@ -169,7 +169,6 @@ options_state_machine() {
     opt_yes_no _lirc        "LIRC (remote control) support"
     opt_yes_no _joystick    "joystick support" no
     opt_yes_no _vm          "X video mode extensions"
-    opt_yes_no _xf86keysym  "support for multimedia keys"
     opt_yes_no _dvb         "DVB input"
     opt_yes_no _tv          "TV interface (TV/DVB grabbers)" yes
     opt_yes_no _tv_v4l2     "Video4Linux2 TV interface"
@@ -201,7 +200,7 @@ options_state_machine() {
     opt_yes_no _xv          "Xv video output"
     opt_yes_no _vdpau       "VDPAU acceleration"
     opt_yes_no _vaapi       "VAAPI acceleration"
-    opt_yes_no _vm          "XF86VidMode support (used for monitor FPS detection)"
+    opt_yes_no _xrandr      "Xrandr support (used for monitor FPS detection)"
     opt_yes_no _xinerama    "Xinerama support"
     opt_yes_no _x11         "X11 video output"
     opt_yes_no _wayland     "Wayland video output"
@@ -635,7 +634,7 @@ fi
 
 check_pkg_config "Xinerama" $_xinerama XINERAMA 'xinerama'
 
-check_pkg_config "Xxf86vm" $_vm XF86VM 'xxf86vm'
+check_pkg_config "Xrandr" $_xrandr XRANDR 'xrandr'
 
 # Check for the presence of special keycodes, like audio control buttons
 # that XFree86 might have.  Used to be bundled with the xf86vm check, but

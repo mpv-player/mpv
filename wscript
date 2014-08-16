@@ -567,11 +567,10 @@ video_output_features = [
         'deps': [ 'x11' ],
         'func': check_pkg_config('xinerama'),
     }, {
-        'name': '--xf86vm',
-        'desc': 'Xxf86vm',
+        'name': '--xrandr',
+        'desc': 'Xrandr',
         'deps': [ 'x11' ],
-        'func': check_cc(fragment=load_fragment('xf86vm.c'),
-                         lib='Xxf86vm', use='x11')
+        'func': check_pkg_config('xrandr'),
     } , {
         'name': '--xf86xk',
         'desc': 'XF86keysym',
