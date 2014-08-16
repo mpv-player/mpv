@@ -636,12 +636,6 @@ check_pkg_config "Xinerama" $_xinerama XINERAMA 'xinerama'
 
 check_pkg_config "Xrandr" $_xrandr XRANDR 'xrandr'
 
-# Check for the presence of special keycodes, like audio control buttons
-# that XFree86 might have.  Used to be bundled with the xf86vm check, but
-# has nothing to do with xf86vm and XFree 3.x has xf86vm but does NOT
-# have these new keycodes.
-check_statement_libs "XF86keysym" auto XF86XK X11/XF86keysym.h 'int x = XF86XK_AudioPause;'
-
 check_pkg_config "CACA" $_caca CACA 'caca >= 0.99.beta18'
 
 check_compile "DVB" $_dvb DVB waftools/fragments/dvb.c

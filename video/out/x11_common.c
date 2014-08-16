@@ -46,6 +46,7 @@
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 #include <X11/XKBlib.h>
+#include <X11/XF86keysym.h>
 
 #if HAVE_XSS
 #include <X11/extensions/scrnsaver.h>
@@ -57,10 +58,6 @@
 
 #if HAVE_XINERAMA
 #include <X11/extensions/Xinerama.h>
-#endif
-
-#if HAVE_XF86XK
-#include <X11/XF86keysym.h>
 #endif
 
 #if HAVE_XRANDR
@@ -544,7 +541,6 @@ static const struct mp_keymap keymap[] = {
     {XK_KP_Right, MP_KEY_KP6}, {XK_KP_Home, MP_KEY_KP7}, {XK_KP_Up, MP_KEY_KP8},
     {XK_KP_Page_Up, MP_KEY_KP9}, {XK_KP_Delete, MP_KEY_KPDEL},
 
-#ifdef XF86XK_AudioPause
     {XF86XK_MenuKB, MP_KEY_MENU},
     {XF86XK_AudioPlay, MP_KEY_PLAY}, {XF86XK_AudioPause, MP_KEY_PAUSE},
     {XF86XK_AudioStop, MP_KEY_STOP}, {XF86XK_AudioPrev, MP_KEY_PREV},
@@ -554,7 +550,6 @@ static const struct mp_keymap keymap[] = {
     {XF86XK_HomePage, MP_KEY_HOMEPAGE}, {XF86XK_WWW, MP_KEY_WWW},
     {XF86XK_Mail, MP_KEY_MAIL}, {XF86XK_Favorites, MP_KEY_FAVORITES},
     {XF86XK_Search, MP_KEY_SEARCH}, {XF86XK_Sleep, MP_KEY_SLEEP},
-#endif
 
     {0, 0}
 };

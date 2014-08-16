@@ -572,11 +572,6 @@ video_output_features = [
         'deps': [ 'x11' ],
         'func': check_pkg_config('xrandr'),
     } , {
-        'name': '--xf86xk',
-        'desc': 'XF86keysym',
-        'deps': [ 'x11' ],
-        'func': check_cc(fragment=load_fragment('xf86xk.c'))
-    } , {
         'name': '--gl-cocoa',
         'desc': 'OpenGL Cocoa Backend',
         'deps': [ 'cocoa' ],
