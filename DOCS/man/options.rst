@@ -2048,11 +2048,21 @@ Demuxer
     Run the demuxer in a separate thread, and let it prefetch a certain amount
     of packets (default: no).
 
+``--demuxer-readahead-secs=N``
+    If ``--demuxer-thread`` is enabled, this controls how much the demuxer
+    should buffer ahead in seconds (default: 0.2). As long as no packet has
+    a timestamp difference higher than the readahead amount relative to the
+    last packet returned to the decoder, the demuxer keeps reading.
+
+    (This value tends to be fuzzy, because many file formats don't store linear
+    timestamps.)
+
 ``--demuxer-readahead-packets=N``
     If ``--demuxer-thread`` is enabled, this controls how much the demuxer
-    should buffer ahead. If the number of packets in the packet queue exceeds
-    ``--demuxer-readahead-packets``, or the total number of bytes exceeds
-    ``--demuxer-readahead-bytes``, the thread stops reading ahead.
+    should buffer ahead. As long as the number of packets in the packet queue
+    doesn't exceed ``--demuxer-readahead-packets``, and the total number of
+    bytes doesn't exceed ``--demuxer-readahead-bytes``, the thread keeps
+    reading ahead.
 
     Note that if you set these options near the maximum, you might get a
     packet queue overflow warning.

@@ -216,6 +216,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
+    OPT_DOUBLE("demuxer-readahead-secs", demuxer_min_secs, M_OPT_MIN, .min = 0),
     OPT_INTRANGE("demuxer-readahead-packets", demuxer_min_packs, 0, 0, MAX_PACKS),
     OPT_INTRANGE("demuxer-readahead-bytes", demuxer_min_bytes, 0, 0, MAX_PACK_BYTES),
 
@@ -600,6 +601,7 @@ const struct MPOpts mp_default_opts = {
     .demuxer_thread = 0,
     .demuxer_min_packs = MIN_PACKS,
     .demuxer_min_bytes = MIN_PACK_BYTES,
+    .demuxer_min_secs = 0.2,
     .network_rtsp_transport = 2,
     .chapterrange = {-1, -1},
     .edition_id = -1,

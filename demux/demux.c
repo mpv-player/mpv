@@ -110,6 +110,7 @@ struct demux_internal {
     bool last_eof;              // last actual global EOF status
     bool eof;                   // whether we're in EOF state (reset for retry)
     bool autoselect;
+    double min_secs;
     int min_packs;
     int min_bytes;
 
@@ -137,6 +138,8 @@ struct demux_stream {
     bool eof;               // end of demuxed stream? (true if all buffer empty)
     size_t packs;           // number of packets in buffer
     size_t bytes;           // total bytes of packets in buffer
+    double base_ts;         // timestamp of the last packet returned to decoder
+    double last_ts;         // timestamp of the last packet added to queue
     struct demux_packet *head;
     struct demux_packet *tail;
 };
@@ -157,6 +160,7 @@ static void ds_flush(struct demux_stream *ds)
     ds->head = ds->tail = NULL;
     ds->packs = 0;
     ds->bytes = 0;
+    ds->last_ts = ds->base_ts = MP_NOPTS_VALUE;
     ds->eof = false;
     ds->active = false;
 }
@@ -294,6 +298,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
         // first packet in stream
         ds->head = ds->tail = dp;
     }
+
     // obviously not true anymore
     ds->eof = false;
     in->last_eof = in->eof = false;
@@ -302,6 +307,12 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     // distinguishing PTS and DTS is not useful.
     if (stream->type != STREAM_VIDEO && dp->pts == MP_NOPTS_VALUE)
         dp->pts = dp->dts;
+
+    double ts = dp->dts == MP_NOPTS_VALUE ? dp->pts : dp->dts;
+    if (ts != MP_NOPTS_VALUE && (ts > ds->last_ts || ts + 10 < ds->last_ts))
+        ds->last_ts = ts;
+    if (ds->base_ts == MP_NOPTS_VALUE)
+        ds->base_ts = ds->last_ts;
 
     MP_DBG(in, "append packet to %s: size=%d pts=%f dts=%f pos=%"PRIi64" "
            "[num=%zd size=%zd]\n", stream_type_name(stream->type),
@@ -326,10 +337,12 @@ static bool read_packet(struct demux_internal *in)
     size_t packs = 0, bytes = 0;
     for (int n = 0; n < in->d_buffer->num_streams; n++) {
         struct demux_stream *ds = in->d_buffer->streams[n]->ds;
-        active |= ds->selected && ds->active;
+        active |= ds->active;
         read_more |= ds->active && !ds->head;
         packs += ds->packs;
         bytes += ds->bytes;
+        if (ds->active && ds->last_ts != MP_NOPTS_VALUE && in->min_secs > 0)
+            read_more |= ds->last_ts - ds->base_ts < in->min_secs;
     }
     MP_DBG(in, "packets=%zd, bytes=%zd, active=%d, more=%d\n",
            packs, bytes, active, read_more);
@@ -474,6 +487,10 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
         ds->tail = NULL;
     ds->bytes -= pkt->len;
     ds->packs--;
+
+    double ts = pkt->dts == MP_NOPTS_VALUE ? pkt->pts : pkt->dts;
+    if (ts != MP_NOPTS_VALUE)
+        ds->base_ts = ts;
 
     // This implies this function is actually called from "the" user thread.
     if (pkt && pkt->pos >= 0)
@@ -791,6 +808,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .d_thread = talloc(demuxer, struct demuxer),
         .d_buffer = talloc(demuxer, struct demuxer),
         .d_user = demuxer,
+        .min_secs = demuxer->opts->demuxer_min_secs,
         .min_packs = demuxer->opts->demuxer_min_packs,
         .min_bytes = demuxer->opts->demuxer_min_bytes,
     };
