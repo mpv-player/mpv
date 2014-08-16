@@ -549,8 +549,7 @@ video_output_features = [
         'name': '--xss',
         'desc': 'Xss screensaver extensions',
         'deps': [ 'x11' ],
-        'func': check_statement('X11/extensions/scrnsaver.h',
-            'XScreenSaverSuspend(NULL, True)', use='x11', lib='Xss'),
+        'func': check_pkg_config('xscrnsaver'),
     } , {
         'name': '--xext',
         'desc': 'X extensions',
