@@ -475,7 +475,7 @@ static struct buffer * buffer_pool_get_no(struct buffer_pool *pool, uint32_t no)
 
 static bool redraw_frame(struct priv *p)
 {
-    draw_image(p->vo, p->original_image);
+    draw_image(p->vo, NULL);
     return true;
 }
 
@@ -656,9 +656,13 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
     struct buffer *buf = buffer_pool_get_back(&p->video_bufpool);
 
+    if (mpi) {
+        talloc_free(p->original_image);
+        p->original_image = mpi;
+    }
+
     if (!buf) {
         MP_VERBOSE(p->wl, "can't draw, back buffer is busy\n");
-        talloc_free(mpi);
         return;
     }
 
@@ -672,8 +676,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     struct mp_image img = buffer_get_mp_image(p, &p->video_bufpool, buf);
 
-    if (mpi) {
-        struct mp_image src = *mpi;
+    if (p->original_image) {
+        struct mp_image src = *p->original_image;
         struct mp_rect src_rc = p->src;
         src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, src.fmt.align_x);
         src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
@@ -684,10 +688,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         mp_image_clear(&img, 0, 0, img.w, img.h);
     }
 
-    if (mpi != p->original_image) {
-        talloc_free(p->original_image);
-        p->original_image = mpi;
-    }
     buffer_finalise_back(buf);
 
     draw_osd(vo);
