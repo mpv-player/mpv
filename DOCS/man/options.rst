@@ -2046,7 +2046,9 @@ Demuxer
 
 ``--demuxer-thread=<yes|no>``
     Run the demuxer in a separate thread, and let it prefetch a certain amount
-    of packets (default: no).
+    of packets (default: yes). Having this enabled may lead to smoother
+    playback, but on the other hand can add delays to seeking or track
+    switching.
 
 ``--demuxer-readahead-secs=N``
     If ``--demuxer-thread`` is enabled, this controls how much the demuxer

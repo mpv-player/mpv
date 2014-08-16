@@ -35,11 +35,6 @@
 // and the demuxer pretends EOF was reached.
 #define MAX_PACKS 16000
 #define MAX_PACK_BYTES (400 * 1024 * 1024)
-// Minimum total size of packets queued - the demuxer thread will read more
-// packets, until either number or total size of the packets exceed the minimum.
-// This can actually be configured with command line options.
-#define MIN_PACKS 64
-#define MIN_PACK_BYTES (5 * 1024 * 1024)
 
 enum demuxer_type {
     DEMUXER_TYPE_GENERIC = 0,
