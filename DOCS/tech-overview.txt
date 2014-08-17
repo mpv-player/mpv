@@ -1,4 +1,4 @@
-This file intends to give a big picture of how mpv is structured.
+This file intends to give a big picture overview of how mpv is structured.
 
 player/*.c:
     Essentially makes up the player applications, including the main() function
@@ -31,15 +31,28 @@ player/*.c:
             * loop, or exit if no next file or quit is requested
               (see enum stop_play_reason)
         * call exit_player_with_rc()
+    * run_playloop():
+        * calls fill_audio_out_buffers()
+            This checks whether new audio needs to be decoded, and pushes it
+            to the AO.
+        * calls write_video()
+            Decode new video, and push it to the VO.
+        * determines whether playback of the current file has ended
+        * determines when to start playback after seeks
+        * and calls a whole lot of other stuff
+            (Really, this function does everything.)
 
     Things worth saying about the playback core:
-    - the currently played tracks are in sh_video and sh_audio
+    - most state is in MPContext (core.h), which is not available to the
+      subsystems
+    - the currently played tracks are in mpctx->current_tracks, and decoder
+      state in d_video/d_audio/d_sub
     - the timeline stuff is used only with MKV ordered chapters (and some other
       minor features: cue, edl)
-    - most state is in MPContext (mp_core.h), which is not available to the
-      subsystems
     - the other subsystems rarely call back into the frontend, and the frontend
       polls them instead (probably a good thing)
+    - one exceptions are wakeup callbacks, which notify a "higher" component
+      of a changed situation in a subsystem
 
     I like to call the player/*.c files the "frontend".
 
@@ -103,7 +116,7 @@ options/options.h, options/options.c
     options.c. Most default values for options and MPOpts are in
     mp_default_opts at the end of options.c.
 
-    MPOpts is unfortunarely quite monolithic, and virtually accessed by
+    MPOpts is unfortunately quite monolithic, and virtually accessed by
     everything.But some components (like video outputs and video filters) have
     their own sub-option tables separate from MPOpts.
 
@@ -111,7 +124,7 @@ options/options.h, options/options.c
     parser-mpcmd.c, and uses the option table in options.c.
 
 input/input.c:
-    This translates keyboard input comming from libvo and other sources (such
+    This translates keyboard input comming from VOs and other sources (such
     as remote control devices like Apple IR or client API commands) to the
     key bindings listed in the user's (or the builtin) input.conf and turns
     them into items of type struct mp_cmd. These commands are queued, and read
@@ -122,7 +135,7 @@ input/input.c:
     of input commands somewhere else.
 
 common/msg.h:
-    All terminal output should go through mp_msg().
+    All terminal output must go through mp_msg().
 
 stream/*:
     File input is implemented here. stream.h/.c provides a simple stream based
@@ -181,7 +194,7 @@ video/out/:
     vo_opengl can pick a windowing system at runtime, e.g. the same binary can
     provide both X11 and Cocoa support on OSX.
 
-    VOs can be reconfigured at runtime. A config() call can change the video
+    VOs can be reconfigured at runtime. A vo_config() call can change the video
     resolution and format, without destroying the window.
 
     vo_vdpau and vo_opengl should be taken as reference.
@@ -203,9 +216,12 @@ audio/filter/:
 audio/out/:
     Audio outputs.
 
-    Unlike VOs, AOs can't be reconfigured on a format change. Without
-    --gapless-audio, even playing a new file will close and re-open the audio
-    device.
+    Unlike VOs, AOs can't be reconfigured on a format change. On audio format
+    changes, the AO will simply be closed and re-opened.
+
+    There are wrappers to support for two types of audio APIs: push.c and
+    pull.c. ao.c calls into one of these. They contain generic code to deal
+    with the data flow these APIs impose.
 
     Note that mpv synchronizes the video to the audio. That's the reason
     why buggy audio drivers can have a bad influence on playback quality.
@@ -218,12 +234,14 @@ sub/:
     the OSD text renderer (which uses libass, and takes care of all the tricky
     fontconfig/freetype API usage and text layouting).
 
-    Subtitle loading is now in demux/ instead. demux_libass.c wraps loading
-    .ass subtitles via libass. demux_lavf.c loads most subtitle types via
-    FFmpeg. demux_subreader.c is the old MPlayer code. It's used as last
-    fallback, or to handle some text subtitle types on Libav. (It also can
-    load UTF-16 encoded subtitles without requiring the use of -sub-codepage.)
-    demux_subreader.c should eventually go away (maybe).
+    The VOs call osd.c to render OSD and subtitle (via e.g. osd_draw()). osd.c
+    in turn asks dec_sub.c for subtitle overlay bitmaps, which relays the
+    request to one of the sd_*.c subtitle decoders/renderers.
+
+    Subtitle loading is in demux/. The MPlayer subreader.c is mostly gone - parts
+    of it survive in demux_subreader.c. It's used as last fallback, or to handle
+    some text subtitle types on Libav. It should go away eventually. Normally,
+    subtitles are loaded via demux_lavf.c.
 
     The subtitles are passed to dec_sub.c and the subtitle decoders in sd_*.c
     as they are demuxed. All text subtitles are rendered by sd_ass.c. If text
