@@ -335,12 +335,13 @@ static void xrandr_read(struct vo_x11_state *x11)
 
     for (int o = 0; o < r->noutput; o++) {
         RROutput output = r->outputs[o];
+        XRRCrtcInfo *crtc = NULL;
         XRROutputInfo *out = XRRGetOutputInfo(x11->display, r, output);
         if (!out || !out->crtc)
-            continue;
-        XRRCrtcInfo *crtc = XRRGetCrtcInfo(x11->display, r, out->crtc);
+            goto next;
+        crtc = XRRGetCrtcInfo(x11->display, r, out->crtc);
         if (!crtc)
-            continue;
+            goto next;
         for (int om = 0; om < out->nmode; om++) {
             RRMode xm = out->modes[om];
             for (int n = 0; n < r->nmode; n++) {
@@ -360,6 +361,11 @@ static void xrandr_read(struct vo_x11_state *x11)
                 x11->displays[num] = d;
             }
         }
+    next:
+        if (crtc)
+            XRRFreeCrtcInfo(crtc);
+        if (out)
+            XRRFreeOutputInfo(out);
     }
 
     XRRFreeScreenResources(r);
