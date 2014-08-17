@@ -1110,7 +1110,7 @@ static int mp_property_cache(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%d %%", (int)cache);
+        *(char **)arg = talloc_asprintf(NULL, "%d", (int)cache);
         return M_PROPERTY_OK;
     }
 
