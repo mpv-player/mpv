@@ -126,7 +126,6 @@ struct vo_internal {
 
     int wakeup_pipe[2]; // used for VOs that use a unix FD for waiting
 
-    char *window_title;
 
     bool hasframe;
     bool request_redraw;
@@ -135,7 +134,6 @@ struct vo_internal {
     int64_t flip_queue_offset; // queue flip events at most this much in advance
 
     int64_t last_flip;
-    int64_t vsync_interval;
     int64_t drop_count;
     bool dropped_frame;             // the previous frame was dropped
     struct mp_image *dropped_image; // used to possibly redraw the dropped frame
@@ -146,6 +144,10 @@ struct vo_internal {
     struct mp_image *frame_queued;  // the image that should be rendered
     int64_t frame_pts;              // realtime of intended display
     int64_t frame_duration;         // realtime frame duration (for framedrop)
+
+    // --- The following fields can be accessed from the VO thread only
+    int64_t vsync_interval;
+    char *window_title;
 };
 
 static void forget_frames(struct vo *vo);
@@ -295,6 +297,21 @@ void vo_destroy(struct vo *vo)
     dealloc_vo(vo);
 }
 
+// to be called from VO thread only
+static void update_display_fps(struct vo *vo)
+{
+    double display_fps = 1000.0; // assume infinite if unset
+    if (vo->global->opts->frame_drop_fps > 0) {
+        display_fps = vo->global->opts->frame_drop_fps;
+    } else {
+        vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &display_fps);
+    }
+    int64_t n_interval = MPMAX((int64_t)(1e6 / display_fps), 1);
+    if (vo->in->vsync_interval != n_interval)
+        MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
+    vo->in->vsync_interval = n_interval;
+}
+
 static void check_vo_caps(struct vo *vo)
 {
     int rot = vo->params->rotate;
@@ -331,14 +348,7 @@ static void run_reconfig(void *p)
     }
     forget_frames(vo); // implicitly synchronized
 
-    double display_fps = 1000.0; // assume infinite if unset
-    if (vo->global->opts->frame_drop_fps > 0) {
-        display_fps = vo->global->opts->frame_drop_fps;
-    } else {
-        vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &display_fps);
-    }
-    vo->in->vsync_interval = MPMAX((int64_t)(1e6 / display_fps), 1);
-    MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
+    update_display_fps(vo);
 }
 
 int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
@@ -528,6 +538,8 @@ static int64_t prev_sync(struct vo *vo, int64_t ts)
 static bool render_frame(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
+
+    update_display_fps(vo);
 
     pthread_mutex_lock(&in->lock);
 
@@ -768,6 +780,11 @@ void vo_set_flip_queue_offset(struct vo *vo, int64_t us)
     pthread_mutex_lock(&in->lock);
     in->flip_queue_offset = us;
     pthread_mutex_unlock(&in->lock);
+}
+
+int64_t vo_get_vsync_interval(struct vo *vo)
+{
+    return vo->in->vsync_interval;
 }
 
 /**

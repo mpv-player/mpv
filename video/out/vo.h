@@ -289,6 +289,7 @@ void vo_set_paused(struct vo *vo, bool paused);
 int64_t vo_get_drop_count(struct vo *vo);
 
 void vo_set_flip_queue_offset(struct vo *vo, int64_t us);
+int64_t vo_get_vsync_interval(struct vo *vo);
 void vo_wakeup(struct vo *vo);
 
 const char *vo_get_window_title(struct vo *vo);

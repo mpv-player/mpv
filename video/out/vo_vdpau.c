@@ -329,27 +329,11 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
         CHECK_VDP_WARNING(vo, "Error setting colorkey");
     }
 
-    vc->vsync_interval = 1;
     if (vc->composite_detect && vo_x11_screen_is_composited(vo)) {
         MP_INFO(vo, "Compositing window manager detected. Assuming timing info "
                 "is inaccurate.\n");
-    } else if (vc->user_fps > 0) {
-        vc->vsync_interval = 1e9 / vc->user_fps;
-        MP_INFO(vo, "Assuming user-specified display refresh rate of %.3f Hz.\n",
-                vc->user_fps);
-    } else if (vc->user_fps == 0) {
-        double fps = vo_x11_vm_get_fps(vo);
-        if (fps < 1)
-            MP_WARN(vo, "Failed to get display FPS\n");
-        else {
-            vc->vsync_interval = 1e9 / fps;
-            // This is verbose, but I'm not yet sure how common wrong values are
-            MP_INFO(vo, "Got display refresh rate %.3f Hz.\n", fps);
-            MP_INFO(vo, "If that value looks wrong give the "
-                    "-vo vdpau:fps=X suboption manually.\n");
-        }
-    } else
-        MP_VERBOSE(vo, "framedrop/timing logic disabled by user.\n");
+        vc->user_fps = -1;
+    }
 
     return 0;
 }
@@ -736,6 +720,13 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 
     if (!check_preemption(vo))
         return;
+
+    vc->vsync_interval = 1;
+    if (vc->user_fps > 0) {
+        vc->vsync_interval = 1e9 / vc->user_fps;
+    } else if (vc->user_fps == 0) {
+        vc->vsync_interval = vo_get_vsync_interval(vo) * 1000;
+    }
 
     if (duration > INT_MAX / 1000)
         duration = -1;
