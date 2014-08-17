@@ -569,7 +569,7 @@ video_output_features = [
         'name': '--xrandr',
         'desc': 'Xrandr',
         'deps': [ 'x11' ],
-        'func': check_pkg_config('xrandr'),
+        'func': check_pkg_config('xrandr', '>= 1.2.0'),
     } , {
         'name': '--gl-cocoa',
         'desc': 'OpenGL Cocoa Backend',

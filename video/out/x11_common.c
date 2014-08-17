@@ -327,6 +327,17 @@ static void xrandr_read(struct vo_x11_state *x11)
 #if HAVE_XRANDR
     x11->num_displays = 0;
 
+    if (x11->xrandr_event < 0) {
+        int event_base, error_base;
+        if (!XRRQueryExtension(x11->display, &event_base, &error_base)) {
+            MP_VERBOSE(x11, "Couldn't init Xrandr.\n");
+            return;
+        }
+        x11->xrandr_event = event_base + RRNotify;
+        XRRSelectInput(x11->display, x11->rootwin, RRScreenChangeNotifyMask |
+                       RRCrtcChangeNotifyMask | RROutputChangeNotifyMask);
+    }
+
     XRRScreenResources *r = XRRGetScreenResources(x11->display, x11->rootwin);
     if (!r) {
         MP_VERBOSE(x11, "Xrandr doesn't work.\n");
@@ -452,6 +463,7 @@ int vo_x11_init(struct vo *vo)
     *x11 = (struct vo_x11_state){
         .log = mp_log_new(x11, vo->log, "x11"),
         .screensaver_enabled = true,
+        .xrandr_event = -1,
     };
     vo->x11 = x11;
 
@@ -931,6 +943,10 @@ int vo_x11_check_events(struct vo *vo)
             if (Event.type == x11->ShmCompletionEvent) {
                 if (x11->ShmCompletionWaitCount > 0)
                     x11->ShmCompletionWaitCount--;
+            }
+            if (Event.type == x11->xrandr_event) {
+                xrandr_read(x11);
+                vo_x11_update_geometry(vo);
             }
             break;
         }

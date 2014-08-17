@@ -50,6 +50,8 @@ struct vo_x11_state {
     struct xrandr_display displays[MAX_DISPLAYS];
     int num_displays;
 
+    int xrandr_event;
+
     bool screensaver_enabled;
     bool dpms_touched;
     double screensaver_time_last;
