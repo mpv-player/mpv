@@ -324,7 +324,7 @@ static int vo_wm_detect(struct vo *vo)
 
 static void xrandr_read(struct vo_x11_state *x11)
 {
-#ifdef HAVE_XRANDR
+#if HAVE_XRANDR
     x11->num_displays = 0;
 
     XRRScreenResources *r = XRRGetScreenResources(x11->display, x11->rootwin);
