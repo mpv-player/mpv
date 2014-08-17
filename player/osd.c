@@ -155,7 +155,9 @@ static void print_status(struct MPContext *mpctx)
     if (!opts->use_terminal)
         return;
 
-    if (opts->quiet || !(mpctx->initialized_flags & INITIALIZED_PLAYBACK)) {
+    if (opts->quiet || !(mpctx->initialized_flags & INITIALIZED_PLAYBACK) ||
+        !mpctx->playing_msg_shown)
+    {
         term_osd_set_status(mpctx, "");
         return;
     }
