@@ -434,7 +434,6 @@ void update_window_title(struct MPContext *mpctx, bool force);
 void stream_dump(struct MPContext *mpctx);
 
 // osd.c
-void print_status(struct MPContext *mpctx);
 void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
                  double min, double max, double neutral, double val);
 void set_osd_msg(struct MPContext *mpctx, int level, int time,

@@ -146,7 +146,7 @@ static void add_term_osd_bar(struct MPContext *mpctx, char **line, int width)
     saddf(line, "%.*s", BSTR_P(parts[4]));
 }
 
-void print_status(struct MPContext *mpctx)
+static void print_status(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 

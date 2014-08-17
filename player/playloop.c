@@ -71,10 +71,6 @@ void pause_player(struct MPContext *mpctx)
     if (mpctx->video_out)
         vo_set_paused(mpctx->video_out, true);
 
-    // Only print status if there's actually a file being played.
-    if (mpctx->num_sources)
-        print_status(mpctx);
-
 end:
     mp_notify(mpctx, mpctx->opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
 }
