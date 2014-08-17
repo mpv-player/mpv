@@ -609,6 +609,7 @@ const struct MPOpts mp_default_opts = {
     .correct_pts = 1,
     .user_pts_assoc_mode = 1,
     .initial_audio_sync = 1,
+    .frame_dropping = 1,
     .term_osd = 2,
     .term_osd_bar_chars = "[-+-]",
     .consolecontrols = 1,

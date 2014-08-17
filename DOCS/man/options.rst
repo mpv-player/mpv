@@ -438,11 +438,11 @@ Video
     The argument selects the drop methods, and can be one of the following:
 
     <no>
-        Disable any framedropping (default).
+        Disable any framedropping.
     <vo>
-        Drop late frames on video output. This still decodes and filters all
-        frames, but doesn't render them on the VO. It tries to query the
-        display FPS (X11 only, not correct on multi-monitor systems), or
+        Drop late frames on video output (default). This still decodes and
+        filters all frames, but doesn't render them on the VO. It tries to query
+        the display FPS (X11 only, not correct on multi-monitor systems), or
         assumes infinite display FPS if that fails. Drops are indicated in
         the terminal status line as ``D: `` field. If the decoder is too slow,
         in theory all frames would have to be dropped (because all frames are
