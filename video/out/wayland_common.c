@@ -183,11 +183,46 @@ static void output_handle_mode(void *data,
     output->width = width;
     output->height = height;
     output->flags = flags;
+    output->refresh_rate = refresh;
 }
 
 static const struct wl_output_listener output_listener = {
     output_handle_geometry,
     output_handle_mode
+};
+
+
+/* SURFACE LISTENER */
+
+static void surface_handle_enter(void *data,
+                                 struct wl_surface *wl_surface,
+                                 struct wl_output *output)
+{
+    struct vo_wayland_state *wl = data;
+    wl->display.current_output = NULL;
+
+    struct vo_wayland_output *o;
+    wl_list_for_each(o, &wl->display.output_list, link) {
+        if (o->output == output) {
+            wl->display.current_output = o;
+            break;
+        }
+    }
+}
+
+static void surface_handle_leave(void *data,
+                                 struct wl_surface *wl_surface,
+                                 struct wl_output *output)
+{
+    // window can be displayed at 2 output, but we only use the most recently
+    // entered and discard the previous one even if a part of the window is
+    // still visible on the previous entered output.
+    // Don't bother with a "leave" logic
+}
+
+static const struct wl_surface_listener surface_listener = {
+    surface_handle_enter,
+    surface_handle_leave
 };
 
 /* KEYBOARD LISTENER */
@@ -738,7 +773,7 @@ static bool create_display (struct vo_wayland_state *wl)
     wl->display.registry = wl_display_get_registry(wl->display.display);
     wl_registry_add_listener(wl->display.registry, &registry_listener, wl);
 
-    wl_display_dispatch(wl->display.display);
+    wl_display_roundtrip(wl->display.display);
 
     wl->display.display_fd = wl_display_get_fd(wl->display.display);
 
@@ -783,6 +818,9 @@ static bool create_window (struct vo_wayland_state *wl)
 {
     wl->window.video_surface =
         wl_compositor_create_surface(wl->display.compositor);
+
+    wl_surface_add_listener(wl->window.video_surface,
+                            &surface_listener, wl);
 
     if (wl->display.shell) {
         wl->window.shell_surface = wl_shell_get_shell_surface(wl->display.shell,
@@ -1047,7 +1085,6 @@ static void vo_wayland_update_screeninfo(struct vo *vo, struct mp_rect *screenrc
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct mp_vo_opts *opts = vo->opts;
-    bool mode_received = false;
 
     wl_display_roundtrip(wl->display.display);
 
@@ -1059,24 +1096,16 @@ static void vo_wayland_update_screeninfo(struct vo *vo, struct mp_rect *screenrc
     struct vo_wayland_output *first_output = NULL;
     struct vo_wayland_output *fsscreen_output = NULL;
 
-    wl_list_for_each_reverse(output, &wl->display.output_list, link) {
-        if (!output || !output->width)
-            continue;
+    if (opts->fsscreen_id >= 0) {
+        wl_list_for_each_reverse(output, &wl->display.output_list, link) {
+            if (!output || !output->width)
+                continue;
 
-        mode_received = true;
+            if (opts->fsscreen_id == screen_id)
+                fsscreen_output = output;
 
-        if (opts->fsscreen_id == screen_id)
-            fsscreen_output = output;
-
-        if (!first_output)
-            first_output = output;
-
-        screen_id++;
-    }
-
-    if (!mode_received) {
-        MP_ERR(wl, "no output mode detected\n");
-        return;
+            screen_id++;
+        }
     }
 
     if (fsscreen_output) {
@@ -1088,8 +1117,8 @@ static void vo_wayland_update_screeninfo(struct vo *vo, struct mp_rect *screenrc
         wl->display.fs_output = NULL; /* current output is always 0 */
 
         if (first_output) {
-            screenrc->x1 = first_output->width;
-            screenrc->y1 = first_output->height;
+            screenrc->x1 = wl->display.current_output->width;
+            screenrc->y1 = wl->display.current_output->height;
         }
     }
 
@@ -1138,6 +1167,15 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         window_set_title(wl, (char*) arg);
         return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_FPS: {
+        if (!wl->display.current_output)
+            break;
+
+        // refresh rate is stored in milli-Hertz (mHz)
+        double fps = wl->display.current_output->refresh_rate / 1000;
+        *(double*) arg = fps;
+        return VO_TRUE;
+    }
     }
     return VO_NOTIMPL;
 }
