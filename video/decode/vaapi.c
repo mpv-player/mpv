@@ -44,10 +44,11 @@
  * - 1 decode frame
  * - decoding 2 frames ahead (done by generic playback code)
  * - keeping the reference to the previous frame (done by vo_vaapi.c)
+ * - keeping the reference to a dropped frame (done by vo.c)
  * Note that redundant additional surfaces also might allow for some
  * buffering (i.e. not trying to reuse a surface while it's busy).
  */
-#define ADDTIONAL_SURFACES 4
+#define ADDTIONAL_SURFACES 5
 
 // Magic number taken from original MPlayer vaapi patch.
 #define MAX_DECODER_SURFACES 21
