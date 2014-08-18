@@ -562,7 +562,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:lscale=spline36:dither-depth=auto:fbo-format=rgb16
+        --vo=opengl:lscale=spline36:dither-depth=auto:fbo-format=rgba16
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
