@@ -133,7 +133,6 @@ struct vo_internal {
 
     int64_t flip_queue_offset; // queue flip events at most this much in advance
 
-    int64_t last_flip;
     int64_t drop_count;
     bool dropped_frame;             // the previous frame was dropped
     struct mp_image *dropped_image; // used to possibly redraw the dropped frame
@@ -147,6 +146,7 @@ struct vo_internal {
 
     // --- The following fields can be accessed from the VO thread only
     int64_t vsync_interval;
+    int64_t last_flip;
     char *window_title;
 };
 
@@ -591,7 +591,9 @@ static bool render_frame(struct vo *vo)
 
         in->last_flip = mp_time_us();
 
-        MP_DBG(vo, "phase: %ld\n", (long)(in->last_flip % in->vsync_interval));
+        long phase = in->last_flip % in->vsync_interval;
+        MP_DBG(vo, "phase: %ld\n", phase);
+        MP_STATS(vo, "value %ld phase", phase);
 
         pthread_mutex_lock(&in->lock);
     }
