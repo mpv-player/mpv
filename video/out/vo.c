@@ -589,7 +589,12 @@ static bool render_frame(struct vo *vo)
         else
             vo->driver->flip_page(vo);
 
-        in->last_flip = mp_time_us();
+        in->last_flip = -1;
+
+        vo->driver->control(vo, VOCTRL_GET_RECENT_FLIP_TIME, &in->last_flip);
+
+        if (in->last_flip < 0)
+            in->last_flip = mp_time_us();
 
         long phase = in->last_flip % in->vsync_interval;
         MP_DBG(vo, "phase: %ld\n", phase);
