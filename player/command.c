@@ -2011,6 +2011,41 @@ static int mp_property_border(void *ctx, struct m_property *prop,
                                &mpctx->opts->vo.border, mpctx);
 }
 
+static int get_frame_count(struct MPContext *mpctx)
+{
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer)
+        return 0;
+    if (!mpctx->d_video)
+        return 0;
+
+    int frame_count = (int)(get_time_length(mpctx) * mpctx->d_video->fps);
+
+    return frame_count;
+}
+
+static int mp_property_frame_number(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->d_video)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int frame_number = ROUND(get_current_pos_ratio(mpctx, false) * (double)get_frame_count(mpctx));
+    return m_property_int_ro(action, arg, frame_number);
+}
+
+static int mp_property_frame_count(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+
+    if (!mpctx->d_video)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_int_ro(action, arg, get_frame_count(mpctx));
+}
+
 static int mp_property_framedrop(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
@@ -2789,6 +2824,9 @@ static const struct m_property mp_properties[] = {
     {"vid", mp_property_video},
     {"program", mp_property_program},
     {"hwdec", mp_property_hwdec},
+
+    {"estimated-frame-count", mp_property_frame_count},
+    {"estimated-frame-number", mp_property_frame_number},
 
     {"osd-width", mp_property_osd_w},
     {"osd-height", mp_property_osd_h},

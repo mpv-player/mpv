@@ -596,6 +596,13 @@ Property list
     ``${stream-end}``. For ordered chapters and such, the
     size of the currently played segment is returned.)
 
+``estimated-frame-count``
+    Total number of frames in current file. Note: It's only an estimate.
+    (It's computed from two unreliable quantities: fps and stream length.)
+
+``estimated-frame-number``
+    Number of current frame in current stream.
+
 ``path``
     Full path of the currently played file.
 
