@@ -262,7 +262,7 @@ static void keyboard_handle_keymap(void *data,
     wl->input.xkb.state = xkb_state_new(wl->input.xkb.keymap);
     if (!wl->input.xkb.state) {
         MP_ERR(wl, "failed to create XKB state\n");
-        xkb_map_unref(wl->input.xkb.keymap);
+        xkb_keymap_unref(wl->input.xkb.keymap);
         wl->input.xkb.keymap = NULL;
         return;
     }
@@ -298,7 +298,7 @@ static void keyboard_handle_key(void *data,
     xkb_keysym_t sym;
 
     code = key + 8;
-    num_syms = xkb_key_get_syms(wl->input.xkb.state, code, &syms);
+    num_syms = xkb_state_key_get_syms(wl->input.xkb.state, code, &syms);
 
     sym = XKB_KEY_NoSymbol;
     if (num_syms == 1)
@@ -897,7 +897,7 @@ static void destroy_input (struct vo_wayland_state *wl)
 {
     if (wl->input.keyboard) {
         wl_keyboard_destroy(wl->input.keyboard);
-        xkb_map_unref(wl->input.xkb.keymap);
+        xkb_keymap_unref(wl->input.xkb.keymap);
         xkb_state_unref(wl->input.xkb.state);
     }
 
