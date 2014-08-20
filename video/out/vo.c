@@ -748,6 +748,21 @@ bool vo_has_frame(struct vo *vo)
     return vo->in->hasframe;
 }
 
+static void run_query_format(void *p)
+{
+    void **pp = p;
+    struct vo *vo = pp[0];
+    *(int *)pp[2] = vo->driver->query_format(vo, *(int *)pp[1]);
+}
+
+int vo_query_format(struct vo *vo, int format)
+{
+    int ret;
+    void *p[] = {vo, &format, &ret};
+    mp_dispatch_run(vo->in->dispatch, run_query_format, p);
+    return ret;
+}
+
 // Calculate the appropriate source and destination rectangle to
 // get a correctly scaled picture, including pan-scan.
 // out_src: visible part of the video

@@ -771,7 +771,7 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
         // Pick whatever works
         int config_format = 0;
         for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
-            if (vo->driver->query_format(vo, fmt)) {
+            if (vo_query_format(vo, fmt)) {
                 config_format = fmt;
                 break;
             }

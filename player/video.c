@@ -91,10 +91,8 @@ void update_fps(struct MPContext *mpctx)
 
 static void set_allowed_vo_formats(struct vf_chain *c, struct vo *vo)
 {
-    for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
-        c->allowed_output_formats[fmt - IMGFMT_START] =
-            vo->driver->query_format(vo, fmt);
-    }
+    for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++)
+        c->allowed_output_formats[fmt - IMGFMT_START] = vo_query_format(vo, fmt);
 }
 
 static int try_filter(struct MPContext *mpctx, struct mp_image_params params,
@@ -575,7 +573,6 @@ static int update_video(struct MPContext *mpctx, double endpts)
     }
 
 
-    //bool vo_framedrop = !!mpctx->video_out->driver->flip_page_timed;
     bool vo_framedrop = !!(mpctx->opts->frame_dropping & 1);
     int min_frames = vo_framedrop ? 2 : 1; // framedrop needs duration
 

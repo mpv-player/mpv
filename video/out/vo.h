@@ -288,6 +288,7 @@ void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
 void vo_set_paused(struct vo *vo, bool paused);
 int64_t vo_get_drop_count(struct vo *vo);
+int vo_query_format(struct vo *vo, int format);
 
 void vo_set_flip_queue_offset(struct vo *vo, int64_t us);
 int64_t vo_get_vsync_interval(struct vo *vo);
