@@ -48,6 +48,7 @@
 #include "wayland-version.h"
 
 static void draw_image(struct vo *vo, mp_image_t *mpi);
+static void draw_osd(struct vo *vo);
 
 static const struct wl_callback_listener frame_listener;
 static const struct wl_buffer_listener buffer_listener;
@@ -170,8 +171,6 @@ struct priv {
     int use_rgb565;
     int use_triplebuffering;
 };
-
-static void draw_osd(struct vo *vo);
 
 /* copied from weston clients */
 static int set_cloexec_or_close(int fd)
@@ -372,8 +371,10 @@ static void buffer_pool_reinit(struct priv *p,
                                struct wl_shm *shm)
 {
     pool->shm = shm;
+
     if (!pool->buffers)
         pool->buffers = calloc(buffer_no, sizeof(struct buffer));
+
     pool->buffer_no = buffer_no;
     pool->format = fmt->wl_fmt;
     pool->bytes_per_pixel = mp_imgfmt_get_desc(fmt->mp_fmt).bytes[0];
@@ -475,7 +476,6 @@ static struct buffer * buffer_pool_get_no(struct buffer_pool *pool, uint32_t no)
 
     return &pool->buffers[no];
 }
-
 
 static bool redraw_frame(struct priv *p)
 {
@@ -910,7 +910,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(p);
-        return true;
+        return VO_TRUE;
     }
     case VOCTRL_GET_RECENT_FLIP_TIME:
     {
