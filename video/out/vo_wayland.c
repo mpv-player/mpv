@@ -42,6 +42,8 @@
 #include "common/msg.h"
 #include "input/input.h"
 
+#include "osdep/timer.h"
+
 #include "wayland_common.h"
 #include "wayland-version.h"
 
@@ -160,6 +162,8 @@ struct priv {
 
     // this id tells us if the subtitle part has changed or not
     int bitmap_pos_id[MAX_OSD_PARTS];
+
+    int64_t recent_flip_time; // last frame event
 
     // options
     int enable_alpha;
@@ -621,6 +625,7 @@ static void frame_handle_redraw(void *data,
 
         p->redraw_callback = NULL;
     }
+    p->recent_flip_time = mp_time_us();
 }
 
 static const struct wl_callback_listener frame_listener = {
@@ -906,6 +911,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(p);
         return true;
+    }
+    case VOCTRL_GET_RECENT_FLIP_TIME:
+    {
+        *(int64_t*) data = p->recent_flip_time;
+        return VO_TRUE;
     }
     }
     int events = 0;
