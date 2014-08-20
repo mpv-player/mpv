@@ -47,8 +47,6 @@
 #include "input/keycodes.h"
 #include "terminal.h"
 
-static int use_terminal;
-
 #if HAVE_TERMIOS
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
@@ -474,7 +472,7 @@ static volatile int getch2_enabled = 0;
 
 static void do_activate_getch2(void)
 {
-    if (getch2_active || !use_terminal)
+    if (getch2_active || !isatty(1))
         return;
 
 #if HAVE_TERMINFO || HAVE_TERMCAP
@@ -627,8 +625,7 @@ void terminal_set_foreground_color(FILE *stream, int c)
 
 int terminal_init(void)
 {
-    use_terminal = isatty(1);
-    if (use_terminal)
+    if (isatty(1))
         load_termcap(NULL);
     return 0;
 }
