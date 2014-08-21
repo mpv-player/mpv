@@ -160,6 +160,17 @@ static bool hwdec_codec_allowed(struct dec_video *vd, const char *codec)
     return false;
 }
 
+static void hwdec_lock(struct lavc_ctx *ctx)
+{
+    if (ctx->hwdec && ctx->hwdec->lock)
+        ctx->hwdec->lock(ctx);
+}
+static void hwdec_unlock(struct lavc_ctx *ctx)
+{
+    if (ctx->hwdec && ctx->hwdec->unlock)
+        ctx->hwdec->unlock(ctx);
+}
+
 // Find the correct profile entry for the current codec and profile.
 // Assumes the table has higher profiles first (for each codec).
 const struct hwdec_profile_entry *hwdec_find_profile(
@@ -608,7 +619,9 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 
     mp_set_av_packet(&pkt, packet, NULL);
 
+    hwdec_lock(ctx);
     ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
+    hwdec_unlock(ctx);
     if (ret < 0) {
         MP_WARN(vd, "Error while decoding frame!\n");
         return -1;
