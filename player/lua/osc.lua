@@ -1538,8 +1538,6 @@ function enable_osc(enable)
     end
 end
 
-mp.use_suspend=false
-
 mp.register_event("tick", tick)
 mp.register_event("start-file", request_init)
 mp.register_event("tracks-changed", request_init)
