@@ -54,8 +54,6 @@ static volatile int tio_orig_set;
 
 int screen_width = 80;
 int screen_height = 24;
-char *terminal_erase_to_end_of_line = "\033[K";
-char *terminal_cursor_up = "\033[A";
 
 typedef struct {
     char *cap;
@@ -271,18 +269,10 @@ static int load_termcap(char *termtype){
 
     static char term_buf[128];
     char *buf_ptr = &term_buf[0];
-    char *tmp;
 
     // References for terminfo/termcap codes:
     //  http://linux.die.net/man/5/termcap
     //  http://unixhelp.ed.ac.uk/CGI/man-cgi?terminfo+5
-
-    tmp = tgetstr("ce", &buf_ptr);
-    if (tmp)
-        terminal_erase_to_end_of_line = tmp;
-    tmp = tgetstr("up", &buf_ptr);
-    if (tmp)
-        terminal_cursor_up = tmp;
 
     screen_width  = tgetnum("co");
     screen_height = tgetnum("li");
@@ -612,15 +602,6 @@ void getch2_disable(void){
 bool terminal_in_background(void)
 {
     return isatty(2) && tcgetpgrp(2) != getpgrp();
-}
-
-void terminal_set_foreground_color(FILE *stream, int c)
-{
-    if (c == -1) {
-        fprintf(stream, "\033[0m");
-    } else {
-        fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
-    }
 }
 
 int terminal_init(void)

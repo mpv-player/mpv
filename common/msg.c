@@ -158,16 +158,10 @@ static void prepare_status_line(struct mp_log_root *root, char *new_status)
     size_t clear_lines = MPMIN(MPMAX(new_lines, old_lines), root->blank_lines);
 
     // clear the status line itself
-    if (terminal_erase_to_end_of_line[0]) {
-        fprintf(f, "\r%s", terminal_erase_to_end_of_line);
-    } else {
-        // This code is for MS windows (no ANSI control sequences)
-        get_screen_size();
-        fprintf(f, "\r%*s\r", screen_width - 1, "");
-    }
+    fprintf(f, "\r\033[K");
     // and clear all previous old lines
     for (size_t n = 1; n < clear_lines; n++)
-        fprintf(f, "%s\r%s", terminal_cursor_up, terminal_erase_to_end_of_line);
+        fprintf(f, "\033[A\r\033[K");
     // skip "unused" blank lines, so that status is aligned to term bottom
     for (size_t n = new_lines; n < clear_lines; n++)
         fprintf(f, "\n");
@@ -200,10 +194,20 @@ bool mp_msg_has_status_line(struct mpv_global *global)
     return r;
 }
 
+static void set_term_color(FILE *stream, int c)
+{
+    if (c == -1) {
+        fprintf(stream, "\033[0m");
+    } else {
+        fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
+    }
+}
+
+
 static void set_msg_color(FILE* stream, int lev)
 {
     static const int v_colors[] = {9, 1, 3, -1, -1, 2, 8, 8, 8, -1};
-    terminal_set_foreground_color(stream, v_colors[lev]);
+    set_term_color(stream, v_colors[lev]);
 }
 
 static void pretty_print_module(FILE* stream, const char *prefix, bool use_color, int lev)
@@ -214,12 +218,12 @@ static void pretty_print_module(FILE* stream, const char *prefix, bool use_color
         unsigned int mod = 0;
         for (int i = 0; i < prefix_len; ++i)
             mod = mod * 33 + prefix[i];
-        terminal_set_foreground_color(stream, (mod + 1) % 15 + 1);
+        set_term_color(stream, (mod + 1) % 15 + 1);
     }
 
     fprintf(stream, "%10s", prefix);
     if (use_color)
-        terminal_set_foreground_color(stream, -1);
+        set_term_color(stream, -1);
     fprintf(stream, ": ");
     if (use_color)
         set_msg_color(stream, lev);
@@ -291,7 +295,7 @@ static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
         fprintf(stream, "%s", terminate);
 
     if (root->color)
-        terminal_set_foreground_color(stream, -1);
+        set_term_color(stream, -1);
     fflush(stream);
 }
 

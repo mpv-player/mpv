@@ -33,9 +33,6 @@ struct input_ctx;
 extern int screen_width;
 extern int screen_height;
 
-extern char *terminal_erase_to_end_of_line;
-extern char *terminal_cursor_up;
-
 /* Global initialization for terminal output. */
 int terminal_init(void);
 
@@ -44,10 +41,6 @@ void terminal_setup_getch(struct input_ctx *ictx);
 
 /* Return whether the process has been backgrounded. */
 bool terminal_in_background(void);
-
-/* Set ANSI text foreground color. c is [-1, 7], where 0-7 are colors, and
- * -1 means reset to default. stream is either stdout or stderr. */
-void terminal_set_foreground_color(FILE *stream, int c);
 
 /* Get screen-size using IOCTL call. */
 void get_screen_size(void);
@@ -58,5 +51,8 @@ void getch2_disable(void);
 
 /* Enable and disable STDIN line-buffering */
 void getch2_poll(void);
+
+// Windows only.
+void mp_write_console_ansi(void **wstream, char *buf);
 
 #endif /* MPLAYER_GETCH2_H */

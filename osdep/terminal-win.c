@@ -33,12 +33,11 @@
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "terminal.h"
+#include "osdep/io.h"
 #include "osdep/w32_keyboard.h"
 
 int screen_width = 79;
 int screen_height = 24;
-char *terminal_erase_to_end_of_line = "";
-char *terminal_cursor_up = "";
 
 #define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
 #define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
@@ -58,7 +57,7 @@ void get_screen_size(void)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
     if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cinfo)) {
-        screen_width = cinfo.dwMaximumWindowSize.X;
+        screen_width = cinfo.dwMaximumWindowSize.X - 1;
         screen_height = cinfo.dwMaximumWindowSize.Y;
     }
 }
@@ -177,13 +176,80 @@ bool terminal_in_background(void)
     return false;
 }
 
-void terminal_set_foreground_color(FILE *stream, int c)
+static void write_console_text(HANDLE *wstream, char *buf)
 {
-    HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
-    if (c < 0 || c >= 8) { // reset or invalid
-        SetConsoleTextAttribute(wstream, stdoutAttrs);
-    } else {
-        SetConsoleTextAttribute(wstream, ansi2win32[c] | FOREGROUND_INTENSITY);
+    wchar_t *out = mp_from_utf8(NULL, buf);
+    size_t out_len = wcslen(out);
+    WriteConsoleW(wstream, out, out_len, NULL, NULL);
+    talloc_free(out);
+}
+
+// Mutates the input argument (buf), because we're evil.
+void mp_write_console_ansi(HANDLE *wstream, char *buf)
+{
+    while (*buf) {
+        char *next = strchr(buf, '\033');
+        if (!next) {
+            write_console_text(wstream, buf);
+            break;
+        }
+        next[0] = '\0'; // mutate input for fun and profit
+        write_console_text(wstream, buf);
+        if (next[1] != '[') {
+            write_console_text(wstream, "\033");
+            buf = next;
+            continue;
+        }
+        next += 2;
+        // ANSI codes generally follow this syntax:
+        //    "\033[" [ <i> (';' <i> )* ] <c>
+        // where <i> are integers, and <c> a single char command code.
+        // Also see: http://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
+        int params[2] = {-1, -1}; // 'm' might be unlimited; ignore that
+        int num_params = 0;
+        while (num_params < 2) {
+            char *end = next;
+            long p = strtol(next, &end, 10);
+            if (end == next)
+                break;
+            next = end;
+            params[num_params++] = p;
+            if (next[0] != ';' || !next[0])
+                break;
+            next += 1;
+        }
+        char code = next[0];
+        if (code)
+            next += 1;
+        CONSOLE_SCREEN_BUFFER_INFO info;
+        GetConsoleScreenBufferInfo(wstream, &info);
+        switch (code) {
+        case 'K': {     // erase to end of line
+            COORD at = info.dwCursorPosition;
+            int len = info.dwSize.X - at.X;
+            FillConsoleOutputCharacterW(wstream, ' ', len, at, &(DWORD){0});
+            SetConsoleCursorPosition(wstream, at);
+            break;
+        }
+        case 'A': {     // cursor up
+            info.dwCursorPosition.Y -= 1;
+            SetConsoleCursorPosition(wstream, info.dwCursorPosition);
+            break;
+        }
+        case 'm': {     // "SGR"
+            for (int n = 0; n < num_params; n++) {
+                int p = params[n];
+                if (p <= 0) {
+                    SetConsoleTextAttribute(wstream, stdoutAttrs);
+                } else if (p >= 0 && p < 8) {
+                    SetConsoleTextAttribute(wstream,
+                        ansi2win32[p] | FOREGROUND_INTENSITY);
+                }
+            }
+            break;
+        }
+        }
+        buf = next;
     }
 }
 
