@@ -238,8 +238,9 @@ static void print_status(struct MPContext *mpctx)
 
     if (opts->term_osd_bar) {
         saddf(&line, "\n");
-        get_screen_size();
-        add_term_osd_bar(mpctx, &line, screen_width);
+        int w = 80, h = 24;
+        terminal_get_size(&w, &h);
+        add_term_osd_bar(mpctx, &line, w);
     }
 
     // end

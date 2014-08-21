@@ -52,9 +52,6 @@ static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
 #endif
 
-int screen_width = 80;
-int screen_height = 24;
-
 typedef struct {
     char *cap;
     int len;
@@ -274,13 +271,6 @@ static int load_termcap(char *termtype){
     //  http://linux.die.net/man/5/termcap
     //  http://unixhelp.ed.ac.uk/CGI/man-cgi?terminfo+5
 
-    screen_width  = tgetnum("co");
-    screen_height = tgetnum("li");
-    if (screen_width < 1 || screen_width > 255)
-        screen_width = 80;
-    if (screen_height < 1 || screen_height > 255)
-        screen_height = 24;
-
     term_smkx = tgetstr("ks", &buf_ptr);
     term_rmkx = tgetstr("ke", &buf_ptr);
 
@@ -334,13 +324,14 @@ static int load_termcap(char *termtype){
     return getch2_keys.len;
 }
 
-void get_screen_size(void) {
+void terminal_get_size(int *w, int *h)
+{
     struct winsize ws;
     if (ioctl(0, TIOCGWINSZ, &ws) < 0 || !ws.ws_row || !ws.ws_col)
         return;
 
-    screen_width = ws.ws_col;
-    screen_height = ws.ws_row;
+    *w = ws.ws_col;
+    *h = ws.ws_row;
 }
 
 #define BUF_LEN 256
@@ -451,14 +442,15 @@ static int read_keys(void *ctx, int fd)
     return MP_INPUT_DEAD;
 }
 
-void terminal_setup_getch(struct input_ctx *ictx)
-{
-    mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
-    getch2_enable();
-}
-
 static volatile int getch2_active  = 0;
 static volatile int getch2_enabled = 0;
+
+void terminal_setup_getch(struct input_ctx *ictx)
+{
+    if (!getch2_enabled)
+        return;
+    mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
+}
 
 static void do_activate_getch2(void)
 {
@@ -563,7 +555,8 @@ static void quit_request_sighandler(int signum)
     async_quit_request = 1;
 }
 
-void getch2_enable(void){
+static void getch2_enable(void)
+{
     if (getch2_enabled)
         return;
 
@@ -581,7 +574,8 @@ void getch2_enable(void){
     getch2_enabled = 1;
 }
 
-void getch2_disable(void){
+void terminal_uninit(void)
+{
     if (!getch2_enabled)
         return;
 
@@ -608,5 +602,6 @@ int terminal_init(void)
 {
     if (isatty(1))
         load_termcap(NULL);
+    getch2_enable();
     return 0;
 }

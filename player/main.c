@@ -132,9 +132,6 @@ void mp_destroy(struct MPContext *mpctx)
 
     command_uninit(mpctx);
 
-    mp_dispatch_set_wakeup_fn(mpctx->dispatch, NULL, NULL);
-    mp_input_uninit(mpctx->input);
-
     osd_free(mpctx->osd);
 
 #if HAVE_LIBASS
@@ -142,10 +139,14 @@ void mp_destroy(struct MPContext *mpctx)
         ass_library_done(mpctx->ass_library);
 #endif
 
-    if (mpctx->opts->use_terminal) {
-        getch2_disable();
+    if (mpctx->opts->use_terminal && terminal_initialized) {
+        terminal_uninit();
         terminal_initialized = false;
     }
+
+    mp_dispatch_set_wakeup_fn(mpctx->dispatch, NULL, NULL);
+    mp_input_uninit(mpctx->input);
+
     uninit_libav(mpctx->global);
 
     if (mpctx->autodetach)
@@ -403,7 +404,7 @@ int mp_initialize(struct MPContext *mpctx)
     }
 #endif
 
-    if (opts->use_terminal && opts->consolecontrols)
+    if (opts->use_terminal && opts->consolecontrols && terminal_initialized)
         terminal_setup_getch(mpctx->input);
 
 #if HAVE_LIBASS

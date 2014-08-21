@@ -29,25 +29,20 @@
 
 struct input_ctx;
 
-/* Screen size. Initialized by load_termcap() and get_screen_size() */
-extern int screen_width;
-extern int screen_height;
-
 /* Global initialization for terminal output. */
 int terminal_init(void);
 
 /* Setup ictx to read keys from the terminal */
 void terminal_setup_getch(struct input_ctx *ictx);
 
+/* Undo terminal_init(), and also terminal_setup_getch() */
+void terminal_uninit(void);
+
 /* Return whether the process has been backgrounded. */
 bool terminal_in_background(void);
 
-/* Get screen-size using IOCTL call. */
-void get_screen_size(void);
-
-/* Initialize getch2 */
-void getch2_enable(void);
-void getch2_disable(void);
+/* Get terminal-size in columns/rows. */
+void terminal_get_size(int *w, int *h);
 
 /* Enable and disable STDIN line-buffering */
 void getch2_poll(void);

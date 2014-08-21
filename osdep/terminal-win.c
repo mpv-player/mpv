@@ -30,14 +30,12 @@
 #include <string.h>
 #include <windows.h>
 #include <io.h>
+#include "common/common.h"
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "terminal.h"
 #include "osdep/io.h"
 #include "osdep/w32_keyboard.h"
-
-int screen_width = 79;
-int screen_height = 24;
 
 #define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
 #define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
@@ -53,40 +51,35 @@ static const unsigned char ansi2win32[8] = {
     FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
 };
 
-void get_screen_size(void)
+void terminal_get_size(int *w, int *h)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
     if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cinfo)) {
-        screen_width = cinfo.dwMaximumWindowSize.X - 1;
-        screen_height = cinfo.dwMaximumWindowSize.Y;
+        *w = cinfo.dwMaximumWindowSize.X - 1;
+        *h = cinfo.dwMaximumWindowSize.Y;
     }
 }
 
-static HANDLE in;
 static int getch2_status = 0;
 
 static int getch2_internal(void)
 {
-    INPUT_RECORD eventbuffer[128];
     DWORD retval;
-    int i = 0;
+    HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
+
     /*check if there are input events*/
-    if (!GetNumberOfConsoleInputEvents(in, &retval)) {
-        printf("getch2: can't get number of input events: %i\n",
-               (int)GetLastError());
+    if (!GetNumberOfConsoleInputEvents(in, &retval))
         return -1;
-    }
     if (retval <= 0)
         return -1;
 
     /*read all events*/
-    if (!ReadConsoleInput(in, eventbuffer, 128, &retval)) {
-        printf("getch: can't read input events\n");
+    INPUT_RECORD eventbuffer[128];
+    if (!ReadConsoleInput(in, eventbuffer, MP_ARRAY_SIZE(eventbuffer), &retval))
         return -1;
-    }
 
     /*filter out keyevents*/
-    for (i = 0; i < retval; i++) {
+    for (int i = 0; i < retval; i++) {
         switch (eventbuffer[i].EventType) {
         case KEY_EVENT: {
             KEY_EVENT_RECORD *record = &eventbuffer[i].Event.KeyEvent;
@@ -101,7 +94,6 @@ static int getch2_internal(void)
                     return mpkey;
 
                 /*only characters should be remaining*/
-                //printf("getch2: YOU PRESSED \"%c\" \n",eventbuffer[i].Event.KeyEvent.uChar.AsciiChar);
                 return eventbuffer[i].Event.KeyEvent.uChar.UnicodeChar;
             }
             break;
@@ -111,7 +103,6 @@ static int getch2_internal(void)
         case FOCUS_EVENT:
         case MENU_EVENT:
         default:
-            //printf("getch2: unsupported event type");
             break;
         }
     }
@@ -136,29 +127,16 @@ static int read_keys(void *ctx, int fd)
 void terminal_setup_getch(struct input_ctx *ictx)
 {
     mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
-    getch2_enable();
+    HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
+    getch2_status = !!GetNumberOfConsoleInputEvents(in, &(DWORD){0});
 }
 
 void getch2_poll(void)
 {
 }
 
-void getch2_enable(void)
+void terminal_uninit(void)
 {
-    DWORD retval;
-    in = GetStdHandle(STD_INPUT_HANDLE);
-    if (!GetNumberOfConsoleInputEvents(in, &retval)) {
-        printf("getch2: %i can't get number of input events  "
-               "[disabling console input]\n", (int)GetLastError());
-        getch2_status = 0;
-    } else
-        getch2_status = 1;
-}
-
-void getch2_disable(void)
-{
-    if (!getch2_status)
-        return;                // already disabled / never enabled
     getch2_status = 0;
 }
 
