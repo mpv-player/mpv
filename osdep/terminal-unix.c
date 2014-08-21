@@ -29,6 +29,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <assert.h>
 
 #if HAVE_TERMIOS
 #if HAVE_TERMIOS_H
@@ -557,8 +558,7 @@ static void quit_request_sighandler(int signum)
 
 static void getch2_enable(void)
 {
-    if (getch2_enabled)
-        return;
+    assert(!getch2_enabled);
 
     // handlers to fix terminal settings
     setsigaction(SIGCONT, continue_sighandler, 0, true);

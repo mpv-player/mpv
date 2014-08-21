@@ -30,6 +30,8 @@
 #include <string.h>
 #include <windows.h>
 #include <io.h>
+#include <pthread.h>
+#include <assert.h>
 #include "common/common.h"
 #include "input/keycodes.h"
 #include "input/input.h"
@@ -51,6 +53,11 @@ static const unsigned char ansi2win32[8] = {
     FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
 };
 
+static bool running;
+static HANDLE death;
+static pthread_t input_thread;
+static struct input_ctx *input_ctx;
+
 void terminal_get_size(int *w, int *h)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
@@ -60,23 +67,21 @@ void terminal_get_size(int *w, int *h)
     }
 }
 
-static int getch2_status = 0;
-
-static int getch2_internal(void)
+static void read_input(void)
 {
     DWORD retval;
     HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
 
     /*check if there are input events*/
     if (!GetNumberOfConsoleInputEvents(in, &retval))
-        return -1;
+        return;
     if (retval <= 0)
-        return -1;
+        return;
 
     /*read all events*/
     INPUT_RECORD eventbuffer[128];
     if (!ReadConsoleInput(in, eventbuffer, MP_ARRAY_SIZE(eventbuffer), &retval))
-        return -1;
+        return;
 
     /*filter out keyevents*/
     for (int i = 0; i < retval; i++) {
@@ -90,11 +95,14 @@ static int getch2_internal(void)
                 bool ext = record->dwControlKeyState & ENHANCED_KEY;
 
                 int mpkey = mp_w32_vkey_to_mpkey(vkey, ext);
-                if (mpkey)
-                    return mpkey;
-
-                /*only characters should be remaining*/
-                return eventbuffer[i].Event.KeyEvent.uChar.UnicodeChar;
+                if (mpkey) {
+                    mp_input_put_key(input_ctx, mpkey);
+                } else {
+                    /*only characters should be remaining*/
+                    int c = eventbuffer[i].Event.KeyEvent.uChar.UnicodeChar;
+                    if (c > 0)
+                        mp_input_put_key(input_ctx, c);
+                }
             }
             break;
         }
@@ -106,29 +114,38 @@ static int getch2_internal(void)
             break;
         }
     }
-    return -1;
+    return;
 }
 
-static bool getch2(struct input_ctx *ctx)
+static void *input_thread_fn(void *ptr)
 {
-    int r = getch2_internal();
-    if (r >= 0)
-        mp_input_put_key(ctx, r);
-    return true;
-}
-
-static int read_keys(void *ctx, int fd)
-{
-    if (getch2(ctx))
-        return MP_INPUT_NOTHING;
-    return MP_INPUT_DEAD;
+    HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
+    HANDLE stuff[2] = {in, death};
+    while (1) {
+        DWORD r = WaitForMultipleObjects(2, stuff, FALSE, INFINITE);
+        if (r != WAIT_OBJECT_0)
+            break;
+        read_input();
+    }
+    return NULL;
 }
 
 void terminal_setup_getch(struct input_ctx *ictx)
 {
-    mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
+    assert(!running);
+
     HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
-    getch2_status = !!GetNumberOfConsoleInputEvents(in, &(DWORD){0});
+    if (GetNumberOfConsoleInputEvents(in, &(DWORD){0})) {
+        input_ctx = ictx;
+        death = CreateEvent(NULL, TRUE, FALSE, NULL);
+        if (!death)
+            return;
+        if (pthread_create(&input_thread, NULL, input_thread_fn, NULL)) {
+            CloseHandle(death);
+            return;
+        }
+        running = true;
+    }
 }
 
 void getch2_poll(void)
@@ -137,7 +154,12 @@ void getch2_poll(void)
 
 void terminal_uninit(void)
 {
-    getch2_status = 0;
+    if (running) {
+        SetEvent(death);
+        pthread_join(input_thread, NULL);
+        input_ctx = NULL;
+        running = false;
+    }
 }
 
 bool terminal_in_background(void)
