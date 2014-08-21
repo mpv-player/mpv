@@ -281,7 +281,7 @@ static double ao_estimate_timeout(struct ao *ao)
         if (timeout > 0.100)
             timeout = MPMAX(timeout - 0.200, 0.100);
     }
-    return MPMAX(timeout, ao->device_buffer * 0.75 / ao->samplerate);
+    return MPMAX(timeout, ao->device_buffer * 0.25 / ao->samplerate);
 }
 
 static void *playthread(void *arg)
