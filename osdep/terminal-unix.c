@@ -46,12 +46,232 @@
 #include "bstr/bstr.h"
 #include "input/input.h"
 #include "input/keycodes.h"
+#include "misc/ctype.h"
 #include "terminal.h"
 
 #if HAVE_TERMIOS
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
 #endif
+
+#if !(HAVE_TERMINFO || HAVE_TERMCAP)
+
+struct key_entry {
+    const char *seq;
+    int mpkey;
+    // If this is not NULL, then if seq is matched as unique prefix, the
+    // existing sequence is replaced by the following string. Matching
+    // continues normally, and mpkey is or-ed into the final result.
+    const char *replace;
+};
+
+static const struct key_entry keys[] = {
+    {"\011", MP_KEY_TAB},
+    {"\012", MP_KEY_ENTER},
+    {"\177", MP_KEY_BS},
+
+    {"\033[1~", MP_KEY_HOME},
+    {"\033[2~", MP_KEY_INS},
+    {"\033[3~", MP_KEY_DEL},
+    {"\033[4~", MP_KEY_END},
+    {"\033[5~", MP_KEY_PGUP},
+    {"\033[6~", MP_KEY_PGDWN},
+    {"\033[7~", MP_KEY_HOME},
+    {"\033[8~", MP_KEY_END},
+
+    {"\033[11~", MP_KEY_F+1},
+    {"\033[12~", MP_KEY_F+2},
+    {"\033[13~", MP_KEY_F+3},
+    {"\033[14~", MP_KEY_F+4},
+    {"\033[15~", MP_KEY_F+5},
+    {"\033[17~", MP_KEY_F+6},
+    {"\033[18~", MP_KEY_F+7},
+    {"\033[19~", MP_KEY_F+8},
+    {"\033[20~", MP_KEY_F+9},
+    {"\033[21~", MP_KEY_F+10},
+    {"\033[23~", MP_KEY_F+11},
+    {"\033[24~", MP_KEY_F+12},
+
+    {"\033[A", MP_KEY_UP},
+    {"\033[B", MP_KEY_DOWN},
+    {"\033[C", MP_KEY_RIGHT},
+    {"\033[D", MP_KEY_LEFT},
+    {"\033[E", MP_KEY_KP5},
+    {"\033[F", MP_KEY_END},
+    {"\033[H", MP_KEY_HOME},
+
+    {"\033[[A", MP_KEY_F+1},
+    {"\033[[B", MP_KEY_F+2},
+    {"\033[[C", MP_KEY_F+3},
+    {"\033[[D", MP_KEY_F+4},
+    {"\033[[E", MP_KEY_F+5},
+
+    {"\033OE", MP_KEY_KP5}, // mintty?
+    {"\033OM", MP_KEY_KPENTER},
+    {"\033OP", MP_KEY_F+1},
+    {"\033OQ", MP_KEY_F+2},
+    {"\033OR", MP_KEY_F+3},
+    {"\033OS", MP_KEY_F+4},
+
+    {"\033Oa", MP_KEY_UP | MP_KEY_MODIFIER_CTRL}, // urxvt
+    {"\033Ob", MP_KEY_DOWN | MP_KEY_MODIFIER_CTRL},
+    {"\033Oc", MP_KEY_RIGHT | MP_KEY_MODIFIER_CTRL},
+    {"\033Od", MP_KEY_LEFT | MP_KEY_MODIFIER_CTRL},
+    {"\033Oj", '*'}, // also keypad, but we don't have separate codes for them
+    {"\033Ok", '+'},
+    {"\033Om", '-'},
+    {"\033On", MP_KEY_KPDEC},
+    {"\033Oo", '/'},
+    {"\033Op", MP_KEY_KP0},
+    {"\033Oq", MP_KEY_KP1},
+    {"\033Or", MP_KEY_KP2},
+    {"\033Os", MP_KEY_KP3},
+    {"\033Ot", MP_KEY_KP4},
+    {"\033Ou", MP_KEY_KP5},
+    {"\033Ov", MP_KEY_KP6},
+    {"\033Ow", MP_KEY_KP7},
+    {"\033Ox", MP_KEY_KP8},
+    {"\033Oy", MP_KEY_KP9},
+
+    {"\033[a", MP_KEY_UP | MP_KEY_MODIFIER_SHIFT}, // urxvt
+    {"\033[b", MP_KEY_DOWN | MP_KEY_MODIFIER_SHIFT},
+    {"\033[c", MP_KEY_RIGHT | MP_KEY_MODIFIER_SHIFT},
+    {"\033[d", MP_KEY_LEFT | MP_KEY_MODIFIER_SHIFT},
+    {"\033[2^", MP_KEY_INS | MP_KEY_MODIFIER_CTRL},
+    {"\033[3^", MP_KEY_DEL | MP_KEY_MODIFIER_CTRL},
+    {"\033[5^", MP_KEY_PGUP | MP_KEY_MODIFIER_CTRL},
+    {"\033[6^", MP_KEY_PGDWN | MP_KEY_MODIFIER_CTRL},
+    {"\033[7^", MP_KEY_HOME | MP_KEY_MODIFIER_CTRL},
+    {"\033[8^", MP_KEY_END | MP_KEY_MODIFIER_CTRL},
+
+    {"\033[1;2", MP_KEY_MODIFIER_SHIFT, .replace = "\033["}, // xterm
+    {"\033[1;3", MP_KEY_MODIFIER_ALT, .replace = "\033["},
+    {"\033[1;5", MP_KEY_MODIFIER_CTRL, .replace = "\033["},
+    {"\033[1;4", MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_SHIFT, .replace = "\033["},
+    {"\033[1;6", MP_KEY_MODIFIER_CTRL | MP_KEY_MODIFIER_SHIFT, .replace = "\033["},
+    {"\033[1;7", MP_KEY_MODIFIER_CTRL | MP_KEY_MODIFIER_ALT, .replace = "\033["},
+    {"\033[1;8",
+     MP_KEY_MODIFIER_CTRL | MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_SHIFT,
+     .replace = "\033["},
+
+    {"\033[29~", MP_KEY_MENU},
+    {"\033[Z", MP_KEY_TAB | MP_KEY_MODIFIER_SHIFT},
+
+    {0}
+};
+
+#define BUF_LEN 256
+
+struct termbuf {
+    unsigned char b[BUF_LEN];
+    int len;
+    int mods;
+};
+
+static void skip_buf(struct termbuf *b, unsigned int count)
+{
+    assert(count <= b->len);
+
+    memmove(&b->b[0], &b->b[count], b->len - count);
+    b->len -= count;
+    b->mods = 0;
+}
+
+static struct termbuf buf;
+
+static bool getch2(struct input_ctx *input_ctx)
+{
+    int retval = read(0, &buf.b[buf.len], BUF_LEN - buf.len);
+    /* Return false on EOF to stop running select() on the FD, as it'd
+     * trigger all the time. Note that it's possible to get temporary
+     * EOF on terminal if the user presses ctrl-d, but that shouldn't
+     * happen if the terminal state change done in getch2_enable()
+     * works.
+     */
+    if (retval == 0)
+        return false;
+    if (retval == -1)
+        return errno != EBADF && errno != EINVAL;
+    buf.len += retval;
+
+    while (buf.len) {
+        int utf8_len = bstr_parse_utf8_code_length(buf.b[0]);
+        if (utf8_len > 1) {
+            if (buf.len < utf8_len)
+                goto read_more;
+
+            mp_input_put_key_utf8(input_ctx, buf.mods, (bstr){buf.b, utf8_len});
+            skip_buf(&buf, utf8_len);
+            continue;
+        }
+
+        const struct key_entry *match = NULL; // may be a partial match
+        for (int n = 0; keys[n].seq; n++) {
+            const struct key_entry *e = &keys[n];
+            if (memcmp(e->seq, buf.b, MPMIN(buf.len, strlen(e->seq))) == 0) {
+                if (match)
+                    goto read_more; /* need more bytes to disambiguate */
+                match = e;
+            }
+        }
+
+        if (!match) { // normal or unknown key
+            if (buf.b[0] == '\033') {
+                skip_buf(&buf, 1);
+                if (buf.len > 0 && mp_isalnum(buf.b[0])) { // meta+normal key
+                    mp_input_put_key(input_ctx, buf.b[0] | MP_KEY_MODIFIER_ALT);
+                    skip_buf(&buf, 1);
+                } else if (buf.len == 1 && buf.b[0] == '\033') {
+                    mp_input_put_key(input_ctx, MP_KEY_ESC);
+                    skip_buf(&buf, 1);
+                } else {
+                    // Throw it away. Typically, this will be a complete,
+                    // unsupported sequence, and dropping this will skip it.
+                    skip_buf(&buf, buf.len);
+                }
+            } else {
+                mp_input_put_key(input_ctx, buf.b[0]);
+                skip_buf(&buf, 1);
+            }
+            continue;
+        }
+
+        int seq_len = strlen(match->seq);
+        if (seq_len > buf.len)
+            goto read_more; /* partial match */
+
+        if (match->replace) {
+            int rep = strlen(match->replace);
+            assert(rep <= seq_len);
+            memcpy(buf.b, match->replace, rep);
+            memmove(buf.b + rep, buf.b + seq_len, buf.len - seq_len);
+            buf.len = rep + buf.len - seq_len;
+            buf.mods |= match->mpkey;
+            continue;
+        }
+
+        mp_input_put_key(input_ctx, buf.mods | match->mpkey);
+        skip_buf(&buf, seq_len);
+    }
+
+read_more:  /* need more bytes */
+    return true;
+}
+
+static void load_termcap(void)
+{
+}
+
+static void enable_kx(bool enable)
+{
+    if (isatty(1)) {
+        char *cmd = enable ? "\033=" : "\033>";
+        printf("%s", cmd);
+        fflush(stdout);
+    }
+}
+
+#else /* terminfo/termcap */
 
 typedef struct {
     char *cap;
@@ -68,8 +288,6 @@ typedef struct {
 
 static keycode_map getch2_keys;
 
-#if HAVE_TERMINFO || HAVE_TERMCAP
-
 static char *term_rmkx = NULL;
 static char *term_smkx = NULL;
 
@@ -77,8 +295,6 @@ static char *term_smkx = NULL;
 #include <curses.h>
 #endif
 #include <term.h>
-
-#endif
 
 static keycode_st *keys_push(char *p, int code) {
     if (strlen(p) > 8)
@@ -137,8 +353,6 @@ static keycode_st* keys_push_once(char *p, int code) {
         return keys_push(p, code);
     return st;
 }
-
-#if HAVE_TERMINFO || HAVE_TERMCAP
 
 typedef struct {
     char *buf;
@@ -225,10 +439,9 @@ static void termcap_add_extra_f_keys(void) {
     }
 }
 
-#endif
-
-static int load_termcap(char *termtype){
-#if HAVE_TERMINFO || HAVE_TERMCAP
+static void load_termcap(void)
+{
+    char *termtype = NULL;
 
 #if HAVE_TERMINFO
     use_env(TRUE);
@@ -243,10 +456,10 @@ static int load_termcap(char *termtype){
         if (setupterm(termtype, 1, &ret) != OK) {
             if (ret < 0) {
                 printf("Could not access the 'terminfo' data base.\n");
-                return 0;
+                return;
             } else {
                 printf("Couldn't use terminal `%s' for input.\n", termtype);
-                return 0;
+                return;
             }
         }
     }
@@ -257,10 +470,10 @@ static int load_termcap(char *termtype){
     int success = tgetent(term_buffer, termtype);
     if (success < 0) {
         printf("Could not access the 'termcap' data base.\n");
-        return 0;
+        return;
     } else if (success == 0) {
         printf("Terminal type `%s' is not defined.\n", termtype);
-        return 0;
+        return;
     }
 #endif
     ensure_cap(&termcap_buf, 2048);
@@ -299,7 +512,6 @@ static int load_termcap(char *termtype){
         termcap_add(keys[i]);
     }
     termcap_add_extra_f_keys();
-#endif
 
     /* special cases (hardcoded, no need for HAVE_TERMCAP) */
 
@@ -321,18 +533,13 @@ static int load_termcap(char *termtype){
 
     /* fallback if terminfo and termcap are not available */
     keys_push_once("\012", MP_KEY_ENTER);
-
-    return getch2_keys.len;
 }
 
-void terminal_get_size(int *w, int *h)
+static void enable_kx(bool enable)
 {
-    struct winsize ws;
-    if (ioctl(0, TIOCGWINSZ, &ws) < 0 || !ws.ws_row || !ws.ws_col)
-        return;
-
-    *w = ws.ws_col;
-    *h = ws.ws_row;
+    char *cmd = enable ? term_smkx : term_rmkx;
+    if (cmd)
+        tputs(cmd, 1, putchar);
 }
 
 #define BUF_LEN 256
@@ -436,6 +643,8 @@ static bool getch2(struct input_ctx *input_ctx)
     return true;
 }
 
+#endif /* terminfo/termcap */
+
 static int read_keys(void *ctx, int fd)
 {
     if (getch2(ctx))
@@ -458,10 +667,7 @@ static void do_activate_getch2(void)
     if (getch2_active || !isatty(1))
         return;
 
-#if HAVE_TERMINFO || HAVE_TERMCAP
-    if (term_smkx)
-        tputs(term_smkx, 1, putchar);
-#endif
+    enable_kx(true);
 
 #if HAVE_TERMIOS
     struct termios tio_new;
@@ -486,10 +692,7 @@ static void do_deactivate_getch2(void)
     if (!getch2_active)
         return;
 
-#if HAVE_TERMINFO || HAVE_TERMCAP
-    if (term_rmkx)
-        tputs(term_rmkx, 1, putchar);
-#endif
+    enable_kx(false);
 
 #if HAVE_TERMIOS
     if (tio_orig_set) {
@@ -598,10 +801,20 @@ bool terminal_in_background(void)
     return isatty(2) && tcgetpgrp(2) != getpgrp();
 }
 
+void terminal_get_size(int *w, int *h)
+{
+    struct winsize ws;
+    if (ioctl(0, TIOCGWINSZ, &ws) < 0 || !ws.ws_row || !ws.ws_col)
+        return;
+
+    *w = ws.ws_col;
+    *h = ws.ws_row;
+}
+
 int terminal_init(void)
 {
     if (isatty(1))
-        load_termcap(NULL);
+        load_termcap();
     getch2_enable();
     return 0;
 }
