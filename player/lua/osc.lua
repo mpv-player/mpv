@@ -1000,7 +1000,7 @@ function osc_init()
     -- prev
     ne = new_element("pl_prev", "button")
 
-    ne.content = "◀"
+    ne.content = "\238\132\144"
     ne.visible = have_pl
     ne.eventresponder["mouse_btn0_up"] =
         function () mp.commandv("playlist_prev", "weak") end
@@ -1010,7 +1010,7 @@ function osc_init()
     --next
     ne = new_element("pl_next", "button")
 
-    ne.content = "▶"
+    ne.content = "\238\132\129"
     ne.visible = have_pl
     ne.eventresponder["mouse_btn0_up"] =
         function () mp.commandv("playlist_next", "weak") end
@@ -1537,6 +1537,8 @@ function enable_osc(enable)
         mp.disable_key_bindings("showhide")
     end
 end
+
+mp.use_suspend=false
 
 mp.register_event("tick", tick)
 mp.register_event("start-file", request_init)
