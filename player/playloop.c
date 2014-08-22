@@ -253,10 +253,8 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
-    if (seek.type == MPSEEK_ABSOLUTE) {
-        mpctx->video_pts = seek.amount;
+    if (seek.type == MPSEEK_ABSOLUTE)
         mpctx->last_seek_pts = seek.amount;
-    }
 
     // The hr_seek==false case is for skipping frames with PTS before the
     // current timeline chapter start. It's not really known where the demuxer

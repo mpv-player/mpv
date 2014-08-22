@@ -214,8 +214,7 @@ void reset_video_state(struct MPContext *mpctx)
 
     mpctx->delay = 0;
     mpctx->time_frame = 0;
-    mpctx->video_next_pts = MP_NOPTS_VALUE;
-    mpctx->playing_last_frame = false;
+    mpctx->video_pts = MP_NOPTS_VALUE;
     mpctx->total_avsync_change = 0;
     mpctx->drop_frame_cnt = 0;
     mpctx->dropped_frames = 0;
@@ -475,7 +474,6 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
 
     double a_pts = written_audio_pts(mpctx) - mpctx->delay;
     double av_delay = a_pts - v_pts;
-    // Try to sync vo_flip() so it will *finish* at given time
     av_delay += mpctx->audio_delay;   // This much pts difference is desired
 
     double change = av_delay * 0.1;
@@ -544,10 +542,8 @@ static int update_video(struct MPContext *mpctx, double endpts)
     if (mpctx->d_video->header->attached_picture) {
         if (vo_has_frame(vo))
             return VD_EOF;
-        if (mpctx->next_frame[0]) {
-            mpctx->video_next_pts = MP_NOPTS_VALUE;
+        if (mpctx->next_frame[0])
             return VD_NEW_FRAME;
-        }
         r = video_output_image(mpctx, MP_NOPTS_VALUE);
         return r <= 0 ? VD_EOF: VD_PROGRESS;
     }
@@ -573,7 +569,7 @@ static int update_video(struct MPContext *mpctx, double endpts)
 
     if (r == VD_NEW_FRAME) {
         double pts = mpctx->next_frame[0]->pts;
-        double last_pts = mpctx->video_next_pts;
+        double last_pts = mpctx->video_pts;
         if (last_pts == MP_NOPTS_VALUE)
             last_pts = pts;
         double frame_time = pts - last_pts;
@@ -582,7 +578,6 @@ static int update_video(struct MPContext *mpctx, double endpts)
             MP_WARN(mpctx, "Jump in video pts: %f -> %f\n", last_pts, pts);
             frame_time = 0;
         }
-        mpctx->video_next_pts = pts;
         if (mpctx->d_audio)
             mpctx->delay -= frame_time;
         if (mpctx->video_status >= STATUS_READY) {
@@ -767,7 +762,7 @@ void write_video(struct MPContext *mpctx, double endpts)
         duration = MPCLAMP(diff, 0, 10) * 1e6;
     }
 
-    mpctx->video_pts = mpctx->video_next_pts;
+    mpctx->video_pts = mpctx->next_frame[0]->pts;
     mpctx->last_vo_pts = mpctx->video_pts;
     mpctx->playback_pts = mpctx->video_pts;
 

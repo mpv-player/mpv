@@ -255,16 +255,11 @@ typedef struct MPContext {
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
     // written to the ao, decreased when moving to the next frame.
-    // In the audio-only case used as a timer since the last seek
-    // by the audio CPU usage meter.
     double delay;
     // AV sync: time until next frame should be shown
     double time_frame;
     // Optional/additional AV sync compensation if video is too slow.
     double insert_silence;
-    // Set to true some time after a new frame has been shown, and it turns out
-    // that this frame was the last one before video ends.
-    bool playing_last_frame;
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
@@ -277,9 +272,6 @@ typedef struct MPContext {
     // the same value if the status line is updated at a time where no new
     // video frame is shown.
     double last_av_difference;
-    /* Timestamp of the latest image that was queued on the VO, but not yet
-     * to be flipped. */
-    double video_next_pts;
     /* timestamp of video frame currently visible on screen
      * (or at least queued to be flipped by VO) */
     double video_pts;
