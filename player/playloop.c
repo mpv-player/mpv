@@ -888,12 +888,10 @@ void run_playloop(struct MPContext *mpctx)
     }
 
     if (mpctx->video_status == STATUS_EOF &&
-        mpctx->audio_status >= STATUS_PLAYING)
+        mpctx->audio_status >= STATUS_PLAYING &&
+        mpctx->audio_status < STATUS_EOF)
     {
-        double a_pos = 0;
-        if (mpctx->d_audio)
-            a_pos = playing_audio_pts(mpctx);
-        mpctx->playback_pts = a_pos;
+        mpctx->playback_pts = playing_audio_pts(mpctx);
     }
 
     handle_dummy_ticks(mpctx);
