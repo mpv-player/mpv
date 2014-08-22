@@ -132,6 +132,10 @@ static void copy_mp_to_vs_frame_props(struct vf_priv_s *p, VSMap *map,
     // The docs explicitly say it uses libavcodec values.
     p->vsapi->propSetInt(map, "_ColorSpace",
             mp_csp_to_avcol_spc(params->colorspace), 0);
+    if (params->chroma_location) {
+        p->vsapi->propSetInt(map, "_ChromaLocation",
+                params->chroma_location == MP_CHROMA_CENTER, 0);
+    }
     char pict_type = 0;
     switch (img->pict_type) {
     case 1: pict_type = 'I'; break;
@@ -140,6 +144,10 @@ static void copy_mp_to_vs_frame_props(struct vf_priv_s *p, VSMap *map,
     }
     if (pict_type)
         p->vsapi->propSetData(map, "_PictType", &pict_type, 1, 0);
+    p->vsapi->propSetInt(map, "_FieldBased",
+            !!(img->fields & MP_IMGFIELD_INTERLACED), 0);
+    p->vsapi->propSetInt(map, "_Field",
+            !!(img->fields & MP_IMGFIELD_TOP_FIRST), 0);
 }
 
 static struct mp_image map_vs_frame(struct vf_priv_s *p, const VSFrameRef *ref,
