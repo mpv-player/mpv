@@ -611,9 +611,11 @@ static void handle_input_and_seek_coalesce(struct MPContext *mpctx)
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
         mp_dispatch_queue_process(mpctx->dispatch, 0);
+        MP_STATS(mpctx, "start command");
         cmd = mp_input_get_cmd(mpctx->input, 0, 0);
         run_command(mpctx, cmd);
         mp_cmd_free(cmd);
+        MP_STATS(mpctx, "end command");
         if (mpctx->stop_play)
             break;
     }
