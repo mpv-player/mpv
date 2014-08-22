@@ -1544,35 +1544,6 @@ Window
     depending on GPU drivers and hardware. For other VOs, this just makes
     rendering slower.
 
-``--fs-missioncontrol``
-    (OS X only)
-    Use OS X Mission Control's fullscreen feature instead of the custom one
-    provided by mpv. This can potentially break a lot of stuff like
-    ``--geometry`` and is disabled by default. On the other hand it provides
-    a more 'OS X-like' user experience.
-
-``--cursor-autohide=<number|no|always>``
-    Make mouse cursor automatically hide after given number of milliseconds.
-    ``no`` will disable cursor autohide. ``always`` means the cursor will stay
-    hidden.
-
-``--cursor-autohide-fs-only``
-    If this option is given, the cursor is always visible in windowed mode. In
-    fullscreen mode, the cursor is shown or hidden according to
-    ``--cursor-autohide``.
-
-``--no-fixed-vo``, ``--fixed-vo``
-    ``--no-fixed-vo`` enforces closing and reopening the video window for
-    multiple files (one (un)initialization for each file).
-
-``--force-rgba-osd-rendering``
-    Change how some video outputs render the OSD and text subtitles. This
-    does not change appearance of the subtitles and only has performance
-    implications. For VOs which support native ASS rendering (like ``vdpau``,
-    ``opengl``, ``direct3d``), this can be slightly faster or slower,
-    depending on GPU drivers and hardware. For other VOs, this just makes
-    rendering slower.
-
 ``--force-window-position``
     Forcefully move mpv's video output window to default location whenever
     there is a change in video parameters, video stream or file. This used to
