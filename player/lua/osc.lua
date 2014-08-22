@@ -42,6 +42,7 @@ local osc_styles = {
     smallButtonsL = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20\\fnmpv-osd-symbols}",
     smallButtonsLlabel = "{\\fs17\\fn" .. mp.get_property("options/osd-font") .. "}",
     smallButtonsR = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
+    topButtons = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12\\fnmpv-osd-symbols}",
 
     elementDown = "{\\1c&H999999}",
     timecodes = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20}",
@@ -727,12 +728,12 @@ layouts["box"] = function ()
     lo = add_layout("pl_prev")
     lo.geometry =
         {x = (posX - pos_offsetX), y = titlerowY, an = 7, w = 12, h = 12}
-    lo.style = osc_styles.vidtitle
+    lo.style = osc_styles.topButtons
 
     lo = add_layout("pl_next")
     lo.geometry =
         {x = (posX + pos_offsetX), y = titlerowY, an = 9, w = 12, h = 12}
-    lo.style = osc_styles.vidtitle
+    lo.style = osc_styles.topButtons
 
     --
     -- Big buttons
