@@ -478,6 +478,9 @@ static int reinit_vs(struct vf_instance *vf)
     if (p->vsapi->propSetNode(vars, "video_in", p->in_node, 0))
         goto error;
 
+    p->vsapi->propSetInt(vars, "video_in_dw", p->fmt_in.d_w, 0);
+    p->vsapi->propSetInt(vars, "video_in_dh", p->fmt_in.d_h, 0);
+
     vsscript_setVariable(p->se, vars);
 
     if (vsscript_evaluateFile(&p->se, p->cfg_file, 0)) {
@@ -519,6 +522,8 @@ static int config(struct vf_instance *vf, int width, int height,
         .imgfmt = fmt,
         .w = width,
         .h = height,
+        .d_w = d_width,
+        .d_h = d_height,
     };
 
     if (reinit_vs(vf) < 0)
