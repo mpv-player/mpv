@@ -457,23 +457,36 @@ static int video_decode_and_filter(struct MPContext *mpctx)
     return VD_PROGRESS;
 }
 
-static void init_vo(struct MPContext *mpctx)
+/* Modify video timing to match the audio timeline. There are two main
+ * reasons this is needed. First, video and audio can start from different
+ * positions at beginning of file or after a seek (MPlayer starts both
+ * immediately even if they have different pts). Second, the file can have
+ * audio timestamps that are inconsistent with the duration of the audio
+ * packets, for example two consecutive timestamp values differing by
+ * one second but only a packet with enough samples for half a second
+ * of playback between them.
+ */
+static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct dec_video *d_video = mpctx->d_video;
 
-    if (opts->gamma_gamma != 1000)
-        video_set_colors(d_video, "gamma", opts->gamma_gamma);
-    if (opts->gamma_brightness != 1000)
-        video_set_colors(d_video, "brightness", opts->gamma_brightness);
-    if (opts->gamma_contrast != 1000)
-        video_set_colors(d_video, "contrast", opts->gamma_contrast);
-    if (opts->gamma_saturation != 1000)
-        video_set_colors(d_video, "saturation", opts->gamma_saturation);
-    if (opts->gamma_hue != 1000)
-        video_set_colors(d_video, "hue", opts->gamma_hue);
+    if (mpctx->audio_status != STATUS_PLAYING)
+        return;
 
-    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
+    double a_pts = written_audio_pts(mpctx) - mpctx->delay;
+    double av_delay = a_pts - v_pts;
+    // Try to sync vo_flip() so it will *finish* at given time
+    av_delay += mpctx->audio_delay;   // This much pts difference is desired
+
+    double change = av_delay * 0.1;
+    double max_change = opts->default_max_pts_correction >= 0 ?
+                        opts->default_max_pts_correction : frame_time * 0.1;
+    if (change < -max_change)
+        change = -max_change;
+    else if (change > max_change)
+        change = max_change;
+    mpctx->delay += change;
+    mpctx->total_avsync_change += change;
 }
 
 // Fill mpctx->next_frame[] with a newly filtered or decoded image.
@@ -519,39 +532,6 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
     }
 
     return r; // includes the true EOF case
-}
-
-
-/* Modify video timing to match the audio timeline. There are two main
- * reasons this is needed. First, video and audio can start from different
- * positions at beginning of file or after a seek (MPlayer starts both
- * immediately even if they have different pts). Second, the file can have
- * audio timestamps that are inconsistent with the duration of the audio
- * packets, for example two consecutive timestamp values differing by
- * one second but only a packet with enough samples for half a second
- * of playback between them.
- */
-static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time)
-{
-    struct MPOpts *opts = mpctx->opts;
-
-    if (mpctx->audio_status != STATUS_PLAYING)
-        return;
-
-    double a_pts = written_audio_pts(mpctx) - mpctx->delay;
-    double av_delay = a_pts - v_pts;
-    // Try to sync vo_flip() so it will *finish* at given time
-    av_delay += mpctx->audio_delay;   // This much pts difference is desired
-
-    double change = av_delay * 0.1;
-    double max_change = opts->default_max_pts_correction >= 0 ?
-                        opts->default_max_pts_correction : frame_time * 0.1;
-    if (change < -max_change)
-        change = -max_change;
-    else if (change > max_change)
-        change = max_change;
-    mpctx->delay += change;
-    mpctx->total_avsync_change += change;
 }
 
 // returns VD_* code
@@ -679,6 +659,25 @@ static void update_avsync_after_frame(struct MPContext *mpctx)
         MP_WARN(mpctx, "%s", av_desync_help_text);
         mpctx->drop_message_shown = true;
     }
+}
+
+static void init_vo(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct dec_video *d_video = mpctx->d_video;
+
+    if (opts->gamma_gamma != 1000)
+        video_set_colors(d_video, "gamma", opts->gamma_gamma);
+    if (opts->gamma_brightness != 1000)
+        video_set_colors(d_video, "brightness", opts->gamma_brightness);
+    if (opts->gamma_contrast != 1000)
+        video_set_colors(d_video, "contrast", opts->gamma_contrast);
+    if (opts->gamma_saturation != 1000)
+        video_set_colors(d_video, "saturation", opts->gamma_saturation);
+    if (opts->gamma_hue != 1000)
+        video_set_colors(d_video, "hue", opts->gamma_hue);
+
+    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
 void write_video(struct MPContext *mpctx, double endpts)
