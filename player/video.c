@@ -701,41 +701,31 @@ void write_video(struct MPContext *mpctx, double endpts)
     int r = update_video(mpctx, endpts);
     MP_TRACE(mpctx, "update_video: %d\n", r);
 
-    if (r == VD_WAIT) // Demuxer will wake us up for more packets to decode.
-        return;
-
     if (r < 0)
         goto error;
 
-    if (r == VD_EOF && vo_still_displaying(vo)) {
-        mpctx->video_status = STATUS_DRAINING;
+    if (r == VD_WAIT) // Demuxer will wake us up for more packets to decode.
         return;
-    }
 
-    if (r == VD_NEW_FRAME) {
-        if (mpctx->video_status > STATUS_PLAYING)
-            mpctx->video_status = STATUS_PLAYING;
-    } else if (r <= 0) {
-        // EOF or error
+    if (r == VD_EOF) {
+        mpctx->video_status =
+            vo_still_displaying(vo) ? STATUS_DRAINING : STATUS_EOF;
         mpctx->delay = 0;
         mpctx->last_av_difference = 0;
-        mpctx->video_status = STATUS_EOF;
-        MP_VERBOSE(mpctx, "video EOF\n");
+        MP_VERBOSE(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
         return;
-    } else {
-        if (mpctx->video_status > STATUS_PLAYING)
-            mpctx->video_status = STATUS_PLAYING;
-
-        // Decode more in next iteration.
-        mpctx->sleeptime = 0;
-        MP_TRACE(mpctx, "filtering more video\n");
     }
+
+    if (mpctx->video_status > STATUS_PLAYING)
+        mpctx->video_status = STATUS_PLAYING;
 
     mpctx->time_frame -= get_relative_time(mpctx);
     update_avsync_before_frame(mpctx);
 
-    if (r != VD_NEW_FRAME)
+    if (r != VD_NEW_FRAME) {
+        mpctx->sleeptime = 0; // Decode more in next iteration.
         return;
+    }
 
     // Filter output is different from VO input?
     struct mp_image_params p = mpctx->next_frame[0]->params;
