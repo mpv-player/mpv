@@ -574,6 +574,8 @@ static bool render_frame(struct vo *vo)
     } else {
         pthread_mutex_unlock(&in->lock);
 
+        MP_STATS(vo, "start video");
+
         vo->driver->draw_image(vo, img);
 
         int64_t target = pts - in->flip_queue_offset;
@@ -599,6 +601,8 @@ static bool render_frame(struct vo *vo)
         long phase = in->last_flip % in->vsync_interval;
         MP_DBG(vo, "phase: %ld\n", phase);
         MP_STATS(vo, "value %ld phase", phase);
+
+        MP_STATS(vo, "end video");
 
         pthread_mutex_lock(&in->lock);
     }
