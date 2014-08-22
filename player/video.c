@@ -491,83 +491,57 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
 // returns VD_* code
 static int video_output_image(struct MPContext *mpctx, double endpts)
 {
+    if (mpctx->d_video->header->attached_picture) {
+        if (vo_has_frame(mpctx->video_out))
+            return VD_EOF;
+        if (mpctx->next_frame[0])
+            return VD_NEW_FRAME;
+        int r = video_decode_and_filter(mpctx);
+        mpctx->next_frame[0] = vf_read_output_frame(mpctx->d_video->vfilter);
+        if (mpctx->next_frame[0])
+            mpctx->next_frame[0]->pts = MP_NOPTS_VALUE;
+        return r <= 0 ? VD_EOF : VD_PROGRESS;
+    }
+
+    bool need_2nd = !!(mpctx->opts->frame_dropping & 1); // we need the duration
+
+    // Enough video filtered already?
+    if (mpctx->next_frame[0] && (!need_2nd || mpctx->next_frame[1]))
+        return VD_NEW_FRAME;
+
     // Filter a new frame.
     int r = video_decode_and_filter(mpctx);
     if (r < 0)
         return r; // error
 
-    struct vf_chain *vf = mpctx->d_video->vfilter;
-    vf_output_frame(vf, false);
-    if (vf->output) {
-        double pts = vf->output->pts;
+    // Get a new frame if we need one.
+    if (!mpctx->next_frame[1]) {
+        struct mp_image *img = vf_read_output_frame(mpctx->d_video->vfilter);
+        if (img) {
+            // Always add these; they make backstepping after seeking faster.
+            add_frame_pts(mpctx, img->pts);
 
-        // Always add these; they make backstepping after seeking faster.
-        add_frame_pts(mpctx, pts);
-
-        bool drop = false;
-        bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING
-                      && !mpctx->d_video->header->attached_picture;
-        if (hrseek && pts < mpctx->hrseek_pts - .005)
-            drop = true;
-        if (endpts != MP_NOPTS_VALUE && pts >= endpts) {
-            drop = true;
-            r = VD_EOF;
+            bool drop = false;
+            bool hrseek = mpctx->hrseek_active
+                       && mpctx->video_status == STATUS_SYNCING;
+            if (hrseek && img->pts < mpctx->hrseek_pts - .005)
+                drop = true;
+            if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
+                drop = true;
+                r = VD_EOF;
+            }
+            if (drop) {
+                talloc_free(img);
+            } else {
+                mpctx->next_frame[1] = img;
+            }
         }
-        if (drop) {
-            talloc_free(vf->output);
-            vf->output = NULL;
-            return r;
-        }
     }
 
-    // Queue new frame, if there's one.
-    struct mp_image *img = vf_read_output_frame(vf);
-    if (img) {
-        int pos = mpctx->next_frame[0] ? 1 : 0;
-        assert(!mpctx->next_frame[pos]);
-        mpctx->next_frame[pos] = img;
-        return VD_NEW_FRAME;
-    }
+    if (!mpctx->next_frame[0] && mpctx->next_frame[1]) {
+        mpctx->next_frame[0] = mpctx->next_frame[1];
+        mpctx->next_frame[1] = NULL;
 
-    return r; // includes the true EOF case
-}
-
-// returns VD_* code
-static int update_video(struct MPContext *mpctx, double endpts)
-{
-    struct vo *vo = mpctx->video_out;
-    bool eof = false;
-    int r = VD_PROGRESS;
-
-    if (mpctx->d_video->header->attached_picture) {
-        if (vo_has_frame(vo))
-            return VD_EOF;
-        if (mpctx->next_frame[0])
-            return VD_NEW_FRAME;
-        r = video_output_image(mpctx, MP_NOPTS_VALUE);
-        return r <= 0 ? VD_EOF: VD_PROGRESS;
-    }
-
-
-    bool vo_framedrop = !!(mpctx->opts->frame_dropping & 1);
-    int min_frames = vo_framedrop ? 2 : 1; // framedrop needs duration
-
-    // Already enough video buffered?
-    if (!mpctx->next_frame[min_frames - 1]) {
-        r = video_output_image(mpctx, endpts);
-        if (r < 0 || r == VD_WAIT)
-            return r;
-        eof = r == VD_EOF;
-    }
-
-    // On EOF, we write the remaining frames; otherwise we must ensure that
-    // we have a frame (and with VO framedropping, the frame after that).
-    if (eof)
-        min_frames = 1;
-    if (!mpctx->next_frame[min_frames - 1])
-        return eof ? VD_EOF : VD_PROGRESS;
-
-    if (r == VD_NEW_FRAME) {
         double pts = mpctx->next_frame[0]->pts;
         double last_pts = mpctx->video_pts;
         if (last_pts == MP_NOPTS_VALUE)
@@ -585,8 +559,14 @@ static int update_video(struct MPContext *mpctx, double endpts)
             adjust_sync(mpctx, pts, frame_time);
         }
         MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
+        r = VD_PROGRESS;
     }
-    return VD_NEW_FRAME;
+
+    // On EOF, always allow the playloop to use the remaining frame.
+    if (r <= 0 && mpctx->next_frame[0])
+        r = VD_NEW_FRAME;
+
+    return r;
 }
 
 /* Update avsync before a new video frame is displayed. Actually, this can be
@@ -637,6 +617,8 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
 // Update the A/V sync difference after a video frame has been shown.
 static void update_avsync_after_frame(struct MPContext *mpctx)
 {
+    mpctx->time_frame -= get_relative_time(mpctx);
+
     if (mpctx->audio_status != STATUS_PLAYING ||
         mpctx->video_status != STATUS_PLAYING)
         return;
@@ -692,8 +674,8 @@ void write_video(struct MPContext *mpctx, double endpts)
 
     update_fps(mpctx);
 
-    int r = update_video(mpctx, endpts);
-    MP_TRACE(mpctx, "update_video: %d\n", r);
+    int r = video_output_image(mpctx, endpts);
+    MP_TRACE(mpctx, "video_output_image: %d\n", r);
 
     if (r < 0)
         goto error;
@@ -770,12 +752,7 @@ void write_video(struct MPContext *mpctx, double endpts)
     update_osd_msg(mpctx);
 
     vo_queue_frame(vo, mpctx->next_frame[0], pts, duration);
-
-    mpctx->next_frame[0] = mpctx->next_frame[1];
-    mpctx->next_frame[1] = NULL;
-
-    // For print_status - VO call finishing early is OK for sync
-    mpctx->time_frame -= get_relative_time(mpctx);
+    mpctx->next_frame[0] = NULL;
 
     mpctx->shown_vframes++;
     if (mpctx->video_status < STATUS_PLAYING) {
@@ -803,6 +780,7 @@ void write_video(struct MPContext *mpctx, double endpts)
             mpctx->max_frames--;
     }
 
+    mpctx->sleeptime = 0;
     return;
 
 error:

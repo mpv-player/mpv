@@ -241,7 +241,6 @@ typedef struct MPContext {
 
     struct vo *video_out;
     // next_frame[0] is the next frame, next_frame[1] the one after that.
-    // Invariant: if next_frame[1] is set, next_frame[0] also is.
     struct mp_image *next_frame[2];
 
     enum playback_status video_status, audio_status;
