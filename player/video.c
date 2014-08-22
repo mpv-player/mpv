@@ -215,6 +215,7 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->delay = 0;
     mpctx->time_frame = 0;
     mpctx->video_pts = MP_NOPTS_VALUE;
+    mpctx->video_next_pts = MP_NOPTS_VALUE;
     mpctx->total_avsync_change = 0;
     mpctx->drop_frame_cnt = 0;
     mpctx->dropped_frames = 0;
@@ -552,6 +553,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             MP_WARN(mpctx, "Jump in video pts: %f -> %f\n", last_pts, pts);
             frame_time = 0;
         }
+        mpctx->video_next_pts = pts;
         if (mpctx->d_audio)
             mpctx->delay -= frame_time;
         if (mpctx->video_status >= STATUS_READY) {
