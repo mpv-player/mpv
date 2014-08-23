@@ -504,7 +504,8 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
         return r <= 0 ? VD_EOF : VD_PROGRESS;
     }
 
-    bool need_2nd = !!(mpctx->opts->frame_dropping & 1); // we need the duration
+    bool need_2nd = !!(mpctx->opts->frame_dropping & 1) // we need the duration
+        && mpctx->video_pts != MP_NOPTS_VALUE; // ...except for the 1st frame
 
     // Enough video filtered already?
     if (mpctx->next_frame[0] && (!need_2nd || mpctx->next_frame[1]))
