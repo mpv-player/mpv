@@ -128,6 +128,7 @@ struct vo_internal {
 
 
     bool hasframe;
+    bool hasframe_rendered;
     bool request_redraw;
     bool paused;
 
@@ -384,6 +385,7 @@ static void forget_frames(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     in->hasframe = false;
+    in->hasframe_rendered = false;
     in->drop_count = 0;
     mp_image_unrefp(&in->frame_queued);
     mp_image_unrefp(&in->dropped_image);
@@ -560,7 +562,8 @@ static bool render_frame(struct vo *vo)
     int64_t next_vsync = prev_sync(vo, mp_time_us()) + in->vsync_interval;
     int64_t end_time = pts + duration;
 
-    in->dropped_frame = end_time < next_vsync;
+    in->dropped_frame = duration >= 0 && end_time < next_vsync;
+    in->dropped_frame &= in->hasframe_rendered;
     in->dropped_frame &= !!(vo->global->opts->frame_dropping & 1);
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP) &&
                          !vo->driver->untimed && !vo->driver->encode;
@@ -572,6 +575,7 @@ static bool render_frame(struct vo *vo)
         in->drop_count += 1;
         in->dropped_image = img;
     } else {
+        in->hasframe_rendered = true;
         pthread_mutex_unlock(&in->lock);
 
         MP_STATS(vo, "start video");
