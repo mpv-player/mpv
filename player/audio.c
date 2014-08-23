@@ -537,10 +537,3 @@ void clear_audio_output_buffers(struct MPContext *mpctx)
         mp_audio_buffer_clear(mpctx->ao_buffer);
     }
 }
-
-// Drop decoded data queued for filtering.
-void clear_audio_decode_buffers(struct MPContext *mpctx)
-{
-    if (mpctx->d_audio)
-        mp_audio_buffer_clear(mpctx->d_audio->decode_buffer);
-}

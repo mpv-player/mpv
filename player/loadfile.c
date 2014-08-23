@@ -391,7 +391,7 @@ double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_re
             return pts - p->start + p->source_start;
         }
     }
-    return -1;
+    return MP_NOPTS_VALUE;
 }
 
 static int find_new_tid(struct MPContext *mpctx, enum stream_type t)

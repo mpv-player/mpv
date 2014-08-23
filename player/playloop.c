@@ -188,13 +188,13 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         bool need_reset = false;
         demuxer_amount = timeline_set_from_time(mpctx, seek.amount,
                                                 &need_reset);
-        if (demuxer_amount == -1) {
+        if (demuxer_amount == MP_NOPTS_VALUE) {
             assert(!need_reset);
             mpctx->stop_play = AT_END_OF_FILE;
-            if (mpctx->d_audio && !timeline_fallthrough) {
-                // Seek outside of the file -> clear audio from current position
-                clear_audio_decode_buffers(mpctx);
+            // When seeking outside of the file, but not when ending last segment.
+            if (!timeline_fallthrough) {
                 clear_audio_output_buffers(mpctx);
+                reset_playback_state(mpctx);
             }
             return -1;
         }

@@ -365,7 +365,6 @@ double playing_audio_pts(struct MPContext *mpctx);
 void fill_audio_out_buffers(struct MPContext *mpctx, double endpts);
 double written_audio_pts(struct MPContext *mpctx);
 void clear_audio_output_buffers(struct MPContext *mpctx);
-void clear_audio_decode_buffers(struct MPContext *mpctx);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);
