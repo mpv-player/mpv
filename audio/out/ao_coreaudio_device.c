@@ -413,7 +413,7 @@ static int init(struct ao *ao)
         .changed_mixing = false,
     };
 
-    OSStatus err = ca_select_device(ao, p->opt_device_id, &p->device);
+    OSStatus err = ca_select_device(ao, opt_device_id, &p->device);
     CHECK_CA_ERROR("failed to select device");
 
     ao->format = af_fmt_from_planar(ao->format);
