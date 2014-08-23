@@ -616,7 +616,7 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
     if (priv->merge_track_metadata) {
         for (int n = 0; n < priv->num_streams; n++) {
             AVStream *st = priv->streams[n] ? priv->avfc->streams[n] : NULL;
-            if (st->event_flags & AVSTREAM_EVENT_FLAG_METADATA_UPDATED) {
+            if (st && st->event_flags & AVSTREAM_EVENT_FLAG_METADATA_UPDATED) {
                 mp_tags_copy_from_av_dictionary(demuxer->metadata, st->metadata);
                 st->event_flags = 0;
                 demux_changed(demuxer, DEMUX_EVENT_METADATA);
