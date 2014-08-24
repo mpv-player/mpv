@@ -173,7 +173,7 @@ static int mp_property_playback_speed(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_PRINT:
-        *(char **)arg = talloc_asprintf(NULL, "x %6.2f", orig_speed);
+        *(char **)arg = talloc_asprintf(NULL, "%.2f", orig_speed);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
