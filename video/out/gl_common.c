@@ -121,7 +121,7 @@ static const struct feature features[] = {
 
 static void list_features(int set, struct mp_log *log, int msgl, bool invert)
 {
-    char b[128] = {0};
+    char b[1024] = {0};
     for (const struct feature *f = &features[0]; f->id; f++) {
         if (invert == !(f->id & set))
             mp_snprintf_cat(b, sizeof(b), " [%s]", f->name);
