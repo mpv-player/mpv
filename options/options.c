@@ -527,6 +527,8 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
 
+    OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
+
     {0}
 };
 

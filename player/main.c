@@ -375,6 +375,12 @@ int mp_initialize(struct MPContext *mpctx)
         mp_msg_update_msglevels(mpctx->global);
     }
 
+    if (opts->slave_mode) {
+        MP_WARN(mpctx, "--slave-broken is deprecated (see manpage).\n");
+        opts->consolecontrols = 0;
+        m_config_set_option0(mpctx->mconfig, "input-file", "/dev/stdin");
+    }
+
     mpctx->input = mp_input_init(mpctx->global);
     mpctx->global->stream_interrupt_cb = check_stream_interrupt;
     mpctx->global->stream_interrupt_cb_ctx = mpctx;

@@ -237,6 +237,8 @@ typedef struct MPOpts {
 
     int w32_priority;
 
+    int slave_mode;
+
     int network_cookies_enabled;
     char *network_cookies_file;
     char *network_useragent;
