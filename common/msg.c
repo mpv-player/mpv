@@ -367,34 +367,39 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 // parent's name. If the name starts with "/", the parent's name is not
 // prefixed (except in verbose mode), and if it starts with "!", the name is
 // not printed at all (except in verbose mode).
+// If name is NULL, the parent's name/prefix is used.
 // Thread-safety: fully thread-safe, but keep in mind that talloc is not (so
 //                talloc_ctx must be owned by the current thread).
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
                           const char *name)
 {
     assert(parent);
-    assert(name);
     struct mp_log *log = talloc_zero(talloc_ctx, struct mp_log);
     if (!parent->root)
         return log; // same as null_log
     log->root = parent->root;
-    if (name[0] == '!') {
-        name = &name[1];
-    } else if (name[0] == '/') {
-        name = &name[1];
-        log->prefix = talloc_strdup(log, name);
-    } else {
-        log->prefix = parent->prefix
+    if (name) {
+        if (name[0] == '!') {
+            name = &name[1];
+        } else if (name[0] == '/') {
+            name = &name[1];
+            log->prefix = talloc_strdup(log, name);
+        } else {
+            log->prefix = parent->prefix
+                    ? talloc_asprintf(log, "%s/%s", parent->prefix, name)
+                    : talloc_strdup(log, name);
+        }
+        log->verbose_prefix = parent->prefix
                 ? talloc_asprintf(log, "%s/%s", parent->prefix, name)
                 : talloc_strdup(log, name);
+        if (log->prefix && !log->prefix[0])
+            log->prefix = NULL;
+        if (!log->verbose_prefix[0])
+            log->verbose_prefix = "global";
+    } else {
+        log->prefix = talloc_strdup(log, parent->prefix);
+        log->verbose_prefix = talloc_strdup(log, parent->verbose_prefix);
     }
-    log->verbose_prefix = parent->prefix
-            ? talloc_asprintf(log, "%s/%s", parent->prefix, name)
-            : talloc_strdup(log, name);
-    if (log->prefix && !log->prefix[0])
-        log->prefix = NULL;
-    if (!log->verbose_prefix[0])
-        log->verbose_prefix = "global";
     return log;
 }
 
