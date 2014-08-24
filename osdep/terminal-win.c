@@ -41,6 +41,9 @@
 
 #define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
 #define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
+
+#define FOREGROUND_ALL (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
+
 static short stdoutAttrs = 0;
 static const unsigned char ansi2win32[8] = {
     0,
@@ -230,11 +233,16 @@ void mp_write_console_ansi(HANDLE wstream, char *buf)
         case 'm': {     // "SGR"
             for (int n = 0; n < num_params; n++) {
                 int p = params[n];
-                if (p <= 0) {
-                    SetConsoleTextAttribute(wstream, stdoutAttrs);
-                } else if (p >= 0 && p < 8) {
-                    SetConsoleTextAttribute(wstream,
-                        ansi2win32[p] | FOREGROUND_INTENSITY);
+                if (p == 0) {
+                    info.wAttributes = stdoutAttrs;
+                    SetConsoleTextAttribute(wstream, info.wAttributes);
+                } else if (p == 1) {
+                    info.wAttributes |= FOREGROUND_INTENSITY;
+                    SetConsoleTextAttribute(wstream, info.wAttributes);
+                } else if (p >= 30 && p < 38) {
+                    info.wAttributes &= ~FOREGROUND_ALL;
+                    info.wAttributes |= ansi2win32[p - 30];
+                    SetConsoleTextAttribute(wstream, info.wAttributes);
                 }
             }
             break;
