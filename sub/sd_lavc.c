@@ -47,7 +47,7 @@ struct sub {
 
 struct sd_lavc_priv {
     AVCodecContext *avctx;
-    struct sub subs[MAX_QUEUE]; // lowest pts first
+    struct sub subs[MAX_QUEUE]; // most recent event first
     struct sub_bitmap *outbitmaps;
     int64_t displayed_id;
     int64_t new_id;
@@ -204,9 +204,6 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     av_init_packet(&pkt);
     pkt.data = packet->buffer;
     pkt.size = packet->len;
-    pkt.pts = AV_NOPTS_VALUE;
-    if (duration >= 0)
-        pkt.convergence_duration = duration * 1000;
     int got_sub;
     int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, &pkt);
     if (res < 0 || !got_sub)
