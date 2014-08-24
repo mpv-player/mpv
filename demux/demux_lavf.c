@@ -780,23 +780,16 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     return 0;
 }
 
-static void destroy_avpacket(void *pkt)
-{
-    av_free_packet(pkt);
-}
-
 static int demux_lavf_fill_buffer(demuxer_t *demux)
 {
     lavf_priv_t *priv = demux->priv;
-    demux_packet_t *dp;
 
-    AVPacket *pkt = talloc(NULL, AVPacket);
+    AVPacket *pkt = &(AVPacket){0};
     int r = av_read_frame(priv->avfc, pkt);
     if (r < 0) {
-        talloc_free(pkt);
+        av_free_packet(pkt);
         return r == AVERROR(EAGAIN) ? 1 : -1; // eof
     }
-    talloc_set_destructor(pkt, destroy_avpacket);
 
     add_new_streams(demux);
     update_metadata(demux, pkt);
@@ -806,18 +799,11 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     AVStream *st = priv->avfc->streams[pkt->stream_index];
 
     if (!demux_stream_is_selected(stream)) {
-        talloc_free(pkt);
+        av_free_packet(pkt);
         return 1; // don't signal EOF if skipping a packet
     }
 
-    // If the packet has pointers to temporary fields that could be
-    // overwritten/freed by next av_read_frame(), copy them to persistent
-    // allocations so we can safely queue the packet for any length of time.
-    if (av_dup_packet(pkt) < 0)
-        abort();
-
-    dp = new_demux_packet_fromdata(pkt->data, pkt->size);
-    dp->avpacket = talloc_steal(dp, pkt);
+    struct demux_packet *dp = new_demux_packet_from_avpacket(pkt);
 
     if (pkt->pts != AV_NOPTS_VALUE)
         dp->pts = pkt->pts * av_q2d(st->time_base);
@@ -833,6 +819,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     } else if (dp->dts != MP_NOPTS_VALUE) {
         priv->last_pts = dp->dts * AV_TIME_BASE;
     }
+    av_free_packet(pkt);
     demux_add_packet(stream, dp);
     return 1;
 }
