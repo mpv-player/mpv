@@ -139,7 +139,7 @@ int mp_stat(const char *path, struct stat *buf)
     return res;
 }
 
-static int mp_check_console(HANDLE *wstream)
+static int mp_check_console(HANDLE wstream)
 {
     if (wstream != INVALID_HANDLE_VALUE) {
         unsigned int filetype = GetFileType(wstream);
@@ -168,7 +168,7 @@ static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
     int done = 0;
 
-    HANDLE *wstream = INVALID_HANDLE_VALUE;
+    HANDLE wstream = INVALID_HANDLE_VALUE;
 
     if (stream == stdout || stream == stderr) {
         wstream = GetStdHandle(stream == stdout ?

@@ -48,6 +48,6 @@ void terminal_get_size(int *w, int *h);
 void getch2_poll(void);
 
 // Windows only.
-void mp_write_console_ansi(void **wstream, char *buf);
+void mp_write_console_ansi(void *wstream, char *buf);
 
 #endif /* MPLAYER_GETCH2_H */
