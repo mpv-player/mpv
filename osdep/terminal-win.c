@@ -167,7 +167,7 @@ bool terminal_in_background(void)
     return false;
 }
 
-static void write_console_text(HANDLE *wstream, char *buf)
+static void write_console_text(HANDLE wstream, char *buf)
 {
     wchar_t *out = mp_from_utf8(NULL, buf);
     size_t out_len = wcslen(out);
@@ -176,7 +176,7 @@ static void write_console_text(HANDLE *wstream, char *buf)
 }
 
 // Mutates the input argument (buf), because we're evil.
-void mp_write_console_ansi(HANDLE *wstream, char *buf)
+void mp_write_console_ansi(HANDLE wstream, char *buf)
 {
     while (*buf) {
         char *next = strchr(buf, '\033');
