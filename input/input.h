@@ -94,7 +94,37 @@ typedef struct mp_cmd {
     const struct mp_cmd_def *def;
 } mp_cmd_t;
 
-/* Add a new command input source.
+struct mp_input_src {
+    struct mpv_global *global;
+    struct mp_log *log;
+    struct input_ctx *input_ctx;
+
+    char *cmd_buffer;
+    size_t cmd_buffer_size;
+    bool drop;
+
+    // If not-NULL: called before destroying the input_src. Should close the
+    // underlying device, and free all memory.
+    void (*close)(struct mp_input_src *src);
+
+    // For free use by the implementer.
+    void *priv;
+};
+
+/* Add a new input source. The input code can create a new thread, which feeds
+ * keys or commands to input_ctx. mp_input_src.close must be set.
+ */
+struct mp_input_src *mp_input_add_src(struct input_ctx *ictx);
+
+// Remove and free the source. You can call this only while the input_ctx
+// exists; otherwise there would be a race condition when another thread
+// destroys input_ctx.
+void mp_input_src_kill(struct mp_input_src *src);
+
+// Feed text data, which will be split into lines of commands.
+void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len);
+
+/* Add a new command input source. (Old version.)
  * "fd" is a file descriptor (use -1 if you don't use any fd)
  * "select" tells whether to use select() on the fd to determine when to
  * try reading.
@@ -225,6 +255,8 @@ bool mp_input_use_alt_gr(struct input_ctx *ictx);
 // Like mp_input_parse_cmd_strv, but also run the command.
 void mp_input_run_cmd(struct input_ctx *ictx, int def_flags, const char **cmd,
                       const char *location);
+
+void mp_input_add_pipe(struct input_ctx *ictx, const char *filename);
 
 void mp_input_set_main_thread(struct input_ctx *ictx);
 

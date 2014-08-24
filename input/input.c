@@ -177,6 +177,8 @@ struct input_ctx {
 
     struct input_fd fds[MP_MAX_FDS];
     unsigned int num_fds;
+    struct mp_input_src *sources[MP_MAX_FDS];
+    int num_sources;
 
     struct cmd_queue cmd_queue;
 
@@ -189,6 +191,7 @@ int async_quit_request;
 
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
                         const char *location, const char *restrict_section);
+static void close_input_sources(struct input_ctx *ictx);
 
 #define OPT_BASE_STRUCT struct input_opts
 struct input_opts {
@@ -1512,11 +1515,6 @@ done:
     return r;
 }
 
-static int close_fd(void *ctx, int fd)
-{
-    return close(fd);
-}
-
 #ifndef __MINGW32__
 static int read_wakeup(void *ctx, int fd)
 {
@@ -1614,24 +1612,8 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
 
     ictx->win_drag = global->opts->allow_win_drag;
 
-    if (input_conf->in_file) {
-        int mode = O_RDONLY;
-#ifndef __MINGW32__
-        // Use RDWR for FIFOs to ensure they stay open over multiple accesses.
-        // Note that on Windows due to how the API works, using RDONLY should
-        // be ok.
-        struct stat st;
-        if (stat(input_conf->in_file, &st) == 0 && S_ISFIFO(st.st_mode))
-            mode = O_RDWR;
-        mode |= O_NONBLOCK;
-#endif
-        int in_file_fd = open(input_conf->in_file, mode);
-        if (in_file_fd >= 0)
-            mp_input_add_fd(ictx, in_file_fd, 1, input_default_read_cmd, NULL, close_fd, NULL);
-        else
-            MP_ERR(ictx, "Can't open %s: %s\n", input_conf->in_file,
-                   strerror(errno));
-    }
+    if (input_conf->in_file && input_conf->in_file[0])
+        mp_input_add_pipe(ictx, input_conf->in_file);
 
     return ictx;
 }
@@ -1664,6 +1646,7 @@ void mp_input_uninit(struct input_ctx *ictx)
         if (ictx->fds[i].close_func)
             ictx->fds[i].close_func(ictx->fds[i].ctx, ictx->fds[i].fd);
     }
+    close_input_sources(ictx);
     for (int i = 0; i < 2; i++) {
         if (ictx->wakeup_pipe[i] != -1)
             close(ictx->wakeup_pipe[i]);
@@ -1738,4 +1721,93 @@ void mp_input_run_cmd(struct input_ctx *ictx, int def_flags, const char **cmd,
 {
     mp_cmd_t *cmdt = mp_input_parse_cmd_strv(ictx->log, def_flags, cmd, location);
     mp_input_queue_cmd(ictx, cmdt);
+}
+
+struct mp_input_src *mp_input_add_src(struct input_ctx *ictx)
+{
+    input_lock(ictx);
+    if (ictx->num_sources == MP_MAX_FDS) {
+        input_unlock(ictx);
+        return NULL;
+    }
+
+    char name[80];
+    snprintf(name, sizeof(name), "#%d", ictx->num_sources + 1);
+    struct mp_input_src *src = talloc_ptrtype(NULL, src);
+    *src = (struct mp_input_src){
+        .global = ictx->global,
+        .log = mp_log_new(src, ictx->log, name),
+        .input_ctx = ictx,
+    };
+
+    ictx->sources[ictx->num_sources++] = src;
+
+    input_unlock(ictx);
+    return src;
+}
+
+static void close_input_sources(struct input_ctx *ictx)
+{
+    // To avoid lock-order issues, we first remove each source from the context,
+    // and then destroy it.
+    while (1) {
+        input_lock(ictx);
+        struct mp_input_src *src = ictx->num_sources ? ictx->sources[0] : NULL;
+        input_unlock(ictx);
+        if (!src)
+            break;
+        mp_input_src_kill(src);
+    }
+}
+
+void mp_input_src_kill(struct mp_input_src *src)
+{
+    if (!src)
+        return;
+    struct input_ctx *ictx = src->input_ctx;
+    input_lock(ictx);
+    for (int n = 0; n < ictx->num_sources; n++) {
+        if (ictx->sources[n] == src) {
+            MP_TARRAY_REMOVE_AT(ictx->sources, ictx->num_sources, n);
+            input_unlock(ictx);
+            if (src->close)
+                src->close(src);
+            talloc_free(src);
+            return;
+        }
+    }
+    abort();
+}
+
+#define CMD_BUFFER (4 * 4096)
+
+void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
+{
+    if (!src->cmd_buffer)
+        src->cmd_buffer = talloc_size(src, CMD_BUFFER);
+    while (len) {
+        char *next = memchr(buf, '\n', len);
+        bool term = !!next;
+        next = next ? next + 1 : buf + len;
+        size_t copy = next - buf;
+        bool overflow = copy > CMD_BUFFER - src->cmd_buffer_size;
+        if (overflow || src->drop) {
+            src->cmd_buffer_size = 0;
+            src->drop = overflow || !term;
+            MP_WARN(src, "Dropping overlong line.\n");
+        } else {
+            memcpy(src->cmd_buffer + src->cmd_buffer_size, buf, copy);
+            src->cmd_buffer_size += copy;
+            buf += copy;
+            len -= copy;
+            if (term) {
+                bstr s = {src->cmd_buffer, src->cmd_buffer_size};
+                s = bstr_strip(s);
+                struct mp_cmd *cmd= mp_input_parse_cmd_(src->log, s, "<>");
+                if (cmd)
+                    mp_input_queue_cmd(src->input_ctx, cmd);
+                src->cmd_buffer_size = 0;
+            }
+        }
+    }
 }
