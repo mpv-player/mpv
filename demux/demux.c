@@ -318,7 +318,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
            "[num=%zd size=%zd]\n", stream_type_name(stream->type),
            dp->len, dp->pts, dp->dts, dp->pos, ds->packs, ds->bytes);
 
-    if (ds->in->wakeup_cb)
+    if (ds->in->wakeup_cb && !ds->head->next)
         ds->in->wakeup_cb(ds->in->wakeup_cb_ctx);
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
