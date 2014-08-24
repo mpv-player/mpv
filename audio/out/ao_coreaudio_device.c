@@ -405,6 +405,7 @@ static int init(struct ao *ao)
     if (p->opt_list) ca_print_device_list(ao);
 
     *p = (struct priv) {
+        .opt_device_id = p->opt_device_id,
         .muted = false,
         .stream_asbd_changed = 0,
         .hog_pid = -1,
@@ -413,7 +414,7 @@ static int init(struct ao *ao)
         .changed_mixing = false,
     };
 
-    OSStatus err = ca_select_device(ao, opt_device_id, &p->device);
+    OSStatus err = ca_select_device(ao, p->opt_device_id, &p->device);
     CHECK_CA_ERROR("failed to select device");
 
     ao->format = af_fmt_from_planar(ao->format);
