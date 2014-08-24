@@ -365,9 +365,10 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
         for (int i = 0; i < bs->num_binds; i++) {
             if (bs->binds[i].num_keys && bs->binds[i].keys[0] == code) {
                 count++;
+                if (count > 1)
+                    msg = talloc_asprintf_append(msg, "\n");
                 msg = talloc_asprintf_append(msg, "%d. ", count);
                 append_bind_info(ictx, &msg, &bs->binds[i]);
-                msg = talloc_asprintf_append(msg, "\n");
             }
         }
     }
@@ -375,7 +376,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
     if (!count)
         msg = talloc_asprintf_append(msg, "(nothing)");
 
-    MP_VERBOSE(ictx, "%s\n", msg);
+    MP_INFO(ictx, "%s\n", msg);
     const char *args[] = {"show_text", msg, NULL};
     mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, MP_ON_OSD_MSG, args, "");
     talloc_free(msg);
@@ -1240,7 +1241,7 @@ void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
 
     mp_input_disable_section(ictx, name);
 
-    MP_VERBOSE(ictx, "enable section '%s'\n", name);
+    MP_DBG(ictx, "enable section '%s'\n", name);
 
     if (ictx->num_active_sections < MAX_ACTIVE_SECTIONS) {
         int top = ictx->num_active_sections;
