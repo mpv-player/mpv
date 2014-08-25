@@ -404,15 +404,6 @@ static int init(struct ao *ao)
 
     if (p->opt_list) ca_print_device_list(ao);
 
-    *p = (struct priv) {
-        .muted = false,
-        .stream_asbd_changed = 0,
-        .hog_pid = -1,
-        .stream = 0,
-        .stream_idx = -1,
-        .changed_mixing = false,
-    };
-
     OSStatus err = ca_select_device(ao, p->opt_device_id, &p->device);
     CHECK_CA_ERROR("failed to select device");
 
@@ -676,6 +667,14 @@ const struct ao_driver audio_out_coreaudio_exclusive = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv){
+        .muted = false,
+        .stream_asbd_changed = 0,
+        .hog_pid = -1,
+        .stream = 0,
+        .stream_idx = -1,
+        .changed_mixing = false,
+    },
     .options = (const struct m_option[]) {
         OPT_INT("device_id", opt_device_id, 0, OPTDEF_INT(-1)),
         OPT_FLAG("list", opt_list, 0),
