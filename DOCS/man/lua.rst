@@ -74,6 +74,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     These two commands are equivalent, except that the first version breaks
     if the filename contains spaces or certain special characters.
 
+    Note that properties are *not* expanded.  You can use either ``mp.command``,
+    the ``expand-properties`` prefix, or the ``mp.get_property`` family of
+    functions.
+
 ``mp.get_property(name [,def])``
     Return the value of the given property as string. These are the same
     properties as used in input.conf. See `Properties`_ for a list of
