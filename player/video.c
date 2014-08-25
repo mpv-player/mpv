@@ -66,13 +66,9 @@ static const char av_desync_help_text[] =
 "Possible reasons, problems, workarounds:\n"
 "- Your system is simply too slow for this file.\n"
 "     Transcode it to a lower bitrate file with tools like HandBrake.\n"
-"- Broken/buggy _audio_ driver.\n"
-"     Experiment with different values for --autosync, 30 is a good start.\n"
-"     If you have PulseAudio, try --ao=alsa .\n"
 "- Slow video output.\n"
-"     Try a different --vo driver (--vo=help for a list) or try --framedrop!\n"
-"- Playing a video file with --vo=opengl with higher FPS than the monitor.\n"
-"     This is due to vsync limiting the framerate.\n"
+"     Try a different --vo driver (--vo=help for a list). Make sure framedrop\n"
+"     is not disabled, or experiment with different values for --framedrop.\n"
 "- Playing from a slow network source.\n"
 "     Download the file instead.\n"
 "- Try to find out whether audio/video/subs are causing this by experimenting\n"
@@ -473,9 +469,8 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
     if (mpctx->audio_status != STATUS_PLAYING)
         return;
 
-    double a_pts = written_audio_pts(mpctx) - mpctx->delay;
+    double a_pts = written_audio_pts(mpctx) + mpctx->audio_delay - mpctx->delay;
     double av_delay = a_pts - v_pts;
-    av_delay += mpctx->audio_delay;   // This much pts difference is desired
 
     double change = av_delay * 0.1;
     double max_change = opts->default_max_pts_correction >= 0 ?

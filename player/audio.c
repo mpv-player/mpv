@@ -276,7 +276,6 @@ static int write_to_ao(struct MPContext *mpctx, struct mp_audio *data, int flags
     struct ao *ao = mpctx->ao;
     struct mp_audio out_format;
     ao_get_format(ao, &out_format);
-    mpctx->ao_pts = pts;
 #if HAVE_ENCODING
     encode_lavc_set_audio_pts(mpctx->encode_lavc_ctx, playing_audio_pts(mpctx));
 #endif
@@ -288,9 +287,6 @@ static int write_to_ao(struct MPContext *mpctx, struct mp_audio *data, int flags
     if (played > 0) {
         mpctx->shown_aframes += played;
         mpctx->delay += played / real_samplerate;
-        // Keep correct pts for remaining data - could be used to flush
-        // remaining buffer when closing ao.
-        mpctx->ao_pts += played / real_samplerate;
         return played;
     }
     return 0;
@@ -343,7 +339,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     }
 
     if (sync_to_video)
-        sync_pts += mpctx->delay - mpctx->audio_delay;
+        sync_pts -= mpctx->audio_delay - mpctx->delay;
 
     double ptsdiff = written_pts - sync_pts;
     // Missing timestamp, or PTS reset, or just broken.

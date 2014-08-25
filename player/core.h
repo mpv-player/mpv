@@ -235,7 +235,6 @@ typedef struct MPContext {
 
     struct mixer *mixer;
     struct ao *ao;
-    double ao_pts;
     struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
     struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
 
@@ -253,9 +252,9 @@ typedef struct MPContext {
     double hrseek_pts;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
-    // written to the ao, decreased when moving to the next frame.
+    // written to the ao, decreased when moving to the next video frame.
     double delay;
-    // AV sync: time until next frame should be shown
+    // AV sync: time in seconds until next frame should be shown
     double time_frame;
     // Optional/additional AV sync compensation if video is too slow.
     double insert_silence;
