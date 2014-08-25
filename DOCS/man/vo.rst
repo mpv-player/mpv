@@ -430,6 +430,13 @@ Available video output drivers are:
         RGB. If chroma is not subsampled, this option is ignored, and the
         luma scaler is used instead. Setting this option is often useless.
 
+    ``cparam1=<value>``
+        Set filter parameters for ``cscale`` . Same as ``lparam1`` for
+        ``lscale``.
+
+    ``cparam2=<value>``
+        See ``cparam1``.
+
     ``fancy-downscaling``
         When using convolution based filters, extend the filter size
         when downscaling. Trades quality for reduced downscaling performance.

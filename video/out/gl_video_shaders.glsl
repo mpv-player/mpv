@@ -158,7 +158,8 @@ uniform float input_gamma;
 uniform float conv_gamma;
 uniform float dither_quantization;
 uniform float dither_center;
-uniform float filter_param1;
+uniform float filter_param1_l;
+uniform float filter_param1_c;
 uniform vec2 dither_size;
 
 in vec2 texcoord;
@@ -167,7 +168,7 @@ DECLARE_FRAGPARMS
 #define CONV_NV12 1
 #define CONV_PLANAR 2
 
-vec4 sample_bilinear(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
+vec4 sample_bilinear(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param1) {
     return texture(tex, texcoord);
 }
 
@@ -188,7 +189,7 @@ vec4 calcweights(float s) {
     return t;
 }
 
-vec4 sample_bicubic_fast(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
+vec4 sample_bicubic_fast(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param1) {
     vec2 pt = 1 / texsize;
     vec2 fcoord = fract(texcoord * texsize + vec2(0.5, 0.5));
     vec4 parmx = calcweights(fcoord.x);
@@ -323,7 +324,7 @@ SAMPLE_CONVOLUTION_N(sample_convolution16, 16, sampler2D, convolution16, weights
 
 
 // Unsharp masking
-vec4 sample_sharpen3(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
+vec4 sample_sharpen3(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param1) {
     vec2 pt = 1 / texsize;
     vec2 st = pt * 0.5;
     vec4 p = texture(tex, texcoord);
@@ -331,10 +332,10 @@ vec4 sample_sharpen3(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
              + texture(tex, texcoord + st * vec2(+1, -1))
              + texture(tex, texcoord + st * vec2(-1, +1))
              + texture(tex, texcoord + st * vec2(-1, -1));
-    return p + (p - 0.25 * sum) * filter_param1;
+    return p + (p - 0.25 * sum) * param1;
 }
 
-vec4 sample_sharpen5(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
+vec4 sample_sharpen5(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param1) {
     vec2 pt = 1 / texsize;
     vec2 st1 = pt * 1.2;
     vec4 p = texture(tex, texcoord);
@@ -348,8 +349,22 @@ vec4 sample_sharpen5(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
               + texture(tex, texcoord + st2 * vec2(-1,  0))
               + texture(tex, texcoord + st2 * vec2( 0, -1));
     vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;
-    return p + t * filter_param1;
+    return p + t * param1;
 }
+
+#define SAMPLE_FILTER_LC(NAME)                                      \
+    vec4 NAME##_l(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) { \
+        return NAME(tex, texsize, texcoord, filter_param1_l);       \
+    }                                                               \
+                                                                    \
+    vec4 NAME##_c(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) { \
+        return NAME(tex, texsize, texcoord, filter_param1_c);       \
+    }
+
+SAMPLE_FILTER_LC(sample_bilinear)
+SAMPLE_FILTER_LC(sample_bicubic_fast)
+SAMPLE_FILTER_LC(sample_sharpen3)
+SAMPLE_FILTER_LC(sample_sharpen5)
 
 void main() {
     vec2 chr_texcoord = texcoord;
