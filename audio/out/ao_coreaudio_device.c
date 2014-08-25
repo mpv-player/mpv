@@ -405,6 +405,7 @@ static int init(struct ao *ao)
     if (p->opt_list) ca_print_device_list(ao);
 
     *p = (struct priv) {
+        .opt_device_id = p->opt_device_id,
         .muted = false,
         .stream_asbd_changed = 0,
         .hog_pid = -1,
