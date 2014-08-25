@@ -319,6 +319,14 @@ Available video output drivers are:
             Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
             ``lparam1`` and ``lparam2``. Both are set to 1/3 by default.
 
+        ``gaussian``
+            Gaussian filter with a parameter ``p`` for sharpness control.
+            ``p`` can be set to float number between 1(blurry) and 100(sharp)
+            and has a default value of about 28.8 (see ``lparam1``).
+
+            Note that for extremely small value of ``p``, a large filter radius
+            might be required to avoid unintended artifacts (see ``lradius``).
+
 
         There are some more filters. For a complete list, pass ``help`` as
         value, e.g.::
@@ -336,7 +344,7 @@ Available video output drivers are:
         Set radius for filters listed below, must be a float number between 1.0
         and 8.0. Defaults to be 2.0 if not specified.
 
-            ``sinc``, ``lanczos``, ``blackman``
+            ``sinc``, ``lanczos``, ``blackman``, ``gaussian``
 
         Note that depending on filter implementation details and video scaling
         ratio, the radius that actually being used might be different
