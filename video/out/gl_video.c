@@ -288,7 +288,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .fbo_format = GL_RGB,
     .scale_sep = 1,
     .scalers = { "bilinear", "bilinear" },
-    .scaler_params = {NAN, NAN},
+    .scaler_params = {{NAN, NAN}, {NAN, NAN}},
     .alpha_mode = 2,
 };
 
@@ -299,7 +299,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .fbo_format = GL_RGBA16,
     .scale_sep = 1,
     .scalers = { "spline36", "bilinear" },
-    .scaler_params = {NAN, NAN},
+    .scaler_params = {{NAN, NAN}, {NAN, NAN}},
     .alpha_mode = 2,
 };
 
@@ -322,8 +322,10 @@ const struct m_sub_options gl_video_conf = {
                     {"quadbuffer",      GL_3D_QUADBUFFER})),
         OPT_STRING_VALIDATE("lscale", scalers[0], 0, validate_scaler_opt),
         OPT_STRING_VALIDATE("cscale", scalers[1], 0, validate_scaler_opt),
-        OPT_FLOAT("lparam1", scaler_params[0], 0),
-        OPT_FLOAT("lparam2", scaler_params[1], 0),
+        OPT_FLOAT("lparam1", scaler_params[0][0], 0),
+        OPT_FLOAT("lparam2", scaler_params[0][1], 0),
+        OPT_FLOAT("cparam1", scaler_params[1][0], 0),
+        OPT_FLOAT("cparam2", scaler_params[1][1], 0),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
         OPT_FLAG("indirect", indirect, 0),
@@ -673,9 +675,12 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     gl->Uniform1f(gl->GetUniformLocation(program, "dither_center"),
                   p->dither_center);
 
-    float sparam1 = p->opts.scaler_params[0];
-    gl->Uniform1f(gl->GetUniformLocation(program, "filter_param1"),
-                  isnan(sparam1) ? 0.5f : sparam1);
+    float sparam1_l = p->opts.scaler_params[0][0];
+    float sparam1_c = p->opts.scaler_params[1][0];
+    gl->Uniform1f(gl->GetUniformLocation(program, "filter_param1_l"),
+                  isnan(sparam1_l) ? 0.5f : sparam1_l);
+    gl->Uniform1f(gl->GetUniformLocation(program, "filter_param1_c"),
+                  isnan(sparam1_c) ? 0.5f : sparam1_c);
 
     gl->UseProgram(0);
 
@@ -817,8 +822,9 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
 {
     const char *target = scaler->index == 0 ? "SAMPLE_L" : "SAMPLE_C";
     if (!scaler->kernel) {
-        *shader = talloc_asprintf_append(*shader, "#define %s sample_%s\n",
-                                         target, scaler->name);
+        *shader = talloc_asprintf_append(*shader, "#define %s sample_%s_%c\n",
+                                         target, scaler->name,
+                                         "lc"[scaler->index]);
     } else {
         int size = scaler->kernel->size;
         if (pass != -1) {
@@ -1023,13 +1029,13 @@ static void compile_shaders(struct gl_video *p)
         // Force using the luma scaler on chroma. If the "indirect" stage is
         // used, the actual scaling will happen in the next stage.
         shader_def(&header_conv, "SAMPLE_C",
-                   use_indirect ? "sample_bilinear" : "SAMPLE_L");
+                   use_indirect ? "sample_bilinear_l" : "SAMPLE_L");
     }
 
     if (use_indirect) {
         // We don't use filtering for the Y-plane (luma), because it's never
         // scaled in this scenario.
-        shader_def(&header_conv, "SAMPLE_L", "sample_bilinear");
+        shader_def(&header_conv, "SAMPLE_L", "sample_bilinear_l");
         shader_def_opt(&header_conv, "FIXED_SCALE", true);
         header_conv = t_concat(tmp, header, header_conv);
         p->indirect_program =
@@ -1107,8 +1113,8 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
     scaler->kernel = &scaler->kernel_storage;
 
     for (int n = 0; n < 2; n++) {
-        if (!isnan(p->opts.scaler_params[n]))
-            scaler->kernel->params[n] = p->opts.scaler_params[n];
+        if (!isnan(p->opts.scaler_params[scaler->index][n]))
+            scaler->kernel->params[n] = p->opts.scaler_params[scaler->index][n];
     }
 
     update_scale_factor(p, scaler->kernel);

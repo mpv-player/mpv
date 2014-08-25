@@ -29,7 +29,7 @@ struct lut3d {
 
 struct gl_video_opts {
     char *scalers[2];
-    float scaler_params[2];
+    float scaler_params[2][2];
     int indirect;
     float gamma;
     int srgb;
