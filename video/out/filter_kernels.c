@@ -9,6 +9,10 @@
  * Also see glumpy (BSD licensed), contains the same code in Python:
  * http://code.google.com/p/glumpy/source/browse/glumpy/image/filter.py
  *
+ * Also see Vapoursynth plugin fmtconv (WTFPL Licensed), which is based on
+ * dither plugin for avisynth from the same author:
+ * https://github.com/vapoursynth/fmtconv/tree/master/src/fmtc
+ *
  * Also see: Paul Heckbert's "zoom"
  *
  * Also see XBMC: ConvolutionKernels.cpp etc.
@@ -222,6 +226,20 @@ static double spline36(kernel *k, double x)
            * (x - 2);
 }
 
+static double spline64(kernel *k, double x)
+{
+    if (x < 1.0)
+        return ((49.0 / 41.0 * x - 6387.0 / 2911.0) * x - 3.0 / 2911.0) * x + 1.0;
+    if (x < 2.0)
+        return ((-24.0 / 41.0 * (x - 1) + 4032.0 / 2911.0) * (x - 1) - 2328.0 / 2911.0)
+               * (x - 1);
+    if (x < 3.0)
+        return ((6.0 / 41.0 * (x - 2) - 1008.0 / 2911.0) * (x - 2) + 582.0 / 2911.0)
+               * (x - 2);
+    return ((-1.0 / 41.0 * (x - 3) + 168.0 / 2911.0) * (x - 3) - 97.0 / 2911.0)
+           * (x - 3);
+}
+
 static double gaussian(kernel *k, double x)
 {
     return exp(-2.0 * x * x) * sqrt(2.0 / M_PI);
@@ -271,6 +289,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"mitchell",       2,   mitchell, .params = {1.0/3.0, 1.0/3.0} },
     {"spline16",       2,   spline16},
     {"spline36",       3,   spline36},
+    {"spline64",       4,   spline64},
     {"gaussian",       2,   gaussian},
     {"sinc2",          2,   sinc},
     {"sinc3",          3,   sinc},
