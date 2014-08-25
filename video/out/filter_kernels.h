@@ -23,7 +23,7 @@
 
 struct filter_kernel {
     const char *name;
-    double radius;
+    double radius;  // A negative value will use user specified radius instead.
     double (*weight)(struct filter_kernel *kernel, double x);
 
     // The filter params can be changed at runtime. Only used by some filters.

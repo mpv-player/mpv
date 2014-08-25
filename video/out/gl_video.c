@@ -289,6 +289,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .scale_sep = 1,
     .scalers = { "bilinear", "bilinear" },
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
+    .scaler_radius = {NAN, NAN},
     .alpha_mode = 2,
 };
 
@@ -300,6 +301,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .scale_sep = 1,
     .scalers = { "spline36", "bilinear" },
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
+    .scaler_radius = {NAN, NAN},
     .alpha_mode = 2,
 };
 
@@ -326,6 +328,8 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLOAT("lparam2", scaler_params[0][1], 0),
         OPT_FLOAT("cparam1", scaler_params[1][0], 0),
         OPT_FLOAT("cparam2", scaler_params[1][1], 0),
+        OPT_FLOATRANGE("lradius", scaler_radius[0], 0, 1.0, 8.0),
+        OPT_FLOATRANGE("cradius", scaler_radius[1], 0, 1.0, 8.0),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
         OPT_FLAG("indirect", indirect, 0),
@@ -1115,6 +1119,12 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
     for (int n = 0; n < 2; n++) {
         if (!isnan(p->opts.scaler_params[scaler->index][n]))
             scaler->kernel->params[n] = p->opts.scaler_params[scaler->index][n];
+    }
+
+    if (scaler->kernel->radius < 0) {
+        float radius = p->opts.scaler_radius[scaler->index];
+        if (!isnan(radius))
+            scaler->kernel->radius = radius;
     }
 
     update_scale_factor(p, scaler->kernel);

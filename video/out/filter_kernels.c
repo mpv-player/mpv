@@ -56,6 +56,8 @@ const struct filter_kernel *mp_find_filter_kernel(const char *name)
 bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double inv_scale)
 {
+    if (filter->radius < 0)
+        filter->radius = 2.0;
     // only downscaling requires widening the filter
     filter->inv_scale = inv_scale >= 1.0 ? inv_scale : 1.0;
     double support = filter->radius * filter->inv_scale;
@@ -294,11 +296,14 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"sinc2",          2,   sinc},
     {"sinc3",          3,   sinc},
     {"sinc4",          4,   sinc},
+    {"sinc",           -1,  sinc},
     {"lanczos2",       2,   lanczos},
     {"lanczos3",       3,   lanczos},
     {"lanczos4",       4,   lanczos},
+    {"lanczos",        -1,  lanczos},
     {"blackman2",      2,   blackman},
     {"blackman3",      3,   blackman},
     {"blackman4",      4,   blackman},
+    {"blackman",       -1,  blackman},
     {0}
 };
