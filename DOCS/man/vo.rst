@@ -297,6 +297,9 @@ Available video output drivers are:
         ``lanczos3``
             Lanczos with radius=3.
 
+        ``lanczos``
+            Generic Lanczos scaling filter. Set radius with ``lradius``.
+
         ``spline36``
             This is the default when using ``opengl-hq``.
 
@@ -328,6 +331,16 @@ Available video output drivers are:
 
     ``lparam2=<value>``
         See ``lparam1``.
+
+    ``lradius=<r>``
+        Set radius for filters listed below, must be a float number between 1.0
+        and 8.0. Defaults to be 2.0 if not specified.
+
+            ``sinc``, ``lanczos``, ``blackman``
+
+        Note that depending on filter implementation details and video scaling
+        ratio, the radius that actually being used might be different
+        (most likely being increased a bit).
 
     ``scaler-resizes-only``
         Disable the scaler if the video image is not resized. In that case,
@@ -430,12 +443,10 @@ Available video output drivers are:
         RGB. If chroma is not subsampled, this option is ignored, and the
         luma scaler is used instead. Setting this option is often useless.
 
-    ``cparam1=<value>``
-        Set filter parameters for ``cscale`` . Same as ``lparam1`` for
-        ``lscale``.
+    ``cparam1``, ``cparam2``, ``cradius``
+        Set filter parameters and radius for ``cscale``.
 
-    ``cparam2=<value>``
-        See ``cparam1``.
+        See ``lparam1``, ``lparam2`` and ``lradius``.
 
     ``fancy-downscaling``
         When using convolution based filters, extend the filter size
