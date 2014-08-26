@@ -1112,6 +1112,10 @@ static void update_cache(struct demux_internal *in)
 // must be called locked
 static int cached_stream_control(struct demux_internal *in, int cmd, void *arg)
 {
+    // If the cache is active, wake up the thread to possibly update cache state.
+    if (in->stream_cache_size >= 0)
+        pthread_cond_signal(&in->wakeup);
+
     switch (cmd) {
     case STREAM_CTRL_GET_CACHE_SIZE:
         if (in->stream_cache_size < 0)
@@ -1156,6 +1160,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
     }
     case DEMUXER_CTRL_SWITCHED_TRACKS:
         in->tracks_switched = true;
+        pthread_cond_signal(&in->wakeup);
         return DEMUXER_CTRL_OK;
     }
     return DEMUXER_CTRL_DONTKNOW;
@@ -1167,7 +1172,6 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
 
     if (in->threading) {
         pthread_mutex_lock(&in->lock);
-        pthread_cond_signal(&in->wakeup);
         int cr = cached_demux_control(in, cmd, arg);
         pthread_mutex_unlock(&in->lock);
         if (cr != DEMUXER_CTRL_DONTKNOW)
