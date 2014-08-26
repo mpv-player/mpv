@@ -613,15 +613,6 @@ static struct mp_cmd *resolve_key(struct input_ctx *ictx, int code)
 
 static void interpret_key(struct input_ctx *ictx, int code, double scale)
 {
-    /* On normal keyboards shift changes the character code of non-special
-     * keys, so don't count the modifier separately for those. In other words
-     * we want to have "a" and "A" instead of "a" and "Shift+A"; but a separate
-     * shift modifier is still kept for special keys like arrow keys.
-     */
-    int unmod = code & ~MP_KEY_MODIFIER_MASK;
-    if (unmod >= 32 && unmod < MP_KEY_BASE)
-        code &= ~MP_KEY_MODIFIER_SHIFT;
-
     int state = code & (MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
     code = code & ~(unsigned)state;
 
@@ -633,7 +624,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         talloc_free(key);
     }
 
-    if (MP_KEY_DEPENDS_ON_MOUSE_POS(unmod))
+    if (MP_KEY_DEPENDS_ON_MOUSE_POS(code & ~MP_KEY_MODIFIER_MASK))
         ictx->mouse_event_counter++;
     mp_input_wakeup(ictx);
 
@@ -687,6 +678,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 
 static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
 {
+    code = mp_normalize_keycode(code);
     int unmod = code & ~MP_KEY_MODIFIER_MASK;
     if (code == MP_INPUT_RELEASE_ALL) {
         MP_DBG(ictx, "release all\n");

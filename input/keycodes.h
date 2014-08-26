@@ -256,6 +256,9 @@
                               MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_META | \
                               MP_KEY_STATE_DOWN | MP_KEY_STATE_UP)
 
+// Makes adjustments like turning "shift+z" into "Z"
+int mp_normalize_keycode(int keycode);
+
 // Get input key from its name.
 int mp_input_get_key_from_name(const char *name);
 
