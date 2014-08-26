@@ -715,7 +715,7 @@ static void handle_sstep(struct MPContext *mpctx)
         queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, 0, true);
     }
 
-    if (mpctx->video_status >= STATUS_DRAINING) {
+    if (mpctx->video_status >= STATUS_EOF) {
         if (mpctx->max_frames >= 0)
             mpctx->stop_play = PT_NEXT_ENTRY;
         if (mpctx->step_frames > 0 && !mpctx->paused)
