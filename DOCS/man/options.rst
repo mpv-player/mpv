@@ -2751,20 +2751,6 @@ Cache
     will not automatically enable the cache e.g. when playing from a network
     stream. Note that using ``--cache`` will always override this option.
 
-``--cache-pause-below=<kBytes|no>``
-    If the cache size goes below the specified value (in KB), pause and wait
-    until the size set by ``--cache-pause-restart`` is reached, then  resume
-    playback (default: 50). If ``no`` is specified, this behavior is disabled.
-
-    When the player is paused this way, the status line shows ``Buffering``
-    instead of ``Paused``, and the OSD uses a clock symbol instead of the
-    normal paused symbol.
-
-``--cache-pause-restart=<kBytes>``
-    If the cache is paused due to the ``--cache-pause-below`` functionality,
-    then the player unpauses as soon as the cache has this much data (in KB).
-    (Default: 100)
-
 ``--cache-initial=<kBytes>``
     Playback will start when the cache has been filled up with this many
     kilobytes of data (default: 0).
@@ -2808,6 +2794,15 @@ Cache
 
 ``--no-cache``
     Turn off input stream caching. See ``--cache``.
+
+``--cache-secs=<seconds>``
+    How many seconds of audio/video to prefetch if the cache is active. This
+    overrides the ``--demuxer-readahead-secs`` option if and only if the cache
+    is enabled. (Default: 10.)
+
+``--cache-pause``, ``--no-cache-pause``
+    Whether the player should automatically pause when the cache runs low,
+    and unpause once more data is available ("buffering").
 
 
 Network

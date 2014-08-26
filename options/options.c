@@ -144,9 +144,6 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("cache-seek-min", stream_cache.seek_min, 0, 0, 0x7fffffff),
     OPT_STRING("cache-file", stream_cache.file, 0),
     OPT_INTRANGE("cache-file-size", stream_cache.file_max, 0, 0, 0x7fffffff),
-    OPT_CHOICE_OR_INT("cache-pause-below", stream_cache_pause, 0, 0, 0x7fffffff,
-                      ({"no", 0})),
-    OPT_INTRANGE("cache-pause-restart", stream_cache_unpause, 0, 0, 0x7fffffff),
 
 #if HAVE_DVDREAD || HAVE_DVDNAV
     OPT_STRING("dvd-device", dvd_device, 0),
@@ -219,6 +216,9 @@ const m_option_t mp_opts[] = {
     OPT_DOUBLE("demuxer-readahead-secs", demuxer_min_secs, M_OPT_MIN, .min = 0),
     OPT_INTRANGE("demuxer-readahead-packets", demuxer_min_packs, 0, 0, MAX_PACKS),
     OPT_INTRANGE("demuxer-readahead-bytes", demuxer_min_bytes, 0, 0, MAX_PACK_BYTES),
+
+    OPT_DOUBLE("cache-secs", demuxer_min_secs_cache, M_OPT_MIN, .min = 0),
+    OPT_FLAG("cache-pause", cache_pausing, 0),
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
     OPT_STRING("mf-type", mf_type, 0),
@@ -598,13 +598,13 @@ const struct MPOpts mp_default_opts = {
         .seek_min = 500,
         .file_max = 1024 * 1024,
     },
-    .stream_cache_pause = 50,
-    .stream_cache_unpause = 100,
     .demuxer_thread = 1,
     .demuxer_min_packs = 0,
     .demuxer_min_bytes = 0,
     .demuxer_min_secs = 0.2,
     .network_rtsp_transport = 2,
+    .demuxer_min_secs_cache = 10,
+    .cache_pausing = 1,
     .chapterrange = {-1, -1},
     .edition_id = -1,
     .default_max_pts_correction = -1,

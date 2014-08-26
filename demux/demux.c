@@ -109,6 +109,7 @@ struct demux_internal {
     bool warned_queue_overflow;
     bool last_eof;              // last actual global EOF status
     bool eof;                   // whether we're in EOF state (reset for retry)
+    bool idle;
     bool autoselect;
     double min_secs;
     int min_packs;
@@ -143,6 +144,10 @@ struct demux_stream {
     struct demux_packet *head;
     struct demux_packet *tail;
 };
+
+// If one of the values is NOPTS, always pick the other one.
+#define MP_PTS_MIN(a, b) ((a) == MP_NOPTS_VALUE || ((a) > (b)) ? (b) : (a))
+#define MP_PTS_MAX(a, b) ((a) == MP_NOPTS_VALUE || ((a) < (b)) ? (b) : (a))
 
 static void demuxer_sort_chapters(demuxer_t *demuxer);
 static void *demux_thread(void *pctx);
@@ -329,6 +334,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 static bool read_packet(struct demux_internal *in)
 {
     in->eof = false;
+    in->idle = true;
 
     // Check if we need to read a new packet. We do this if all queues are below
     // the minimum, or if a stream explicitly needs new packets. Also includes
@@ -373,6 +379,7 @@ static bool read_packet(struct demux_internal *in)
 
     // Actually read a packet. Drop the lock while doing so, because waiting
     // for disk or network I/O can take time.
+    in->idle = false;
     pthread_mutex_unlock(&in->lock);
     struct demuxer *demux = in->d_thread;
     bool eof = !demux->desc->fill_buffer || demux->desc->fill_buffer(demux) <= 0;
@@ -808,7 +815,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .d_thread = talloc(demuxer, struct demuxer),
         .d_buffer = talloc(demuxer, struct demuxer),
         .d_user = demuxer,
-        .min_secs = demuxer->opts->demuxer_min_secs,
+        .min_secs = stream->uncached_stream ? demuxer->opts->demuxer_min_secs_cache
+                                            : demuxer->opts->demuxer_min_secs,
         .min_packs = demuxer->opts->demuxer_min_packs,
         .min_bytes = demuxer->opts->demuxer_min_bytes,
     };
@@ -1162,6 +1170,24 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         in->tracks_switched = true;
         pthread_cond_signal(&in->wakeup);
         return DEMUXER_CTRL_OK;
+    case DEMUXER_CTRL_GET_READER_STATE: {
+        struct demux_ctrl_reader_state *r = arg;
+        *r = (struct demux_ctrl_reader_state){
+            .eof = in->last_eof,
+            .idle = in->idle,
+            .ts_range = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
+        };
+        for (int n = 0; n < in->d_user->num_streams; n++) {
+            struct demux_stream *ds = in->d_user->streams[n]->ds;
+            if (ds->active) {
+                r->underrun |= !ds->head;
+                r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
+                r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);
+            }
+        }
+        r->idle &= !r->underrun;
+        return DEMUXER_CTRL_OK;
+    }
     }
     return DEMUXER_CTRL_DONTKNOW;
 }

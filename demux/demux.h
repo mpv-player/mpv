@@ -54,6 +54,12 @@ enum demux_ctrl {
     DEMUXER_CTRL_RESYNC,
     DEMUXER_CTRL_IDENTIFY_PROGRAM,
     DEMUXER_CTRL_STREAM_CTRL,
+    DEMUXER_CTRL_GET_READER_STATE,
+};
+
+struct demux_ctrl_reader_state {
+    bool eof, underrun, idle;
+    double ts_range[2]; // start, end
 };
 
 struct demux_ctrl_stream_ctrl {

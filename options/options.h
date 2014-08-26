@@ -123,8 +123,6 @@ typedef struct MPOpts {
     int use_filedir_conf;
     int network_rtsp_transport;
     struct mp_cache_opts stream_cache;
-    int stream_cache_pause;
-    int stream_cache_unpause;
     int chapterrange[2];
     int edition_id;
     int correct_pts;
@@ -188,6 +186,9 @@ typedef struct MPOpts {
     char *audio_demuxer_name;
     char *sub_demuxer_name;
     int mkv_subtitle_preroll;
+
+    double demuxer_min_secs_cache;
+    int cache_pausing;
 
     struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;
