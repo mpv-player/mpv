@@ -6,6 +6,10 @@ cookies_dir="$(mktemp -d /tmp/youtube-dl_mpv.XXXX)"
 cookies_file="${cookies_dir}/cookies"
 user_agent="$(youtube-dl --dump-user-agent)" # or set whatever you want
 
+if [ -z "$MPV" ] ; then
+    MPV=mpv
+fi
+
 video_url="$(youtube-dl \
     --user-agent="$user_agent" \
     --cookies="$cookies_file" \
@@ -14,7 +18,7 @@ video_url="$(youtube-dl \
 
 shift
 
-mpv \
+$MPV \
     --cookies \
     --cookies-file="$cookies_file" \
     --user-agent="$user_agent" \
