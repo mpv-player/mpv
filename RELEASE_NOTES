@@ -1,3 +1,34 @@
+Release 0.5.1
+=============
+
+Changes
+-------
+
+- Add audio/flac to the MIME type list in mpv.desktop.
+- The --slave-broken option has been reintroduced and is equivalent to using
+  --input-file=/dev/stdin and --input-terminal=no.
+
+Bug fixes
+---------
+
+- Fix screenshots with anamorphic videos in the vdpau vo.
+- Fix a crash happening when mpv fails to create a vdpau mixer in the vdpau vo.
+- Don't quit when the --loop-file option is used.
+- Always load the cursor theme in the wayland vo (this fixes a crash caused by
+  moving the mouse cursor over the video).
+- Properly return non-zero from the zsh completion script when no matches are
+  found (this fixes the use of user-defined zsh completion matchers).
+- Fix the description of the opengl-hq vo default options in the manpage.
+- Remove duplicated content from the manpage that was accidentally added in the
+  manpage reorganization from the previous release.
+- Avoid clobbering playback position on video end (when both audio and video
+  streams reached the end, the playback poisition was briefly set at 0).
+- Avoid overwriting user input in the coreaudio_device ao.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 6729e39..fdd648b`` in
+the git repository.
+
 Release 0.5.0
 =============
 
