@@ -637,7 +637,7 @@ int open_tv(tvi_handle_t *tvh)
 
     /* grep frequency in chanlist */
     {
-        unsigned long i2;
+        unsigned long i2 = 0;
         int freq;
 
         tv_get_freq(tvh, &i2);
@@ -797,7 +797,7 @@ int tv_get_signal(tvi_handle_t *tvh)
  *
  */
 int tv_step_freq(tvi_handle_t* tvh, float step_interval){
-    unsigned long frequency;
+    unsigned long frequency = 0;
 
     tvh->tv_param->scan=0;
     tv_get_freq(tvh,&frequency);
