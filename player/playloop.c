@@ -527,19 +527,16 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
-    // disable on unknown/broken timestamps
-    double range = s.ts_duration >= 0 ? s.ts_duration : 1e20;
-
     if (mpctx->restart_complete && idle != -1) {
         if (mpctx->paused && mpctx->paused_for_cache) {
-            if (!opts->cache_pausing || range >= 2.0 || s.idle) {
+            if (!opts->cache_pausing || s.ts_duration >= 2.0 || s.idle) {
                 mpctx->paused_for_cache = false;
                 if (!opts->pause)
                     unpause_player(mpctx);
             }
             mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.2);
         } else {
-            if (opts->cache_pausing && range < 0.5 && !s.idle) {
+            if (opts->cache_pausing && s.underrun) {
                 bool prev_paused_user = opts->pause;
                 pause_player(mpctx);
                 mpctx->paused_for_cache = true;

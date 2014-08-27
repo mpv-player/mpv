@@ -1187,6 +1187,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             }
         }
         r->idle = (in->idle && !r->underrun) || r->eof;
+        r->underrun &= !r->idle;
         if (r->ts_range[0] != MP_NOPTS_VALUE && r->ts_range[1] != MP_NOPTS_VALUE)
             r->ts_duration = r->ts_range[1] - r->ts_range[0];
         return DEMUXER_CTRL_OK;
