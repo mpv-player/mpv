@@ -1176,6 +1176,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             .eof = in->last_eof,
             .idle = in->idle,
             .ts_range = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
+            .ts_duration = -1,
         };
         for (int n = 0; n < in->d_user->num_streams; n++) {
             struct demux_stream *ds = in->d_user->streams[n]->ds;
@@ -1186,6 +1187,8 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             }
         }
         r->idle = (r->idle && !r->underrun) || r->eof;
+        if (r->ts_range[0] != MP_NOPTS_VALUE && r->ts_range[1] != MP_NOPTS_VALUE)
+            r->ts_duration = r->ts_range[1] - r->ts_range[0];
         return DEMUXER_CTRL_OK;
     }
     }

@@ -521,18 +521,14 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     if (!mpctx->demuxer)
         return;
 
-    struct demux_ctrl_reader_state s =
-        {.idle = true, .ts_range = {MP_NOPTS_VALUE, MP_NOPTS_VALUE}};
-    demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
-
     int idle = -1;
     demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_IDLE, &idle);
 
-    double range = -1;
-    if (s.ts_range[0] != MP_NOPTS_VALUE && s.ts_range[1] != MP_NOPTS_VALUE)
-        range = s.ts_range[1] - s.ts_range[0];
-    if (range < 0)
-        range = 1e20; // unknown/broken timestamps; disable
+    struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
+    demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
+
+    // disable on unknown/broken timestamps
+    double range = s.ts_duration >= 0 ? s.ts_duration : 1e20;
 
     if (mpctx->restart_complete && idle != -1) {
         if (mpctx->paused && mpctx->paused_for_cache) {

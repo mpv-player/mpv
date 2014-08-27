@@ -37,6 +37,7 @@
 #include "osdep/timer.h"
 
 #include "demux/demux.h"
+#include "stream/stream.h"
 #include "sub/osd.h"
 
 #include "video/out/vo.h"
@@ -232,9 +233,23 @@ static void print_status(struct MPContext *mpctx)
         }
     }
 
-    float cache = mp_get_cache_percent(mpctx);
-    if (cache >= 0)
-        saddf(&line, " Cache: %.2f%%", cache);
+    if (mpctx->demuxer) {
+        int64_t fill = -1;
+        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &fill);
+        if (fill >= 0) {
+            saddf(&line, " Cache: ");
+
+            struct demux_ctrl_reader_state s = {.ts_duration = -1};
+            demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
+
+            if (s.ts_duration < 0) {
+                saddf(&line, "???");
+            } else {
+                saddf(&line, "%2ds", (int)s.ts_duration);
+            }
+            saddf(&line, "+%lldKB", (long long)(fill / 1024));
+        }
+    }
 
     if (opts->term_osd_bar) {
         saddf(&line, "\n");

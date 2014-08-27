@@ -60,6 +60,7 @@ enum demux_ctrl {
 struct demux_ctrl_reader_state {
     bool eof, underrun, idle;
     double ts_range[2]; // start, end
+    double ts_duration;
 };
 
 struct demux_ctrl_stream_ctrl {
