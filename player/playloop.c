@@ -525,22 +525,25 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
         {.idle = true, .ts_range = {MP_NOPTS_VALUE, MP_NOPTS_VALUE}};
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
+    int idle = -1;
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_IDLE, &idle);
+
     double range = -1;
     if (s.ts_range[0] != MP_NOPTS_VALUE && s.ts_range[1] != MP_NOPTS_VALUE)
         range = s.ts_range[1] - s.ts_range[0];
     if (range < 0)
         range = 1e20; // unknown/broken timestamps; disable
 
-    if (mpctx->restart_complete) {
+    if (mpctx->restart_complete && idle != -1) {
         if (mpctx->paused && mpctx->paused_for_cache) {
-            if (!opts->cache_pausing || range >= 2.0 || s.eof) {
+            if (!opts->cache_pausing || range >= 2.0 || s.idle) {
                 mpctx->paused_for_cache = false;
                 if (!opts->pause)
                     unpause_player(mpctx);
             }
             mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.2);
         } else {
-            if (opts->cache_pausing && range < 0.5 && !s.eof) {
+            if (opts->cache_pausing && range < 0.5 && !s.idle) {
                 bool prev_paused_user = opts->pause;
                 pause_player(mpctx);
                 mpctx->paused_for_cache = true;
@@ -548,9 +551,6 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
             }
         }
     }
-
-    int idle = 1;
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_IDLE, &idle);
 
     // Also update cache properties.
     bool busy = idle == 0 || !s.idle;

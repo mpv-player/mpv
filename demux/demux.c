@@ -1185,7 +1185,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
                 r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);
             }
         }
-        r->idle &= !r->underrun;
+        r->idle = (r->idle && !r->underrun) || r->eof;
         return DEMUXER_CTRL_OK;
     }
     }
