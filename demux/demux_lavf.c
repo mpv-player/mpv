@@ -234,7 +234,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     priv->filename = remove_prefix(priv->filename, prefixes);
 
     char *avdevice_format = NULL;
-    if (s->type == STREAMTYPE_AVDEVICE) {
+    if (s->uncached_type == STREAMTYPE_AVDEVICE) {
         // always require filename in the form "format:filename"
         char *sep = strchr(priv->filename, ':');
         if (!sep) {
