@@ -433,7 +433,7 @@ int get_current_chapter(struct MPContext *mpctx)
 char *chapter_display_name(struct MPContext *mpctx, int chapter)
 {
     char *name = chapter_name(mpctx, chapter);
-    char *dname = name;
+    char *dname = NULL;
     if (name) {
         dname = talloc_asprintf(NULL, "(%d) %s", chapter + 1, name);
     } else if (chapter < -1) {
@@ -446,8 +446,7 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
             dname = talloc_asprintf(NULL, "(%d) of %d", chapter + 1,
                                     chapter_count);
     }
-    if (dname != name)
-        talloc_free(name);
+    talloc_free(name);
     return dname;
 }
 
