@@ -925,6 +925,7 @@ static void flush_locked(demuxer_t *demuxer)
     demuxer->in->warned_queue_overflow = false;
     demuxer->in->eof = false;
     demuxer->in->last_eof = false;
+    demuxer->in->idle = true;
 }
 
 // clear the packet queues
@@ -1174,7 +1175,6 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         struct demux_ctrl_reader_state *r = arg;
         *r = (struct demux_ctrl_reader_state){
             .eof = in->last_eof,
-            .idle = in->idle,
             .ts_range = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
             .ts_duration = -1,
         };
@@ -1186,7 +1186,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
                 r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);
             }
         }
-        r->idle = (r->idle && !r->underrun) || r->eof;
+        r->idle = (in->idle && !r->underrun) || r->eof;
         if (r->ts_range[0] != MP_NOPTS_VALUE && r->ts_range[1] != MP_NOPTS_VALUE)
             r->ts_duration = r->ts_range[1] - r->ts_range[0];
         return DEMUXER_CTRL_OK;
