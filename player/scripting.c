@@ -151,7 +151,8 @@ static char **list_script_files(void *talloc_ctx, char *path)
             MP_TARRAY_APPEND(talloc_ctx, files, count, fname);
     }
     closedir(dp);
-    qsort(files, count, sizeof(char *), compare_filename);
+    if (files)
+        qsort(files, count, sizeof(char *), compare_filename);
     MP_TARRAY_APPEND(talloc_ctx, files, count, NULL);
     return files;
 }
