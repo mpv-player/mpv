@@ -128,6 +128,7 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->hrseek_framedrop = false;
     mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
+    mpctx->cache_wait_time = 0;
     mpctx->restart_complete = false;
 
 #if HAVE_ENCODING
@@ -529,7 +530,16 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
     if (mpctx->restart_complete && idle != -1) {
         if (mpctx->paused && mpctx->paused_for_cache) {
-            if (!opts->cache_pausing || s.ts_duration >= 2.0 || s.idle) {
+            mpctx->cache_wait_time = MPCLAMP(mpctx->cache_wait_time, 1, 10);
+            if (!opts->cache_pausing || s.ts_duration >= mpctx->cache_wait_time
+                || s.idle)
+            {
+                double elapsed_time = mp_time_sec() - mpctx->cache_stop_time;
+                if (elapsed_time > mpctx->cache_wait_time) {
+                    mpctx->cache_wait_time *= 1.5 + 0.1;
+                } else {
+                    mpctx->cache_wait_time /= 1.5 - 0.1;
+                }
                 mpctx->paused_for_cache = false;
                 if (!opts->pause)
                     unpause_player(mpctx);
@@ -541,6 +551,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                 pause_player(mpctx);
                 mpctx->paused_for_cache = true;
                 opts->pause = prev_paused_user;
+                mpctx->cache_stop_time = mp_time_sec();
             }
         }
     }
