@@ -352,13 +352,15 @@ vec4 sample_sharpen5(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param
     return p + t * param1;
 }
 
-#define SAMPLE_FILTER_LC(NAME)                                      \
-    vec4 NAME##_l(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) { \
-        return NAME(tex, texsize, texcoord, filter_param1_l);       \
-    }                                                               \
-                                                                    \
-    vec4 NAME##_c(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) { \
-        return NAME(tex, texsize, texcoord, filter_param1_c);       \
+#define CONCAT(a, b) a ## b
+
+#define SAMPLE_FILTER_LC(NAME)                                              \
+    vec4 CONCAT(NAME, _l)(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) { \
+        return NAME(tex, texsize, texcoord, filter_param1_l);               \
+    }                                                                       \
+                                                                            \
+    vec4 CONCAT(NAME, _c)(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) { \
+        return NAME(tex, texsize, texcoord, filter_param1_c);               \
     }
 
 SAMPLE_FILTER_LC(sample_bilinear)
