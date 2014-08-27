@@ -497,8 +497,9 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     mp_verbose(log, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
     mp_verbose(log, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
     mp_verbose(log, "GL_VERSION='%s'\n",  gl->GetString(GL_VERSION));
-    mp_verbose(log, "GL_SHADING_LANGUAGE_VERSION='%s'\n",
-                    gl->GetString(GL_SHADING_LANGUAGE_VERSION));
+    const char *shader = gl->GetString(GL_SHADING_LANGUAGE_VERSION);
+    if (shader)
+        mp_verbose(log, "GL_SHADING_LANGUAGE_VERSION='%s'\n", shader);
 
     // Note: This code doesn't handle CONTEXT_FORWARD_COMPATIBLE_BIT_ARB
     //       on OpenGL 3.0 correctly. Apparently there's no way to detect this
