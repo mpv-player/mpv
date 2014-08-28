@@ -166,6 +166,8 @@ static int mp_property_playback_speed(void *ctx, struct m_property *prop,
     switch (action) {
     case M_PROPERTY_SET: {
         opts->playback_speed = *(double *) arg;
+        if (opts->playback_speed == orig_speed)
+            return M_PROPERTY_OK;
         // Adjust time until next frame flip for nosound mode
         mpctx->time_frame *= orig_speed / opts->playback_speed;
         if (mpctx->d_audio)
