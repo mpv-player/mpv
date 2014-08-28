@@ -17,6 +17,7 @@ int mp_clients_num(struct MPContext *mpctx);
 void mp_client_broadcast_event(struct MPContext *mpctx, int event, void *data);
 int mp_client_send_event(struct MPContext *mpctx, const char *client_name,
                          int event, void *data);
+bool mp_client_event_is_registered(struct MPContext *mpctx, int event);
 void mp_client_property_change(struct MPContext *mpctx, const char *name);
 
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name);

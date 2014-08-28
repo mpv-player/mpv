@@ -49,6 +49,7 @@
 #include "video/out/vo.h"
 
 #include "core.h"
+#include "client.h"
 #include "command.h"
 
 void pause_player(struct MPContext *mpctx)
@@ -556,7 +557,11 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     }
 
     // Also update cache properties.
-    bool busy = idle == 0 || !s.idle;
+    bool busy = idle == 0;
+    if (!s.idle) {
+        busy |= idle != -1;
+        busy |= mp_client_event_is_registered(mpctx, MP_EVENT_CACHE_UPDATE);
+    }
     if (busy || mpctx->next_cache_update > 0) {
         double now = mp_time_sec();
         if (mpctx->next_cache_update <= now) {
