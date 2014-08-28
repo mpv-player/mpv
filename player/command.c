@@ -1217,6 +1217,37 @@ static int mp_property_cache_idle(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, !!idle);
 }
 
+static int mp_property_demuxer_cache_duration(void *ctx, struct m_property *prop,
+                                              int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct demux_ctrl_reader_state s;
+    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    if (s.ts_duration < 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_double_ro(action, arg, s.ts_duration);
+}
+
+static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
+                                          int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct demux_ctrl_reader_state s;
+    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_flag_ro(action, arg, s.idle);
+}
+
 static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
@@ -2762,6 +2793,8 @@ static const struct m_property mp_properties[] = {
     {"cache-used", mp_property_cache_used},
     {"cache-size", mp_property_cache_size},
     {"cache-idle", mp_property_cache_idle},
+    {"demuxer-cache-duration", mp_property_demuxer_cache_duration},
+    {"demuxer-cache-idle", mp_property_demuxer_cache_idle},
     {"paused-for-cache", mp_property_paused_for_cache},
     {"pts-association-mode", mp_property_generic_option},
     {"hr-seek", mp_property_generic_option},
@@ -2897,7 +2930,8 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata"),
     E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
-    E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle"),
+    E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle",
+      "demuxer-cache-duration", "demuxer-cache-idle"),
 };
 #undef E
 

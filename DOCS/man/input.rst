@@ -834,6 +834,15 @@ Property list
     Returns ``yes`` if the cache is idle, which means the cache is filled as
     much as possible, and is currently not reading more data.
 
+``demuxer-cache-duration``
+    Approximate duration of video buffered in the demuxer, in seconds. The
+    guess is very unreliable, and often the property will not be available
+    at all, even if data is buffered.
+
+``demuxer-cache-idle``
+    Returns ``yes`` if the demuxer is idle, which means the demuxer cache is
+    filled to the requested amount, and is currently not reading more data.
+
 ``paused-for-cache``
     Returns ``yes`` when playback is paused because of waiting for the cache.
 
