@@ -111,8 +111,6 @@ void reinit_audio_chain(struct MPContext *mpctx)
 
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
-    mpctx->audio_status = STATUS_SYNCING;
-
     if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
         mpctx->initialized_flags |= INITIALIZED_ACODEC;
         assert(!mpctx->d_audio);
