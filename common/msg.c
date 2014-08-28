@@ -437,8 +437,8 @@ void mp_msg_update_msglevels(struct mpv_global *global)
     root->use_terminal = opts->use_terminal;
     root->show_time = opts->msg_time;
     if (root->use_terminal) {
-        root->color = opts->msg_color && isatty(fileno(stdout));
-        root->termosd = isatty(fileno(stderr));
+        root->color = opts->msg_color && isatty(STDOUT_FILENO);
+        root->termosd = isatty(STDERR_FILENO);
     }
 
     talloc_free(root->msglevels);

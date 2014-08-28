@@ -41,7 +41,7 @@ static void *reader_thread(void *ctx)
     int fd = -1;
     bool close_fd = true;
     if (strcmp(p->filename, "/dev/stdin") == 0) { // mainly for win32
-        fd = fileno(stdin);
+        fd = STDIN_FILENO;
         close_fd = false;
     }
     if (fd < 0)

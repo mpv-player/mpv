@@ -264,7 +264,7 @@ static void load_termcap(void)
 
 static void enable_kx(bool enable)
 {
-    if (isatty(1)) {
+    if (isatty(STDOUT_FILENO)) {
         char *cmd = enable ? "\033=" : "\033>";
         printf("%s", cmd);
         fflush(stdout);
@@ -664,7 +664,7 @@ void terminal_setup_getch(struct input_ctx *ictx)
 
 static void do_activate_getch2(void)
 {
-    if (getch2_active || !isatty(1))
+    if (getch2_active || !isatty(STDOUT_FILENO))
         return;
 
     enable_kx(true);
@@ -798,7 +798,7 @@ void terminal_uninit(void)
 
 bool terminal_in_background(void)
 {
-    return isatty(2) && tcgetpgrp(2) != getpgrp();
+    return isatty(STDERR_FILENO) && tcgetpgrp(STDERR_FILENO) != getpgrp();
 }
 
 void terminal_get_size(int *w, int *h)
@@ -813,7 +813,7 @@ void terminal_get_size(int *w, int *h)
 
 int terminal_init(void)
 {
-    if (isatty(1))
+    if (isatty(STDOUT_FILENO))
         load_termcap();
     getch2_enable();
     return 0;
