@@ -2698,9 +2698,11 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                    " Remove the given elements. Take the list element index (starting from 0).\n"
                    " Negative index can be used (i.e. -1 is the last element).\n"
                    " Filter names work as well.\n\n"
+                   "  %s-toggle\n"
+                   " Add the filter to the list, or remove it if it's already added.\n\n"
                    "  %s-clr\n"
-                   " Clear the current list.\n",
-                   BSTR_P(name), BSTR_P(suffix), pre, pre, pre, pre, pre);
+                   " Clear the current list.\n\n",
+                   BSTR_P(name), BSTR_P(suffix), pre, pre, pre, pre, pre, pre);
 
             return M_OPT_UNKNOWN;
         }
