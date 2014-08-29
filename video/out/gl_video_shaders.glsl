@@ -172,6 +172,8 @@ vec4 sample_bilinear(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param
     return texture(tex, texcoord);
 }
 
+#define SAMPLE_BILINEAR(p0, p1, p2) sample_bilinear(p0, p1, p2, 0)
+
 // Explanation how bicubic scaling with only 4 texel fetches is done:
 //   http://www.mate.tue.nl/mate/pdfs/10318.pdf
 //   'Efficient GPU-Based Texture Interpolation using Uniform B-Splines'
@@ -351,22 +353,6 @@ vec4 sample_sharpen5(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param
     vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;
     return p + t * param1;
 }
-
-#define CONCAT(a, b) a ## b
-
-#define SAMPLE_FILTER_LC(NAME)                                              \
-    vec4 CONCAT(NAME, _l)(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) { \
-        return NAME(tex, texsize, texcoord, filter_param1_l);               \
-    }                                                                       \
-                                                                            \
-    vec4 CONCAT(NAME, _c)(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) { \
-        return NAME(tex, texsize, texcoord, filter_param1_c);               \
-    }
-
-SAMPLE_FILTER_LC(sample_bilinear)
-SAMPLE_FILTER_LC(sample_bicubic_fast)
-SAMPLE_FILTER_LC(sample_sharpen3)
-SAMPLE_FILTER_LC(sample_sharpen5)
 
 void main() {
     vec2 chr_texcoord = texcoord;

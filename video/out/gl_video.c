@@ -826,9 +826,9 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
 {
     const char *target = scaler->index == 0 ? "SAMPLE_L" : "SAMPLE_C";
     if (!scaler->kernel) {
-        *shader = talloc_asprintf_append(*shader, "#define %s sample_%s_%c\n",
-                                         target, scaler->name,
-                                         "lc"[scaler->index]);
+        *shader = talloc_asprintf_append(*shader, "#define %s(p0, p1, p2) "
+            "sample_%s(p0, p1, p2, filter_param1_%c)\n",
+            target, scaler->name, "lc"[scaler->index]);
     } else {
         int size = scaler->kernel->size;
         if (pass != -1) {
@@ -1033,13 +1033,13 @@ static void compile_shaders(struct gl_video *p)
         // Force using the luma scaler on chroma. If the "indirect" stage is
         // used, the actual scaling will happen in the next stage.
         shader_def(&header_conv, "SAMPLE_C",
-                   use_indirect ? "sample_bilinear_l" : "SAMPLE_L");
+                   use_indirect ? "SAMPLE_BILINEAR" : "SAMPLE_L");
     }
 
     if (use_indirect) {
         // We don't use filtering for the Y-plane (luma), because it's never
         // scaled in this scenario.
-        shader_def(&header_conv, "SAMPLE_L", "sample_bilinear_l");
+        shader_def(&header_conv, "SAMPLE_L", "SAMPLE_BILINEAR");
         shader_def_opt(&header_conv, "FIXED_SCALE", true);
         header_conv = t_concat(tmp, header, header_conv);
         p->indirect_program =
