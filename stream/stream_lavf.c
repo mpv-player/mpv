@@ -252,6 +252,8 @@ static int open_f(stream_t *stream)
     stream->close = close_f;
     // enable cache (should be avoided for files, but no way to detect this)
     stream->streaming = true;
+    stream->pos = 0; // reset specifically for STREAM_CTRL_RECONNECT
+    stream->buf_pos = stream->buf_len = 0;
     res = STREAM_OK;
 
 out:

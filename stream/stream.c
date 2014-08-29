@@ -384,7 +384,7 @@ static int stream_reconnect(stream_t *s)
 {
 #define MAX_RECONNECT_RETRIES 5
 #define RECONNECT_SLEEP_MAX_MS 500
-    if (!s->streaming)
+    if (!s->streaming || s->uncached_stream)
         return 0;
     if (!s->seekable)
         return 0;
@@ -404,8 +404,6 @@ static int stream_reconnect(stream_t *s)
             return 0;
 
         s->eof = 1;
-        s->pos = 0;
-        s->buf_pos = s->buf_len = 0;
 
         int r = stream_control(s, STREAM_CTRL_RECONNECT, NULL);
         if (r == STREAM_UNSUPPORTED)
