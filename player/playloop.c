@@ -899,12 +899,11 @@ void run_playloop(struct MPContext *mpctx)
     update_osd_msg(mpctx);
     update_subtitles(mpctx);
 
-    /* If we're paused, don't end playback yet. But if video is enabled, is EOF,
-     * and we don't have a video frame, then the user probably seeked outside
-     * of the video, and we want to quit. */
-    bool prevent_eof = mpctx->paused;
-    if (mpctx->d_video && mpctx->video_status == STATUS_EOF)
-        prevent_eof &= mpctx->video_out && mpctx->video_out->hasframe;
+    /* Don't quit while paused and we're displaying the last video frame. On the
+     * other hand, if we don't have a video frame, then the user probably seeked
+     * outside of the video, and we do want to quit. */
+    bool prevent_eof =
+        mpctx->paused && mpctx->video_out && vo_has_frame(mpctx->video_out);
     /* Handles terminating on end of playback (or switching to next segment).
      *
      * It's possible for the user to simultaneously switch both audio
