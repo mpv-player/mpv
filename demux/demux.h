@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/common.h"
 #include "common/tags.h"
 #include "packet.h"

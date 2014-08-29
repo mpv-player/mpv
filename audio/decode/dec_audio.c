@@ -28,7 +28,7 @@
 #include "config.h"
 #include "common/codecs.h"
 #include "common/msg.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 #include "stream/stream.h"
 #include "demux/demux.h"

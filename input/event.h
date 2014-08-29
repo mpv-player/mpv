@@ -15,7 +15,7 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 struct input_ctx;
 

@@ -27,8 +27,8 @@
 
 #include "talloc.h"
 
-#include "bstr/bstr.h"
-#include "compat/atomics.h"
+#include "misc/bstr.h"
+#include "osdep/atomics.h"
 #include "common/common.h"
 #include "common/global.h"
 #include "misc/ring.h"

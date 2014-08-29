@@ -31,7 +31,7 @@
 
 #include "cookies.h"
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "talloc.h"
 
 struct stream_lavf_params *stream_lavf_opts;

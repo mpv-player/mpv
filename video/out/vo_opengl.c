@@ -36,7 +36,7 @@
 
 #include "talloc.h"
 #include "common/common.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "vo.h"

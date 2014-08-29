@@ -22,7 +22,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "compat/libav.h"
 #include "common/common.h"
 #include "options/options.h"
 #include "video/fmt-conversion.h"

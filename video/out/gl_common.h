@@ -30,7 +30,7 @@
 
 #include "config.h"
 #include "common/msg.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 #include "vo.h"
 #include "video/csputils.h"

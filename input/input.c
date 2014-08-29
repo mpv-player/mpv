@@ -48,7 +48,7 @@
 #include "options/path.h"
 #include "talloc.h"
 #include "options/options.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "stream/stream.h"
 #include "common/common.h"
 

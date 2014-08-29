@@ -23,7 +23,7 @@
 #include <limits.h>
 
 #include "config.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "options/options.h"
 #include "common/common.h"
 #include "common/msg.h"

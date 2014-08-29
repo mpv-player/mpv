@@ -18,7 +18,7 @@
 
 #include <stddef.h>
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/common.h"
 #include "common/msg.h"
 #include "options/m_option.h"

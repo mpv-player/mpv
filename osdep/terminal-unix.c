@@ -43,7 +43,7 @@
 #include <unistd.h>
 
 #include "common/common.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "input/input.h"
 #include "input/keycodes.h"
 #include "misc/ctype.h"

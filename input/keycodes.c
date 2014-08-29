@@ -20,7 +20,7 @@
 #include <string.h>
 #include <strings.h>
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/common.h"
 #include "common/msg.h"
 

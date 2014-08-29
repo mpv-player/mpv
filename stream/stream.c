@@ -31,7 +31,7 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include "compat/mpbswap.h"
+#include "osdep/mpbswap.h"
 
 #include "talloc.h"
 
@@ -39,7 +39,7 @@
 
 #include "common/common.h"
 #include "common/global.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/msg.h"
 #include "options/options.h"
 #include "options/path.h"

@@ -27,7 +27,7 @@
 #include <libavutil/common.h>
 
 #include "common/msg.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "sd.h"
 
 struct line {

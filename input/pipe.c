@@ -10,7 +10,7 @@
 #endif
 
 #include "common/msg.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "osdep/io.h"
 #include "input.h"
 #include "cmd_parse.h"

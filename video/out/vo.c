@@ -36,7 +36,7 @@
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
 #include "options/options.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "vo.h"
 #include "aspect.h"
 #include "input/input.h"

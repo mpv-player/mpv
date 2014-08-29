@@ -28,17 +28,15 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/pixdesc.h>
 
-#include "compat/libav.h"
-
 #include "talloc.h"
 #include "config.h"
 #include "common/msg.h"
 #include "options/options.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
 
-#include "compat/mpbswap.h"
+#include "osdep/mpbswap.h"
 #include "video/fmt-conversion.h"
 
 #include "vd.h"

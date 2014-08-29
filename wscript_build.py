@@ -155,9 +155,6 @@ def build(ctx):
         ( "audio/out/pull.c" ),
         ( "audio/out/push.c" ),
 
-        ## Bstr
-        ( "bstr/bstr.c" ),
-
         ## Core
         ( "common/av_common.c" ),
         ( "common/av_log.c" ),
@@ -198,6 +195,7 @@ def build(ctx):
         ( "input/lirc.c",                        "lirc" ),
 
         ## Misc
+        ( "misc/bstr.c" ),
         ( "misc/charset_conv.c" ),
         ( "misc/dispatch.c" ),
         ( "misc/ring.c" ),

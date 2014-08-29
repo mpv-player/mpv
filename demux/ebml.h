@@ -24,7 +24,7 @@
 #include <stdbool.h>
 
 #include "stream/stream.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 struct mp_log;
 

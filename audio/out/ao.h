@@ -21,7 +21,7 @@
 
 #include <stdbool.h>
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/common.h"
 #include "audio/chmap.h"
 #include "audio/chmap_sel.h"

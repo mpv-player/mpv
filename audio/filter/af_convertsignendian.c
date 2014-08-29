@@ -20,7 +20,7 @@
 
 #include "af.h"
 #include "audio/format.h"
-#include "compat/mpbswap.h"
+#include "osdep/mpbswap.h"
 
 static bool test_conversion(int src_format, int dst_format)
 {

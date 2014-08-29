@@ -32,7 +32,6 @@
 #include "video/mp_image.h"
 #include "vf.h"
 #include "video/fmt-conversion.h"
-#include "compat/mpbswap.h"
 
 #include "video/sws_utils.h"
 

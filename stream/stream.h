@@ -27,7 +27,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 enum streamtype {
     STREAMTYPE_GENERIC = 0,

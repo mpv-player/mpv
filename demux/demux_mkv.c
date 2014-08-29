@@ -44,7 +44,7 @@
 #include "talloc.h"
 #include "common/av_common.h"
 #include "options/options.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "stream/stream.h"
 #include "demux.h"
 #include "stheader.h"

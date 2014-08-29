@@ -39,13 +39,12 @@
 # include <libavutil/display.h>
 #endif
 #include <libavutil/opt.h>
-#include "compat/libav.h"
 
 #include "options/options.h"
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 #include "stream/stream.h"
 #include "demux.h"
