@@ -29,7 +29,7 @@
 
 #include "common/common.h"
 #include "misc/ctype.h"
-#include "bstr/bstr.h"
+#include "bstr.h"
 
 int bstrcmp(struct bstr str1, struct bstr str2)
 {
