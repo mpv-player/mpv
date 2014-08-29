@@ -1055,7 +1055,7 @@ Property list
     Window size multiplier. Setting this will resize the video window to the
     values contained in ``dwidth`` and ``dheight`` multiplied with the value
     set with this property. Setting ``1`` will resize to original video size
-    (or to be exactly, the size the video filters output). ``2`` will set the
+    (or to be exact, the size the video filters output). ``2`` will set the
     double size, ``0.5`` halves the size.
 
 ``video-aspect`` (RW)
