@@ -2811,7 +2811,7 @@ static const struct m_property mp_properties[] = {
 
     // Audio
     {"volume", mp_property_volume},
-    { "mute", mp_property_mute},
+    {"mute", mp_property_mute},
     {"audio-delay", mp_property_audio_delay},
     {"audio-format", mp_property_audio_format},
     {"audio-codec", mp_property_audio_codec},
