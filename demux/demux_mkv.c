@@ -1952,11 +1952,7 @@ static int64_t real_fix_timestamp(unsigned char *buf, int len, int64_t timestamp
         *kf_base = timestamp;
         *kf_pts  = pts;
     } else {
-        if (pict_type != 3) {
-            timestamp = *kf_base + ((pts - *kf_pts) & 0x1FFF);
-        } else {
-            timestamp = *kf_base - ((*kf_pts - pts) & 0x1FFF);
-        }
+        timestamp = *kf_base - ((*kf_pts - pts) & 0x1FFF);
     }
 
     return timestamp;
