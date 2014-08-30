@@ -79,9 +79,11 @@ enum mp_render_intent {
     MP_INTENT_ABSOLUTE_COLORIMETRIC = 3
 };
 
+// The numeric values (except -1) match the Matroska StereoMode element value.
 enum mp_stereo3d_mode {
     MP_STEREO3D_INVALID = -1,
     MP_STEREO3D_MONO = 0,
+    /* no explicit enum entries for most valid values */
     MP_STEREO3D_COUNT = 13, // 12 is last valid mode
 };
 

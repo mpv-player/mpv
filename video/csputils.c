@@ -79,8 +79,8 @@ const char *const mp_chroma_names[MP_CHROMA_COUNT] = {
 
 // The short name _must_ match with what vf_stereo3d accepts (if supported).
 // The long name is closer to the Matroska spec (StereoMode element).
-// If you add entries that don't match Matroska, make sure demux_mkv.c rejects
-// them properly.
+// The numeric index matches the Matroska StereoMode value. If you add entries
+// that don't match Matroska, make sure demux_mkv.c rejects them properly.
 // The long name is unused.
 #define E(index, short, long) [index] = short
 const char *const mp_stereo3d_names[MP_STEREO3D_COUNT] = {
@@ -89,7 +89,7 @@ const char *const mp_stereo3d_names[MP_STEREO3D_COUNT] = {
     E(2,  "abr",    "top_bottom_right"),
     E(3,  "abl",    "top_bottom_left"),
     E(4,  "checkr", "checkboard_right"),        // unsupported by vf_stereo3d
-    E(5,  "checkl", "checkboard_left"),
+    E(5,  "checkl", "checkboard_left"),         // unsupported by vf_stereo3d
     E(6,  "irr",    "row_interleaved_right"),
     E(7,  "irl",    "row_interleaved_left"),
     E(8,  "icr",    "column_interleaved_right"),// unsupported by vf_stereo3d
