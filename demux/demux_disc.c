@@ -135,19 +135,21 @@ static void add_streams(demuxer_t *demuxer)
             }
         }
         struct sh_stream *sh = new_sh_stream(demuxer, src->type);
+        if (!sh)
+            break;
         assert(p->num_streams == n); // directly mapped
         MP_TARRAY_APPEND(p, p->streams, p->num_streams, sh);
         // Copy all stream fields that might be relevant
         sh->codec = talloc_strdup(sh, src->codec);
         sh->format = src->format;
         sh->lav_headers = src->lav_headers;
-        if (sh && src->video) {
+        if (src->video) {
             double ar;
             if (stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
                                 == STREAM_OK)
                 sh->video->aspect = ar;
         }
-        if (sh && src->audio)
+        if (src->audio)
             sh->audio = src->audio;
     }
     reselect_streams(demuxer);
