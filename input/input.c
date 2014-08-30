@@ -858,17 +858,17 @@ int mp_input_add_fd(struct input_ctx *ictx, int unix_fd, int select,
         MP_ERR(ictx, "Too many file descriptors.\n");
     } else {
         fd = &ictx->fds[ictx->num_fds];
+        *fd = (struct input_fd){
+            .log = ictx->log,
+            .fd = unix_fd,
+            .select = select,
+            .read_cmd = read_cmd_func,
+            .read_key = read_key_func,
+            .close_func = close_func,
+            .ctx = ctx,
+        };
+        ictx->num_fds++;
     }
-    *fd = (struct input_fd){
-        .log = ictx->log,
-        .fd = unix_fd,
-        .select = select,
-        .read_cmd = read_cmd_func,
-        .read_key = read_key_func,
-        .close_func = close_func,
-        .ctx = ctx,
-    };
-    ictx->num_fds++;
     input_unlock(ictx);
     return !!fd;
 }
