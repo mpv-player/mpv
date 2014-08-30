@@ -2767,30 +2767,51 @@ Cache
     on the situation, either of these might be slower than the other method.
     This option allows control over this.
 
-``--cache-file=<path>``
-    Create a cache file on the filesystem with the given name. The file is
-    always overwritten. When the general cache is enabled, this file cache
-    will be used to store whatever is read from the source stream.
+``--cache-file=<TMP|path>``
+    Create a cache file on the filesystem.
 
-    This will always overwrite the cache file, and you can't use an existing
-    cache file to resume playback of a stream. (Technically, mpv wouldn't
-    even know which blocks in the file are valid and which not.)
+    There are two ways of using this:
 
-    The resulting file will not necessarily contain all data of the source
-    stream. For example, if you seek, the parts that were skipped over are
-    never read and consequently are not written to the cache. The skipped over
-    parts are filled with zeros. This means that the cache file doesn't
-    necessarily correspond to a full download of the source stream.
+    1. Passing a path (a filename). The file will always be overwritten. When
+       the general cache is enabled, this file cache will be used to store
+       whatever is read from the source stream.
 
-    Both of these issues could be improved if there is any user interest.
+       This will always overwrite the cache file, and you can't use an existing
+       cache file to resume playback of a stream. (Technically, mpv wouldn't
+       even know which blocks in the file are valid and which not.)
+
+       The resulting file will not necessarily contain all data of the source
+       stream. For example, if you seek, the parts that were skipped over are
+       never read and consequently are not written to the cache. The skipped over
+       parts are filled with zeros. This means that the cache file doesn't
+       necessarily correspond to a full download of the source stream.
+
+       Both of these issues could be improved if there is any user interest.
+
+       .. warning:: Causes random corruption when used with ordered chapters or
+                    with ``--audio-file``.
+
+    2. Passing the string ``TMP``. This will not be interpreted as filename.
+       Instead, an invisible temporary file is created. It depends on your
+       C library where this file is created (usually ``/tmp/``), and whether
+       filename is visible (the ``tmpfile()`` function is used). On some
+       systems, automatic deletion of the cache file might not be guaranteed
+       (like on MS Windows).
+
+       If you want to use a file cache, this mode is recommended, because it
+       doesn't break ordered chapters or ``--audio-file``. These modes open
+       multiple cache streams, and using the same file for them obviously
+       clashes.
 
     Also see ``--cache-file-size``.
-
-    .. warning:: Causes random corruption when used with ordered chapters.
 
 ``--cache-file-size=<kBytes>``
     Maximum size of the file created with ``--cache-file``. For read accesses
     above this size, the cache is simply not used.
+
+    Keep in mind that some use-cases, like playing ordered chapters with cache
+    enabled, will actually create multiple cache files, each of which will
+    use up to this much disk space.
 
     (Default: 1048576, 1 GB.)
 
