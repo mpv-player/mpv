@@ -769,7 +769,7 @@ stream_t *open_memory_stream(void *data, int len)
 static stream_t *open_cache(stream_t *orig, const char *name)
 {
     stream_t *cache = new_stream();
-    cache->uncached_type = orig->type;
+    cache->uncached_type = orig->uncached_type;
     cache->uncached_stream = orig;
     cache->seekable = true;
     cache->mode = STREAM_READ;
