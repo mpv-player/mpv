@@ -561,6 +561,22 @@ Video
     which means the value ``0`` would rotate the video according to the
     rotation metadata.)
 
+``--video-stereo-mode=<mode>``
+    Set the stereo 3D output mode (default: ``mono``). This is done by inserting
+    the ``stereo3d`` conversion filter.
+
+    The mode ``mono`` is an alias to ``ml``, which refers to the left frame in
+    2D. This is the default, which means mpv will try to show 3D movies in 2D,
+    instead of the mangled 3D image not intended for consumption (such as
+    showing the left and right frame side by side, etc.).
+
+    The pseudo-mode ``none`` disables automatic conversion completely.
+
+    Use ``--video-stereo-mode=help`` to list all available modes. Check with
+    the ``stereo3d`` filter documentation to see what the names mean. Note that
+    some names refer to modes not supported by ``stereo3d`` - these modes can
+    appear in files, but can't be handled properly by mpv.
+
 ``--video-zoom=<value>``
     Adjust the video display scale factor by the given value. The unit is in
     fractions of the (scaled) window video size.

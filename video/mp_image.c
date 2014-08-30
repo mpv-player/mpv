@@ -364,6 +364,8 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->fields = src->fields;
     dst->qscale_type = src->qscale_type;
     dst->pts = src->pts;
+    dst->params.stereo_in = src->params.stereo_in;
+    dst->params.stereo_out = src->params.stereo_out;
     if (dst->w == src->w && dst->h == src->h) {
         dst->params.d_w = src->params.d_w;
         dst->params.d_h = src->params.d_h;
@@ -489,7 +491,9 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            p1->outputlevels == p2->outputlevels &&
            p1->primaries == p2->primaries &&
            p1->chroma_location == p2->chroma_location &&
-           p1->rotate == p2->rotate;
+           p1->rotate == p2->rotate &&
+           p1->stereo_in == p2->stereo_in &&
+           p1->stereo_out == p2->stereo_out;
 }
 
 // Set most image parameters, but not image format or size.

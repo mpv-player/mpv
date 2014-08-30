@@ -98,6 +98,7 @@ typedef struct MPOpts {
     int requested_primaries;
 
     int video_rotate;
+    int video_stereo_mode;
 
     char *audio_decoders;
     char *video_decoders;

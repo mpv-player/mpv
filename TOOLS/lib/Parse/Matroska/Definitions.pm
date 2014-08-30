@@ -265,6 +265,7 @@ sub define_matroska {
                         elem('DisplayUnit',   '54b2', 'uint'),
                         elem('FrameRate',   '2383e3', 'float'),
                         elem('ColourSpace', '2eb524', 'binary'),
+                        elem('StereoMode',    '53b8', 'uint'),
                     }),
                     elem('Audio', 'e1', {
                         elem('SamplingFrequency',         'b5', 'float'),

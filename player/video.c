@@ -157,6 +157,18 @@ static void filter_reconfig(struct MPContext *mpctx,
             }
         }
     }
+
+    if (params.stereo_in != params.stereo_out &&
+        params.stereo_in > 0 && params.stereo_out >= 0)
+    {
+        char *from = MP_STEREO3D_NAME(params.stereo_in);
+        char *to = MP_STEREO3D_NAME(params.stereo_out);
+        if (from && to) {
+            char *args[] = {"in", from, "out", to, NULL, NULL};
+            if (try_filter(mpctx, params, "stereo3d", "stereo3d", args) < 0)
+                MP_ERR(mpctx, "Can't insert 3D conversion filter.\n");
+        }
+    }
 }
 
 static void recreate_video_filters(struct MPContext *mpctx)

@@ -415,6 +415,7 @@ const m_option_t mp_opts[] = {
                 {"BT.2020", MP_CSP_PRIM_BT_2020})),
     OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 359,
                       ({"no", -1})),
+    OPT_VID_STEREO_MODE("video-stereo-mode", video_stereo_mode, 0),
 
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),

@@ -82,6 +82,7 @@ typedef struct sh_video {
     int bitrate;          // compressed bits/sec
     int disp_w, disp_h;   // display size
     int rotate;           // intended display rotation, in degrees, [0, 359]
+    int stereo_mode;      // mp_stereo3d_mode (0 if none/unknown)
     MP_BITMAPINFOHEADER *bih;
 } sh_video_t;
 

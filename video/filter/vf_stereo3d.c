@@ -445,6 +445,8 @@ const struct m_opt_choice_alternatives stereo_code_names[] = {
     {"interleave_rows_left_first",         INTERLEAVE_ROWS_LR},
     {"irr",                                INTERLEAVE_ROWS_RL},
     {"interleave_rows_right_first",        INTERLEAVE_ROWS_RL},
+    // convenience alias for MP_STEREO3D_MONO
+    {"mono",                             MONO_L},
     { NULL, 0}
 };
 

@@ -485,6 +485,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .chroma_location =
             avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
         .rotate = vd->header->video->rotate,
+        .stereo_in = vd->header->video->stereo_mode,
     };
 
     if (opts->video_rotate < 0) {
@@ -492,6 +493,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
     } else {
         out_params->rotate = (out_params->rotate + opts->video_rotate) % 360;
     }
+    out_params->stereo_out = opts->video_stereo_mode;
 }
 
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
