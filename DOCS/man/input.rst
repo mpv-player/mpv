@@ -597,11 +597,16 @@ Property list
     size of the currently played segment is returned.)
 
 ``estimated-frame-count``
-    Total number of frames in current file. Note: It's only an estimate.
-    (It's computed from two unreliable quantities: fps and stream length.)
+    Total number of frames in current file.
+
+    .. note:: This is only an estimate. (It's computed from two unreliable
+              quantities: fps and stream length.)
 
 ``estimated-frame-number``
     Number of current frame in current stream.
+
+    .. note:: This is only an estimate. (It's computed from two unreliable
+              quantities: fps and possibly rounded timestamps.)
 
 ``path``
     Full path of the currently played file.
