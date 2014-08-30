@@ -41,10 +41,6 @@ __midentify__main() {
         return 1
     fi
 
-    if [ -z "$MPV" ]; then
-        local MPV="mpv"
-    fi
-
     local LF="
 "
 
@@ -101,8 +97,8 @@ __midentify__main() {
         unset "$nextprefix$key"
     done
 
-    local output="$($MPV --term-playing-msg="$propstr" --vo=null --ao=null \
-                        --frames=1 --quiet --no-cache --no-config -- "$@")"
+    local output="$(${MPV:-mpv} --term-playing-msg="$propstr" --vo=null --ao=null \
+                                --frames=1 --quiet --no-cache --no-config -- "$@")"
     local fileindex=0
     local prefix=
     while :; do
