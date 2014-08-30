@@ -134,8 +134,8 @@ struct input_ctx {
     int64_t last_ar;
 
     // Autorepeat config
-    unsigned int ar_delay;
-    unsigned int ar_rate;
+    int ar_delay;
+    int ar_rate;
     // Maximum number of queued commands from keypresses (limit to avoid
     // repeated slow commands piling up)
     int key_fifo_size;
