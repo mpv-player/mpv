@@ -22,17 +22,11 @@ __midentify__main() {
     case "$0" in
         mpv_identify.sh|*/mpv_identify.sh)
             # we are NOT being sourced
-            case "$1" in
-                '')
-                    ;;
-                *)
-                    set -- '' "$@"
-                    ;;
-            esac
+            [ -n "$1" ] && set -- '' "$@"
             ;;
     esac
 
-    if [ $# -lt 2 ]; then
+    if [ "$#" -lt 2 ]; then
         echo >&2 "Usage 1 (for humans only): $0 filename.mkv"
         echo >&2 "will print all property values."
         echo >&2 "Note that this output really shouldn't be parsed, as the"
@@ -54,12 +48,12 @@ __midentify__main() {
     local LF="
 "
 
-    local nextprefix=$1
+    local nextprefix="$1"
     shift
 
     if [ -n "$nextprefix" ]; then
         # in case of error, we always want this unset
-        eval unset $nextprefix'path'
+        unset "${nextprefix}path"
     fi
 
     local allprops="
@@ -102,12 +96,13 @@ __midentify__main() {
     local propstr="X-MIDENTIFY-START:$LF"
     local key
     for key in $allprops; do
-        propstr=$propstr"X-MIDENTIFY: $key \${=$key}$LF"
-        key=`echo "$key" | tr - _`
-        eval unset $nextprefix$key
+        propstr="${propstr}X-MIDENTIFY: $key \${=$key}$LF"
+        key="$(printf '%s\n' "$key" | tr - _)"
+        unset "$nextprefix$key"
     done
 
-    local output=`$MPV --term-playing-msg="$propstr" --vo=null --ao=null --frames=1 --quiet --no-cache --no-config "$@"`
+    local output="$($MPV --term-playing-msg="$propstr" --vo=null --ao=null \
+                        --frames=1 --quiet --no-cache --no-config -- "$@")"
     local fileindex=0
     local prefix=
     while :; do
@@ -116,45 +111,45 @@ __midentify__main() {
             '')
                 break
                 ;;
-            *$LF*)
-                line=${output%%$LF*}
-                output=${output#*$LF}
+            *"$LF"*)
+                line="${output%%$LF*}"
+                output="${output#*$LF}"
                 ;;
             *)
-                line=$output
+                line="$output"
                 output=
                 ;;
         esac
         case "$line" in
             X-MIDENTIFY-START:)
                 if [ -n "$nextprefix" ]; then
-                    prefix=$nextprefix
-                    if [ $fileindex -gt 0 ]; then
-                        nextprefix=${prefix%$fileindex\_}
+                    prefix="$nextprefix"
+                    if [ "$fileindex" -gt 0 ]; then
+                        nextprefix="${prefix%${fileindex}_}"
                     fi
-                    fileindex=$(($fileindex+1))
-                    nextprefix=$nextprefix$fileindex\_
+                    fileindex="$(($fileindex+1))"
+                    nextprefix="${nextprefix}${fileindex}_"
                     for key in $allprops; do
-                        key=`echo "$key" | tr - _`
-                        eval unset $nextprefix$key
+                        key="$(printf '%s\n' "$key" | tr - _)"
+                        unset "$nextprefix$key"
                     done
                 else
-                    if [ $fileindex -gt 0 ]; then
+                    if [ "$fileindex" -gt 0 ]; then
                         echo
                     fi
-                    fileindex=$(($fileindex+1))
+                    fileindex="$(($fileindex+1))"
                 fi
                 ;;
             X-MIDENTIFY:\ *)
-                key=${line#X-MIDENTIFY:\ }
-                local value=${key#* }
-                key=${key%% *}
-                key=`echo "$key" | tr - _`
+                local key="${line#X-MIDENTIFY:\ }"
+                local value="${key#* }"
+                key="${key%% *}"
+                key="$(printf '%s\n' "$key" | tr - _)"
                 if [ -n "$nextprefix" ]; then
                     if [ -z "$prefix" ]; then
                         echo >&2 "Got X-MIDENTIFY: without X-MIDENTIFY-START:"
                     elif [ -n "$value" ]; then
-                        eval $prefix$key=\$value
+                        eval "$prefix$key"='"$value"'
                     fi
                 else
                     if [ -n "$value" ]; then
