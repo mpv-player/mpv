@@ -500,7 +500,7 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
         ds->base_ts = ts;
 
     // This implies this function is actually called from "the" user thread.
-    if (pkt && pkt->pos >= 0)
+    if (pkt->pos >= 0)
         ds->in->d_user->filepos = pkt->pos;
 
     return pkt;
