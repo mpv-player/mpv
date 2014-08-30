@@ -486,6 +486,10 @@ This built-in module provides generic helper functions for Lua, and have
 strictly speaking nothing to do with mpv or video/audio playback. They are
 provided for convenience. Most compensate for Lua's scarce standard library.
 
+``utils.getcwd()``
+    Returns the directory that mpv was launched from. On error, ``nil, error``
+    is returned.
+
 ``utils.readdir(path [, filter])``
     Enumerate all entries at the given path on the filesystem, and return them
     as array. Each entry is a directory entry (without the path).
