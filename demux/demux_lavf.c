@@ -787,7 +787,12 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     int r = av_read_frame(priv->avfc, pkt);
     if (r < 0) {
         av_free_packet(pkt);
-        return r == AVERROR(EAGAIN) ? 1 : -1; // eof
+        if (r == AVERROR(EAGAIN))
+            return 1;
+        if (r == AVERROR_EOF)
+            return 0;
+        MP_WARN(demux, "error reading packet.\n");
+        return -1;
     }
 
     add_new_streams(demux);
