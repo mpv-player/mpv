@@ -2786,6 +2786,8 @@ Cache
 
     Also see ``--cache-file-size``.
 
+    .. warning:: Causes random corruption when used with ordered chapters.
+
 ``--cache-file-size=<kBytes>``
     Maximum size of the file created with ``--cache-file``. For read accesses
     above this size, the cache is simply not used.
