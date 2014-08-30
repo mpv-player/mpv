@@ -16,6 +16,7 @@ video_url="$(youtube-dl \
     --get-url \
     "$@")"
 
+set -f
 $MPV \
     --cookies \
     --cookies-file="$cookies_file" \
