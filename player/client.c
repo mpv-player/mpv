@@ -416,76 +416,6 @@ int mpv_initialize(mpv_handle *ctx)
     return 0;
 }
 
-// Reserve an entry in the ring buffer. This can be used to guarantee that the
-// reply can be made, even if the buffer becomes congested _after_ sending
-// the request.
-// Returns an error code if the buffer is full.
-static int reserve_reply(struct mpv_handle *ctx)
-{
-    int res = MPV_ERROR_EVENT_QUEUE_FULL;
-    pthread_mutex_lock(&ctx->lock);
-    if (ctx->reserved_events + ctx->num_events < ctx->max_events) {
-        ctx->reserved_events++;
-        res = 0;
-    }
-    pthread_mutex_unlock(&ctx->lock);
-    return res;
-}
-
-static int append_event(struct mpv_handle *ctx, struct mpv_event *event)
-{
-    if (ctx->num_events + ctx->reserved_events >= ctx->max_events)
-        return -1;
-    ctx->events[(ctx->first_event + ctx->num_events) % ctx->max_events] = *event;
-    ctx->num_events++;
-    wakeup_client(ctx);
-    return 0;
-}
-
-static int send_event(struct mpv_handle *ctx, struct mpv_event *event)
-{
-    pthread_mutex_lock(&ctx->lock);
-    uint64_t mask = 1ULL << event->event_id;
-    if (ctx->property_event_masks & mask)
-        notify_property_events(ctx, mask);
-    if (!(ctx->event_mask & mask)) {
-        pthread_mutex_unlock(&ctx->lock);
-        return 0;
-    }
-    int r = append_event(ctx, event);
-    if (r < 0 && !ctx->choke_warning) {
-        mp_err(ctx->log, "Too many events queued.\n");
-        ctx->choke_warning = true;
-    }
-    pthread_mutex_unlock(&ctx->lock);
-    return r;
-}
-
-// Send a reply; the reply must have been previously reserved with
-// reserve_reply (otherwise, use send_event()).
-static void send_reply(struct mpv_handle *ctx, uint64_t userdata,
-                       struct mpv_event *event)
-{
-    event->reply_userdata = userdata;
-    pthread_mutex_lock(&ctx->lock);
-    // If this fails, reserve_reply() probably wasn't called.
-    assert(ctx->reserved_events > 0);
-    ctx->reserved_events--;
-    if (append_event(ctx, event) < 0)
-        abort();
-    pthread_mutex_unlock(&ctx->lock);
-}
-
-static void status_reply(struct mpv_handle *ctx, int event,
-                         uint64_t userdata, int status)
-{
-    struct mpv_event reply = {
-        .event_id = event,
-        .error = status,
-    };
-    send_reply(ctx, userdata, &reply);
-}
-
 // set ev->data to a new copy of the original data
 // (done only for message types that are broadcast)
 static void dup_event_data(struct mpv_event *ev)
@@ -510,6 +440,78 @@ static void dup_event_data(struct mpv_event *ev)
         if (ev->data)
             abort();
     }
+}
+
+// Reserve an entry in the ring buffer. This can be used to guarantee that the
+// reply can be made, even if the buffer becomes congested _after_ sending
+// the request.
+// Returns an error code if the buffer is full.
+static int reserve_reply(struct mpv_handle *ctx)
+{
+    int res = MPV_ERROR_EVENT_QUEUE_FULL;
+    pthread_mutex_lock(&ctx->lock);
+    if (ctx->reserved_events + ctx->num_events < ctx->max_events) {
+        ctx->reserved_events++;
+        res = 0;
+    }
+    pthread_mutex_unlock(&ctx->lock);
+    return res;
+}
+
+static int append_event(struct mpv_handle *ctx, struct mpv_event event, bool copy)
+{
+    if (ctx->num_events + ctx->reserved_events >= ctx->max_events)
+        return -1;
+    if (copy)
+        dup_event_data(&event);
+    ctx->events[(ctx->first_event + ctx->num_events) % ctx->max_events] = event;
+    ctx->num_events++;
+    wakeup_client(ctx);
+    return 0;
+}
+
+static int send_event(struct mpv_handle *ctx, struct mpv_event *event, bool copy)
+{
+    pthread_mutex_lock(&ctx->lock);
+    uint64_t mask = 1ULL << event->event_id;
+    if (ctx->property_event_masks & mask)
+        notify_property_events(ctx, mask);
+    if (!(ctx->event_mask & mask)) {
+        pthread_mutex_unlock(&ctx->lock);
+        return 0;
+    }
+    int r = append_event(ctx, *event, copy);
+    if (r < 0 && !ctx->choke_warning) {
+        mp_err(ctx->log, "Too many events queued.\n");
+        ctx->choke_warning = true;
+    }
+    pthread_mutex_unlock(&ctx->lock);
+    return r;
+}
+
+// Send a reply; the reply must have been previously reserved with
+// reserve_reply (otherwise, use send_event()).
+static void send_reply(struct mpv_handle *ctx, uint64_t userdata,
+                       struct mpv_event *event)
+{
+    event->reply_userdata = userdata;
+    pthread_mutex_lock(&ctx->lock);
+    // If this fails, reserve_reply() probably wasn't called.
+    assert(ctx->reserved_events > 0);
+    ctx->reserved_events--;
+    if (append_event(ctx, *event, false) < 0)
+        abort(); // not reached
+    pthread_mutex_unlock(&ctx->lock);
+}
+
+static void status_reply(struct mpv_handle *ctx, int event,
+                         uint64_t userdata, int status)
+{
+    struct mpv_event reply = {
+        .event_id = event,
+        .error = status,
+    };
+    send_reply(ctx, userdata, &reply);
 }
 
 // Return whether there's any client listening to this event.
@@ -546,8 +548,7 @@ void mp_client_broadcast_event(struct MPContext *mpctx, int event, void *data)
             .event_id = event,
             .data = data,
         };
-        dup_event_data(&event_data);
-        send_event(clients->clients[n], &event_data);
+        send_event(clients->clients[n], &event_data, true);
     }
 
     pthread_mutex_unlock(&clients->lock);
@@ -568,7 +569,7 @@ int mp_client_send_event(struct MPContext *mpctx, const char *client_name,
 
     struct mpv_handle *ctx = find_client(clients, client_name);
     if (ctx) {
-        r = send_event(ctx, &event_data);
+        r = send_event(ctx, &event_data, false);
     } else {
         r = -1;
         talloc_free(data);
