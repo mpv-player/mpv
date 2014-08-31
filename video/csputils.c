@@ -86,8 +86,8 @@ const char *const mp_chroma_names[MP_CHROMA_COUNT] = {
 const char *const mp_stereo3d_names[MP_STEREO3D_COUNT] = {
     E(0,  "mono",   "mono"),                    // unsupported by vf_stereo3d
     E(1,  "sbs2l",  "side_by_side_left"),
-    E(2,  "abr",    "top_bottom_right"),
-    E(3,  "abl",    "top_bottom_left"),
+    E(2,  "ab2r",   "top_bottom_right"),
+    E(3,  "ab2l",   "top_bottom_left"),
     E(4,  "checkr", "checkboard_right"),        // unsupported by vf_stereo3d
     E(5,  "checkl", "checkboard_left"),         // unsupported by vf_stereo3d
     E(6,  "irr",    "row_interleaved_right"),
