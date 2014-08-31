@@ -261,6 +261,8 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
         return STREAM_NO_MATCH;
     if (!sinfo->is_safe && (flags & STREAM_SAFE_ONLY))
         return STREAM_UNSAFE;
+    if (!sinfo->is_network && (flags & STREAM_NETWORK_ONLY))
+        return STREAM_UNSAFE;
 
     const char *path = NULL;
     // Stream filters use the original URL, with no protocol matching at all.
@@ -284,6 +286,7 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     s->path = talloc_strdup(s, path);
     s->source = underlying;
     s->allow_caching = true;
+    s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
 
     if ((s->mode & STREAM_WRITE) && !sinfo->can_write) {
@@ -797,6 +800,7 @@ static stream_t *open_cache(stream_t *orig, const char *name)
     cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
     cache->safe_origin = orig->safe_origin;
     cache->streaming = orig->streaming,
+    cache->is_network = orig->is_network;
     cache->opts = orig->opts;
     cache->global = orig->global;
 

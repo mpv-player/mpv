@@ -1085,8 +1085,8 @@ static void play_current_file(struct MPContext *mpctx)
         stream_filename = mpctx->resolve_result->url;
     }
     int stream_flags = STREAM_READ;
-    if (mpctx->playlist->current->unsafe_origin && !opts->load_unsafe_playlists)
-        stream_flags |= STREAM_SAFE_ONLY;
+    if (!opts->load_unsafe_playlists)
+        stream_flags |= mpctx->playlist->current->stream_flags;
     mpctx->stream = stream_create(stream_filename, stream_flags, mpctx->global);
     if (!mpctx->stream) { // error...
         demux_was_interrupted(mpctx);
@@ -1130,9 +1130,12 @@ goto_reopen_demuxer: ;
     mpctx->initialized_flags |= INITIALIZED_DEMUXER;
 
     if (mpctx->demuxer->playlist) {
+        int entry_stream_flags =
+            (mpctx->demuxer->stream->safe_origin ? 0 : STREAM_SAFE_ONLY) |
+            (mpctx->demuxer->stream->is_network ? STREAM_NETWORK_ONLY : 0);
         struct playlist *pl = mpctx->demuxer->playlist;
         for (struct playlist_entry *e = pl->first; e; e = e->next)
-            e->unsafe_origin |= !mpctx->demuxer->stream->safe_origin;
+            e->stream_flags |= entry_stream_flags;
         transfer_playlist(mpctx, pl);
         goto terminate_playback;
     }

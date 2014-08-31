@@ -324,10 +324,10 @@ const stream_info_t stream_info_ffmpeg = {
   .protocols = (const char *const[]){
      "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh", "mmshttp", "rtp",
      "httpproxy", "hls", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srtp",
-     "md5",
      NULL },
   .can_write = true,
   .is_safe = true,
+  .is_network = true,
 };
 
 // Unlike above, this is not marked as safe, and can contain protocols which
@@ -338,7 +338,7 @@ const stream_info_t stream_info_ffmpeg_unsafe = {
   .name = "ffmpeg",
   .open = open_f,
   .protocols = (const char *const[]){
-     "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp",
+     "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp", "md5",
      NULL },
   .can_write = true,
 };
