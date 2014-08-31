@@ -286,9 +286,6 @@ struct playlist *playlist_parse_file(const char *file, struct mpv_global *global
     if (ret && !ret->first)
         mp_warn(log, "Warning: empty playlist\n");
 
-    if (ret)
-        playlist_add_base_path(ret, mp_dirname(file));
-
     talloc_free(log);
     return ret;
 }
