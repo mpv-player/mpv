@@ -281,4 +281,5 @@ const stream_info_t stream_info_file = {
     .open = open_f,
     .protocols = (const char*const[]){ "file", "", NULL },
     .can_write = true,
+    .is_safe = true,
 };

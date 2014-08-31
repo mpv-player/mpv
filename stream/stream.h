@@ -55,7 +55,9 @@ enum streamtype {
 
 // flags for stream_open_ext (this includes STREAM_READ and STREAM_WRITE)
 #define STREAM_NO_FILTERS 2
+#define STREAM_SAFE_ONLY 4
 
+#define STREAM_UNSAFE -3
 #define STREAM_NO_MATCH -2
 #define STREAM_UNSUPPORTED -1
 #define STREAM_ERROR 0
@@ -141,6 +143,7 @@ typedef struct stream_info_st {
     const char *const *url_options;
     bool stream_filter;
     bool can_write;
+    bool is_safe;
 } stream_info_t;
 
 typedef struct stream {

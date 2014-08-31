@@ -1084,7 +1084,10 @@ static void play_current_file(struct MPContext *mpctx)
         }
         stream_filename = mpctx->resolve_result->url;
     }
-    mpctx->stream = stream_open(stream_filename, mpctx->global);
+    int stream_flags = STREAM_READ;
+    if (mpctx->playlist->current->unsafe_origin && !opts->load_unsafe_playlists)
+        stream_flags |= STREAM_SAFE_ONLY;
+    mpctx->stream = stream_create(stream_filename, stream_flags, mpctx->global);
     if (!mpctx->stream) { // error...
         demux_was_interrupted(mpctx);
         goto terminate_playback;
@@ -1127,16 +1130,10 @@ goto_reopen_demuxer: ;
     mpctx->initialized_flags |= INITIALIZED_DEMUXER;
 
     if (mpctx->demuxer->playlist) {
-        if (mpctx->demuxer->stream->safe_origin || opts->load_unsafe_playlists) {
-            transfer_playlist(mpctx, mpctx->demuxer->playlist);
-        } else {
-            MP_ERR(mpctx, "\nThis looks like a playlist, but playlist support "
-                   "will not be used automatically.\nThe main problem with "
-                   "playlist safety is that playlist entries can be arbitrary,\n"
-                   "and an attacker could make mpv poke around in your local "
-                   "filesystem or network.\nUse --playlist=file or the "
-                   "--load-unsafe-playlists option to load them anyway.\n");
-        }
+        struct playlist *pl = mpctx->demuxer->playlist;
+        for (struct playlist_entry *e = pl->first; e; e = e->next)
+            e->unsafe_origin |= !mpctx->demuxer->stream->safe_origin;
+        transfer_playlist(mpctx, pl);
         goto terminate_playback;
     }
 

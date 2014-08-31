@@ -41,6 +41,9 @@ struct playlist_entry {
     bool playback_short : 1;
     // Set to true if not at least 1 frame (audio or video) could be played.
     bool init_failed : 1;
+    // If set, assume that this is e.g. from an external playlist, and needs an
+    // additional safety check.
+    bool unsafe_origin : 1;
 };
 
 struct playlist {

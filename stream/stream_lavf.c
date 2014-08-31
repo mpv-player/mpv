@@ -322,10 +322,24 @@ const stream_info_t stream_info_ffmpeg = {
   .name = "ffmpeg",
   .open = open_f,
   .protocols = (const char *const[]){
-     "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh",
-     "mmshttp", "udp", "ftp", "rtp", "httpproxy", "hls", "rtmpe", "rtmps",
-     "rtmpt", "rtmpte", "rtmpts", "srtp", "tcp", "udp", "tls", "unix", "sftp",
+     "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh", "mmshttp", "rtp",
+     "httpproxy", "hls", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srtp",
      "md5",
      NULL },
   .can_write = true,
+  .is_safe = true,
 };
+
+// Unlike above, this is not marked as safe, and can contain protocols which
+// may do insecure things. (Such as "ffmpeg", which can access the "lavfi"
+// pseudo-demuxer, which in turn gives access to filters that can access the
+// local filesystem.)
+const stream_info_t stream_info_ffmpeg_unsafe = {
+  .name = "ffmpeg",
+  .open = open_f,
+  .protocols = (const char *const[]){
+     "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp",
+     NULL },
+  .can_write = true,
+};
+

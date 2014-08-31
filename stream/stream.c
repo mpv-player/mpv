@@ -61,6 +61,7 @@ extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_memory;
 extern const stream_info_t stream_info_mf;
 extern const stream_info_t stream_info_ffmpeg;
+extern const stream_info_t stream_info_ffmpeg_unsafe;
 extern const stream_info_t stream_info_avdevice;
 extern const stream_info_t stream_info_file;
 extern const stream_info_t stream_info_ifo;
@@ -77,6 +78,7 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_cdda,
 #endif
     &stream_info_ffmpeg,
+    &stream_info_ffmpeg_unsafe,
     &stream_info_avdevice,
 #if HAVE_DVBIN
     &stream_info_dvb,
@@ -257,6 +259,8 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
         return STREAM_NO_MATCH;
     if (sinfo->stream_filter && (flags & STREAM_NO_FILTERS))
         return STREAM_NO_MATCH;
+    if (!sinfo->is_safe && (flags & STREAM_SAFE_ONLY))
+        return STREAM_UNSAFE;
 
     const char *path = NULL;
     // Stream filters use the original URL, with no protocol matching at all.
@@ -335,16 +339,28 @@ struct stream *stream_create(const char *url, int flags, struct mpv_global *glob
     assert(url);
 
     // Open stream proper
+    bool unsafe = false;
     for (int i = 0; stream_list[i]; i++) {
         int r = open_internal(stream_list[i], NULL, url, flags, global, &s);
         if (r == STREAM_OK)
             break;
         if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED)
             continue;
+        if (r == STREAM_UNSAFE) {
+            unsafe = true;
+            continue;
+        }
         if (r != STREAM_OK) {
             mp_err(log, "Failed to open %s.\n", url);
             goto done;
         }
+    }
+
+    if (!s && unsafe) {
+        mp_err(log, "\nRefusing to load potentially unsafe URL from a playlist.\n"
+               "Use --playlist=file or the --load-unsafe-playlists option to "
+               "load it anyway.\n\n");
+        goto done;
     }
 
     if (!s) {
