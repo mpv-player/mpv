@@ -1177,11 +1177,16 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     }
 
     // map window
-    vo_x11_selectinput_witherr(vo, x11->display, x11->window,
-                               StructureNotifyMask | ExposureMask |
-                               KeyPressMask | KeyReleaseMask |
-                               ButtonPressMask | ButtonReleaseMask |
-                               PointerMotionMask | LeaveWindowMask);
+    int events = StructureNotifyMask | ExposureMask;
+    if (vo->opts->WinID > 0) {
+        XWindowAttributes attribs;
+        if (XGetWindowAttributes(x11->display, vo->opts->WinID, &attribs))
+            events |= attribs.your_event_mask;
+    } else {
+        events |= KeyPressMask | KeyReleaseMask | ButtonPressMask |
+                  ButtonReleaseMask | PointerMotionMask | LeaveWindowMask;
+    }
+    vo_x11_selectinput_witherr(vo, x11->display, x11->window, events);
     XMapWindow(x11->display, x11->window);
 }
 
