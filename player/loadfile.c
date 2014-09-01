@@ -1019,6 +1019,20 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->filename = NULL;
     mpctx->shown_aframes = 0;
     mpctx->shown_vframes = 0;
+    mpctx->last_vo_pts = MP_NOPTS_VALUE;
+    mpctx->last_chapter_seek = -2;
+    mpctx->last_chapter_pts = MP_NOPTS_VALUE;
+    mpctx->last_chapter = -2;
+    mpctx->paused = false;
+    mpctx->paused_for_cache = false;
+    mpctx->playing_msg_shown = false;
+    mpctx->step_frames = 0;
+    mpctx->backstep_active = false;
+    mpctx->audio_delay = 0;
+    mpctx->max_frames = -1;
+    mpctx->seek = (struct seek_params){ 0 };
+
+    reset_playback_state(mpctx);
 
     if (mpctx->playlist->current)
         mpctx->filename = mpctx->playlist->current->filename;
@@ -1029,10 +1043,6 @@ static void play_current_file(struct MPContext *mpctx)
     char *local_filename = mp_file_url_to_filename(tmp, bstr0(mpctx->filename));
     if (local_filename)
         mpctx->filename = local_filename;
-
-#if HAVE_ENCODING
-    encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
-#endif
 
     mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION;
 
@@ -1062,9 +1072,10 @@ static void play_current_file(struct MPContext *mpctx)
         ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
 #endif
 
-    MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
+    mpctx->audio_delay = opts->audio_delay;
+    mpctx->max_frames = opts->play_frames;
 
-    //============ Open & Sync STREAM --- fork cache2 ====================
+    MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
     assert(mpctx->stream == NULL);
     assert(mpctx->demuxer == NULL);
@@ -1114,8 +1125,6 @@ goto_reopen_demuxer: ;
     mp_nav_reset(mpctx);
 
     //============ Open DEMUXERS --- DETECT file type =======================
-
-    mpctx->audio_delay = opts->audio_delay;
 
     mpctx->demuxer = demux_open(mpctx->stream, opts->demuxer_name, NULL,
                                 mpctx->global);
@@ -1250,25 +1259,10 @@ goto_reopen_demuxer: ;
 
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
-    mpctx->max_frames = opts->play_frames;
-
     if (mpctx->max_frames == 0) {
         mpctx->stop_play = PT_NEXT_ENTRY;
         goto terminate_playback;
     }
-
-    reset_playback_state(mpctx);
-
-    mpctx->last_vo_pts = MP_NOPTS_VALUE;
-    mpctx->last_chapter_seek = -2;
-    mpctx->last_chapter_pts = MP_NOPTS_VALUE;
-    mpctx->last_chapter = -2;
-    mpctx->paused = false;
-    mpctx->paused_for_cache = false;
-    mpctx->playing_msg_shown = false;
-    mpctx->step_frames = 0;
-    mpctx->backstep_active = false;
-    mpctx->seek = (struct seek_params){ 0 };
 
     // If there's a timeline force an absolute seek to initialize state
     double startpos = rel_time_to_abs(mpctx, opts->play_start);
