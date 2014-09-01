@@ -464,13 +464,15 @@ static int match_lang(char **langs, char *lang)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
  * 3) track is marked default
- * 4) lower track number
- * If select_fallback is not set, 4) is only used to determine whether a
+ * 4) attached picture, HLS bitrate
+ * 5) lower track number
+ * If select_fallback is not set, 5) is only used to determine whether a
  * matching track is preferred over another track. Otherwise, always pick a
  * track (if nothing else matches, return the track with lowest ID).
  */
 // Return whether t1 is preferred over t2
-static bool compare_track(struct track *t1, struct track *t2, char **langs)
+static bool compare_track(struct track *t1, struct track *t2, char **langs,
+                          struct MPOpts *opts)
 {
     bool ext1 = t1->is_external && !t1->no_default;
     bool ext2 = t2->is_external && !t2->no_default;
@@ -485,6 +487,11 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs)
         return t1->default_track;
     if (t1->attached_picture != t2->attached_picture)
         return !t1->attached_picture;
+    if (t1->stream && t2->stream && opts->hls_bitrate) {
+        int d = t1->stream->hls_bitrate - t2->stream->hls_bitrate;
+        if (d)
+            return opts->hls_bitrate == 1 ? d < 0 : d > 0;
+    }
     return t1->user_tid <= t2->user_tid;
 }
 static struct track *select_track(struct MPContext *mpctx,
@@ -500,7 +507,7 @@ static struct track *select_track(struct MPContext *mpctx,
             continue;
         if (track->user_tid == tid)
             return track;
-        if (!pick || compare_track(track, pick, langs))
+        if (!pick || compare_track(track, pick, langs, mpctx->opts))
             pick = track;
     }
     if (pick && !select_fallback && !(pick->is_external && !pick->no_default)

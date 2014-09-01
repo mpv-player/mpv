@@ -429,6 +429,19 @@ static void export_replaygain(demuxer_t *demuxer, sh_audio_t *sh, AVStream *st)
 #endif
 }
 
+// Return a dictionary entry as (decimal) integer.
+static int dict_get_decimal(AVDictionary *dict, const char *entry, int def)
+{
+    AVDictionaryEntry *e = av_dict_get(dict, entry, NULL, 0);
+    if (e && e->value) {
+        char *end = NULL;
+        long int r = strtol(e->value, &end, 10);
+        if (end && !end[0] && r >= INT_MIN && r <= INT_MAX)
+            return r;
+    }
+    return def;
+}
+
 static void handle_stream(demuxer_t *demuxer, int i)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -505,13 +518,9 @@ static void handle_stream(demuxer_t *demuxer, int i)
         if (sd)
             sh_video->rotate = -av_display_rotation_get((uint32_t *)sd);
 #else
-        AVDictionaryEntry *rot = av_dict_get(st->metadata, "rotate", NULL, 0);
-        if (rot && rot->value) {
-            char *end = NULL;
-            long int r = strtol(rot->value, &end, 10);
-            if (end && !end[0])
-                sh_video->rotate = r;
-        }
+        int rot = dict_get_decimal(st->metadata, "rotate", -1);
+        if (rot >= 0)
+            sh_video->rotate = rot;
 #endif
         sh_video->rotate = ((sh_video->rotate % 360) + 360) % 360;
 
@@ -589,6 +598,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
         AVDictionaryEntry *lang = av_dict_get(st->metadata, "language", NULL, 0);
         if (lang && lang->value)
             sh->lang = talloc_strdup(sh, lang->value);
+        sh->hls_bitrate = dict_get_decimal(st->metadata, "variant_bitrate", 0);
     }
 
     select_tracks(demuxer, i);

@@ -123,6 +123,7 @@ typedef struct MPOpts {
     char *force_configdir;
     int use_filedir_conf;
     int network_rtsp_transport;
+    int hls_bitrate;
     struct mp_cache_opts stream_cache;
     int chapterrange[2];
     int edition_id;

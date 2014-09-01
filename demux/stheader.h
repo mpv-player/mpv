@@ -55,6 +55,7 @@ struct sh_stream {
     char *title;
     char *lang;                 // language code
     bool default_track;         // container default track flag
+    int hls_bitrate;
 
     // stream is a picture (such as album art)
     struct demux_packet *attached_picture;

@@ -2838,11 +2838,9 @@ Network
     Use ``<string>`` as user agent for HTTP streaming.
 
 ``--cookies``, ``--no-cookies``
-    (network only)
     Support cookies when making HTTP requests. Disabled by default.
 
 ``--cookies-file=<filename>``
-    (network only)
     Read HTTP cookies from <filename>. The file is assumed to be in Netscape
     format.
 
@@ -2882,6 +2880,17 @@ Network
     network transport when playing ``rtsp://...`` URLs. The value ``lavf``
     leaves the decision to libavformat.
 
+``--hls-bitrate=<no|min|max>``
+    If HLS streams are played, this option controls what streams are selected
+    by default. The option allows the following parameters:
+
+    :no:        Don't do anything special. Typically, this will simply pick the
+                first audio/video streams it can find. (Default.)
+    :min:       Pick the streams with the lowest bitrate.
+    :max:       Same, but highest bitrate.
+
+    The bitrate as used is sent by the server, and there's no guarantee it's
+    actually meaningful.
 
 DVB
 ---

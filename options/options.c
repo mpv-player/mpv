@@ -202,6 +202,9 @@ const m_option_t mp_opts[] = {
     OPT_STRING("quvi-format", quvi_format, 0),
     OPT_FLAG("quvi-fetch-subtitles", quvi_fetch_subtitles, 0),
 
+    OPT_CHOICE("hls-bitrate", hls_bitrate, M_OPT_FIXED,
+               ({"no", 0}, {"min", 1}, {"max", 2})),
+
 #if HAVE_CDDA
     OPT_SUBSTRUCT("cdda", stream_cdda_opts, stream_cdda_conf, 0),
     OPT_STRING("cdrom-device", cdrom_device, 0),
