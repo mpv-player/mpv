@@ -679,11 +679,6 @@ Video
         The following explanations are relevant:
         `<http://quvi.sourceforge.net/r/api/0.9/glossary_termino.html#m_stream_id>`_
 
-    The ``quvi-format`` property can be used at runtime to cycle through the
-    list of formats. Unfortunately, this is slow. On libquvi 0.4.x, this
-    functionality is limited to switching between ``best`` and ``default`` if
-    the ``cycle`` input command is used.
-
 ``--vd-lavc-check-hw-profile=<yes|no>``
     Check hardware decoder profile (default: yes). If ``no`` is set, the
     highest profile of the hardware decoder is unconditionally selected, and

@@ -748,79 +748,6 @@ static int property_list_editions(void *ctx, struct m_property *prop,
                                 get_edition_entry, mpctx);
 }
 
-static struct mp_resolve_src *find_source(struct mp_resolve_result *res,
-                                          char *encid, char *url)
-{
-    if (res->num_srcs == 0)
-        return NULL;
-
-    int src = 0;
-    for (int n = 0; n < res->num_srcs; n++) {
-        char *s_url = res->srcs[n]->url;
-        char *s_encid = res->srcs[n]->encid;
-        if (url && s_url && strcmp(url, s_url) == 0) {
-            src = n;
-            break;
-        }
-        // Prefer source URL if possible; so continue in case encid isn't unique
-        if (encid && s_encid && strcmp(encid, s_encid) == 0)
-            src = n;
-    }
-    return res->srcs[src];
-}
-
-static int mp_property_quvi_format(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct MPOpts *opts = mpctx->opts;
-    struct mp_resolve_result *res = mpctx->resolve_result;
-    if (!res || !res->num_srcs)
-        return M_PROPERTY_UNAVAILABLE;
-
-    struct mp_resolve_src *cur = find_source(res, opts->quvi_format, res->url);
-    if (!cur)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(char **)arg = talloc_strdup(NULL, cur->encid);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET: {
-        mpctx->stop_play = PT_RESTART;
-        // Make it restart at the same position. This will have disastrous
-        // consequences if the stream is not arbitrarily seekable, but whatever.
-        m_config_backup_opt(mpctx->mconfig, "start");
-        opts->play_start = (struct m_rel_time) {
-            .type = REL_TIME_ABSOLUTE,
-            .pos = get_current_time(mpctx),
-        };
-        break;
-    }
-    case M_PROPERTY_SWITCH: {
-        struct m_property_switch_arg *sarg = arg;
-        int pos = 0;
-        for (int n = 0; n < res->num_srcs; n++) {
-            if (res->srcs[n] == cur) {
-                pos = n;
-                break;
-            }
-        }
-        pos += sarg->inc;
-        if (pos < 0 || pos >= res->num_srcs) {
-            if (sarg->wrap) {
-                pos = (res->num_srcs + pos) % res->num_srcs;
-            } else {
-                pos = av_clip(pos, 0, res->num_srcs);
-            }
-        }
-        char *fmt = res->srcs[pos]->encid;
-        return mp_property_quvi_format(mpctx, prop, M_PROPERTY_SET, &fmt);
-    }
-    }
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-
 /// Number of titles in BD/DVD
 static int mp_property_disc_titles(void *ctx, struct m_property *prop,
                                    int action, void *arg)
@@ -2782,7 +2709,6 @@ static const struct m_property mp_properties[] = {
     {"disc-menu-active", mp_property_disc_menu},
     {"chapter", mp_property_chapter},
     {"edition", mp_property_edition},
-    {"quvi-format", mp_property_quvi_format},
     {"disc-titles", mp_property_disc_titles},
     {"chapters", mp_property_chapters},
     {"editions", mp_property_editions},

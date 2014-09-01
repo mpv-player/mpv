@@ -1261,11 +1261,6 @@ Property list
                 "title" MPV_FORMAT_STRING
                 "time"  MPV_FORMAT_DOUBLE
 
-``quvi-format`` (RW)
-    See ``--quvi-format``. Cycling this property (``cycle``) will attempt to
-    cycle through known format, although currently this feature doesn't work
-    well at all.
-
 ``af`` (RW)
     See ``--af`` and the ``af`` command.
 
