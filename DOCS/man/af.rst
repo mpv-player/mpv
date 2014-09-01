@@ -72,7 +72,7 @@ Available filters are:
 
     ``tospdif=<yes|no>``
         Output raw AC-3 stream if ``no``, output to S/PDIF for
-        passthrough if ``yes`` (default).
+        pass-through if ``yes`` (default).
 
     ``bitrate=<rate>``
         The bitrate use for the AC-3 stream. Set it to 384 to get 384 kbps.
@@ -101,7 +101,7 @@ Available filters are:
         Sine function delta, use very low values to hear the sweep.
 
 ``sinesuppress[=freq:decay]``
-    Remove a sine at the specified frequency. Useful to get rid of the 50/60Hz
+    Remove a sine at the specified frequency. Useful to get rid of the 50/60 Hz
     noise on low quality audio equipment. It only works on mono input.
 
     ``<freq>``
@@ -182,7 +182,7 @@ Available filters are:
 
         ``mpv --af=equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi``
             Would amplify the sound in the upper and lower frequency region
-            while canceling it almost completely around 1kHz.
+            while canceling it almost completely around 1 kHz.
 
 ``channels=nch[:routes]``
     Can be used for adding, removing, routing and copying audio channels. If
@@ -277,8 +277,8 @@ Available filters are:
     once for every audio stream.
 
     ``<volumedb>``
-        Sets the desired gain in dB for all channels in the stream from -200dB
-        to +60dB, where -200dB mutes the sound completely and +60dB equals a
+        Sets the desired gain in dB for all channels in the stream from -200 dB
+        to +60 dB, where -200 dB mutes the sound completely and +60 dB equals a
         gain of 1000 (default: 0).
     ``replaygain-track``
         Adjust volume gain according to the track-gain replaygain value stored
@@ -311,7 +311,7 @@ Available filters are:
     .. admonition:: Example
 
         ``mpv --af=volume=10.1 media.avi``
-            Would amplify the sound by 10.1dB and hard-clip if the sound level
+            Would amplify the sound by 10.1 dB and hard-clip if the sound level
             is too high.
 
 ``pan=n:[<matrix>]``
@@ -368,8 +368,8 @@ Available filters are:
         to the subwoofer.
 
     ``<fc>``
-        cutoff frequency in Hz for the low-pass filter (20Hz to 300Hz)
-        (default: 60Hz) For the best result try setting the cutoff frequency
+        cutoff frequency in Hz for the low-pass filter (20 Hz to 300 Hz)
+        (default: 60 Hz) For the best result try setting the cutoff frequency
         as low as possible. This will improve the stereo or surround sound
         experience.
     ``<ch>``
@@ -381,7 +381,7 @@ Available filters are:
     .. admonition:: Example
 
         ``mpv --af=sub=100:4 --audio-channels=5 media.avi``
-            Would add a subwoofer channel with a cutoff frequency of 100Hz to
+            Would add a subwoofer channel with a cutoff frequency of 100 Hz to
             output channel 4.
 
 ``center``
@@ -409,7 +409,7 @@ Available filters are:
     .. admonition:: Example
 
         ``mpv --af=surround=15 --audio-channels=4 media.avi``
-            Would add surround sound decoding with 15ms delay for the sound to
+            Would add surround sound decoding with 15 ms delay for the sound to
             the rear speakers.
 
 ``delay[=[ch1,ch2,...]]``
@@ -437,8 +437,8 @@ Available filters are:
     .. admonition:: Example
 
         ``mpv --af=delay=[10.5,10.5,0,0,7,0] media.avi``
-            Would delay front left and right by 10.5ms, the two rear channels
-            and the subwoofer by 0ms and the center channel by 7ms.
+            Would delay front left and right by 10.5 ms, the two rear channels
+            and the subwoofer by 0 ms and the center channel by 7 ms.
 
 ``export=mmapped_file:nsamples]``
     Exports the incoming signal to other processes using memory mapping
@@ -588,7 +588,7 @@ Available filters are:
             tempo.
 
         ``mpv --af=scaletempo=stride=30:overlap=.50:search=10 media.ogg``
-            Would tweak the quality and performace parameters.
+            Would tweak the quality and performance parameters.
 
         ``mpv --af=format=float,scaletempo media.ogg``
             Would make scaletempo use float code. Maybe faster on some
@@ -600,7 +600,7 @@ Available filters are:
             1.2x.
 
 ``lavfi=graph``
-    Filter audio using ffmpeg's libavfilter.
+    Filter audio using FFmpeg's libavfilter.
 
     ``<graph>``
         Libavfilter graph. See ``lavfi`` video filter for details - the graph

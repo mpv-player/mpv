@@ -93,7 +93,7 @@ Available filters are:
 
 ``scale[=w:h:param:param2:chr-drop:noup:arnd``
     Scales the image with the software scaler (slow) and performs a YUV<->RGB
-    colorspace conversion (see also ``--sws``).
+    color space conversion (see also ``--sws``).
 
     All parameters are optional.
 
@@ -120,9 +120,9 @@ Available filters are:
                 0.33:0.33 Mitchell-Netravali spline
                 1.00:0.00 cubic B-spline
 
-            --sws=7 (gaussian): sharpness (0 (soft) - 100 (sharp))
+            --sws=7 (Gaussian): sharpness (0 (soft) - 100 (sharp))
 
-            --sws=9 (lanczos):  filter length (1-10)
+            --sws=9 (Lanczos):  filter length (1-10)
 
     ``<chr-drop>``
         chroma skipping
@@ -222,8 +222,8 @@ Available filters are:
             ====================== =====================
 
 ``noformat[=fmt]``
-    Restricts the colorspace for the next filter without doing any conversion.
-    Unlike the format filter, this will allow any colorspace except the one
+    Restricts the color space for the next filter without doing any conversion.
+    Unlike the format filter, this will allow any color space except the one
     you specify.
 
     .. note:: For a list of available formats, see ``noformat=fmt=help``.
@@ -232,7 +232,7 @@ Available filters are:
         Format name, e.g. rgb15, bgr24, 420p, etc. (default: 420p).
 
 ``pp[=[filter1[:option1[:option2...]]/[-]filter2...]]``
-    Enables the specified chain of postprocessing subfilters. Subfilters must
+    Enables the specified chain of post-processing subfilters. Subfilters must
     be separated by '/' and can be disabled by prepending a '-'. Each
     subfilter and some options have a short and a long name that can be used
     interchangeably, i.e. ``dr``/``dering`` are the same. All subfilters share
@@ -336,7 +336,7 @@ Available filters are:
         filtering every second line with a (-1 4 2 4 -1) filter.
 
     ``l5/lowpass5``
-        Vertically applied FIR lowpass deinterlacing filter that deinterlaces
+        Vertically applied FIR low-pass deinterlacing filter that deinterlaces
         the given block by filtering all lines with a (-1 2 6 2 -1) filter.
 
     ``fq/forceQuant[:quantizer]``
@@ -356,7 +356,7 @@ Available filters are:
 
     .. note::
 
-        This filter is only available if FFmpeg/libav has been compiled
+        This filter is only available if FFmpeg/Libav has been compiled
         with libpostproc enabled.
 
     .. admonition:: Examples
@@ -443,7 +443,7 @@ Available filters are:
         temporal noise (noise pattern changes between frames)
 
     ``uniform``
-        uniform noise (gaussian otherwise)
+        uniform noise (Gaussian otherwise)
 
     ``hq``
         high quality (slightly better looking, slightly slower) - not available
@@ -503,7 +503,7 @@ Available filters are:
         :1: linear interpolation (default)
 
 ``unsharp[=lx:ly:la:cx:cy:ca]``
-    unsharp mask / gaussian blur
+    unsharp mask / Gaussian blur
 
     ``l`` is for the luma component, ``c`` for the chroma component. ``x``/``y``
     is the filter size. ``a`` is the amount.
@@ -769,8 +769,8 @@ Available filters are:
             anaglyph red/cyan color (red filter on left eye, cyan filter on
             right eye)
         ``arcd`` or ``anaglyph_red_cyan_dubois``
-            anaglyph red/cyan color optimized with the least squares
-            projection of dubois (red filter on left eye, cyan filter on right
+            anaglyph red/cyan color optimized with the least-squares
+            projection of Dubois (red filter on left eye, cyan filter on right
             eye)
         ``agmg`` or ``anaglyph_green_magenta_gray``
             anaglyph green/magenta gray (green filter on left eye, magenta
@@ -803,7 +803,7 @@ Available filters are:
 
 ``gradfun[=strength[:radius|:size=<size>]]``
     Fix the banding artifacts that are sometimes introduced into nearly flat
-    regions by truncation to 8bit color depth. Interpolates the gradients that
+    regions by truncation to 8-bit color depth. Interpolates the gradients that
     should go where the bands are, and dithers them.
 
     ``<strength>``

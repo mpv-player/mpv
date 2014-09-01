@@ -23,7 +23,7 @@ normal driver parameters.
     where PulseAudio is used. On Windows, ``--ao=wasapi`` is preferred,
     though it might cause trouble sometimes, in which case ``--ao=dsound``
     should be used. On BSD systems, ``--ao=oss`` or `--ao=sndio`` may work
-    (the latter being experimental). On OSX systems, use ``--ao=coreaudio``.
+    (the latter being experimental). On OS X systems, use ``--ao=coreaudio``.
 
 .. admonition:: Examples
 

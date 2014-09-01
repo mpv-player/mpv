@@ -114,7 +114,7 @@ List of Input Commands
     to be precise, not fast), and sometimes fails to behave as expected. How
     well this works depends on whether precise seeking works correctly (e.g.
     see the ``--hr-seek-demuxer-offset`` option). Video filters or other video
-    postprocessing that modifies timing of frames (e.g. deinterlacing) should
+    post-processing that modifies timing of frames (e.g. deinterlacing) should
     usually work, but might make backstepping silently behave incorrectly in
     corner cases. Using ``--hr-seek-framedrop=no`` should help, although it
     might make precise seeking slower.
@@ -572,7 +572,7 @@ Property list
     See ``--osd-level``.
 
 ``osd-scale`` (RW)
-    OSD font size multiplicator, see ``--osd-scale``.
+    OSD font size multiplier, see ``--osd-scale``.
 
 ``loop`` (RW)
     See ``--loop``.
@@ -765,7 +765,7 @@ Property list
     ::
 
         MPV_FORMAT_NODE_MAP
-            (key and string value for each metdata entry)
+            (key and string value for each metadata entry)
 
 ``chapter-metadata``
     Metadata of current chapter. Works similar to ``metadata`` property. It
@@ -809,7 +809,7 @@ Property list
     this easier, the cache resizing code will allocate the new cache while the
     old cache is still allocated.
 
-    Don't use this when playing DVD or Bluray.
+    Don't use this when playing DVD or Blu-ray.
 
 ``cache-free`` (R)
     Total free cache size in KB.
@@ -1025,7 +1025,7 @@ Property list
     Estimated/measured FPS of the video filter chain output. (If no filters
     are used, this corresponds to decoder output.) This uses the average of
     the 10 past frame durations to calculate the FPS. It will be inaccurate
-    if framedropping is involved (such as when framedrop is explicitly
+    if frame-dropping is involved (such as when framedrop is explicitly
     enabled, or after precise seeking). Files with imprecise timestamps (such
     as Matroska) might lead to unstable results.
 
@@ -1090,7 +1090,7 @@ Property list
     See ``--sub-forced-only``.
 
 ``sub-scale`` (RW)
-    Subtitle font size multiplicator.
+    Subtitle font size multiplier.
 
 ``ass-use-margins`` (RW)
     See ``--ass-use-margins``.

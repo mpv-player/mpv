@@ -245,8 +245,8 @@ Playback Control
         Without ``--hr-seek``, skipping will snap to keyframes.
 
 
-Program Behaviour
------------------
+Program Behavior
+----------------
 
 ``--help``
     Show short summary of options.
@@ -332,7 +332,7 @@ Program Behaviour
 ``--merge-files``
     Pretend that all files passed to mpv are concatenated into a single, big
     file. This uses timeline/EDL support internally. Note that this won't work
-    for ordered chapter files or quvi-resolved URLs (such as youtube links).
+    for ordered chapter files or quvi-resolved URLs (such as YouTube links).
 
     This option is interpreted at program start, and doesn't affect for
     example files or playlists loaded with the ``loadfile`` or ``loadlist``
@@ -453,7 +453,7 @@ Video
     :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux with Intel GPUs only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
-    :vda:       requires ``--vo=opengl`` or ``--vo=corevideo`` (OSX only)
+    :vda:       requires ``--vo=opengl`` or ``--vo=corevideo`` (OS X only)
 
     ``auto`` tries to automatically enable hardware decoding using the first
     available method. This still depends what VO you are using. For example,
@@ -750,7 +750,7 @@ Audio
     .. admonition:: Examples
 
         ``--ad=lavc:mp3float``
-            Prefer the FFmpeg/Libav ``mp3float`` decoder over all other mp3
+            Prefer the FFmpeg/Libav ``mp3float`` decoder over all other MP3
             decoders.
 
         ``--ad=spdif:ac3,lavc:*``
@@ -821,12 +821,12 @@ Audio
     welcome. A full list of AVOptions can be found in the FFmpeg manual.
 
 ``--ad-spdif-dtshd=<yes|no>``, ``--dtshd``, ``--no-dtshd``
-    When using DTS passthrough, output any DTS-HD track as-is.
+    When using DTS pass-through, output any DTS-HD track as-is.
     With ``ad-spdif-dtshd=no`` (the default), only the DTS Core parts will be
     output.
 
     DTS-HD tracks can be sent over HDMI but not over the original
-    coax/toslink S/PDIF system.
+    coax/TOSLINK S/PDIF system.
 
     Some receivers don't accept DTS core-only when ``--ad-spdif-dtshd=yes`` is
     used, even though they accept DTS-HD.
@@ -1136,7 +1136,7 @@ Subtitles
 
 ``--ass-vsfilter-color-compat=<basic|full|force-601|no>``
     Mangle colors like (xy-)vsfilter do (default: basic). Historically, VSFilter
-    was not colorspace aware. This was no problem as long as the colorspace
+    was not color space aware. This was no problem as long as the color space
     used for SD video (BT.601) was used. But when everything switched to HD
     (BT.709), VSFilter was still converting RGB colors to BT.601, rendered
     them into the video frame, and handled the frame to the video output, which
@@ -1146,16 +1146,16 @@ Subtitles
 
     :basic: Handle only BT.601->BT.709 mangling, if the subtitles seem to
             indicate that this is required (default).
-    :full:  Handle the full ``YCbCr Matrix`` header with all video colorspaces
+    :full:  Handle the full ``YCbCr Matrix`` header with all video color spaces
             supported by libass and mpv. This might lead to bad breakages in
             corner cases and is not strictly needed for compatibility
             (hopefully), which is why this is not default.
     :force-601: Force BT.601->BT.709 mangling, regardless of subtitle headers
-            or video colorspace.
+            or video color space.
     :no:    Disable color mangling completely. All colors are RGB.
 
     Choosing anything other than ``no`` will make the subtitle color depend on
-    the video colorspace, and it's for example in theory not possible to reuse
+    the video color space, and it's for example in theory not possible to reuse
     a subtitle script with another video file. The ``--ass-style-override``
     option doesn't affect how this option is interpreted.
 
@@ -1177,7 +1177,7 @@ Subtitles
     Many studios tend to use bitmap fonts designed for square pixels when
     authoring DVDs, causing the fonts to look stretched on playback on DVD
     players. This option fixes them, however at the price of possibly
-    misaligning sume subtitles (e.g. sign translations).
+    misaligning some subtitles (e.g. sign translations).
 
     Disabled by default.
 
@@ -1284,7 +1284,7 @@ Subtitles
     Also see ``--sub-speed`` option.
 
 ``--sub-gauss=<0.0-3.0>``
-    Apply gaussian blur to image subtitles (default: 0). This can help making
+    Apply Gaussian blur to image subtitles (default: 0). This can help making
     pixelated DVD/Vobsubs look nicer. A value other than 0 also switches to
     software subtitle scaling. Might be slow.
 
@@ -1357,7 +1357,7 @@ Window
 ``--fs-screen=<all|current|0-32>``
     In multi-monitor configurations (i.e. a single desktop that spans across
     multiple displays), this option tells mpv which screen to go fullscreen to.
-    If ``default`` is provided mpv will fallback on using the behaviour
+    If ``default`` is provided mpv will fallback on using the behavior
     depending on what the user provided with the ``screen`` option.
 
     .. admonition:: Note (X11)
@@ -1367,7 +1367,7 @@ Window
 
     .. admonition:: Note (OS X)
 
-        ``all`` does not work on OSX and will behave like ``current``.
+        ``all`` does not work on OS X and will behave like ``current``.
 
     See also ``--screen``.
 
@@ -1429,7 +1429,7 @@ Window
 
     .. admonition: Note (OS X)
 
-        On Mac OSX the origin of the screen coordinate system is located on the
+        On Mac OS X the origin of the screen coordinate system is located on the
         bottom-left corner. For instance, ``0:0`` will place the window at the
         bottom-left of the screen.
 
@@ -1806,7 +1806,7 @@ Equalizer
     such as PC monitors use full range color levels. However, some TVs and
     video monitors expect studio RGB levels. Providing full range output to a
     device expecting studio level input results in crushed blacks and whites,
-    the reverse in dim grey blacks and dim whites.
+    the reverse in dim gray blacks and dim whites.
 
     The same limitations as with ``--colormatrix`` apply.
 
@@ -1942,7 +1942,7 @@ Demuxer
     Sample format for ``--demuxer=rawaudio`` (default: s16le).
 
 ``--demuxer-rawaudio-rate=<value>``
-    Sample rate for ``--demuxer=rawaudio`` (default: 44KHz).
+    Sample rate for ``--demuxer=rawaudio`` (default: 44 kHz).
 
 ``--demuxer-rawvideo-fps=<value>``
     Rate in frames per second for ``--demuxer=rawvideo`` (default: 25.0).
@@ -1958,11 +1958,11 @@ Demuxer
             --demuxer-rawvideo=w=720:h=576
 
 ``--demuxer-rawvideo-format=<value>``
-    Colorspace (fourcc) in hex or string for ``--demuxer=rawvideo``
+    Color space (fourcc) in hex or string for ``--demuxer=rawvideo``
     (default: ``YV12``).
 
 ``--demuxer-rawvideo-mp-format=<value>``
-    Colorspace by internal video format for ``--demuxer=rawvideo``. Use
+    Color space by internal video format for ``--demuxer=rawvideo``. Use
     ``--demuxer-rawvideo-mp-format=help`` for a list of possible formats.
 
 ``--demuxer-rawvideo-codec=<value>``
@@ -2012,7 +2012,7 @@ Input
     ``~/.config/mpv/input.conf``.
 
 ``--no-input-default-bindings``
-    Disable mpv default (builtin) key bindings.
+    Disable mpv default (built-in) key bindings.
 
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
@@ -2078,7 +2078,7 @@ Input
     Specifies a configuration file for LIRC (default: ``~/.lircrc``).
 
 ``--input-media-keys``, ``--no-input-media-keys``
-    OSX only: Enabled by default. Enables/disable media keys support.
+    OS X only: Enabled by default. Enables/disable media keys support.
 
 ``--input-right-alt-gr``, ``--no-input-right-alt-gr``
     (Cocoa and Windows only)
@@ -2228,7 +2228,7 @@ OSD
     Default: 10.
 
 ``--osd-scale=<factor>``
-    OSD font size multiplicator, multiplied with ``--osd-font-size`` value.
+    OSD font size multiplier, multiplied with ``--osd-font-size`` value.
 
 ``--osd-scale-by-window=yes|no``
     Whether to scale the OSD with the window size (default: yes). If this is
@@ -2272,7 +2272,7 @@ Screenshot
 ``--screenshot-template=<template>``
     Specify the filename template used to save screenshots. The template
     specifies the filename without file extension, and can contain format
-    specifiers, which will be substituted when taking a screeshot.
+    specifiers, which will be substituted when taking a screenshot.
     By default the template is ``shot%n``, which results in filenames like
     ``shot0012.png`` for example.
 
@@ -2385,10 +2385,10 @@ Software Scaler
     Default: ``bicubic``.
 
 ``--sws-lgb=<0-100>``
-    Software scaler gaussian blur filter (luma). See ``--sws-scaler``.
+    Software scaler Gaussian blur filter (luma). See ``--sws-scaler``.
 
 ``--sws-cgb=<0-100>``
-    Software scaler gaussian blur filter (chroma). See ``--sws-scaler``.
+    Software scaler Gaussian blur filter (chroma). See ``--sws-scaler``.
 
 ``--sws-ls=<-100-100>``
     Software scaler sharpen filter (luma). See ``--sws-scaler``.
@@ -2467,7 +2467,7 @@ Terminal
 ``--term-osd-bar-chars=<string>``
     Customize the ``--term-osd-bar`` feature. The string is expected to
     consist of 5 characters (start, left space, position indicator,
-    right space, end). You can use unicode characters, but note that double-
+    right space, end). You can use Unicode characters, but note that double-
     width characters will not be treated correctly.
 
     Default: ``[-+-]``.
@@ -2684,7 +2684,7 @@ Cache
 
     May be useful when playing files from slow media, but can also have
     negative effects, especially with file formats that require a lot of
-    seeking, such as mp4.
+    seeking, such as MP4.
 
     Note that half the cache size will be used to allow fast seeking back. This
     is also the reason why a full cache is usually reported as 50% full. The
@@ -2721,7 +2721,7 @@ Cache
     filled to this position rather than performing a stream seek (default:
     500).
 
-    This matters for small forward seeks. With slow streams (especially http
+    This matters for small forward seeks. With slow streams (especially HTTP
     streams) there is a tradeoff between skipping the data between current
     position and seek destination, or performing an actual seek. Depending
     on the situation, either of these might be slower than the other method.
@@ -2793,11 +2793,11 @@ Network
 
 ``--tls-ca-file=<filename>``
     Certificate authority database file for use with TLS. (Silently fails with
-    older ffmpeg or libav versions.)
+    older FFmpeg or Libav versions.)
 
 ``--tls-verify``
     Verify peer certificates when using TLS (e.g. with ``https://...``).
-    (Silently fails with older ffmpeg or libav versions.)
+    (Silently fails with older FFmpeg or Libav versions.)
 
 ``--referrer=<string>``
     Specify a referrer path or URL for HTTP requests.
@@ -2865,8 +2865,8 @@ PVR
 ``--pvr-vmode=<value>``
     Specify video encoding mode:
 
-    :vbr: Variable BitRate (default)
-    :cbr: Constant BitRate
+    :vbr: Variable Bit Rate (default)
+    :cbr: Constant Bit Rate
 
 ``--pvr-vpeak=<value>``
     Specify peak video bitrate encoding in Mbps (only useful for VBR
