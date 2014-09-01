@@ -1091,6 +1091,8 @@ static int mp_property_eof_reached(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    if (!mpctx->num_sources)
+        return M_PROPERTY_UNAVAILABLE;
     bool eof = mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF;
     return m_property_flag_ro(action, arg, eof);
@@ -1100,6 +1102,8 @@ static int mp_property_seeking(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    if (!mpctx->num_sources)
+        return M_PROPERTY_UNAVAILABLE;
     return m_property_flag_ro(action, arg, !mpctx->restart_complete);
 }
 
@@ -1252,6 +1256,8 @@ static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    if (!mpctx->num_sources)
+        return M_PROPERTY_UNAVAILABLE;
     return m_property_flag_ro(action, arg, mpctx->paused_for_cache);
 }
 
@@ -3515,6 +3521,8 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         double v = cmd->args[0].v.d * cmd->scale;
         int abs = cmd->args[1].v.i;
         int exact = cmd->args[2].v.i;
+        if (!mpctx->num_sources)
+            return -1;
         mark_seek(mpctx);
         if (abs == 2) {   // Absolute seek to a timestamp in seconds
             queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact, false);
@@ -3535,6 +3543,8 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_REVERT_SEEK: {
+        if (!mpctx->num_sources)
+            return -1;
         double oldpts = cmdctx->last_seek_pts;
         if (oldpts != MP_NOPTS_VALUE) {
             cmdctx->last_seek_pts = get_current_time(mpctx);
@@ -3671,10 +3681,14 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_FRAME_STEP:
+        if (!mpctx->num_sources)
+            return -1;
         add_step_frame(mpctx, 1);
         break;
 
     case MP_CMD_FRAME_BACK_STEP:
+        if (!mpctx->num_sources)
+            return -1;
         add_step_frame(mpctx, -1);
         break;
 
@@ -3704,6 +3718,8 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SUB_STEP:
     case MP_CMD_SUB_SEEK: {
+        if (!mpctx->num_sources)
+            return -1;
         struct osd_sub_state state;
         osd_get_sub(mpctx->osd, OSDTYPE_SUB, &state);
         if (state.dec_sub && mpctx->video_pts != MP_NOPTS_VALUE) {
@@ -3861,12 +3877,15 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_LAST_CHANNEL: {
-        if (mpctx->demuxer)
-            demux_stream_control(mpctx->demuxer, STREAM_CTRL_TV_LAST_CHAN, NULL);
+        if (!mpctx->demuxer)
+            return -1;
+        demux_stream_control(mpctx->demuxer, STREAM_CTRL_TV_LAST_CHAN, NULL);
         break;
     }
 
     case MP_CMD_SUB_ADD: {
+        if (!mpctx->num_sources)
+            return -1;
         struct track *sub = mp_add_subtitles(mpctx, cmd->args[0].v.s);
         if (!sub)
             return -1;
