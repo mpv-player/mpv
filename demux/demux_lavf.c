@@ -599,6 +599,8 @@ static void handle_stream(demuxer_t *demuxer, int i)
         if (lang && lang->value)
             sh->lang = talloc_strdup(sh, lang->value);
         sh->hls_bitrate = dict_get_decimal(st->metadata, "variant_bitrate", 0);
+        if (!sh->title && sh->hls_bitrate > 0)
+            sh->title = talloc_asprintf(sh, "bitrate %d", sh->hls_bitrate);
     }
 
     select_tracks(demuxer, i);
