@@ -114,7 +114,7 @@ List of Input Commands
     to be precise, not fast), and sometimes fails to behave as expected. How
     well this works depends on whether precise seeking works correctly (e.g.
     see the ``--hr-seek-demuxer-offset`` option). Video filters or other video
-    postprocessing that modifies timing of frames (e.g. deinterlacing) should
+    post-processing that modifies timing of frames (e.g. deinterlacing) should
     usually work, but might make backstepping silently behave incorrectly in
     corner cases. Using ``--hr-seek-framedrop=no`` should help, although it
     might make precise seeking slower.
@@ -159,7 +159,7 @@ List of Input Commands
         Take a single screenshot.
     <each-frame>
         Take a screenshot each frame. Issue this command again to stop taking
-        screenshots. Note that you should disable framedropping when using
+        screenshots. Note that you should disable frame-dropping when using
         this mode - or you might receive duplicate images in cases when a
         frame was dropped.
 
@@ -574,7 +574,7 @@ Property list
     See ``--osd-level``.
 
 ``osd-scale`` (RW)
-    OSD font size multiplicator, see ``--osd-scale``.
+    OSD font size multiplier, see ``--osd-scale``.
 
 ``loop`` (RW)
     See ``--loop``.
@@ -650,7 +650,7 @@ Property list
 
 ``drop-frame-count``
     Frames dropped because they arrived to late. Doesn't necessarily indicate
-    actual framedrops, just the number of times the decoder was asked to drop.
+    actual frame-drops, just the number of times the decoder was asked to drop.
     Unavailable if video is disabled
 
 ``vo-drop-frame-count``
@@ -783,7 +783,7 @@ Property list
     ::
 
         MPV_FORMAT_NODE_MAP
-            (key and string value for each metdata entry)
+            (key and string value for each metadata entry)
 
 ``chapter-metadata``
     Metadata of current chapter. Works similar to ``metadata`` property. It
@@ -827,7 +827,7 @@ Property list
     this easier, the cache resizing code will allocate the new cache while the
     old cache is still allocated.
 
-    Don't use this when playing DVD or Bluray.
+    Don't use this when playing DVD or Blu-ray.
 
 ``cache-free`` (R)
     Total free cache size in KB.
@@ -1052,7 +1052,7 @@ Property list
     Estimated/measured FPS of the video filter chain output. (If no filters
     are used, this corresponds to decoder output.) This uses the average of
     the 10 past frame durations to calculate the FPS. It will be inaccurate
-    if framedropping is involved (such as when framedrop is explicitly
+    if frame-dropping is involved (such as when framedrop is explicitly
     enabled, or after precise seeking). Files with imprecise timestamps (such
     as Matroska) might lead to unstable results.
 
@@ -1117,7 +1117,7 @@ Property list
     See ``--sub-forced-only``.
 
 ``sub-scale`` (RW)
-    Subtitle font size multiplicator.
+    Subtitle font size multiplier.
 
 ``ass-use-margins`` (RW)
     See ``--ass-use-margins``.

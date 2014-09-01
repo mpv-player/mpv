@@ -122,11 +122,11 @@ time remaining
     left-click      toggle between total and remaining time
     =============   ================================================
 
-Keybindings
-~~~~~~~~~~~
+Key Bindings
+~~~~~~~~~~~~
 
-These keybindings are active by default if nothing else is already bound to
-these keys. In case of collosision, the function needs to be bound to a
+These key bindings are active by default if nothing else is already bound to
+these keys. In case of collision, the function needs to be bound to a
 different key. See `Script Commands`_ section.
 
 =============   ================================================

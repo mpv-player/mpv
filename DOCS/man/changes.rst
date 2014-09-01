@@ -19,14 +19,14 @@ General Changes for MPlayer to mpv
   Linux 2.4 (including VIDIX)
 * Large internal cleanups
 * Removal of support for dead platforms
-* New buildsystem
-* No embedded copy of ffmpeg and other libraries
+* New build system
+* No embedded copy of FFmpeg and other libraries
 * Better pause handling (do not unpause on a command)
 * Better MKV support (such as ordered chapters)
 * vo_vdpau improvements
 * Precise seeking support
-* Native OpenGL backend for OSX
-* General OSX improvements
+* Native OpenGL backend for OS X
+* General OS X improvements
 * Improvements in audio/video sync handling
 * Cleaned up terminal output
 * Gapless audio support (``--gapless-audio``)
@@ -35,14 +35,14 @@ General Changes for MPlayer to mpv
 * OSS4 volume control
 * More correct color reproduction (color matrix generation)
 * Use libass for subtitle rendering by default (better quality)
-* Generally preferring ffmpeg/libav over internal demuxers and decoders
+* Generally preferring FFmpeg/Libav over internal demuxers and decoders
 * Improvements when playing multiple files (``--fixed-vo``)
 * Screenshot improvements (instant screenshots without 1-frame delay, allow
   taking screenshots even with hardware decoding)
 * Improved support for PulseAudio
-* Generally improved MS Windows support (dealing with unicode filenames,
+* Generally improved MS Windows support (dealing with Unicode file names,
   improved ``--vo=direct3d``, improved window handling)
-* Better OSD rendering (using libass). This has full unicode support, and
+* Better OSD rendering (using libass). This has full Unicode support, and
   languages like Arabic should be better supported.
 * Cleaned up terminal output (nicer status line, less useless noise)
 * Support for playing URLs of popular streaming sites directly
@@ -50,19 +50,19 @@ General Changes for MPlayer to mpv
 * Improved OpenGL output (``--vo=opengl-hq``)
 * Make ``--softvol`` default (**mpv** is not a mixer control panel)
 * Improved support for .cue files
-* Screenshot improvements (can save screenshots as JPG or PNG, configurable
-  filenames, support for taking screenshots with or without subtitles - the
+* Screenshot improvements (can save screenshots as JPEG or PNG, configurable
+  file names, support for taking screenshots with or without subtitles - the
   ``screenshot`` video filter is not needed anymore, and should not be put
   into the mpv config file)
 * Removal of teletext support
-* Removal of most builtin demuxers, using libavformat instead
-* Removal of builtin network support, using libavformat instead (also,
+* Removal of most built-in demuxers, using libavformat instead
+* Removal of built-in network support, using libavformat instead (also,
   support https via libavformat)
 * Replace image VOs (``--vo=jpeg`` etc.) with ``--vo=image``
 * Do not lose settings when playing a new file in the same player instance
 * New location for config files, new name for the binary.
 * Slave mode compatibility broken (see below)
-* Encoding functionality (replacement for mencoder, see ``DOCS/encoding.rst``)
+* Encoding functionality (replacement for MEncoder, see ``DOCS/encoding.rst``)
 * Remove ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding can
   handle these use cases. For yuv4mpeg, for example, use:
   ``mpv input.mkv -o output.y4m --no-audio --oautofps --oneverdrop``.
@@ -71,10 +71,10 @@ General Changes for MPlayer to mpv
 * Wayland support
 * Support for precise scrolling which scales the parameter of commands. If the
   input doesn't support precise scrolling the scale factor stays 1.
-* OSX: Cocoa event loop is independent from mplayer's event loop, so user
+* OS X: Cocoa event loop is independent from MPlayer's event loop, so user
   actions like accessing menus and live resizing do not block the playback.
-* OSX: Apple Remote support.
-* OSX: Media Keys support.
+* OS X: Apple Remote support.
+* OS X: Media Keys support.
 * Windows: Added WASAPI audio output.
 * New OSD bar with chapter marks and not positioned in the middle of the video
   (though this can be customized with the ``--osd-bar-align-y`` option).
@@ -99,7 +99,7 @@ General Changes for MPlayer to mpv
 * Allow changing/adjusting video filters at runtime. (This is also used to make
   the ``D`` key insert vf_yadif if deinterlacing is not supported otherwise.)
 * Native VAAPI support
-* OSX: VDA support using libavcodec hwaccel API insted of FFmpeg's decoder. Up
+* OS X: VDA support using libavcodec hwaccel API instead of FFmpeg's decoder. Up
   to 2-2.5x reduction in CPU usage.
 * Make hardware decoding in general work with the ``opengl`` video output.
 * Lua scripting (see `LUA SCRIPTING`_)

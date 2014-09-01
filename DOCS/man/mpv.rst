@@ -163,7 +163,7 @@ corresponding adjustment, or the software equalizer (``--vf=eq``).)
 7 and 8
     Adjust saturation.
 
-(The following keys are valid only on OSX.)
+(The following keys are valid only on OS X.)
 
 command + 0
     Resize video window to half its original size.
@@ -419,8 +419,8 @@ PROTOCOLS
     Play a path from  Samba share.
 
 ``bd://[title][/device]`` ``--bluray-device=PATH``
-    Play a Blu-Ray disc. Currently, this does not accept iso files. Instead,
-    you must mount the iso file as filesystem, and point ``--bluray-device``
+    Play a Blu-Ray disc. Currently, this does not accept ISO files. Instead,
+    you must mount the ISO file as filesystem, and point ``--bluray-device``
     to the mounted directly.
 
 ``bdnav://[title][/device]``
@@ -672,7 +672,7 @@ Play only chapters 5, 6, 7:
 Play only titles 5, 6, 7:
     ``mpv dvd://5-7``
 
-Play a multiangle DVD:
+Play a multi-angle DVD:
     ``mpv dvd://1 --dvd-angle=2``
 
 Play from a different DVD device:
