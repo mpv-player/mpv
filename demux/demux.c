@@ -965,11 +965,6 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
     return 1;
 }
 
-char *demux_info_get(demuxer_t *demuxer, const char *opt)
-{
-    return mp_tags_get_str(demuxer->metadata, opt);
-}
-
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id)
 {

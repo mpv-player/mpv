@@ -256,8 +256,6 @@ void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *c
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, int flags);
 
-char *demux_info_get(struct demuxer *demuxer, const char *opt);
-
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
 void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
