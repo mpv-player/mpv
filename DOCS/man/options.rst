@@ -2190,6 +2190,13 @@ OSD
     non-default cases when seeking. Expands properties. See
     `Property Expansion`_.
 
+``--osd-playing-msg=<string>``
+    Show a message on OSD when playback starts. The string is expanded for
+    properties, e.g. ``--osd-playing-msg='file: ${filename}'`` will show the
+    message ``file:`` followed by a space and the currently played filename.
+
+    See `Property Expansion`_.
+
 ``--osd-bar-align-x=<-1-1>``
     Position of the OSD bar. -1 is far left, 0 is centered, 1 is far right.
     Fractional values (like 0.5) are allowed.

@@ -143,6 +143,7 @@ typedef struct MPOpts {
     int term_osd_bar;
     char *term_osd_bar_chars;
     char *playing_msg;
+    char *osd_playing_msg;
     char *status_msg;
     char *osd_status_msg;
     char *heartbeat_cmd;

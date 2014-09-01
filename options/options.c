@@ -515,6 +515,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("term-osd-bar-chars", term_osd_bar_chars, 0),
 
     OPT_STRING("term-playing-msg", playing_msg, 0),
+    OPT_STRING("osd-playing-msg", osd_playing_msg, 0),
     OPT_STRING("term-status-msg", status_msg, 0),
     OPT_STRING("osd-status-msg", osd_status_msg, 0),
 

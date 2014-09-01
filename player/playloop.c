@@ -871,11 +871,19 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->hrseek_active = false;
             mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
             mpctx->restart_complete = true;
-            if (opts->playing_msg && !mpctx->playing_msg_shown) {
-                char *msg =
-                    mp_property_expand_escaped_string(mpctx, opts->playing_msg);
-                MP_INFO(mpctx, "%s\n", msg);
-                talloc_free(msg);
+            if (!mpctx->playing_msg_shown) {
+                if (opts->playing_msg) {
+                    char *msg =
+                        mp_property_expand_escaped_string(mpctx, opts->playing_msg);
+                    MP_INFO(mpctx, "%s\n", msg);
+                    talloc_free(msg);
+                }
+                if (opts->osd_playing_msg) {
+                    char *msg =
+                        mp_property_expand_escaped_string(mpctx, opts->osd_playing_msg);
+                    set_osd_msg(mpctx, 1, opts->osd_duration, "%s", msg);
+                    talloc_free(msg);
+                }
             }
             mpctx->playing_msg_shown = true;
         }
