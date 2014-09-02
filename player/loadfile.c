@@ -924,10 +924,13 @@ static void print_resolve_contents(struct mp_log *log,
 static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
 {
     if (pl->first) {
+        struct playlist_entry *new = mp_check_playlist_resume(mpctx, pl);
         playlist_transfer_entries(mpctx->playlist, pl);
         // current entry is replaced
         if (mpctx->playlist->current)
             playlist_remove(mpctx->playlist, mpctx->playlist->current);
+        if (new)
+            mpctx->playlist->current = new;
     } else {
         MP_WARN(mpctx, "Empty playlist!\n");
     }
