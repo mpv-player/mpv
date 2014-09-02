@@ -57,11 +57,11 @@ static void hide_cursor(struct vo_wayland_state * wl);
 static void show_cursor(struct vo_wayland_state * wl);
 static void window_move(struct vo_wayland_state * wl, uint32_t serial);
 static void window_set_title(struct vo_wayland_state * wl, const char *title);
+static void window_set_fullscreen(struct vo_wayland_state * wl);
 static void schedule_resize(struct vo_wayland_state *wl,
                             int32_t width,
                             int32_t height);
 
-static void vo_wayland_fullscreen (struct vo *vo);
 
 static const struct mp_keymap keymap[] = {
     // special keys
@@ -137,12 +137,16 @@ static void xdg_handle_configure(void *data,
         schedule_resize(wl, width, height);
 
     enum xdg_surface_state *state;
+
+    // reset states
+    wl->window.state.fullscreen = false;
+
     wl_array_for_each(state, states) {
         switch (*state) {
             case XDG_SURFACE_STATE_MAXIMIZED:
                 break;
             case XDG_SURFACE_STATE_FULLSCREEN:
-                wl->window.is_fullscreen = true;
+                wl->window.state.fullscreen = true;
                 break;
             case XDG_SURFACE_STATE_RESIZING:
             case XDG_SURFACE_STATE_ACTIVATED:
@@ -698,16 +702,30 @@ static void window_move(struct vo_wayland_state *wl, uint32_t serial)
         xdg_surface_move(wl->window.xdg_surface, wl->input.seat, serial);
 }
 
-static void window_set_toplevel(struct vo_wayland_state *wl)
-{
-    if (wl->display.shell)
-        xdg_surface_unset_fullscreen(wl->window.xdg_surface);
-}
-
 static void window_set_title(struct vo_wayland_state *wl, const char *title)
 {
     if (wl->display.shell)
         xdg_surface_set_title(wl->window.xdg_surface, title);
+}
+
+static void window_set_fullscreen(struct vo_wayland_state *wl)
+{
+    if (!wl->display.shell)
+        return;
+
+    if (!wl->window.state.fullscreen) {
+        MP_DBG(wl, "going fullscreen\n");
+        wl->window.p_width = wl->window.width;
+        wl->window.p_height = wl->window.height;
+        xdg_surface_set_fullscreen(wl->window.xdg_surface,
+                                   wl->display.fs_output);
+    }
+
+    else {
+        MP_DBG(wl, "leaving fullscreen\n");
+        xdg_surface_unset_fullscreen(wl->window.xdg_surface);
+        schedule_resize(wl, wl->window.p_width, wl->window.p_height);
+    }
 }
 
 static void schedule_resize(struct vo_wayland_state *wl,
@@ -940,50 +958,6 @@ void vo_wayland_uninit (struct vo *vo)
     vo->wayland = NULL;
 }
 
-static void vo_wayland_ontop (struct vo *vo)
-{
-    /*
-     * No ontop
-     *
-     *
-     */
-}
-
-static void vo_wayland_border (struct vo *vo)
-{
-    /* wayland clienst have to do the decorations themself
-     * (client side decorations) but there is no such code implement nor
-     * do I plan on implementing something like client side decorations
-     *
-     * The only exception would be resizing on when clicking and dragging
-     * on the border region of the window but this should be discussed at first
-     */
-}
-
-static void vo_wayland_fullscreen (struct vo *vo)
-{
-    struct vo_wayland_state *wl = vo->wayland;
-    if (!wl->display.shell)
-        return;
-
-
-    if (vo->opts->fullscreen) {
-        MP_DBG(wl, "going fullscreen\n");
-        wl->window.is_fullscreen = true;
-        wl->window.p_width = wl->window.width;
-        wl->window.p_height = wl->window.height;
-        xdg_surface_set_fullscreen(wl->window.xdg_surface,
-                                   wl->display.fs_output);
-    }
-
-    else {
-        MP_DBG(wl, "leaving fullscreen\n");
-        wl->window.is_fullscreen = false;
-        xdg_surface_unset_fullscreen(wl->window.xdg_surface);
-        schedule_resize(wl, wl->window.p_width, wl->window.p_height);
-    }
-}
-
 static int vo_wayland_check_events (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
@@ -1130,10 +1104,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
         *events |= vo_wayland_check_events(vo);
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-        vo_wayland_fullscreen(vo);
-        return VO_TRUE;
-    case VOCTRL_ONTOP:
-        vo_wayland_ontop(vo);
+        window_set_fullscreen(wl);
         return VO_TRUE;
     case VOCTRL_GET_WINDOW_SIZE: {
         int *s = arg;
@@ -1143,7 +1114,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_SET_WINDOW_SIZE: {
         int *s = arg;
-        if (!wl->window.is_fullscreen)
+        if (!wl->window.state.fullscreen)
             schedule_resize(wl, s[0], s[1]);
         return VO_TRUE;
     }
@@ -1178,6 +1149,9 @@ bool vo_wayland_config (struct vo *vo, uint32_t flags)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
+    // reset states
+    wl->window.state.fullscreen = false;
+
     struct mp_rect screenrc;
     vo_wayland_update_screeninfo(vo, &screenrc);
 
@@ -1190,20 +1164,17 @@ bool vo_wayland_config (struct vo *vo, uint32_t flags)
     wl->window.aspect = vo->dwidth / (float) MPMAX(vo->dheight, 1);
 
     if (!(flags & VOFLAG_HIDDEN)) {
-        if (!wl->window.is_init) {
+        if (!wl->window.state.init) {
             wl->window.width = vo->dwidth;
             wl->window.height = vo->dheight;
         }
 
-        if (vo->opts->fullscreen) {
-            if (wl->window.is_fullscreen)
-                schedule_resize(wl, wl->window.fs_width, wl->window.fs_height);
-            else
-                vo_wayland_fullscreen(vo);
-        }
+        if (vo->opts->fullscreen)
+            window_set_fullscreen(wl);
         else
-            vo_wayland_ontop(vo);
-        wl->window.is_init = true;
+            schedule_resize(wl, vo->dwidth, vo->dheight);
+
+        wl->window.state.init = true;
     }
 
     return true;
