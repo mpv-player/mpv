@@ -500,7 +500,7 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
         ds->base_ts = ts;
 
     // This implies this function is actually called from "the" user thread.
-    if (pkt->pos >= 0)
+    if (pkt->pos >= ds->in->d_user->filepos)
         ds->in->d_user->filepos = pkt->pos;
 
     return pkt;
@@ -926,6 +926,7 @@ static void flush_locked(demuxer_t *demuxer)
     demuxer->in->eof = false;
     demuxer->in->last_eof = false;
     demuxer->in->idle = true;
+    demuxer->filepos = -1; // implicitly synchronized
 }
 
 // clear the packet queues
