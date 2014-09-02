@@ -229,6 +229,10 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     char *name = NULL;
+    if (mpctx->opts->media_title)
+        name = mpctx->opts->media_title;
+    if (name && name[0])
+        return m_property_strdup_ro(action, arg, name);
     if (mpctx->resolve_result)
         name = mpctx->resolve_result->title;
     if (name && name[0])

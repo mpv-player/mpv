@@ -3032,6 +3032,11 @@ Miscellaneous
     You can also try to use ``--no-correct-pts`` for files with completely
     broken timestamps.
 
+``--media-title=<string>``
+    Force the contents of the ``media-title`` property to this value. Useful
+    for scripts which want to set a title, without overriding the user's
+    setting in ``--title``.
+
 ``--slave-broken``
     Switches on the old slave mode. This is for testing only, and incompatible
     to the removed ``--slave`` switch.

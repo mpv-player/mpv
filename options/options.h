@@ -79,6 +79,7 @@ typedef struct MPOpts {
     int allow_win_drag;
 
     char *wintitle;
+    char *media_title;
     int force_rgba_osd;
 
     // ranges -100 - 100, 1000 if the vo default should be used

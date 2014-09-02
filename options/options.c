@@ -379,6 +379,7 @@ const m_option_t mp_opts[] = {
     // vo name (X classname) and window title strings
     OPT_STRING("x11-name", vo.winname, 0),
     OPT_STRING("title", wintitle, 0),
+    OPT_STRING("media-title", media_title, 0),
     // set aspect ratio of monitor - useful for 16:9 TV-out
     OPT_FLOATRANGE("monitoraspect", vo.force_monitor_aspect, 0, 0.0, 9.0),
     OPT_FLOATRANGE("monitorpixelaspect", vo.monitor_pixel_aspect, 0, 0.2, 9.0),
