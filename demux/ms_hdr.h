@@ -19,7 +19,7 @@
 #ifndef MPLAYER_MS_HDR_H
 #define MPLAYER_MS_HDR_H
 
-#include "compat/mpbswap.h"
+#include "osdep/mpbswap.h"
 #include "video/img_fourcc.h"
 
 // These structs must be binary-compatible to the native win32 types,

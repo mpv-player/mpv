@@ -55,6 +55,7 @@ struct sh_stream {
     char *title;
     char *lang;                 // language code
     bool default_track;         // container default track flag
+    int hls_bitrate;
 
     // stream is a picture (such as album art)
     struct demux_packet *attached_picture;
@@ -82,6 +83,7 @@ typedef struct sh_video {
     int bitrate;          // compressed bits/sec
     int disp_w, disp_h;   // display size
     int rotate;           // intended display rotation, in degrees, [0, 359]
+    int stereo_mode;      // mp_stereo3d_mode (0 if none/unknown)
     MP_BITMAPINFOHEADER *bih;
 } sh_video_t;
 

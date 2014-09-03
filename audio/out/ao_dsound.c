@@ -98,6 +98,7 @@ struct priv {
     int outburst;                   ///play in multiple of chunks of this size
 
     int cfg_device;
+    int cfg_buffersize;
 };
 
 static float get_delay(struct ao *ao);
@@ -403,11 +404,11 @@ static int init(struct ao *ao)
     ao->samplerate = rate;
     ao->format = format;
     ao->bps = ao->channels.num * rate * af_fmt2bps(format);
-    int buffersize = ao->bps * 0.100; // space for 100ms
+    int buffersize = ao->bps * p->cfg_buffersize / 1000;
     MP_VERBOSE(ao, "Samplerate:%iHz Channels:%i Format:%s\n", rate,
                ao->channels.num, af_fmt_to_str(format));
-    MP_VERBOSE(ao, "Buffersize:%d bytes (%d msec)\n",
-               buffersize, buffersize / ao->bps * 1000);
+    MP_VERBOSE(ao, "Buffersize:%d bytes (%f msec)\n",
+               buffersize, buffersize * 1000.0 / ao->bps);
 
     //fill waveformatex
     ZeroMemory(&wformat, sizeof(WAVEFORMATEXTENSIBLE));
@@ -636,6 +637,7 @@ const struct ao_driver audio_out_dsound = {
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_INT("device", cfg_device, 0),
+        OPT_INTRANGE("buffersize", cfg_buffersize, 0, 1, 10000, OPTDEF_INT(200)),
         {0}
     },
 };

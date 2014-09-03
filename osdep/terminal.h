@@ -29,34 +29,25 @@
 
 struct input_ctx;
 
-/* Screen size. Initialized by load_termcap() and get_screen_size() */
-extern int screen_width;
-extern int screen_height;
-
-extern char *terminal_erase_to_end_of_line;
-extern char *terminal_cursor_up;
-
 /* Global initialization for terminal output. */
 int terminal_init(void);
 
 /* Setup ictx to read keys from the terminal */
 void terminal_setup_getch(struct input_ctx *ictx);
 
+/* Undo terminal_init(), and also terminal_setup_getch() */
+void terminal_uninit(void);
+
 /* Return whether the process has been backgrounded. */
 bool terminal_in_background(void);
 
-/* Set ANSI text foreground color. c is [-1, 7], where 0-7 are colors, and
- * -1 means reset to default. stream is either stdout or stderr. */
-void terminal_set_foreground_color(FILE *stream, int c);
-
-/* Get screen-size using IOCTL call. */
-void get_screen_size(void);
-
-/* Initialize getch2 */
-void getch2_enable(void);
-void getch2_disable(void);
+/* Get terminal-size in columns/rows. */
+void terminal_get_size(int *w, int *h);
 
 /* Enable and disable STDIN line-buffering */
 void getch2_poll(void);
+
+// Windows only.
+void mp_write_console_ansi(void *wstream, char *buf);
 
 #endif /* MPLAYER_GETCH2_H */

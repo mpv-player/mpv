@@ -79,6 +79,7 @@ typedef struct MPOpts {
     int allow_win_drag;
 
     char *wintitle;
+    char *media_title;
     int force_rgba_osd;
 
     // ranges -100 - 100, 1000 if the vo default should be used
@@ -98,6 +99,7 @@ typedef struct MPOpts {
     int requested_primaries;
 
     int video_rotate;
+    int video_stereo_mode;
 
     char *audio_decoders;
     char *video_decoders;
@@ -122,9 +124,8 @@ typedef struct MPOpts {
     char *force_configdir;
     int use_filedir_conf;
     int network_rtsp_transport;
+    int hls_bitrate;
     struct mp_cache_opts stream_cache;
-    int stream_cache_pause;
-    int stream_cache_unpause;
     int chapterrange[2];
     int edition_id;
     int correct_pts;
@@ -137,10 +138,13 @@ typedef struct MPOpts {
     float default_max_pts_correction;
     int autosync;
     int frame_dropping;
+    double frame_drop_fps;
+    int insert_silence;
     int term_osd;
     int term_osd_bar;
     char *term_osd_bar_chars;
     char *playing_msg;
+    char *osd_playing_msg;
     char *status_msg;
     char *osd_status_msg;
     char *heartbeat_cmd;
@@ -182,9 +186,13 @@ typedef struct MPOpts {
     int demuxer_thread;
     int demuxer_min_packs;
     int demuxer_min_bytes;
+    double demuxer_min_secs;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
     int mkv_subtitle_preroll;
+
+    double demuxer_min_secs_cache;
+    int cache_pausing;
 
     struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;
@@ -236,6 +244,8 @@ typedef struct MPOpts {
     char *hwdec_codecs;
 
     int w32_priority;
+
+    int slave_mode;
 
     int network_cookies_enabled;
     char *network_cookies_file;

@@ -20,7 +20,7 @@
 #include <string.h>
 #include <strings.h>
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/common.h"
 #include "common/msg.h"
 
@@ -239,14 +239,14 @@ found:
     struct bstr rest;
     int code = bstr_decode_utf8(bname, &rest);
     if (code >= 0 && rest.len == 0)
-        return code + modifiers;
+        return mp_normalize_keycode(code + modifiers);
 
     if (bstr_startswith0(bname, "0x"))
-        return strtol(name, NULL, 16) + modifiers;
+        return mp_normalize_keycode(strtol(name, NULL, 16) + modifiers);
 
     for (int i = 0; key_names[i].name != NULL; i++) {
         if (strcasecmp(key_names[i].name, name) == 0)
-            return key_names[i].key + modifiers;
+            return mp_normalize_keycode(key_names[i].key + modifiers);
     }
 
     return -1;
@@ -329,4 +329,26 @@ void mp_print_key_list(struct mp_log *out)
     mp_info(out, "\n");
     for (int i = 0; key_names[i].name != NULL; i++)
         mp_info(out, "%s\n", key_names[i].name);
+}
+
+int mp_normalize_keycode(int keycode)
+{
+    if (keycode <= 0)
+        return keycode;
+    int code = keycode & ~MP_KEY_MODIFIER_MASK;
+    int mod = keycode & MP_KEY_MODIFIER_MASK;
+    /* On normal keyboards shift changes the character code of non-special
+     * keys, so don't count the modifier separately for those. In other words
+     * we want to have "a" and "A" instead of "a" and "Shift+A"; but a separate
+     * shift modifier is still kept for special keys like arrow keys. */
+    if (code >= 32 && code < MP_KEY_BASE) {
+        /* Still try to support ASCII case-modifications properly. For example,
+         * we want to change "Shift+a" to "A", not "a". Doing this for unicode
+         * in general would require huge lookup tables, or a libc with proper
+         * unicode support, so we don't do that. */
+        if (code >= 'a' && code <= 'z' && (mod & MP_KEY_MODIFIER_SHIFT))
+            code &= 0x5F;
+        mod &= ~MP_KEY_MODIFIER_SHIFT;
+    }
+    return code | mod;
 }

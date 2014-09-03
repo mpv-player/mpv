@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <inttypes.h>
+#include <pthread.h>
 #include <va/va.h>
 #include <va/va_x11.h>
 
@@ -79,6 +80,7 @@ struct mp_vaapi_ctx {
     struct mp_log *log;
     VADisplay display;
     struct va_image_formats *image_formats;
+    pthread_mutex_t lock;
 };
 
 struct va_image_formats;
@@ -86,6 +88,9 @@ struct va_image_formats;
 bool check_va_status(struct mp_log *log, VAStatus status, const char *msg);
 
 #define CHECK_VA_STATUS(ctx, msg) check_va_status((ctx)->log, status, msg)
+
+#define va_lock(ctx)     pthread_mutex_lock(&(ctx)->lock)
+#define va_unlock(ctx)   pthread_mutex_unlock(&(ctx)->lock)
 
 int                      va_get_colorspace_flag(enum mp_csp csp);
 

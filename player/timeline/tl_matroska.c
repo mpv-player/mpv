@@ -34,7 +34,7 @@
 #include "common/msg.h"
 #include "demux/demux.h"
 #include "options/path.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/common.h"
 #include "common/playlist.h"
 #include "stream/stream.h"

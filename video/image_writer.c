@@ -23,8 +23,6 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/mem.h>
 
-#include "compat/libav.h"
-
 #include "config.h"
 
 #if HAVE_JPEG

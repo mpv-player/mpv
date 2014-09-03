@@ -26,7 +26,7 @@
 #include <stdbool.h>
 
 #include "osdep/endian.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 #if BYTE_ORDER == BIG_ENDIAN
 #define AF_SELECT_LE_BE(LE, BE) BE

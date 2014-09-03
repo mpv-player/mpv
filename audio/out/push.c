@@ -35,7 +35,7 @@
 
 #include "osdep/threads.h"
 #include "osdep/timer.h"
-#include "compat/atomics.h"
+#include "osdep/atomics.h"
 
 #include "audio/audio.h"
 #include "audio/audio_buffer.h"
@@ -281,7 +281,7 @@ static double ao_estimate_timeout(struct ao *ao)
         if (timeout > 0.100)
             timeout = MPMAX(timeout - 0.200, 0.100);
     }
-    return MPMAX(timeout, ao->device_buffer * 0.75 / ao->samplerate);
+    return MPMAX(timeout, ao->device_buffer * 0.25 / ao->samplerate);
 }
 
 static void *playthread(void *arg)
@@ -319,7 +319,8 @@ static void *playthread(void *arg)
                 // The most important part is that the decoder is woken up, so
                 // that the decoder will wake up us in turn.
                 MP_TRACE(ao, "buffer inactive.\n");
-                mp_input_wakeup(ao->input_ctx);
+                if (!p->requested_data)
+                    mp_input_wakeup(ao->input_ctx);
                 pthread_cond_wait(&p->wakeup, &p->lock);
             } else {
                 if (!ao->driver->wait || ao->driver->wait(ao, &p->lock) < 0) {

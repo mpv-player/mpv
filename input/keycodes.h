@@ -228,33 +228,36 @@
 // Emit a command even on key-up (normally key-up is ignored). This means by
 // default they binding will be triggered on key-up instead of key-down.
 // This is a fixed part of the keycode, not a modifier than can change.
-#define MP_KEY_EMIT_ON_UP      (1<<22)
+#define MP_KEY_EMIT_ON_UP      (1u<<22)
 
 // Use this when the key shouldn't be auto-repeated (like mouse buttons)
 // Also means both key-down key-up events produce emit bound commands.
 // This is a fixed part of the keycode, not a modifier than can change.
-#define MP_NO_REPEAT_KEY       (1<<23)
+#define MP_NO_REPEAT_KEY       (1u<<23)
 
 /* Modifiers added to individual keys */
-#define MP_KEY_MODIFIER_SHIFT  (1<<24)
-#define MP_KEY_MODIFIER_CTRL   (1<<25)
-#define MP_KEY_MODIFIER_ALT    (1<<26)
-#define MP_KEY_MODIFIER_META   (1<<27)
+#define MP_KEY_MODIFIER_SHIFT  (1u<<24)
+#define MP_KEY_MODIFIER_CTRL   (1u<<25)
+#define MP_KEY_MODIFIER_ALT    (1u<<26)
+#define MP_KEY_MODIFIER_META   (1u<<27)
 
 // Flag for key events. Multiple down events are idempotent. Release keys by
 // sending the key code with KEY_STATE_UP set, or by sending
 // MP_INPUT_RELEASE_ALL as key code.
-#define MP_KEY_STATE_DOWN      (1<<28)
+#define MP_KEY_STATE_DOWN      (1u<<28)
 
 // Flag for key events. Releases a key previously held down with
 // MP_KEY_STATE_DOWN. Do not send redundant UP events and do not forget to
 // release keys at all with UP. If input is unreliable, use MP_INPUT_RELEASE_ALL
 // or don't use MP_KEY_STATE_DOWN in the first place.
-#define MP_KEY_STATE_UP        (1<<29)
+#define MP_KEY_STATE_UP        (1u<<29)
 
 #define MP_KEY_MODIFIER_MASK (MP_KEY_MODIFIER_SHIFT | MP_KEY_MODIFIER_CTRL | \
                               MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_META | \
                               MP_KEY_STATE_DOWN | MP_KEY_STATE_UP)
+
+// Makes adjustments like turning "shift+z" into "Z"
+int mp_normalize_keycode(int keycode);
 
 // Get input key from its name.
 int mp_input_get_key_from_name(const char *name);

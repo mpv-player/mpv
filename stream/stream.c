@@ -31,7 +31,7 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include "compat/mpbswap.h"
+#include "osdep/mpbswap.h"
 
 #include "talloc.h"
 
@@ -39,7 +39,7 @@
 
 #include "common/common.h"
 #include "common/global.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/msg.h"
 #include "options/options.h"
 #include "options/path.h"
@@ -61,6 +61,7 @@ extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_memory;
 extern const stream_info_t stream_info_mf;
 extern const stream_info_t stream_info_ffmpeg;
+extern const stream_info_t stream_info_ffmpeg_unsafe;
 extern const stream_info_t stream_info_avdevice;
 extern const stream_info_t stream_info_file;
 extern const stream_info_t stream_info_ifo;
@@ -77,6 +78,7 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_cdda,
 #endif
     &stream_info_ffmpeg,
+    &stream_info_ffmpeg_unsafe,
     &stream_info_avdevice,
 #if HAVE_DVBIN
     &stream_info_dvb,
@@ -257,6 +259,10 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
         return STREAM_NO_MATCH;
     if (sinfo->stream_filter && (flags & STREAM_NO_FILTERS))
         return STREAM_NO_MATCH;
+    if (!sinfo->is_safe && (flags & STREAM_SAFE_ONLY))
+        return STREAM_UNSAFE;
+    if (!sinfo->is_network && (flags & STREAM_NETWORK_ONLY))
+        return STREAM_UNSAFE;
 
     const char *path = NULL;
     // Stream filters use the original URL, with no protocol matching at all.
@@ -280,6 +286,7 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     s->path = talloc_strdup(s, path);
     s->source = underlying;
     s->allow_caching = true;
+    s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
 
     if ((s->mode & STREAM_WRITE) && !sinfo->can_write) {
@@ -335,16 +342,28 @@ struct stream *stream_create(const char *url, int flags, struct mpv_global *glob
     assert(url);
 
     // Open stream proper
+    bool unsafe = false;
     for (int i = 0; stream_list[i]; i++) {
         int r = open_internal(stream_list[i], NULL, url, flags, global, &s);
         if (r == STREAM_OK)
             break;
         if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED)
             continue;
+        if (r == STREAM_UNSAFE) {
+            unsafe = true;
+            continue;
+        }
         if (r != STREAM_OK) {
             mp_err(log, "Failed to open %s.\n", url);
             goto done;
         }
+    }
+
+    if (!s && unsafe) {
+        mp_err(log, "\nRefusing to load potentially unsafe URL from a playlist.\n"
+               "Use --playlist=file or the --load-unsafe-playlists option to "
+               "load it anyway.\n\n");
+        goto done;
     }
 
     if (!s) {
@@ -384,7 +403,7 @@ static int stream_reconnect(stream_t *s)
 {
 #define MAX_RECONNECT_RETRIES 5
 #define RECONNECT_SLEEP_MAX_MS 500
-    if (!s->streaming)
+    if (!s->streaming || s->uncached_stream)
         return 0;
     if (!s->seekable)
         return 0;
@@ -404,8 +423,6 @@ static int stream_reconnect(stream_t *s)
             return 0;
 
         s->eof = 1;
-        s->pos = 0;
-        s->buf_pos = s->buf_len = 0;
 
         int r = stream_control(s, STREAM_CTRL_RECONNECT, NULL);
         if (r == STREAM_UNSUPPORTED)
@@ -771,7 +788,7 @@ stream_t *open_memory_stream(void *data, int len)
 static stream_t *open_cache(stream_t *orig, const char *name)
 {
     stream_t *cache = new_stream();
-    cache->uncached_type = orig->type;
+    cache->uncached_type = orig->uncached_type;
     cache->uncached_stream = orig;
     cache->seekable = true;
     cache->mode = STREAM_READ;
@@ -782,6 +799,8 @@ static stream_t *open_cache(stream_t *orig, const char *name)
     cache->demuxer = talloc_strdup(cache, orig->demuxer);
     cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
     cache->safe_origin = orig->safe_origin;
+    cache->streaming = orig->streaming,
+    cache->is_network = orig->is_network;
     cache->opts = orig->opts;
     cache->global = orig->global;
 

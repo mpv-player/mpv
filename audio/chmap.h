@@ -20,7 +20,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 #define MP_NUM_CHANNELS 8
 

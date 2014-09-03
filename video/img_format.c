@@ -22,8 +22,6 @@
 #include <libavutil/pixfmt.h>
 #include <libavutil/pixdesc.h>
 
-#include "compat/libav.h"
-
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/fmt-conversion.h"

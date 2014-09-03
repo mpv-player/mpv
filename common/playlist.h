@@ -19,7 +19,7 @@
 #define MPLAYER_PLAYLIST_H
 
 #include <stdbool.h>
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 struct playlist_param {
     bstr name, value;
@@ -41,6 +41,12 @@ struct playlist_entry {
     bool playback_short : 1;
     // Set to true if not at least 1 frame (audio or video) could be played.
     bool init_failed : 1;
+    // Used to reject loading of unsafe entries from external playlists.
+    // Can have any of the following bit flags set:
+    //  STREAM_SAFE_ONLY: only allow streams marked with is_safe
+    //  STREAM_NETWORK_ONLY: only allow streams marked with is_network
+    // The value 0 allows everything.
+    int stream_flags;
 };
 
 struct playlist {

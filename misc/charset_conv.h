@@ -2,7 +2,7 @@
 #define MP_CHARSET_CONV_H
 
 #include <stdbool.h>
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 struct mp_log;
 

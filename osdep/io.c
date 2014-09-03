@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "osdep/io.h"
+#include "osdep/terminal.h"
 
 // Set the CLOEXEC flag on the given fd.
 // On error, false is returned (and errno set).
@@ -138,7 +139,7 @@ int mp_stat(const char *path, struct stat *buf)
     return res;
 }
 
-static int mp_check_console(HANDLE *wstream)
+static int mp_check_console(HANDLE wstream)
 {
     if (wstream != INVALID_HANDLE_VALUE) {
         unsigned int filetype = GetFileType(wstream);
@@ -167,7 +168,7 @@ static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
     int done = 0;
 
-    HANDLE *wstream = INVALID_HANDLE_VALUE;
+    HANDLE wstream = INVALID_HANDLE_VALUE;
 
     if (stream == stdout || stream == stderr) {
         wstream = GetStdHandle(stream == stdout ?
@@ -179,13 +180,10 @@ static int mp_vfprintf(FILE *stream, const char *format, va_list args)
         char *buf = talloc_array(NULL, char, len);
 
         if (buf) {
-            vsnprintf(buf, len, format, args);
-            wchar_t *out = mp_from_utf8(NULL, buf);
-            size_t out_len = wcslen(out);
-            talloc_free(buf);
-            done = WriteConsoleW(wstream, out, out_len, NULL, NULL);
-            talloc_free(out);
+            done = vsnprintf(buf, len, format, args);
+            mp_write_console_ansi(wstream, buf);
         }
+        talloc_free(buf);
     } else {
         done = vfprintf(stream, format, args);
     }

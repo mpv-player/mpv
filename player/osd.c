@@ -37,7 +37,10 @@
 #include "osdep/timer.h"
 
 #include "demux/demux.h"
+#include "stream/stream.h"
 #include "sub/osd.h"
+
+#include "video/out/vo.h"
 
 #include "core.h"
 #include "command.h"
@@ -144,7 +147,7 @@ static void add_term_osd_bar(struct MPContext *mpctx, char **line, int width)
     saddf(line, "%.*s", BSTR_P(parts[4]));
 }
 
-void print_status(struct MPContext *mpctx)
+static void print_status(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
@@ -153,7 +156,9 @@ void print_status(struct MPContext *mpctx)
     if (!opts->use_terminal)
         return;
 
-    if (opts->quiet || !(mpctx->initialized_flags & INITIALIZED_PLAYBACK)) {
+    if (opts->quiet || !(mpctx->initialized_flags & INITIALIZED_PLAYBACK) ||
+        !mpctx->playing_msg_shown)
+    {
         term_osd_set_status(mpctx, "");
         return;
     }
@@ -219,18 +224,38 @@ void print_status(struct MPContext *mpctx)
 #endif
     {
         // VO stats
-        if (mpctx->d_video && mpctx->drop_frame_cnt)
-            saddf(&line, " Late: %d", mpctx->drop_frame_cnt);
+        if (mpctx->d_video) {
+            if (mpctx->drop_frame_cnt)
+                saddf(&line, " Late: %d", mpctx->drop_frame_cnt);
+            int64_t c = vo_get_drop_count(mpctx->video_out);
+            if (c > 0)
+                saddf(&line, " D: %"PRId64, c);
+        }
     }
 
-    float cache = mp_get_cache_percent(mpctx);
-    if (cache >= 0)
-        saddf(&line, " Cache: %.2f%%", cache);
+    if (mpctx->demuxer) {
+        int64_t fill = -1;
+        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &fill);
+        if (fill >= 0) {
+            saddf(&line, " Cache: ");
+
+            struct demux_ctrl_reader_state s = {.ts_duration = -1};
+            demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
+
+            if (s.ts_duration < 0) {
+                saddf(&line, "???");
+            } else {
+                saddf(&line, "%2ds", (int)s.ts_duration);
+            }
+            saddf(&line, "+%lldKB", (long long)(fill / 1024));
+        }
+    }
 
     if (opts->term_osd_bar) {
         saddf(&line, "\n");
-        get_screen_size();
-        add_term_osd_bar(mpctx, &line, screen_width);
+        int w = 80, h = 24;
+        terminal_get_size(&w, &h);
+        add_term_osd_bar(mpctx, &line, w);
     }
 
     // end

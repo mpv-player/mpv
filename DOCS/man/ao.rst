@@ -23,7 +23,7 @@ normal driver parameters.
     where PulseAudio is used. On Windows, ``--ao=wasapi`` is preferred,
     though it might cause trouble sometimes, in which case ``--ao=dsound``
     should be used. On BSD systems, ``--ao=oss`` or `--ao=sndio`` may work
-    (the latter being experimental). On OSX systems, use ``--ao=coreaudio``.
+    (the latter being experimental). On OS X systems, use ``--ao=coreaudio``.
 
 .. admonition:: Examples
 
@@ -180,6 +180,9 @@ Available audio output drivers are:
     ``device=<devicenum>``
         Sets the device number to use. Playing a file with ``-v`` will show a
         list of available devices.
+
+    ``buffersize=<ms>``
+        DirectSound buffer size in milliseconds (default: 200).
 
 ``sdl``
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL

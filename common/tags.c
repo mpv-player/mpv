@@ -17,7 +17,7 @@
 
 #include <libavutil/dict.h>
 #include "tags.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 
 void mp_tags_set_str(struct mp_tags *tags, const char *key, const char *value)
 {

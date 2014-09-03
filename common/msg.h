@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "compat/compiler.h"
+#include "osdep/compiler.h"
 
 struct mp_log;
 

@@ -114,7 +114,7 @@ List of Input Commands
     to be precise, not fast), and sometimes fails to behave as expected. How
     well this works depends on whether precise seeking works correctly (e.g.
     see the ``--hr-seek-demuxer-offset`` option). Video filters or other video
-    postprocessing that modifies timing of frames (e.g. deinterlacing) should
+    post-processing that modifies timing of frames (e.g. deinterlacing) should
     usually work, but might make backstepping silently behave incorrectly in
     corner cases. Using ``--hr-seek-framedrop=no`` should help, although it
     might make precise seeking slower.
@@ -159,7 +159,9 @@ List of Input Commands
         Take a single screenshot.
     <each-frame>
         Take a screenshot each frame. Issue this command again to stop taking
-        screenshots.
+        screenshots. Note that you should disable frame-dropping when using
+        this mode - or you might receive duplicate images in cases when a
+        frame was dropped.
 
 ``screenshot_to_file "<filename>" [subtitles|video|window]``
     Take a screenshot and save it to a given file. The format of the file will
@@ -572,7 +574,7 @@ Property list
     See ``--osd-level``.
 
 ``osd-scale`` (RW)
-    OSD font size multiplicator, see ``--osd-scale``.
+    OSD font size multiplier, see ``--osd-scale``.
 
 ``loop`` (RW)
     See ``--loop``.
@@ -593,6 +595,18 @@ Property list
     Length in bytes of the source file/stream. (This is the same as
     ``${stream-end}``. For ordered chapters and such, the
     size of the currently played segment is returned.)
+
+``estimated-frame-count``
+    Total number of frames in current file.
+
+    .. note:: This is only an estimate. (It's computed from two unreliable
+              quantities: fps and stream length.)
+
+``estimated-frame-number``
+    Number of current frame in current stream.
+
+    .. note:: This is only an estimate. (It's computed from two unreliable
+              quantities: fps and possibly rounded timestamps.)
 
 ``path``
     Full path of the currently played file.
@@ -635,8 +649,12 @@ Property list
     disabled.
 
 ``drop-frame-count``
-    Frames dropped because they arrived to late. Unavailable if video
-    is disabled
+    Frames dropped because they arrived to late. Doesn't necessarily indicate
+    actual frame-drops, just the number of times the decoder was asked to drop.
+    Unavailable if video is disabled
+
+``vo-drop-frame-count``
+    Frames dropped by VO (when using ``--framedrop=vo``).
 
 ``percent-pos`` (RW)
     Position in current file (0-100). The advantage over using this instead of
@@ -765,7 +783,7 @@ Property list
     ::
 
         MPV_FORMAT_NODE_MAP
-            (key and string value for each metdata entry)
+            (key and string value for each metadata entry)
 
 ``chapter-metadata``
     Metadata of current chapter. Works similar to ``metadata`` property. It
@@ -809,7 +827,7 @@ Property list
     this easier, the cache resizing code will allocate the new cache while the
     old cache is still allocated.
 
-    Don't use this when playing DVD or Bluray.
+    Don't use this when playing DVD or Blu-ray.
 
 ``cache-free`` (R)
     Total free cache size in KB.
@@ -820,6 +838,15 @@ Property list
 ``cache-idle`` (R)
     Returns ``yes`` if the cache is idle, which means the cache is filled as
     much as possible, and is currently not reading more data.
+
+``demuxer-cache-duration``
+    Approximate duration of video buffered in the demuxer, in seconds. The
+    guess is very unreliable, and often the property will not be available
+    at all, even if data is buffered.
+
+``demuxer-cache-idle``
+    Returns ``yes`` if the demuxer is idle, which means the demuxer cache is
+    filled to the requested amount, and is currently not reading more data.
 
 ``paused-for-cache``
     Returns ``yes`` when playback is paused because of waiting for the cache.
@@ -1025,7 +1052,7 @@ Property list
     Estimated/measured FPS of the video filter chain output. (If no filters
     are used, this corresponds to decoder output.) This uses the average of
     the 10 past frame durations to calculate the FPS. It will be inaccurate
-    if framedropping is involved (such as when framedrop is explicitly
+    if frame-dropping is involved (such as when framedrop is explicitly
     enabled, or after precise seeking). Files with imprecise timestamps (such
     as Matroska) might lead to unstable results.
 
@@ -1033,7 +1060,7 @@ Property list
     Window size multiplier. Setting this will resize the video window to the
     values contained in ``dwidth`` and ``dheight`` multiplied with the value
     set with this property. Setting ``1`` will resize to original video size
-    (or to be exactly, the size the video filters output). ``2`` will set the
+    (or to be exact, the size the video filters output). ``2`` will set the
     double size, ``0.5`` halves the size.
 
 ``video-aspect`` (RW)
@@ -1090,7 +1117,7 @@ Property list
     See ``--sub-forced-only``.
 
 ``sub-scale`` (RW)
-    Subtitle font size multiplicator.
+    Subtitle font size multiplier.
 
 ``ass-use-margins`` (RW)
     See ``--ass-use-margins``.
@@ -1233,11 +1260,6 @@ Property list
             MPV_FORMAT_NODE_MAP (for each chapter)
                 "title" MPV_FORMAT_STRING
                 "time"  MPV_FORMAT_DOUBLE
-
-``quvi-format`` (RW)
-    See ``--quvi-format``. Cycling this property (``cycle``) will attempt to
-    cycle through known format, although currently this feature doesn't work
-    well at all.
 
 ``af`` (RW)
     See ``--af`` and the ``af`` command.

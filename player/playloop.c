@@ -49,6 +49,7 @@
 #include "video/out/vo.h"
 
 #include "core.h"
+#include "client.h"
 #include "command.h"
 
 void pause_player(struct MPContext *mpctx)
@@ -66,15 +67,10 @@ void pause_player(struct MPContext *mpctx)
     mpctx->osd_function = 0;
     mpctx->paused_for_cache = false;
 
-    if (mpctx->video_out && mpctx->d_video && mpctx->video_out->config_ok)
-        vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
-
     if (mpctx->ao && mpctx->d_audio)
-        ao_pause(mpctx->ao);    // pause audio, keep data if possible
-
-    // Only print status if there's actually a file being played.
-    if (mpctx->num_sources)
-        print_status(mpctx);
+        ao_pause(mpctx->ao);
+    if (mpctx->video_out)
+        vo_set_paused(mpctx->video_out, true);
 
 end:
     mp_notify(mpctx, mpctx->opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
@@ -97,8 +93,9 @@ void unpause_player(struct MPContext *mpctx)
 
     if (mpctx->ao && mpctx->d_audio)
         ao_resume(mpctx->ao);
-    if (mpctx->video_out && mpctx->d_video && mpctx->video_out->config_ok)
-        vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);      // resume video
+    if (mpctx->video_out)
+        vo_set_paused(mpctx->video_out, false);
+
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 
 end:
@@ -132,6 +129,7 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->hrseek_framedrop = false;
     mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
+    mpctx->cache_wait_time = 0;
     mpctx->restart_complete = false;
 
 #if HAVE_ENCODING
@@ -192,13 +190,13 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         bool need_reset = false;
         demuxer_amount = timeline_set_from_time(mpctx, seek.amount,
                                                 &need_reset);
-        if (demuxer_amount == -1) {
+        if (demuxer_amount == MP_NOPTS_VALUE) {
             assert(!need_reset);
             mpctx->stop_play = AT_END_OF_FILE;
-            if (mpctx->d_audio && !timeline_fallthrough) {
-                // Seek outside of the file -> clear audio from current position
-                clear_audio_decode_buffers(mpctx);
+            // When seeking outside of the file, but not when ending last segment.
+            if (!timeline_fallthrough) {
                 clear_audio_output_buffers(mpctx);
+                reset_playback_state(mpctx);
             }
             return -1;
         }
@@ -234,12 +232,10 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     for (int t = 0; t < mpctx->num_tracks; t++) {
         struct track *track = mpctx->tracks[t];
         if (track->selected && track->is_external && track->demuxer) {
-            double main_new_pos;
-            if (seek.type == MPSEEK_ABSOLUTE) {
-                main_new_pos = seek.amount - mpctx->video_offset;
-            } else {
+            double main_new_pos = seek.amount;
+            if (seek.type != MPSEEK_ABSOLUTE)
                 main_new_pos = get_main_demux_pts(mpctx);
-            }
+            main_new_pos -= get_track_video_offset(mpctx, track);
             demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE);
         }
     }
@@ -259,10 +255,8 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
-    if (seek.type == MPSEEK_ABSOLUTE) {
-        mpctx->video_pts = seek.amount;
+    if (seek.type == MPSEEK_ABSOLUTE)
         mpctx->last_seek_pts = seek.amount;
-    }
 
     // The hr_seek==false case is for skipping frames with PTS before the
     // current timeline chapter start. It's not really known where the demuxer
@@ -441,7 +435,7 @@ int get_current_chapter(struct MPContext *mpctx)
 char *chapter_display_name(struct MPContext *mpctx, int chapter)
 {
     char *name = chapter_name(mpctx, chapter);
-    char *dname = name;
+    char *dname = NULL;
     if (name) {
         dname = talloc_asprintf(NULL, "(%d) %s", chapter + 1, name);
     } else if (chapter < -1) {
@@ -454,8 +448,7 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
             dname = talloc_asprintf(NULL, "(%d) of %d", chapter + 1,
                                     chapter_count);
     }
-    if (dname != name)
-        talloc_free(name);
+    talloc_free(name);
     return dname;
 }
 
@@ -528,32 +521,51 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     if (!mpctx->demuxer)
         return;
-    int64_t fill = -1;
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &fill);
-    int cache_kb = fill > 0 ? (fill + 1023) / 1024 : -1;
-    bool idle = mp_get_cache_idle(mpctx);
-    if (mpctx->paused && mpctx->paused_for_cache) {
-        if (cache_kb < 0 || cache_kb >= opts->stream_cache_unpause || idle) {
-            mpctx->paused_for_cache = false;
-            if (!opts->pause)
-                unpause_player(mpctx);
-        }
-        mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.2);
-    } else {
-        if (cache_kb >= 0 && cache_kb <= opts->stream_cache_pause && !idle &&
-            opts->stream_cache_pause < opts->stream_cache_unpause)
-        {
-            bool prev_paused_user = opts->pause;
-            pause_player(mpctx);
-            mpctx->paused_for_cache = true;
-            opts->pause = prev_paused_user;
+
+    int idle = -1;
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_IDLE, &idle);
+
+    struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
+    demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
+
+    if (mpctx->restart_complete && idle != -1) {
+        if (mpctx->paused && mpctx->paused_for_cache) {
+            mpctx->cache_wait_time = MPCLAMP(mpctx->cache_wait_time, 1, 10);
+            if (!opts->cache_pausing || s.ts_duration >= mpctx->cache_wait_time
+                || s.idle)
+            {
+                double elapsed_time = mp_time_sec() - mpctx->cache_stop_time;
+                if (elapsed_time > mpctx->cache_wait_time) {
+                    mpctx->cache_wait_time *= 1.5 + 0.1;
+                } else {
+                    mpctx->cache_wait_time /= 1.5 - 0.1;
+                }
+                mpctx->paused_for_cache = false;
+                if (!opts->pause)
+                    unpause_player(mpctx);
+            }
+            mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.2);
+        } else {
+            if (opts->cache_pausing && s.underrun) {
+                bool prev_paused_user = opts->pause;
+                pause_player(mpctx);
+                mpctx->paused_for_cache = true;
+                opts->pause = prev_paused_user;
+                mpctx->cache_stop_time = mp_time_sec();
+            }
         }
     }
+
     // Also update cache properties.
-    if (cache_kb > 0 || mpctx->next_cache_update > 0) {
+    bool busy = idle == 0;
+    if (!s.idle) {
+        busy |= idle != -1;
+        busy |= mp_client_event_is_registered(mpctx, MP_EVENT_CACHE_UPDATE);
+    }
+    if (busy || mpctx->next_cache_update > 0) {
         double now = mp_time_sec();
         if (mpctx->next_cache_update <= now) {
-            mpctx->next_cache_update = cache_kb > 0 ? now + 0.25 : 0;
+            mpctx->next_cache_update = busy ? now + 0.25 : 0;
             mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
         }
         if (mpctx->next_cache_update > 0) {
@@ -619,9 +631,11 @@ static void handle_input_and_seek_coalesce(struct MPContext *mpctx)
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
         mp_dispatch_queue_process(mpctx->dispatch, 0);
+        MP_STATS(mpctx, "start command");
         cmd = mp_input_get_cmd(mpctx->input, 0, 0);
         run_command(mpctx, cmd);
         mp_cmd_free(cmd);
+        MP_STATS(mpctx, "end command");
         if (mpctx->stop_play)
             break;
     }
@@ -721,7 +735,7 @@ static void handle_sstep(struct MPContext *mpctx)
         queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, 0, true);
     }
 
-    if (mpctx->video_status >= STATUS_DRAINING) {
+    if (mpctx->video_status >= STATUS_EOF) {
         if (mpctx->max_frames >= 0)
             mpctx->stop_play = PT_NEXT_ENTRY;
         if (mpctx->step_frames > 0 && !mpctx->paused)
@@ -777,7 +791,7 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
         // Pick whatever works
         int config_format = 0;
         for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
-            if (vo->driver->query_format(vo, fmt)) {
+            if (vo_query_format(vo, fmt)) {
                 config_format = fmt;
                 break;
             }
@@ -857,23 +871,29 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->hrseek_active = false;
             mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
             mpctx->restart_complete = true;
-            if (opts->playing_msg && !mpctx->playing_msg_shown) {
-                mpctx->playing_msg_shown = true;
-                char *msg =
-                    mp_property_expand_escaped_string(mpctx, opts->playing_msg);
-                MP_INFO(mpctx, "%s\n", msg);
-                talloc_free(msg);
+            if (!mpctx->playing_msg_shown) {
+                if (opts->playing_msg) {
+                    char *msg =
+                        mp_property_expand_escaped_string(mpctx, opts->playing_msg);
+                    MP_INFO(mpctx, "%s\n", msg);
+                    talloc_free(msg);
+                }
+                if (opts->osd_playing_msg) {
+                    char *msg =
+                        mp_property_expand_escaped_string(mpctx, opts->osd_playing_msg);
+                    set_osd_msg(mpctx, 1, opts->osd_duration, "%s", msg);
+                    talloc_free(msg);
+                }
             }
+            mpctx->playing_msg_shown = true;
         }
     }
 
     if (mpctx->video_status == STATUS_EOF &&
-        mpctx->audio_status >= STATUS_PLAYING)
+        mpctx->audio_status >= STATUS_PLAYING &&
+        mpctx->audio_status < STATUS_EOF)
     {
-        double a_pos = 0;
-        if (mpctx->d_audio)
-            a_pos = playing_audio_pts(mpctx);
-        mpctx->playback_pts = a_pos;
+        mpctx->playback_pts = playing_audio_pts(mpctx);
     }
 
     handle_dummy_ticks(mpctx);
@@ -881,12 +901,11 @@ void run_playloop(struct MPContext *mpctx)
     update_osd_msg(mpctx);
     update_subtitles(mpctx);
 
-    /* If we're paused, don't end playback yet. But if video is enabled, is EOF,
-     * and we don't have a video frame, then the user probably seeked outside
-     * of the video, and we want to quit. */
-    bool prevent_eof = mpctx->paused;
-    if (mpctx->d_video && mpctx->video_status == STATUS_EOF)
-        prevent_eof &= mpctx->video_out && vo_has_frame(mpctx->video_out);
+    /* Don't quit while paused and we're displaying the last video frame. On the
+     * other hand, if we don't have a video frame, then the user probably seeked
+     * outside of the video, and we do want to quit. */
+    bool prevent_eof =
+        mpctx->paused && mpctx->video_out && vo_has_frame(mpctx->video_out);
     /* Handles terminating on end of playback (or switching to next segment).
      *
      * It's possible for the user to simultaneously switch both audio

@@ -121,7 +121,7 @@ static const struct feature features[] = {
 
 static void list_features(int set, struct mp_log *log, int msgl, bool invert)
 {
-    char b[128] = {0};
+    char b[1024] = {0};
     for (const struct feature *f = &features[0]; f->id; f++) {
         if (invert == !(f->id & set))
             mp_snprintf_cat(b, sizeof(b), " [%s]", f->name);
@@ -341,6 +341,14 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    {
+        .extension = "GLX_SGI_video_sync",
+        .functions = (struct gl_function[]) {
+            DEF_FN_NAMES(GetVideoSync, "glXGetVideoSyncSGI"),
+            DEF_FN_NAMES(WaitVideoSync, "glXWaitVideoSyncSGI"),
+            {0},
+        },
+    },
     // GL legacy functions in GL 1.x - 2.x, removed from GL 3.x
     {
         .ver_core = MPGL_VER(1, 1),
@@ -489,8 +497,9 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     mp_verbose(log, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
     mp_verbose(log, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
     mp_verbose(log, "GL_VERSION='%s'\n",  gl->GetString(GL_VERSION));
-    mp_verbose(log, "GL_SHADING_LANGUAGE_VERSION='%s'\n",
-                    gl->GetString(GL_SHADING_LANGUAGE_VERSION));
+    const char *shader = gl->GetString(GL_SHADING_LANGUAGE_VERSION);
+    if (shader)
+        mp_verbose(log, "GL_SHADING_LANGUAGE_VERSION='%s'\n", shader);
 
     // Note: This code doesn't handle CONTEXT_FORWARD_COMPATIBLE_BIT_ARB
     //       on OpenGL 3.0 correctly. Apparently there's no way to detect this

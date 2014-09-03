@@ -9,6 +9,10 @@
  * Also see glumpy (BSD licensed), contains the same code in Python:
  * http://code.google.com/p/glumpy/source/browse/glumpy/image/filter.py
  *
+ * Also see Vapoursynth plugin fmtconv (WTFPL Licensed), which is based on
+ * dither plugin for avisynth from the same author:
+ * https://github.com/vapoursynth/fmtconv/tree/master/src/fmtc
+ *
  * Also see: Paul Heckbert's "zoom"
  *
  * Also see XBMC: ConvolutionKernels.cpp etc.
@@ -52,6 +56,8 @@ const struct filter_kernel *mp_find_filter_kernel(const char *name)
 bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double inv_scale)
 {
+    if (filter->radius < 0)
+        filter->radius = 2.0;
     // only downscaling requires widening the filter
     filter->inv_scale = inv_scale >= 1.0 ? inv_scale : 1.0;
     double support = filter->radius * filter->inv_scale;
@@ -222,9 +228,28 @@ static double spline36(kernel *k, double x)
            * (x - 2);
 }
 
+static double spline64(kernel *k, double x)
+{
+    if (x < 1.0)
+        return ((49.0 / 41.0 * x - 6387.0 / 2911.0) * x - 3.0 / 2911.0) * x + 1.0;
+    if (x < 2.0)
+        return ((-24.0 / 41.0 * (x - 1) + 4032.0 / 2911.0) * (x - 1) - 2328.0 / 2911.0)
+               * (x - 1);
+    if (x < 3.0)
+        return ((6.0 / 41.0 * (x - 2) - 1008.0 / 2911.0) * (x - 2) + 582.0 / 2911.0)
+               * (x - 2);
+    return ((-1.0 / 41.0 * (x - 3) + 168.0 / 2911.0) * (x - 3) - 97.0 / 2911.0)
+           * (x - 3);
+}
+
 static double gaussian(kernel *k, double x)
 {
-    return exp(-2.0 * x * x) * sqrt(2.0 / M_PI);
+    double p = k->params[0];
+    if (p > 100.0)
+        p = 100.0;
+    if (p < 1.0)
+        p = 1.0;
+    return pow(2.0, -(p / 10.0) * x * x);
 }
 
 static double sinc(kernel *k, double x)
@@ -271,15 +296,19 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"mitchell",       2,   mitchell, .params = {1.0/3.0, 1.0/3.0} },
     {"spline16",       2,   spline16},
     {"spline36",       3,   spline36},
-    {"gaussian",       2,   gaussian},
+    {"spline64",       4,   spline64},
+    {"gaussian",       -1,  gaussian, .params = {28.85390081777927, NAN} },
     {"sinc2",          2,   sinc},
     {"sinc3",          3,   sinc},
     {"sinc4",          4,   sinc},
+    {"sinc",           -1,  sinc},
     {"lanczos2",       2,   lanczos},
     {"lanczos3",       3,   lanczos},
     {"lanczos4",       4,   lanczos},
+    {"lanczos",        -1,  lanczos},
     {"blackman2",      2,   blackman},
     {"blackman3",      3,   blackman},
     {"blackman4",      4,   blackman},
+    {"blackman",       -1,  blackman},
     {0}
 };

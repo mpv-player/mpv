@@ -31,7 +31,7 @@
 
 #include "cookies.h"
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "talloc.h"
 
 struct stream_lavf_params *stream_lavf_opts;
@@ -252,6 +252,8 @@ static int open_f(stream_t *stream)
     stream->close = close_f;
     // enable cache (should be avoided for files, but no way to detect this)
     stream->streaming = true;
+    stream->pos = 0; // reset specifically for STREAM_CTRL_RECONNECT
+    stream->buf_pos = stream->buf_len = 0;
     res = STREAM_OK;
 
 out:
@@ -320,10 +322,24 @@ const stream_info_t stream_info_ffmpeg = {
   .name = "ffmpeg",
   .open = open_f,
   .protocols = (const char *const[]){
-     "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh",
-     "mmshttp", "udp", "ftp", "rtp", "httpproxy", "hls", "rtmpe", "rtmps",
-     "rtmpt", "rtmpte", "rtmpts", "srtp", "tcp", "udp", "tls", "unix", "sftp",
-     "md5",
+     "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh", "mmshttp", "rtp",
+     "httpproxy", "hls", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srtp",
+     NULL },
+  .can_write = true,
+  .is_safe = true,
+  .is_network = true,
+};
+
+// Unlike above, this is not marked as safe, and can contain protocols which
+// may do insecure things. (Such as "ffmpeg", which can access the "lavfi"
+// pseudo-demuxer, which in turn gives access to filters that can access the
+// local filesystem.)
+const stream_info_t stream_info_ffmpeg_unsafe = {
+  .name = "ffmpeg",
+  .open = open_f,
+  .protocols = (const char *const[]){
+     "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp", "md5",
      NULL },
   .can_write = true,
 };
+

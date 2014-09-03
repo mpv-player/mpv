@@ -2,6 +2,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "compat/compiler.h"
+#include "osdep/compiler.h"
 
 #include "ta/ta_talloc.h"

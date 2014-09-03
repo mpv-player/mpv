@@ -20,6 +20,7 @@
 #include "vaapi.h"
 #include "common/common.h"
 #include "common/msg.h"
+#include "osdep/threads.h"
 #include "mp_image.h"
 #include "img_format.h"
 #include "mp_image_pool.h"
@@ -122,6 +123,7 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog)
         .log = talloc_steal(res, log),
         .display = display,
     };
+    mpthread_mutex_init_recursive(&res->lock);
 
     va_get_formats(res);
     if (!res->image_formats)
@@ -142,6 +144,7 @@ void va_destroy(struct mp_vaapi_ctx *ctx)
     if (ctx) {
         if (ctx->display)
             vaTerminate(ctx->display);
+        pthread_mutex_destroy(&ctx->lock);
         talloc_free(ctx);
     }
 }
@@ -192,11 +195,13 @@ static void release_va_surface(void *arg)
 {
     struct va_surface *surface = arg;
 
+    va_lock(surface->ctx);
     if (surface->id != VA_INVALID_ID) {
         if (surface->image.image_id != VA_INVALID_ID)
             vaDestroyImage(surface->display, surface->image.image_id);
         vaDestroySurfaces(surface->display, &surface->id, 1);
     }
+    va_unlock(surface->ctx);
     talloc_free(surface);
 }
 
@@ -205,7 +210,9 @@ static struct mp_image *alloc_surface(struct mp_vaapi_ctx *ctx, int rt_format,
 {
     VASurfaceID id = VA_INVALID_ID;
     VAStatus status;
+    va_lock(ctx);
     status = vaCreateSurfaces(ctx->display, w, h, rt_format, 1, &id);
+    va_unlock(ctx);
     if (!CHECK_VA_STATUS(ctx, "vaCreateSurfaces()"))
         return NULL;
 
@@ -249,6 +256,9 @@ static int va_surface_image_alloc(struct mp_image *img, VAImageFormat *format)
         p->image.format.fourcc == format->fourcc)
         return 0;
 
+    int r = 0;
+    va_lock(p->ctx);
+
     va_surface_image_destroy(p);
 
     VAStatus status = vaDeriveImage(display, p->id, &p->image);
@@ -269,10 +279,12 @@ static int va_surface_image_alloc(struct mp_image *img, VAImageFormat *format)
         status = vaCreateImage(p->display, format, img->w, img->h, &p->image);
         if (!CHECK_VA_STATUS(p->ctx, "vaCreateImage()")) {
             p->image.image_id = VA_INVALID_ID;
-            return -1;
+            r = -1;
         }
     }
-    return 0;
+
+    va_unlock(p->ctx);
+    return r;
 }
 
 // img must be a VAAPI surface; make sure its internal VAImage is allocated
@@ -302,7 +314,9 @@ bool va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi
     if (imgfmt == IMGFMT_NONE)
         return false;
     void *data = NULL;
+    va_lock(ctx);
     const VAStatus status = vaMapBuffer(ctx->display, image->buf, &data);
+    va_unlock(ctx);
     if (!CHECK_VA_STATUS(ctx, "vaMapBuffer()"))
         return false;
 
@@ -325,7 +339,9 @@ bool va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi
 
 bool va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image)
 {
+    va_lock(ctx);
     const VAStatus status = vaUnmapBuffer(ctx->display, image->buf);
+    va_unlock(ctx);
     return CHECK_VA_STATUS(ctx, "vaUnmapBuffer()");
 }
 
@@ -347,10 +363,12 @@ int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
     va_image_unmap(p->ctx, &p->image);
 
     if (!p->is_derived) {
+        va_lock(p->ctx);
         VAStatus status = vaPutImage2(p->display, p->id,
                                       p->image.image_id,
                                       0, 0, sw_src->w, sw_src->h,
                                       0, 0, sw_src->w, sw_src->h);
+        va_unlock(p->ctx);
         if (!CHECK_VA_STATUS(p->ctx, "vaPutImage()"))
             return -1;
     }
@@ -373,8 +391,10 @@ static struct mp_image *try_download(struct mp_image *src,
         return NULL;
 
     if (!p->is_derived) {
+        va_lock(p->ctx);
         status = vaGetImage(p->display, p->id, 0, 0,
                             src->w, src->h, image->image_id);
+        va_unlock(p->ctx);
         if (status != VA_STATUS_SUCCESS)
             return NULL;
     }
@@ -400,7 +420,9 @@ struct mp_image *va_surface_download(struct mp_image *src,
     if (!p)
         return NULL;
     struct mp_vaapi_ctx *ctx = p->ctx;
+    va_lock(ctx);
     VAStatus status = vaSyncSurface(p->display, p->id);
+    va_unlock(ctx);
     if (!CHECK_VA_STATUS(ctx, "vaSyncSurface()"))
         return NULL;
 
@@ -452,6 +474,8 @@ void va_pool_set_allocator(struct mp_image_pool *pool, struct mp_vaapi_ctx *ctx,
 
 bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx)
 {
+    va_lock(ctx);
     const char *s = vaQueryVendorString(ctx->display);
+    va_unlock(ctx);
     return s && strstr(s, "VDPAU backend");
 }

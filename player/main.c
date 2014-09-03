@@ -132,9 +132,6 @@ void mp_destroy(struct MPContext *mpctx)
 
     command_uninit(mpctx);
 
-    mp_dispatch_set_wakeup_fn(mpctx->dispatch, NULL, NULL);
-    mp_input_uninit(mpctx->input);
-
     osd_free(mpctx->osd);
 
 #if HAVE_LIBASS
@@ -142,10 +139,14 @@ void mp_destroy(struct MPContext *mpctx)
         ass_library_done(mpctx->ass_library);
 #endif
 
-    if (mpctx->opts->use_terminal) {
-        getch2_disable();
+    if (mpctx->opts->use_terminal && terminal_initialized) {
+        terminal_uninit();
         terminal_initialized = false;
     }
+
+    mp_dispatch_set_wakeup_fn(mpctx->dispatch, NULL, NULL);
+    mp_input_uninit(mpctx->input);
+
     uninit_libav(mpctx->global);
 
     if (mpctx->autodetach)
@@ -375,6 +376,12 @@ int mp_initialize(struct MPContext *mpctx)
         mp_msg_update_msglevels(mpctx->global);
     }
 
+    if (opts->slave_mode) {
+        MP_WARN(mpctx, "--slave-broken is deprecated (see manpage).\n");
+        opts->consolecontrols = 0;
+        m_config_set_option0(mpctx->mconfig, "input-file", "/dev/stdin");
+    }
+
     mpctx->input = mp_input_init(mpctx->global);
     mpctx->global->stream_interrupt_cb = check_stream_interrupt;
     mpctx->global->stream_interrupt_cb_ctx = mpctx;
@@ -403,7 +410,7 @@ int mp_initialize(struct MPContext *mpctx)
     }
 #endif
 
-    if (opts->use_terminal && opts->consolecontrols)
+    if (opts->use_terminal && opts->consolecontrols && terminal_initialized)
         terminal_setup_getch(mpctx->input);
 
 #if HAVE_LIBASS

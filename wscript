@@ -166,12 +166,14 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--terminfo',
         'desc': 'terminfo',
+        'default': 'disable',
         'func': check_libs(['ncurses', 'ncursesw'],
             check_statement('term.h', 'setupterm(0, 1, 0)')),
     }, {
         'name': '--termcap',
         'desc': 'termcap',
         'deps_neg': ['terminfo'],
+        'default': 'disable',
         'func': check_libs(['ncurses', 'tinfo', 'termcap'],
             check_statement('term.h', 'tgetent(0, 0)')),
     }, {
@@ -549,8 +551,7 @@ video_output_features = [
         'name': '--xss',
         'desc': 'Xss screensaver extensions',
         'deps': [ 'x11' ],
-        'func': check_statement('X11/extensions/scrnsaver.h',
-            'XScreenSaverSuspend(NULL, True)', use='x11', lib='Xss'),
+        'func': check_pkg_config('xscrnsaver'),
     } , {
         'name': '--xext',
         'desc': 'X extensions',
@@ -567,16 +568,10 @@ video_output_features = [
         'deps': [ 'x11' ],
         'func': check_pkg_config('xinerama'),
     }, {
-        'name': '--xf86vm',
-        'desc': 'Xxf86vm',
+        'name': '--xrandr',
+        'desc': 'Xrandr',
         'deps': [ 'x11' ],
-        'func': check_cc(fragment=load_fragment('xf86vm.c'),
-                         lib='Xxf86vm', use='x11')
-    } , {
-        'name': '--xf86xk',
-        'desc': 'XF86keysym',
-        'deps': [ 'x11' ],
-        'func': check_cc(fragment=load_fragment('xf86xk.c'))
+        'func': check_pkg_config('xrandr', '>= 1.2.0'),
     } , {
         'name': '--gl-cocoa',
         'desc': 'OpenGL Cocoa Backend',

@@ -235,13 +235,11 @@ typedef struct MPContext {
 
     struct mixer *mixer;
     struct ao *ao;
-    double ao_pts;
     struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
     struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
 
     struct vo *video_out;
     // next_frame[0] is the next frame, next_frame[1] the one after that.
-    // Invariant: if next_frame[1] is set, next_frame[0] also is.
     struct mp_image *next_frame[2];
 
     enum playback_status video_status, audio_status;
@@ -254,15 +252,12 @@ typedef struct MPContext {
     double hrseek_pts;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
-    // written to the ao, decreased when moving to the next frame.
-    // In the audio-only case used as a timer since the last seek
-    // by the audio CPU usage meter.
+    // written to the ao, decreased when moving to the next video frame.
     double delay;
-    // AV sync: time until next frame should be shown
+    // AV sync: time in seconds until next frame should be shown
     double time_frame;
-    // Set to true some time after a new frame has been shown, and it turns out
-    // that this frame was the last one before video ends.
-    bool playing_last_frame;
+    // Optional/additional AV sync compensation if video is too slow.
+    double insert_silence;
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
@@ -275,13 +270,12 @@ typedef struct MPContext {
     // the same value if the status line is updated at a time where no new
     // video frame is shown.
     double last_av_difference;
-    /* Timestamp of the latest image that was queued on the VO, but not yet
-     * to be flipped. */
-    double video_next_pts;
     /* timestamp of video frame currently visible on screen
      * (or at least queued to be flipped by VO) */
     double video_pts;
     double last_seek_pts;
+    // Mostly unused; for proper audio resync on speed changes.
+    double video_next_pts;
     // As video_pts, but is not reset when seeking away. (For the very short
     // period of time until a new frame is decoded and shown.)
     double last_vo_pts;
@@ -351,6 +345,7 @@ typedef struct MPContext {
     bool playing_msg_shown;
 
     bool paused_for_cache;
+    double cache_stop_time, cache_wait_time;
 
     // Set after showing warning about decoding being too slow for realtime
     // playback rate. Used to avoid showing it multiple times.
@@ -370,7 +365,6 @@ double playing_audio_pts(struct MPContext *mpctx);
 void fill_audio_out_buffers(struct MPContext *mpctx, double endpts);
 double written_audio_pts(struct MPContext *mpctx);
 void clear_audio_output_buffers(struct MPContext *mpctx);
-void clear_audio_decode_buffers(struct MPContext *mpctx);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);
@@ -421,6 +415,7 @@ void mp_print_version(struct mp_log *log, int always);
 // misc.c
 double get_start_time(struct MPContext *mpctx);
 double get_main_demux_pts(struct MPContext *mpctx);
+double get_track_video_offset(struct MPContext *mpctx, struct track *track);
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
 double get_play_end_pts(struct MPContext *mpctx);
 double get_relative_time(struct MPContext *mpctx);
@@ -431,7 +426,6 @@ void update_window_title(struct MPContext *mpctx, bool force);
 void stream_dump(struct MPContext *mpctx);
 
 // osd.c
-void print_status(struct MPContext *mpctx);
 void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
                  double min, double max, double neutral, double val);
 void set_osd_msg(struct MPContext *mpctx, int level, int time,

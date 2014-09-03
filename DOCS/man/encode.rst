@@ -38,7 +38,7 @@ You can encode files from one format/codec to another using this facility.
 
 ``--oautofps``
     Sets the output format time base to the guessed frame rate of the input
-    video (simulates mencoder behavior, useful for AVI; may cause frame drops).
+    video (simulates MEncoder behavior, useful for AVI; may cause frame drops).
     Note that not all codecs and not all formats support VFR encoding, and some
     which do have bugs when a target bitrate is specified - use ``--ofps`` or
     ``--oautofps`` to force CFR encoding in these cases.
@@ -74,7 +74,7 @@ You can encode files from one format/codec to another using this facility.
     .. admonition:: Example
 
         "``--oac=libmp3lame --oacopts=b=128000``"
-            selects 128kbps MP3 encoding.
+            selects 128 kbps MP3 encoding.
 
     Options are managed in lists. There are a few commands to manage the
     options list.

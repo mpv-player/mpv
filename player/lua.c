@@ -39,7 +39,7 @@
 #include "options/m_option.h"
 #include "input/input.h"
 #include "options/path.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 #include "sub/osd.h"
@@ -873,6 +873,7 @@ static int script_set_osd_ass(lua_State *L)
     int res_y = luaL_checkinteger(L, 2);
     const char *text = luaL_checkstring(L, 3);
     osd_set_external(mpctx->osd, res_x, res_y, (char *)text);
+    mp_input_wakeup(mpctx->input);
     return 0;
 }
 
@@ -1004,6 +1005,19 @@ static int script_get_wakeup_pipe(lua_State *L)
     return 1;
 }
 
+static int script_getcwd(lua_State *L)
+{
+    char *cwd = mp_getcwd(NULL);
+    if (!cwd) {
+        lua_pushnil(L);
+        lua_pushstring(L, "error");
+        return 2;
+    }
+    lua_pushstring(L, cwd);
+    talloc_free(cwd);
+    return 1;
+}
+
 static int script_readdir(lua_State *L)
 {
     //                    0      1        2       3
@@ -1103,6 +1117,7 @@ static const struct fn_entry main_fns[] = {
 };
 
 static const struct fn_entry utils_fns[] = {
+    FN_ENTRY(getcwd),
     FN_ENTRY(readdir),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),

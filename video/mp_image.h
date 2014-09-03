@@ -55,6 +55,8 @@ struct mp_image_params {
     enum mp_csp_levels outputlevels;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;
+    enum mp_stereo3d_mode stereo_in;    // image is encoded with this mode
+    enum mp_stereo3d_mode stereo_out;   // should be displayed with this mode
 };
 
 /* Memory management:

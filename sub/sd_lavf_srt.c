@@ -21,7 +21,7 @@
 #include <inttypes.h>
 #include <assert.h>
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "sd.h"
 
 /*

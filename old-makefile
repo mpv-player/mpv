@@ -146,7 +146,6 @@ SOURCES = audio/audio.c \
           audio/out/ao_pcm.c \
           audio/out/pull.c \
           audio/out/push.c \
-          bstr/bstr.c \
           common/av_common.c \
           common/av_log.c \
           common/codecs.c \
@@ -174,6 +173,8 @@ SOURCES = audio/audio.c \
           input/event.c \
           input/input.c \
           input/keycodes.c \
+          input/pipe.c \
+          misc/bstr.c \
           misc/charset_conv.c \
           misc/dispatch.c \
           misc/rendezvous.c \
@@ -302,7 +303,6 @@ DIRS =  . \
         audio/decode \
         audio/filter \
         audio/out \
-        bstr \
         common \
         compat \
         input \

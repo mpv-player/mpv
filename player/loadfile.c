@@ -391,7 +391,7 @@ double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_re
             return pts - p->start + p->source_start;
         }
     }
-    return -1;
+    return MP_NOPTS_VALUE;
 }
 
 static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
@@ -464,13 +464,15 @@ static int match_lang(char **langs, char *lang)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
  * 3) track is marked default
- * 4) lower track number
- * If select_fallback is not set, 4) is only used to determine whether a
+ * 4) attached picture, HLS bitrate
+ * 5) lower track number
+ * If select_fallback is not set, 5) is only used to determine whether a
  * matching track is preferred over another track. Otherwise, always pick a
  * track (if nothing else matches, return the track with lowest ID).
  */
 // Return whether t1 is preferred over t2
-static bool compare_track(struct track *t1, struct track *t2, char **langs)
+static bool compare_track(struct track *t1, struct track *t2, char **langs,
+                          struct MPOpts *opts)
 {
     bool ext1 = t1->is_external && !t1->no_default;
     bool ext2 = t2->is_external && !t2->no_default;
@@ -485,6 +487,11 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs)
         return t1->default_track;
     if (t1->attached_picture != t2->attached_picture)
         return !t1->attached_picture;
+    if (t1->stream && t2->stream && opts->hls_bitrate) {
+        int d = t1->stream->hls_bitrate - t2->stream->hls_bitrate;
+        if (d)
+            return opts->hls_bitrate == 1 ? d < 0 : d > 0;
+    }
     return t1->user_tid <= t2->user_tid;
 }
 static struct track *select_track(struct MPContext *mpctx,
@@ -500,7 +507,7 @@ static struct track *select_track(struct MPContext *mpctx,
             continue;
         if (track->user_tid == tid)
             return track;
-        if (!pick || compare_track(track, pick, langs))
+        if (!pick || compare_track(track, pick, langs, mpctx->opts))
             pick = track;
     }
     if (pick && !select_fallback && !(pick->is_external && !pick->no_default)
@@ -923,10 +930,13 @@ static void print_resolve_contents(struct mp_log *log,
 static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
 {
     if (pl->first) {
+        struct playlist_entry *new = mp_check_playlist_resume(mpctx, pl);
         playlist_transfer_entries(mpctx->playlist, pl);
         // current entry is replaced
         if (mpctx->playlist->current)
             playlist_remove(mpctx->playlist, mpctx->playlist->current);
+        if (new)
+            mpctx->playlist->current = new;
     } else {
         MP_WARN(mpctx, "Empty playlist!\n");
     }
@@ -1019,6 +1029,20 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->filename = NULL;
     mpctx->shown_aframes = 0;
     mpctx->shown_vframes = 0;
+    mpctx->last_vo_pts = MP_NOPTS_VALUE;
+    mpctx->last_chapter_seek = -2;
+    mpctx->last_chapter_pts = MP_NOPTS_VALUE;
+    mpctx->last_chapter = -2;
+    mpctx->paused = false;
+    mpctx->paused_for_cache = false;
+    mpctx->playing_msg_shown = false;
+    mpctx->step_frames = 0;
+    mpctx->backstep_active = false;
+    mpctx->audio_delay = 0;
+    mpctx->max_frames = -1;
+    mpctx->seek = (struct seek_params){ 0 };
+
+    reset_playback_state(mpctx);
 
     if (mpctx->playlist->current)
         mpctx->filename = mpctx->playlist->current->filename;
@@ -1029,10 +1053,6 @@ static void play_current_file(struct MPContext *mpctx)
     char *local_filename = mp_file_url_to_filename(tmp, bstr0(mpctx->filename));
     if (local_filename)
         mpctx->filename = local_filename;
-
-#if HAVE_ENCODING
-    encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
-#endif
 
     mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION;
 
@@ -1062,9 +1082,10 @@ static void play_current_file(struct MPContext *mpctx)
         ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
 #endif
 
-    MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
+    mpctx->audio_delay = opts->audio_delay;
+    mpctx->max_frames = opts->play_frames;
 
-    //============ Open & Sync STREAM --- fork cache2 ====================
+    MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
     assert(mpctx->stream == NULL);
     assert(mpctx->demuxer == NULL);
@@ -1084,7 +1105,10 @@ static void play_current_file(struct MPContext *mpctx)
         }
         stream_filename = mpctx->resolve_result->url;
     }
-    mpctx->stream = stream_open(stream_filename, mpctx->global);
+    int stream_flags = STREAM_READ;
+    if (!opts->load_unsafe_playlists)
+        stream_flags |= mpctx->playlist->current->stream_flags;
+    mpctx->stream = stream_create(stream_filename, stream_flags, mpctx->global);
     if (!mpctx->stream) { // error...
         demux_was_interrupted(mpctx);
         goto terminate_playback;
@@ -1112,8 +1136,6 @@ goto_reopen_demuxer: ;
 
     //============ Open DEMUXERS --- DETECT file type =======================
 
-    mpctx->audio_delay = opts->audio_delay;
-
     mpctx->demuxer = demux_open(mpctx->stream, opts->demuxer_name, NULL,
                                 mpctx->global);
     mpctx->master_demuxer = mpctx->demuxer;
@@ -1127,16 +1149,13 @@ goto_reopen_demuxer: ;
     mpctx->initialized_flags |= INITIALIZED_DEMUXER;
 
     if (mpctx->demuxer->playlist) {
-        if (mpctx->demuxer->stream->safe_origin || opts->load_unsafe_playlists) {
-            transfer_playlist(mpctx, mpctx->demuxer->playlist);
-        } else {
-            MP_ERR(mpctx, "\nThis looks like a playlist, but playlist support "
-                   "will not be used automatically.\nThe main problem with "
-                   "playlist safety is that playlist entries can be arbitrary,\n"
-                   "and an attacker could make mpv poke around in your local "
-                   "filesystem or network.\nUse --playlist=file or the "
-                   "--load-unsafe-playlists option to load them anyway.\n");
-        }
+        int entry_stream_flags =
+            (mpctx->demuxer->stream->safe_origin ? 0 : STREAM_SAFE_ONLY) |
+            (mpctx->demuxer->stream->is_network ? STREAM_NETWORK_ONLY : 0);
+        struct playlist *pl = mpctx->demuxer->playlist;
+        for (struct playlist_entry *e = pl->first; e; e = e->next)
+            e->stream_flags |= entry_stream_flags;
+        transfer_playlist(mpctx, pl);
         goto terminate_playback;
     }
 
@@ -1250,25 +1269,10 @@ goto_reopen_demuxer: ;
 
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
-    mpctx->max_frames = opts->play_frames;
-
     if (mpctx->max_frames == 0) {
         mpctx->stop_play = PT_NEXT_ENTRY;
         goto terminate_playback;
     }
-
-    reset_playback_state(mpctx);
-
-    mpctx->last_vo_pts = MP_NOPTS_VALUE;
-    mpctx->last_chapter_seek = -2;
-    mpctx->last_chapter_pts = MP_NOPTS_VALUE;
-    mpctx->last_chapter = -2;
-    mpctx->paused = false;
-    mpctx->paused_for_cache = false;
-    mpctx->playing_msg_shown = false;
-    mpctx->step_frames = 0;
-    mpctx->backstep_active = false;
-    mpctx->seek = (struct seek_params){ 0 };
 
     // If there's a timeline force an absolute seek to initialize state
     double startpos = rel_time_to_abs(mpctx, opts->play_start);

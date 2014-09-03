@@ -42,7 +42,9 @@ static void destroy_texture(struct gl_hwdec *hw)
     VAStatus status;
 
     if (p->vaglx_surface) {
+        va_lock(p->ctx);
         status = vaDestroySurfaceGLX(p->display, p->vaglx_surface);
+        va_unlock(p->ctx);
         CHECK_VA_STATUS(p, "vaDestroySurfaceGLX()");
         p->vaglx_surface = NULL;
     }
@@ -98,8 +100,10 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
                    GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
+    va_lock(p->ctx);
     status = vaCreateSurfaceGLX(p->display, GL_TEXTURE_2D,
                                 p->gl_texture, &p->vaglx_surface);
+    va_unlock(p->ctx);
     return CHECK_VA_STATUS(p, "vaCreateSurfaceGLX()") ? 0 : -1;
 }
 
@@ -112,9 +116,11 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!p->vaglx_surface)
         return -1;
 
+    va_lock(p->ctx);
     status = vaCopySurfaceGLX(p->display, p->vaglx_surface,
                               va_surface_id(hw_image),
                               va_get_colorspace_flag(hw_image->params.colorspace));
+    va_unlock(p->ctx);
     if (!CHECK_VA_STATUS(p, "vaCopySurfaceGLX()"))
         return -1;
 

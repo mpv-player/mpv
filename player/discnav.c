@@ -270,7 +270,6 @@ void mp_handle_nav(struct MPContext *mpctx)
         if (nav->nav_still_frame > 0) {
             // gross hack
             mpctx->time_frame += nav->nav_still_frame;
-            mpctx->playing_last_frame = true;
             nav->nav_still_frame = -2;
         } else if (nav->nav_still_frame == -2) {
             struct mp_nav_cmd inp = {MP_NAV_CMD_SKIP_STILL};

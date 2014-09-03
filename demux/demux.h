@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/common.h"
 #include "common/tags.h"
 #include "packet.h"
@@ -35,11 +35,6 @@
 // and the demuxer pretends EOF was reached.
 #define MAX_PACKS 16000
 #define MAX_PACK_BYTES (400 * 1024 * 1024)
-// Minimum total size of packets queued - the demuxer thread will read more
-// packets, until either number or total size of the packets exceed the minimum.
-// This can actually be configured with command line options.
-#define MIN_PACKS 64
-#define MIN_PACK_BYTES (5 * 1024 * 1024)
 
 enum demuxer_type {
     DEMUXER_TYPE_GENERIC = 0,
@@ -59,6 +54,13 @@ enum demux_ctrl {
     DEMUXER_CTRL_RESYNC,
     DEMUXER_CTRL_IDENTIFY_PROGRAM,
     DEMUXER_CTRL_STREAM_CTRL,
+    DEMUXER_CTRL_GET_READER_STATE,
+};
+
+struct demux_ctrl_reader_state {
+    bool eof, underrun, idle;
+    double ts_range[2]; // start, end
+    double ts_duration;
 };
 
 struct demux_ctrl_stream_ctrl {
@@ -239,7 +241,6 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
 bool demux_stream_is_selected(struct sh_stream *stream);
 double demux_get_next_pts(struct sh_stream *sh);
 bool demux_has_packet(struct sh_stream *sh);
-bool demux_stream_eof(struct sh_stream *sh);
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer);
 
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
@@ -254,8 +255,6 @@ void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *c
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, int flags);
-
-char *demux_info_get(struct demuxer *demuxer, const char *opt);
 
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 

@@ -2,7 +2,7 @@ LUA SCRIPTING
 =============
 
 mpv can load Lua scripts. Scripts in ``~/.mpv/lua/`` will be loaded on program
-start, or if passed to ``--lua``. mpv provides the builtin module ``mp``, which
+start, or if passed to ``--lua``. mpv provides the built-in module ``mp``, which
 provides functions to send commands to the mpv core and to retrieve information
 about playback state, user settings, file information, and so on.
 
@@ -74,6 +74,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     These two commands are equivalent, except that the first version breaks
     if the filename contains spaces or certain special characters.
 
+    Note that properties are *not* expanded.  You can use either ``mp.command``,
+    the ``expand-properties`` prefix, or the ``mp.get_property`` family of
+    functions.
+
 ``mp.get_property(name [,def])``
     Return the value of the given property as string. These are the same
     properties as used in input.conf. See `Properties`_ for a list of
@@ -94,9 +98,9 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     will always result in a string.
 
 ``mp.get_property_bool(name [,def])``
-    Similar to ``mp.get_property``, but return the property value as boolean.
+    Similar to ``mp.get_property``, but return the property value as Boolean.
 
-    Returns a boolean on success, or ``def, error`` on error.
+    Returns a Boolean on success, or ``def, error`` on error.
 
 ``mp.get_property_number(name [,def])``
     Similar to ``mp.get_property``, but return the property value as number.
@@ -109,7 +113,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
 ``mp.get_property_native(name [,def])``
     Similar to ``mp.get_property``, but return the property value using the best
-    Lua type for the property. Most time, this will return a string, boolean,
+    Lua type for the property. Most time, this will return a string, Boolean,
     or number. Some properties (for example ``chapter-list``) are returned as
     tables.
 
@@ -124,7 +128,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
 ``mp.set_property_bool(name, value)``
     Similar to ``mp.set_property``, but set the given property to the given
-    boolean value.
+    Boolean value.
 
 ``mp.set_property_number(name, value)``
     Similar to ``mp.set_property``, but set the given property to the given
@@ -159,7 +163,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     (e.g. ``ctrl+a``).
 
     After calling this function, key presses will cause the function ``fn`` to
-    be called (unless the user overmapped the key with another binding).
+    be called (unless the user remapped the key with another binding).
 
     The ``name`` argument should be a short symbolic string. It allows the user
     to remap the key binding via input.conf using the ``script_message``
@@ -197,7 +201,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
 
     This will print the message when the key ``y`` is pressed. (``x`` will
-    still work, unless the user overmaps it.)
+    still work, unless the user remaps it.)
 
     You can also explicitly send a message to a named script only. Assume the
     above script was using the filename ``fooscript.lua``:
@@ -311,7 +315,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
         ``oneshot`` (RW)
             Whether the timer is periodic (``false``) or fires just once
             (``true``). This value is used when the timer expires (but before
-            the timer calback function fn is run).
+            the timer callback function fn is run).
 
 
 ``mp.get_opt(key)``
@@ -373,7 +377,7 @@ are useful only in special situations.
     control what the Lua script does (instead of being called by the default
     event loop), you can set the global variable ``mp_event_loop`` to your
     own function running the event loop. From your event loop, you should call
-    ``mp.dispatch_events()`` to unqueue and dispatch mpv events.
+    ``mp.dispatch_events()`` to dequeue and dispatch mpv events.
 
     If the ``allow_wait`` parameter is set to ``true``, the function will block
     until the next event is received or the next timer expires. Otherwise (and
@@ -481,6 +485,10 @@ mp.utils options
 This built-in module provides generic helper functions for Lua, and have
 strictly speaking nothing to do with mpv or video/audio playback. They are
 provided for convenience. Most compensate for Lua's scarce standard library.
+
+``utils.getcwd()``
+    Returns the directory that mpv was launched from. On error, ``nil, error``
+    is returned.
 
 ``utils.readdir(path [, filter])``
     Enumerate all entries at the given path on the filesystem, and return them

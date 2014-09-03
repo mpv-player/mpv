@@ -37,8 +37,6 @@
 #include "ad.h"
 #include "audio/fmt-conversion.h"
 
-#include "compat/libav.h"
-
 struct priv {
     AVCodecContext *avctx;
     AVFrame *avframe;

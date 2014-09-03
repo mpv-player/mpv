@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "compat/compiler.h"
+#include "osdep/compiler.h"
 #include "talloc.h"
 
 // double should be able to represent this exactly

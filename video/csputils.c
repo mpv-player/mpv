@@ -77,6 +77,28 @@ const char *const mp_chroma_names[MP_CHROMA_COUNT] = {
     "mpeg1/jpeg",
 };
 
+// The short name _must_ match with what vf_stereo3d accepts (if supported).
+// The long name is closer to the Matroska spec (StereoMode element).
+// The numeric index matches the Matroska StereoMode value. If you add entries
+// that don't match Matroska, make sure demux_mkv.c rejects them properly.
+// The long name is unused.
+#define E(index, short, long) [index] = short
+const char *const mp_stereo3d_names[MP_STEREO3D_COUNT] = {
+    E(0,  "mono",   "mono"),                    // unsupported by vf_stereo3d
+    E(1,  "sbs2l",  "side_by_side_left"),
+    E(2,  "ab2r",   "top_bottom_right"),
+    E(3,  "ab2l",   "top_bottom_left"),
+    E(4,  "checkr", "checkboard_right"),        // unsupported by vf_stereo3d
+    E(5,  "checkl", "checkboard_left"),         // unsupported by vf_stereo3d
+    E(6,  "irr",    "row_interleaved_right"),
+    E(7,  "irl",    "row_interleaved_left"),
+    E(8,  "icr",    "column_interleaved_right"),// unsupported by vf_stereo3d
+    E(9,  "icl",    "column_interleaved_left"), // unsupported by vf_stereo3d
+    E(10, "arcc",   "anaglyph_cyan_red"),       // Matroska: unclear which mode
+    E(11, "sbs2r",  "side_by_side_right"),
+    E(12, "agmc",   "anaglyph_green_magenta"),  // Matroska: unclear which mode
+};
+
 enum mp_csp avcol_spc_to_mp_csp(int avcolorspace)
 {
     switch (avcolorspace) {

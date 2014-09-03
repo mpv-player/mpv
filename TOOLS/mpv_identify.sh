@@ -17,157 +17,144 @@
 # When multiple files were specified, their info will be put into FOO_* for the
 # first file, FOO_1_* for the second file, FOO_2_* for the third file, etc.
 
-case "$0" in
-    mpv_identify.sh|*/mpv_identify.sh)
-        # we are NOT being sourced
-        case "$1" in
+__midentify__main() {
+
+    case "$0" in
+        mpv_identify.sh|*/mpv_identify.sh)
+            # we are NOT being sourced
+            [ -n "$1" ] && set -- '' "$@"
+            ;;
+    esac
+
+    if [ "$#" -lt 2 ]; then
+        echo >&2 "Usage 1 (for humans only): $0 filename.mkv"
+        echo >&2 "will print all property values."
+        echo >&2 "Note that this output really shouldn't be parsed, as the"
+        echo >&2 "format is subject to change."
+        echo >&2
+        echo >&2 "Usage 2 (for use by scripts): see top of this file"
+        echo >&2
+        echo >&2 "NOTE: for mkv with ordered chapters, this may"
+        echo >&2 "not always identify the specified file, but the"
+        echo >&2 "file providing the first chapter. Specify"
+        echo >&2 "--no-ordered-chapters to prevent this."
+        return 1
+    fi
+
+    local LF="
+"
+
+    local nextprefix="$1"
+    shift
+
+    if [ -n "$nextprefix" ]; then
+        # in case of error, we always want this unset
+        unset "${nextprefix}path"
+    fi
+
+    local allprops="
+        filename
+        path
+        stream-start
+        stream-end
+        stream-length
+
+        demuxer
+
+        length
+        chapters
+        editions
+        titles
+
+        audio
+        audio-bitrate
+        audio-codec
+        audio-format
+        channels
+        samplerate
+
+        video
+        angle
+        video-bitrate
+        video-codec
+        video-format
+        video-aspect
+        fps
+        width
+        height
+        dwidth
+        dheight
+
+        sub
+    "
+    # TODO add metadata support once mpv can do it
+
+    local propstr="X-MIDENTIFY-START:$LF"
+    local key
+    for key in $allprops; do
+        propstr="${propstr}X-MIDENTIFY: $key \${=$key}$LF"
+        key="$(printf '%s\n' "$key" | tr - _)"
+        unset "$nextprefix$key"
+    done
+
+    local output="$(${MPV:-mpv} --term-playing-msg="$propstr" --vo=null --ao=null \
+                                --frames=1 --quiet --no-cache --no-config -- "$@")"
+    local fileindex=0
+    local prefix=
+    while :; do
+        local line output
+        case "$output" in
             '')
+                break
+                ;;
+            *"$LF"*)
+                line="${output%%$LF*}"
+                output="${output#*$LF}"
                 ;;
             *)
-                set -- '' "$@"
+                line="$output"
+                output=
                 ;;
         esac
-        ;;
-esac
-
-if [ $# -lt 2 ]; then
-    echo >&2 "Usage 1 (for humans only): $0 filename.mkv"
-    echo >&2 "will print all property values."
-    echo >&2 "Note that this output really shouldn't be parsed, as the"
-    echo >&2 "format is subject to change."
-    echo >&2
-    echo >&2 "Usage 2 (for use by scripts): see top of this file"
-    echo >&2
-    echo >&2 "NOTE: for mkv with ordered chapters, this may"
-    echo >&2 "not always identify the specified file, but the"
-    echo >&2 "file providing the first chapter. Specify"
-    echo >&2 "--no-ordered-chapters to prevent this."
-    exit 1
-fi
-
-if [ -z "$MPV" ]; then
-    MPV="mpv"
-fi
-
-__midentify__LF="
-"
-
-__midentify__nextprefix=$1
-shift
-
-if [ -n "$__midentify__nextprefix" ]; then
-    # in case of error, we always want this unset
-    eval unset $__midentify__nextprefix'path'
-fi
-
-__midentify__allprops="
-    filename
-    path
-    stream-start
-    stream-end
-    stream-length
-
-    demuxer
-
-    length
-    chapters
-    editions
-    titles
-
-    audio
-    audio-bitrate
-    audio-codec
-    audio-format
-    channels
-    samplerate
-
-    video
-    angle
-    video-bitrate
-    video-codec
-    video-format
-    video-aspect
-    fps
-    width
-    height
-    dwidth
-    dheight
-
-    sub
-"
-# TODO add metadata support once mpv can do it
-
-__midentify__propstr="X-MIDENTIFY-START:$__midentify__LF"
-for __midentify__key in $__midentify__allprops; do
-    __midentify__propstr=$__midentify__propstr"X-MIDENTIFY: $__midentify__key \${=$__midentify__key}$__midentify__LF"
-    __midentify__key=`echo "$__midentify__key" | tr - _`
-    eval unset $__midentify__nextprefix$__midentify__key
-done
-
-__midentify__output=`$MPV --term-playing-msg="$__midentify__propstr" --vo=null --ao=null --frames=1 --quiet --no-cache --no-config "$@"`
-__midentify__fileindex=0
-__midentify__prefix=
-while :; do
-    case "$__midentify__output" in
-        '')
-            break
-            ;;
-        *$__midentify__LF*)
-            __midentify__line=${__midentify__output%%$__midentify__LF*}
-            __midentify__output=${__midentify__output#*$__midentify__LF}
-            ;;
-        *)
-            __midentify__line=$__midentify__output
-            __midentify__output=
-            ;;
-    esac
-    case "$__midentify__line" in
-        X-MIDENTIFY-START:)
-            if [ -n "$__midentify__nextprefix" ]; then
-                __midentify__prefix=$__midentify__nextprefix
-                if [ $__midentify__fileindex -gt 0 ]; then
-                    __midentify__nextprefix=${__midentify__prefix%$__midentify__fileindex\_}
+        case "$line" in
+            X-MIDENTIFY-START:)
+                if [ -n "$nextprefix" ]; then
+                    prefix="$nextprefix"
+                    if [ "$fileindex" -gt 0 ]; then
+                        nextprefix="${prefix%${fileindex}_}"
+                    fi
+                    fileindex="$(($fileindex+1))"
+                    nextprefix="${nextprefix}${fileindex}_"
+                    for key in $allprops; do
+                        key="$(printf '%s\n' "$key" | tr - _)"
+                        unset "$nextprefix$key"
+                    done
+                else
+                    if [ "$fileindex" -gt 0 ]; then
+                        echo
+                    fi
+                    fileindex="$(($fileindex+1))"
                 fi
-                __midentify__fileindex=$(($__midentify__fileindex+1))
-                __midentify__nextprefix=$__midentify__nextprefix$__midentify__fileindex\_
-                for __midentify__key in $__midentify__allprops; do
-                    __midentify__key=`echo "$__midentify__key" | tr - _`
-                    eval unset $__midentify__nextprefix$__midentify__key
-                done
-            else
-                if [ $__midentify__fileindex -gt 0 ]; then
-                    echo
+                ;;
+            X-MIDENTIFY:\ *)
+                local key="${line#X-MIDENTIFY:\ }"
+                local value="${key#* }"
+                key="${key%% *}"
+                key="$(printf '%s\n' "$key" | tr - _)"
+                if [ -n "$nextprefix" ]; then
+                    if [ -z "$prefix" ]; then
+                        echo >&2 "Got X-MIDENTIFY: without X-MIDENTIFY-START:"
+                    elif [ -n "$value" ]; then
+                        eval "$prefix$key"='"$value"'
+                    fi
+                else
+                    if [ -n "$value" ]; then
+                        echo "$key=$value"
+                    fi
                 fi
-                __midentify__fileindex=$(($__midentify__fileindex+1))
-            fi
-            ;;
-        X-MIDENTIFY:\ *)
-            __midentify__key=${__midentify__line#X-MIDENTIFY:\ }
-            __midentify__value=${__midentify__key#* }
-            __midentify__key=${__midentify__key%% *}
-            __midentify__key=`echo "$__midentify__key" | tr - _`
-            if [ -n "$__midentify__nextprefix" ]; then
-                if [ -z "$__midentify__prefix" ]; then
-                    echo >&2 "Got X-MIDENTIFY: without X-MIDENTIFY-START:"
-                elif [ -n "$__midentify__value" ]; then
-                    eval $__midentify__prefix$__midentify__key=\$__midentify__value
-                fi
-            else
-                if [ -n "$__midentify__value" ]; then
-                    echo "$__midentify__key=$__midentify__value"
-                fi
-            fi
-            ;;
-    esac
-done
+                ;;
+        esac
+    done
+}
 
-unset __midentify__fileindex
-unset __midentify__allprops
-unset __midentify__key
-unset __midentify__LF
-unset __midentify__line
-unset __midentify__output
-unset __midentify__nextprefix
-unset __midentify__prefix
-unset __midentify__propstr
-unset __midentify__value
+__midentify__main "$@"

@@ -42,10 +42,13 @@
 #include "common/msg.h"
 #include "input/input.h"
 
+#include "osdep/timer.h"
+
 #include "wayland_common.h"
 #include "wayland-version.h"
 
 static void draw_image(struct vo *vo, mp_image_t *mpi);
+static void draw_osd(struct vo *vo);
 
 static const struct wl_callback_listener frame_listener;
 static const struct wl_buffer_listener buffer_listener;
@@ -161,13 +164,13 @@ struct priv {
     // this id tells us if the subtitle part has changed or not
     int bitmap_pos_id[MAX_OSD_PARTS];
 
+    int64_t recent_flip_time; // last frame event
+
     // options
     int enable_alpha;
     int use_rgb565;
     int use_triplebuffering;
 };
-
-static void draw_osd(struct vo *vo);
 
 /* copied from weston clients */
 static int set_cloexec_or_close(int fd)
@@ -368,8 +371,10 @@ static void buffer_pool_reinit(struct priv *p,
                                struct wl_shm *shm)
 {
     pool->shm = shm;
+
     if (!pool->buffers)
         pool->buffers = calloc(buffer_no, sizeof(struct buffer));
+
     pool->buffer_no = buffer_no;
     pool->format = fmt->wl_fmt;
     pool->bytes_per_pixel = mp_imgfmt_get_desc(fmt->mp_fmt).bytes[0];
@@ -472,10 +477,9 @@ static struct buffer * buffer_pool_get_no(struct buffer_pool *pool, uint32_t no)
     return &pool->buffers[no];
 }
 
-
 static bool redraw_frame(struct priv *p)
 {
-    draw_image(p->vo, p->original_image);
+    draw_image(p->vo, NULL);
     return true;
 }
 
@@ -621,6 +625,7 @@ static void frame_handle_redraw(void *data,
 
         p->redraw_callback = NULL;
     }
+    p->recent_flip_time = mp_time_us();
 }
 
 static const struct wl_callback_listener frame_listener = {
@@ -656,9 +661,13 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
     struct buffer *buf = buffer_pool_get_back(&p->video_bufpool);
 
+    if (mpi) {
+        talloc_free(p->original_image);
+        p->original_image = mpi;
+    }
+
     if (!buf) {
         MP_VERBOSE(p->wl, "can't draw, back buffer is busy\n");
-        talloc_free(mpi);
         return;
     }
 
@@ -672,8 +681,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     struct mp_image img = buffer_get_mp_image(p, &p->video_bufpool, buf);
 
-    if (mpi) {
-        struct mp_image src = *mpi;
+    if (p->original_image) {
+        struct mp_image src = *p->original_image;
         struct mp_rect src_rc = p->src;
         src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, src.fmt.align_x);
         src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
@@ -684,10 +693,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         mp_image_clear(&img, 0, 0, img.w, img.h);
     }
 
-    if (mpi != p->original_image) {
-        talloc_free(p->original_image);
-        p->original_image = mpi;
-    }
     buffer_finalise_back(buf);
 
     draw_osd(vo);
@@ -905,7 +910,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
     {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(p);
-        return true;
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_RECENT_FLIP_TIME:
+    {
+        *(int64_t*) data = p->recent_flip_time;
+        return VO_TRUE;
     }
     }
     int events = 0;

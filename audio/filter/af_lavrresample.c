@@ -214,8 +214,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     if (avresample_open(s->avrctx) < 0 ||
         avresample_open(s->avrctx_out) < 0)
     {
-        MP_ERR(af, "Cannot open "
-                "Libavresample Context. \n");
+        MP_ERR(af, "Cannot open Libavresample Context. \n");
         return AF_ERROR;
     }
     return AF_OK;
@@ -371,8 +370,7 @@ static int af_open(struct af_instance *af)
     if (s->avrctx && s->avrctx_out) {
         return AF_OK;
     } else {
-        MP_ERR(af, "Cannot initialize "
-               "Libavresample Context. \n");
+        MP_ERR(af, "Cannot initialize Libavresample Context. \n");
         uninit(af);
         return AF_ERROR;
     }

@@ -23,7 +23,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "audio/chmap.h"
 
 // m_option allows to parse, print and copy data of various types.
@@ -56,6 +56,7 @@ extern const m_option_type_t m_option_type_msglevels;
 extern const m_option_type_t m_option_type_print_fn;
 extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_imgfmt;
+extern const m_option_type_t m_option_vid_stereo_mode;
 extern const m_option_type_t m_option_type_fourcc;
 extern const m_option_type_t m_option_type_afmt;
 extern const m_option_type_t m_option_type_color;
@@ -648,8 +649,11 @@ extern const char m_option_path_separator;
 #define OPT_TRACKCHOICE(name, var) \
     OPT_CHOICE_OR_INT(name, var, 0, 1, 8190, ({"no", -2}, {"auto", -1}))
 
+#define OPT_VID_STEREO_MODE(...) \
+    OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_vid_stereo_mode)
+
 #define OPT_STRING_VALIDATE_(optname, varname, flags, validate_fn, ...)        \
-    OPT_GENERAL(char*, optname, varname, flags, __VA_ARGS__,                                            \
+    OPT_GENERAL(char*, optname, varname, flags, __VA_ARGS__,                   \
                 .priv = MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn))
 #define OPT_STRING_VALIDATE(...) \
     OPT_STRING_VALIDATE_(__VA_ARGS__, .type = &m_option_type_string)

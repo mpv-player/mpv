@@ -79,6 +79,19 @@ enum mp_render_intent {
     MP_INTENT_ABSOLUTE_COLORIMETRIC = 3
 };
 
+// The numeric values (except -1) match the Matroska StereoMode element value.
+enum mp_stereo3d_mode {
+    MP_STEREO3D_INVALID = -1,
+    MP_STEREO3D_MONO = 0,
+    /* no explicit enum entries for most valid values */
+    MP_STEREO3D_COUNT = 13, // 12 is last valid mode
+};
+
+extern const char *const mp_stereo3d_names[MP_STEREO3D_COUNT];
+
+#define MP_STEREO3D_NAME(x) \
+    ((x) >= 0 && (x) < MP_STEREO3D_COUNT ? (char *)mp_stereo3d_names[(x)] : NULL)
+
 struct mp_csp_details {
     enum mp_csp format;
     enum mp_csp_levels levels_in;      // encoded video

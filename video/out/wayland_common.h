@@ -41,6 +41,7 @@ struct vo_wayland_output {
     uint32_t flags;
     int32_t width;
     int32_t height;
+    int32_t refresh_rate; // fps (mHz)
     struct wl_list link;
 };
 
@@ -72,7 +73,7 @@ struct vo_wayland_state {
 
         struct wl_list output_list;
         struct wl_output *fs_output; /* fullscreen output */
-        int output_mode_received;
+        struct vo_wayland_output *current_output;
 
         int display_fd;
 

@@ -38,36 +38,36 @@ Available video output drivers are:
     .. note:: This driver is for compatibility with old systems.
 
     ``adaptor=<number>``
-        Select a specific XVideo adaptor (check xvinfo results).
+        Select a specific XVideo adapter (check xvinfo results).
     ``port=<number>``
         Select a specific XVideo port.
     ``ck=<cur|use|set>``
-        Select the source from which the colorkey is taken (default: cur).
+        Select the source from which the color key is taken (default: cur).
 
         cur
-          The default takes the colorkey currently set in Xv.
+          The default takes the color key currently set in Xv.
         use
-          Use but do not set the colorkey from mpv (use the ``--colorkey``
+          Use but do not set the color key from mpv (use the ``--colorkey``
           option to change it).
         set
-          Same as use but also sets the supplied colorkey.
+          Same as use but also sets the supplied color key.
 
     ``ck-method=<man|bg|auto>``
-        Sets the colorkey drawing method (default: man).
+        Sets the color key drawing method (default: man).
 
         man
-          Draw the colorkey manually (reduces flicker in some cases).
+          Draw the color key manually (reduces flicker in some cases).
         bg
-          Set the colorkey as window background.
+          Set the color key as window background.
         auto
-          Let Xv draw the colorkey.
+          Let Xv draw the color key.
 
     ``colorkey=<number>``
-        Changes the colorkey to an RGB value of your choice. ``0x000000`` is
+        Changes the color key to an RGB value of your choice. ``0x000000`` is
         black and ``0xffffff`` is white.
 
     ``no-colorkey``
-        Disables colorkeying.
+        Disables color-keying.
 
 ``x11`` (X11 only)
     Shared memory video output driver without hardware acceleration that works
@@ -82,7 +82,7 @@ Available video output drivers are:
     .. note::
 
         Earlier versions of mpv (and MPlayer, mplayer2) provided sub-options
-        to tune vdpau postprocessing, like ``deint``, ``sharpen``, ``denoise``,
+        to tune vdpau post-processing, like ``deint``, ``sharpen``, ``denoise``,
         ``chroma-deint``, ``pullup``, ``hqscaling``. These sub-options are
         deprecated, and you should use the ``vdpaupp`` video filter instead.
 
@@ -173,7 +173,7 @@ Available video output drivers are:
         to a YUV format before the VO. Sometimes useful to force availability
         of certain YUV-only features, like video equalizer or deinterlacing.
 
-    Using the VDPAU frame queueing functionality controlled by the queuetime
+    Using the VDPAU frame queuing functionality controlled by the queuetime
     options makes mpv's frame flip timing less sensitive to system CPU load and
     allows mpv to start decoding the next frame(s) slightly earlier, which can
     reduce jitter caused by individual slow-to-decode frames. However, the
@@ -282,7 +282,7 @@ Available video output drivers are:
 
     Hardware decoding over OpenGL-interop is supported to some degree. Note
     that in this mode, some corner case might not be gracefully handled, and
-    colorspace conversion and chroma upsampling is generally in the hand of
+    color space conversion and chroma upsampling is generally in the hand of
     the hardware decoder APIs.
 
     ``lscale=<filter>``
@@ -296,6 +296,9 @@ Available video output drivers are:
 
         ``lanczos3``
             Lanczos with radius=3.
+
+        ``lanczos``
+            Generic Lanczos scaling filter. Set radius with ``lradius``.
 
         ``spline36``
             This is the default when using ``opengl-hq``.
@@ -316,6 +319,14 @@ Available video output drivers are:
             Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
             ``lparam1`` and ``lparam2``. Both are set to 1/3 by default.
 
+        ``gaussian``
+            Gaussian filter with a parameter ``p`` for sharpness control.
+            ``p`` can be set to float number between 1(blurry) and 100(sharp)
+            and has a default value of about 28.8 (see ``lparam1``).
+
+            Note that for extremely small value of ``p``, a large filter radius
+            might be required to avoid unintended artifacts (see ``lradius``).
+
 
         There are some more filters. For a complete list, pass ``help`` as
         value, e.g.::
@@ -328,6 +339,16 @@ Available video output drivers are:
 
     ``lparam2=<value>``
         See ``lparam1``.
+
+    ``lradius=<r>``
+        Set radius for filters listed below, must be a float number between 1.0
+        and 8.0. Defaults to be 2.0 if not specified.
+
+            ``sinc``, ``lanczos``, ``blackman``, ``gaussian``
+
+        Note that depending on filter implementation details and video scaling
+        ratio, the radius that actually being used might be different
+        (most likely being increased a bit).
 
     ``scaler-resizes-only``
         Disable the scaler if the video image is not resized. In that case,
@@ -349,7 +370,7 @@ Available video output drivers are:
         green-magenta
             Convert side by side input to full-color green-magenta stereo.
         quadbuffer
-            Convert side by side input to quadbuffered stereo. Only supported
+            Convert side by side input to quad buffered stereo. Only supported
             by very few OpenGL cards.
 
     ``srgb``
@@ -430,6 +451,11 @@ Available video output drivers are:
         RGB. If chroma is not subsampled, this option is ignored, and the
         luma scaler is used instead. Setting this option is often useless.
 
+    ``cparam1``, ``cparam2``, ``cradius``
+        Set filter parameters and radius for ``cscale``.
+
+        See ``lparam1``, ``lparam2`` and ``lradius``.
+
     ``fancy-downscaling``
         When using convolution based filters, extend the filter size
         when downscaling. Trades quality for reduced downscaling performance.
@@ -439,7 +465,16 @@ Available video output drivers are:
         Borders will be distorted due to filtering.
 
     ``glfinish``
-        Call ``glFinish()`` before swapping buffers
+        Call ``glFinish()`` before and after swapping buffers (default: disabled).
+        Slower, but might help getting better results when doing framedropping.
+        The details depend entirely on the OpenGL driver.
+
+    ``waitvsync``
+        Call ``glXWaitVideoSyncSGI`` after each buffer swap (default: disabled).
+        This may or may not help with video timing accuracy and frame drop. It's
+        possible that this makes video output slower, or has no effect at all.
+
+        X11 only.
 
     ``sw``
         Continue even if a software renderer is detected.
@@ -452,7 +487,7 @@ Available video output drivers are:
         auto
             auto-select (default)
         cocoa
-            Cocoa/OSX
+            Cocoa/OS X
         win
             Win32/WGL
         x11
@@ -479,7 +514,7 @@ Available video output drivers are:
 
     ``gamma=<0.0..10.0>``
         Set a gamma value. If gamma is adjusted in other ways (like with
-        the ``--gamma`` option or keybindings and the ``gamma`` property), the
+        the ``--gamma`` option or key bindings and the ``gamma`` property), the
         value is multiplied with the other gamma value.
 
         Setting this value to 1.0 can be used to always enable gamma control.
@@ -487,7 +522,7 @@ Available video output drivers are:
 
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.
-        Needs LittleCMS2 support compiled in. This option overrides the ``srgb``
+        Needs LittleCMS 2 support compiled in. This option overrides the ``srgb``
         property, as using both is somewhat redundant. It also enables linear
         light scaling.
 
@@ -500,12 +535,12 @@ Available video output drivers are:
 
     ``icc-cache=<file>``
         Store and load the 3D LUT created from the ICC profile in this file.
-        This can be used to speed up loading, since LittleCMS2 can take a while
+        This can be used to speed up loading, since LittleCMS 2 can take a while
         to create the 3D LUT. Note that this file contains an uncompressed LUT.
         Its size depends on the ``3dlut-size``, and can be very big.
 
     ``icc-intent=<value>``
-        Specifies the ICC Intent used for transformations between colorspaces.
+        Specifies the ICC Intent used for transformations between color spaces.
         This affects the rendering when using ``icc-profile`` or ``srgb`` and
         also affects the way DCP XYZ content gets converted to RGB.
 
@@ -562,7 +597,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:lscale=spline36:dither-depth=auto:fbo-format=rgb16
+        --vo=opengl:lscale=spline36:dither-depth=auto:fbo-format=rgba16
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
@@ -571,7 +606,7 @@ Available video output drivers are:
     can achieve better quality or performance by changing the ``fbo-format``
     suboption to ``rgb16f``, ``rgb32f`` or ``rgb``. Known problems include
     Mesa/Intel not accepting ``rgb16``, Mesa sometimes not being compiled with
-    float texture support, and some OSX setups being very slow with ``rgb16``
+    float texture support, and some OS X setups being very slow with ``rgb16``
     but fast with ``rgb32f``.
 
 ``opengl-old``
@@ -706,7 +741,7 @@ Available video output drivers are:
         2
             Convert side by side input to full-color green-magenta stereo.
         3
-            Convert side by side input to quadbuffered stereo. Only supported
+            Convert side by side input to quad buffered stereo. Only supported
             by very few OpenGL cards.
 
     The following options are only useful if writing your own fragment programs.
@@ -748,7 +783,7 @@ Available video output drivers are:
         auto
             auto-select (default)
         cocoa
-            Cocoa/OSX
+            Cocoa/OS X
         win
             Win32/WGL
         x11

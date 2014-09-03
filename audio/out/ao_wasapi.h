@@ -28,7 +28,7 @@
 #include <mmdeviceapi.h>
 #include <avrt.h>
 
-#include "compat/atomics.h"
+#include "osdep/atomics.h"
 
 typedef struct wasapi_state {
     struct mp_log *log;

@@ -144,9 +144,6 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("cache-seek-min", stream_cache.seek_min, 0, 0, 0x7fffffff),
     OPT_STRING("cache-file", stream_cache.file, 0),
     OPT_INTRANGE("cache-file-size", stream_cache.file_max, 0, 0, 0x7fffffff),
-    OPT_CHOICE_OR_INT("cache-pause-below", stream_cache_pause, 0, 0, 0x7fffffff,
-                      ({"no", 0})),
-    OPT_INTRANGE("cache-pause-restart", stream_cache_unpause, 0, 0, 0x7fffffff),
 
 #if HAVE_DVDREAD || HAVE_DVDNAV
     OPT_STRING("dvd-device", dvd_device, 0),
@@ -205,6 +202,9 @@ const m_option_t mp_opts[] = {
     OPT_STRING("quvi-format", quvi_format, 0),
     OPT_FLAG("quvi-fetch-subtitles", quvi_fetch_subtitles, 0),
 
+    OPT_CHOICE("hls-bitrate", hls_bitrate, M_OPT_FIXED,
+               ({"no", 0}, {"min", 1}, {"max", 2})),
+
 #if HAVE_CDDA
     OPT_SUBSTRUCT("cdda", stream_cdda_opts, stream_cdda_conf, 0),
     OPT_STRING("cdrom-device", cdrom_device, 0),
@@ -216,8 +216,12 @@ const m_option_t mp_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
+    OPT_DOUBLE("demuxer-readahead-secs", demuxer_min_secs, M_OPT_MIN, .min = 0),
     OPT_INTRANGE("demuxer-readahead-packets", demuxer_min_packs, 0, 0, MAX_PACKS),
     OPT_INTRANGE("demuxer-readahead-bytes", demuxer_min_bytes, 0, 0, MAX_PACK_BYTES),
+
+    OPT_DOUBLE("cache-secs", demuxer_min_secs_cache, M_OPT_MIN, .min = 0),
+    OPT_FLAG("cache-pause", cache_pausing, 0),
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
     OPT_STRING("mf-type", mf_type, 0),
@@ -375,6 +379,7 @@ const m_option_t mp_opts[] = {
     // vo name (X classname) and window title strings
     OPT_STRING("x11-name", vo.winname, 0),
     OPT_STRING("title", wintitle, 0),
+    OPT_STRING("media-title", media_title, 0),
     // set aspect ratio of monitor - useful for 16:9 TV-out
     OPT_FLOATRANGE("monitoraspect", vo.force_monitor_aspect, 0, 0.0, 9.0),
     OPT_FLOATRANGE("monitorpixelaspect", vo.monitor_pixel_aspect, 0, 0.2, 9.0),
@@ -414,6 +419,7 @@ const m_option_t mp_opts[] = {
                 {"BT.2020", MP_CSP_PRIM_BT_2020})),
     OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 359,
                       ({"no", -1})),
+    OPT_VID_STEREO_MODE("video-stereo-mode", video_stereo_mode, 0),
 
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
@@ -458,7 +464,13 @@ const m_option_t mp_opts[] = {
 
     OPT_CHOICE("framedrop", frame_dropping, 0,
                ({"no", 0},
-                {"yes", 1})),
+                {"vo", 1},
+                {"decoder", 2},
+                {"decoder+vo", 3})),
+
+    OPT_DOUBLE("display-fps", frame_drop_fps, M_OPT_MIN, .min = 0),
+
+    OPT_FLAG("audiodrop", insert_silence, 0),
 
     OPT_FLAG("untimed", untimed, M_OPT_FIXED),
 
@@ -504,6 +516,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("term-osd-bar-chars", term_osd_bar_chars, 0),
 
     OPT_STRING("term-playing-msg", playing_msg, 0),
+    OPT_STRING("osd-playing-msg", osd_playing_msg, 0),
     OPT_STRING("term-status-msg", status_msg, 0),
     OPT_STRING("osd-status-msg", osd_status_msg, 0),
 
@@ -525,6 +538,8 @@ const m_option_t mp_opts[] = {
 #if HAVE_ENCODING
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
+
+    OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
 
     {0}
 };
@@ -589,18 +604,20 @@ const struct MPOpts mp_default_opts = {
         .seek_min = 500,
         .file_max = 1024 * 1024,
     },
-    .stream_cache_pause = 50,
-    .stream_cache_unpause = 100,
-    .demuxer_thread = 0,
-    .demuxer_min_packs = MIN_PACKS,
-    .demuxer_min_bytes = MIN_PACK_BYTES,
+    .demuxer_thread = 1,
+    .demuxer_min_packs = 0,
+    .demuxer_min_bytes = 0,
+    .demuxer_min_secs = 0.2,
     .network_rtsp_transport = 2,
+    .demuxer_min_secs_cache = 2,
+    .cache_pausing = 1,
     .chapterrange = {-1, -1},
     .edition_id = -1,
     .default_max_pts_correction = -1,
     .correct_pts = 1,
     .user_pts_assoc_mode = 1,
     .initial_audio_sync = 1,
+    .frame_dropping = 1,
     .term_osd = 2,
     .term_osd_bar_chars = "[-+-]",
     .consolecontrols = 1,

@@ -28,17 +28,15 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/pixdesc.h>
 
-#include "compat/libav.h"
-
 #include "talloc.h"
 #include "config.h"
 #include "common/msg.h"
 #include "options/options.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
 
-#include "compat/mpbswap.h"
+#include "osdep/mpbswap.h"
 #include "video/fmt-conversion.h"
 
 #include "vd.h"
@@ -158,6 +156,17 @@ static bool hwdec_codec_allowed(struct dec_video *vd, const char *codec)
             return true;
     }
     return false;
+}
+
+static void hwdec_lock(struct lavc_ctx *ctx)
+{
+    if (ctx->hwdec && ctx->hwdec->lock)
+        ctx->hwdec->lock(ctx);
+}
+static void hwdec_unlock(struct lavc_ctx *ctx)
+{
+    if (ctx->hwdec && ctx->hwdec->unlock)
+        ctx->hwdec->unlock(ctx);
 }
 
 // Find the correct profile entry for the current codec and profile.
@@ -476,6 +485,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .chroma_location =
             avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
         .rotate = vd->header->video->rotate,
+        .stereo_in = vd->header->video->stereo_mode,
     };
 
     if (opts->video_rotate < 0) {
@@ -483,6 +493,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
     } else {
         out_params->rotate = (out_params->rotate + opts->video_rotate) % 360;
     }
+    out_params->stereo_out = opts->video_stereo_mode;
 }
 
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
@@ -608,7 +619,9 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 
     mp_set_av_packet(&pkt, packet, NULL);
 
+    hwdec_lock(ctx);
     ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
+    hwdec_unlock(ctx);
     if (ret < 0) {
         MP_WARN(vd, "Error while decoding frame!\n");
         return -1;

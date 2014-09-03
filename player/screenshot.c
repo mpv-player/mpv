@@ -28,7 +28,7 @@
 #include "screenshot.h"
 #include "core.h"
 #include "command.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/msg.h"
 #include "options/path.h"
 #include "video/mp_image.h"

@@ -442,6 +442,8 @@ int m_property_double_ro(int action, void *arg, double var)
 
 int m_property_strdup_ro(int action, void* arg, const char *var)
 {
+    if (!var)
+        return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
         *(char **)arg = talloc_strdup(NULL, var);

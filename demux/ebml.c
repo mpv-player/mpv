@@ -34,7 +34,7 @@
 #include "talloc.h"
 #include "ebml.h"
 #include "stream/stream.h"
-#include "compat/mpbswap.h"
+#include "osdep/mpbswap.h"
 #include "common/msg.h"
 
 // Whether the id is a known Matroska level 1 element (allowed as element on

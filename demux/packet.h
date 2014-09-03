@@ -34,13 +34,11 @@ typedef struct demux_packet {
     bool keyframe;
     int stream; // source stream index
     struct demux_packet *next;
-    void *allocation;
-    struct AVPacket *avpacket;   // original libavformat packet (demux_lavf)
+    struct AVPacket *avpacket;   // keep the buffer allocation
 } demux_packet_t;
 
 struct demux_packet *new_demux_packet(size_t len);
-// data must already have suitable padding
-struct demux_packet *new_demux_packet_fromdata(void *data, size_t len);
+struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt);
 struct demux_packet *new_demux_packet_from(void *data, size_t len);
 void demux_packet_shorten(struct demux_packet *dp, size_t len);
 void free_demux_packet(struct demux_packet *dp);

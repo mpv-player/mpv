@@ -37,10 +37,43 @@ chomp $vf_str;
 $protos_str .= qq{$_ } foreach (@protos);
 chomp $protos_str;
 
+my $profile_comp = <<'EOS';
+      local -a profiles
+      local current
+      for current in "${(@f)$($words[1] --profile=help)}"; do
+        current=${current//\*/\\\*}
+        current=${current//\:/\\\:}
+        current=${current//\[/\\\[}
+        current=${current//\]/\\\]}
+        if [[ $current =~ $'\t'([^$'\t']*)$'\t'(.*) ]]; then
+          if [[ -n $match[2] ]]; then
+            current="$match[1][$match[2]]"
+          else
+            current="$match[1]"
+          fi
+          profiles=($profiles $current)
+        fi
+      done
+      if [[ $state == profile ]]; then
+        # For --show-profile, only one allowed
+        if (( ${#profiles} > 0 )); then
+          _values 'profile' $profiles && rc=0
+        fi
+      else
+        # For --profile, multiple allowed
+        profiles=($profiles 'help[list profiles]')
+        _values -s , 'profile(s)' $profiles && rc=0
+      fi
+EOS
+chomp $profile_comp;
+
 my $tmpl = <<"EOS";
 #compdef mpv
 
 # mpv zsh completion
+
+local curcontext="\$curcontext" state state_descr line
+typeset -A opt_args
 
 local rc=1
 
@@ -85,14 +118,19 @@ $vf_str
     _describe -t values 'video filters' values && rc=0
   ;;
 
+  profile|profiles)
+$profile_comp
+  ;;
+
   mfiles)
+    local expl
     _tags files urls
     while _tags; do
       _requested files expl 'media file' _files -g \\
          "*.(#i)(asf|asx|avi|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|qt|rm|ts|vob|wav|webm|wma|wmv)(-.)" && rc=0
       if _requested urls; then
         while _next_label urls expl URL; do
-          _urls "\$expl[@]" && ret=0
+          _urls "\$expl[@]" && rc=0
           compadd -S '' "\$expl[@]" $protos_str && rc=0
         done
       fi
@@ -137,6 +175,8 @@ sub parse_opts {
             $entry .= '->vo' if ($1 eq '--vo');
             $entry .= '->af' if ($1 eq '--af');
             $entry .= '->vf' if ($1 eq '--vf');
+            $entry .= '->profiles' if ($1 eq '--profile');
+            $entry .= '->profile' if ($1 eq '--show-profile');
         }
 
         push @list, $entry

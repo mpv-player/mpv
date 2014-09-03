@@ -974,5 +974,7 @@ static const char *const replaced_opts =
     "|status-msg#--term-status-msg"
     "|idx#--index"
     "|forceidx#--index"
+    "|cache-pause-below#for 'no', use --no-cache-pause"
+    "|no-cache-pause-below#--no-cache-pause"
     "|"
 ;

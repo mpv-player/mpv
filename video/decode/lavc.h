@@ -60,6 +60,9 @@ struct vd_lavc_hwdec {
                                        int w, int h);
     // Process the image returned by the libavcodec decoder.
     struct mp_image *(*process_image)(struct lavc_ctx *ctx, struct mp_image *img);
+    // For horrible Intel shit-drivers only
+    void (*lock)(struct lavc_ctx *ctx);
+    void (*unlock)(struct lavc_ctx *ctx);
 };
 
 enum {

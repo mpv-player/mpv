@@ -109,7 +109,9 @@ struct demux_internal {
     bool warned_queue_overflow;
     bool last_eof;              // last actual global EOF status
     bool eof;                   // whether we're in EOF state (reset for retry)
+    bool idle;
     bool autoselect;
+    double min_secs;
     int min_packs;
     int min_bytes;
 
@@ -137,9 +139,15 @@ struct demux_stream {
     bool eof;               // end of demuxed stream? (true if all buffer empty)
     size_t packs;           // number of packets in buffer
     size_t bytes;           // total bytes of packets in buffer
+    double base_ts;         // timestamp of the last packet returned to decoder
+    double last_ts;         // timestamp of the last packet added to queue
     struct demux_packet *head;
     struct demux_packet *tail;
 };
+
+// If one of the values is NOPTS, always pick the other one.
+#define MP_PTS_MIN(a, b) ((a) == MP_NOPTS_VALUE || ((a) > (b)) ? (b) : (a))
+#define MP_PTS_MAX(a, b) ((a) == MP_NOPTS_VALUE || ((a) < (b)) ? (b) : (a))
 
 static void demuxer_sort_chapters(demuxer_t *demuxer);
 static void *demux_thread(void *pctx);
@@ -157,6 +165,7 @@ static void ds_flush(struct demux_stream *ds)
     ds->head = ds->tail = NULL;
     ds->packs = 0;
     ds->bytes = 0;
+    ds->last_ts = ds->base_ts = MP_NOPTS_VALUE;
     ds->eof = false;
     ds->active = false;
 }
@@ -294,6 +303,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
         // first packet in stream
         ds->head = ds->tail = dp;
     }
+
     // obviously not true anymore
     ds->eof = false;
     in->last_eof = in->eof = false;
@@ -303,11 +313,17 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     if (stream->type != STREAM_VIDEO && dp->pts == MP_NOPTS_VALUE)
         dp->pts = dp->dts;
 
+    double ts = dp->dts == MP_NOPTS_VALUE ? dp->pts : dp->dts;
+    if (ts != MP_NOPTS_VALUE && (ts > ds->last_ts || ts + 10 < ds->last_ts))
+        ds->last_ts = ts;
+    if (ds->base_ts == MP_NOPTS_VALUE)
+        ds->base_ts = ds->last_ts;
+
     MP_DBG(in, "append packet to %s: size=%d pts=%f dts=%f pos=%"PRIi64" "
            "[num=%zd size=%zd]\n", stream_type_name(stream->type),
            dp->len, dp->pts, dp->dts, dp->pos, ds->packs, ds->bytes);
 
-    if (ds->in->wakeup_cb)
+    if (ds->in->wakeup_cb && !ds->head->next)
         ds->in->wakeup_cb(ds->in->wakeup_cb_ctx);
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
@@ -318,6 +334,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 static bool read_packet(struct demux_internal *in)
 {
     in->eof = false;
+    in->idle = true;
 
     // Check if we need to read a new packet. We do this if all queues are below
     // the minimum, or if a stream explicitly needs new packets. Also includes
@@ -326,10 +343,12 @@ static bool read_packet(struct demux_internal *in)
     size_t packs = 0, bytes = 0;
     for (int n = 0; n < in->d_buffer->num_streams; n++) {
         struct demux_stream *ds = in->d_buffer->streams[n]->ds;
-        active |= ds->selected && ds->active;
+        active |= ds->active;
         read_more |= ds->active && !ds->head;
         packs += ds->packs;
         bytes += ds->bytes;
+        if (ds->active && ds->last_ts != MP_NOPTS_VALUE && in->min_secs > 0)
+            read_more |= ds->last_ts - ds->base_ts < in->min_secs;
     }
     MP_DBG(in, "packets=%zd, bytes=%zd, active=%d, more=%d\n",
            packs, bytes, active, read_more);
@@ -360,6 +379,7 @@ static bool read_packet(struct demux_internal *in)
 
     // Actually read a packet. Drop the lock while doing so, because waiting
     // for disk or network I/O can take time.
+    in->idle = false;
     pthread_mutex_unlock(&in->lock);
     struct demuxer *demux = in->d_thread;
     bool eof = !demux->desc->fill_buffer || demux->desc->fill_buffer(demux) <= 0;
@@ -475,8 +495,12 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     ds->bytes -= pkt->len;
     ds->packs--;
 
+    double ts = pkt->dts == MP_NOPTS_VALUE ? pkt->pts : pkt->dts;
+    if (ts != MP_NOPTS_VALUE)
+        ds->base_ts = ts;
+
     // This implies this function is actually called from "the" user thread.
-    if (pkt && pkt->pos >= 0)
+    if (pkt->pos >= ds->in->d_user->filepos)
         ds->in->d_user->filepos = pkt->pos;
 
     return pkt;
@@ -556,18 +580,6 @@ bool demux_has_packet(struct sh_stream *sh)
         pthread_mutex_unlock(&sh->ds->in->lock);
     }
     return has_packet;
-}
-
-// Return whether EOF was returned with an earlier packet read.
-bool demux_stream_eof(struct sh_stream *sh)
-{
-    bool eof = false;
-    if (sh) {
-        pthread_mutex_lock(&sh->ds->in->lock);
-        eof = sh->ds->eof && !sh->ds->head;
-        pthread_mutex_unlock(&sh->ds->in->lock);
-    }
-    return eof;
 }
 
 // Read and return any packet we find.
@@ -803,6 +815,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .d_thread = talloc(demuxer, struct demuxer),
         .d_buffer = talloc(demuxer, struct demuxer),
         .d_user = demuxer,
+        .min_secs = stream->uncached_stream ? demuxer->opts->demuxer_min_secs_cache
+                                            : demuxer->opts->demuxer_min_secs,
         .min_packs = demuxer->opts->demuxer_min_packs,
         .min_bytes = demuxer->opts->demuxer_min_bytes,
     };
@@ -911,6 +925,8 @@ static void flush_locked(demuxer_t *demuxer)
     demuxer->in->warned_queue_overflow = false;
     demuxer->in->eof = false;
     demuxer->in->last_eof = false;
+    demuxer->in->idle = true;
+    demuxer->filepos = -1; // implicitly synchronized
 }
 
 // clear the packet queues
@@ -948,11 +964,6 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
     pthread_mutex_unlock(&in->lock);
 
     return 1;
-}
-
-char *demux_info_get(demuxer_t *demuxer, const char *opt)
-{
-    return mp_tags_get_str(demuxer->metadata, opt);
 }
 
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
@@ -1106,6 +1117,10 @@ static void update_cache(struct demux_internal *in)
 // must be called locked
 static int cached_stream_control(struct demux_internal *in, int cmd, void *arg)
 {
+    // If the cache is active, wake up the thread to possibly update cache state.
+    if (in->stream_cache_size >= 0)
+        pthread_cond_signal(&in->wakeup);
+
     switch (cmd) {
     case STREAM_CTRL_GET_CACHE_SIZE:
         if (in->stream_cache_size < 0)
@@ -1150,7 +1165,29 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
     }
     case DEMUXER_CTRL_SWITCHED_TRACKS:
         in->tracks_switched = true;
+        pthread_cond_signal(&in->wakeup);
         return DEMUXER_CTRL_OK;
+    case DEMUXER_CTRL_GET_READER_STATE: {
+        struct demux_ctrl_reader_state *r = arg;
+        *r = (struct demux_ctrl_reader_state){
+            .eof = in->last_eof,
+            .ts_range = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
+            .ts_duration = -1,
+        };
+        for (int n = 0; n < in->d_user->num_streams; n++) {
+            struct demux_stream *ds = in->d_user->streams[n]->ds;
+            if (ds->active) {
+                r->underrun |= !ds->head;
+                r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
+                r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);
+            }
+        }
+        r->idle = (in->idle && !r->underrun) || r->eof;
+        r->underrun &= !r->idle;
+        if (r->ts_range[0] != MP_NOPTS_VALUE && r->ts_range[1] != MP_NOPTS_VALUE)
+            r->ts_duration = r->ts_range[1] - r->ts_range[0];
+        return DEMUXER_CTRL_OK;
+    }
     }
     return DEMUXER_CTRL_DONTKNOW;
 }
@@ -1161,7 +1198,6 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
 
     if (in->threading) {
         pthread_mutex_lock(&in->lock);
-        pthread_cond_signal(&in->wakeup);
         int cr = cached_demux_control(in, cmd, arg);
         pthread_mutex_unlock(&in->lock);
         if (cr != DEMUXER_CTRL_DONTKNOW)

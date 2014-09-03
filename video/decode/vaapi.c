@@ -44,10 +44,11 @@
  * - 1 decode frame
  * - decoding 2 frames ahead (done by generic playback code)
  * - keeping the reference to the previous frame (done by vo_vaapi.c)
+ * - keeping the reference to a dropped frame (done by vo.c)
  * Note that redundant additional surfaces also might allow for some
  * buffering (i.e. not trying to reuse a surface while it's busy).
  */
-#define ADDTIONAL_SURFACES 4
+#define ADDTIONAL_SURFACES 5
 
 // Magic number taken from original MPlayer vaapi patch.
 #define MAX_DECODER_SURFACES 21
@@ -186,6 +187,8 @@ static void destroy_decoder(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
 
+    va_lock(p->ctx);
+
     if (p->va_context->context_id != VA_INVALID_ID) {
         vaDestroyContext(p->display, p->va_context->context_id);
         p->va_context->context_id = VA_INVALID_ID;
@@ -195,6 +198,8 @@ static void destroy_decoder(struct lavc_ctx *ctx)
         vaDestroyConfig(p->display, p->va_context->config_id);
         p->va_context->config_id = VA_INVALID_ID;
     }
+
+    va_unlock(p->ctx);
 
     mp_image_pool_clear(p->pool);
 }
@@ -217,6 +222,8 @@ static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
     int res = -1;
 
     destroy_decoder(ctx);
+
+    va_lock(p->ctx);
 
     const struct hwdec_profile_entry *pe = hwdec_find_profile(ctx, profiles);
     if (!pe) {
@@ -299,6 +306,7 @@ static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
 
     res = 0;
 error:
+    va_unlock(p->ctx);
     talloc_free(tmp);
     return res;
 }
@@ -454,6 +462,18 @@ static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
     return img;
 }
 
+static void intel_shit_lock(struct lavc_ctx *ctx)
+{
+    struct priv *p = ctx->hwdec_priv;
+    va_lock(p->ctx);
+}
+
+static void intel_crap_unlock(struct lavc_ctx *ctx)
+{
+    struct priv *p = ctx->hwdec_priv;
+    va_unlock(p->ctx);
+}
+
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .type = HWDEC_VAAPI,
     .image_format = IMGFMT_VAAPI,
@@ -462,6 +482,8 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .uninit = uninit,
     .init_decoder = init_decoder,
     .allocate_image = allocate_image,
+    .lock = intel_shit_lock,
+    .unlock = intel_crap_unlock,
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {

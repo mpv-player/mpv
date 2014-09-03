@@ -162,14 +162,13 @@ options_state_machine() {
 
     opt_yes_no _gl          "OpenGL video output"
     opt_yes_no _libguess    "libguess"
-    opt_yes_no _terminfo    "terminfo database for key codes"
-    opt_yes_no _termcap     "termcap database for key codes"
+    opt_yes_no _terminfo    "terminfo database for key codes" no
+    opt_yes_no _termcap     "termcap database for key codes" no
     opt_yes_no _termios     "termios database for key codes"
     opt_yes_no _iconv       "iconv for encoding conversion"
     opt_yes_no _lirc        "LIRC (remote control) support"
     opt_yes_no _joystick    "joystick support" no
     opt_yes_no _vm          "X video mode extensions"
-    opt_yes_no _xf86keysym  "support for multimedia keys"
     opt_yes_no _dvb         "DVB input"
     opt_yes_no _tv          "TV interface (TV/DVB grabbers)" yes
     opt_yes_no _tv_v4l2     "Video4Linux2 TV interface"
@@ -201,7 +200,7 @@ options_state_machine() {
     opt_yes_no _xv          "Xv video output"
     opt_yes_no _vdpau       "VDPAU acceleration"
     opt_yes_no _vaapi       "VAAPI acceleration"
-    opt_yes_no _vm          "XF86VidMode support (used for monitor FPS detection)"
+    opt_yes_no _xrandr      "Xrandr support (used for monitor FPS detection)"
     opt_yes_no _xinerama    "Xinerama support"
     opt_yes_no _x11         "X11 video output"
     opt_yes_no _wayland     "Wayland video output"
@@ -635,13 +634,7 @@ fi
 
 check_pkg_config "Xinerama" $_xinerama XINERAMA 'xinerama'
 
-check_pkg_config "Xxf86vm" $_vm XF86VM 'xxf86vm'
-
-# Check for the presence of special keycodes, like audio control buttons
-# that XFree86 might have.  Used to be bundled with the xf86vm check, but
-# has nothing to do with xf86vm and XFree 3.x has xf86vm but does NOT
-# have these new keycodes.
-check_statement_libs "XF86keysym" auto XF86XK X11/XF86keysym.h 'int x = XF86XK_AudioPause;'
+check_pkg_config "Xrandr" $_xrandr XRANDR 'xrandr >= 1.2.0'
 
 check_pkg_config "CACA" $_caca CACA 'caca >= 0.99.beta18'
 

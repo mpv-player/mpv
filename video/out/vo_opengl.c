@@ -36,7 +36,7 @@
 
 #include "talloc.h"
 #include "common/common.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "vo.h"
@@ -66,6 +66,7 @@ struct gl_priv {
     struct gl_video_opts *renderer_opts;
     struct mp_icc_opts *icc_opts;
     int use_glFinish;
+    int waitvsync;
     int use_gl_debug;
     int allow_sw;
     int swap_interval;
@@ -74,6 +75,12 @@ struct gl_priv {
     int vo_flipped;
 
     int frames_rendered;
+    unsigned int prev_sgi_sync_count;
+
+    // check-pattern sub-option; for testing/debugging
+    int opt_pattern[2];
+    int last_pattern;
+    int matches, mismatches;
 };
 
 // Always called under mpgl_lock
@@ -93,9 +100,26 @@ static void resize(struct gl_priv *p)
     vo->want_redraw = true;
 }
 
+static void check_pattern(struct vo *vo, int item)
+{
+    struct gl_priv *p = vo->priv;
+    int expected = p->opt_pattern[p->last_pattern];
+    if (item == expected) {
+        p->last_pattern++;
+        if (p->last_pattern >= 2)
+            p->last_pattern = 0;
+        p->matches++;
+    } else {
+        p->mismatches++;
+        MP_WARN(vo, "wrong pattern, exptected %d got %d (hit: %d, mis: %d)\n",
+                expected, item, p->matches, p->mismatches);
+    }
+}
+
 static void flip_page(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
+    GL *gl = p->gl;
 
     mpgl_lock(p->glctx);
 
@@ -104,6 +128,27 @@ static void flip_page(struct vo *vo)
     p->frames_rendered++;
     if (p->frames_rendered > 5)
         gl_video_set_debug(p->renderer, false);
+
+    if (p->use_glFinish)
+        gl->Finish();
+
+    if (p->waitvsync || p->opt_pattern[0]) {
+        if (gl->GetVideoSync) {
+            unsigned int n1 = 0, n2 = 0;
+            gl->GetVideoSync(&n1);
+            if (p->waitvsync)
+                gl->WaitVideoSync(2, (n1 + 1) % 2, &n2);
+            int step = n1 - p->prev_sgi_sync_count;
+            p->prev_sgi_sync_count = n1;
+            MP_DBG(vo, "Flip counts: %u->%u, step=%d\n", n1, n2, step);
+            if (p->opt_pattern[0])
+                check_pattern(vo, step);
+        } else {
+            MP_WARN(vo, "GLX_SGI_video_sync not available, disabling.\n");
+            p->waitvsync = 0;
+            p->opt_pattern[0] = 0;
+        }
+    }
 
     mpgl_unlock(p->glctx);
 }
@@ -451,10 +496,12 @@ err_out:
 #define OPT_BASE_STRUCT struct gl_priv
 const struct m_option options[] = {
     OPT_FLAG("glfinish", use_glFinish, 0),
+    OPT_FLAG("waitvsync", waitvsync, 0),
     OPT_INT("swapinterval", swap_interval, 0, OPTDEF_INT(1)),
     OPT_FLAG("debug", use_gl_debug, 0),
     OPT_STRING_VALIDATE("backend", backend, 0, mpgl_validate_backend_opt),
     OPT_FLAG("sw", allow_sw, 0),
+    OPT_INTPAIR("check-pattern", opt_pattern, 0),
 
     OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
     OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),

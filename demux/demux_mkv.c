@@ -44,8 +44,9 @@
 #include "talloc.h"
 #include "common/av_common.h"
 #include "options/options.h"
-#include "bstr/bstr.h"
+#include "misc/bstr.h"
 #include "stream/stream.h"
+#include "video/csputils.h"
 #include "demux.h"
 #include "stheader.h"
 #include "ebml.h"
@@ -102,6 +103,7 @@ typedef struct mkv_track {
     bool v_dwidth_set, v_dheight_set;
     double v_frate;
     uint32_t colorspace;
+    int stereo_mode;
 
     uint32_t a_formattag;
     uint32_t a_channels, a_bps;
@@ -503,6 +505,15 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
         track->colorspace = d[0] | (d[1] << 8) | (d[2] << 16) | (d[3] << 24);
         MP_VERBOSE(demuxer, "|   + Colorspace: %#x\n",
                    (unsigned int)track->colorspace);
+    }
+    if (video->n_stereo_mode) {
+        const char *name = MP_STEREO3D_NAME(video->stereo_mode);
+        if (name) {
+            track->stereo_mode = video->stereo_mode;
+            MP_VERBOSE(demuxer, "|   + StereoMode: %s\n", name);
+        } else {
+            MP_WARN(demuxer, "Unknown StereoMode: %d\n", (int)video->stereo_mode);
+        }
     }
 }
 
@@ -1276,6 +1287,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     }
     MP_VERBOSE(demuxer, "Aspect: %f\n", sh_v->aspect);
     sh_v->avi_dts = track->ms_compat;
+    sh_v->stereo_mode = track->stereo_mode;
 
     return 0;
 }
@@ -1952,11 +1964,7 @@ static int64_t real_fix_timestamp(unsigned char *buf, int len, int64_t timestamp
         *kf_base = timestamp;
         *kf_pts  = pts;
     } else {
-        if (pict_type != 3) {
-            timestamp = *kf_base + ((pts - *kf_pts) & 0x1FFF);
-        } else {
-            timestamp = *kf_base - ((*kf_pts - pts) & 0x1FFF);
-        }
+        timestamp = *kf_base - ((*kf_pts - pts) & 0x1FFF);
     }
 
     return timestamp;

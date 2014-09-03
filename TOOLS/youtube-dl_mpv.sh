@@ -10,14 +10,13 @@ video_url="$(youtube-dl \
     --user-agent="$user_agent" \
     --cookies="$cookies_file" \
     --get-url \
-    "$1")"
+    "$@")"
 
-shift
-
-mpv \
+set -f
+${MPV:-mpv} \
     --cookies \
     --cookies-file="$cookies_file" \
     --user-agent="$user_agent" \
-    "$@" -- $video_url
+    -- $video_url
 
 rm -rf "$cookies_dir"
