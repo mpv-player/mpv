@@ -177,7 +177,8 @@ static void output_handle_mode(void *data,
 {
     struct vo_wayland_output *output = data;
 
-    if (!output)
+    // only save current mode
+    if (!output || !(flags & WL_OUTPUT_MODE_CURRENT))
         return;
 
     output->width = width;
