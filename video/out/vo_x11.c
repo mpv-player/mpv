@@ -213,11 +213,11 @@ shmemerror:
         XCreateImage(vo->x11->display, p->vinfo.visual, p->depth, ZPixmap,
                      0, NULL, p->image_width, p->image_height, 8, 0);
     p->ImageDataOrig[foo] =
-        malloc(p->myximage[foo]->bytes_per_line * p->image_height + 32);
+        calloc(p->myximage[foo]->bytes_per_line , p->image_height + 32);
     p->myximage[foo]->data = p->ImageDataOrig[foo] + 16
                            - ((long)p->ImageDataOrig & 15);
-    memset(p->myximage[foo]->data, 0, p->myximage[foo]->bytes_per_line
-                                      * p->image_height);
+    //memset(p->myximage[foo]->data, 0, p->myximage[foo]->bytes_per_line
+    //                                  * p->image_height);
     p->ImageData[foo] = p->myximage[foo]->data;
 #if HAVE_SHM && HAVE_XEXT
 }

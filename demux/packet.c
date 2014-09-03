@@ -55,12 +55,12 @@ static struct demux_packet *create_packet(size_t len)
 struct demux_packet *new_demux_packet(size_t len)
 {
     struct demux_packet *dp = create_packet(len);
-    dp->buffer = av_malloc(len + FF_INPUT_BUFFER_PADDING_SIZE);
+    dp->buffer = calloc(1,len + FF_INPUT_BUFFER_PADDING_SIZE);
     if (!dp->buffer) {
         fprintf(stderr, "Memory allocation failure!\n");
         abort();
     }
-    memset(dp->buffer + len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+    //memset(dp->buffer + len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
     dp->allocation = dp->buffer;
     return dp;
 }
