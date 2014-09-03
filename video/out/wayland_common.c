@@ -153,19 +153,9 @@ static void output_handle_geometry(void *data,
                                    const char *model,
                                    int32_t transform)
 {
-    /* Ignore transforms for now */
-    switch (transform) {
-        case WL_OUTPUT_TRANSFORM_NORMAL:
-        case WL_OUTPUT_TRANSFORM_90:
-        case WL_OUTPUT_TRANSFORM_180:
-        case WL_OUTPUT_TRANSFORM_270:
-        case WL_OUTPUT_TRANSFORM_FLIPPED:
-        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
-        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
-        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
-        default:
-            break;
-    }
+    struct vo_wayland_output *output = data;
+    output->make = make;
+    output->model = model;
 }
 
 static void output_handle_mode(void *data,
@@ -938,6 +928,22 @@ int vo_wayland_init (struct vo *vo)
         return false;
     }
 
+    // create_display's roundtrip only adds the interfaces
+    // the second roundtrip receives output modes, geometry and more ...
+    wl_display_roundtrip(wl->display.display);
+
+    struct vo_wayland_output *o = NULL;
+    wl_list_for_each(o, &wl->display.output_list, link) {
+        MP_VERBOSE(wl, "output received:\n"
+                       "\tvendor: %s\n"
+                       "\tmodel: %s\n"
+                       "\tw: %d, h: %d\n"
+                       "\tHz: %d\n",
+                       o->make, o->model,
+                       o->width, o->height,
+                       o->refresh_rate / 1000);
+    }
+
     vo->event_fd = wl->display.display_fd;
 
     return true;
@@ -1086,8 +1092,6 @@ static void vo_wayland_update_screeninfo(struct vo *vo, struct mp_rect *screenrc
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct mp_vo_opts *opts = vo->opts;
-
-    wl_display_roundtrip(wl->display.display);
 
     *screenrc = (struct mp_rect){0};
 

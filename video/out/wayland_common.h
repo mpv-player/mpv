@@ -42,6 +42,8 @@ struct vo_wayland_output {
     int32_t width;
     int32_t height;
     int32_t refresh_rate; // fps (mHz)
+    const char *make;
+    const char *model;
     struct wl_list link;
 };
 
