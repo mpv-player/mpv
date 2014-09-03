@@ -6,7 +6,7 @@ from waflib import Utils
 __all__ = [
     "check_pkg_config", "check_cc", "check_statement", "check_libs",
     "check_headers", "compose_checks", "check_true", "any_version",
-    "load_fragment", "check_stub", "check_ctx_vars"]
+    "load_fragment", "check_stub", "check_ctx_vars", "check_program"]
 
 any_version = None
 
@@ -28,6 +28,11 @@ def _filter_cc_arguments(ctx, opts):
         if opts.get('execute'):
             opts['execute'] = False
     return opts
+
+def check_program(name, var):
+    def fn(ctx, dependency_identifier):
+        return ctx.find_program(name, var=var, mandatory=False)
+    return fn
 
 def check_libs(libs, function):
     libs = [None] + libs
