@@ -73,29 +73,7 @@ static int mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i)
     i = mp_add_macosx_bundle_dir(global, dirs, i);
 #endif
 
-    tmp = getenv("XDG_CONFIG_DIRS");
-    if (tmp && *tmp) {
-        char *xdgdirs = talloc_strdup(talloc_ctx, tmp);
-        while (xdgdirs) {
-            char *dir = xdgdirs;
-
-            xdgdirs = strchr(xdgdirs, ':');
-            if (xdgdirs)
-                *xdgdirs++ = 0;
-
-            if (!dir[0])
-                continue;
-
-            dirs[i++] = talloc_asprintf(talloc_ctx, "%s%s", dir, "/mpv");
-
-            if (i + 1 >= MAX_CONFIG_PATHS) {
-                MP_WARN(global, "Too many config files, not reading any more\n");
-                break;
-            }
-        }
-    } else {
-        dirs[i++] = MPLAYER_CONFDIR;
-    }
+    dirs[i++] = MPLAYER_CONFDIR;
 
     return i;
 }
