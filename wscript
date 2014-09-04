@@ -538,8 +538,13 @@ video_output_features = [
         'desc': 'UUID',
         'func': check_cc(lib='uuid')
     } , {
+        'name': 'wayland-scanner',
+        'desc': 'wayland-scanner',
+        'func': check_program('wayland-scanner', 'WAYSCAN')
+    } , {
         'name': '--wayland',
         'desc': 'Wayland',
+        'deps': [ 'wayland-scanner' ],
         'func': check_pkg_config('wayland-client', '>= 1.5.0',
                                  'wayland-cursor', '>= 1.5.0',
                                  'xkbcommon',      '>= 0.3.0'),
@@ -823,7 +828,6 @@ def configure(ctx):
     ctx.find_program('rst2man',         var='RST2MAN',   mandatory=False)
     ctx.find_program('rst2pdf',         var='RST2PDF',   mandatory=False)
     ctx.find_program(windres,           var='WINDRES',   mandatory=False)
-    ctx.find_program('wayland-scanner', var='WAYSCAN',   mandatory=False)
 
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()
