@@ -1650,7 +1650,7 @@ Window
     .. note::
 
         This does not affect the normal screensaver operation in any way.
-        
+
 ``--no-keepaspect``, ``--keepaspect``
     ``--no-keepaspect`` will always stretch the video to window size, and will
     disable the window manager hints that force the window aspect ratio.
@@ -2819,8 +2819,7 @@ Cache
        Instead, an invisible temporary file is created. It depends on your
        C library where this file is created (usually ``/tmp/``), and whether
        filename is visible (the ``tmpfile()`` function is used). On some
-       systems, automatic deletion of the cache file might not be guaranteed
-       (like on MS Windows).
+       systems, automatic deletion of the cache file might not be guaranteed.
 
        If you want to use a file cache, this mode is recommended, because it
        doesn't break ordered chapters or ``--audio-file``. These modes open
