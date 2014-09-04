@@ -21,10 +21,10 @@
 #include "input/keycodes.h"
 
 #include "osdep/macosx_compat.h"
-#include "video/out/cocoa_common.h"
-#import  "video/out/cocoa/additions.h"
 
-#include "view.h"
+#import "adapter.h"
+#import "additions.h"
+#import "view.h"
 
 @implementation MpvVideoView
 @synthesize adapter = _adapter;
