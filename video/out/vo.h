@@ -72,8 +72,10 @@ enum mp_voctrl {
     VOCTRL_SET_DEINTERLACE,
     VOCTRL_GET_DEINTERLACE,
 
-    VOCTRL_GET_WINDOW_SIZE,             // int[2] (w/h)
-    VOCTRL_SET_WINDOW_SIZE,             // int[2] (w/h)
+    // Return or set window size (not-fullscreen mode only - if fullscreened,
+    // these must access the not-fullscreened window size only).
+    VOCTRL_GET_UNFS_WINDOW_SIZE,        // int[2] (w/h)
+    VOCTRL_SET_UNFS_WINDOW_SIZE,        // int[2] (w/h)
 
     // The VO is supposed to set  "known" fields, and leave the others
     // untouched or set to 0.

@@ -656,7 +656,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_ONTOP:
         vo_cocoa_ontop(vo);
         return VO_TRUE;
-    case VOCTRL_GET_WINDOW_SIZE: {
+    case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         dispatch_on_main_thread(vo, ^{
             NSSize size = [vo->cocoa->view frame].size;
@@ -665,7 +665,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         });
         return VO_TRUE;
     }
-    case VOCTRL_SET_WINDOW_SIZE: {
+    case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         dispatch_on_main_thread(vo, ^{
             int *s = arg;
             [vo->cocoa->window queueNewVideoSize:NSMakeSize(s[0], s[1])];

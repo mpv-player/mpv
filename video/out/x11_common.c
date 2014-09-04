@@ -1547,7 +1547,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         vo_x11_border(vo);
         *events |= VO_EVENT_RESIZE;
         return VO_TRUE;
-    case VOCTRL_GET_WINDOW_SIZE: {
+    case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (!x11->window)
             return VO_FALSE;
@@ -1555,7 +1555,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         s[1] = x11->fs ? RC_H(x11->nofsrc) : RC_H(x11->winrc);
         return VO_TRUE;
     }
-    case VOCTRL_SET_WINDOW_SIZE: {
+    case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (!x11->window)
             return VO_FALSE;

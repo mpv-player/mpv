@@ -1100,7 +1100,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int *events,
         reinit_window_state(w32);
         *events |= VO_EVENT_RESIZE;
         return VO_TRUE;
-    case VOCTRL_GET_WINDOW_SIZE: {
+    case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
 
         if (!w32->window_bounds_initialized)
@@ -1110,7 +1110,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int *events,
         s[1] = w32->current_fs ? w32->prev_height : w32->dh;
         return VO_TRUE;
     }
-    case VOCTRL_SET_WINDOW_SIZE: {
+    case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
 
         if (!w32->window_bounds_initialized)

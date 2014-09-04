@@ -1146,13 +1146,13 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_ONTOP:
         vo_wayland_ontop(vo);
         return VO_TRUE;
-    case VOCTRL_GET_WINDOW_SIZE: {
+    case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         s[0] = wl->window.width;
         s[1] = wl->window.height;
         return VO_TRUE;
     }
-    case VOCTRL_SET_WINDOW_SIZE: {
+    case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (!wl->window.is_fullscreen)
             schedule_resize(wl, 0, s[0], s[1]);
