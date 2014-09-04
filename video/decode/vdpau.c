@@ -22,6 +22,7 @@
 #include <libavcodec/vdpau.h>
 #include <libavutil/common.h>
 
+#include "config.h"
 #include "lavc.h"
 #include "common/common.h"
 #include "common/av_common.h"
@@ -36,7 +37,7 @@ struct priv {
     uint64_t                    preemption_counter;
     int                         fmt, w, h;
 
-    AVVDPAUContext              context;
+    AVVDPAUContext             *context;
 };
 
 #define PE(av_codec_id, ff_profile, vdp_profile)                \
@@ -76,8 +77,8 @@ static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
     if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) < 0)
         return 0;
 
-    if (p->context.decoder != VDP_INVALID_HANDLE)
-        vdp->decoder_destroy(p->context.decoder);
+    if (p->context->decoder != VDP_INVALID_HANDLE)
+        vdp->decoder_destroy(p->context->decoder);
 
     const struct hwdec_profile_entry *pe = hwdec_find_profile(ctx, profiles);
     if (!pe) {
@@ -104,14 +105,14 @@ static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
     int maxrefs = hwdec_get_max_refs(ctx);
 
     vdp_st = vdp->decoder_create(vdp_device, pe->hw_profile, w, h, maxrefs,
-                                 &p->context.decoder);
+                                 &p->context->decoder);
     CHECK_VDP_WARNING(p, "Failed creating VDPAU decoder");
     if (vdp_st != VDP_STATUS_OK)
         goto fail;
     return 0;
 
 fail:
-    p->context.decoder = VDP_INVALID_HANDLE;
+    p->context->decoder = VDP_INVALID_HANDLE;
     return -1;
 }
 
@@ -138,9 +139,10 @@ static void uninit(struct lavc_ctx *ctx)
     if (!p)
         return;
 
-    if (p->context.decoder != VDP_INVALID_HANDLE)
-        p->vdp->decoder_destroy(p->context.decoder);
+    if (p->context && p->context->decoder != VDP_INVALID_HANDLE)
+        p->vdp->decoder_destroy(p->context->decoder);
 
+    av_free(p->context);
     talloc_free(p);
 
     ctx->hwdec_priv = NULL;
@@ -155,16 +157,28 @@ static int init(struct lavc_ctx *ctx)
     };
     ctx->hwdec_priv = p;
 
+#if HAVE_AVCODEC_VDPAU_ALLOC_CONTEXT
+    p->context = av_vdpau_alloc_context();
+#else
+    p->context = av_mallocz(sizeof(AVVDPAUContext));
+#endif
+    if (!p->context)
+        goto error;
+
     p->vdp = &p->mpvdp->vdp;
-    p->context.render = p->vdp->decoder_render;
-    p->context.decoder = VDP_INVALID_HANDLE;
+    p->context->render = p->vdp->decoder_render;
+    p->context->decoder = VDP_INVALID_HANDLE;
 
     if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) < 1)
-        return -1;
+        goto error;
 
-    ctx->avctx->hwaccel_context = &p->context;
+    ctx->avctx->hwaccel_context = p->context;
 
     return 0;
+
+error:
+    uninit(ctx);
+    return -1;
 }
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
