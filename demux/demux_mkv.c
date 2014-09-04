@@ -576,7 +576,7 @@ static void parse_trackentry(struct demuxer *demuxer,
         track->codec_id = "";
     }
 
-    if (entry->n_codec_private && entry->codec_private.len <= 0x1000000) {
+    if (entry->n_codec_private && entry->codec_private.len <= 0x10000000) {
         int len = entry->codec_private.len;
         track->private_data = talloc_size(track, len + AV_LZO_INPUT_PADDING);
         memcpy(track->private_data, entry->codec_private.start, len);
