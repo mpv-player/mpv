@@ -420,12 +420,16 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         if (num_elems[i] && type->fields[i].multiple) {
             char *ptr = s + type->fields[i].offset;
             switch (type->fields[i].desc->type) {
-            case EBML_TYPE_SUBELEMENTS:
-                num_elems[i] = FFMIN(num_elems[i],
-                                     1000000000 / type->fields[i].desc->size);
+            case EBML_TYPE_SUBELEMENTS: {
+                size_t max = 1000000000 / type->fields[i].desc->size;
+                if (num_elems[i] > max) {
+                    MP_ERR(ctx, "Too many subelements.\n");
+                    num_elems[i] = max;
+                }
                 int sz = num_elems[i] * type->fields[i].desc->size;
                 *(generic_struct **) ptr = talloc_zero_size(ctx->talloc_ctx, sz);
                 break;
+            }
             case EBML_TYPE_UINT:
                 *(uint64_t **) ptr = talloc_zero_array(ctx->talloc_ctx,
                                                        uint64_t, num_elems[i]);
