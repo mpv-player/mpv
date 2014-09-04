@@ -833,6 +833,12 @@ api_statement_check \
     libavutil/frame.h \
     'av_frame_get_qp_table(NULL, NULL, NULL)'
 
+api_statement_check \
+    "libavcodec av_vdpau_alloc_context()" \
+    HAVE_AVCODEC_VDPAU_ALLOC_CONTEXT \
+    libavcodec/vdpau.h \
+    'AVVDPAUContext *x = av_vdpau_alloc_context()'
+
 check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 3.90.100'
 
 check_pkg_config "libavdevice" $_libavdevice LIBAVDEVICE 'libavdevice >= 54.0.0'

@@ -369,6 +369,12 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
                                 'av_frame_get_qp_table(NULL, NULL, NULL)',
                                 use='libav')
     }, {
+        'name': 'avcodec-vdpau-alloc-context',
+        'desc': 'libavcodec vdpau non-sense',
+        'func': check_statement('libavcodec/vdpau.h',
+                                'AVVDPAUContext *x = av_vdpau_alloc_context()',
+                                use='libav')
+    }, {
         'name': '--libavfilter',
         'desc': 'libavfilter',
         'func': check_pkg_config('libavfilter', '>= 3.90.100'),
