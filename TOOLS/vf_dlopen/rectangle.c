@@ -348,8 +348,7 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
         { "yuv420p", "yuv420p" },
         { NULL, NULL }
     };
-    privdata *priv = malloc(sizeof(privdata));
-    memset(priv, 0, sizeof(*priv));
+    privdata *priv = calloc(1,sizeof(privdata));
     priv->step = 8;
     if(argc >= 1)
         priv->w = atoi(argv[0]);

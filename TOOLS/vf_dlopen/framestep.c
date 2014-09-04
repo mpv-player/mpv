@@ -90,8 +90,7 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
     if (argc != 1 && argc != 2)
         return -1;
 
-    framestep_data_t *framestep = malloc(sizeof(framestep_data_t));
-    memset(framestep, 0, sizeof(*framestep));
+    framestep_data_t *framestep = calloc(1,sizeof(framestep_data_t));
 
     framestep->step = atoi(argv[0]);
     framestep->pos = (argc >= 2) ? atoi(argv[1]) : 0;

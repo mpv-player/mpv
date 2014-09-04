@@ -150,8 +150,7 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
     if (argc != 2)
         return -1;
 
-    tile_data_t *tile = malloc(sizeof(tile_data_t));
-    memset(tile, 0, sizeof(*tile));
+    tile_data_t *tile = calloc(1,sizeof(tile_data_t));
 
     tile->cols = atoi(argv[0]);
     tile->rows = atoi(argv[1]);
