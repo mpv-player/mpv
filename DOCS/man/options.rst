@@ -994,6 +994,20 @@ Audio
 
     Do not use.
 
+``--audio-buffer=<seconds>``
+    Set the audio output minimum buffer. The audio device might actually create
+    a larger buffer if it pleases. If the device creates a smaller buffer,
+    additional audio is buffered in an additional software buffer.
+
+    Making this larger will make soft-volume and other filters react slower,
+    introduce additional issues on playback speed change, and block the
+    player on audio format changes. A smaller buffer might lead to audio
+    dropouts.
+
+    This option should be used for testing only. If a non-default value helps
+    significantly, the mpv developers should be contacted.
+
+    Default: 0.2 (200 ms).
 
 Subtitles
 ---------

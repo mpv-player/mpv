@@ -152,6 +152,7 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
         .channels = channels,
         .format = format,
         .log = mp_log_new(ao, log, name),
+        .def_buffer = global->opts->audio_buffer,
     };
     if (ao->driver->encode != !!ao->encode_lavc_ctx)
         goto error;
@@ -187,7 +188,7 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
         ao->device_buffer = ao->driver->get_space(ao);
         MP_VERBOSE(ao, "device buffer: %d samples.\n", ao->device_buffer);
     }
-    ao->buffer = MPMAX(ao->device_buffer, MIN_BUFFER * ao->samplerate);
+    ao->buffer = MPMAX(ao->device_buffer, ao->def_buffer * ao->samplerate);
     MP_VERBOSE(ao, "using soft-buffer of %d samples.\n", ao->buffer);
 
     if (ao->api->init(ao) < 0)

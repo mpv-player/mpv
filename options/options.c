@@ -371,6 +371,8 @@ const m_option_t mp_opts[] = {
                ({"no", 0},
                 {"yes", 1}, {"", 1},
                 {"weak", -1})),
+    OPT_DOUBLE("audio-buffer", audio_buffer, M_OPT_MIN | M_OPT_MAX,
+               .min = 0, .max = 10),
 
     OPT_GEOMETRY("geometry", vo.geometry, 0),
     OPT_SIZE_BOX("autofit", vo.autofit, 0),
@@ -558,6 +560,7 @@ const struct MPOpts mp_default_opts = {
     .mixer_init_mute = -1,
     .volstep = 3,
     .gapless_audio = -1,
+    .audio_buffer = 0.2,
     .vo = {
         .video_driver_list = NULL,
         .monitor_pixel_aspect = 1.0,

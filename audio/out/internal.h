@@ -25,9 +25,6 @@
 #include "audio/chmap.h"
 #include "audio/chmap_sel.h"
 
-// Minimum buffer size in seconds.
-#define MIN_BUFFER 0.2
-
 // If ao_get_delay() reaches this value after ao_play() was called with the
 // AOPLAY_FINAL_CHUNK flag set, the playback core expects that the audio has
 // all been played.
@@ -56,6 +53,7 @@ struct ao {
     struct mp_log *log; // Using e.g. "[ao/coreaudio]" as prefix
 
     int buffer;
+    double def_buffer;
     void *api_priv;
 };
 

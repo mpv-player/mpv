@@ -168,11 +168,11 @@ static int unlocked_get_space(struct ao *ao)
     int space = mp_audio_buffer_get_write_available(p->buffer);
     if (ao->driver->get_space) {
         // The following code attempts to keep the total buffered audio to
-        // MIN_BUFFER/2+device_buffer in order to improve latency.
+        // def_buffer/2+device_buffer in order to improve latency.
         int device_space = ao->driver->get_space(ao);
         int device_buffered = ao->device_buffer - device_space;
         int soft_buffered = mp_audio_buffer_samples(p->buffer);
-        int min_buffer = MIN_BUFFER / 2 * ao->samplerate + ao->device_buffer;
+        int min_buffer = ao->def_buffer / 2 * ao->samplerate + ao->device_buffer;
         int total_buffer = device_buffered + soft_buffered;
         int missing = min_buffer - total_buffer;
         space = MPMIN(space, missing);
