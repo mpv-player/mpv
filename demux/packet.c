@@ -66,6 +66,7 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
     }
     dp->buffer = dp->avpacket->data;
     dp->len = dp->avpacket->size;
+
     return dp;
 }
 

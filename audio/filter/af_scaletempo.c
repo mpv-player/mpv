@@ -314,13 +314,17 @@ static int control(struct af_instance *af, int cmd, void *arg)
             s->bytes_overlap    = frames_overlap * nch * bps;
             s->bytes_standing   = s->bytes_stride - s->bytes_overlap;
             s->samples_standing = s->bytes_standing / bps;
-            s->buf_overlap      = realloc(s->buf_overlap, s->bytes_overlap);
-            s->table_blend      = realloc(s->table_blend, s->bytes_overlap * 4);
-            if (!s->buf_overlap || !s->table_blend) {
+            free(s->buf_overlap);
+            s->buf_overlap      = calloc(1, s->bytes_overlap);
+            int32_t *tmp_relloc0   = realloc(s->table_blend, s->bytes_overlap * 4);
+                        
+            if (!s->buf_overlap || !tmp_relloc0) {
                 MP_FATAL(af, "Out of memory\n");
                 return AF_ERROR;
-            }
-            memset(s->buf_overlap, 0, s->bytes_overlap);
+            }else{
+				s->table_blend = tmp_relloc0;
+			}
+            //memset(s->buf_overlap, 0, s->bytes_overlap);
             if (use_int) {
                 int32_t *pb = s->table_blend;
                 int64_t blend = 0;
@@ -349,16 +353,19 @@ static int control(struct af_instance *af, int cmd, void *arg)
             if (use_int) {
                 int64_t t = frames_overlap;
                 int32_t n = 8589934588LL / (t * t); // 4 * (2^31 - 1) / t^2
-                s->buf_pre_corr = realloc(s->buf_pre_corr,
+                int32_t *tmp_relloc0 = realloc(s->buf_pre_corr,
                                           s->bytes_overlap * 2 + UNROLL_PADDING);
-                s->table_window = realloc(s->table_window,
+                int32_t *tmp_relloc1 = realloc(s->table_window,
                                           s->bytes_overlap * 2 - nch * bps * 2);
-                if (!s->buf_pre_corr || !s->table_window) {
+                if (!tmp_relloc0 || !tmp_relloc1) {
                     MP_FATAL(af, "Out of memory\n");
                     return AF_ERROR;
-                }
-                memset((char *)s->buf_pre_corr + s->bytes_overlap * 2, 0,
-                       UNROLL_PADDING);
+                }else {
+                s->buf_pre_corr = tmp_relloc0;
+                s->table_window = tmp_relloc1;
+			    }
+                memset((char *)s->buf_pre_corr + s->bytes_overlap * 2, 0,UNROLL_PADDING);
+                
                 int32_t *pw = s->table_window;
                 for (int i = 1; i < frames_overlap; i++) {
                     int32_t v = (i * (t - i) * n) >> 15;
