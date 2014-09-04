@@ -224,7 +224,7 @@ double written_audio_pts(struct MPContext *mpctx)
     mp_audio_buffer_get_format(d_audio->decode_buffer, &in_format);
 
     if (!mp_audio_config_valid(&in_format) || !d_audio->afilter)
-        return MP_NOPTS_VALUE;;
+        return MP_NOPTS_VALUE;
 
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = d_audio->pts;
