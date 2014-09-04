@@ -63,7 +63,6 @@ static void makegauss(struct ctx *k, unsigned int sizeb)
 {
     assert(sizeb >= 1 && sizeb <= MAX_SIZEB);
 
-    memset(k, 0, sizeof(*k));
     av_lfg_init(&k->avlfg, 123);
 
     k->sizeb = sizeb;
@@ -159,7 +158,7 @@ static void makeuniform(struct ctx *k)
 // out_matrix is a reactangular tsize * tsize array, where tsize = (1 << size).
 void mp_make_fruit_dither_matrix(float *out_matrix, int size)
 {
-    struct ctx *k = talloc(NULL, struct ctx);
+    struct ctx *k = talloc_zero(NULL, struct ctx);
     makegauss(k, size);
     makeuniform(k);
     float invscale = k->size2;
@@ -225,7 +224,7 @@ static void print(struct ctx *k)
 int main(void)
 {
     mp_time_init();
-    struct ctx *k = malloc(sizeof(struct ctx));
+    struct ctx *k = calloc(1,sizeof(struct ctx));
     int64_t s = mp_time_us();
     makegauss(k, 6);
     makeuniform(k);

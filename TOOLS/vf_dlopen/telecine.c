@@ -237,8 +237,7 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
     if (!a0[0] || a0[1] || !a1[0] || argc > 2)
         return -1;
 
-    tc_data_t *tc = malloc(sizeof(tc_data_t));
-    memset(tc, 0, sizeof(*tc));
+    tc_data_t *tc = calloc(1,sizeof(tc_data_t));
 
     if (a0[0] == 't')
         tc->firstfield = 0;

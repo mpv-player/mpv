@@ -267,8 +267,7 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
     (void) argc;
     (void) argv;
 
-    ildetect_data_t *il = malloc(sizeof(ildetect_data_t));
-    memset(il, 0, sizeof(*il));
+    ildetect_data_t *il = calloc(1,sizeof(ildetect_data_t));
 
 #define A(i,d) ((argc>(i) && *argv[i]) ? atof(argv[i]) : (d))
     il->method = A(0, 0);
