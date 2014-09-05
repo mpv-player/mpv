@@ -87,10 +87,9 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         audio_uninit(mpctx->d_audio);
         mpctx->d_audio = NULL;
         talloc_free(mpctx->ao_buffer);
+        mpctx->ao_buffer = NULL;
         mpctx->audio_status = STATUS_EOF;
         reselect_demux_streams(mpctx);
-        if (mpctx->ao_buffer)
-            mp_audio_buffer_clear(mpctx->ao_buffer);
     }
 
     if (mask & INITIALIZED_SUB) {
