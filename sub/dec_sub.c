@@ -531,6 +531,8 @@ bool sub_has_get_text(struct dec_sub *sub)
 }
 
 // See sub_get_bitmaps() for locking requirements.
+// It can be called unlocked too, but then only 1 thread must call this function
+// at a time (unless exclusive access is guaranteed).
 char *sub_get_text(struct dec_sub *sub, double pts)
 {
     pthread_mutex_lock(&sub->lock);
