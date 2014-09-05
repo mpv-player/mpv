@@ -126,6 +126,12 @@ void reinit_audio_chain(struct MPContext *mpctx)
         if (!audio_init_best_codec(mpctx->d_audio, opts->audio_decoders))
             goto init_error;
         reset_audio_state(mpctx);
+
+        if (mpctx->ao) {
+            struct mp_audio fmt;
+            ao_get_format(mpctx->ao, &fmt);
+            mp_audio_buffer_reinit(mpctx->ao_buffer, &fmt);
+        }
     }
     assert(mpctx->d_audio);
 
