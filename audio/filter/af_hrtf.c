@@ -301,15 +301,15 @@ static int control(struct af_instance *af, int cmd, void* arg)
             return AF_ERROR;
         }
         mp_audio_set_channels_old(af->data, ((struct mp_audio*)arg)->nch);
-            if(af->data->nch == 2) {
-               /* 2 channel input */
-               if(s->decode_mode != HRTF_MIX_MATRIX2CH) {
-                  /* Default behavior is stereo mixing. */
-                  s->decode_mode = HRTF_MIX_STEREO;
-               }
+        if(af->data->nch == 2) {
+            /* 2 channel input */
+            if(s->decode_mode != HRTF_MIX_MATRIX2CH) {
+                /* Default behavior is stereo mixing. */
+                s->decode_mode = HRTF_MIX_STEREO;
             }
-            else if (af->data->nch < 5)
-              mp_audio_set_channels_old(af->data, 5);
+        } else if (af->data->nch < 5) {
+            mp_audio_set_channels_old(af->data, 5);
+        }
         mp_audio_set_format(af->data, AF_FORMAT_S16);
         test_output_res = af_test_output(af, (struct mp_audio*)arg);
         // after testing input set the real output format
