@@ -292,14 +292,7 @@ static int control(struct af_instance *af, int cmd, void* arg)
 
     switch(cmd) {
     case AF_CONTROL_REINIT:
-        af->data->rate   = ((struct mp_audio*)arg)->rate;
-        if(af->data->rate != 48000) {
-            // automatic samplerate adjustment in the filter chain
-            // is not yet supported.
-            MP_ERR(af, "ERROR: Sampling rate is not 48000 Hz (%d)!\n",
-                   af->data->rate);
-            return AF_ERROR;
-        }
+        af->data->rate = 48000;
         mp_audio_set_channels_old(af->data, ((struct mp_audio*)arg)->nch);
         if(af->data->nch == 2) {
             /* 2 channel input */
