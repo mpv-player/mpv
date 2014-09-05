@@ -200,7 +200,8 @@ static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
 
     if (!res) {
         res = mp_find_config_file(tmp, global, MP_WATCH_LATER_CONF);
-        res = talloc_asprintf(NULL, "%s/%s", res, conf);
+        if (res)
+            res = talloc_asprintf(NULL, "%s/%s", res, conf);
     }
 
 exit:
