@@ -324,7 +324,7 @@ static bool try_create_renderer(struct vo *vo, int i, const char *driver,
                                   rc->x1 - rc->x0, rc->y1 - rc->y0,
                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
     if (!vc->window) {
-        MP_ERR(vo, "SDL_CreateWindow failedd\n");
+        MP_ERR(vo, "SDL_CreateWindow failed\n");
         destroy_renderer(vo);
         return false;
     }
