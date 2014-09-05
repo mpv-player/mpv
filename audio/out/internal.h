@@ -134,6 +134,8 @@ struct ao_driver {
     float (*get_delay)(struct ao *ao);
     // push based: block until all queued audio is played (optional)
     void (*drain)(struct ao *ao);
+    // Optional. Return true if audio has stopped in any way.
+    bool (*get_eof)(struct ao *ao);
     // Wait until the audio buffer needs to be refilled. The lock is the
     // internal mutex usually protecting the internal AO state (and used to
     // protect driver calls), and must be temporarily unlocked while waiting.

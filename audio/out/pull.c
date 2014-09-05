@@ -201,6 +201,14 @@ static void drain(struct ao *ao)
     reset(ao);
 }
 
+static bool get_eof(struct ao *ao)
+{
+    struct ao_pull_state *p = ao->api_priv;
+    // For simplicity, ignore the latency. Otherwise, we would have to run an
+    // extra thread to time it.
+    return mp_ring_buffered(p->buffers[0]) == 0;
+}
+
 static void uninit(struct ao *ao)
 {
     ao->driver->uninit(ao);
@@ -225,6 +233,7 @@ const struct ao_driver ao_api_pull = {
     .get_space = get_space,
     .play = play,
     .get_delay = get_delay,
+    .get_eof = get_eof,
     .pause = pause,
     .resume = resume,
     .priv_size = sizeof(struct ao_pull_state),

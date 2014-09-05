@@ -321,7 +321,7 @@ void ao_drain(struct ao *ao)
 
 bool ao_eof_reached(struct ao *ao)
 {
-    return ao_get_delay(ao) < AO_EOF_DELAY;
+    return ao->api->get_eof ? ao->api->get_eof(ao) : true;
 }
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,

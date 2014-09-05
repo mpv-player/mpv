@@ -54,6 +54,7 @@ struct ao_push_state {
     bool drain;
     bool buffers_full;
     bool avoid_ao_wait;
+    bool still_playing;
     bool need_wakeup;
     bool requested_data;
     bool paused;
@@ -87,15 +88,13 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     return r;
 }
 
-static float get_delay(struct ao *ao)
+static double unlocked_get_delay(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
-    pthread_mutex_lock(&p->lock);
     double driver_delay = 0;
     if (ao->driver->get_delay)
         driver_delay = ao->driver->get_delay(ao);
     double delay = driver_delay + mp_audio_buffer_seconds(p->buffer);
-    pthread_mutex_unlock(&p->lock);
     if (delay >= AO_EOF_DELAY && p->expected_end_time) {
         if (mp_time_sec() > p->expected_end_time) {
             MP_ERR(ao, "Audio device EOF reporting is broken!\n");
@@ -103,6 +102,15 @@ static float get_delay(struct ao *ao)
             delay = 0;
         }
     }
+    return delay;
+}
+
+static float get_delay(struct ao *ao)
+{
+    struct ao_push_state *p = ao->api_priv;
+    pthread_mutex_lock(&p->lock);
+    float delay = unlocked_get_delay(ao);
+    pthread_mutex_unlock(&p->lock);
     return delay;
 }
 
@@ -114,6 +122,7 @@ static void reset(struct ao *ao)
         ao->driver->reset(ao);
     mp_audio_buffer_clear(p->buffer);
     p->paused = false;
+    p->still_playing = false;
     wakeup_playthread(ao);
     pthread_mutex_unlock(&p->lock);
 }
@@ -190,6 +199,15 @@ static int get_space(struct ao *ao)
     return space;
 }
 
+static bool get_eof(struct ao *ao)
+{
+    struct ao_push_state *p = ao->api_priv;
+    pthread_mutex_lock(&p->lock);
+    bool eof = !p->still_playing;
+    pthread_mutex_unlock(&p->lock);
+    return eof;
+}
+
 static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct ao_push_state *p = ao->api_priv;
@@ -215,6 +233,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     p->expected_end_time = 0;
     p->final_chunk = is_final;
     p->paused = false;
+    p->still_playing |= write_samples > 0;
 
     // If we don't have new data, the decoder thread basically promises it
     // will send new data as soon as it's available.
@@ -266,6 +285,7 @@ static void ao_play_data(struct ao *ao)
     // any new data (due to rounding to period boundaries).
     p->buffers_full = max >= space && r <= 0;
     p->avoid_ao_wait = (max == 0 && space > 0) || p->paused || stuck;
+    p->still_playing |= r > 0;
     MP_TRACE(ao, "in=%d, space=%d r=%d flags=%d aw=%d full=%d f=%d\n", max,
              space, r, flags, p->avoid_ao_wait, p->buffers_full, p->final_chunk);
 }
@@ -319,9 +339,23 @@ static void *playthread(void *arg)
                 // The most important part is that the decoder is woken up, so
                 // that the decoder will wake up us in turn.
                 MP_TRACE(ao, "buffer inactive.\n");
-                if (!p->requested_data)
+
+                bool was_playing = p->still_playing;
+                double timeout = -1;
+                if (p->still_playing && !p->paused) {
+                    timeout = unlocked_get_delay(ao);
+                    if (timeout < AO_EOF_DELAY)
+                        p->still_playing = false;
+                }
+
+                if (!p->requested_data || (was_playing && !p->still_playing))
                     mp_input_wakeup(ao->input_ctx);
-                pthread_cond_wait(&p->wakeup, &p->lock);
+
+                if (p->still_playing && timeout > 0) {
+                    mpthread_cond_timedwait_rel(&p->wakeup, &p->lock, timeout);
+                } else {
+                    pthread_cond_wait(&p->wakeup, &p->lock);
+                }
             } else {
                 if (!ao->driver->wait || ao->driver->wait(ao, &p->lock) < 0) {
                     // Fallback to guessing.
@@ -390,6 +424,7 @@ const struct ao_driver ao_api_push = {
     .pause = audio_pause,
     .resume = resume,
     .drain = drain,
+    .get_eof = get_eof,
     .priv_size = sizeof(struct ao_push_state),
 };
 
