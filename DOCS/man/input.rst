@@ -260,7 +260,7 @@ List of Input Commands
     exactly as in the ``quit`` command.
 
 ``sub_add "<file>"``
-    Load the given subtitle file. It is not selected as current subtitle after
+    Load the given subtitle file. It is selected as current subtitle after
     loading.
 
 ``sub_remove [<id>]``
