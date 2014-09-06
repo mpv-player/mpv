@@ -354,7 +354,6 @@ def build(ctx):
         ( "video/out/pnm_loader.c",              "gl" ),
         ( "video/out/vo.c" ),
         ( "video/out/vo_caca.c",                 "caca" ),
-        ( "video/out/vo_corevideo.c",            "corevideo"),
         ( "video/out/vo_direct3d.c",             "direct3d" ),
         ( "video/out/vo_image.c" ),
         ( "video/out/vo_lavc.c",                 "encoding" ),

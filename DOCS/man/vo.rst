@@ -259,13 +259,6 @@ Available video output drivers are:
 
     .. note:: This driver is for compatibility with old systems.
 
-``corevideo`` (Mac OS X 10.6 and later)
-    Mac OS X CoreVideo video output driver. Uses the CoreVideo APIs to fill
-    PixelBuffers and generate OpenGL textures from them (useful as a fallback
-    for ``opengl``).
-
-    .. note:: This driver is for compatibility with old systems.
-
 ``opengl``
     OpenGL video output driver. It supports extended scaling methods, dithering
     and color management.

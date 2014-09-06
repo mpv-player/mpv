@@ -612,13 +612,6 @@ video_output_features = [
         'deps_any': [ 'gl-cocoa', 'gl-x11', 'gl-win32', 'gl-wayland' ],
         'func': check_true
     } , {
-        'name': '--corevideo',
-        'desc': 'CoreVideo',
-        'deps': [ 'gl', 'gl-cocoa' ],
-        'func': check_statement('QuartzCore/CoreVideo.h',
-            'CVOpenGLTextureCacheCreate(0, 0, 0, 0, 0, 0)',
-            framework_name=['QuartzCore'])
-    } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
         'deps': [ 'x11' ],
@@ -679,7 +672,6 @@ hwaccel_features = [
     } , {
         'name': '--vda-hwaccel',
         'desc': 'libavcodec VDA hwaccel',
-        'deps': [ 'corevideo' ],
         'func': compose_checks(
             check_headers('VideoDecodeAcceleration/VDADecoder.h'),
             check_statement('libavcodec/vda.h',
@@ -690,7 +682,9 @@ hwaccel_features = [
         'name': '--vda-gl',
         'desc': 'VDA with OpenGL',
         'deps': [ 'gl-cocoa', 'vda-hwaccel' ],
-        'func': check_true
+        # apparently a bug in waf causes msg= to be needed when passing only
+        # framework= (it probably fails to infer it)
+        'func': check_cc(msg='QuartzCore', framework='QuartzCore')
     }, {
         'name': '--vdpau-hwaccel',
         'desc': 'libavcodec VDPAU hwaccel',

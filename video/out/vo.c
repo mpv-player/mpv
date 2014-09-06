@@ -61,7 +61,6 @@ extern const struct vo_driver video_out_caca;
 extern const struct vo_driver video_out_direct3d;
 extern const struct vo_driver video_out_direct3d_shaders;
 extern const struct vo_driver video_out_sdl;
-extern const struct vo_driver video_out_corevideo;
 extern const struct vo_driver video_out_vaapi;
 extern const struct vo_driver video_out_wayland;
 
@@ -76,9 +75,6 @@ const struct vo_driver *const video_out_drivers[] =
 #if HAVE_DIRECT3D
         &video_out_direct3d_shaders,
         &video_out_direct3d,
-#endif
-#if HAVE_COREVIDEO
-        &video_out_corevideo,
 #endif
 #if HAVE_XV
         &video_out_xv,
