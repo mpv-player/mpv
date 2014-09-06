@@ -303,7 +303,7 @@ static struct mp_tags *read_icy(stream_t *s)
     int i = bstr_find(packet, head);
     if (i >= 0) {
         packet = bstr_cut(packet, i + head.len);
-        int end = bstrchr(packet, '\'');
+        int end = bstr_find(packet, bstr0("\';"));
         packet = bstr_splice(packet, 0, end);
         mp_tags_set_bstr(res, bstr0("icy-title"), packet);
     }
