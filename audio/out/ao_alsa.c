@@ -675,7 +675,7 @@ static int get_space(struct ao *ao)
     unsigned space = snd_pcm_status_get_avail(status);
     if (space > p->buffersize) // Buffer underrun?
         space = p->buffersize;
-    return space;
+    return space / p->outburst * p->outburst;
 
 alsa_error:
     return 0;

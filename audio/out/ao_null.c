@@ -148,7 +148,8 @@ static int get_space(struct ao *ao)
     struct priv *priv = ao->priv;
 
     drain(ao);
-    return priv->buffersize - priv->latency - priv->buffered;
+    int samples = priv->buffersize - priv->latency - priv->buffered;
+    return samples / priv->outburst * priv->outburst;
 }
 
 static int play(struct ao *ao, void **data, int samples, int flags)

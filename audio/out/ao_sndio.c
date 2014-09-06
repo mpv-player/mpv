@@ -273,7 +273,8 @@ static int get_space(struct ao *ao)
         ; /* nothing */
     sio_revents(p->hdl, p->pfd);
 
-    return (p->par.bufsz * p->par.pchan * p->par.bps - p->delay) / ao->sstride;
+    int samples = (p->par.bufsz * p->par.pchan * p->par.bps - p->delay) / ao->sstride;
+    return samples / p->par.round * p->par.round;
 }
 
 /*

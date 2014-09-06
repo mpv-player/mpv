@@ -585,7 +585,7 @@ static int get_space(struct ao *ao)
     int space = check_free_buffer_size(ao);
     if (space < p->min_free_space)
         return 0;
-    return (space - p->min_free_space) / ao->sstride;
+    return (space - p->min_free_space) / p->outburst * p->outburst / ao->sstride;
 }
 
 /**
