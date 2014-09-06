@@ -76,6 +76,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         vol->left = vol->right = volume * 100;
         return CONTROL_TRUE;
     }
+    case AOCONTROL_HAS_SOFT_VOLUME:
+        return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }
@@ -132,7 +134,6 @@ static int init(struct ao *ao)
         return -1;
     }
     ao_data = ao;
-    ao->no_persistent_volume = true;
     struct mp_chmap_sel sel = {0};
     for (i = 0; speaker_pos[i].id != -1; i++)
         mp_chmap_sel_add_speaker(&sel, speaker_pos[i].id);

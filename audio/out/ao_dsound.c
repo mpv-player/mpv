@@ -351,6 +351,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         IDirectSoundBuffer_SetVolume(p->hdsbuf, volume);
         return CONTROL_OK;
     }
+    case AOCONTROL_HAS_SOFT_VOLUME:
+        return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }
@@ -371,7 +373,6 @@ static int init(struct ao *ao)
     if (!InitDirectSound(ao))
         return -1;
 
-    ao->no_persistent_volume = true;
     p->audio_volume = 100;
 
     // ok, now create the buffers

@@ -36,7 +36,9 @@ enum aocontrol {
     AOCONTROL_SET_MUTE,
     // Has char* as argument, which contains the desired stream title.
     AOCONTROL_UPDATE_STREAM_TITLE,
-    AOCONTROL_HAS_TEMP_VOLUME,
+    // the AO does the equivalent of af_volume (return CONTROL_TRUE if yes)
+    AOCONTROL_HAS_SOFT_VOLUME,
+    // like above, but volume persists (per app), mpv won't restore volume
     AOCONTROL_HAS_PER_APP_VOLUME,
 };
 

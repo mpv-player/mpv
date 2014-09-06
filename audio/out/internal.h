@@ -41,8 +41,6 @@ struct ao {
     int num_planes;
     bool probing;               // if true, don't fail loudly on init
     bool untimed;               // don't assume realtime playback
-    bool no_persistent_volume;  // the AO does the equivalent of af_volume
-    bool per_application_mixer; // like above, but volume persists (per app)
     int device_buffer;          // device buffer in samples (guessed by
                                 // common init code if not set by driver)
     const struct ao_driver *api; // entrypoints to the wrapper (push.c/pull.c)

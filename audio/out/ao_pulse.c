@@ -284,8 +284,6 @@ static int init(struct ao *ao)
     pthread_mutex_init(&priv->wakeup_lock, NULL);
     pthread_cond_init(&priv->wakeup, NULL);
 
-    ao->per_application_mixer = true;
-
     if (!(priv->mainloop = pa_threaded_mainloop_new())) {
         MP_ERR(ao, "Failed to allocate main loop\n");
         goto fail;
@@ -643,6 +641,9 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         pa_threaded_mainloop_unlock(priv->mainloop);
         return CONTROL_OK;
     }
+
+    case AOCONTROL_HAS_PER_APP_VOLUME:
+        return CONTROL_TRUE;
 
     case AOCONTROL_UPDATE_STREAM_TITLE: {
         char *title = (char *)arg;

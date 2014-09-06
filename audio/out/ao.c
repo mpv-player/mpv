@@ -259,16 +259,7 @@ int ao_play(struct ao *ao, void **data, int samples, int flags)
 
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
-    switch (cmd) {
-    case AOCONTROL_HAS_TEMP_VOLUME:
-        return !ao->no_persistent_volume;
-    case AOCONTROL_HAS_PER_APP_VOLUME:
-        return !!ao->per_application_mixer;
-    default:
-        if (ao->api->control)
-            return ao->api->control(ao, cmd, arg);
-    }
-    return CONTROL_UNKNOWN;
+    return ao->api->control ? ao->api->control(ao, cmd, arg) : CONTROL_UNKNOWN;
 }
 
 // Return size of the buffered data in seconds. Can include the device latency.

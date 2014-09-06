@@ -136,6 +136,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         return get_volume(ao, arg);
     case AOCONTROL_SET_VOLUME:
         return set_volume(ao, arg);
+    case AOCONTROL_HAS_SOFT_VOLUME:
+        return CONTROL_TRUE;
+    case AOCONTROL_HAS_PER_APP_VOLUME:
+        return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }
@@ -148,9 +152,6 @@ static int init(struct ao *ao)
     struct priv *p = ao->priv;
 
     if (p->opt_list) ca_print_device_list(ao);
-
-    ao->per_application_mixer = true;
-    ao->no_persistent_volume  = true;
 
     OSStatus err = ca_select_device(ao, p->opt_device_id, &p->device);
     CHECK_CA_ERROR("failed to select device");

@@ -60,6 +60,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             return CONTROL_FALSE;
         sio_setvol(p->hdl, vol->left * SIO_MAXVOL / 100);
         break;
+    case AOCONTROL_HAS_SOFT_VOLUME:
+        return CONTROL_TRUE;
     default:
         return CONTROL_UNKNOWN;
     }
@@ -193,7 +195,6 @@ static int init(struct ao *ao)
     }
 
     ao->bps = p->par.bps * p->par.pchan * p->par.rate;
-    ao->no_persistent_volume = true;
     p->havevol = sio_onvol(p->hdl, volcb, p);
     sio_onmove(p->hdl, movecb, p);
     p->delay = 0;

@@ -178,8 +178,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     struct priv *p = ao->priv;
     switch (cmd) {
     case AOCONTROL_GET_VOLUME:
-    case AOCONTROL_SET_VOLUME:
-    {
+    case AOCONTROL_SET_VOLUME: {
         ao_control_vol_t *vol = (ao_control_vol_t *)arg;
         int fd, v, devs;
 
@@ -210,8 +209,12 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             close(fd);
             return CONTROL_OK;
         }
-    }
         return CONTROL_ERROR;
+    }
+#ifdef SNDCTL_DSP_GETPLAYVOL
+    case AOCONTROL_HAS_SOFT_VOLUME:
+        return CONTROL_TRUE;
+#endif
     }
     return CONTROL_UNKNOWN;
 }
@@ -222,10 +225,6 @@ static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int oss_format;
-
-#ifdef SNDCTL_DSP_GETPLAYVOL
-    ao->no_persistent_volume = true;
-#endif
 
     const char *mchan = NULL;
     if (p->cfg_oss_mixer_channel && p->cfg_oss_mixer_channel[0])

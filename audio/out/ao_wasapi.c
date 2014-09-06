@@ -194,7 +194,6 @@ static int init(struct ao *ao)
         wasapi_enumerate_devices(state->log);
     }
 
-    ao->per_application_mixer = true;
     if (state->opt_exclusive) {
         state->share_mode = AUDCLNT_SHAREMODE_EXCLUSIVE;
     } else {
@@ -284,6 +283,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             ISimpleAudioVolume_SetMute(state->pAudioVolumeProxy, mute, NULL);
 
         return CONTROL_OK;
+    case AOCONTROL_HAS_PER_APP_VOLUME:
+        return CONTROL_TRUE;
     case AOCONTROL_UPDATE_STREAM_TITLE: {
         MP_VERBOSE(state, "Updating stream title to \"%s\"\n", (char*)arg);
         wchar_t *title = mp_from_utf8(NULL, (char*)arg);
