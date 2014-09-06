@@ -434,6 +434,8 @@ void set_osd_function(struct MPContext *mpctx, int osd_function);
 void set_osd_subtitle(struct MPContext *mpctx, const char *text);
 
 // playloop.c
+void mp_wait_events(struct MPContext *mpctx, double sleeptime);
+void mp_process_input(struct MPContext *mpctx);
 void reset_playback_state(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);

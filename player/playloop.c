@@ -52,6 +52,33 @@
 #include "client.h"
 #include "command.h"
 
+// Wait until mp_input_wakeup(mpctx->input) is called, since the last time
+// mp_wait_events() was called. (But see mp_process_input().)
+void mp_wait_events(struct MPContext *mpctx, double sleeptime)
+{
+    if (sleeptime > 0) {
+        MP_STATS(mpctx, "start sleep");
+        mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
+        MP_STATS(mpctx, "end sleep");
+    }
+}
+
+// Process any queued input, whether it's user input, or requests from client
+// API threads. This also resets the "wakeup" flag used with mp_wait_events().
+void mp_process_input(struct MPContext *mpctx)
+{
+    mp_cmd_t *cmd;
+    while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
+        mp_dispatch_queue_process(mpctx->dispatch, 0);
+        cmd = mp_input_get_cmd(mpctx->input, 0, 0);
+        run_command(mpctx, cmd);
+        mp_cmd_free(cmd);
+        if (mpctx->stop_play)
+            break;
+    }
+    mp_dispatch_queue_process(mpctx->dispatch, 0);
+}
+
 void pause_player(struct MPContext *mpctx)
 {
     mpctx->opts->pause = 1;
@@ -626,22 +653,6 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
     mpctx->mouse_cursor_visible = mouse_cursor_visible;
 }
 
-static void handle_input_and_seek_coalesce(struct MPContext *mpctx)
-{
-    mp_cmd_t *cmd;
-    while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
-        mp_dispatch_queue_process(mpctx->dispatch, 0);
-        MP_STATS(mpctx, "start command");
-        cmd = mp_input_get_cmd(mpctx->input, 0, 0);
-        run_command(mpctx, cmd);
-        mp_cmd_free(cmd);
-        MP_STATS(mpctx, "end command");
-        if (mpctx->stop_play)
-            break;
-    }
-    mp_dispatch_queue_process(mpctx->dispatch, 0);
-}
-
 void add_frame_pts(struct MPContext *mpctx, double pts)
 {
     if (pts == MP_NOPTS_VALUE || mpctx->hrseek_framedrop) {
@@ -938,16 +949,12 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_osd_redraw(mpctx);
 
-    if (mpctx->sleeptime > 0) {
-        MP_STATS(mpctx, "start sleep");
-        mp_input_get_cmd(mpctx->input, mpctx->sleeptime * 1000, true);
-        MP_STATS(mpctx, "end sleep");
-    }
+    mp_wait_events(mpctx, mpctx->sleeptime);
     mpctx->sleeptime = 100.0; // infinite for all practical purposes
 
     handle_pause_on_low_cache(mpctx);
 
-    handle_input_and_seek_coalesce(mpctx);
+    mp_process_input(mpctx);
 
     handle_backstep(mpctx);
 
