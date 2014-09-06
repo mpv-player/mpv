@@ -302,8 +302,8 @@ static void audio_resume(struct ao *ao)
     int n, count, todo;
 
     /*
-     * we want to start with buffers full, because mplayer uses
-     * get_space() pointer as clock, which would cause video to
+     * we want to start with buffers full, because mpv uses
+     * get_delay() as clock, which would cause video to
      * accelerate while buffers are filled.
      */
     todo = p->par.bufsz * p->par.pchan * p->par.bps;
