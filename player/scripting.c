@@ -66,6 +66,7 @@ static char *script_name_from_filename(void *talloc_ctx, const char *fname)
 }
 
 struct thread_arg {
+    struct mp_log *log;
     const struct mp_scripting *backend;
     mpv_handle *client;
     const char *fname;
@@ -76,18 +77,23 @@ static void *script_thread(void *p)
     pthread_detach(pthread_self());
 
     struct thread_arg *arg = p;
-    struct mp_log *log = mp_client_get_log(arg->client);
-
-    mp_verbose(log, "Loading script...\n");
 
     if (arg->backend->load(arg->client, arg->fname) < 0)
-        mp_err(log, "Could not load script %s\n", arg->fname);
+        MP_ERR(arg, "Could not load script %s\n", arg->fname);
 
-    mp_verbose(log, "Exiting...\n");
+    MP_VERBOSE(arg, "Exiting...\n");
 
     mpv_detach_destroy(arg->client);
     talloc_free(arg);
     return NULL;
+}
+
+static void wait_loaded(struct MPContext *mpctx)
+{
+    while (!mp_clients_all_initialized(mpctx)) {
+        mp_wait_events(mpctx, 1e9);
+        mp_process_input(mpctx);
+    }
 }
 
 static void mp_load_script(struct MPContext *mpctx, const char *fname)
@@ -121,10 +127,16 @@ static void mp_load_script(struct MPContext *mpctx, const char *fname)
         talloc_free(arg);
         return;
     }
+    arg->log = mp_client_get_log(arg->client);
+
+    MP_VERBOSE(arg, "Loading script %s...\n", fname);
 
     pthread_t thread;
     if (pthread_create(&thread, NULL, script_thread, arg))
         talloc_free(arg);
+
+    wait_loaded(mpctx);
+    MP_VERBOSE(mpctx, "Done loading %s.\n", fname);
 
     return;
 }

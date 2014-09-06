@@ -13,6 +13,7 @@ struct mp_log;
 void mp_clients_init(struct MPContext *mpctx);
 void mp_clients_destroy(struct MPContext *mpctx);
 int mp_clients_num(struct MPContext *mpctx);
+bool mp_clients_all_initialized(struct MPContext *mpctx);
 
 void mp_client_broadcast_event(struct MPContext *mpctx, int event, void *data);
 int mp_client_send_event(struct MPContext *mpctx, const char *client_name,

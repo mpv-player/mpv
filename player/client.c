@@ -118,6 +118,7 @@ struct mpv_handle {
     int properties_updating;
     uint64_t property_event_masks; // or-ed together event masks of all properties
 
+    bool fuzzy_initialized;
     struct mp_log_buffer *messages;
 };
 
@@ -149,6 +150,22 @@ int mp_clients_num(struct MPContext *mpctx)
     int num_clients = mpctx->clients->num_clients;
     pthread_mutex_unlock(&mpctx->clients->lock);
     return num_clients;
+}
+
+// Test for "fuzzy" initialization of all clients. That is, all clients have
+// at least called mpv_wait_event() at least once since creation (or exited).
+bool mp_clients_all_initialized(struct MPContext *mpctx)
+{
+    bool all_ok = true;
+    pthread_mutex_lock(&mpctx->clients->lock);
+    for (int n = 0; n < mpctx->clients->num_clients; n++) {
+        struct mpv_handle *ctx = mpctx->clients->clients[n];
+        pthread_mutex_lock(&ctx->lock);
+        all_ok &= ctx->fuzzy_initialized;
+        pthread_mutex_unlock(&ctx->lock);
+    }
+    pthread_mutex_unlock(&mpctx->clients->lock);
+    return all_ok;
 }
 
 static void invalidate_global_event_mask(struct mpv_handle *ctx)
@@ -377,6 +394,7 @@ mpv_handle *mpv_create(void)
     mpv_handle *ctx = mp_new_client(mpctx->clients, "main");
     if (ctx) {
         ctx->owner = true;
+        ctx->fuzzy_initialized = true;
         // Set some defaults.
         mpv_set_option_string(ctx, "config", "no");
         mpv_set_option_string(ctx, "idle", "yes");
@@ -598,6 +616,10 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
     mpv_event *event = ctx->cur_event;
 
     pthread_mutex_lock(&ctx->lock);
+
+    if (!ctx->fuzzy_initialized && ctx->clients->mpctx->input)
+        mp_input_wakeup(ctx->clients->mpctx->input);
+    ctx->fuzzy_initialized = true;
 
     if (timeout < 0)
         timeout = 1e20;
