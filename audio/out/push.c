@@ -120,8 +120,9 @@ static void reset(struct ao *ao)
         ao->driver->reset(ao);
     mp_audio_buffer_clear(p->buffer);
     p->paused = false;
+    if (p->still_playing)
+        wakeup_playthread(ao);
     p->still_playing = false;
-    wakeup_playthread(ao);
     pthread_mutex_unlock(&p->lock);
 }
 
