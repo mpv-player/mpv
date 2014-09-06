@@ -499,13 +499,11 @@ static void reset(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    int playsize = p->outburst;
 
 #ifdef SNDCTL_DSP_GETOSPACE
     if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &p->zz) != -1) {
         // calculate exact buffer space:
-        playsize = p->zz.fragments * p->zz.fragsize;
-        return playsize / ao->sstride;
+        return p->zz.fragments * p->zz.fragsize / ao->sstride;
     }
 #endif
 
