@@ -52,11 +52,9 @@ struct ao_push_state {
 
     bool terminate;
     bool drain;
-    bool buffers_full;
-    bool avoid_ao_wait;
+    bool wait_on_ao;
     bool still_playing;
     bool need_wakeup;
-    bool requested_data;
     bool paused;
 
     // Whether the current buffer contains the complete audio.
@@ -177,13 +175,17 @@ static int unlocked_get_space(struct ao *ao)
     int space = mp_audio_buffer_get_write_available(p->buffer);
     if (ao->driver->get_space) {
         // The following code attempts to keep the total buffered audio to
-        // def_buffer/2+device_buffer in order to improve latency.
+        // ao->buffer in order to improve latency.
         int device_space = ao->driver->get_space(ao);
         int device_buffered = ao->device_buffer - device_space;
         int soft_buffered = mp_audio_buffer_samples(p->buffer);
-        int min_buffer = ao->def_buffer / 2 * ao->samplerate + ao->device_buffer;
-        int total_buffer = device_buffered + soft_buffered;
-        int missing = min_buffer - total_buffer;
+        // The extra margin helps avoiding too many wakeups if the AO is fully
+        // byte based and doesn't do proper chunked processing.
+        int min_buffer = ao->buffer + 64;
+        int missing = min_buffer - device_buffered - soft_buffered;
+        // But always keep the device's buffer filled as much as we can.
+        int device_missing = device_space - soft_buffered;
+        missing = MPMAX(missing, device_missing);
         space = MPMIN(space, missing);
         space = MPMAX(0, space);
     }
@@ -217,6 +219,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     int write_samples = mp_audio_buffer_get_write_available(p->buffer);
     write_samples = MPMIN(write_samples, samples);
 
+    MP_TRACE(ao, "samples=%d flags=%d r=%d\n", samples, flags, write_samples);
+
     if (write_samples < samples)
         flags = flags & ~AOPLAY_FINAL_CHUNK;
     bool is_final = flags & AOPLAY_FINAL_CHUNK;
@@ -237,10 +241,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     // If we don't have new data, the decoder thread basically promises it
     // will send new data as soon as it's available.
-    if (got_data) {
-        p->requested_data = false;
+    if (got_data)
         wakeup_playthread(ao);
-    }
     pthread_mutex_unlock(&p->lock);
     return write_samples;
 }
@@ -270,8 +272,8 @@ static void ao_play_data(struct ao *ao)
     }
     r = MPMAX(r, 0);
     // Probably can't copy the rest of the buffer due to period alignment.
-    bool stuck = r <= 0 && space >= max && data.samples > 0;
-    if ((flags & AOPLAY_FINAL_CHUNK) && stuck) {
+    bool stuck_eof = r <= 0 && space >= max && data.samples > 0;
+    if ((flags & AOPLAY_FINAL_CHUNK) && stuck_eof) {
         MP_ERR(ao, "Audio output driver seems to ignore AOPLAY_FINAL_CHUNK.\n");
         r = max;
     }
@@ -281,27 +283,23 @@ static void ao_play_data(struct ao *ao)
         if (ao->driver->get_delay)
             p->expected_end_time += ao->driver->get_delay(ao);
     }
-    // In both cases, we have to account for space!=0, but the AO not accepting
-    // any new data (due to rounding to period boundaries).
-    p->buffers_full = max >= space && r <= 0;
-    p->avoid_ao_wait = (max == 0 && space > 0) || p->paused || stuck;
+    // Nothing written, but more input data than space - this must mean the
+    // AO's get_space() doesn't do period alignment correctly.
+    bool stuck = r == 0 && max >= space && space > 0;
+    if (stuck)
+        MP_ERR(ao, "Audio output is reporting incorrect buffer status.\n");
+    // Wait until space becomes available. Also wait if we actually wrote data,
+    // so the AO wakes us up properly if it needs more data.
+    p->wait_on_ao = space == 0 || r > 0 || stuck;
     p->still_playing |= r > 0;
-    MP_TRACE(ao, "in=%d, space=%d r=%d flags=%d aw=%d full=%d f=%d\n", max,
-             space, r, flags, p->avoid_ao_wait, p->buffers_full, p->final_chunk);
-}
-
-// Estimate when the AO needs data again.
-static double ao_estimate_timeout(struct ao *ao)
-{
-    struct ao_push_state *p = ao->api_priv;
-    double timeout = 0;
-    if (p->buffers_full && ao->driver->get_delay) {
-        timeout = ao->driver->get_delay(ao) - 0.050;
-        // Keep extra safety margin if the buffers are large
-        if (timeout > 0.100)
-            timeout = MPMAX(timeout - 0.200, 0.100);
-    }
-    return MPMAX(timeout, ao->device_buffer * 0.25 / ao->samplerate);
+    // If we just filled the AO completely (r == space), don't refill for a
+    // while. Prevents wakeup feedback with byte-granular AOs.
+    int needed = unlocked_get_space(ao);
+    bool more = needed >= (r == space ? ao->device_buffer / 4 : 1) && !stuck;
+    if (more)
+        mp_input_wakeup(ao->input_ctx); // request more data
+    MP_TRACE(ao, "in=%d flags=%d space=%d r=%d wa=%d needed=%d more=%d\n",
+             max, flags, space, r, p->wait_on_ao, needed, more);
 }
 
 static void *playthread(void *arg)
@@ -313,16 +311,7 @@ static void *playthread(void *arg)
         if (!p->paused)
             ao_play_data(ao);
 
-        // Request new data from decoder if buffer goes below "full".
-        // Allow a small margin of missing data for AOs that use timeouts.
-        double margin = ao->driver->wait ? 0 : ao->device_buffer / 8;
-        if (!p->buffers_full && unlocked_get_space(ao) > margin) {
-            if (!p->requested_data)
-                mp_input_wakeup(ao->input_ctx);
-            p->requested_data = true;
-        }
-
-        if (p->drain && (p->avoid_ao_wait || p->paused)) {
+        if (p->drain && (!p->wait_on_ao || p->paused)) {
             if (ao->driver->drain)
                 ao->driver->drain(ao);
             p->drain = false;
@@ -331,7 +320,7 @@ static void *playthread(void *arg)
 
         if (!p->need_wakeup) {
             MP_STATS(ao, "start audio wait");
-            if (p->avoid_ao_wait || p->paused) {
+            if (!p->wait_on_ao || p->paused) {
                 // Avoid busy waiting, because the audio API will still report
                 // that it needs new data, even if we're not ready yet, or if
                 // get_space() decides that the amount of audio buffered in the
@@ -348,7 +337,7 @@ static void *playthread(void *arg)
                         p->still_playing = false;
                 }
 
-                if (!p->requested_data || (was_playing && !p->still_playing))
+                if (was_playing && !p->still_playing)
                     mp_input_wakeup(ao->input_ctx);
 
                 if (p->still_playing && timeout > 0) {
@@ -359,7 +348,10 @@ static void *playthread(void *arg)
             } else {
                 if (!ao->driver->wait || ao->driver->wait(ao, &p->lock) < 0) {
                     // Fallback to guessing.
-                    double timeout = ao_estimate_timeout(ao);
+                    double timeout = 0;
+                    if (ao->driver->get_delay)
+                        timeout = ao->driver->get_delay(ao);
+                    timeout *= 0.25; // wake up if 25% played
                     mpthread_cond_timedwait_rel(&p->wakeup, &p->lock, timeout);
                 }
             }
