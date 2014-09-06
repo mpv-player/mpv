@@ -203,7 +203,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     fwrite(data[0], len, 1, priv->fp);
     priv->data_length += len;
-    return len / ao->sstride;
+    return samples;
 }
 
 #define OPT_BASE_STRUCT struct priv
