@@ -56,27 +56,22 @@
 // mp_wait_events() was called. (But see mp_process_input().)
 void mp_wait_events(struct MPContext *mpctx, double sleeptime)
 {
-    if (sleeptime > 0) {
-        MP_STATS(mpctx, "start sleep");
-        mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
-        MP_STATS(mpctx, "end sleep");
-    }
+    mp_input_wait(mpctx->input, sleeptime);
 }
 
 // Process any queued input, whether it's user input, or requests from client
 // API threads. This also resets the "wakeup" flag used with mp_wait_events().
 void mp_process_input(struct MPContext *mpctx)
 {
-    mp_cmd_t *cmd;
-    while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
-        mp_dispatch_queue_process(mpctx->dispatch, 0);
-        cmd = mp_input_get_cmd(mpctx->input, 0, 0);
+    mp_dispatch_queue_process(mpctx->dispatch, 0);
+    for (;;) {
+        mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
+        if (!cmd)
+            break;
         run_command(mpctx, cmd);
         mp_cmd_free(cmd);
-        if (mpctx->stop_play)
-            break;
+        mp_dispatch_queue_process(mpctx->dispatch, 0);
     }
-    mp_dispatch_queue_process(mpctx->dispatch, 0);
 }
 
 void pause_player(struct MPContext *mpctx)
@@ -976,8 +971,6 @@ void idle_loop(struct MPContext *mpctx)
     while (mpctx->opts->player_idle_mode && !mpctx->playlist->current
            && mpctx->stop_play != PT_QUIT)
     {
-        mpctx->video_status = STATUS_EOF;
-        mpctx->audio_status = STATUS_EOF;
         if (need_reinit) {
             mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
             handle_force_window(mpctx, true);
@@ -988,16 +981,11 @@ void idle_loop(struct MPContext *mpctx)
         if (!mpctx->opts->force_vo)
             uninit |= INITIALIZED_VO;
         uninit_player(mpctx, uninit);
-        handle_force_window(mpctx, false);
         update_osd_msg(mpctx);
         handle_osd_redraw(mpctx);
-        mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, mpctx->sleeptime * 1000,
-                                         false);
+        mp_process_input(mpctx);
+        mp_wait_events(mpctx, mpctx->sleeptime);
         mpctx->sleeptime = 100.0;
-        if (cmd)
-            run_command(mpctx, cmd);
-        mp_cmd_free(cmd);
-        mp_dispatch_queue_process(mpctx->dispatch, 0);
         if (mpctx->opts->use_terminal)
             getch2_poll();
     }

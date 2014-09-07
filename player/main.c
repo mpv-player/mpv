@@ -111,7 +111,7 @@ static void shutdown_clients(struct MPContext *mpctx)
     while (mpctx->clients && mp_clients_num(mpctx)) {
         mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
         mp_dispatch_queue_process(mpctx->dispatch, 0);
-        mp_input_get_cmd(mpctx->input, 100, 1);
+        mp_wait_events(mpctx, 10000);
     }
     mp_clients_destroy(mpctx);
 }

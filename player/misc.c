@@ -188,13 +188,7 @@ void stream_dump(struct MPContext *mpctx)
                    (long long int)pos, (long long int)size);
         }
         stream_fill_buffer(stream);
-        for (;;) {
-            mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, 0, false);
-            if (!cmd)
-                break;
-            run_command(mpctx, cmd);
-            talloc_free(cmd);
-        }
+        mp_process_input(mpctx);
     }
 }
 

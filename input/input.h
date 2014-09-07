@@ -179,12 +179,8 @@ void mp_input_rm_key_fd(struct input_ctx *ictx, int fd);
 // Add a command to the command queue.
 int mp_input_queue_cmd(struct input_ctx *ictx, struct mp_cmd *cmd);
 
-/* Return next available command, or sleep up to "time" ms if none is
- * available. If "peek_only" is true return a reference to the command
- * but leave it queued.
- */
-struct mp_cmd *mp_input_get_cmd(struct input_ctx *ictx, int time,
-                                int peek_only);
+// Return next queued command, or NULL.
+struct mp_cmd *mp_input_read_cmd(struct input_ctx *ictx);
 
 // Parse text and return corresponding struct mp_cmd.
 // The location parameter is for error messages.
@@ -239,6 +235,10 @@ struct mpv_global;
 struct input_ctx *mp_input_init(struct mpv_global *global);
 
 void mp_input_uninit(struct input_ctx *ictx);
+
+// Sleep for the given amount of seconds, until mp_input_wakeup() is called,
+// or new input arrives. seconds<=0 returns immediately.
+void mp_input_wait(struct input_ctx *ictx, double seconds);
 
 // Wake up sleeping input loop from another thread.
 void mp_input_wakeup(struct input_ctx *ictx);

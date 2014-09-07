@@ -985,26 +985,6 @@ static void load_chapters(struct MPContext *mpctx)
     }
 }
 
-/* When demux performs a blocking operation (network connection or
- * cache filling) if the operation fails we use this function to check
- * if it was interrupted by the user.
- * The function returns whether it was interrupted. */
-static bool demux_was_interrupted(struct MPContext *mpctx)
-{
-    for (;;) {
-        if (mpctx->stop_play != KEEP_PLAYING
-            && mpctx->stop_play != AT_END_OF_FILE)
-            return true;
-        mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, 0, 0);
-        if (!cmd)
-            break;
-        if (mp_input_is_abort_cmd(cmd))
-            run_command(mpctx, cmd);
-        mp_cmd_free(cmd);
-    }
-    return false;
-}
-
 static void load_per_file_options(m_config_t *conf,
                                   struct playlist_param *params,
                                   int params_count)
@@ -1022,8 +1002,6 @@ static void play_current_file(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     void *tmp = talloc_new(NULL);
     double playback_start = -1e100;
-
-    mpctx->initialized_flags |= INITIALIZED_PLAYBACK;
 
     mp_notify(mpctx, MPV_EVENT_START_FILE, NULL);
 
@@ -1112,7 +1090,7 @@ static void play_current_file(struct MPContext *mpctx)
         stream_flags |= mpctx->playlist->current->stream_flags;
     mpctx->stream = stream_create(stream_filename, stream_flags, mpctx->global);
     if (!mpctx->stream) { // error...
-        demux_was_interrupted(mpctx);
+        mp_process_input(mpctx);
         goto terminate_playback;
     }
     mpctx->initialized_flags |= INITIALIZED_STREAM;
@@ -1125,10 +1103,11 @@ static void play_current_file(struct MPContext *mpctx)
     // Must be called before enabling cache.
     mp_nav_init(mpctx);
 
-    int res = stream_enable_cache(&mpctx->stream, &opts->stream_cache);
-    if (res == 0)
-        if (demux_was_interrupted(mpctx))
-            goto terminate_playback;
+    stream_enable_cache(&mpctx->stream, &opts->stream_cache);
+
+    mp_process_input(mpctx);
+    if (mpctx->stop_play)
+        goto terminate_playback;
 
     stream_set_capture_file(mpctx->stream, opts->stream_capture);
 
@@ -1297,6 +1276,7 @@ goto_reopen_demuxer: ;
     if (mpctx->opts->pause)
         pause_player(mpctx);
 
+    mpctx->initialized_flags |= INITIALIZED_PLAYBACK;
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
 
     playback_start = mp_time_sec();

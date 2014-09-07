@@ -192,6 +192,7 @@ int async_quit_request;
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
                         const char *location, const char *restrict_section);
 static void close_input_sources(struct input_ctx *ictx);
+static bool test_abort(struct input_ctx *ictx);
 
 #define OPT_BASE_STRUCT struct input_opts
 struct input_opts {
@@ -1158,21 +1159,27 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
     return NULL;
 }
 
-/**
- * \param peek_only when set, the returned command stays in the queue.
- * Do not free the returned cmd whe you set this!
- */
-mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
+void mp_input_wait(struct input_ctx *ictx, double seconds)
+{
+    if (seconds <= 0)
+        return;
+    input_lock(ictx);
+    if (ictx->cmd_queue.first)
+        seconds = 0;
+    MP_STATS(ictx, "start sleep");
+    read_events(ictx, MPMIN(seconds * 1000, INT_MAX));
+    MP_STATS(ictx, "end sleep");
+    input_unlock(ictx);
+}
+
+mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
 {
     input_lock(ictx);
-    if (async_quit_request) {
+    read_events(ictx, 0);
+    if (async_quit_request && !test_abort(ictx)) {
         struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0("quit"), "");
         queue_add_head(&ictx->cmd_queue, cmd);
     }
-
-    if (ictx->cmd_queue.first)
-        time = 0;
-    read_events(ictx, time);
     struct cmd_queue *queue = &ictx->cmd_queue;
     if (!queue->first) {
         struct mp_cmd *repeated = check_autorepeat(ictx);
@@ -1186,7 +1193,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
         }
     }
     struct mp_cmd *ret = queue_peek(queue);
-    if (ret && !peek_only) {
+    if (ret) {
         queue_remove(queue, ret);
         if (ret->mouse_move) {
             ictx->mouse_x = ret->mouse_x;
