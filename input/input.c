@@ -192,7 +192,6 @@ int async_quit_request;
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
                         const char *location, const char *restrict_section);
 static void close_input_sources(struct input_ctx *ictx);
-static bool test_abort(struct input_ctx *ictx);
 
 #define OPT_BASE_STRUCT struct input_opts
 struct input_opts {
@@ -1176,9 +1175,10 @@ mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
 {
     input_lock(ictx);
     read_events(ictx, 0);
-    if (async_quit_request && !test_abort(ictx)) {
+    if (async_quit_request && !queue_has_abort_cmds(&ictx->cmd_queue)) {
         struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0("quit"), "");
         queue_add_head(&ictx->cmd_queue, cmd);
+        async_quit_request = 0;
     }
     struct cmd_queue *queue = &ictx->cmd_queue;
     if (!queue->first) {
