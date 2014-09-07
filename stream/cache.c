@@ -599,13 +599,13 @@ static void cache_uninit(stream_t *cache)
     talloc_free(s);
 }
 
-// return 1 on success, 0 if the function was interrupted and -1 on error, or
-// if the cache is disabled
+// return 1 on success, 0 if the cache is disabled/not needed, and -1 on error
+// or if the cache is disabled
 int stream_cache_init(stream_t *cache, stream_t *stream,
                       struct mp_cache_opts *opts)
 {
     if (opts->size < 1)
-        return -1;
+        return 0;
 
     struct priv *s = talloc_zero(NULL, struct priv);
     s->log = cache->log;
@@ -653,7 +653,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
         return 1;
     for (;;) {
         if (stream_check_interrupt(cache))
-            return 0;
+            return -1;
         int64_t fill;
         int idle;
         if (stream_control(s->cache, STREAM_CTRL_GET_CACHE_FILL, &fill) < 0)

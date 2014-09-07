@@ -827,15 +827,15 @@ bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts)
     return use_opts.size > 0;
 }
 
-// return: 1 on success, 0 if the function was interrupted and -1 on error, or
-//         if the cache is disabled
+// return 1 on success, 0 if the cache is disabled/not needed, and -1 on error
+// or if the cache is disabled
 int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
 {
     stream_t *orig = *stream;
     struct mp_cache_opts use_opts = check_cache_opts(*stream, opts);
 
     if (use_opts.size < 1)
-        return -1;
+        return 0;
 
     stream_t *fcache = open_cache(orig, "file-cache");
     if (stream_file_cache_init(fcache, orig, &use_opts) <= 0) {
