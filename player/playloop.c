@@ -810,6 +810,9 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
             .d_w = w, .d_h = h,
         };
         vo_reconfig(vo, &p, 0);
+        vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &(bool){true});
+        vo_control(vo, VOCTRL_RESTORE_SCREENSAVER, NULL);
+        vo_set_paused(vo, true);
         vo_redraw(vo);
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
     }
