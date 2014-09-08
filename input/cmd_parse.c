@@ -242,27 +242,28 @@ error:
     return NULL;
 }
 
-static struct mp_cmd *parse_cmd_str(struct mp_log *log, bstr *str, const char *loc)
+static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
+                                    bstr *str, const char *loc)
 {
     struct parse_ctx ctx = {
         .log = log,
         .loc = loc,
-        .tmp = talloc_new(NULL),
+        .tmp = tmp,
         .str = *str,
         .start = *str,
     };
     struct mp_cmd *res = parse_cmd(&ctx, MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES);
-    talloc_free(ctx.tmp);
     *str = ctx.str;
     return res;
 }
 
 mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
 {
+    void *tmp = talloc_new(NULL);
     bstr original = str;
-    struct mp_cmd *cmd = parse_cmd_str(log, &str, loc);
+    struct mp_cmd *cmd = parse_cmd_str(log, tmp, &str, loc);
     if (!cmd)
-        return NULL;
+        goto done;
 
     // Handle "multi" commands
     struct mp_cmd **p_prev = NULL;
@@ -287,16 +288,19 @@ mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
             p_prev = &cmd->queue_next;
             cmd = list;
         }
-        struct mp_cmd *sub = parse_cmd_str(log, &str, loc);
+        struct mp_cmd *sub = parse_cmd_str(log, tmp, &str, loc);
         if (!sub) {
             talloc_free(cmd);
-            return NULL;
+            cmd = NULL;
+            goto done;
         }
         talloc_steal(cmd, sub);
         *p_prev = sub;
         p_prev = &sub->queue_next;
     }
 
+done:
+    talloc_free(tmp);
     return cmd;
 }
 
