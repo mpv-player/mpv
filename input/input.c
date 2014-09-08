@@ -1096,29 +1096,12 @@ static void read_events(struct input_ctx *ictx, int time)
     }
     time = FFMAX(time, 0);
 
-    while (1) {
-        if (ictx->need_wakeup)
-            time = 0;
-        ictx->need_wakeup = false;
+    if (ictx->need_wakeup)
+        time = 0;
 
-        remove_dead_fds(ictx);
+    remove_dead_fds(ictx);
 
-        if (time) {
-            for (int i = 0; i < ictx->num_fds; i++) {
-                if (!ictx->fds[i].select)
-                    read_fd(ictx, &ictx->fds[i]);
-            }
-        }
-
-        if (ictx->need_wakeup)
-            time = 0;
-
-        input_wait_read(ictx, time);
-
-        // Read until no new wakeups happen.
-        if (!ictx->need_wakeup)
-            break;
-    }
+    input_wait_read(ictx, time);
 }
 
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
@@ -1160,14 +1143,15 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
 
 void mp_input_wait(struct input_ctx *ictx, double seconds)
 {
-    if (seconds <= 0)
-        return;
     input_lock(ictx);
     if (ictx->cmd_queue.first)
         seconds = 0;
-    MP_STATS(ictx, "start sleep");
-    read_events(ictx, MPMIN(seconds * 1000, INT_MAX));
-    MP_STATS(ictx, "end sleep");
+    if (seconds > 0) {
+        MP_STATS(ictx, "start sleep");
+        read_events(ictx, MPMIN(seconds * 1000, INT_MAX));
+        MP_STATS(ictx, "end sleep");
+    }
+    ictx->need_wakeup = false;
     input_unlock(ictx);
 }
 
