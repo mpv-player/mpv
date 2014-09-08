@@ -187,7 +187,8 @@ typedef struct MPContext {
     struct osd_progbar_state osd_progbar;
 
     struct playlist *playlist;
-    char *filename; // currently playing file
+    struct playlist_entry *playing; // currently playing file
+    char *filename; // always the same as playing->filename (or NULL)
     struct mp_resolve_result *resolve_result;
     enum stop_play_reason stop_play;
     unsigned int initialized_flags;  // which subsystems have been initialized

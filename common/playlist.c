@@ -106,10 +106,18 @@ static void playlist_unlink(struct playlist *pl, struct playlist_entry *entry)
     entry->pl = NULL;
 }
 
+void playlist_entry_unref(struct playlist_entry *e)
+{
+    e->reserved--;
+    if (e->reserved < 0)
+        talloc_free(e);
+}
+
 void playlist_remove(struct playlist *pl, struct playlist_entry *entry)
 {
     playlist_unlink(pl, entry);
-    talloc_free(entry);
+    entry->removed = true;
+    playlist_entry_unref(entry);
 }
 
 void playlist_clear(struct playlist *pl)

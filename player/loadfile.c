@@ -1024,11 +1024,12 @@ static void play_current_file(struct MPContext *mpctx)
 
     reset_playback_state(mpctx);
 
-    if (mpctx->playlist->current)
-        mpctx->filename = mpctx->playlist->current->filename;
-
-    if (!mpctx->filename)
+    mpctx->playing = mpctx->playlist->current;
+    if (!mpctx->playing || !mpctx->playing->filename)
         goto terminate_playback;
+    mpctx->playing->reserved += 1;
+
+    mpctx->filename = mpctx->playing->filename;
 
     mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION;
 
@@ -1050,8 +1051,8 @@ static void play_current_file(struct MPContext *mpctx)
     if (opts->position_resume)
         mp_load_playback_resume(mpctx, mpctx->filename);
 
-    load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
-                          mpctx->playlist->current->num_params);
+    load_per_file_options(mpctx->mconfig, mpctx->playing->params,
+                          mpctx->playing->num_params);
 
 #if HAVE_LIBASS
     if (opts->ass_style_override)
@@ -1083,7 +1084,7 @@ static void play_current_file(struct MPContext *mpctx)
     }
     int stream_flags = STREAM_READ;
     if (!opts->load_unsafe_playlists)
-        stream_flags |= mpctx->playlist->current->stream_flags;
+        stream_flags |= mpctx->playing->stream_flags;
     mpctx->stream = stream_create(stream_filename, stream_flags, mpctx->global);
     if (!mpctx->stream) { // error...
         mp_process_input(mpctx);
@@ -1321,18 +1322,14 @@ terminate_playback:
     if (mpctx->stop_play != PT_RESTART)
         m_config_restore_backups(mpctx->mconfig);
 
-    mpctx->filename = NULL;
     mpctx->resolve_result = NULL;
-    talloc_free(tmp);
 
-    // Played/paused for longer than 3 seconds -> ok
-    bool playback_short = mpctx->stop_play == AT_END_OF_FILE &&
-                (playback_start < 0 || mp_time_sec() - playback_start < 3.0);
-    bool init_failed = mpctx->stop_play == AT_END_OF_FILE &&
-                (mpctx->shown_aframes == 0 && mpctx->shown_vframes == 0);
-    if (mpctx->playlist->current && !mpctx->playlist->current_was_replaced) {
-        mpctx->playlist->current->playback_short = playback_short;
-        mpctx->playlist->current->init_failed = init_failed;
+    if (mpctx->playing && mpctx->stop_play == AT_END_OF_FILE) {
+        // Played/paused for longer than 3 seconds -> ok
+        mpctx->playing->playback_short =
+            playback_start < 0 || mp_time_sec() - playback_start < 3.0;
+        mpctx->playing->init_failed =
+            mpctx->shown_aframes == 0 && mpctx->shown_vframes == 0;
     }
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
@@ -1348,6 +1345,13 @@ terminate_playback:
     default:                end_event.reason = -1; break;
     };
     mp_notify(mpctx, MPV_EVENT_END_FILE, &end_event);
+
+    if (mpctx->playing)
+        playlist_entry_unref(mpctx->playing);
+    mpctx->playing = NULL;
+    mpctx->filename = NULL;
+
+    talloc_free(tmp);
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,
