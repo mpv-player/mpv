@@ -579,7 +579,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         pa_threaded_mainloop_lock(priv->mainloop);
         if (!waitop(priv, pa_context_get_sink_input_info(priv->context, devidx,
                                                          info_func, ao))) {
-            GENERIC_ERR_MSG("pa_stream_get_sink_input_info() failed");
+            GENERIC_ERR_MSG("pa_context_get_sink_input_info() failed");
             return CONTROL_ERROR;
         }
         // Warning: some information in pi might be unaccessible, because
