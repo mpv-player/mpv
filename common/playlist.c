@@ -30,7 +30,8 @@
 struct playlist_entry *playlist_entry_new(const char *filename)
 {
     struct playlist_entry *e = talloc_zero(NULL, struct playlist_entry);
-    e->filename = talloc_strdup(e, filename);
+    char *local_filename = mp_file_url_to_filename(e, bstr0(filename));
+    e->filename = local_filename ? local_filename : talloc_strdup(e, filename);
     return e;
 }
 

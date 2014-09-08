@@ -1030,10 +1030,6 @@ static void play_current_file(struct MPContext *mpctx)
     if (!mpctx->filename)
         goto terminate_playback;
 
-    char *local_filename = mp_file_url_to_filename(tmp, bstr0(mpctx->filename));
-    if (local_filename)
-        mpctx->filename = local_filename;
-
     mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION;
 
     if (opts->reset_options) {
