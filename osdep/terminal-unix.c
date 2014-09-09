@@ -756,7 +756,7 @@ static void quit_request_sighandler(int signum)
 
 static void *terminal_thread(void *ptr)
 {
-    bool stdin_ok = true; // if false, we still wait for SIGTERM
+    bool stdin_ok = isatty(STDIN_FILENO); // if false, we still wait for SIGTERM
     while (1) {
         struct pollfd fds[2] = {
             {.events = POLLIN, .fd = death_pipe[0]},
