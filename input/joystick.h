@@ -21,6 +21,6 @@
 
 struct input_ctx;
 struct mp_log;
-int mp_input_joystick_init(struct input_ctx *ictx, struct mp_log *log, char *dev);
+void mp_input_joystick_add(struct input_ctx *ictx, char *dev);
 
 #endif /* MPLAYER_JOYSTICK_H */

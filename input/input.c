@@ -1557,7 +1557,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
 
 #if HAVE_JOYSTICK
     if (input_conf->use_joystick)
-        mp_input_joystick_init(ictx, ictx->log, input_conf->js_dev);
+        mp_input_joystick_add(ictx, input_conf->js_dev);
 #endif
 
 #if HAVE_LIRC

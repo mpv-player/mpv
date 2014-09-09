@@ -29,6 +29,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <poll.h>
 
 #include "common/msg.h"
 #include "keycodes.h"
@@ -43,21 +44,21 @@
 
 #include <linux/joystick.h>
 
-static int mp_input_joystick_read(void *ctx, int fd);
-
 struct ctx {
     struct mp_log *log;
     int axis[256];
     int btns;
+    int fd;
 };
 
 static int close_js(void *ctx, int fd)
 {
+  close(fd);
   talloc_free(ctx);
   return 0;
 }
 
-int mp_input_joystick_init(struct input_ctx *ictx, struct mp_log *log, char *dev)
+static struct ctx *joystick_init(struct input_ctx *ictx, struct mp_log *log, char *dev)
 {
   int fd,l=0;
   int initialized = 0;
@@ -68,7 +69,7 @@ int mp_input_joystick_init(struct input_ctx *ictx, struct mp_log *log, char *dev
   fd = open( dev ? dev : JS_DEV , O_RDONLY | O_NONBLOCK );
   if(fd < 0) {
     mp_err(log, "Can't open joystick device %s: %s\n",dev ? dev : JS_DEV,strerror(errno));
-    return -1;
+    return NULL;
   }
 
   struct ctx *ctx = talloc_ptrtype(NULL, ctx);
@@ -88,7 +89,7 @@ int mp_input_joystick_init(struct input_ctx *ictx, struct mp_log *log, char *dev
         MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
         close(fd);
         talloc_free(ctx);
-        return -1;
+        return NULL;
       }
       l += r;
     }
@@ -103,8 +104,8 @@ int mp_input_joystick_init(struct input_ctx *ictx, struct mp_log *log, char *dev
       ctx->axis[ev.number] = ev.value;
   }
 
-  mp_input_add_fd(ictx, fd, 1, NULL, mp_input_joystick_read, close_js, ctx);
-  return fd;
+  ctx->fd = fd;
+  return ctx;
 }
 
 static int mp_input_joystick_read(void *pctx, int fd) {
@@ -118,12 +119,12 @@ static int mp_input_joystick_read(void *pctx, int fd) {
       if(errno == EINTR)
         continue;
       else if(errno == EAGAIN)
-        return MP_INPUT_NOTHING;
+        return 0;
       if( r < 0)
         MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
       else
         MP_ERR(ctx, "Error while reading joystick device: %s\n","EOF");
-      return MP_INPUT_DEAD;
+      return -1;
     }
     l += r;
   }
@@ -131,7 +132,7 @@ static int mp_input_joystick_read(void *pctx, int fd) {
   if((unsigned int)l < sizeof(struct js_event)) {
     if(l > 0)
       MP_WARN(ctx, "Joystick: We lose %d bytes of data\n",l);
-    return MP_INPUT_NOTHING;
+    return 0;
   }
 
   if(ev.type & JS_EVENT_INIT) {
@@ -140,14 +141,14 @@ static int mp_input_joystick_read(void *pctx, int fd) {
     if(ev.type == JS_EVENT_BUTTON) {
       int s = (ctx->btns >> ev.number) & 1;
       if(s == ev.value) // State is the same : ignore
-        return MP_INPUT_NOTHING;
+        return 0;
     }
     if(ev.type == JS_EVENT_AXIS) {
       if( ( ctx->axis[ev.number] == 1 && ev.value > JOY_AXIS_DELTA) ||
           (ctx->axis[ev.number] == -1 && ev.value < -JOY_AXIS_DELTA) ||
           (ctx->axis[ev.number] == 0 && ev.value >= -JOY_AXIS_DELTA && ev.value <= JOY_AXIS_DELTA)
           ) // State is the same : ignore
-        return MP_INPUT_NOTHING;
+        return 0;
     }
   }
 
@@ -170,11 +171,44 @@ static int mp_input_joystick_read(void *pctx, int fd) {
       ctx->axis[ev.number] = 0;
       return r | MP_KEY_STATE_UP;
     } else
-      return MP_INPUT_NOTHING;
+      return 0;
   } else {
     MP_WARN(ctx, "Joystick warning unknown event type %d\n",ev.type);
-    return MP_INPUT_ERROR;
+    return -1;
   }
 
-  return MP_INPUT_NOTHING;
+  return 0;
+}
+
+static void read_joystick_thread(struct mp_input_src *src, void *param)
+{
+    int wakeup_fd = mp_input_src_get_wakeup_fd(src);
+    struct ctx *ctx = joystick_init(src->input_ctx, src->log, param);
+
+    if (!ctx)
+        return;
+
+    mp_input_src_init_done(src);
+
+    while (1) {
+        struct pollfd fds[2] = {
+            { .fd = ctx->fd, .events = POLLIN },
+            { .fd = wakeup_fd, .events = POLLIN },
+        };
+        poll(fds, 2, -1);
+        if (!(fds[0].revents & POLLIN))
+            break;
+        int r = mp_input_joystick_read(ctx, ctx->fd);
+        if (r < 0)
+            break;
+        if (r > 0)
+            mp_input_put_key(src->input_ctx, r);
+    }
+
+    close_js(ctx, ctx->fd);
+}
+
+void mp_input_joystick_add(struct input_ctx *ictx, char *dev)
+{
+    mp_input_add_thread_src(ictx, (void *)dev, read_joystick_thread);
 }
