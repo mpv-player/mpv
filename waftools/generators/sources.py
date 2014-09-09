@@ -13,6 +13,9 @@ def __zshcomp_cmd__(ctx, argument):
     return "${{BIN_PERL}} {0}/TOOLS/zsh.pl {1} > ${{TGT}}" \
                 .format(ctx.srcnode.abspath(), argument)
 
+def __wayland_scanner_cmd__(ctx, argument):
+    return "${{WAYSCAN}} {0} < ${{SRC}} > ${{TGT}}".format(argument)
+
 def __file2string__(ctx, **kwargs):
     ctx(
         rule   = __file2string_cmd__(ctx),
@@ -44,7 +47,24 @@ def __zshcomp__(ctx, **kwargs):
         **kwargs
     )
 
-BuildContext.file2string          = __file2string__
-BuildContext.matroska_header      = __matroska_header__
-BuildContext.matroska_definitions = __matroska_definitions__
-BuildContext.zshcomp              = __zshcomp__
+def __wayland_protocol_code__(ctx, **kwargs):
+    ctx(
+        rule   = __wayland_scanner_cmd__(ctx, 'code'),
+        name   = os.path.basename(kwargs['target']),
+        **kwargs
+    )
+
+def __wayland_protocol_header__(ctx, **kwargs):
+    ctx(
+        rule   = __wayland_scanner_cmd__(ctx, 'client-header'),
+        before = ('c',),
+        name   = os.path.basename(kwargs['target']),
+        **kwargs
+    )
+
+BuildContext.file2string             = __file2string__
+BuildContext.matroska_header         = __matroska_header__
+BuildContext.matroska_definitions    = __matroska_definitions__
+BuildContext.zshcomp                 = __zshcomp__
+BuildContext.wayland_protocol_code   = __wayland_protocol_code__
+BuildContext.wayland_protocol_header = __wayland_protocol_header__

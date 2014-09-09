@@ -41,6 +41,7 @@
 #include "vo.h"
 #include "win_state.h"
 #include "osdep/timer.h"
+#include "sub/osd.h"
 
 #include "input/input.h"
 #include "input/event.h"
@@ -56,12 +57,11 @@ static void hide_cursor(struct vo_wayland_state * wl);
 static void show_cursor(struct vo_wayland_state * wl);
 static void window_move(struct vo_wayland_state * wl, uint32_t serial);
 static void window_set_title(struct vo_wayland_state * wl, const char *title);
+static void window_set_fullscreen(struct vo_wayland_state * wl);
 static void schedule_resize(struct vo_wayland_state *wl,
-                            uint32_t edges,
                             int32_t width,
                             int32_t height);
 
-static void vo_wayland_fullscreen (struct vo *vo);
 
 static const struct mp_keymap keymap[] = {
     // special keys
@@ -114,32 +114,59 @@ static const struct mp_keymap keymap[] = {
 
 /** Wayland listeners **/
 
-static void ssurface_handle_ping(void *data,
-                                 struct wl_shell_surface *shell_surface,
+static void xdg_handle_ping(void *data,
+                            struct xdg_shell *shell,
+                            uint32_t serial)
+{
+    xdg_shell_pong(shell, serial);
+}
+
+static const struct xdg_shell_listener shell_listener = {
+    xdg_handle_ping,
+};
+
+static void xdg_handle_configure(void *data,
+                                 struct xdg_surface *surface,
+                                 int32_t width,
+                                 int32_t height,
+                                 struct wl_array *states,
                                  uint32_t serial)
 {
-    wl_shell_surface_pong(shell_surface, serial);
+    struct vo_wayland_state *wl = data;
+    if (width > 0 && height > 0)
+        schedule_resize(wl, width, height);
+
+    enum xdg_surface_state *state;
+
+    // reset states
+    wl->window.state.fullscreen = false;
+
+    wl_array_for_each(state, states) {
+        switch (*state) {
+            case XDG_SURFACE_STATE_MAXIMIZED:
+                break;
+            case XDG_SURFACE_STATE_FULLSCREEN:
+                wl->window.state.fullscreen = true;
+                break;
+            case XDG_SURFACE_STATE_RESIZING:
+            case XDG_SURFACE_STATE_ACTIVATED:
+            default:
+                // No need to deal with them now
+                break;
+        }
+    }
+    xdg_surface_ack_configure(wl->window.xdg_surface, serial);
 }
 
-static void ssurface_handle_configure(void *data,
-                                      struct wl_shell_surface *shell_surface,
-                                      uint32_t edges,
-                                      int32_t width,
-                                      int32_t height)
+static void xdg_handle_close(void *data, struct xdg_surface *surface)
 {
     struct vo_wayland_state *wl = data;
-    schedule_resize(wl, edges, width, height);
+    mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
 }
 
-static void ssurface_handle_popup_done(void *data,
-                                       struct wl_shell_surface *shell_surface)
-{
-}
-
-static const struct wl_shell_surface_listener shell_surface_listener = {
-    ssurface_handle_ping,
-    ssurface_handle_configure,
-    ssurface_handle_popup_done
+const struct xdg_surface_listener xdg_surface_listener = {
+    xdg_handle_configure,
+    xdg_handle_close,
 };
 
 static void output_handle_geometry(void *data,
@@ -561,11 +588,6 @@ static void registry_handle_global (void *data,
                                                   &wl_compositor_interface, 1);
     }
 
-    else if (strcmp(interface, "wl_shell") == 0) {
-
-        wl->display.shell = wl_registry_bind(reg, id, &wl_shell_interface, 1);
-    }
-
     else if (strcmp(interface, "wl_shm") == 0) {
 
         wl->display.shm = wl_registry_bind(reg, id, &wl_shm_interface, 1);
@@ -605,6 +627,14 @@ static void registry_handle_global (void *data,
 
         wl->display.subcomp = wl_registry_bind(reg, id,
                                                &wl_subcompositor_interface, 1);
+    }
+
+    else if (strcmp(interface, "xdg_shell") == 0) {
+
+        wl->display.shell = wl_registry_bind(reg, id, &xdg_shell_interface, 1);
+        xdg_shell_add_listener(wl->display.shell, &shell_listener, wl);
+        xdg_shell_use_unstable_version(wl->display.shell,
+                                       XDG_SHELL_VERSION_CURRENT);
     }
 }
 
@@ -669,81 +699,49 @@ static void show_cursor (struct vo_wayland_state *wl)
 static void window_move(struct vo_wayland_state *wl, uint32_t serial)
 {
     if (wl->display.shell)
-        wl_shell_surface_move(wl->window.shell_surface, wl->input.seat, serial);
-}
-
-static void window_set_toplevel(struct vo_wayland_state *wl)
-{
-    if (wl->display.shell)
-        wl_shell_surface_set_toplevel(wl->window.shell_surface);
+        xdg_surface_move(wl->window.xdg_surface, wl->input.seat, serial);
 }
 
 static void window_set_title(struct vo_wayland_state *wl, const char *title)
 {
     if (wl->display.shell)
-        wl_shell_surface_set_title(wl->window.shell_surface, title);
+        xdg_surface_set_title(wl->window.xdg_surface, title);
+}
+
+static void window_set_fullscreen(struct vo_wayland_state *wl)
+{
+    if (!wl->display.shell)
+        return;
+
+    if (!wl->window.state.fullscreen) {
+        MP_DBG(wl, "going fullscreen\n");
+        wl->window.p_width = wl->window.width;
+        wl->window.p_height = wl->window.height;
+        xdg_surface_set_fullscreen(wl->window.xdg_surface,
+                                   wl->display.fs_output);
+    }
+
+    else {
+        MP_DBG(wl, "leaving fullscreen\n");
+        xdg_surface_unset_fullscreen(wl->window.xdg_surface);
+        schedule_resize(wl, wl->window.p_width, wl->window.p_height);
+    }
 }
 
 static void schedule_resize(struct vo_wayland_state *wl,
-                            uint32_t edges,
                             int32_t width,
                             int32_t height)
 {
-    int32_t minimum_size = 150;
-    int32_t x, y;
-    float temp_aspect = width / (float) MPMAX(height, 1);
-
-    MP_DBG(wl, "schedule resize: %dx%d\n", width, height);
-
-    if (width < minimum_size)
-        width = minimum_size;
-
-    if (height < minimum_size)
-        height = minimum_size;
-
-    // don't keep the aspect ration in fullscreen mode, because the compositor
-    // shows the desktop in the border regions if the video has not the same
-    // aspect ration as the screen
-    /* if only the height is changed we have to calculate the width
-     * in any other case we calculate the height */
-    switch (edges) {
-        case WL_SHELL_SURFACE_RESIZE_TOP:
-        case WL_SHELL_SURFACE_RESIZE_BOTTOM:
-            width = wl->window.aspect * height;
-            break;
-        case WL_SHELL_SURFACE_RESIZE_LEFT:
-        case WL_SHELL_SURFACE_RESIZE_RIGHT:
-        case WL_SHELL_SURFACE_RESIZE_TOP_LEFT:    // just a preference
-        case WL_SHELL_SURFACE_RESIZE_TOP_RIGHT:
-        case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
-        case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
-            height = (1 / wl->window.aspect) * width;
-            break;
-        default:
-            if (wl->window.aspect < temp_aspect)
-                width = wl->window.aspect * height;
-            else
-                height = (1 / wl->window.aspect) * width;
-            break;
-    }
-
-    if (edges & WL_SHELL_SURFACE_RESIZE_LEFT)
-        x = wl->window.width - width;
-    else
-        x = 0;
-
-    if (edges & WL_SHELL_SURFACE_RESIZE_TOP)
-        y = wl->window.height - height;
-    else
-        y = 0;
-
-    wl->window.sh_width = width;
-    wl->window.sh_height = height;
-    wl->window.sh_x = x;
-    wl->window.sh_y = y;
-    wl->window.events |= VO_EVENT_RESIZE;
+    MP_DBG(wl, "shedule resize: %dx%d\n", width, height);
     wl->vo->dwidth = width;
     wl->vo->dheight = height;
+    struct mp_rect src, dst;
+    struct mp_osd_res osd;
+    vo_get_src_dst_rects(wl->vo, &src, &dst, &osd);
+
+    wl->window.sh_width = dst.x1 - dst.x0;
+    wl->window.sh_height = dst.y1 - dst.y0;
+    wl->window.events |= VO_EVENT_RESIZE;
 }
 
 static bool create_display (struct vo_wayland_state *wl)
@@ -768,6 +766,8 @@ static bool create_display (struct vo_wayland_state *wl)
 
     wl->display.display_fd = wl_display_get_fd(wl->display.display);
 
+    printf("DISPLAY_FD: %d\n", wl->display.display_fd);
+
     return true;
 }
 
@@ -788,7 +788,7 @@ static void destroy_display (struct vo_wayland_state *wl)
         wl_shm_destroy(wl->display.shm);
 
     if (wl->display.shell)
-        wl_shell_destroy(wl->display.shell);
+        xdg_shell_destroy(wl->display.shell);
 
     if (wl->display.subcomp)
         wl_subcompositor_destroy(wl->display.subcomp);
@@ -814,19 +814,17 @@ static bool create_window (struct vo_wayland_state *wl)
                             &surface_listener, wl);
 
     if (wl->display.shell) {
-        wl->window.shell_surface = wl_shell_get_shell_surface(wl->display.shell,
-                                                              wl->window.video_surface);
+        wl->window.xdg_surface = xdg_shell_get_xdg_surface(wl->display.shell,
+                                                    wl->window.video_surface);
 
-        if (!wl->window.shell_surface) {
-            MP_ERR(wl, "creating shell surface failed\n");
+        if (!wl->window.xdg_surface) {
+            MP_ERR(wl, "creating xdg surface failed\n");
             return false;
         }
 
-        wl_shell_surface_add_listener(wl->window.shell_surface,
-                                      &shell_surface_listener, wl);
-
-        wl_shell_surface_set_toplevel(wl->window.shell_surface);
-        wl_shell_surface_set_class(wl->window.shell_surface, "mpv");
+        xdg_surface_add_listener(wl->window.xdg_surface,
+                                 &xdg_surface_listener, wl);
+        xdg_surface_set_app_id(wl->window.xdg_surface, "mpv");
     }
 
     return true;
@@ -834,8 +832,8 @@ static bool create_window (struct vo_wayland_state *wl)
 
 static void destroy_window (struct vo_wayland_state *wl)
 {
-    if (wl->window.shell_surface)
-        wl_shell_surface_destroy(wl->window.shell_surface);
+    if (wl->window.xdg_surface)
+        xdg_surface_destroy(wl->window.xdg_surface);
 
     if (wl->window.video_surface)
         wl_surface_destroy(wl->window.video_surface);
@@ -958,41 +956,6 @@ void vo_wayland_uninit (struct vo *vo)
     destroy_input(wl);
     talloc_free(wl);
     vo->wayland = NULL;
-}
-
-static void vo_wayland_ontop (struct vo *vo)
-{
-    struct vo_wayland_state *wl = vo->wayland;
-    MP_DBG(wl, "going ontop\n");
-    vo->opts->ontop = 1;
-    window_set_toplevel(wl);
-    schedule_resize(wl, 0, wl->window.width, wl->window.height);
-}
-
-static void vo_wayland_fullscreen (struct vo *vo)
-{
-    struct vo_wayland_state *wl = vo->wayland;
-    if (!wl->display.shell)
-        return;
-
-    struct wl_output *fs_output = wl->display.fs_output;
-
-    if (vo->opts->fullscreen) {
-        MP_DBG(wl, "going fullscreen\n");
-        wl->window.is_fullscreen = true;
-        wl->window.p_width = wl->window.width;
-        wl->window.p_height = wl->window.height;
-        wl_shell_surface_set_fullscreen(wl->window.shell_surface,
-                WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
-                0, fs_output);
-    }
-
-    else {
-        MP_DBG(wl, "leaving fullscreen\n");
-        wl->window.is_fullscreen = false;
-        window_set_toplevel(wl);
-        schedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
-    }
 }
 
 static int vo_wayland_check_events (struct vo *vo)
@@ -1141,10 +1104,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
         *events |= vo_wayland_check_events(vo);
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-        vo_wayland_fullscreen(vo);
-        return VO_TRUE;
-    case VOCTRL_ONTOP:
-        vo_wayland_ontop(vo);
+        window_set_fullscreen(wl);
         return VO_TRUE;
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
@@ -1154,8 +1114,8 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        if (!wl->window.is_fullscreen)
-            schedule_resize(wl, 0, s[0], s[1]);
+        if (!wl->window.state.fullscreen)
+            schedule_resize(wl, s[0], s[1]);
         return VO_TRUE;
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:
@@ -1189,6 +1149,9 @@ bool vo_wayland_config (struct vo *vo, uint32_t flags)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
+    // reset states
+    wl->window.state.fullscreen = false;
+
     struct mp_rect screenrc;
     vo_wayland_update_screeninfo(vo, &screenrc);
 
@@ -1201,20 +1164,17 @@ bool vo_wayland_config (struct vo *vo, uint32_t flags)
     wl->window.aspect = vo->dwidth / (float) MPMAX(vo->dheight, 1);
 
     if (!(flags & VOFLAG_HIDDEN)) {
-        if (!wl->window.is_init) {
+        if (!wl->window.state.init) {
             wl->window.width = vo->dwidth;
             wl->window.height = vo->dheight;
         }
 
-        if (vo->opts->fullscreen) {
-            if (wl->window.is_fullscreen)
-                schedule_resize(wl, 0, wl->window.fs_width, wl->window.fs_height);
-            else
-                vo_wayland_fullscreen(vo);
-        }
+        if (vo->opts->fullscreen)
+            window_set_fullscreen(wl);
         else
-            vo_wayland_ontop(vo);
-        wl->window.is_init = true;
+            schedule_resize(wl, vo->dwidth, vo->dheight);
+
+        wl->window.state.init = true;
     }
 
     return true;
