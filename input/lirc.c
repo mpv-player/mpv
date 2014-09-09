@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "config.h"
-
 #include <lirc/lirc_client.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -29,7 +27,6 @@
 
 #include "common/msg.h"
 #include "input.h"
-#include "lirc.h"
 
 struct ctx {
     struct mp_log *log;

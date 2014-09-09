@@ -53,12 +53,6 @@
 #include "stream/stream.h"
 #include "common/common.h"
 
-#include "joystick.h"
-
-#if HAVE_LIRC
-#include "lirc.h"
-#endif
-
 #if HAVE_COCOA
 #include "osdep/macosx_events.h"
 #endif
@@ -230,13 +224,13 @@ const struct m_sub_options input_config = {
         OPT_FLAG("right-alt-gr", use_alt_gr, CONF_GLOBAL),
         OPT_INTRANGE("key-fifo-size", key_fifo_size, CONF_GLOBAL, 2, 65000),
         OPT_FLAG("cursor", enable_mouse_movements, CONF_GLOBAL),
-    #if HAVE_LIRC
+#if HAVE_LIRC
         OPT_STRING("lirc-conf", lirc_configfile, CONF_GLOBAL),
-    #endif
-    #if HAVE_COCOA
+#endif
+#if HAVE_COCOA
         OPT_FLAG("appleremote", use_appleremote, CONF_GLOBAL),
         OPT_FLAG("media-keys", use_media_keys, CONF_GLOBAL),
-    #endif
+#endif
         {0}
     },
     .size = sizeof(struct input_opts),
