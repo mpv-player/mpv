@@ -20,8 +20,6 @@
 #define MPLAYER_LIRC_H
 
 struct input_ctx;
-struct mp_log;
-int mp_input_lirc_init(struct input_ctx *ictx, struct mp_log *log,
-                       char *lirc_configfile);
+void mp_input_lirc_add(struct input_ctx *ictx, char *lirc_configfile);
 
 #endif /* MPLAYER_LIRC_H */

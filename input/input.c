@@ -1562,7 +1562,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
 
 #if HAVE_LIRC
     if (input_conf->use_lirc)
-        mp_input_lirc_init(ictx, ictx->log, input_conf->lirc_configfile);
+        mp_input_lirc_add(ictx, input_conf->lirc_configfile);
 #endif
 
     if (input_conf->use_alt_gr) {
