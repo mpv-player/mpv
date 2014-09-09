@@ -824,6 +824,9 @@ static int reinit_window_state(struct vo_w32_state *w32)
     // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
     updateScreenProperties(w32);
 
+    int screen_w = w32->screenrc.x1 - w32->screenrc.x0;
+    int screen_h = w32->screenrc.y1 - w32->screenrc.y0;
+
     if (w32->opts->fullscreen) {
         // Save window position and size when switching to fullscreen.
         if (toggle_fs) {
@@ -837,9 +840,8 @@ static int reinit_window_state(struct vo_w32_state *w32)
 
         w32->window_x = w32->screenrc.x0;
         w32->window_y = w32->screenrc.y0;
-        w32->dw = w32->screenrc.x1 - w32->screenrc.x0;
-        w32->dh = w32->screenrc.y1 - w32->screenrc.y0;
-        style &= ~WS_OVERLAPPEDWINDOW;
+        w32->dw = screen_w;
+        w32->dh = screen_h;
     } else {
         if (toggle_fs) {
             // Restore window position and size when switching from fullscreen.
@@ -858,7 +860,36 @@ static int reinit_window_state(struct vo_w32_state *w32)
     r.bottom = r.top + w32->dh;
 
     SetWindowLong(w32->window, GWL_STYLE, style);
+
+    RECT cr = r;
     add_window_borders(w32->window, &r);
+
+    if (!w32->opts->fullscreen &&
+        ((r.right - r.left) >= screen_w || (r.bottom - r.top) >= screen_h))
+    {
+        MP_VERBOSE(w32, "requested window size larger than the screen\n");
+        // Use the aspect of the client area, not the full window size.
+        // Basically, try to compute the maximum window size.
+        long n_w = screen_w - (r.right - cr.right) - (cr.left - r.left) - 1;
+        long n_h = screen_h - (r.bottom - cr.bottom) - (cr.top - r.top) - 1;
+        // Letterbox
+        double asp = (cr.right - cr.left) / (double)(cr.bottom - cr.top);
+        double s_asp = n_w / (double)n_h;
+        if (asp > s_asp) {
+            n_h = n_w / asp;
+        } else {
+            n_w = n_h * asp;
+        }
+        r = (RECT){.right = n_w, .bottom = n_h};
+        add_window_borders(w32->window, &r);
+        // Center the final window
+        n_w = r.right - r.left;
+        n_h = r.bottom - r.top;
+        r.left = screen_w / 2 - n_w / 2;
+        r.top = screen_h / 2 - n_h / 2;
+        r.right = r.left + n_w;
+        r.bottom = r.top + n_h;
+    }
 
     MP_VERBOSE(w32, "reset window bounds: %d:%d:%d:%d\n",
                (int) r.left, (int) r.top, (int)(r.right - r.left),
