@@ -114,6 +114,26 @@ struct mp_input_src {
  */
 struct mp_input_src *mp_input_add_src(struct input_ctx *ictx);
 
+// Add an input source that runs on a thread. The source is automatically
+// removed if the thread loop exits.
+//  ctx: this is passed to loop_fn.
+//  loop_fn: this is called once inside of a new thread, and should not return
+//      until all input is read, or src->close is called by another thread.
+//      You must call mp_input_src_init_done(src) early during init to signal
+//      success (then src->close may be called at a later point); on failure,
+//      return from loop_fn immediately.
+// Returns >=0 on success, <0 on failure to allocate resources.
+// Do not set src->close after mp_input_src_init_done() has been called.
+int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
+    void (*loop_fn)(struct mp_input_src *src, void *ctx));
+
+// Signal successful init.
+// Must be called on the same thread as loop_fn (see mp_input_add_thread_src()).
+void mp_input_src_init_done(struct mp_input_src *src);
+
+// Currently only with mp_input_add_thread_src().
+int mp_input_src_get_wakeup_fd(struct mp_input_src *src);
+
 // Remove and free the source. You can call this only while the input_ctx
 // exists; otherwise there would be a race condition when another thread
 // destroys input_ctx.

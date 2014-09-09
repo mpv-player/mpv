@@ -35,6 +35,7 @@
 #include <libavutil/common.h>
 
 #include "osdep/io.h"
+#include "misc/rendezvous.h"
 
 #include "input.h"
 #include "keycodes.h"
@@ -1689,6 +1690,11 @@ void mp_input_run_cmd(struct input_ctx *ictx, int def_flags, const char **cmd,
 }
 
 struct mp_input_src_internal {
+    pthread_t thread;
+    bool thread_running;
+    int wakeup[2];
+    bool init_done;
+
     char *cmd_buffer;
     size_t cmd_buffer_size;
     bool drop;
@@ -1709,7 +1715,10 @@ struct mp_input_src *mp_input_add_src(struct input_ctx *ictx)
         .global = ictx->global,
         .log = mp_log_new(src, ictx->log, name),
         .input_ctx = ictx,
-        .in = talloc_zero(src, struct mp_input_src_internal),
+        .in = talloc(src, struct mp_input_src_internal),
+    };
+    *src->in = (struct mp_input_src_internal){
+        .wakeup = {-1, -1},
     };
 
     ictx->sources[ictx->num_sources++] = src;
@@ -1742,13 +1751,74 @@ void mp_input_src_kill(struct mp_input_src *src)
         if (ictx->sources[n] == src) {
             MP_TARRAY_REMOVE_AT(ictx->sources, ictx->num_sources, n);
             input_unlock(ictx);
+            write(src->in->wakeup[1], &(char){0}, 1);
             if (src->close)
                 src->close(src);
+            if (src->in->thread_running)
+                pthread_join(src->in->thread, NULL);
             talloc_free(src);
             return;
         }
     }
     abort();
+}
+
+void mp_input_src_init_done(struct mp_input_src *src)
+{
+    assert(!src->in->init_done);
+    assert(src->in->thread_running);
+    assert(pthread_equal(src->in->thread, pthread_self()));
+    src->in->init_done = true;
+    mp_rendezvous(&src->in->init_done, 0);
+}
+
+static void *input_src_thread(void *ptr)
+{
+    void **args = ptr;
+    struct mp_input_src *src = args[0];
+    void (*loop_fn)(struct mp_input_src *src, void *ctx) = args[1];
+    void *ctx = args[2];
+
+    src->in->thread_running = true;
+
+    loop_fn(src, ctx);
+
+    if (!src->in->init_done)
+        mp_rendezvous(&src->in->init_done, -1);
+
+    return NULL;
+}
+
+int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
+    void (*loop_fn)(struct mp_input_src *src, void *ctx))
+{
+    struct mp_input_src *src = mp_input_add_src(ictx);
+    if (!src)
+        return -1;
+
+#ifndef __MINGW32__
+    // Always create for convenience.
+    if (mp_make_wakeup_pipe(src->in->wakeup) < 0) {
+        mp_input_src_kill(src);
+        return -1;
+    }
+#endif
+
+    void *args[] = {src, loop_fn, ctx};
+    if (pthread_create(&src->in->thread, NULL, input_src_thread, args)) {
+        mp_input_src_kill(src);
+        return -1;
+    }
+    if (mp_rendezvous(&src->in->init_done, 0) < 0) {
+        mp_input_src_kill(src);
+        return -1;
+    }
+    return 0;
+}
+
+int mp_input_src_get_wakeup_fd(struct mp_input_src *src)
+{
+    return src->in->wakeup[0];
 }
 
 #define CMD_BUFFER (4 * 4096)
