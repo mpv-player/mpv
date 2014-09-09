@@ -151,10 +151,6 @@ void terminal_setup_getch(struct input_ctx *ictx)
     }
 }
 
-void getch2_poll(void)
-{
-}
-
 void terminal_uninit(void)
 {
     if (running) {

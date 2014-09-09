@@ -961,9 +961,6 @@ void run_playloop(struct MPContext *mpctx)
     handle_force_window(mpctx, false);
 
     execute_queued_seek(mpctx);
-
-    if (mpctx->opts->use_terminal)
-        getch2_poll();
 }
 
 // Waiting for the slave master to send us a new file to play.
@@ -989,7 +986,5 @@ void idle_loop(struct MPContext *mpctx)
         mp_process_input(mpctx);
         mp_wait_events(mpctx, mpctx->sleeptime);
         mpctx->sleeptime = 100.0;
-        if (mpctx->opts->use_terminal)
-            getch2_poll();
     }
 }

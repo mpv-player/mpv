@@ -29,6 +29,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <pthread.h>
 #include <assert.h>
 
 #if HAVE_TERMIOS
@@ -41,6 +42,9 @@
 #endif
 
 #include <unistd.h>
+#include <poll.h>
+
+#include "osdep/io.h"
 
 #include "common/common.h"
 #include "misc/bstr.h"
@@ -185,7 +189,7 @@ static bool getch2(struct input_ctx *input_ctx)
     /* Return false on EOF to stop running select() on the FD, as it'd
      * trigger all the time. Note that it's possible to get temporary
      * EOF on terminal if the user presses ctrl-d, but that shouldn't
-     * happen if the terminal state change done in getch2_enable()
+     * happen if the terminal state change done in terminal_init()
      * works.
      */
     if (retval == 0)
@@ -570,7 +574,7 @@ static bool getch2(struct input_ctx *input_ctx)
     /* Return false on EOF to stop running select() on the FD, as it'd
      * trigger all the time. Note that it's possible to get temporary
      * EOF on terminal if the user presses ctrl-d, but that shouldn't
-     * happen if the terminal state change done in getch2_enable()
+     * happen if the terminal state change done in terminal_init()
      * works.
      */
     if (retval == 0)
@@ -645,22 +649,8 @@ static bool getch2(struct input_ctx *input_ctx)
 
 #endif /* terminfo/termcap */
 
-static int read_keys(void *ctx, int fd)
-{
-    if (getch2(ctx))
-        return MP_INPUT_NOTHING;
-    return MP_INPUT_DEAD;
-}
-
 static volatile int getch2_active  = 0;
 static volatile int getch2_enabled = 0;
-
-void terminal_setup_getch(struct input_ctx *ictx)
-{
-    if (!getch2_enabled)
-        return;
-    mp_input_add_fd(ictx, 0, 1, NULL, read_keys, NULL, ictx);
-}
 
 static void do_activate_getch2(void)
 {
@@ -721,7 +711,8 @@ static int setsigaction(int signo, void (*handler) (int),
     return sigaction(signo, &sa, NULL);
 }
 
-void getch2_poll(void){
+static void getch2_poll(void)
+{
     if (!getch2_enabled)
         return;
 
@@ -752,29 +743,62 @@ static void continue_sighandler(int signum)
     getch2_poll();
 }
 
+static pthread_t input_thread;
+static struct input_ctx *input_ctx;
+static int death_pipe[2];
+
 static void quit_request_sighandler(int signum)
 {
     do_deactivate_getch2();
 
-    async_quit_request = 1;
+    write(death_pipe[1], &(char){0}, 1);
 }
 
-static void getch2_enable(void)
+static void *terminal_thread(void *ptr)
 {
-    assert(!getch2_enabled);
+    bool stdin_ok = true; // if false, we still wait for SIGTERM
+    while (1) {
+        struct pollfd fds[2] = {
+            {.events = POLLIN, .fd = death_pipe[0]},
+            {.events = POLLIN, .fd = STDIN_FILENO},
+        };
+        // Wait with some timeout, so we can call getch2_poll() frequently.
+        poll(fds, stdin_ok ? 2 : 1, 1000);
+        if (fds[0].revents)
+            break;
+        if (fds[1].revents)
+            stdin_ok = getch2(input_ctx);
+        getch2_poll();
+    }
+    // Important if we received SIGTERM, rather than regular quit.
+    struct mp_cmd *cmd = mp_input_parse_cmd(input_ctx, bstr0("quit"), "");
+    if (cmd)
+        mp_input_queue_cmd(input_ctx, cmd);
+    return NULL;
+}
 
-    // handlers to fix terminal settings
-    setsigaction(SIGCONT, continue_sighandler, 0, true);
-    setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
+void terminal_setup_getch(struct input_ctx *ictx)
+{
+    if (!getch2_enabled)
+        return;
+
+    assert(!input_ctx); // already setup
+
+    if (mp_make_wakeup_pipe(death_pipe) < 0)
+        return;
+
+    input_ctx = ictx;
+
+    if (pthread_create(&input_thread, NULL, terminal_thread, NULL)) {
+        input_ctx = NULL;
+        close(death_pipe[0]);
+        close(death_pipe[1]);
+        return;
+    }
+
     setsigaction(SIGINT,  quit_request_sighandler, SA_RESETHAND, false);
     setsigaction(SIGQUIT, quit_request_sighandler, SA_RESETHAND, false);
     setsigaction(SIGTERM, quit_request_sighandler, SA_RESETHAND, false);
-    setsigaction(SIGTTIN, SIG_IGN, 0, true);
-    setsigaction(SIGTTOU, SIG_IGN, 0, true);
-
-    do_activate_getch2();
-
-    getch2_enabled = 1;
 }
 
 void terminal_uninit(void)
@@ -792,6 +816,14 @@ void terminal_uninit(void)
     setsigaction(SIGTTOU, SIG_DFL, 0, false);
 
     do_deactivate_getch2();
+
+    if (input_ctx) {
+        write(death_pipe[1], &(char){0}, 1);
+        pthread_join(input_thread, NULL);
+        close(death_pipe[0]);
+        close(death_pipe[1]);
+        input_ctx = NULL;
+    }
 
     getch2_enabled = 0;
 }
@@ -815,6 +847,17 @@ int terminal_init(void)
 {
     if (isatty(STDOUT_FILENO))
         load_termcap();
-    getch2_enable();
+
+    assert(!getch2_enabled);
+
+    // handlers to fix terminal settings
+    setsigaction(SIGCONT, continue_sighandler, 0, true);
+    setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
+    setsigaction(SIGTTIN, SIG_IGN, 0, true);
+    setsigaction(SIGTTOU, SIG_IGN, 0, true);
+
+    do_activate_getch2();
+
+    getch2_enabled = 1;
     return 0;
 }

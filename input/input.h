@@ -260,6 +260,4 @@ void mp_input_add_pipe(struct input_ctx *ictx, const char *filename);
 
 void mp_input_set_main_thread(struct input_ctx *ictx);
 
-extern int async_quit_request;
-
 #endif /* MPLAYER_INPUT_H */

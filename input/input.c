@@ -187,8 +187,6 @@ struct input_ctx {
     int wakeup_pipe[2];
 };
 
-int async_quit_request;
-
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
                         const char *location, const char *restrict_section);
 static void close_input_sources(struct input_ctx *ictx);
@@ -294,12 +292,6 @@ static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
     // if this fails, cmd was not in the queue
     assert(*p_prev == cmd);
     *p_prev = cmd->queue_next;
-}
-
-static void queue_add_head(struct cmd_queue *queue, struct mp_cmd *cmd)
-{
-    cmd->queue_next = queue->first;
-    queue->first = cmd;
 }
 
 static void queue_add_tail(struct cmd_queue *queue, struct mp_cmd *cmd)
@@ -1159,11 +1151,6 @@ mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
 {
     input_lock(ictx);
     read_events(ictx, 0);
-    if (async_quit_request && !queue_has_abort_cmds(&ictx->cmd_queue)) {
-        struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0("quit"), "");
-        queue_add_head(&ictx->cmd_queue, cmd);
-        async_quit_request = 0;
-    }
     struct cmd_queue *queue = &ictx->cmd_queue;
     if (!queue->first) {
         struct mp_cmd *repeated = check_autorepeat(ictx);
@@ -1664,11 +1651,6 @@ void mp_input_wakeup_nolock(struct input_ctx *ictx)
     }
 }
 
-static bool test_abort(struct input_ctx *ictx)
-{
-    return async_quit_request || queue_has_abort_cmds(&ictx->cmd_queue);
-}
-
 void mp_input_set_main_thread(struct input_ctx *ictx)
 {
     ictx->mainthread = pthread_self();
@@ -1678,7 +1660,7 @@ void mp_input_set_main_thread(struct input_ctx *ictx)
 bool mp_input_check_interrupt(struct input_ctx *ictx)
 {
     input_lock(ictx);
-    bool res = test_abort(ictx);
+    bool res = queue_has_abort_cmds(&ictx->cmd_queue);
     if (!res && ictx->mainthread_set &&
         pthread_equal(ictx->mainthread, pthread_self()))
     {

@@ -44,9 +44,6 @@ bool terminal_in_background(void);
 /* Get terminal-size in columns/rows. */
 void terminal_get_size(int *w, int *h);
 
-/* Enable and disable STDIN line-buffering */
-void getch2_poll(void);
-
 // Windows only.
 void mp_write_console_ansi(void *wstream, char *buf);
 
