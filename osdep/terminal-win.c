@@ -78,7 +78,7 @@ static void read_input(void)
     /*check if there are input events*/
     if (!GetNumberOfConsoleInputEvents(in, &retval))
         return;
-    if (retval <= 0)
+    if (!retval)
         return;
 
     /*read all events*/
@@ -102,7 +102,7 @@ static void read_input(void)
                     mp_input_put_key(input_ctx, mpkey);
                 } else {
                     /*only characters should be remaining*/
-                    int c = eventbuffer[i].Event.KeyEvent.uChar.UnicodeChar;
+                    int c = record->uChar.UnicodeChar;
                     if (c > 0)
                         mp_input_put_key(input_ctx, c);
                 }
