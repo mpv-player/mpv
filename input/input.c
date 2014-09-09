@@ -1688,6 +1688,12 @@ void mp_input_run_cmd(struct input_ctx *ictx, int def_flags, const char **cmd,
     mp_input_queue_cmd(ictx, cmdt);
 }
 
+struct mp_input_src_internal {
+    char *cmd_buffer;
+    size_t cmd_buffer_size;
+    bool drop;
+};
+
 struct mp_input_src *mp_input_add_src(struct input_ctx *ictx)
 {
     input_lock(ictx);
@@ -1703,6 +1709,7 @@ struct mp_input_src *mp_input_add_src(struct input_ctx *ictx)
         .global = ictx->global,
         .log = mp_log_new(src, ictx->log, name),
         .input_ctx = ictx,
+        .in = talloc_zero(src, struct mp_input_src_internal),
     };
 
     ictx->sources[ictx->num_sources++] = src;
@@ -1748,30 +1755,31 @@ void mp_input_src_kill(struct mp_input_src *src)
 
 void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
 {
-    if (!src->cmd_buffer)
-        src->cmd_buffer = talloc_size(src, CMD_BUFFER);
+    struct mp_input_src_internal *in = src->in;
+    if (!in->cmd_buffer)
+        in->cmd_buffer = talloc_size(in, CMD_BUFFER);
     while (len) {
         char *next = memchr(buf, '\n', len);
         bool term = !!next;
         next = next ? next + 1 : buf + len;
         size_t copy = next - buf;
-        bool overflow = copy > CMD_BUFFER - src->cmd_buffer_size;
-        if (overflow || src->drop) {
-            src->cmd_buffer_size = 0;
-            src->drop = overflow || !term;
+        bool overflow = copy > CMD_BUFFER - in->cmd_buffer_size;
+        if (overflow || in->drop) {
+            in->cmd_buffer_size = 0;
+            in->drop = overflow || !term;
             MP_WARN(src, "Dropping overlong line.\n");
         } else {
-            memcpy(src->cmd_buffer + src->cmd_buffer_size, buf, copy);
-            src->cmd_buffer_size += copy;
+            memcpy(in->cmd_buffer + in->cmd_buffer_size, buf, copy);
+            in->cmd_buffer_size += copy;
             buf += copy;
             len -= copy;
             if (term) {
-                bstr s = {src->cmd_buffer, src->cmd_buffer_size};
+                bstr s = {in->cmd_buffer, in->cmd_buffer_size};
                 s = bstr_strip(s);
                 struct mp_cmd *cmd= mp_input_parse_cmd_(src->log, s, "<>");
                 if (cmd)
                     mp_input_queue_cmd(src->input_ctx, cmd);
-                src->cmd_buffer_size = 0;
+                in->cmd_buffer_size = 0;
             }
         }
     }

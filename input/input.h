@@ -99,9 +99,7 @@ struct mp_input_src {
     struct mp_log *log;
     struct input_ctx *input_ctx;
 
-    char *cmd_buffer;
-    size_t cmd_buffer_size;
-    bool drop;
+    struct mp_input_src_internal *in;
 
     // If not-NULL: called before destroying the input_src. Should close the
     // underlying device, and free all memory.
