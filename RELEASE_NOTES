@@ -1,3 +1,35 @@
+Release 0.5.2
+=============
+
+Changes
+-------
+
+- Inherit event flags from parent X11 window when using --wid.
+- Properly resume playlists loaded at runtime (this makes mpv try to resume a
+  playlist when loaded like "mpv playlist.m3u").
+- Don't honor $XDG_CONFIG_DIRS anymore for global paths (this fixes a regression
+  on systems that set the variable by default to somewhere else then /etc,
+  making mpv skip previously created config files).
+- Allow up to 256 MB of extradata to make broken files work.
+
+Bug fixes
+---------
+
+- Restore old speed change behavior (this fixes a temporary lack of sound after
+  restoring normal speed e.g. when pressing Backspace).
+- Fix quit handling when seeking past EOF while paused.
+- Prevent burning CPU when seeking while paused.
+- Don't add the playlist base path twice when using --playlist.
+- Fix a crash when the initialization of the EGL context fails on Wayland.
+- Make EOF handling properly event-based (this fixes a bug that made mpv hang
+  when changing from one file to the next with --gapless-audio=no).
+- Assume icy title data is terminated with ';' (this fixes handling of streams
+  with metadata containing apostrophes).
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 0f1d6c0..e3d3a47`` in
+the git repository.
+
 Release 0.5.1
 =============
 
