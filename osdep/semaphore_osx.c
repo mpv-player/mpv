@@ -11,6 +11,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "osdep/semaphore.h"
+
 #ifdef MP_SEMAPHORE_EMULATION
 
 #include <unistd.h>
@@ -20,9 +22,6 @@
 #include <errno.h>
 
 #include "osdep/io.h"
-
-#include "semaphore.h"
-
 
 int mp_sem_init(mp_sem_t *sem, int pshared, unsigned int value)
 {
