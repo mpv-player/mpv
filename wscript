@@ -461,7 +461,7 @@ audio_output_features = [
     }, {
         'name': '--audio-select',
         'desc': 'audio select()',
-        'deps': [ 'posix-select', 'oss-audio' ],
+        'deps': [ 'oss-audio' ],
         'func': check_true,
     }, {
         'name': '--rsound',
