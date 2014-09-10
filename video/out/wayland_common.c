@@ -1201,20 +1201,9 @@ bool vo_wayland_config (struct vo *vo, uint32_t flags)
     wl->window.aspect = vo->dwidth / (float) MPMAX(vo->dheight, 1);
 
     if (!(flags & VOFLAG_HIDDEN)) {
-        if (!wl->window.is_init) {
-            wl->window.width = vo->dwidth;
-            wl->window.height = vo->dheight;
-        }
-
-        if (vo->opts->fullscreen) {
-            if (wl->window.is_fullscreen)
-                schedule_resize(wl, 0, wl->window.fs_width, wl->window.fs_height);
-            else
-                vo_wayland_fullscreen(vo);
-        }
-        else
-            vo_wayland_ontop(vo);
-        wl->window.is_init = true;
+        wl->window.width = vo->dwidth;
+        wl->window.height = vo->dheight;
+        vo_wayland_fullscreen(vo);
     }
 
     return true;

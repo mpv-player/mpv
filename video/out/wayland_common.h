@@ -95,7 +95,6 @@ struct vo_wayland_state {
         int32_t sh_y;
         float aspect;
 
-        bool is_init;       // true if the window has a valid size
         bool is_fullscreen; // don't keep aspect ratio in fullscreen mode
         int32_t fs_width;   // fullscreen sizes
         int32_t fs_height;
