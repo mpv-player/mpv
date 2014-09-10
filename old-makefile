@@ -96,7 +96,10 @@ SOURCES-$(VAAPI_GLX)            += video/out/gl_hwdec_vaglx.c
 
 SOURCES-$(X11)                  += video/out/vo_x11.c video/out/x11_common.c
 SOURCES-$(XV)                   += video/out/vo_xv.c
-SOURCES-$(WAYLAND)              += video/out/vo_wayland.c video/out/wayland_common.c
+SOURCES-$(WAYLAND)              += video/out/vo_wayland.c \
+                                   video/out/wayland_common.c \
+                                   video/out/wayland/buffer.c \
+                                   video/out/wayland/memfile.c
 
 SOURCES-$(LIBAVFILTER)          += video/filter/vf_lavfi.c \
                                    audio/filter/af_lavfi.c
