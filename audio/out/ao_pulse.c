@@ -295,6 +295,12 @@ static int init(struct ao *ao)
         goto fail;
     }
 
+    MP_VERBOSE(ao, "Library version: %s\n", pa_get_library_version());
+    MP_VERBOSE(ao, "Proto: %lu\n",
+        (long)pa_context_get_protocol_version(priv->context));
+    MP_VERBOSE(ao, "Server proto: %lu\n",
+        (long)pa_context_get_server_protocol_version(priv->context));
+
     pa_context_set_state_callback(priv->context, context_state_cb, ao);
 
     if (pa_context_connect(priv->context, host, 0, NULL) < 0)
