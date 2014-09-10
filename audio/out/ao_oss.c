@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <errno.h>
 #include <string.h>
 #include <strings.h>
@@ -219,6 +220,14 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
+// 1: ok, 0: not writable, -1: error
+static int device_writable(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    struct pollfd fd = {.fd = p->audio_fd, .events = POLLOUT};
+    return poll(&fd, 1, 0);
+}
+
 // open & setup audio device
 // return: 0=success -1=fail
 static int init(struct ao *ao)
@@ -393,30 +402,22 @@ ac3_retry:
 
     if (p->buffersize == -1) {
         // Measuring buffer size:
-        void *data;
+        void *data = malloc(p->outburst);
+        if (!data) {
+            MP_ERR(ao, "Out of memory, or broken outburst size.\n");
+            return -1;
+        }
         p->buffersize = 0;
-#if HAVE_AUDIO_SELECT
-        data = malloc(p->outburst);
         memset(data, 0, p->outburst);
-        while (p->buffersize < 0x40000) {
-            fd_set rfds;
-            struct timeval tv;
-            FD_ZERO(&rfds);
-            FD_SET(p->audio_fd, &rfds);
-            tv.tv_sec = 0;
-            tv.tv_usec = 0;
-            if (!select(p->audio_fd + 1, NULL, &rfds, NULL, &tv))
-                break;
+        while (p->buffersize < 0x40000 && device_writable(ao) > 0) {
             write(p->audio_fd, data, p->outburst);
             p->buffersize += p->outburst;
         }
         free(data);
         if (p->buffersize == 0) {
-            MP_ERR(ao, "***  Your audio driver DOES NOT support select()  ***\n");
-            MP_ERR(ao, "Recompile mpv with #define HAVE_AUDIO_SELECT 0 in config.h!\n");
+            MP_ERR(ao, "Your OSS audio driver DOES NOT support poll().\n");
             return -1;
         }
-#endif
     }
 
     ao->bps = ao->channels.num * af_fmt2bps(ao->format);
@@ -500,28 +501,12 @@ static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-#ifdef SNDCTL_DSP_GETOSPACE
     if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &p->zz) != -1) {
         // calculate exact buffer space:
         return p->zz.fragments * p->zz.fragsize / ao->sstride;
     }
-#endif
 
-    // check buffer
-#if HAVE_AUDIO_SELECT
-    {
-        fd_set rfds;
-        struct timeval tv;
-        FD_ZERO(&rfds);
-        FD_SET(p->audio_fd, &rfds);
-        tv.tv_sec = 0;
-        tv.tv_usec = 0;
-        if (!select(p->audio_fd + 1, NULL, &rfds, NULL, &tv))
-            return 0;                                            // not block!
-    }
-#endif
-
-    return p->outburst / ao->sstride;
+    return device_writable(ao) > 0 ? p->outburst / ao->sstride : 0;
 }
 
 // stop playing, keep buffers (for pause)

@@ -459,11 +459,6 @@ audio_output_features = [
         'deps_any': [ 'oss-audio-native', 'oss-audio-sunaudio',
                       'oss-audio-4front' ]
     }, {
-        'name': '--audio-select',
-        'desc': 'audio select()',
-        'deps': [ 'oss-audio' ],
-        'func': check_true,
-    }, {
         'name': '--rsound',
         'desc': 'RSound audio output',
         'func': check_statement('rsound.h', 'rsd_init(NULL)', lib='rsound')

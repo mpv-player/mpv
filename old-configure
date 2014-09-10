@@ -213,7 +213,6 @@ options_state_machine() {
     opt_yes_no _portaudio   "PortAudio audio output"
     opt_yes_no _jack        "JACK audio output"
     opt_yes_no _openal      "OpenAL audio output"
-    opt_yes_no _select      "using select() on the audio device" yes
     opt_yes_no _shm         "X11/Xv shared memory"
     opt_yes_no _lua         "Lua scripting"
     opt_yes_no _encoding    "encoding functionality" yes
@@ -541,8 +540,6 @@ define_yes_no $_termios_ok HAVE_TERMIOS
 
 check_statement_libs "shm" $_shm SHM "sys/types.h sys/ipc.h sys/shm.h" \
     "shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0);"
-
-check_trivial "audio select()" $_select AUDIO_SELECT
 
 echocheck "pkg-config"
 if $($_pkg_config --version > /dev/null 2>&1); then
