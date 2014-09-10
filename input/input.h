@@ -25,18 +25,8 @@
 #include "cmd_list.h"
 #include "cmd_parse.h"
 
-// Error codes for the drivers
-
-// An error occurred but we can continue
-#define MP_INPUT_ERROR -1
-// A fatal error occurred, this driver should be removed
-#define MP_INPUT_DEAD -2
-// No input was available
-#define MP_INPUT_NOTHING -3
-//! Input will be available if you try again
-#define MP_INPUT_RETRY -4
-// Key FIFO was full - release events may be lost, zero button-down status
-#define MP_INPUT_RELEASE_ALL -5
+// For mp_input_put_key(): release all keys that are down.
+#define MP_INPUT_RELEASE_ALL -1
 
 enum mp_cmd_flags {
     MP_ON_OSD_NO = 0,           // prefer not using OSD
@@ -142,28 +132,6 @@ void mp_input_src_kill(struct mp_input_src *src);
 // Feed text data, which will be split into lines of commands.
 void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len);
 
-/* Add a new command input source. (Old version.)
- * "fd" is a file descriptor (use -1 if you don't use any fd)
- * "select" tells whether to use select() on the fd to determine when to
- * try reading.
- * "read_cmd_func" is optional. It must return either text data or one of the
- * MP_INPUT error codes above. For return values >= 0, it behaves like UNIX
- * read() and returns the number of bytes copied to the dest buffer.
- * "read_key_func" is optional. It returns either key codes (ASCII, keycodes.h),
- * or MP_INPUT error codes.
- * "close_func" will be called when closing. Can be NULL. Its return value
- * is ignored (it's only there to allow using standard close() as the func).
- * "ctx" is for free use, and is passed to the callbacks.
- */
-int mp_input_add_fd(struct input_ctx *ictx, int fd, int select,
-                    int read_cmd_func(void *ctx, int fd, char *dest, int size),
-                    int read_key_func(void *ctx, int fd),
-                    int close_func(void *ctx, int fd), void *ctx);
-
-/* Can be passed as read_func for above function in order to read() from the FD.
- */
-int input_default_read_cmd(void *ctx, int fd, char *buf, int l);
-
 // Process keyboard input. code is a key code from keycodes.h, possibly
 // with modifiers applied. MP_INPUT_RELEASE_ALL is also a valid value.
 void mp_input_put_key(struct input_ctx *ictx, int code);
@@ -190,9 +158,6 @@ bool mp_input_mouse_enabled(struct input_ctx *ictx);
 struct mp_rect;
 void mp_input_set_mouse_transform(struct input_ctx *ictx, struct mp_rect *dst,
                                   struct mp_rect *src);
-
-// As for the cmd one you usually don't need this function.
-void mp_input_rm_key_fd(struct input_ctx *ictx, int fd);
 
 // Add a command to the command queue.
 int mp_input_queue_cmd(struct input_ctx *ictx, struct mp_cmd *cmd);
@@ -277,7 +242,5 @@ void mp_input_run_cmd(struct input_ctx *ictx, int def_flags, const char **cmd,
 void mp_input_add_pipe(struct input_ctx *ictx, const char *filename);
 void mp_input_joystick_add(struct input_ctx *ictx, char *dev);
 void mp_input_lirc_add(struct input_ctx *ictx, char *lirc_configfile);
-
-void mp_input_set_main_thread(struct input_ctx *ictx);
 
 #endif /* MPLAYER_INPUT_H */

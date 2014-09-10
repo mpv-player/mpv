@@ -93,10 +93,10 @@ static int mp_input_lirc_read(void *pctx,int fd,char* dest, int s) {
   // Nothing in the buffer, poll the lirc fd
   if(lirc_nextcode(&code) != 0) {
     MP_ERR(ctx, "Lirc error.\n");
-    return MP_INPUT_DEAD;
+    return -1;
   }
 
-  if(!code) return MP_INPUT_NOTHING;
+  if(!code) return 0;
 
   // We put all cmds in a single buffer separated by \n
   while((r = lirc_code2char(ctx->lirc_config,code,&c))==0 && c!=NULL) {

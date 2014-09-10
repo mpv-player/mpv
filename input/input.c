@@ -35,6 +35,7 @@
 #include <libavutil/common.h>
 
 #include "osdep/io.h"
+#include "osdep/semaphore.h"
 #include "misc/rendezvous.h"
 
 #include "input.h"
@@ -80,24 +81,7 @@ struct cmd_bind_section {
     struct cmd_bind_section *next;
 };
 
-#define MP_MAX_FDS 10
-
-struct input_fd {
-    struct mp_log *log;
-    int fd;
-    int (*read_key)(void *ctx, int fd);
-    int (*read_cmd)(void *ctx, int fd, char *dest, int size);
-    int (*close_func)(void *ctx, int fd);
-    void *ctx;
-    unsigned eof : 1;
-    unsigned drop : 1;
-    unsigned dead : 1;
-    unsigned got_cmd : 1;
-    unsigned select : 1;
-    // These fields are for the cmd fds.
-    char *buffer;
-    int pos, size;
-};
+#define MP_MAX_SOURCES 10
 
 #define MAX_ACTIVE_SECTIONS 50
 
@@ -112,9 +96,7 @@ struct cmd_queue {
 
 struct input_ctx {
     pthread_mutex_t mutex;
-    pthread_cond_t wakeup;
-    pthread_t mainthread;
-    bool mainthread_set;
+    sem_t wakeup;
     struct mp_log *log;
     struct mpv_global *global;
     struct input_opts *opts;
@@ -170,16 +152,10 @@ struct input_ctx {
 
     unsigned int mouse_event_counter;
 
-    struct input_fd fds[MP_MAX_FDS];
-    unsigned int num_fds;
-    struct mp_input_src *sources[MP_MAX_FDS];
+    struct mp_input_src *sources[MP_MAX_SOURCES];
     int num_sources;
 
     struct cmd_queue cmd_queue;
-
-    bool need_wakeup;
-    bool in_select;
-    int wakeup_pipe[2];
 };
 
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
@@ -812,283 +788,13 @@ unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
     return ret;
 }
 
-int input_default_read_cmd(void *ctx, int fd, char *buf, int l)
-{
-    while (1) {
-        int r = read(fd, buf, l);
-        // Error ?
-        if (r < 0) {
-            if (errno == EINTR)
-                continue;
-            else if (errno == EAGAIN)
-                return MP_INPUT_NOTHING;
-            return MP_INPUT_ERROR;
-            // EOF ?
-        }
-        return r;
-    }
-}
-
-int mp_input_add_fd(struct input_ctx *ictx, int unix_fd, int select,
-                    int read_cmd_func(void *ctx, int fd, char *dest, int size),
-                    int read_key_func(void *ctx, int fd),
-                    int close_func(void *ctx, int fd), void *ctx)
-{
-    if (select && unix_fd < 0) {
-        MP_ERR(ictx, "Invalid fd %d in mp_input_add_fd", unix_fd);
-        return 0;
-    }
-
-    input_lock(ictx);
-    struct input_fd *fd = NULL;
-    if (ictx->num_fds == MP_MAX_FDS) {
-        MP_ERR(ictx, "Too many file descriptors.\n");
-    } else {
-        fd = &ictx->fds[ictx->num_fds];
-        *fd = (struct input_fd){
-            .log = ictx->log,
-            .fd = unix_fd,
-            .select = select,
-            .read_cmd = read_cmd_func,
-            .read_key = read_key_func,
-            .close_func = close_func,
-            .ctx = ctx,
-        };
-        ictx->num_fds++;
-    }
-    input_unlock(ictx);
-    return !!fd;
-}
-
-static void mp_input_rm_fd(struct input_ctx *ictx, int fd)
-{
-    struct input_fd *fds = ictx->fds;
-    unsigned int i;
-
-    for (i = 0; i < ictx->num_fds; i++) {
-        if (fds[i].fd == fd)
-            break;
-    }
-    if (i == ictx->num_fds)
-        return;
-    if (fds[i].close_func)
-        fds[i].close_func(fds[i].ctx, fds[i].fd);
-    talloc_free(fds[i].buffer);
-
-    if (i + 1 < ictx->num_fds)
-        memmove(&fds[i], &fds[i + 1],
-                (ictx->num_fds - i - 1) * sizeof(struct input_fd));
-    ictx->num_fds--;
-}
-
-void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
-{
-    input_lock(ictx);
-    mp_input_rm_fd(ictx, fd);
-    input_unlock(ictx);
-}
-
-#define MP_CMD_MAX_SIZE 4096
-
-static int read_cmd(struct input_fd *mp_fd, char **ret)
-{
-    char *end;
-    *ret = NULL;
-
-    // Allocate the buffer if it doesn't exist
-    if (!mp_fd->buffer) {
-        mp_fd->buffer = talloc_size(NULL, MP_CMD_MAX_SIZE);
-        mp_fd->pos = 0;
-        mp_fd->size = MP_CMD_MAX_SIZE;
-    }
-
-    // Get some data if needed/possible
-    while (!mp_fd->got_cmd && !mp_fd->eof && (mp_fd->size - mp_fd->pos > 1)) {
-        int r = mp_fd->read_cmd(mp_fd->ctx, mp_fd->fd, mp_fd->buffer + mp_fd->pos,
-                                mp_fd->size - 1 - mp_fd->pos);
-        // Error ?
-        if (r < 0) {
-            switch (r) {
-            case MP_INPUT_ERROR:
-            case MP_INPUT_DEAD:
-                MP_ERR(mp_fd, "Error while reading command file descriptor %d: %s\n",
-                       mp_fd->fd, strerror(errno));
-            case MP_INPUT_NOTHING:
-                return r;
-            case MP_INPUT_RETRY:
-                continue;
-            }
-            // EOF ?
-        } else if (r == 0) {
-            mp_fd->eof = 1;
-            break;
-        }
-        mp_fd->pos += r;
-        break;
-    }
-
-    mp_fd->got_cmd = 0;
-
-    while (1) {
-        int l = 0;
-        // Find the cmd end
-        mp_fd->buffer[mp_fd->pos] = '\0';
-        end = strchr(mp_fd->buffer, '\r');
-        if (end)
-            *end = '\n';
-        end = strchr(mp_fd->buffer, '\n');
-        // No cmd end ?
-        if (!end) {
-            // If buffer is full we must drop all until the next \n
-            if (mp_fd->size - mp_fd->pos <= 1) {
-                MP_ERR(mp_fd, "Command buffer of file descriptor %d is full: "
-                       "dropping content.\n", mp_fd->fd);
-                mp_fd->pos = 0;
-                mp_fd->drop = 1;
-            }
-            break;
-        }
-        // We already have a cmd : set the got_cmd flag
-        else if ((*ret)) {
-            mp_fd->got_cmd = 1;
-            break;
-        }
-
-        l = end - mp_fd->buffer;
-
-        // Not dropping : put the cmd in ret
-        if (!mp_fd->drop)
-            *ret = talloc_strndup(NULL, mp_fd->buffer, l);
-        else
-            mp_fd->drop = 0;
-        mp_fd->pos -= l + 1;
-        memmove(mp_fd->buffer, end + 1, mp_fd->pos);
-    }
-
-    if (*ret)
-        return 1;
-    else
-        return MP_INPUT_NOTHING;
-}
-
-static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
-{
-    int r;
-    char *text;
-    while ((r = read_cmd(cmd_fd, &text)) >= 0) {
-        mp_input_wakeup(ictx);
-        struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0(text), "<pipe>");
-        talloc_free(text);
-        if (cmd)
-            queue_add_tail(&ictx->cmd_queue, cmd);
-        if (!cmd_fd->got_cmd)
-            return;
-    }
-    if (r == MP_INPUT_ERROR)
-        MP_ERR(ictx, "Error on command file descriptor %d\n", cmd_fd->fd);
-    else if (r == MP_INPUT_DEAD)
-        cmd_fd->dead = true;
-}
-
-static void read_key_fd(struct input_ctx *ictx, struct input_fd *key_fd)
-{
-    int code = key_fd->read_key(key_fd->ctx, key_fd->fd);
-    if (code >= 0 || code == MP_INPUT_RELEASE_ALL) {
-        mp_input_feed_key(ictx, code, 1);
-        return;
-    }
-
-    if (code == MP_INPUT_ERROR)
-        MP_ERR(ictx, "Error on key input file descriptor %d\n", key_fd->fd);
-    else if (code == MP_INPUT_DEAD) {
-        MP_ERR(ictx, "Dead key input on file descriptor %d\n", key_fd->fd);
-        key_fd->dead = true;
-    }
-}
-
-static void read_fd(struct input_ctx *ictx, struct input_fd *fd)
-{
-    if (fd->read_cmd) {
-        read_cmd_fd(ictx, fd);
-    } else {
-        read_key_fd(ictx, fd);
-    }
-}
-
-static void remove_dead_fds(struct input_ctx *ictx)
-{
-    for (int i = 0; i < ictx->num_fds; i++) {
-        if (ictx->fds[i].dead) {
-            mp_input_rm_fd(ictx, ictx->fds[i].fd);
-            i--;
-        }
-    }
-}
-
-#if HAVE_POSIX_SELECT
-
-static void input_wait_read(struct input_ctx *ictx, int time)
-{
-    fd_set fds;
-    FD_ZERO(&fds);
-    int max_fd = 0;
-    for (int i = 0; i < ictx->num_fds; i++) {
-        if (!ictx->fds[i].select)
-            continue;
-        if (ictx->fds[i].fd > max_fd)
-            max_fd = ictx->fds[i].fd;
-        FD_SET(ictx->fds[i].fd, &fds);
-    }
-    struct timeval tv, *time_val;
-    tv.tv_sec = time / 1000;
-    tv.tv_usec = (time % 1000) * 1000;
-    time_val = &tv;
-    ictx->in_select = true;
-    input_unlock(ictx);
-    if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
-        if (errno != EINTR)
-            MP_ERR(ictx, "Select error: %s\n", strerror(errno));
-        FD_ZERO(&fds);
-    }
-    input_lock(ictx);
-    ictx->in_select = false;
-    for (int i = 0; i < ictx->num_fds; i++) {
-        if (ictx->fds[i].select && !FD_ISSET(ictx->fds[i].fd, &fds))
-            continue;
-        read_fd(ictx, &ictx->fds[i]);
-    }
-}
-
-#else
-
-static void input_wait_read(struct input_ctx *ictx, int time)
-{
-    if (time > 0)
-        mpthread_cond_timedwait_rel(&ictx->wakeup, &ictx->mutex, time / 1000.0);
-
-    for (int i = 0; i < ictx->num_fds; i++)
-        read_fd(ictx, &ictx->fds[i]);
-}
-
-#endif
-
-/**
- * \param time time to wait at most for an event in milliseconds
- */
-static void read_events(struct input_ctx *ictx, int time)
+// adjust min time to wait until next repeat event
+static void adjust_max_wait_time(struct input_ctx *ictx, double *time)
 {
     if (ictx->last_key_down && ictx->ar_rate > 0 && ictx->ar_state >= 0) {
-        time = FFMIN(time, 1000 / ictx->ar_rate);
-        time = FFMIN(time, ictx->ar_delay);
+        *time = FFMIN(*time, 1000 / ictx->ar_rate);
+        *time = FFMIN(*time, ictx->ar_delay);
     }
-    time = FFMAX(time, 0);
-
-    if (ictx->need_wakeup)
-        time = 0;
-
-    remove_dead_fds(ictx);
-
-    input_wait_read(ictx, time);
 }
 
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
@@ -1132,20 +838,33 @@ void mp_input_wait(struct input_ctx *ictx, double seconds)
 {
     input_lock(ictx);
     if (ictx->cmd_queue.first)
-        seconds = 0;
+        seconds = -1;
+    adjust_max_wait_time(ictx, &seconds);
+    input_unlock(ictx);
+    while (sem_trywait(&ictx->wakeup) == 0)
+        seconds = -1;
     if (seconds > 0) {
         MP_STATS(ictx, "start sleep");
-        read_events(ictx, MPMIN(seconds * 1000, INT_MAX));
+        struct timespec ts =
+            mp_time_us_to_timespec(mp_add_timeout(mp_time_us(), seconds));
+        sem_timedwait(&ictx->wakeup, &ts);
         MP_STATS(ictx, "end sleep");
     }
-    ictx->need_wakeup = false;
-    input_unlock(ictx);
+}
+
+void mp_input_wakeup(struct input_ctx *ictx)
+{
+    sem_post(&ictx->wakeup);
+}
+
+void mp_input_wakeup_nolock(struct input_ctx *ictx)
+{
+    mp_input_wakeup(ictx);
 }
 
 mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
 {
     input_lock(ictx);
-    read_events(ictx, 0);
     struct cmd_queue *queue = &ictx->cmd_queue;
     if (!queue->first) {
         struct mp_cmd *repeated = check_autorepeat(ictx);
@@ -1480,15 +1199,6 @@ done:
     return r;
 }
 
-#ifndef __MINGW32__
-static int read_wakeup(void *ctx, int fd)
-{
-    char buf[100];
-    read(fd, buf, sizeof(buf));
-    return MP_INPUT_NOTHING;
-}
-#endif
-
 struct input_ctx *mp_input_init(struct mpv_global *global)
 {
     struct input_opts *input_conf = global->opts->input_opts;
@@ -1506,11 +1216,14 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         .default_bindings = input_conf->default_bindings,
         .mouse_section = "default",
         .test = input_conf->test,
-        .wakeup_pipe = {-1, -1},
     };
 
+    if (sem_init(&ictx->wakeup, 0, 0)) {
+        MP_FATAL(ictx, "mpv doesn't work on systems without POSIX semaphores.\n");
+        abort();
+    }
+
     mpthread_mutex_init_recursive(&ictx->mutex);
-    pthread_cond_init(&ictx->wakeup, NULL);
 
     // Setup default section, so that it does nothing.
     mp_input_enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |
@@ -1526,15 +1239,6 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         if (!bstr_startswith0(line, " "))
             parse_config(ictx, true, line, "<builtin>", NULL);
     }
-
-#ifndef __MINGW32__
-    int ret = mp_make_wakeup_pipe(ictx->wakeup_pipe);
-    if (ret < 0)
-        MP_ERR(ictx, "Failed to initialize wakeup pipe.\n");
-    else
-        mp_input_add_fd(ictx, ictx->wakeup_pipe[0], true, NULL, read_wakeup,
-                        NULL, NULL);
-#endif
 
     bool config_ok = false;
     if (input_conf->config_file)
@@ -1607,60 +1311,18 @@ void mp_input_uninit(struct input_ctx *ictx)
     }
 #endif
 
-    for (int i = 0; i < ictx->num_fds; i++) {
-        if (ictx->fds[i].close_func)
-            ictx->fds[i].close_func(ictx->fds[i].ctx, ictx->fds[i].fd);
-    }
     close_input_sources(ictx);
-    for (int i = 0; i < 2; i++) {
-        if (ictx->wakeup_pipe[i] != -1)
-            close(ictx->wakeup_pipe[i]);
-    }
     clear_queue(&ictx->cmd_queue);
     talloc_free(ictx->current_down_cmd);
     pthread_mutex_destroy(&ictx->mutex);
-    pthread_cond_destroy(&ictx->wakeup);
+    sem_destroy(&ictx->wakeup);
     talloc_free(ictx);
-}
-
-void mp_input_wakeup(struct input_ctx *ictx)
-{
-    input_lock(ictx);
-    bool send_wakeup = ictx->in_select;
-    ictx->need_wakeup = true;
-    pthread_cond_signal(&ictx->wakeup);
-    input_unlock(ictx);
-    // Safe without locking
-    if (send_wakeup && ictx->wakeup_pipe[1] >= 0)
-        write(ictx->wakeup_pipe[1], &(char){0}, 1);
-}
-
-void mp_input_wakeup_nolock(struct input_ctx *ictx)
-{
-    if (ictx->wakeup_pipe[1] >= 0) {
-        write(ictx->wakeup_pipe[1], &(char){0}, 1);
-    } else {
-        // Not race condition free. Done for the sake of jackaudio+windows.
-        ictx->need_wakeup = true;
-        pthread_cond_signal(&ictx->wakeup);
-    }
-}
-
-void mp_input_set_main_thread(struct input_ctx *ictx)
-{
-    ictx->mainthread = pthread_self();
-    ictx->mainthread_set = true;
 }
 
 bool mp_input_check_interrupt(struct input_ctx *ictx)
 {
     input_lock(ictx);
     bool res = queue_has_abort_cmds(&ictx->cmd_queue);
-    if (!res && ictx->mainthread_set &&
-        pthread_equal(ictx->mainthread, pthread_self()))
-    {
-        read_events(ictx, 0);
-    }
     input_unlock(ictx);
     return res;
 }
@@ -1697,7 +1359,7 @@ struct mp_input_src_internal {
 struct mp_input_src *mp_input_add_src(struct input_ctx *ictx)
 {
     input_lock(ictx);
-    if (ictx->num_sources == MP_MAX_FDS) {
+    if (ictx->num_sources == MP_MAX_SOURCES) {
         input_unlock(ictx);
         return NULL;
     }
