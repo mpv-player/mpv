@@ -11,6 +11,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifdef MP_SEMAPHORE_EMULATION
+
 #include <unistd.h>
 #include <poll.h>
 #include <limits.h>
@@ -21,7 +23,6 @@
 
 #include "semaphore.h"
 
-#ifdef MP_SEMAPHORE_EMULATION
 
 int mp_sem_init(mp_sem_t *sem, int pshared, unsigned int value)
 {
