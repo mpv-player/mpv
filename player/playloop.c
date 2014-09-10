@@ -903,7 +903,7 @@ void run_playloop(struct MPContext *mpctx)
      * other hand, if we don't have a video frame, then the user probably seeked
      * outside of the video, and we do want to quit. */
     bool prevent_eof =
-        mpctx->paused && mpctx->video_out && vo_has_frame(mpctx->video_out);
+        mpctx->paused && mpctx->video_out && mpctx->video_out->hasframe;
     /* Handles terminating on end of playback (or switching to next segment).
      *
      * It's possible for the user to simultaneously switch both audio
