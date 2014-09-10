@@ -382,8 +382,8 @@ def build(ctx):
         ( "osdep/ar/HIDRemote.m",                "cocoa" ),
         ( "osdep/macosx_application.m",          "cocoa-application" ),
         ( "osdep/macosx_events.m",               "cocoa" ),
+        ( "osdep/semaphore_osx.c" ),
         ( "osdep/path-macosx.m",                 "cocoa" ),
-
         ( "osdep/path-win.c",                    "os-win32" ),
         ( "osdep/path-win.c",                    "os-cygwin" ),
         ( "osdep/glob-win.c",                    "glob-win32-replacement" ),

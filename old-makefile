@@ -188,6 +188,7 @@ SOURCES = audio/audio.c \
           options/path.c \
           osdep/io.c \
           osdep/numcores.c \
+          osdep/semaphore_osx.c \
           osdep/terminal-unix.c \
           osdep/timer.c \
           osdep/timer-linux.c \
