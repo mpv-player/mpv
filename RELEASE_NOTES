@@ -1,3 +1,15 @@
+Release 0.5.3
+=============
+
+Bug fixes
+---------
+
+- Fix build failure introduced by the previous release.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 41f2ad3..41f2ad3`` in
+the git repository.
+
 Release 0.5.2
 =============
 
