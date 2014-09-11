@@ -228,6 +228,19 @@ static int device_writable(struct ao *ao)
     return poll(&fd, 1, 0);
 }
 
+// close audio device
+static void uninit(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    if (p->audio_fd == -1)
+        return;
+#ifdef SNDCTL_DSP_RESET
+    ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
+#endif
+    close(p->audio_fd);
+    p->audio_fd = -1;
+}
+
 // open & setup audio device
 // return: 0=success -1=fail
 static int init(struct ao *ao)
@@ -281,14 +294,14 @@ static int init(struct ao *ao)
 #endif
     if (p->audio_fd < 0) {
         MP_ERR(ao, "Can't open audio device %s: %s\n", p->dsp, strerror(errno));
-        return -1;
+        goto fail;
     }
 
 #ifdef __linux__
     /* Remove the non-blocking flag */
     if (fcntl(p->audio_fd, F_SETFL, 0) < 0) {
         MP_ERR(ao, "Can't make file descriptor blocking: %s\n",  strerror(errno));
-        return -1;
+        goto fail;
     }
 #endif
 
@@ -345,7 +358,7 @@ ac3_retry:
     ao->format = oss2format(oss_format);
     if (ao->format == -1) {
         MP_ERR(ao, "Unknown/Unsupported OSS format: %x.\n", oss_format);
-        return -1;
+        goto fail;
     }
 
     MP_VERBOSE(ao, "sample format: %s\n", af_fmt_to_str(ao->format));
@@ -355,7 +368,7 @@ ac3_retry:
         for (int n = 0; n < MP_NUM_CHANNELS + 1; n++)
             mp_chmap_sel_add_map(&sel, &oss_layouts[n]);
         if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
-            return -1;
+            goto fail;
         int reqchannels = ao->channels.num;
         // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it
         if (reqchannels > 2) {
@@ -365,17 +378,17 @@ ac3_retry:
             {
                 MP_ERR(ao, "Failed to set audio device to %d channels.\n",
                        reqchannels);
-                return -1;
+                goto fail;
             }
         } else {
             int c = reqchannels - 1;
             if (ioctl(p->audio_fd, SNDCTL_DSP_STEREO, &c) == -1) {
                 MP_ERR(ao, "Failed to set audio device to %d channels.\n",
                        reqchannels);
-                return -1;
+                goto fail;
             }
             if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, c + 1))
-                return -1;
+                goto fail;
         }
         MP_VERBOSE(ao, "using %d channels (requested: %d)\n",
                    ao->channels.num, reqchannels);
@@ -405,7 +418,7 @@ ac3_retry:
         void *data = malloc(p->outburst);
         if (!data) {
             MP_ERR(ao, "Out of memory, or broken outburst size.\n");
-            return -1;
+            goto fail;
         }
         p->buffersize = 0;
         memset(data, 0, p->outburst);
@@ -416,7 +429,7 @@ ac3_retry:
         free(data);
         if (p->buffersize == 0) {
             MP_ERR(ao, "Your OSS audio driver DOES NOT support poll().\n");
-            return -1;
+            goto fail;
         }
     }
 
@@ -425,19 +438,10 @@ ac3_retry:
     ao->bps *= ao->samplerate;
 
     return 0;
-}
 
-// close audio device
-static void uninit(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-    if (p->audio_fd == -1)
-        return;
-#ifdef SNDCTL_DSP_RESET
-    ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
-#endif
-    close(p->audio_fd);
-    p->audio_fd = -1;
+fail:
+    uninit(ao);
+    return -1;
 }
 
 static void drain(struct ao *ao)
