@@ -2516,6 +2516,13 @@ static int mp_property_playlist_pos(void *ctx, struct m_property *prop,
         *(struct m_option *)arg = opt;
         return M_PROPERTY_OK;
     }
+    case M_PROPERTY_PRINT: {
+        int pos = playlist_entry_to_index(pl, pl->current);
+        if (pos < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        *(char **)arg = talloc_asprintf(NULL, "%d", pos + 1);
+        return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
