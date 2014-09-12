@@ -973,18 +973,19 @@ void idle_loop(struct MPContext *mpctx)
     {
         if (need_reinit) {
             mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
+            int uninit = INITIALIZED_AO;
+            if (!mpctx->opts->force_vo)
+                uninit |= INITIALIZED_VO;
+            uninit_player(mpctx, uninit);
             handle_force_window(mpctx, true);
+            mpctx->sleeptime = 0;
+            need_reinit = false;
         }
-        need_reinit = false;
         handle_dummy_ticks(mpctx);
-        int uninit = INITIALIZED_AO;
-        if (!mpctx->opts->force_vo)
-            uninit |= INITIALIZED_VO;
-        uninit_player(mpctx, uninit);
-        update_osd_msg(mpctx);
-        handle_osd_redraw(mpctx);
-        mp_process_input(mpctx);
         mp_wait_events(mpctx, mpctx->sleeptime);
         mpctx->sleeptime = 100.0;
+        mp_process_input(mpctx);
+        update_osd_msg(mpctx);
+        handle_osd_redraw(mpctx);
     }
 }
