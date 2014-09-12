@@ -2492,11 +2492,16 @@ static int mp_property_playlist_pos(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
-    case M_PROPERTY_GET: {
+    case M_PROPERTY_GET
+    case M_PROPERTY_PRINT: {
         int pos = playlist_entry_to_index(pl, pl->current);
         if (pos < 0)
             return M_PROPERTY_UNAVAILABLE;
-        *(int *)arg = pos;
+
+        if (action == M_PROPERTY_GET)
+            *(int *)arg = pos;
+        else
+            *(char **)arg = talloc_asprintf(NULL, "%d", pos + 1);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET: {
