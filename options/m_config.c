@@ -161,16 +161,19 @@ static int list_options(struct m_config *config)
 
 // The memcpys are supposed to work around the strict aliasing violation,
 // that would result if we just dereferenced a void** (where the void** is
-// actually casted from struct some_type* ).
+// actually casted from struct some_type* ). The dummy struct type is in
+// theory needed, because void* and struct pointers could have different
+// representations, while pointers to different struct types don't.
 static void *substruct_read_ptr(const void *ptr)
 {
-    void *res;
-    memcpy(&res, ptr, sizeof(void*));
+    struct mp_dummy_ *res;
+    memcpy(&res, ptr, sizeof(res));
     return res;
 }
 static void substruct_write_ptr(void *ptr, void *val)
 {
-    memcpy(ptr, &val, sizeof(void*));
+    struct mp_dummy_ *src = val;
+    memcpy(ptr, &src, sizeof(src));
 }
 
 static void add_options(struct m_config *config,
