@@ -119,6 +119,11 @@ Application *mpv_shared_app(void)
     [self menuItemWithParent:menu title:@"About mpv"
                     action:@selector(showAbout) keyEquivalent:@""];
     [menu addItem:[NSMenuItem separatorItem]];
+    [self menuItemWithParent:menu title:@"Edit config"
+                    action:@selector(editConfig) keyEquivalent:@""];
+    [self menuItemWithParent:menu title:@"Edit input.conf"
+                    action:@selector(editInputConf) keyEquivalent:@""];
+    [menu addItem:[NSMenuItem separatorItem]];
     [self menuItemWithParent:menu title:@"Hide mpv"
                     action:@selector(hide:) keyEquivalent:@"h"];
     [menu addItem:[NSMenuItem separatorItem]];
@@ -251,6 +256,18 @@ Application *mpv_shared_app(void)
     }
 
     [_aboutWin makeKeyAndOrderFront:NSApp];
+}
+
+- (void)editConfig
+{
+    [[NSWorkspace sharedWorkspace] openFile:
+    [@"~/.mpv/config" stringByExpandingTildeInPath]];
+}
+
+- (void)editInputConf
+{
+    [[NSWorkspace sharedWorkspace] openFile:
+    [@"~/.mpv/input.conf" stringByExpandingTildeInPath]];
 }
 
 
