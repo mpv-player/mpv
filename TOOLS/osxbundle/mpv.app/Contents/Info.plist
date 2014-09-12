@@ -513,6 +513,26 @@
           <key>public.filename-extension</key>
           <array>
             <string>mkv</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>WebM Video</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.webm</string>
+        <key>UTTypeReferenceURL</key>
+        <string>http://www.webmproject.org</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
             <string>webm</string>
           </array>
         </dict>
