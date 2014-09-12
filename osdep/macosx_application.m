@@ -34,6 +34,7 @@ static pthread_t playback_thread_id;
 @interface Application ()
 {
     EventsResponder *_eventsResponder;
+    NSWindow* _aboutWin;
 }
 
 - (NSMenuItem *)menuItemWithParent:(NSMenu *)parent
@@ -82,6 +83,7 @@ Application *mpv_shared_app(void)
         self.argumentsList = [[[NSMutableArray alloc] init] autorelease];
         _eventsResponder = [EventsResponder sharedInstance];
         self.willStopOnOpenEvent = NO;
+        _aboutWin = nil;
 
         NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
         [em setEventHandler:self
@@ -98,6 +100,7 @@ Application *mpv_shared_app(void)
     NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
     [em removeEventHandlerForEventClass:kInternetEventClass
                              andEventID:kAEGetURL];
+    [_aboutWin release];
     [super dealloc];
 }
 
@@ -112,13 +115,18 @@ Application *mpv_shared_app(void)
 {
     NSMenu *menu = [[NSMenu alloc] initWithTitle:@"Apple Menu"];
     [self mainMenuItemWithParent:mainMenu child:menu];
+
+    [self menuItemWithParent:menu title:@"About mpv"
+                    action:@selector(showAbout) keyEquivalent:@""];
+    [menu addItem:[NSMenuItem separatorItem]];
     [self menuItemWithParent:menu title:@"Hide mpv"
-                      action:@selector(hide:) keyEquivalent: @"h"];
+                    action:@selector(hide:) keyEquivalent:@"h"];
+    [menu addItem:[NSMenuItem separatorItem]];
     [self menuItemWithParent:menu title:@"Quit mpv"
-                      action:@selector(stopPlayback) keyEquivalent: @"q"];
+                    action:@selector(stopPlayback) keyEquivalent:@"q"];
     [self menuItemWithParent:menu title:@"Quit mpv & remember position"
-                      action:@selector(stopPlaybackAndRememberPosition)
-               keyEquivalent: @"Q"];
+                    action:@selector(stopPlaybackAndRememberPosition)
+                    keyEquivalent:@"Q"];
     return [menu autorelease];
 }
 
@@ -170,6 +178,79 @@ Application *mpv_shared_app(void)
     } else {
         terminate_cocoa_application();
     }
+}
+
+- (void)showAbout
+{
+    if (!_aboutWin) {
+        NSRect sc_fr = [[NSScreen mainScreen] frame];
+        NSRect w_fr = NSMakeRect(sc_fr.size.width / 2,
+                                sc_fr.size.height / 2, 320, 260);
+        NSUInteger mask = NSTitledWindowMask | NSClosableWindowMask;
+        _aboutWin  = [[NSWindow alloc] initWithContentRect:w_fr
+                                                styleMask:mask
+                                                backing:NSBackingStoreBuffered
+                                                defer:NO];
+        [_aboutWin setReleasedWhenClosed:NO];
+
+        NSRect iv_fr = NSMakeRect((w_fr.size.width - 128) / 2,
+                                    w_fr.size.height - 138,
+                                    128, 128);
+        NSImageView* iconView = [[NSImageView alloc] initWithFrame:iv_fr];
+        NSImage* img = [[NSApplication sharedApplication] applicationIconImage];
+        [iconView setImage:img];
+        [[_aboutWin contentView] addSubview:iconView];
+        [iconView release];
+
+        NSRect l_fr = NSMakeRect(0, iv_fr.origin.y - 30, w_fr.size.width, 24);
+        NSTextField* nameLabel = [[NSTextField alloc] initWithFrame:l_fr];
+        [nameLabel setStringValue:@"mpv"];
+        [nameLabel setBezeled:NO];
+        [nameLabel setDrawsBackground:NO];
+        [nameLabel setEditable:NO];
+        [nameLabel setSelectable:NO];
+        [nameLabel setFont:[NSFont boldSystemFontOfSize:16.0]];
+        [nameLabel setAlignment:NSCenterTextAlignment];
+        [[_aboutWin contentView] addSubview:nameLabel];
+        [nameLabel release];
+
+        l_fr = NSMakeRect(0, l_fr.origin.y - 30, w_fr.size.width, 24);
+        NSTextField* versionLabel = [[NSTextField alloc] initWithFrame:l_fr];
+        // Won't work if launched from cmd line, which make sense btw
+        // and if you use cmd line just run `mpv --version` anyway
+        NSString* version = [[NSBundle mainBundle] objectForInfoDictionaryKey:
+                                @"CFBundleShortVersionString"];
+        if (version) {
+            NSString* s = [NSString stringWithFormat:@"Version %@", version];
+            [versionLabel setStringValue:s];
+        }
+        else
+            [versionLabel setStringValue:@"run `mpv --version`"];
+        [versionLabel setBezeled:NO];
+        [versionLabel setDrawsBackground:NO];
+        [versionLabel setEditable:NO];
+        [versionLabel setSelectable:NO];
+        [versionLabel setFont:[NSFont systemFontOfSize:14.0]];
+        [versionLabel setAlignment:NSCenterTextAlignment];
+        [[_aboutWin contentView] addSubview:versionLabel];
+        [versionLabel release];
+
+        l_fr = NSMakeRect(0, l_fr.origin.y - 46, w_fr.size.width, 32);
+        NSTextField* copyLabel = [[NSTextField alloc] initWithFrame:l_fr];
+        [copyLabel setStringValue:
+        @"Copyright © 2000-2014 mpv/MPlayer/mplayer2 projects"];
+        [copyLabel setBezeled:NO];
+        [copyLabel setDrawsBackground:NO];
+        [copyLabel setEditable:NO];
+        [copyLabel setSelectable:NO];
+        [copyLabel setFont:[NSFont systemFontOfSize:12.0]];
+        [copyLabel setAlignment:NSCenterTextAlignment];
+        [[copyLabel cell] setBackgroundStyle:NSBackgroundStyleRaised];
+        [[_aboutWin contentView] addSubview:copyLabel];
+        [copyLabel release];
+    }
+
+    [_aboutWin makeKeyAndOrderFront:NSApp];
 }
 
 
