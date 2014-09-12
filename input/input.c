@@ -607,6 +607,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         ictx->ar_state = 0;
         ictx->current_down_cmd = mp_cmd_clone(cmd);
         ictx->current_down_cmd_need_release = false;
+        mp_input_wakeup(ictx); // possibly start timer for autorepeat
     } else if (state == MP_KEY_STATE_UP) {
         // Most VOs send RELEASE_ALL anyway
         release_down_cmd(ictx, false);
@@ -792,8 +793,8 @@ unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
 static void adjust_max_wait_time(struct input_ctx *ictx, double *time)
 {
     if (ictx->last_key_down && ictx->ar_rate > 0 && ictx->ar_state >= 0) {
-        *time = FFMIN(*time, 1000 / ictx->ar_rate);
-        *time = FFMIN(*time, ictx->ar_delay);
+        *time = FFMIN(*time, 1.0 / ictx->ar_rate);
+        *time = FFMIN(*time, ictx->ar_delay / 1000.0);
     }
 }
 
