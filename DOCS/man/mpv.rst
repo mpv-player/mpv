@@ -145,6 +145,10 @@ PGUP and PGDWN
     "previous" will actually go to the beginning of the current chapter; see
     ``--chapter-seek-threshold``.
 
+Shift+PGUP and Shift+PGDWN
+    Seek backward or forward by 10 minutes. (This used to be mapped to
+    PGUP/PGDWN without Shift.)
+
 D
     Activate/deactivate deinterlacer.
 
