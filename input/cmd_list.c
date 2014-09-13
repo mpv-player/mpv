@@ -265,7 +265,7 @@ static int is_abort_cmd(struct mp_cmd *cmd)
     case MP_CMD_COMMAND_LIST:;
         int r = 0;
         for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next) {
-            int x = is_abort_cmd(cmd);
+            int x = is_abort_cmd(sub);
             r = MPMAX(r, x);
         }
         return r;
