@@ -308,6 +308,7 @@ struct MPContext *mp_create(void)
         .osd_progbar = { .type = -1 },
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
         .dispatch = mp_dispatch_create(mpctx),
+        .playback_abort = mp_cancel_new(mpctx),
     };
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
@@ -339,12 +340,6 @@ struct MPContext *mp_create(void)
     mp_clients_init(mpctx);
 
     return mpctx;
-}
-
-static int check_stream_interrupt(void *ctx)
-{
-    struct MPContext *mpctx = ctx;
-    return mp_input_check_interrupt(mpctx->input);
 }
 
 static void wakeup_playloop(void *ctx)
@@ -383,8 +378,7 @@ int mp_initialize(struct MPContext *mpctx)
     }
 
     mpctx->input = mp_input_init(mpctx->global);
-    mpctx->global->stream_interrupt_cb = check_stream_interrupt;
-    mpctx->global->stream_interrupt_cb_ctx = mpctx;
+    mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
 
     mp_dispatch_set_wakeup_fn(mpctx->dispatch, wakeup_playloop, mpctx);
 

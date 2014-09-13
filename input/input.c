@@ -156,6 +156,8 @@ struct input_ctx {
     int num_sources;
 
     struct cmd_queue cmd_queue;
+
+    struct mp_cancel *cancel;
 };
 
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
@@ -243,10 +245,10 @@ static int queue_count_cmds(struct cmd_queue *queue)
     return res;
 }
 
-static bool queue_has_abort_cmds(struct cmd_queue *queue)
+static bool has_abort_cmds(struct input_ctx *ictx)
 {
     bool ret = false;
-    for (struct mp_cmd *cmd = queue->first; cmd; cmd = cmd->queue_next)
+    for (struct mp_cmd *cmd = ictx->cmd_queue.first; cmd; cmd = cmd->queue_next)
         if (mp_input_is_abort_cmd(cmd)) {
             ret = true;
             break;
@@ -556,8 +558,8 @@ static bool key_updown_ok(enum mp_command_type cmd)
 static bool should_drop_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
 {
     struct cmd_queue *queue = &ictx->cmd_queue;
-    return (queue_count_cmds(queue) >= ictx->key_fifo_size &&
-            (!mp_input_is_abort_cmd(cmd) || queue_has_abort_cmds(queue)));
+    return queue_count_cmds(queue) >= ictx->key_fifo_size &&
+           !mp_input_is_abort_cmd(cmd);
 }
 
 static struct mp_cmd *resolve_key(struct input_ctx *ictx, int code)
@@ -796,6 +798,9 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 {
     input_lock(ictx);
     if (cmd) {
+        // Abort only if there are going to be at least 2 commands in the queue.
+        if (ictx->cancel && mp_input_is_abort_cmd(cmd) && has_abort_cmds(ictx))
+            mp_cancel_trigger(ictx->cancel);
         queue_add_tail(&ictx->cmd_queue, cmd);
         mp_input_wakeup(ictx);
     }
@@ -1304,12 +1309,11 @@ void mp_input_uninit(struct input_ctx *ictx)
     talloc_free(ictx);
 }
 
-bool mp_input_check_interrupt(struct input_ctx *ictx)
+void mp_input_set_cancel(struct input_ctx *ictx, struct mp_cancel *cancel)
 {
     input_lock(ictx);
-    bool res = queue_has_abort_cmds(&ictx->cmd_queue);
+    ictx->cancel = cancel;
     input_unlock(ictx);
-    return res;
 }
 
 bool mp_input_use_alt_gr(struct input_ctx *ictx)

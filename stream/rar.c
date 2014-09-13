@@ -386,7 +386,8 @@ int RarParse(struct stream *s, int *count, rar_file_t ***file)
         if (!volume_mrl)
             goto done;
 
-        vol = stream_create(volume_mrl, STREAM_READ | STREAM_NO_FILTERS, s->global);
+        vol = stream_create(volume_mrl, STREAM_READ | STREAM_NO_FILTERS,
+                            s->cancel, s->global);
 
         if (!vol)
             goto done;
@@ -423,7 +424,7 @@ int  RarSeek(rar_file_t *file, uint64_t position)
             free_stream(file->s);
         file->s = stream_create(file->current_chunk->mrl,
                                 STREAM_READ | STREAM_NO_FILTERS,
-                                file->global);
+                                file->cancel, file->global);
     }
     return file->s ? stream_seek(file->s, offset) : 0;
 }

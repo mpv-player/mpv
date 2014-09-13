@@ -138,7 +138,7 @@ static int control(stream_t *s, int cmd, void *arg)
 static int interrupt_cb(void *ctx)
 {
     struct stream *stream = ctx;
-    return stream_check_interrupt(stream);
+    return mp_cancel_test(stream->cancel);
 }
 
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };

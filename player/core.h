@@ -169,6 +169,7 @@ typedef struct MPContext {
     struct input_ctx *input;
     struct mp_client_api *clients;
     struct mp_dispatch_queue *dispatch;
+    struct mp_cancel *playback_abort;
 
     struct mp_log *statusline;
     struct osd_state *osd;

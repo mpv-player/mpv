@@ -45,6 +45,7 @@ typedef struct {
 
     // When actually reading the data
     struct mpv_global *global;
+    struct mp_cancel *cancel;
     uint64_t i_pos;
     stream_t *s;
     rar_file_chunk_t *current_chunk;

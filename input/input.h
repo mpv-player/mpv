@@ -228,8 +228,10 @@ void mp_input_wakeup(struct input_ctx *ictx);
 
 void mp_input_wakeup_nolock(struct input_ctx *ictx);
 
-// Interruptible usleep:  (used by demux)
-bool mp_input_check_interrupt(struct input_ctx *ictx);
+// Used to asynchronously abort playback. Needed because the core still can
+// block on network in some situations.
+struct mp_cancel;
+void mp_input_set_cancel(struct input_ctx *ictx, struct mp_cancel *cancel);
 
 // If this returns true, use Right Alt key as Alt Gr to produce special
 // characters. If false, count Right Alt as the modifier Alt key.

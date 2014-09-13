@@ -189,6 +189,8 @@ typedef struct stream {
     struct MPOpts *opts;
     struct mpv_global *global;
 
+    struct mp_cancel *cancel;   // cancellation notification
+
     FILE *capture_file;
     char *capture_filename;
 
@@ -248,15 +250,19 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size);
 int stream_control(stream_t *s, int cmd, void *arg);
 void free_stream(stream_t *s);
-struct stream *stream_create(const char *url, int flags, struct mpv_global *global);
+struct stream *stream_create(const char *url, int flags,
+                             struct mp_cancel *c, struct mpv_global *global);
 struct stream *stream_open(const char *filename, struct mpv_global *global);
 stream_t *open_output_stream(const char *filename, struct mpv_global *global);
 stream_t *open_memory_stream(void *data, int len);
 
-bool stream_check_interrupt(struct stream *s);
-
 void mp_url_unescape_inplace(char *buf);
 char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok);
+
+struct mp_cancel *mp_cancel_new(void *talloc_ctx);
+void mp_cancel_trigger(struct mp_cancel *c);
+bool mp_cancel_test(struct mp_cancel *c);
+void mp_cancel_reset(struct mp_cancel *c);
 
 // stream_file.c
 char *mp_file_url_to_filename(void *talloc_ctx, bstr url);

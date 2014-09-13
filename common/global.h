@@ -7,9 +7,6 @@
 struct mpv_global {
     struct MPOpts *opts;
     struct mp_log *log;
-
-    int (*stream_interrupt_cb)(void *ctx);
-    void *stream_interrupt_cb_ctx;
 };
 
 #endif

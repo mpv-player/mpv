@@ -1005,6 +1005,8 @@ static void play_current_file(struct MPContext *mpctx)
 
     mp_notify(mpctx, MPV_EVENT_START_FILE, NULL);
 
+    mp_cancel_reset(mpctx->playback_abort);
+
     mpctx->stop_play = 0;
     mpctx->filename = NULL;
     mpctx->shown_aframes = 0;
@@ -1085,7 +1087,8 @@ static void play_current_file(struct MPContext *mpctx)
     int stream_flags = STREAM_READ;
     if (!opts->load_unsafe_playlists)
         stream_flags |= mpctx->playing->stream_flags;
-    mpctx->stream = stream_create(stream_filename, stream_flags, mpctx->global);
+    mpctx->stream = stream_create(stream_filename, stream_flags,
+                                  mpctx->playback_abort, mpctx->global);
     if (!mpctx->stream) { // error...
         mp_process_input(mpctx);
         goto terminate_playback;
@@ -1306,6 +1309,8 @@ terminate_playback:
 
     if (mpctx->step_frames)
         opts->pause = 1;
+
+    mp_cancel_trigger(mpctx->playback_abort);
 
     MP_INFO(mpctx, "\n");
 
