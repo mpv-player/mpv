@@ -255,6 +255,8 @@ static bool is_abort_cmd(int cmd_id)
 {
     switch (cmd_id) {
     case MP_CMD_QUIT:
+    case MP_CMD_QUIT_WATCH_LATER:
+    case MP_CMD_STOP:
     case MP_CMD_PLAYLIST_NEXT:
     case MP_CMD_PLAYLIST_PREV:
         return true;

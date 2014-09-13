@@ -327,6 +327,12 @@ List of Input Commands
     Write the resume config file that the ``quit_watch_later`` command writes,
     but continue playback normally.
 
+``stop``
+    Stop playback and clear playlist. With default settings, this is
+    essentially like ``quit``. Useful for the client API: playback can be
+    stopped without terminating the player.
+
+
 Input Commands that are Possibly Subject to Change
 --------------------------------------------------
 
@@ -503,8 +509,8 @@ Input Commands that are Possibly Subject to Change
     be used in input.conf to reassign such bindings.)
 
 
-Undocumented commands: ``tv_last_channel`` (TV/DVB only), ``stop`` (questionable
-use), ``get_property`` (?), ``vo_cmdline`` (experimental).
+Undocumented commands: ``tv_last_channel`` (TV/DVB only), ``get_property`` (?),
+``vo_cmdline`` (experimental).
 
 Input Command Prefixes
 ----------------------
