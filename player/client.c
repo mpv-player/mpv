@@ -23,6 +23,7 @@
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "input/input.h"
+#include "input/cmd_list.h"
 #include "misc/dispatch.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
@@ -32,6 +33,7 @@
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
+#include "stream/stream.h"
 
 #include "command.h"
 #include "core.h"
@@ -856,6 +858,9 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd)
         return MPV_ERROR_UNINITIALIZED;
     if (!cmd)
         return MPV_ERROR_INVALID_PARAMETER;
+
+    if (mp_input_is_abort_cmd(cmd))
+        mp_cancel_trigger(ctx->mpctx->playback_abort);
 
     struct cmd_request req = {
         .mpctx = ctx->mpctx,
