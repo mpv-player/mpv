@@ -1000,20 +1000,20 @@ struct mp_cancel *mp_cancel_new(void *talloc_ctx)
 // Request abort.
 void mp_cancel_trigger(struct mp_cancel *c)
 {
-    c->triggered = true;
+    atomic_store(&c->triggered, true);
 }
 
 // Restore original state. (Allows reusing a mp_cancel.)
 void mp_cancel_reset(struct mp_cancel *c)
 {
-    c->triggered = false;
+    atomic_store(&c->triggered, false);
 }
 
 // Return whether the caller should abort.
 // For convenience, c==NULL is allowed.
 bool mp_cancel_test(struct mp_cancel *c)
 {
-    return c ? c->triggered : false;
+    return c ? atomic_load(&c->triggered) : false;
 }
 
 void stream_print_proto_list(struct mp_log *log)
