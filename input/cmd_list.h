@@ -101,8 +101,10 @@ enum mp_command_type {
     MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
 };
 
-// Executing this command will abort playback (play something else, or quit).
+// Executing this command will maybe abort playback (play something else, or quit).
 struct mp_cmd;
+bool mp_input_is_maybe_abort_cmd(struct mp_cmd *cmd);
+// This command will definitely abort playback.
 bool mp_input_is_abort_cmd(struct mp_cmd *cmd);
 
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd);

@@ -245,17 +245,6 @@ static int queue_count_cmds(struct cmd_queue *queue)
     return res;
 }
 
-static bool has_abort_cmds(struct input_ctx *ictx)
-{
-    bool ret = false;
-    for (struct mp_cmd *cmd = ictx->cmd_queue.first; cmd; cmd = cmd->queue_next)
-        if (mp_input_is_abort_cmd(cmd)) {
-            ret = true;
-            break;
-        }
-    return ret;
-}
-
 static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
 {
     struct mp_cmd **p_prev = &queue->first;
@@ -794,12 +783,25 @@ static void adjust_max_wait_time(struct input_ctx *ictx, double *time)
     }
 }
 
+static bool test_abort_cmd(struct input_ctx *ictx, struct mp_cmd *new)
+{
+    if (!mp_input_is_maybe_abort_cmd(new))
+        return false;
+    if (mp_input_is_abort_cmd(new))
+        return true;
+    // Abort only if there are going to be at least 2 commands in the queue.
+    for (struct mp_cmd *cmd = ictx->cmd_queue.first; cmd; cmd = cmd->queue_next) {
+        if (mp_input_is_maybe_abort_cmd(cmd))
+            return true;
+    }
+    return false;
+}
+
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 {
     input_lock(ictx);
     if (cmd) {
-        // Abort only if there are going to be at least 2 commands in the queue.
-        if (ictx->cancel && mp_input_is_abort_cmd(cmd) && has_abort_cmds(ictx))
+        if (ictx->cancel && test_abort_cmd(ictx, cmd))
             mp_cancel_trigger(ictx->cancel);
         queue_add_tail(&ictx->cmd_queue, cmd);
         mp_input_wakeup(ictx);

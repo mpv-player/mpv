@@ -251,31 +251,36 @@ bool mp_replace_legacy_cmd(void *t, bstr *s)
     return false;
 }
 
-static bool is_abort_cmd(int cmd_id)
+// 0: no, 1: maybe, 2: sure
+static int is_abort_cmd(struct mp_cmd *cmd)
 {
-    switch (cmd_id) {
+    switch (cmd->id) {
     case MP_CMD_QUIT:
     case MP_CMD_QUIT_WATCH_LATER:
     case MP_CMD_STOP:
+        return 2;
     case MP_CMD_PLAYLIST_NEXT:
     case MP_CMD_PLAYLIST_PREV:
-        return true;
+        return 1;
+    case MP_CMD_COMMAND_LIST:;
+        int r = 0;
+        for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next) {
+            int x = is_abort_cmd(cmd);
+            r = MPMAX(r, x);
+        }
+        return r;
     }
-    return false;
+    return 0;
+}
+
+bool mp_input_is_maybe_abort_cmd(struct mp_cmd *cmd)
+{
+    return is_abort_cmd(cmd) >= 1;
 }
 
 bool mp_input_is_abort_cmd(struct mp_cmd *cmd)
 {
-    if (is_abort_cmd(cmd->id))
-        return true;
-    if (cmd->id == MP_CMD_COMMAND_LIST) {
-        for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next)
-        {
-            if (mp_input_is_abort_cmd(sub))
-                return true;
-        }
-    }
-    return false;
+    return is_abort_cmd(cmd) >= 2;
 }
 
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
