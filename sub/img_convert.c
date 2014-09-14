@@ -46,10 +46,10 @@ static void rgba_to_premultiplied_rgba(uint32_t *colors, size_t count)
 {
     for (int n = 0; n < count; n++) {
         uint32_t c = colors[n];
-        int b = c & 0xFF;
-        int g = (c >> 8) & 0xFF;
-        int r = (c >> 16) & 0xFF;
-        int a = (c >> 24) & 0xFF;
+        unsigned b = c & 0xFF;
+        unsigned g = (c >> 8) & 0xFF;
+        unsigned r = (c >> 16) & 0xFF;
+        unsigned a = (c >> 24) & 0xFF;
         b = b * a / 255;
         g = g * a / 255;
         r = r * a / 255;
