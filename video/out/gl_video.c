@@ -573,7 +573,7 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     }
 
     loc = gl->GetUniformLocation(program, "transform");
-    if (loc >= 0) {
+    if (loc >= 0 && p->vp_w > 0 && p->vp_h > 0) {
         float matrix[3][3];
         matrix_ortho2d(matrix, 0, p->vp_w, p->vp_h, 0);
         gl->UniformMatrix3fv(loc, 1, GL_FALSE, &matrix[0][0]);

@@ -428,9 +428,11 @@ void osd_object_get_scale_factor(struct osd_state *osd, int obj,
     int nw, nh;
     osd_object_get_resolution(osd, obj, &nw, &nh);
     pthread_mutex_lock(&osd->lock);
-    *sw = nw / (double)osd->objs[obj]->vo_res.w;
-    *sh = nh / (double)osd->objs[obj]->vo_res.h;
+    int vow = osd->objs[obj]->vo_res.w;
+    int voh = osd->objs[obj]->vo_res.h;
     pthread_mutex_unlock(&osd->lock);
+    *sw = vow ? nw / (double)vow : 0;
+    *sh = voh ? nh / (double)voh : 0;
 }
 
 // Turn *x and *y, which are given in OSD coordinates, to video coordinates.
