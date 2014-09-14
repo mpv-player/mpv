@@ -80,7 +80,8 @@ static void read_pipe_thread(struct mp_input_src *src, void *param)
     }
 
 done:
-    waio_free(waio);
+    if (waio)
+        waio_free(waio);
     if (close_fd)
         close(fd);
 }
