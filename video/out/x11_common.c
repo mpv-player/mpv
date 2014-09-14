@@ -1578,7 +1578,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         vo_x11_update_window_title(vo);
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS: {
-        double fps = vo_x11_vm_get_fps(vo);
+        double fps = x11->current_display_fps;
         if (fps <= 0)
             break;
         *(double *)arg = fps;
@@ -1679,12 +1679,6 @@ static void vo_x11_selectinput_witherr(struct vo *vo,
             XSelectInput(display, w, event_mask & ~bad);
         }
     }
-}
-
-double vo_x11_vm_get_fps(struct vo *vo)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    return x11->current_display_fps;
 }
 
 bool vo_x11_screen_is_composited(struct vo *vo)

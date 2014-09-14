@@ -120,6 +120,4 @@ void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
 
-double vo_x11_vm_get_fps(struct vo *vo);
-
 #endif /* MPLAYER_X11_COMMON_H */
