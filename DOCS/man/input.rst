@@ -268,7 +268,7 @@ List of Input Commands
     the current track. (Works on external subtitle files only.)
 
 ``sub_reload [<id>]``
-    Reload the given subtitle tracks. If the ``id`` argument is missing, remove
+    Reload the given subtitle tracks. If the ``id`` argument is missing, reload
     the current track. (Works on external subtitle files only.)
 
     This works by unloading and re-adding the subtitle track.
