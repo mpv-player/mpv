@@ -891,8 +891,10 @@ static int script_get_screen_size(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
     struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_EXTERNAL);
-    double aspect = 1.0 * vo_res.w / MPMAX(vo_res.h, 1) /
-                    vo_res.display_par;
+    double aspect = vo_res.display_par
+                        ? 1.0 * vo_res.w / MPMAX(vo_res.h, 1) /
+                          vo_res.display_par
+                        : 0.;
     lua_pushnumber(L, vo_res.w);
     lua_pushnumber(L, vo_res.h);
     lua_pushnumber(L, aspect);
@@ -978,10 +980,10 @@ static int script_input_set_section_mouse_area(lua_State *L)
     osd_object_get_scale_factor(mpctx->osd, OSDTYPE_EXTERNAL, &sw, &sh);
 
     char *section = (char *)luaL_checkstring(L, 1);
-    int x0 = luaL_checkinteger(L, 2) / sw;
-    int y0 = luaL_checkinteger(L, 3) / sh;
-    int x1 = luaL_checkinteger(L, 4) / sw;
-    int y1 = luaL_checkinteger(L, 5) / sh;
+    int x0 = sw ? luaL_checkinteger(L, 2) / sw : 0;
+    int y0 = sh ? luaL_checkinteger(L, 3) / sh : 0;
+    int x1 = sw ? luaL_checkinteger(L, 4) / sw : 0;
+    int y1 = sh ? luaL_checkinteger(L, 5) / sh : 0;
     mp_input_set_section_mouse_area(mpctx->input, section, x0, y0, x1, y1);
     return 0;
 }
