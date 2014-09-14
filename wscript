@@ -104,6 +104,11 @@ main_dependencies = [
         'desc': 'mman.h',
         'func': check_statement('sys/mman.h', 'mmap(0, 0, 0, 0, 0, 0)')
     }, {
+        'name': 'mingw',
+        'desc': 'MinGW',
+        'deps': [ 'os-win32' ],
+        'func': check_statement('stddef.h', 'int x = __MINGW32__')
+    }, {
         'name': 'pthreads',
         'desc': 'POSIX threads',
         'func': check_pthreads,
@@ -159,6 +164,12 @@ iconv support use --disable-iconv.",
         'desc': 'w32 priority API',
         'deps_any': [ 'os-win32', 'os-cygwin'],
         'func': check_true
+    }, {
+        'name': '--waio',
+        'desc': 'libwaio for win32',
+        'deps': [ 'os-win32', 'mingw' ],
+        'func': check_libs(['waio'],
+                    check_statement('waio/waio.h', 'waio_alloc(0, 0, 0, 0)')),
     }, {
         'name': 'videoio',
         'desc': 'videoio.h',

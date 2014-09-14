@@ -176,7 +176,7 @@ SOURCES = audio/audio.c \
           input/event.c \
           input/input.c \
           input/keycodes.c \
-          input/pipe.c \
+          input/pipe-unix.c \
           misc/bstr.c \
           misc/charset_conv.c \
           misc/dispatch.c \

@@ -91,34 +91,38 @@ struct mp_input_src {
 
     struct mp_input_src_internal *in;
 
-    // If not-NULL: called before destroying the input_src. Should close the
-    // underlying device, and free all memory.
-    void (*close)(struct mp_input_src *src);
+    // If not-NULL: called before destroying the input_src. Should unblock the
+    // reader loop, and make it exit. (Use with mp_input_add_thread_src().)
+    void (*cancel)(struct mp_input_src *src);
+    // Called after the reader thread returns, and cancel() won't be called
+    // again. This should make sure that nothing after this call accesses src.
+    void (*uninit)(struct mp_input_src *src);
 
     // For free use by the implementer.
     void *priv;
 };
 
-/* Add a new input source. The input code can create a new thread, which feeds
- * keys or commands to input_ctx. mp_input_src.close must be set.
- */
+// Add a new input source. The input code can create a new thread, which feeds
+// keys or commands to input_ctx. mp_input_src.uninit must be set.
+// mp_input_src_kill() must not be called by anything after init.
 struct mp_input_src *mp_input_add_src(struct input_ctx *ictx);
 
 // Add an input source that runs on a thread. The source is automatically
 // removed if the thread loop exits.
 //  ctx: this is passed to loop_fn.
 //  loop_fn: this is called once inside of a new thread, and should not return
-//      until all input is read, or src->close is called by another thread.
+//      until all input is read, or src->cancel is called by another thread.
 //      You must call mp_input_src_init_done(src) early during init to signal
-//      success (then src->close may be called at a later point); on failure,
+//      success (then src->cancel may be called at a later point); on failure,
 //      return from loop_fn immediately.
 // Returns >=0 on success, <0 on failure to allocate resources.
-// Do not set src->close after mp_input_src_init_done() has been called.
+// Do not set src->cancel after mp_input_src_init_done() has been called.
 int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
     void (*loop_fn)(struct mp_input_src *src, void *ctx));
 
 // Signal successful init.
 // Must be called on the same thread as loop_fn (see mp_input_add_thread_src()).
+// Set src->cancel and src->uninit (if needed) before calling this.
 void mp_input_src_init_done(struct mp_input_src *src);
 
 // Currently only with mp_input_add_thread_src().
@@ -241,7 +245,7 @@ bool mp_input_use_alt_gr(struct input_ctx *ictx);
 void mp_input_run_cmd(struct input_ctx *ictx, int def_flags, const char **cmd,
                       const char *location);
 
-void mp_input_add_pipe(struct input_ctx *ictx, const char *filename);
+void mp_input_pipe_add(struct input_ctx *ictx, const char *filename);
 void mp_input_joystick_add(struct input_ctx *ictx, char *dev);
 void mp_input_lirc_add(struct input_ctx *ictx, char *lirc_configfile);
 

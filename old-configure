@@ -961,6 +961,7 @@ cat > $TMPC << EOF
 #define HAVE_SYS_MMAN_H 1
 #define HAVE_NANOSLEEP 1
 #define HAVE_SDL1 0
+#define HAVE_WAIO 0
 
 #define DEFAULT_CDROM_DEVICE "/dev/cdrom"
 #define DEFAULT_DVD_DEVICE   "/dev/dvd"

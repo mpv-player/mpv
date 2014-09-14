@@ -1273,8 +1273,13 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
 
     ictx->win_drag = global->opts->allow_win_drag;
 
-    if (input_conf->in_file && input_conf->in_file[0])
-        mp_input_add_pipe(ictx, input_conf->in_file);
+    if (input_conf->in_file && input_conf->in_file[0]) {
+#if !defined(__MINGW32__) || HAVE_WAIO
+        mp_input_pipe_add(ictx, input_conf->in_file);
+#else
+        MP_ERR(ictx, "Pipes not available.\n");
+#endif
+    }
 
     return ictx;
 }
@@ -1399,10 +1404,12 @@ void mp_input_src_kill(struct mp_input_src *src)
             MP_TARRAY_REMOVE_AT(ictx->sources, ictx->num_sources, n);
             input_unlock(ictx);
             write(src->in->wakeup[1], &(char){0}, 1);
-            if (src->close)
-                src->close(src);
+            if (src->cancel)
+                src->cancel(src);
             if (src->in->thread_running)
                 pthread_join(src->in->thread, NULL);
+            if (src->uninit)
+                src->uninit(src);
             talloc_free(src);
             return;
         }

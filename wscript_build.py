@@ -190,7 +190,8 @@ def build(ctx):
         ( "input/event.c" ),
         ( "input/input.c" ),
         ( "input/keycodes.c" ),
-        ( "input/pipe.c" ),
+        ( "input/pipe-unix.c",                   "!mingw" ),
+        ( "input/pipe-win32.c",                  "waio" ),
         ( "input/joystick.c",                    "joystick" ),
         ( "input/lirc.c",                        "lirc" ),
 

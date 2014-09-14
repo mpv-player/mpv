@@ -26,6 +26,15 @@ created scripts to help ease the process. These are the two recommended methods:
 Note that MinGW environments included in Linux distributions are often broken,
 outdated and useless, and usually don't use MinGW-w64.
 
+Additional dependencies
+-----------------------
+
+You need a pthread wrapper. It must be interoperable with native Windows
+threads. pthreads-win32 or MinGW pthreads might work.
+
+If you want ``--input-file=...`` to work, you need libwaio. It's available
+from: git://midipix.org/waio
+
 Example with MXE
 ----------------
 
