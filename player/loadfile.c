@@ -1330,9 +1330,9 @@ terminate_playback:
     mpctx->resolve_result = NULL;
 
     if (mpctx->playing && mpctx->stop_play == AT_END_OF_FILE) {
-        // Played/paused for longer than 3 seconds -> ok
+        // Played/paused for longer than 1 second -> ok
         mpctx->playing->playback_short =
-            playback_start < 0 || mp_time_sec() - playback_start < 3.0;
+            playback_start < 0 || mp_time_sec() - playback_start < 1.0;
         mpctx->playing->init_failed =
             mpctx->shown_aframes == 0 && mpctx->shown_vframes == 0;
     }
