@@ -500,7 +500,7 @@ static void reset(struct ao *ao)
     }
 }
 
-// return: how many bytes can be played without blocking
+// return: how many samples can be played without blocking
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -525,9 +525,9 @@ static void audio_pause(struct ao *ao)
 #endif
 }
 
-// plays 'len' bytes of 'data'
+// plays 'len' samples of 'data'
 // it should round it down to outburst*n
-// return: number of bytes played
+// return: number of samples played
 static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
