@@ -27,6 +27,8 @@
 #include "osdep/macosx_compat.h"
 #import "osdep/macosx_events_objc.h"
 
+#include "build/version.h"
+
 #define MPV_PROTOCOL @"mpv://"
 
 static pthread_t playback_thread_id;
@@ -221,16 +223,7 @@ Application *mpv_shared_app(void)
 
         l_fr = NSMakeRect(0, l_fr.origin.y - 30, w_fr.size.width, 24);
         NSTextField* versionLabel = [[NSTextField alloc] initWithFrame:l_fr];
-        // Won't work if launched from cmd line, which make sense btw
-        // and if you use cmd line just run `mpv --version` anyway
-        NSString* version = [[NSBundle mainBundle] objectForInfoDictionaryKey:
-                                @"CFBundleShortVersionString"];
-        if (version) {
-            NSString* s = [NSString stringWithFormat:@"Version %@", version];
-            [versionLabel setStringValue:s];
-        }
-        else
-            [versionLabel setStringValue:@"run `mpv --version`"];
+        [versionLabel setStringValue:[NSString stringWithFormat:@"%s (%s)", VERSION, BUILDDATE]];
         [versionLabel setBezeled:NO];
         [versionLabel setDrawsBackground:NO];
         [versionLabel setEditable:NO];
