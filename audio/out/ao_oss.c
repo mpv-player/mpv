@@ -472,7 +472,6 @@ static void close_device(struct ao *ao)
 static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    int oss_format;
 #if KEEP_DEVICE
     ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
 #else
@@ -487,9 +486,8 @@ static void reset(struct ao *ao)
 #if defined(FD_CLOEXEC) && defined(F_SETFD)
     fcntl(p->audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
-#endif
 
-    oss_format = format2oss(ao->format);
+    int oss_format = format2oss(ao->format);
     if (AF_FORMAT_IS_AC3(ao->format))
         ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &ao->samplerate);
     ioctl(p->audio_fd, SNDCTL_DSP_SETFMT, &oss_format);
@@ -503,6 +501,7 @@ static void reset(struct ao *ao)
         }
         ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &ao->samplerate);
     }
+#endif
 }
 
 // return: how many samples can be played without blocking
