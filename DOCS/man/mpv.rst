@@ -73,7 +73,7 @@ p / SPACE
     Step backward. Pressing once will pause, every consecutive press will
     play one frame in reverse and then go into pause mode again.
 
-q / ESC
+q
     Stop playing and quit.
 
 Q
@@ -97,6 +97,9 @@ m
 
 f
     Toggle fullscreen (see also ``--fs``).
+
+ESC
+    Exit fullscreen mode.
 
 T
     Toggle stay-on-top (see also ``--ontop``).
