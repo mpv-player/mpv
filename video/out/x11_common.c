@@ -925,6 +925,7 @@ int vo_x11_check_events(struct vo *vo)
             if (x11->window_hidden)
                 vo_x11_clearwindow(vo, x11->window);
             x11->window_hidden = false;
+            x11->pseudo_mapped = true;
             vo_x11_update_geometry(vo);
             break;
         case DestroyNotify:
@@ -940,6 +941,13 @@ int vo_x11_check_events(struct vo *vo)
             break;
         case SelectionNotify:
             vo_x11_dnd_handle_selection(vo, &Event.xselection);
+            break;
+        case PropertyNotify:
+            if (Event.xproperty.atom == x11->atom_frame_exts) {
+                if (!x11->pseudo_mapped)
+                    MP_VERBOSE(x11, "not waiting for MapNotify\n");
+                x11->pseudo_mapped = true;
+            }
             break;
         default:
             if (Event.type == x11->ShmCompletionEvent) {
@@ -1212,6 +1220,8 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
     vo_x11_set_wm_icon(x11);
     vo_x11_update_window_title(vo);
     vo_x11_dnd_init_window(vo);
+
+    x11->atom_frame_exts = XA(x11, _NET_FRAME_EXTENTS);
 }
 
 static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
@@ -1244,7 +1254,7 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     }
 
     // map window
-    int events = StructureNotifyMask | ExposureMask;
+    int events = StructureNotifyMask | ExposureMask | PropertyChangeMask;
     if (vo->opts->WinID > 0) {
         XWindowAttributes attribs;
         if (XGetWindowAttributes(x11->display, vo->opts->WinID, &attribs))
@@ -1285,7 +1295,9 @@ static void vo_x11_highlevel_resize(struct vo *vo, struct mp_rect rc)
 static void wait_until_mapped(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
-    while (x11->window_hidden && x11->window) {
+    if (!x11->pseudo_mapped)
+        x11_send_ewmh_msg(x11, "_NET_REQUEST_FRAME_EXTENTS", (long[5]){0});
+    while (!x11->pseudo_mapped && x11->window) {
         XEvent unused;
         XPeekEvent(x11->display, &unused);
         vo_x11_check_events(vo);

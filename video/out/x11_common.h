@@ -65,7 +65,8 @@ struct vo_x11_state {
     Colormap colormap;
 
     int wm_type;
-    bool window_hidden;
+    bool window_hidden; // the window was mapped at least once
+    bool pseudo_mapped; // not necessarily mapped, but known window size
     int fs;     // whether we assume the window is in fullscreen mode
 
     bool mouse_cursor_hidden;
@@ -105,6 +106,8 @@ struct vo_x11_state {
     Atom dnd_property;
     Atom dnd_requested_format;
     Window dnd_src_window;
+
+    Atom atom_frame_exts;
 
     /* dragging the window */
     bool win_drag_button1_down;
