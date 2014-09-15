@@ -62,7 +62,6 @@ struct priv {
     int audio_fd;
     int prepause_space;
     int oss_mixer_channel;
-    audio_buf_info zz;
     int audio_delay_method;
     int buffersize;
     int outburst;
@@ -368,7 +367,8 @@ ac3_retry:
         MP_VERBOSE(ao, "using %d Hz samplerate\n", samplerate);
     }
 
-    if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &p->zz) == -1) {
+    audio_buf_info zz = {0};
+    if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &zz) == -1) {
         int r = 0;
         MP_WARN(ao, "driver doesn't support SNDCTL_DSP_GETOSPACE\n");
         if (ioctl(p->audio_fd, SNDCTL_DSP_GETBLKSIZE, &r) == -1)
@@ -379,9 +379,9 @@ ac3_retry:
         }
     } else {
         MP_VERBOSE(ao, "frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
-                   p->zz.fragments, p->zz.fragstotal, p->zz.fragsize, p->zz.bytes);
-        p->buffersize = p->zz.bytes;
-        p->outburst = p->zz.fragsize;
+                   zz.fragments, zz.fragstotal, zz.fragsize, zz.bytes);
+        p->buffersize = zz.bytes;
+        p->outburst = zz.fragsize;
     }
 
     if (allow_format_changes) {
@@ -513,9 +513,10 @@ static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &p->zz) != -1) {
+    audio_buf_info zz = {0};
+    if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &zz) != -1) {
         // calculate exact buffer space:
-        return p->zz.fragments * p->zz.fragsize / ao->sstride;
+        return zz.fragments * zz.fragsize / ao->sstride;
     }
 
     return device_writable(ao) > 0 ? p->outburst / ao->sstride : 0;
@@ -576,10 +577,9 @@ static float get_delay(struct ao *ao)
         p->audio_delay_method = 1; // fallback if not supported
     }
     if (p->audio_delay_method == 1) {
-        // SNDCTL_DSP_GETOSPACE
-        if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &p->zz) != -1) {
-            return ((float)(p->buffersize -
-                            p->zz.bytes)) / (float)ao->bps;
+        audio_buf_info zz = {0};
+        if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &zz) != -1) {
+            return ((float)(p->buffersize - zz.bytes)) / (float)ao->bps;
         }
         p->audio_delay_method = 0; // fallback if not supported
     }
