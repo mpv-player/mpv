@@ -39,6 +39,7 @@
 #include "config.h"
 #include "options/options.h"
 #include "common/msg.h"
+#include "osdep/timer.h"
 
 #if HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
@@ -60,11 +61,13 @@
 
 struct priv {
     int audio_fd;
-    int prepause_space;
+    int prepause_samples;
     int oss_mixer_channel;
     int audio_delay_method;
     int buffersize;
     int outburst;
+    bool device_failed;
+    double audio_end;
 
     char *dsp;
     char *oss_mixer_device;
@@ -235,6 +238,7 @@ static int device_writable(struct ao *ao)
 static void close_device(struct ao *ao)
 {
     struct priv *p = ao->priv;
+    p->device_failed = false;
     if (p->audio_fd == -1)
         return;
 #if defined(SNDCTL_DSP_RESET)
@@ -501,10 +505,6 @@ static void reset(struct ao *ao)
     ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
 #else
     close_device(ao);
-    if (reopen_device(ao, false) < 0) {
-        MP_ERR(ao, "Fatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE ***\n");
-        return;
-    }
 #endif
 }
 
@@ -519,19 +519,10 @@ static int get_space(struct ao *ao)
         return zz.fragments * zz.fragsize / ao->sstride;
     }
 
-    return device_writable(ao) > 0 ? p->outburst / ao->sstride : 0;
-}
+    if (p->audio_fd < 0 || device_writable(ao) > 0)
+        return p->outburst / ao->sstride;
 
-// stop playing, keep buffers (for pause)
-static void audio_pause(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-    p->prepause_space = get_space(ao) * ao->sstride;
-#if KEEP_DEVICE
-    ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
-#else
-    close_device(ao);
-#endif
+    return 0;
 }
 
 // plays 'len' samples of 'data'
@@ -543,6 +534,19 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     int len = samples * ao->sstride;
     if (len == 0)
         return len;
+
+    if (p->audio_fd < 0 && !p->device_failed && reopen_device(ao, false) < 0)
+        MP_ERR(ao, "Fatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE ***\n");
+    if (p->audio_fd < 0) {
+        // Let playback continue normally, even with a closed device.
+        p->device_failed = true;
+        double now = mp_time_sec();
+        if (p->audio_end < now)
+            p->audio_end = now;
+        p->audio_end += samples / (double)ao->samplerate;
+        return samples;
+    }
+
     if (len > p->outburst || !(flags & AOPLAY_FINAL_CHUNK)) {
         len /= p->outburst;
         len *= p->outburst;
@@ -555,18 +559,21 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 static void audio_resume(struct ao *ao)
 {
     struct priv *p = ao->priv;
-#if !KEEP_DEVICE
-    reset(ao);
-#endif
-    int fillframes = get_space(ao) - p->prepause_space / ao->sstride;
-    if (fillframes > 0)
-        ao_play_silence(ao, fillframes);
+    p->audio_end = 0;
+    if (p->prepause_samples > 0)
+        ao_play_silence(ao, p->prepause_samples);
 }
 
 // return: delay in seconds between first and last sample in buffer
 static float get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
+    if (p->audio_fd < 0) {
+        double rest = p->audio_end - mp_time_sec();
+        if (rest > 0)
+            return rest;
+        return 0;
+    }
     /* Calculate how many bytes/second is sent out */
     if (p->audio_delay_method == 2) {
 #ifdef SNDCTL_DSP_GETODELAY
@@ -584,6 +591,18 @@ static float get_delay(struct ao *ao)
         p->audio_delay_method = 0; // fallback if not supported
     }
     return ((float)p->buffersize) / (float)ao->bps;
+}
+
+// stop playing, keep buffers (for pause)
+static void audio_pause(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    p->prepause_samples = get_delay(ao) * ao->samplerate;
+#if KEEP_DEVICE
+    ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
+#else
+    close_device(ao);
+#endif
 }
 
 #define OPT_BASE_STRUCT struct priv
