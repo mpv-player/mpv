@@ -1040,13 +1040,17 @@ Property list
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling
     have been applied. The actual video window size can still be different
-    from this.
+    from this, e.g. if the user resized the video window manually.
+
+    These have the same values as ``video-out-params/dw`` and
+    ``video-out-params/dh``.
 
 ``video-out-params``
     Same as ``video-params``, but after video filters have been applied. If
     there are no video filters in use, this will contain the same values as
     ``video-params``. Note that this is still not necessarily what the video
-    window uses, since all real VOs do their own scaling.
+    window uses, since the user can change the window size, and all real VOs
+    do their own scaling independently from the filter chain.
 
     Has the same sub-properties as ``video-params``.
 
