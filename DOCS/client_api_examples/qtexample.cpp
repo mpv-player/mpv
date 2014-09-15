@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mpv_container = new QWidget(this);
     setCentralWidget(mpv_container);
     mpv_container->setAttribute(Qt::WA_NativeWindow);
+    // If you have a HWND, use: int64_t wid = (intptr_t)hwnd;
     int64_t wid = mpv_container->winId();
     mpv_set_option(mpv, "wid", MPV_FORMAT_INT64, &wid);
 
@@ -81,6 +82,26 @@ void MainWindow::handle_mpv_event(mpv_event *event)
                 // was stopped.
                 statusBar()->showMessage("");
             }
+        }
+        break;
+    }
+    case MPV_EVENT_VIDEO_RECONFIG: {
+        // Retrieve the new video size.
+        int64_t w, h;
+        if (mpv_get_property(mpv, "dwidth", MPV_FORMAT_INT64, &w) >= 0 &&
+            mpv_get_property(mpv, "dheight", MPV_FORMAT_INT64, &h) >= 0 &&
+            w > 0 && h > 0)
+        {
+            // Force Qt to resize the mpv window to video size. You probably
+            // want to do something more sophisticated here, because:
+            // A) it prevents the user from making the window smaller for no
+            //    reason (I was unsure how to make Qt do the right thing)
+            // B) the MPV_EVENT_VIDEO_RECONFIG event doesn't necessarily imply
+            //    a resize, and you should check yourself if the video
+            //    dimensions really changed
+            // mpv itself will scale/letter box the video to the container size
+            // if the video doesn't fit.
+            mpv_container->setMinimumSize(w, h);
         }
         break;
     }
