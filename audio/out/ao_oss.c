@@ -53,6 +53,11 @@
 #include "ao.h"
 #include "internal.h"
 
+// Define to 0 if the device must be reopened to reset it (stop all playback,
+// clear the buffer), and the device should be closed when unused.
+// Define to 1 if SNDCTL_DSP_RESET should be used to reset without close.
+#define KEEP_DEVICE (defined(SNDCTL_DSP_RESET) && !defined(__NetBSD__))
+
 struct priv {
     int audio_fd;
     int prepause_space;
@@ -234,7 +239,7 @@ static void uninit(struct ao *ao)
     struct priv *p = ao->priv;
     if (p->audio_fd == -1)
         return;
-#ifdef SNDCTL_DSP_RESET
+#if defined(SNDCTL_DSP_RESET)
     ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
 #endif
     close(p->audio_fd);
@@ -454,7 +459,7 @@ static void drain(struct ao *ao)
 #endif
 }
 
-#ifndef SNDCTL_DSP_RESET
+#if !KEEP_DEVICE
 static void close_device(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -468,7 +473,7 @@ static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int oss_format;
-#ifdef SNDCTL_DSP_RESET
+#if KEEP_DEVICE
     ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
 #else
     close_device(ao);
@@ -518,7 +523,7 @@ static void audio_pause(struct ao *ao)
 {
     struct priv *p = ao->priv;
     p->prepause_space = get_space(ao) * ao->sstride;
-#ifdef SNDCTL_DSP_RESET
+#if KEEP_DEVICE
     ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
 #else
     close_device(ao);
@@ -546,7 +551,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 static void audio_resume(struct ao *ao)
 {
     struct priv *p = ao->priv;
-#ifndef SNDCTL_DSP_RESET
+#if !KEEP_DEVICE
     reset(ao);
 #endif
     int fillframes = get_space(ao) - p->prepause_space / ao->sstride;
