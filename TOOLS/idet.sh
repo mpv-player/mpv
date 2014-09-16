@@ -1,14 +1,5 @@
 #!/bin/sh
 
-case "$0" in
-    */*)
-        MYDIR=${0%/*}
-        ;;
-    *)
-        MYDIR=.
-        ;;
-esac
-
 : ${MPV:=mpv}
 : ${ILDETECT_MPV:=$MPV}
 : ${ILDETECT_MPV:=$MPV}
