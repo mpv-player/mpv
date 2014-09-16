@@ -297,8 +297,21 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     FILE *file = fopen(conffile, "wb");
     if (!file)
         goto exit;
-    if (mpctx->opts->write_filename_in_watch_later_config)
-        fprintf(file, "# %s\n", mpctx->filename);
+    if (mpctx->opts->write_filename_in_watch_later_config) {
+        // Care about multiline filenames.
+        const char *rest = mpctx->filename;
+        while (1) {
+            const char *next_break = strchr(rest, '\n');
+            if (!next_break)
+                next_break = rest + strlen(rest);
+            fprintf(file, "# ");
+            fwrite(rest, 1, (size_t)(next_break - rest), file);
+            fprintf(file, "\n");
+            if (!*next_break)
+                break;
+            rest = next_break + 1;
+        }
+    }
     fprintf(file, "start=%f\n", pos);
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];
