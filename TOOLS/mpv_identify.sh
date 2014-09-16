@@ -123,7 +123,7 @@ __midentify__main() {
                     if [ "$fileindex" -gt 0 ]; then
                         nextprefix="${prefix%${fileindex}_}"
                     fi
-                    fileindex="$(($fileindex+1))"
+                    fileindex="$((fileindex+1))"
                     nextprefix="${nextprefix}${fileindex}_"
                     for key in $allprops; do
                         key="$(printf '%s\n' "$key" | tr - _)"
@@ -133,7 +133,7 @@ __midentify__main() {
                     if [ "$fileindex" -gt 0 ]; then
                         echo
                     fi
-                    fileindex="$(($fileindex+1))"
+                    fileindex="$((fileindex+1))"
                 fi
                 ;;
             X-MIDENTIFY:\ *)
