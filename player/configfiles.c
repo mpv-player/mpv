@@ -287,8 +287,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
 
     mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
 
-    conffile = mp_get_playback_resume_config_filename(mpctx->global,
-                                                      mpctx->filename);
+    conffile = mp_get_playback_resume_config_filename(mpctx->global, filename);
     if (!conffile)
         goto exit;
 
@@ -297,8 +296,12 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     FILE *file = fopen(conffile, "wb");
     if (!file)
         goto exit;
-    if (mpctx->opts->write_filename_in_watch_later_config)
-        fprintf(file, "# %s\n", mpctx->filename);
+    if (mpctx->opts->write_filename_in_watch_later_config) {
+        char write_name[1024] = {0};
+        for (int n = 0; filename[n] && n < sizeof(write_name) - 1; n++)
+            write_name[n] = (unsigned char)filename[n] < 32 ? '_' : filename[n];
+        fprintf(file, "# %s\n", write_name);
+    }
     fprintf(file, "start=%f\n", pos);
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];
