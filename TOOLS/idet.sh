@@ -1,14 +1,14 @@
 #!/bin/sh
 
-: ${MPV:=mpv}
-: ${ILDETECT_MPV:=$MPV}
-: ${ILDETECT_MPV:=$MPV}
-: ${ILDETECT_MPVFLAGS:=--start=35% --length=35}
-: ${ILDETECT_DRY_RUN:=}
-: ${ILDETECT_QUIET:=}
-: ${ILDETECT_RUN_INTERLACED_ONLY:=}
-: ${ILDETECT_FORCE_RUN:=}
-: ${MAKE:=make}
+: "${MPV:=mpv}"
+: "${ILDETECT_MPV:=$MPV}"
+: "${ILDETECT_MPV:=$MPV}"
+: "${ILDETECT_MPVFLAGS:=--start=35% --length=35}"
+: "${ILDETECT_DRY_RUN:=}"
+: "${ILDETECT_QUIET:=}"
+: "${ILDETECT_RUN_INTERLACED_ONLY:=}"
+: "${ILDETECT_FORCE_RUN:=}"
+: "${MAKE:=make}"
 
 # exit status:
 # 0 progressive
@@ -47,22 +47,22 @@ judge()
     interlaced=$((bff + tff))
     determined=$((interlaced + progressive))
 
-    if [ $undetermined -gt $determined ] || [ $determined -lt 250 ]; then
+    if [ "$undetermined" -gt "$determined" ] || [ "$determined" -lt 250 ]; then
         echo >&2 "ERROR: Less than 50% or 250 frames are determined."
         [ -n "$ILDETECT_FORCE_RUN" ] || exit 8
         echo >&2 "Assuming interlacing."
-        if [ $tff -gt $((bff * 10)) ]; then
+        if [ "$tff" -gt $((bff * 10)) ]; then
             verdict=interlaced-tff
-        elif [ $bff -gt $((tff * 10)) ]; then
+        elif [ "$bff" -gt $((tff * 10)) ]; then
             verdict=interlaced-bff
         else
             verdict=interlaced
         fi
-    elif [ $((interlaced * 20)) -gt $progressive ]; then
+    elif [ $((interlaced * 20)) -gt "$progressive" ]; then
         # At least 5% of the frames are interlaced!
-        if [ $tff -gt $((bff * 10)) ]; then
+        if [ "$tff" -gt $((bff * 10)) ]; then
             verdict=interlaced-tff
-        elif [ $bff -gt $((tff * 10)) ]; then
+        elif [ "$bff" -gt $((tff * 10)) ]; then
             verdict=interlaced-bff
         else
             echo >&2 "ERROR: Content is interlaced, but can't determine field order."
