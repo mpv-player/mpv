@@ -352,7 +352,7 @@ static int mp_property_length(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     double len;
 
-    if (!(int) (len = get_time_length(mpctx)))
+    if ((len = get_time_length(mpctx)) <= 0)
         return M_PROPERTY_UNAVAILABLE;
 
     return property_time(action, arg, len);
