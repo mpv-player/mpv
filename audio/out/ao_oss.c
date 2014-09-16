@@ -508,23 +508,6 @@ static void reset(struct ao *ao)
 #endif
 }
 
-// return: how many samples can be played without blocking
-static int get_space(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-
-    audio_buf_info zz = {0};
-    if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &zz) != -1) {
-        // calculate exact buffer space:
-        return zz.fragments * zz.fragsize / ao->sstride;
-    }
-
-    if (p->audio_fd < 0 || device_writable(ao) > 0)
-        return p->outburst / ao->sstride;
-
-    return 0;
-}
-
 // plays 'len' samples of 'data'
 // it should round it down to outburst*n
 // return: number of samples played
@@ -553,15 +536,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     }
     len = write(p->audio_fd, data[0], len);
     return len / ao->sstride;
-}
-
-// resume playing, after audio_pause()
-static void audio_resume(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-    p->audio_end = 0;
-    if (p->prepause_samples > 0)
-        ao_play_silence(ao, p->prepause_samples);
 }
 
 // return: delay in seconds between first and last sample in buffer
@@ -593,6 +567,24 @@ static float get_delay(struct ao *ao)
     return ((float)p->buffersize) / (float)ao->bps;
 }
 
+
+// return: how many samples can be played without blocking
+static int get_space(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    audio_buf_info zz = {0};
+    if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &zz) != -1) {
+        // calculate exact buffer space:
+        return zz.fragments * zz.fragsize / ao->sstride;
+    }
+
+    if (p->audio_fd < 0 || device_writable(ao) > 0)
+        return p->outburst / ao->sstride;
+
+    return 0;
+}
+
 // stop playing, keep buffers (for pause)
 static void audio_pause(struct ao *ao)
 {
@@ -603,6 +595,15 @@ static void audio_pause(struct ao *ao)
 #else
     close_device(ao);
 #endif
+}
+
+// resume playing, after audio_pause()
+static void audio_resume(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    p->audio_end = 0;
+    if (p->prepause_samples > 0)
+        ao_play_silence(ao, p->prepause_samples);
 }
 
 #define OPT_BASE_STRUCT struct priv
