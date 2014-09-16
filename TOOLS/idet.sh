@@ -30,7 +30,7 @@ testfun()
 
 judge()
 {
-    out=`testfun "$@"`
+    out="$(testfun "$@")"
 
     tff=${out##* TFF:}; tff=${tff%% *}
     bff=${out##* BFF:}; bff=${bff%% *}
