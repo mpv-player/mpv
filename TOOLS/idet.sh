@@ -85,7 +85,7 @@ case "$verdict" in
             [ -n "$ILDETECT_RUN_INTERLACED_ONLY" ] || \
             $ILDETECT_MPV "$@"
         r=$?
-        [ $r -eq 0 ] || exit $(($r | 16))
+        [ $r -eq 0 ] || exit $((r | 16))
         exit 0
         ;;
     interlaced-tff)
@@ -95,14 +95,14 @@ case "$verdict" in
                 [ -n "$ILDETECT_DRY_RUN" ] || \
                     $ILDETECT_MPV "$@" --vf-pre=pullup --field-dominance=top
                 r=$?
-                [ $r -eq 0 ] || exit $(($r | 16))
+                [ $r -eq 0 ] || exit $((r | 16))
                 exit 1
                 ;;
             *)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
                     $ILDETECT_MPV "$@" --vf-pre=yadif --field-dominance=top
                 r=$?
-                [ $r -eq 0 ] || exit $(($r | 16))
+                [ $r -eq 0 ] || exit $((r | 16))
                 exit 2
                 ;;
         esac
@@ -114,14 +114,14 @@ case "$verdict" in
                 [ -n "$ILDETECT_DRY_RUN" ] || \
                     $ILDETECT_MPV "$@" --vf-pre=pullup --field-dominance=bottom
                 r=$?
-                [ $r -eq 0 ] || exit $(($r | 16))
+                [ $r -eq 0 ] || exit $((r | 16))
                 exit 1
                 ;;
             *)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
                     $ILDETECT_MPV "$@" --vf-pre=yadif --field-dominance=bottom
                 r=$?
-                [ $r -eq 0 ] || exit $(($r | 16))
+                [ $r -eq 0 ] || exit $((r | 16))
                 exit 2
                 ;;
         esac
@@ -133,14 +133,14 @@ case "$verdict" in
                 [ -n "$ILDETECT_DRY_RUN" ] || \
                     $ILDETECT_MPV "$@" --vf-pre=pullup
                 r=$?
-                [ $r -eq 0 ] || exit $(($r | 16))
+                [ $r -eq 0 ] || exit $((r | 16))
                 exit 1
                 ;;
             *)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
                     $ILDETECT_MPV "$@" --vf-pre=yadif
                 r=$?
-                [ $r -eq 0 ] || exit $(($r | 16))
+                [ $r -eq 0 ] || exit $((r | 16))
                 exit 2
                 ;;
         esac
