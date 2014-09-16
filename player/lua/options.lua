@@ -31,11 +31,10 @@ end
 
 
 function read_options(options, identifier)
-    msg.debug("reading options for " .. identifier)
-
     if identifier == nil then
         identifier = mp.get_script_name()
     end
+    msg.debug("reading options for " .. identifier)
 
     -- read config file
     local conffilename = "lua-settings/" .. identifier .. ".conf"
