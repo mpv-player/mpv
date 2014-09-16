@@ -975,7 +975,7 @@ Audio
 
 ``--volstep=<0-100>``
     Set the step size of mixer volume changes in percent of the full range
-    (default: 3).
+    (default: 2).
 
 ``--audiodrop``
     If video is by more than 500 ms behind, insert 500 ms of silence, to make up
