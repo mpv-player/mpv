@@ -52,27 +52,27 @@ judge()
         [ -n "$ILDETECT_FORCE_RUN" ] || exit 8
         echo >&2 "Assuming interlacing."
         if [ "$tff" -gt $((bff * 10)) ]; then
-            verdict=interlaced-tff
+            verdict="interlaced-tff"
         elif [ "$bff" -gt $((tff * 10)) ]; then
-            verdict=interlaced-bff
+            verdict="interlaced-bff"
         else
-            verdict=interlaced
+            verdict="interlaced"
         fi
     elif [ $((interlaced * 20)) -gt "$progressive" ]; then
         # At least 5% of the frames are interlaced!
         if [ "$tff" -gt $((bff * 10)) ]; then
-            verdict=interlaced-tff
+            verdict="interlaced-tff"
         elif [ "$bff" -gt $((tff * 10)) ]; then
-            verdict=interlaced-bff
+            verdict="interlaced-bff"
         else
             echo >&2 "ERROR: Content is interlaced, but can't determine field order."
             [ -n "$ILDETECT_FORCE_RUN" ] || exit 8
             echo >&2 "Assuming interlacing with default field order."
-            verdict=interlaced
+            verdict="interlaced"
         fi
     else
-        # Likely progrssive.
-        verdict=progressive
+        # Likely progressive
+        verdict="progressive"
     fi
 
     echo "$verdict"
