@@ -579,6 +579,9 @@ static int get_space(struct ao *ao)
         return zz.fragments * zz.fragsize / ao->sstride;
     }
 
+    if (p->audio_fd < 0 && p->device_failed && get_delay(ao) > 0.2)
+        return 0;
+
     if (p->audio_fd < 0 || device_writable(ao) > 0)
         return p->outburst / ao->sstride;
 
