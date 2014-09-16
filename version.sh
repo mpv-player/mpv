@@ -21,18 +21,18 @@ done
 # Extract revision number from file used by daily tarball snapshots
 # or from "git describe" output
 git_revision=$(cat snapshot_version 2> /dev/null)
-test $git_revision || test ! -e .git || git_revision=`git rev-parse --short HEAD`
-test $git_revision && git_revision=git-$git_revision
+test "$git_revision" || test ! -e .git || git_revision="$(git rev-parse --short HEAD)"
+test "$git_revision" && git_revision="git-$git_revision"
 version="$git_revision"
 
 # releases extract the version number from the VERSION file
-releaseversion=$(cat VERSION 2> /dev/null)
-if test $releaseversion ; then
-    test $version && version="-$version"
+releaseversion="$(cat VERSION 2> /dev/null)"
+if test "$releaseversion" ; then
+    test "$version" && version="-$version"
     version="$releaseversion$version"
 fi
 
-test $version || version=UNKNOWN
+test "$version" || version=UNKNOWN
 
 VERSION="${version}${extra}"
 
