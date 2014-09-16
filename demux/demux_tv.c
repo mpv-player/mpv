@@ -204,26 +204,30 @@ static int demux_tv_fill_buffer(demuxer_t *demux)
     if (want_audio && tvh->tv_param->audio &&
         tvh->functions->control(tvh->priv,
                                 TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
-        {
+    {
         len = tvh->functions->get_audio_framesize(tvh->priv);
 
         dp=new_demux_packet(len);
-        dp->keyframe = true;
-        dp->pts=tvh->functions->grab_audio_frame(tvh->priv, dp->buffer,len);
-        demux_add_packet(want_audio, dp);
+        if (dp) {
+            dp->keyframe = true;
+            dp->pts=tvh->functions->grab_audio_frame(tvh->priv, dp->buffer,len);
+            demux_add_packet(want_audio, dp);
         }
+    }
 
     /* ================== ADD VIDEO PACKET =================== */
 
     if (want_video && tvh->functions->control(tvh->priv,
                             TVI_CONTROL_IS_VIDEO, 0) == TVI_CONTROL_TRUE)
-        {
-                len = tvh->functions->get_video_framesize(tvh->priv);
+    {
+        len = tvh->functions->get_video_framesize(tvh->priv);
         dp=new_demux_packet(len);
-        dp->keyframe = true;
-                dp->pts=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
-                demux_add_packet(want_video, dp);
-         }
+        if (dp) {
+            dp->keyframe = true;
+            dp->pts=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
+            demux_add_packet(want_video, dp);
+        }
+    }
 
     if (tvh->tv_param->scan) tv_scan(tvh);
     return 1;

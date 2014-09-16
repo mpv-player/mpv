@@ -227,6 +227,11 @@ static int raw_fill_buffer(demuxer_t *demuxer)
         return 0;
 
     struct demux_packet *dp = new_demux_packet(p->frame_size * p->read_frames);
+    if (!dp) {
+        MP_ERR(demuxer, "Can't read packet.\n");
+        return 1;
+    }
+
     dp->pos = stream_tell(demuxer->stream);
     dp->pts = (dp->pos  / p->frame_size) / p->frame_rate;
 

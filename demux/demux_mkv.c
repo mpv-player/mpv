@@ -1978,6 +1978,8 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
     int64_t timestamp = mkv_d->last_pts * 1000;
 
     dp = new_demux_packet_from(data.start, data.len);
+    if (!dp)
+        return;
 
     if (mkv_d->v_skip_to_keyframe) {
         dp->pts = mkv_d->last_pts;
@@ -2096,6 +2098,8 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
             for (int x = 0; x < sph * w / apk_usize; x++) {
                 dp = new_demux_packet_from(track->audio_buf + x * apk_usize,
                                            apk_usize);
+                if (!dp)
+                    goto error;
                 /* Put timestamp only on packets that correspond to original
                  * audio packets in file */
                 dp->pts = (x * apk_usize % w) ? MP_NOPTS_VALUE :
@@ -2107,6 +2111,8 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
         }
     } else { // Not a codec that requires reordering
         dp = new_demux_packet_from(buffer, size);
+        if (!dp)
+            goto error;
         if (track->ra_pts == mkv_d->last_pts && !mkv_d->a_skip_to_keyframe)
             dp->pts = MP_NOPTS_VALUE;
         else
@@ -2119,7 +2125,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
     }
     return;
 error:
-    MP_ERR(demuxer, "RealAudio decrypting error.\n");
+    MP_ERR(demuxer, "RealAudio packet extraction or decryption error.\n");
 }
 
 static void mkv_seek_reset(demuxer_t *demuxer)
@@ -2424,6 +2430,8 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 while (raw.start && mkv_parse_packet(track, &raw, &buffer)) {
                     demux_packet_t *dp =
                         new_demux_packet_from(buffer.start, buffer.len);
+                    if (!dp)
+                        break;
                     dp->keyframe = keyframe;
                     /* If default_duration is 0, assume no pts value is known
                      * for packets after the first one (rather than all pts

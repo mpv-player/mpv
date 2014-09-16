@@ -77,10 +77,12 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
         bstr data = stream_read_complete(stream, NULL, MF_MAX_FILE_SIZE);
         if (data.len) {
             demux_packet_t *dp = new_demux_packet(data.len);
-            memcpy(dp->buffer, data.start, data.len);
-            dp->pts = mf->curr_frame / mf->sh->fps;
-            dp->keyframe = true;
-            demux_add_packet(demuxer->streams[0], dp);
+            if (dp) {
+                memcpy(dp->buffer, data.start, data.len);
+                dp->pts = mf->curr_frame / mf->sh->fps;
+                dp->keyframe = true;
+                demux_add_packet(demuxer->streams[0], dp);
+            }
         }
         talloc_free(data.start);
     }

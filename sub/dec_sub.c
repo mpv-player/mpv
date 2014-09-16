@@ -400,8 +400,10 @@ static void add_sub_list(struct dec_sub *sub, int at, struct packet_list *subs)
 static void add_packet(struct packet_list *subs, struct demux_packet *pkt)
 {
     pkt = demux_copy_packet(pkt);
-    talloc_steal(subs, pkt);
-    MP_TARRAY_APPEND(subs, subs->packets, subs->num_packets, pkt);
+    if (pkt) {
+        talloc_steal(subs, pkt);
+        MP_TARRAY_APPEND(subs, subs->packets, subs->num_packets, pkt);
+    }
 }
 
 // Read all packets from the demuxer and decode/add them. Returns false if

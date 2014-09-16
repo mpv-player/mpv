@@ -37,10 +37,8 @@ static void packet_destroy(void *ptr)
 // does not allow it, but we do it to simplify new_demux_packet().
 struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
 {
-    if (avpkt->size > 1000000000) {
-        fprintf(stderr, "Attempt to allocate demux packet over 1 GB!\n");
-        abort();
-    }
+    if (avpkt->size > 1000000000)
+        return NULL;
     struct demux_packet *dp = talloc(NULL, struct demux_packet);
     talloc_set_destructor(dp, packet_destroy);
     *dp = (struct demux_packet) {
@@ -61,8 +59,9 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
         r = av_new_packet(dp->avpacket, avpkt->size);
     }
     if (r < 0) {
-        fprintf(stderr, "Out of memory when referencing packet.\n");
-        abort();
+        *dp->avpacket = (AVPacket){0};
+        talloc_free(dp);
+        return NULL;
     }
     dp->buffer = dp->avpacket->data;
     dp->len = dp->avpacket->size;
@@ -72,13 +71,16 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
 // Input data doesn't need to be padded.
 struct demux_packet *new_demux_packet_from(void *data, size_t len)
 {
+    if (len > INT_MAX)
+        return NULL;
     AVPacket pkt = { .data = data, .size = len };
     return new_demux_packet_from_avpacket(&pkt);
 }
 
 struct demux_packet *new_demux_packet(size_t len)
 {
-    assert(len <= INT_MAX);
+    if (len > INT_MAX)
+        return NULL;
     AVPacket pkt = { .data = NULL, .size = len };
     return new_demux_packet_from_avpacket(&pkt);
 }
@@ -104,6 +106,8 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
         // Some packets might be not created by new_demux_packet*().
         new = new_demux_packet_from(dp->buffer, dp->len);
     }
+    if (!new)
+        return NULL;
     new->pts = dp->pts;
     new->dts = dp->dts;
     new->duration = dp->duration;

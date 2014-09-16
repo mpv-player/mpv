@@ -479,9 +479,11 @@ static void handle_stream(demuxer_t *demuxer, int i)
         if (st->disposition & AV_DISPOSITION_ATTACHED_PIC) {
             sh->attached_picture = new_demux_packet_from(st->attached_pic.data,
                                                          st->attached_pic.size);
-            sh->attached_picture->pts = 0;
-            talloc_steal(sh, sh->attached_picture);
-            sh->attached_picture->keyframe = true;
+            if (sh->attached_picture) {
+                sh->attached_picture->pts = 0;
+                talloc_steal(sh, sh->attached_picture);
+                sh->attached_picture->keyframe = true;
+            }
         }
 
         sh->format = codec->codec_tag;
@@ -820,6 +822,10 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     }
 
     struct demux_packet *dp = new_demux_packet_from_avpacket(pkt);
+    if (!dp) {
+        av_free_packet(pkt);
+        return 1;
+    }
 
     if (pkt->pts != AV_NOPTS_VALUE)
         dp->pts = pkt->pts * av_q2d(st->time_base);
