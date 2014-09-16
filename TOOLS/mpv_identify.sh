@@ -27,18 +27,20 @@ __midentify__main() {
     esac
 
     if [ "$#" -lt 2 ]; then
-        echo >&2 "Usage 1 (for humans only): $0 filename.mkv"
-        echo >&2 "will print all property values."
-        echo >&2 "Note that this output really shouldn't be parsed, as the"
-        echo >&2 "format is subject to change."
-        echo >&2
-        echo >&2 "Usage 2 (for use by scripts): see top of this file"
-        echo >&2
-        echo >&2 "NOTE: for mkv with ordered chapters, this may"
-        echo >&2 "not always identify the specified file, but the"
-        echo >&2 "file providing the first chapter. Specify"
-        echo >&2 "--no-ordered-chapters to prevent this."
-        return 1
+        cat >&2 <<EOF
+Usage 1 (for humans only): $0 filename.mkv
+will print all property values.
+Note that this output really shouldn't be parsed, as the
+format is subject to change.
+
+Usage 2 (for use by scripts): see top of this file
+
+NOTE: for mkv with ordered chapters, this may
+not always identify the specified file, but the
+file providing the first chapter. Specify
+--no-ordered-chapters to prevent this.
+EOF
+        return 2
     fi
 
     local LF="
@@ -116,7 +118,7 @@ __midentify__main() {
                     done
                 else
                     if [ "$fileindex" -gt 0 ]; then
-                        echo
+                        printf '\n'
                     fi
                     fileindex="$((fileindex+1))"
                 fi
@@ -134,7 +136,7 @@ __midentify__main() {
                     fi
                 else
                     if [ -n "$value" ]; then
-                        echo "$key=$value"
+                        printf '%s=%s\n' "$key" "$value"
                     fi
                 fi
                 ;;

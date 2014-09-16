@@ -39,7 +39,7 @@ judge()
 
     case "$tff$bff$progressive$undetermined" in
         *[!0-9]*)
-            echo >&2 "ERROR: Unrecognized idet output: $out"
+            printf >&2 'ERROR: Unrecognized idet output: %s\n' "$out"
             exit 16
             ;;
     esac
@@ -75,7 +75,7 @@ judge()
         verdict="progressive"
     fi
 
-    echo "$verdict"
+    printf '%s\n' "$verdict"
 }
 
 judge "$@" --vf-clr
