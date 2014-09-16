@@ -74,14 +74,14 @@ int shm_buffer_resize(shm_buffer_t *buffer, uint32_t width, uint32_t height)
     uint32_t new_stride = SHM_BUFFER_STRIDE(width, buffer->bytes);
     uint32_t new_size = new_stride * height;
 
-    if (!!(buffer->flags & SHM_BUFFER_BUSY)) {
-        buffer->flags |= SHM_BUFFER_RESIZE_LATER;
+    if (SHM_BUFFER_IS_BUSY(buffer)) {
+        SHM_BUFFER_SET_PNDNG_RSZ(buffer);
         buffer->pending_width = width;
         buffer->pending_height = height;
         return SHM_BUFFER_BUSY;
     }
 
-    buffer->flags &= ~SHM_BUFFER_RESIZE_LATER;
+    SHM_BUFFER_CLEAR_PNDNG_RSZ(buffer);
 
     if (new_size > buffer->pool_size) {
         munmap(buffer->data, buffer->pool_size);
