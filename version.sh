@@ -21,7 +21,7 @@ done
 # Extract revision number from file used by daily tarball snapshots
 # or from "git describe" output
 git_revision=$(cat snapshot_version 2> /dev/null)
-test $git_revision || test ! -e .git || git_revision=`git rev-parse --short HEAD`
+test $git_revision || test ! -e .git || git_revision=$(git rev-parse --short HEAD)
 test $git_revision && git_revision=git-$git_revision
 version="$git_revision"
 
