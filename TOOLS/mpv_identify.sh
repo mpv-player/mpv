@@ -97,25 +97,10 @@ __midentify__main() {
         unset "$nextprefix$key"
     done
 
-    local output="$(${MPV:-mpv} --term-playing-msg="$propstr" --vo=null --ao=null \
-                                --frames=1 --quiet --no-cache --no-config -- "$@")"
     local fileindex=0
     local prefix=
-    while :; do
-        local line output
-        case "$output" in
-            '')
-                break
-                ;;
-            *"$LF"*)
-                line="${output%%$LF*}"
-                output="${output#*$LF}"
-                ;;
-            *)
-                line="$output"
-                output=
-                ;;
-        esac
+    local line
+    while IFS= read -r line; do
         case "$line" in
             X-MIDENTIFY-START:)
                 if [ -n "$nextprefix" ]; then
@@ -154,7 +139,10 @@ __midentify__main() {
                 fi
                 ;;
         esac
-    done
+    done <<EOF
+$(${MPV:-mpv} --term-playing-msg="$propstr" --vo=null --ao=null \
+              --frames=1 --quiet --no-cache --no-config -- "$@")
+EOF
 }
 
 __midentify__main "$@"
