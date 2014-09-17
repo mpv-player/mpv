@@ -89,8 +89,6 @@ struct vo_w32_state {
     bool disable_screensaver;
     bool cursor_visible;
     int event_flags;
-    int mon_cnt;
-    int mon_id;
 
     BOOL tracking;
     TRACKMOUSEEVENT trackEvent;
@@ -862,17 +860,29 @@ static void run_message_loop(struct vo_w32_state *w32)
         mp_dispatch_queue_process(w32->dispatch, 1000);
 }
 
-static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
+struct get_monitor_data {
+    int i;
+    int target;
+    HMONITOR mon;
+};
+
+static BOOL CALLBACK get_monitor_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
 {
-    struct vo_w32_state *w32 = (void *)p;
-    // this defaults to the last screen if specified number does not exist
-    w32->screenrc = (struct mp_rect){r->left, r->top, r->right, r->bottom};
+    struct get_monitor_data *data = (struct get_monitor_data*)p;
 
-    if (w32->mon_cnt == w32->mon_id)
+    if (data->i == data->target) {
+        data->mon = mon;
         return FALSE;
-
-    w32->mon_cnt++;
+    }
+    data->i++;
     return TRUE;
+}
+
+static HMONITOR get_monitor(int id)
+{
+    struct get_monitor_data data = { .target = id };
+    EnumDisplayMonitors(NULL, NULL, get_monitor_proc, (LPARAM)&data);
+    return data.mon;
 }
 
 static void update_screen_rect(struct vo_w32_state *w32)
@@ -880,6 +890,7 @@ static void update_screen_rect(struct vo_w32_state *w32)
     struct mp_vo_opts *opts = w32->opts;
     int screen = w32->current_fs ? opts->fsscreen_id : opts->screen_id;
 
+    // Handle --fs-screen=all
     if (w32->current_fs && screen == -2) {
         struct mp_rect rc = {
             GetSystemMetrics(SM_XVIRTUALSCREEN),
@@ -890,20 +901,29 @@ static void update_screen_rect(struct vo_w32_state *w32)
         rc.x1 += rc.x0;
         rc.y1 += rc.y0;
         w32->screenrc = rc;
-    } else if (screen == -1) {
-        MONITORINFO mi;
-        HMONITOR m = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
-        mi.cbSize = sizeof(mi);
-        GetMonitorInfoW(m, &mi);
-        w32->screenrc = (struct mp_rect){
-            mi.rcMonitor.left, mi.rcMonitor.top,
-            mi.rcMonitor.right, mi.rcMonitor.bottom,
-        };
-    } else {
-        w32->mon_cnt = 0;
-        w32->mon_id = screen;
-        EnumDisplayMonitors(NULL, NULL, mon_enum, (LONG_PTR)w32);
+        return;
     }
+
+    // When not using --fs-screen=all, mpv belongs to a specific HMONITOR
+    HMONITOR mon;
+    if (screen == -1) {
+        // Handle --fs-screen=current and --screen=default
+        mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+    } else {
+        mon = get_monitor(screen);
+        if (!mon) {
+            MP_INFO(w32, "Screen %d does not exist, falling back to primary\n",
+                    screen);
+            mon = MonitorFromPoint((POINT){0, 0}, MONITOR_DEFAULTTOPRIMARY);
+        }
+    }
+
+    MONITORINFO mi = { .cbSize = sizeof(mi) };
+    GetMonitorInfoW(mon, &mi);
+    w32->screenrc = (struct mp_rect){
+        mi.rcMonitor.left, mi.rcMonitor.top,
+        mi.rcMonitor.right, mi.rcMonitor.bottom,
+    };
 }
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
