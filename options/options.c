@@ -521,6 +521,9 @@ const m_option_t mp_opts[] = {
     OPT_STRING("osd-playing-msg", osd_playing_msg, 0),
     OPT_STRING("term-status-msg", status_msg, 0),
     OPT_STRING("osd-status-msg", osd_status_msg, 0),
+    OPT_STRING("osd-msg1", osd_msg[0], 0),
+    OPT_STRING("osd-msg2", osd_msg[1], 0),
+    OPT_STRING("osd-msg3", osd_msg[2], 0),
 
     OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),

@@ -458,23 +458,34 @@ void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size)
     osd_get_function_sym(buf, buf_size, sym);
 }
 
-static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
+static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
 {
-    bool fractions = mpctx->opts->osd_fractions;
-    char sym[10];
-    get_current_osd_sym(mpctx, sym, sizeof(sym));
-    saddf(buffer, "%s ", sym);
-    char *custom_msg = mpctx->opts->osd_status_msg;
-    if (custom_msg && full) {
-        char *text = mp_property_expand_escaped_string(mpctx, custom_msg);
+    assert(level >= 0 && level <= 3);
+    if (level == 0)
+        return;
+    char *msg = mpctx->opts->osd_msg[level - 1];
+
+    if (msg && msg[0]) {
+        char *text = mp_property_expand_escaped_string(mpctx, msg);
         *buffer = talloc_strdup_append(*buffer, text);
         talloc_free(text);
-    } else {
-        sadd_hhmmssff(buffer, get_playback_time(mpctx), fractions);
-        if (full) {
-            saddf(buffer, " / ");
-            sadd_hhmmssff(buffer, get_time_length(mpctx), fractions);
-            sadd_percentage(buffer, get_percent_pos(mpctx));
+    } else if (level >= 2) {
+        bool fractions = mpctx->opts->osd_fractions;
+        char sym[10];
+        get_current_osd_sym(mpctx, sym, sizeof(sym));
+        saddf(buffer, "%s ", sym);
+        char *custom_msg = mpctx->opts->osd_status_msg;
+        if (custom_msg && level == 3) {
+            char *text = mp_property_expand_escaped_string(mpctx, custom_msg);
+            *buffer = talloc_strdup_append(*buffer, text);
+            talloc_free(text);
+        } else {
+            sadd_hhmmssff(buffer, get_playback_time(mpctx), fractions);
+            if (level == 3) {
+                saddf(buffer, " / ");
+                sadd_hhmmssff(buffer, get_time_length(mpctx), fractions);
+                sadd_percentage(buffer, get_percent_pos(mpctx));
+            }
         }
     }
 }
@@ -547,9 +558,7 @@ void update_osd_msg(struct MPContext *mpctx)
 
     // clear, or if OSD level demands it, show the status
     char *text = NULL;
-
-    if (osd_level >= 2)
-        sadd_osd_status(&text, mpctx, osd_level == 3);
+    sadd_osd_status(&text, mpctx, osd_level);
 
     osd_set_text(osd, OSDTYPE_OSD, text);
     talloc_free(text);

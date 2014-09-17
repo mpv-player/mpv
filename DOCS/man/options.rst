@@ -2197,12 +2197,36 @@ OSD
 
     Default: 45.
 
+``--osd-msg1=<string>``
+    Show this string as message on OSD with OSD level 1 (visible by default).
+    The message will be visible by default, and as long no other message
+    covers it, and the OSD level isn't changed (see ``--osd-level``).
+    Expands properties; see `Property Expansion`_.
+
+``--osd-msg2=<string>``
+    Similar as ``--osd-msg1``, but for OSD level 2. If this is an empty string
+    (default), then the playback time is shown.
+
+``--osd-msg3=<string>``
+    Similar as ``--osd-msg1``, but for OSD level 3. If this is an empty string
+    (default), then the playback time, duration, and some more information is
+    shown.
+
+    This is also used for the ``show_progress`` command (by default mapped to
+    ``P``), or in some non-default cases when seeking.
+
+    ``--osd-status-msg`` is a legacy equivalent (but with a minor difference).
+
 ``--osd-status-msg=<string>``
     Show a custom string during playback instead of the standard status text.
     This overrides the status text used for ``--osd-level=3``, when using the
     ``show_progress`` command (by default mapped to ``P``), or in some
     non-default cases when seeking. Expands properties. See
     `Property Expansion`_.
+
+    This option has been replaced with ``--osd-msg3``. The only difference is
+    that this option implicitly includes ``${osd-sym-cc}``. This option is
+    ignored if ``--osd-msg3`` is not empty.
 
 ``--osd-playing-msg=<string>``
     Show a message on OSD when playback starts. The string is expanded for
