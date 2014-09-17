@@ -1298,8 +1298,25 @@ Property list
 
 ``osd-sym-cc``
     Inserts the current OSD symbol as opaque OSD control code (cc). This makes
-    sense with the ``show_text`` command only. The control code is
-    implementation specific and is useless for any other use.
+    sense only with the ``show_text`` command or options which set OSD messages.
+    The control code is implementation specific and is useless for anything else.
+
+``osd-ass-cc``
+    ``${osd-ass-cc/0}`` disables escaping ASS sequences of text in OSD,
+    ``${osd-ass-cc/1}`` enables it again. By default, ASS sequences are
+    escaped to avoid accidental formatting, and this property can disable
+    this behavior. Note that the properties return an opaque OSD control
+    code, which only makes sense for the ``show_text`` command or options
+    which set OSD messages.
+
+    .. admonition:: Example
+
+        --osd-status-msg='This is ${osd-ass-cc/0}{\\b1}bold text'
+
+    Any ASS override tags as understood by libass can be used.
+
+    Note that you need to escape the ``\`` character, because the string is
+    processed for C escape sequences before passing it to the OSD code.
 
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be

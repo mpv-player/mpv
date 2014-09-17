@@ -2229,6 +2229,17 @@ static int mp_property_osd_sym(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, temp);
 }
 
+static int mp_property_osd_ass(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    struct m_sub_property props[] = {
+        {"0",   SUB_PROP_STR(osd_ass_0)},
+        {"1",   SUB_PROP_STR(osd_ass_1)},
+        {0}
+    };
+    return m_property_read_sub(props, action, arg);
+}
+
 /// Video fps (RO)
 static int mp_property_fps(void *ctx, struct m_property *prop,
                            int action, void *arg)
@@ -2816,6 +2827,7 @@ static const struct m_property mp_properties[] = {
     {"osd-par", mp_property_osd_par},
 
     {"osd-sym-cc", mp_property_osd_sym},
+    {"osd-ass-cc", mp_property_osd_ass},
 
     // Subs
     {"sid", mp_property_sub},

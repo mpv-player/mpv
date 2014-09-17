@@ -6,6 +6,9 @@
 #include "talloc.h"
 #include "osd.h"
 
+const char *osd_ass_0 = "";
+const char *osd_ass_1 = "";
+
 void osd_init_backend(struct osd_state *osd)
 {
 }

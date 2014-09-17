@@ -159,8 +159,13 @@ void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
     snprintf(buffer, buffer_size, "\xFF%c", osd_function);
 }
 
+// Same trick as above: never valid UTF-8, so we expect it's free for use.
+const char *osd_ass_0 = "\xFD";
+const char *osd_ass_1 = "\xFE";
+
 static void mangle_ass(bstr *dst, const char *in)
 {
+    bool escape_ass = true;
     while (*in) {
         // As used by osd_get_function_sym().
         if (in[0] == '\xFF' && in[1]) {
@@ -170,11 +175,16 @@ static void mangle_ass(bstr *dst, const char *in)
             in += 2;
             continue;
         }
-        if (*in == '{')
+        if (*in == '\xFD' || *in == '\xFE') {
+            escape_ass = *in == '\xFE';
+            in += 1;
+            continue;
+        }
+        if (escape_ass && *in == '{')
             bstr_xappend(NULL, dst, bstr0("\\"));
         bstr_xappend(NULL, dst, (bstr){(char *)in, 1});
         // Break ASS escapes with U+2060 WORD JOINER
-        if (*in == '\\')
+        if (escape_ass && *in == '\\')
             mp_append_utf8_bstr(NULL, dst, 0x2060);
         in++;
     }
