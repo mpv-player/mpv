@@ -875,7 +875,7 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
     return TRUE;
 }
 
-static void w32_update_xinerama_info(struct vo_w32_state *w32)
+static void update_screen_rect(struct vo_w32_state *w32)
 {
     struct mp_vo_opts *opts = w32->opts;
     int screen = w32->current_fs ? opts->fsscreen_id : opts->screen_id;
@@ -887,11 +887,6 @@ static void w32_update_xinerama_info(struct vo_w32_state *w32)
             GetSystemMetrics(SM_CXVIRTUALSCREEN),
             GetSystemMetrics(SM_CYVIRTUALSCREEN),
         };
-        if (!rc.x1 || !rc.y1) {
-            rc.x0 = rc.y0 = 0;
-            rc.x1 = w32->screenrc.x1;
-            rc.y1 = w32->screenrc.y1;
-        }
         rc.x1 += rc.x0;
         rc.y1 += rc.y0;
         w32->screenrc = rc;
@@ -904,27 +899,11 @@ static void w32_update_xinerama_info(struct vo_w32_state *w32)
             mi.rcMonitor.left, mi.rcMonitor.top,
             mi.rcMonitor.right, mi.rcMonitor.bottom,
         };
-    } else if (screen >= 0) {
+    } else {
         w32->mon_cnt = 0;
         w32->mon_id = screen;
         EnumDisplayMonitors(NULL, NULL, mon_enum, (LONG_PTR)w32);
     }
-}
-
-static void updateScreenProperties(struct vo_w32_state *w32)
-{
-    DEVMODE dm;
-    dm.dmSize = sizeof dm;
-    dm.dmDriverExtra = 0;
-    dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-    if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm)) {
-        MP_ERR(w32, "unable to enumerate display settings!\n");
-        return;
-    }
-
-    w32->screenrc = (struct mp_rect){0, 0, dm.dmPelsWidth, dm.dmPelsHeight};
-    w32_update_xinerama_info(w32);
 }
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
@@ -960,7 +939,7 @@ static void reinit_window_state(struct vo_w32_state *w32)
         layer = HWND_TOPMOST;
 
     // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
-    updateScreenProperties(w32);
+    update_screen_rect(w32);
 
     int screen_w = w32->screenrc.x1 - w32->screenrc.x0;
     int screen_h = w32->screenrc.y1 - w32->screenrc.y0;
@@ -1192,7 +1171,7 @@ static void *gui_thread(void *ptr)
 
     w32->cursor_visible = true;
 
-    updateScreenProperties(w32);
+    update_screen_rect(w32);
 
     mp_dispatch_set_wakeup_fn(w32->dispatch, wakeup_gui_thread, w32);
 
