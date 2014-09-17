@@ -25,24 +25,33 @@ testfun()
         --o= --vo=null --no-audio --untimed \
         $ILDETECT_MPVFLAGS \
         | { if [ -n "$ILDETECT_QUIET" ]; then cat; else tee /dev/stderr; fi } \
-        | grep "Parsed_idet_0: Multi frame detection: " | tail -n 1
+        | grep "Parsed_idet_0: Multi frame detection: "
 }
 
 judge()
 {
-    out="$(testfun "$@")"
-
-    tff=${out##* TFF:}; tff=${tff%% *}
-    bff=${out##* BFF:}; bff=${bff%% *}
-    progressive=${out##* Progressive:}; progressive=${progressive%% *}
-    undetermined=${out##* Undetermined:}; undetermined=${undetermined%% *}
-
-    case "$tff$bff$progressive$undetermined" in
-        *[!0-9]*)
-            printf >&2 'ERROR: Unrecognized idet output: %s\n' "$out"
-            exit 16
-            ;;
-    esac
+    tff=0
+    bff=0
+    progressive=0
+    undetermined=0
+    while IFS= read -r out; do
+        tff1=${out##* TFF:}; tff1=${tff1%% *}
+        bff1=${out##* BFF:}; bff1=${bff1%% *}
+        progressive1=${out##* Progressive:}; progressive1=${progressive1%% *}
+        undetermined1=${out##* Undetermined:}; undetermined1=${undetermined1%% *}
+        case "$tff1$bff1$progressive1$undetermined1" in
+            *[!0-9]*)
+                printf >&2 'ERROR: Unrecognized idet output: %s\n' "$out"
+                exit 16
+                ;;
+        esac
+        tff=$(($tff + $tff1))
+        bff=$(($bff + $bff1))
+        progressive=$(($progressive + $progressive1))
+        undetermined=$(($undetermined + $undetermined1))
+    done <<EOF
+$(testfun "$@")
+EOF
 
     interlaced=$((bff + tff))
     determined=$((interlaced + progressive))
