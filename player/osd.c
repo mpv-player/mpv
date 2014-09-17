@@ -443,17 +443,8 @@ void set_osd_subtitle(struct MPContext *mpctx, const char *text)
     term_osd_set_subs(mpctx, text);
 }
 
-// sym == mpctx->osd_function
-static void saddf_osd_function_sym(char **buffer, int sym)
+void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size)
 {
-    char temp[10];
-    osd_get_function_sym(temp, sizeof(temp), sym);
-    saddf(buffer, "%s ", temp);
-}
-
-static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
-{
-    bool fractions = mpctx->opts->osd_fractions;
     int sym = mpctx->osd_function;
     if (!sym) {
         if (mpctx->paused_for_cache && !mpctx->opts->pause) {
@@ -464,7 +455,15 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
             sym = OSD_PLAY;
         }
     }
-    saddf_osd_function_sym(buffer, sym);
+    osd_get_function_sym(buf, buf_size, sym);
+}
+
+static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
+{
+    bool fractions = mpctx->opts->osd_fractions;
+    char sym[10];
+    get_current_osd_sym(mpctx, sym, sizeof(sym));
+    saddf(buffer, "%s ", sym);
     char *custom_msg = mpctx->opts->osd_status_msg;
     if (custom_msg && full) {
         char *text = mp_property_expand_escaped_string(mpctx, custom_msg);

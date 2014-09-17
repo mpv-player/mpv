@@ -434,6 +434,7 @@ void set_osd_msg(struct MPContext *mpctx, int level, int time,
                  const char* fmt, ...) PRINTF_ATTRIBUTE(4,5);
 void set_osd_function(struct MPContext *mpctx, int osd_function);
 void set_osd_subtitle(struct MPContext *mpctx, const char *text);
+void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size);
 
 // playloop.c
 void mp_wait_events(struct MPContext *mpctx, double sleeptime);

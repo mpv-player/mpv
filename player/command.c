@@ -2220,6 +2220,15 @@ static int mp_property_osd_par(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, vo_res.display_par);
 }
 
+static int mp_property_osd_sym(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    char temp[20];
+    get_current_osd_sym(mpctx, temp, sizeof(temp));
+    return m_property_strdup_ro(action, arg, temp);
+}
+
 /// Video fps (RO)
 static int mp_property_fps(void *ctx, struct m_property *prop,
                            int action, void *arg)
@@ -2805,6 +2814,8 @@ static const struct m_property mp_properties[] = {
     {"osd-width", mp_property_osd_w},
     {"osd-height", mp_property_osd_h},
     {"osd-par", mp_property_osd_par},
+
+    {"osd-sym-cc", mp_property_osd_sym},
 
     // Subs
     {"sid", mp_property_sub},

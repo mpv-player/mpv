@@ -1296,6 +1296,11 @@ Property list
 ``seekable``
     Return whether it's generally possible to seek in the current file.
 
+``osd-sym-cc``
+    Inserts the current OSD symbol as opaque OSD control code (cc). This makes
+    sense with the ``show_text`` command only. The control code is
+    implementation specific and is useless for any other use.
+
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
     changed at runtime by writing to this property. Note that many options
