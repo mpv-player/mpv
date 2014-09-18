@@ -379,10 +379,19 @@ void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img)
     }
 }
 
+static bool vf_has_output_frame(struct vf_instance *vf)
+{
+    if (!vf->num_out_queued && vf->filter_out) {
+        if (vf->filter_out(vf) < 0)
+            MP_ERR(vf, "Error filtering frame.\n");
+    }
+    return vf->num_out_queued > 0;
+}
+
 static struct mp_image *vf_dequeue_output_frame(struct vf_instance *vf)
 {
     struct mp_image *res = NULL;
-    if (vf->num_out_queued) {
+    if (vf_has_output_frame(vf)) {
         res = vf->out_queued[0];
         MP_TARRAY_REMOVE_AT(vf->out_queued, vf->num_out_queued, 0);
     }
@@ -445,7 +454,7 @@ int vf_output_frame(struct vf_chain *c, bool eof)
                 if (r < 0)
                     return r;
             }
-            if (cur->num_out_queued)
+            if (vf_has_output_frame(cur))
                 last = cur;
         }
         if (!last)

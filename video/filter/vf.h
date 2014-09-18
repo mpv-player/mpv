@@ -75,6 +75,15 @@ typedef struct vf_instance {
     //          can be used to output delayed or otherwise remaining images.
     int (*filter_ext)(struct vf_instance *vf, struct mp_image *mpi);
 
+    // Produce an output frame. This is called after filter or filter_ext.
+    // You can add 0 or more frames with vf_add_output_frame(). (This allows
+    // distributing the filter load over time -> typically add at most 1 frame.)
+    // If this adds no frame (or is NULL), then the caller assumes that the
+    // filter needs new input.
+    // Return a negative value on error. (No more frames is not an error.)
+    // May be called multiple times, even if the filter gives no output.
+    int (*filter_out)(struct vf_instance *vf);
+
     void (*uninit)(struct vf_instance *vf);
 
     char *label;
