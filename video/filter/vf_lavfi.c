@@ -315,33 +315,34 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
         return -1;
 
     AVFrame *frame = mp_to_av(vf, mpi);
-    if (av_buffersrc_add_frame(p->in, frame) < 0) {
-        av_frame_free(&frame);
-        return -1;
-    }
+    int r = av_buffersrc_add_frame(p->in, frame) < 0 ? -1 : 0;
     av_frame_free(&frame);
 
-    for (;;) {
-        frame = av_frame_alloc();
-        int err = av_buffersink_get_frame(p->out, frame);
-        if (err == AVERROR(EAGAIN) || err == AVERROR_EOF) {
-            // Not an error situation - no more output buffers in queue.
-            // AVERROR_EOF means we shouldn't even give the filter more
-            // input, but we don't handle that completely correctly.
-            av_frame_free(&frame);
-            p->eof |= err == AVERROR_EOF;
-            break;
-        }
-        if (err < 0) {
-            av_frame_free(&frame);
-            MP_ERR(vf, "libavfilter error: %d\n", err);
-            return -1;
-        }
+    return r;
+}
 
-        get_metadata_from_av_frame(vf, frame);
-        vf_add_output_frame(vf, av_to_mp(vf, frame));
+static int filter_out(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+
+    AVFrame *frame = av_frame_alloc();
+    int err = av_buffersink_get_frame(p->out, frame);
+    if (err == AVERROR(EAGAIN) || err == AVERROR_EOF) {
+        // Not an error situation - no more output buffers in queue.
+        // AVERROR_EOF means we shouldn't even give the filter more
+        // input, but we don't handle that completely correctly.
+        av_frame_free(&frame);
+        p->eof |= err == AVERROR_EOF;
+        return 0;
+    }
+    if (err < 0) {
+        av_frame_free(&frame);
+        MP_ERR(vf, "libavfilter error: %d\n", err);
+        return -1;
     }
 
+    get_metadata_from_av_frame(vf, frame);
+    vf_add_output_frame(vf, av_to_mp(vf, frame));
     return 0;
 }
 
@@ -374,6 +375,7 @@ static int vf_open(vf_instance_t *vf)
     vf->reconfig = NULL;
     vf->config = config;
     vf->filter_ext = filter_ext;
+    vf->filter_out = filter_out;
     vf->filter = NULL;
     vf->query_format = query_format;
     vf->control = control;
