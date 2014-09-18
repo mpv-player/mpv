@@ -495,6 +495,15 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
     mpctx->total_avsync_change += change;
 }
 
+// Enough video filtered already to push one frame to the VO?
+static bool have_new_frame(struct MPContext *mpctx)
+{
+    bool need_2nd = !!(mpctx->opts->frame_dropping & 1) // we need the duration
+        && mpctx->video_pts != MP_NOPTS_VALUE; // ...except for the 1st frame
+
+    return mpctx->next_frame[0] && (!need_2nd || mpctx->next_frame[1]);
+}
+
 // Fill mpctx->next_frame[] with a newly filtered or decoded image.
 // returns VD_* code
 static int video_output_image(struct MPContext *mpctx, double endpts)
@@ -511,11 +520,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
         return r <= 0 ? VD_EOF : VD_PROGRESS;
     }
 
-    bool need_2nd = !!(mpctx->opts->frame_dropping & 1) // we need the duration
-        && mpctx->video_pts != MP_NOPTS_VALUE; // ...except for the 1st frame
-
-    // Enough video filtered already?
-    if (mpctx->next_frame[0] && (!need_2nd || mpctx->next_frame[1]))
+    if (have_new_frame(mpctx))
         return VD_NEW_FRAME;
 
     // Filter a new frame.
@@ -573,7 +578,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
     }
 
     // On EOF, always allow the playloop to use the remaining frame.
-    if (r <= 0 && mpctx->next_frame[0])
+    if (have_new_frame(mpctx) || (r <= 0 && mpctx->next_frame[0]))
         r = VD_NEW_FRAME;
 
     return r;
