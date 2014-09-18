@@ -523,30 +523,6 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
     if (r < 0)
         return r; // error
 
-    // Get a new frame if we need one.
-    if (!mpctx->next_frame[1]) {
-        struct mp_image *img = vf_read_output_frame(mpctx->d_video->vfilter);
-        if (img) {
-            // Always add these; they make backstepping after seeking faster.
-            add_frame_pts(mpctx, img->pts);
-
-            bool drop = false;
-            bool hrseek = mpctx->hrseek_active
-                       && mpctx->video_status == STATUS_SYNCING;
-            if (hrseek && img->pts < mpctx->hrseek_pts - .005)
-                drop = true;
-            if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
-                drop = true;
-                r = VD_EOF;
-            }
-            if (drop) {
-                talloc_free(img);
-            } else {
-                mpctx->next_frame[1] = img;
-            }
-        }
-    }
-
     if (!mpctx->next_frame[0] && mpctx->next_frame[1]) {
         mpctx->next_frame[0] = mpctx->next_frame[1];
         mpctx->next_frame[1] = NULL;
@@ -570,6 +546,30 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
         }
         MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
         r = VD_PROGRESS;
+    }
+
+    // Get a new frame if we need one.
+    if (!mpctx->next_frame[1]) {
+        struct mp_image *img = vf_read_output_frame(mpctx->d_video->vfilter);
+        if (img) {
+            // Always add these; they make backstepping after seeking faster.
+            add_frame_pts(mpctx, img->pts);
+
+            bool drop = false;
+            bool hrseek = mpctx->hrseek_active
+                       && mpctx->video_status == STATUS_SYNCING;
+            if (hrseek && img->pts < mpctx->hrseek_pts - .005)
+                drop = true;
+            if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
+                drop = true;
+                r = VD_EOF;
+            }
+            if (drop) {
+                talloc_free(img);
+            } else {
+                mpctx->next_frame[1] = img;
+            }
+        }
     }
 
     // On EOF, always allow the playloop to use the remaining frame.
