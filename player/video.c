@@ -404,11 +404,9 @@ static void init_filter_params(struct MPContext *mpctx)
         mp_property_do("deinterlace", M_PROPERTY_SET, &opts->deinterlace, mpctx);
 }
 
-// Make sure at least 1 filtered image is available.
-// returns VD_* code
-// A return value of VD_PROGRESS doesn't necessarily output a frame, but makes
-// the promise that calling this function again will eventually do something.
-static int video_decode_and_filter(struct MPContext *mpctx)
+// Feed newly decoded frames to the filter, take care of format changes.
+// If eof=true, drain the filter chain, and return VD_EOF if empty.
+static int video_filter(struct MPContext *mpctx, bool eof)
 {
     struct dec_video *d_video = mpctx->d_video;
     struct vf_chain *vf = d_video->vfilter;
@@ -417,7 +415,7 @@ static int video_decode_and_filter(struct MPContext *mpctx)
         return VD_ERROR;
 
     // There is already a filtered frame available.
-    if (vf_output_frame(vf, false) > 0)
+    if (vf_output_frame(vf, eof) > 0)
         return VD_PROGRESS;
 
     // Decoder output is different from filter input?
@@ -447,22 +445,32 @@ static int video_decode_and_filter(struct MPContext *mpctx)
         return VD_PROGRESS;
     }
 
+    return eof ? VD_EOF : VD_PROGRESS;
+}
+
+// Make sure at least 1 filtered image is available, decode new video if needed.
+// returns VD_* code
+// A return value of VD_PROGRESS doesn't necessarily output a frame, but makes
+// the promise that calling this function again will eventually do something.
+static int video_decode_and_filter(struct MPContext *mpctx)
+{
+    struct dec_video *d_video = mpctx->d_video;
+
+    int r = video_filter(mpctx, false);
+    if (r < 0)
+        return r;
+
     if (!d_video->waiting_decoded_mpi) {
         // Decode a new image, or at least feed the decoder a packet.
-        int r = decode_image(mpctx);
+        r = decode_image(mpctx);
         if (r == VD_WAIT)
             return r;
         if (d_video->waiting_decoded_mpi)
             d_video->decoder_output = d_video->waiting_decoded_mpi->params;
-        if (!d_video->waiting_decoded_mpi && (r == VD_EOF || r < 0)) {
-            if (vf_output_frame(vf, true) > 0)
-                return VD_PROGRESS;
-            return VD_EOF; // true EOF
-        }
     }
 
-    // Image will be filtered on the next iteration.
-    return VD_PROGRESS;
+    bool eof = !d_video->waiting_decoded_mpi && (r == VD_EOF || r < 0);
+    return video_filter(mpctx, eof);
 }
 
 /* Modify video timing to match the audio timeline. There are two main
