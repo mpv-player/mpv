@@ -320,12 +320,28 @@ static void keyboard_handle_modifiers(void *data,
                           0, 0, group);
 }
 
+static void keyboard_handle_repeat_info(void *data,
+                                        struct wl_keyboard *wl_keyboard,
+                                        int32_t rate,
+                                        int32_t delay)
+{
+    struct vo_wayland_state *wl = data;
+    if (wl->vo->opts->native_keyrepeat) {
+        if (rate < 0 || delay < 0) {
+            MP_WARN(wl, "Invalid rate or delay values sent by compositor\n");
+            return;
+        }
+        mp_input_set_repeat_info(wl->vo->input_ctx, rate, delay);
+    }
+}
+
 static const struct wl_keyboard_listener keyboard_listener = {
     keyboard_handle_keymap,
     keyboard_handle_enter,
     keyboard_handle_leave,
     keyboard_handle_key,
-    keyboard_handle_modifiers
+    keyboard_handle_modifiers,
+    keyboard_handle_repeat_info
 };
 
 /* POINTER LISTENER */
@@ -450,8 +466,17 @@ static void seat_handle_capabilities(void *data,
     }
 }
 
+static void seat_handle_name(void *data,
+                             struct wl_seat *seat,
+                             const char *name)
+{
+    struct vo_wayland_state *wl = data;
+    MP_VERBOSE(wl, "Seat \"%s\" connected\n", name);
+}
+
 static const struct wl_seat_listener seat_listener = {
     seat_handle_capabilities,
+    seat_handle_name,
 };
 
 static void data_offer_handle_offer(void *data,
@@ -593,7 +618,7 @@ static void registry_handle_global (void *data,
 
     else if (strcmp(interface, "wl_seat") == 0) {
 
-        wl->input.seat = wl_registry_bind(reg, id, &wl_seat_interface, 1);
+        wl->input.seat = wl_registry_bind(reg, id, &wl_seat_interface, 4);
         wl_seat_add_listener(wl->input.seat, &seat_listener, wl);
 
         wl->input.datadev = wl_data_device_manager_get_data_device(
