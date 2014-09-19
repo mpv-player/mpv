@@ -258,7 +258,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
             if (seek.type != MPSEEK_ABSOLUTE)
                 main_new_pos = get_main_demux_pts(mpctx);
             main_new_pos -= get_track_video_offset(mpctx, track);
-            demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE);
+            demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE | SEEK_BACKWARD);
         }
     }
 
