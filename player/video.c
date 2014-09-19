@@ -344,11 +344,7 @@ static int check_framedrop(struct MPContext *mpctx)
         // we should avoid dropping too many frames in sequence unless we
         // are too late. and we allow 100ms A-V delay here:
         if (mpctx->last_av_difference - 0.100 > mpctx->dropped_frames * frame_time)
-        {
-            mpctx->drop_frame_cnt++;
-            mpctx->dropped_frames++;
             return !!(opts->frame_dropping & 2);
-        }
     }
     return 0;
 }
@@ -383,6 +379,13 @@ static int decode_image(struct MPContext *mpctx)
         video_decode(d_video, pkt, framedrop_type);
     bool had_packet = !!pkt;
     talloc_free(pkt);
+
+    if (had_packet && !d_video->waiting_decoded_mpi &&
+        mpctx->video_status == STATUS_PLAYING)
+    {
+        mpctx->drop_frame_cnt++;
+        mpctx->dropped_frames++;
+    }
 
     return had_packet ? VD_PROGRESS : VD_EOF;
 }
