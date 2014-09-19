@@ -411,6 +411,51 @@ taking screenshots is handled by the VOs, and adding the screenshot filter will
 break hardware decoding. (The filter may still be useful for taking screenshots
 at a certain point within the video chain when using multiple video filters.)
 
+TERMINAL STATUS LINE
+====================
+
+During playback, mpv shows the playback status on the terminal. It looks like
+something like this:
+
+    ``AV: 00:03:12 / 00:24:25 (13%) A-V: -0.000``
+
+The status line can be overridden with the ``--term-status-msg`` option.
+
+The following is a list of things that can show up in the status line. Input
+properties, that can be used to get the same information manually, are also
+listed.
+
+- ``AV:`` or ``V:`` (video only) or ``A:`` (audio only)
+- The current time position in ``HH:MM:SS`` format (``playback-time`` property)
+- The total file duration (or ``00:00:00`` if unknown) (``length`` property)
+- Playback speed, e.g. `` x2.0``. Only visible if the speed is not normal. This
+  is the user-requested speed, and not the actual speed  (usually they should
+  be the same, unless playback is too slow). (``speed`` property.)
+- Playback percentage, e.g. ``(13%)``. How much of the file has been played.
+  Normally calculated out of playback position and duration, but can fallback
+  to other methods (like byte position) if these are not available.
+  (``percent-pos`` property.)
+- The audio/video sync as ``A-V:  0.000``. This is the difference between
+  audio and video time. Normally it should be 0 or close to 0. If it's growing,
+  it might indicate a playback problem. (``avsync`` property.)
+- Total A/V sync change, e.g. ``ct: -0.417``. Normally invisible. Can show up
+  if there is audio "missing", or not enough frames can be dropped. Usually
+  this will indicate a problem. (``total-avsync-change`` property.)
+- Encoding state in ``{...}``, only shown in encoding mode.
+- Decoder-dropped video frames, e.g. ``SD: 2``. Shows up only if the count is
+  not 0. Normally should never show up, unless ``--framedrop`` is set to enable
+  this mode, and your CPU is too slow. (``drop-frame-count`` property.)
+- VO-dropped video frames, e.g. ``D: 4``. Shows up only if the count is not 0.
+  Can grow if the video framerate is higher than that of the display, or if
+  video rendering is too slow. Also can be incremented on "hiccups" and when
+  the video frame couldn't be displayed on time. (``vo-drop-frame-count``
+  property.)
+- Cache state, e.g. ``Cache:  2s+134KB``. Visible if the stream cache is enabled.
+  The first value shows the amount of video buffered in the demuxer in seconds,
+  the second value shows *additional* data buffered in the stream cache in
+  kilobytes. (``demuxer-cache-duration`` and ``cached-used`` properties.)
+
+
 PROTOCOLS
 =========
 
