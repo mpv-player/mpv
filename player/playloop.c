@@ -192,9 +192,9 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     if (seek.type == MPSEEK_FACTOR || seek.amount < 0 ||
         (seek.type == MPSEEK_ABSOLUTE && seek.amount < mpctx->last_chapter_pts))
         mpctx->last_chapter_seek = -2;
-    if (seek.type == MPSEEK_FACTOR) {
+    if (seek.type == MPSEEK_FACTOR && !mpctx->demuxer->ts_resets_possible) {
         double len = get_time_length(mpctx);
-        if (len > 0 && !mpctx->demuxer->ts_resets_possible) {
+        if (len > 0) {
             seek.amount = seek.amount * len + get_start_time(mpctx);
             seek.type = MPSEEK_ABSOLUTE;
         }
