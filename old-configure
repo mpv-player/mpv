@@ -585,7 +585,7 @@ _libquvi=no
 (test "$_libquvi9" = yes || test "$_libquvi4" = yes) && _libquvi=yes
 define_yes_no $_libquvi HAVE_LIBQUVI
 
-_wlver="1.2.0"
+_wlver="1.6.0"
 check_pkg_config "Wayland" $_wayland WAYLAND "wayland-client >= $_wlver wayland-cursor >= $_wlver xkbcommon >= 0.3.0"
 _wayland=$(defretval)
 
