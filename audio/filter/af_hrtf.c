@@ -284,6 +284,27 @@ static inline void update_ch(af_hrtf_t *s, short *in, const int k)
     s->ba_r[k] = in[4] + in[1] + in[3];
 }
 
+static void clear_coeff(af_hrtf_t *s, float *c)
+{
+    memset(c, 0, s->dlbuflen * sizeof(float));
+}
+
+static void reset(af_hrtf_t *s)
+{
+    clear_coeff(s, s->lf);
+    clear_coeff(s, s->rf);
+    clear_coeff(s, s->lr);
+    clear_coeff(s, s->rr);
+    clear_coeff(s, s->cf);
+    clear_coeff(s, s->cr);
+    clear_coeff(s, s->ba_l);
+    clear_coeff(s, s->ba_r);
+    clear_coeff(s, s->fwrbuf_l);
+    clear_coeff(s, s->fwrbuf_r);
+    clear_coeff(s, s->fwrbuf_lr);
+    clear_coeff(s, s->fwrbuf_rr);
+}
+
 /* Initialization and runtime control */
 static int control(struct af_instance *af, int cmd, void* arg)
 {
@@ -292,6 +313,7 @@ static int control(struct af_instance *af, int cmd, void* arg)
 
     switch(cmd) {
     case AF_CONTROL_REINIT:
+        reset(s);
         af->data->rate = 48000;
         mp_audio_set_channels_old(af->data, ((struct mp_audio*)arg)->nch);
         if(af->data->nch == 2) {
@@ -309,6 +331,9 @@ static int control(struct af_instance *af, int cmd, void* arg)
         mp_audio_set_num_channels(af->data, 2);
         s->print_flag = 1;
         return test_output_res;
+    case AF_CONTROL_RESET:
+        reset(s);
+        return AF_OK;
     }
 
     return AF_UNKNOWN;
