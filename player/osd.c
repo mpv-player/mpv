@@ -226,7 +226,7 @@ static void print_status(struct MPContext *mpctx)
         // VO stats
         if (mpctx->d_video) {
             if (mpctx->drop_frame_cnt)
-                saddf(&line, " Late: %d", mpctx->drop_frame_cnt);
+                saddf(&line, " SD: %d", mpctx->drop_frame_cnt);
             int64_t c = vo_get_drop_count(mpctx->video_out);
             if (c > 0)
                 saddf(&line, " D: %"PRId64, c);
