@@ -641,6 +641,7 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
 static void update_avsync_after_frame(struct MPContext *mpctx)
 {
     mpctx->time_frame -= get_relative_time(mpctx);
+    mpctx->last_av_difference = 0;
 
     if (mpctx->audio_status != STATUS_PLAYING ||
         mpctx->video_status != STATUS_PLAYING)

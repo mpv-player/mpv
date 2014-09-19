@@ -409,6 +409,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     if (opts->insert_silence) {
         float S = 0.5;
         if (!mpctx->paused && mpctx->audio_status == STATUS_PLAYING &&
+            mpctx->video_status == STATUS_PLAYING &&
             mpctx->last_av_difference - mpctx->insert_silence > S)
             mpctx->insert_silence += S;
 
