@@ -249,4 +249,6 @@ void mp_input_pipe_add(struct input_ctx *ictx, const char *filename);
 void mp_input_joystick_add(struct input_ctx *ictx, char *dev);
 void mp_input_lirc_add(struct input_ctx *ictx, char *lirc_configfile);
 
+void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay);
+
 #endif /* MPLAYER_INPUT_H */
