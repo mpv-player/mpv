@@ -1511,6 +1511,9 @@ void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
 
 void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay)
 {
+    input_lock(ictx);
     ictx->ar_rate = rate;
     ictx->ar_delay = delay;
+    input_unlock(ictx);
 }
+
