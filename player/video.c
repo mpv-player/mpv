@@ -339,18 +339,16 @@ static int check_framedrop(struct MPContext *mpctx)
     if (mpctx->video_status == STATUS_PLAYING && !mpctx->paused &&
         mpctx->audio_status == STATUS_PLAYING && !ao_untimed(mpctx->ao))
     {
-        float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
-        float d = delay - mpctx->delay;
         float fps = mpctx->d_video->fps;
         double frame_time = fps > 0 ? 1.0 / fps : 0;
         // we should avoid dropping too many frames in sequence unless we
         // are too late. and we allow 100ms A-V delay here:
-        if (d < -mpctx->dropped_frames * frame_time - 0.100) {
+        if (mpctx->last_av_difference - 0.100 > mpctx->dropped_frames * frame_time)
+        {
             mpctx->drop_frame_cnt++;
             mpctx->dropped_frames++;
-            return !!(mpctx->opts->frame_dropping & 2);
-        } else
-            mpctx->dropped_frames = 0;
+            return !!(opts->frame_dropping & 2);
+        }
     }
     return 0;
 }
@@ -557,6 +555,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             mpctx->time_frame += frame_time / mpctx->opts->playback_speed;
             adjust_sync(mpctx, pts, frame_time);
         }
+        mpctx->dropped_frames = 0;
         MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
         r = VD_PROGRESS;
     }
