@@ -50,17 +50,15 @@ if len(sys.argv) < 1:
     sys.exit(1)
 files = sys.argv[1:]
 
-# this is about the same method mpv uses to decide this
+# this is the same method mpv uses to decide this
 def is_url(filename):
-    parts = filename.split(":", 1)
+    parts = filename.split("://", 1)
     if len(parts) < 2:
         return False
     # protocol prefix has no special characters => it's an URL
+    allowed_symbols = string.ascii_letters + string.digits + '_'
     prefix = parts[0]
-    for c in prefix:
-        if string.ascii_letters.find(c) < 0:
-            return False
-    return True
+    return all(map(lambda c: c in allowed_symbols, prefix))
 
 # make them absolute; also makes them safe against interpretation as options
 def make_abs(filename):
