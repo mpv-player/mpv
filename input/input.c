@@ -854,14 +854,17 @@ void mp_input_wait(struct input_ctx *ictx, double seconds)
     }
 }
 
-void mp_input_wakeup(struct input_ctx *ictx)
+void mp_input_wakeup_nolock(struct input_ctx *ictx)
 {
+    // Some audio APIs discourage use of locking in their audio callback,
+    // and these audio callbacks happen to call mp_input_wakeup_nolock()
+    // when new data is needed. This is why we use semaphores here.
     sem_post(&ictx->wakeup);
 }
 
-void mp_input_wakeup_nolock(struct input_ctx *ictx)
+void mp_input_wakeup(struct input_ctx *ictx)
 {
-    mp_input_wakeup(ictx);
+    mp_input_wakeup_nolock(ictx);
 }
 
 mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
