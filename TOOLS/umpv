@@ -87,7 +87,8 @@ if fifo_fd >= 0:
     if (((st.st_mode & (stat.S_IRWXG | stat.S_IRWXO)) != 0) or
         (not stat.S_ISFIFO(st.st_mode)) or
         (st.st_uid != os.getuid())):
-        print("error: command FIFO is not a FIFO or has bogus permissions")
+        sys.stderr.write("error: command FIFO is not a FIFO or has bogus "
+                         "permissions\n")
         sys.exit(1)
 
 if fifo_fd >= 0:
