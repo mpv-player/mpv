@@ -23,10 +23,11 @@ Note that you can control the mpv instance by writing to the command fifo:
 
     echo "cycle fullscreen" > /tmp/umpv-fifo-*
 
-Note: you can supply custom options with the UMPV_OPTIONS environment variable.
-      The environment variable will be split on whitespace, and each item is
-      passed as option to mpv _if_ the script starts mpv. If mpv is not started
-      by the script (i.e. mpv is already running), the options will be ignored.
+Note: you can supply custom mpv path and options with the MPV environment
+      variable. The environment variable will be split on whitespace, and the
+      first item is used as path to mpv binary and the rest is passed as options
+      _if_ the script starts mpv. If mpv is not started by the script (i.e. mpv
+      is already running), this will be ignored.
 
 Warning:
 
@@ -67,9 +68,6 @@ def make_abs(filename):
         return os.path.abspath(filename)
     return filename
 files = [make_abs(f) for f in files]
-
-opts_env = os.getenv("UMPV_OPTIONS")
-opts_env = opts_env.split() if opts_env else []
 
 FIFO = "/tmp/umpv-fifo-" + os.getenv("USER")
 
@@ -114,9 +112,9 @@ else:
             raise e
     os.mkfifo(FIFO, int("0600", 8))
 
-    opts = ["mpv", "--no-terminal", "--force-window", "--input-file=" + FIFO]
-    opts.extend(opts_env)
-    opts.append("--")
+    opts = (os.getenv("MPV") or "mpv").split()
+    opts.extend(["--no-terminal", "--force-window", "--input-file=" + FIFO,
+                 "--"])
     opts.extend(files)
 
     subprocess.check_call(opts)
