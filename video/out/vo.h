@@ -195,13 +195,19 @@ struct vo_driver {
 
     /*
      * Blit/Flip buffer to the screen. Must be called after each frame!
+     */
+    void (*flip_page)(struct vo *vo);
+
+    /*
+     * Timed version of flip_page (optional).
      * pts_us is the frame presentation time, linked to mp_time_us().
      * pts_us is 0 if the frame should be presented immediately.
      * duration is estimated time in us until the next frame is shown.
-     * duration is -1 if it is unknown or unset.
+     * duration is -1 if it is unknown or unset (also: disable framedrop).
+     * If the VO does manual framedropping, VO_CAP_FRAMEDROP should be set.
+     * Returns 1 on display, or 0 if the frame was dropped.
      */
-    void (*flip_page)(struct vo *vo);
-    void (*flip_page_timed)(struct vo *vo, int64_t pts_us, int duration);
+    int (*flip_page_timed)(struct vo *vo, int64_t pts_us, int duration);
 
     /* These optional callbacks can be provided if the GUI framework used by
      * the VO requires entering a message loop for receiving events, does not

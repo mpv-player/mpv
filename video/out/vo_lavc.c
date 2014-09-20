@@ -501,7 +501,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
 }
 
-static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
+static void flip_page(struct vo *vo)
 {
 }
 
@@ -531,7 +531,7 @@ const struct vo_driver video_out_lavc = {
     .control = control,
     .uninit = uninit,
     .draw_image = draw_image,
-    .flip_page_timed = flip_page_timed,
+    .flip_page = flip_page,
 };
 
 // vim: sw=4 ts=4 et tw=80

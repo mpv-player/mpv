@@ -452,9 +452,8 @@ Video
 
     .. note::
 
-        ``--vo=vdpau`` (also the default VO) always has the ``vo`` framedrop
-        mode enabled. It doesn't increment the ``D:`` field in the status line
-        either.
+        ``--vo=vdpau`` has its own code for the ``vo`` framedrop mode. Slight
+        differences to other VOs are possible.
 
 ``--display-fps=<fps>``
     Set the maximum assumed display FPS used with ``--framedrop``. By default

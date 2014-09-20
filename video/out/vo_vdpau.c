@@ -711,14 +711,16 @@ static inline uint64_t prev_vsync(struct vdpctx *vc, uint64_t ts)
     return ts - offset;
 }
 
-static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
+static int flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
+    vc->dropped_frame = true; // changed at end if false
+
     if (!check_preemption(vo))
-        return;
+        return 0;
 
     vc->vsync_interval = 1;
     if (vc->user_fps > 0) {
@@ -798,13 +800,12 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
             || vc->dropped_frame && vsync > vc->dropped_time))
         pts -= vc->vsync_interval / 2;
 
-    vc->dropped_frame = true; // changed at end if false
     vc->dropped_time = ideal_pts;
 
     pts = FFMAX(pts, vc->last_queue_time + vc->vsync_interval);
     pts = FFMAX(pts, now);
     if (npts < PREV_VSYNC(pts) + vc->vsync_interval)
-        return;
+        return 0;
 
     int num_flips = update_presentation_queue_status(vo);
     vsync = vc->recent_vsync_time + num_flips * vc->vsync_interval;
@@ -812,7 +813,7 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     pts = FFMAX(pts, vsync + (vc->vsync_interval >> 2));
     vsync = PREV_VSYNC(pts);
     if (npts < vsync + vc->vsync_interval)
-        return;
+        return 0;
     pts = vsync + (vc->vsync_interval >> 2);
     VdpOutputSurface frame = vc->output_surfaces[vc->surface_num];
     vdp_st = vdp->presentation_queue_display(vc->flip_queue, frame,
@@ -827,6 +828,7 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     vc->last_ideal_time = ideal_pts;
     vc->dropped_frame = false;
     vc->surface_num = WRAP_ADD(vc->surface_num, 1, vc->num_output_surfaces);
+    return 1;
 }
 
 static void draw_image(struct vo *vo, struct mp_image *mpi)

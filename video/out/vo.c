@@ -558,17 +558,17 @@ static bool render_frame(struct vo *vo)
     int64_t next_vsync = prev_sync(vo, mp_time_us()) + in->vsync_interval;
     int64_t end_time = pts + duration;
 
+    if (!(vo->global->opts->frame_dropping & 1) || !in->hasframe_rendered ||
+        vo->driver->untimed || vo->driver->encode)
+        duration = -1; // disable framedrop
+
     in->dropped_frame = duration >= 0 && end_time < next_vsync;
-    in->dropped_frame &= in->hasframe_rendered;
-    in->dropped_frame &= !!(vo->global->opts->frame_dropping & 1);
-    in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP) &&
-                         !vo->driver->untimed && !vo->driver->encode;
+    in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
     // instead of just freezing the display forever.
     in->dropped_frame &= mp_time_us() - in->last_flip < 100 * 1000;
 
     if (in->dropped_frame) {
-        in->drop_count += 1;
         in->dropped_image = img;
     } else {
         in->hasframe_rendered = true;
@@ -587,8 +587,9 @@ static bool render_frame(struct vo *vo)
             mp_sleep_us(target - now);
         }
 
+        bool drop = false;
         if (vo->driver->flip_page_timed)
-            vo->driver->flip_page_timed(vo, pts, duration);
+            drop = vo->driver->flip_page_timed(vo, pts, duration) < 1;
         else
             vo->driver->flip_page(vo);
 
@@ -606,7 +607,11 @@ static bool render_frame(struct vo *vo)
         MP_STATS(vo, "end video");
 
         pthread_mutex_lock(&in->lock);
+        in->dropped_frame = drop;
     }
+
+    if (in->dropped_frame)
+        in->drop_count += 1;
 
     vo->want_redraw = false;
 
