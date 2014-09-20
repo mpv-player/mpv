@@ -37,6 +37,7 @@ struct mixer {
     struct af_stream *af;
     // Static, dependent on ao/softvol settings
     bool softvol;                       // use AO (true) or af_volume (false)
+    bool ao_softvol;                    // AO has private or per-app volume
     bool emulate_mute;                  // if true, emulate mute with volume=0
     // Last known values (possibly out of sync with reality)
     float vol_l, vol_r;
@@ -245,11 +246,13 @@ char *mixer_get_volume_restore_data(struct mixer *mixer)
 
 static void probe_softvol(struct mixer *mixer)
 {
+    mixer->ao_softvol =
+        ao_control(mixer->ao, AOCONTROL_HAS_SOFT_VOLUME, 0) == 1 ||
+        ao_control(mixer->ao, AOCONTROL_HAS_PER_APP_VOLUME, 0) == 1;
+
     if (mixer->opts->softvol == SOFTVOL_AUTO) {
         // No system-wide volume => fine with AO volume control.
-        mixer->softvol =
-            ao_control(mixer->ao, AOCONTROL_HAS_SOFT_VOLUME, 0) != 1 &&
-            ao_control(mixer->ao, AOCONTROL_HAS_PER_APP_VOLUME, 0) != 1;
+        mixer->softvol = !mixer->ao_softvol;
     } else {
         mixer->softvol = mixer->opts->softvol == SOFTVOL_YES;
     }
@@ -282,8 +285,7 @@ static void restore_volume(struct mixer *mixer)
     const char *prev_driver = mixer->driver;
     mixer->driver = mixer->softvol ? "softvol" : ao_get_name(ao);
 
-    bool restore =
-        mixer->softvol || ao_control(ao, AOCONTROL_HAS_SOFT_VOLUME, 0) == 1;
+    bool restore = mixer->softvol || mixer->ao_softvol;
 
     // Restore old parameters if volume won't survive reinitialization.
     // But not if volume scale is possibly different.
@@ -361,7 +363,7 @@ void mixer_uninit_audio(struct mixer *mixer)
         return;
 
     checkvolume(mixer);
-    if (mixer->muted_by_us) {
+    if (mixer->muted_by_us && !mixer->softvol && !mixer->ao_softvol) {
         /* Current audio output API combines playing the remaining buffered
          * audio and uninitializing the AO into one operation, even though
          * ideally unmute would happen between those two steps. We can't do
