@@ -703,7 +703,7 @@ void vo_set_paused(struct vo *vo, bool paused)
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
     if (in->paused != paused) {
-        in->paused = true;
+        in->paused = paused;
         if (in->paused && in->dropped_frame)
             in->request_redraw = true;
     }
