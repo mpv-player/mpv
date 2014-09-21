@@ -109,7 +109,7 @@ static void term_osd_set_subs(struct MPContext *mpctx, const char *text)
 
 static void term_osd_set_text(struct MPContext *mpctx, const char *text)
 {
-    if (mpctx->video_out && mpctx->opts->term_osd != 1)
+    if ((mpctx->video_out && mpctx->opts->term_osd != 1) || !mpctx->opts->term_osd)
         text = ""; // disable
     talloc_free(mpctx->term_osd_text);
     mpctx->term_osd_text = talloc_strdup(mpctx, text);
