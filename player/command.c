@@ -2329,8 +2329,6 @@ static int property_osd_helper(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->video_out)
-        return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_SET)
         osd_changed_all(mpctx->osd);
     return mp_property_generic_option(mpctx, prop, action, arg);
