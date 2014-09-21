@@ -3069,81 +3069,74 @@ static const struct property_osd_display {
     {0}
 };
 
-static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
+static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
 {
     struct MPOpts *opts = mpctx->opts;
-    const struct property_osd_display *p;
-    const char *name = pname;
+    struct property_osd_display disp = { .name = name };
 
-    int osd_progbar = 0;
-    const char *osd_name = NULL;
-    const char *msg = NULL;
+    if (!osd_mode)
+        return;
 
     // look for the command
-    for (p = property_osd_display; p->name; p++) {
+    for (const struct property_osd_display *p = property_osd_display; p->name; p++)
+    {
         if (!strcmp(p->name, name)) {
-            osd_progbar = p->seek_bar ? 1 : p->osd_progbar;
-            osd_name = p->seek_msg ? "" : p->osd_name;
+            disp = *p;
             break;
         }
     }
-    if (!p->name)
-        p = NULL;
 
-    if (p)
-        msg = p->msg;
-
-    if (osd_mode != MP_ON_OSD_AUTO) {
-        osd_name = osd_name ? osd_name : name;
-        if (!(osd_mode & MP_ON_OSD_MSG)) {
-            osd_name = NULL;
-            msg = NULL;
-        }
-        osd_progbar = osd_progbar ? osd_progbar : ' ';
-        if (!(osd_mode & MP_ON_OSD_BAR))
-            osd_progbar = 0;
+    if (osd_mode == MP_ON_OSD_AUTO) {
+        osd_mode =
+            ((disp.msg || disp.osd_name || disp.seek_msg) ? MP_ON_OSD_MSG : 0) |
+            ((disp.osd_progbar || disp.seek_bar) ? MP_ON_OSD_BAR : 0);
     }
 
-    if (p && (p->seek_msg || p->seek_bar)) {
+    if (!disp.osd_progbar)
+        disp.osd_progbar = ' ';
+
+    if (!disp.osd_name)
+        disp.osd_name = name;
+
+    if (disp.seek_msg || disp.seek_bar) {
         mpctx->add_osd_seek_info |=
-            (osd_name ? p->seek_msg : 0) | (osd_progbar ? p->seek_bar : 0);
+            (osd_mode & MP_ON_OSD_MSG ? disp.seek_msg : 0) |
+            (osd_mode & MP_ON_OSD_BAR ? disp.seek_bar : 0);
         return;
     }
 
-    void *tmp = talloc_new(NULL);
-
-    if (!msg && osd_name)
-        msg = talloc_asprintf(tmp, "%s: ${%s}", osd_name, name);
-
     struct m_option prop = {0};
-    mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx);
-    if (osd_progbar && (prop.flags & CONF_RANGE) == CONF_RANGE) {
-        bool ok = false;
+    mp_property_do(name, M_PROPERTY_GET_TYPE, &prop, mpctx);
+    if ((osd_mode & MP_ON_OSD_BAR) && (prop.flags & CONF_RANGE) == CONF_RANGE) {
         if (prop.type == CONF_TYPE_INT) {
             int n = prop.min;
             mp_property_do(name, M_PROPERTY_GET_NEUTRAL, &n, mpctx);
             int i;
-            ok = mp_property_do(name, M_PROPERTY_GET, &i, mpctx) > 0;
-            if (ok)
-                set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, n, i);
+            if (mp_property_do(name, M_PROPERTY_GET, &i, mpctx) > 0)
+                set_osd_bar(mpctx, disp.osd_progbar, prop.min, prop.max, n, i);
         } else if (prop.type == CONF_TYPE_FLOAT) {
             float n = prop.min;
             mp_property_do(name, M_PROPERTY_GET_NEUTRAL, &n, mpctx);
             float f;
-            ok = mp_property_do(name, M_PROPERTY_GET, &f, mpctx) > 0;
-            if (ok)
-                set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, n, f);
+            if (mp_property_do(name, M_PROPERTY_GET, &f, mpctx) > 0)
+                set_osd_bar(mpctx, disp.osd_progbar, prop.min, prop.max, n, f);
         }
     }
 
-    char *osd_msg = NULL;
-    if (msg)
-        osd_msg = talloc_steal(tmp, mp_property_expand_string(mpctx, msg));
+    if (osd_mode & MP_ON_OSD_MSG) {
+        void *tmp = talloc_new(NULL);
 
-    if (osd_msg && osd_msg[0])
-        set_osd_msg(mpctx, 1, opts->osd_duration, "%s", osd_msg);
+        const char *msg = disp.msg;
+        if (!msg)
+            msg = talloc_asprintf(tmp, "%s: ${%s}", disp.osd_name, name);
 
-    talloc_free(tmp);
+        char *osd_msg = talloc_steal(tmp, mp_property_expand_string(mpctx, msg));
+
+        if (osd_msg && osd_msg[0])
+            set_osd_msg(mpctx, 1, opts->osd_duration, "%s", osd_msg);
+
+        talloc_free(tmp);
+    }
 }
 
 static const char *property_error_string(int error_value)

@@ -364,15 +364,14 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
 }
 
 // type: mp_osd_font_codepoints, ASCII, or OSD_BAR_*
-// name: fallback for terminal OSD
-void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
+void set_osd_bar(struct MPContext *mpctx, int type,
                  double min, double max, double neutral, double val)
 {
     struct MPOpts *opts = mpctx->opts;
     if (opts->osd_level < 1 || !opts->osd_bar_visible)
         return;
 
-    if (mpctx->video_out && opts->term_osd != 1) {
+    if (mpctx->video_out) {
         mpctx->osd_visible = mp_time_sec() + opts->osd_duration / 1000.0;
         mpctx->sleeptime = 0;
         mpctx->osd_progbar.type = type;
@@ -384,11 +383,7 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
                              mpctx->osd_progbar.num_stops, pos);
         }
         osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
-        return;
     }
-
-    set_osd_msg(mpctx, 1, opts->osd_duration, "%s: %d %%",
-                name, ROUND(100 * (val - min) / (max - min)));
 }
 
 // Update a currently displayed bar of the same type, without resetting the
@@ -496,7 +491,7 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
 {
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_BAR) {
         double pos = get_current_pos_ratio(mpctx, false);
-        set_osd_bar(mpctx, OSD_BAR_SEEK, "Position", 0, 1, 0, MPCLAMP(pos, 0, 1));
+        set_osd_bar(mpctx, OSD_BAR_SEEK, 0, 1, 0, MPCLAMP(pos, 0, 1));
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {

@@ -428,7 +428,7 @@ void update_window_title(struct MPContext *mpctx, bool force);
 void stream_dump(struct MPContext *mpctx);
 
 // osd.c
-void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
+void set_osd_bar(struct MPContext *mpctx, int type,
                  double min, double max, double neutral, double val);
 void set_osd_msg(struct MPContext *mpctx, int level, int time,
                  const char* fmt, ...) PRINTF_ATTRIBUTE(4,5);
