@@ -3689,17 +3689,17 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_OSD: {
         int v = cmd->args[0].v.i;
-        int max = (opts->term_osd && !mpctx->video_out) ? MAX_TERM_OSD_LEVEL
-                                                        : MAX_OSD_LEVEL;
-        if (opts->osd_level > max)
-            opts->osd_level = max;
+        if (opts->osd_level > MAX_OSD_LEVEL)
+            opts->osd_level = MAX_OSD_LEVEL;
         if (v < 0)
-            opts->osd_level = (opts->osd_level + 1) % (max + 1);
+            opts->osd_level = (opts->osd_level + 1) % (MAX_OSD_LEVEL + 1);
         else
-            opts->osd_level = v > max ? max : v;
-        if (msg_osd && opts->osd_level <= 1)
-            set_osd_msg(mpctx, 0, osd_duration,
-                         "OSD: %s", opts->osd_level ? "yes" : "no");
+            opts->osd_level = MPCLAMP(v, 0, MAX_OSD_LEVEL);
+        if (opts->osd_level > 0) {
+            set_osd_msg(mpctx, osdl, osd_duration, "OSD level: %d", opts->osd_level);
+        } else {
+            set_osd_msg(mpctx, 0, 0, "%s", "");
+        }
         break;
     }
 

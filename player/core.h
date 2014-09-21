@@ -85,7 +85,6 @@ enum mp_osd_seek_info {
 enum {
     // other constants
     MAX_OSD_LEVEL = 3,
-    MAX_TERM_OSD_LEVEL = 1,
     OSD_LEVEL_INVISIBLE = 4,
     OSD_BAR_SEEK = 256,
 
