@@ -2,13 +2,11 @@
 
 : "${MPV:=mpv}"
 : "${ILDETECT_MPV:=$MPV}"
-: "${ILDETECT_MPV:=$MPV}"
 : "${ILDETECT_MPVFLAGS:=--start=35% --length=35}"
 : "${ILDETECT_DRY_RUN:=}"
 : "${ILDETECT_QUIET:=}"
 : "${ILDETECT_RUN_INTERLACED_ONLY:=}"
 : "${ILDETECT_FORCE_RUN:=}"
-: "${MAKE:=make}"
 
 # exit status:
 # 0 progressive
