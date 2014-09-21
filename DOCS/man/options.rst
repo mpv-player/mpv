@@ -972,10 +972,6 @@ Audio
         maximum amplification, i.e. amplify by 200%. The default volume (no
         change in volume) will be ``50`` in this case.
 
-``--volstep=<0-100>``
-    Set the step size of mixer volume changes in percent of the full range
-    (default: 2).
-
 ``--audiodrop``
     If video is by more than 500 ms behind, insert 500 ms of silence, to make up
     for audio getting ahead. Might help if video decoding is too slow beyond

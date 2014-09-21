@@ -71,7 +71,6 @@ typedef struct MPOpts {
     float mixer_init_volume;
     int mixer_init_mute;
     char *mixer_restore_volume_data;
-    int volstep;
     float softvol_max;
     int gapless_audio;
     double audio_buffer;

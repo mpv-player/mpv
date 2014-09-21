@@ -981,5 +981,6 @@ static const char *const replaced_opts =
     "|forceidx#--index"
     "|cache-pause-below#for 'no', use --no-cache-pause"
     "|no-cache-pause-below#--no-cache-pause"
+    "|volstep#edit input.conf directly instead"
     "|"
 ;
