@@ -140,6 +140,10 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
     const char *optname = prop->name;
     struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
                                                   bstr0(optname));
+
+    if (!opt)
+        return M_PROPERTY_UNKNOWN;
+
     void *valptr = opt->data;
 
     switch (action) {
@@ -2837,11 +2841,9 @@ static const struct m_property mp_properties[] = {
     {"sub-visibility", property_osd_helper},
     {"sub-forced-only", property_osd_helper},
     {"sub-scale", property_osd_helper},
-#if HAVE_LIBASS
     {"ass-use-margins", property_osd_helper},
     {"ass-vsfilter-aspect-compat", property_osd_helper},
     {"ass-style-override", property_osd_helper},
-#endif
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
@@ -3062,12 +3064,10 @@ static const struct property_osd_display {
     { "ass-style-override", "ASS subtitle style override"},
     { "vf", "Video filters", .msg = "Video filters:\n${vf}"},
     { "af", "Audio filters", .msg = "Audio filters:\n${af}"},
-#if HAVE_TV
     { "tv-brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS },
     { "tv-hue", "Hue", .osd_progbar = OSD_HUE},
     { "tv-saturation", "Saturation", .osd_progbar = OSD_SATURATION },
     { "tv-contrast", "Contrast", .osd_progbar = OSD_CONTRAST },
-#endif
     {0}
 };
 
