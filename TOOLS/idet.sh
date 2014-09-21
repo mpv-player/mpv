@@ -8,6 +8,9 @@
 : "${ILDETECT_RUN_INTERLACED_ONLY:=}"
 : "${ILDETECT_FORCE_RUN:=}"
 
+# This script uses ffmpeg's "idet" filter for interlace detection. In the
+# long run this should replace ildetect.sh+ildetect.so.
+
 # exit status:
 # 0 progressive
 # 1 telecine
