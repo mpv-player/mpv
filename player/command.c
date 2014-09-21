@@ -3012,8 +3012,6 @@ static const struct property_osd_display {
     int seek_msg, seek_bar;
     // Free-form message (if NULL, osd_name or the property name is used)
     const char *msg;
-    // Extra free-form message (just for volume)
-    const char *extra_msg;
 } property_osd_display[] = {
     // general
     { "loop", "Loop" },
@@ -3026,7 +3024,8 @@ static const struct property_osd_display {
     { "clock", "Clock" },
     // audio
     { "volume", "Volume",
-      .extra_msg = "${?mute==yes:(Muted)}", .osd_progbar = OSD_VOLUME },
+      .msg = "Volume: ${volume} % ${?mute==yes:(Muted)}",
+      .osd_progbar = OSD_VOLUME },
     { "mute", "Mute" },
     { "audio-delay", "A-V delay" },
     { "audio", "Audio" },
@@ -3081,7 +3080,6 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
     int osd_progbar = 0;
     const char *osd_name = NULL;
     const char *msg = NULL;
-    const char *extra_msg = NULL;
 
     // look for the command
     for (p = property_osd_display; p->name; p++) {
@@ -3094,17 +3092,14 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
     if (!p->name)
         p = NULL;
 
-    if (p) {
+    if (p)
         msg = p->msg;
-        extra_msg = p->extra_msg;
-    }
 
     if (osd_mode != MP_ON_OSD_AUTO) {
         osd_name = osd_name ? osd_name : name;
         if (!(osd_mode & MP_ON_OSD_MSG)) {
             osd_name = NULL;
             msg = NULL;
-            extra_msg = NULL;
         }
         osd_progbar = osd_progbar ? osd_progbar : ' ';
         if (!(osd_mode & MP_ON_OSD_BAR))
@@ -3141,18 +3136,11 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
             if (ok)
                 set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, n, f);
         }
-        if (ok && osd_mode == MP_ON_OSD_AUTO && opts->osd_bar_visible)
-            msg = NULL;
     }
 
     char *osd_msg = NULL;
     if (msg)
         osd_msg = talloc_steal(tmp, mp_property_expand_string(mpctx, msg));
-    if (extra_msg) {
-        char *t = talloc_steal(tmp, mp_property_expand_string(mpctx, extra_msg));
-        osd_msg = talloc_asprintf(tmp, "%s%s%s", osd_msg ? osd_msg : "",
-                                  osd_msg && osd_msg[0] ? " " : "", t);
-    }
 
     if (osd_msg && osd_msg[0])
         set_osd_msg(mpctx, 1, opts->osd_duration, "%s", osd_msg);
