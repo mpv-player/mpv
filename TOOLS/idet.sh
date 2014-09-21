@@ -45,10 +45,10 @@ judge()
                 exit 16
                 ;;
         esac
-        tff=$(($tff + $tff1))
-        bff=$(($bff + $bff1))
-        progressive=$(($progressive + $progressive1))
-        undetermined=$(($undetermined + $undetermined1))
+        tff=$((tff + tff1))
+        bff=$((bff + bff1))
+        progressive=$((progressive + progressive1))
+        undetermined=$((undetermined + undetermined1))
     done <<EOF
 $(testfun "$@")
 EOF
