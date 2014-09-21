@@ -124,7 +124,7 @@ EOF
                 fi
                 ;;
             X-MIDENTIFY:\ *)
-                local key="${line#X-MIDENTIFY:\ }"
+                local key="${line#X-MIDENTIFY: }"
                 local value="${key#* }"
                 key="${key%% *}"
                 key="$(printf '%s\n' "$key" | tr - _)"
