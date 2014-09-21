@@ -231,12 +231,23 @@ Available filters are:
     ``<fmt>``
         Format name, e.g. rgb15, bgr24, 420p, etc. (default: 420p).
 
-``pp[=[filter1[:option1[:option2...]]/[-]filter2...]]``
+``pp=[filter string]``
     Enables the specified chain of post-processing subfilters. Subfilters must
     be separated by '/' and can be disabled by prepending a '-'. Each
     subfilter and some options have a short and a long name that can be used
-    interchangeably, i.e. ``dr``/``dering`` are the same. All subfilters share
-    common options to determine their scope:
+    interchangeably, i.e. ``dr``/``dering`` are the same.
+
+    .. note::
+
+        Unlike in MPlayer or in earlier versions, you must quote the pp string
+        if it contains ``:`` characters, e.g. ``'--vf=pp=[...]'``.
+
+    .. admonition:: Warning
+
+        This filter is most likely useless on modern HD video. It might be
+        helpful with old low-resolution files.
+
+    All subfilters share common options to determine their scope:
 
     ``a/autoq``
         Automatically switch the subfilter off if the CPU is too slow.
@@ -250,11 +261,6 @@ Available filters are:
     .. note::
 
         ``--vf=pp:help`` shows a list of available subfilters.
-
-    .. note::
-
-        Unlike in MPlayer or in earlier versions, you must quote the pp string
-        if it contains ``:`` characters, e.g. ``'--vf=pp=[...]'``.
 
     Available subfilters are:
 
