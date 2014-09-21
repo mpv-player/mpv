@@ -3667,8 +3667,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 if (cmd->id == MP_CMD_SUB_STEP) {
                     opts->sub_delay -= a[0];
                     osd_changed_all(mpctx->osd);
-                    set_osd_msg(mpctx, osdl, osd_duration,
-                                 "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));
+                    show_property_osd(mpctx, "sub-delay", on_osd);
                 } else {
                     // We can easily get stuck by failing to seek to the video
                     // frame which actually shows the sub first (because video
