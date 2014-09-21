@@ -3066,13 +3066,16 @@ static const struct property_osd_display {
     { "tv-hue", "Hue", .osd_progbar = OSD_HUE},
     { "tv-saturation", "Saturation", .osd_progbar = OSD_SATURATION },
     { "tv-contrast", "Contrast", .osd_progbar = OSD_CONTRAST },
+    // By default, don't display the following properties on OSD
+    { "pause", NULL },
+    { "fullscreen", NULL },
     {0}
 };
 
 static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct property_osd_display disp = { .name = name };
+    struct property_osd_display disp = { .name = name, .osd_name = name };
 
     if (!osd_mode)
         return;
