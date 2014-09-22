@@ -48,10 +48,10 @@ extern const struct ad_functions ad_lavc;
 extern const struct ad_functions ad_spdif;
 
 static const struct ad_functions * const ad_drivers[] = {
+    &ad_lavc,
 #if HAVE_MPG123
     &ad_mpg123,
 #endif
-    &ad_lavc,
     &ad_spdif,
     NULL
 };
