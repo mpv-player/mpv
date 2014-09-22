@@ -756,6 +756,8 @@ static void handle_loop_file(struct MPContext *mpctx)
         mpctx->stop_play = KEEP_PLAYING;
         set_osd_function(mpctx, OSD_FFW);
         queue_seek(mpctx, MPSEEK_ABSOLUTE, get_start_time(mpctx), 0, true);
+        if (opts->loop_file > 0)
+            opts->loop_file--;
     }
 }
 

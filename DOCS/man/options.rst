@@ -205,11 +205,15 @@ Playback Control
     Note that ``--playlist`` always loads all entries, so you use that instead
     if you really have the need for this functionality.
 
-``--loop-file``
-    Loop a single file. The difference to ``--loop=inf`` is that this doesn't
-    loop the playlist, just the file itself. If the playlist contains only a
-    single file, the difference between the two option is that this option
-    performs a seek on loop, instead of reloading the file.
+``--loop-file=<N|inf|no>``
+    Loop a single file N times. ``inf`` means forever, ``no`` means normal
+    playback. For compatibility, ``--loop-file`` and ``--loop-file=yes`` are
+    also accepted, and are the same as ``--loop-file=inf``.
+
+    The difference to ``--loop`` is that this doesn't loop the playlist, just
+    the file itself. If the playlist contains only a single file, the difference
+    between the two option is that this option performs a seek on loop, instead
+    of reloading the file.
 
 ``--ordered-chapters``, ``--no-ordered-chapters``
     Enabled by default.
