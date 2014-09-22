@@ -223,6 +223,54 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
     pthread_mutex_unlock(&p->lock);
 }
 
+static bool locked_need_input(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+    return p->num_buffered < MP_TALLOC_ELEMS(p->buffered);
+}
+
+// Return true if progress was made.
+static bool locked_read_output(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+    bool r = false;
+
+    // Move finished frames from the request slots to the vf output queue.
+    while (p->requested[0] && p->requested[0] != &dummy_img) {
+        struct mp_image *out = p->requested[0];
+        if (out->pts != MP_NOPTS_VALUE) {
+            double duration = out->pts;
+            out->pts = p->out_pts;
+            p->out_pts += duration;
+        }
+        vf_add_output_frame(vf, out);
+        for (int n = 0; n < p->max_requests - 1; n++)
+            p->requested[n] = p->requested[n + 1];
+        p->requested[p->max_requests - 1] = NULL;
+        p->out_frameno++;
+        r = true;
+    }
+
+    // Don't request frames if we haven't sent any input yet.
+    if (p->num_buffered + p->in_frameno == 0)
+        return r;
+
+    // Request new future frames as far as possible.
+    for (int n = 0; n < p->max_requests; n++) {
+        if (!p->requested[n]) {
+            // Note: this assumes getFrameAsync() will never call
+            //       infiltGetFrame (if it does, we would deadlock)
+            p->requested[n] = (struct mp_image *)&dummy_img;
+            p->failed = false;
+            MP_DBG(vf, "requesting frame %d (%d)\n", p->out_frameno + n, n);
+            p->vsapi->getFrameAsync(p->out_frameno + n, p->out_node,
+                                    vs_frame_done, vf);
+        }
+    }
+
+    return r;
+}
+
 static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 {
     struct vf_priv_s *p = vf->priv;
@@ -254,44 +302,43 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
             break;
         }
 
-        if (mpi && p->num_buffered < MP_TALLOC_ELEMS(p->buffered)) {
+        // Make the input frame available to infiltGetFrame().
+        if (mpi && locked_need_input(vf)) {
             p->buffered[p->num_buffered++] = talloc_steal(p->buffered, mpi);
             mpi = NULL;
             pthread_cond_broadcast(&p->wakeup);
         }
 
-        while (p->requested[0] && p->requested[0] != &dummy_img) {
-            struct mp_image *out = p->requested[0];
-            if (out->pts != MP_NOPTS_VALUE) {
-                double duration = out->pts;
-                out->pts = p->out_pts;
-                p->out_pts += duration;
-            }
-            vf_add_output_frame(vf, out);
-            for (int n = 0; n < p->max_requests - 1; n++)
-                p->requested[n] = p->requested[n + 1];
-            p->requested[p->max_requests - 1] = NULL;
-            p->out_frameno++;
-        }
-
-        for (int n = 0; n < p->max_requests; n++) {
-            if (!p->requested[n]) {
-                // Note: this assumes getFrameAsync() will never call
-                //       infiltGetFrame (if it does, we would deadlock)
-                p->requested[n] = (struct mp_image *)&dummy_img;
-                p->failed = false;
-                MP_DBG(vf, "requesting frame %d (%d)\n", p->out_frameno + n, n);
-                p->vsapi->getFrameAsync(p->out_frameno + n, p->out_node,
-                                        vs_frame_done, vf);
-            }
-        }
+        locked_read_output(vf);
 
         if (!mpi)
             break;
         pthread_cond_wait(&p->wakeup, &p->lock);
     }
     pthread_mutex_unlock(&p->lock);
+    return ret;
+}
 
+// Fetch 1 outout frame, or 0 if we probably need new input.
+static int filter_out(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+    int ret = 0;
+    pthread_mutex_lock(&p->lock);
+    while (1) {
+        if (p->failed) {
+            ret = -1;
+            break;
+        }
+        if (locked_read_output(vf))
+            break;
+        // If the VS filter wants new input, there's no guarantee that we can
+        // actually finish any time soon without feeding new input.
+        if (locked_need_input(vf))
+            break;
+        pthread_cond_wait(&p->wakeup, &p->lock);
+    }
+    pthread_mutex_unlock(&p->lock);
     return ret;
 }
 
@@ -375,6 +422,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
         }
         pthread_cond_wait(&p->wakeup, &p->lock);
     }
+    pthread_cond_broadcast(&p->wakeup);
     pthread_mutex_unlock(&p->lock);
     return ret;
 }
@@ -413,6 +461,8 @@ static void destroy_vs(struct vf_instance *vf)
     while (num_requested(p))
         pthread_cond_wait(&p->wakeup, &p->lock);
     pthread_mutex_unlock(&p->lock);
+
+    MP_DBG(vf, "all requests terminated\n");
 
     if (p->in_node)
         p->vsapi->freeNode(p->in_node);
@@ -594,7 +644,7 @@ static int vf_open(vf_instance_t *vf)
     vf->reconfig = NULL;
     vf->config = config;
     vf->filter_ext = filter_ext;
-    vf->filter = NULL;
+    vf->filter_out = filter_out;
     vf->query_format = query_format;
     vf->control = control;
     vf->uninit = uninit;
