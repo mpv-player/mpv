@@ -532,11 +532,6 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
     if (have_new_frame(mpctx))
         return VD_NEW_FRAME;
 
-    // Filter a new frame.
-    int r = video_decode_and_filter(mpctx);
-    if (r < 0)
-        return r; // error
-
     if (!mpctx->next_frame[0] && mpctx->next_frame[1]) {
         mpctx->next_frame[0] = mpctx->next_frame[1];
         mpctx->next_frame[1] = NULL;
@@ -560,11 +555,18 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
         }
         mpctx->dropped_frames = 0;
         MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
-        r = VD_PROGRESS;
     }
 
+    if (have_new_frame(mpctx))
+        return VD_NEW_FRAME;
+
     // Get a new frame if we need one.
+    int r = VD_PROGRESS;
     if (!mpctx->next_frame[1]) {
+        // Filter a new frame.
+        r = video_decode_and_filter(mpctx);
+        if (r < 0)
+            return r; // error
         struct mp_image *img = vf_read_output_frame(mpctx->d_video->vfilter);
         if (img) {
             // Always add these; they make backstepping after seeking faster.
@@ -589,7 +591,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
 
     // On EOF, always allow the playloop to use the remaining frame.
     if (have_new_frame(mpctx) || (r <= 0 && mpctx->next_frame[0]))
-        r = VD_NEW_FRAME;
+        return VD_NEW_FRAME;
 
     return r;
 }
