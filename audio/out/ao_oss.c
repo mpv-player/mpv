@@ -296,9 +296,9 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
 
 ac3_retry:
     if (AF_FORMAT_IS_IEC61937(format)) {
-        oss_format = format2oss(format);
-    } else {
         oss_format = AFMT_AC3;
+    } else {
+        oss_format = format2oss(format);
     }
     if (oss_format == -1) {
         MP_VERBOSE(ao, "Unknown/not supported internal format: %s\n",
