@@ -522,7 +522,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     err = ca_enable_device_listener(p->device, changed);
     CHECK_CA_ERROR("cannot install format change listener during init");
 
-    if (p->stream_asdb.mFormatFlags & kAudioFormatFlagIsBigEndian)
+    if (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsBigEndian)
         MP_WARN(ao, "stream has non-native byte order, output may fail\n");
 
     ao->samplerate = p->stream_asbd.mSampleRate;
