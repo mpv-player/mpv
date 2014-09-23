@@ -1,3 +1,18 @@
+Release 0.5.4
+=============
+
+Bug fixes
+---------
+
+- Fix generation of watch later config file for multiline file names when
+  --write-filename-in-watch-later-config is used (avoid writing the new lines
+  in the config, which would make it possible for the filename to set options).
+- Fix random crashes on audio uninit.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 6f7f7c3..1a7b6f1`` in
+the git repository.
+
 Release 0.5.3
 =============
 
