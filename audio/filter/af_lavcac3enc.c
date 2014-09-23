@@ -30,6 +30,7 @@
 #include <libavutil/audioconvert.h>
 #include <libavutil/intreadwrite.h>
 #include <libavutil/common.h>
+#include <libavutil/bswap.h>
 #include <libavutil/mem.h>
 
 #include "common/common.h"
@@ -87,7 +88,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (in->nch > AC3_MAX_CHANNELS)
             mp_audio_set_num_channels(in, AC3_MAX_CHANNELS);
 
-        mp_audio_set_format(af->data, AF_FORMAT_AC3_BE);
+        mp_audio_set_format(af->data, AF_FORMAT_AC3);
         mp_audio_set_num_channels(af->data, 2);
 
         if (!mp_audio_config_equals(in, &orig_in))
@@ -148,6 +149,12 @@ static void uninit(struct af_instance* af)
             av_free(s->lavc_actx);
         }
     }
+}
+
+static void swap_16(uint16_t *ptr, size_t size)
+{
+    for (size_t n = 0; n < size; n++)
+        ptr[n] = av_bswap16(ptr[n]);
 }
 
 // Filter data through filter
@@ -223,11 +230,11 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
             frame_size = AC3_FRAME_SIZE * 2 * 2;
             header_len = 8;
 
-            AV_WB16(hdr,     0xF872);   // iec 61937 syncword 1
-            AV_WB16(hdr + 2, 0x4E1F);   // iec 61937 syncword 2
+            AV_WL16(hdr,     0xF872);   // iec 61937 syncword 1
+            AV_WL16(hdr + 2, 0x4E1F);   // iec 61937 syncword 2
             hdr[4] = bsmod;             // bsmod
             hdr[5] = 0x01;              // data-type ac3
-            AV_WB16(hdr + 6, len << 3); // number of bits in payload
+            AV_WL16(hdr + 6, len << 3); // number of bits in payload
         }
 
         size_t max_size = (max_out_samples - out->samples) * out->sstride;
@@ -239,6 +246,7 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
         memcpy(buf + header_len, s->pkt.data, s->pkt.size);
         memset(buf + header_len + s->pkt.size, 0,
                frame_size - (header_len + s->pkt.size));
+        swap_16((uint16_t *)(buf + header_len), s->pkt.size / 2);
         out->samples += frame_size / out->sstride;
     }
 

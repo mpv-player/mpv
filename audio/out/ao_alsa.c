@@ -222,10 +222,8 @@ static const int mp_to_alsa_format[][2] = {
     {AF_FORMAT_S24_BE,      SND_PCM_FORMAT_S24_3BE},
     {AF_FORMAT_FLOAT_LE,    SND_PCM_FORMAT_FLOAT_LE},
     {AF_FORMAT_FLOAT_BE,    SND_PCM_FORMAT_FLOAT_BE},
-    {AF_FORMAT_AC3_LE,      SND_PCM_FORMAT_S16_LE},
-    {AF_FORMAT_AC3_BE,      SND_PCM_FORMAT_S16_BE},
-    {AF_FORMAT_IEC61937_LE, SND_PCM_FORMAT_S16_LE},
-    {AF_FORMAT_IEC61937_BE, SND_PCM_FORMAT_S16_BE},
+    {AF_FORMAT_AC3,         SND_PCM_FORMAT_S16_LE},
+    {AF_FORMAT_IEC61937,    SND_PCM_FORMAT_S16_LE},
     {AF_FORMAT_MPEG2,       SND_PCM_FORMAT_MPEG},
     {AF_FORMAT_UNKNOWN,     SND_PCM_FORMAT_UNKNOWN},
 };
@@ -421,9 +419,9 @@ static int init(struct ao *ao)
                 af_fmt_to_str(ao->format));
         p->alsa_fmt = SND_PCM_FORMAT_S16_LE;
         if (AF_FORMAT_IS_AC3(ao->format))
-            ao->format = AF_FORMAT_AC3_LE;
+            ao->format = AF_FORMAT_AC3;
         else if (AF_FORMAT_IS_IEC61937(ao->format))
-            ao->format = AF_FORMAT_IEC61937_LE;
+            ao->format = AF_FORMAT_IEC61937;
         else
             ao->format = AF_FORMAT_S16_LE;
     }

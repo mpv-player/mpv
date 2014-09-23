@@ -130,7 +130,7 @@ static int init(struct ao *ao)
         case AF_FORMAT_S24_LE:
         case AF_FORMAT_S32_LE:
         case AF_FORMAT_FLOAT_LE:
-        case AF_FORMAT_AC3_LE:
+        case AF_FORMAT_AC3:
              break;
         default:
             ao->format = AF_FORMAT_S16_LE;

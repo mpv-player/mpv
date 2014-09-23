@@ -117,13 +117,13 @@ static int init(struct dec_audio *da, const char *decoder)
     switch (stream->codec->codec_id) {
     case AV_CODEC_ID_AAC:
         spdif_ctx->iec61937_packet_size = 16384;
-        sample_format                   = AF_FORMAT_IEC61937_LE;
+        sample_format                   = AF_FORMAT_IEC61937;
         samplerate                      = 48000;
         num_channels                    = 2;
         break;
     case AV_CODEC_ID_AC3:
         spdif_ctx->iec61937_packet_size = 6144;
-        sample_format                   = AF_FORMAT_AC3_LE;
+        sample_format                   = AF_FORMAT_AC3;
         samplerate                      = 48000;
         num_channels                    = 2;
         break;
@@ -131,19 +131,19 @@ static int init(struct dec_audio *da, const char *decoder)
         if (da->opts->dtshd) {
             av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
             spdif_ctx->iec61937_packet_size = 32768;
-            sample_format                   = AF_FORMAT_IEC61937_LE;
+            sample_format                   = AF_FORMAT_IEC61937;
             samplerate                      = 192000;
             num_channels                    = 2*4;
         } else {
             spdif_ctx->iec61937_packet_size = 32768;
-            sample_format                   = AF_FORMAT_AC3_LE;
+            sample_format                   = AF_FORMAT_AC3;
             samplerate                      = 48000;
             num_channels                    = 2;
         }
         break;
     case AV_CODEC_ID_EAC3:
         spdif_ctx->iec61937_packet_size = 24576;
-        sample_format                   = AF_FORMAT_IEC61937_LE;
+        sample_format                   = AF_FORMAT_IEC61937;
         samplerate                      = 192000;
         num_channels                    = 2;
         break;
@@ -155,7 +155,7 @@ static int init(struct dec_audio *da, const char *decoder)
         break;
     case AV_CODEC_ID_TRUEHD:
         spdif_ctx->iec61937_packet_size = 61440;
-        sample_format                   = AF_FORMAT_IEC61937_LE;
+        sample_format                   = AF_FORMAT_IEC61937;
         samplerate                      = 192000;
         num_channels                    = 8;
         break;

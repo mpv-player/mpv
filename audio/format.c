@@ -119,8 +119,8 @@ bool af_fmt_is_planar(int format)
 
 const struct af_fmt_entry af_fmtstr_table[] = {
     FMT("mpeg2",                AF_FORMAT_MPEG2)
-    FMT_ENDIAN("ac3",           AF_FORMAT_AC3)
-    FMT_ENDIAN("iec61937",      AF_FORMAT_IEC61937)
+    FMT("ac3",                  AF_FORMAT_AC3)
+    FMT("iec61937",             AF_FORMAT_IEC61937)
 
     FMT("u8",                   AF_FORMAT_U8)
     FMT("s8",                   AF_FORMAT_S8)
