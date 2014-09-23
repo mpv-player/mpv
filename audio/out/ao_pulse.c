@@ -380,7 +380,14 @@ static int init(struct ao *ao)
         goto unlock_and_fail;
 
     /* Wait until the stream is ready */
-    pa_threaded_mainloop_wait(priv->mainloop);
+    while (1) {
+        int state = pa_stream_get_state(priv->stream);
+        if (state == PA_STREAM_READY)
+            break;
+        if (!PA_STREAM_IS_GOOD(state))
+            goto unlock_and_fail;
+        pa_threaded_mainloop_wait(priv->mainloop);
+    }
 
     if (pa_stream_get_state(priv->stream) != PA_STREAM_READY)
         goto unlock_and_fail;
