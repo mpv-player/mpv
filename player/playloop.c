@@ -938,11 +938,11 @@ void run_playloop(struct MPContext *mpctx)
 
     mp_handle_nav(mpctx);
 
+    handle_loop_file(mpctx);
+
     handle_keep_open(mpctx);
 
     handle_sstep(mpctx);
-
-    handle_loop_file(mpctx);
 
     if (mpctx->stop_play)
         return;
