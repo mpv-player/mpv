@@ -30,9 +30,6 @@
 
 int af_fmt2bps(int format)
 {
-    if (AF_FORMAT_IS_AC3(format)) return 2;
-    if (format == AF_FORMAT_UNKNOWN)
-        return 0;
     switch (format & AF_FORMAT_BITS_MASK) {
     case AF_FORMAT_8BIT:  return 1;
     case AF_FORMAT_16BIT: return 2;
@@ -62,7 +59,7 @@ static int bits_to_mask(int bits)
 
 int af_fmt_change_bits(int format, int bits)
 {
-    if (!af_fmt_is_valid(format) || (format & AF_FORMAT_SPECIAL_MASK))
+    if (!af_fmt_is_valid(format))
         return 0;
     int mask = bits_to_mask(bits);
     format = (format & ~AF_FORMAT_BITS_MASK) | mask;
@@ -110,10 +107,6 @@ bool af_fmt_is_planar(int format)
 }
 
 const struct af_fmt_entry af_fmtstr_table[] = {
-    {"mpeg2",       AF_FORMAT_MPEG2},
-    {"ac3",         AF_FORMAT_AC3},
-    {"iec61937",    AF_FORMAT_IEC61937},
-
     {"u8",          AF_FORMAT_U8},
     {"s8",          AF_FORMAT_S8},
     {"u16",         AF_FORMAT_U16},
@@ -130,6 +123,14 @@ const struct af_fmt_entry af_fmtstr_table[] = {
     {"s32p",        AF_FORMAT_S32P},
     {"floatp",      AF_FORMAT_FLOATP},
     {"doublep",     AF_FORMAT_DOUBLEP},
+
+    {"spdif-aac",   AF_FORMAT_S_AAC},
+    {"spdif-ac3",   AF_FORMAT_S_AC3},
+    {"spdif-dts",   AF_FORMAT_S_DTS},
+    {"spdif-dtshd", AF_FORMAT_S_DTSHD},
+    {"spdif-eac3",  AF_FORMAT_S_EAC3},
+    {"spdif-mp3",   AF_FORMAT_S_MP3},
+    {"spdif-truehd",AF_FORMAT_S_TRUEHD},
 
     {0}
 };
@@ -199,9 +200,9 @@ int af_format_conversion_score(int dst_format, int src_format)
         score -= 1;     // has to (de-)planarize
     if (FMT_DIFF(AF_FORMAT_SIGN_MASK, dst_format, src_format))
         score -= 4;     // has to swap sign
-    if (FMT_DIFF(AF_FORMAT_POINT_MASK, dst_format, src_format)) {
+    if (FMT_DIFF(AF_FORMAT_TYPE_MASK, dst_format, src_format)) {
         int dst_bits = dst_format & AF_FORMAT_BITS_MASK;
-        if ((dst_format & AF_FORMAT_POINT_MASK) == AF_FORMAT_F) {
+        if ((dst_format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F) {
             // For int->float, always prefer 32 bit float.
             score -= dst_bits == AF_FORMAT_32BIT ? 8 : 0;
         } else {
@@ -217,7 +218,7 @@ int af_format_conversion_score(int dst_format, int src_format)
         }
     }
     // Consider this the worst case.
-    if (FMT_DIFF(AF_FORMAT_POINT_MASK, dst_format, src_format))
+    if (FMT_DIFF(AF_FORMAT_TYPE_MASK, dst_format, src_format))
         score -= 2048;  // has to convert float<->int
     return score;
 }

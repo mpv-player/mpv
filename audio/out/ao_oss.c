@@ -134,15 +134,12 @@ static const int format_table[][2] = {
 #ifdef AFMT_FLOAT
     {AFMT_FLOAT,        AF_FORMAT_FLOAT},
 #endif
-    // SPECIALS
-#ifdef AFMT_MPEG
-    {AFMT_MPEG,         AF_FORMAT_MPEG2},
-#endif
-#ifdef AFMT_AC3
-    {AFMT_AC3,          AF_FORMAT_AC3},
-#endif
     {-1, -1}
 };
+
+#ifndef AFMT_AC3
+#define AFMT_AC3 -1
+#endif
 
 static int format2oss(int format)
 {
@@ -204,7 +201,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             return CONTROL_OK;
 #endif
 
-        if (AF_FORMAT_IS_AC3(ao->format))
+        if (AF_FORMAT_IS_SPECIAL(ao->format))
             return CONTROL_TRUE;
 
         if ((fd = open(p->oss_mixer_device, O_RDONLY)) != -1) {
@@ -293,14 +290,16 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
     fcntl(p->audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
 
-    if (AF_FORMAT_IS_AC3(format)) {
+    if (AF_FORMAT_IS_IEC61937(format)) {
         ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &samplerate);
     }
 
 ac3_retry:
-    if (AF_FORMAT_IS_AC3(format))
-        format = AF_FORMAT_AC3;
-    oss_format = format2oss(format);
+    if (AF_FORMAT_IS_IEC61937(format)) {
+        oss_format = format2oss(format);
+    } else {
+        oss_format = AFMT_AC3;
+    }
     if (oss_format == -1) {
         MP_VERBOSE(ao, "Unknown/not supported internal format: %s\n",
                    af_fmt_to_str(format));
@@ -345,7 +344,7 @@ ac3_retry:
 
     MP_VERBOSE(ao, "sample format: %s\n", af_fmt_to_str(format));
 
-    if (!AF_FORMAT_IS_AC3(format)) {
+    if (!AF_FORMAT_IS_IEC61937(format)) {
         struct mp_chmap_sel sel = {0};
         for (int n = 0; n < MP_NUM_CHANNELS + 1; n++)
             mp_chmap_sel_add_map(&sel, &oss_layouts[n]);

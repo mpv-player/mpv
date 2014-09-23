@@ -88,7 +88,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (in->nch > AC3_MAX_CHANNELS)
             mp_audio_set_num_channels(in, AC3_MAX_CHANNELS);
 
-        mp_audio_set_format(af->data, AF_FORMAT_AC3);
+        mp_audio_set_format(af->data, AF_FORMAT_S_AC3);
         mp_audio_set_num_channels(af->data, 2);
 
         if (!mp_audio_config_equals(in, &orig_in))

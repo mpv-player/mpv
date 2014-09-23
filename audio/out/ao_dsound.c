@@ -382,21 +382,20 @@ static int init(struct ao *ao)
     int format = af_fmt_from_planar(ao->format);
     int rate = ao->samplerate;
 
-    if (AF_FORMAT_IS_AC3(format))
-        format = AF_FORMAT_AC3;
-    else {
+    if (!AF_FORMAT_IS_IEC61937(format)) {
         struct mp_chmap_sel sel = {0};
         mp_chmap_sel_add_waveext(&sel);
         if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
             return -1;
     }
     switch (format) {
-    case AF_FORMAT_AC3:
     case AF_FORMAT_S24:
     case AF_FORMAT_S16:
     case AF_FORMAT_U8:
         break;
     default:
+        if (AF_FORMAT_IS_IEC61937(format))
+            break;
         MP_VERBOSE(ao, "format %s not supported defaulting to Signed 16-bit Little-Endian\n",
                    af_fmt_to_str(format));
         format = AF_FORMAT_S16;
@@ -417,7 +416,8 @@ static int init(struct ao *ao)
                     ? sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX) : 0;
     wformat.Format.nChannels = ao->channels.num;
     wformat.Format.nSamplesPerSec = rate;
-    if (AF_FORMAT_IS_AC3(format)) {
+    if (AF_FORMAT_IS_IEC61937(format)) {
+        // Whether it also works with e.g. DTS is unknown, but probably does.
         wformat.Format.wFormatTag = WAVE_FORMAT_DOLBY_AC3_SPDIF;
         wformat.Format.wBitsPerSample = 16;
         wformat.Format.nBlockAlign = 4;

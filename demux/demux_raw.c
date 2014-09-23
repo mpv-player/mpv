@@ -110,7 +110,7 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     if (check != DEMUX_CHECK_REQUEST && check != DEMUX_CHECK_FORCE)
         return -1;
 
-    if ((opts->aformat & AF_FORMAT_SPECIAL_MASK) != 0)
+    if (AF_FORMAT_IS_SPECIAL(opts->aformat))
         return -1;
 
     sh = new_sh_stream(demuxer, STREAM_AUDIO);

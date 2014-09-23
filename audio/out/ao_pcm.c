@@ -137,10 +137,10 @@ static int init(struct ao *ao)
         case AF_FORMAT_S24:
         case AF_FORMAT_S32:
         case AF_FORMAT_FLOAT:
-        case AF_FORMAT_AC3:
              break;
         default:
-            ao->format = AF_FORMAT_S16;
+            if (!AF_FORMAT_IS_IEC61937(ao->format))
+                ao->format = AF_FORMAT_S16;
             break;
         }
     }

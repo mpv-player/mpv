@@ -29,7 +29,7 @@ static bool test_conversion(int src_format, int dst_format)
         return false;
     if (((src_format & ~AF_FORMAT_SIGN_MASK) ==
          (dst_format & ~AF_FORMAT_SIGN_MASK)) &&
-        ((src_format & AF_FORMAT_POINT_MASK) == AF_FORMAT_I))
+        ((src_format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_I))
         return true;
     return false;
 }

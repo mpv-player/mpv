@@ -315,7 +315,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     ao_get_format(mpctx->ao, &out_format);
     double play_samplerate = out_format.rate / opts->playback_speed;
 
-    bool is_pcm = !(out_format.format & AF_FORMAT_SPECIAL_MASK); // no spdif
+    bool is_pcm = !AF_FORMAT_IS_SPECIAL(out_format.format); // no spdif
     if (!opts->initial_audio_sync || !is_pcm) {
         mpctx->audio_status = STATUS_FILLING;
         return true;

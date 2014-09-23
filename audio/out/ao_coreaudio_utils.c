@@ -130,14 +130,15 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
 void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd)
 {
     asbd->mSampleRate       = ao->samplerate;
-    asbd->mFormatID         = AF_FORMAT_IS_AC3(ao->format) ?
+    // Set "AC3" for other spdif formats too - unknown if that works.
+    asbd->mFormatID         = AF_FORMAT_IS_IEC61937(ao->format) ?
                               kAudioFormat60958AC3 :
                               kAudioFormatLinearPCM;
     asbd->mChannelsPerFrame = ao->channels.num;
     asbd->mBitsPerChannel   = af_fmt2bits(ao->format);
     asbd->mFormatFlags      = kAudioFormatFlagIsPacked;
 
-    if ((ao->format & AF_FORMAT_POINT_MASK) == AF_FORMAT_F)
+    if ((ao->format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F)
         asbd->mFormatFlags |= kAudioFormatFlagIsFloat;
 
     if ((ao->format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_SI)

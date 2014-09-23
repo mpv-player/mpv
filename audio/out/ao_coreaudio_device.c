@@ -410,8 +410,9 @@ static int init(struct ao *ao)
     ao->format = af_fmt_from_planar(ao->format);
 
     bool supports_digital = false;
-    /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
-    if (AF_FORMAT_IS_AC3(ao->format)) {
+    /* Probe whether device support S/PDIF stream output if input is AC3 stream,
+     * or anything else IEC61937-framed. */
+    if (AF_FORMAT_IS_IEC61937(ao->format)) {
         if (ca_device_supports_digital(ao, p->device))
             supports_digital = true;
     }
