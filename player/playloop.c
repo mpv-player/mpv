@@ -764,7 +764,9 @@ static void handle_loop_file(struct MPContext *mpctx)
 static void handle_keep_open(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE) {
+    if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE &&
+        !playlist_get_next(mpctx->playlist, 1) && opts->loop_times < 0)
+    {
         mpctx->stop_play = KEEP_PLAYING;
         if (mpctx->d_video)
             mpctx->playback_pts = mpctx->last_vo_pts;

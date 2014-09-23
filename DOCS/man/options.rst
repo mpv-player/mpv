@@ -1430,7 +1430,8 @@ Window
     See also ``--screen``.
 
 ``--keep-open``
-    Do not terminate when playing or seeking beyond the end of the file.
+    Do not terminate when playing or seeking beyond the end of the file, and
+    there is not next file to be played (and ``--loop`` is not used).
     Instead, pause the player. When trying to seek beyond end of the file, the
     player will pause at an arbitrary playback position (or, in corner cases,
     not redraw the window at all).
@@ -1442,6 +1443,12 @@ Window
         Explicitly skipping to the next file or skipping beyond the last
         chapter will terminate playback as well, even if ``--keep-open`` is
         given.
+
+    Since mpv 0.6.0, this doesn't pause if there is a next file in the playlist,
+    or the playlist is looped. Approximately, this will pause when the player
+    would normally exit, but in practice there are corner cases in which this
+    is not the case (e.g. ``mpv --keep-open file.mkv /dev/null`` will play
+    file.mkv normally, then fail to open ``/dev/null``, then exit).
 
 ``--force-window``
     Create a video output window even if there is no video. This can be useful
