@@ -109,7 +109,7 @@ else:
             pass
         else:
             raise e
-    os.mkfifo(FIFO, int("0600", 8))
+    os.mkfifo(FIFO, 0o600)
 
     opts = (os.getenv("MPV") or "mpv").split()
     opts.extend(["--no-terminal", "--force-window", "--input-file=" + FIFO,
