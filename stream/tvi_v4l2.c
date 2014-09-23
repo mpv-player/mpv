@@ -922,7 +922,7 @@ static int do_control(priv_t *priv, int cmd, void *arg)
     case TVI_CONTROL_AUD_GET_FORMAT:
         init_audio(priv);
         if (!priv->audio_initialized) return TVI_CONTROL_FALSE;
-        *(int *)arg = AF_FORMAT_S16_LE;
+        *(int *)arg = AF_FORMAT_S16;
         MP_VERBOSE(priv, "%s: get audio format: %d\n",
                info.short_name, *(int *)arg);
         return TVI_CONTROL_TRUE;

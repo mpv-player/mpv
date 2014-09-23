@@ -38,6 +38,20 @@ struct priv
     float buflen;
 };
 
+static int fmtmap[][2] = {
+    {AF_FORMAT_U8,      AUDIO_U8},
+    {AF_FORMAT_S8,      AUDIO_S8},
+    {AF_FORMAT_U16,     AUDIO_U16SYS},
+    {AF_FORMAT_S16,     AUDIO_S16SYS},
+#ifdef AUDIO_S32SYS
+    {AF_FORMAT_S32,     AUDIO_S32SYS},
+#endif
+#ifdef AUDIO_F32SYS
+    {AF_FORMAT_FLOAT,   AUDIO_F32SYS},
+#endif
+    {0}
+};
+
 static void audio_callback(void *userdata, Uint8 *stream, int len)
 {
     struct ao *ao = userdata;
@@ -104,26 +118,12 @@ static int init(struct ao *ao)
 
     SDL_AudioSpec desired, obtained;
 
-    switch (ao->format) {
-        case AF_FORMAT_U8: desired.format = AUDIO_U8; break;
-        case AF_FORMAT_S8: desired.format = AUDIO_S8; break;
-        case AF_FORMAT_U16_LE: desired.format = AUDIO_U16LSB; break;
-        case AF_FORMAT_U16_BE: desired.format = AUDIO_U16MSB; break;
-        default:
-        case AF_FORMAT_S16_LE: desired.format = AUDIO_S16LSB; break;
-        case AF_FORMAT_S16_BE: desired.format = AUDIO_S16MSB; break;
-#ifdef AUDIO_S32LSB
-        case AF_FORMAT_S32_LE: desired.format = AUDIO_S32LSB; break;
-#endif
-#ifdef AUDIO_S32MSB
-        case AF_FORMAT_S32_BE: desired.format = AUDIO_S32MSB; break;
-#endif
-#ifdef AUDIO_F32LSB
-        case AF_FORMAT_FLOAT_LE: desired.format = AUDIO_F32LSB; break;
-#endif
-#ifdef AUDIO_F32MSB
-        case AF_FORMAT_FLOAT_BE: desired.format = AUDIO_F32MSB; break;
-#endif
+    desired.format = AUDIO_S16SYS;
+    for (int n = 0; fmtmap[n][0]; n++) {
+        if (ao->format == fmtmap[n][0]) {
+            desired.format = fmtmap[n][1];
+            break;
+        }
     }
     desired.freq = ao->samplerate;
     desired.channels = ao->channels.num;
@@ -156,30 +156,18 @@ static int init(struct ao *ao)
     // large, this will help.
     ao->device_buffer = 3 * obtained.samples;
 
-    switch (obtained.format) {
-        case AUDIO_U8: ao->format = AF_FORMAT_U8; break;
-        case AUDIO_S8: ao->format = AF_FORMAT_S8; break;
-        case AUDIO_S16LSB: ao->format = AF_FORMAT_S16_LE; break;
-        case AUDIO_S16MSB: ao->format = AF_FORMAT_S16_BE; break;
-        case AUDIO_U16LSB: ao->format = AF_FORMAT_U16_LE; break;
-        case AUDIO_U16MSB: ao->format = AF_FORMAT_U16_BE; break;
-#ifdef AUDIO_S32LSB
-        case AUDIO_S32LSB: ao->format = AF_FORMAT_S32_LE; break;
-#endif
-#ifdef AUDIO_S32MSB
-        case AUDIO_S32MSB: ao->format = AF_FORMAT_S32_BE; break;
-#endif
-#ifdef AUDIO_F32LSB
-        case AUDIO_F32LSB: ao->format = AF_FORMAT_FLOAT_LE; break;
-#endif
-#ifdef AUDIO_F32MSB
-        case AUDIO_F32MSB: ao->format = AF_FORMAT_FLOAT_BE; break;
-#endif
-        default:
-            if (!ao->probing)
-                MP_ERR(ao, "could not find matching format\n");
-            uninit(ao);
-            return -1;
+    ao->format = 0;
+    for (int n = 0; fmtmap[n][0]; n++) {
+        if (obtained.format == fmtmap[n][1]) {
+            ao->format = fmtmap[n][0];
+            break;
+        }
+    }
+    if (!ao->format) {
+        if (!ao->probing)
+            MP_ERR(ao, "could not find matching format\n");
+        uninit(ao);
+        return -1;
     }
 
     if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, obtained.channels)) {

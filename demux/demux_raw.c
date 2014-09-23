@@ -34,10 +34,13 @@
 #include "video/img_format.h"
 #include "video/img_fourcc.h"
 
+#include "osdep/endian.h"
+
 struct demux_rawaudio_opts {
     struct mp_chmap channels;
     int samplerate;
     int aformat;
+    int endian;
 };
 
 #define OPT_BASE_STRUCT struct demux_rawaudio_opts
@@ -46,13 +49,16 @@ const struct m_sub_options demux_rawaudio_conf = {
         OPT_CHMAP("channels", channels, CONF_MIN, .min = 1),
         OPT_INTRANGE("rate", samplerate, 0, 1000, 8 * 48000),
         OPT_AUDIOFORMAT("format", aformat, 0),
+        OPT_CHOICE("endian", endian, 0, ({"native", 0}, {"le", 1}, {"be", 2})),
         {0}
     },
     .size = sizeof(struct demux_rawaudio_opts),
     .defaults = &(const struct demux_rawaudio_opts){
+        // Note that currently, stream_cdda expects exactly these parameters!
         .channels = MP_CHMAP_INIT_STEREO,
         .samplerate = 44100,
         .aformat = AF_FORMAT_S16,
+        .endian = 0,
     },
 };
 
@@ -121,6 +127,10 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     w->nBlockAlign = w->nChannels * samplesize;
     w->wBitsPerSample = 8 * samplesize;
     w->cbSize = 0;
+    int machine_endian = BYTE_ORDER == BIG_ENDIAN ? 2 : 1;
+    int endian = opts->endian ? opts->endian : machine_endian;
+    // wav usually implies little endian
+    sh_audio->big_endian = endian == 2;
 
     struct priv *p = talloc_ptrtype(demuxer, p);
     demuxer->priv = p;

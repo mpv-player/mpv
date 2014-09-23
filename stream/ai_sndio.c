@@ -15,7 +15,7 @@ int ai_sndio_setup(audio_in_t *ai)
 
     par.bits = 16;
     par.sig = 1;
-    par.le = 1;
+    par.le = SIO_LE_NATIVE;
     par.rchan = ai->req_channels;
     par.rate = ai->req_samplerate;
     par.appbufsz = ai->req_samplerate;  /* 1 sec */

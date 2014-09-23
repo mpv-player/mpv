@@ -25,6 +25,7 @@
 #include "audio/out/ao_coreaudio_utils.h"
 #include "audio/out/ao_coreaudio_properties.h"
 #include "osdep/timer.h"
+#include "osdep/endian.h"
 #include "audio/format.h"
 
 void ca_print_device_list(struct ao *ao)
@@ -142,7 +143,7 @@ void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd)
     if ((ao->format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_SI)
         asbd->mFormatFlags |= kAudioFormatFlagIsSignedInteger;
 
-    if ((ao->format & AF_FORMAT_END_MASK) == AF_FORMAT_BE)
+    if (BYTE_ORDER == BIG_ENDIAN)
         asbd->mFormatFlags |= kAudioFormatFlagIsBigEndian;
 
     asbd->mFramesPerPacket = 1;

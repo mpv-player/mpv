@@ -392,14 +392,14 @@ static int init(struct ao *ao)
     }
     switch (format) {
     case AF_FORMAT_AC3:
-    case AF_FORMAT_S24_LE:
-    case AF_FORMAT_S16_LE:
+    case AF_FORMAT_S24:
+    case AF_FORMAT_S16:
     case AF_FORMAT_U8:
         break;
     default:
         MP_VERBOSE(ao, "format %s not supported defaulting to Signed 16-bit Little-Endian\n",
                    af_fmt_to_str(format));
-        format = AF_FORMAT_S16_LE;
+        format = AF_FORMAT_S16;
     }
     //set our audio parameters
     ao->samplerate = rate;

@@ -28,4 +28,10 @@
 
 #endif /* !defined(BYTE_ORDER) */
 
+#if BYTE_ORDER == BIG_ENDIAN
+#define MP_SELECT_LE_BE(LE, BE) BE
+#else
+#define MP_SELECT_LE_BE(LE, BE) LE
+#endif
+
 #endif

@@ -20,6 +20,7 @@
 
 #include "audio/format.h"
 #include "af.h"
+#include "osdep/endian.h"
 
 static bool test_conversion(int src_format, int dst_format)
 {

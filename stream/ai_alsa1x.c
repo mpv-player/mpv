@@ -51,7 +51,7 @@ int ai_alsa_setup(audio_in_t *ai)
         return -1;
     }
 
-    err = snd_pcm_hw_params_set_format(ai->alsa.handle, params, SND_PCM_FORMAT_S16_LE);
+    err = snd_pcm_hw_params_set_format(ai->alsa.handle, params, SND_PCM_FORMAT_S16);
     if (err < 0) {
         MP_ERR(ai, "Sample format not available.\n");
         return -1;
@@ -122,7 +122,7 @@ int ai_alsa_setup(audio_in_t *ai)
         snd_pcm_dump(ai->alsa.handle, ai->alsa.log);
     }
 
-    ai->alsa.bits_per_sample = snd_pcm_format_physical_width(SND_PCM_FORMAT_S16_LE);
+    ai->alsa.bits_per_sample = snd_pcm_format_physical_width(SND_PCM_FORMAT_S16);
     ai->alsa.bits_per_frame = ai->alsa.bits_per_sample * ai->channels;
     ai->blocksize = ai->alsa.chunk_size * ai->alsa.bits_per_frame / 8;
     ai->samplesize = ai->alsa.bits_per_sample;

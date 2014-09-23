@@ -52,40 +52,26 @@ static int set_format(struct ao *ao)
     case AF_FORMAT_S8:
         rsd_format = RSD_S8;
         break;
-    case AF_FORMAT_S16_LE:
-        rsd_format = RSD_S16_LE;
+    case AF_FORMAT_S16:
+        rsd_format = RSD_S16_NE;
         break;
-    case AF_FORMAT_S16_BE:
-        rsd_format = RSD_S16_BE;
+    case AF_FORMAT_U16:
+        rsd_format = RSD_U16_NE;
         break;
-    case AF_FORMAT_U16_LE:
-        rsd_format = RSD_U16_LE;
+    case AF_FORMAT_S24:
+    case AF_FORMAT_U24:
+        rsd_format = RSD_S32_NE;
+        ao->format = AF_FORMAT_S32;
         break;
-    case AF_FORMAT_U16_BE:
-        rsd_format = RSD_U16_BE;
+    case AF_FORMAT_S32:
+        rsd_format = RSD_S32_NE;
         break;
-    case AF_FORMAT_S24_LE:
-    case AF_FORMAT_S24_BE:
-    case AF_FORMAT_U24_LE:
-    case AF_FORMAT_U24_BE:
-        rsd_format = RSD_S32_LE;
-        ao->format = AF_FORMAT_S32_LE;
-        break;
-    case AF_FORMAT_S32_LE:
-        rsd_format = RSD_S32_LE;
-        break;
-    case AF_FORMAT_S32_BE:
-        rsd_format = RSD_S32_BE;
-        break;
-    case AF_FORMAT_U32_LE:
-        rsd_format = RSD_U32_LE;
-        break;
-    case AF_FORMAT_U32_BE:
-        rsd_format = RSD_U32_BE;
+    case AF_FORMAT_U32:
+        rsd_format = RSD_U32_NE;
         break;
     default:
-        rsd_format = RSD_S16_LE;
-        ao->format = AF_FORMAT_S16_LE;
+        rsd_format = RSD_S16_NE;
+        ao->format = AF_FORMAT_S16;
     }
 
     return rsd_format;

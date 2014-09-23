@@ -100,10 +100,10 @@ int ai_oss_init(audio_in_t *ai)
            ioctl(ai->oss.audio_fd, SNDCTL_DSP_GETFMTS, &ioctl_param));
 
     MP_VERBOSE(ai, "Supported formats: %x\n", ioctl_param);
-    if (!(ioctl_param & AFMT_S16_LE))
+    if (!(ioctl_param & AFMT_S16_NE))
         MP_ERR(ai, "unsupported format\n");
 
-    ioctl_param = AFMT_S16_LE;
+    ioctl_param = AFMT_S16_NE;
     MP_VERBOSE(ai, "ioctl dsp setfmt: %d\n",
            err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_SETFMT, &ioctl_param));
     if (err < 0) {

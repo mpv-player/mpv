@@ -35,6 +35,7 @@
 #include "ao.h"
 #include "internal.h"
 #include "common/msg.h"
+#include "osdep/endian.h"
 
 #ifdef __MINGW32__
 // for GetFileType to detect pipes
@@ -72,8 +73,7 @@ static void fput32le(uint32_t val, FILE *fp)
 static void write_wave_header(struct ao *ao, FILE *fp, uint64_t data_length)
 {
     bool use_waveex = true;
-    uint16_t fmt = ao->format == AF_FORMAT_FLOAT_LE ?
-        WAV_ID_FLOAT_PCM : WAV_ID_PCM;
+    uint16_t fmt = ao->format == AF_FORMAT_FLOAT ? WAV_ID_FLOAT_PCM : WAV_ID_PCM;
     uint32_t fmt_chunk_size = use_waveex ? 40 : 16;
     int bits = af_fmt2bits(ao->format);
 
@@ -124,16 +124,23 @@ static int init(struct ao *ao)
     if (priv->waveheader) {
         // WAV files must have one of the following formats
 
+        // And they don't work in big endian; fixing it would be simple, but
+        // nobody cares.
+        if (BYTE_ORDER == BIG_ENDIAN) {
+            MP_FATAL(ao, "Not supported on big endian.\n");
+            return -1;
+        }
+
         switch (ao->format) {
         case AF_FORMAT_U8:
-        case AF_FORMAT_S16_LE:
-        case AF_FORMAT_S24_LE:
-        case AF_FORMAT_S32_LE:
-        case AF_FORMAT_FLOAT_LE:
+        case AF_FORMAT_S16:
+        case AF_FORMAT_S24:
+        case AF_FORMAT_S32:
+        case AF_FORMAT_FLOAT:
         case AF_FORMAT_AC3:
              break;
         default:
-            ao->format = AF_FORMAT_S16_LE;
+            ao->format = AF_FORMAT_S16;
             break;
         }
     }

@@ -109,22 +109,16 @@ static int init(struct ao *ao)
     struct priv *p = ao->priv;
 
     struct af_to_par {
-        int format, bits, sig, le;
+        int format, bits, sig;
     } static const af_to_par[] = {
-        {AF_FORMAT_U8,      8, 0, 0},
-        {AF_FORMAT_S8,      8, 1, 0},
-        {AF_FORMAT_U16_LE, 16, 0, 1},
-        {AF_FORMAT_U16_BE, 16, 0, 0},
-        {AF_FORMAT_S16_LE, 16, 1, 1},
-        {AF_FORMAT_S16_BE, 16, 1, 0},
-        {AF_FORMAT_U24_LE, 16, 0, 1},
-        {AF_FORMAT_U24_BE, 24, 0, 0},
-        {AF_FORMAT_S24_LE, 24, 1, 1},
-        {AF_FORMAT_S24_BE, 24, 1, 0},
-        {AF_FORMAT_U32_LE, 32, 0, 1},
-        {AF_FORMAT_U32_BE, 32, 0, 0},
-        {AF_FORMAT_S32_LE, 32, 1, 1},
-        {AF_FORMAT_S32_BE, 32, 1, 0}
+        {AF_FORMAT_U8,   8, 0},
+        {AF_FORMAT_S8,   8, 1},
+        {AF_FORMAT_U16, 16, 0},
+        {AF_FORMAT_S16, 16, 1},
+        {AF_FORMAT_U24, 16, 0},
+        {AF_FORMAT_S24, 24, 1},
+        {AF_FORMAT_U32, 32, 0},
+        {AF_FORMAT_S32, 32, 1},
     }, *ap;
     int i;
 
@@ -149,7 +143,7 @@ static int init(struct ao *ao)
             p->par.bits = ap->bits;
             p->par.sig = ap->sig;
             if (ap->bits > 8)
-                p->par.le = ap->le;
+                p->par.le = SIO_LE_NATIVE;
             if (ap->bits != SIO_BPS(ap->bits))
                 p->par.bps = ap->bits / 8;
             break;
@@ -175,20 +169,18 @@ static int init(struct ao *ao)
         MP_ERR(ao, "couldn't get params\n");
         goto error;
     }
+    if (p->par.bps > 1 && p->par.le != SIO_LE_NATIVE) {
+        MP_ERR(ao, "swapped endian output not supported\n");
+        goto error;
+    }
     if (p->par.bits == 8 && p->par.bps == 1) {
         ao->format = p->par.sig ? AF_FORMAT_S8 : AF_FORMAT_U8;
     } else if (p->par.bits == 16 && p->par.bps == 2) {
-        ao->format = p->par.sig ?
-            (p->par.le ? AF_FORMAT_S16_LE : AF_FORMAT_S16_BE) :
-            (p->par.le ? AF_FORMAT_U16_LE : AF_FORMAT_U16_BE);
+        ao->format = p->par.sig ? AF_FORMAT_S16 : AF_FORMAT_U16;
     } else if ((p->par.bits == 24 || p->par.msb) && p->par.bps == 3) {
-        ao->format = p->par.sig ?
-            (p->par.le ? AF_FORMAT_S24_LE : AF_FORMAT_S24_BE) :
-            (p->par.le ? AF_FORMAT_U24_LE : AF_FORMAT_U24_BE);
+        ao->format = p->par.sig ? AF_FORMAT_S24 : AF_FORMAT_U24;
     } else if ((p->par.bits == 32 || p->par.msb) && p->par.bps == 4) {
-        ao->format = p->par.sig ?
-            (p->par.le ? AF_FORMAT_S32_LE : AF_FORMAT_S32_BE) :
-            (p->par.le ? AF_FORMAT_U32_LE : AF_FORMAT_U32_BE);
+        ao->format = p->par.sig ? AF_FORMAT_S32 : AF_FORMAT_U32;
     } else {
         MP_ERR(ao, "couldn't set format\n");
         goto error;

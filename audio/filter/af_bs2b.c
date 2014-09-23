@@ -48,20 +48,12 @@ static int filter_##name(struct af_instance *af, struct mp_audio *data, int f) \
 }
 
 FILTER(f, float)
-FILTER(fbe, float)
-FILTER(fle, float)
-FILTER(s32be, int32_t)
-FILTER(u32be, uint32_t)
-FILTER(s32le, int32_t)
-FILTER(u32le, uint32_t)
-FILTER(s24be, bs2b_int24_t)
-FILTER(u24be, bs2b_uint24_t)
-FILTER(s24le, bs2b_int24_t)
-FILTER(u24le, bs2b_uint24_t)
-FILTER(s16be, int16_t)
-FILTER(u16be, uint16_t)
-FILTER(s16le, int16_t)
-FILTER(u16le, uint16_t)
+FILTER(s32, int32_t)
+FILTER(u32, uint32_t)
+FILTER(s24, bs2b_int24_t)
+FILTER(u24, bs2b_uint24_t)
+FILTER(s16, int16_t)
+FILTER(u16, uint16_t)
 FILTER(s8, int8_t)
 FILTER(u8, uint8_t)
 
@@ -85,47 +77,26 @@ static int control(struct af_instance *af, int cmd, void *arg)
         /* check for formats supported by libbs2b
            and assign corresponding handlers */
         switch (format) {
-            case AF_FORMAT_FLOAT_BE:
-                af->filter = filter_fbe;
+            case AF_FORMAT_FLOAT:
+                af->filter = filter_f;
                 break;
-            case AF_FORMAT_FLOAT_LE:
-                af->filter = filter_fle;
+            case AF_FORMAT_S32:
+                af->filter = filter_s32;
                 break;
-            case AF_FORMAT_S32_BE:
-                af->filter = filter_s32be;
+            case AF_FORMAT_U32:
+                af->filter = filter_u32;
                 break;
-            case AF_FORMAT_U32_BE:
-                af->filter = filter_u32be;
+            case AF_FORMAT_S24:
+                af->filter = filter_s24;
                 break;
-            case AF_FORMAT_S32_LE:
-                af->filter = filter_s32le;
+            case AF_FORMAT_U24:
+                af->filter = filter_u24;
                 break;
-            case AF_FORMAT_U32_LE:
-                af->filter = filter_u32le;
+            case AF_FORMAT_S16:
+                af->filter = filter_s16;
                 break;
-            case AF_FORMAT_S24_BE:
-                af->filter = filter_s24be;
-                break;
-            case AF_FORMAT_U24_BE:
-                af->filter = filter_u24be;
-                break;
-            case AF_FORMAT_S24_LE:
-                af->filter = filter_s24le;
-                break;
-            case AF_FORMAT_U24_LE:
-                af->filter = filter_u24le;
-                break;
-            case AF_FORMAT_S16_BE:
-                af->filter = filter_s16be;
-                break;
-            case AF_FORMAT_U16_BE:
-                af->filter = filter_u16be;
-                break;
-            case AF_FORMAT_S16_LE:
-                af->filter = filter_s16le;
-                break;
-            case AF_FORMAT_U16_LE:
-                af->filter = filter_u16le;
+            case AF_FORMAT_U16:
+                af->filter = filter_u16;
                 break;
             case AF_FORMAT_S8:
                 af->filter = filter_s8;

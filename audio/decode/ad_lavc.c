@@ -96,25 +96,30 @@ static const struct pcm_map tag_map[] = {
 
 // For demux_rawaudio.c; needed because ffmpeg doesn't have these sample
 // formats natively.
-static const struct pcm_map af_map[] = {
+static const struct pcm_map af_map_le[] = {
     {AF_FORMAT_U8,              {"pcm_u8"}},
     {AF_FORMAT_S8,              {"pcm_u8"}},
-    {AF_FORMAT_U16_LE,          {"pcm_u16le"}},
-    {AF_FORMAT_U16_BE,          {"pcm_u16be"}},
-    {AF_FORMAT_S16_LE,          {"pcm_s16le"}},
-    {AF_FORMAT_S16_BE,          {"pcm_s16be"}},
-    {AF_FORMAT_U24_LE,          {"pcm_u24le"}},
-    {AF_FORMAT_U24_BE,          {"pcm_u24be"}},
-    {AF_FORMAT_S24_LE,          {"pcm_s24le"}},
-    {AF_FORMAT_S24_BE,          {"pcm_s24be"}},
-    {AF_FORMAT_U32_LE,          {"pcm_u32le"}},
-    {AF_FORMAT_U32_BE,          {"pcm_u32be"}},
-    {AF_FORMAT_S32_LE,          {"pcm_s32le"}},
-    {AF_FORMAT_S32_BE,          {"pcm_s32be"}},
-    {AF_FORMAT_FLOAT_LE,        {"pcm_f32le"}},
-    {AF_FORMAT_FLOAT_BE,        {"pcm_f32be"}},
-    {AF_FORMAT_DOUBLE_LE,       {"pcm_f64le"}},
-    {AF_FORMAT_DOUBLE_BE,       {"pcm_f64be"}},
+    {AF_FORMAT_U16,             {"pcm_u16le"}},
+    {AF_FORMAT_S16,             {"pcm_s16le"}},
+    {AF_FORMAT_U24,             {"pcm_u24le"}},
+    {AF_FORMAT_S24,             {"pcm_s24le"}},
+    {AF_FORMAT_U32,             {"pcm_u32le"}},
+    {AF_FORMAT_S32,             {"pcm_s32le"}},
+    {AF_FORMAT_FLOAT,           {"pcm_f32le"}},
+    {AF_FORMAT_DOUBLE,          {"pcm_f64le"}},
+    {-1},
+};
+static const struct pcm_map af_map_be[] = {
+    {AF_FORMAT_U8,              {"pcm_u8"}},
+    {AF_FORMAT_S8,              {"pcm_u8"}},
+    {AF_FORMAT_U16,             {"pcm_u16be"}},
+    {AF_FORMAT_S16,             {"pcm_s16be"}},
+    {AF_FORMAT_U24,             {"pcm_u24be"}},
+    {AF_FORMAT_S24,             {"pcm_s24be"}},
+    {AF_FORMAT_U32,             {"pcm_u32be"}},
+    {AF_FORMAT_S32,             {"pcm_s32be"}},
+    {AF_FORMAT_FLOAT,           {"pcm_f32be"}},
+    {AF_FORMAT_DOUBLE,          {"pcm_f64be"}},
     {-1},
 };
 
@@ -198,7 +203,8 @@ static int init(struct dec_audio *da, const char *decoder)
         decoder = find_pcm_decoder(tag_map, sh->format,
                                    sh_audio->wf->wBitsPerSample);
     } else if (sh_audio->wf && strcmp(decoder, "mp-pcm") == 0) {
-        decoder = find_pcm_decoder(af_map, sh->format, 0);
+        const struct pcm_map *map = sh_audio->big_endian ? af_map_be : af_map_le;
+        decoder = find_pcm_decoder(map, sh->format, 0);
         ctx->force_channel_map = true;
     }
 

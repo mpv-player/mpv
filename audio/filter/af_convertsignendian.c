@@ -20,21 +20,16 @@
 
 #include "af.h"
 #include "audio/format.h"
-#include "osdep/mpbswap.h"
+#include "osdep/endian.h"
 
 static bool test_conversion(int src_format, int dst_format)
 {
     if ((src_format & AF_FORMAT_PLANAR) ||
         (dst_format & AF_FORMAT_PLANAR))
         return false;
-    int src_noend = src_format & ~AF_FORMAT_END_MASK;
-    int dst_noend = dst_format & ~AF_FORMAT_END_MASK;
-    // We can swap endian for all formats, but sign only for integer formats.
-    if (src_noend == dst_noend)
-        return true;
-    if (((src_noend & ~AF_FORMAT_SIGN_MASK) ==
-         (dst_noend & ~AF_FORMAT_SIGN_MASK)) &&
-        ((src_noend & AF_FORMAT_POINT_MASK) == AF_FORMAT_I))
+    if (((src_format & ~AF_FORMAT_SIGN_MASK) ==
+         (dst_format & ~AF_FORMAT_SIGN_MASK)) &&
+        ((src_format & AF_FORMAT_POINT_MASK) == AF_FORMAT_I))
         return true;
     return false;
 }
@@ -63,34 +58,11 @@ static int control(struct af_instance *af, int cmd, void *arg)
     return AF_UNKNOWN;
 }
 
-static void endian(void *data, int len, int bps)
-{
-    switch (bps) {
-    case 2:
-        for (int i = 0; i < len; i++) {
-            ((uint16_t*)data)[i] = bswap_16(((uint16_t *)data)[i]);
-        }
-        break;
-    case 3:
-        for(int i = 0; i < len; i++) {
-            uint8_t s = ((uint8_t *)data)[3 * i];
-            ((uint8_t *)data)[3 * i] = ((uint8_t *)data)[3 * i + 2];
-            ((uint8_t *)data)[3 * i + 2] = s;
-        }
-        break;
-    case 4:
-        for(int i = 0; i < len; i++) {
-            ((uint32_t*)data)[i] = bswap_32(((uint32_t *)data)[i]);
-        }
-        break;
-    }
-}
-
-static void si2us(void *data, int len, int bps, bool le)
+static void si2us(void *data, int len, int bps)
 {
     ptrdiff_t i = -(len * bps);
     uint8_t *p = &((uint8_t *)data)[len * bps];
-    if (le && bps > 1)
+    if (BYTE_ORDER == LITTLE_ENDIAN && bps > 1)
         p += bps - 1;
     if (len <= 0)
         return;
@@ -105,12 +77,8 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
     int outfmt = af->data->format;
     size_t len = data->samples * data->nch;
 
-    if ((infmt & AF_FORMAT_END_MASK) != (outfmt & AF_FORMAT_END_MASK))
-        endian(data->planes[0], len, data->bps);
-
     if ((infmt & AF_FORMAT_SIGN_MASK) != (outfmt & AF_FORMAT_SIGN_MASK))
-        si2us(data->planes[0], len, data->bps,
-              (outfmt & AF_FORMAT_END_MASK) == AF_FORMAT_LE);
+        si2us(data->planes[0], len, data->bps);
 
     mp_audio_set_format(data, outfmt);
     return 0;
@@ -124,8 +92,8 @@ static int af_open(struct af_instance *af)
 }
 
 const struct af_info af_info_convertsignendian = {
-    .info = "Convert between sample format sign/endian",
-    .name = "convertsignendian",
+    .info = "Convert between sample format sign",
+    .name = "convertsign",
     .open = af_open,
     .test_conversion = test_conversion,
 };

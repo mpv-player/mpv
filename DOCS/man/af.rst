@@ -265,9 +265,8 @@ Available filters are:
     Filter for internal use only. Converts between 24-bit and 32-bit sample
     formats.
 
-``convertsignendian``
-    Filter for internal use only. Converts between signed/unsigned formats
-    and formats with different endian.
+``convertsign``
+    Filter for internal use only. Converts between signed/unsigned formats.
 
 ``volume[=<volumedb>[:...]]``
     Implements software volume control. Use this filter with caution since it

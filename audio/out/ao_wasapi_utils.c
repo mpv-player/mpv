@@ -292,14 +292,13 @@ static int try_passthrough(struct wasapi_state *state,
     union WAVEFMT u;
     u.extensible = &wformat;
 
-    MP_VERBOSE(ao, "trying passthrough for %s...\n",
-               af_fmt_to_str((ao->format&~AF_FORMAT_END_MASK) | AF_FORMAT_LE));
+    MP_VERBOSE(ao, "trying passthrough for %s...\n", af_fmt_to_str(ao->format));
 
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 state->share_mode,
                                                 u.ex, NULL);
     if (!FAILED(hr)) {
-        ao->format = (ao->format&~AF_FORMAT_END_MASK) | AF_FORMAT_LE;
+        ao->format = ao->format;
         state->format = wformat;
         return 1;
     }

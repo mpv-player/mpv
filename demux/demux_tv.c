@@ -11,6 +11,7 @@
 
 #include "audio/format.h"
 #include "video/img_fourcc.h"
+#include "osdep/endian.h"
 
 #include "stream/stream.h"
 #include "stream/tv.h"
@@ -106,14 +107,10 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         {
             case AF_FORMAT_U8:
             case AF_FORMAT_S8:
-            case AF_FORMAT_U16_LE:
-            case AF_FORMAT_U16_BE:
-            case AF_FORMAT_S16_LE:
-            case AF_FORMAT_S16_BE:
-            case AF_FORMAT_S32_LE:
-            case AF_FORMAT_S32_BE:
+            case AF_FORMAT_U16:
+            case AF_FORMAT_S16:
+            case AF_FORMAT_S32:
                 break;
-            case AF_FORMAT_MPEG2:
             default:
                 MP_ERR(tvh, "Audio type '%s' unsupported!\n",
                     af_fmt_to_str(audio_format));
@@ -147,6 +144,8 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;
         sh_audio->wf->nBlockAlign = block_align;
         sh_audio->wf->nAvgBytesPerSec = bytes_per_second;
+        // wav header usually implies little endian
+        sh_audio->big_endian = BYTE_ORDER == BIG_ENDIAN;
 
         MP_VERBOSE(tvh, "  TV audio: %d channels, %d bits, %d Hz\n",
           sh_audio->wf->nChannels, sh_audio->wf->wBitsPerSample,
