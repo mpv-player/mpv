@@ -134,6 +134,9 @@ static const int format_table[][2] = {
 #ifdef AFMT_FLOAT
     {AFMT_FLOAT,        AF_FORMAT_FLOAT},
 #endif
+#ifdef AFMT_MPEG
+    {AFMT_MPEG,         AF_FORMAT_S_MP3},
+#endif
     {-1, -1}
 };
 
@@ -156,7 +159,7 @@ static int oss2format(int format)
         if (format_table[n][0] == format)
             return format_table[n][1];
     }
-    return -1;
+    return 0;
 }
 
 
@@ -259,10 +262,38 @@ static void uninit(struct ao *ao)
     close_device(ao);
 }
 
+static bool try_format(struct ao *ao, int *format)
+{
+    struct priv *p = ao->priv;
+
+    int oss_format = format2oss(*format);
+    if (oss_format == -1 && AF_FORMAT_IS_IEC61937(*format))
+        oss_format = AFMT_AC3;
+
+    if (oss_format == -1) {
+        MP_VERBOSE(ao, "Unknown/not supported internal format: %s\n",
+                   af_fmt_to_str(*format));
+        *format = 0;
+        return false;
+    }
+
+    int actual_format = oss_format;
+    if (ioctl(p->audio_fd, SNDCTL_DSP_SETFMT, &actual_format) < 0)
+        actual_format = -1;
+
+    if (actual_format == oss_format)
+        return true;
+
+    MP_WARN(ao, "Can't set audio device to %s output.\n", af_fmt_to_str(*format));
+    *format = oss2format(actual_format);
+    if (actual_format != -1 && !*format)
+        MP_ERR(ao, "Unknown/Unsupported OSS format: 0x%x.\n", actual_format);
+    return false;
+}
+
 static int reopen_device(struct ao *ao, bool allow_format_changes)
 {
     struct priv *p = ao->priv;
-    int oss_format;
 
     int samplerate = ao->samplerate;
     int format = ao->format;
@@ -292,53 +323,22 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
 
     if (AF_FORMAT_IS_IEC61937(format)) {
         ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &samplerate);
+        // Probably could be fixed by setting number of channels; needs testing.
+        if (channels.num != 2) {
+            MP_ERR(ao, "Format %s not implemented.\n", af_fmt_to_str(format));
+            goto fail;
+        }
     }
 
-ac3_retry:
-    if (AF_FORMAT_IS_IEC61937(format)) {
-        oss_format = AFMT_AC3;
-    } else {
-        oss_format = format2oss(format);
-    }
-    if (oss_format == -1) {
-        MP_VERBOSE(ao, "Unknown/not supported internal format: %s\n",
-                   af_fmt_to_str(format));
-#if defined(AFMT_S32_LE) && defined(AFMT_S32_BE)
-#if BYTE_ORDER == BIG_ENDIAN
-        oss_format = AFMT_S32_BE;
-#else
-        oss_format = AFMT_S32_LE;
-#endif
-        format = AF_FORMAT_S32;
-#elif defined(AFMT_S24_LE) && defined(AFMT_S24_BE)
-#if BYTE_ORDER == BIG_ENDIAN
-        oss_format = AFMT_S24_BE;
-#else
-        oss_format = AFMT_S24_LE;
-#endif
-        format = AF_FORMAT_S24;
-#else
-#if BYTE_ORDER == BIG_ENDIAN
-        oss_format = AFMT_S16_BE;
-#else
-        oss_format = AFMT_S16_LE;
-#endif
-        format = AF_FORMAT_S16;
-#endif
-    }
-    if (ioctl(p->audio_fd, SNDCTL_DSP_SETFMT, &oss_format) < 0 ||
-        oss_format != format2oss(format))
-    {
-        MP_WARN(ao, "Can't set audio device %s to %s output, trying %s...\n",
-                p->dsp, af_fmt_to_str(format),
-                af_fmt_to_str(AF_FORMAT_S16));
-        format = AF_FORMAT_S16;
-        goto ac3_retry;
+    int try_formats[] = {format, AF_FORMAT_S32, AF_FORMAT_S24, AF_FORMAT_S16, 0};
+    for (int n = 0; try_formats[n]; n++) {
+        format = try_formats[n];
+        if (try_format(ao, &format))
+            break;
     }
 
-    format = oss2format(oss_format);
-    if (format == -1) {
-        MP_ERR(ao, "Unknown/Unsupported OSS format: %x.\n", oss_format);
+    if (!format) {
+        MP_ERR(ao, "Can't set sample format.\n");
         goto fail;
     }
 
