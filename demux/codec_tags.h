@@ -19,11 +19,15 @@
 #define MP_CODEC_TAGS_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 uint32_t mp_video_fourcc_alias(uint32_t fourcc);
 
 struct sh_stream;
 
 void mp_set_codec_from_tag(struct sh_stream *sh);
+
+void mp_set_pcm_codec(struct sh_stream *sh, bool sign, bool is_float, int bits,
+                      bool is_be);
 
 #endif

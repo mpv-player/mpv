@@ -94,35 +94,6 @@ static const struct pcm_map tag_map[] = {
     {-1},
 };
 
-// For demux_rawaudio.c; needed because ffmpeg doesn't have these sample
-// formats natively.
-static const struct pcm_map af_map_le[] = {
-    {AF_FORMAT_U8,              {"pcm_u8"}},
-    {AF_FORMAT_S8,              {"pcm_u8"}},
-    {AF_FORMAT_U16,             {"pcm_u16le"}},
-    {AF_FORMAT_S16,             {"pcm_s16le"}},
-    {AF_FORMAT_U24,             {"pcm_u24le"}},
-    {AF_FORMAT_S24,             {"pcm_s24le"}},
-    {AF_FORMAT_U32,             {"pcm_u32le"}},
-    {AF_FORMAT_S32,             {"pcm_s32le"}},
-    {AF_FORMAT_FLOAT,           {"pcm_f32le"}},
-    {AF_FORMAT_DOUBLE,          {"pcm_f64le"}},
-    {-1},
-};
-static const struct pcm_map af_map_be[] = {
-    {AF_FORMAT_U8,              {"pcm_u8"}},
-    {AF_FORMAT_S8,              {"pcm_u8"}},
-    {AF_FORMAT_U16,             {"pcm_u16be"}},
-    {AF_FORMAT_S16,             {"pcm_s16be"}},
-    {AF_FORMAT_U24,             {"pcm_u24be"}},
-    {AF_FORMAT_S24,             {"pcm_s24be"}},
-    {AF_FORMAT_U32,             {"pcm_u32be"}},
-    {AF_FORMAT_S32,             {"pcm_s32be"}},
-    {AF_FORMAT_FLOAT,           {"pcm_f32be"}},
-    {AF_FORMAT_DOUBLE,          {"pcm_f64be"}},
-    {-1},
-};
-
 static const char *find_pcm_decoder(const struct pcm_map *map, int format,
                                     int bits_per_sample)
 {
@@ -202,11 +173,9 @@ static int init(struct dec_audio *da, const char *decoder)
     if (sh_audio->wf && strcmp(decoder, "pcm") == 0) {
         decoder = find_pcm_decoder(tag_map, sh->format,
                                    sh_audio->wf->wBitsPerSample);
-    } else if (sh_audio->wf && strcmp(decoder, "mp-pcm") == 0) {
-        const struct pcm_map *map = sh_audio->big_endian ? af_map_be : af_map_le;
-        decoder = find_pcm_decoder(map, sh->format, 0);
-        ctx->force_channel_map = true;
     }
+
+    ctx->force_channel_map = sh_audio->force_channels;
 
     lavc_codec = avcodec_find_decoder_by_name(decoder);
     if (!lavc_codec) {
@@ -236,6 +205,7 @@ static int init(struct dec_audio *da, const char *decoder)
     lavc_context->codec_tag = sh->format;
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->bitrate;
+    lavc_context->channels = sh_audio->channels.num;
     lavc_context->channel_layout = mp_chmap_to_lavc(&sh_audio->channels);
 
     if (sh_audio->wf)
@@ -367,7 +337,6 @@ static void add_decoders(struct mp_decoder_list *list)
 {
     mp_add_lavc_decoders(list, AVMEDIA_TYPE_AUDIO);
     mp_add_decoder(list, "lavc", "pcm", "pcm", "Raw PCM");
-    mp_add_decoder(list, "lavc", "mp-pcm", "mp-pcm", "Raw PCM");
 }
 
 const struct ad_functions ad_lavc = {

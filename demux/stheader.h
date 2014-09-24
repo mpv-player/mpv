@@ -67,10 +67,10 @@ struct sh_stream {
 typedef struct sh_audio {
     int samplerate;
     struct mp_chmap channels;
+    bool force_channels;
     int bitrate; // compressed bits/sec
     // win32-compatible codec parameters:
     MP_WAVEFORMATEX *wf;
-    bool big_endian; // endianess with wf and mp-pcm
     // note codec extradata may be either under "wf" or "codecdata"
     unsigned char *codecdata;
     int codecdata_len;

@@ -2005,6 +2005,7 @@ Demuxer
 
 ``--demuxer-rawaudio-format=<value>``
     Sample format for ``--demuxer=rawaudio`` (default: s16le).
+    Use ``--demuxer-rawaudio-format=help`` to get a list of all formats.
 
 ``--demuxer-rawaudio-rate=<value>``
     Sample rate for ``--demuxer=rawaudio`` (default: 44 kHz).

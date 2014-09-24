@@ -383,3 +383,19 @@ uint32_t mp_video_fourcc_alias(uint32_t fourcc)
     }
     return fourcc;
 }
+
+void mp_set_pcm_codec(struct sh_stream *sh, bool sign, bool is_float, int bits,
+                      bool is_be)
+{
+    // This uses libavcodec pcm codec names, e.g. "pcm_u16le".
+    char codec[64] = "pcm_";
+    if (is_float) {
+        mp_snprintf_cat(codec, sizeof(codec), "f");
+    } else {
+        mp_snprintf_cat(codec, sizeof(codec), sign ? "s" : "u");
+    }
+    mp_snprintf_cat(codec, sizeof(codec), "%d", bits);
+    if (bits != 8)
+        mp_snprintf_cat(codec, sizeof(codec), is_be ? "be" : "le");
+    sh->codec = talloc_strdup(sh->audio, codec);
+}

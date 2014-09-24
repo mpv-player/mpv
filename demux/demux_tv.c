@@ -8,6 +8,7 @@
 #include "options/options.h"
 
 #include "demux.h"
+#include "codec_tags.h"
 
 #include "audio/format.h"
 #include "video/img_fourcc.h"
@@ -105,11 +106,8 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
 
         switch(audio_format)
         {
-            case AF_FORMAT_U8:
-            case AF_FORMAT_S8:
-            case AF_FORMAT_U16:
+            // This is the only format any of the current inputs generate.
             case AF_FORMAT_S16:
-            case AF_FORMAT_S32:
                 break;
             default:
                 MP_ERR(tvh, "Audio type '%s' unsupported!\n",
@@ -127,29 +125,11 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
                    &nchannels);
         mp_chmap_from_channels(&sh_audio->channels, nchannels);
 
-        sh_a->codec = "mp-pcm";
-        sh_a->format = audio_format;
-
-        int samplesize = af_fmt2bps(audio_format);
-        int block_align = samplesize * sh_audio->channels.num;
-        int bytes_per_second = sh_audio->samplerate * block_align;
-
-        sh_audio->bitrate = bytes_per_second * 8;
-
-        // emulate WF for win32 codecs:
-        sh_audio->wf = talloc_zero(sh_audio, MP_WAVEFORMATEX);
-        sh_audio->wf->wFormatTag = sh_a->format;
-        sh_audio->wf->nChannels = sh_audio->channels.num;
-        sh_audio->wf->wBitsPerSample = samplesize * 8;
-        sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;
-        sh_audio->wf->nBlockAlign = block_align;
-        sh_audio->wf->nAvgBytesPerSec = bytes_per_second;
-        // wav header usually implies little endian
-        sh_audio->big_endian = BYTE_ORDER == BIG_ENDIAN;
+        // s16ne
+        mp_set_pcm_codec(sh_a, true, false, 16, BYTE_ORDER == BIG_ENDIAN);
 
         MP_VERBOSE(tvh, "  TV audio: %d channels, %d bits, %d Hz\n",
-          sh_audio->wf->nChannels, sh_audio->wf->wBitsPerSample,
-          sh_audio->wf->nSamplesPerSec);
+                   nchannels, 16, sh_audio->samplerate);
     }
 no_audio:
 
