@@ -102,18 +102,6 @@ static void set_data_from_avframe(struct dec_audio *da)
         da->decoded.planes[n] = priv->avframe->data[n];
 }
 
-static void set_from_wf(AVCodecContext *avctx, MP_WAVEFORMATEX *wf)
-{
-    avctx->channels = wf->nChannels;
-    avctx->sample_rate = wf->nSamplesPerSec;
-    avctx->bit_rate = wf->nAvgBytesPerSec * 8;
-    avctx->block_align = wf->nBlockAlign;
-    avctx->bits_per_coded_sample = wf->wBitsPerSample;
-
-    if (wf->cbSize > 0)
-        mp_lavc_set_extradata(avctx, wf + 1, wf->cbSize);
-}
-
 static int init(struct dec_audio *da, const char *decoder)
 {
     struct MPOpts *mpopts = da->opts;
@@ -156,13 +144,13 @@ static int init(struct dec_audio *da, const char *decoder)
     lavc_context->codec_tag = sh->format;
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->bitrate;
+    lavc_context->block_align = sh_audio->block_align;
+    lavc_context->bits_per_coded_sample = sh_audio->bits_per_coded_sample;
     lavc_context->channels = sh_audio->channels.num;
-    lavc_context->channel_layout = mp_chmap_to_lavc(&sh_audio->channels);
+    if (!mp_chmap_is_unknown(&sh_audio->channels))
+        lavc_context->channel_layout = mp_chmap_to_lavc(&sh_audio->channels);
 
-    if (sh_audio->wf)
-        set_from_wf(lavc_context, sh_audio->wf);
-
-    // demux_mkv, demux_mpg
+    // demux_mkv
     if (sh_audio->codecdata_len && sh_audio->codecdata &&
             !lavc_context->extradata) {
         mp_lavc_set_extradata(lavc_context, sh_audio->codecdata,
@@ -183,8 +171,6 @@ static int init(struct dec_audio *da, const char *decoder)
 
     if (lavc_context->bit_rate != 0)
         da->bitrate = lavc_context->bit_rate;
-    else if (sh_audio->wf && sh_audio->wf->nAvgBytesPerSec)
-        da->bitrate = sh_audio->wf->nAvgBytesPerSec * 8;
 
     return 1;
 }

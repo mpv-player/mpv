@@ -69,9 +69,8 @@ typedef struct sh_audio {
     struct mp_chmap channels;
     bool force_channels;
     int bitrate; // compressed bits/sec
-    // win32-compatible codec parameters:
-    MP_WAVEFORMATEX *wf;
-    // note codec extradata may be either under "wf" or "codecdata"
+    int block_align;
+    int bits_per_coded_sample;
     unsigned char *codecdata;
     int codecdata_len;
     struct replaygain_data *replaygain_data;

@@ -460,7 +460,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh->format = codec->codec_tag;
 
         // probably unneeded
-        mp_chmap_from_channels(&sh_audio->channels, codec->channels);
+        mp_chmap_set_unknown(&sh_audio->channels, codec->channels);
         if (codec->channel_layout)
             mp_chmap_from_lavc(&sh_audio->channels, codec->channel_layout);
         sh_audio->samplerate = codec->sample_rate;
