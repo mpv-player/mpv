@@ -115,7 +115,7 @@ static int init(struct ao *ao)
         {AF_FORMAT_S8,   8, 1},
         {AF_FORMAT_U16, 16, 0},
         {AF_FORMAT_S16, 16, 1},
-        {AF_FORMAT_U24, 16, 0},
+        {AF_FORMAT_U24, 24, 0},
         {AF_FORMAT_S24, 24, 1},
         {AF_FORMAT_U32, 32, 0},
         {AF_FORMAT_S32, 32, 1},
