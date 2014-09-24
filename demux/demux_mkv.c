@@ -1250,15 +1250,12 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v = sh->video;
     sh->demuxer_id = track->tnum;
     sh->title = talloc_strdup(sh_v, track->name);
-    sh_v->bih = talloc_size(sh_v, sizeof(MP_BITMAPINFOHEADER) + extradata_size);
-    if (!sh_v->bih) {
-        MP_FATAL(demuxer, "Memory allocation failure!\n");
-        abort();
-    }
-    *sh_v->bih = *bih;
-    if (extradata_size)
-        memcpy(sh_v->bih + 1, extradata, extradata_size);
-    sh->format = sh_v->bih->biCompression;
+    sh->format = bih->biCompression;
+    sh_v->bits_per_coded_sample = bih->biBitCount;
+    sh_v->coded_width = bih->biWidth;
+    sh_v->coded_height = bih->biHeight;
+    sh_v->extradata = talloc_memdup(sh_v, extradata, extradata_size);
+    sh_v->extradata_len = extradata_size;
     if (raw) {
         sh->codec = "rawvideo";
     } else {
@@ -1988,7 +1985,7 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
     } else {
         dp->pts =
             real_fix_timestamp(dp->buffer, dp->len, timestamp,
-                               track->stream->video->bih->biCompression,
+                               track->stream->format,
                                &track->rv_kf_base, &track->rv_kf_pts) * 0.001;
     }
     dp->pos = mkv_d->last_filepos;

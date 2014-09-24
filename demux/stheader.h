@@ -82,10 +82,13 @@ typedef struct sh_video {
     float fps;            // frames per second (set only if constant fps)
     float aspect;         // aspect ratio stored in the file (for prescaling)
     int bitrate;          // compressed bits/sec
+    int bits_per_coded_sample;
+    int coded_width, coded_height;
+    unsigned char *extradata;
+    int extradata_len;
     int disp_w, disp_h;   // display size
     int rotate;           // intended display rotation, in degrees, [0, 359]
     int stereo_mode;      // mp_stereo3d_mode (0 if none/unknown)
-    MP_BITMAPINFOHEADER *bih;
 } sh_video_t;
 
 typedef struct sh_sub {
