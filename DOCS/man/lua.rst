@@ -2,9 +2,14 @@ LUA SCRIPTING
 =============
 
 mpv can load Lua scripts. Scripts in ``~/.mpv/lua/`` will be loaded on program
-start, or if passed to ``--lua``. mpv provides the built-in module ``mp``, which
-provides functions to send commands to the mpv core and to retrieve information
-about playback state, user settings, file information, and so on.
+start, or if passed to ``--lua``. mpv appends ``~/.mpv/lua`` to the end of
+lua's path so you can import them too. Since it's added to the end, don't name
+scripts you want to import the same as lua libraries because they will be
+overshadowed by them.
+
+mpv provides the built-in module ``mp``, which provides functions to send
+commands to the mpv core and to retrieve information about playback state, user
+settings, file information, and so on.
 
 These scripts can be used to control mpv in a similar way to slave mode.
 Technically, the Lua code uses the client API internally.
