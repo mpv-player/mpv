@@ -46,8 +46,6 @@ import fcntl
 import stat
 import string
 
-if len(sys.argv) < 1:
-    sys.exit(1)
 files = sys.argv[1:]
 
 # this is the same method mpv uses to decide this
