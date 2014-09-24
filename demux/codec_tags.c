@@ -97,12 +97,6 @@ static const struct mp_codec_tag mp_audio_codec_tags[] = {
     {MKTAG('s', 'a', 'm', 'r'), "amr_nb"},
     {MKTAG('s', 'a', 'w', 'b'), "amr_wb"},
     {MKTAG('v', 'r', 'b', 's'), "vorbis"},
-    // Special cased in ad_lavc:
-    {0                        , "pcm"},
-    {0x1                      , "pcm"}, // lavf: pcm_s16le
-    {0x3                      , "pcm"}, // lavf: pcm_f32le
-    {0xfffe                   , "pcm"},
-    {MKTAG('t', 'w', 'o', 's'), "pcm"},
     // ------- internal mplayer FourCCs ------
     {MKTAG('O', 'p', 'u', 's'), "opus"}, // demux_mkv.c
     {MKTAG('a', 'L', 'a', 'C'), "alac"}, // demux_mkv.c
@@ -358,6 +352,28 @@ static const char *lookup_tag(const struct mp_codec_tag *mp_table,
     return id == AV_CODEC_ID_NONE ? NULL : mp_codec_from_av_codec_id(id);
 }
 
+static const char *pcm_le[] = {"pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"};
+static const char *pcm_be[] = {"pcm_s8", "pcm_s16be", "pcm_s24be", "pcm_s32be"};
+
+static const char *map_audio_pcm_tag(uint32_t tag, int bits)
+{
+    int bytes = (bits + 7) / 8;
+    switch (tag) {
+    case 0x0:       // Microsoft PCM
+    case 0x1:
+    case 0xfffe:    // MS PCM, Extended
+        return bytes >= 1 && bytes <= 4 ? pcm_le[bytes - 1] : NULL;
+    case 0x3:       // IEEE float
+        return bits == 64 ? "pcm_f64le" : "pcm_f32le";
+    case 0x20776172:// 'raw '
+        return bits == 8 ? "pcm_u8" : "pcm_s16be";
+    case MKTAG('t', 'w', 'o', 's'): // demux_mkv.c internal
+        return bytes >= 1 && bytes <= 4 ? pcm_be[bytes - 1] : NULL;
+    default:
+        return NULL;
+    }
+}
+
 void mp_set_codec_from_tag(struct sh_stream *sh)
 {
     switch (sh->type) {
@@ -370,6 +386,12 @@ void mp_set_codec_from_tag(struct sh_stream *sh)
         sh->codec = lookup_tag(mp_audio_codec_tags,
                                avformat_get_riff_audio_tags(),
                                sh->format);
+        if (sh->audio && sh->audio->wf) {
+            const char *codec =
+                map_audio_pcm_tag(sh->format, sh->audio->wf->wBitsPerSample);
+            if (codec)
+                sh->codec = codec;
+        }
         break;
     default: ;
     }

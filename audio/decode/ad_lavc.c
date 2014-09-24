@@ -71,50 +71,6 @@ const struct m_sub_options ad_lavc_conf = {
     },
 };
 
-struct pcm_map
-{
-    int tag;
-    const char *codecs[6]; // {any, 1byte, 2bytes, 3bytes, 4bytes, 8bytes}
-};
-
-// NOTE: these are needed to make rawaudio with demux_mkv work.
-static const struct pcm_map tag_map[] = {
-    // Microsoft PCM
-    {0x0,           {NULL, "pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"}},
-    {0x1,           {NULL, "pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"}},
-    // MS PCM, Extended
-    {0xfffe,        {NULL, "pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"}},
-    // IEEE float
-    {0x3,           {"pcm_f32le", [5] = "pcm_f64le"}},
-    // 'raw '
-    {0x20776172,    {"pcm_s16be", [1] = "pcm_u8"}},
-    // 'twos', used by demux_mkv.c internally
-    {MKTAG('t', 'w', 'o', 's'),
-                    {NULL, "pcm_s8", "pcm_s16be", "pcm_s24be", "pcm_s32be"}},
-    {-1},
-};
-
-static const char *find_pcm_decoder(const struct pcm_map *map, int format,
-                                    int bits_per_sample)
-{
-    int bytes = (bits_per_sample + 7) / 8;
-    if (bytes == 8)
-        bytes = 5; // 64 bit entry
-    for (int n = 0; map[n].tag != -1; n++) {
-        const struct pcm_map *entry = &map[n];
-        if (entry->tag == format) {
-            const char *dec = NULL;
-            if (bytes >= 1 && bytes <= 5)
-                dec = entry->codecs[bytes];
-            if (!dec)
-                dec = entry->codecs[0];
-            if (dec)
-                return dec;
-        }
-    }
-    return NULL;
-}
-
 static void set_data_from_avframe(struct dec_audio *da)
 {
     struct priv *priv = da->priv;
@@ -169,11 +125,6 @@ static int init(struct dec_audio *da, const char *decoder)
 
     struct priv *ctx = talloc_zero(NULL, struct priv);
     da->priv = ctx;
-
-    if (sh_audio->wf && strcmp(decoder, "pcm") == 0) {
-        decoder = find_pcm_decoder(tag_map, sh->format,
-                                   sh_audio->wf->wBitsPerSample);
-    }
 
     ctx->force_channel_map = sh_audio->force_channels;
 
@@ -336,7 +287,6 @@ static int decode_packet(struct dec_audio *da)
 static void add_decoders(struct mp_decoder_list *list)
 {
     mp_add_lavc_decoders(list, AVMEDIA_TYPE_AUDIO);
-    mp_add_decoder(list, "lavc", "pcm", "pcm", "Raw PCM");
 }
 
 const struct ad_functions ad_lavc = {
