@@ -23,7 +23,7 @@
 
 #include "common/common.h"
 #include "audio/chmap.h"
-#include "ms_hdr.h"
+
 struct MPOpts;
 struct demuxer;
 
