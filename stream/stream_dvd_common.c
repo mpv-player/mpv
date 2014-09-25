@@ -21,6 +21,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
+#include <assert.h>
+
 #include <libavutil/intreadwrite.h>
 
 #include "config.h"
@@ -42,6 +45,7 @@
 #include "osdep/io.h"
 
 #include "common/msg.h"
+#include "misc/bstr.h"
 #include "stream_dvd_common.h"
 
 const char * const dvd_audio_stream_types[8] = { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
@@ -133,4 +137,29 @@ int mp_dvdtimetomsec(dvd_time_t *dt)
   if(framerate > 0)
     msec += (((dt->frame_u & 0x30) >> 3) * 5 + (dt->frame_u & 0x0f)) * 100000 / framerate;
   return msec;
+}
+
+// Check if this is likely to be an .ifo or similar file.
+int dvd_probe(const char *path, const char *ext, const char *sig)
+{
+    if (!bstr_case_endswith(bstr0(path), bstr0(ext)))
+        return false;
+
+    FILE *temp = fopen(path, "rb");
+    if (!temp)
+        return false;
+
+    bool r = false;
+
+    char data[50];
+
+    assert(strlen(sig) <= sizeof(data));
+
+    if (fread(data, 50, 1, temp) == 1) {
+        if (memcmp(data, sig, strlen(sig)) == 0)
+            r = true;
+    }
+
+    fclose(temp);
+    return r;
 }

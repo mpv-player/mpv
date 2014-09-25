@@ -266,6 +266,7 @@ void mp_cancel_reset(struct mp_cancel *c);
 
 // stream_file.c
 char *mp_file_url_to_filename(void *talloc_ctx, bstr url);
+char *mp_file_get_path(void *talloc_ctx, bstr url);
 
 void stream_print_proto_list(struct mp_log *log);
 

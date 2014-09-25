@@ -126,6 +126,17 @@ char *mp_file_url_to_filename(void *talloc_ctx, bstr url)
     return filename;
 }
 
+// Return talloc_strdup's filesystem path if local, otherwise NULL.
+// Unlike mp_file_url_to_filename(), doesn't return NULL if already local.
+char *mp_file_get_path(void *talloc_ctx, bstr url)
+{
+    if (mp_split_proto(url, &(bstr){0}).len) {
+        return mp_file_url_to_filename(talloc_ctx, url);
+    } else {
+        return bstrto0(talloc_ctx, url);
+    }
+}
+
 #if HAVE_BSD_FSTATFS
 static bool check_stream_network(stream_t *stream)
 {

@@ -33,6 +33,8 @@
 #include <dvdread/ifo_read.h>
 #include <dvdread/nav_read.h>
 
+#include "osdep/io.h"
+
 #include "config.h"
 #include "talloc.h"
 #include "common/common.h"
@@ -46,6 +48,7 @@
 #include "stream.h"
 #include "options/m_option.h"
 #include "options/options.h"
+#include "options/path.h"
 
 #include "stream_dvd_common.h"
 
@@ -913,38 +916,37 @@ fail:
   return STREAM_UNSUPPORTED;
 }
 
-static int ifo_stream_open (stream_t *stream)
+static int ifo_stream_open(stream_t *stream)
 {
-    char* filename;
     dvd_priv_t *priv = talloc_ptrtype(stream, priv);
     stream->priv = priv;
     *priv = stream_priv_dflts;
 
-    // "file://" prefix -> decode URL-style escapes
-    if (strlen(stream->url) > strlen(stream->path))
-        mp_url_unescape_inplace(stream->path);
+    char *path = mp_file_get_path(priv, bstr0(stream->url));
+    if (!path)
+        goto unsupported;
 
-    int len = strlen(stream->path);
-    if (len < 4 || strcasecmp (stream->path + len - 4, ".ifo"))
-        return STREAM_UNSUPPORTED;
+    if (!dvd_probe(path, ".ifo", "DVDVIDEO-VTS"))
+        goto unsupported;
 
-    MP_INFO(stream, ".IFO detected. Redirecting to dvd://\n");
+    char *base = mp_basename(path);
 
-    filename = strdup(basename(stream->path));
+    // Only accept individual titles - use dvdnav for video_ts.ifo
+    if (strncasecmp(base, "vts_", 4))
+        goto unsupported;
 
-    talloc_free(priv->cfg_device);
-    priv->cfg_device = talloc_strdup(NULL, dirname(stream->path));
-    if(!strncasecmp(filename,"vts_",4))
-    {
-        if(sscanf(filename+3, "_%02d_", &priv->cfg_title)!=0)
-            priv->cfg_title = 0;
-    }else
-        priv->cfg_title = 0;
+    if (sscanf(base + 3, "_%02d_", &priv->cfg_title) != 1)
+        goto unsupported;
 
-    free(filename);
-    stream->url=talloc_strdup(stream, "dvdread://");
+    priv->cfg_device = bstrto0(priv, mp_dirname(path));
 
+    MP_INFO(stream, ".IFO detected. Redirecting to dvdread://\n");
     return open_s(stream);
+
+unsupported:
+    talloc_free(priv);
+    stream->priv = NULL;
+    return STREAM_UNSUPPORTED;
 }
 
 const stream_info_t stream_info_dvd = {
