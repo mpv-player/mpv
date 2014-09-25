@@ -28,6 +28,7 @@
  */
 
 #include <string.h>
+#include <strings.h>
 #include <assert.h>
 
 #include <libbluray/bluray.h>
@@ -43,6 +44,7 @@
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "options/options.h"
+#include "options/path.h"
 #include "stream.h"
 #include "osdep/timer.h"
 #include "discnav.h"
@@ -828,4 +830,88 @@ const stream_info_t stream_info_bdnav = {
         "filename=device",
         NULL
     },
+};
+
+static bool check_bdmv(const char *path)
+{
+    if (strcasecmp(mp_basename(path), "MovieObject.bdmv"))
+        return false;
+
+    FILE *temp = fopen(path, "rb");
+    if (!temp)
+        return false;
+
+    bool r = false;
+
+    const char *sig = "MOBJ020";
+    char data[50];
+
+    if (fread(data, 50, 1, temp) == 1) {
+        if (memcmp(data, sig, strlen(sig)) == 0)
+            r = true;
+    }
+
+    fclose(temp);
+    return r;
+}
+
+// Destructively remove the current trailing path component.
+static void remove_prefix(char *path)
+{
+    size_t len = strlen(path);
+#if HAVE_DOS_PATHS
+    const char *seps = "/\\";
+#else
+    const char *seps = "/";
+#endif
+    while (len > 0 && !strchr(seps, path[len - 1]))
+        len--;
+    while (len > 0 && strchr(seps, path[len - 1]))
+        len--;
+    path[len] = '\0';
+}
+
+static int bdmv_dir_stream_open(stream_t *stream)
+{
+    struct bluray_priv_s *priv = talloc_ptrtype(stream, priv);
+    stream->priv = priv;
+    *priv = bluray_stream_priv_dflts;
+
+    char *path = mp_file_get_path(priv, bstr0(stream->url));
+    if (!path)
+        goto unsupported;
+
+    // We allow the path to point to a directory containing BDMV/, a
+    // directory containing MovieObject.bdmv, or that file itself.
+    if (!check_bdmv(path)) {
+        // On UNIX, just assume the filename has always this case.
+        char *npath = mp_path_join(priv, bstr0(path), bstr0("MovieObject.bdmv"));
+        if (!check_bdmv(npath)) {
+            npath = mp_path_join(priv, bstr0(path), bstr0("BDMV/MovieObject.bdmv"));
+            if (!check_bdmv(npath))
+                goto unsupported;
+        }
+        path = npath;
+    }
+
+    // Go up by 2 levels.
+    remove_prefix(path);
+    remove_prefix(path);
+    priv->cfg_device = path;
+    if (strlen(priv->cfg_device) <= 1)
+        goto unsupported;
+
+    MP_INFO(stream, "BDMV detected. Redirecting to bluray://\n");
+    return bluray_stream_open(stream);
+
+unsupported:
+    talloc_free(priv);
+    stream->priv = NULL;
+    return STREAM_UNSUPPORTED;
+}
+
+const stream_info_t stream_info_bdmv_dir = {
+    .name = "bdmv/bluray",
+    .open = bdmv_dir_stream_open,
+    .protocols = (const char*const[]){ "file", "", NULL },
 };
