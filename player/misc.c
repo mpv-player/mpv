@@ -80,8 +80,9 @@ double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
 double get_play_end_pts(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
+    double end = MP_NOPTS_VALUE;
     if (opts->play_end.type) {
-        return rel_time_to_abs(mpctx, opts->play_end);
+        end = rel_time_to_abs(mpctx, opts->play_end);
     } else if (opts->play_length.type) {
         double startpts = get_start_time(mpctx);
         double start = rel_time_to_abs(mpctx, opts->play_start);
@@ -89,9 +90,14 @@ double get_play_end_pts(struct MPContext *mpctx)
             start = startpts;
         double length = rel_time_to_abs(mpctx, opts->play_length);
         if (start != MP_NOPTS_VALUE && length != MP_NOPTS_VALUE)
-            return start + length;
+            end = start + length;
     }
-    return MP_NOPTS_VALUE;
+    if (opts->chapterrange[1] > 0) {
+        double cend = chapter_start_time(mpctx, opts->chapterrange[1]);
+        if (cend != MP_NOPTS_VALUE && (end == MP_NOPTS_VALUE || cend < end))
+            end = cend;
+    }
+    return end;
 }
 
 // Time used to seek external tracks to.

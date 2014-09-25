@@ -859,12 +859,6 @@ void run_playloop(struct MPContext *mpctx)
         }
     }
 
-    if (opts->chapterrange[1] > 0) {
-        double end = chapter_start_time(mpctx, opts->chapterrange[1]);
-        if (end != MP_NOPTS_VALUE && (endpts == MP_NOPTS_VALUE || end < endpts))
-            endpts = end;
-    }
-
     handle_cursor_autohide(mpctx);
     handle_heartbeat_cmd(mpctx);
 
