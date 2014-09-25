@@ -78,7 +78,7 @@ const struct m_sub_options demux_rawaudio_conf = {
         // Note that currently, stream_cdda expects exactly these parameters!
         .channels = MP_CHMAP_INIT_STEREO,
         .samplerate = 44100,
-        .aformat = PCM(1, 0, 16, NE), // s16
+        .aformat = PCM(1, 0, 16, 0), // s16le
     },
 };
 

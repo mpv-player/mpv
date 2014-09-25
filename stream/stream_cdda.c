@@ -38,15 +38,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "osdep/endian.h"
-
 #include "talloc.h"
 
 #include "stream.h"
 #include "options/m_option.h"
 #include "options/m_config.h"
 #include "options/options.h"
-#include "osdep/mpbswap.h"
 
 #include "common/msg.h"
 
@@ -175,11 +172,6 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     buf = paranoia_read(p->cdp, cdparanoia_callback);
     if (!buf)
         return 0;
-
-#if BYTE_ORDER == BIG_ENDIAN
-    for (i = 0; i < CDIO_CD_FRAMESIZE_RAW / 2; i++)
-        buf[i] = le2me_16(buf[i]);
-#endif
 
     p->sector++;
     memcpy(buffer, buf, CDIO_CD_FRAMESIZE_RAW);
