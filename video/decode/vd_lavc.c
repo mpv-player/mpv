@@ -36,7 +36,6 @@
 #include "common/av_common.h"
 #include "common/codecs.h"
 
-#include "osdep/mpbswap.h"
 #include "video/fmt-conversion.h"
 
 #include "vd.h"

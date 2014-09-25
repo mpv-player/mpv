@@ -31,7 +31,6 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include "osdep/mpbswap.h"
 #include "osdep/atomics.h"
 
 #include "talloc.h"
@@ -860,7 +859,7 @@ static uint16_t stream_read_word_endian(stream_t *s, bool big_endian)
     unsigned int y = stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
     if (big_endian)
-        y = bswap_16(y);
+        y = (y >> 8) | ((y << 8) & 0xFF);
     return y;
 }
 

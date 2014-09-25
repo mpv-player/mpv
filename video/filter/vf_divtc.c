@@ -23,10 +23,11 @@
 #include <math.h>
 #include <stdint.h>
 
+#include <libavutil/bswap.h>
+
 #include "config.h"
 #include "common/msg.h"
 #include "options/m_option.h"
-#include "osdep/mpbswap.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -119,9 +120,9 @@ static unsigned int checksum_plane(unsigned char *p, unsigned char *z,
          wsum^=*(wsum_t *)p;
 
 #if FAST_64BIT
-      t=be2me_32((uint32_t)(wsum>>32^wsum));
+      t=av_be2ne32((uint32_t)(wsum>>32^wsum));
 #else
-      t=be2me_32(wsum);
+      t=av_be2ne32(wsum);
 #endif
 
       for(sum^=(t<<shift|t>>(32-shift)); p<e;)
