@@ -287,6 +287,7 @@ static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int level, int time)
         .msg = "",
         .time = time / 1000.0,
     });
+    mpctx->osd_force_update = true;
     return mpctx->osd_msg_stack;
 }
 
@@ -519,19 +520,22 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
     mpctx->add_osd_seek_info = 0;
 }
 
-/**
- * \brief Update the OSD message line.
- *
- * This function displays the current message on the vo OSD or on the term.
- * If the stack is empty and the OSD level is high enough the timer
- * is displayed (only on the vo OSD).
- *
- */
-
+// Update the OSD text (both on VO and terminal status line).
 void update_osd_msg(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct osd_state *osd = mpctx->osd;
+
+    if (!mpctx->osd_force_update) {
+        double now = mp_time_sec();
+        double delay = 0.050; // update the OSD at most this often
+        double diff = now - mpctx->osd_last_update;
+        if (diff < delay) {
+            mpctx->sleeptime = MPMIN(mpctx->sleeptime, delay - diff);
+            return;
+        }
+    }
+    mpctx->osd_force_update = false;
 
     add_seek_osd_messages(mpctx);
     double pos = get_current_pos_ratio(mpctx, false);

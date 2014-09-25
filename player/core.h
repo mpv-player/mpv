@@ -184,6 +184,7 @@ typedef struct MPContext {
     int osd_function;
     double osd_function_visible;
     double osd_last_update;
+    bool osd_force_update;
     struct osd_progbar_state osd_progbar;
 
     struct playlist *playlist;

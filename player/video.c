@@ -776,8 +776,9 @@ void write_video(struct MPContext *mpctx, double endpts)
     mpctx->last_vo_pts = mpctx->video_pts;
     mpctx->playback_pts = mpctx->video_pts;
 
-    update_subtitles(mpctx);
+    mpctx->osd_force_update = true;
     update_osd_msg(mpctx);
+    update_subtitles(mpctx);
 
     vo_queue_frame(vo, mpctx->next_frame[0], pts, duration);
     mpctx->next_frame[0] = NULL;

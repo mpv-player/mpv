@@ -87,6 +87,7 @@ void pause_player(struct MPContext *mpctx)
     mpctx->step_frames = 0;
     mpctx->time_frame -= get_relative_time(mpctx);
     mpctx->osd_function = 0;
+    mpctx->osd_force_update = true;
     mpctx->paused_for_cache = false;
 
     if (mpctx->ao && mpctx->d_audio)
@@ -112,6 +113,7 @@ void unpause_player(struct MPContext *mpctx)
         goto end;
     mpctx->paused = false;
     mpctx->osd_function = 0;
+    mpctx->osd_force_update = true;
 
     if (mpctx->ao && mpctx->d_audio)
         ao_resume(mpctx->ao);
