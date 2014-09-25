@@ -23,15 +23,19 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <assert.h>
 
 #include <dvdnav/dvdnav.h>
 
+#include "osdep/io.h"
+
 #include "options/options.h"
 #include "common/msg.h"
 #include "input/input.h"
 #include "options/m_option.h"
+#include "options/path.h"
 #include "osdep/timer.h"
 #include "stream.h"
 #include "demux/demux.h"
@@ -752,4 +756,52 @@ const stream_info_t stream_info_dvdnav = {
         "filename=device",
         NULL
     },
+};
+
+static bool check_ifo(const char *path)
+{
+    if (strcasecmp(mp_basename(path), "video_ts.ifo"))
+        return false;
+
+    return dvd_probe(path, ".ifo", "DVDVIDEO-VMG");
+}
+
+static int ifo_dvdnav_stream_open(stream_t *stream)
+{
+    struct priv *priv = talloc_ptrtype(stream, priv);
+    stream->priv = priv;
+    *priv = stream_priv_dflts;
+
+    char *path = mp_file_get_path(priv, bstr0(stream->url));
+    if (!path)
+        goto unsupported;
+
+    // We allow the path to point to a directory containing VIDEO_TS/, a
+    // directory containing VIDEO_TS.IFO, or that file itself.
+    if (!check_ifo(path)) {
+        // On UNIX, just assume the filename is always uppercase.
+        char *npath = mp_path_join(priv, bstr0(path), bstr0("VIDEO_TS.IFO"));
+        if (!check_ifo(npath)) {
+            npath = mp_path_join(priv, bstr0(path), bstr0("VIDEO_TS/VIDEO_TS.IFO"));
+            if (!check_ifo(npath))
+                goto unsupported;
+        }
+        path = npath;
+    }
+
+    priv->device = bstrto0(priv, mp_dirname(path));
+
+    MP_INFO(stream, ".IFO detected. Redirecting to dvd://\n");
+    return open_s(stream);
+
+unsupported:
+    talloc_free(priv);
+    stream->priv = NULL;
+    return STREAM_UNSUPPORTED;
+}
+
+const stream_info_t stream_info_ifo_dvdnav = {
+    .name = "ifo/dvdnav",
+    .open = ifo_dvdnav_stream_open,
+    .protocols = (const char*const[]){ "file", "", NULL },
 };
