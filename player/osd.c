@@ -293,22 +293,20 @@ void set_osd_bar(struct MPContext *mpctx, int type,
                  double min, double max, double neutral, double val)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (opts->osd_level < 1 || !opts->osd_bar_visible)
+    if (opts->osd_level < 1 || !opts->osd_bar_visible || !mpctx->video_out)
         return;
 
-    if (mpctx->video_out) {
-        mpctx->osd_visible = mp_time_sec() + opts->osd_duration / 1000.0;
-        mpctx->sleeptime = 0;
-        mpctx->osd_progbar.type = type;
-        mpctx->osd_progbar.value = (val - min) / (max - min);
-        mpctx->osd_progbar.num_stops = 0;
-        if (neutral > min && neutral < max) {
-            float pos = (neutral - min) / (max - min);
-            MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
-                             mpctx->osd_progbar.num_stops, pos);
-        }
-        osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
+    mpctx->osd_visible = mp_time_sec() + opts->osd_duration / 1000.0;
+    mpctx->sleeptime = 0;
+    mpctx->osd_progbar.type = type;
+    mpctx->osd_progbar.value = (val - min) / (max - min);
+    mpctx->osd_progbar.num_stops = 0;
+    if (neutral > min && neutral < max) {
+        float pos = (neutral - min) / (max - min);
+        MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
+                         mpctx->osd_progbar.num_stops, pos);
     }
+    osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
 }
 
 // Update a currently displayed bar of the same type, without resetting the
@@ -316,29 +314,31 @@ void set_osd_bar(struct MPContext *mpctx, int type,
 static void update_osd_bar(struct MPContext *mpctx, int type,
                            double min, double max, double val)
 {
-    if (mpctx->osd_progbar.type == type) {
-        float new_value = (val - min) / (max - min);
-        if (new_value != mpctx->osd_progbar.value) {
-            mpctx->osd_progbar.value = new_value;
-            osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
-        }
+    if (mpctx->osd_progbar.type != type)
+        return;
+
+    float new_value = (val - min) / (max - min);
+    if (new_value != mpctx->osd_progbar.value) {
+        mpctx->osd_progbar.value = new_value;
+        osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
     }
 }
 
 static void set_osd_bar_chapters(struct MPContext *mpctx, int type)
 {
+    if (mpctx->osd_progbar.type != type)
+        return;
+
     mpctx->osd_progbar.num_stops = 0;
-    if (mpctx->osd_progbar.type == type) {
-        double len = get_time_length(mpctx);
-        if (len > 0) {
-            int num = get_chapter_count(mpctx);
-            for (int n = 0; n < num; n++) {
-                double time = chapter_start_time(mpctx, n);
-                if (time >= 0) {
-                    float pos = time / len;
-                    MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
-                                     mpctx->osd_progbar.num_stops, pos);
-                }
+    double len = get_time_length(mpctx);
+    if (len > 0) {
+        int num = get_chapter_count(mpctx);
+        for (int n = 0; n < num; n++) {
+            double time = chapter_start_time(mpctx, n);
+            if (time >= 0) {
+                float pos = time / len;
+                MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
+                                    mpctx->osd_progbar.num_stops, pos);
             }
         }
     }
