@@ -227,5 +227,8 @@ void reinit_subs(struct MPContext *mpctx, int order)
     if (order == 1 && sub_has_get_text(dec_sub))
         state.render_bitmap_subs = false;
 
+    if (!mpctx->current_track[0][STREAM_VIDEO])
+        state.render_bitmap_subs = false;
+
     osd_set_sub(mpctx->osd, obj, &state);
 }
