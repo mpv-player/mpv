@@ -2409,14 +2409,16 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                     dp->keyframe = keyframe;
                     /* If default_duration is 0, assume no pts value is known
                      * for packets after the first one (rather than all pts
-                     * values being the same) */
-                    if (p == 0 || track->default_duration)
+                     * values being the same). Also, don't use it for extra
+                     * packets resulting from parsing. */
+                    if (p == 0 || (p == i && track->default_duration))
                         dp->pts = mkv_d->last_pts + p * track->default_duration;
-                    p++;
                     if (track->ms_compat)
                         MPSWAP(double, dp->pts, dp->dts);
-                    dp->duration = block_duration / 1e9;
+                    if (p == 0)
+                        dp->duration = block_duration / 1e9;
                     demux_add_packet(stream, dp);
+                    p++;
                 }
                 talloc_free_children(track->parser_tmp);
             }
