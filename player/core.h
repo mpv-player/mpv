@@ -172,7 +172,6 @@ typedef struct MPContext {
 
     struct mp_log *statusline;
     struct osd_state *osd;
-    struct mp_osd_msg *osd_msg_stack;
     char *term_osd_text;
     char *term_osd_status;
     char *term_osd_subs;
@@ -183,8 +182,11 @@ typedef struct MPContext {
     double osd_visible; // for the osd bar only
     int osd_function;
     double osd_function_visible;
+    double osd_msg_visible;
     double osd_last_update;
     bool osd_force_update;
+    char *osd_msg_text;
+    bool osd_show_pos;
     struct osd_progbar_state osd_progbar;
 
     struct playlist *playlist;
@@ -430,7 +432,7 @@ void stream_dump(struct MPContext *mpctx);
 // osd.c
 void set_osd_bar(struct MPContext *mpctx, int type,
                  double min, double max, double neutral, double val);
-void set_osd_msg(struct MPContext *mpctx, int level, int time,
+bool set_osd_msg(struct MPContext *mpctx, int level, int time,
                  const char* fmt, ...) PRINTF_ATTRIBUTE(4,5);
 void set_osd_function(struct MPContext *mpctx, int osd_function);
 void set_osd_subtitle(struct MPContext *mpctx, const char *text);

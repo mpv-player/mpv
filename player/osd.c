@@ -263,105 +263,29 @@ static void print_status(struct MPContext *mpctx)
     talloc_free(line);
 }
 
-typedef struct mp_osd_msg mp_osd_msg_t;
-struct mp_osd_msg {
-    /// Message text.
-    char *msg;
-    int started;
-    /// Display duration in seconds.
-    double time;
-    // Show full OSD for duration of message instead of msg
-    // (osd_show_progression command)
-    bool show_position;
-};
-
-// time is in ms
-static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int level, int time)
-{
-    struct MPOpts *opts = mpctx->opts;
-    if (level > opts->osd_level)
-        return NULL;
-
-    talloc_free(mpctx->osd_msg_stack);
-    mpctx->osd_msg_stack = talloc_struct(mpctx, mp_osd_msg_t, {
-        .msg = "",
-        .time = time / 1000.0,
-    });
-    mpctx->osd_force_update = true;
-    return mpctx->osd_msg_stack;
-}
-
-static void set_osd_msg_va(struct MPContext *mpctx, int level, int time,
+static bool set_osd_msg_va(struct MPContext *mpctx, int level, int time,
                            const char *fmt, va_list ap)
 {
-    if (level == OSD_LEVEL_INVISIBLE)
-        return;
-    mp_osd_msg_t *msg = add_osd_msg(mpctx, level, time);
-    if (msg)
-        msg->msg = talloc_vasprintf(msg, fmt, ap);
+    if (level > mpctx->opts->osd_level)
+        return false;
+
+    talloc_free(mpctx->osd_msg_text);
+    mpctx->osd_msg_text = talloc_vasprintf(mpctx, fmt, ap);
+    mpctx->osd_show_pos = false;
+    mpctx->osd_msg_visible = mp_time_sec() + time / 1000.0;
+    mpctx->osd_force_update = true;
+    mpctx->sleeptime = 0;
+    return true;
 }
 
-void set_osd_msg(struct MPContext *mpctx, int level, int time,
+bool set_osd_msg(struct MPContext *mpctx, int level, int time,
                  const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    set_osd_msg_va(mpctx, level, time, fmt, ap);
+    bool r = set_osd_msg_va(mpctx, level, time, fmt, ap);
     va_end(ap);
-}
-
-/**
- *  \brief Get the current message from the OSD stack.
- *
- *  This function decrements the message timer and destroys the old ones.
- *  The message that should be displayed is returned (if any).
- *
- */
-
-static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
-{
-    double now = mp_time_sec();
-    double diff;
-
-    if (mpctx->osd_visible) {
-        double sleep = mpctx->osd_visible - now;
-        if (sleep > 0) {
-            mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
-        } else {
-            mpctx->osd_visible = 0;
-            mpctx->osd_progbar.type = -1; // disable
-            osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
-        }
-    }
-    if (mpctx->osd_function_visible && now >= mpctx->osd_function_visible) {
-        mpctx->osd_function_visible = 0;
-        mpctx->osd_function = 0;
-    }
-
-    if (!mpctx->osd_last_update)
-        mpctx->osd_last_update = now;
-    diff = now >= mpctx->osd_last_update ? now - mpctx->osd_last_update : 0;
-
-    mpctx->osd_last_update = now;
-
-    mp_osd_msg_t *msg = mpctx->osd_msg_stack;
-    if (msg) {
-        if (!msg->started || msg->time > diff) {
-            // display it
-            if (msg->started)
-                msg->time -= diff;
-            else
-                msg->started = 1;
-        } else {
-            // kill the message
-            talloc_free(msg);
-            msg = NULL;
-            mpctx->osd_msg_stack = NULL;
-        }
-    }
-    if (msg)
-        mpctx->sleeptime = MPMIN(mpctx->sleeptime, msg->time);
-    return msg;
+    return r;
 }
 
 // type: mp_osd_font_codepoints, ASCII, or OSD_BAR_*
@@ -498,9 +422,8 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
         // Never in term-osd mode
         if (mpctx->video_out && mpctx->opts->term_osd != 1) {
-            mp_osd_msg_t *msg = add_osd_msg(mpctx, 1, mpctx->opts->osd_duration);
-            if (msg)
-                msg->show_position = true;
+            if (set_osd_msg(mpctx, 1, mpctx->opts->osd_duration, "%s", ""))
+                mpctx->osd_show_pos = true;
         }
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CHAPTER_TEXT) {
@@ -526,8 +449,9 @@ void update_osd_msg(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     struct osd_state *osd = mpctx->osd;
 
+    double now = mp_time_sec();
+
     if (!mpctx->osd_force_update) {
-        double now = mp_time_sec();
         double delay = 0.050; // update the OSD at most this often
         double diff = now - mpctx->osd_last_update;
         if (diff < delay) {
@@ -536,23 +460,54 @@ void update_osd_msg(struct MPContext *mpctx)
         }
     }
     mpctx->osd_force_update = false;
+    mpctx->osd_last_update = now;
+
+    if (mpctx->osd_visible) {
+        double sleep = mpctx->osd_visible - now;
+        if (sleep > 0) {
+            mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+        } else {
+            mpctx->osd_visible = 0;
+            mpctx->osd_progbar.type = -1; // disable
+            osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
+        }
+    }
+
+    if (mpctx->osd_function_visible && now >= mpctx->osd_function_visible) {
+        mpctx->osd_function_visible = 0;
+        mpctx->osd_function = 0;
+    }
+
+    if (mpctx->osd_msg_visible) {
+        double sleep = mpctx->osd_msg_visible - now;
+        if (sleep > 0) {
+            mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+        } else {
+            talloc_free(mpctx->osd_msg_text);
+            mpctx->osd_msg_text = NULL;
+            mpctx->osd_msg_visible = 0;
+            mpctx->osd_show_pos = false;
+        }
+    }
 
     add_seek_osd_messages(mpctx);
-    double pos = get_current_pos_ratio(mpctx, false);
-    update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 1, MPCLAMP(pos, 0, 1));
+
+    if (mpctx->osd_progbar.type == OSD_BAR_SEEK) {
+        double pos = get_current_pos_ratio(mpctx, false);
+        update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 1, MPCLAMP(pos, 0, 1));
+    }
 
     print_status(mpctx);
 
     // Look if we have a msg
-    mp_osd_msg_t *msg = get_osd_msg(mpctx);
-    if (msg && !msg->show_position) {
-        osd_set_text(osd, OSDTYPE_OSD, msg->msg);
-        term_osd_set_text(mpctx, msg->msg);
+    if (mpctx->osd_msg_text && !mpctx->osd_show_pos) {
+        osd_set_text(osd, OSDTYPE_OSD, mpctx->osd_msg_text);
+        term_osd_set_text(mpctx, mpctx->osd_msg_text);
         return;
     }
 
     int osd_level = opts->osd_level;
-    if (msg && msg->show_position)
+    if (mpctx->osd_msg_text && mpctx->osd_show_pos)
         osd_level = 3;
 
     // clear, or if OSD level demands it, show the status
