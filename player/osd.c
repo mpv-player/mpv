@@ -422,7 +422,7 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
         // Never in term-osd mode
         if (mpctx->video_out && mpctx->opts->term_osd != 1) {
-            if (set_osd_msg(mpctx, 1, mpctx->opts->osd_duration, "%s", ""))
+            if (set_osd_msg(mpctx, 1, mpctx->opts->osd_duration, ""))
                 mpctx->osd_show_pos = true;
         }
     }

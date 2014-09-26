@@ -3698,7 +3698,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (opts->osd_level > 0) {
             set_osd_msg(mpctx, osdl, osd_duration, "OSD level: %d", opts->osd_level);
         } else {
-            set_osd_msg(mpctx, 0, 0, "%s", "");
+            set_osd_msg(mpctx, 0, 0, "");
         }
         break;
     }

@@ -38,6 +38,7 @@ def __add_gcc_flags__(ctx):
     __test_and_add_flags__(ctx, ["-Wempty-body"])
     __test_and_add_flags__(ctx, ["-Wdisabled-optimization"])
     __test_and_add_flags__(ctx, ["-Wstrict-prototypes"])
+    __test_and_add_flags__(ctx, ["-Wno-format-zero-length"])
 
 def __add_clang_flags__(ctx):
     ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics",
