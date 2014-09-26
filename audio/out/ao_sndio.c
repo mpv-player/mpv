@@ -234,7 +234,7 @@ static void reset(struct ao *ao)
 }
 
 /*
- * play given number of bytes until sio_write() blocks
+ * play given number of samples until sio_write() blocks
  */
 static int play(struct ao *ao, void **data, int samples, int flags)
 {
@@ -249,7 +249,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 }
 
 /*
- * how many bytes can be played without blocking
+ * how many samples can be played without blocking
  */
 static int get_space(struct ao *ao)
 {
