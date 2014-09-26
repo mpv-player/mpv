@@ -247,21 +247,24 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 }
 
 /*
+ * make libsndio call movecb()
+ */
+static void update(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    int n = sio_pollfd(p->hdl, p->pfd, POLLOUT);
+    while (poll(p->pfd, n, 0) < 0 && errno == EINTR) {}
+    sio_revents(p->hdl, p->pfd);
+}
+
+/*
  * how many samples can be played without blocking
  */
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    int n;
 
-    /*
-     * call poll() and sio_revents(), so the
-     * delay counter is updated
-     */
-    n = sio_pollfd(p->hdl, p->pfd, POLLOUT);
-    while (poll(p->pfd, n, 0) < 0 && errno == EINTR)
-        ; /* nothing */
-    sio_revents(p->hdl, p->pfd);
+    update(ao);
 
     int samples = p->par.bufsz - p->delay;
     return samples / p->par.round * p->par.round;
@@ -273,6 +276,9 @@ static int get_space(struct ao *ao)
 static float get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
+
+    update(ao);
+
     return p->delay / (double)p->par.rate;
 }
 
