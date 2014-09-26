@@ -188,6 +188,13 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
         ao->device_buffer = ao->driver->get_space(ao);
         MP_VERBOSE(ao, "device buffer: %d samples.\n", ao->device_buffer);
     }
+
+    if (ao->device_buffer <= 0) {
+        MP_FATAL(ao, "Couldn't probe device buffer size.\n");
+        ao->driver->uninit(ao);
+        goto error;
+    }
+
     ao->buffer = MPMAX(ao->device_buffer, ao->def_buffer * ao->samplerate);
     MP_VERBOSE(ao, "using soft-buffer of %d samples.\n", ao->buffer);
 
