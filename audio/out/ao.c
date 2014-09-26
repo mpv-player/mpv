@@ -60,9 +60,6 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #if HAVE_PULSE
     &audio_out_pulse,
 #endif
-#if HAVE_SNDIO
-    &audio_out_sndio,
-#endif
 #if HAVE_ALSA
     &audio_out_alsa,
 #endif
@@ -87,6 +84,9 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #endif
 #if HAVE_SDL1 || HAVE_SDL2
     &audio_out_sdl,
+#endif
+#if HAVE_SNDIO
+    &audio_out_sndio,
 #endif
     &audio_out_null,
     // should not be auto-selected:
