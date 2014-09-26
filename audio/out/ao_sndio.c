@@ -74,7 +74,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 static void movecb(void *addr, int delta)
 {
     struct priv *p = addr;
-    p->delay -= delta * (int)(p->par.bps * p->par.pchan);
+    p->delay -= delta;
 }
 
 /*
@@ -186,10 +186,8 @@ static int init(struct ao *ao)
         goto error;
     }
 
-    ao->bps = p->par.bps * p->par.pchan * p->par.rate;
     p->havevol = sio_onvol(p->hdl, volcb, p);
     sio_onmove(p->hdl, movecb, p);
-    p->delay = 0;
     if (!sio_start(p->hdl))
         MP_ERR(ao, "init: couldn't start\n");
 
@@ -241,11 +239,11 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     struct priv *p = ao->priv;
     int n;
 
-    n = sio_write(p->hdl, data[0], samples * ao->sstride);
+    n = sio_write(p->hdl, data[0], samples * ao->sstride) / ao->sstride;
     p->delay += n;
     if (flags & AOPLAY_FINAL_CHUNK)
         reset(ao);
-    return n / ao->sstride;
+    return n;
 }
 
 /*
@@ -265,7 +263,7 @@ static int get_space(struct ao *ao)
         ; /* nothing */
     sio_revents(p->hdl, p->pfd);
 
-    int samples = (p->par.bufsz * p->par.pchan * p->par.bps - p->delay) / ao->sstride;
+    int samples = p->par.bufsz - p->delay;
     return samples / p->par.round * p->par.round;
 }
 
@@ -275,7 +273,7 @@ static int get_space(struct ao *ao)
 static float get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    return (float)p->delay / (p->par.bps * p->par.pchan * p->par.rate);
+    return p->delay / (double)p->par.rate;
 }
 
 /*
