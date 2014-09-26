@@ -122,7 +122,7 @@ static int init(struct ao *ao)
     }, *ap;
     int i;
 
-    p->hdl = sio_open(p->dev, SIO_PLAY, 0);
+    p->hdl = sio_open(p->dev, SIO_PLAY, 1);
     if (p->hdl == NULL) {
         MP_ERR(ao, "can't open sndio %s\n", p->dev);
         goto error;
