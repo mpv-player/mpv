@@ -238,9 +238,7 @@ static bool parse_url(struct stream *st, struct m_config *config)
 
 static stream_t *new_stream(void)
 {
-    stream_t *s = talloc_size(NULL, sizeof(stream_t) + TOTAL_BUFFER_SIZE);
-    memset(s, 0, sizeof(stream_t));
-    return s;
+    return talloc_zero_size(NULL, sizeof(stream_t) + TOTAL_BUFFER_SIZE);
 }
 
 static const char *match_proto(const char *url, const char *proto)

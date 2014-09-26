@@ -1350,8 +1350,6 @@ static int start(priv_t *priv)
         MP_ERR(priv, "cannot allocate video buffer: %s\n", strerror(errno));
         return 0;
     }
-    memset(priv->video_ringbuffer,0,priv->video_buffer_size_max * sizeof(video_buffer_entry));
-
     pthread_mutex_init(&priv->video_buffer_mutex, NULL);
 
     priv->video_head = 0;
@@ -1382,7 +1380,6 @@ static int start(priv_t *priv)
 
     /* map and queue buffers */
     for (i = 0; i < request.count; i++) {
-        memset(&priv->map[i].buf,0,sizeof(priv->map[i].buf));
         priv->map[i].buf.index = i;
         priv->map[i].buf.type  = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         priv->map[i].buf.memory  = V4L2_MEMORY_MMAP;

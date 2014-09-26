@@ -314,8 +314,7 @@ static int open_cdda(stream_t *st)
         return STREAM_ERROR;
     }
 
-    priv = malloc(sizeof(cdda_priv));
-    memset(priv, 0, sizeof(cdda_priv));
+    priv = calloc(1,sizeof(cdda_priv));
     priv->cd = cdd;
 
     if (p->toc_bias)
