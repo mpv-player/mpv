@@ -33,6 +33,7 @@ struct priv {
     struct sio_hdl *hdl;
     struct sio_par par;
     int delay;
+    bool playing;
     int vol;
     int havevol;
 #define SILENCE_NMAX 0x1000
@@ -224,11 +225,17 @@ static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    if (!sio_stop(p->hdl))
-        MP_ERR(ao, "reset: couldn't stop\n");
-    p->delay = 0;
-    if (!sio_start(p->hdl))
-        MP_ERR(ao, "reset: couldn't start\n");
+    if (p->playing) {
+        MP_WARN(ao, "Blocking until remaining audio is played... (sndio design bug).\n");
+
+        p->playing = false;
+
+        if (!sio_stop(p->hdl))
+            MP_ERR(ao, "reset: couldn't stop\n");
+        p->delay = 0;
+        if (!sio_start(p->hdl))
+            MP_ERR(ao, "reset: couldn't start\n");
+    }
 }
 
 /*
@@ -241,8 +248,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     n = sio_write(p->hdl, data[0], samples * ao->sstride) / ao->sstride;
     p->delay += n;
-    if (flags & AOPLAY_FINAL_CHUNK)
-        reset(ao);
+    p->playing = true;
+    /* on AOPLAY_FINAL_CHUNK, just let it underrun */
     return n;
 }
 
