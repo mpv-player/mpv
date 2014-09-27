@@ -333,6 +333,7 @@ struct MPContext *mp_create(void)
 
     mpctx->global->opts = mpctx->opts;
 
+    mpctx->input = mp_input_init(mpctx->global);
     screenshot_init(mpctx);
     mpctx->mixer = mixer_init(mpctx, mpctx->global);
     command_init(mpctx);
@@ -377,7 +378,7 @@ int mp_initialize(struct MPContext *mpctx)
         m_config_set_option0(mpctx->mconfig, "input-file", "/dev/stdin");
     }
 
-    mpctx->input = mp_input_init(mpctx->global);
+    mp_input_load(mpctx->input);
     mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
 
     mp_dispatch_set_wakeup_fn(mpctx->dispatch, wakeup_playloop, mpctx);

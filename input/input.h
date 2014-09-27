@@ -221,6 +221,9 @@ bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y);
 struct mpv_global;
 struct input_ctx *mp_input_init(struct mpv_global *global);
 
+// Load config, options, and devices.
+void mp_input_load(struct input_ctx *ictx);
+
 void mp_input_uninit(struct input_ctx *ictx);
 
 // Sleep for the given amount of seconds, until mp_input_wakeup() is called,

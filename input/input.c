@@ -1196,21 +1196,14 @@ done:
 
 struct input_ctx *mp_input_init(struct mpv_global *global)
 {
-    struct input_opts *input_conf = global->opts->input_opts;
 
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
     *ictx = (struct input_ctx){
         .global = global,
-        .opts = input_conf,
-        .log = mp_log_new(ictx, global->log, "input"),
-        .key_fifo_size = input_conf->key_fifo_size,
-        .doubleclick_time = input_conf->doubleclick_time,
+        .opts = talloc_zero(ictx, struct input_opts), // replaced later
         .ar_state = -1,
-        .ar_delay = input_conf->ar_delay,
-        .ar_rate = input_conf->ar_rate,
-        .default_bindings = input_conf->default_bindings,
+        .log = mp_log_new(ictx, global->log, "input"),
         .mouse_section = "default",
-        .test = input_conf->test,
     };
 
     if (sem_init(&ictx->wakeup, 0, 0)) {
@@ -1225,6 +1218,21 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
                                         MP_INPUT_ALLOW_HIDE_CURSOR);
     mp_input_set_section_mouse_area(ictx, NULL, INT_MIN, INT_MIN, INT_MAX, INT_MAX);
 
+    return ictx;
+}
+
+void mp_input_load(struct input_ctx *ictx)
+{
+    struct input_opts *input_conf = ictx->global->opts->input_opts;
+
+    ictx->opts = input_conf;
+    ictx->key_fifo_size = input_conf->key_fifo_size;
+    ictx->doubleclick_time = input_conf->doubleclick_time;
+    ictx->ar_delay = input_conf->ar_delay;
+    ictx->ar_rate = input_conf->ar_rate;
+    ictx->default_bindings = input_conf->default_bindings;
+    ictx->test = input_conf->test;
+
     // "Uncomment" the default key bindings in etc/input.conf and add them.
     // All lines that do not start with '# ' are parsed.
     bstr builtin = bstr0(builtin_input_conf);
@@ -1238,9 +1246,9 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     bool config_ok = false;
     if (input_conf->config_file)
         config_ok = parse_config_file(ictx, input_conf->config_file, true);
-    if (!config_ok && global->opts->load_config) {
+    if (!config_ok && ictx->global->opts->load_config) {
         // Try global conf dir
-        char *file = mp_find_config_file(NULL, global, "input.conf");
+        char *file = mp_find_config_file(NULL, ictx->global, "input.conf");
         config_ok = file && parse_config_file(ictx, file, false);
         talloc_free(file);
     }
@@ -1274,7 +1282,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     }
 #endif
 
-    ictx->win_drag = global->opts->allow_win_drag;
+    ictx->win_drag = ictx->global->opts->allow_win_drag;
 
     if (input_conf->in_file && input_conf->in_file[0]) {
 #if !defined(__MINGW32__) || HAVE_WAIO
@@ -1283,8 +1291,6 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         MP_ERR(ictx, "Pipes not available.\n");
 #endif
     }
-
-    return ictx;
 }
 
 static void clear_queue(struct cmd_queue *queue)
