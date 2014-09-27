@@ -394,6 +394,11 @@ static int init(struct ao *ao)
     pthread_cond_init(&p->wakeup_drain, NULL);
     mp_make_wakeup_pipe(p->wakeup_pipe);
 
+    if (ao->device_buffer <= 0) {
+        MP_FATAL(ao, "Couldn't probe device buffer size.\n");
+        goto err;
+    }
+
     p->buffer = mp_audio_buffer_create(ao);
     mp_audio_buffer_reinit_fmt(p->buffer, ao->format,
                                &ao->channels, ao->samplerate);
