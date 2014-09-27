@@ -843,12 +843,13 @@ static bool check_bdmv(const char *path)
 
     bool r = false;
 
-    const char *sig = "MOBJ020";
+    const char *sig1 = "MOBJ020";
+    const char *sig2 = "MOBJ0100";
     char data[50];
 
     if (fread(data, 50, 1, temp) == 1) {
-        if (memcmp(data, sig, strlen(sig)) == 0)
-            r = true;
+        r = memcmp(data, sig1, strlen(sig1)) == 0 ||
+            memcmp(data, sig2, strlen(sig2)) == 0;
     }
 
     fclose(temp);
