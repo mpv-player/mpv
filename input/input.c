@@ -46,6 +46,7 @@
 #include "osdep/timer.h"
 #include "common/msg.h"
 #include "common/global.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/path.h"
 #include "talloc.h"
@@ -110,13 +111,6 @@ struct input_ctx {
     short ar_state;
     int64_t last_ar;
 
-    // Autorepeat config
-    int ar_delay;
-    int ar_rate;
-    // Maximum number of queued commands from keypresses (limit to avoid
-    // repeated slow commands piling up)
-    int key_fifo_size;
-
     // history of key downs - the newest is in position 0
     int key_history[MP_MAX_KEY_DOWN];
     // key code of the last key that triggered MP_KEY_STATE_DOWN
@@ -125,7 +119,6 @@ struct input_ctx {
     bool current_down_cmd_need_release;
     struct mp_cmd *current_down_cmd;
 
-    int doubleclick_time;
     int last_doubleclick_key_down;
     double last_doubleclick_time;
 
@@ -140,9 +133,6 @@ struct input_ctx {
     bool mouse_mangle, mouse_src_mangle;
     struct mp_rect mouse_src, mouse_dst;
 
-    bool test;
-
-    bool default_bindings;
     // List of command binding sections
     struct cmd_bind_section *cmd_bind_sections;
 
@@ -168,7 +158,10 @@ static void close_input_sources(struct input_ctx *ictx);
 struct input_opts {
     char *config_file;
     int doubleclick_time;
+    // Maximum number of queued commands from keypresses (limit to avoid
+    // repeated slow commands piling up)
     int key_fifo_size;
+    // Autorepeat config (be aware of mp_input_set_repeat_info())
     int ar_delay;
     int ar_rate;
     char *js_dev;
@@ -391,7 +384,7 @@ static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
 
     // Prefer user-defined keys over builtin bindings
     for (int builtin = 0; builtin < 2; builtin++) {
-        if (builtin && !ictx->default_bindings)
+        if (builtin && !ictx->opts->default_bindings)
             break;
         if (best)
             break;
@@ -454,7 +447,7 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
 static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
                                    int code)
 {
-    if (ictx->test)
+    if (ictx->opts->test)
         return handle_test(ictx, code);
 
     struct cmd_bind *cmd = find_any_bind_for_key(ictx, force_section, code);
@@ -547,7 +540,7 @@ static bool key_updown_ok(enum mp_command_type cmd)
 static bool should_drop_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
 {
     struct cmd_queue *queue = &ictx->cmd_queue;
-    return queue_count_cmds(queue) >= ictx->key_fifo_size &&
+    return queue_count_cmds(queue) >= ictx->opts->key_fifo_size &&
            !mp_input_is_abort_cmd(cmd);
 }
 
@@ -631,6 +624,8 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 
 static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
 {
+    struct input_opts *opts = ictx->opts;
+
     code = mp_normalize_keycode(code);
     int unmod = code & ~MP_KEY_MODIFIER_MASK;
     if (code == MP_INPUT_RELEASE_ALL) {
@@ -638,7 +633,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
         release_down_cmd(ictx, false);
         return;
     }
-    if (!ictx->opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod))
+    if (!opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod))
         return;
     if (unmod == MP_KEY_MOUSE_LEAVE) {
         update_mouse_section(ictx);
@@ -646,15 +641,14 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
         return;
     }
     double now = mp_time_sec();
-    int doubleclick_time = ictx->doubleclick_time;
     // ignore system-doubleclick if we generate these events ourselves
-    if (doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
+    if (opts->doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
         return;
     interpret_key(ictx, code, scale);
     if (code & MP_KEY_STATE_DOWN) {
         code &= ~MP_KEY_STATE_DOWN;
-        if (ictx->last_doubleclick_key_down == code
-            && now - ictx->last_doubleclick_time < doubleclick_time / 1000.0)
+        if (ictx->last_doubleclick_key_down == code &&
+            now - ictx->last_doubleclick_time < opts->doubleclick_time / 1000.0)
         {
             if (code >= MP_MOUSE_BTN0 && code <= MP_MOUSE_BTN2)
                 interpret_key(ictx, code - MP_MOUSE_BTN0 + MP_MOUSE_BTN0_DBL, 1);
@@ -777,9 +771,10 @@ unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
 // adjust min time to wait until next repeat event
 static void adjust_max_wait_time(struct input_ctx *ictx, double *time)
 {
-    if (ictx->last_key_down && ictx->ar_rate > 0 && ictx->ar_state >= 0) {
-        *time = FFMIN(*time, 1.0 / ictx->ar_rate);
-        *time = FFMIN(*time, ictx->ar_delay / 1000.0);
+    struct input_opts *opts = ictx->opts;
+    if (ictx->last_key_down && opts->ar_rate > 0 && ictx->ar_state >= 0) {
+        *time = FFMIN(*time, 1.0 / opts->ar_rate);
+        *time = FFMIN(*time, opts->ar_delay / 1000.0);
     }
 }
 
@@ -812,8 +807,10 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 
 static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
 {
+    struct input_opts *opts = ictx->opts;
+
     // No input : autorepeat ?
-    if (ictx->ar_rate <= 0 || !ictx->current_down_cmd || !ictx->last_key_down ||
+    if (opts->ar_rate <= 0 || !ictx->current_down_cmd || !ictx->last_key_down ||
         (ictx->last_key_down & MP_NO_REPEAT_KEY) ||
         !mp_input_is_repeatable_cmd(ictx->current_down_cmd))
         ictx->ar_state = -1; // disable
@@ -823,15 +820,15 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
             ictx->last_ar = t;
         // First time : wait delay
         if (ictx->ar_state == 0
-            && (t - ictx->last_key_down_time) >= ictx->ar_delay * 1000)
+            && (t - ictx->last_key_down_time) >= opts->ar_delay * 1000)
         {
             ictx->ar_state = 1;
-            ictx->last_ar = ictx->last_key_down_time + ictx->ar_delay * 1000;
+            ictx->last_ar = ictx->last_key_down_time + opts->ar_delay * 1000;
             return mp_cmd_clone(ictx->current_down_cmd);
             // Then send rate / sec event
         } else if (ictx->ar_state == 1
-                   && (t - ictx->last_ar) >= 1000000 / ictx->ar_rate) {
-            ictx->last_ar += 1000000 / ictx->ar_rate;
+                   && (t - ictx->last_ar) >= 1000000 / opts->ar_rate) {
+            ictx->last_ar += 1000000 / opts->ar_rate;
             return mp_cmd_clone(ictx->current_down_cmd);
         }
     }
@@ -1223,15 +1220,11 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
 
 void mp_input_load(struct input_ctx *ictx)
 {
-    struct input_opts *input_conf = ictx->global->opts->input_opts;
+    struct input_opts *input_conf =
+        m_sub_options_copy(ictx, &input_config, ictx->global->opts->input_opts);
 
+    talloc_free(ictx->opts);
     ictx->opts = input_conf;
-    ictx->key_fifo_size = input_conf->key_fifo_size;
-    ictx->doubleclick_time = input_conf->doubleclick_time;
-    ictx->ar_delay = input_conf->ar_delay;
-    ictx->ar_rate = input_conf->ar_rate;
-    ictx->default_bindings = input_conf->default_bindings;
-    ictx->test = input_conf->test;
 
     // "Uncomment" the default key bindings in etc/input.conf and add them.
     // All lines that do not start with '# ' are parsed.
@@ -1521,8 +1514,8 @@ void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
 void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay)
 {
     input_lock(ictx);
-    ictx->ar_rate = rate;
-    ictx->ar_delay = delay;
+    ictx->opts->ar_rate = rate;
+    ictx->opts->ar_delay = delay;
     input_unlock(ictx);
 }
 
