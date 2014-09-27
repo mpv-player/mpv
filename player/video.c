@@ -147,9 +147,7 @@ static void filter_reconfig(struct MPContext *mpctx,
     if (params.rotate && (params.rotate % 90 == 0)) {
         if (!(mpctx->video_out->driver->caps & VO_CAP_ROTATE90)) {
             // Try to insert a rotation filter.
-            char deg[10];
-            snprintf(deg, sizeof(deg), "%d", params.rotate);
-            char *args[] = {"angle", deg, NULL, NULL};
+            char *args[] = {"angle", "auto", NULL};
             if (try_filter(mpctx, params, "rotate", "autorotate", args) >= 0) {
                 params.rotate = 0;
             } else {
@@ -161,10 +159,9 @@ static void filter_reconfig(struct MPContext *mpctx,
     if (params.stereo_in != params.stereo_out &&
         params.stereo_in > 0 && params.stereo_out >= 0)
     {
-        char *from = MP_STEREO3D_NAME(params.stereo_in);
         char *to = MP_STEREO3D_NAME(params.stereo_out);
-        if (from && to) {
-            char *args[] = {"in", from, "out", to, NULL, NULL};
+        if (to) {
+            char *args[] = {"in", "auto", "out", to, NULL, NULL};
             if (try_filter(mpctx, params, "stereo3d", "stereo3d", args) < 0)
                 MP_ERR(mpctx, "Can't insert 3D conversion filter.\n");
         }

@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <libavutil/common.h>
 
@@ -64,6 +65,7 @@ typedef enum stereo_code {
     ABOVE_BELOW_2_RL,   //above-below with half height resolution
     INTERLEAVE_ROWS_LR, //row-interleave (left eye has top row)
     INTERLEAVE_ROWS_RL, //row-interleave (right eye has top row)
+    STEREO_AUTO,        //use video metadata info (for input)
     STEREO_CODE_COUNT   //no value set - TODO: needs autodetection
 } stereo_code;
 
@@ -132,6 +134,7 @@ static const int ana_coeff[][3][6] = {
 struct vf_priv_s {
     component in;
     component out;
+    bool auto_in;
     int ana_matrix[3][6];
     unsigned int width;
     unsigned int height;
@@ -141,6 +144,8 @@ struct vf_priv_s {
   {SIDE_BY_SIDE_LR},
   {ANAGLYPH_RC_DUBOIS}
 };
+
+static bool handle_auto_in(struct vf_instance *vf);
 
 //==functions==//
 static inline uint8_t ana_convert(int coeff[6], uint8_t left[3], uint8_t right[3])
@@ -170,6 +175,9 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
     vf->priv->in.off_right      = 0;
     vf->priv->in.row_left       = 0;
     vf->priv->in.row_right      = 0;
+
+    if (vf->priv->auto_in && !handle_auto_in(vf))
+        return 0;
 
     //check input format
     switch (vf->priv->in.fmt) {
@@ -447,6 +455,8 @@ const struct m_opt_choice_alternatives stereo_code_names[] = {
     {"interleave_rows_right_first",        INTERLEAVE_ROWS_RL},
     // convenience alias for MP_STEREO3D_MONO
     {"mono",                             MONO_L},
+    // for filter auto-insertion
+    {"auto",                             STEREO_AUTO},
     { NULL, 0}
 };
 
@@ -461,18 +471,87 @@ static const char *rev_map_name(int val)
     return NULL;
 }
 
+// Extremely stupid; can be dropped when the internal filter is dropped,
+// and OPT_VID_STEREO_MODE() can be used instead.
+static int opt_to_stereo3dmode(int val)
+{
+    // Find x for rev_map_name(val) == MP_STEREO3D_NAME(x)
+    const char *name = rev_map_name(val);
+    for (int n = 0; n < MP_STEREO3D_COUNT; n++) {
+        const char *o = MP_STEREO3D_NAME(val);
+        if (name && o && strcmp(o, name) == 0)
+            return n;
+    }
+    return MP_STEREO3D_INVALID;
+}
+static int stereo3dmode_to_opt(int val)
+{
+    // Find x for rev_map_name(x) == MP_STEREO3D_NAME(val)
+    const char *name = MP_STEREO3D_NAME(val);
+    for (int n = 0; stereo_code_names[n].name; n++) {
+        if (name && strcmp(stereo_code_names[n].name, name) == 0)
+            return stereo_code_names[n].value;
+    }
+    return -1;
+}
+
+static bool handle_auto_in(struct vf_instance *vf)
+{
+    if (vf->priv->auto_in) {
+        int inv = stereo3dmode_to_opt(vf->fmt_in.stereo_in);
+        if (inv < 0) {
+            MP_ERR(vf, "Unknown/unsupported 3D mode.\n");
+            return false;
+        }
+        vf->priv->in.fmt = inv;
+        vf->fmt_out.stereo_in = vf->fmt_out.stereo_out =
+            opt_to_stereo3dmode(vf->priv->out.fmt);
+    }
+    return true;
+}
+
+static int lavfi_reconfig(struct vf_instance *vf,
+                          struct mp_image_params *in,
+                          struct mp_image_params *out)
+{
+    struct vf_priv_s *p = vf_lw_old_priv(vf);
+    if (p->auto_in) {
+        const char *inf = MP_STEREO3D_NAME(in->stereo_in);
+        if (!inf) {
+            MP_ERR(vf, "Unknown/unsupported 3D mode.\n");
+            return -1;
+        }
+        vf_lw_update_graph(vf, "stereo3d", "%s:%s",
+                           inf, rev_map_name(p->out.fmt));
+        out->stereo_in = out->stereo_out = opt_to_stereo3dmode(p->out.fmt);
+    }
+    return 0;
+}
+
 static int vf_open(vf_instance_t *vf)
 {
     vf->config          = config;
     vf->filter          = filter;
     vf->query_format    = query_format;
 
+    if (vf->priv->out.fmt == STEREO_AUTO) {
+        MP_FATAL(vf, "No autodetection for stereo output.\n");
+        return 0;
+    }
+    if (vf->priv->in.fmt == STEREO_AUTO)
+        vf->priv->auto_in = 1;
+
+    if (vf->priv->in.fmt == STEREO_AUTO &&
+        vf_lw_set_graph(vf, vf->priv->lw_opts, NULL, "null") >= 0)
+    {
+        vf_lw_set_reconfig_cb(vf, lavfi_reconfig);
+        return 1;
+    }
+
     if (vf_lw_set_graph(vf, vf->priv->lw_opts, "stereo3d", "%s:%s",
                         rev_map_name(vf->priv->in.fmt),
                         rev_map_name(vf->priv->out.fmt)) >= 0)
-    {
         return 1;
-    }
 
     return 1;
 }
