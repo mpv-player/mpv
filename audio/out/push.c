@@ -364,6 +364,20 @@ static void *playthread(void *arg)
     return NULL;
 }
 
+static void destroy_no_thread(struct ao *ao)
+{
+    struct ao_push_state *p = ao->api_priv;
+
+    ao->driver->uninit(ao);
+
+    for (int n = 0; n < 2; n++)
+        close(p->wakeup_pipe[n]);
+
+    pthread_cond_destroy(&p->wakeup);
+    pthread_cond_destroy(&p->wakeup_drain);
+    pthread_mutex_destroy(&p->lock);
+}
+
 static void uninit(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
@@ -375,14 +389,7 @@ static void uninit(struct ao *ao)
 
     pthread_join(p->thread, NULL);
 
-    ao->driver->uninit(ao);
-
-    for (int n = 0; n < 2; n++)
-        close(p->wakeup_pipe[n]);
-
-    pthread_cond_destroy(&p->wakeup);
-    pthread_cond_destroy(&p->wakeup_drain);
-    pthread_mutex_destroy(&p->lock);
+    destroy_no_thread(ao);
 }
 
 static int init(struct ao *ao)
@@ -407,7 +414,7 @@ static int init(struct ao *ao)
         goto err;
     return 0;
 err:
-    ao->driver->uninit(ao);
+    destroy_no_thread(ao);
     return -1;
 }
 
