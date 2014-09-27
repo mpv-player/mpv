@@ -17,8 +17,10 @@ int vf_lw_set_graph(struct vf_instance *vf, struct vf_lw_opts *lavfi_opts,
 void *vf_lw_old_priv(struct vf_instance *vf);
 void vf_lw_update_graph(struct vf_instance *vf, char *filter, char *opts, ...)
                         PRINTF_ATTRIBUTE(3,4);
-void vf_lw_set_recreate_cb(struct vf_instance *vf,
-                           void (*recreate)(struct vf_instance *vf));
+void vf_lw_set_reconfig_cb(struct vf_instance *vf,
+                                int (*reconfig)(struct vf_instance *vf,
+                                                struct mp_image_params *in,
+                                                struct mp_image_params *out));
 #else
 static inline
 int vf_lw_set_graph(struct vf_instance *vf, struct vf_lw_opts *lavfi_opts,
@@ -33,9 +35,12 @@ static void *vf_lw_old_priv(struct vf_instance *vf)
 static void vf_lw_update_graph(struct vf_instance *vf, char *filter, char *opts, ...)
 {
 }
-static void vf_lw_set_recreate_cb(struct vf_instance *vf,
-                                  void (*recreate)(struct vf_instance *vf))
+void vf_lw_set_reconfig_cb(struct vf_instance *vf,
+                                int (*reconfig)(struct vf_instance *vf,
+                                                struct mp_image_params *in,
+                                                struct mp_image_params *out))
 {
+    return 0;
 }
 #include "options/m_option.h"
 static const struct m_sub_options vf_lw_conf = {0};

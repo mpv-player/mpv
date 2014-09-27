@@ -73,7 +73,9 @@ struct vf_priv_s {
 
     // for the lw wrapper
     void *old_priv;
-    void (*lw_recreate_cb)(struct vf_instance *vf);
+    int (*lw_reconfig_cb)(struct vf_instance *vf,
+                          struct mp_image_params *in,
+                          struct mp_image_params *out);
 
     // options
     char *cfg_graph;
@@ -127,9 +129,6 @@ static bool recreate_graph(struct vf_instance *vf, int width, int height,
     void *tmp = talloc_new(NULL);
     struct vf_priv_s *p = vf->priv;
     AVFilterContext *in = NULL, *out = NULL, *f_format = NULL;
-
-    if (vf->priv->lw_recreate_cb)
-        vf->priv->lw_recreate_cb(vf);
 
     if (bstr0(p->cfg_graph).len == 0) {
         MP_FATAL(vf, "lavfi: no filter graph set\n");
@@ -227,14 +226,20 @@ static void reset(vf_instance_t *vf)
         recreate_graph(vf, f->w, f->h, f->d_w, f->d_h, f->imgfmt);
 }
 
-static int config(struct vf_instance *vf, int width, int height,
-                  int d_width, int d_height, unsigned int flags,
-                  unsigned int fmt)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
 {
     struct vf_priv_s *p = vf->priv;
 
-    if (!recreate_graph(vf, width, height, d_width, d_height, fmt))
-        return 0;
+    *out = *in; // pass-through untouched flags
+
+    if (vf->priv->lw_reconfig_cb) {
+        if (vf->priv->lw_reconfig_cb(vf, in, out) < 0)
+            return -1;
+    }
+
+    if (!recreate_graph(vf, in->w, in->h, in->d_w, in->d_h, in->imgfmt))
+        return -1;
 
     AVFilterLink *l_out = p->out->inputs[0];
     AVFilterLink *l_in = p->in->outputs[0];
@@ -247,9 +252,12 @@ static int config(struct vf_instance *vf, int width, int height,
     int dw, dh;
     dar_from_sar_par(l_out->w, l_out->h, l_out->sample_aspect_ratio, &dw, &dh);
 
-    return vf_next_config(vf, l_out->w, l_out->h, dw, dh, flags,
-                          pixfmt2imgfmt(l_out->format));
-
+    out->w = l_out->w;
+    out->h = l_out->h;
+    out->d_w = dw;
+    out->d_h = dh;
+    out->imgfmt = pixfmt2imgfmt(l_out->format);
+    return 0;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
@@ -372,8 +380,8 @@ static void uninit(struct vf_instance *vf)
 
 static int vf_open(vf_instance_t *vf)
 {
-    vf->reconfig = NULL;
-    vf->config = config;
+    vf->reconfig = reconfig;
+    vf->config = NULL;
     vf->filter_ext = filter_ext;
     vf->filter_out = filter_out;
     vf->filter = NULL;
@@ -519,13 +527,16 @@ void vf_lw_update_graph(struct vf_instance *vf, char *filter, char *opts, ...)
     va_start(ap, opts);
     char *s = talloc_vasprintf(vf, opts, ap);
     talloc_free(p->cfg_graph);
-    p->cfg_graph = talloc_asprintf(vf, "%s=%s", filter, s);
+    p->cfg_graph = filter ? talloc_asprintf(vf, "%s=%s", filter, s)
+                          : talloc_strdup(vf, s);
     talloc_free(s);
     va_end(ap);
 }
 
-void vf_lw_set_recreate_cb(struct vf_instance *vf,
-                           void (*recreate)(struct vf_instance *vf))
+void vf_lw_set_reconfig_cb(struct vf_instance *vf,
+                                int (*reconfig_)(struct vf_instance *vf,
+                                                 struct mp_image_params *in,
+                                                 struct mp_image_params *out))
 {
-    vf->priv->lw_recreate_cb = recreate;
+    vf->priv->lw_reconfig_cb = reconfig_;
 }

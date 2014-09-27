@@ -43,16 +43,19 @@ struct vf_priv_s {
   .cfg_size = -1,
 };
 
-static void lavfi_recreate(struct vf_instance *vf)
+static int lavfi_reconfig(struct vf_instance *vf,
+                          struct mp_image_params *in,
+                          struct mp_image_params *out)
 {
     struct vf_priv_s *p = vf_lw_old_priv(vf);
-    int w = vf->fmt_in.w;
-    int h = vf->fmt_in.h;
+    int w = in->w;
+    int h = in->h;
     p->radius = p->cfg_radius;
     if (p->cfg_size > -1)
         p->radius = (p->cfg_size / 100.0f) * sqrtf(w * w + h * h);
     p->radius = MPCLAMP((p->radius+1)&~1, 4, 32);
     vf_lw_update_graph(vf, "gradfun", "%f:%d", p->cfg_thresh, p->radius);
+    return 0;
 }
 
 static int vf_open(vf_instance_t *vf)
@@ -72,7 +75,7 @@ static int vf_open(vf_instance_t *vf)
     if (vf_lw_set_graph(vf, vf->priv->lw_opts, "gradfun", "%f:4",
                         vf->priv->cfg_thresh) >= 0)
     {
-        vf_lw_set_recreate_cb(vf, lavfi_recreate);
+        vf_lw_set_reconfig_cb(vf, lavfi_reconfig);
         return 1;
     }
 
