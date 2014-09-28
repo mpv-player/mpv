@@ -35,7 +35,7 @@ static void *vf_lw_old_priv(struct vf_instance *vf)
 static void vf_lw_update_graph(struct vf_instance *vf, char *filter, char *opts, ...)
 {
 }
-void vf_lw_set_reconfig_cb(struct vf_instance *vf,
+static void vf_lw_set_reconfig_cb(struct vf_instance *vf,
                                 int (*reconfig)(struct vf_instance *vf,
                                                 struct mp_image_params *in,
                                                 struct mp_image_params *out))
