@@ -2163,6 +2163,24 @@ Input
     Use the right Alt key as Alt Gr to produce special characters. If disabled,
     count the right Alt as an Alt modifier key. Enabled by default.
 
+``--input-x11-keyboard=<yes|no>``
+    Disable all keyboard input on the X11 VO window. Generally useful for
+    embedding only.
+
+    On X11, a sub-window with input enabled grabs all keyboard input as long
+    as it is 1. a child of a focused window, and 2. the mouse is inside of
+    the sub-window. The can steal away all keyboard input from the
+    application embedding the mpv window, and on the other hand, the mpv
+    window will receive no input if the mouse is outside of the mpv window,
+    even though mpv has focus. Modern toolkits work around this weird X11
+    behavior, but naively embedding foreign windows breaks it.
+
+    The only way to handle this reasonably is using the XEmbed protocol, which
+    was designed to solve these problems. But Qt has questionable support, and
+    mpv doesn't implement it yet.
+
+    As a workaround, this option is disabled by default in libmpv. (Note that
+    ``input-default-bindings`` is disabled by default in libmpv as well.)
 
 OSD
 ---

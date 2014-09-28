@@ -25,7 +25,12 @@ API changes
 
 ::
 
+ 1.5    - change in X11 and "--wid" behavior again. The previous change didn't
+          work as expected, and now the behavior can be explicitly controlled
+          with the "input-x11-keyboard" option. This is only a temporary
+          measure until XEmbed is implemented and confirmed working.
  1.4    - subtle change in X11 and "--wid" behavior
+          (this change was added to 0.5.2, and broke some things, see #1090)
  --- mpv 0.5.0 is released ---
  1.3    - add MPV_MAKE_VERSION()
  1.2    - remove "stream-time-pos" property (no replacement)

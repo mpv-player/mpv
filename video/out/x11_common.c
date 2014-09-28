@@ -1254,15 +1254,12 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     }
 
     // map window
-    int events = StructureNotifyMask | ExposureMask | PropertyChangeMask;
-    if (vo->opts->WinID > 0) {
-        XWindowAttributes attribs;
-        if (XGetWindowAttributes(x11->display, vo->opts->WinID, &attribs))
-            events |= attribs.your_event_mask;
-    } else {
-        events |= KeyPressMask | KeyReleaseMask | ButtonPressMask |
-                  ButtonReleaseMask | PointerMotionMask | LeaveWindowMask;
-    }
+    int events = StructureNotifyMask | ExposureMask | PropertyChangeMask |
+                 LeaveWindowMask;
+    if (mp_input_mouse_enabled(vo->input_ctx))
+        events |= PointerMotionMask | ButtonPressMask | ButtonReleaseMask;
+    if (mp_input_x11_keyboard_enabled(vo->input_ctx))
+        events |= KeyPressMask | KeyReleaseMask;
     vo_x11_selectinput_witherr(vo, x11->display, x11->window, events);
     XMapWindow(x11->display, x11->window);
 }
@@ -1667,9 +1664,6 @@ static void vo_x11_selectinput_witherr(struct vo *vo,
                                        Window w,
                                        long event_mask)
 {
-    if (!mp_input_mouse_enabled(vo->input_ctx))
-        event_mask &= ~(PointerMotionMask | ButtonPressMask | ButtonReleaseMask);
-
     XSelectInput(display, w, NoEventMask);
 
     // NOTE: this can raise BadAccess, which should be ignored by the X error
