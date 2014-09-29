@@ -1014,7 +1014,7 @@ redo:
                       AVSEEK_FLAG_BYTE);
         // avio_flush() is designed for write-only streams, and does the wrong
         // thing when reading. Flush it manually instead.
-        priv->avfc->pb->buf_ptr = priv->avfc->pb->buf_end;
+        priv->avfc->pb->buf_ptr = priv->avfc->pb->buf_end = priv->avfc->pb->buffer;
         stream_drop_buffers(demuxer->stream);
         return DEMUXER_CTRL_OK;
     default:

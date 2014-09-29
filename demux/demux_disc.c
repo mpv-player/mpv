@@ -310,6 +310,12 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     // Can be seekable even if the stream isn't.
     demuxer->seekable = true;
 
+    // With cache enabled, the stream can be seekable. This causes demux_lavf.c
+    // (actually libavformat/mpegts.c) to seek sometimes when reading a packet.
+    // It does this to seek back a bit in case the current file position points
+    // into the middle of a packet.
+    demuxer->stream->seekable = false;
+
     add_dvd_streams(demuxer);
     add_streams(demuxer);
     add_stream_chapters(demuxer);
