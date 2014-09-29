@@ -151,6 +151,7 @@ static void add_streams(demuxer_t *demuxer)
         }
         if (src->audio)
             sh->audio = src->audio;
+        get_disc_lang(demuxer->stream, sh);
     }
     reselect_streams(demuxer);
 }
