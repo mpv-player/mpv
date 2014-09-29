@@ -1,0 +1,68 @@
+Release 0.6.0
+=============
+
+Changes
+-------
+
+- Map ESC to exiting fullscreen.
+- Run the vo inside its own thread.
+- Enable the demuxer thread by default.
+- Prefer the opengl vo over the vdpau one.
+- Complete profile names in the zsh completion script.
+- Raise dsound ao buffer size to 200ms and make it configurable.
+- Bind ctrl+c to quit, so that it works both in the terminal and the player
+  window.
+- Automatically load playlists without needing --load-unsafe-playlists or
+  --playlist. Unsafe URLs are still rejected (e.g. remote playlists can't load
+  local files).
+- Remove quvi-format property (which never really worked).
+- Wait until all Lua scripts are loaded on start.
+- Use separate threads for input sources (terminal, lirc, joystick) instead of
+  using a central I/O loop.
+- Complete values for options that take file names in the zsh completion script.
+- Use libwaio for pipe input on Windows (if you want --input-file to work on
+  Windows you need libwaio as an additional dependency).
+- Remove the --volstep option (users should change the argument to the "add"
+  function in input.conf instead).
+- Always show the OSD message when changing volume, gamma, panscan, etc along
+  with the OSD bar.
+- When changing a property always show it on the OSD (except for "pause" and
+  "fullscreen").
+- Prefer the libavcodec decoder over libmpg123 for mp3 decoding (ffmpeg/libav
+  support for gapless audio works better for mpv's use-case).
+- Allow passing number of loops to --loop-file.
+- Change --keep-open option semantics to not terminate the player when playing
+  or seeking past the end of the file and there's no next file to be played.
+- Disable the sndio ao by default and prefer other outputs even if it's enabled.
+
+New features
+------------
+
+- Add new framedrop mode that limits the frequency of new video frames displayed
+  based on the display framerate (this is enabled by default, the old
+  decoder-based mode can be enabled with --framedrop=decoder).
+- Add --demuxer-readahead-secs option to control the readahead buffer using a
+  duration value.
+- Add estimated-frame-count and estimated-frame-number properties.
+- Add --cache-secs option which overrides the value of --demuxer-readahead-secs
+  if the stream cache is active.
+- Add demuxer-cache-duration and demuxer-cache-idle properties.
+- Make --cache-file create a temporary file if the string "TMP" is passed
+  instead of a file name.
+- Add support for Matroska 3D (if a file is marked as 3D using the StereoMode
+  element, an automatic conversion filter is added).
+- Add --osd-playing-msg option to show a message on the OSD when the playback
+  starts.
+- Add --media-title option to force the content of the media-title property.
+- Add --osd-msg1, --osd-msg2 and --osd-msg3 options to override the OSD message
+  for the corresponding OSD level (before only level 3 could be overridden with
+  --osd-status-message).
+- Add support for digital passthrough in the pulse ao.
+- Add support for opening DVD and Bluray directories directly.
+- Add --input-x11-keyboard option to control whether keyboard input should be
+  enabled on the X11 window ot not (this is disabled by default when using the
+  libmpv library).
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log a1be3cf..61ebe61`` in
+the git repository.
