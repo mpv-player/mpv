@@ -1010,12 +1010,13 @@ redo:
          * call the new API instead of relying on av_seek_frame() to do this
          * for us.
          */
-        av_seek_frame(priv->avfc, 0, stream_tell(demuxer->stream),
-                      AVSEEK_FLAG_BYTE);
         // avio_flush() is designed for write-only streams, and does the wrong
         // thing when reading. Flush it manually instead.
-        priv->avfc->pb->buf_ptr = priv->avfc->pb->buf_end = priv->avfc->pb->buffer;
         stream_drop_buffers(demuxer->stream);
+        priv->avfc->pb->buf_ptr = priv->avfc->pb->buf_end = priv->avfc->pb->buffer;
+        priv->avfc->pb->pos = stream_tell(demuxer->stream);
+        av_seek_frame(priv->avfc, 0, stream_tell(demuxer->stream),
+                      AVSEEK_FLAG_BYTE);
         return DEMUXER_CTRL_OK;
     default:
         return DEMUXER_CTRL_NOTIMPL;
