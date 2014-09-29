@@ -944,9 +944,10 @@ int vo_x11_check_events(struct vo *vo)
             break;
         case PropertyNotify:
             if (Event.xproperty.atom == x11->atom_frame_exts) {
-                if (!x11->pseudo_mapped)
+                if (!x11->pseudo_mapped && vo->opts->WinID < 0) {
                     MP_VERBOSE(x11, "not waiting for MapNotify\n");
-                x11->pseudo_mapped = true;
+                    x11->pseudo_mapped = true;
+                }
             }
             break;
         default:
