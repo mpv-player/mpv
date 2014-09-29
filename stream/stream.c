@@ -651,8 +651,9 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
             MP_ERR(s, "Seek failed\n");
             return 0;
         }
+        stream_drop_buffers(s);
+        s->pos = newpos;
     }
-    s->pos = newpos;
     s->eof = 0; // EOF reset when seek succeeds.
     return -1;
 }
@@ -661,8 +662,6 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 // Unlike stream_seek_unbuffered(), it still fills the local buffer.
 static int stream_seek_long(stream_t *s, int64_t pos)
 {
-    stream_drop_buffers(s);
-
     if (s->mode == STREAM_WRITE) {
         if (!s->seekable || !s->seek(s, pos))
             return 0;
@@ -686,8 +685,6 @@ static int stream_seek_long(stream_t *s, int64_t pos)
         return 1; // success
 
     // Fill failed, but seek still is a success (partially).
-    s->buf_pos = 0;
-    s->buf_len = 0;
     s->eof = 0; // eof should be set only on read
 
     MP_VERBOSE(s, "Seek to/past EOF: no buffer preloaded.\n");
@@ -696,7 +693,6 @@ static int stream_seek_long(stream_t *s, int64_t pos)
 
 int stream_seek(stream_t *s, int64_t pos)
 {
-
     MP_TRACE(s, "seek to 0x%llX\n", (long long)pos);
 
     if (pos == stream_tell(s))
