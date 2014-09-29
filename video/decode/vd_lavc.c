@@ -62,8 +62,6 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags);
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                                            const enum AVPixelFormat *pix_fmt);
 
-static void uninit(struct dec_video *vd);
-
 #define OPT_BASE_STRUCT struct vd_lavc_params
 
 struct vd_lavc_params {
@@ -254,6 +252,11 @@ static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
     return NULL;
 }
 
+static void uninit(struct dec_video *vd)
+{
+    uninit_avctx(vd);
+    talloc_free(vd->priv);
+}
 
 static int init(struct dec_video *vd, const char *decoder)
 {
@@ -437,11 +440,6 @@ static void uninit_avctx(struct dec_video *vd)
     av_freep(&ctx->avctx);
 
     av_frame_free(&ctx->pic);
-}
-
-static void uninit(struct dec_video *vd)
-{
-    uninit_avctx(vd);
 }
 
 static void update_image_params(struct dec_video *vd, AVFrame *frame,

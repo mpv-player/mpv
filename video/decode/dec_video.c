@@ -122,7 +122,6 @@ void video_uninit(struct dec_video *d_video)
         MP_VERBOSE(d_video, "Uninit video.\n");
         d_video->vd_driver->uninit(d_video);
     }
-    talloc_free(d_video->priv);
     vf_destroy(d_video->vfilter);
     talloc_free(d_video);
 }
