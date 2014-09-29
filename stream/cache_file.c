@@ -127,6 +127,11 @@ int stream_file_cache_init(stream_t *cache, stream_t *stream,
     if (!opts->file || !opts->file[0] || opts->file_max < 1)
         return 0;
 
+    if (!stream->seekable) {
+        MP_ERR(cache, "can't cache unseekable stream\n");
+        return -1;
+    }
+
     bool use_anon_file = strcmp(opts->file, "TMP") == 0;
     FILE *file = use_anon_file ? tmpfile() : fopen(opts->file, "wb+");
     if (!file) {
