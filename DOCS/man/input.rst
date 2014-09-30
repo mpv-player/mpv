@@ -655,7 +655,7 @@ Property list
     disabled.
 
 ``drop-frame-count``
-    Frames dropped because they arrived to late. Doesn't necessarily indicate
+    Frames dropped because they arrived too late. Doesn't necessarily indicate
     actual frame-drops, just the number of times the decoder was asked to drop.
     Unavailable if video is disabled
 
