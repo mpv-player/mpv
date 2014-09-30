@@ -66,6 +66,9 @@ struct vo_w32_state {
     int prev_x;
     int prev_y;
 
+    // Has the window seen a WM_DESTROY? If so, don't call DestroyWindow again.
+    bool destroyed;
+
     // whether the window position and size were intialized
     bool window_bounds_initialized;
 
@@ -573,7 +576,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         // Don't actually allow it to destroy the window, or whatever else it
         // is that will make us lose WM_USER wakeups.
         mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
-        return 1;
+        return 0;
+    case WM_DESTROY:
+        w32->destroyed = true;
+        PostQuitMessage(0);
+        return 0;
     case WM_SYSCOMMAND:
         switch (wParam) {
         case SC_SCREENSAVE:
@@ -1047,10 +1054,6 @@ static void *gui_thread(void *ptr)
 
     mp_dispatch_set_wakeup_fn(w32->dispatch, wakeup_gui_thread, w32);
 
-    // Microsoft-recommended way to create a message queue.
-    // Needed so that initial WM_USER wakeups are not lost.
-    PeekMessage(&(MSG){0}, NULL, WM_USER, WM_USER, PM_NOREMOVE);
-
     res = 1;
 done:
 
@@ -1212,7 +1215,9 @@ static void do_terminate(void *ptr)
 {
     struct vo_w32_state *w32 = ptr;
     w32->terminate = true;
-    PostQuitMessage(0);
+
+    if (!w32->destroyed)
+        DestroyWindow(w32->window);
 }
 
 void vo_w32_uninit(struct vo *vo)
