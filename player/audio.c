@@ -406,20 +406,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         playsize = MPMAX(1, playsize + skip); // silence will be prepended
     }
 
-    if (opts->insert_silence) {
-        float S = 0.5;
-        if (!mpctx->paused && mpctx->audio_status == STATUS_PLAYING &&
-            mpctx->video_status == STATUS_PLAYING &&
-            mpctx->last_av_difference - mpctx->insert_silence > S)
-            mpctx->insert_silence += S;
-
-        if (mpctx->insert_silence > 0) {
-            int samples = MPMIN(playsize, play_samplerate * mpctx->insert_silence);
-            mp_audio_buffer_prepend_silence(mpctx->ao_buffer, samples);
-            mpctx->insert_silence -= samples / play_samplerate;
-        }
-    }
-
     int status = AD_OK;
     if (playsize > mp_audio_buffer_samples(mpctx->ao_buffer)) {
         status = audio_decode(d_audio, mpctx->ao_buffer, playsize);

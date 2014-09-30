@@ -471,8 +471,6 @@ const m_option_t mp_opts[] = {
 
     OPT_DOUBLE("display-fps", frame_drop_fps, M_OPT_MIN, .min = 0),
 
-    OPT_FLAG("audiodrop", insert_silence, 0),
-
     OPT_FLAG("untimed", untimed, M_OPT_FIXED),
 
     OPT_STRING("stream-capture", stream_capture, M_OPT_FIXED | M_OPT_FILE),

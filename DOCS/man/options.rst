@@ -976,11 +976,6 @@ Audio
         maximum amplification, i.e. amplify by 200%. The default volume (no
         change in volume) will be ``50`` in this case.
 
-``--audiodrop``
-    If video is by more than 500 ms behind, insert 500 ms of silence, to make up
-    for audio getting ahead. Might help if video decoding is too slow beyond
-    help.
-
 ``--volume-restore-data=<string>``
     Used internally for use by playback resume (e.g. with ``quit_watch_later``).
     Restoring value has to be done carefully, because different AOs as well as

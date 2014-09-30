@@ -260,8 +260,6 @@ typedef struct MPContext {
     double delay;
     // AV sync: time in seconds until next frame should be shown
     double time_frame;
-    // Optional/additional AV sync compensation if video is too slow.
-    double insert_silence;
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
