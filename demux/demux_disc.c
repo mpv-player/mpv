@@ -143,6 +143,7 @@ static void add_streams(demuxer_t *demuxer)
         sh->codec = talloc_strdup(sh, src->codec);
         sh->format = src->format;
         sh->lav_headers = src->lav_headers;
+        sh->demuxer_id = src->demuxer_id;
         if (src->video) {
             double ar;
             if (stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
