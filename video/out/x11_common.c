@@ -1339,6 +1339,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
         vo_x11_create_window(vo, vis, rc);
         vo_x11_classhint(vo, x11->window, classname);
         x11->window_hidden = true;
+        x11->winrc = geo.win;
     }
 
     if (flags & VOFLAG_HIDDEN)
@@ -1453,7 +1454,7 @@ static void vo_x11_update_geometry(struct vo *vo)
     int dummy_int;
     Window dummy_win;
     Window win = vo->opts->WinID > 0 ? vo->opts->WinID : x11->window;
-    if (x11->window_hidden || !win)
+    if (!win)
         return;
     XGetGeometry(x11->display, win, &dummy_win, &dummy_int, &dummy_int,
                  &w, &h, &dummy_int, &dummy_uint);
