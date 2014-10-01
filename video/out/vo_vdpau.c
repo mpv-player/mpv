@@ -234,6 +234,13 @@ static void forget_frames(struct vo *vo, bool seek_reset)
     vc->dropped_frame = false;
 }
 
+static int s_size(int s, int disp)
+{
+    disp = MPMAX(1, disp);
+    s += s / 2;
+    return s >= disp ? s : disp;
+}
+
 static void resize(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
@@ -259,16 +266,8 @@ static void resize(struct vo *vo)
 
     if (vc->output_surface_width < vo->dwidth
         || vc->output_surface_height < vo->dheight) {
-        if (vc->output_surface_width < vo->dwidth) {
-            vc->output_surface_width += vc->output_surface_width >> 1;
-            vc->output_surface_width = FFMAX(vc->output_surface_width,
-                                             vo->dwidth);
-        }
-        if (vc->output_surface_height < vo->dheight) {
-            vc->output_surface_height += vc->output_surface_height >> 1;
-            vc->output_surface_height = FFMAX(vc->output_surface_height,
-                                              vo->dheight);
-        }
+        vc->output_surface_width = s_size(vc->output_surface_width, vo->dwidth);
+        vc->output_surface_height = s_size(vc->output_surface_height, vo->dheight);
         // Creation of output_surfaces
         for (int i = 0; i < vc->num_output_surfaces; i++)
             if (vc->output_surfaces[i] != VDP_INVALID_HANDLE) {
