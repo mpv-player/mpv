@@ -485,10 +485,10 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
     int cy = vidh / 2 - (int)(frame_h * yscale) / 2;
     for (int i = 0; i < imgs->num_parts; i++) {
         struct sub_bitmap *bi = &imgs->parts[i];
-        bi->x = bi->x * xscale + cx + res.ml;
-        bi->y = bi->y * yscale + cy + res.mt;
-        bi->dw = bi->w * xscale;
-        bi->dh = bi->h * yscale;
+        bi->x = (int)(bi->x * xscale) + cx + res.ml;
+        bi->y = (int)(bi->y * yscale) + cy + res.mt;
+        bi->dw = (int)(bi->w * xscale + 0.5);
+        bi->dh = (int)(bi->h * yscale + 0.5);
     }
     imgs->scaled = xscale != 1 || yscale != 1;
 }
