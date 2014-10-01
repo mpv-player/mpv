@@ -45,34 +45,30 @@
 
 static int recreate_audio_filters(struct MPContext *mpctx)
 {
-    struct dec_audio *d_audio = mpctx->d_audio;
+    assert(mpctx->d_audio);
+
+    struct af_stream *afs = mpctx->d_audio->afilter;
     struct MPOpts *opts = mpctx->opts;
 
-    assert(d_audio);
-
     struct mp_audio in_format;
-    mp_audio_buffer_get_format(d_audio->decode_buffer, &in_format);
+    mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &in_format);
+    int new_srate = in_format.rate;
 
-    struct mp_audio out_format;
-    ao_get_format(mpctx->ao, &out_format);
-
-    int new_srate;
-    if (af_control_any_rev(d_audio->afilter, AF_CONTROL_SET_PLAYBACK_SPEED,
-                           &opts->playback_speed))
-        new_srate = in_format.rate;
-    else {
+    if (!af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED,
+                            &opts->playback_speed))
+    {
         new_srate = in_format.rate * opts->playback_speed;
-        if (new_srate != out_format.rate)
+        if (new_srate != afs->output.rate)
             opts->playback_speed = new_srate / (double)in_format.rate;
     }
-    if (!audio_init_filters(d_audio, new_srate,
-                &out_format.rate, &out_format.channels, &out_format.format))
-    {
+    afs->input.rate = new_srate;
+
+    if (af_init(afs) < 0) {
         MP_ERR(mpctx, "Couldn't find matching filter/ao format!\n");
         return -1;
     }
 
-    mixer_reinit_audio(mpctx->mixer, mpctx->ao, mpctx->d_audio->afilter);
+    mixer_reinit_audio(mpctx->mixer, mpctx->ao, afs);
 
     return 0;
 }
@@ -121,7 +117,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->d_audio->global = mpctx->global;
         mpctx->d_audio->opts = opts;
         mpctx->d_audio->header = sh;
-        mpctx->d_audio->replaygain_data = sh->audio->replaygain_data;
+        mpctx->d_audio->afilter = af_new(mpctx->global);
+        mpctx->d_audio->afilter->replaygain_data = sh->audio->replaygain_data;
         mpctx->ao_buffer = mp_audio_buffer_create(NULL);
         if (!audio_init_best_codec(mpctx->d_audio, opts->audio_decoders))
             goto init_error;
@@ -152,39 +149,41 @@ void reinit_audio_chain(struct MPContext *mpctx)
         uninit_player(mpctx, INITIALIZED_AO);
     }
 
-    int ao_srate = opts->force_srate;
-    int ao_format = opts->audio_output_format;
-    struct mp_chmap ao_channels = {0};
+    struct af_stream *afs = mpctx->d_audio->afilter;
+
     if (mpctx->initialized_flags & INITIALIZED_AO) {
-        struct mp_audio out_format;
-        ao_get_format(mpctx->ao, &out_format);
-        ao_srate    = out_format.rate;
-        ao_format   = out_format.format;
-        ao_channels = out_format.channels;
+        ao_get_format(mpctx->ao, &afs->output);
     } else {
+        afs->output = (struct mp_audio){0};
+        afs->output.rate = opts->force_srate;
+        mp_audio_set_format(&afs->output, opts->audio_output_format);
+        // automatic downmix
         if (!AF_FORMAT_IS_SPECIAL(in_format.format))
-            ao_channels = opts->audio_output_channels; // automatic downmix
+            mp_audio_set_channels(&afs->output, &opts->audio_output_channels);
     }
+
+    // filter input format: same as codec's output format:
+    mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &afs->input);
 
     // Determine what the filter chain outputs. recreate_audio_filters() also
     // needs this for testing whether playback speed is changed by resampling
     // or using a special filter.
-    if (!audio_init_filters(mpctx->d_audio,  // preliminary init
-                            // input:
-                            in_format.rate,
-                            // output:
-                            &ao_srate, &ao_channels, &ao_format)) {
+    if (af_init(afs) < 0) {
         MP_ERR(mpctx, "Error at audio filter chain pre-init!\n");
         goto init_error;
     }
 
     if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
         mpctx->initialized_flags |= INITIALIZED_AO;
-        mp_chmap_remove_useless_channels(&ao_channels,
+        afs->initialized = 0; // do it again
+
+        mp_chmap_remove_useless_channels(&afs->output.channels,
                                          &opts->audio_output_channels);
+        mp_audio_set_channels(&afs->output, &afs->output.channels);
+
         mpctx->ao = ao_init_best(mpctx->global, mpctx->input,
-                                 mpctx->encode_lavc_ctx, ao_srate, ao_format,
-                                 ao_channels);
+                                 mpctx->encode_lavc_ctx, afs->output.rate,
+                                 afs->output.format, afs->output.channels);
         struct ao *ao = mpctx->ao;
         if (!ao) {
             MP_ERR(mpctx, "Could not open/initialize audio device -> no sound.\n");
@@ -195,6 +194,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         ao_get_format(ao, &fmt);
 
         mp_audio_buffer_reinit(mpctx->ao_buffer, &fmt);
+        afs->output = fmt;
 
         mpctx->ao_decoder_fmt = talloc(NULL, struct mp_audio);
         *mpctx->ao_decoder_fmt = in_format;
@@ -229,7 +229,7 @@ double written_audio_pts(struct MPContext *mpctx)
     struct mp_audio in_format;
     mp_audio_buffer_get_format(d_audio->decode_buffer, &in_format);
 
-    if (!mp_audio_config_valid(&in_format) || !d_audio->afilter)
+    if (!mp_audio_config_valid(&in_format) || d_audio->afilter->initialized < 1)
         return MP_NOPTS_VALUE;
 
     // first calculate the end pts of audio that has been output by decoder
@@ -365,7 +365,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     if (!d_audio)
         return;
 
-    if (!d_audio->afilter || !mpctx->ao) {
+    if (d_audio->afilter->initialized < 1 || !mpctx->ao) {
         // Probe the initial audio format. Returns AD_OK (and does nothing) if
         // the format is already known.
         int r = initial_audio_decode(mpctx->d_audio);

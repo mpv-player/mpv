@@ -558,22 +558,27 @@ static int af_reinit(struct af_stream *s)
             MP_ERR(s, "Reinitialization did not work, "
                    "audio filter '%s' returned error code %i\n",
                    af->info->name, rv);
-            af_print_filter_chain(s, af, MSGL_ERR);
-            return AF_ERROR;
+            goto error;
         }
     }
-
-    af_print_filter_chain(s, NULL, MSGL_V);
 
     /* Set previously unset fields in s->output to those of the filter chain
      * output. This is used to make the output format fixed, and even if you
      * insert new filters or change the input format, the output format won't
      * change. (Audio outputs generally can't change format at runtime.) */
     af_copy_unset_fields(&s->output, &s->filter_output);
-    return af_config_equals(&s->output, &s->filter_output) ? AF_OK : AF_ERROR;
+    if (af_config_equals(&s->output, &s->filter_output)) {
+        s->initialized = 1;
+        af_print_filter_chain(s, NULL, MSGL_V);
+        return AF_OK;
+    }
+
+    goto error;
 
 negotiate_error:
     MP_ERR(s, "Unable to convert audio input format to output format.\n");
+error:
+    s->initialized = -1;
     af_print_filter_chain(s, af, MSGL_ERR);
     return AF_ERROR;
 }
@@ -583,6 +588,7 @@ void af_uninit(struct af_stream *s)
 {
     while (s->first->next && s->first->next != s->last)
         af_remove(s, s->first->next);
+    s->initialized = 0;
 }
 
 struct af_stream *af_new(struct mpv_global *global)
@@ -632,10 +638,6 @@ void af_destroy(struct af_stream *s)
    The return value is 0 if success and -1 if failure */
 int af_init(struct af_stream *s)
 {
-    // Sanity check
-    if (!s)
-        return -1;
-
     // Precaution in case caller is misbehaving
     mp_audio_set_null_data(&s->input);
     mp_audio_set_null_data(&s->output);
@@ -647,6 +649,7 @@ int af_init(struct af_stream *s)
         for (int i = 0; list && list[i].name; i++) {
             if (!af_prepend(s, s->last, list[i].name, list[i].attribs)) {
                 af_uninit(s);
+                s->initialized = -1;
                 return -1;
             }
         }
@@ -655,7 +658,6 @@ int af_init(struct af_stream *s)
     if (af_reinit(s) != AF_OK) {
         // Something is stuffed audio out will not work
         MP_ERR(s, "Could not create audio filter chain.\n");
-        af_uninit(s);
         return -1;
     }
     return 0;
@@ -668,9 +670,6 @@ int af_init(struct af_stream *s)
 struct af_instance *af_add(struct af_stream *s, char *name, char **args)
 {
     struct af_instance *new;
-    // Sanity check
-    if (!s || !s->first || !name)
-        return NULL;
     // Insert the filter somewhere nice
     if (af_is_conversion_filter(s->first->next))
         new = af_append(s, s->first->next, name, args);
@@ -698,6 +697,7 @@ struct af_instance *af_add(struct af_stream *s, char *name, char **args)
 int af_filter(struct af_stream *s, struct mp_audio *data, int flags)
 {
     struct af_instance *af = s->first;
+    assert(s->initialized > 0);
     assert(mp_audio_config_equals(af->data, data));
     // Iterate through all filters
     while (af) {

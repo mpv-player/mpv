@@ -80,6 +80,8 @@ struct af_instance {
 
 // Current audio stream
 struct af_stream {
+    int initialized; // 0: no, 1: yes, -1: attempted to, but failed
+
     // The first and last filter in the list
     struct af_instance *first;
     struct af_instance *last;

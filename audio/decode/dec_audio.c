@@ -164,55 +164,11 @@ void audio_uninit(struct dec_audio *d_audio)
 {
     if (!d_audio)
         return;
-    if (d_audio->afilter) {
-        MP_VERBOSE(d_audio, "Uninit audio filters...\n");
-        af_destroy(d_audio->afilter);
-        d_audio->afilter = NULL;
-    }
+    MP_VERBOSE(d_audio, "Uninit audio filters...\n");
+    af_destroy(d_audio->afilter);
     uninit_decoder(d_audio);
     talloc_free(d_audio->decode_buffer);
     talloc_free(d_audio);
-}
-
-
-int audio_init_filters(struct dec_audio *d_audio, int in_samplerate,
-                       int *out_samplerate, struct mp_chmap *out_channels,
-                       int *out_format)
-{
-    if (!d_audio->afilter)
-        d_audio->afilter = af_new(d_audio->global);
-    struct af_stream *afs = d_audio->afilter;
-
-    // input format: same as codec's output format:
-    mp_audio_buffer_get_format(d_audio->decode_buffer, &afs->input);
-    // Sample rate can be different when adjusting playback speed
-    afs->input.rate = in_samplerate;
-
-    // output format: same as ao driver's input format (if missing, fallback to input)
-    afs->output.rate = *out_samplerate;
-    mp_audio_set_channels(&afs->output, out_channels);
-    mp_audio_set_format(&afs->output, *out_format);
-
-    afs->replaygain_data = d_audio->replaygain_data;
-
-    char *s_from = mp_audio_config_to_str(&afs->input);
-    char *s_to = mp_audio_config_to_str(&afs->output);
-    MP_VERBOSE(d_audio, "Building audio filter chain for %s -> %s...\n", s_from, s_to);
-    talloc_free(s_from);
-    talloc_free(s_to);
-
-    // let's autoprobe it!
-    if (af_init(afs) != 0) {
-        af_destroy(afs);
-        d_audio->afilter = NULL;
-        return 0;   // failed :(
-    }
-
-    *out_samplerate = afs->output.rate;
-    *out_channels = afs->output.channels;
-    *out_format = afs->output.format;
-
-    return 1;
 }
 
 /* Decode packets until we know the audio format. Then reinit the buffer.
@@ -304,7 +260,7 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
 int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
                  int minsamples)
 {
-    if (!d_audio->afilter)
+    if (d_audio->afilter->initialized < 1)
         return AD_ERR;
 
     // Indicates that a filter seems to be buffering large amounts of data
@@ -354,8 +310,7 @@ void audio_reset_decoding(struct dec_audio *d_audio)
 {
     if (d_audio->ad_driver)
         d_audio->ad_driver->control(d_audio, ADCTRL_RESET, NULL);
-    if (d_audio->afilter)
-        af_control_all(d_audio->afilter, AF_CONTROL_RESET, NULL);
+    af_control_all(d_audio->afilter, AF_CONTROL_RESET, NULL);
     d_audio->pts = MP_NOPTS_VALUE;
     d_audio->pts_offset = 0;
     if (d_audio->decode_buffer)
