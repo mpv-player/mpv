@@ -681,8 +681,11 @@ struct af_instance *af_add(struct af_stream *s, char *name, char **args)
 
     // Reinitalize the filter list
     if (af_reinit(s) != AF_OK) {
-        af_uninit(s);
-        af_init(s);
+        af_remove(s, new);
+        if (af_reinit(s) != AF_OK) {
+            af_uninit(s);
+            af_init(s);
+        }
         return NULL;
     }
     return new;
