@@ -1328,6 +1328,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
     if (opts->WinID >= 0) {
         if (opts->WinID == 0) {
             x11->window = x11->rootwin;
+            x11->pseudo_mapped = true;
             XSelectInput(x11->display, x11->window, StructureNotifyMask);
         } else {
             XSelectInput(x11->display, opts->WinID, StructureNotifyMask);
