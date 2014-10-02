@@ -308,9 +308,9 @@ int reinit_video_chain(struct MPContext *mpctx)
 err_out:
 no_video:
     uninit_player(mpctx, INITIALIZED_VCODEC | (opts->force_vo ? 0 : INITIALIZED_VO));
-    mp_deselect_track(mpctx, track);
+    if (track)
+        mp_deselect_track(mpctx, track);
     handle_force_window(mpctx, true);
-    MP_INFO(mpctx, "Video: no video\n");
     return 0;
 }
 

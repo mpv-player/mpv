@@ -215,7 +215,8 @@ init_error:
     uninit_player(mpctx, INITIALIZED_ACODEC | INITIALIZED_AO);
 no_audio:
     mp_deselect_track(mpctx, track);
-    MP_INFO(mpctx, "Audio: no audio\n");
+    if (track)
+        MP_INFO(mpctx, "Audio: no audio\n");
 }
 
 // Return pts value corresponding to the end point of audio written to the
