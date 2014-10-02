@@ -126,6 +126,9 @@ j and J
 x and z
     Adjust subtitle delay by +/- 0.1 seconds.
 
+Ctrl + and Ctrl -
+    Adjust audio delay by +/- 0.1 seconds.
+
 V
     Toggle subtitle VSFilter aspect compatibility mode. See
     ``--ass-vsfilter-aspect-compat`` for more info.
