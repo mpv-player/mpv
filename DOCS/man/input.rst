@@ -668,9 +668,6 @@ Property list
     estimating the playback position from the byte position, if the file
     duration is not known.
 
-``ratio-pos`` (RW)
-    Position in current file (0.0-1.0). higher precision that ``percent-pos``.
-
 ``time-pos`` (RW)
     Position in current file in seconds.
 
