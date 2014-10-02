@@ -88,6 +88,19 @@ int reinit_audio_filters(struct MPContext *mpctx)
     return 1;
 }
 
+void set_playback_speed(struct MPContext *mpctx, double new_speed)
+{
+    struct MPOpts *opts = mpctx->opts;
+
+    // Adjust time until next frame flip for nosound mode
+    mpctx->time_frame *= opts->playback_speed / new_speed;
+
+    opts->playback_speed = new_speed;
+
+    if (mpctx->d_audio)
+        recreate_audio_filters(mpctx);
+}
+
 void reset_audio_state(struct MPContext *mpctx)
 {
     if (mpctx->d_audio)
