@@ -3326,6 +3326,12 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
         if (!file[1] || end[0])
             fd = -1;
         close_fd = false;
+    } else if (file[0] == '&') {
+        char *end;
+        unsigned long long addr = strtoull(&file[1], &end, 0);
+        if (!file[1] || end[0])
+            addr = 0;
+        p = (void *)(uintptr_t)addr;
     } else {
         fd = open(file, O_RDONLY | O_BINARY | O_CLOEXEC);
     }
