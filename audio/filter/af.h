@@ -76,6 +76,7 @@ struct af_instance {
                  * the number of samples passed though. (Ratio of input
                  * and output, e.g. mul=4 => 1 sample becomes 4 samples) .*/
     bool auto_inserted; // inserted by af.c, such as conversion filters
+    char *label;
 };
 
 // Current audio stream
@@ -132,6 +133,8 @@ void af_destroy(struct af_stream *s);
 int af_init(struct af_stream *s);
 void af_uninit(struct af_stream *s);
 struct af_instance *af_add(struct af_stream *s, char *name, char **args);
+int af_remove_by_label(struct af_stream *s, char *label);
+struct af_instance *af_find_by_label(struct af_stream *s, char *label);
 int af_filter(struct af_stream *s, struct mp_audio *data, int flags);
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
 void af_control_all(struct af_stream *s, int cmd, void *arg);

@@ -647,11 +647,14 @@ int af_init(struct af_stream *s)
         // Add all filters in the list (if there are any)
         struct m_obj_settings *list = s->opts->af_settings;
         for (int i = 0; list && list[i].name; i++) {
-            if (!af_prepend(s, s->last, list[i].name, list[i].attribs)) {
+            struct af_instance *af =
+                af_prepend(s, s->last, list[i].name, list[i].attribs);
+            if (!af) {
                 af_uninit(s);
                 s->initialized = -1;
                 return -1;
             }
+            af->label = talloc_strdup(af, list[i].label);
         }
     }
 
@@ -688,6 +691,32 @@ struct af_instance *af_add(struct af_stream *s, char *name, char **args)
         return NULL;
     }
     return new;
+}
+
+struct af_instance *af_find_by_label(struct af_stream *s, char *label)
+{
+    for (struct af_instance *af = s->first; af; af = af->next) {
+        if (af->label && strcmp(af->label, label) == 0)
+            return af;
+    }
+    return NULL;
+}
+
+/* Remove the first filter that matches this name. Return number of filters
+ * removed (0, 1), or a negative error code if reinit after removing failed.
+ */
+int af_remove_by_label(struct af_stream *s, char *label)
+{
+    struct af_instance *af = af_find_by_label(s, label);
+    if (!af)
+        return 0;
+    af_remove(s, af);
+    if (af_reinit(s) != AF_OK) {
+        af_uninit(s);
+        af_init(s);
+        return -1;
+    }
+    return 1;
 }
 
 /* Filter data chunk through the filters in the list.
