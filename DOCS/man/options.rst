@@ -95,6 +95,9 @@ Playback Control
 ``--speed=<0.01-100>``
     Slow down or speed up playback by the factor given as parameter.
 
+    If ``--audio-pitch-correction`` is used, playing with a speed higher than
+    normal automatically inserts the ``scaletempo`` audio filter.
+
 ``--loop=<N|inf|no>``
     Loops playback ``N`` times. A value of ``1`` plays it one time (default),
     ``2`` two times, etc. ``inf`` means forever. ``no`` is the same as ``1`` and
@@ -754,6 +757,11 @@ Video
 
 Audio
 -----
+
+``--audio-pitch-correction=<yes|no``
+    If this is enabled, playing with a speed higher than normal automatically
+    inserts the ``scaletempo`` audio filter. For details, see audio filter
+    section.
 
 ``--ao=<driver1[:suboption1[=value]:...],driver2,...[,]>``
     Specify a priority list of audio output drivers to be used. For

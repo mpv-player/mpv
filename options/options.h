@@ -205,6 +205,7 @@ typedef struct MPOpts {
     int force_srate;
     int dtshd;
     double playback_speed;
+    int pitch_correction;
     struct m_obj_settings *vf_settings, *vf_defs;
     struct m_obj_settings *af_settings, *af_defs;
     int deinterlace;

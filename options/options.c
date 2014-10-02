@@ -249,6 +249,8 @@ const m_option_t mp_opts[] = {
     OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE | M_OPT_FIXED,
                .min = 0.01, .max = 100.0),
 
+    OPT_FLAG("audio-pitch-correction", pitch_correction, 0),
+
     // set a-v distance
     OPT_FLOATRANGE("audio-delay", audio_delay, 0, -100.0, 100.0),
 
@@ -639,6 +641,7 @@ const struct MPOpts mp_default_opts = {
     .audio_output_channels = MP_CHMAP_INIT_STEREO,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,
+    .pitch_correction = 1,
     .movie_aspect = -1.,
     .field_dominance = -1,
     .sub_auto = 0,

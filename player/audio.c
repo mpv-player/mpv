@@ -88,6 +88,23 @@ int reinit_audio_filters(struct MPContext *mpctx)
     return 1;
 }
 
+static int try_filter(struct MPContext *mpctx,
+                      char *name, char *label, char **args)
+{
+    struct dec_audio *d_audio = mpctx->d_audio;
+
+    if (af_find_by_label(d_audio->afilter, label))
+        return 0;
+
+    struct af_instance *af = af_add(d_audio->afilter, name, args);
+    if (!af)
+        return -1;
+
+    af->label = talloc_strdup(af, label);
+
+    return 1;
+}
+
 void set_playback_speed(struct MPContext *mpctx, double new_speed)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -97,8 +114,23 @@ void set_playback_speed(struct MPContext *mpctx, double new_speed)
 
     opts->playback_speed = new_speed;
 
-    if (mpctx->d_audio)
-        recreate_audio_filters(mpctx);
+    if (!mpctx->d_audio)
+        return;
+
+    if (new_speed > 1.0 && opts->pitch_correction) {
+        if (!af_control_any_rev(mpctx->d_audio->afilter,
+                                AF_CONTROL_SET_PLAYBACK_SPEED,
+                                &new_speed))
+        {
+            if (try_filter(mpctx, "scaletempo", "playback-speed", NULL) < 0)
+                return;
+        }
+    } else {
+        if (af_remove_by_label(mpctx->d_audio->afilter, "playback-speed") < 0)
+            return;
+    }
+
+    recreate_audio_filters(mpctx);
 }
 
 void reset_audio_state(struct MPContext *mpctx)
@@ -155,6 +187,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         return;
     }
 
+    // Weak gapless audio: drain AO on decoder format changes
     if (mpctx->ao_decoder_fmt && (mpctx->initialized_flags & INITIALIZED_AO) &&
         !mp_audio_config_equals(mpctx->ao_decoder_fmt, &in_format) &&
         opts->gapless_audio < 0)
@@ -221,6 +254,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
 
     if (recreate_audio_filters(mpctx) < 0)
         goto init_error;
+
+    set_playback_speed(mpctx, opts->playback_speed);
 
     return;
 
