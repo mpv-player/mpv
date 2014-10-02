@@ -78,12 +78,18 @@ struct command_ctx {
     struct cycle_counter *cycle_counters;
     int num_cycle_counters;
 
-    struct sub_bitmap *overlays;
+    struct overlay *overlays;
     int num_overlays;
     // One of these is in use by the OSD; the other one exists so that the
     // bitmap list can be manipulated without additional synchronization.
     struct sub_bitmaps overlay_osd[2];
     struct sub_bitmaps *overlay_osd_current;
+};
+
+struct overlay {
+    bool need_unmap : 1;
+    size_t map_size;
+    struct sub_bitmap osd;
 };
 
 static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
@@ -3240,8 +3246,6 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
     return r;
 }
 
-#if HAVE_SYS_MMAN_H
-
 static void recreate_overlays(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
@@ -3253,19 +3257,45 @@ static void recreate_overlays(struct MPContext *mpctx)
     // overlay array can have unused entries, but parts list must be "packed"
     new->num_parts = 0;
     for (int n = 0; n < cmd->num_overlays; n++) {
-        struct sub_bitmap *s = &cmd->overlays[n];
-        if (s->bitmap)
-            MP_TARRAY_APPEND(cmd, new->parts, new->num_parts, *s);
+        struct overlay *o = &cmd->overlays[n];
+        if (o->osd.bitmap)
+            MP_TARRAY_APPEND(cmd, new->parts, new->num_parts, o->osd);
     }
     cmd->overlay_osd_current = new;
     osd_set_external2(mpctx->osd, cmd->overlay_osd_current);
+}
+
+// Set overlay with the given ID to the contents as described by "new".
+static void replace_overlay(struct MPContext *mpctx, int id, struct overlay *new)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    assert(id >= 0);
+    if (id >= cmd->num_overlays) {
+        MP_TARRAY_GROW(cmd, cmd->overlays, id);
+        while (cmd->num_overlays <= id)
+            cmd->overlays[cmd->num_overlays++] = (struct overlay){0};
+    }
+
+    struct overlay *ptr = &cmd->overlays[id];
+    struct overlay old = *ptr;
+
+    if (!ptr->osd.bitmap && !new->osd.bitmap)
+        return; // don't need to recreate or unmap
+
+    *ptr = *new;
+    recreate_overlays(mpctx);
+
+#if HAVE_SYS_MMAN_H
+    // Do this afterwards, so we never unmap while the OSD is using it.
+    if (old.osd.bitmap && old.map_size)
+        munmap(old.osd.bitmap, old.map_size);
+#endif
 }
 
 static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
                        char *file, int offset, char *fmt, int w, int h,
                        int stride)
 {
-    struct command_ctx *cmd = mpctx->command_ctx;
     int r = -1;
     if (strcmp(fmt, "bgra") != 0) {
         MP_ERR(mpctx, "overlay_add: unsupported OSD format '%s'\n", fmt);
@@ -3275,8 +3305,21 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
         MP_ERR(mpctx, "overlay_add: invalid id %d\n", id);
         goto error;
     }
+    if (w < 0 || h < 0 || stride < w * 4 || (stride % 4)) {
+        MP_ERR(mpctx, "overlay_add: inconsistent parameters\n");
+        goto error;
+    }
+    struct overlay overlay = {
+        .osd = {
+            .stride = stride,
+            .x = x, .y = y,
+            .w = w, .h = h,
+            .dw = w, .dh = h,
+        },
+    };
     int fd = -1;
     bool close_fd = true;
+    void *p = (void *)-1;
     if (file[0] == '@') {
         char *end;
         fd = strtol(&file[1], &end, 10);
@@ -3286,30 +3329,20 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
     } else {
         fd = open(file, O_RDONLY | O_BINARY | O_CLOEXEC);
     }
-    void *p = mmap(NULL, h * stride, PROT_READ, MAP_SHARED, fd, offset);
-    if (fd >= 0 && close_fd)
-        close(fd);
-    if (!p) {
+    if (fd >= 0) {
+#if HAVE_SYS_MMAN_H
+        overlay.map_size = h * stride;
+        p = mmap(NULL, overlay.map_size, PROT_READ, MAP_SHARED, fd, offset);
+#endif
+        if (close_fd)
+            close(fd);
+    }
+    if (!p || p == (void *)-1) {
         MP_ERR(mpctx, "overlay_add: could not open or map '%s'\n", file);
         goto error;
     }
-    MP_TARRAY_GROW(cmd, cmd->overlays, id);
-    while (cmd->num_overlays <= id)
-        cmd->overlays[cmd->num_overlays++].bitmap = NULL;
-    struct sub_bitmap *overlay = &cmd->overlays[id];
-    void *prev = overlay->bitmap;
-    size_t prev_size = overlay->stride * overlay->h;
-    *overlay = (struct sub_bitmap) {
-        .bitmap = p,
-        .stride = stride,
-        .x = x, .y = y,
-        .w = w, .h = h,
-        .dw = w, .dh = h,
-    };
-    recreate_overlays(mpctx);
-    // unmap afterwards, to avoid unmapping while OSD uses the memory
-    if (prev)
-        munmap(prev, prev_size);
+    overlay.osd.bitmap = p;
+    replace_overlay(mpctx, id, &overlay);
     r = 0;
 error:
     return r;
@@ -3318,16 +3351,8 @@ error:
 static void overlay_remove(struct MPContext *mpctx, int id)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
-    if (id >= 0 && id < cmd->num_overlays) {
-        struct sub_bitmap *overlay = &cmd->overlays[id];
-        if (overlay->bitmap) {
-            void *ptr = overlay->bitmap;
-            size_t ptr_size = overlay->h * overlay->stride;
-            overlay->bitmap = NULL; // remove
-            recreate_overlays(mpctx);
-            munmap(ptr, ptr_size);
-        }
-    }
+    if (id >= 0 && id < cmd->num_overlays)
+        replace_overlay(mpctx, id, &(struct overlay){0});
 }
 
 static void overlay_uninit(struct MPContext *mpctx)
@@ -3339,12 +3364,6 @@ static void overlay_uninit(struct MPContext *mpctx)
         overlay_remove(mpctx, id);
     osd_set_external2(mpctx->osd, NULL);
 }
-
-#else
-
-static void overlay_uninit(struct MPContext *mpctx){}
-
-#endif
 
 struct cycle_counter {
     char **args;
@@ -3955,7 +3974,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
-#if HAVE_SYS_MMAN_H
     case MP_CMD_OVERLAY_ADD:
         overlay_add(mpctx,
                     cmd->args[0].v.i, cmd->args[1].v.i, cmd->args[2].v.i,
@@ -3966,7 +3984,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_OVERLAY_REMOVE:
         overlay_remove(mpctx, cmd->args[0].v.i);
         break;
-#endif
 
     case MP_CMD_COMMAND_LIST: {
         for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next)
