@@ -533,7 +533,8 @@ static void handle_osd_redraw(struct MPContext *mpctx)
     // Don't redraw immediately during a seek (makes it significantly slower).
     if (mpctx->d_video && mp_time_sec() - mpctx->start_timestamp < 0.1)
         return;
-    bool want_redraw = osd_query_and_reset_want_redraw(mpctx->osd);
+    bool want_redraw = osd_query_and_reset_want_redraw(mpctx->osd) ||
+                       vo_want_redraw(mpctx->video_out);
     if (!want_redraw)
         return;
     vo_redraw(mpctx->video_out);
