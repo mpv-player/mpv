@@ -400,7 +400,7 @@ static int init(struct ao *ao)
         .fragsize = -1,
     };
 
-    int flags = PA_STREAM_NOT_MONOTONIC;
+    int flags = PA_STREAM_NOT_MONOTONIC | PA_STREAM_FAIL_ON_SUSPEND;
     if (!priv->cfg_latency_hacks)
         flags |= PA_STREAM_INTERPOLATE_TIMING|PA_STREAM_AUTO_TIMING_UPDATE;
 
