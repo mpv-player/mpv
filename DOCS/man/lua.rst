@@ -1,11 +1,12 @@
 LUA SCRIPTING
 =============
 
-mpv can load Lua scripts. Scripts in ``~/.mpv/lua/`` will be loaded on program
-start, or if passed to ``--lua``. mpv appends ``~/.mpv/lua`` to the end of
-lua's path so you can import them too. Since it's added to the end, don't name
-scripts you want to import the same as lua libraries because they will be
-overshadowed by them.
+mpv can load Lua scripts. Scripts passed to the ``--lua`` option, or found in
+the ``lua`` subdirectory of the mpv configuration directory (usually
+``~/.config/mpv/lua/``) will be loaded on program start. mpv also appends the
+``lua`` subdirectory to the end of Lua's path so you can import scripts from
+there too. Since it's added to the end, don't name scripts you want to import
+the same as Lua libraries because they will be overshadowed by them.
 
 mpv provides the built-in module ``mp``, which provides functions to send
 commands to the mpv core and to retrieve information about playback state, user
@@ -32,12 +33,13 @@ allow users implement features which are not going to be added to the mpv core.
 Mode of operation
 -----------------
 
-Your script will be loaded by the player at program start from ``~/.mpv/lua/``,
-or ``--lua``, or in some cases, internally (like ``--osc``). Each script runs
-in its own thread. Your script is first run "as is", and once that is done,
-the event loop is entered. This event loop will dispatch events received by mpv
-and call your own event handlers which you have registered with
-``mp.register_event``, or timers added with ``mp.add_timeout`` or similar.
+Your script will be loaded by the player at program start from the ``lua``
+configuration subdirectory, from a path specified with the ``--lua`` option, or
+in some cases, internally (like ``--osc``). Each script runs in its own
+thread. Your script is first run "as is", and once that is done, the event loop
+is entered. This event loop will dispatch events received by mpv and call your
+own event handlers which you have registered with ``mp.register_event``, or
+timers added with ``mp.add_timeout`` or similar.
 
 When the player quits, all scripts will be asked to terminate. This happens via
 a ``shutdown`` event, which by default will make the event loop return. If your
