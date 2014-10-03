@@ -292,6 +292,7 @@ void vo_wait_frame(struct vo *vo);
 bool vo_still_displaying(struct vo *vo);
 bool vo_has_frame(struct vo *vo);
 void vo_redraw(struct vo *vo);
+bool vo_want_redraw(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
 void vo_set_paused(struct vo *vo, bool paused);

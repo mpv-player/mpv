@@ -125,7 +125,8 @@ struct vo_internal {
 
     bool hasframe;
     bool hasframe_rendered;
-    bool request_redraw;
+    bool request_redraw;            // redraw request from player to VO
+    bool want_redraw;               // redraw request from VO to player
     bool paused;
 
     int64_t flip_queue_offset; // queue flip events at most this much in advance
@@ -615,6 +616,7 @@ static bool render_frame(struct vo *vo)
 
     vo->want_redraw = false;
 
+    in->want_redraw = false;
     in->request_redraw = false;
     in->rendering = false;
 
@@ -634,6 +636,7 @@ static void do_redraw(struct vo *vo)
 
     pthread_mutex_lock(&in->lock);
     in->request_redraw = false;
+    in->want_redraw = false;
     bool skip = !in->paused && in->dropped_frame;
     struct mp_image *img = in->dropped_image;
     if (!skip) {
@@ -685,9 +688,13 @@ static void *vo_thread(void *ptr)
                 mp_input_wakeup(vo->input_ctx);
             }
         }
-        vo->want_redraw |= in->request_redraw;
+        if (vo->want_redraw && !in->want_redraw) {
+            in->want_redraw = true;
+            mp_input_wakeup(vo->input_ctx);
+        }
+        bool redraw = in->request_redraw;
         pthread_mutex_unlock(&in->lock);
-        if (wait_until > now && vo->want_redraw) {
+        if (wait_until > now && redraw) {
             do_redraw(vo); // now is a good time
             continue;
         }
@@ -729,6 +736,15 @@ void vo_redraw(struct vo *vo)
         wakeup_locked(vo);
     }
     pthread_mutex_unlock(&in->lock);
+}
+
+bool vo_want_redraw(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    bool r = in->want_redraw;
+    pthread_mutex_unlock(&in->lock);
+    return r;
 }
 
 void vo_seek_reset(struct vo *vo)
