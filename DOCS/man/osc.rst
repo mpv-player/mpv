@@ -161,7 +161,7 @@ To avoid collisions with other scripts, all options need to be prefixed with
 
 Example::
 
-    --lua-opts=osc-optionA=value1:osc-optionB=value2
+    --lua-opts=osc-optionA=value1,osc-optionB=value2
 
 
 Configurable Options
