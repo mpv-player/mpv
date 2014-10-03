@@ -1686,10 +1686,10 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
         int new = *(int *)arg;
         if (current == new)
             return M_PROPERTY_OK;
-        if (!(mpctx->initialized_flags & INITIALIZED_VCODEC))
+        if (!mpctx->d_video)
             return M_PROPERTY_ERROR;
         double last_pts = mpctx->last_vo_pts;
-        uninit_player(mpctx, INITIALIZED_VCODEC);
+        uninit_video_chain(mpctx);
         opts->hwdec_api = new;
         reinit_video_chain(mpctx);
         if (last_pts != MP_NOPTS_VALUE)

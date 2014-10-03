@@ -29,19 +29,6 @@
 
 // definitions used internally by the core player code
 
-#define INITIALIZED_VO      1
-#define INITIALIZED_AO      2
-#define INITIALIZED_PLAYBACK 16
-#define INITIALIZED_LIBASS  32
-#define INITIALIZED_STREAM  64
-#define INITIALIZED_DEMUXER 512
-#define INITIALIZED_ACODEC  1024
-#define INITIALIZED_VCODEC  2048
-#define INITIALIZED_SUB     4096
-#define INITIALIZED_SUB2    8192
-#define INITIALIZED_ALL     0xFFFF
-
-
 enum stop_play_reason {
     KEEP_PLAYING = 0,   // must be 0, numeric values of others do not matter
     AT_END_OF_FILE,     // file has ended, prepare to play next
@@ -194,7 +181,7 @@ typedef struct MPContext {
     char *filename; // always the same as playing->filename (or NULL)
     struct mp_resolve_result *resolve_result;
     enum stop_play_reason stop_play;
-    unsigned int initialized_flags;  // which subsystems have been initialized
+    bool playback_initialized; // playloop can be run/is running
 
     // Return code to use with PT_QUIT
     enum exit_reason quit_player_rc;
@@ -368,6 +355,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts);
 double written_audio_pts(struct MPContext *mpctx);
 void clear_audio_output_buffers(struct MPContext *mpctx);
 void set_playback_speed(struct MPContext *mpctx, double new_speed);
+void uninit_audio_out(struct MPContext *mpctx);
+void uninit_audio_chain(struct MPContext *mpctx);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);
@@ -407,6 +396,7 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 void update_demuxer_properties(struct MPContext *mpctx);
+void reselect_demux_streams(struct MPContext *mpctx);
 
 // main.c
 int mpv_main(int argc, char *argv[]);
@@ -473,8 +463,10 @@ void mp_load_scripts(struct MPContext *mpctx);
 // sub.c
 void reset_subtitle_state(struct MPContext *mpctx);
 void reset_subtitles(struct MPContext *mpctx, int order);
-void uninit_subs(struct demuxer *demuxer);
+void uninit_stream_sub_decoders(struct demuxer *demuxer);
 void reinit_subs(struct MPContext *mpctx, int order);
+void uninit_sub(struct MPContext *mpctx, int order);
+void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
 void update_subtitles(struct MPContext *mpctx);
 
@@ -492,5 +484,7 @@ int reinit_video_filters(struct MPContext *mpctx);
 void write_video(struct MPContext *mpctx, double endpts);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void update_fps(struct MPContext *mpctx);
+void uninit_video_out(struct MPContext *mpctx);
+void uninit_video_chain(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

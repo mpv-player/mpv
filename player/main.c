@@ -118,8 +118,8 @@ static void shutdown_clients(struct MPContext *mpctx)
 
 void mp_destroy(struct MPContext *mpctx)
 {
-    if (mpctx->initialized)
-        uninit_player(mpctx, INITIALIZED_ALL);
+    uninit_audio_out(mpctx);
+    uninit_video_out(mpctx);
 
 #if HAVE_ENCODING
     encode_lavc_finish(mpctx->encode_lavc_ctx);
@@ -439,7 +439,6 @@ int mp_initialize(struct MPContext *mpctx)
             return -1;
         }
         mpctx->mouse_cursor_visible = true;
-        mpctx->initialized_flags |= INITIALIZED_VO;
     }
 
     // Lua user scripts (etc.) can call arbitrary functions. Load them at a point

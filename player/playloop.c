@@ -789,17 +789,18 @@ static void handle_chapter_change(struct MPContext *mpctx)
 // Execute a forceful refresh of the VO window, if it hasn't had a valid frame
 // for a while. The problem is that a VO with no valid frame (vo->hasframe==0)
 // doesn't redraw video and doesn't OSD interaction. So screw it, hard.
+// It also closes the VO if force_window or video display is not active.
 void handle_force_window(struct MPContext *mpctx, bool reconfig)
 {
     // Don't interfere with real video playback
     if (mpctx->d_video)
         return;
 
-    struct vo *vo = mpctx->video_out;
-    if (!vo)
-        return;
+    if (!mpctx->opts->force_vo)
+        uninit_video_out(mpctx);
 
-    if (!vo->config_ok || reconfig) {
+    if (mpctx->video_out && (!mpctx->video_out->config_ok || reconfig)) {
+        struct vo *vo = mpctx->video_out;
         MP_INFO(mpctx, "Creating non-video VO window.\n");
         // Pick whatever works
         int config_format = 0;
@@ -974,10 +975,7 @@ void idle_loop(struct MPContext *mpctx)
     {
         if (need_reinit) {
             mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
-            int uninit = INITIALIZED_AO;
-            if (!mpctx->opts->force_vo)
-                uninit |= INITIALIZED_VO;
-            uninit_player(mpctx, uninit);
+            uninit_audio_out(mpctx);
             handle_force_window(mpctx, true);
             mpctx->sleeptime = 0;
             need_reinit = false;

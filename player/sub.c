@@ -38,7 +38,7 @@
 
 #include "core.h"
 
-void uninit_subs(struct demuxer *demuxer)
+void uninit_stream_sub_decoders(struct demuxer *demuxer)
 {
     for (int i = 0; i < demuxer->num_streams; i++) {
         struct sh_stream *sh = demuxer->streams[i];
@@ -47,6 +47,23 @@ void uninit_subs(struct demuxer *demuxer)
             sh->sub->dec_sub = NULL;
         }
     }
+}
+
+void uninit_sub(struct MPContext *mpctx, int order)
+{
+    if (mpctx->d_sub[order]) {
+        mpctx->d_sub[order] = NULL; // Note: not free'd.
+        int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
+        osd_set_sub(mpctx->osd, obj, NULL);
+        reset_subtitles(mpctx, order);
+        reselect_demux_streams(mpctx);
+    }
+}
+
+void uninit_sub_all(struct MPContext *mpctx)
+{
+    uninit_sub(mpctx, 0);
+    uninit_sub(mpctx, 1);
 }
 
 // When reading subtitles from a demuxer, and we read video or audio from the
@@ -85,17 +102,13 @@ void reset_subtitle_state(struct MPContext *mpctx)
 static void update_subtitle(struct MPContext *mpctx, int order)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (order == 0) {
-        if (!(mpctx->initialized_flags & INITIALIZED_SUB))
-            return;
-    } else {
-        if (!(mpctx->initialized_flags & INITIALIZED_SUB2))
-            return;
-    }
-
     struct track *track = mpctx->current_track[order][STREAM_SUB];
     struct dec_sub *dec_sub = mpctx->d_sub[order];
-    assert(track && dec_sub);
+
+    if (!track)
+        return;
+
+    assert(dec_sub);
     int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
 
     if (mpctx->d_video) {
@@ -190,30 +203,20 @@ void reinit_subs(struct MPContext *mpctx, int order)
     struct MPOpts *opts = mpctx->opts;
     struct track *track = mpctx->current_track[order][STREAM_SUB];
     int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
-    int init_flag = order ? INITIALIZED_SUB2 : INITIALIZED_SUB;
 
-    assert(!(mpctx->initialized_flags & init_flag));
+    assert(!mpctx->d_sub[order]);
 
     struct sh_stream *sh = track ? track->stream : NULL;
     if (!sh)
         return;
 
-    if (!sh->sub->dec_sub) {
-        assert(!mpctx->d_sub[order]);
+    // The decoder is cached in the stream header in order to make ordered
+    // chapters work better.
+    if (!sh->sub->dec_sub)
         sh->sub->dec_sub = sub_create(mpctx->global);
-    }
-
-    assert(!mpctx->d_sub[order] || sh->sub->dec_sub == mpctx->d_sub[order]);
-
-    // The decoder is kept in the stream header in order to make ordered
-    // chapters work well.
     mpctx->d_sub[order] = sh->sub->dec_sub;
 
-    mpctx->initialized_flags |= init_flag;
-
     struct dec_sub *dec_sub = mpctx->d_sub[order];
-    assert(dec_sub);
-
     reinit_subdec(mpctx, track, dec_sub);
 
     struct osd_sub_state state = {

@@ -142,21 +142,45 @@ void reset_audio_state(struct MPContext *mpctx)
     mpctx->audio_status = mpctx->d_audio ? STATUS_SYNCING : STATUS_EOF;
 }
 
+void uninit_audio_out(struct MPContext *mpctx)
+{
+    if (mpctx->ao) {
+        // Note: with gapless_audio, stop_play is not correctly set
+        if (mpctx->opts->gapless_audio || mpctx->stop_play == AT_END_OF_FILE)
+            ao_drain(mpctx->ao);
+        ao_uninit(mpctx->ao);
+    }
+    mpctx->ao = NULL;
+    talloc_free(mpctx->ao_decoder_fmt);
+    mpctx->ao_decoder_fmt = NULL;
+}
+
+void uninit_audio_chain(struct MPContext *mpctx)
+{
+    if (mpctx->d_audio) {
+        mixer_uninit_audio(mpctx->mixer);
+        audio_uninit(mpctx->d_audio);
+        mpctx->d_audio = NULL;
+        talloc_free(mpctx->ao_buffer);
+        mpctx->ao_buffer = NULL;
+        mpctx->audio_status = STATUS_EOF;
+        reselect_demux_streams(mpctx);
+    }
+}
+
 void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct track *track = mpctx->current_track[0][STREAM_AUDIO];
     struct sh_stream *sh = track ? track->stream : NULL;
     if (!sh) {
-        uninit_player(mpctx, INITIALIZED_AO);
+        uninit_audio_out(mpctx);
         goto no_audio;
     }
 
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
-    if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
-        mpctx->initialized_flags |= INITIALIZED_ACODEC;
-        assert(!mpctx->d_audio);
+    if (!mpctx->d_audio) {
         mpctx->d_audio = talloc_zero(NULL, struct dec_audio);
         mpctx->d_audio->log = mp_log_new(mpctx->d_audio, mpctx->log, "!ad");
         mpctx->d_audio->global = mpctx->global;
@@ -188,16 +212,15 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
 
     // Weak gapless audio: drain AO on decoder format changes
-    if (mpctx->ao_decoder_fmt && (mpctx->initialized_flags & INITIALIZED_AO) &&
-        !mp_audio_config_equals(mpctx->ao_decoder_fmt, &in_format) &&
-        opts->gapless_audio < 0)
+    if (mpctx->ao_decoder_fmt && mpctx->ao && opts->gapless_audio < 0 &&
+        !mp_audio_config_equals(mpctx->ao_decoder_fmt, &in_format))
     {
-        uninit_player(mpctx, INITIALIZED_AO);
+        uninit_audio_out(mpctx);
     }
 
     struct af_stream *afs = mpctx->d_audio->afilter;
 
-    if (mpctx->initialized_flags & INITIALIZED_AO) {
+    if (mpctx->ao) {
         ao_get_format(mpctx->ao, &afs->output);
     } else {
         afs->output = (struct mp_audio){0};
@@ -219,8 +242,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         goto init_error;
     }
 
-    if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
-        mpctx->initialized_flags |= INITIALIZED_AO;
+    if (!mpctx->ao) {
         afs->initialized = 0; // do it again
 
         mp_chmap_remove_useless_channels(&afs->output.channels,
@@ -260,7 +282,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
     return;
 
 init_error:
-    uninit_player(mpctx, INITIALIZED_ACODEC | INITIALIZED_AO);
+    uninit_audio_chain(mpctx);
+    uninit_audio_out(mpctx);
 no_audio:
     mp_deselect_track(mpctx, track);
     if (track)
@@ -466,7 +489,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
              * while displaying video, then doing the output format switch.
              */
             if (mpctx->opts->gapless_audio < 1)
-                uninit_player(mpctx, INITIALIZED_AO);
+                uninit_audio_out(mpctx);
             reinit_audio_chain(mpctx);
             mpctx->sleeptime = 0;
             return; // retry on next iteration

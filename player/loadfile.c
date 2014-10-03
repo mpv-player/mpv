@@ -60,133 +60,44 @@
 #include "command.h"
 #include "libmpv/client.h"
 
-static void reselect_demux_streams(struct MPContext *mpctx);
-
-static void uninit_sub(struct MPContext *mpctx, int order)
+static void uninit_demuxer(struct MPContext *mpctx)
 {
-    mpctx->d_sub[order] = NULL; // Note: not free'd.
-    int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
-    osd_set_sub(mpctx->osd, obj, NULL);
-    reset_subtitles(mpctx, order);
-    reselect_demux_streams(mpctx);
+    assert(!mpctx->d_video && !mpctx->d_audio &&
+           !mpctx->d_sub[0] && !mpctx->d_sub[1]);
+    for (int i = 0; i < mpctx->num_tracks; i++) {
+        talloc_free(mpctx->tracks[i]);
+    }
+    mpctx->num_tracks = 0;
+    for (int r = 0; r < NUM_PTRACKS; r++) {
+        for (int t = 0; t < STREAM_TYPE_COUNT; t++)
+            mpctx->current_track[r][t] = NULL;
+    }
+    mpctx->master_demuxer = NULL;
+    for (int i = 0; i < mpctx->num_sources; i++) {
+        uninit_stream_sub_decoders(mpctx->sources[i]);
+        struct demuxer *demuxer = mpctx->sources[i];
+        struct stream *stream = demuxer->stream;
+        free_demuxer(demuxer);
+        if (stream != mpctx->stream)
+            free_stream(stream);
+    }
+    talloc_free(mpctx->sources);
+    mpctx->sources = NULL;
+    mpctx->demuxer = NULL;
+    mpctx->num_sources = 0;
+    talloc_free(mpctx->timeline);
+    mpctx->timeline = NULL;
+    mpctx->num_timeline_parts = 0;
+    talloc_free(mpctx->chapters);
+    mpctx->chapters = NULL;
+    mpctx->num_chapters = 0;
+    mpctx->video_offset = 0;
 }
 
-void uninit_player(struct MPContext *mpctx, unsigned int mask)
+static void uninit_stream(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = mpctx->opts;
-
-    mask &= mpctx->initialized_flags;
-
-    MP_DBG(mpctx, "\n*** uninit(0x%X)\n", mask);
-
-    if (mask & INITIALIZED_ACODEC) {
-        mpctx->initialized_flags &= ~INITIALIZED_ACODEC;
-        mixer_uninit_audio(mpctx->mixer);
-        audio_uninit(mpctx->d_audio);
-        mpctx->d_audio = NULL;
-        talloc_free(mpctx->ao_buffer);
-        mpctx->ao_buffer = NULL;
-        mpctx->audio_status = STATUS_EOF;
-        reselect_demux_streams(mpctx);
-    }
-
-    if (mask & INITIALIZED_SUB) {
-        mpctx->initialized_flags &= ~INITIALIZED_SUB;
-        uninit_sub(mpctx, 0);
-    }
-    if (mask & INITIALIZED_SUB2) {
-        mpctx->initialized_flags &= ~INITIALIZED_SUB2;
-        uninit_sub(mpctx, 1);
-    }
-
-    if (mask & INITIALIZED_LIBASS) {
-        mpctx->initialized_flags &= ~INITIALIZED_LIBASS;
-#if HAVE_LIBASS
-        if (mpctx->ass_renderer)
-            ass_renderer_done(mpctx->ass_renderer);
-        mpctx->ass_renderer = NULL;
-        ass_clear_fonts(mpctx->ass_library);
-#endif
-    }
-
-    if (mask & INITIALIZED_VCODEC) {
-        mpctx->initialized_flags &= ~INITIALIZED_VCODEC;
-        reset_video_state(mpctx);
-        if (mpctx->d_video)
-            video_uninit(mpctx->d_video);
-        mpctx->d_video = NULL;
-        mpctx->video_status = STATUS_EOF;
-        mpctx->sync_audio_to_video = false;
-        reselect_demux_streams(mpctx);
-    }
-
-    if (mask & INITIALIZED_DEMUXER) {
-        mpctx->initialized_flags &= ~INITIALIZED_DEMUXER;
-        assert(!(mpctx->initialized_flags &
-                 (INITIALIZED_VCODEC | INITIALIZED_ACODEC |
-                  INITIALIZED_SUB2 | INITIALIZED_SUB)));
-        for (int i = 0; i < mpctx->num_tracks; i++) {
-            talloc_free(mpctx->tracks[i]);
-        }
-        mpctx->num_tracks = 0;
-        for (int r = 0; r < NUM_PTRACKS; r++) {
-            for (int t = 0; t < STREAM_TYPE_COUNT; t++)
-                mpctx->current_track[r][t] = NULL;
-        }
-        assert(!mpctx->d_video && !mpctx->d_audio &&
-               !mpctx->d_sub[0] && !mpctx->d_sub[1]);
-        mpctx->master_demuxer = NULL;
-        for (int i = 0; i < mpctx->num_sources; i++) {
-            uninit_subs(mpctx->sources[i]);
-            struct demuxer *demuxer = mpctx->sources[i];
-            struct stream *stream = demuxer->stream;
-            free_demuxer(demuxer);
-            if (stream != mpctx->stream)
-                free_stream(stream);
-        }
-        talloc_free(mpctx->sources);
-        mpctx->sources = NULL;
-        mpctx->demuxer = NULL;
-        mpctx->num_sources = 0;
-        talloc_free(mpctx->timeline);
-        mpctx->timeline = NULL;
-        mpctx->num_timeline_parts = 0;
-        talloc_free(mpctx->chapters);
-        mpctx->chapters = NULL;
-        mpctx->num_chapters = 0;
-        mpctx->video_offset = 0;
-    }
-
-    // kill the cache process:
-    if (mask & INITIALIZED_STREAM) {
-        mpctx->initialized_flags &= ~INITIALIZED_STREAM;
-        if (mpctx->stream)
-            free_stream(mpctx->stream);
-        mpctx->stream = NULL;
-    }
-
-    if (mask & INITIALIZED_VO) {
-        mpctx->initialized_flags &= ~INITIALIZED_VO;
-        vo_destroy(mpctx->video_out);
-        mpctx->video_out = NULL;
-    }
-
-    if (mask & INITIALIZED_AO) {
-        struct ao *ao = mpctx->ao;
-        mpctx->initialized_flags &= ~INITIALIZED_AO;
-        if (ao) {
-            // Note: with gapless_audio, stop_play is not correctly set
-            if (opts->gapless_audio || mpctx->stop_play == AT_END_OF_FILE)
-                ao_drain(ao);
-            ao_uninit(ao);
-        }
-        mpctx->ao = NULL;
-        talloc_free(mpctx->ao_decoder_fmt);
-        mpctx->ao_decoder_fmt = NULL;
-    }
-
-    if (mask & INITIALIZED_PLAYBACK)
-        mpctx->initialized_flags &= ~INITIALIZED_PLAYBACK;
+    free_stream(mpctx->stream);
+    mpctx->stream = NULL;
 }
 
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
@@ -283,7 +194,7 @@ static bool need_init_seek(struct demuxer *demux)
 // can be important, because reading from a demuxer stream (e.g. during init)
 // will implicitly discard interleaved packets from unselected streams.
 // Also initializes position for external streams.
-static void reselect_demux_streams(struct MPContext *mpctx)
+void reselect_demux_streams(struct MPContext *mpctx)
 {
     // Note: we assume that all demuxer streams are covered by the track list.
     for (int t = 0; t < mpctx->num_tracks; t++) {
@@ -345,7 +256,13 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     enum stop_play_reason orig_stop_play = mpctx->stop_play;
     if (!mpctx->d_video && mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;  // let audio uninit drain data
-    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts->fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts->gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB | INITIALIZED_SUB2);
+    uninit_audio_chain(mpctx);
+    uninit_video_chain(mpctx);
+    uninit_sub_all(mpctx);
+    if (!mpctx->opts->fixed_vo)
+        uninit_video_out(mpctx);
+    if (!mpctx->opts->gapless_audio)
+        uninit_audio_out(mpctx);
     mpctx->stop_play = orig_stop_play;
 
     if (mpctx->demuxer) {
@@ -580,19 +497,19 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
 
     if (order == 0) {
         if (type == STREAM_VIDEO) {
-            int uninit = INITIALIZED_VCODEC;
-            if (!mpctx->opts->force_vo)
-                uninit |= mpctx->opts->fixed_vo && track ? 0 : INITIALIZED_VO;
-            uninit_player(mpctx, uninit);
+            uninit_video_chain(mpctx);
+            if (!mpctx->opts->fixed_vo || !track)
+                handle_force_window(mpctx, false);
         } else if (type == STREAM_AUDIO) {
             clear_audio_output_buffers(mpctx);
-            uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
+            uninit_audio_chain(mpctx);
+            uninit_audio_out(mpctx);
         } else if (type == STREAM_SUB) {
-            uninit_player(mpctx, INITIALIZED_SUB);
+            uninit_sub(mpctx, 0);
         }
     } else if (order == 1) {
         if (type == STREAM_SUB)
-            uninit_player(mpctx, INITIALIZED_SUB2);
+            uninit_sub(mpctx, 1);
     }
 
     if (current)
@@ -870,18 +787,26 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
 #endif
 }
 
+static void uninit_libass(struct MPContext *mpctx)
+{
+#if HAVE_LIBASS
+    if (mpctx->ass_renderer)
+        ass_renderer_done(mpctx->ass_renderer);
+    mpctx->ass_renderer = NULL;
+    ass_clear_fonts(mpctx->ass_library);
+#endif
+}
+
 static void init_sub_renderer(struct MPContext *mpctx)
 {
 #if HAVE_LIBASS
-    assert(!(mpctx->initialized_flags & INITIALIZED_LIBASS));
-    assert(!mpctx->ass_renderer);
+    uninit_libass(mpctx);
 
     mpctx->ass_renderer = ass_renderer_init(mpctx->ass_library);
     if (mpctx->ass_renderer) {
         mp_ass_configure_fonts(mpctx->ass_renderer, mpctx->opts->sub_text_style,
                                mpctx->global, mpctx->ass_log);
     }
-    mpctx->initialized_flags |= INITIALIZED_LIBASS;
 #endif
 }
 
@@ -1093,7 +1018,6 @@ static void play_current_file(struct MPContext *mpctx)
         mp_process_input(mpctx);
         goto terminate_playback;
     }
-    mpctx->initialized_flags |= INITIALIZED_STREAM;
 
     if (opts->stream_dump && opts->stream_dump[0]) {
         stream_dump(mpctx);
@@ -1126,8 +1050,6 @@ goto_reopen_demuxer: ;
     }
 
     MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, mpctx->demuxer);
-
-    mpctx->initialized_flags |= INITIALIZED_DEMUXER;
 
     if (mpctx->demuxer->playlist) {
         int entry_stream_flags =
@@ -1276,7 +1198,7 @@ goto_reopen_demuxer: ;
     if (mpctx->opts->pause)
         pause_player(mpctx);
 
-    mpctx->initialized_flags |= INITIALIZED_PLAYBACK;
+    mpctx->playback_initialized = true;
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
 
     playback_start = mp_time_sec();
@@ -1288,9 +1210,11 @@ goto_reopen_demuxer: ;
 
     if (mpctx->stop_play == PT_RELOAD_DEMUXER) {
         mpctx->stop_play = KEEP_PLAYING;
-        uninit_player(mpctx, INITIALIZED_ALL -
-            (INITIALIZED_PLAYBACK | INITIALIZED_STREAM |
-             (opts->fixed_vo ? INITIALIZED_VO : 0)));
+        mpctx->playback_initialized = false;
+        uninit_audio_chain(mpctx);
+        uninit_video_chain(mpctx);
+        uninit_sub_all(mpctx);
+        uninit_demuxer(mpctx);
         goto goto_reopen_demuxer;
     }
 
@@ -1315,15 +1239,18 @@ terminate_playback:
     MP_INFO(mpctx, "\n");
 
     // time to uninit all, except global stuff:
-    int uninitialize_parts = INITIALIZED_ALL;
-    if (opts->fixed_vo)
-        uninitialize_parts -= INITIALIZED_VO;
-    if ((opts->gapless_audio && mpctx->stop_play == AT_END_OF_FILE) ||
-        mpctx->encode_lavc_ctx)
-        uninitialize_parts -= INITIALIZED_AO;
-    uninit_player(mpctx, uninitialize_parts);
+    uninit_audio_chain(mpctx);
+    uninit_video_chain(mpctx);
+    uninit_sub_all(mpctx);
+    uninit_libass(mpctx);
+    uninit_demuxer(mpctx);
+    uninit_stream(mpctx);
+    if (!opts->fixed_vo)
+        uninit_video_out(mpctx);
+    if (!(opts->gapless_audio && mpctx->stop_play == AT_END_OF_FILE) &&
+        !mpctx->encode_lavc_ctx)
+        uninit_audio_out(mpctx);
 
-    // xxx handle this as INITIALIZED_CONFIG?
     if (mpctx->stop_play != PT_RESTART)
         m_config_restore_backups(mpctx->mconfig);
 
