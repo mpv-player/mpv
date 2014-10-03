@@ -258,9 +258,8 @@ Program Behavior
     Print version string and exit.
 
 ``--no-config``
-    Do not load default configuration files. This prevents loading of
-    ``~/.config/mpv/mpv.conf`` and ``~/.config/mpv/input.conf``, as well as
-    loading the same files from system wide configuration directories. Other
+    Do not load default configuration files. This prevents loading of both the
+    user-level and system-wide ``mpv.conf`` and ``input.conf`` files. Other
     configuration files are blocked as well, such as resume playback files.
 
     .. note::
@@ -316,7 +315,8 @@ Program Behavior
     Specify configuration file to be parsed after the default ones.
 
 ``--load-scripts=<yes|no>``
-    If set to ``no``, don't auto-load scripts from ``~/.mpv/lua/``.
+    If set to ``no``, don't auto-load scripts from the ``lua`` configuration
+    subdirectory (usually ``~/.config/mpv/lua/``).
     (Default: ``yes``)
 
 ``--lua=<filename>``
@@ -338,7 +338,8 @@ Program Behavior
     commands.
 
 ``--no-resume-playback``
-    Do not restore playback position from ``~/.mpv/watch_later/``.
+    Do not restore playback position from the ``watch_later`` configuration
+    subdirectory (usually ``~/.config/mpv/watch_later/``).
     See ``quit_watch_later`` input command.
 
 ``--profile=<profile1,profile2,...>``
@@ -1370,7 +1371,7 @@ Subtitles
         - ``/path/to/video/sub/``
         - ``/path/to/video/subtitles/``
         - ``/tmp/subs/``
-        - ``~/.mpv/sub/``
+        -  the ``sub`` configuration subdirectory (usually ``~/.config/mpv/sub/``)
 
 ``--sub-visibility``, ``--no-sub-visibility``
     Can be used to disable display of subtitles, but still select and decode
@@ -2089,8 +2090,8 @@ Input
     Number of key presses to generate per second on autorepeat.
 
 ``--input-conf=<filename>``
-    Specify input configuration file other than the default
-    ``~/.config/mpv/input.conf``.
+    Specify input configuration file other than the default location in the mpv
+    configuration directory (usually ``~/.config/mpv/input.conf``).
 
 ``--no-input-default-bindings``
     Disable mpv default (built-in) key bindings.
@@ -2971,9 +2972,10 @@ DVB
     Specifies using card number 1-4 (default: 1).
 
 ``--dvbin-file=<filename>``
-    Instructs mpv to read the channels list from ``<filename>``. Default is
-    ``~/.mpv/channels.conf.{sat,ter,cbl,atsc}`` (based on your card type) or
-    ``~/.mpv/channels.conf`` as a last resort.
+    Instructs mpv to read the channels list from ``<filename>``. The default is
+    in the mpv configuration directory (usually ``~/.config/mpv``) with the
+    filename ``channels.conf.{sat,ter,cbl,atsc}`` (based on your card type) or
+    ``channels.conf`` as a last resort.
 
 ``--dvbin-timeout=<1-30>``
     Maximum number of seconds to wait when trying to tune a frequency before

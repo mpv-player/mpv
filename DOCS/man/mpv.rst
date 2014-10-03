@@ -265,7 +265,7 @@ need to escape special characters. To work this around, the path can be
 additionally wrapped in the ``%n%string_of_length_n`` syntax (see above).
 
 Some mpv options interpret paths starting with ``~``. Currently, the prefix
-``~~/`` expands to the mpv configuration directory (usually ``~/.mpv/``).
+``~~/`` expands to the mpv configuration directory (usually ``~/.config/mpv/``).
 ``~/`` expands to the user's home directory. (The trailing ``/`` is always
 required.)
 
@@ -355,11 +355,11 @@ File-specific Configuration Files
 You can also write file-specific configuration files. If you wish to have a
 configuration file for a file called 'video.avi', create a file named
 'video.avi.conf' with the file-specific options in it and put it in
-``~/.mpv/``. You can also put the configuration file in the same directory
+``~/.config/mpv/``. You can also put the configuration file in the same directory
 as the file to be played, as long as you give the ``--use-filedir-conf``
 option (either on the command line or in your global config file). If a
 file-specific configuration file is found in the same directory, no
-file-specific configuration is loaded from ``~/.mpv``. In addition, the
+file-specific configuration is loaded from ``~/.config/mpv``. In addition, the
 ``--use-filedir-conf`` option enables directory-specific configuration files.
 For this, mpv first tries to load a mpv.conf from the same directory
 as the file played and then tries to load any file-specific configuration.
