@@ -53,7 +53,6 @@
 #include "audio/mixer.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
-#include "sub/ass_mp.h"
 #include "sub/osd.h"
 #include "video/decode/dec_video.h"
 #include "video/out/vo.h"
@@ -133,11 +132,6 @@ void mp_destroy(struct MPContext *mpctx)
     command_uninit(mpctx);
 
     osd_free(mpctx->osd);
-
-#if HAVE_LIBASS
-    if (mpctx->ass_library)
-        ass_library_done(mpctx->ass_library);
-#endif
 
     if (mpctx->opts->use_terminal && terminal_initialized) {
         terminal_uninit();
@@ -408,10 +402,7 @@ int mp_initialize(struct MPContext *mpctx)
     if (opts->use_terminal && opts->consolecontrols && terminal_initialized)
         terminal_setup_getch(mpctx->input);
 
-#if HAVE_LIBASS
-    mpctx->ass_log = mp_log_new(mpctx, mpctx->global->log, "!libass");
-    mpctx->ass_library = mp_ass_init(mpctx->global, mpctx->ass_log);
-#else
+#if !HAVE_LIBASS
     MP_WARN(mpctx, "Compiled without libass.\n");
     MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
 #endif

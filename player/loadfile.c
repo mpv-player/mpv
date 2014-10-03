@@ -50,7 +50,6 @@
 #include "demux/demux.h"
 #include "stream/stream.h"
 #include "stream/resolve/resolve.h"
-#include "sub/ass_mp.h"
 #include "sub/dec_sub.h"
 #include "sub/find_subfiles.h"
 #include "video/decode/dec_video.h"
@@ -735,81 +734,6 @@ static void open_subtitles_from_resolve(struct MPContext *mpctx)
     }
 }
 
-static const char *const font_mimetypes[] = {
-    "application/x-truetype-font",
-    "application/vnd.ms-opentype",
-    "application/x-font-ttf",
-    "application/x-font", // probably incorrect
-    NULL
-};
-
-static const char *const font_exts[] = {".ttf", ".ttc", ".otf", NULL};
-
-static bool attachment_is_font(struct mp_log *log, struct demux_attachment *att)
-{
-    if (!att->name || !att->type || !att->data || !att->data_size)
-        return false;
-    for (int n = 0; font_mimetypes[n]; n++) {
-        if (strcmp(font_mimetypes[n], att->type) == 0)
-            return true;
-    }
-    // fallback: match against file extension
-    char *ext = strlen(att->name) > 4 ? att->name + strlen(att->name) - 4 : "";
-    for (int n = 0; font_exts[n]; n++) {
-        if (strcasecmp(ext, font_exts[n]) == 0) {
-            mp_warn(log, "Loading font attachment '%s' with MIME type %s. "
-                    "Assuming this is a broken Matroska file, which was "
-                    "muxed without setting a correct font MIME type.\n",
-                    att->name, att->type);
-            return true;
-        }
-    }
-    return false;
-}
-
-static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
-{
-#if HAVE_LIBASS
-    if (mpctx->opts->ass_enabled) {
-        for (int j = 0; j < mpctx->num_sources; j++) {
-            struct demuxer *d = mpctx->sources[j];
-            for (int i = 0; i < d->num_attachments; i++) {
-                struct demux_attachment *att = d->attachments + i;
-                if (mpctx->opts->use_embedded_fonts &&
-                    attachment_is_font(mpctx->log, att))
-                {
-                    ass_add_font(mpctx->ass_library, att->name, att->data,
-                                 att->data_size);
-                }
-            }
-        }
-    }
-#endif
-}
-
-static void uninit_libass(struct MPContext *mpctx)
-{
-#if HAVE_LIBASS
-    if (mpctx->ass_renderer)
-        ass_renderer_done(mpctx->ass_renderer);
-    mpctx->ass_renderer = NULL;
-    ass_clear_fonts(mpctx->ass_library);
-#endif
-}
-
-static void init_sub_renderer(struct MPContext *mpctx)
-{
-#if HAVE_LIBASS
-    uninit_libass(mpctx);
-
-    mpctx->ass_renderer = ass_renderer_init(mpctx->ass_library);
-    if (mpctx->ass_renderer) {
-        mp_ass_configure_fonts(mpctx->ass_renderer, mpctx->opts->sub_text_style,
-                               mpctx->global, mpctx->ass_log);
-    }
-#endif
-}
-
 static struct mp_resolve_result *resolve_url(const char *filename,
                                              struct mpv_global *global)
 {
@@ -981,11 +905,6 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_file_options(mpctx->mconfig, mpctx->playing->params,
                           mpctx->playing->num_params);
 
-#if HAVE_LIBASS
-    if (opts->ass_style_override)
-        ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
-#endif
-
     mpctx->audio_delay = opts->audio_delay;
     mpctx->max_frames = opts->play_frames;
 
@@ -1093,10 +1012,6 @@ goto_reopen_demuxer: ;
     if (mpctx->timeline)
         timeline_set_part(mpctx, mpctx->timeline_part, true);
 
-    add_subtitle_fonts_from_sources(mpctx);
-    // libass seems to misbehave if fonts are changed while a renderer
-    // exists, so we (re)create the renderer after fonts are set.
-    init_sub_renderer(mpctx);
 
     open_subtitles_from_options(mpctx);
     open_subtitles_from_resolve(mpctx);
@@ -1140,6 +1055,8 @@ goto_reopen_demuxer: ;
         MP_INFO(mpctx,
             "Displaying attached picture. Use --no-audio-display to prevent this.\n");
     }
+
+    init_sub_renderer(mpctx);
 
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_VIDEO])
@@ -1242,7 +1159,7 @@ terminate_playback:
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
     uninit_sub_all(mpctx);
-    uninit_libass(mpctx);
+    //uninit_sub_renderer(mpctx);
     uninit_demuxer(mpctx);
     uninit_stream(mpctx);
     if (!opts->fixed_vo)
