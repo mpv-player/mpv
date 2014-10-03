@@ -422,6 +422,12 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'func': check_statement('libavutil/frame.h',
                                 'av_frame_get_metadata(NULL)',
                                 use='libav')
+    }, {
+        'name': 'avframe-skip-samples',
+        'desc': 'libavutil AVFrame skip samples metadata',
+        'func': check_statement('libavutil/frame.h',
+                                'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES',
+                                use='libav')
     }
 ]
 

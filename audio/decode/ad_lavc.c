@@ -25,6 +25,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/opt.h>
 #include <libavutil/common.h>
+#include <libavutil/intreadwrite.h>
 
 #include "talloc.h"
 
@@ -100,6 +101,22 @@ static void set_data_from_avframe(struct dec_audio *da)
     da->decoded.samples = priv->avframe->nb_samples;
     for (int n = 0; n < da->decoded.num_planes; n++)
         da->decoded.planes[n] = priv->avframe->data[n];
+
+#if HAVE_AVFRAME_SKIP_SAMPLES
+    AVFrameSideData *sd =
+        av_frame_get_side_data(priv->avframe, AV_FRAME_DATA_SKIP_SAMPLES);
+    if (sd && sd->size >= 10) {
+        char *d = sd->data;
+        uint32_t skip = AV_RL32(d + 0);
+        uint32_t pad = AV_RL32(d + 4);
+        if (skip <= da->decoded.samples) {
+            mp_audio_skip_samples(&da->decoded, skip);
+            da->pts_offset += skip;
+        }
+        if (pad <= da->decoded.samples)
+            da->decoded.samples -= pad;
+    }
+#endif
 }
 
 static int init(struct dec_audio *da, const char *decoder)
@@ -138,6 +155,9 @@ static int init(struct dec_audio *da, const char *decoder)
     // Always try to set - option only exists for AC3 at the moment
     av_opt_set_double(lavc_context, "drc_scale", opts->ac3drc,
                       AV_OPT_SEARCH_CHILDREN);
+
+    // Let decoder add AV_FRAME_DATA_SKIP_SAMPLES.
+    av_opt_set(lavc_context, "flags2", "+skip_manual", AV_OPT_SEARCH_CHILDREN);
 
     mp_set_avopts(da->log, lavc_context, opts->avopts);
 
@@ -258,13 +278,13 @@ static int decode_packet(struct dec_audio *da)
     if (!got_frame)
         return mpkt ? AD_OK : AD_EOF;
 
-    set_data_from_avframe(da);
-
     double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, NULL);
     if (out_pts != MP_NOPTS_VALUE) {
         da->pts = out_pts;
         da->pts_offset = 0;
     }
+
+    set_data_from_avframe(da);
 
     MP_DBG(da, "Decoded %d -> %d samples\n", in_len, da->decoded.samples);
     return 0;
