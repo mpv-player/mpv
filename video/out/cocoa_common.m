@@ -164,7 +164,6 @@ void vo_cocoa_uninit(struct vo *vo)
         struct vo_cocoa_state *s = vo->cocoa;
         enable_power_management(vo);
         cocoa_rm_fs_screen_profile_observer(vo);
-        [NSApp setPresentationOptions:NSApplicationPresentationDefault];
 
         // XXX: It looks like there are some circular retain cycles for the
         // video view / video window that cause them to not be deallocated,
