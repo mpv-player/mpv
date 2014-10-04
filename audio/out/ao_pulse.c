@@ -418,6 +418,11 @@ static int init(struct ao *ao)
         pa_threaded_mainloop_wait(priv->mainloop);
     }
 
+    if (pa_stream_is_suspended(priv->stream)) {
+        MP_ERR(ao, "The stream is suspended. Bailing out.\n");
+        goto unlock_and_fail;
+    }
+
     pa_threaded_mainloop_unlock(priv->mainloop);
 
     return 0;
