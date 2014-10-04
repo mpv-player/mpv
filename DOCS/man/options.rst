@@ -1666,6 +1666,13 @@ Window
     disable the window manager hints that force the window aspect ratio.
     (Ignored in fullscreen mode.)
 
+``--no-keepaspect-window``, ``--keepaspect-window``
+    ``--keepaspect-window`` (the default) will lock the window size to the
+    video aspect. ``--no-keepaspect-window`` disables this behavior, and will
+    instead add black bars if window aspect and video aspect mismatch. Whether
+    this actually works depends on the VO backend.
+    (Ignored in fullscreen mode.)
+
 ``--monitoraspect=<ratio>``
     Set the aspect ratio of your monitor or TV screen. A value of 0 disables a
     previous setting (e.g. in the config file). Overrides the

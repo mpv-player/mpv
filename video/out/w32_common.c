@@ -551,8 +551,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
     case WM_SIZING:
-        if (w32->opts->keepaspect && !w32->opts->fullscreen &&
-            w32->opts->WinID < 0)
+        if (w32->opts->keepaspect && w32->opts->keepaspect_window &&
+            !w32->opts->fullscreen && w32->opts->WinID < 0)
         {
             RECT *rc = (RECT*)lParam;
             // get client area of the windows if it had the rect rc

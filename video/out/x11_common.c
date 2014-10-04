@@ -999,7 +999,7 @@ static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
     hint->max_width = 0;
     hint->max_height = 0;
 
-    if (opts->keepaspect) {
+    if (opts->keepaspect && opts->keepaspect_window) {
         hint->flags |= PAspect;
         hint->min_aspect.x = hint->width;
         hint->min_aspect.y = hint->height;

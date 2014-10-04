@@ -453,6 +453,7 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("hue", gamma_hue, 0, -100, 100),
     OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
     OPT_FLAG("keepaspect", vo.keepaspect, 0),
+    OPT_FLAG("keepaspect-window", vo.keepaspect_window, 0),
 
 //---------------------- mplayer-only options ------------------------
 
@@ -572,6 +573,7 @@ const struct MPOpts mp_default_opts = {
         .fsscreen_id = -1,
         .panscan = 0.0f,
         .keepaspect = 1,
+        .keepaspect_window = 1,
         .border = 1,
         .WinID = -1,
     },
