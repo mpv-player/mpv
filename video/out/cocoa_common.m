@@ -647,6 +647,7 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 - (void)setNeedsResize {
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->did_resize = true;
+    vo_wakeup(self.vout);
 }
 
 - (void)recalcMovableByWindowBackground:(NSPoint)p
