@@ -227,13 +227,6 @@
     [self.adapter putKey:(mpkey | state) withModifiers:[event modifierFlags]];
 }
 
-- (void)drawRect:(NSRect)rect
-{
-    [self.adapter lock];
-    [self.adapter setNeedsResize];
-    [self.adapter unlock];
-}
-
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
