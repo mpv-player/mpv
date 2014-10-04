@@ -67,6 +67,7 @@ struct vo_cocoa_state {
     NSInteger window_level;
 
     bool did_resize;
+    bool waiting_frame;
 
     IOPMAssertionID power_mgmt_assertion;
 
@@ -134,6 +135,7 @@ int vo_cocoa_init(struct vo *vo)
     struct vo_cocoa_state *s = talloc_zero(vo, struct vo_cocoa_state);
     *s = (struct vo_cocoa_state){
         .did_resize = false,
+        .waiting_frame = false,
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .log = mp_log_new(s, vo->log, "cocoa"),
         .icc_profile_path_changed = false,
@@ -415,10 +417,23 @@ void vo_cocoa_set_current_context(struct vo *vo, bool current)
     }
 }
 
+static void draw_changes_after_next_frame(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    if (!s->waiting_frame) {
+        s->waiting_frame = true;
+        NSDisableScreenUpdates();
+    }
+}
+
 void vo_cocoa_swap_buffers(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     [s->gl_ctx flushBuffer];
+    if (s->waiting_frame) {
+        s->waiting_frame = false;
+        NSEnableScreenUpdates();
+    }
 }
 
 int vo_cocoa_check_events(struct vo *vo)
@@ -456,6 +471,7 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     if (opts->fs_missioncontrol) {
         [s->window setFullScreen:opts->fullscreen];
     } else {
+        draw_changes_after_next_frame(vo);
         [s->view setFullScreen:opts->fullscreen];
     }
 
