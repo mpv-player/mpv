@@ -542,7 +542,7 @@ static int vf_open(vf_instance_t *vf)
         vf->priv->auto_in = 1;
 
     if (vf->priv->in.fmt == STEREO_AUTO &&
-        vf_lw_set_graph(vf, vf->priv->lw_opts, NULL, "null") >= 0)
+        vf_lw_set_graph(vf, vf->priv->lw_opts, "stereo3d", "null") >= 0)
     {
         vf_lw_set_reconfig_cb(vf, lavfi_reconfig);
         return 1;
