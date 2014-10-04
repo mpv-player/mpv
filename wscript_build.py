@@ -507,11 +507,17 @@ def build(ctx):
         ctx.install_as(ctx.env.LIBDIR + '/pkgconfig/mpv.pc', 'libmpv/mpv.pc')
 
     if ctx.dependency_satisfied('client-api-examples'):
+        import os
         # This assumes all examples are single-file (as examples should be)
-        for f in ["simple"]:
+        examples_sources = [
+            ( "DOCS/client_api_examples/simple.c" ),
+            ( "DOCS/client_api_examples/cocoabasic.m", "cocoa" ),
+        ]
+
+        for source in ctx.filtered_sources(examples_sources):
             ctx(
-                target       = f,
-                source       = "DOCS/client_api_examples/" + f + ".c",
+                target       = os.path.splitext(source)[0],
+                source       = source,
                 includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()],
                 use          = "mpv",
                 features     = "c cprogram",
