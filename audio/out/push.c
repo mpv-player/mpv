@@ -165,8 +165,10 @@ static void drain(struct ao *ao)
         pthread_cond_wait(&p->wakeup_drain, &p->lock);
     pthread_mutex_unlock(&p->lock);
 
-    if (!ao->driver->drain)
-        mp_sleep_us(get_delay(ao) * 1000000);
+    if (!ao->driver->drain) {
+        double time = get_delay(ao);
+        mp_sleep_us(MPMIN(time, ao->buffer / (double)ao->samplerate + 1) * 1e6);
+    }
     reset(ao);
 }
 
