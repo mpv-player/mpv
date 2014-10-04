@@ -44,14 +44,12 @@ struct ao_push_state {
     pthread_t thread;
     pthread_mutex_t lock;
     pthread_cond_t wakeup;
-    pthread_cond_t wakeup_drain;
 
     // --- protected by lock
 
     struct mp_audio_buffer *buffer;
 
     bool terminate;
-    bool drain;
     bool wait_on_ao;
     bool still_playing;
     bool need_wakeup;
@@ -153,22 +151,27 @@ static void drain(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
 
-    pthread_mutex_lock(&p->lock);
-    if (p->paused) {
-        pthread_mutex_unlock(&p->lock);
-        return;
-    }
-    p->final_chunk = true;
-    p->drain = true;
-    wakeup_playthread(ao);
-    while (p->drain)
-        pthread_cond_wait(&p->wakeup_drain, &p->lock);
-    pthread_mutex_unlock(&p->lock);
+    MP_VERBOSE(ao, "draining...\n");
 
-    if (!ao->driver->drain) {
+    pthread_mutex_lock(&p->lock);
+    if (p->paused)
+        goto done;
+
+    p->final_chunk = true;
+    wakeup_playthread(ao);
+    while (p->still_playing)
+        pthread_cond_wait(&p->wakeup, &p->lock);
+
+    if (ao->driver->drain) {
+        ao->driver->drain(ao);
+    } else {
         double time = get_delay(ao);
         mp_sleep_us(MPMIN(time, ao->buffer / (double)ao->samplerate + 1) * 1e6);
     }
+
+done:
+    pthread_mutex_unlock(&p->lock);
+
     reset(ao);
 }
 
@@ -314,13 +317,6 @@ static void *playthread(void *arg)
         if (!p->paused)
             ao_play_data(ao);
 
-        if (p->drain && (!p->wait_on_ao || p->paused)) {
-            if (ao->driver->drain)
-                ao->driver->drain(ao);
-            p->drain = false;
-            pthread_cond_signal(&p->wakeup_drain);
-        }
-
         if (!p->need_wakeup) {
             MP_STATS(ao, "start audio wait");
             if (!p->wait_on_ao || p->paused) {
@@ -342,6 +338,7 @@ static void *playthread(void *arg)
 
                 if (was_playing && !p->still_playing)
                     mp_input_wakeup(ao->input_ctx);
+                pthread_cond_signal(&p->wakeup); // for draining
 
                 if (p->still_playing && timeout > 0) {
                     mpthread_cond_timedwait_rel(&p->wakeup, &p->lock, timeout);
@@ -376,7 +373,6 @@ static void destroy_no_thread(struct ao *ao)
         close(p->wakeup_pipe[n]);
 
     pthread_cond_destroy(&p->wakeup);
-    pthread_cond_destroy(&p->wakeup_drain);
     pthread_mutex_destroy(&p->lock);
 }
 
@@ -400,7 +396,6 @@ static int init(struct ao *ao)
 
     pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
-    pthread_cond_init(&p->wakeup_drain, NULL);
     mp_make_wakeup_pipe(p->wakeup_pipe);
 
     if (ao->device_buffer <= 0) {
