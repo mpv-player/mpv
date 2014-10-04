@@ -156,8 +156,10 @@ static int init(struct dec_audio *da, const char *decoder)
     av_opt_set_double(lavc_context, "drc_scale", opts->ac3drc,
                       AV_OPT_SEARCH_CHILDREN);
 
+#if HAVE_AVFRAME_SKIP_SAMPLES
     // Let decoder add AV_FRAME_DATA_SKIP_SAMPLES.
     av_opt_set(lavc_context, "flags2", "+skip_manual", AV_OPT_SEARCH_CHILDREN);
+#endif
 
     mp_set_avopts(da->log, lavc_context, opts->avopts);
 
