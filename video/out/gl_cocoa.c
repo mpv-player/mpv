@@ -29,13 +29,6 @@ struct cgl_context {
     CGLContextObj ctx;
 };
 
-static void gl_clear(void *ctx)
-{
-    struct GL *gl = ctx;
-    gl->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    gl->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
 static int set_swap_interval(int enabled)
 {
     CGLContextObj ctx = CGLGetCurrentContext();
@@ -128,7 +121,6 @@ static bool config_window_cocoa(struct MPGLContext *ctx, int flags)
         ctx->gl->SwapInterval = set_swap_interval;
 
     vo_cocoa_config_window(ctx->vo, flags, p->ctx);
-    vo_cocoa_register_gl_clear_callback(ctx->vo, ctx->gl, gl_clear);
 
     return true;
 }

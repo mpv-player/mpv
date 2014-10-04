@@ -71,9 +71,6 @@ struct vo_cocoa_state {
     IOPMAssertionID power_mgmt_assertion;
 
     pthread_mutex_t mutex;
-    void *ctx;
-    void (*gl_clear)(void *ctx);
-
     struct mp_log *log;
 
     uint32_t old_dwidth;
@@ -177,14 +174,6 @@ void vo_cocoa_uninit(struct vo *vo)
         [s->window release];
         s->window = nil;
     });
-}
-
-void vo_cocoa_register_gl_clear_callback(struct vo *vo, void *ctx,
-                                         void (*cb)(void *ctx))
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    s->ctx = ctx;
-    s->gl_clear = cb;
 }
 
 static int get_screen_handle(struct vo *vo, int identifier, NSWindow *window,
