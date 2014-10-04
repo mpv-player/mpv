@@ -147,6 +147,7 @@
 {
     [super setFrameSize:size];
     [self signalMousePosition];
+    [self.adapter setNeedsResize];
 }
 
 - (NSPoint)convertPointToPixels:(NSPoint)point

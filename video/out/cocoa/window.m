@@ -47,13 +47,9 @@
     return self;
 }
 
-- (void)windowDidResize:(NSNotification *) notification
-{
-    [self.adapter setNeedsResize];
-}
-
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification
 {
+    // XXX: we maybe only need expose for this
     [self.adapter setNeedsResize];
 }
 
