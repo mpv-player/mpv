@@ -19,7 +19,8 @@ MPlayer.
 Player
 ~~~~~~
 
-* New location for config files, new name for the binary.
+* New name for the binary (``mpv``). New location for config files (either
+  ``~/.config/mpv/mpv.conf``, or if you want, ``~/.mpv/config``).
 * Encoding functionality (replacement for MEncoder, see the `ENCODING`_ section).
 * Support for Lua scripting (see the `LUA SCRIPTING`_ section).
 * Better pause handling (e.g. do not unpause on a command).
@@ -28,16 +29,18 @@ Player
 * Do not lose settings when playing a new file in the same player instance.
 * Slave mode compatibility broken (see below).
 * Re-enable screensaver while the player is paused.
-* A client API, that allows embedding **mpv** into applications
-  (see ``libmpv/client.h`` in the sources).
 * Allow resuming playback at a later point with ``Shift+q``, also see the
   ``quit_watch_later`` input command.
 * ``--keep-open`` option to stop the player from closing the window and
   exiting after playback ends.
+* A client API, that allows embedding **mpv** into applications
+  (see ``libmpv/client.h`` in the sources).
 
 Input
 ~~~~~
 
+* Improved default keybindings. MPlayer bindings are also available (see
+  ``etc/mplayer-input.conf`` in the source tree).
 * Improved responsiveness on user input.
 * Support for modifier keys (alt, shift, ctrl) in input.conf.
 * Allow customizing whether a key binding for seeking shows the video time, the
@@ -51,6 +54,7 @@ Audio
 * Support for OSS4 volume control.
 * Improved support for PulseAudio.
 * Make ``--softvol`` default (**mpv** is not a mixer control panel).
+* By default, do pitch correction if playback speed is increased.
 * Improved downmixing and output of surround audio:
 
   - Instead of using hardcoded pan filters to do remixing, libavresample is used
@@ -61,16 +65,16 @@ Video
 ~~~~~
 
 * Wayland support.
-* Native support for VAAPI.
+* Native support for VAAPI and VDA. Improved VDPAU video output.
 * Improved OpenGL output (see the ``opengl-hq`` video output).
-* Improved VDPAU video output.
 * Make hardware decoding work with the ``opengl`` video output.
 * Support for libavfilter (for video->video and audio->audio). This allows
   using most of FFmpeg's filters, which improve greatly on the old MPlayer
   filters in features, performance, and correctness.
 * More correct color reproduction (color matrix generation).
-* Better subtitles rendering using libass by default.
-* Improvements when playing multiple files (``--fixed-vo``).
+* Better subtitle rendering using libass by default.
+* Improvements when playing multiple files (``--fixed-vo`` is default, do not
+  reset settings by default when playing a new file).
 * Replace image video outputs (``--vo=jpeg`` etc.) with ``--vo=image``.
 * Removal of ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding
   can handle these use cases. For yuv4mpeg, for example, use::
@@ -78,15 +82,15 @@ Video
     mpv input.mkv -o output.y4m --no-audio --oautofps --oneverdrop
 
 * Image subtitles (DVDs etc.) are rendered in color and use more correct
-  positioning (color can be disabled with ``--sub-gray``).
+  positioning (color for image subs can be disabled with ``--sub-gray``).
 
 OSD and terminal
 ~~~~~~~~~~~~~~~~
 
-* Cleaned up terminal output (nicer status line, less useless noise).
+* Cleaned up terminal output: nicer status line, less useless noise.
 * Improved OSD rendering using libass, with full Unicode support.
-* New OSD bar with chapter marks and not positioned in the middle of the video
-  (though this can be customized with the ``--osd-bar-align-y`` option).
+* New OSD bar with chapter marks. Not positioned in the middle of the video
+  (this can be customized with the ``--osd-bar-align-y`` option).
 * Display list of chapters and audio/subtitle tracks on OSD (see the
   `Properties`_ section).
 
@@ -99,7 +103,7 @@ Screenshots
 * Support for configurable file names.
 * Support for taking screenshots with or without subtitles.
 
-Note that the ``screenshot`` video filter is not needed anymore, and should not 
+Note that the ``screenshot`` video filter is not needed anymore, and should not
 be put into the mpv config file.
 
 Miscellaneous
@@ -131,6 +135,7 @@ Windows
 
 * Improved support for Unicode file names.
 * Improved window handling.
+* Do not block playback when moving the window.
 * Improved Direct3D video output.
 * Added WASAPI audio output.
 
@@ -154,7 +159,8 @@ Internal changes
 * General code cleanups (including refactoring or rewrites of many parts).
 * New build system.
 * Many bug fixes and removal of long-standing issues.
-* Generally preferring FFmpeg/Libav over internal demuxers and decoders.
+* Generally preferring FFmpeg/Libav over internal demuxers, decoders, and
+  filters.
 
 Detailed Listing of User-visible Changes
 ----------------------------------------
