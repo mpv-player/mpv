@@ -157,7 +157,6 @@ void mpgl_set_backend_cocoa(MPGLContext *ctx)
     ctx->releaseGlContext = releaseGlContext_cocoa;
     ctx->swapGlBuffers = swapGlBuffers_cocoa;
     ctx->vo_init = vo_cocoa_init;
-    ctx->register_resize_callback = vo_cocoa_register_resize_callback;
     ctx->vo_uninit = vo_cocoa_uninit;
     ctx->vo_control = vo_cocoa_control;
     ctx->set_current = set_current_cocoa;

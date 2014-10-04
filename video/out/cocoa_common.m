@@ -27,6 +27,7 @@
 #include "video/out/cocoa/view.h"
 #import "video/out/cocoa/mpvadapter.h"
 
+#include "osdep/threads.h"
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_events_objc.h"
 
@@ -47,6 +48,8 @@
 #include "common/msg.h"
 
 #define CF_RELEASE(a) if ((a) != NULL) CFRelease(a)
+#define cocoa_lock(s)    pthread_mutex_lock(&s->mutex)
+#define cocoa_unlock(s)  pthread_mutex_unlock(&s->mutex)
 
 static void vo_cocoa_fullscreen(struct vo *vo);
 static void vo_cocoa_ontop(struct vo *vo);
@@ -64,16 +67,12 @@ struct vo_cocoa_state {
     NSInteger window_level;
 
     bool did_resize;
-    bool skip_next_swap_buffer;
-    bool inside_sync_section;
 
     IOPMAssertionID power_mgmt_assertion;
 
-    NSLock *lock;
-    bool enable_resize_redraw;
+    pthread_mutex_t mutex;
     void *ctx;
     void (*gl_clear)(void *ctx);
-    void (*resize_redraw)(struct vo *vo, int w, int h);
 
     struct mp_log *log;
 
@@ -86,18 +85,19 @@ struct vo_cocoa_state {
     id   fs_icc_changed_ns_observer;
 };
 
-static void dispatch_on_main_thread(struct vo *vo, void(^block)(void))
+static void with_cocoa_lock(struct vo *vo, void(^block)(void))
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    if (!s->inside_sync_section) {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            s->inside_sync_section = true;
-            block();
-            s->inside_sync_section = false;
-        });
-    } else {
-        block();
-    }
+    cocoa_lock(s);
+    block();
+    cocoa_unlock(s);
+}
+
+static void with_cocoa_lock_on_main_thread(struct vo *vo, void(^block)(void))
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        with_cocoa_lock(vo, block);
+    });
 }
 
 void *vo_cocoa_glgetaddr(const char *s)
@@ -137,14 +137,11 @@ int vo_cocoa_init(struct vo *vo)
     struct vo_cocoa_state *s = talloc_zero(vo, struct vo_cocoa_state);
     *s = (struct vo_cocoa_state){
         .did_resize = false,
-        .skip_next_swap_buffer = false,
-        .inside_sync_section = false,
         .power_mgmt_assertion = kIOPMNullAssertionID,
-        .lock = [[NSLock alloc] init],
-        .enable_resize_redraw = NO,
         .log = mp_log_new(s, vo->log, "cocoa"),
         .icc_profile_path_changed = false,
     };
+    mpthread_mutex_init_recursive(&s->mutex);
     vo->cocoa = s;
     return 1;
 }
@@ -164,7 +161,7 @@ static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
 
 void vo_cocoa_uninit(struct vo *vo)
 {
-    dispatch_sync(dispatch_get_main_queue(), ^{
+    with_cocoa_lock(vo, ^{
         struct vo_cocoa_state *s = vo->cocoa;
         enable_power_management(vo);
         cocoa_rm_fs_screen_profile_observer(vo);
@@ -179,17 +176,7 @@ void vo_cocoa_uninit(struct vo *vo)
 
         [s->window release];
         s->window = nil;
-
-        [s->lock release];
-        s->lock = nil;
     });
-}
-
-void vo_cocoa_register_resize_callback(struct vo *vo,
-                                       void (*cb)(struct vo *vo, int w, int h))
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    s->resize_redraw = cb;
 }
 
 void vo_cocoa_register_gl_clear_callback(struct vo *vo, void *ctx,
@@ -343,31 +330,6 @@ static void cocoa_set_window_title(struct vo *vo, const char *title)
     talloc_free(talloc_ctx);
 }
 
-static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-
-    if (!s->resize_redraw)
-        return;
-
-    if (!s->gl_ctx)
-        return;
-
-    vo_cocoa_set_current_context(vo, true);
-
-    [s->gl_ctx update];
-
-    if (s->enable_resize_redraw) {
-        s->resize_redraw(vo, width, height);
-        s->skip_next_swap_buffer = true;
-    } else {
-        s->gl_clear(s->ctx);
-    }
-
-    [s->gl_ctx flushBuffer];
-    vo_cocoa_set_current_context(vo, false);
-}
-
 static void cocoa_rm_fs_screen_profile_observer(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -416,9 +378,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
     struct vo_cocoa_state *s = vo->cocoa;
     __block int ctxok = 0;
 
-    dispatch_on_main_thread(vo, ^{
-        s->enable_resize_redraw = false;
-
+    with_cocoa_lock(vo, ^{
         struct mp_rect screenrc;
         vo_cocoa_update_screen_info(vo, &screenrc);
 
@@ -443,8 +403,6 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
             vo_cocoa_fullscreen(vo);
             cocoa_add_fs_screen_profile_observer(vo);
         }
-
-        s->enable_resize_redraw = true;
     });
 
     if (ctxok < 0)
@@ -460,31 +418,18 @@ void vo_cocoa_set_current_context(struct vo *vo, bool current)
     struct vo_cocoa_state *s = vo->cocoa;
 
     if (current) {
-        if (!s->inside_sync_section)
-            [s->lock lock];
-
-        if (s->gl_ctx)
-            [s->gl_ctx makeCurrentContext];
+        cocoa_lock(s);
+        if (s->gl_ctx) [s->gl_ctx makeCurrentContext];
     } else {
         [NSOpenGLContext clearCurrentContext];
-
-        if (!s->inside_sync_section)
-            [s->lock unlock];
+        cocoa_unlock(s);
     }
 }
 
 void vo_cocoa_swap_buffers(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    if (s->skip_next_swap_buffer) {
-        // When in live resize the GL view asynchronously updates itself from
-        // it's drawRect: implementation and calls flushBuffer. This means the
-        // backbuffer is probably in an inconsistent state, so we skip one
-        // flushBuffer call here on the playloop thread.
-        s->skip_next_swap_buffer = false;
-    } else {
-        [s->gl_ctx flushBuffer];
-    }
+    [s->gl_ctx flushBuffer];
 }
 
 int vo_cocoa_check_events(struct vo *vo)
@@ -507,10 +452,8 @@ int vo_cocoa_check_events(struct vo *vo)
 
 static void vo_cocoa_fullscreen_sync(struct vo *vo)
 {
-    dispatch_on_main_thread(vo, ^{
-        vo->cocoa->enable_resize_redraw = false;
+    with_cocoa_lock_on_main_thread(vo, ^{
         vo_cocoa_fullscreen(vo);
-        vo->cocoa->enable_resize_redraw = true;
     });
 }
 
@@ -651,14 +594,13 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         vo_cocoa_fullscreen_sync(vo);
-        *events |= VO_EVENT_RESIZE;
         return VO_TRUE;
     case VOCTRL_ONTOP:
         vo_cocoa_ontop(vo);
         return VO_TRUE;
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        dispatch_on_main_thread(vo, ^{
+        with_cocoa_lock(vo, ^{
             NSSize size = [vo->cocoa->view frame].size;
             s[0] = size.width;
             s[1] = size.height;
@@ -666,7 +608,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
-        dispatch_on_main_thread(vo, ^{
+        with_cocoa_lock(vo, ^{
             int *s = arg;
             [vo->cocoa->window queueNewVideoSize:NSMakeSize(s[0], s[1])];
         });
@@ -705,6 +647,14 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 @implementation MpvCocoaAdapter
 @synthesize vout = _video_output;
 
+- (void)lock {
+    vo_cocoa_set_current_context(self.vout, true);
+}
+
+- (void)unlock {
+    vo_cocoa_set_current_context(self.vout, false);
+}
+
 - (void)setNeedsResize {
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->did_resize = true;
@@ -741,10 +691,6 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
     mp_cmd_t *cmdt = mp_input_parse_cmd(self.vout->input_ctx, bstr0(cmd_), "");
     mp_input_queue_cmd(self.vout->input_ctx, cmdt);
     ta_free(cmd_);
-}
-
-- (void)performAsyncResize:(NSSize)size {
-    vo_cocoa_resize_redraw(self.vout, size.width, size.height);
 }
 
 - (BOOL)isInFullScreenMode {

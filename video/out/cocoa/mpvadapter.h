@@ -19,12 +19,13 @@
 #include "video/out/vo.h"
 
 @interface MpvCocoaAdapter : NSObject
+- (void)lock;
+- (void)unlock;
 - (void)setNeedsResize;
 - (void)signalMouseMovement:(NSPoint)point;
 - (void)putKey:(int)mpkey withModifiers:(int)modifiers;
 - (void)putAxis:(int)mpkey delta:(float)delta;
 - (void)putCommand:(char*)cmd;
-- (void)performAsyncResize:(NSSize)size;
 - (void)handleFilesArray:(NSArray *)files;
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen;
 

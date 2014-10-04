@@ -229,8 +229,9 @@
 
 - (void)drawRect:(NSRect)rect
 {
-    [self.adapter performAsyncResize:[self frameInPixels].size];
+    [self.adapter lock];
     [self.adapter setNeedsResize];
+    [self.adapter unlock];
 }
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
