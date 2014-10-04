@@ -510,14 +510,14 @@ def build(ctx):
         import os
         # This assumes all examples are single-file (as examples should be)
         examples_sources = [
-            ( "DOCS/client_api_examples/simple.c" ),
-            ( "DOCS/client_api_examples/cocoabasic.m", "cocoa" ),
+            ( "simple.c" ),
+            ( "cocoabasic.m", "cocoa" ),
         ]
 
         for source in ctx.filtered_sources(examples_sources):
             ctx(
                 target       = os.path.splitext(source)[0],
-                source       = source,
+                source       = "DOCS/client_api_examples/" + source,
                 includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()],
                 use          = "mpv",
                 features     = "c cprogram",
