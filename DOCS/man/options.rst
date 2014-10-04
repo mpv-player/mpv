@@ -1708,16 +1708,26 @@ Window
 ``--x11-name``
     Set the window class name for X11-based video output methods.
 
-``--x11-netwm=no``
+``--x11-netwm=<yes|no|auto>``
     (X11 only)
-    Disable use of the NetWM protocol when switching to or from fullscreen.
+    Control the use of NetWM protocol features.
+
     This may or may not help with broken window managers. This provides some
     functionality that was implemented by the now removed ``--fstype`` option.
     Actually, it is not known to the developers to which degree this option
     was needed, so feedback is welcome.
 
-    By default, NetWM support is autodetected, and using this option forces
-    autodetection to fail.
+    Specifically, ``yes`` will force use of NetWM fullscreen support, even if
+    not advertised by the WM. This can be useful for WMs that are broken on
+    purpose, like XMonad. (XMonad supposedly doesn't advertise fullscreen
+    support, because Flash uses it. Apparently, applications which want to
+    use fullscreen anyway are supposed to either ignore the NetWM support hints,
+    or provide a workaround. Shame on XMonad for deliberately breaking X
+    protocols (as if X isn't bad enough already).
+
+    By default, NetWM support is autodetected (``auto``).
+
+    This option might be removed in the future.
 
 
 Disc Devices

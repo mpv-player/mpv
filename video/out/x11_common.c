@@ -308,7 +308,7 @@ static int vo_wm_detect(struct vo *vo)
                             &nitems);
     if (args) {
         MP_VERBOSE(x11, "Detected wm supports NetWM.\n");
-        if (vo->opts->x11_netwm) {
+        if (vo->opts->x11_netwm >= 0) {
             for (i = 0; i < nitems; i++)
                 wm |= net_wm_support_state_test(vo->x11, args[i]);
         } else {
@@ -319,6 +319,10 @@ static int vo_wm_detect(struct vo *vo)
 
     if (wm == 0)
         MP_VERBOSE(x11, "Unknown wm type...\n");
+    if (vo->opts->x11_netwm > 0 && !(wm & vo_wm_FULLSCREEN)) {
+        MP_WARN(x11, "Forcing NetWM FULLSCREEN support.\n");
+        wm |= vo_wm_FULLSCREEN;
+    }
     return wm;
 }
 
