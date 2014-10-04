@@ -16,28 +16,6 @@ General Changes from MPlayer to mpv
 This listing is about changes introduced by mplayer2 and mpv relatively to
 MPlayer.
 
-Internal changes
-~~~~~~~~~~~~~~~~
-
-* Switch to GPLv2+ (see ``Copyright`` file for details).
-* Removal of lots of cruft:
-
-  - Internal GUI (replaced by the OSC, see the `ON SCREEN CONTROLLER`_ section).
-  - MEncoder (replaced by native encoding, see the `ENCODING`_ section).
-  - OSD menu.
-  - Kernel video drivers for Linux 2.4 (including VIDIX).
-  - Teletext support.
-  - Support for dead platforms.
-  - Most built-in demuxers have been replaced by their libavformat counterparts.
-  - Built-in network support has been replaced by libavformat's (which also
-    supports https URLs).
-  - Embedded copies of libraries (such as FFmpeg).
-
-* General code cleanups (including refactoring or rewrites of many parts).
-* New build system.
-* Many bug fixes and removal of long-standing issues.
-* Generally preferring FFmpeg/Libav over internal demuxers and decoders.
-
 Player
 ~~~~~~
 
@@ -155,6 +133,28 @@ Windows
 * Improved window handling.
 * Improved Direct3D video output.
 * Added WASAPI audio output.
+
+Internal changes
+~~~~~~~~~~~~~~~~
+
+* Switch to GPLv2+ (see ``Copyright`` file for details).
+* Removal of lots of cruft:
+
+  - Internal GUI (replaced by the OSC, see the `ON SCREEN CONTROLLER`_ section).
+  - MEncoder (replaced by native encoding, see the `ENCODING`_ section).
+  - OSD menu.
+  - Kernel video drivers for Linux 2.4 (including VIDIX).
+  - Teletext support.
+  - Support for dead platforms.
+  - Most built-in demuxers have been replaced by their libavformat counterparts.
+  - Built-in network support has been replaced by libavformat's (which also
+    supports https URLs).
+  - Embedded copies of libraries (such as FFmpeg).
+
+* General code cleanups (including refactoring or rewrites of many parts).
+* New build system.
+* Many bug fixes and removal of long-standing issues.
+* Generally preferring FFmpeg/Libav over internal demuxers and decoders.
 
 Detailed Listing of User-visible Changes
 ----------------------------------------
