@@ -366,9 +366,7 @@ void vo_cocoa_release_nsgl_ctx(struct vo *vo)
 int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    __block int ctxok = 0;
-
-    with_cocoa_lock(vo, ^{
+    with_cocoa_lock_on_main_thread(vo, ^{
         struct mp_rect screenrc;
         vo_cocoa_update_screen_info(vo, &screenrc);
 
@@ -394,12 +392,6 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
             cocoa_add_fs_screen_profile_observer(vo);
         }
     });
-
-    if (ctxok < 0)
-        return ctxok;
-
-    [vo->cocoa->gl_ctx makeCurrentContext];
-
     return 0;
 }
 
