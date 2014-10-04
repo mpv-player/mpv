@@ -10,104 +10,151 @@ should generally be treated as a completely different program.
 .. note::
     These lists are incomplete.
 
-General Changes for MPlayer to mpv
-----------------------------------
+General Changes from MPlayer to mpv
+-----------------------------------
 
-* Switch to GPLv2+. (Technically speaking, MPlayer as a whole seems to be
-  GPLv2-only, while mplayer2 is GPLv3+ - see ``Copyright`` file for details.)
-* Removal of the internal GUI, MEncoder, OSD menu, video kernel drivers for
-  Linux 2.4 (including VIDIX)
-* Large internal cleanups
-* Removal of support for dead platforms
-* New build system
-* No embedded copy of FFmpeg and other libraries
-* Better pause handling (do not unpause on a command)
-* Better MKV support (such as ordered chapters)
-* vo_vdpau improvements
-* Precise seeking support
-* Native OpenGL backend for OS X
-* General OS X improvements
-* Improvements in audio/video sync handling
-* Cleaned up terminal output
-* Gapless audio support (``--gapless-audio``)
-* Improved responsiveness on user input
-* Support for modifier keys (alt, shift, ctrl) in input.conf
-* OSS4 volume control
-* More correct color reproduction (color matrix generation)
-* Use libass for subtitle rendering by default (better quality)
-* Generally preferring FFmpeg/Libav over internal demuxers and decoders
-* Improvements when playing multiple files (``--fixed-vo``)
-* Screenshot improvements (instant screenshots without 1-frame delay, allow
-  taking screenshots even with hardware decoding)
-* Improved support for PulseAudio
-* Generally improved MS Windows support (dealing with Unicode file names,
-  improved ``--vo=direct3d``, improved window handling)
-* Better OSD rendering (using libass). This has full Unicode support, and
-  languages like Arabic should be better supported.
-* Cleaned up terminal output (nicer status line, less useless noise)
-* Support for playing URLs of popular streaming sites directly
-  (e.g. ``mpv https://www.youtube.com/watch?v=...``)
-* Improved OpenGL output (``--vo=opengl-hq``)
-* Make ``--softvol`` default (**mpv** is not a mixer control panel)
-* Improved support for .cue files
-* Screenshot improvements (can save screenshots as JPEG or PNG, configurable
-  file names, support for taking screenshots with or without subtitles - the
-  ``screenshot`` video filter is not needed anymore, and should not be put
-  into the mpv config file)
-* Removal of teletext support
-* Removal of most built-in demuxers, using libavformat instead
-* Removal of built-in network support, using libavformat instead (also,
-  support https via libavformat)
-* Replace image VOs (``--vo=jpeg`` etc.) with ``--vo=image``
-* Do not lose settings when playing a new file in the same player instance
+This listing is about changes introduced by mplayer2 and mpv relatively to
+MPlayer.
+
+Internal changes
+~~~~~~~~~~~~~~~~
+
+* Switch to GPLv2+ (see ``Copyright`` file for details).
+* Removal of lots of cruft:
+
+  - Internal GUI (replaced by the OSC, see the `ON SCREEN CONTROLLER`_ section).
+  - MEncoder (replaced by native encoding, see the `ENCODING`_ section).
+  - OSD menu.
+  - Kernel video drivers for Linux 2.4 (including VIDIX).
+  - Teletext support.
+  - Support for dead platforms.
+  - Most built-in demuxers have been replaced by their libavformat counterparts.
+  - Built-in network support has been replaced by libavformat's (which also
+    supports https URLs).
+  - Embedded copies of libraries (such as FFmpeg).
+
+* General code cleanups (including refactoring or rewrites of many parts).
+* New build system.
+* Many bug fixes and removal of long-standing issues.
+* Generally preferring FFmpeg/Libav over internal demuxers and decoders.
+
+Player
+~~~~~~
+
 * New location for config files, new name for the binary.
-* Slave mode compatibility broken (see below)
-* Encoding functionality (replacement for MEncoder, see ``DOCS/encoding.rst``)
-* Remove ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding can
-  handle these use cases. For yuv4mpeg, for example, use:
-  ``mpv input.mkv -o output.y4m --no-audio --oautofps --oneverdrop``.
-* Image subtitles (DVDs etc.) are rendered in color and use more correct
-  positioning (color can be disabled with ``--sub-gray``)
-* Wayland support
-* Support for precise scrolling which scales the parameter of commands. If the
-  input doesn't support precise scrolling the scale factor stays 1.
-* OS X: Cocoa event loop is independent from MPlayer's event loop, so user
-  actions like accessing menus and live resizing do not block the playback.
-* OS X: Apple Remote support.
-* OS X: Media Keys support.
-* Windows: Added WASAPI audio output.
-* New OSD bar with chapter marks and not positioned in the middle of the video
-  (though this can be customized with the ``--osd-bar-align-y`` option).
-* Allow customizing whether a key binding for seeking shows the video time, the
-  OSD bar, or nothing (see section `Input Command Prefixes`_).
-* Display list of chapters and audio/subtitle tracks on OSD (see section
-  `Properties`_).
+* Encoding functionality (replacement for MEncoder, see the `ENCODING`_ section).
+* Support for Lua scripting (see the `LUA SCRIPTING`_ section).
+* Better pause handling (e.g. do not unpause on a command).
+* Precise seeking support.
+* Improvements in audio/video sync handling.
+* Do not lose settings when playing a new file in the same player instance.
+* Slave mode compatibility broken (see below).
+* Re-enable screensaver while the player is paused.
+* A client API, that allows embedding **mpv** into applications
+  (see ``libmpv/client.h`` in the sources).
+* Allow resuming playback at a later point with ``Shift+q``, also see the
+  ``quit_watch_later`` input command.
 * ``--keep-open`` option to stop the player from closing the window and
   exiting after playback ends.
-* Re-enable screensaver while the player is paused.
-* Matroska edition switching at runtime.
+
+Input
+~~~~~
+
+* Improved responsiveness on user input.
+* Support for modifier keys (alt, shift, ctrl) in input.conf.
+* Allow customizing whether a key binding for seeking shows the video time, the
+  OSD bar, or nothing (see the `Input Command Prefixes`_ section).
+* Support mapping multiple commands to one key.
+
+Audio
+~~~~~
+
+* Support for gapless audio (see the ``--gapless-audio`` option).
+* Support for OSS4 volume control.
+* Improved support for PulseAudio.
+* Make ``--softvol`` default (**mpv** is not a mixer control panel).
+* Improved downmixing and output of surround audio:
+
+  - Instead of using hardcoded pan filters to do remixing, libavresample is used
+  - Channel maps are used to identify the channel layout, so e.g. ``3.0`` and
+    ``2.1`` audio can be distinguished.
+
+Video
+~~~~~
+
+* Wayland support.
+* Native support for VAAPI.
+* Improved OpenGL output (see the ``opengl-hq`` video output).
+* Improved VDPAU video output.
+* Make hardware decoding work with the ``opengl`` video output.
 * Support for libavfilter (for video->video and audio->audio). This allows
   using most of FFmpeg's filters, which improve greatly on the old MPlayer
   filters in features, performance, and correctness.
-* Improved downmixing and output of surround audio. Instead of using hardcoded
-  pan filters to do remixing, use libavresample. Channel maps are used to
-  identify the channel layout, so e.g. ``3.0`` and ``2.1`` audio can be
-  distinguished.
-* Allow resuming playback at a later point with ``Shift+q``, also see
-  ``quit_watch_later`` input command.
-* Support mapping multiple commands to one key.
+* More correct color reproduction (color matrix generation).
+* Better subtitles rendering using libass by default.
+* Improvements when playing multiple files (``--fixed-vo``).
+* Replace image video outputs (``--vo=jpeg`` etc.) with ``--vo=image``.
+* Removal of ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding
+  can handle these use cases. For yuv4mpeg, for example, use::
+
+    mpv input.mkv -o output.y4m --no-audio --oautofps --oneverdrop
+
+* Image subtitles (DVDs etc.) are rendered in color and use more correct
+  positioning (color can be disabled with ``--sub-gray``).
+
+OSD and terminal
+~~~~~~~~~~~~~~~~
+
+* Cleaned up terminal output (nicer status line, less useless noise).
+* Improved OSD rendering using libass, with full Unicode support.
+* New OSD bar with chapter marks and not positioned in the middle of the video
+  (though this can be customized with the ``--osd-bar-align-y`` option).
+* Display list of chapters and audio/subtitle tracks on OSD (see the
+  `Properties`_ section).
+
+Screenshots
+~~~~~~~~~~~
+
+* Instant screenshots without 1-frame delay.
+* Support for taking screenshots even with hardware decoding.
+* Support for saving screenshots as JPEG or PNG.
+* Support for configurable file names.
+* Support for taking screenshots with or without subtitles.
+
+Note that the ``screenshot`` video filter is not needed anymore, and should not 
+be put into the mpv config file.
+
+Miscellaneous
+~~~~~~~~~~~~~
+
+* Better MKV support (e.g. ordered chapters, 3D metadata).
+* Matroska edition switching at runtime.
+* Support for playing URLs of popular streaming sites directly.
+  (e.g. ``mpv https://www.youtube.com/watch?v=...``).
+* Support for precise scrolling which scales the parameter of commands. If the
+  input doesn't support precise scrolling the scale factor stays 1.
 * Allow changing/adjusting video filters at runtime. (This is also used to make
-  the ``D`` key insert vf_yadif if deinterlacing is not supported otherwise.)
-* Native VAAPI support
-* OS X: VDA support using libavcodec hwaccel API instead of FFmpeg's decoder. Up
+  the ``D`` key insert vf_yadif if deinterlacing is not supported otherwise).
+* Improved support for .cue files.
+
+Mac OS X
+~~~~~~~~
+
+* Native OpenGL backend.
+* Cocoa event loop is independent from MPlayer's event loop, so user
+  actions like accessing menus and live resizing do not block the playback.
+* Apple Remote support.
+* Media Keys support.
+* VDA support using libavcodec hwaccel API instead of FFmpeg's decoder with up
   to 2-2.5x reduction in CPU usage.
-* Make hardware decoding in general work with the ``opengl`` video output.
-* Lua scripting (see `LUA SCRIPTING`_)
-* A client API, that allows embedding **mpv** into applications
-  (see ``libmpv/client.h`` in the sources)
-* General bug fixes and removal of long-standing issues
-* General code cleanups (including refactoring or rewrites of many parts)
-* Many more changes
+
+Windows
+~~~~~~~
+
+* Improved support for Unicode file names.
+* Improved window handling.
+* Improved Direct3D video output.
+* Added WASAPI audio output.
 
 Detailed Listing of User-visible Changes
 ----------------------------------------
