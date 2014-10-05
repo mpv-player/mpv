@@ -410,11 +410,13 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
             create_ui(vo, &geo.win, geo.flags);
         }
 
-        if (s->window) {
+        if (!s->embedded && s->window) {
             if (reset_size)
                 queue_new_video_size(vo, width, height);
             vo_cocoa_fullscreen(vo);
             cocoa_add_fs_screen_profile_observer(vo);
+            cocoa_set_window_title(vo, vo_get_window_title(vo));
+            vo_set_level(vo, vo->opts->ontop);
         }
 
         // trigger a resize -> don't set vo->dwidth and vo->dheight directly
