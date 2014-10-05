@@ -137,7 +137,7 @@
 
 - (BOOL)canHideCursor
 {
-    return self.hasMouseDown && [self containsMouseLocation];
+    return !self.hasMouseDown && [self containsMouseLocation];
 }
 
 - (void)mouseEntered:(NSEvent *)event
