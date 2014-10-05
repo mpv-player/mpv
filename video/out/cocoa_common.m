@@ -300,7 +300,7 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
         NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
 
     if (opts->WinID >= 0) {
-        s->window = (NSWindow *) opts->WinID;
+        s->window = (NSWindow *) (intptr_t) opts->WinID;
     } else {
         s->window = create_window(contentRect, s->current_screen,
                                   opts->border, adapter);
