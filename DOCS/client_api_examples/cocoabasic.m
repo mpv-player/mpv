@@ -8,16 +8,47 @@
 
 #import <Cocoa/Cocoa.h>
 
+#define EMBED_VIEW 1
+
+#if EMBED_VIEW
+@interface CocoaWindow : NSWindow
+@end
+
+@implementation CocoaWindow
+- (BOOL)canBecomeMainWindow { return YES; }
+- (BOOL)canBecomeKeyWindow { return YES; }
+@end
+
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 {
     mpv_handle *mpv;
     dispatch_queue_t queue;
+    NSWindow *w;
 }
 @end
+#endif
 
 static void wakeup(void *);
 
+#if EMBED_VIEW
 @implementation AppDelegate
+
+- (void)createWindow {
+
+    int mask = NSTitledWindowMask|NSClosableWindowMask|
+               NSMiniaturizableWindowMask|NSResizableWindowMask;
+
+    self->w = [[CocoaWindow alloc]
+        initWithContentRect:NSMakeRect(0,0, 1280, 720)
+                  styleMask:mask
+                    backing:NSBackingStoreBuffered
+                      defer:NO];
+
+    [self->w setTitle:@"cocoabasic example"];
+    [self->w makeKeyAndOrderFront:nil];
+    [NSApp activateIgnoringOtherApps:YES];
+}
+#endif
 
 - (void) applicationDidFinishLaunching:(NSNotification *)notification {
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -36,6 +67,10 @@ static void wakeup(void *);
     }
     NSString *filename = args[1];
 
+#if EMBED_VIEW
+    [self createWindow];
+#endif
+
     // Deal with MPV in the background.
     queue = dispatch_queue_create("mpv", DISPATCH_QUEUE_SERIAL);
     dispatch_async(queue, ^{
@@ -45,6 +80,11 @@ static void wakeup(void *);
             printf("failed creating context\n");
             exit(1);
         }
+
+#if EMBED_VIEW
+        uintptr_t wid = (uintptr_t)self->w;
+        check_error(mpv_set_option(mpv, "wid", MPV_FORMAT_INT64, &wid));
+#endif
 
         // Maybe set some options here, like default key bindings.
         // NOTE: Interaction with the window seems to be broken for now.
@@ -99,6 +139,8 @@ static void wakeup(void *context) {
 - (BOOL) windowShouldClose:(id)sender
 {
     [self shutdown];
+    if (self->w)
+        [self->w release];
     return YES;
 }
 
@@ -110,8 +152,6 @@ static void wakeup(void *context) {
     }
 }
 @end
-
-
 
 // Delete this if you already have a main.m.
 int main(int argc, const char * argv[]) {

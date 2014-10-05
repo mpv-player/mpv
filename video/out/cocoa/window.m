@@ -27,6 +27,11 @@
 
 #include "window.h"
 
+@interface MpvVideoWindow()
+- (NSRect)frameRect:(NSRect)frameRect forCenteredContentSize:(NSSize)newSize;
+- (void)setCenteredContentSize:(NSSize)newSize;
+@end
+
 @implementation MpvVideoWindow {
     NSSize _queued_video_size;
 }

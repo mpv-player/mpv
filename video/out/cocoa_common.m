@@ -57,7 +57,7 @@ static void cocoa_change_profile(struct vo *vo, char **store, NSScreen *screen);
 static void cocoa_rm_fs_screen_profile_observer(struct vo *vo);
 
 struct vo_cocoa_state {
-    MpvVideoWindow *window;
+    NSWindow *window;
     MpvVideoView *view;
     NSOpenGLContext *gl_ctx;
 
@@ -96,6 +96,15 @@ static void with_cocoa_lock_on_main_thread(struct vo *vo, void(^block)(void))
     dispatch_async(dispatch_get_main_queue(), ^{
         with_cocoa_lock(vo, block);
     });
+}
+
+static void queue_new_video_size(struct vo *vo, int w, int h)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    if ([s->window conformsToProtocol: @protocol(MpvSizing)]) {
+        id<MpvSizing> win = (id<MpvSizing>) s->window;
+        [win queueNewVideoSize:NSMakeSize(w, h)];
+    }
 }
 
 void *vo_cocoa_glgetaddr(const char *s)
@@ -233,6 +242,12 @@ static void resize_window(struct vo *vo)
 static void vo_set_level(struct vo *vo, int ontop)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+    struct mp_vo_opts *opts = vo->opts;
+
+    // completely ignore window level commands when the window is embedded
+    if (opts->WinID >= 0)
+        return;
+
     if (ontop) {
         // +1 is not enough as that will show the icon layer on top of the
         // menubar when the application is not frontmost. so use +2
@@ -252,28 +267,44 @@ static void vo_cocoa_ontop(struct vo *vo)
     vo_set_level(vo, opts->ontop);
 }
 
-static void create_window(struct vo *vo, struct mp_rect *win, int geo_flags)
+static MpvVideoWindow *create_window(NSRect rect, NSScreen *s, bool border,
+                                     MpvCocoaAdapter *adapter)
 {
-    struct vo_cocoa_state *s = vo->cocoa;
-    struct mp_vo_opts *opts  = vo->opts;
-
-    const NSRect contentRect =
-        NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
-
     int window_mask = 0;
-    if (opts->border) {
+    if (border) {
         window_mask = NSTitledWindowMask|NSClosableWindowMask|
                       NSMiniaturizableWindowMask|NSResizableWindowMask;
     } else {
         window_mask = NSBorderlessWindowMask|NSResizableWindowMask;
     }
 
-    s->window =
-        [[MpvVideoWindow alloc] initWithContentRect:contentRect
+    MpvVideoWindow *w =
+        [[MpvVideoWindow alloc] initWithContentRect:rect
                                           styleMask:window_mask
                                             backing:NSBackingStoreBuffered
                                               defer:NO
-                                             screen:s->current_screen];
+                                             screen:s];
+    w.adapter = adapter;
+    [w setDelegate: w];
+
+    return w;
+}
+
+static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    struct mp_vo_opts *opts  = vo->opts;
+
+    MpvCocoaAdapter *adapter = [[[MpvCocoaAdapter alloc] init] autorelease];
+    const NSRect contentRect =
+        NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
+
+    if (opts->WinID >= 0) {
+        s->window = (NSWindow *) opts->WinID;
+    } else {
+        s->window = create_window(contentRect, s->current_screen,
+                                  opts->border, adapter);
+    }
     s->view = [[[MpvVideoView alloc] initWithFrame:contentRect] autorelease];
 
     [s->view setWantsBestResolutionOpenGLSurface:YES];
@@ -286,20 +317,18 @@ static void create_window(struct vo *vo, struct mp_rect *win, int geo_flags)
     cocoa_register_menu_item_action(MPM_ZOOM,     @selector(performZoom:));
 #endif
 
-    [s->window setRestorable:NO];
     [s->window setContentView:s->view];
     [s->gl_ctx setView:s->view];
 
-    MpvCocoaAdapter *adapter = [[[MpvCocoaAdapter alloc] init] autorelease];
     adapter.vout = vo;
     s->view.adapter = adapter;
-    s->window.adapter = adapter;
 
-    [s->window setDelegate:s->window];
-    [s->window makeMainWindow];
-
-    [s->window makeKeyAndOrderFront:nil];
-    [NSApp activateIgnoringOtherApps:YES];
+    if (opts->WinID < 0) {
+        [s->window setRestorable:NO];
+        [s->window makeMainWindow];
+        [s->window makeKeyAndOrderFront:nil];
+        [NSApp activateIgnoringOtherApps:YES];
+    }
 
     vo_set_level(vo, opts->ontop);
 
@@ -312,6 +341,10 @@ static void create_window(struct vo *vo, struct mp_rect *win, int geo_flags)
 static void cocoa_set_window_title(struct vo *vo, const char *title)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+    struct mp_vo_opts *opts  = vo->opts;
+    if (opts->WinID >= 0)
+        return;
+
     void *talloc_ctx   = talloc_new(NULL);
     struct bstr btitle = bstr_sanitize_utf8_latin1(talloc_ctx, bstr0(title));
     NSString *nstitle  = [NSString stringWithUTF8String:btitle.start];
@@ -381,16 +414,22 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
         s->old_dwidth  = width;
         s->old_dheight = height;
 
-        if (!(flags & VOFLAG_HIDDEN) && !s->window)
-            create_window(vo, &geo.win, geo.flags);
+        if (!(flags & VOFLAG_HIDDEN) && !s->window) {
+            create_ui(vo, &geo.win, geo.flags);
+        }
 
         if (s->window) {
             if (reset_size)
-                [s->window queueNewVideoSize:NSMakeSize(width, height)];
+                queue_new_video_size(vo, width, height);
             cocoa_set_window_title(vo, vo_get_window_title(vo));
             vo_cocoa_fullscreen(vo);
             cocoa_add_fs_screen_profile_observer(vo);
         }
+
+        // trigger a resize -> don't set vo->dwidth and vo->dheight directly
+        // since this block is executed asynchrolously to the video
+        // reconfiguration code.
+        s->did_resize = true;
     });
     return 0;
 }
@@ -460,7 +499,10 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     vo_cocoa_update_screen_info(vo, NULL);
 
     if (opts->fs_missioncontrol) {
-        [s->window setFullScreen:opts->fullscreen];
+        if ([s->window conformsToProtocol:@protocol(MpvFullscreen)]) {
+            id<MpvFullscreen> win = (id<MpvFullscreen>) s->window;
+            [win setFullScreen:opts->fullscreen];
+        }
     } else {
         draw_changes_after_next_frame(vo);
         [s->view setFullScreen:opts->fullscreen];
@@ -606,7 +648,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         with_cocoa_lock(vo, ^{
             int *s = arg;
-            [vo->cocoa->window queueNewVideoSize:NSMakeSize(s[0], s[1])];
+            queue_new_video_size(vo, s[0], s[1]);
         });
         return VO_TRUE;
     }
