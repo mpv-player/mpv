@@ -498,7 +498,7 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     if (s->icc_fs_profile_path != s->icc_wnd_profile_path)
         s->pending_events = VO_EVENT_ICC_PROFILE_PATH_CHANGED;
 
-    resize_window(vo);
+    s->pending_events |= VO_EVENT_RESIZE;
 }
 
 static char *cocoa_get_icc_profile_path(struct vo *vo, NSScreen *screen)
