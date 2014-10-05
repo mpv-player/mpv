@@ -55,7 +55,7 @@
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification
 {
     // XXX: we maybe only need expose for this
-    // [self.adapter setNeedsResize];
+    [self.adapter setNeedsResize];
 }
 
 - (void)windowDidChangeScreenProfile:(NSNotification *)notification
