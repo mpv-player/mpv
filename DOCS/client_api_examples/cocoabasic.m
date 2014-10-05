@@ -20,6 +20,14 @@ static void wakeup(void *);
 @implementation AppDelegate
 
 - (void) applicationDidFinishLaunching:(NSNotification *)notification {
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+    atexit_b(^{
+        // Because activation policy has just been set to behave like a real
+        // application, that policy must be reset on exit to prevent, among
+        // other things, the menubar created here from remaining on screen.
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
+    });
+
     // Read filename
     NSArray *args = [NSProcessInfo processInfo].arguments;
     if (args.count < 2) {
