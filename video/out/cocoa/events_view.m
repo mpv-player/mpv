@@ -24,11 +24,18 @@
 #include "video/out/cocoa_common.h"
 #import  "video/out/cocoa/additions.h"
 
-#include "view.h"
+#include "events_view.h"
 
-@implementation MpvVideoView
+@interface MpvEventsView()
+@property(nonatomic, assign) BOOL hasMouseDown;
+@property(nonatomic, retain) NSTrackingArea *tracker;
+- (void)signalMousePosition;
+@end
+
+@implementation MpvEventsView
 @synthesize adapter = _adapter;
 @synthesize tracker = _tracker;
+@synthesize hasMouseDown = _mouse_down;
 
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
@@ -130,7 +137,7 @@
 
 - (BOOL)canHideCursor
 {
-    return !self->hasMouseDown && [self containsMouseLocation];
+    return self.hasMouseDown && [self containsMouseLocation];
 }
 
 - (void)mouseEntered:(NSEvent *)event
@@ -147,7 +154,6 @@
 {
     [super setFrameSize:size];
     [self signalMousePosition];
-    [self.adapter setNeedsResize];
 }
 
 - (NSPoint)convertPointToPixels:(NSPoint)point
@@ -223,7 +229,7 @@
 
 - (void)putMouseEvent:(NSEvent *)event withState:(int)state
 {
-    self->hasMouseDown = (state == MP_KEY_STATE_DOWN);
+    self.hasMouseDown = (state == MP_KEY_STATE_DOWN);
     int mpkey = (MP_MOUSE_BTN0 + [event mpvButtonNumber]);
     [self.adapter putKey:(mpkey | state) withModifiers:[event modifierFlags]];
 }

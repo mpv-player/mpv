@@ -22,9 +22,10 @@
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #include <dlfcn.h>
 
-#include "cocoa_common.h"
-#include "video/out/cocoa/window.h"
-#include "video/out/cocoa/view.h"
+#import "cocoa_common.h"
+#import "video/out/cocoa/window.h"
+#import "video/out/cocoa/events_view.h"
+#import "video/out/cocoa/video_view.h"
 #import "video/out/cocoa/mpvadapter.h"
 
 #include "osdep/threads.h"
@@ -57,7 +58,8 @@ static void cocoa_rm_fs_screen_profile_observer(struct vo *vo);
 
 struct vo_cocoa_state {
     NSWindow *window;
-    MpvVideoView *view;
+    MpvEventsView *view;
+    MpvVideoView *video;
     NSOpenGLContext *gl_ctx;
 
     NSScreen *current_screen;
@@ -172,6 +174,8 @@ void vo_cocoa_uninit(struct vo *vo)
         struct vo_cocoa_state *s = vo->cocoa;
         enable_power_management(vo);
         cocoa_rm_fs_screen_profile_observer(vo);
+
+        [s->video release];
 
         // XXX: It looks like there are some circular retain cycles for the
         // video view / video window that cause them to not be deallocated,
@@ -304,7 +308,7 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
         s->window = create_window(contentRect, s->current_screen,
                                   opts->border, adapter);
     }
-    s->view = [[[MpvVideoView alloc] initWithFrame:contentRect] autorelease];
+    s->view = [[[MpvEventsView alloc] initWithFrame:contentRect] autorelease];
 
     [s->view setWantsBestResolutionOpenGLSurface:YES];
 
@@ -316,11 +320,15 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     cocoa_register_menu_item_action(MPM_ZOOM,     @selector(performZoom:));
 #endif
 
+    s->video = [[MpvVideoView alloc] initWithFrame:[s->view bounds]];
+    [s->view addSubview:s->video];
+    [s->view setAutoresizesSubviews:YES];
     [s->window setContentView:s->view];
-    [s->gl_ctx setView:s->view];
+    [s->gl_ctx setView:s->video];
 
     adapter.vout = vo;
     s->view.adapter = adapter;
+    s->video.adapter = adapter;
 
     if (!s->embedded) {
         [s->window setRestorable:NO];
@@ -465,8 +473,9 @@ int vo_cocoa_check_events(struct vo *vo)
     int events = s->pending_events;
     s->pending_events = 0;
 
-    if (events & VO_EVENT_RESIZE)
+    if (events & VO_EVENT_RESIZE) {
         resize_window(vo);
+    }
 
     return events;
 }

@@ -18,13 +18,9 @@
 #import <Cocoa/Cocoa.h>
 #import "video/out/cocoa/mpvadapter.h"
 
-@interface MpvVideoView : NSView <NSDraggingDestination> {
-    BOOL hasMouseDown;
-}
+@interface MpvEventsView : NSView <NSDraggingDestination>
 @property(nonatomic, retain) MpvCocoaAdapter *adapter;
-@property(nonatomic, retain) NSTrackingArea *tracker;
 - (void)setFullScreen:(BOOL)willBeFullscreen;
 - (NSRect)frameInPixels;
 - (BOOL)canHideCursor;
-- (void)signalMousePosition;
 @end
