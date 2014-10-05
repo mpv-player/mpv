@@ -165,7 +165,7 @@ static void drain(struct ao *ao)
     if (ao->driver->drain) {
         ao->driver->drain(ao);
     } else {
-        double time = get_delay(ao);
+        double time = unlocked_get_delay(ao);
         mp_sleep_us(MPMIN(time, ao->buffer / (double)ao->samplerate + 1) * 1e6);
     }
 
