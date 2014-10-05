@@ -461,6 +461,7 @@ int vo_cocoa_check_events(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     int events = s->pending_events;
+    s->pending_events = 0;
 
     if (events & VO_EVENT_RESIZE)
         resize_window(vo);
