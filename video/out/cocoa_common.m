@@ -52,7 +52,6 @@
 #define cocoa_unlock(s)  pthread_mutex_unlock(&s->mutex)
 
 static void vo_cocoa_fullscreen(struct vo *vo);
-static void vo_cocoa_ontop(struct vo *vo);
 static void cocoa_change_profile(struct vo *vo, char **store, NSScreen *screen);
 static void cocoa_rm_fs_screen_profile_observer(struct vo *vo);
 
@@ -68,6 +67,7 @@ struct vo_cocoa_state {
 
     bool did_resize;
     bool waiting_frame;
+    bool embedded; // wether we are embedding in another GUI
 
     IOPMAssertionID power_mgmt_assertion;
 
@@ -148,6 +148,7 @@ int vo_cocoa_init(struct vo *vo)
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .log = mp_log_new(s, vo->log, "cocoa"),
         .icc_profile_path_changed = false,
+        .embedded = vo->opts->WinID >= 0,
     };
     mpthread_mutex_init_recursive(&s->mutex);
     vo->cocoa = s;
@@ -242,11 +243,6 @@ static void resize_window(struct vo *vo)
 static void vo_set_level(struct vo *vo, int ontop)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    struct mp_vo_opts *opts = vo->opts;
-
-    // completely ignore window level commands when the window is embedded
-    if (opts->WinID >= 0)
-        return;
 
     if (ontop) {
         // +1 is not enough as that will show the icon layer on top of the
@@ -260,11 +256,16 @@ static void vo_set_level(struct vo *vo, int ontop)
     [s->window        setLevel:s->window_level];
 }
 
-static void vo_cocoa_ontop(struct vo *vo)
+static int vo_cocoa_ontop(struct vo *vo)
 {
+    struct vo_cocoa_state *s = vo->cocoa;
+    if (s->embedded)
+        return VO_NOTIMPL;
+
     struct mp_vo_opts *opts = vo->opts;
     opts->ontop = !opts->ontop;
     vo_set_level(vo, opts->ontop);
+    return VO_TRUE;
 }
 
 static MpvVideoWindow *create_window(NSRect rect, NSScreen *s, bool border,
@@ -299,7 +300,7 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     const NSRect contentRect =
         NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
 
-    if (opts->WinID >= 0) {
+    if (s->embedded) {
         s->window = (NSWindow *) (intptr_t) opts->WinID;
     } else {
         s->window = create_window(contentRect, s->current_screen,
@@ -323,22 +324,19 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     adapter.vout = vo;
     s->view.adapter = adapter;
 
-    if (opts->WinID < 0) {
+    if (!s->embedded) {
         [s->window setRestorable:NO];
         [s->window makeMainWindow];
         [s->window makeKeyAndOrderFront:nil];
         [NSApp activateIgnoringOtherApps:YES];
     }
-
-    vo_set_level(vo, opts->ontop);
 }
 
-static void cocoa_set_window_title(struct vo *vo, const char *title)
+static int cocoa_set_window_title(struct vo *vo, const char *title)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    struct mp_vo_opts *opts  = vo->opts;
-    if (opts->WinID >= 0)
-        return;
+    if (s->embedded)
+        return VO_NOTIMPL;
 
     void *talloc_ctx   = talloc_new(NULL);
     struct bstr btitle = bstr_sanitize_utf8_latin1(talloc_ctx, bstr0(title));
@@ -346,6 +344,7 @@ static void cocoa_set_window_title(struct vo *vo, const char *title)
     if (nstitle)
         [s->window setTitle: nstitle];
     talloc_free(talloc_ctx);
+    return VO_TRUE;
 }
 
 static void cocoa_rm_fs_screen_profile_observer(struct vo *vo)
@@ -416,7 +415,6 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
         if (s->window) {
             if (reset_size)
                 queue_new_video_size(vo, width, height);
-            cocoa_set_window_title(vo, vo_get_window_title(vo));
             vo_cocoa_fullscreen(vo);
             cocoa_add_fs_screen_profile_observer(vo);
         }
@@ -479,11 +477,18 @@ int vo_cocoa_check_events(struct vo *vo)
     return 0;
 }
 
-static void vo_cocoa_fullscreen_sync(struct vo *vo)
+static int vo_cocoa_fullscreen_sync(struct vo *vo)
 {
+    struct vo_cocoa_state *s = vo->cocoa;
+
+    if (s->embedded)
+        return VO_NOTIMPL;
+
     with_cocoa_lock_on_main_thread(vo, ^{
         vo_cocoa_fullscreen(vo);
     });
+
+    return VO_TRUE;
 }
 
 static void vo_cocoa_fullscreen(struct vo *vo)
@@ -618,11 +623,9 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         *events |= vo_cocoa_check_events(vo);
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-        vo_cocoa_fullscreen_sync(vo);
-        return VO_TRUE;
+        return vo_cocoa_fullscreen_sync(vo);
     case VOCTRL_ONTOP:
-        vo_cocoa_ontop(vo);
-        return VO_TRUE;
+        return vo_cocoa_ontop(vo);
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         with_cocoa_lock(vo, ^{
@@ -643,8 +646,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         vo_cocoa_set_cursor_visibility(vo, arg);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
-        cocoa_set_window_title(vo, (const char *) arg);
-        return VO_TRUE;
+        return cocoa_set_window_title(vo, (const char *) arg);
     case VOCTRL_RESTORE_SCREENSAVER:
         enable_power_management(vo);
         return VO_TRUE;
