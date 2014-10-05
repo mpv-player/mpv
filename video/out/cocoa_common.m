@@ -65,7 +65,8 @@ struct vo_cocoa_state {
 
     NSInteger window_level;
 
-    bool did_resize;
+    int pending_events;
+
     bool waiting_frame;
     bool embedded; // wether we are embedding in another GUI
 
@@ -77,7 +78,6 @@ struct vo_cocoa_state {
     uint32_t old_dwidth;
     uint32_t old_dheight;
 
-    bool icc_profile_path_changed;
     char *icc_wnd_profile_path;
     char *icc_fs_profile_path;
     id   fs_icc_changed_ns_observer;
@@ -143,11 +143,9 @@ int vo_cocoa_init(struct vo *vo)
 {
     struct vo_cocoa_state *s = talloc_zero(vo, struct vo_cocoa_state);
     *s = (struct vo_cocoa_state){
-        .did_resize = false,
         .waiting_frame = false,
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .log = mp_log_new(s, vo->log, "cocoa"),
-        .icc_profile_path_changed = false,
         .embedded = vo->opts->WinID >= 0,
     };
     mpthread_mutex_init_recursive(&s->mutex);
@@ -366,7 +364,7 @@ static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
 
     void (^nblock)(NSNotification *n) = ^(NSNotification *n) {
         cocoa_change_profile(vo, &s->icc_fs_profile_path, s->fs_screen);
-        s->icc_profile_path_changed = true;
+        s->pending_events |= VO_EVENT_ICC_PROFILE_PATH_CHANGED;
     };
 
     s->fs_icc_changed_ns_observer = [[NSNotificationCenter defaultCenter]
@@ -422,7 +420,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
         // trigger a resize -> don't set vo->dwidth and vo->dheight directly
         // since this block is executed asynchrolously to the video
         // reconfiguration code.
-        s->did_resize = true;
+        s->pending_events |= VO_EVENT_RESIZE;
     });
     return 0;
 }
@@ -462,19 +460,12 @@ void vo_cocoa_swap_buffers(struct vo *vo)
 int vo_cocoa_check_events(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+    int events = s->pending_events;
 
-    if (s->did_resize) {
-        s->did_resize = false;
+    if (events & VO_EVENT_RESIZE)
         resize_window(vo);
-        return VO_EVENT_RESIZE;
-    }
 
-    if (s->icc_profile_path_changed) {
-        s->icc_profile_path_changed = false;
-        return VO_EVENT_ICC_PROFILE_PATH_CHANGED;
-    }
-
-    return 0;
+    return events;
 }
 
 static int vo_cocoa_fullscreen_sync(struct vo *vo)
@@ -502,7 +493,7 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     [s->view setFullScreen:opts->fullscreen];
 
     if (s->icc_fs_profile_path != s->icc_wnd_profile_path)
-        s->icc_profile_path_changed = true;
+        s->pending_events = VO_EVENT_ICC_PROFILE_PATH_CHANGED;
 
     resize_window(vo);
 }
@@ -684,7 +675,7 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 
 - (void)setNeedsResize {
     struct vo_cocoa_state *s = self.vout->cocoa;
-    s->did_resize = true;
+    s->pending_events |= VO_EVENT_RESIZE;
     vo_wakeup(self.vout);
 }
 
@@ -739,6 +730,6 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 {
     struct vo_cocoa_state *s = self.vout->cocoa;
     cocoa_change_profile(self.vout, &s->icc_wnd_profile_path, screen);
-    s->icc_profile_path_changed = true;
+    s->pending_events |= VO_EVENT_ICC_PROFILE_PATH_CHANGED;
 }
 @end
