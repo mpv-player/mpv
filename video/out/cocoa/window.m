@@ -63,26 +63,6 @@
     [self.adapter didChangeWindowedScreenProfile:[self screen]];
 }
 
-- (BOOL)isInFullScreenMode
-{
-    return !!([self styleMask] & NSFullScreenWindowMask);
-}
-
-- (void)setFullScreen:(BOOL)willBeFullscreen
-{
-    if (willBeFullscreen != [self isInFullScreenMode]) {
-        [super toggleFullScreen:nil];
-    }
-}
-
-- (void)toggleFullScreen:(id)sender {
-    if ([self isInFullScreenMode]) {
-        [self.adapter putCommand:"set fullscreen no"];
-    } else {
-        [self.adapter putCommand:"set fullscreen yes"];
-    }
-}
-
 - (BOOL)canBecomeMainWindow { return YES; }
 - (BOOL)canBecomeKeyWindow { return YES; }
 - (BOOL)windowShouldClose:(id)sender
@@ -124,9 +104,6 @@
 
 - (NSRect)constrainFrameRect:(NSRect)nf toScreen:(NSScreen *)screen
 {
-    if ([self isInFullScreenMode])
-        return [super constrainFrameRect:nf toScreen:screen];
-
     NSRect of  = [self frame];
     NSRect vf  = [screen ?: self.screen ?: [NSScreen mainScreen] visibleFrame];
     NSRect ncf = [self contentRectForFrameRect:nf];
@@ -167,6 +144,7 @@
     if (_queued_video_size.width <= 0.0 || _queued_video_size.height <= 0.0)
         return;
 
+    // XXX find a way to kill this state
     if (![self.adapter isInFullScreenMode]) {
         [self setContentAspectRatio:_queued_video_size];
         [self setCenteredContentSize:_queued_video_size];
@@ -183,22 +161,6 @@
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)notification {
-    [self tryDequeueSize];
-}
-
-- (NSSize)window:(NSWindow *)window willUseFullScreenContentSize:(NSSize)size {
-    return window.screen.frame.size;
-}
-
-- (NSApplicationPresentationOptions)window:(NSWindow *)window
-      willUseFullScreenPresentationOptions:(NSApplicationPresentationOptions)opts {
-    return NSApplicationPresentationFullScreen      |
-           NSApplicationPresentationAutoHideDock    |
-           NSApplicationPresentationAutoHideMenuBar |
-           NSApplicationPresentationAutoHideToolbar;
-}
-
-- (void)windowDidExitFullScreen:(NSNotification *)notification {
     [self tryDequeueSize];
 }
 @end

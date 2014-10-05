@@ -1618,13 +1618,6 @@ Window
     there is a change in video parameters, video stream or file. This used to
     be the default behavior. Currently only affects X11 VOs.
 
-``--fs-missioncontrol``
-    (OS X only)
-    Use OS X Mission Control's fullscreen feature instead of the custom one
-    provided by mpv. This can potentially break a lot of stuff like
-    ``--geometry`` and is disabled by default. On the other hand it provides
-    a more 'OS X-like' user experience.
-
 ``--heartbeat-cmd=<command>``
     Command that is executed every 30 seconds during playback via *system()* -
     i.e. using the shell. The time between the commands can be customized with

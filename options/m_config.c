@@ -975,7 +975,6 @@ static const char *const replaced_opts =
     "|right-alt-gr#--input-right-alt-gr"
     "|autosub#--sub-auto"
     "|autosub-match#--sub-auto"
-    "|native-fs#--fs-missioncontrol"
     "|status-msg#--term-status-msg"
     "|idx#--index"
     "|forceidx#--index"

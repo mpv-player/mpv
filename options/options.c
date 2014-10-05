@@ -443,10 +443,6 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("fs-screen", vo.fsscreen_id, 0, 0, 32,
                       ({"all", -2}, {"current", -1})),
 
-#if HAVE_COCOA
-    OPT_FLAG("fs-missioncontrol", vo.fs_missioncontrol, 0),
-#endif
-
     OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),
     OPT_INTRANGE("saturation", gamma_saturation, 0, -100, 100),
     OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),

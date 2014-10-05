@@ -331,11 +331,6 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     }
 
     vo_set_level(vo, opts->ontop);
-
-    if (opts->fs_missioncontrol) {
-        [s->window setCollectionBehavior:
-            NSWindowCollectionBehaviorFullScreenPrimary];
-    }
 }
 
 static void cocoa_set_window_title(struct vo *vo, const char *title)
@@ -498,20 +493,12 @@ static void vo_cocoa_fullscreen(struct vo *vo)
 
     vo_cocoa_update_screen_info(vo, NULL);
 
-    if (opts->fs_missioncontrol) {
-        if ([s->window conformsToProtocol:@protocol(MpvFullscreen)]) {
-            id<MpvFullscreen> win = (id<MpvFullscreen>) s->window;
-            [win setFullScreen:opts->fullscreen];
-        }
-    } else {
-        draw_changes_after_next_frame(vo);
-        [s->view setFullScreen:opts->fullscreen];
-    }
+    draw_changes_after_next_frame(vo);
+    [s->view setFullScreen:opts->fullscreen];
 
     if (s->icc_fs_profile_path != s->icc_wnd_profile_path)
         s->icc_profile_path_changed = true;
 
-    // Make the core aware of the view size change.
     resize_window(vo);
 }
 

@@ -36,8 +36,6 @@ typedef struct mp_vo_opts {
     float monitor_pixel_aspect;
     int force_window_position;
 
-    int fs_missioncontrol;
-
     struct sws_opts *sws_opts;
 } mp_vo_opts;
 
