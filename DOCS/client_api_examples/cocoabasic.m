@@ -116,7 +116,7 @@ static void wakeup(void *context) {
 // Delete this if you already have a main.m.
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        NSApplication *app = [NSApplication new];
+        NSApplication *app = [NSApplication sharedApplication];
         AppDelegate *delegate = [AppDelegate new];
         app.delegate = delegate;
         [app run];
