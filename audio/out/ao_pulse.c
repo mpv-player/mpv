@@ -381,20 +381,15 @@ static int init(struct ao *ao)
     pa_proplist_free(proplist);
     proplist = NULL;
 
-    pa_sample_spec ss;
-    pa_channel_map map2;
-
-    if (pa_format_info_to_sample_spec(format, &ss, &map2) < 0)
-        goto unlock_and_fail;
-
     pa_stream_set_state_callback(priv->stream, stream_state_cb, ao);
     pa_stream_set_write_callback(priv->stream, stream_request_cb, ao);
     pa_stream_set_latency_update_callback(priv->stream,
                                           stream_latency_update_cb, ao);
+    int buf_size = af_fmt_seconds_to_bytes(ao->format, priv->cfg_buffer / 1000.0,
+                                           ao->channels.num, ao->samplerate);
     pa_buffer_attr bufattr = {
         .maxlength = -1,
-        .tlength = priv->cfg_buffer > 0 ?
-            pa_usec_to_bytes(priv->cfg_buffer * 1000, &ss) : (uint32_t)-1,
+        .tlength = buf_size > 0 ? buf_size : (uint32_t)-1,
         .prebuf = -1,
         .minreq = -1,
         .fragsize = -1,
@@ -733,7 +728,7 @@ const struct ao_driver audio_out_pulse = {
     .options = (const struct m_option[]) {
         OPT_STRING("host", cfg_host, 0),
         OPT_STRING("sink", cfg_sink, 0),
-        OPT_CHOICE_OR_INT("buffer", cfg_buffer, 0, 1, 2000, ({"native", -1})),
+        OPT_CHOICE_OR_INT("buffer", cfg_buffer, 0, 1, 2000, ({"native", 0})),
         OPT_FLAG("latency-hacks", cfg_latency_hacks, 0),
         {0}
     },
