@@ -174,6 +174,7 @@ typedef struct MPContext {
     int osd_function;
     double osd_function_visible;
     double osd_msg_visible;
+    double osd_msg_next_duration;
     double osd_last_update;
     bool osd_force_update;
     char *osd_msg_text;

@@ -271,7 +271,7 @@ static bool set_osd_msg_va(struct MPContext *mpctx, int level, int time,
     talloc_free(mpctx->osd_msg_text);
     mpctx->osd_msg_text = talloc_vasprintf(mpctx, fmt, ap);
     mpctx->osd_show_pos = false;
-    mpctx->osd_msg_visible = mp_time_sec() + time / 1000.0;
+    mpctx->osd_msg_next_duration = time / 1000.0;
     mpctx->osd_force_update = true;
     mpctx->sleeptime = 0;
     return true;
@@ -475,6 +475,13 @@ void update_osd_msg(struct MPContext *mpctx)
     if (mpctx->osd_function_visible && now >= mpctx->osd_function_visible) {
         mpctx->osd_function_visible = 0;
         mpctx->osd_function = 0;
+    }
+
+    if (mpctx->osd_msg_next_duration > 0) {
+        // This is done to avoid cutting the OSD message short if slow commands
+        // are executed between setting the OSD message and showing it.
+        mpctx->osd_msg_visible = now + mpctx->osd_msg_next_duration;
+        mpctx->osd_msg_next_duration = 0;
     }
 
     if (mpctx->osd_msg_visible) {
