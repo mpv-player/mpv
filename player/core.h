@@ -41,6 +41,10 @@ enum stop_play_reason {
     PT_QUIT,            // stop playback, quit player
 };
 
+// stop_play_reason that is an explicit user abort.
+#define PT_IS_QUIT(x) ((x) == PT_NEXT_ENTRY || (x) == PT_CURRENT_ENTRY || \
+                       (x) == PT_STOP || (x) == PT_QUIT)
+
 enum exit_reason {
   EXIT_NONE,
   EXIT_QUIT,
