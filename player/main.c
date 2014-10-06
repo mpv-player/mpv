@@ -446,6 +446,9 @@ int mp_initialize(struct MPContext *mpctx)
     if (!mpctx->playlist->current)
         mpctx->playlist->current = mpctx->playlist->first;
 
+    //struct m_config *new = m_config_dup(NULL, mpctx->mconfig);
+    //talloc_free(new);
+
     MP_STATS(mpctx, "end init");
 
     return 0;
