@@ -21,6 +21,8 @@
 #include <inttypes.h>
 #include <assert.h>
 #include <dirent.h>
+#include <string.h>
+#include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -59,7 +61,20 @@ static int cmp_entry(const void *pa, const void *pb)
     return 0;
 }
 
-static char **find_files(const char *original_file, const char *suffix)
+static bool test_matroska_ext(const char *filename)
+{
+    static const char *const exts[] = {".mkv", ".mka", ".mks", ".mk3d", NULL};
+    for (int n = 0; exts[n]; n++) {
+        const char *suffix = exts[n];
+        int offset = strlen(filename) - strlen(suffix);
+        // name must end with suffix
+        if (offset > 0 && strcasecmp(filename + offset, suffix) == 0)
+            return true;
+    }
+    return false;
+}
+
+static char **find_files(const char *original_file)
 {
     void *tmpmem = talloc_new(NULL);
     char *basename = mp_basename(original_file);
@@ -75,9 +90,7 @@ static char **find_files(const char *original_file, const char *suffix)
     struct dirent *ep;
     int num_results = 0;
     while ((ep = readdir(dp))) {
-        int suffix_offset = strlen(ep->d_name) - strlen(suffix);
-        // name must end with suffix
-        if (suffix_offset < 0 || strcmp(ep->d_name + suffix_offset, suffix))
+        if (!test_matroska_ext(ep->d_name))
             continue;
         // don't list the original name
         if (!strcmp(ep->d_name, basename))
@@ -269,7 +282,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         } else {
             MP_INFO(mpctx, "Will scan other files in the "
                    "same directory to find referenced sources.\n");
-            filenames = find_files(main_filename, ".mkv");
+            filenames = find_files(main_filename);
             num_filenames = MP_TALLOC_ELEMS(filenames);
             talloc_steal(tmp, filenames);
         }
