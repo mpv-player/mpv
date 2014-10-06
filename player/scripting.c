@@ -90,10 +90,8 @@ static void *script_thread(void *p)
 
 static void wait_loaded(struct MPContext *mpctx)
 {
-    while (!mp_clients_all_initialized(mpctx)) {
-        mp_wait_events(mpctx, 1e9);
-        mp_process_input(mpctx);
-    }
+    while (!mp_clients_all_initialized(mpctx))
+        mp_idle(mpctx);
 }
 
 static void mp_load_script(struct MPContext *mpctx, const char *fname)

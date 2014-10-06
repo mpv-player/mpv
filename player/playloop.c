@@ -968,6 +968,16 @@ void run_playloop(struct MPContext *mpctx)
     execute_queued_seek(mpctx);
 }
 
+void mp_idle(struct MPContext *mpctx)
+{
+    handle_dummy_ticks(mpctx);
+    mp_wait_events(mpctx, mpctx->sleeptime);
+    mpctx->sleeptime = 100.0;
+    mp_process_input(mpctx);
+    update_osd_msg(mpctx);
+    handle_osd_redraw(mpctx);
+}
+
 // Waiting for the slave master to send us a new file to play.
 void idle_loop(struct MPContext *mpctx)
 {
@@ -983,11 +993,6 @@ void idle_loop(struct MPContext *mpctx)
             mpctx->sleeptime = 0;
             need_reinit = false;
         }
-        handle_dummy_ticks(mpctx);
-        mp_wait_events(mpctx, mpctx->sleeptime);
-        mpctx->sleeptime = 100.0;
-        mp_process_input(mpctx);
-        update_osd_msg(mpctx);
-        handle_osd_redraw(mpctx);
+        mp_idle(mpctx);
     }
 }

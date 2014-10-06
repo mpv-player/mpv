@@ -32,6 +32,7 @@
 #include "osdep/timer.h"
 
 #include "common/msg.h"
+#include "common/global.h"
 #include "options/path.h"
 #include "options/m_config.h"
 #include "options/parse_configfile.h"
@@ -844,6 +845,60 @@ static void load_per_file_options(m_config_t *conf,
     }
 }
 
+struct stream_open_args {
+    struct mp_cancel *cancel;
+    struct mpv_global *global;  // contains copy of global options
+    char *filename;
+    int stream_flags;
+    struct stream *stream;      // result
+};
+
+static void open_stream_thread(void *pctx)
+{
+    struct stream_open_args *args = pctx;
+    args->stream = stream_create(args->filename, args->stream_flags,
+                                 args->cancel, args->global);
+}
+
+static struct stream *open_stream_async(struct MPContext *mpctx,
+                                        char *filename, int stream_flags)
+{
+    struct stream_open_args args = {
+        .cancel = mpctx->playback_abort,
+        .global = create_sub_global(mpctx),
+        .filename = filename,
+        .stream_flags = stream_flags,
+    };
+    mpctx_run_non_blocking(mpctx, open_stream_thread, &args);
+    if (args.stream) {
+        talloc_steal(args.stream, args.global);
+    } else {
+        talloc_free(args.global);
+    }
+    return args.stream;
+}
+
+struct demux_open_args {
+    struct stream *stream;
+    struct demuxer *demux;      // result
+};
+
+static void open_demux_thread(void *pctx)
+{
+    struct demux_open_args *args = pctx;
+    struct stream *s = args->stream;
+    struct mpv_global *global = s->global; // they run in the same thread anyway
+    args->demux = demux_open(s, global->opts->demuxer_name, NULL, global);
+}
+
+static struct demuxer *open_demux_async(struct MPContext *mpctx,
+                                        struct stream *stream)
+{
+    struct demux_open_args args = {stream};
+    mpctx_run_non_blocking(mpctx, open_demux_thread, &args);
+    return args.demux;
+}
+
 // Start playing the current playlist entry.
 // Handle initialization and deinitialization.
 static void play_current_file(struct MPContext *mpctx)
@@ -880,7 +935,7 @@ static void play_current_file(struct MPContext *mpctx)
         goto terminate_playback;
     mpctx->playing->reserved += 1;
 
-    mpctx->filename = mpctx->playing->filename;
+    mpctx->filename = talloc_strdup(tmp, mpctx->playing->filename);
 
     mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION;
 
@@ -931,8 +986,7 @@ static void play_current_file(struct MPContext *mpctx)
     int stream_flags = STREAM_READ;
     if (!opts->load_unsafe_playlists)
         stream_flags |= mpctx->playing->stream_flags;
-    mpctx->stream = stream_create(stream_filename, stream_flags,
-                                  mpctx->playback_abort, mpctx->global);
+    mpctx->stream = open_stream_async(mpctx, stream_filename, stream_flags);
     if (!mpctx->stream) { // error...
         mp_process_input(mpctx);
         goto terminate_playback;
@@ -958,15 +1012,12 @@ goto_reopen_demuxer: ;
 
     mp_nav_reset(mpctx);
 
-    //============ Open DEMUXERS --- DETECT file type =======================
-
-    mpctx->demuxer = demux_open(mpctx->stream, opts->demuxer_name, NULL,
-                                mpctx->global);
-    mpctx->master_demuxer = mpctx->demuxer;
+    mpctx->demuxer = open_demux_async(mpctx, mpctx->stream);
     if (!mpctx->demuxer) {
         MP_ERR(mpctx, "Failed to recognize file format.\n");
         goto terminate_playback;
     }
+    mpctx->master_demuxer = mpctx->demuxer;
 
     MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, mpctx->demuxer);
 

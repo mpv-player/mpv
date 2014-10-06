@@ -18,6 +18,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include <assert.h>
 
 #include "config.h"
@@ -29,7 +30,9 @@
 #include "common/msg.h"
 #include "options/options.h"
 #include "options/m_property.h"
+#include "options/m_config.h"
 #include "common/common.h"
+#include "common/global.h"
 #include "common/encode.h"
 #include "common/playlist.h"
 #include "input/input.h"
@@ -218,4 +221,65 @@ void merge_playlist_files(struct playlist *pl)
     playlist_clear(pl);
     playlist_add_file(pl, edl);
     talloc_free(edl);
+}
+
+// Create a talloc'ed copy of mpctx->global. It contains a copy of the global
+// option struct. It still just references some things though, like mp_log.
+// The main purpose is letting threads access the option struct without the
+// need for additional synchronization.
+struct mpv_global *create_sub_global(struct MPContext *mpctx)
+{
+    struct mpv_global *new = talloc_ptrtype(NULL, new);
+    struct m_config *new_config = m_config_dup(new, mpctx->mconfig);
+    *new = (struct mpv_global){
+        .log = mpctx->global->log,
+        .opts = new_config->optstruct,
+    };
+    return new;
+}
+
+struct wrapper_args {
+    struct MPContext *mpctx;
+    void (*thread_fn)(void *);
+    void *thread_arg;
+    pthread_mutex_t mutex;
+    bool done;
+};
+
+static void *thread_wrapper(void *pctx)
+{
+    struct wrapper_args *args = pctx;
+    args->thread_fn(args->thread_arg);
+    pthread_mutex_lock(&args->mutex);
+    args->done = true;
+    pthread_mutex_unlock(&args->mutex);
+    mp_input_wakeup(args->mpctx->input); // this interrupts mp_idle()
+    return NULL;
+}
+
+// Run the thread_fn in a new thread. Wait until the thread returns, but while
+// waiting, process input and input commands.
+int mpctx_run_non_blocking(struct MPContext *mpctx, void (*thread_fn)(void *arg),
+                           void *thread_arg)
+{
+    struct wrapper_args args = {mpctx, thread_fn, thread_arg};
+    pthread_mutex_init(&args.mutex, NULL);
+    bool success = false;
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, thread_wrapper, &args))
+        goto done;
+    while (!success) {
+        mp_idle(mpctx);
+
+        if (mpctx->stop_play)
+            mp_cancel_trigger(mpctx->playback_abort);
+
+        pthread_mutex_lock(&args.mutex);
+        success |= args.done;
+        pthread_mutex_unlock(&args.mutex);
+    }
+    pthread_join(thread, NULL);
+done:
+    pthread_mutex_destroy(&args.mutex);
+    return success ? 0 : -1;
 }

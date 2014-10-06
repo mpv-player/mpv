@@ -167,6 +167,11 @@ void mp_nav_user_input(struct MPContext *mpctx, char *command)
     struct mp_nav_state *nav = mpctx->nav_state;
     if (!nav)
         return;
+    // In the short time while the demuxer is opened (running in a different
+    // thread) we can't access the stream directly. Once the demuxer is opened,
+    // we can access the stream via demux_stream_control() though.
+    if (!mpctx->demuxer)
+        return;
     if (strcmp(command, "mouse_move") == 0) {
         struct mp_image_params vid = {0};
         if (mpctx->d_video)

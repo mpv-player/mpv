@@ -178,7 +178,7 @@ typedef struct MPContext {
 
     struct playlist *playlist;
     struct playlist_entry *playing; // currently playing file
-    char *filename; // always the same as playing->filename (or NULL)
+    char *filename; // immutable copy of playing->filename (or NULL)
     struct mp_resolve_result *resolve_result;
     enum stop_play_reason stop_play;
     bool playback_initialized; // playloop can be run/is running
@@ -417,6 +417,9 @@ float mp_get_cache_percent(struct MPContext *mpctx);
 bool mp_get_cache_idle(struct MPContext *mpctx);
 void update_window_title(struct MPContext *mpctx, bool force);
 void stream_dump(struct MPContext *mpctx);
+int mpctx_run_non_blocking(struct MPContext *mpctx, void (*thread_fn)(void *arg),
+                           void *thread_arg);
+struct mpv_global *create_sub_global(struct MPContext *mpctx);
 
 // osd.c
 void set_osd_bar(struct MPContext *mpctx, int type,
@@ -449,6 +452,7 @@ double chapter_start_time(struct MPContext *mpctx, int chapter);
 int get_chapter_count(struct MPContext *mpctx);
 void execute_queued_seek(struct MPContext *mpctx);
 void run_playloop(struct MPContext *mpctx);
+void mp_idle(struct MPContext *mpctx);
 void idle_loop(struct MPContext *mpctx);
 void handle_force_window(struct MPContext *mpctx, bool reconfig);
 void add_frame_pts(struct MPContext *mpctx, double pts);
