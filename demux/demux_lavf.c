@@ -131,6 +131,7 @@ static const char *const format_blacklist[] = {
     // Image demuxers, disabled in favor of demux_mf:
     "image2", "image2pipe",
     "bmp_pipe", "dpx_pipe", "exr_pipe", "j2k_pipe", "png_pipe", "tiff_pipe",
+    "jpeg_pipe",
     0
 };
 
