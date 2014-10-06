@@ -310,8 +310,6 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     }
     s->view = [[[MpvEventsView alloc] initWithFrame:contentRect] autorelease];
 
-    [s->view setWantsBestResolutionOpenGLSurface:YES];
-
 #if HAVE_COCOA_APPLICATION
     cocoa_register_menu_item_action(MPM_H_SIZE,   @selector(halfSize));
     cocoa_register_menu_item_action(MPM_N_SIZE,   @selector(normalSize));
@@ -321,6 +319,8 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
 #endif
 
     s->video = [[MpvVideoView alloc] initWithFrame:[s->view bounds]];
+    [s->video setWantsBestResolutionOpenGLSurface:YES];
+
     [s->view addSubview:s->video];
     [s->view setAutoresizesSubviews:YES];
     [s->window setContentView:s->view];
