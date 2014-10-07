@@ -828,6 +828,10 @@ Property list
     be different ``pause`` in special situations, such as when the player
     pauses itself due to low network cache.
 
+    This also returns ``yes`` if playback is restarting or if nothing is
+    playing at all. In other words, it's only ``no`` if there's actually
+    video playing. (Behavior since mpv 0.7.0.)
+
 ``cache``
     Network cache fill state (0-100.0).
 

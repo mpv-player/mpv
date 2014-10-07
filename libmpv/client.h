@@ -162,7 +162,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 5)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 6)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -892,10 +892,21 @@ typedef enum mpv_event_id {
      */
     MPV_EVENT_IDLE              = 11,
     /**
-     * Playback was paused. This indicates the logical pause state (like the
-     * property "pause" as opposed to the "core-idle" propetty). This event
-     * is sent whenever any pause state changes, not only the logical state,
-     * so you might get multiple MPV_EVENT_PAUSE events in a row.
+     * Playback was paused. This indicates the user pause state.
+     *
+     * The user pause state is the state the user requested (changed with the
+     * "pause" property). There is an internal pause state too, which is entered
+     * if e.g. the network is too slow (the "core-idle" property generally
+     * indicates whether the core is playing or waiting).
+     *
+     * This event is sent whenever any pause states change, not only the user
+     * state. You might get multiple events in a row while these states change
+     * independently. But the event ID sent always indicates the user pause
+     * state.
+     *
+     * If you don't want to deal with this, use mpv_observe_property() on the
+     * "pause" property and ignore MPV_EVENT_PAUSE/UNPAUSE. Likewise, the
+     * "core-idle" property tells you whether video is actually playing or not.
      */
     MPV_EVENT_PAUSE             = 12,
     /**

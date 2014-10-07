@@ -1020,7 +1020,8 @@ static int mp_property_core_idle(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg, mpctx->paused);
+    bool idle = mpctx->paused || !mpctx->restart_complete || !mpctx->playing;
+    return m_property_flag_ro(action, arg, idle);
 }
 
 static int mp_property_eof_reached(void *ctx, struct m_property *prop,
