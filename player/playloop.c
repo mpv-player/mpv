@@ -607,8 +607,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
 double get_cache_buffering_percentage(struct MPContext *mpctx)
 {
-    struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
     if (mpctx->demuxer && mpctx->paused_for_cache && mpctx->cache_wait_time > 0) {
+        struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
         demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
         if (s.ts_duration < 0)
             s.ts_duration = 0;
