@@ -1222,9 +1222,11 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
                              NULL);
     }
 
-    vo_x11_set_wm_icon(x11);
-    vo_x11_update_window_title(vo);
-    vo_x11_dnd_init_window(vo);
+    if (vo->opts->WinID >= 0) {
+        vo_x11_set_wm_icon(x11);
+        vo_x11_update_window_title(vo);
+        vo_x11_dnd_init_window(vo);
+    }
 
     x11->atom_frame_exts = XA(x11, _NET_FRAME_EXTENTS);
 }
