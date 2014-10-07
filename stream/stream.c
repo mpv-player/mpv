@@ -631,6 +631,7 @@ static int stream_skip_read(struct stream *s, int64_t len)
 // logical stream position by the amount of buffered but not yet read data.
 void stream_drop_buffers(stream_t *s)
 {
+    s->pos = stream_tell(s);
     s->buf_pos = s->buf_len = 0;
     s->eof = 0;
 }
