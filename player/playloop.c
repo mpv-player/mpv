@@ -155,6 +155,7 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->cache_wait_time = 0;
     mpctx->restart_complete = false;
+    mpctx->paused_for_cache = false;
 
 #if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
@@ -557,7 +558,6 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
     if (mpctx->restart_complete && idle != -1) {
         if (mpctx->paused && mpctx->paused_for_cache) {
-            mpctx->cache_wait_time = MPCLAMP(mpctx->cache_wait_time, 1, 10);
             if (!opts->cache_pausing || s.ts_duration >= mpctx->cache_wait_time
                 || s.idle)
             {
@@ -570,6 +570,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                 mpctx->paused_for_cache = false;
                 if (!opts->pause)
                     unpause_player(mpctx);
+                mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
             }
             mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.2);
         } else {
@@ -579,8 +580,10 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                 mpctx->paused_for_cache = true;
                 opts->pause = prev_paused_user;
                 mpctx->cache_stop_time = mp_time_sec();
+                mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
             }
         }
+        mpctx->cache_wait_time = MPCLAMP(mpctx->cache_wait_time, 1, 10);
     }
 
     // Also update cache properties.
@@ -600,6 +603,21 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                 MPMIN(mpctx->sleeptime, mpctx->next_cache_update - now);
         }
     }
+}
+
+double get_cache_buffering_percentage(struct MPContext *mpctx)
+{
+    struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
+    if (mpctx->demuxer && mpctx->paused_for_cache && mpctx->cache_wait_time > 0) {
+        demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
+        if (s.ts_duration < 0)
+            s.ts_duration = 0;
+
+        return MPCLAMP(s.ts_duration / mpctx->cache_wait_time, 0.0, 1.0);
+    }
+    if (mpctx->demuxer && !mpctx->paused_for_cache)
+        return 1.0;
+    return -1;
 }
 
 static void handle_heartbeat_cmd(struct MPContext *mpctx)

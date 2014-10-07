@@ -1198,6 +1198,16 @@ static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, mpctx->paused_for_cache);
 }
 
+static int mp_property_cache_buffering(void *ctx, struct m_property *prop,
+                                       int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    double state = get_cache_buffering_percentage(mpctx);
+    if (state < 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(action, arg, state * 100);
+}
+
 static int mp_property_clock(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -2757,6 +2767,7 @@ static const struct m_property mp_properties[] = {
     {"cache-idle", mp_property_cache_idle},
     {"demuxer-cache-duration", mp_property_demuxer_cache_duration},
     {"demuxer-cache-idle", mp_property_demuxer_cache_idle},
+    {"cache-buffering-state", mp_property_cache_buffering},
     {"paused-for-cache", mp_property_paused_for_cache},
     {"pts-association-mode", mp_property_generic_option},
     {"hr-seek", mp_property_generic_option},

@@ -869,6 +869,10 @@ Property list
 ``paused-for-cache``
     Returns ``yes`` when playback is paused because of waiting for the cache.
 
+``cache-buffering-state``
+    Return the percentage (0-100) of the cache fill status until the player
+    will unpause (related to ``paused-for-cache``).
+
 ``eof-reached``
     Returns ``yes`` if end of playback was reached, ``no`` otherwise. Note
     that this is usually interesting only if ``--keep-open`` is enabled,
