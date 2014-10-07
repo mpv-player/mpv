@@ -987,10 +987,8 @@ static void play_current_file(struct MPContext *mpctx)
     if (!opts->load_unsafe_playlists)
         stream_flags |= mpctx->playing->stream_flags;
     mpctx->stream = open_stream_async(mpctx, stream_filename, stream_flags);
-    if (!mpctx->stream) { // error...
-        mp_process_input(mpctx);
+    if (!mpctx->stream)
         goto terminate_playback;
-    }
 
     if (opts->stream_dump && opts->stream_dump[0]) {
         stream_dump(mpctx);
