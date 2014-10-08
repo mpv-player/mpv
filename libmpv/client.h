@@ -1044,13 +1044,9 @@ typedef struct mpv_event_log_message {
      */
     const char *level;
     /**
-     * The log message. Note that this is the direct output of a printf()
-     * style output API. The text will contain embedded newlines, and it's
-     * possible that a single message contains multiple lines, or that a
-     * message contains a partial line.
-     *
-     * It's safe to display messages only if they end with a newline character,
-     * and to buffer them otherwise.
+     * The log message. It consists of 1 line of text, and is terminated with
+     * a newline character. (Before API version 1.6, it could contain multiple
+     * or partial lines.)
      */
     const char *text;
 } mpv_event_log_message;

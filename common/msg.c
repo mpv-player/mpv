@@ -51,7 +51,6 @@ struct mp_log_root {
     bool module;
     bool show_time;
     bool termosd;       // use terminal control codes for status line
-    bool header;        // indicate that message header should be printed
     int blank_lines;    // number of lines useable by status
     int status_lines;   // number of current status lines
     bool color;
@@ -67,6 +66,8 @@ struct mp_log_root {
      * (This is perhaps better than maintaining a globally accessible and
      * synchronized mp_log tree.) */
     atomic_ulong reload_counter;
+    // --- protected by mp_msg_lock
+    char buffer[MSGSIZE_MAX];
 };
 
 struct mp_log {
@@ -229,70 +230,42 @@ static void pretty_print_module(FILE* stream, const char *prefix, bool use_color
         set_msg_color(stream, lev);
 }
 
-static void print_msg_on_terminal(struct mp_log *log, int lev, char *text)
+static bool test_terminal_level(struct mp_log *log, int lev)
 {
+    return lev <= log->terminal_level &&
+           !(lev == MSGL_STATUS && terminal_in_background());
+}
+
+static void print_terminal_line(struct mp_log *log, int lev, char *text)
+{
+    if (!test_terminal_level(log, lev))
+        return;
+
     struct mp_log_root *root = log->root;
     FILE *stream = (root->force_stderr || lev == MSGL_STATUS) ? stderr : stdout;
 
-    if (!(lev <= log->terminal_level))
-        return;
-
-    bool header = root->header;
-    const char *prefix = log->prefix;
-    char *terminate = NULL;
-
-    if ((lev >= MSGL_V) || root->verbose || root->module)
-        prefix = log->verbose_prefix;
-
-    if (lev == MSGL_STATUS) {
-        // skip status line output if stderr is a tty but in background
-        if (terminal_in_background())
-            return;
-        // don't clear if we don't have to
-        if (!text[0] && !root->status_lines)
-            return;
-        if (root->termosd) {
-            prepare_status_line(root, text);
-            terminate = "\r";
-        } else {
-            terminate = "\n";
-        }
-        root->header = true;
-    } else {
+    if (lev != MSGL_STATUS)
         flush_status_line(root);
-        size_t len = strlen(text);
-        root->header = len && text[len - 1] == '\n';
-        if (lev == MSGL_STATS)
-            terminate = "\n";
-    }
 
     if (root->color)
         set_msg_color(stream, lev);
 
-    do {
-        if (header) {
-            if (root->show_time)
-                fprintf(stream, "[%" PRId64 "] ", mp_time_us());
+    if (root->show_time)
+        fprintf(stream, "[%" PRId64 "] ", mp_time_us());
 
-            if (prefix) {
-                if (root->module) {
-                    pretty_print_module(stream, prefix, root->color, lev);
-                } else {
-                    fprintf(stream, "[%s] ", prefix);
-                }
-            }
+    const char *prefix = log->prefix;
+    if ((lev >= MSGL_V) || root->verbose || root->module)
+        prefix = log->verbose_prefix;
+
+    if (prefix) {
+        if (root->module) {
+            pretty_print_module(stream, prefix, root->color, lev);
+        } else {
+            fprintf(stream, "[%s] ", prefix);
         }
+    }
 
-        char *next = strchr(text, '\n');
-        int len = next ? next - text + 1 : strlen(text);
-        fprintf(stream, "%.*s", len, text);
-        text = text + len;
-
-        header = true;
-    } while (text[0]);
-
-    if (terminate)
-        fprintf(stream, "%s", terminate);
+    fprintf(stream, "%s", text);
 
     if (root->color)
         set_term_color(stream, -1);
@@ -348,15 +321,55 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     pthread_mutex_lock(&mp_msg_lock);
 
     char tmp[MSGSIZE_MAX];
-    if (vsnprintf(tmp, MSGSIZE_MAX, format, va) < 0)
-        snprintf(tmp, MSGSIZE_MAX, "[fprintf error]\n");
-    tmp[MSGSIZE_MAX - 2] = '\n';
-    tmp[MSGSIZE_MAX - 1] = 0;
-    char *text = tmp;
+    bool use_tmp = lev == MSGL_STATUS || lev == MSGL_STATS;
 
-    print_msg_on_terminal(log, lev, text);
-    write_msg_to_buffers(log, lev, text);
-    dump_stats(log, lev, text);
+    struct mp_log_root *root = log->root;
+    char *text = use_tmp ? tmp : root->buffer;
+    int len = use_tmp ? 0 : strlen(text);
+
+    if (vsnprintf(text + len, MSGSIZE_MAX - len, format, va) < 0)
+        snprintf(text + len, MSGSIZE_MAX - len, "[fprintf error]\n");
+    text[MSGSIZE_MAX - 2] = '\n';
+    text[MSGSIZE_MAX - 1] = 0;
+
+    if (lev == MSGL_STATS) {
+        dump_stats(log, lev, text);
+    } else if (lev == MSGL_STATUS && !test_terminal_level(log, lev)) {
+        /* discard */
+    } else {
+        if (lev == MSGL_STATUS && root->termosd)
+            prepare_status_line(root, text);
+
+        // Split away each line. Normally we require full lines; buffer partial
+        // lines if they happen.
+        while (1) {
+            char *end = strchr(text, '\n');
+            if (!end)
+                break;
+            char *next = &end[1];
+            char saved = next[0];
+            next[0] = '\0';
+            print_terminal_line(log, lev, text);
+            write_msg_to_buffers(log, lev, text);
+            next[0] = saved;
+            text = next;
+        }
+
+        if (lev == MSGL_STATUS) {
+            if (text[0]) {
+                len = strlen(text);
+                if (len < MSGSIZE_MAX - 1) {
+                    text[len] = root->termosd ? '\r' : '\n';
+                    text[len + 1] = '\0';
+                }
+                print_terminal_line(log, lev, text);
+            }
+            root->buffer[0] = '\0';
+        } else {
+            int leftover = strlen(text);
+            memmove(root->buffer, text, leftover + 1);
+        }
+    }
 
     pthread_mutex_unlock(&mp_msg_lock);
 }
@@ -410,7 +423,6 @@ void mp_msg_init(struct mpv_global *global)
     struct mp_log_root *root = talloc_zero(NULL, struct mp_log_root);
     *root = (struct mp_log_root){
         .global = global,
-        .header = true,
         .reload_counter = ATOMIC_VAR_INIT(1),
     };
 

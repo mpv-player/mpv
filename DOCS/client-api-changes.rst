@@ -26,6 +26,7 @@ API changes
 ::
 
  1.6    - modify "core-idle" property behavior
+        - MPV_EVENT_LOG_MESSAGE now always sends complete lines
  --- mpv 0.6.0 is released ---
  1.5    - change in X11 and "--wid" behavior again. The previous change didn't
           work as expected, and now the behavior can be explicitly controlled
