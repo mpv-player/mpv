@@ -1032,7 +1032,10 @@ typedef struct mpv_event_property {
 
 typedef struct mpv_event_log_message {
     /**
-     * The module prefix, identifies the sender of the message.
+     * The module prefix, identifies the sender of the message. As a special
+     * case, if the message buffer overflows, this will be set to the string
+     * "overflow" (which doesn't appear as prefix otherwise), and the text
+     * field will contain an informative message.
      */
     const char *prefix;
     /**

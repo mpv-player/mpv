@@ -321,7 +321,7 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
                 *entry = (struct mp_log_buffer_entry) {
                     .prefix = "overflow",
                     .level = MSGL_FATAL,
-                    .text = "",
+                    .text = "log message buffer overflow\n",
                 };
             }
             mp_ring_write(buffer->ring, (unsigned char *)&entry, sizeof(entry));
