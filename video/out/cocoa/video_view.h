@@ -20,4 +20,5 @@
 
 @interface MpvVideoView : NSView
 @property(nonatomic, retain) MpvCocoaAdapter *adapter;
+- (NSRect)frameInPixels;
 @end

@@ -58,7 +58,7 @@ static void cocoa_rm_fs_screen_profile_observer(struct vo *vo);
 
 struct vo_cocoa_state {
     NSWindow *window;
-    MpvEventsView *view;
+    NSView *view;
     MpvVideoView *video;
     NSOpenGLContext *gl_ctx;
 
@@ -155,17 +155,24 @@ int vo_cocoa_init(struct vo *vo)
     return 1;
 }
 
-static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
+static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
+    if (s->embedded)
+        return VO_NOTIMPL;
+
+    MpvEventsView *v = (MpvEventsView *) s->view;
+
     if (*visible) {
         CGDisplayShowCursor(kCGDirectMainDisplay);
-    } else if ([s->view canHideCursor]) {
+    } else if ([v canHideCursor]) {
         CGDisplayHideCursor(kCGDirectMainDisplay);
     } else {
         *visible = true;
     }
+
+    return VO_TRUE;
 }
 
 void vo_cocoa_uninit(struct vo *vo)
@@ -225,6 +232,9 @@ static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
+    if (s->embedded)
+        return;
+
     vo_cocoa_update_screens_pointers(vo);
 
     if (out_rc) {
@@ -236,7 +246,7 @@ static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
 static void resize_window(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    NSRect frame = [s->view frameInPixels];
+    NSRect frame = [s->video frameInPixels];
     vo->dwidth  = frame.size.width;
     vo->dheight = frame.size.height;
     [s->gl_ctx update];
@@ -301,14 +311,19 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     MpvCocoaAdapter *adapter = [[[MpvCocoaAdapter alloc] init] autorelease];
     const NSRect contentRect =
         NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
+    adapter.vout = vo;
 
     if (s->embedded) {
-        s->window = (NSWindow *) (intptr_t) opts->WinID;
+        s->view = (NSView *) (intptr_t) opts->WinID;
     } else {
         s->window = create_window(contentRect, s->current_screen,
                                   opts->border, adapter);
+
+        MpvEventsView *view = [[MpvEventsView alloc] initWithFrame:contentRect];
+        [view autorelease];
+        view.adapter = adapter;
+        s->view = view;
     }
-    s->view = [[[MpvEventsView alloc] initWithFrame:contentRect] autorelease];
 
 #if HAVE_COCOA_APPLICATION
     cocoa_register_menu_item_action(MPM_H_SIZE,   @selector(halfSize));
@@ -326,8 +341,6 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     [s->window setContentView:s->view];
     [s->gl_ctx setView:s->video];
 
-    adapter.vout = vo;
-    s->view.adapter = adapter;
     s->video.adapter = adapter;
 
     if (!s->embedded) {
@@ -414,7 +427,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
         s->old_dwidth  = width;
         s->old_dheight = height;
 
-        if (!(flags & VOFLAG_HIDDEN) && !s->window) {
+        if (!(flags & VOFLAG_HIDDEN) && !s->view) {
             create_ui(vo, &geo.win, geo.flags);
         }
 
@@ -499,10 +512,13 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts  = vo->opts;
 
+    if (s->embedded)
+        return;
+
     vo_cocoa_update_screen_info(vo, NULL);
 
     draw_changes_after_next_frame(vo);
-    [s->view setFullScreen:opts->fullscreen];
+    [(MpvEventsView *)s->view setFullScreen:opts->fullscreen];
 
     if (s->icc_fs_profile_path != s->icc_wnd_profile_path)
         s->pending_events = VO_EVENT_ICC_PROFILE_PATH_CHANGED;
@@ -646,8 +662,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:
-        vo_cocoa_set_cursor_visibility(vo, arg);
-        return VO_TRUE;
+        return vo_cocoa_set_cursor_visibility(vo, arg);
     case VOCTRL_UPDATE_WINDOW_TITLE:
         return cocoa_set_window_title(vo, (const char *) arg);
     case VOCTRL_RESTORE_SCREENSAVER:

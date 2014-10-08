@@ -35,4 +35,9 @@
     [super setFrameSize:size];
     [self.adapter setNeedsResize];
 }
+
+- (NSRect)frameInPixels
+{
+    return [self convertRectToBacking:[self frame]];
+}
 @end

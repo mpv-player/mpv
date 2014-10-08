@@ -130,11 +130,6 @@
 - (BOOL)becomeFirstResponder { return YES; }
 - (BOOL)resignFirstResponder { return YES; }
 
-- (NSRect)frameInPixels
-{
-    return [self convertRectToBacking:[self frame]];
-}
-
 - (BOOL)canHideCursor
 {
     return !self.hasMouseDown && [self containsMouseLocation];

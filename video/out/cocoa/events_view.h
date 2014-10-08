@@ -21,6 +21,5 @@
 @interface MpvEventsView : NSView <NSDraggingDestination>
 @property(nonatomic, retain) MpvCocoaAdapter *adapter;
 - (void)setFullScreen:(BOOL)willBeFullscreen;
-- (NSRect)frameInPixels;
 - (BOOL)canHideCursor;
 @end

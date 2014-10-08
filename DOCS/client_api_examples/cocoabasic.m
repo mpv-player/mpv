@@ -82,7 +82,7 @@ static void wakeup(void *);
         }
 
 #if EMBED_VIEW
-        int64_t wid = (intptr_t) self->w;
+        int64_t wid = (intptr_t) [self->w contentView];
         check_error(mpv_set_option(mpv, "wid", MPV_FORMAT_INT64, &wid));
 #endif
 
