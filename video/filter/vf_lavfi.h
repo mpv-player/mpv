@@ -40,7 +40,6 @@ static void vf_lw_set_reconfig_cb(struct vf_instance *vf,
                                                 struct mp_image_params *in,
                                                 struct mp_image_params *out))
 {
-    return 0;
 }
 #include "options/m_option.h"
 static const struct m_sub_options vf_lw_conf = {0};
