@@ -158,6 +158,9 @@ static void prepare_status_line(struct mp_log_root *root, char *new_status)
     }
 
     size_t old_lines = root->status_lines;
+    if (!new_status[0] && old_lines == 0)
+        return; // nothing to clear
+
     size_t clear_lines = MPMIN(MPMAX(new_lines, old_lines), root->blank_lines);
 
     // clear the status line itself
@@ -366,7 +369,6 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
                 }
                 print_terminal_line(log, lev, text);
             }
-            root->buffer[0] = '\0';
         } else {
             int leftover = strlen(text);
             memmove(root->buffer, text, leftover + 1);
