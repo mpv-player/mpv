@@ -11,6 +11,7 @@
 #include <QMenu>
 #include <QGridLayout>
 #include <QApplication>
+#include <QTextEdit>
 
 #include "qtexample.h"
 
@@ -27,6 +28,9 @@ static void wakeup(void *ctx)
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
+    setWindowTitle("Qt embedding demo");
+    setMinimumSize(640, 480);
+
     QMenu *menu = menuBar()->addMenu(tr("&File"));
     QAction *on_open = new QAction(tr("&Open"), this);
     on_open->setShortcuts(QKeySequence::Open);
@@ -35,6 +39,14 @@ MainWindow::MainWindow(QWidget *parent) :
     menu->addAction(on_open);
 
     statusBar();
+
+    QMainWindow *log_window = new QMainWindow(this);
+    log = new QTextEdit(log_window);
+    log->setReadOnly(true);
+    log_window->setCentralWidget(log);
+    log_window->setWindowTitle("mpv log window");
+    log_window->setMinimumSize(500, 50);
+    log_window->show();
 
     mpv = mpv_create();
     if (!mpv)
@@ -61,6 +73,10 @@ MainWindow::MainWindow(QWidget *parent) :
     // Let us receive property change events with MPV_EVENT_PROPERTY_CHANGE if
     // this property changes.
     mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
+
+    // Request log messages with level verbose ("v") or higher.
+    // They are received as MPV_EVENT_LOG_MESSAGE.
+    mpv_request_log_messages(mpv, "v");
 
     // From this point on, the wakeup function will be called. The callback
     // can come from any thread, so we use the Qt QEvent mechanism to relay
@@ -106,6 +122,16 @@ void MainWindow::handle_mpv_event(mpv_event *event)
             ss << "Reconfig: " << w << " " << h;
             statusBar()->showMessage(QString::fromStdString(ss.str()));
         }
+        break;
+    }
+    case MPV_EVENT_LOG_MESSAGE: {
+        struct mpv_event_log_message *msg = (struct mpv_event_log_message *)event->data;
+        std::stringstream ss;
+        ss << "[" << msg->prefix << "] " << msg->level << ": " << msg->text;
+        QTextCursor cursor = log->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        cursor.insertText(QString::fromStdString(ss.str()));
+        log->setTextCursor(cursor);
         break;
     }
     case MPV_EVENT_SHUTDOWN: {
