@@ -37,6 +37,8 @@
 #include "osdep/io.h"
 #include "osdep/timer.h"
 
+#include "libmpv/client.h"
+
 #include "msg.h"
 #include "msg_control.h"
 
@@ -598,6 +600,18 @@ const char *const mp_log_levels[MSGL_MAX + 1] = {
     [MSGL_DEBUG]        = "debug",
     [MSGL_TRACE]        = "trace",
     [MSGL_STATS]        = "stats",
+};
+
+const int const mp_mpv_log_levels[MSGL_MAX + 1] = {
+    [MSGL_FATAL]        = MPV_LOG_LEVEL_FATAL,
+    [MSGL_ERR]          = MPV_LOG_LEVEL_ERROR,
+    [MSGL_WARN]         = MPV_LOG_LEVEL_WARN,
+    [MSGL_INFO]         = MPV_LOG_LEVEL_INFO,
+    [MSGL_STATUS]       = 0, // never used
+    [MSGL_V]            = MPV_LOG_LEVEL_V,
+    [MSGL_DEBUG]        = MPV_LOG_LEVEL_DEBUG,
+    [MSGL_TRACE]        = MPV_LOG_LEVEL_TRACE,
+    [MSGL_STATS]        = 0, // never used
 };
 
 int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level)

@@ -1030,6 +1030,23 @@ typedef struct mpv_event_property {
     void *data;
 } mpv_event_property;
 
+/**
+ * Numeric log levels. The lower the number, the more important the message is.
+ * MPV_LOG_LEVEL_NONE is never used when receiving messages. The string in
+ * the comment after the value is the name of the log level as used for the
+ * mpv_request_log_messages() function.
+ */
+typedef enum mpv_log_level {
+    MPV_LOG_LEVEL_NONE  = 0,    /// "no"    - disable absolutely all messages
+    MPV_LOG_LEVEL_FATAL = 10,   /// "fatal" - critical/aborting errors
+    MPV_LOG_LEVEL_ERROR = 20,   /// "error" - simple errors
+    MPV_LOG_LEVEL_WARN  = 30,   /// "warn"  - possible problems
+    MPV_LOG_LEVEL_INFO  = 40,   /// "info"  - informational message
+    MPV_LOG_LEVEL_V     = 50,   /// "v"     - noisy informational message
+    MPV_LOG_LEVEL_DEBUG = 60,   /// "debug" - very noisy technical information
+    MPV_LOG_LEVEL_TRACE = 70,   /// "trace" - extremely noisy
+} mpv_log_level;
+
 typedef struct mpv_event_log_message {
     /**
      * The module prefix, identifies the sender of the message. As a special
@@ -1040,7 +1057,7 @@ typedef struct mpv_event_log_message {
     const char *prefix;
     /**
      * The log level as string. See mpv_request_log_messages() for possible
-     * values.
+     * values. The level "no" is never used here.
      */
     const char *level;
     /**
@@ -1049,6 +1066,11 @@ typedef struct mpv_event_log_message {
      * or partial lines.)
      */
     const char *text;
+    /**
+     * The same contents as the level field, but as a numeric ID.
+     * Since API version 1.6.
+     */
+    mpv_log_level log_level;
 } mpv_event_log_message;
 
 typedef struct mpv_event_end_file {
@@ -1146,6 +1168,7 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable);
  * @param min_level Minimal log level as string. Valid log levels:
  *                      no fatal error warn info status v debug trace
  *                  The value "no" disables all messages. This is the default.
+ *                  Also see mpv_log_level.
  */
 int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
 

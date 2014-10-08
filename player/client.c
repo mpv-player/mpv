@@ -654,6 +654,7 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
                 *cmsg = (struct mpv_event_log_message){
                     .prefix = talloc_steal(event, msg->prefix),
                     .level = mp_log_levels[msg->level],
+                    .log_level = mp_mpv_log_levels[msg->level],
                     .text = talloc_steal(event, msg->text),
                 };
                 event->data = cmsg;
