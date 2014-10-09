@@ -25,6 +25,7 @@ struct input_ctx;
 
 void cocoa_put_key(int keycode);
 void cocoa_put_key_with_modifiers(int keycode, int modifiers);
+void cocoa_put_key_event(void *event);
 
 void cocoa_start_event_monitor(void);
 

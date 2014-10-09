@@ -719,6 +719,11 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
     [self recalcMovableByWindowBackground:point];
 }
 
+- (void)putKeyEvent:(NSEvent*)event
+{
+    cocoa_put_key_event(event);
+}
+
 - (void)putKey:(int)mpkey withModifiers:(int)modifiers
 {
     cocoa_put_key_with_modifiers(mpkey, modifiers);
