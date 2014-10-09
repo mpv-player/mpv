@@ -150,7 +150,6 @@ enum playback_status {
 
 typedef struct MPContext {
     bool initialized;
-    bool is_cplayer;
     bool autodetach;
     struct mpv_global *global;
     struct MPOpts *opts;

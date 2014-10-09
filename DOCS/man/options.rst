@@ -2175,8 +2175,9 @@ Input
     or intend to read from stdin later on via the loadfile or loadlist slave
     commands.
 
-``--input-appleremote``, ``--no-input-appleremote``
-    Enable/disable AppleIR remote support. Enabled by default.
+``--input-appleremote=<yes|no>``
+    (OS X only)
+    Enable/disable Apple Remote support. Enabled by default (except for libmpv).
 
 ``--input-cursor``, ``--no-input-cursor``
     Permit mpv to receive pointer events reported by the video output
@@ -2196,8 +2197,9 @@ Input
     (LIRC only)
     Specifies a configuration file for LIRC (default: ``~/.lircrc``).
 
-``--input-media-keys``, ``--no-input-media-keys``
-    OS X only: Enabled by default. Enables/disable media keys support.
+``--input-media-keys=<yes|no>``
+    (OS X only)
+    Enable/disable media keys support. Enabled by default (except for libmpv).
 
 ``--input-right-alt-gr``, ``--no-input-right-alt-gr``
     (Cocoa and Windows only)

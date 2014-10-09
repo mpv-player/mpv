@@ -72,6 +72,8 @@
 
 #if HAVE_COCOA_APPLICATION
 #include "osdep/macosx_application.h"
+#endif
+#if HAVE_COCOA
 #include "osdep/macosx_events.h"
 #endif
 
@@ -418,9 +420,8 @@ int mp_initialize(struct MPContext *mpctx)
 
     mp_get_resume_defaults(mpctx);
 
-#if HAVE_COCOA_APPLICATION
-    if (mpctx->is_cplayer)
-        cocoa_set_input_context(mpctx->input);
+#if HAVE_COCOA
+    cocoa_set_input_context(mpctx->input);
 #endif
 
     if (opts->force_vo) {
@@ -464,8 +465,6 @@ int mpv_main(int argc, char *argv[])
 
     struct MPContext *mpctx = mp_create();
     struct MPOpts *opts = mpctx->opts;
-
-    mpctx->is_cplayer = true;
 
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)

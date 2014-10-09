@@ -90,6 +90,9 @@ static void wakeup(void *);
         // NOTE: Interaction with the window seems to be broken for now.
         check_error(mpv_set_option_string(mpv, "input-default-bindings", "yes"));
 
+        // for testing!
+        check_error(mpv_set_option_string(mpv, "input-media-keys", "yes"));
+
         check_error(mpv_initialize(mpv));
 
         // Register to be woken up whenever mpv generates new events.
