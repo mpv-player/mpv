@@ -1222,7 +1222,7 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
                              NULL);
     }
 
-    if (vo->opts->WinID >= 0) {
+    if (vo->opts->WinID < 0) {
         vo_x11_set_wm_icon(x11);
         vo_x11_update_window_title(vo);
         vo_x11_dnd_init_window(vo);
@@ -1593,7 +1593,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         set_screensaver(x11, true);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
-        vo_x11_update_window_title(vo);
+        if (vo->opts->WinID < 0)
+            vo_x11_update_window_title(vo);
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS: {
         double fps = x11->current_display_fps;
