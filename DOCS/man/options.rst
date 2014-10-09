@@ -1692,14 +1692,25 @@ Window
     to to work this around using ``--heartbeat-cmd`` instead.
 
 ``--wid=<ID>``
-    (X11 and Windows only)
-    This tells mpv to attach to an existing window. The ID is interpreted as
-    "Window" on X11, and as HWND on Windows. If a VO is selected that supports
-    this option, a new window will be created and the given window will be set
-    as parent. The window will always be resized to cover the parent window
-    fully, and will add black bars to compensate for the video aspect ratio.
+    This tells mpv to attach to an existing window. If a VO is selected that
+    supports this option, it will use that window for video output. mpv will
+    scale the video to the size of this window, and will add black bars to
+    compensate if the aspect ratio of the video is different.
 
-    See also ``--slave-broken``.
+    On X11, the ID is interpreted as a ``Window`` on X11. Unlike
+    MPlayer/mplayer2, mpv always creates its own window, and sets the wid
+    window as parent. The window will always be resized to cover the parent
+    window fully. The value ``0`` is interpreted specially, and mpv will
+    draw directly on the root window.
+
+    On win32, the ID is interpreted as ``HWND``. Pass it as value cast to
+    ``intptr_t``. mpv will create its own window, and set the wid window as
+    parent, like with X11.
+
+    On OSX/Cocoa. the ID is interpreted as ``NSView*``. Pass it as value cast
+    to ``intptr_t``. mpv will creates its own sub-view. Because OSX does not
+    support window embedding of foreign processes, this works only with libmpv,
+    and will crash when used from the command line.
 
 ``--no-window-dragging``
     Don't move the window when clicking on it and moving the mouse pointer.
