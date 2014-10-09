@@ -64,6 +64,7 @@ typedef struct MPOpts {
     int auto_load_scripts;
 
     struct m_obj_settings *audio_driver_list, *ao_defs;
+    char *audio_device;
     int fixed_vo;
     int force_vo;
     int softvol;

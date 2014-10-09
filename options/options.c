@@ -350,6 +350,7 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("vo-defaults", vo.vo_defs, 0, &vo_obj_list),
     OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list),
     OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list),
+    OPT_STRING("audio-device", audio_device, 0),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
     OPT_FLAG("force-window", force_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
@@ -562,6 +563,7 @@ const struct MPOpts mp_default_opts = {
     .mixer_init_mute = -1,
     .gapless_audio = -1,
     .audio_buffer = 0.2,
+    .audio_device = "auto",
     .vo = {
         .video_driver_list = NULL,
         .monitor_pixel_aspect = 1.0,

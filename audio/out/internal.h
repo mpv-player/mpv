@@ -50,6 +50,11 @@ struct ao {
     struct input_ctx *input_ctx;
     struct mp_log *log; // Using e.g. "[ao/coreaudio]" as prefix
 
+    // The device as selected by the user, usually using ao_device_desc.name
+    // from an entry from the list returned by driver->list_devices. If the
+    // default device should be used, this is set to NULL.
+    char *device;
+
     int buffer;
     double def_buffer;
     void *api_priv;
@@ -147,6 +152,11 @@ struct ao_driver {
     // In combination with wait(). Lock may or may not be held.
     void (*wakeup)(struct ao *ao);
 
+    // Return the list of devices currently available in the system. Use
+    // ao_device_list_add() to add entries. The selected device will be set as
+    // ao->device (using ao_device_desc.name).
+    void (*list_devs)(const struct ao_driver *d, struct ao_device_list *list);
+
     // For option parsing (see vo.h)
     int priv_size;
     const void *priv_defaults;
@@ -166,5 +176,9 @@ bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
 bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num);
+
+// Add a deep copy of e to the list.
+void ao_device_list_add(struct ao_device_list *list, const struct ao_driver *d,
+                        struct ao_device_desc *e);
 
 #endif

@@ -763,6 +763,23 @@ Audio
     inserts the ``scaletempo`` audio filter. For details, see audio filter
     section.
 
+``--audio-device=<name>``
+    Use the given audio device. This consists of the audio output name, e.g.
+    ``alsa``, followed by ``/``, followed by the audio output specific device
+    name.
+
+    You can list audio devices with ``--audio-device=help``.
+
+    The default value for this option is ``auto``, which tries every audio
+    output in preference order with the default device.
+
+    Note that many AOs have a ``device`` sub-option, which overrides the
+    device selection of this option (but not the audio output selection).
+    Likewise, forcing an AO with ``--ao`` will override the audio output
+    selection of ``--audio-device`` (but not the device selecton).
+
+    Currently not implemented for most AOs.
+
 ``--ao=<driver1[:suboption1[=value]:...],driver2,...[,]>``
     Specify a priority list of audio output drivers to be used. For
     interactive use one would normally specify a single one to use, but in

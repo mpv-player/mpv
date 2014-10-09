@@ -51,6 +51,16 @@ typedef struct ao_control_vol {
     float right;
 } ao_control_vol_t;
 
+struct ao_device_desc {
+    char *name;     // symbolic name; will be set on ao->device
+    char *desc;     // verbose human readable name
+};
+
+struct ao_device_list {
+    struct ao_device_desc *devices;
+    int num_devices;
+};
+
 struct ao;
 struct mpv_global;
 struct input_ctx;
@@ -75,5 +85,8 @@ void ao_pause(struct ao *ao);
 void ao_resume(struct ao *ao);
 void ao_drain(struct ao *ao);
 bool ao_eof_reached(struct ao *ao);
+
+struct ao_device_list *ao_get_device_list(void);
+void ao_print_devices(struct mp_log *log);
 
 #endif /* MPLAYER_AUDIO_OUT_H */
