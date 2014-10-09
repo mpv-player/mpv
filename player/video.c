@@ -55,6 +55,7 @@ enum {
     VD_PROGRESS = 1,    // progress, but no output; repeat call with no waiting
     VD_NEW_FRAME = 2,   // the call produced a new frame
     VD_WAIT = 3,        // no EOF, but no output; wait until wakeup
+    VD_RECONFIG = 4,
 };
 
 static const char av_desync_help_text[] =
@@ -433,7 +434,7 @@ static int video_filter(struct MPContext *mpctx, bool eof)
         if (vf->initialized < 1)
             return VD_ERROR;
         init_filter_params(mpctx);
-        return VD_PROGRESS;
+        return VD_RECONFIG;
     }
 
     // If something was decoded, and the filter chain is ready, filter it.
@@ -468,7 +469,10 @@ static int video_decode_and_filter(struct MPContext *mpctx)
     }
 
     bool eof = !d_video->waiting_decoded_mpi && (r == VD_EOF || r < 0);
-    return video_filter(mpctx, eof);
+    r = video_filter(mpctx, eof);
+    if (r == VD_RECONFIG) // retry feeding decoded image
+        r = video_filter(mpctx, eof);
+    return r;
 }
 
 /* Modify video timing to match the audio timeline. There are two main
@@ -520,6 +524,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
         if (mpctx->next_frame[0])
             return VD_NEW_FRAME;
         int r = video_decode_and_filter(mpctx);
+        video_filter(mpctx, true); // force EOF filtering (avoid decoding more)
         mpctx->next_frame[0] = vf_read_output_frame(mpctx->d_video->vfilter);
         if (mpctx->next_frame[0])
             mpctx->next_frame[0]->pts = MP_NOPTS_VALUE;
