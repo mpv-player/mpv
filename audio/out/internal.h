@@ -22,8 +22,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#include "audio/chmap.h"
-#include "audio/chmap_sel.h"
+#include "audio/out/ao.h"
 
 // If ao_get_delay() reaches this value after ao_play() was called with the
 // AOPLAY_FINAL_CHUNK flag set, the playback core expects that the audio has
