@@ -758,10 +758,10 @@ Video
 Audio
 -----
 
-``--audio-pitch-correction=<yes|no``
-    If this is enabled, playing with a speed higher than normal automatically
-    inserts the ``scaletempo`` audio filter. For details, see audio filter
-    section.
+``--audio-pitch-correction=<yes|no>``
+    If this is enabled (default), playing with a speed higher than normal
+    automatically inserts the ``scaletempo`` audio filter. For details, see
+    audio filter section.
 
 ``--audio-device=<name>``
     Use the given audio device. This consists of the audio output name, e.g.
