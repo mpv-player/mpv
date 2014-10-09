@@ -31,7 +31,7 @@ int mp_msg_open_stats_file(struct mpv_global *global, const char *path);
 struct bstr;
 int mp_msg_split_msglevel(struct bstr *s, struct bstr *out_mod, int *out_level);
 
-extern const char *const mp_log_levels[MSGL_MAX + 1];
-extern const int const mp_mpv_log_levels[MSGL_MAX + 1];
+extern const char *mp_log_levels[MSGL_MAX + 1];
+extern const int mp_mpv_log_levels[MSGL_MAX + 1];
 
 #endif

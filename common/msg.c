@@ -592,7 +592,7 @@ void mp_msg(struct mp_log *log, int lev, const char *format, ...)
     va_end(va);
 }
 
-const char *const mp_log_levels[MSGL_MAX + 1] = {
+const char *mp_log_levels[MSGL_MAX + 1] = {
     [MSGL_FATAL]        = "fatal",
     [MSGL_ERR]          = "error",
     [MSGL_WARN]         = "warn",
@@ -604,7 +604,7 @@ const char *const mp_log_levels[MSGL_MAX + 1] = {
     [MSGL_STATS]        = "stats",
 };
 
-const int const mp_mpv_log_levels[MSGL_MAX + 1] = {
+const int mp_mpv_log_levels[MSGL_MAX + 1] = {
     [MSGL_FATAL]        = MPV_LOG_LEVEL_FATAL,
     [MSGL_ERR]          = MPV_LOG_LEVEL_ERROR,
     [MSGL_WARN]         = MPV_LOG_LEVEL_WARN,
