@@ -45,6 +45,7 @@
 
 - (BOOL)handleMediaKey:(NSEvent *)event;
 - (NSEvent *)handleKey:(NSEvent *)event;
+- (void)startEventMonitor;
 - (void)startAppleRemote;
 - (void)stopAppleRemote;
 - (void)startMediaKeys;
@@ -110,6 +111,11 @@ static int convert_key(unsigned key, unsigned charcode)
     if (mpkey)
         return mpkey;
     return charcode;
+}
+
+void cocoa_start_event_monitor(void)
+{
+    [[EventsResponder sharedInstance] startEventMonitor];
 }
 
 void cocoa_init_apple_remote(void)
@@ -211,16 +217,6 @@ void cocoa_set_input_context(struct input_ctx *input_context)
     self = [super init];
     if (self) {
         _input_ready = [NSCondition new];
-
-        [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask|NSKeyUpMask
-                                              handler:^(NSEvent *event) {
-            BOOL equivalent = [[NSApp mainMenu] performKeyEquivalent:event];
-            if (equivalent) {
-                return (NSEvent *)nil;
-            } else {
-                return [self handleKey:event];
-            }
-        }];
     }
     return self;
 }
@@ -252,6 +248,19 @@ void cocoa_set_input_context(struct input_ctx *input_context)
         return mp_input_use_alt_gr(self.inputContext);
     else
         return YES;
+}
+
+- (void)startEventMonitor
+{
+    [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask|NSKeyUpMask
+                                          handler:^(NSEvent *event) {
+        BOOL equivalent = [[NSApp mainMenu] performKeyEquivalent:event];
+        if (equivalent) {
+            return (NSEvent *)nil;
+        } else {
+            return [self handleKey:event];
+        }
+    }];
 }
 
 - (void)startAppleRemote

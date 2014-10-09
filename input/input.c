@@ -173,6 +173,7 @@ struct input_opts {
     int use_alt_gr;
     int use_appleremote;
     int use_media_keys;
+    int use_app_events;
     int default_bindings;
     int enable_mouse_movements;
     int vo_key_input;
@@ -204,6 +205,7 @@ const struct m_sub_options input_config = {
 #if HAVE_COCOA
         OPT_FLAG("appleremote", use_appleremote, CONF_GLOBAL),
         OPT_FLAG("media-keys", use_media_keys, CONF_GLOBAL),
+        OPT_FLAG("app-events", use_app_events, CONF_GLOBAL),
 #endif
         {0}
     },
@@ -219,6 +221,7 @@ const struct m_sub_options input_config = {
 #if HAVE_COCOA
         .use_appleremote = 1,
         .use_media_keys = 1,
+        .use_app_events = 1,
 #endif
         .default_bindings = 1,
         .vo_key_input = 1,
@@ -1276,6 +1279,10 @@ void mp_input_load(struct input_ctx *ictx)
     }
 
 #if HAVE_COCOA
+    if (input_conf->use_app_events) {
+        cocoa_start_event_monitor();
+    }
+
     if (input_conf->use_appleremote) {
         cocoa_init_apple_remote();
         ictx->using_ar = true;

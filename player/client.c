@@ -405,8 +405,9 @@ mpv_handle *mpv_create(void)
         mpv_set_option_string(ctx, "input-default-bindings", "no");
         mpv_set_option_string(ctx, "input-vo-keyboard", "no");
         mpv_set_option_string(ctx, "input-lirc", "no");
-        mpv_set_option_string(ctx, "input-media-keys", "no");
         mpv_set_option_string(ctx, "input-appleremote", "no");
+        mpv_set_option_string(ctx, "input-media-keys", "no");
+        mpv_set_option_string(ctx, "input-app-events", "no");
     } else {
         mp_destroy(mpctx);
     }
