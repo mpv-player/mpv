@@ -155,7 +155,6 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->cache_wait_time = 0;
     mpctx->restart_complete = false;
-    mpctx->paused_for_cache = false;
 
 #if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
