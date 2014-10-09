@@ -1265,7 +1265,7 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
                  LeaveWindowMask;
     if (mp_input_mouse_enabled(vo->input_ctx))
         events |= PointerMotionMask | ButtonPressMask | ButtonReleaseMask;
-    if (mp_input_x11_keyboard_enabled(vo->input_ctx))
+    if (mp_input_vo_keyboard_enabled(vo->input_ctx))
         events |= KeyPressMask | KeyReleaseMask;
     vo_x11_selectinput_witherr(vo, x11->display, x11->window, events);
     XMapWindow(x11->display, x11->window);

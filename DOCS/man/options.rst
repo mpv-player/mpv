@@ -2176,8 +2176,9 @@ Input
     Use the right Alt key as Alt Gr to produce special characters. If disabled,
     count the right Alt as an Alt modifier key. Enabled by default.
 
-``--input-x11-keyboard=<yes|no>``
-    Disable all keyboard input on the X11 VO window. Generally useful for
+``--input-vo-keyboard=<yes|no>``
+    Disable all keyboard input on for VOs which can't participate in proper
+    keyboard input dispatching. This currently affects X11. Generally useful for
     embedding only.
 
     On X11, a sub-window with input enabled grabs all keyboard input as long
@@ -2194,6 +2195,8 @@ Input
 
     As a workaround, this option is disabled by default in libmpv. (Note that
     ``input-default-bindings`` is disabled by default in libmpv as well.)
+
+    (This option was renamed from ``--input-x11-keyboard``.)
 
 OSD
 ---

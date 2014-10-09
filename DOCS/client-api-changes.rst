@@ -33,6 +33,8 @@ API changes
           work as expected, and now the behavior can be explicitly controlled
           with the "input-x11-keyboard" option. This is only a temporary
           measure until XEmbed is implemented and confirmed working.
+          Note: in 1.6, "input-x11-keyboard" was renamed to "input-vo-keyboard",
+          although the old option name still works.
  1.4    - subtle change in X11 and "--wid" behavior
           (this change was added to 0.5.2, and broke some things, see #1090)
  --- mpv 0.5.0 is released ---

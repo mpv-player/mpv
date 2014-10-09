@@ -67,8 +67,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mpv_set_option_string(mpv, "input-default-bindings", "yes");
 
     // Enable keyboard input on the X11 window. For the messy details, see
-    // --input-x11-keyboard on the manpage.
-    mpv_set_option_string(mpv, "input-x11-keyboard", "yes");
+    // --input-vo-keyboard on the manpage.
+    mpv_set_option_string(mpv, "input-vo-keyboard", "yes");
 
     // Let us receive property change events with MPV_EVENT_PROPERTY_CHANGE if
     // this property changes.

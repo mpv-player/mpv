@@ -175,7 +175,7 @@ struct input_opts {
     int use_media_keys;
     int default_bindings;
     int enable_mouse_movements;
-    int x11_key_input;
+    int vo_key_input;
     int test;
 };
 
@@ -196,7 +196,8 @@ const struct m_sub_options input_config = {
         OPT_FLAG("right-alt-gr", use_alt_gr, CONF_GLOBAL),
         OPT_INTRANGE("key-fifo-size", key_fifo_size, CONF_GLOBAL, 2, 65000),
         OPT_FLAG("cursor", enable_mouse_movements, CONF_GLOBAL),
-        OPT_FLAG("x11-keyboard", x11_key_input, CONF_GLOBAL),
+        OPT_FLAG("vo-keyboard", vo_key_input, CONF_GLOBAL),
+        OPT_FLAG("x11-keyboard", vo_key_input, CONF_GLOBAL), // old alias
 #if HAVE_LIRC
         OPT_STRING("lirc-conf", lirc_configfile, CONF_GLOBAL),
 #endif
@@ -220,7 +221,7 @@ const struct m_sub_options input_config = {
         .use_media_keys = 1,
 #endif
         .default_bindings = 1,
-        .x11_key_input = 1,
+        .vo_key_input = 1,
     },
 };
 
@@ -709,10 +710,10 @@ bool mp_input_mouse_enabled(struct input_ctx *ictx)
     return r;
 }
 
-bool mp_input_x11_keyboard_enabled(struct input_ctx *ictx)
+bool mp_input_vo_keyboard_enabled(struct input_ctx *ictx)
 {
     input_lock(ictx);
-    bool r = ictx->opts->x11_key_input;
+    bool r = ictx->opts->vo_key_input;
     input_unlock(ictx);
     return r;
 }

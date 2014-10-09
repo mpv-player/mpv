@@ -403,7 +403,7 @@ mpv_handle *mpv_create(void)
         mpv_set_option_string(ctx, "terminal", "no");
         mpv_set_option_string(ctx, "osc", "no");
         mpv_set_option_string(ctx, "input-default-bindings", "no");
-        mpv_set_option_string(ctx, "input-x11-keyboard", "no");
+        mpv_set_option_string(ctx, "input-vo-keyboard", "no");
         mpv_set_option_string(ctx, "input-lirc", "no");
     } else {
         mp_destroy(mpctx);

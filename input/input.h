@@ -156,7 +156,7 @@ void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y);
 // Return whether we want/accept mouse input.
 bool mp_input_mouse_enabled(struct input_ctx *ictx);
 
-bool mp_input_x11_keyboard_enabled(struct input_ctx *ictx);
+bool mp_input_vo_keyboard_enabled(struct input_ctx *ictx);
 
 /* Make mp_input_set_mouse_pos() mangle the mouse coordinates. Hack for certain
  * VOs. dst=NULL, src=NULL reset it. src can be NULL.
