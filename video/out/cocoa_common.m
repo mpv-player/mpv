@@ -184,15 +184,13 @@ void vo_cocoa_uninit(struct vo *vo)
 
         [s->video release];
 
-        // XXX: It looks like there are some circular retain cycles for the
-        // video view / video window that cause them to not be deallocated,
-        // This is a workaround to make the fullscreen window be released,
-        // but the retain cycle problems should be investigated.
-        if ([s->view isInFullScreenMode])
-            [[s->view window] release];
+        if (!s->embedded) {
+            if ([s->view isInFullScreenMode])
+                [[s->view window] release];
 
-        [s->window release];
-        s->window = nil;
+            [s->window release];
+            s->window = nil;
+        }
     });
 }
 
