@@ -365,6 +365,8 @@ static int init(struct ao *ao)
             device = talloc_asprintf(ao, "plug:%s", device);
         }
     }
+    if (ao->device)
+        device = ao->device;
     if (p->cfg_device && p->cfg_device[0])
         device = p->cfg_device;
 
@@ -731,6 +733,30 @@ alsa_error:
     return -1;
 }
 
+static void list_devs(const struct ao_driver *d, struct ao_device_list *list)
+{
+    void **hints;
+    if (snd_device_name_hint(-1, "pcm", &hints) < 0)
+        return;
+
+    for (int n = 0; hints[n]; n++) {
+        char *name = snd_device_name_get_hint(hints[n], "NAME");
+        char *desc = snd_device_name_get_hint(hints[n], "DESC");
+        char *io = snd_device_name_get_hint(hints[n], "IOID");
+        if (io && strcmp(io, "Output") != 0)
+            continue;
+        char desc2[1024];
+        snprintf(desc2, sizeof(desc2), "%s", desc ? desc : "");
+        for (int i = 0; desc2[i]; i++) {
+            if (desc2[i] == '\n')
+                desc2[i] = '/';
+        }
+        ao_device_list_add(list, d, &(struct ao_device_desc){name, desc2});
+    }
+
+    snd_device_name_free_hint(hints);
+}
+
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_alsa = {
@@ -748,6 +774,7 @@ const struct ao_driver audio_out_alsa = {
     .drain     = drain,
     .wait      = audio_wait,
     .wakeup    = ao_wakeup_poll,
+    .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .cfg_block = 1,
