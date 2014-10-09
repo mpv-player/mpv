@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <inttypes.h>
 #include <stdarg.h>
 #include <assert.h>
@@ -116,9 +117,9 @@ static void dar_from_sar_par(int width, int height, AVRational par,
     if (par.num != 0 && par.den != 0) {
         double d = av_q2d(par);
         if (d > 1.0) {
-            *out_dw *= d;
+            *out_dw = floor(*out_dw * d + 0.5);
         } else {
-            *out_dh /= d;
+            *out_dh = floor(*out_dh / d + 0.5);
         }
     }
 }
