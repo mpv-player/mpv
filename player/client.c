@@ -120,7 +120,7 @@ struct mpv_handle {
     int properties_updating;
     uint64_t property_event_masks; // or-ed together event masks of all properties
 
-    bool fuzzy_initialized;
+    bool fuzzy_initialized; // see scripting.c wait_loaded()
     struct mp_log_buffer *messages;
 };
 
