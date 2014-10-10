@@ -208,58 +208,29 @@ static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
     return true;
 }
 
-// Somewhat awkward; the main purpose is supporting both strings and
-// pre-split string arrays as input.
 struct parse_ctx {
     struct mp_log *log;
-    const char *loc;
     void *tmp;
-    bool array_input; // false: use start/str, true: use num_strs/strs
     bstr start, str;
-    bstr *strs;
-    int num_strs;
 };
 
 static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
 {
     *out = (bstr){0};
-    if (ctx->array_input) {
-        if (!ctx->num_strs)
-            return 0;
-        *out = ctx->strs[0];
-        ctx->strs++;
-        ctx->num_strs--;
-        return 1;
-    } else {
-        ctx->str = bstr_lstrip(ctx->str);
-        bstr start = ctx->str;
-        if (bstr_eatstart0(&ctx->str, "\"")) {
-            if (!mp_append_escaped_string_noalloc(ctx->tmp, out, &ctx->str)) {
-                MP_ERR(ctx, "Broken string escapes: ...>%.*s<.\n", BSTR_P(start));
-                return -1;
-            }
-            if (!bstr_eatstart0(&ctx->str, "\"")) {
-                MP_ERR(ctx, "Unterminated quotes: ...>%.*s<.\n", BSTR_P(start));
-                return -1;
-            }
-            return 1;
+    ctx->str = bstr_lstrip(ctx->str);
+    bstr start = ctx->str;
+    if (bstr_eatstart0(&ctx->str, "\"")) {
+        if (!mp_append_escaped_string_noalloc(ctx->tmp, out, &ctx->str)) {
+            MP_ERR(ctx, "Broken string escapes: ...>%.*s<.\n", BSTR_P(start));
+            return -1;
         }
-        return read_token(ctx->str, &ctx->str, out) ? 1 : 0;
+        if (!bstr_eatstart0(&ctx->str, "\"")) {
+            MP_ERR(ctx, "Unterminated quotes: ...>%.*s<.\n", BSTR_P(start));
+            return -1;
+        }
+        return 1;
     }
-}
-
-static bstr pctx_get_trailing(struct parse_ctx *ctx)
-{
-    if (ctx->array_input) {
-        if (ctx->num_strs == 0)
-            return (bstr){0};
-        return ctx->strs[0]; // mentioning the first trailing arg is enough?
-    } else {
-        bstr dummy;
-        if (!read_token(ctx->str, &dummy, &dummy))
-            return (bstr){0};
-        return ctx->str;
-    }
+    return read_token(ctx->str, &ctx->str, out) ? 1 : 0;
 }
 
 static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
@@ -267,7 +238,6 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
 {
     struct parse_ctx *ctx = &(struct parse_ctx){
         .log = log,
-        .loc = loc,
         .tmp = tmp,
         .str = *str,
         .start = *str,
@@ -280,15 +250,13 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
         .scale = 1,
     };
 
-    if (!ctx->array_input) {
-        ctx->str = bstr_lstrip(ctx->str);
-        bstr old = ctx->str;
-        if (mp_replace_legacy_cmd(ctx->tmp, &ctx->str)) {
-            MP_WARN(ctx, "Warning: command '%.*s' is deprecated, "
-                    "replaced with '%.*s' at %s.\n",
-                    BSTR_P(old), BSTR_P(ctx->str), ctx->loc);
-            ctx->start = ctx->str;
-        }
+    ctx->str = bstr_lstrip(ctx->str);
+    bstr old = ctx->str;
+    if (mp_replace_legacy_cmd(ctx->tmp, &ctx->str)) {
+        MP_WARN(ctx, "Warning: command '%.*s' is deprecated, "
+                "replaced with '%.*s' at %s.\n",
+                BSTR_P(old), BSTR_P(ctx->str), loc);
+        ctx->start = ctx->str;
     }
 
     bstr cur_token;
@@ -332,24 +300,22 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
     if (!finish_cmd(ctx->log, cmd))
         goto error;
 
-    bstr left = pctx_get_trailing(ctx);
-    if (left.len) {
+    bstr dummy;
+    if (read_token(ctx->str, &dummy, &dummy) && ctx->str.len) {
         MP_ERR(ctx, "Command %s has trailing unused arguments: '%.*s'.\n",
-               cmd->name, BSTR_P(left));
+               cmd->name, BSTR_P(ctx->str));
         // Better make it fatal to make it clear something is wrong.
         goto error;
     }
 
-    if (!ctx->array_input) {
-        bstr orig = {ctx->start.start, ctx->str.start - ctx->start.start};
-        cmd->original = bstrdup(cmd, bstr_strip(orig));
-    }
+    bstr orig = {ctx->start.start, ctx->str.start - ctx->start.start};
+    cmd->original = bstrdup(cmd, bstr_strip(orig));
 
     *str = ctx->str;
     return cmd;
 
 error:
-    MP_ERR(ctx, "Command was defined at %s.\n", ctx->loc);
+    MP_ERR(ctx, "Command was defined at %s.\n", loc);
     talloc_free(cmd);
     *str = ctx->str;
     return NULL;
