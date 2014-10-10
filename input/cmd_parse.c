@@ -27,6 +27,8 @@
 #include "cmd_list.h"
 #include "input.h"
 
+#include "libmpv/client.h"
+
 static void destroy_cmd(void *ptr)
 {
     struct mp_cmd *cmd = ptr;
@@ -118,10 +120,152 @@ static const struct flag cmd_flags[] = {
     {0}
 };
 
+static bool apply_flag(struct mp_cmd *cmd, bstr str)
+{
+    for (int n = 0; cmd_flags[n].name; n++) {
+        if (bstr_equals0(str, cmd_flags[n].name)) {
+            cmd->flags = (cmd->flags & ~cmd_flags[n].remove) | cmd_flags[n].add;
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool find_cmd(struct mp_log *log, struct mp_cmd *cmd, bstr name)
+{
+    if (name.len == 0) {
+        mp_err(log, "Command name missing.\n");
+        return false;
+    }
+    for (int n = 0; mp_cmds[n].name; n++) {
+        if (bstr_equals0(name, mp_cmds[n].name)) {
+            cmd->def = &mp_cmds[n];
+            cmd->name = (char *)cmd->def->name;
+            cmd->id = cmd->def->id;
+            return true;
+        }
+    }
+    mp_err(log, "Command '%.*s' not found.\n", BSTR_P(name));
+    return false;
+}
+
+static bool is_vararg(const struct mp_cmd_def *m, int i)
+{
+    return m->vararg && (i + 1 >= MP_CMD_MAX_ARGS || !m->args[i + 1].type);
+}
+
+static const struct m_option *get_arg_type(const struct mp_cmd_def *cmd, int i)
+{
+    if (i >= MP_CMD_MAX_ARGS)
+        return NULL;
+    const struct m_option *opt = &cmd->args[i];
+    if (!opt->type && is_vararg(cmd, i)) {
+        // The last arg in a vararg command sets all vararg types.
+        for (int n = i; n >= 0; n--) {
+            if (cmd->args[n].type) {
+                opt = &cmd->args[n];
+                break;
+            }
+        }
+    }
+    return opt->type ? opt : NULL;
+}
+
+// Set correct arg count, and fill in missing optional args.
+static bool finish_cmd(struct mp_log *log, struct mp_cmd *cmd)
+{
+    cmd->nargs = 0;
+    for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
+        if (!cmd->args[i].type) {
+            const struct m_option *opt = get_arg_type(cmd->def, i);
+            if (!opt || is_vararg(cmd->def, i))
+                break;
+            if (!opt->defval && !(opt->flags & MP_CMD_OPT_ARG)) {
+                mp_err(log, "Command %s: more than %d arguments required.\n",
+                       cmd->name, cmd->nargs);
+                return false;
+            }
+            cmd->args[i].type = opt;
+            if (opt->defval)
+                m_option_copy(opt, &cmd->args[i].v, opt->defval);
+        }
+        if (cmd->args[i].type)
+            cmd->nargs = i + 1;
+    }
+    return true;
+}
+
+struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, mpv_node *node)
+{
+    struct mp_cmd *cmd = talloc_ptrtype(NULL, cmd);
+    talloc_set_destructor(cmd, destroy_cmd);
+    *cmd = (struct mp_cmd) { .scale = 1, };
+
+    if (node->format != MPV_FORMAT_NODE_ARRAY)
+        goto error;
+    mpv_node_list *args = node->u.list;
+    int cur = 0;
+
+    while (cur < args->num) {
+        if (args->values[cur].format != MPV_FORMAT_STRING)
+            break;
+        if (!apply_flag(cmd, bstr0(args->values[cur].u.string)))
+            break;
+        cur++;
+    }
+
+    bstr cmd_name = {0};
+    if (cur < args->num && args->values[cur].format == MPV_FORMAT_STRING)
+        cmd_name = bstr0(args->values[cur++].u.string);
+    if (!find_cmd(log, cmd, cmd_name))
+        goto error;
+
+    int first = cur;
+    for (int i = 0; i < args->num - first; i++) {
+        const struct m_option *opt = get_arg_type(cmd->def, i);
+        if (!opt) {
+            mp_err(log, "Command %s: has only %d arguments.\n", cmd->name, i);
+            goto error;
+        }
+        mpv_node *val = &args->values[cur++];
+        cmd->args[i].type = opt;
+        void *dst = &cmd->args[i].v;
+        if (val->format == MPV_FORMAT_STRING) {
+            int r = m_option_parse(log, opt, bstr0(cmd->name),
+                                   bstr0(val->u.string), dst);
+            if (r < 0) {
+                mp_err(log, "Command %s: argument %d can't be parsed: %s.\n",
+                       cmd->name, i + 1, m_option_strerror(r));
+                goto error;
+            }
+        } else {
+            int r = m_option_set_node(opt, dst, val);
+            if (r < 0) {
+                mp_err(log, "Command %s: argument %d has incompatible type.\n",
+                       cmd->name, i + 1);
+                goto error;
+            }
+        }
+    }
+
+    if (!finish_cmd(log, cmd))
+        goto error;
+
+    return cmd;
+error:
+    for (int n = 0; n < MP_CMD_MAX_ARGS; n++) {
+        if (cmd->args[n].type)
+            m_option_free(cmd->args[n].type, &cmd->args[n].v);
+    }
+    talloc_free(cmd);
+    return NULL;
+}
+
 static struct mp_cmd *parse_cmd(struct parse_ctx *ctx, int def_flags)
 {
-    struct mp_cmd *cmd = NULL;
-    int r;
+    struct mp_cmd *cmd = talloc_ptrtype(NULL, cmd);
+    talloc_set_destructor(cmd, destroy_cmd);
+    *cmd = (struct mp_cmd) { .flags = def_flags, .scale = 1, };
 
     if (!ctx->array_input) {
         ctx->str = bstr_lstrip(ctx->str);
@@ -139,80 +283,31 @@ static struct mp_cmd *parse_cmd(struct parse_ctx *ctx, int def_flags)
         goto error;
 
     while (1) {
-        for (int n = 0; cmd_flags[n].name; n++) {
-            if (bstr_equals0(cur_token, cmd_flags[n].name)) {
-                if (pctx_read_token(ctx, &cur_token) < 0)
-                    goto error;
-                def_flags &= ~cmd_flags[n].remove;
-                def_flags |= cmd_flags[n].add;
-                goto cont;
-            }
-        }
-        break;
-    cont: ;
-    }
-
-    if (cur_token.len == 0) {
-        MP_ERR(ctx, "Command name missing.\n");
-        goto error;
-    }
-    const struct mp_cmd_def *cmd_def = NULL;
-    for (int n = 0; mp_cmds[n].name; n++) {
-        if (bstr_equals0(cur_token, mp_cmds[n].name)) {
-            cmd_def = &mp_cmds[n];
+        if (!apply_flag(cmd, cur_token))
             break;
-        }
+        if (pctx_read_token(ctx, &cur_token) < 0)
+            goto error;
+        break;
     }
 
-    if (!cmd_def) {
-        MP_ERR(ctx, "Command '%.*s' not found.\n", BSTR_P(cur_token));
+    if (!find_cmd(ctx->log, cmd, cur_token))
         goto error;
-    }
-
-    cmd = talloc_ptrtype(NULL, cmd);
-    talloc_set_destructor(cmd, destroy_cmd);
-    *cmd = (struct mp_cmd) {
-        .name = (char *)cmd_def->name,
-        .id = cmd_def->id,
-        .flags = def_flags,
-        .scale = 1,
-        .def = cmd_def,
-    };
 
     for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
-        const struct m_option *opt = &cmd_def->args[i];
-        bool is_vararg = cmd_def->vararg &&
-            (i + 1 >= MP_CMD_MAX_ARGS || !cmd_def->args[i + 1].type); // last arg
-        if (!opt->type && is_vararg && cmd->nargs > 0)
-            opt = cmd->args[cmd->nargs - 1].type;
-        if (!opt->type)
+        const struct m_option *opt = get_arg_type(cmd->def, i);
+        if (!opt)
             break;
 
-        r = pctx_read_token(ctx, &cur_token);
+        int r = pctx_read_token(ctx, &cur_token);
         if (r < 0) {
             MP_ERR(ctx, "Command %s: error in argument %d.\n", cmd->name, i + 1);
             goto error;
         }
-        if (r < 1) {
-            if (is_vararg)
-                continue;
-            // Skip optional arguments
-            if (opt->defval || (opt->flags & MP_CMD_OPT_ARG)) {
-                struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
-                cmdarg->type = opt;
-                if (opt->defval)
-                    m_option_copy(opt, &cmdarg->v, opt->defval);
-                cmd->nargs++;
-                continue;
-            }
-            MP_ERR(ctx, "Command %s: more than %d arguments required.\n",
-                   cmd->name, cmd->nargs);
-            goto error;
-        }
+        if (r < 1)
+            break;
 
-        struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
+        struct mp_cmd_arg *cmdarg = &cmd->args[i];
         cmdarg->type = opt;
-        cmd->nargs++;
         r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &cmdarg->v);
         if (r < 0) {
             MP_ERR(ctx, "Command %s: argument %d can't be parsed: %s.\n",
@@ -220,6 +315,9 @@ static struct mp_cmd *parse_cmd(struct parse_ctx *ctx, int def_flags)
             goto error;
         }
     }
+
+    if (!finish_cmd(ctx->log, cmd))
+        goto error;
 
     bstr left = pctx_get_trailing(ctx);
     if (left.len) {

@@ -20,6 +20,7 @@
 
 struct mp_log;
 struct mp_cmd;
+struct mpv_node;
 
 // Parse text and return corresponding struct mp_cmd.
 // The location parameter is for error messages.
@@ -36,6 +37,7 @@ struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
 struct mp_cmd *mp_input_parse_cmd_bstrv(struct mp_log *log, int def_flags,
                                         int argc, bstr *argv,
                                         const char *location);
+struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, struct mpv_node *node);
 
 // After getting a command from mp_input_get_cmd you need to free it using this
 // function
