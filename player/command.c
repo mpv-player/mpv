@@ -84,6 +84,8 @@ struct command_ctx {
     // bitmap list can be manipulated without additional synchronization.
     struct sub_bitmaps overlay_osd[2];
     struct sub_bitmaps *overlay_osd_current;
+
+    struct ao_device_list *cached_ao_devices;
 };
 
 struct overlay {
@@ -1306,6 +1308,35 @@ static int mp_property_volrestore(void *ctx, struct m_property *prop,
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
+static int get_device_entry(int item, int action, void *arg, void *ctx)
+{
+    struct ao_device_list *list = ctx;
+    struct ao_device_desc *entry = &list->devices[item];
+
+    struct m_sub_property props[] = {
+        {"name",        SUB_PROP_STR(entry->name)},
+        {"description", SUB_PROP_STR(entry->desc)},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
+static int mp_property_audio_devices(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    struct MPContext *mpctx = ctx;
+    struct command_ctx *cmd = mpctx->command_ctx;
+    if (!cmd->cached_ao_devices)
+        cmd->cached_ao_devices = ao_get_device_list(mpctx->global);
+    if (!cmd->cached_ao_devices)
+        return M_PROPERTY_ERROR;
+    talloc_steal(cmd, cmd->cached_ao_devices);
+
+    return m_property_read_list(action, arg, cmd->cached_ao_devices->num_devices,
+                                get_device_entry, cmd->cached_ao_devices);
 }
 
 /// Audio delay (RW)
@@ -2794,6 +2825,7 @@ static const struct m_property mp_properties[] = {
     {"aid", mp_property_audio},
     {"balance", mp_property_balance},
     {"volume-restore-data", mp_property_volrestore},
+    {"audio-device-list", mp_property_audio_devices},
 
     // Video
     {"fullscreen", mp_property_fullscreen},

@@ -1334,6 +1334,27 @@ Property list
     Note that you need to escape the ``\`` character, because the string is
     processed for C escape sequences before passing it to the OSD code.
 
+``audio-device-list``
+    Return the list of discovered audio devices. This is mostly for use with
+    the client API, and reflects what ``--audio-device=help`` with the command
+    line player returns.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each device entry)
+                "name"          MPV_FORMAT_STRING
+                "description"   MPV_FORMAT_STRING
+
+    The ``name`` is what is to be passed to the ``--audio-device`` option (and
+    often a rather cryptic audio API-specific ID), while ``description`` is
+    human readable free form text. The description is an empty string if none
+    was received.
+
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
     changed at runtime by writing to this property. Note that many options
