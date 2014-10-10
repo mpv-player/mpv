@@ -343,7 +343,7 @@ static const struct gl_functions gl_functions[] = {
     },
     {
         .extension = "GLX_SGI_video_sync",
-        .functions = (struct gl_function[]) {
+        .functions = (const struct gl_function[]) {
             DEF_FN_NAMES(GetVideoSync, "glXGetVideoSyncSGI"),
             DEF_FN_NAMES(WaitVideoSync, "glXWaitVideoSyncSGI"),
             {0},

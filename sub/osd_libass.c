@@ -160,8 +160,8 @@ void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
 }
 
 // Same trick as above: never valid UTF-8, so we expect it's free for use.
-const char *osd_ass_0 = "\xFD";
-const char *osd_ass_1 = "\xFE";
+const char *const osd_ass_0 = "\xFD";
+const char *const osd_ass_1 = "\xFE";
 
 static void mangle_ass(bstr *dst, const char *in)
 {

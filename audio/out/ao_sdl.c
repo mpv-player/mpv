@@ -38,7 +38,7 @@ struct priv
     float buflen;
 };
 
-static int fmtmap[][2] = {
+static const int fmtmap[][2] = {
     {AF_FORMAT_U8,      AUDIO_U8},
     {AF_FORMAT_S8,      AUDIO_S8},
     {AF_FORMAT_U16,     AUDIO_U16SYS},

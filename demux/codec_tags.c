@@ -352,8 +352,8 @@ static const char *lookup_tag(const struct mp_codec_tag *mp_table,
     return id == AV_CODEC_ID_NONE ? NULL : mp_codec_from_av_codec_id(id);
 }
 
-static const char *pcm_le[] = {"pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"};
-static const char *pcm_be[] = {"pcm_s8", "pcm_s16be", "pcm_s24be", "pcm_s32be"};
+static const char *const pcm_le[] = {"pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"};
+static const char *const pcm_be[] = {"pcm_s8", "pcm_s16be", "pcm_s24be", "pcm_s32be"};
 
 static const char *map_audio_pcm_tag(uint32_t tag, int bits)
 {
