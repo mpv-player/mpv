@@ -24,11 +24,6 @@
 
 #include "audio/out/ao.h"
 
-// If ao_get_delay() reaches this value after ao_play() was called with the
-// AOPLAY_FINAL_CHUNK flag set, the playback core expects that the audio has
-// all been played.
-#define AO_EOF_DELAY 0.05
-
 /* global data used by ao.c and ao drivers */
 struct ao {
     int samplerate;
