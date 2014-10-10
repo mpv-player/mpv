@@ -288,6 +288,8 @@ no_audio:
     mp_deselect_track(mpctx, track);
     if (track)
         MP_INFO(mpctx, "Audio: no audio\n");
+    if (!mpctx->current_track[STREAM_VIDEO])
+        mpctx->stop_play = PT_NEXT_ENTRY;
 }
 
 // Return pts value corresponding to the end point of audio written to the
