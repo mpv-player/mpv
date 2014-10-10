@@ -1216,6 +1216,7 @@ terminate_playback:
     if (mpctx->stop_play != PT_RESTART)
         m_config_restore_backups(mpctx->mconfig);
 
+    mpctx->playback_initialized = false;
     mpctx->resolve_result = NULL;
 
     if (mpctx->playing && mpctx->stop_play == AT_END_OF_FILE) {
