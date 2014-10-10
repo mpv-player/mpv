@@ -90,15 +90,7 @@ static double unlocked_get_delay(struct ao *ao)
     double driver_delay = 0;
     if (ao->driver->get_delay)
         driver_delay = ao->driver->get_delay(ao);
-    double delay = driver_delay + mp_audio_buffer_seconds(p->buffer);
-    if (delay >= AO_EOF_DELAY && p->expected_end_time) {
-        if (mp_time_sec() > p->expected_end_time) {
-            MP_ERR(ao, "Audio device EOF reporting is broken!\n");
-            MP_ERR(ao, "Please report this problem.\n");
-            delay = 0;
-        }
-    }
-    return delay;
+    return driver_delay + mp_audio_buffer_seconds(p->buffer);
 }
 
 static float get_delay(struct ao *ao)
@@ -240,7 +232,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     bool got_data = write_samples > 0 || p->paused || p->final_chunk != is_final;
 
-    p->expected_end_time = 0;
     p->final_chunk = is_final;
     p->paused = false;
     p->still_playing |= write_samples > 0;
@@ -284,11 +275,8 @@ static void ao_play_data(struct ao *ao)
         r = max;
     }
     mp_audio_buffer_skip(p->buffer, r);
-    if (p->final_chunk && mp_audio_buffer_samples(p->buffer) == 0) {
-        p->expected_end_time = mp_time_sec() + AO_EOF_DELAY + 0.25; // + margin
-        if (ao->driver->get_delay)
-            p->expected_end_time += ao->driver->get_delay(ao);
-    }
+    if (r > 0)
+        p->expected_end_time = 0;
     // Nothing written, but more input data than space - this must mean the
     // AO's get_space() doesn't do period alignment correctly.
     bool stuck = r == 0 && max >= space && space > 0;
@@ -330,10 +318,17 @@ static void *playthread(void *arg)
 
                 bool was_playing = p->still_playing;
                 double timeout = -1;
-                if (p->still_playing && !p->paused) {
-                    timeout = unlocked_get_delay(ao);
-                    if (timeout < AO_EOF_DELAY)
+                if (p->still_playing && !p->paused && p->final_chunk &&
+                    !mp_audio_buffer_samples(p->buffer))
+                {
+                    double now = mp_time_sec();
+                    if (!p->expected_end_time)
+                        p->expected_end_time = now + unlocked_get_delay(ao);
+                    if (p->expected_end_time < now) {
                         p->still_playing = false;
+                    } else {
+                        timeout = p->expected_end_time - now;
+                    }
                 }
 
                 if (was_playing && !p->still_playing)
@@ -346,6 +341,7 @@ static void *playthread(void *arg)
                     pthread_cond_wait(&p->wakeup, &p->lock);
                 }
             } else {
+                // Wait until the device wants us to write more data to it.
                 if (!ao->driver->wait || ao->driver->wait(ao, &p->lock) < 0) {
                     // Fallback to guessing.
                     double timeout = 0;
