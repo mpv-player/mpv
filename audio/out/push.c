@@ -151,7 +151,7 @@ static void drain(struct ao *ao)
 
     p->final_chunk = true;
     wakeup_playthread(ao);
-    while (p->still_playing)
+    while (p->still_playing && mp_audio_buffer_samples(p->buffer) > 0)
         pthread_cond_wait(&p->wakeup, &p->lock);
 
     if (ao->driver->drain) {
