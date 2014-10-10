@@ -563,7 +563,7 @@ def build(ctx):
     if ctx.dependency_satisfied('zsh-comp'):
         ctx.zshcomp(target = "etc/_mpv")
         ctx.install_files(
-            ctx.env.DATADIR + '/zsh/vendor-completions',
+            ctx.env.ZSHDIR,
             ['etc/_mpv'])
 
     ctx.install_files(
