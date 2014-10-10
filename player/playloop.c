@@ -820,7 +820,6 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
             .d_w = w, .d_h = h,
         };
         vo_reconfig(vo, &p, 0);
-        vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &(bool){true});
         vo_control(vo, VOCTRL_RESTORE_SCREENSAVER, NULL);
         vo_set_paused(vo, true);
         vo_redraw(vo);
@@ -989,6 +988,7 @@ void idle_loop(struct MPContext *mpctx)
         mp_wait_events(mpctx, mpctx->sleeptime);
         mpctx->sleeptime = 100.0;
         mp_process_input(mpctx);
+        handle_cursor_autohide(mpctx);
         update_osd_msg(mpctx);
         handle_osd_redraw(mpctx);
     }
