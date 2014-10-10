@@ -1210,8 +1210,7 @@ terminate_playback:
     uninit_stream(mpctx);
     if (!opts->fixed_vo)
         uninit_video_out(mpctx);
-    if (!(opts->gapless_audio && mpctx->stop_play == AT_END_OF_FILE) &&
-        !mpctx->encode_lavc_ctx)
+    if (!opts->gapless_audio && !mpctx->encode_lavc_ctx)
         uninit_audio_out(mpctx);
 
     if (mpctx->stop_play != PT_RESTART)
