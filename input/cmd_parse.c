@@ -36,74 +36,6 @@ static void destroy_cmd(void *ptr)
         m_option_free(cmd->args[n].type, &cmd->args[n].v);
 }
 
-static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
-{
-    bstr t = bstr_lstrip(str);
-    char nextc = t.len > 0 ? t.start[0] : 0;
-    if (nextc == '#' || nextc == ';')
-        return false; // comment or command separator
-    int next = bstrcspn(t, WHITESPACE);
-    if (!next)
-        return false;
-    *out_token = bstr_splice(t, 0, next);
-    *out_rest = bstr_cut(t, next);
-    return true;
-}
-
-// Somewhat awkward; the main purpose is supporting both strings and
-// pre-split string arrays as input.
-struct parse_ctx {
-    struct mp_log *log;
-    const char *loc;
-    void *tmp;
-    bool array_input; // false: use start/str, true: use num_strs/strs
-    bstr start, str;
-    bstr *strs;
-    int num_strs;
-};
-
-static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
-{
-    *out = (bstr){0};
-    if (ctx->array_input) {
-        if (!ctx->num_strs)
-            return 0;
-        *out = ctx->strs[0];
-        ctx->strs++;
-        ctx->num_strs--;
-        return 1;
-    } else {
-        ctx->str = bstr_lstrip(ctx->str);
-        bstr start = ctx->str;
-        if (bstr_eatstart0(&ctx->str, "\"")) {
-            if (!mp_append_escaped_string_noalloc(ctx->tmp, out, &ctx->str)) {
-                MP_ERR(ctx, "Broken string escapes: ...>%.*s<.\n", BSTR_P(start));
-                return -1;
-            }
-            if (!bstr_eatstart0(&ctx->str, "\"")) {
-                MP_ERR(ctx, "Unterminated quotes: ...>%.*s<.\n", BSTR_P(start));
-                return -1;
-            }
-            return 1;
-        }
-        return read_token(ctx->str, &ctx->str, out) ? 1 : 0;
-    }
-}
-
-static bstr pctx_get_trailing(struct parse_ctx *ctx)
-{
-    if (ctx->array_input) {
-        if (ctx->num_strs == 0)
-            return (bstr){0};
-        return ctx->strs[0]; // mentioning the first trailing arg is enough?
-    } else {
-        bstr dummy;
-        if (!read_token(ctx->str, &dummy, &dummy))
-            return (bstr){0};
-        return ctx->str;
-    }
-}
-
 struct flag {
     const char *name;
     unsigned int remove, add;
@@ -259,6 +191,75 @@ error:
     }
     talloc_free(cmd);
     return NULL;
+}
+
+
+static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
+{
+    bstr t = bstr_lstrip(str);
+    char nextc = t.len > 0 ? t.start[0] : 0;
+    if (nextc == '#' || nextc == ';')
+        return false; // comment or command separator
+    int next = bstrcspn(t, WHITESPACE);
+    if (!next)
+        return false;
+    *out_token = bstr_splice(t, 0, next);
+    *out_rest = bstr_cut(t, next);
+    return true;
+}
+
+// Somewhat awkward; the main purpose is supporting both strings and
+// pre-split string arrays as input.
+struct parse_ctx {
+    struct mp_log *log;
+    const char *loc;
+    void *tmp;
+    bool array_input; // false: use start/str, true: use num_strs/strs
+    bstr start, str;
+    bstr *strs;
+    int num_strs;
+};
+
+static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
+{
+    *out = (bstr){0};
+    if (ctx->array_input) {
+        if (!ctx->num_strs)
+            return 0;
+        *out = ctx->strs[0];
+        ctx->strs++;
+        ctx->num_strs--;
+        return 1;
+    } else {
+        ctx->str = bstr_lstrip(ctx->str);
+        bstr start = ctx->str;
+        if (bstr_eatstart0(&ctx->str, "\"")) {
+            if (!mp_append_escaped_string_noalloc(ctx->tmp, out, &ctx->str)) {
+                MP_ERR(ctx, "Broken string escapes: ...>%.*s<.\n", BSTR_P(start));
+                return -1;
+            }
+            if (!bstr_eatstart0(&ctx->str, "\"")) {
+                MP_ERR(ctx, "Unterminated quotes: ...>%.*s<.\n", BSTR_P(start));
+                return -1;
+            }
+            return 1;
+        }
+        return read_token(ctx->str, &ctx->str, out) ? 1 : 0;
+    }
+}
+
+static bstr pctx_get_trailing(struct parse_ctx *ctx)
+{
+    if (ctx->array_input) {
+        if (ctx->num_strs == 0)
+            return (bstr){0};
+        return ctx->strs[0]; // mentioning the first trailing arg is enough?
+    } else {
+        bstr dummy;
+        if (!read_token(ctx->str, &dummy, &dummy))
+            return (bstr){0};
+        return ctx->str;
+    }
 }
 
 static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
