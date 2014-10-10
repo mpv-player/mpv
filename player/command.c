@@ -3836,7 +3836,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_STOP:
-        // Go back to the starting point.
+        playlist_clear(mpctx->playlist);
         mpctx->stop_play = PT_STOP;
         break;
 

@@ -1329,14 +1329,8 @@ void mp_play_files(struct MPContext *mpctx)
 
         if (mpctx->stop_play == PT_NEXT_ENTRY) {
             new_entry = mp_next_file(mpctx, +1, false);
-        } else if (mpctx->stop_play == PT_CURRENT_ENTRY) {
+        } else {
             new_entry = mpctx->playlist->current;
-        } else if (mpctx->stop_play == PT_RESTART) {
-            // The same as PT_CURRENT_ENTRY, unless we decide that the current
-            // playlist entry can be removed during playback.
-            new_entry = mpctx->playlist->current;
-        } else { // PT_STOP
-            playlist_clear(mpctx->playlist);
         }
 
         mpctx->playlist->current = new_entry;
