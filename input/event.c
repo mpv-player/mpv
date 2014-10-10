@@ -29,22 +29,24 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files)
     if (all_sub) {
         for (int i = 0; i < num_files; i++) {
             const char *cmd[] = {
+                "osd-auto",
                 "sub_add",
                 files[i],
                 NULL
             };
-            mp_input_run_cmd(ictx, MP_ON_OSD_AUTO, cmd, "<drop-subtitle>");
+            mp_input_run_cmd(ictx, cmd);
         }
     } else {
         for (int i = 0; i < num_files; i++) {
             const char *cmd[] = {
+                "osd-auto",
                 "loadfile",
                 files[i],
                 /* Start playing the dropped files right away */
                 (i == 0) ? "replace" : "append",
                 NULL
             };
-            mp_input_run_cmd(ictx, MP_ON_OSD_AUTO, cmd, "<drop-files>");
+            mp_input_run_cmd(ictx, cmd);
         }
     }
 }

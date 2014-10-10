@@ -18,6 +18,8 @@
 #ifndef MP_PARSE_COMMAND_H
 #define MP_PARSE_COMMAND_H
 
+#include "misc/bstr.h"
+
 struct mp_log;
 struct mp_cmd;
 struct mpv_node;
@@ -27,16 +29,11 @@ struct mpv_node;
 struct mp_cmd *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc);
 
 // Similar to mp_input_parse_cmd(), but takes a list of strings instead.
-// Also, def_flags contains initial command flags (see mp_cmd_flags; the default
-// as used by mp_input_parse_cmd is MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES).
+// Also, MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES are not set by default.
 // Keep in mind that these functions (naturally) don't take multiple commands,
 // i.e. a ";" argument does not start a new command.
-// The _strv version is limitted to MP_CMD_MAX_ARGS argv array items.
-struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
-                                       const char **argv, const char *location);
-struct mp_cmd *mp_input_parse_cmd_bstrv(struct mp_log *log, int def_flags,
-                                        int argc, bstr *argv,
-                                        const char *location);
+struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, const char **argv);
+
 struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, struct mpv_node *node);
 
 // After getting a command from mp_input_get_cmd you need to free it using this

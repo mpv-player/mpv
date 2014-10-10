@@ -308,7 +308,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
             "CLOSE_WIN was received. This pseudo key can be remapped too,\n"
             "but --input-test will always quit when receiving it.\n");
         const char *args[] = {"quit", NULL};
-        mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, 0, args, "");
+        mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, args);
         return res;
     }
 
@@ -336,7 +336,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
 
     MP_INFO(ictx, "%s\n", msg);
     const char *args[] = {"show_text", msg, NULL};
-    mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, MP_ON_OSD_MSG, args, "");
+    mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, args);
     talloc_free(msg);
     return res;
 }
@@ -1355,11 +1355,9 @@ struct mp_cmd *mp_input_parse_cmd(struct input_ctx *ictx, bstr str,
     return mp_input_parse_cmd_(ictx->log, str, location);
 }
 
-void mp_input_run_cmd(struct input_ctx *ictx, int def_flags, const char **cmd,
-                      const char *location)
+void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd)
 {
-    mp_cmd_t *cmdt = mp_input_parse_cmd_strv(ictx->log, def_flags, cmd, location);
-    mp_input_queue_cmd(ictx, cmdt);
+    mp_input_queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
 }
 
 struct mp_input_src_internal {

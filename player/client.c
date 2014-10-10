@@ -877,8 +877,7 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd)
 
 int mpv_command(mpv_handle *ctx, const char **args)
 {
-    return run_client_command(ctx, mp_input_parse_cmd_strv(ctx->log, 0, args,
-                                                           ctx->name));
+    return run_client_command(ctx, mp_input_parse_cmd_strv(ctx->log, args));
 }
 
 int mpv_command_string(mpv_handle *ctx, const char *args)
@@ -892,7 +891,7 @@ int mpv_command_async(mpv_handle *ctx, uint64_t ud, const char **args)
     if (!ctx->mpctx->initialized)
         return MPV_ERROR_UNINITIALIZED;
 
-    struct mp_cmd *cmd = mp_input_parse_cmd_strv(ctx->log, 0, args, "<client>");
+    struct mp_cmd *cmd = mp_input_parse_cmd_strv(ctx->log, args);
     if (!cmd)
         return MPV_ERROR_INVALID_PARAMETER;
 

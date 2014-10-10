@@ -261,11 +261,23 @@ error:
     return NULL;
 }
 
-static struct mp_cmd *parse_cmd(struct parse_ctx *ctx, int def_flags)
+static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
+                                    bstr *str, const char *loc)
 {
+    struct parse_ctx *ctx = &(struct parse_ctx){
+        .log = log,
+        .loc = loc,
+        .tmp = tmp,
+        .str = *str,
+        .start = *str,
+    };
+
     struct mp_cmd *cmd = talloc_ptrtype(NULL, cmd);
     talloc_set_destructor(cmd, destroy_cmd);
-    *cmd = (struct mp_cmd) { .flags = def_flags, .scale = 1, };
+    *cmd = (struct mp_cmd) {
+        .flags = MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES,
+        .scale = 1,
+    };
 
     if (!ctx->array_input) {
         ctx->str = bstr_lstrip(ctx->str);
@@ -332,27 +344,14 @@ static struct mp_cmd *parse_cmd(struct parse_ctx *ctx, int def_flags)
         cmd->original = bstrdup(cmd, bstr_strip(orig));
     }
 
+    *str = ctx->str;
     return cmd;
 
 error:
     MP_ERR(ctx, "Command was defined at %s.\n", ctx->loc);
     talloc_free(cmd);
+    *str = ctx->str;
     return NULL;
-}
-
-static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
-                                    bstr *str, const char *loc)
-{
-    struct parse_ctx ctx = {
-        .log = log,
-        .loc = loc,
-        .tmp = tmp,
-        .str = *str,
-        .start = *str,
-    };
-    struct mp_cmd *res = parse_cmd(&ctx, MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES);
-    *str = ctx.str;
-    return res;
 }
 
 mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
@@ -402,36 +401,21 @@ done:
     return cmd;
 }
 
-struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, int def_flags,
-                                       const char **argv, const char *location)
+struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, const char **argv)
 {
-    bstr args[MP_CMD_MAX_ARGS];
-    int num = 0;
-    for (; argv[num]; num++) {
-        if (num >= MP_CMD_MAX_ARGS) {
-            mp_err(log, "%s: too many arguments.\n", location);
+    mpv_node items[MP_CMD_MAX_ARGS];
+    mpv_node_list list = {.values = items};
+    mpv_node node = {.format = MPV_FORMAT_NODE_ARRAY, .u = {.list = &list}};
+    while (argv[list.num]) {
+        if (list.num >= MP_CMD_MAX_ARGS) {
+            mp_err(log, "Too many arguments to command.\n");
             return NULL;
         }
-        args[num] = bstr0(argv[num]);
+        char *s = (char *)argv[list.num];
+        items[list.num++] = (mpv_node){.format = MPV_FORMAT_STRING,
+                                       .u = {.string = s}};
     }
-    return mp_input_parse_cmd_bstrv(log, def_flags, num, args, location);
-}
-
-struct mp_cmd *mp_input_parse_cmd_bstrv(struct mp_log *log, int def_flags,
-                                        int argc, bstr *argv,
-                                        const char *location)
-{
-    struct parse_ctx ctx = {
-        .log = log,
-        .loc = location,
-        .tmp = talloc_new(NULL),
-        .array_input = true,
-        .strs = argv,
-        .num_strs = argc,
-    };
-    struct mp_cmd *res = parse_cmd(&ctx, def_flags);
-    talloc_free(ctx.tmp);
-    return res;
+    return mp_input_parse_cmd_node(log, &node);
 }
 
 void mp_cmd_free(mp_cmd_t *cmd)
