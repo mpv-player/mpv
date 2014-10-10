@@ -748,7 +748,7 @@ static void handle_sstep(struct MPContext *mpctx)
 
     if (mpctx->video_status >= STATUS_EOF) {
         if (mpctx->max_frames >= 0)
-            mpctx->stop_play = PT_NEXT_ENTRY;
+            mpctx->stop_play = AT_END_OF_FILE;
         if (mpctx->step_frames > 0 && !mpctx->paused)
             pause_player(mpctx);
     }
