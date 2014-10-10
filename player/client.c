@@ -880,18 +880,24 @@ int mpv_command(mpv_handle *ctx, const char **args)
     return run_client_command(ctx, mp_input_parse_cmd_strv(ctx->log, args));
 }
 
+int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result)
+{
+    int r = run_client_command(ctx, mp_input_parse_cmd_node(ctx->log, args));
+    if (r >= 0)
+        *result = (mpv_node){.format = MPV_FORMAT_NONE};
+    return r;
+}
+
 int mpv_command_string(mpv_handle *ctx, const char *args)
 {
     return run_client_command(ctx,
         mp_input_parse_cmd(ctx->mpctx->input, bstr0((char*)args), ctx->name));
 }
 
-int mpv_command_async(mpv_handle *ctx, uint64_t ud, const char **args)
+static int run_cmd_async(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)
 {
     if (!ctx->mpctx->initialized)
         return MPV_ERROR_UNINITIALIZED;
-
-    struct mp_cmd *cmd = mp_input_parse_cmd_strv(ctx->log, args);
     if (!cmd)
         return MPV_ERROR_INVALID_PARAMETER;
 
@@ -903,6 +909,16 @@ int mpv_command_async(mpv_handle *ctx, uint64_t ud, const char **args)
         .userdata = ud,
     };
     return run_async(ctx, cmd_fn, req);
+}
+
+int mpv_command_async(mpv_handle *ctx, uint64_t ud, const char **args)
+{
+    return run_cmd_async(ctx, ud, mp_input_parse_cmd_strv(ctx->log, args));
+}
+
+int mpv_command_node_async(mpv_handle *ctx, uint64_t ud, mpv_node *args)
+{
+    return run_cmd_async(ctx, ud, mp_input_parse_cmd_node(ctx->log, args));
 }
 
 static int translate_property_error(int errc)

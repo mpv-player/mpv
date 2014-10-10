@@ -162,7 +162,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 6)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 7)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -611,6 +611,11 @@ typedef struct mpv_node_list {
  * Frees any data referenced by the node. It doesn't free the node itself.
  * Call this only if the mpv client API set the node. If you constructed the
  * node yourself (manually), you have to free it yourself.
+ *
+ * If node->format is MPV_FORMAT_NONE, this call does nothing. Likewise, if
+ * the client API sets a node with this format, this function doesn't need to
+ * be called. (This is just a clarification that there's no danger of anything
+ * strange happening in these cases.)
  */
 void mpv_free_node_contents(mpv_node *node);
 
@@ -656,6 +661,24 @@ int mpv_set_option_string(mpv_handle *ctx, const char *name, const char *data);
 int mpv_command(mpv_handle *ctx, const char **args);
 
 /**
+ * Same as mpv_command(), but allows passing structured data in any format.
+ * In particular, calling mpv_command() is exactly like calling
+ * mpv_command_node() with the format set to MPV_FORMAT_NODE_ARRAY, and
+ * every arg passed in order as MPV_FORMAT_STRING.
+ *
+ * @param[in] args mpv_node with format set to MPV_FORMAT_NODE_ARRAY; each entry
+ *                 is an argument using an arbitrary format (the format must be
+ *                 compatible to the used command). Usually, the first item is
+ *                 the command name (as MPV_FORMAT_STRING).
+ * @param[out] result Optional, pass NULL if unused. If not NULL, and if the
+ *                    function succeeds, this is set to command-specific return
+ *                    data. You must call mpv_free_node_contents() to free it
+ *                    (again, only if the command actually succeeds).
+ * @return error code (the result parameter is not set on error)
+ */
+int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result);
+
+/**
  * Same as mpv_command, but use input.conf parsing for splitting arguments.
  * This is slightly simpler, but also more error prone, since arguments may
  * need quoting/escaping.
@@ -669,12 +692,29 @@ int mpv_command_string(mpv_handle *ctx, const char *args);
  * MPV_EVENT_COMMAND_REPLY event. (This event will also have an
  * error code set if running the command failed.)
  *
- * @param reply_userdata see section about asynchronous calls
+ * @param reply_userdata the value mpv_event.reply_userdata of the reply will
+ *                       be set to (see section about asynchronous calls)
  * @param args NULL-terminated list of strings (see mpv_command())
- * @return error code
+ * @return error code (if parsing or queuing the command fails)
  */
 int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
                       const char **args);
+
+/**
+ * Same as mpv_command_node(), but run it asynchronously. Basically, this
+ * function is to mpv_command_node() what mpv_command_async() is to
+ * mpv_command().
+ *
+ * See mpv_command_async() for details. Retrieving the result is not
+ * supported yet.
+ *
+ * @param reply_userdata the value mpv_event.reply_userdata of the reply will
+ *                       be set to (see section about asynchronous calls)
+ * @param args as in mpv_command_node()
+ * @return error code (if parsing or queuing the command fails)
+ */
+int mpv_command_node_async(mpv_handle *ctx, uint64_t reply_userdata,
+                           mpv_node *args);
 
 /**
  * Set a property to a given value. Properties are essentially variables which

@@ -25,6 +25,7 @@ API changes
 
 ::
 
+ 1.7    - add mpv_command_node(), mpv_command_node_async()
  1.6    - modify "core-idle" property behavior
         - MPV_EVENT_LOG_MESSAGE now always sends complete lines
         - introduce numeric log levels (mpv_log_level)
