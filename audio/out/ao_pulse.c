@@ -359,7 +359,7 @@ static int init(struct ao *ao)
     pa_proplist *proplist = NULL;
     pa_format_info *format = NULL;
     struct priv *priv = ao->priv;
-    char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : NULL;
+    char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : ao->device;
 
     if (pa_init_boilerplate(ao) < 0)
         return -1;
@@ -728,6 +728,42 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     }
 }
 
+struct sink_cb_ctx {
+    struct ao *ao;
+    struct ao_device_list *list;
+};
+
+static void sink_info_cb(pa_context *c, const pa_sink_info *i, int eol, void *ud)
+{
+    struct sink_cb_ctx *ctx = ud;
+    struct priv *priv = ctx->ao->priv;
+
+    if (eol) {
+        pa_threaded_mainloop_signal(priv->mainloop, 0); // wakeup waitop()
+        return;
+    }
+
+    struct ao_device_desc entry = {.name = i->name, .desc = i->description};
+    ao_device_list_add(ctx->list, ctx->ao, &entry);
+}
+
+static void list_devs(struct ao *ao, struct ao_device_list *list)
+{
+    struct priv *priv = ao->priv;
+    bool need_uninit = !priv->mainloop;
+    struct sink_cb_ctx ctx = {ao, list};
+
+    if (need_uninit && pa_init_boilerplate(ao) < 0)
+        return;
+
+    pa_threaded_mainloop_lock(priv->mainloop);
+    waitop(priv, pa_context_get_sink_info_list(priv->context, sink_info_cb, &ctx));
+
+    if (need_uninit)
+        uninit(ao);
+}
+
+
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_pulse = {
@@ -745,6 +781,7 @@ const struct ao_driver audio_out_pulse = {
     .drain     = drain,
     .wait      = wait_audio,
     .wakeup    = wakeup,
+    .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .cfg_buffer = 250,
