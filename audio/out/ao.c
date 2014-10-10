@@ -152,11 +152,8 @@ static bool match_ao_driver(const char *ao_name, char *opt, char **out_device)
     return true;
 }
 
-static struct ao *ao_create(bool probing, struct mpv_global *global,
-                            struct input_ctx *input_ctx,
-                            struct encode_lavc_context *encode_lavc_ctx,
-                            int samplerate, int format, struct mp_chmap channels,
-                            char *name, char **args)
+static struct ao *ao_alloc(bool probing, struct mpv_global *global,
+                           struct input_ctx *input_ctx, char *name, char **args)
 {
     struct MPOpts *opts = global->opts;
     struct mp_log *log = mp_log_new(NULL, global->log, "ao");
@@ -171,22 +168,36 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     *ao = (struct ao) {
         .driver = desc.p,
         .probing = probing,
-        .encode_lavc_ctx = encode_lavc_ctx,
         .input_ctx = input_ctx,
-        .samplerate = samplerate,
-        .channels = channels,
-        .format = format,
         .log = mp_log_new(ao, log, name),
         .def_buffer = opts->audio_buffer,
     };
-    if (ao->driver->encode != !!ao->encode_lavc_ctx)
-        goto error;
     struct m_config *config = m_config_from_obj_desc(ao, ao->log, &desc);
     if (m_config_apply_defaults(config, name, opts->ao_defs) < 0)
         goto error;
     if (m_config_set_obj_params(config, args) < 0)
         goto error;
     ao->priv = config->optstruct;
+    return ao;
+error:
+    talloc_free(ao);
+    return NULL;
+}
+
+static struct ao *ao_create(bool probing, struct mpv_global *global,
+                            struct input_ctx *input_ctx,
+                            struct encode_lavc_context *encode_lavc_ctx,
+                            int samplerate, int format, struct mp_chmap channels,
+                            char *name, char **args)
+{
+    struct MPOpts *opts = global->opts;
+    struct ao *ao = ao_alloc(probing, global, input_ctx, name, args);
+    ao->samplerate = samplerate;
+    ao->channels = channels;
+    ao->format = format;
+    ao->encode_lavc_ctx = encode_lavc_ctx;
+    if (ao->driver->encode != !!ao->encode_lavc_ctx)
+        goto error;
 
     match_ao_driver(ao->driver->name, opts->audio_device, &ao->device);
     ao->device = talloc_strdup(ao, ao->device);
@@ -388,34 +399,39 @@ bool ao_untimed(struct ao *ao)
     return ao->untimed;
 }
 
-struct ao_device_list *ao_get_device_list(void)
+struct ao_device_list *ao_get_device_list(struct mpv_global *global)
 {
     struct ao_device_list *list = talloc_zero(NULL, struct ao_device_list);
     for (int n = 0; audio_out_drivers[n]; n++) {
         const struct ao_driver *d = audio_out_drivers[n];
+        struct ao *ao = ao_alloc(true, global, NULL, (char *)d->name, NULL);
+        if (!ao)
+            continue;
         int num = list->num_devices;
         if (d->list_devs)
-            d->list_devs(d, list);
+            d->list_devs(ao, list);
         // Add at least a default entry
         if (list->num_devices == num)
-            ao_device_list_add(list, d, &(struct ao_device_desc){"", ""});
+            ao_device_list_add(list, ao, &(struct ao_device_desc){"", ""});
+        talloc_free(ao);
     }
     return list;
 }
 
-void ao_device_list_add(struct ao_device_list *list, const struct ao_driver *d,
+void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
                         struct ao_device_desc *e)
 {
     struct ao_device_desc c = *e;
-    c.name = c.name[0] ? talloc_asprintf(list, "%s/%s", d->name, c.name)
-                       : talloc_strdup(list, d->name);
+    const char *dname = ao->driver->name;
+    c.name = c.name[0] ? talloc_asprintf(list, "%s/%s", dname, c.name)
+                       : talloc_strdup(list, dname);
     c.desc = talloc_strdup(list, c.desc);
     MP_TARRAY_APPEND(list, list->devices, list->num_devices, c);
 }
 
-void ao_print_devices(struct mp_log *log)
+void ao_print_devices(struct mpv_global *global, struct mp_log *log)
 {
-    struct ao_device_list *list = ao_get_device_list();
+    struct ao_device_list *list = ao_get_device_list(global);
     mp_info(log, "List of detected audio devices:\n");
     for (int n = 0; n < list->num_devices; n++) {
         struct ao_device_desc *desc = &list->devices[n];

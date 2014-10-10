@@ -232,7 +232,7 @@ static bool handle_help_options(struct MPContext *mpctx)
         opt_exit = 1;
     }
     if (opts->audio_device && strcmp(opts->audio_device, "help") == 0) {
-        ao_print_devices(log);
+        ao_print_devices(mpctx->global, log);
         opt_exit = 1;
     }
 #if HAVE_ENCODING

@@ -733,7 +733,7 @@ alsa_error:
     return -1;
 }
 
-static void list_devs(const struct ao_driver *d, struct ao_device_list *list)
+static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
     void **hints;
     if (snd_device_name_hint(-1, "pcm", &hints) < 0)
@@ -751,7 +751,7 @@ static void list_devs(const struct ao_driver *d, struct ao_device_list *list)
             if (desc2[i] == '\n')
                 desc2[i] = '/';
         }
-        ao_device_list_add(list, d, &(struct ao_device_desc){name, desc2});
+        ao_device_list_add(list, ao, &(struct ao_device_desc){name, desc2});
     }
 
     snd_device_name_free_hint(hints);

@@ -149,7 +149,16 @@ struct ao_driver {
     // Return the list of devices currently available in the system. Use
     // ao_device_list_add() to add entries. The selected device will be set as
     // ao->device (using ao_device_desc.name).
-    void (*list_devs)(const struct ao_driver *d, struct ao_device_list *list);
+    // Warning: the ao struct passed doesn't necessarily have ao_driver->init()
+    //          called on it - in this case, ->uninit() won't be called either
+    //          after this function. The idea is that list_devs can be called
+    //          both when no audio or when audio is active. the latter can
+    //          happen if the audio config change at runtime, and in this case
+    //          we don't want to force a new connection to the audio server
+    //          just to update the device list. For runtime updates, ->init()
+    //          will have been called. In both cases, ao->priv is properly
+    //          allocated. (Runtime updates are not used/supported yet.)
+    void (*list_devs)(struct ao *ao, struct ao_device_list *list);
 
     // For option parsing (see vo.h)
     int priv_size;
@@ -172,7 +181,8 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num);
 
 // Add a deep copy of e to the list.
-void ao_device_list_add(struct ao_device_list *list, const struct ao_driver *d,
+// Call from ao_driver->list_devs callback only.
+void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
                         struct ao_device_desc *e);
 
 #endif
