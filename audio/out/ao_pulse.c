@@ -287,14 +287,11 @@ static void uninit(struct ao *ao)
     pthread_mutex_destroy(&priv->wakeup_lock);
 }
 
-static int init(struct ao *ao)
+static int pa_init_boilerplate(struct ao *ao)
 {
-    struct pa_channel_map map;
-    pa_proplist *proplist = NULL;
-    pa_format_info *format = NULL;
     struct priv *priv = ao->priv;
     char *host = priv->cfg_host && priv->cfg_host[0] ? priv->cfg_host : NULL;
-    char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : NULL;
+    bool locked = false;
 
     pthread_mutex_init(&priv->wakeup_lock, NULL);
     pthread_cond_init(&priv->wakeup, NULL);
@@ -304,8 +301,15 @@ static int init(struct ao *ao)
         goto fail;
     }
 
+    if (pa_threaded_mainloop_start(priv->mainloop) < 0)
+        goto fail;
+
+    pa_threaded_mainloop_lock(priv->mainloop);
+    locked = true;
+
     if (!(priv->context = pa_context_new(pa_threaded_mainloop_get_api(
-                                 priv->mainloop), PULSE_CLIENT_NAME))) {
+                                         priv->mainloop), PULSE_CLIENT_NAME)))
+    {
         MP_ERR(ao, "Failed to allocate context\n");
         goto fail;
     }
@@ -321,16 +325,46 @@ static int init(struct ao *ao)
     if (pa_context_connect(priv->context, host, 0, NULL) < 0)
         goto fail;
 
-    pa_threaded_mainloop_lock(priv->mainloop);
-
-    if (pa_threaded_mainloop_start(priv->mainloop) < 0)
-        goto unlock_and_fail;
-
     /* Wait until the context is ready */
-    pa_threaded_mainloop_wait(priv->mainloop);
+    while (1) {
+        int state = pa_context_get_state(priv->context);
+        if (state == PA_CONTEXT_READY)
+            break;
+        if (!PA_CONTEXT_IS_GOOD(state))
+            goto fail;
+        pa_threaded_mainloop_wait(priv->mainloop);
+    }
 
-    if (pa_context_get_state(priv->context) != PA_CONTEXT_READY)
-        goto unlock_and_fail;
+    pa_threaded_mainloop_unlock(priv->mainloop);
+    return 0;
+
+fail:
+    if (locked)
+        pa_threaded_mainloop_unlock(priv->mainloop);
+
+    if (priv->context) {
+        pa_threaded_mainloop_lock(priv->mainloop);
+        if (!(pa_context_errno(priv->context) == PA_ERR_CONNECTIONREFUSED
+              && ao->probing))
+            GENERIC_ERR_MSG("Init failed");
+        pa_threaded_mainloop_unlock(priv->mainloop);
+    }
+    uninit(ao);
+    return -1;
+}
+
+static int init(struct ao *ao)
+{
+    struct pa_channel_map map;
+    pa_proplist *proplist = NULL;
+    pa_format_info *format = NULL;
+    struct priv *priv = ao->priv;
+    char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : NULL;
+
+    if (pa_init_boilerplate(ao) < 0)
+        return -1;
+
+    pa_threaded_mainloop_lock(priv->mainloop);
 
     if (!(format = pa_format_info_new()))
         goto unlock_and_fail;
@@ -419,22 +453,13 @@ static int init(struct ao *ao)
     }
 
     pa_threaded_mainloop_unlock(priv->mainloop);
-
     return 0;
 
 unlock_and_fail:
+    pa_threaded_mainloop_unlock(priv->mainloop);
 
-    if (priv->mainloop)
-        pa_threaded_mainloop_unlock(priv->mainloop);
-
-fail:
     if (format)
         pa_format_info_free(format);
-    if (priv->context) {
-        if (!(pa_context_errno(priv->context) == PA_ERR_CONNECTIONREFUSED
-              && ao->probing))
-            GENERIC_ERR_MSG("Init failed");
-    }
 
     if (proplist)
         pa_proplist_free(proplist);
