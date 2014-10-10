@@ -1194,9 +1194,6 @@ terminate_playback:
     if (mpctx->stop_play != AT_END_OF_FILE)
         clear_audio_output_buffers(mpctx);
 
-    if (opts->position_save_on_quit && mpctx->stop_play == PT_QUIT)
-        mp_write_watch_later_conf(mpctx);
-
     if (mpctx->step_frames)
         opts->pause = 1;
 

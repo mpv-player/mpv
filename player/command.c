@@ -3663,7 +3663,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_QUIT:
     case MP_CMD_QUIT_WATCH_LATER:
-        if (cmd->id == MP_CMD_QUIT_WATCH_LATER)
+        if (cmd->id == MP_CMD_QUIT_WATCH_LATER || opts->position_save_on_quit)
             mp_write_watch_later_conf(mpctx);
         mpctx->stop_play = PT_QUIT;
         mpctx->quit_custom_rc = cmd->args[0].v.i;
@@ -3764,8 +3764,11 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         playlist_add(mpctx->playlist, entry);
 
-        if (!append || (append == 2 && !mpctx->playlist->current))
+        if (!append || (append == 2 && !mpctx->playlist->current)) {
+            if (opts->position_save_on_quit) // requested in issue #1148
+                mp_write_watch_later_conf(mpctx);
             mp_set_playlist_entry(mpctx, mpctx->playlist->first);
+        }
         break;
     }
 
