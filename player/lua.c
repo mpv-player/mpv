@@ -891,6 +891,28 @@ static int script_raw_unobserve_property(lua_State *L)
     return 1;
 }
 
+static int script_command_native(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    struct mpv_node node;
+    struct mpv_node result;
+    void *tmp = talloc_new(NULL);
+    makenode(tmp, &node, L, 1);
+    int err = mpv_command_node(ctx->client, &node, &result);
+    talloc_free(tmp);
+    const char *errstr = mpv_error_string(err);
+    if (err >= 0) {
+        bool ok = pushnode(L, &result, 50);
+        mpv_free_node_contents(&result);
+        if (ok)
+            return 1;
+        errstr = "command result too large";
+    }
+    lua_pushvalue(L, 2);
+    lua_pushstring(L, errstr);
+    return 2;
+}
+
 static int script_set_osd_ass(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
@@ -1117,6 +1139,7 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(find_config_file),
     FN_ENTRY(command),
     FN_ENTRY(commandv),
+    FN_ENTRY(command_native),
     FN_ENTRY(get_property_bool),
     FN_ENTRY(get_property_number),
     FN_ENTRY(get_property_native),

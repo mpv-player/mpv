@@ -94,6 +94,15 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     the ``expand-properties`` prefix, or the ``mp.get_property`` family of
     functions.
 
+``mp.command_native(table [,def])``
+    Similar to ``mp.commandv``, but pass the argument list as table. This has
+    the advantage that in at least some cases, arguments can be passed as
+    native types.
+
+    Returns a result table on success (usually empty), or ``def, error`` on
+    error. ``def`` is the second parameter provided to the function, and is
+    nil if it's missing.
+
 ``mp.get_property(name [,def])``
     Return the value of the given property as string. These are the same
     properties as used in input.conf. See `Properties`_ for a list of
