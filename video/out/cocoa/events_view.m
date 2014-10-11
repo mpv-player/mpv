@@ -22,14 +22,15 @@
 
 #include "osdep/macosx_compat.h"
 #include "video/out/cocoa_common.h"
-#import  "video/out/cocoa/additions.h"
-
 #include "events_view.h"
 
 @interface MpvEventsView()
 @property(nonatomic, assign) BOOL hasMouseDown;
 @property(nonatomic, retain) NSTrackingArea *tracker;
 - (void)signalMousePosition;
+- (BOOL)hasDock:(NSScreen*)screen;
+- (BOOL)hasMenubar:(NSScreen*)screen;
+- (int)mpvButtonNumber:(NSEvent*)event;
 @end
 
 @implementation MpvEventsView
@@ -52,14 +53,14 @@
         NSApplicationPresentationOptions popts =
             NSApplicationPresentationDefault;
 
-        if ([[self.adapter fsScreen] hasMenubar])
+        if ([self hasMenubar:[self.adapter fsScreen]])
             // Cocoa raises an exception when autohiding the menubar but
             // not the dock. They probably got bored while programming the
             // multi screen support and took some shortcuts (tested on 10.8).
             popts |= NSApplicationPresentationAutoHideMenuBar |
                      NSApplicationPresentationAutoHideDock;
 
-        if ([[self.adapter fsScreen] hasDock])
+        if ([self hasDock:[self.adapter fsScreen]])
             popts |= NSApplicationPresentationAutoHideDock;
 
         NSDictionary *fsopts = @{
@@ -233,7 +234,7 @@
 - (void)putMouseEvent:(NSEvent *)event withState:(int)state
 {
     self.hasMouseDown = (state == MP_KEY_STATE_DOWN);
-    int mpkey = (MP_MOUSE_BTN0 + [event mpvButtonNumber]);
+    int mpkey = (MP_MOUSE_BTN0 + [self mpvButtonNumber:event]);
     [self.adapter putKey:(mpkey | state) withModifiers:[event modifierFlags]];
 }
 
@@ -261,5 +262,36 @@
         return YES;
     }
     return NO;
+}
+
+- (BOOL)hasDock:(NSScreen*)screen
+{
+    NSRect vF = [screen visibleFrame];
+    NSRect f  = [screen frame];
+    return
+        // The visible frame's width is smaller: dock is on left or right end
+        // of this method's receiver.
+        vF.size.width < f.size.width ||
+        // The visible frame's veritical origin is bigger: dock is
+        // on the bottom of this method's receiver.
+        vF.origin.y > f.origin.y;
+
+}
+
+- (BOOL)hasMenubar:(NSScreen*)screen
+{
+    NSRect vF = [screen visibleFrame];
+    NSRect f  = [screen frame];
+    return f.size.height + f.origin.y > vF.size.height + vF.origin.y;
+}
+
+- (int)mpvButtonNumber:(NSEvent*)event
+{
+    int buttonNumber = [event buttonNumber];
+    switch (buttonNumber) {
+        case 1:  return 2;
+        case 2:  return 1;
+        default: return buttonNumber;
+    }
 }
 @end
