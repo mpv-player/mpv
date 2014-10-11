@@ -617,9 +617,10 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static int control(vf_instance_t *vf, int request, void *data)
 {
+    struct vf_priv_s *p = vf->priv;
     switch (request) {
     case VFCTRL_SEEK_RESET:
-        if (reinit_vs(vf) < 0)
+        if (p->out_node && reinit_vs(vf) < 0)
             return CONTROL_ERROR;
         return CONTROL_OK;
     }
