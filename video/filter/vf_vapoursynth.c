@@ -60,6 +60,7 @@ struct vf_priv_s {
     int max_requests;           // upper bound for requested[] array
     bool failed;                // frame callback returned with an error
     bool shutdown;              // ask node to return
+    bool initializing;          // filters are being built
     bool in_node_active;        // node might still be called
 
     // --- options
@@ -380,6 +381,10 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             p->vsapi->setFilterError("EOF or filter reinit/uninit", frameCtx);
             break;
         }
+        if (p->initializing) {
+            p->vsapi->setFilterError("Frame requested during init", frameCtx);
+            break;
+        }
         if (frameno < p->in_frameno) {
             char msg[180];
             snprintf(msg, sizeof(msg),
@@ -456,6 +461,7 @@ static void destroy_vs(struct vf_instance *vf)
 
     // Wait until our frame callbacks return.
     pthread_mutex_lock(&p->lock);
+    p->initializing = false;
     p->shutdown = true;
     pthread_cond_broadcast(&p->wakeup);
     while (num_requested(p))
@@ -506,6 +512,7 @@ static int reinit_vs(struct vf_instance *vf)
     destroy_vs(vf);
 
     MP_DBG(vf, "initializing...\n");
+    p->initializing = true;
 
     // First load an empty script to get a VSScript, so that we get the vsapi
     // and vscore.
@@ -557,6 +564,9 @@ static int reinit_vs(struct vf_instance *vf)
         goto error;
     }
 
+    pthread_mutex_lock(&p->lock);
+    p->initializing = false;
+    pthread_mutex_unlock(&p->lock);
     MP_DBG(vf, "initialized.\n");
     res = 0;
 error:
