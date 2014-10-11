@@ -186,7 +186,6 @@ options_state_machine() {
     opt_yes_no _libpostproc "postprocess filter (vf_pp)"
     opt_yes_no _libavdevice "libavdevice demuxers"
     opt_yes_no _libavfilter "libavfilter"
-    opt_yes_no _vapoursynth "VapourSynth filter bridge"
     opt_yes_no _jpeg        "support for writing JPEG screenshots"
     opt_yes_no _libcdio     "libcdio support"
     opt_yes_no _ffmpeg      "skip FFmpeg/Libav autodetection"
@@ -215,6 +214,8 @@ options_state_machine() {
     opt_yes_no _openal      "OpenAL audio output"
     opt_yes_no _shm         "X11/Xv shared memory"
     opt_yes_no _lua         "Lua scripting"
+    opt_yes_no _vapoursynth "VapourSynth filter bridge (Python)"
+    opt_yes_no _vapoursynth_lazy "VapourSynth filter bridge (Lua)"
     opt_yes_no _encoding    "encoding functionality" yes
     opt_yes_no _build_man   "building manpage"
 }
@@ -759,8 +760,6 @@ check_pkg_config "libbs2b audio filter support" $_libbs2b LIBBS2B 'libbs2b'
 
 check_pkg_config "LCMS2 support" $_lcms2 LCMS2 'lcms2 >= 2.6'
 
-check_pkg_config "VapourSynth support" $_vapoursynth VAPOURSYNTH 'vapoursynth >= 23 vapoursynth-script >= 23'
-
 check_pkg_config "FFmpeg/Libav" $_ffmpeg FFMPEG \
     "libavutil >= 52.48.101 libavcodec >= 55.34.1 libavformat >= 55.12.0 libswscale >= 2.1.2"
 test $(defretval) = no && die "Unable to find development files for some of the required Libav libraries above. Aborting."
@@ -882,6 +881,24 @@ test_lua "lua >= 5.2.0"
 test_lua "lua5.2 >= 5.2.0" # debian
 
 test "$_lua" != yes && check_yes_no no LUA
+
+if ! ( $_pkg_config 'vapoursynth >= 23' ) ; then
+    _vapoursynth=no
+    _vapoursynth_lazy=no
+fi
+check_pkg_config "VapourSynth support (Python)" $_vapoursynth VAPOURSYNTH 'vapoursynth >= 23 vapoursynth-script >= 23'
+_vapoursynth=$(defretval)
+if test "$_lua" = no ; then
+    _vapoursynth_lazy=no
+fi
+check_pkg_config "VapourSynth support (Lua)" $_vapoursynth_lazy VAPOURSYNTH_LAZY 'vapoursynth >= 23'
+_vapoursynth_lazy=$(defretval)
+
+_vapoursynth_core=yes
+if test "$_vapoursynth" = no && test "$_vapoursynth_lazy" = no ; then
+    _vapoursynth_core=no
+fi
+check_trivial "VapourSynth core" $_vapoursynth_core VAPOURSYNTH_CORE
 
 check_trivial "joystick" $_joystick JOYSTICK
 

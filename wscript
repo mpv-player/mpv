@@ -244,6 +244,10 @@ iconv support use --disable-iconv.",
         'deps_any': [ 'libquvi4', 'libquvi9' ],
         'func': check_true
     }, {
+        'name' : '--lua',
+        'desc' : 'Lua',
+        'func': check_lua,
+    }, {
         'name': '--libass',
         'desc': 'SSA/ASS support',
         'func': check_pkg_config('libass'),
@@ -319,9 +323,19 @@ If you really mean to compile without libass support use --disable-libass."
         'desc': 'LCMS2 support',
         'func': check_pkg_config('lcms2', '>= 2.6'),
     }, {
+        'name': 'vapoursynth-core',
+        'desc': 'VapourSynth filter bridge (core)',
+        'func': check_pkg_config('vapoursynth >= 23'),
+    }, {
         'name': '--vapoursynth',
-        'desc': 'VapourSynth filter bridge',
-        'func': check_pkg_config('vapoursynth >= 23 vapoursynth-script >= 23'),
+        'desc': 'VapourSynth filter bridge (Python)',
+        'deps': ['vapoursynth-core'],
+        'func': check_pkg_config('vapoursynth-script >= 23'),
+    }, {
+        'name': '--vapoursynth-lazy',
+        'desc': 'VapourSynth filter bridge (Lazy Lua)',
+        'deps': ['vapoursynth-core', 'lua'],
+        'func': check_true,
     }
 ]
 
@@ -725,14 +739,6 @@ radio_and_tv_features = [
     }
 ]
 
-scripting_features = [
-    {
-        'name' : '--lua',
-        'desc' : 'Lua',
-        'func': check_lua,
-    }
-]
-
 standalone_features = [
     {
         'name': '--cplayer',
@@ -796,10 +802,9 @@ def options(opt):
     opt.parse_features('video outputs',     video_output_features)
     opt.parse_features('hwaccels',          hwaccel_features)
     opt.parse_features('tv features',       radio_and_tv_features)
-    opt.parse_features('scripting',         scripting_features)
     opt.parse_features('standalone app',    standalone_features)
 
-    group = opt.get_option_group("scripting")
+    group = opt.get_option_group("optional feaures")
     group.add_option('--lua',
         type    = 'string',
         dest    = 'LUA_VER',
@@ -856,7 +861,6 @@ def configure(ctx):
     if ctx.options.LUA_VER:
         ctx.options.enable_lua = True
 
-    ctx.parse_dependencies(scripting_features)
     ctx.parse_dependencies(standalone_features)
 
     ctx.define('HAVE_SYS_SOUNDCARD_H',
