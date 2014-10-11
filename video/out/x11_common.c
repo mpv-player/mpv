@@ -656,11 +656,6 @@ void vo_x11_uninit(struct vo *vo)
 
         XSelectInput(x11->display, x11->window, StructureNotifyMask);
         XDestroyWindow(x11->display, x11->window);
-        XEvent xev;
-        do {
-            XNextEvent(x11->display, &xev);
-        } while (xev.type != DestroyNotify ||
-                 xev.xdestroywindow.event != x11->window);
     }
     if (x11->xic)
         XDestroyIC(x11->xic);
