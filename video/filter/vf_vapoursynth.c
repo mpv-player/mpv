@@ -114,8 +114,8 @@ static int mp_from_vs(VSPresetFormat vs)
     return pfNone;
 }
 
-static void copy_mp_to_vs_frame_props(struct vf_priv_s *p, VSMap *map,
-                                      struct mp_image *img)
+static void copy_mp_to_vs_frame_props_map(struct vf_priv_s *p, VSMap *map,
+                                          struct mp_image *img)
 {
     struct mp_image_params *params = &img->params;
     if (params->d_w > 0 && params->d_h > 0) {
@@ -149,6 +149,25 @@ static void copy_mp_to_vs_frame_props(struct vf_priv_s *p, VSMap *map,
             !!(img->fields & MP_IMGFIELD_INTERLACED), 0);
     p->vsapi->propSetInt(map, "_Field",
             !!(img->fields & MP_IMGFIELD_TOP_FIRST), 0);
+}
+
+static int set_vs_frame_props(struct vf_priv_s *p, VSFrameRef *frame,
+                              struct mp_image *img, int dur_num, int dur_den)
+{
+    VSMap *map = p->vsapi->getFramePropsRW(frame);
+    if (!map)
+        return -1;
+    p->vsapi->propSetInt(map, "_DurationNum", dur_num, 0);
+    p->vsapi->propSetInt(map, "_DurationDen", dur_den, 0);
+    copy_mp_to_vs_frame_props_map(p, map, img);
+    return 0;
+}
+
+static VSFrameRef *alloc_vs_frame(struct vf_priv_s *p, struct mp_image_params *fmt)
+{
+    const VSFormat *vsfmt =
+        p->vsapi->getFormatPreset(mp_to_vs(fmt->imgfmt), p->vscore);
+    return p->vsapi->newVideoFrame(vsfmt, fmt->w, fmt->h, NULL, p->vscore);
 }
 
 static struct mp_image map_vs_frame(struct vf_priv_s *p, const VSFrameRef *ref,
@@ -406,23 +425,16 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
         }
         if (frameno < p->in_frameno + p->num_buffered) {
             struct mp_image *img = p->buffered[frameno - p->in_frameno];
-            const VSFormat *vsfmt =
-                vsapi->getFormatPreset(mp_to_vs(img->imgfmt), core);
-            ret = vsapi->newVideoFrame(vsfmt, img->w, img->h, NULL, core);
+            ret = alloc_vs_frame(p, &img->params);
             if (!ret) {
                 p->vsapi->setFilterError("Could not allocate VS frame", frameCtx);
                 break;
             }
             struct mp_image vsframe = map_vs_frame(p, ret, true);
             mp_image_copy(&vsframe, img);
-            VSMap *map = p->vsapi->getFramePropsRW(ret);
-            if (map) {
-                int res = 1e6;
-                int dur = img->pts * res + 0.5;
-                p->vsapi->propSetInt(map, "_DurationNum", dur, 0);
-                p->vsapi->propSetInt(map, "_DurationDen", res, 0);
-                copy_mp_to_vs_frame_props(p, map, img);
-            }
+            int res = 1e6;
+            int dur = img->pts * res + 0.5;
+            set_vs_frame_props(p, ret, img, dur, res);
             break;
         }
         pthread_cond_wait(&p->wakeup, &p->lock);
