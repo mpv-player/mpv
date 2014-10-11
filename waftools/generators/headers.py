@@ -1,5 +1,5 @@
 def __cp_to_variant__(ctx, variant, basename):
-    src = ctx.bldnode.search(basename).read()
+    src = ctx.bldnode.search_node(basename).read()
     node = ctx.bldnode.make_node("{0}/{1}".format(variant, basename))
     node.parent.mkdir()
     node.write(src)
