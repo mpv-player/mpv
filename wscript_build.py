@@ -447,6 +447,11 @@ def build(ctx):
             install_path = ctx.env.BINDIR,
             **cprog_kwargs
         )
+        for f in ['example.conf', 'input.conf', 'mplayer-input.conf', \
+                  'restore-old-bindings.conf']:
+            import os
+            ctx.install_as(os.path.join(ctx.env.DOCDIR, f),
+                           os.path.join('etc/', f))
 
     build_shared = ctx.dependency_satisfied('libmpv-shared')
     build_static = ctx.dependency_satisfied('libmpv-static')
