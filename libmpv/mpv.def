@@ -2,6 +2,8 @@ mpv_client_api_version
 mpv_client_name
 mpv_command
 mpv_command_async
+mpv_command_node
+mpv_command_node_async
 mpv_command_string
 mpv_create
 mpv_detach_destroy
