@@ -23,7 +23,6 @@
 #include <assert.h>
 
 #include <VapourSynth.h>
-#include <VSScript.h>
 #include <VSHelper.h>
 
 #include <libavutil/rational.h>
@@ -39,9 +38,11 @@
 struct vf_priv_s {
     VSCore *vscore;
     const VSAPI *vsapi;
-    VSScript *se;
     VSNodeRef *out_node;
     VSNodeRef *in_node;
+
+    const struct script_driver *drv;
+    struct VSScript *se;
 
     struct mp_image_params fmt_in;
 
@@ -71,6 +72,14 @@ struct vf_priv_s {
 
 // priv->requested[n] points to this if a request for frame n is in-progress
 static const struct mp_image dummy_img;
+
+struct script_driver {
+    int (*init)(struct vf_instance *vf);        // first time init
+    void (*uninit)(struct vf_instance *vf);     // last time uninit
+    int (*load_core)(struct vf_instance *vf);   // make vsapi/vscore available
+    int (*load)(struct vf_instance *vf, VSMap *vars); // also set p->out_node
+    void (*unload)(struct vf_instance *vf);     // unload script and maybe vs
+};
 
 struct mpvs_fmt {
     VSPresetFormat vs;
@@ -499,12 +508,7 @@ static void destroy_vs(struct vf_instance *vf)
         p->vsapi->freeNode(p->out_node);
     p->in_node = p->out_node = NULL;
 
-    if (p->se)
-        vsscript_freeScript(p->se);
-
-    p->se = NULL;
-    p->vsapi = NULL;
-    p->vscore = NULL;
+    p->drv->unload(vf);
 
     assert(!p->in_node_active);
     assert(num_requested(p) == 0); // async callback didn't return?
@@ -537,13 +541,7 @@ static int reinit_vs(struct vf_instance *vf)
     MP_DBG(vf, "initializing...\n");
     p->initializing = true;
 
-    // First load an empty script to get a VSScript, so that we get the vsapi
-    // and vscore.
-    if (vsscript_evaluateScript(&p->se, "", NULL, 0))
-        goto error;
-    p->vsapi = vsscript_getVSApi();
-    p->vscore = vsscript_getCore(p->se);
-    if (!p->vsapi || !p->vscore) {
+    if (p->drv->load_core(vf) < 0 || !p->vsapi || !p->vscore) {
         MP_FATAL(vf, "Could not get vapoursynth API handle.\n");
         goto error;
     }
@@ -569,13 +567,8 @@ static int reinit_vs(struct vf_instance *vf)
     p->vsapi->propSetInt(vars, "video_in_dw", p->fmt_in.d_w, 0);
     p->vsapi->propSetInt(vars, "video_in_dh", p->fmt_in.d_h, 0);
 
-    vsscript_setVariable(p->se, vars);
-
-    if (vsscript_evaluateFile(&p->se, p->cfg_file, 0)) {
-        MP_FATAL(vf, "Script evaluation failed:\n%s\n", vsscript_getError(p->se));
+    if (p->drv->load(vf, vars) < 0)
         goto error;
-    }
-    p->out_node = vsscript_getOutput(p->se, 0);
     if (!p->out_node) {
         MP_FATAL(vf, "Could not get script output node.\n");
         goto error;
@@ -655,19 +648,16 @@ static void uninit(struct vf_instance *vf)
     struct vf_priv_s *p = vf->priv;
 
     destroy_vs(vf);
-    vsscript_finalize();
+    p->drv->uninit(vf);
 
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);
 }
-
 static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
-    if (!vsscript_init()) {
-        MP_FATAL(vf, "Could not initialize VapourSynth scripting.\n");
+    if (p->drv->init(vf) < 0)
         return 0;
-    }
     if (!p->cfg_file || !p->cfg_file[0]) {
         MP_FATAL(vf, "'file' parameter must be set.\n");
         return 0;
@@ -697,10 +687,79 @@ static const m_option_t vf_opts_fields[] = {
     {0}
 };
 
+#include <VSScript.h>
+
+static int drv_vss_init(struct vf_instance *vf)
+{
+    if (!vsscript_init()) {
+        MP_FATAL(vf, "Could not initialize VapourSynth scripting.\n");
+        return -1;
+    }
+    return 0;
+}
+
+static void drv_vss_uninit(struct vf_instance *vf)
+{
+    vsscript_finalize();
+}
+
+static int drv_vss_load_core(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+
+    // First load an empty script to get a VSScript, so that we get the vsapi
+    // and vscore.
+    if (vsscript_evaluateScript(&p->se, "", NULL, 0))
+        return -1;
+    p->vsapi = vsscript_getVSApi();
+    p->vscore = vsscript_getCore(p->se);
+    return 0;
+}
+
+static int drv_vss_load(struct vf_instance *vf, VSMap *vars)
+{
+    struct vf_priv_s *p = vf->priv;
+
+    vsscript_setVariable(p->se, vars);
+
+    if (vsscript_evaluateFile(&p->se, p->cfg_file, 0)) {
+        MP_FATAL(vf, "Script evaluation failed:\n%s\n", vsscript_getError(p->se));
+        return -1;
+    }
+    p->out_node = vsscript_getOutput(p->se, 0);
+    return 0;
+}
+
+static void drv_vss_unload(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+
+    if (p->se)
+        vsscript_freeScript(p->se);
+    p->se = NULL;
+    p->vsapi = NULL;
+    p->vscore = NULL;
+}
+
+static const struct script_driver drv_vss = {
+    .init = drv_vss_init,
+    .uninit = drv_vss_uninit,
+    .load_core = drv_vss_load_core,
+    .load = drv_vss_load,
+    .unload = drv_vss_unload,
+};
+
+static int vf_open_vss(vf_instance_t *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+    p->drv = &drv_vss;
+    return vf_open(vf);
+}
+
 const vf_info_t vf_info_vapoursynth = {
-    .description = "vapoursynth bridge",
+    .description = "VapourSynth bridge (Python)",
     .name = "vapoursynth",
-    .open = vf_open,
+    .open = vf_open_vss,
     .priv_size = sizeof(struct vf_priv_s),
     .options = vf_opts_fields,
 };
