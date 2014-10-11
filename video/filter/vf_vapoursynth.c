@@ -401,7 +401,18 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             break;
         }
         if (p->initializing) {
-            p->vsapi->setFilterError("Frame requested during init", frameCtx);
+            MP_WARN(vf, "Frame requested during init! This is unsupported.\n"
+                        "Returning black dummy frame with 0 duration.\n");
+            ret = alloc_vs_frame(p, &vf->fmt_in);
+            if (!ret) {
+                p->vsapi->setFilterError("Could not allocate VS frame", frameCtx);
+                break;
+            }
+            struct mp_image vsframe = map_vs_frame(p, ret, true);
+            mp_image_clear(&vsframe, 0, 0, vf->fmt_in.w, vf->fmt_in.h);
+            struct mp_image dummy = {0};
+            mp_image_set_params(&dummy, &vf->fmt_in);
+            set_vs_frame_props(p, ret, &dummy, 0, 1);
             break;
         }
         if (frameno < p->in_frameno) {
