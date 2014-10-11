@@ -31,9 +31,6 @@ def m_hook(self, node):
 def build(ctx):
     from waflib import Task
 
-    def nice_path(node):
-        return node.path_from(node.ctx.launch_node())
-
     cls = Task.classes['cprogram']
     class cprogram(cls):
         run_str = cls.hcode + '${LAST_LINKFLAGS}'
