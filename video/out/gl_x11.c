@@ -193,9 +193,11 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
     int glx_major, glx_minor;
 
     // FBConfigs were added in GLX version 1.3.
-    if (!glXQueryVersion(vo->x11->display, &glx_major, &glx_minor) ||
-        (MPGL_VER(glx_major, glx_minor) <  MPGL_VER(1, 3)))
-    {
+    if (!glXQueryVersion(vo->x11->display, &glx_major, &glx_minor)) {
+        MP_ERR(vo, "GLX not found.\n");
+        return false;
+    }
+    if (MPGL_VER(glx_major, glx_minor) <  MPGL_VER(1, 3)) {
         MP_ERR(vo, "GLX version older than 1.3.\n");
         return false;
     }
