@@ -43,6 +43,7 @@
     if (self) {
         [self registerForDraggedTypes:@[NSFilenamesPboardType,
                                         NSURLPboardType]];
+        [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
     }
     return self;
 }

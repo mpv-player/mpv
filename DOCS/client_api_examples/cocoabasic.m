@@ -45,6 +45,7 @@ static void wakeup(void *);
                       defer:NO];
 
     [self->w setTitle:@"cocoabasic example"];
+    [self->w makeMainWindow];
     [self->w makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
 }
@@ -92,6 +93,10 @@ static void wakeup(void *);
 
         // for testing!
         check_error(mpv_set_option_string(mpv, "input-media-keys", "yes"));
+        check_error(mpv_set_option_string(mpv, "input-vo-keyboard", "yes"));
+
+        // request important errors
+        check_error(mpv_request_log_messages(mpv, "warn"));
 
         check_error(mpv_initialize(mpv));
 
@@ -107,17 +112,27 @@ static void wakeup(void *);
 - (void) handleEvent:(mpv_event *)event
 {
     switch (event->event_id) {
-        case MPV_EVENT_SHUTDOWN:
-            // Clean up and shut down.
-            mpv_terminate_destroy(mpv);
-            mpv = NULL;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[NSApplication sharedApplication] terminate:nil];
-            });
-            break;
+    case MPV_EVENT_SHUTDOWN:
+        // Clean up and shut down.
+        mpv_terminate_destroy(mpv);
+        mpv = NULL;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSApplication sharedApplication] terminate:nil];
+        });
+        break;
 
-        default:
-            printf("event: %s\n", mpv_event_name(event->event_id));
+    case MPV_EVENT_LOG_MESSAGE: {
+        struct mpv_event_log_message *msg = (struct mpv_event_log_message *)event->data;
+        printf("[%s] %s: %s", msg->prefix, msg->level, msg->text);
+    }
+
+    case MPV_EVENT_VIDEO_RECONFIG:
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->w selectNextKeyView:nil];
+        });
+
+    default:
+        printf("event: %s\n", mpv_event_name(event->event_id));
     }
 }
 

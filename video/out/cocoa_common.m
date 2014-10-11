@@ -183,14 +183,8 @@ void vo_cocoa_uninit(struct vo *vo)
         cocoa_rm_fs_screen_profile_observer(vo);
 
         [s->video release];
-
-        if (!s->embedded) {
-            if ([s->view isInFullScreenMode])
-                [[s->view window] release];
-
-            [s->window release];
-            s->window = nil;
-        }
+        [s->view release];
+        [s->window release];
     });
 }
 
@@ -307,21 +301,26 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     struct mp_vo_opts *opts  = vo->opts;
 
     MpvCocoaAdapter *adapter = [[[MpvCocoaAdapter alloc] init] autorelease];
-    const NSRect contentRect =
-        NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
     adapter.vout = vo;
 
+    NSView *parent;
     if (s->embedded) {
-        s->view = (NSView *) (intptr_t) opts->WinID;
+        parent = (NSView *) (intptr_t) opts->WinID;
     } else {
-        s->window = create_window(contentRect, s->current_screen,
-                                  opts->border, adapter);
-
-        MpvEventsView *view = [[MpvEventsView alloc] initWithFrame:contentRect];
-        [view autorelease];
-        view.adapter = adapter;
-        s->view = view;
+        const NSRect wr =
+            NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
+        s->window = create_window(wr, s->current_screen, opts->border, adapter);
+        parent = [s->window contentView];
     }
+
+    MpvEventsView *view = [[MpvEventsView alloc] initWithFrame:[parent bounds]];
+    view.adapter = adapter;
+    s->view = view;
+    [parent addSubview:s->view];
+
+    // insert ourselves as the next key view so that clients can give key
+    // focus to the mpv view by calling -[NSWindow selectNextKeyView:]
+    [parent setNextKeyView:s->view];
 
 #if HAVE_COCOA_APPLICATION
     cocoa_register_menu_item_action(MPM_H_SIZE,   @selector(halfSize));
@@ -335,8 +334,6 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     [s->video setWantsBestResolutionOpenGLSurface:YES];
 
     [s->view addSubview:s->video];
-    [s->view setAutoresizesSubviews:YES];
-    [s->window setContentView:s->view];
     [s->gl_ctx setView:s->video];
 
     s->video.adapter = adapter;
@@ -715,23 +712,28 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 }
 
 - (void)signalMouseMovement:(NSPoint)point {
-    mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
-    [self recalcMovableByWindowBackground:point];
+    if (mp_input_mouse_enabled(self.vout->input_ctx)) {
+        mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
+        [self recalcMovableByWindowBackground:point];
+    }
 }
 
 - (void)putKeyEvent:(NSEvent*)event
 {
-    cocoa_put_key_event(event);
+    if (mp_input_vo_keyboard_enabled(self.vout->input_ctx))
+        cocoa_put_key_event(event);
 }
 
 - (void)putKey:(int)mpkey withModifiers:(int)modifiers
 {
-    cocoa_put_key_with_modifiers(mpkey, modifiers);
+    if (mp_input_vo_keyboard_enabled(self.vout->input_ctx))
+        cocoa_put_key_with_modifiers(mpkey, modifiers);
 }
 
 - (void)putAxis:(int)mpkey delta:(float)delta;
 {
-    mp_input_put_axis(self.vout->input_ctx, mpkey, delta);
+    if (mp_input_mouse_enabled(self.vout->input_ctx))
+        mp_input_put_axis(self.vout->input_ctx, mpkey, delta);
 }
 
 - (void)putCommand:(char*)cmd
