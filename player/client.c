@@ -883,7 +883,7 @@ int mpv_command(mpv_handle *ctx, const char **args)
 int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result)
 {
     int r = run_client_command(ctx, mp_input_parse_cmd_node(ctx->log, args));
-    if (r >= 0)
+    if (result && r >= 0)
         *result = (mpv_node){.format = MPV_FORMAT_NONE};
     return r;
 }
