@@ -3067,7 +3067,7 @@ static const struct property_osd_display {
     { "clock", "Clock" },
     // audio
     { "volume", "Volume",
-      .msg = "Volume: ${volume}% ${?mute==yes:(Muted)}",
+      .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
       .osd_progbar = OSD_VOLUME },
     { "mute", "Mute" },
     { "audio-delay", "A-V delay" },
