@@ -930,9 +930,8 @@ static int l_invoke(lua_State *L)
     int err2 = 0;
     VSNodeRef *node = vsapi->propGetNode(r, "clip", 0, &err2);
     MP_TARRAY_APPEND(p, p->gc_noderef, p->num_gc_noderef, node);
-    if (!node)
-        luaL_error(L, "invoke() didn't return clip (error %d)", err2);
-    lua_pushlightuserdata(L, node);
+    if (node)
+        lua_pushlightuserdata(L, node);
     return 1;
 }
 
