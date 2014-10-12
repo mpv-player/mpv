@@ -232,8 +232,8 @@ static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
 
             AV_WL16(hdr,     0xF872);   // iec 61937 syncword 1
             AV_WL16(hdr + 2, 0x4E1F);   // iec 61937 syncword 2
-            hdr[4] = bsmod;             // bsmod
-            hdr[5] = 0x01;              // data-type ac3
+            hdr[5] = bsmod;             // bsmod
+            hdr[4] = 0x01;              // data-type ac3
             AV_WL16(hdr + 6, len << 3); // number of bits in payload
         }
 
