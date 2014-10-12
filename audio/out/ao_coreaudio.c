@@ -33,10 +33,6 @@ struct priv {
     AudioUnit audio_unit;
 
     uint64_t hw_latency_us;
-
-    // options
-    int opt_device_id;
-    int opt_list;
 };
 
 bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
@@ -151,9 +147,7 @@ static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    if (p->opt_list) ca_print_device_list(ao);
-
-    OSStatus err = ca_select_device(ao, p->opt_device_id, &p->device);
+    OSStatus err = ca_select_device(ao, ao->device, &p->device);
     CHECK_CA_ERROR("failed to select device");
 
     if (!init_chmap(ao))
@@ -221,9 +215,9 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
 
     AudioComponentDescription desc = (AudioComponentDescription) {
         .componentType         = kAudioUnitType_Output,
-        .componentSubType      = (p->opt_device_id < 0) ?
-                                    kAudioUnitSubType_DefaultOutput :
-                                    kAudioUnitSubType_HALOutput,
+        .componentSubType      = (ao->device) ?
+                                    kAudioUnitSubType_HALOutput :
+                                    kAudioUnitSubType_DefaultOutput,
         .componentManufacturer = kAudioUnitManufacturer_Apple,
         .componentFlags        = 0,
         .componentFlagsMask    = 0,
@@ -440,10 +434,6 @@ const struct ao_driver audio_out_coreaudio = {
     .control   = control,
     .pause     = stop,
     .resume    = start,
+    .list_devs = ca_get_device_list,
     .priv_size = sizeof(struct priv),
-    .options = (const struct m_option[]) {
-        OPT_INT("device_id", opt_device_id, 0, OPTDEF_INT(-1)),
-        OPT_FLAG("list", opt_list, 0),
-        {0}
-    },
 };

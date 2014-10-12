@@ -46,8 +46,8 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
         if (err != noErr) goto label; \
     } while (0)
 
-void ca_print_device_list(struct ao *ao);
-OSStatus ca_select_device(struct ao *ao, int selection, AudioDeviceID *device);
+void ca_get_device_list(struct ao *ao, struct ao_device_list *list);
+OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device);
 
 void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd);
 void ca_print_asbd(struct ao *ao, const char *description,

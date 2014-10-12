@@ -28,42 +28,36 @@
 #include "osdep/endian.h"
 #include "audio/format.h"
 
-void ca_print_device_list(struct ao *ao)
+void ca_get_device_list(struct ao *ao, struct ao_device_list *list)
 {
-    char *help = talloc_strdup(NULL, "Available output devices:\n");
-
     AudioDeviceID *devs;
     size_t n_devs;
-
     OSStatus err =
         CA_GET_ARY(kAudioObjectSystemObject, kAudioHardwarePropertyDevices,
                    &devs, &n_devs);
-
     CHECK_CA_ERROR("Failed to get list of output devices.");
-
     for (int i = 0; i < n_devs; i++) {
-        char *name;
-        err = CA_GET_STR(devs[i], kAudioObjectPropertyName, &name);
-
-        if (err == noErr)
-            talloc_steal(devs, name);
-        else
-            name = "Unknown";
-
-        help = talloc_asprintf_append(
-                help, "  * %s (id: %" PRIu32 ")\n", name, devs[i]);
+        char name[32];
+        char *desc;
+        sprintf(name, "%d", devs[i]);
+        err = CA_GET_STR(devs[i], kAudioObjectPropertyName, &desc);
+        if (err != noErr)
+            desc = "Unknown";
+        ao_device_list_add(list, ao, &(struct ao_device_desc){name, desc});
     }
-
     talloc_free(devs);
-
 coreaudio_error:
-    MP_INFO(ao, "%s", help);
-    talloc_free(help);
+    return;
 }
 
-OSStatus ca_select_device(struct ao *ao, int selection, AudioDeviceID *device)
+OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
 {
     OSStatus err = noErr;
+    int selection = name ? strtol(name, (char **)NULL, 10) : -1;
+    if (errno == EINVAL || errno == ERANGE) {
+        selection = -1;
+        MP_ERR(ao, "device identifier '%s' is invalid\n", name);
+    }
     *device = 0;
     if (selection < 0) {
         // device not set by user, get the default one
@@ -76,14 +70,14 @@ OSStatus ca_select_device(struct ao *ao, int selection, AudioDeviceID *device)
     }
 
     if (mp_msg_test(ao->log, MSGL_V)) {
-        char *name;
-        err = CA_GET_STR(*device, kAudioObjectPropertyName, &name);
+        char *desc;
+        err = CA_GET_STR(*device, kAudioObjectPropertyName, &desc);
         CHECK_CA_ERROR("could not get selected audio device name");
 
         MP_VERBOSE(ao, "selected audio output device: %s (%" PRIu32 ")\n",
-                       name, *device);
+                       desc, *device);
 
-        talloc_free(name);
+        talloc_free(desc);
     }
 
 coreaudio_error:
