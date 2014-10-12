@@ -1,3 +1,37 @@
+Release 0.6.1
+=============
+
+Changes
+-------
+
+- Don't show message on "osd" command by default (this essentially reverts a
+  change introduced in the last release).
+- Add an alternative input configuration that reverts the key binding changes
+  introduced by previous releases (see etc/restore-old-bindings.conf in the
+  sources).
+- Automatically install example input configuration files.
+
+Bug fixes
+---------
+
+- Make stream language work with Bluray as well (the previous release
+  introduced this for DVDs, but it didn't work for Blurays).
+- Don't try to create surfaces of size 0 in the VDPAU vo.
+- Don't print audio/video init failure message twice.
+- Fix playback on the root window on X11 (i.e. when using --wid=0).
+- Fix the autodetection of the input format in the vf_stereo3d filter when mpv
+  is built against libav (this makes --video-stereo-mode work with libav as
+  well).
+- Fix compilation with PulseAudio 1.0.
+- Fix compilation with clang.
+- Try harder to decode cover art picture only once.
+- Fix cursor autohide (--cursor-autohide) with audio-only files on file change
+  (e.g. when skipping to the next playlist file).
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 061f509..2ffdc0d`` in
+the git repository.
+
 Release 0.6.0
 =============
 
