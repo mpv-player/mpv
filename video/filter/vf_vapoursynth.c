@@ -31,6 +31,7 @@
 
 #include "common/msg.h"
 #include "options/m_option.h"
+#include "options/path.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -671,6 +672,8 @@ static int vf_open(vf_instance_t *vf)
         MP_FATAL(vf, "'file' parameter must be set.\n");
         return 0;
     }
+    talloc_steal(vf, p->cfg_file);
+    p->cfg_file = mp_get_user_path(vf, vf->chain->global, p->cfg_file);
 
     pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
