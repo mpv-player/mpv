@@ -48,8 +48,7 @@ struct sh_stream {
     // Usually a FourCC, exact meaning depends on codec.
     unsigned int format;
 
-    // Codec specific header data (set by demux_lavf.c)
-    // Other demuxers use sh_audio->wf and sh_video->bih instead.
+    // Codec specific header data (set by demux_lavf.c only)
     struct AVCodecContext *lav_headers;
 
     char *title;
