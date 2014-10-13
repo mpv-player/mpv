@@ -1149,7 +1149,7 @@ static const videocodec_info_t vinfo[] = {
 
 static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 {
-    unsigned char *extradata;
+    unsigned char *extradata = NULL;
     unsigned int extradata_size = 0;
     bool raw = false;
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
