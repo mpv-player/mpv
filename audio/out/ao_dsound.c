@@ -41,6 +41,7 @@
 #include "internal.h"
 #include "common/msg.h"
 #include "osdep/timer.h"
+#include "osdep/io.h"
 #include "options/m_option.h"
 
 /**
@@ -99,6 +100,8 @@ struct priv {
 
     int cfg_device;
     int cfg_buffersize;
+
+    struct ao_device_list *listing; ///temporary during list_devs()
 };
 
 static float get_delay(struct ao *ao);
@@ -172,11 +175,84 @@ static BOOL CALLBACK DirectSoundEnum(LPGUID guid, LPCSTR desc, LPCSTR module,
         if (guid)
             memcpy(&p->device, guid, sizeof(GUID));
     }
+    char *guidstr = talloc_strdup(NULL, "");
+    if (guid) {
+        wchar_t guidwstr[80] = {0};
+        StringFromGUID2(guid, guidwstr, MP_ARRAY_SIZE(guidwstr));
+        char *nstr = mp_to_utf8(NULL, guidwstr);
+        if (nstr) {
+            talloc_free(guidstr);
+            guidstr = nstr;
+        }
+    }
+    if (p->device_num < 0 && ao->device) {
+        if (strcmp(ao->device, guidstr) == 0) {
+            MP_VERBOSE(ao, "<--");
+            p->device_num = p->device_index;
+            if (guid)
+                memcpy(&p->device, guid, sizeof(GUID));
+        }
+    }
+    if (p->listing) {
+        struct ao_device_desc e = {guidstr, desc};
+        ao_device_list_add(p->listing, ao, &e);
+    }
+    talloc_free(guidstr);
+
     MP_VERBOSE(ao, "\n");
     p->device_index++;
     return TRUE;
 }
 
+static void EnumDevs(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    p->device_index = 0;
+    p->device_num = p->cfg_device;
+
+    HRESULT (WINAPI *OurDirectSoundEnumerate)(LPDSENUMCALLBACKA, LPVOID);
+    OurDirectSoundEnumerate = (void *)GetProcAddress(p->hdsound_dll,
+                                                     "DirectSoundEnumerateA");
+
+    if (OurDirectSoundEnumerate == NULL) {
+        MP_ERR(ao, "GetProcAddress FAILED\n");
+        return;
+    }
+
+    // Enumerate all directsound p->devices
+    MP_VERBOSE(ao, "Output Devices:\n");
+    OurDirectSoundEnumerate(DirectSoundEnum, ao);
+}
+
+static int LoadDirectSound(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    // initialize directsound
+    p->hdsound_dll = LoadLibrary("DSOUND.DLL");
+    if (p->hdsound_dll == NULL) {
+        MP_ERR(ao, "cannot load DSOUND.DLL\n");
+        return 0;
+    }
+
+    return 1;
+}
+
+static void list_devs(struct ao *ao, struct ao_device_list *list)
+{
+    struct priv *p = ao->priv;
+    bool need_init = !p->hdsound_dll;
+    if (need_init && !LoadDirectSound(ao))
+        return;
+
+    p->listing = list;
+    EnumDevs(ao);
+    p->listing = NULL;
+
+    if (need_init)
+        UninitDirectSound(ao);
+}
 
 /**
 \brief initilize direct sound
@@ -188,34 +264,23 @@ static int InitDirectSound(struct ao *ao)
 
     DSCAPS dscaps;
 
-    // initialize directsound
-    HRESULT (WINAPI *OurDirectSoundCreate)(LPGUID, LPDIRECTSOUND *, LPUNKNOWN);
-    HRESULT (WINAPI *OurDirectSoundEnumerate)(LPDSENUMCALLBACKA, LPVOID);
-    p->device_index = 0;
-    p->device_num = p->cfg_device;
-
-    p->hdsound_dll = LoadLibrary("DSOUND.DLL");
-    if (p->hdsound_dll == NULL) {
-        MP_ERR(ao, "cannot load DSOUND.DLL\n");
+    if (!LoadDirectSound(ao))
         return 0;
-    }
-    OurDirectSoundCreate = (void *)GetProcAddress(p->hdsound_dll,
-                                                  "DirectSoundCreate");
-    OurDirectSoundEnumerate = (void *)GetProcAddress(p->hdsound_dll,
-                                                     "DirectSoundEnumerateA");
 
-    if (OurDirectSoundCreate == NULL || OurDirectSoundEnumerate == NULL) {
+    HRESULT (WINAPI *OurDirectSoundCreate)(LPGUID, LPDIRECTSOUND *, LPUNKNOWN);
+    OurDirectSoundCreate =
+        (void *)GetProcAddress(p->hdsound_dll, "DirectSoundCreate");
+
+    if (OurDirectSoundCreate == NULL) {
         MP_ERR(ao, "GetProcAddress FAILED\n");
         FreeLibrary(p->hdsound_dll);
         return 0;
     }
 
-    // Enumerate all directsound p->devices
-    MP_VERBOSE(ao, "Output Devices:\n");
-    OurDirectSoundEnumerate(DirectSoundEnum, ao);
+    EnumDevs(ao);
 
     // Create the direct sound object
-    if (FAILED(OurDirectSoundCreate((p->device_num) ? &p->device : NULL,
+    if (FAILED(OurDirectSoundCreate((p->device_num > 0) ? &p->device : NULL,
                                     &p->hds, NULL)))
     {
         MP_ERR(ao, "cannot create a DirectSound device\n");
@@ -635,9 +700,10 @@ const struct ao_driver audio_out_dsound = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
+    .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
-        OPT_INT("device", cfg_device, 0),
+        OPT_INT("device", cfg_device, 0, OPTDEF_INT(-1)),
         OPT_INTRANGE("buffersize", cfg_buffersize, 0, 1, 10000, OPTDEF_INT(200)),
         {0}
     },
