@@ -417,6 +417,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
     while (1) {
         if (p->shutdown) {
             p->vsapi->setFilterError("EOF or filter reinit/uninit", frameCtx);
+            MP_DBG(vf, "returning error on EOF/reset\n");
             break;
         }
         if (p->initializing) {
