@@ -191,7 +191,7 @@ static int init(struct ao *ao)
     wasapi_fill_VistaBlob(state);
 
     if (state->opt_list) {
-        wasapi_enumerate_devices(state->log);
+        wasapi_enumerate_devices(state->log, NULL, NULL);
     }
 
     if (state->opt_exclusive) {
@@ -329,6 +329,11 @@ static void audio_resume(struct ao *ao)
     IAudioClient_Start(state->pAudioClientProxy);
 }
 
+static void list_devs(struct ao *ao, struct ao_device_list *list)
+{
+    wasapi_enumerate_devices(mp_null_log, ao, list);
+}
+
 #define OPT_BASE_STRUCT struct wasapi_state
 
 const struct ao_driver audio_out_wasapi = {
@@ -339,6 +344,7 @@ const struct ao_driver audio_out_wasapi = {
     .control   = control,
     //.reset     = audio_reset, <- doesn't wait for audio callback to return
     .resume    = audio_resume,
+    .list_devs = list_devs,
     .priv_size = sizeof(wasapi_state),
     .options   = (const struct m_option[]) {
         OPT_FLAG("exclusive", opt_exclusive, 0),

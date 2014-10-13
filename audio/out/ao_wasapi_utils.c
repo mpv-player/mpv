@@ -619,8 +619,10 @@ end:
     return found;
 }
 
-static HRESULT enumerate_with_state(struct mp_log *log, char *header,
-                                    int status, int with_id)
+// Warning: ao and list are NULL in the "--ao=wasapi:device=help" path!
+static HRESULT enumerate_with_state(struct mp_log *log, struct ao *ao,
+                                    struct ao_device_list *list,
+                                    char *header, int status, int with_id)
 {
     HRESULT hr;
     IMMDeviceEnumerator *pEnumerator = NULL;
@@ -668,6 +670,12 @@ static HRESULT enumerate_with_state(struct mp_log *log, char *header,
             mp_info(log, "%s, ID: %s%s\n", name, id, mark);
         }
 
+        if (ao) {
+            char *desc = talloc_asprintf(NULL, "%s, ID: %s%s", name, id, mark);
+            struct ao_device_desc e = {id, desc};
+            ao_device_list_add(list, ao, &e);
+        }
+
         talloc_free(name);
         talloc_free(id);
         SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
@@ -685,14 +693,17 @@ exit_label:
     return hr;
 }
 
-int wasapi_enumerate_devices(struct mp_log *log)
+int wasapi_enumerate_devices(struct mp_log *log, struct ao *ao,
+                             struct ao_device_list *list)
 {
     HRESULT hr;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-    hr = enumerate_with_state(log, "Active devices:", DEVICE_STATE_ACTIVE, 1);
+    hr = enumerate_with_state(log, ao, list, "Active devices:",
+                              DEVICE_STATE_ACTIVE, 1);
     EXIT_ON_ERROR(hr);
-    hr = enumerate_with_state(log, "Unplugged devices:", DEVICE_STATE_UNPLUGGED, 0);
+    hr = enumerate_with_state(log, ao, list, "Unplugged devices:",
+                              DEVICE_STATE_UNPLUGGED, 0);
     EXIT_ON_ERROR(hr);
     CoUninitialize();
     return 0;
@@ -822,7 +833,7 @@ int wasapi_validate_device(struct mp_log *log, const m_option_t *opt,
                            struct bstr name, struct bstr param)
 {
     if (bstr_equals0(param, "help")) {
-        wasapi_enumerate_devices(log);
+        wasapi_enumerate_devices(log, NULL, NULL);
         return M_OPT_EXIT;
     }
 
@@ -901,7 +912,11 @@ int wasapi_thread_init(struct ao *ao)
     HRESULT hr;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-    if (!state->opt_device) {
+    char *device = state->opt_device;
+    if (!device || !device[0])
+        device = ao->device;
+
+    if (!device || !device[0]) {
         IMMDeviceEnumerator *pEnumerator;
         hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
                               &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
@@ -916,7 +931,7 @@ int wasapi_thread_init(struct ao *ao)
         MP_VERBOSE(ao, "default device ID: %s\n", id);
         talloc_free(id);
     } else {
-        hr = find_and_load_device(ao, &state->pDevice, state->opt_device);
+        hr = find_and_load_device(ao, &state->pDevice, device);
     }
     EXIT_ON_ERROR(hr);
 
