@@ -1,10 +1,10 @@
 TA ("Tree Allocator") is a wrapper around malloc() and related functions,
-adding features like automatically free sub-trees of memory allocations if
+adding features like automatically freeing sub-trees of memory allocations if
 a parent allocation is freed.
 
 Generally, the idea is that every TA allocation can have a parent (indicated
 by the ta_parent argument in allocation function calls). If a parent is freed,
-its child allocations are automatically freed as well. It's also allowed the
+its child allocations are automatically freed as well. It is also allowed to
 free a child before the parent, or to move a child to another parent with
 ta_set_parent().
 
