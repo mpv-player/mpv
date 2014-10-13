@@ -505,7 +505,7 @@ def build(ctx):
             PRIV_LIBS    = get_deps(),
         )
 
-        headers = ["client.h"]
+        headers = ["client.h", "qthelper.hpp"]
         for f in headers:
             ctx.install_as(ctx.env.INCDIR + '/mpv/' + f, 'libmpv/' + f)
 
