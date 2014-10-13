@@ -101,6 +101,17 @@ static int validate_device_opt(struct mp_log *log, const m_option_t *opt,
     return 0;
 }
 
+static void list_devs(struct ao *ao, struct ao_device_list *list)
+{
+    if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE)
+        return;
+    const char *devs = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+    while (devs && *devs) {
+        ao_device_list_add(list, ao, &(struct ao_device_desc){devs, devs});
+        devs = devs + strlen(devs) + 1;
+    }
+}
+
 struct speaker {
     int id;
     float pos[3];
@@ -151,7 +162,10 @@ static int init(struct ao *ao)
             goto err_out;
         }
     }
-    dev = alcOpenDevice(p->cfg_device && p->cfg_device[0] ? p->cfg_device : NULL);
+    char *dev_name = p->cfg_device;
+    if (!dev_name || !dev_name[0])
+        dev_name = ao->device;
+    dev = alcOpenDevice(dev_name && dev_name[0] ? dev_name : NULL);
     if (!dev) {
         MP_FATAL(ao, "could not open device\n");
         goto err_out;
@@ -302,6 +316,7 @@ const struct ao_driver audio_out_openal = {
     .resume    = audio_resume,
     .reset     = reset,
     .drain     = drain,
+    .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt),
