@@ -125,6 +125,24 @@ static int validate_device_opt(struct mp_log *log, const m_option_t *opt,
     return 0;
 }
 
+static void list_devs(struct ao *ao, struct ao_device_list *list)
+{
+    if (Pa_Initialize() < 0)
+        return;
+    int count = Pa_GetDeviceCount(); // negative on error
+    for (int n = 0; n < count; n++) {
+        const PaDeviceInfo* info = Pa_GetDeviceInfo(n);
+        char desc[1024];
+        snprintf(desc, sizeof(desc), "%s, %d channels, latency: %.2f "
+                 "ms, sample rate: %.0f", info->name,
+                 info->maxOutputChannels,
+                 info->defaultHighOutputLatency * 1000,
+                 info->defaultSampleRate);
+        ao_device_list_add(list, ao, &(struct ao_device_desc){info->name, desc});
+    }
+    Pa_Terminate();
+}
+
 static int stream_callback(const void *input,
                            void *output_v,
                            unsigned long frameCount,
@@ -167,8 +185,11 @@ static int init(struct ao *ao)
         return -1;
 
     int pa_device = Pa_GetDefaultOutputDevice();
-    if (priv->cfg_device && priv->cfg_device[0])
-        pa_device = find_device(ao->log, priv->cfg_device);
+    char *dev_name = priv->cfg_device;
+    if (!dev_name || !dev_name[0])
+        dev_name = ao->device;
+    if (dev_name && dev_name[0])
+        pa_device = find_device(ao->log, dev_name);
     if (pa_device == paNoDevice)
         goto error_exit;
 
@@ -246,6 +267,7 @@ const struct ao_driver audio_out_portaudio = {
     .uninit    = uninit,
     .reset     = reset,
     .resume    = resume,
+    .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt),
