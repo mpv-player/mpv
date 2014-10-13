@@ -402,6 +402,8 @@ bool ao_untimed(struct ao *ao)
 struct ao_device_list *ao_get_device_list(struct mpv_global *global)
 {
     struct ao_device_list *list = talloc_zero(NULL, struct ao_device_list);
+    MP_TARRAY_APPEND(list, list->devices, list->num_devices,
+        (struct ao_device_desc){"auto", "Autoselect device"});
     for (int n = 0; audio_out_drivers[n]; n++) {
         const struct ao_driver *d = audio_out_drivers[n];
         if (d->encode)
@@ -414,7 +416,7 @@ struct ao_device_list *ao_get_device_list(struct mpv_global *global)
             d->list_devs(ao, list);
         // Add at least a default entry
         if (list->num_devices == num)
-            ao_device_list_add(list, ao, &(struct ao_device_desc){"", ""});
+            ao_device_list_add(list, ao, &(struct ao_device_desc){"", "Default"});
         talloc_free(ao);
     }
     return list;
