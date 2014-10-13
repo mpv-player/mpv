@@ -12,6 +12,9 @@
 #include <QGridLayout>
 #include <QApplication>
 #include <QTextEdit>
+#include <QJsonDocument>
+
+#include <mpv/qthelper.hpp>
 
 #include "qtexample.h"
 
@@ -74,9 +77,12 @@ MainWindow::MainWindow(QWidget *parent) :
     // this property changes.
     mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
 
-    // Request log messages with level verbose ("v") or higher.
+    mpv_observe_property(mpv, 0, "track-list", MPV_FORMAT_NODE);
+    mpv_observe_property(mpv, 0, "chapter-list", MPV_FORMAT_NODE);
+
+    // Request log messages with level "info" or higher.
     // They are received as MPV_EVENT_LOG_MESSAGE.
-    mpv_request_log_messages(mpv, "v");
+    mpv_request_log_messages(mpv, "info");
 
     // From this point on, the wakeup function will be called. The callback
     // can come from any thread, so we use the Qt QEvent mechanism to relay
@@ -103,6 +109,17 @@ void MainWindow::handle_mpv_event(mpv_event *event)
                 // was stopped.
                 statusBar()->showMessage("");
             }
+        } else if (strcmp(prop->name, "chapter-list") == 0 ||
+                   strcmp(prop->name, "track-list") == 0)
+        {
+            if (prop->format == MPV_FORMAT_NODE) {
+                QVariant v = mpv::qt::node_to_variant((mpv_node *)prop->data);
+                mpv::qt::node_builder x(v);
+                QVariant v2 = mpv::qt::node_to_variant(x.node());
+                QJsonDocument d = QJsonDocument::fromVariant(v);
+                append_log("Change property " + QString(prop->name) + ":\n");
+                append_log(d.toJson().data());
+            }
         }
         break;
     }
@@ -128,10 +145,7 @@ void MainWindow::handle_mpv_event(mpv_event *event)
         struct mpv_event_log_message *msg = (struct mpv_event_log_message *)event->data;
         std::stringstream ss;
         ss << "[" << msg->prefix << "] " << msg->level << ": " << msg->text;
-        QTextCursor cursor = log->textCursor();
-        cursor.movePosition(QTextCursor::End);
-        cursor.insertText(QString::fromStdString(ss.str()));
-        log->setTextCursor(cursor);
+        append_log(QString::fromStdString(ss.str()));
         break;
     }
     case MPV_EVENT_SHUTDOWN: {
@@ -168,6 +182,14 @@ void MainWindow::on_file_open()
         const char *args[] = {"loadfile", c_filename.data(), NULL};
         mpv_command_async(mpv, 0, args);
     }
+}
+
+void MainWindow::append_log(const QString &text)
+{
+    QTextCursor cursor = log->textCursor();
+    cursor.movePosition(QTextCursor::End);
+    cursor.insertText(text);
+    log->setTextCursor(cursor);
 }
 
 MainWindow::~MainWindow()

@@ -5,7 +5,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = qtexample
 TEMPLATE = app
 
-CONFIG += link_pkgconfig
+CONFIG += link_pkgconfig debug
 PKGCONFIG = mpv
 
 SOURCES += qtexample.cpp
