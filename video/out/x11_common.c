@@ -1286,9 +1286,6 @@ static void vo_x11_highlevel_resize(struct vo *vo, struct mp_rect rc)
     } else {
         vo_x11_move_resize(vo, reset_pos, true, rc);
     }
-
-    vo_x11_update_geometry(vo);
-    update_vo_size(vo);
 }
 
 static void wait_until_mapped(struct vo *vo)
@@ -1576,6 +1573,10 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         rc.x1 = rc.x0 + s[0];
         rc.y1 = rc.y0 + s[1];
         vo_x11_highlevel_resize(vo, rc);
+        if (!x11->fs) { // guess new window size, instead of waiting for X
+            x11->winrc.x1 = x11->winrc.x0 + s[0];
+            x11->winrc.y1 = x11->winrc.y0 + s[1];
+        }
         return VO_TRUE;
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:
