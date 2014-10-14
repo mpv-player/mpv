@@ -467,6 +467,10 @@ PROTOCOLS
     be specified. mpv will never attempt to guess whether a filename is
     actually a network address. A protocol prefix is always required.
 
+    Note that not all prefixes are documented here. Undocumented prefixes are
+    either aliases to documented protocols, or are just reidrections to
+    protocols implemented and documented in FFmpeg.
+
 ``-``
     Play data from stdin.
 
