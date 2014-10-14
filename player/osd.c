@@ -274,6 +274,8 @@ static bool set_osd_msg_va(struct MPContext *mpctx, int level, int time,
     mpctx->osd_msg_next_duration = time / 1000.0;
     mpctx->osd_force_update = true;
     mpctx->sleeptime = 0;
+    if (mpctx->osd_msg_next_duration <= 0)
+        mpctx->osd_msg_visible = mp_time_sec();
     return true;
 }
 
