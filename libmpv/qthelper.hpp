@@ -133,6 +133,7 @@ private:
             mpv_node_list *list = create_list(dst, false, qlist.size());
             if (!list)
                 goto fail;
+            list->num = qlist.size();
             for (int n = 0; n < qlist.size(); n++)
                 set(&list->values[n], qlist[n]);
         } else if (src.canConvert<QVariantMap>()) {
@@ -140,6 +141,7 @@ private:
             mpv_node_list *list = create_list(dst, true, qmap.size());
             if (!list)
                 goto fail;
+            list->num = qmap.size();
             for (int n = 0; n < qmap.size(); n++) {
                 list->keys[n] = dup_qstring(qmap.keys()[n]);
                 if (!list->keys[n]) {
@@ -166,7 +168,7 @@ private:
             if (list) {
                 for (int n = 0; n < list->num; n++) {
                     if (list->keys)
-                        delete list->keys[n];
+                        delete[] list->keys[n];
                     if (list->values)
                         free_node(&list->values[n]);
                 }
