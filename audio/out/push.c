@@ -234,7 +234,10 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     p->final_chunk = is_final;
     p->paused = false;
-    p->still_playing |= write_samples > 0;
+    if (got_data) {
+        p->still_playing = true;
+        p->expected_end_time = 0;
+    }
 
     // If we don't have new data, the decoder thread basically promises it
     // will send new data as soon as it's available.
