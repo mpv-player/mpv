@@ -114,8 +114,7 @@ void MainWindow::handle_mpv_event(mpv_event *event)
         {
             if (prop->format == MPV_FORMAT_NODE) {
                 QVariant v = mpv::qt::node_to_variant((mpv_node *)prop->data);
-                mpv::qt::node_builder x(v);
-                QVariant v2 = mpv::qt::node_to_variant(x.node());
+                // Abuse JSON support for easily printing the mpv_node contents.
                 QJsonDocument d = QJsonDocument::fromVariant(v);
                 append_log("Change property " + QString(prop->name) + ":\n");
                 append_log(d.toJson().data());
