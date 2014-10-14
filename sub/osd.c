@@ -203,6 +203,7 @@ void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs)
 {
     pthread_mutex_lock(&osd->lock);
     osd->objs[OSDTYPE_EXTERNAL2]->external2 = imgs;
+    osd_changed_unlocked(osd, OSDTYPE_EXTERNAL2);
     pthread_mutex_unlock(&osd->lock);
 }
 
