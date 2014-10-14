@@ -268,6 +268,13 @@ void mp_cancel_reset(struct mp_cancel *c);
 char *mp_file_url_to_filename(void *talloc_ctx, bstr url);
 char *mp_file_get_path(void *talloc_ctx, bstr url);
 
+// stream_lavf.c
+struct AVDictionary;
+void mp_setup_av_network_options(struct AVDictionary **dict,
+                                 struct mpv_global *global,
+                                 struct mp_log *log,
+                                 struct MPOpts *opts);
+
 void stream_print_proto_list(struct mp_log *log);
 
 #endif /* MPLAYER_STREAM_H */

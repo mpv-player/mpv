@@ -143,6 +143,45 @@ static int interrupt_cb(void *ctx)
 
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
+void mp_setup_av_network_options(AVDictionary **dict, struct mpv_global *global,
+                                 struct mp_log *log, struct MPOpts *opts)
+{
+    void *temp = talloc_new(NULL);
+
+    // HTTP specific options (other protocols ignore them)
+    if (opts->network_useragent)
+        av_dict_set(dict, "user-agent", opts->network_useragent, 0);
+    if (opts->network_cookies_enabled) {
+        char *file = opts->network_cookies_file;
+        if (file && file[0])
+            file = mp_get_user_path(temp, global, file);
+        char *cookies = cookies_lavf(temp, log, file);
+        if (cookies && cookies[0])
+            av_dict_set(dict, "cookies", cookies, 0);
+    }
+    av_dict_set(dict, "tls_verify", opts->network_tls_verify ? "1" : "0", 0);
+    if (opts->network_tls_ca_file)
+        av_dict_set(dict, "ca_file", opts->network_tls_ca_file, 0);
+    char *cust_headers = talloc_strdup(temp, "");
+    if (opts->network_referrer) {
+        cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",
+                                              opts->network_referrer);
+    }
+    if (opts->network_http_header_fields) {
+        for (int n = 0; opts->network_http_header_fields[n]; n++) {
+            cust_headers = talloc_asprintf_append(cust_headers, "%s\r\n",
+                                                  opts->network_http_header_fields[n]);
+        }
+    }
+    if (strlen(cust_headers))
+        av_dict_set(dict, "headers", cust_headers, 0);
+    av_dict_set(dict, "icy", "1", 0);
+
+    mp_set_avdict(dict, opts->stream_lavf_opts->avopts);
+
+    talloc_free(temp);
+}
+
 static int open_f(stream_t *stream)
 {
     struct MPOpts *opts = stream->opts;
@@ -186,35 +225,7 @@ static int open_f(stream_t *stream)
         filename = talloc_asprintf(temp, "mmsh://%.*s", BSTR_P(b_filename));
     }
 
-    // HTTP specific options (other protocols ignore them)
-    if (opts->network_useragent)
-        av_dict_set(&dict, "user-agent", opts->network_useragent, 0);
-    if (opts->network_cookies_enabled) {
-        char *file = opts->network_cookies_file;
-        if (file && file[0])
-            file = mp_get_user_path(temp, stream->global, file);
-        char *cookies = cookies_lavf(temp, stream->log, file);
-        if (cookies && cookies[0])
-            av_dict_set(&dict, "cookies", cookies, 0);
-    }
-    av_dict_set(&dict, "tls_verify", opts->network_tls_verify ? "1" : "0", 0);
-    if (opts->network_tls_ca_file)
-        av_dict_set(&dict, "ca_file", opts->network_tls_ca_file, 0);
-    char *cust_headers = talloc_strdup(temp, "");
-    if (opts->network_referrer) {
-        cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",
-                                              opts->network_referrer);
-    }
-    if (opts->network_http_header_fields) {
-        for (int n = 0; opts->network_http_header_fields[n]; n++) {
-            cust_headers = talloc_asprintf_append(cust_headers, "%s\r\n",
-                                                  opts->network_http_header_fields[n]);
-        }
-    }
-    if (strlen(cust_headers))
-        av_dict_set(&dict, "headers", cust_headers, 0);
-    av_dict_set(&dict, "icy", "1", 0);
-    mp_set_avdict(&dict, opts->stream_lavf_opts->avopts);
+    mp_setup_av_network_options(&dict, stream->global, stream->log, opts);
 
     AVIOInterruptCB cb = {
         .callback = interrupt_cb,

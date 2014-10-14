@@ -706,10 +706,13 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                    "analyzeduration to %f\n", analyze_duration);
     }
 
+    AVDictionary *dopts = NULL;
+
     if ((priv->avif->flags & AVFMT_NOFILE) ||
         demuxer->stream->type == STREAMTYPE_AVDEVICE ||
         matches_avinputformat_name(priv, "hls"))
     {
+        mp_setup_av_network_options(&dopts, demuxer->global, demuxer->log, opts);
         // This might be incorrect.
         demuxer->seekable = true;
     } else {
@@ -726,8 +729,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         priv->pb->seekable = demuxer->seekable ? AVIO_SEEKABLE_NORMAL : 0;
         avfc->pb = priv->pb;
     }
-
-    AVDictionary *dopts = NULL;
 
     if (matches_avinputformat_name(priv, "rtsp")) {
         const char *transport = NULL;
