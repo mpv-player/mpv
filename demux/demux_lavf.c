@@ -707,7 +707,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     }
 
     if ((priv->avif->flags & AVFMT_NOFILE) ||
-        demuxer->stream->type == STREAMTYPE_AVDEVICE)
+        demuxer->stream->type == STREAMTYPE_AVDEVICE ||
+        matches_avinputformat_name(priv, "hls"))
     {
         // This might be incorrect.
         demuxer->seekable = true;
