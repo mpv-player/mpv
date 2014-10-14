@@ -560,6 +560,8 @@ PROTOCOLS
 
 .. include:: lua.rst
 
+.. include:: ipc.rst
+
 .. include:: changes.rst
 
 ENVIRONMENT VARIABLES
