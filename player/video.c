@@ -579,7 +579,9 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
                        && mpctx->video_status == STATUS_SYNCING;
             if (hrseek && img->pts < mpctx->hrseek_pts - .005)
                 drop = true;
-            if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
+            if ((endpts != MP_NOPTS_VALUE && img->pts >= endpts) ||
+                mpctx->max_frames == 0)
+            {
                 drop = true;
                 r = VD_EOF;
             }
