@@ -73,8 +73,6 @@ struct node_builder {
     mpv_node *node() { return &node_; }
 private:
     Q_DISABLE_COPY(node_builder)
-    //node_builder(node_builder const&); // disallow
-    //node_builder& operator=(node_builder const&); // disallow
     mpv_node node_;
     mpv_node_list *create_list(mpv_node *dst, bool is_map, int num) {
         dst->format = is_map ? MPV_FORMAT_NODE_MAP : MPV_FORMAT_NODE_ARRAY;
