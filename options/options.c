@@ -528,6 +528,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
 
+    OPT_STRING("input-file", input_file, M_OPT_FILE | M_OPT_GLOBAL),
     OPT_STRING("input-unix-socket", ipc_path, M_OPT_FILE),
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, image_writer_conf, 0),
