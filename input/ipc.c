@@ -31,6 +31,7 @@
 #include "osdep/io.h"
 
 #include "common/common.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "input/input.h"
 #include "libmpv/client.h"
@@ -53,6 +54,7 @@ struct client_arg {
     struct mp_log *log;
     struct mpv_handle *client;
 
+    char *client_name;
     int client_fd;
 
     char *(*encode_event)(mpv_event *event);
@@ -432,6 +434,15 @@ error:
     return output;
 }
 
+static char *text_execute_command(struct client_arg *arg, bstr msg)
+{
+    char *cmd_str = bstrdup0(NULL, msg);
+    mpv_command_string(arg->client, cmd_str);
+    talloc_free(cmd_str);
+
+    return NULL;
+}
+
 static int ipc_write(int fd, const char *buf, size_t count)
 {
     while (count > 0) {
@@ -576,19 +587,10 @@ done:
     return NULL;
 }
 
-static void ipc_start_client(struct MPContext *mpctx, int id, int fd)
+static void ipc_start_client(struct MPContext *mpctx, struct client_arg *client)
 {
-    struct client_arg *client = talloc_ptrtype(NULL, client);
-    char *client_name = talloc_asprintf(client, "ipc-%d", id);
-    *client = (struct client_arg){
-        .client    = mp_new_client(mpctx->clients, client_name),
-        .client_fd = fd,
-
-        .encode_event    = json_encode_event,
-        .execute_command = json_execute_command,
-    };
-
-    client->log = mp_client_get_log(client->client);
+    client->client = mp_new_client(mpctx->clients, client->client_name),
+    client->log    = mp_client_get_log(client->client);
 
     pthread_t client_thr;
     if (pthread_create(&client_thr, NULL, client_thread, client)) {
@@ -596,6 +598,45 @@ static void ipc_start_client(struct MPContext *mpctx, int id, int fd)
         close(client->client_fd);
         talloc_free(client);
     }
+}
+
+static void ipc_start_client_json(struct MPContext *mpctx, int id, int fd)
+{
+    struct client_arg *client = talloc_ptrtype(NULL, client);
+    *client = (struct client_arg){
+        .client_name = talloc_asprintf(client, "ipc-%d", id),
+        .client_fd   = fd,
+
+        .encode_event    = json_encode_event,
+        .execute_command = json_execute_command,
+    };
+
+    ipc_start_client(mpctx, client);
+}
+
+static void ipc_start_client_text(struct MPContext *mpctx, const char *path)
+{
+    int mode = O_RDONLY;
+    // Use RDWR for FIFOs to ensure they stay open over multiple accesses.
+    struct stat st;
+    if (stat(path, &st) == 0 && S_ISFIFO(st.st_mode))
+        mode = O_RDWR;
+    int client_fd = open(path, mode);
+    if (client_fd < 0) {
+        MP_ERR(mpctx, "Could not open pipe at '%s'\n", path);
+        return;
+    }
+
+    struct client_arg *client = talloc_ptrtype(NULL, client);
+    *client = (struct client_arg){
+        .client_name = "input-file",
+        .client_fd   = client_fd,
+
+        .encode_event    = NULL,
+        .execute_command = text_execute_command,
+    };
+
+    ipc_start_client(mpctx, client);
 }
 
 static void *ipc_thread(void *p)
@@ -668,7 +709,7 @@ static void *ipc_thread(void *p)
                 goto done;
             }
 
-            ipc_start_client(arg->mpctx, client_num++, client_fd);
+            ipc_start_client_json(arg->mpctx, client_num++, client_fd);
         }
     }
 
@@ -688,6 +729,9 @@ done:
 
 void mp_init_ipc(struct MPContext *mpctx)
 {
+    if (mpctx->global->opts->input_file && *mpctx->global->opts->input_file)
+        ipc_start_client_text(mpctx, mpctx->global->opts->input_file);
+
     if (!mpctx->opts->ipc_path || !*mpctx->opts->ipc_path)
         return;
 

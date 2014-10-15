@@ -165,7 +165,6 @@ struct input_opts {
     int ar_delay;
     int ar_rate;
     char *js_dev;
-    char *in_file;
     int use_joystick;
     int use_lirc;
     char *lirc_configfile;
@@ -188,7 +187,6 @@ const struct m_sub_options input_config = {
         OPT_PRINT("keylist", mp_print_key_list),
         OPT_PRINT("cmdlist", mp_print_cmd_list),
         OPT_STRING("js-dev", js_dev, CONF_GLOBAL),
-        OPT_STRING("file", in_file, CONF_GLOBAL),
         OPT_FLAG("default-bindings", default_bindings, CONF_GLOBAL),
         OPT_FLAG("test", test, CONF_GLOBAL),
         OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
@@ -1296,13 +1294,14 @@ void mp_input_load(struct input_ctx *ictx)
 
     ictx->win_drag = ictx->global->opts->allow_win_drag;
 
-    if (input_conf->in_file && input_conf->in_file[0]) {
-#if !defined(__MINGW32__) || HAVE_WAIO
-        mp_input_pipe_add(ictx, input_conf->in_file);
+#if defined(__MINGW32__)
+    if (ictx->global->opts->input_file && *ictx->global->opts->input_file)
+#if HAVE_WAIO
+        mp_input_pipe_add(ictx, ictx->global->opts->input_file);
 #else
         MP_ERR(ictx, "Pipes not available.\n");
 #endif
-    }
+#endif
 }
 
 static void clear_queue(struct cmd_queue *queue)
