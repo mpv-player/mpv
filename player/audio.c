@@ -520,8 +520,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 // Drop data queued for output, or which the AO is currently outputting.
 void clear_audio_output_buffers(struct MPContext *mpctx)
 {
-    if (mpctx->ao) {
+    if (mpctx->ao)
         ao_reset(mpctx->ao);
+    if (mpctx->ao_buffer)
         mp_audio_buffer_clear(mpctx->ao_buffer);
-    }
 }
