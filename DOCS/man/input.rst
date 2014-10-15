@@ -1361,6 +1361,16 @@ Property list
     require reloading the file for changes to take effect. If there is an
     equivalent property, prefer setting the property instead.
 
+``file-local-options/<name>``
+    Similar to ``options/<name>``, but when setting an option through this
+    property, the option is reset to its old value once the current file has
+    stopped playing. Trying to write an option while no file is playing (or
+    is being loaded) results in an error.
+
+    (Note that if an option is marked as file-local, even ``options/`` will
+    access the local value, and the ``old`` value, which will be restored on
+    end of playback, can not be read or written until end of playback.)
+
 ``property-list``
     Return the list of top-level properties.
 

@@ -2674,7 +2674,8 @@ static int mp_property_alias(void *ctx, struct m_property *prop,
     return mp_property_do(real_property, action, arg, ctx);
 }
 
-static int access_options(struct m_property_action_arg *ka, MPContext *mpctx)
+static int access_options(struct m_property_action_arg *ka, bool local,
+                          MPContext *mpctx)
 {
     struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
                                                   bstr0(ka->key));
@@ -2688,8 +2689,10 @@ static int access_options(struct m_property_action_arg *ka, MPContext *mpctx)
         m_option_copy(opt->opt, ka->arg, opt->data);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET: {
-        int r = m_config_set_option_raw(mpctx->mconfig, opt, ka->arg,
-                                        M_SETOPT_RUNTIME);
+        if (local && !mpctx->playing)
+            return M_PROPERTY_ERROR;
+        int flags = M_SETOPT_RUNTIME | (local ? M_SETOPT_BACKUP : 0);
+        int r = m_config_set_option_raw(mpctx->mconfig, opt, ka->arg, flags);
         return r < 0 ? M_PROPERTY_ERROR : M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
@@ -2699,10 +2702,8 @@ static int access_options(struct m_property_action_arg *ka, MPContext *mpctx)
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_options(void *ctx, struct m_property *prop,
-                               int action, void *arg)
+static int access_option_list(int action, void *arg, bool local, MPContext *mpctx)
 {
-    MPContext *mpctx = ctx;
     switch (action) {
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};
@@ -2711,9 +2712,24 @@ static int mp_property_options(void *ctx, struct m_property *prop,
         *(char ***)arg = m_config_list_options(NULL, mpctx->mconfig);
         return M_PROPERTY_OK;
     case M_PROPERTY_KEY_ACTION:
-        return access_options(arg, mpctx);
+        return access_options(arg, local, mpctx);
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+
+static int mp_property_options(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return access_option_list(action, arg, false, mpctx);
+}
+
+static int mp_property_local_options(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return access_option_list(action, arg, true, mpctx);
 }
 
 static const struct m_property mp_properties[];
@@ -2906,6 +2922,7 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("sub", "sid"),
 
     {"options", mp_property_options},
+    {"file-local-options", mp_property_local_options},
     {"property-list", mp_property_list},
 
     {0},
