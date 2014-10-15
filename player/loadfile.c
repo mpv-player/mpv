@@ -794,6 +794,36 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
     }
 }
 
+static int process_open_hooks(struct MPContext *mpctx)
+{
+
+    mp_hook_run(mpctx, NULL, "on_load");
+
+    while (!mp_hook_test_completion(mpctx, "on_load")) {
+        mp_idle(mpctx);
+        if (mpctx->stop_play) {
+            if (mpctx->stop_play == PT_QUIT)
+                return -1;
+            // Can't exit immediately, the script would interfere with the
+            // next file being loaded.
+            mp_hook_abort(mpctx, "on_load");
+        }
+    }
+
+    // quvi stuff
+    char *filename = mpctx->stream_open_filename;
+    mpctx->resolve_result = resolve_url(filename, mpctx->global);
+    if (mpctx->resolve_result) {
+        print_resolve_contents(mpctx->log, mpctx->resolve_result);
+        if (mpctx->resolve_result->playlist) {
+            transfer_playlist(mpctx, mpctx->resolve_result->playlist);
+            return 1;
+        }
+        mpctx->stream_open_filename = mpctx->resolve_result->url;
+    }
+    return 0;
+}
+
 static void print_timeline(struct MPContext *mpctx)
 {
     if (mpctx->timeline) {
@@ -936,6 +966,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->playing->reserved += 1;
 
     mpctx->filename = talloc_strdup(tmp, mpctx->playing->filename);
+    mpctx->stream_open_filename = mpctx->filename;
 
     mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION;
 
@@ -972,21 +1003,16 @@ static void play_current_file(struct MPContext *mpctx)
     assert(mpctx->d_sub[0] == NULL);
     assert(mpctx->d_sub[1] == NULL);
 
-    char *stream_filename = mpctx->filename;
-    mpctx->resolve_result = resolve_url(stream_filename, mpctx->global);
-    if (mpctx->resolve_result) {
-        talloc_steal(tmp, mpctx->resolve_result);
-        print_resolve_contents(mpctx->log, mpctx->resolve_result);
-        if (mpctx->resolve_result->playlist) {
-            transfer_playlist(mpctx, mpctx->resolve_result->playlist);
-            goto terminate_playback;
-        }
-        stream_filename = mpctx->resolve_result->url;
-    }
+    int hooks_res = process_open_hooks(mpctx);
+    talloc_steal(tmp, mpctx->resolve_result);
+    if (hooks_res)
+        goto terminate_playback; // quit or preloaded playlist special-case
+
     int stream_flags = STREAM_READ;
     if (!opts->load_unsafe_playlists)
         stream_flags |= mpctx->playing->stream_flags;
-    mpctx->stream = open_stream_async(mpctx, stream_filename, stream_flags);
+    mpctx->stream = open_stream_async(mpctx, mpctx->stream_open_filename,
+                                      stream_flags);
     if (!mpctx->stream)
         goto terminate_playback;
 
@@ -1245,6 +1271,7 @@ terminate_playback:
         playlist_entry_unref(mpctx->playing);
     mpctx->playing = NULL;
     mpctx->filename = NULL;
+    mpctx->stream_open_filename = NULL;
 
     talloc_free(tmp);
 }

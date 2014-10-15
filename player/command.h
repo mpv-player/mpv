@@ -43,4 +43,8 @@ uint64_t mp_get_property_event_mask(const char *name);
 #define INTERNAL_EVENT_BASE 24
 #define MP_EVENT_CACHE_UPDATE (INTERNAL_EVENT_BASE + 0)
 
+bool mp_hook_test_completion(struct MPContext *mpctx, char *type);
+void mp_hook_run(struct MPContext *mpctx, char *client, char *type);
+void mp_hook_abort(struct MPContext *mpctx, char *type);
+
 #endif /* MPLAYER_COMMAND_H */

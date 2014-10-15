@@ -871,6 +871,8 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd)
     if (mp_input_is_abort_cmd(cmd))
         mp_cancel_trigger(ctx->mpctx->playback_abort);
 
+    cmd->sender = ctx->name;
+
     struct cmd_request req = {
         .mpctx = ctx->mpctx,
         .cmd = cmd,
@@ -904,6 +906,8 @@ static int run_cmd_async(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)
         return MPV_ERROR_UNINITIALIZED;
     if (!cmd)
         return MPV_ERROR_INVALID_PARAMETER;
+
+    cmd->sender = ctx->name;
 
     struct cmd_request *req = talloc_ptrtype(NULL, req);
     *req = (struct cmd_request){

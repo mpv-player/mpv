@@ -82,6 +82,7 @@ typedef struct mp_cmd {
     struct mp_cmd *queue_next;
     double scale;               // for scaling numeric arguments
     const struct mp_cmd_def *def;
+    char *sender; // name of the client API user which sent this
 } mp_cmd_t;
 
 struct mp_input_src {

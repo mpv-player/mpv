@@ -179,6 +179,7 @@ typedef struct MPContext {
     struct playlist *playlist;
     struct playlist_entry *playing; // currently playing file
     char *filename; // immutable copy of playing->filename (or NULL)
+    char *stream_open_filename;
     struct mp_resolve_result *resolve_result;
     enum stop_play_reason stop_play;
     bool playback_initialized; // playloop can be run/is running

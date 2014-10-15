@@ -85,6 +85,10 @@ struct command_ctx {
     struct sub_bitmaps overlay_osd[2];
     struct sub_bitmaps *overlay_osd_current;
 
+    struct hook_handler **hooks;
+    int num_hooks;
+    int64_t hook_seq; // for hook_handler.seq
+
     struct ao_device_list *cached_ao_devices;
 };
 
@@ -94,10 +98,106 @@ struct overlay {
     struct sub_bitmap osd;
 };
 
+struct hook_handler {
+    char *client;   // client API user name
+    char *type;     // kind of hook, e.g. "on_load"
+    char *user_id;  // numeric user-chosen ID, printed as string
+    int priority;   // priority for global hook order
+    int64_t seq;    // unique ID (also age -> fixed order for equal priorities)
+    bool active;    // hook is currently in progress (only 1 at a time for now)
+};
+
 static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
                         const char *cmd, const char *arg);
 static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
                        struct m_obj_settings *new_chain);
+
+bool mp_hook_test_completion(struct MPContext *mpctx, char *type)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    for (int n = 0; n < cmd->num_hooks; n++) {
+        struct hook_handler *h = cmd->hooks[n];
+        if (h->active && strcmp(h->type, type) == 0)
+            return false;
+    }
+    return true;
+}
+
+static bool send_hook_msg(struct MPContext *mpctx, struct hook_handler *h,
+                          char *cmd)
+{
+    mpv_event_client_message *m = talloc_ptrtype(NULL, m);
+    *m = (mpv_event_client_message){0};
+    MP_TARRAY_APPEND(m, m->args, m->num_args, "hook_run");
+    MP_TARRAY_APPEND(m, m->args, m->num_args, talloc_strdup(m, h->user_id));
+    MP_TARRAY_APPEND(m, m->args, m->num_args, talloc_strdup(m, h->type));
+    bool r =
+        mp_client_send_event(mpctx, h->client, MPV_EVENT_CLIENT_MESSAGE, m) >= 0;
+    if (!r)
+        MP_WARN(mpctx, "Sending hook command failed.\n");
+    return r;
+}
+
+// client==NULL means start the hook chain
+void mp_hook_run(struct MPContext *mpctx, char *client, char *type)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    struct hook_handler *next = NULL;
+    bool found_current = !client;
+    for (int n = 0; n < cmd->num_hooks; n++) {
+        struct hook_handler *h = cmd->hooks[n];
+        if (!found_current) {
+            if (h->active && strcmp(h->type, type) == 0) {
+                h->active = false;
+                found_current = true;
+            }
+        } else if (strcmp(h->type, type) == 0) {
+            next = h;
+            break;
+        }
+    }
+    if (!next)
+        return;
+    MP_VERBOSE(mpctx, "Running hook: %s/%s\n", next->client, type);
+    next->active = true;
+    send_hook_msg(mpctx, next, "hook_run");
+}
+
+void mp_hook_abort(struct MPContext *mpctx, char *type)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    for (int n = 0; n < cmd->num_hooks; n++) {
+        struct hook_handler *h = cmd->hooks[n];
+        if (h->active && strcmp(h->type, type) == 0)
+            send_hook_msg(mpctx, h, "hook_abort");
+    }
+}
+
+static int compare_hook(const void *pa, const void *pb)
+{
+    struct hook_handler **h1 = (void *)pa;
+    struct hook_handler **h2 = (void *)pb;
+    if ((*h1)->priority != (*h2)->priority)
+        return (*h1)->priority - (*h2)->priority;
+    return (*h1)->seq - (*h2)->seq;
+}
+
+static void mp_hook_add(struct MPContext *mpctx, char *client, char *name,
+                        int id, int pri)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    struct hook_handler *h = talloc_ptrtype(cmd, h);
+    int64_t seq = cmd->hook_seq++;
+    *h = (struct hook_handler){
+        .client = talloc_strdup(h, client),
+        .type = talloc_strdup(h, name),
+        .user_id = talloc_asprintf(h, "%d", id),
+        .priority = pri,
+        .seq = seq,
+    };
+    MP_TARRAY_APPEND(cmd, cmd->hooks, cmd->num_hooks, h);
+    qsort(cmd->hooks, cmd->num_hooks, sizeof(cmd->hooks[0]), compare_hook);
+}
 
 // Call before a seek, in order to allow revert_seek to undo the seek.
 static void mark_seek(struct MPContext *mpctx)
@@ -211,6 +311,27 @@ static int mp_property_filename(void *ctx, struct m_property *prop,
     int r = m_property_strdup_ro(action, arg, f[0] ? f : filename);
     talloc_free(filename);
     return r;
+}
+
+static int mp_property_stream_open_filename(void *ctx, struct m_property *prop,
+                                            int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->stream_open_filename || !mpctx->playing)
+        return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_SET: {
+        if (mpctx->stream)
+            return M_PROPERTY_ERROR;
+        mpctx->stream_open_filename =
+            talloc_strdup(mpctx->stream_open_filename, *(char **)arg);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+    case M_PROPERTY_GET:
+        return m_property_strdup_ro(action, arg, mpctx->stream_open_filename);
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static int mp_property_file_size(void *ctx, struct m_property *prop,
@@ -2771,6 +2892,7 @@ static const struct m_property mp_properties[] = {
     {"loop-file", mp_property_generic_option},
     {"speed", mp_property_playback_speed},
     {"filename", mp_property_filename},
+    {"stream-open-filename", mp_property_stream_open_filename},
     {"file-size", mp_property_file_size},
     {"path", mp_property_path},
     {"media-title", mp_property_media_title},
@@ -4065,6 +4187,22 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         mp_write_watch_later_conf(mpctx);
         break;
     }
+
+    case MP_CMD_HOOK_ADD:
+        if (!cmd->sender) {
+            MP_ERR(mpctx, "Can be used from client API only.\n");
+            return -1;
+        }
+        mp_hook_add(mpctx, cmd->sender, cmd->args[0].v.s, cmd->args[1].v.i,
+                    cmd->args[2].v.i);
+        break;
+    case MP_CMD_HOOK_ACK:
+        if (!cmd->sender) {
+            MP_ERR(mpctx, "Can be used from client API only.\n");
+            return -1;
+        }
+        mp_hook_run(mpctx, cmd->sender, cmd->args[0].v.s);
+        break;
 
     default:
         MP_VERBOSE(mpctx, "Received unknown cmd %s\n", cmd->name);
