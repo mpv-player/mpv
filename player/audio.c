@@ -382,6 +382,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             return;
         }
         reinit_audio_chain(mpctx);
+        mpctx->sleeptime = 0;
         return; // try again next iteration
     }
 
