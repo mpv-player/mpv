@@ -167,10 +167,10 @@ struct gl_video {
 
     uint32_t image_w, image_h;
     uint32_t image_dw, image_dh;
-    uint32_t image_format;              // "real" input format
+    uint32_t image_format;
     int texture_w, texture_h;
 
-    struct mp_imgfmt_desc image_desc;   // input format for shader filter chain
+    struct mp_imgfmt_desc image_desc;
 
     bool is_yuv, is_rgb, is_packed_yuv;
     bool is_linear_rgb;
