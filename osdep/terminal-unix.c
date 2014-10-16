@@ -70,6 +70,7 @@ struct key_entry {
 };
 
 static const struct key_entry keys[] = {
+    {"\010", MP_KEY_BS},
     {"\011", MP_KEY_TAB},
     {"\012", MP_KEY_ENTER},
     {"\177", MP_KEY_BS},
