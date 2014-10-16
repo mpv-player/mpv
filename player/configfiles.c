@@ -266,6 +266,8 @@ void mp_get_resume_defaults(struct MPContext *mpctx)
 // Should follow what parser-cfg.c does/needs
 static bool needs_config_quoting(const char *s)
 {
+    if (s[0] == '%')
+        return true;
     for (int i = 0; s && s[i]; i++) {
         unsigned char c = s[i];
         if (!mp_isprint(c) || mp_isspace(c) || c == '#' || c == '\'' || c == '"')
