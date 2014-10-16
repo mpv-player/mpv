@@ -56,8 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
         throw "can't create mpv instance";
 
     // Create a video child window. Force Qt to create a native window, and
-    // pass the window ID to the mpv wid option. This doesn't work on OSX,
-    // because Cocoa doesn't support this form of embedding.
+    // pass the window ID to the mpv wid option. Works on: X11, win32, Cocoa
     mpv_container = new QWidget(this);
     setCentralWidget(mpv_container);
     mpv_container->setAttribute(Qt::WA_NativeWindow);
