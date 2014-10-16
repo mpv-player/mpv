@@ -189,6 +189,7 @@ def build(ctx):
         ( "input/cmd_parse.c" ),
         ( "input/event.c" ),
         ( "input/input.c" ),
+        ( "input/ipc.c",                         "!mingw" ),
         ( "input/keycodes.c" ),
         ( "input/pipe-unix.c",                   "!mingw" ),
         ( "input/pipe-win32.c",                  "waio" ),
@@ -199,6 +200,7 @@ def build(ctx):
         ( "misc/bstr.c" ),
         ( "misc/charset_conv.c" ),
         ( "misc/dispatch.c" ),
+        ( "misc/json.c" ),
         ( "misc/ring.c" ),
         ( "misc/rendezvous.c" ),
 
