@@ -371,7 +371,9 @@ struct stream *stream_create(const char *url, int flags,
     }
 
     if (!s) {
-        mp_err(log, "No stream found to handle url %s\n", url);
+        mp_err(log, "No protocol handler found to open URL %s\n", url);
+        mp_err(log, "The protocol is either unsupported, or was disabled "
+                    "at compile-time.\n");
         goto done;
     }
 
