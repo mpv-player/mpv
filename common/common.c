@@ -171,7 +171,7 @@ static bool mp_parse_escape(void *talloc_ctx, bstr *dst, bstr *code)
     if (code->start[0] == 'x' && code->len >= 3) {
         bstr num = bstr_splice(*code, 1, 3);
         char c = bstrtoll(num, &num, 16);
-        if (!num.len)
+        if (num.len)
             return false;
         bstr_xappend(talloc_ctx, dst, (bstr){&c, 1});
         *code = bstr_cut(*code, 3);
