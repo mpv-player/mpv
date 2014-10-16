@@ -131,6 +131,10 @@ void mp_destroy(struct MPContext *mpctx)
 
     shutdown_clients(mpctx);
 
+#if !defined(__MINGW32__)
+    mp_uninit_ipc(mpctx);
+#endif
+
     command_uninit(mpctx);
 
     osd_free(mpctx->osd);
@@ -440,6 +444,10 @@ int mp_initialize(struct MPContext *mpctx)
     // Lua user scripts (etc.) can call arbitrary functions. Load them at a point
     // where this is safe.
     mp_load_scripts(mpctx);
+
+#if !defined(__MINGW32__)
+    mp_init_ipc(mpctx);
+#endif
 
     if (opts->shuffle)
         playlist_shuffle(mpctx->playlist);

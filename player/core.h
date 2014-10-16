@@ -345,6 +345,8 @@ typedef struct MPContext {
     struct command_ctx *command_ctx;
     struct encode_lavc_context *encode_lavc_ctx;
     struct mp_nav_state *nav_state;
+
+    void *ipc_ctx;
 } MPContext;
 
 // audio.c
@@ -375,6 +377,10 @@ void mp_nav_destroy(struct MPContext *mpctx);
 void mp_nav_user_input(struct MPContext *mpctx, char *command);
 void mp_handle_nav(struct MPContext *mpctx);
 int mp_nav_in_menu(struct MPContext *mpctx);
+
+// ipc.c
+void mp_init_ipc(struct MPContext *mpctx);
+void mp_uninit_ipc(struct MPContext *mpctx);
 
 // loadfile.c
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
