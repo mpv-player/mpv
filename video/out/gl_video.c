@@ -167,10 +167,10 @@ struct gl_video {
 
     uint32_t image_w, image_h;
     uint32_t image_dw, image_dh;
-    uint32_t image_format;
+    uint32_t image_format;              // "real" input format
     int texture_w, texture_h;
 
-    struct mp_imgfmt_desc image_desc;
+    struct mp_imgfmt_desc image_desc;   // input format for shader filter chain
 
     bool is_yuv, is_rgb, is_packed_yuv;
     bool is_linear_rgb;
@@ -958,7 +958,7 @@ static void compile_shaders(struct gl_video *p)
     char *header_final = talloc_strdup(tmp, "");
     char *header_sep = NULL;
 
-    if (p->image_format == IMGFMT_NV12 || p->image_format == IMGFMT_NV21) {
+    if (p->image_desc.id == IMGFMT_NV12 || p->image_desc.id == IMGFMT_NV21) {
         shader_def(&header_conv, "USE_CONV", "CONV_NV12");
     } else if (p->plane_count > 1) {
         shader_def(&header_conv, "USE_CONV", "CONV_PLANAR");
@@ -966,7 +966,7 @@ static void compile_shaders(struct gl_video *p)
 
     if (p->color_swizzle[0])
         shader_def(&header_conv, "USE_COLOR_SWIZZLE", p->color_swizzle);
-    shader_def_opt(&header_conv, "USE_SWAP_UV", p->image_format == IMGFMT_NV21);
+    shader_def_opt(&header_conv, "USE_SWAP_UV", p->image_desc.id == IMGFMT_NV21);
     shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && !p->is_packed_yuv
                                               && p->plane_count == 1);
     shader_def_opt(&header_conv, "USE_INPUT_GAMMA", use_input_gamma);
