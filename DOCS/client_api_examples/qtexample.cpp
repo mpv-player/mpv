@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // pass the window ID to the mpv wid option. Works on: X11, win32, Cocoa
     mpv_container = new QWidget(this);
     setCentralWidget(mpv_container);
+    mpv_container->setAttribute(Qt::WA_DontCreateNativeAncestors);
     mpv_container->setAttribute(Qt::WA_NativeWindow);
     // If you have a HWND, use: int64_t wid = (intptr_t)hwnd;
     int64_t wid = mpv_container->winId();
