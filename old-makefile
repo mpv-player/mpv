@@ -175,11 +175,12 @@ SOURCES = audio/audio.c \
           input/cmd_parse.c \
           input/event.c \
           input/input.c \
+          input/ipc.c \
           input/keycodes.c \
-          input/pipe-unix.c \
           misc/bstr.c \
           misc/charset_conv.c \
           misc/dispatch.c \
+          misc/json.c \
           misc/rendezvous.c \
           misc/ring.c \
           options/m_config.c \
