@@ -474,6 +474,7 @@ static void *client_thread(void *p)
     int rc;
 
     struct client_arg *arg = p;
+    bstr client_msg = { talloc_strdup(NULL, ""), 0 };
 
     int pipe_fd = mpv_get_wakeup_pipe(arg->client);
     if (pipe_fd < 0) {
@@ -490,7 +491,6 @@ static void *client_thread(void *p)
 
     fcntl(arg->client_fd, F_SETFL, fcntl(arg->client_fd, F_GETFL, 0) | O_NONBLOCK);
 
-    bstr client_msg = { talloc_strdup(NULL, ""), 0 };
     while (1) {
         rc = poll(fds, 2, -1);
         if (rc < 0) {
@@ -581,6 +581,7 @@ command_done:
     }
 
 done:
+    talloc_free(client_msg.start);
     close(arg->client_fd);
     mpv_detach_destroy(arg->client);
     talloc_free(arg);
