@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License along
  * with mplayer2.  If not, see <http://www.gnu.org/licenses/>.
  */
+#define MP_HIDE_IO_REPLACEMENTS
 
 #include <unistd.h>
 #include <errno.h>
@@ -393,6 +394,16 @@ char *mp_getenv(const char *name)
             || utf8_environ[i][l] != '='); i++) {}
     if (utf8_environ[i]) return utf8_environ[i] + l+1;
     return NULL;
+}
+
+off_t mp_lseek(int fd, off_t offset, int whence)
+{
+    HANDLE h = (HANDLE)_get_osfhandle(fd);
+    if (h != INVALID_HANDLE_VALUE && GetFileType(h) != FILE_TYPE_DISK) {
+        errno = ESPIPE;
+        return (off_t)-1;
+    }
+    return lseek(fd, offset, whence);
 }
 
 #endif // __MINGW32__

@@ -77,6 +77,7 @@ int mp_closedir(DIR *dir);
 int mp_mkdir(const char *path, int mode);
 FILE *mp_tmpfile(void);
 char *mp_getenv(const char *name);
+off_t mp_lseek(int fd, off_t offset, int whence);
 
 typedef struct {
     size_t gl_pathc;
@@ -104,6 +105,13 @@ void mp_globfree(mp_glob_t *pglob);
 #define mkdir(...) mp_mkdir(__VA_ARGS__)
 #define tmpfile(...) mp_tmpfile(__VA_ARGS__)
 #define getenv(...) mp_getenv(__VA_ARGS__)
+
+// Things MinGW defines as macros, and which we want to override only for the
+// user, and not io.c (which wants the original definition).
+#ifndef MP_HIDE_IO_REPLACEMENTS
+#undef lseek
+#define lseek(...) mp_lseek(__VA_ARGS__)
+#endif
 
 #ifndef GLOB_NOMATCH
 #define GLOB_NOMATCH 3
