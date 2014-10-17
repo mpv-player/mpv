@@ -382,7 +382,7 @@ def build(ctx):
         ( timer_c ),
         ( "osdep/threads.c" ),
 
-        ( "osdep/ar/HIDRemote.m",                "cocoa" ),
+        ( "osdep/ar/HIDRemote.m",                "apple-remote" ),
         ( "osdep/macosx_application.m",          "cocoa-application" ),
         ( "osdep/macosx_events.m",               "cocoa" ),
         ( "osdep/semaphore_osx.c" ),

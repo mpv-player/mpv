@@ -756,6 +756,11 @@ standalone_features = [
         'deps_neg': [ 'libmpv-shared', 'libmpv-static' ],
         'func': check_true
     }, {
+        'name': '--apple-remote',
+        'desc': 'Apple Remote support',
+        'deps': [ 'cocoa' ],
+        'func': check_true
+    }, {
         'name': '--macosx-bundle',
         'desc': 'compilation of a Mac OS X Application bundle',
         'deps': [ 'os-darwin' ],

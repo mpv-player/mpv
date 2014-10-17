@@ -35,12 +35,16 @@
 #include "osdep/macosx_compat.h"
 #import "osdep/macosx_events_objc.h"
 
+#include "config.h"
+
 @interface EventsResponder ()
 {
     struct input_ctx *_inputContext;
     NSCondition *_input_ready;
     CFMachPortRef _mk_tap_port;
+#if HAVE_APPLE_REMOTE
     HIDRemote *_remote;
+#endif
 }
 
 - (BOOL)handleMediaKey:(NSEvent *)event;
@@ -270,6 +274,8 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 
 - (void)startAppleRemote
 {
+
+#if HAVE_APPLE_REMOTE
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_remote = [[HIDRemote alloc] init];
         if (self->_remote) {
@@ -277,14 +283,17 @@ void cocoa_set_input_context(struct input_ctx *input_context)
             [self->_remote startRemoteControl:kHIDRemoteModeExclusiveAuto];
         }
     });
+#endif
 
 }
 - (void)stopAppleRemote
 {
+#if HAVE_APPLE_REMOTE
     dispatch_async(dispatch_get_main_queue(), ^{
         [self->_remote stopRemoteControl];
         [self->_remote release];
     });
+#endif
 }
 - (void)restartMediaKeys
 {
