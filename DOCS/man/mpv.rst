@@ -356,7 +356,7 @@ You can also write file-specific configuration files. If you wish to have a
 configuration file for a file called 'video.avi', create a file named
 'video.avi.conf' with the file-specific options in it and put it in
 ``~/.config/mpv/``. You can also put the configuration file in the same directory
-as the file to be played, as long as you give the ``--use-filedir-conf``
+as the file to be played. Both require you to set the ``--use-filedir-conf``
 option (either on the command line or in your global config file). If a
 file-specific configuration file is found in the same directory, no
 file-specific configuration is loaded from ``~/.config/mpv``. In addition, the

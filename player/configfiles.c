@@ -111,15 +111,15 @@ static void mp_load_per_file_config(struct MPContext *mpctx)
     char cfg[512];
     const char *file = mpctx->filename;
 
-    if (snprintf(cfg, sizeof(cfg), "%s.conf", file) >= sizeof(cfg)) {
-        MP_VERBOSE(mpctx, "Filename is too long, "
-                   "can not load file or directory specific config files\n");
-        return;
-    }
-
-    char *name = mp_basename(cfg);
-
     if (opts->use_filedir_conf) {
+        if (snprintf(cfg, sizeof(cfg), "%s.conf", file) >= sizeof(cfg)) {
+            MP_VERBOSE(mpctx, "Filename is too long, can not load file or "
+                              "directory specific config files\n");
+            return;
+        }
+
+        char *name = mp_basename(cfg);
+
         bstr dir = mp_dirname(cfg);
         char *dircfg = mp_path_join(NULL, dir, bstr0("mpv.conf"));
         try_load_config(mpctx, dircfg, FILE_LOCAL_FLAGS);
@@ -127,12 +127,12 @@ static void mp_load_per_file_config(struct MPContext *mpctx)
 
         if (try_load_config(mpctx, cfg, FILE_LOCAL_FLAGS))
             return;
-    }
 
-    if ((confpath = mp_find_config_file(NULL, mpctx->global, name))) {
-        try_load_config(mpctx, confpath, FILE_LOCAL_FLAGS);
+        if ((confpath = mp_find_config_file(NULL, mpctx->global, name))) {
+            try_load_config(mpctx, confpath, FILE_LOCAL_FLAGS);
 
-        talloc_free(confpath);
+            talloc_free(confpath);
+        }
     }
 }
 
