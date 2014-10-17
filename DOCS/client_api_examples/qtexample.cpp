@@ -5,6 +5,7 @@
 #include <clocale>
 #include <sstream>
 
+#include <QtGlobal>
 #include <QFileDialog>
 #include <QStatusBar>
 #include <QMenuBar>
@@ -12,7 +13,10 @@
 #include <QGridLayout>
 #include <QApplication>
 #include <QTextEdit>
+
+#if QT_VERSION >= 0x050000
 #include <QJsonDocument>
+#endif
 
 #include <mpv/qthelper.hpp>
 
@@ -112,6 +116,8 @@ void MainWindow::handle_mpv_event(mpv_event *event)
         } else if (strcmp(prop->name, "chapter-list") == 0 ||
                    strcmp(prop->name, "track-list") == 0)
         {
+            // Dump the properties as JSON for demo purposes.
+#if QT_VERSION >= 0x050000
             if (prop->format == MPV_FORMAT_NODE) {
                 QVariant v = mpv::qt::node_to_variant((mpv_node *)prop->data);
                 // Abuse JSON support for easily printing the mpv_node contents.
@@ -119,6 +125,7 @@ void MainWindow::handle_mpv_event(mpv_event *event)
                 append_log("Change property " + QString(prop->name) + ":\n");
                 append_log(d.toJson().data());
             }
+#endif
         }
         break;
     }
