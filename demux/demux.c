@@ -845,10 +845,11 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                        in->d_thread->filetype, desc->desc);
         else
             mp_verbose(log, "Detected file format: %s\n", desc->desc);
+        if (!in->d_thread->seekable)
+            mp_warn(log, "Stream is not seekable.\n");
         // Pretend we can seek if we can't seek, but there's a cache.
         if (!in->d_thread->seekable && stream->uncached_stream) {
-            mp_warn(log,
-                    "File is not seekable, but there's a cache: enabling seeking.\n");
+            mp_warn(log, "Enabling seeking because stream cache is active.\n");
             in->d_thread->seekable = true;
         }
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
