@@ -1090,7 +1090,7 @@ static int script_readdir(lua_State *L)
                 fullpath[0] = '\0';
             fullpath = talloc_asprintf_append(fullpath, "%s/%s", path, name);
             struct stat st;
-            if (mp_stat(fullpath, &st))
+            if (stat(fullpath, &st))
                 continue;
             if (!(((t & 1) && S_ISREG(st.st_mode)) ||
                   ((t & 2) && S_ISDIR(st.st_mode))))

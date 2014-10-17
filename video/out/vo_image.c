@@ -55,7 +55,7 @@ static bool checked_mkdir(struct vo *vo, const char *buf)
         char *errstr = strerror(errno);
         if (errno == EEXIST) {
             struct stat stat_p;
-            if (mp_stat(buf, &stat_p ) == 0 && S_ISDIR(stat_p.st_mode))
+            if (stat(buf, &stat_p ) == 0 && S_ISDIR(stat_p.st_mode))
                 return true;
         }
         MP_ERR(vo, "Error creating output directory: %s\n", errstr);

@@ -157,7 +157,7 @@ static char **list_script_files(void *talloc_ctx, char *path)
     while ((ep = readdir(dp))) {
         char *fname = mp_path_join(talloc_ctx, bstr0(path), bstr0(ep->d_name));
         struct stat s;
-        if (!mp_stat(fname, &s) && S_ISREG(s.st_mode))
+        if (!stat(fname, &s) && S_ISREG(s.st_mode))
             MP_TARRAY_APPEND(talloc_ctx, files, count, fname);
     }
     closedir(dp);

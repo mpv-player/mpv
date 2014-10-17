@@ -132,11 +132,36 @@ void mp_get_converted_argv(int *argc, char ***argv)
     *argv = win32_argv_utf8;
 }
 
-int mp_stat(const char *path, struct stat *buf)
+static void copy_stat(struct mp_stat *dst, struct _stat64 *src)
 {
+    dst->st_dev = src->st_dev;
+    dst->st_ino = src->st_ino;
+    dst->st_mode = src->st_mode;
+    dst->st_nlink = src->st_nlink;
+    dst->st_uid = src->st_uid;
+    dst->st_gid = src->st_gid;
+    dst->st_rdev = src->st_rdev;
+    dst->st_size = src->st_size;
+    dst->st_atime = src->st_atime;
+    dst->st_mtime = src->st_mtime;
+    dst->st_ctime = src->st_ctime;
+}
+
+int mp_stat(const char *path, struct mp_stat *buf)
+{
+    struct _stat64 buf_;
     wchar_t *wpath = mp_from_utf8(NULL, path);
-    int res = _wstati64(wpath, buf);
+    int res = _wstat64(wpath, &buf_);
     talloc_free(wpath);
+    copy_stat(buf, &buf_);
+    return res;
+}
+
+int mp_fstat(int fd, struct mp_stat *buf)
+{
+    struct _stat64 buf_;
+    int res = _fstat64(fd, &buf_);
+    copy_stat(buf, &buf_);
     return res;
 }
 

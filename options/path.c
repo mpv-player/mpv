@@ -271,13 +271,13 @@ char *mp_getcwd(void *talloc_ctx)
 bool mp_path_exists(const char *path)
 {
     struct stat st;
-    return path && mp_stat(path, &st) == 0;
+    return path && stat(path, &st) == 0;
 }
 
 bool mp_path_isdir(const char *path)
 {
     struct stat st;
-    return mp_stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+    return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
 }
 
 // Return false if it's considered a normal local filesystem path.

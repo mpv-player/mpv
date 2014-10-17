@@ -22,6 +22,7 @@
 
 #include "config.h"
 #include <stdbool.h>
+#include <stdint.h>
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -65,7 +66,6 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 
 void mp_get_converted_argv(int *argc, char ***argv);
 
-int mp_stat(const char *path, struct stat *buf);
 int mp_printf(const char *format, ...);
 int mp_fprintf(FILE *stream, const char *format, ...);
 int mp_open(const char *filename, int oflag, ...);
@@ -78,6 +78,27 @@ int mp_mkdir(const char *path, int mode);
 FILE *mp_tmpfile(void);
 char *mp_getenv(const char *name);
 off_t mp_lseek(int fd, off_t offset, int whence);
+
+// MinGW-w64 will define "stat" to something useless. Since this affects both
+// the type (struct stat) and the stat() function, it makes us harder to
+// override these separately.
+// Corresponds to struct _stat64 (copy & pasted, but using public types).
+struct mp_stat {
+    dev_t st_dev;
+    ino_t st_ino;
+    unsigned short st_mode;
+    short st_nlink;
+    short st_uid;
+    short st_gid;
+    dev_t st_rdev;
+    int64_t st_size;
+    time_t st_atime;
+    time_t st_mtime;
+    time_t st_ctime;
+};
+
+int mp_stat(const char *path, struct mp_stat *buf);
+int mp_fstat(int fd, struct mp_stat *buf);
 
 typedef struct {
     size_t gl_pathc;
@@ -113,6 +134,11 @@ void mp_globfree(mp_glob_t *pglob);
 #define lseek(...) mp_lseek(__VA_ARGS__)
 #endif
 
+#undef stat
+#define stat mp_stat
+#undef fstat
+#define fstat(...) mp_fstat(__VA_ARGS__)
+
 #ifndef GLOB_NOMATCH
 #define GLOB_NOMATCH 3
 #endif
@@ -120,10 +146,6 @@ void mp_globfree(mp_glob_t *pglob);
 #define glob_t mp_glob_t
 #define glob(...) mp_glob(__VA_ARGS__)
 #define globfree(...) mp_globfree(__VA_ARGS__)
-
-#else /* __MINGW32__ */
-
-#define mp_stat(...) stat(__VA_ARGS__)
 
 #endif /* __MINGW32__ */
 
