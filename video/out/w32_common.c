@@ -579,6 +579,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         return 0;
     case WM_DESTROY:
         w32->destroyed = true;
+        w32->window = NULL;
         PostQuitMessage(0);
         return 0;
     case WM_SYSCOMMAND:
