@@ -31,6 +31,8 @@
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen;
 
 - (BOOL)isInFullScreenMode;
+- (BOOL)keyboardEnabled;
+- (BOOL)mouseEnabled;
 - (NSScreen *)fsScreen;
 @property(nonatomic, assign) struct vo *vout;
 @end

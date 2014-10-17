@@ -31,6 +31,8 @@
 - (BOOL)hasDock:(NSScreen*)screen;
 - (BOOL)hasMenubar:(NSScreen*)screen;
 - (int)mpvButtonNumber:(NSEvent*)event;
+- (void)mouseDownEvent:(NSEvent *)event;
+- (void)mouseUpEvent:(NSEvent *)event;
 @end
 
 @implementation MpvEventsView
@@ -94,7 +96,11 @@
 
 - (void)updateTrackingAreas
 {
-    if (self.tracker) [self removeTrackingArea:self.tracker];
+    if (self.tracker)
+        [self removeTrackingArea:self.tracker];
+
+    if (![self.adapter mouseEnabled])
+        return;
 
     NSTrackingAreaOptions trackingOptions =
         NSTrackingEnabledDuringMouseDrag |
@@ -127,9 +133,18 @@
     return CGRectContainsPoint(clippedBounds, pt);
 }
 
-- (BOOL)acceptsFirstMouse:(NSEvent *)theEvent { return YES; }
-- (BOOL)acceptsFirstResponder { return YES; }
-- (BOOL)becomeFirstResponder { return YES; }
+- (BOOL)acceptsFirstMouse:(NSEvent *)theEvent
+{
+    return [self.adapter mouseEnabled];
+}
+- (BOOL)acceptsFirstResponder {
+    return [self.adapter keyboardEnabled] || [self.adapter mouseEnabled];
+}
+
+- (BOOL)becomeFirstResponder {
+    return [self.adapter keyboardEnabled] || [self.adapter mouseEnabled];
+}
+
 - (BOOL)resignFirstResponder { return YES; }
 
 - (void)keyDown:(NSEvent *)event {
@@ -147,12 +162,16 @@
 
 - (void)mouseEntered:(NSEvent *)event
 {
-    // do nothing!
+    [super mouseEntered:event];
 }
 
 - (void)mouseExited:(NSEvent *)event
 {
-    [self.adapter putKey:MP_KEY_MOUSE_LEAVE withModifiers:0];
+    if ([self.adapter mouseEnabled]) {
+        [self.adapter putKey:MP_KEY_MOUSE_LEAVE withModifiers:0];
+    } else {
+        [super mouseExited:event];
+    }
 }
 
 - (void)setFrameSize:(NSSize)size
@@ -183,14 +202,75 @@
     [self.adapter signalMouseMovement:p];
 }
 
-- (void)mouseMoved:(NSEvent *)event   { [self signalMouseMovement:event]; }
-- (void)mouseDragged:(NSEvent *)event { [self signalMouseMovement:event]; }
-- (void)mouseDown:(NSEvent *)evt      { [self mouseDownEvent:evt]; }
-- (void)mouseUp:(NSEvent *)evt        { [self mouseUpEvent:evt]; }
-- (void)rightMouseDown:(NSEvent *)evt { [self mouseDownEvent:evt]; }
-- (void)rightMouseUp:(NSEvent *)evt   { [self mouseUpEvent:evt]; }
-- (void)otherMouseDown:(NSEvent *)evt { [self mouseDownEvent:evt]; }
-- (void)otherMouseUp:(NSEvent *)evt   { [self mouseUpEvent:evt]; }
+- (void)mouseMoved:(NSEvent *)event
+{
+    if ([self.adapter mouseEnabled]) {
+        [self signalMouseMovement:event];
+    } else {
+        [super mouseMoved:event];
+    }
+}
+
+- (void)mouseDragged:(NSEvent *)event
+{
+    if ([self.adapter mouseEnabled]) {
+        [self signalMouseMovement:event];
+    } else {
+        [super mouseDragged:event];
+    }
+}
+
+- (void)mouseDown:(NSEvent *)event
+{
+    if ([self.adapter mouseEnabled]) {
+        [self mouseDownEvent:event];
+    } else {
+        [super mouseDown:event];
+    }
+}
+- (void)mouseUp:(NSEvent *)event
+{
+    if ([self.adapter mouseEnabled]) {
+        [self mouseUpEvent:event];
+    } else {
+        [super mouseUp:event];
+    }
+}
+- (void)rightMouseDown:(NSEvent *)event
+{
+    if ([self.adapter mouseEnabled]) {
+        [self mouseDownEvent:event];
+    } else {
+        [super rightMouseUp:event];
+    }
+}
+
+- (void)rightMouseUp:(NSEvent *)event
+{
+    if ([self.adapter mouseEnabled]) {
+        [self mouseUpEvent:event];
+    } else {
+        [super rightMouseUp:event];
+    }
+}
+
+- (void)otherMouseDown:(NSEvent *)event
+{
+    if ([self.adapter mouseEnabled]) {
+        [self mouseDownEvent:event];
+    } else {
+        [super otherMouseDown:event];
+    }
+}
+
+- (void)otherMouseUp:(NSEvent *)event
+{
+     if ([self.adapter mouseEnabled]) {
+        [self mouseUpEvent:event];
+    } else {
+        [super otherMouseUp:event];
+    }
+}
 
 - (void)preciseScroll:(NSEvent *)event
 {
@@ -210,6 +290,11 @@
 
 - (void)scrollWheel:(NSEvent *)event
 {
+    if (![self.adapter mouseEnabled]) {
+        [super scrollWheel:event];
+        return;
+    }
+
     if ([event hasPreciseScrollingDeltas]) {
         [self preciseScroll:event];
     } else {

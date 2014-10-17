@@ -93,6 +93,7 @@ static void wakeup(void *);
 
         // for testing!
         check_error(mpv_set_option_string(mpv, "input-media-keys", "yes"));
+        check_error(mpv_set_option_string(mpv, "input-cursor", "no"));
         check_error(mpv_set_option_string(mpv, "input-vo-keyboard", "yes"));
 
         // request important errors

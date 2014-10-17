@@ -693,6 +693,14 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
     vo_cocoa_set_current_context(self.vout, false);
 }
 
+- (BOOL)keyboardEnabled {
+    return !!mp_input_vo_keyboard_enabled(self.vout->input_ctx);
+}
+
+- (BOOL)mouseEnabled {
+    return !!mp_input_mouse_enabled(self.vout->input_ctx);
+}
+
 - (void)setNeedsResize {
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->pending_events |= VO_EVENT_RESIZE;
@@ -710,28 +718,23 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 }
 
 - (void)signalMouseMovement:(NSPoint)point {
-    if (mp_input_mouse_enabled(self.vout->input_ctx)) {
-        mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
-        [self recalcMovableByWindowBackground:point];
-    }
+    mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
+    [self recalcMovableByWindowBackground:point];
 }
 
 - (void)putKeyEvent:(NSEvent*)event
 {
-    if (mp_input_vo_keyboard_enabled(self.vout->input_ctx))
-        cocoa_put_key_event(event);
+    cocoa_put_key_event(event);
 }
 
 - (void)putKey:(int)mpkey withModifiers:(int)modifiers
 {
-    if (mp_input_vo_keyboard_enabled(self.vout->input_ctx))
-        cocoa_put_key_with_modifiers(mpkey, modifiers);
+    cocoa_put_key_with_modifiers(mpkey, modifiers);
 }
 
 - (void)putAxis:(int)mpkey delta:(float)delta;
 {
-    if (mp_input_mouse_enabled(self.vout->input_ctx))
-        mp_input_put_axis(self.vout->input_ctx, mpkey, delta);
+    mp_input_put_axis(self.vout->input_ctx, mpkey, delta);
 }
 
 - (void)putCommand:(char*)cmd
