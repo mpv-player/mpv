@@ -6,6 +6,14 @@ can be enabled by specifying the path to a unix socket using the option
 ``--input-unix-socket``. Clients can connect to this socket and send commands to
 the player or receive events from it.
 
+.. warning::
+
+    This is not intended to be a secure network protocol. It is explicitly
+    insecure: there is no authentication, no encryption, and the commands
+    themselves are insecure too. For example, the ``run`` command is exposed,
+    which can run arbitrary system commands. The use-case is controlling the
+    player locally. This is not different from the MPlayer slave protocol.
+
 Protocol
 --------
 
