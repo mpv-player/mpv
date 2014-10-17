@@ -3,7 +3,7 @@ import re
 def _add_rst_manual_dependencies(ctx):
     manpage_sources_basenames = """
         options.rst ao.rst vo.rst af.rst vf.rst encode.rst
-        input.rst osc.rst lua.rst changes.rst""".split()
+        input.rst osc.rst lua.rst ipc.rst changes.rst""".split()
 
     manpage_sources = ['DOCS/man/'+x for x in manpage_sources_basenames]
 
@@ -189,8 +189,8 @@ def build(ctx):
         ( "input/cmd_parse.c" ),
         ( "input/event.c" ),
         ( "input/input.c" ),
+        ( "input/ipc.c",                         "!mingw" ),
         ( "input/keycodes.c" ),
-        ( "input/pipe-unix.c",                   "!mingw" ),
         ( "input/pipe-win32.c",                  "waio" ),
         ( "input/joystick.c",                    "joystick" ),
         ( "input/lirc.c",                        "lirc" ),
@@ -199,6 +199,7 @@ def build(ctx):
         ( "misc/bstr.c" ),
         ( "misc/charset_conv.c" ),
         ( "misc/dispatch.c" ),
+        ( "misc/json.c" ),
         ( "misc/ring.c" ),
         ( "misc/rendezvous.c" ),
 

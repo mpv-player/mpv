@@ -387,8 +387,8 @@ Slave mode
 
   (The option was readded in 0.5.1 and sets exactly these options.)
 
-* A JSON RPC protocol giving access to the client API is planned, but nothing
-  has emerged yet.
+* A JSON RPC protocol giving access to the client API is also supported. See
+  `JSON IPC`_ for more information.
 
 * **mpv** also provides a client API, which can be used to embed the player
   by loading it as shared library. (See ``libmpv/client.h`` in the sources.)

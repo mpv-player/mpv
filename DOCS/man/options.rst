@@ -2177,6 +2177,9 @@ Input
     or intend to read from stdin later on via the loadfile or loadlist slave
     commands.
 
+``--input-unix-socket=<filename>``
+    Enable the IPC support and create the listening socket at the given path.
+
 ``--input-appleremote=<yes|no>``
     (OS X only)
     Enable/disable Apple Remote support. Enabled by default (except for libmpv).

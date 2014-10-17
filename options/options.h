@@ -284,6 +284,9 @@ typedef struct MPOpts {
 
     // may be NULL if encoding is not compiled-in
     struct encode_opts *encode_opts;
+
+    char *ipc_path;
+    char *input_file;
 } MPOpts;
 
 extern const m_option_t mp_opts[];
