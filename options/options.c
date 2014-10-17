@@ -332,7 +332,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("ass-shaper", ass_shaper, 0,
                ({"simple", 0}, {"complex", 1})),
     OPT_CHOICE("ass-style-override", ass_style_override, 0,
-               ({"no", 0}, {"yes", 1}, {"force", 3})),
+               ({"no", 0}, {"yes", 1}, {"force", 3}, {"signfs", 4})),
     OPT_FLAG("sub-scale-with-window", sub_scale_with_window, 0),
     OPT_FLAG("osd-bar", osd_bar_visible, 0),
     OPT_FLOATRANGE("osd-bar-align-x", osd_bar_align_x, 0, -1.0, +1.0),

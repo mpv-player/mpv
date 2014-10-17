@@ -1146,6 +1146,7 @@ Subtitles
     :yes:   Apply all the ``--ass-*`` style override options. Changing the default
             for any of these options can lead to incorrect subtitle rendering
             (default).
+    :signfs: like ``yes``, but apply ``--sub-scale`` only to signs
     :no:    Render subtitles as forced by subtitle scripts.
     :force: Try to force the font style as defined by the ``--sub-text-*``
             options. Requires a modified libass, can break rendering easily.
