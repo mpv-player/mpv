@@ -95,7 +95,9 @@ static void with_cocoa_lock(struct vo *vo, void(^block)(void))
 
 static void with_cocoa_lock_on_main_thread(struct vo *vo, void(^block)(void))
 {
-    dispatch_sync(dispatch_get_main_queue(), block);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        with_cocoa_lock(vo, block);
+    });
 }
 
 static void queue_new_video_size(struct vo *vo, int w, int h)
