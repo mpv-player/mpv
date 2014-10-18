@@ -197,6 +197,10 @@ iconv support use --disable-iconv.",
         'func': check_statement(['sys/types.h', 'sys/ipc.h', 'sys/shm.h'],
             'shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0)')
     }, {
+        'name': 'posix-spawn',
+        'desc': 'posix_spawn()',
+        'func': check_statement('spawn.h', 'posix_spawnp(0,0,0,0,0,0)')
+    }, {
         'name': 'glob',
         'desc': 'glob()',
         'func': check_statement('glob.h', 'glob("filename", 0, 0, 0)')

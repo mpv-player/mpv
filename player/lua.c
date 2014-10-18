@@ -42,6 +42,7 @@
 #include "misc/bstr.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
+#include "stream/stream.h"
 #include "sub/osd.h"
 #include "core.h"
 #include "command.h"
@@ -435,12 +436,16 @@ static int script_resume(lua_State *L)
     return 0;
 }
 
-static int script_resume_all(lua_State *L)
+static void resume_all(struct script_ctx *ctx)
 {
-    struct script_ctx *ctx = get_ctx(L);
     if (ctx->suspended)
         mpv_resume(ctx->client);
     ctx->suspended = 0;
+}
+
+static int script_resume_all(lua_State *L)
+{
+    resume_all(get_ctx(L));
     return 0;
 }
 
@@ -1149,6 +1154,142 @@ static int script_join_path(lua_State *L)
     return 1;
 }
 
+#if HAVE_POSIX_SPAWN
+#include <spawn.h>
+#include <poll.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <errno.h>
+
+// Normally, this must be declared manually, but glibc is retarded.
+#ifndef __GLIBC__
+extern char **environ;
+#endif
+
+static int script_subprocess(lua_State *L)
+{
+    void *tmp = mp_lua_PITA(L);
+    struct script_ctx *ctx = get_ctx(L);
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    resume_all(ctx);
+
+    lua_getfield(L, 1, "args"); // args
+    int num_args = lua_objlen(L, -1);
+    char *args[256];
+    if (num_args > MP_ARRAY_SIZE(args) - 1) // last needs to be NULL
+        luaL_error(L, "too many arguments");
+    if (num_args < 1)
+        luaL_error(L, "program name missing");
+    for (int n = 0; n < num_args; n++) {
+        lua_pushinteger(L, n + 1); // args n
+        lua_gettable(L, -2); // args arg
+        args[n] = talloc_strdup(tmp, lua_tostring(L, -1));
+        lua_pop(L, 1); // args
+    }
+    args[num_args] = NULL;
+    lua_pop(L, 1); // -
+
+    lua_getfield(L, 1, "cancellable"); // c
+    struct mp_cancel *cancel = NULL;
+    if (lua_isnil(L, -1) ? true : lua_toboolean(L, -1))
+        cancel = ctx->mpctx->playback_abort;
+    lua_pop(L, 1); // -
+
+    lua_getfield(L, 1, "max_size"); // m
+    int64_t max_size = lua_isnil(L, -1) ? 16 * 1024 * 1024 : lua_tointeger(L, -1);
+
+    // --- no Lua errors from here
+
+    posix_spawn_file_actions_t fa;
+    bool fa_destroy = false;
+    bstr stdout = {0};
+    int status = -1;
+    int pipes[2] = {-1, -1};
+    pid_t pid = -1;
+
+    if (pipe(pipes))
+        goto done;
+    mp_set_cloexec(pipes[0]);
+    mp_set_cloexec(pipes[1]);
+
+    if (posix_spawn_file_actions_init(&fa))
+        goto done;
+    fa_destroy = true;
+    // redirect stdout, but not stderr or stdin
+    if (posix_spawn_file_actions_adddup2(&fa, pipes[1], 1))
+        goto done;
+
+    if (posix_spawnp(&pid, args[0], &fa, NULL, args, environ)) {
+        pid = -1;
+        goto done;
+    }
+
+    close(pipes[1]);
+    pipes[1] = -1;
+
+    bool eof = false;
+    while (!eof) {
+        struct pollfd fds[] = {
+            {.events = POLLIN, .fd = pipes[0]},
+            {.events = POLLIN, .fd = cancel ? mp_cancel_get_fd(cancel) : -1},
+        };
+        if (poll(fds, fds[1].fd >= 0 ? 2 : 1, -1) < 0 && errno != EINTR)
+            break;
+        if (fds[1].revents)
+            break;
+        if (fds[0].revents) {
+            char buf[4096];
+            ssize_t r = read(pipes[0], buf, sizeof(buf));
+            if (r < 0 && errno == EINTR)
+                continue;
+            if (r > 0)
+                bstr_xappend(tmp, &stdout, (bstr){buf, r});
+            eof = r == 0;
+            if (r <= 0)
+                break;
+        }
+        if (stdout.len >= max_size)
+            break;
+    }
+
+    if (!eof || (cancel && mp_cancel_test(cancel)))
+        kill(pid, SIGKILL);
+
+    // Note: it can happen that a child process closes the pipe, but does not
+    //       terminate yet. In this case, we would have to run waitpid() in
+    //       a separate thread and use pthread_cancel(), or use other weird
+    //       and laborious tricks. So this isn't handled yet.
+    while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {}
+
+done:
+    if (fa_destroy)
+        posix_spawn_file_actions_destroy(&fa);
+    close(pipes[0]);
+    close(pipes[1]);
+
+    // --- Lua errors are ok again from here
+    char *error = NULL;
+    if (WIFEXITED(status) && WEXITSTATUS(status) != 127) {
+        status = WEXITSTATUS(status);
+    } else {
+        error = WEXITSTATUS(status) == 127 ? "init" : "killed";
+        status = -1;
+    }
+    lua_newtable(L); // res
+    if (error) {
+        lua_pushstring(L, error); // res e
+        lua_setfield(L, -2, "error"); // res
+    }
+    lua_pushinteger(L, status); // res s
+    lua_setfield(L, -2, "status"); // res
+    lua_pushlstring(L, stdout.start, stdout.len); // res d
+    lua_setfield(L, -2, "stdout"); // res
+    return 1;
+}
+#endif
+
 #define FN_ENTRY(name) {#name, script_ ## name}
 struct fn_entry {
     const char *name;
@@ -1195,6 +1336,9 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(readdir),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
+#if HAVE_POSIX_SPAWN
+    FN_ENTRY(subprocess),
+#endif
     {0}
 };
 

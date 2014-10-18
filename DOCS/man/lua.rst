@@ -511,6 +511,9 @@ This built-in module provides generic helper functions for Lua, and have
 strictly speaking nothing to do with mpv or video/audio playback. They are
 provided for convenience. Most compensate for Lua's scarce standard library.
 
+Be warned that any of these functions might disappear any time. They are not
+strictly part of the guaranteed API.
+
 ``utils.getcwd()``
     Returns the directory that mpv was launched from. On error, ``nil, error``
     is returned.
@@ -550,6 +553,45 @@ provided for convenience. Most compensate for Lua's scarce standard library.
 ``utils.join_path(p1, p2)``
     Return the concatenation of the 2 paths. Tries to be clever. For example,
     if ```p2`` is an absolute path, p2 is returned without change.
+
+``utils.subprocess(t)``
+    Runs an external process and waits until it exits. Returns process status
+    and the captured output.
+
+    This function is not available on Microsoft Windows.
+
+    The paramater ``t`` is a table. The function reads the following entries:
+
+        ``args``
+            Array of strings. The first array entry is the executable. This
+            can be either an absolute path, or a filename with no path
+            components, in which case the ``PATH`` environment variable is
+            used to resolve the executable. The other array elements are
+            passed as command line arguments.
+
+        ``cancellable``
+            Optional. If set to ``true`` (default), then if the user stops
+            playback or goes to the next file while the process is running,
+            the process will be killed.
+
+        ``max_size``
+            Optional. The maximum size in bytes of the data that can be captured
+            from stdout. (Default: 16 MB.)
+
+    The function returns a table as result with the following entries:
+
+        ``status``
+            The raw exit status of the process. It will be negative on error.
+
+        ``stdout``
+            Captured output stream as string, limited to ``max_size``.
+
+        ``error``
+            ``nil`` on success. The string ``killed`` if the process was
+            terminated in an unusual way. The string ``init`` if the process
+            could not be started.
+
+    In all cases, ``mp.resume_all()`` is implicitly called.
 
 Events
 ------

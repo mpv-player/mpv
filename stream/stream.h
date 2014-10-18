@@ -263,6 +263,7 @@ struct mp_cancel *mp_cancel_new(void *talloc_ctx);
 void mp_cancel_trigger(struct mp_cancel *c);
 bool mp_cancel_test(struct mp_cancel *c);
 void mp_cancel_reset(struct mp_cancel *c);
+int mp_cancel_get_fd(struct mp_cancel *c);
 
 // stream_file.c
 char *mp_file_url_to_filename(void *talloc_ctx, bstr url);

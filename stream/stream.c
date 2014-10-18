@@ -18,20 +18,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-
 #include <sys/types.h>
-#include <sys/stat.h>
-#ifndef __MINGW32__
-#include <sys/ioctl.h>
-#include <sys/wait.h>
-#endif
-#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+
 #include <strings.h>
 #include <assert.h>
 
 #include <libavutil/common.h>
 #include "osdep/atomics.h"
+#include "osdep/io.h"
 
 #include "talloc.h"
 
@@ -988,12 +984,22 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
 
 struct mp_cancel {
     atomic_bool triggered;
+    int wakeup_pipe[2];
 };
+
+static void cancel_destroy(void *p)
+{
+    struct mp_cancel *c = p;
+    close(c->wakeup_pipe[0]);
+    close(c->wakeup_pipe[1]);
+}
 
 struct mp_cancel *mp_cancel_new(void *talloc_ctx)
 {
     struct mp_cancel *c = talloc_ptrtype(talloc_ctx, c);
+    talloc_set_destructor(c, cancel_destroy);
     *c = (struct mp_cancel){.triggered = ATOMIC_VAR_INIT(false)};
+    mp_make_wakeup_pipe(c->wakeup_pipe);
     return c;
 }
 
@@ -1001,12 +1007,21 @@ struct mp_cancel *mp_cancel_new(void *talloc_ctx)
 void mp_cancel_trigger(struct mp_cancel *c)
 {
     atomic_store(&c->triggered, true);
+    write(c->wakeup_pipe[1], &(char){0}, 1);
 }
 
 // Restore original state. (Allows reusing a mp_cancel.)
 void mp_cancel_reset(struct mp_cancel *c)
 {
     atomic_store(&c->triggered, false);
+    // Flush it fully.
+    while (1) {
+        int r = read(c->wakeup_pipe[0], &(char[256]){0}, 256);
+        if (r < 0 && errno == EINTR)
+            continue;
+        if (r <= 0)
+            break;
+    }
 }
 
 // Return whether the caller should abort.
@@ -1014,6 +1029,13 @@ void mp_cancel_reset(struct mp_cancel *c)
 bool mp_cancel_test(struct mp_cancel *c)
 {
     return c ? atomic_load(&c->triggered) : false;
+}
+
+// The FD becomes readable if mp_cancel_test() would return true.
+// Don't actually read from it, just use it for poll().
+int mp_cancel_get_fd(struct mp_cancel *c)
+{
+    return c->wakeup_pipe[0];
 }
 
 void stream_print_proto_list(struct mp_log *log)
