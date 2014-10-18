@@ -112,9 +112,6 @@ int mp_glob(const char *restrict pattern, int flags,
             int (*errfunc)(const char*, int), mp_glob_t *restrict pglob);
 void mp_globfree(mp_glob_t *pglob);
 
-// NOTE: stat is not overridden with mp_stat, because MinGW-w64 defines it as
-//       macro.
-
 #define printf(...) mp_printf(__VA_ARGS__)
 #define fprintf(...) mp_fprintf(__VA_ARGS__)
 #define open(...) mp_open(__VA_ARGS__)
