@@ -19,8 +19,6 @@
 #include "video/out/vo.h"
 
 @interface MpvCocoaAdapter : NSObject
-- (void)lock;
-- (void)unlock;
 - (void)setNeedsResize;
 - (void)signalMouseMovement:(NSPoint)point;
 - (void)putKeyEvent:(NSEvent*)event;
@@ -29,6 +27,7 @@
 - (void)putCommand:(char*)cmd;
 - (void)handleFilesArray:(NSArray *)files;
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen;
+- (void)performAsyncResize:(NSSize)size;
 
 - (BOOL)isInFullScreenMode;
 - (BOOL)keyboardEnabled;

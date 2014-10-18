@@ -70,6 +70,7 @@ struct vo_cocoa_state {
     int pending_events;
 
     bool waiting_frame;
+    bool skip_swap_buffer;
     bool embedded; // wether we are embedding in another GUI
 
     IOPMAssertionID power_mgmt_assertion;
@@ -83,6 +84,8 @@ struct vo_cocoa_state {
     char *icc_wnd_profile_path;
     char *icc_fs_profile_path;
     id   fs_icc_changed_ns_observer;
+
+    void (*resize_redraw)(struct vo *vo, int w, int h);
 };
 
 static void with_cocoa_lock(struct vo *vo, void(^block)(void))
@@ -173,6 +176,13 @@ static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
     }
 
     return VO_TRUE;
+}
+
+void vo_cocoa_register_resize_callback(struct vo *vo,
+                                       void (*cb)(struct vo *vo, int w, int h))
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    s->resize_redraw = cb;
 }
 
 void vo_cocoa_uninit(struct vo *vo)
@@ -456,6 +466,26 @@ void vo_cocoa_set_current_context(struct vo *vo, bool current)
     }
 }
 
+static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+
+    if (!s->gl_ctx)
+        return;
+
+    if (!s->resize_redraw)
+        return;
+
+    vo_cocoa_set_current_context(vo, true);
+
+    [s->gl_ctx update];
+    s->resize_redraw(vo, width, height);
+    s->skip_swap_buffer = true;
+
+    [s->gl_ctx flushBuffer];
+    vo_cocoa_set_current_context(vo, false);
+}
+
 static void draw_changes_after_next_frame(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -468,7 +498,13 @@ static void draw_changes_after_next_frame(struct vo *vo)
 void vo_cocoa_swap_buffers(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    [s->gl_ctx flushBuffer];
+    if (s->skip_swap_buffer) {
+        s->skip_swap_buffer = false;
+        return;
+    } else {
+        [s->gl_ctx flushBuffer];
+    }
+
     if (s->waiting_frame) {
         s->waiting_frame = false;
         NSEnableScreenUpdates();
@@ -687,12 +723,8 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 @implementation MpvCocoaAdapter
 @synthesize vout = _video_output;
 
-- (void)lock {
-    vo_cocoa_set_current_context(self.vout, true);
-}
-
-- (void)unlock {
-    vo_cocoa_set_current_context(self.vout, false);
+- (void)performAsyncResize:(NSSize)size {
+    vo_cocoa_resize_redraw(self.vout, size.width, size.height);
 }
 
 - (BOOL)keyboardEnabled {

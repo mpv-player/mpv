@@ -40,4 +40,10 @@
 {
     return [self convertRectToBacking:[self frame]];
 }
+
+
+- (void)drawRect:(NSRect)rect
+{
+    [self.adapter performAsyncResize:[self frameInPixels].size];
+}
 @end

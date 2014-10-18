@@ -2388,6 +2388,18 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
     return handle_scaler_opt(s) ? 1 : M_OPT_INVALID;
 }
 
+// Resize and redraw the contents of the window without further configuration.
+// Intended to be used in situations where the frontend can't really be
+// involved with reconfiguring the VO properly.
+// gl_video_resize() should be called when user interaction is done.
+void gl_video_resize_redraw(struct gl_video *p, int w, int h)
+{
+    p->gl->Viewport(p->vp_x, p->vp_y, w, h);
+    p->vp_w = w;
+    p->vp_h = h;
+    gl_video_render_frame(p);
+}
+
 void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)
 {
     p->hwdec = hwdec;
