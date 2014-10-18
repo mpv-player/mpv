@@ -90,6 +90,34 @@ static int mp_cpcall (lua_State *L, lua_CFunction func, void *ud)
 }
 #endif
 
+static int destroy_crap(lua_State *L)
+{
+    void **data = luaL_checkudata(L, 1, "ohthispain");
+    talloc_free(data[0]);
+    data[0] = NULL;
+    return 0;
+}
+
+// Creates a small userdata object and pushes it to the Lua stack. The function
+// will (on the C level) return a talloc object that will be released by the
+// userdata gc routine.
+// This can be used to free temporary C data structures correctly if Lua errors
+// happen.
+// You can't free the talloc context directly; the Lua __gc handler does this.
+static void *mp_lua_PITA(lua_State *L)
+{
+    void **data = lua_newuserdata(L, sizeof(void *)); // u
+    if (luaL_newmetatable(L, "ohthispain")) { // u metatable
+        lua_pushvalue(L, -1);  // u metatable metatable
+        lua_setfield(L, -2, "__index");  // u metatable
+        lua_pushcfunction(L, destroy_crap); // u metatable gc
+        lua_setfield(L, -2, "__gc"); // u metatable
+    }
+    lua_setmetatable(L, -2); // u
+    *data = talloc_new(NULL);
+    return *data;
+}
+
 static struct script_ctx *get_ctx(lua_State *L)
 {
     lua_getfield(L, LUA_REGISTRYINDEX, "ctx");
@@ -693,7 +721,6 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
                 MP_TARRAY_GROW(tmp, list->keys, list->num);
                 makenode(tmp, &list->values[list->num], L, -1);
                 if (lua_type(L, -2) != LUA_TSTRING) {
-                    talloc_free(tmp);
                     luaL_error(L, "key must be a string, but got %s",
                                lua_typename(L, -2));
                 }
@@ -706,7 +733,6 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
     }
     default:
         // unknown type
-        talloc_free(tmp);
         luaL_error(L, "disallowed Lua type found: %s\n", lua_typename(L, t));
     }
 }
@@ -716,10 +742,10 @@ static int script_set_property_native(lua_State *L)
     struct script_ctx *ctx = get_ctx(L);
     const char *p = luaL_checkstring(L, 1);
     struct mpv_node node;
-    void *tmp = talloc_new(NULL);
+    void *tmp = mp_lua_PITA(L);
     makenode(tmp, &node, L, 2);
     int res = mpv_set_property(ctx->client, p, MPV_FORMAT_NODE, &node);
-    talloc_free(tmp);
+    talloc_free_children(tmp);
     return check_error(L, res);
 
 }
@@ -896,10 +922,10 @@ static int script_command_native(lua_State *L)
     struct script_ctx *ctx = get_ctx(L);
     struct mpv_node node;
     struct mpv_node result;
-    void *tmp = talloc_new(NULL);
+    void *tmp = mp_lua_PITA(L);
     makenode(tmp, &node, L, 1);
     int err = mpv_command_node(ctx->client, &node, &result);
-    talloc_free(tmp);
+    talloc_free_children(tmp);
     const char *errstr = mpv_error_string(err);
     if (err >= 0) {
         bool ok = pushnode(L, &result, 50);
