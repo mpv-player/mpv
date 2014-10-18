@@ -124,15 +124,13 @@ void mp_globfree(mp_glob_t *pglob);
 #define tmpfile(...) mp_tmpfile(__VA_ARGS__)
 #define getenv(...) mp_getenv(__VA_ARGS__)
 
-// Things MinGW defines as macros, and which we want to override only for the
-// user, and not io.c (which wants the original definition).
-#ifndef MP_HIDE_IO_REPLACEMENTS
 #undef lseek
 #define lseek(...) mp_lseek(__VA_ARGS__)
-#endif
 
+// Affects both "stat()" and "struct stat".
 #undef stat
 #define stat mp_stat
+
 #undef fstat
 #define fstat(...) mp_fstat(__VA_ARGS__)
 

@@ -17,8 +17,6 @@
  * You should have received a copy of the GNU General Public License along
  * with mplayer2.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define MP_HIDE_IO_REPLACEMENTS
-
 #include <unistd.h>
 #include <errno.h>
 
@@ -428,7 +426,7 @@ off_t mp_lseek(int fd, off_t offset, int whence)
         errno = ESPIPE;
         return (off_t)-1;
     }
-    return lseek(fd, offset, whence);
+    return _lseeki64(fd, offset, whence);
 }
 
 #endif // __MINGW32__
