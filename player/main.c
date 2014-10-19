@@ -132,7 +132,8 @@ void mp_destroy(struct MPContext *mpctx)
     shutdown_clients(mpctx);
 
 #if !defined(__MINGW32__)
-    mp_uninit_ipc(mpctx);
+    mp_uninit_ipc(mpctx->ipc_ctx);
+    mpctx->ipc_ctx = NULL;
 #endif
 
     command_uninit(mpctx);
@@ -446,7 +447,7 @@ int mp_initialize(struct MPContext *mpctx)
     mp_load_scripts(mpctx);
 
 #if !defined(__MINGW32__)
-    mp_init_ipc(mpctx);
+    mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
 #endif
 
     if (opts->shuffle)
@@ -458,9 +459,6 @@ int mp_initialize(struct MPContext *mpctx)
     mpctx->playlist->current = mp_check_playlist_resume(mpctx, mpctx->playlist);
     if (!mpctx->playlist->current)
         mpctx->playlist->current = mpctx->playlist->first;
-
-    //struct m_config *new = m_config_dup(NULL, mpctx->mconfig);
-    //talloc_free(new);
 
     MP_STATS(mpctx, "end init");
 

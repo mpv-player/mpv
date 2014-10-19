@@ -250,10 +250,16 @@ bool mp_input_use_alt_gr(struct input_ctx *ictx);
 // Like mp_input_parse_cmd_strv, but also run the command.
 void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd);
 
+void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay);
+
 void mp_input_pipe_add(struct input_ctx *ictx, const char *filename);
 void mp_input_joystick_add(struct input_ctx *ictx, char *dev);
 void mp_input_lirc_add(struct input_ctx *ictx, char *lirc_configfile);
 
-void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay);
+struct mp_ipc_ctx;
+struct mp_client_api;
+struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
+                               struct mpv_global *global);
+void mp_uninit_ipc(struct mp_ipc_ctx *ctx);
 
 #endif /* MPLAYER_INPUT_H */

@@ -38,12 +38,13 @@
 #include "misc/bstr.h"
 #include "misc/json.h"
 #include "options/m_option.h"
+#include "options/options.h"
 #include "options/path.h"
-#include "player/core.h"
 #include "player/client.h"
 
-struct thread_arg {
-    struct MPContext *mpctx;
+struct mp_ipc_ctx {
+    struct mp_log *log;
+    struct mp_client_api *client_api;
     const char *path;
 
     pthread_t thread;
@@ -588,9 +589,9 @@ done:
     return NULL;
 }
 
-static void ipc_start_client(struct MPContext *mpctx, struct client_arg *client)
+static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
 {
-    client->client = mp_new_client(mpctx->clients, client->client_name),
+    client->client = mp_new_client(ctx->client_api, client->client_name),
     client->log    = mp_client_get_log(client->client);
 
     pthread_t client_thr;
@@ -601,7 +602,7 @@ static void ipc_start_client(struct MPContext *mpctx, struct client_arg *client)
     }
 }
 
-static void ipc_start_client_json(struct MPContext *mpctx, int id, int fd)
+static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, int fd)
 {
     struct client_arg *client = talloc_ptrtype(NULL, client);
     *client = (struct client_arg){
@@ -612,10 +613,10 @@ static void ipc_start_client_json(struct MPContext *mpctx, int id, int fd)
         .execute_command = json_execute_command,
     };
 
-    ipc_start_client(mpctx, client);
+    ipc_start_client(ctx, client);
 }
 
-static void ipc_start_client_text(struct MPContext *mpctx, const char *path)
+static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
 {
     int mode = O_RDONLY;
     // Use RDWR for FIFOs to ensure they stay open over multiple accesses.
@@ -624,7 +625,7 @@ static void ipc_start_client_text(struct MPContext *mpctx, const char *path)
         mode = O_RDWR;
     int client_fd = open(path, mode);
     if (client_fd < 0) {
-        MP_ERR(mpctx, "Could not open pipe at '%s'\n", path);
+        MP_ERR(ctx, "Could not open pipe at '%s'\n", path);
         return;
     }
 
@@ -637,7 +638,7 @@ static void ipc_start_client_text(struct MPContext *mpctx, const char *path)
         .execute_command = text_execute_command,
     };
 
-    ipc_start_client(mpctx, client);
+    ipc_start_client(ctx, client);
 }
 
 static void *ipc_thread(void *p)
@@ -647,19 +648,19 @@ static void *ipc_thread(void *p)
     int ipc_fd;
     struct sockaddr_un ipc_un;
 
-    struct thread_arg *arg = p;
+    struct mp_ipc_ctx *arg = p;
 
-    MP_INFO(arg->mpctx, "Starting IPC master\n");
+    MP_INFO(arg, "Starting IPC master\n");
 
     ipc_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (ipc_fd < 0) {
-        MP_ERR(arg->mpctx, "Could not create IPC socket\n");
+        MP_ERR(arg, "Could not create IPC socket\n");
         goto done;
     }
 
     size_t path_len = strlen(arg->path);
     if (path_len >= sizeof(ipc_un.sun_path) - 1) {
-        MP_ERR(arg->mpctx, "Could not create IPC socket\n");
+        MP_ERR(arg, "Could not create IPC socket\n");
         goto done;
     }
 
@@ -676,13 +677,13 @@ static void *ipc_thread(void *p)
     size_t addr_len = offsetof(struct sockaddr_un, sun_path) + 1 + path_len;
     rc = bind(ipc_fd, (struct sockaddr *) &ipc_un, addr_len);
     if (rc < 0) {
-        MP_ERR(arg->mpctx, "Could not bind IPC socket\n");
+        MP_ERR(arg, "Could not bind IPC socket\n");
         goto done;
     }
 
     rc = listen(ipc_fd, 10);
     if (rc < 0) {
-        MP_ERR(arg->mpctx, "Could not listen on IPC socket\n");
+        MP_ERR(arg, "Could not listen on IPC socket\n");
         goto done;
     }
 
@@ -696,7 +697,7 @@ static void *ipc_thread(void *p)
     while (1) {
         rc = poll(fds, 2, -1);
         if (rc < 0) {
-            MP_ERR(arg->mpctx, "Poll error\n");
+            MP_ERR(arg, "Poll error\n");
             continue;
         }
 
@@ -706,11 +707,11 @@ static void *ipc_thread(void *p)
         if (fds[1].revents & POLLIN) {
             int client_fd = accept(ipc_fd, NULL, NULL);
             if (client_fd < 0) {
-                MP_ERR(arg->mpctx, "Could not accept IPC client\n");
+                MP_ERR(arg, "Could not accept IPC client\n");
                 goto done;
             }
 
-            ipc_start_client_json(arg->mpctx, client_num++, client_fd);
+            ipc_start_client_json(arg, client_num++, client_fd);
         }
     }
 
@@ -722,47 +723,48 @@ done:
     arg->death_pipe[0] = -1;
     close(arg->death_pipe[1]);
     arg->death_pipe[1] = -1;
-    arg->mpctx->ipc_ctx = NULL;
 
     talloc_free(arg);
     return NULL;
 }
 
-void mp_init_ipc(struct MPContext *mpctx)
+struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
+                               struct mpv_global *global)
 {
-    if (mpctx->global->opts->input_file && *mpctx->global->opts->input_file)
-        ipc_start_client_text(mpctx, mpctx->global->opts->input_file);
+    struct MPOpts *opts = global->opts;
 
-    if (!mpctx->opts->ipc_path || !*mpctx->opts->ipc_path)
-        return;
-
-    struct thread_arg *arg = talloc_ptrtype(NULL, arg);
-    *arg = (struct thread_arg){
-        .mpctx  = mpctx,
-        .path   = mp_get_user_path(arg, mpctx->global, mpctx->opts->ipc_path),
+    struct mp_ipc_ctx *arg = talloc_ptrtype(NULL, arg);
+    *arg = (struct mp_ipc_ctx){
+        .log        = mp_log_new(arg, global->log, "ipc"),
+        .client_api = client_api,
+        .path       = mp_get_user_path(arg, global, opts->ipc_path),
     };
 
-    if (mp_make_wakeup_pipe(arg->death_pipe) < 0) {
-        talloc_free(arg);
-        return;
-    }
+    if (opts->input_file && *opts->input_file)
+        ipc_start_client_text(arg, opts->input_file);
 
-    mpctx->ipc_ctx = arg;
+    if (!opts->ipc_path || !*opts->ipc_path)
+        goto out;
+
+    if (mp_make_wakeup_pipe(arg->death_pipe) < 0)
+        goto out;
 
     if (pthread_create(&arg->thread, NULL, ipc_thread, arg))
-        talloc_free(arg);
+        goto out;
+
+    return arg;
+
+out:
+    talloc_free(arg);
+    return NULL;
 }
 
-void mp_uninit_ipc(struct MPContext *mpctx)
+void mp_uninit_ipc(struct mp_ipc_ctx *arg)
 {
-    struct thread_arg *arg = mpctx->ipc_ctx;
-
     if (!arg)
         return;
 
     if (arg->death_pipe[1] != -1)
         write(arg->death_pipe[1], &(char){0}, 1);
     pthread_join(arg->thread, NULL);
-
-    mpctx->ipc_ctx = NULL;
 }
