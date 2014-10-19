@@ -81,6 +81,7 @@ struct script_ctx {
 
 #if LUA_VERSION_NUM <= 501
 #define mp_cpcall lua_cpcall
+#define mp_lua_len lua_objlen
 #else
 // Curse whoever had this stupid idea. Curse whoever thought it would be a good
 // idea not to include an emulated lua_cpcall() even more.
@@ -90,6 +91,7 @@ static int mp_cpcall (lua_State *L, lua_CFunction func, void *ud)
     lua_pushlightuserdata(L, ud);
     return lua_pcall(L, 1, 0, 0);
 }
+#define mp_lua_len lua_rawlen
 #endif
 
 static int destroy_crap(lua_State *L)
@@ -1175,7 +1177,7 @@ static int script_subprocess(lua_State *L)
     resume_all(ctx);
 
     lua_getfield(L, 1, "args"); // args
-    int num_args = lua_objlen(L, -1);
+    int num_args = mp_lua_len(L, -1);
     char *args[256];
     if (num_args > MP_ARRAY_SIZE(args) - 1) // last needs to be NULL
         luaL_error(L, "too many arguments");
