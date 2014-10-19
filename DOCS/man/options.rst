@@ -769,7 +769,9 @@ Audio
     ``alsa``, followed by ``/``, followed by the audio output specific device
     name.
 
-    You can list audio devices with ``--audio-device=help``.
+    You can list audio devices with ``--audio-device=help``. This outputs the
+    device name in quotes, followed by a description. The device name is what
+    you have to pass to the ``--audio-device`` option.
 
     The default value for this option is ``auto``, which tries every audio
     output in preference order with the default device.

@@ -439,7 +439,7 @@ void ao_print_devices(struct mpv_global *global, struct mp_log *log)
     mp_info(log, "List of detected audio devices:\n");
     for (int n = 0; n < list->num_devices; n++) {
         struct ao_device_desc *desc = &list->devices[n];
-        mp_info(log, "  %s (%s)\n", desc->name, desc->desc);
+        mp_info(log, "  '%s' (%s)\n", desc->name, desc->desc);
     }
     talloc_free(list);
 }
