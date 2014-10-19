@@ -719,12 +719,6 @@ done:
     if (ipc_fd >= 0)
         close(ipc_fd);
 
-    close(arg->death_pipe[0]);
-    arg->death_pipe[0] = -1;
-    close(arg->death_pipe[1]);
-    arg->death_pipe[1] = -1;
-
-    talloc_free(arg);
     return NULL;
 }
 
@@ -738,6 +732,7 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
         .log        = mp_log_new(arg, global->log, "ipc"),
         .client_api = client_api,
         .path       = mp_get_user_path(arg, global, opts->ipc_path),
+        .death_pipe = {-1, -1},
     };
 
     if (opts->input_file && *opts->input_file)
@@ -755,6 +750,8 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
     return arg;
 
 out:
+    close(arg->death_pipe[0]);
+    close(arg->death_pipe[1]);
     talloc_free(arg);
     return NULL;
 }
@@ -764,7 +761,10 @@ void mp_uninit_ipc(struct mp_ipc_ctx *arg)
     if (!arg)
         return;
 
-    if (arg->death_pipe[1] != -1)
-        write(arg->death_pipe[1], &(char){0}, 1);
+    write(arg->death_pipe[1], &(char){0}, 1);
     pthread_join(arg->thread, NULL);
+
+    close(arg->death_pipe[0]);
+    close(arg->death_pipe[1]);
+    talloc_free(arg);
 }
