@@ -119,6 +119,8 @@ static void shutdown_clients(struct MPContext *mpctx)
 
 void mp_destroy(struct MPContext *mpctx)
 {
+    shutdown_clients(mpctx);
+
     uninit_audio_out(mpctx);
     uninit_video_out(mpctx);
 
@@ -128,8 +130,6 @@ void mp_destroy(struct MPContext *mpctx)
 #endif
 
     mpctx->encode_lavc_ctx = NULL;
-
-    shutdown_clients(mpctx);
 
 #if !defined(__MINGW32__)
     mp_uninit_ipc(mpctx->ipc_ctx);
