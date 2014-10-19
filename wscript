@@ -198,8 +198,9 @@ iconv support use --disable-iconv.",
             'shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0)')
     }, {
         'name': 'posix-spawn',
-        'desc': 'posix_spawn()',
-        'func': check_statement('spawn.h', 'posix_spawnp(0,0,0,0,0,0)')
+        'desc': 'POSIX spawnp()/kill()',
+        'func': check_statement(['spawn.h', 'signal.h'],
+            'posix_spawnp(0,0,0,0,0,0); kill(0,0)')
     }, {
         'name': 'glob',
         'desc': 'glob()',

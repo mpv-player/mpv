@@ -1162,6 +1162,7 @@ static int script_join_path(lua_State *L)
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <signal.h>
 
 // Normally, this must be declared manually, but glibc is retarded.
 #ifndef __GLIBC__
