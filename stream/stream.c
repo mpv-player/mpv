@@ -312,7 +312,7 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
         }
     }
 
-    int r = sinfo->open(s);
+    int r = (sinfo->open)(s);
     if (r != STREAM_OK) {
         talloc_free(s);
         return r;
