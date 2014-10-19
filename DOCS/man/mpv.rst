@@ -468,7 +468,7 @@ PROTOCOLS
     actually a network address. A protocol prefix is always required.
 
     Note that not all prefixes are documented here. Undocumented prefixes are
-    either aliases to documented protocols, or are just reidrections to
+    either aliases to documented protocols, or are just redirections to
     protocols implemented and documented in FFmpeg.
 
 ``-``
