@@ -2956,6 +2956,7 @@ static const struct m_property mp_properties[] = {
     // Video
     {"fullscreen", mp_property_fullscreen},
     {"deinterlace", mp_property_deinterlace},
+    {"field-dominance", mp_property_generic_option},
     {"colormatrix", mp_property_colormatrix},
     {"colormatrix-input-range", mp_property_colormatrix_input_range},
     {"colormatrix-output-range", mp_property_colormatrix_output_range},

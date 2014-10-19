@@ -950,6 +950,9 @@ Property list
 ``deinterlace`` (RW)
     See ``--deinterlace``.
 
+``field-dominance`` (RW)
+    See ``--field-dominance``
+
 ``colormatrix`` (RW)
     See ``--colormatrix``.
 
