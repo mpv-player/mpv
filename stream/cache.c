@@ -457,6 +457,7 @@ static void cache_execute_control(struct priv *s)
 static void *cache_thread(void *arg)
 {
     struct priv *s = arg;
+    mpthread_set_name("cache");
     pthread_mutex_lock(&s->mutex);
     update_cached_controls(s);
     double last = mp_time_sec();

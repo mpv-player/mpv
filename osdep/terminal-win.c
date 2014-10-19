@@ -37,6 +37,7 @@
 #include "input/input.h"
 #include "terminal.h"
 #include "osdep/io.h"
+#include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
 
 #define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
@@ -122,6 +123,7 @@ static void read_input(void)
 
 static void *input_thread_fn(void *ptr)
 {
+    mpthread_set_name("terminal");
     HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
     HANDLE stuff[2] = {in, death};
     while (1) {

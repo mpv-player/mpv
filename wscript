@@ -212,6 +212,25 @@ iconv support use --disable-iconv.",
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_true
     }, {
+        'name': 'glibc-thread-name',
+        'desc': 'GLIBC API for setting thread name',
+        'func': check_statement('pthread.h',
+                                'pthread_setname_np(pthread_self(), "ducks")',
+                                use=['pthreads']),
+    }, {
+        'name': 'osx-thread-name',
+        'desc': 'OSX API for setting thread name',
+        'deps_neg': [ 'glibc-thread-name' ],
+        'func': check_statement('pthread.h',
+                                'pthread_setname_np("ducks")', use=['pthreads']),
+    }, {
+        'name': 'bsd-thread-name',
+        'desc': 'BSD API for setting thread name',
+        'deps_neg': [ 'glibc-thread-name', 'osx-thread-name' ],
+        'func': check_statement('pthread.h',
+                                'pthread_set_name_np(pthread_self(), "ducks")',
+                                use=['pthreads']),
+    }, {
         'name': 'bsd-fstatfs',
         'desc': "BSD's fstatfs()",
         'func': check_statement(['sys/param.h', 'sys/mount.h'],

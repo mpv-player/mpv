@@ -29,6 +29,7 @@
 #include "config.h"
 
 #include "osdep/io.h"
+#include "osdep/threads.h"
 
 #include "common/common.h"
 #include "common/global.h"
@@ -471,6 +472,8 @@ static void *client_thread(void *p)
     struct client_arg *arg = p;
     bstr client_msg = { talloc_strdup(NULL, ""), 0 };
 
+    mpthread_set_name(arg->client_name);
+
     int pipe_fd = mpv_get_wakeup_pipe(arg->client);
     if (pipe_fd < 0) {
         MP_ERR(arg, "Could not get wakeup pipe\n");
@@ -648,6 +651,8 @@ static void *ipc_thread(void *p)
     struct sockaddr_un ipc_un;
 
     struct mp_ipc_ctx *arg = p;
+
+    mpthread_set_name("ipc socket listener");
 
     MP_INFO(arg, "Starting IPC master\n");
 

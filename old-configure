@@ -990,6 +990,9 @@ cat > $TMPC << EOF
 #define HAVE_SDL1 0
 #define HAVE_WAIO 0
 #define HAVE_POSIX_SPAWN 1
+#define HAVE_GLIBC_THREAD_NAME (!!__GLIBC__)
+#define HAVE_OSX_THREAD_NAME 0
+#define HAVE_BSD_THREAD_NAME 0
 
 #define DEFAULT_CDROM_DEVICE "/dev/cdrom"
 #define DEFAULT_DVD_DEVICE   "/dev/dvd"

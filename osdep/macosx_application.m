@@ -26,6 +26,7 @@
 #import "osdep/macosx_application_objc.h"
 #include "osdep/macosx_compat.h"
 #import "osdep/macosx_events_objc.h"
+#include "osdep/threads.h"
 
 #define MPV_PROTOCOL @"mpv://"
 
@@ -283,6 +284,7 @@ struct playback_thread_ctx {
 
 static void *playback_thread(void *ctx_obj)
 {
+    mpthread_set_name("playback core (OSX)");
     @autoreleasepool {
         struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
         ctx->mpv_main(*ctx->argc, *ctx->argv);

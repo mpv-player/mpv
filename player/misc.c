@@ -26,6 +26,7 @@
 
 #include "osdep/io.h"
 #include "osdep/timer.h"
+#include "osdep/threads.h"
 
 #include "common/msg.h"
 #include "options/options.h"
@@ -249,6 +250,7 @@ struct wrapper_args {
 static void *thread_wrapper(void *pctx)
 {
     struct wrapper_args *args = pctx;
+    mpthread_set_name("opener");
     args->thread_fn(args->thread_arg);
     pthread_mutex_lock(&args->mutex);
     args->done = true;

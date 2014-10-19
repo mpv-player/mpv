@@ -419,6 +419,8 @@ static void *playback_thread(void *p)
     struct MPContext *mpctx = p;
     mpctx->autodetach = true;
 
+    mpthread_set_name("playback core");
+
     mp_play_files(mpctx);
 
     // This actually waits until all clients are gone before actually

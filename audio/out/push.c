@@ -303,6 +303,7 @@ static void *playthread(void *arg)
 {
     struct ao *ao = arg;
     struct ao_push_state *p = ao->api_priv;
+    mpthread_set_name("ao");
     pthread_mutex_lock(&p->lock);
     while (!p->terminate) {
         if (!p->paused)

@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License along
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdio.h>
+
+#include "config.h"
 
 #include "threads.h"
 #include "timer.h"
@@ -39,4 +42,17 @@ int mpthread_mutex_init_recursive(pthread_mutex_t *mutex)
     int r = pthread_mutex_init(mutex, &attr);
     pthread_mutexattr_destroy(&attr);
     return r;
+}
+
+void mpthread_set_name(const char *name)
+{
+    char tname[90];
+    snprintf(tname, sizeof(tname), "mpv %s", name);
+#if HAVE_GLIBC_THREAD_NAME
+    pthread_setname_np(pthread_self(), tname);
+#elif HAVE_BSD_THREAD_NAME
+    pthread_set_name_np(pthread_self(), tname);
+#elif HAVE_OSX_THREAD_NAME
+    pthread_setname_np(tname);
+#endif
 }

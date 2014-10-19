@@ -33,6 +33,7 @@
 #include "talloc.h"
 #include "common/msg.h"
 #include "common/global.h"
+#include "osdep/threads.h"
 
 #include "stream/stream.h"
 #include "demux.h"
@@ -455,6 +456,7 @@ static void execute_seek(struct demux_internal *in)
 static void *demux_thread(void *pctx)
 {
     struct demux_internal *in = pctx;
+    mpthread_set_name("demux");
     pthread_mutex_lock(&in->lock);
     while (!in->thread_terminate) {
         in->thread_paused = in->thread_request_pause > 0;

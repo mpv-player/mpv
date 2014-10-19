@@ -26,6 +26,7 @@
 #include "config.h"
 
 #include "osdep/io.h"
+#include "osdep/threads.h"
 
 #include "common/common.h"
 #include "common/msg.h"
@@ -77,6 +78,10 @@ static void *script_thread(void *p)
     pthread_detach(pthread_self());
 
     struct thread_arg *arg = p;
+
+    char name[90];
+    snprintf(name, sizeof(name), "script (%s)", arg->fname);
+    mpthread_set_name(name);
 
     if (arg->backend->load(arg->client, arg->fname) < 0)
         MP_ERR(arg, "Could not load script %s\n", arg->fname);

@@ -1451,6 +1451,8 @@ static void *input_src_thread(void *ptr)
     void (*loop_fn)(struct mp_input_src *src, void *ctx) = args[1];
     void *ctx = args[2];
 
+    mpthread_set_name("input source");
+
     src->in->thread_running = true;
 
     loop_fn(src, ctx);

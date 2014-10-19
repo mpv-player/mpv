@@ -34,6 +34,7 @@
 #include "win_state.h"
 #include "w32_common.h"
 #include "osdep/io.h"
+#include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
@@ -989,6 +990,8 @@ static void *gui_thread(void *ptr)
     struct vo_w32_state *w32 = ptr;
     bool ole_ok = false;
     int res = 0;
+
+    mpthread_set_name("win32 window");
 
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 

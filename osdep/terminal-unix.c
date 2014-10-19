@@ -45,6 +45,7 @@
 #include <poll.h>
 
 #include "osdep/io.h"
+#include "osdep/threads.h"
 
 #include "common/common.h"
 #include "misc/bstr.h"
@@ -757,6 +758,7 @@ static void quit_request_sighandler(int signum)
 
 static void *terminal_thread(void *ptr)
 {
+    mpthread_set_name("terminal");
     bool stdin_ok = isatty(STDIN_FILENO); // if false, we still wait for SIGTERM
     while (1) {
         struct pollfd fds[2] = {

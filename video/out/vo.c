@@ -47,6 +47,7 @@
 #include "video/vfcap.h"
 #include "sub/osd.h"
 #include "osdep/io.h"
+#include "osdep/threads.h"
 
 extern const struct vo_driver video_out_x11;
 extern const struct vo_driver video_out_vdpau;
@@ -665,6 +666,8 @@ static void *vo_thread(void *ptr)
 {
     struct vo *vo = ptr;
     struct vo_internal *in = vo->in;
+
+    mpthread_set_name("vo");
 
     int r = vo->driver->preinit(vo) ? -1 : 0;
     mp_rendezvous(vo, r); // init barrier
