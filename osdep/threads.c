@@ -46,7 +46,7 @@ int mpthread_mutex_init_recursive(pthread_mutex_t *mutex)
 
 void mpthread_set_name(const char *name)
 {
-    char tname[90];
+    char tname[16];
     snprintf(tname, sizeof(tname), "mpv %s", name);
 #if HAVE_GLIBC_THREAD_NAME
     pthread_setname_np(pthread_self(), tname);
