@@ -557,8 +557,10 @@ static void *client_thread(void *p)
 
                     json_skip_whitespace(&line0);
 
-                    char *reply_msg;
-                    if (line0[0] == '{') {
+                    char *reply_msg = NULL;
+                    if (line0[0] == '\0' || line0[0] == '#') {
+                        // skip
+                    } else if (line0[0] == '{') {
                         reply_msg = json_execute_command(arg, tmp, line0);
                     } else {
                         reply_msg = text_execute_command(arg, tmp, line0);

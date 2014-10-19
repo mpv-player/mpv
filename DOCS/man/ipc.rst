@@ -49,7 +49,11 @@ can also be present. See `List of events`_ for a list of all supported events.
 
 If the first character (after skipping whitespace) is not ``{``, the command
 will be interpreted as non-JSON text command, as they are used in input.conf
-(or ``mpv_command_string()`` in the client API).
+(or ``mpv_command_string()`` in the client API). Additionally, line starting
+with ``#`` and empty lines are ignored.
+
+Currently, embedded 0 bytes terminate the current line, but you should not
+rely on this.
 
 Commands
 --------
