@@ -2162,7 +2162,11 @@ Input
     like any other binding). See `INPUT.CONF`_.
 
 ``--input-file=<filename>``
-    Read commands from the given file. Mostly useful with a FIFO.
+    Read commands from the given file. Mostly useful with a FIFO. Since
+    mpv 0.7.0 also understands JSON commands (see `JSON IPC`_), but you can't
+    get replies or events. Use ``--input-unix-socket`` for something
+    bi-directional.
+
     See also ``--slave-broken``.
 
     .. note::
@@ -2181,6 +2185,8 @@ Input
 
 ``--input-unix-socket=<filename>``
     Enable the IPC support and create the listening socket at the given path.
+
+    See `JSON IPC`_ for details.
 
 ``--input-appleremote=<yes|no>``
     (OS X only)

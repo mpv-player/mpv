@@ -58,8 +58,7 @@ struct client_arg {
     char *client_name;
     int client_fd;
 
-    char *(*encode_event)(mpv_event *event);
-    char *(*execute_command)(struct client_arg *arg, bstr msg);
+    bool writable;
 };
 
 static mpv_node *mpv_node_map_get(mpv_node *src, const char *key)
@@ -239,7 +238,9 @@ static char *json_encode_event(mpv_event *event)
     return output;
 }
 
-static char *json_execute_command(struct client_arg *arg, bstr msg)
+// Function is allowed to modify src[n].
+static char *json_execute_command(struct client_arg *arg, void *ta_parent,
+                                  char *src)
 {
     int rc;
     const char *cmd = NULL;
@@ -247,9 +248,6 @@ static char *json_execute_command(struct client_arg *arg, bstr msg)
     mpv_node msg_node;
     mpv_node reply_node = {.format = MPV_FORMAT_NODE_MAP, .u.list = NULL};
 
-    void *ta_parent = talloc_new(NULL);
-
-    char *src = bstrdup0(ta_parent, msg);
     rc = json_parse(ta_parent, &msg_node, &src, 3);
     if (rc < 0) {
         rc = MPV_ERROR_INVALID_PARAMETER;
@@ -426,20 +424,16 @@ static char *json_execute_command(struct client_arg *arg, bstr msg)
 error:
     mpv_node_map_add_string(ta_parent, &reply_node, "error", mpv_error_string(rc));
 
-    char *output = talloc_strdup(NULL, "");
+    char *output = talloc_strdup(ta_parent, "");
     json_write(&output, &reply_node);
     output = ta_talloc_strdup_append(output, "\n");
-
-    talloc_free(ta_parent);
 
     return output;
 }
 
-static char *text_execute_command(struct client_arg *arg, bstr msg)
+static char *text_execute_command(struct client_arg *arg, void *tmp, char *src)
 {
-    char *cmd_str = bstrdup0(NULL, msg);
-    mpv_command_string(arg->client, cmd_str);
-    talloc_free(cmd_str);
+    mpv_command_string(arg->client, src);
 
     return NULL;
 }
@@ -512,10 +506,10 @@ static void *client_thread(void *p)
                 if (event->event_id == MPV_EVENT_SHUTDOWN)
                     goto done;
 
-                if (!arg->encode_event)
+                if (!arg->writable)
                     continue;
 
-                char *event_msg = arg->encode_event(event);
+                char *event_msg = json_encode_event(event);
                 if (!event_msg) {
                     MP_ERR(arg, "Encoding error\n");
                     goto done;
@@ -554,28 +548,33 @@ static void *client_thread(void *p)
                 bstr_xappend(NULL, &client_msg, append);
 
                 while (bstrchr(client_msg, '\n') != -1) {
-                    bstr rest, tmp;
+                    void *tmp = talloc_new(NULL);
+                    bstr rest;
                     bstr line = bstr_getline(client_msg, &rest);
+                    char *line0 = bstrto0(tmp, line);
+                    talloc_steal(tmp, client_msg.start);
+                    client_msg = bstrdup(NULL, rest);
 
-                    if (arg->execute_command) {
-                        char *reply_msg = arg->execute_command(arg, line);
-                        if (!reply_msg)
-                            goto command_done;
+                    json_skip_whitespace(&line0);
 
+                    char *reply_msg;
+                    if (line0[0] == '{') {
+                        reply_msg = json_execute_command(arg, tmp, line0);
+                    } else {
+                        reply_msg = text_execute_command(arg, tmp, line0);
+                    }
+
+                    if (reply_msg && arg->writable) {
                         rc = ipc_write(arg->client_fd, reply_msg,
                                        strlen(reply_msg));
-                        talloc_free(reply_msg);
                         if (rc < 0) {
                             MP_ERR(arg, "Write error\n");
-                            talloc_free(client_msg.start);
+                            talloc_free(tmp);
                             goto done;
                         }
                     }
 
-command_done:
-                    tmp = bstrdup(NULL, rest);
-                    talloc_free(client_msg.start);
-                    client_msg = tmp;
+                    talloc_free(tmp);
                 }
             }
         }
@@ -609,8 +608,7 @@ static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, int fd)
         .client_name = talloc_asprintf(client, "ipc-%d", id),
         .client_fd   = fd,
 
-        .encode_event    = json_encode_event,
-        .execute_command = json_execute_command,
+        .writable = true,
     };
 
     ipc_start_client(ctx, client);
@@ -634,8 +632,7 @@ static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
         .client_name = "input-file",
         .client_fd   = client_fd,
 
-        .encode_event    = NULL,
-        .execute_command = text_execute_command,
+        .writable = false,
     };
 
     ipc_start_client(ctx, client);

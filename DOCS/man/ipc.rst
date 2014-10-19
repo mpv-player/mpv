@@ -47,6 +47,10 @@ mpv will also send events to clients with JSON messages of the following form:
 where ``event_name`` is the name of the event. Additional event-specific fields
 can also be present. See `List of events`_ for a list of all supported events.
 
+If the first character (after skipping whitespace) is not ``{``, the command
+will be interpreted as non-JSON text command, as they are used in input.conf
+(or ``mpv_command_string()`` in the client API).
+
 Commands
 --------
 
