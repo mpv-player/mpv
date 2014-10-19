@@ -40,6 +40,7 @@
 #include "input/input.h"
 #include "options/path.h"
 #include "misc/bstr.h"
+#include "misc/json.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 #include "stream/stream.h"
@@ -1290,6 +1291,30 @@ done:
 }
 #endif
 
+static int script_parse_json(lua_State *L)
+{
+    void *tmp = mp_lua_PITA(L);
+    char *text = talloc_strdup(tmp, luaL_checkstring(L, 1));
+    bool trail = lua_toboolean(L, 2);
+    bool ok = false;
+    struct mpv_node node;
+    if (json_parse(tmp, &node, &text, 32) >= 0) {
+        json_skip_whitespace(&text);
+        ok = !text[0] || !trail;
+    }
+    if (ok) {
+        if (!pushnode(L, &node, 64))
+            luaL_error(L, "stack overflow");
+        lua_pushnil(L);
+    } else {
+        lua_pushnil(L);
+        lua_pushstring(L, "error");
+    }
+    lua_pushstring(L, text);
+    talloc_free_children(tmp);
+    return 3;
+}
+
 #define FN_ENTRY(name) {#name, script_ ## name}
 struct fn_entry {
     const char *name;
@@ -1339,6 +1364,7 @@ static const struct fn_entry utils_fns[] = {
 #if HAVE_POSIX_SPAWN
     FN_ENTRY(subprocess),
 #endif
+    FN_ENTRY(parse_json),
     {0}
 };
 

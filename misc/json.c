@@ -70,6 +70,11 @@ static void eat_ws(char **src)
     }
 }
 
+void json_skip_whitespace(char **src)
+{
+    eat_ws(src);
+}
+
 static int read_str(void *ta_parent, struct mpv_node *dst, char **src)
 {
     if (!eat_c(src, '"'))

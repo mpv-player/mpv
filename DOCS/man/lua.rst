@@ -593,6 +593,20 @@ strictly part of the guaranteed API.
 
     In all cases, ``mp.resume_all()`` is implicitly called.
 
+``utils.parse_json(str [, trail])``
+    Parses the given string argument as JSON, and returns it as a Lua table. On
+    error, returns ``nil, error``. (Currently, ``error`` is just a string
+    reading ``error``, because there is no fine-grained error reporting of any
+    kind.)
+
+    The returned value uses similar conventions as ``mp.get_property_native()``
+    to distinguish empty objects and arrays.
+
+    If the ``trail`` parameter is ``true`` (or any value equal to ``true``),
+    then trailing non-whitespace text is tolerated by the function, and the
+    trailing text is returned as 3rd return value. (The 3rd return value is
+    always there, but with ``trail`` set, no error is raised.)
+
 Events
 ------
 
