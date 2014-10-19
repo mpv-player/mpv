@@ -2165,7 +2165,7 @@ Input
     Read commands from the given file. Mostly useful with a FIFO. Since
     mpv 0.7.0 also understands JSON commands (see `JSON IPC`_), but you can't
     get replies or events. Use ``--input-unix-socket`` for something
-    bi-directional.
+    bi-directional. On MS Windows, JSON commands are not available.
 
     See also ``--slave-broken``.
 
@@ -2187,6 +2187,8 @@ Input
     Enable the IPC support and create the listening socket at the given path.
 
     See `JSON IPC`_ for details.
+
+    Not available on MS Windows.
 
 ``--input-appleremote=<yes|no>``
     (OS X only)
