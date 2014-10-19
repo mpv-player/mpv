@@ -106,6 +106,9 @@ static int destroy_crap(lua_State *L)
 // This can be used to free temporary C data structures correctly if Lua errors
 // happen.
 // You can't free the talloc context directly; the Lua __gc handler does this.
+// In my cases, talloc_free_children(returnval) will be used to free attached
+// memory in advance when it's known not to be needed anymore (a minor
+// optimization). Freeing it completely must be left to the Lua GC.
 static void *mp_lua_PITA(lua_State *L)
 {
     void **data = lua_newuserdata(L, sizeof(void *)); // u
@@ -118,6 +121,12 @@ static void *mp_lua_PITA(lua_State *L)
     lua_setmetatable(L, -2); // u
     *data = talloc_new(NULL);
     return *data;
+}
+
+// Perform the equivalent of mpv_free_node_contents(node) when tmp is freed.
+static void auto_free_node(void *tmp, mpv_node *node)
+{
+    talloc_steal(tmp, node_get_alloc(node));
 }
 
 static struct script_ctx *get_ctx(lua_State *L)
@@ -450,7 +459,7 @@ static int script_resume_all(lua_State *L)
     return 0;
 }
 
-static bool pushnode(lua_State *L, mpv_node *node, int depth);
+static void pushnode(lua_State *L, mpv_node *node);
 
 static int script_wait_event(lua_State *L)
 {
@@ -517,8 +526,7 @@ static int script_wait_event(lua_State *L)
         lua_setfield(L, -2, "name");
         switch (prop->format) {
         case MPV_FORMAT_NODE:
-            if (!pushnode(L, prop->data, 50))
-                luaL_error(L, "stack overflow");
+            pushnode(L, prop->data);
             break;
         case MPV_FORMAT_DOUBLE:
             lua_pushnumber(L, *(double *)prop->data);
@@ -815,11 +823,8 @@ static int script_get_property_number(lua_State *L)
     }
 }
 
-static bool pushnode(lua_State *L, mpv_node *node, int depth)
+static void pushnode(lua_State *L, mpv_node *node)
 {
-    depth--;
-    if (depth < 0)
-        return false;
     luaL_checkstack(L, 6, "stack overflow");
 
     switch (node->format) {
@@ -843,8 +848,7 @@ static bool pushnode(lua_State *L, mpv_node *node, int depth)
         lua_getfield(L, LUA_REGISTRYINDEX, "ARRAY"); // table mt
         lua_setmetatable(L, -2); // table
         for (int n = 0; n < node->u.list->num; n++) {
-            if (!pushnode(L, &node->u.list->values[n], depth)) // table value
-                return false;
+            pushnode(L, &node->u.list->values[n]); // table value
             lua_rawseti(L, -2, n + 1); // table
         }
         break;
@@ -854,8 +858,7 @@ static bool pushnode(lua_State *L, mpv_node *node, int depth)
         lua_setmetatable(L, -2); // table
         for (int n = 0; n < node->u.list->num; n++) {
             lua_pushstring(L, node->u.list->keys[n]); // table key
-            if (!pushnode(L, &node->u.list->values[n], depth)) // table key value
-                return false;
+            pushnode(L, &node->u.list->values[n]); // table key value
             lua_rawset(L, -3);
         }
         break;
@@ -867,26 +870,24 @@ static bool pushnode(lua_State *L, mpv_node *node, int depth)
         lua_setmetatable(L, -2); // table
         break;
     }
-    return true;
 }
 
 static int script_get_property_native(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     const char *name = luaL_checkstring(L, 1);
+    void *tmp = mp_lua_PITA(L);
 
     mpv_node node;
     int err = mpv_get_property(ctx->client, name, MPV_FORMAT_NODE, &node);
-    const char *errstr = mpv_error_string(err);
     if (err >= 0) {
-        bool ok = pushnode(L, &node, 50);
-        mpv_free_node_contents(&node);
-        if (ok)
-            return 1;
-        errstr = "value too large";
+        auto_free_node(tmp, &node);
+        pushnode(L, &node);
+        talloc_free_children(tmp);
+        return 1;
     }
     lua_pushvalue(L, 2);
-    lua_pushstring(L, errstr);
+    lua_pushstring(L, mpv_error_string(err));
     return 2;
 }
 
@@ -931,17 +932,14 @@ static int script_command_native(lua_State *L)
     void *tmp = mp_lua_PITA(L);
     makenode(tmp, &node, L, 1);
     int err = mpv_command_node(ctx->client, &node, &result);
-    talloc_free_children(tmp);
-    const char *errstr = mpv_error_string(err);
     if (err >= 0) {
-        bool ok = pushnode(L, &result, 50);
-        mpv_free_node_contents(&result);
-        if (ok)
-            return 1;
-        errstr = "command result too large";
+        auto_free_node(tmp, &result);
+        pushnode(L, &result);
+        talloc_free_children(tmp);
+        return 1;
     }
     lua_pushvalue(L, 2);
-    lua_pushstring(L, errstr);
+    lua_pushstring(L, mpv_error_string(err));
     return 2;
 }
 
@@ -1303,8 +1301,7 @@ static int script_parse_json(lua_State *L)
         ok = !text[0] || !trail;
     }
     if (ok) {
-        if (!pushnode(L, &node, 64))
-            luaL_error(L, "stack overflow");
+        pushnode(L, &node);
         lua_pushnil(L);
     } else {
         lua_pushnil(L);

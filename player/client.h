@@ -2,6 +2,7 @@
 #define MP_CLIENT_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "libmpv/client.h"
 
@@ -24,5 +25,8 @@ void mp_client_property_change(struct MPContext *mpctx, const char *name);
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name);
 struct mp_log *mp_client_get_log(struct mpv_handle *ctx);
 struct MPContext *mp_client_get_core(struct mpv_handle *ctx);
+
+// m_option.c
+void *node_get_alloc(struct mpv_node *node);
 
 #endif

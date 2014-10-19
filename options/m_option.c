@@ -35,6 +35,7 @@
 #include <libavutil/avstring.h>
 
 #include "libmpv/client.h"
+#include "player/client.h"
 
 #include "talloc.h"
 #include "common/common.h"
@@ -3092,7 +3093,7 @@ static void copy_node(const m_option_t *opt, void *dst, const void *src)
     dup_node(NULL, &VAL(dst));
 }
 
-static void *node_get_alloc(struct mpv_node *node)
+void *node_get_alloc(struct mpv_node *node)
 {
     // Assume it was allocated with copy_node(), which allocates all
     // sub-nodes with the parent node as talloc parent.
