@@ -4024,7 +4024,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SUB_ADD: {
-        if (!mpctx->num_sources)
+        if (!mpctx->playing)
             return -1;
         struct track *sub = mp_add_subtitles(mpctx, cmd->args[0].v.s);
         if (!sub)
