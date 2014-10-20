@@ -15,6 +15,7 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdio.h>
+#include <errno.h>
 
 #include "config.h"
 
@@ -46,10 +47,13 @@ int mpthread_mutex_init_recursive(pthread_mutex_t *mutex)
 
 void mpthread_set_name(const char *name)
 {
-    char tname[16];
-    snprintf(tname, sizeof(tname), "mpv %s", name);
+    char tname[80];
+    snprintf(tname, sizeof(tname), "mpv/%s", name);
 #if HAVE_GLIBC_THREAD_NAME
-    pthread_setname_np(pthread_self(), tname);
+    if (pthread_setname_np(pthread_self(), tname) == ERANGE) {
+        tname[15] = '\0'; // glibc-checked kernel limit
+        pthread_setname_np(pthread_self(), tname);
+    }
 #elif HAVE_BSD_THREAD_NAME
     pthread_set_name_np(pthread_self(), tname);
 #elif HAVE_OSX_THREAD_NAME
