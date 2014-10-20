@@ -20,9 +20,9 @@ pullup_label = string.format("%s-pullup", script_name)
 
 function pullup_on()
     for i,vf in pairs(mp.get_property_native('vf')) do
-	if vf['label'] == pullup_label then
-	    return "yes"
-	end
+        if vf['label'] == pullup_label then
+            return "yes"
+        end
     end
     return "no"
 end
