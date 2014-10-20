@@ -4019,8 +4019,16 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         struct track *sub = mp_add_subtitles(mpctx, cmd->args[0].v.s);
         if (!sub)
             return -1;
-        mp_switch_track(mpctx, sub->type, sub);
-        mp_mark_user_track_selection(mpctx, 0, sub->type);
+        if (cmd->args[1].v.i == 0) {
+            mp_switch_track(mpctx, sub->type, sub);
+            mp_mark_user_track_selection(mpctx, 0, sub->type);
+        }
+        char *title = cmd->args[2].v.s;
+        if (title && title[0])
+            sub->title = talloc_strdup(sub, title);
+        char *lang = cmd->args[3].v.s;
+        if (lang && lang[0])
+            sub->lang = talloc_strdup(sub, lang);
         break;
     }
 

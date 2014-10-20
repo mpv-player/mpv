@@ -260,9 +260,25 @@ List of Input Commands
     will seek to the previous position on start. The (optional) argument is
     exactly as in the ``quit`` command.
 
-``sub_add "<file>"``
+``sub_add "<file>" [<flags> [<title> [<lang>]]]``
     Load the given subtitle file. It is selected as current subtitle after
     loading.
+
+    The ``flags`` args is one of the following values:
+
+    <select>
+
+        Select the subtitle immediately.
+
+    <auto>
+
+        Don't select the subtitle. (Or in some special situations, let the
+        default stream selection mechanism decide.)
+
+    The ``title`` argument sets the track title in the UI.
+
+    The ``lang`` argument sets the track language, and can also influence
+    stream selection with ``flags`` set to ``auto``.
 
 ``sub_remove [<id>]``
     Remove the given subtitle track. If the ``id`` argument is missing, remove
