@@ -802,11 +802,10 @@ static int process_open_hooks(struct MPContext *mpctx)
     while (!mp_hook_test_completion(mpctx, "on_load")) {
         mp_idle(mpctx);
         if (mpctx->stop_play) {
-            if (mpctx->stop_play == PT_QUIT)
-                return -1;
             // Can't exit immediately, the script would interfere with the
             // next file being loaded.
-            mp_hook_abort(mpctx, "on_load");
+            if (mpctx->stop_play == PT_QUIT)
+                return -1;
         }
     }
 

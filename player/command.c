@@ -128,7 +128,7 @@ static bool send_hook_msg(struct MPContext *mpctx, struct hook_handler *h,
 {
     mpv_event_client_message *m = talloc_ptrtype(NULL, m);
     *m = (mpv_event_client_message){0};
-    MP_TARRAY_APPEND(m, m->args, m->num_args, "hook_run");
+    MP_TARRAY_APPEND(m, m->args, m->num_args, cmd);
     MP_TARRAY_APPEND(m, m->args, m->num_args, talloc_strdup(m, h->user_id));
     MP_TARRAY_APPEND(m, m->args, m->num_args, talloc_strdup(m, h->type));
     bool r =
@@ -161,16 +161,6 @@ void mp_hook_run(struct MPContext *mpctx, char *client, char *type)
     MP_VERBOSE(mpctx, "Running hook: %s/%s\n", next->client, type);
     next->active = true;
     send_hook_msg(mpctx, next, "hook_run");
-}
-
-void mp_hook_abort(struct MPContext *mpctx, char *type)
-{
-    struct command_ctx *cmd = mpctx->command_ctx;
-    for (int n = 0; n < cmd->num_hooks; n++) {
-        struct hook_handler *h = cmd->hooks[n];
-        if (h->active && strcmp(h->type, type) == 0)
-            send_hook_msg(mpctx, h, "hook_abort");
-    }
 }
 
 static int compare_hook(const void *pa, const void *pb)
