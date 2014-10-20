@@ -734,3 +734,29 @@ List of events
 
 ``chapter-change``
     The current chapter possibly changed.
+
+Extras
+------
+
+This documents experimental features, or features that are "too special" and
+we don't guarantee a stable interface to it.
+
+``mp.add_hook(type, priority, fn)``
+    Add a hook callback for ``type`` (a string identifying a certain kind of
+    hook). These hooks allow the player to call script functions and wait for
+    their result (normally, the Lua scripting interface is asynchronous from
+    the point of view of the player core). ``priority`` is an arbitrary integer
+    that allows ordering among hooks of the same kind. Using the value 50 is
+    recommended as neutral default value. ``fn`` is the function that will be
+    called during execution of the hook.
+
+    Currently existing hooks:
+
+    ``on_load``
+        Called when a file is to be opened, before anything is actually done.
+        For example, you could read and write the ``stream-open-filename``
+        property to redirect an URL to something else (consider support for
+        streaming sites which rarely give the user a direct media URL), or
+        you could set per-file options with by setting the property
+        ``file-local-options/<option name>``. The player will wait until all
+        hooks are run.

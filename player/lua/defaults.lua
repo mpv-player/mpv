@@ -399,6 +399,27 @@ function mp.osd_message(text, duration)
     mp.commandv("show_text", text, duration)
 end
 
+local hook_table = {}
+local hook_registered = false
+
+local function hook_run(id, cont)
+    local fn = hook_table[tonumber(id)]
+    if fn then
+        fn()
+    end
+    mp.commandv("hook_ack", cont)
+end
+
+function mp.add_hook(name, pri, cb)
+    if not hook_registered then
+        mp.register_script_message("hook_run", hook_run)
+        hook_registered = true
+    end
+    local id = #hook_table + 1
+    hook_table[id] = cb
+    mp.commandv("hook_add", name, id, pri)
+end
+
 function mp.format_table(t, set)
     if not set then
         set = { [t] = true }
