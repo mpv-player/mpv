@@ -2566,6 +2566,18 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
     return property_osd_helper(mpctx, prop, action, arg);
 }
 
+static int mp_property_cursor_autohide(void *ctx, struct m_property *prop,
+                                       int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct MPOpts *opts = mpctx->opts;
+    int old_value = opts->cursor_autohide_delay;
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (opts->cursor_autohide_delay != old_value)
+        mpctx->mouse_timer = 0;
+    return r;
+}
+
 static int prop_stream_ctrl(struct MPContext *mpctx, int ctrl, void *arg)
 {
     if (!mpctx->demuxer)
@@ -3079,6 +3091,8 @@ static const struct m_property mp_properties[] = {
     {"tv-scan", mp_property_tv_scan},
     {"tv-channel", mp_property_tv_channel},
     {"dvb-channel", mp_property_dvb_channel},
+
+    {"cursor-autohide", mp_property_cursor_autohide},
 
 #define TRACK_FF(name, type) \
     {name, property_switch_track_ff, (void *)(intptr_t)type}

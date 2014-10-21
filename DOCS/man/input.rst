@@ -1339,6 +1339,10 @@ Property list
     situations like during ``on_load`` hook processing, when the user can
     stop playback, but the script has to explicitly end processing.)
 
+``cursor-autohide`` (RW)
+    See ``--cursor-autohide``. Setting this to a new value will always update
+    the cursor, and reset the internal timer.
+
 ``osd-sym-cc``
     Inserts the current OSD symbol as opaque OSD control code (cc). This makes
     sense only with the ``show_text`` command or options which set OSD messages.
