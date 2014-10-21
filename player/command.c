@@ -2808,6 +2808,16 @@ static int mp_property_af(void *ctx, struct m_property *prop,
     return property_filter(prop, action, arg, ctx, STREAM_AUDIO);
 }
 
+static int property_reinit_vf_helper(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (action == M_PROPERTY_SET && r == M_PROPERTY_OK)
+        reinit_video_filters(mpctx);
+    return r;
+}
+
 static int mp_property_alias(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -3047,6 +3057,8 @@ static const struct m_property mp_properties[] = {
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
+
+    {"video-rotate", property_reinit_vf_helper},
 
 #define PROPERTY_TV_COLOR(name, type) \
     {name, mp_property_tv_color, (void *)(intptr_t)type}

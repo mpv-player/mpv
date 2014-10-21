@@ -1328,6 +1328,9 @@ Property list
 
     It's also possible to write the property using this format.
 
+``video-rotate`` (RW)
+    See ``--video-rotate`` option.
+
 ``seekable``
     Return whether it's generally possible to seek in the current file.
 
