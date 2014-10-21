@@ -94,6 +94,15 @@ static int mp_cpcall (lua_State *L, lua_CFunction func, void *ud)
 #define mp_lua_len lua_rawlen
 #endif
 
+// Ensure that the given argument exists, even if it's nil. Can be used to
+// avoid confusing the last missing optional arg with the first temporary value
+// pushed to the stack.
+static void mp_lua_optarg(lua_State *L, int arg)
+{
+    while (arg < lua_gettop(L))
+        lua_pushnil(L);
+}
+
 static int destroy_crap(lua_State *L)
 {
     void **data = luaL_checkudata(L, 1, "ohthispain");
@@ -878,6 +887,7 @@ static int script_get_property_native(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     const char *name = luaL_checkstring(L, 1);
+    mp_lua_optarg(L, 2);
     void *tmp = mp_lua_PITA(L);
 
     mpv_node node;
@@ -929,6 +939,7 @@ static int script_raw_unobserve_property(lua_State *L)
 static int script_command_native(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
+    mp_lua_optarg(L, 2);
     struct mpv_node node;
     struct mpv_node result;
     void *tmp = mp_lua_PITA(L);
@@ -1171,9 +1182,9 @@ extern char **environ;
 
 static int script_subprocess(lua_State *L)
 {
-    void *tmp = mp_lua_PITA(L);
     struct script_ctx *ctx = get_ctx(L);
     luaL_checktype(L, 1, LUA_TTABLE);
+    void *tmp = mp_lua_PITA(L);
 
     resume_all(ctx);
 
@@ -1294,6 +1305,7 @@ done:
 
 static int script_parse_json(lua_State *L)
 {
+    mp_lua_optarg(L, 2);
     void *tmp = mp_lua_PITA(L);
     char *text = talloc_strdup(tmp, luaL_checkstring(L, 1));
     bool trail = lua_toboolean(L, 2);
