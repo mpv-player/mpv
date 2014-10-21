@@ -1206,7 +1206,7 @@ static int script_subprocess(lua_State *L)
 
     posix_spawn_file_actions_t fa;
     bool fa_destroy = false;
-    bstr stdout = {0};
+    bstr output = {0};
     int status = -1;
     int pipes[2] = {-1, -1};
     pid_t pid = -1;
@@ -1247,12 +1247,12 @@ static int script_subprocess(lua_State *L)
             if (r < 0 && errno == EINTR)
                 continue;
             if (r > 0)
-                bstr_xappend(tmp, &stdout, (bstr){buf, r});
+                bstr_xappend(tmp, &output, (bstr){buf, r});
             eof = r == 0;
             if (r <= 0)
                 break;
         }
-        if (stdout.len >= max_size)
+        if (output.len >= max_size)
             break;
     }
 
@@ -1286,7 +1286,7 @@ done:
     }
     lua_pushinteger(L, status); // res s
     lua_setfield(L, -2, "status"); // res
-    lua_pushlstring(L, stdout.start, stdout.len); // res d
+    lua_pushlstring(L, output.start, output.len); // res d
     lua_setfield(L, -2, "stdout"); // res
     return 1;
 }
