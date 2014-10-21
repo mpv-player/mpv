@@ -1661,6 +1661,35 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+// Similar, less featured, for selecting by ff-index.
+static int property_switch_track_ff(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    enum stream_type type = (intptr_t)prop->priv;
+    if (!mpctx->num_sources)
+        return M_PROPERTY_UNAVAILABLE;
+    struct track *track = mpctx->current_track[0][type];
+
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(int *) arg = track ? track->ff_index : -2;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET: {
+        track = NULL;
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            if (mpctx->tracks[n]->ff_index == *(int *)arg) {
+                track = mpctx->tracks[n];
+                break;
+            }
+        }
+        mp_switch_track_n(mpctx, 0, type, track);
+        return M_PROPERTY_OK;
+    }
+    }
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
 static int get_track_entry(int item, int action, void *arg, void *ctx)
 {
     struct MPContext *mpctx = ctx;
@@ -1686,6 +1715,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !track->external_filename},
         {"codec",       SUB_PROP_STR(codec),
                         .unavailable = !codec},
+        {"ff-index",    SUB_PROP_INT(track->ff_index)},
         {0}
     };
 
@@ -3029,6 +3059,12 @@ static const struct m_property mp_properties[] = {
     {"tv-scan", mp_property_tv_scan},
     {"tv-channel", mp_property_tv_channel},
     {"dvb-channel", mp_property_dvb_channel},
+
+#define TRACK_FF(name, type) \
+    {name, property_switch_track_ff, (void *)(intptr_t)type}
+    TRACK_FF("ff-vid", STREAM_VIDEO),
+    TRACK_FF("ff-aid", STREAM_AUDIO),
+    TRACK_FF("ff-sid", STREAM_SUB),
 
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),

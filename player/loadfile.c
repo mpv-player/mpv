@@ -340,6 +340,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         .type = stream->type,
         .user_tid = find_new_tid(mpctx, stream->type),
         .demuxer_id = stream->demuxer_id,
+        .ff_index = stream->ff_index,
         .title = stream->title,
         .default_track = stream->default_track,
         .attached_picture = stream->attached_picture != NULL,
@@ -378,7 +379,8 @@ static int match_lang(char **langs, char *lang)
  * tid is the track ID requested by the user (-2: deselect, -1: default)
  * lang is a string list, NULL is same as empty list
  * Sort tracks based on the following criteria, and pick the first:
- * 0) track matches tid (always wins)
+ * 0a) track matches ff-index (always wins)
+ * 0b) track matches tid (almost always wins)
  * 1) track is external (no_default cancels this)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
@@ -414,9 +416,12 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
     return t1->user_tid <= t2->user_tid;
 }
 static struct track *select_track(struct MPContext *mpctx,
-                                  enum stream_type type, int tid, char **langs)
+                                  enum stream_type type, int tid, int ffid,
+                                  char **langs)
 {
-    if (tid == -2)
+    if (ffid != -1)
+        tid = -1; // prefer selecting ffid
+    if (tid == -2 || ffid == -2)
         return NULL;
     bool select_fallback = type == STREAM_VIDEO || type == STREAM_AUDIO;
     struct track *pick = NULL;
@@ -425,6 +430,8 @@ static struct track *select_track(struct MPContext *mpctx,
         if (track->type != type)
             continue;
         if (track->user_tid == tid)
+            return track;
+        if (track->ff_index == ffid)
             return track;
         if (!pick || compare_track(track, pick, langs, mpctx->opts))
             pick = track;
@@ -1094,15 +1101,16 @@ goto_reopen_demuxer: ;
     check_previous_track_selection(mpctx);
 
     mpctx->current_track[0][STREAM_VIDEO] =
-        select_track(mpctx, STREAM_VIDEO, mpctx->opts->video_id, NULL);
+        select_track(mpctx, STREAM_VIDEO, opts->video_id, opts->video_id_ff,
+                     NULL);
     mpctx->current_track[0][STREAM_AUDIO] =
-        select_track(mpctx, STREAM_AUDIO, mpctx->opts->audio_id,
-                     mpctx->opts->audio_lang);
+        select_track(mpctx, STREAM_AUDIO, opts->audio_id, opts->audio_id_ff,
+                     opts->audio_lang);
     mpctx->current_track[0][STREAM_SUB] =
-        select_track(mpctx, STREAM_SUB, mpctx->opts->sub_id,
-                     mpctx->opts->sub_lang);
+        select_track(mpctx, STREAM_SUB, opts->sub_id, opts->sub_id_ff,
+                     opts->sub_lang);
     mpctx->current_track[1][STREAM_SUB] =
-        select_track(mpctx, STREAM_SUB, mpctx->opts->sub2_id, NULL);
+        select_track(mpctx, STREAM_SUB, opts->sub2_id, -2, NULL);
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int i = 0; i < NUM_PTRACKS; i++) {
             struct track *track = mpctx->current_track[i][t];

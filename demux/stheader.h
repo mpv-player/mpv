@@ -36,6 +36,8 @@ struct sh_stream {
     // Demuxer/format specific ID. Corresponds to the stream IDs as encoded in
     // some file formats (e.g. MPEG), or an index chosen by demux.c.
     int demuxer_id;
+    // FFmpeg stream index (AVFormatContext.streams[index]), or equivalent.
+    int ff_index;
     // One of these is non-NULL, the others are NULL, depending on the stream
     // type.
     struct sh_audio *audio;

@@ -45,6 +45,15 @@ Track Selection
 ``--vid=<ID|auto|no>``
     Select video channel. ``auto`` selects the default, ``no`` disables video.
 
+``--ff-aid=<ID|auto|no>``, ``--ff-sid=<ID|auto|no>``, ``--ff-vid=<ID|auto|no>``
+    Select audio/subtitle/video streams by the FFmpeg stream index. The FFmpeg
+    stream index is relatively arbitrary, but useful when interacting with
+    other software using FFmpeg (consider ``ffprobe``).
+
+    Note that with external tracks (added with ``--sub-file`` and similar
+    options) will have duplicate IDs. In that case, the first stream in order
+    is selected.
+
 ``--edition=<ID|auto>``
     (Matroska files only)
     Specify the edition (set of chapters) to use, where 0 is the first. If set

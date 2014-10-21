@@ -190,6 +190,7 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
     *sh = (struct sh_stream) {
         .type = type,
         .index = demuxer->num_streams,
+        .ff_index = demuxer->num_streams,
         .demuxer_id = demuxer_id, // may be overwritten by demuxer
         .ds = talloc(sh, struct demux_stream),
     };

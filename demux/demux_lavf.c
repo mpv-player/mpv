@@ -587,6 +587,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
     MP_TARRAY_APPEND(priv, priv->streams, priv->num_streams, sh);
 
     if (sh) {
+        sh->ff_index = st->index;
         sh->codec = mp_codec_from_av_codec_id(codec->codec_id);
         sh->lav_headers = codec;
 

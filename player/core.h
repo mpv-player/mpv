@@ -96,8 +96,8 @@ struct track {
     // IDs coming from demuxers or container files.
     int user_tid;
 
-    // Same as stream->demuxer_id. -1 if not set.
-    int demuxer_id;
+    int demuxer_id; // same as stream->demuxer_id. -1 if not set.
+    int ff_index; // same as stream->ff_index, or 0.
 
     char *title;
     bool default_track;
