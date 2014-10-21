@@ -3650,7 +3650,7 @@ static int *get_cmd_cycle_counter(struct MPContext *mpctx, char **args)
         if (stringlist_equals(ctr->args, args))
             return &ctr->counter;
     }
-    struct cycle_counter ctr = {stringlist_dup(cmd, args), 0};
+    struct cycle_counter ctr = {stringlist_dup(cmd, args), -1};
     MP_TARRAY_APPEND(cmd, cmd->cycle_counters, cmd->num_cycle_counters, ctr);
     return &cmd->cycle_counters[cmd->num_cycle_counters - 1].counter;
 }
@@ -3840,14 +3840,13 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         int *ptr = get_cmd_cycle_counter(mpctx, &args[first - 1]);
         int count = cmd->nargs - first;
         if (ptr && count > 0) {
-            int next = *ptr;
-            *ptr += dir;
+            *ptr = *ptr < 0 ? (dir > 0 ? 0 : -1) : *ptr + dir;
             if (*ptr >= count)
                 *ptr = 0;
             if (*ptr < 0)
                 *ptr = count - 1;
             char *property = args[first - 1];
-            char *value = args[first + next];
+            char *value = args[first + *ptr];
             int r = mp_property_do(property, M_PROPERTY_SET_STRING, value, mpctx);
             if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
                 show_property_osd(mpctx, property, on_osd);

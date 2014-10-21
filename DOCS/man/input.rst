@@ -419,7 +419,7 @@ Input Commands that are Possibly Subject to Change
     The special argument ``!reverse`` can be used to cycle the value list in
     reverse. Compared with a command that just lists the value in reverse, this
     command will actually share the internal counter with the forward-cycling
-    key binding.
+    key binding (as long as the rest of the arguments are the same).
 
     Note that there is a static limit of (as of this writing) 10 arguments
     (this limit could be raised on demand).
