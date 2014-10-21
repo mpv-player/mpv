@@ -292,7 +292,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     priv->displayed_id = current->id;
     res->format = SUBBITMAP_INDEXED;
 
-    double video_par = -1;
+    double video_par = 0;
     if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
             opts->stretch_dvd_subs) {
         // For DVD subs, try to keep the subtitle PAR at display PAR.
@@ -302,6 +302,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
         if (isnormal(par))
             video_par = par;
     }
+    if (priv->avctx->codec_id == AV_CODEC_ID_HDMV_PGS_SUBTITLE)
+        video_par = -1;
     int insize[2];
     get_resolution(sd, insize);
     osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);

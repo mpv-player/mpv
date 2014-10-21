@@ -344,7 +344,7 @@ void mp_nav_get_highlight(void *priv, struct mp_osd_res res,
     if (out_imgs->num_parts) {
         out_imgs->parts = nav->outputs;
         out_imgs->format = SUBBITMAP_RGBA;
-        osd_rescale_bitmaps(out_imgs, sizes[0], sizes[1], res, -1);
+        osd_rescale_bitmaps(out_imgs, sizes[0], sizes[1], res, 0);
     }
 
     pthread_mutex_unlock(&nav->osd_lock);
