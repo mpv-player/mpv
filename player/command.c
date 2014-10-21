@@ -1157,6 +1157,13 @@ static int mp_property_seeking(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, !mpctx->restart_complete);
 }
 
+static int mp_property_playback_abort(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_flag_ro(action, arg, !mpctx->playing || mpctx->stop_play);
+}
+
 static int mp_property_cache(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -2957,6 +2964,7 @@ static const struct m_property mp_properties[] = {
     {"core-idle", mp_property_core_idle},
     {"eof-reached", mp_property_eof_reached},
     {"seeking", mp_property_seeking},
+    {"playback-abort", mp_property_playback_abort},
     {"cache", mp_property_cache},
     {"cache-free", mp_property_cache_free},
     {"cache-used", mp_property_cache_used},

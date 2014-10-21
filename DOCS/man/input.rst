@@ -1334,6 +1334,11 @@ Property list
 ``seekable``
     Return whether it's generally possible to seek in the current file.
 
+``playback-abort``
+    Return whether playback is stopped or is to be stopped. (Useful in obscure
+    situations like during ``on_load`` hook processing, when the user can
+    stop playback, but the script has to explicitly end processing.)
+
 ``osd-sym-cc``
     Inserts the current OSD symbol as opaque OSD control code (cc). This makes
     sense only with the ``show_text`` command or options which set OSD messages.
