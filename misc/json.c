@@ -85,8 +85,9 @@ static int read_str(void *ta_parent, struct mpv_node *dst, char **src)
     while (cur[0] && cur[0] != '"') {
         if (cur[0] == '\\') {
             has_escapes = true;
-            if (cur[1] == '"')
-                cur++; // skip \"
+            // skip >\"< and >\\< (latter to handle >\\"< correctly)
+            if (cur[1] == '"' || cur[1] == '\\')
+                cur++;
         }
         cur++;
     }
