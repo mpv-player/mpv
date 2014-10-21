@@ -650,7 +650,7 @@ extern const char m_option_path_separator;
     OPT_GENERAL(struct m_geometry, __VA_ARGS__, .type = &m_option_type_size_box)
 
 #define OPT_TRACKCHOICE(name, var) \
-    OPT_CHOICE_OR_INT(name, var, 0, 1, 8190, ({"no", -2}, {"auto", -1}))
+    OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
 
 #define OPT_VID_STEREO_MODE(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_vid_stereo_mode)
