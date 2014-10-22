@@ -51,6 +51,7 @@
 #define OARG_DOUBLE(def)        OPT_DOUBLE(ARG(d), 0, OPTDEF_DOUBLE(def))
 #define OARG_INT(def)           OPT_INT(ARG(i), 0, OPTDEF_INT(def))
 #define OARG_CHOICE(def, c)     OPT_CHOICE(ARG(i), 0, c, OPTDEF_INT(def))
+#define OARG_STRING(def)        OPT_STRING(ARG(s), 0, OPTDEF_STR(def))
 
 #define OARG_CYCLEDIR(def)      OPT_CYCLEDIR(ARG(d), 0, OPTDEF_DOUBLE(def))
 
@@ -91,7 +92,7 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_SHOW_PROGRESS, "show_progress",  .allow_auto_repeat = true},
   { MP_CMD_SUB_ADD, "sub_add", { ARG_STRING,
       OARG_CHOICE(0, ({"select", 0}, {"auto", 1})),
-      ARG_STRING, ARG_STRING } },
+      OARG_STRING(""), OARG_STRING("") } },
   { MP_CMD_SUB_REMOVE, "sub_remove", { OARG_INT(-1) } },
   { MP_CMD_SUB_RELOAD, "sub_reload", { OARG_INT(-1) } },
 
