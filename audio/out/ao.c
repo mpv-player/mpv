@@ -192,6 +192,8 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
 {
     struct MPOpts *opts = global->opts;
     struct ao *ao = ao_alloc(probing, global, input_ctx, name, args);
+    if (!ao)
+        goto error;
     ao->samplerate = samplerate;
     ao->channels = channels;
     ao->format = format;
