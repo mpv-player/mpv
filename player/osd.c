@@ -147,6 +147,11 @@ static void add_term_osd_bar(struct MPContext *mpctx, char **line, int width)
     saddf(line, "%.*s", BSTR_P(parts[4]));
 }
 
+static bool is_busy(struct MPContext *mpctx)
+{
+    return !mpctx->restart_complete && mp_time_sec() - mpctx->start_timestamp > 0.3;
+}
+
 static void print_status(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -172,7 +177,7 @@ static void print_status(struct MPContext *mpctx)
     char *line = NULL;
 
     // Playback status
-    if (!mpctx->restart_complete && mp_time_sec() - mpctx->start_timestamp > 0.3) {
+    if (is_busy(mpctx)) {
         saddf(&line, "(...) ");
     } else if (mpctx->paused_for_cache && !opts->pause) {
         saddf(&line, "(Buffering) ");
@@ -368,7 +373,7 @@ void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size)
 {
     int sym = mpctx->osd_function;
     if (!sym) {
-        if (mpctx->paused_for_cache && !mpctx->opts->pause) {
+        if (is_busy(mpctx) || (mpctx->paused_for_cache && !mpctx->opts->pause)) {
             sym = OSD_CLOCK;
         } else if (mpctx->paused || mpctx->step_frames) {
             sym = OSD_PAUSE;
