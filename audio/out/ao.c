@@ -406,8 +406,8 @@ struct ao_device_list *ao_get_device_list(struct mpv_global *global)
         (struct ao_device_desc){"auto", "Autoselect device"});
     for (int n = 0; audio_out_drivers[n]; n++) {
         const struct ao_driver *d = audio_out_drivers[n];
-        if (d->encode)
-            continue;
+        if (d == &audio_out_null)
+            break; // don't add unsafe/special entries
         struct ao *ao = ao_alloc(true, global, NULL, (char *)d->name, NULL);
         if (!ao)
             continue;
