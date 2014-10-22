@@ -184,26 +184,33 @@ error:
     return NULL;
 }
 
-static struct ao *ao_create(bool probing, struct mpv_global *global,
-                            struct input_ctx *input_ctx,
-                            struct encode_lavc_context *encode_lavc_ctx,
-                            int samplerate, int format, struct mp_chmap channels,
-                            char *name, char **args)
+static struct ao *ao_alloc_pb(bool probing, struct mpv_global *global,
+                              struct input_ctx *input_ctx,
+                              struct encode_lavc_context *encode_lavc_ctx,
+                              int samplerate, int format, struct mp_chmap channels,
+                              char *name, char **args)
 {
     struct MPOpts *opts = global->opts;
     struct ao *ao = ao_alloc(probing, global, input_ctx, name, args);
     if (!ao)
-        goto error;
+        return NULL;
     ao->samplerate = samplerate;
     ao->channels = channels;
     ao->format = format;
     ao->encode_lavc_ctx = encode_lavc_ctx;
-    if (ao->driver->encode != !!ao->encode_lavc_ctx)
-        goto error;
+    if (ao->driver->encode != !!ao->encode_lavc_ctx) {
+        talloc_free(ao);
+        return NULL;
+    }
 
     match_ao_driver(ao->driver->name, opts->audio_device, &ao->device);
     ao->device = talloc_strdup(ao, ao->device);
 
+    return ao;
+}
+
+static int ao_init(struct ao *ao)
+{
     char *chmap = mp_chmap_to_str(&ao->channels);
     MP_VERBOSE(ao, "requested format: %d Hz, %s channels, %s\n",
                ao->samplerate, chmap, af_fmt_to_str(ao->format));
@@ -213,8 +220,9 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     ao->api_priv = talloc_zero_size(ao, ao->api->priv_size);
     assert(!ao->api->priv_defaults && !ao->api->options);
 
-    if (ao->driver->init(ao) < 0)
-        goto error;
+    int r = ao->driver->init(ao);
+    if (r < 0)
+        return r;
 
     ao->sstride = af_fmt2bps(ao->format);
     ao->num_planes = 1;
@@ -232,11 +240,33 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     ao->buffer = MPMAX(ao->device_buffer, ao->def_buffer * ao->samplerate);
     MP_VERBOSE(ao, "using soft-buffer of %d samples.\n", ao->buffer);
 
-    if (ao->api->init(ao) < 0)
-        goto error;
+    return ao->api->init(ao);
+}
 
-    return ao;
-error:
+static struct ao *ao_create(bool probing, struct mpv_global *global,
+                            struct input_ctx *input_ctx,
+                            struct encode_lavc_context *encode_lavc_ctx,
+                            int samplerate, int format, struct mp_chmap channels,
+                            char *name, char **args)
+{
+    struct ao *ao = ao_alloc_pb(probing, global, input_ctx, encode_lavc_ctx,
+                                samplerate, format, channels, name, args);
+    if (ao && ao_init(ao) >= 0)
+        return ao;
+    // Silly exception for coreaudio spdif redirection
+    if (ao && ao->redirect) {
+        char redirect[80], device[80];
+        snprintf(redirect, sizeof(redirect), "%s", ao->redirect);
+        snprintf(device, sizeof(device), "%s", ao->device ? ao->device : "");
+        talloc_free(ao);
+        ao = ao_alloc_pb(probing, global, input_ctx, encode_lavc_ctx,
+                         samplerate, format, channels, redirect, args);
+        if (ao) {
+            ao->device = talloc_strdup(ao, device);
+            if (ao_init(ao) >= 0)
+                return ao;
+        }
+    }
     talloc_free(ao);
     return NULL;
 }

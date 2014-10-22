@@ -49,6 +49,9 @@ struct ao {
     // default device should be used, this is set to NULL.
     char *device;
 
+    // Used during init: if init fails, redirect to this ao
+    char *redirect;
+
     int buffer;
     double def_buffer;
     void *api_priv;
