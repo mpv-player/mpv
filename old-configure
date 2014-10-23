@@ -162,8 +162,6 @@ options_state_machine() {
 
     opt_yes_no _gl          "OpenGL video output"
     opt_yes_no _libguess    "libguess"
-    opt_yes_no _terminfo    "terminfo database for key codes" no
-    opt_yes_no _termcap     "termcap database for key codes" no
     opt_yes_no _termios     "termios database for key codes"
     opt_yes_no _iconv       "iconv for encoding conversion"
     opt_yes_no _lirc        "LIRC (remote control) support"
@@ -532,10 +530,6 @@ check_statement_libs "soundcard.h" $_check_snd SOUNDCARD_H soundcard.h
 test $(defretval) = yes && _soundcard_header=soundcard.h
 
 check_statement_libs "sys/videoio.h" auto SYS_VIDEOIO_H sys/videoio.h
-
-check_statement_libs "terminfo" $_terminfo TERMINFO term.h 'setupterm(0, 1, 0)' "-lncurses" "-lncursesw"
-
-check_statement_libs "termcap" $_termcap TERMCAP term.h 'tgetent(0, 0)' " " "-lncurses" "-ltinfo" "-ltermcap"
 
 _termios_ok=no
 check_statement_libs "termios.h" $_termios TERMIOS_H termios.h

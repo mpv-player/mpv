@@ -175,19 +175,6 @@ iconv support use --disable-iconv.",
         'desc': 'videoio.h',
         'func': check_headers('sys/videoio.h')
     }, {
-        'name': '--terminfo',
-        'desc': 'terminfo',
-        'default': 'disable',
-        'func': check_libs(['ncurses', 'ncursesw'],
-            check_statement('term.h', 'setupterm(0, 1, 0)')),
-    }, {
-        'name': '--termcap',
-        'desc': 'termcap',
-        'deps_neg': ['terminfo'],
-        'default': 'disable',
-        'func': check_libs(['ncurses', 'tinfo', 'termcap'],
-            check_statement('term.h', 'tgetent(0, 0)')),
-    }, {
         'name': '--termios',
         'desc': 'termios',
         'func': check_headers('termios.h', 'sys/termios.h'),
