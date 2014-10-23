@@ -293,6 +293,32 @@ static int map_iec958_srate(int srate)
     }
 }
 
+// ALSA device strings can have parameters. They are usually appended to the
+// device name. Since there can be various forms, and we (sometimes) want to
+// append them to unknown device strings, which possibly already include params.
+static char *append_params(void *ta_parent, const char *device, const char *p)
+{
+    if (!p || !p[0])
+        return talloc_strdup(ta_parent, device);
+
+    int len = strlen(device);
+    char *end = strchr(device, ':');
+    if (!end) {
+        /* no existing parameters: add it behind device name */
+        return talloc_asprintf(ta_parent, "%s:%s", device, p);
+    } else if (end[1] == '\0') {
+        /* ":" but no parameters */
+        return talloc_asprintf(ta_parent, "%s%s", device, p);
+    } else if (end[1] == '{' && device[len - 1] == '}') {
+        /* parameters in config syntax: add it inside the { } block */
+        return talloc_asprintf(ta_parent, "%.*s %s}", len - 1, device, p);
+    } else {
+        /* a simple list of parameters: add it at the end of the list */
+        return talloc_asprintf(ta_parent, "%s,%s", device, p);
+    }
+    abort();
+}
+
 static int try_open_device(struct ao *ao, const char *device, int open_mode)
 {
     struct priv *p = ao->priv;
@@ -305,22 +331,7 @@ static int try_open_device(struct ao *ao, const char *device, int open_mode)
                         IEC958_AES0_NONAUDIO | IEC958_AES0_PRO_EMPHASIS_NONE,
                         IEC958_AES1_CON_ORIGINAL | IEC958_AES1_CON_PCM_CODER,
                         map_iec958_srate(ao->samplerate));
-        const char *ac3_device = device;
-        int len = strlen(device);
-        char *end = strchr(device, ':');
-        if (!end) {
-            /* no existing parameters: add it behind device name */
-            ac3_device = talloc_asprintf(tmp, "%s:%s", device, params);
-        } else if (end[1] == '\0') {
-            /* ":" but no parameters */
-            ac3_device = talloc_asprintf(tmp, "%s%s", device, params);
-        } else if (end[1] == '{' && device[len - 1] == '}') {
-            /* parameters in config syntax: add it inside the { } block */
-            ac3_device = talloc_asprintf(tmp, "%.*s %s}", len - 1, device, params);
-        } else {
-            /* a simple list of parameters: add it at the end of the list */
-            ac3_device = talloc_asprintf(tmp, "%s,%s", device, params);
-        }
+        const char *ac3_device = append_params(tmp, device, params);
         int err = snd_pcm_open
                     (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, open_mode);
         talloc_free(tmp);
