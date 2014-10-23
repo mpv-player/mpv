@@ -653,10 +653,11 @@ static bool getch2(struct input_ctx *input_ctx)
 
 static volatile int getch2_active  = 0;
 static volatile int getch2_enabled = 0;
+static bool read_terminal;
 
 static void do_activate_getch2(void)
 {
-    if (getch2_active || !isatty(STDOUT_FILENO))
+    if (getch2_active || !read_terminal)
         return;
 
     enable_kx(true);
@@ -759,7 +760,7 @@ static void quit_request_sighandler(int signum)
 static void *terminal_thread(void *ptr)
 {
     mpthread_set_name("terminal");
-    bool stdin_ok = isatty(STDIN_FILENO); // if false, we still wait for SIGTERM
+    bool stdin_ok = read_terminal; // if false, we still wait for SIGTERM
     while (1) {
         struct pollfd fds[2] = {
             {.events = POLLIN, .fd = death_pipe[0]},
@@ -833,7 +834,7 @@ void terminal_uninit(void)
 
 bool terminal_in_background(void)
 {
-    return isatty(STDERR_FILENO) && tcgetpgrp(STDERR_FILENO) != getpgrp();
+    return read_terminal && tcgetpgrp(STDERR_FILENO) != getpgrp();
 }
 
 void terminal_get_size(int *w, int *h)
@@ -848,10 +849,13 @@ void terminal_get_size(int *w, int *h)
 
 int terminal_init(void)
 {
+    assert(!getch2_enabled);
+    getch2_enabled = 1;
+
     if (isatty(STDOUT_FILENO))
         load_termcap();
 
-    assert(!getch2_enabled);
+    read_terminal = isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
 
     // handlers to fix terminal settings
     setsigaction(SIGCONT, continue_sighandler, 0, true);
@@ -861,6 +865,5 @@ int terminal_init(void)
 
     do_activate_getch2();
 
-    getch2_enabled = 1;
     return 0;
 }

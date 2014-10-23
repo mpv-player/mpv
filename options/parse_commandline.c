@@ -257,10 +257,6 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 process_non_option(files, file0);
             }
             talloc_free(tmp);
-
-            // Lock stdin if it will be used as input
-            if (bstrcmp0(file, "-") == 0)
-                m_config_set_option0(config, "input-terminal", "no");
         }
     }
 
