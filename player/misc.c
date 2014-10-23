@@ -175,6 +175,24 @@ void update_window_title(struct MPContext *mpctx, bool force)
     }
 }
 
+void error_on_track(struct MPContext *mpctx, struct track *track)
+{
+    if (!track)
+        return;
+    mp_deselect_track(mpctx, track);
+    if (track) {
+        if (track->type == STREAM_AUDIO)
+            MP_INFO(mpctx, "Audio: no audio\n");
+        if (track->type == STREAM_VIDEO)
+            MP_INFO(mpctx, "Video: no video\n");
+        if (!mpctx->current_track[0][STREAM_AUDIO] &&
+            !mpctx->current_track[0][STREAM_VIDEO])
+            mpctx->stop_play = PT_NEXT_ENTRY;
+        mpctx->error_playing = true;
+        mpctx->sleeptime = 0;
+    }
+}
+
 void stream_dump(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;

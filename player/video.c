@@ -310,7 +310,7 @@ err_out:
 no_video:
     uninit_player(mpctx, INITIALIZED_VCODEC | (opts->force_vo ? 0 : INITIALIZED_VO));
     if (track)
-        mp_deselect_track(mpctx, track);
+        error_on_track(mpctx, track);
     handle_force_window(mpctx, true);
     return 0;
 }
@@ -822,9 +822,7 @@ error:
     if (!opts->force_vo)
         uninit |= INITIALIZED_VO;
     uninit_player(mpctx, uninit);
-    if (!mpctx->current_track[STREAM_AUDIO])
-        mpctx->stop_play = PT_NEXT_ENTRY;
-    mpctx->error_playing = true;
+    error_on_track(mpctx, mpctx->current_track[STREAM_VIDEO][0]);
     handle_force_window(mpctx, true);
     mpctx->sleeptime = 0;
 }

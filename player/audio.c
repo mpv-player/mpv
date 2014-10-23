@@ -214,9 +214,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
 init_error:
     uninit_player(mpctx, INITIALIZED_ACODEC | INITIALIZED_AO);
 no_audio:
-    mp_deselect_track(mpctx, track);
     if (track)
-        MP_INFO(mpctx, "Audio: no audio\n");
+        error_on_track(mpctx, track);
 }
 
 // Return pts value corresponding to the end point of audio written to the
