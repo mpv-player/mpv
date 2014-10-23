@@ -1,3 +1,27 @@
+Release 0.6.2
+=============
+
+Changes
+-------
+
+- The --ass-style-override option now requires a newer version of libass.
+
+Bug fixes
+---------
+
+- Correctly signal EOF when using --frames.
+- Strictly endorce the limit imposed by --frames (i.e. avoid producing an extra
+  frame at the end).
+- Fix \x-style escaping when parsing commands.
+- Correctly handle ^h key on the terminal (this should fix the when inserted
+  fromBackspace key on new versions of xterm).
+- Don't put the player to sleep after audio reinit.
+- Properly exit if both audio and video fail to initialize.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log a6eb071..0a40fb0`` in
+the git repository.
+
 Release 0.6.1
 =============
 
