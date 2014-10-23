@@ -275,6 +275,13 @@ List of Input Commands
         Don't select the subtitle. (Or in some special situations, let the
         default stream selection mechanism decide.)
 
+    <cached>
+
+        Select the subtitle. If a subtitle with the same filename was already
+        added, that one is selected, instead of loading a duplicate entry.
+        (In this case, title/language are ignored, and if the was changed since
+        it was loaded, these changes won't be reflected.)
+
     The ``title`` argument sets the track title in the UI.
 
     The ``lang`` argument sets the track language, and can also influence
