@@ -327,7 +327,7 @@ err_out:
 no_video:
     uninit_video_chain(mpctx);
     if (track)
-        mp_deselect_track(mpctx, track);
+        error_on_track(mpctx, track);
     handle_force_window(mpctx, true);
     return 0;
 }
@@ -836,9 +836,7 @@ void write_video(struct MPContext *mpctx, double endpts)
 error:
     MP_FATAL(mpctx, "Could not initialize video chain.\n");
     uninit_video_chain(mpctx);
-    if (!mpctx->current_track[STREAM_AUDIO])
-        mpctx->stop_play = PT_NEXT_ENTRY;
-    mpctx->error_playing = true;
+    error_on_track(mpctx, mpctx->current_track[STREAM_VIDEO][0]);
     handle_force_window(mpctx, true);
     mpctx->sleeptime = 0;
 }

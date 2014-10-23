@@ -419,6 +419,7 @@ void merge_playlist_files(struct playlist *pl);
 float mp_get_cache_percent(struct MPContext *mpctx);
 bool mp_get_cache_idle(struct MPContext *mpctx);
 void update_window_title(struct MPContext *mpctx, bool force);
+void error_on_track(struct MPContext *mpctx, struct track *track);
 void stream_dump(struct MPContext *mpctx);
 int mpctx_run_non_blocking(struct MPContext *mpctx, void (*thread_fn)(void *arg),
                            void *thread_arg);
