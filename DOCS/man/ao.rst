@@ -114,24 +114,17 @@ Available audio output drivers are:
         with fixed setups.
 
 ``coreaudio`` (Mac OS X only)
-    Native Mac OS X audio output driver using the AudioUnits and the CoreAudio
+    Native Mac OS X audio output driver using AudioUnits and the CoreAudio
     sound server.
 
-    ``device_id=<id>``
-        ID of output device to use (0 = default device)
-    ``help``
-        List all available output devices with their IDs.
+    Automatically redirects to ``coreaudio_exclusive`` when playing compressed
+    formats.
 
-``coreaudio_device`` (Mac OS X only)
+``coreaudio_exclusive`` (Mac OS X only)
     Native Mac OS X audio output driver using direct device access and
     exclusive mode (bypasses the sound server).
 
     Supports only compressed formats (AC3 and DTS).
-
-    ``device_id=<id>``
-        ID of output device to use (0 = default device)
-    ``help``
-        List all available output devices with their IDs.
 
 ``openal``
     Experimental OpenAL audio output driver
