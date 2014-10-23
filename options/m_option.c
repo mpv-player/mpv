@@ -41,6 +41,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "misc/json.h"
 #include "m_option.h"
 #include "m_config.h"
 
@@ -3041,7 +3042,12 @@ static int parse_node(struct mp_log *log, const m_option_t *opt,
 
 static char *print_node(const m_option_t *opt, const void *val)
 {
-    return NULL;
+    char *t = talloc_strdup(NULL, "");
+    if (json_write(&t, &VAL(val)) < 0) {
+        talloc_free(t);
+        t = NULL;
+    }
+    return t;
 }
 
 static void dup_node(void *ta_parent, struct mpv_node *node)
