@@ -514,7 +514,7 @@ function render_elements(master_ass)
                     local sliderpos = get_slider_value(element)
                     local tooltiplabel = element.slider.tooltipF(sliderpos)
 
-                    local an = slider_lo.tooltip_an or 2
+                    local an = slider_lo.tooltip_an
 
                     if (slider_lo.adjust_tooltip) then
                         if (sliderpos < (s_min + 5)) then
@@ -534,7 +534,7 @@ function render_elements(master_ass)
 
 
                     local ty
-                    if (slider_lo.tooltip_an or 2) == 2 then
+                    if (slider_lo.tooltip_an == 2) then
                         ty = element.hitbox.y1 - slider_lo.border
                     else
                         ty = element.hitbox.y2 + slider_lo.border
@@ -647,6 +647,7 @@ function add_layout(name)
                 stype = "slider",
                 adjust_tooltip = true,
                 tooltip_style = "",
+                tooltip_an = 2,
             }
         elseif (elements[name].type == "box") then
             elements[name].layout.box = {radius = 0}
