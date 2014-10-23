@@ -155,3 +155,15 @@ extra commands can also be used as part of the protocol:
 ``resume``
     Undo one ``suspend`` call. ``suspend`` increments an internal counter, and
     ``resume`` decrements it. When 0 is reached, the player is actually resumed.
+
+UTF-8
+-----
+
+Normally, all strings are in UTF-8. Sometimes it can happen that strings are
+in some broken encoding (often happens with file tags and such, and filenames
+on many Unixes are not required to be in UTF-8 either). This means that mpv
+sometimes sends invalid JSON. If that is a problem for the client application's
+parser, it should filter the raw data for invalid UTF-8 sequences and perform
+the desired replacement, before feeding the data to its JSON parser.
+
+mpv will not attempt to construct invalid UTF-8 with broken escape sequences.
