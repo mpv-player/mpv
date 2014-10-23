@@ -1683,13 +1683,17 @@ static int property_switch_track_ff(void *ctx, struct m_property *prop,
         *(int *) arg = track ? track->ff_index : -2;
         return M_PROPERTY_OK;
     case M_PROPERTY_SET: {
+        int id = *(int *)arg;
         track = NULL;
         for (int n = 0; n < mpctx->num_tracks; n++) {
-            if (mpctx->tracks[n]->ff_index == *(int *)arg) {
-                track = mpctx->tracks[n];
+            struct track *cur = mpctx->tracks[n];
+            if (cur->type == type && cur->ff_index == id) {
+                track = cur;
                 break;
             }
         }
+        if (!track && id >= 0)
+            return M_PROPERTY_ERROR;
         mp_switch_track_n(mpctx, 0, type, track);
         return M_PROPERTY_OK;
     }
