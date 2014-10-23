@@ -40,6 +40,8 @@ struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, struct mpv_node *node
 // function
 void mp_cmd_free(struct mp_cmd *cmd);
 
+void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd);
+
 // This creates a copy of a command (used by the auto repeat stuff).
 struct mp_cmd *mp_cmd_clone(struct mp_cmd *cmd);
 

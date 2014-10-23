@@ -3720,6 +3720,8 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     bool msg_or_nobar_osd = msg_osd && !(auto_osd && opts->osd_bar_visible);
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
 
+    mp_cmd_dump(mpctx->log, MSGL_V, "Run: ", cmd);
+
     if (cmd->flags & MP_EXPAND_PROPERTIES) {
         for (int n = 0; n < cmd->nargs; n++) {
             if (cmd->args[n].type->type == CONF_TYPE_STRING) {

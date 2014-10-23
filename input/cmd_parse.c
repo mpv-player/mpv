@@ -423,6 +423,27 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
     return ret;
 }
 
+void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
+{
+    if (!mp_msg_test(log, msgl))
+        return;
+    if (header)
+        mp_msg(log, msgl, "%s: ", header);
+    if (!cmd) {
+        mp_msg(log, msgl, "(NULL)\n");
+        return;
+    }
+    mp_msg(log, msgl, "%s, flags=%d args=[", cmd->name, cmd->flags);
+    for (int n = 0; n < cmd->nargs; n++) {
+        char *s = m_option_print(cmd->args[n].type, &cmd->args[n].v);
+        if (n)
+            mp_msg(log, msgl, ", ");
+        mp_msg(log, msgl, "%s", s ? s : "(NULL)");
+        talloc_free(s);
+    }
+    mp_msg(log, msgl, "]\n");
+}
+
 static int parse_cycle_dir(struct mp_log *log, const struct m_option *opt,
                            struct bstr name, struct bstr param, void *dst)
 {
