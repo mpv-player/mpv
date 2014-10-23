@@ -99,7 +99,7 @@ static int mp_cpcall (lua_State *L, lua_CFunction func, void *ud)
 // pushed to the stack.
 static void mp_lua_optarg(lua_State *L, int arg)
 {
-    while (arg < lua_gettop(L))
+    while (arg > lua_gettop(L))
         lua_pushnil(L);
 }
 
