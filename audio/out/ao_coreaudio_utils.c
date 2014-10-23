@@ -56,7 +56,7 @@ OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
     int selection = name ? strtol(name, (char **)NULL, 10) : -1;
     if (errno == EINVAL || errno == ERANGE) {
         selection = -1;
-        MP_ERR(ao, "device identifier '%s' is invalid\n", name);
+        MP_WARN(ao, "device identifier '%s' is invalid\n", name);
     }
     *device = 0;
     if (selection < 0) {

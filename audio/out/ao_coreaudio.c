@@ -145,6 +145,12 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd);
 
 static int init(struct ao *ao)
 {
+    if (AF_FORMAT_IS_IEC61937(ao->format)) {
+        MP_WARN(ao, "detected IEC61937, redirecting to coreaudio_exclusive\n");
+        ao->redirect = "coreaudio_exclusive";
+        return CONTROL_ERROR;
+    }
+
     struct priv *p = ao->priv;
 
     OSStatus err = ca_select_device(ao, ao->device, &p->device);
