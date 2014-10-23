@@ -2295,7 +2295,7 @@ OSD
     height: if the window height is larger or smaller than 720, the actual size
     of the text increases or decreases as well.
 
-    Default: 45.
+    Default: 55.
 
 ``--osd-msg1=<string>``
     Show this string as message on OSD with OSD level 1 (visible by default).
@@ -2369,7 +2369,7 @@ OSD
     Size of the OSD/sub font border in scaled pixels (see ``--osd-font-size``
     for details). A value of 0 disables borders.
 
-    Default: 2.5.
+    Default: 3.
 
 ``--osd-color=<color>``, ``--sub-text-color=<color>``
     Specify the color used for OSD/unstyled text subtitles.
@@ -2427,7 +2427,7 @@ OSD
     for unstyled text subtitles. If you just want to raise the vertical
     subtitle position, use ``--sub-pos``.
 
-    Default: 10.
+    Default: 22.
 
 ``--osd-scale=<factor>``
     OSD font size multiplier, multiplied with ``--osd-font-size`` value.

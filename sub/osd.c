@@ -43,14 +43,14 @@
 
 static const struct osd_style_opts osd_style_opts_def = {
     .font = "sans-serif",
-    .font_size = 45,
+    .font_size = 55,
     .color = {255, 255, 255, 255},
     .border_color = {0, 0, 0, 255},
     .shadow_color = {240, 240, 240, 128},
-    .border_size = 2.5,
+    .border_size = 3,
     .shadow_offset = 0,
     .margin_x = 25,
-    .margin_y = 10,
+    .margin_y = 22,
 };
 
 #define OPT_BASE_STRUCT struct osd_style_opts
