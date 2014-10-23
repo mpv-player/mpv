@@ -549,10 +549,23 @@ function render_elements(master_ass)
                 end
             end
 
-        elseif type(element.content) == "function" then
-            element.content(elem_ass) -- function objects
-        elseif not (element.content == nil) then
-            elem_ass:append(element.content) -- text objects
+        elseif (element.type == "button") then
+
+            local buttontext
+            if type(element.content) == "function" then
+                buttontext = element.content() -- function objects
+            elseif not (element.content == nil) then
+                buttontext = element.content -- text objects
+            end
+
+            local maxchars = element.layout.button.maxchars
+
+            if not (maxchars == nil) and (#buttontext > maxchars) then
+                buttontext = string.format("{\\fscx%f}",
+                    (maxchars/#buttontext)*100) .. buttontext
+            end
+
+            elem_ass:append(buttontext)
         end
 
         master_ass:merge(elem_ass)
@@ -637,7 +650,11 @@ function add_layout(name)
         elements[name].layout.layer = 50
         elements[name].layout.alpha = {[1] = 0, [2] = 255, [3] = 255, [4] = 255}
 
-        if (elements[name].type == "slider") then
+        if (elements[name].type == "button") then
+            elements[name].layout.button = {
+                maxchars = nil,
+            }
+        elseif (elements[name].type == "slider") then
             -- slider defaults
             elements[name].layout.slider = {
                 border = 1,
@@ -741,6 +758,7 @@ layouts["box"] = function ()
     lo = add_layout("title")
     lo.geometry = {x = posX, y = titlerowY, an = 8, w = 496, h = 12}
     lo.style = osc_styles.vidtitle
+    lo.button.maxchars = 90
 
     lo = add_layout("pl_prev")
     lo.geometry =
@@ -1249,15 +1267,12 @@ function osc_init()
     -- title
     ne = new_element("title", "button")
 
-    ne.content = function (ass)
+    ne.content = function ()
         local title = mp.get_property_osd("media-title")
         if not (title == nil) then
-            if (#title > 80) then
-                title = string.format("{\\fscx%f}", (80/#title)*100) .. title
-            end
-            ass:append(title)
+            return (title)
         else
-            ass:append("mpv")
+            return ("mpv")
         end
     end
 
@@ -1301,11 +1316,11 @@ function osc_init()
     --playpause
     ne = new_element("playpause", "button")
 
-    ne.content = function (ass)
+    ne.content = function ()
         if mp.get_property("pause") == "yes" then
-            ass:append("\238\132\129")
+            return ("\238\132\129")
         else
-            ass:append("\238\128\130")
+            return ("\238\128\130")
         end
     end
     ne.eventresponder["mouse_btn0_up"] =
@@ -1362,12 +1377,12 @@ function osc_init()
     ne = new_element("cy_audio", "button")
 
     ne.enabled = (#tracks_osc.audio > 0)
-    ne.content = function (ass)
+    ne.content = function ()
         local aid = "–"
         if not (get_track("audio") == 0) then
             aid = get_track("audio")
         end
-        ass:append("\238\132\134" .. osc_styles.smallButtonsLlabel
+        return ("\238\132\134" .. osc_styles.smallButtonsLlabel
             .. " " .. aid .. "/" .. #tracks_osc.audio)
     end
     ne.eventresponder["mouse_btn0_up"] =
@@ -1381,12 +1396,12 @@ function osc_init()
     ne = new_element("cy_sub", "button")
 
     ne.enabled = (#tracks_osc.sub > 0)
-    ne.content = function (ass)
+    ne.content = function ()
         local sid = "–"
         if not (get_track("sub") == 0) then
             sid = get_track("sub")
         end
-        ass:append("\238\132\135" .. osc_styles.smallButtonsLlabel
+        return ("\238\132\135" .. osc_styles.smallButtonsLlabel
             .. " " .. sid .. "/" .. #tracks_osc.sub)
     end
     ne.eventresponder["mouse_btn0_up"] =
@@ -1398,11 +1413,11 @@ function osc_init()
 
     --tog_fs
     ne = new_element("tog_fs", "button")
-    ne.content = function (ass)
+    ne.content = function ()
         if (state.fullscreen) then
-            ass:append("\238\132\137")
+            return ("\238\132\137")
         else
-            ass:append("\238\132\136")
+            return ("\238\132\136")
         end
     end
     ne.eventresponder["mouse_btn0_up"] =
@@ -1461,11 +1476,11 @@ function osc_init()
     -- tc_left (current pos)
     ne = new_element("tc_left", "button")
 
-    ne.content = function (ass)
+    ne.content = function ()
         if (state.tc_ms) then
-            ass:append(mp.get_property_osd("playback-time/full"))
+            return (mp.get_property_osd("playback-time/full"))
         else
-            ass:append(mp.get_property_osd("playback-time"))
+            return (mp.get_property_osd("playback-time"))
         end
     end
     ne.eventresponder["mouse_btn0_up"] =
@@ -1476,18 +1491,18 @@ function osc_init()
 
     ne.visible = (not (mp.get_property("length") == nil))
         and (mp.get_property_number("length") > 0)
-    ne.content = function (ass)
+    ne.content = function ()
         if (state.rightTC_trem) then
             if state.tc_ms then
-                ass:append("-"..mp.get_property_osd("playtime-remaining/full"))
+                return ("-"..mp.get_property_osd("playtime-remaining/full"))
             else
-                ass:append("-"..mp.get_property_osd("playtime-remaining"))
+                return ("-"..mp.get_property_osd("playtime-remaining"))
             end
         else
             if state.tc_ms then
-                ass:append(mp.get_property_osd("length/full"))
+                return (mp.get_property_osd("length/full"))
             else
-                ass:append(mp.get_property_osd("length"))
+                return (mp.get_property_osd("length"))
             end
         end
     end
@@ -1497,7 +1512,7 @@ function osc_init()
     -- cache
     ne = new_element("cache", "button")
 
-    ne.content = function (ass)
+    ne.content = function ()
         local dmx_cache = mp.get_property_number("demuxer-cache-duration")
         if not (dmx_cache == nil) then
             dmx_cache = math.floor(dmx_cache + 0.5) .. "s + "
@@ -1511,7 +1526,9 @@ function osc_init()
             else
                 cache_used = math.floor((cache_used/102.4)+0.5)/10 .. " MB"
             end
-            ass:append("Cache: " .. dmx_cache .. cache_used)
+            return ("Cache: " .. dmx_cache .. cache_used)
+        else
+            return ""
         end
     end
 
