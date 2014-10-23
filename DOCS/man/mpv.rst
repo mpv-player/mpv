@@ -717,6 +717,35 @@ override the standard directory ``~/.config/mpv/``.
 Also, the old config location at ``~/.mpv/`` is still read, and if the XDG
 variant does not exist, will still be preferred.
 
+FILES ON WINDOWS
+================
+
+On win32 (if compiled with MinGW, but not Cygwin), the default config file
+locations are different:
+
+``$CSIDL_APPDATA/mpv/mpv.conf``
+    Preferred mpv config file. This maps to a system and user-specific path,
+    for example ``C:\users\USERNAME\Application Data\mpv\mpv.conf``.
+
+``$CSIDL_APPDATA/mpv/input.conf``
+    key bindings (see `INPUT.CONF`_ section)
+
+``$CSIDL_APPDATA/mpv/lua/``
+    equivalent of ``~/.config/mpv/lua/`` on Unix.
+
+The environment variable ``$MPV_HOME`` completely overrides these, like on
+UNIX.
+
+Config files located in the same directory as ``mpv.exe`` are loaded with
+lower priority. Some config files are loaded only once, which means that
+e.g. of 2 ``input.conf`` files located in two config directories, only the
+one from the directory with higher priority will be loaded.
+
+A third config directory with lowest priority is the directory named ``mpv``
+in the same directory as ``mpv.exe``. This used to be the directory with
+highest priority, but is now discouraged to use and might be removed in the
+future.
+
 EXAMPLES OF MPV USAGE
 =====================
 

@@ -61,11 +61,11 @@ static char *mp_get_win_app_dir(void *talloc_ctx)
 int mp_add_win_config_dirs(struct mpv_global *global, char **dirs, int i)
 {
     void *talloc_ctx = dirs;
-    if ((dirs[i] = mp_get_win_exe_subdir(talloc_ctx)))
+    if ((dirs[i] = mp_get_win_app_dir(talloc_ctx)))
         i++;
     if ((dirs[i] = mp_get_win_exe_dir(talloc_ctx)))
         i++;
-    if ((dirs[i] = mp_get_win_app_dir(talloc_ctx)))
+    if ((dirs[i] = mp_get_win_exe_subdir(talloc_ctx)))
         i++;
     return i;
 }
