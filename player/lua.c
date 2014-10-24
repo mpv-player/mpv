@@ -346,8 +346,10 @@ static int run_lua(lua_State *L)
     // run this under an error handler that can do backtraces
     lua_pushcfunction(L, error_handler); // errf
     lua_pushcfunction(L, load_scripts); // errf fn
-    if (lua_pcall(L, 0, 0, -2)) // errf [error]
-        MP_FATAL(ctx, "Lua error: %s\n", lua_tostring(L, -1));
+    if (lua_pcall(L, 0, 0, -2)) { // errf [error]
+        const char *e = lua_tostring(L, -1);
+        MP_FATAL(ctx, "Lua error: %s\n", e ? e : "(unknown)");
+    }
 
     return 0;
 }
