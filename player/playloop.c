@@ -837,7 +837,11 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
             .w = w,   .h = h,
             .d_w = w, .d_h = h,
         };
-        vo_reconfig(vo, &p, 0);
+        if (vo_reconfig(vo, &p, 0) < 0) {
+            mpctx->opts->force_vo = 0;
+            uninit_video_out(mpctx);
+            return;
+        }
         vo_control(vo, VOCTRL_RESTORE_SCREENSAVER, NULL);
         vo_set_paused(vo, true);
         vo_redraw(vo);
