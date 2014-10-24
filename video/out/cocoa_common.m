@@ -686,9 +686,12 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
-        with_cocoa_lock(vo, ^{
-            int *s = arg;
-            queue_new_video_size(vo, s[0], s[1]);
+        int *s = arg;
+        int w, h;
+        w = s[0];
+        h = s[1];
+        with_cocoa_lock_on_main_thread(vo, ^{
+            queue_new_video_size(vo, w, h);
         });
         return VO_TRUE;
     }
