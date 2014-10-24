@@ -1372,6 +1372,11 @@ Property list
     Note that you need to escape the ``\`` character, because the string is
     processed for C escape sequences before passing it to the OSD code.
 
+``vo-configured``
+    Return whether the VO is configured right now. Usually this corresponds to
+    whether the video window is visible. If the ``--force-window`` option is
+    used, this is usually always returns ``yes``.
+
 ``audio-device-list``
     Return the list of discovered audio devices. This is mostly for use with
     the client API, and reflects what ``--audio-device=help`` with the command

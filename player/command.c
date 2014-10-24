@@ -2403,6 +2403,14 @@ static int mp_property_window_scale(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_vo_configured(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_flag_ro(action, arg,
+                        mpctx->video_out && mpctx->video_out->config_ok);
+}
+
 static int mp_property_osd_w(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -3050,6 +3058,7 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("width", "video-params/w"),
     M_PROPERTY_ALIAS("height", "video-params/h"),
     {"window-scale", mp_property_window_scale},
+    {"vo-configured", mp_property_vo_configured},
     {"fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
     {"video-aspect", mp_property_aspect},
@@ -3132,7 +3141,7 @@ static const char *const *const mp_event_property_change[] = {
       "estimated-vf-fps"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
-      "width", "height", "fps", "aspect"),
+      "width", "height", "fps", "aspect", "vo-configured"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio"),
     E(MPV_EVENT_SEEK, "seeking"),
