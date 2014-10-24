@@ -187,6 +187,14 @@ static struct mpv_handle *find_client(struct mp_client_api *clients,
     return NULL;
 }
 
+bool mp_client_exists(struct MPContext *mpctx, const char *client_name)
+{
+    pthread_mutex_lock(&mpctx->clients->lock);
+    bool r = find_client(mpctx->clients, client_name);
+    pthread_mutex_unlock(&mpctx->clients->lock);
+    return r;
+}
+
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name)
 {
     pthread_mutex_lock(&clients->lock);
@@ -348,7 +356,8 @@ void mpv_detach_destroy(mpv_handle *ctx)
             }
             talloc_free(ctx);
             ctx = NULL;
-            // shutdown_clients() sleeps to avoid wasting CPU
+            // shutdown_clients() sleeps to avoid wasting CPU.
+            // mp_hook_test_completion() also relies on this a bit.
             if (clients->mpctx->input)
                 mp_input_wakeup(clients->mpctx->input);
             break;

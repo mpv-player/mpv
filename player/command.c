@@ -112,13 +112,26 @@ static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
 static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
                        struct m_obj_settings *new_chain);
 
+static void hook_remove(struct MPContext *mpctx, int index)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    assert(index >= 0 && index < cmd->num_hooks);
+    talloc_free(cmd->hooks[index]);
+    MP_TARRAY_REMOVE_AT(cmd->hooks, cmd->num_hooks, index);
+}
+
 bool mp_hook_test_completion(struct MPContext *mpctx, char *type)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
     for (int n = 0; n < cmd->num_hooks; n++) {
         struct hook_handler *h = cmd->hooks[n];
-        if (h->active && strcmp(h->type, type) == 0)
+        if (h->active && strcmp(h->type, type) == 0) {
+            if (!mp_client_exists(mpctx, h->client)) {
+                hook_remove(mpctx, n);
+                break;
+            }
             return false;
+        }
     }
     return true;
 }
@@ -142,8 +155,8 @@ static bool send_hook_msg(struct MPContext *mpctx, struct hook_handler *h,
 void mp_hook_run(struct MPContext *mpctx, char *client, char *type)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
-    struct hook_handler *next = NULL;
     bool found_current = !client;
+    int index = -1;
     for (int n = 0; n < cmd->num_hooks; n++) {
         struct hook_handler *h = cmd->hooks[n];
         if (!found_current) {
@@ -152,15 +165,19 @@ void mp_hook_run(struct MPContext *mpctx, char *client, char *type)
                 found_current = true;
             }
         } else if (strcmp(h->type, type) == 0) {
-            next = h;
+            index = n;
             break;
         }
     }
-    if (!next)
+    if (index < 0)
         return;
+    struct hook_handler *next = cmd->hooks[index];
     MP_VERBOSE(mpctx, "Running hook: %s/%s\n", next->client, type);
     next->active = true;
-    send_hook_msg(mpctx, next, "hook_run");
+    if (!send_hook_msg(mpctx, next, "hook_run")) {
+        hook_remove(mpctx, index);
+        mp_input_wakeup(mpctx->input); // repeat next iteration to finish
+    }
 }
 
 static int compare_hook(const void *pa, const void *pb)
