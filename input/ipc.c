@@ -738,9 +738,10 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
         .path       = mp_get_user_path(arg, global, opts->ipc_path),
         .death_pipe = {-1, -1},
     };
+    char *input_file = mp_get_user_path(arg, global, opts->input_file);
 
-    if (opts->input_file && *opts->input_file)
-        ipc_start_client_text(arg, opts->input_file);
+    if (input_file && *input_file)
+        ipc_start_client_text(arg, input_file);
 
     if (!opts->ipc_path || !*opts->ipc_path)
         goto out;
