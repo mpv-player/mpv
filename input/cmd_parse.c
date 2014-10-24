@@ -428,12 +428,12 @@ void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
     if (!mp_msg_test(log, msgl))
         return;
     if (header)
-        mp_msg(log, msgl, "%s: ", header);
+        mp_msg(log, msgl, "%s ", header);
     if (!cmd) {
         mp_msg(log, msgl, "(NULL)\n");
         return;
     }
-    mp_msg(log, msgl, "%s, flags=%d args=[", cmd->name, cmd->flags);
+    mp_msg(log, msgl, "%s, flags=%d, args=[", cmd->name, cmd->flags);
     for (int n = 0; n < cmd->nargs; n++) {
         char *s = m_option_print(cmd->args[n].type, &cmd->args[n].v);
         if (n)
