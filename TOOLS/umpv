@@ -28,14 +28,6 @@ Note: you can supply custom mpv path and options with the MPV environment
       first item is used as path to mpv binary and the rest is passed as options
       _if_ the script starts mpv. If mpv is not started by the script (i.e. mpv
       is already running), this will be ignored.
-
-Warning:
-
-The script attempts to make sure the FIFO is safely created (i.e. not world-
-writable), and checks that it's really a FIFO. This is important for security,
-because the FIFO allows anyone with write access to run arbitrary commands
-in mpv's context using the "run" input command. If you are worried about
-security, you should verify that the code handles these concerns correctly.
 """
 
 import sys
@@ -65,7 +57,7 @@ def make_abs(filename):
     return filename
 files = [make_abs(f) for f in files]
 
-FIFO = "/tmp/umpv-fifo-" + os.getenv("USER")
+FIFO = os.path.join(os.getenv("HOME"), ".umpv_fifo")
 
 fifo_fd = -1
 try:
@@ -77,15 +69,6 @@ except OSError as e:
         pass # doesn't exist
     else:
         raise e
-
-if fifo_fd >= 0:
-    st = os.fstat(fifo_fd)
-    if (((st.st_mode & (stat.S_IRWXG | stat.S_IRWXO)) != 0) or
-        (not stat.S_ISFIFO(st.st_mode)) or
-        (st.st_uid != os.getuid())):
-        sys.stderr.write("error: command FIFO is not a FIFO or has bogus "
-                         "permissions\n")
-        sys.exit(1)
 
 if fifo_fd >= 0:
     # Unhandled race condition: what if mpv is terminating right now?
@@ -103,10 +86,7 @@ else:
     try:
         os.unlink(FIFO)
     except OSError as e:
-        if e.errno == errno.ENOENT:
-            pass
-        else:
-            raise e
+        pass
     os.mkfifo(FIFO, 0o600)
 
     opts = (os.getenv("MPV") or "mpv").split()
