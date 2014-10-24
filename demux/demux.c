@@ -387,9 +387,8 @@ static bool read_packet(struct demux_internal *in)
     pthread_mutex_unlock(&in->lock);
     struct demuxer *demux = in->d_thread;
     bool eof = !demux->desc->fill_buffer || demux->desc->fill_buffer(demux) <= 0;
-    pthread_mutex_lock(&in->lock);
-
     update_cache(in);
+    pthread_mutex_lock(&in->lock);
 
     if (eof) {
         for (int n = 0; n < in->d_buffer->num_streams; n++) {
@@ -480,7 +479,6 @@ static void *demux_thread(void *pctx)
             if (read_packet(in))
                 continue; // read_packet unlocked, so recheck conditions
         }
-        update_cache(in);
         pthread_cond_signal(&in->wakeup);
         pthread_cond_wait(&in->wakeup, &in->lock);
     }
@@ -758,9 +756,9 @@ void demux_changed(demuxer_t *demuxer, int events)
 
     demuxer->events |= events;
 
-    pthread_mutex_lock(&in->lock);
-
     update_cache(in);
+
+    pthread_mutex_lock(&in->lock);
 
     if (demuxer->events & DEMUX_EVENT_INIT)
         demuxer_sort_chapters(demuxer);
@@ -779,9 +777,10 @@ void demux_update(demuxer_t *demuxer)
     assert(demuxer == demuxer->in->d_user);
     struct demux_internal *in = demuxer->in;
 
-    pthread_mutex_lock(&in->lock);
     if (!in->threading)
         update_cache(in);
+
+    pthread_mutex_lock(&in->lock);
     demux_copy(demuxer, in->d_buffer);
     if (in->stream_metadata && (demuxer->events & DEMUX_EVENT_METADATA))
         mp_tags_merge(demuxer->metadata, in->stream_metadata);
@@ -1101,34 +1100,43 @@ double demuxer_get_time_length(struct demuxer *demuxer)
     return -1;
 }
 
-// must be called locked
+// must be called not locked
 static void update_cache(struct demux_internal *in)
 {
     struct demuxer *demuxer = in->d_thread;
     struct stream *stream = demuxer->stream;
 
-    in->time_length = -1;
+    // Don't lock while querying the stream.
+    double time_length = -1;
+    struct mp_tags *stream_metadata = NULL;
+    int64_t stream_size = -1;
+    int64_t stream_cache_size = -1;
+    int64_t stream_cache_fill = -1;
+    int stream_cache_idle = -1;
+
     if (demuxer->desc->control) {
         demuxer->desc->control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
-                               &in->time_length);
+                               &time_length);
     }
 
-    struct mp_tags *s_meta = NULL;
-    stream_control(stream, STREAM_CTRL_GET_METADATA, &s_meta);
-    if (s_meta) {
+    stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
+    stream_control(stream, STREAM_CTRL_GET_SIZE, &stream_size);
+    stream_control(stream, STREAM_CTRL_GET_CACHE_SIZE, &stream_cache_size);
+    stream_control(stream, STREAM_CTRL_GET_CACHE_FILL, &stream_cache_fill);
+    stream_control(stream, STREAM_CTRL_GET_CACHE_IDLE, &stream_cache_idle);
+
+    pthread_mutex_lock(&in->lock);
+    in->time_length = time_length;
+    in->stream_size = stream_size;
+    in->stream_cache_size = stream_cache_size;
+    in->stream_cache_fill = stream_cache_fill;
+    in->stream_cache_idle = stream_cache_idle;
+    if (stream_metadata) {
         talloc_free(in->stream_metadata);
-        in->stream_metadata = talloc_steal(in, s_meta);
+        in->stream_metadata = talloc_steal(in, stream_metadata);
         in->d_buffer->events |= DEMUX_EVENT_METADATA;
     }
-
-    in->stream_size = -1;
-    stream_control(stream, STREAM_CTRL_GET_SIZE, &in->stream_size);
-    in->stream_cache_size = -1;
-    stream_control(stream, STREAM_CTRL_GET_CACHE_SIZE, &in->stream_cache_size);
-    in->stream_cache_fill = -1;
-    stream_control(stream, STREAM_CTRL_GET_CACHE_FILL, &in->stream_cache_fill);
-    in->stream_cache_idle = -1;
-    stream_control(stream, STREAM_CTRL_GET_CACHE_IDLE, &in->stream_cache_idle);
+    pthread_mutex_unlock(&in->lock);
 }
 
 // must be called locked
