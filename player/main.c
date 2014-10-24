@@ -114,11 +114,15 @@ static void shutdown_clients(struct MPContext *mpctx)
         mp_dispatch_queue_process(mpctx->dispatch, 0);
         mp_wait_events(mpctx, 10000);
     }
-    mp_clients_destroy(mpctx);
 }
 
 void mp_destroy(struct MPContext *mpctx)
 {
+#if !defined(__MINGW32__)
+    mp_uninit_ipc(mpctx->ipc_ctx);
+    mpctx->ipc_ctx = NULL;
+#endif
+
     shutdown_clients(mpctx);
 
     uninit_audio_out(mpctx);
@@ -131,12 +135,9 @@ void mp_destroy(struct MPContext *mpctx)
 
     mpctx->encode_lavc_ctx = NULL;
 
-#if !defined(__MINGW32__)
-    mp_uninit_ipc(mpctx->ipc_ctx);
-    mpctx->ipc_ctx = NULL;
-#endif
-
     command_uninit(mpctx);
+
+    mp_clients_destroy(mpctx);
 
     osd_free(mpctx->osd);
 
