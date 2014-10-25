@@ -1182,6 +1182,27 @@ static int script_join_path(lua_State *L)
 extern char **environ;
 #endif
 
+// A silly helper: automatically skips entries with negative FDs
+static int sparse_poll(struct pollfd *fds, int num_fds, int timeout)
+{
+    struct pollfd p_fds[10];
+    int map[10];
+    if (num_fds > MP_ARRAY_SIZE(p_fds))
+        return -1;
+    int p_num_fds = 0;
+    for (int n = 0; n < num_fds; n++) {
+        map[n] = -1;
+        if (fds[n].fd < 0)
+            break;
+        map[n] = p_num_fds;
+        p_fds[p_num_fds++] = fds[n];
+    }
+    int r = poll(p_fds, p_num_fds, timeout);
+    for (int n = 0; n < num_fds; n++)
+        fds[n].revents = (map[n] < 0 && r >= 0) ? 0 : p_fds[map[n]].revents;
+    return r;
+}
+
 static int script_subprocess(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -1223,19 +1244,22 @@ static int script_subprocess(lua_State *L)
     bool fa_destroy = false;
     bstr output = {0};
     int status = -1;
-    int pipes[2] = {-1, -1};
+    int p_stdout[2] = {-1, -1};
+    int p_stderr[2] = {-1, -1};
     pid_t pid = -1;
 
-    if (pipe(pipes))
+    if (mp_make_cloexec_pipe(p_stdout) < 0)
         goto done;
-    mp_set_cloexec(pipes[0]);
-    mp_set_cloexec(pipes[1]);
+    if (mp_make_cloexec_pipe(p_stderr) < 0)
+        goto done;
 
     if (posix_spawn_file_actions_init(&fa))
         goto done;
     fa_destroy = true;
-    // redirect stdout, but not stderr or stdin
-    if (posix_spawn_file_actions_adddup2(&fa, pipes[1], 1))
+    // redirect stdout and stderr
+    if (posix_spawn_file_actions_adddup2(&fa, p_stdout[1], 1))
+        goto done;
+    if (posix_spawn_file_actions_adddup2(&fa, p_stderr[1], 2))
         goto done;
 
     if (posix_spawnp(&pid, args[0], &fa, NULL, args, environ)) {
@@ -1243,29 +1267,46 @@ static int script_subprocess(lua_State *L)
         goto done;
     }
 
-    close(pipes[1]);
-    pipes[1] = -1;
+    close(p_stdout[1]);
+    p_stdout[1] = -1;
+    close(p_stderr[1]);
+    p_stderr[1] = -1;
 
-    while (1) {
+    while (p_stdout[0] >= 0 || p_stderr[0] >= 0) {
         struct pollfd fds[] = {
-            {.events = POLLIN, .fd = pipes[0]},
+            {.events = POLLIN, .fd = p_stdout[0]},
+            {.events = POLLIN, .fd = p_stderr[0]},
             {.events = POLLIN, .fd = cancel ? mp_cancel_get_fd(cancel) : -1},
         };
-        if (poll(fds, fds[1].fd >= 0 ? 2 : 1, -1) < 0 && errno != EINTR)
+        if (sparse_poll(fds, MP_ARRAY_SIZE(fds), -1) < 0 && errno != EINTR)
             break;
-        if (fds[1].revents) {
-            kill(pid, SIGKILL);
-            break;
-        }
         if (fds[0].revents) {
             char buf[4096];
-            ssize_t r = read(pipes[0], buf, sizeof(buf));
+            ssize_t r = read(p_stdout[0], buf, sizeof(buf));
             if (r < 0 && errno == EINTR)
                 continue;
             if (r > 0)
                 bstr_xappend(tmp, &output, (bstr){buf, r});
-            if (r <= 0)
-                break;
+            if (r <= 0) {
+                close(p_stdout[0]);
+                p_stdout[0] = -1;
+            }
+        }
+        if (fds[1].revents) {
+            char buf[4096];
+            ssize_t r = read(p_stderr[0], buf, sizeof(buf));
+            if (r < 0 && errno == EINTR)
+                continue;
+            if (r > 0)
+                MP_INFO(ctx, "%.*s", (int)r, buf);
+            if (r <= 0) {
+                close(p_stderr[0]);
+                p_stderr[0] = -1;
+            }
+        }
+        if (fds[2].revents) {
+            kill(pid, SIGKILL);
+            break;
         }
         if (output.len >= max_size)
             break;
@@ -1280,8 +1321,10 @@ static int script_subprocess(lua_State *L)
 done:
     if (fa_destroy)
         posix_spawn_file_actions_destroy(&fa);
-    close(pipes[0]);
-    close(pipes[1]);
+    close(p_stdout[0]);
+    close(p_stdout[1]);
+    close(p_stderr[0]);
+    close(p_stderr[1]);
 
     // --- Lua errors are ok again from here
     char *error = NULL;
