@@ -111,8 +111,6 @@ Miscellaneous
 
 * Better MKV support (e.g. ordered chapters, 3D metadata).
 * Matroska edition switching at runtime.
-* Support for playing URLs of popular streaming sites directly.
-  (e.g. ``mpv https://www.youtube.com/watch?v=...``).
 * Support for precise scrolling which scales the parameter of commands. If the
   input doesn't support precise scrolling the scale factor stays 1.
 * Allow changing/adjusting video filters at runtime. (This is also used to make

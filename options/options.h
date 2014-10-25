@@ -178,8 +178,6 @@ typedef struct MPOpts {
     float sub_speed;
     int forced_subs_only;
     int stretch_dvd_subs;
-    char *quvi_format;
-    int quvi_fetch_subtitles;
 
     int sub_fix_timing;
     char *sub_cp;

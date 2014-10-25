@@ -41,7 +41,6 @@
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
-#include "stream/resolve/resolve.h"
 #include "common/playlist.h"
 #include "sub/osd.h"
 #include "sub/dec_sub.h"
@@ -368,8 +367,6 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
         name = mpctx->opts->media_title;
     if (name && name[0])
         return m_property_strdup_ro(action, arg, name);
-    if (mpctx->resolve_result)
-        name = mpctx->resolve_result->title;
     if (name && name[0])
         return m_property_strdup_ro(action, arg, name);
     if (mpctx->master_demuxer) {

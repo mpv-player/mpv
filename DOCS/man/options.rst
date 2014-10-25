@@ -340,7 +340,7 @@ Program Behavior
 ``--merge-files``
     Pretend that all files passed to mpv are concatenated into a single, big
     file. This uses timeline/EDL support internally. Note that this won't work
-    for ordered chapter files or quvi-resolved URLs (such as YouTube links).
+    for ordered chapter files.
 
     This option is interpreted at program start, and doesn't affect for
     example files or playlists loaded with the ``loadfile`` or ``loadlist``
@@ -675,26 +675,6 @@ Video
 
         ``mpv --hwdec=vdpau --vo=vdpau --hwdec-codecs=h264,mpeg2video``
             Enable vdpau decoding for h264 and mpeg2 only.
-
-``--quvi-format=<best|default|...>``
-    Video format/quality that is directly passed to libquvi (default: ``best``).
-    This is used when opening links to streaming sites like YouTube. The
-    interpretation of this value is highly specific to the streaming site and
-    the video.
-
-    libquvi 0.4.x:
-
-        The only well-defined values that work on all sites are ``best``
-        (best quality/highest bandwidth, default), and ``default`` (lowest
-        quality).
-
-        The quvi command line tool can be used to find out which formats are
-        supported for a given URL: ``quvi --query-formats URL``.
-
-    libquvi 0.9.x:
-
-        The following explanations are relevant:
-        `<http://quvi.sourceforge.net/r/api/0.9/glossary_termino.html#m_stream_id>`_
 
 ``--vd-lavc-check-hw-profile=<yes|no>``
     Check hardware decoder profile (default: yes). If ``no`` is set, the
@@ -1243,15 +1223,6 @@ Subtitles
     the video color space, and it's for example in theory not possible to reuse
     a subtitle script with another video file. The ``--ass-style-override``
     option doesn't affect how this option is interpreted.
-
-``--quvi-fetch-subtitles=<yes|no>``
-    Toggles fetching of subtitles from streaming sites with libquvi. Disabled
-    by default, because it's unreliable and slow. Note that when enabled,
-    subtitles will always be fetched, even if subtitles are explicitly
-    disabled with ``--no-sub`` (because you might want to enable subtitles
-    at runtime).
-
-    Supported when using libquvi 0.9.x.
 
 ``--stretch-dvd-subs=<yes|no>``
     Stretch DVD subtitles when playing anamorphic videos for better looking

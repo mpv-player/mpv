@@ -173,8 +173,6 @@ options_state_machine() {
     opt_yes_no _libv4l2     "libv4l2"
     opt_yes_no _pvr         "Video4Linux2 MPEG PVR"
     opt_yes_no _smb         "Samba (SMB) input"
-    opt_yes_no _libquvi4    "libquvi 0.4.x"
-    opt_yes_no _libquvi9    "libquvi 0.9.x"
     opt_yes_no _lcms2       "LCMS2 support"
     opt_yes_no _bluray      "Blu-ray support"
     opt_yes_no _dvdread     "libdvdread"
@@ -573,17 +571,6 @@ check_pkg_config() {
 check_pkg_config "libguess support" $_libguess LIBGUESS 'libguess >= 1.0'
 
 check_pkg_config "Samba support (libsmbclient)" $_smb LIBSMBCLIENT 'smbclient >= 0.2.0'
-
-check_pkg_config "libquvi 0.4.x support" $_libquvi4 LIBQUVI4 'libquvi >= 0.4.1'
-_libquvi4=$(defretval)
-
-test $_libquvi4 = yes && _libquvi9=no
-check_pkg_config "libquvi 0.9.x support" $_libquvi9 LIBQUVI9 'libquvi-0.9 >= 0.9.0'
-_libquvi9=$(defretval)
-
-_libquvi=no
-(test "$_libquvi9" = yes || test "$_libquvi4" = yes) && _libquvi=yes
-define_yes_no $_libquvi HAVE_LIBQUVI
 
 _wlver="1.6.0"
 check_pkg_config "Wayland" $_wayland WAYLAND "wayland-client >= $_wlver wayland-cursor >= $_wlver xkbcommon >= 0.3.0"
@@ -988,6 +975,7 @@ cat > $TMPC << EOF
 #define HAVE_OSX_THREAD_NAME 0
 #define HAVE_BSD_THREAD_NAME 0
 #define HAVE_NETBSD_THREAD_NAME 0
+#define HAVE_DXVA2_HWACCEL 0
 
 #define DEFAULT_CDROM_DEVICE "/dev/cdrom"
 #define DEFAULT_DVD_DEVICE   "/dev/dvd"

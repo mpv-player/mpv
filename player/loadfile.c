@@ -50,7 +50,6 @@
 #include "audio/out/ao.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
-#include "stream/resolve/resolve.h"
 #include "sub/dec_sub.h"
 #include "sub/find_subfiles.h"
 #include "video/decode/dec_video.h"
@@ -721,69 +720,6 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename)
                               STREAM_SUB);
 }
 
-static void open_subtitles_from_resolve(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-    struct mp_resolve_result *res = mpctx->resolve_result;
-    if (!res)
-        return;
-    for (int n = 0; n < res->num_subs; n++) {
-        struct mp_resolve_sub *sub = res->subs[n];
-        char *s = talloc_strdup(NULL, sub->url);
-        if (!s)
-            s = talloc_asprintf(NULL, "memory://%s", sub->data);
-        struct track *t =
-            open_external_file(mpctx, s, opts->sub_demuxer_name, STREAM_SUB);
-        talloc_free(s);
-        if (t) {
-            t->lang = talloc_strdup(t, sub->lang);
-            t->no_default = true;
-        }
-    }
-}
-
-static struct mp_resolve_result *resolve_url(const char *filename,
-                                             struct mpv_global *global)
-{
-    if (!mp_is_url(bstr0(filename)))
-        return NULL;
-#if HAVE_LIBQUVI
-    return mp_resolve_quvi(filename, global);
-#else
-    return NULL;
-#endif
-}
-
-static void print_resolve_contents(struct mp_log *log,
-                                   struct mp_resolve_result *res)
-{
-    mp_msg(log, MSGL_V, "Resolve:\n");
-    mp_msg(log, MSGL_V, "  title: %s\n", res->title);
-    mp_msg(log, MSGL_V, "  url: %s\n", res->url);
-    for (int n = 0; n < res->num_srcs; n++) {
-        mp_msg(log, MSGL_V, "  source %d:\n", n);
-        if (res->srcs[n]->url)
-            mp_msg(log, MSGL_V, "    url: %s\n", res->srcs[n]->url);
-        if (res->srcs[n]->encid)
-            mp_msg(log, MSGL_V, "    encid: %s\n", res->srcs[n]->encid);
-    }
-    for (int n = 0; n < res->num_subs; n++) {
-        mp_msg(log, MSGL_V, "  subtitle %d:\n", n);
-        if (res->subs[n]->url)
-            mp_msg(log, MSGL_V, "    url: %s\n", res->subs[n]->url);
-        if (res->subs[n]->lang)
-            mp_msg(log, MSGL_V, "    lang: %s\n", res->subs[n]->lang);
-        if (res->subs[n]->data) {
-            mp_msg(log, MSGL_V, "    data: %zd bytes\n",
-                       strlen(res->subs[n]->data));
-        }
-    }
-    if (res->playlist) {
-        mp_msg(log, MSGL_V, "  playlist with %d entries\n",
-                   playlist_entry_count(res->playlist));
-    }
-}
-
 // Replace the current playlist entry with playlist contents. Moves the entries
 // from the given playlist pl, so the entries don't actually need to be copied.
 static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
@@ -816,17 +752,6 @@ static int process_open_hooks(struct MPContext *mpctx)
         }
     }
 
-    // quvi stuff
-    char *filename = mpctx->stream_open_filename;
-    mpctx->resolve_result = resolve_url(filename, mpctx->global);
-    if (mpctx->resolve_result) {
-        print_resolve_contents(mpctx->log, mpctx->resolve_result);
-        if (mpctx->resolve_result->playlist) {
-            transfer_playlist(mpctx, mpctx->resolve_result->playlist);
-            return 1;
-        }
-        mpctx->stream_open_filename = mpctx->resolve_result->url;
-    }
     return 0;
 }
 
@@ -1009,10 +934,8 @@ static void play_current_file(struct MPContext *mpctx)
     assert(mpctx->d_sub[0] == NULL);
     assert(mpctx->d_sub[1] == NULL);
 
-    int hooks_res = process_open_hooks(mpctx);
-    talloc_steal(tmp, mpctx->resolve_result);
-    if (hooks_res)
-        goto terminate_playback; // quit or preloaded playlist special-case
+    if (process_open_hooks(mpctx) < 0)
+        goto terminate_playback;
 
     int stream_flags = STREAM_READ;
     if (!opts->load_unsafe_playlists)
@@ -1095,7 +1018,6 @@ goto_reopen_demuxer: ;
 
 
     open_subtitles_from_options(mpctx);
-    open_subtitles_from_resolve(mpctx);
     open_audiofiles_from_options(mpctx);
 
     check_previous_track_selection(mpctx);
@@ -1178,9 +1100,6 @@ goto_reopen_demuxer: ;
 
     // If there's a timeline force an absolute seek to initialize state
     double startpos = rel_time_to_abs(mpctx, opts->play_start);
-    if (startpos == MP_NOPTS_VALUE && mpctx->resolve_result &&
-        mpctx->resolve_result->start_time > 0)
-        startpos = mpctx->resolve_result->start_time;
     if (startpos == MP_NOPTS_VALUE && opts->chapterrange[0] > 0) {
         double start = chapter_start_time(mpctx, opts->chapterrange[0] - 1);
         if (start != MP_NOPTS_VALUE)
@@ -1250,7 +1169,6 @@ terminate_playback:
         m_config_restore_backups(mpctx->mconfig);
 
     mpctx->playback_initialized = false;
-    mpctx->resolve_result = NULL;
 
     if (mpctx->playing && mpctx->stop_play == AT_END_OF_FILE) {
         // Played/paused for longer than 1 second -> ok

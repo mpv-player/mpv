@@ -48,7 +48,7 @@ Essential dependencies (incomplete list):
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavresample)
   At least FFmpeg 2.1.4 or Libav 10 is required.
 - libjpeg (for screenshots)
-- libquvi if you want to play Youtube videos directly
+- Lua (strictly speaking optional, but required for the OSC pseudo-GUI)
 
 Libass dependencies:
 

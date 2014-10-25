@@ -264,8 +264,6 @@ def build(ctx):
         ( "stream/tv.c",                         "tv" ),
         ( "stream/tvi_dummy.c",                  "tv" ),
         ( "stream/tvi_v4l2.c",                   "tv-v4l2"),
-        ( "stream/resolve/resolve_quvi.c",       "libquvi4" ),
-        ( "stream/resolve/resolve_quvi9.c",      "libquvi9" ),
 
         ## Subtitles
         ( "sub/ass_mp.c",                        "libass"),

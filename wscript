@@ -246,22 +246,6 @@ iconv support use --disable-iconv.",
         'func': check_pkg_config('smbclient'),
         'module': 'input',
     }, {
-        'name': '--libquvi4',
-        'desc': 'libquvi 0.4.x support',
-        'groups': [ 'libquvi' ],
-        'func': check_pkg_config('libquvi', '>= 0.4.1'),
-    }, {
-        'name': '--libquvi9',
-        'desc': 'libquvi 0.9.x support',
-        'groups': [ 'libquvi' ],
-        'deps_neg': [ 'libquvi4' ],
-        'func': check_pkg_config('libquvi-0.9', '>= 0.9.0'),
-    }, {
-        'name': '--libquvi',
-        'desc': 'libquvi support',
-        'deps_any': [ 'libquvi4', 'libquvi9' ],
-        'func': check_true
-    }, {
         'name' : '--lua',
         'desc' : 'Lua',
         'func': check_lua,

@@ -652,10 +652,7 @@ Property list
     Full path of the currently played file.
 
 ``media-title``
-    If libquvi is used and libquvi returns a page title for the currently
-    played URL, return the page title.
-
-    Otherwise, if the currently played file has a ``title`` tag, use that.
+    If the currently played file has a ``title`` tag, use that.
 
     Otherwise, if the media type is DVD, return the volume ID of DVD.
 
