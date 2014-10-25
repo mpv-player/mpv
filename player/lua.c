@@ -1314,7 +1314,7 @@ static int script_parse_json(lua_State *L)
     struct mpv_node node;
     if (json_parse(tmp, &node, &text, 32) >= 0) {
         json_skip_whitespace(&text);
-        ok = !text[0] || !trail;
+        ok = !text[0] || trail;
     }
     if (ok) {
         pushnode(L, &node);
