@@ -208,7 +208,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("hls-bitrate", hls_bitrate, M_OPT_FIXED,
                ({"no", 0}, {"min", 1}, {"max", 2})),
 
-#if HAVE_CDDA
+#if HAVE_CDDA || HAVE_CDDA_LIBAV
     OPT_SUBSTRUCT("cdda", stream_cdda_opts, stream_cdda_conf, 0),
     OPT_STRING("cdrom-device", cdrom_device, M_OPT_FILE),
 #endif
