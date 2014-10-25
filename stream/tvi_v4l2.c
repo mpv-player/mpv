@@ -1012,11 +1012,13 @@ static int uninit(priv_t *priv)
         }
         priv->streamon = 0;
 
-        /* unqueue all remaining buffers */
-        memset(&buf,0,sizeof(buf));
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-        while (!v4l2_ioctl(priv->video_fd, VIDIOC_DQBUF, &buf));
+        /* unqueue all remaining buffers (not sure if this code is correct) */
+        for (i = 0; i < priv->mapcount; i++) {
+            if (v4l2_ioctl(priv->video_fd, VIDIOC_DQBUF, &priv->map[i].buf) < 0) {
+                MP_ERR(priv, "%s: VIDIOC_DQBUF failed: %s\n",
+                       info.short_name, strerror(errno));
+            }
+        }
     }
 
     /* unmap all buffers */
