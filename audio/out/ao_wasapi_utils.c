@@ -931,6 +931,13 @@ exit_label:
     return hr;
 }
 
+static void destroy_proxies(struct wasapi_state *state) {
+    SAFE_RELEASE(state->sAudioClient, IUnknown_Release(state->sAudioClient));
+    SAFE_RELEASE(state->sAudioVolume, IUnknown_Release(state->sAudioVolume));
+    SAFE_RELEASE(state->sEndpointVolume, IUnknown_Release(state->sEndpointVolume));
+    SAFE_RELEASE(state->sSessionControl, IUnknown_Release(state->sSessionControl));
+}
+
 void wasapi_dispatch(void)
 {
     /* dispatch any possible pending messages */
@@ -1044,6 +1051,8 @@ void wasapi_thread_uninit(struct ao *ao)
         state->initial_volume > 0 )
         IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolume,
                                                         state->initial_volume, NULL);
+
+    destroy_proxies(state);
 
     SAFE_RELEASE(state->pRenderClient,   IAudioRenderClient_Release(state->pRenderClient));
     SAFE_RELEASE(state->pAudioClock,     IAudioClock_Release(state->pAudioClock));
