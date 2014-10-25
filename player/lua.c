@@ -1246,16 +1246,17 @@ static int script_subprocess(lua_State *L)
     close(pipes[1]);
     pipes[1] = -1;
 
-    bool eof = false;
-    while (!eof) {
+    while (1) {
         struct pollfd fds[] = {
             {.events = POLLIN, .fd = pipes[0]},
             {.events = POLLIN, .fd = cancel ? mp_cancel_get_fd(cancel) : -1},
         };
         if (poll(fds, fds[1].fd >= 0 ? 2 : 1, -1) < 0 && errno != EINTR)
             break;
-        if (fds[1].revents)
+        if (fds[1].revents) {
+            kill(pid, SIGKILL);
             break;
+        }
         if (fds[0].revents) {
             char buf[4096];
             ssize_t r = read(pipes[0], buf, sizeof(buf));
@@ -1263,16 +1264,12 @@ static int script_subprocess(lua_State *L)
                 continue;
             if (r > 0)
                 bstr_xappend(tmp, &output, (bstr){buf, r});
-            eof = r == 0;
             if (r <= 0)
                 break;
         }
         if (output.len >= max_size)
             break;
     }
-
-    if (!eof || (cancel && mp_cancel_test(cancel)))
-        kill(pid, SIGKILL);
 
     // Note: it can happen that a child process closes the pipe, but does not
     //       terminate yet. In this case, we would have to run waitpid() in
