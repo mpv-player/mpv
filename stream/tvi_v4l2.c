@@ -1590,7 +1590,7 @@ static void *video_grabber(void *data)
     return NULL;
 }
 
-#define MAX_LOOP 50
+#define MAX_LOOP 500
 static double grab_video_frame(priv_t *priv, char *buffer, int len)
 {
     int loop_cnt = 0;
@@ -1601,7 +1601,7 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
     }
 
     while (priv->video_cnt == 0) {
-        usleep(10000);
+        usleep(1000);
         if (loop_cnt++ > MAX_LOOP) return 0;
     }
 
