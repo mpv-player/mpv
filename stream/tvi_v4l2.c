@@ -1243,12 +1243,7 @@ static int start(priv_t *priv)
     init_audio(priv);
     if (priv->tv_param->audio && !priv->audio_initialized) return 0;
 
-    /* we need this to size the audio buffer properly */
-    if (priv->immediate_mode) {
-        priv->video_buffer_size_max = 2;
-    } else {
-        priv->video_buffer_size_max = get_capture_buffer_size(priv);
-    }
+    priv->video_buffer_size_max = get_capture_buffer_size(priv);
 
     if (priv->tv_param->audio) {
         setup_audio_buffer_sizes(priv);
@@ -1319,11 +1314,7 @@ static int start(priv_t *priv)
     priv->video_cnt = 0;
 
     /* request buffers */
-    if (priv->immediate_mode) {
-        request.count = 2;
-    } else {
-        request.count = BUFFER_COUNT;
-    }
+    request.count = BUFFER_COUNT;
 
     request.type  = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     request.memory = V4L2_MEMORY_MMAP;
@@ -1435,12 +1426,10 @@ static void *video_grabber(void *data)
     {
         int ret;
 
-        if (priv->immediate_mode) {
-            while (priv->video_cnt == priv->video_buffer_size_max) {
-                usleep(10000);
-                if (priv->shutdown) {
-                    return NULL;
-                }
+        while (priv->video_cnt == priv->video_buffer_size_max) {
+            usleep(10000);
+            if (priv->shutdown) {
+                return NULL;
             }
         }
 
@@ -1513,19 +1502,17 @@ static void *video_grabber(void *data)
         interval = priv->curr_frame - priv->first_frame;
         delta = interval - prev_interval;
 
-        if (!priv->immediate_mode) {
-            // interpolate the skew in time
-            if (priv->tv_param->audio) pthread_mutex_lock(&priv->skew_mutex);
-            xskew = priv->audio_skew + (interval - priv->audio_skew_measure_time)*priv->audio_skew_factor;
-            if (priv->tv_param->audio) pthread_mutex_unlock(&priv->skew_mutex);
-             // correct extreme skew changes to avoid (especially) moving backwards in time
-            if (xskew - prev_skew > delta*MAX_SKEW_DELTA) {
-                skew = prev_skew + delta*MAX_SKEW_DELTA;
-            } else if (xskew - prev_skew < -delta*MAX_SKEW_DELTA) {
-                skew = prev_skew - delta*MAX_SKEW_DELTA;
-            } else {
-                skew = xskew;
-            }
+        // interpolate the skew in time
+        if (priv->tv_param->audio) pthread_mutex_lock(&priv->skew_mutex);
+        xskew = priv->audio_skew + (interval - priv->audio_skew_measure_time)*priv->audio_skew_factor;
+        if (priv->tv_param->audio) pthread_mutex_unlock(&priv->skew_mutex);
+            // correct extreme skew changes to avoid (especially) moving backwards in time
+        if (xskew - prev_skew > delta*MAX_SKEW_DELTA) {
+            skew = prev_skew + delta*MAX_SKEW_DELTA;
+        } else if (xskew - prev_skew < -delta*MAX_SKEW_DELTA) {
+            skew = prev_skew - delta*MAX_SKEW_DELTA;
+        } else {
+            skew = xskew;
         }
 
         MP_TRACE(priv, "\nfps = %f, interval = %f, a_skew = %f, corr_skew = %f\n",
@@ -1553,17 +1540,15 @@ static void *video_grabber(void *data)
         pthread_mutex_unlock(&priv->video_buffer_mutex);
 
         if (priv->video_cnt == priv->video_buffer_size_current) {
-            if (!priv->immediate_mode) {
-                MP_ERR(priv, "\nvideo buffer full - dropping frame\n");
-                if (priv->audio_insert_null_samples) {
-                    pthread_mutex_lock(&priv->audio_mutex);
-                    priv->dropped_frames_timeshift += delta;
-                    pthread_mutex_unlock(&priv->audio_mutex);
-                }
+            MP_ERR(priv, "\nvideo buffer full - dropping frame\n");
+            if (!priv->immediate_mode || priv->audio_insert_null_samples) {
+                pthread_mutex_lock(&priv->audio_mutex);
+                priv->dropped_frames_timeshift += delta;
+                pthread_mutex_unlock(&priv->audio_mutex);
             }
         } else {
             if (priv->immediate_mode) {
-                priv->video_ringbuffer[priv->video_tail].timestamp = -1;
+                priv->video_ringbuffer[priv->video_tail].timestamp = interval - skew;
             } else {
                 // compensate for audio skew
                 // negative skew => there are more audio samples, increase interval
