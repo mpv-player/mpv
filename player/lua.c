@@ -161,7 +161,7 @@ static int error_handler(lua_State *L)
     if (luaL_loadstring(L, "return debug.traceback('', 3)") == 0) { // e fn|err
         lua_call(L, 0, 1); // e backtrace
         const char *tr = lua_tostring(L, -1);
-        MP_WARN(ctx, "%s\n", tr);
+        MP_WARN(ctx, "%s\n", tr ? tr : "(unknown)");
     }
     lua_pop(L, 1); // e
 
@@ -1201,6 +1201,8 @@ static int script_subprocess(lua_State *L)
         lua_pushinteger(L, n + 1); // args n
         lua_gettable(L, -2); // args arg
         args[n] = talloc_strdup(tmp, lua_tostring(L, -1));
+        if (!args[n])
+            luaL_error(L, "program arguments must be strings");
         lua_pop(L, 1); // args
     }
     args[num_args] = NULL;
