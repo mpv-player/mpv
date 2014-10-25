@@ -41,6 +41,7 @@
 #include "video/fmt-conversion.h"
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
+#include "gpu_memcpy_sse4.h"
 
 // A minor evil.
 #ifndef FF_DXVA2_WORKAROUND_INTEL_CLEARVIDEO
@@ -97,6 +98,9 @@ typedef struct surface_info {
 
 typedef struct DXVA2Context {
     struct mp_log *log;
+
+    void (*copy_nv12)(struct mp_image *dest, uint8_t *src_bits,
+                      unsigned src_pitch, unsigned surf_height);
 
     HMODULE d3dlib;
     HMODULE dxva2lib;
@@ -241,6 +245,26 @@ static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s, int fmt,
     return mp_image_new_custom_ref(&mpi, w, dxva2_release_img);
 }
 
+static void copy_nv12_fallback(struct mp_image *dest, uint8_t *src_bits,
+                               unsigned src_pitch, unsigned surf_height)
+{
+    unsigned height = dest->h * src_pitch;
+    memcpy(dest->planes[0], src_bits, height);
+    dest->stride[0] = src_pitch;
+    memcpy(dest->planes[1], src_bits + src_pitch * surf_height, height / 2);
+    dest->stride[1] = src_pitch;
+}
+
+static void copy_nv12_gpu_sse4(struct mp_image *dest, uint8_t *src_bits,
+                               unsigned src_pitch, unsigned surf_height)
+{
+    unsigned height = dest->h * src_pitch;
+    gpu_memcpy(dest->planes[0], src_bits, height);
+    dest->stride[0] = src_pitch;
+    gpu_memcpy(dest->planes[1], src_bits + src_pitch * surf_height, height / 2);
+    dest->stride[1] = src_pitch;
+}
+
 static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
                                              struct mp_image *img)
 {
@@ -265,17 +289,7 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
         return img;
     }
 
-    struct mp_image buf = {0};
-    mp_image_setfmt(&buf, IMGFMT_NV12);
-    mp_image_set_size(&buf, img->w, img->h);
-
-    buf.planes[0] = LockedRect.pBits;
-    buf.stride[0] = LockedRect.Pitch;
-    buf.planes[1] = (char *)LockedRect.pBits + LockedRect.Pitch * surfaceDesc.Height;
-    buf.stride[1] = LockedRect.Pitch;
-
-    // This should probably use some sort of "special" memcpy-like function.
-    mp_image_copy(sw_img, &buf);
+    ctx->copy_nv12(sw_img, LockedRect.pBits, LockedRect.Pitch, surfaceDesc.Height);
 
     IDirect3DSurface9_UnlockRect(surface);
 
@@ -301,6 +315,16 @@ static int dxva2_init(struct lavc_ctx *s)
 
     ctx->log = mp_log_new(s, s->log, "dxva2");
     ctx->sw_pool = talloc_steal(ctx, mp_image_pool_new(17));
+
+    if (av_get_cpu_flags() & AV_CPU_FLAG_SSE4) {
+        // Use a memcpy implementation optimised for copying from GPU memory
+        MP_DBG(ctx, "Using SSE4 memcpy\n");
+        ctx->copy_nv12 = copy_nv12_gpu_sse4;
+    } else {
+        // Use the CRT memcpy. This can be slower than software decoding.
+        MP_WARN(ctx, "Using fallback memcpy (slow)\n");
+        ctx->copy_nv12 = copy_nv12_fallback;
+    }
 
     ctx->deviceHandle = INVALID_HANDLE_VALUE;
 

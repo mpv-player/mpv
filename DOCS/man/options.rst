@@ -492,7 +492,7 @@ Video
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux with Intel GPUs only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :vda:       requires ``--vo=opengl`` (OS X only)
-    :dxva2-copy: copies video back to system RAM (win32 only) (doesn't work)
+    :dxva2-copy: copies video back to system RAM (Windows only) (experimental)
 
     ``auto`` tries to automatically enable hardware decoding using the first
     available method. This still depends what VO you are using. For example,
