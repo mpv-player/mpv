@@ -99,8 +99,10 @@ def check_pkg_config(*args, **kw_ext):
         result = bool(ctx.check_cfg(**opts))
         ConfigSet.append_unique = original_append_unique
 
-        if not result:
-            defkey = DependencyInflector(dependency_identifier).define_key()
+        defkey = DependencyInflector(dependency_identifier).define_key()
+        if result:
+            ctx.define(defkey, 1)
+        else:
             ctx.undefine(defkey)
         return result
     return fn
