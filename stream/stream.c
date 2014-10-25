@@ -72,7 +72,7 @@ extern const stream_info_t stream_info_rar_entry;
 extern const stream_info_t stream_info_edl;
 
 static const stream_info_t *const stream_list[] = {
-#if HAVE_CDDA
+#if HAVE_CDDA || HAVE_CDDA_LIBAV
     &stream_info_cdda,
 #endif
     &stream_info_ffmpeg,

@@ -421,6 +421,12 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 54.0.0'),
     }, {
+        'name': '--cdda-libav',
+        'desc': 'cdda support (libav)',
+        'deps': [ 'libavdevice' ],
+        'deps_neg': [ 'cdda' ],
+        'func': check_true,
+    }, {
         'name': '--libpostproc',
         'desc': 'libpostproc',
         'func': check_pkg_config('libpostproc', '>= 52.2.100'),

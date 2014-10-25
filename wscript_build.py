@@ -247,6 +247,7 @@ def build(ctx):
         ( "stream/stream_avdevice.c" ),
         ( "stream/stream_bluray.c",              "libbluray" ),
         ( "stream/stream_cdda.c",                "cdda" ),
+        ( "stream/stream_cdda_libav.c",          "cdda-libav" ),
         ( "stream/stream_dvb.c",                 "dvbin" ),
         ( "stream/stream_dvd.c",                 "dvdread" ),
         ( "stream/stream_dvd_common.c",          "dvdread" ),
