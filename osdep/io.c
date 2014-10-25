@@ -43,22 +43,38 @@ bool mp_set_cloexec(int fd)
 }
 
 #ifdef __MINGW32__
-int mp_make_wakeup_pipe(int pipes[2])
+int mp_make_cloexec_pipe(int pipes[2])
 {
     pipes[0] = pipes[1] = -1;
     return -1;
 }
 #else
-// create a pipe, and set it to non-blocking (and also set FD_CLOEXEC)
-int mp_make_wakeup_pipe(int pipes[2])
+int mp_make_cloexec_pipe(int pipes[2])
 {
     if (pipe(pipes) != 0) {
         pipes[0] = pipes[1] = -1;
         return -1;
     }
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++)
         mp_set_cloexec(pipes[i]);
+    return 0;
+}
+#endif
+
+#ifdef __MINGW32__
+int mp_make_wakeup_pipe(int pipes[2])
+{
+    mp_make_cloexec_pipe(pipes);
+}
+#else
+// create a pipe, and set it to non-blocking (and also set FD_CLOEXEC)
+int mp_make_wakeup_pipe(int pipes[2])
+{
+    if (mp_make_cloexec_pipe(pipes) < 0)
+        return -1;
+
+    for (int i = 0; i < 2; i++) {
         int val = fcntl(pipes[i], F_GETFL) | O_NONBLOCK;
         fcntl(pipes[i], F_SETFL, val);
     }
