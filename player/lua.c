@@ -1193,7 +1193,7 @@ static int sparse_poll(struct pollfd *fds, int num_fds, int timeout)
     for (int n = 0; n < num_fds; n++) {
         map[n] = -1;
         if (fds[n].fd < 0)
-            break;
+            continue;
         map[n] = p_num_fds;
         p_fds[p_num_fds++] = fds[n];
     }
