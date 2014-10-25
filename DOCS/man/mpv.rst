@@ -723,14 +723,15 @@ FILES ON WINDOWS
 On win32 (if compiled with MinGW, but not Cygwin), the default config file
 locations are different:
 
-``$CSIDL_APPDATA/mpv/mpv.conf``
+``%APPDATA%/mpv/mpv.conf``
     Preferred mpv config file. This maps to a system and user-specific path,
-    for example ``C:\users\USERNAME\Application Data\mpv\mpv.conf``.
+    for example ``C:\users\USERNAME\Application Data\mpv\mpv.conf``. You can
+    find the exact path by running ``echo %APPDATA%\mpv\mpv.conf`` in cmd.exe.
 
-``$CSIDL_APPDATA/mpv/input.conf``
+``%APPDATA%/mpv/input.conf``
     key bindings (see `INPUT.CONF`_ section)
 
-``$CSIDL_APPDATA/mpv/lua/``
+``%APPDATA%/mpv/lua/``
     equivalent of ``~/.config/mpv/lua/`` on Unix.
 
 The environment variable ``$MPV_HOME`` completely overrides these, like on
@@ -745,6 +746,9 @@ A third config directory with lowest priority is the directory named ``mpv``
 in the same directory as ``mpv.exe``. This used to be the directory with
 highest priority, but is now discouraged to use and might be removed in the
 future.
+
+Note that mpv likes to mix ``/`` and ``\`` path separators for simplicity.
+kernel32.dll accepts this, but cmd.exe does not.
 
 EXAMPLES OF MPV USAGE
 =====================
