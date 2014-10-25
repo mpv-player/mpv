@@ -319,7 +319,6 @@ If you really mean to compile without libass support use --disable-libass."
         'name': '--cdda',
         'desc': 'cdda support (libcdio)',
         'func': check_pkg_config('libcdio_paranoia'),
-        'default': 'disable',
     }, {
         'name': '--enca',
         'desc': 'ENCA support',
