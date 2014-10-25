@@ -727,6 +727,11 @@ hwaccel_features = [
         'desc': 'libavcodec VDPAU hwaccel',
         'deps': [ 'vdpau' ],
         'func': check_true,
+    }, {
+        'name': '--dxva2-hwaccel',
+        'desc': 'libavcodec DXVA2 hwaccel',
+        'deps': [ 'gdi' ],
+        'func': check_true,
     }
 ]
 

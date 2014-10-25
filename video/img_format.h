@@ -256,6 +256,7 @@ enum mp_imgfmt {
     IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
     IMGFMT_VDA,
     IMGFMT_VAAPI,
+    IMGFMT_DXVA2,
 
 
     IMGFMT_END,
@@ -332,7 +333,7 @@ static inline bool IMGFMT_IS_RGB(int fmt)
 
 #define IMGFMT_IS_HWACCEL(fmt) \
     ((fmt) == IMGFMT_VDPAU || (fmt) == IMGFMT_VDPAU_OUTPUT || \
-     (fmt) == IMGFMT_VAAPI || (fmt) == IMGFMT_VDA)
+     (fmt) == IMGFMT_VAAPI || (fmt) == IMGFMT_VDA || (fmt) == IMGFMT_DXVA2)
 
 int mp_imgfmt_from_name(bstr name, bool allow_hwaccel);
 char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt);

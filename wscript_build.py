@@ -296,6 +296,7 @@ def build(ctx):
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
         ( "video/decode/dec_video.c"),
+        ( "video/decode/dxva2.c",                "dxva2-hwaccel" ),
         ( "video/decode/vaapi.c",                "vaapi-hwaccel" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/decode/vda.c",                  "vda-hwaccel" ),

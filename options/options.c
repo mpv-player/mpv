@@ -281,7 +281,8 @@ const m_option_t mp_opts[] = {
                 {"vdpau", 1},
                 {"vda", 2},
                 {"vaapi", 4},
-                {"vaapi-copy", 5})),
+                {"vaapi-copy", 5},
+                {"dxva2-copy", 6})),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 
     OPT_SUBSTRUCT("sws", vo.sws_opts, sws_conf, 0),

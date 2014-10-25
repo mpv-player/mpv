@@ -177,6 +177,7 @@ static const struct {
     {IMGFMT_VDA,   AV_PIX_FMT_VDA},
 #endif
     {IMGFMT_VAAPI, AV_PIX_FMT_VAAPI_VLD},
+    {IMGFMT_DXVA2, AV_PIX_FMT_DXVA2_VLD},
 
     {0, AV_PIX_FMT_NONE}
 };
