@@ -325,7 +325,7 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
 
     s->uncached_type = s->type;
 
-    MP_VERBOSE(s, "Opened: [%s] %s\n", sinfo->name, url);
+    MP_VERBOSE(s, "Opened: %s\n", url);
 
     if (s->mime_type)
         MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
