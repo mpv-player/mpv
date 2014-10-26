@@ -201,6 +201,8 @@ static const struct fmt_entry fmt_table[] = {
     {IMGFMT_420P,  MAKEFOURCC('I','4','2','0')},
     {IMGFMT_420P,  MAKEFOURCC('I','Y','U','V')},
     {IMGFMT_410P,  MAKEFOURCC('Y','V','U','9')},
+    {IMGFMT_NV12,  MAKEFOURCC('N','V','1','2')},
+    {IMGFMT_NV21,  MAKEFOURCC('N','V','2','1')},
     // packed YUV
     {IMGFMT_YUYV,  D3DFMT_YUY2},
     {IMGFMT_UYVY,  D3DFMT_UYVY},
@@ -1378,6 +1380,12 @@ static bool get_video_buffer(d3d_priv *priv, struct mp_image *out)
 
         out->planes[0] = base;
         out->stride[0] = stride;
+
+        if (out->num_planes == 2) {
+            // NV12, NV21
+            out->planes[1] = base + stride * out->h;
+            out->stride[1] = stride;
+        }
 
         if (out->num_planes == 3) {
             bool swap = priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2');
