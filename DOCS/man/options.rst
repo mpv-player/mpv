@@ -939,7 +939,7 @@ Audio
     of the current media, the lavrresample audio filter will be inserted into
     the audio filter layer to compensate for the difference.
 
-``--gapless-audio=<no|yes|weak``
+``--gapless-audio=<no|yes|weak>``
     Try to play consecutive audio files with no silence or disruption at the
     point of file change. Default: ``weak``.
 
@@ -1078,7 +1078,7 @@ Subtitles
         This affects ASS subtitles as well, and may lead to incorrect subtitle
         rendering. Use with care, or use ``--sub-text-font-size`` instead.
 
-``--sub-scale-with-window=yes|no``
+``--sub-scale-with-window=<yes|no>``
     Make the subtitle font size relative to the window, instead of the video.
     This is useful if you always want the same font size, even if the video
     doesn't covert the window fully, e.g. because screen aspect and window
@@ -1121,7 +1121,7 @@ Subtitles
 
         Using this option may lead to incorrect subtitle rendering.
 
-``--ass-hinting=none|light|normal|native``
+``--ass-hinting=<none|light|normal|native>``
     Set font hinting type. <type> can be:
 
     :none:       no hinting (default)
@@ -1139,7 +1139,7 @@ Subtitles
 ``--ass-line-spacing=<value>``
     Set line spacing value for SSA/ASS renderer.
 
-``--ass-shaper=simple|complex``
+``--ass-shaper=<simple|complex>``
     Set the text layout engine used by libass.
 
     :simple:   uses Fribidi only, fast, doesn't render some languages correctly
@@ -1799,7 +1799,7 @@ Disc Devices
     Add ``<value>`` sectors to the values reported when addressing tracks.
     May be negative.
 
-``--cdda-skip=<es|no``
+``--cdda-skip=<yes|no>``
     (Never) accept imperfect data reconstruction.
 
 ``--dvd-speed=<speed>``
@@ -2071,7 +2071,7 @@ Demuxer
     playback, but on the other hand can add delays to seeking or track
     switching.
 
-``--demuxer-readahead-secs=N``
+``--demuxer-readahead-secs=<seconds>``
     If ``--demuxer-thread`` is enabled, this controls how much the demuxer
     should buffer ahead in seconds (default: 0.2). As long as no packet has
     a timestamp difference higher than the readahead amount relative to the
@@ -2080,7 +2080,7 @@ Demuxer
     (This value tends to be fuzzy, because many file formats don't store linear
     timestamps.)
 
-``--demuxer-readahead-packets=N``
+``--demuxer-readahead-packets=<packets>``
     If ``--demuxer-thread`` is enabled, this controls how much the demuxer
     should buffer ahead. As long as the number of packets in the packet queue
     doesn't exceed ``--demuxer-readahead-packets``, and the total number of
@@ -2092,7 +2092,7 @@ Demuxer
 
     See ``--list-options`` for defaults and value range.
 
-``--demuxer-readahead-bytes=N``
+``--demuxer-readahead-bytes=<bytes>``
     See ``--demuxer-readahead-packets``.
 
 
@@ -2404,7 +2404,7 @@ OSD
 ``--osd-scale=<factor>``
     OSD font size multiplier, multiplied with ``--osd-font-size`` value.
 
-``--osd-scale-by-window=yes|no``
+``--osd-scale-by-window=<yes|no>``
     Whether to scale the OSD with the window size (default: yes). If this is
     disabled, ``--osd-font-size`` and other OSD options that use scaled pixels
     are always in actual pixels. The effect is that changing the window size
