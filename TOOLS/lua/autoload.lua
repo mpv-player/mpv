@@ -40,10 +40,10 @@ function find_and_add_entries()
         return
     end
     local append = {[-1] = {}, [1] = {}}
-    for dir = -1, 1, 2 do -- 2 iterations, with dir = -1 and +1
+    for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
         for i = 1, MAXENTRIES do
-            local file = files[current + i * dir]
-            local pl_e = pl[pl_current + i * dir]
+            local file = files[current + i * direction]
+            local pl_e = pl[pl_current + i * direction]
             if file == nil or file[1] == "." then
                 break
             end
@@ -53,7 +53,7 @@ function find_and_add_entries()
                     break
                 end
             end
-            if dir == -1 then
+            if direction == -1 then
                 if pl_current == 1 then -- never add additional entries in the middle
                     mp.msg.info("Prepending " .. file)
                     table.insert(append[-1], 1, file)
