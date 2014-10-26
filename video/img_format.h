@@ -256,7 +256,7 @@ enum mp_imgfmt {
     IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
     IMGFMT_VDA,
     IMGFMT_VAAPI,
-    IMGFMT_DXVA2,
+    IMGFMT_DXVA2,           // IDirect3DSurface9 (NV12)
 
 
     IMGFMT_END,
