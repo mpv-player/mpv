@@ -157,6 +157,8 @@ static void dxva2_destroy_decoder(struct lavc_ctx *s)
 static void dxva2_uninit(struct lavc_ctx *s)
 {
     DXVA2Context *ctx = s->hwdec_priv;
+    if (!ctx)
+        return;
 
     if (ctx->decoder)
         dxva2_destroy_decoder(s);
