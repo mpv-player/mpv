@@ -373,6 +373,9 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
         name = mp_tags_get_str(mpctx->master_demuxer->metadata, "title");
         if (name && name[0])
             return m_property_strdup_ro(action, arg, name);
+        name = mp_tags_get_str(mpctx->master_demuxer->metadata, "icy-title");
+        if (name && name[0])
+            return m_property_strdup_ro(action, arg, name);
     }
     return mp_property_filename(ctx, prop, action, arg);
 }
