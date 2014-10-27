@@ -816,7 +816,7 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
     if (mpctx->d_video)
         return;
 
-    if (!mpctx->opts->force_vo)
+    if (!mpctx->opts->force_vo && mpctx->video_out)
         uninit_video_out(mpctx);
 
     if (mpctx->video_out && (!mpctx->video_out->config_ok || reconfig)) {
