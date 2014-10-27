@@ -365,10 +365,15 @@ static void xrandr_read(struct vo_x11_state *x11)
                     continue;
                 if (x11->num_displays >= MAX_DISPLAYS)
                     continue;
+                double vTotal = m.vTotal;
+                if (m.modeFlags & RR_DoubleScan)
+                    vTotal *= 2;
+                if (m.modeFlags & RR_Interlace)
+                    vTotal /= 2;
                 struct xrandr_display d = {
                     .rc = { crtc->x, crtc->y,
                             crtc->x + crtc->width, crtc->y + crtc->height },
-                    .fps = m.dotClock / (m.hTotal * (double)m.vTotal),
+                    .fps = m.dotClock / (m.hTotal * vTotal),
                 };
                 int num = x11->num_displays++;
                 MP_VERBOSE(x11, "Display %d: [%d, %d, %d, %d] @ %f FPS\n",
