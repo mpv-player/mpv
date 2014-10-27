@@ -250,21 +250,29 @@ static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s, int fmt,
 static void copy_nv12_fallback(struct mp_image *dest, uint8_t *src_bits,
                                unsigned src_pitch, unsigned surf_height)
 {
-    unsigned height = dest->h * src_pitch;
-    memcpy(dest->planes[0], src_bits, height);
-    dest->stride[0] = src_pitch;
-    memcpy(dest->planes[1], src_bits + src_pitch * surf_height, height / 2);
-    dest->stride[1] = src_pitch;
+    struct mp_image buf = {0};
+    mp_image_setfmt(&buf, IMGFMT_NV12);
+    mp_image_set_size(&buf, dest->w, dest->h);
+
+    buf.planes[0] = src_bits;
+    buf.stride[0] = src_pitch;
+    buf.planes[1] = src_bits + src_pitch * surf_height;
+    buf.stride[1] = src_pitch;
+    mp_image_copy(dest, &buf);
 }
 
 static void copy_nv12_gpu_sse4(struct mp_image *dest, uint8_t *src_bits,
                                unsigned src_pitch, unsigned surf_height)
 {
-    unsigned height = dest->h * src_pitch;
-    gpu_memcpy(dest->planes[0], src_bits, height);
-    dest->stride[0] = src_pitch;
-    gpu_memcpy(dest->planes[1], src_bits + src_pitch * surf_height, height / 2);
-    dest->stride[1] = src_pitch;
+    // Unfortunately the fallback must be used if the stride doesn't match
+    if (dest->stride[0] != src_pitch) {
+        copy_nv12_fallback(dest, src_bits, src_pitch, surf_height);
+        return;
+    }
+
+    unsigned size = dest->h * src_pitch;
+    gpu_memcpy(dest->planes[0], src_bits, size);
+    gpu_memcpy(dest->planes[1], src_bits + src_pitch * surf_height, size / 2);
 }
 
 static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
