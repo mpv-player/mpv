@@ -264,15 +264,36 @@ static void copy_nv12_fallback(struct mp_image *dest, uint8_t *src_bits,
 static void copy_nv12_gpu_sse4(struct mp_image *dest, uint8_t *src_bits,
                                unsigned src_pitch, unsigned surf_height)
 {
-    // Unfortunately the fallback must be used if the stride doesn't match
-    if (dest->stride[0] != src_pitch) {
-        copy_nv12_fallback(dest, src_bits, src_pitch, surf_height);
-        return;
-    }
+    const int lines = dest->h;
+    const int stride_y = dest->stride[0];
+    const int stride_uv = dest->stride[1];
 
-    unsigned size = dest->h * src_pitch;
-    gpu_memcpy(dest->planes[0], src_bits, size);
-    gpu_memcpy(dest->planes[1], src_bits + src_pitch * surf_height, size / 2);
+    // If the strides match, the image can be copied in one go
+    if (stride_y == src_pitch && stride_uv == src_pitch) {
+        const size_t size = lines * src_pitch;
+        gpu_memcpy(dest->planes[0], src_bits, size);
+        gpu_memcpy(dest->planes[1], src_bits + src_pitch * surf_height, size / 2);
+
+    } else {
+        // Copy the Y plane line-by-line
+        uint8_t *dest_y = dest->planes[0];
+        const uint8_t *src_y = src_bits;
+        const int bytes_per_line = dest->w;
+        for (int i = 0; i < lines; i++) {
+            gpu_memcpy(dest_y, src_y, bytes_per_line);
+            dest_y += stride_y;
+            src_y += src_pitch;
+        }
+
+        // Copy the UV plane line-by-line
+        uint8_t *dest_uv = dest->planes[1];
+        const uint8_t *src_uv = src_bits + src_pitch * surf_height;
+        for (int i = 0; i < lines / 2; i++) {
+            gpu_memcpy(dest_uv, src_uv, bytes_per_line);
+            dest_uv += stride_uv;
+            src_uv += src_pitch;
+        }
+    }
 }
 
 static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
