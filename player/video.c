@@ -247,8 +247,8 @@ void uninit_video_chain(struct MPContext *mpctx)
         mpctx->video_status = STATUS_EOF;
         mpctx->sync_audio_to_video = false;
         reselect_demux_streams(mpctx);
+        mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
     }
-    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
 int reinit_video_chain(struct MPContext *mpctx)
