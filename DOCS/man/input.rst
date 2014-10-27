@@ -544,7 +544,7 @@ Input Commands that are Possibly Subject to Change
 
 
 Undocumented commands: ``tv_last_channel`` (TV/DVB only), ``get_property`` (?),
-``vo_cmdline`` (experimental).
+``vo_cmdline`` (experimental), ``ao_reload`` (experimental/internal).
 
 Input Command Prefixes
 ----------------------

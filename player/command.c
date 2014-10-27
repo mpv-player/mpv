@@ -1454,6 +1454,18 @@ static int get_device_entry(int item, int action, void *arg, void *ctx)
     return m_property_read_sub(props, action, arg);
 }
 
+static void reload_audio_output(struct MPContext *mpctx)
+{
+    if (!mpctx->ao)
+        return;
+    ao_reset(mpctx->ao);
+    uninit_audio_out(mpctx);
+    // This normally recreates the AO, although there are situations when AO
+    // creation is delayed; for example if there are no audio packets around,
+    // and the audio format is yet unknown.
+    reinit_audio_chain(mpctx);
+}
+
 static int mp_property_audio_devices(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -4231,6 +4243,10 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 return -1;
             }
         }
+        break;
+
+    case MP_CMD_AO_RELOAD:
+        reload_audio_output(mpctx);
         break;
 
     case MP_CMD_AF:

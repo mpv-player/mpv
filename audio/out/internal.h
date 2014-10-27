@@ -183,6 +183,8 @@ bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
 bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num);
 
+void ao_request_reload(struct ao *ao);
+
 // Add a deep copy of e to the list.
 // Call from ao_driver->list_devs callback only.
 void ao_device_list_add(struct ao_device_list *list, struct ao *ao,

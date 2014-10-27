@@ -156,6 +156,7 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_DISCNAV, "discnav", { ARG_STRING } },
 
   { MP_CMD_AF, "af", { ARG_STRING, ARG_STRING } },
+  { MP_CMD_AO_RELOAD, "ao_reload", },
 
   { MP_CMD_VF, "vf", { ARG_STRING, ARG_STRING } },
 

@@ -29,6 +29,7 @@
 #include "audio/format.h"
 #include "audio/audio.h"
 
+#include "input/input.h"
 #include "options/options.h"
 #include "options/m_config.h"
 #include "common/msg.h"
@@ -404,6 +405,13 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num)
 {
     return mp_chmap_sel_get_def(s, map, num);
+}
+
+// Request that the player core destroys and recreates the AO.
+void ao_request_reload(struct ao *ao)
+{
+    const char *cmd[] = {"ao_reload", NULL};
+    mp_input_run_cmd(ao->input_ctx, cmd);
 }
 
 // --- The following functions just return immutable information.
