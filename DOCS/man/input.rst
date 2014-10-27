@@ -1395,6 +1395,19 @@ Property list
     human readable free form text. The description is an empty string if none
     was received.
 
+``audio-device`` (RW)
+    Set the audio device. This directly reads/writes the ``--audio-device``
+    option, but on write accesses, the audio output will be scheduled for
+    reloading.
+
+    Writing this property while no audio output is active will not automatically
+    enable audio. (This is also true in the case when audio was disabled due to
+    reinitialization failure after a previous write access to ``audio-device``.)
+
+    This property also doesn't tell you which audio device is actually in use.
+
+    How these details are handled may change in the future.
+
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
     changed at runtime by writing to this property. Note that many options

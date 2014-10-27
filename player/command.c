@@ -1466,6 +1466,16 @@ static void reload_audio_output(struct MPContext *mpctx)
     reinit_audio_chain(mpctx);
 }
 
+static int mp_property_audio_device(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    struct MPContext *mpctx = ctx;
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (action == M_PROPERTY_SET)
+        reload_audio_output(mpctx);
+    return r;
+}
+
 static int mp_property_audio_devices(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3049,6 +3059,7 @@ static const struct m_property mp_properties[] = {
     {"aid", mp_property_audio},
     {"balance", mp_property_balance},
     {"volume-restore-data", mp_property_volrestore},
+    {"audio-device", mp_property_audio_device},
     {"audio-device-list", mp_property_audio_devices},
 
     // Video
