@@ -8,9 +8,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-#define EMBED_VIEW 1
-
-#if EMBED_VIEW
 @interface CocoaWindow : NSWindow
 @end
 
@@ -26,11 +23,9 @@
     NSWindow *w;
 }
 @end
-#endif
 
 static void wakeup(void *);
 
-#if EMBED_VIEW
 @implementation AppDelegate
 
 - (void)createWindow {
@@ -47,9 +42,15 @@ static void wakeup(void *);
     [self->w setTitle:@"cocoabasic example"];
     [self->w makeMainWindow];
     [self->w makeKeyAndOrderFront:nil];
+
+    NSMenu *m = [[NSMenu alloc] initWithTitle:@"AMainMenu"];
+    NSMenuItem *item = [m addItemWithTitle:@"Apple" action:nil keyEquivalent:@""];
+    NSMenu *sm = [[NSMenu alloc] initWithTitle:@"Apple"];
+    [m setSubmenu:sm forItem:item];
+    [sm addItemWithTitle: @"Shutdown mpv" action:@selector(shutdown) keyEquivalent:@"s"];
+    [NSApp setMenu:m];
     [NSApp activateIgnoringOtherApps:YES];
 }
-#endif
 
 - (void) applicationDidFinishLaunching:(NSNotification *)notification {
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -68,9 +69,7 @@ static void wakeup(void *);
     }
     NSString *filename = args[1];
 
-#if EMBED_VIEW
     [self createWindow];
-#endif
 
     // Deal with MPV in the background.
     queue = dispatch_queue_create("mpv", DISPATCH_QUEUE_SERIAL);
@@ -82,10 +81,8 @@ static void wakeup(void *);
             exit(1);
         }
 
-#if EMBED_VIEW
         int64_t wid = (intptr_t) [self->w contentView];
         check_error(mpv_set_option(mpv, "wid", MPV_FORMAT_INT64, &wid));
-#endif
 
         // Maybe set some options here, like default key bindings.
         // NOTE: Interaction with the window seems to be broken for now.
