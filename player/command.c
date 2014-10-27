@@ -4064,7 +4064,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (!append || (append == 2 && !mpctx->playlist->current)) {
             if (opts->position_save_on_quit) // requested in issue #1148
                 mp_write_watch_later_conf(mpctx);
-            mp_set_playlist_entry(mpctx, mpctx->playlist->first);
+            mp_set_playlist_entry(mpctx, entry);
         }
         break;
     }
