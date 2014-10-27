@@ -349,6 +349,7 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     [s->video release];
 
     s->video.adapter = adapter;
+    [adapter release];
 
     if (!s->embedded) {
         [s->window setRestorable:NO];
