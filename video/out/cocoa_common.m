@@ -192,9 +192,9 @@ void vo_cocoa_uninit(struct vo *vo)
         enable_power_management(vo);
         cocoa_rm_fs_screen_profile_observer(vo);
 
-        [s->video release];
-        [s->view release];
-        [s->window release];
+        [s->gl_ctx release];
+        [s->view removeFromSuperview];
+        if (s->window) [s->window release];
     });
 }
 
@@ -310,7 +310,7 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts  = vo->opts;
 
-    MpvCocoaAdapter *adapter = [[[MpvCocoaAdapter alloc] init] autorelease];
+    MpvCocoaAdapter *adapter = [[MpvCocoaAdapter alloc] init];
     adapter.vout = vo;
 
     NSView *parent;
@@ -327,6 +327,7 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     view.adapter = adapter;
     s->view = view;
     [parent addSubview:s->view];
+    [s->view release];
 
     // insert ourselves as the next key view so that clients can give key
     // focus to the mpv view by calling -[NSWindow selectNextKeyView:]
@@ -345,6 +346,7 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
 
     [s->view addSubview:s->video];
     [s->gl_ctx setView:s->video];
+    [s->video release];
 
     s->video.adapter = adapter;
 
