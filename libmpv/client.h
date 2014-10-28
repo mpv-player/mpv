@@ -246,7 +246,30 @@ typedef enum mpv_error {
     /**
      * General error when running a command with mpv_command and similar.
      */
-    MPV_ERROR_COMMAND           = -12
+    MPV_ERROR_COMMAND           = -12,
+    /**
+     * Generic error on loading (used with mpv_event_end_file.error).
+     */
+    MPV_ERROR_LOADING_FAILED    = -13,
+    /**
+     * Initializing the audio output failed.
+     */
+    MPV_ERROR_AO_INIT_FAILED    = -14,
+    /**
+     * Initializing the video output failed.
+     */
+    MPV_ERROR_VO_INIT_FAILED    = -15,
+    /**
+     * There was no audio or video data to play. This also happens if the
+     * file was recognized, but did not contain any audio or video streams,
+     * or no streams were selected.
+     */
+    MPV_ERROR_NOTHING_TO_PLAY   = -16,
+    /**
+     * When trying to load the file, the file format could not be determined,
+     * or the file was too broken to open it.
+     */
+    MPV_ERROR_UNKNOWN_FORMAT    = -17
 } mpv_error;
 
 /**
@@ -1131,6 +1154,14 @@ typedef enum mpv_end_file_reason {
      * Playback was stopped by the quit command or player shutdown.
      */
     MPV_END_FILE_REASON_QUIT = 3,
+    /**
+     * Some kind of error happened that lead to playback abort. Does not
+     * necessarily happen on incomplete or broken files (in these cases, both
+     * MPV_END_FILE_REASON_ERROR or MPV_END_FILE_REASON_EOF are possible).
+     *
+     * mpv_event_end_file.error will be set.
+     */
+    MPV_END_FILE_REASON_ERROR = 4,
 } mpv_end_file_reason;
 
 typedef struct mpv_event_end_file {
@@ -1141,6 +1172,12 @@ typedef struct mpv_event_end_file {
      * Unknown values should be treated as unknown.
      */
     int reason;
+    /**
+     * If reason==MPV_END_FILE_REASON_ERROR, this contains a mpv error code
+     * (one of MPV_ERROR_...) giving an approximate reason why playback
+     * failed. In other cases, this field is 0 (no error).
+     */
+    int error;
 } mpv_event_end_file;
 
 typedef struct mpv_event_script_input_dispatch {

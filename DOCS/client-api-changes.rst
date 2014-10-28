@@ -26,6 +26,8 @@ API changes
 ::
 
  1.9    - add enum mpv_end_file_reason for mpv_event_end_file.reason
+        - add MPV_END_FILE_REASON_ERROR and the mpv_event_end_file.error field
+          for slightly better error reporting on playback failure
  1.8    - add qthelper.hpp
  1.7    - add mpv_command_node(), mpv_command_node_async()
  1.6    - modify "core-idle" property behavior

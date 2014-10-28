@@ -255,6 +255,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         struct ao *ao = mpctx->ao;
         if (!ao) {
             MP_ERR(mpctx, "Could not open/initialize audio device -> no sound.\n");
+            mpctx->error_playing = MPV_ERROR_AO_INIT_FAILED;
             goto init_error;
         }
 

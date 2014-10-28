@@ -38,6 +38,7 @@ enum stop_play_reason {
     PT_STOP,            // stop playback, clear playlist
     PT_RELOAD_DEMUXER,  // restart playback, but keep stream open
     PT_QUIT,            // stop playback, quit player
+    PT_ERROR,           // play next playlist entry (due to an error)
 };
 
 enum exit_reason {
@@ -186,7 +187,7 @@ typedef struct MPContext {
     enum exit_reason quit_player_rc;
     int quit_custom_rc;
     bool has_quit_custom_rc;
-    bool error_playing;
+    int error_playing;
     char **resume_defaults;
 
     int64_t shown_vframes, shown_aframes;

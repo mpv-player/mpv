@@ -1479,6 +1479,11 @@ static const char *const err_table[] = {
     [-MPV_ERROR_PROPERTY_UNAVAILABLE] = "property unavailable",
     [-MPV_ERROR_PROPERTY_ERROR] = "error accessing property",
     [-MPV_ERROR_COMMAND] = "error running command",
+    [-MPV_ERROR_LOADING_FAILED] = "loading failed",
+    [-MPV_ERROR_AO_INIT_FAILED] = "audio output initialization failed",
+    [-MPV_ERROR_VO_INIT_FAILED] = "audio output initialization failed",
+    [-MPV_ERROR_NOTHING_TO_PLAY] = "the file has no audio or video data",
+    [-MPV_ERROR_UNKNOWN_FORMAT] = "unrecognized file format",
 };
 
 const char *mpv_error_string(int error)

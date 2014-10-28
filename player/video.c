@@ -273,6 +273,7 @@ int reinit_video_chain(struct MPContext *mpctx)
         if (!mpctx->video_out) {
             MP_FATAL(mpctx, "Error opening/initializing "
                     "the selected video_out (-vo) device.\n");
+            mpctx->error_playing = MPV_ERROR_VO_INIT_FAILED;
             goto err_out;
         }
         mpctx->mouse_cursor_visible = true;
@@ -766,8 +767,10 @@ void write_video(struct MPContext *mpctx, double endpts)
         MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
         int vo_r = vo_reconfig(vo, &p, 0);
-        if (vo_r < 0)
+        if (vo_r < 0) {
+            mpctx->error_playing = MPV_ERROR_VO_INIT_FAILED;
             goto error;
+        }
         init_vo(mpctx);
         mpctx->time_frame = 0; // display immediately
     }

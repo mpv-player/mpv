@@ -191,8 +191,11 @@ void error_on_track(struct MPContext *mpctx, struct track *track)
             MP_INFO(mpctx, "Video: no video\n");
         if (!mpctx->current_track[0][STREAM_AUDIO] &&
             !mpctx->current_track[0][STREAM_VIDEO])
-            mpctx->stop_play = PT_NEXT_ENTRY;
-        mpctx->error_playing = true;
+        {
+            mpctx->stop_play = PT_ERROR;
+            if (mpctx->error_playing >= 0)
+                mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
+        }
         mpctx->sleeptime = 0;
     }
 }
