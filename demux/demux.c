@@ -844,12 +844,17 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     in->d_user->metadata = talloc_zero(in->d_user, struct mp_tags);
     in->d_buffer->metadata = talloc_zero(in->d_buffer, struct mp_tags);
 
-    int64_t start_pos = stream_tell(stream);
-
     mp_verbose(log, "Trying demuxer: %s (force-level: %s)\n",
                desc->name, d_level(check));
 
     in->d_thread->params = params; // temporary during open()
+
+    if (stream->seekable) // not for DVD/BD/DVB in particular
+        stream_seek(stream, 0);
+
+    // Peek this much data to avoid that stream_read() run by some demuxers
+    // or stream filters will flush previous peeked data.
+    stream_peek(stream, STREAM_BUFFER_SIZE);
 
     int ret = demuxer->desc->open(in->d_thread, check);
     if (ret >= 0) {
@@ -873,7 +878,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     }
 
     free_demuxer(demuxer);
-    stream_seek(stream, start_pos);
     return NULL;
 }
 
@@ -908,10 +912,6 @@ struct demuxer *demux_open(struct stream *stream, char *force_format,
             goto done;
         }
     }
-
-    // Peek this much data to avoid that stream_read() run by some demuxers
-    // or stream filters will flush previous peeked data.
-    stream_peek(stream, STREAM_BUFFER_SIZE);
 
     // Test demuxers from first to last, one pass for each check_levels[] entry
     for (int pass = 0; check_levels[pass] != -1; pass++) {
