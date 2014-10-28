@@ -809,7 +809,7 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
         edition = *(int *)arg;
         if (edition != demuxer->edition) {
             opts->edition_id = edition;
-            mpctx->stop_play = PT_RESTART;
+            mpctx->stop_play = PT_RELOAD_DEMUXER;
         }
         return M_PROPERTY_OK;
     }

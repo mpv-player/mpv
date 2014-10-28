@@ -270,7 +270,6 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     }
 
     mpctx->demuxer = n->source;
-    mpctx->stream = mpctx->demuxer->stream;
 
     // While another timeline was active, the selection of active tracks might
     // have been changed - possibly we need to update this source.
@@ -841,6 +840,7 @@ static struct stream *open_stream_async(struct MPContext *mpctx,
 
 struct demux_open_args {
     struct stream *stream;
+    struct mpv_global *global;
     struct demuxer *demux;      // result
 };
 
@@ -848,15 +848,20 @@ static void open_demux_thread(void *pctx)
 {
     struct demux_open_args *args = pctx;
     struct stream *s = args->stream;
-    struct mpv_global *global = s->global; // they run in the same thread anyway
+    struct mpv_global *global = args->global;
     args->demux = demux_open(s, global->opts->demuxer_name, NULL, global);
 }
 
 static struct demuxer *open_demux_async(struct MPContext *mpctx,
                                         struct stream *stream)
 {
-    struct demux_open_args args = {stream};
+    struct demux_open_args args = {stream, create_sub_global(mpctx)};
     mpctx_run_non_blocking(mpctx, open_demux_thread, &args);
+    if (args.demux) {
+        talloc_steal(args.demux, args.global);
+    } else {
+        talloc_free(args.global);
+    }
     return args.demux;
 }
 
@@ -1016,7 +1021,6 @@ goto_reopen_demuxer: ;
     if (mpctx->timeline)
         timeline_set_part(mpctx, mpctx->timeline_part, true);
 
-
     open_subtitles_from_options(mpctx);
     open_audiofiles_from_options(mpctx);
 
@@ -1165,8 +1169,7 @@ terminate_playback:
     if (!opts->gapless_audio && !mpctx->encode_lavc_ctx)
         uninit_audio_out(mpctx);
 
-    if (mpctx->stop_play != PT_RESTART)
-        m_config_restore_backups(mpctx->mconfig);
+    m_config_restore_backups(mpctx->mconfig);
 
     mpctx->playback_initialized = false;
 
@@ -1182,8 +1185,6 @@ terminate_playback:
     struct mpv_event_end_file end_event = {0};
     switch (mpctx->stop_play) {
     case AT_END_OF_FILE:    end_event.reason = 0; break;
-    case PT_RESTART:
-    case PT_RELOAD_DEMUXER: end_event.reason = 1; break;
     case PT_NEXT_ENTRY:
     case PT_CURRENT_ENTRY:
     case PT_STOP:           end_event.reason = 2; break;
