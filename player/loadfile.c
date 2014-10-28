@@ -1184,12 +1184,11 @@ terminate_playback:
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
     struct mpv_event_end_file end_event = {0};
     switch (mpctx->stop_play) {
-    case AT_END_OF_FILE:    end_event.reason = 0; break;
+    case AT_END_OF_FILE:    end_event.reason = MPV_END_FILE_REASON_EOF; break;
     case PT_NEXT_ENTRY:
     case PT_CURRENT_ENTRY:
-    case PT_STOP:           end_event.reason = 2; break;
-    case PT_QUIT:           end_event.reason = 3; break;
-    default:                end_event.reason = -1; break;
+    case PT_STOP:           end_event.reason = MPV_END_FILE_REASON_STOP; break;
+    case PT_QUIT:           end_event.reason = MPV_END_FILE_REASON_QUIT; break;
     };
     mp_notify(mpctx, MPV_EVENT_END_FILE, &end_event);
 

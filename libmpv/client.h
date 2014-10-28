@@ -158,11 +158,13 @@ extern "C" {
  * number is incremented. This affects only C part, and not properties and
  * options.
  *
+ * Every API bump is described in DOCS/client-api-changes.rst
+ *
  * You can use MPV_MAKE_VERSION() and compare the result with integer
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 8)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 9)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -1113,16 +1115,32 @@ typedef struct mpv_event_log_message {
     mpv_log_level log_level;
 } mpv_event_log_message;
 
+typedef enum mpv_end_file_reason {
+    /**
+     * The end of file was reached. Sometimes this may also happen on
+     * incomplete or corrupted files, or if the network connection was
+     * interrupted when playing a remote file. It also happens if the
+     * playback range was restricted with --end or --frames or similar.
+     */
+    MPV_END_FILE_REASON_EOF = 0,
+    /**
+     * Playback was stopped by an external action (e.g. playlist controls).
+     */
+    MPV_END_FILE_REASON_STOP = 2,
+    /**
+     * Playback was stopped by the quit command or player shutdown.
+     */
+    MPV_END_FILE_REASON_QUIT = 3,
+} mpv_end_file_reason;
+
 typedef struct mpv_event_end_file {
     /**
-     * Identifies the reason why playback was stopped:
-     *  0: the end of the file was reached or initialization failed
-     *  1: the file is restarted (e.g. edition switching)
-     *  2: playback was aborted by an external action (e.g. playlist controls)
-     *  3: the player received the quit command
-     * Other values should be treated as unknown.
+     * Corresponds to the values in enum mpv_end_file_reason (the "int" type
+     * will be replaced with mpv_end_file_reason on the next ABI bump).
+     *
+     * Unknown values should be treated as unknown.
      */
-  int reason;
+    int reason;
 } mpv_event_end_file;
 
 typedef struct mpv_event_script_input_dispatch {

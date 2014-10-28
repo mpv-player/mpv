@@ -25,6 +25,7 @@ API changes
 
 ::
 
+ 1.9    - add enum mpv_end_file_reason for mpv_event_end_file.reason
  1.8    - add qthelper.hpp
  1.7    - add mpv_command_node(), mpv_command_node_async()
  1.6    - modify "core-idle" property behavior
