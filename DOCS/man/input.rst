@@ -193,7 +193,7 @@ List of Input Commands
     force
         Terminate playback if the first file is being played.
 
-``loadfile "<file>" [replace|append [options]]``
+``loadfile "<file>" [replace|append|append-play [options]]``
     Load the given file and play it.
 
     Second argument:
@@ -204,6 +204,8 @@ List of Input Commands
         Append the file to the playlist.
     <append-play>
         Append the file, and if nothing is currently playing, start playback.
+        (Always starts with the added file, even if the playlist was not empty
+        before running this command.)
 
     The third argument is a list of options and values which should be set
     while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
