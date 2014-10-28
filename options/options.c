@@ -478,6 +478,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("stream-capture", stream_capture, M_OPT_FIXED | M_OPT_FILE),
     OPT_STRING("stream-dump", stream_dump, M_OPT_FIXED | M_OPT_FILE),
 
+    OPT_FLAG("stop-playback-on-init-failure", stop_playback_on_init_failure, 0),
+
     OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 2, 10000,
                       ({"no", -1}, {"1", -1},
                        {"inf", 0})),

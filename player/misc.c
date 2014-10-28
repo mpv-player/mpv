@@ -189,8 +189,9 @@ void error_on_track(struct MPContext *mpctx, struct track *track)
             MP_INFO(mpctx, "Audio: no audio\n");
         if (track->type == STREAM_VIDEO)
             MP_INFO(mpctx, "Video: no video\n");
-        if (!mpctx->current_track[0][STREAM_AUDIO] &&
-            !mpctx->current_track[0][STREAM_VIDEO])
+        if (mpctx->opts->stop_playback_on_init_failure ||
+            (!mpctx->current_track[0][STREAM_AUDIO] &&
+             !mpctx->current_track[0][STREAM_VIDEO]))
         {
             mpctx->stop_play = PT_ERROR;
             if (mpctx->error_playing >= 0)

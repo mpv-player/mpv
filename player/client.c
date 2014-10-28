@@ -417,6 +417,7 @@ mpv_handle *mpv_create(void)
         mpv_set_option_string(ctx, "input-appleremote", "no");
         mpv_set_option_string(ctx, "input-media-keys", "no");
         mpv_set_option_string(ctx, "input-app-events", "no");
+        mpv_set_option_string(ctx, "stop-playback-on-init-failure", "yes");
     } else {
         mp_destroy(mpctx);
     }
