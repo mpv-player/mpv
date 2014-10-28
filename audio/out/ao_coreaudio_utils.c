@@ -28,6 +28,16 @@
 #include "osdep/endian.h"
 #include "audio/format.h"
 
+static bool ca_is_output_device(struct ao *ao, AudioDeviceID dev)
+{
+    size_t n_buffers;
+    AudioBufferList *buffers;
+    const ca_scope scope = kAudioDevicePropertyStreamConfiguration;
+    CA_GET_ARY_O(dev, scope, &buffers, &n_buffers);
+    talloc_free(buffers);
+    return n_buffers > 0;
+}
+
 void ca_get_device_list(struct ao *ao, struct ao_device_list *list)
 {
     AudioDeviceID *devs;
@@ -37,6 +47,8 @@ void ca_get_device_list(struct ao *ao, struct ao_device_list *list)
                    &devs, &n_devs);
     CHECK_CA_ERROR("Failed to get list of output devices.");
     for (int i = 0; i < n_devs; i++) {
+        if (!ca_is_output_device(ao, devs[i]))
+            continue;
         char name[32];
         char *desc;
         sprintf(name, "%d", devs[i]);
