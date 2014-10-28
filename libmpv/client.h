@@ -1222,11 +1222,12 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
  * overflow and silently discard further events. If this happens, making
  * asynchronous requests will fail as well (with MPV_ERROR_EVENT_QUEUE_FULL).
  *
- * Only one thread is allowed to call this at a time. The API won't complain
- * if more than one thread calls this, but it will cause race conditions in
- * the client when accessing the shared mpv_event struct. Note that most other
- * API functions are not restricted by this, and no API function internally
- * calls mpv_wait_event().
+ * Only one thread is allowed to call this on the same mpv_handle at a time.
+ * The API won't complain if more than one thread calls this, but it will cause
+ * race conditions in the client when accessing the shared mpv_event struct.
+ * Note that most other API functions are not restricted by this, and no API
+ * function internally calls mpv_wait_event(). This does not apply to concurrent
+ * calls of this function on different mpv_handles: these are always safe.
  *
  * @param timeout Timeout in seconds, after which the function returns even if
  *                no event was received. A MPV_EVENT_NONE is returned on
