@@ -1135,6 +1135,8 @@ goto_reopen_demuxer: ;
 
     MP_VERBOSE(mpctx, "EOF code: %d  \n", mpctx->stop_play);
 
+terminate_playback:
+
     if (mpctx->stop_play == PT_RELOAD_DEMUXER) {
         mpctx->stop_play = KEEP_PLAYING;
         mpctx->playback_initialized = false;
@@ -1144,8 +1146,6 @@ goto_reopen_demuxer: ;
         uninit_demuxer(mpctx);
         goto goto_reopen_demuxer;
     }
-
-terminate_playback:
 
     mp_nav_destroy(mpctx);
 
