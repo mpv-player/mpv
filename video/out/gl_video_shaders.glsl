@@ -71,6 +71,7 @@ vec3 bt2020_compand(vec3 v)
 #endif
 
 uniform mat3 transform;
+uniform vec3 translation;
 uniform sampler3D lut_3d;
 uniform mat3 cms_matrix; // transformation from file's gamut to bt.2020
 
@@ -81,7 +82,7 @@ in vec2 vertex_texcoord;
 out vec2 texcoord;
 
 void main() {
-    vec3 position = vec3(vertex_position, 1);
+    vec3 position = vec3(vertex_position, 1) + translation;
 #ifndef FIXED_SCALE
     position = transform * position;
 #endif
