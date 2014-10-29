@@ -2407,6 +2407,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                     if (!dp)
                         break;
                     dp->keyframe = keyframe;
+                    dp->pos = mkv_d->last_filepos;
                     /* If default_duration is 0, assume no pts value is known
                      * for packets after the first one (rather than all pts
                      * values being the same). Also, don't use it for extra
