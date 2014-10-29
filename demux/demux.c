@@ -963,8 +963,21 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
         return 0;
     }
 
+    if ((flags & SEEK_FACTOR) && !(flags & SEEK_ABSOLUTE)) {
+        MP_WARN(demuxer, "Invalid seek flags.\n");
+        return 0;
+    }
+
     if (rel_seek_secs == MP_NOPTS_VALUE && (flags & SEEK_ABSOLUTE))
         return 0;
+
+    if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
+        if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0) {
+            flags |= SEEK_BACKWARD;
+        } else {
+            flags |= SEEK_FORWARD;
+        }
+    }
 
     pthread_mutex_lock(&in->lock);
 

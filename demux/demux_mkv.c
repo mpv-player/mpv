@@ -2720,13 +2720,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
     mkv_d->subtitle_preroll = NUM_SUB_PREROLL_PACKETS;
     if (!st_active[STREAM_SUB] || !st_active[STREAM_VIDEO])
         flags &= ~SEEK_SUBPREROLL;
-    if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
-        if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0) {
-            flags |= SEEK_BACKWARD;
-        } else {
-            flags |= SEEK_FORWARD;
-        }
-    }
+
     // Adjust the target a little bit to catch cases where the target position
     // specifies a keyframe with high, but not perfect, precision.
     rel_seek_secs += flags & SEEK_FORWARD ? -0.005 : 0.005;
@@ -2760,9 +2754,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
         }
 
         demux_mkv_fill_buffer(demuxer);
-    } else if (!(flags & SEEK_ABSOLUTE))
-        MP_VERBOSE(demuxer, "seek unsupported flags\n");
-    else {
+    } else {
         stream_t *s = demuxer->stream;
 
         read_deferred_cues(demuxer);
