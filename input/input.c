@@ -1177,11 +1177,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
     stream_t *s = NULL;
 
     file = mp_get_user_path(tmp, ictx->global, file);
-    if (!mp_path_exists(file)) {
-        MP_MSG(ictx, warn ? MSGL_ERR : MSGL_V,
-               "Input config file %s not found.\n", file);
-        goto done;
-    }
+
     s = stream_open(file, ictx->global);
     if (!s) {
         MP_ERR(ictx, "Can't open input config file %s.\n", file);
@@ -1254,9 +1250,11 @@ void mp_input_load(struct input_ctx *ictx)
         config_ok = parse_config_file(ictx, input_conf->config_file, true);
     if (!config_ok && ictx->global->opts->load_config) {
         // Try global conf dir
-        char *file = mp_find_config_file(NULL, ictx->global, "input.conf");
-        config_ok = file && parse_config_file(ictx, file, false);
-        talloc_free(file);
+        void *tmp = talloc_new(NULL);
+        char **files = mp_find_all_config_files(tmp, ictx->global, "input.conf");
+        for (int n = 0; files && files[n]; n++)
+            config_ok = config_ok | parse_config_file(ictx, files[n], false);
+        talloc_free(tmp);
     }
     if (!config_ok) {
         MP_VERBOSE(ictx, "Falling back on default (hardcoded) input config\n");
