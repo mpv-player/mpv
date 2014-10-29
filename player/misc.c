@@ -65,12 +65,12 @@ double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
         if (t.pos >= 0) {
             return start + t.pos;
         } else {
-            if (length != 0)
+            if (length >= 0)
                 return MPMAX(start + length + t.pos, 0.0);
         }
         break;
     case REL_TIME_PERCENT:
-        if (length != 0)
+        if (length >= 0)
             return start + length * (t.pos / 100.0);
         break;
     case REL_TIME_CHAPTER:

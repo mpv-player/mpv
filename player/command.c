@@ -485,9 +485,9 @@ static int mp_property_length(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    double len;
+    double len = get_time_length(mpctx);
 
-    if ((len = get_time_length(mpctx)) <= 0)
+    if (len < 0)
         return M_PROPERTY_UNAVAILABLE;
 
     return property_time(action, arg, len);
@@ -605,7 +605,7 @@ static bool time_remaining(MPContext *mpctx, double *remaining)
 
     *remaining = len - playback;
 
-    return len > 0;
+    return len >= 0;
 }
 
 static int mp_property_remaining(void *ctx, struct m_property *prop,
@@ -2234,10 +2234,12 @@ static int get_frame_count(struct MPContext *mpctx)
         return 0;
     if (!mpctx->d_video)
         return 0;
+    double len = get_time_length(mpctx);
+    double fps = mpctx->d_video->fps;
+    if (len < 0 || fps <= 0)
+        return 0;
 
-    int frame_count = (int)(get_time_length(mpctx) * mpctx->d_video->fps);
-
-    return frame_count;
+    return len * fps;
 }
 
 static int mp_property_frame_number(void *ctx, struct m_property *prop,

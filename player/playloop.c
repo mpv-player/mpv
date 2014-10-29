@@ -196,7 +196,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         mpctx->last_chapter_seek = -2;
     if (seek.type == MPSEEK_FACTOR && !mpctx->demuxer->ts_resets_possible) {
         double len = get_time_length(mpctx);
-        if (len > 0) {
+        if (len >= 0) {
             seek.amount = seek.amount * len + get_start_time(mpctx);
             seek.type = MPSEEK_ABSOLUTE;
         }
@@ -359,11 +359,12 @@ void execute_queued_seek(struct MPContext *mpctx)
     }
 }
 
+// -1 if unknown
 double get_time_length(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
-        return 0;
+        return -1;
 
     if (mpctx->timeline)
         return mpctx->timeline[mpctx->num_timeline_parts].start;
@@ -372,8 +373,7 @@ double get_time_length(struct MPContext *mpctx)
     if (len >= 0)
         return len;
 
-    // Unknown
-    return 0;
+    return -1; // unknown
 }
 
 /* If there are timestamps from stream level then use those (for example
@@ -410,8 +410,8 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     if (use_range) {
         double startpos = rel_time_to_abs(mpctx, mpctx->opts->play_start);
         double endpos = get_play_end_pts(mpctx);
-        if (endpos == MP_NOPTS_VALUE || endpos > start + len)
-            endpos = start + len;
+        if (endpos == MP_NOPTS_VALUE || endpos > start + MPMAX(0, len))
+            endpos = start + MPMAX(0, len);
         if (startpos == MP_NOPTS_VALUE || startpos < start)
             startpos = start;
         if (endpos < startpos)
@@ -420,7 +420,7 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
         len = endpos - startpos;
     }
     double pos = get_current_time(mpctx);
-    if (len > 0 && !demuxer->ts_resets_possible) {
+    if (len >= 0 && !demuxer->ts_resets_possible) {
         ans = MPCLAMP((pos - start) / len, 0, 1);
     } else {
         int64_t size;
