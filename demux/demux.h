@@ -254,7 +254,7 @@ void demux_stop_thread(struct demuxer *demuxer);
 void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *ctx);
 
 void demux_flush(struct demuxer *demuxer);
-int demux_seek(struct demuxer *demuxer, float rel_seek_secs, int flags);
+int demux_seek(struct demuxer *demuxer, double rel_seek_secs, int flags);
 
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 

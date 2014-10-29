@@ -953,7 +953,7 @@ void demux_flush(demuxer_t *demuxer)
     pthread_mutex_unlock(&demuxer->in->lock);
 }
 
-int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
+int demux_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 {
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
