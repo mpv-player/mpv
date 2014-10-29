@@ -2764,40 +2764,42 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
         MP_VERBOSE(demuxer, "seek unsupported flags\n");
     else {
         stream_t *s = demuxer->stream;
-        uint64_t target_filepos;
-        mkv_index_t *index = NULL;
 
         read_deferred_cues(demuxer);
-
-        if (!mkv_d->index_complete) {   /* not implemented without index */
-            MP_VERBOSE(demuxer, "seek unsupported flags\n");
-            stream_seek(s, old_pos);
-            return;
-        }
 
         int64_t size = 0;
         stream_control(s, STREAM_CTRL_GET_SIZE, &size);
 
-        target_filepos = (uint64_t) (size * rel_seek_secs);
-        for (size_t i = 0; i < mkv_d->num_indexes; i++)
-            if (mkv_d->indexes[i].tnum == v_tnum)
-                if ((index == NULL)
-                    || ((mkv_d->indexes[i].filepos >= target_filepos)
-                        && ((index->filepos < target_filepos)
-                            || (mkv_d->indexes[i].filepos < index->filepos))))
-                    index = &mkv_d->indexes[i];
+        int64_t target_filepos = size * MPCLAMP(rel_seek_secs, 0, 1);
 
-        if (!index) {
-            stream_seek(s, old_pos);
-            return;
+        mkv_index_t *index = NULL;
+        if (mkv_d->index_complete) {
+            for (size_t i = 0; i < mkv_d->num_indexes; i++) {
+                if (mkv_d->indexes[i].tnum == v_tnum) {
+                    if ((index == NULL)
+                        || ((mkv_d->indexes[i].filepos >= target_filepos)
+                            && ((index->filepos < target_filepos)
+                                || (mkv_d->indexes[i].filepos < index->filepos))))
+                        index = &mkv_d->indexes[i];
+                }
+            }
         }
 
         mkv_d->cluster_end = 0;
-        stream_seek(s, index->filepos);
 
         mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
         mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
-        mkv_d->skip_to_timecode = index->timecode * mkv_d->tc_scale;
+
+        if (index) {
+            stream_seek(s, index->filepos);
+            mkv_d->skip_to_timecode = index->timecode * mkv_d->tc_scale;
+        } else {
+            stream_seek(s, target_filepos);
+            if (ebml_resync_cluster(mp_null_log, s) < 0) {
+                // Assume EOF
+                mkv_d->cluster_end = size;
+            }
+        }
 
         demux_mkv_fill_buffer(demuxer);
     }
