@@ -907,8 +907,9 @@ Audio
     lists speaker names, which can be used to express arbitrary channel
     layouts (e.g. ``fl-fr-lfe`` is 2.1).
 
-    You can use ``--audio-channels=empty`` to disable this. In this case, the AO
-    use the channel layout as the audio filter chain indicates.
+    You can use ``--audio-channels=auto`` to disable this. In this case, the AO
+    use the channel layout as the audio filter chain indicates. (``empty`` is
+    an accepted obsolete for ``auto``.)
 
     This will also request the channel layout from the decoder. If the decoder
     does not support the layout, it will fall back to its native channel layout.
