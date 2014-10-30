@@ -217,6 +217,16 @@ static inline int set_property_variant(mpv_handle *ctx, const QString &name,
 }
 
 /**
+ * Set the given option as mpv_node converted from the QVariant argument.
+ */
+static inline int set_option_variant(mpv_handle *ctx, const QString &name,
+                                     const QVariant &v)
+{
+    node_builder node(v);
+    return mpv_set_option(ctx, name.toUtf8().data(), MPV_FORMAT_NODE, node.node());
+}
+
+/**
  * mpv_command_node() equivalent. Returns QVariant() on error (and
  * unfortunately, the same on success).
  */

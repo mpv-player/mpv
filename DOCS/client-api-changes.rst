@@ -30,6 +30,7 @@ API changes
           for slightly better error reporting on playback failure
         - add --stop-playback-on-init-failure option, and make it the default
           behavior for libmpv only
+        - add qthelper.hpp set_option_variant()
  1.8    - add qthelper.hpp
  1.7    - add mpv_command_node(), mpv_command_node_async()
  1.6    - modify "core-idle" property behavior
