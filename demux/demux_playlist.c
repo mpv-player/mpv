@@ -27,6 +27,17 @@
 
 #define PROBE_SIZE (8 * 1024)
 
+static bool check_mimetype(struct stream *s, const char *const *list)
+{
+    if (s->mime_type) {
+        for (int n = 0; list && list[n]; n++) {
+            if (strcmp(s->mime_type, list[n]) == 0)
+                return true;
+        }
+    }
+    return false;
+}
+
 struct pl_parser {
     struct mp_log *log;
     struct stream *s;
@@ -88,6 +99,22 @@ static int parse_ref_init(struct pl_parser *p)
     bstr line = bstr_strip(pl_get_line(p));
     if (!bstr_equals0(line, "[Reference]"))
         return -1;
+
+    // ASF http streaming redirection - this is needed because ffmpeg http://
+    // and mmsh:// can not automatically switch automatically between each
+    // others. Both protocols use http - MMSH requires special http headers
+    // to "activate" it, and will in other cases return this playlist.
+    static const char *const mmsh_types[] = {"audio/x-ms-wax",
+        "audio/x-ms-wma", "video/x-ms-asf", "video/x-ms-afs", "video/x-ms-wmv",
+        "video/x-ms-wma", "application/x-mms-framed",
+        "application/vnd.ms.wms-hdr.asfv1", NULL};
+    bstr burl = bstr0(p->s->url);
+    if (bstr_eatstart0(&burl, "http://") && check_mimetype(p->s, mmsh_types)) {
+        MP_INFO(p, "Redirectiong to mmsh://\n");
+        playlist_add_file(p->pl, talloc_asprintf(p, "mmsh://%.*s", BSTR_P(burl)));
+        return 0;
+    }
+
     while (!pl_eof(p)) {
         line = bstr_strip(pl_get_line(p));
         if (bstr_case_startswith(line, bstr0("Ref"))) {
@@ -153,14 +180,14 @@ static int parse_txt(struct pl_parser *p)
     return 0;
 }
 
+#define MIME_TYPES(...) \
+    .mime_types = (const char*const[]){__VA_ARGS__, NULL}
+
 struct pl_format {
     const char *name;
     int (*parse)(struct pl_parser *p);
     const char *const *mime_types;
 };
-
-#define MIME_TYPES(...) \
-    .mime_types = (const char*const[]){__VA_ARGS__, NULL}
 
 static const struct pl_format formats[] = {
     {"m3u", parse_m3u,
@@ -171,17 +198,6 @@ static const struct pl_format formats[] = {
      MIME_TYPES("audio/x-scpls")},
     {"txt", parse_txt},
 };
-
-static bool check_mimetype(struct stream *s, const char *const *list)
-{
-    if (s->mime_type) {
-        for (int n = 0; list && list[n]; n++) {
-            if (strcmp(s->mime_type, list[n]) == 0)
-                return true;
-        }
-    }
-    return false;
-}
 
 static const struct pl_format *probe_pl(struct pl_parser *p)
 {
