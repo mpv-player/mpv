@@ -83,6 +83,12 @@
 
 static bool terminal_initialized;
 
+enum exit_reason {
+  EXIT_NONE,
+  EXIT_NORMAL,
+  EXIT_ERROR,
+};
+
 const char mp_help_text[] =
 "Usage:   mpv [options] [url|path/]filename\n"
 "\n"
@@ -161,45 +167,45 @@ void mp_destroy(struct MPContext *mpctx)
 static MP_NORETURN void exit_player(struct MPContext *mpctx,
                                     enum exit_reason how)
 {
-    int rc;
-
 #if HAVE_COCOA_APPLICATION
     cocoa_set_input_context(NULL);
 #endif
 
-    if (how != EXIT_NONE) {
-        const char *reason;
-        switch (how) {
-        case EXIT_SOMENOTPLAYED:
-        case EXIT_PLAYED:
-            reason = "End of file";
-            break;
-        case EXIT_NOTPLAYED:
-            reason = "No files played";
-            break;
-        case EXIT_ERROR:
-            reason = "Fatal error";
-            break;
-        default:
+    int rc = 0;
+    const char *reason = NULL;
+
+    if (how == EXIT_ERROR) {
+        reason = "Fatal error";
+        rc = 1;
+    } else if (how == EXIT_NORMAL) {
+        if (mpctx->stop_play == PT_QUIT) {
             reason = "Quit";
+            rc = 0;
+        } else if (mpctx->files_played) {
+            if (mpctx->files_errored || mpctx->files_broken) {
+                reason = "Some errors happened";
+                rc = 3;
+            } else {
+                reason = "End of file";
+                rc = 0;
+            }
+        } else if (mpctx->files_broken && !mpctx->files_errored) {
+            reason = "Errors when loading file";
+            rc = 2;
+        } else if (mpctx->files_errored) {
+            reason = "Interrupted by error";
+            rc = 2;
+        } else {
+            reason = "No files played";
+            rc = 0;
         }
-        MP_INFO(mpctx, "\nExiting... (%s)\n", reason);
     }
 
-    if (mpctx->has_quit_custom_rc) {
+    if (reason)
+        MP_INFO(mpctx, "\nExiting... (%s)\n", reason);
+
+    if (mpctx->has_quit_custom_rc)
         rc = mpctx->quit_custom_rc;
-    } else {
-        switch (how) {
-            case EXIT_ERROR:
-                rc = 1; break;
-            case EXIT_NOTPLAYED:
-                rc = 2; break;
-            case EXIT_SOMENOTPLAYED:
-                rc = 3; break;
-            default:
-                rc = 0;
-        }
-    }
 
     mp_destroy(mpctx);
 
@@ -527,8 +533,6 @@ int mpv_main(int argc, char *argv[])
         exit_player(mpctx, EXIT_ERROR);
 
     mp_play_files(mpctx);
-
-    exit_player(mpctx, mpctx->stop_play == PT_QUIT ? EXIT_QUIT : mpctx->quit_player_rc);
-
+    exit_player(mpctx, EXIT_NORMAL);
     return 1;
 }

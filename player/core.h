@@ -41,15 +41,6 @@ enum stop_play_reason {
     PT_ERROR,           // play next playlist entry (due to an error)
 };
 
-enum exit_reason {
-  EXIT_NONE,
-  EXIT_QUIT,
-  EXIT_PLAYED,
-  EXIT_ERROR,
-  EXIT_NOTPLAYED,
-  EXIT_SOMENOTPLAYED
-};
-
 struct timeline_part {
     double start;
     double source_start;
@@ -182,14 +173,19 @@ typedef struct MPContext {
     char *stream_open_filename;
     enum stop_play_reason stop_play;
     bool playback_initialized; // playloop can be run/is running
+    int error_playing;
 
     // Return code to use with PT_QUIT
-    enum exit_reason quit_player_rc;
     int quit_custom_rc;
     bool has_quit_custom_rc;
-    int error_playing;
     char **resume_defaults;
 
+    // Global file statistics
+    int files_played;       // played without issues (even if stopped by user)
+    int files_errored;      // played, but errors happened at one point
+    int files_broken;       // couldn't be played at all
+
+    // Current file statistics
     int64_t shown_vframes, shown_aframes;
 
     struct stream *stream; // stream that was initially opened

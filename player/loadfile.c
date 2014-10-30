@@ -989,7 +989,7 @@ goto_reopen_demuxer: ;
         for (struct playlist_entry *e = pl->first; e; e = e->next)
             e->stream_flags |= entry_stream_flags;
         transfer_playlist(mpctx, pl);
-        mpctx->error_playing = 0;
+        mpctx->error_playing = 1;
         goto terminate_playback;
     }
 
@@ -1179,16 +1179,16 @@ terminate_playback:
     mpctx->playback_initialized = false;
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
+
+    bool nothing_played = !mpctx->shown_aframes && !mpctx->shown_vframes &&
+                          mpctx->error_playing <= 0;
     struct mpv_event_end_file end_event = {0};
     switch (mpctx->stop_play) {
     case PT_ERROR:
     case AT_END_OF_FILE:
     {
-        if (mpctx->error_playing >= 0 &&
-            mpctx->shown_aframes == 0 && mpctx->shown_vframes == 0)
-        {
+        if (mpctx->error_playing >= 0 && nothing_played)
             mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
-        }
         end_event.error = mpctx->error_playing;
         if (end_event.error < 0) {
             end_event.reason = MPV_END_FILE_REASON_ERROR;
@@ -1199,8 +1199,7 @@ terminate_playback:
             // Played/paused for longer than 1 second -> ok
             mpctx->playing->playback_short =
                 playback_start < 0 || mp_time_sec() - playback_start < 1.0;
-            mpctx->playing->init_failed =
-                end_event.error == MPV_ERROR_NOTHING_TO_PLAY;
+            mpctx->playing->init_failed = nothing_played;
         }
         break;
     }
@@ -1217,6 +1216,14 @@ terminate_playback:
     mpctx->playing = NULL;
     mpctx->filename = NULL;
     mpctx->stream_open_filename = NULL;
+
+    if (end_event.error < 0 && nothing_played) {
+        mpctx->files_broken++;
+    } else if (end_event.error < 0) {
+        mpctx->files_errored++;
+    } else {
+        mpctx->files_played++;
+    }
 
     talloc_free(tmp);
 }
@@ -1273,24 +1280,12 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 // Return if all done.
 void mp_play_files(struct MPContext *mpctx)
 {
-    mpctx->quit_player_rc = EXIT_NONE;
     for (;;) {
         idle_loop(mpctx);
         if (mpctx->stop_play == PT_QUIT)
             break;
 
         play_current_file(mpctx);
-        if (mpctx->error_playing < 0) {
-            if (!mpctx->quit_player_rc) {
-                mpctx->quit_player_rc = EXIT_NOTPLAYED;
-            } else if (mpctx->quit_player_rc == EXIT_PLAYED) {
-                mpctx->quit_player_rc = EXIT_SOMENOTPLAYED;
-            }
-        } else if (mpctx->quit_player_rc == EXIT_NOTPLAYED) {
-            mpctx->quit_player_rc = EXIT_SOMENOTPLAYED;
-        } else {
-            mpctx->quit_player_rc = EXIT_PLAYED;
-        }
         if (mpctx->stop_play == PT_QUIT)
             break;
 
