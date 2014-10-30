@@ -117,6 +117,10 @@ static int control(stream_t *s, int cmd, void *arg)
             return 1;
         break;
     }
+    case STREAM_CTRL_HAS_AVSEEK:
+        if (avio->read_seek)
+            return 1;
+        break;
     case STREAM_CTRL_GET_METADATA: {
         *(struct mp_tags **)arg = read_icy(s);
         if (!*(struct mp_tags **)arg)

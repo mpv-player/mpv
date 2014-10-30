@@ -105,6 +105,7 @@ enum stream_ctrl {
     STREAM_CTRL_DVB_SET_CHANNEL,
     STREAM_CTRL_DVB_STEP_CHANNEL,
     STREAM_CTRL_AVSEEK,
+    STREAM_CTRL_HAS_AVSEEK,
 };
 
 struct stream_lang_req {

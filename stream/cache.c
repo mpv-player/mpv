@@ -112,6 +112,7 @@ struct priv {
     int64_t stream_size;
     struct mp_tags *stream_metadata;
     double start_pts;
+    bool has_avseek;
 };
 
 enum {
@@ -361,6 +362,7 @@ static void update_cached_controls(struct priv *s)
     s->stream_size = -1;
     if (stream_control(s->stream, STREAM_CTRL_GET_SIZE, &i64) == STREAM_OK)
         s->stream_size = i64;
+    s->has_avseek = stream_control(s->stream, STREAM_CTRL_HAS_AVSEEK, NULL) > 0;
 }
 
 // the core might call these every frame, so cache them...
@@ -391,6 +393,8 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         *(double *)arg = s->start_pts;
         return STREAM_OK;
     }
+    case STREAM_CTRL_HAS_AVSEEK:
+        return s->has_avseek ? STREAM_OK : STREAM_UNSUPPORTED;
     case STREAM_CTRL_GET_METADATA: {
         if (s->stream_metadata) {
             ta_set_parent(s->stream_metadata, NULL);
