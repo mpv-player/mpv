@@ -113,8 +113,10 @@ static int control(stream_t *s, int cmd, void *arg)
     case STREAM_CTRL_AVSEEK: {
         struct stream_avseek *c = arg;
         int64_t r = avio_seek_time(avio, c->stream_index, c->timestamp, c->flags);
-        if (r >= 0)
+        if (r >= 0) {
+            stream_drop_buffers(s);
             return 1;
+        }
         break;
     }
     case STREAM_CTRL_HAS_AVSEEK:

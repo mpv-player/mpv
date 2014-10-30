@@ -189,8 +189,11 @@ static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
         .flags = flags,
     };
 
-    int ret = stream_control(stream, STREAM_CTRL_AVSEEK, &cmd);
-    return ret < 1 ? AVERROR(ENOSYS) : 0;
+    if (stream_control(stream, STREAM_CTRL_AVSEEK, &cmd) == STREAM_OK) {
+        stream_drop_buffers(stream);
+        return 0;
+    }
+    return AVERROR(ENOSYS);
 }
 
 static void list_formats(struct demuxer *demuxer)
