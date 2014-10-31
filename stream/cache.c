@@ -408,6 +408,10 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         s->idle = s->eof = false;
         pthread_cond_signal(&s->wakeup);
         return STREAM_OK;
+    case STREAM_CTRL_AVSEEK:
+        if (!s->has_avseek)
+            return STREAM_UNSUPPORTED;
+        break;
     }
     return STREAM_ERROR;
 }
