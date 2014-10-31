@@ -197,10 +197,7 @@ error:
 static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
 {
     bstr t = bstr_lstrip(str);
-    char nextc = t.len > 0 ? t.start[0] : 0;
-    if (nextc == '#' || nextc == ';')
-        return false; // comment or command separator
-    int next = bstrcspn(t, WHITESPACE);
+    int next = bstrcspn(t, WHITESPACE "#;");
     if (!next)
         return false;
     *out_token = bstr_splice(t, 0, next);
