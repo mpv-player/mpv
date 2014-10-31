@@ -157,7 +157,6 @@ struct osd_sub_state {
     bool render_bitmap_subs;
 };
 void osd_set_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate);
-void osd_get_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate);
 
 bool osd_get_render_subs_in_filter(struct osd_state *osd);
 void osd_set_render_subs_in_filter(struct osd_state *osd, bool s);

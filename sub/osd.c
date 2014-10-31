@@ -146,13 +146,6 @@ void osd_set_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate)
     pthread_mutex_unlock(&osd->lock);
 }
 
-void osd_get_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate)
-{
-    pthread_mutex_lock(&osd->lock);
-    *substate = osd->objs[obj]->sub_state;
-    pthread_mutex_unlock(&osd->lock);
-}
-
 bool osd_get_render_subs_in_filter(struct osd_state *osd)
 {
     pthread_mutex_lock(&osd->lock);

@@ -3989,7 +3989,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (!mpctx->num_sources)
             return -1;
         struct osd_sub_state state;
-        osd_get_sub(mpctx->osd, OSDTYPE_SUB, &state);
+        get_osd_sub_state(mpctx, 0, &state);
         if (state.dec_sub && mpctx->video_pts != MP_NOPTS_VALUE) {
             double a[2];
             a[0] = mpctx->video_pts - state.video_offset - opts->sub_delay;
