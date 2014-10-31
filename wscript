@@ -833,15 +833,17 @@ def configure(ctx):
     ctx.resetenv(ctx.options.variant)
     ctx.check_waf_version(mini='1.8.1')
     target = os.environ.get('TARGET')
-    (cc, pkg_config, windres) = ('cc', 'pkg-config', 'windres')
+    (cc, pkg_config, ar, windres) = ('cc', 'pkg-config', 'ar', 'windres')
 
     if target:
         cc         = '-'.join([target, 'gcc'])
         pkg_config = '-'.join([target, pkg_config])
+        ar         = '-'.join([target, ar])
         windres    = '-'.join([target, windres])
 
     ctx.find_program(cc,          var='CC')
     ctx.find_program(pkg_config,  var='PKG_CONFIG')
+    ctx.find_program(ar,          var='AR')
     ctx.find_program('perl',      var='BIN_PERL')
     ctx.find_program('rst2man',   var='RST2MAN',   mandatory=False)
     ctx.find_program('rst2pdf',   var='RST2PDF',   mandatory=False)
