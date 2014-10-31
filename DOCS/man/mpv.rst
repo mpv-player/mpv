@@ -445,14 +445,15 @@ listed.
   if there is audio "missing", or not enough frames can be dropped. Usually
   this will indicate a problem. (``total-avsync-change`` property.)
 - Encoding state in ``{...}``, only shown in encoding mode.
-- Decoder-dropped video frames, e.g. ``SD: 2``. Shows up only if the count is
-  not 0. Normally should never show up, unless ``--framedrop`` is set to enable
-  this mode, and your CPU is too slow. (``drop-frame-count`` property.)
-- VO-dropped video frames, e.g. ``D: 4``. Shows up only if the count is not 0.
-  Can grow if the video framerate is higher than that of the display, or if
-  video rendering is too slow. Also can be incremented on "hiccups" and when
-  the video frame couldn't be displayed on time. (``vo-drop-frame-count``
-  property.)
+- Dropped frames, e.g. ``Dropped: 4``. Shows up only if the count is not 0. Can
+  grow if the video framerate is higher than that of the display, or if video
+  rendering is too slow. Also can be incremented on "hiccups" and when the video
+  frame couldn't be displayed on time. (``vo-drop-frame-count`` property.)
+  If the decoder drops frames, the number of decoder-dropped frames is appended
+  to the display as well, e.g.: ``Dropped: 4/34``. This should almost never
+  happen, unless decoder-framedropping is enabled with one of the
+  ``--framedrop`` options, the stream contains errors, or a weird codec is in
+  use. (``drop-frame-count`` property.)
 - Cache state, e.g. ``Cache:  2s+134KB``. Visible if the stream cache is enabled.
   The first value shows the amount of video buffered in the demuxer in seconds,
   the second value shows *additional* data buffered in the stream cache in
