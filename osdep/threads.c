@@ -16,6 +16,7 @@
  */
 #include <stdio.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include "config.h"
 
