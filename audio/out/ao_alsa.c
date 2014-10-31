@@ -78,6 +78,12 @@ struct priv {
         } \
     } while (0)
 
+#define CHECK_ALSA_WARN(message) \
+    do { \
+        if (err < 0) \
+            MP_WARN(ao, "%s: %s\n", (message), snd_strerror(err)); \
+    } while (0)
+
 static float get_delay(struct ao *ao);
 static void uninit(struct ao *ao);
 
@@ -474,7 +480,7 @@ static int init(struct ao *ao)
 
     err = snd_pcm_hw_params_set_buffer_time_near
             (p->alsa, alsa_hwparams, &(unsigned int){BUFFER_TIME}, NULL);
-    CHECK_ALSA_ERROR("Unable to set buffer time near");
+    CHECK_ALSA_WARN("Unable to set buffer time near");
 
     err = snd_pcm_hw_params_set_periods_near
             (p->alsa, alsa_hwparams, &(unsigned int){FRAGCOUNT}, NULL);
