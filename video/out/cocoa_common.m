@@ -502,6 +502,7 @@ void vo_cocoa_swap_buffers(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     if (s->skip_swap_buffer) {
+        vo->want_redraw = true;
         s->skip_swap_buffer = false;
         return;
     } else {
