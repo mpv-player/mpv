@@ -359,6 +359,8 @@ void set_osd_function(struct MPContext *mpctx, int osd_function)
 
     mpctx->osd_function = osd_function;
     mpctx->osd_function_visible = mp_time_sec() + opts->osd_duration / 1000.0;
+    mpctx->osd_force_update = true;
+    mpctx->sleeptime = 0;
 }
 
 /**
@@ -483,9 +485,14 @@ void update_osd_msg(struct MPContext *mpctx)
         }
     }
 
-    if (mpctx->osd_function_visible && now >= mpctx->osd_function_visible) {
-        mpctx->osd_function_visible = 0;
-        mpctx->osd_function = 0;
+    if (mpctx->osd_function_visible) {
+        double sleep = mpctx->osd_function_visible - now;
+        if (sleep > 0) {
+            mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+        } else {
+            mpctx->osd_function_visible = 0;
+            mpctx->osd_function = 0;
+        }
     }
 
     if (mpctx->osd_msg_next_duration > 0) {
