@@ -766,12 +766,6 @@ standalone_features = [
         'desc': 'Apple Remote support',
         'deps': [ 'cocoa' ],
         'func': check_true
-    }, {
-        'name': '--macosx-bundle',
-        'desc': 'compilation of a Mac OS X Application bundle',
-        'deps': [ 'os-darwin' ],
-        'default': 'disable',
-        'func': check_true
     }
 ]
 

@@ -418,24 +418,6 @@ def build(ctx):
                 ctx.path.find_node('osdep/mpv.rc'),
                 ctx.path.find_node(node))
 
-    cprog_kwargs = {}
-    if ctx.dependency_satisfied('macosx-bundle'):
-        import os
-        basepath = 'TOOLS/osxbundle/mpv.app/Contents'
-        cprog_kwargs['mac_app']   = True
-        cprog_kwargs['mac_plist'] = os.path.join(basepath, 'Info.plist')
-
-        resources_glob  = os.path.join(basepath, 'Resources', '*')
-        resources_nodes = ctx.srcnode.ant_glob(resources_glob)
-        resources       = [node.srcpath() for node in resources_nodes]
-        cprog_kwargs['mac_resources'] = resources
-
-        for resource in resources:
-            res_basename = os.path.basename(resource)
-            install_name = '/mpv.app/Contents/Resources/' + res_basename
-            ctx.install_as(ctx.env.BINDIR + install_name, resource)
-
-
     if ctx.dependency_satisfied('cplayer'):
         ctx(
             target       = "mpv",
@@ -444,8 +426,7 @@ def build(ctx):
             includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
                            ctx.dependencies_includes(),
             features     = "c cprogram",
-            install_path = ctx.env.BINDIR,
-            **cprog_kwargs
+            install_path = ctx.env.BINDIR
         )
         for f in ['example.conf', 'input.conf', 'mplayer-input.conf', \
                   'restore-old-bindings.conf']:
@@ -541,10 +522,6 @@ def build(ctx):
         wrapflags = ['-municode', '-mconsole']
         wrapctx.env.CFLAGS = wrapflags
         wrapctx.env.LAST_LINKFLAGS = wrapflags
-
-    if ctx.dependency_satisfied('macosx-bundle'):
-        from waflib import Utils
-        ctx.install_files(ctx.env.BINDIR, 'mpv', chmod=Utils.O755)
 
     if ctx.dependency_satisfied("vf-dlopen-filters"):
         dlfilters = "showqscale telecine tile rectangle framestep \
