@@ -146,6 +146,16 @@ extra commands can also be used as part of the protocol:
         { "command": ["unobserve_property", 1] }
         { "error": "success" }
 
+``request_log_messages``
+    Enable output of mpv log messages. They will be received as events. The
+    parameter to this command is the log-level (see ``mpv_request_log_messages``
+    C API function).
+
+    Log message output is meant for humans only (mostly for debugging).
+    Attempting to retrieve information by parsing these messages will just
+    lead to breakages with future mpv releases. Instead, make a feature request,
+    and ask for a proper event that returns the information you need.
+
 ``suspend``
     Suspend the mpv main loop. There is a long-winded explanation of this in
     the C API function ``mpv_suspend()``. In short, this prevents the player

@@ -414,6 +414,19 @@ static char *json_execute_command(struct client_arg *arg, void *ta_parent,
 
         rc = mpv_unobserve_property(arg->client,
                                   cmd_node->u.list->values[1].u.int64);
+    } else if (!strcmp("request_log_messages", cmd)) {
+        if (cmd_node->u.list->num != 2) {
+            rc = MPV_ERROR_INVALID_PARAMETER;
+            goto error;
+        }
+
+        if (cmd_node->u.list->values[1].format != MPV_FORMAT_STRING) {
+            rc = MPV_ERROR_INVALID_PARAMETER;
+            goto error;
+        }
+
+        rc = mpv_request_log_messages(arg->client,
+                                      cmd_node->u.list->values[1].u.string);
     } else if (!strcmp("suspend", cmd)) {
         if (arg->suspend_counter < INT_MAX) {
             mpv_suspend(arg->client);
