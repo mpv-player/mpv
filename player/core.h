@@ -246,9 +246,8 @@ typedef struct MPContext {
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
-    // Total number of dropped frames that were "approved" to be dropped.
-    // Actual dropping depends on --framedrop and decoder internals.
-    int drop_frame_cnt;
+    // Total number of dropped frames that were dropped by decoder.
+    int dropped_frames_total;
     // Number of frames dropped in a row.
     int dropped_frames;
     // A-V sync difference when last frame was displayed. Kept to display

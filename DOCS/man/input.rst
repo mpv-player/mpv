@@ -688,9 +688,10 @@ Property list
     disabled.
 
 ``drop-frame-count``
-    Frames dropped because they arrived too late. Doesn't necessarily indicate
-    actual frame-drops, just the number of times the decoder was asked to drop.
-    Unavailable if video is disabled
+    Video frames dropped by decoder, because video is too far behind audio (when
+    using ``--framedrop=decoder``). Sometimes, this may be incremented in other
+    situations, e.g. when video packets are damaged, or the decoder doesn't
+    follow the usual rules. Unavailable if video is disabled.
 
 ``vo-drop-frame-count``
     Frames dropped by VO (when using ``--framedrop=vo``).

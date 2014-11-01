@@ -223,7 +223,7 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->video_pts = MP_NOPTS_VALUE;
     mpctx->video_next_pts = MP_NOPTS_VALUE;
     mpctx->total_avsync_change = 0;
-    mpctx->drop_frame_cnt = 0;
+    mpctx->dropped_frames_total = 0;
     mpctx->dropped_frames = 0;
     mpctx->drop_message_shown = 0;
 
@@ -400,7 +400,7 @@ static int decode_image(struct MPContext *mpctx)
     if (had_packet && !d_video->waiting_decoded_mpi &&
         mpctx->video_status == STATUS_PLAYING)
     {
-        mpctx->drop_frame_cnt++;
+        mpctx->dropped_frames_total++;
         mpctx->dropped_frames++;
     }
 

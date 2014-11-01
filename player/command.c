@@ -524,7 +524,7 @@ static int mp_property_drop_frame_cnt(void *ctx, struct m_property *prop,
      if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_int_ro(action, arg, mpctx->drop_frame_cnt);
+    return m_property_int_ro(action, arg, mpctx->dropped_frames_total);
 }
 
 static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,

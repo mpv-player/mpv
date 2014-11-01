@@ -230,10 +230,10 @@ static void print_status(struct MPContext *mpctx)
         // VO stats
         if (mpctx->d_video) {
             int64_t c = vo_get_drop_count(mpctx->video_out);
-            if (c > 0 || mpctx->drop_frame_cnt > 0) {
+            if (c > 0 || mpctx->dropped_frames_total > 0) {
                 saddf(&line, " Dropped: %"PRId64, c);
-                if (mpctx->drop_frame_cnt)
-                    saddf(&line, "/%d", mpctx->drop_frame_cnt);
+                if (mpctx->dropped_frames_total)
+                    saddf(&line, "/%d", mpctx->dropped_frames_total);
             }
         }
     }
