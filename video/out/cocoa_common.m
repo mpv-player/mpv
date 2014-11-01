@@ -501,8 +501,8 @@ static void draw_changes_after_next_frame(struct vo *vo)
 void vo_cocoa_swap_buffers(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    if (s->skip_swap_buffer) {
-        vo->want_redraw = true;
+
+    if (s->skip_swap_buffer && !s->waiting_frame) {
         s->skip_swap_buffer = false;
         return;
     } else {
