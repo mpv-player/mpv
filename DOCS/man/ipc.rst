@@ -156,6 +156,10 @@ extra commands can also be used as part of the protocol:
     Undo one ``suspend`` call. ``suspend`` increments an internal counter, and
     ``resume`` decrements it. When 0 is reached, the player is actually resumed.
 
+``get_version``
+    Returns the client API version the C API of the remote mpv instance
+    provides. (Also see ``DOCS/client-api-changes.rst``.)
+
 UTF-8
 -----
 

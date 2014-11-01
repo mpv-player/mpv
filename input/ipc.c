@@ -287,6 +287,10 @@ static char *json_execute_command(struct client_arg *arg, void *ta_parent,
         int64_t time_us = mpv_get_time_us(arg->client);
         mpv_node_map_add_int64(ta_parent, &reply_node, "data", time_us);
         rc = MPV_ERROR_SUCCESS;
+    } else if (!strcmp("get_version", cmd)) {
+        int64_t ver = mpv_client_api_version();
+        mpv_node_map_add_int64(ta_parent, &reply_node, "data", ver);
+        rc = MPV_ERROR_SUCCESS;
     } else if (!strcmp("get_property", cmd)) {
         mpv_node result_node;
 
