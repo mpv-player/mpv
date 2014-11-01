@@ -131,7 +131,7 @@ extra commands can also be used as part of the protocol:
 
     ::
 
-        { "command": ["observe_property", 1, "volume"] }
+        { "command": ["observe_property_string", 1, "volume"] }
         { "error": "success" }
         { "event": "property-change", "id": 1, "data": "52.000000", "name": "volume" }
 
