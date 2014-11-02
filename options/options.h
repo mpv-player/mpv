@@ -118,6 +118,7 @@ typedef struct MPOpts {
     char *ordered_chapters_files;
     int chapter_merge_threshold;
     double chapter_seek_threshold;
+    char *chapter_file;
     int load_unsafe_playlists;
     int merge_files;
     int quiet;

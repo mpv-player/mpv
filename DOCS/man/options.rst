@@ -247,6 +247,10 @@ Playback Control
     Note: a playlist can be as simple as a text file containing filenames
     separated by newlines.
 
+``--chapters-file=<filename>``
+    Load chapters from this file, instead of using the chapter metadata found
+    in the main file.
+
 ``--sstep=<sec>``
     Skip <sec> seconds after every frame.
 

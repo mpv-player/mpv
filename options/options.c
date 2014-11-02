@@ -497,6 +497,8 @@ const m_option_t mp_opts[] = {
 
     OPT_DOUBLE("chapter-seek-threshold", chapter_seek_threshold, 0),
 
+    OPT_STRING("chapters-file", chapter_file, M_OPT_FILE),
+
     OPT_FLAG("load-unsafe-playlists", load_unsafe_playlists, 0),
     OPT_FLAG("merge-files", merge_files, 0),
 

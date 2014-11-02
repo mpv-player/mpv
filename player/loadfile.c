@@ -779,19 +779,39 @@ static void print_timeline(struct MPContext *mpctx)
 
 static void load_chapters(struct MPContext *mpctx)
 {
-    if (!mpctx->chapters && mpctx->master_demuxer &&
-        mpctx->master_demuxer->num_chapters)
-    {
-        int count = mpctx->master_demuxer->num_chapters;
+    struct demuxer *src = mpctx->master_demuxer;
+    bool free_src = false;
+    char *chapter_file = mpctx->opts->chapter_file;
+    if (chapter_file && chapter_file[0]) {
+        struct stream *stream = stream_create(chapter_file, STREAM_READ,
+                                        mpctx->playback_abort, mpctx->global);
+        if (stream) {
+            struct demuxer *demux = demux_open(stream, NULL, NULL, mpctx->global);
+            if (demux) {
+                src = demux;
+                free_src = true;
+            }
+        }
+        talloc_free(mpctx->chapters);
+        mpctx->chapters = NULL;
+    }
+    if (src && !mpctx->chapters) {
+        talloc_free(mpctx->chapters);
+        int count = src->num_chapters;
         mpctx->chapters = talloc_array(NULL, struct chapter, count);
         mpctx->num_chapters = count;
         for (int n = 0; n < count; n++) {
-            struct demux_chapter *dchapter = &mpctx->master_demuxer->chapters[n];
+            struct demux_chapter *dchapter = &src->chapters[n];
             mpctx->chapters[n] = (struct chapter){
                 .start = dchapter->start / 1e9,
                 .name = talloc_strdup(mpctx->chapters, dchapter->name),
             };
         }
+    }
+    if (free_src) {
+        struct stream *s = src->stream;
+        free_demuxer(src);
+        free_stream(s);
     }
 }
 
