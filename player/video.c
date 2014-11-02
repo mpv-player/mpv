@@ -761,8 +761,11 @@ void write_video(struct MPContext *mpctx, double endpts)
             return;
 
         const struct vo_driver *info = mpctx->video_out->driver;
-        MP_INFO(mpctx, "VO: [%s] %dx%d => %dx%d %s\n",
-                info->name, p.w, p.h, p.d_w, p.d_h, vo_format_name(p.imgfmt));
+        char extra[20] = {0};
+        if (p.w != p.d_w || p.h != p.d_h)
+            snprintf(extra, sizeof(extra), " => %dx%d", p.d_w, p.d_h);
+        MP_INFO(mpctx, "VO: [%s] %dx%d%s %s\n",
+                info->name, p.w, p.h, extra, vo_format_name(p.imgfmt));
         MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
         int vo_r = vo_reconfig(vo, &p, 0);
