@@ -1115,6 +1115,9 @@ Property list
     (or to be exact, the size the video filters output). ``2`` will set the
     double size, ``0.5`` halves the size.
 
+``window-minimized``
+    Return whether the video window is minimized or not.
+
 ``video-aspect`` (RW)
     Video aspect, see ``--video-aspect``.
 

@@ -36,9 +36,11 @@
 #define VO_EVENT_RESIZE 2
 // The ICC profile needs to be reloaded
 #define VO_EVENT_ICC_PROFILE_PATH_CHANGED 4
+// Some other window state changed
+#define VO_EVENT_WIN_STATE 8
 
 // Set of events the player core may be interested in.
-#define VO_EVENTS_USER (VO_EVENT_RESIZE)
+#define VO_EVENTS_USER (VO_EVENT_RESIZE | VO_EVENT_WIN_STATE)
 
 enum mp_voctrl {
     /* signal a device reset seek */
@@ -82,6 +84,8 @@ enum mp_voctrl {
     // these must access the not-fullscreened window size only).
     VOCTRL_GET_UNFS_WINDOW_SIZE,        // int[2] (w/h)
     VOCTRL_SET_UNFS_WINDOW_SIZE,        // int[2] (w/h)
+
+    VOCTRL_GET_WIN_STATE,               // int* (VO_WIN_STATE_* flags)
 
     // The VO is supposed to set  "known" fields, and leave the others
     // untouched or set to 0.
@@ -129,6 +133,9 @@ struct voctrl_screenshot_args {
     // Whether the VO rendered OSD/subtitles into out_image
     bool has_osd;
 };
+
+// VOCTRL_GET_WIN_STATE
+#define VO_WIN_STATE_MINIMIZED 1
 
 #define VO_TRUE         true
 #define VO_FALSE        false

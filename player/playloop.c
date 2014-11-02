@@ -676,6 +676,8 @@ static void handle_vo_events(struct MPContext *mpctx)
     int events = vo ? vo_query_events(vo, VO_EVENTS_USER, true) : 0;
     if (events & VO_EVENT_RESIZE)
         mp_notify(mpctx, MP_EVENT_WIN_RESIZE, NULL);
+    if (events & VO_EVENT_WIN_STATE)
+        mp_notify(mpctx, MP_EVENT_WIN_STATE, NULL);
 }
 
 void add_frame_pts(struct MPContext *mpctx, double pts)

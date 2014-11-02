@@ -2445,6 +2445,21 @@ static int mp_property_window_scale(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_win_minimized(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int state = 0;
+    if (vo_control(vo, VOCTRL_GET_WIN_STATE, &state) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_flag_ro(action, arg, state & VO_WIN_STATE_MINIMIZED);
+}
+
 static int mp_property_vo_configured(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3166,6 +3181,8 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("audio", "aid"),
     M_PROPERTY_ALIAS("sub", "sid"),
 
+    {"window-minimized", mp_property_win_minimized},
+
     {"mpv-version", mp_property_version},
 
     {"options", mp_property_options},
@@ -3202,6 +3219,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle",
       "demuxer-cache-duration", "demuxer-cache-idle"),
     E(MP_EVENT_WIN_RESIZE, "window-scale"),
+    E(MP_EVENT_WIN_STATE, "window-minimized"),
 };
 #undef E
 

@@ -108,6 +108,7 @@ struct vo_x11_state {
     Window dnd_src_window;
 
     Atom atom_frame_exts;
+    Atom atom_wm_state;
 
     /* dragging the window */
     bool win_drag_button1_down;
