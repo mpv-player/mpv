@@ -128,21 +128,23 @@ Playback Control
     no format is detected, t will be treated as list of files, separated by
     newline characters. Note that XML playlist formats are not supported.)
 
+    You can play playlists directly and without this option, however, this
+    option disables any security mechanisms that might be in place. You may
+    also need this option to load plaintext files as playlist.
+
     .. warning::
 
-        The way mpv uses playlist files is not safe against maliciously
-        constructed files. Such files may trigger harmful actions.
+        The way mpv uses playlist files via ``--playlist`` is not safe against
+        maliciously constructed files. Such files may trigger harmful actions.
         This has been the case for all mpv and MPlayer versions, but
         unfortunately this fact was not well documented earlier, and some people
         have even misguidedly recommended use of ``--playlist`` with untrusted
         sources. Do NOT use ``--playlist`` with random internet sources or files
         you do not trust!
 
-        The main problem is that playlists can point to arbitrary network
-        addresses (including local addresses inside of your LAN), and thus
-        can't be considered secure. Playlists also can contain entries using
-        other protocols, such as local files, or (most severely), special
-        protocols like ``avdevice://``, which are inherently unsafe.
+        Playlist can contain entries using other protocols, such as local files,
+        or (most severely), special protocols like ``avdevice://``, which are
+        inherently unsafe.
 
 ``--chapter-merge-threshold=<number>``
     Threshold for merging almost consecutive ordered chapter parts in
