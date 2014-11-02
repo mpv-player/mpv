@@ -1411,6 +1411,10 @@ Property list
 
     How these details are handled may change in the future.
 
+``mpv-version``
+    Return the mpv version/copyright string. Depending on how the binary was
+    built, it might contain either a release version, or just a git hash.
+
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
     changed at runtime by writing to this property. Note that many options

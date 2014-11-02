@@ -2891,6 +2891,12 @@ static int mp_property_af(void *ctx, struct m_property *prop,
     return property_filter(prop, action, arg, ctx, STREAM_AUDIO);
 }
 
+static int mp_property_version(void *ctx, struct m_property *prop,
+                            int action, void *arg)
+{
+    return m_property_strdup_ro(action, arg, mpv_version);
+}
+
 static int mp_property_alias(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -3159,6 +3165,8 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),
     M_PROPERTY_ALIAS("sub", "sid"),
+
+    {"mpv-version", mp_property_version},
 
     {"options", mp_property_options},
     {"file-local-options", mp_property_local_options},
