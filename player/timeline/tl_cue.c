@@ -361,8 +361,8 @@ void build_cue_timeline(struct MPContext *mpctx)
 
     struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline,
                                                           track_count + 1);
-    struct chapter *chapters = talloc_array_ptrtype(NULL, chapters,
-                                                    track_count);
+    struct demux_chapter *chapters = talloc_array_ptrtype(NULL, chapters,
+                                                          track_count);
     double starttime = 0;
     for (int i = 0; i < track_count; i++) {
         struct demuxer *source = mpctx->sources[1 + tracks[i].source];
@@ -387,8 +387,8 @@ void build_cue_timeline(struct MPContext *mpctx)
             .source_start = tracks[i].start,
             .source = source,
         };
-        chapters[i] = (struct chapter) {
-            .start = timeline[i].start,
+        chapters[i] = (struct demux_chapter) {
+            .pts = timeline[i].start,
             // might want to include other metadata here
             .name = bstrdup0(chapters, tracks[i].title),
         };

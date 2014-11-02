@@ -1081,12 +1081,13 @@ static int mp_property_chapter_metadata(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
     int chapter = get_current_chapter(mpctx);
-    if (!demuxer || chapter < 0 || chapter >= demuxer->num_chapters)
+    if (chapter < 0 || chapter >= mpctx->num_chapters)
+        return M_PROPERTY_UNAVAILABLE;
+    if (!mpctx->chapters[chapter].metadata)
         return M_PROPERTY_UNAVAILABLE;
 
-    return tag_property(action, arg, demuxer->chapters[chapter].metadata);
+    return tag_property(action, arg, mpctx->chapters[chapter].metadata);
 }
 
 static int mp_property_vf_metadata(void *ctx, struct m_property *prop,

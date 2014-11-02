@@ -797,16 +797,8 @@ static void load_chapters(struct MPContext *mpctx)
     }
     if (src && !mpctx->chapters) {
         talloc_free(mpctx->chapters);
-        int count = src->num_chapters;
-        mpctx->chapters = talloc_array(NULL, struct chapter, count);
-        mpctx->num_chapters = count;
-        for (int n = 0; n < count; n++) {
-            struct demux_chapter *dchapter = &src->chapters[n];
-            mpctx->chapters[n] = (struct chapter){
-                .start = dchapter->start / 1e9,
-                .name = talloc_strdup(mpctx->chapters, dchapter->name),
-            };
-        }
+        mpctx->num_chapters = src->num_chapters;
+        mpctx->chapters = demux_copy_chapter_data(src->chapters, src->num_chapters);
     }
     if (free_src) {
         struct stream *s = src->stream;

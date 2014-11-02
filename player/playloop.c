@@ -451,7 +451,7 @@ int get_current_chapter(struct MPContext *mpctx)
     double current_pts = get_current_time(mpctx);
     int i;
     for (i = 0; i < mpctx->num_chapters; i++)
-        if (current_pts < mpctx->chapters[i].start)
+        if (current_pts < mpctx->chapters[i].pts)
             break;
     return MPMAX(mpctx->last_chapter_seek, i - 1);
 }
@@ -490,7 +490,7 @@ double chapter_start_time(struct MPContext *mpctx, int chapter)
     if (chapter == -1)
         return get_start_time(mpctx);
     if (chapter >= 0 && chapter < mpctx->num_chapters)
-        return mpctx->chapters[chapter].start;
+        return mpctx->chapters[chapter].pts;
     return MP_NOPTS_VALUE;
 }
 

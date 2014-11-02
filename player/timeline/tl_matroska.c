@@ -380,7 +380,7 @@ static void build_timeline_loop(struct MPContext *mpctx,
                                 uint64_t *missing_time,
                                 uint64_t *last_end_time,
                                 struct timeline_part **timeline,
-                                struct chapter *chapters,
+                                struct demux_chapter *chapters,
                                 int *part_count,
                                 uint64_t skip,
                                 uint64_t limit)
@@ -419,7 +419,7 @@ static void build_timeline_loop(struct MPContext *mpctx,
              * needed to add chapters for external non-ordered segment loading
              * as well since that part is not recursive. */
             if (!limit) {
-                chapters[i].start = *starttime / 1e9;
+                chapters[i].pts = *starttime / 1e9;
                 chapters[i].name = talloc_strdup(chapters, c->name);
             }
 
@@ -560,8 +560,8 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     talloc_free(uids);
 
     struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline, 0);
-    struct chapter *chapters =
-        talloc_zero_array(NULL, struct chapter, m->num_ordered_chapters);
+    struct demux_chapter *chapters =
+        talloc_zero_array(NULL, struct demux_chapter, m->num_ordered_chapters);
     uint64_t starttime = 0;
     uint64_t missing_time = 0;
     uint64_t last_end_time = 0;

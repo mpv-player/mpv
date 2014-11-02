@@ -879,7 +879,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                    BSTR_P(name));
 
             if (idx == selected_edition) {
-                demuxer_add_chapter(demuxer, name, chapter.start, chapter.end,
+                demuxer_add_chapter(demuxer, name, chapter.start / 1e9,
                                     ca->chapter_uid);
             }
             if (m_chapters) {

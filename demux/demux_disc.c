@@ -275,7 +275,7 @@ static void add_stream_chapters(struct demuxer *demuxer)
         double p = n;
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_CHAPTER_TIME, &p) < 1)
             continue;
-        demuxer_add_chapter(demuxer, bstr0(""), p * 1e9, 0, 0);
+        demuxer_add_chapter(demuxer, bstr0(""), p, 0);
     }
 }
 

@@ -1076,9 +1076,9 @@ static int chapter_compare(const void *p1, const void *p2)
     struct demux_chapter *c1 = (void *)p1;
     struct demux_chapter *c2 = (void *)p2;
 
-    if (c1->start > c2->start)
+    if (c1->pts > c2->pts)
         return 1;
-    else if (c1->start < c2->start)
+    else if (c1->pts < c2->pts)
         return -1;
     return c1->original_index > c2->original_index ? 1 :-1; // never equal
 }
@@ -1090,12 +1090,11 @@ static void demuxer_sort_chapters(demuxer_t *demuxer)
 }
 
 int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
-                        uint64_t start, uint64_t end, uint64_t demuxer_id)
+                        double pts, uint64_t demuxer_id)
 {
     struct demux_chapter new = {
         .original_index = demuxer->num_chapters,
-        .start = start,
-        .end = end,
+        .pts = pts,
         .name = name.len ? bstrdup0(demuxer, name) : NULL,
         .metadata = talloc_zero(demuxer, struct mp_tags),
         .demuxer_id = demuxer_id,
@@ -1308,4 +1307,15 @@ void demux_unpause(demuxer_t *demuxer)
     in->thread_request_pause--;
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
+}
+
+struct demux_chapter *demux_copy_chapter_data(struct demux_chapter *c, int num)
+{
+    struct demux_chapter *new = talloc_array(NULL, struct demux_chapter, num);
+    for (int n = 0; n < num; n++) {
+        new[n] = c[n];
+        new[n].name = talloc_strdup(new, new[n].name);
+        new[n].metadata = mp_tags_dup(new, new[n].metadata);
+    }
+    return new;
 }

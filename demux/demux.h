@@ -123,7 +123,7 @@ typedef struct demuxer_desc {
 typedef struct demux_chapter
 {
     int original_index;
-    uint64_t start, end;
+    double pts;
     char *name;
     struct mp_tags *metadata;
     uint64_t demuxer_id; // for mapping to internal demuxer data structures
@@ -268,8 +268,8 @@ void demuxer_help(struct mp_log *log);
 
 int demuxer_add_attachment(struct demuxer *demuxer, struct bstr name,
                            struct bstr type, struct bstr data);
-int demuxer_add_chapter(struct demuxer *demuxer, struct bstr name,
-                        uint64_t start, uint64_t end, uint64_t demuxer_id);
+int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
+                        double pts, uint64_t demuxer_id);
 
 double demuxer_get_time_length(struct demuxer *demuxer);
 
@@ -283,6 +283,8 @@ void demux_update(demuxer_t *demuxer);
 
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
+
+struct demux_chapter *demux_copy_chapter_data(struct demux_chapter *c, int num);
 
 bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
                             struct matroska_segment_uid *b);

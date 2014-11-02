@@ -158,20 +158,20 @@ static double demuxer_chapter_time(struct demuxer *demuxer, int n)
 {
     if (n < 0 || n >= demuxer->num_chapters)
         return -1;
-    return demuxer->chapters[n].start / 1e9;
+    return demuxer->chapters[n].pts;
 }
 
 // Append all chapters from src to the chapters array.
 // Ignore chapters outside of the given time range.
-static void copy_chapters(struct chapter **chapters, int *num_chapters,
+static void copy_chapters(struct demux_chapter **chapters, int *num_chapters,
                           struct demuxer *src, double start, double len,
                           double dest_offset)
 {
     for (int n = 0; n < src->num_chapters; n++) {
         double time = demuxer_chapter_time(src, n);
         if (time >= start && time <= start + len) {
-            struct chapter ch = {
-                .start = dest_offset + time - start,
+            struct demux_chapter ch = {
+                .pts = dest_offset + time - start,
                 .name = talloc_strdup(*chapters, src->chapters[n].name),
             };
             MP_TARRAY_APPEND(NULL, *chapters, *num_chapters, ch);
@@ -208,7 +208,7 @@ static void resolve_timestamps(struct tl_part *part, struct demuxer *demuxer)
 
 static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
 {
-    struct chapter *chapters = talloc_new(NULL);
+    struct demux_chapter *chapters = talloc_new(NULL);
     int num_chapters = 0;
     struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline,
                                                           parts->num_parts + 1);
@@ -244,8 +244,8 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
         }
 
         // Add a chapter between each file.
-        struct chapter ch = {
-            .start = starttime,
+        struct demux_chapter ch = {
+            .pts = starttime,
             .name = talloc_strdup(chapters, part->filename),
         };
         MP_TARRAY_APPEND(NULL, chapters, num_chapters, ch);

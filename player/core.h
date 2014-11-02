@@ -47,11 +47,6 @@ struct timeline_part {
     struct demuxer *source;
 };
 
-struct chapter {
-    double start;
-    char *name;
-};
-
 enum mp_osd_seek_info {
     OSD_SEEK_INFO_BAR           = 1,
     OSD_SEEK_INFO_TEXT          = 2,
@@ -195,7 +190,7 @@ typedef struct MPContext {
     struct timeline_part *timeline;
     int num_timeline_parts;
     int timeline_part;
-    struct chapter *chapters;
+    struct demux_chapter *chapters;
     int num_chapters;
     double video_offset;
 
