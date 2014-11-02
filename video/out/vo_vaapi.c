@@ -567,6 +567,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(p);
     if (events & VO_EVENT_EXPOSE)
         vo->want_redraw = true;
+    vo_event(vo, events);
     return r;
 }
 

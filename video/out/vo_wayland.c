@@ -705,6 +705,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     if (events & VO_EVENT_RESIZE)
         resize(p);
 
+    vo_event(vo, events);
+
     return r;
 }
 

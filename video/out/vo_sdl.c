@@ -561,6 +561,7 @@ static int wait_events(struct vo *vo, int64_t until_time_us)
                 break;
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 check_resize(vo);
+                vo_event(vo, VO_EVENT_RESIZE);
                 break;
             }
             break;

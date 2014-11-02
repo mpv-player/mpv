@@ -39,9 +39,13 @@ void mp_notify_property(struct MPContext *mpctx, const char *property);
 int mp_get_property_id(const char *name);
 uint64_t mp_get_property_event_mask(const char *name);
 
-// Must start with the first unused positive value in enum mpv_event_id
-#define INTERNAL_EVENT_BASE 24
-#define MP_EVENT_CACHE_UPDATE (INTERNAL_EVENT_BASE + 0)
+enum {
+    // Must start with the first unused positive value in enum mpv_event_id
+    // MPV_EVENT_* and MP_EVENT_* must not overlap.
+    INTERNAL_EVENT_BASE = 24,
+    MP_EVENT_CACHE_UPDATE,
+    MP_EVENT_WIN_RESIZE,
+};
 
 bool mp_hook_test_completion(struct MPContext *mpctx, char *type);
 void mp_hook_run(struct MPContext *mpctx, char *client, char *type);

@@ -670,6 +670,14 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
     mpctx->mouse_cursor_visible = mouse_cursor_visible;
 }
 
+static void handle_vo_events(struct MPContext *mpctx)
+{
+    struct vo *vo = mpctx->video_out;
+    int events = vo ? vo_query_events(vo, VO_EVENTS_USER, true) : 0;
+    if (events & VO_EVENT_RESIZE)
+        mp_notify(mpctx, MP_EVENT_WIN_RESIZE, NULL);
+}
+
 void add_frame_pts(struct MPContext *mpctx, double pts)
 {
     if (pts == MP_NOPTS_VALUE || mpctx->hrseek_framedrop) {
@@ -884,6 +892,7 @@ void run_playloop(struct MPContext *mpctx)
     }
 
     handle_cursor_autohide(mpctx);
+    handle_vo_events(mpctx);
     handle_heartbeat_cmd(mpctx);
 
     fill_audio_out_buffers(mpctx, endpts);
@@ -995,6 +1004,7 @@ void mp_idle(struct MPContext *mpctx)
     mpctx->sleeptime = 100.0;
     mp_process_input(mpctx);
     handle_cursor_autohide(mpctx);
+    handle_vo_events(mpctx);
     update_osd_msg(mpctx);
     handle_osd_redraw(mpctx);
 }

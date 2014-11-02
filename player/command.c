@@ -3201,6 +3201,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
     E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle",
       "demuxer-cache-duration", "demuxer-cache-idle"),
+    E(MP_EVENT_WIN_RESIZE, "window-scale"),
 };
 #undef E
 

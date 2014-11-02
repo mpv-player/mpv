@@ -631,6 +631,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     int r = vo_x11_control(vo, &events, request, data);
     if (events & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE))
         resize(vo);
+    vo_event(vo, events);
     return r;
 }
 

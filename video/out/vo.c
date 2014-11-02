@@ -129,6 +129,7 @@ struct vo_internal {
     bool request_redraw;            // redraw request from player to VO
     bool want_redraw;               // redraw request from VO to player
     bool paused;
+    int queued_events;
 
     int64_t flip_queue_offset; // queue flip events at most this much in advance
 
@@ -836,6 +837,31 @@ void vo_set_flip_queue_offset(struct vo *vo, int64_t us)
 int64_t vo_get_vsync_interval(struct vo *vo)
 {
     return vo->in->vsync_interval;
+}
+
+// Set specific event flags, and wakeup the playback core if needed.
+// vo_query_events() can retrieve the events again.
+void vo_event(struct vo *vo, int event)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    if ((in->queued_events & event & VO_EVENTS_USER) != (event & VO_EVENTS_USER))
+        mp_input_wakeup(vo->input_ctx);
+    in->queued_events |= event;
+    pthread_mutex_unlock(&in->lock);
+}
+
+// Check event flags set with vo_event(). Return the mask of events that was
+// set and included in the events parameter. If clear==true, clear these events.
+int vo_query_events(struct vo *vo, int events, bool clear)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    int r = in->queued_events & events;
+    if (clear)
+        in->queued_events &= ~(unsigned)r;
+    pthread_mutex_unlock(&in->lock);
+    return r;
 }
 
 /**

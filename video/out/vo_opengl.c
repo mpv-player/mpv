@@ -439,6 +439,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         get_and_update_icc_profile(vo, p->icc_opts);
         vo->want_redraw = true;
     }
+    vo_event(vo, events);
     mpgl_unlock(p->glctx);
 
     return r;
