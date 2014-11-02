@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "common.h"
 #include "version.h"
 #ifdef NO_BUILD_TIMESTAMPS
 #undef BUILDDATE
