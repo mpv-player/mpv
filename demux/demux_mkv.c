@@ -112,6 +112,7 @@ typedef struct mkv_track {
     float a_osfreq;
 
     double default_duration;
+    double codec_delay;
 
     int default_track;
 
@@ -182,6 +183,7 @@ typedef struct mkv_demuxer {
 
     uint64_t skip_to_timecode;
     int v_skip_to_keyframe, a_skip_to_keyframe;
+    int a_skip_preroll;
     int subtitle_preroll;
 } mkv_demuxer_t;
 
@@ -625,6 +627,9 @@ static void parse_trackentry(struct demuxer *demuxer,
 
     if (entry->n_content_encodings)
         parse_trackencodings(demuxer, track, &entry->content_encodings);
+
+    if (entry->n_codec_delay)
+        track->codec_delay = entry->codec_delay / 1e9;
 
     mkv_d->tracks[mkv_d->num_tracks++] = track;
 }
@@ -1750,6 +1755,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     mkv_d->tc_scale = 1000000;
     mkv_d->segment_start = stream_tell(s);
     mkv_d->segment_end = end_pos;
+    mkv_d->a_skip_preroll = 1;
 
     if (demuxer->params && demuxer->params->matroska_was_valid)
         *demuxer->params->matroska_was_valid = true;
@@ -2258,7 +2264,7 @@ static bool mkv_parse_packet(mkv_track_t *track, bstr *raw, bstr *out)
 }
 
 struct block_info {
-    uint64_t duration;
+    uint64_t duration, discardpadding;
     bool simple, keyframe;
     uint64_t timecode;
     mkv_track_t *track;
@@ -2358,7 +2364,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         return 0;
     }
 
-    current_pts = tc / 1e9;
+    current_pts = tc / 1e9 - track->codec_delay;
 
     if (track->type == MATROSKA_TRACK_AUDIO) {
         if (mkv_d->a_skip_to_keyframe)
@@ -2418,6 +2424,13 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                         MPSWAP(double, dp->pts, dp->dts);
                     if (p == 0)
                         dp->duration = block_duration / 1e9;
+                    if (stream->type == STREAM_AUDIO) {
+                        unsigned int srate = track->a_sfreq;
+                        demux_packet_set_padding(dp,
+                            mkv_d->a_skip_preroll ? track->codec_delay * srate : 0,
+                            block_info->discardpadding / 1e9 * srate);
+                        mkv_d->a_skip_preroll = 0;
+                    }
                     demux_add_packet(stream, dp);
                     p++;
                 }
@@ -2454,6 +2467,12 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             if (block->duration == EBML_UINT_INVALID)
                 goto error;
             block->duration *= mkv_d->tc_scale;
+            break;
+
+        case MATROSKA_ID_DISCARDPADDING:
+            block->discardpadding = ebml_read_uint(s);
+            if (block->discardpadding == EBML_UINT_INVALID)
+                goto error;
             break;
 
         case MATROSKA_ID_BLOCK:
@@ -2745,6 +2764,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 
         mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
         mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
+        mkv_d->a_skip_preroll = mkv_d->a_skip_to_keyframe;
 
         if (flags & SEEK_FORWARD) {
             mkv_d->skip_to_timecode = target_timecode;
@@ -2781,6 +2801,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 
         mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
         mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
+        mkv_d->a_skip_preroll = mkv_d->a_skip_to_keyframe;
 
         if (index) {
             stream_seek(s, index->filepos);

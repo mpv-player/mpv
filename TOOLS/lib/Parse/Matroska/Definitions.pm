@@ -232,6 +232,7 @@ sub define_matroska {
                     elem('Block',           'a1', 'binary'),
                     elem('BlockDuration',   '9b', 'uint'),
                     elem('ReferenceBlock*', 'fb', 'sint'),
+                    elem('DiscardPadding',  '75A2', 'sint'),
                 }),
                 elem('SimpleBlock*', 'a3', 'binary'),
             }),
@@ -256,6 +257,8 @@ sub define_matroska {
                     elem('CodecPrivate',         '63a2', 'binary'),
                     elem('CodecName',          '258688', 'str'),
                     elem('CodecDecodeAll',         'aa', 'uint'),
+                    elem('CodecDelay',           '56AA', 'uint'),
+                    elem('SeekPreRoll',          '56BB', 'uint'),
                     elem('Video', 'e0', {
                         elem('FlagInterlaced',  '9a', 'uint'),
                         elem('PixelWidth',      'b0', 'uint'),
