@@ -614,6 +614,13 @@ video_output_features = [
                    check_cc(fragment=load_fragment('gl_x11.c'),
                             use=['x11', 'libdl', 'pthreads']))
     } , {
+        'name': '--egl-x11',
+        'desc': 'OpenGL X11 EGL Backend',
+        'deps': [ 'x11' ],
+        'groups': [ 'gl' ],
+        'func': check_pkg_config('egl', 'gl'),
+        'default': 'disable',
+    } , {
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
         'deps': [ 'wayland' ],

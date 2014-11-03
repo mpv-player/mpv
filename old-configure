@@ -628,12 +628,13 @@ check_yes_no $_dvbin DVBIN
 
 check_statement_libs "JPEG support" $_jpeg JPEG "stdio.h jpeglib.h" "" "-ljpeg $_ld_lm"
 
+_gl_x11_egl=no
 (test "$_x11" = no && test "$_wayland" = no) && _gl=no
 echocheck "OpenGL"
 #Note: this test is run even with --enable-gl since we autodetect linker flags
 if test "$_gl" != no ; then
   cat > $TMPC << EOF
-#if defined(GL_WAYLAND)
+#if defined(GL_WAYLAND) || defined(EGL_X11)
 #include <EGL/egl.h>
 #else
 #include <X11/Xlib.h>
@@ -670,6 +671,10 @@ EOF
     libs_mplayer="$libs_mplayer -lGL -lEGL"
     test "$_gl_wayland" = yes && res_comment="$res_comment wayland"
   fi
+  if test "$_x11" = yes && test "$_gl" = yes && pkg_config_add "egl"; then
+    _gl_x11_egl=yes
+    res_comment="$res_comment x11egl"
+  fi
 else
   _gl=no
 fi
@@ -677,9 +682,11 @@ fi
 if test "$_gl" = no ; then
     _gl_x11=no
     _gl_wayland=no
+    _gl_x11_egl=no
 fi
 check_yes_no $_gl GL
 check_yes_no $_gl_x11 GL_X11
+check_yes_no $_gl_x11_egl EGL_X11
 check_yes_no $_gl_wayland GL_WAYLAND
 echores "$_gl"
 

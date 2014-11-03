@@ -352,6 +352,7 @@ def build(ctx):
         ( "video/out/gl_w32.c",                  "gl-win32" ),
         ( "video/out/gl_wayland.c",              "gl-wayland" ),
         ( "video/out/gl_x11.c",                  "gl-x11" ),
+        ( "video/out/gl_x11egl.c",               "egl-x11" ),
         ( "video/out/pnm_loader.c",              "gl" ),
         ( "video/out/vo.c" ),
         ( "video/out/vo_caca.c",                 "caca" ),
