@@ -148,9 +148,11 @@ struct demux_stream {
     struct demux_packet *tail;
 };
 
+// Return "a", or if that is NOPTS, return "def".
+#define PTS_OR_DEF(a, def) ((a) == MP_NOPTS_VALUE ? (def) : (a))
 // If one of the values is NOPTS, always pick the other one.
-#define MP_PTS_MIN(a, b) ((a) == MP_NOPTS_VALUE || ((a) > (b)) ? (b) : (a))
-#define MP_PTS_MAX(a, b) ((a) == MP_NOPTS_VALUE || ((a) < (b)) ? (b) : (a))
+#define MP_PTS_MIN(a, b) MPMIN(PTS_OR_DEF(a, b), PTS_OR_DEF(b, a))
+#define MP_PTS_MAX(a, b) MPMAX(PTS_OR_DEF(a, b), PTS_OR_DEF(b, a))
 
 static void demuxer_sort_chapters(demuxer_t *demuxer);
 static void *demux_thread(void *pctx);
