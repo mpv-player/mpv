@@ -44,6 +44,7 @@ struct priv {
     struct mp_audio frame;
     bool force_channel_map;
     struct demux_packet *packet;
+    uint32_t skip_samples;
 };
 
 static void uninit(struct dec_audio *da);
@@ -107,11 +108,13 @@ static void set_data_from_avframe(struct dec_audio *da)
         av_frame_get_side_data(priv->avframe, AV_FRAME_DATA_SKIP_SAMPLES);
     if (sd && sd->size >= 10) {
         char *d = sd->data;
-        uint32_t skip = AV_RL32(d + 0);
+        priv->skip_samples += AV_RL32(d + 0);
         uint32_t pad = AV_RL32(d + 4);
-        if (skip <= da->decoded.samples) {
+        uint32_t skip = MPMIN(priv->skip_samples, da->decoded.samples);
+        if (skip) {
             mp_audio_skip_samples(&da->decoded, skip);
             da->pts_offset += skip;
+            priv->skip_samples -= skip;
         }
         if (pad <= da->decoded.samples)
             da->decoded.samples -= pad;
@@ -222,6 +225,7 @@ static int control(struct dec_audio *da, int cmd, void *arg)
         mp_audio_set_null_data(&da->decoded);
         talloc_free(ctx->packet);
         ctx->packet = NULL;
+        ctx->skip_samples = 0;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
