@@ -2762,18 +2762,12 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
         if (!index)
             stream_seek(demuxer->stream, old_pos);
 
-        mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
-        mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
-        mkv_d->a_skip_preroll = mkv_d->a_skip_to_keyframe;
-
         if (flags & SEEK_FORWARD) {
             mkv_d->skip_to_timecode = target_timecode;
         } else {
             mkv_d->skip_to_timecode = index ? index->timecode * mkv_d->tc_scale
                                             : 0;
         }
-
-        demux_mkv_fill_buffer(demuxer);
     } else {
         stream_t *s = demuxer->stream;
 
@@ -2799,10 +2793,6 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 
         mkv_d->cluster_end = 0;
 
-        mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
-        mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
-        mkv_d->a_skip_preroll = mkv_d->a_skip_to_keyframe;
-
         if (index) {
             stream_seek(s, index->filepos);
             mkv_d->skip_to_timecode = index->timecode * mkv_d->tc_scale;
@@ -2813,9 +2803,13 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
                 mkv_d->cluster_end = size;
             }
         }
-
-        demux_mkv_fill_buffer(demuxer);
     }
+
+    mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
+    mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
+    mkv_d->a_skip_preroll = mkv_d->a_skip_to_keyframe;
+
+    demux_mkv_fill_buffer(demuxer);
 }
 
 static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
