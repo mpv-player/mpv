@@ -1219,7 +1219,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         for (int n = 0; n < in->d_user->num_streams; n++) {
             struct demux_stream *ds = in->d_user->streams[n]->ds;
             if (ds->active) {
-                r->underrun |= !ds->head;
+                r->underrun |= !ds->head && !ds->eof;
                 r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
                 r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);
             }
