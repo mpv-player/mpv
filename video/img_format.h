@@ -64,6 +64,8 @@
 // The only real paletted format we support is IMGFMT_PAL8, so check for that
 // format directly if you want an actual paletted format.
 #define MP_IMGFLAG_PAL 0x8000
+// planes don't contain real data; planes[3] contains an API-specific pointer
+#define MP_IMGFLAG_HWACCEL 0x10000
 
 // Exactly one of these bits is set in mp_imgfmt_desc.flags
 #define MP_IMGFLAG_COLOR_CLASS_MASK \
@@ -330,10 +332,7 @@ static inline bool IMGFMT_IS_RGB(int fmt)
 }
 
 #define IMGFMT_RGB_DEPTH(fmt) (mp_imgfmt_get_desc(fmt).plane_bits)
-
-#define IMGFMT_IS_HWACCEL(fmt) \
-    ((fmt) == IMGFMT_VDPAU || (fmt) == IMGFMT_VDPAU_OUTPUT || \
-     (fmt) == IMGFMT_VAAPI || (fmt) == IMGFMT_VDA || (fmt) == IMGFMT_DXVA2)
+#define IMGFMT_IS_HWACCEL(fmt) (mp_imgfmt_get_desc(fmt).flags & MP_IMGFLAG_HWACCEL)
 
 int mp_imgfmt_from_name(bstr name, bool allow_hwaccel);
 char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt);
