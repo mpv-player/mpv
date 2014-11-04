@@ -1051,7 +1051,7 @@ goto_reopen_demuxer: ;
         select_track(mpctx, STREAM_SUB, opts->sub_id, opts->sub_id_ff,
                      opts->sub_lang);
     mpctx->current_track[1][STREAM_SUB] =
-        select_track(mpctx, STREAM_SUB, opts->sub2_id, -2, NULL);
+        select_track(mpctx, STREAM_SUB, opts->sub2_id, -1, NULL);
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int i = 0; i < NUM_PTRACKS; i++) {
             struct track *track = mpctx->current_track[i][t];
