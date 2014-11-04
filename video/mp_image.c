@@ -122,7 +122,7 @@ static bool mp_image_alloc_planes(struct mp_image *mpi)
 {
     assert(!mpi->planes[0]);
 
-    if (!mp_image_params_valid(&mpi->params))
+    if (!mp_image_params_valid(&mpi->params) || mpi->fmt.flags & MP_IMGFLAG_HWACCEL)
         return false;
 
     // Note: for non-mod-2 4:2:0 YUV frames, we have to allocate an additional
