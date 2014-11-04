@@ -144,12 +144,14 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     int planedepth[4] = {0};
     int el_size = (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM) ? 1 : 8;
+    bool need_endian = false; // single component is spread over >1 bytes
     for (int c = 0; c < pd->nb_components; c++) {
         AVComponentDescriptor d = pd->comp[c];
         // multiple components per plane -> Y is definitive, ignore chroma
         if (!desc.bpp[d.plane])
             desc.bpp[d.plane] = (d.step_minus1 + 1) * el_size;
         planedepth[d.plane] += d.depth_minus1 + 1;
+        need_endian |= (d.depth_minus1 + 1 + d.shift) > 8;
     }
 
     for (int p = 0; p < 4; p++) {
@@ -157,18 +159,30 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             desc.num_planes++;
     }
 
-    // Packed RGB formats are the only formats that have less than 8 bits per
-    // component, and still require endian dependent access.
-    if (pd->comp[0].depth_minus1 + 1 <= 8 &&
-        !(mpfmt >= IMGFMT_RGB444_LE && mpfmt <= IMGFMT_BGR565_BE))
-    {
+    desc.plane_bits = planedepth[0];
+
+    // Check whether any components overlap other components (per plane).
+    // We're cheating/simplifying here: we assume that this happens if a shift
+    // is set - which is wrong in general (could be needed for padding, instead
+    // of overlapping bits of another component). Needed for rgb444le/be.
+    bool component_byte_overlap = false;
+    for (int c = 0; c < pd->nb_components; c++) {
+        AVComponentDescriptor d = pd->comp[c];
+        component_byte_overlap |= d.shift > 0 && planedepth[d.plane] > 8;
+    }
+
+    // If every component sits in its own byte, or all components are within
+    // a single byte, no endian-dependent access is needed. If components
+    // stride bytes (like with packed 2 byte RGB formats), endian-dependent
+    // access is needed.
+    need_endian |= component_byte_overlap;
+
+    if (!need_endian) {
         desc.flags |= MP_IMGFLAG_LE | MP_IMGFLAG_BE;
     } else {
         desc.flags |= (pd->flags & AV_PIX_FMT_FLAG_BE)
                       ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
     }
-
-    desc.plane_bits = planedepth[0];
 
     if (mpfmt == IMGFMT_XYZ12_LE || mpfmt == IMGFMT_XYZ12_BE) {
         desc.flags |= MP_IMGFLAG_XYZ;
