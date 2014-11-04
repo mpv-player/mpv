@@ -260,6 +260,10 @@ enum mp_imgfmt {
     IMGFMT_VAAPI,
     IMGFMT_DXVA2,           // IDirect3DSurface9 (NV12)
 
+    // Generic pass-through of AV_PIX_FMT_*. Used for formats which don't have
+    // a corresponding IMGFMT_ value.
+    IMGFMT_AVPIXFMT_START,
+    IMGFMT_AVPIXFMT_END = IMGFMT_AVPIXFMT_START + 500,
 
     IMGFMT_END,
 
