@@ -106,38 +106,23 @@ enum mp_imgfmt {
     // YUV formats with 2 bytes per plane-pixel. Formats with 9-15 bits pad the
     // most significant bits with 0 (use shifts to expand them to 16 bits).
 
-    IMGFMT_444P16_LE,
-    IMGFMT_444P16_BE,
-    IMGFMT_444P14_LE,
-    IMGFMT_444P14_BE,
-    IMGFMT_444P12_LE,
-    IMGFMT_444P12_BE,
-    IMGFMT_444P10_LE,
-    IMGFMT_444P10_BE,
-    IMGFMT_444P9_LE,
-    IMGFMT_444P9_BE,
+    IMGFMT_444P16,
+    IMGFMT_444P14,
+    IMGFMT_444P12,
+    IMGFMT_444P10,
+    IMGFMT_444P9,
 
-    IMGFMT_422P16_LE,
-    IMGFMT_422P16_BE,
-    IMGFMT_422P14_LE,
-    IMGFMT_422P14_BE,
-    IMGFMT_422P12_LE,
-    IMGFMT_422P12_BE,
-    IMGFMT_422P10_LE,
-    IMGFMT_422P10_BE,
-    IMGFMT_422P9_LE,
-    IMGFMT_422P9_BE,
+    IMGFMT_422P16,
+    IMGFMT_422P14,
+    IMGFMT_422P12,
+    IMGFMT_422P10,
+    IMGFMT_422P9,
 
-    IMGFMT_420P16_LE,
-    IMGFMT_420P16_BE,
-    IMGFMT_420P14_LE,
-    IMGFMT_420P14_BE,
-    IMGFMT_420P12_LE,
-    IMGFMT_420P12_BE,
-    IMGFMT_420P10_LE,
-    IMGFMT_420P10_BE,
-    IMGFMT_420P9_LE,
-    IMGFMT_420P9_BE,
+    IMGFMT_420P16,
+    IMGFMT_420P14,
+    IMGFMT_420P12,
+    IMGFMT_420P10,
+    IMGFMT_420P9,
 
     // Planar YUV with alpha (4th plane)
     IMGFMT_444AP,
@@ -146,8 +131,7 @@ enum mp_imgfmt {
 
     // Gray
     IMGFMT_Y8,
-    IMGFMT_Y16_LE,
-    IMGFMT_Y16_BE,
+    IMGFMT_Y16,
 
     // Gray with alpha (packed)
     IMGFMT_YA8,
@@ -169,12 +153,9 @@ enum mp_imgfmt {
     IMGFMT_RGBA,
     IMGFMT_BGR24,               // 3 bytes per pixel
     IMGFMT_RGB24,
-    IMGFMT_RGB48_LE,            // 6 bytes per pixel, uint16_t channels
-    IMGFMT_RGB48_BE,
-    IMGFMT_RGBA64_LE,           // 8 bytes per pixel, uint16_t channels
-    IMGFMT_RGBA64_BE,
-    IMGFMT_BGRA64_LE,
-    IMGFMT_BGRA64_BE,
+    IMGFMT_RGB48,               // 6 bytes per pixel, uint16_t channels
+    IMGFMT_RGBA64,              // 8 bytes per pixel, uint16_t channels
+    IMGFMT_BGRA64,
 
     // Like e.g. IMGFMT_ARGB, but has a padding byte instead of alpha
     IMGFMT_0RGB,
@@ -196,18 +177,12 @@ enum mp_imgfmt {
     IMGFMT_MONO_W,              // like IMGFMT_MONO, but inverted (white pixels)
 
     // Accessed with bit-shifts after endian-swapping the uint16_t pixel
-    IMGFMT_RGB444_LE,           // 4r 4g 4b 4a  (MSB to LSB)
-    IMGFMT_RGB444_BE,
-    IMGFMT_RGB555_LE,           // 5r 5g 5b 1a
-    IMGFMT_RGB555_BE,
-    IMGFMT_RGB565_LE,           // 5r 6g 5b
-    IMGFMT_RGB565_BE,
-    IMGFMT_BGR444_LE,           // 4b 4r 4g 4a
-    IMGFMT_BGR444_BE,
-    IMGFMT_BGR555_LE,           // 5b 5g 5r 1a
-    IMGFMT_BGR555_BE,
-    IMGFMT_BGR565_LE,           // 5b 6g 5r
-    IMGFMT_BGR565_BE,
+    IMGFMT_RGB444,              // 4r 4g 4b 4a  (MSB to LSB)
+    IMGFMT_RGB555,              // 5r 5g 5b 1a
+    IMGFMT_RGB565,              // 5r 6g 5b
+    IMGFMT_BGR444,              // 4b 4r 4g 4a
+    IMGFMT_BGR555,              // 5b 5g 5r 1a
+    IMGFMT_BGR565,              // 5b 6g 5r
 
     // The first plane has 1 byte per pixel. The second plane is a palette with
     // 256 entries, with each entry encoded like in IMGFMT_BGR32.
@@ -218,8 +193,7 @@ enum mp_imgfmt {
 
     // XYZ colorspace, similar organization to RGB48. Even though it says "12",
     // the components are stored as 16 bit, with lower 4 bits set to 0.
-    IMGFMT_XYZ12_LE,
-    IMGFMT_XYZ12_BE,
+    IMGFMT_XYZ12,
 
     // Hardware accelerated formats. Plane data points to special data
     // structures, instead of pixel data.
@@ -237,8 +211,6 @@ enum mp_imgfmt {
     IMGFMT_END,
 
     // Redundant format aliases for native endian access
-    // For all formats that have _LE/_BE, define a native-endian entry without
-    // the suffix.
 
     // The IMGFMT_RGB32 and IMGFMT_BGR32 formats provide bit-shift access to
     // normally byte-accessed formats:
@@ -246,38 +218,6 @@ enum mp_imgfmt {
     // IMGFMT_BGR32 = b | (g << 8) | (r << 16) | (a << 24)
     IMGFMT_RGB32   = MP_SELECT_LE_BE(IMGFMT_RGBA, IMGFMT_ABGR),
     IMGFMT_BGR32   = MP_SELECT_LE_BE(IMGFMT_BGRA, IMGFMT_ARGB),
-
-    IMGFMT_RGB444  = MP_SELECT_LE_BE(IMGFMT_RGB444_LE, IMGFMT_RGB444_BE),
-    IMGFMT_RGB555  = MP_SELECT_LE_BE(IMGFMT_RGB555_LE, IMGFMT_RGB555_BE),
-    IMGFMT_RGB565  = MP_SELECT_LE_BE(IMGFMT_RGB565_LE, IMGFMT_RGB565_BE),
-    IMGFMT_BGR444  = MP_SELECT_LE_BE(IMGFMT_BGR444_LE, IMGFMT_BGR444_BE),
-    IMGFMT_BGR555  = MP_SELECT_LE_BE(IMGFMT_BGR555_LE, IMGFMT_BGR555_BE),
-    IMGFMT_BGR565  = MP_SELECT_LE_BE(IMGFMT_BGR565_LE, IMGFMT_BGR565_BE),
-    IMGFMT_RGB48   = MP_SELECT_LE_BE(IMGFMT_RGB48_LE, IMGFMT_RGB48_BE),
-    IMGFMT_RGBA64  = MP_SELECT_LE_BE(IMGFMT_RGBA64_LE, IMGFMT_RGBA64_BE),
-    IMGFMT_BGRA64  = MP_SELECT_LE_BE(IMGFMT_BGRA64_LE, IMGFMT_BGRA64_BE),
-
-    IMGFMT_444P16  = MP_SELECT_LE_BE(IMGFMT_444P16_LE, IMGFMT_444P16_BE),
-    IMGFMT_444P14  = MP_SELECT_LE_BE(IMGFMT_444P14_LE, IMGFMT_444P14_BE),
-    IMGFMT_444P12  = MP_SELECT_LE_BE(IMGFMT_444P12_LE, IMGFMT_444P12_BE),
-    IMGFMT_444P10  = MP_SELECT_LE_BE(IMGFMT_444P10_LE, IMGFMT_444P10_BE),
-    IMGFMT_444P9   = MP_SELECT_LE_BE(IMGFMT_444P9_LE, IMGFMT_444P9_BE),
-
-    IMGFMT_422P16  = MP_SELECT_LE_BE(IMGFMT_422P16_LE, IMGFMT_422P16_BE),
-    IMGFMT_422P14  = MP_SELECT_LE_BE(IMGFMT_422P14_LE, IMGFMT_422P14_BE),
-    IMGFMT_422P12  = MP_SELECT_LE_BE(IMGFMT_422P12_LE, IMGFMT_422P12_BE),
-    IMGFMT_422P10  = MP_SELECT_LE_BE(IMGFMT_422P10_LE, IMGFMT_422P10_BE),
-    IMGFMT_422P9   = MP_SELECT_LE_BE(IMGFMT_422P9_LE, IMGFMT_422P9_BE),
-
-    IMGFMT_420P16  = MP_SELECT_LE_BE(IMGFMT_420P16_LE, IMGFMT_420P16_BE),
-    IMGFMT_420P14  = MP_SELECT_LE_BE(IMGFMT_420P14_LE, IMGFMT_420P14_BE),
-    IMGFMT_420P12  = MP_SELECT_LE_BE(IMGFMT_420P12_LE, IMGFMT_420P12_BE),
-    IMGFMT_420P10  = MP_SELECT_LE_BE(IMGFMT_420P10_LE, IMGFMT_420P10_BE),
-    IMGFMT_420P9   = MP_SELECT_LE_BE(IMGFMT_420P9_LE, IMGFMT_420P9_BE),
-
-    IMGFMT_Y16     = MP_SELECT_LE_BE(IMGFMT_Y16_LE, IMGFMT_Y16_BE),
-
-    IMGFMT_XYZ12   = MP_SELECT_LE_BE(IMGFMT_XYZ12_LE, IMGFMT_XYZ12_BE),
 };
 
 static inline bool IMGFMT_IS_RGB(int fmt)

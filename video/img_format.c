@@ -185,7 +185,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
                       ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
     }
 
-    if (mpfmt == IMGFMT_XYZ12_LE || mpfmt == IMGFMT_XYZ12_BE) {
+    if (fmt == AV_PIX_FMT_XYZ12LE || fmt == AV_PIX_FMT_XYZ12BE) {
         desc.flags |= MP_IMGFLAG_XYZ;
     } else if (!(pd->flags & AV_PIX_FMT_FLAG_RGB) &&
                fmt != AV_PIX_FMT_MONOBLACK &&
