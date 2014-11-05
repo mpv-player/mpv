@@ -1218,6 +1218,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             .ts_range = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
             .ts_duration = -1,
         };
+        int num_packets = 0;
         for (int n = 0; n < in->d_user->num_streams; n++) {
             struct demux_stream *ds = in->d_user->streams[n]->ds;
             if (ds->active) {
@@ -1226,12 +1227,15 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
                     r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
                     r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);
                 }
+                num_packets += ds->packs;
             }
         }
         r->idle = (in->idle && !r->underrun) || r->eof;
         r->underrun &= !r->idle;
         if (r->ts_range[0] != MP_NOPTS_VALUE && r->ts_range[1] != MP_NOPTS_VALUE)
-            r->ts_duration = r->ts_range[1] - r->ts_range[0];
+            r->ts_duration = MPMAX(0, r->ts_range[1] - r->ts_range[0]);
+        if (!num_packets || in->seeking)
+            r->ts_duration = 0;
         return DEMUXER_CTRL_OK;
     }
     }
