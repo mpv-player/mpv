@@ -87,6 +87,10 @@ enum mp_voctrl {
 
     VOCTRL_GET_WIN_STATE,               // int* (VO_WIN_STATE_* flags)
 
+    // char *** (NULL terminated array compatible with CONF_TYPE_STRING_LIST)
+    // names for displays the window is on
+    VOCTRL_GET_DISPLAY_NAMES,
+
     // The VO is supposed to set  "known" fields, and leave the others
     // untouched or set to 0.
     // imgfmt/w/h/d_w/d_h can be omitted for convenience.

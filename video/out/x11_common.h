@@ -34,6 +34,7 @@ struct mp_log;
 struct xrandr_display {
     struct mp_rect rc;
     double fps;
+    char *name;
 };
 
 struct vo_x11_state {

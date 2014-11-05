@@ -330,6 +330,9 @@ static int vo_wm_detect(struct vo *vo)
 static void xrandr_read(struct vo_x11_state *x11)
 {
 #if HAVE_XRANDR
+    for(int i = 0; i < x11->num_displays; i++)
+        talloc_free(x11->displays[i].name);
+
     x11->num_displays = 0;
 
     if (x11->xrandr_event < 0) {
@@ -375,10 +378,11 @@ static void xrandr_read(struct vo_x11_state *x11)
                     .rc = { crtc->x, crtc->y,
                             crtc->x + crtc->width, crtc->y + crtc->height },
                     .fps = m.dotClock / (m.hTotal * vTotal),
+                    .name = talloc_strdup(x11, out->name),
                 };
                 int num = x11->num_displays++;
-                MP_VERBOSE(x11, "Display %d: [%d, %d, %d, %d] @ %f FPS\n",
-                           num, d.rc.x0, d.rc.y0, d.rc.x1, d.rc.y1, d.fps);
+                MP_VERBOSE(x11, "Display %d (%s): [%d, %d, %d, %d] @ %f FPS\n",
+                           num, d.name, d.rc.x0, d.rc.y0, d.rc.x1, d.rc.y1, d.fps);
                 x11->displays[num] = d;
             }
         }
@@ -1599,6 +1603,18 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
             }
             XFree(elems);
         }
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_DISPLAY_NAMES: {
+        char **names = NULL;
+        int displays_spanned = 0;
+        for (int n = 0; n < x11->num_displays; n++) {
+            if (rc_overlaps(x11->displays[n].rc, x11->winrc))
+                MP_TARRAY_APPEND(NULL, names, displays_spanned,
+                                 talloc_strdup(NULL, x11->displays[n].name));
+        }
+        MP_TARRAY_APPEND(NULL, names, displays_spanned, NULL);
+        *(char ***)arg = names;
         return VO_TRUE;
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:
