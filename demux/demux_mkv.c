@@ -2727,9 +2727,9 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
                 for (size_t i = 0; i < mkv_d->num_indexes; i++) {
                     struct mkv_index *cur = &mkv_d->indexes[i];
                     overlap = cur->timecode <= index->timecode &&
-                               cur->timecode + cur->duration > index->timecode &&
-                               cur->filepos >= prev_target &&
-                               cur->filepos != seek_pos;
+                              cur->timecode + cur->duration > index->timecode &&
+                              cur->filepos >= prev_target &&
+                              cur->filepos != seek_pos;
                     if (overlap)
                         break;
                 }
