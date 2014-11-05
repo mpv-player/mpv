@@ -2722,6 +2722,22 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
                         prev_target = index_pos;
                 }
             }
+            if (mkv_d->index_has_durations) {
+                // If there are no earlier subtitles overlapping with the
+                // target cluster, then disable preroll-seeking.
+                bool overlap = false;
+                for (size_t i = 0; i < mkv_d->num_indexes; i++) {
+                    struct mkv_index *cur = &mkv_d->indexes[i];
+                    overlap = cur->timecode <= index->timecode &&
+                               cur->timecode + cur->duration > index->timecode &&
+                               cur->filepos >= prev_target &&
+                               cur->filepos != seek_pos;
+                    if (overlap)
+                        break;
+                }
+                if (!overlap)
+                    prev_target = 0;
+            }
             if (prev_target)
                 seek_pos = prev_target;
         }
