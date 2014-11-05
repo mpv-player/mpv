@@ -2716,11 +2716,9 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
         if (flags & SEEK_SUBPREROLL) {
             uint64_t prev_target = 0;
             for (size_t i = 0; i < mkv_d->num_indexes; i++) {
-                if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
-                    uint64_t index_pos = mkv_d->indexes[i].filepos;
-                    if (index_pos > prev_target && index_pos < seek_pos)
-                        prev_target = index_pos;
-                }
+                uint64_t index_pos = mkv_d->indexes[i].filepos;
+                if (index_pos > prev_target && index_pos < seek_pos)
+                    prev_target = index_pos;
             }
             if (mkv_d->index_has_durations) {
                 // If there are no earlier subtitles overlapping with the
