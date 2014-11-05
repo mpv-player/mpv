@@ -150,7 +150,8 @@ typedef struct mkv_track {
 
 typedef struct mkv_index {
     int tnum;
-    uint64_t timecode, filepos;
+    uint64_t timecode, duration;
+    uint64_t filepos; // position of the cluster which contains the packet
 } mkv_index_t;
 
 typedef struct mkv_demuxer {
@@ -185,6 +186,8 @@ typedef struct mkv_demuxer {
     int v_skip_to_keyframe, a_skip_to_keyframe;
     int a_skip_preroll;
     int subtitle_preroll;
+
+    bool index_has_durations;
 } mkv_demuxer_t;
 
 #define REALHEADER_SIZE    16
@@ -657,32 +660,40 @@ static int demux_mkv_read_tracks(demuxer_t *demuxer)
 }
 
 static void cue_index_add(demuxer_t *demuxer, int track_id, uint64_t filepos,
-                          uint64_t timecode)
+                          uint64_t timecode, uint64_t duration)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
 
     MP_TARRAY_GROW(mkv_d, mkv_d->indexes, mkv_d->num_indexes);
 
-    mkv_d->indexes[mkv_d->num_indexes].tnum = track_id;
-    mkv_d->indexes[mkv_d->num_indexes].timecode = timecode;
-    mkv_d->indexes[mkv_d->num_indexes].filepos = filepos;
+    mkv_d->indexes[mkv_d->num_indexes] = (mkv_index_t) {
+        .tnum = track_id,
+        .filepos = filepos,
+        .timecode = timecode,
+        .duration = duration,
+    };
+
     mkv_d->num_indexes++;
 }
 
 static void add_block_position(demuxer_t *demuxer, struct mkv_track *track,
-                               uint64_t filepos, uint64_t timecode)
+                               uint64_t filepos,
+                               uint64_t timecode, uint64_t duration)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
 
     if (mkv_d->index_complete || !track)
         return;
+
+    mkv_d->index_has_durations = true;
+
     if (track->last_index_entry != (size_t)-1) {
         mkv_index_t *index = &mkv_d->indexes[track->last_index_entry];
         // Never add blocks which are already covered by the index.
         if (index->timecode >= timecode)
             return;
     }
-    cue_index_add(demuxer, track->tnum, filepos, timecode);
+    cue_index_add(demuxer, track->tnum, filepos, timecode, duration);
     track->last_index_entry = mkv_d->num_indexes - 1;
 }
 
@@ -718,10 +729,14 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
             struct ebml_cue_track_positions *trackpos =
                 &cuepoint->cue_track_positions[c];
             uint64_t pos = mkv_d->segment_start + trackpos->cue_cluster_position;
-            cue_index_add(demuxer, trackpos->cue_track, pos, time);
+            cue_index_add(demuxer, trackpos->cue_track, pos,
+                          time, trackpos->cue_duration);
+            mkv_d->index_has_durations |= trackpos->n_cue_duration > 0;
             MP_DBG(demuxer, "|+ found cue point for track %" PRIu64
-                   ": timecode %" PRIu64 ", filepos: %" PRIu64 "\n",
-                   trackpos->cue_track, time, pos);
+                   ": timecode %" PRIu64 ", filepos: %" PRIu64
+                   " offset %" PRIu64 ", duration %" PRIu64 "\n",
+                   trackpos->cue_track, time, pos,
+                   trackpos->cue_relative_position, trackpos->cue_duration);
         }
     }
 
@@ -2283,7 +2298,8 @@ static void index_block(demuxer_t *demuxer, struct block_info *block)
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     if (block->keyframe) {
         add_block_position(demuxer, block->track, mkv_d->cluster_start,
-                           block->timecode / mkv_d->tc_scale);
+                           block->timecode / mkv_d->tc_scale,
+                           block->duration / mkv_d->tc_scale);
     }
 }
 

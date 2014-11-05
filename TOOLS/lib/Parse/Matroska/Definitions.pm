@@ -296,6 +296,8 @@ sub define_matroska {
                     elem('CueTrackPositions*', 'b7', {
                         elem('CueTrack',           'f7', 'uint'),
                         elem('CueClusterPosition', 'f1', 'uint'),
+                        elem('CueRelativePosition','f0', 'uint'),
+                        elem('CueDuration',        'b2', 'uint'),
                     }),
                 }),
             }),
