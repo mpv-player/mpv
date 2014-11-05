@@ -678,10 +678,8 @@ static void add_block_position(demuxer_t *demuxer, struct mkv_track *track,
         return;
     if (track->last_index_entry != (size_t)-1) {
         mkv_index_t *index = &mkv_d->indexes[track->last_index_entry];
-        // filepos is always the cluster position, which can contain multiple
-        // blocks with different timecodes - one is enough.
-        // Also, never add block which are already covered by the index.
-        if (index->filepos == filepos || index->timecode >= timecode)
+        // Never add blocks which are already covered by the index.
+        if (index->timecode >= timecode)
             return;
     }
     cue_index_add(demuxer, track->tnum, filepos, timecode);
