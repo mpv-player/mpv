@@ -25,6 +25,7 @@ local user_opts = {
     seektooltip = true,                     -- display tooltip over the seekbar indicating time at mouse position
     iamaprogrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
     layout = "box",
+    seekbarstyle = "slider",                -- seekbar style, slider (diamond marker) and bar (fill)
 }
 
 -- read options from config and command-line
@@ -826,6 +827,7 @@ layouts["box"] = function ()
         {x = posX, y = posY+pos_offsetY-22, an = 2, w = pos_offsetX*2, h = 15}
     lo.style = osc_styles.timecodes
     lo.slider.tooltip_style = osc_styles.vidtitle
+    lo.slider.stype = user_opts["seekbarstyle"]
 
     --
     -- Timecodes + Cache
@@ -942,6 +944,7 @@ layouts["slimbox"] = function ()
     lo.slider.border = 0
     lo.slider.gap = 1.5
     lo.slider.tooltip_style = osc_styles.vidtitle
+    lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.adjust_tooltip = false
 
     --
@@ -1092,6 +1095,7 @@ layouts["bottombar"] = function()
     lo.layer = 16
     lo.slider.border = 0
     lo.slider.tooltip_style = osc_styles.vidtitle
+    lo.slider.stype = user_opts["seekbarstyle"]
 end
 
 layouts["topbar"] = function()
@@ -1197,6 +1201,7 @@ layouts["topbar"] = function()
     lo.layer = 16
     lo.slider.border = 0
     lo.slider.tooltip_style = osc_styles.vidtitle
+    lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.tooltip_an = 8
 
 
