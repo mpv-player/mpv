@@ -616,6 +616,17 @@ static void audio_resume(struct ao *ao)
         ao_play_silence(ao, p->prepause_samples);
 }
 
+static int audio_wait(struct ao *ao, pthread_mutex_t *lock)
+{
+    struct priv *p = ao->priv;
+
+    struct pollfd fd = {.fd = p->audio_fd, .events = POLLOUT};
+    int r = ao_wait_poll(ao, &fd, 1, lock);
+    if (fd.revents & (POLLERR | POLLNVAL))
+        return -1;
+    return r;
+}
+
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_oss = {
@@ -631,6 +642,8 @@ const struct ao_driver audio_out_oss = {
     .resume    = audio_resume,
     .reset     = reset,
     .drain     = drain,
+    .wait      = audio_wait,
+    .wakeup    = ao_wakeup_poll,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .audio_fd = -1,
