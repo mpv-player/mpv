@@ -2460,6 +2460,30 @@ static int mp_property_win_minimized(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, state & VO_WIN_STATE_MINIMIZED);
 }
 
+static int mp_property_display_names(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET: {
+        char** display_names;
+        if (vo_control(vo, VOCTRL_GET_DISPLAY_NAMES, &display_names) < 1)
+            return M_PROPERTY_UNAVAILABLE;
+
+        *(char ***)arg = display_names;
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_vo_configured(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3182,6 +3206,7 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("sub", "sid"),
 
     {"window-minimized", mp_property_win_minimized},
+    {"display-names", mp_property_display_names},
 
     {"mpv-version", mp_property_version},
 

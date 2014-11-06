@@ -1118,6 +1118,10 @@ Property list
 ``window-minimized``
     Return whether the video window is minimized or not.
 
+``display-names``
+    Names of the displays that the mpv window covers. On X11, these
+    are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.).
+
 ``video-aspect`` (RW)
     Video aspect, see ``--video-aspect``.
 
