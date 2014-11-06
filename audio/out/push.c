@@ -352,7 +352,8 @@ static void *playthread(void *arg)
                     if (ao->driver->get_delay)
                         timeout = ao->driver->get_delay(ao);
                     timeout *= 0.25; // wake up if 25% played
-                    mpthread_cond_timedwait_rel(&p->wakeup, &p->lock, timeout);
+                    if (!p->need_wakeup)
+                        mpthread_cond_timedwait_rel(&p->wakeup, &p->lock, timeout);
                 }
             }
             MP_STATS(ao, "end audio wait");
