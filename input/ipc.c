@@ -58,6 +58,7 @@ struct client_arg {
 
     char *client_name;
     int client_fd;
+    bool close_client_fd;
 
     bool writable;
 
@@ -616,7 +617,8 @@ static void *client_thread(void *p)
 
 done:
     talloc_free(client_msg.start);
-    close(arg->client_fd);
+    if (arg->close_client_fd)
+        close(arg->client_fd);
     mpv_detach_destroy(arg->client);
     talloc_free(arg);
     return NULL;
@@ -630,7 +632,8 @@ static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
     pthread_t client_thr;
     if (pthread_create(&client_thr, NULL, client_thread, client)) {
         mpv_detach_destroy(client->client);
-        close(client->client_fd);
+        if (client->close_client_fd)
+            close(client->client_fd);
         talloc_free(client);
     }
 }
@@ -641,6 +644,7 @@ static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, int fd)
     *client = (struct client_arg){
         .client_name = talloc_asprintf(client, "ipc-%d", id),
         .client_fd   = fd,
+        .close_client_fd = true,
 
         .writable = true,
     };
@@ -651,11 +655,19 @@ static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, int fd)
 static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
 {
     int mode = O_RDONLY;
-    // Use RDWR for FIFOs to ensure they stay open over multiple accesses.
-    struct stat st;
-    if (stat(path, &st) == 0 && S_ISFIFO(st.st_mode))
-        mode = O_RDWR;
-    int client_fd = open(path, mode);
+    int client_fd = -1;
+    bool close_client_fd = true;
+
+    if (strcmp(path, "/dev/stdin") == 0) { // for symmetry with Linux
+        client_fd = STDIN_FILENO;
+        close_client_fd = false;
+    } else {
+        // Use RDWR for FIFOs to ensure they stay open over multiple accesses.
+        struct stat st;
+        if (stat(path, &st) == 0 && S_ISFIFO(st.st_mode))
+            mode = O_RDWR;
+        client_fd = open(path, mode);
+    }
     if (client_fd < 0) {
         MP_ERR(ctx, "Could not open pipe at '%s'\n", path);
         return;
@@ -665,6 +677,7 @@ static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
     *client = (struct client_arg){
         .client_name = "input-file",
         .client_fd   = client_fd,
+        .close_client_fd = close_client_fd,
 
         .writable = false,
     };
