@@ -382,7 +382,7 @@ static void draw_osd_cb(void *pctx, struct sub_bitmaps *imgs)
 
         struct vaapi_osd_image *img = &part->image;
         struct mp_image vaimg;
-        if (va_image_map(p->mpvaapi, &img->image, &vaimg) < 0)
+        if (!va_image_map(p->mpvaapi, &img->image, &vaimg))
             goto error;
 
         // Clear borders and regions uncovered by sub-bitmaps
@@ -403,7 +403,7 @@ static void draw_osd_cb(void *pctx, struct sub_bitmaps *imgs)
                        vaimg.stride[0], sub->stride);
         }
 
-        if (va_image_unmap(p->mpvaapi, &img->image) < 0)
+        if (!va_image_unmap(p->mpvaapi, &img->image))
             goto error;
 
         part->subpic = (struct vaapi_subpic) {
