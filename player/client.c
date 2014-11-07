@@ -1154,7 +1154,6 @@ static void getproperty_fn(void *arg)
             .event_id = MPV_EVENT_GET_PROPERTY_REPLY,
             .data = prop,
             .error = req->status,
-            .reply_userdata = req->userdata,
         };
         send_reply(req->reply_ctx, req->userdata, &reply);
     }
