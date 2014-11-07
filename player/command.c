@@ -3001,6 +3001,31 @@ static int mp_property_local_options(void *ctx, struct m_property *prop,
     return access_option_list(action, arg, true, mpctx);
 }
 
+static int mp_property_option_flags(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    switch (action) {
+    case M_PROPERTY_KEY_ACTION: {
+        struct m_property_action_arg *ka = arg;
+        bstr key;
+        char *rem;
+        m_property_split_path(ka->key, &key, &rem);
+        struct m_config_option *co = m_config_get_co(mpctx->mconfig, key);
+        if (!co)
+            return M_PROPERTY_UNKNOWN;
+
+        struct m_sub_property props[] = {
+            {"set-from-commandline",    SUB_PROP_FLAG(co->is_set_from_cmdline)},
+            {0}
+        };
+
+        return m_property_read_sub(props, ka->action, ka->arg);
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static const struct m_property mp_properties[];
 
 static int mp_property_list(void *ctx, struct m_property *prop,
@@ -3212,6 +3237,7 @@ static const struct m_property mp_properties[] = {
 
     {"options", mp_property_options},
     {"file-local-options", mp_property_local_options},
+    {"option-flags", mp_property_option_flags},
     {"property-list", mp_property_list},
 
     {0},

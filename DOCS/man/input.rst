@@ -1438,6 +1438,18 @@ Property list
     access the local value, and the ``old`` value, which will be restored on
     end of playback, can not be read or written until end of playback.)
 
+``option-flags/<name>``
+    Minor additional per-option information.
+
+    This has a number of sub-properties. Replace ``<name>`` with the name of
+    a top-level option.
+
+    ``option-flags/<name>/set-from-commandline``
+
+        Return ``yes`` if the option was set from the mpv command line,
+        ``no`` otherwise. What this is set to if the option is e.g. changed
+        at runtime is left undefined (meaning it could change in the future).
+
 ``property-list``
     Return the list of top-level properties.
 
