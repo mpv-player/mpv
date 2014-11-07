@@ -707,7 +707,7 @@ static const struct m_option type_conv[] = {
 
 static const struct m_option *get_mp_type(mpv_format format)
 {
-    if (format < 0 || format >= MP_ARRAY_SIZE(type_conv))
+    if ((unsigned)format >= MP_ARRAY_SIZE(type_conv))
         return NULL;
     if (!type_conv[format].type)
         return NULL;
@@ -1527,7 +1527,7 @@ static const char *const event_table[] = {
 
 const char *mpv_event_name(mpv_event_id event)
 {
-    if (event < 0 || event >= MP_ARRAY_SIZE(event_table))
+    if ((unsigned)event >= MP_ARRAY_SIZE(event_table))
         return NULL;
     return event_table[event];
 }
