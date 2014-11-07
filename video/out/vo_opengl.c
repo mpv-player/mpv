@@ -225,11 +225,11 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
         p->glctx->register_resize_callback(vo, video_resize_redraw_callback);
     }
 
+    resize(p);
+
     gl_video_config(p->renderer, params);
 
     p->vo_flipped = !!(flags & VOFLAG_FLIPPING);
-
-    resize(p);
 
     mpgl_unlock(p->glctx);
 

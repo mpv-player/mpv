@@ -2324,6 +2324,8 @@ void gl_video_config(struct gl_video *p, struct mp_image_params *params)
         uninit_video(p);
         init_video(p, params);
     }
+
+    check_resize(p);
 }
 
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
