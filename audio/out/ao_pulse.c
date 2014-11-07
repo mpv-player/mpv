@@ -35,8 +35,6 @@
 #include "ao.h"
 #include "internal.h"
 
-#define PULSE_CLIENT_NAME "mpv"
-
 #define VOL_PA2MP(v) ((v) * 100 / PA_VOLUME_NORM)
 #define VOL_MP2PA(v) ((v) * PA_VOLUME_NORM / 100)
 
@@ -308,7 +306,7 @@ static int pa_init_boilerplate(struct ao *ao)
     locked = true;
 
     if (!(priv->context = pa_context_new(pa_threaded_mainloop_get_api(
-                                         priv->mainloop), PULSE_CLIENT_NAME)))
+                                         priv->mainloop), ao->client_name)))
     {
         MP_ERR(ao, "Failed to allocate context\n");
         goto fail;
@@ -396,8 +394,7 @@ static int init(struct ao *ao)
         goto unlock_and_fail;
     }
     (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ROLE, "video");
-    (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ICON_NAME,
-                           PULSE_CLIENT_NAME);
+    (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ICON_NAME, ao->client_name);
 
     pa_format_info_set_rate(format, ao->samplerate);
     pa_format_info_set_channels(format, ao->channels.num);

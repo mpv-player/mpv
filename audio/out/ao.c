@@ -207,6 +207,8 @@ static struct ao *ao_alloc_pb(bool probing, struct mpv_global *global,
     match_ao_driver(ao->driver->name, opts->audio_device, &ao->device);
     ao->device = talloc_strdup(ao, ao->device);
 
+    ao->client_name = talloc_strdup(ao, opts->audio_client_name);
+
     return ao;
 }
 

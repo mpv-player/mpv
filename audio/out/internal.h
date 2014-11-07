@@ -49,6 +49,9 @@ struct ao {
     // default device should be used, this is set to NULL.
     char *device;
 
+    // Application name to report to the audio API.
+    char *client_name;
+
     // Used during init: if init fails, redirect to this ao
     char *redirect;
 

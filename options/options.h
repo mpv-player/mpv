@@ -65,6 +65,7 @@ typedef struct MPOpts {
 
     struct m_obj_settings *audio_driver_list, *ao_defs;
     char *audio_device;
+    char *audio_client_name;
     int fixed_vo;
     int force_vo;
     int softvol;

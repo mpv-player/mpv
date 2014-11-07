@@ -1007,6 +1007,11 @@ Audio
         maximum amplification, i.e. amplify by 200%. The default volume (no
         change in volume) will be ``50`` in this case.
 
+``--audio-client-name=<name>``
+    The application name the player reports to the audio API. Can be useful
+    if you want to force a different audio profile (e.g. with PulseAudio),
+    or to set your own application name when using libmpv.
+
 ``--volume-restore-data=<string>``
     Used internally for use by playback resume (e.g. with ``quit_watch_later``).
     Restoring value has to be done carefully, because different AOs as well as
