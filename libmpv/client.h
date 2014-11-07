@@ -1079,8 +1079,10 @@ typedef struct mpv_event_property {
      */
     const char *name;
     /**
-     * Format of the given data. See enum mpv_format.
-     * This is always the same format as the requested format.
+     * Format of the data field in the same struct. See enum mpv_format.
+     * This is always the same format as the requested format, except when
+     * the property could not be retrieved (unavailable, or an error happened),
+     * in which case the format is MPV_FORMAT_NONE.
      */
     mpv_format format;
     /**
@@ -1091,7 +1093,8 @@ typedef struct mpv_event_property {
      *
      *    char *value = *(char **)(event_property->data);
      *
-     * Note that this is set to NULL if retrieving the property failed.
+     * Note that this is set to NULL if retrieving the property failed (the
+     * format will be MPV_FORMAT_NONE).
      * See mpv_event.error for the status.
      */
     void *data;
@@ -1102,6 +1105,7 @@ typedef struct mpv_event_property {
  * MPV_LOG_LEVEL_NONE is never used when receiving messages. The string in
  * the comment after the value is the name of the log level as used for the
  * mpv_request_log_messages() function.
+ * Unused numeric values are unused, but reserved for future use.
  */
 typedef enum mpv_log_level {
     MPV_LOG_LEVEL_NONE  = 0,    /// "no"    - disable absolutely all messages
@@ -1140,6 +1144,7 @@ typedef struct mpv_event_log_message {
     mpv_log_level log_level;
 } mpv_event_log_message;
 
+/// Since API version 1.9.
 typedef enum mpv_end_file_reason {
     /**
      * The end of file was reached. Sometimes this may also happen on
@@ -1178,6 +1183,7 @@ typedef struct mpv_event_end_file {
      * If reason==MPV_END_FILE_REASON_ERROR, this contains a mpv error code
      * (one of MPV_ERROR_...) giving an approximate reason why playback
      * failed. In other cases, this field is 0 (no error).
+     * Since API version 1.9.
      */
     int error;
 } mpv_event_end_file;
@@ -1218,13 +1224,21 @@ typedef struct mpv_event {
      * requests. It contains a status code, which is >= 0 on success, or < 0
      * on error (a mpv_error value). Usually, this will be set if an
      * asynchronous request fails.
+     * Used for:
+     *  MPV_EVENT_GET_PROPERTY_REPLY
+     *  MPV_EVENT_SET_PROPERTY_REPLY
+     *  MPV_EVENT_COMMAND_REPLY
      */
     int error;
     /**
      * If the event is in reply to a request (made with this API and this
      * API handle), this is set to the reply_userdata parameter of the request
-     * call.
-     * Otherwise, this field is 0.
+     * call. Otherwise, this field is 0.
+     * Used for:
+     *  MPV_EVENT_GET_PROPERTY_REPLY
+     *  MPV_EVENT_SET_PROPERTY_REPLY
+     *  MPV_EVENT_COMMAND_REPLY
+     *  MPV_EVENT_PROPERTY_CHANGE
      */
     uint64_t reply_userdata;
     /**
