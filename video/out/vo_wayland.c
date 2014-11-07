@@ -47,7 +47,7 @@ static const struct wl_callback_listener frame_listener;
 static const struct wl_buffer_listener buffer_listener;
 
 // TODO: pay attention to the reported subpixel order
-static const format_t const format_table[] = {
+static const format_t format_table[] = {
     {WL_SHM_FORMAT_ARGB8888, IMGFMT_BGRA}, // 8b 8g 8r 8a
     {WL_SHM_FORMAT_XRGB8888, IMGFMT_BGR0},
     {WL_SHM_FORMAT_RGB332,   IMGFMT_RGB8}, // 3b 3g 2r
