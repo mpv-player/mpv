@@ -4147,6 +4147,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 mp_write_watch_later_conf(mpctx);
             mp_set_playlist_entry(mpctx, entry);
         }
+        mp_notify_property(mpctx, "playlist");
         break;
     }
 
@@ -4165,6 +4166,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
                     mp_check_playlist_resume(mpctx, mpctx->playlist);
                 mp_set_playlist_entry(mpctx, e ? e : mpctx->playlist->first);
             }
+            mp_notify_property(mpctx, "playlist");
         } else {
             MP_ERR(mpctx, "Unable to load playlist %s.\n", filename);
             return -1;
@@ -4185,6 +4187,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
             }
             playlist_remove(mpctx->playlist, e);
         }
+        mp_notify_property(mpctx, "playlist");
         break;
     }
 
@@ -4199,6 +4202,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (mpctx->playlist->current == e)
             mpctx->stop_play = PT_CURRENT_ENTRY;
         playlist_remove(mpctx->playlist, e);
+        mp_notify_property(mpctx, "playlist");
         break;
     }
 
@@ -4210,6 +4214,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (!e1)
             return -1;
         playlist_move(mpctx->playlist, e1, e2);
+        mp_notify_property(mpctx, "playlist");
         break;
     }
 
