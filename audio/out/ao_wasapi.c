@@ -103,7 +103,7 @@ static void thread_feed(struct ao *ao)
 
     return;
 exit_label:
-    MP_ERR(state, "thread_feed fails with %"PRIx32"!\n", (uint32_t)hr);
+    MP_ERR(state, "thread_feed fails with %"PRIx32": %s!\n", (uint32_t)hr, wasapi_explain_err(hr));
     return;
 }
 
@@ -193,7 +193,9 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
                 DispatchMessage(&msg);
             }
             break;
+        default:
         case WAIT_FAILED: /* ??? */
+            MP_ERR(ao, "unhandled case in thread loop!");
             return -1;
         }
     }

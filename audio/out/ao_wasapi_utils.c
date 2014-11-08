@@ -85,6 +85,9 @@ const char *wasapi_explain_err(const HRESULT hr)
 #define E(x) case x : return # x ;
     switch (hr) {
     E(S_OK)
+    E(E_OUTOFMEMORY)
+    E(E_POINTER)
+    E(E_INVALIDARG)
     E(AUDCLNT_E_NOT_INITIALIZED)
     E(AUDCLNT_E_ALREADY_INITIALIZED)
     E(AUDCLNT_E_WRONG_ENDPOINT_TYPE)
@@ -462,7 +465,9 @@ static int fix_format(struct wasapi_state *state)
     hr = IAudioClient_GetDevicePeriod(state->pAudioClient,
                                       &state->defaultRequestedDuration,
                                       &state->minRequestedDuration);
+    MP_VERBOSE(state, "IAudioClient::Initialize GetDevicePeriod: %s\n", wasapi_explain_err(hr));
 reinit:
+    MP_VERBOSE(state, "IAudioClient::Initialize reinit\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
                                  state->share_mode,
                                  AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
@@ -472,7 +477,7 @@ reinit:
                                  NULL);
     /* something about buffer sizes on Win7, fixme might loop forever */
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
-        MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s, used %lld * 100ns\n",
+        MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s, used %"PRId64" * 100ns\n",
                    wasapi_explain_err(hr), state->defaultRequestedDuration);
         if (offset > 10.0)
             goto exit_label;                /* is 10 enough to break out of the loop?*/
@@ -489,10 +494,13 @@ reinit:
         goto reinit;
     }
     EXIT_ON_ERROR(hr);
+
+    MP_VERBOSE(state, "IAudioClient::Initialize pRenderClient\n");
     hr = IAudioClient_GetService(state->pAudioClient,
                                  &IID_IAudioRenderClient,
                                  (void **)&state->pRenderClient);
     EXIT_ON_ERROR(hr);
+    MP_VERBOSE(state, "IAudioClient::Initialize pAudioVolume\n");
     hr = IAudioClient_GetService(state->pAudioClient,
                                  &IID_ISimpleAudioVolume,
                                  (void **) &state->pAudioVolume);
@@ -500,8 +508,10 @@ reinit:
 
     if (!state->hFeed)
         goto exit_label;
+    MP_VERBOSE(state, "IAudioClient::Initialize IAudioClient_SetEventHandle\n");
     hr = IAudioClient_SetEventHandle(state->pAudioClient, state->hFeed);
     EXIT_ON_ERROR(hr);
+    MP_VERBOSE(state, "IAudioClient::Initialize IAudioClient_GetBufferSize\n");
     hr = IAudioClient_GetBufferSize(state->pAudioClient,
                                     &state->bufferFrameCount);
     EXIT_ON_ERROR(hr);
@@ -516,7 +526,7 @@ reinit:
 
     state->hTask =
         state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio", &state->taskIndex);
-    MP_VERBOSE(state, "fix_format OK, using %lld byte buffer block size!\n",
+    MP_VERBOSE(state, "fix_format OK, using %"PRId64" byte buffer block size!\n",
                (long long) state->buffer_block_size);
     return 0;
 exit_label:
@@ -936,10 +946,12 @@ int wasapi_thread_init(struct ao *ao)
     MP_VERBOSE(ao, "device loaded: %s\n", name);
     talloc_free(name);
 
+    MP_VERBOSE(ao, "wasapi_thread_init: activating pAudioClient %p\n", state->pAudioClient);
     hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
                                      CLSCTX_ALL, NULL, (void **)&state->pAudioClient);
     EXIT_ON_ERROR(hr);
 
+    MP_VERBOSE(ao, "wasapi_thread_init: activating pEndpointVolume\n");
     hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioEndpointVolume,
                                      CLSCTX_ALL, NULL,
                                      (void **)&state->pEndpointVolume);
@@ -947,10 +959,12 @@ int wasapi_thread_init(struct ao *ao)
     IAudioEndpointVolume_QueryHardwareSupport(state->pEndpointVolume,
                                               &state->vol_hw_support);
 
+    MP_VERBOSE(ao, "wasapi_thread_init: probing formats\n");
     state->init_ret = find_formats(ao); /* Probe support formats */
     if (state->init_ret)
         goto exit_label;
     if (!fix_format(state)) { /* now that we're sure what format to use */
+    MP_VERBOSE(ao, "wasapi_thread_init: fixing formats\n");
         EXIT_ON_ERROR(create_proxies(state));
 
         if (state->opt_exclusive)
@@ -967,6 +981,7 @@ int wasapi_thread_init(struct ao *ao)
         return state->init_ret;
     }
 exit_label:
+   MP_ERR(state, "wasapi_thread_init fails with %"PRIx32": %s!\n", (uint32_t)hr, wasapi_explain_err(hr));
     state->init_ret = -1;
     SetEvent(state->init_done);
     return -1;
