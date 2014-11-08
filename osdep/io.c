@@ -65,7 +65,7 @@ int mp_make_cloexec_pipe(int pipes[2])
 #ifdef __MINGW32__
 int mp_make_wakeup_pipe(int pipes[2])
 {
-    mp_make_cloexec_pipe(pipes);
+    return mp_make_cloexec_pipe(pipes);
 }
 #else
 // create a pipe, and set it to non-blocking (and also set FD_CLOEXEC)
