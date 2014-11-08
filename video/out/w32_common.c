@@ -459,32 +459,23 @@ static int decode_key(struct vo_w32_state *w32, UINT vkey, UINT scancode)
     return c;
 }
 
-static bool is_wm_key(UINT vkey)
+static void handle_key_down(struct vo_w32_state *w32, UINT vkey, UINT scancode)
 {
-    return vkey == VK_F10 || (vkey == ' ' && key_state(VK_LMENU));
-}
-
-static bool handle_key_down(struct vo_w32_state *w32, UINT vkey, UINT scancode)
-{
-    if (is_wm_key(vkey))
-        return 0;
-
     // Ignore key repeat
     if (scancode & KF_REPEAT)
-        return 1;
+        return;
 
     int mpkey = mp_w32_vkey_to_mpkey(vkey, scancode & KF_EXTENDED);
     if (!mpkey) {
         mpkey = decode_key(w32, vkey, scancode & (0xff | KF_EXTENDED));
         if (!mpkey)
-            return 1;
+            return;
     }
 
     mp_input_put_key(w32->input_ctx, mpkey | mod_state(w32) | MP_KEY_STATE_DOWN);
-    return 1;
 }
 
-static bool handle_key_up(struct vo_w32_state *w32, UINT vkey, UINT scancode)
+static void handle_key_up(struct vo_w32_state *w32, UINT vkey, UINT scancode)
 {
     switch (vkey) {
     case VK_MENU:
@@ -496,7 +487,6 @@ static bool handle_key_up(struct vo_w32_state *w32, UINT vkey, UINT scancode)
         // get "stuck." This matches the behaviour of other VOs.
         mp_input_put_key(w32->input_ctx, MP_INPUT_RELEASE_ALL);
     }
-    return !is_wm_key(vkey);
 }
 
 static bool handle_char(struct vo_w32_state *w32, wchar_t wc)
@@ -606,12 +596,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_SYSKEYDOWN:
     case WM_KEYDOWN:
-        if (!handle_key_down(w32, wParam, HIWORD(lParam)))
+        handle_key_down(w32, wParam, HIWORD(lParam));
+        if (wParam == VK_F10)
             return 0;
         break;
     case WM_SYSKEYUP:
     case WM_KEYUP:
-        if (!handle_key_up(w32, wParam, HIWORD(lParam)))
+        handle_key_up(w32, wParam, HIWORD(lParam));
+        if (wParam == VK_F10)
             return 0;
         break;
     case WM_CHAR:
