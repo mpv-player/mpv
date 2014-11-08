@@ -3020,7 +3020,9 @@ static int mp_property_option_flags(void *ctx, struct m_property *prop,
             {0}
         };
 
-        return m_property_read_sub(props, ka->action, ka->arg);
+        struct m_property_action_arg next_ka = *ka;
+        next_ka.key = rem;
+        return m_property_read_sub(props, M_PROPERTY_KEY_ACTION, &next_ka);
     }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
