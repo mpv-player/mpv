@@ -952,10 +952,18 @@ typedef enum mpv_event_id {
      * The list of video/audio/subtitle tracks was changed. (E.g. a new track
      * was found. This doesn't necessarily indicate a track switch; for this,
      * MPV_EVENT_TRACK_SWITCHED is used.)
+     *
+     * @deprecated This is equivalent to using mpv_observe_property() on the
+     *             "track-list" property. The event is redundant, and might
+     *             be removed in the far future.
      */
     MPV_EVENT_TRACKS_CHANGED    = 9,
     /**
      * A video/audio/subtitle track was switched on or off.
+     *
+     * @deprecated This is equivalent to using mpv_observe_property() on the
+     *             "vid", "aid", and "sid" properties. The event is redundant,
+     *             and might be removed in the far future.
      */
     MPV_EVENT_TRACK_SWITCHED    = 10,
     /**
@@ -981,10 +989,17 @@ typedef enum mpv_event_id {
      * If you don't want to deal with this, use mpv_observe_property() on the
      * "pause" property and ignore MPV_EVENT_PAUSE/UNPAUSE. Likewise, the
      * "core-idle" property tells you whether video is actually playing or not.
+     *
+     * @deprecated The event is redundant with mpv_observe_property() as
+     *             mentioned above, and might be removed in the far future.
      */
     MPV_EVENT_PAUSE             = 12,
     /**
      * Playback was unpaused. See MPV_EVENT_PAUSE for not so obvious details.
+     *
+     * @deprecated The event is redundant with mpv_observe_property() as
+     *             explained in the MPV_EVENT_PAUSE comments, and might be
+     *             removed in the far future.
      */
     MPV_EVENT_UNPAUSE           = 13,
     /**
@@ -1031,6 +1046,10 @@ typedef enum mpv_event_id {
      * Happens when metadata (like file tags) is possibly updated. (It's left
      * unspecified whether this happens on file start or only when it changes
      * within a file.)
+     *
+     * @deprecated This is equivalent to using mpv_observe_property() on the
+     *             "metadata" property. The event is redundant, and might
+     *             be removed in the far future.
      */
     MPV_EVENT_METADATA_UPDATE   = 19,
     /**
@@ -1052,6 +1071,10 @@ typedef enum mpv_event_id {
     MPV_EVENT_PROPERTY_CHANGE   = 22,
     /**
      * Happens when the current chapter changes.
+     *
+     * @deprecated This is equivalent to using mpv_observe_property() on the
+     *             "chapter" property. The event is redundant, and might
+     *             be removed in the far future.
      */
     MPV_EVENT_CHAPTER_CHANGE = 23
     // Internal note: adjust INTERNAL_EVENT_BASE when adding new events.

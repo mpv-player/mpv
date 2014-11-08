@@ -31,6 +31,15 @@ API changes
         - add --stop-playback-on-init-failure option, and make it the default
           behavior for libmpv only
         - add qthelper.hpp set_option_variant()
+        - mark the following events as deprecated:
+            MPV_EVENT_TRACKS_CHANGED
+            MPV_EVENT_TRACK_SWITCHED
+            MPV_EVENT_PAUSE
+            MPV_EVENT_UNPAUSE
+            MPV_EVENT_METADATA_UPDATE
+            MPV_EVENT_CHAPTER_CHANGE
+          They are handled better with mpv_observe_property() as mentioned in
+          the documentation comments. They are not removed and still work.
  1.8    - add qthelper.hpp
  1.7    - add mpv_command_node(), mpv_command_node_async()
  1.6    - modify "core-idle" property behavior

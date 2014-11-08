@@ -648,27 +648,10 @@ List of events
 ``playback-restart``
     Start of playback after seek or after file was loaded.
 
-``tracks-changed``
-    The list of video/audio/sub tracks was updated. (This happens on playback
-    start, and very rarely during playback.)
-
-``track-switched``
-    A video/audio/subtitle track was switched on or off. This usually happens
-    when the user (or a script) changes the subtitle track and so on.
-
 ``idle``
     Idle mode is entered. This happens when playback ended, and the player was
     started with ``--idle`` or ``--force-window``. This mode is implicitly ended
     when the ``start-file`` or ``shutdown`` events happen.
-
-``pause``
-    Playback was paused. This also happens when for example the player is
-    paused on low network cache. Then the event type indicates the pause state
-    (like the property "pause" as opposed to the "core-idle" property), and you
-    might receive multiple ``pause`` events in a row.
-
-``unpause``
-    Playback was unpaused. See above for details.
 
 ``tick``
     Called after a video frame was displayed. This is a hack, and you should
@@ -729,11 +712,9 @@ List of events
 ``audio-reconfig``
     Happens on audio output or filter reconfig.
 
-``metadata-update``
-    Metadata (like file tags) was updated.
-
-``chapter-change``
-    The current chapter possibly changed.
+The following events also happen, but are deprecated: ``tracks-changed``,
+``track-switched``, ``pause``, ``unpause``, ``metadata-update``,
+``chapter-change``. Use ``mp.observe_property()`` instead.
 
 Extras
 ------
