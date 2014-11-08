@@ -3656,7 +3656,9 @@ static void replace_overlay(struct MPContext *mpctx, int id, struct overlay *new
     }
 
     struct overlay *ptr = &cmd->overlays[id];
+#if HAVE_SYS_MMAN_H
     struct overlay old = *ptr;
+#endif
 
     if (!ptr->osd.bitmap && !new->osd.bitmap)
         return; // don't need to recreate or unmap
