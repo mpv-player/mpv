@@ -595,6 +595,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         }
         break;
     case WM_SYSKEYDOWN:
+        // Open the window menu on Alt+Space. Normally DefWindowProc opens the
+        // window menu in response to WM_SYSCHAR, but since mpv translates its
+        // own keyboard input, WM_SYSCHAR isn't generated, so the window menu
+        // must be opened manually.
+        if (wParam == VK_SPACE) {
+            SendMessage(w32->window, WM_SYSCOMMAND, SC_KEYMENU, ' ');
+            return 0;
+        }
+
+        // Handle all other WM_SYSKEYDOWN messages as WM_KEYDOWN
     case WM_KEYDOWN:
         handle_key_down(w32, wParam, HIWORD(lParam));
         if (wParam == VK_F10)
