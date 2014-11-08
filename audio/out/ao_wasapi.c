@@ -116,16 +116,38 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
     if (wasapi_thread_init(ao))
         goto exit_label;
 
+    MP_VERBOSE(ao, "Setting up device monitoring on playback device!\n");
+    HRESULT monitor = wasapi_change_init(&state->changeNotify,state->pDevice);
+    MP_VERBOSE(ao, "Monitoring device: %S - %s!\n", state->changeNotify.monitored, wasapi_explain_err(monitor));
+    if (monitor == S_OK) {
+        IMMDeviceEnumerator_RegisterEndpointNotificationCallback(
+            state->pEnumerator,
+            (IMMNotificationClient *)&state->changeNotify);
+    }
+
     MSG msg;
     DWORD waitstatus = WAIT_FAILED;
-    HANDLE playcontrol[] =
-        {state->hUninit, state->hFeed, state->hForceFeed, NULL};
+    HANDLE playcontrol[] = {
+        state->hUninit,
+        state->hFeed,
+        state->hForceFeed,
+        state->changeNotify.OnDeviceRemoved,
+        state->changeNotify.OnDeviceStateChanged,
+        state->changeNotify.OnPropertyValueChanged,
+        NULL};
+    int reload_requested=0;
     MP_VERBOSE(ao, "Entering dispatch loop!\n");
     while (1) { /* watch events */
-        waitstatus = MsgWaitForMultipleObjects(3, playcontrol, FALSE, INFINITE,
-                                               QS_POSTMESSAGE | QS_SENDMESSAGE);
+        waitstatus = MsgWaitForMultipleObjects(
+            sizeof(playcontrol)/sizeof(HANDLE) - 1,
+            playcontrol, FALSE, INFINITE,
+            QS_POSTMESSAGE | QS_SENDMESSAGE);
         switch (waitstatus) {
         case WAIT_OBJECT_0: /*shutdown*/
+            IMMDeviceEnumerator_UnregisterEndpointNotificationCallback(
+                state->pEnumerator,
+                (IMMNotificationClient *)&state->changeNotify);
+            wasapi_change_free(&state->changeNotify);
             wasapi_thread_uninit(state);
             goto exit_label;
         case (WAIT_OBJECT_0 + 1): /* feed */
@@ -135,7 +157,38 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
             thread_feed(ao);
             SetEvent(state->hFeedDone);
             break;
-        case (WAIT_OBJECT_0 + 3): /* messages to dispatch (COM marshalling) */
+        case (WAIT_OBJECT_0 + 3): /* force reset */
+            MP_VERBOSE(ao, "OnDeviceRemoved Triggered!\n");
+            if(!reload_requested){
+                ao_request_reload(ao);
+                reload_requested=1;
+            }
+            break;
+        case (WAIT_OBJECT_0 + 4):
+            MP_VERBOSE(ao, "OnDeviceStateChanged Triggered!\n");
+            if(!reload_requested){
+                ao_request_reload(ao);
+                reload_requested=1;
+            }
+            break;
+        case (WAIT_OBJECT_0 + 5):
+            MP_VERBOSE(ao, "OnPropertyValueChanged Triggered!\n");
+            MP_VERBOSE(ao,"  -->Changed device property "
+                       "{%8.8x-%4.4x-%4.4x-%2.2x%2.2x-%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x}#%d\n",
+                       state->changeNotify.propChanged.fmtid.Data1,
+                       state->changeNotify.propChanged.fmtid.Data2,
+                       state->changeNotify.propChanged.fmtid.Data3,
+                       state->changeNotify.propChanged.fmtid.Data4[0], state->changeNotify.propChanged.fmtid.Data4[1],
+                       state->changeNotify.propChanged.fmtid.Data4[2], state->changeNotify.propChanged.fmtid.Data4[3],
+                       state->changeNotify.propChanged.fmtid.Data4[4], state->changeNotify.propChanged.fmtid.Data4[5],
+                       state->changeNotify.propChanged.fmtid.Data4[6], state->changeNotify.propChanged.fmtid.Data4[7],
+                       state->changeNotify.propChanged.pid);
+            if(!reload_requested){
+                ao_request_reload(ao);
+                reload_requested=1;
+            }
+            break;
+        case (WAIT_OBJECT_0 + 6): /* messages to dispatch (COM marshalling) */
             while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
                 DispatchMessage(&msg);
             }

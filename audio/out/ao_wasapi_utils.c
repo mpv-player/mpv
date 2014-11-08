@@ -912,21 +912,18 @@ int wasapi_thread_init(struct ao *ao)
     HRESULT hr;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
+    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                          &IID_IMMDeviceEnumerator, (void**)&state->pEnumerator);
+    EXIT_ON_ERROR(hr);
+
     char *device = state->opt_device;
     if (!device || !device[0])
         device = ao->device;
 
     if (!device || !device[0]) {
-        IMMDeviceEnumerator *pEnumerator;
-        hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                              &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
-        EXIT_ON_ERROR(hr);
-
-        hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
+        hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(state->pEnumerator,
                                                          eRender, eConsole,
                                                          &state->pDevice);
-        SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
-
         char *id = get_device_id(state->pDevice);
         MP_VERBOSE(ao, "default device ID: %s\n", id);
         talloc_free(id);
@@ -991,6 +988,7 @@ void wasapi_thread_uninit(wasapi_state *state)
     SAFE_RELEASE(state->pSessionControl, IAudioSessionControl_Release(state->pSessionControl));
     SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
     SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
+    SAFE_RELEASE(state->pEnumerator,     IMMDeviceEnumerator_Release(state->pEnumerator));
 
     if (state->hTask)
         state->VistaBlob.pAvRevertMmThreadCharacteristics(state->hTask);
