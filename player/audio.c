@@ -429,7 +429,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     return true;
 }
 
-void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
+static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 {
     struct MPOpts *opts = mpctx->opts;
     struct dec_audio *d_audio = mpctx->d_audio;
@@ -587,6 +587,15 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         if (ao_eof_reached(mpctx->ao) || opts->gapless_audio)
             mpctx->audio_status = STATUS_EOF;
     }
+}
+
+void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
+{
+    do_fill_audio_out_buffers(mpctx, endpts);
+    // Run audio playback state machine again to display the actual audio PTS
+    // as current time on OSD in audio-only mode in most situations.
+    if (mpctx->audio_status == STATUS_SYNCING)
+        do_fill_audio_out_buffers(mpctx, endpts);
 }
 
 // Drop data queued for output, or which the AO is currently outputting.
