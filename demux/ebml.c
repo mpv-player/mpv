@@ -173,7 +173,7 @@ uint64_t ebml_read_uint(stream_t *s)
  */
 int64_t ebml_read_int(stream_t *s)
 {
-    int64_t value = 0;
+    uint64_t value = 0;
     uint64_t len;
     int l;
 
@@ -189,7 +189,7 @@ int64_t ebml_read_int(stream_t *s)
     while (len--)
         value = (value << 8) | stream_read_char(s);
 
-    return value;
+    return (int64_t)value; // assume complement of 2
 }
 
 /*
@@ -328,12 +328,12 @@ static uint64_t ebml_parse_uint(uint8_t *data, int length)
 static int64_t ebml_parse_sint(uint8_t *data, int length)
 {
     assert(length >=1 && length <= 8);
-    int64_t r = 0;
+    uint64_t r = 0;
     if (*data & 0x80)
         r = -1;
     while (length--)
         r = (r << 8) | *data++;
-    return r;
+    return (int64_t)r; // assume complement of 2
 }
 
 static double ebml_parse_float(uint8_t *data, int length)
