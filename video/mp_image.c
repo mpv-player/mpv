@@ -689,6 +689,10 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
     if (!new_ref)
         return NULL;
     AVFrame *frame = av_frame_alloc();
+    if (!frame) {
+        talloc_free(new_ref);
+        return NULL;
+    }
     mp_image_copy_fields_to_av_frame(frame, new_ref);
     // Caveat: if img has shared references, and all other references disappear
     //         at a later point, the AVFrame will still be read-only.
