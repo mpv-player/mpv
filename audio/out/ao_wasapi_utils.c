@@ -836,6 +836,7 @@ exit_label:
     SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
     SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
+    CoTaskMemFree(deviceID);
     return hr;
 }
 
