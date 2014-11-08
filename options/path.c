@@ -44,6 +44,7 @@
 #include "osdep/io.h"
 #include "osdep/path.h"
 
+#if !defined(_WIN32) || defined(__CYGWIN__)
 static int mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i)
 {
     void *talloc_ctx = dirs;
@@ -77,6 +78,7 @@ static int mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i)
 
     return i;
 }
+#endif
 
 // Return NULL-terminated array of config directories, from highest to lowest
 // priority
