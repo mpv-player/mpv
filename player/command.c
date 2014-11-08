@@ -3668,6 +3668,8 @@ static void replace_overlay(struct MPContext *mpctx, int id, struct overlay *new
     // Do this afterwards, so we never unmap while the OSD is using it.
     if (old.osd.bitmap && old.map_size)
         munmap(old.osd.bitmap, old.map_size);
+#else
+    (void)old;
 #endif
 }
 
