@@ -1230,6 +1230,20 @@ layouts["topbar"] = function()
     lo.style = osc_styles.vidtitle
 end
 
+-- Validate string type user options
+function validate_user_opts()
+    if layouts[user_opts.layout] == nil then
+        msg.warn("Invalid setting \""..user_opts.layout.."\" for layout")
+        user_opts.layout = "box"
+    end
+
+    if user_opts.seekbarstyle ~= "slider" and
+       user_opts.seekbarstyle ~= "bar" then
+        msg.warn("Invalid setting \""..user_opts.seekbarstyle.."\" for seekbarstyle")
+        user_opts.seekbarstyle = "slider"
+    end
+end
+
 
 -- OSC INIT
 function osc_init()
@@ -1848,6 +1862,8 @@ function enable_osc(enable)
         mp.disable_key_bindings("showhide")
     end
 end
+
+validate_user_opts()
 
 mp.register_event("tick", tick)
 mp.register_event("start-file", request_init)
