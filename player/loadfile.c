@@ -1001,6 +1001,7 @@ goto_reopen_demuxer: ;
         for (struct playlist_entry *e = pl->first; e; e = e->next)
             e->stream_flags |= entry_stream_flags;
         transfer_playlist(mpctx, pl);
+        mp_notify_property(mpctx, "playlist");
         mpctx->error_playing = 1;
         goto terminate_playback;
     }
