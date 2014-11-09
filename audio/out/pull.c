@@ -147,7 +147,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 // it takes until the last sample in the buffer reaches the speakers. This is
 // used for audio/video synchronization, so it's very important to implement
 // this correctly.
-static float get_delay(struct ao *ao)
+static double get_delay(struct ao *ao)
 {
     struct ao_pull_state *p = ao->api_priv;
 

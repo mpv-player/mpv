@@ -93,11 +93,11 @@ static double unlocked_get_delay(struct ao *ao)
     return driver_delay + mp_audio_buffer_seconds(p->buffer);
 }
 
-static float get_delay(struct ao *ao)
+static double get_delay(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
     pthread_mutex_lock(&p->lock);
-    float delay = unlocked_get_delay(ao);
+    double delay = unlocked_get_delay(ao);
     pthread_mutex_unlock(&p->lock);
     return delay;
 }

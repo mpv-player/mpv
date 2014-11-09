@@ -153,7 +153,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     return rsd_write(priv->rd, data[0], samples * ao->sstride) / ao->sstride;
 }
 
-static float get_delay(struct ao *ao)
+static double get_delay(struct ao *ao)
 {
     struct priv *priv = ao->priv;
     return rsd_delay_ms(priv->rd) / 1000.0;

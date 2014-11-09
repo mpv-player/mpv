@@ -135,7 +135,7 @@ struct ao_driver {
     // push based: see ao_play()
     int (*play)(struct ao *ao, void **data, int samples, int flags);
     // push based: see ao_get_delay()
-    float (*get_delay)(struct ao *ao);
+    double (*get_delay)(struct ao *ao);
     // push based: block until all queued audio is played (optional)
     void (*drain)(struct ao *ao);
     // Optional. Return true if audio has stopped in any way.

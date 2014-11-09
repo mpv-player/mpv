@@ -546,7 +546,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 }
 
 // return: delay in seconds between first and last sample in buffer
-static float get_delay(struct ao *ao)
+static double get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
     if (p->audio_fd < 0) {
@@ -560,18 +560,18 @@ static float get_delay(struct ao *ao)
 #ifdef SNDCTL_DSP_GETODELAY
         int r = 0;
         if (ioctl(p->audio_fd, SNDCTL_DSP_GETODELAY, &r) != -1)
-            return ((float)r) / (float)ao->bps;
+            return r / (double)ao->bps;
 #endif
         p->audio_delay_method = 1; // fallback if not supported
     }
     if (p->audio_delay_method == 1) {
         audio_buf_info zz = {0};
         if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &zz) != -1) {
-            return ((float)(p->buffersize - zz.bytes)) / (float)ao->bps;
+            return (p->buffersize - zz.bytes) / (double)ao->bps;
         }
         p->audio_delay_method = 0; // fallback if not supported
     }
-    return ((float)p->buffersize) / (float)ao->bps;
+    return p->buffersize / (double)ao->bps;
 }
 
 

@@ -581,12 +581,12 @@ static int get_space(struct ao *ao)
     return mp_ring_available(p->buffer) / ao->sstride;
 }
 
-static float get_delay(struct ao *ao)
+static double get_delay(struct ao *ao)
 {
     // FIXME: should also report the delay of coreaudio itself (hardware +
     // internal buffers)
     struct priv *p = ao->priv;
-    return mp_ring_buffered(p->buffer) / (float)ao->bps;
+    return mp_ring_buffered(p->buffer) / (double)ao->bps;
 }
 
 static void uninit(struct ao *ao)

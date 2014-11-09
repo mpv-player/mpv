@@ -104,8 +104,6 @@ struct priv {
     struct ao_device_list *listing; ///temporary during list_devs()
 };
 
-static float get_delay(struct ao *ao);
-
 /***************************************************************************************/
 
 /**
@@ -678,12 +676,12 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 \brief get the delay between the first and last sample in the buffer
 \return delay in seconds
 */
-static float get_delay(struct ao *ao)
+static double get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
     int space = check_free_buffer_size(ao);
-    return (float)(p->buffer_size - space) / (float)ao->bps;
+    return (p->buffer_size - space) / (double)ao->bps;
 }
 
 #define OPT_BASE_STRUCT struct priv

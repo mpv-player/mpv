@@ -176,7 +176,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     return accepted;
 }
 
-static float get_delay(struct ao *ao)
+static double get_delay(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 

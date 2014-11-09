@@ -54,7 +54,7 @@ struct priv {
     snd_pcm_format_t alsa_fmt;
     int can_pause;
     snd_pcm_sframes_t prepause_frames;
-    float delay_before_pause;
+    double delay_before_pause;
     int buffersize; // in frames
     int outburst; // in frames
 
@@ -84,7 +84,7 @@ struct priv {
             MP_WARN(ao, "%s: %s\n", (message), snd_strerror(err)); \
     } while (0)
 
-static float get_delay(struct ao *ao);
+static double get_delay(struct ao *ao);
 static void uninit(struct ao *ao);
 
 /* to set/get/query special features/parameters */
@@ -586,7 +586,7 @@ static void audio_pause(struct ao *ao)
         if (snd_pcm_delay(p->alsa, &p->prepause_frames) < 0
             || p->prepause_frames < 0)
             p->prepause_frames = 0;
-        p->delay_before_pause = p->prepause_frames / (float)ao->samplerate;
+        p->delay_before_pause = p->prepause_frames / (double)ao->samplerate;
 
         err = snd_pcm_drop(p->alsa);
         CHECK_ALSA_ERROR("pcm drop error");
@@ -697,7 +697,7 @@ alsa_error:
 }
 
 /* delay in seconds between first and last sample in buffer */
-static float get_delay(struct ao *ao)
+static double get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
     snd_pcm_sframes_t delay;
@@ -713,7 +713,7 @@ static float get_delay(struct ao *ao)
         snd_pcm_forward(p->alsa, -delay);
         delay = 0;
     }
-    return (float)delay / (float)ao->samplerate;
+    return delay / (double)ao->samplerate;
 }
 
 #define MAX_POLL_FDS 20
