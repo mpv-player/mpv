@@ -434,6 +434,11 @@ static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     struct MPOpts *opts = mpctx->opts;
     struct dec_audio *d_audio = mpctx->d_audio;
 
+    if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_RELOAD)) {
+        ao_reset(mpctx->ao);
+        uninit_audio_out(mpctx);
+    }
+
     if (!d_audio)
         return;
 

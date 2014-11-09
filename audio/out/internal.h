@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#include "osdep/atomics.h"
 #include "audio/out/ao.h"
 
 /* global data used by ao.c and ao drivers */
@@ -54,6 +55,8 @@ struct ao {
 
     // Used during init: if init fails, redirect to this ao
     char *redirect;
+
+    atomic_bool request_reload;
 
     int buffer;
     double def_buffer;
@@ -185,8 +188,6 @@ bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
 bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num);
-
-void ao_request_reload(struct ao *ao);
 
 // Add a deep copy of e to the list.
 // Call from ao_driver->list_devs callback only.

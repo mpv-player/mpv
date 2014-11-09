@@ -1462,12 +1462,7 @@ static void reload_audio_output(struct MPContext *mpctx)
 {
     if (!mpctx->ao)
         return;
-    ao_reset(mpctx->ao);
-    uninit_audio_out(mpctx);
-    // This normally recreates the AO, although there are situations when AO
-    // creation is delayed; for example if there are no audio packets around,
-    // and the audio format is yet unknown.
-    reinit_audio_chain(mpctx);
+    ao_request_reload(mpctx->ao);
 }
 
 static int mp_property_audio_device(void *ctx, struct m_property *prop,

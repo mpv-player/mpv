@@ -397,6 +397,22 @@ bool ao_eof_reached(struct ao *ao)
     return ao->api->get_eof ? ao->api->get_eof(ao) : true;
 }
 
+// Query the AO_EVENT_*s as requested by the events parameter, and return them.
+int ao_query_and_reset_events(struct ao *ao, int events)
+{
+    int actual_events = 0;
+    if (atomic_load(&ao->request_reload)) // don't need to reset it
+        actual_events |= AO_EVENT_RELOAD;
+    return actual_events & events;
+}
+
+// Request that the player core destroys and recreates the AO.
+void ao_request_reload(struct ao *ao)
+{
+    atomic_store(&ao->request_reload, true);
+    mp_input_wakeup(ao->input_ctx);
+}
+
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map)
 {
@@ -407,13 +423,6 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num)
 {
     return mp_chmap_sel_get_def(s, map, num);
-}
-
-// Request that the player core destroys and recreates the AO.
-void ao_request_reload(struct ao *ao)
-{
-    const char *cmd[] = {"ao_reload", NULL};
-    mp_input_run_cmd(ao->input_ctx, cmd);
 }
 
 // --- The following functions just return immutable information.

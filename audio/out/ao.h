@@ -46,6 +46,10 @@ enum aocontrol {
 // data might be written again, instead of closing the AO.
 #define AOPLAY_FINAL_CHUNK 1
 
+enum {
+    AO_EVENT_RELOAD = 1,
+};
+
 typedef struct ao_control_vol {
     float left;
     float right;
@@ -85,6 +89,8 @@ void ao_pause(struct ao *ao);
 void ao_resume(struct ao *ao);
 void ao_drain(struct ao *ao);
 bool ao_eof_reached(struct ao *ao);
+int ao_query_and_reset_events(struct ao *ao, int events);
+void ao_request_reload(struct ao *ao);
 
 struct ao_device_list *ao_get_device_list(struct mpv_global *global);
 void ao_print_devices(struct mpv_global *global, struct mp_log *log);
