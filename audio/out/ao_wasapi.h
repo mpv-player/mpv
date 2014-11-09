@@ -30,6 +30,23 @@
 
 #include "osdep/atomics.h"
 
+typedef struct change_notify {
+  IMMNotificationClient client;
+  HANDLE OnDefaultDeviceChanged;
+  HANDLE OnDeviceAdded;
+  HANDLE OnDeviceRemoved;
+  HANDLE OnDeviceStateChanged;
+  HANDLE OnPropertyValueChanged;
+  LPWSTR monitored; /* Monitored device */
+  LPWSTR newDevice; /* whatever last plugged in new device */
+  PROPERTYKEY propChanged; /* what prop changed ?*/
+  ULONG count;
+} change_notify;
+
+HRESULT wasapi_change_init(struct change_notify *change, IMMDevice *monitor);
+void wasapi_change_free(struct change_notify *change);
+HRESULT wasapi_change_reset(struct change_notify *change, IMMDevice *monitor);
+
 typedef struct wasapi_state {
     struct mp_log *log;
     HANDLE threadLoop;
@@ -62,6 +79,8 @@ typedef struct wasapi_state {
     ISimpleAudioVolume *pAudioVolume;
     IAudioEndpointVolume *pEndpointVolume;
     IAudioSessionControl *pSessionControl;
+    IMMDeviceEnumerator *pEnumerator;
+
     HANDLE hFeed; /* wasapi event */
     HANDLE hForceFeed; /* forces writing a buffer (e.g. before audio_resume) */
     HANDLE hFeedDone; /* set only after a hForceFeed */
@@ -100,6 +119,9 @@ typedef struct wasapi_state {
         HANDLE (WINAPI *pAvSetMmThreadCharacteristicsW)(LPCWSTR, LPDWORD);
         WINBOOL (WINAPI *pAvRevertMmThreadCharacteristics)(HANDLE);
     } VistaBlob;
+
+    change_notify changeNotify;
+
 } wasapi_state;
 
 #endif
