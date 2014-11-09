@@ -49,6 +49,9 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
     __atomic_store_n(&(p)->v, val, __ATOMIC_SEQ_CST)
 #define atomic_fetch_add(a, b) \
     __atomic_fetch_add(&(a)->v, b, __ATOMIC_SEQ_CST)
+#define atomic_compare_exchange_strong(a, b, c) \
+    __atomic_compare_exchange_n(&(a)->v, b, c, 0, __ATOMIC_SEQ_CST, \
+    __ATOMIC_SEQ_CST)
 
 #elif HAVE_SYNC_BUILTINS
 
@@ -58,6 +61,12 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
     (__sync_synchronize(), (p)->v = (val), __sync_synchronize())
 #define atomic_fetch_add(a, b) \
     __sync_fetch_and_add(&(a)->v, b)
+// Assumes __sync_val_compare_and_swap is "strong" (using the C11 meaning).
+#define atomic_compare_exchange_strong(p, old, new) \
+    ({ __typeof__((p)->v) val_ = __sync_val_compare_and_swap(&(p)->v, *(old), new); \
+       bool ok_ = val_ == *(old);       \
+       if (!ok_) *(old) = val_;         \
+       ok_; })
 
 #else
 
@@ -66,6 +75,8 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
 #define atomic_load(p) ((p)->v)
 #define atomic_store(p, val) ((p)->v = (val))
 #define atomic_fetch_add(a, b) (((a)->v += (b)) - (b))
+#define atomic_compare_exchange_strong(p, old, new) \
+    ((p)->v == *(old) ? ((p)->v = (new), 1) : (*(old) = (p)->v, 0))
 
 #undef HAVE_ATOMICS
 #define HAVE_ATOMICS 0

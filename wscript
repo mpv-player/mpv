@@ -134,6 +134,7 @@ main_dependencies = [
         'desc': 'compiler support for __sync built-ins',
         'func': check_statement('stdint.h',
                     'int64_t test = 0;'
+                    '__typeof__(test) x = ({int a = 1; a;});'
                     'test = __sync_add_and_fetch(&test, 1)'),
         'deps_neg': [ 'stdatomic', 'atomic-builtins' ],
     }, {
