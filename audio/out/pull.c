@@ -43,7 +43,10 @@ enum {
                     // finished, but device is open)
     AO_STATE_WAIT,  // wait for callback to go into AO_STATE_NONE state
     AO_STATE_PLAY,  // play the buffer
+    AO_STATE_BUSY,  // like AO_STATE_PLAY, but ao_read_data() is being called
 };
+
+#define IS_PLAYING(st) ((st) == AO_STATE_PLAY || (st) == AO_STATE_BUSY)
 
 struct ao_pull_state {
     // Be very careful with the order when accessing planes.
@@ -55,6 +58,21 @@ struct ao_pull_state {
     // Device delay of the last written sample, in realtime.
     atomic_llong end_time_us;
 };
+
+static void set_state(struct ao *ao, int new_state)
+{
+    struct ao_pull_state *p = ao->api_priv;
+    while (1) {
+        int old = atomic_load(&p->state);
+        if (old == AO_STATE_BUSY) {
+            // A spinlock, because some audio APIs don't want us to use mutexes.
+            mp_sleep_us(1);
+            continue;
+        }
+        if (atomic_compare_exchange_strong(&p->state, &old, new_state))
+            break;
+    }
+}
 
 static int get_space(struct ao *ao)
 {
@@ -79,8 +97,10 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         int r = mp_ring_write(p->buffers[n], data[n], write_bytes);
         assert(r == write_bytes);
     }
-    if (atomic_load(&p->state) != AO_STATE_PLAY) {
-        atomic_store(&p->state, AO_STATE_PLAY);
+
+    int state = atomic_load(&p->state);
+    if (!IS_PLAYING(state)) {
+        set_state(ao, AO_STATE_PLAY);
         ao->driver->resume(ao);
     }
 
@@ -101,14 +121,13 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
 
     struct ao_pull_state *p = ao->api_priv;
     int full_bytes = samples * ao->sstride;
-    int state = atomic_load(&p->state);
+    bool need_wakeup = false;
     int bytes = 0;
 
-    if (state != AO_STATE_PLAY) {
-        if (state == AO_STATE_WAIT)
-            atomic_store(&p->state, AO_STATE_NONE);
+    // Play silence in states other than AO_STATE_PLAY.
+    if (!atomic_compare_exchange_strong(&p->state, &(int){AO_STATE_PLAY},
+                                        AO_STATE_BUSY))
         goto end;
-    }
 
     // Since the writer will write the first plane last, its buffered amount
     // of data is the minimum amount across all planes.
@@ -124,10 +143,16 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
     }
 
     // Half of the buffer played -> request more.
-    if (buffered_bytes - bytes <= mp_ring_size(p->buffers[0]) / 2)
-        mp_input_wakeup_nolock(ao->input_ctx);
+    need_wakeup = buffered_bytes - bytes <= mp_ring_size(p->buffers[0]) / 2;
+
+    // Should never fail.
+    atomic_compare_exchange_strong(&p->state, &(int){AO_STATE_BUSY}, AO_STATE_PLAY);
 
 end:
+
+    if (need_wakeup)
+        mp_input_wakeup_nolock(ao->input_ctx);
+
     // pad with silence (underflow/paused/eof)
     for (int n = 0; n < ao->num_planes; n++)
         af_fill_silence(data[n], full_bytes - bytes, ao->format);
@@ -160,19 +185,9 @@ static double get_delay(struct ao *ao)
 static void reset(struct ao *ao)
 {
     struct ao_pull_state *p = ao->api_priv;
-    if (ao->driver->reset) {
+    if (ao->driver->reset)
         ao->driver->reset(ao); // assumes the audio callback thread is stopped
-        atomic_store(&p->state, AO_STATE_NONE);
-    } else {
-        // The thread keeps running. Wait until the audio callback gets into
-        // a defined state where it won't touch the ringbuffer. We must do
-        // this, because emptying the ringbuffer is not an atomic operation.
-        if (atomic_load(&p->state) != AO_STATE_NONE) {
-            atomic_store(&p->state, AO_STATE_WAIT);
-            while (atomic_load(&p->state) != AO_STATE_NONE)
-                mp_sleep_us(1);
-        }
-    }
+    set_state(ao, AO_STATE_NONE);
     for (int n = 0; n < ao->num_planes; n++)
         mp_ring_reset(p->buffers[n]);
     atomic_store(&p->end_time_us, 0);
@@ -180,23 +195,22 @@ static void reset(struct ao *ao)
 
 static void pause(struct ao *ao)
 {
-    struct ao_pull_state *p = ao->api_priv;
     if (ao->driver->reset)
         ao->driver->reset(ao);
-    atomic_store(&p->state, AO_STATE_NONE);
+    set_state(ao, AO_STATE_NONE);
 }
 
 static void resume(struct ao *ao)
 {
-    struct ao_pull_state *p = ao->api_priv;
-    atomic_store(&p->state, AO_STATE_PLAY);
+    set_state(ao, AO_STATE_PLAY);
     ao->driver->resume(ao);
 }
 
 static void drain(struct ao *ao)
 {
     struct ao_pull_state *p = ao->api_priv;
-    if (atomic_load(&p->state) == AO_STATE_PLAY)
+    int state = atomic_load(&p->state);
+    if (IS_PLAYING(state))
         mp_sleep_us(get_delay(ao) * 1000000);
     reset(ao);
 }
