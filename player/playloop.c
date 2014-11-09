@@ -673,7 +673,7 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
 static void handle_vo_events(struct MPContext *mpctx)
 {
     struct vo *vo = mpctx->video_out;
-    int events = vo ? vo_query_events(vo, VO_EVENTS_USER, true) : 0;
+    int events = vo ? vo_query_and_reset_events(vo, VO_EVENTS_USER) : 0;
     if (events & VO_EVENT_RESIZE)
         mp_notify(mpctx, MP_EVENT_WIN_RESIZE, NULL);
     if (events & VO_EVENT_WIN_STATE)

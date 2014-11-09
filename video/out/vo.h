@@ -316,7 +316,7 @@ void vo_set_paused(struct vo *vo, bool paused);
 int64_t vo_get_drop_count(struct vo *vo);
 int vo_query_format(struct vo *vo, int format);
 void vo_event(struct vo *vo, int event);
-int vo_query_events(struct vo *vo, int events, bool clear);
+int vo_query_and_reset_events(struct vo *vo, int events);
 
 void vo_set_flip_queue_offset(struct vo *vo, int64_t us);
 int64_t vo_get_vsync_interval(struct vo *vo);

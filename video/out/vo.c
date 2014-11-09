@@ -840,7 +840,7 @@ int64_t vo_get_vsync_interval(struct vo *vo)
 }
 
 // Set specific event flags, and wakeup the playback core if needed.
-// vo_query_events() can retrieve the events again.
+// vo_query_and_reset_events() can retrieve the events again.
 void vo_event(struct vo *vo, int event)
 {
     struct vo_internal *in = vo->in;
@@ -852,14 +852,13 @@ void vo_event(struct vo *vo, int event)
 }
 
 // Check event flags set with vo_event(). Return the mask of events that was
-// set and included in the events parameter. If clear==true, clear these events.
-int vo_query_events(struct vo *vo, int events, bool clear)
+// set and included in the events parameter. Clear the returned events.
+int vo_query_and_reset_events(struct vo *vo, int events)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
     int r = in->queued_events & events;
-    if (clear)
-        in->queued_events &= ~(unsigned)r;
+    in->queued_events &= ~(unsigned)r;
     pthread_mutex_unlock(&in->lock);
     return r;
 }
