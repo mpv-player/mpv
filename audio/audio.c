@@ -121,6 +121,15 @@ void mp_audio_set_null_data(struct mp_audio *mpa)
     mpa->samples = 0;
 }
 
+static int get_plane_size(const struct mp_audio *mpa, int samples)
+{
+    if (samples < 0 || !mpa->format)
+        return -1;
+    if (samples >= INT_MAX / mpa->sstride)
+        return -1;
+    return MPMAX(samples * mpa->sstride, 1);
+}
+
 static void mp_audio_destructor(void *ptr)
 {
     struct mp_audio *mpa = ptr;
@@ -144,10 +153,9 @@ static void mp_audio_destructor(void *ptr)
  */
 void mp_audio_realloc(struct mp_audio *mpa, int samples)
 {
-    assert(samples >= 0);
-    if (samples >= INT_MAX / mpa->sstride)
-        abort(); // oom
-    int size = MPMAX(samples * mpa->sstride, 1);
+    int size = get_plane_size(mpa, samples);
+    if (size < 0)
+        abort(); // oom or invalid parameters
     for (int n = 0; n < mpa->num_planes; n++) {
         if (!mpa->allocated[n] || size != mpa->allocated[n]->size) {
             if (av_buffer_realloc(&mpa->allocated[n], size) < 0)
@@ -229,4 +237,54 @@ void mp_audio_skip_samples(struct mp_audio *data, int samples)
         data->planes[n] = (uint8_t *)data->planes[n] + samples * data->sstride;
 
     data->samples -= samples;
+}
+
+struct mp_audio_pool {
+    AVBufferPool *avpool;
+    int element_size;
+};
+
+struct mp_audio_pool *mp_audio_pool_create(void *ta_parent)
+{
+    return talloc_zero(ta_parent, struct mp_audio_pool);
+}
+
+static void mp_audio_pool_destructor(void *p)
+{
+    struct mp_audio_pool *pool = p;
+    av_buffer_pool_uninit(&pool->avpool);
+}
+
+// Allocate data using the given format and number of samples.
+// Returns NULL on error.
+struct mp_audio *mp_audio_pool_get(struct mp_audio_pool *pool,
+                                   const struct mp_audio *fmt, int samples)
+{
+    int size = get_plane_size(fmt, samples);
+    if (size < 0)
+        return NULL;
+    if (!pool->avpool || size > pool->element_size) {
+        size_t alloc = ta_calc_prealloc_elems(size);
+        if (alloc >= INT_MAX)
+            return NULL;
+        av_buffer_pool_uninit(&pool->avpool);
+        pool->avpool = av_buffer_pool_init(alloc, NULL);
+        if (!pool->avpool)
+            return NULL;
+        talloc_set_destructor(pool, mp_audio_pool_destructor);
+    }
+    struct mp_audio *new = talloc_ptrtype(NULL, new);
+    talloc_set_destructor(new, mp_audio_destructor);
+    *new = *fmt;
+    mp_audio_set_null_data(new);
+    new->samples = samples;
+    for (int n = 0; n < new->num_planes; n++) {
+        new->allocated[n] = av_buffer_pool_get(pool->avpool);
+        if (!new->allocated[n]) {
+            talloc_free(new);
+            return NULL;
+        }
+        new->planes[n] = new->allocated[n]->data;
+    }
+    return new;
 }

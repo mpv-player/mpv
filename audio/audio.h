@@ -68,4 +68,8 @@ void mp_audio_copy(struct mp_audio *dst, int dst_offset,
                    struct mp_audio *src, int src_offset, int length);
 void mp_audio_skip_samples(struct mp_audio *data, int samples);
 
+struct mp_audio_pool *mp_audio_pool_create(void *ta_parent);
+struct mp_audio *mp_audio_pool_get(struct mp_audio_pool *pool,
+                                   const struct mp_audio *fmt, int samples);
+
 #endif
