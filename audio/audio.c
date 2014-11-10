@@ -21,9 +21,12 @@
 #include <assert.h>
 
 #include <libavutil/buffer.h>
+#include <libavutil/frame.h>
+#include <libavutil/version.h>
 
 #include "talloc.h"
 #include "common/common.h"
+#include "fmt-conversion.h"
 #include "audio.h"
 
 static void update_redundant_info(struct mp_audio *mpa)
@@ -237,6 +240,51 @@ void mp_audio_skip_samples(struct mp_audio *data, int samples)
         data->planes[n] = (uint8_t *)data->planes[n] + samples * data->sstride;
 
     data->samples -= samples;
+}
+
+struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe)
+{
+    struct mp_audio *new = talloc_zero(NULL, struct mp_audio);
+    talloc_set_destructor(new, mp_audio_destructor);
+
+    mp_audio_set_format(new, af_from_avformat(avframe->format));
+
+    struct mp_chmap lavc_chmap;
+    mp_chmap_from_lavc(&lavc_chmap, avframe->channel_layout);
+
+#if LIBAVUTIL_VERSION_MICRO >= 100
+    // FFmpeg being special again
+    if (lavc_chmap.num != avframe->channels)
+        mp_chmap_from_channels(&lavc_chmap, avframe->channels);
+#endif
+
+    new->rate = avframe->sample_rate;
+
+    mp_audio_set_channels(new, &lavc_chmap);
+
+    // If we can't handle the format (e.g. too many channels), bail out.
+    if (!mp_audio_config_valid(new) || avframe->nb_extended_buf)
+        goto fail;
+
+    for (int n = 0; n < AV_NUM_DATA_POINTERS; n++) {
+        if (!avframe->buf[n])
+            break;
+        if (n >= MP_NUM_CHANNELS)
+            goto fail;
+        new->allocated[n] = av_buffer_ref(avframe->buf[n]);
+        if (!new->allocated[n])
+            goto fail;
+    }
+
+    for (int n = 0; n < new->num_planes; n++)
+        new->planes[n] = avframe->data[n];
+    new->samples = avframe->nb_samples;
+
+    return new;
+
+fail:
+    talloc_free(new);
+    return NULL;
 }
 
 struct mp_audio_pool {
