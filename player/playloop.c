@@ -420,7 +420,7 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
         len = endpos - startpos;
     }
     double pos = get_current_time(mpctx);
-    if (len >= 0 && !demuxer->ts_resets_possible) {
+    if (len > 0 && !demuxer->ts_resets_possible) {
         ans = MPCLAMP((pos - start) / len, 0, 1);
     } else {
         int64_t size;
