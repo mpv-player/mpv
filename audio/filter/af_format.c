@@ -80,12 +80,12 @@ static int control(struct af_instance *af, int cmd, void *arg)
         force_out_params(af, out);
 
         if (in->nch != out->nch || in->bps != out->bps) {
-            MP_ERR(af, "[af_format] Forced input/output formats are incompatible.\n");
+            MP_ERR(af, "Forced input/output formats are incompatible.\n");
             return AF_ERROR;
         }
 
         if (priv->fail) {
-            MP_ERR(af, "[af_format] Failing on purpose.\n");
+            MP_ERR(af, "Failing on purpose.\n");
             return AF_ERROR;
         }
 
