@@ -244,6 +244,32 @@ void mp_audio_skip_samples(struct mp_audio *data, int samples)
     data->samples -= samples;
 }
 
+// Make sure the frame owns the audio data, and if not, copy the data.
+// Return negative value on failure (which means it can't be made writeable).
+// Non-refcounted frames are always considered writeable.
+int mp_audio_make_writeable(struct mp_audio *data)
+{
+    bool ok = true;
+    for (int n = 0; n < MP_NUM_CHANNELS; n++) {
+        if (data->allocated[n])
+            ok &= av_buffer_is_writable(data->allocated[n]);
+    }
+    if (!ok) {
+        struct mp_audio *new = talloc(NULL, struct mp_audio);
+        *new = *data;
+        mp_audio_set_null_data(new); // use format only
+        mp_audio_realloc(new, data->samples);
+        new->samples = data->samples;
+        mp_audio_copy(new, 0, data, 0, data->samples);
+        // "Transfer" the reference.
+        mp_audio_destructor(data);
+        *data = *new;
+        talloc_set_destructor(new, NULL);
+        talloc_free(new);
+    }
+    return 0;
+}
+
 struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe)
 {
     struct mp_audio *new = talloc_zero(NULL, struct mp_audio);

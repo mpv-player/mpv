@@ -68,6 +68,8 @@ void mp_audio_copy(struct mp_audio *dst, int dst_offset,
                    struct mp_audio *src, int src_offset, int length);
 void mp_audio_skip_samples(struct mp_audio *data, int samples);
 
+int mp_audio_make_writeable(struct mp_audio *data);
+
 struct AVFrame;
 struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe);
 
