@@ -666,6 +666,7 @@ static int mp_property_disc_title(void *ctx, struct m_property *prop,
         title = *(int*)arg;
         if (demux_stream_control(d, STREAM_CTRL_SET_CURRENT_TITLE, &title) < 0)
             return M_PROPERTY_NOT_IMPLEMENTED;
+        mpctx->stop_play = PT_RELOAD_DEMUXER;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
