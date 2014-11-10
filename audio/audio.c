@@ -119,8 +119,10 @@ int mp_audio_psize(struct mp_audio *mpa)
 
 void mp_audio_set_null_data(struct mp_audio *mpa)
 {
-    for (int n = 0; n < MP_NUM_CHANNELS; n++)
+    for (int n = 0; n < MP_NUM_CHANNELS; n++) {
         mpa->planes[n] = NULL;
+        mpa->allocated[n] = NULL;
+    }
     mpa->samples = 0;
 }
 
