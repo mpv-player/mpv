@@ -43,25 +43,61 @@
 #include "core.h"
 #include "command.h"
 
+static int try_filter(struct MPContext *mpctx,
+                      char *name, char *label, char **args)
+{
+    struct dec_audio *d_audio = mpctx->d_audio;
+
+    if (af_find_by_label(d_audio->afilter, label))
+        return 0;
+
+    struct af_instance *af = af_add(d_audio->afilter, name, args);
+    if (!af)
+        return -1;
+
+    af->label = talloc_strdup(af, label);
+
+    return 1;
+}
+
 static int recreate_audio_filters(struct MPContext *mpctx)
 {
     assert(mpctx->d_audio);
 
-    struct af_stream *afs = mpctx->d_audio->afilter;
     struct MPOpts *opts = mpctx->opts;
+    struct af_stream *afs = mpctx->d_audio->afilter;
 
-    struct mp_audio in_format;
-    mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &in_format);
-    int new_srate = in_format.rate;
+    double speed = opts->playback_speed;
 
-    if (!af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED,
-                            &opts->playback_speed))
-    {
-        new_srate = in_format.rate * opts->playback_speed;
-        if (new_srate != afs->output.rate)
-            opts->playback_speed = new_srate / (double)in_format.rate;
+    if (speed != 1.0) {
+        int method = AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE;
+        if (speed > 1.0 && opts->pitch_correction)
+            method = AF_CONTROL_SET_PLAYBACK_SPEED;
+        if (!af_control_any_rev(afs, method, &speed)) {
+            if (af_remove_by_label(afs, "playback-speed") < 0)
+                return -1;
+
+            // Compatibility: if the user uses --af=scaletempo, always use
+            // this filter to change speed. Don't insert a second "scaletempo"
+            // filter either.
+            if (!af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED, &speed))
+            {
+                char *filter = method == AF_CONTROL_SET_PLAYBACK_SPEED
+                             ? "scaletempo" : "forcespeed";
+                if (try_filter(mpctx, filter, "playback-speed", NULL) < 0)
+                    return -1;
+                // Try again.
+                if (!af_control_any_rev(afs, method, &speed))
+                    return -1;
+            }
+        }
+    } else {
+        if (af_remove_by_label(afs, "playback-speed") < 0)
+            return -1;
+        // The filters could be inserted by the user (we don't remove them).
+        af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED, &speed);
+        af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE, &speed);
     }
-    afs->input.rate = new_srate;
 
     if (af_init(afs) < 0) {
         MP_ERR(mpctx, "Couldn't find matching filter/ao format!\n");
@@ -88,23 +124,6 @@ int reinit_audio_filters(struct MPContext *mpctx)
     return 1;
 }
 
-static int try_filter(struct MPContext *mpctx,
-                      char *name, char *label, char **args)
-{
-    struct dec_audio *d_audio = mpctx->d_audio;
-
-    if (af_find_by_label(d_audio->afilter, label))
-        return 0;
-
-    struct af_instance *af = af_add(d_audio->afilter, name, args);
-    if (!af)
-        return -1;
-
-    af->label = talloc_strdup(af, label);
-
-    return 1;
-}
-
 void set_playback_speed(struct MPContext *mpctx, double new_speed)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -116,19 +135,6 @@ void set_playback_speed(struct MPContext *mpctx, double new_speed)
 
     if (!mpctx->d_audio)
         return;
-
-    if (new_speed > 1.0 && opts->pitch_correction) {
-        if (!af_control_any_rev(mpctx->d_audio->afilter,
-                                AF_CONTROL_SET_PLAYBACK_SPEED,
-                                &new_speed))
-        {
-            if (try_filter(mpctx, "scaletempo", "playback-speed", NULL) < 0)
-                return;
-        }
-    } else {
-        if (af_remove_by_label(mpctx->d_audio->afilter, "playback-speed") < 0)
-            return;
-    }
 
     recreate_audio_filters(mpctx);
 }

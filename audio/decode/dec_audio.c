@@ -227,7 +227,6 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
     // Filter
     struct mp_audio filter_data;
     mp_audio_buffer_peek(da->decode_buffer, &filter_data);
-    filter_data.rate = da->afilter->input.rate; // due to playback speed change
     len = MPMIN(filter_data.samples, len);
     filter_data.samples = len;
     bool eof = error == AD_EOF && filter_data.samples == 0;
