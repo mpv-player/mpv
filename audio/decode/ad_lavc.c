@@ -73,55 +73,6 @@ const struct m_sub_options ad_lavc_conf = {
     },
 };
 
-static void set_data_from_avframe(struct dec_audio *da)
-{
-    struct priv *priv = da->priv;
-    AVCodecContext *lavc_context = priv->avctx;
-
-    // Note: invalid parameters are rejected by dec_audio.c
-
-    int fmt = lavc_context->sample_fmt;
-    mp_audio_set_format(&da->decoded, af_from_avformat(fmt));
-    if (!da->decoded.format)
-        MP_FATAL(da, "unsupported lavc format %s", av_get_sample_fmt_name(fmt));
-
-    da->decoded.rate = lavc_context->sample_rate;
-
-    struct mp_chmap lavc_chmap;
-    mp_chmap_from_lavc(&lavc_chmap, lavc_context->channel_layout);
-    // No channel layout or layout disagrees with channel count
-    if (lavc_chmap.num != lavc_context->channels)
-        mp_chmap_from_channels(&lavc_chmap, lavc_context->channels);
-    if (priv->force_channel_map) {
-        struct sh_audio *sh_audio = da->header->audio;
-        if (lavc_chmap.num == sh_audio->channels.num)
-            lavc_chmap = sh_audio->channels;
-    }
-    mp_audio_set_channels(&da->decoded, &lavc_chmap);
-
-    da->decoded.samples = priv->avframe->nb_samples;
-    for (int n = 0; n < da->decoded.num_planes; n++)
-        da->decoded.planes[n] = priv->avframe->data[n];
-
-#if HAVE_AVFRAME_SKIP_SAMPLES
-    AVFrameSideData *sd =
-        av_frame_get_side_data(priv->avframe, AV_FRAME_DATA_SKIP_SAMPLES);
-    if (sd && sd->size >= 10) {
-        char *d = sd->data;
-        priv->skip_samples += AV_RL32(d + 0);
-        uint32_t pad = AV_RL32(d + 4);
-        uint32_t skip = MPMIN(priv->skip_samples, da->decoded.samples);
-        if (skip) {
-            mp_audio_skip_samples(&da->decoded, skip);
-            da->pts_offset += skip;
-            priv->skip_samples -= skip;
-        }
-        if (pad <= da->decoded.samples)
-            da->decoded.samples -= pad;
-    }
-#endif
-}
-
 static int init(struct dec_audio *da, const char *decoder)
 {
     struct MPOpts *mpopts = da->opts;
@@ -222,7 +173,6 @@ static int control(struct dec_audio *da, int cmd, void *arg)
     switch (cmd) {
     case ADCTRL_RESET:
         avcodec_flush_buffers(ctx->avctx);
-        mp_audio_set_null_data(&da->decoded);
         talloc_free(ctx->packet);
         ctx->packet = NULL;
         ctx->skip_samples = 0;
@@ -231,12 +181,10 @@ static int control(struct dec_audio *da, int cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
-static int decode_packet(struct dec_audio *da)
+static int decode_packet(struct dec_audio *da, struct mp_audio **out)
 {
     struct priv *priv = da->priv;
     AVCodecContext *avctx = priv->avctx;
-
-    mp_audio_set_null_data(&da->decoded);
 
     struct demux_packet *mpkt = priv->packet;
     if (!mpkt) {
@@ -290,9 +238,43 @@ static int decode_packet(struct dec_audio *da)
         da->pts_offset = 0;
     }
 
-    set_data_from_avframe(da);
+    struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
+    if (!mpframe)
+        return AD_ERR;
 
-    MP_DBG(da, "Decoded %d -> %d samples\n", in_len, da->decoded.samples);
+    struct mp_chmap lavc_chmap = mpframe->channels;
+    if (lavc_chmap.num != avctx->channels)
+        mp_chmap_from_channels(&lavc_chmap, avctx->channels);
+    if (priv->force_channel_map) {
+        struct sh_audio *sh_audio = da->header->audio;
+        if (lavc_chmap.num == sh_audio->channels.num)
+            lavc_chmap = sh_audio->channels;
+    }
+    mp_audio_set_channels(mpframe, &lavc_chmap);
+
+#if HAVE_AVFRAME_SKIP_SAMPLES
+    AVFrameSideData *sd =
+        av_frame_get_side_data(priv->avframe, AV_FRAME_DATA_SKIP_SAMPLES);
+    if (sd && sd->size >= 10) {
+        char *d = sd->data;
+        priv->skip_samples += AV_RL32(d + 0);
+        uint32_t pad = AV_RL32(d + 4);
+        uint32_t skip = MPMIN(priv->skip_samples, mpframe->samples);
+        if (skip) {
+            mp_audio_skip_samples(mpframe, skip);
+            da->pts_offset += skip;
+            priv->skip_samples -= skip;
+        }
+        if (pad <= mpframe->samples)
+            mpframe->samples -= pad;
+    }
+#endif
+
+    *out = mpframe;
+
+    av_frame_unref(priv->avframe);
+
+    MP_DBG(da, "Decoded %d -> %d samples\n", in_len, mpframe->samples);
     return 0;
 }
 

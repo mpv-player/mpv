@@ -28,6 +28,7 @@
 #include "options/m_option.h"
 #include "options/m_config.h"
 
+#include "audio/audio_buffer.h"
 #include "af.h"
 
 // Static list of filters
@@ -721,24 +722,49 @@ int af_remove_by_label(struct af_stream *s, char *label)
     return 1;
 }
 
-/* Filter data chunk through the filters in the list.
- * On success, *data is set to the filtered data/format.
- * Warning: input audio data will be overwritten.
+/* Feed "data" to the chain, and write results to output. "data" needs to be
+ * a refcounted frame, although refcounting is not used yet.
+ * data==NULL means EOF.
  */
-int af_filter(struct af_stream *s, struct mp_audio *data, int flags)
+int af_filter(struct af_stream *s, struct mp_audio *data,
+              struct mp_audio_buffer *output)
 {
     struct af_instance *af = s->first;
     assert(s->initialized > 0);
-    assert(mp_audio_config_equals(af->data, data));
+    int flags = 0;
+    int r = 0;
+    struct mp_audio tmp;
+    char dummy[MP_NUM_CHANNELS];
+    if (data) {
+        assert(mp_audio_config_equals(af->data, data));
+        r = mp_audio_make_writeable(data);
+    } else {
+        data = &tmp;
+        *data = *(af->data);
+        mp_audio_set_null_data(data);
+        flags = AF_FILTER_FLAG_EOF;
+        for (int n = 0; n < MP_NUM_CHANNELS; n++)
+            data->planes[n] = &dummy[n];
+    }
+    if (r < 0)
+        goto done;
+    struct mp_audio frame = *data;
+    for (int n = 0; n < MP_NUM_CHANNELS; n++)
+        frame.allocated[n] = NULL;
     // Iterate through all filters
     while (af) {
-        int r = af->filter(af, data, flags);
+        r = af->filter(af, &frame, flags);
         if (r < 0)
-            return r;
-        assert(mp_audio_config_equals(af->data, data));
+            goto done;
+        assert(mp_audio_config_equals(af->data, &frame));
         af = af->next;
     }
-    return 0;
+    mp_audio_buffer_append(output, &frame);
+
+done:
+    if (data != &tmp)
+        talloc_free(data);
+    return r;
 }
 
 // Calculate average ratio of filter output samples to input samples.

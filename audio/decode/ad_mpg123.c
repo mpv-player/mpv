@@ -43,6 +43,7 @@ struct ad_mpg123_context {
     short delay;
     /* If the stream is actually VBR. */
     char vbr;
+    struct mp_audio frame;
 };
 
 static void uninit(struct dec_audio *da)
@@ -197,26 +198,24 @@ static int set_format(struct dec_audio *da)
     int encoding;
     ret = mpg123_getformat(con->handle, &rate, &channels, &encoding);
     if (ret == MPG123_OK) {
-        mp_audio_set_num_channels(&da->decoded, channels);
-        da->decoded.rate = rate;
+        mp_audio_set_num_channels(&con->frame, channels);
+        con->frame.rate = rate;
         int af = mpg123_format_to_af(encoding);
         if (!af) {
             /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */
             MP_ERR(da, "Bad encoding from mpg123: %i.\n", encoding);
             return MPG123_ERR;
         }
-        mp_audio_set_format(&da->decoded, af);
+        mp_audio_set_format(&con->frame, af);
         con->sample_size = channels * af_fmt2bps(af);
     }
     return ret;
 }
 
-static int decode_packet(struct dec_audio *da)
+static int decode_packet(struct dec_audio *da, struct mp_audio **out)
 {
     struct ad_mpg123_context *con = da->priv;
     int ret;
-
-    mp_audio_set_null_data(&da->decoded);
 
     struct demux_packet *pkt;
     if (demux_read_packet_async(da->header, &pkt) == 0)
@@ -257,8 +256,11 @@ static int decode_packet(struct dec_audio *da)
     }
 
     int got_samples = bytes / con->sample_size;
-    da->decoded.planes[0] = audio;
-    da->decoded.samples = got_samples;
+    *out = mp_audio_pool_get(da->pool, &con->frame, got_samples);
+    if (!*out)
+        return AD_ERR;
+
+    memcpy((*out)->planes[0], audio, bytes);
 
     update_info(da);
     return 0;
@@ -274,7 +276,6 @@ static int control(struct dec_audio *da, int cmd, void *arg)
 
     switch (cmd) {
     case ADCTRL_RESET:
-        mp_audio_set_null_data(&da->decoded);
         mpg123_close(con->handle);
 
         if (mpg123_open_feed(con->handle) != MPG123_OK) {

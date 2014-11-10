@@ -136,7 +136,9 @@ void af_uninit(struct af_stream *s);
 struct af_instance *af_add(struct af_stream *s, char *name, char **args);
 int af_remove_by_label(struct af_stream *s, char *label);
 struct af_instance *af_find_by_label(struct af_stream *s, char *label);
-int af_filter(struct af_stream *s, struct mp_audio *data, int flags);
+struct mp_audio_buffer;
+int af_filter(struct af_stream *s, struct mp_audio *data,
+              struct mp_audio_buffer *output);
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
 void af_control_all(struct af_stream *s, int cmd, void *arg);
 

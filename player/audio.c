@@ -192,6 +192,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->d_audio->global = mpctx->global;
         mpctx->d_audio->opts = opts;
         mpctx->d_audio->header = sh;
+        mpctx->d_audio->pool = mp_audio_pool_create(mpctx->d_audio);
         mpctx->d_audio->afilter = af_new(mpctx->global);
         mpctx->d_audio->afilter->replaygain_data = sh->audio->replaygain_data;
         mpctx->ao_buffer = mp_audio_buffer_create(NULL);
@@ -207,8 +208,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
     assert(mpctx->d_audio);
 
-    struct mp_audio in_format;
-    mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &in_format);
+    struct mp_audio in_format = mpctx->d_audio->decode_format;
 
     if (!mp_audio_config_valid(&in_format)) {
         // We don't know the audio format yet - so configure it later as we're
@@ -238,7 +238,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
 
     // filter input format: same as codec's output format:
-    mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &afs->input);
+    afs->input = in_format;
 
     // Determine what the filter chain outputs. recreate_audio_filters() also
     // needs this for testing whether playback speed is changed by resampling
@@ -304,8 +304,7 @@ double written_audio_pts(struct MPContext *mpctx)
     if (!d_audio)
         return MP_NOPTS_VALUE;
 
-    struct mp_audio in_format;
-    mp_audio_buffer_get_format(d_audio->decode_buffer, &in_format);
+    struct mp_audio in_format = d_audio->decode_format;
 
     if (!mp_audio_config_valid(&in_format) || d_audio->afilter->initialized < 1)
         return MP_NOPTS_VALUE;
@@ -324,7 +323,8 @@ double written_audio_pts(struct MPContext *mpctx)
     // Subtract data in buffers between decoder and audio out.
 
     // Decoded but not filtered
-    a_pts -= mp_audio_buffer_seconds(d_audio->decode_buffer);
+    if (d_audio->waiting)
+        a_pts -= d_audio->waiting->samples / (double)in_format.rate;
 
     // Data buffered in audio filters, measured in seconds of "missing" output
     double buffered_output = af_calc_delay(d_audio->afilter);

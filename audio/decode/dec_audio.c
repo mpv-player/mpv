@@ -56,19 +56,6 @@ static const struct ad_functions * const ad_drivers[] = {
     NULL
 };
 
-// Drop audio buffer and reinit it (after format change)
-// Returns whether the format was valid at all.
-static bool reinit_audio_buffer(struct dec_audio *da)
-{
-    if (!mp_audio_config_valid(&da->decoded)) {
-        MP_ERR(da, "Audio decoder did not specify audio "
-               "format, or requested an unsupported configuration!\n");
-        return false;
-    }
-    mp_audio_buffer_reinit(da->decode_buffer, &da->decoded);
-    return true;
-}
-
 static void uninit_decoder(struct dec_audio *d_audio)
 {
     if (d_audio->ad_driver) {
@@ -89,7 +76,6 @@ static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
         return 0;
     }
 
-    d_audio->decode_buffer = mp_audio_buffer_create(NULL);
     return 1;
 }
 
@@ -167,7 +153,6 @@ void audio_uninit(struct dec_audio *d_audio)
     MP_VERBOSE(d_audio, "Uninit audio filters...\n");
     af_destroy(d_audio->afilter);
     uninit_decoder(d_audio);
-    talloc_free(d_audio->decode_buffer);
     talloc_free(d_audio);
 }
 
@@ -177,78 +162,14 @@ void audio_uninit(struct dec_audio *d_audio)
  */
 int initial_audio_decode(struct dec_audio *da)
 {
-    while (!mp_audio_config_valid(&da->decoded)) {
-        if (da->decoded.samples > 0)
-            return AD_ERR; // invalid format, rather than uninitialized
-        int ret = da->ad_driver->decode_packet(da);
+    while (!da->waiting) {
+        int ret = da->ad_driver->decode_packet(da, &da->waiting);
         if (ret < 0)
             return ret;
     }
-    if (mp_audio_buffer_samples(da->decode_buffer) > 0) // avoid accidental flush
-        return AD_OK;
-    return reinit_audio_buffer(da) ? AD_OK : AD_ERR;
-}
-
-// Filter len bytes of input, put result into outbuf.
-static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
-                          int len)
-{
-    bool format_change = false;
-    int error = 0;
-
-    assert(len > 0); // would break EOF logic below
-
-    while (mp_audio_buffer_samples(da->decode_buffer) < len) {
-        // Check for a format change
-        struct mp_audio config;
-        mp_audio_buffer_get_format(da->decode_buffer, &config);
-        format_change = !mp_audio_config_equals(&da->decoded, &config);
-        if (format_change) {
-            error = AD_EOF; // drain remaining data left in the current buffer
-            break;
-        }
-        if (da->decoded.samples > 0) {
-            int copy = MPMIN(da->decoded.samples, len);
-            struct mp_audio append = da->decoded;
-            append.samples = copy;
-            mp_audio_buffer_append(da->decode_buffer, &append);
-            mp_audio_skip_samples(&da->decoded, copy);
-            da->pts_offset += copy;
-            continue;
-        }
-        error = da->ad_driver->decode_packet(da);
-        if (error < 0)
-            break;
-    }
-
-    if (error == AD_WAIT)
-        return error;
-
-    // Filter
-    struct mp_audio filter_data;
-    mp_audio_buffer_peek(da->decode_buffer, &filter_data);
-    len = MPMIN(filter_data.samples, len);
-    filter_data.samples = len;
-    bool eof = error == AD_EOF && filter_data.samples == 0;
-
-    if (af_filter(da->afilter, &filter_data, eof ? AF_FILTER_FLAG_EOF : 0) < 0)
-        return AD_ERR;
-
-    mp_audio_buffer_append(outbuf, &filter_data);
-    if (error == AD_EOF && filter_data.samples > 0)
-        error = 0; // don't end playback yet
-
-    // remove processed data from decoder buffer:
-    mp_audio_buffer_skip(da->decode_buffer, len);
-
-    // if format was changed, and all data was drained, execute the format change
-    if (format_change && eof) {
-        error = AD_NEW_FMT;
-        if (!reinit_audio_buffer(da))
-            error = AD_ERR; // switch to invalid format
-    }
-
-    return error;
+    talloc_steal(da, da->waiting);
+    da->decode_format = *da->waiting;
+    return mp_audio_config_valid(da->waiting) ? AD_OK : AD_ERR;
 }
 
 /* Try to get at least minsamples decoded+filtered samples in outbuf
@@ -256,52 +177,55 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
  * Return 0 on success, or negative AD_* error code.
  * In the former case outbuf has at least minsamples buffered on return.
  * In case of EOF/error it might or might not be. */
-int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
+int audio_decode(struct dec_audio *da, struct mp_audio_buffer *outbuf,
                  int minsamples)
 {
-    if (d_audio->afilter->initialized < 1)
+    struct af_stream *afs = da->afilter;
+    if (afs->initialized < 1)
         return AD_ERR;
 
-    // Indicates that a filter seems to be buffering large amounts of data
-    int huge_filter_buffer = 0;
+    MP_STATS(da, "start audio");
 
-    /* Filter output size will be about filter_multiplier times input size.
-     * If some filter buffers audio in big blocks this might only hold
-     * as average over time. */
-    double filter_multiplier = af_calc_filter_multiplier(d_audio->afilter);
-
-    int prev_buffered = -1;
     int res = 0;
-    MP_STATS(d_audio, "start audio");
     while (res >= 0 && minsamples >= 0) {
         int buffered = mp_audio_buffer_samples(outbuf);
-        if (minsamples < buffered || buffered == prev_buffered)
+        if (minsamples < buffered)
             break;
-        prev_buffered = buffered;
 
-        int decsamples = (minsamples - buffered) / filter_multiplier;
-        // + some extra for possible filter buffering, and avoid 0
-        decsamples += 512;
+        res = 0;
 
-        if (huge_filter_buffer) {
-            /* Some filter must be doing significant buffering if the estimated
-             * input length didn't produce enough output from filters.
-             * Feed the filters 250 samples at a time until we have enough
-             * output. Very small amounts could make filtering inefficient while
-             * large amounts can make mpv demux the file unnecessarily far ahead
-             * to get audio data and buffer video frames in memory while doing
-             * so. However the performance impact of either is probably not too
-             * significant as long as the value is not completely insane. */
-            decsamples = 250;
+        struct mp_audio *mpa = da->waiting;
+        if (!mpa)
+            res = da->ad_driver->decode_packet(da, &mpa);
+
+        if (res != AD_EOF) {
+            if (res < 0)
+                break;
+            if (!mpa )
+                continue;
         }
 
-        /* if this iteration does not fill buffer, we must have lots
-         * of buffering in filters */
-        huge_filter_buffer = 1;
+        if (mpa) {
+            da->pts_offset += mpa->samples;
+            da->decode_format = *mpa;
+            mp_audio_set_null_data(&da->decode_format);
+            // On format change, make sure to drain the filter chain.
+            if (!mp_audio_config_equals(&afs->input, mpa)) {
+                res = AD_NEW_FMT;
+                da->waiting = talloc_steal(da, mpa);
+                mpa = NULL;
+            }
+        }
 
-        res = filter_n_bytes(d_audio, outbuf, decsamples);
+        if (mpa)
+            da->waiting = NULL;
+
+        if (af_filter(afs, mpa, outbuf) < 0)
+            return AD_ERR;
     }
-    MP_STATS(d_audio, "end audio");
+
+    MP_STATS(da, "end audio");
+
     return res;
 }
 
@@ -312,6 +236,8 @@ void audio_reset_decoding(struct dec_audio *d_audio)
     af_control_all(d_audio->afilter, AF_CONTROL_RESET, NULL);
     d_audio->pts = MP_NOPTS_VALUE;
     d_audio->pts_offset = 0;
-    if (d_audio->decode_buffer)
-        mp_audio_buffer_clear(d_audio->decode_buffer);
+    if (d_audio->waiting) {
+        talloc_free(d_audio->waiting);
+        d_audio->waiting = NULL;
+    }
 }

@@ -1550,7 +1550,7 @@ static int mp_property_samplerate(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct mp_audio fmt = {0};
     if (mpctx->d_audio)
-        mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &fmt);
+        fmt = mpctx->d_audio->decode_format;
     if (!fmt.rate)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
@@ -1567,7 +1567,7 @@ static int mp_property_channels(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct mp_audio fmt = {0};
     if (mpctx->d_audio)
-        mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &fmt);
+        fmt = mpctx->d_audio->decode_format;
     if (!fmt.channels.num)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {

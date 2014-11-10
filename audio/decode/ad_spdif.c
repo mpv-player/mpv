@@ -40,6 +40,7 @@ struct spdifContext {
     int              out_buffer_len;
     uint8_t          out_buffer[OUTBUF_SIZE];
     bool             need_close;
+    struct mp_audio  fmt;
 };
 
 static int write_packet(void *p, uint8_t *buf, int buf_size)
@@ -162,9 +163,9 @@ static int init(struct dec_audio *da, const char *decoder)
     default:
         abort();
     }
-    mp_audio_set_num_channels(&da->decoded, num_channels);
-    mp_audio_set_format(&da->decoded, sample_format);
-    da->decoded.rate = samplerate;
+    mp_audio_set_num_channels(&spdif_ctx->fmt, num_channels);
+    mp_audio_set_format(&spdif_ctx->fmt, sample_format);
+    spdif_ctx->fmt.rate = samplerate;
 
     if (avformat_write_header(lavf_ctx, &format_opts) < 0) {
         MP_FATAL(da, "libavformat spdif initialization failed.\n");
@@ -182,12 +183,10 @@ fail:
     return 0;
 }
 
-static int decode_packet(struct dec_audio *da)
+static int decode_packet(struct dec_audio *da, struct mp_audio **out)
 {
     struct spdifContext *spdif_ctx = da->priv;
     AVFormatContext     *lavf_ctx  = spdif_ctx->lavf_ctx;
-
-    mp_audio_set_null_data(&da->decoded);
 
     spdif_ctx->out_buffer_len  = 0;
 
@@ -212,8 +211,12 @@ static int decode_packet(struct dec_audio *da)
     if (ret < 0)
         return AD_ERR;
 
-    da->decoded.planes[0] = spdif_ctx->out_buffer;
-    da->decoded.samples = spdif_ctx->out_buffer_len / da->decoded.sstride;
+    int samples = spdif_ctx->out_buffer_len / spdif_ctx->fmt.sstride;
+    *out = mp_audio_pool_get(da->pool, &spdif_ctx->fmt, samples);
+    if (!*out)
+        return AD_ERR;
+
+    memcpy((*out)->planes[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
 
     return 0;
 }
