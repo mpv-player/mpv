@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <libavutil/mem.h>
+#include <libavutil/buffer.h>
 
 #include "talloc.h"
 #include "common/common.h"
@@ -124,11 +124,8 @@ void mp_audio_set_null_data(struct mp_audio *mpa)
 static void mp_audio_destructor(void *ptr)
 {
     struct mp_audio *mpa = ptr;
-    for (int n = 0; n < MP_NUM_CHANNELS; n++) {
-        // Note: don't free if not allocated by mp_audio_realloc
-        if (mpa->allocated[n])
-            av_free(mpa->planes[n]);
-    }
+    for (int n = 0; n < MP_NUM_CHANNELS; n++)
+        av_buffer_unref(&mpa->allocated[n]);
 }
 
 /* Reallocate the data stored in mpa->planes[n] so that enough samples are
@@ -152,22 +149,15 @@ void mp_audio_realloc(struct mp_audio *mpa, int samples)
         abort(); // oom
     int size = MPMAX(samples * mpa->sstride, 1);
     for (int n = 0; n < mpa->num_planes; n++) {
-        if (size != mpa->allocated[n]) {
-            // Note: av_realloc() can't be used (see libavutil doxygen)
-            void *new = av_malloc(size);
-            if (!new)
-                abort();
-            if (mpa->allocated[n])
-                memcpy(new, mpa->planes[n], MPMIN(mpa->allocated[n], size));
-            av_free(mpa->planes[n]);
-            mpa->planes[n] = new;
-            mpa->allocated[n] = size;
+        if (!mpa->allocated[n] || size != mpa->allocated[n]->size) {
+            if (av_buffer_realloc(&mpa->allocated[n], size) < 0)
+                abort(); // OOM
+            mpa->planes[n] = mpa->allocated[n]->data;
         }
     }
     for (int n = mpa->num_planes; n < MP_NUM_CHANNELS; n++) {
-        av_free(mpa->planes[n]);
+        av_buffer_unref(&mpa->allocated[n]);
         mpa->planes[n] = NULL;
-        mpa->allocated[n] = 0;
     }
     talloc_set_destructor(mpa, mp_audio_destructor);
 }
@@ -194,7 +184,7 @@ int mp_audio_get_allocated_size(struct mp_audio *mpa)
 {
     int size = 0;
     for (int n = 0; n < mpa->num_planes; n++) {
-        int s = mpa->allocated[n] / mpa->sstride;
+        int s = mpa->allocated[n] ? mpa->allocated[n]->size / mpa->sstride : 0;
         size = n == 0 ? s : MPMIN(size, s);
     }
     return size;

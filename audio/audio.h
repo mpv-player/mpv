@@ -38,7 +38,7 @@ struct mp_audio {
     int bps;            // size of sub-samples (af_fmt2bps(format))
 
     // private
-    int allocated[MP_NUM_CHANNELS]; // use mp_audio_get_allocated_size()
+    struct AVBufferRef *allocated[MP_NUM_CHANNELS];
 };
 
 void mp_audio_set_format(struct mp_audio *mpa, int format);
