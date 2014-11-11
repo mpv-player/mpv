@@ -2390,6 +2390,9 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
         p->scalers[n].name = p->opts.scalers[n];
     }
 
+    if (!p->opts.gamma && p->video_eq.values[MP_CSP_EQ_GAMMA] != 0)
+        p->opts.gamma = 1.0f;
+
     check_gl_features(p);
     reinit_rendering(p);
 }
