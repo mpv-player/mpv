@@ -2716,25 +2716,28 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
         if (flags & SEEK_SUBPREROLL) {
             uint64_t prev_target = 0;
             for (size_t i = 0; i < mkv_d->num_indexes; i++) {
-                uint64_t index_pos = mkv_d->indexes[i].filepos;
-                if (index_pos > prev_target && index_pos < seek_pos)
-                    prev_target = index_pos;
+                if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
+                    uint64_t index_pos = mkv_d->indexes[i].filepos;
+                    if (index_pos > prev_target && index_pos < seek_pos)
+                        prev_target = index_pos;
+                }
             }
             if (mkv_d->index_has_durations) {
-                // If there are no earlier subtitles overlapping with the
-                // target cluster, then disable preroll-seeking.
-                bool overlap = false;
+                // Find the earliest cluster that is not before prev_target,
+                // but contains subtitle packets overlapping with the cluster
+                // at seek_pos.
+                uint64_t target = seek_pos;
                 for (size_t i = 0; i < mkv_d->num_indexes; i++) {
                     struct mkv_index *cur = &mkv_d->indexes[i];
-                    overlap = cur->timecode <= index->timecode &&
-                              cur->timecode + cur->duration > index->timecode &&
-                              cur->filepos >= prev_target &&
-                              cur->filepos != seek_pos;
-                    if (overlap)
-                        break;
+                    if (cur->timecode <= index->timecode &&
+                        cur->timecode + cur->duration > index->timecode &&
+                        cur->filepos >= prev_target &&
+                        cur->filepos < target)
+                    {
+                        target = cur->filepos;
+                    }
                 }
-                if (!overlap)
-                    prev_target = 0;
+                prev_target = target;
             }
             if (prev_target)
                 seek_pos = prev_target;
