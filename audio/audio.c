@@ -272,6 +272,7 @@ int mp_audio_make_writeable(struct mp_audio *data)
 
 struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe)
 {
+    AVFrame *tmp = NULL;
     struct mp_audio *new = talloc_zero(NULL, struct mp_audio);
     talloc_set_destructor(new, mp_audio_destructor);
 
@@ -289,6 +290,16 @@ struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe)
     new->rate = avframe->sample_rate;
 
     mp_audio_set_channels(new, &lavc_chmap);
+
+    // Force refcounted frame.
+    if (!avframe->buf[0]) {
+        tmp = av_frame_alloc();
+        if (!tmp)
+            goto fail;
+        if (av_frame_ref(tmp, avframe) < 0)
+            goto fail;
+        avframe = tmp;
+    }
 
     // If we can't handle the format (e.g. too many channels), bail out.
     if (!mp_audio_config_valid(new) || avframe->nb_extended_buf)
@@ -312,6 +323,7 @@ struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe)
 
 fail:
     talloc_free(new);
+    av_frame_free(&tmp);
     return NULL;
 }
 
