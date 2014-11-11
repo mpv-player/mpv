@@ -4060,6 +4060,8 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         mpctx->playlist->current = e;
         mpctx->playlist->current_was_replaced = false;
         mpctx->stop_play = PT_CURRENT_ENTRY;
+        if (on_osd & MP_ON_OSD_MSG)
+            mpctx->add_osd_seek_info |= OSD_SEEK_INFO_CURRENT_FILE;
         break;
     }
 

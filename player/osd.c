@@ -452,6 +452,12 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
                      mpctx->master_demuxer->edition + 1,
                      mpctx->master_demuxer->num_editions);
     }
+    if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CURRENT_FILE) {
+        if (mpctx->filename) {
+            set_osd_msg(mpctx, 1, mpctx->opts->osd_duration, "%s",
+                        mpctx->filename);
+        }
+    }
     mpctx->add_osd_seek_info = 0;
 }
 
