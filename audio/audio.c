@@ -128,7 +128,7 @@ void mp_audio_set_null_data(struct mp_audio *mpa)
 
 static int get_plane_size(const struct mp_audio *mpa, int samples)
 {
-    if (samples < 0 || !mpa->format)
+    if (samples < 0 || !mp_audio_config_valid(mpa))
         return -1;
     if (samples >= INT_MAX / mpa->sstride)
         return -1;
