@@ -408,7 +408,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
     if (vc->lastipts != AV_NOPTS_VALUE) {
 
         // we have a valid image in lastimg
-        while (vc->lastipts < frameipts) {
+        while (vc->lastimg && vc->lastipts < frameipts) {
             int64_t thisduration = vc->harddup ? 1 : (frameipts - vc->lastipts);
             AVPacket packet;
 
