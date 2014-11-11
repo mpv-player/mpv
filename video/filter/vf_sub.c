@@ -94,6 +94,9 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     struct vf_priv_s *priv = vf->priv;
     struct osd_state *osd = priv->osd;
 
+    if (!osd)
+        return mpi;
+
     if (vf->priv->opt_top_margin || vf->priv->opt_bottom_margin) {
         struct mp_image *dmpi = vf_alloc_out_image(vf);
         if (!dmpi)
