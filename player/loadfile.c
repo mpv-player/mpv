@@ -252,17 +252,16 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     mpctx->video_offset = n->start - n->source_start;
     if (n->source == p->source && !force)
         return false;
-    enum stop_play_reason orig_stop_play = mpctx->stop_play;
-    if (!mpctx->d_video && mpctx->stop_play == KEEP_PLAYING)
-        mpctx->stop_play = AT_END_OF_FILE;  // let audio uninit drain data
+
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
     uninit_sub_all(mpctx);
     if (!mpctx->opts->fixed_vo)
         uninit_video_out(mpctx);
-    if (!mpctx->opts->gapless_audio)
+    if (mpctx->ao && !mpctx->opts->gapless_audio) {
+        ao_drain(mpctx->ao);
         uninit_audio_out(mpctx);
-    mpctx->stop_play = orig_stop_play;
+    }
 
     if (mpctx->demuxer) {
         demux_stop_thread(mpctx->demuxer);
