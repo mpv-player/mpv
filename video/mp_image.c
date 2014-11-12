@@ -465,11 +465,16 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
         mp_snprintf_cat(b, bs, " %s", mp_imgfmt_to_name(p->imgfmt));
         mp_snprintf_cat(b, bs, " %s/%s", mp_csp_names[p->colorspace],
                         mp_csp_levels_names[p->colorlevels]);
-        mp_snprintf_cat(b, bs, " CL=%d", (int)p->chroma_location);
+        mp_snprintf_cat(b, bs, " CL=%s", mp_chroma_names[p->chroma_location]);
         if (p->outputlevels)
             mp_snprintf_cat(b, bs, " out=%s", mp_csp_levels_names[p->outputlevels]);
         if (p->rotate)
             mp_snprintf_cat(b, bs, " rot=%d", p->rotate);
+        if (p->stereo_in > 0 || p->stereo_out > 0) {
+            mp_snprintf_cat(b, bs, " stereo=%s/%s",
+                            MP_STEREO3D_NAME_DEF(p->stereo_in, "?"),
+                            MP_STEREO3D_NAME_DEF(p->stereo_out, "?"));
+        }
     } else {
         snprintf(b, bs, "???");
     }
