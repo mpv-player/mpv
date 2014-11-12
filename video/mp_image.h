@@ -142,6 +142,10 @@ struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
 
 void mp_image_params_guess_csp(struct mp_image_params *params);
 
+char *mp_image_params_to_str_buf(char *b, size_t bs,
+                                 const struct mp_image_params *p);
+#define mp_image_params_to_str(p) mp_image_params_to_str_buf((char[64]){0}, 64, p)
+
 bool mp_image_params_valid(const struct mp_image_params *p);
 bool mp_image_params_equal(const struct mp_image_params *p1,
                            const struct mp_image_params *p2);
