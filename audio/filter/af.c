@@ -526,11 +526,16 @@ static int af_reinit(struct af_stream *s)
         // Reset just in case...
         mp_audio_set_null_data(&in);
 
+        if (!mp_audio_config_valid(&in))
+            goto error;
+
         int rv = af->control(af, AF_CONTROL_REINIT, &in);
         if (rv == AF_OK && !mp_audio_config_equals(&in, af->prev->data))
             rv = AF_FALSE; // conversion filter needed
         switch (rv) {
         case AF_OK:
+            if (!mp_audio_config_valid(af->data))
+                goto error;
             af = af->next;
             break;
         case AF_FALSE: { // Configuration filter is needed
