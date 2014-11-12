@@ -154,6 +154,7 @@ void uninit_audio_out(struct MPContext *mpctx)
         // Note: with gapless_audio, stop_play is not correctly set
         if (mpctx->opts->gapless_audio || mpctx->stop_play == AT_END_OF_FILE)
             ao_drain(mpctx->ao);
+        mixer_uninit_audio(mpctx->mixer);
         ao_uninit(mpctx->ao);
     }
     mpctx->ao = NULL;
@@ -443,6 +444,8 @@ static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_RELOAD)) {
         ao_reset(mpctx->ao);
         uninit_audio_out(mpctx);
+        if (d_audio)
+            mpctx->audio_status = STATUS_SYNCING;
     }
 
     if (!d_audio)
