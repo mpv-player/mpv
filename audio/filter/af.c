@@ -124,13 +124,6 @@ const struct m_obj_list af_obj_list = {
     },
 };
 
-static bool af_config_equals(struct mp_audio *a, struct mp_audio *b)
-{
-    return a->format == b->format
-        && mp_chmap_equals(&a->channels, &b->channels)
-        && a->rate   == b->rate;
-}
-
 static void af_copy_unset_fields(struct mp_audio *dst, struct mp_audio *src)
 {
     if (dst->format == AF_FORMAT_UNKNOWN)
@@ -165,7 +158,7 @@ static int output_control(struct af_instance* af, int cmd, void* arg)
         *filter_output = *output;
         af_copy_unset_fields(filter_output, in);
         *in = *filter_output;
-        return af_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
+        return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
     }
     return AF_UNKNOWN;
@@ -575,7 +568,7 @@ static int af_reinit(struct af_stream *s)
      * insert new filters or change the input format, the output format won't
      * change. (Audio outputs generally can't change format at runtime.) */
     af_copy_unset_fields(&s->output, &s->filter_output);
-    if (af_config_equals(&s->output, &s->filter_output)) {
+    if (mp_audio_config_equals(&s->output, &s->filter_output)) {
         s->initialized = 1;
         af_print_filter_chain(s, NULL, MSGL_V);
         return AF_OK;
