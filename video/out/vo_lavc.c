@@ -56,6 +56,8 @@ struct priv {
     int worst_time_base_is_stream;
 
     struct mp_image_params real_colorspace;
+
+    bool shutdown;
 };
 
 static int preinit(struct vo *vo)
@@ -75,7 +77,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi);
 static void uninit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
-    if (!vc)
+    if (!vc || vc->shutdown)
         return;
 
     pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
@@ -86,6 +88,8 @@ static void uninit(struct vo *vo)
     mp_image_unrefp(&vc->lastimg);
 
     pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
+
+    vc->shutdown = true;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
@@ -97,7 +101,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     uint32_t width = params->w;
     uint32_t height = params->h;
 
-    if (!vc)
+    if (!vc || vc->shutdown)
         return -1;
 
     pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
@@ -131,6 +135,14 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
         MP_ERR(vo, "resolution changes not supported.\n");
         goto error;
     }
+
+    // When we get here, this must be the first call to reconfigure(). Thus, we
+    // can rely on no existing data in vc having been allocated yet.
+    // Reason:
+    // - Second calls after reconfigure() already failed once fail (due to the
+    //   vc->shutdown check above).
+    // - Second calls after reconfigure() already succeeded once return early
+    //   (due to the vc->stream check above).
 
     vc->lastipts = AV_NOPTS_VALUE;
     vc->lastframeipts = AV_NOPTS_VALUE;
@@ -169,15 +181,13 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     vc->buffer = talloc_size(vc, vc->buffer_size);
 
-    mp_image_unrefp(&vc->lastimg);
-
 done:
     pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
     return 0;
 
 error:
     pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
-    uninit(vo);
+    vc->shutdown = true;
     return -1;
 }
 
@@ -288,7 +298,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
 
     double pts = mpi ? mpi->pts : MP_NOPTS_VALUE;
 
-    if (!vc)
+    if (!vc || vc->shutdown)
         goto done;
     if (!encode_lavc_start(ectx)) {
         MP_WARN(vo, "NOTE: skipped initial video frame (probably because audio is not there yet)\n");

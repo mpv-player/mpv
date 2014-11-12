@@ -56,6 +56,8 @@ struct priv {
 
     AVRational worst_time_base;
     int worst_time_base_is_stream;
+
+    bool shutdown;
 };
 
 static void select_format(struct ao *ao, AVCodec *codec)
@@ -174,6 +176,7 @@ static int init(struct ao *ao)
 
 fail:
     pthread_mutex_unlock(&ao->encode_lavc_ctx->lock);
+    ac->shutdown = true;
     return -1;
 }
 
@@ -183,6 +186,9 @@ static void uninit(struct ao *ao)
 {
     struct priv *ac = ao->priv;
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
+
+    if (!ac || ac->shutdown)
+        return;
 
     pthread_mutex_lock(&ectx->lock);
 
@@ -201,6 +207,8 @@ static void uninit(struct ao *ao)
     }
 
     pthread_mutex_unlock(&ectx->lock);
+
+    ac->shutdown = true;
 }
 
 // return: how many bytes can be played without blocking
