@@ -508,12 +508,14 @@ Video
 
     ``auto`` tries to automatically enable hardware decoding using the first
     available method. This still depends what VO you are using. For example,
-    if you are not using ``--vo=vdpau``, vdpau decoding will never be enabled.
-    Also note that if the first found method doesn't actually work, it will
-    always fall back to software decoding, instead of trying the next method.
+    if you are not using ``--vo=vdpau`` or ``--vo=opengl``, vdpau decoding will
+    never be enabled. Also note that if the first found method doesn't actually
+    work, it will always fall back to software decoding, instead of trying the
+    next method (might matter on some Linux systems).
 
-    The ``vaapi-copy`` function allows you to use vaapi with any VO. Because
-    this copies the decoded video back to system RAM, it's quite inefficient.
+    The ``vaapi-copy`` mode allows you to use vaapi with any VO. Because
+    this copies the decoded video back to system RAM, it's likely less efficient
+    than the ``vaapi`` mode.
 
     .. note::
 
