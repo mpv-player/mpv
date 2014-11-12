@@ -123,6 +123,7 @@ struct demux_internal {
     double seek_pts;
 
     // Cached state.
+    bool force_cache_update;
     double time_length;
     struct mp_tags *stream_metadata;
     int64_t stream_size;
@@ -480,6 +481,13 @@ static void *demux_thread(void *pctx)
         if (!in->eof) {
             if (read_packet(in))
                 continue; // read_packet unlocked, so recheck conditions
+        }
+        if (in->force_cache_update) {
+            pthread_mutex_unlock(&in->lock);
+            update_cache(in);
+            pthread_mutex_lock(&in->lock);
+            in->force_cache_update = false;
+            continue;
         }
         pthread_cond_signal(&in->wakeup);
         pthread_cond_wait(&in->wakeup, &in->lock);
@@ -1157,8 +1165,10 @@ static void update_cache(struct demux_internal *in)
 static int cached_stream_control(struct demux_internal *in, int cmd, void *arg)
 {
     // If the cache is active, wake up the thread to possibly update cache state.
-    if (in->stream_cache_size >= 0)
+    if (in->stream_cache_size >= 0) {
+        in->force_cache_update = true;
         pthread_cond_signal(&in->wakeup);
+    }
 
     switch (cmd) {
     case STREAM_CTRL_GET_CACHE_SIZE:
