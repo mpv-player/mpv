@@ -444,7 +444,7 @@ int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
 //  returns: -1: error, 0: no output, 1: output available
 int vf_output_frame(struct vf_chain *c, bool eof)
 {
-    if (c->output)
+    if (c->last->num_out_queued)
         return 1;
     if (c->initialized < 1)
         return -1;
@@ -463,12 +463,9 @@ int vf_output_frame(struct vf_chain *c, bool eof)
         }
         if (!last)
             return 0;
-        struct mp_image *img = vf_dequeue_output_frame(last);
-        if (!last->next) {
-            c->output = img;
-            return !!c->output;
-        }
-        int r = vf_do_filter(last->next, img);
+        if (!last->next)
+            return 1;
+        int r = vf_do_filter(last->next, vf_dequeue_output_frame(last));
         if (r < 0)
             return r;
     }
@@ -476,11 +473,9 @@ int vf_output_frame(struct vf_chain *c, bool eof)
 
 struct mp_image *vf_read_output_frame(struct vf_chain *c)
 {
-    if (!c->output)
+    if (!c->last->num_out_queued)
         vf_output_frame(c, false);
-    struct mp_image *res = c->output;
-    c->output = NULL;
-    return res;
+    return vf_dequeue_output_frame(c->last);
 }
 
 static void vf_forget_frames(struct vf_instance *vf)
@@ -494,7 +489,6 @@ static void vf_chain_forget_frames(struct vf_chain *c)
 {
     for (struct vf_instance *cur = c->first; cur; cur = cur->next)
         vf_forget_frames(cur);
-    mp_image_unrefp(&c->output);
 }
 
 void vf_seek_reset(struct vf_chain *c)
@@ -705,12 +699,13 @@ struct vf_chain *vf_new(struct mpv_global *global)
         .query_format = input_query_format,
     };
     static const struct vf_info out = { .name = "out" };
-    c->first->next = talloc(c, struct vf_instance);
-    *c->first->next = (struct vf_instance) {
+    c->last = talloc(c, struct vf_instance);
+    *c->last = (struct vf_instance) {
         .info = &out,
         .query_format = output_query_format,
         .priv = (void *)c,
     };
+    c->first->next = c->last;
     return c;
 }
 

@@ -121,8 +121,6 @@ struct vf_chain {
     struct MPOpts *opts;
     struct mpv_global *global;
     struct mp_hwdec_info *hwdec;
-
-    struct mp_image *output;
 };
 
 typedef struct vf_seteq {
