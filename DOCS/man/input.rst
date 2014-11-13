@@ -1422,6 +1422,10 @@ Property list
     Return the mpv version/copyright string. Depending on how the binary was
     built, it might contain either a release version, or just a git hash.
 
+``mpv-configuration``
+    Return the configuration arguments which were passed to the build system
+    (typically the way ``./waf configure ...`` was invoked).
+
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
     changed at runtime by writing to this property. Note that many options

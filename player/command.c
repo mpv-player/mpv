@@ -2932,6 +2932,12 @@ static int mp_property_version(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, mpv_version);
 }
 
+static int mp_property_configuration(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    return m_property_strdup_ro(action, arg, CONFIGURATION);
+}
+
 static int mp_property_alias(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -3232,6 +3238,7 @@ static const struct m_property mp_properties[] = {
     {"display-names", mp_property_display_names},
 
     {"mpv-version", mp_property_version},
+    {"mpv-configuration", mp_property_configuration},
 
     {"options", mp_property_options},
     {"file-local-options", mp_property_local_options},
