@@ -189,6 +189,8 @@ struct m_sub_property {
     .type = {.type = CONF_TYPE_STRING}, .value = {.string = (char *)(s)}
 #define SUB_PROP_FLOAT(f) \
     .type = {.type = CONF_TYPE_FLOAT}, .value = {.float_ = (f)}
+#define SUB_PROP_DOUBLE(f) \
+    .type = {.type = CONF_TYPE_DOUBLE}, .value = {.double_ = (f)}
 #define SUB_PROP_FLAG(f) \
     .type = {.type = CONF_TYPE_FLAG}, .value = {.flag = (f)}
 

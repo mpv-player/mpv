@@ -3017,14 +3017,46 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
         if (!co)
             return M_PROPERTY_UNKNOWN;
 
+        union m_option_value def = {0};
+        if (co->default_data)
+            memcpy(&def, co->default_data, co->opt->type->size);
+
+        const struct m_option *opt = co->opt;
+        bool has_minmax =
+            opt->type == &m_option_type_int ||
+            opt->type == &m_option_type_int64 ||
+            opt->type == &m_option_type_float ||
+            opt->type == &m_option_type_double;
+        char **choices = NULL;
+
+        if (opt->type == &m_option_type_choice) {
+            has_minmax = true;
+            struct m_opt_choice_alternatives *alt = opt->priv;
+            int num = 0;
+            for ( ; alt->name; alt++)
+                MP_TARRAY_APPEND(NULL, choices, num, alt->name);
+            MP_TARRAY_APPEND(NULL, choices, num, NULL);
+        }
+
         struct m_sub_property props[] = {
+            {"name",                    SUB_PROP_STR(co->name)},
+            {"type",                    SUB_PROP_STR(opt->type->name)},
             {"set-from-commandline",    SUB_PROP_FLAG(co->is_set_from_cmdline)},
+            {"default-value",           *opt, def},
+            {"min",                     SUB_PROP_DOUBLE(opt->min),
+             .unavailable = !(has_minmax && (opt->flags & M_OPT_MIN))},
+            {"max",                     SUB_PROP_DOUBLE(opt->max),
+             .unavailable = !(has_minmax && (opt->flags & M_OPT_MAX))},
+            {"choices", .type = {.type = CONF_TYPE_STRING_LIST},
+             .value = {.string_list = choices}, .unavailable = !choices},
             {0}
         };
 
         struct m_property_action_arg next_ka = *ka;
         next_ka.key = rem;
-        return m_property_read_sub(props, M_PROPERTY_KEY_ACTION, &next_ka);
+        int r = m_property_read_sub(props, M_PROPERTY_KEY_ACTION, &next_ka);
+        talloc_free(choices);
+        return r;
     }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;

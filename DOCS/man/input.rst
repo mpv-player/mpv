@@ -1446,13 +1446,36 @@ Property list
     Additional per-option information.
 
     This has a number of sub-properties. Replace ``<name>`` with the name of
-    a top-level option.
+    a top-level option. No guarantee of stability is given to any of these
+    sub-properties - they may change radically in the feature.
+
+    ``option-info/<name>/name``
+        Returns the name of the option.
+
+    ``option-info/<name>/type``
+        Return the name of the option type, like ``String`` or ``Integer``.
+        For many complex types, this isn't very accurate.
 
     ``option-info/<name>/set-from-commandline``
 
         Return ``yes`` if the option was set from the mpv command line,
         ``no`` otherwise. What this is set to if the option is e.g. changed
         at runtime is left undefined (meaning it could change in the future).
+
+    ``option-info/<name>/default-value``
+        The default value of the option. May not always be available.
+
+    ``option-info/<name>/min``, ``option-info/<name>/max``
+        Integer minimum and maximum values allowed for the option. Only
+        available if the options are numeric, and the minimum/maximum has been
+        set internally. It's also possible that only one of these is set.
+
+    ``option-info/<name>/choices``
+        If the option is a choice option, the possible choices. Choices that
+        are integers may or may not be included (they can be implied by ``min``
+        and ``max``). Note that options which behave like choice options, but
+        are not actual choice options internally, may not have this info
+        available.
 
 ``property-list``
     Return the list of top-level properties.

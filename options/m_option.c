@@ -696,7 +696,7 @@ static char *print_choice(const m_option_t *opt, const void *val)
 }
 
 const struct m_option_type m_option_type_choice = {
-    .name  = "String",  // same as arbitrary strings in option list for now
+    .name  = "Choice",
     .size  = sizeof(int),
     .parse = parse_choice,
     .print = print_choice,
