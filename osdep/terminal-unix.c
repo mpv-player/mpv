@@ -268,6 +268,11 @@ static bool read_terminal;
 
 static void enable_kx(bool enable)
 {
+    // This check is actually always true, as enable_kx calls are all guarded
+    // by read_terminal, which is true only if both stdin and stdout are a
+    // tty. Note that stderr being redirected away has no influence over mpv's
+    // I/O handling except for disabling the terminal OSD, and thus stderr
+    // shouldn't be relied on here either.
     if (isatty(STDOUT_FILENO)) {
         char *cmd = enable ? "\033=" : "\033>";
         printf("%s", cmd);
@@ -472,6 +477,9 @@ int terminal_init(void)
     assert(!getch2_enabled);
     getch2_enabled = 1;
 
+    // Disable reading from the terminal even if stdout is not a tty, to make
+    //   mpv ... | less
+    // do the right thing.
     read_terminal = isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
 
     // handlers to fix terminal settings
