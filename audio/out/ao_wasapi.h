@@ -31,12 +31,18 @@
 #include "osdep/atomics.h"
 
 typedef struct change_notify {
-    IMMNotificationClient client;
+    IMMNotificationClient client; /* this must be first in the structure! */
     LPWSTR monitored; /* Monitored device */
+    struct ao *ao;
 } change_notify;
 
-HRESULT wasapi_change_init(struct change_notify *change, IMMDevice *monitor);
-void wasapi_change_free(struct change_notify *change);
+HRESULT wasapi_change_init(struct ao* ao);
+void wasapi_change_uninit(struct ao* ao);
+
+#define EXIT_ON_ERROR(hres)  \
+              do { if (FAILED(hres)) { goto exit_label; } } while(0)
+#define SAFE_RELEASE(unk, release) \
+              do { if ((unk) != NULL) { release; (unk) = NULL; } } while(0)
 
 typedef struct wasapi_state {
     struct mp_log *log;
@@ -70,6 +76,8 @@ typedef struct wasapi_state {
     ISimpleAudioVolume *pAudioVolume;
     IAudioEndpointVolume *pEndpointVolume;
     IAudioSessionControl *pSessionControl;
+    IMMDeviceEnumerator *pEnumerator;
+
     HANDLE hFeed; /* wasapi event */
     HANDLE hForceFeed; /* forces writing a buffer (e.g. before audio_resume) */
     HANDLE hFeedDone; /* set only after a hForceFeed */
@@ -108,6 +116,8 @@ typedef struct wasapi_state {
         HANDLE (WINAPI *pAvSetMmThreadCharacteristicsW)(LPCWSTR, LPDWORD);
         WINBOOL (WINAPI *pAvRevertMmThreadCharacteristics)(HANDLE);
     } VistaBlob;
+
+    change_notify change;
 } wasapi_state;
 
 #endif

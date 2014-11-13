@@ -33,11 +33,6 @@
 
 #define MIXER_DEFAULT_LABEL L"mpv - video player"
 
-#define EXIT_ON_ERROR(hres)  \
-              do { if (FAILED(hres)) { goto exit_label; } } while(0)
-#define SAFE_RELEASE(unk, release) \
-              do { if ((unk) != NULL) { release; (unk) = NULL; } } while(0)
-
 #ifndef PKEY_Device_FriendlyName
 DEFINE_PROPERTYKEY(PKEY_Device_FriendlyName,
                    0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
@@ -728,20 +723,12 @@ exit_label:
     return 1;
 }
 
-static HRESULT load_default_device(struct ao *ao, IMMDevice **ppDevice)
+static HRESULT load_default_device(struct ao *ao, IMMDeviceEnumerator* pEnumerator,
+                                   IMMDevice **ppDevice)
 {
-    HRESULT hr;
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-
-    IMMDeviceEnumerator *pEnumerator;
-    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                          &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
-    EXIT_ON_ERROR(hr);
-
-    hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
-                                                     eRender, eMultimedia,
-                                                     ppDevice);
-    SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
+    HRESULT hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
+                                                             eRender, eMultimedia,
+                                                             ppDevice);
     EXIT_ON_ERROR(hr);
 
     char *id = get_device_id(*ppDevice);
@@ -750,16 +737,15 @@ static HRESULT load_default_device(struct ao *ao, IMMDevice **ppDevice)
 
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error loading default device: %s (0x%"PRIx32")\n",
+    MP_ERR(ao , "Error loading default device: %s (0x%"PRIx32")\n",
            wasapi_explain_err(hr), (uint32_t)hr);
     return hr;
 }
 
-static HRESULT find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
-                                    char *search)
+static HRESULT find_and_load_device(struct ao *ao, IMMDeviceEnumerator* pEnumerator,
+                                    IMMDevice **ppDevice, char *search)
 {
     HRESULT hr;
-    IMMDeviceEnumerator *pEnumerator = NULL;
     IMMDeviceCollection *pDevices = NULL;
     IMMDevice *pTempDevice = NULL;
     LPWSTR deviceID = NULL;
@@ -771,10 +757,6 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
     if (end == search || *end) {
         devid = search;
     }
-
-    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                          &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
-    EXIT_ON_ERROR(hr);
 
     int search_err = 0;
 
@@ -866,7 +848,7 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
 exit_label:
     SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
-    SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
+
     CoTaskMemFree(deviceID);
     return hr;
 }
@@ -963,14 +945,19 @@ HRESULT wasapi_thread_init(struct ao *ao)
     MP_DBG(ao, "Init wasapi thread\n");
     state->initial_volume = -1.0;
 
+    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                          &IID_IMMDeviceEnumerator, (void**)&state->pEnumerator);
+    EXIT_ON_ERROR(hr);
+
     char *device = state->opt_device;
     if (!device || !device[0])
         device = ao->device;
 
+
     if (!device || !device[0])
-        hr = load_default_device(ao, &state->pDevice);
+        hr = load_default_device(ao, state->pEnumerator, &state->pDevice);
     else
-        hr = find_and_load_device(ao, &state->pDevice, device);
+        hr = find_and_load_device(ao, state->pEnumerator, &state->pDevice, device);
     EXIT_ON_ERROR(hr);
 
     char *name = get_device_name(state->pDevice);
@@ -1019,6 +1006,8 @@ HRESULT wasapi_thread_init(struct ao *ao)
 
     state->previous_volume = state->initial_volume;
 
+    wasapi_change_init(ao);
+
     MP_DBG(ao, "Init wasapi thread done\n");
     return S_OK;
 exit_label:
@@ -1036,6 +1025,8 @@ void wasapi_thread_uninit(struct ao *ao)
     if (state->pAudioClient)
         IAudioClient_Stop(state->pAudioClient);
 
+    wasapi_change_uninit(ao);
+
     if (state->opt_exclusive &&
         state->pEndpointVolume &&
         state->initial_volume > 0 )
@@ -1049,6 +1040,7 @@ void wasapi_thread_uninit(struct ao *ao)
     SAFE_RELEASE(state->pSessionControl, IAudioSessionControl_Release(state->pSessionControl));
     SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
     SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
+    SAFE_RELEASE(state->pEnumerator,     IMMDeviceEnumerator_Release(state->pEnumerator));
 
     if (state->hTask)
         state->VistaBlob.pAvRevertMmThreadCharacteristics(state->hTask);

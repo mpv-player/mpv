@@ -125,13 +125,16 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDeviceStateChanged(
     DWORD dwNewState)
 {
     change_notify *change = (change_notify *)This;
+    struct ao *ao = change->ao;
 
-    if (!wcscmp(change->monitored, pwstrDeviceId)){
+    if (pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId)){
         switch (dwNewState) {
         case DEVICE_STATE_DISABLED:
         case DEVICE_STATE_NOTPRESENT:
         case DEVICE_STATE_UNPLUGGED:
-
+            MP_VERBOSE(ao,
+                       "OnDeviceStateChange triggered - requesting ao reload\n");
+            ao_request_reload(ao);
         case DEVICE_STATE_ACTIVE:
         default:
             return S_OK;
@@ -145,7 +148,11 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDeviceAdded(
     LPCWSTR pwstrDeviceId)
 {
     change_notify *change = (change_notify *)This;
+    struct ao *ao = change->ao;
 
+    MP_VERBOSE(ao, "OnDeviceAdded triggered\n");
+    if(pwstrDeviceId)
+        MP_VERBOSE(ao, "New device %S\n",pwstrDeviceId);
     return S_OK;
 }
 
@@ -155,9 +162,11 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDeviceRemoved(
     LPCWSTR pwstrDeviceId)
 {
     change_notify *change = (change_notify *)This;
+    struct ao *ao = change->ao;
 
-    if (!wcscmp(change->monitored, pwstrDeviceId)) {
-
+    if (pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId)) {
+        MP_VERBOSE(ao, "OnDeviceRemoved triggered - requesting ao reload\n");
+        ao_request_reload(ao);
     }
     return S_OK;
 }
@@ -169,10 +178,33 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDefaultDeviceChanged(
     LPCWSTR pwstrDeviceId)
 {
     change_notify *change = (change_notify *)This;
+    struct ao *ao = change->ao;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
 
-    if (!wcscmp(change->monitored, pwstrDeviceId)) {
+    MP_VERBOSE(ao, "OnDefaultDeviceChanged triggered for role:%s flow:%s\n",
+               ERole_to_str(role), EDataFlow_to_str(flow));
+    if(pwstrDeviceId)
+        MP_VERBOSE(ao, "New default device %S\n", pwstrDeviceId);
 
+    /* don't care about "eCapture" or non-"eMultimedia" roles  */
+    if ( flow == eCapture ||
+         role != eMultimedia ) return S_OK;
+
+    /* stay on the device the user specified */
+    if (state->opt_device) {
+        MP_VERBOSE(ao, "Staying on specified device \"%s\"", state->opt_device);
+        return S_OK;
     }
+
+    /* don't reload if already on the new default */
+    if ( pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId) ){
+        MP_VERBOSE(ao, "Already using default device, no reload required\n");
+        return S_OK;
+    }
+
+    /* if we got here, we need to reload */
+    ao_request_reload(ao);
+    MP_VERBOSE(ao, "Requesting ao reload\n");
     return S_OK;
 }
 
@@ -182,9 +214,18 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     const PROPERTYKEY key)
 {
     change_notify *change = (change_notify *)This;
+    struct ao *ao = change->ao;
 
-    if (!wcscmp(change->monitored, pwstrDeviceId)) {
-
+    if (pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId)) {
+        MP_VERBOSE(ao, "OnPropertyValueChanged triggered\n");
+        MP_VERBOSE(ao, "Changed property: ");
+        if (!PKEY_compare(&PKEY_AudioEngine_DeviceFormat, &key)) {
+            MP_VERBOSE(change->ao,
+                       "PKEY_AudioEngine_DeviceFormat - requesting ao reload\n");
+            ao_request_reload(change->ao);
+        } else {
+            MP_VERBOSE(ao, "%s\n", PKEY_to_str(&key));
+        }
     }
     return S_OK;
 }
@@ -200,21 +241,44 @@ static CONST_VTBL IMMNotificationClientVtbl sIMMDeviceEnumeratorVtbl_vtbl = {
     .OnPropertyValueChanged = sIMMNotificationClient_OnPropertyValueChanged,
 };
 
-HRESULT wasapi_change_init(struct change_notify *change, IMMDevice *monitor)
+
+HRESULT wasapi_change_init(struct ao *ao)
 {
-    HRESULT ret;
-
-    if ( ((ret = IMMDevice_GetId(monitor, &change->monitored)) != S_OK) ) {
-        wasapi_change_free(change);
-        return ret;
-    }
-
-    ret = S_OK;
+    MP_DBG(ao, "Setting up monitoring on playback device\n");
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct change_notify *change = &state->change;
+    /* COM voodoo to emulate c++ class */
     change->client.lpVtbl = &sIMMDeviceEnumeratorVtbl_vtbl;
-    return ret;
+
+    /* so the callbacks can access the ao */
+    change->ao = ao;
+
+    /* get the device string to compare with the pwstrDeviceId argument in callbacks */
+    HRESULT hr = IMMDevice_GetId(state->pDevice, &change->monitored);
+    EXIT_ON_ERROR(hr);
+
+    /* register the change notification client */
+    hr = IMMDeviceEnumerator_RegisterEndpointNotificationCallback(
+        state->pEnumerator, (IMMNotificationClient *)change);
+    EXIT_ON_ERROR(hr);
+
+    MP_VERBOSE(state, "Monitoring changes in device: %S\n", state->change.monitored);
+    return hr;
+exit_label:
+    MP_ERR(state, "Error setting up device change monitoring: %s\n",
+           wasapi_explain_err(hr));
+    wasapi_change_uninit(ao);
+    return hr;
 }
 
-void wasapi_change_free(struct change_notify *change)
+void wasapi_change_uninit(struct ao *ao)
 {
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct change_notify *change = &state->change;
+
+    if( state->pEnumerator && change->client.lpVtbl )
+        IMMDeviceEnumerator_UnregisterEndpointNotificationCallback(
+            state->pEnumerator, (IMMNotificationClient *)change);
+
     if (change->monitored) CoTaskMemFree(change->monitored);
 }

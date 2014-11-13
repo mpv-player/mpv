@@ -36,11 +36,6 @@
 #include "osdep/timer.h"
 #include "osdep/io.h"
 
-#define EXIT_ON_ERROR(hres)  \
-              do { if (FAILED(hres)) { goto exit_label; } } while(0)
-#define SAFE_RELEASE(unk, release) \
-              do { if ((unk) != NULL) { release; (unk) = NULL; } } while(0)
-
 static double get_device_delay(struct wasapi_state *state) {
     UINT64 sample_count = atomic_load(&state->sample_count);
     UINT64 position, qpc_position;
