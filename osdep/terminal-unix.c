@@ -480,7 +480,7 @@ int terminal_init(void)
     setsigaction(SIGTTIN, SIG_IGN, 0, true);
     setsigaction(SIGTTOU, SIG_IGN, 0, true);
 
-    do_activate_getch2();
+    getch2_poll();
 
     return 0;
 }
