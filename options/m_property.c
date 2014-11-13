@@ -461,6 +461,7 @@ int m_property_strdup_ro(int action, void* arg, const char *var)
 // This does not support write access.
 int m_property_read_sub(const struct m_sub_property *props, int action, void *arg)
 {
+    m_property_unkey(&action, &arg);
     switch (action) {
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
