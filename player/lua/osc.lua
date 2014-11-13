@@ -25,7 +25,7 @@ local user_opts = {
     seektooltip = true,                     -- display tooltip over the seekbar indicating time at mouse position
     iamaprogrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
     layout = "box",
-    seekbarstyle = "slider",                -- seekbar style, slider (diamond marker) and bar (fill)
+    seekbarstyle = "slider",                -- seekbar style, slider (diamond marker) or bar (fill)
 }
 
 -- read options from config and command-line

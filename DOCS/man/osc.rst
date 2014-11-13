@@ -229,6 +229,10 @@ Configurable Options
     | Default: yes
     | Display a tooltip over the seekbar indicating time at mouse position.
 
+``seekbarstyle``
+    | Default: slider
+    | Sets the style of the seekbar, slider (diamond marker) or bar (fill)
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
