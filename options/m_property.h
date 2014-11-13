@@ -174,7 +174,7 @@ struct m_sub_property {
     // property's name.
     const char *name;
     // Type of the data stored in the value member. See m_option.
-    const struct m_option_type *type;
+    struct m_option type;
     // Data returned by the sub-property. m_property_read_sub() will make a
     // copy of this if needed. It will never write or free the data.
     union m_option_value value;
@@ -184,13 +184,13 @@ struct m_sub_property {
 
 // Convenience macros which can be used as part of a sub_property entry.
 #define SUB_PROP_INT(i) \
-    .type = CONF_TYPE_INT, .value = {.int_ = (i)}
+    .type = {.type = CONF_TYPE_INT}, .value = {.int_ = (i)}
 #define SUB_PROP_STR(s) \
-    .type = CONF_TYPE_STRING, .value = {.string = (char *)(s)}
+    .type = {.type = CONF_TYPE_STRING}, .value = {.string = (char *)(s)}
 #define SUB_PROP_FLOAT(f) \
-    .type = CONF_TYPE_FLOAT, .value = {.float_ = (f)}
+    .type = {.type = CONF_TYPE_FLOAT}, .value = {.float_ = (f)}
 #define SUB_PROP_FLAG(f) \
-    .type = CONF_TYPE_FLAG, .value = {.flag = (f)}
+    .type = {.type = CONF_TYPE_FLAG}, .value = {.flag = (f)}
 
 int m_property_read_sub(const struct m_sub_property *props, int action, void *arg);
 

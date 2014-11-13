@@ -747,7 +747,7 @@ static int get_chapter_entry(int item, int action, void *arg, void *ctx)
     double time = chapter_start_time(mpctx, item);
     struct m_sub_property props[] = {
         {"title",       SUB_PROP_STR(name)},
-        {"time",        CONF_TYPE_TIME, {.time = time}},
+        {"time",        {.type = CONF_TYPE_TIME}, {.time = time}},
         {0}
     };
 
