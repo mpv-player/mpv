@@ -3003,8 +3003,8 @@ static int mp_property_local_options(void *ctx, struct m_property *prop,
     return access_option_list(action, arg, true, mpctx);
 }
 
-static int mp_property_option_flags(void *ctx, struct m_property *prop,
-                                    int action, void *arg)
+static int mp_property_option_info(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
     switch (action) {
@@ -3242,7 +3242,7 @@ static const struct m_property mp_properties[] = {
 
     {"options", mp_property_options},
     {"file-local-options", mp_property_local_options},
-    {"option-flags", mp_property_option_flags},
+    {"option-info", mp_property_option_info},
     {"property-list", mp_property_list},
 
     {0},
