@@ -42,6 +42,55 @@ static int GUID_compare(const GUID *l, const GUID *r)
     return 0;
 }
 
+static int PKEY_compare(const PROPERTYKEY *l, const PROPERTYKEY *r)
+{
+    if (GUID_compare(&l->fmtid, &r->fmtid)) return 1;
+    if (l->pid != r->pid) return 1;
+    return 0;
+}
+
+static char *GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
+{
+    snprintf(buf, buf_size,
+             "{%8.8x-%4.4x-%4.4x-%2.2x%2.2x-%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x}",
+             guid->Data1, guid->Data2, guid->Data3,
+             guid->Data4[0], guid->Data4[1],
+             guid->Data4[2], guid->Data4[3],
+             guid->Data4[4], guid->Data4[5],
+             guid->Data4[6], guid->Data4[7]);
+    return buf;
+}
+
+static char *PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey)
+{
+    buf = GUID_to_str_buf(buf, buf_size, &pkey->fmtid);
+    size_t guid_len = strnlen(buf, buf_size);
+    snprintf(buf + guid_len, buf_size - guid_len, ",%"PRIu32, (uint32_t)pkey->pid );
+    return buf;
+}
+
+#define PKEY_to_str(pkey) PKEY_to_str_buf((char[42]){0}, 42, (pkey))
+
+static char* ERole_to_str(ERole role)
+{
+    switch(role){
+    case eConsole:        return "console";
+    case eMultimedia:     return "multimedia";
+    case eCommunications: return "communications";
+    default:              return "<Unknown>";
+    }
+}
+
+static char* EDataFlow_to_str(EDataFlow flow)
+{
+    switch(flow){
+    case eRender:  return "render";
+    case eCapture: return "capture";
+    case eAll:     return "all";
+    default:       return "<Unknown>";
+    }
+}
+
 static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_QueryInterface(
     IMMNotificationClient* This, REFIID riid, void **ppvObject)
 {
