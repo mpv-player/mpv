@@ -3037,6 +3037,17 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
                 MP_TARRAY_APPEND(NULL, choices, num, alt->name);
             MP_TARRAY_APPEND(NULL, choices, num, NULL);
         }
+        if (opt->type == &m_option_type_obj_settings_list) {
+            struct m_obj_list *objs = opt->priv;
+            int num = 0;
+            for (int n = 0; ; n++) {
+                struct m_obj_desc desc = {0};
+                if (!objs->get_desc(&desc, n))
+                    break;
+                MP_TARRAY_APPEND(NULL, choices, num, (char *)desc.name);
+            }
+            MP_TARRAY_APPEND(NULL, choices, num, NULL);
+        }
 
         struct m_sub_property props[] = {
             {"name",                    SUB_PROP_STR(co->name)},
