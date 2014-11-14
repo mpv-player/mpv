@@ -301,6 +301,8 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("demuxer-mkv-subtitle-preroll", mkv_subtitle_preroll, 0),
     OPT_FLAG("mkv-subtitle-preroll", mkv_subtitle_preroll, 0), // old alias
+    OPT_DOUBLE("demuxer-mkv-subtitle-preroll-secs", mkv_subtitle_preroll_secs,
+               M_OPT_MIN, .min = 0),
 
 // ------------------------- subtitles options --------------------
 
@@ -670,6 +672,7 @@ const struct MPOpts mp_default_opts = {
     .use_embedded_fonts = 1,
     .sub_fix_timing = 1,
     .sub_cp = "auto",
+    .mkv_subtitle_preroll_secs = 1.0,
 
     .hwdec_codecs = "h264,vc1,wmv3",
 

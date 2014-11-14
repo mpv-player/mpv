@@ -717,6 +717,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
         return -1;
 
     mkv_d->num_indexes = 0;
+    mkv_d->index_has_durations = false;
 
     for (int i = 0; i < cues.n_cue_point; i++) {
         struct ebml_cue_point *cuepoint = &cues.cue_point[i];
@@ -2714,12 +2715,20 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
     if (index) {        /* We've found an entry. */
         uint64_t seek_pos = index->filepos;
         if (flags & SEEK_SUBPREROLL) {
+            // Find the cluster with the highest filepos, that has a timestamp
+            // still lower than min_tc.
+            double secs = demuxer->opts->mkv_subtitle_preroll_secs;
+            uint64_t pre = MPMIN(INT64_MAX, secs * 1e9 / mkv_d->tc_scale);
+            uint64_t min_tc = pre < index->timecode ? index->timecode - pre : 0;
             uint64_t prev_target = 0;
+            uint64_t prev_tc = 0;
             for (size_t i = 0; i < mkv_d->num_indexes; i++) {
                 if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
-                    uint64_t index_pos = mkv_d->indexes[i].filepos;
-                    if (index_pos > prev_target && index_pos < seek_pos)
-                        prev_target = index_pos;
+                    struct mkv_index *cur = &mkv_d->indexes[i];
+                    if (cur->timecode <= min_tc && cur->timecode >= prev_tc) {
+                        prev_tc = cur->timecode;
+                        prev_target = cur->filepos;
+                    }
                 }
             }
             if (mkv_d->index_has_durations) {

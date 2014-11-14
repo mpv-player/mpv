@@ -2038,12 +2038,31 @@ Demuxer
     and hr-seeks, and this option changes behavior with relative or imprecise
     seeks only.
 
+    You can use the ``--demuxer-mkv-subtitle-preroll-secs`` option to specify
+    how mach data the demuxer should pre-read at most in order to find subtitle
+    packets that may overlap. Setting this to 0 will effectively disable this
+    preroll mechanism. Setting a very large value can make seeking very slow,
+    and an extremely large value would completely reread the entire file from
+    start to seek target on every seek - seeking can become slower towards the
+    end of the file. The details are messy, and the value is actually rounded
+    down to the cluster with the previous video keyframe.
+
+    Some files, especially files muxed with newer mkvmerge versions, have
+    information embedded that can be used to determine what subtitle packets
+    overlap with a seek target. In these cases, mpv will reduce the amount
+    of data read to a minimum. (Although it will still read *all* data between
+    the cluster that contains the first wanted subtitle packet, and the seek
+    target.)
+
     See also ``--hr-seek-demuxer-offset`` option. This option can achieve a
     similar effect, but only if hr-seek is active. It works with any demuxer,
     but makes seeking much slower, as it has to decode audio and video data
     instead of just skipping over it.
 
     ``--mkv-subtitle-preroll`` is a deprecated alias.
+
+``--demuxer-mkv-subtitle-preroll-secs=<value>``
+    See ``--demuxer-mkv-subtitle-preroll``.
 
 ``--demuxer-rawaudio-channels=<value>``
     Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used
