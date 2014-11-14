@@ -30,6 +30,7 @@
 
 #include "audio/format.h"
 #include "osdep/io.h"
+#include "osdep/timer.h"
 
 #define MIXER_DEFAULT_LABEL L"mpv - video player"
 
@@ -943,6 +944,8 @@ HRESULT wasapi_thread_init(struct ao *ao)
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     HRESULT hr;
     MP_DBG(ao, "Init wasapi thread\n");
+    int64_t retry_wait = 1;
+retry:
     state->initial_volume = -1.0;
 
     hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
@@ -990,6 +993,15 @@ HRESULT wasapi_thread_init(struct ao *ao)
 
     MP_DBG(ao, "Fixing format\n");
     hr = fix_format(state);
+    if ( (hr == AUDCLNT_E_DEVICE_IN_USE ||
+          hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
+         retry_wait <= 8 ) {
+        wasapi_thread_uninit(ao);
+        MP_WARN(ao, "Retrying in %ld us\n", retry_wait);
+        mp_sleep_us(retry_wait);
+        retry_wait *= 2;
+        goto retry;
+    }
     EXIT_ON_ERROR(hr);
 
     MP_DBG(ao, "Creating proxies\n");
