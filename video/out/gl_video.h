@@ -29,6 +29,7 @@ struct lut3d {
 
 struct gl_video_opts {
     char *scalers[2];
+    char *dscalers[2];
     float scaler_params[2][2];
     float scaler_radius[2];
     int indirect;

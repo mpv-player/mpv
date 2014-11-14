@@ -438,11 +438,16 @@ Available video output drivers are:
         this options will make rendering a single operation.
         Note that chroma scalers are always done as 1-pass filters.
 
-    ``cscale=<n>``
+    ``cscale=<filter>``
         As ``lscale``, but for chroma (2x slower with little visible effect).
         Note that with some scaling filters, upscaling is always done in
         RGB. If chroma is not subsampled, this option is ignored, and the
         luma scaler is used instead. Setting this option is often useless.
+
+    ``lscale-down=<filter>``, ``cscale-down=<filter>``
+        Like ``lscale`` and ``cscale``, but apply these filters on downscaling
+        instead. If these options are unset, the filter implied by ``lscale``
+        (and ``cscale``, respectively) will be applied.
 
     ``cparam1``, ``cparam2``, ``cradius``
         Set filter parameters and radius for ``cscale``.

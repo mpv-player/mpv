@@ -326,6 +326,8 @@ const struct m_sub_options gl_video_conf = {
                     {"quadbuffer",      GL_3D_QUADBUFFER})),
         OPT_STRING_VALIDATE("lscale", scalers[0], 0, validate_scaler_opt),
         OPT_STRING_VALIDATE("cscale", scalers[1], 0, validate_scaler_opt),
+        OPT_STRING_VALIDATE("lscale-down", dscalers[0], 0, validate_scaler_opt),
+        OPT_STRING_VALIDATE("cscale-down", dscalers[1], 0, validate_scaler_opt),
         OPT_FLOAT("lparam1", scaler_params[0][0], 0),
         OPT_FLOAT("lparam2", scaler_params[0][1], 0),
         OPT_FLOAT("cparam1", scaler_params[1][0], 0),
@@ -1263,6 +1265,8 @@ static const char *expected_scaler(struct gl_video *p, int unit)
     {
         return "bilinear";
     }
+    if (p->opts.dscalers[unit] && get_scale_factor(p) < 1.0)
+        return p->opts.dscalers[unit];
     return p->opts.scalers[unit];
 }
 
@@ -2386,8 +2390,7 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
     p->opts = *opts;
     for (int n = 0; n < 2; n++) {
         p->opts.scalers[n] = (char *)handle_scaler_opt(p->opts.scalers[n]);
-        assert(p->opts.scalers[n]);
-        p->scalers[n].name = p->opts.scalers[n];
+        p->opts.dscalers[n] = (char *)handle_scaler_opt(p->opts.dscalers[n]);
     }
 
     if (!p->opts.gamma && p->video_eq.values[MP_CSP_EQ_GAMMA] != 0)
