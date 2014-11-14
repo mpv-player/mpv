@@ -126,7 +126,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
                                                QS_POSTMESSAGE | QS_SENDMESSAGE);
         switch (waitstatus) {
         case WAIT_OBJECT_0: /*shutdown*/
-            wasapi_thread_uninit(state);
+            wasapi_thread_uninit(ao);
             goto exit_label;
         case (WAIT_OBJECT_0 + 1): /* feed */
             thread_feed(ao);

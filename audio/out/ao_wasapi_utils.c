@@ -976,8 +976,10 @@ exit_label:
     return -1;
 }
 
-void wasapi_thread_uninit(wasapi_state *state)
+void wasapi_thread_uninit(struct ao *ao)
 {
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+
     if (state->pAudioClient)
         IAudioClient_Stop(state->pAudioClient);
 

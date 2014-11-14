@@ -38,7 +38,7 @@ int wasapi_validate_device(struct mp_log *log, const m_option_t *opt,
                            struct bstr name, struct bstr param);
 
 int wasapi_thread_init(struct ao *ao);
-void wasapi_thread_uninit(wasapi_state *state);
+void wasapi_thread_uninit(struct ao *ao);
 
 HRESULT wasapi_setup_proxies(wasapi_state *state);
 void wasapi_release_proxies(wasapi_state *state);
