@@ -1079,8 +1079,6 @@ goto_reopen_demuxer: ;
             "Displaying attached picture. Use --no-audio-display to prevent this.\n");
     }
 
-    init_sub_renderer(mpctx);
-
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_VIDEO])
         encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_VIDEO);
