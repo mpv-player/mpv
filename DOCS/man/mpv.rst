@@ -59,7 +59,7 @@ BACKSPACE
     Go backward/forward in the playlist.
 
 ENTER
-    Go forward in the playlist, even over the end.
+    Go forward in the playlist.
 
 p / SPACE
     Pause (pressing again unpauses).
