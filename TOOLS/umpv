@@ -21,7 +21,10 @@ script after that will start a new mpv instance.
 
 Note that you can control the mpv instance by writing to the command fifo:
 
-    echo "cycle fullscreen" > /tmp/umpv-fifo-*
+    echo "cycle fullscreen" > umpv-fifo
+
+The command fifo is placed in $XDG_RUNTIME_DIR/mpv (if available), otherwise in
+$XDG_CACHE_HOME/mpv.
 
 Note: you can supply custom mpv path and options with the MPV environment
       variable. The environment variable will be split on whitespace, and the
@@ -37,6 +40,7 @@ import subprocess
 import fcntl
 import stat
 import string
+from xdg import BaseDirectory
 
 files = sys.argv[1:]
 
@@ -57,7 +61,13 @@ def make_abs(filename):
     return filename
 files = [make_abs(f) for f in files]
 
-FIFO = os.path.join(os.getenv("HOME"), ".umpv_fifo")
+try:
+    fifodir = BaseDirectory.get_runtime_dir()
+    fifodir = os.path.join(fifodir, 'mpv')
+    os.mkdir(fifodir)
+except:
+    fifodir = BaseDirectory.save_cache_path('mpv')
+FIFO = os.path.join(fifodir, "umpv_fifo")
 
 fifo_fd = -1
 try:
