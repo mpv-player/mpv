@@ -921,13 +921,20 @@ exit_label:
     return hr;
 }
 
+void wasapi_dispatch(void)
+{
+    /* dispatch any possible pending messages */
+    MSG msg;
+    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        DispatchMessage(&msg);
+}
+
 HRESULT wasapi_thread_init(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     HRESULT hr;
     MP_DBG(ao, "Init wasapi thread\n");
     state->initial_volume = -1.0;
-    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     char *device = state->opt_device;
     if (!device || !device[0])
@@ -1010,10 +1017,14 @@ void wasapi_thread_uninit(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
 
+    wasapi_dispatch();
+
     if (state->pAudioClient)
         IAudioClient_Stop(state->pAudioClient);
 
-    if (state->opt_exclusive)
+    if (state->opt_exclusive &&
+        state->pEndpointVolume &&
+        state->initial_volume > 0 )
         IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolume,
                                                         state->initial_volume, NULL);
 

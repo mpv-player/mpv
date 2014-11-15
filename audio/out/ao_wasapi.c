@@ -116,6 +116,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
         return -1;
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     int thread_ret;
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     state->init_ret = wasapi_thread_init(ao);
     SetEvent(state->init_done);
@@ -124,7 +125,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
         goto exit_label;
     }
 
-    MSG msg;
+
     DWORD waitstatus;
     HANDLE playcontrol[] =
         {state->hUninit, state->hFeed, state->hForceFeed, NULL};
@@ -134,7 +135,6 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
                                                QS_POSTMESSAGE | QS_SENDMESSAGE);
         switch (waitstatus) {
         case WAIT_OBJECT_0: /*shutdown*/
-            wasapi_thread_uninit(ao);
             thread_ret = 0;
             goto exit_label;
         case (WAIT_OBJECT_0 + 1): /* feed */
@@ -145,9 +145,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
             SetEvent(state->hFeedDone);
             break;
         case (WAIT_OBJECT_0 + 3): /* messages to dispatch (COM marshalling) */
-            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-                DispatchMessage(&msg);
-            }
+            wasapi_dispatch();
             break;
         default:
             MP_ERR(ao, "Unhandled case in thread loop");
@@ -156,11 +154,9 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
         }
     }
 exit_label:
-    /* dispatch any possible pending messages */
-    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-        DispatchMessage(&msg);
-    }
+    wasapi_thread_uninit(ao);
 
+    CoUninitialize();
     return thread_ret;
 }
 
@@ -224,6 +220,7 @@ static int init(struct ao *ao)
         /* failed to init events */
         return -1;
     }
+
     state->init_ret = E_FAIL;
     state->threadLoop = (HANDLE)CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
     if (!state->threadLoop) {
@@ -231,16 +228,18 @@ static int init(struct ao *ao)
         MP_ERR(ao, "Failed to create thread\n");
         return -1;
     }
+
     WaitForSingleObject(state->init_done, INFINITE); /* wait on init complete */
     if (state->init_ret != S_OK) {
-        if (!ao->probing) {
+        if (!ao->probing)
             MP_ERR(ao, "Received failure from audio thread\n");
-        }
+        if (state->VistaBlob.hAvrt)
+            FreeLibrary(state->VistaBlob.hAvrt);
         return -1;
     }
 
-    MP_DBG(ao, "Init wasapi done\n");
     wasapi_setup_proxies(state);
+    MP_DBG(ao, "Init wasapi done\n");
     return 0;
 }
 
