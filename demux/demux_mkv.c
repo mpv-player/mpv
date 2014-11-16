@@ -1757,6 +1757,13 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     int64_t start_pos;
     int64_t end_pos;
 
+    bstr start = stream_peek(s, 4);
+    uint32_t start_id;
+    for (int n = 0; n < start.len; n++)
+        start_id = (start_id << 8) | start.start[n];
+    if (start_id != EBML_ID_EBML)
+        return -1;
+
     if (!read_ebml_header(demuxer))
         return -1;
     MP_VERBOSE(demuxer, "Found the head...\n");
