@@ -1168,6 +1168,182 @@ static int script_join_path(lua_State *L)
     return 1;
 }
 
+#ifdef __MINGW32__
+#include <windows.h>
+#include "osdep/io.h"
+
+struct subprocess_ctx {
+    HANDLE stderr_read;
+    void *cb_ctx;
+    void (*on_stderr)(void *ctx, char *data, size_t size);
+};
+
+static void write_arg(bstr *cmdline, char *arg)
+{
+    // If the string doesn't have characters that need to be escaped, it's best
+    // to leave it alone for the sake of Windows programs that don't process
+    // quoted args correctly.
+    if (!strpbrk(arg, " \t\"")) {
+        bstr_xappend(NULL, cmdline, bstr0(arg));
+        return;
+    }
+
+    // If there are characters that need to be escaped, write a quoted string
+    bstr_xappend(NULL, cmdline, bstr0("\""));
+
+    // Escape the argument. To match the behavior of CommandLineToArgvW,
+    // backslashes are only escaped if they appear before a quote or the end of
+    // the string.
+    int num_slashes = 0;
+    for (int pos = 0; arg[pos]; pos++) {
+        switch (arg[pos]) {
+        case '\\':
+            // Count backslashes that appear in a row
+            num_slashes++;
+            break;
+        case '"':
+            bstr_xappend(NULL, cmdline, (struct bstr){arg, pos});
+
+            // Double preceding slashes
+            for (int i = 0; i < num_slashes; i++)
+                bstr_xappend(NULL, cmdline, bstr0("\\"));
+
+            // Escape the following quote
+            bstr_xappend(NULL, cmdline, bstr0("\\"));
+
+            arg += pos;
+            pos = 0;
+            num_slashes = 0;
+            break;
+        default:
+            num_slashes = 0;
+        }
+    }
+
+    // Write the rest of the argument
+    bstr_xappend(NULL, cmdline, bstr0(arg));
+
+    // Double slashes that appear at the end of the string
+    for (int i = 0; i < num_slashes; i++)
+        bstr_xappend(NULL, cmdline, bstr0("\\"));
+
+    bstr_xappend(NULL, cmdline, bstr0("\""));
+}
+
+// Convert an array of arguments to a properly escaped command-line string
+static wchar_t *write_cmdline(void *ctx, char **argv)
+{
+    bstr cmdline = {0};
+
+    for (int i = 0; argv[i]; i++) {
+        write_arg(&cmdline, argv[i]);
+        if (argv[i + 1])
+            bstr_xappend(NULL, &cmdline, bstr0(" "));
+    }
+
+    wchar_t *wcmdline = mp_from_utf8(ctx, cmdline.start);
+    talloc_free(cmdline.start);
+    return wcmdline;
+}
+
+static void *stderr_routine(void *arg)
+{
+    struct subprocess_ctx *ctx = arg;
+
+    // Read from stderr until it's closed on process exit
+    char buf[4096];
+    DWORD r;
+    while (ReadFile(ctx->stderr_read, buf, 4096, &r, NULL))
+        ctx->on_stderr(ctx->cb_ctx, buf, r);
+
+    return NULL;
+}
+
+static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
+                      void (*on_stdout)(void *ctx, char *data, size_t size),
+                      void (*on_stderr)(void *ctx, char *data, size_t size),
+                      char **error)
+{
+    wchar_t *tmp = talloc_new(NULL);
+    HANDLE stdout_read = NULL, stdout_write = NULL;
+    HANDLE stderr_read = NULL, stderr_write = NULL;
+    int status = -1;
+
+    // If the function exits before CreateProcess, there was an init error
+    *error = "init";
+
+    if (!CreatePipe(&stdout_read, &stdout_write, NULL, 0))
+        goto done;
+    if (!CreatePipe(&stderr_read, &stderr_write, NULL, 0))
+        goto done;
+    if (!SetHandleInformation(stdout_write, HANDLE_FLAG_INHERIT, 1))
+        goto done;
+    if (!SetHandleInformation(stderr_write, HANDLE_FLAG_INHERIT, 1))
+        goto done;
+
+    // Convert the args array to a UTF-16 Windows command-line string
+    wchar_t *cmdline = write_cmdline(tmp, args);
+
+    PROCESS_INFORMATION pi = {0};
+    STARTUPINFOW si = {
+        .cb = sizeof(si),
+        .dwFlags = STARTF_USESTDHANDLES,
+        .hStdInput = NULL,
+        .hStdOutput = stdout_write,
+        .hStdError = stderr_write,
+    };
+
+    if (!CreateProcessW(NULL, cmdline, NULL, NULL, TRUE,
+                        CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
+                        NULL, NULL, &si, &pi))
+        goto done;
+    talloc_free(cmdline);
+    CloseHandle(pi.hThread);
+
+    // Init is finished
+    *error = NULL;
+
+    // Close our copy of the write end of the pipes
+    CloseHandle(stdout_write);
+    stdout_write = NULL;
+    CloseHandle(stderr_write);
+    stderr_write = NULL;
+
+    // Create a thread to read stderr output
+    pthread_t stderr_thread;
+    struct subprocess_ctx sctx = {
+        .stderr_read = stderr_read,
+        .cb_ctx = ctx,
+        .on_stderr = on_stderr,
+    };
+    if (pthread_create(&stderr_thread, NULL, stderr_routine, &sctx))
+        goto done;
+
+    // Read from stdout until it's closed on process exit
+    char buf[4096];
+    DWORD r;
+    while (ReadFile(stdout_read, buf, 4096, &r, NULL))
+        on_stdout(ctx, buf, r);
+
+    pthread_join(stderr_thread, NULL);
+
+    // Get process exit code
+    DWORD exit_code;
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    GetExitCodeProcess(pi.hProcess, &exit_code);
+    status = exit_code;
+
+done:
+    CloseHandle(stdout_read);
+    CloseHandle(stdout_write);
+    CloseHandle(stderr_read);
+    CloseHandle(stderr_write);
+    CloseHandle(pi.hProcess);
+    talloc_free(tmp);
+    return status;
+}
+#endif
+
 #if HAVE_POSIX_SPAWN
 #include <spawn.h>
 #include <poll.h>
@@ -1203,46 +1379,13 @@ static int sparse_poll(struct pollfd *fds, int num_fds, int timeout)
     return r;
 }
 
-static int script_subprocess(lua_State *L)
+static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
+                      void (*on_stdout)(void *ctx, char *data, size_t size),
+                      void (*on_stderr)(void *ctx, char *data, size_t size),
+                      char **error)
 {
-    struct script_ctx *ctx = get_ctx(L);
-    luaL_checktype(L, 1, LUA_TTABLE);
-    void *tmp = mp_lua_PITA(L);
-
-    resume_all(ctx);
-
-    lua_getfield(L, 1, "args"); // args
-    int num_args = mp_lua_len(L, -1);
-    char *args[256];
-    if (num_args > MP_ARRAY_SIZE(args) - 1) // last needs to be NULL
-        luaL_error(L, "too many arguments");
-    if (num_args < 1)
-        luaL_error(L, "program name missing");
-    for (int n = 0; n < num_args; n++) {
-        lua_pushinteger(L, n + 1); // args n
-        lua_gettable(L, -2); // args arg
-        args[n] = talloc_strdup(tmp, lua_tostring(L, -1));
-        if (!args[n])
-            luaL_error(L, "program arguments must be strings");
-        lua_pop(L, 1); // args
-    }
-    args[num_args] = NULL;
-    lua_pop(L, 1); // -
-
-    lua_getfield(L, 1, "cancellable"); // c
-    struct mp_cancel *cancel = NULL;
-    if (lua_isnil(L, -1) ? true : lua_toboolean(L, -1))
-        cancel = ctx->mpctx->playback_abort;
-    lua_pop(L, 1); // -
-
-    lua_getfield(L, 1, "max_size"); // m
-    int64_t max_size = lua_isnil(L, -1) ? 16 * 1024 * 1024 : lua_tointeger(L, -1);
-
-    // --- no Lua errors from here
-
     posix_spawn_file_actions_t fa;
     bool fa_destroy = false;
-    bstr output = {0};
     int status = -1;
     int p_stdout[2] = {-1, -1};
     int p_stderr[2] = {-1, -1};
@@ -1286,7 +1429,7 @@ static int script_subprocess(lua_State *L)
             if (r < 0 && errno == EINTR)
                 continue;
             if (r > 0)
-                bstr_xappend(tmp, &output, (bstr){buf, r});
+                on_stdout(ctx, buf, r);
             if (r <= 0) {
                 close(p_stdout[0]);
                 p_stdout[0] = -1;
@@ -1298,7 +1441,7 @@ static int script_subprocess(lua_State *L)
             if (r < 0 && errno == EINTR)
                 continue;
             if (r > 0)
-                MP_INFO(ctx, "%.*s", (int)r, buf);
+                on_stderr(ctx, buf, r);
             if (r <= 0) {
                 close(p_stderr[0]);
                 p_stderr[0] = -1;
@@ -1308,8 +1451,6 @@ static int script_subprocess(lua_State *L)
             kill(pid, SIGKILL);
             break;
         }
-        if (output.len >= max_size)
-            break;
     }
 
     // Note: it can happen that a child process closes the pipe, but does not
@@ -1326,14 +1467,84 @@ done:
     close(p_stderr[0]);
     close(p_stderr[1]);
 
-    // --- Lua errors are ok again from here
-    char *error = NULL;
     if (WIFEXITED(status) && WEXITSTATUS(status) != 127) {
+        *error = NULL;
         status = WEXITSTATUS(status);
     } else {
-        error = WEXITSTATUS(status) == 127 ? "init" : "killed";
+        *error = WEXITSTATUS(status) == 127 ? "init" : "killed";
         status = -1;
     }
+
+    return status;
+}
+#endif
+
+#if HAVE_POSIX_SPAWN || defined(__MINGW32__)
+struct subprocess_cb_ctx {
+    struct mp_log *log;
+    void* talloc_ctx;
+    int64_t max_size;
+    bstr output;
+};
+
+static void subprocess_stdout(void *p, char *data, size_t size)
+{
+    struct subprocess_cb_ctx *ctx = p;
+    if (ctx->output.len < ctx->max_size)
+        bstr_xappend(ctx->talloc_ctx, &ctx->output, (bstr){data, size});
+}
+
+static void subprocess_stderr(void *p, char *data, size_t size)
+{
+    struct subprocess_cb_ctx *ctx = p;
+    MP_INFO(ctx, "%.*s", (int)size, data);
+}
+
+static int script_subprocess(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    luaL_checktype(L, 1, LUA_TTABLE);
+    void *tmp = mp_lua_PITA(L);
+
+    resume_all(ctx);
+
+    lua_getfield(L, 1, "args"); // args
+    int num_args = mp_lua_len(L, -1);
+    char *args[256];
+    if (num_args > MP_ARRAY_SIZE(args) - 1) // last needs to be NULL
+        luaL_error(L, "too many arguments");
+    if (num_args < 1)
+        luaL_error(L, "program name missing");
+    for (int n = 0; n < num_args; n++) {
+        lua_pushinteger(L, n + 1); // args n
+        lua_gettable(L, -2); // args arg
+        args[n] = talloc_strdup(tmp, lua_tostring(L, -1));
+        if (!args[n])
+            luaL_error(L, "program arguments must be strings");
+        lua_pop(L, 1); // args
+    }
+    args[num_args] = NULL;
+    lua_pop(L, 1); // -
+
+    lua_getfield(L, 1, "cancellable"); // c
+    struct mp_cancel *cancel = NULL;
+    if (lua_isnil(L, -1) ? true : lua_toboolean(L, -1))
+        cancel = ctx->mpctx->playback_abort;
+    lua_pop(L, 1); // -
+
+    lua_getfield(L, 1, "max_size"); // m
+    int64_t max_size = lua_isnil(L, -1) ? 16 * 1024 * 1024 : lua_tointeger(L, -1);
+
+    struct subprocess_cb_ctx cb_ctx = {
+        .log = ctx->log,
+        .talloc_ctx = tmp,
+        .max_size = max_size,
+    };
+
+    char *error = NULL;
+    int status = subprocess(args, cancel, &cb_ctx, subprocess_stdout,
+                            subprocess_stderr, &error);
+
     lua_newtable(L); // res
     if (error) {
         lua_pushstring(L, error); // res e
@@ -1341,7 +1552,7 @@ done:
     }
     lua_pushinteger(L, status); // res s
     lua_setfield(L, -2, "status"); // res
-    lua_pushlstring(L, output.start, output.len); // res d
+    lua_pushlstring(L, cb_ctx.output.start, cb_ctx.output.len); // res d
     lua_setfield(L, -2, "stdout"); // res
     return 1;
 }
@@ -1417,7 +1628,7 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(readdir),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
-#if HAVE_POSIX_SPAWN
+#if HAVE_POSIX_SPAWN || defined(__MINGW32__)
     FN_ENTRY(subprocess),
 #endif
     FN_ENTRY(parse_json),
