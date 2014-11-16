@@ -1168,6 +1168,8 @@ static int script_join_path(lua_State *L)
     return 1;
 }
 
+typedef void (*read_cb)(void *ctx, char *data, size_t size);
+
 #ifdef __MINGW32__
 #include <windows.h>
 #include "osdep/io.h"
@@ -1175,7 +1177,7 @@ static int script_join_path(lua_State *L)
 struct subprocess_ctx {
     HANDLE stderr_read;
     void *cb_ctx;
-    void (*on_stderr)(void *ctx, char *data, size_t size);
+    read_cb on_stderr;
 };
 
 static void write_arg(bstr *cmdline, char *arg)
@@ -1260,9 +1262,7 @@ static void *stderr_routine(void *arg)
 }
 
 static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
-                      void (*on_stdout)(void *ctx, char *data, size_t size),
-                      void (*on_stderr)(void *ctx, char *data, size_t size),
-                      char **error)
+                      read_cb on_stdout, read_cb on_stderr, char **error)
 {
     wchar_t *tmp = talloc_new(NULL);
     HANDLE stdout_read = NULL, stdout_write = NULL;
@@ -1380,9 +1380,7 @@ static int sparse_poll(struct pollfd *fds, int num_fds, int timeout)
 }
 
 static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
-                      void (*on_stdout)(void *ctx, char *data, size_t size),
-                      void (*on_stderr)(void *ctx, char *data, size_t size),
-                      char **error)
+                      read_cb on_stdout, read_cb on_stderr, char **error)
 {
     posix_spawn_file_actions_t fa;
     bool fa_destroy = false;
@@ -1415,36 +1413,29 @@ static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     close(p_stderr[1]);
     p_stderr[1] = -1;
 
+    int *read_fds[2] = {&p_stdout[0], &p_stderr[0]};
+    read_cb read_cbs[2] = {on_stdout, on_stderr};
+
     while (p_stdout[0] >= 0 || p_stderr[0] >= 0) {
         struct pollfd fds[] = {
-            {.events = POLLIN, .fd = p_stdout[0]},
-            {.events = POLLIN, .fd = p_stderr[0]},
+            {.events = POLLIN, .fd = *read_fds[0]},
+            {.events = POLLIN, .fd = *read_fds[1]},
             {.events = POLLIN, .fd = cancel ? mp_cancel_get_fd(cancel) : -1},
         };
         if (sparse_poll(fds, MP_ARRAY_SIZE(fds), -1) < 0 && errno != EINTR)
             break;
-        if (fds[0].revents) {
-            char buf[4096];
-            ssize_t r = read(p_stdout[0], buf, sizeof(buf));
-            if (r < 0 && errno == EINTR)
-                continue;
-            if (r > 0)
-                on_stdout(ctx, buf, r);
-            if (r <= 0) {
-                close(p_stdout[0]);
-                p_stdout[0] = -1;
-            }
-        }
-        if (fds[1].revents) {
-            char buf[4096];
-            ssize_t r = read(p_stderr[0], buf, sizeof(buf));
-            if (r < 0 && errno == EINTR)
-                continue;
-            if (r > 0)
-                on_stderr(ctx, buf, r);
-            if (r <= 0) {
-                close(p_stderr[0]);
-                p_stderr[0] = -1;
+        for (int n = 0; n < 2; n++) {
+            if (fds[n].revents) {
+                char buf[4096];
+                ssize_t r = read(*read_fds[n], buf, sizeof(buf));
+                if (r < 0 && errno == EINTR)
+                    continue;
+                if (r > 0 && read_cbs[n])
+                    read_cbs[n](ctx, buf, r);
+                if (r <= 0) {
+                    close(*read_fds[n]);
+                    *read_fds[n] = -1;
+                }
             }
         }
         if (fds[2].revents) {
