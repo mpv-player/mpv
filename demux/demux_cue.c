@@ -35,13 +35,9 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 {
     struct stream *s = demuxer->stream;
     if (check >= DEMUX_CHECK_UNSAFE) {
-        char buf[PROBE_SIZE];
-        int len = stream_read(s, buf, sizeof(buf));
-        if (len <= 0)
+        bstr d = stream_peek(s, PROBE_SIZE);
+        if (d.len < 1 || !mp_probe_cue(d))
             return -1;
-        if (!mp_probe_cue((struct bstr) { buf, len }))
-            return -1;
-        stream_seek(s, 0);
     }
     demuxer->file_contents = stream_read_complete(s, demuxer, 1000000);
     if (demuxer->file_contents.start == NULL)
