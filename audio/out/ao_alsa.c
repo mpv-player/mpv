@@ -656,7 +656,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             res = snd_pcm_writei(p->alsa, data[0], samples);
         }
 
-        if (res == -EINTR) {
+        if (res == -EINTR || res == -EAGAIN) {
             /* nothing to do */
             res = 0;
         } else if (res == -ESTRPIPE) {  /* suspend */
