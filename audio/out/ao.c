@@ -64,11 +64,11 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #if HAVE_ALSA
     &audio_out_alsa,
 #endif
-#if HAVE_DSOUND
-    &audio_out_dsound,
-#endif
 #if HAVE_WASAPI
     &audio_out_wasapi,
+#endif
+#if HAVE_DSOUND
+    &audio_out_dsound,
 #endif
 #if HAVE_OSS_AUDIO
     &audio_out_oss,
