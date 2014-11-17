@@ -2849,8 +2849,10 @@ static int get_playlist_entry(int item, int action, void *arg, void *ctx)
     if (!e)
         return M_PROPERTY_ERROR;
 
+    bool playing = e == mpctx->playing;
     struct m_sub_property props[] = {
         {"filename",    SUB_PROP_STR(e->filename)},
+        {"playing",     SUB_PROP_FLAG(1), .unavailable = !playing},
         {0}
     };
 

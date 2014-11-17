@@ -1214,6 +1214,13 @@ Property list
     ``playlist/N/filename``
         Filename of the Nth entry.
 
+    ``playlist/N/playing``
+        ``yes`` if this entry is currently playing (or being loaded).
+        Unavailable or ``no`` otherwise. Can be set incorrectly when changing
+        files, because it's not set to ``yes`` for the brief time when the
+        previous file was unloaded, and loading the new entry has not started
+        yet. (Since mpv 0.7.0.)
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -1223,6 +1230,7 @@ Property list
         MPV_FORMAT_NODE_ARRAY
             MPV_FORMAT_NODE_MAP (for each playlist entry)
                 "filename"  MPV_FORMAT_STRING
+                "playing"   MPV_FORMAT_FLAG (might be missing; since mpv 0.7.0)
 
 ``track-list``
     List of audio/video/sub tracks, current entry marked. Currently, the raw
