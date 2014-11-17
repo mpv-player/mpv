@@ -728,6 +728,33 @@ exit_label:
     return 1;
 }
 
+static HRESULT load_default_device(struct ao *ao, IMMDevice **ppDevice)
+{
+    HRESULT hr;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+
+    IMMDeviceEnumerator *pEnumerator;
+    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                          &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
+    EXIT_ON_ERROR(hr);
+
+    hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
+                                                     eRender, eConsole,
+                                                     ppDevice);
+    SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
+    EXIT_ON_ERROR(hr);
+
+    char *id = get_device_id(*ppDevice);
+    MP_VERBOSE(ao, "Default device ID: %s\n", id);
+    talloc_free(id);
+
+    return S_OK;
+exit_label:
+    MP_ERR(state, "Error loading default device: %s (0x%"PRIx32")\n",
+           wasapi_explain_err(hr), (uint32_t)hr);
+    return hr;
+}
+
 static HRESULT find_and_load_device(struct ao *ao, IMMDevice **ppDevice,
                                     char *search)
 {
@@ -940,24 +967,10 @@ HRESULT wasapi_thread_init(struct ao *ao)
     if (!device || !device[0])
         device = ao->device;
 
-    if (!device || !device[0]) {
-        IMMDeviceEnumerator *pEnumerator;
-        hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                              &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
-        EXIT_ON_ERROR(hr);
-
-        hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
-                                                         eRender, eConsole,
-                                                         &state->pDevice);
-        SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
-        EXIT_ON_ERROR(hr);
-
-        char *id = get_device_id(state->pDevice);
-        MP_VERBOSE(ao, "Default device ID: %s\n", id);
-        talloc_free(id);
-    } else {
+    if (!device || !device[0])
+        hr = load_default_device(ao, &state->pDevice);
+    else
         hr = find_and_load_device(ao, &state->pDevice, device);
-    }
     EXIT_ON_ERROR(hr);
 
     char *name = get_device_name(state->pDevice);
