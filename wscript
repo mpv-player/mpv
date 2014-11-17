@@ -107,7 +107,22 @@ main_dependencies = [
         'name': 'mingw',
         'desc': 'MinGW',
         'deps': [ 'os-win32' ],
-        'func': check_statement('stddef.h', 'int x = __MINGW32__')
+        'func': check_statement('stddef.h', 'int x = __MINGW32__;'
+                                            'int y = __MINGW64_VERSION_MAJOR'),
+    }, {
+        'name': 'posix',
+        'desc': 'POSIX environment',
+        # This should be good enough.
+        'func': check_statement(['poll.h', 'unistd.h'],
+                    'struct pollfd pfd; poll(&pfd, 1, 0); fork(); int f[2]; pipe(f)'),
+    }, {
+        'name': 'posix-or-mingw',
+        'desc': 'programming environment',
+        'deps_any': [ 'posix', 'mingw' ],
+        'func': check_true,
+        'req': True,
+        'fmsg': 'Unable to find either POSIX or MinGW-w64 environment, ' \
+                'or compiler does not work.',
     }, {
         'name': 'pthreads',
         'desc': 'POSIX threads',
