@@ -35,7 +35,7 @@ typedef struct wasapi_state {
     HANDLE threadLoop;
 
     /* Init phase */
-    int init_ret;
+    HRESULT init_ret;
     HANDLE init_done;
     int share_mode;
 

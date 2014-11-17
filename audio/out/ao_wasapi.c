@@ -50,7 +50,8 @@ static double get_device_delay(struct wasapi_state *state) {
         case S_OK: case S_FALSE:
             break;
         default:
-            MP_ERR(state, "IAudioClock::GetPosition returned %s\n", wasapi_explain_err(hr));
+            MP_ERR(state, "IAudioClock::GetPosition returned %s (0x%"PRIx32")\n",
+                   wasapi_explain_err(hr), (uint32_t)hr);
     }
 
     LARGE_INTEGER qpc_count;
@@ -65,7 +66,7 @@ static double get_device_delay(struct wasapi_state *state) {
     double diff = sample_count - position;
     double delay = diff / state->format.Format.nSamplesPerSec;
 
-    MP_TRACE(state, "device delay: %g samples (%g ms)\n", diff, delay * 1000);
+    MP_TRACE(state, "Device delay: %g samples (%g ms)\n", diff, delay * 1000);
 
     return delay;
 }
@@ -103,7 +104,8 @@ static void thread_feed(struct ao *ao)
 
     return;
 exit_label:
-    MP_ERR(state, "thread_feed fails with %"PRIx32"!\n", (uint32_t)hr);
+    MP_ERR(state, "Error feeding audio: %s (0x%"PRIx32")\n",
+           wasapi_explain_err(hr), (uint32_t)hr);
     return;
 }
 
@@ -113,20 +115,27 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
     if (!ao || !ao->priv)
         return -1;
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    if (wasapi_thread_init(ao))
+    int thread_ret;
+
+    state->init_ret = wasapi_thread_init(ao);
+    SetEvent(state->init_done);
+    if (state->init_ret != S_OK) {
+        thread_ret = -1;
         goto exit_label;
+    }
 
     MSG msg;
-    DWORD waitstatus = WAIT_FAILED;
+    DWORD waitstatus;
     HANDLE playcontrol[] =
         {state->hUninit, state->hFeed, state->hForceFeed, NULL};
-    MP_VERBOSE(ao, "Entering dispatch loop!\n");
+    MP_DBG(ao, "Entering dispatch loop\n");
     while (1) { /* watch events */
         waitstatus = MsgWaitForMultipleObjects(3, playcontrol, FALSE, INFINITE,
                                                QS_POSTMESSAGE | QS_SENDMESSAGE);
         switch (waitstatus) {
         case WAIT_OBJECT_0: /*shutdown*/
             wasapi_thread_uninit(ao);
+            thread_ret = 0;
             goto exit_label;
         case (WAIT_OBJECT_0 + 1): /* feed */
             thread_feed(ao);
@@ -140,8 +149,10 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
                 DispatchMessage(&msg);
             }
             break;
-        case WAIT_FAILED: /* ??? */
-            return -1;
+        default:
+            MP_ERR(ao, "Unhandled case in thread loop");
+            thread_ret = -1;
+            goto exit_label;
         }
     }
 exit_label:
@@ -149,7 +160,8 @@ exit_label:
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         DispatchMessage(&msg);
     }
-    return state->init_ret;
+
+    return thread_ret;
 }
 
 static void closehandles(struct ao *ao)
@@ -165,22 +177,22 @@ static void closehandles(struct ao *ao)
 
 static void uninit(struct ao *ao)
 {
-    MP_VERBOSE(ao, "uninit!\n");
+    MP_DBG(ao, "Uninit wasapi\n");
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     wasapi_release_proxies(state);
     SetEvent(state->hUninit);
     /* wait up to 10 seconds */
     if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT)
-        MP_ERR(ao, "audio loop thread refuses to abort!");
+        MP_ERR(ao, "Audio loop thread refuses to abort");
     if (state->VistaBlob.hAvrt)
         FreeLibrary(state->VistaBlob.hAvrt);
     closehandles(ao);
-    MP_VERBOSE(ao, "uninit END!\n");
+    MP_DBG(ao, "Uninit wasapi done\n");
 }
 
 static int init(struct ao *ao)
 {
-    MP_VERBOSE(ao, "init!\n");
+    MP_DBG(ao, "Init wasapi\n");
     ao->format = af_fmt_from_planar(ao->format);
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_waveext(&sel);
@@ -212,23 +224,24 @@ static int init(struct ao *ao)
         /* failed to init events */
         return -1;
     }
-    state->init_ret = -1;
+    state->init_ret = E_FAIL;
     state->threadLoop = (HANDLE)CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
     if (!state->threadLoop) {
         /* failed to init thread */
-        MP_ERR(ao, "fail to create thread!\n");
+        MP_ERR(ao, "Failed to create thread\n");
         return -1;
     }
     WaitForSingleObject(state->init_done, INFINITE); /* wait on init complete */
-    if (state->init_ret) {
+    if (state->init_ret != S_OK) {
         if (!ao->probing) {
-            MP_ERR(ao, "thread_init failed!\n");
+            MP_ERR(ao, "Received failure from audio thread\n");
         }
-    } else
-        MP_VERBOSE(ao, "Init Done!\n");
+        return -1;
+    }
 
+    MP_DBG(ao, "Init wasapi done\n");
     wasapi_setup_proxies(state);
-    return state->init_ret;
+    return 0;
 }
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -249,7 +262,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         /* check to see if user manually changed volume through mixer;
            this information is used in exclusive mode for restoring the mixer volume on uninit */
         if (state->audio_volume != state->previous_volume) {
-            MP_VERBOSE(state, "mixer difference: %.2g now, expected %.2g\n",
+            MP_VERBOSE(state, "Mixer difference: %.2g now, expected %.2g\n",
                        state->audio_volume, state->previous_volume);
             state->initial_volume = state->audio_volume;
         }
