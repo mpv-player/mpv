@@ -950,6 +950,7 @@ HRESULT wasapi_thread_init(struct ao *ao)
                                                          eRender, eConsole,
                                                          &state->pDevice);
         SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
+        EXIT_ON_ERROR(hr);
 
         char *id = get_device_id(state->pDevice);
         MP_VERBOSE(ao, "Default device ID: %s\n", id);
