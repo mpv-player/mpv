@@ -96,14 +96,6 @@ main_dependencies = [
         'desc': '-lm',
         'func': check_cc(lib='m')
     }, {
-        'name': 'nanosleep',
-        'desc': 'nanosleep',
-        'func': check_statement('time.h', 'nanosleep(0,0)')
-    }, {
-        'name': 'sys-mman-h',
-        'desc': 'mman.h',
-        'func': check_statement('sys/mman.h', 'mmap(0, 0, 0, 0, 0, 0)')
-    }, {
         'name': 'mingw',
         'desc': 'MinGW',
         'deps': [ 'os-win32' ],
@@ -199,6 +191,14 @@ iconv support use --disable-iconv.",
         'desc': 'shm',
         'func': check_statement(['sys/types.h', 'sys/ipc.h', 'sys/shm.h'],
             'shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0)')
+    }, {
+        'name': 'sys-mman-h',
+        'desc': 'mman.h',
+        'func': check_statement('sys/mman.h', 'mmap(0, 0, 0, 0, 0, 0)')
+    }, {
+        'name': 'nanosleep',
+        'desc': 'nanosleep',
+        'func': check_statement('time.h', 'nanosleep(0,0)')
     }, {
         'name': 'posix-spawn',
         'desc': 'POSIX spawnp()/kill()',
