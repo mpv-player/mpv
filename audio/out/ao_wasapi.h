@@ -30,6 +30,14 @@
 
 #include "osdep/atomics.h"
 
+typedef struct change_notify {
+    IMMNotificationClient client;
+    LPWSTR monitored; /* Monitored device */
+} change_notify;
+
+HRESULT wasapi_change_init(struct change_notify *change, IMMDevice *monitor);
+void wasapi_change_free(struct change_notify *change);
+
 typedef struct wasapi_state {
     struct mp_log *log;
     HANDLE threadLoop;
