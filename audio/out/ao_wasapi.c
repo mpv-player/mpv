@@ -101,6 +101,8 @@ static void thread_feed(struct ao *ao)
 exit_label:
     MP_ERR(state, "Error feeding audio: %s (0x%"PRIx32")\n",
            wasapi_explain_err(hr), (uint32_t)hr);
+    MP_VERBOSE(ao, "Requesting ao reload\n");
+    ao_request_reload(ao);
     return;
 }
 
