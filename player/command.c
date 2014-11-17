@@ -74,6 +74,8 @@ struct command_ctx {
     double last_seek_time;
     double last_seek_pts;
 
+    double prev_pts;
+
     struct cycle_counter *cycle_counters;
     int num_cycle_counters;
 
@@ -2930,8 +2932,22 @@ static int mp_property_af(void *ctx, struct m_property *prop,
     return property_filter(prop, action, arg, ctx, STREAM_AUDIO);
 }
 
+static int mp_property_ab_loop(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (action == M_PROPERTY_KEY_ACTION) {
+        double val;
+        if (mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &val) < 1)
+            return M_PROPERTY_ERROR;
+
+        return property_time(action, arg, val);
+    }
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
 static int mp_property_version(void *ctx, struct m_property *prop,
-                            int action, void *arg)
+                               int action, void *arg)
 {
     return m_property_strdup_ro(action, arg, mpv_version);
 }
@@ -3256,6 +3272,9 @@ static const struct m_property mp_properties[] = {
     {"af", mp_property_af},
 
     {"video-rotate", video_simple_refresh_property},
+
+    {"ab-loop-a", mp_property_ab_loop},
+    {"ab-loop-b", mp_property_ab_loop},
 
 #define PROPERTY_TV_COLOR(name, type) \
     {name, mp_property_tv_color, (void *)(intptr_t)type}
@@ -4515,14 +4534,41 @@ void command_init(struct MPContext *mpctx)
     mpctx->command_ctx = talloc(NULL, struct command_ctx);
     *mpctx->command_ctx = (struct command_ctx){
         .last_seek_pts = MP_NOPTS_VALUE,
+        .prev_pts = MP_NOPTS_VALUE,
     };
+}
+
+static void command_event(struct MPContext *mpctx, int event, void *arg)
+{
+    struct command_ctx *ctx = mpctx->command_ctx;
+    struct MPOpts *opts = mpctx->opts;
+
+    if (event == MPV_EVENT_START_FILE)
+        ctx->last_seek_pts = MP_NOPTS_VALUE;
+
+    if (event == MPV_EVENT_TICK) {
+        double now =
+            mpctx->restart_complete ? mpctx->playback_pts : MP_NOPTS_VALUE;
+        if (now != MP_NOPTS_VALUE && opts->ab_loop[0] != MP_NOPTS_VALUE &&
+            opts->ab_loop[1] != MP_NOPTS_VALUE)
+        {
+            if (ctx->prev_pts >= opts->ab_loop[0] &&
+                ctx->prev_pts < opts->ab_loop[1] &&
+                now >= opts->ab_loop[1])
+            {
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0], 1, false);
+            }
+        }
+        ctx->prev_pts = now;
+    }
+    if (event == MPV_EVENT_SEEK) {
+        ctx->prev_pts = MP_NOPTS_VALUE;
+    }
 }
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg)
 {
-    struct command_ctx *ctx = mpctx->command_ctx;
-    if (event == MPV_EVENT_START_FILE)
-        ctx->last_seek_pts = MP_NOPTS_VALUE;
+    command_event(mpctx, event, arg);
 
     mp_client_broadcast_event(mpctx, event, arg);
 }

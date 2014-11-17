@@ -2180,7 +2180,9 @@ static int parse_time(struct mp_log *log, const m_option_t *opt,
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
-    if (!parse_timestring(param, &time, 0)) {
+    if (opt->min == MP_NOPTS_VALUE && bstr_equals0(param, "no")) {
+        time = MP_NOPTS_VALUE;
+    } else if (!parse_timestring(param, &time, 0)) {
         mp_err(log, "Option %.*s: invalid time: '%.*s'\n",
                BSTR_P(name), BSTR_P(param));
         return M_OPT_INVALID;
@@ -2193,7 +2195,10 @@ static int parse_time(struct mp_log *log, const m_option_t *opt,
 
 static char *pretty_print_time(const m_option_t *opt, const void *val)
 {
-    return mp_format_time(*(double *)val, false);
+    double pts = *(double *)val;
+    if (pts == MP_NOPTS_VALUE && opt->min == MP_NOPTS_VALUE)
+        return talloc_strdup(NULL, "no"); // symmetry with parsing
+    return mp_format_time(pts, false);
 }
 
 const m_option_type_t m_option_type_time = {

@@ -778,6 +778,9 @@ Property list
                 "title"             MPV_FORMAT_STRING
                 "default"           MPV_FORMAT_FLAG
 
+``ab-loop-a``, ``ab-loop-b`` (TW)
+    Set/get A-B loop points. See corresponding options.
+
 ``angle`` (RW)
     Current DVD angle.
 

@@ -180,6 +180,9 @@ const m_option_t mp_opts[] = {
     OPT_REL_TIME("end", play_end, 0),
     OPT_REL_TIME("length", play_length, 0),
 
+    OPT_TIME("ab-loop-a", ab_loop[0], 0, .min = MP_NOPTS_VALUE),
+    OPT_TIME("ab-loop-b", ab_loop[1], 0, .min = MP_NOPTS_VALUE),
+
     OPT_FLAG("pause", pause, M_OPT_FIXED),
     OPT_FLAG("keep-open", keep_open, 0),
 

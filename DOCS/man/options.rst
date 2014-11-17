@@ -229,6 +229,12 @@ Playback Control
     between the two option is that this option performs a seek on loop, instead
     of reloading the file.
 
+``--ab-loop-a=<time>``, ``--ab-loop-b=<time>``
+    Set loop points. If playback passes the ``b`` timestamp, it will seek to
+    the ``a`` timestamp. Seeking past the ``b`` point doesn't loop (this is
+    intentional). The loop-points can be adjusted at runtime with the
+    corresponding properties.
+
 ``--ordered-chapters``, ``--no-ordered-chapters``
     Enabled by default.
     Disable support for Matroska ordered chapters. mpv will not load or
