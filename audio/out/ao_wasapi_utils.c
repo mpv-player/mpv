@@ -649,7 +649,7 @@ static HRESULT enumerate_with_state(struct mp_log *log, struct ao *ao,
     EXIT_ON_ERROR(hr);
 
     hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
-                                                     eRender, eConsole,
+                                                     eRender, eMultimedia,
                                                      &pDevice);
     EXIT_ON_ERROR(hr);
 
@@ -739,7 +739,7 @@ static HRESULT load_default_device(struct ao *ao, IMMDevice **ppDevice)
     EXIT_ON_ERROR(hr);
 
     hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
-                                                     eRender, eConsole,
+                                                     eRender, eMultimedia,
                                                      ppDevice);
     SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
     EXIT_ON_ERROR(hr);
