@@ -20,6 +20,7 @@
 #define COBJMACROS 1
 #define _WIN32_WINNT 0x600
 
+#include <math.h>
 #include <initguid.h>
 #include <audioclient.h>
 #include <endpointvolume.h>
@@ -451,38 +452,41 @@ exit_label:
     return hr;
 }
 
-static HRESULT fix_format(struct wasapi_state *state)
+static HRESULT fix_format(struct ao *ao)
 {
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     HRESULT hr;
     double offset = 0.5;
+
+    REFERENCE_TIME devicePeriod, bufferDuration;
+    MP_DBG(state, "IAudioClient::GetDevicePeriod\n");
+    hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&devicePeriod, NULL);
+    MP_VERBOSE(state, "Device period: %.2g ms\n", (double) devicePeriod / 10000.0 );
+    /* integer multiple of device period close to 50ms */
+    bufferDuration = ceil( 50.0 * 10000.0 / devicePeriod ) * devicePeriod;
 
     /* cargo cult code to negotiate buffer block size, affected by hardware/drivers combinations,
        gradually grow it to 10s, by 0.5s, consider failure if it still doesn't work
      */
-    MP_DBG(state, "IAudioClient::GetDevicePeriod\n");
-    hr = IAudioClient_GetDevicePeriod(state->pAudioClient,
-                                      &state->defaultRequestedDuration,
-                                      &state->minRequestedDuration);
-
 reinit:
     MP_DBG(state, "IAudioClient::Initialize\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
                                  state->share_mode,
                                  AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                                 state->defaultRequestedDuration,
-                                 state->defaultRequestedDuration,
+                                 bufferDuration,
+                                 bufferDuration,
                                  &(state->format.Format),
                                  NULL);
-    /* something about buffer sizes on Win7, fixme might loop forever */
+    /* something about buffer sizes on Win7 */
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
         MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s (0x%"PRIx32"), used %lld * 100ns\n",
-                   wasapi_explain_err(hr), (uint32_t)hr, state->defaultRequestedDuration);
+                   wasapi_explain_err(hr), (uint32_t)hr, bufferDuration);
         if (offset > 10.0) {
             hr = E_FAIL;
             EXIT_ON_ERROR(hr);
         }
         IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
-        state->defaultRequestedDuration =
+        bufferDuration =
             (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
                               state->bufferFrameCount) + offset);
         offset += 0.5;
@@ -500,6 +504,7 @@ reinit:
                                  &IID_IAudioRenderClient,
                                  (void **)&state->pRenderClient);
     EXIT_ON_ERROR(hr);
+
     MP_DBG(state, "IAudioClient::Initialize pAudioVolume\n");
     hr = IAudioClient_GetService(state->pAudioClient,
                                  &IID_ISimpleAudioVolume,
@@ -509,13 +514,21 @@ reinit:
     MP_DBG(state, "IAudioClient::Initialize IAudioClient_SetEventHandle\n");
     hr = IAudioClient_SetEventHandle(state->pAudioClient, state->hFeed);
     EXIT_ON_ERROR(hr);
+
     MP_DBG(state, "IAudioClient::Initialize IAudioClient_GetBufferSize\n");
     hr = IAudioClient_GetBufferSize(state->pAudioClient,
                                     &state->bufferFrameCount);
     EXIT_ON_ERROR(hr);
+
+    ao->device_buffer = state->bufferFrameCount;
     state->buffer_block_size = state->format.Format.nChannels *
                                state->format.Format.wBitsPerSample / 8 *
                                state->bufferFrameCount;
+    bufferDuration =
+        (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
+                          state->bufferFrameCount) + offset);
+    MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%.2g ms)\n",
+               state->bufferFrameCount, (double) bufferDuration / 10000.0 );
 
     hr = init_clock(state);
     EXIT_ON_ERROR(hr);
@@ -999,7 +1012,7 @@ retry:
     }
 
     MP_DBG(ao, "Fixing format\n");
-    hr = fix_format(state);
+    hr = fix_format(ao);
     if ( (hr == AUDCLNT_E_DEVICE_IN_USE ||
           hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
          retry_wait <= 8 ) {

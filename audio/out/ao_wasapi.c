@@ -79,6 +79,7 @@ static void thread_feed(struct ao *ao)
         EXIT_ON_ERROR(hr);
 
         frame_count -= padding;
+        MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n", frame_count, padding);
     }
 
     BYTE *pData;

@@ -63,10 +63,6 @@ typedef struct wasapi_state {
 
     /* Buffers */
     size_t buffer_block_size; /* Size of each block in bytes */
-    REFERENCE_TIME
-        minRequestedDuration; /* minimum wasapi buffer block size, in 100-nanosecond units */
-    REFERENCE_TIME
-        defaultRequestedDuration; /* default wasapi default block size, in 100-nanosecond units */
     UINT32 bufferFrameCount; /* wasapi buffer block size, number of frames, frame size at format.nBlockAlign */
 
     /* WASAPI handles, owned by other thread */
