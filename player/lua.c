@@ -1360,7 +1360,8 @@ static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     *error = NULL;
 
     // List of handles to watch with sparse_wait
-    HANDLE handles[] = { pipes[0].ol.hEvent, pipes[1].ol.hEvent, pi.hProcess };
+    HANDLE handles[] = { pipes[0].ol.hEvent, pipes[1].ol.hEvent, pi.hProcess,
+                         cancel ? mp_cancel_get_event(cancel) : NULL };
 
     for (int i = 0; i < 2; i++) {
         // Close our copy of the write end of the pipes
@@ -1403,6 +1404,13 @@ static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
 
             CloseHandle(pi.hProcess);
             handles[i] = pi.hProcess = NULL;
+            break;
+        case 3:
+            if (pi.hProcess) {
+                TerminateProcess(pi.hProcess, 1);
+                *error = "killed";
+                goto done;
+            }
             break;
         default:
             goto done;
