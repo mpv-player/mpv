@@ -230,8 +230,7 @@ static int init(struct ao *ao)
     if (state->init_ret != S_OK) {
         if (!ao->probing)
             MP_ERR(ao, "Received failure from audio thread\n");
-        if (state->VistaBlob.hAvrt)
-            FreeLibrary(state->VistaBlob.hAvrt);
+        uninit(ao);
         return -1;
     }
 
