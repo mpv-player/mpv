@@ -264,7 +264,11 @@ struct mp_cancel *mp_cancel_new(void *talloc_ctx);
 void mp_cancel_trigger(struct mp_cancel *c);
 bool mp_cancel_test(struct mp_cancel *c);
 void mp_cancel_reset(struct mp_cancel *c);
+#ifdef __MINGW32__
+void *mp_cancel_get_event(struct mp_cancel *c);
+#else
 int mp_cancel_get_fd(struct mp_cancel *c);
+#endif
 
 // stream_file.c
 char *mp_file_url_to_filename(void *talloc_ctx, bstr url);
