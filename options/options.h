@@ -196,6 +196,7 @@ typedef struct MPOpts {
     char *sub_demuxer_name;
     int mkv_subtitle_preroll;
     double mkv_subtitle_preroll_secs;
+    int mkv_probe_duration;
 
     double demuxer_min_secs_cache;
     int cache_pausing;

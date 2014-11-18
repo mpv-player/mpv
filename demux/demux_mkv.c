@@ -199,6 +199,8 @@ typedef struct mkv_demuxer {
 // (Subtitle packets added before first A/V keyframe packet is found with seek.)
 #define NUM_SUB_PREROLL_PACKETS 500
 
+static void probe_last_timestamp(struct demuxer *demuxer);
+
 #define AAC_SYNC_EXTENSION_TYPE 0x02b7
 static int aac_get_sample_rate_index(uint32_t sample_rate)
 {
@@ -1845,6 +1847,9 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     process_tags(demuxer);
     display_create_tracks(demuxer);
 
+    if (demuxer->opts->mkv_probe_duration)
+        probe_last_timestamp(demuxer);
+
     return 0;
 }
 
@@ -2857,6 +2862,66 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
     mkv_d->a_skip_preroll = mkv_d->a_skip_to_keyframe;
 
     demux_mkv_fill_buffer(demuxer);
+}
+
+static void probe_last_timestamp(struct demuxer *demuxer)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+    int64_t old_pos = stream_tell(demuxer->stream);
+
+    if (!demuxer->seekable)
+        return;
+
+    // Pick some arbitrary video track
+    int v_tnum = -1;
+    for (int n = 0; n < mkv_d->num_tracks; n++) {
+        if (mkv_d->tracks[n]->type == MATROSKA_TRACK_VIDEO) {
+            v_tnum = mkv_d->tracks[n]->tnum;
+            break;
+        }
+    }
+    if (v_tnum < 0)
+        return;
+
+    read_deferred_cues(demuxer);
+
+    if (!mkv_d->index_complete)
+        return;
+
+    // Find last cluster that still has video packets
+    int64_t target = 0;
+    for (size_t i = 0; i < mkv_d->num_indexes; i++) {
+        struct mkv_index *cur = &mkv_d->indexes[i];
+        if (cur->tnum == v_tnum)
+            target = MPMAX(target, cur->filepos);
+    }
+    if (!target)
+        return;
+
+    if (!stream_seek(demuxer->stream, target))
+        return;
+
+    int64_t last_ts[STREAM_TYPE_COUNT] = {0};
+    while (1) {
+        struct block_info block;
+        int res = read_next_block(demuxer, &block);
+        if (res < 0)
+            break;
+        if (res > 0) {
+            if (block.track && block.track->stream) {
+                enum stream_type type = block.track->stream->type;
+                if (last_ts[type] < block.timecode)
+                    last_ts[type] = block.timecode;
+            }
+            free_block(&block);
+        }
+    }
+
+    if (last_ts[STREAM_VIDEO])
+        mkv_d->duration = last_ts[STREAM_VIDEO] / 1e9;
+
+    stream_seek(demuxer->stream, old_pos);
+    mkv_d->cluster_start = mkv_d->cluster_end = 0;
 }
 
 static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)

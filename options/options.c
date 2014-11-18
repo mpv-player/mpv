@@ -306,6 +306,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("mkv-subtitle-preroll", mkv_subtitle_preroll, 0), // old alias
     OPT_DOUBLE("demuxer-mkv-subtitle-preroll-secs", mkv_subtitle_preroll_secs,
                M_OPT_MIN, .min = 0),
+    OPT_FLAG("demuxer-mkv-probe-video-duration", mkv_probe_duration, 0),
 
 // ------------------------- subtitles options --------------------
 

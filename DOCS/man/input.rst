@@ -792,6 +792,7 @@ Property list
 
 ``ab-loop-a``, ``ab-loop-b`` (TW)
     Set/get A-B loop points. See corresponding options and ``ab_loop`` command.
+    The special value ``no`` on either of these properties disables looping.
 
 ``angle`` (RW)
     Current DVD angle.
