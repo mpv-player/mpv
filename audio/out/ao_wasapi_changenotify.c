@@ -52,7 +52,7 @@ static int PKEY_compare(const PROPERTYKEY *l, const PROPERTYKEY *r)
 static char *GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
 {
     snprintf(buf, buf_size,
-             "{%8.8x-%4.4x-%4.4x-%2.2x%2.2x-%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x}",
+             "{%8.8lx-%4.4x-%4.4x-%2.2x%2.2x-%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x}",
              guid->Data1, guid->Data2, guid->Data3,
              guid->Data4[0], guid->Data4[1],
              guid->Data4[2], guid->Data4[3],

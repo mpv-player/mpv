@@ -997,7 +997,7 @@ retry:
           hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
          retry_wait <= 8 ) {
         wasapi_thread_uninit(ao);
-        MP_WARN(ao, "Retrying in %ld us\n", retry_wait);
+        MP_WARN(ao, "Retrying in %"PRId64" us\n", retry_wait);
         mp_sleep_us(retry_wait);
         retry_wait *= 2;
         goto retry;
