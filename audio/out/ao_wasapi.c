@@ -165,6 +165,7 @@ static void closehandles(struct ao *ao)
     if (state->hFeed)      CloseHandle(state->hFeed);
     if (state->hForceFeed) CloseHandle(state->hForceFeed);
     if (state->hFeedDone)  CloseHandle(state->hFeedDone);
+    if (state->threadLoop) CloseHandle(state->threadLoop);
 }
 
 static void uninit(struct ao *ao)
