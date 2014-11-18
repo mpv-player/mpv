@@ -471,7 +471,6 @@ static HRESULT fix_format(struct ao *ao)
     /* hopefully this shouldn't happen because of the above integer device period */
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx */
     int retries=0;
-    
 reinit:
     MP_DBG(state, "IAudioClient::Initialize\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
@@ -485,7 +484,7 @@ reinit:
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
         MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s (0x%"PRIx32"), used %lld * 100ns\n",
                    wasapi_explain_err(hr), (uint32_t)hr, bufferDuration);
-        if (retries > 1) {
+        if (retries > 0) {
             hr = E_FAIL;
             EXIT_ON_ERROR(hr);
         } else {
