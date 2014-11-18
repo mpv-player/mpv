@@ -992,9 +992,8 @@ struct mp_cancel {
     atomic_bool triggered;
 #ifdef __MINGW32__
     HANDLE event;
-#else
-    int wakeup_pipe[2];
 #endif
+    int wakeup_pipe[2];
 };
 
 static void cancel_destroy(void *p)
@@ -1002,10 +1001,9 @@ static void cancel_destroy(void *p)
     struct mp_cancel *c = p;
 #ifdef __MINGW32__
     CloseHandle(c->event);
-#else
+#endif
     close(c->wakeup_pipe[0]);
     close(c->wakeup_pipe[1]);
-#endif
 }
 
 struct mp_cancel *mp_cancel_new(void *talloc_ctx)
@@ -1015,9 +1013,8 @@ struct mp_cancel *mp_cancel_new(void *talloc_ctx)
     *c = (struct mp_cancel){.triggered = ATOMIC_VAR_INIT(false)};
 #ifdef __MINGW32__
     c->event = CreateEventW(NULL, TRUE, FALSE, NULL);
-#else
-    mp_make_wakeup_pipe(c->wakeup_pipe);
 #endif
+    mp_make_wakeup_pipe(c->wakeup_pipe);
     return c;
 }
 
@@ -1027,9 +1024,8 @@ void mp_cancel_trigger(struct mp_cancel *c)
     atomic_store(&c->triggered, true);
 #ifdef __MINGW32__
     SetEvent(c->event);
-#else
-    write(c->wakeup_pipe[1], &(char){0}, 1);
 #endif
+    write(c->wakeup_pipe[1], &(char){0}, 1);
 }
 
 // Restore original state. (Allows reusing a mp_cancel.)
@@ -1038,7 +1034,7 @@ void mp_cancel_reset(struct mp_cancel *c)
     atomic_store(&c->triggered, false);
 #ifdef __MINGW32__
     ResetEvent(c->event);
-#else
+#endif
     // Flush it fully.
     while (1) {
         int r = read(c->wakeup_pipe[0], &(char[256]){0}, 256);
@@ -1047,7 +1043,6 @@ void mp_cancel_reset(struct mp_cancel *c)
         if (r <= 0)
             break;
     }
-#endif
 }
 
 // Return whether the caller should abort.
@@ -1062,14 +1057,14 @@ void *mp_cancel_get_event(struct mp_cancel *c)
 {
     return c->event;
 }
-#else
+#endif
+
 // The FD becomes readable if mp_cancel_test() would return true.
 // Don't actually read from it, just use it for poll().
 int mp_cancel_get_fd(struct mp_cancel *c)
 {
     return c->wakeup_pipe[0];
 }
-#endif
 
 void stream_print_proto_list(struct mp_log *log)
 {
