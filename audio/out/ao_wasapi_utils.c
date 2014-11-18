@@ -458,12 +458,15 @@ static HRESULT fix_format(struct ao *ao)
     HRESULT hr;
     double offset = 0.5;
 
-    REFERENCE_TIME devicePeriod, bufferDuration;
+    REFERENCE_TIME devicePeriod, bufferDuration, bufferPeriod;
     MP_DBG(state, "IAudioClient::GetDevicePeriod\n");
     hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&devicePeriod, NULL);
     MP_VERBOSE(state, "Device period: %.2g ms\n", (double) devicePeriod / 10000.0 );
+
     /* integer multiple of device period close to 50ms */
-    bufferDuration = ceil( 50.0 * 10000.0 / devicePeriod ) * devicePeriod;
+    bufferPeriod = bufferDuration = ceil( 50.0 * 10000.0 / devicePeriod ) * devicePeriod;
+    if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
+        bufferPeriod = 0;
 
     /* cargo cult code to negotiate buffer block size, affected by hardware/drivers combinations,
        gradually grow it to 10s, by 0.5s, consider failure if it still doesn't work
@@ -474,7 +477,7 @@ reinit:
                                  state->share_mode,
                                  AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
                                  bufferDuration,
-                                 bufferDuration,
+                                 bufferPeriod,
                                  &(state->format.Format),
                                  NULL);
     /* something about buffer sizes on Win7 */
