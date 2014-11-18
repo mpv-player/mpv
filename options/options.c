@@ -633,6 +633,7 @@ const struct MPOpts mp_default_opts = {
     .demuxer_min_secs_cache = 2,
     .cache_pausing = 1,
     .chapterrange = {-1, -1},
+    .ab_loop = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
     .edition_id = -1,
     .default_max_pts_correction = -1,
     .correct_pts = 1,
