@@ -456,7 +456,6 @@ static HRESULT fix_format(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     HRESULT hr;
-    double offset = 0.5;
 
     REFERENCE_TIME devicePeriod, bufferDuration, bufferPeriod;
     MP_DBG(state, "IAudioClient::GetDevicePeriod\n");
@@ -468,9 +467,10 @@ static HRESULT fix_format(struct ao *ao)
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
         bufferPeriod = 0;
 
-    /* cargo cult code to negotiate buffer block size, affected by hardware/drivers combinations,
-       gradually grow it to 10s, by 0.5s, consider failure if it still doesn't work
-     */
+    /* handle unsupported buffer size */
+    /* hopefully this shouldn't happen because of the above integer device period */
+    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx */
+    int retries=0;
 reinit:
     MP_DBG(state, "IAudioClient::Initialize\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
@@ -484,18 +484,20 @@ reinit:
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
         MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s (0x%"PRIx32"), used %lld * 100ns\n",
                    wasapi_explain_err(hr), (uint32_t)hr, bufferDuration);
-        if (offset > 10.0) {
+        if (retries > 0) {
             hr = E_FAIL;
             EXIT_ON_ERROR(hr);
+        } else {
+            retries ++;
         }
+
         IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
         bufferPeriod = bufferDuration =
             (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
-                              state->bufferFrameCount) + offset);
+                              state->bufferFrameCount) + 0.5);
         if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
             bufferPeriod = 0;
 
-        offset += 0.5;
         IAudioClient_Release(state->pAudioClient);
         state->pAudioClient = NULL;
         hr = IMMDeviceActivator_Activate(state->pDevice,
@@ -532,7 +534,7 @@ reinit:
                                state->bufferFrameCount;
     bufferDuration =
         (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
-                          state->bufferFrameCount) + offset);
+                          state->bufferFrameCount) + 0.5);
     MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%.2g ms)\n",
                state->bufferFrameCount, (double) bufferDuration / 10000.0 );
 
