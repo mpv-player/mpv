@@ -3527,6 +3527,8 @@ static const struct property_osd_display {
     { "tv-hue", "Hue", .osd_progbar = OSD_HUE},
     { "tv-saturation", "Saturation", .osd_progbar = OSD_SATURATION },
     { "tv-contrast", "Contrast", .osd_progbar = OSD_CONTRAST },
+    { "ab-loop-a", "A-B loop point A"},
+    { "ab-loop-b", "A-B loop point B"},
     // By default, don't display the following properties on OSD
     { "pause", NULL },
     { "fullscreen", NULL },
@@ -4419,6 +4421,24 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_DISCNAV:
         mp_nav_user_input(mpctx, cmd->args[0].v.s);
         break;
+
+    case MP_CMD_AB_LOOP: {
+        double now = get_current_time(mpctx);
+        int r = 0;
+        if (opts->ab_loop[0] == MP_NOPTS_VALUE) {
+            r = mp_property_do("ab-loop-a", M_PROPERTY_SET, &now, mpctx);
+            show_property_osd(mpctx, "ab-loop-a", on_osd);
+        } else if (opts->ab_loop[1] == MP_NOPTS_VALUE) {
+            r = mp_property_do("ab-loop-b", M_PROPERTY_SET, &now, mpctx);
+            show_property_osd(mpctx, "ab-loop-b", on_osd);
+        } else {
+            now = MP_NOPTS_VALUE;
+            r = mp_property_do("ab-loop-a", M_PROPERTY_SET, &now, mpctx);
+            r = mp_property_do("ab-loop-b", M_PROPERTY_SET, &now, mpctx);
+            set_osd_msg(mpctx, osdl, osd_duration, "Clear A-B loop");
+        }
+        return r > 0;
+    }
 
     case MP_CMD_VO_CMDLINE:
         if (mpctx->video_out) {

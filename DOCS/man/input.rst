@@ -544,6 +544,11 @@ Input Commands that are Possibly Subject to Change
     (Scripts use this internally to dispatch key bindings, and this can also
     be used in input.conf to reassign such bindings.)
 
+``ab_loop``
+    Cycle through A-B loop states. The first command will set the ``A`` point
+    (the ``ab-loop-a`` property); the second the ``B`` point, and the third
+    will clear both points.
+
 
 Undocumented commands: ``tv_last_channel`` (TV/DVB only), ``get_property`` (?),
 ``vo_cmdline`` (experimental), ``ao_reload`` (experimental/internal).
@@ -779,7 +784,7 @@ Property list
                 "default"           MPV_FORMAT_FLAG
 
 ``ab-loop-a``, ``ab-loop-b`` (TW)
-    Set/get A-B loop points. See corresponding options.
+    Set/get A-B loop points. See corresponding options and ``ab_loop`` command.
 
 ``angle`` (RW)
     Current DVD angle.

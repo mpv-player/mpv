@@ -78,6 +78,8 @@ enum mp_command_type {
 
     MP_CMD_DISCNAV,
 
+    MP_CMD_AB_LOOP,
+
     /// Audio Filter commands
     MP_CMD_AF,
     MP_CMD_AO_RELOAD,
