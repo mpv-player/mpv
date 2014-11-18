@@ -489,9 +489,12 @@ reinit:
             EXIT_ON_ERROR(hr);
         }
         IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
-        bufferDuration =
+        bufferPeriod = bufferDuration =
             (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
                               state->bufferFrameCount) + offset);
+        if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
+            bufferPeriod = 0;
+
         offset += 0.5;
         IAudioClient_Release(state->pAudioClient);
         state->pAudioClient = NULL;
