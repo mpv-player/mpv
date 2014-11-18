@@ -331,7 +331,7 @@ static void update_osd_bar(struct MPContext *mpctx, int type,
     }
 }
 
-static void set_osd_bar_chapters(struct MPContext *mpctx, int type)
+void set_osd_bar_chapters(struct MPContext *mpctx, int type)
 {
     struct MPOpts *opts = mpctx->opts;
     if (mpctx->osd_progbar.type != type)

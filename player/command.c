@@ -2935,7 +2935,8 @@ static int mp_property_af(void *ctx, struct m_property *prop,
 static int mp_property_ab_loop(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
-    MPContext *mpctx = ctx;
+    struct MPContext *mpctx = ctx;
+    struct MPOpts *opts = mpctx->opts;
     if (action == M_PROPERTY_KEY_ACTION) {
         double val;
         if (mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &val) < 1)
@@ -2943,7 +2944,18 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
 
         return property_time(action, arg, val);
     }
-    return mp_property_generic_option(mpctx, prop, action, arg);
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (r > 0 && action == M_PROPERTY_SET) {
+        if (strcmp(prop->name, "ab-loop-b") == 0) {
+            double now = mpctx->playback_pts;
+            if (now != MP_NOPTS_VALUE && opts->ab_loop[0] != MP_NOPTS_VALUE &&
+                opts->ab_loop[1] != MP_NOPTS_VALUE && now >= opts->ab_loop[1])
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0], 1, false);
+        }
+        // Update if visible
+        set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
+    }
+    return r;
 }
 
 static int mp_property_version(void *ctx, struct m_property *prop,
