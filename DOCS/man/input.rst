@@ -549,9 +549,16 @@ Input Commands that are Possibly Subject to Change
     (the ``ab-loop-a`` property); the second the ``B`` point, and the third
     will clear both points.
 
+``vo_cmdline "<args>"``
+    Reset the sub-option of the current VO. Currently works with ``opengl``
+    (including ``opengl-hq``). The argument is the sub-option string usually
+    passed to the VO on the command line. Not all sub-options can be set, but
+    those which can will be reset even if they don't appear in the argument.
+    This command might be changed or removed in the future.
+
 
 Undocumented commands: ``tv_last_channel`` (TV/DVB only), ``get_property`` (?),
-``vo_cmdline`` (experimental), ``ao_reload`` (experimental/internal).
+``ao_reload`` (experimental/internal).
 
 Input Command Prefixes
 ----------------------
