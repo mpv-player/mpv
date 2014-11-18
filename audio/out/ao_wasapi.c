@@ -160,12 +160,11 @@ exit_label:
 static void closehandles(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    if (state->init_done)
-        CloseHandle(state->init_done);
-    if (state->hUninit)
-        CloseHandle(state->hUninit);
-    if (state->hFeed)
-        CloseHandle(state->hFeed);
+    if (state->init_done)  CloseHandle(state->init_done);
+    if (state->hUninit)    CloseHandle(state->hUninit);
+    if (state->hFeed)      CloseHandle(state->hFeed);
+    if (state->hForceFeed) CloseHandle(state->hForceFeed);
+    if (state->hFeedDone)  CloseHandle(state->hFeedDone);
 }
 
 static void uninit(struct ao *ao)
