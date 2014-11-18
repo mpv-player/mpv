@@ -175,8 +175,10 @@ static void uninit(struct ao *ao)
     wasapi_release_proxies(state);
     SetEvent(state->hUninit);
     /* wait up to 10 seconds */
-    if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT)
+    if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT){
         MP_ERR(ao, "Audio loop thread refuses to abort");
+        return;
+    }
     if (state->VistaBlob.hAvrt)
         FreeLibrary(state->VistaBlob.hAvrt);
     closehandles(ao);
