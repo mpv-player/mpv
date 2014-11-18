@@ -236,10 +236,10 @@ static int ao_init(struct ao *ao)
     }
     ao->bps = ao->samplerate * ao->sstride;
 
-    if (!ao->device_buffer && ao->driver->get_space) {
+    if (!ao->device_buffer && ao->driver->get_space)
         ao->device_buffer = ao->driver->get_space(ao);
+    if (ao->device_buffer)
         MP_VERBOSE(ao, "device buffer: %d samples.\n", ao->device_buffer);
-    }
     ao->buffer = MPMAX(ao->device_buffer, ao->def_buffer * ao->samplerate);
     MP_VERBOSE(ao, "using soft-buffer of %d samples.\n", ao->buffer);
 
