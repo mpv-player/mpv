@@ -55,16 +55,25 @@ mp.add_hook("on_load", 10, function ()
             url = url:sub(8)
         end
 
+        local format = mp.get_property("options/ytdl-format")
+
         -- subformat workaround
         local subformat = "srt"
         if url:find("crunchyroll.com") then
             subformat = "ass"
         end
 
-        local es, json = exec({
+        local command = {
             ytdl.path, "-J", "--flat-playlist", "--all-subs",
-            "--sub-format", subformat, "--no-playlist", "--", url
-            })
+            "--sub-format", subformat, "--no-playlist"
+        }
+        if (format ~= "") then
+            table.insert(command, "--format")
+            table.insert(command, format)
+        end
+        table.insert(command, "--")
+        table.insert(command, url)
+        local es, json = exec(command)
 
         if (es < 0) or (json == nil) or (json == "") then
             msg.warn("youtube-dl failed, trying to play URL directly ...")
