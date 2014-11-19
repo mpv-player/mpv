@@ -46,6 +46,10 @@ UP and DOWN
     Seek forward/backward 1 minute. Shift+arrow does a 5 second exact seek (see
     ``--hr-seek``).
 
+Ctrl+LEFT and Ctrl+RIGHT
+    Seek to the previous/next subtitle. Subject to some restrictions and
+    might not work always; see ``sub_seek`` command.
+
 [ and ]
     Decrease/increase current playback speed by 10%.
 
@@ -124,6 +128,9 @@ j and J
 
 x and z
     Adjust subtitle delay by +/- 0.1 seconds.
+
+l
+    Set/clear A-B loop points. See ``ab_loop`` command for details.
 
 Ctrl + and Ctrl -
     Adjust audio delay by +/- 0.1 seconds.
