@@ -1343,6 +1343,7 @@ static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     // Convert the args array to a UTF-16 Windows command-line string
     wchar_t *cmdline = write_cmdline(tmp, args);
 
+    DWORD flags = CREATE_UNICODE_ENVIRONMENT;
     PROCESS_INFORMATION pi = {0};
     STARTUPINFOW si = {
         .cb = sizeof(si),
@@ -1352,9 +1353,16 @@ static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
         .hStdError = pipes[1].write,
     };
 
-    if (!CreateProcessW(NULL, cmdline, NULL, NULL, TRUE,
-                        CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
-                        NULL, NULL, &si, &pi))
+    // If we have a console, the subprocess will automatically attach to it so
+    // it can receive Ctrl+C events. If we don't have a console, prevent the
+    // subprocess from creating its own console window by specifying
+    // CREATE_NO_WINDOW. GetConsoleCP() can be used to reliably determine if we
+    // have a console or not (Cygwin uses it too.)
+    if (!GetConsoleCP())
+        flags |= CREATE_NO_WINDOW;
+
+    if (!CreateProcessW(NULL, cmdline, NULL, NULL, TRUE, flags, NULL, NULL,
+                        &si, &pi))
         goto done;
     talloc_free(cmdline);
     CloseHandle(pi.hThread);
