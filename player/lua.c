@@ -1422,9 +1422,14 @@ static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
 
 done:
     for (int i = 0; i < 2; i++) {
-        if (pipes[i].ol.hEvent) CloseHandle(pipes[i].ol.hEvent);
-        if (pipes[i].read) CloseHandle(pipes[i].read);
+        if (pipes[i].read) {
+            // Cancel any pending I/O (if the process was killed)
+            CancelIo(pipes[i].read);
+            GetOverlappedResult(pipes[i].read, &pipes[i].ol, &r, TRUE);
+            CloseHandle(pipes[i].read);
+        }
         if (pipes[i].write) CloseHandle(pipes[i].write);
+        if (pipes[i].ol.hEvent) CloseHandle(pipes[i].ol.hEvent);
     }
     if (pi.hProcess) CloseHandle(pi.hProcess);
     talloc_free(tmp);
