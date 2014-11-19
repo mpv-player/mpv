@@ -2074,7 +2074,7 @@ Demuxer
     When opening the file, seek to the end of it, and check what timestamp the
     last video packet has, and report that as file duration. This is strictly
     for compatibility with Haali only. In this mode, it's possible that opening
-    will slower (especially when playing over http), or that behavior with
+    will be slower (especially when playing over http), or that behavior with
     broken files is much worse. So don't use this option.
 
 ``--demuxer-rawaudio-channels=<value>``
