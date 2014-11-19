@@ -435,6 +435,12 @@ Program Behavior
 
     (Note: this is the replacement for the now removed libquvi support.)
 
+``--ytdl-format=<best|worst|mp4|webm|...>``
+    Video format/quality that is directly passed to youtube-dl. The possible
+    values are specific to the website and the video, for a given url the
+    available formats can be found with the command
+    ``youtube-dl --list-formats URL``.
+
 Video
 -----
 
