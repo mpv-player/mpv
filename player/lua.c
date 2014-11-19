@@ -65,6 +65,9 @@ static const char * const builtin_lua_scripts[][2] = {
     {"@osc.lua",
 #   include "player/lua/osc.inc"
     },
+    {"@ytdl_hook.lua",
+#   include "player/lua/ytdl_hook.inc"
+    },
     {0}
 };
 

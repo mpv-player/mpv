@@ -386,6 +386,7 @@ player/lua/%.inc: TOOLS/file2string.pl player/lua/%.lua
 player/lua.c: player/lua/defaults.inc \
               player/lua/assdraw.inc \
               player/lua/osc.inc \
+              player/lua/ytdl_hook.inc \
               player/lua/options.inc
 
 etc/_mpv: TOOLS/zsh.pl ./mpv
@@ -490,6 +491,7 @@ clean:
 	-$(RM) player/lua/defaults.inc
 	-$(RM) player/lua/assdraw.inc
 	-$(RM) player/lua/osc.inc
+	-$(RM) player/lua/ytdl_hook.inc
 	-$(RM) player/lua/options.inc
 
 distclean: clean

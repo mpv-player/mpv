@@ -61,6 +61,7 @@ typedef struct MPOpts {
     char **lua_files;
     char **lua_opts;
     int lua_load_osc;
+    int lua_load_ytdl;
     int auto_load_scripts;
 
     struct m_obj_settings *audio_driver_list, *ao_defs;

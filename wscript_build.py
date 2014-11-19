@@ -1,4 +1,5 @@
 import re
+import os
 
 def _add_rst_manual_dependencies(ctx):
     manpage_sources_basenames = """
@@ -56,21 +57,11 @@ def build(ctx):
         source = "sub/osd_font.otf",
         target = "sub/osd_font.h")
 
-    ctx.file2string(
-        source = "player/lua/defaults.lua",
-        target = "player/lua/defaults.inc")
-
-    ctx.file2string(
-        source = "player/lua/assdraw.lua",
-        target = "player/lua/assdraw.inc")
-
-    ctx.file2string(
-        source = "player/lua/options.lua",
-        target = "player/lua/options.inc")
-
-    ctx.file2string(
-        source = "player/lua/osc.lua",
-        target = "player/lua/osc.inc")
+    lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
+                 "ytdl_hook.lua"]
+    for fn in lua_files:
+        fn = "player/lua/" + fn
+        ctx.file2string(source = fn, target = os.path.splitext(fn)[0] + ".inc")
 
     ctx.matroska_header(
         source = "demux/ebml.c demux/demux_mkv.c",
@@ -433,7 +424,6 @@ def build(ctx):
         )
         for f in ['example.conf', 'input.conf', 'mplayer-input.conf', \
                   'restore-old-bindings.conf']:
-            import os
             ctx.install_as(os.path.join(ctx.env.DOCDIR, f),
                            os.path.join('etc/', f))
 
@@ -441,7 +431,6 @@ def build(ctx):
     build_static = ctx.dependency_satisfied('libmpv-static')
     if build_shared or build_static:
         if build_shared:
-            import os
             waftoolsdir = os.path.join(os.path.dirname(__file__), "waftools")
             ctx.load("syms", tooldir=waftoolsdir)
         vre = '^#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION\((.*), (.*)\)$'
@@ -496,7 +485,6 @@ def build(ctx):
         ctx.install_as(ctx.env.LIBDIR + '/pkgconfig/mpv.pc', 'libmpv/mpv.pc')
 
     if ctx.dependency_satisfied('client-api-examples'):
-        import os
         # This assumes all examples are single-file (as examples should be)
         examples_sources = [
             ( "simple.c" ),

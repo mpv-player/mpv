@@ -130,6 +130,7 @@ const m_option_t mp_opts[] = {
     OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL | M_OPT_FILE),
     OPT_KEYVALUELIST("lua-opts", lua_opts, M_OPT_GLOBAL),
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
+    OPT_FLAG("ytdl", lua_load_ytdl, CONF_GLOBAL),
     OPT_FLAG("load-scripts", auto_load_scripts, CONF_GLOBAL),
 #endif
 
@@ -610,6 +611,7 @@ const struct MPOpts mp_default_opts = {
     .osd_scale_by_window = 1,
 #if HAVE_LUA
     .lua_load_osc = 1,
+    .lua_load_ytdl = 0,
 #endif
     .auto_load_scripts = 1,
     .loop_times = -1,

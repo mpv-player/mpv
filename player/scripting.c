@@ -177,6 +177,8 @@ void mp_load_scripts(struct MPContext *mpctx)
     // Load scripts from options
     if (mpctx->opts->lua_load_osc)
         mp_load_script(mpctx, "@osc.lua");
+    if (mpctx->opts->lua_load_ytdl)
+        mp_load_script(mpctx, "@ytdl_hook.lua");
     char **files = mpctx->opts->lua_files;
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])
