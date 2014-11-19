@@ -562,8 +562,6 @@ strictly part of the guaranteed API.
     Runs an external process and waits until it exits. Returns process status
     and the captured output.
 
-    This function is not available on Microsoft Windows.
-
     The paramater ``t`` is a table. The function reads the following entries:
 
         ``args``
@@ -594,6 +592,9 @@ strictly part of the guaranteed API.
             ``nil`` on success. The string ``killed`` if the process was
             terminated in an unusual way. The string ``init`` if the process
             could not be started.
+
+            On Windows, ``killed`` is only returned when the process has been
+            killed by mpv as a result of ``cancellable`` being set to ``true``.
 
     In all cases, ``mp.resume_all()`` is implicitly called.
 
