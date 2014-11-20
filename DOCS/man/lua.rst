@@ -181,7 +181,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Return the current mpv internal time in seconds as a number. This is
     basically the system time, with an arbitrary offset.
 
-``mp.add_key_binding(key, name|fn [,fn])``
+``mp.add_key_binding(key, name|fn [,fn [,flags]])``
     Register callback to be run on a key binding. The binding will be mapped to
     the given ``key``, which is a string describing the physical key. This uses
     the same key names as in input.conf, and also allows combinations
@@ -197,6 +197,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     script - if not, the previous binding with the same name will be
     overwritten. You can omit the name, in which case a random name is generated
     internally.
+
+    The last argument is used for additional flags. Currently, this includes
+    the string ``repeatable``, which enables key repeat for this specific
+    binding.
 
     Internally, key bindings are dispatched via the ``script_message_to`` input
     command and ``mp.register_script_message``.

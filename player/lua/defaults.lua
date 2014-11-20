@@ -105,8 +105,9 @@ local function update_key_bindings()
         local cfg = ""
         for k, v in pairs(key_bindings) do
             if v.forced ~= def then
-                cfg = cfg .. v.key .. " script_message_to " .. mp.script_name
-                      .. " " .. v.name .. "\n"
+                local flags = (v.repeatable and " repeatable") or ""
+                cfg = cfg .. v.key .. " " .. flags .. " script_message_to "
+                      .. mp.script_name .. " " .. v.name .. "\n"
             end
         end
         mp.input_define_section(section, cfg, flags)
@@ -115,12 +116,13 @@ local function update_key_bindings()
     end
 end
 
-local function add_binding(attrs, key, name, fn)
+local function add_binding(attrs, key, name, fn, rp)
     if (type(name) ~= "string") and (not fn) then
         fn = name
         name = "message" .. tostring(message_id)
         message_id = message_id + 1
     end
+    attrs.repeatable = rp == "repeatable"
     attrs.key = key
     attrs.name = name
     key_bindings[name] = attrs
