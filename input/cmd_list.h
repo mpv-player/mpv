@@ -80,6 +80,8 @@ enum mp_command_type {
 
     MP_CMD_AB_LOOP,
 
+    MP_CMD_DROP_BUFFERS,
+
     /// Audio Filter commands
     MP_CMD_AF,
     MP_CMD_AO_RELOAD,

@@ -556,6 +556,10 @@ Input Commands that are Possibly Subject to Change
     those which can will be reset even if they don't appear in the argument.
     This command might be changed or removed in the future.
 
+``drop_buffers``
+    Drop audio/video/demuxer buffers, and restart from fresh. Might help with
+    unseekable streams that are going out of sync.
+    This command might be changed or removed in the future.
 
 Undocumented commands: ``tv_last_channel`` (TV/DVB only), ``get_property`` (?),
 ``ao_reload`` (experimental/internal).

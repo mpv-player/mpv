@@ -4440,6 +4440,16 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         return r > 0;
     }
 
+    case MP_CMD_DROP_BUFFERS: {
+        reset_audio_state(mpctx);
+        reset_video_state(mpctx);
+
+        if (mpctx->demuxer)
+            demux_flush(mpctx->demuxer);
+
+        break;
+    }
+
     case MP_CMD_VO_CMDLINE:
         if (mpctx->video_out) {
             char *s = cmd->args[0].v.s;
