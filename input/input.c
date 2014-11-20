@@ -883,7 +883,8 @@ mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
     struct mp_cmd *ret = queue_remove_head(&ictx->cmd_queue);
     if (!ret) {
         ret = check_autorepeat(ictx);
-        if (ret)
+        // (if explicitly repeated, don't let command.c ignore it)
+        if (ret && !(ret->flags & MP_ALLOW_REPEAT))
             ret->repeated = true;
     }
     if (ret && ret->mouse_move) {

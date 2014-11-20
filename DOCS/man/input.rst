@@ -587,7 +587,9 @@ prefixes can be specified. They are separated by whitespace.
     Do not expand properties in string arguments. (Like ``"${property-name}"``.)
 ``expand-properties`` (default)
     All string arguments are expanded as described in `Property Expansion`_.
-
+``repeatable``
+    For some commands, keeping a key pressed doesn't run the command repeatedly.
+    This prefix forces enabling key repeat in any case.
 
 All of the osd prefixes are still overridden by the global ``--osd-level``
 settings.

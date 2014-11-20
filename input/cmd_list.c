@@ -297,7 +297,8 @@ bool mp_input_is_abort_cmd(struct mp_cmd *cmd)
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
 {
     return (cmd->def && cmd->def->allow_auto_repeat) ||
-           cmd->id == MP_CMD_COMMAND_LIST;
+           cmd->id == MP_CMD_COMMAND_LIST ||
+           (cmd->flags & MP_ALLOW_REPEAT);
 }
 
 void mp_print_cmd_list(struct mp_log *out)

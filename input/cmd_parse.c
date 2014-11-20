@@ -47,8 +47,9 @@ static const struct flag cmd_flags[] = {
     {"osd-msg",             MP_ON_OSD_FLAGS, MP_ON_OSD_MSG},
     {"osd-msg-bar",         MP_ON_OSD_FLAGS, MP_ON_OSD_MSG | MP_ON_OSD_BAR},
     {"osd-auto",            MP_ON_OSD_FLAGS, MP_ON_OSD_AUTO},
-    {"expand-properties",   0,                    MP_EXPAND_PROPERTIES},
+    {"expand-properties",   0,               MP_EXPAND_PROPERTIES},
     {"raw",                 MP_EXPAND_PROPERTIES, 0},
+    {"repeatable",          0,               MP_ALLOW_REPEAT},
     {0}
 };
 
