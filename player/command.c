@@ -967,11 +967,8 @@ static int mp_property_angle(void *ctx, struct m_property *prop,
         demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
         demux_unpause(demuxer);
 
-        if (mpctx->d_video)
-            video_reset_decoding(mpctx->d_video);
-
-        if (mpctx->d_audio)
-            audio_reset_decoding(mpctx->d_audio);
+        reset_audio_state(mpctx);
+        reset_video_state(mpctx);
 
         return ris == STREAM_OK ? M_PROPERTY_OK : M_PROPERTY_ERROR;
     case M_PROPERTY_GET_TYPE: {
