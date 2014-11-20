@@ -2910,8 +2910,9 @@ static void probe_last_timestamp(struct demuxer *demuxer)
         if (res > 0) {
             if (block.track && block.track->stream) {
                 enum stream_type type = block.track->stream->type;
-                if (last_ts[type] < block.timecode)
-                    last_ts[type] = block.timecode;
+                uint64_t endtime = block.timecode + block.duration;
+                if (last_ts[type] < endtime)
+                    last_ts[type] = endtime;
             }
             free_block(&block);
         }
