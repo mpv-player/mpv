@@ -427,6 +427,20 @@ def build(ctx):
             ctx.install_as(os.path.join(ctx.env.DOCDIR, f),
                            os.path.join('etc/', f))
 
+        if ctx.env.DEST_OS == 'win32':
+            wrapctx = ctx(
+                target       = "mpv",
+                source       = ['osdep/win32-console-wrapper.c'],
+                features     = "c cprogram",
+                install_path = ctx.env.BINDIR
+            )
+
+            wrapctx.env.cprogram_PATTERN = "%s.com"
+            wrapflags = ['-municode', '-mconsole']
+            wrapctx.env.CFLAGS = wrapflags
+            wrapctx.env.LAST_LINKFLAGS = wrapflags
+
+
     build_shared = ctx.dependency_satisfied('libmpv-shared')
     build_static = ctx.dependency_satisfied('libmpv-static')
     if build_shared or build_static:
@@ -500,19 +514,6 @@ def build(ctx):
                 features     = "c cprogram",
                 install_path = None
             )
-
-    if ctx.env.DEST_OS == 'win32':
-        wrapctx = ctx(
-            target       = "mpv",
-            source       = ['osdep/win32-console-wrapper.c'],
-            features     = "c cprogram",
-            install_path = ctx.env.BINDIR
-        )
-
-        wrapctx.env.cprogram_PATTERN = "%s.com"
-        wrapflags = ['-municode', '-mconsole']
-        wrapctx.env.CFLAGS = wrapflags
-        wrapctx.env.LAST_LINKFLAGS = wrapflags
 
     if ctx.dependency_satisfied("vf-dlopen-filters"):
         dlfilters = "showqscale telecine tile rectangle framestep \
