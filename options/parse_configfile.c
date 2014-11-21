@@ -156,6 +156,13 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
                 c = line[line_pos];
                 ++line_pos;
                 for (param_pos = 0; line[line_pos] != c; /* NOTHING */) {
+                    if (!line[line_pos]) {
+                        PRINT_LINENUM;
+                        MP_ERR(config, "unterminated quotes\n");
+                        ret = -1;
+                        errors++;
+                        goto nextline;
+                    }
                     param[param_pos++] = line[line_pos++];
                     if (param_pos >= MAX_PARAM_LEN) {
                         PRINT_LINENUM;
