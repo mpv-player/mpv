@@ -72,39 +72,35 @@ static void fput32le(uint32_t val, FILE *fp)
 
 static void write_wave_header(struct ao *ao, FILE *fp, uint64_t data_length)
 {
-    bool use_waveex = true;
     uint16_t fmt = ao->format == AF_FORMAT_FLOAT ? WAV_ID_FLOAT_PCM : WAV_ID_PCM;
-    uint32_t fmt_chunk_size = use_waveex ? 40 : 16;
     int bits = af_fmt2bits(ao->format);
 
     // Master RIFF chunk
     fput32le(WAV_ID_RIFF, fp);
-    // RIFF chunk size: 'WAVE' + 'fmt ' + 4 + fmt_chunk_size +
+    // RIFF chunk size: 'WAVE' + 'fmt ' + 4 + 40 +
     // data chunk hdr (8) + data length
-    fput32le(12 + fmt_chunk_size + 8 + data_length, fp);
+    fput32le(12 + 40 + 8 + data_length, fp);
     fput32le(WAV_ID_WAVE, fp);
 
     // Format chunk
     fput32le(WAV_ID_FMT, fp);
-    fput32le(fmt_chunk_size, fp);
-    fput16le(use_waveex ? WAV_ID_FORMAT_EXTENSIBLE : fmt, fp);
+    fput32le(40, fp);
+    fput16le(WAV_ID_FORMAT_EXTENSIBLE, fp);
     fput16le(ao->channels.num, fp);
     fput32le(ao->samplerate, fp);
     fput32le(ao->bps, fp);
     fput16le(ao->channels.num * (bits / 8), fp);
     fput16le(bits, fp);
 
-    if (use_waveex) {
-        // Extension chunk
-        fput16le(22, fp);
-        fput16le(bits, fp);
-        fput32le(mp_chmap_to_waveext(&ao->channels), fp);
-        // 2 bytes format + 14 bytes guid
-        fput32le(fmt, fp);
-        fput32le(0x00100000, fp);
-        fput32le(0xAA000080, fp);
-        fput32le(0x719B3800, fp);
-    }
+    // Extension chunk
+    fput16le(22, fp);
+    fput16le(bits, fp);
+    fput32le(mp_chmap_to_waveext(&ao->channels), fp);
+    // 2 bytes format + 14 bytes guid
+    fput32le(fmt, fp);
+    fput32le(0x00100000, fp);
+    fput32le(0xAA000080, fp);
+    fput32le(0x719B3800, fp);
 
     // Data chunk
     fput32le(WAV_ID_DATA, fp);
