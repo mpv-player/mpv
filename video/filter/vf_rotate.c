@@ -47,7 +47,7 @@ static int lavfi_reconfig(struct vf_instance *vf,
     struct vf_priv_s *p = vf_lw_old_priv(vf);
     if (p->angle == 4) { // "auto"
         int r = in->rotate;
-        if (r < 0 || (r % 90) != 0) {
+        if (r < 0 || r >= 360 || (r % 90) != 0) {
             MP_ERR(vf, "Can't apply rotation of %d degrees.\n", r);
             return -1;
         }

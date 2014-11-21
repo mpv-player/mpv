@@ -1573,6 +1573,7 @@ pvr_stream_open (stream_t *stream)
   if (ioctl (pvr->dev_fd, VIDIOC_G_EXT_CTRLS, &ctrls) < 0)
   {
     MP_ERR(pvr, "%s device do not support MPEG input.\n", LOG_LEVEL_ENCODER);
+    pvr_uninit (pvr);
     return STREAM_ERROR;
   }
 

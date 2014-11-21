@@ -277,7 +277,7 @@ int bstr_decode_utf8(struct bstr s, struct bstr *out_next)
     s.start++; s.len--;
     if (codepoint >= 128) {
         int bytes = bstr_parse_utf8_code_length(codepoint);
-        if (bytes < 0 || s.len < bytes - 1)
+        if (bytes < 1 || s.len < bytes - 1)
             return -1;
         codepoint &= 127 >> bytes;
         for (int n = 1; n < bytes; n++) {
