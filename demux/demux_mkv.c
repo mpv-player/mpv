@@ -131,13 +131,13 @@ typedef struct mkv_track {
     double ra_pts;              /* previous audio timestamp */
 
   /** realaudio descrambling */
-    uint16_t sub_packet_size;   ///< sub packet size, per stream
-    uint16_t sub_packet_h;      ///< number of coded frames per block
+    uint32_t sub_packet_size;   ///< sub packet size, per stream
+    uint32_t sub_packet_h;      ///< number of coded frames per block
     uint32_t coded_framesize;   ///< coded frame size, per stream
-    uint16_t audiopk_size;      ///< audio packet size
+    uint32_t audiopk_size;      ///< audio packet size
     unsigned char *audio_buf;   ///< place to store reordered audio data
     double *audio_timestamp;    ///< timestamp for each audio packet
-    uint16_t sub_packet_cnt;    ///< number of subpacket already received
+    uint32_t sub_packet_cnt;    ///< number of subpacket already received
     int audio_filepos;          ///< file position of first audio packet in block
 
     /* generic content encoding support */
@@ -2013,11 +2013,11 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
                              bstr data, bool keyframe)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-    uint16_t sps = track->sub_packet_size;
-    uint16_t sph = track->sub_packet_h;
+    uint32_t sps = track->sub_packet_size;
+    uint32_t sph = track->sub_packet_h;
     uint32_t cfs = track->coded_framesize; // restricted to [1,0x40000000]
-    uint16_t w = track->audiopk_size;
-    uint16_t spc = track->sub_packet_cnt;
+    uint32_t w = track->audiopk_size;
+    uint32_t spc = track->sub_packet_cnt;
     uint8_t *buffer = data.start;
     uint32_t size = data.len;
     demux_packet_t *dp;
