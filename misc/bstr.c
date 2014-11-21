@@ -379,6 +379,8 @@ static void resize_append(void *talloc_ctx, bstr *s, size_t append_min)
 // talloc_ctx will be used as parent context, if s->start is NULL.
 void bstr_xappend(void *talloc_ctx, bstr *s, bstr append)
 {
+    if (!append.len)
+        return;
     resize_append(talloc_ctx, s, append.len + 1);
     memcpy(s->start + s->len, append.start, append.len);
     s->len += append.len;
