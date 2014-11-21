@@ -1471,7 +1471,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         /* Common initialization for all RealAudio codecs */
         unsigned char *src = track->private_data;
         int codecdata_length, version;
-        int flavor;
+        unsigned int flavor;
 
         sh_a->bitrate = 0;  /* FIXME !? */
 
@@ -1507,14 +1507,20 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
         switch (track->a_formattag) {
         case MP_FOURCC('a', 't', 'r', 'c'):
+            if (flavor >= MP_ARRAY_SIZE(atrc_fl2bps))
+                goto error;
             sh_a->bitrate = atrc_fl2bps[flavor] * 8;
             sh_a->block_align = track->sub_packet_size;
             goto audiobuf;
         case MP_FOURCC('c', 'o', 'o', 'k'):
+            if (flavor >= MP_ARRAY_SIZE(cook_fl2bps))
+                goto error;
             sh_a->bitrate = cook_fl2bps[flavor] * 8;
             sh_a->block_align = track->sub_packet_size;
             goto audiobuf;
         case MP_FOURCC('s', 'i', 'p', 'r'):
+            if (flavor >= MP_ARRAY_SIZE(sipr_fl2bps))
+                goto error;
             sh_a->bitrate = sipr_fl2bps[flavor] * 8;
             sh_a->block_align = track->coded_framesize;
             goto audiobuf;
