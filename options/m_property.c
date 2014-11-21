@@ -201,7 +201,7 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
         int err = m_option_get_node(&opt, NULL, node, &val);
         if (err == M_OPT_UNKNOWN) {
             r = M_PROPERTY_NOT_IMPLEMENTED;
-        } else if (r < 0) {
+        } else if (err < 0) {
             r = M_PROPERTY_INVALID_FORMAT;
         } else {
             r = M_PROPERTY_OK;
