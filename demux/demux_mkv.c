@@ -1760,7 +1760,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     int64_t end_pos;
 
     bstr start = stream_peek(s, 4);
-    uint32_t start_id;
+    uint32_t start_id = 0;
     for (int n = 0; n < start.len; n++)
         start_id = (start_id << 8) | start.start[n];
     if (start_id != EBML_ID_EBML)
