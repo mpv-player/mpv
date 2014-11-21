@@ -353,12 +353,12 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
 
     void *tempdata = NULL;
+    void *padded[MP_NUM_CHANNELS];
 
     if ((flags & AOPLAY_FINAL_CHUNK) && (samples % ac->aframesize)) {
        tempdata = talloc_new(NULL);
        size_t bytelen = samples * ao->sstride;
        size_t extralen = (ac->aframesize - 1) * ao->sstride;
-       void *padded[MP_NUM_CHANNELS];
        for (int n = 0; n < num_planes; n++) {
            padded[n] = talloc_size(tempdata, bytelen + extralen);
            memcpy(padded[n], data[n], bytelen);
