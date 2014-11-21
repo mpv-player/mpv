@@ -242,8 +242,9 @@ static int encode(struct ao *ao, double apts, void **data)
         frame->format = af_to_avformat(ao->format);
         frame->nb_samples = ac->aframesize;
 
-        assert(ao->channels.num <= AV_NUM_DATA_POINTERS);
-        for (int n = 0; n < ao->channels.num; n++)
+        size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
+        assert(num_planes <= AV_NUM_DATA_POINTERS);
+        for (int n = 0; n < num_planes; n++)
             frame->extended_data[n] = data[n];
 
         frame->linesize[0] = frame->nb_samples * ao->sstride;
@@ -438,7 +439,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     outpts += encode_lavc_getoffset(ectx, ac->stream);
 
     while (samples - bufpos >= ac->aframesize) {
-        void *start[MP_NUM_CHANNELS];
+        void *start[MP_NUM_CHANNELS] = {0};
         for (int n = 0; n < num_planes; n++)
             start[n] = (char *)data[n] + bufpos * ao->sstride;
         encode(ao, outpts + bufpos / (double) ao->samplerate, start);
