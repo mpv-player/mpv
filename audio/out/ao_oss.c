@@ -322,7 +322,8 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
 #endif
 
     if (AF_FORMAT_IS_IEC61937(format)) {
-        ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &samplerate);
+        if (ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &samplerate) == -1)
+            goto fail;
         // Probably could be fixed by setting number of channels; needs testing.
         if (channels.num != 2) {
             MP_ERR(ao, "Format %s not implemented.\n", af_fmt_to_str(format));
@@ -374,7 +375,8 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
         MP_VERBOSE(ao, "using %d channels (requested: %d)\n",
                    channels.num, reqchannels);
         // set rate
-        ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &samplerate);
+        if (ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &samplerate) == -1)
+            goto fail;
         MP_VERBOSE(ao, "using %d Hz samplerate\n", samplerate);
     }
 
