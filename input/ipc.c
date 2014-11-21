@@ -475,12 +475,12 @@ static int ipc_write(int fd, const char *buf, size_t count)
         ssize_t rc = write(fd, buf, count);
         if (rc <= 0) {
             if (rc == 0)
-                return ECONNRESET;
+                return -1;
 
-            if (rc == EINTR)
+            if (errno == EINTR)
                 continue;
 
-            if (rc == EAGAIN)
+            if (errno == EAGAIN)
                 return 0;
 
             return rc;
