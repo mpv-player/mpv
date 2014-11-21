@@ -464,7 +464,7 @@ int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
     assert(ao->api == &ao_api_push);
     assert(&p->lock == lock);
 
-    if (num_fds > MAX_POLL_FDS || p->wakeup_pipe[0] < 0)
+    if (num_fds >= MAX_POLL_FDS || p->wakeup_pipe[0] < 0)
         return -1;
 
     struct pollfd p_fds[MAX_POLL_FDS];
