@@ -8,6 +8,8 @@ env:
   - LIBAV=libav-git
   - LIBAV=ffmpeg-stable
   - LIBAV=ffmpeg-git
+  global:
+   - secure: "H21mSRlMhk4BKS0xHZvCFGJxteCP0hRVUxTuNfM2Z9HBsyutuLEYMtViLO86VtM+Tqla3xXPzUdS4ozLwI72Ax/5ZUDXACROj73yW6QhFB5D6rLut12+FjqC7M33Qv2hl0xwgNBmR5dsm1ToP37+Wn+ecJQNvN8fkTXF+HVzOEw="
 compiler:
   - clang
 
@@ -39,10 +41,6 @@ notifications:
       - "irc.freenode.org#mpv-player-dev"
     on_success: change
     on_failure: always
-
-env:
-  global:
-   - secure: "H21mSRlMhk4BKS0xHZvCFGJxteCP0hRVUxTuNfM2Z9HBsyutuLEYMtViLO86VtM+Tqla3xXPzUdS4ozLwI72Ax/5ZUDXACROj73yW6QhFB5D6rLut12+FjqC7M33Qv2hl0xwgNBmR5dsm1ToP37+Wn+ecJQNvN8fkTXF+HVzOEw="
 
 addons:
   coverity_scan:
