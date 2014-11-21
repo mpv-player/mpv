@@ -202,9 +202,6 @@ int reinit_video_filters(struct MPContext *mpctx)
     if (need_reconfig)
         filter_reconfig(mpctx, true);
 
-    if (!d_video->vfilter)
-        return 0;
-
     return d_video->vfilter->initialized;
 }
 

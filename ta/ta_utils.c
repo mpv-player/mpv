@@ -247,7 +247,7 @@ bool ta_asprintf_append(char **str, const char *fmt, ...)
 
 bool ta_vasprintf_append(char **str, const char *fmt, va_list ap)
 {
-    return ta_vasprintf_append_at(str, str && *str ? strlen(*str) : 0, fmt, ap);
+    return ta_vasprintf_append_at(str, *str ? strlen(*str) : 0, fmt, ap);
 }
 
 /* Append the formatted string at the end of the allocation of *str. It

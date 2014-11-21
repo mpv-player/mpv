@@ -1969,8 +1969,7 @@ static int probe_deint_filters(struct MPContext *mpctx)
     if (check_output_format(mpctx, IMGFMT_VDPAU)) {
         char filter[80] = "vdpaupp:deint=yes";
         int pref = 0;
-        if (mpctx->video_out)
-            vo_control(mpctx->video_out, VOCTRL_GET_PREF_DEINT, &pref);
+        vo_control(mpctx->video_out, VOCTRL_GET_PREF_DEINT, &pref);
         pref = pref < 0 ? -pref : pref;
         if (pref > 0 && pref <= 4) {
             const char *types[] =
