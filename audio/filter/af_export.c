@@ -78,8 +78,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     int mapsize;
 
     // Free previous buffers
-    if (s->buf)
-      free(s->buf[0]);
+    free(s->buf[0]);
 
     // unmap previous area
     if(s->mmap_area)
@@ -94,8 +93,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     // Allocate new buffers (as one continuous block)
     s->buf[0] = calloc(s->sz*af->data->nch, af->data->bps);
-    if(NULL == s->buf[0])
+    if(NULL == s->buf[0]) {
       MP_FATAL(af, "Out of memory\n");
+      return AF_ERROR;
+    }
     for(i = 1; i < af->data->nch; i++)
       s->buf[i] = (uint8_t *)s->buf[0] + i*s->sz*af->data->bps;
 
@@ -147,8 +148,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
 static void uninit( struct af_instance* af )
 {
     af_export_t* s = af->priv;
-    if (s->buf)
-      free(s->buf[0]);
+
+    free(s->buf[0]);
 
     // Free mmaped area
     if(s->mmap_area)

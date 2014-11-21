@@ -305,7 +305,7 @@ int mp_input_get_keys_from_string(char *name, int max_num_keys,
 
     ptr = name;
     n = 0;
-    for (end = strchr(ptr, '-'); ptr != NULL; end = strchr(ptr, '-')) {
+    for (end = strchr(ptr, '-'); ; end = strchr(ptr, '-')) {
         if (end && end[1] != '\0') {
             if (end[1] == '-')
                 end = &end[1];

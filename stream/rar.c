@@ -438,13 +438,12 @@ ssize_t RarRead(rar_file_t *file, void *data, size_t size)
         if (max <= 0)
             break;
 
-        int r = file->s ? stream_read(file->s, data, max) : -1;
+        int r = stream_read(file->s, data, max);
         if (r <= 0)
             break;
 
         total += r;
-        if( data )
-            data = (char *)data + r;
+        data = (char *)data + r;
         file->i_pos += r;
         if (file->i_pos >= chunk_end &&
             RarSeek(file, file->i_pos))
