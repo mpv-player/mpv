@@ -271,7 +271,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
     switch (cmd) {
     case AF_CONTROL_REINIT: {
         struct mp_audio *data = (struct mp_audio *)arg;
-        float srate = data->rate / 1000;
+        float srate  = data->rate / 1000.0;
         int nch = data->nch;
         int use_int = 0;
 
