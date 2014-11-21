@@ -861,8 +861,8 @@ static uint16_t stream_read_word_endian(stream_t *s, bool big_endian)
 {
     unsigned int y = stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
-    if (big_endian)
-        y = (y >> 8) | ((y << 8) & 0xFF);
+    if (!big_endian)
+        y = ((y >> 8) & 0xFF) | (y << 8);
     return y;
 }
 
