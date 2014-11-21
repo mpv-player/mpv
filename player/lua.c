@@ -15,6 +15,11 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef __MINGW32__
+#define _WIN32_WINNT 0x0600
+#include <windows.h>
+#endif
+
 #include <assert.h>
 #include <string.h>
 #include <strings.h>
@@ -25,6 +30,7 @@
 #include <math.h>
 
 #include "osdep/io.h"
+#include "osdep/atomics.h"
 
 #include <lua.h>
 #include <lualib.h>
@@ -1174,10 +1180,6 @@ static int script_join_path(lua_State *L)
 typedef void (*read_cb)(void *ctx, char *data, size_t size);
 
 #ifdef __MINGW32__
-#include <windows.h>
-#include "osdep/io.h"
-#include "osdep/atomics.h"
-
 static void write_arg(bstr *cmdline, char *arg)
 {
     // If the string doesn't have characters that need to be escaped, it's best
@@ -1277,6 +1279,65 @@ error:
     return -1;
 }
 
+static void delete_handle_list(void *p)
+{
+    LPPROC_THREAD_ATTRIBUTE_LIST list = p;
+    VOID (WINAPI *pDeleteProcThreadAttributeList)(LPPROC_THREAD_ATTRIBUTE_LIST);
+
+    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+    pDeleteProcThreadAttributeList =
+        (VOID (WINAPI*)(LPPROC_THREAD_ATTRIBUTE_LIST))
+        GetProcAddress(kernel32, "DeleteProcThreadAttributeList");
+
+    if (pDeleteProcThreadAttributeList)
+        pDeleteProcThreadAttributeList(list);
+}
+
+// Create a PROC_THREAD_ATTRIBUTE_LIST that specifies exactly which handles are
+// inherited by the subprocess
+static LPPROC_THREAD_ATTRIBUTE_LIST create_handle_list(void *ctx,
+                                                       HANDLE *handles, int num)
+{
+    WINBOOL (WINAPI *pInitializeProcThreadAttributeList)(
+            LPPROC_THREAD_ATTRIBUTE_LIST, DWORD, DWORD, PSIZE_T);
+    WINBOOL (WINAPI *pUpdateProcThreadAttribute)(LPPROC_THREAD_ATTRIBUTE_LIST,
+            DWORD, DWORD_PTR, PVOID, SIZE_T, PVOID, PSIZE_T);
+
+    // Load Windows Vista functions, if available
+    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+    pInitializeProcThreadAttributeList =
+        (WINBOOL (WINAPI*)(LPPROC_THREAD_ATTRIBUTE_LIST, DWORD, DWORD, PSIZE_T))
+        GetProcAddress(kernel32, "InitializeProcThreadAttributeList");
+    pUpdateProcThreadAttribute =
+        (WINBOOL (WINAPI*)(LPPROC_THREAD_ATTRIBUTE_LIST, DWORD, DWORD_PTR,
+                           PVOID, SIZE_T, PVOID, PSIZE_T))
+        GetProcAddress(kernel32, "UpdateProcThreadAttribute");
+    if (!pInitializeProcThreadAttributeList || !pUpdateProcThreadAttribute)
+        return NULL;
+
+    // Get required attribute list size
+    SIZE_T size = 0;
+    if (!pInitializeProcThreadAttributeList(NULL, 1, 0, &size)) {
+        if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+            return NULL;
+    }
+
+    // Allocate attribute list
+    LPPROC_THREAD_ATTRIBUTE_LIST list = talloc_size(ctx, size);
+    if (!pInitializeProcThreadAttributeList(list, 1, 0, &size))
+        goto error;
+    talloc_set_destructor(list, delete_handle_list);
+
+    if (!pUpdateProcThreadAttribute(list, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
+                                    handles, num * sizeof(HANDLE), NULL, NULL))
+        goto error;
+
+    return list;
+error:
+    talloc_free(list);
+    return NULL;
+}
+
 // Helper method similar to sparse_poll, skips NULL handles
 static int sparse_wait(HANDLE *handles, unsigned num_handles)
 {
@@ -1345,13 +1406,27 @@ static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
 
     DWORD flags = CREATE_UNICODE_ENVIRONMENT;
     PROCESS_INFORMATION pi = {0};
-    STARTUPINFOW si = {
-        .cb = sizeof(si),
-        .dwFlags = STARTF_USESTDHANDLES,
-        .hStdInput = NULL,
-        .hStdOutput = pipes[0].write,
-        .hStdError = pipes[1].write,
+    STARTUPINFOEXW si = {
+        .StartupInfo = {
+            .cb = sizeof(si),
+            .dwFlags = STARTF_USESTDHANDLES,
+            .hStdInput = NULL,
+            .hStdOutput = pipes[0].write,
+            .hStdError = pipes[1].write,
+        },
+
+        // Specify which handles are inherited by the subprocess. If this isn't
+        // specified, the subprocess inherits all inheritable handles, which
+        // could include handles created by other threads. See:
+        // http://blogs.msdn.com/b/oldnewthing/archive/2011/12/16/10248328.aspx
+        .lpAttributeList = create_handle_list(tmp,
+                (HANDLE[]){ pipes[0].write, pipes[1].write }, 2),
     };
+
+    // PROC_THREAD_ATTRIBUTE_LISTs are only supported in Vista and up. If not
+    // supported, create_handle_list will return NULL.
+    if (si.lpAttributeList)
+        flags |= EXTENDED_STARTUPINFO_PRESENT;
 
     // If we have a console, the subprocess will automatically attach to it so
     // it can receive Ctrl+C events. If we don't have a console, prevent the
@@ -1362,9 +1437,10 @@ static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
         flags |= CREATE_NO_WINDOW;
 
     if (!CreateProcessW(NULL, cmdline, NULL, NULL, TRUE, flags, NULL, NULL,
-                        &si, &pi))
+                        &si.StartupInfo, &pi))
         goto done;
     talloc_free(cmdline);
+    talloc_free(si.lpAttributeList);
     CloseHandle(pi.hThread);
 
     // Init is finished
