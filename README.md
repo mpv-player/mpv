@@ -119,17 +119,17 @@ make code review easier for both parties later on.
 Contact
 -------
 
-These forms of contact are meant to ask questions about mpv usage, give
-feedback on mpv and discuss it's development.
+Most activity happens on the IRC channel and the github issue tracker. The
+mailing lists are mostly unused.
 
-If possible, please avoid posting bugs here and use the [issue tracker][issue-tracker]
-instead.
-
- - **Users IRC Channel**: `#mpv-player` on `irc.freenode.net`
+ - **Github issue tracker**: [issue tracker][issue-tracker] (report bugs here)
+ - **User IRC Channel**: `#mpv-player` on `irc.freenode.net`
+ - **Developer IRC Channel**: `#mpv-player-dev` on `irc.freenode.net`
  - **Users Mailing List**: `mpv-users@googlegroups.com` ([Archive / Subscribe][mpv-users]).
  - **Devel Mailing List**: `mpv-devel@googlegroups.com` ([Archive / Subscribe][mpv-devel])
 
-To contact the `mpv` team in private write to `mpv-team@googlegroups.com`.
+To contact the `mpv` team in private write to `mpv-team@googlegroups.com`. Use
+only if discretion is required.
 
 [changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/man/changes.rst
 [mpv-build]: https://github.com/mpv-player/mpv-build
