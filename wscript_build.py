@@ -380,6 +380,8 @@ def build(ctx):
         ( "osdep/macosx_application.m",          "cocoa-application" ),
         ( "osdep/macosx_events.m",               "cocoa" ),
         ( "osdep/semaphore_osx.c" ),
+        ( "osdep/subprocess-posix.c",            "posix-spawn" ),
+        ( "osdep/subprocess-win.c",              "os-win32" ),
         ( "osdep/path-macosx.m",                 "cocoa" ),
         ( "osdep/path-win.c",                    "os-win32" ),
         ( "osdep/path-win.c",                    "os-cygwin" ),
