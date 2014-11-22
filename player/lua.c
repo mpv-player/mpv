@@ -1397,7 +1397,8 @@ static int subprocess(char **args, struct mp_cancel *cancel, void *ctx,
             goto done;
         if (create_overlapped_pipe(&pipes[i].read, &pipes[i].write))
             goto done;
-        if (!SetHandleInformation(pipes[i].write, HANDLE_FLAG_INHERIT, 1))
+        if (!SetHandleInformation(pipes[i].write, HANDLE_FLAG_INHERIT,
+                                                  HANDLE_FLAG_INHERIT))
             goto done;
     }
 
