@@ -35,11 +35,7 @@ judge()
     bff=0
     progressive=0
     undetermined=0
-    while IFS= read -r out; do
-        tff1=${out##* TFF:}; tff1=${tff1%% *}
-        bff1=${out##* BFF:}; bff1=${bff1%% *}
-        progressive1=${out##* Progressive:}; progressive1=${progressive1%% *}
-        undetermined1=${out##* Undetermined:}; undetermined1=${undetermined1%% *}
+    while read -r _ _ _ _ _ _ tff1 _ bff1 _ progressive1 _ undetermined1 _; do
         case "$tff1$bff1$progressive1$undetermined1" in
             *[!0-9]*)
                 printf >&2 'ERROR: Unrecognized idet output: %s\n' "$out"
