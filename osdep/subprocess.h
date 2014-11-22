@@ -18,7 +18,9 @@
 #ifndef MP_SUBPROCESS_H_
 #define MP_SUBPROCESS_H_
 
-#include "stream/stream.h"
+#include <stddef.h>
+
+struct mp_cancel;
 
 typedef void (*subprocess_read_cb)(void *ctx, char *data, size_t size);
 

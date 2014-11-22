@@ -16,16 +16,17 @@
  */
 
 #define _WIN32_WINNT 0x0600
-#include "osdep/subprocess.h"
-
 #include <windows.h>
 #include <string.h>
+
+#include "osdep/subprocess.h"
 
 #include "osdep/io.h"
 #include "osdep/atomics.h"
 
 #include "talloc.h"
 #include "common/common.h"
+#include "stream/stream.h"
 #include "misc/bstr.h"
 
 static void write_arg(bstr *cmdline, char *arg)

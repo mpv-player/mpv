@@ -15,8 +15,6 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "osdep/subprocess.h"
-
 #include <spawn.h>
 #include <poll.h>
 #include <unistd.h>
@@ -25,8 +23,11 @@
 #include <errno.h>
 #include <signal.h>
 
+#include "osdep/subprocess.h"
+
 #include "osdep/io.h"
 #include "common/common.h"
+#include "stream/stream.h"
 
 // Normally, this must be declared manually, but glibc is retarded.
 #ifndef __GLIBC__
