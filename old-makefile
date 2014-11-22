@@ -193,6 +193,7 @@ SOURCES = audio/audio.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/semaphore_osx.c \
+          osdep/subprocess-posix.c \
           osdep/terminal-unix.c \
           osdep/timer.c \
           osdep/timer-linux.c \
