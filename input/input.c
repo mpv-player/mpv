@@ -362,6 +362,8 @@ static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
     }
     *bind_section = (struct cmd_bind_section) {
         .section = bstrdup0(bind_section, section),
+        .mouse_area = {INT_MIN, INT_MIN, INT_MAX, INT_MAX},
+        .mouse_area_set = true,
     };
     return bind_section;
 }
@@ -1223,7 +1225,6 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     // Setup default section, so that it does nothing.
     mp_input_enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |
                                         MP_INPUT_ALLOW_HIDE_CURSOR);
-    mp_input_set_section_mouse_area(ictx, NULL, INT_MIN, INT_MIN, INT_MAX, INT_MAX);
 
     return ictx;
 }

@@ -112,7 +112,7 @@ local function update_key_bindings()
         end
         mp.input_define_section(section, cfg, flags)
         -- TODO: remove the section if the script is stopped
-        mp.input_enable_section(section)
+        mp.input_enable_section(section, "allow-hide-cursor|allow-vo-dragging")
     end
 end
 
