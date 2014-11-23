@@ -465,14 +465,15 @@ static HRESULT fix_format(struct ao *ao)
 
     /* integer multiple of device period close to 50ms */
     bufferPeriod = bufferDuration = ceil( 50.0 * 10000.0 / devicePeriod ) * devicePeriod;
-    if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
-        bufferPeriod = 0;
 
     /* handle unsupported buffer size */
     /* hopefully this shouldn't happen because of the above integer device period */
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx */
     int retries=0;
 reinit:
+    if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
+        bufferPeriod = 0;
+
     MP_DBG(state, "IAudioClient::Initialize\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
                                  state->share_mode,
@@ -483,21 +484,18 @@ reinit:
                                  NULL);
     /* something about buffer sizes on Win7 */
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
+        if (retries > 0)
+            EXIT_ON_ERROR(hr);
+        else
+            retries ++;
+
         MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s (0x%"PRIx32"), used %lld * 100ns\n",
                    wasapi_explain_err(hr), (uint32_t)hr, bufferDuration);
-        if (retries > 0) {
-            hr = E_FAIL;
-            EXIT_ON_ERROR(hr);
-        } else {
-            retries ++;
-        }
 
         IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
         bufferPeriod = bufferDuration =
             (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
                               state->bufferFrameCount) + 0.5);
-        if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
-            bufferPeriod = 0;
 
         IAudioClient_Release(state->pAudioClient);
         state->pAudioClient = NULL;
