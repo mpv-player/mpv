@@ -4113,7 +4113,20 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_FRAME_STEP:
         if (!mpctx->num_sources)
             return -1;
-        add_step_frame(mpctx, 1);
+        if (cmd->is_up_down) {
+            if (cmd->is_up) {
+                if (mpctx->step_frames < 1)
+                    pause_player(mpctx);
+            } else {
+                if (cmd->repeated) {
+                    unpause_player(mpctx);
+                } else {
+                    add_step_frame(mpctx, 1);
+                }
+            }
+        } else {
+            add_step_frame(mpctx, 1);
+        }
         break;
 
     case MP_CMD_FRAME_BACK_STEP:

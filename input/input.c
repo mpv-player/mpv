@@ -537,6 +537,7 @@ static bool key_updown_ok(enum mp_command_type cmd)
 {
     switch (cmd) {
     case MP_CMD_SCRIPT_BINDING:
+    case MP_CMD_FRAME_STEP:
         return true;
     default:
         return false;
