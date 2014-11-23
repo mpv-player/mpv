@@ -25,6 +25,7 @@ API changes
 
 ::
 
+ --- mpv 0.7.0 is released ---
  1.10   - deprecate/disable everything directly related to script_dispatch
           (most likely affects nobody)
  1.9    - add enum mpv_end_file_reason for mpv_event_end_file.reason

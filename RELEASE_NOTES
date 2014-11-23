@@ -1,0 +1,67 @@
+Release 0.7.0
+=============
+
+Changes
+-------
+
+- Buffer partial log messages in the client API (the client API will now only
+  pass full log messages to clients).
+- Remove ncurses/terminfo/termcap support (it was disabled by default and
+  replaced by new code since v0.6.0).
+- Enable cdda:// support by default again (it was disabled since v0.6.0).
+- Cascade-load input.conf (if there are several input.confs in the set of valid
+  config paths, load them all).
+- Draw the OSD twice in 3D mode (this fixes subtitles display in 3D mode).
+- Make wasapi the default AO on Windows again since many of its problems have
+  been solved.
+- Use "site-functions" subdir to install the zsh completion script instead of
+  the Debian-specific "vendor-completions" (also provide the --zshdir waf
+  configure option for changing this value).
+- Improve synchronization between the Cocoa GUI and the player (this fixes some
+  long standing deadlock issues on Mac OS X).
+- Remove --fs-missioncontrol option (only relevant to Mac OS X).
+
+New features
+------------
+
+- Enable pitch correction by default when playing at higher speeds (this can be
+  controlled with the --audio-pitch-correction option).
+- Open stream and demuxer asynchronously (this should avoid having the player
+  get blocked on network streams).
+- Add cache-buffering-state property for querying the cache fill status until
+  the player unpauses.
+- Add support for listing and selecting the audio device (note that it is not
+  implemented for all AOs, see the --audio-device option for more information).
+- Add support for a JSON-based IPC mechanism (note that this is not currently
+  supported on Windows, see the JSON IPC section in the manpage for more
+  information).
+- Add Lua utility function for starting processes (see utils.subprocess() in the
+  manpage).
+- Add Lua utility function for parsing JSON (see utils.parse_json() in the
+  manpage).
+- Add field-dominance property (see --field-dominance option).
+- Add video-rotate property (see --video-rotate option).
+- Add playback-abort property for querying whether playback is stopped or is to
+  be stopped.
+- Add cursor-autohide property (see --cursor-autohide option).
+- Add vo-configured property for querying whether a window is created.
+- Add support for dxva2 hardware acceleration on Windows.
+- Drop libquvi support (this has been replaced by a built-in Lua script that
+  invokes the youtube-dl tool, which needs to be installed, see the --ytdl
+  option).
+- Add support for loading chapters from an external file (see the
+  --chapters-file option).
+- Add window-minimized property for querying whether the window is minimized
+  (works for X11 only).
+- Make it possible to configure the OSC seekbar style (see the "seekbarstyle"
+  OSC option).
+- Add support for libmpv on Mac OS X (it used to be broken, now it's fully
+  functional and also provides support for embedding the mpv window inside a
+  Cocoa/Qt application).
+- Try to use the audio channel map reported by ALSA in the alsa AO.
+- Add option to disable text OSD rendering completely (useful for working around
+  certain fontconfig issues, see the --use-text-osd option).
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 7759c18..9479daa`` in
+the git repository.
