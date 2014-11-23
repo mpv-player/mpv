@@ -201,8 +201,6 @@ void get_osd_sub_state(struct MPContext *mpctx, int order,
     struct dec_sub *dec_sub = mpctx->d_sub[order];
     int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
 
-    assert(track);
-
     struct osd_sub_state state = {
         .dec_sub = dec_sub,
         // Decides whether to use OSD path or normal subtitle rendering path.
