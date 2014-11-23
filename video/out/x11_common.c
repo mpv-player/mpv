@@ -1213,8 +1213,6 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
                       vis->depth, CopyFromParent, vis->visual, xswamask, &xswa);
     Atom protos[1] = {XA(x11, WM_DELETE_WINDOW)};
     XSetWMProtocols(x11->display, x11->window, protos, 1);
-    x11->f_gc = XCreateGC(x11->display, x11->window, 0, 0);
-    x11->vo_gc = XCreateGC(x11->display, x11->window, 0, NULL);
     XSetForeground(x11->display, x11->f_gc, 0);
 
     if (x11->mouse_cursor_hidden) {
@@ -1349,6 +1347,11 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
         vo_x11_classhint(vo, x11->window, classname);
         x11->window_hidden = true;
         x11->winrc = geo.win;
+    }
+
+    if (!x11->f_gc && !x11->vo_gc) {
+        x11->f_gc = XCreateGC(x11->display, x11->window, 0, 0);
+        x11->vo_gc = XCreateGC(x11->display, x11->window, 0, NULL);
     }
 
     if (flags & VOFLAG_HIDDEN)
