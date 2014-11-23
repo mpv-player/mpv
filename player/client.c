@@ -24,6 +24,7 @@
 #include "common/msg_control.h"
 #include "input/input.h"
 #include "input/cmd_list.h"
+#include "misc/ctype.h"
 #include "misc/dispatch.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
@@ -81,7 +82,7 @@ struct observe_property {
 
 struct mpv_handle {
     // -- immmutable
-    char *name;
+    char name[MAX_CLIENT_NAME];
     bool owner;
     struct mp_log *log;
     struct MPContext *mpctx;
@@ -197,31 +198,28 @@ bool mp_client_exists(struct MPContext *mpctx, const char *client_name)
 
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name)
 {
-    pthread_mutex_lock(&clients->lock);
-
-    char *unique_name = NULL;
-    if (find_client(clients, name)) {
-        for (int n = 2; n < 1000; n++) {
-            unique_name = talloc_asprintf(NULL, "%s%d", name, n);
-            if (!find_client(clients, unique_name))
-                break;
-            talloc_free(unique_name);
-            unique_name = NULL;
-        }
-        if (!unique_name) {
-            pthread_mutex_unlock(&clients->lock);
-            return NULL;
-        }
+    char nname[MAX_CLIENT_NAME];
+    for (int n = 1; n < 1000; n++) {
+        snprintf(nname, sizeof(nname) - 3, "%s", name); // - space for number
+        for (int i = 0; nname[i]; i++)
+            nname[i] = mp_isalnum(nname[i]) ? nname[i] : '_';
+        if (n > 1)
+            mp_snprintf_cat(nname, sizeof(nname), "%d", n);
+        if (!find_client(clients, nname))
+            break;
+        nname[0] = '\0';
     }
-    if (!unique_name)
-        unique_name = talloc_strdup(NULL, name);
+
+    if (!nname[0])
+        return NULL;
+
+    pthread_mutex_lock(&clients->lock);
 
     int num_events = 1000;
 
     struct mpv_handle *client = talloc_ptrtype(NULL, client);
     *client = (struct mpv_handle){
-        .name = talloc_steal(client, unique_name),
-        .log = mp_log_new(client, clients->mpctx->log, unique_name),
+        .log = mp_log_new(client, clients->mpctx->log, nname),
         .mpctx = clients->mpctx,
         .clients = clients,
         .cur_event = talloc_zero(client, struct mpv_event),
@@ -234,6 +232,7 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
     pthread_mutex_init(&client->wakeup_lock, NULL);
     pthread_cond_init(&client->wakeup, NULL);
 
+    snprintf(client->name, sizeof(client->name), "%s", nname);
 
     MP_TARRAY_APPEND(clients, clients->clients, clients->num_clients, client);
 

@@ -11,6 +11,9 @@ struct mpv_handle;
 struct mp_client_api;
 struct mp_log;
 
+// Includes space for \0
+#define MAX_CLIENT_NAME 64
+
 void mp_clients_init(struct MPContext *mpctx);
 void mp_clients_destroy(struct MPContext *mpctx);
 int mp_clients_num(struct MPContext *mpctx);
