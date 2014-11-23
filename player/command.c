@@ -4471,17 +4471,29 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         return edit_filters_osd(mpctx, STREAM_VIDEO, cmd->args[0].v.s,
                                 cmd->args[1].v.s, msg_osd);
 
-    case MP_CMD_SCRIPT_DISPATCH: {
-        mpv_event_script_input_dispatch *event = talloc_ptrtype(NULL, event);
-        *event = (mpv_event_script_input_dispatch){
-            .arg0 = cmd->args[1].v.i,
-            .type = cmd->key_up_follows ? "keyup_follows" : "press",
-        };
-        if (mp_client_send_event(mpctx, cmd->args[0].v.s,
-                                 MPV_EVENT_SCRIPT_INPUT_DISPATCH, event) < 0)
+    case MP_CMD_SCRIPT_BINDING: {
+        mpv_event_client_message event = {0};
+        char *name = cmd->args[0].v.s;
+        if (!name || !name[0])
+            return -1;
+        char *sep = strchr(name, '/');
+        char *target = NULL;
+        char space[MAX_CLIENT_NAME];
+        if (name) {
+            snprintf(space, sizeof(space), "%.*s", (int)(sep - name), name);
+            target = space;
+            name = sep + 1;
+        }
+        char state[3] = {'p', cmd->is_mouse_button ? 'm' : '-'};
+        if (cmd->is_up_down)
+            state[0] = cmd->repeated ? 'r' : (cmd->is_up ? 'u' : 'd');
+        event.num_args = 3;
+        event.args = (const char*[3]){"key-binding", name, state};
+        if (mp_client_send_event_dup(mpctx, target,
+                                     MPV_EVENT_CLIENT_MESSAGE, &event) < 0)
         {
             MP_VERBOSE(mpctx, "Can't find script '%s' when handling input.\n",
-                       cmd->args[0].v.s);
+                       target ? target : "-");
             return -1;
         }
         break;

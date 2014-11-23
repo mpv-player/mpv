@@ -25,6 +25,8 @@ API changes
 
 ::
 
+ 1.10   - deprecate/disable everything directly related to script_dispatch
+          (most likely affects nobody)
  1.9    - add enum mpv_end_file_reason for mpv_event_end_file.reason
         - add MPV_END_FILE_REASON_ERROR and the mpv_event_end_file.error field
           for slightly better error reporting on playback failure

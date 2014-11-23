@@ -93,7 +93,7 @@ enum mp_command_type {
     MP_CMD_VO_CMDLINE,
 
     /// Internal for Lua scripts
-    MP_CMD_SCRIPT_DISPATCH,
+    MP_CMD_SCRIPT_BINDING,
     MP_CMD_SCRIPT_MESSAGE,
     MP_CMD_SCRIPT_MESSAGE_TO,
 

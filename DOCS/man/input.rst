@@ -541,8 +541,26 @@ Input Commands that are Possibly Subject to Change
     ``<target>``. Each client (scripts etc.) has a unique name. For example,
     Lua scripts can get their name via ``mp.get_script_name()``.
 
-    (Scripts use this internally to dispatch key bindings, and this can also
-    be used in input.conf to reassign such bindings.)
+``script_binding "<name>"``
+    Invoke a script-provided key binding. This can be used to remap key
+    bindings provided by external Lua scripts.
+
+    The argument is the name of the binding.
+
+    It can optionally be prefixed with the name of the script, using ``/`` as
+    separator, e.g. ``script_binding scriptname/bindingname``.
+
+    For completeness, here is how this command works internally. The details
+    could change any time. On any matching key event, ``script_message_to``
+    or ``script_message`` is called (depending on whether the script name is
+    included), where the first argument is the string ``key-binding``, the
+    second argument is the name of the binding, and the third argument is the
+    key state as string. The key state consists of a number of letters. The
+    first letter is one of ``d`` (key was pressed down), ``u`` (was released),
+    ``r`` (key is still down, and was repeated; only if key repeat is enabled
+    for this binding), ``p`` (key was pressed; happens if up/down can't be
+    tracked). The second letter whether the event originates from the mouse,
+    either ``m`` (mouse button) or ``-`` (something else).
 
 ``ab_loop``
     Cycle through A-B loop states. The first command will set the ``A`` point

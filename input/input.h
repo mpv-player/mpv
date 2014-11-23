@@ -76,9 +76,12 @@ typedef struct mp_cmd {
     int flags; // mp_cmd_flags bitfield
     bstr original;
     char *input_section;
-    bool key_up_follows;
-    bool repeated;
-    bool mouse_move;
+    bool is_up_down : 1;
+    bool is_up : 1;
+    bool is_mouse_button : 1;
+    bool key_up_follows : 1;
+    bool repeated : 1;
+    bool mouse_move : 1;
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
     double scale;               // for scaling numeric arguments

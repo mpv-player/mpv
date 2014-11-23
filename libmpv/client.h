@@ -164,7 +164,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 9)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 10)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -1010,12 +1010,12 @@ typedef enum mpv_event_id {
      */
     MPV_EVENT_TICK              = 14,
     /**
-     * Triggered by the script_dispatch input command. The command uses the
-     * client name (see mpv_client_name()) to dispatch keyboard or mouse input
-     * to a client.
-     * (This is pretty obscure and largely replaced by MPV_EVENT_CLIENT_MESSAGE,
-     * but still the only way to distinguish key down/up events when binding
-     * script_dispatch via input.conf.)
+     * @deprecated This was used internally with the internal "script_dispatch"
+     *             command to dispatch keyboard and mouse input for the OSC.
+     *             It was never useful in general and has been completely
+     *             replaced with "script_binding".
+     *             This event never happens anymore, and is included in this
+     *             header only for compatibility.
      */
     MPV_EVENT_SCRIPT_INPUT_DISPATCH = 15,
     /**
@@ -1211,17 +1211,10 @@ typedef struct mpv_event_end_file {
     int error;
 } mpv_event_end_file;
 
+/** @deprecated see MPV_EVENT_SCRIPT_INPUT_DISPATCH for remarks
+ */
 typedef struct mpv_event_script_input_dispatch {
-    /**
-     * Arbitrary integer value that was provided as argument to the
-     * script_dispatch input command.
-     */
     int arg0;
-    /**
-     * Type of the input. Currently either "keyup_follows" (basically a key
-     * down event), or "press" (either a single key event, or a key up event
-     * following a "keyup_follows" event).
-     */
     const char *type;
 } mpv_event_script_input_dispatch;
 
@@ -1269,7 +1262,6 @@ typedef struct mpv_event {
      *  MPV_EVENT_GET_PROPERTY_REPLY:     mpv_event_property*
      *  MPV_EVENT_PROPERTY_CHANGE:        mpv_event_property*
      *  MPV_EVENT_LOG_MESSAGE:            mpv_event_log_message*
-     *  MPV_EVENT_SCRIPT_INPUT_DISPATCH:  mpv_event_script_input_dispatch*
      *  MPV_EVENT_CLIENT_MESSAGE:         mpv_event_client_message*
      *  MPV_EVENT_END_FILE:               mpv_event_end_file*
      *  other: NULL

@@ -476,6 +476,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
                    keyname, cmd->cmd, ret->input_section);
             talloc_free(keyname);
         }
+        ret->is_mouse_button = code & MP_KEY_EMIT_ON_UP;
     } else {
         char *key_buf = mp_input_get_key_combo_name(&code, 1);
         MP_ERR(ictx, "Invalid command for bound key '%s': '%s'\n",
@@ -518,6 +519,7 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
     {
         memset(ictx->key_history, 0, sizeof(ictx->key_history));
         ictx->current_down_cmd->key_up_follows = false;
+        ictx->current_down_cmd->is_up = true;
         mp_input_queue_cmd(ictx, ictx->current_down_cmd);
     } else {
         talloc_free(ictx->current_down_cmd);
@@ -534,7 +536,7 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
 static bool key_updown_ok(enum mp_command_type cmd)
 {
     switch (cmd) {
-    case MP_CMD_SCRIPT_DISPATCH:
+    case MP_CMD_SCRIPT_BINDING:
         return true;
     default:
         return false;
@@ -589,8 +591,11 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         // Cancel current down-event (there can be only one)
         release_down_cmd(ictx, true);
         cmd = resolve_key(ictx, code);
-        if (cmd && (code & MP_KEY_EMIT_ON_UP))
-            cmd->key_up_follows = true;
+        if (cmd) {
+            cmd->is_up_down = true;
+            cmd->key_up_follows = (code & MP_KEY_EMIT_ON_UP) |
+                                  key_updown_ok(cmd->id);
+        }
         ictx->last_key_down = code;
         ictx->last_key_down_time = mp_time_us();
         ictx->ar_state = 0;
@@ -885,8 +890,7 @@ mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
     struct mp_cmd *ret = queue_remove_head(&ictx->cmd_queue);
     if (!ret) {
         ret = check_autorepeat(ictx);
-        // (if explicitly repeated, don't let command.c ignore it)
-        if (ret && !(ret->flags & MP_ALLOW_REPEAT))
+        if (ret)
             ret->repeated = true;
     }
     if (ret && ret->mouse_move) {

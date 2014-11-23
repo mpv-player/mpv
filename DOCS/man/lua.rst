@@ -198,12 +198,23 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     overwritten. You can omit the name, in which case a random name is generated
     internally.
 
-    The last argument is used for additional flags. Currently, this includes
-    the string ``repeatable``, which enables key repeat for this specific
-    binding.
+    The last argument is used for optional flags. This is a table, which can
+    have the following entries:
 
-    Internally, key bindings are dispatched via the ``script_message_to`` input
-    command and ``mp.register_script_message``.
+        ``repeatable``
+            If set to ``true``, enables key repeat for this specific binding.
+
+        ``complex``
+            If set to ``true``, then ``fn`` is called on both key up and down
+            events (as well as key repeat, if enabled), with the first
+            argument being a table. This table has an ``event`` entry, which
+            is set to one of the strings ``down``, ``repeat``, ``up`` or
+            ``press`` (the latter if key up/down can't be tracked). It further
+            has an ``is_mouse`` entry, which tells whether the event was caused
+            by a mouse button.
+
+    Internally, key bindings are dispatched via the ``script_message_to`` or
+    ``script_binding`` input commands and ``mp.register_script_message``.
 
     Trying to map multiple commands to a key will essentially prefer a random
     binding, while the other bindings are not called. It is guaranteed that
@@ -226,7 +237,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     ::
 
-        y script_message something
+        y script_binding something
 
 
     This will print the message when the key ``y`` is pressed. (``x`` will
@@ -237,7 +248,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     ::
 
-        y script_message_to fooscript something
+        y script_binding fooscript.something
 
 ``mp.add_forced_key_binding(...)``
     This works almost the same as ``mp.add_key_binding``, but registers the

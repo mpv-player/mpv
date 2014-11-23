@@ -589,9 +589,16 @@ void mp_client_broadcast_event(struct MPContext *mpctx, int event, void *data)
     pthread_mutex_unlock(&clients->lock);
 }
 
+// If client_name == NULL, then broadcast and free the event.
 int mp_client_send_event(struct MPContext *mpctx, const char *client_name,
                          int event, void *data)
 {
+    if (!client_name) {
+        mp_client_broadcast_event(mpctx, event, data);
+        talloc_free(data);
+        return 0;
+    }
+
     struct mp_client_api *clients = mpctx->clients;
     int r = 0;
 
@@ -613,6 +620,23 @@ int mp_client_send_event(struct MPContext *mpctx, const char *client_name,
     pthread_mutex_unlock(&clients->lock);
 
     return r;
+}
+
+int mp_client_send_event_dup(struct MPContext *mpctx, const char *client_name,
+                             int event, void *data)
+{
+    if (!client_name) {
+        mp_client_broadcast_event(mpctx, event, data);
+        return 0;
+    }
+
+    struct mpv_event event_data = {
+        .event_id = event,
+        .data = data,
+    };
+
+    dup_event_data(&event_data);
+    return mp_client_send_event(mpctx, client_name, event, event_data.data);
 }
 
 int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
