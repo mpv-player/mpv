@@ -572,6 +572,15 @@ Available video output drivers are:
         Color used to draw parts of the mpv window not covered by video.
         See ``--osd-color`` option how colors are defined.
 
+    ``smoothmotion``
+        Use frame interpolation to reduce stuttering caused by mismatches in
+        video fps and display refresh rate (similar to MadVR's smoothmotion,
+        thus the naming).
+
+    ``smoothmotion-threshold=<threshold>``
+        Mix threshold at which interpolation is skipped (default: 0.0 – never
+        skip).
+
 ``opengl-hq``
     Same as ``opengl``, but with default settings for high quality rendering.
 

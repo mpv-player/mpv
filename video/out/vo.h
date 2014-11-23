@@ -106,6 +106,8 @@ enum mp_voctrl {
     VOCTRL_GET_RECENT_FLIP_TIME,        // int64_t* (using mp_time_us())
 
     VOCTRL_GET_PREF_DEINT,              // int*
+
+    VOCTRL_GET_VSYNC_TIMED,             // bool*
 };
 
 // VOCTRL_SET_EQUALIZER
@@ -171,6 +173,11 @@ struct vo_extra {
     struct mpv_opengl_cb_context *opengl_cb_context;
 };
 
+struct frame_timing {
+    int64_t pts;
+    int64_t next_vsync;
+};
+
 struct vo_driver {
     // Encoding functionality, which can be invoked via --o only.
     bool encode;
@@ -217,6 +224,12 @@ struct vo_driver {
      * This also should draw the OSD.
      */
     void (*draw_image)(struct vo *vo, struct mp_image *mpi);
+
+    /* Like draw image, but is called before every vsync with timing
+     * information
+     */
+    void (*draw_image_timed)(struct vo *vo, struct mp_image *mpi,
+                             struct frame_timing *t);
 
     /*
      * Blit/Flip buffer to the screen. Must be called after each frame!

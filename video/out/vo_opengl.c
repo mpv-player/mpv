@@ -154,7 +154,8 @@ static void flip_page(struct vo *vo)
     mpgl_unlock(p->glctx);
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
+                             struct frame_timing *t)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
@@ -164,8 +165,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     mpgl_lock(p->glctx);
 
-    gl_video_upload_image(p->renderer, mpi);
-    gl_video_render_frame(p->renderer, 0);
+    if (mpi)
+        gl_video_upload_image(p->renderer, mpi);
+    gl_video_render_frame(p->renderer, 0, t);
 
     // The playloop calls this last before waiting some time until it decides
     // to call flip_page(). Tell OpenGL to start execution of the GPU commands
@@ -176,6 +178,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         gl->Finish();
 
     mpgl_unlock(p->glctx);
+}
+
+static void draw_image(struct vo *vo, mp_image_t *mpi)
+{
+    draw_image_timed(vo, mpi, NULL);
 }
 
 static int query_format(struct vo *vo, int format)
@@ -361,13 +368,21 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     case VOCTRL_REDRAW_FRAME:
         mpgl_lock(p->glctx);
-        gl_video_render_frame(p->renderer, 0);
+        gl_video_render_frame(p->renderer, 0, NULL);
         mpgl_unlock(p->glctx);
         return true;
     case VOCTRL_SET_COMMAND_LINE: {
         char *arg = data;
         return reparse_cmdline(p, arg);
     }
+    case VOCTRL_GET_VSYNC_TIMED:
+        *(bool *)data = p->renderer_opts->smoothmotion;
+        return VO_TRUE;
+    case VOCTRL_RESET:
+        mpgl_lock(p->glctx);
+        gl_video_reset(p->renderer);
+        mpgl_unlock(p->glctx);
+        return true;
     }
 
     mpgl_lock(p->glctx);
@@ -474,6 +489,7 @@ const struct vo_driver video_out_opengl = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
+    .draw_image_timed = draw_image_timed,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
@@ -489,6 +505,7 @@ const struct vo_driver video_out_opengl_hq = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
+    .draw_image_timed = draw_image_timed,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),

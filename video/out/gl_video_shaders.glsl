@@ -190,6 +190,7 @@ uniform float filter_param1_l;
 uniform float filter_param1_c;
 uniform float antiring_factor;
 uniform vec2 dither_size;
+uniform float inter_coeff;
 
 in vec2 texcoord;
 DECLARE_FRAGPARMS
@@ -374,7 +375,18 @@ void main() {
 #ifndef USE_CONV
 #define USE_CONV 0
 #endif
-#if USE_CONV == CONV_PLANAR
+#ifndef USE_LINEAR_INTERPOLATION
+#define USE_LINEAR_INTERPOLATION 0
+#endif
+#if USE_LINEAR_INTERPOLATION == 1
+    vec4 acolor = mix(
+        texture(texture0, texcoord),
+        texture(texture1, texcoord),
+        inter_coeff);
+    // debug code to visually check the interpolation amount
+    // vec4 acolor = texture(texture0, texcoord) -
+    //               inter_coeff * texture(texture1, texcoord);
+#elif USE_CONV == CONV_PLANAR
     vec4 acolor = vec4(SAMPLE(texture0, textures_size[0], texcoord).r,
                        SAMPLE_C(texture1, textures_size[1], chr_texcoord).r,
                        SAMPLE_C(texture2, textures_size[2], chr_texcoord).r,
