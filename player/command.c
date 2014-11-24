@@ -1571,7 +1571,7 @@ static int mp_property_channels(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **) arg = mp_chmap_to_str(&fmt.channels);
+        *(char **) arg = talloc_strdup(NULL, mp_chmap_to_str(&fmt.channels));
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
         *(int *)arg = fmt.channels.num;

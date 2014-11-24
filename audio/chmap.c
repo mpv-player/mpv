@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "chmap.h"
 
@@ -376,34 +377,35 @@ void mp_chmap_get_reorder(int dst[MP_NUM_CHANNELS], const struct mp_chmap *from,
 // Returns something like "fl-fr-fc". If there's a standard layout in lavc
 // order, return that, e.g. "3.0" instead of "fl-fr-fc".
 // Unassigned but valid speakers get names like "sp28".
-char *mp_chmap_to_str(const struct mp_chmap *src)
+char *mp_chmap_to_str_buf(char *buf, size_t buf_size, const struct mp_chmap *src)
 {
-    char *res = talloc_strdup(NULL, "");
+    buf[0] = '\0';
 
-    if (mp_chmap_is_unknown(src))
-        return talloc_asprintf_append_buffer(res, "unknown%d", src->num);
+    if (mp_chmap_is_unknown(src)) {
+        snprintf(buf, buf_size, "unknown%d", src->num);
+        return buf;
+    }
 
     for (int n = 0; n < src->num; n++) {
         int sp = src->speaker[n];
         const char *s = sp < MP_SPEAKER_ID_COUNT ? speaker_names[sp][0] : NULL;
-        char buf[10];
+        char sp_buf[10];
         if (!s) {
-            snprintf(buf, sizeof(buf), "sp%d", sp);
-            s = buf;
+            snprintf(sp_buf, sizeof(sp_buf), "sp%d", sp);
+            s = sp_buf;
         }
-        res = talloc_asprintf_append_buffer(res, "%s%s", n > 0 ? "-" : "", s);
+        mp_snprintf_cat(buf, buf_size, "%s%s", n > 0 ? "-" : "", s);
     }
 
     // To standard layout name
     for (int n = 0; std_layout_names[n][0]; n++) {
-        if (res && strcmp(res, std_layout_names[n][1]) == 0) {
-            talloc_free(res);
-            res = talloc_strdup(NULL, std_layout_names[n][0]);
+        if (strcmp(buf, std_layout_names[n][1]) == 0) {
+            snprintf(buf, buf_size, "%s", std_layout_names[n][0]);
             break;
         }
     }
 
-    return res;
+    return buf;
 }
 
 // If src can be parsed as channel map (as produced by mp_chmap_to_str()),

@@ -317,10 +317,8 @@ static const char *select_chmap(struct ao *ao)
             return device_channel_layouts[n][0];
     }
 
-    char *name = mp_chmap_to_str(&ao->channels);
     MP_ERR(ao, "channel layout %s (%d ch) not supported.\n",
-           name, ao->channels.num);
-    talloc_free(name);
+           mp_chmap_to_str(&ao->channels), ao->channels.num);
     return "default";
 }
 
@@ -587,9 +585,7 @@ static int init(struct ao *ao)
         for (int c = 0; c < chmap.num; c++)
             chmap.speaker[c] = find_mp_channel(alsa_chmap->pos[c]);
 
-        char *mp_map_str = mp_chmap_to_str(&chmap);
-        MP_VERBOSE(ao, "which we understand as: %s\n", mp_map_str);
-        talloc_free(mp_map_str);
+        MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
 
         if (mp_chmap_is_valid(&chmap) && chmap.num == ao->channels.num) {
             MP_VERBOSE(ao, "using the ALSA channel map.\n");

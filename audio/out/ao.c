@@ -214,10 +214,9 @@ static struct ao *ao_alloc_pb(bool probing, struct mpv_global *global,
 
 static int ao_init(struct ao *ao)
 {
-    char *chmap = mp_chmap_to_str(&ao->channels);
     MP_VERBOSE(ao, "requested format: %d Hz, %s channels, %s\n",
-               ao->samplerate, chmap, af_fmt_to_str(ao->format));
-    talloc_free(chmap);
+               ao->samplerate, mp_chmap_to_str(&ao->channels),
+               af_fmt_to_str(ao->format));
 
     ao->api = ao->driver->play ? &ao_api_push : &ao_api_pull;
     ao->api_priv = talloc_zero_size(ao, ao->api->priv_size);
