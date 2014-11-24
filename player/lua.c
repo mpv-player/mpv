@@ -517,15 +517,6 @@ static int script_wait_event(lua_State *L)
         lua_setfield(L, -2, "text"); // event
         break;
     }
-    case MPV_EVENT_SCRIPT_INPUT_DISPATCH: {
-        mpv_event_script_input_dispatch *msg = event->data;
-
-        lua_pushinteger(L, msg->arg0); // event i
-        lua_setfield(L, -2, "arg0"); // event
-        lua_pushstring(L, msg->type); // event s
-        lua_setfield(L, -2, "type"); // event
-        break;
-    }
     case MPV_EVENT_CLIENT_MESSAGE: {
         mpv_event_client_message *msg = event->data;
 

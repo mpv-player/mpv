@@ -84,7 +84,6 @@ function mp.set_key_bindings(list, section, flags)
                 elseif event == "u" and cb_up then
                     cb_up()
                 elseif event == def and cb then
-                    print("whooo")
                     cb()
                 end
             end

@@ -181,15 +181,6 @@ static void mpv_event_to_node(void *ta_parent, mpv_event *event, mpv_node *dst)
         break;
     }
 
-    case MPV_EVENT_SCRIPT_INPUT_DISPATCH: {
-        mpv_event_script_input_dispatch *msg = event->data;
-
-        mpv_node_map_add_int64(ta_parent, dst, "arg0", msg->arg0);
-        mpv_node_map_add_string(ta_parent, dst, "type", msg->type);
-
-        break;
-    }
-
     case MPV_EVENT_CLIENT_MESSAGE: {
         mpv_event_client_message *msg = event->data;
 
