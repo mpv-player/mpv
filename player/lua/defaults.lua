@@ -75,7 +75,7 @@ function mp.set_key_bindings(list, section, flags)
                 local is_mouse = state:sub(2, 2) == "m"
                 local def = (is_mouse and "u") or "d"
                 if event == "r" then
-                    event = "d"
+                    return
                 end
                 if event == "p" and cb then
                     cb()
@@ -142,9 +142,7 @@ local function add_binding(attrs, key, name, fn, rp)
         name = reserve_binding()
     end
     local bind = key
-    if rp == "repeatable" or rp["repeatable"] then
-        bind = bind .. " repeatable"
-    end
+    local repeatable = rp == "repeatable" or rp["repeatable"]
     if rp["forced"] then
         attrs.forced = true
     end
@@ -176,6 +174,9 @@ local function add_binding(attrs, key, name, fn, rp)
             -- Also, key repeat triggers the binding again.
             local event = state:sub(1, 1)
             local is_mouse = state:sub(2, 2) == "m"
+            if event == "r" and not repeatable then
+                return
+            end
             if is_mouse and event == "u" then
                 fn()
             elseif (not is_mouse) and (event == "d" or event == "r") then
