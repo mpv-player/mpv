@@ -32,6 +32,10 @@ matrix:
       env: LIBAV=ffmpeg-git
     - os: osx
       compiler: gcc
+    - os: linux
+      env: LIBAV=ffmpeg-stable
+    - os: linux
+      compiler: clang
 
 before_install: ./travis-deps libass-stable $LIBAV
 script:
