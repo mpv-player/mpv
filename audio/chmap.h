@@ -61,7 +61,8 @@ enum mp_speaker_id {
     MP_SPEAKER_ID_UNKNOWN0 = 64,
     MP_SPEAKER_ID_UNKNOWN_LAST = MP_SPEAKER_ID_UNKNOWN0 + MP_NUM_CHANNELS - 1,
 
-    // Including the unassigned IDs in between. This is not a valid ID anymore.
+    // Including the unassigned IDs in between. This is not a valid ID anymore,
+    // but is still within uint8_t.
     MP_SPEAKER_ID_COUNT,
 };
 

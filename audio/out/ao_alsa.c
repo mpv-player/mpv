@@ -45,6 +45,9 @@
 
 #include <alsa/asoundlib.h>
 
+#define HAVE_CHMAP_API \
+    (defined(SND_CHMAP_API_VERSION) && SND_CHMAP_API_VERSION >= (1 << 16))
+
 #include "ao.h"
 #include "internal.h"
 #include "audio/format.h"
@@ -236,6 +239,45 @@ static int find_alsa_format(int af_format)
     }
     return SND_PCM_FORMAT_UNKNOWN;
 }
+
+#if HAVE_CHMAP_API
+
+static const int alsa_to_mp_channels[][2] = {
+    {SND_CHMAP_FL,      MP_SP(FL)},
+    {SND_CHMAP_FR,      MP_SP(FR)},
+    {SND_CHMAP_RL,      MP_SP(BL)},
+    {SND_CHMAP_RR,      MP_SP(BR)},
+    {SND_CHMAP_FC,      MP_SP(FC)},
+    {SND_CHMAP_LFE,     MP_SP(LFE)},
+    {SND_CHMAP_SL,      MP_SP(SL)},
+    {SND_CHMAP_SR,      MP_SP(SR)},
+    {SND_CHMAP_RC,      MP_SP(BC)},
+    {SND_CHMAP_FLC,     MP_SP(FLC)},
+    {SND_CHMAP_FRC,     MP_SP(FRC)},
+    {SND_CHMAP_FLW,     MP_SP(WL)},
+    {SND_CHMAP_FRW,     MP_SP(WR)},
+    {SND_CHMAP_TC,      MP_SP(TC)},
+    {SND_CHMAP_TFL,     MP_SP(TFL)},
+    {SND_CHMAP_TFR,     MP_SP(TFR)},
+    {SND_CHMAP_TFC,     MP_SP(TFC)},
+    {SND_CHMAP_TRL,     MP_SP(TBL)},
+    {SND_CHMAP_TRR,     MP_SP(TBR)},
+    {SND_CHMAP_TRC,     MP_SP(TBC)},
+    {SND_CHMAP_MONO,    MP_SP(FC)},
+    {SND_CHMAP_LAST,    MP_SPEAKER_ID_COUNT}
+};
+
+static int find_mp_channel(int alsa_channel)
+{
+    for (int i = 0; alsa_to_mp_channels[i][1] != MP_SPEAKER_ID_COUNT; i++) {
+        if (alsa_to_mp_channels[i][0] == alsa_channel)
+            return alsa_to_mp_channels[i][1];
+    }
+
+    return MP_SPEAKER_ID_COUNT;
+}
+
+#endif /* HAVE_CHMAP_API */
 
 // Lists device names and their implied channel map.
 // The second item must be resolvable with mp_chmap_from_str().
@@ -533,6 +575,28 @@ static int init(struct ao *ao)
     /* end setting sw-params */
 
     p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
+
+#if HAVE_CHMAP_API
+    snd_pcm_chmap_t *alsa_chmap = snd_pcm_get_chmap(p->alsa);
+    if (alsa_chmap) {
+        char tmp[128];
+        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
+            MP_VERBOSE(ao, "attempting to set ALSA channel map: %s\n", tmp);
+
+        struct mp_chmap chmap = {.num = alsa_chmap->channels};
+        for (int c = 0; c < chmap.num; c++)
+            chmap.speaker[c] = find_mp_channel(alsa_chmap->pos[c]);
+
+        char *mp_map_str = mp_chmap_to_str(&chmap);
+        MP_VERBOSE(ao, "which we understand as: %s\n", mp_map_str);
+        talloc_free(mp_map_str);
+
+        if (mp_chmap_is_valid(&chmap) && chmap.num == ao->channels.num) {
+            MP_VERBOSE(ao, "using the ALSA channel map.\n");
+            ao->channels = chmap;
+        }
+    }
+#endif
 
     MP_VERBOSE(ao, "opened: %d Hz/%d channels/%d bps/%d samples buffer/%s\n",
                ao->samplerate, ao->channels.num, af_fmt2bits(ao->format),
