@@ -31,6 +31,7 @@ struct mp_cmd_def {
     const char *name;   // user-visible name (as used in input.conf)
     const struct m_option args[MP_CMD_MAX_ARGS];
     bool allow_auto_repeat; // react to repeated key events
+    bool on_updown;     // always emit it on both up and down key events
     bool vararg;        // last argument can be given 0 to multiple times
 };
 

@@ -116,7 +116,6 @@ struct input_ctx {
     // key code of the last key that triggered MP_KEY_STATE_DOWN
     int last_key_down;
     int64_t last_key_down_time;
-    bool current_down_cmd_need_release;
     struct mp_cmd *current_down_cmd;
 
     int last_doubleclick_key_down;
@@ -512,36 +511,20 @@ static void update_mouse_section(struct input_ctx *ictx)
 // thinking a key is still held down.
 static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
 {
-    if (ictx->current_down_cmd_need_release)
-        drop_current = false;
-    if (!drop_current && ictx->current_down_cmd &&
-        ictx->current_down_cmd->key_up_follows)
+    if (ictx->current_down_cmd && ictx->current_down_cmd->emit_on_up &&
+        (!drop_current || ictx->current_down_cmd->def->on_updown))
     {
         memset(ictx->key_history, 0, sizeof(ictx->key_history));
-        ictx->current_down_cmd->key_up_follows = false;
         ictx->current_down_cmd->is_up = true;
         mp_input_queue_cmd(ictx, ictx->current_down_cmd);
     } else {
         talloc_free(ictx->current_down_cmd);
     }
     ictx->current_down_cmd = NULL;
-    ictx->current_down_cmd_need_release = false;
     ictx->last_key_down = 0;
     ictx->last_key_down_time = 0;
     ictx->ar_state = -1;
     update_mouse_section(ictx);
-}
-
-// Whether a command shall be sent on both key down and key up events.
-static bool key_updown_ok(enum mp_command_type cmd)
-{
-    switch (cmd) {
-    case MP_CMD_SCRIPT_BINDING:
-    case MP_CMD_FRAME_STEP:
-        return true;
-    default:
-        return false;
-    }
 }
 
 // We don't want the append to the command queue indefinitely, because that
@@ -594,14 +577,12 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         cmd = resolve_key(ictx, code);
         if (cmd) {
             cmd->is_up_down = true;
-            cmd->key_up_follows = (code & MP_KEY_EMIT_ON_UP) |
-                                  key_updown_ok(cmd->id);
+            cmd->emit_on_up = (code & MP_KEY_EMIT_ON_UP) || cmd->def->on_updown;
+            ictx->current_down_cmd = mp_cmd_clone(cmd);
         }
         ictx->last_key_down = code;
         ictx->last_key_down_time = mp_time_us();
         ictx->ar_state = 0;
-        ictx->current_down_cmd = mp_cmd_clone(cmd);
-        ictx->current_down_cmd_need_release = false;
         mp_input_wakeup(ictx); // possibly start timer for autorepeat
     } else if (state == MP_KEY_STATE_UP) {
         // Most VOs send RELEASE_ALL anyway
@@ -621,7 +602,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
     // Don't emit a command on key-down if the key is designed to emit commands
     // on key-up (like mouse buttons). Also, if the command specifically should
     // be sent both on key down and key up, still emit the command.
-    if (cmd->key_up_follows && !key_updown_ok(cmd->id)) {
+    if (cmd->emit_on_up && !cmd->def->on_updown) {
         talloc_free(cmd);
         return;
     }
@@ -629,9 +610,6 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
     memset(ictx->key_history, 0, sizeof(ictx->key_history));
 
     cmd->scale = scale;
-
-    if (cmd->key_up_follows)
-        ictx->current_down_cmd_need_release = true;
     mp_input_queue_cmd(ictx, cmd);
 }
 
@@ -835,6 +813,7 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
         (ictx->last_key_down & MP_NO_REPEAT_KEY) ||
         !mp_input_is_repeatable_cmd(ictx->current_down_cmd))
         ictx->ar_state = -1; // disable
+
     if (ictx->ar_state >= 0) {
         int64_t t = mp_time_us();
         if (ictx->last_ar + 2000000 < t)
@@ -845,13 +824,16 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
         {
             ictx->ar_state = 1;
             ictx->last_ar = ictx->last_key_down_time + opts->ar_delay * 1000;
-            return mp_cmd_clone(ictx->current_down_cmd);
             // Then send rate / sec event
         } else if (ictx->ar_state == 1
                    && (t - ictx->last_ar) >= 1000000 / opts->ar_rate) {
             ictx->last_ar += 1000000 / opts->ar_rate;
-            return mp_cmd_clone(ictx->current_down_cmd);
+        } else {
+            return NULL;
         }
+        struct mp_cmd *ret = mp_cmd_clone(ictx->current_down_cmd);
+        ret->repeated = true;
+        return ret;
     }
     return NULL;
 }
@@ -889,11 +871,8 @@ mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
 {
     input_lock(ictx);
     struct mp_cmd *ret = queue_remove_head(&ictx->cmd_queue);
-    if (!ret) {
+    if (!ret)
         ret = check_autorepeat(ictx);
-        if (ret)
-            ret->repeated = true;
-    }
     if (ret && ret->mouse_move) {
         ictx->mouse_x = ret->mouse_x;
         ictx->mouse_y = ret->mouse_y;

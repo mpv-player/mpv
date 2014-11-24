@@ -78,8 +78,8 @@ typedef struct mp_cmd {
     char *input_section;
     bool is_up_down : 1;
     bool is_up : 1;
+    bool emit_on_up : 1;
     bool is_mouse_button : 1;
-    bool key_up_follows : 1;
     bool repeated : 1;
     bool mouse_move : 1;
     int mouse_x, mouse_y;

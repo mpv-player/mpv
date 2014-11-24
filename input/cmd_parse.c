@@ -319,6 +319,11 @@ error:
     return NULL;
 }
 
+static struct mp_cmd_def list_def = {
+    .id = MP_CMD_COMMAND_LIST,
+    .name = "list",
+};
+
 mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
 {
     void *tmp = talloc_new(NULL);
@@ -341,8 +346,9 @@ mp_cmd_t *mp_input_parse_cmd_(struct mp_log *log, bstr str, const char *loc)
             struct mp_cmd *list = talloc_ptrtype(NULL, list);
             talloc_set_destructor(list, destroy_cmd);
             *list = (struct mp_cmd) {
-                .id = MP_CMD_COMMAND_LIST,
-                .name = "list",
+                .id = list_def.id,
+                .name = (char *)list_def.name,
+                .def = &list_def,
                 .original = bstrdup(list, original),
             };
             talloc_steal(list, cmd);
