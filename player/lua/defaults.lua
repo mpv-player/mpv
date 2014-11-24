@@ -190,7 +190,6 @@ local function add_binding(attrs, key, name, fn, rp)
     key_bindings[name] = attrs
     update_key_bindings()
     dispatch_key_bindings[name] = key_cb
-    mp.unregister_script_message(name)
     mp.register_script_message(name, msg_cb)
 end
 
