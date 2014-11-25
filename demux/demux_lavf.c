@@ -101,6 +101,7 @@ typedef struct lavf_priv {
     AVFormatContext *avfc;
     AVIOContext *pb;
     int64_t last_pts;
+    bool init_pts;
     struct sh_stream **streams; // NULL for unknown streams
     int num_streams;
     int cur_program;
@@ -832,6 +833,12 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
         return 1;
     }
 
+    if (!priv->init_pts && (priv->avfc->flags & AVFMT_NOTIMESTAMPS)) {
+        if (pkt->pts == AV_NOPTS_VALUE && pkt->dts == AV_NOPTS_VALUE)
+            pkt->dts = 0;
+        priv->init_pts = true;
+    }
+
     if (pkt->pts != AV_NOPTS_VALUE)
         dp->pts = pkt->pts * av_q2d(st->time_base);
     if (pkt->dts != AV_NOPTS_VALUE)
@@ -855,6 +862,8 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
 {
     lavf_priv_t *priv = demuxer->priv;
     int avsflags = 0;
+
+    priv->init_pts = false;
 
     if (flags & SEEK_ABSOLUTE)
         priv->last_pts = 0;
