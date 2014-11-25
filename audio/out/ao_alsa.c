@@ -538,6 +538,7 @@ static int init(struct ao *ao)
         ao->channels = dev_chmap;
     } else {
         dev_chmap.num = 0;
+        ao->channels = implied_chmap;
     }
 
     int num_channels = ao->channels.num;
