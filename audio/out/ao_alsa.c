@@ -266,7 +266,60 @@ static int find_mp_channel(int alsa_channel)
     return MP_SPEAKER_ID_COUNT;
 }
 
-#endif /* HAVE_CHMAP_API */
+static int find_alsa_channel(int mp_channel)
+{
+    for (int i = 0; alsa_to_mp_channels[i][1] != MP_SPEAKER_ID_COUNT; i++) {
+        if (alsa_to_mp_channels[i][1] == mp_channel)
+            return alsa_to_mp_channels[i][0];
+    }
+
+    return SND_CHMAP_UNKNOWN;
+}
+
+static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
+{
+    struct priv *p = ao->priv;
+    struct mp_chmap_sel chmap_sel = {0};
+
+    snd_pcm_chmap_query_t **maps = snd_pcm_query_chmaps(p->alsa);
+    if (!maps)
+        return false;
+
+    for (int i = 0; maps[i] != NULL; i++) {
+        if (maps[i]->map.channels > MP_NUM_CHANNELS) {
+            MP_VERBOSE(ao, "skipping ALSA channel map with too many channels.\n");
+            continue;
+        }
+
+        struct mp_chmap entry = {.num = maps[i]->map.channels};
+        for (int c = 0; c < entry.num; c++)
+            entry.speaker[c] = find_mp_channel(maps[i]->map.pos[c]);
+
+        if (mp_chmap_is_valid(&entry)) {
+            MP_VERBOSE(ao, "Got supported channel map: %s (type %s)\n",
+                       mp_chmap_to_str(&entry),
+                       snd_pcm_chmap_type_name(maps[i]->type));
+            mp_chmap_sel_add_map(&chmap_sel, &entry);
+        } else {
+            char tmp[128];
+            if (snd_pcm_chmap_print(&maps[i]->map, sizeof(tmp), tmp) > 0)
+                MP_VERBOSE(ao, "skipping unknown ALSA channel map: %s\n", tmp);
+        }
+    }
+
+    snd_pcm_free_chmaps(maps);
+
+    return ao_chmap_sel_adjust(ao, &chmap_sel, chmap);
+}
+
+#else /* HAVE_CHMAP_API */
+
+static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
+{
+    return false;
+}
+
+#endif /* else HAVE_CHMAP_API */
 
 // Lists device names and their implied channel map.
 // The second item must be resolvable with mp_chmap_from_str().
@@ -287,7 +340,7 @@ static const char *const device_channel_layouts[][2] = {
 
 #define NUM_ALSA_CHMAPS MP_ARRAY_SIZE(device_channel_layouts)
 
-static const char *select_chmap(struct ao *ao)
+static const char *select_chmap(struct ao *ao, struct mp_chmap *chmap)
 {
     struct mp_chmap_sel sel = {0};
     struct mp_chmap maps[NUM_ALSA_CHMAPS];
@@ -296,16 +349,16 @@ static const char *select_chmap(struct ao *ao)
         mp_chmap_sel_add_map(&sel, &maps[n]);
     };
 
-    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+    if (!ao_chmap_sel_adjust(ao, &sel, chmap))
         return "default";
 
     for (int n = 0; n < NUM_ALSA_CHMAPS; n++) {
-        if (mp_chmap_equals(&ao->channels, &maps[n]))
+        if (mp_chmap_equals(chmap, &maps[n]))
             return device_channel_layouts[n][0];
     }
 
     MP_ERR(ao, "channel layout %s (%d ch) not supported.\n",
-           mp_chmap_to_str(&ao->channels), ao->channels.num);
+           mp_chmap_to_str(chmap), chmap->num);
     return "default";
 }
 
@@ -396,13 +449,14 @@ static int init(struct ao *ao)
     if (!p->cfg_ni)
         ao->format = af_fmt_from_planar(ao->format);
 
+    struct mp_chmap implied_chmap = ao->channels;
     const char *device;
     if (AF_FORMAT_IS_IEC61937(ao->format)) {
         device = "iec958";
         MP_VERBOSE(ao, "playing AC3/iec61937/iec958, %i channels\n",
                    ao->channels.num);
     } else {
-        device = select_chmap(ao);
+        device = select_chmap(ao, &implied_chmap);
         if (strcmp(device, "default") != 0 && (ao->format & AF_FORMAT_F)) {
             // hack - use the converter plugin (why the heck?)
             device = talloc_asprintf(ao, "plug:%s", device);
@@ -480,10 +534,22 @@ static int init(struct ao *ao)
     }
     CHECK_ALSA_ERROR("Unable to set access type");
 
+    struct mp_chmap dev_chmap = ao->channels;
+    if (query_chmaps(ao, &dev_chmap)) {
+        ao->channels = dev_chmap;
+    } else {
+        dev_chmap.num = 0;
+    }
+
     int num_channels = ao->channels.num;
     err = snd_pcm_hw_params_set_channels_near
             (p->alsa, alsa_hwparams, &num_channels);
     CHECK_ALSA_ERROR("Unable to set channels");
+
+    if (num_channels > MP_NUM_CHANNELS) {
+        MP_FATAL(ao, "Too many audio channels (%d).\n", num_channels);
+        goto alsa_error;
+    }
 
     if (num_channels != ao->channels.num) {
         MP_ERR(ao, "Couldn't get requested number of channels.\n");
@@ -514,6 +580,59 @@ static int init(struct ao *ao)
     CHECK_ALSA_ERROR("Unable to set hw-parameters");
 
     /* end setting hw-params */
+
+#if HAVE_CHMAP_API
+    if (mp_chmap_is_valid(&dev_chmap)) {
+        snd_pcm_chmap_t *alsa_chmap =
+            calloc(1, sizeof(*alsa_chmap) +
+                      sizeof(alsa_chmap->pos[0]) * dev_chmap.num);
+        if (!alsa_chmap)
+            goto alsa_error;
+
+        alsa_chmap->channels = dev_chmap.num;
+        for (int c = 0; c < dev_chmap.num; c++)
+            alsa_chmap->pos[c] = find_alsa_channel(dev_chmap.speaker[c]);
+
+        char tmp[128];
+        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
+            MP_VERBOSE(ao, "trying to set ALSA channel map: %s\n", tmp);
+
+        err = snd_pcm_set_chmap(p->alsa, alsa_chmap);
+        if (err == -ENXIO) {
+            MP_WARN(ao, "Device does not support requested channel map\n");
+        } else {
+            CHECK_ALSA_WARN("Channel map setup failed");
+        }
+    }
+
+    snd_pcm_chmap_t *alsa_chmap = snd_pcm_get_chmap(p->alsa);
+    if (alsa_chmap) {
+        char tmp[128];
+        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
+            MP_VERBOSE(ao, "channel map reported by ALSA: %s\n", tmp);
+
+        struct mp_chmap chmap = {.num = alsa_chmap->channels};
+        for (int c = 0; c < chmap.num; c++)
+            chmap.speaker[c] = find_mp_channel(alsa_chmap->pos[c]);
+
+        MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
+
+        if (mp_chmap_is_valid(&chmap)) {
+            if (mp_chmap_equals(&chmap, &ao->channels)) {
+                MP_VERBOSE(ao, "which is what we requested.\n");
+            } else if (chmap.num == ao->channels.num) {
+                MP_VERBOSE(ao, "using the ALSA channel map.\n");
+                ao->channels = chmap;
+            } else {
+                MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
+            }
+        } else {
+            MP_WARN(ao, "Got unknown channel map from ALSA.\n");
+        }
+
+        free(alsa_chmap);
+    }
+#endif
 
     snd_pcm_uframes_t bufsize;
     err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize);
@@ -558,28 +677,6 @@ static int init(struct ao *ao)
     /* end setting sw-params */
 
     p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
-
-#if HAVE_CHMAP_API
-    snd_pcm_chmap_t *alsa_chmap = snd_pcm_get_chmap(p->alsa);
-    if (alsa_chmap) {
-        char tmp[128];
-        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
-            MP_VERBOSE(ao, "channel map reported by ALSA: %s\n", tmp);
-
-        struct mp_chmap chmap = {.num = alsa_chmap->channels};
-        for (int c = 0; c < chmap.num; c++)
-            chmap.speaker[c] = find_mp_channel(alsa_chmap->pos[c]);
-
-        MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
-
-        if (mp_chmap_is_valid(&chmap) && chmap.num == ao->channels.num) {
-            MP_VERBOSE(ao, "using the ALSA channel map.\n");
-            ao->channels = chmap;
-        }
-
-        free(alsa_chmap);
-    }
-#endif
 
     return 0;
 
