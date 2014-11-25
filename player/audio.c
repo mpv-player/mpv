@@ -275,9 +275,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->ao_decoder_fmt = talloc(NULL, struct mp_audio);
         *mpctx->ao_decoder_fmt = in_format;
 
-        char *s = mp_audio_config_to_str(&fmt);
-        MP_INFO(mpctx, "AO: [%s] %s\n", ao_get_name(ao), s);
-        talloc_free(s);
+        MP_INFO(mpctx, "AO: [%s] %s\n", ao_get_name(ao),
+                mp_audio_config_to_str(&fmt));
         MP_VERBOSE(mpctx, "AO: Description: %s\n", ao_get_description(ao));
         update_window_title(mpctx, true);
     }

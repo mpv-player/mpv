@@ -308,11 +308,8 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
     while (af) {
         char b[128] = {0};
         mp_snprintf_cat(b, sizeof(b), "  [%s] ", af->info->name);
-        if (af->data) {
-            char *info = mp_audio_config_to_str(af->data);
-            mp_snprintf_cat(b, sizeof(b), "%s", info);
-            talloc_free(info);
-        }
+        if (af->data)
+            mp_snprintf_cat(b, sizeof(b), "%s", mp_audio_config_to_str(af->data));
         if (af == at)
             mp_snprintf_cat(b, sizeof(b), " <-");
         MP_MSG(s, msg_level, "%s\n", b);
@@ -320,9 +317,7 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
         af = af->next;
     }
 
-    char *info = mp_audio_config_to_str(&s->output);
-    MP_MSG(s, msg_level, "  [ao] %s\n", info);
-    talloc_free(info);
+    MP_MSG(s, msg_level, "  [ao] %s\n", mp_audio_config_to_str(&s->output));
 }
 
 static int af_count_filters(struct af_stream *s)

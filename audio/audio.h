@@ -49,8 +49,8 @@ void mp_audio_copy_config(struct mp_audio *dst, const struct mp_audio *src);
 bool mp_audio_config_equals(const struct mp_audio *a, const struct mp_audio *b);
 bool mp_audio_config_valid(const struct mp_audio *mpa);
 
-char *mp_audio_fmt_to_str(int srate, const struct mp_chmap *chmap, int format);
-char *mp_audio_config_to_str(struct mp_audio *mpa);
+char *mp_audio_config_to_str_buf(char *buf, size_t buf_sz, struct mp_audio *mpa);
+#define mp_audio_config_to_str(m) mp_audio_config_to_str_buf((char[64]){0}, 64, (m))
 
 void mp_audio_force_interleaved_format(struct mp_audio *mpa);
 

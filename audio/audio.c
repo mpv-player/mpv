@@ -91,17 +91,12 @@ bool mp_audio_config_valid(const struct mp_audio *mpa)
         && mpa->rate >= 1 && mpa->rate < 10000000;
 }
 
-char *mp_audio_fmt_to_str(int srate, const struct mp_chmap *chmap, int format)
+char *mp_audio_config_to_str_buf(char *buf, size_t buf_sz, struct mp_audio *mpa)
 {
-    char *res = talloc_asprintf(NULL, "%dHz %s %dch %s", srate,
-                                mp_chmap_to_str(chmap), chmap->num,
-                                af_fmt_to_str(format));
-    return res;
-}
-
-char *mp_audio_config_to_str(struct mp_audio *mpa)
-{
-    return mp_audio_fmt_to_str(mpa->rate, &mpa->channels, mpa->format);
+    snprintf(buf, buf_sz, "%dHz %s %dch %s", mpa->rate,
+             mp_chmap_to_str(&mpa->channels), mpa->channels.num,
+             af_fmt_to_str(mpa->format));
+    return buf;
 }
 
 void mp_audio_force_interleaved_format(struct mp_audio *mpa)
