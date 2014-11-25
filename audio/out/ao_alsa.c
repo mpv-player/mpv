@@ -457,10 +457,9 @@ static int init(struct ao *ao)
                    ao->channels.num);
     } else {
         device = select_chmap(ao, &implied_chmap);
-        if (strcmp(device, "default") != 0 && (ao->format & AF_FORMAT_F)) {
-            // hack - use the converter plugin (why the heck?)
+        // Not-default likely means a hw device - enable software conversions.
+        if (strcmp(device, "default") != 0)
             device = talloc_asprintf(ao, "plug:%s", device);
-        }
     }
     if (ao->device)
         device = ao->device;
