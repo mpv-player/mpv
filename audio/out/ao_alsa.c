@@ -297,7 +297,7 @@ static const char *select_chmap(struct ao *ao)
     };
 
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
-        return NULL;
+        return "default";
 
     for (int n = 0; n < NUM_ALSA_CHMAPS; n++) {
         if (mp_chmap_equals(&ao->channels, &maps[n]))
@@ -507,7 +507,7 @@ static int init(struct ao *ao)
 
     err = snd_pcm_hw_params_set_periods_near
             (p->alsa, alsa_hwparams, &(unsigned int){FRAGCOUNT}, NULL);
-    CHECK_ALSA_ERROR("Unable to set periods");
+    CHECK_ALSA_WARN("Unable to set periods");
 
     /* finally install hardware parameters */
     err = snd_pcm_hw_params(p->alsa, alsa_hwparams);
@@ -564,7 +564,7 @@ static int init(struct ao *ao)
     if (alsa_chmap) {
         char tmp[128];
         if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
-            MP_VERBOSE(ao, "attempting to set ALSA channel map: %s\n", tmp);
+            MP_VERBOSE(ao, "channel map reported by ALSA: %s\n", tmp);
 
         struct mp_chmap chmap = {.num = alsa_chmap->channels};
         for (int c = 0; c < chmap.num; c++)
@@ -576,6 +576,8 @@ static int init(struct ao *ao)
             MP_VERBOSE(ao, "using the ALSA channel map.\n");
             ao->channels = chmap;
         }
+
+        free(alsa_chmap);
     }
 #endif
 
@@ -797,7 +799,7 @@ static void list_devs(struct ao *ao, struct ao_device_list *list)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_alsa = {
-    .description = "ALSA-0.9.x-1.x audio output",
+    .description = "ALSA audio output",
     .name      = "alsa",
     .init      = init,
     .uninit    = uninit,
