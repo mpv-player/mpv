@@ -573,7 +573,7 @@ strictly part of the guaranteed API.
     Runs an external process and waits until it exits. Returns process status
     and the captured output.
 
-    The paramater ``t`` is a table. The function reads the following entries:
+    The parameter ``t`` is a table. The function reads the following entries:
 
         ``args``
             Array of strings. The first array entry is the executable. This
