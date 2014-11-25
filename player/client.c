@@ -410,6 +410,7 @@ mpv_handle *mpv_create(void)
         mpv_set_option_string(ctx, "idle", "yes");
         mpv_set_option_string(ctx, "terminal", "no");
         mpv_set_option_string(ctx, "osc", "no");
+        mpv_set_option_string(ctx, "ytdl", "no");
         mpv_set_option_string(ctx, "input-default-bindings", "no");
         mpv_set_option_string(ctx, "input-vo-keyboard", "no");
         mpv_set_option_string(ctx, "input-lirc", "no");
