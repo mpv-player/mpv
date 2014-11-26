@@ -419,8 +419,9 @@ void main() {
                               lessThanEqual(color.br, vec2(0))) + color.gg;
 #endif
 #ifdef USE_COLORMATRIX
-    // Clamp down here to avoid clipping CbCr details before CONST_LUMA
-    // has a chance to convert them.
+    // CONST_LUMA involves numbers outside the [0,1] range so we make sure
+    // to clip here, after the (possible) USE_CONST_LUMA calculations are done,
+    // instead of immediately after the colormatrix conversion.
     color = clamp(color, 0, 1);
 #endif
     // If we are scaling in linear light (SRGB or 3DLUT option enabled), we
