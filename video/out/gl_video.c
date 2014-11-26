@@ -1018,7 +1018,7 @@ static void compile_shaders(struct gl_video *p)
 
     // Don't sample from input video textures before converting the input to
     // linear light.
-    if (use_input_gamma || use_conv_gamma)
+    if (use_input_gamma || use_conv_gamma || convert_to_linear_gamma)
         use_indirect = true;
 
     // It doesn't make sense to scale the chroma with cscale in the 1. scale
