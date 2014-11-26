@@ -3,7 +3,7 @@ local msg = require 'mp.msg'
 
 local ytdl = {
     path = "youtube-dl",
-    minver = "2014.11.09",
+    minver = "2014.11.26",
     vercheck = nil,
 }
 
