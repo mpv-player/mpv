@@ -67,6 +67,13 @@ enum mp_csp_prim {
     MP_CSP_PRIM_COUNT
 };
 
+enum mp_csp_trc {
+    MP_CSP_TRC_NONE,
+    MP_CSP_TRC_BT_2020_APPROX,
+    MP_CSP_TRC_BT_2020_EXACT,
+    MP_CSP_TRC_SRGB
+};
+
 // Any enum mp_csp_prim value is a valid index (except MP_CSP_PRIM_COUNT)
 extern const char *const mp_csp_prim_names[MP_CSP_PRIM_COUNT];
 
