@@ -1700,19 +1700,6 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     return 1;
 }
 
-static bool config_window(struct vo *vo, int flags)
-{
-    struct gl_priv *p = vo->priv;
-
-    if (p->stereo_mode == GL_3D_QUADBUFFER)
-        flags |= VOFLAG_STEREO;
-
-    int mpgl_caps = MPGL_CAP_GL_LEGACY;
-    if (!p->allow_sw)
-        mpgl_caps |= MPGL_CAP_NO_SW;
-    return mpgl_config_window(p->glctx, mpgl_caps, flags);
-}
-
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct gl_priv *p = vo->priv;
@@ -1733,7 +1720,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     uninitGl(vo);
 
-    if (!config_window(vo, flags))
+    if (!mpgl_reconfig_window(p->glctx, flags))
         return -1;
 
     initGl(vo, vo->dwidth, vo->dheight);
@@ -2085,16 +2072,22 @@ static int preinit(struct vo *vo)
         p->use_yuv = 2;
     }
 
-    p->glctx = mpgl_init(vo, p->backend_arg);
+    int vo_flags = 0;
+
+    if (p->stereo_mode == GL_3D_QUADBUFFER)
+        vo_flags |= VOFLAG_STEREO;
+
+    int mpgl_caps = MPGL_CAP_GL_LEGACY;
+    if (!p->allow_sw)
+        mpgl_caps |= MPGL_CAP_NO_SW;
+
+    p->glctx = mpgl_init(vo, p->backend_arg, mpgl_caps, vo_flags);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
 
-    if (p->use_yuv == -1) {
-        if (!config_window(vo, VOFLAG_HIDDEN))
-            goto err_out;
+    if (p->use_yuv == -1)
         autodetectGlExtensions(vo);
-    }
     MP_VERBOSE(vo, "Using %d as slice height "
                "(0 means image height).\n", p->slice_height);
 

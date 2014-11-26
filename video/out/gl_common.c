@@ -930,7 +930,7 @@ static MPGLContext *init_backend(struct vo *vo, MPGLSetBackendFn set_backend,
     return ctx;
 }
 
-MPGLContext *mpgl_init(struct vo *vo, const char *backend_name)
+static MPGLContext *mpgl_create(struct vo *vo, const char *backend_name)
 {
     MPGLContext *ctx = NULL;
     int index = mpgl_find_backend(backend_name);
@@ -946,17 +946,22 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name)
     return ctx;
 }
 
-bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, int flags)
+MPGLContext *mpgl_init(struct vo *vo, const char *backend_name,
+                       int gl_caps, int vo_flags)
 {
+    MPGLContext *ctx = mpgl_create(vo, backend_name);
+    if (!ctx)
+        return NULL;
+
     gl_caps |= MPGL_CAP_GL;
 
     ctx->requested_gl_version = (gl_caps & MPGL_CAP_GL_LEGACY)
                                 ? MPGL_VER(2, 1) : MPGL_VER(3, 0);
 
-    if (ctx->config_window(ctx, flags)) {
+    if (ctx->config_window(ctx, vo_flags | VOFLAG_HIDDEN)) {
         int missing = (ctx->gl->mpgl_caps & gl_caps) ^ gl_caps;
         if (!missing)
-            return true;
+            return ctx;
 
         MP_WARN(ctx->vo, "Missing OpenGL features:");
         list_features(missing, ctx->vo->log, MSGL_WARN, false);
@@ -970,7 +975,13 @@ bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, int flags)
     }
 
     MP_ERR(ctx->vo, "OpenGL context creation failed!\n");
-    return false;
+    mpgl_uninit(ctx);
+    return NULL;
+}
+
+bool mpgl_reconfig_window(struct MPGLContext *ctx, int flags)
+{
+    return ctx->config_window(ctx, flags);
 }
 
 void mpgl_uninit(MPGLContext *ctx)

@@ -136,9 +136,6 @@ typedef struct MPGLContext {
     void *priv;
 } MPGLContext;
 
-MPGLContext *mpgl_init(struct vo *vo, const char *backend_name);
-void mpgl_uninit(MPGLContext *ctx);
-
 void mpgl_lock(MPGLContext *ctx);
 void mpgl_unlock(MPGLContext *ctx);
 void mpgl_set_context(MPGLContext *ctx);
@@ -150,7 +147,12 @@ bool mpgl_is_thread_safe(MPGLContext *ctx);
 // gl_caps: bitfield of MPGL_CAP_* (required GL version and feature set)
 // flags: passed to the backend's create window function
 // Returns success.
-bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, int flags);
+MPGLContext *mpgl_init(struct vo *vo, const char *backend_name,
+                       int gl_caps, int vo_flags);
+void mpgl_uninit(MPGLContext *ctx);
+
+// flags: passed to the backend function
+bool mpgl_reconfig_window(struct MPGLContext *ctx, int flags);
 
 int mpgl_find_backend(const char *name);
 
