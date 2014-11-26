@@ -89,4 +89,7 @@ bool mp_append_escaped_string_noalloc(void *talloc_ctx, struct bstr *dst,
 bool mp_append_escaped_string(void *talloc_ctx, struct bstr *dst,
                               struct bstr *src);
 
+char *mp_strerror_buf(char *buf, size_t buf_size, int errnum);
+#define mp_strerror(e) mp_strerror_buf((char[80]){0}, 80, e)
+
 #endif /* MPLAYER_MPCOMMON_H */

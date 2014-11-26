@@ -21,7 +21,7 @@
 
 #include "config.h"
 
-#include <string.h> /* strerror */
+#include <string.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/ioctl.h>
@@ -39,6 +39,7 @@
 #include "osdep/io.h"
 
 #include "audio_in.h"
+#include "common/common.h"
 #include "common/msg.h"
 
 int ai_oss_set_samplerate(audio_in_t *ai)
@@ -91,7 +92,7 @@ int ai_oss_init(audio_in_t *ai)
     if (ai->oss.audio_fd < 0)
     {
         MP_ERR(ai, "Unable to open '%s': %s\n",
-               ai->oss.device, strerror(errno));
+               ai->oss.device, mp_strerror(errno));
         return -1;
     }
 

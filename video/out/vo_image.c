@@ -29,6 +29,7 @@
 #include "osdep/io.h"
 #include "options/path.h"
 #include "talloc.h"
+#include "common/common.h"
 #include "common/msg.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
@@ -52,7 +53,7 @@ static bool checked_mkdir(struct vo *vo, const char *buf)
 {
     MP_INFO(vo, "Creating output directory '%s'...\n", buf);
     if (mkdir(buf, 0755) < 0) {
-        char *errstr = strerror(errno);
+        char *errstr = mp_strerror(errno);
         if (errno == EEXIST) {
             struct stat stat_p;
             if (stat(buf, &stat_p ) == 0 && S_ISDIR(stat_p.st_mode))

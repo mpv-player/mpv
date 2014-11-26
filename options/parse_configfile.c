@@ -27,6 +27,7 @@
 #include "osdep/io.h"
 
 #include "parse_configfile.h"
+#include "common/common.h"
 #include "common/msg.h"
 #include "misc/ctype.h"
 #include "m_option.h"
@@ -79,7 +80,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
         MP_VERBOSE(config, "\n");
 
     if ((fp = fopen(conffile, "r")) == NULL) {
-        MP_VERBOSE(config, "Can't open config file: %s\n", strerror(errno));
+        MP_VERBOSE(config, "Can't open config file: %s\n", mp_strerror(errno));
         ret = 0;
         goto out;
     }

@@ -29,6 +29,7 @@
 
 #include "osdep/io.h"
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "stream.h"
 #include "options/m_option.h"
@@ -253,7 +254,7 @@ static int open_f(stream_t *stream)
         fd = open(filename, m | O_BINARY, openmode);
         if (fd < 0) {
             MP_ERR(stream, "Cannot open file '%s': %s\n",
-                    filename, strerror(errno));
+                    filename, mp_strerror(errno));
             return STREAM_ERROR;
         }
         struct stat st;

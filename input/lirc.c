@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <poll.h>
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "input.h"
 
@@ -49,7 +50,7 @@ static struct ctx *mp_input_lirc_init(struct input_ctx *ictx, struct mp_log *log
 
   mode = fcntl(lirc_sock, F_GETFL);
   if (mode < 0 || fcntl(lirc_sock, F_SETFL, mode | O_NONBLOCK) < 0) {
-    mp_err(log, "setting non-blocking mode failed: %s\n", strerror(errno));
+    mp_err(log, "setting non-blocking mode failed: %s\n", mp_strerror(errno));
     lirc_deinit();
     return NULL;
   }

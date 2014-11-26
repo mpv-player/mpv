@@ -38,6 +38,7 @@
 
 #include "config.h"
 #include "options/options.h"
+#include "common/common.h"
 #include "common/msg.h"
 #include "osdep/timer.h"
 #include "osdep/endian.h"
@@ -107,11 +108,11 @@ static const struct mp_chmap oss_layouts[MP_NUM_CHANNELS + 1] = {
 #endif
 
 #if !defined(AFMT_U32_NE) && defined(AFMT_U32_LE) && defined(AFMT_U32_BE)
-#define AFMT_U32MP_SELECT_LE_BE(AFMT_U32_LE, AFMT_U32_BE)
+#define AFMT_U32_NE AFMT_U32MP_SELECT_LE_BE(AFMT_U32_LE, AFMT_U32_BE)
 #endif
 
 #if !defined(AFMT_S32_NE) && defined(AFMT_S32_LE) && defined(AFMT_S32_BE)
-#define AFMT_S32MP_SELECT_LE_BE(AFMT_S32_LE, AFMT_S32_BE)
+#define AFMT_S32_NE AFMT_S32MP_SELECT_LE_BE(AFMT_S32_LE, AFMT_S32_BE)
 #endif
 
 static const int format_table[][2] = {
@@ -305,14 +306,16 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
     p->audio_fd = open(p->dsp, O_WRONLY);
 #endif
     if (p->audio_fd < 0) {
-        MP_ERR(ao, "Can't open audio device %s: %s\n", p->dsp, strerror(errno));
+        MP_ERR(ao, "Can't open audio device %s: %s\n",
+               p->dsp, mp_strerror(errno));
         goto fail;
     }
 
 #ifdef __linux__
     /* Remove the non-blocking flag */
     if (fcntl(p->audio_fd, F_SETFL, 0) < 0) {
-        MP_ERR(ao, "Can't make file descriptor blocking: %s\n",  strerror(errno));
+        MP_ERR(ao, "Can't make file descriptor blocking: %s\n",
+               mp_strerror(errno));
         goto fail;
     }
 #endif
@@ -434,7 +437,7 @@ static int init(struct ao *ao)
 
         if ((fd = open(p->oss_mixer_device, O_RDONLY)) == -1) {
             MP_ERR(ao, "Can't open mixer device %s: %s\n",
-                   p->oss_mixer_device, strerror(errno));
+                   p->oss_mixer_device, mp_strerror(errno));
         } else {
             ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
             close(fd);

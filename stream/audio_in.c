@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include "audio_in.h"
+#include "common/common.h"
 #include "common/msg.h"
 #include <string.h>
 #include <errno.h>
@@ -268,7 +269,7 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
         ret = read(ai->oss.audio_fd, buffer, ai->blocksize);
        if (ret != ai->blocksize) {
            if (ret < 0) {
-               MP_ERR(ai, "\nError reading audio: %s\n", strerror(errno));
+               MP_ERR(ai, "\nError reading audio: %s\n", mp_strerror(errno));
 
            } else {
                MP_ERR(ai, "\nNot enough audio samples!\n");
@@ -282,7 +283,7 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
        ret = sio_read(ai->sndio.hdl, buffer, ai->blocksize);
         if (ret != ai->blocksize) {
             if (ret < 0) {
-                MP_ERR(ai, "\nError reading audio: %s\n", strerror(errno));
+                MP_ERR(ai, "\nError reading audio: %s\n", mp_strerror(errno));
             } else {
                 MP_ERR(ai, "\nNot enough audio samples!\n");
             }
