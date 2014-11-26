@@ -904,7 +904,8 @@ static void compile_shaders(struct gl_video *p)
     // Linear light scaling is only enabled when either color correction
     // option (3dlut or srgb) is enabled, otherwise scaling is done in the
     // source space. We also need to linearize for constant luminance systems.
-    bool convert_to_linear_gamma = !p->is_linear_rgb && use_cms || use_const_luma;
+    bool convert_to_linear_gamma =
+        (!p->is_linear_rgb && use_cms) || use_const_luma;
 
     // Figure out the right color spaces we need to convert, if any
     enum mp_csp_prim prim_src = p->image_params.primaries, prim_dest;
