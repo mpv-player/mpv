@@ -43,6 +43,12 @@
 
 // Earlier GLSL doesn't support mix() with bvec
 #if __VERSION__ >= 130
+vec3 srgb_expand(vec3 v)
+{
+    return mix(v / 12.92, pow((v + vec3(0.055))/1.055, vec3(2.4)),
+               lessThanEqual(vec3(0.04045), v));
+}
+
 vec3 srgb_compand(vec3 v)
 {
     return mix(v * 12.92, 1.055 * pow(v, vec3(1.0/2.4)) - 0.055,
@@ -97,6 +103,9 @@ void main() {
 #endif
 #ifdef USE_OSD_LINEAR_CONV_BT2020
     color.rgb = bt2020_expand(color.rgb);
+#endif
+#ifdef USE_OSD_LINEAR_CONV_SRGB
+    color.rgb = srgb_expand(color.rgb);
 #endif
 #ifdef USE_OSD_CMS_MATRIX
     // Convert to the right target gamut first (to BT.709 for sRGB,
@@ -438,6 +447,13 @@ void main() {
 #ifdef USE_LINEAR_LIGHT_BT2020
     // ... and actual BT.2020 (two-part function)
     color = bt2020_expand(color);
+#endif
+#ifdef USE_LINEAR_LIGHT_SRGB
+    // This is not needed for most sRGB content since we can use GL_SRGB to
+    // directly sample RGB texture in linear light, but for things which are
+    // also sRGB but in a different format (such as JPEG's YUV), we need
+    // to convert to linear light manually.
+    color = srgb_expand(color);
 #endif
 #ifdef USE_CONST_LUMA
     // Calculate the green channel from the expanded RYcB

@@ -901,11 +901,25 @@ static void compile_shaders(struct gl_video *p)
     bool use_conv_gamma = p->conv_gamma != 1.0;
     bool use_const_luma = p->image_params.colorspace == MP_CSP_BT_2020_C;
 
+    enum mp_csp_trc gamma_fun = MP_CSP_TRC_NONE;
+
     // Linear light scaling is only enabled when either color correction
     // option (3dlut or srgb) is enabled, otherwise scaling is done in the
     // source space. We also need to linearize for constant luminance systems.
-    bool convert_to_linear_gamma =
-        (!p->is_linear_rgb && use_cms) || use_const_luma;
+    if ((!p->is_linear_rgb && use_cms) || use_const_luma) {
+        // We just use the color level range to distinguish between PC
+        // content like images, which are most likely sRGB, and TV content
+        // like movies, which are most likely BT.2020
+        if (p->image_params.colorlevels == MP_CSP_LEVELS_PC && !p->hwdec_active) {
+            // FIXME: I don't know if hwdec sets the color levels to PC or not,
+            // but let's avoid the bug just in case.
+            gamma_fun = MP_CSP_TRC_SRGB;
+        } else if (p->opts.approx_gamma) {
+            gamma_fun = MP_CSP_TRC_BT_2020_APPROX;
+        } else {
+            gamma_fun = MP_CSP_TRC_BT_2020_EXACT;
+        }
+    }
 
     // Figure out the right color spaces we need to convert, if any
     enum mp_csp_prim prim_src = p->image_params.primaries, prim_dest;
@@ -944,9 +958,11 @@ static void compile_shaders(struct gl_video *p)
 
     char *header_osd = talloc_strdup(tmp, header);
     shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV_APPROX",
-                   use_cms && p->opts.approx_gamma);
+                   use_cms && gamma_fun == MP_CSP_TRC_BT_2020_APPROX);
     shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV_BT2020",
-                   use_cms && !p->opts.approx_gamma);
+                   use_cms && gamma_fun == MP_CSP_TRC_BT_2020_EXACT);
+    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV_SRGB",
+                   use_cms && gamma_fun == MP_CSP_TRC_SRGB);
     shader_def_opt(&header_osd, "USE_OSD_CMS_MATRIX", use_cms_matrix);
     shader_def_opt(&header_osd, "USE_OSD_3DLUT", p->use_lut_3d);
     // 3DLUT overrides SRGB
@@ -981,9 +997,11 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_conv, "USE_CONV_GAMMA", use_conv_gamma);
     shader_def_opt(&header_conv, "USE_CONST_LUMA", use_const_luma);
     shader_def_opt(&header_conv, "USE_LINEAR_LIGHT_APPROX",
-                   convert_to_linear_gamma && p->opts.approx_gamma);
+                   gamma_fun == MP_CSP_TRC_BT_2020_APPROX);
     shader_def_opt(&header_conv, "USE_LINEAR_LIGHT_BT2020",
-                   convert_to_linear_gamma && !p->opts.approx_gamma);
+                   gamma_fun == MP_CSP_TRC_BT_2020_EXACT);
+    shader_def_opt(&header_conv, "USE_LINEAR_LIGHT_SRGB",
+                   gamma_fun == MP_CSP_TRC_SRGB);
     if (p->opts.alpha_mode > 0 && p->has_alpha && p->plane_count > 3)
         shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
     if (p->opts.alpha_mode == 2 && p->has_alpha)
@@ -1019,7 +1037,7 @@ static void compile_shaders(struct gl_video *p)
 
     // Don't sample from input video textures before converting the input to
     // linear light.
-    if (use_input_gamma || use_conv_gamma || convert_to_linear_gamma)
+    if (use_input_gamma || use_conv_gamma || gamma_fun != MP_CSP_TRC_NONE)
         use_indirect = true;
 
     // It doesn't make sense to scale the chroma with cscale in the 1. scale
