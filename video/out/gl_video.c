@@ -1409,7 +1409,7 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
     p->image_dh = params->d_h;
     p->image_params = *params;
 
-    if (p->is_rgb && (p->opts.srgb || p->use_lut_3d)) {
+    if (p->is_rgb && (p->opts.srgb || p->use_lut_3d) && !p->hwdec_active) {
         // If we're opening an RGB source like a png file or similar,
         // we just sample it using GL_SRGB which treats it as an sRGB source
         // and pretend it's linear as far as CMS is concerned
