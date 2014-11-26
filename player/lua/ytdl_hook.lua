@@ -97,23 +97,46 @@ mp.add_hook("on_load", 10, function ()
         elseif not (json["_type"] == nil) and (json["_type"] == "playlist") then
             -- a playlist
 
-            local playlist = "#EXTM3U\n"
-            for i, entry in pairs(json.entries) do
-                local site = entry.url
+            -- some funky guessing to detect multi-arc videos
+            if  not (json.entries[1]["webpage_url"] == nil)
+                and (json.entries[1]["webpage_url"] == json["webpage_url"]) then
+                msg.verbose("multi-arc video detected, building EDL")
 
-                -- some extractors will still return the full info for
-                -- all clips in the playlist and the URL will point
-                -- directly to the file in that case, which we don't
-                -- want so get the webpage URL instead, which is what
-                -- we want
-                if not (entry["webpage_url"] == nil) then
-                    site = entry["webpage_url"]
+
+                local playlist = "edl://"
+                for i, entry in pairs(json.entries) do
+
+                    playlist = playlist .. entry.url .. ";"
                 end
 
-                playlist = playlist .. "ytdl://" .. site .. "\n"
-            end
+                msg.debug("EDL: " .. playlist)
 
-            mp.set_property("stream-open-filename", "memory://" .. playlist)
+
+                mp.set_property("stream-open-filename", playlist)
+                if not (json.title == nil) then
+                    mp.set_property("file-local-options/media-title", json.title)
+                end
+
+            else
+
+                local playlist = "#EXTM3U\n"
+                for i, entry in pairs(json.entries) do
+                    local site = entry.url
+
+                    -- some extractors will still return the full info for
+                    -- all clips in the playlist and the URL will point
+                    -- directly to the file in that case, which we don't
+                    -- want so get the webpage URL instead, which is what
+                    -- we want
+                    if not (entry["webpage_url"] == nil) then
+                        site = entry["webpage_url"]
+                    end
+
+                    playlist = playlist .. "ytdl://" .. site .. "\n"
+                end
+
+                mp.set_property("stream-open-filename", "memory://" .. playlist)
+            end
 
         else -- probably a video
             local streamurl = ""
