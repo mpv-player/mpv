@@ -682,12 +682,14 @@ static int open_s(stream_t *stream)
         snprintf(temp_device, len, "/dev/rdisk%d", i);
         dvd = DVDOpen(temp_device);
         if(!dvd) {
-          MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",temp_device, strerror(errno));
+          MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",temp_device,
+                 mp_strerror(errno));
         } else {
 #if DVDREAD_VERSION <= LIBDVDREAD_VERSION(0,9,4)
           dvd_file_t *dvdfile = DVDOpenFile(dvd,d->dvd_title,DVD_READ_INFO_FILE);
           if(!dvdfile) {
-            MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",temp_device, strerror(errno));
+            MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",temp_device,
+                   mp_strerror(errno));
             DVDClose(dvd);
             continue;
           }
@@ -706,7 +708,8 @@ static int open_s(stream_t *stream)
     {
         dvd = DVDOpen(d->dvd_device_current);
         if(!dvd) {
-          MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",d->dvd_device_current, strerror(errno));
+          MP_ERR(stream, "Couldn't open DVD device: %s (%s)\n",
+                 d->dvd_device_current, mp_strerror(errno));
           return STREAM_UNSUPPORTED;
         }
     }

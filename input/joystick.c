@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <poll.h>
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "keycodes.h"
 
@@ -65,7 +66,8 @@ static struct ctx *joystick_init(struct input_ctx *ictx, struct mp_log *log, cha
 
   fd = open( dev ? dev : JS_DEV , O_RDONLY | O_NONBLOCK );
   if(fd < 0) {
-    mp_err(log, "Can't open joystick device %s: %s\n",dev ? dev : JS_DEV,strerror(errno));
+    mp_err(log, "Can't open joystick device %s: %s\n",dev ? dev : JS_DEV,
+           mp_strerror(errno));
     return NULL;
   }
 
@@ -83,7 +85,8 @@ static struct ctx *joystick_init(struct input_ctx *ictx, struct mp_log *log, cha
           initialized = 1;
           break;
         }
-        MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
+        MP_ERR(ctx, "Error while reading joystick device: %s\n",
+               mp_strerror(errno));
         close(fd);
         talloc_free(ctx);
         return NULL;
@@ -117,10 +120,12 @@ static int mp_input_joystick_read(void *pctx, int fd) {
         continue;
       else if(errno == EAGAIN)
         return 0;
-      if( r < 0)
-        MP_ERR(ctx, "Error while reading joystick device: %s\n",strerror(errno));
-      else
+      if( r < 0) {
+        MP_ERR(ctx, "Error while reading joystick device: %s\n",
+               mp_strerror(errno));
+      } else {
         MP_ERR(ctx, "Error while reading joystick device: %s\n","EOF");
+      }
       return -1;
     }
     l += r;

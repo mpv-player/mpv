@@ -20,6 +20,7 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
+#include <libavutil/error.h>
 
 #include "talloc.h"
 #include "misc/bstr.h"
@@ -242,4 +243,12 @@ bool mp_append_escaped_string(void *talloc_ctx, bstr *dst, bstr *src)
         return true;
     }
     return false;
+}
+
+// Behaves like strerror()/strerror_r(), but is thread- and GNU-safe.
+char *mp_strerror_buf(char *buf, size_t buf_size, int errnum)
+{
+    // This handles the nasty details of calling the right function for us.
+    av_strerror(AVERROR(errnum), buf, buf_size);
+    return buf;
 }

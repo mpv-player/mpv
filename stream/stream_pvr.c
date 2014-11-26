@@ -45,6 +45,7 @@
 #include "osdep/io.h"
 
 #include "common/msg.h"
+#include "common/common.h"
 #include "options/options.h"
 
 #include "stream.h"
@@ -530,7 +531,7 @@ get_v4l2_freq (struct pvr_t *pvr)
   if (ioctl (pvr->dev_fd, VIDIOC_G_TUNER, &vt) < 0)
   {
     MP_ERR(pvr, "%s can't set tuner (%s).\n",
-            LOG_LEVEL_V4L2, strerror (errno));
+            LOG_LEVEL_V4L2, mp_strerror (errno));
     return -1;
   }
 
@@ -581,7 +582,7 @@ set_v4l2_freq (struct pvr_t *pvr)
   if (ioctl (pvr->dev_fd, VIDIOC_G_TUNER, &vt) < 0)
   {
     MP_ERR(pvr, "%s can't get tuner (%s).\n",
-            LOG_LEVEL_V4L2, strerror (errno));
+            LOG_LEVEL_V4L2, mp_strerror (errno));
     return -1;
   }
 
@@ -594,7 +595,7 @@ set_v4l2_freq (struct pvr_t *pvr)
   if (ioctl (pvr->dev_fd, VIDIOC_S_FREQUENCY, &vf) < 0)
   {
     MP_ERR(pvr, "%s can't set frequency (%s).\n",
-            LOG_LEVEL_V4L2, strerror (errno));
+            LOG_LEVEL_V4L2, mp_strerror (errno));
     return -1;
   }
 
@@ -602,7 +603,7 @@ set_v4l2_freq (struct pvr_t *pvr)
   if (ioctl (pvr->dev_fd, VIDIOC_G_TUNER, &vt) < 0)
   {
     MP_ERR(pvr, "%s can't set tuner (%s).\n",
-            LOG_LEVEL_V4L2, strerror (errno));
+            LOG_LEVEL_V4L2, mp_strerror (errno));
     return -1;
   }
 
@@ -1070,7 +1071,7 @@ set_encoder_settings (struct pvr_t *pvr)
   if (ioctl (pvr->dev_fd, VIDIOC_S_EXT_CTRLS, &ctrls) < 0)
   {
     MP_ERR(pvr, "%s Error setting MPEG controls (%s).\n",
-            LOG_LEVEL_ENCODER, strerror (errno));
+            LOG_LEVEL_ENCODER, mp_strerror (errno));
     free (ext_ctrl);
     return -1;
   }
@@ -1166,7 +1167,7 @@ set_v4l2_settings (struct pvr_t *pvr)
     ctrl.value = 1;
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
-      MP_ERR(pvr, "%s can't mute (%s).\n", LOG_LEVEL_V4L2, strerror (errno));
+      MP_ERR(pvr, "%s can't mute (%s).\n", LOG_LEVEL_V4L2, mp_strerror (errno));
       return -1;
     }
   }
@@ -1176,7 +1177,7 @@ set_v4l2_settings (struct pvr_t *pvr)
   {
     if (ioctl (pvr->dev_fd, VIDIOC_S_INPUT, &pvr->input) < 0)
     {
-      MP_ERR(pvr, "%s can't set input (%s)\n", LOG_LEVEL_V4L2, strerror (errno));
+      MP_ERR(pvr, "%s can't set input (%s)\n", LOG_LEVEL_V4L2, mp_strerror (errno));
       return -1;
     }
   }
@@ -1189,7 +1190,7 @@ set_v4l2_settings (struct pvr_t *pvr)
 
     if (ioctl (pvr->dev_fd, VIDIOC_ENUMSTD, &std) < 0)
     {
-      MP_ERR(pvr, "%s can't set norm (%s)\n", LOG_LEVEL_V4L2, strerror (errno));
+      MP_ERR(pvr, "%s can't set norm (%s)\n", LOG_LEVEL_V4L2, mp_strerror (errno));
       return -1;
     }
 
@@ -1197,7 +1198,7 @@ set_v4l2_settings (struct pvr_t *pvr)
 
     if (ioctl (pvr->dev_fd, VIDIOC_S_STD, &std.id) < 0)
     {
-      MP_ERR(pvr, "%s can't set norm (%s)\n", LOG_LEVEL_V4L2, strerror (errno));
+      MP_ERR(pvr, "%s can't set norm (%s)\n", LOG_LEVEL_V4L2, mp_strerror (errno));
       return -1;
     }
   }
@@ -1217,7 +1218,7 @@ set_v4l2_settings (struct pvr_t *pvr)
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
       MP_ERR(pvr, "%s can't set brightness to %d (%s).\n",
-              LOG_LEVEL_V4L2, ctrl.value, strerror (errno));
+              LOG_LEVEL_V4L2, ctrl.value, mp_strerror (errno));
       return -1;
     }
   }
@@ -1237,7 +1238,7 @@ set_v4l2_settings (struct pvr_t *pvr)
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
       MP_ERR(pvr, "%s can't set contrast to %d (%s).\n",
-              LOG_LEVEL_V4L2, ctrl.value, strerror (errno));
+              LOG_LEVEL_V4L2, ctrl.value, mp_strerror (errno));
       return -1;
     }
   }
@@ -1257,7 +1258,7 @@ set_v4l2_settings (struct pvr_t *pvr)
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
       MP_ERR(pvr, "%s can't set hue to %d (%s).\n",
-              LOG_LEVEL_V4L2, ctrl.value, strerror (errno));
+              LOG_LEVEL_V4L2, ctrl.value, mp_strerror (errno));
       return -1;
     }
   }
@@ -1277,7 +1278,7 @@ set_v4l2_settings (struct pvr_t *pvr)
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
       MP_ERR(pvr, "%s can't set saturation to %d (%s).\n",
-              LOG_LEVEL_V4L2, ctrl.value, strerror (errno));
+              LOG_LEVEL_V4L2, ctrl.value, mp_strerror (errno));
       return -1;
     }
   }
@@ -1293,7 +1294,7 @@ set_v4l2_settings (struct pvr_t *pvr)
     if (ioctl (pvr->dev_fd, VIDIOC_S_FMT, &vfmt) < 0)
     {
       MP_ERR(pvr, "%s can't set resolution to %dx%d (%s).\n",
-              LOG_LEVEL_V4L2, pvr->width, pvr->height, strerror (errno));
+              LOG_LEVEL_V4L2, pvr->width, pvr->height, mp_strerror (errno));
       return -1;
     }
   }
@@ -1405,7 +1406,7 @@ v4l2_display_settings (struct pvr_t *pvr)
     vin.index = input;
     if (ioctl (pvr->dev_fd, VIDIOC_ENUMINPUT, &vin) < 0)
     {
-      MP_ERR(pvr, "%s can't get input (%s).\n", LOG_LEVEL_V4L2, strerror (errno));
+      MP_ERR(pvr, "%s can't get input (%s).\n", LOG_LEVEL_V4L2, mp_strerror (errno));
       return -1;
     }
     else
@@ -1413,7 +1414,7 @@ v4l2_display_settings (struct pvr_t *pvr)
   }
   else
   {
-    MP_ERR(pvr, "%s can't get input (%s).\n", LOG_LEVEL_V4L2, strerror (errno));
+    MP_ERR(pvr, "%s can't get input (%s).\n", LOG_LEVEL_V4L2, mp_strerror (errno));
     return -1;
   }
 
@@ -1424,7 +1425,7 @@ v4l2_display_settings (struct pvr_t *pvr)
   }
   else
   {
-    MP_ERR(pvr, "%s can't get input (%s).\n", LOG_LEVEL_V4L2, strerror (errno));
+    MP_ERR(pvr, "%s can't get input (%s).\n", LOG_LEVEL_V4L2, mp_strerror (errno));
     return -1;
   }
 
@@ -1445,7 +1446,7 @@ v4l2_display_settings (struct pvr_t *pvr)
   }
   else
   {
-    MP_ERR(pvr, "%s can't get norm (%s)\n", LOG_LEVEL_V4L2, strerror (errno));
+    MP_ERR(pvr, "%s can't get norm (%s)\n", LOG_LEVEL_V4L2, mp_strerror (errno));
     return -1;
   }
 
@@ -1549,7 +1550,7 @@ pvr_stream_open (stream_t *stream)
   if (ioctl (pvr->dev_fd, VIDIOC_QUERYCAP, &vcap) < 0)
   {
     MP_ERR(pvr, "%s device is not V4L2 compliant (%s).\n",
-            LOG_LEVEL_PVR, strerror (errno));
+            LOG_LEVEL_PVR, mp_strerror (errno));
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }

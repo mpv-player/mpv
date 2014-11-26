@@ -651,8 +651,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
     s->seekable = stream->seekable;
 
     if (pthread_create(&s->cache_thread, NULL, cache_thread, s) != 0) {
-        MP_ERR(s, "Starting cache process/thread failed: %s.\n",
-               strerror(errno));
+        MP_ERR(s, "Starting cache thread failed.\n");
         return -1;
     }
     s->cache_thread_running = true;

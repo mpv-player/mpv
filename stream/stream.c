@@ -449,7 +449,7 @@ static void stream_capture_write(stream_t *s, void *buf, size_t len)
 {
     if (s->capture_file && len > 0) {
         if (fwrite(buf, len, 1, s->capture_file) < 1) {
-            MP_ERR(s, "Error writing capture file: %s\n", strerror(errno));
+            MP_ERR(s, "Error writing capture file: %s\n", mp_strerror(errno));
             stream_set_capture_file(s, NULL);
         }
     }
@@ -470,7 +470,7 @@ void stream_set_capture_file(stream_t *s, const char *filename)
                 if (s->buf_pos < s->buf_len)
                     stream_capture_write(s, s->buffer, s->buf_len);
             } else {
-                MP_ERR(s, "Error opening capture file: %s\n", strerror(errno));
+                MP_ERR(s, "Error opening capture file: %s\n", mp_strerror(errno));
             }
         }
     }

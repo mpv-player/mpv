@@ -180,8 +180,6 @@ static bool getMyXImage(struct priv *p, int foo)
                                        IPC_CREAT | 0777);
         if (p->Shminfo[foo].shmid < 0) {
             XDestroyImage(p->myximage[foo]);
-            MP_VERBOSE(vo, "%s\n", strerror(errno));
-            //perror( strerror( errno ) );
             MP_WARN(vo, "Shared memory error,disabling ( seg id error )\n");
             goto shmemerror;
         }
