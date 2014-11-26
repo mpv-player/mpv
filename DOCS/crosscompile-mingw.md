@@ -43,8 +43,8 @@ Example with MXE
 # or more!
 
 cd /opt
-git clone https://github.com/mxe/mxe mingw
-cd mingw
+git clone https://github.com/mxe/mxe mxe
+cd mxe
 
 # Set build options.
 
@@ -57,10 +57,10 @@ echo "JOBS := 4" >> settings.mk
 # The MXE_TARGET environment variable builds MinGW-w64 for 32 bit targets.
 # Alternatively, you can specify this in the make command by appending
 # "MXE_TARGETS=i686-w64-mingw32" to the end of command:
-echo "MXE_TARGETS := i686-w64-mingw32" >> settings.mk
+echo "MXE_TARGETS := i686-w64-mingw32.static" >> settings.mk
 
 # If you want to build 64 bit version, use this:
-# echo "MXE_TARGETS := x86_64-w64-mingw32" >> settings.mk
+# echo "MXE_TARGETS := x86_64-w64-mingw32.static" >> settings.mk
 
 # Build required packages. The following provide a minimum required to build
 # mpv.
@@ -68,16 +68,16 @@ echo "MXE_TARGETS := i686-w64-mingw32" >> settings.mk
 make gcc ffmpeg libass jpeg pthreads
 
 # Add MXE binaries to $PATH
-export PATH=/opt/mingw/usr/bin/:$PATH
+export PATH=/opt/mxe/usr/bin/:$PATH
 
 # Build mpv. The target will be used to automatically select the name of the
-# build tools involved (e.g. it will use i686-w64-mingw32-gcc).
+# build tools involved (e.g. it will use i686-w64-mingw32.static-gcc).
 
 cd ..
 git clone https://github.com/mpv-player/mpv.git
 cd mpv
-DEST_OS=win32 TARGET=i686-w64-mingw32 ./waf configure
+DEST_OS=win32 TARGET=i686-w64-mingw32.static ./waf configure
 # Or, if 64 bit version,
-# DEST_OS=win32 TARGET=x86_64-w64-mingw32 ./waf configure
+# DEST_OS=win32 TARGET=x86_64-w64-mingw32.static ./waf configure
 ./waf build
 ```
