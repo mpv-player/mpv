@@ -120,7 +120,11 @@ mp.add_hook("on_load", 10, function ()
 
             -- DASH?
             if not (json["requested_formats"] == nil) then
-                msg.info("NOTE: Using DASH, expect inaccurate duration.")
+                msg.info("Using DASH, expect inaccurate duration.")
+                if not (json.duration == nil) then
+                    msg.info("actual duration: " .. mp.format_time(json.duration))
+                end
+
                 -- video url
                 streamurl = json["requested_formats"][1].url
 
