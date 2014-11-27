@@ -4350,7 +4350,9 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         struct track *sub = mp_add_subtitles(mpctx, cmd->args[0].v.s);
         if (!sub)
             return -1;
-        if (cmd->args[1].v.i != 1) {
+        if (cmd->args[1].v.i == 1) {
+            sub->no_default = true;
+        } else {
             mp_switch_track(mpctx, sub->type, sub);
             mp_mark_user_track_selection(mpctx, 0, sub->type);
         }
