@@ -36,7 +36,7 @@ struct mixer {
     struct ao *ao;
     struct af_stream *af;
     // Static, dependent on ao/softvol settings
-    bool softvol;                       // use AO (true) or af_volume (false)
+    bool softvol;                       // use AO (false) or af_volume (true)
     bool ao_softvol;                    // AO has private or per-app volume
     bool emulate_mute;                  // if true, emulate mute with volume=0
     // Last known values (possibly out of sync with reality)
@@ -72,7 +72,7 @@ bool mixer_audio_initialized(struct mixer *mixer)
 float mixer_getneutralvolume(struct mixer *mixer)
 {
     // gain == 1
-    return 1.0 / mixer->opts->softvol_max * 100.0 * 100.0;
+    return mixer->softvol ? 1.0 / mixer->opts->softvol_max * 100.0 * 100.0 : 100;
 }
 
 static void checkvolume(struct mixer *mixer)
