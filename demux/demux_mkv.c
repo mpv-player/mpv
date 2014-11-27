@@ -1414,20 +1414,22 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->bitrate = 16000 * 8;
         sh_a->block_align = 1024;
 
-        if (!strcmp(track->codec_id, MKV_A_AAC) && track->private_data) {
-            if (!extradata_len) {
+        if (!strcmp(track->codec_id, MKV_A_AAC)) {
+            if (track->private_data && !extradata_len) {
                 extradata = track->private_data;
                 extradata_len = track->private_size;
             }
         } else {
             /* Recreate the 'private data' */
-            /* which faad2 uses in its initialization */
             srate_idx = aac_get_sample_rate_index(track->a_sfreq);
-            if (!strncmp(&track->codec_id[12], "MAIN", 4))
+            const char *tail = "";
+            if (strlen(track->codec_id) >= 12)
+                tail = &track->codec_id[12];
+            if (!strncmp(tail, "MAIN", 4))
                 profile = 0;
-            else if (!strncmp(&track->codec_id[12], "LC", 2))
+            else if (!strncmp(tail, "LC", 2))
                 profile = 1;
-            else if (!strncmp(&track->codec_id[12], "SSR", 3))
+            else if (!strncmp(tail, "SSR", 3))
                 profile = 2;
             else
                 profile = 3;
