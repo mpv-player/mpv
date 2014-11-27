@@ -181,6 +181,8 @@ typedef struct d3d_priv {
     int max_texture_width;          /**< from the device capabilities */
     int max_texture_height;         /**< from the device capabilities */
 
+    D3DFORMAT osd_fmt_table[SUBBITMAP_COUNT];
+
     D3DMATRIX d3d_colormatrix;
     struct mp_csp_equalizer video_eq;
 
@@ -217,15 +219,6 @@ static const struct fmt_entry fmt_table[] = {
     {IMGFMT_Y8,    D3DFMT_L8},
     {IMGFMT_Y16,   D3DFMT_L16},
     {0},
-};
-
-static const D3DFORMAT osd_fmt_table[SUBBITMAP_COUNT] = {
-    [SUBBITMAP_LIBASS] = D3DFMT_A8,
-    [SUBBITMAP_RGBA]   = D3DFMT_A8R8G8B8,
-};
-static const bool osd_fmt_supported[SUBBITMAP_COUNT] = {
-    [SUBBITMAP_LIBASS] = true,
-    [SUBBITMAP_RGBA]   = true,
 };
 
 
@@ -657,6 +650,27 @@ static bool init_d3d(d3d_priv *priv)
 
     if (priv->opt_force_power_of_2)
         priv->device_caps_power2_only = 1;
+
+    priv->osd_fmt_table[SUBBITMAP_LIBASS] = D3DFMT_A8;
+    priv->osd_fmt_table[SUBBITMAP_RGBA]   = D3DFMT_A8R8G8B8;
+
+    for (int n = 0; n < MP_ARRAY_SIZE(priv->osd_fmt_table); n++) {
+        int fmt = priv->osd_fmt_table[n];
+        if (fmt && FAILED(IDirect3D9_CheckDeviceFormat(priv->d3d_handle,
+                            D3DADAPTER_DEFAULT,
+                            DEVTYPE,
+                            priv->desktop_fmt,
+                            D3DUSAGE_DYNAMIC | D3DUSAGE_QUERY_FILTER,
+                            D3DRTYPE_TEXTURE,
+                            fmt)))
+        {
+            MP_VERBOSE(priv, "OSD format %#x not supported.\n", fmt);
+            priv->osd_fmt_table[n] = 0;
+        }
+    }
+
+    if (!priv->osd_fmt_table[SUBBITMAP_RGBA])
+        MP_WARN(priv, "GPU too old - no OSD support.\n");
 
     MP_VERBOSE(priv, "device_caps_power2_only %d, device_caps_square_only %d\n"
                "device_texture_sys %d\n"
@@ -1536,7 +1550,7 @@ error_exit:
 static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
                        struct sub_bitmaps *imgs)
 {
-    D3DFORMAT fmt = osd_fmt_table[imgs->format];
+    D3DFORMAT fmt = priv->osd_fmt_table[imgs->format];
 
     osd->packer->w_max = priv->max_texture_width;
     osd->packer->h_max = priv->max_texture_height;
@@ -1596,7 +1610,7 @@ static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
 
 static struct osdpart *generate_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
 {
-    if (imgs->num_parts == 0 || !osd_fmt_table[imgs->format])
+    if (imgs->num_parts == 0 || !priv->osd_fmt_table[imgs->format])
         return NULL;
 
     struct osdpart *osd = priv->osd[imgs->render_index];
@@ -1716,6 +1730,10 @@ static void draw_osd(struct vo *vo)
     d3d_priv *priv = vo->priv;
     if (!priv->d3d_device)
         return;
+
+    bool osd_fmt_supported[SUBBITMAP_COUNT];
+    for (int n = 0; n < SUBBITMAP_COUNT; n++)
+        osd_fmt_supported[n] = !!priv->osd_fmt_table[n];
 
     osd_draw(vo->osd, priv->osd_res, priv->osd_pts, 0, osd_fmt_supported,
              draw_osd_cb, priv);
