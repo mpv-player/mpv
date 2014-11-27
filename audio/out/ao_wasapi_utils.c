@@ -449,7 +449,8 @@ static HRESULT init_session_display(struct wasapi_state *state) {
 exit_label:
     MP_ERR(state, "Error setting audio session display name: %s (0x%"PRIx32")\n",
            wasapi_explain_err(hr), (uint32_t)hr);
-    return hr;
+    // No reason to abort initialization.
+    return S_OK;
 }
 
 static HRESULT fix_format(struct ao *ao)
