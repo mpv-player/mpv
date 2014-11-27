@@ -1333,8 +1333,11 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     track->stream = sh;
     sh_audio_t *sh_a = sh->audio;
 
-    unsigned char *extradata = NULL;
-    int extradata_len = 0;
+    if (track->private_size > 0x1000000)
+        goto error;
+
+    unsigned char *extradata = track->private_data;
+    unsigned int extradata_len = track->private_size;
 
     if (track->language && (strcmp(track->language, "und") != 0))
         sh->lang = talloc_strdup(sh_a, track->language);
@@ -1401,20 +1404,11 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                || !strcmp(track->codec_id, MKV_A_QDMC2)) {
         sh_a->bitrate = 16000 * 8;
         sh_a->block_align = 1486;
-        if (!extradata_len) {
-            extradata = track->private_data;
-            extradata_len = track->private_size;
-        }
     } else if (track->a_formattag == MP_FOURCC('M', 'P', '4', 'A')) {
         sh_a->bitrate = 16000 * 8;
         sh_a->block_align = 1024;
 
-        if (!strcmp(track->codec_id, MKV_A_AAC)) {
-            if (track->private_data && !extradata_len) {
-                extradata = track->private_data;
-                extradata_len = track->private_size;
-            }
-        } else {
+        if (strcmp(track->codec_id, MKV_A_AAC)) {
             /* Recreate the 'private data' */
             int srate_idx = aac_get_sample_rate_index(track->a_sfreq);
             const char *tail = "";
@@ -1448,19 +1442,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         }
     } else if (track->a_formattag == MP_FOURCC('v', 'r', 'b', 's')) {
         /* VORBIS */
-        if (track->private_size == 0 || (track->ms_compat && !extradata_len))
-            goto error;
-        if (!track->ms_compat) {
-            extradata = track->private_data;
-            extradata_len = track->private_size;
-        }
     } else if (!strcmp(track->codec_id, MKV_A_OPUS)
                || !strcmp(track->codec_id, MKV_A_OPUS_EXP)) {
         sh->format = MP_FOURCC('O', 'p', 'u', 's');
-        if (!track->ms_compat) {
-            extradata = track->private_data;
-            extradata_len = track->private_size;
-        }
     } else if (!strncmp(track->codec_id, MKV_A_REALATRC, 7)) {
         if (track->private_size < RAPROPERTIES4_SIZE)
             goto error;
@@ -1536,13 +1520,10 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->bitrate = 0;
         sh_a->block_align = 0;
 
-        unsigned char *ptr = track->private_data;
-        int size = track->private_size;
-        if (track->ms_compat) {
+        if (track->ms_compat)
             sh->format = MP_FOURCC('f', 'L', 'a', 'C');
-            ptr = extradata;
-            size = extradata_len;
-        }
+        unsigned char *ptr = extradata;
+        unsigned int size = extradata_len;
         if (size < 4 || ptr[0] != 'f' || ptr[1] != 'L' || ptr[2] != 'a'
             || ptr[3] != 'C') {
             sh_a->codecdata = talloc_size(sh_a, 4);
@@ -1554,7 +1535,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             memcpy(sh_a->codecdata, ptr, size);
         }
     } else if (!strcmp(track->codec_id, MKV_A_ALAC)) {
-        if (track->private_size && track->private_size < 10000000) {
+        if (track->private_size) {
             sh_a->codecdata_len = track->private_size + 12;
             sh_a->codecdata = talloc_size(sh_a, sh_a->codecdata_len);
             char *data = sh_a->codecdata;
@@ -1565,10 +1546,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         }
     } else if (track->a_formattag == MP_FOURCC('W', 'V', 'P', 'K') ||
                track->a_formattag == MP_FOURCC('T', 'R', 'H', 'D')) {
-        if (!track->ms_compat) {
-            extradata = track->private_data;
-            extradata_len = track->private_size;
-        }
+        /* ok */
     } else if (track->a_formattag == MP_FOURCC('T', 'T', 'A', '1')) {
         sh_a->codecdata_len = 30;
         sh_a->codecdata = talloc_zero_size(sh_a, sh_a->codecdata_len);
@@ -1594,10 +1572,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
     mp_set_codec_from_tag(sh);
 
-    if (track->private_size > 0x1000000 || extradata_len > 0x1000000)
-        goto error;
-
-    if (!sh_a->codecdata && extradata) {
+    if (!sh_a->codecdata && extradata_len) {
         sh_a->codecdata = talloc_memdup(sh_a, extradata, extradata_len);
         sh_a->codecdata_len = extradata_len;
     }
