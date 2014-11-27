@@ -514,8 +514,10 @@ static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     // restart audio properly. This helps with video files where audio starts
     // later. Retrying is needed to get the correct sync PTS.
     if (mpctx->audio_status >= STATUS_DRAINING && status == AD_OK) {
-        mpctx->audio_status = STATUS_SYNCING;
-        mpctx->sleeptime = 0;
+        if (!mpctx->paused) {
+            mpctx->audio_status = STATUS_SYNCING;
+            mpctx->sleeptime = 0;
+        }
         return; // retry on next iteration
     }
 
