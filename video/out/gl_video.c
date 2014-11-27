@@ -2212,10 +2212,6 @@ static const struct fmt_entry *find_tex_format(int bytes_per_comp, int n_channel
 
 static bool init_format(int fmt, struct gl_video *init)
 {
-    struct gl_video dummy;
-    if (!init)
-        init = &dummy;
-
     init->hwdec_active = false;
     if (init->hwdec && init->hwdec->driver->imgfmt == fmt) {
         fmt = init->hwdec->converted_imgfmt;
