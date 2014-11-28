@@ -120,18 +120,14 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
 {
     struct ao *ao = lpParameter;
     if (!ao || !ao->priv)
-        return -1;
+        return 1;
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    int thread_ret;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     state->init_ret = wasapi_thread_init(ao);
     SetEvent(state->init_done);
-    if (state->init_ret != S_OK) {
-        thread_ret = -1;
+    if (state->init_ret != S_OK)
         goto exit_label;
-    }
-
 
     DWORD waitstatus;
     HANDLE playcontrol[] =
@@ -143,7 +139,6 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
         switch (waitstatus) {
         case WAIT_OBJECT_0: /*shutdown*/
             MP_DBG(ao, "Thread shutdown\n");
-            thread_ret = 0;
             goto exit_label;
         case (WAIT_OBJECT_0 + 1): /* feed */
             thread_feed(ao);
@@ -158,7 +153,6 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
             break;
         default:
             MP_ERR(ao, "Unhandled case in thread loop");
-            thread_ret = -1;
             goto exit_label;
         }
     }
@@ -166,8 +160,8 @@ exit_label:
     wasapi_thread_uninit(ao);
 
     CoUninitialize();
-    MP_DBG(ao, "Thread return %u\n", (unsigned)thread_ret);
-    return thread_ret;
+    MP_DBG(ao, "Thread return\n");
+    return 0;
 }
 
 static void closehandles(struct ao *ao)
