@@ -142,6 +142,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
                                                QS_POSTMESSAGE | QS_SENDMESSAGE);
         switch (waitstatus) {
         case WAIT_OBJECT_0: /*shutdown*/
+            MP_DBG(ao, "Thread shutdown\n");
             thread_ret = 0;
             goto exit_label;
         case (WAIT_OBJECT_0 + 1): /* feed */
@@ -152,6 +153,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
             SetEvent(state->hFeedDone);
             break;
         case (WAIT_OBJECT_0 + 3): /* messages to dispatch (COM marshalling) */
+            MP_DBG(ao, "Dispatch\n");
             wasapi_dispatch();
             break;
         default:
@@ -164,6 +166,7 @@ exit_label:
     wasapi_thread_uninit(ao);
 
     CoUninitialize();
+    MP_DBG(ao, "Thread return %u\n", (unsigned)thread_ret);
     return thread_ret;
 }
 
@@ -186,7 +189,7 @@ static void uninit(struct ao *ao)
     SetEvent(state->hUninit);
     /* wait up to 10 seconds */
     if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT){
-        MP_ERR(ao, "Audio loop thread refuses to abort");
+        MP_ERR(ao, "Audio loop thread refuses to abort\n");
         return;
     }
     if (state->VistaBlob.hAvrt)
@@ -201,8 +204,10 @@ static int init(struct ao *ao)
     ao->format = af_fmt_from_planar(ao->format);
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_waveext(&sel);
-    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels)) {
+        MP_ERR(ao, "Error adjusting channel map to waveext channel order\n");
         return -1;
+    }
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     state->log = ao->log;
     wasapi_fill_VistaBlob(state);
