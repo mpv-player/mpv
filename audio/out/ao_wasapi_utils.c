@@ -35,22 +35,19 @@
 
 #define MIXER_DEFAULT_LABEL L"mpv - video player"
 
-#ifndef PKEY_Device_FriendlyName
-DEFINE_PROPERTYKEY(PKEY_Device_FriendlyName,
+DEFINE_PROPERTYKEY(mp_PKEY_Device_FriendlyName,
                    0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
                    0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14);
-DEFINE_PROPERTYKEY(PKEY_Device_DeviceDesc,
+DEFINE_PROPERTYKEY(mp_PKEY_Device_DeviceDesc,
                    0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
                    0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 2);
-#endif
 
-/* Supposed to use __uuidof, but it is C++ only, declare our own */
-static const GUID local_KSDATAFORMAT_SUBTYPE_PCM = {
-    0x1, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
-};
-static const GUID local_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = {
-    0x3, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
-};
+DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_PCM,
+            0x00000001, 0x0000, 0x0010, 0x80, 0x00,
+            0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
+            0x00000003, 0x0000, 0x0010, 0x80, 0x00,
+            0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 
 union WAVEFMT {
     WAVEFORMATEX *ex;
@@ -139,9 +136,9 @@ static void set_format(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
     wformat->Format.cbSize =
         22; /* must be at least 22 for WAVE_FORMAT_EXTENSIBLE */
     if (bytepersample == 4)
-        wformat->SubFormat = local_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+        wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
     else
-        wformat->SubFormat = local_KSDATAFORMAT_SUBTYPE_PCM;
+        wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_PCM;
     wformat->Samples.wValidBitsPerSample = wformat->Format.wBitsPerSample;
     wformat->dwChannelMask = chanmask;
 }
@@ -284,7 +281,7 @@ static int try_passthrough(struct ao *ao)
         },
         .Samples.wValidBitsPerSample = 16,
         .dwChannelMask = mp_chmap_to_waveext(&ao->channels),
-        .SubFormat = local_KSDATAFORMAT_SUBTYPE_PCM,
+        .SubFormat = mp_KSDATAFORMAT_SUBTYPE_PCM,
     };
     wformat.SubFormat.Data1 = WAVE_FORMAT_DOLBY_AC3_SPDIF; // see INIT_WAVEFORMATEX_GUID macro
 
@@ -599,7 +596,7 @@ static char* get_device_name(IMMDevice *pDevice) {
     PROPVARIANT devname;
     PropVariantInit(&devname);
 
-    hr = IPropertyStore_GetValue(pProps, &PKEY_Device_FriendlyName, &devname);
+    hr = IPropertyStore_GetValue(pProps, &mp_PKEY_Device_FriendlyName, &devname);
     EXIT_ON_ERROR(hr);
 
     namestr = mp_to_utf8(NULL, devname.pwszVal);
@@ -624,7 +621,7 @@ static char* get_device_desc(IMMDevice *pDevice) {
     PROPVARIANT devdesc;
     PropVariantInit(&devdesc);
 
-    hr = IPropertyStore_GetValue(pProps, &PKEY_Device_DeviceDesc, &devdesc);
+    hr = IPropertyStore_GetValue(pProps, &mp_PKEY_Device_DeviceDesc, &devdesc);
     EXIT_ON_ERROR(hr);
 
     desc = mp_to_utf8(NULL, devdesc.pwszVal);
