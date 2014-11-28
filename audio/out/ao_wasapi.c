@@ -186,7 +186,8 @@ static void uninit(struct ao *ao)
     MP_DBG(ao, "Uninit wasapi\n");
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     wasapi_release_proxies(state);
-    SetEvent(state->hUninit);
+    if (state->hUninit)
+        SetEvent(state->hUninit);
     /* wait up to 10 seconds */
     if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT){
         MP_ERR(ao, "Audio loop thread refuses to abort\n");
@@ -213,10 +214,16 @@ static int init(struct ao *ao)
     }
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     state->log = ao->log;
-    wasapi_fill_VistaBlob(state);
+    if(!wasapi_fill_VistaBlob(state)) {
+        // pretty sure this is a show stopper
+        MP_ERR(ao, "Error filling Vista blob\n");
+        uninit(ao);
+        return -1;
+    }
 
     if (state->opt_list) {
-        wasapi_enumerate_devices(state->log, NULL, NULL);
+        if(!wasapi_enumerate_devices(state->log, NULL, NULL))
+            MP_WARN(ao, "Error enumerating devices\n");
     }
 
     if (state->opt_exclusive) {
@@ -360,7 +367,8 @@ static void audio_resume(struct ao *ao)
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    wasapi_enumerate_devices(mp_null_log, ao, list);
+    if(!wasapi_enumerate_devices(mp_null_log, ao, list))
+        MP_WARN(ao, "Error enumerating devices\n");
     CoUninitialize();
 }
 
