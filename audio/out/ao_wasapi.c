@@ -119,8 +119,6 @@ exit_label:
 static DWORD __stdcall ThreadLoop(void *lpParameter)
 {
     struct ao *ao = lpParameter;
-    if (!ao || !ao->priv)
-        return 1;
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
