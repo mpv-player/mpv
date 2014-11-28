@@ -535,19 +535,21 @@ def build(ctx):
     if ctx.dependency_satisfied('pdf-build'):
         _build_pdf(ctx)
 
-    if ctx.dependency_satisfied('zsh-comp'):
-        ctx.zshcomp(target = "etc/_mpv")
+    if ctx.dependency_satisfied('cplayer'):
+
+        if ctx.dependency_satisfied('zsh-comp'):
+            ctx.zshcomp(target = "etc/_mpv")
+            ctx.install_files(
+                ctx.env.ZSHDIR,
+                ['etc/_mpv'])
+
         ctx.install_files(
-            ctx.env.ZSHDIR,
-            ['etc/_mpv'])
+            ctx.env.DATADIR + '/applications',
+            ['etc/mpv.desktop'] )
 
-    ctx.install_files(
-        ctx.env.DATADIR + '/applications',
-        ['etc/mpv.desktop'] )
+        ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
 
-    ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
-
-    for size in '16x16 32x32 64x64'.split():
-        ctx.install_as(
-            ctx.env.DATADIR + '/icons/hicolor/' + size + '/apps/mpv.png',
-            'etc/mpv-icon-8bit-' + size + '.png')
+        for size in '16x16 32x32 64x64'.split():
+            ctx.install_as(
+                ctx.env.DATADIR + '/icons/hicolor/' + size + '/apps/mpv.png',
+                'etc/mpv-icon-8bit-' + size + '.png')
