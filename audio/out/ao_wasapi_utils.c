@@ -182,7 +182,7 @@ static void set_format(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
     wformat->dwChannelMask = chanmask;
 }
 
-static int format_set_bits(int old_format, int bits, int fp)
+static int format_set_bits(int old_format, int bits, bool fp)
 {
     if (fp) {
         switch (bits) {
@@ -199,15 +199,15 @@ static int set_ao_format(struct ao *ao,
                          WAVEFORMATEXTENSIBLE wformat)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    if (wformat.SubFormat.Data1 != 1 && wformat.SubFormat.Data1 != 3) {
-        MP_ERR(ao, "Unknown SubFormat %"PRIu32"\n",
-               (uint32_t)wformat.SubFormat.Data1);
+    bool is_float =
+        !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat.SubFormat);
+
+    if ( !is_float &&
+         mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat.SubFormat) ) {
+        MP_ERR(ao, "Unknown SubFormat %s\n", mp_GUID_to_str(&wformat.SubFormat));
         return 0;
     }
-
-    // .Data1 == 1 is PCM, .Data1 == 3 is IEEE_FLOAT
-    int format = format_set_bits(ao->format,
-        wformat.Format.wBitsPerSample, wformat.SubFormat.Data1 == 3);
+    int format = format_set_bits(ao->format, wformat.Format.wBitsPerSample, is_float);
 
     if (!format)
         return 0;
