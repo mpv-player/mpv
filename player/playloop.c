@@ -154,6 +154,7 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->cache_wait_time = 0;
+    mpctx->step_frames = 0;
     mpctx->restart_complete = false;
 
 #if HAVE_ENCODING
