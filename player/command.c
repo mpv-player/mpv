@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <time.h>
+#include <math.h>
 #include <pthread.h>
 #include <sys/types.h>
 
@@ -2535,9 +2536,10 @@ static int mp_property_fps(void *ctx, struct m_property *prop,
                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video)
-        return M_PROPERTY_UNAVAILABLE;
-    return m_property_float_ro(action, arg, mpctx->d_video->fps);
+    float fps = mpctx->d_video ? mpctx->d_video->fps : 0;
+    if (fps < 0.1 || !isfinite(fps))
+        return M_PROPERTY_UNAVAILABLE;;
+    return m_property_float_ro(action, arg, fps);
 }
 
 static int mp_property_vf_fps(void *ctx, struct m_property *prop,
