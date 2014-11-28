@@ -1258,7 +1258,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         sh->codec = "rawvideo";
     } else {
         mp_set_codec_from_tag(sh);
-        sh->format = mp_video_fourcc_alias(sh->format);
     }
     if (track->v_frate == 0.0)
         track->v_frate = 25.0;
