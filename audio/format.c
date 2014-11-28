@@ -45,6 +45,11 @@ int af_fmt2bits(int format)
     return af_fmt2bps(format) * 8;
 }
 
+bool af_fmt_is_float(int format)
+{
+    return !!(format & AF_FORMAT_F);
+}
+
 static int bits_to_mask(int bits)
 {
     switch (bits) {
