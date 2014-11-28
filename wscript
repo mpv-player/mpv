@@ -825,14 +825,14 @@ def options(opt):
 
     opt.parse_features('build and install options', build_options)
     optional_features = main_dependencies + libav_dependencies
-    opt.parse_features('optional feaures',  optional_features)
+    opt.parse_features('optional features', optional_features)
     opt.parse_features('audio outputs',     audio_output_features)
     opt.parse_features('video outputs',     video_output_features)
     opt.parse_features('hwaccels',          hwaccel_features)
     opt.parse_features('tv features',       radio_and_tv_features)
     opt.parse_features('standalone app',    standalone_features)
 
-    group = opt.get_option_group("optional feaures")
+    group = opt.get_option_group("optional features")
     group.add_option('--lua',
         type    = 'string',
         dest    = 'LUA_VER',
