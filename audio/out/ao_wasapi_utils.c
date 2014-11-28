@@ -172,8 +172,7 @@ static void set_format(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
     wformat->Format.nAvgBytesPerSec = samplerate * block_align;
     wformat->Format.nBlockAlign = block_align;
     wformat->Format.wBitsPerSample = bytepersample * 8;
-    wformat->Format.cbSize =
-        22; /* must be at least 22 for WAVE_FORMAT_EXTENSIBLE */
+    wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
     if (bytepersample == 4)
         wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
     else
