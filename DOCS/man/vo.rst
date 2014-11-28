@@ -469,6 +469,9 @@ Available video output drivers are:
         When using convolution based filters, extend the filter size
         when downscaling. Trades quality for reduced downscaling performance.
 
+        This is automatically disabled for anamorphic video, because this
+        feature doesn't work correctly with this.
+
     ``no-npot``
         Force use of power-of-2 texture sizes. For debugging only.
         Borders will be distorted due to filtering.

@@ -124,6 +124,7 @@ struct scaler {
     struct filter_kernel *kernel;
     GLuint gl_lut;
     const char *lut_name;
+    bool insufficient;
 
     // kernel points here
     struct filter_kernel kernel_storage;
@@ -1107,23 +1108,34 @@ static void delete_shaders(struct gl_video *p)
     delete_program(gl, &p->final_program);
 }
 
-static double get_scale_factor(struct gl_video *p)
+static void get_scale_factors(struct gl_video *p, double xy[2])
 {
-    double sx = (p->dst_rect.x1 - p->dst_rect.x0) /
-                (double)(p->src_rect.x1 - p->src_rect.x0);
-    double sy = (p->dst_rect.y1 - p->dst_rect.y0) /
-                (double)(p->src_rect.y1 - p->src_rect.y0);
-    // xxx: actually we should use different scalers in X/Y directions if the
-    // scale factors are different due to anamorphic content
-    return FFMIN(sx, sy);
+    xy[0] = (p->dst_rect.x1 - p->dst_rect.x0) /
+            (double)(p->src_rect.x1 - p->src_rect.x0);
+    xy[1] = (p->dst_rect.y1 - p->dst_rect.y0) /
+            (double)(p->src_rect.y1 - p->src_rect.y0);
 }
 
-static bool update_scale_factor(struct gl_video *p, struct filter_kernel *kernel)
+static double get_scale_factor(struct gl_video *p)
 {
-    double scale = get_scale_factor(p);
-    if (!p->opts.fancy_downscaling && scale < 1.0)
-        scale = 1.0;
-    return mp_init_filter(kernel, filter_sizes, FFMAX(1.0, 1.0 / scale));
+    double xy[2];
+    get_scale_factors(p, xy);
+    return FFMIN(xy[0], xy[1]);
+}
+
+static void update_scale_factor(struct gl_video *p, struct scaler *scaler)
+{
+    double scale = 1.0;
+    double xy[2];
+    get_scale_factors(p, xy);
+    double f = MPMIN(xy[0], xy[1]);
+    if (p->opts.fancy_downscaling && f < 1.0 &&
+        fabs(xy[0] - f) < 0.01 && fabs(xy[1] - f) < 0.01)
+    {
+        MP_VERBOSE(p, "Using fancy-downscaling (scaler %d).\n", scaler->index);
+        scale = FFMAX(1.0, 1.0 / f);
+    }
+    scaler->insufficient = !mp_init_filter(scaler->kernel, filter_sizes, scale);
 }
 
 static void init_scaler(struct gl_video *p, struct scaler *scaler)
@@ -1133,6 +1145,7 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
     assert(scaler->name);
 
     scaler->kernel = NULL;
+    scaler->insufficient = false;
 
     const struct filter_kernel *t_kernel = mp_find_filter_kernel(scaler->name);
     if (!t_kernel)
@@ -1152,7 +1165,7 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
             scaler->kernel->radius = radius;
     }
 
-    update_scale_factor(p, scaler->kernel);
+    update_scale_factor(p, scaler);
 
     int size = scaler->kernel->size;
     assert(size < FF_ARRAY_ELEMS(lut_tex_formats));
@@ -1736,12 +1749,12 @@ static void check_resize(struct gl_video *p)
     bool too_small = false;
     for (int n = 0; n < 2; n++) {
         if (p->scalers[n].kernel) {
-            struct filter_kernel tkernel = *p->scalers[n].kernel;
-            struct filter_kernel old = tkernel;
-            bool ok = update_scale_factor(p, &tkernel);
-            too_small |= !ok;
-            need_scaler_reinit |= (tkernel.size != old.size);
-            need_scaler_update |= (tkernel.inv_scale != old.inv_scale);
+            struct filter_kernel old = *p->scalers[n].kernel;
+            update_scale_factor(p, &p->scalers[n]);
+            struct filter_kernel new = *p->scalers[n].kernel;
+            need_scaler_reinit |= (new.size != old.size);
+            need_scaler_update |= (new.inv_scale != old.inv_scale);
+            too_small |= p->scalers[n].insufficient;
         }
     }
     for (int n = 0; n < 2; n++) {
@@ -1756,7 +1769,7 @@ static void check_resize(struct gl_video *p)
     }
     if (too_small) {
         MP_WARN(p, "Can't downscale that much, window "
-                "output may look suboptimal.\n");
+                   "output may look suboptimal.\n");
     }
 
     update_window_sized_objects(p);
