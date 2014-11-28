@@ -180,7 +180,8 @@ static void uninit(struct ao *ao)
     MP_DBG(ao, "Uninit wasapi\n");
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     wasapi_release_proxies(state);
-    SetEvent(state->hUninit);
+    if (state->hUninit)
+        SetEvent(state->hUninit);
     /* wait up to 10 seconds */
     if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT){
         MP_ERR(ao, "Audio loop thread refuses to abort\n");
@@ -229,7 +230,8 @@ static int init(struct ao *ao)
     if (!state->init_done || !state->hFeed || !state->hUninit ||
         !state->hForceFeed || !state->hFeedDone)
     {
-        closehandles(ao);
+        MP_ERR(ao, "Error initing events\n");
+        uninit(ao);
         /* failed to init events */
         return -1;
     }
@@ -239,6 +241,7 @@ static int init(struct ao *ao)
     if (!state->threadLoop) {
         /* failed to init thread */
         MP_ERR(ao, "Failed to create thread\n");
+        uninit(ao);
         return -1;
     }
 
@@ -333,7 +336,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         return CONTROL_UNKNOWN;
     }
 }
-
 
 static void audio_reset(struct ao *ao)
 {
