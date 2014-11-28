@@ -240,7 +240,8 @@ static int init(struct ao *ao)
     if (!state->init_done || !state->hFeed || !state->hUninit ||
         !state->hForceFeed || !state->hFeedDone)
     {
-        closehandles(ao);
+        MP_ERR(ao, "Error initing events\n");
+        uninit(ao);
         /* failed to init events */
         return -1;
     }
@@ -250,6 +251,7 @@ static int init(struct ao *ao)
     if (!state->threadLoop) {
         /* failed to init thread */
         MP_ERR(ao, "Failed to create thread\n");
+        uninit(ao);
         return -1;
     }
 
@@ -344,7 +346,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         return CONTROL_UNKNOWN;
     }
 }
-
 
 static void audio_reset(struct ao *ao)
 {
