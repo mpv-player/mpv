@@ -623,6 +623,10 @@ strictly part of the guaranteed API.
     trailing text is returned as 3rd return value. (The 3rd return value is
     always there, but with ``trail`` set, no error is raised.)
 
+``utils.to_string(v)``
+    Turn the given value into a string. Formats tables and their contents. This
+    doesn't do anything special; it is only needed because Lua is terrible.
+
 Events
 ------
 
