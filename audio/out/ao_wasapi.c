@@ -120,7 +120,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
 {
     struct ao *ao = lpParameter;
     if (!ao || !ao->priv)
-        return -1;
+        return 1;
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     int thread_ret;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
@@ -128,7 +128,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
     state->init_ret = wasapi_thread_init(ao);
     SetEvent(state->init_done);
     if (state->init_ret != S_OK) {
-        thread_ret = -1;
+        thread_ret = 1;
         goto exit_label;
     }
 
@@ -158,7 +158,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
             break;
         default:
             MP_ERR(ao, "Unhandled case in thread loop");
-            thread_ret = -1;
+            thread_ret = 1;
             goto exit_label;
         }
     }
