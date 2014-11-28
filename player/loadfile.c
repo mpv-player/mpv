@@ -903,7 +903,6 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->paused = false;
     mpctx->paused_for_cache = false;
     mpctx->playing_msg_shown = false;
-    mpctx->step_frames = 0;
     mpctx->backstep_active = false;
     mpctx->audio_delay = 0;
     mpctx->max_frames = -1;
