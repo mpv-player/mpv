@@ -85,7 +85,10 @@ const char *wasapi_explain_err(const HRESULT hr)
     E(E_FAIL)
     E(E_OUTOFMEMORY)
     E(E_POINTER)
+    E(E_HANDLE)
+    E(E_NOTIMPL)
     E(E_INVALIDARG)
+    E(REGDB_E_IIDNOTREG)
     E(AUDCLNT_E_NOT_INITIALIZED)
     E(AUDCLNT_E_ALREADY_INITIALIZED)
     E(AUDCLNT_E_WRONG_ENDPOINT_TYPE)
@@ -242,7 +245,6 @@ static int try_mix_format(struct wasapi_state *state,
 {
     WAVEFORMATEX *deviceFormat = NULL;
     WAVEFORMATEX *closestMatch = NULL;
-    int ret = 0;
 
     HRESULT hr = IAudioClient_GetMixFormat(state->pAudioClient, &deviceFormat);
     EXIT_ON_ERROR(hr);
@@ -251,15 +253,20 @@ static int try_mix_format(struct wasapi_state *state,
     u.ex = deviceFormat;
     WAVEFORMATEXTENSIBLE wformat = *u.extensible;
 
-    ret = try_format(state, ao, wformat.Format.wBitsPerSample,
+    int ret = try_format(ao, wformat.Format.wBitsPerSample,
                      wformat.Format.nSamplesPerSec, ao->channels);
     if (ret)
         state->format = wformat;
 
-exit_label:
     SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
     SAFE_RELEASE(closestMatch, CoTaskMemFree(closestMatch));
     return ret;
+exit_label:
+    MP_ERR(state, "Error getting mix format: %s (0x%"PRIx32")\n",
+           wasapi_explain_err(hr), (uint32_t)hr);
+    SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
+    SAFE_RELEASE(closestMatch, CoTaskMemFree(closestMatch));
+    return 0;
 }
 
 static int try_passthrough(struct wasapi_state *state,
@@ -447,10 +454,9 @@ static HRESULT init_session_display(struct wasapi_state *state) {
 
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error setting audio session display name: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
-    // No reason to abort initialization.
-    return S_OK;
+    MP_WARN(state, "Error setting audio session display name: %s (0x%"PRIx32")\n",
+            wasapi_explain_err(hr), (uint32_t)hr);
+    return S_OK; // No reason to abort initialization.
 }
 
 static HRESULT fix_format(struct ao *ao)
@@ -913,11 +919,10 @@ HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
 
 #undef UNMARSHAL
 
+    return S_OK;
 exit_label:
-    if (hr != S_OK) {
-        MP_ERR(state, "Error reading COM proxy: %s (0x%"PRIx32")\n",
-               wasapi_explain_err(hr), (uint32_t)hr);
-    }
+    MP_ERR(state, "Error reading COM proxy: %s (0x%"PRIx32")\n",
+           wasapi_explain_err(hr), (uint32_t)hr);
     return hr;
 }
 
@@ -947,7 +952,10 @@ static HRESULT create_proxies(struct wasapi_state *state) {
     MARSHAL(IID_IAudioEndpointVolume, state->sEndpointVolume, state->pEndpointVolume);
     MARSHAL(IID_IAudioSessionControl, state->sSessionControl, state->pSessionControl);
 
+    return S_OK;
 exit_label:
+    MP_ERR(state, "Error creating COM proxy: %s (0x%"PRIx32")\n",
+           wasapi_explain_err(hr), (uint32_t)hr);
     return hr;
 }
 
@@ -1009,7 +1017,7 @@ retry:
     hr = IAudioEndpointVolume_QueryHardwareSupport(state->pEndpointVolume,
                                                    &state->vol_hw_support);
     if ( hr != S_OK )
-        MP_WARN(ao, "Query hardware volume control: %s (0x%"PRIx32")\n",
+        MP_WARN(ao, "Error querying hardware volume control: %s (0x%"PRIx32")\n",
                 wasapi_explain_err(hr), (uint32_t)hr);
 
     MP_DBG(ao, "Probing formats\n");
