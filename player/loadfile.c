@@ -300,14 +300,17 @@ double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_re
 {
     if (pts < 0)
         pts = 0;
+
+    int new = mpctx->num_timeline_parts - 1;
     for (int i = 0; i < mpctx->num_timeline_parts; i++) {
-        struct timeline_part *p = mpctx->timeline + i;
-        if (pts < (p + 1)->start) {
-            *need_reset = timeline_set_part(mpctx, i, false);
-            return pts - p->start + p->source_start;
+        if (pts < mpctx->timeline[i + 1].start) {
+            new = i;
+            break;
         }
     }
-    return MP_NOPTS_VALUE;
+
+    *need_reset = timeline_set_part(mpctx, new, false);
+    return pts - mpctx->timeline[new].start + mpctx->timeline[new].source_start;
 }
 
 static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
