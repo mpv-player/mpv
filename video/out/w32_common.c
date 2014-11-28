@@ -904,8 +904,8 @@ static int reinit_window_state(struct vo_w32_state *w32)
         // Center the final window
         n_w = r.right - r.left;
         n_h = r.bottom - r.top;
-        r.left = screen_w / 2 - n_w / 2;
-        r.top = screen_h / 2 - n_h / 2;
+        r.left = w32->screenrc.x0 + screen_w / 2 - n_w / 2;
+        r.top = w32->screenrc.y0 + screen_h / 2 - n_h / 2;
         r.right = r.left + n_w;
         r.bottom = r.top + n_h;
     }
