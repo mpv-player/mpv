@@ -27,12 +27,19 @@
 #include "ao.h"
 #include "internal.h"
 
-int wasapi_fill_VistaBlob(wasapi_state *state);
+int mp_GUID_compare(const GUID *l, const GUID *r);
+int mp_PKEY_compare(const PROPERTYKEY *l, const PROPERTYKEY *r);
+char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid);
+char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey);
+#define mp_GUID_to_str(guid) mp_GUID_to_str_buf((char[40]){0}, 40, (guid))
+#define mp_PKEY_to_str(pkey) mp_PKEY_to_str_buf((char[42]){0}, 42, (pkey))
+
+bool wasapi_fill_VistaBlob(wasapi_state *state);
 
 const char *wasapi_explain_err(const HRESULT hr);
 
-int wasapi_enumerate_devices(struct mp_log *log, struct ao *ao,
-                             struct ao_device_list *list);
+bool wasapi_enumerate_devices(struct mp_log *log, struct ao *ao,
+                              struct ao_device_list *list);
 
 int wasapi_validate_device(struct mp_log *log, const m_option_t *opt,
                            struct bstr name, struct bstr param);
