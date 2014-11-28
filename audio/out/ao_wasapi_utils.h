@@ -27,6 +27,12 @@
 #include "ao.h"
 #include "internal.h"
 
+int mp_GUID_compare(const GUID *l, const GUID *r);
+int mp_PKEY_compare(const PROPERTYKEY *l, const PROPERTYKEY *r);
+char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid);
+char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey);
+#define mp_PKEY_to_str(pkey) mp_PKEY_to_str_buf((char[42]){0}, 42, (pkey))
+
 int wasapi_fill_VistaBlob(wasapi_state *state);
 
 const char *wasapi_explain_err(const HRESULT hr);
