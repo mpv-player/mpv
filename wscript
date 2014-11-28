@@ -686,15 +686,6 @@ video_output_features = [
         'desc': 'CACA',
         'func': check_pkg_config('caca', '>= 0.99.beta18'),
     }, {
-        'name': '--dvb',
-        'desc': 'DVB',
-        'func': check_cc(fragment=load_fragment('dvb.c')),
-    } , {
-        'name': '--dvbin',
-        'desc': 'DVB input module',
-        'deps': [ 'dvb' ],
-        'func': check_true,
-    }, {
         'name': '--jpeg',
         'desc': 'JPEG support',
         'func': check_cc(header_name=['stdio.h', 'jpeglib.h'],
@@ -765,6 +756,10 @@ radio_and_tv_features = [
         'desc': 'audio input support',
         'deps_any': [ 'tv-v4l2' ],
         'func': check_true
+    } , {
+        'name': '--dvbin',
+        'desc': 'DVB input module',
+        'func': check_cc(fragment=load_fragment('dvb.c')),
     }
 ]
 
