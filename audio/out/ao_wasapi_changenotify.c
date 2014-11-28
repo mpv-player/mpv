@@ -30,47 +30,6 @@
 #include "ao_wasapi.h"
 #include "ao_wasapi_utils.h"
 
-static int GUID_compare(const GUID *l, const GUID *r)
-{
-    unsigned int i;
-    if (l->Data1 != r->Data1) return 1;
-    if (l->Data2 != r->Data2) return 1;
-    if (l->Data3 != r->Data3) return 1;
-    for (i = 0; i < 8; i++) {
-        if (l->Data4[i] != r->Data4[i]) return 1;
-    }
-    return 0;
-}
-
-static int PKEY_compare(const PROPERTYKEY *l, const PROPERTYKEY *r)
-{
-    if (GUID_compare(&l->fmtid, &r->fmtid)) return 1;
-    if (l->pid != r->pid) return 1;
-    return 0;
-}
-
-static char *GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
-{
-    snprintf(buf, buf_size,
-             "{%8.8x-%4.4x-%4.4x-%2.2x%2.2x-%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x}",
-             (unsigned) guid->Data1, guid->Data2, guid->Data3,
-             guid->Data4[0], guid->Data4[1],
-             guid->Data4[2], guid->Data4[3],
-             guid->Data4[4], guid->Data4[5],
-             guid->Data4[6], guid->Data4[7]);
-    return buf;
-}
-
-static char *PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey)
-{
-    buf = GUID_to_str_buf(buf, buf_size, &pkey->fmtid);
-    size_t guid_len = strnlen(buf, buf_size);
-    snprintf(buf + guid_len, buf_size - guid_len, ",%"PRIu32, (uint32_t)pkey->pid );
-    return buf;
-}
-
-#define PKEY_to_str(pkey) PKEY_to_str_buf((char[42]){0}, 42, (pkey))
-
 static char* ERole_to_str(ERole role)
 {
     switch(role){
@@ -95,8 +54,8 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_QueryInterface(
     IMMNotificationClient* This, REFIID riid, void **ppvObject)
 {
     /* Compatible with IMMNotificationClient and IUnknown */
-    if (!GUID_compare(&IID_IMMNotificationClient, riid) ||
-        !GUID_compare(&IID_IUnknown, riid)) {
+    if (!mp_GUID_compare(&IID_IMMNotificationClient, riid) ||
+        !mp_GUID_compare(&IID_IUnknown, riid)) {
         *ppvObject = (void *)This;
         return S_OK;
     } else {
@@ -219,12 +178,12 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     if (pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId)) {
         MP_VERBOSE(ao, "OnPropertyValueChanged triggered\n");
         MP_VERBOSE(ao, "Changed property: ");
-        if (!PKEY_compare(&PKEY_AudioEngine_DeviceFormat, &key)) {
+        if (!mp_PKEY_compare(&PKEY_AudioEngine_DeviceFormat, &key)) {
             MP_VERBOSE(change->ao,
                        "PKEY_AudioEngine_DeviceFormat - requesting ao reload\n");
             ao_request_reload(change->ao);
         } else {
-            MP_VERBOSE(ao, "%s\n", PKEY_to_str(&key));
+            MP_VERBOSE(ao, "%s\n", mp_PKEY_to_str(&key));
         }
     }
     return S_OK;

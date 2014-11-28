@@ -49,6 +49,45 @@ DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
             0x00000003, 0x0000, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 
+int mp_GUID_compare(const GUID *l, const GUID *r)
+{
+    unsigned int i;
+    if (l->Data1 != r->Data1) return 1;
+    if (l->Data2 != r->Data2) return 1;
+    if (l->Data3 != r->Data3) return 1;
+    for (i = 0; i < 8; i++) {
+        if (l->Data4[i] != r->Data4[i]) return 1;
+    }
+    return 0;
+}
+
+int mp_PKEY_compare(const PROPERTYKEY *l, const PROPERTYKEY *r)
+{
+    if (mp_GUID_compare(&l->fmtid, &r->fmtid)) return 1;
+    if (l->pid != r->pid) return 1;
+    return 0;
+}
+
+char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
+{
+    snprintf(buf, buf_size,
+             "{%8.8x-%4.4x-%4.4x-%2.2x%2.2x-%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x}",
+             (unsigned) guid->Data1, guid->Data2, guid->Data3,
+             guid->Data4[0], guid->Data4[1],
+             guid->Data4[2], guid->Data4[3],
+             guid->Data4[4], guid->Data4[5],
+             guid->Data4[6], guid->Data4[7]);
+    return buf;
+}
+
+char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey)
+{
+    buf = mp_GUID_to_str_buf(buf, buf_size, &pkey->fmtid);
+    size_t guid_len = strnlen(buf, buf_size);
+    snprintf(buf + guid_len, buf_size - guid_len, ",%"PRIu32, (uint32_t)pkey->pid );
+    return buf;
+}
+
 union WAVEFMT {
     WAVEFORMATEX *ex;
     WAVEFORMATEXTENSIBLE *extensible;
