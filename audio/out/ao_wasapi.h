@@ -106,7 +106,10 @@ typedef struct wasapi_state {
     int opt_list;
     char *opt_device;
 
-    /* We still need to support XP, don't use these functions directly, blob owned by main thread */
+    /* Don't use these functions directly in case
+       they are unimplemented for some reason.
+       (XP shouldn't be an issue since it doesn't support wasapi, maybe wine?)
+       Blob is owned by the main thread */
     struct {
         HMODULE hAvrt;
         HANDLE (WINAPI *pAvSetMmThreadCharacteristicsW)(LPCWSTR, LPDWORD);

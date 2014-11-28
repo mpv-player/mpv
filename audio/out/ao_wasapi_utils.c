@@ -100,16 +100,25 @@ bool wasapi_fill_VistaBlob(wasapi_state *state)
     state->VistaBlob.hAvrt = LoadLibraryW(L"avrt.dll");
     if (!state->VistaBlob.hAvrt)
         goto exit_label;
+
     state->VistaBlob.pAvSetMmThreadCharacteristicsW =
         (HANDLE (WINAPI *)(LPCWSTR, LPDWORD))
-            GetProcAddress(state->VistaBlob.hAvrt, "AvSetMmThreadCharacteristicsW");
+        GetProcAddress(state->VistaBlob.hAvrt, "AvSetMmThreadCharacteristicsW");
+    if (!state->VistaBlob.pAvSetMmThreadCharacteristicsW)
+        goto exit_label;
+
     state->VistaBlob.pAvRevertMmThreadCharacteristics =
         (WINBOOL (WINAPI *)(HANDLE))
-            GetProcAddress(state->VistaBlob.hAvrt, "AvRevertMmThreadCharacteristics");
+        GetProcAddress(state->VistaBlob.hAvrt, "AvRevertMmThreadCharacteristics");
+    if (!state->VistaBlob.pAvRevertMmThreadCharacteristics)
+        goto exit_label;
+
     return true;
 exit_label:
-    if (state->VistaBlob.hAvrt)
+    if (state->VistaBlob.hAvrt) {
         FreeLibrary(state->VistaBlob.hAvrt);
+        state->VistaBlob.hAvrt = NULL;
+    }
     return false;
 }
 
@@ -581,8 +590,11 @@ reinit:
     hr = init_session_display(state);
     EXIT_ON_ERROR(hr);
 
-    state->hTask =
-        state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio", &state->taskIndex);
+    if (state->VistaBlob.hAvrt) {
+        state->hTask =
+            state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio", &state->taskIndex);
+    }
+
     MP_VERBOSE(state, "Format fixed. Using %lld byte buffer block size\n",
                (long long) state->buffer_block_size);
 
