@@ -195,12 +195,15 @@ static void uninit(struct ao *ao)
     if (state->VistaBlob.hAvrt)
         FreeLibrary(state->VistaBlob.hAvrt);
     closehandles(ao);
+    CoUninitialize();
     MP_DBG(ao, "Uninit wasapi done\n");
 }
 
 static int init(struct ao *ao)
 {
     MP_DBG(ao, "Init wasapi\n");
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
     ao->format = af_fmt_from_planar(ao->format);
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_waveext(&sel);
@@ -356,7 +359,9 @@ static void audio_resume(struct ao *ao)
 
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     wasapi_enumerate_devices(mp_null_log, ao, list);
+    CoUninitialize();
 }
 
 #define OPT_BASE_STRUCT struct wasapi_state

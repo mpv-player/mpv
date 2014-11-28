@@ -733,20 +733,16 @@ int wasapi_enumerate_devices(struct mp_log *log, struct ao *ao,
                              struct ao_device_list *list)
 {
     HRESULT hr;
-    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-
     hr = enumerate_with_state(log, ao, list, "Active devices:",
                               DEVICE_STATE_ACTIVE, 1);
     EXIT_ON_ERROR(hr);
     hr = enumerate_with_state(log, ao, list, "Unplugged devices:",
                               DEVICE_STATE_UNPLUGGED, 0);
     EXIT_ON_ERROR(hr);
-    CoUninitialize();
     return 0;
 exit_label:
     mp_err(log, "Error enumerating devices: %s (0x%"PRIx32")\n",
            wasapi_explain_err(hr), (uint32_t)hr);
-    CoUninitialize();
     return 1;
 }
 
@@ -904,8 +900,6 @@ int wasapi_validate_device(struct mp_log *log, const m_option_t *opt,
 HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
     HRESULT hr;
 
-    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-
 #define UNMARSHAL(type, to, from) do {                                    \
     hr = CoGetInterfaceAndReleaseStream((from), &(type), (void**) &(to)); \
     (from) = NULL;                                                        \
@@ -931,8 +925,6 @@ void wasapi_release_proxies(wasapi_state *state) {
     SAFE_RELEASE(state->pAudioVolumeProxy,    IUnknown_Release(state->pAudioVolumeProxy));
     SAFE_RELEASE(state->pEndpointVolumeProxy, IUnknown_Release(state->pEndpointVolumeProxy));
     SAFE_RELEASE(state->pSessionControlProxy, IUnknown_Release(state->pSessionControlProxy));
-
-    CoUninitialize();
 }
 
 static HRESULT create_proxies(struct wasapi_state *state) {
