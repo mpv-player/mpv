@@ -241,7 +241,6 @@ static int try_mix_format(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     WAVEFORMATEX *deviceFormat = NULL;
-    WAVEFORMATEX *closestMatch = NULL;
 
     HRESULT hr = IAudioClient_GetMixFormat(state->pAudioClient, &deviceFormat);
     EXIT_ON_ERROR(hr);
@@ -256,13 +255,11 @@ static int try_mix_format(struct ao *ao)
         state->format = wformat;
 
     SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
-    SAFE_RELEASE(closestMatch, CoTaskMemFree(closestMatch));
     return ret;
 exit_label:
     MP_ERR(state, "Error getting mix format: %s (0x%"PRIx32")\n",
            wasapi_explain_err(hr), (uint32_t)hr);
     SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
-    SAFE_RELEASE(closestMatch, CoTaskMemFree(closestMatch));
     return 0;
 }
 
