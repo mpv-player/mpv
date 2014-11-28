@@ -207,10 +207,12 @@ static int init(struct ao *ao)
     }
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     state->log = ao->log;
-    wasapi_fill_VistaBlob(state);
+    if(!wasapi_fill_VistaBlob(state))
+        MP_WARN(ao, "Error loading thread priority functions\n");
 
     if (state->opt_list) {
-        wasapi_enumerate_devices(state->log, NULL, NULL);
+        if(!wasapi_enumerate_devices(state->log, NULL, NULL))
+            MP_WARN(ao, "Error enumerating devices\n");
     }
 
     if (state->opt_exclusive) {
@@ -354,7 +356,8 @@ static void audio_resume(struct ao *ao)
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    wasapi_enumerate_devices(mp_null_log, ao, list);
+    if(!wasapi_enumerate_devices(mp_null_log, ao, list))
+        MP_WARN(ao, "Error enumerating devices\n");
     CoUninitialize();
 }
 
