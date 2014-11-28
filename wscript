@@ -10,6 +10,11 @@ from waftools.checks.custom import *
 
 build_options = [
     {
+        'name': '--cplayer',
+        'desc': 'mpv CLI player',
+        'default': 'enable',
+        'func': check_true
+    }, {
         'name': '--libmpv-shared',
         'desc': 'shared library',
         'default': 'disable',
@@ -765,10 +770,6 @@ radio_and_tv_features = [
 
 standalone_features = [
     {
-        'name': '--cplayer',
-        'desc': 'mpv CLI player',
-        'func': check_true
-    }, {
         'name': 'win32-executable',
         'desc': 'w32 executable',
         'deps_any': [ 'os-win32', 'os-cygwin'],
