@@ -93,10 +93,10 @@ union WAVEFMT {
     WAVEFORMATEXTENSIBLE *extensible;
 };
 
-int wasapi_fill_VistaBlob(wasapi_state *state)
+bool wasapi_fill_VistaBlob(wasapi_state *state)
 {
     if (!state)
-        return 1;
+        goto exit_label;
     state->VistaBlob.hAvrt = LoadLibraryW(L"avrt.dll");
     if (!state->VistaBlob.hAvrt)
         goto exit_label;
@@ -106,11 +106,11 @@ int wasapi_fill_VistaBlob(wasapi_state *state)
     state->VistaBlob.pAvRevertMmThreadCharacteristics =
         (WINBOOL (WINAPI *)(HANDLE))
             GetProcAddress(state->VistaBlob.hAvrt, "AvRevertMmThreadCharacteristics");
-    return 0;
+    return true;
 exit_label:
     if (state->VistaBlob.hAvrt)
         FreeLibrary(state->VistaBlob.hAvrt);
-    return 1;
+    return false;
 }
 
 const char *wasapi_explain_err(const HRESULT hr)
@@ -195,7 +195,7 @@ static int format_set_bits(int old_format, int bits, bool fp)
     return af_fmt_change_bits(old_format, bits);
 }
 
-static int set_ao_format(struct ao *ao,
+static bool set_ao_format(struct ao *ao,
                          WAVEFORMATEXTENSIBLE wformat)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
@@ -205,12 +205,12 @@ static int set_ao_format(struct ao *ao,
     if ( !is_float &&
          mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat.SubFormat) ) {
         MP_ERR(ao, "Unknown SubFormat %s\n", mp_GUID_to_str(&wformat.SubFormat));
-        return 0;
+        return false;
     }
     int format = format_set_bits(ao->format, wformat.Format.wBitsPerSample, is_float);
 
     if (!format)
-        return 0;
+        return false;
 
     ao->samplerate = wformat.Format.nSamplesPerSec;
     ao->bps = wformat.Format.nAvgBytesPerSec;
@@ -221,10 +221,10 @@ static int set_ao_format(struct ao *ao,
     }
 
     state->format = wformat;
-    return 1;
+    return true;
 }
 
-static int try_format(struct ao *ao,
+static bool try_format(struct ao *ao,
                       int bits, int samplerate,
                       const struct mp_chmap channels)
 {
@@ -234,7 +234,7 @@ static int try_format(struct ao *ao,
 
     int af_format = format_set_bits(ao->format, bits, bits == 32);
     if (!af_format)
-        return 0;
+        return false;
 
     MP_VERBOSE(ao, "Trying %dch %s @ %dhz\n",
                channels.num, af_fmt_to_str(af_format), samplerate);
@@ -263,20 +263,20 @@ static int try_format(struct ao *ao,
             MP_VERBOSE(ao, "Accepted as %dch %s @ %dhz\n",
                        ao->channels.num, af_fmt_to_str(ao->format), ao->samplerate);
 
-            return 1;
+            return true;
         }
     } if (hr == S_OK || (!state->opt_exclusive && hr == AUDCLNT_E_UNSUPPORTED_FORMAT)) {
         // AUDCLNT_E_UNSUPPORTED_FORMAT here means "works in shared, doesn't in exclusive"
         if (set_ao_format(ao, wformat)) {
             MP_VERBOSE(ao, "%dch %s @ %dhz accepted\n",
                        ao->channels.num, af_fmt_to_str(af_format), samplerate);
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
-static int try_mix_format(struct ao *ao)
+static bool try_mix_format(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     WAVEFORMATEX *deviceFormat = NULL;
@@ -288,8 +288,8 @@ static int try_mix_format(struct ao *ao)
     u.ex = deviceFormat;
     WAVEFORMATEXTENSIBLE wformat = *u.extensible;
 
-    int ret = try_format(ao, wformat.Format.wBitsPerSample,
-                     wformat.Format.nSamplesPerSec, ao->channels);
+    bool ret = try_format(ao, wformat.Format.wBitsPerSample,
+                          wformat.Format.nSamplesPerSec, ao->channels);
     if (ret)
         state->format = wformat;
 
@@ -302,7 +302,7 @@ exit_label:
     return 0;
 }
 
-static int try_passthrough(struct ao *ao)
+static bool try_passthrough(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     WAVEFORMATEXTENSIBLE wformat = {
@@ -332,24 +332,24 @@ static int try_passthrough(struct ao *ao)
     if (!FAILED(hr)) {
         ao->format = ao->format;
         state->format = wformat;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
-static int find_formats(struct ao *ao)
+static bool find_formats(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
 
     if (AF_FORMAT_IS_IEC61937(ao->format)) {
         if (try_passthrough(ao))
-            return 0;
+            return true;
 
         MP_ERR(ao, "Couldn't use passthrough");
         if (!state->opt_exclusive)
             MP_ERR(ao, " (try exclusive mode)");
         MP_ERR(ao, "\n");
-        return -1;
+        return false;
     }
 
     /* See if the format works as-is */
@@ -359,12 +359,12 @@ static int find_formats(struct ao *ao)
     if (bits == 8) {
         bits = 16;
     } else if (try_format(ao, bits, ao->samplerate, ao->channels)) {
-        return 0;
+        return true;
     }
     if (!state->opt_exclusive) {
         /* shared mode, we can use the system default mix format. */
         if (try_mix_format(ao)) {
-            return 0;
+            return true;
         }
 
         MP_WARN(ao, "Couldn't use default mix format\n");
@@ -387,7 +387,7 @@ static int find_formats(struct ao *ao)
         for (; bits > 8; bits -= 8) {
             int samplerate = ao->samplerate;
             if (try_format(ao, bits, samplerate, ao->channels)) {
-                return 0;
+                return true;
             }
 
             // make samplerate fit in [44100 192000]
@@ -399,7 +399,7 @@ static int find_formats(struct ao *ao)
                     samplerate = 192000;
 
                 if (try_format(ao, bits, samplerate, ao->channels)) {
-                    return 0;
+                    return true;
                 }
             }
 
@@ -407,7 +407,7 @@ static int find_formats(struct ao *ao)
             if (samplerate > 48000) {
                 samplerate = 96000;
                 if (try_format(ao, bits, samplerate, ao->channels)) {
-                    return 0;
+                    return true;
                 }
             }
 
@@ -415,7 +415,7 @@ static int find_formats(struct ao *ao)
             if (samplerate > 44100) {
                 samplerate = 48000;
                 if (try_format(ao, bits, samplerate, ao->channels)) {
-                    return 0;
+                    return true;
                 }
             }
 
@@ -424,7 +424,7 @@ static int find_formats(struct ao *ao)
                 samplerate = 44100;
 
                 if (try_format(ao, bits, samplerate, ao->channels)) {
-                    return 0;
+                    return true;
                 }
             }
         }
@@ -439,7 +439,7 @@ static int find_formats(struct ao *ao)
             mp_chmap_from_channels(&ao->channels, 2);
         } else {
             MP_ERR(ao, "Couldn't find acceptable audio format\n");
-            return -1;
+            return false;
         }
     }
 }
@@ -762,7 +762,7 @@ exit_label:
     return hr;
 }
 
-int wasapi_enumerate_devices(struct mp_log *log, struct ao *ao,
+bool wasapi_enumerate_devices(struct mp_log *log, struct ao *ao,
                              struct ao_device_list *list)
 {
     HRESULT hr;
@@ -772,11 +772,11 @@ int wasapi_enumerate_devices(struct mp_log *log, struct ao *ao,
     hr = enumerate_with_state(log, ao, list, "Unplugged devices:",
                               DEVICE_STATE_UNPLUGGED, 0);
     EXIT_ON_ERROR(hr);
-    return 0;
+    return true;
 exit_label:
     mp_err(log, "Error enumerating devices: %s (0x%"PRIx32")\n",
            wasapi_explain_err(hr), (uint32_t)hr);
-    return 1;
+    return false;
 }
 
 static HRESULT load_default_device(struct ao *ao, IMMDeviceEnumerator* pEnumerator,
@@ -1046,7 +1046,7 @@ retry:
                 wasapi_explain_err(hr), (uint32_t)hr);
 
     MP_DBG(ao, "Probing formats\n");
-    if (find_formats(ao)){
+    if (!find_formats(ao)){
         hr = E_FAIL;
         EXIT_ON_ERROR(hr);
     }
