@@ -255,7 +255,8 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    WaitForSingleObject(state->init_done, INFINITE); /* wait on init complete */
+    HANDLE init_complete[] = {state->threadLoop, state->init_done, NULL};
+    WaitForMultipleObjects(2, init_complete, FALSE, INFINITE);/* wait on init complete */
     if (state->init_ret != S_OK) {
         if (!ao->probing)
             MP_ERR(ao, "Received failure from audio thread\n");
