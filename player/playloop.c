@@ -214,16 +214,6 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         bool need_reset = false;
         demuxer_amount = timeline_set_from_time(mpctx, seek.amount,
                                                 &need_reset);
-        if (demuxer_amount == MP_NOPTS_VALUE) {
-            assert(!need_reset);
-            mpctx->stop_play = AT_END_OF_FILE;
-            // When seeking outside of the file, but not when ending last segment.
-            if (!timeline_fallthrough) {
-                clear_audio_output_buffers(mpctx);
-                reset_playback_state(mpctx);
-            }
-            return -1;
-        }
         if (need_reset) {
             reinit_video_chain(mpctx);
             reinit_audio_chain(mpctx);
@@ -961,10 +951,11 @@ void run_playloop(struct MPContext *mpctx)
         mpctx->audio_status == STATUS_EOF &&
         mpctx->video_status == STATUS_EOF)
     {
-        if (end_is_new_segment) {
+        int new_part = mpctx->timeline_part + 1;
+        if (end_is_new_segment && new_part < mpctx->num_timeline_parts) {
             mp_seek(mpctx, (struct seek_params){
                            .type = MPSEEK_ABSOLUTE,
-                           .amount = mpctx->timeline[mpctx->timeline_part+1].start
+                           .amount = mpctx->timeline[new_part].start
                            }, true);
         } else
             mpctx->stop_play = AT_END_OF_FILE;
