@@ -51,8 +51,8 @@ Track Selection
     other software using FFmpeg (consider ``ffprobe``).
 
     Note that with external tracks (added with ``--sub-file`` and similar
-    options) will have duplicate IDs. In that case, the first stream in order
-    is selected.
+    options), there will be streams with duplicate IDs. In this case, the
+    first stream in order is selected.
 
 ``--edition=<ID|auto>``
     (Matroska files only)

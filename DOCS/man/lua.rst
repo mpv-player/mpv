@@ -22,10 +22,12 @@ A script which leaves fullscreen mode when the player is paused:
 
 ::
 
-    function on_pause()
-        mp.set_property("fullscreen", "no")
+    function on_pause(name, value)
+        if pause == true then
+            mp.set_property("fullscreen", "no")
+        end
     end
-    mp.register_event("pause", on_pause)
+    mp.observe_property("pause", "bool", on_pause_change)
 
 This script provides a pretty weird feature, but Lua scripting was made to
 allow users implement features which are not going to be added to the mpv core.
@@ -719,9 +721,6 @@ List of events
 
 ``command-reply``
     Undocumented (not useful for Lua scripts).
-
-``script-input-dispatch``
-    Undocumented (used internally).
 
 ``client-message``
     Undocumented (used internally).

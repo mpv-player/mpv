@@ -488,7 +488,7 @@ listed.
 
 - ``AV:`` or ``V:`` (video only) or ``A:`` (audio only)
 - The current time position in ``HH:MM:SS`` format (``playback-time`` property)
-- The total file duration (or ``00:00:00`` if unknown) (``length`` property)
+- The total file duration (absent if unknown) (``length`` property)
 - Playback speed, e.g. `` x2.0``. Only visible if the speed is not normal. This
   is the user-requested speed, and not the actual speed  (usually they should
   be the same, unless playback is too slow). (``speed`` property.)
@@ -539,7 +539,7 @@ PROTOCOLS
 ``bd://[title][/device]`` ``--bluray-device=PATH``
     Play a Blu-Ray disc. Currently, this does not accept ISO files. Instead,
     you must mount the ISO file as filesystem, and point ``--bluray-device``
-    to the mounted directly.
+    to the mounted directory directly.
 
 ``bdnav://[title][/device]``
     Play a Blu-Ray disc, with navigation features enabled. This feature is
