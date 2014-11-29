@@ -22,8 +22,8 @@ A script which leaves fullscreen mode when the player is paused:
 
 ::
 
-    function on_pause(name, value)
-        if pause == true then
+    function on_pause_change(name, value)
+        if value == true then
             mp.set_property("fullscreen", "no")
         end
     end
