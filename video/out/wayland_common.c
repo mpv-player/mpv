@@ -108,6 +108,19 @@ static const struct mp_keymap keymap[] = {
     {XKB_KEY_KP_Up,     MP_KEY_KP8},   {XKB_KEY_KP_Page_Up,   MP_KEY_KP9},
     {XKB_KEY_KP_Delete, MP_KEY_KPDEL},
 
+    // "Multimedia keyboard" keys
+    {XKB_KEY_XF86MenuKB, MP_KEY_MENU},
+    {XKB_KEY_XF86AudioPlay, MP_KEY_PLAY}, {XKB_KEY_XF86AudioPause, MP_KEY_PAUSE},
+    {XKB_KEY_XF86AudioStop, MP_KEY_STOP},
+    {XKB_KEY_XF86AudioPrev, MP_KEY_PREV}, {XKB_KEY_XF86AudioNext, MP_KEY_NEXT},
+    {XKB_KEY_XF86AudioRewind, MP_KEY_REWIND}, {XKB_KEY_XF86AudioForward, MP_KEY_FORWARD},
+    {XKB_KEY_XF86AudioMute, MP_KEY_MUTE},
+    {XKB_KEY_XF86AudioLowerVolume, MP_KEY_VOLUME_DOWN},
+    {XKB_KEY_XF86AudioRaiseVolume, MP_KEY_VOLUME_UP},
+    {XKB_KEY_XF86HomePage, MP_KEY_HOMEPAGE}, {XKB_KEY_XF86WWW, MP_KEY_WWW},
+    {XKB_KEY_XF86Mail, MP_KEY_MAIL}, {XKB_KEY_XF86Favorites, MP_KEY_FAVORITES},
+    {XKB_KEY_XF86Search, MP_KEY_SEARCH}, {XKB_KEY_XF86Sleep, MP_KEY_SLEEP},
+
     {0, 0}
 };
 
