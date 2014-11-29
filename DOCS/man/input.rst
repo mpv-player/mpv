@@ -1,5 +1,13 @@
-INPUT.CONF
-==========
+COMMAND INTERFACE
+=================
+
+The mpv core can be controlled with commands and properties. A number of ways
+to interact with the player use them: key bindings (``input.conf``), OSD
+(showing information with properties), JSON IPC, the client API (``libmpv``),
+and the classic slave mode.
+
+input.conf
+----------
 
 The input.conf file consists of a list of key bindings, for example::
 
@@ -814,7 +822,7 @@ Property list
                 "title"             MPV_FORMAT_STRING
                 "default"           MPV_FORMAT_FLAG
 
-``ab-loop-a``, ``ab-loop-b`` (TW)
+``ab-loop-a``, ``ab-loop-b`` (RW)
     Set/get A-B loop points. See corresponding options and ``ab_loop`` command.
     The special value ``no`` on either of these properties disables looping.
 
