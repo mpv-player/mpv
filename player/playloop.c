@@ -311,10 +311,6 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
             seek->exact = exact;
         if (seek->type == MPSEEK_ABSOLUTE)
             return;
-        if (seek->amount == 0) {
-            *seek = (struct seek_params){ 0 };
-            return;
-        }
         seek->type = MPSEEK_RELATIVE;
         return;
     case MPSEEK_ABSOLUTE:
