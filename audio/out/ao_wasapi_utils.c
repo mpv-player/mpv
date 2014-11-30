@@ -238,21 +238,8 @@ static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
         dst->Format = *src;
 }
 
-static int format_set_bits(int old_format, int bits, bool fp)
-{
-    if (fp) {
-        switch (bits) {
-        case 64: return AF_FORMAT_DOUBLE;
-        case 32: return AF_FORMAT_FLOAT;
-        default: return 0;
-        }
-    }
-
-    return af_fmt_change_bits(old_format, bits);
-}
-
 static bool set_ao_format(struct ao *ao,
-                         WAVEFORMATEXTENSIBLE wformat)
+                          WAVEFORMATEXTENSIBLE wformat)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     // explicitly disallow 8 bits - this will catch if the
@@ -261,16 +248,17 @@ static bool set_ao_format(struct ao *ao,
     if (wformat.Format.wBitsPerSample < 16)
         return false;
 
-    bool is_float =
-        !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat.SubFormat);
-
-    if ( !is_float &&
-         mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat.SubFormat) ) {
+    int format;
+    if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat.SubFormat) ) {
+        format = AF_FORMAT_FLOAT;
+    } else if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat.SubFormat) ) {
+        format = AF_FORMAT_S32;
+    } else {
         MP_ERR(ao, "Unknown SubFormat %s\n", mp_GUID_to_str(&wformat.SubFormat));
         return false;
     }
-    int format = format_set_bits(ao->format, wformat.Format.wBitsPerSample, is_float);
-
+    // set the correct number of bits (the 32-bits assumed above may be wrong)
+    format = af_fmt_change_bits(format, wformat.Format.wBitsPerSample);
     if (!format)
         return false;
 
@@ -278,9 +266,8 @@ static bool set_ao_format(struct ao *ao,
     ao->bps = wformat.Format.nAvgBytesPerSec;
     ao->format = format;
 
-    if (ao->channels.num != wformat.Format.nChannels) {
+    if (ao->channels.num != wformat.Format.nChannels)
         mp_chmap_from_channels(&ao->channels, wformat.Format.nChannels);
-    }
 
     state->format = wformat;
     return true;
