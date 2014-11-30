@@ -244,33 +244,21 @@ static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
         dst->Format = *src;
 }
 
-static int format_set_bits(int old_format, int bits, bool fp)
-{
-    if (fp) {
-        switch (bits) {
-        case 64: return AF_FORMAT_DOUBLE;
-        case 32: return AF_FORMAT_FLOAT;
-        default: return 0;
-        }
-    }
-
-    return af_fmt_change_bits(old_format, bits);
-}
-
 static bool set_ao_format(struct ao *ao,
                          WAVEFORMATEXTENSIBLE wformat)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    bool is_float =
-        !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat.SubFormat);
 
-    if ( !is_float &&
-         mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat.SubFormat) ) {
+    int format = AF_FORMAT_32BIT; // valid for both float and PCM
+    if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat.SubFormat) ) {
+        format |= AF_FORMAT_F;
+    } else if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat.SubFormat) ) {
+        format |= AF_FORMAT_I | AF_FORMAT_SI;
+    } else {
         MP_ERR(ao, "Unknown SubFormat %s\n", mp_GUID_to_str(&wformat.SubFormat));
         return false;
     }
-    int format = format_set_bits(ao->format, wformat.Format.wBitsPerSample, is_float);
-
+    format = af_fmt_change_bits(format, wformat.Format.wBitsPerSample);
     if (!format)
         return false;
 
