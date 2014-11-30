@@ -79,7 +79,10 @@ typedef struct wasapi_state {
     HANDLE hFeedDone; /* set only after a hForceFeed */
     HANDLE hTask; /* AV thread */
     DWORD taskIndex; /* AV task ID */
-    WAVEFORMATEXTENSIBLE format;
+    union WAVEFORMAT {
+        WAVEFORMATEX ex;
+        WAVEFORMATEXTENSIBLE extensible;
+    } uFormat;
 
     /* WASAPI proxy handles, for Single-Threaded Apartment communication.
        One is needed for each object that's accessed by a different thread. */

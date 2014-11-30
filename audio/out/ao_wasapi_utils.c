@@ -228,7 +228,7 @@ static bool set_ao_format(struct ao *ao,
         mp_chmap_from_channels(&ao->channels, wformat.Format.nChannels);
     }
 
-    state->format = wformat;
+    state->uFormat.extensible = wformat;
     return true;
 }
 
@@ -299,7 +299,7 @@ static bool try_mix_format(struct ao *ao)
     bool ret = try_format(ao, wformat.Format.wBitsPerSample,
                           wformat.Format.nSamplesPerSec, ao->channels);
     if (ret)
-        state->format = wformat;
+        state->uFormat.extensible = wformat;
 
     SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
     return ret;
@@ -339,7 +339,7 @@ static bool try_passthrough(struct ao *ao)
                                                 u.ex, NULL);
     if (!FAILED(hr)) {
         ao->format = ao->format;
-        state->format = wformat;
+        state->uFormat.extensible = wformat;
         return true;
     }
     return false;
@@ -527,7 +527,7 @@ reinit:
                                  AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
                                  bufferDuration,
                                  bufferPeriod,
-                                 &(state->format.Format),
+                                 &(state->uFormat.ex),
                                  NULL);
     /* something about buffer sizes on Win7 */
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
@@ -541,7 +541,7 @@ reinit:
 
         IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
         bufferPeriod = bufferDuration =
-            (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
+            (REFERENCE_TIME)((10000.0 * 1000 / state->uFormat.ex.nSamplesPerSec *
                               state->bufferFrameCount) + 0.5);
 
         IAudioClient_Release(state->pAudioClient);
@@ -575,11 +575,11 @@ reinit:
     EXIT_ON_ERROR(hr);
 
     ao->device_buffer = state->bufferFrameCount;
-    state->buffer_block_size = state->format.Format.nChannels *
-                               state->format.Format.wBitsPerSample / 8 *
+    state->buffer_block_size = state->uFormat.ex.nChannels *
+                               state->uFormat.ex.wBitsPerSample / 8 *
                                state->bufferFrameCount;
     bufferDuration =
-        (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
+        (REFERENCE_TIME)((10000.0 * 1000 / state->uFormat.ex.nSamplesPerSec *
                           state->bufferFrameCount) + 0.5);
     MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%.2g ms)\n",
                state->bufferFrameCount, (double) bufferDuration / 10000.0 );
