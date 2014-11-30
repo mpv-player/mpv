@@ -386,7 +386,8 @@ static bool find_formats(struct ao *ao)
     int bits = af_fmt2bits(ao->format);
     bool is_float = af_fmt_is_float(ao->format);
 
-    if (try_format(ao, bits, is_float, ao->samplerate, ao->channels))
+    if ( af_fmt_is_signed(ao->format)
+         && try_format(ao, bits, is_float, ao->samplerate, ao->channels))
         return true;
 
     if (!state->opt_exclusive) {
