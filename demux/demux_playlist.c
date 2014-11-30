@@ -86,7 +86,7 @@ static int parse_m3u(struct pl_parser *p)
         return -1;
     if (p->probing)
         return 0;
-    while (!pl_eof(p)) {
+    while (line.len || !pl_eof(p)) {
         if (line.len > 0 && !bstr_startswith0(line, "#"))
             pl_add(p, line);
         line = bstr_strip(pl_get_line(p));
@@ -110,7 +110,7 @@ static int parse_ref_init(struct pl_parser *p)
         "application/vnd.ms.wms-hdr.asfv1", NULL};
     bstr burl = bstr0(p->s->url);
     if (bstr_eatstart0(&burl, "http://") && check_mimetype(p->s, mmsh_types)) {
-        MP_INFO(p, "Redirectiong to mmsh://\n");
+        MP_INFO(p, "Redirecting to mmsh://\n");
         playlist_add_file(p->pl, talloc_asprintf(p, "mmsh://%.*s", BSTR_P(burl)));
         return 0;
     }
