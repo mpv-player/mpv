@@ -187,6 +187,34 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
     wformat->dwChannelMask = chanmask;
 }
 
+static char *waveformat_to_str_buf(char *buf, size_t buf_size, const WAVEFORMATEX *wf)
+{
+    char* type = "?";
+    switch(wf->wFormatTag) {
+    case WAVE_FORMAT_EXTENSIBLE:
+    {
+        WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
+        if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
+                              &wformat->SubFormat) )
+            type = "float";
+        else if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM,
+                                   &wformat->SubFormat) )
+            type = "s";
+        break;
+    }
+    case WAVE_FORMAT_IEEE_FLOAT:
+        type = "float";
+        break;
+    case WAVE_FORMAT_PCM:
+        type = "s";
+        break;
+    }
+    snprintf(buf, buf_size, "%"PRIu16"ch %s%"PRIu16" @ %"PRIu32"hz",
+             wf->nChannels, type, wf->wBitsPerSample, (unsigned)wf->nSamplesPerSec);
+    return buf;
+}
+#define waveformat_to_str(wf) waveformat_to_str_buf((char[32]){0}, 32, (wf))
+
 static bool waveformat_is_float(WAVEFORMATEX *wf)
 {
     switch(wf->wFormatTag) {
@@ -273,13 +301,7 @@ static bool try_format(struct ao *ao,
     WAVEFORMATEXTENSIBLE wformat;
     set_waveformat(&wformat, bits / 8, is_float, samplerate, channels.num,
                    mp_chmap_to_waveext(&channels));
-
-    int af_format = format_set_bits(ao->format, bits, is_float);
-    if (!af_format)
-        return false;
-
-    MP_VERBOSE(ao, "Trying %dch %s @ %dhz\n",
-               channels.num, af_fmt_to_str(af_format), samplerate);
+    MP_VERBOSE(ao, "Trying %s\n", waveformat_to_str(&wformat.Format));
 
     WAVEFORMATEX *closestMatch;
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
@@ -302,7 +324,7 @@ static bool try_format(struct ao *ao,
         // AUDCLNT_E_UNSUPPORTED_FORMAT here means "works in shared, doesn't in exclusive"
         if (set_ao_format(ao, wformat)) {
             MP_VERBOSE(ao, "%dch %s @ %dhz accepted\n",
-                       ao->channels.num, af_fmt_to_str(af_format), samplerate);
+                       ao->channels.num, af_fmt_to_str(ao->format), samplerate);
             return true;
         }
     }
