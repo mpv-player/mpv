@@ -88,11 +88,6 @@ char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey)
     return buf;
 }
 
-union WAVEFMT {
-    WAVEFORMATEX *ex;
-    WAVEFORMATEXTENSIBLE *extensible;
-};
-
 bool wasapi_fill_VistaBlob(wasapi_state *state)
 {
     if (!state)
@@ -171,18 +166,18 @@ const char *wasapi_explain_err(const HRESULT hr)
 #undef E
 }
 
-static void set_format(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
-                       DWORD samplerate, WORD channels, DWORD chanmask)
+static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample, bool is_float,
+                           DWORD samplerate, WORD channels, DWORD chanmask)
 {
     int block_align = channels * bytepersample;
-    wformat->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE; /* Only PCM is supported */
+    wformat->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
     wformat->Format.nChannels = channels;
     wformat->Format.nSamplesPerSec = samplerate;
     wformat->Format.nAvgBytesPerSec = samplerate * block_align;
     wformat->Format.nBlockAlign = block_align;
     wformat->Format.wBitsPerSample = bytepersample * 8;
     wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
-    if (bytepersample == 4)
+    if (is_float)
         wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
     else
         wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_PCM;
@@ -190,33 +185,75 @@ static void set_format(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
     wformat->dwChannelMask = chanmask;
 }
 
-static int format_set_bits(int old_format, int bits, bool fp)
+static char *waveformat_to_str_buf(char *buf, size_t buf_size, const WAVEFORMATEX *wf)
 {
-    if (fp) {
-        switch (bits) {
-        case 64: return AF_FORMAT_DOUBLE;
-        case 32: return AF_FORMAT_FLOAT;
-        default: return 0;
-        }
+    char* type = "";
+    switch(wf->wFormatTag) {
+    case WAVE_FORMAT_EXTENSIBLE:
+    {
+        WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
+        if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
+                              &wformat->SubFormat) )
+            type = "float";
+        else if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM,
+                                   &wformat->SubFormat) )
+            type = "s";
+        break;
     }
+    case WAVE_FORMAT_IEEE_FLOAT:
+        type = "float";
+        break;
+    case WAVE_FORMAT_PCM:
+        type = "s";
+        break;
+    }
+    snprintf(buf, buf_size, "%"PRIu16"ch %s%"PRIu16" @ %"PRIu32"hz",
+             wf->nChannels, type, wf->wBitsPerSample, (unsigned)wf->nSamplesPerSec);
+    return buf;
+}
+#define waveformat_to_str(wf) waveformat_to_str_buf((char[32]){0}, 32, (wf))
 
-    return af_fmt_change_bits(old_format, bits);
+static bool waveformat_is_float(WAVEFORMATEX *wf)
+{
+    switch(wf->wFormatTag) {
+    case WAVE_FORMAT_EXTENSIBLE:
+    {
+        WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
+        if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat->SubFormat) )
+            return true;
+        else
+            return false;
+    }
+    case WAVE_FORMAT_IEEE_FLOAT:
+        return true;
+    default:
+        return false;
+    }
+}
+
+static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
+{
+    if ( src->wFormatTag == WAVE_FORMAT_EXTENSIBLE )
+        *dst = *(WAVEFORMATEXTENSIBLE *)src;
+    else
+        dst->Format = *src;
 }
 
 static bool set_ao_format(struct ao *ao,
                          WAVEFORMATEXTENSIBLE wformat)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    bool is_float =
-        !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat.SubFormat);
 
-    if ( !is_float &&
-         mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat.SubFormat) ) {
+    int format = AF_FORMAT_32BIT; // valid for both float and PCM
+    if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat.SubFormat) ) {
+        format |= AF_FORMAT_F;
+    } else if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat.SubFormat) ) {
+        format |= AF_FORMAT_I | AF_FORMAT_SI;
+    } else {
         MP_ERR(ao, "Unknown SubFormat %s\n", mp_GUID_to_str(&wformat.SubFormat));
         return false;
     }
-    int format = format_set_bits(ao->format, wformat.Format.wBitsPerSample, is_float);
-
+    format = af_fmt_change_bits(format, wformat.Format.wBitsPerSample);
     if (!format)
         return false;
 
@@ -228,41 +265,26 @@ static bool set_ao_format(struct ao *ao,
         mp_chmap_from_channels(&ao->channels, wformat.Format.nChannels);
     }
 
-    state->format = wformat;
+    state->uFormat.extensible = wformat;
     return true;
 }
 
 static bool try_format(struct ao *ao,
-                      int bits, int samplerate,
+                      int bits, bool is_float, int samplerate,
                       const struct mp_chmap channels)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     WAVEFORMATEXTENSIBLE wformat;
-    set_format(&wformat, bits / 8, samplerate, channels.num, mp_chmap_to_waveext(&channels));
-
-    int af_format = format_set_bits(ao->format, bits, bits == 32);
-    if (!af_format)
-        return false;
-
-    MP_VERBOSE(ao, "Trying %dch %s @ %dhz\n",
-               channels.num, af_fmt_to_str(af_format), samplerate);
-
-    union WAVEFMT u;
-    u.extensible = &wformat;
+    set_waveformat(&wformat, bits / 8, is_float, samplerate, channels.num, mp_chmap_to_waveext(&channels));
+    MP_VERBOSE(ao, "Trying %s\n", waveformat_to_str(&wformat.Format));
 
     WAVEFORMATEX *closestMatch;
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 state->share_mode,
-                                                u.ex, &closestMatch);
+                                                &wformat.Format, &closestMatch);
 
     if (closestMatch) {
-        if (closestMatch->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
-            u.ex = closestMatch;
-            wformat = *u.extensible;
-        } else {
-            wformat.Format = *closestMatch;
-        }
-
+        waveformat_copy(&wformat, closestMatch);
         CoTaskMemFree(closestMatch);
     }
 
@@ -277,7 +299,7 @@ static bool try_format(struct ao *ao,
         // AUDCLNT_E_UNSUPPORTED_FORMAT here means "works in shared, doesn't in exclusive"
         if (set_ao_format(ao, wformat)) {
             MP_VERBOSE(ao, "%dch %s @ %dhz accepted\n",
-                       ao->channels.num, af_fmt_to_str(af_format), samplerate);
+                       ao->channels.num, af_fmt_to_str(ao->format), samplerate);
             return true;
         }
     }
@@ -287,27 +309,23 @@ static bool try_format(struct ao *ao,
 static bool try_mix_format(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    WAVEFORMATEX *deviceFormat = NULL;
+    WAVEFORMATEX *wf = NULL;
 
-    HRESULT hr = IAudioClient_GetMixFormat(state->pAudioClient, &deviceFormat);
+    HRESULT hr = IAudioClient_GetMixFormat(state->pAudioClient, &wf);
     EXIT_ON_ERROR(hr);
 
-    union WAVEFMT u;
-    u.ex = deviceFormat;
-    WAVEFORMATEXTENSIBLE wformat = *u.extensible;
+    if (!try_format(ao, wf->wBitsPerSample, waveformat_is_float(wf),
+                    wf->nSamplesPerSec, ao->channels))
+        return false;
 
-    bool ret = try_format(ao, wformat.Format.wBitsPerSample,
-                          wformat.Format.nSamplesPerSec, ao->channels);
-    if (ret)
-        state->format = wformat;
-
-    SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
-    return ret;
+    waveformat_copy(&state->uFormat.extensible, wf);
+    SAFE_RELEASE(wf, CoTaskMemFree(wf));
+    return true;
 exit_label:
     MP_ERR(state, "Error getting mix format: %s (0x%"PRIx32")\n",
            wasapi_explain_err(hr), (uint32_t)hr);
-    SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
-    return 0;
+    SAFE_RELEASE(wf, CoTaskMemFree(wf));
+    return false;
 }
 
 static bool try_passthrough(struct ao *ao)
@@ -329,17 +347,14 @@ static bool try_passthrough(struct ao *ao)
     };
     wformat.SubFormat.Data1 = WAVE_FORMAT_DOLBY_AC3_SPDIF; // see INIT_WAVEFORMATEX_GUID macro
 
-    union WAVEFMT u;
-    u.extensible = &wformat;
-
     MP_VERBOSE(ao, "Trying passthrough for %s...\n", af_fmt_to_str(ao->format));
 
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 state->share_mode,
-                                                u.ex, NULL);
+                                                &wformat.Format, NULL);
     if (!FAILED(hr)) {
         ao->format = ao->format;
-        state->format = wformat;
+        state->uFormat.extensible = wformat;
         return true;
     }
     return false;
@@ -362,13 +377,12 @@ static bool find_formats(struct ao *ao)
 
     /* See if the format works as-is */
     int bits = af_fmt2bits(ao->format);
-    /* don't try 8bits -- there are various 8bit modes other than PCM (*-law et al);
-       let's just stick to PCM or float here. */
-    if (bits == 8) {
-        bits = 16;
-    } else if (try_format(ao, bits, ao->samplerate, ao->channels)) {
+    bool is_float = af_fmt_is_float(ao->format);
+
+    if ( af_fmt_is_signed(ao->format)
+         && try_format(ao, bits, is_float, ao->samplerate, ao->channels))
         return true;
-    }
+
     if (!state->opt_exclusive) {
         /* shared mode, we can use the system default mix format. */
         if (try_mix_format(ao)) {
@@ -385,18 +399,16 @@ static bool find_formats(struct ao *ao)
      * Drivers dated 2/18/2011
      */
 
-    /* try float first for non-16bit audio */
-    if (bits != 16) {
-        bits = 32;
-    }
+    bits = 32;
+    /* fixme: try float first */
+    is_float = false;
 
     int start_bits = bits;
     while (1) { // not infinite -- returns at bottom
         for (; bits > 8; bits -= 8) {
             int samplerate = ao->samplerate;
-            if (try_format(ao, bits, samplerate, ao->channels)) {
+            if (try_format(ao, bits, is_float, samplerate, ao->channels))
                 return true;
-            }
 
             // make samplerate fit in [44100 192000]
             // we check for samplerate > 96k so that we can upsample instead of downsampling later
@@ -405,35 +417,29 @@ static bool find_formats(struct ao *ao)
                     samplerate = 44100;
                 if (samplerate > 96000)
                     samplerate = 192000;
-
-                if (try_format(ao, bits, samplerate, ao->channels)) {
+                if (try_format(ao, bits, is_float, samplerate, ao->channels))
                     return true;
-                }
             }
 
             // try bounding to 96kHz
             if (samplerate > 48000) {
                 samplerate = 96000;
-                if (try_format(ao, bits, samplerate, ao->channels)) {
+                if (try_format(ao, bits, is_float, samplerate, ao->channels))
                     return true;
-                }
             }
 
             // try bounding to 48kHz
             if (samplerate > 44100) {
                 samplerate = 48000;
-                if (try_format(ao, bits, samplerate, ao->channels)) {
+                if (try_format(ao, bits, is_float, samplerate, ao->channels))
                     return true;
-                }
             }
 
             /* How bad is this? try 44100hz, but only on 16bit */
             if (bits == 16 && samplerate != 44100) {
                 samplerate = 44100;
-
-                if (try_format(ao, bits, samplerate, ao->channels)) {
+                if (try_format(ao, bits, is_float, samplerate, ao->channels))
                     return true;
-                }
             }
         }
 
@@ -527,7 +533,7 @@ reinit:
                                  AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
                                  bufferDuration,
                                  bufferPeriod,
-                                 &(state->format.Format),
+                                 &(state->uFormat.ex),
                                  NULL);
     /* something about buffer sizes on Win7 */
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
@@ -541,7 +547,7 @@ reinit:
 
         IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
         bufferPeriod = bufferDuration =
-            (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
+            (REFERENCE_TIME)((10000.0 * 1000 / state->uFormat.ex.nSamplesPerSec *
                               state->bufferFrameCount) + 0.5);
 
         IAudioClient_Release(state->pAudioClient);
@@ -575,11 +581,11 @@ reinit:
     EXIT_ON_ERROR(hr);
 
     ao->device_buffer = state->bufferFrameCount;
-    state->buffer_block_size = state->format.Format.nChannels *
-                               state->format.Format.wBitsPerSample / 8 *
+    state->buffer_block_size = state->uFormat.ex.nChannels *
+                               state->uFormat.ex.wBitsPerSample / 8 *
                                state->bufferFrameCount;
     bufferDuration =
-        (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
+        (REFERENCE_TIME)((10000.0 * 1000 / state->uFormat.ex.nSamplesPerSec *
                           state->bufferFrameCount) + 0.5);
     MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%.2g ms)\n",
                state->bufferFrameCount, (double) bufferDuration / 10000.0 );

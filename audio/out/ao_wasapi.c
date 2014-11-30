@@ -57,10 +57,10 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
     position += state->clock_frequency * (uint64_t)(qpc_diff / 1e7);
 
     /* convert position to the same base as sample_count */
-    position = position * state->format.Format.nSamplesPerSec / state->clock_frequency;
+    position = position * state->uFormat.ex.nSamplesPerSec / state->clock_frequency;
 
     double diff = sample_count - position;
-    *delay = diff / state->format.Format.nSamplesPerSec;
+    *delay = diff / state->uFormat.ex.nSamplesPerSec;
 
     MP_TRACE(state, "Device delay: %g samples (%g ms)\n", diff, *delay * 1000);
 
@@ -99,7 +99,7 @@ static void thread_feed(struct ao *ao)
 
     ao_read_data(ao, (void**)data, frame_count, (int64_t) (
                      mp_time_us() + delay * 1e6 +
-                     frame_count * 1e6 / state->format.Format.nSamplesPerSec));
+                     frame_count * 1e6 / state->uFormat.ex.nSamplesPerSec));
 
     hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                           frame_count, 0);
