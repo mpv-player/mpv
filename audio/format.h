@@ -109,6 +109,7 @@ const char *af_fmt_to_str(int format);
 
 int af_fmt2bps(int format);
 int af_fmt2bits(int format);
+bool af_fmt_is_float(int format);
 int af_fmt_change_bits(int format, int bits);
 
 int af_fmt_to_planar(int format);
