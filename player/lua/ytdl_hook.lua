@@ -23,7 +23,8 @@ mp.add_hook("on_load", 10, function ()
         if (ytdl.vercheck == nil) then
 
              -- check for youtube-dl in mpv's config dir
-            local ytdl_mcd = mp.find_config_file("youtube-dl") or mp.find_config_file("youtube-dl.py")
+            local ytdl_mcd = mp.find_config_file("youtube-dl")
+                          or mp.find_config_file("youtube-dl.py")
             if not (ytdl_mcd == nil) then
                 msg.verbose("found youtube-dl at: " .. ytdl_mcd)
                 ytdl.path = ytdl_mcd
