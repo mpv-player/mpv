@@ -33,5 +33,6 @@
 - (BOOL)keyboardEnabled;
 - (BOOL)mouseEnabled;
 - (NSScreen *)fsScreen;
+- (BOOL)fsModeAllScreens;
 @property(nonatomic, assign) struct vo *vout;
 @end

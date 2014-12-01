@@ -1478,6 +1478,10 @@ Window
 
     See also ``--screen``.
 
+``--fs-black-out-screens``
+
+    OS X only. Black out other displays when going fullscreen.
+
 ``--keep-open``
     Do not terminate when playing or seeking beyond the end of the file, and
     there is not next file to be played (and ``--loop`` is not used).

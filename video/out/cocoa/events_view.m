@@ -67,7 +67,7 @@
             popts |= NSApplicationPresentationAutoHideDock;
 
         NSDictionary *fsopts = @{
-            NSFullScreenModeAllScreens : @NO,
+            NSFullScreenModeAllScreens : @([self.adapter fsModeAllScreens]),
             NSFullScreenModeApplicationPresentationOptions : @(popts)
         };
 

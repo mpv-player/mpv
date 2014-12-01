@@ -12,6 +12,7 @@ typedef struct mp_vo_opts {
     int fullscreen;
     int screen_id;
     int fsscreen_id;
+    int fs_black_out_screens;
     char *winname;
     int x11_netwm;
     int native_keyrepeat;

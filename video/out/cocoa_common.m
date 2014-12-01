@@ -795,6 +795,11 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
     return s->fs_screen;
 }
 
+- (BOOL)fsModeAllScreens
+{
+    return self.vout->opts->fs_black_out_screens;
+}
+
 - (void)handleFilesArray:(NSArray *)files
 {
     [[EventsResponder sharedInstance] handleFilesArray:files];
