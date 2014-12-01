@@ -2145,7 +2145,7 @@ static int parse_chmap(struct mp_log *log, const m_option_t *opt,
 
 const m_option_type_t m_option_type_chmap = {
     .name  = "Audio channels or channel map",
-    .size  = sizeof(struct mp_chmap *),
+    .size  = sizeof(struct mp_chmap),
     .parse = parse_chmap,
     .copy  = copy_opt,
 };
