@@ -279,7 +279,7 @@ static int find_alsa_channel(int mp_channel)
 static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
 {
     struct priv *p = ao->priv;
-    struct mp_chmap_sel chmap_sel = {0};
+    struct mp_chmap_sel chmap_sel = {.tmp = p};
 
     snd_pcm_chmap_query_t **maps = snd_pcm_query_chmaps(p->alsa);
     if (!maps)
