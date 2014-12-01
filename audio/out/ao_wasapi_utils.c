@@ -167,23 +167,39 @@ const char *wasapi_explain_err(const HRESULT hr)
 #undef E
 }
 
-static void set_format(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
-                       DWORD samplerate, WORD channels, DWORD chanmask)
+static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
+                           bool is_float, DWORD samplerate, WORD channels,
+                           DWORD chanmask)
 {
     int block_align = channels * bytepersample;
-    wformat->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE; /* Only PCM is supported */
+    wformat->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
     wformat->Format.nChannels = channels;
     wformat->Format.nSamplesPerSec = samplerate;
     wformat->Format.nAvgBytesPerSec = samplerate * block_align;
     wformat->Format.nBlockAlign = block_align;
     wformat->Format.wBitsPerSample = bytepersample * 8;
     wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
-    if (bytepersample == 4)
+    if (is_float)
         wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
     else
         wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_PCM;
     wformat->Samples.wValidBitsPerSample = wformat->Format.wBitsPerSample;
     wformat->dwChannelMask = chanmask;
+}
+
+static bool waveformat_is_float(WAVEFORMATEX *wf)
+{
+    switch(wf->wFormatTag) {
+    case WAVE_FORMAT_EXTENSIBLE:
+    {
+        WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
+        return !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat->SubFormat);
+    }
+    case WAVE_FORMAT_IEEE_FLOAT:
+        return true;
+    default:
+        return false;
+    }
 }
 
 static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
@@ -243,7 +259,7 @@ static bool set_ao_format(struct ao *ao,
 }
 
 static bool try_format(struct ao *ao,
-                      int bits, int samplerate,
+                      int bits, bool is_float, int samplerate,
                       const struct mp_chmap channels)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
@@ -255,9 +271,10 @@ static bool try_format(struct ao *ao,
     bits = FFMAX(16, bits);
 
     WAVEFORMATEXTENSIBLE wformat;
-    set_format(&wformat, bits / 8, samplerate, channels.num, mp_chmap_to_waveext(&channels));
+    set_waveformat(&wformat, bits / 8, is_float, samplerate, channels.num,
+                   mp_chmap_to_waveext(&channels));
 
-    int af_format = format_set_bits(ao->format, bits, bits == 32);
+    int af_format = format_set_bits(ao->format, bits, is_float);
     if (!af_format)
         return false;
 
@@ -295,20 +312,20 @@ static bool try_format(struct ao *ao,
 static bool try_mix_format(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    WAVEFORMATEX *deviceFormat = NULL;
-    HRESULT hr = IAudioClient_GetMixFormat(state->pAudioClient, &deviceFormat);
+    WAVEFORMATEX *wf = NULL;
+    HRESULT hr = IAudioClient_GetMixFormat(state->pAudioClient, &wf);
     EXIT_ON_ERROR(hr);
 
-    bool ret = try_format(ao, deviceFormat->wBitsPerSample,
-                          deviceFormat->nSamplesPerSec, ao->channels);
+    bool ret = try_format(ao, wf->wBitsPerSample, waveformat_is_float(wf),
+                          wf->nSamplesPerSec, ao->channels);
 
-    SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
+    SAFE_RELEASE(wf, CoTaskMemFree(wf));
     return ret;
 exit_label:
     MP_ERR(state, "Error getting mix format: %s (0x%"PRIx32")\n",
            wasapi_explain_err(hr), (uint32_t)hr);
-    SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
-    return 0;
+    SAFE_RELEASE(wf, CoTaskMemFree(wf));
+    return false;
 }
 
 static bool try_passthrough(struct ao *ao)
@@ -359,38 +376,27 @@ static bool find_formats(struct ao *ao)
     }
 
     /* See if the format works as-is */
-    int bits = af_fmt2bits(ao->format);
-    if (try_format(ao, bits, ao->samplerate, ao->channels))
+    if (try_format(ao, af_fmt2bits(ao->format),
+                   af_fmt_is_float(ao->format), ao->samplerate, ao->channels))
         return true;
 
     if (!state->opt_exclusive) {
         /* shared mode, we can use the system default mix format. */
-        if (try_mix_format(ao)) {
+        if (try_mix_format(ao))
             return true;
-        }
-
         MP_WARN(ao, "Couldn't use default mix format\n");
     }
 
     /* Exclusive mode, we have to guess. */
-
-    /* as far as testing shows, only PCM 16/24LE (44100Hz - 192kHz) is supported
-     * Tested on Realtek High Definition Audio, (Realtek Semiconductor Corp. 6.0.1.6312)
-     * Drivers dated 2/18/2011
-     */
-
-    /* try float first for non-16bit audio */
-    if (bits != 16) {
-        bits = 32;
-    }
-
-    int start_bits = bits;
+    int start_bits = 32;
+    /* fixme: try float first */
+    bool is_float = false;
     while (1) { // not infinite -- returns at bottom
+        int bits = start_bits;
         for (; bits > 8; bits -= 8) {
             int samplerate = ao->samplerate;
-            if (try_format(ao, bits, samplerate, ao->channels)) {
+            if (try_format(ao, bits, is_float, samplerate, ao->channels))
                 return true;
-            }
 
             // make samplerate fit in [44100 192000]
             // we check for samplerate > 96k so that we can upsample instead of downsampling later
@@ -399,45 +405,37 @@ static bool find_formats(struct ao *ao)
                     samplerate = 44100;
                 if (samplerate > 96000)
                     samplerate = 192000;
-
-                if (try_format(ao, bits, samplerate, ao->channels)) {
+                if (try_format(ao, bits, is_float, samplerate, ao->channels))
                     return true;
-                }
             }
 
             // try bounding to 96kHz
             if (samplerate > 48000) {
                 samplerate = 96000;
-                if (try_format(ao, bits, samplerate, ao->channels)) {
+                if (try_format(ao, bits, is_float, samplerate, ao->channels))
                     return true;
-                }
             }
 
             // try bounding to 48kHz
             if (samplerate > 44100) {
                 samplerate = 48000;
-                if (try_format(ao, bits, samplerate, ao->channels)) {
+                if (try_format(ao, bits, is_float, samplerate, ao->channels))
                     return true;
-                }
             }
 
             /* How bad is this? try 44100hz, but only on 16bit */
             if (bits == 16 && samplerate != 44100) {
                 samplerate = 44100;
-
-                if (try_format(ao, bits, samplerate, ao->channels)) {
+                if (try_format(ao, bits, is_float, samplerate, ao->channels))
                     return true;
-                }
             }
         }
 
         if (ao->channels.num > 6) {
             /* Maybe this is 5.1 hardware with no support for more. */
-            bits = start_bits;
             mp_chmap_from_channels(&ao->channels, 6);
         } else if (ao->channels.num != 2) {
             /* Poor quality hardware? Try stereo mode, go through the list again. */
-            bits = start_bits;
             mp_chmap_from_channels(&ao->channels, 2);
         } else {
             MP_ERR(ao, "Couldn't find acceptable audio format\n");
