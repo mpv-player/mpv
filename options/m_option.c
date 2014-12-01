@@ -2619,7 +2619,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
     if (m_obj_list_find(&desc, list, str)) {
         if (desc.replaced_name)
             mp_warn(log, "Driver '%s' has been replaced with '%s'!\n",
-                   desc.name, desc.replaced_name);
+                   desc.replaced_name, desc.name);
     } else {
         if (!list->allow_unknown_entries) {
             mp_err(log, "Option %.*s: %.*s doesn't exist.\n",
