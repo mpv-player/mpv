@@ -88,11 +88,6 @@ char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey)
     return buf;
 }
 
-union WAVEFMT {
-    WAVEFORMATEX *ex;
-    WAVEFORMATEXTENSIBLE *extensible;
-};
-
 bool wasapi_fill_VistaBlob(wasapi_state *state)
 {
     if (!state)
@@ -190,6 +185,14 @@ static void set_format(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
     wformat->dwChannelMask = chanmask;
 }
 
+static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
+{
+    if ( src->wFormatTag == WAVE_FORMAT_EXTENSIBLE )
+        *dst = *(WAVEFORMATEXTENSIBLE *)src;
+    else
+        dst->Format = *src;
+}
+
 static int format_set_bits(int old_format, int bits, bool fp)
 {
     if (fp) {
@@ -247,22 +250,13 @@ static bool try_format(struct ao *ao,
     MP_VERBOSE(ao, "Trying %dch %s @ %dhz\n",
                channels.num, af_fmt_to_str(af_format), samplerate);
 
-    union WAVEFMT u;
-    u.extensible = &wformat;
-
     WAVEFORMATEX *closestMatch;
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 state->share_mode,
-                                                u.ex, &closestMatch);
+                                                &wformat.Format, &closestMatch);
 
     if (closestMatch) {
-        if (closestMatch->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
-            u.ex = closestMatch;
-            wformat = *u.extensible;
-        } else {
-            wformat.Format = *closestMatch;
-        }
-
+        waveformat_copy(&wformat, closestMatch);
         CoTaskMemFree(closestMatch);
     }
 
@@ -288,18 +282,11 @@ static bool try_mix_format(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     WAVEFORMATEX *deviceFormat = NULL;
-
     HRESULT hr = IAudioClient_GetMixFormat(state->pAudioClient, &deviceFormat);
     EXIT_ON_ERROR(hr);
 
-    union WAVEFMT u;
-    u.ex = deviceFormat;
-    WAVEFORMATEXTENSIBLE wformat = *u.extensible;
-
-    bool ret = try_format(ao, wformat.Format.wBitsPerSample,
-                          wformat.Format.nSamplesPerSec, ao->channels);
-    if (ret)
-        state->format = wformat;
+    bool ret = try_format(ao, deviceFormat->wBitsPerSample,
+                          deviceFormat->nSamplesPerSec, ao->channels);
 
     SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
     return ret;
@@ -329,14 +316,11 @@ static bool try_passthrough(struct ao *ao)
     };
     wformat.SubFormat.Data1 = WAVE_FORMAT_DOLBY_AC3_SPDIF; // see INIT_WAVEFORMATEX_GUID macro
 
-    union WAVEFMT u;
-    u.extensible = &wformat;
-
     MP_VERBOSE(ao, "Trying passthrough for %s...\n", af_fmt_to_str(ao->format));
 
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 state->share_mode,
-                                                u.ex, NULL);
+                                                &wformat.Format, NULL);
     if (!FAILED(hr)) {
         ao->format = ao->format;
         state->format = wformat;
