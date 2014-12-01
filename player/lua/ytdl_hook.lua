@@ -29,15 +29,15 @@ mp.add_hook("on_load", 10, function ()
                 ytdl.path = ytdl_mcd
             end
             if (ytdl_mcd == mp.find_config_file("youtube-dl")) then
-                pyscript = 1
+                pyscript = false
             elseif (ytdl_mcd == mp.find_config_file("youtube-dl.py")) then
-                pyscript = 0
+                pyscript = true
             end
 
             msg.debug("checking ytdl version ...")
-            if (pyscript == 1) then
+            if (pyscript == false) then
                 es, version = exec({ytdl.path, "--version"})
-            elseif (pyscript == 0) then
+            else
                 es, version = exec({"python", ytdl.path, "--version"})
             end
             if (es < 0) then
@@ -72,12 +72,12 @@ mp.add_hook("on_load", 10, function ()
             subformat = "ass"
         end
 
-        if (pyscript == 1) then
+        if (pyscript == false) then
             command = {
                 ytdl.path, "-J", "--flat-playlist", "--all-subs",
                 "--sub-format", subformat, "--no-playlist"
             }
-        elseif (pyscript == 0) then
+        else
             command = {
                 "python", ytdl.path, "-J", "--flat-playlist", "--all-subs",
                 "--sub-format", subformat, "--no-playlist"
