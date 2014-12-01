@@ -81,14 +81,21 @@ void mp_chmap_sel_add_alsa_def(struct mp_chmap_sel *s)
     }
 }
 
-#define ARRAY_LEN(x) (sizeof(x) / sizeof((x)[0]))
-
 // Add a channel map that should be allowed.
 void mp_chmap_sel_add_map(struct mp_chmap_sel *s, const struct mp_chmap *map)
 {
-    assert(s->num_chmaps < ARRAY_LEN(s->chmaps));
-    if (mp_chmap_is_valid(map))
-        s->chmaps[s->num_chmaps++] = *map;
+    if (!mp_chmap_is_valid(map))
+        return;
+    if (!s->chmaps)
+        s->chmaps = s->chmaps_storage;
+    if (s->num_chmaps == MP_ARRAY_SIZE(s->chmaps)) {
+        if (!s->tmp)
+            return;
+        s->chmaps = talloc_memdup(s->tmp, s->chmaps, sizeof(s->chmaps_storage));
+    }
+    if (s->chmaps != s->chmaps_storage)
+        MP_TARRAY_GROW(s->tmp, s->chmaps, s->num_chmaps);
+    s->chmaps[s->num_chmaps++] = *map;
 }
 
 // Allow all waveext formats in default order.

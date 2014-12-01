@@ -26,8 +26,12 @@ struct mp_chmap_sel {
     // should be considered opaque
     bool allow_any, allow_waveext;
     bool speakers[MP_SPEAKER_ID_COUNT];
-    struct mp_chmap chmaps[20];
+    struct mp_chmap *chmaps;
     int num_chmaps;
+
+    struct mp_chmap chmaps_storage[20];
+
+    void *tmp; // set to any talloc context to allow more chmaps entries
 };
 
 void mp_chmap_sel_add_any(struct mp_chmap_sel *s);
