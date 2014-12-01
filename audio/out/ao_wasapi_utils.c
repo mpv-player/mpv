@@ -230,6 +230,21 @@ static bool waveformat_is_float(WAVEFORMATEX *wf)
     }
 }
 
+static bool waveformat_is_pcm(WAVEFORMATEX *wf)
+{
+    switch(wf->wFormatTag) {
+    case WAVE_FORMAT_EXTENSIBLE:
+    {
+        WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
+        return !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat->SubFormat);
+    }
+    case WAVE_FORMAT_PCM:
+        return true;
+    default:
+        return false;
+    }
+}
+
 static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
 {
     if ( src->wFormatTag == WAVE_FORMAT_EXTENSIBLE )
@@ -238,38 +253,37 @@ static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
         dst->Format = *src;
 }
 
-static bool set_ao_format(struct ao *ao,
-                          WAVEFORMATEXTENSIBLE wformat)
+static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     // explicitly disallow 8 bits - this will catch if the
     // closestMatch returned by IsFormatSupported in try_format below returns
     // a bit depth of less than 16
-    if (wformat.Format.wBitsPerSample < 16)
+    if (wf->wBitsPerSample < 16)
         return false;
 
     int format;
-    if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat.SubFormat) ) {
+    if (waveformat_is_float(wf)){
         format = AF_FORMAT_FLOAT;
-    } else if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat.SubFormat) ) {
+    } else if (waveformat_is_pcm(wf)) {
         format = AF_FORMAT_S32;
     } else {
-        MP_ERR(ao, "Unknown SubFormat %s\n", mp_GUID_to_str(&wformat.SubFormat));
+        MP_ERR(ao, "Unknown WAVEFORMAT\n");
         return false;
     }
     // set the correct number of bits (the 32-bits assumed above may be wrong)
-    format = af_fmt_change_bits(format, wformat.Format.wBitsPerSample);
+    format = af_fmt_change_bits(format, wf->wBitsPerSample);
     if (!format)
         return false;
 
-    ao->samplerate = wformat.Format.nSamplesPerSec;
-    ao->bps = wformat.Format.nAvgBytesPerSec;
+    ao->samplerate = wf->nSamplesPerSec;
+    ao->bps = wf->nAvgBytesPerSec;
     ao->format = format;
 
-    if (ao->channels.num != wformat.Format.nChannels)
-        mp_chmap_from_channels(&ao->channels, wformat.Format.nChannels);
+    if (ao->channels.num != wf->nChannels)
+        mp_chmap_from_channels(&ao->channels, wf->nChannels);
 
-    state->format = wformat;
+    waveformat_copy(&state->format, wf);
     return true;
 }
 
@@ -301,7 +315,7 @@ static bool try_format(struct ao *ao,
     }
 
     if (hr == S_FALSE) {
-        if (set_ao_format(ao, wformat)) {
+        if (set_ao_format(ao, &wformat.Format)) {
             MP_VERBOSE(ao, "Accepted as %dch %s @ %dhz\n",
                        ao->channels.num, af_fmt_to_str(ao->format), ao->samplerate);
 
@@ -309,7 +323,7 @@ static bool try_format(struct ao *ao,
         }
     } if (hr == S_OK || (!state->opt_exclusive && hr == AUDCLNT_E_UNSUPPORTED_FORMAT)) {
         // AUDCLNT_E_UNSUPPORTED_FORMAT here means "works in shared, doesn't in exclusive"
-        if (set_ao_format(ao, wformat)) {
+        if (set_ao_format(ao, &wformat.Format)) {
             MP_VERBOSE(ao, "%dch %s @ %dhz accepted\n",
                        ao->channels.num, af_fmt_to_str(ao->format), samplerate);
             return true;
