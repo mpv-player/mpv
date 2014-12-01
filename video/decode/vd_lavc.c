@@ -430,7 +430,7 @@ static void uninit_avctx(struct dec_video *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
 
-    if (avctx)
+    if (avctx && avctx->codec)
         avcodec_flush_buffers(avctx);
 
     if (ctx->hwdec && ctx->hwdec->uninit)
