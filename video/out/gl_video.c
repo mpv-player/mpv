@@ -2167,10 +2167,6 @@ static int init_gl(struct gl_video *p)
     check_gl_features(p);
 
     gl->Disable(GL_DITHER);
-    gl->Disable(GL_BLEND);
-    gl->Disable(GL_DEPTH_TEST);
-    gl->DepthMask(GL_FALSE);
-    gl->Disable(GL_CULL_FACE);
 
     gl->GenBuffers(1, &p->vertex_buffer);
     gl->BindBuffer(GL_ARRAY_BUFFER, p->vertex_buffer);
