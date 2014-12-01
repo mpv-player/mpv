@@ -440,8 +440,10 @@ void cocoa_set_input_context(struct input_ctx *input_context)
     size_t num_files  = [files count];
     char **files_utf8 = talloc_array(NULL, char*, num_files);
     [files enumerateObjectsUsingBlock:^(id obj, NSUInteger i, BOOL *_){
-        char *filename = (char *)[obj UTF8String];
-        size_t bytes   = [obj lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+        NSURL *url     = [NSURL URLWithString:obj];
+        NSString *path = [url path];
+        char *filename = (char *)[path UTF8String];
+        size_t bytes   = [path lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
         files_utf8[i]  = talloc_memdup(files_utf8, filename, bytes + 1);
     }];
     mp_event_drop_files(_inputContext, num_files, files_utf8);
