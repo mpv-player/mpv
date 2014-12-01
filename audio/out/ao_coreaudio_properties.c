@@ -62,7 +62,7 @@ OSStatus ca_get_ary(AudioObjectID id, ca_scope scope, ca_sel selector,
     err = AudioObjectGetPropertyDataSize(id, &p_addr, 0, NULL, &p_size);
     CHECK_CA_ERROR_SILENT_L(coreaudio_error);
 
-    *data = talloc_size(NULL, p_size);
+    *data = talloc_zero_size(NULL, p_size);
     *elements = p_size / element_size;
 
     err = ca_get(id, scope, selector, p_size, *data);
@@ -87,7 +87,7 @@ OSStatus ca_get_str(AudioObjectID id, ca_scope scope, ca_sel selector,
         CFStringGetMaximumSizeForEncoding(
             CFStringGetLength(string), CA_CFSTR_ENCODING) + 1;
 
-    *data = talloc_size(NULL, size);
+    *data = talloc_zero_size(NULL, size);
     CFStringGetCString(string, *data, size, CA_CFSTR_ENCODING);
     CFRelease(string);
 coreaudio_error:
