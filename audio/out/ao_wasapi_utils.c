@@ -21,6 +21,7 @@
 #define _WIN32_WINNT 0x600
 
 #include <math.h>
+#include <libavutil/common.h>
 #include <initguid.h>
 #include <audioclient.h>
 #include <endpointvolume.h>
@@ -210,6 +211,12 @@ static bool set_ao_format(struct ao *ao,
                          WAVEFORMATEXTENSIBLE wformat)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    // explicitly disallow 8 bits - this will catch if the
+    // closestMatch returned by IsFormatSupported in try_format below returns
+    // a bit depth of less than 16
+    if (wformat.Format.wBitsPerSample < 16)
+        return false;
+
     bool is_float =
         !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat.SubFormat);
 
@@ -240,6 +247,13 @@ static bool try_format(struct ao *ao,
                       const struct mp_chmap channels)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    /* If for some reason we get 8-bits, try 16-bit equivalent instead.
+       This can happen if 8-bits is initially requested in ao->format
+       or in the unlikely event that GetMixFormat return 8-bits.
+       If someone with a "vintage" sound card or something complains
+       this can be reconsidered */
+    bits = FFMAX(16, bits);
+
     WAVEFORMATEXTENSIBLE wformat;
     set_format(&wformat, bits / 8, samplerate, channels.num, mp_chmap_to_waveext(&channels));
 
@@ -346,13 +360,9 @@ static bool find_formats(struct ao *ao)
 
     /* See if the format works as-is */
     int bits = af_fmt2bits(ao->format);
-    /* don't try 8bits -- there are various 8bit modes other than PCM (*-law et al);
-       let's just stick to PCM or float here. */
-    if (bits == 8) {
-        bits = 16;
-    } else if (try_format(ao, bits, ao->samplerate, ao->channels)) {
+    if (try_format(ao, bits, ao->samplerate, ao->channels))
         return true;
-    }
+
     if (!state->opt_exclusive) {
         /* shared mode, we can use the system default mix format. */
         if (try_mix_format(ao)) {
