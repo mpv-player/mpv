@@ -2114,8 +2114,9 @@ const m_option_type_t m_option_type_afmt = {
 static int parse_chmap(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
-    // min>0: at least min channels, min=0: empty ok, min=-1: invalid ok
+    // min>0: at least min channels, min=0: empty ok
     int min_ch = (opt->flags & M_OPT_MIN) ? opt->min : 1;
+    assert(min_ch >= 0);
 
     if (bstr_equals0(param, "help")) {
         mp_chmap_print_help(log);
@@ -2131,9 +2132,7 @@ static int parse_chmap(struct mp_log *log, const m_option_t *opt,
         return M_OPT_INVALID;
     }
 
-    if ((min_ch >= 0 && !mp_chmap_is_valid(&res)) &&
-        !(min_ch == 0 && mp_chmap_is_empty(&res)))
-    {
+    if (!mp_chmap_is_valid(&res) && !(min_ch == 0 && mp_chmap_is_empty(&res))) {
         mp_err(log, "Invalid channel layout: %.*s\n", BSTR_P(param));
         return M_OPT_INVALID;
     }
