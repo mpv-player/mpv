@@ -88,7 +88,7 @@ void mp_chmap_sel_add_map(struct mp_chmap_sel *s, const struct mp_chmap *map)
         return;
     if (!s->chmaps)
         s->chmaps = s->chmaps_storage;
-    if (s->num_chmaps == MP_ARRAY_SIZE(s->chmaps)) {
+    if (s->num_chmaps == MP_ARRAY_SIZE(s->chmaps_storage)) {
         if (!s->tmp)
             return;
         s->chmaps = talloc_memdup(s->tmp, s->chmaps, sizeof(s->chmaps_storage));
