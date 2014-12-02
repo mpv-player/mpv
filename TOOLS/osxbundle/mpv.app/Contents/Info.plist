@@ -88,6 +88,7 @@
           <string>VOB</string>
           <string>WEBM</string>
           <string>WMV</string>
+          <string>MK3D</string>
           <string>asf</string>
           <string>avi</string>
           <string>cpk</string>
@@ -122,6 +123,7 @@
           <string>vob</string>
           <string>webm</string>
           <string>wmv</string>
+          <string>mk3d</string>
         </array>
         <key>CFBundleTypeIconFile</key>
         <string>document.icns</string>
@@ -513,6 +515,27 @@
           <key>public.filename-extension</key>
           <array>
             <string>mkv</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>Matroska stereoscopic/3D video</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.mk3d</string>
+        <key>UTTypeReferenceURL</key>
+        <string>http://www.matroska.org</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>mk3d</string>
           </array>
         </dict>
       </dict>
