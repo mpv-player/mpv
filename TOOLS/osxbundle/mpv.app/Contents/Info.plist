@@ -210,6 +210,7 @@
           <string>mms</string>
           <string>mmst</string>
           <string>http</string>
+          <string>https</string>
           <string>httpproxy</string>
           <string>rtp</string>
           <string>rtsp</string>
