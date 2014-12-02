@@ -517,8 +517,10 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
     gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                              p->gl_target, fbo->texture, 0);
 
-    if (gl->CheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        MP_ERR(p, "Error: framebuffer completeness check failed!\n");
+    GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (err != GL_FRAMEBUFFER_COMPLETE) {
+        MP_ERR(p, "Error: framebuffer completeness check failed (error=%d).\n",
+               (int)err);
         res = false;
     }
 
