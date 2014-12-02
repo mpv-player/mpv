@@ -1,3 +1,33 @@
+Release 0.7.1
+=============
+
+Changes
+-------
+
+- Don't show the volume neutral marker on the OSD if softvol is disabled.
+- Don't select a subtitle track when executing the sub_add input command in
+  "auto" mode.
+
+Bug fixes
+---------
+
+- Fix busy loop when seeking while paused (this fixes a problem with pulseaudio
+  that caused mpv and the pulseaudio daemon to use 100% CPU).
+- Fix Lua function utils.subprocess() in Windows versions older than Vista.
+- Avoid creating a window bigger than the screen on Windows.
+- Don't ignore the last line in m3u playlists.
+- Don't crash if a codec could not be opened.
+- Dynamically allocate audio channel map entries (this should fix a crash in
+  the alsa and coreaudio AOs with audio devices that support more than 20
+  channel maps).
+- Ignore the "srgb" option in the opengl VO if hardware decoding is enabled.
+- Linearize non-RGB sRGB files correctly (eg. JPEG).
+- Fix opening reference URLs (.file/id=) on OS X.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 8d8b36d..6583ad6`` in
+the git repository.
+
 Release 0.7.0
 =============
 
