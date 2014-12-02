@@ -445,6 +445,8 @@ int mpv_initialize(mpv_handle *ctx)
     if (mp_initialize(ctx->mpctx) < 0)
         return MPV_ERROR_INVALID_PARAMETER;
 
+    mp_print_version(ctx->mpctx->log, false);
+
     pthread_t thread;
     if (pthread_create(&thread, NULL, playback_thread, ctx->mpctx) != 0)
         return MPV_ERROR_NOMEM;
