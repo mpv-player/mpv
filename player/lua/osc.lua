@@ -1880,7 +1880,7 @@ mp.observe_property("cache-idle", "bool", cache_state)
 mp.set_key_bindings({
     {"mouse_move",              function(e) process_event("mouse_move", nil) end},
     {"mouse_leave",             mouse_leave},
-}, "showhide")
+}, "showhide", "force")
 mp.enable_key_bindings("showhide", "allow-vo-dragging|allow-hide-cursor")
 
 --mouse input bindings
