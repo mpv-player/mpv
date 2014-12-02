@@ -77,12 +77,6 @@
 #include "osdep/macosx_events.h"
 #endif
 
-#ifdef PTW32_STATIC_LIB
-#include <pthread.h>
-#endif
-
-static bool terminal_initialized;
-
 enum exit_reason {
   EXIT_NONE,
   EXIT_NORMAL,
@@ -102,6 +96,19 @@ const char mp_help_text[] =
 "\n"
 " --list-options    list all mpv options\n"
 "\n";
+
+static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;
+static struct MPContext *terminal_owner;
+
+static bool cas_terminal_owner(struct MPContext *old, struct MPContext *new)
+{
+    pthread_mutex_lock(&terminal_owner_lock);
+    bool r = terminal_owner == old;
+    if (r)
+        terminal_owner = new;
+    pthread_mutex_unlock(&terminal_owner_lock);
+    return r;
+}
 
 void mp_print_version(struct mp_log *log, int always)
 {
@@ -147,9 +154,9 @@ void mp_destroy(struct MPContext *mpctx)
 
     osd_free(mpctx->osd);
 
-    if (mpctx->opts->use_terminal && terminal_initialized) {
+    if (cas_terminal_owner(mpctx, mpctx)) {
         terminal_uninit();
-        terminal_initialized = false;
+        cas_terminal_owner(mpctx, NULL);
     }
 
     mp_dispatch_set_wakeup_fn(mpctx->dispatch, NULL, NULL);
@@ -378,11 +385,10 @@ int mp_initialize(struct MPContext *mpctx)
     }
     MP_STATS(mpctx, "start init");
 
-    if (mpctx->opts->use_terminal && !terminal_initialized) {
-        terminal_initialized = true;
+    if (mpctx->opts->use_terminal && cas_terminal_owner(NULL, mpctx))
         terminal_init();
-        mp_msg_update_msglevels(mpctx->global);
-    }
+
+    mp_msg_update_msglevels(mpctx->global);
 
     if (opts->slave_mode) {
         MP_WARN(mpctx, "--slave-broken is deprecated (see manpage).\n");
@@ -417,7 +423,7 @@ int mp_initialize(struct MPContext *mpctx)
     }
 #endif
 
-    if (opts->use_terminal && opts->consolecontrols && terminal_initialized)
+    if (opts->consolecontrols && cas_terminal_owner(mpctx, mpctx))
         terminal_setup_getch(mpctx->input);
 
 #if !HAVE_LIBASS
@@ -486,10 +492,8 @@ int mpv_main(int argc, char *argv[])
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argc, argv);
 
-    if (mpctx->opts->use_terminal && !terminal_initialized) {
-        terminal_initialized = true;
+    if (mpctx->opts->use_terminal && cas_terminal_owner(NULL, mpctx))
         terminal_init();
-    }
 
     mp_msg_update_msglevels(mpctx->global);
 
