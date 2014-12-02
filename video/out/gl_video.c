@@ -1642,10 +1642,14 @@ static void handle_pass(struct gl_video *p, struct pass *chain,
     };
 }
 
-void gl_video_render_frame(struct gl_video *p)
+// (fbo==0 makes BindFramebuffer select the screen backbuffer)
+void gl_video_render_frame(struct gl_video *p, int fbo)
 {
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
 
     if (p->opts.temporal_dither)
         change_dither_trafo(p);
@@ -1693,7 +1697,7 @@ void gl_video_render_frame(struct gl_video *p)
         .vp_y = p->vp_y,
         .vp_w = p->vp_w,
         .vp_h = p->vp_h,
-        .texture = 0, //makes BindFramebuffer select the screen backbuffer
+        .fbo = fbo,
     };
 
     // For Y direction, use the whole source viewport; it has been fit to the
@@ -1712,8 +1716,6 @@ void gl_video_render_frame(struct gl_video *p)
     handle_pass(p, &chain, &screen, p->final_program);
 
     gl->UseProgram(0);
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-    gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
 
     unset_image_textures(p);
 
@@ -1723,6 +1725,8 @@ void gl_video_render_frame(struct gl_video *p)
 
 draw_osd:
     draw_osd(p);
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 static void update_window_sized_objects(struct gl_video *p)
@@ -1798,7 +1802,6 @@ void gl_video_resize(struct gl_video *p, struct mp_rect *window,
     p->vp_w = window->x1 - window->x0;
     p->vp_h = window->y1 - window->y0;
 
-    p->gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
 
     check_resize(p);
 }
@@ -2473,10 +2476,9 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
 // gl_video_resize() should be called when user interaction is done.
 void gl_video_resize_redraw(struct gl_video *p, int w, int h)
 {
-    p->gl->Viewport(p->vp_x, p->vp_y, w, h);
     p->vp_w = w;
     p->vp_h = h;
-    gl_video_render_frame(p);
+    gl_video_render_frame(p, 0);
 }
 
 void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)

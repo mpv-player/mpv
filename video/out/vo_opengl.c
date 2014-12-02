@@ -164,7 +164,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     mpgl_lock(p->glctx);
 
     gl_video_upload_image(p->renderer, mpi);
-    gl_video_render_frame(p->renderer);
+    gl_video_render_frame(p->renderer, 0);
 
     // The playloop calls this last before waiting some time until it decides
     // to call flip_page(). Tell OpenGL to start execution of the GPU commands
@@ -402,7 +402,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     case VOCTRL_REDRAW_FRAME:
         mpgl_lock(p->glctx);
-        gl_video_render_frame(p->renderer);
+        gl_video_render_frame(p->renderer, 0);
         mpgl_unlock(p->glctx);
         return true;
     case VOCTRL_SET_COMMAND_LINE: {
