@@ -967,6 +967,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (opts->stream_dump && opts->stream_dump[0]) {
         stream_dump(mpctx);
+        mpctx->error_playing = 1;
         goto terminate_playback;
     }
 
