@@ -1043,7 +1043,7 @@ static int script_input_enable_section(lua_State *L)
         } else if (bstr_equals0(val, "exclusive")) {
             flags |= MP_INPUT_EXCLUSIVE;
         } else {
-            luaL_error(L, "invalid flag: '%.*s'", BSTR_P(val));
+            luaL_error(L, "invalid flag");
         }
     }
     mp_input_enable_section(mpctx->input, section, flags);
