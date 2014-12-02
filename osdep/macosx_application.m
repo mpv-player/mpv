@@ -233,6 +233,8 @@ Application *mpv_shared_app(void)
                    options:NSAnchoredSearch
                      range:NSMakeRange(0, [MPV_PROTOCOL length])];
 
+    url = [url stringByRemovingPercentEncoding];
+
     self.files = @[url];
 
     if (self.willStopOnOpenEvent) {
