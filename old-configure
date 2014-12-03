@@ -821,12 +821,6 @@ api_statement_check \
     'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES'
 
 api_statement_check \
-    "libavutil QP API" \
-    HAVE_AVUTIL_QP_API \
-    libavutil/frame.h \
-    'av_frame_get_qp_table(NULL, NULL, NULL)'
-
-api_statement_check \
     "libavcodec av_vdpau_alloc_context()" \
     HAVE_AVCODEC_VDPAU_ALLOC_CONTEXT \
     libavcodec/vdpau.h \

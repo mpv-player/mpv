@@ -62,10 +62,6 @@ struct vf_priv_s {
     unsigned int outbufferlen;
     mp_image_t *outbuffermpi;
 
-    // qscale buffer
-    unsigned char *qbuffer;
-    size_t qbuffersize;
-
     unsigned int outfmt;
 
     int argc;
@@ -182,55 +178,17 @@ static void uninit(struct vf_instance *vf)
         DLLClose(vf->priv->dll);
         vf->priv->dll = NULL;
     }
-    if (vf->priv->qbuffer) {
-        free(vf->priv->qbuffer);
-        vf->priv->qbuffer = NULL;
-    }
-}
-
-static int norm_qscale(int qscale, int type)
-{
-    switch (type) {
-    case 0: // MPEG-1
-        return qscale;
-    case 1: // MPEG-2
-        return qscale >> 1;
-    case 2: // H264
-        return qscale >> 2;
-    case 3: // VP56
-        return (63 - qscale + 2) >> 2;
-    }
-    return qscale;
 }
 
 static int filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    int i, k;
-
     if (!mpi)
         return 0;
 
     set_imgprop(&vf->priv->filter.inpic, mpi);
-    if (mpi->qscale) {
-        if (mpi->qscale_type != 0) {
-            k = mpi->qstride * ((mpi->h + 15) >> 4);
-            if (vf->priv->qbuffersize != k) {
-                vf->priv->qbuffer = realloc(vf->priv->qbuffer, k);
-                vf->priv->qbuffersize = k;
-            }
-            for (i = 0; i < k; ++i)
-                vf->priv->qbuffer[i] = norm_qscale(mpi->qscale[i],
-                                                   mpi->qscale_type);
-            vf->priv->filter.inpic_qscale = vf->priv->qbuffer;
-        } else
-            vf->priv->filter.inpic_qscale = mpi->qscale;
-        vf->priv->filter.inpic_qscalestride = mpi->qstride;
-        vf->priv->filter.inpic_qscaleshift = 4;
-    } else {
-        vf->priv->filter.inpic_qscale = NULL;
-        vf->priv->filter.inpic_qscalestride = 0;
-        vf->priv->filter.inpic_qscaleshift = 0;
-    }
+    vf->priv->filter.inpic_qscale = NULL;
+    vf->priv->filter.inpic_qscalestride = 0;
+    vf->priv->filter.inpic_qscaleshift = 0;
     vf->priv->filter.inpic.pts = mpi->pts;
 
     struct mp_image *out[FILTER_MAX_OUTCNT] = {0};

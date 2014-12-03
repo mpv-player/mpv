@@ -40,7 +40,6 @@ struct vf_priv_s {
         struct pullup_context *ctx;
         int init;
         int fakecount;
-        char *qbuf;
         double lastpts;
         int junk_left, junk_right, junk_top, junk_bottom;
         int strict_breaks, metric_plane;
@@ -51,8 +50,6 @@ static void reset(struct vf_instance *vf)
 {
     if (vf->priv->ctx)
         pullup_free_context(vf->priv->ctx);
-    free(vf->priv->qbuf);
-    vf->priv->qbuf = NULL;
     vf->priv->init = 0;
     struct pullup_context *c;
     vf->priv->ctx = c = pullup_alloc_context();
@@ -87,7 +84,6 @@ static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
         pullup_init_context(c);
 
         vf->priv->init = 1;
-        vf->priv->qbuf = malloc(c->w[3]);
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
@@ -96,7 +92,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
         struct pullup_buffer *b;
         struct pullup_frame *f;
         int p;
-        int i;
         double pts = mpi->pts;
         struct mp_image *dmpi = NULL;
 
@@ -119,11 +114,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
                                 mpi->chroma_width, mpi->chroma_height,
                                 c->stride[2], mpi->stride[2]);
         }
-        if (mpi->qscale) {
-                memcpy(b->planes[3], mpi->qscale, c->w[3]);
-                memcpy(b->planes[3]+c->w[3], mpi->qscale, c->w[3]);
-        }
-
         p = mpi->fields & MP_IMGFIELD_TOP_FIRST ? 0 :
                 (mpi->fields & MP_IMGFIELD_ORDERED ? 1 : 0);
 
@@ -178,23 +168,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
                 }
         }
 
-#if 0
-        /* Average qscale tables from both frames. */
-        if (mpi->qscale) {
-                for (i=0; i<c->w[3]; i++) {
-                        vf->priv->qbuf[i] = (f->ofields[0]->planes[3][i]
-                                + f->ofields[1]->planes[3][i+c->w[3]])>>1;
-                }
-        }
-#else
-        /* Take worst of qscale tables from both frames. */
-        if (mpi->qscale) {
-                for (i=0; i<c->w[3]; i++) {
-                        vf->priv->qbuf[i] = MAX(f->ofields[0]->planes[3][i], f->ofields[1]->planes[3][i+c->w[3]]);
-                }
-        }
-#endif
-
         /* If the frame isn't already exportable... */
         if (!f->buffer)
             pullup_pack_frame(c, f);
@@ -222,12 +195,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
         dmpi->pts = f->pts;
 
-        // Warning: entirely bogus memory management of qscale
-        if (mpi->qscale) {
-                dmpi->qscale = vf->priv->qbuf;
-                dmpi->qstride = mpi->qstride;
-                dmpi->qscale_type = mpi->qscale_type;
-        }
         pullup_release_frame(f);
 
 skip:
