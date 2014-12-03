@@ -7,6 +7,7 @@ int main(int argc, char *argv[]) {
   glXCreateContext(NULL, NULL, NULL, True);
   glXQueryExtensionsString(NULL, 0);
   glXGetProcAddressARB("");
+  glXGetCurrentDisplay();
   glFinish();
   return 0;
 }

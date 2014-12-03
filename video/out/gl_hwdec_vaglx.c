@@ -64,12 +64,13 @@ static int create(struct gl_hwdec *hw)
 {
     if (hw->info->vaapi_ctx)
         return -1;
-    if (!hw->mpgl->vo->x11 || !glXGetCurrentContext())
+    Display *x11disp = glXGetCurrentDisplay();
+    if (!x11disp)
         return -1;
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
     p->log = hw->log;
-    p->display = vaGetDisplayGLX(hw->mpgl->vo->x11->display);
+    p->display = vaGetDisplayGLX(x11disp);
     if (!p->display)
         return -1;
     p->ctx = va_initialize(p->display, p->log);
@@ -85,7 +86,7 @@ static int create(struct gl_hwdec *hw)
 static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->mpgl->gl;
+    GL *gl = hw->gl;
     VAStatus status;
 
     destroy_texture(hw);
