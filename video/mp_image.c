@@ -225,12 +225,6 @@ struct mp_image *mp_image_new_copy(struct mp_image *img)
         return NULL;
     mp_image_copy(new, img);
     mp_image_copy_attributes(new, img);
-
-    // Normally these are covered by the reference to the original image data
-    // (like the AVFrame in vd_lavc.c), but we can't manage it on our own.
-    new->qscale = NULL;
-    new->qstride = 0;
-
     return new;
 }
 
@@ -363,7 +357,6 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
 {
     dst->pict_type = src->pict_type;
     dst->fields = src->fields;
-    dst->qscale_type = src->qscale_type;
     dst->pts = src->pts;
     dst->params.stereo_in = src->params.stereo_in;
     dst->params.stereo_out = src->params.stereo_out;
@@ -635,9 +628,6 @@ void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
     if (src->repeat_pict == 1)
         dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
 
-#if HAVE_AVUTIL_QP_API
-    dst->qscale = av_frame_get_qp_table(src, &dst->qstride, &dst->qscale_type);
-#endif
 }
 
 // Not strictly related, but was added in a similar timeframe.

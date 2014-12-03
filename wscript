@@ -405,12 +405,6 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
                                 'int x = AVCOL_SPC_BT2020_NCL',
                                 use='libav')
     }, {
-        'name': 'avutil-qp-api',
-        'desc': 'libavutil QP API',
-        'func': check_statement('libavutil/frame.h',
-                                'av_frame_get_qp_table(NULL, NULL, NULL)',
-                                use='libav')
-    }, {
         'name': 'avcodec-vdpau-alloc-context',
         'desc': 'libavcodec vdpau non-sense',
         'func': check_statement('libavcodec/vdpau.h',
