@@ -716,17 +716,6 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-void *vo_cocoa_cgl_context(struct vo *vo)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    return [s->gl_ctx CGLContextObj];
-}
-
-void *vo_cocoa_cgl_pixel_format(struct vo *vo)
-{
-    return CGLGetPixelFormat(vo_cocoa_cgl_context(vo));
-}
-
 @implementation MpvCocoaAdapter
 @synthesize vout = _video_output;
 

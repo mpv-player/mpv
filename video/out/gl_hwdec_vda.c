@@ -23,7 +23,6 @@
 #include <OpenGL/CGLIOSurface.h>
 
 #include "video/decode/dec_video.h"
-#include "cocoa_common.h"
 #include "gl_common.h"
 
 struct priv {
@@ -87,7 +86,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     gl->BindTexture(hw->gl_texture_target, p->gl_texture);
 
     CGLError err = CGLTexImageIOSurface2D(
-        vo_cocoa_cgl_context(vo), hw->gl_texture_target, GL_RGB,
+        CGLGetCurrentContext(), hw->gl_texture_target, GL_RGB,
         CVPixelBufferGetWidth(p->pbuf), CVPixelBufferGetHeight(p->pbuf),
         GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, surface, 0);
 

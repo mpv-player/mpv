@@ -42,9 +42,6 @@ void vo_cocoa_register_resize_callback(struct vo *vo,
 void vo_cocoa_register_gl_clear_callback(struct vo *vo, void *ctx,
                                          void (*cb)(void *ctx));
 
-void *vo_cocoa_cgl_context(struct vo *vo);
-void *vo_cocoa_cgl_pixel_format(struct vo *vo);
-
 void vo_cocoa_create_nsgl_ctx(struct vo *vo, void *ctx);
 void vo_cocoa_release_nsgl_ctx(struct vo *vo);
 
