@@ -43,7 +43,6 @@
 
 extern const vf_info_t vf_info_crop;
 extern const vf_info_t vf_info_expand;
-extern const vf_info_t vf_info_pp;
 extern const vf_info_t vf_info_scale;
 extern const vf_info_t vf_info_format;
 extern const vf_info_t vf_info_noformat;
@@ -86,9 +85,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_rotate,
     &vf_info_mirror,
 
-#if HAVE_LIBPOSTPROC
-    &vf_info_pp,
-#endif
 #if HAVE_LIBAVFILTER
     &vf_info_lavfi,
 #endif

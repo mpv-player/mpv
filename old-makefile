@@ -42,7 +42,6 @@ SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c \
 SOURCES-$(LIBBLURAY)            += stream/stream_bluray.c
 SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
 
-SOURCES-$(LIBPOSTPROC)          += video/filter/vf_pp.c
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
 SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
