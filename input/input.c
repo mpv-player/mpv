@@ -1019,14 +1019,15 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
     if (!name || !name[0])
         return; // parse_config() changes semantics with restrict_section==empty
     input_lock(ictx);
+    // Delete:
+    struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(name));
+    remove_binds(bs, builtin);
     if (contents) {
+        // Redefine:
         parse_config(ictx, builtin, bstr0(contents), location, name);
     } else {
         // Disable:
         mp_input_disable_section(ictx, name);
-        // Delete:
-        struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(name));
-        remove_binds(bs, builtin);
     }
     input_unlock(ictx);
 }
