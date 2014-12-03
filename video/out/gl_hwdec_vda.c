@@ -23,7 +23,7 @@
 #include <OpenGL/CGLIOSurface.h>
 
 #include "video/decode/dec_video.h"
-#include "gl_common.h"
+#include "gl_hwdec.h"
 
 struct priv {
     CVPixelBufferRef pbuf;

@@ -45,6 +45,7 @@
 #include "sub/osd.h"
 
 #include "gl_common.h"
+#include "gl_hwdec.h"
 #include "gl_osd.h"
 #include "filter_kernels.h"
 #include "video/memcpy_pic.h"
@@ -219,43 +220,14 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     return 0;
 }
 
-static void load_hwdec_driver(struct gl_priv *p,
-                              const struct gl_hwdec_driver *drv)
-{
-    assert(!p->hwdec);
-    struct gl_hwdec *hwdec = talloc(NULL, struct gl_hwdec);
-    *hwdec = (struct gl_hwdec) {
-        .driver = drv,
-        .log = mp_log_new(hwdec, p->vo->log, drv->api_name),
-        .gl = p->glctx->gl,
-        .info = &p->hwdec_info,
-        .gl_texture_target = GL_TEXTURE_2D,
-    };
-    mpgl_lock(p->glctx);
-    if (hwdec->driver->create(hwdec) < 0) {
-        mpgl_unlock(p->glctx);
-        talloc_free(hwdec);
-        MP_ERR(p->vo, "Couldn't load hwdec driver '%s'\n", drv->api_name);
-        return;
-    }
-    p->hwdec = hwdec;
-    gl_video_set_hwdec(p->renderer, p->hwdec);
-    mpgl_unlock(p->glctx);
-}
-
 static void request_hwdec_api(struct gl_priv *p, const char *api_name)
 {
-    // Load at most one hwdec API
     if (p->hwdec)
         return;
-    for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
-        const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
-        if (api_name && strcmp(drv->api_name, api_name) == 0) {
-            load_hwdec_driver(p, drv);
-            if (p->hwdec)
-                return;
-        }
-    }
+    mpgl_lock(p->glctx);
+    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, api_name, &p->hwdec_info);
+    gl_video_set_hwdec(p->renderer, p->hwdec);
+    mpgl_unlock(p->glctx);
 }
 
 static void call_request_hwdec_api(struct mp_hwdec_info *info,
@@ -266,18 +238,6 @@ static void call_request_hwdec_api(struct mp_hwdec_info *info,
     // Roundabout way to run hwdec loading on the VO thread.
     // Redirects to request_hwdec_api().
     vo_control(vo, VOCTRL_LOAD_HWDEC_API, (void *)api_name);
-}
-
-static void unload_hwdec_driver(struct gl_priv *p)
-{
-    if (p->hwdec) {
-        mpgl_lock(p->glctx);
-        gl_video_set_hwdec(p->renderer, NULL);
-        p->hwdec->driver->destroy(p->hwdec);
-        talloc_free(p->hwdec);
-        p->hwdec = NULL;
-        mpgl_unlock(p->glctx);
-    }
 }
 
 static bool update_icc_profile(struct gl_priv *p, struct mp_icc_opts *opts)
@@ -433,9 +393,9 @@ static void uninit(struct vo *vo)
     struct gl_priv *p = vo->priv;
 
     if (p->glctx) {
-        unload_hwdec_driver(p);
         if (p->renderer)
             gl_video_uninit(p->renderer);
+        gl_hwdec_uninit(p->hwdec);
         mpgl_uninit(p->glctx);
     }
 }

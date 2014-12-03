@@ -20,9 +20,8 @@
 
 #include <GL/glx.h>
 
-#include "gl_common.h"
+#include "gl_hwdec.h"
 #include "video/vdpau.h"
-#include "video/hwdec.h"
 #include "video/vdpau_mixer.h"
 
 // This is a GL_NV_vdpau_interop specification bug, and headers (unfortunately)
@@ -88,6 +87,8 @@ static void destroy(struct gl_hwdec *hw)
     destroy_objects(hw);
     mp_vdpau_mixer_destroy(p->mixer);
     mp_vdpau_destroy(p->ctx);
+
+    hw->info->vdpau_ctx = NULL;
 }
 
 static int create(struct gl_hwdec *hw)

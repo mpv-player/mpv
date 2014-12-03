@@ -336,6 +336,7 @@ def build(ctx):
         ( "video/out/filter_kernels.c" ),
         ( "video/out/gl_cocoa.c",                "gl-cocoa" ),
         ( "video/out/gl_common.c",               "gl" ),
+        ( "video/out/gl_hwdec.c",                "gl" ),
         ( "video/out/gl_hwdec_vaglx.c",          "vaapi-glx" ),
         ( "video/out/gl_hwdec_vda.c",            "vda-gl" ),
         ( "video/out/gl_hwdec_vdpau.c",          "vdpau-gl-x11" ),

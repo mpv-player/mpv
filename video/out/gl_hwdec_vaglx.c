@@ -24,9 +24,8 @@
 #include <va/va_glx.h>
 
 #include "x11_common.h"
-#include "gl_common.h"
+#include "gl_hwdec.h"
 #include "video/vaapi.h"
-#include "video/hwdec.h"
 
 struct priv {
     struct mp_log *log;
@@ -58,6 +57,8 @@ static void destroy(struct gl_hwdec *hw)
     struct priv *p = hw->priv;
     destroy_texture(hw);
     va_destroy(p->ctx);
+
+    hw->info->vaapi_ctx = NULL;
 }
 
 static int create(struct gl_hwdec *hw)

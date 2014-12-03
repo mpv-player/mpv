@@ -1035,20 +1035,3 @@ void mp_log_source(struct mp_log *log, int lev, const char *src)
         src = next;
     }
 }
-
-extern const struct gl_hwdec_driver gl_hwdec_vaglx;
-extern const struct gl_hwdec_driver gl_hwdec_vda;
-extern const struct gl_hwdec_driver gl_hwdec_vdpau;
-
-const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
-#if HAVE_VAAPI_GLX
-    &gl_hwdec_vaglx,
-#endif
-#if HAVE_VDA_GL
-    &gl_hwdec_vda,
-#endif
-#if HAVE_VDPAU_GL_X11
-    &gl_hwdec_vdpau,
-#endif
-    NULL
-};
