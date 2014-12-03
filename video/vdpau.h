@@ -38,7 +38,7 @@ struct vdp_functions {
 // incompatible to each other, so all code must use a shared VdpDevice.
 struct mp_vdpau_ctx {
     struct mp_log *log;
-    struct vo_x11_state *x11;
+    Display *x11;
 
     // These are mostly immutable, except on preemption. We don't really care
     // to synchronize the preemption case fully correctly, because it's an
@@ -70,8 +70,7 @@ struct mp_vdpau_ctx {
     } video_surfaces[MAX_VIDEO_SURFACES];
 };
 
-struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log,
-                                                struct vo_x11_state *x11);
+struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11);
 void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx);
 
 int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter);

@@ -47,7 +47,7 @@ static void preemption_callback(VdpDevice device, void *context)
 
 static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx)
 {
-    struct vo_x11_state *x11 = ctx->x11;
+    Display *x11 = ctx->x11;
     VdpStatus vdp_st;
 
     // Don't operate on ctx->vdp directly, so that even if init fails, ctx->vdp
@@ -71,7 +71,7 @@ static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx)
     };
 
     VdpGetProcAddress *get_proc_address;
-    vdp_st = vdp_device_create_x11(x11->display, x11->screen, &ctx->vdp_device,
+    vdp_st = vdp_device_create_x11(x11, DefaultScreen(x11), &ctx->vdp_device,
                                    &get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
         if (ctx->is_preempted)
@@ -295,8 +295,7 @@ struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
     return mp_vdpau_get_surface(ctx, chroma, 0, false, w, h);
 }
 
-struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log,
-                                                struct vo_x11_state *x11)
+struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11)
 {
     struct mp_vdpau_ctx *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct mp_vdpau_ctx) {

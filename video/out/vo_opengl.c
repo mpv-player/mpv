@@ -227,7 +227,6 @@ static void load_hwdec_driver(struct gl_priv *p,
     *hwdec = (struct gl_hwdec) {
         .driver = drv,
         .log = mp_log_new(hwdec, p->vo->log, drv->api_name),
-        .mpgl = p->glctx,
         .gl = p->glctx->gl,
         .info = &p->hwdec_info,
         .gl_texture_target = GL_TEXTURE_2D,

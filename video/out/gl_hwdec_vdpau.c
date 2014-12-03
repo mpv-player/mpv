@@ -18,6 +18,8 @@
 #include <stddef.h>
 #include <assert.h>
 
+#include <GL/glx.h>
+
 #include "gl_common.h"
 #include "video/vdpau.h"
 #include "video/hwdec.h"
@@ -51,7 +53,7 @@ static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
 static void destroy_objects(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->mpgl->gl;
+    GL *gl = hw->gl;
     struct vdp_functions *vdp = &p->ctx->vdp;
     VdpStatus vdp_st;
 
@@ -90,17 +92,18 @@ static void destroy(struct gl_hwdec *hw)
 
 static int create(struct gl_hwdec *hw)
 {
-    GL *gl = hw->mpgl->gl;
+    GL *gl = hw->gl;
     if (hw->info->vdpau_ctx)
         return -1;
-    if (!hw->mpgl->vo->x11)
+    Display *x11disp = glXGetCurrentDisplay();
+    if (!x11disp)
         return -1;
     if (!(gl->mpgl_caps & MPGL_CAP_VDPAU))
         return -1;
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
     p->log = hw->log;
-    p->ctx = mp_vdpau_create_device_x11(hw->log, hw->mpgl->vo->x11);
+    p->ctx = mp_vdpau_create_device_x11(hw->log, x11disp);
     if (!p->ctx)
         return -1;
     if (mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter) < 1)
@@ -115,7 +118,7 @@ static int create(struct gl_hwdec *hw)
 static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->mpgl->gl;
+    GL *gl = hw->gl;
     struct vdp_functions *vdp = &p->ctx->vdp;
     VdpStatus vdp_st;
 
@@ -158,7 +161,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
                      GLuint *out_textures)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->mpgl->gl;
+    GL *gl = hw->gl;
 
     assert(hw_image && hw_image->imgfmt == IMGFMT_VDPAU);
 
@@ -184,7 +187,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 static void unmap_image(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->mpgl->gl;
+    GL *gl = hw->gl;
 
     gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
 }
