@@ -32,14 +32,12 @@ struct priv {
 
 static bool check_hwdec(struct gl_hwdec *hw)
 {
-    struct vo *vo = hw->mpgl->vo;
-
     if (hw->gl_texture_target != GL_TEXTURE_RECTANGLE) {
         MP_ERR(hw, "must use rectangle video textures with VDA\n");
         return false;
     }
 
-    if (!vo->cocoa) {
+    if (!CGLGetCurrentContext()) {
         MP_ERR(hw, "need cocoa opengl backend to be active");
         return false;
     }
@@ -57,7 +55,7 @@ static int create(struct gl_hwdec *hw)
     if (!check_hwdec(hw))
         return -1;
 
-    GL *gl = hw->mpgl->gl;
+    GL *gl = hw->gl;
     gl->GenTextures(1, &p->gl_texture);
 
     return 0;
@@ -75,8 +73,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         return -1;
 
     struct priv *p = hw->priv;
-    struct vo *vo = hw->mpgl->vo;
-    GL *gl = hw->mpgl->gl;
+    GL *gl = hw->gl;
 
     CVPixelBufferRelease(p->pbuf);
     p->pbuf = (CVPixelBufferRef)hw_image->planes[3];
@@ -91,7 +88,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, surface, 0);
 
     if (err != kCGLNoError)
-        MP_ERR(vo, "error creating IOSurface texture: %s (%x)\n",
+        MP_ERR(hw, "error creating IOSurface texture: %s (%x)\n",
                CGLErrorString(err), gl->GetError());
 
     gl->BindTexture(hw->gl_texture_target, 0);
@@ -127,7 +124,7 @@ static struct mp_image *download_image(struct gl_hwdec *hw,
 static void destroy(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->mpgl->gl;
+    GL *gl = hw->gl;
 
     CVPixelBufferRelease(p->pbuf);
     gl->DeleteTextures(1, &p->gl_texture);

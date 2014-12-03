@@ -171,6 +171,7 @@ struct mp_hwdec_info;
 struct gl_hwdec {
     const struct gl_hwdec_driver *driver;
     struct mp_log *log;
+    GL *gl;
     struct MPGLContext *mpgl;
     struct mp_hwdec_info *info;
     // For free use by hwdec driver
