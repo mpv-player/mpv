@@ -203,6 +203,7 @@ end
 
 function mp.remove_key_binding(name)
     key_bindings[name] = nil
+    dispatch_key_bindings[name] = nil
     update_key_bindings()
     mp.unregister_script_message(name)
 end
