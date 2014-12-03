@@ -392,12 +392,9 @@ static void uninit(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
 
-    if (p->glctx) {
-        if (p->renderer)
-            gl_video_uninit(p->renderer);
-        gl_hwdec_uninit(p->hwdec);
-        mpgl_uninit(p->glctx);
-    }
+    gl_video_uninit(p->renderer);
+    gl_hwdec_uninit(p->hwdec);
+    mpgl_uninit(p->glctx);
 }
 
 static int preinit(struct vo *vo)

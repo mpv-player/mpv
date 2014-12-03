@@ -2197,6 +2197,9 @@ static int init_gl(struct gl_video *p)
 
 void gl_video_uninit(struct gl_video *p)
 {
+    if (!p)
+        return;
+
     GL *gl = p->gl;
 
     uninit_video(p);
