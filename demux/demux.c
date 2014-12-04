@@ -777,6 +777,8 @@ void demux_changed(demuxer_t *demuxer, int events)
 
     demux_copy(in->d_buffer, demuxer);
 
+    if (in->wakeup_cb)
+        in->wakeup_cb(in->wakeup_cb_ctx);
     pthread_mutex_unlock(&in->lock);
 }
 
