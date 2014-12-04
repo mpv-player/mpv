@@ -55,6 +55,7 @@ enum demux_ctrl {
     DEMUXER_CTRL_IDENTIFY_PROGRAM,
     DEMUXER_CTRL_STREAM_CTRL,
     DEMUXER_CTRL_GET_READER_STATE,
+    DEMUXER_CTRL_GET_NAV_EVENT,
 };
 
 struct demux_ctrl_reader_state {

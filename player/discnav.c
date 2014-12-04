@@ -195,9 +195,12 @@ void mp_handle_nav(struct MPContext *mpctx)
     struct mp_nav_state *nav = mpctx->nav_state;
     if (!nav)
         return;
+    mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.5);
     while (1) {
+        if (!mpctx->demuxer)
+            break;
         struct mp_nav_event *ev = NULL;
-        run_stream_control(mpctx, STREAM_CTRL_GET_NAV_EVENT, &ev);
+        demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_NAV_EVENT, &ev);
         if (!ev)
             break;
         switch (ev->event) {

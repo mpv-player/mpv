@@ -125,6 +125,7 @@ struct demux_internal {
     // Cached state.
     bool force_cache_update;
     double time_length;
+    struct mp_nav_event *nav_event;
     struct mp_tags *stream_metadata;
     int64_t stream_size;
     int64_t stream_cache_size;
@@ -229,6 +230,7 @@ void free_demuxer(demuxer_t *demuxer)
         ds_flush(demuxer->streams[n]->ds);
     pthread_mutex_destroy(&in->lock);
     pthread_cond_destroy(&in->wakeup);
+    talloc_free(in->nav_event);
     talloc_free(demuxer);
 }
 
@@ -1135,10 +1137,17 @@ static void update_cache(struct demux_internal *in)
     int64_t stream_cache_size = -1;
     int64_t stream_cache_fill = -1;
     int stream_cache_idle = -1;
+    struct mp_nav_event *nav_event = NULL;
+
+    pthread_mutex_lock(&in->lock);
+    bool need_nav_event = !in->nav_event;;
+    pthread_mutex_unlock(&in->lock);
 
     if (demuxer->desc->control) {
         demuxer->desc->control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
                                &time_length);
+        if (need_nav_event)
+            demuxer->desc->control(demuxer, DEMUXER_CTRL_GET_NAV_EVENT, &nav_event);
     }
 
     stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
@@ -1158,6 +1167,7 @@ static void update_cache(struct demux_internal *in)
         in->stream_metadata = talloc_steal(in, stream_metadata);
         in->d_buffer->events |= DEMUX_EVENT_METADATA;
     }
+    in->nav_event = nav_event ? nav_event : in->nav_event;
     pthread_mutex_unlock(&in->lock);
 }
 
@@ -1248,6 +1258,13 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             r->ts_duration = 0;
         return DEMUXER_CTRL_OK;
     }
+    case DEMUXER_CTRL_GET_NAV_EVENT:
+        if (!in->nav_event)
+            return DEMUXER_CTRL_NOTIMPL;
+        *(struct mp_nav_event **)arg = in->nav_event;
+        in->nav_event = NULL;
+        return DEMUXER_CTRL_OK;
+
     }
     return DEMUXER_CTRL_DONTKNOW;
 }

@@ -27,13 +27,13 @@
 // Note: order matters somewhat (stream_dvdnav sends them in numeric order)
 enum mp_nav_event_type {
     MP_NAV_EVENT_NONE,
+    MP_NAV_EVENT_MENU_MODE,     // menu mode on/off
+    MP_NAV_EVENT_HIGHLIGHT,     // highlight changed
     MP_NAV_EVENT_RESET,         // reinitialize some things
     MP_NAV_EVENT_RESET_CLUT,    // reinitialize sub palette
     MP_NAV_EVENT_RESET_ALL,     // reinitialize all things
     MP_NAV_EVENT_DRAIN,         // reply with MP_NAV_CMD_DRAIN_OK
     MP_NAV_EVENT_STILL_FRAME,   // keep displaying current frame
-    MP_NAV_EVENT_HIGHLIGHT,     // highlight changed
-    MP_NAV_EVENT_MENU_MODE,     // menu mode on/off
     MP_NAV_EVENT_EOF,           // it's over
     MP_NAV_EVENT_OVERLAY,       // overlay changed
 };
