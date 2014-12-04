@@ -518,8 +518,7 @@ def build(ctx):
             )
 
     if ctx.dependency_satisfied("vf-dlopen-filters"):
-        dlfilters = "showqscale telecine tile rectangle framestep \
-                     ildetect".split()
+        dlfilters = "telecine tile rectangle framestep ildetect".split()
         for dlfilter in dlfilters:
             ctx(
                 target       = dlfilter,
