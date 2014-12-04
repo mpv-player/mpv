@@ -461,17 +461,22 @@ static int init(struct ao *ao)
         if (strcmp(device, "default") != 0)
             device = talloc_asprintf(ao, "plug:%s", device);
     }
+    const char *old_dev = device;
     if (ao->device)
         device = ao->device;
     if (p->cfg_device && p->cfg_device[0])
         device = p->cfg_device;
+    bool user_set_device = device != old_dev; // not strcmp()
 
     MP_VERBOSE(ao, "using device: %s\n", device);
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
 
     err = try_open_device(ao, device, p->cfg_block ? 0 : SND_PCM_NONBLOCK);
     if (err < 0) {
-        if (err != -EBUSY && !p->cfg_block) {
+        if (err == -EBUSY && !user_set_device && strcmp(device, "default") != 0) {
+            MP_WARN(ao, "Device '%s' busy, retrying default.\n", device);
+            err = try_open_device(ao, "default", 0);
+        } else if (err != -EBUSY && !p->cfg_block) {
             MP_WARN(ao, "Open in nonblock-mode "
                     "failed, trying to open in block-mode.\n");
             err = try_open_device(ao, device, 0);
