@@ -663,10 +663,8 @@ static int decode_gain(demuxer_t *demuxer, const char *tag, float *out)
     float dec_val;
 
     tag_val = mp_tags_get_str(demuxer->metadata, tag);
-    if (!tag_val) {
-        mp_msg(demuxer->log, MSGL_V, "Replaygain tags not found\n");
+    if (!tag_val)
         return -1;
-    }
 
     if (decode_float(tag_val, &dec_val)) {
         mp_msg(demuxer->log, MSGL_ERR, "Invalid replaygain value\n");
