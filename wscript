@@ -834,7 +834,7 @@ def is_debug_build(ctx):
 
 def configure(ctx):
     ctx.resetenv(ctx.options.variant)
-    ctx.check_waf_version(mini='1.8.1')
+    ctx.check_waf_version(mini='1.8.4')
     target = os.environ.get('TARGET')
     (cc, pkg_config, ar, windres) = ('cc', 'pkg-config', 'ar', 'windres')
 
