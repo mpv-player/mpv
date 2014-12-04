@@ -354,19 +354,19 @@ static void ca_log_layout(struct ao *ao, AudioChannelLayout *layout)
 
     AudioChannelDescription *descs = layout->mChannelDescriptions;
 
-    MP_VERBOSE(ao, "layout: tag: <%d>, bitmap: <%d>, "
-                   "descriptions <%d>\n",
-                   layout->mChannelLayoutTag,
-                   layout->mChannelBitmap,
-                   layout->mNumberChannelDescriptions);
+    MP_VERBOSE(ao, "layout: tag: <%u>, bitmap: <%u>, "
+                   "descriptions <%u>\n",
+                   (unsigned) layout->mChannelLayoutTag,
+                   (unsigned) layout->mChannelBitmap,
+                   (unsigned) layout->mNumberChannelDescriptions);
 
     for (int i = 0; i < layout->mNumberChannelDescriptions; i++) {
         AudioChannelDescription d = descs[i];
-        MP_VERBOSE(ao, " - description %d: label <%d, %d>, flags: <%u>, "
-                       "coords: <%f, %f, %f>\n", i,
-                       d.mChannelLabel,
-                       ca_label_to_mp_speaker_id(d.mChannelLabel),
-                       d.mChannelFlags,
+        MP_VERBOSE(ao, " - description %d: label <%u, %u>, "
+                       " flags: <%u>, coords: <%f, %f, %f>\n", i,
+                       (unsigned) d.mChannelLabel,
+                       (unsigned) ca_label_to_mp_speaker_id(d.mChannelLabel),
+                       (unsigned) d.mChannelFlags,
                        d.mCoordinates[0],
                        d.mCoordinates[1],
                        d.mCoordinates[2]);
