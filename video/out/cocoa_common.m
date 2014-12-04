@@ -720,7 +720,9 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 @synthesize vout = _video_output;
 
 - (void)performAsyncResize:(NSSize)size {
-    vo_cocoa_resize_redraw(self.vout, size.width, size.height);
+    struct vo_cocoa_state *s = self.vout->cocoa;
+    if (!s->waiting_frame)
+        vo_cocoa_resize_redraw(self.vout, size.width, size.height);
 }
 
 - (BOOL)keyboardEnabled {
