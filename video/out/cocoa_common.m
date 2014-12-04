@@ -731,7 +731,9 @@ void *vo_cocoa_cgl_pixel_format(struct vo *vo)
 @synthesize vout = _video_output;
 
 - (void)performAsyncResize:(NSSize)size {
-    vo_cocoa_resize_redraw(self.vout, size.width, size.height);
+    struct vo_cocoa_state *s = self.vout->cocoa;
+    if (!s->waiting_frame)
+        vo_cocoa_resize_redraw(self.vout, size.width, size.height);
 }
 
 - (BOOL)keyboardEnabled {
