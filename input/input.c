@@ -445,6 +445,8 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
         }
         if (s->flags & MP_INPUT_EXCLUSIVE)
             break;
+        if (best_bind && (s->flags & MP_INPUT_ON_TOP))
+            break;
     }
 
     return best_bind;
