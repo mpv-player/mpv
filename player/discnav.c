@@ -126,8 +126,6 @@ void mp_nav_init(struct MPContext *mpctx)
     MP_VERBOSE(mpctx->nav_state, "enabling\n");
 
     mp_input_enable_section(mpctx->input, "discnav", 0);
-    mp_input_set_section_mouse_area(mpctx->input, "discnav-menu",
-                                    INT_MIN, INT_MIN, INT_MAX, INT_MAX);
 
     update_state(mpctx);
 }
