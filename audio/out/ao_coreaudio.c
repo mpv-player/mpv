@@ -416,8 +416,8 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
         if (label == kAudioChannelLabel_Unknown)
             continue;
         if (speaker < 0) {
-            MP_VERBOSE(ao, "channel label=%d unusable to build channel "
-                           "bitmap, skipping layout\n", label);
+            MP_VERBOSE(ao, "channel label=%u unusable to build channel "
+                           "bitmap, skipping layout\n", (unsigned) label);
         } else {
             chmap->speaker[n] = speaker;
             chmap->num = n + 1;
