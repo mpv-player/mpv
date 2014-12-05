@@ -478,11 +478,7 @@ static int init(struct ao *ao)
     CHECK_ALSA_ERROR("Playback open error");
 
     err = snd_pcm_nonblock(p->alsa, 0);
-    if (err < 0) {
-        MP_ERR(ao, "Error setting block-mode: %s.\n", snd_strerror(err));
-    } else {
-        MP_VERBOSE(ao, "pcm opened in blocking mode\n");
-    }
+    CHECK_ALSA_WARN("Unable to set blocking mode");
 
     snd_pcm_hw_params_t *alsa_hwparams;
     snd_pcm_sw_params_t *alsa_swparams;
