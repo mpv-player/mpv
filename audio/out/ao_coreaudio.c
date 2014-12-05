@@ -411,7 +411,7 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
     //   descriptions we process here.
 
     if (layout->mNumberChannelDescriptions > MP_NUM_CHANNELS) {
-        MP_VERBOSE(ao, "layout has too many descriptions (%u, max: %d)",
+        MP_VERBOSE(ao, "layout has too many descriptions (%u, max: %d)\n",
                    (unsigned) layout->mNumberChannelDescriptions,
                    MP_NUM_CHANNELS);
         return false;
