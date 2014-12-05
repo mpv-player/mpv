@@ -635,6 +635,9 @@ static int init(struct ao *ao)
             MP_WARN(ao, "Got unknown channel map from ALSA.\n");
         }
 
+        if (ao->channels.num == 1)
+            ao->channels.speaker[0] = MP_SP(FC);
+
         free(alsa_chmap);
     }
 #endif
