@@ -58,7 +58,6 @@ struct priv {
     int buffersize; // in frames
     int outburst; // in frames
 
-    int cfg_block;
     char *cfg_device;
     char *cfg_mixer_device;
     char *cfg_mixer_name;
@@ -405,7 +404,7 @@ static char *append_params(void *ta_parent, const char *device, const char *p)
     abort();
 }
 
-static int try_open_device(struct ao *ao, const char *device, int open_mode)
+static int try_open_device(struct ao *ao, const char *device)
 {
     struct priv *p = ao->priv;
 
@@ -418,13 +417,13 @@ static int try_open_device(struct ao *ao, const char *device, int open_mode)
                         map_iec958_srate(ao->samplerate));
         const char *ac3_device = append_params(tmp, device, params);
         int err = snd_pcm_open
-                    (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, open_mode);
+                    (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, 0);
         talloc_free(tmp);
         if (!err)
             return 0;
     }
 
-    return snd_pcm_open(&p->alsa, device, SND_PCM_STREAM_PLAYBACK, open_mode);
+    return snd_pcm_open(&p->alsa, device, SND_PCM_STREAM_PLAYBACK, 0);
 }
 
 static void uninit(struct ao *ao)
@@ -471,18 +470,12 @@ static int init(struct ao *ao)
     MP_VERBOSE(ao, "using device: %s\n", device);
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
 
-    err = try_open_device(ao, device, p->cfg_block ? 0 : SND_PCM_NONBLOCK);
-    if (err < 0) {
-        if (err == -EBUSY && !user_set_device && strcmp(device, "default") != 0) {
-            MP_WARN(ao, "Device '%s' busy, retrying default.\n", device);
-            err = try_open_device(ao, "default", 0);
-        } else if (err != -EBUSY && !p->cfg_block) {
-            MP_WARN(ao, "Open in nonblock-mode "
-                    "failed, trying to open in block-mode.\n");
-            err = try_open_device(ao, device, 0);
-        }
-        CHECK_ALSA_ERROR("Playback open error");
+    err = try_open_device(ao, device);
+    if (err == -EBUSY && !user_set_device && strcmp(device, "default") != 0) {
+        MP_WARN(ao, "Device '%s' busy, retrying default.\n", device);
+        err = try_open_device(ao, "default");
     }
+    CHECK_ALSA_ERROR("Playback open error");
 
     err = snd_pcm_nonblock(p->alsa, 0);
     if (err < 0) {
@@ -918,7 +911,6 @@ const struct ao_driver audio_out_alsa = {
     .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
-        .cfg_block = 1,
         .cfg_mixer_device = "default",
         .cfg_mixer_name = "Master",
         .cfg_mixer_index = 0,
@@ -927,7 +919,6 @@ const struct ao_driver audio_out_alsa = {
     .options = (const struct m_option[]) {
         OPT_STRING("device", cfg_device, 0),
         OPT_FLAG("resample", cfg_resample, 0),
-        OPT_FLAG("block", cfg_block, 0),
         OPT_STRING("mixer-device", cfg_mixer_device, 0),
         OPT_STRING("mixer-name", cfg_mixer_name, 0),
         OPT_INTRANGE("mixer-index", cfg_mixer_index, 0, 0, 99),

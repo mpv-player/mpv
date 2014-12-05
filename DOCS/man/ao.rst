@@ -39,8 +39,6 @@ Available audio output drivers are:
     ``device=<device>``
         Sets the device name. For ac3 output via S/PDIF, use an "iec958" or
         "spdif" device, unless you really know how to set it correctly.
-    ``no-block``
-        Sets noblock-mode.
     ``resample=yes``
         Enable ALSA resampling plugin. (This is disabled by default, because
         some drivers report incorrect audio delay in some cases.)
