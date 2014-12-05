@@ -127,7 +127,7 @@ Key Bindings
 
 These key bindings are active by default if nothing else is already bound to
 these keys. In case of collision, the function needs to be bound to a
-different key. See `Script Commands`_ section.
+different key. See the `Script Commands`_ section.
 
 =============   ================================================
 del             Hide the OSC permanently until mpv is restarted.
@@ -228,6 +228,11 @@ Configurable Options
 ``seektooltip``
     | Default: yes
     | Display a tooltip over the seekbar indicating time at mouse position.
+
+``layout``
+    | Default: box
+    | The layout for the OSC. Currently available are: box, slimbox,
+      bottombar and topbar.
 
 ``seekbarstyle``
     | Default: slider
