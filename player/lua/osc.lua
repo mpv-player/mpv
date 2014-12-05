@@ -9,23 +9,27 @@ local opt = require 'mp.options'
 -- default user option values
 -- do not touch, change them in osc.conf
 local user_opts = {
-    showwindowed = true,                    -- show OSC when windowed?
-    showfullscreen = true,                  -- show OSC when fullscreen?
-    scalewindowed = 1,                      -- scaling of the controller when windowed
-    scalefullscreen = 1,                    -- scaling of the controller when fullscreen
-    scaleforcedwindow = 2,                  -- scaling of the controller when rendered on a forced (dummy) window
-    vidscale = true,                        -- scale the controller with the video?
-    valign = 0.8,                           -- vertical alignment, -1 (top) to 1 (bottom)
-    halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
-    boxalpha = 80,                          -- alpha of the background box, 0 (opaque) to 255 (fully transparent)
-    hidetimeout = 500,                      -- duration in ms until the OSC hides if no mouse movement, negative value disables autohide
-    fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
-    deadzonesize = 0,                       -- size of deadzone
-    minmousemove = 3,                       -- minimum amount of pixels the mouse has to move between ticks to make the OSC show up
-    seektooltip = true,                     -- display tooltip over the seekbar indicating time at mouse position
-    iamaprogrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
+    showwindowed = true,        -- show OSC when windowed?
+    showfullscreen = true,      -- show OSC when fullscreen?
+    scalewindowed = 1,          -- scaling of the controller when windowed
+    scalefullscreen = 1,        -- scaling of the controller when fullscreen
+    scaleforcedwindow = 2,      -- scaling when rendered on a forced window
+    vidscale = true,            -- scale the controller with the video?
+    valign = 0.8,               -- vertical alignment, -1 (top) to 1 (bottom)
+    halign = 0,                 -- horizontal alignment, -1 (left) to 1 (right)
+    boxalpha = 80,              -- alpha of the background box,
+                                -- 0 (opaque) to 255 (fully transparent)
+    hidetimeout = 500,          -- duration in ms until the OSC hides if no
+                                -- mouse movement, negative value = disabled
+    fadeduration = 200,         -- duration of fade out in ms, 0 = no fade
+    deadzonesize = 0,           -- size of deadzone
+    minmousemove = 3,           -- minimum amount of pixels the mouse has to
+                                -- move between ticks to make the OSC show up
+    iamaprogrammer = false,     -- use native mpv values and disable OSC
+                                -- internal track list management (and some
+                                -- functions that depend on it)
     layout = "box",
-    seekbarstyle = "slider",                -- seekbar style, slider (diamond marker) or bar (fill)
+    seekbarstyle = "slider",    -- slider (diamond marker) or bar (fill)
 }
 
 -- read options from config and command-line
@@ -65,7 +69,7 @@ local state = {
     tc_ms = false,                          -- Should the timecodes display their time with milliseconds
     mp_screen_sizeX, mp_screen_sizeY,       -- last screen-resolution, to detect resolution changes to issue reINITs
     initREQ = false,                        -- is a re-init request pending?
-    last_mouseX, last_mouseY,                -- last mouse position, to detect siginificant mouse movement
+    last_mouseX, last_mouseY,               -- last mouse position, to detect siginificant mouse movement
     message_text,
     message_timeout,
     fullscreen = false,
@@ -210,25 +214,25 @@ end
 -- return a nice list of tracks of the given type (video, audio, sub)
 function get_tracklist(type)
     local msg = "Available " .. nicetypes[type] .. " Tracks: "
-    local select_scale = 100
     if #tracks_osc[type] == 0 then
         msg = msg .. "none"
     else
         for n = 1, #tracks_osc[type] do
             local track = tracks_osc[type][n]
-            local lang, title, selected = "unknown", "", "{\\fscx" .. select_scale .. "\\fscy" .. select_scale .. "}○{\\fscx100\\fscy100}"
+            local lang, title, selected = "unknown", "", "○"
             if not(track.lang == nil) then lang = track.lang end
             if not(track.title == nil) then title = track.title end
             if (track.id == tonumber(mp.get_property(type))) then
-                selected = "{\\fscx" .. select_scale .. "\\fscy" .. select_scale .. "}●{\\fscx100\\fscy100}"
+                selected = "●"
             end
-            msg = msg .. "\n" .. selected .. " " .. n .. ": [" .. lang .. "] " .. title
+            msg = msg.."\n"..selected.." "..n..": ["..lang.."] "..title
         end
     end
     return msg
 end
 
--- relatively change the track of given <type> by <next> tracks (+1 -> next, -1 -> previous)
+-- relatively change the track of given <type> by <next> tracks
+    --(+1 -> next, -1 -> previous)
 function set_track(type, next)
     local current_track_mpv, current_track_osc
     if (mp.get_property(type) == "no") then
@@ -250,8 +254,10 @@ function set_track(type, next)
         if (new_track_osc == 0) then
         show_message(nicetypes[type] .. " Track: none")
     else
-        show_message(nicetypes[type]  .. " Track: " .. new_track_osc .. "/" .. #tracks_osc[type]
-            .. " [" .. (tracks_osc[type][new_track_osc].lang or "unknown") .. "] " .. (tracks_osc[type][new_track_osc].title or ""))
+        show_message(nicetypes[type]  .. " Track: "
+            .. new_track_osc .. "/" .. #tracks_osc[type]
+            .. " [".. (tracks_osc[type][new_track_osc].lang or "unknown") .."] "
+            .. (tracks_osc[type][new_track_osc].title or ""))
     end
 end
 
@@ -451,8 +457,10 @@ function render_elements(master_ass)
                     style_ass:append(osc_styles.elementDown)
                 end
 
-                if (element.softrepeat) and (state.mouse_down_counter >= 15 and state.mouse_down_counter % 5 == 0) then
-                    element.eventresponder[state.active_event_source .. "_down"](element)
+                if (element.softrepeat) and (state.mouse_down_counter >= 15
+                    and state.mouse_down_counter % 5 == 0) then
+
+                    element.eventresponder[state.active_event_source.."_down"](element)
                 end
                 state.mouse_down_counter = state.mouse_down_counter + 1
             end
@@ -583,19 +591,24 @@ function show_message(text, duration)
         duration = tonumber(mp.get_property("options/osd-duration")) / 1000
     end
 
-    -- cut the text short, otherwise the following functions may slow down massively on huge input
+    -- cut the text short, otherwise the following functions
+    -- may slow down massively on huge input
     text = string.sub(text, 0, 4000)
 
-    -- replace actual linebreaks with ASS linebreaks and get the amount of lines along the way
+    -- replace actual linebreaks with ASS linebreaks
+    -- and get the amount of lines along the way
     local lines
     text, lines = string.gsub(text, "\n", "\\N")
 
-    -- append a Zero-Width-Space to . and _ to enable linebreaking of long filenames
+    -- append a Zero-Width-Space to . and _ to enable
+    -- linebreaking of long filenames
     text = string.gsub(text, "%.", ".\226\128\139")
     text = string.gsub(text, "_", "_\226\128\139")
 
     -- scale the fontsize for longer multi-line output
-    local fontsize, outline = tonumber(mp.get_property("options/osd-font-size")), tonumber(mp.get_property("options/osd-border-size"))
+    local fontsize = tonumber(mp.get_property("options/osd-font-size"))
+    local outline = tonumber(mp.get_property("options/osd-border-size"))
+
     if lines > 12 then
         fontsize, outline = fontsize / 2, outline / 1.5
     elseif lines > 8 then
@@ -609,7 +622,9 @@ function show_message(text, duration)
 end
 
 function render_message(ass)
-    if not(state.message_timeout == nil) and not(state.message_text == nil) and state.message_timeout > mp.get_time() then
+    if not(state.message_timeout == nil) and not(state.message_text == nil)
+        and state.message_timeout > mp.get_time() then
+
         ass:new_event()
         ass:append(state.message_text)
     else
@@ -856,15 +871,14 @@ end
 layouts["slimbox"] = function ()
 
     local osc_geo = {
-        w = 600,    -- width
-        h = 20,    -- height
-        r = 20,     -- corner-radius
-        p = 20,     -- padding
+        w = 660,    -- width
+        h = 70,     -- height
+        r = 10,     -- corner-radius
     }
 
     -- make sure the OSC actually fits into the video
-    if (osc_param.playresx < (osc_geo.w + (2 * osc_geo.p))) then
-        osc_param.playresy = (osc_geo.w+(2*osc_geo.p))/osc_param.display_aspect
+    if (osc_param.playresx < (osc_geo.w)) then
+        osc_param.playresy = (osc_geo.w)/osc_param.display_aspect
         osc_param.playresx = osc_param.playresy * osc_param.display_aspect
     end
 
@@ -873,10 +887,6 @@ layouts["slimbox"] = function ()
         osc_geo.w, 0))
     local posY = math.floor(get_align(user_opts.valign, osc_param.playresy,
         osc_geo.h, 0))
-
-    -- position offset for contents aligned at the borders of the box
-    local pos_offsetX = (osc_geo.w - (2*osc_geo.p)) / 2
-    local pos_offsetY = (osc_geo.h - (2*osc_geo.p)) / 2
 
     osc_param.areas = {} -- delete areas
 
@@ -899,51 +909,36 @@ layouts["slimbox"] = function ()
     end
     add_area("showhide", 0, sh_area_y0, osc_param.playresx, sh_area_y1)
 
-    -- fetch values
-    local osc_w, osc_h, osc_r, osc_p =
-        osc_geo.w, osc_geo.h, osc_geo.r, osc_geo.p
-
     local lo
 
-    local tc_w = 70
+    local tc_w, ele_h, inner_w = 100, 20, osc_geo.w - 100
+
+    -- styles
+    local styles = {
+        box = "{\\rDefault\\blur0\\bord1\\1c&H000000\\3c&HFFFFFF}",
+        timecodes = "{\\1c&HFFFFFF\\3c&H000000\\fs20\\bord2\\blur1}",
+        tooltip = "{\\1c&HFFFFFF\\3c&H000000\\fs12\\bord1\\blur0.5}",
+    }
 
 
     new_element("bgbox", "box")
     lo = add_layout("bgbox")
 
-    lo.geometry = {x = posX, y = posY, an = 5, w = osc_w, h = osc_h}
+    lo.geometry = {x = posX, y = posY - 1, an = 2, w = inner_w, h = ele_h}
     lo.layer = 10
     lo.style = osc_styles.box
     lo.alpha[1] = user_opts.boxalpha
-    lo.box.radius = osc_r
-
-
-    new_element("bgbar1", "box")
-    lo = add_layout("bgbar1")
-
-    lo.geometry =
-        {x = posX - (osc_w/2) + tc_w, y = posY, an = 5, w = 1, h = osc_h}
-    lo.layer = 20
-    lo.style = osc_styles.timecodes
-    lo.alpha[1] = user_opts.boxalpha
-
-    new_element("bgbar2", "box")
-    lo = add_layout("bgbar2")
-
-    lo.geometry =
-        {x = posX + (osc_w/2) - tc_w, y = posY, an = 5, w = 1, h = osc_h}
-    lo.layer = 20
-    lo.style = osc_styles.timecodes
-    lo.alpha[1] = user_opts.boxalpha
+    lo.alpha[3] = 0
+    lo.box.radius = osc_geo.r
 
 
     lo = add_layout("seekbar")
     lo.geometry =
-        {x = posX, y = posY, an = 5, w = osc_w - (tc_w*2), h = osc_h}
+        {x = posX, y = posY - 1, an = 2, w = inner_w, h = ele_h}
     lo.style = osc_styles.timecodes
     lo.slider.border = 0
     lo.slider.gap = 1.5
-    lo.slider.tooltip_style = osc_styles.vidtitle
+    lo.slider.tooltip_style = styles.tooltip
     lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.adjust_tooltip = false
 
@@ -951,19 +946,28 @@ layouts["slimbox"] = function ()
     -- Timecodes
     --
 
-    local bottomrowY = posY + pos_offsetY - 5
-
     lo = add_layout("tc_left")
     lo.geometry =
-        {x = posX - (osc_w/2) + tc_w - 5, y = posY+0.5,
-        an = 6, w = tc_w, h = osc_h}
-    lo.style = osc_styles.timecodes
+        {x = posX - (inner_w/2) + osc_geo.r, y = posY + 1,
+        an = 7, w = tc_w, h = ele_h}
+    lo.style = styles.timecodes
+    lo.alpha[3] = user_opts.boxalpha
 
     lo = add_layout("tc_right")
     lo.geometry =
-        {x = posX + (osc_w/2) - tc_w + 5, y = posY+0.5,
-        an = 4, w = tc_w, h = osc_h}
-    lo.style = osc_styles.timecodes
+        {x = posX + (inner_w/2) - osc_geo.r, y = posY + 1,
+        an = 9, w = tc_w, h = ele_h}
+    lo.style = styles.timecodes
+    lo.alpha[3] = user_opts.boxalpha
+
+    -- Cache
+
+    lo = add_layout("cache")
+    lo.geometry =
+        {x = posX, y = posY + 1,
+        an = 8, w = tc_w, h = ele_h}
+    lo.style = styles.timecodes
+    lo.alpha[3] = user_opts.boxalpha
 
 
 end
@@ -1080,7 +1084,7 @@ layouts["bottombar"] = function()
 
 
     -- Seekbar
-    geo = { x = sb_l, y = osc_param.playresy, an = 1, w = sb_r - sb_l, h = geo.h }
+    geo = {x = sb_l, y = osc_param.playresy, an = 1, w = sb_r - sb_l, h = geo.h}
     new_element("bgbar1", "box")
     lo = add_layout("bgbar1")
 
@@ -1239,7 +1243,8 @@ function validate_user_opts()
 
     if user_opts.seekbarstyle ~= "slider" and
        user_opts.seekbarstyle ~= "bar" then
-        msg.warn("Invalid setting \""..user_opts.seekbarstyle.."\" for seekbarstyle")
+        msg.warn("Invalid setting \"" .. user_opts.seekbarstyle
+            .. "\" for seekbarstyle")
         user_opts.seekbarstyle = "slider"
     end
 end
@@ -1700,9 +1705,13 @@ function render()
 
             if (state.anitype == "in") then --fade in
                 osc_visible(true)
-                state.animation = scale_value(state.anistart, (state.anistart + (user_opts.fadeduration/1000)), 255, 0, now)
+                state.animation = scale_value(state.anistart,
+                    (state.anistart + (user_opts.fadeduration/1000)),
+                    255, 0, now)
             elseif (state.anitype == "out") then --fade out
-                state.animation = scale_value(state.anistart, (state.anistart + (user_opts.fadeduration/1000)), 0, 255, now)
+                state.animation = scale_value(state.anistart,
+                    (state.anistart + (user_opts.fadeduration/1000)),
+                    0, 255, now)
             end
 
         else
@@ -1779,7 +1788,8 @@ function process_event(source, what)
         for n = 1, #elements do
 
             if not (elements[n].eventresponder == nil) then
-                if not (elements[n].eventresponder[source .. "_up"] == nil) or not (elements[n].eventresponder[source .. "_down"] == nil) then
+                if not (elements[n].eventresponder[source .. "_up"] == nil)
+                    or not (elements[n].eventresponder[source .. "_down"] == nil) then
 
                     if mouse_hit(elements[n]) then
                         state.active_element = n
