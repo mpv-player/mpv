@@ -414,7 +414,7 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
         MP_VERBOSE(ao, "layout has too many descriptions (%u, max: %d)",
                    (unsigned) layout->mNumberChannelDescriptions,
                    MP_NUM_CHANNELS);
-        goto coreaudio_error;
+        return false;
     }
 
     for (int n = 0; n < layout->mNumberChannelDescriptions; n++) {
