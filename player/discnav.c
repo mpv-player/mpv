@@ -125,7 +125,8 @@ void mp_nav_init(struct MPContext *mpctx)
 
     MP_VERBOSE(mpctx->nav_state, "enabling\n");
 
-    mp_input_enable_section(mpctx->input, "discnav", 0);
+    mp_input_enable_section(mpctx->input, "discnav",
+                MP_INPUT_ALLOW_VO_DRAGGING | MP_INPUT_ALLOW_HIDE_CURSOR);
 
     update_state(mpctx);
 }
