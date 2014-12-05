@@ -76,22 +76,23 @@ function ass_mt.rect_cw(ass, x0, y0, x1, y1)
 end
 
 function ass_mt.round_rect_cw(ass, x0, y0, x1, y1, r)
+    local c = 0.551915024494 * r -- circle approximation
     ass:move_to(x0 + r, y0)
     ass:line_to(x1 - r, y0) -- top line
     if r > 0 then
-        ass:bezier_curve(x1, y0, x1, y0, x1, y0 + r) -- top right corner
+        ass:bezier_curve(x1 - r + c, y0, x1, y0 + r - c, x1, y0 + r) -- top right corner
     end
     ass:line_to(x1, y1 - r) -- right line
     if r > 0 then
-        ass:bezier_curve(x1, y1, x1, y1, x1 - r, y1) -- bottom right corner
+        ass:bezier_curve(x1, y1 - r + c, x1 - r + c, y1, x1 - r, y1) -- bottom right corner
     end
     ass:line_to(x0 + r, y1) -- bottom line
     if r > 0 then
-        ass:bezier_curve(x0, y1, x0, y1, x0, y1 - r) -- bottom left corner
+        ass:bezier_curve(x0 + r - c, y1, x0, y1 - r + c, x0, y1 - r) -- bottom left corner
     end
     ass:line_to(x0, y0 + r) -- left line
     if r > 0 then
-        ass:bezier_curve(x0, y0, x0, y0, x0 + r, y0) -- top left corner
+        ass:bezier_curve(x0, y0 + r - c, x0 + r - c, y0, x0 + r, y0) -- top left corner
     end
 end
 
