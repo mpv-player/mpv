@@ -1853,9 +1853,13 @@ function tick()
     end
 end
 
+function do_enable_keybindings()
+    mp.enable_key_bindings("showhide", "allow-vo-dragging|allow-hide-cursor")
+end
+
 function enable_osc(enable)
     if enable then
-        mp.enable_key_bindings("showhide")
+        do_enable_keybindings()
         show_osc()
     else
         hide_osc()
@@ -1881,7 +1885,7 @@ mp.observe_property("disc-menu-active", "bool", function(name, val)
         hide_osc()
         mp.disable_key_bindings("showhide")
     else
-        mp.enable_key_bindings("showhide")
+        do_enable_keybindings()
     end
 end)
 
@@ -1890,7 +1894,7 @@ mp.set_key_bindings({
     {"mouse_move",              function(e) process_event("mouse_move", nil) end},
     {"mouse_leave",             mouse_leave},
 }, "showhide", "force")
-mp.enable_key_bindings("showhide", "allow-vo-dragging|allow-hide-cursor")
+do_enable_keybindings()
 
 --mouse input bindings
 mp.set_key_bindings({
