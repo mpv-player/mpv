@@ -331,7 +331,10 @@ void init_cocoa_application(void)
     NSApp = mpv_shared_app();
     [NSApp setDelegate:NSApp];
     [NSApp initialize_menu];
-    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+
+    // Will be set to Regular from cocoa_common during UI creation so that we
+    // don't create an icon when playing audio only files.
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
 
     atexit_b(^{
         // Because activation policy has just been set to behave like a real
@@ -441,21 +444,6 @@ static bool bundle_started_from_finder(int argc, char **argv)
     }
 }
 
-static const char macosx_icon[] =
-#include "osdep/macosx_icon.inc"
-;
-
-static void set_application_icon(NSApplication *app)
-{
-    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
-                                             length:sizeof(macosx_icon)
-                                       freeWhenDone:NO];
-    NSImage *icon = [[NSImage alloc] initWithData:icon_data];
-    [app setApplicationIconImage:icon];
-    [icon release];
-    [icon_data release];
-}
-
 void macosx_finder_args_preinit(int *argc, char ***argv)
 {
     Application *app = mpv_shared_app();
@@ -477,7 +465,6 @@ void macosx_finder_args_preinit(int *argc, char ***argv)
         *argc = cocoa_argc;
         *argv = cocoa_argv;
     } else {
-        set_application_icon(app);
         for (int i = 0; i < *argc; i++ ) {
             NSString *arg = [NSString stringWithUTF8String:(*argv)[i]];
             [app.argumentsList addObject:arg];
