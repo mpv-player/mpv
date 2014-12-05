@@ -47,6 +47,8 @@ struct pl_parser {
     bool error;
     bool probing;
     bool force;
+    enum demux_check check_level;
+    struct stream *real_stream;
 };
 
 static char *pl_get_line0(struct pl_parser *p)
@@ -79,11 +81,30 @@ static bool pl_eof(struct pl_parser *p)
     return p->error || p->s->eof;
 }
 
+static bool maybe_text(bstr d)
+{
+    for (int n = 0; n < d.len; n++) {
+        unsigned char c = d.start[n];
+        if (c < 32 && c != '\n' && c != '\r' && c != '\t')
+            return false;
+    }
+    return true;
+}
+
 static int parse_m3u(struct pl_parser *p)
 {
     bstr line = bstr_strip(pl_get_line(p));
-    if (p->probing && !bstr_equals0(line, "#EXTM3U"))
+    if (p->probing && !bstr_equals0(line, "#EXTM3U")) {
+        // Last resort: if the file extension is m3u, it might be headerless.
+        if (p->check_level == DEMUX_CHECK_UNSAFE) {
+            char *ext = mp_splitext(p->real_stream->url, NULL);
+            bstr data = stream_peek(p->real_stream, PROBE_SIZE);
+            if (ext && strcmp(ext, "m3u") && data.len > 10 && maybe_text(data))
+                goto ok;
+        }
         return -1;
+    }
+ok:
     if (p->probing)
         return 0;
     while (line.len || !pl_eof(p)) {
@@ -223,12 +244,14 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     struct pl_parser *p = talloc_zero(NULL, struct pl_parser);
     p->log = demuxer->log;
     p->pl = talloc_zero(p, struct playlist);
+    p->real_stream = demuxer->stream;
 
     bstr probe_buf = stream_peek(demuxer->stream, PROBE_SIZE);
     p->s = open_memory_stream(probe_buf.start, probe_buf.len);
     p->s->mime_type = demuxer->stream->mime_type;
     p->utf16 = stream_skip_bom(p->s);
     p->force = force;
+    p->check_level = check;
     p->probing = true;
     const struct pl_format *fmt = probe_pl(p);
     free_stream(p->s);
