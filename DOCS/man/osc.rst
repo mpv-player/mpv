@@ -225,10 +225,6 @@ Configurable Options
     | Minimum amount of pixels the mouse has to move between ticks to make
       the OSC show up
 
-``seektooltip``
-    | Default: yes
-    | Display a tooltip over the seekbar indicating time at mouse position.
-
 ``layout``
     | Default: box
     | The layout for the OSC. Currently available are: box, slimbox,
