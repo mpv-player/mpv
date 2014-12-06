@@ -208,10 +208,18 @@ void vo_cocoa_uninit(struct vo *vo)
         enable_power_management(vo);
         cocoa_rm_fs_screen_profile_observer(vo);
 
+        // make sure we exit fullscreen before releasing stuff to make sure our
+        // events view retain count actually reaches 0
+        if (!s->embedded)
+            [(MpvEventsView *)s->view setFullScreen:NO];
+
         [s->gl_ctx release];
         [s->view removeFromSuperview];
         [s->view release];
-        if (s->window) [s->window release];
+
+        // if using --wid + libmpv there's no window to release
+        if (s->window)
+            [s->window release];
     });
 }
 
