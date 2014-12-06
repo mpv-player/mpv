@@ -345,6 +345,10 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     if (info.n_timecode_scale) {
         mkv_d->tc_scale = info.timecode_scale;
         MP_VERBOSE(demuxer, "| + timecode scale: %" PRIu64 "\n", mkv_d->tc_scale);
+        if (mkv_d->tc_scale < 1 || mkv_d->tc_scale > INT_MAX) {
+            res = -1;
+            goto out;
+        }
     }
     if (info.n_duration) {
         mkv_d->duration = info.duration * mkv_d->tc_scale / 1e9;
