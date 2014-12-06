@@ -91,7 +91,8 @@ void mp_compute_weights(struct filter_kernel *filter, double f, float *out_w)
     double sum = 0;
     for (int n = 0; n < filter->size; n++) {
         double x = f - (n - filter->size / 2 + 1);
-        double w = filter->weight(filter, fabs(x) / filter->inv_scale);
+        double c = fabs(x) / filter->inv_scale;
+        double w = c <= filter->radius ? filter->weight(filter, c) : 0;
         out_w[n] = w;
         sum += w;
     }
