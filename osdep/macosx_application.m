@@ -48,7 +48,6 @@ static pthread_t playback_thread_id;
 - (NSMenu *)appleMenuWithMainMenu:(NSMenu *)mainMenu;
 - (NSMenu *)movieMenu;
 - (NSMenu *)windowMenu;
-- (void)handleFiles;
 @end
 
 @interface NSApplication (NiblessAdditions)
@@ -61,10 +60,6 @@ Application *mpv_shared_app(void)
 }
 
 @implementation Application
-@synthesize files = _files;
-@synthesize argumentsList = _arguments_list;
-@synthesize willStopOnOpenEvent = _will_stop_on_open_event;
-
 @synthesize menuItems = _menu_items;
 
 - (void)sendEvent:(NSEvent *)event
@@ -79,10 +74,7 @@ Application *mpv_shared_app(void)
 {
     if (self = [super init]) {
         self.menuItems = [[[NSMutableDictionary alloc] init] autorelease];
-        self.files = nil;
-        self.argumentsList = [[[NSMutableArray alloc] init] autorelease];
         _eventsResponder = [EventsResponder sharedInstance];
-        self.willStopOnOpenEvent = NO;
 
         NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
         [em setEventHandler:self
@@ -234,47 +226,14 @@ Application *mpv_shared_app(void)
                      range:NSMakeRange(0, [MPV_PROTOCOL length])];
 
     url = [url stringByRemovingPercentEncoding];
-
-    self.files = @[url];
-
-    if (self.willStopOnOpenEvent) {
-        self.willStopOnOpenEvent = NO;
-        cocoa_stop_runloop();
-    } else {
-        [self handleFiles];
-    }
+    [_eventsResponder handleFilesArray:@[url]];
 }
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
 {
-    Application *app = mpv_shared_app();
-    NSMutableArray *filesToOpen = [[[NSMutableArray alloc] init] autorelease];
-
-    [filenames enumerateObjectsUsingBlock:^(id obj, NSUInteger i, BOOL *_) {
-        NSInteger place = [app.argumentsList indexOfObject:obj];
-        if (place == NSNotFound) {
-            // Proper new event ^_^
-            [filesToOpen addObject:obj];
-        } else {
-            // This file was already opened from the CLI. Cocoa is trying to
-            // open it again using events. Ignore it!
-            [app.argumentsList removeObjectAtIndex:place];
-        }
-    }];
-
     SEL cmpsel = @selector(localizedStandardCompare:);
-    self.files = [filesToOpen sortedArrayUsingSelector:cmpsel];
-    if (self.willStopOnOpenEvent) {
-        self.willStopOnOpenEvent = NO;
-        cocoa_stop_runloop();
-    } else {
-        [self handleFiles];
-    }
-}
-
-- (void)handleFiles
-{
-    [_eventsResponder handleFilesArray:self.files];
+    NSArray *files = [filenames sortedArrayUsingSelector:cmpsel];
+    [_eventsResponder handleFilesArray:files];
 }
 @end
 
@@ -283,6 +242,26 @@ struct playback_thread_ctx {
     int  *argc;
     char ***argv;
 };
+
+void terminate_cocoa_application(void)
+{
+    [NSApp hide:NSApp];
+    [NSApp terminate:NSApp];
+}
+
+static void cocoa_run_runloop(void)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    [NSApp run];
+    [pool drain];
+}
+
+static void cocoa_stop_runloop(void)
+{
+    [NSApp performSelectorOnMainThread:@selector(stop:)
+                            withObject:nil
+                         waitUntilDone:true];
+}
 
 static void *playback_thread(void *ctx_obj)
 {
@@ -295,38 +274,12 @@ static void *playback_thread(void *ctx_obj)
     }
 }
 
-int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
-{
-    @autoreleasepool {
-        struct playback_thread_ctx ctx = {0};
-        ctx.mpv_main = mpv_main;
-        ctx.argc     = &argc;
-        ctx.argv     = &argv;
-
-        init_cocoa_application();
-        macosx_finder_args_preinit(&argc, &argv);
-        pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
-
-        [[EventsResponder sharedInstance] waitForInputContext];
-
-        cocoa_run_runloop();
-
-        // This should never be reached: cocoa_run_runloop blocks until the
-        // process is quit
-        fprintf(stderr, "There was either a problem "
-                "initializing Cocoa or the Runloop was stopped unexpectedly. "
-                "Please report this issues to a developer.\n");
-        pthread_join(playback_thread_id, NULL);
-        return 1;
-    }
-}
-
 void cocoa_register_menu_item_action(MPMenuKey key, void* action)
 {
     [NSApp registerSelector:(SEL)action forKey:key];
 }
 
-void init_cocoa_application(void)
+static void init_cocoa_application(bool regular)
 {
     NSApp = mpv_shared_app();
     [NSApp setDelegate:NSApp];
@@ -334,7 +287,9 @@ void init_cocoa_application(void)
 
     // Will be set to Regular from cocoa_common during UI creation so that we
     // don't create an icon when playing audio only files.
-    [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
+    [NSApp setActivationPolicy: regular ?
+        NSApplicationActivationPolicyRegular :
+        NSApplicationActivationPolicyAccessory];
 
     atexit_b(^{
         // Because activation policy has just been set to behave like a real
@@ -342,47 +297,6 @@ void init_cocoa_application(void)
         // other things, the menubar created here from remaining on screen.
         [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
     });
-}
-
-void terminate_cocoa_application(void)
-{
-    [NSApp hide:NSApp];
-    [NSApp terminate:NSApp];
-}
-
-void cocoa_run_runloop()
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    [NSApp run];
-    [pool drain];
-}
-
-void cocoa_stop_runloop(void)
-{
-    [NSApp performSelectorOnMainThread:@selector(stop:)
-                            withObject:nil
-                         waitUntilDone:true];
-    cocoa_post_fake_event();
-}
-
-void cocoa_post_fake_event(void)
-{
-    NSEvent* event = [NSEvent otherEventWithType:NSApplicationDefined
-                                        location:NSMakePoint(0,0)
-                                   modifierFlags:0
-                                       timestamp:0.0
-                                    windowNumber:0
-                                         context:nil
-                                         subtype:0
-                                           data1:0
-                                           data2:0];
-    [NSApp postEvent:event atStart:NO];
-}
-
-static void macosx_wait_fileopen_events()
-{
-    mpv_shared_app().willStopOnOpenEvent = YES;
-    cocoa_run_runloop(); // block until done
 }
 
 static void macosx_redirect_output_to_logfile(const char *filename)
@@ -444,30 +358,33 @@ static bool bundle_started_from_finder(int argc, char **argv)
     }
 }
 
-void macosx_finder_args_preinit(int *argc, char ***argv)
+int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
 {
-    Application *app = mpv_shared_app();
+    @autoreleasepool {
+        struct playback_thread_ctx ctx = {0};
+        ctx.mpv_main = mpv_main;
+        ctx.argc     = &argc;
+        ctx.argv     = &argv;
 
-    if (bundle_started_from_finder(*argc, *argv)) {
-        macosx_redirect_output_to_logfile("mpv");
-        macosx_wait_fileopen_events();
-
-        char **cocoa_argv = talloc_zero_array(NULL, char*, [app.files count] + 2);
-        cocoa_argv[0]     = "mpv";
-        cocoa_argv[1]     = "--quiet";
-        int  cocoa_argc   = 2;
-
-        for (NSString *filename in app.files) {
-            cocoa_argv[cocoa_argc] = (char*)[filename UTF8String];
-            cocoa_argc++;
+        if (bundle_started_from_finder(argc, argv)) {
+            argc = 1; // clears out -psn argument is present
+            macosx_redirect_output_to_logfile("mpv");
+            init_cocoa_application(true);
+        } else {
+            init_cocoa_application(false);
         }
 
-        *argc = cocoa_argc;
-        *argv = cocoa_argv;
-    } else {
-        for (int i = 0; i < *argc; i++ ) {
-            NSString *arg = [NSString stringWithUTF8String:(*argv)[i]];
-            [app.argumentsList addObject:arg];
-        }
+        pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
+        [[EventsResponder sharedInstance] waitForInputContext];
+        cocoa_run_runloop();
+
+        // This should never be reached: cocoa_run_runloop blocks until the
+        // process is quit
+        fprintf(stderr, "There was either a problem "
+                "initializing Cocoa or the Runloop was stopped unexpectedly. "
+                "Please report this issues to a developer.\n");
+        pthread_join(playback_thread_id, NULL);
+        return 1;
     }
 }
+

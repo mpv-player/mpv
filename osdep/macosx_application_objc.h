@@ -26,8 +26,6 @@
 
 @property(nonatomic, retain) NSMutableDictionary *menuItems;
 @property(nonatomic, retain) NSArray *files;
-@property(nonatomic, retain) NSMutableArray *argumentsList;
-@property(nonatomic, assign) BOOL willStopOnOpenEvent;
 @end
 
 Application *mpv_shared_app(void);

@@ -32,18 +32,7 @@ typedef enum {
 
 // multithreaded wrapper for mpv_main
 int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[]);
-
 void cocoa_register_menu_item_action(MPMenuKey key, void* action);
-
-// initializes Cocoa application
-void init_cocoa_application(void);
 void terminate_cocoa_application(void);
-
-// Runs the Cocoa Main Event Loop
-void cocoa_run_runloop(void);
-void cocoa_stop_runloop(void);
-void cocoa_post_fake_event(void);
-
-void macosx_finder_args_preinit(int *argc, char ***argv);
 
 #endif /* MPV_MACOSX_APPLICATION */
