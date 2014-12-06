@@ -38,6 +38,7 @@ struct priv {
 static void destroy_texture(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
+    GL *gl = hw->gl;
     VAStatus status;
 
     if (p->vaglx_surface) {
@@ -48,7 +49,7 @@ static void destroy_texture(struct gl_hwdec *hw)
         p->vaglx_surface = NULL;
     }
 
-    glDeleteTextures(1, &p->gl_texture);
+    gl->DeleteTextures(1, &p->gl_texture);
     p->gl_texture = 0;
 }
 
