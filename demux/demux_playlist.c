@@ -99,7 +99,7 @@ static int parse_m3u(struct pl_parser *p)
         if (p->check_level == DEMUX_CHECK_UNSAFE) {
             char *ext = mp_splitext(p->real_stream->url, NULL);
             bstr data = stream_peek(p->real_stream, PROBE_SIZE);
-            if (ext && strcmp(ext, "m3u") && data.len > 10 && maybe_text(data))
+            if (ext && !strcmp(ext, "m3u") && data.len > 10 && maybe_text(data))
                 goto ok;
         }
         return -1;
