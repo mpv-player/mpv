@@ -211,9 +211,10 @@ void vo_cocoa_uninit(struct vo *vo)
         [s->gl_ctx release];
         [s->view removeFromSuperview];
         [s->view release];
-        if (s->window) [s->window release];
-
-        [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
+        if (s->window) { 
+            [s->window release];
+            [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
+        }
     });
 }
 
