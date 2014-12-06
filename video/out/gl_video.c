@@ -82,10 +82,11 @@ const struct lut_tex_format lut_tex_formats[] = {
     [12] = {3, GL_RGBA16F, GL_RGBA},
     [16] = {4, GL_RGBA16F, GL_RGBA},
     [32] = {8, GL_RGBA16F, GL_RGBA},
+    [64] = {16, GL_RGBA16F, GL_RGBA},
 };
 
 // must be sorted, and terminated with 0
-static const int filter_sizes[] = {2, 4, 6, 8, 12, 16, 32, 0};
+static const int filter_sizes[] = {2, 4, 6, 8, 12, 16, 32, 64, 0};
 
 struct vertex {
     float position[2];
@@ -336,8 +337,8 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLOAT("lparam2", scaler_params[0][1], 0),
         OPT_FLOAT("cparam1", scaler_params[1][0], 0),
         OPT_FLOAT("cparam2", scaler_params[1][1], 0),
-        OPT_FLOATRANGE("lradius", scaler_radius[0], 0, 1.0, 16.0),
-        OPT_FLOATRANGE("cradius", scaler_radius[1], 0, 1.0, 16.0),
+        OPT_FLOATRANGE("lradius", scaler_radius[0], 0, 1.0, 32.0),
+        OPT_FLOATRANGE("cradius", scaler_radius[1], 0, 1.0, 32.0),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
         OPT_FLAG("indirect", indirect, 0),
