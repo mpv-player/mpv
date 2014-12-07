@@ -61,6 +61,7 @@ Application *mpv_shared_app(void)
 
 @implementation Application
 @synthesize menuItems = _menu_items;
+@synthesize openCount = _open_count;
 
 - (void)sendEvent:(NSEvent *)event
 {
@@ -231,6 +232,10 @@ Application *mpv_shared_app(void)
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
 {
+    if (mpv_shared_app().openCount > 0) {
+        mpv_shared_app().openCount--;
+        return;
+    }
     SEL cmpsel = @selector(localizedStandardCompare:);
     NSArray *files = [filenames sortedArrayUsingSelector:cmpsel];
     [_eventsResponder handleFilesArray:files];
@@ -371,6 +376,9 @@ int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
             macosx_redirect_output_to_logfile("mpv");
             init_cocoa_application(true);
         } else {
+            for (int i = 1; i < argc; i++)
+                if (argv[i][0] != '-')
+                    mpv_shared_app().openCount++;
             init_cocoa_application(false);
         }
 

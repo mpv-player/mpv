@@ -26,6 +26,7 @@
 
 @property(nonatomic, retain) NSMutableDictionary *menuItems;
 @property(nonatomic, retain) NSArray *files;
+@property(nonatomic, assign) size_t openCount;
 @end
 
 Application *mpv_shared_app(void);
