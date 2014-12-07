@@ -541,7 +541,12 @@ const m_option_t mp_opts[] = {
     OPT_STRING("osd-msg2", osd_msg[1], 0),
     OPT_STRING("osd-msg3", osd_msg[2], 0),
 
-    OPT_FLAG("idle", player_idle_mode, M_OPT_GLOBAL),
+    OPT_CHOICE("idle", player_idle_mode, M_OPT_OPTIONAL_PARAM,
+               ({"no",      0},
+                {"oneshot", 1},
+                {"yes",     2},
+                {"",        2})),
+
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
 
     OPT_STRING("input-file", input_file, M_OPT_FILE | M_OPT_GLOBAL),
