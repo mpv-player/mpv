@@ -442,7 +442,10 @@ Program Behavior
     Video format/quality that is directly passed to youtube-dl. The possible
     values are specific to the website and the video, for a given url the
     available formats can be found with the command
-    ``youtube-dl --list-formats URL``.
+    ``youtube-dl --list-formats URL``. See youtube-dl's documentation for
+    available aliases. To use experimental DASH support for youtube, use
+    ``bestvideo+bestaudio``.
+    (Default: ``best``)
 
 Video
 -----
