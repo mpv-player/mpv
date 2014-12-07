@@ -227,10 +227,9 @@ static void update_subtitle(struct MPContext *mpctx, int order)
     struct track *track = mpctx->current_track[order][STREAM_SUB];
     struct dec_sub *dec_sub = mpctx->d_sub[order];
 
-    if (!track)
+    if (!track || !dec_sub)
         return;
 
-    assert(dec_sub);
     int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
 
     if (mpctx->d_video) {
