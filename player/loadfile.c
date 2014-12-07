@@ -1313,7 +1313,7 @@ void mp_play_files(struct MPContext *mpctx)
         mpctx->playlist->current_was_replaced = false;
         mpctx->stop_play = 0;
 
-        if (!mpctx->playlist->current && !mpctx->opts->player_idle_mode)
+        if (!mpctx->playlist->current && mpctx->opts->player_idle_mode < 2)
             break;
     }
 }

@@ -333,10 +333,13 @@ Program Behavior
 
     This option is useful for debugging only.
 
-``--idle``
+``--idle=<no|yes|once>``
     Makes mpv wait idly instead of quitting when there is no file to play.
     Mostly useful in slave mode, where mpv can be controlled through input
     commands (see also ``--slave-broken``).
+
+    ``once`` will only idle at start and let the player close once the
+    first playlist has finished playing back.
 
 ``--include=<configuration-file>``
     Specify configuration file to be parsed after the default ones.
