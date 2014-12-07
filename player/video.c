@@ -214,6 +214,7 @@ void reset_video_state(struct MPContext *mpctx)
 
     mp_image_unrefp(&mpctx->next_frame[0]);
     mp_image_unrefp(&mpctx->next_frame[1]);
+    mp_image_unrefp(&mpctx->saved_frame);
 
     mpctx->delay = 0;
     mpctx->time_frame = 0;
@@ -534,6 +535,8 @@ static bool have_new_frame(struct MPContext *mpctx)
 // returns VD_* code
 static int video_output_image(struct MPContext *mpctx, double endpts)
 {
+    bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
+
     if (mpctx->d_video->header->attached_picture) {
         if (vo_has_frame(mpctx->video_out))
             return VD_EOF;
@@ -591,16 +594,18 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             add_frame_pts(mpctx, img->pts);
 
             bool drop = false;
-            bool hrseek = mpctx->hrseek_active
-                       && mpctx->video_status == STATUS_SYNCING;
-            if (hrseek && img->pts < mpctx->hrseek_pts - .005)
-                drop = true;
             if ((endpts != MP_NOPTS_VALUE && img->pts >= endpts) ||
                 mpctx->max_frames == 0)
             {
                 drop = true;
                 r = VD_EOF;
             }
+            if (!drop && hrseek && mpctx->hrseek_lastframe) {
+                mp_image_setrefp(&mpctx->saved_frame, img);
+                drop = true;
+            }
+            if (hrseek && img->pts < mpctx->hrseek_pts - .005)
+                drop = true;
             if (drop) {
                 talloc_free(img);
             } else {
@@ -612,6 +617,13 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
     // On EOF, always allow the playloop to use the remaining frame.
     if (have_new_frame(mpctx) || (r <= 0 && mpctx->next_frame[0]))
         return VD_NEW_FRAME;
+
+    // Last-frame seek
+    if (r <= 0 && hrseek && mpctx->hrseek_lastframe && mpctx->saved_frame) {
+        mpctx->next_frame[1] = mpctx->saved_frame;
+        mpctx->saved_frame = NULL;
+        return VD_PROGRESS;
+    }
 
     return r;
 }

@@ -151,6 +151,7 @@ void reset_playback_state(struct MPContext *mpctx)
 
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
+    mpctx->hrseek_lastframe = false;
     mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->cache_wait_time = 0;
@@ -780,6 +781,28 @@ static void handle_loop_file(struct MPContext *mpctx)
     }
 }
 
+static void seek_to_last_frame(struct MPContext *mpctx)
+{
+    if (!mpctx->d_video)
+        return;
+    MP_VERBOSE(mpctx, "seeking to last frame...\n");
+    // Approximately seek close to the end of the file.
+    // Usually, it will seek some seconds before end.
+    double end = get_play_end_pts(mpctx);
+    if (end == MP_NOPTS_VALUE)
+        end = get_time_length(mpctx);
+    mp_seek(mpctx, (struct seek_params){
+                   .type = MPSEEK_ABSOLUTE,
+                   .amount = end,
+                   .exact = 2, // "very exact", no framedrop
+                   }, false);
+    // Make it exact: stop seek only if last frame was reached.
+    if (mpctx->hrseek_active) {
+        mpctx->hrseek_pts = 1e99; // "infinite"
+        mpctx->hrseek_lastframe = true;
+    }
+}
+
 static void handle_keep_open(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -787,8 +810,11 @@ static void handle_keep_open(struct MPContext *mpctx)
         !playlist_get_next(mpctx->playlist, 1) && opts->loop_times < 0)
     {
         mpctx->stop_play = KEEP_PLAYING;
-        if (mpctx->d_video)
+        if (mpctx->d_video) {
+            if (!vo_has_frame(mpctx->video_out)) // EOF not reached normally
+                seek_to_last_frame(mpctx);
             mpctx->playback_pts = mpctx->last_vo_pts;
+        }
         if (!mpctx->opts->pause)
             pause_player(mpctx);
     }

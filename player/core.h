@@ -224,14 +224,16 @@ typedef struct MPContext {
     struct vo *video_out;
     // next_frame[0] is the next frame, next_frame[1] the one after that.
     struct mp_image *next_frame[2];
+    struct mp_image *saved_frame;   // for hrseek_lastframe
 
     enum playback_status video_status, audio_status;
     bool restart_complete;
     /* Set if audio should be timed to start with video frame after seeking,
      * not set when e.g. playing cover art */
     bool sync_audio_to_video;
-    bool hrseek_active;
-    bool hrseek_framedrop;
+    bool hrseek_active;     // skip all data until hrseek_pts
+    bool hrseek_framedrop;  // allow decoder to drop frames before hrseek_pts
+    bool hrseek_lastframe;  // drop everything until last frame reached
     double hrseek_pts;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
