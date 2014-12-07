@@ -24,13 +24,23 @@ mp.add_hook("on_load", 10, function ()
 
              -- check for youtube-dl in mpv's config dir
             local ytdl_mcd = mp.find_config_file("youtube-dl")
+                          or mp.find_config_file("youtube-dl.py")
             if not (ytdl_mcd == nil) then
                 msg.verbose("found youtube-dl at: " .. ytdl_mcd)
                 ytdl.path = ytdl_mcd
             end
+            if (ytdl_mcd == mp.find_config_file("youtube-dl")) then
+                pyscript = false
+            elseif (ytdl_mcd == mp.find_config_file("youtube-dl.py")) then
+                pyscript = true
+            end
 
             msg.debug("checking ytdl version ...")
-            local es, version = exec({ytdl.path, "--version"})
+            if (pyscript == false) then
+                es, version = exec({ytdl.path, "--version"})
+            else
+                es, version = exec({"python", ytdl.path, "--version"})
+            end
             if (es < 0) then
                 msg.warn("youtube-dl not found, not executable, or broken.")
                 ytdl.vercheck = false
@@ -63,10 +73,17 @@ mp.add_hook("on_load", 10, function ()
             subformat = "ass"
         end
 
-        local command = {
-            ytdl.path, "-J", "--flat-playlist", "--all-subs",
-            "--sub-format", subformat, "--no-playlist"
-        }
+        if (pyscript == false) then
+            command = {
+                ytdl.path, "-J", "--flat-playlist", "--all-subs",
+                "--sub-format", subformat, "--no-playlist"
+            }
+        else
+            command = {
+                "python", ytdl.path, "-J", "--flat-playlist", "--all-subs",
+                "--sub-format", subformat, "--no-playlist"
+            }
+        end
         if (format ~= "") then
             table.insert(command, "--format")
             table.insert(command, format)
