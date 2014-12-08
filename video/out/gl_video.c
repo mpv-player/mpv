@@ -64,29 +64,10 @@ static const char *const fixed_scale_filters[] = {
     NULL
 };
 
-struct lut_tex_format {
-    int pixels;
-    GLint internal_format;
-    GLenum format;
-};
-
-// Indexed with filter_kernel->size.
-// This must match the weightsN functions in the shader.
-// Each entry uses (size+3)/4 pixels per LUT entry, and size/pixels components
-// per pixel.
-const struct lut_tex_format lut_tex_formats[] = {
-    [2] =  {1, GL_RG16F,   GL_RG},
-    [4] =  {1, GL_RGBA16F, GL_RGBA},
-    [6] =  {2, GL_RGB16F,  GL_RGB},
-    [8] =  {2, GL_RGBA16F, GL_RGBA},
-    [12] = {3, GL_RGBA16F, GL_RGBA},
-    [16] = {4, GL_RGBA16F, GL_RGBA},
-    [32] = {8, GL_RGBA16F, GL_RGBA},
-    [64] = {16, GL_RGBA16F, GL_RGBA},
-};
-
 // must be sorted, and terminated with 0
-static const int filter_sizes[] = {2, 4, 6, 8, 12, 16, 32, 64, 0};
+// 2 & 6 are special-cased, the rest can be generated with WEIGHTS_N().
+int filter_sizes[] =
+    {2, 4, 6, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 0};
 
 struct vertex {
     float position[2];
@@ -247,6 +228,13 @@ static const struct fmt_entry gl_byte_formats[] = {
     {0, GL_RG16,    GL_RG,      GL_UNSIGNED_SHORT},     // 2 x 16
     {0, GL_RGB16,   GL_RGB,     GL_UNSIGNED_SHORT},     // 3 x 16
     {0, GL_RGBA16,  GL_RGBA,    GL_UNSIGNED_SHORT},     // 4 x 16
+};
+
+static const struct fmt_entry gl_float16_formats[] = {
+    {0, GL_R16F,    GL_RED,     GL_FLOAT},              // 1 x f
+    {0, GL_RG16F,   GL_RG,      GL_FLOAT},              // 2 x f
+    {0, GL_RGB16F,  GL_RGB,     GL_FLOAT},              // 3 x f
+    {0, GL_RGBA16F, GL_RGBA,    GL_FLOAT},              // 4 x f
 };
 
 static const struct fmt_entry gl_apple_formats[] = {
@@ -853,7 +841,7 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
         snprintf(name, sizeof(name), "sample_scaler%d", unit);
         APPENDF(shader, "#define DEF_SCALER%d \\\n", unit);
         char lut_fn[40];
-        if (size < 8) {
+        if (size == 2 || size == 6) {
             snprintf(lut_fn, sizeof(lut_fn), "weights%d", size);
         } else {
             snprintf(lut_fn, sizeof(lut_fn), "weights_scaler%d", unit);
@@ -1190,10 +1178,15 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
     update_scale_factor(p, scaler);
 
     int size = scaler->kernel->size;
-    assert(size < FF_ARRAY_ELEMS(lut_tex_formats));
-    const struct lut_tex_format *fmt = &lut_tex_formats[size];
-    bool is_luma = scaler->index == 0;
-    scaler->lut_name = is_luma ? "lut_l" : "lut_c";
+    int elems_per_pixel = 4;
+    if (size == 2) {
+        elems_per_pixel = 2;
+    } else if (size == 6) {
+        elems_per_pixel = 3;
+    }
+    int width = size / elems_per_pixel;
+    const struct fmt_entry *fmt = &gl_float16_formats[elems_per_pixel - 1];
+    scaler->lut_name = scaler->index == 0 ? "lut_l" : "lut_c";
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_SCALERS + scaler->index);
 
@@ -1206,7 +1199,7 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
 
     float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE * size);
     mp_compute_lut(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, fmt->pixels,
+    gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, width,
                    LOOKUP_TEXTURE_SIZE, 0, fmt->format, GL_FLOAT, weights);
     talloc_free(weights);
 

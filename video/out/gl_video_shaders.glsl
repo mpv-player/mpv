@@ -224,11 +224,6 @@ float[2] weights2(sampler2D lookup, float f) {
     return float[2](c.r, c.g);
 }
 
-float[4] weights4(sampler2D lookup, float f) {
-    vec4 c = texture(lookup, vec2(0.5, f));
-    return float[4](c.r, c.g, c.b, c.a);
-}
-
 float[6] weights6(sampler2D lookup, float f) {
     vec4 c1 = texture(lookup, vec2(0.25, f));
     vec4 c2 = texture(lookup, vec2(0.75, f));
