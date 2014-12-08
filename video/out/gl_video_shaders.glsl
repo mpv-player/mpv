@@ -154,10 +154,8 @@ uniform VIDEO_SAMPLER texture3;
 uniform vec2 textures_size[4];
 uniform vec2 chroma_center_offset;
 uniform vec2 chroma_div;
-uniform sampler1D lut_c_1d;
-uniform sampler1D lut_l_1d;
-uniform sampler2D lut_c_2d;
-uniform sampler2D lut_l_2d;
+uniform sampler2D lut_c;
+uniform sampler2D lut_l;
 uniform sampler3D lut_3d;
 uniform sampler2D dither;
 uniform mat4x3 colormatrix;
@@ -221,13 +219,13 @@ vec4 sample_bicubic_fast(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float p
     return mix(aa, ab, parmx.b);
 }
 
-float[2] weights2(sampler1D lookup, float f) {
-    vec4 c = texture1D(lookup, f);
+float[2] weights2(sampler2D lookup, float f) {
+    vec4 c = texture(lookup, vec2(0.5, f));
     return float[2](c.r, c.g);
 }
 
-float[4] weights4(sampler1D lookup, float f) {
-    vec4 c = texture1D(lookup, f);
+float[4] weights4(sampler2D lookup, float f) {
+    vec4 c = texture(lookup, vec2(0.5, f));
     return float[4](c.r, c.g, c.b, c.a);
 }
 
@@ -259,8 +257,8 @@ WEIGHTS_N(weights64, 64)
 
 // The dir parameter is (0, 1) or (1, 0), and we expect the shader compiler to
 // remove all the redundant multiplications and additions.
-#define SAMPLE_CONVOLUTION_SEP_N(NAME, N, SAMPLERT, WEIGHTS_FUNC)           \
-    vec4 NAME(vec2 dir, SAMPLERT lookup, VIDEO_SAMPLER tex, vec2 texsize,   \
+#define SAMPLE_CONVOLUTION_SEP_N(NAME, N, WEIGHTS_FUNC)                     \
+    vec4 NAME(vec2 dir, sampler2D lookup, VIDEO_SAMPLER tex, vec2 texsize,  \
               vec2 texcoord) {                                              \
         vec2 pt = (1 / texsize) * dir;                                      \
         float fcoord = dot(fract(texcoord * texsize - 0.5), dir);           \
@@ -273,17 +271,17 @@ WEIGHTS_N(weights64, 64)
         return res;                                                         \
     }
 
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep2, 2, sampler1D, weights2)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep4, 4, sampler1D, weights4)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep6, 6, sampler2D, weights6)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep8, 8, sampler2D, weights8)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep12, 12, sampler2D, weights12)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep16, 16, sampler2D, weights16)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep32, 32, sampler2D, weights32)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep64, 64, sampler2D, weights64)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep2, 2, weights2)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep4, 4, weights4)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep6, 6, weights6)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep8, 8, weights8)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep12, 12, weights12)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep16, 16, weights16)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep32, 32, weights32)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep64, 64, weights64)
 
-#define SAMPLE_CONVOLUTION_N(NAME, N, SAMPLERT, WEIGHTS_FUNC)               \
-    vec4 NAME(SAMPLERT lookup, VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {\
+#define SAMPLE_CONVOLUTION_N(NAME, N, WEIGHTS_FUNC)                         \
+    vec4 NAME(sampler2D lookup, VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {\
         vec2 pt = 1 / texsize;                                              \
         vec2 fcoord = fract(texcoord * texsize - 0.5);                      \
         vec2 base = texcoord - fcoord * pt - pt * (N / 2 - 1);              \
@@ -299,14 +297,14 @@ SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep64, 64, sampler2D, weights64)
         return res;                                                         \
     }
 
-SAMPLE_CONVOLUTION_N(sample_convolution2, 2, sampler1D, weights2)
-SAMPLE_CONVOLUTION_N(sample_convolution4, 4, sampler1D, weights4)
-SAMPLE_CONVOLUTION_N(sample_convolution6, 6, sampler2D, weights6)
-SAMPLE_CONVOLUTION_N(sample_convolution8, 8, sampler2D, weights8)
-SAMPLE_CONVOLUTION_N(sample_convolution12, 12, sampler2D, weights12)
-SAMPLE_CONVOLUTION_N(sample_convolution16, 16, sampler2D, weights16)
-SAMPLE_CONVOLUTION_N(sample_convolution32, 32, sampler2D, weights32)
-SAMPLE_CONVOLUTION_N(sample_convolution64, 64, sampler2D, weights64)
+SAMPLE_CONVOLUTION_N(sample_convolution2, 2, weights2)
+SAMPLE_CONVOLUTION_N(sample_convolution4, 4, weights4)
+SAMPLE_CONVOLUTION_N(sample_convolution6, 6, weights6)
+SAMPLE_CONVOLUTION_N(sample_convolution8, 8, weights8)
+SAMPLE_CONVOLUTION_N(sample_convolution12, 12, weights12)
+SAMPLE_CONVOLUTION_N(sample_convolution16, 16, weights16)
+SAMPLE_CONVOLUTION_N(sample_convolution32, 32, weights32)
+SAMPLE_CONVOLUTION_N(sample_convolution64, 64, weights64)
 
 // Unsharp masking
 vec4 sample_sharpen3(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param1) {

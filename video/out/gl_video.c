@@ -1159,39 +1159,28 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
     int size = scaler->kernel->size;
     assert(size < FF_ARRAY_ELEMS(lut_tex_formats));
     const struct lut_tex_format *fmt = &lut_tex_formats[size];
-    bool use_2d = fmt->pixels > 1;
     bool is_luma = scaler->index == 0;
-    scaler->lut_name = use_2d
-                       ? (is_luma ? "lut_l_2d" : "lut_c_2d")
-                       : (is_luma ? "lut_l_1d" : "lut_c_1d");
+    scaler->lut_name = is_luma ? "lut_l" : "lut_c";
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_SCALERS + scaler->index);
-    GLenum target = use_2d ? GL_TEXTURE_2D : GL_TEXTURE_1D;
 
     if (!scaler->gl_lut)
         gl->GenTextures(1, &scaler->gl_lut);
 
-    gl->BindTexture(target, scaler->gl_lut);
+    gl->BindTexture(GL_TEXTURE_2D, scaler->gl_lut);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
     gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
     float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE * size);
     mp_compute_lut(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
-    if (use_2d) {
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, fmt->pixels,
-                       LOOKUP_TEXTURE_SIZE, 0, fmt->format, GL_FLOAT,
-                       weights);
-    } else {
-        gl->TexImage1D(GL_TEXTURE_1D, 0, fmt->internal_format,
-                       LOOKUP_TEXTURE_SIZE, 0, fmt->format, GL_FLOAT,
-                       weights);
-    }
+    gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, fmt->pixels,
+                   LOOKUP_TEXTURE_SIZE, 0, fmt->format, GL_FLOAT, weights);
     talloc_free(weights);
 
-    gl->TexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl->TexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl->TexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl->TexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     gl->ActiveTexture(GL_TEXTURE0);
 
