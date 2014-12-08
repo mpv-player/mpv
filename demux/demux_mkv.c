@@ -1176,7 +1176,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 {
     unsigned char *extradata = NULL;
     unsigned int extradata_size = 0;
-    bool raw = false;
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
     if (!sh)
         return 1;
@@ -1200,6 +1199,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 
         extradata = track->private_data + 40;
         extradata_size = track->private_size - 40;
+        mp_set_codec_from_tag(sh);
     } else {
         sh_v->bits_per_coded_sample = 24;
 
@@ -1224,28 +1224,38 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
             extradata_size = cnt + 8;
             extradata = src - 8;
             track->realmedia = 1;
+            mp_set_codec_from_tag(sh);
         } else if (strcmp(track->codec_id, MKV_V_UNCOMPRESSED) == 0) {
             // raw video, "like AVI" - this is a FourCC
             sh->format = track->colorspace;
-            raw = true;
+            sh->codec = "rawvideo";
+        } else if (strcmp(track->codec_id, MKV_V_QUICKTIME) == 0) {
+            uint32_t fourcc1 = 0, fourcc2 = 0;
+            if (track->private_size >= 8) {
+                fourcc1 = AV_RL32(track->private_data + 0);
+                fourcc2 = AV_RL32(track->private_data + 4);
+            }
+            if (fourcc1 == MP_FOURCC('S', 'V', 'Q', '3') ||
+                fourcc2 == MP_FOURCC('S', 'V', 'Q', '3'))
+            {
+                sh->codec = "svq3";
+                extradata = track->private_data;
+                extradata_size = track->private_size;
+            }
         } else {
             const videocodec_info_t *vi = vinfo;
             while (vi->id && strcmp(vi->id, track->codec_id))
                 vi++;
-            sh->format = vi->fourcc;
+            if (vi->id) {
+                sh->format = vi->fourcc;
+                mp_set_codec_from_tag(sh);
+            }
             if (vi->extradata && track->private_data && track->private_size > 0)
             {
                 extradata = track->private_data;
                 extradata_size = track->private_size;
             }
             track->parse = vi->parse;
-            if (!vi->id) {
-                MP_WARN(demuxer, "Unknown/unsupported "
-                        "CodecID (%s) or missing/bad CodecPrivate\n"
-                        "data (track %u).\n",
-                        track->codec_id, track->tnum);
-                return 1;
-            }
         }
     }
 
@@ -1258,10 +1268,10 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->coded_height = track->v_height;
     sh_v->extradata = talloc_memdup(sh_v, extradata, extradata_size);
     sh_v->extradata_len = extradata_size;
-    if (raw) {
-        sh->codec = "rawvideo";
-    } else {
-        mp_set_codec_from_tag(sh);
+    if (!sh->codec) {
+        MP_WARN(demuxer, "Unknown/unsupported CodecID (%s) or missing/bad "
+                "CodecPrivate data (track %u).\n",
+                track->codec_id, track->tnum);
     }
     if (track->v_frate == 0.0)
         track->v_frate = 25.0;
