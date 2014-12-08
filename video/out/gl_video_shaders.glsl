@@ -257,87 +257,56 @@ WEIGHTS_N(weights16, 16)
 WEIGHTS_N(weights32, 32)
 WEIGHTS_N(weights64, 64)
 
-#define CONVOLUTION_SEP_N(NAME, N)                                          \
-    vec4 NAME(VIDEO_SAMPLER tex, vec2 texcoord, vec2 pt, float weights[N]) {\
-        vec4 res = vec4(0);                                                 \
-        for (int n = 0; n < N; n++) {                                       \
-            res += weights[n] * texture(tex, texcoord + pt * n);            \
-        }                                                                   \
-        return res;                                                         \
-    }
-
-CONVOLUTION_SEP_N(convolution_sep2, 2)
-CONVOLUTION_SEP_N(convolution_sep4, 4)
-CONVOLUTION_SEP_N(convolution_sep6, 6)
-CONVOLUTION_SEP_N(convolution_sep8, 8)
-CONVOLUTION_SEP_N(convolution_sep12, 12)
-CONVOLUTION_SEP_N(convolution_sep16, 16)
-CONVOLUTION_SEP_N(convolution_sep32, 32)
-CONVOLUTION_SEP_N(convolution_sep64, 64)
-
 // The dir parameter is (0, 1) or (1, 0), and we expect the shader compiler to
 // remove all the redundant multiplications and additions.
-#define SAMPLE_CONVOLUTION_SEP_N(NAME, N, SAMPLERT, CONV_FUNC, WEIGHTS_FUNC)\
+#define SAMPLE_CONVOLUTION_SEP_N(NAME, N, SAMPLERT, WEIGHTS_FUNC)           \
     vec4 NAME(vec2 dir, SAMPLERT lookup, VIDEO_SAMPLER tex, vec2 texsize,   \
               vec2 texcoord) {                                              \
         vec2 pt = (1 / texsize) * dir;                                      \
         float fcoord = dot(fract(texcoord * texsize - 0.5), dir);           \
-        vec2 base = texcoord - fcoord * pt;                                 \
-        return CONV_FUNC(tex, base - pt * (N / 2 - 1), pt,                  \
-                         WEIGHTS_FUNC(lookup, fcoord));                     \
+        vec2 base = texcoord - fcoord * pt - pt * (N / 2 - 1);              \
+        float weights[N] = WEIGHTS_FUNC(lookup, fcoord);                    \
+        vec4 res = vec4(0);                                                 \
+        for (int n = 0; n < N; n++) {                                       \
+            res += weights[n] * texture(tex, base + pt * n);                \
+        }                                                                   \
+        return res;                                                         \
     }
 
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep2, 2, sampler1D, convolution_sep2, weights2)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep4, 4, sampler1D, convolution_sep4, weights4)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep6, 6, sampler2D, convolution_sep6, weights6)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep8, 8, sampler2D, convolution_sep8, weights8)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep12, 12, sampler2D, convolution_sep12, weights12)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep16, 16, sampler2D, convolution_sep16, weights16)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep32, 32, sampler2D, convolution_sep32, weights32)
-SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep64, 64, sampler2D, convolution_sep64, weights64)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep2, 2, sampler1D, weights2)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep4, 4, sampler1D, weights4)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep6, 6, sampler2D, weights6)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep8, 8, sampler2D, weights8)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep12, 12, sampler2D, weights12)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep16, 16, sampler2D, weights16)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep32, 32, sampler2D, weights32)
+SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep64, 64, sampler2D, weights64)
 
-
-#define CONVOLUTION_N(NAME, N)                                               \
-    vec4 NAME(VIDEO_SAMPLER tex, vec2 texcoord, vec2 pt, float taps_x[N],    \
-              float taps_y[N]) {                                             \
-        vec4 res = vec4(0);                                                  \
-        for (int y = 0; y < N; y++) {                                        \
-            vec4 line = vec4(0);                                             \
-            for (int x = 0; x < N; x++)                                      \
-                line += taps_x[x] * texture(tex, texcoord + pt * vec2(x, y));\
-            res += taps_y[y] * line;                                         \
-        }                                                                    \
-        return res;                                                          \
-    }
-
-CONVOLUTION_N(convolution2, 2)
-CONVOLUTION_N(convolution4, 4)
-CONVOLUTION_N(convolution6, 6)
-CONVOLUTION_N(convolution8, 8)
-CONVOLUTION_N(convolution12, 12)
-CONVOLUTION_N(convolution16, 16)
-CONVOLUTION_N(convolution32, 32)
-CONVOLUTION_N(convolution64, 64)
-
-#define SAMPLE_CONVOLUTION_N(NAME, N, SAMPLERT, CONV_FUNC, WEIGHTS_FUNC)    \
+#define SAMPLE_CONVOLUTION_N(NAME, N, SAMPLERT, WEIGHTS_FUNC)               \
     vec4 NAME(SAMPLERT lookup, VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {\
         vec2 pt = 1 / texsize;                                              \
         vec2 fcoord = fract(texcoord * texsize - 0.5);                      \
-        vec2 base = texcoord - fcoord * pt;                                 \
-        return CONV_FUNC(tex, base - pt * (N / 2 - 1), pt,                  \
-                         WEIGHTS_FUNC(lookup, fcoord.x),                    \
-                         WEIGHTS_FUNC(lookup, fcoord.y));                   \
+        vec2 base = texcoord - fcoord * pt - pt * (N / 2 - 1);              \
+        vec4 res = vec4(0);                                                 \
+        float w_x[N] = WEIGHTS_FUNC(lookup, fcoord.x);                      \
+        float w_y[N] = WEIGHTS_FUNC(lookup, fcoord.y);                      \
+        for (int y = 0; y < N; y++) {                                       \
+            vec4 line = vec4(0);                                            \
+            for (int x = 0; x < N; x++)                                     \
+                line += w_x[x] * texture(tex, base + pt * vec2(x, y));      \
+            res += w_y[y] * line;                                           \
+        }                                                                   \
+        return res;                                                         \
     }
 
-SAMPLE_CONVOLUTION_N(sample_convolution2, 2, sampler1D, convolution2, weights2)
-SAMPLE_CONVOLUTION_N(sample_convolution4, 4, sampler1D, convolution4, weights4)
-SAMPLE_CONVOLUTION_N(sample_convolution6, 6, sampler2D, convolution6, weights6)
-SAMPLE_CONVOLUTION_N(sample_convolution8, 8, sampler2D, convolution8, weights8)
-SAMPLE_CONVOLUTION_N(sample_convolution12, 12, sampler2D, convolution12, weights12)
-SAMPLE_CONVOLUTION_N(sample_convolution16, 16, sampler2D, convolution16, weights16)
-SAMPLE_CONVOLUTION_N(sample_convolution32, 32, sampler2D, convolution32, weights32)
-SAMPLE_CONVOLUTION_N(sample_convolution64, 64, sampler2D, convolution64, weights64)
-
+SAMPLE_CONVOLUTION_N(sample_convolution2, 2, sampler1D, weights2)
+SAMPLE_CONVOLUTION_N(sample_convolution4, 4, sampler1D, weights4)
+SAMPLE_CONVOLUTION_N(sample_convolution6, 6, sampler2D, weights6)
+SAMPLE_CONVOLUTION_N(sample_convolution8, 8, sampler2D, weights8)
+SAMPLE_CONVOLUTION_N(sample_convolution12, 12, sampler2D, weights12)
+SAMPLE_CONVOLUTION_N(sample_convolution16, 16, sampler2D, weights16)
+SAMPLE_CONVOLUTION_N(sample_convolution32, 32, sampler2D, weights32)
+SAMPLE_CONVOLUTION_N(sample_convolution64, 64, sampler2D, weights64)
 
 // Unsharp masking
 vec4 sample_sharpen3(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param1) {
