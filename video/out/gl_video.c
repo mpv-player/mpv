@@ -835,27 +835,43 @@ static void shader_def_opt(char **shader, const char *name, bool b)
         shader_def(shader, name, "1");
 }
 
+#define APPENDF(s_ptr, ...) \
+    *(s_ptr) = talloc_asprintf_append(*(s_ptr), __VA_ARGS__)
+
 static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
 {
-    const char *target = scaler->index == 0 ? "SAMPLE_L" : "SAMPLE_C";
+    int unit = scaler->index;
+    const char *target = unit == 0 ? "SAMPLE_L" : "SAMPLE_C";
     if (!scaler->kernel) {
-        *shader = talloc_asprintf_append(*shader, "#define %s(p0, p1, p2) "
-            "sample_%s(p0, p1, p2, filter_param1_%c)\n",
-            target, scaler->name, "lc"[scaler->index]);
+        APPENDF(shader, "#define %s(p0, p1, p2) "
+                "sample_%s(p0, p1, p2, filter_param1_%c)\n",
+                target, scaler->name, "lc"[unit]);
     } else {
         int size = scaler->kernel->size;
+        const char *lut_tex = scaler->lut_name;
+        char name[40];
+        snprintf(name, sizeof(name), "sample_scaler%d", unit);
+        APPENDF(shader, "#define DEF_SCALER%d \\\n", unit);
+        char lut_fn[40];
+        if (size < 8) {
+            snprintf(lut_fn, sizeof(lut_fn), "weights%d", size);
+        } else {
+            snprintf(lut_fn, sizeof(lut_fn), "weights_scaler%d", unit);
+            APPENDF(shader, "    WEIGHTS_N(%s, %d) \\\n    ", lut_fn, size);
+        }
         if (pass != -1) {
             // The direction/pass assignment is rather arbitrary, but fixed in
             // other parts of the code (like FBO setup).
             const char *direction = pass == 0 ? "0, 1" : "1, 0";
-            *shader = talloc_asprintf_append(*shader, "#define %s(p0, p1, p2) "
-                "sample_convolution_sep%d(vec2(%s), %s, p0, p1, p2)\n",
-                target, size, direction, scaler->lut_name);
+            // SAMPLE_CONVOLUTION_SEP_N(NAME, DIR, N, LUT, WEIGHTS_FUNC)
+            APPENDF(shader, "SAMPLE_CONVOLUTION_SEP_N(%s, vec2(%s), %d, %s, %s)\n",
+                    name, direction, size, lut_tex, lut_fn);
         } else {
-            *shader = talloc_asprintf_append(*shader, "#define %s(p0, p1, p2) "
-                "sample_convolution%d(%s, p0, p1, p2)\n",
-                target, size, scaler->lut_name);
+            // SAMPLE_CONVOLUTION_N(NAME, N, LUT, WEIGHTS_FUNC)
+            APPENDF(shader, "SAMPLE_CONVOLUTION_N(%s, %d, %s, %s)\n",
+                    name, size, lut_tex, lut_fn);
         }
+        APPENDF(shader, "#define %s %s\n", target, name);
     }
 }
 
