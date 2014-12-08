@@ -734,7 +734,11 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
         if (chapter < -1)
             chapter = -1;
         if (chapter >= get_chapter_count(mpctx) && step_all > 0) {
-            mpctx->stop_play = PT_NEXT_ENTRY;
+            if (mpctx->opts->keep_open) {
+                seek_to_last_frame(mpctx);
+            } else {
+                mpctx->stop_play = PT_NEXT_ENTRY;
+            }
         } else {
             mp_seek_chapter(mpctx, chapter);
         }

@@ -781,7 +781,7 @@ static void handle_loop_file(struct MPContext *mpctx)
     }
 }
 
-static void seek_to_last_frame(struct MPContext *mpctx)
+void seek_to_last_frame(struct MPContext *mpctx)
 {
     if (!mpctx->d_video)
         return;

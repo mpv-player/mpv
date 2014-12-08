@@ -454,6 +454,7 @@ void mp_idle(struct MPContext *mpctx);
 void idle_loop(struct MPContext *mpctx);
 void handle_force_window(struct MPContext *mpctx, bool reconfig);
 void add_frame_pts(struct MPContext *mpctx, double pts);
+void seek_to_last_frame(struct MPContext *mpctx);
 
 // scripting.c
 struct mp_scripting {
