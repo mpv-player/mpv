@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#define COBJMACROS
 #include <stdio.h>
 #include <limits.h>
 #include <pthread.h>
@@ -23,6 +24,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <ole2.h>
+#include <shobjidl.h>
 
 #include "options/options.h"
 #include "input/keycodes.h"
@@ -99,6 +101,8 @@ struct vo_w32_state {
 
     // UTF-16 decoding state for WM_CHAR and VK_PACKET
     int high_surrogate;
+
+    ITaskbarList2 *taskbar_list;
 };
 
 typedef struct tagDropTarget {
@@ -835,6 +839,11 @@ static int reinit_window_state(struct vo_w32_state *w32)
     bool toggle_fs = w32->current_fs != w32->opts->fullscreen;
     w32->current_fs = w32->opts->fullscreen;
 
+    if (w32->taskbar_list) {
+        ITaskbarList2_MarkFullscreenWindow(w32->taskbar_list,
+                                           w32->window, w32->opts->fullscreen);
+    }
+
     DWORD style = update_style(w32, GetWindowLong(w32->window, GWL_STYLE));
 
     if (w32->opts->ontop)
@@ -1044,12 +1053,27 @@ static void *gui_thread(void *ptr)
         goto done;
     }
 
-    if (OleInitialize(NULL) == S_OK) {
+    if (SUCCEEDED(OleInitialize(NULL))) {
+        ole_ok = true;
+
         fmtetc_url.cfFormat = (CLIPFORMAT)RegisterClipboardFormat(TEXT("UniformResourceLocator"));
         DropTarget* dropTarget = talloc(NULL, DropTarget);
         DropTarget_Init(dropTarget, w32);
         RegisterDragDrop(w32->window, &dropTarget->iface);
-        ole_ok = true;
+
+        // ITaskbarList2 has the MarkFullscreenWindow method, which is used to
+        // make sure the taskbar is hidden when mpv goes fullscreen
+        if (SUCCEEDED(CoCreateInstance(&CLSID_TaskbarList, NULL,
+                                       CLSCTX_INPROC_SERVER, &IID_ITaskbarList2,
+                                       (void**)&w32->taskbar_list)))
+        {
+            if (FAILED(ITaskbarList2_HrInit(w32->taskbar_list))) {
+                ITaskbarList2_Release(w32->taskbar_list);
+                w32->taskbar_list = NULL;
+            }
+        }
+    } else {
+        MP_ERR(w32, "Failed to initialize OLE/COM\n");
     }
 
     w32->tracking   = FALSE;
@@ -1083,6 +1107,8 @@ done:
         RevokeDragDrop(w32->window);
         DestroyWindow(w32->window);
     }
+    if (w32->taskbar_list)
+        ITaskbarList2_Release(w32->taskbar_list);
     if (ole_ok)
         OleUninitialize();
     SetThreadExecutionState(ES_CONTINUOUS);
