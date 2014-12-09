@@ -49,7 +49,6 @@ public:
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size)
     {
         QOpenGLFramebufferObjectFormat format;
-        format.setSamples(4);
         return new QOpenGLFramebufferObject(size, format);
     }
 

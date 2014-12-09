@@ -5,9 +5,9 @@
 
 #include <QtQuick/QQuickFramebufferObject>
 
-#include "libmpv/client.h"
-#include "libmpv/opengl_cb.h"
-#include "libmpv/qthelper.hpp"
+#include <mpv/client.h>
+#include <mpv/opengl_cb.h>
+#include <mpv/qthelper.hpp>
 
 class MpvObject : public QQuickFramebufferObject
 {
