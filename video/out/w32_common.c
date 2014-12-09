@@ -43,8 +43,6 @@
 #include "misc/rendezvous.h"
 #include "talloc.h"
 
-#define WIN_ID_TO_HWND(x) ((HWND)(intptr_t)(x))
-
 static const wchar_t classname[] = L"mpv";
 
 static __thread struct vo_w32_state *w32_thread_context;
@@ -60,6 +58,7 @@ struct vo_w32_state {
     struct mp_dispatch_queue *dispatch; // used to run stuff on the GUI thread
 
     HWND window;
+    HWND parent; // 0 normally, set in embedding mode
 
     // Size and virtual position of the current screen.
     struct mp_rect screenrc;
@@ -558,7 +557,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     }
     case WM_SIZING:
         if (w32->opts->keepaspect && w32->opts->keepaspect_window &&
-            !w32->opts->fullscreen && w32->opts->WinID < 0)
+            !w32->opts->fullscreen && !w32->parent)
         {
             RECT *rc = (RECT*)lParam;
             // get client area of the windows if it had the rect rc
@@ -734,16 +733,15 @@ static void run_message_loop(struct vo_w32_state *w32)
             TranslateMessage(&msg);
         DispatchMessageW(&msg);
 
-        if (w32->opts->WinID >= 0) {
-            HWND parent = WIN_ID_TO_HWND(w32->opts->WinID);
+        if (w32->parent) {
             RECT r, rp;
             BOOL res = GetClientRect(w32->window, &r);
-            res = res && GetClientRect(parent, &rp);
+            res = res && GetClientRect(w32->parent, &rp);
             if (res && (r.right != rp.right || r.bottom != rp.bottom))
                 MoveWindow(w32->window, 0, 0, rp.right, rp.bottom, FALSE);
 
             // Window has probably been closed, e.g. due to parent program crash
-            if (!IsWindow(parent))
+            if (!IsWindow(w32->parent))
                 mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
         }
     }
@@ -834,7 +832,7 @@ static int reinit_window_state(struct vo_w32_state *w32)
     HWND layer = HWND_NOTOPMOST;
     RECT r;
 
-    if (w32->opts->WinID >= 0)
+    if (w32->parent)
         return 1;
 
     bool toggle_fs = w32->current_fs != w32->opts->fullscreen;
@@ -966,7 +964,7 @@ static void gui_thread_reconfig(void *ptr)
     w32->o_dheight = vo->dheight;
 
     // the desired size is ignored in wid mode, it always matches the window size.
-    if (w32->opts->WinID < 0) {
+    if (!w32->parent) {
         if (w32->window_bounds_initialized) {
             // restore vo_dwidth/vo_dheight, which are reset against our will
             // in vo_config()
@@ -1032,15 +1030,17 @@ static void *gui_thread(void *ptr)
 
     w32_thread_context = w32;
 
-    if (w32->opts->WinID >= 0) {
+    if (w32->opts->WinID >= 0)
+        w32->parent = (HWND)(intptr_t)(w32->opts->WinID);
+
+    if (w32->parent) {
         RECT r;
-        GetClientRect(WIN_ID_TO_HWND(w32->opts->WinID), &r);
+        GetClientRect(w32->parent, &r);
         w32->window = CreateWindowExW(WS_EX_NOPARENTNOTIFY, classname,
                                       classname,
                                       WS_CHILD | WS_VISIBLE,
                                       0, 0, r.right, r.bottom,
-                                      WIN_ID_TO_HWND(w32->opts->WinID),
-                                      0, hInstance, NULL);
+                                      w32->parent, 0, hInstance, NULL);
     } else {
         w32->window = CreateWindowExW(0, classname,
                                       classname,
@@ -1084,7 +1084,7 @@ static void *gui_thread(void *ptr)
         .hwndTrack = w32->window,
     };
 
-    if (w32->opts->WinID >= 0)
+    if (w32->parent)
         EnableWindow(w32->window, 0);
 
     w32->cursor_visible = true;
