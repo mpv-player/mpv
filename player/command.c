@@ -4627,6 +4627,7 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
                 ctx->prev_pts < opts->ab_loop[1] &&
                 now >= opts->ab_loop[1])
             {
+                mark_seek(mpctx);
                 queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0], 1, false);
             }
         }
