@@ -141,7 +141,7 @@ static bool is_software_gl(GL *gl)
            strcmp(renderer, "Mesa X11") == 0;
 }
 
-static void dummy_glBindFramebuffer(GLenum target, GLuint framebuffer)
+static void GLAPIENTRY dummy_glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
     assert(framebuffer == 0);
 }
