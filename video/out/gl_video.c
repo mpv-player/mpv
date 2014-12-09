@@ -846,13 +846,13 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
         const char *lut_tex = scaler->lut_name;
         char name[40];
         snprintf(name, sizeof(name), "sample_scaler%d", unit);
-        APPENDF(shader, "#define DEF_SCALER%d \\\n", unit);
+        APPENDF(shader, "#define DEF_SCALER%d \\\n    ", unit);
         char lut_fn[40];
         if (size == 2 || size == 6) {
             snprintf(lut_fn, sizeof(lut_fn), "weights%d", size);
         } else {
             snprintf(lut_fn, sizeof(lut_fn), "weights_scaler%d", unit);
-            APPENDF(shader, "    WEIGHTS_N(%s, %d) \\\n    ", lut_fn, size);
+            APPENDF(shader, "WEIGHTS_N(%s, %d) \\\n    ", lut_fn, size);
         }
         if (pass != -1) {
             // The direction/pass assignment is rather arbitrary, but fixed in
