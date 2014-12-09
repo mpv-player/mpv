@@ -141,6 +141,11 @@ static bool is_software_gl(GL *gl)
            strcmp(renderer, "Mesa X11") == 0;
 }
 
+static void dummy_glBindFramebuffer(GLenum target, GLuint framebuffer)
+{
+    assert(framebuffer == 0);
+}
+
 #define FN_OFFS(name) offsetof(GL, name)
 
 #define DEF_FN(name)            {FN_OFFS(name), {"gl" # name}}
@@ -618,6 +623,10 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     mp_verbose(log, "Detected OpenGL features:");
     list_features(gl->mpgl_caps, log, MSGL_V, false);
+
+    // Provided for simpler handling if no framebuffer support is available.
+    if (!gl->BindFramebuffer)
+        gl->BindFramebuffer = &dummy_glBindFramebuffer;
 }
 
 static void *get_procaddr_wrapper(void *ctx, const char *name)
