@@ -80,6 +80,10 @@ static int create(struct gl_hwdec *hw)
         vaTerminate(p->display);
         return -1;
     }
+    if (hw->reject_emulated && va_guess_if_emulated(p->ctx)) {
+        destroy(hw);
+        return -1;
+    }
     hw->info->vaapi_ctx = p->ctx;
     hw->converted_imgfmt = IMGFMT_RGB0;
     return 0;

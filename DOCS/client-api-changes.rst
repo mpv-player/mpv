@@ -25,6 +25,10 @@ API changes
 
 ::
 
+ 1.11   - add OpenGL rendering interop API - allows an application to combine
+          its own and mpv's OpenGL rendering
+          Warning: this API is not stable yet - anything in opengl_cb.h might
+                   be changed in completely incompatible ways in minor API bumps
  --- mpv 0.7.0 is released ---
  1.10   - deprecate/disable everything directly related to script_dispatch
           (most likely affects nobody)

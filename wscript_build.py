@@ -354,6 +354,7 @@ def build(ctx):
         ( "video/out/vo_lavc.c",                 "encoding" ),
         ( "video/out/vo_null.c" ),
         ( "video/out/vo_opengl.c",               "gl" ),
+        ( "video/out/vo_opengl_cb.c",            "gl" ),
         ( "video/out/vo_opengl_old.c",           "gl" ),
         ( "video/out/vo_sdl.c",                  "sdl2" ),
         ( "video/out/vo_vaapi.c",                "vaapi" ),
@@ -494,7 +495,7 @@ def build(ctx):
             PRIV_LIBS    = get_deps(),
         )
 
-        headers = ["client.h", "qthelper.hpp"]
+        headers = ["client.h", "qthelper.hpp", "opengl_cb.h"]
         for f in headers:
             ctx.install_as(ctx.env.INCDIR + '/mpv/' + f, 'libmpv/' + f)
 

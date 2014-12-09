@@ -105,6 +105,8 @@ enum mp_voctrl {
     VOCTRL_GET_RECENT_FLIP_TIME,        // int64_t* (using mp_time_us())
 
     VOCTRL_GET_PREF_DEINT,              // int*
+
+    VOCTRL_SET_LIBMPV_OPENGL_CB_CONTEXT,// struct mpv_opengl_cb_context*
 };
 
 // VOCTRL_SET_EQUALIZER

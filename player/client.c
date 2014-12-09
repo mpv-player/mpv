@@ -1511,6 +1511,8 @@ static const char *const err_table[] = {
     [-MPV_ERROR_VO_INIT_FAILED] = "audio output initialization failed",
     [-MPV_ERROR_NOTHING_TO_PLAY] = "the file has no audio or video data",
     [-MPV_ERROR_UNKNOWN_FORMAT] = "unrecognized file format",
+    [-MPV_ERROR_UNSUPPORTED] = "not supported",
+    [-MPV_ERROR_NOT_IMPLEMENTED] = "operation not implemented",
 };
 
 const char *mpv_error_string(int error)
@@ -1566,4 +1568,59 @@ void mpv_free(void *data)
 int64_t mpv_get_time_us(mpv_handle *ctx)
 {
     return mp_time_us();
+}
+
+#include "libmpv/opengl_cb.h"
+
+#if HAVE_GL
+static mpv_opengl_cb_context *opengl_cb_get_context(mpv_handle *ctx)
+{
+    mpv_opengl_cb_context *cb = ctx->mpctx->gl_cb_ctx;
+    if (!cb) {
+        cb = mp_opengl_create(ctx->mpctx->global, ctx->mpctx->osd);
+        ctx->mpctx->gl_cb_ctx = cb;
+    }
+    return cb;
+}
+#else
+static mpv_opengl_cb_context *opengl_cb_get_context(mpv_handle *ctx)
+{
+    return NULL;
+}
+void mpv_opengl_cb_set_update_callback(mpv_opengl_cb_context *ctx,
+                                       mpv_opengl_cb_update_fn callback,
+                                       void *callback_ctx)
+{
+    return MPV_ERROR_NOT_IMPLEMENTED;
+}
+int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
+                          mpv_opengl_cb_get_proc_address_fn get_proc_address,
+                          void *get_proc_address_ctx)
+{
+    return MPV_ERROR_NOT_IMPLEMENTED;
+}
+int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
+{
+    return MPV_ERROR_NOT_IMPLEMENTED;
+}
+int mpv_opengl_cb_uninit_gl(mpv_opengl_cb_context *ctx)
+{
+    return MPV_ERROR_NOT_IMPLEMENTED;
+}
+#endif
+
+void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
+{
+    if (!ctx->mpctx->initialized)
+        return NULL;
+    void *res = NULL;
+    lock_core(ctx);
+    switch (sub_api) {
+    case MPV_SUB_API_OPENGL_CB:
+        res = opengl_cb_get_context(ctx);
+        break;
+    default:;
+    }
+    unlock_core(ctx);
+    return res;
 }

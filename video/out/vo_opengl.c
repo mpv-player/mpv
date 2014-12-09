@@ -96,7 +96,7 @@ static void resize(struct gl_priv *p)
     struct mp_osd_res osd;
     vo_get_src_dst_rects(vo, &src, &dst, &osd);
 
-    gl_video_resize(p->renderer, &wnd, &src, &dst, &osd);
+    gl_video_resize(p->renderer, &wnd, &src, &dst, &osd, false);
 
     vo->want_redraw = true;
 }
@@ -447,7 +447,7 @@ err_out:
 }
 
 #define OPT_BASE_STRUCT struct gl_priv
-const struct m_option options[] = {
+static const struct m_option options[] = {
     OPT_FLAG("glfinish", use_glFinish, 0),
     OPT_FLAG("waitvsync", waitvsync, 0),
     OPT_INT("swapinterval", swap_interval, 0, OPTDEF_INT(1)),

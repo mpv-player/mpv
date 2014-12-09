@@ -15,11 +15,16 @@ mpv_get_property
 mpv_get_property_async
 mpv_get_property_osd_string
 mpv_get_property_string
+mpv_get_sub_api
 mpv_get_time_us
 mpv_get_wakeup_pipe
 mpv_initialize
 mpv_load_config_file
 mpv_observe_property
+mpv_opengl_cb_init_gl
+mpv_opengl_cb_render
+mpv_opengl_cb_set_update_callback
+mpv_opengl_cb_uninit_gl
 mpv_request_event
 mpv_request_log_messages
 mpv_resume

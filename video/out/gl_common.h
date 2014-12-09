@@ -168,6 +168,8 @@ void mpgl_set_backend_wayland(MPGLContext *ctx);
 
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);
+void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
+                          void *fn_ctx, const char *ext2, struct mp_log *log);
 
 // print a multi line string with line numbers (e.g. for shader sources)
 // log, lev: module and log level, as in mp_msg()

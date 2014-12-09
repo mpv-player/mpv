@@ -190,6 +190,7 @@ struct gl_video {
     struct mp_rect dst_rect;    // video rectangle on output window
     struct mp_osd_res osd_rect; // OSD size/margins
     int vp_x, vp_y, vp_w, vp_h; // GL viewport
+    bool vp_vflipped;
 
     int frames_rendered;
 
@@ -574,7 +575,10 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     loc = gl->GetUniformLocation(program, "transform");
     if (loc >= 0 && p->vp_w > 0 && p->vp_h > 0) {
         float matrix[3][3];
-        matrix_ortho2d(matrix, 0, p->vp_w, p->vp_h, 0);
+        int vvp[2] = {p->vp_h, 0};
+        if (p->vp_vflipped)
+            MPSWAP(int, vvp[0], vvp[1]);
+        matrix_ortho2d(matrix, 0, p->vp_w, vvp[0], vvp[1]);
         gl->UniformMatrix3fv(loc, 1, GL_FALSE, &matrix[0][0]);
     }
 
@@ -1786,7 +1790,7 @@ static void check_resize(struct gl_video *p)
 
 void gl_video_resize(struct gl_video *p, struct mp_rect *window,
                      struct mp_rect *src, struct mp_rect *dst,
-                     struct mp_osd_res *osd)
+                     struct mp_osd_res *osd, bool vflip)
 {
     p->src_rect = *src;
     p->src_rect_rot = *src;
@@ -1803,6 +1807,7 @@ void gl_video_resize(struct gl_video *p, struct mp_rect *window,
     p->vp_w = window->x1 - window->x0;
     p->vp_h = window->y1 - window->y0;
 
+    p->vp_vflipped = vflip;
 
     check_resize(p);
 }
@@ -2188,7 +2193,7 @@ static int init_gl(struct gl_video *p)
 
     gl->BindBuffer(GL_ARRAY_BUFFER, 0);
 
-    gl->ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    gl_video_set_gl_state(p);
 
     debug_check_gl(p, "after init_gl");
 
@@ -2212,6 +2217,24 @@ void gl_video_uninit(struct gl_video *p)
     mpgl_osd_destroy(p->osd);
 
     talloc_free(p);
+}
+
+void gl_video_set_gl_state(struct gl_video *p)
+{
+    GL *gl = p->gl;
+
+    gl->ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    gl->ActiveTexture(GL_TEXTURE0);
+}
+
+void gl_video_unset_gl_state(struct gl_video *p)
+{
+    GL *gl = p->gl;
+
+    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
+    gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
 // dest = src.<w> (always using 4 components)

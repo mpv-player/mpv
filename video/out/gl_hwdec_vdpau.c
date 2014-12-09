@@ -111,6 +111,10 @@ static int create(struct gl_hwdec *hw)
         return -1;
     p->vdp_surface = VDP_INVALID_HANDLE;
     p->mixer = mp_vdpau_mixer_create(p->ctx, hw->log);
+    if (hw->reject_emulated && mp_vdpau_guess_if_emulated(p->ctx)) {
+        destroy(hw);
+        return -1;
+    }
     hw->info->vdpau_ctx = p->ctx;
     hw->converted_imgfmt = IMGFMT_RGB0;
     return 0;

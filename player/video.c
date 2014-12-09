@@ -275,6 +275,9 @@ int reinit_video_chain(struct MPContext *mpctx)
             goto err_out;
         }
         mpctx->mouse_cursor_visible = true;
+
+        vo_control(mpctx->video_out, VOCTRL_SET_LIBMPV_OPENGL_CB_CONTEXT,
+                   mpctx->gl_cb_ctx);
     }
 
     update_window_title(mpctx, true);

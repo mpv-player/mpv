@@ -474,15 +474,15 @@ static const struct gl_functions gl_functions[] = {
 // log: used to output messages
 // Note: if you create a CONTEXT_FORWARD_COMPATIBLE_BIT_ARB with OpenGL 3.0,
 //       you must append "GL_ARB_compatibility" to ext2.
-void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
-                         const char *ext2, struct mp_log *log)
+void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
+                          void *fn_ctx, const char *ext2, struct mp_log *log)
 {
     talloc_free_children(gl);
     *gl = (GL) {
         .extensions = talloc_strdup(gl, ext2 ? ext2 : ""),
     };
 
-    gl->GetString = getProcAddress ? getProcAddress("glGetString") : NULL;
+    gl->GetString = get_fn(fn_ctx, "glGetString");
     if (!gl->GetString) {
         mp_err(log, "Can't load OpenGL functions.\n");
         return;
@@ -508,8 +508,8 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
 
     bool has_legacy = false;
     if (gl->version >= MPGL_VER(3, 0)) {
-        gl->GetStringi = getProcAddress("glGetStringi");
-        gl->GetIntegerv = getProcAddress("glGetIntegerv");
+        gl->GetStringi = get_fn(fn_ctx, "glGetStringi");
+        gl->GetIntegerv = get_fn(fn_ctx, "glGetIntegerv");
 
         if (!(gl->GetStringi && gl->GetIntegerv))
             return;
@@ -571,7 +571,7 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
             const struct gl_function *fn = &section->functions[i];
             void *ptr = NULL;
             for (int x = 0; fn->funcnames[x]; x++) {
-                ptr = getProcAddress((const GLubyte *)fn->funcnames[x]);
+                ptr = get_fn(fn_ctx, fn->funcnames[x]);
                 if (ptr)
                     break;
             }
@@ -618,6 +618,18 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
 
     mp_verbose(log, "Detected OpenGL features:");
     list_features(gl->mpgl_caps, log, MSGL_V, false);
+}
+
+static void *get_procaddr_wrapper(void *ctx, const char *name)
+{
+    void *(*getProcAddress)(const GLubyte *) = ctx;
+    return getProcAddress ? getProcAddress((const GLubyte*)name) : NULL;
+}
+
+void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
+                         const char *ext2, struct mp_log *log)
+{
+    mpgl_load_functions2(gl, get_procaddr_wrapper, getProcAddress, ext2, log);
 }
 
 /**

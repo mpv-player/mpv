@@ -123,14 +123,15 @@ extern "C" {
  * --------------------------
  *
  * Currently you have to get the raw window handle, and set it as "wid" option.
- * This works on X11 and win32 only. In addition, it works with a few VOs only,
- * and VOs which do not support this will just create a freestanding window.
+ * This works on X11, win32, and OSX only. In addition, it works with a few VOs
+ * only, and VOs which do not support this will just create a freestanding
+ * window.
  *
  * Both on X11 and win32, the player will fill the window referenced by the
  * "wid" option fully and letterbox the video (i.e. add black bars if the
  * aspect ratio of the window and the video mismatch).
  *
- * On OSX, embedding is not yet possible, because Cocoa makes this non-trivial.
+ * Also see client API examples and the mpv manpage.
  *
  * Compatibility
  * -------------
@@ -164,7 +165,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 10)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 11)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -269,7 +270,16 @@ typedef enum mpv_error {
      * When trying to load the file, the file format could not be determined,
      * or the file was too broken to open it.
      */
-    MPV_ERROR_UNKNOWN_FORMAT    = -17
+    MPV_ERROR_UNKNOWN_FORMAT    = -17,
+    /**
+     * Generic error for signaling that certain system requirements are not
+     * fulfilled.
+     */
+    MPV_ERROR_UNSUPPORTED       = -18,
+    /**
+     * The API function which was called is a stub only.
+     */
+    MPV_ERROR_NOT_IMPLEMENTED   = -19
 } mpv_error;
 
 /**
@@ -437,6 +447,9 @@ void mpv_resume(mpv_handle *ctx);
  * with playback time. For example, playback could go faster or slower due to
  * playback speed, or due to playback being paused. Use the "time-pos" property
  * instead to get the playback status.
+ *
+ * Unlike other libmpv APIs, this can be called at absolutely any time (even
+ * within wakeup callbacks), as long as the context is valid.
  */
 int64_t mpv_get_time_us(mpv_handle *ctx);
 
@@ -1425,6 +1438,23 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
  *         On MS Windows/MinGW, this will always return -1.
  */
 int mpv_get_wakeup_pipe(mpv_handle *ctx);
+
+typedef enum mpv_sub_api {
+    /**
+     * For using mpv's OpenGL renderer on an external OpenGL context.
+     * mpv_get_sub_api(MPV_SUB_API_OPENGL_CB) returns mpv_opengl_cb_context*.
+     * This context can be used with mpv_opengl_cb_* functions.
+     * Will return NULL if unavailable (if OpenGL support was not compiled in).
+     * See opengl_cb.h for details.
+     */
+    MPV_SUB_API_OPENGL_CB = 1
+} mpv_sub_api;
+
+/**
+ * This is used for additional APIs that are not strictly part of the core API.
+ * See the individual mpv_sub_api member values.
+ */
+void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api);
 
 #ifdef __cplusplus
 }

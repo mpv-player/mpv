@@ -339,6 +339,8 @@ typedef struct MPContext {
     struct mp_nav_state *nav_state;
 
     struct mp_ipc_ctx *ipc_ctx;
+
+    struct mpv_opengl_cb_context *gl_cb_ctx;
 } MPContext;
 
 // audio.c
