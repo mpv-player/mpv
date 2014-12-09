@@ -441,7 +441,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("cursor-autohide-fs-only", cursor_autohide_fs, 0),
     OPT_FLAG("stop-screensaver", stop_screensaver, 0),
 
-    OPT_INT64("wid", vo.WinID, CONF_GLOBAL),
+    OPT_INT64("wid", vo.WinID, 0),
 #if HAVE_X11
     OPT_CHOICE("x11-netwm", vo.x11_netwm, 0,
                ({"auto", 0}, {"no", -1}, {"yes", 1})),
