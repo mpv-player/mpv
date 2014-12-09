@@ -228,6 +228,7 @@ static struct vo *vo_create(struct mpv_global *global,
     talloc_steal(vo, log);
     *vo->in = (struct vo_internal) {
         .dispatch = mp_dispatch_create(vo),
+        .flip_queue_offset = VO_DEFAULT_FLIP_QUEUE_OFFSET,
     };
     mp_make_wakeup_pipe(vo->in->wakeup_pipe);
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
@@ -481,8 +482,8 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
     if (r) {
         // Don't show the frame too early - it would basically freeze the
         // display by disallowing OSD redrawing or VO interaction.
-        // Actually render the frame at earliest 50ms before target time.
-        next_pts -= 0.050 * 1e6;
+        // Actually render the frame at earliest 50ms before target time
+        // (flip_queue_offset is usually VO_DEFAULT_FLIP_QUEUE_OFFSET, 50ms).
         next_pts -= in->flip_queue_offset;
         int64_t now = mp_time_us();
         if (next_pts > now)

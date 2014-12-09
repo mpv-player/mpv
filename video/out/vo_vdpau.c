@@ -99,7 +99,7 @@ struct vdpctx {
     int                                chroma_deint;
     int                                flip_offset_window;
     int                                flip_offset_fs;
-    int                                flip_offset_ms;
+    int64_t                            flip_offset_us;
     bool                               flip;
 
     VdpRect                            src_rect_vid;
@@ -258,11 +258,12 @@ static void resize(struct vo *vo)
     vc->src_rect_vid.y0 = vc->flip ? src_rect.y1 : src_rect.y0;
     vc->src_rect_vid.y1 = vc->flip ? src_rect.y0 : src_rect.y1;
 
-    vc->flip_offset_ms = vo->opts->fullscreen ?
-                         vc->flip_offset_fs :
-                         vc->flip_offset_window;
+    vc->flip_offset_us = vo->opts->fullscreen ?
+                         1000LL * vc->flip_offset_fs :
+                         1000LL * vc->flip_offset_window;
+    vc->flip_offset_us += VO_DEFAULT_FLIP_QUEUE_OFFSET;
 
-    vo_set_flip_queue_offset(vo, vc->flip_offset_ms * 1000);
+    vo_set_flip_queue_offset(vo, vc->flip_offset_us);
 
     if (vc->output_surface_width < vo->dwidth
         || vc->output_surface_height < vo->dheight) {
@@ -752,11 +753,11 @@ static int flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     /* This should normally never happen.
      * - The last queued frame can't have a PTS that goes more than 50ms in the
      *   future. This is guaranteed by vo.c, which currently actually queues
-     *   ahead by roughly 50ms, plus the flip queue offset. Just to be sure
+     *   ahead by roughly the flip queue offset. Just to be sure
      *   give some additional room by doubling the time.
      * - The last vsync can never be in the future.
      */
-    int64_t max_pts_ahead = (vc->flip_offset_ms + 50) * 1000 * 1000 * 2;
+    int64_t max_pts_ahead = vc->flip_offset_us * 1000 * 2;
     if (vc->last_queue_time > now + max_pts_ahead ||
         vc->recent_vsync_time > now)
     {
