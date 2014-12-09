@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <windows.h>
 #include <windowsx.h>
+#include <initguid.h>
 #include <ole2.h>
 
 #include "options/options.h"
