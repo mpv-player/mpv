@@ -55,7 +55,7 @@ struct mpv_opengl_cb_context {
     void *update_cb_ctx;
     struct mp_image *next_frame;
     struct mp_image_params img_params;
-    struct mp_image_params *new_params;
+    bool reconfigured;
     struct mp_rect wnd;
     bool flip;
     bool force_update;
@@ -175,12 +175,7 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
 
     struct vo *vo = ctx->active;
 
-    struct mp_image_params *new_params = ctx->new_params;
-    ctx->new_params = NULL;
-    if (new_params) {
-        ctx->img_params = *new_params;
-        ctx->force_update = true;
-    }
+    ctx->force_update |= ctx->reconfigured;
 
     int h = vp[3];
     bool flip = h < 0 && h > INT_MIN;
@@ -205,9 +200,12 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
         gl_video_resize(ctx->renderer, &wnd, &src, &dst, &osd, !ctx->flip);
     }
 
-    if (new_params) {
-        gl_video_config(ctx->renderer, new_params);
-        talloc_free(new_params);
+    if (ctx->reconfigured) {
+        ctx->reconfigured = false;
+        gl_video_config(ctx->renderer, &ctx->img_params);
+        struct gl_video_opts opts = gl_video_opts_def;
+        opts.background.a = 0; // transparent
+        gl_video_set_options(ctx->renderer, &opts);
     }
 
     struct mp_image *mpi = ctx->next_frame;
@@ -268,8 +266,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     if (p->ctx) {
         pthread_mutex_lock(&p->ctx->lock);
         mp_image_unrefp(&p->ctx->next_frame);
-        talloc_free(p->ctx->new_params);
-        p->ctx->new_params = talloc_memdup(NULL, params, sizeof(*params));
+        p->ctx->img_params = *params;
+        p->ctx->reconfigured = true;
         pthread_mutex_unlock(&p->ctx->lock);
     } else {
         return -1;
@@ -293,6 +291,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
                 MP_FATAL(vo, "There is already a VO using the OpenGL context.\n");
             } else {
                 nctx->active = vo;
+                nctx->reconfigured = true;
                 p->ctx = nctx;
                 assert(vo->osd == p->ctx->osd);
                 copy_vo_opts(vo);
@@ -332,8 +331,8 @@ static void uninit(struct vo *vo)
     if (p->ctx) {
         pthread_mutex_lock(&p->ctx->lock);
         mp_image_unrefp(&p->ctx->next_frame);
-        talloc_free(p->ctx->new_params);
-        p->ctx->new_params = NULL;
+        p->ctx->img_params = (struct mp_image_params){0};
+        p->ctx->reconfigured = true;
         p->ctx->active = NULL;
         pthread_mutex_unlock(&p->ctx->lock);
     }

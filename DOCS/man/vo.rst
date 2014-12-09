@@ -931,3 +931,6 @@ Available video output drivers are:
         Use 3 buffers instead of 2. This can lead to more fluid playback, but
         uses more memory.
 
+``opengl-cb``
+    For use with libmpv direct OpenGL embedding; useless in any other contexts.
+    (See ``<mpv/opengl_cb.h>``.)

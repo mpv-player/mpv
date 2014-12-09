@@ -2387,7 +2387,8 @@ void gl_video_config(struct gl_video *p, struct mp_image_params *params)
 
     if (!mp_image_params_equal(&p->image_params, params)) {
         uninit_video(p);
-        init_video(p, params);
+        if (params->imgfmt)
+            init_video(p, params);
     }
 
     check_resize(p);
