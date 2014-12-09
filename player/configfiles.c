@@ -243,6 +243,8 @@ static const char *const backup_properties[] = {
     "options/ass-use-margins",
     "options/ass-vsfilter-aspect-compat",
     "options/ass-style-override",
+    "options/ab-loop-a",
+    "options/ab-loop-b",
     0
 };
 
