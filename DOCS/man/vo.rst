@@ -604,6 +604,10 @@ Available video output drivers are:
         have any advantages over normal textures. Note that hardware decoding
         overrides this flag.
 
+    ``background=<color>``
+        Color used to draw parts of the mpv window not covered by video.
+        See ``--osd-color`` option how colors are defined.
+
 ``opengl-hq``
     Same as ``opengl``, but with default settings for high quality rendering.
 

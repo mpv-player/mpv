@@ -276,7 +276,7 @@ static const char *const osd_shaders[SUBBITMAP_COUNT] = {
     [SUBBITMAP_RGBA] =   "frag_osd_rgba",
 };
 
-static const struct gl_video_opts gl_video_opts_def = {
+const struct gl_video_opts gl_video_opts_def = {
     .npot = 1,
     .dither_depth = -1,
     .dither_size = 6,
@@ -286,6 +286,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
     .scaler_radius = {NAN, NAN},
     .alpha_mode = 2,
+    .background = {0, 0, 0, 255},
 };
 
 const struct gl_video_opts gl_video_opts_hq_def = {
@@ -299,6 +300,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
     .scaler_radius = {NAN, NAN},
     .alpha_mode = 2,
+    .background = {0, 0, 0, 255},
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -360,6 +362,7 @@ const struct m_sub_options gl_video_conf = {
                     {"yes", 1}, {"", 1},
                     {"blend", 2})),
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
+        OPT_COLOR("background", background, 0),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -2063,7 +2066,7 @@ static bool test_fbo(struct gl_video *p, GLenum format)
     }
     fbotex_uninit(p, &fbo);
     glCheckError(gl, p->log, "FBO test");
-    gl->ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    gl_video_set_gl_state(p);
     return success;
 }
 
@@ -2223,7 +2226,8 @@ void gl_video_set_gl_state(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    gl->ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    struct m_color c = p->opts.background;
+    gl->ClearColor(c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
     gl->ActiveTexture(GL_TEXTURE0);
 }
 
@@ -2454,6 +2458,7 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
         p->opts.gamma = 1.0f;
 
     check_gl_features(p);
+    gl_video_set_gl_state(p);
     reinit_rendering(p);
 }
 

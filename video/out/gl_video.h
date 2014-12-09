@@ -19,6 +19,7 @@
 
 #include <stdbool.h>
 
+#include "options/m_option.h"
 #include "sub/osd.h"
 #include "gl_common.h"
 
@@ -50,10 +51,12 @@ struct gl_video_opts {
     int alpha_mode;
     int chroma_location;
     int use_rectangle;
+    struct m_color background;
 };
 
 extern const struct m_sub_options gl_video_conf;
 extern const struct gl_video_opts gl_video_opts_hq_def;
+extern const struct gl_video_opts gl_video_opts_def;
 
 struct gl_video;
 
