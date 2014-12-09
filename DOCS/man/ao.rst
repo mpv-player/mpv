@@ -28,8 +28,8 @@ normal driver parameters.
 .. admonition:: Examples
 
     - ``--ao=alsa,oss,`` Try the ALSA driver, then the OSS driver, then others.
-    - ``--ao=alsa:no-block:device=[hw:0,3]`` Sets noblock-mode and the
-      device-name as first card, fourth device.
+    - ``--ao=alsa:resample=yes:device=[plughw:0,3]`` Lets ALSA resample and
+      sets the device-name as first card, fourth device.
 
 Available audio output drivers are:
 
