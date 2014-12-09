@@ -429,12 +429,9 @@ Program Behavior
     Enable the youtube-dl hook-script. It will look at the input URL, and will
     play the video located on the website. This works with many streaming sites,
     not just the one the scripts are named after. This requires a recent version
-    of youtube-dl to be installed on the system.
+    of youtube-dl to be installed on the system. (Enabled by default.)
 
     If the script can't do anything with an URL, it will do nothing.
-
-    Currently disabled by default, because youtube-dl's generic extractor can
-    get stuck on some URL, preventing playback.
 
     (Note: this is the replacement for the now removed libquvi support.)
 
