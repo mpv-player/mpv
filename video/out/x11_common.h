@@ -42,6 +42,7 @@ struct vo_x11_state {
     Display *display;
     Window window;
     Window rootwin;
+    Window parent;  // embedded in this foreign window
     int screen;
     int display_is_local;
     int ws_width;

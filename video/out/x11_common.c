@@ -228,7 +228,7 @@ static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
 
     x11->mouse_cursor_hidden = cursor_hidden;
 
-    if (vo->opts->WinID == 0 || !win)
+    if (x11->parent == x11->rootwin || !win)
         return;                 // do not hide if playing on the root window
 
     if (x11->mouse_cursor_hidden) {
@@ -289,7 +289,7 @@ static int vo_wm_detect(struct vo *vo)
     Atom *args = NULL;
     Window win = x11->rootwin;
 
-    if (vo->opts->WinID >= 0)
+    if (x11->parent)
         return 0;
 
 // -- supports layers
@@ -503,6 +503,9 @@ int vo_x11_init(struct vo *vo)
     x11->screen = DefaultScreen(x11->display);  // screen ID
     x11->rootwin = RootWindow(x11->display, x11->screen);   // root window ID
 
+    if (vo->opts->WinID >= 0)
+        x11->parent = vo->opts->WinID ? vo->opts->WinID : x11->rootwin;
+
     if (!opts->native_keyrepeat) {
         Bool ok = False;
         XkbSetDetectableAutoRepeat(x11->display, True, &ok);
@@ -608,7 +611,7 @@ static void vo_x11_decoration(struct vo *vo, bool d)
 {
     struct vo_x11_state *x11 = vo->x11;
 
-    if (vo->opts->WinID >= 0 || !x11->window)
+    if (x11->parent || !x11->window)
         return;
 
     Atom motif_hints = XA(x11, _MOTIF_WM_HINTS);
@@ -849,7 +852,7 @@ int vo_x11_check_events(struct vo *vo)
             if (x11->window == None)
                 break;
             vo_x11_update_geometry(vo);
-            if (Event.xconfigure.window == (Window)vo->opts->WinID) {
+            if (Event.xconfigure.window == x11->parent) {
                 XMoveResizeWindow(x11->display, x11->window,
                                   x11->winrc.x0, x11->winrc.y0,
                                   RC_W(x11->winrc), RC_H(x11->winrc));
@@ -953,7 +956,7 @@ int vo_x11_check_events(struct vo *vo)
             break;
         case PropertyNotify:
             if (Event.xproperty.atom == XA(x11, _NET_FRAME_EXTENTS)) {
-                if (!x11->pseudo_mapped && vo->opts->WinID < 0) {
+                if (!x11->pseudo_mapped && !x11->parent) {
                     MP_VERBOSE(x11, "not waiting for MapNotify\n");
                     x11->pseudo_mapped = true;
                 }
@@ -991,7 +994,7 @@ static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
     bool force_pos = opts->geometry.xy_valid ||     // explicitly forced by user
                      opts->force_window_position || // resize -> reset position
                      opts->screen_id >= 0 ||        // force onto screen area
-                     opts->WinID >= 0 ||            // force to fill parent
+                     x11->parent ||                 // force to fill parent
                      override_pos;                  // for fullscreen and such
 
     XSizeHints *hint = XAllocSizeHints();
@@ -1206,7 +1209,9 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
         .colormap = x11->colormap,
     };
 
-    Window parent = vo->opts->WinID >= 0 ? vo->opts->WinID : x11->rootwin;
+    Window parent = x11->parent;
+    if (!parent)
+        parent = x11->rootwin;
 
     x11->window =
         XCreateWindow(x11->display, parent, rc.x0, rc.y0, RC_W(rc), RC_H(rc), 0,
@@ -1226,7 +1231,7 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
                              NULL);
     }
 
-    if (vo->opts->WinID < 0) {
+    if (!x11->parent) {
         vo_x11_set_wm_icon(x11);
         vo_x11_update_window_title(vo);
         vo_x11_dnd_init_window(vo);
@@ -1330,13 +1335,13 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
 
     struct mp_rect rc = geo.win;
 
-    if (opts->WinID >= 0) {
-        if (opts->WinID == 0) {
+    if (x11->parent) {
+        if (x11->parent == x11->rootwin) {
             x11->window = x11->rootwin;
             x11->pseudo_mapped = true;
             XSelectInput(x11->display, x11->window, StructureNotifyMask);
         } else {
-            XSelectInput(x11->display, opts->WinID, StructureNotifyMask);
+            XSelectInput(x11->display, x11->parent, StructureNotifyMask);
         }
         vo_x11_update_geometry(vo);
         rc = x11->winrc;
@@ -1421,7 +1426,7 @@ void vo_x11_clearwindow(struct vo *vo, Window vo_window)
 static void vo_x11_setlayer(struct vo *vo, bool ontop)
 {
     struct vo_x11_state *x11 = vo->x11;
-    if (vo->opts->WinID >= 0 || !x11->window)
+    if (x11->parent || !x11->window)
         return;
 
     if (x11->wm_type & (vo_wm_STAYS_ON_TOP | vo_wm_ABOVE)) {
@@ -1465,14 +1470,14 @@ static void vo_x11_update_geometry(struct vo *vo)
     unsigned w, h, dummy_uint;
     int dummy_int;
     Window dummy_win;
-    Window win = vo->opts->WinID > 0 ? vo->opts->WinID : x11->window;
+    Window win = x11->parent ? x11->parent : x11->window;
     if (!win)
         return;
     XGetGeometry(x11->display, win, &dummy_win, &dummy_int, &dummy_int,
                  &w, &h, &dummy_int, &dummy_uint);
     if (w > INT_MAX || h > INT_MAX)
         w = h = 0;
-    if (vo->opts->WinID < 0) {
+    if (!x11->parent) {
         XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
                               &x, &y, &dummy_win);
     }
@@ -1497,7 +1502,7 @@ static void vo_x11_fullscreen(struct vo *vo)
     if (opts->fullscreen == x11->fs)
         return;
     x11->fs = opts->fullscreen; // x11->fs now contains the new state
-    if (opts->WinID >= 0 || !x11->window)
+    if (x11->parent || !x11->window)
         return;
 
     // Save old state before entering fullscreen
@@ -1632,7 +1637,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         set_screensaver(x11, true);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
-        if (vo->opts->WinID < 0)
+        if (!x11->parent)
             vo_x11_update_window_title(vo);
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS: {
