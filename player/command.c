@@ -4627,8 +4627,11 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         }
         ctx->prev_pts = now;
     }
-    if (event == MPV_EVENT_SEEK) {
+    if (event == MPV_EVENT_SEEK)
         ctx->prev_pts = MP_NOPTS_VALUE;
+    if (event == MPV_EVENT_END_FILE || event == MPV_EVENT_FILE_LOADED) {
+        // Update chapters - does nothing if something else is visible.
+        set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
 }
 
