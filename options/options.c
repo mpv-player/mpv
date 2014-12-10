@@ -601,7 +601,7 @@ const struct MPOpts mp_default_opts = {
         .WinID = -1,
     },
     .allow_win_drag = 1,
-    .wintitle = "mpv - ${media-title}",
+    .wintitle = "mpv - ${?media-title:${media-title}}${!media-title:No file.}",
     .heartbeat_interval = 30.0,
     .stop_screensaver = 1,
     .cursor_autohide_delay = 1000,
