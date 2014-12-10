@@ -177,9 +177,9 @@ local function add_binding(attrs, key, name, fn, rp)
             if event == "r" and not repeatable then
                 return
             end
-            if is_mouse and event == "u" then
+            if is_mouse and (event == "u" or event == "p") then
                 fn()
-            elseif (not is_mouse) and (event == "d" or event == "r") then
+            elseif (not is_mouse) and (event == "d" or event == "r" or event == "p") then
                 fn()
             end
         end
