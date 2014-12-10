@@ -894,6 +894,10 @@ Property list
 ``pause`` (RW)
     Pause status. This is usually ``yes`` or ``no``. See ``--pause``.
 
+``idle``
+    Return ``yes`` if no file is loaded, but the player is staying around
+    because of the ``--idle`` option.
+
 ``core-idle``
     Return ``yes`` if the playback core is paused, otherwise ``no``. This can
     be different ``pause`` in special situations, such as when the player

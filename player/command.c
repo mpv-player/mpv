@@ -72,6 +72,8 @@
 #include "core.h"
 
 struct command_ctx {
+    bool is_idle;
+
     double last_seek_time;
     double last_seek_pts;
 
@@ -1158,6 +1160,14 @@ static int mp_property_core_idle(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     bool idle = mpctx->paused || !mpctx->restart_complete || !mpctx->playing;
     return m_property_flag_ro(action, arg, idle);
+}
+
+static int mp_property_idle(void *ctx, struct m_property *prop,
+                            int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct command_ctx *cmd = mpctx->command_ctx;
+    return m_property_flag_ro(action, arg, cmd->is_idle);
 }
 
 static int mp_property_eof_reached(void *ctx, struct m_property *prop,
@@ -3195,6 +3205,7 @@ static const struct m_property mp_properties[] = {
     {"hr-seek", mp_property_generic_option},
     {"clock", mp_property_clock},
     {"seekable", mp_property_seekable},
+    {"idle", mp_property_idle},
 
     {"chapter-list", mp_property_list_chapters},
     {"track-list", property_list_tracks},
@@ -4633,9 +4644,12 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         }
         ctx->prev_pts = now;
     }
-    if (event == MPV_EVENT_SEEK) {
+    if (event == MPV_EVENT_SEEK)
         ctx->prev_pts = MP_NOPTS_VALUE;
-    }
+    if (event == MPV_EVENT_IDLE)
+        ctx->is_idle = true;
+    if (event == MPV_EVENT_START_FILE)
+        ctx->is_idle = false;
 }
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg)
