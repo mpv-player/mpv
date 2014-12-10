@@ -4650,6 +4650,10 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         ctx->is_idle = true;
     if (event == MPV_EVENT_START_FILE)
         ctx->is_idle = false;
+    if (event == MPV_EVENT_END_FILE || event == MPV_EVENT_FILE_LOADED) {
+        // Update chapters - does nothing if something else is visible.
+        set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
+    }
 }
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg)
