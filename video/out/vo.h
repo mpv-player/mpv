@@ -160,8 +160,6 @@ struct voctrl_screenshot_args {
 // VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
 #define VO_CAP_FRAMEDROP 2
 
-#define VO_DEFAULT_FLIP_QUEUE_OFFSET ((uint64_t)(0.050 * 1e6))
-
 struct vo;
 struct osd_state;
 struct mp_image;

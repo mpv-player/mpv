@@ -53,6 +53,7 @@ struct mpv_opengl_cb_context {
     // --- Protected by lock
     mpv_opengl_cb_update_fn update_cb;
     void *update_cb_ctx;
+    struct mp_image *waiting_frame;
     struct mp_image *next_frame;
     struct mp_image_params img_params;
     bool reconfigured;
@@ -228,7 +229,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct vo_priv *p = vo->priv;
     if (p->ctx) {
         pthread_mutex_lock(&p->ctx->lock);
-        mp_image_setrefp(&p->ctx->next_frame, mpi);
+        mp_image_setrefp(&p->ctx->waiting_frame, mpi);
         pthread_mutex_unlock(&p->ctx->lock);
     }
     talloc_free(mpi);
@@ -239,6 +240,9 @@ static void flip_page(struct vo *vo)
     struct vo_priv *p = vo->priv;
     if (p->ctx) {
         pthread_mutex_lock(&p->ctx->lock);
+        mp_image_unrefp(&p->ctx->next_frame);
+        p->ctx->next_frame = p->ctx->waiting_frame;
+        p->ctx->waiting_frame = NULL;
         if (p->ctx->update_cb)
             p->ctx->update_cb(p->ctx->update_cb_ctx);
         pthread_mutex_unlock(&p->ctx->lock);
@@ -331,6 +335,7 @@ static void uninit(struct vo *vo)
     if (p->ctx) {
         pthread_mutex_lock(&p->ctx->lock);
         mp_image_unrefp(&p->ctx->next_frame);
+        mp_image_unrefp(&p->ctx->waiting_frame);
         p->ctx->img_params = (struct mp_image_params){0};
         p->ctx->reconfigured = true;
         p->ctx->active = NULL;
@@ -342,9 +347,6 @@ static int preinit(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
     p->vo = vo;
-    // Currently, there's no video timing in the API, and it's questionable
-    // how API users would make use of it too.
-    vo_set_flip_queue_offset(vo, 0);
     return 0;
 }
 
