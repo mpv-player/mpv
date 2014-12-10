@@ -2171,6 +2171,7 @@ static int parse_timestring(struct bstr str, double *time, char endchar)
     return len;
 }
 
+#define HAS_NOPTS(opt) ((opt)->min == MP_NOPTS_VALUE)
 
 static int parse_time(struct mp_log *log, const m_option_t *opt,
                       struct bstr name, struct bstr param, void *dst)
@@ -2180,7 +2181,7 @@ static int parse_time(struct mp_log *log, const m_option_t *opt,
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
-    if (opt->min == MP_NOPTS_VALUE && bstr_equals0(param, "no")) {
+    if (HAS_NOPTS(opt) == MP_NOPTS_VALUE && bstr_equals0(param, "no")) {
         time = MP_NOPTS_VALUE;
     } else if (!parse_timestring(param, &time, 0)) {
         mp_err(log, "Option %.*s: invalid time: '%.*s'\n",
@@ -2193,25 +2194,55 @@ static int parse_time(struct mp_log *log, const m_option_t *opt,
     return 1;
 }
 
+static char *print_time(const m_option_t *opt, const void *val)
+{
+    double pts = *(double *)val;
+    if (pts == MP_NOPTS_VALUE && HAS_NOPTS(opt))
+        return talloc_strdup(NULL, "no"); // symmetry with parsing
+    return talloc_asprintf(NULL, "%f", pts);
+}
+
 static char *pretty_print_time(const m_option_t *opt, const void *val)
 {
     double pts = *(double *)val;
-    if (pts == MP_NOPTS_VALUE && opt->min == MP_NOPTS_VALUE)
+    if (pts == MP_NOPTS_VALUE && HAS_NOPTS(opt))
         return talloc_strdup(NULL, "no"); // symmetry with parsing
     return mp_format_time(pts, false);
+}
+
+static int time_set(const m_option_t *opt, void *dst, struct mpv_node *src)
+{
+    if (HAS_NOPTS(opt) && src->format == MPV_FORMAT_STRING) {
+        if (strcmp(src->u.string, "no") == 0) {
+            *(double *)dst = MP_NOPTS_VALUE;
+            return 1;
+        }
+    }
+    return double_set(opt, dst, src);
+}
+
+static int time_get(const m_option_t *opt, void *ta_parent,
+                      struct mpv_node *dst, void *src)
+{
+    if (HAS_NOPTS(opt) && *(double *)src == MP_NOPTS_VALUE) {
+        dst->format = MPV_FORMAT_STRING;
+        dst->u.string = talloc_strdup(ta_parent, "no");
+        return 1;
+    }
+    return double_get(opt, ta_parent, dst, src);
 }
 
 const m_option_type_t m_option_type_time = {
     .name  = "Time",
     .size  = sizeof(double),
     .parse = parse_time,
-    .print = print_double,
+    .print = print_time,
     .pretty_print = pretty_print_time,
     .copy  = copy_opt,
     .add = add_double,
     .clamp = clamp_double,
-    .set   = double_set,
-    .get   = double_get,
+    .set   = time_set,
+    .get   = time_get,
 };
 
 
