@@ -616,8 +616,10 @@ int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
     }
     ctx->talloc_ctx = talloc_size(NULL, length + 8);
     int read_len = stream_read(s, ctx->talloc_ctx, length);
-    if (read_len < length)
+    if (read_len < length) {
         MP_MSG(ctx, msglevel, "Unexpected end of file - partial or corrupt file?\n");
+        memset((char *)ctx->talloc_ctx + read_len, 0, length - read_len);
+    }
     ebml_parse_element(ctx, target, ctx->talloc_ctx, read_len, desc, 0);
     if (ctx->has_errors)
         MP_MSG(ctx, msglevel, "Error parsing element %s\n", desc->name);
