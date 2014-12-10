@@ -4494,7 +4494,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         char *sep = strchr(name, '/');
         char *target = NULL;
         char space[MAX_CLIENT_NAME];
-        if (name) {
+        if (sep) {
             snprintf(space, sizeof(space), "%.*s", (int)(sep - name), name);
             target = space;
             name = sep + 1;
