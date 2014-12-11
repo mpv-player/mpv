@@ -3181,3 +3181,11 @@ const m_option_type_t m_option_type_node = {
     .set   = node_set,
     .get   = node_get,
 };
+
+// Special-cased by m_config.c.
+const m_option_type_t m_option_type_alias = {
+    .name  = "alias",
+};
+const m_option_type_t m_option_type_removed = {
+    .name  = "removed",
+};

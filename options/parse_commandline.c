@@ -302,4 +302,7 @@ void m_config_preparse_command_line(m_config_t *config, struct mpv_global *globa
     }
 
     mp_msg_mute(global, false);
+
+    for (int n = 0; n < config->num_opts; n++)
+        config->opts[n].warning_was_printed = false;
 }
