@@ -275,7 +275,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("vd", video_decoders, 0),
 
     OPT_FLAG("ad-spdif-dtshd", dtshd, 0),
-    OPT_FLAG("dtshd", dtshd, 0), // old alias
 
     OPT_CHOICE("hwdec", hwdec_api, 0,
                ({"no", 0},
@@ -305,7 +304,6 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("demuxer-rawvideo", demux_rawvideo, demux_rawvideo_conf, 0),
 
     OPT_FLAG("demuxer-mkv-subtitle-preroll", mkv_subtitle_preroll, 0),
-    OPT_FLAG("mkv-subtitle-preroll", mkv_subtitle_preroll, 0), // old alias
     OPT_DOUBLE("demuxer-mkv-subtitle-preroll-secs", mkv_subtitle_preroll_secs,
                M_OPT_MIN, .min = 0),
     OPT_FLAG("demuxer-mkv-probe-video-duration", mkv_probe_duration, 0),
@@ -642,6 +640,9 @@ const m_option_t mp_opts[] = {
     OPT_REMOVED("cache-pause-below", "for 'no', use --no-cache-pause"),
     OPT_REMOVED("no-cache-pause-below", "use --no-cache-pause"),
     OPT_REMOVED("volstep", "edit input.conf directly instead"),
+
+    OPT_REPLACED("mkv-subtitle-preroll", "demuxer-mkv-subtitle-preroll"),
+    OPT_REPLACED("dtshd", "ad-spdif-dtshd"),
 
     {0}
 };

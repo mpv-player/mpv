@@ -372,10 +372,6 @@ static void m_config_add_option(struct m_config *config,
         .name = arg->name,
     };
 
-    if (co.opt->type == &m_option_type_alias ||
-        co.opt->type == &m_option_type_removed)
-        co.is_generated = true;
-
     if (arg->offset >= 0) {
         if (optstruct)
             co.data = (char *)optstruct + arg->offset;
@@ -434,6 +430,24 @@ static void m_config_add_option(struct m_config *config,
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
 
     add_negation_option(config, &co, parent_name);
+
+    if (co.opt->type == &m_option_type_alias) {
+        co.is_generated = true; // hide it
+        const char *alias = (const char *)co.opt->priv;
+        char no_alias[40];
+        snprintf(no_alias, sizeof(no_alias), "no-%s", alias);
+        if (m_config_get_co(config, bstr0(no_alias))) {
+            struct m_option *new = talloc_zero(config, struct m_option);
+            new->name = talloc_asprintf(config, "no-%s", co.name);
+            new->priv = talloc_strdup(config, no_alias);
+            new->type = &m_option_type_alias;
+            new->offset = -1;
+            m_config_add_option(config, "", NULL, NULL, new);
+        }
+    }
+
+    if (co.opt->type == &m_option_type_removed)
+        co.is_generated = true; // hide it
 }
 
 struct m_config_option *m_config_get_co(const struct m_config *config,
@@ -453,14 +467,14 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
             matches = true;
         if (matches) {
             if (co->opt->type == &m_option_type_alias) {
-                const char *new = (const char *)co->opt->priv;
+                const char *alias = (const char *)co->opt->priv;
                 if (!co->warning_was_printed) {
                     MP_WARN(config, "Warning: option %s%s was replaced with "
                             "%s%s and might be removed in the future.\n",
-                            prefix, co->name, prefix, new);
+                            prefix, co->name, prefix, alias);
                     co->warning_was_printed = true;
                 }
-                return m_config_get_co(config, bstr0(new));
+                return m_config_get_co(config, bstr0(alias));
             } else if (co->opt->type == &m_option_type_removed) {
                 if (!co->warning_was_printed) {
                     char *msg = co->opt->priv;
