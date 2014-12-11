@@ -841,13 +841,15 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .d_thread = talloc(demuxer, struct demuxer),
         .d_buffer = talloc(demuxer, struct demuxer),
         .d_user = demuxer,
-        .min_secs = stream->uncached_stream ? demuxer->opts->demuxer_min_secs_cache
-                                            : demuxer->opts->demuxer_min_secs,
+        .min_secs = demuxer->opts->demuxer_min_secs,
         .min_packs = demuxer->opts->demuxer_min_packs,
         .min_bytes = demuxer->opts->demuxer_min_bytes,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
+
+    if (stream->uncached_stream)
+        in->min_secs = MPMAX(in->min_secs, demuxer->opts->demuxer_min_secs_cache);
 
     *in->d_thread = *demuxer;
     *in->d_buffer = *demuxer;

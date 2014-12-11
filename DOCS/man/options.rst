@@ -2154,6 +2154,9 @@ Demuxer
     a timestamp difference higher than the readahead amount relative to the
     last packet returned to the decoder, the demuxer keeps reading.
 
+    Note that the ``--cache-secs`` option will override this value if a cache
+    is enabled, and the value is larger.
+
     (This value tends to be fuzzy, because many file formats don't store linear
     timestamps.)
 
@@ -3027,7 +3030,7 @@ Cache
 ``--cache-secs=<seconds>``
     How many seconds of audio/video to prefetch if the cache is active. This
     overrides the ``--demuxer-readahead-secs`` option if and only if the cache
-    is enabled. (Default: 2.)
+    is enabled and the value is larger. (Default: 2.)
 
 ``--cache-pause``, ``--no-cache-pause``
     Whether the player should automatically pause when the cache runs low,
