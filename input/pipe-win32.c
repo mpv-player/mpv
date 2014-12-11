@@ -45,6 +45,16 @@ static void read_pipe_thread(struct mp_input_src *src, void *param)
         goto done;
     }
 
+    // If we're reading from stdin, unset it. All I/O on synchronous handles is
+    // serialized, so stupid DLLs that call GetFileType on stdin can hang the
+    // process if they do it while we're reading from it. At least, the
+    // VirtualBox OpenGL ICD is affected by this, but only on Windows XP.
+    // GetFileType works differently in later versions of Windows. See:
+    // https://support.microsoft.com/kb/2009703
+    // http://blogs.msdn.com/b/oldnewthing/archive/2011/12/02/10243553.aspx
+    if ((void*)_get_osfhandle(fd) == GetStdHandle(STD_INPUT_HANDLE))
+        SetStdHandle(STD_INPUT_HANDLE, NULL);
+
     waio = waio_alloc((void *)_get_osfhandle(fd), 0, NULL, NULL);
     if (!waio) {
         MP_ERR(src, "Can't initialize win32 file reader.\n");
