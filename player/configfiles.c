@@ -179,10 +179,14 @@ static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
     const char *realpath = fname;
     bstr bfname = bstr0(fname);
     if (!mp_is_url(bfname)) {
-        char *cwd = mp_getcwd(tmp);
-        if (!cwd)
-            goto exit;
-        realpath = mp_path_join(tmp, bstr0(cwd), bstr0(fname));
+        if (opts->ignore_path_in_watch_later_config) {
+            realpath = mp_basename(fname);
+        } else {
+            char *cwd = mp_getcwd(tmp);
+            if (!cwd)
+                goto exit;
+            realpath = mp_path_join(tmp, bstr0(cwd), bstr0(fname));
+        }
     }
     if (bstr_startswith0(bfname, "dvd://"))
         realpath = talloc_asprintf(tmp, "%s - %s", realpath, opts->dvd_device);

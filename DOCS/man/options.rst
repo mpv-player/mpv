@@ -414,6 +414,9 @@ Program Behavior
         This option may expose privacy-sensitive information and is thus
         disabled by default.
 
+``--ignore-path-in-watch-later-config``
+    Ignore path (i.e. use filename only) when using watch later feature.
+
 ``--show-profile=<profile>``
     Show the description and content of a profile.
 

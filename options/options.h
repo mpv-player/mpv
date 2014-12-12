@@ -167,6 +167,7 @@ typedef struct MPOpts {
     int position_resume;
     int position_save_on_quit;
     int write_filename_in_watch_later_config;
+    int ignore_path_in_watch_later_config;
     int pause;
     int keep_open;
     int audio_id;
