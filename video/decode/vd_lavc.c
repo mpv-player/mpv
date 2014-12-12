@@ -353,6 +353,8 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     ctx->hwdec_fmt = 0;
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
     AVCodecContext *avctx = ctx->avctx;
+    if (!ctx->avctx)
+        return;
     avctx->bit_rate = 0;
     avctx->opaque = vd;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
@@ -360,6 +362,8 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 
     avctx->refcounted_frames = 1;
     ctx->pic = av_frame_alloc();
+    if (!ctx->pic)
+        return;
 
     if (ctx->hwdec) {
         avctx->thread_count    = 1;

@@ -286,6 +286,8 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         .buf_size = 0,
         .buf = av_mallocz(PROBE_BUF_SIZE + FF_INPUT_BUFFER_PADDING_SIZE),
     };
+    if (!avpd.buf)
+        return -1;
 
     bool final_probe = false;
     do {
@@ -679,6 +681,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         return -1;
 
     avfc = avformat_alloc_context();
+    if (!avfc)
+        return -1;
 
     if (lavfdopts->cryptokey)
         parse_cryptokey(avfc, lavfdopts->cryptokey);
