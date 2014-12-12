@@ -186,7 +186,10 @@ const m_option_t mp_opts[] = {
     OPT_TIME("ab-loop-b", ab_loop[1], 0, .min = MP_NOPTS_VALUE),
 
     OPT_FLAG("pause", pause, M_OPT_FIXED),
-    OPT_FLAG("keep-open", keep_open, 0),
+    OPT_CHOICE("keep-open", keep_open, M_OPT_OPTIONAL_PARAM,
+               ({"no", 0},
+                {"yes", 1}, {"", 1},
+                {"always", 2})),
 
     OPT_CHOICE("index", index_mode, 0, ({"default", 1}, {"recreate", 0})),
 

@@ -1485,26 +1485,37 @@ Window
 
     OS X only. Black out other displays when going fullscreen.
 
-``--keep-open``
+``--keep-open=<yes|no|always``
     Do not terminate when playing or seeking beyond the end of the file, and
     there is not next file to be played (and ``--loop`` is not used).
     Instead, pause the player. When trying to seek beyond end of the file, the
-    player will pause at an arbitrary playback position (or, in corner cases,
-    not redraw the window at all).
+    player will attempt to seek to the last frame.
+
+    The following arguments can be given:
+
+    :no:        If the current file ends, go to the next file or terminate.
+                (Default.)
+    :yes:       Don't terminate if the current file is the last playlist entry.
+                Equivalent to ``--keep-open`` without arguments.
+    :always:    Like ``yes``, but also applies to files before the last playlist
+                entry. This means playback will never automatically advance to
+                the next file.
 
     .. note::
 
-        This option is not respected when using ``--frames``, ``--end``,
-        ``--length``, or when passing a chapter range to ``--chapter``.
-        Explicitly skipping to the next file or skipping beyond the last
-        chapter will terminate playback as well, even if ``--keep-open`` is
-        given.
+        This option is not respected when using ``--frames``. Explicitly
+        skipping to the next file if the binding uses ``force`` will terminate
+        playback as well.
+
+        Also, if errors or unusual circumstances happen, the player can quit
+        anyway.
 
     Since mpv 0.6.0, this doesn't pause if there is a next file in the playlist,
     or the playlist is looped. Approximately, this will pause when the player
     would normally exit, but in practice there are corner cases in which this
     is not the case (e.g. ``mpv --keep-open file.mkv /dev/null`` will play
-    file.mkv normally, then fail to open ``/dev/null``, then exit).
+    file.mkv normally, then fail to open ``/dev/null``, then exit). (In
+    mpv 0.8.0, ``always`` was introduced, which restores the old behavior.)
 
 ``--force-window``
     Create a video output window even if there is no video. This can be useful
