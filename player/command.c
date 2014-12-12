@@ -2970,6 +2970,23 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
     return r;
 }
 
+static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int type = (intptr_t)prop->priv;
+
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    double r[STREAM_TYPE_COUNT];
+    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_BITRATE_STATS, &r) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    // r[type] is in bytes/second -> kilobits
+    return m_property_int64_ro(action, arg, r[type] * 8 / 1000.0 + 0.5);
+}
+
 static int mp_property_version(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
@@ -3300,6 +3317,12 @@ static const struct m_property mp_properties[] = {
 
     {"ab-loop-a", mp_property_ab_loop},
     {"ab-loop-b", mp_property_ab_loop},
+
+#define PROPERTY_BITRATE(name, type) \
+    {name, mp_property_packet_bitrate, (void *)(intptr_t)type}
+    PROPERTY_BITRATE("packet-video-bitrate", STREAM_VIDEO),
+    PROPERTY_BITRATE("packet-audio-bitrate", STREAM_AUDIO),
+    PROPERTY_BITRATE("packet-sub-bitrate", STREAM_SUB),
 
 #define PROPERTY_TV_COLOR(name, type) \
     {name, mp_property_tv_color, (void *)(intptr_t)type}

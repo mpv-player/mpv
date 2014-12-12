@@ -56,6 +56,7 @@ enum demux_ctrl {
     DEMUXER_CTRL_STREAM_CTRL,
     DEMUXER_CTRL_GET_READER_STATE,
     DEMUXER_CTRL_GET_NAV_EVENT,
+    DEMUXER_CTRL_GET_BITRATE_STATS, // double[STREAM_TYPE_COUNT]
 };
 
 struct demux_ctrl_reader_state {

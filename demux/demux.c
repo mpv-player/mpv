@@ -146,6 +146,9 @@ struct demux_stream {
     size_t bytes;           // total bytes of packets in buffer
     double base_ts;         // timestamp of the last packet returned to decoder
     double last_ts;         // timestamp of the last packet added to queue
+    double last_br_ts;      // timestamp of last packet bitrate was calculated
+    size_t last_br_bytes;   // summed packet sizes since last bitrate calculation
+    double bitrate;
     struct demux_packet *head;
     struct demux_packet *tail;
 };
@@ -172,7 +175,9 @@ static void ds_flush(struct demux_stream *ds)
     ds->head = ds->tail = NULL;
     ds->packs = 0;
     ds->bytes = 0;
-    ds->last_ts = ds->base_ts = MP_NOPTS_VALUE;
+    ds->last_ts = ds->base_ts = ds->last_br_ts = MP_NOPTS_VALUE;
+    ds->last_br_bytes = 0;
+    ds->bitrate = -1;
     ds->eof = false;
     ds->active = false;
 }
@@ -513,6 +518,22 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     double ts = pkt->dts == MP_NOPTS_VALUE ? pkt->pts : pkt->dts;
     if (ts != MP_NOPTS_VALUE)
         ds->base_ts = ts;
+
+    if (pkt->keyframe) {
+        // Update bitrate - only at keyframe points, because we use the
+        // (possibly) reordered packet timestamps instead of realtime.
+        double d = ts - ds->last_br_ts;
+        if (ts == MP_NOPTS_VALUE || ds->last_br_ts == MP_NOPTS_VALUE || d < 0) {
+            ds->bitrate = -1;
+            ds->last_br_ts = ts;
+            ds->last_br_bytes = 0;
+        } else if (d > 0 && d >= 0.5) { // a window of least 500ms for UI purposes
+            ds->bitrate = ds->last_br_bytes / d;
+            ds->last_br_ts = ts;
+            ds->last_br_bytes = 0;
+        }
+    }
+    ds->last_br_bytes += pkt->len;
 
     // This implies this function is actually called from "the" user thread.
     if (pkt->pos >= ds->in->d_user->filepos)
@@ -1233,6 +1254,16 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         in->tracks_switched = true;
         pthread_cond_signal(&in->wakeup);
         return DEMUXER_CTRL_OK;
+    case DEMUXER_CTRL_GET_BITRATE_STATS: {
+        double *rates = arg;
+        for (int n = 0; n < STREAM_TYPE_COUNT; n++)
+            rates[n] = 0;
+        for (int n = 0; n < in->d_user->num_streams; n++) {
+            struct demux_stream *ds = in->d_user->streams[n]->ds;
+            rates[ds->type] += MPMAX(0, ds->bitrate);
+        }
+        return DEMUXER_CTRL_OK;
+    }
     case DEMUXER_CTRL_GET_READER_STATE: {
         struct demux_ctrl_reader_state *r = arg;
         *r = (struct demux_ctrl_reader_state){

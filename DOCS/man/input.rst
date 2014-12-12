@@ -1445,6 +1445,17 @@ Property list
     whether the video window is visible. If the ``--force-window`` option is
     used, this is usually always returns ``yes``.
 
+``packet-video-bitrate``, ``packet-audio-bitrate``, ``packet-sub-bitrate``
+    Bitrate values calculated on the packet level. This works by dividing the
+    bit size of all packets between two keyframes by their presentation
+    timestamp distance. (This uses the timestamps are stored in the file, so
+    e.g. playback speed does not influence the returned values.) In particular,
+    the video bitrate will update only per keyframe, and show the "past"
+    bitrate. To make the property more UI friendly, updates to these properties
+    are throttled in a certain way.
+
+    How exactly these values are calculated might change in the future.
+
 ``audio-device-list``
     Return the list of discovered audio devices. This is mostly for use with
     the client API, and reflects what ``--audio-device=help`` with the command
