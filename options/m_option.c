@@ -2180,7 +2180,7 @@ static int parse_time(struct mp_log *log, const m_option_t *opt,
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
-    if (HAS_NOPTS(opt) == MP_NOPTS_VALUE && bstr_equals0(param, "no")) {
+    if (HAS_NOPTS(opt) && bstr_equals0(param, "no")) {
         time = MP_NOPTS_VALUE;
     } else if (!parse_timestring(param, &time, 0)) {
         mp_err(log, "Option %.*s: invalid time: '%.*s'\n",
