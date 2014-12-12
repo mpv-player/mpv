@@ -12,14 +12,12 @@ DEST_OS=win32 TARGET=i686-w64-mingw32 ./waf configure
 ```
 
 While building a complete MinGW-w64 toolchain yourself is possible, people have
-created scripts to help ease the process. These are the two recommended methods:
+created scripts to help ease the process. In particular, [MXE](http://mxe.cc)
+makes it very easy to bootstrap a complete MingGW-w64 environment from scratch.
+See a working example below.
 
-- Using [mingw-w64-cmake](https://github.com/lachs0r/mingw-w64-cmake) to setup
-  a MinGW-w64 environment. We recommend you to try this first before MXE.
-  mingw-w64-cmake will also build mpv and its dependencies.
-- Alternatively, you can use MXE: http://mxe.cc. With MXE, you have to manually
-  set the target to MinGW-w64 (even if you compile to 32 bit). A working example
-  below.
+Alternatively, you can try [mingw-w64-cmake](https://github.com/lachs0r/mingw-w64-cmake),
+which bootstraps a MinGW-w64 environment and builds mpv and dependencies.
 
 **Warning**: the original MinGW (http://www.mingw.org) is unsupported.
 
@@ -39,6 +37,16 @@ Example with MXE
 ----------------
 
 ```bash
+# Before starting, make sure you install MXE prerequisites. MXE will download
+# and build all target dependencies, but no host dependencies. For example,
+# you need a working compiler, or MXE can't build the crosscompiler.
+#
+# Refer to
+#
+#    http://mxe.cc/#requirements
+#
+# Scroll down for disto/OS-specific instructions to install them.
+
 # Download MXE. Note that compiling the required packages requires about 1.4 GB
 # or more!
 
