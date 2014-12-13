@@ -489,7 +489,7 @@ static int control(stream_t *stream, int cmd, void *arg)
             break;
         if (!part)
             break;
-        *(unsigned int *)arg = part + 1;
+        *(unsigned int *)arg = part;
         return 1;
     }
     case STREAM_CTRL_GET_CHAPTER_TIME: {
@@ -501,7 +501,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         int n = dvdnav_describe_title_chapters(dvdnav, tit, &parts, &duration);
         if (!parts)
             break;
-        if (chapter < 0 || chapter >= n)
+        if (chapter < 0 || chapter + 1 >= n)
             break;
         *ch = chapter > 0 ? parts[chapter - 1] / 90000.0 : 0;
         free(parts);
