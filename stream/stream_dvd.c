@@ -541,6 +541,18 @@ static int control(stream_t *stream,int cmd,void* arg)
             *((unsigned int *)arg) = d->vmg_file->tt_srpt->nr_of_srpts;
             return 1;
         }
+        case STREAM_CTRL_GET_TITLE_LENGTH:
+        {
+            int t = *(double *)arg;
+            if (t < 0 || t >= d->vmg_file->tt_srpt->nr_of_srpts)
+                break;
+            if (d->tt_srpt->title[t].title_set_nr !=
+                d->tt_srpt->title[d->dvd_title].title_set_nr)
+                break;
+            *(double *)arg =
+                mp_get_titleset_length(d->vts_file, d->tt_srpt, t) / 1000.0;
+            return 1;
+        }
         case STREAM_CTRL_GET_NUM_CHAPTERS:
         {
             int r;

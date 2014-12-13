@@ -910,6 +910,38 @@ static int mp_property_disc_titles(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, num_titles);
 }
 
+static int get_disc_title_entry(int item, int action, void *arg, void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+    struct demuxer *demuxer = mpctx->master_demuxer;
+
+    double len = item;
+    if (demux_stream_control(demuxer, STREAM_CTRL_GET_TITLE_LENGTH, &len) < 1)
+        len = -1;
+
+    struct m_sub_property props[] = {
+        {"id",          SUB_PROP_INT(item)},
+        {"length",      {.type = CONF_TYPE_TIME}, {.time = len},
+                        .unavailable = len < 0},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
+static int mp_property_list_disc_titles(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    unsigned int num_titles;
+    if (!demuxer || demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
+                                         &num_titles) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_read_list(action, arg, num_titles,
+                                get_disc_title_entry, mpctx);
+}
+
 /// Number of chapters in file
 static int mp_property_chapters(void *ctx, struct m_property *prop,
                                 int action, void *arg)
@@ -3227,6 +3259,7 @@ static const struct m_property mp_properties[] = {
     {"chapter-list", mp_property_list_chapters},
     {"track-list", property_list_tracks},
     {"edition-list", property_list_editions},
+    {"disc-title-list", mp_property_list_disc_titles},
 
     {"playlist", mp_property_playlist},
     {"playlist-pos", mp_property_playlist_pos},

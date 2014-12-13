@@ -535,6 +535,22 @@ static int control(stream_t *stream, int cmd, void *arg)
         *((unsigned int*)arg)= num_titles;
         return STREAM_OK;
     }
+    case STREAM_CTRL_GET_TITLE_LENGTH: {
+        int t = *(double *)arg;
+        int32_t num_titles = 0;
+        if (dvdnav_get_number_of_titles(dvdnav, &num_titles) != DVDNAV_STATUS_OK)
+            break;
+        if (t < 0 || t >= num_titles)
+            break;
+        uint64_t duration = 0;
+        uint64_t *parts = NULL;
+        dvdnav_describe_title_chapters(dvdnav, t + 1, &parts, &duration);
+        if (!parts)
+            break;
+        free(parts);
+        *(double *)arg = duration / 90000.0;
+        return STREAM_OK;
+    }
     case STREAM_CTRL_GET_CURRENT_TITLE: {
         if (dvdnav_current_title_info(dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
             break;
