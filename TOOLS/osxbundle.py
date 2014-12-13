@@ -3,6 +3,7 @@
 import os
 import shutil
 import sys
+import fileinput
 from optparse import OptionParser
 
 def sh(command):
@@ -35,7 +36,8 @@ def copy_binary(binary_name):
     shutil.copy(binary_name, target_binary(binary_name))
 
 def apply_plist_template(plist_file, version):
-    sh("sed -i -e 's/${VERSION}/%s/g' %s" % (version, plist_file))
+    for line in fileinput.input(plist_file, inplace=1):
+        print (line.rstrip().replace('${VERSION}', version))
 
 def main():
     version = sh("./version.sh --print").strip()
