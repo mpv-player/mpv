@@ -847,6 +847,8 @@ works like in older mpv releases. The profiles are currently defined as follows:
 
 .. include:: lua.rst
 
+.. include:: javascript.rst
+
 .. include:: ipc.rst
 
 .. include:: changes.rst
