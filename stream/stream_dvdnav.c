@@ -489,7 +489,7 @@ static int control(stream_t *stream, int cmd, void *arg)
             break;
         if (!part)
             break;
-        *(unsigned int *)arg = part;
+        *(unsigned int *)arg = part + 1;
         return 1;
     }
     case STREAM_CTRL_GET_CHAPTER_TIME: {
@@ -503,7 +503,7 @@ static int control(stream_t *stream, int cmd, void *arg)
             break;
         if (chapter < 0 || chapter >= n)
             break;
-        *ch = parts[chapter] / 90000.0;
+        *ch = chapter > 0 ? parts[chapter - 1] / 90000.0 : 0;
         free(parts);
         return 1;
     }
