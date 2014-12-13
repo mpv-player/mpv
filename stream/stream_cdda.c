@@ -243,11 +243,6 @@ static int control(stream_t *stream, int cmd, void *arg)
 {
     cdda_priv *p = stream->priv;
     switch (cmd) {
-    case STREAM_CTRL_GET_NUM_TITLES:
-    {
-      *(unsigned int *)arg = p->cd->tracks;
-      return STREAM_OK;
-    }
     case STREAM_CTRL_GET_NUM_CHAPTERS:
     {
         int start_track = get_track_by_sector(p, p->start_sector);
