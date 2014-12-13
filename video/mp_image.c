@@ -734,6 +734,8 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
         void *ptr = new_ref->planes[n];
         size_t size = new_ref->stride[n] * new_ref->h;
         frame->buf[n] = av_buffer_create(ptr, size, free_img, dummy_ref, flags);
+        if (!frame->buf[n])
+            abort();
     }
     talloc_free(new_ref);
     return frame;
