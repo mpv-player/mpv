@@ -308,14 +308,16 @@ const m_option_t mp_opts[] = {
                M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE),
     OPT_STRINGLIST("reset-on-next-file", reset_options, 0),
 
-#if HAVE_LUA
+#if HAVE_LUA || HAVE_JAVASCRIPT
     OPT_STRINGLIST("script", script_files, M_OPT_FIXED | M_OPT_FILE),
     OPT_KEYVALUELIST("script-opts", script_opts, 0),
+    OPT_FLAG("load-scripts", auto_load_scripts, 0),
+#endif
+#if HAVE_LUA
     OPT_FLAG("osc", lua_load_osc, UPDATE_BUILTIN_SCRIPTS),
     OPT_FLAG("ytdl", lua_load_ytdl, UPDATE_BUILTIN_SCRIPTS),
     OPT_STRING("ytdl-format", lua_ytdl_format, 0),
     OPT_KEYVALUELIST("ytdl-raw-options", lua_ytdl_raw_options, 0),
-    OPT_FLAG("load-scripts", auto_load_scripts, 0),
 #endif
 
 // ------------------------- stream options --------------------

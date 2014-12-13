@@ -38,6 +38,7 @@
 
 extern const struct mp_scripting mp_scripting_lua;
 extern const struct mp_scripting mp_scripting_cplugin;
+extern const struct mp_scripting mp_scripting_js;
 
 static const struct mp_scripting *const scripting_backends[] = {
 #if HAVE_LUA
@@ -45,6 +46,9 @@ static const struct mp_scripting *const scripting_backends[] = {
 #endif
 #if HAVE_CPLUGINS
     &mp_scripting_cplugin,
+#endif
+#if HAVE_JAVASCRIPT
+    &mp_scripting_js,
 #endif
     NULL
 };

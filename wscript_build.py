@@ -92,6 +92,12 @@ def build(ctx):
             target = os.path.splitext(fn)[0] + ".inc",
         )
 
+    ctx(
+        features = "file2string",
+        source = "player/javascript/defaults.js",
+        target = "player/javascript/defaults.js.inc",
+    )
+
     ctx(features = "ebml_header", target = "ebml_types.h")
     ctx(features = "ebml_definitions", target = "ebml_defs.c")
 
@@ -237,6 +243,7 @@ def build(ctx):
         ( "player/misc.c" ),
         ( "player/lavfi.c" ),
         ( "player/lua.c",                        "lua" ),
+        ( "player/javascript.c",                 "javascript" ),
         ( "player/osd.c" ),
         ( "player/playloop.c" ),
         ( "player/screenshot.c" ),
