@@ -354,7 +354,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
     AVCodecContext *avctx = ctx->avctx;
     if (!ctx->avctx)
-        return;
+        goto error;
     avctx->bit_rate = 0;
     avctx->opaque = vd;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
@@ -363,16 +363,14 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->refcounted_frames = 1;
     ctx->pic = av_frame_alloc();
     if (!ctx->pic)
-        return;
+        goto error;
 
     if (ctx->hwdec) {
         avctx->thread_count    = 1;
         avctx->get_format      = get_format_hwdec;
         avctx->get_buffer2     = get_buffer2_hwdec;
-        if (ctx->hwdec->init(ctx) < 0) {
-            uninit_avctx(vd);
-            return;
-        }
+        if (ctx->hwdec->init(ctx) < 0)
+            goto error;
     } else {
         mp_set_avcodec_threads(avctx, lavc_param->threads);
     }
@@ -422,11 +420,14 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         mp_copy_lav_codec_headers(avctx, sh->lav_headers);
 
     /* open it */
-    if (avcodec_open2(avctx, lavc_codec, NULL) < 0) {
-        MP_ERR(vd, "Could not open codec.\n");
-        uninit_avctx(vd);
-        return;
-    }
+    if (avcodec_open2(avctx, lavc_codec, NULL) < 0)
+        goto error;
+
+    return;
+
+error:
+    MP_ERR(vd, "Could not open codec.\n");
+    uninit_avctx(vd);
 }
 
 static void uninit_avctx(struct dec_video *vd)
