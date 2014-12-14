@@ -379,7 +379,7 @@ int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
             for (int i = 1; i < argc; i++)
                 if (argv[i][0] != '-')
                     mpv_shared_app().openCount++;
-            init_cocoa_application(false);
+            init_cocoa_application(true);
         }
 
         pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
