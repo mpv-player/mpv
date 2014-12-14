@@ -4,7 +4,7 @@ mpv lua scripts
 The lua scripts in this folder can be loaded on a one-time basis by
 adding the option
 
-    --lua=/path/to/script.lua
+    --script=/path/to/script.lua
 
 to mpv's command line.
 

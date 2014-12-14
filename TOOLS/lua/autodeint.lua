@@ -19,7 +19,7 @@
 --
 -- The default detection time may be overridden by adding
 --
--- --lua-opts=autodeint.detect_seconds=<number of seconds>
+-- --script-opts=autodeint.detect_seconds=<number of seconds>
 --
 -- to mpv's arguments. This may be desirable to allow idet more
 -- time to collect data.

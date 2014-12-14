@@ -59,8 +59,8 @@ typedef struct MPOpts {
     int msg_time;
 
     char **reset_options;
-    char **lua_files;
-    char **lua_opts;
+    char **script_files;
+    char **script_opts;
     int lua_load_osc;
     int lua_load_ytdl;
     char *lua_ytdl_format;

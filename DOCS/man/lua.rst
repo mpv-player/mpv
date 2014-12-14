@@ -1,10 +1,10 @@
 LUA SCRIPTING
 =============
 
-mpv can load Lua scripts. Scripts passed to the ``--lua`` option, or found in
-the ``lua`` subdirectory of the mpv configuration directory (usually
-``~/.config/mpv/lua/``) will be loaded on program start. mpv also appends the
-``lua`` subdirectory to the end of Lua's path so you can import scripts from
+mpv can load Lua scripts. Scripts passed to the ``--script`` option, or found in
+the ``scripts`` subdirectory of the mpv configuration directory (usually
+``~/.config/mpv/scripts/``) will be loaded on program start. mpv also appends the
+``scripts`` subdirectory to the end of Lua's path so you can import scripts from
 there too. Since it's added to the end, don't name scripts you want to import
 the same as Lua libraries because they will be overshadowed by them.
 
@@ -35,9 +35,9 @@ allow users implement features which are not going to be added to the mpv core.
 Mode of operation
 -----------------
 
-Your script will be loaded by the player at program start from the ``lua``
-configuration subdirectory, from a path specified with the ``--lua`` option, or
-in some cases, internally (like ``--osc``). Each script runs in its own
+Your script will be loaded by the player at program start from the ``scripts``
+configuration subdirectory, from a path specified with the ``--script`` option,
+or in some cases, internally (like ``--osc``). Each script runs in its own
 thread. Your script is first run "as is", and once that is done, the event loop
 is entered. This event loop will dispatch events received by mpv and call your
 own event handlers which you have registered with ``mp.register_event``, or
@@ -361,7 +361,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
 
 ``mp.get_opt(key)``
-    Return a setting from the ``--lua-opts`` option. It's up to the user and
+    Return a setting from the ``--script-opts`` option. It's up to the user and
     the script how this mechanism is used. Currently, all scripts can access
     this equally, so you should be careful about collisions.
 
@@ -513,12 +513,12 @@ Example config::
     optionC=no
 
 
-Command-line options are read from the ``--lua-opts`` parameter. To avoid
+Command-line options are read from the ``--script-opts`` parameter. To avoid
 collisions, all keys have to be prefixed with ``identifier-``.
 
 Example command-line::
 
-     --lua-opts=myscript-optionA=TEST:myscript-optionB=0:myscript-optionC=yes
+     --script-opts=myscript-optionA=TEST:myscript-optionB=0:myscript-optionC=yes
 
 
 mp.utils options

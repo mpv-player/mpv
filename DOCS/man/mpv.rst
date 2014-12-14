@@ -712,9 +712,9 @@ FILES
 ``~/.config/mpv/input.conf``
     key bindings (see `INPUT.CONF`_ section)
 
-``~/.config/mpv/lua/``
-    All files in this directly are loaded as if they were passed to the
-    ``--lua`` option. They are loaded in alphabetical order, and sub-directories
+``~/.config/mpv/scripts/``
+    All files in this directory are loaded as if they were passed to the
+    ``--script`` option. They are loaded in alphabetical order, and sub-directories
     and files with no ``.lua`` extension are ignored. The ``--load-scripts=no``
     option disables loading these files.
 
@@ -738,8 +738,8 @@ locations are different:
 ``%APPDATA%/mpv/input.conf``
     key bindings (see `INPUT.CONF`_ section)
 
-``%APPDATA%/mpv/lua/``
-    equivalent of ``~/.config/mpv/lua/`` on Unix.
+``%APPDATA%/mpv/scripts/``
+    equivalent of ``~/.config/mpv/scripts/``on Unix.
 
 The environment variable ``$MPV_HOME`` completely overrides these, like on
 UNIX.

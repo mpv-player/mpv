@@ -127,8 +127,8 @@ const m_option_t mp_opts[] = {
     OPT_STRINGLIST("reset-on-next-file", reset_options, M_OPT_GLOBAL),
 
 #if HAVE_LUA
-    OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL | M_OPT_FILE),
-    OPT_KEYVALUELIST("lua-opts", lua_opts, M_OPT_GLOBAL),
+    OPT_STRINGLIST("script", script_files, CONF_GLOBAL | M_OPT_FILE),
+    OPT_KEYVALUELIST("script-opts", script_opts, M_OPT_GLOBAL),
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
     OPT_FLAG("ytdl", lua_load_ytdl, CONF_GLOBAL),
     OPT_STRING("ytdl-format", lua_ytdl_format, CONF_GLOBAL),
@@ -594,6 +594,8 @@ const m_option_t mp_opts[] = {
     OPT_REMOVED("lavdopts", "use --vd-lavc-..."),
     OPT_REMOVED("lavfdopts", "use --demuxer-lavf-..."),
     OPT_REPLACED("lircconf", "input-lirc-conf"),
+    OPT_REPLACED("lua", "script"),
+    OPT_REPLACED("lua-opts", "script-opts"),
     OPT_REMOVED("mixer-channel", "use AO suboptions (alsa, oss)"),
     OPT_REMOVED("mixer", "use AO suboptions (alsa, oss)"),
     OPT_REPLACED("mouse-movements", "input-cursor"),

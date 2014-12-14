@@ -14,7 +14,7 @@ function mp.get_script_name()
 end
 
 function mp.get_opt(key, def)
-    local opts = mp.get_property_native("options/lua-opts")
+    local opts = mp.get_property_native("options/script-opts")
     local val = opts[key]
     if val == nil then
         val = def
