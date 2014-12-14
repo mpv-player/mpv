@@ -1,4 +1,11 @@
 (function main_default_js(){
+// Note: the names of anonymous functions are not required.
+//   e.g. var x = function some_name(){...};
+//   would work just as well as: var x = function(){...};
+// However, the names are used at stack traces on errors.
+// So where it's unlikely to have errors - names are omitted.
+// (the filename and line number will still show on traces
+//  but the function name will be empty).
 
 /**********************************************************************
  *  CommonJS style module/require
@@ -119,21 +126,21 @@ function addTimer(callback, duration, isRepeat) {
 }
 
 // Immediate callbacks will execute as soon as possible when the event queue is empty
-setImmediate = function setImmediate(fn) {
+setImmediate = function(fn) {
   return addTimer(fn, 0);
 }
 
 // timeouts and intervals are clipped to a minimum of 4 ms
-setTimeout = function setTimeout(fn, duration) {
+setTimeout = function(fn, duration) {
   return addTimer(fn, Math.max(MIN_TIMEOUT_MS, duration));
 }
 
-setInterval = function setInterval(fn, interval) {
+setInterval = function(fn, interval) {
   return addTimer(fn, Math.max(MIN_TIMEOUT_MS, interval), true);
 }
 
 // Cancelled timers will get applied lazily during the next processTimers().
-clearTimeout = clearInterval = clearImmediate = function _clearTimer(id) {
+clearTimeout = clearInterval = clearImmediate = function(id) {
   if (!canceledTimers)
     canceledTimers = {};
   canceledTimers[id] = true;
@@ -219,7 +226,7 @@ function processTimers(allowImmediate) {
  *********************************************************************/
 var ehandlers = {}; // with event names as keys and array of callbacks for each
 
-mp.register_event = function register_event(name, fn) {
+mp.register_event = function(name, fn) {
   if (!ehandlers[name]) {
     var rv = mp._request_event(name, true);
     if (!rv)
@@ -231,7 +238,7 @@ mp.register_event = function register_event(name, fn) {
   return true;
 }
 
-mp.unregister_event = function unregister_event(fn) {
+mp.unregister_event = function(fn) {
   for (var name in ehandlers) {
     for (var i = ehandlers[name].length - 1; i >= 0; i--) {
       if (ehandlers[name][i] == fn)
@@ -269,7 +276,7 @@ function dispatch_event(e) {
  *********************************************************************/
 var ohandlers = {nextId: 1, callbacks: {}};
 
-mp.observe_property = function observe_property(name, format, fn) {
+mp.observe_property = function(name, format, fn) {
   format = (mp._formats[format]);
   if (typeof format == "undefined") {
     mp.last_error_string = "unknown format";
@@ -282,7 +289,7 @@ mp.observe_property = function observe_property(name, format, fn) {
   return id;
 }
 
-mp.unobserve_property = function unobserve_property(fn) {
+mp.unobserve_property = function(fn) {
   var unobserved = false;
   for (var id in ohandlers.callbacks)
     if (ohandlers.callbacks[id] == fn) {
@@ -293,7 +300,7 @@ mp.unobserve_property = function unobserve_property(fn) {
   return unobserved;
 }
 
-mp.unobserve_property_id = function unobserve_property_id(id) {
+mp.unobserve_property_id = function(id) {
   delete ohandlers.callbacks[id];
   return mp._unobserve_property(id);
 }
@@ -316,11 +323,11 @@ function notifyObserver(e) {
  *********************************************************************/
 var messages = {};
 
-mp.register_script_message = function register_script_message(name, fn) {
+mp.register_script_message = function(name, fn) {
     messages[name] = fn;
 }
 
-mp.unregister_script_message = function unregister_script_message(name) {
+mp.unregister_script_message = function(name) {
     delete messages[name];
 }
 
@@ -438,7 +445,7 @@ mp.add_forced_key_binding = function add_forced_key_binding(a, b, c, d) {
   add_binding({forced: true}, a, b, c, d);
 }
 
-mp.remove_key_binding = function remove_key_binding(name) {
+mp.remove_key_binding = function(name) {
   delete key_bindings[name];
   update_key_bindings();
   delete dispatch_key_bindings[name];
@@ -495,11 +502,11 @@ dump = function dump(x, name) {
   print(name + JSON_stringify_any(x, 2));
 }
 
-mp.get_script_name = function get_script_name() {
+mp.get_script_name = function() {
   return mp.script_name;
 }
 
-mp.get_opt = function get_opt(key, def) {
+mp.get_opt = function(key, def) {
   var opts = mp.get_property_native("options/lua-opts");
   var val = opts[key];
   if (typeof val == "undefined")
@@ -508,10 +515,10 @@ mp.get_opt = function get_opt(key, def) {
 }
 
 mp.osd_message = function osd_message(text, duration) {
-  if (typeof duration == "undefined")
-    duration = "-1";
+  if (isNaN(duration))
+    duration = -1;
   else
-    duration = "" + Math.floor(duration * 1000);
+    duration = Math.floor(duration * 1000);
   mp.commandv("show_text", text, duration);
 }
 

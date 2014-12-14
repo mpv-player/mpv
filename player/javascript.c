@@ -291,8 +291,6 @@ static void script_run_scripts(js_State *J)
 // - js calle's stack index 0 is "this", and the rest (1, 2, 3, ...) are the args
 static int load_javascript(struct mpv_handle *client, const char *fname)
 {
-    printf("JS: loading '%s'\n", fname);
-
     struct script_ctx ctx = (struct script_ctx) {
         .mpctx = mp_client_get_core(client),
         .client = client,
@@ -472,6 +470,7 @@ static void script_wait_event(js_State *J)
 
     case MPV_EVENT_PROPERTY_CHANGE: {
         mpv_event_property *prop = event->data;
+
         js_pushstring(J, prop->name);
         js_setproperty(J, -2, "name");
 
@@ -482,7 +481,7 @@ static void script_wait_event(js_State *J)
         case MPV_FORMAT_FLAG:   js_pushboolean(J, *(int *)prop->data);    break;
         case MPV_FORMAT_STRING: js_pushstring(J, *(char **)prop->data);   break;
         default:
-            printf("--- unknown property type: %d\n", prop->format);
+            MP_WARN(ctx, "unknown property type: %d\n", prop->format);
             js_pushundefined(J);
         }
         js_setproperty(J, -2, "data");
