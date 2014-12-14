@@ -622,7 +622,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
-        resize(vo);
+        if (vo->config_ok)
+            resize(vo);
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, p->original_image);
@@ -636,7 +637,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     int events = 0;
     int r = vo_x11_control(vo, &events, request, data);
-    if (events & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE))
+    if (vo->config_ok && (events & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE)))
         resize(vo);
     vo_event(vo, events);
     return r;
