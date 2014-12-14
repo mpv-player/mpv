@@ -152,7 +152,7 @@ static int find_depth_from_visuals(struct vo *vo, Visual ** visual_return)
     return bestvisual_depth;
 }
 
-static void getMyXImage(struct priv *p, int foo)
+static bool getMyXImage(struct priv *p, int foo)
 {
     struct vo *vo = p->vo;
 #if HAVE_SHM && HAVE_XEXT
@@ -212,6 +212,10 @@ shmemerror:
     p->myximage[foo] =
         XCreateImage(vo->x11->display, p->vinfo.visual, p->depth, ZPixmap,
                      0, NULL, p->image_width, p->image_height, 8, 0);
+    if (!p->myximage[foo]) {
+        MP_WARN(vo, "could not allocate image");
+        return false;
+    }
     size_t sz = p->myximage[foo]->bytes_per_line * p->image_height + 32;
     p->ImageDataOrig[foo] = calloc(1, sz);
     p->myximage[foo]->data = p->ImageDataOrig[foo] + 16
@@ -220,6 +224,7 @@ shmemerror:
 #if HAVE_SHM && HAVE_XEXT
 }
 #endif
+    return true;
 }
 
 static void freeMyXImage(struct priv *p, int foo)
@@ -342,8 +347,10 @@ static bool resize(struct vo *vo)
     p->image_height = p->dst_h;
 
     p->num_buffers = 2;
-    for (int i = 0; i < p->num_buffers; i++)
-        getMyXImage(p, i);
+    for (int i = 0; i < p->num_buffers; i++) {
+        if (!getMyXImage(p, i))
+            return -1;
+    }
 
     const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
     while (fmte->mpfmt) {
