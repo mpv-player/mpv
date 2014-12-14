@@ -31,14 +31,14 @@ def __add_generic_flags__(ctx):
 def __add_gcc_flags__(ctx):
     ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
                        "-Wno-switch", "-Wno-parentheses", "-Wpointer-arith",
-                       "-Wredundant-decls", "-Wno-pointer-sign",
-                       "-Werror=implicit-function-declaration",
-                       "-Wno-error=deprecated-declarations",
-                       "-Wno-error=unused-function" ]
-    __test_and_add_flags__(ctx, ["-Wempty-body"])
-    __test_and_add_flags__(ctx, ["-Wdisabled-optimization"])
-    __test_and_add_flags__(ctx, ["-Wstrict-prototypes"])
-    __test_and_add_flags__(ctx, ["-Wno-format-zero-length"])
+                       "-Wredundant-decls", "-Wno-pointer-sign"]
+    __test_and_add_flags__(ctx, ["-Werror=implicit-function-declaration",
+                                 "-Wno-error=deprecated-declarations",
+                                 "-Wno-error=unused-function",
+                                 "-Wempty-body",
+                                 "-Wdisabled-optimization",
+                                 "-Wstrict-prototypes",
+                                 "-Wno-format-zero-length"])
 
 def __add_clang_flags__(ctx):
     ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics",
