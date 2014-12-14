@@ -21,7 +21,7 @@
 -- The default delay between insertion of the cropdetect and
 -- crop filters may be overridden by adding
 --
--- --lua-opts=autocrop.detect_seconds=<number of seconds>
+-- --script-opts=autocrop.detect_seconds=<number of seconds>
 --
 -- to mpv's arguments. This may be desirable to allow cropdetect more
 -- time to collect data.

@@ -179,7 +179,7 @@ void mp_load_scripts(struct MPContext *mpctx)
         mp_load_script(mpctx, "@osc.lua");
     if (mpctx->opts->lua_load_ytdl)
         mp_load_script(mpctx, "@ytdl_hook.lua");
-    char **files = mpctx->opts->lua_files;
+    char **files = mpctx->opts->script_files;
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])
             mp_load_script(mpctx, files[n]);
@@ -187,13 +187,24 @@ void mp_load_scripts(struct MPContext *mpctx)
     if (!mpctx->opts->auto_load_scripts)
         return;
 
-    // Load all lua scripts
+    // Load all scripts
     void *tmp = talloc_new(NULL);
-    char **luadir = mp_find_all_config_files(tmp, mpctx->global, "lua");
-    for (int i = 0; luadir && luadir[i]; i++) {
-        files = list_script_files(tmp, luadir[i]);
-        for (int n = 0; files && files[n]; n++)
-            mp_load_script(mpctx, files[n]);
+    const char *dirs[] = {"scripts", "lua", NULL}; // 'lua' is deprecated
+    int warning_displayed = 0;
+    for (int s = 0; dirs[s]; s++) {
+        char **scriptsdir = mp_find_all_config_files(tmp, mpctx->global, dirs[s]);
+        for (int i = 0; scriptsdir && scriptsdir[i]; i++) {
+            files = list_script_files(tmp, scriptsdir[i]);
+            for (int n = 0; files && files[n]; n++) {
+                if (s && !warning_displayed) {
+                    warning_displayed = 1;
+                    MP_WARN(mpctx,
+                            "warning: '%s' - '%s' dirs are deprecated. Please move scripts to '%s'.",
+                            files[n], dirs[s], dirs[0]);
+                }
+                mp_load_script(mpctx, files[n]);
+            }
+        }
     }
     talloc_free(tmp);
 }

@@ -345,18 +345,18 @@ Program Behavior
     Specify configuration file to be parsed after the default ones.
 
 ``--load-scripts=<yes|no>``
-    If set to ``no``, don't auto-load scripts from the ``lua`` configuration
-    subdirectory (usually ``~/.config/mpv/lua/``).
+    If set to ``no``, don't auto-load scripts from the ``scripts``
+    configuration subdirectory (usually ``~/.config/mpv/scripts/``).
     (Default: ``yes``)
 
-``--lua=<filename>``
+``--script=<filename>``
     Load a Lua script. You can load multiple scripts by separating them with
     commas (``,``).
 
-``--lua-opts=key1=value1,key2=value2,...``
-    Set options for scripts. A Lua script can query an option by key. If an
+``--script-opts=key1=value1,key2=value2,...``
+    Set options for scripts. A script can query an option by key. If an
     option is used and what semantics the option value has depends entirely on
-    the loaded Lua scripts. Values not claimed by any scripts are ignored.
+    the loaded scripts. Values not claimed by any scripts are ignored.
 
 ``--merge-files``
     Pretend that all files passed to mpv are concatenated into a single, big

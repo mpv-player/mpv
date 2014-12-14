@@ -79,18 +79,18 @@ function read_options(options, identifier)
     end
 
     --parse command-line options
-    for key, val in pairs(mp.get_property_native("options/lua-opts")) do
+    for key, val in pairs(mp.get_property_native("options/script-opts")) do
         local prefix = identifier.."-"
         if not (string.find(key, prefix, 1, true) == nil) then
             key = string.sub(key, string.len(prefix)+1)
 
             -- match found values with defaults
             if options[key] == nil then
-                msg.warn("lua-opts: unknown key " .. key .. ", ignoring")
+                msg.warn("script-opts: unknown key " .. key .. ", ignoring")
             else
                 local convval = typeconv(options[key], val)
                 if convval == nil then
-                    msg.error("lua-opts: error converting value '" .. val ..
+                    msg.error("script-opts: error converting value '" .. val ..
                         "' for key '" .. key .. "'")
                 else
                     options[key] = convval
