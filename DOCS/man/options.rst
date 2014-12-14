@@ -346,7 +346,7 @@ Program Behavior
 
 ``--load-scripts=<yes|no>``
     If set to ``no``, don't auto-load scripts from the ``scripts``
-    configuration subdirectory (usually ``~/.config/mpv/script/``).
+    configuration subdirectory (usually ``~/.config/mpv/scripts/``).
     (Default: ``yes``)
 
 ``--script=<filename>``

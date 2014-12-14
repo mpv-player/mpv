@@ -190,13 +190,14 @@ void mp_load_scripts(struct MPContext *mpctx)
     // Load all scripts
     void *tmp = talloc_new(NULL);
     const char *dirs[] = {"scripts", "lua", NULL};
-    int warningDisplayed = 0;
+    int warning_displayed = 0;
     for (int s = 0; dirs[s]; s++) {
         char **scriptsdir = mp_find_all_config_files(tmp, mpctx->global, dirs[s]);
         for (int i = 0; scriptsdir && scriptsdir[i]; i++) {
             files = list_script_files(tmp, scriptsdir[i]);
             for (int n = 0; files && files[n]; n++) {
-                if (s && !warningDisplayed) {
+                if (s && !warning_displayed) {
+                    warning_displayed = 1;
                     MP_WARN(mpctx,
                             "warning: '%s' - '%s' dirs are deprecated. Please move scripts to '%s'.",
                             files[n], dirs[s], dirs[0]);

@@ -739,7 +739,7 @@ locations are different:
     key bindings (see `INPUT.CONF`_ section)
 
 ``%APPDATA%/mpv/scripts/``
-    equivalent of ``~/.config/mpv/scripts/``on Unix.
+    equivalent of ``~/.config/mpv/scripts/`` on Unix.
 
 The environment variable ``$MPV_HOME`` completely overrides these, like on
 UNIX.
