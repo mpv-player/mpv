@@ -54,7 +54,7 @@
 
 // List of builtin modules and their contents as strings.
 // All these are generated from player/javascript/*.js
-static const char * const builtin_files[][3] = {
+static const char *const builtin_files[][3] = {
     {"@defaults.js",
 #   include "player/javascript/defaults.js.inc"
     },
@@ -82,7 +82,8 @@ static struct MPContext *get_mpctx(js_State *J)
     return get_ctx(J)->mpctx;
 }
 
-static mpv_handle *client_js(js_State *J) {
+static mpv_handle *client_js(js_State *J)
+{
     return get_ctx(J)->client;
 }
 
@@ -101,7 +102,8 @@ static void set_last_error(js_State *J, int err, const char *str)
 
 // if err < 0: sets mp.last_error_string, pushes undefined and returns 1
 // else: does nothing and returns 0
-static int handledAsError(js_State *J, int err) {
+static int handledAsError(js_State *J, int err)
+{
     if (err >= 0)
         return 0;
 
@@ -114,9 +116,10 @@ static int handledAsError(js_State *J, int err) {
 // identical to handledAsError if idx 2 is undefined. otherwise:
 // - always sets mp.last_error_string ("success" on success)
 // - on error, pushes idx 2 as the result.
-static int handledAsErrDef(js_State *J, int err) {
+static int handledAsErrDef(js_State *J, int err)
+{
     if (js_isundefined(J, 2))
-      return handledAsError(J, err);
+        return handledAsError(J, err);
 
     set_last_error(J, err, NULL);
     if (err >= 0)
@@ -127,7 +130,8 @@ static int handledAsErrDef(js_State *J, int err) {
 }
 
 // pushes true/false and handles error if required
-static void pushStatus(js_State *J, int err) {
+static void pushStatus(js_State *J, int err)
+{
     if (!handledAsError(J, err))
         js_pushboolean(J, 1);
 }
@@ -143,7 +147,8 @@ enum FILE_COMMAND {
     FILE_RUN   // compiles + runs the file and pushes the result
 };
 
-static void push_file_result(js_State *J, enum FILE_COMMAND command, const char *filename);
+static void push_file_result(js_State *J, enum FILE_COMMAND command,
+                             const char *filename);
 
 static void script_read_file(js_State *J)
 {
@@ -171,78 +176,80 @@ static const char *get_builtin_file(const char *name)
 
 // executes the command and pushes the result or throws an error
 // filename is taken as is, unless it starts with '@', at which case it's read from builtin_files.
-static void push_file_result(js_State *J, enum FILE_COMMAND command, const char *filename)
+static void push_file_result(js_State *J, enum FILE_COMMAND command,
+                             const char *filename)
 {
-  if (!filename || !filename[0])
-      js_error(J, "invalid file name");
+    if (!filename || !filename[0])
+        js_error(J, "invalid file name");
 
-  FILE *f;
-  char *s = NULL;
-  const char *data;
+    FILE *f;
+    char *s = NULL;
+    const char *data;
 
-  if (filename[0] == '@') {
-      data = get_builtin_file(filename);
-      if (!data)
-          js_error(J, "cannot find built in file '%s'", filename);
+    if (filename[0] == '@') {
+        data = get_builtin_file(filename);
+        if (!data)
+            js_error(J, "cannot find built in file '%s'", filename);
 
-  } else {
-      int n, t;
+    } else {
+        int n, t;
 
-      f = fopen(filename, "rb");
-      if (!f)
-          js_error(J, "cannot open file: '%s'", filename);
+        f = fopen(filename, "rb");
+        if (!f)
+            js_error(J, "cannot open file: '%s'", filename);
 
-      if (fseek(f, 0, SEEK_END) < 0) {
-          fclose(f);
-          js_error(J, "cannot seek in file: '%s'", filename);
-      }
-      n = ftell(f);
-      fseek(f, 0, SEEK_SET);
+        if (fseek(f, 0, SEEK_END) < 0) {
+            fclose(f);
+            js_error(J, "cannot seek in file: '%s'", filename);
+        }
+        n = ftell(f);
+        fseek(f, 0, SEEK_SET);
 
-      s = talloc_array(NULL, char, n + 1);
-      if (!s) {
-          fclose(f);
-          js_error(J, "cannot allocate storage for file contents: '%s'", filename);
-      }
+        s = talloc_array(NULL, char, n + 1);
+        if (!s) {
+            fclose(f);
+            js_error(J, "cannot allocate storage for file contents: '%s'",
+                     filename);
+        }
 
-      t = fread(s, 1, n, f);
-      if (t != n) {
-          talloc_free(s);
-          fclose(f);
-          js_error(J, "cannot read data from file: '%s'", filename);
-      }
+        t = fread(s, 1, n, f);
+        if (t != n) {
+            talloc_free(s);
+            fclose(f);
+            js_error(J, "cannot read data from file: '%s'", filename);
+        }
 
-      s[n] = 0;
-      data = s;
-  }
+        s[n] = 0;
+        data = s;
+    }
 
-  int err;
-  switch (command) {
-      case FILE_READ:
-          js_pushstring (J, data);
-          err = 0;
-          break;
-      case FILE_LOAD:
-          err = js_ploadstring(J, filename, data);
-          break;
-      case FILE_RUN :
-          if (err = js_ploadstring(J, filename, data))
+    int err;
+    switch (command) {
+    case FILE_READ:
+        js_pushstring(J, data);
+        err = 0;
+        break;
+    case FILE_LOAD:
+        err = js_ploadstring(J, filename, data);
+        break;
+    case FILE_RUN:
+        if (err = js_ploadstring(J, filename, data))
             break;
-          js_pushglobal(J);
-          err = js_pcall(J, 0);
-          break;
-      default:
-          js_newerror(J, "unknown file command");
-          err = -1;
-  }
+        js_pushglobal(J);
+        err = js_pcall(J, 0);
+        break;
+    default:
+        js_newerror(J, "unknown file command");
+        err = -1;
+    }
 
-  if (s) {
-      talloc_free(s);
-      fclose(f);
-  }
+    if (s) {
+        talloc_free(s);
+        fclose(f);
+    }
 
-  if (err)
-      js_throw(J);
+    if (err)
+        js_throw(J);
 }
 
 static void add_functions(struct script_ctx *ctx);
@@ -261,7 +268,7 @@ static void run_file(js_State *J, const char *fname)
     int r = js_pcall(J, 1);
     talloc_free(res_name); // careful to not leak this on errors
     if (r)
-        js_throw(J); // the error object is at the top of the stack
+        js_throw(J);  // the error object is at the top of the stack
     js_pop(J, 1);
 }
 
@@ -271,7 +278,7 @@ static void script_run_scripts(js_State *J)
     add_functions(get_ctx(J));
     run_file(J, "@defaults.js");
     //run_file(J, "player/javascript/defaults.js"); // useful for development to read from the filesystem instead of embedded.
-    run_file(J,  get_ctx(J)->filename); // the main file for this script
+    run_file(J, get_ctx(J)->filename);  // the main file for this script
 
     js_getglobal(J, "mp_event_loop"); // fn
     if (!js_iscallable(J, -1))
@@ -344,7 +351,8 @@ static void finalize_log(int msgl, js_State *J, int fromIdx)
     struct script_ctx *ctx = get_ctx(J);
     int last = js_gettop(J) - 1;
     for (int i = fromIdx; i <= last; i++)
-        mp_msg(ctx->log, msgl, "%s%s", (i > fromIdx ? " " : ""), js_tostring(J, i));
+        mp_msg(ctx->log, msgl, "%s%s", (i > fromIdx ? " " : ""),
+               js_tostring(J, i));
 
     mp_msg(ctx->log, msgl, "\n");
     pushStatus(J, 1);
@@ -353,15 +361,19 @@ static void finalize_log(int msgl, js_State *J, int fromIdx)
 // All the log functions are at mp.msg
 
 // args: level as string and the rest are strings to log
-static void script_log(js_State *J) { finalize_log(check_loglevel(J, 1), J, 2); }
+static void script_log(js_State *J)
+{
+    finalize_log(check_loglevel(J, 1), J, 2);
+}
 
+#define LOG_BODY(mlevel) { finalize_log(mlevel, J, 1); }
 // args: strings to log
-static void script_fatal(js_State *J)   { finalize_log(MSGL_FATAL, J, 1); }
-static void script_error(js_State *J)   { finalize_log(MSGL_ERR,   J, 1); }
-static void script_warn(js_State *J)    { finalize_log(MSGL_WARN,  J, 1); }
-static void script_info(js_State *J)    { finalize_log(MSGL_INFO,  J, 1); }
-static void script_verbose(js_State *J) { finalize_log(MSGL_V,     J, 1); }
-static void script_debug(js_State *J)   { finalize_log(MSGL_DEBUG, J, 1); }
+static void script_fatal(js_State *J)   LOG_BODY(MSGL_FATAL)
+static void script_error(js_State *J)   LOG_BODY(MSGL_ERR)
+static void script_warn(js_State *J)    LOG_BODY(MSGL_WARN)
+static void script_info(js_State *J)    LOG_BODY(MSGL_INFO)
+static void script_verbose(js_State *J) LOG_BODY(MSGL_V)
+static void script_debug(js_State *J)   LOG_BODY(MSGL_DEBUG)
 
 static void script_find_config_file(js_State *J)
 {
@@ -416,9 +428,9 @@ static void script_wait_event(js_State *J)
     int top = js_gettop(J);
     double timeout = -1;
     if (!js_isundefined(J, -1))
-      timeout = js_tonumber(J, -1);
+        timeout = js_tonumber(J, -1);
     if (timeout < 0)
-      timeout = 1e20;
+        timeout = 1e20;
 
     // This will almost surely lead to a deadlock. (Polling is still ok.)
     if (ctx->suspended && timeout > 0)
@@ -475,11 +487,16 @@ static void script_wait_event(js_State *J)
         js_setproperty(J, -2, "name");
 
         switch (prop->format) {
-        case MPV_FORMAT_NODE:   pushnode(J, prop->data);                  break;
-        case MPV_FORMAT_DOUBLE: js_pushnumber(J, *(double *)prop->data);  break;
-        case MPV_FORMAT_INT64:  js_pushnumber(J, *(int64_t *)prop->data); break;
-        case MPV_FORMAT_FLAG:   js_pushboolean(J, *(int *)prop->data);    break;
-        case MPV_FORMAT_STRING: js_pushstring(J, *(char **)prop->data);   break;
+        case MPV_FORMAT_NODE:   pushnode(J, prop->data);
+            break;
+        case MPV_FORMAT_DOUBLE: js_pushnumber(J, *(double *)prop->data);
+            break;
+        case MPV_FORMAT_INT64:  js_pushnumber(J, *(int64_t *)prop->data);
+            break;
+        case MPV_FORMAT_FLAG:   js_pushboolean(J, *(int *)prop->data);
+            break;
+        case MPV_FORMAT_STRING: js_pushstring(J, *(char **)prop->data);
+            break;
         default:
             MP_WARN(ctx, "unknown property type: %d\n", prop->format);
             js_pushundefined(J);
@@ -487,7 +504,7 @@ static void script_wait_event(js_State *J)
         js_setproperty(J, -2, "data");
         break;
     }
-    default: ;
+    default:;
     }
 
     // return event
@@ -533,7 +550,8 @@ static void script_commandv(js_State *J)
     const char *args[MAX_LENGTH_COMMANDV + 1];
     unsigned int length = js_gettop(J);
     if (!length || length > MAX_LENGTH_COMMANDV)
-        js_error(J, "Invalid number of arguments. Allowed: 1 - %d", MAX_LENGTH_COMMANDV);
+        js_error(J, "Invalid number of arguments. Allowed: 1 - %d",
+                 MAX_LENGTH_COMMANDV);
 
     unsigned int i;
     for (i = 0; i < length - 1; i++)
@@ -578,7 +596,8 @@ static void script_get_property_number(js_State *J)
 
 // for the object at stack index idx, extract the property names into keys array
 // and return the number of keys.
-static int get_object_properties(void *ta_ctx, char ***keys, js_State *J, int idx)
+static int get_object_properties(void *ta_ctx, char ***keys, js_State *J,
+                                 int idx)
 {
     idx = idx >= 0 ? idx : js_gettop(J) + idx;
     int length = 0;
@@ -590,7 +609,7 @@ static int get_object_properties(void *ta_ctx, char ***keys, js_State *J, int id
     js_pop(J, 1);
 
     js_pushiterator(J, idx, 1);
-    *keys = talloc_array(ta_ctx, char*, length);
+    *keys = talloc_array(ta_ctx, char *, length);
     for (int n = 0; n < length; n++)
         (*keys)[n] = talloc_strdup(ta_ctx, js_nextiterator(J, -1));
     js_pop(J, 1); // the iterator
@@ -661,7 +680,8 @@ static void script_set_property_native(js_State *J)
     void *tmp = talloc_new(NULL);
     makenode(tmp, &node, J, 2);
     //debug_node(&node);
-    int err = mpv_set_property(client_js(J), js_tostring(J, 1), MPV_FORMAT_NODE, &node);
+    int err = mpv_set_property(client_js(J), js_tostring(J, 1),
+                               MPV_FORMAT_NODE, &node);
     talloc_free(tmp);
     pushStatus(J, err);
 }
@@ -670,7 +690,9 @@ static void script_set_property_native(js_State *J)
 static void script_get_property(js_State *J)
 {
     char *result = NULL;
-    if (!handledAsErrDef(J, mpv_get_property(client_js(J), js_tostring(J, 1), MPV_FORMAT_STRING, &result))) {
+    if (!handledAsErrDef(J, mpv_get_property(client_js(J), js_tostring(J, 1),
+                                             MPV_FORMAT_STRING, &result)))
+    {
         js_pushstring(J, result);
         talloc_free(result);
     }
@@ -680,40 +702,49 @@ static void script_get_property(js_State *J)
 static void script_get_property_bool(js_State *J)
 {
     int result;
-    if (!handledAsErrDef(J, mpv_get_property(client_js(J), js_tostring(J, 1), MPV_FORMAT_FLAG, &result)))
+    if (!handledAsErrDef(J, mpv_get_property(client_js(J), js_tostring(J, 1),
+                                             MPV_FORMAT_FLAG, &result)))
+    {
         js_pushboolean(J, result);
+    }
 }
 
 //args: name, number
 static void script_set_property_number(js_State *J)
 {
     double v = js_tonumber(J, 2);
-    pushStatus(J, mpv_set_property(client_js(J), js_tostring(J, 1), MPV_FORMAT_DOUBLE, &v));
+    pushStatus(J, mpv_set_property(client_js(J), js_tostring(J, 1),
+                                   MPV_FORMAT_DOUBLE, &v));
 }
 
 static void pushnode(js_State *J, mpv_node *node)
 {
     switch (node->format) {
-    case MPV_FORMAT_NONE:   js_pushnull   (J);                  break;
-    case MPV_FORMAT_STRING: js_pushstring (J, node->u.string);  break;
-    case MPV_FORMAT_INT64:  js_pushnumber (J, node->u.int64);   break;
-    case MPV_FORMAT_DOUBLE: js_pushnumber (J, node->u.double_); break;
-    case MPV_FORMAT_FLAG:   js_pushboolean(J, node->u.flag);    break;
+    case MPV_FORMAT_NONE:   js_pushnull(J);
+        break;
+    case MPV_FORMAT_STRING: js_pushstring(J, node->u.string);
+        break;
+    case MPV_FORMAT_INT64:  js_pushnumber(J, node->u.int64);
+        break;
+    case MPV_FORMAT_DOUBLE: js_pushnumber(J, node->u.double_);
+        break;
+    case MPV_FORMAT_FLAG:   js_pushboolean(J, node->u.flag);
+        break;
     case MPV_FORMAT_NODE_ARRAY:
-                            js_newarray(J);
-                            js_setlength(J, -1, node->u.list->num);
-                            for (int n = 0; n < node->u.list->num; n++) {
-                                pushnode(J, &node->u.list->values[n]);
-                                js_setindex(J, -2, n);
-                            }
-                            break;
+        js_newarray(J);
+        js_setlength(J, -1, node->u.list->num);
+        for (int n = 0; n < node->u.list->num; n++) {
+            pushnode(J, &node->u.list->values[n]);
+            js_setindex(J, -2, n);
+        }
+        break;
     case MPV_FORMAT_NODE_MAP:
-                            js_newobject(J);
-                            for (int n = 0; n < node->u.list->num; n++) {
-                                pushnode(J, &node->u.list->values[n]);
-                                js_setproperty(J, -2, node->u.list->keys[n]);
-                            }
-                            break;
+        js_newobject(J);
+        for (int n = 0; n < node->u.list->num; n++) {
+            pushnode(J, &node->u.list->values[n]);
+            js_setproperty(J, -2, node->u.list->keys[n]);
+        }
+        break;
     default:
         js_pushstring(J, "[UNKNOWN_VALUE_FORMAT]");
         break;
@@ -726,7 +757,8 @@ static void script_get_property_native(js_State *J)
     mpv_node result;
     if (!handledAsErrDef(J, mpv_get_property(client_js(J),
                                              js_tostring(J, 1),
-                                             MPV_FORMAT_NODE, &result))) {
+                                             MPV_FORMAT_NODE, &result)))
+    {
         pushnode(J, &result);
         mpv_free_node_contents(&result);
     }
@@ -736,7 +768,9 @@ static void script_get_property_native(js_State *J)
 static void script_get_property_osd(js_State *J)
 {
     char *result = NULL;
-    if (!handledAsErrDef(J, mpv_get_property(client_js(J), js_tostring(J, 1), MPV_FORMAT_OSD_STRING, &result))) {
+    if (!handledAsErrDef(J, mpv_get_property(client_js(J), js_tostring(J, 1),
+                                             MPV_FORMAT_OSD_STRING, &result)))
+    {
         js_pushstring(J, result);
         talloc_free(result);
     }
@@ -758,16 +792,17 @@ static void script__unobserve_property(js_State *J)
 }
 
 //args: native (node)
-static void script_command_native(js_State *J) {
-  mpv_node cmd;
-  mpv_node result;
-  void *tmp = talloc_new(NULL);
-  makenode(tmp, &cmd, J, 1);
-  if (!handledAsErrDef(J, mpv_command_node(client_js(J), &cmd, &result))) {
-      pushnode(tmp, &result);
-      mpv_free_node_contents(&result);
-  }
-  talloc_free(tmp);
+static void script_command_native(js_State *J)
+{
+    mpv_node cmd;
+    mpv_node result;
+    void *tmp = talloc_new(NULL);
+    makenode(tmp, &cmd, J, 1);
+    if (!handledAsErrDef(J, mpv_command_node(client_js(J), &cmd, &result))) {
+        pushnode(tmp, &result);
+        mpv_free_node_contents(&result);
+    }
+    talloc_free(tmp);
 }
 
 // TODO: untested
@@ -854,7 +889,8 @@ static void script_input_define_section(js_State *J)
     } else {
         js_error(J, "invalid flags: '%s'", flags);
     }
-    mp_input_define_section(mpctx->input, section, "<script>", contents, builtin);
+    mp_input_define_section(mpctx->input, section, "<script>", contents,
+                            builtin);
 }
 
 // args: section [,flags]
@@ -935,22 +971,24 @@ static void script_getcwd(js_State *J)
     talloc_free(cwd);
 }
 
-static int checkoption(js_State *J, int idx, const char *def, const char *const opts[]) {
-  const char *opt;
-  if (js_isstring(J, idx)) {
-      opt = js_tostring(J, idx);
-  } else {
-      if (def)
-          opt = def;
-      else
-          js_error(J, "Not a string");
-  }
+static int checkoption(js_State *J, int idx, const char *def,
+                       const char *const opts[])
+{
+    const char *opt;
+    if (js_isstring(J, idx))
+        opt = js_tostring(J, idx);
+    else {
+        if (def)
+            opt = def;
+        else
+            js_error(J, "Not a string");
+    }
 
-  for (int i = 0; opts[i]; i++)
-      if (!strcmp(opt, opts[i]))
-          return i;
+    for (int i = 0; opts[i]; i++)
+        if (!strcmp(opt, opts[i]))
+            return i;
 
-  js_error(J, "Unknown option");
+    js_error(J, "Unknown option");
 }
 
 static void script_readdir(js_State *J)
@@ -1013,7 +1051,7 @@ static void script_join_path(js_State *J)
 #if HAVE_POSIX_SPAWN || defined(__MINGW32__)
 struct subprocess_cb_ctx {
     struct mp_log *log;
-    void* talloc_ctx;
+    void *talloc_ctx;
     int64_t max_size;
     bstr output;
     bstr err;
@@ -1039,7 +1077,7 @@ static void script_subprocess_exec(js_State *J)
 {
     struct script_ctx *ctx = get_ctx(J);
     if (!js_isobject(J, 1))
-      js_error(J, "argument must be an object");
+        js_error(J, "argument must be an object");
 
     void *tmp = js_touserdata(J, 2, "talloc_ctx");
 
@@ -1048,7 +1086,7 @@ static void script_subprocess_exec(js_State *J)
     js_getproperty(J, 1, "args"); // args
     int num_args = js_getlength(J, -1);
     if (!num_args) // not using js_isarray to also accept array-like objects
-      js_error(J, "args must be an non-empty array");
+        js_error(J, "args must be an non-empty array");
     char *args[256];
     if (num_args > MP_ARRAY_SIZE(args) - 1) // last needs to be NULL
         js_error(J, "too many arguments");
@@ -1072,7 +1110,8 @@ static void script_subprocess_exec(js_State *J)
     js_pop(J, 1); // -
 
     js_getproperty(J, 1, "max_size"); // m
-    int64_t max_size = js_isundefined(J, -1) ? 16 * 1024 * 1024 : (int64_t)js_tointeger(J, -1);
+    int64_t max_size =
+        js_isundefined(J, -1) ? 16 * 1024 * 1024 : (int64_t)js_tointeger(J, -1);
 
     struct subprocess_cb_ctx cb_ctx = {
         .log = ctx->log,
@@ -1197,7 +1236,8 @@ static const struct fn_entry msg_fns[] = {
 };
 
 // adds an object <module> with the functions at e to the current object on stack
-static void register_package_fns(js_State *J, const char *module, const struct fn_entry *e)
+static void register_package_fns(js_State *J, const char *module,
+                                 const struct fn_entry *e)
 {
     js_newobject(J);
     for (int n = 0; e[n].name; n++) {
@@ -1216,31 +1256,32 @@ static void add_functions(struct script_ctx *ctx)
 
     js_getproperty(J, -1, "mp");
 
-      js_pushstring(J, ctx->name);
-      js_setproperty(J, -2, "script_name");
+    js_pushstring(J, ctx->name);
+    js_setproperty(J, -2, "script_name");
 
-      char *res_name = mp_get_user_path(NULL, ctx->mpctx->global, get_ctx(J)->filename);
-      js_pushstring(J, res_name);
-      js_setproperty(J, -2, "script_path");
-      talloc_free(res_name);
+    char *res_name = mp_get_user_path(NULL, ctx->mpctx->global,
+                                      get_ctx(J)->filename);
+    js_pushstring(J, res_name);
+    js_setproperty(J, -2, "script_path");
+    talloc_free(res_name);
 
-      register_package_fns(J, "msg", msg_fns);
-      register_package_fns(J, "utils", utils_fns);
+    register_package_fns(J, "msg", msg_fns);
+    register_package_fns(J, "utils", utils_fns);
 
-      js_newobject(J); // mp._formats
-        js_pushnumber(J, MPV_FORMAT_NONE);
-        js_setproperty(J, -2, "none");
-        js_pushnumber(J, MPV_FORMAT_STRING);
-        js_setproperty(J, -2, "string");
-        js_pushnumber(J, MPV_FORMAT_FLAG);
-        js_setproperty(J, -2, "bool");
-        js_pushnumber(J, MPV_FORMAT_DOUBLE);
-        js_setproperty(J, -2, "number");
-        js_pushnumber(J, MPV_FORMAT_NODE);
-        js_setproperty(J, -2, "native");
-        js_pushnumber(J, MPV_FORMAT_OSD_STRING); // currently unused
-        js_setproperty(J, -2, "osd");            //
-      js_setproperty(J, -2, "_formats");
+    js_newobject(J);   // mp._formats
+    js_pushnumber(J, MPV_FORMAT_NONE);
+    js_setproperty(J, -2, "none");
+    js_pushnumber(J, MPV_FORMAT_STRING);
+    js_setproperty(J, -2, "string");
+    js_pushnumber(J, MPV_FORMAT_FLAG);
+    js_setproperty(J, -2, "bool");
+    js_pushnumber(J, MPV_FORMAT_DOUBLE);
+    js_setproperty(J, -2, "number");
+    js_pushnumber(J, MPV_FORMAT_NODE);
+    js_setproperty(J, -2, "native");
+    js_pushnumber(J, MPV_FORMAT_OSD_STRING);     // currently unused
+    js_setproperty(J, -2, "osd");                //
+    js_setproperty(J, -2, "_formats");
 
     js_pop(J, 1);
 }
