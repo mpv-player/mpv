@@ -60,7 +60,7 @@ function resolve_uri(id) {
 // Supports relative id, symlinks and cyclic referencing (inc. of relative id),
 // broken: cyclic references which go ../ from symlinks link point might
 //         load from disk as a new module despite being cached already.
-function require(id) {
+require = function require(id) {
   var orig_id = String(id);
   id = resolve_id(id);
   if (mp._modules.cache[id])
