@@ -24,12 +24,11 @@
 #include <dirent.h>
 #include <math.h>
 
-#include "osdep/io.h"
-#include "osdep/atomics.h"
-
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+
+#include "osdep/io.h"
 
 #include "talloc.h"
 
