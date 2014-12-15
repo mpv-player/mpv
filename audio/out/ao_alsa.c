@@ -320,47 +320,6 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
 
 #endif /* else HAVE_CHMAP_API */
 
-// Lists device names and their implied channel map.
-// The second item must be resolvable with mp_chmap_from_str().
-// Source: http://www.alsa-project.org/main/index.php/DeviceNames
-// (Speaker names are slightly different from mpv's.)
-static const char *const device_channel_layouts[][2] = {
-    {"default",         "fc"},
-    {"default",         "fl-fr"},
-    {"rear",            "bl-br"},
-    {"center_lfe",      "fc-lfe"},
-    {"side",            "sl-sr"},
-    {"surround40",      "fl-fr-bl-br"},
-    {"surround50",      "fl-fr-bl-br-fc"},
-    {"surround41",      "fl-fr-bl-br-lfe"},
-    {"surround51",      "fl-fr-bl-br-fc-lfe"},
-    {"surround71",      "fl-fr-bl-br-fc-lfe-sl-sr"},
-};
-
-#define NUM_ALSA_CHMAPS MP_ARRAY_SIZE(device_channel_layouts)
-
-static const char *select_chmap(struct ao *ao, struct mp_chmap *chmap)
-{
-    struct mp_chmap_sel sel = {0};
-    struct mp_chmap maps[NUM_ALSA_CHMAPS];
-    for (int n = 0; n < NUM_ALSA_CHMAPS; n++) {
-        mp_chmap_from_str(&maps[n], bstr0(device_channel_layouts[n][1]));
-        mp_chmap_sel_add_map(&sel, &maps[n]);
-    };
-
-    if (!ao_chmap_sel_adjust(ao, &sel, chmap))
-        return "default";
-
-    for (int n = 0; n < NUM_ALSA_CHMAPS; n++) {
-        if (mp_chmap_equals(chmap, &maps[n]))
-            return device_channel_layouts[n][0];
-    }
-
-    MP_ERR(ao, "channel layout %s (%d ch) not supported.\n",
-           mp_chmap_to_str(chmap), chmap->num);
-    return "default";
-}
-
 static int map_iec958_srate(int srate)
 {
     switch (srate) {
@@ -451,17 +410,11 @@ static int init_device(struct ao *ao)
     if (!p->cfg_ni)
         ao->format = af_fmt_from_planar(ao->format);
 
-    struct mp_chmap implied_chmap = ao->channels;
-    const char *device;
+    const char *device = "default";
     if (AF_FORMAT_IS_IEC61937(ao->format)) {
         device = "iec958";
         MP_VERBOSE(ao, "playing AC3/iec61937/iec958, %i channels\n",
                    ao->channels.num);
-    } else {
-        device = select_chmap(ao, &implied_chmap);
-        // Not-default likely means a hw device - enable software conversions.
-        if (strcmp(device, "default") != 0)
-            device = talloc_asprintf(ao, "plug:%s", device);
     }
     const char *old_dev = device;
     if (ao->device)
@@ -534,8 +487,9 @@ static int init_device(struct ao *ao)
     if (query_chmaps(ao, &dev_chmap)) {
         ao->channels = dev_chmap;
     } else {
+        // Assume only stereo and mono are supported.
+        mp_chmap_from_channels(&ao->channels, MPMIN(2, dev_chmap.num));
         dev_chmap.num = 0;
-        ao->channels = implied_chmap;
     }
 
     int num_channels = ao->channels.num;
