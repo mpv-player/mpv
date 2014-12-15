@@ -67,14 +67,6 @@ void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
 void glCheckError(GL *gl, struct mp_log *log, const char *info);
 mp_image_t *glGetWindowScreenshot(GL *gl);
 
-#define GL_3D_RED_CYAN        1
-#define GL_3D_GREEN_MAGENTA   2
-#define GL_3D_QUADBUFFER      3
-
-void glEnable3DLeft(GL *gl, int type);
-void glEnable3DRight(GL *gl, int type);
-void glDisable3D(GL *gl, int type);
-
 enum {
     MPGL_CAP_GL                 = (1 << 0),     // GL was successfully loaded
     MPGL_CAP_GL_LEGACY          = (1 << 1),     // GL 1.1 (but not 3.x)

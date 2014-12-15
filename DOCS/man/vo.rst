@@ -362,21 +362,6 @@ Available video output drivers are:
         processing chain might do chroma scaling differently if ``lscale`` is
         disabled.
 
-    ``stereo=<value>``
-        Select a method for stereo display. You may have to use
-        ``--video-aspect`` to fix the aspect value. Experimental, do not expect
-        too much from it.
-
-        no
-            Normal 2D display
-        red-cyan
-            Convert side by side input to full-color red-cyan stereo.
-        green-magenta
-            Convert side by side input to full-color green-magenta stereo.
-        quadbuffer
-            Convert side by side input to quad buffered stereo. Only supported
-            by very few OpenGL cards.
-
     ``srgb``
         Convert and color correct the output to sRGB before displaying it on
         the screen. This option enables linear light scaling. It also forces

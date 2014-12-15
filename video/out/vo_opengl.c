@@ -404,9 +404,6 @@ static int preinit(struct vo *vo)
 
     int vo_flags = 0;
 
-    if (p->renderer_opts->stereo_mode == GL_3D_QUADBUFFER)
-        vo_flags |= VOFLAG_STEREO;
-
     if (p->renderer_opts->alpha_mode == 1)
         vo_flags |= VOFLAG_ALPHA;
 

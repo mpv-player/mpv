@@ -200,6 +200,97 @@ static void glSetupYUVConversion(struct vo *vo, GL *gl,
 static void glEnableYUVConversion(GL *gl, GLenum target, int type);
 static void glDisableYUVConversion(GL *gl, GLenum target, int type);
 
+
+#define GL_3D_RED_CYAN        1
+#define GL_3D_GREEN_MAGENTA   2
+#define GL_3D_QUADBUFFER      3
+
+static void glEnable3DLeft(GL *gl, int type)
+{
+    GLint buffer;
+    switch (type) {
+    case GL_3D_RED_CYAN:
+        gl->ColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE);
+        break;
+    case GL_3D_GREEN_MAGENTA:
+        gl->ColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE);
+        break;
+    case GL_3D_QUADBUFFER:
+        gl->GetIntegerv(GL_DRAW_BUFFER, &buffer);
+        switch (buffer) {
+        case GL_FRONT:
+        case GL_FRONT_LEFT:
+        case GL_FRONT_RIGHT:
+            buffer = GL_FRONT_LEFT;
+            break;
+        case GL_BACK:
+        case GL_BACK_LEFT:
+        case GL_BACK_RIGHT:
+            buffer = GL_BACK_LEFT;
+            break;
+        }
+        gl->DrawBuffer(buffer);
+        break;
+    }
+}
+
+static void glEnable3DRight(GL *gl, int type)
+{
+    GLint buffer;
+    switch (type) {
+    case GL_3D_RED_CYAN:
+        gl->ColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_FALSE);
+        break;
+    case GL_3D_GREEN_MAGENTA:
+        gl->ColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_FALSE);
+        break;
+    case GL_3D_QUADBUFFER:
+        gl->GetIntegerv(GL_DRAW_BUFFER, &buffer);
+        switch (buffer) {
+        case GL_FRONT:
+        case GL_FRONT_LEFT:
+        case GL_FRONT_RIGHT:
+            buffer = GL_FRONT_RIGHT;
+            break;
+        case GL_BACK:
+        case GL_BACK_LEFT:
+        case GL_BACK_RIGHT:
+            buffer = GL_BACK_RIGHT;
+            break;
+        }
+        gl->DrawBuffer(buffer);
+        break;
+    }
+}
+
+static void glDisable3D(GL *gl, int type)
+{
+    GLint buffer;
+    switch (type) {
+    case GL_3D_RED_CYAN:
+    case GL_3D_GREEN_MAGENTA:
+        gl->ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        break;
+    case GL_3D_QUADBUFFER:
+        gl->DrawBuffer(GL_BACK);
+        gl->GetIntegerv(GL_DRAW_BUFFER, &buffer);
+        switch (buffer) {
+        case GL_FRONT:
+        case GL_FRONT_LEFT:
+        case GL_FRONT_RIGHT:
+            buffer = GL_FRONT;
+            break;
+        case GL_BACK:
+        case GL_BACK_LEFT:
+        case GL_BACK_RIGHT:
+            buffer = GL_BACK;
+            break;
+        }
+        gl->DrawBuffer(buffer);
+        break;
+    }
+}
+
 //! always return this format as internal texture format in glFindFormat
 #define TEXTUREFORMAT_ALWAYS GL_RGB8
 #undef TEXTUREFORMAT_ALWAYS

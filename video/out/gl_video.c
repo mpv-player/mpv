@@ -315,11 +315,6 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("approx-gamma", approx_gamma, 0),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
-        OPT_CHOICE("stereo", stereo_mode, 0,
-                   ({"no", 0},
-                    {"red-cyan",        GL_3D_RED_CYAN},
-                    {"green-magenta",   GL_3D_GREEN_MAGENTA},
-                    {"quadbuffer",      GL_3D_QUADBUFFER})),
         OPT_STRING_VALIDATE("lscale", scalers[0], 0, validate_scaler_opt),
         OPT_STRING_VALIDATE("cscale", scalers[1], 0, validate_scaler_opt),
         OPT_STRING_VALIDATE("lscale-down", dscalers[0], 0, validate_scaler_opt),
@@ -1574,7 +1569,6 @@ struct pass {
     bool use_dst;
     struct mp_rect dst;
     int flags; // for write_quad
-    bool render_stereo;
 };
 
 // *chain contains the source, and is overwritten with a copy of the result
@@ -1613,36 +1607,11 @@ static void handle_pass(struct gl_video *p, struct pass *chain,
              fbo->vp_x, fbo->vp_y, fbo->vp_w, fbo->vp_h,
              fbo->tex_w, fbo->tex_h, chain->flags);
 
-    if (chain->render_stereo && p->opts.stereo_mode) {
-        int w = src.x1 - src.x0;
-        int imgw = p->image_w;
-
-        glEnable3DLeft(gl, p->opts.stereo_mode);
-
-        write_quad(vb,
-                   dst.x0, dst.y0, dst.x1, dst.y1,
-                   src.x0 / 2, src.y0,
-                   src.x0 / 2 + w / 2, src.y1,
-                   tex_w, tex_h, NULL, p->gl_target, chain->flags);
-        draw_triangles(p, vb, VERTICES_PER_QUAD);
-
-        glEnable3DRight(gl, p->opts.stereo_mode);
-
-        write_quad(vb,
-                   dst.x0, dst.y0, dst.x1, dst.y1,
-                   src.x0 / 2 + imgw / 2, src.y0,
-                   src.x0 / 2 + imgw / 2 + w / 2, src.y1,
-                   tex_w, tex_h, NULL, p->gl_target, chain->flags);
-        draw_triangles(p, vb, VERTICES_PER_QUAD);
-
-        glDisable3D(gl, p->opts.stereo_mode);
-    } else {
-        write_quad(vb,
-                   dst.x0, dst.y0, dst.x1, dst.y1,
-                   src.x0, src.y0, src.x1, src.y1,
-                   tex_w, tex_h, NULL, p->gl_target, chain->flags);
-        draw_triangles(p, vb, VERTICES_PER_QUAD);
-    }
+    write_quad(vb,
+               dst.x0, dst.y0, dst.x1, dst.y1,
+               src.x0, src.y0, src.x1, src.y1,
+               tex_w, tex_h, NULL, p->gl_target, chain->flags);
+    draw_triangles(p, vb, VERTICES_PER_QUAD);
 
     *chain = (struct pass){
         .num = chain->num + 1,
@@ -1719,7 +1688,6 @@ void gl_video_render_frame(struct gl_video *p, int fbo)
     chain.dst = p->dst_rect;
     chain.flags = (p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90)
                 | (vimg->image_flipped ? 4 : 0);
-    chain.render_stereo = true;
 
     handle_pass(p, &chain, &screen, p->final_program);
 
