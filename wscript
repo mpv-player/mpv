@@ -272,7 +272,7 @@ iconv support use --disable-iconv.",
         'func': check_lua,
     }, {
         'name' : '--javascript',
-        'desc' : 'Javascript (mujs)',
+        'desc' : 'Javascript (MuJS)',
         'func':  check_statement('mujs.h', 'js_setcontext(js_newstate(0, 0), 0)', lib='mujs'),
     }, {
         'name': '--libass',
