@@ -280,8 +280,17 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf)
     ao->bps = wf->nAvgBytesPerSec;
     ao->format = format;
 
-    if (ao->channels.num != wf->nChannels)
+    if ( wf->wFormatTag == WAVE_FORMAT_EXTENSIBLE ){
+        WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
+        mp_chmap_from_waveext(&ao->channels, wformat->dwChannelMask);
+    } else {
         mp_chmap_from_channels(&ao->channels, wf->nChannels);
+    }
+
+    if ( ao->channels.num != wf->nChannels ) {
+        MP_ERR(ao, "Channel map doesn't match number of channels\n");
+        return false;
+    }
 
     waveformat_copy(&state->format, wf);
     return true;
