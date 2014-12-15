@@ -108,6 +108,7 @@ struct mpv_handle {
     uint64_t event_mask;
     bool queued_wakeup;
     bool choke_warning;
+    int suspend_count;
 
     mpv_event *events;      // ringbuffer of max_events entries
     int max_events;         // allocated number of entries in events
@@ -300,12 +301,47 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d)
 
 void mpv_suspend(mpv_handle *ctx)
 {
-    mp_dispatch_suspend(ctx->mpctx->dispatch);
+    bool do_suspend = false;
+
+    pthread_mutex_lock(&ctx->lock);
+    if (ctx->suspend_count == INT_MAX) {
+        MP_ERR(ctx, "suspend counter overflow");
+    } else {
+        do_suspend = ctx->suspend_count == 0;
+        ctx->suspend_count++;
+    }
+    pthread_mutex_unlock(&ctx->lock);
+
+    if (do_suspend)
+        mp_dispatch_suspend(ctx->mpctx->dispatch);
 }
 
 void mpv_resume(mpv_handle *ctx)
 {
-    mp_dispatch_resume(ctx->mpctx->dispatch);
+    bool do_resume = false;
+
+    pthread_mutex_lock(&ctx->lock);
+    if (ctx->suspend_count == 0) {
+        MP_ERR(ctx, "suspend counter underflow");
+    } else {
+        do_resume = ctx->suspend_count == 1;
+        ctx->suspend_count--;
+    }
+    pthread_mutex_unlock(&ctx->lock);
+
+    if (do_resume)
+        mp_dispatch_resume(ctx->mpctx->dispatch);
+}
+
+void mp_resume_all(mpv_handle *ctx)
+{
+    pthread_mutex_lock(&ctx->lock);
+    bool do_resume = ctx->suspend_count > 0;
+    ctx->suspend_count = 0;
+    pthread_mutex_unlock(&ctx->lock);
+
+    if (do_resume)
+        mp_dispatch_resume(ctx->mpctx->dispatch);
 }
 
 static void lock_core(mpv_handle *ctx)
@@ -324,6 +360,8 @@ void mpv_detach_destroy(mpv_handle *ctx)
 {
     if (!ctx)
         return;
+
+    mp_resume_all(ctx);
 
     pthread_mutex_lock(&ctx->lock);
     // reserved_events equals the number of asynchronous requests that weren't
@@ -674,6 +712,11 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
     talloc_free_children(event);
 
     while (1) {
+        // This will almost surely lead to a deadlock. (Polling is still ok.)
+        if (ctx->suspend_count && timeout > 0) {
+            MP_ERR(ctx, "attempting to wait while core is suspended");
+            break;
+        }
         if (ctx->num_events) {
             *event = ctx->events[ctx->first_event];
             ctx->first_event = (ctx->first_event + 1) % ctx->max_events;

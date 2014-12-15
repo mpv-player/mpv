@@ -81,7 +81,6 @@ struct script_ctx {
     struct mp_log *log;
     struct mpv_handle *client;
     struct MPContext *mpctx;
-    int suspended;
 };
 
 #if LUA_VERSION_NUM <= 501
@@ -388,8 +387,7 @@ static int load_lua(struct mpv_handle *client, const char *fname)
     r = 0;
 
 error_out:
-    if (ctx->suspended)
-        mpv_resume(ctx->client);
+    mp_resume_all(client);
     if (ctx->state)
         lua_close(ctx->state);
     talloc_free(ctx);
@@ -447,33 +445,20 @@ static int script_find_config_file(lua_State *L)
 static int script_suspend(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
-    if (!ctx->suspended)
-        mpv_suspend(ctx->client);
-    ctx->suspended++;
+    mpv_suspend(ctx->client);
     return 0;
 }
 
 static int script_resume(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
-    if (ctx->suspended < 1)
-        luaL_error(L, "trying to resume, but core is not suspended");
-    ctx->suspended--;
-    if (!ctx->suspended)
-        mpv_resume(ctx->client);
+    mpv_resume(ctx->client);
     return 0;
-}
-
-static void resume_all(struct script_ctx *ctx)
-{
-    if (ctx->suspended)
-        mpv_resume(ctx->client);
-    ctx->suspended = 0;
 }
 
 static int script_resume_all(lua_State *L)
 {
-    resume_all(get_ctx(L));
+    mp_resume_all(get_ctx(L)->client);
     return 0;
 }
 
@@ -483,13 +468,7 @@ static int script_wait_event(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
 
-    double timeout = luaL_optnumber(L, 1, 1e20);
-
-    // This will almost surely lead to a deadlock. (Polling is still ok.)
-    if (ctx->suspended && timeout > 0)
-        luaL_error(L, "attempting to wait while core is suspended");
-
-    mpv_event *event = mpv_wait_event(ctx->client, timeout);
+    mpv_event *event = mpv_wait_event(ctx->client, luaL_optnumber(L, 1, 1e20));
 
     lua_newtable(L); // event
     lua_pushstring(L, mpv_event_name(event->event_id)); // event name
@@ -1191,7 +1170,7 @@ static int script_subprocess(lua_State *L)
     luaL_checktype(L, 1, LUA_TTABLE);
     void *tmp = mp_lua_PITA(L);
 
-    resume_all(ctx);
+    mp_resume_all(ctx->client);
 
     lua_getfield(L, 1, "args"); // args
     int num_args = mp_lua_len(L, -1);

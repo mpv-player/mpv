@@ -61,8 +61,6 @@ struct client_arg {
     bool close_client_fd;
 
     bool writable;
-
-    int suspend_counter;
 };
 
 static mpv_node *mpv_node_map_get(mpv_node *src, const char *key)
@@ -420,21 +418,11 @@ static char *json_execute_command(struct client_arg *arg, void *ta_parent,
         rc = mpv_request_log_messages(arg->client,
                                       cmd_node->u.list->values[1].u.string);
     } else if (!strcmp("suspend", cmd)) {
-        if (arg->suspend_counter < INT_MAX) {
-            mpv_suspend(arg->client);
-            arg->suspend_counter++;
-            rc = MPV_ERROR_SUCCESS;
-        } else {
-            rc = MPV_ERROR_INVALID_PARAMETER;
-        }
+        mpv_suspend(arg->client);
+        rc = MPV_ERROR_SUCCESS;
     } else if (!strcmp("resume", cmd)) {
-        if (arg->suspend_counter > 0) {
-            mpv_resume(arg->client);
-            arg->suspend_counter--;
-            rc = MPV_ERROR_SUCCESS;
-        } else {
-            rc = MPV_ERROR_INVALID_PARAMETER;
-        }
+        mpv_resume(arg->client);
+        rc = MPV_ERROR_SUCCESS;
     } else {
         mpv_node result_node;
 
