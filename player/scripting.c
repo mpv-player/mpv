@@ -37,10 +37,14 @@
 #include "libmpv/client.h"
 
 extern const struct mp_scripting mp_scripting_lua;
+extern const struct mp_scripting mp_scripting_js;
 
 static const struct mp_scripting *const scripting_backends[] = {
 #if HAVE_LUA
     &mp_scripting_lua,
+#endif
+#if HAVE_JAVASCRIPT
+    &mp_scripting_js,
 #endif
     NULL
 };
@@ -80,7 +84,7 @@ static void *script_thread(void *p)
     struct thread_arg *arg = p;
 
     char name[90];
-    snprintf(name, sizeof(name), "lua (%s)", mpv_client_name(arg->client));
+    snprintf(name, sizeof(name), "%s (%s)", arg->backend->file_ext, mpv_client_name(arg->client));
     mpthread_set_name(name);
 
     if (arg->backend->load(arg->client, arg->fname) < 0)
