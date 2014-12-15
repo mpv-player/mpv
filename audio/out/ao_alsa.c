@@ -440,7 +440,10 @@ static void uninit(struct ao *ao)
 alsa_error: ;
 }
 
-static int init(struct ao *ao)
+#define INIT_OK 0
+#define INIT_ERROR -1
+#define INIT_BRAINDEATH -2
+static int init_device(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int err;
@@ -621,6 +624,34 @@ static int init(struct ao *ao)
                 MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
             }
         } else {
+            // Is it one that contains NA channels?
+            struct mp_chmap chmap2 = {0};
+            for (int c = 0; c < alsa_chmap->channels; c++) {
+                int alsa_ch = alsa_chmap->pos[c];
+                if (alsa_ch != SND_CHMAP_NA)
+                    chmap2.speaker[chmap2.num++] = find_mp_channel(alsa_ch);
+            }
+
+            if (mp_chmap_is_valid(&chmap2)) {
+                // Sometimes, ALSA will advertise certain chmaps, but it's not
+                // possible to set them. This can happen with dmix: as of
+                // alsa 1.0.28, dmix can do stereo only, but advertises the
+                // surround chmaps of the underlying device. In this case,
+                // requesting e.g. 5.1 will fail, but it will still allow
+                // setting 6 channels. Then it will return something like
+                // "FL FR NA NA NA NA" as channel map. This means we would
+                // have to pad stereo output to 6 channels with silence, which
+                // is way too complicated in the general case. You can't change
+                // the number of channels to 2 either, because the hw params
+                // are already set! So just fuck it and reopen the device with
+                // the chmap "cleaned out" of NA entries.
+                err = snd_pcm_close(p->alsa);
+                p->alsa = NULL;
+                CHECK_ALSA_ERROR("pcm close error");
+                ao->channels = chmap2;
+                return INIT_BRAINDEATH;
+            }
+
             MP_WARN(ao, "Got unknown channel map from ALSA.\n");
         }
 
@@ -675,11 +706,19 @@ static int init(struct ao *ao)
 
     p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
 
-    return 0;
+    return INIT_OK;
 
 alsa_error:
     uninit(ao);
-    return -1;
+    return INIT_ERROR;
+}
+
+static int init(struct ao *ao)
+{
+    int r = init_device(ao);
+    if (r == INIT_BRAINDEATH)
+        r = init_device(ao); // retry with normalized channel layout
+    return r == INIT_OK ? 0 : -1;
 }
 
 static void drain(struct ao *ao)
