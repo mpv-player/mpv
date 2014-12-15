@@ -198,9 +198,12 @@ void mp_load_scripts(struct MPContext *mpctx)
             for (int n = 0; files && files[n]; n++) {
                 if (s && !warning_displayed) {
                     warning_displayed = 1;
-                    MP_WARN(mpctx,
-                            "warning: '%s' - '%s' dirs are deprecated. Please move scripts to '%s'.",
-                            files[n], dirs[s], dirs[0]);
+                    char *cfg = mp_find_config_file(tmp, mpctx->global, "");
+                    if (cfg)
+                        cfg = mp_path_join(tmp, bstr0(cfg), bstr0("scripts"));
+                    MP_WARN(mpctx, "Warning: '%s' - lua subdir is deprecated.\n"
+                            "Please move scripts to '%s'.\n",
+                            files[n], cfg ? cfg : "/scripts");
                 }
                 mp_load_script(mpctx, files[n]);
             }
