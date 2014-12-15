@@ -68,6 +68,36 @@ Available audio output drivers are:
         shells (like zsh), you have to quote the option string to prevent the
         shell from interpreting the brackets instead of passing them to mpv.
 
+        Actually, you should use the ``--audio-device`` option, instead of
+        setting the device directly.
+
+    .. warning::
+
+        Handling of multichannel/surround audio changed in mpv 0.8.0 from the
+        behavior in MPlayer/mplayer2 and older versions of mpv.
+
+        The old behavior is that the player always downmixed to stereo by
+        default. The ``--audio-channels`` (or ``--channels`` before that) option
+        had to be set to get multichannel audio. Then playing stereo would
+        use the ``default`` device (which typically allows multiple programs
+        to play audio at the same time via dmix), while playing anything with
+        more channels would open one of the hardware devices, e.g. via the
+        ``surround51`` alias (typically with exclusive access). Whether the
+        player would use exclusive access or not would depend on the file
+        being played.
+
+        The new behavior since mpv 0.8.0 always enables multichannel audio,
+        i.e. ``--audio-channels=auto`` is the default. However, since ALSA
+        provides no good way to play multichannel audio in a non-exclusive
+        way (without blocking other applications from using audio), the player
+        is restricted to the capabilities of the ``default`` device by default,
+        which means it supports only stereo and mono. But if a hardware device
+        is selected, then multichannel audio will typically work.
+
+        The short story is: if you want multichannel audio with ALSA, use
+        ``--audio-device`` to select the device (use ``--audio-device=help``
+        to get a list of all devices and their mpv name).
+
 ``oss``
     OSS audio output driver
 

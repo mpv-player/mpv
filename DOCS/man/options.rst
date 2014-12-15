@@ -932,7 +932,7 @@ Audio
     ``--dtshd`` and ``--no-dtshd`` are deprecated aliases.
 
 ``--audio-channels=<number|layout>``
-    Request a channel layout for audio output (default: stereo). This  will ask
+    Request a channel layout for audio output (default: auto). This  will ask
     the AO to open a device with the given channel layout. It's up to the AO
     to accept this layout, or to pick a fallback or to error out if the
     requested layout is not supported.
@@ -945,9 +945,9 @@ Audio
     lists speaker names, which can be used to express arbitrary channel
     layouts (e.g. ``fl-fr-lfe`` is 2.1).
 
-    You can use ``--audio-channels=auto`` to disable this. In this case, the AO
-    use the channel layout as the audio filter chain indicates. (``empty`` is
-    an accepted obsolete for ``auto``.)
+    The default is ``--audio-channels=auto``, which tries to play audio using
+    the input file's channel layout. (Or more precisely, the output of the
+    audio filter chain.) (``empty`` is an accepted obsolete alias for ``auto``.)
 
     This will also request the channel layout from the decoder. If the decoder
     does not support the layout, it will fall back to its native channel layout.
