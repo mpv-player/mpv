@@ -507,7 +507,7 @@ mp.get_script_name = function() {
 }
 
 mp.get_opt = function(key, def) {
-  var opts = mp.get_property_native("options/lua-opts");
+  var opts = mp.get_property_native("options/script-opts");
   var val = opts[key];
   if (typeof val == "undefined")
     val = def;
