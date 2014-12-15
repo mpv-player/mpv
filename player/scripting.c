@@ -189,7 +189,7 @@ void mp_load_scripts(struct MPContext *mpctx)
 
     // Load all scripts
     void *tmp = talloc_new(NULL);
-    const char *dirs[] = {"scripts", "lua", NULL};
+    const char *dirs[] = {"scripts", "lua", NULL}; // 'lua' is deprecated
     int warning_displayed = 0;
     for (int s = 0; dirs[s]; s++) {
         char **scriptsdir = mp_find_all_config_files(tmp, mpctx->global, dirs[s]);
