@@ -8,5 +8,5 @@ adding the option
 
 to mpv's command line.
 
-Where appropriate, they may also be placed in ~/.config/mpv/lua from where
-they will be automatically loaded when mpv starts.
+Where appropriate, they may also be placed in ~/.config/mpv/scripts/ from
+where they will be automatically loaded when mpv starts.
