@@ -231,6 +231,21 @@ static const struct fmt_entry gl_byte_formats[] = {
     {0, GL_RGBA16,  GL_RGBA,    GL_UNSIGNED_SHORT},     // 4 x 16
 };
 
+static const struct fmt_entry gl_byte_formats_legacy[] = {
+    {0, GL_ALPHA,   GL_ALPHA,   GL_UNSIGNED_BYTE},      // 1 x 8
+    {0, GL_LUMINANCE_ALPHA,
+                    GL_LUMINANCE_ALPHA,
+                                GL_UNSIGNED_BYTE},      // 2 x 8
+    {0, GL_RGB,     GL_RGB,     GL_UNSIGNED_BYTE},      // 3 x 8
+    {0, GL_RGBA,    GL_RGBA,    GL_UNSIGNED_BYTE},      // 4 x 8
+    {0, GL_ALPHA16, GL_ALPHA,   GL_UNSIGNED_SHORT},     // 1 x 16
+    {0, GL_LUMINANCE16_ALPHA16,
+                    GL_LUMINANCE_ALPHA,
+                                GL_UNSIGNED_SHORT},     // 2 x 16
+    {0, GL_RGB16,   GL_RGB,     GL_UNSIGNED_SHORT},     // 3 x 16
+    {0, GL_RGBA16,  GL_RGBA,    GL_UNSIGNED_SHORT},     // 4 x 16
+};
+
 static const struct fmt_entry gl_float16_formats[] = {
     {0, GL_R16F,    GL_RED,     GL_FLOAT},              // 1 x f
     {0, GL_RG16F,   GL_RG,      GL_FLOAT},              // 2 x f
@@ -369,6 +384,15 @@ static void delete_shaders(struct gl_video *p);
 static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
 
+static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
+                                               int n_channels)
+{
+    assert(bytes_per_comp == 1 || bytes_per_comp == 2);
+    assert(n_channels >= 1 && n_channels <= 4);
+    const struct fmt_entry *fmts = (gl->mpgl_caps & MPGL_CAP_TEX_RG)
+        ? gl_byte_formats : gl_byte_formats_legacy;
+    return &fmts[n_channels - 1 + (bytes_per_comp - 1) * 4];
+}
 
 static void default_tex_params(struct GL *gl, GLenum target, GLint filter)
 {
@@ -887,8 +911,12 @@ static void compile_shaders(struct gl_video *p)
     char *shader_prelude = get_section(tmp, src, "prelude");
     char *s_video = get_section(tmp, src, "frag_video");
 
-    char *header = talloc_asprintf(tmp, "#version %d\n%s%s", gl->glsl_version,
-                                   shader_prelude, PRELUDE_END);
+    int rg = !!(gl->mpgl_caps & MPGL_CAP_TEX_RG);
+    char *header =
+        talloc_asprintf(tmp, "#version %d\n"
+                             "#define HAVE_RG %d\n"
+                             "%s%s",
+                             gl->glsl_version, rg, shader_prelude, PRELUDE_END);
 
     bool use_cms = p->opts.srgb || p->use_lut_3d;
 
@@ -1233,6 +1261,7 @@ static void init_dither(struct gl_video *p)
     GLint tex_iformat;
     GLenum tex_type;
     unsigned char temp[256];
+    GLint tex_format = find_tex_format(gl, 1, 1)->format;
 
     if (p->opts.dither_algo == 0) {
         int sizeb = p->opts.dither_size;
@@ -1246,7 +1275,7 @@ static void init_dither(struct gl_video *p)
         }
 
         tex_size = size;
-        tex_iformat = GL_R16;
+        tex_iformat = find_tex_format(gl, 2, 1)->internal_format;
         tex_type = GL_FLOAT;
         tex_data = p->last_dither_matrix;
     } else {
@@ -1254,7 +1283,7 @@ static void init_dither(struct gl_video *p)
         mp_make_ordered_dither_matrix(temp, 8);
 
         tex_size = 8;
-        tex_iformat = GL_RED;
+        tex_iformat = tex_format;
         tex_type = GL_UNSIGNED_BYTE;
         tex_data = temp;
     }
@@ -1272,8 +1301,8 @@ static void init_dither(struct gl_video *p)
     gl->BindTexture(GL_TEXTURE_2D, p->dither_texture);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, tex_iformat, tex_size, tex_size, 0, GL_RED,
-                   tex_type, tex_data);
+    gl->TexImage2D(GL_TEXTURE_2D, 0, tex_iformat, tex_size, tex_size, 0,
+                   tex_format, tex_type, tex_data);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -2022,9 +2051,10 @@ static bool test_fbo(struct gl_video *p, GLenum format)
         for (int i = 0; i < 4; i++) {
             float pixel = -1;
             float val = vals[i];
-            gl->ClearColor(val, 0.0f, 0.0f, 1.0f);
+            gl->ClearColor(val, val, val, val);
             gl->Clear(GL_COLOR_BUFFER_BIT);
-            gl->ReadPixels(0, 0, 1, 1, GL_RED, GL_FLOAT, &pixel);
+            GLint one_byte = find_tex_format(gl, 1, 1)->format;
+            gl->ReadPixels(0, 0, 1, 1, one_byte, GL_FLOAT, &pixel);
             MP_VERBOSE(p, "   %s: %a\n", val_names[i], val - pixel);
         }
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -2044,6 +2074,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
     bool have_srgb = gl->mpgl_caps & MPGL_CAP_SRGB_TEX;
+    bool have_rg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
     bool have_mix = gl->glsl_version >= 130;
 
     char *disabled[10];
@@ -2068,7 +2099,8 @@ static void check_gl_features(struct gl_video *p)
     // Normally, we want to disable them by default if FBOs are unavailable,
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
-    if (!have_float_tex || (!have_fbo && p->opts.scale_sep)) {
+    // I don't know if luminance alpha float textures exist, so disregard them.
+    if (!have_float_tex || !have_rg || (!have_fbo && p->opts.scale_sep)) {
         for (int n = 0; n < 2; n++) {
             if (mp_find_filter_kernel(p->opts.scalers[n])) {
                 p->opts.scalers[n] = "bilinear";
@@ -2110,8 +2142,7 @@ static void check_gl_features(struct gl_video *p)
     }
 
     if (n_disabled) {
-        MP_ERR(p, "Some OpenGL extensions not detected, "
-               "disabling: ");
+        MP_ERR(p, "Some OpenGL extensions not detected, disabling: ");
         for (int n = 0; n < n_disabled; n++) {
             if (n)
                 MP_ERR(p, ", ");
@@ -2208,22 +2239,26 @@ void gl_video_unset_gl_state(struct gl_video *p)
 }
 
 // dest = src.<w> (always using 4 components)
-static void packed_fmt_swizzle(char w[5], const struct packed_fmt_entry *fmt)
+static void packed_fmt_swizzle(char w[5], const struct fmt_entry *texfmt,
+                               const struct packed_fmt_entry *fmt)
 {
-    for (int c = 0; c < 4; c++)
-        w[c] = "rgba"[MPMAX(fmt->components[c] - 1, 0)];
-    w[4] = '\0';
-}
+    const char *comp = "rgba";
 
-static const struct fmt_entry *find_tex_format(int bytes_per_comp, int n_channels)
-{
-    assert(bytes_per_comp == 1 || bytes_per_comp == 2);
-    assert(n_channels >= 1 && n_channels <= 4);
-    return &gl_byte_formats[n_channels - 1 + (bytes_per_comp - 1) * 4];
+    // Normally, we work with GL_RED and GL_RG
+    if (texfmt && texfmt->internal_format == GL_LUMINANCE_ALPHA)
+        comp = "ragb";
+    if (texfmt && texfmt->internal_format == GL_ALPHA)
+        comp = "argb";
+
+    for (int c = 0; c < 4; c++)
+        w[c] = comp[MPMAX(fmt->components[c] - 1, 0)];
+    w[4] = '\0';
 }
 
 static bool init_format(int fmt, struct gl_video *init)
 {
+    struct GL *gl = init->gl;
+
     init->hwdec_active = false;
     if (init->hwdec && init->hwdec->driver->imgfmt == fmt) {
         fmt = init->hwdec->converted_imgfmt;
@@ -2250,17 +2285,21 @@ static bool init_format(int fmt, struct gl_video *init)
         if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
             init->plane_bits = bits;
             init->has_alpha = desc.num_planes > 3;
-            plane_format[0] = find_tex_format((bits + 7) / 8, 1);
+            plane_format[0] = find_tex_format(gl, (bits + 7) / 8, 1);
             for (int p = 1; p < desc.num_planes; p++)
                 plane_format[p] = plane_format[0];
+            if (!(init->gl->mpgl_caps & MPGL_CAP_TEX_RG) && desc.num_planes < 2)
+                snprintf(init->color_swizzle, sizeof(init->color_swizzle), "argb");
             goto supported;
         }
     }
 
     // YUV/half-packed
     if (fmt == IMGFMT_NV12 || fmt == IMGFMT_NV21) {
-        plane_format[0] = find_tex_format(1, 1);
-        plane_format[1] = find_tex_format(1, 2);
+        if (!(init->gl->mpgl_caps & MPGL_CAP_TEX_RG))
+            return false;
+        plane_format[0] = find_tex_format(gl, 1, 1);
+        plane_format[1] = find_tex_format(gl, 1, 2);
         if (fmt == IMGFMT_NV21)
             snprintf(init->color_swizzle, sizeof(init->color_swizzle), "rbga");
         goto supported;
@@ -2269,7 +2308,7 @@ static bool init_format(int fmt, struct gl_video *init)
     // RGB/planar
     if (fmt == IMGFMT_GBRP) {
         snprintf(init->color_swizzle, sizeof(init->color_swizzle), "brga");
-        plane_format[0] = find_tex_format(1, 1);
+        plane_format[0] = find_tex_format(gl, 1, 1);
         for (int p = 1; p < desc.num_planes; p++)
             plane_format[p] = plane_format[0];
         goto supported;
@@ -2277,7 +2316,7 @@ static bool init_format(int fmt, struct gl_video *init)
 
     // XYZ (same organization as RGB packed, but requires conversion matrix)
     if (fmt == IMGFMT_XYZ12) {
-        plane_format[0] = find_tex_format(2, 3);
+        plane_format[0] = find_tex_format(gl, 2, 3);
         goto supported;
     }
 
@@ -2293,8 +2332,8 @@ static bool init_format(int fmt, struct gl_video *init)
     for (const struct packed_fmt_entry *e = mp_packed_formats; e->fmt; e++) {
         if (e->fmt == fmt) {
             int n_comp = desc.bytes[0] / e->component_size;
-            plane_format[0] = find_tex_format(e->component_size, n_comp);
-            packed_fmt_swizzle(init->color_swizzle, e);
+            plane_format[0] = find_tex_format(gl, e->component_size, n_comp);
+            packed_fmt_swizzle(init->color_swizzle, plane_format[0], e);
             init->has_alpha = e->components[3] != 0;
             goto supported;
         }

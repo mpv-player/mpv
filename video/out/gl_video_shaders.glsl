@@ -41,6 +41,14 @@
 # define in varying
 #endif
 
+#if HAVE_RG
+#define R r
+#define RG rg
+#else
+#define R a
+#define RG ra
+#endif
+
 // Earlier GLSL doesn't support mix() with bvec
 #if __VERSION__ >= 130
 vec3 srgb_expand(vec3 v)
@@ -133,7 +141,7 @@ in vec4 color;
 DECLARE_FRAGPARMS
 
 void main() {
-    out_color = vec4(color.rgb, color.a * texture(texture0, texcoord).r);
+    out_color = vec4(color.rgb, color.a * texture(texture0, texcoord).R);
 }
 
 #!section frag_osd_rgba
@@ -205,8 +213,8 @@ vec4 sample_bicubic_fast(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float p
     vec4 parmx = calcweights(fcoord.x);
     vec4 parmy = calcweights(fcoord.y);
     vec4 cdelta;
-    cdelta.xz = parmx.rg * vec2(-pt.x, pt.x);
-    cdelta.yw = parmy.rg * vec2(-pt.y, pt.y);
+    cdelta.xz = parmx.RG * vec2(-pt.x, pt.x);
+    cdelta.yw = parmy.RG * vec2(-pt.y, pt.y);
     // first y-interpolation
     vec4 ar = texture(tex, texcoord + cdelta.xy);
     vec4 ag = texture(tex, texcoord + cdelta.xw);
@@ -220,7 +228,7 @@ vec4 sample_bicubic_fast(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float p
 }
 
 float[2] weights2(sampler2D lookup, float f) {
-    vec4 c = texture(lookup, vec2(0.5, f));
+    vec2 c = texture(lookup, vec2(0.5, f)).RG;
     return float[2](c.r, c.g);
 }
 
@@ -326,22 +334,22 @@ void main() {
 #define USE_CONV 0
 #endif
 #if USE_CONV == CONV_PLANAR
-    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).r,
-                       SAMPLE_C(texture1, textures_size[1], chr_texcoord).r,
-                       SAMPLE_C(texture2, textures_size[2], chr_texcoord).r,
+    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).R,
+                       SAMPLE_C(texture1, textures_size[1], chr_texcoord).R,
+                       SAMPLE_C(texture2, textures_size[2], chr_texcoord).R,
                        1.0);
 #elif USE_CONV == CONV_NV12
-    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).r,
-                       SAMPLE_C(texture1, textures_size[1], chr_texcoord).rg,
+    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).R,
+                       SAMPLE_C(texture1, textures_size[1], chr_texcoord).RG,
                        1.0);
 #else
     vec4 acolor = SAMPLE_L(texture0, textures_size[0], texcoord);
 #endif
-#ifdef USE_ALPHA_PLANE
-    acolor.a = SAMPLE_L(texture3, textures_size[3], texcoord).r;
-#endif
 #ifdef USE_COLOR_SWIZZLE
     acolor = acolor. USE_COLOR_SWIZZLE ;
+#endif
+#ifdef USE_ALPHA_PLANE
+    acolor.a = SAMPLE_L(texture3, textures_size[3], texcoord).R;
 #endif
     vec3 color = acolor.rgb;
     float alpha = acolor.a;
@@ -452,7 +460,7 @@ void main() {
 #ifdef USE_TEMPORAL_DITHER
     dither_pos = dither_trafo * dither_pos;
 #endif
-    float dither_value = texture(dither, dither_pos).r;
+    float dither_value = texture(dither, dither_pos).R;
     color = floor(color * dither_quantization + dither_value + dither_center) /
                 dither_quantization;
 #endif
