@@ -91,12 +91,16 @@ Available audio output drivers are:
         provides no good way to play multichannel audio in a non-exclusive
         way (without blocking other applications from using audio), the player
         is restricted to the capabilities of the ``default`` device by default,
-        which means it supports only stereo and mono. But if a hardware device
-        is selected, then multichannel audio will typically work.
+        which means it supports only stereo and mono (at least with current
+        typical ALSA configurations). But if a hardware device is selected,
+        then multichannel audio will typically work.
 
         The short story is: if you want multichannel audio with ALSA, use
         ``--audio-device`` to select the device (use ``--audio-device=help``
         to get a list of all devices and their mpv name).
+
+        You can also try
+        `Using the upmix plugin <https://github.com/mpv-player/mpv/wiki/ALSA:-Surround-Sound-and-Upmixing>`_.
 
 ``oss``
     OSS audio output driver
