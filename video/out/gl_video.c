@@ -2071,9 +2071,8 @@ static void check_gl_features(struct gl_video *p)
     // Without FP textures, we must always disable them.
     if (!have_float_tex || (!have_fbo && p->opts.scale_sep)) {
         for (int n = 0; n < 2; n++) {
-            struct scaler *scaler = &p->scalers[n];
-            if (mp_find_filter_kernel(scaler->name)) {
-                scaler->name = "bilinear";
+            if (mp_find_filter_kernel(p->opts.scalers[n])) {
+                p->opts.scalers[n] = "bilinear";
                 disabled[n_disabled++]
                     = have_float_tex ? "scaler (FBO)" : "scaler (float tex.)";
             }
