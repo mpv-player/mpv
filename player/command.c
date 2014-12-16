@@ -506,6 +506,10 @@ static int mp_property_avsync(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
     if (mpctx->last_av_difference == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
+    if (action == M_PROPERTY_PRINT) {
+        *(char **)arg = talloc_asprintf(NULL, "%7.3f", mpctx->last_av_difference);
+        return M_PROPERTY_OK;
+    }
     return m_property_double_ro(action, arg, mpctx->last_av_difference);
 }
 
