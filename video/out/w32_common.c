@@ -1003,6 +1003,12 @@ int vo_w32_config(struct vo *vo, uint32_t flags)
     return r;
 }
 
+// cygwin doesn't have this, so just define a mp_ name-spaced copy to
+// guarantee it's defined
+DEFINE_GUID(mp_IID_ITaskbarList2,
+            0x602D4995, 0xB13A, 0x429b, 0xA6, 0x6E,
+            0x19, 0x35, 0xE4, 0x4F, 0x43, 0x17);
+
 static void *gui_thread(void *ptr)
 {
     struct vo_w32_state *w32 = ptr;
@@ -1065,7 +1071,7 @@ static void *gui_thread(void *ptr)
         // ITaskbarList2 has the MarkFullscreenWindow method, which is used to
         // make sure the taskbar is hidden when mpv goes fullscreen
         if (SUCCEEDED(CoCreateInstance(&CLSID_TaskbarList, NULL,
-                                       CLSCTX_INPROC_SERVER, &IID_ITaskbarList2,
+                                       CLSCTX_INPROC_SERVER, &mp_IID_ITaskbarList2,
                                        (void**)&w32->taskbar_list)))
         {
             if (FAILED(ITaskbarList2_HrInit(w32->taskbar_list))) {
