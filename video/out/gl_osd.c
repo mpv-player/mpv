@@ -61,6 +61,9 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .scratch = talloc_zero_size(ctx, 1),
     };
 
+    if (!(gl->mpgl_caps & MPGL_CAP_TEX_RG))
+        ctx->fmt_table = osd_to_gl_legacy_formats;
+
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct mpgl_osd_part *p = talloc_ptrtype(ctx, p);
         *p = (struct mpgl_osd_part) {

@@ -197,7 +197,7 @@ static bool config_window(struct gl_priv *p, int flags)
     if (p->use_gl_debug)
         flags |= VOFLAG_GL_DEBUG;
 
-    int mpgl_caps = MPGL_CAP_GL21 | MPGL_CAP_TEX_RG;
+    int mpgl_caps = MPGL_CAP_GL21;
     if (!p->allow_sw)
         mpgl_caps |= MPGL_CAP_NO_SW;
     return mpgl_config_window(p->glctx, mpgl_caps, flags);
