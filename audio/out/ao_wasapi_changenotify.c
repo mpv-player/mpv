@@ -54,8 +54,8 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_QueryInterface(
     IMMNotificationClient* This, REFIID riid, void **ppvObject)
 {
     /* Compatible with IMMNotificationClient and IUnknown */
-    if (!mp_GUID_compare(&IID_IMMNotificationClient, riid) ||
-        !mp_GUID_compare(&IID_IUnknown, riid)) {
+    if ( IsEqualGUID(&IID_IMMNotificationClient, riid) ||
+         IsEqualGUID(&IID_IUnknown, riid) ) {
         *ppvObject = (void *)This;
         return S_OK;
     } else {
@@ -178,7 +178,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     if (pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId)) {
         MP_VERBOSE(ao, "OnPropertyValueChanged triggered\n");
         MP_VERBOSE(ao, "Changed property: ");
-        if (!mp_PKEY_compare(&PKEY_AudioEngine_DeviceFormat, &key)) {
+        if ( IsEqualPropertyKey(PKEY_AudioEngine_DeviceFormat, key) ) {
             MP_VERBOSE(change->ao,
                        "PKEY_AudioEngine_DeviceFormat - requesting ao reload\n");
             ao_request_reload(change->ao);

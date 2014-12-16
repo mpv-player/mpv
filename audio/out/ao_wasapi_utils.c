@@ -50,25 +50,6 @@ DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
             0x00000003, 0x0000, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 
-int mp_GUID_compare(const GUID *l, const GUID *r)
-{
-    unsigned int i;
-    if (l->Data1 != r->Data1) return 1;
-    if (l->Data2 != r->Data2) return 1;
-    if (l->Data3 != r->Data3) return 1;
-    for (i = 0; i < 8; i++) {
-        if (l->Data4[i] != r->Data4[i]) return 1;
-    }
-    return 0;
-}
-
-int mp_PKEY_compare(const PROPERTYKEY *l, const PROPERTYKEY *r)
-{
-    if (mp_GUID_compare(&l->fmtid, &r->fmtid)) return 1;
-    if (l->pid != r->pid) return 1;
-    return 0;
-}
-
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
 {
     snprintf(buf, buf_size,
@@ -194,11 +175,11 @@ static char *waveformat_to_str_buf(char *buf, size_t buf_size, const WAVEFORMATE
     case WAVE_FORMAT_EXTENSIBLE:
     {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
-        if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
-                              &wformat->SubFormat) )
+        if ( IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
+                         &wformat->SubFormat) )
             type = "float";
-        else if ( !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM,
-                                   &wformat->SubFormat) )
+        else if ( IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_PCM,
+                              &wformat->SubFormat) )
             type = "s";
         break;
     }
@@ -221,7 +202,7 @@ static bool waveformat_is_float(WAVEFORMATEX *wf)
     case WAVE_FORMAT_EXTENSIBLE:
     {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
-        return !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat->SubFormat);
+        return IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat->SubFormat);
     }
     case WAVE_FORMAT_IEEE_FLOAT:
         return true;
@@ -236,7 +217,7 @@ static bool waveformat_is_pcm(WAVEFORMATEX *wf)
     case WAVE_FORMAT_EXTENSIBLE:
     {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
-        return !mp_GUID_compare(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat->SubFormat);
+        return IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat->SubFormat);
     }
     case WAVE_FORMAT_PCM:
         return true;
