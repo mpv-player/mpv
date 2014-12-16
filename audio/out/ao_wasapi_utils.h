@@ -27,8 +27,6 @@
 #include "ao.h"
 #include "internal.h"
 
-int mp_GUID_compare(const GUID *l, const GUID *r);
-int mp_PKEY_compare(const PROPERTYKEY *l, const PROPERTYKEY *r);
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid);
 char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey);
 #define mp_GUID_to_str(guid) mp_GUID_to_str_buf((char[40]){0}, 40, (guid))
