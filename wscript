@@ -539,7 +539,7 @@ audio_output_features = [
     }, {
         'name': '--alsa',
         'desc': 'ALSA audio output',
-        'func': check_pkg_config('alsa'),
+        'func': check_pkg_config('alsa >= 1.0.18'),
     }, {
         'name': '--coreaudio',
         'desc': 'CoreAudio audio output',
