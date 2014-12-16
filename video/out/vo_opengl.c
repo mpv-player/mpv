@@ -240,8 +240,9 @@ static void call_request_hwdec_api(struct mp_hwdec_info *info,
     vo_control(vo, VOCTRL_LOAD_HWDEC_API, (void *)api_name);
 }
 
-static bool update_icc_profile(struct gl_priv *p, struct mp_icc_opts *opts)
+static bool update_icc_profile(struct gl_priv *p)
 {
+    struct mp_icc_opts *opts = p->icc_opts;
     struct lut3d *lut3d = NULL;
     if (opts->profile) {
         lut3d = mp_load_icc(opts, p->vo->log, p->vo->global);
@@ -253,21 +254,20 @@ static bool update_icc_profile(struct gl_priv *p, struct mp_icc_opts *opts)
     return true;
 }
 
-static bool get_and_update_icc_profile(struct vo *vo,
-                                       struct mp_icc_opts *opts)
+static bool get_and_update_icc_profile(struct gl_priv *p)
 {
-    struct gl_priv *p = vo->priv;
-
-    if (!opts->profile_auto)
-        return update_icc_profile(p, opts);
+    if (!p->icc_opts->profile_auto)
+        return update_icc_profile(p);
 
     char *icc = NULL;
-    int r = p->glctx->vo_control(vo, NULL, VOCTRL_GET_ICC_PROFILE_PATH, &icc);
-    if (r != VO_TRUE)
-        return false;
+    int r = p->glctx->vo_control(p->vo, NULL, VOCTRL_GET_ICC_PROFILE_PATH, &icc);
+    if (r != VO_TRUE) {
+        MP_WARN(p->vo, "Could not retrieve an ICC profile.\n");
+        return true; // no error if the system doesn't have any
+    }
 
-    if (mp_icc_set_profile(opts, icc))
-        return update_icc_profile(p, opts);
+    if (mp_icc_set_profile(p->icc_opts, icc))
+        return update_icc_profile(p);
 
     return true;
 }
@@ -282,7 +282,6 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
 #define OPT_BASE_STRUCT struct gl_priv
     static const struct m_option change_otps[] = {
         OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
-        OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
         {0}
     };
 #undef OPT_BASE_STRUCT
@@ -299,7 +298,6 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
     if (r >= 0) {
         mpgl_lock(p->glctx);
         gl_video_set_options(p->renderer, opts->renderer_opts);
-        update_icc_profile(p, opts->icc_opts);
         resize(p);
         mpgl_unlock(p->glctx);
     }
@@ -379,7 +377,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     if (events & VO_EVENT_EXPOSE)
         vo->want_redraw = true;
     if (events & VO_EVENT_ICC_PROFILE_PATH_CHANGED) {
-        get_and_update_icc_profile(vo, p->icc_opts);
+        get_and_update_icc_profile(p);
         vo->want_redraw = true;
     }
     vo_event(vo, events);
@@ -428,7 +426,7 @@ static int preinit(struct vo *vo)
     gl_video_set_output_depth(p->renderer, p->glctx->depth_r, p->glctx->depth_g,
                               p->glctx->depth_b);
     gl_video_set_options(p->renderer, p->renderer_opts);
-    if (!get_and_update_icc_profile(vo, p->icc_opts))
+    if (!get_and_update_icc_profile(p))
         goto err_out;
 
     mpgl_unset_context(p->glctx);
