@@ -194,12 +194,6 @@ static bool init_chmap(struct ao *ao)
 
     talloc_free(layouts);
 
-    if (ao->channels.num < 3) {
-        struct mp_chmap chmap;
-        mp_chmap_from_channels(&chmap, ao->channels.num);
-        mp_chmap_sel_add_map(&chmap_sel, &chmap);
-    }
-
     if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels)) {
         MP_ERR(ao, "could not select a suitable channel map among the "
                    "hardware supported ones. Make sure to configure your "
@@ -336,7 +330,7 @@ static const int speaker_map[][2] = {
     { kAudioChannelLabel_HeadphonesLeft,       MP_SPEAKER_ID_DL   },
     { kAudioChannelLabel_HeadphonesRight,      MP_SPEAKER_ID_DR   },
 
-    { kAudioChannelLabel_Unknown,              -1 },
+    { kAudioChannelLabel_Unknown,              MP_SPEAKER_ID_UNKNOWN0 },
 };
 
 static int ca_label_to_mp_speaker_id(AudioChannelLabel label)
@@ -426,8 +420,6 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
     for (int n = 0; n < layout->mNumberChannelDescriptions; n++) {
         AudioChannelLabel label = layout->mChannelDescriptions[n].mChannelLabel;
         uint8_t speaker = ca_label_to_mp_speaker_id(label);
-        if (label == kAudioChannelLabel_Unknown)
-            continue;
         if (speaker < 0) {
             MP_VERBOSE(ao, "channel label=%u unusable to build channel "
                            "bitmap, skipping layout\n", (unsigned) label);
@@ -437,6 +429,12 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
             chmap->num = n + 1;
         }
     }
+
+    // In OS X systems with unconfigured multichannel, coreaudio reports
+    // speakers with an unknown channel label. Just assume those are stereo
+    // and mono
+    if (mp_chmap_is_unknown(chmap) && chmap->num < 3)
+        mp_chmap_from_channels(chmap, chmap->num);
 
     return chmap->num > 0;
 coreaudio_error:
