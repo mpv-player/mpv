@@ -1002,7 +1002,6 @@ static void compile_shaders(struct gl_video *p)
 
     if (p->color_swizzle[0])
         shader_def(&header_conv, "USE_COLOR_SWIZZLE", p->color_swizzle);
-    shader_def_opt(&header_conv, "USE_SWAP_UV", p->image_desc.id == IMGFMT_NV21);
     shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && !p->is_packed_yuv
                                               && p->plane_count == 1);
     shader_def_opt(&header_conv, "USE_INPUT_GAMMA", use_input_gamma);
