@@ -29,10 +29,9 @@
 #include "common/common.h"
 #include "stream/stream.h"
 
-// Normally, this must be declared manually, but glibc is retarded.
-#ifndef __GLIBC__
+// Normally, this must be declared manually, but glibc is retarded
+// resulting in a warning.
 extern char **environ;
-#endif
 
 // A silly helper: automatically skips entries with negative FDs
 static int sparse_poll(struct pollfd *fds, int num_fds, int timeout)
