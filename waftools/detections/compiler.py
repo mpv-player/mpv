@@ -28,17 +28,19 @@ def __add_generic_flags__(ctx):
     if ctx.is_debug_build():
         ctx.env.CFLAGS += ['-g']
 
-def __add_gcc_flags__(ctx):
-    ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
-                       "-Wno-switch", "-Wno-parentheses", "-Wpointer-arith",
-                       "-Wredundant-decls", "-Wno-pointer-sign"]
     __test_and_add_flags__(ctx, ["-Werror=implicit-function-declaration",
                                  "-Wno-error=deprecated-declarations",
                                  "-Wno-error=unused-function",
                                  "-Wempty-body",
                                  "-Wdisabled-optimization",
                                  "-Wstrict-prototypes",
-                                 "-Wno-format-zero-length"])
+                                 "-Wno-format-zero-length",
+                                 "-Werror=format-security"])
+
+def __add_gcc_flags__(ctx):
+    ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
+                       "-Wno-switch", "-Wno-parentheses", "-Wpointer-arith",
+                       "-Wredundant-decls", "-Wno-pointer-sign"]
 
 def __add_clang_flags__(ctx):
     ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics",
