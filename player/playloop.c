@@ -364,9 +364,6 @@ double get_time_length(struct MPContext *mpctx)
     return -1; // unknown
 }
 
-/* If there are timestamps from stream level then use those (for example
- * DVDs can have consistent times there while the MPEG-level timestamps
- * reset). */
 double get_current_time(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
