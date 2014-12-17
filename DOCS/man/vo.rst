@@ -507,7 +507,7 @@ Available video output drivers are:
         always used, and typically only when using extended scalers.)
         ``fmt`` can be one of: rgb, rgba, rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
-        Default: rgb.
+        Default: rgba.
 
     ``gamma=<0.0..10.0>``
         Set a gamma value. If gamma is adjusted in other ways (like with

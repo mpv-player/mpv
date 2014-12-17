@@ -295,7 +295,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .npot = 1,
     .dither_depth = -1,
     .dither_size = 6,
-    .fbo_format = GL_RGB,
+    .fbo_format = GL_RGBA,
     .scale_sep = 1,
     .scalers = { "bilinear", "bilinear" },
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
@@ -525,8 +525,11 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
     gl->BindTexture(p->gl_target, fbo->texture);
     gl->TexImage2D(p->gl_target, 0, iformat,
                    fbo->tex_w, fbo->tex_h, 0,
-                   GL_RGB, GL_UNSIGNED_BYTE, NULL);
+                   GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     default_tex_params(gl, p->gl_target, GL_LINEAR);
+
+    debug_check_gl(p, "after creating framebuffer texture");
+
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
     gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                              p->gl_target, fbo->texture, 0);
@@ -540,7 +543,7 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    debug_check_gl(p, "after creating framebuffer & associated texture");
+    debug_check_gl(p, "after creating framebuffer");
 
     return res;
 }
