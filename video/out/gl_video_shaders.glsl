@@ -53,25 +53,25 @@
 #if __VERSION__ >= 130
 vec3 srgb_expand(vec3 v)
 {
-    return mix(v / 12.92, pow((v + vec3(0.055))/1.055, vec3(2.4)),
+    return mix(v / vec3(12.92), pow((v + vec3(0.055))/vec3(1.055), vec3(2.4)),
                lessThanEqual(vec3(0.04045), v));
 }
 
 vec3 srgb_compand(vec3 v)
 {
-    return mix(v * 12.92, 1.055 * pow(v, vec3(1.0/2.4)) - 0.055,
+    return mix(v * vec3(12.92), vec3(1.055) * pow(v, vec3(1.0/2.4)) - vec3(0.055),
                lessThanEqual(vec3(0.0031308), v));
 }
 
 vec3 bt2020_expand(vec3 v)
 {
-    return mix(v / 4.5, pow((v + vec3(0.0993))/1.0993, vec3(1/0.45)),
+    return mix(v / vec3(4.5), pow((v + vec3(0.0993))/vec3(1.0993), vec3(1.0/0.45)),
                lessThanEqual(vec3(0.08145), v));
 }
 
 vec3 bt2020_compand(vec3 v)
 {
-    return mix(v * 4.5, 1.0993 * pow(v, vec3(0.45)) - vec3(0.0993),
+    return mix(v * vec3(4.5), vec3(1.0993) * pow(v, vec3(0.45)) - vec3(0.0993),
                lessThanEqual(vec3(0.0181), v));
 }
 #endif
@@ -123,7 +123,7 @@ void main() {
     color.rgb = clamp(cms_matrix * color.rgb, 0, 1);
 #endif
 #ifdef USE_OSD_3DLUT
-    color.rgb = pow(color.rgb, vec3(1/2.4)); // linear -> 2.4 3DLUT space
+    color.rgb = pow(color.rgb, vec3(1.0/2.4)); // linear -> 2.4 3DLUT space
     color = vec4(texture3D(lut_3d, color.rgb).rgb, color.a);
 #endif
 #ifdef USE_OSD_SRGB
@@ -188,7 +188,7 @@ vec4 sample_bilinear(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param
     return texture(tex, texcoord);
 }
 
-#define SAMPLE_BILINEAR(p0, p1, p2) sample_bilinear(p0, p1, p2, 0)
+#define SAMPLE_BILINEAR(p0, p1, p2) sample_bilinear(p0, p1, p2, 0.0)
 
 // Explanation how bicubic scaling with only 4 texel fetches is done:
 //   http://www.mate.tue.nl/mate/pdfs/10318.pdf
@@ -208,7 +208,7 @@ vec4 calcweights(float s) {
 }
 
 vec4 sample_bicubic_fast(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param1) {
-    vec2 pt = 1 / texsize;
+    vec2 pt = 1.0 / texsize;
     vec2 fcoord = fract(texcoord * texsize + vec2(0.5, 0.5));
     vec4 parmx = calcweights(fcoord.x);
     vec4 parmy = calcweights(fcoord.y);
@@ -257,30 +257,30 @@ float[6] weights6(sampler2D lookup, float f) {
 // remove all the redundant multiplications and additions.
 #define SAMPLE_CONVOLUTION_SEP_N(NAME, DIR, N, LUT, WEIGHTS_FUNC)           \
     vec4 NAME(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {             \
-        vec2 pt = (1 / texsize) * DIR;                                      \
-        float fcoord = dot(fract(texcoord * texsize - 0.5), DIR);           \
-        vec2 base = texcoord - fcoord * pt - pt * (N / 2 - 1);              \
+        vec2 pt = (vec2(1.0) / texsize) * DIR;                              \
+        float fcoord = dot(fract(texcoord * texsize - vec2(0.5)), DIR);     \
+        vec2 base = texcoord - fcoord * pt - pt * vec2(N / 2 - 1);          \
         float weights[N] = WEIGHTS_FUNC(LUT, fcoord);                       \
         vec4 res = vec4(0);                                                 \
         for (int n = 0; n < N; n++) {                                       \
-            res += weights[n] * texture(tex, base + pt * n);                \
+            res += vec4(weights[n]) * texture(tex, base + pt * vec2(n));    \
         }                                                                   \
         return res;                                                         \
     }
 
 #define SAMPLE_CONVOLUTION_N(NAME, N, LUT, WEIGHTS_FUNC)                    \
     vec4 NAME(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {             \
-        vec2 pt = 1 / texsize;                                              \
-        vec2 fcoord = fract(texcoord * texsize - 0.5);                      \
-        vec2 base = texcoord - fcoord * pt - pt * (N / 2 - 1);              \
+        vec2 pt = vec2(1.0) / texsize;                                      \
+        vec2 fcoord = fract(texcoord * texsize - vec2(0.5));                \
+        vec2 base = texcoord - fcoord * pt - pt * vec2(N / 2 - 1);          \
         vec4 res = vec4(0);                                                 \
         float w_x[N] = WEIGHTS_FUNC(LUT, fcoord.x);                         \
         float w_y[N] = WEIGHTS_FUNC(LUT, fcoord.y);                         \
         for (int y = 0; y < N; y++) {                                       \
             vec4 line = vec4(0);                                            \
             for (int x = 0; x < N; x++)                                     \
-                line += w_x[x] * texture(tex, base + pt * vec2(x, y));      \
-            res += w_y[y] * line;                                           \
+                line += vec4(w_x[x]) * texture(tex, base + pt * vec2(x, y));\
+            res += vec4(w_y[y]) * line;                                     \
         }                                                                   \
         return res;                                                         \
     }
@@ -294,7 +294,7 @@ DEF_SCALER1
 
 // Unsharp masking
 vec4 sample_sharpen3(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param1) {
-    vec2 pt = 1 / texsize;
+    vec2 pt = 1.0 / texsize;
     vec2 st = pt * 0.5;
     vec4 p = texture(tex, texcoord);
     vec4 sum = texture(tex, texcoord + st * vec2(+1, +1))
@@ -305,7 +305,7 @@ vec4 sample_sharpen3(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param
 }
 
 vec4 sample_sharpen5(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param1) {
-    vec2 pt = 1 / texsize;
+    vec2 pt = 1.0 / texsize;
     vec2 st1 = pt * 1.2;
     vec4 p = texture(tex, texcoord);
     vec4 sum1 = texture(tex, texcoord + st1 * vec2(+1, +1))
@@ -438,7 +438,7 @@ void main() {
     // For the 3DLUT we are arbitrarily using 2.4 as input gamma to reduce
     // the amount of rounding errors, so we pull up to that space first and
     // then pass it through the 3D texture.
-    color = pow(color, vec3(1/2.4));
+    color = pow(color, vec3(1.0/2.4));
     color = texture3D(lut_3d, color).rgb;
 #endif
 #ifdef USE_SRGB
@@ -450,7 +450,7 @@ void main() {
     // comes in two flavours, one for the approximate gamma system and one
     // for the actual gamma system.
 #ifdef USE_CONST_LUMA_INV_APPROX
-    color = pow(color, vec3(1/1.95));
+    color = pow(color, vec3(1.0/1.95));
 #endif
 #ifdef USE_CONST_LUMA_INV_BT2020
     color = bt2020_compand(color);
