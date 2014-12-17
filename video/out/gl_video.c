@@ -1262,9 +1262,9 @@ static void init_dither(struct gl_video *p)
     int tex_size;
     void *tex_data;
     GLint tex_iformat;
+    GLint tex_format;
     GLenum tex_type;
     unsigned char temp[256];
-    GLint tex_format = find_tex_format(gl, 1, 1)->format;
 
     if (p->opts.dither_algo == 0) {
         int sizeb = p->opts.dither_size;
@@ -1278,16 +1278,19 @@ static void init_dither(struct gl_video *p)
         }
 
         tex_size = size;
-        tex_iformat = find_tex_format(gl, 2, 1)->internal_format;
+        tex_iformat = gl_float16_formats[0].internal_format;
+        tex_format = gl_float16_formats[0].format;
         tex_type = GL_FLOAT;
         tex_data = p->last_dither_matrix;
     } else {
         assert(sizeof(temp) >= 8 * 8);
         mp_make_ordered_dither_matrix(temp, 8);
 
+        const struct fmt_entry *fmt = find_tex_format(gl, 1, 1);
         tex_size = 8;
-        tex_iformat = tex_format;
-        tex_type = GL_UNSIGNED_BYTE;
+        tex_iformat = fmt->internal_format;
+        tex_format = fmt->format;
+        tex_type = fmt->type;
         tex_data = temp;
     }
 
@@ -1311,6 +1314,8 @@ static void init_dither(struct gl_video *p)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     gl->ActiveTexture(GL_TEXTURE0);
+
+    debug_check_gl(p, "dither setup");
 }
 
 static void recreate_osd(struct gl_video *p)
