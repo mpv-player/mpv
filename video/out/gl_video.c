@@ -2034,19 +2034,6 @@ static void draw_osd(struct gl_video *p)
 
 static bool test_fbo(struct gl_video *p, GLenum format)
 {
-    static const float vals[] = {
-        127 / 255.0f,                   // full 8 bit integer
-        32767 / 65535.0f,               // full 16 bit integer
-        0xFFFFFF / (float)(1 << 25),    // float mantissa
-        2,                              // out of range value
-    };
-    static const char *const val_names[] = {
-        "8-bit precision",
-        "16-bit precision",
-        "full float",
-        "out of range value (2)",
-    };
-
     GL *gl = p->gl;
     bool success = false;
     struct fbotex fbo = {0};
@@ -2055,18 +2042,7 @@ static bool test_fbo(struct gl_video *p, GLenum format)
     gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
     if (fbotex_init(p, &fbo, 16, 16, format)) {
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
-        gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
-        for (int i = 0; i < 4; i++) {
-            float pixel = -1;
-            float val = vals[i];
-            gl->ClearColor(val, val, val, val);
-            gl->Clear(GL_COLOR_BUFFER_BIT);
-            GLint one_byte = find_tex_format(gl, 1, 1)->format;
-            gl->ReadPixels(0, 0, 1, 1, one_byte, GL_FLOAT, &pixel);
-            MP_VERBOSE(p, "   %s: %a\n", val_names[i], val - pixel);
-        }
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-        glCheckError(gl, p->log, "after FBO read");
         success = true;
     }
     fbotex_uninit(p, &fbo);
@@ -2089,17 +2065,9 @@ static void check_gl_features(struct gl_video *p)
     int n_disabled = 0;
 
     if (have_fbo) {
-        MP_VERBOSE(p, "Testing user-set FBO format\n");
+        MP_VERBOSE(p, "Testing user-set FBO format (0x%x)\n",
+                   (unsigned)p->opts.fbo_format);
         have_fbo = test_fbo(p, p->opts.fbo_format);
-    }
-
-    // fruit dithering mode and the 3D lut use this texture format
-    if (have_fbo && ((p->opts.dither_depth >= 0 && p->opts.dither_algo == 0) ||
-                     p->use_lut_3d))
-    {
-        // doesn't disable anything; it's just for the log
-        MP_VERBOSE(p, "Testing GL_R16 FBO (dithering/LUT)\n");
-        test_fbo(p, GL_R16);
     }
 
     // Disable these only if the user didn't disable scale-sep on the command
