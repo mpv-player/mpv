@@ -76,6 +76,7 @@ struct command_ctx {
 
     double last_seek_time;
     double last_seek_pts;
+    double marked_pts;
 
     double prev_pts;
 
@@ -4054,8 +4055,13 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (!mpctx->num_sources)
             return -1;
         double oldpts = cmdctx->last_seek_pts;
-        if (oldpts != MP_NOPTS_VALUE) {
+        if (cmdctx->marked_pts != MP_NOPTS_VALUE)
+            oldpts = cmdctx->marked_pts;
+        if (cmd->args[0].v.i == 1) {
+            cmdctx->marked_pts = get_current_time(mpctx);
+        } else if (oldpts != MP_NOPTS_VALUE) {
             cmdctx->last_seek_pts = get_current_time(mpctx);
+            cmdctx->marked_pts = MP_NOPTS_VALUE;
             queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, 1, false);
             set_osd_function(mpctx, OSD_REW);
             if (bar_osd)
@@ -4685,8 +4691,10 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
     struct command_ctx *ctx = mpctx->command_ctx;
     struct MPOpts *opts = mpctx->opts;
 
-    if (event == MPV_EVENT_START_FILE)
+    if (event == MPV_EVENT_START_FILE) {
         ctx->last_seek_pts = MP_NOPTS_VALUE;
+        ctx->marked_pts = MP_NOPTS_VALUE;
+    }
 
     if (event == MPV_EVENT_TICK) {
         double now =
