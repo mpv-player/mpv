@@ -27,6 +27,10 @@
 // inserted at the beginning of all shaders
 #!section prelude
 
+#ifdef GL_ES
+precision mediump float;
+#endif
+
 // GLSL 1.20 compatibility layer
 // texture() should be assumed to always map to texture2D()
 #if __VERSION__ >= 130

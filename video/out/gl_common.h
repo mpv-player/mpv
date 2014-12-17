@@ -156,6 +156,7 @@ void mpgl_set_backend_cocoa(MPGLContext *ctx);
 void mpgl_set_backend_w32(MPGLContext *ctx);
 void mpgl_set_backend_x11(MPGLContext *ctx);
 void mpgl_set_backend_x11egl(MPGLContext *ctx);
+void mpgl_set_backend_x11egles(MPGLContext *ctx);
 void mpgl_set_backend_wayland(MPGLContext *ctx);
 
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
@@ -169,6 +170,7 @@ void mp_log_source(struct mp_log *log, int lev, const char *src);
 
 //function pointers loaded from the OpenGL library
 struct GL {
+    bool es;                    // false: desktop GL, true: GLES
     int version;                // MPGL_VER() mangled
     int glsl_version;           // e.g. 130 for GLSL 1.30
     char *extensions;           // Equivalent to GL_EXTENSIONS

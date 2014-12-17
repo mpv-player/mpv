@@ -231,6 +231,19 @@ static const struct fmt_entry gl_byte_formats[] = {
     {0, GL_RGBA16,  GL_RGBA,    GL_UNSIGNED_SHORT},     // 4 x 16
 };
 
+static const struct fmt_entry gl_byte_formats_gles3[] = {
+    {0, GL_R8,       GL_RED,    GL_UNSIGNED_BYTE},      // 1 x 8
+    {0, GL_RG8,      GL_RG,     GL_UNSIGNED_BYTE},      // 2 x 8
+    {0, GL_RGB8,     GL_RGB,    GL_UNSIGNED_BYTE},      // 3 x 8
+    {0, GL_RGBA8,    GL_RGBA,   GL_UNSIGNED_BYTE},      // 4 x 8
+    // There are no filterable texture formats that can be uploaded as
+    // GL_UNSIGNED_SHORT, so apparently we're out of luck.
+    {0, 0,           0,         0},                     // 1 x 16
+    {0, 0,           0,         0},                     // 2 x 16
+    {0, 0,           0,         0},                     // 3 x 16
+    {0, 0,           0,         0},                     // 4 x 16
+};
+
 static const struct fmt_entry gl_byte_formats_legacy[] = {
     {0, GL_ALPHA,   GL_ALPHA,   GL_UNSIGNED_BYTE},      // 1 x 8
     {0, GL_LUMINANCE_ALPHA,
@@ -389,8 +402,12 @@ static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
 {
     assert(bytes_per_comp == 1 || bytes_per_comp == 2);
     assert(n_channels >= 1 && n_channels <= 4);
-    const struct fmt_entry *fmts = (gl->mpgl_caps & MPGL_CAP_TEX_RG)
-        ? gl_byte_formats : gl_byte_formats_legacy;
+    const struct fmt_entry *fmts = gl_byte_formats;
+    if (gl->es) {
+        fmts = gl_byte_formats_gles3;
+    } else if (!(gl->mpgl_caps & MPGL_CAP_TEX_RG)) {
+        fmts = gl_byte_formats_legacy;
+    }
     return &fmts[n_channels - 1 + (bytes_per_comp - 1) * 4];
 }
 
@@ -905,6 +922,8 @@ static void compile_shaders(struct gl_video *p)
 {
     GL *gl = p->gl;
 
+    debug_check_gl(p, "before shaders");
+
     delete_shaders(p);
 
     void *tmp = talloc_new(NULL);
@@ -916,10 +935,11 @@ static void compile_shaders(struct gl_video *p)
 
     int rg = !!(gl->mpgl_caps & MPGL_CAP_TEX_RG);
     char *header =
-        talloc_asprintf(tmp, "#version %d\n"
+        talloc_asprintf(tmp, "#version %d%s\n"
                              "#define HAVE_RG %d\n"
                              "%s%s",
-                             gl->glsl_version, rg, shader_prelude, PRELUDE_END);
+                             gl->glsl_version, gl->es ? " es" : "",
+                             rg, shader_prelude, PRELUDE_END);
 
     bool use_cms = p->opts.srgb || p->use_lut_3d;
 
@@ -2086,6 +2106,12 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
+    // GLES doesn't provide filtered 16 bit integer textures
+    if (p->use_lut_3d && gl->es) {
+        p->use_lut_3d = false;
+        disabled[n_disabled++] = "color management (GLES unsupported)";
+    }
+
     int use_cms = p->opts.srgb || p->use_lut_3d;
 
     // srgb_compand() not available
@@ -2336,6 +2362,11 @@ supported:
     // Stuff like IMGFMT_420AP10. Untested, most likely insane.
     if (desc.num_planes == 4 && (init->plane_bits % 8) != 0)
         return false;
+
+    for (int p = 0; p < desc.num_planes; p++) {
+        if (!plane_format[p]->format)
+            return false;
+    }
 
     for (int p = 0; p < desc.num_planes; p++) {
         struct texplane *plane = &init->image.planes[p];

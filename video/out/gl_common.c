@@ -495,9 +495,20 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     int major = 0, minor = 0;
     const char *version = gl->GetString(GL_VERSION);
+    if (strncmp(version, "OpenGL ES ", 10) == 0) {
+        version += 10;
+        gl->es = true;
+    }
     sscanf(version, "%d.%d", &major, &minor);
     gl->version = MPGL_VER(major, minor);
-    mp_verbose(log, "Detected OpenGL %d.%d.\n", major, minor);
+    mp_verbose(log, "Detected OpenGL %d.%d (%s).\n", major, minor,
+               gl->es ? "GLES" : "desktop");
+
+    if (gl->es && gl->version < MPGL_VER(3, 0)) {
+        mp_warn(log, "At least GLESv3 required.\n");
+        gl->version = 0;
+        return;
+    }
 
     mp_verbose(log, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
     mp_verbose(log, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
@@ -607,16 +618,21 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     }
 
     gl->glsl_version = 0;
-    if (gl->version >= MPGL_VER(2, 0))
-        gl->glsl_version = 110;
-    if (gl->version >= MPGL_VER(2, 1))
-        gl->glsl_version = 120;
-    if (gl->version >= MPGL_VER(3, 0))
-        gl->glsl_version = 130;
-    // Specifically needed for OSX (normally we request 3.0 contexts only, but
-    // OSX always creates 3.2 contexts when requesting a core context).
-    if (gl->version >= MPGL_VER(3, 2))
-        gl->glsl_version = 150;
+    if (gl->es) {
+        if (gl->version >= MPGL_VER(3, 0))
+            gl->glsl_version = 300;
+    } else {
+        if (gl->version >= MPGL_VER(2, 0))
+            gl->glsl_version = 110;
+        if (gl->version >= MPGL_VER(2, 1))
+            gl->glsl_version = 120;
+        if (gl->version >= MPGL_VER(3, 0))
+            gl->glsl_version = 130;
+        // Specifically needed for OSX (normally we request 3.0 contexts only, but
+        // OSX always creates 3.2 contexts when requesting a core context).
+        if (gl->version >= MPGL_VER(3, 2))
+            gl->glsl_version = 150;
+    }
 
     if (!is_software_gl(gl))
         gl->mpgl_caps |= MPGL_CAP_NO_SW;
@@ -678,14 +694,18 @@ int glFmt2bpp(GLenum format, GLenum type)
         return 2;
     case GL_RGB:
     case GL_BGR:
+    case GL_RGB_INTEGER:
         return 3 * component_size;
     case GL_RGBA:
     case GL_BGRA:
+    case GL_RGBA_INTEGER:
         return 4 * component_size;
     case GL_RED:
+    case GL_RED_INTEGER:
         return component_size;
     case GL_RG:
     case GL_LUMINANCE_ALPHA:
+    case GL_RG_INTEGER:
         return 2 * component_size;
     }
     abort(); // unknown
@@ -817,6 +837,7 @@ static const struct backend backends[] = {
 #endif
 #if HAVE_EGL_X11
     {"x11egl", mpgl_set_backend_x11egl},
+    {"x11egles", mpgl_set_backend_x11egles},
 #endif
     {0}
 };

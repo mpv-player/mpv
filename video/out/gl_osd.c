@@ -42,6 +42,11 @@ static const struct osd_fmt_entry osd_to_gl3_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_BGRA,  GL_UNSIGNED_BYTE},
 };
 
+static const struct osd_fmt_entry osd_to_gles3_formats[SUBBITMAP_COUNT] = {
+    [SUBBITMAP_LIBASS] = {GL_R8,    GL_RED,   GL_UNSIGNED_BYTE},
+    [SUBBITMAP_RGBA] =   {GL_RGBA8, GL_BGRA,  GL_UNSIGNED_BYTE},
+};
+
 static const struct osd_fmt_entry osd_to_gl_legacy_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = {GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE},
     [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_BGRA,  GL_UNSIGNED_BYTE},
@@ -61,8 +66,11 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .scratch = talloc_zero_size(ctx, 1),
     };
 
-    if (!(gl->mpgl_caps & MPGL_CAP_TEX_RG))
+    if (gl->es) {
+        ctx->fmt_table = osd_to_gles3_formats;
+    } else if (!(gl->mpgl_caps & MPGL_CAP_TEX_RG)) {
         ctx->fmt_table = osd_to_gl_legacy_formats;
+    }
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct mpgl_osd_part *p = talloc_ptrtype(ctx, p);

@@ -34,7 +34,7 @@ struct priv {
     EGLSurface egl_surface;
 };
 
-static EGLConfig select_fb_config_egl(struct MPGLContext *ctx)
+static EGLConfig select_fb_config_egl(struct MPGLContext *ctx, bool es)
 {
     struct priv *p = ctx->priv;
 
@@ -44,7 +44,7 @@ static EGLConfig select_fb_config_egl(struct MPGLContext *ctx)
         EGL_GREEN_SIZE, 8,
         EGL_BLUE_SIZE, 8,
         EGL_DEPTH_SIZE, 0,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+        EGL_RENDERABLE_TYPE, es ? EGL_OPENGL_ES_BIT : EGL_OPENGL_BIT,
         EGL_NONE
     };
 
@@ -62,13 +62,13 @@ static EGLConfig select_fb_config_egl(struct MPGLContext *ctx)
 }
 
 static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
-                                EGLNativeWindowType window)
+                               EGLNativeWindowType window, bool es)
 {
     struct priv *p = ctx->priv;
 
     EGLint context_attributes[] = {
         EGL_CONTEXT_MAJOR_VERSION_KHR,
-        MPGL_VER_GET_MAJOR(ctx->requested_gl_version),
+        es ? 3 : MPGL_VER_GET_MAJOR(ctx->requested_gl_version),
         EGL_NONE
     };
 
@@ -93,7 +93,7 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
     return true;
 }
 
-static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
+static bool config_window_x11_egl_(struct MPGLContext *ctx, int flags, bool es)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -103,12 +103,12 @@ static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
         return true;
     }
 
-    eglBindAPI(EGL_OPENGL_API);
+    eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API);
 
     p->egl_display = eglGetDisplay(vo->x11->display);
     eglInitialize(p->egl_display, NULL, NULL);
 
-    EGLConfig config = select_fb_config_egl(ctx);
+    EGLConfig config = select_fb_config_egl(ctx, es);
     if (!config)
         return false;
 
@@ -126,7 +126,7 @@ static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
 
     XFree(vi);
 
-    if (!create_context_egl(ctx, config, (EGLNativeWindowType)vo->x11->window))
+    if (!create_context_egl(ctx, config, (EGLNativeWindowType)vo->x11->window, es))
     {
         vo_x11_uninit(ctx->vo);
         return false;
@@ -136,6 +136,16 @@ static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
     mpgl_load_functions(ctx->gl, gpa, NULL, vo->log);
 
     return true;
+}
+
+static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
+{
+    return config_window_x11_egl_(ctx, flags, false);
+}
+
+static bool config_window_x11_egles(struct MPGLContext *ctx, int flags)
+{
+    return config_window_x11_egl_(ctx, flags, true);
 }
 
 static void releaseGlContext_egl(MPGLContext *ctx)
@@ -159,6 +169,17 @@ void mpgl_set_backend_x11egl(MPGLContext *ctx)
 {
     ctx->priv = talloc_zero(ctx, struct priv);
     ctx->config_window = config_window_x11_egl;
+    ctx->releaseGlContext = releaseGlContext_egl;
+    ctx->swapGlBuffers = swapGlBuffers_egl;
+    ctx->vo_init = vo_x11_init;
+    ctx->vo_uninit = vo_x11_uninit;
+    ctx->vo_control = vo_x11_control;
+}
+
+void mpgl_set_backend_x11egles(MPGLContext *ctx)
+{
+    ctx->priv = talloc_zero(ctx, struct priv);
+    ctx->config_window = config_window_x11_egles;
     ctx->releaseGlContext = releaseGlContext_egl;
     ctx->swapGlBuffers = swapGlBuffers_egl;
     ctx->vo_init = vo_x11_init;
