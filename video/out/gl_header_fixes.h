@@ -265,6 +265,13 @@
 #define GLvdpauSurfaceNV GLintptr
 #endif
 
+// OSX
+#ifndef GL_RED_INTEGER
+#define GL_RED_INTEGER                    0x8D94
+#define GL_RGB_INTEGER                    0x8D98
+#define GL_RGBA_INTEGER                   0x8D99
+#endif
+
 #undef MP_GET_GL_WORKAROUNDS
 
 #endif
