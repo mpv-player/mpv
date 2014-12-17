@@ -541,7 +541,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
         // This version doesn't have GL_ARB_compatibility yet, and always
         // includes legacy (except with CONTEXT_FORWARD_COMPATIBLE_BIT_ARB).
-        if (gl->version == MPGL_VER(3, 0))
+        if (gl->version == MPGL_VER(3, 0) && !gl->es)
             has_legacy = true;
     } else {
         const char *ext = (char*)gl->GetString(GL_EXTENSIONS);
