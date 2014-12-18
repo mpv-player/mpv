@@ -46,10 +46,8 @@ precision mediump float;
 #endif
 
 #if HAVE_RG
-#define R r
 #define RG rg
 #else
-#define R a
 #define RG ra
 #endif
 
@@ -145,7 +143,7 @@ in vec4 color;
 DECLARE_FRAGPARMS
 
 void main() {
-    out_color = vec4(color.rgb, color.a * texture(texture0, texcoord).R);
+    out_color = vec4(color.rgb, color.a * texture(texture0, texcoord).r);
 }
 
 #!section frag_osd_rgba
@@ -338,12 +336,12 @@ void main() {
 #define USE_CONV 0
 #endif
 #if USE_CONV == CONV_PLANAR
-    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).R,
-                       SAMPLE_C(texture1, textures_size[1], chr_texcoord).R,
-                       SAMPLE_C(texture2, textures_size[2], chr_texcoord).R,
+    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).r,
+                       SAMPLE_C(texture1, textures_size[1], chr_texcoord).r,
+                       SAMPLE_C(texture2, textures_size[2], chr_texcoord).r,
                        1.0);
 #elif USE_CONV == CONV_NV12
-    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).R,
+    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).r,
                        SAMPLE_C(texture1, textures_size[1], chr_texcoord).RG,
                        1.0);
 #else
@@ -353,7 +351,7 @@ void main() {
     acolor = acolor. USE_COLOR_SWIZZLE ;
 #endif
 #ifdef USE_ALPHA_PLANE
-    acolor.a = SAMPLE_L(texture3, textures_size[3], texcoord).R;
+    acolor.a = SAMPLE_L(texture3, textures_size[3], texcoord).r;
 #endif
     vec3 color = acolor.rgb;
     float alpha = acolor.a;
@@ -464,7 +462,7 @@ void main() {
 #ifdef USE_TEMPORAL_DITHER
     dither_pos = dither_trafo * dither_pos;
 #endif
-    float dither_value = texture(dither, dither_pos).R;
+    float dither_value = texture(dither, dither_pos).r;
     color = floor(color * dither_quantization + dither_value + dither_center) /
                 dither_quantization;
 #endif

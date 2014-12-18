@@ -48,8 +48,8 @@ static const struct osd_fmt_entry osd_to_gles3_formats[SUBBITMAP_COUNT] = {
 };
 
 static const struct osd_fmt_entry osd_to_gl_legacy_formats[SUBBITMAP_COUNT] = {
-    [SUBBITMAP_LIBASS] = {GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE},
-    [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_BGRA,  GL_UNSIGNED_BYTE},
+    [SUBBITMAP_LIBASS] = {GL_LUMINANCE, GL_LUMINANCE,   GL_UNSIGNED_BYTE},
+    [SUBBITMAP_RGBA] =   {GL_RGBA,      GL_BGRA,        GL_UNSIGNED_BYTE},
 };
 
 struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd)

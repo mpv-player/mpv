@@ -245,18 +245,14 @@ static const struct fmt_entry gl_byte_formats_gles3[] = {
 };
 
 static const struct fmt_entry gl_byte_formats_legacy[] = {
-    {0, GL_ALPHA,   GL_ALPHA,   GL_UNSIGNED_BYTE},      // 1 x 8
-    {0, GL_LUMINANCE_ALPHA,
-                    GL_LUMINANCE_ALPHA,
-                                GL_UNSIGNED_BYTE},      // 2 x 8
-    {0, GL_RGB,     GL_RGB,     GL_UNSIGNED_BYTE},      // 3 x 8
-    {0, GL_RGBA,    GL_RGBA,    GL_UNSIGNED_BYTE},      // 4 x 8
-    {0, GL_ALPHA16, GL_ALPHA,   GL_UNSIGNED_SHORT},     // 1 x 16
-    {0, GL_LUMINANCE16_ALPHA16,
-                    GL_LUMINANCE_ALPHA,
-                                GL_UNSIGNED_SHORT},     // 2 x 16
-    {0, GL_RGB16,   GL_RGB,     GL_UNSIGNED_SHORT},     // 3 x 16
-    {0, GL_RGBA16,  GL_RGBA,    GL_UNSIGNED_SHORT},     // 4 x 16
+    {0, GL_LUMINANCE,           GL_LUMINANCE,       GL_UNSIGNED_BYTE}, // 1 x 8
+    {0, GL_LUMINANCE_ALPHA,     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE}, // 2 x 8
+    {0, GL_RGB,                 GL_RGB,             GL_UNSIGNED_BYTE}, // 3 x 8
+    {0, GL_RGBA,                GL_RGBA,            GL_UNSIGNED_BYTE}, // 4 x 8
+    {0, GL_LUMINANCE16,         GL_LUMINANCE,       GL_UNSIGNED_SHORT},// 1 x 16
+    {0, GL_LUMINANCE16_ALPHA16, GL_LUMINANCE_ALPHA, GL_UNSIGNED_SHORT},// 2 x 16
+    {0, GL_RGB16,               GL_RGB,             GL_UNSIGNED_SHORT},// 3 x 16
+    {0, GL_RGBA16,              GL_RGBA,            GL_UNSIGNED_SHORT},// 4 x 16
 };
 
 static const struct fmt_entry gl_float16_formats[] = {
@@ -2246,11 +2242,9 @@ static void packed_fmt_swizzle(char w[5], const struct fmt_entry *texfmt,
 {
     const char *comp = "rgba";
 
-    // Normally, we work with GL_RED and GL_RG
+    // Normally, we work with GL_RG
     if (texfmt && texfmt->internal_format == GL_LUMINANCE_ALPHA)
         comp = "ragb";
-    if (texfmt && texfmt->internal_format == GL_ALPHA)
-        comp = "argb";
 
     for (int c = 0; c < 4; c++)
         w[c] = comp[MPMAX(fmt->components[c] - 1, 0)];
@@ -2290,8 +2284,6 @@ static bool init_format(int fmt, struct gl_video *init)
             plane_format[0] = find_tex_format(gl, (bits + 7) / 8, 1);
             for (int p = 1; p < desc.num_planes; p++)
                 plane_format[p] = plane_format[0];
-            if (!(init->gl->mpgl_caps & MPGL_CAP_TEX_RG) && desc.num_planes < 2)
-                snprintf(init->color_swizzle, sizeof(init->color_swizzle), "argb");
             goto supported;
         }
     }
