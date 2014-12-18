@@ -802,6 +802,8 @@ void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
 void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                    void *dataptr, int stride)
 {
+    if (!gl->GetTexImage)
+        abort();
     // this is not always correct, but should work for MPlayer
     glAdjustAlignment(gl, stride);
     gl->PixelStorei(GL_PACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
@@ -810,12 +812,13 @@ void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
 
 mp_image_t *glGetWindowScreenshot(GL *gl)
 {
+    if (gl->es)
+        return NULL; // ES can't read from front buffer
     GLint vp[4]; //x, y, w, h
     gl->GetIntegerv(GL_VIEWPORT, vp);
     mp_image_t *image = mp_image_alloc(IMGFMT_RGB24, vp[2], vp[3]);
     if (!image)
         return NULL;
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
     gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
     gl->ReadBuffer(GL_FRONT);

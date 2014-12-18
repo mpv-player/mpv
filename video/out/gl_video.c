@@ -1933,7 +1933,7 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
 
     struct video_image *vimg = &p->image;
 
-    if (!p->have_image)
+    if (!p->have_image || !gl->GetTexImage)
         return NULL;
 
     if (p->hwdec_active && p->hwdec->driver->download_image) {
@@ -2060,7 +2060,6 @@ static bool test_fbo(struct gl_video *p, GLenum format)
     GL *gl = p->gl;
     bool success = false;
     struct fbotex fbo = {0};
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
     gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
     if (fbotex_init(p, &fbo, 16, 16, format)) {
@@ -2144,6 +2143,10 @@ static void check_gl_features(struct gl_video *p)
     if (!have_fbo) {
         p->opts.scale_sep = false;
         p->opts.indirect = false;
+    }
+    if (gl->es && p->opts.pbo) {
+        p->opts.pbo = 0;
+        disabled[n_disabled++] = "PBOs (GLES unsupported)";
     }
 
     if (n_disabled) {
