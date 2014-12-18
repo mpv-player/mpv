@@ -313,28 +313,24 @@ static const struct gl_functions gl_functions[] = {
         .ver_core = MPGL_VER(3, 0),
         .extension = "GL_EXT_texture_sRGB",
         .provides = MPGL_CAP_SRGB_TEX,
-        .functions = (const struct gl_function[]) {{0}},
     },
     // sRGB framebuffers, extension in GL 2.x, core in GL 3.x core.
     {
         .ver_core = MPGL_VER(3, 0),
         .extension = "GL_EXT_framebuffer_sRGB",
         .provides = MPGL_CAP_SRGB_FB,
-        .functions = (const struct gl_function[]) {{0}},
     },
     // Float textures, extension in GL 2.x, core in GL 3.x core.
     {
         .ver_core = MPGL_VER(3, 0),
         .extension = "GL_ARB_texture_float",
         .provides = MPGL_CAP_FLOAT_TEX,
-        .functions = (const struct gl_function[]) {{0}},
     },
     // GL_RED / GL_RG textures, extension in GL 2.x, core in GL 3.x core.
     {
         .ver_core = MPGL_VER(3, 0),
         .extension = "GL_ARB_texture_rg",
         .provides = MPGL_CAP_TEX_RG,
-        .functions = (const struct gl_function[]) {{0}},
     },
     // Swap control, always an OS specific extension
     {
@@ -460,9 +456,6 @@ static const struct gl_functions gl_functions[] = {
     {
         .extension = "GL_APPLE_rgb_422",
         .provides = MPGL_CAP_APPLE_RGB_422,
-        .functions = (const struct gl_function[]) {
-            {0}
-        },
     },
 };
 
@@ -582,9 +575,10 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
         void *loaded[MAX_FN_COUNT] = {0};
         bool all_loaded = true;
+        const struct gl_function *fnlist = section->functions;
 
-        for (int i = 0; section->functions[i].funcnames[0]; i++) {
-            const struct gl_function *fn = &section->functions[i];
+        for (int i = 0; fnlist && fnlist[i].funcnames[0]; i++) {
+            const struct gl_function *fn = &fnlist[i];
             void *ptr = NULL;
             for (int x = 0; fn->funcnames[x]; x++) {
                 ptr = get_fn(fn_ctx, fn->funcnames[x]);
@@ -608,8 +602,8 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
         if (all_loaded || section->partial_ok) {
             gl->mpgl_caps |= section->provides;
-            for (int i = 0; section->functions[i].funcnames[0]; i++) {
-                const struct gl_function *fn = &section->functions[i];
+            for (int i = 0; fnlist && fnlist[i].funcnames[0]; i++) {
+                const struct gl_function *fn = &fnlist[i];
                 void **funcptr = (void**)(((char*)gl) + fn->offset);
                 if (loaded[i])
                     *funcptr = loaded[i];
