@@ -109,7 +109,7 @@ static bool create_context_x11_gl3(struct MPGLContext *ctx, bool debug)
                                                     glx_ctx->fbc, 0, True,
                                                     context_attribs);
     if (!context) {
-        MP_ERR(vo, "Could not create GL3 context. Retrying with legacy context.\n");
+        MP_INFO(vo, "Could not create GL3 context. Retrying with legacy context.\n");
         return false;
     }
 
