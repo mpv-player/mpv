@@ -988,7 +988,7 @@ static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
 
-    if (!x11->window)
+    if (!x11->window || x11->parent)
         return;
 
     bool force_pos = opts->geometry.xy_valid ||     // explicitly forced by user
