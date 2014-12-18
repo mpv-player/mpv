@@ -70,6 +70,7 @@ mp_image_t *glGetWindowScreenshot(GL *gl);
 enum {
     MPGL_CAP_GL_LEGACY          = (1 << 1),     // GL 1.1 (excluding 3.x)
     MPGL_CAP_GL21               = (1 << 3),     // GL 2.1+ (excluding legacy)
+    MPGL_CAP_ROW_LENGTH         = (1 << 4),     // GL_[UN]PACK_ROW_LENGTH
     MPGL_CAP_FB                 = (1 << 5),
     MPGL_CAP_VAO                = (1 << 6),
     MPGL_CAP_SRGB_TEX           = (1 << 7),

@@ -1249,8 +1249,6 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
         gl->GenTextures(1, &scaler->gl_lut);
 
     gl->BindTexture(GL_TEXTURE_2D, scaler->gl_lut);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
     float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE * size);
     mp_compute_lut(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
@@ -1329,13 +1327,13 @@ static void init_dither(struct gl_video *p)
     gl->GenTextures(1, &p->dither_texture);
     gl->BindTexture(GL_TEXTURE_2D, p->dither_texture);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     gl->TexImage2D(GL_TEXTURE_2D, 0, tex_iformat, tex_size, tex_size, 0,
                    tex_format, tex_type, tex_data);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
     gl->ActiveTexture(GL_TEXTURE0);
 
     debug_check_gl(p, "dither setup");
@@ -1432,8 +1430,6 @@ void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_3DLUT);
     gl->BindTexture(GL_TEXTURE_3D, p->lut_3d_texture);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     gl->TexImage3D(GL_TEXTURE_3D, 0, GL_RGB16, lut3d->size[0], lut3d->size[1],
                    lut3d->size[2], 0, GL_RGB, GL_UNSIGNED_SHORT, lut3d->data);
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -2060,8 +2056,6 @@ static bool test_fbo(struct gl_video *p, GLenum format)
     GL *gl = p->gl;
     bool success = false;
     struct fbotex fbo = {0};
-    gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
-    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
     if (fbotex_init(p, &fbo, 16, 16, format)) {
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -2234,16 +2228,17 @@ void gl_video_set_gl_state(struct gl_video *p)
     struct m_color c = p->opts.background;
     gl->ClearColor(c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
     gl->ActiveTexture(GL_TEXTURE0);
+    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH) {
+        gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
+        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    }
+    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
 void gl_video_unset_gl_state(struct gl_video *p)
 {
-    GL *gl = p->gl;
-
-    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
-    gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    // nop
 }
 
 // dest = src.<w> (always using 4 components)

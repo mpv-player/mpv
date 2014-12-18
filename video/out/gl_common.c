@@ -72,28 +72,21 @@ void glCheckError(GL *gl, struct mp_log *log, const char *info)
     }
 }
 
-//! \defgroup glcontext OpenGL context management helper functions
+static int get_alignment(int stride)
+{
+    if (stride % 8 == 0)
+        return 8;
+    if (stride % 4 == 0)
+        return 4;
+    if (stride % 2 == 0)
+        return 2;
+    return 1;
+}
 
-//! \defgroup gltexture OpenGL texture handling helper functions
-
-//! \defgroup glconversion OpenGL conversion helper functions
-
-/**
- * \brief adjusts the GL_UNPACK_ALIGNMENT to fit the stride.
- * \param stride number of bytes per line for which alignment should fit.
- * \ingroup glgeneral
- */
+// adjusts the GL_UNPACK_ALIGNMENT to fit the stride.
 void glAdjustAlignment(GL *gl, int stride)
 {
-    GLint gl_alignment;
-    if (stride % 8 == 0)
-        gl_alignment = 8;
-    else if (stride % 4 == 0)
-        gl_alignment = 4;
-    else if (stride % 2 == 0)
-        gl_alignment = 2;
-    else
-        gl_alignment = 1;
+    GLint gl_alignment = get_alignment(stride);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, gl_alignment);
     gl->PixelStorei(GL_PACK_ALIGNMENT, gl_alignment);
 }
@@ -190,6 +183,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(GetError),
             DEF_FN(GetIntegerv),
             DEF_FN(GetString),
+            DEF_FN(PixelStorei),
             DEF_FN(ReadPixels),
             DEF_FN(TexImage2D),
             DEF_FN(TexParameteri),
@@ -203,6 +197,7 @@ static const struct gl_functions gl_functions[] = {
     // GL 1.1+ desktop only
     {
         .ver_core = 110,
+        .provides = MPGL_CAP_ROW_LENGTH,
         .functions = (const struct gl_function[]) {
             DEF_FN(DrawBuffer),
             DEF_FN(GetTexImage),
@@ -210,9 +205,6 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(ReadBuffer),
             DEF_FN(TexEnvi),
             DEF_FN(TexImage1D),
-            // This is actually in ES 2.0, but quite useless, because it doesn't
-            // support GL_[UN]PACK_ROW_LENGTH.
-            DEF_FN(PixelStorei),
             {0}
         },
     },
@@ -282,10 +274,15 @@ static const struct gl_functions gl_functions[] = {
             // for ES 3.0
             DEF_FN(ReadBuffer),
             DEF_FN(UnmapBuffer),
-            // ES 3.0 adds support for GL_[UN]PACK_ROW_LENGTH.
-            DEF_FN(PixelStorei),
             {0}
         },
+    },
+    // Useful for ES 2.0
+    {
+        .ver_core = 110,
+        .ver_es_core = 300,
+        .extension = "GL_EXT_unpack_subimage",
+        .provides = MPGL_CAP_ROW_LENGTH,
     },
     // Framebuffers, extension in GL 2.x, core in GL 3.x core.
     {
@@ -754,15 +751,24 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
         data += (h - 1) * stride;
         stride = -stride;
     }
-    // this is not always correct, but should work for MPlayer
-    glAdjustAlignment(gl, stride);
-    gl->PixelStorei(GL_UNPACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, get_alignment(stride));
+    bool use_rowlength = slice > 1 && (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH);
+    if (use_rowlength) {
+        // this is not always correct, but should work for MPlayer
+        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
+    } else {
+        if (stride != glFmt2bpp(format, type) * w)
+            slice = 1; // very inefficient, but at least it works
+    }
     for (; y + slice <= y_max; y += slice) {
         gl->TexSubImage2D(target, 0, x, y, w, slice, format, type, data);
         data += stride * slice;
     }
     if (y < y_max)
         gl->TexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
+    if (use_rowlength)
+        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
 // Like glUploadTex, but upload a byte array with all elements set to val.
@@ -780,9 +786,9 @@ void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
     if (talloc_get_size(data) < size)
         data = talloc_realloc(NULL, data, char *, size);
     memset(data, val, size);
-    glAdjustAlignment(gl, stride);
-    gl->PixelStorei(GL_UNPACK_ROW_LENGTH, w);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, get_alignment(stride));
     gl->TexSubImage2D(target, 0, x, y, w, h, format, type, data);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
     if (scratch) {
         *scratch = data;
     } else {
@@ -804,10 +810,13 @@ void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
 {
     if (!gl->GetTexImage)
         abort();
+    assert(gl->mpgl_caps & MPGL_CAP_ROW_LENGTH);
     // this is not always correct, but should work for MPlayer
-    glAdjustAlignment(gl, stride);
+    gl->PixelStorei(GL_PACK_ALIGNMENT, get_alignment(stride));
     gl->PixelStorei(GL_PACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
     gl->GetTexImage(target, 0, format, type, dataptr);
+    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
+    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
 }
 
 mp_image_t *glGetWindowScreenshot(GL *gl)
@@ -820,7 +829,6 @@ mp_image_t *glGetWindowScreenshot(GL *gl)
     if (!image)
         return NULL;
     gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
-    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
     gl->ReadBuffer(GL_FRONT);
     //flip image while reading (and also avoid stride-related trouble)
     for (int y = 0; y < vp[3]; y++) {
@@ -828,6 +836,7 @@ mp_image_t *glGetWindowScreenshot(GL *gl)
                        GL_RGB, GL_UNSIGNED_BYTE,
                        image->planes[0] + y * image->stride[0]);
     }
+    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
     return image;
 }
 
