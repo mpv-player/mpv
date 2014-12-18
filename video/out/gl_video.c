@@ -632,7 +632,14 @@ static void update_uniforms(struct gl_video *p, GLuint program)
         } else {
             mp_get_yuv2rgb_coeffs(&cparams, m);
         }
-        gl->UniformMatrix4x3fv(loc, 1, GL_TRUE, &m[0][0]);
+        float transposed[3][3];
+        for (int a = 0; a < 3; a++) {
+            for (int b = 0; b < 3; b++)
+                transposed[a][b] = m[b][a];
+        }
+        gl->UniformMatrix3fv(loc, 1, GL_FALSE, &transposed[0][0]);
+        loc = gl->GetUniformLocation(program, "colormatrix_c");
+        gl->Uniform3f(loc, m[0][3], m[1][3], m[2][3]);
     }
 
     gl->Uniform1f(gl->GetUniformLocation(program, "input_gamma"),

@@ -202,9 +202,11 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
-    // GL 2.0-3.x functions
+    // GL 2.1-3.x functions (also: GLSL 120 shaders)
+    // All of the listed functions are also in GL 2.0
     {
-        .ver_core = MPGL_VER(2, 0),
+        .ver_core = MPGL_VER(2, 1),
+        .provides = MPGL_CAP_GL21,
         .functions = (const struct gl_function[]) {
             DEF_FN(GenBuffers),
             DEF_FN(DeleteBuffers),
@@ -243,15 +245,6 @@ static const struct gl_functions gl_functions[] = {
             // Added in OpenGL 1.4, but vo_opengl_old doesn't need it
             DEF_FN(BlendFuncSeparate),
             {0},
-        },
-    },
-    // GL 2.1-3.x functions (also: GLSL 120 shaders)
-    {
-        .ver_core = MPGL_VER(2, 1),
-        .provides = MPGL_CAP_GL21,
-        .functions = (const struct gl_function[]) {
-            DEF_FN(UniformMatrix4x3fv),
-            {0}
         },
     },
     // GL 3.x core only functions.

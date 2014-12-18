@@ -310,8 +310,6 @@ struct GL {
                                         const GLfloat *);
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);
-    void (GLAPIENTRY *UniformMatrix4x3fv)(GLint, GLsizei, GLboolean,
-                                          const GLfloat *);
 
     void (GLAPIENTRY *VDPAUInitNV)(const GLvoid *, const GLvoid *);
     void (GLAPIENTRY *VDPAUFiniNV)(void);

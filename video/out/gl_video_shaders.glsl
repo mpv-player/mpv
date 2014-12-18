@@ -168,7 +168,8 @@ uniform sampler2D lut_c;
 uniform sampler2D lut_l;
 uniform sampler3D lut_3d;
 uniform sampler2D dither;
-uniform mat4x3 colormatrix;
+uniform mat3 colormatrix;
+uniform vec3 colormatrix_c;
 uniform mat3 cms_matrix;
 uniform mat2 dither_trafo;
 uniform vec3 inv_gamma;
@@ -366,7 +367,7 @@ void main() {
 #endif
 #ifdef USE_COLORMATRIX
     // Conversion from Y'CbCr or other spaces to RGB
-    color = mat3(colormatrix) * color + colormatrix[3];
+    color = mat3(colormatrix) * color + colormatrix_c;
 #endif
 #ifdef USE_CONV_GAMMA
     // Post-colormatrix converted gamma correction (eg. for MP_IMGFLAG_XYZ)
