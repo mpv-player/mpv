@@ -104,11 +104,8 @@ struct feature {
 };
 
 static const struct feature features[] = {
-    {MPGL_CAP_GL,               "Basic OpenGL"},
     {MPGL_CAP_GL_LEGACY,        "Legacy OpenGL"},
-    {MPGL_CAP_GL2,              "OpenGL 2.0"},
-    {MPGL_CAP_GL21,             "OpenGL 2.1"},
-    {MPGL_CAP_GL3,              "OpenGL 3.0"},
+    {MPGL_CAP_GL21,             "OpenGL 2.1+"},
     {MPGL_CAP_FB,               "Framebuffers"},
     {MPGL_CAP_VAO,              "VAOs"},
     {MPGL_CAP_SRGB_TEX,         "sRGB textures"},
@@ -171,7 +168,6 @@ static const struct gl_functions gl_functions[] = {
     // GL functions which are always available anywhere at least since 1.1
     {
         .ver_core = MPGL_VER(1, 1),
-        .provides = MPGL_CAP_GL,
         .functions = (const struct gl_function[]) {
             DEF_FN(Viewport),
             DEF_FN(Clear),
@@ -209,7 +205,6 @@ static const struct gl_functions gl_functions[] = {
     // GL 2.0-3.x functions
     {
         .ver_core = MPGL_VER(2, 0),
-        .provides = MPGL_CAP_GL2,
         .functions = (const struct gl_function[]) {
             DEF_FN(GenBuffers),
             DEF_FN(DeleteBuffers),
@@ -262,7 +257,7 @@ static const struct gl_functions gl_functions[] = {
     // GL 3.x core only functions.
     {
         .ver_core = MPGL_VER(3, 0),
-        .provides = MPGL_CAP_GL3 | MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB,
+        .provides = MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB,
         .functions = (const struct gl_function[]) {
             DEF_FN(GetStringi),
             {0}
@@ -490,17 +485,22 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     const char *version = gl->GetString(GL_VERSION);
     if (strncmp(version, "OpenGL ES ", 10) == 0) {
         version += 10;
-        gl->es = true;
+        gl->es = 100;
     }
     sscanf(version, "%d.%d", &major, &minor);
     gl->version = MPGL_VER(major, minor);
-    mp_verbose(log, "Detected OpenGL %d.%d (%s).\n", major, minor,
-               gl->es ? "GLES" : "desktop");
+    mp_verbose(log, "Detected %s %d.%d.\n", gl->es ? "GLES" : "desktop OpenGL",
+               major, minor);
 
-    if (gl->es && gl->version < MPGL_VER(3, 0)) {
-        mp_warn(log, "At least GLESv3 required.\n");
-        gl->version = 0;
-        return;
+    if (gl->es) {
+        gl->es = gl->version;
+        if (gl->version >= 300) {
+            gl->version = 300; // pretend it's desktop OpenGL 3.0
+        } else {
+            mp_warn(log, "At least GLESv3 required.\n");
+            gl->version = 0;
+            return;
+        }
     }
 
     mp_verbose(log, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
@@ -902,8 +902,6 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name,
     MPGLContext *ctx = mpgl_create(vo, backend_name);
     if (!ctx)
         return NULL;
-
-    gl_caps |= MPGL_CAP_GL;
 
     ctx->requested_gl_version = (gl_caps & MPGL_CAP_GL_LEGACY)
                                 ? MPGL_VER(2, 1) : MPGL_VER(3, 0);

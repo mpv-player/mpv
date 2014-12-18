@@ -68,11 +68,8 @@ void glCheckError(GL *gl, struct mp_log *log, const char *info);
 mp_image_t *glGetWindowScreenshot(GL *gl);
 
 enum {
-    MPGL_CAP_GL                 = (1 << 0),     // GL was successfully loaded
-    MPGL_CAP_GL_LEGACY          = (1 << 1),     // GL 1.1 (but not 3.x)
-    MPGL_CAP_GL2                = (1 << 2),     // GL 2.0 (3.x core subset)
-    MPGL_CAP_GL21               = (1 << 3),     // GL 2.1 (3.x core subset)
-    MPGL_CAP_GL3                = (1 << 4),     // GL 3.x core
+    MPGL_CAP_GL_LEGACY          = (1 << 1),     // GL 1.1 (excluding 3.x)
+    MPGL_CAP_GL21               = (1 << 3),     // GL 2.1+ (excluding legacy)
     MPGL_CAP_FB                 = (1 << 5),
     MPGL_CAP_VAO                = (1 << 6),
     MPGL_CAP_SRGB_TEX           = (1 << 7),
@@ -84,9 +81,11 @@ enum {
     MPGL_CAP_NO_SW              = (1 << 30),    // used to block sw. renderers
 };
 
-#define MPGL_VER(major, minor) (((major) << 16) | (minor))
-#define MPGL_VER_GET_MAJOR(ver) ((ver) >> 16)
-#define MPGL_VER_GET_MINOR(ver) ((ver) & ((1 << 16) - 1))
+// E.g. 310 means 3.1
+// Code doesn't have to use the macros; they are for convenience only.
+#define MPGL_VER(major, minor) (((major) * 100) + (minor))
+#define MPGL_VER_GET_MAJOR(ver) ((unsigned)(ver) / 100)
+#define MPGL_VER_GET_MINOR(ver) ((unsigned)(ver) % 100)
 
 #define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
 
@@ -170,8 +169,8 @@ void mp_log_source(struct mp_log *log, int lev, const char *src);
 
 //function pointers loaded from the OpenGL library
 struct GL {
-    bool es;                    // false: desktop GL, true: GLES
-    int version;                // MPGL_VER() mangled
+    int version;                // MPGL_VER() mangled (e.g. 210 for 2.1)
+    int es;                     // es version (e.g. 300), 0 for desktop GL
     int glsl_version;           // e.g. 130 for GLSL 1.30
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
