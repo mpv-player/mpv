@@ -844,6 +844,7 @@ int vo_x11_check_events(struct vo *vo)
 
     while (XPending(display)) {
         XNextEvent(display, &Event);
+        MP_TRACE(x11, "XEvent: %d\n", Event.type);
         switch (Event.type) {
         case Expose:
             x11->pending_vo_events |= VO_EVENT_EXPOSE;
@@ -852,10 +853,10 @@ int vo_x11_check_events(struct vo *vo)
             if (x11->window == None)
                 break;
             vo_x11_update_geometry(vo);
-            if (Event.xconfigure.window == x11->parent) {
+            if (x11->parent && Event.xconfigure.window == x11->parent) {
+                MP_TRACE(x11, "adjusting embedded window position\n");
                 XMoveResizeWindow(x11->display, x11->window,
-                                  x11->winrc.x0, x11->winrc.y0,
-                                  RC_W(x11->winrc), RC_H(x11->winrc));
+                                  0, 0, RC_W(x11->winrc), RC_H(x11->winrc));
             }
             break;
         case KeyPress: {
@@ -1344,7 +1345,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
             XSelectInput(x11->display, x11->parent, StructureNotifyMask);
         }
         vo_x11_update_geometry(vo);
-        rc = x11->winrc;
+        rc = (struct mp_rect){0, 0, RC_W(x11->winrc), RC_H(x11->winrc)};
     }
     if (x11->window == None) {
         vo_x11_create_window(vo, vis, rc);
@@ -1477,10 +1478,8 @@ static void vo_x11_update_geometry(struct vo *vo)
                  &w, &h, &dummy_int, &dummy_uint);
     if (w > INT_MAX || h > INT_MAX)
         w = h = 0;
-    if (!x11->parent) {
-        XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
-                              &x, &y, &dummy_win);
-    }
+    XTranslateCoordinates(x11->display, win, x11->rootwin, 0, 0,
+                          &x, &y, &dummy_win);
     x11->winrc = (struct mp_rect){x, y, x + w, y + h};
     double fps = 1000.0;
     for (int n = 0; n < x11->num_displays; n++) {
