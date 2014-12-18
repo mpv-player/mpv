@@ -158,107 +158,139 @@ struct gl_functions {
     int provides;               // bitfield of MPGL_CAP_* constants
     int ver_core;               // introduced as required function
     int ver_removed;            // removed as required function (no replacement)
+    int ver_es_core;            // introduced as required GL ES function
+    int ver_es_removed;         // removed as required function (no replacement)
     bool partial_ok;            // loading only some functions is ok
     const struct gl_function *functions;
 };
 
 #define MAX_FN_COUNT 50         // max functions per gl_functions section
 
+// Note: to keep the number of sections low, some functions are in multiple
+//       sections (if there are tricky combinations of GL/ES versions)
 static const struct gl_functions gl_functions[] = {
-    // GL functions which are always available anywhere at least since 1.1
+    // GL functions which are always available anywhere at least since 1.1/ES2.0
     {
-        .ver_core = MPGL_VER(1, 1),
+        .ver_core = 110,
+        .ver_es_core = 200,
         .functions = (const struct gl_function[]) {
-            DEF_FN(Viewport),
-            DEF_FN(Clear),
-            DEF_FN(GenTextures),
-            DEF_FN(DeleteTextures),
-            DEF_FN(TexEnvi),
-            DEF_FN(ClearColor),
-            DEF_FN(Enable),
-            DEF_FN(Disable),
-            DEF_FN(DrawBuffer),
-            DEF_FN(DepthMask),
             DEF_FN(BlendFunc),
-            DEF_FN(Flush),
+            DEF_FN(Clear),
+            DEF_FN(ClearColor),
+            DEF_FN(ColorMask),
+            DEF_FN(DeleteTextures),
+            DEF_FN(DepthMask),
+            DEF_FN(Disable),
+            DEF_FN(DrawArrays),
+            DEF_FN(Enable),
             DEF_FN(Finish),
-            DEF_FN(PixelStorei),
-            DEF_FN(TexImage1D),
+            DEF_FN(Flush),
+            DEF_FN(GenTextures),
+            DEF_FN(GetBooleanv),
+            DEF_FN(GetError),
+            DEF_FN(GetIntegerv),
+            DEF_FN(GetString),
+            DEF_FN(ReadPixels),
             DEF_FN(TexImage2D),
-            DEF_FN(TexSubImage2D),
-            DEF_FN(GetTexImage),
             DEF_FN(TexParameteri),
             DEF_FN(TexParameterf),
             DEF_FN(TexParameterfv),
-            DEF_FN(GetIntegerv),
-            DEF_FN(GetBooleanv),
-            DEF_FN(ColorMask),
-            DEF_FN(ReadPixels),
-            DEF_FN(ReadBuffer),
-            DEF_FN(DrawArrays),
-            DEF_FN(GetString),
-            DEF_FN(GetError),
-            DEF_FN(GetTexLevelParameteriv),
+            DEF_FN(TexSubImage2D),
+            DEF_FN(Viewport),
             {0}
         },
     },
-    // GL 2.1-3.x functions (also: GLSL 120 shaders)
-    // All of the listed functions are also in GL 2.0
+    // GL 1.1+ desktop only
     {
-        .ver_core = MPGL_VER(2, 1),
+        .ver_core = 110,
+        .functions = (const struct gl_function[]) {
+            DEF_FN(DrawBuffer),
+            DEF_FN(GetTexImage),
+            DEF_FN(GetTexLevelParameteriv),
+            DEF_FN(ReadBuffer),
+            DEF_FN(TexEnvi),
+            DEF_FN(TexImage1D),
+            // This is actually in ES 2.0, but quite useless, because it doesn't
+            // support GL_[UN]PACK_ROW_LENGTH.
+            DEF_FN(PixelStorei),
+            {0}
+        },
+    },
+    // GL 2.1+ functions (also: GLSL 120 shaders)
+    // All of the listed functions are also in GL 2.0 and ES 2.0
+    {
+        .ver_core = 210, // not 200, so that we're guaranteed GLSL 120
+        .ver_es_core = 200,
         .provides = MPGL_CAP_GL21,
         .functions = (const struct gl_function[]) {
-            DEF_FN(GenBuffers),
-            DEF_FN(DeleteBuffers),
-            DEF_FN(BindBuffer),
-            DEF_FN(MapBuffer),
-            DEF_FN(UnmapBuffer),
-            DEF_FN(BufferData),
             DEF_FN(ActiveTexture),
+            DEF_FN(AttachShader),
+            DEF_FN(BindAttribLocation),
+            DEF_FN(BindBuffer),
             DEF_FN(BindTexture),
-            DEF_FN(GetAttribLocation),
-            DEF_FN(EnableVertexAttribArray),
-            DEF_FN(DisableVertexAttribArray),
-            DEF_FN(VertexAttribPointer),
-            DEF_FN(UseProgram),
-            DEF_FN(GetUniformLocation),
+            DEF_FN(BufferData),
             DEF_FN(CompileShader),
             DEF_FN(CreateProgram),
             DEF_FN(CreateShader),
-            DEF_FN(ShaderSource),
-            DEF_FN(LinkProgram),
-            DEF_FN(AttachShader),
-            DEF_FN(DeleteShader),
+            DEF_FN(DeleteBuffers),
             DEF_FN(DeleteProgram),
+            DEF_FN(DeleteShader),
+            DEF_FN(DisableVertexAttribArray),
+            DEF_FN(EnableVertexAttribArray),
+            DEF_FN(GetAttribLocation),
+            DEF_FN(GenBuffers),
             DEF_FN(GetShaderInfoLog),
             DEF_FN(GetShaderiv),
             DEF_FN(GetProgramInfoLog),
             DEF_FN(GetProgramiv),
-            DEF_FN(BindAttribLocation),
+            DEF_FN(GetUniformLocation),
+            DEF_FN(LinkProgram),
+            DEF_FN(ShaderSource),
             DEF_FN(Uniform1f),
             DEF_FN(Uniform2f),
             DEF_FN(Uniform3f),
             DEF_FN(Uniform1i),
             DEF_FN(UniformMatrix2fv),
             DEF_FN(UniformMatrix3fv),
-            DEF_FN(TexImage3D),
-            // Added in OpenGL 1.4, but vo_opengl_old doesn't need it
+            DEF_FN(UseProgram),
+            DEF_FN(VertexAttribPointer),
+            // Added in GL 1.4 and ES 2.0, but vo_opengl_old doesn't need it
             DEF_FN(BlendFuncSeparate),
             {0},
         },
     },
-    // GL 3.x core only functions.
+    // GL 2.1+ desktop only
     {
-        .ver_core = MPGL_VER(3, 0),
-        .provides = MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB,
+        .ver_core = 210,
         .functions = (const struct gl_function[]) {
+            DEF_FN(MapBuffer),
+            DEF_FN(TexImage3D),
+            DEF_FN(UnmapBuffer),
+            {0}
+        },
+    },
+    // GL+ES 3.x core only functions.
+    {
+        .ver_core = 300,
+        .ver_es_core = 300,
+        .provides = MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB | MPGL_CAP_VAO,
+        .functions = (const struct gl_function[]) {
+            DEF_FN(BindVertexArray),
+            DEF_FN(DeleteVertexArrays),
             DEF_FN(GetStringi),
+            DEF_FN(GenVertexArrays),
+            // for ES 3.0
+            DEF_FN(ReadBuffer),
+            DEF_FN(UnmapBuffer),
+            // ES 3.0 adds support for GL_[UN]PACK_ROW_LENGTH.
+            DEF_FN(PixelStorei),
             {0}
         },
     },
     // Framebuffers, extension in GL 2.x, core in GL 3.x core.
     {
-        .ver_core = MPGL_VER(3, 0),
+        .ver_core = 300,
+        .ver_es_core = 300,
         .extension = "GL_ARB_framebuffer_object",
         .provides = MPGL_CAP_FB,
         .functions = (const struct gl_function[]) {
@@ -272,7 +304,8 @@ static const struct gl_functions gl_functions[] = {
     },
     // Framebuffers, alternative extension name.
     {
-        .ver_removed = MPGL_VER(3, 0), // don't touch these fn names in 3.x
+        .ver_removed = 300, // don't touch these fn names in 3.x
+        .ver_es_removed = 300,
         .extension = "GL_EXT_framebuffer_object",
         .provides = MPGL_CAP_FB,
         .functions = (const struct gl_function[]) {
@@ -284,39 +317,29 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
-    // VAOs, extension in GL 2.x, core in GL 3.x core.
-    {
-        .ver_core = MPGL_VER(3, 0),
-        .extension = "GL_ARB_vertex_array_object",
-        .provides = MPGL_CAP_VAO,
-        .functions = (const struct gl_function[]) {
-            DEF_FN(GenVertexArrays),
-            DEF_FN(BindVertexArray),
-            DEF_FN(DeleteVertexArrays),
-            {0}
-        }
-    },
     // sRGB textures, extension in GL 2.x, core in GL 3.x core.
     {
-        .ver_core = MPGL_VER(3, 0),
+        .ver_core = 300,
         .extension = "GL_EXT_texture_sRGB",
         .provides = MPGL_CAP_SRGB_TEX,
     },
     // sRGB framebuffers, extension in GL 2.x, core in GL 3.x core.
     {
-        .ver_core = MPGL_VER(3, 0),
+        .ver_core = 300,
         .extension = "GL_EXT_framebuffer_sRGB",
         .provides = MPGL_CAP_SRGB_FB,
     },
     // Float textures, extension in GL 2.x, core in GL 3.x core.
     {
-        .ver_core = MPGL_VER(3, 0),
+        .ver_core = 300,
+        .ver_es_core = 300,
         .extension = "GL_ARB_texture_float",
         .provides = MPGL_CAP_FLOAT_TEX,
     },
     // GL_RED / GL_RG textures, extension in GL 2.x, core in GL 3.x core.
     {
-        .ver_core = MPGL_VER(3, 0),
+        .ver_core = 300,
+        .ver_es_core = 300,
         .extension = "GL_ARB_texture_rg",
         .provides = MPGL_CAP_TEX_RG,
     },
@@ -340,8 +363,8 @@ static const struct gl_functions gl_functions[] = {
     },
     // GL legacy functions in GL 1.x - 2.x, removed from GL 3.x
     {
-        .ver_core = MPGL_VER(1, 1),
-        .ver_removed = MPGL_VER(3, 0),
+        .ver_core = 110,
+        .ver_removed = 300,
         .provides = MPGL_CAP_GL_LEGACY,
         .functions = (const struct gl_function[]) {
             DEF_FN(Begin),
@@ -377,7 +400,8 @@ static const struct gl_functions gl_functions[] = {
     //       library could provide an entry point, but not implement it.
     //       But the previous code didn't do that, and nobody ever complained.
     {
-        .ver_removed = MPGL_VER(2, 1),
+        .ver_removed = 210,
+        .ver_es_removed = 300,
         .partial_ok = true,
         .functions = (const struct gl_function[]) {
             DEF_FN_NAMES(GenBuffers, "glGenBuffers", "glGenBuffersARB"),
@@ -396,7 +420,8 @@ static const struct gl_functions gl_functions[] = {
     // Ancient ARB shaders.
     {
         .extension = "_program",
-        .ver_removed = MPGL_VER(3, 0),
+        .ver_removed = 300,
+        .ver_es_removed = 100,
         .functions = (const struct gl_function[]) {
             DEF_FN_NAMES(GenPrograms, "glGenProgramsARB"),
             DEF_FN_NAMES(DeletePrograms, "glDeleteProgramsARB"),
@@ -410,7 +435,8 @@ static const struct gl_functions gl_functions[] = {
     // Ancient ATI extensions.
     {
         .extension = "ATI_fragment_shader",
-        .ver_removed = MPGL_VER(3, 0),
+        .ver_removed = 300,
+        .ver_es_removed = 100,
         .functions = (const struct gl_function[]) {
             DEF_FN_NAMES(BeginFragmentShader, "glBeginFragmentShaderATI"),
             DEF_FN_NAMES(EndFragmentShader, "glEndFragmentShaderATI"),
@@ -475,12 +501,12 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     }
 
     int major = 0, minor = 0;
-    const char *version = gl->GetString(GL_VERSION);
-    if (strncmp(version, "OpenGL ES ", 10) == 0) {
-        version += 10;
+    const char *version_string = gl->GetString(GL_VERSION);
+    if (strncmp(version_string, "OpenGL ES ", 10) == 0) {
+        version_string += 10;
         gl->es = 100;
     }
-    sscanf(version, "%d.%d", &major, &minor);
+    sscanf(version_string, "%d.%d", &major, &minor);
     gl->version = MPGL_VER(major, minor);
     mp_verbose(log, "Detected %s %d.%d.\n", gl->es ? "GLES" : "desktop OpenGL",
                major, minor);
@@ -542,20 +568,22 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     for (int n = 0; n < sizeof(gl_functions) / sizeof(gl_functions[0]); n++) {
         const struct gl_functions *section = &gl_functions[n];
+        int version = gl->es ? gl->es : gl->version;
+        int ver_core = gl->es ? section->ver_es_core : section->ver_core;
+        int ver_removed = gl->es ? section->ver_es_removed : section->ver_removed;
 
         // With has_legacy, the legacy functions are still available, and
         // functions are never actually removed. (E.g. the context could be at
         // version >= 3.0, but functions like glBegin still exist and work.)
-        if (!has_legacy && section->ver_removed &&
-            gl->version >= section->ver_removed)
+        if (!has_legacy && ver_removed && version >= ver_removed)
             continue;
 
         // NOTE: Function entrypoints can exist, even if they do not work.
         //       We must always check extension strings and versions.
 
         bool exists = false;
-        if (section->ver_core)
-            exists = gl->version >= section->ver_core;
+        if (ver_core)
+            exists = version >= ver_core;
 
         if (section->extension && strstr(gl->extensions, section->extension))
             exists = true;
@@ -584,8 +612,8 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                     mp_msg(log, MSGL_V, "Required function '%s' not "
                            "found for %s/%d.%d.\n", fn->funcnames[0],
                            section->extension ? section->extension : "native",
-                           MPGL_VER_GET_MAJOR(section->ver_core),
-                           MPGL_VER_GET_MINOR(section->ver_core));
+                           MPGL_VER_GET_MAJOR(ver_core),
+                           MPGL_VER_GET_MINOR(ver_core));
                     break;
                 }
             }
@@ -606,18 +634,18 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     gl->glsl_version = 0;
     if (gl->es) {
-        if (gl->version >= MPGL_VER(3, 0))
+        if (gl->es >= 300)
             gl->glsl_version = 300;
     } else {
-        if (gl->version >= MPGL_VER(2, 0))
+        if (gl->version >= 200)
             gl->glsl_version = 110;
-        if (gl->version >= MPGL_VER(2, 1))
+        if (gl->version >= 210)
             gl->glsl_version = 120;
-        if (gl->version >= MPGL_VER(3, 0))
+        if (gl->version >= 300)
             gl->glsl_version = 130;
         // Specifically needed for OSX (normally we request 3.0 contexts only, but
         // OSX always creates 3.2 contexts when requesting a core context).
-        if (gl->version >= MPGL_VER(3, 2))
+        if (gl->version >= 320)
             gl->glsl_version = 150;
     }
 
