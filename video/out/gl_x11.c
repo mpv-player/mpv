@@ -32,6 +32,7 @@ struct glx_context {
     XVisualInfo *vinfo;
     GLXContext context;
     GLXFBConfig fbc;
+    bool force_es;
 };
 
 static bool create_context_x11_old(struct MPGLContext *ctx)
@@ -74,7 +75,8 @@ static bool create_context_x11_old(struct MPGLContext *ctx)
 typedef GLXContext (*glXCreateContextAttribsARBProc)
     (Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
-static bool create_context_x11_gl3(struct MPGLContext *ctx, bool debug)
+static bool create_context_x11_gl3(struct MPGLContext *ctx, int vo_flags,
+                                   int gl_version, bool es)
 {
     struct glx_context *glx_ctx = ctx->priv;
     struct vo *vo = ctx->vo;
@@ -94,12 +96,20 @@ static bool create_context_x11_gl3(struct MPGLContext *ctx, bool debug)
         return false;
     }
 
-    int gl_version = ctx->requested_gl_version;
+    int ctx_flags = vo_flags & VOFLAG_GL_DEBUG ? GLX_CONTEXT_DEBUG_BIT_ARB : 0;
+    int profile_mask = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
+
+    if (es) {
+        profile_mask = GLX_CONTEXT_ES2_PROFILE_BIT_EXT;
+        if (!(glxstr && strstr(glxstr, "GLX_EXT_create_context_es2_profile")))
+            return false;
+    }
+
     int context_attribs[] = {
         GLX_CONTEXT_MAJOR_VERSION_ARB, MPGL_VER_GET_MAJOR(gl_version),
         GLX_CONTEXT_MINOR_VERSION_ARB, MPGL_VER_GET_MINOR(gl_version),
-        GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-        GLX_CONTEXT_FLAGS_ARB, debug ? GLX_CONTEXT_DEBUG_BIT_ARB : 0,
+        GLX_CONTEXT_PROFILE_MASK_ARB, profile_mask,
+        GLX_CONTEXT_FLAGS_ARB, ctx_flags,
         None
     };
     GLXContext context = glXCreateContextAttribsARB(vo->x11->display,
@@ -186,11 +196,11 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
 
     int glx_major, glx_minor;
 
-    // FBConfigs were added in GLX version 1.3.
     if (!glXQueryVersion(vo->x11->display, &glx_major, &glx_minor)) {
         MP_ERR(vo, "GLX not found.\n");
         return false;
     }
+    // FBConfigs were added in GLX version 1.3.
     if (MPGL_VER(glx_major, glx_minor) <  MPGL_VER(1, 3)) {
         MP_ERR(vo, "GLX version older than 1.3.\n");
         return false;
@@ -249,11 +259,14 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
 
     vo_x11_config_vo_window(vo, glx_ctx->vinfo, flags, "gl");
 
+    int gl_version = ctx->requested_gl_version;
     bool success = false;
-    if (ctx->requested_gl_version >= MPGL_VER(3, 0))
-        success = create_context_x11_gl3(ctx, flags & VOFLAG_GL_DEBUG);
-    if (!success)
+    if (gl_version >= 300 && !glx_ctx->force_es)
+        success = create_context_x11_gl3(ctx, flags, gl_version, false);
+    if (!success && !glx_ctx->force_es)
         success = create_context_x11_old(ctx);
+    if (!success && gl_version >= 300) // 3.00 = vo_opengl; accepts GLES 2 or 3
+        success = create_context_x11_gl3(ctx, flags, 200, true);
     if (success && !glXIsDirect(vo->x11->display, glx_ctx->context))
         ctx->gl->mpgl_caps |= MPGL_CAP_SW;
     return success;
@@ -292,4 +305,11 @@ void mpgl_set_backend_x11(MPGLContext *ctx)
     ctx->vo_init = vo_x11_init;
     ctx->vo_uninit = vo_x11_uninit;
     ctx->vo_control = vo_x11_control;
+}
+
+void mpgl_set_backend_x11es(MPGLContext *ctx)
+{
+    mpgl_set_backend_x11(ctx);
+    struct glx_context *glx_ctx = ctx->priv;
+    glx_ctx->force_es = true;
 }
