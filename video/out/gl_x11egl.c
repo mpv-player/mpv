@@ -68,7 +68,7 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
 
     EGLint context_attributes[] = {
         EGL_CONTEXT_MAJOR_VERSION_KHR,
-        es ? 3 : MPGL_VER_GET_MAJOR(ctx->requested_gl_version),
+        es ? 2 : MPGL_VER_GET_MAJOR(ctx->requested_gl_version),
         EGL_NONE
     };
 

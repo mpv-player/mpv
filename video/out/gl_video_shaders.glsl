@@ -29,6 +29,12 @@
 
 #ifdef GL_ES
 precision mediump float;
+#define HAVE_3DTEX (__VERSION__ >= 300)
+#define HAVE_ARRAYS (__VERSION__ >= 300)
+#else
+// Desktop GL
+#define HAVE_3DTEX 1
+#define HAVE_ARRAYS 1
 #endif
 
 // GLSL 1.20 compatibility layer
@@ -88,7 +94,9 @@ vec3 bt2020_compand(vec3 v)
 
 uniform mat3 transform;
 uniform vec3 translation;
+#if HAVE_3DTEX
 uniform sampler3D lut_3d;
+#endif
 uniform mat3 cms_matrix; // transformation from file's gamut to bt.2020
 
 in vec2 vertex_position;
@@ -122,7 +130,7 @@ void main() {
     // and to BT.2020 for 3DLUT). Normal clamping here as perceptually
     // accurate colorimetry is probably not worth the performance trade-off
     // here.
-    color.rgb = clamp(cms_matrix * color.rgb, 0, 1);
+    color.rgb = clamp(cms_matrix * color.rgb, 0.0, 1.0);
 #endif
 #ifdef USE_OSD_3DLUT
     color.rgb = pow(color.rgb, vec3(1.0/2.4)); // linear -> 2.4 3DLUT space
@@ -166,7 +174,9 @@ uniform vec2 chroma_center_offset;
 uniform vec2 chroma_div;
 uniform sampler2D lut_c;
 uniform sampler2D lut_l;
+#if HAVE_3DTEX
 uniform sampler3D lut_3d;
+#endif
 uniform sampler2D dither;
 uniform mat3 colormatrix;
 uniform vec3 colormatrix_c;
@@ -230,16 +240,17 @@ vec4 sample_bicubic_fast(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float p
     return mix(aa, ab, parmx.b);
 }
 
+#if HAVE_ARRAYS
 float[2] weights2(sampler2D lookup, float f) {
     vec2 c = texture(lookup, vec2(0.5, f)).RG;
     return float[2](c.r, c.g);
 }
-
 float[6] weights6(sampler2D lookup, float f) {
     vec4 c1 = texture(lookup, vec2(0.25, f));
     vec4 c2 = texture(lookup, vec2(0.75, f));
     return float[6](c1.r, c1.g, c1.b, c2.r, c2.g, c2.b);
 }
+#endif
 
 // For N=n*4 with n>1 (N==4 is covered by weights4()).
 #define WEIGHTS_N(NAME, N)                          \
@@ -391,7 +402,7 @@ void main() {
     // CONST_LUMA involves numbers outside the [0,1] range so we make sure
     // to clip here, after the (possible) USE_CONST_LUMA calculations are done,
     // instead of immediately after the colormatrix conversion.
-    color = clamp(color, 0, 1);
+    color = clamp(color, 0.0, 1.0);
 #endif
     // If we are scaling in linear light (SRGB or 3DLUT option enabled), we
     // expand our source colors before scaling. This shader currently just
@@ -435,7 +446,7 @@ void main() {
     // the fact that they're not representable on the target device.
     // TODO: Desaturate colorimetrically; this happens automatically for
     // 3dlut targets but not for sRGB mode. Not sure if this is a requirement.
-    color = clamp(color, 0, 1);
+    color = clamp(color, 0.0, 1.0);
 #endif
 #ifdef USE_3DLUT
     // For the 3DLUT we are arbitrarily using 2.4 as input gamma to reduce

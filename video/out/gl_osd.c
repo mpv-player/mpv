@@ -66,7 +66,7 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .scratch = talloc_zero_size(ctx, 1),
     };
 
-    if (gl->es) {
+    if (gl->es >= 300) {
         ctx->fmt_table = osd_to_gles3_formats;
     } else if (!(gl->mpgl_caps & MPGL_CAP_TEX_RG)) {
         ctx->fmt_table = osd_to_gl_legacy_formats;

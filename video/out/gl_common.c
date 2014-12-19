@@ -510,11 +510,9 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     if (gl->es) {
         gl->es = gl->version;
-        if (gl->version >= 300) {
-            gl->version = 300; // pretend it's desktop OpenGL 3.0
-        } else {
-            mp_warn(log, "At least GLESv3 required.\n");
-            gl->version = 0;
+        gl->version = 0;
+        if (gl->es < 200) {
+            mp_fatal(log, "At least GLESv2 required.\n");
             return;
         }
     }
@@ -532,7 +530,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     //       and above.
 
     bool has_legacy = false;
-    if (gl->version >= MPGL_VER(3, 0)) {
+    if (gl->version >= 300) {
         gl->GetStringi = get_fn(fn_ctx, "glGetStringi");
         gl->GetIntegerv = get_fn(fn_ctx, "glGetIntegerv");
 
@@ -550,7 +548,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
         // This version doesn't have GL_ARB_compatibility yet, and always
         // includes legacy (except with CONTEXT_FORWARD_COMPATIBLE_BIT_ARB).
-        if (gl->version == MPGL_VER(3, 0) && !gl->es)
+        if (gl->version == 300)
             has_legacy = true;
     } else {
         const char *ext = (char*)gl->GetString(GL_EXTENSIONS);
@@ -558,6 +556,9 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
         has_legacy = true;
     }
+
+    if (gl->es)
+        has_legacy = false;
 
     if (has_legacy)
         mp_verbose(log, "OpenGL legacy compat. found.\n");
@@ -631,6 +632,8 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     gl->glsl_version = 0;
     if (gl->es) {
+        if (gl->es >= 200)
+            gl->glsl_version = 100;
         if (gl->es >= 300)
             gl->glsl_version = 300;
     } else {

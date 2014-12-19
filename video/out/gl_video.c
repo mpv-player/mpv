@@ -244,6 +244,17 @@ static const struct fmt_entry gl_byte_formats_gles3[] = {
     {0, 0,           0,         0},                     // 4 x 16
 };
 
+static const struct fmt_entry gl_byte_formats_gles2[] = {
+    {0, GL_LUMINANCE,           GL_LUMINANCE,       GL_UNSIGNED_BYTE}, // 1 x 8
+    {0, GL_LUMINANCE_ALPHA,     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE}, // 2 x 8
+    {0, GL_RGB,                 GL_RGB,             GL_UNSIGNED_BYTE}, // 3 x 8
+    {0, GL_RGBA,                GL_RGBA,            GL_UNSIGNED_BYTE}, // 4 x 8
+    {0, 0,                      0,                  0},                // 1 x 16
+    {0, 0,                      0,                  0},                // 2 x 16
+    {0, 0,                      0,                  0},                // 3 x 16
+    {0, 0,                      0,                  0},                // 4 x 16
+};
+
 static const struct fmt_entry gl_byte_formats_legacy[] = {
     {0, GL_LUMINANCE,           GL_LUMINANCE,       GL_UNSIGNED_BYTE}, // 1 x 8
     {0, GL_LUMINANCE_ALPHA,     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE}, // 2 x 8
@@ -399,8 +410,10 @@ static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
     assert(bytes_per_comp == 1 || bytes_per_comp == 2);
     assert(n_channels >= 1 && n_channels <= 4);
     const struct fmt_entry *fmts = gl_byte_formats;
-    if (gl->es) {
+    if (gl->es >= 300) {
         fmts = gl_byte_formats_gles3;
+    } else if (gl->es) {
+        fmts = gl_byte_formats_gles2;
     } else if (!(gl->mpgl_caps & MPGL_CAP_TEX_RG)) {
         fmts = gl_byte_formats_legacy;
     }
@@ -941,7 +954,7 @@ static void compile_shaders(struct gl_video *p)
         talloc_asprintf(tmp, "#version %d%s\n"
                              "#define HAVE_RG %d\n"
                              "%s%s",
-                             gl->glsl_version, gl->es ? " es" : "",
+                             gl->glsl_version, gl->es >= 300 ? " es" : "",
                              rg, shader_prelude, PRELUDE_END);
 
     bool use_cms = p->opts.srgb || p->use_lut_3d;
@@ -2102,7 +2115,8 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
-    // GLES doesn't provide filtered 16 bit integer textures
+    // GLES3 doesn't provide filtered 16 bit integer textures
+    // GLES2 doesn't even provide 3D textures
     if (p->use_lut_3d && gl->es) {
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (GLES unsupported)";
