@@ -569,9 +569,9 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         // NOTE: Function entrypoints can exist, even if they do not work.
         //       We must always check extension strings and versions.
 
-        bool exists = false;
+        bool exists = false, must_exist = false;
         if (ver_core)
-            exists = version >= ver_core;
+            must_exist = version >= ver_core;
 
         if (section->extension && strstr(gl->extensions, section->extension))
             exists = true;
@@ -579,6 +579,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (section->partial_ok)
             exists = true; // possibly
 
+        exists |= must_exist;
         if (!exists)
             continue;
 
@@ -597,11 +598,15 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
             if (!ptr) {
                 all_loaded = false;
                 if (!section->partial_ok) {
-                    mp_msg(log, MSGL_V, "Required function '%s' not "
-                           "found for %s/%d.%d.\n", fn->funcnames[0],
-                           section->extension ? section->extension : "native",
+                    mp_warn(log, "Required function '%s' not "
+                           "found for %s OpenGL %d.%d.\n", fn->funcnames[0],
+                           section->extension ? section->extension : "builtin",
                            MPGL_VER_GET_MAJOR(ver_core),
                            MPGL_VER_GET_MINOR(ver_core));
+                    if (must_exist) {
+                        gl->mpgl_caps = 0;
+                        return;
+                    }
                     break;
                 }
             }
