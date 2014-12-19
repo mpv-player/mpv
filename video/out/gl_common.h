@@ -84,9 +84,9 @@ enum {
 
 // E.g. 310 means 3.1
 // Code doesn't have to use the macros; they are for convenience only.
-#define MPGL_VER(major, minor) (((major) * 100) + (minor))
+#define MPGL_VER(major, minor) (((major) * 100) + (minor) * 10)
 #define MPGL_VER_GET_MAJOR(ver) ((unsigned)(ver) / 100)
-#define MPGL_VER_GET_MINOR(ver) ((unsigned)(ver) % 100)
+#define MPGL_VER_GET_MINOR(ver) ((unsigned)(ver) % 100 / 10)
 
 #define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
 
