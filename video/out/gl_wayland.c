@@ -180,11 +180,9 @@ static bool config_window_wayland(struct MPGLContext *ctx, int flags)
 
 static void releaseGlContext_wayland(MPGLContext *ctx)
 {
-    GL *gl = ctx->gl;
     struct vo_wayland_state *wl = ctx->vo->wayland;
 
     if (wl->egl_context.egl.ctx) {
-        gl->Finish();
         eglReleaseThread();
         wl_egl_window_destroy(wl->egl_context.egl_window);
         eglDestroySurface(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
