@@ -202,7 +202,7 @@ static void dealloc_vo(struct vo *vo)
     talloc_free(vo);
 }
 
-static struct vo *vo_create(struct mpv_global *global,
+static struct vo *vo_create(bool probing, struct mpv_global *global,
                             struct input_ctx *input_ctx, struct osd_state *osd,
                             struct encode_lavc_context *encode_lavc_ctx,
                             char *name, char **args)
@@ -225,6 +225,7 @@ static struct vo *vo_create(struct mpv_global *global,
         .osd = osd,
         .event_fd = -1,
         .monitor_par = 1,
+        .probing = probing,
         .in = talloc(vo, struct vo_internal),
     };
     talloc_steal(vo, log);
@@ -271,7 +272,8 @@ struct vo *init_best_video_out(struct mpv_global *global,
             // Something like "-vo name," allows fallback to autoprobing.
             if (strlen(vo_list[n].name) == 0)
                 goto autoprobe;
-            struct vo *vo = vo_create(global, input_ctx, osd, encode_lavc_ctx,
+            bool p = !!vo_list[n + 1].name;
+            struct vo *vo = vo_create(p, global, input_ctx, osd, encode_lavc_ctx,
                                       vo_list[n].name, vo_list[n].attribs);
             if (vo)
                 return vo;
@@ -281,7 +283,7 @@ struct vo *init_best_video_out(struct mpv_global *global,
 autoprobe:
     // now try the rest...
     for (int i = 0; video_out_drivers[i]; i++) {
-        struct vo *vo = vo_create(global, input_ctx, osd, encode_lavc_ctx,
+        struct vo *vo = vo_create(true, global, input_ctx, osd, encode_lavc_ctx,
                                   (char *)video_out_drivers[i]->name, NULL);
         if (vo)
             return vo;

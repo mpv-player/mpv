@@ -79,7 +79,7 @@ enum {
     MPGL_CAP_TEX_RG             = (1 << 10),    // GL_ARB_texture_rg / GL 3.x
     MPGL_CAP_VDPAU              = (1 << 11),    // GL_NV_vdpau_interop
     MPGL_CAP_APPLE_RGB_422      = (1 << 12),    // GL_APPLE_rgb_422
-    MPGL_CAP_NO_SW              = (1 << 30),    // used to block sw. renderers
+    MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
 
 // E.g. 310 means 3.1
@@ -136,11 +136,11 @@ bool mpgl_is_thread_safe(MPGLContext *ctx);
 
 // Create a VO window and create a GL context on it.
 // (Calls config_window_gl3 or config_window+setGlWindow.)
-// gl_caps: bitfield of MPGL_CAP_* (required GL version and feature set)
+// gl_flavor: 110 for legacy GL, 210 for GL 2.1 or 3.x core
 // flags: passed to the backend's create window function
 // Returns success.
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name,
-                       int gl_caps, int vo_flags);
+                       int gl_flavor, int vo_flags);
 void mpgl_uninit(MPGLContext *ctx);
 
 // flags: passed to the backend function

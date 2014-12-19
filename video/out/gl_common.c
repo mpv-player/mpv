@@ -98,26 +98,16 @@ struct feature {
 
 static const struct feature features[] = {
     {MPGL_CAP_GL_LEGACY,        "Legacy OpenGL"},
-    {MPGL_CAP_GL21,             "OpenGL 2.1+"},
+    {MPGL_CAP_GL21,             "OpenGL 2.1+ (or subset)"},
     {MPGL_CAP_FB,               "Framebuffers"},
     {MPGL_CAP_VAO,              "VAOs"},
     {MPGL_CAP_SRGB_TEX,         "sRGB textures"},
     {MPGL_CAP_SRGB_FB,          "sRGB framebuffers"},
     {MPGL_CAP_FLOAT_TEX,        "Float textures"},
     {MPGL_CAP_TEX_RG,           "RG textures"},
-    {MPGL_CAP_NO_SW,            "NO_SW"},
+    {MPGL_CAP_SW,               "suspected software renderer"},
     {0},
 };
-
-static void list_features(int set, struct mp_log *log, int msgl, bool invert)
-{
-    char b[1024] = {0};
-    for (const struct feature *f = &features[0]; f->id; f++) {
-        if (invert == !(f->id & set))
-            mp_snprintf_cat(b, sizeof(b), " [%s]", f->name);
-    }
-    mp_msg(log, msgl, "%s\n", b);
-}
 
 // This guesses if the current GL context is a suspected software renderer.
 static bool is_software_gl(GL *gl)
@@ -649,11 +639,16 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
             gl->glsl_version = 150;
     }
 
-    if (!is_software_gl(gl))
-        gl->mpgl_caps |= MPGL_CAP_NO_SW;
+    if (is_software_gl(gl))
+        gl->mpgl_caps |= MPGL_CAP_SW;
 
-    mp_verbose(log, "Detected OpenGL features:");
-    list_features(gl->mpgl_caps, log, MSGL_V, false);
+    if (gl->mpgl_caps) {
+        mp_verbose(log, "Detected OpenGL features:\n");
+        for (const struct feature *f = &features[0]; f->id; f++) {
+            if ((f->id & gl->mpgl_caps))
+                mp_verbose(log, "  - %s\n", f->name);
+        }
+    }
 
     // Provided for simpler handling if no framebuffer support is available.
     if (!gl->BindFramebuffer)
@@ -906,13 +901,14 @@ static MPGLContext *init_backend(struct vo *vo, MPGLSetBackendFn set_backend,
         .gl = talloc_zero(ctx, GL),
         .vo = vo,
     };
-    vo->probing = probing;
+    bool old_probing = vo->probing;
+    vo->probing = probing; // hack; kill it once backends are separate
     set_backend(ctx);
     if (!ctx->vo_init(vo)) {
         talloc_free(ctx);
         ctx = NULL;
     }
-    vo->probing = false;
+    vo->probing = old_probing;
     return ctx;
 }
 
@@ -933,32 +929,37 @@ static MPGLContext *mpgl_create(struct vo *vo, const char *backend_name)
 }
 
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name,
-                       int gl_caps, int vo_flags)
+                       int gl_flavor, int vo_flags)
 {
     MPGLContext *ctx = mpgl_create(vo, backend_name);
     if (!ctx)
-        return NULL;
+        goto cleanup;
 
-    ctx->requested_gl_version = (gl_caps & MPGL_CAP_GL_LEGACY)
-                                ? MPGL_VER(2, 1) : MPGL_VER(3, 0);
+    // A bit strange; but <300 triggers legacy context creation in mpv code.
+    ctx->requested_gl_version = gl_flavor < 210 ? 210 : 300;
 
-    if (ctx->config_window(ctx, vo_flags | VOFLAG_HIDDEN)) {
-        int missing = (ctx->gl->mpgl_caps & gl_caps) ^ gl_caps;
-        if (!missing)
-            return ctx;
+    if (!ctx->config_window(ctx, vo_flags | VOFLAG_HIDDEN))
+        goto cleanup;
 
-        MP_WARN(ctx->vo, "Missing OpenGL features:");
-        list_features(missing, ctx->vo->log, MSGL_WARN, false);
-        if (missing == MPGL_CAP_NO_SW) {
-            MP_WARN(ctx->vo, "Rejecting suspected software OpenGL renderer.\n");
-        } else if ((missing & MPGL_CAP_GL21) &&
-                   (ctx->gl->mpgl_caps & MPGL_CAP_GL_LEGACY))
-        {
-            MP_WARN(ctx->vo, "OpenGL version too old. Try: --vo=opengl-old\n");
-        }
+    if (gl_flavor >= 210 && !(ctx->gl->mpgl_caps & MPGL_CAP_GL21)) {
+        MP_WARN(ctx->vo, "At least OpenGL 2.1 required.\n");
+        if (!vo->probing && (ctx->gl->mpgl_caps & MPGL_CAP_GL_LEGACY))
+            MP_WARN(ctx->vo, "Try with: --vo=opengl-old\n");
+        goto cleanup;
+    } else if (gl_flavor < 210 && !(ctx->gl->mpgl_caps & MPGL_CAP_GL_LEGACY)) {
+        MP_WARN(ctx->vo, "OpenGL context creation failed!\n");
+        goto cleanup;
     }
 
-    MP_ERR(ctx->vo, "OpenGL context creation failed!\n");
+    if (ctx->gl->mpgl_caps & MPGL_CAP_SW) {
+        MP_WARN(ctx->vo, "Suspected software renderer or indirect context.\n");
+        if (vo->probing)
+            goto cleanup;
+    }
+
+    return ctx;
+
+cleanup:
     mpgl_uninit(ctx);
     return NULL;
 }

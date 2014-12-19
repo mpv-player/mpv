@@ -408,11 +408,10 @@ static int preinit(struct vo *vo)
     if (p->use_gl_debug)
         vo_flags |= VOFLAG_GL_DEBUG;
 
-    int mpgl_caps = MPGL_CAP_GL21;
-    if (!p->allow_sw)
-        mpgl_caps |= MPGL_CAP_NO_SW;
+    if (p->allow_sw)
+        vo->probing = false;
 
-    p->glctx = mpgl_init(vo, p->backend, mpgl_caps, vo_flags);
+    p->glctx = mpgl_init(vo, p->backend, 210, vo_flags);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;

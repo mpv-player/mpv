@@ -2168,11 +2168,10 @@ static int preinit(struct vo *vo)
     if (p->stereo_mode == GL_3D_QUADBUFFER)
         vo_flags |= VOFLAG_STEREO;
 
-    int mpgl_caps = MPGL_CAP_GL_LEGACY;
-    if (!p->allow_sw)
-        mpgl_caps |= MPGL_CAP_NO_SW;
+    if (p->allow_sw)
+        vo->probing = false;
 
-    p->glctx = mpgl_init(vo, p->backend_arg, mpgl_caps, vo_flags);
+    p->glctx = mpgl_init(vo, p->backend_arg, MPGL_CAP_GL_LEGACY, vo_flags);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;

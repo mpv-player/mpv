@@ -68,9 +68,6 @@ static bool create_context_x11_old(struct MPGLContext *ctx)
 
     glx_ctx->context = new_context;
 
-    if (!glXIsDirect(vo->x11->display, new_context))
-        ctx->gl->mpgl_caps &= ~MPGL_CAP_NO_SW;
-
     return true;
 }
 
@@ -123,9 +120,6 @@ static bool create_context_x11_gl3(struct MPGLContext *ctx, bool debug)
     glx_ctx->context = context;
 
     mpgl_load_functions(ctx->gl, (void *)glXGetProcAddress, glxstr, vo->log);
-
-    if (!glXIsDirect(vo->x11->display, context))
-        ctx->gl->mpgl_caps &= ~MPGL_CAP_NO_SW;
 
     return true;
 }
@@ -260,14 +254,11 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
         success = create_context_x11_gl3(ctx, flags & VOFLAG_GL_DEBUG);
     if (!success)
         success = create_context_x11_old(ctx);
+    if (success && !glXIsDirect(vo->x11->display, glx_ctx->context))
+        ctx->gl->mpgl_caps |= MPGL_CAP_SW;
     return success;
 }
 
-
-/**
- * \brief free the VisualInfo and GLXContext of an OpenGL context.
- * \ingroup glcontext
- */
 static void releaseGlContext_x11(MPGLContext *ctx)
 {
     struct glx_context *glx_ctx = ctx->priv;
