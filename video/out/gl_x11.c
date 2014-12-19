@@ -278,13 +278,10 @@ static void releaseGlContext_x11(MPGLContext *ctx)
     XVisualInfo **vinfo = &glx_ctx->vinfo;
     GLXContext *context = &glx_ctx->context;
     Display *display = ctx->vo->x11->display;
-    GL *gl = ctx->gl;
     if (*vinfo)
         XFree(*vinfo);
     *vinfo = NULL;
     if (*context) {
-        if (gl->Finish)
-            gl->Finish();
         glXMakeCurrent(display, None, NULL);
         glXDestroyContext(display, *context);
     }
