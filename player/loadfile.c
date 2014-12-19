@@ -167,11 +167,27 @@ void update_demuxer_properties(struct MPContext *mpctx)
         }
         tracks->events &= ~DEMUX_EVENT_STREAMS;
     }
-    struct mp_tags *info = demuxer->metadata;
-    if ((events & DEMUX_EVENT_METADATA) && info->num_keys) {
-        MP_INFO(mpctx, "File tags:\n");
-        for (int n = 0; n < info->num_keys; n++)
+    if (events & DEMUX_EVENT_METADATA) {
+        struct mp_tags *info = demuxer->metadata;
+        // prev is used to attempt to print changed tags only (to some degree)
+        struct mp_tags *prev = mpctx->tags;
+        int n_prev = 0;
+        bool had_output = false;
+        for (int n = 0; n < info->num_keys; n++) {
+            if (prev && n_prev < prev->num_keys) {
+                if (strcmp(prev->keys[n_prev], info->keys[n]) == 0) {
+                    n_prev++;
+                    if (strcmp(prev->values[n_prev - 1], info->values[n]) == 0)
+                        continue;
+                }
+            }
+            if (!had_output)
+                MP_INFO(mpctx, "File tags:\n");
             MP_INFO(mpctx, " %s: %s\n", info->keys[n], info->values[n]);
+            had_output = true;
+        }
+        talloc_free(mpctx->tags);
+        mpctx->tags = mp_tags_dup(mpctx, info);
         mp_notify(mpctx, MPV_EVENT_METADATA_UPDATE, NULL);
     }
     demuxer->events = 0;
@@ -1188,6 +1204,9 @@ terminate_playback:
         uninit_audio_out(mpctx);
 
     m_config_restore_backups(mpctx->mconfig);
+
+    talloc_free(mpctx->tags);
+    mpctx->tags = NULL;
 
     mpctx->playback_initialized = false;
 

@@ -196,6 +196,7 @@ typedef struct MPContext {
     double video_offset;
 
     struct demuxer *demuxer;
+    struct mp_tags *tags;
 
     struct track **tracks;
     int num_tracks;
