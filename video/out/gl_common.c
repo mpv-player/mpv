@@ -957,6 +957,11 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name,
         goto cleanup;
     }
 
+    if (ctx->gl->es && vo->probing) {
+        MP_INFO(ctx->vo, "Skipping experimental GLES support (use --vo=opengl).\n");
+        goto cleanup;
+    }
+
     if (ctx->gl->mpgl_caps & MPGL_CAP_SW) {
         MP_WARN(ctx->vo, "Suspected software renderer or indirect context.\n");
         if (vo->probing)
