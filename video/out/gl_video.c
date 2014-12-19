@@ -420,10 +420,10 @@ static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
     return &fmts[n_channels - 1 + (bytes_per_comp - 1) * 4];
 }
 
-static void default_tex_params(struct GL *gl, GLenum target, GLint filter)
+static void default_tex_params(struct GL *gl, GLenum target)
 {
-    gl->TexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
-    gl->TexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
+    gl->TexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl->TexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     gl->TexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl->TexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
@@ -552,7 +552,7 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
     gl->TexImage2D(p->gl_target, 0, iformat,
                    fbo->tex_w, fbo->tex_h, 0,
                    GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    default_tex_params(gl, p->gl_target, GL_LINEAR);
+    default_tex_params(gl, p->gl_target);
 
     debug_check_gl(p, "after creating framebuffer texture");
 
@@ -1564,7 +1564,7 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
                            plane->tex_w, plane->tex_h, 0,
                            plane->gl_format, plane->gl_type, NULL);
 
-            default_tex_params(gl, p->gl_target, GL_LINEAR);
+            default_tex_params(gl, p->gl_target);
         }
 
         MP_VERBOSE(p, "Texture for plane %d: %dx%d\n",
