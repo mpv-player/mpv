@@ -1,3 +1,41 @@
+Release 0.7.2
+=============
+
+Changes
+-------
+
+- Give precedence to the DVD menu navigation keyboard bindings so that user
+  defined LEFT/RIGHT/... bindings don't break DVD menu navigation.
+- Try to fallback to the "default" device if the selected device is busy in the
+  alsa AO.
+- Don't create Dock icon for audio only files on OS X.
+- Save screenshots to desktop when using the app bundle on OS X.
+- Restore ab-loop settings with playback resume.
+- Bump required youtube-dl version to 2014.11.26 and enable the ytdl_hook Lua
+  script by default (now playing videos from YouTube and the like will work
+  out of the box without any configuration change needed).
+
+Bug fixes
+---------
+
+- Don't signal an error if --stream-dump is used.
+- Fix removing key bindings from Lua scripts.
+- Reject channel descriptions with too many channels in the coreaudio AO.
+- Don't async redraw when waiting for VO redraw on OS X (this fixes the very
+  annoying glitch where the black bars disappear for a single frame when going
+  fullscreen).
+- Fix mono playback with the also AO.
+- Don't crash if framebuffers are not available in the opengl VO.
+
+New features
+------------
+
+- Try to handle multi-arc videos in the ytdl_hook Lua script.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 47ec404..c7d6b21`` in
+the git repository.
+
 Release 0.7.1
 =============
 
