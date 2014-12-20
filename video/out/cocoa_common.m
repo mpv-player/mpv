@@ -387,8 +387,10 @@ static int cocoa_set_window_title(struct vo *vo, const char *title)
     void *talloc_ctx   = talloc_new(NULL);
     struct bstr btitle = bstr_sanitize_utf8_latin1(talloc_ctx, bstr0(title));
     NSString *nstitle  = [NSString stringWithUTF8String:btitle.start];
-    if (nstitle)
+    if (nstitle) {
         [s->window setTitle: nstitle];
+        [s->window displayIfNeeded];
+    }
     talloc_free(talloc_ctx);
     return VO_TRUE;
 }
