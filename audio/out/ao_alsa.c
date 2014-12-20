@@ -416,21 +416,15 @@ static int init_device(struct ao *ao)
         MP_VERBOSE(ao, "playing AC3/iec61937/iec958, %i channels\n",
                    ao->channels.num);
     }
-    const char *old_dev = device;
     if (ao->device)
         device = ao->device;
     if (p->cfg_device && p->cfg_device[0])
         device = p->cfg_device;
-    bool user_set_device = device != old_dev; // not strcmp()
 
     MP_VERBOSE(ao, "using device: %s\n", device);
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
 
     err = try_open_device(ao, device);
-    if (err == -EBUSY && !user_set_device && strcmp(device, "default") != 0) {
-        MP_WARN(ao, "Device '%s' busy, retrying default.\n", device);
-        err = try_open_device(ao, "default");
-    }
     CHECK_ALSA_ERROR("Playback open error");
 
     err = snd_pcm_nonblock(p->alsa, 0);
