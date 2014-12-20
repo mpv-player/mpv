@@ -598,6 +598,10 @@ static int init(struct ao *ao)
         for (int c = 0; c < dev_chmap.num; c++)
             alsa_chmap->pos[c] = find_alsa_channel(dev_chmap.speaker[c]);
 
+        // mpv and ALSA use different conventions for mono
+        if (dev_chmap.num == 1 && dev_chmap.speaker[0] == MP_SP(FC))
+            alsa_chmap->pos[0] = SND_CHMAP_MONO;
+
         char tmp[128];
         if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
             MP_VERBOSE(ao, "trying to set ALSA channel map: %s\n", tmp);
@@ -635,6 +639,7 @@ static int init(struct ao *ao)
             MP_WARN(ao, "Got unknown channel map from ALSA.\n");
         }
 
+        // mpv and ALSA use different conventions for mono
         if (ao->channels.num == 1)
             ao->channels.speaker[0] = MP_SP(FC);
 
