@@ -30,7 +30,8 @@ struct mpgl_osd {
     void *scratch;
 };
 
-struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd);
+struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd,
+                               bool legacy);
 void mpgl_osd_destroy(struct mpgl_osd *ctx);
 
 struct mpgl_osd_part *mpgl_osd_generate(struct mpgl_osd *ctx,
