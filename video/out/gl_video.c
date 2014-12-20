@@ -1930,7 +1930,8 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
                     plane_ptr, mpi2.stride[n], 0, 0, plane->w, plane->h, 0);
     }
     gl->ActiveTexture(GL_TEXTURE0);
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    if (pbo)
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     p->have_image = true;
     talloc_free(mpi);
