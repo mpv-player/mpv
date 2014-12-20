@@ -568,9 +568,13 @@ static int mp_property_percent_pos(void *ctx, struct m_property *prop,
             .max = 100,
         };
         return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT:
-        *(char **)arg = talloc_asprintf(NULL, "%d", get_percent_pos(mpctx));
+    case M_PROPERTY_PRINT: {
+        int pos = get_percent_pos(mpctx);
+        if (pos < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        *(char **)arg = talloc_asprintf(NULL, "%d", pos);
         return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
