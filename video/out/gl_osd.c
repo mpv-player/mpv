@@ -39,17 +39,17 @@ static const int blend_factors[SUBBITMAP_COUNT][4] = {
 
 static const struct osd_fmt_entry osd_to_gl3_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = {GL_RED,   GL_RED,   GL_UNSIGNED_BYTE},
-    [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_BGRA,  GL_UNSIGNED_BYTE},
+    [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_RGBA,  GL_UNSIGNED_BYTE},
 };
 
 static const struct osd_fmt_entry osd_to_gles3_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = {GL_R8,    GL_RED,   GL_UNSIGNED_BYTE},
-    [SUBBITMAP_RGBA] =   {GL_RGBA8, GL_BGRA,  GL_UNSIGNED_BYTE},
+    [SUBBITMAP_RGBA] =   {GL_RGBA8, GL_RGBA,  GL_UNSIGNED_BYTE},
 };
 
 static const struct osd_fmt_entry osd_to_gl2_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = {GL_LUMINANCE, GL_LUMINANCE,   GL_UNSIGNED_BYTE},
-    [SUBBITMAP_RGBA] =   {GL_RGBA,      GL_BGRA,        GL_UNSIGNED_BYTE},
+    [SUBBITMAP_RGBA] =   {GL_RGBA,      GL_RGBA,        GL_UNSIGNED_BYTE},
 };
 
 static const struct osd_fmt_entry osd_to_gl_legacy_formats[SUBBITMAP_COUNT] = {

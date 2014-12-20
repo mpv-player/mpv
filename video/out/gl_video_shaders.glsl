@@ -161,7 +161,7 @@ in vec2 texcoord;
 DECLARE_FRAGPARMS
 
 void main() {
-    out_color = texture(texture0, texcoord);
+    out_color = texture(texture0, texcoord).bgra;
 }
 
 #!section frag_video

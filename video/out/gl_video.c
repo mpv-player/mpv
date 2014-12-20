@@ -2335,7 +2335,7 @@ static bool init_format(int fmt, struct gl_video *init)
 
     // Packed RGB special formats
     for (const struct fmt_entry *e = mp_to_gl_formats; e->mp_format; e++) {
-        if (e->mp_format == fmt) {
+        if (!gl->es && e->mp_format == fmt) {
             plane_format[0] = e;
             goto supported;
         }
