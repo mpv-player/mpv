@@ -184,12 +184,11 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
         }
     }
     // Fallback to mono/stereo as last resort
-    if (map->num == 1) {
-        *map = (struct mp_chmap) MP_CHMAP_INIT_MONO;
-    } else if (map->num >= 2) {
-        *map = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
-    }
-    if (test_layout(s, map))
+    *map = (struct mp_chmap) MP_CHMAP_INIT_MONO;
+    if (map->num == 1 && test_layout(s, map))
+        return true;
+    *map = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
+    if (map->num >= 2 && test_layout(s, map))
         return true;
     *map = (struct mp_chmap) {0};
     return false;
