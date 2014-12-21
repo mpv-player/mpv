@@ -7,6 +7,28 @@
 // (the filename and line number will still show on traces
 //  but the function name will be empty).
 
+// Duktape/MuJS
+var _Duktape;
+if (typeof Duktape != "undefined") {
+  _Duktape = Duktape;
+  // For compatibility, make invisible to prevent scripts depending on it.
+  delete Duktape;
+}
+
+mp.utils._js_backend = _Duktape ? "Duktape" : "MuJS";
+mp.utils.js_backend = function() { return mp.utils._js_backend; };
+mp.msg.verbose("Javascript backend:", mp.utils.js_backend());
+
+mp.utils.get_exception_str = function(e) {
+  // With Duktape, e.stack is not enumerable, so dump(e) won't display it.
+  // With MuJS, e is the whole stack trace as string.
+  return e.stack || e;
+}
+
+function msg_ex(e) {
+  mp.msg.fatal(mp.utils.get_exception_str(e));
+}
+
 /**********************************************************************
  *  CommonJS style module/require
 
@@ -203,7 +225,7 @@ function processTimers(allowImmediate) {
       try {
         timer.callback();
       } catch (e) {
-        mp.msg.fatal(e);
+        msg_ex(e);
       }
     }
 
@@ -233,7 +255,6 @@ function processTimers(allowImmediate) {
 
   canceledTimers = false;
 
-  //mp.msg.fatal("timers pending: " + timers.length);
   return !timers.length ? -1 : Math.max(0, timers[timers.length - 1].when - mp.get_time_ms());
 }
 
@@ -277,7 +298,7 @@ function dispatch_event_name(e, handlers) {
     try {
       handlers[i](e);
     } catch (ex) {
-      mp.msg.fatal(ex);
+      msg_ex(ex);
     }
 }
 
@@ -330,7 +351,7 @@ function notifyObserver(e) {
   try {
     observer(e.name, e.data);
   } catch (ex) {
-    mp.msg.fatal(ex);
+    msg_ex(ex);
   }
 }
 
