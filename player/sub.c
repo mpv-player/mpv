@@ -132,6 +132,21 @@ void mp_ass_configure_fonts(struct ass_renderer *a, struct MPOpts *b,
 
 #endif
 
+static void reset_subtitles(struct MPContext *mpctx, int order)
+{
+    int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
+    if (mpctx->d_sub[order])
+        sub_reset(mpctx->d_sub[order]);
+    set_osd_subtitle(mpctx, NULL);
+    osd_set_text(mpctx->osd, obj, NULL);
+}
+
+void reset_subtitle_state(struct MPContext *mpctx)
+{
+    reset_subtitles(mpctx, 0);
+    reset_subtitles(mpctx, 1);
+}
+
 void uninit_stream_sub_decoders(struct demuxer *demuxer)
 {
     for (int i = 0; i < demuxer->num_streams; i++) {
@@ -176,21 +191,6 @@ static bool is_interleaved(struct MPContext *mpctx, struct track *track)
             return true;
     }
     return track->demuxer == mpctx->demuxer;
-}
-
-void reset_subtitles(struct MPContext *mpctx, int order)
-{
-    int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
-    if (mpctx->d_sub[order])
-        sub_reset(mpctx->d_sub[order]);
-    set_osd_subtitle(mpctx, NULL);
-    osd_set_text(mpctx->osd, obj, NULL);
-}
-
-void reset_subtitle_state(struct MPContext *mpctx)
-{
-    reset_subtitles(mpctx, 0);
-    reset_subtitles(mpctx, 1);
 }
 
 void get_osd_sub_state(struct MPContext *mpctx, int order,

@@ -468,7 +468,6 @@ void mp_load_scripts(struct MPContext *mpctx);
 
 // sub.c
 void reset_subtitle_state(struct MPContext *mpctx);
-void reset_subtitles(struct MPContext *mpctx, int order);
 void uninit_stream_sub_decoders(struct demuxer *demuxer);
 void reinit_subs(struct MPContext *mpctx, int order);
 void uninit_sub(struct MPContext *mpctx, int order);
