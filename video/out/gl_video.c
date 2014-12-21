@@ -949,13 +949,17 @@ static void compile_shaders(struct gl_video *p)
     char *shader_prelude = get_section(tmp, src, "prelude");
     char *s_video = get_section(tmp, src, "frag_video");
 
-    int rg = !!(gl->mpgl_caps & MPGL_CAP_TEX_RG);
+    bool rg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
+    bool tex3d = gl->mpgl_caps & MPGL_CAP_3D_TEX;
+    bool arrays = gl->mpgl_caps & MPGL_CAP_1ST_CLASS_ARRAYS;
     char *header =
         talloc_asprintf(tmp, "#version %d%s\n"
                              "#define HAVE_RG %d\n"
+                             "#define HAVE_3DTEX %d\n"
+                             "#define HAVE_ARRAYS %d\n"
                              "%s%s",
                              gl->glsl_version, gl->es >= 300 ? " es" : "",
-                             rg, shader_prelude, PRELUDE_END);
+                             rg, tex3d, arrays, shader_prelude, PRELUDE_END);
 
     bool use_cms = p->opts.srgb || p->use_lut_3d;
 
@@ -2088,7 +2092,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
     bool have_srgb = gl->mpgl_caps & MPGL_CAP_SRGB_TEX;
-    bool have_rg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
+    bool have_arrays = gl->mpgl_caps & MPGL_CAP_1ST_CLASS_ARRAYS;
     bool have_mix = gl->glsl_version >= 130;
 
     char *disabled[10];
@@ -2106,21 +2110,31 @@ static void check_gl_features(struct gl_video *p)
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
     // I don't know if luminance alpha float textures exist, so disregard them.
-    if (!have_float_tex || !have_rg || (!have_fbo && p->opts.scale_sep)) {
+    if (!have_float_tex || !have_arrays || (!have_fbo && p->opts.scale_sep)) {
         for (int n = 0; n < 2; n++) {
             if (mp_find_filter_kernel(p->opts.scalers[n])) {
                 p->opts.scalers[n] = "bilinear";
-                disabled[n_disabled++]
-                    = have_float_tex ? "scaler (FBO)" : "scaler (float tex.)";
+                char *reason = "scaler (FBO)";
+                if (!have_float_tex)
+                    reason = "scaler (float tex.)";
+                if (!have_arrays)
+                    reason = "scaler (no GLSL support)";
+                disabled[n_disabled++] = reason;
             }
         }
     }
 
     // GLES3 doesn't provide filtered 16 bit integer textures
     // GLES2 doesn't even provide 3D textures
-    if (p->use_lut_3d && gl->es) {
+    if (p->use_lut_3d && (gl->es < 300 || !have_float_tex)) {
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (GLES unsupported)";
+    }
+
+    // Missing float textures etc. (maybe ordered would actually work)
+    if (p->opts.dither_algo >= 0 && gl->es) {
+        p->opts.dither_algo = -1;
+        disabled[n_disabled++] = "dithering (GLES unsupported)";
     }
 
     int use_cms = p->opts.srgb || p->use_lut_3d;

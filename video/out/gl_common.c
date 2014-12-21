@@ -105,6 +105,8 @@ static const struct feature features[] = {
     {MPGL_CAP_SRGB_FB,          "sRGB framebuffers"},
     {MPGL_CAP_FLOAT_TEX,        "Float textures"},
     {MPGL_CAP_TEX_RG,           "RG textures"},
+    {MPGL_CAP_1ST_CLASS_ARRAYS, "1st class shader arrays"},
+    {MPGL_CAP_3D_TEX,           "3D textures"},
     {MPGL_CAP_SW,               "suspected software renderer"},
     {0},
 };
@@ -241,9 +243,10 @@ static const struct gl_functions gl_functions[] = {
             {0},
         },
     },
-    // GL 2.1+ desktop only
+    // GL 2.1+ desktop only, GLSL 120
     {
         .ver_core = 210,
+        .provides = MPGL_CAP_3D_TEX | MPGL_CAP_1ST_CLASS_ARRAYS,
         .functions = (const struct gl_function[]) {
             DEF_FN(MapBuffer),
             DEF_FN(TexImage3D),
@@ -255,7 +258,8 @@ static const struct gl_functions gl_functions[] = {
     {
         .ver_core = 300,
         .ver_es_core = 300,
-        .provides = MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB | MPGL_CAP_VAO,
+        .provides = MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB | MPGL_CAP_VAO |
+                    MPGL_CAP_3D_TEX | MPGL_CAP_1ST_CLASS_ARRAYS,
         .functions = (const struct gl_function[]) {
             DEF_FN(BindVertexArray),
             DEF_FN(DeleteVertexArrays),
@@ -388,7 +392,7 @@ static const struct gl_functions gl_functions[] = {
     //       But the previous code didn't do that, and nobody ever complained.
     {
         .ver_removed = 210,
-        .ver_es_removed = 300,
+        .ver_es_removed = 100,
         .partial_ok = true,
         .functions = (const struct gl_function[]) {
             DEF_FN_NAMES(GenBuffers, "glGenBuffers", "glGenBuffersARB"),

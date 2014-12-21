@@ -29,12 +29,6 @@
 
 #ifdef GL_ES
 precision mediump float;
-#define HAVE_3DTEX (__VERSION__ >= 300)
-#define HAVE_ARRAYS (__VERSION__ >= 300)
-#else
-// Desktop GL
-#define HAVE_3DTEX 1
-#define HAVE_ARRAYS 1
 #endif
 
 // GLSL 1.20 compatibility layer
