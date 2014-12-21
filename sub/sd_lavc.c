@@ -210,8 +210,11 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         return;
 
     if (pts != MP_NOPTS_VALUE) {
-        if (sub.end_display_time > sub.start_display_time)
+        if (sub.end_display_time > sub.start_display_time &&
+            sub.end_display_time != UINT32_MAX)
+        {
             duration = (sub.end_display_time - sub.start_display_time) / 1000.0;
+        }
         pts += sub.start_display_time / 1000.0;
     }
     double endpts = MP_NOPTS_VALUE;
