@@ -607,13 +607,8 @@ define_yes_no $_vaapi HAVE_VAAPI_HWACCEL
 
 if test "$_vaapi" = yes ; then
     check_pkg_config "VAAPI VPP" auto VAAPI_VPP 'libva >= 0.34.0'
-
-    check_pkg_config "VAAPI GLX" auto VAAPI_GLX 'libva-glx >= 0.32.0'
-    _vaapi_glx=$(defretval)
 else
     check_yes_no no VAAPI_VPP
-    check_yes_no no VAAPI_GLX
-    _vaapi_glx=no
 fi
 
 check_pkg_config "Xinerama" $_xinerama XINERAMA 'xinerama'
@@ -695,6 +690,10 @@ _vdpau_gl_x11=no
 (test "$_gl_x11" = yes && test "$_vdpau" = yes) && _vdpau_gl_x11=yes
 check_yes_no $_vdpau_gl_x11 VDPAU_GL_X11
 echores "$_vdpau_gl_x11"
+
+_vaapi_glx=no
+(test "$_gl_x11" = yes && test "$_vaapi" = yes) && _vaapi_glx=auto
+check_pkg_config "VAAPI with OpenGL/X11" $_vaapi_glx VAAPI_GLX 'libva-glx >= 0.32.0'
 
 check_pkg_config "SDL 2.0" $_sdl2 SDL2 'sdl2'
 
