@@ -277,6 +277,9 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
             ((sub->pts == MP_NOPTS_VALUE || pts >= sub->pts) &&
              (sub->endpts == MP_NOPTS_VALUE || pts < sub->endpts)))
         {
+            // Ignore "trailing" subtitles with unknown length after 1 minute.
+            if (sub->endpts == MP_NOPTS_VALUE && pts >= sub->pts + 60)
+                break;
             current = sub;
             break;
         }
