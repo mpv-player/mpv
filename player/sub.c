@@ -161,10 +161,8 @@ void uninit_stream_sub_decoders(struct demuxer *demuxer)
 void uninit_sub(struct MPContext *mpctx, int order)
 {
     if (mpctx->d_sub[order]) {
-        mpctx->d_sub[order] = NULL; // Note: not free'd.
-        int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
-        osd_set_sub(mpctx->osd, obj, NULL);
         reset_subtitles(mpctx, order);
+        mpctx->d_sub[order] = NULL; // Note: not free'd.
         reselect_demux_streams(mpctx);
     }
 }
