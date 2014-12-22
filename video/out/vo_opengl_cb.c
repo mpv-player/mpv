@@ -79,10 +79,18 @@ struct mpv_opengl_cb_context {
     struct vo *active;
 };
 
+static void free_ctx(void *ptr)
+{
+    mpv_opengl_cb_context *ctx = ptr;
+
+    pthread_mutex_destroy(&ctx->lock);
+}
+
 struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
                                                struct osd_state *osd)
 {
     mpv_opengl_cb_context *ctx = talloc_zero(NULL, mpv_opengl_cb_context);
+    talloc_set_destructor(ctx, free_ctx);
     ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
     pthread_mutex_init(&ctx->lock, NULL);
 
