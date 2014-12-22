@@ -1634,7 +1634,6 @@ void mpv_opengl_cb_set_update_callback(mpv_opengl_cb_context *ctx,
                                        mpv_opengl_cb_update_fn callback,
                                        void *callback_ctx)
 {
-    return MPV_ERROR_NOT_IMPLEMENTED;
 }
 int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
                           mpv_opengl_cb_get_proc_address_fn get_proc_address,
