@@ -2440,6 +2440,11 @@ void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
 
 struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd)
 {
+    if (!(gl->mpgl_caps & MPGL_CAP_GL21)) {
+        mp_err(log, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
+        return NULL;
+    }
+
     struct gl_video *p = talloc_ptrtype(NULL, p);
     *p = (struct gl_video) {
         .gl = gl,

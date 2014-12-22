@@ -422,6 +422,8 @@ static int preinit(struct vo *vo)
         p->gl->SwapInterval(p->swap_interval);
 
     p->renderer = gl_video_init(p->gl, vo->log, vo->osd);
+    if (!p->renderer)
+        goto err_out;
     gl_video_set_output_depth(p->renderer, p->glctx->depth_r, p->glctx->depth_g,
                               p->glctx->depth_b);
     gl_video_set_options(p->renderer, p->renderer_opts);

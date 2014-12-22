@@ -143,12 +143,9 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
 
     mpgl_load_functions2(ctx->gl, get_proc_address, get_proc_address_ctx,
                          exts, ctx->log);
-    int caps = MPGL_CAP_GL21;
-    if ((ctx->gl->mpgl_caps & caps) != caps) {
-        MP_FATAL(ctx, "Missing OpenGL features.\n");
-        return MPV_ERROR_UNSUPPORTED;
-    }
     ctx->renderer = gl_video_init(ctx->gl, ctx->log, ctx->osd);
+    if (!ctx->renderer)
+        return MPV_ERROR_UNSUPPORTED;
     ctx->hwdec = gl_hwdec_load_api(ctx->log, ctx->gl, ctx->hwapi, &ctx->hwdec_info);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
 
