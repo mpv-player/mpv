@@ -706,8 +706,6 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
 
     if (timeout < 0)
         timeout = 1e20;
-    if (ctx->queued_wakeup)
-        timeout = 0;
 
     int64_t deadline = mp_add_timeout(mp_time_us(), timeout);
 
@@ -715,6 +713,8 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
     talloc_free_children(event);
 
     while (1) {
+        if (ctx->queued_wakeup)
+            deadline = 0;
         // This will almost surely lead to a deadlock. (Polling is still ok.)
         if (ctx->suspend_count && timeout > 0) {
             MP_ERR(ctx, "attempting to wait while core is suspended");
