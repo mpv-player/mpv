@@ -43,6 +43,9 @@ struct vo_priv {
     struct vo *vo;
 
     struct mpv_opengl_cb_context *ctx;
+
+    int use_gl_debug;
+    struct gl_video_opts *renderer_opts;
 };
 
 struct mpv_opengl_cb_context {
@@ -206,12 +209,12 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
         gl_video_resize(ctx->renderer, &wnd, &src, &dst, &osd, !ctx->flip);
     }
 
-    if (ctx->reconfigured) {
+    if (ctx->reconfigured && vo) {
         ctx->reconfigured = false;
         gl_video_config(ctx->renderer, &ctx->img_params);
-        struct gl_video_opts opts = gl_video_opts_def;
-        opts.background.a = 0; // transparent
-        gl_video_set_options(ctx->renderer, &opts);
+        struct vo_priv *p = vo->priv;
+        gl_video_set_options(ctx->renderer, p->renderer_opts);
+        gl_video_set_debug(ctx->renderer, p->use_gl_debug);
     }
 
     struct mp_image *mpi = ctx->next_frame;
@@ -355,8 +358,10 @@ static int preinit(struct vo *vo)
     return 0;
 }
 
-#define OPT_BASE_STRUCT struct gl_priv
+#define OPT_BASE_STRUCT struct vo_priv
 static const struct m_option options[] = {
+    OPT_FLAG("debug", use_gl_debug, 0),
+    OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
     {0},
 };
 
