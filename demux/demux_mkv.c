@@ -1123,7 +1123,20 @@ skip:
     return 0;
 }
 
-
+static void add_coverart(struct demuxer *demuxer)
+{
+    for (int n = 0; n < demuxer->num_attachments; n++) {
+        struct demux_attachment *att = &demuxer->attachments[n];
+        const char *codec = mp_map_mimetype_to_video_codec(att->type);
+        if (!codec)
+            continue;
+        struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
+        if (!sh)
+            break;
+        sh->codec = codec;
+        sh->attached_picture = new_demux_packet_from(att->data, att->data_size);
+    }
+}
 
 static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track);
 static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track);
@@ -1831,6 +1844,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 
     process_tags(demuxer);
     display_create_tracks(demuxer);
+    add_coverart(demuxer);
 
     if (demuxer->opts->mkv_probe_duration)
         probe_last_timestamp(demuxer);

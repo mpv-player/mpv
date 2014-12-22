@@ -28,4 +28,6 @@ void mp_set_codec_from_tag(struct sh_stream *sh);
 void mp_set_pcm_codec(struct sh_stream *sh, bool sign, bool is_float, int bits,
                       bool is_be);
 
+const char *mp_map_mimetype_to_video_codec(const char *mimetype);
+
 #endif

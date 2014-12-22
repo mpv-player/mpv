@@ -141,3 +141,20 @@ void mp_set_pcm_codec(struct sh_stream *sh, bool sign, bool is_float, int bits,
         mp_snprintf_cat(codec, sizeof(codec), is_be ? "be" : "le");
     sh->codec = talloc_strdup(sh->audio, codec);
 }
+
+static const char *const mimetype_to_codec[][2] = {
+    {"image/jpeg",      "mjpeg"},
+    {"image/png",       "png"},
+    {0}
+};
+
+const char *mp_map_mimetype_to_video_codec(const char *mimetype)
+{
+    if (mimetype) {
+        for (int n = 0; mimetype_to_codec[n][0]; n++) {
+            if (strcmp(mimetype_to_codec[n][0], mimetype) == 0)
+                return mimetype_to_codec[n][1];
+        }
+    }
+    return NULL;
+}
