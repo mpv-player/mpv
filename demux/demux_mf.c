@@ -33,6 +33,7 @@
 #include "stream/stream.h"
 #include "demux.h"
 #include "stheader.h"
+#include "codec_tags.h"
 #include "mf.h"
 
 #define MF_MAX_FILE_SIZE (1024 * 1024 * 256)
@@ -186,7 +187,10 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     if (!mf || mf->nr_of_files < 1)
         goto error;
 
-    const char *codec = probe_format(mf, demuxer->opts->mf_type, check);
+    char *force_type = demuxer->opts->mf_type;
+    const char *codec = mp_map_mimetype_to_video_codec(demuxer->stream->mime_type);
+    if (!codec || (force_type && force_type[0]))
+        codec = probe_format(mf, force_type, check);
     if (!codec)
         goto error;
 
