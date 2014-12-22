@@ -2126,7 +2126,7 @@ static void check_gl_features(struct gl_video *p)
 
     // GLES3 doesn't provide filtered 16 bit integer textures
     // GLES2 doesn't even provide 3D textures
-    if (p->use_lut_3d && (gl->es < 300 || !have_float_tex)) {
+    if (p->use_lut_3d && ((gl->es && gl->es < 300) || !have_float_tex)) {
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (GLES unsupported)";
     }
