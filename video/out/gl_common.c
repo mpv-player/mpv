@@ -107,6 +107,7 @@ static const struct feature features[] = {
     {MPGL_CAP_TEX_RG,           "RG textures"},
     {MPGL_CAP_1ST_CLASS_ARRAYS, "1st class shader arrays"},
     {MPGL_CAP_3D_TEX,           "3D textures"},
+    {MPGL_CAP_DEBUG,            "debugging extensions"},
     {MPGL_CAP_SW,               "suspected software renderer"},
     {0},
 };
@@ -461,6 +462,16 @@ static const struct gl_functions gl_functions[] = {
     {
         .extension = "GL_APPLE_rgb_422",
         .provides = MPGL_CAP_APPLE_RGB_422,
+    },
+    {
+        .ver_core = 430,
+        .extension = "GL_ARB_debug_output",
+        .provides = MPGL_CAP_DEBUG,
+        .functions = (const struct gl_function[]) {
+            // (only functions needed by us)
+            DEF_FN(DebugMessageCallback),
+            {0}
+        },
     },
 };
 
@@ -971,6 +982,8 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name,
         if (vo->probing)
             goto cleanup;
     }
+
+    ctx->gl->debug_context = !!(vo_flags & VOFLAG_GL_DEBUG);
 
     return ctx;
 

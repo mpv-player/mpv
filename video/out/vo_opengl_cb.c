@@ -214,6 +214,7 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
         gl_video_config(ctx->renderer, &ctx->img_params);
         struct vo_priv *p = vo->priv;
         gl_video_set_options(ctx->renderer, p->renderer_opts);
+        ctx->gl->debug_context = p->use_gl_debug;
         gl_video_set_debug(ctx->renderer, p->use_gl_debug);
     }
 

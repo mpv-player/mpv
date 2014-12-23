@@ -81,6 +81,7 @@ enum {
     MPGL_CAP_APPLE_RGB_422      = (1 << 12),    // GL_APPLE_rgb_422
     MPGL_CAP_1ST_CLASS_ARRAYS   = (1 << 13),
     MPGL_CAP_3D_TEX             = (1 << 14),
+    MPGL_CAP_DEBUG              = (1 << 15),
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
 
@@ -171,6 +172,9 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 // log, lev: module and log level, as in mp_msg()
 void mp_log_source(struct mp_log *log, int lev, const char *src);
 
+typedef void (GLAPIENTRY *MP_GLDEBUGPROC)(GLenum, GLenum, GLuint, GLenum,
+                                          GLsizei, const GLchar *,const void *);
+
 //function pointers loaded from the OpenGL library
 struct GL {
     int version;                // MPGL_VER() mangled (e.g. 210 for 2.1)
@@ -178,6 +182,7 @@ struct GL {
     int glsl_version;           // e.g. 130 for GLSL 1.30
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
+    bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
 
     void (GLAPIENTRY *Begin)(GLenum);
     void (GLAPIENTRY *End)(void);
@@ -326,6 +331,9 @@ struct GL {
 
     GLint (GLAPIENTRY *GetVideoSync)(GLuint *);
     GLint (GLAPIENTRY *WaitVideoSync)(GLint, GLint, unsigned int *);
+
+    void (GLAPIENTRY *DebugMessageCallback)(MP_GLDEBUGPROC callback,
+                                            const void *userParam);
 };
 
 #endif /* MPLAYER_GL_COMMON_H */

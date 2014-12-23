@@ -127,6 +127,7 @@ struct gl_video {
     struct mp_log *log;
     struct gl_video_opts opts;
     bool gl_debug;
+    bool debug_cb_set;
 
     int depth_g;
 
@@ -434,9 +435,39 @@ static void debug_check_gl(struct gl_video *p, const char *msg)
         glCheckError(p->gl, p->log, msg);
 }
 
+
+static void GLAPIENTRY gl_debug_cb(GLenum source, GLenum type, GLuint id,
+                                   GLenum severity, GLsizei length,
+                                   const GLchar *message, const void *userParam)
+{
+    // keep in mind that the debug callback can be asynchronous
+    struct gl_video *p = (void *)userParam;
+    int level = MSGL_ERR;
+    switch (severity) {
+    case GL_DEBUG_SEVERITY_NOTIFICATION:level = MSGL_V; break;
+    case GL_DEBUG_SEVERITY_LOW:         level = MSGL_INFO; break;
+    case GL_DEBUG_SEVERITY_MEDIUM:      level = MSGL_WARN; break;
+    case GL_DEBUG_SEVERITY_HIGH:        level = MSGL_ERR; break;
+    }
+    MP_MSG(p, level, "GL: %s\n", message);
+}
+
 void gl_video_set_debug(struct gl_video *p, bool enable)
 {
+    GL *gl = p->gl;
+
     p->gl_debug = enable;
+
+    if (p->debug_cb_set != enable && gl->debug_context &&
+        gl->DebugMessageCallback)
+    {
+        if (enable) {
+            gl->DebugMessageCallback(gl_debug_cb, p);
+        } else {
+            gl->DebugMessageCallback(NULL, NULL);
+        }
+        p->debug_cb_set = enable;
+    }
 }
 
 static void texture_size(struct gl_video *p, int w, int h, int *texw, int *texh)
@@ -2247,6 +2278,9 @@ void gl_video_uninit(struct gl_video *p)
 
     mpgl_osd_destroy(p->osd);
 
+    if (p->debug_cb_set)
+        gl->DebugMessageCallback(NULL, NULL);
+
     talloc_free(p);
 }
 
@@ -2452,13 +2486,13 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .osd_state = osd,
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
-        .gl_debug = true,
         .scalers = {
             { .index = 0, .name = "bilinear" },
             { .index = 1, .name = "bilinear" },
         },
         .scratch = talloc_zero_array(p, char *, 1),
     };
+    gl_video_set_debug(p, true);
     init_gl(p);
     recreate_osd(p);
     return p;

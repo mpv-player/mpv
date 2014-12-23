@@ -127,7 +127,7 @@ static void flip_page(struct vo *vo)
     p->glctx->swapGlBuffers(p->glctx);
 
     p->frames_rendered++;
-    if (p->frames_rendered > 5)
+    if (p->frames_rendered > 5 && !p->use_gl_debug)
         gl_video_set_debug(p->renderer, false);
 
     if (p->use_glFinish)
