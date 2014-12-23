@@ -259,13 +259,10 @@ static const struct gl_functions gl_functions[] = {
     {
         .ver_core = 300,
         .ver_es_core = 300,
-        .provides = MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB | MPGL_CAP_VAO |
-                    MPGL_CAP_3D_TEX | MPGL_CAP_1ST_CLASS_ARRAYS,
+        .provides = MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB | MPGL_CAP_3D_TEX |
+                    MPGL_CAP_1ST_CLASS_ARRAYS,
         .functions = (const struct gl_function[]) {
-            DEF_FN(BindVertexArray),
-            DEF_FN(DeleteVertexArrays),
             DEF_FN(GetStringi),
-            DEF_FN(GenVertexArrays),
             // for ES 3.0
             DEF_FN(ReadBuffer),
             DEF_FN(UnmapBuffer),
@@ -308,6 +305,19 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN_NAMES(FramebufferTexture2D, "glFramebufferTexture2DEXT"),
             {0}
         },
+    },
+    // VAOs, extension in GL 2.x, core in GL 3.x core.
+    {
+        .ver_core = 300,
+        .ver_es_core = 300,
+        .extension = "GL_ARB_vertex_array_object",
+        .provides = MPGL_CAP_VAO,
+        .functions = (const struct gl_function[]) {
+            DEF_FN(GenVertexArrays),
+            DEF_FN(BindVertexArray),
+            DEF_FN(DeleteVertexArrays),
+            {0}
+        }
     },
     // sRGB textures, extension in GL 2.x, core in GL 3.x core.
     {
