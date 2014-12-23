@@ -2253,8 +2253,6 @@ static int init_gl(struct gl_video *p)
         gl->BindVertexArray(p->vao);
         setup_vertex_array(gl);
         gl->BindVertexArray(0);
-    } else {
-        setup_vertex_array(gl);
     }
 
     gl->BindBuffer(GL_ARRAY_BUFFER, 0);
@@ -2301,11 +2299,23 @@ void gl_video_set_gl_state(struct gl_video *p)
     }
     gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+    if (!gl->BindVertexArray) {
+        gl->BindBuffer(GL_ARRAY_BUFFER, p->vertex_buffer);
+        setup_vertex_array(gl);
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 }
 
 void gl_video_unset_gl_state(struct gl_video *p)
 {
-    // nop
+    GL *gl = p->gl;
+
+    if (!gl->BindVertexArray) {
+        gl->DisableVertexAttribArray(VERTEX_ATTRIB_POSITION);
+        gl->DisableVertexAttribArray(VERTEX_ATTRIB_COLOR);
+        gl->DisableVertexAttribArray(VERTEX_ATTRIB_TEXCOORD);
+    }
 }
 
 // dest = src.<w> (always using 4 components)
