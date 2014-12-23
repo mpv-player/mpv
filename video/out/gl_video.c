@@ -1473,6 +1473,9 @@ void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
         return;
     }
 
+    if (!(gl->mpgl_caps & MPGL_CAP_3D_TEX))
+        return;
+
     if (!p->lut_3d_texture)
         gl->GenTextures(1, &p->lut_3d_texture);
 
@@ -2124,6 +2127,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
     bool have_srgb = gl->mpgl_caps & MPGL_CAP_SRGB_TEX;
     bool have_arrays = gl->mpgl_caps & MPGL_CAP_1ST_CLASS_ARRAYS;
+    bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
 
     char *disabled[10];
@@ -2157,7 +2161,7 @@ static void check_gl_features(struct gl_video *p)
 
     // GLES3 doesn't provide filtered 16 bit integer textures
     // GLES2 doesn't even provide 3D textures
-    if (p->use_lut_3d && ((gl->es && gl->es < 300) || !have_float_tex)) {
+    if (p->use_lut_3d && !(have_3d_tex && have_float_tex)) {
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (GLES unsupported)";
     }
