@@ -763,6 +763,8 @@ static void audio_resume(struct ao *ao)
     struct priv *p = ao->priv;
     int err;
 
+    resume_device(ao);
+
     if (p->can_pause) {
         if (snd_pcm_state(p->alsa) == SND_PCM_STATE_PAUSED) {
             err = snd_pcm_pause(p->alsa, 0);
