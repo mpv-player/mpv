@@ -1135,6 +1135,7 @@ static void add_coverart(struct demuxer *demuxer)
             break;
         sh->codec = codec;
         sh->attached_picture = new_demux_packet_from(att->data, att->data_size);
+        sh->title = att->name;
     }
 }
 
