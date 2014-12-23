@@ -745,7 +745,7 @@ static void audio_pause(struct ao *ao)
 alsa_error: ;
 }
 
-static void audio_resume(struct ao *ao)
+static void resume_device(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int err;
@@ -756,6 +756,12 @@ static void audio_resume(struct ao *ao)
         while ((err = snd_pcm_resume(p->alsa)) == -EAGAIN)
             sleep(1);
     }
+}
+
+static void audio_resume(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    int err;
 
     if (p->can_pause) {
         if (snd_pcm_state(p->alsa) == SND_PCM_STATE_PAUSED) {
@@ -807,10 +813,12 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
         if (res == -EINTR || res == -EAGAIN) { /* retry */
             res = 0;
-        } else if (res == -ESTRPIPE) {  /* suspend */
-            audio_resume(ao);
         } else if (res < 0) {
-            MP_ERR(ao, "Write error: %s\n", snd_strerror(res));
+            if (res == -ESTRPIPE) {  /* suspend */
+                resume_device(ao);
+            } else {
+                MP_ERR(ao, "Write error: %s\n", snd_strerror(res));
+            }
             res = snd_pcm_prepare(p->alsa);
             int err = res;
             CHECK_ALSA_ERROR("pcm prepare error");
