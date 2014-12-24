@@ -265,6 +265,7 @@ static const struct gl_functions gl_functions[] = {
         .provides = MPGL_CAP_GL3 | MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB,
         .functions = (const struct gl_function[]) {
             DEF_FN(GetStringi),
+            DEF_FN(GetTexLevelParameteriv),
             {0}
         },
     },
