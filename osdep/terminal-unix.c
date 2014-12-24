@@ -488,7 +488,7 @@ int terminal_init(void)
     setsigaction(SIGTTIN, SIG_IGN, 0, true);
     setsigaction(SIGTTOU, SIG_IGN, 0, true);
 
-    // don't crash on SIGPIPE caused by semi-broken libraries
+    // get sane behavior, instead of hysteric UNIX-nonsense
     setsigaction(SIGPIPE, SIG_IGN, 0, true);
 
     getch2_poll();
