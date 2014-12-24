@@ -424,6 +424,39 @@ static char *json_execute_command(struct client_arg *arg, void *ta_parent,
     } else if (!strcmp("resume", cmd)) {
         mpv_resume(arg->client);
         rc = MPV_ERROR_SUCCESS;
+    } else if (!strcmp("enable_event", cmd) ||
+               !strcmp("disable_event", cmd))
+    {
+        bool enable = !strcmp("enable_event", cmd);
+
+        if (cmd_node->u.list->num != 2) {
+            rc = MPV_ERROR_INVALID_PARAMETER;
+            goto error;
+        }
+
+        if (cmd_node->u.list->values[1].format != MPV_FORMAT_STRING) {
+            rc = MPV_ERROR_INVALID_PARAMETER;
+            goto error;
+        }
+
+        char *name = cmd_node->u.list->values[1].u.string;
+        if (strcmp(name, "all") == 0) {
+            for (int n = 0; n < 64; n++)
+                mpv_request_event(arg->client, n, enable);
+            rc = MPV_ERROR_SUCCESS;
+        } else {
+            int event = -1;
+            for (int n = 0; n < 64; n++) {
+                const char *evname = mpv_event_name(n);
+                if (evname && strcmp(evname, name) == 0)
+                    event = n;
+            }
+            if (event < 0) {
+                rc = MPV_ERROR_INVALID_PARAMETER;
+                goto error;
+            }
+            rc = mpv_request_event(arg->client, event, enable);
+        }
     } else {
         mpv_node result_node;
 

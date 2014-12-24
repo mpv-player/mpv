@@ -156,6 +156,14 @@ extra commands can also be used as part of the protocol:
     lead to breakages with future mpv releases. Instead, make a feature request,
     and ask for a proper event that returns the information you need.
 
+``enable_event``, ``disable_event``
+    Enables or disables the named event. Mirrors the ``mpv_request_event`` C
+    API function. If the string ``all`` is used instead of an event name, all
+    events are enabled or disabled.
+
+    By default, most events are enabled, and there is not much use for this
+    command.
+
 ``suspend``
     Suspend the mpv main loop. There is a long-winded explanation of this in
     the C API function ``mpv_suspend()``. In short, this prevents the player
