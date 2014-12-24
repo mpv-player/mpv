@@ -783,6 +783,8 @@ void seek_to_last_frame(struct MPContext *mpctx)
 {
     if (!mpctx->d_video)
         return;
+    if (mpctx->hrseek_lastframe) // exit if we already tried this
+        return;
     MP_VERBOSE(mpctx, "seeking to last frame...\n");
     // Approximately seek close to the end of the file.
     // Usually, it will seek some seconds before end.
