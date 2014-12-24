@@ -117,6 +117,8 @@ extern "C" {
  *   (used through libass), ALSA, FFmpeg, and possibly more.
  * - The FPU precision must be set at least to double precision.
  * - On Windows, mpv will call timeBeginPeriod(1).
+ * - SIGPIPE should be blocked. Some parts rely on this signal not crashing the
+ *   process (such as ffmpeg OpenSSL support, or the mpv IPC code).
  * - On memory exhaustion, mpv will kill the process.
  *
  * Embedding the video window
