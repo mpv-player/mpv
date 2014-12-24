@@ -74,7 +74,7 @@ static const char av_desync_help_text[] =
 "     Download the file instead.\n"
 "- Try to find out whether audio/video/subs are causing this by experimenting\n"
 "  with --no-video, --no-audio, or --no-sub.\n"
-"- If you swiched audio or video tracks, try seeking to force synchronization.\n"
+"- If you switched audio or video tracks, try seeking to force synchronization.\n"
 "If none of this helps you, file a bug report.\n\n";
 
 void update_fps(struct MPContext *mpctx)
