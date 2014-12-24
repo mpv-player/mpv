@@ -130,6 +130,7 @@ struct gl_video {
     bool debug_cb_set;
 
     int depth_g;
+    int texture_16bit_depth;    // actual bits available in 16 bit textures
 
     GLenum gl_target; // texture target (GL_TEXTURE_2D, ...) for video and FBOs
 
@@ -2259,6 +2260,29 @@ static int init_gl(struct gl_video *p)
 
     gl_video_set_gl_state(p);
 
+    // Test whether we can use 10 bit. Hope that testing a single format/channel
+    // is good enough (instead of testing all 1-4 channels variants etc.).
+    const struct fmt_entry *fmt = find_tex_format(gl, 2, 1);
+    if (gl->GetTexLevelParameteriv && fmt->format) {
+        GLuint tex;
+        gl->GenTextures(1, &tex);
+        gl->BindTexture(GL_TEXTURE_2D, tex);
+        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, 64, 64, 0,
+                       fmt->format, fmt->type, NULL);
+        GLenum pname = 0;
+        switch (fmt->format) {
+        case GL_RED:        pname = GL_TEXTURE_RED_SIZE; break;
+        case GL_LUMINANCE:  pname = GL_TEXTURE_LUMINANCE_SIZE; break;
+        }
+        GLint param = 0;
+        if (pname)
+            gl->GetTexLevelParameteriv(GL_TEXTURE_2D, 0, pname, &param);
+        if (param) {
+            MP_VERBOSE(p, "16 bit texture depth: %d.\n", (int)param);
+            p->texture_16bit_depth = param;
+        }
+    }
+
     debug_check_gl(p, "after init_gl");
 
     return 1;
@@ -2437,6 +2461,11 @@ supported:
     if (desc.num_planes == 4 && (init->plane_bits % 8) != 0)
         return false;
 
+    if (init->plane_bits > 8 && init->plane_bits < 16) {
+        if (init->texture_16bit_depth < 16)
+            return false;
+    }
+
     for (int p = 0; p < desc.num_planes; p++) {
         if (!plane_format[p]->format)
             return false;
@@ -2500,6 +2529,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .osd_state = osd,
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
+        .texture_16bit_depth = 16,
         .scalers = {
             { .index = 0, .name = "bilinear" },
             { .index = 1, .name = "bilinear" },

@@ -264,6 +264,7 @@ static const struct gl_functions gl_functions[] = {
         .functions = (const struct gl_function[]) {
             DEF_FN(GetStringi),
             // for ES 3.0
+            DEF_FN(GetTexLevelParameteriv),
             DEF_FN(ReadBuffer),
             DEF_FN(UnmapBuffer),
             {0}
