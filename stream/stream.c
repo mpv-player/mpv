@@ -325,6 +325,9 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     if (!s->read_chunk)
         s->read_chunk = 4 * (s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE);
 
+    if (!s->fill_buffer)
+        s->allow_caching = false;
+
     assert(s->seekable == !!s->seek);
 
     s->uncached_type = s->type;
