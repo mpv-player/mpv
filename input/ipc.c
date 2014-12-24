@@ -243,6 +243,7 @@ static char *json_execute_command(struct client_arg *arg, void *ta_parent,
 
     rc = json_parse(ta_parent, &msg_node, &src, 3);
     if (rc < 0) {
+        MP_ERR(arg, "malformed JSON received\n");
         rc = MPV_ERROR_INVALID_PARAMETER;
         goto error;
     }
@@ -546,7 +547,7 @@ static void *client_thread(void *p)
                     if (errno == EAGAIN)
                         break;
 
-                    MP_ERR(arg, "Read error\n");
+                    MP_ERR(arg, "Read error (%s)\n", mp_strerror(errno));
                     goto done;
                 }
 
@@ -582,7 +583,7 @@ static void *client_thread(void *p)
                         rc = ipc_write(arg->client_fd, reply_msg,
                                        strlen(reply_msg));
                         if (rc < 0) {
-                            MP_ERR(arg, "Write error\n");
+                            MP_ERR(arg, "Write error (%s)\n", mp_strerror(errno));
                             talloc_free(tmp);
                             goto done;
                         }
@@ -595,6 +596,8 @@ static void *client_thread(void *p)
     }
 
 done:
+    if (client_msg.len > 0)
+        MP_WARN(arg, "Ignoring unterminated command on disconnect.\n");
     talloc_free(client_msg.start);
     if (arg->close_client_fd)
         close(arg->client_fd);
