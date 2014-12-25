@@ -8,7 +8,7 @@ the ``scripts`` subdirectory of the mpv configuration directory (usually
 there too. Since it's added to the end, don't name scripts you want to import
 the same as Lua libraries because they will be overshadowed by them.
 
-mpv provides the built-in module ``mp``, which provides functions to send
+mpv provides the built-in module ``mp``, which contains functions to send
 commands to the mpv core and to retrieve information about playback state, user
 settings, file information, and so on.
 
@@ -29,16 +29,14 @@ A script which leaves fullscreen mode when the player is paused:
     end
     mp.observe_property("pause", "bool", on_pause_change)
 
-This script provides a pretty weird feature, but Lua scripting was made to
-allow users implement features which are not going to be added to the mpv core.
 
-Mode of operation
------------------
+Details on the script initialization and lifecycle
+--------------------------------------------------
 
 Your script will be loaded by the player at program start from the ``scripts``
-configuration subdirectory, from a path specified with the ``--script`` option,
-or in some cases, internally (like ``--osc``). Each script runs in its own
-thread. Your script is first run "as is", and once that is done, the event loop
+configuration subdirectory, or from a path specified with the ``--script``
+option. Some scripts are loaded internally (like ``--osc``). Each script runs in
+its own thread. Your script is first run "as is", and once that is done, the event loop
 is entered. This event loop will dispatch events received by mpv and call your
 own event handlers which you have registered with ``mp.register_event``, or
 timers added with ``mp.add_timeout`` or similar.
@@ -518,7 +516,7 @@ collisions, all keys have to be prefixed with ``identifier-``.
 
 Example command-line::
 
-     --script-opts=myscript-optionA=TEST:myscript-optionB=0:myscript-optionC=yes
+     --script-opts=myscript-optionA=TEST,myscript-optionB=0,myscript-optionC=yes
 
 
 mp.utils options
@@ -646,7 +644,7 @@ Example:
         print("start of playback!")
     end
 
-    mp.register_event("playback-start", my_fn)
+    mp.register_event("file-loaded", my_fn)
 
 
 
@@ -665,7 +663,9 @@ List of events
     Happens after a file was loaded and begins playback.
 
 ``seek``
-    Happens on seeking (including ordered chapter segment changes).
+    Happens on seeking. (This might include cases when the player seeks
+    internally, even without user interaction. This includes e.g. segment
+    changes when playing ordered chapters Matroska files.)
 
 ``playback-restart``
     Start of playback after seek or after file was loaded.
@@ -701,13 +701,8 @@ List of events
         (undocumented) existing ones.
 
     ``text``
-        The log message. Note that this is the direct output of a printf()
-        style output API. The text will contain embedded newlines, and it's
-        possible that a single message contains multiple lines, or that a
-        message contains a partial line.
-
-        It's safe to display messages only if they end with a newline character,
-        and to buffer them otherwise.
+        The log message. The text will end with a newline character. Sometimes
+        it can contain multiple lines.
 
     Keep in mind that these messages are meant to be hints for humans. You
     should not parse them, and prefix/level/text of messages might change
@@ -738,8 +733,8 @@ The following events also happen, but are deprecated: ``tracks-changed``,
 Extras
 ------
 
-This documents experimental features, or features that are "too special" and
-we don't guarantee a stable interface to it.
+This documents experimental features, or features that are "too special" to
+guarantee a stable interface.
 
 ``mp.add_hook(type, priority, fn)``
     Add a hook callback for ``type`` (a string identifying a certain kind of
