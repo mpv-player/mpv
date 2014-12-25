@@ -124,8 +124,8 @@ Playback Control
     chapter to end playing at. Also see ``--start``.
 
 ``--playlist=<filename>``
-    Play files according to a playlist file (Supports some common formats.If
-    no format is detected, t will be treated as list of files, separated by
+    Play files according to a playlist file (Supports some common formats. If
+    no format is detected, it will be treated as list of files, separated by
     newline characters. Note that XML playlist formats are not supported.)
 
     You can play playlists directly and without this option, however, this
