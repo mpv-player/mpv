@@ -168,27 +168,37 @@ const char *wasapi_explain_err(const HRESULT hr)
 #undef E
 }
 
-static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
-                           bool is_float, DWORD samplerate, WORD channels,
-                           DWORD chanmask)
+static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
+                           WORD bits, WORD valid_bits, bool is_float,
+                           DWORD samplerate, struct mp_chmap *channels)
 {
-    int block_align = channels * bytepersample;
+    int block_align = channels->num * bits / 8;
     wformat->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
-    wformat->Format.nChannels = channels;
+    wformat->Format.nChannels = channels->num;
     wformat->Format.nSamplesPerSec = samplerate;
     wformat->Format.nAvgBytesPerSec = samplerate * block_align;
     wformat->Format.nBlockAlign = block_align;
-    wformat->Format.wBitsPerSample = bytepersample * 8;
+    wformat->Format.wBitsPerSample = bits;
     wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
     if (is_float)
         wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
     else
         wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_PCM;
-    wformat->Samples.wValidBitsPerSample = wformat->Format.wBitsPerSample;
-    wformat->dwChannelMask = chanmask;
+    wformat->Samples.wValidBitsPerSample = valid_bits;
+    wformat->dwChannelMask = mp_chmap_to_waveext(channels);
 }
 
-static char *waveformat_to_str_buf(char *buf, size_t buf_size, const WAVEFORMATEX *wf)
+static WORD waveformat_valid_bits(const WAVEFORMATEX *wf)
+{
+    if (wf->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+        WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
+        return wformat->Samples.wValidBitsPerSample;
+    } else {
+        return wf->wBitsPerSample;
+    }
+}
+
+static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
 {
     char* type = "?";
     switch(wf->wFormatTag) {
@@ -210,11 +220,18 @@ static char *waveformat_to_str_buf(char *buf, size_t buf_size, const WAVEFORMATE
         type = "s";
         break;
     }
-    snprintf(buf, buf_size, "%"PRIu16"ch %s%"PRIu16" @ %"PRIu32"hz",
-             wf->nChannels, type, wf->wBitsPerSample, (unsigned)wf->nSamplesPerSec);
+    int valid_bits = waveformat_valid_bits(wf);
+    if (valid_bits == wf->wBitsPerSample){
+        snprintf(buf, buf_size, "%"PRIu16"ch %s%"PRIu16" @ %"PRIu32"hz",
+                 wf->nChannels, type, valid_bits, (unsigned)wf->nSamplesPerSec);
+    } else {
+        snprintf(buf, buf_size, "%"PRIu16"ch %s%"PRIu16" (in %s%"PRIu16") @ %"PRIu32"hz",
+                 wf->nChannels, type, valid_bits, type, wf->wBitsPerSample,
+                 (unsigned)wf->nSamplesPerSec);
+    }
     return buf;
 }
-#define waveformat_to_str(wf) waveformat_to_str_buf((char[32]){0}, 32, (wf))
+#define waveformat_to_str(wf) waveformat_to_str_buf((char[40]){0}, 40, (wf))
 
 static bool waveformat_is_float(WAVEFORMATEX *wf)
 {
@@ -289,8 +306,8 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf)
 }
 
 static bool try_format(struct ao *ao,
-                      int bits, bool is_float, int samplerate,
-                      const struct mp_chmap channels)
+                       int bits, int valid_bits, bool is_float,
+                       int samplerate, struct mp_chmap *channels)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     /* If for some reason we get 8-bits, try 16-bit equivalent instead.
@@ -301,8 +318,7 @@ static bool try_format(struct ao *ao,
     bits = FFMAX(16, bits);
 
     WAVEFORMATEXTENSIBLE wformat;
-    set_waveformat(&wformat, bits / 8, is_float, samplerate, channels.num,
-                   mp_chmap_to_waveext(&channels));
+    set_waveformat(&wformat, bits, valid_bits, is_float, samplerate, channels);
     MP_VERBOSE(ao, "Trying %s\n", waveformat_to_str(&wformat.Format));
 
     WAVEFORMATEX *closestMatch;
@@ -319,7 +335,6 @@ static bool try_format(struct ao *ao,
         if (set_ao_format(ao, &wformat.Format)) {
             MP_VERBOSE(ao, "Accepted as %dch %s @ %dhz\n",
                        ao->channels.num, af_fmt_to_str(ao->format), ao->samplerate);
-
             return true;
         }
     } if (hr == S_OK || (!state->opt_exclusive && hr == AUDCLNT_E_UNSUPPORTED_FORMAT)) {
@@ -340,8 +355,8 @@ static bool try_mix_format(struct ao *ao)
     HRESULT hr = IAudioClient_GetMixFormat(state->pAudioClient, &wf);
     EXIT_ON_ERROR(hr);
 
-    bool ret = try_format(ao, wf->wBitsPerSample, waveformat_is_float(wf),
-                          wf->nSamplesPerSec, ao->channels);
+    bool ret = try_format(ao, wf->wBitsPerSample, waveformat_valid_bits(wf),
+                          waveformat_is_float(wf), wf->nSamplesPerSec, &ao->channels);
 
     SAFE_RELEASE(wf, CoTaskMemFree(wf));
     return ret;
@@ -400,8 +415,9 @@ static bool find_formats(struct ao *ao)
     }
 
     /* See if the format works as-is */
-    if (try_format(ao, af_fmt2bits(ao->format),
-                   af_fmt_is_float(ao->format), ao->samplerate, ao->channels))
+    int bits = af_fmt2bits(ao->format);
+    if (try_format(ao, bits, bits, af_fmt_is_float(ao->format),
+                   ao->samplerate, &ao->channels))
         return true;
 
     if (!state->opt_exclusive) {
@@ -416,10 +432,10 @@ static bool find_formats(struct ao *ao)
     /* fixme: try float first */
     bool is_float = false;
     while (1) { // not infinite -- returns at bottom
-        int bits = start_bits;
+        bits = start_bits;
         for (; bits > 8; bits -= 8) {
             int samplerate = ao->samplerate;
-            if (try_format(ao, bits, is_float, samplerate, ao->channels))
+            if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
                 return true;
 
             // make samplerate fit in [44100 192000]
@@ -429,28 +445,28 @@ static bool find_formats(struct ao *ao)
                     samplerate = 44100;
                 if (samplerate > 96000)
                     samplerate = 192000;
-                if (try_format(ao, bits, is_float, samplerate, ao->channels))
+                if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
                     return true;
             }
 
             // try bounding to 96kHz
             if (samplerate > 48000) {
                 samplerate = 96000;
-                if (try_format(ao, bits, is_float, samplerate, ao->channels))
+                if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
                     return true;
             }
 
             // try bounding to 48kHz
             if (samplerate > 44100) {
                 samplerate = 48000;
-                if (try_format(ao, bits, is_float, samplerate, ao->channels))
+                if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
                     return true;
             }
 
             /* How bad is this? try 44100hz, but only on 16bit */
             if (bits == 16 && samplerate != 44100) {
                 samplerate = 44100;
-                if (try_format(ao, bits, is_float, samplerate, ao->channels))
+                if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
                     return true;
             }
         }
