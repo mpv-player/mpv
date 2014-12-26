@@ -562,6 +562,9 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline, 0);
     struct demux_chapter *chapters =
         talloc_zero_array(NULL, struct demux_chapter, m->num_ordered_chapters);
+    // Stupid hack, because fuck everything.
+    for (int n = 0; n < m->num_ordered_chapters; n++)
+        chapters[n].pts = -1;
     uint64_t starttime = 0;
     uint64_t missing_time = 0;
     uint64_t last_end_time = 0;
@@ -569,6 +572,12 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     build_timeline_loop(mpctx, sources, num_sources, 0, &starttime,
                         &missing_time, &last_end_time, &timeline,
                         chapters, &part_count, 0, 0);
+
+    // Fuck everything (2): filter out all "unset" chapters.
+    for (int n = m->num_ordered_chapters - 1; n >= 0; n--) {
+        if (chapters[n].pts == -1)
+            MP_TARRAY_REMOVE_AT(chapters, m->num_ordered_chapters, n);
+    }
 
     if (!part_count) {
         // None of the parts come from the file itself???
