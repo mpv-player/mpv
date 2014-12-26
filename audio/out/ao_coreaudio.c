@@ -415,11 +415,11 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
                            struct mp_chmap *chmap)
 {
     void *talloc_ctx = talloc_new(NULL);
-    AudioChannelLayout *l = ca_layout_to_custom_layout(ao, talloc_ctx, layout);
 
     MP_DBG(ao, "input channel layout:\n");
     ca_log_layout(ao, MSGL_DEBUG, layout);
 
+    AudioChannelLayout *l = ca_layout_to_custom_layout(ao, talloc_ctx, layout);
     if (!l)
         goto coreaudio_error;
 
