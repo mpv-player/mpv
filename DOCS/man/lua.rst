@@ -682,7 +682,7 @@ List of events
 
 ``shutdown``
     Sent when the player quits, and the script should terminate. Normally
-    handled automatically. See `Mode of operation`_.
+    handled automatically. See `Details on the script initialization and lifecycle`_.
 
 ``log-message``
     Receives messages enabled with ``mp.enable_messages``. The message data
