@@ -75,6 +75,7 @@ local state = {
     fullscreen = false,
     timer = nil,
     cache_idle = false,
+    idle = false,
 }
 
 
@@ -1732,6 +1733,7 @@ function render()
     for k,cords in pairs(osc_param.areas["showhide"]) do
         mp.set_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "showhide")
     end
+    do_enable_keybindings()
 
     --mouse input area
     local mouse_over_osc = false
@@ -1856,9 +1858,47 @@ end
 
 -- called by mpv on every frame
 function tick()
-    if (state.fullscreen and user_opts.showfullscreen) or (not state.fullscreen and user_opts.showwindowed) then
+    if (state.idle) then
+
+        -- render idle message
+        msg.debug("idle message")
+        local icon_x, icon_y = 320 - 28, 140
+
+        local ass = assdraw.ass_new()
+        ass:new_event()
+        ass:pos(icon_x, icon_y)
+        ass:append("{\\an7\\c&H430142&\\1a&H00&\\bord0\\shad0\\p6}m 1605 828 b 1605 1175 1324 1456 977 1456 631 1456 349 1175 349 828 349 482 631 200 977 200 1324 200 1605 482 1605 828{\\p0}")
+        ass:new_event()
+        ass:pos(icon_x, icon_y)
+        ass:append("{\\an7\\c&HDDDBDD&\\1a&H00&\\bord0\\shad0\\p6}m 1296 910 b 1296 1131 1117 1310 897 1310 676 1310 497 1131 497 910 497 689 676 511 897 511 1117 511 1296 689 1296 910{\\p0}")
+        ass:new_event()
+        ass:pos(icon_x, icon_y)
+        ass:append("{\\an7\\c&H691F69&\\1a&H00&\\bord0\\shad0\\p6}m 762 1113 l 762 708 b 881 776 1000 843 1119 911 1000 978 881 1046 762 1113{\\p0}")
+        ass:new_event()
+        ass:pos(icon_x, icon_y)
+        ass:append("{\\an7\\c&H682167&\\1a&H00&\\bord0\\shad0\\p6}m 925 42 b 463 42 87 418 87 880 87 1343 463 1718 925 1718 1388 1718 1763 1343 1763 880 1763 418 1388 42 925 42 m 925 42 m 977 200 b 1324 200 1605 482 1605 828 1605 1175 1324 1456 977 1456 631 1456 349 1175 349 828 349 482 631 200 977 200{\\p0}")
+        ass:new_event()
+        ass:pos(icon_x, icon_y)
+        ass:append("{\\an7\\c&H753074&\\1a&H00&\\bord0\\shad0\\p6}m 977 198 b 630 198 348 480 348 828 348 1176 630 1458 977 1458 1325 1458 1607 1176 1607 828 1607 480 1325 198 977 198 m 977 198 m 977 202 b 1323 202 1604 483 1604 828 1604 1174 1323 1454 977 1454 632 1454 351 1174 351 828 351 483 632 202 977 202{\\p0}")
+        ass:new_event()
+        ass:pos(icon_x, icon_y)
+        ass:append("{\\an7\\c&HE5E5E5&\\1a&H00&\\bord0\\shad0\\p6}m 895 10 b 401 10 0 410 0 905 0 1399 401 1800 895 1800 1390 1800 1790 1399 1790 905 1790 410 1390 10 895 10 m 895 10 m 925 42 b 1388 42 1763 418 1763 880 1763 1343 1388 1718 925 1718 463 1718 87 1343 87 880 87 418 463 42 925 42{\\p0}")
+        ass:new_event()
+        ass:pos(320, icon_y+40)
+        ass:an(8)
+        ass:append("\\N\\NDrop files to play here.")
+        mp.set_osd_ass(640, 360, ass.text)
+
+        mp.disable_key_bindings("showhide")
+
+
+    elseif (state.fullscreen and user_opts.showfullscreen)
+        or (not state.fullscreen and user_opts.showwindowed) then
+
+        -- render the OSC
         render()
     else
+        -- Flush OSD
         mp.set_osd_ass(osc_param.playresy, osc_param.playresy, "")
     end
 end
@@ -1886,7 +1926,17 @@ mp.register_event("tracks-changed", request_init)
 mp.register_script_message("enable-osc", function() enable_osc(true) end)
 mp.register_script_message("disable-osc", function() enable_osc(false) end)
 
-mp.observe_property("fullscreen", "bool", function(name, val) state.fullscreen = val end)
+mp.observe_property("fullscreen", "bool",
+    function(name, val)
+        state.fullscreen = val
+    end
+)
+mp.observe_property("idle", "bool",
+    function(name, val)
+        state.idle = val
+        tick()
+    end
+)
 mp.observe_property("pause", "bool", pause_state)
 mp.observe_property("cache-idle", "bool", cache_state)
 
