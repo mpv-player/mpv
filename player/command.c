@@ -95,7 +95,7 @@ struct command_ctx {
 };
 
 struct overlay {
-    bool need_unmap : 1;
+    void *map_start;
     size_t map_size;
     struct sub_bitmap osd;
 };
@@ -3823,8 +3823,8 @@ static void replace_overlay(struct MPContext *mpctx, int id, struct overlay *new
     recreate_overlays(mpctx);
 
     // Do this afterwards, so we never unmap while the OSD is using it.
-    if (old.osd.bitmap && old.map_size)
-        munmap(old.osd.bitmap, old.map_size);
+    if (old.map_start && old.map_size)
+        munmap(old.map_start, old.map_size);
 }
 
 static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
@@ -3854,7 +3854,7 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
     };
     int fd = -1;
     bool close_fd = true;
-    void *p = (void *)-1;
+    void *p = NULL;
     if (file[0] == '@') {
         char *end;
         fd = strtol(&file[1], &end, 10);
@@ -3871,16 +3871,20 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
         fd = open(file, O_RDONLY | O_BINARY | O_CLOEXEC);
     }
     if (fd >= 0) {
-        overlay.map_size = h * stride;
-        p = mmap(NULL, overlay.map_size, PROT_READ, MAP_SHARED, fd, offset);
+        overlay.map_size = offset + h * stride;
+        void *m = mmap(NULL, overlay.map_size, PROT_READ, MAP_SHARED, fd, 0);
         if (close_fd)
             close(fd);
+        if (m && m != MAP_FAILED) {
+            overlay.map_start = m;
+            p = m;
+        }
     }
-    if (!p || p == (void *)-1) {
+    if (!p) {
         MP_ERR(mpctx, "overlay_add: could not open or map '%s'\n", file);
         goto error;
     }
-    overlay.osd.bitmap = p;
+    overlay.osd.bitmap = (char *)p + offset;
     replace_overlay(mpctx, id, &overlay);
     r = 0;
 error:

@@ -501,13 +501,15 @@ Input Commands that are Possibly Subject to Change
 
     It is also possible to pass a raw memory address for use as bitmap memory
     by passing a memory address as integer prefixed with a ``&`` character.
-    Passing the wrong thing here will crash the player. The ``offset`` parameter
-    is not used and must be 0. This mode might be useful for use with libmpv.
+    Passing the wrong thing here will crash the player. This mode might be
+    useful for use with libmpv. The ``offset`` parameter is simply added to the
+    memory address (since mpv 0.8.0, ignored before).
 
-    ``offset`` is the offset of the first pixel in the source file. It is
-    passed directly to ``mmap`` and is subject to certain restrictions
-    (see ``man mmap`` for details). In particular, this value has to be a
-    multiple of the system's page size.
+    ``offset`` is the byte offset of the first pixel in the source file.
+    (The current implementation always mmap's the whole file from position 0 to
+    the end of the image, so large offsets should be avoided. Before mpv 0.8.0,
+    the offset was actually passed directly to ``mmap``, but it was changed to
+    make using it easier.)
 
     ``fmt`` is a string identifying the image format. Currently, only ``bgra``
     is defined. This format has 4 bytes per pixels, with 8 bits per component.
