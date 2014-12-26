@@ -537,8 +537,8 @@ get_v4l2_freq (struct pvr_t *pvr)
 
   if (ioctl (pvr->dev_fd, VIDIOC_G_FREQUENCY, &vf) < 0)
   {
-    MP_ERR(pvr, "%s can't get frequency %d.\n",
-            LOG_LEVEL_V4L2, errno);
+    MP_ERR(pvr, "%s can't get frequency (%s).\n",
+            LOG_LEVEL_V4L2, mp_strerror(errno));
     return -1;
   }
   freq = vf.frequency;
@@ -1491,10 +1491,15 @@ pvr_stream_read (stream_t *stream, char *buffer, int size)
 
     rk = size - pos;
 
-    if (poll (pfds, 1, 500) <= 0)
+    int r = poll(pfds, 1, 5000);
+    if (r <= 0)
     {
-      MP_ERR(pvr, "%s failed with errno %d when reading %d bytes\n",
-              LOG_LEVEL_PVR, errno, size-pos);
+      if (r < 0) {
+        MP_ERR(pvr, "%s failed with '%s' when reading %d bytes\n",
+               LOG_LEVEL_PVR, mp_strerror(errno), size-pos);
+      } else {
+        MP_ERR(pvr, "timeout when trying to read from device\n");
+      }
       break;
     }
 
