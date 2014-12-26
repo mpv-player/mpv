@@ -183,7 +183,7 @@ static bool init_chmap(struct ao *ao)
     err = CA_GET_ARY_O(p->device,
                        kAudioDevicePropertyPreferredChannelLayout,
                        &layouts, &n_layouts);
-    CHECK_CA_ERROR("could not get audio device prefered layouts");
+    CHECK_CA_ERROR("could not get audio device preferred layouts");
 
     struct mp_chmap_sel chmap_sel = {.tmp = p};
     for (int i = 0; i < n_layouts; i++) {
