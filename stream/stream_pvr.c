@@ -55,11 +55,6 @@
 #define PVR_DEFAULT_DEVICE "/dev/video0"
 #define PVR_MAX_CONTROLS 10
 
-/* logging mechanisms */
-#define LOG_LEVEL_PVR  "[pvr]"
-#define LOG_LEVEL_V4L2 "[v4l2]"
-#define LOG_LEVEL_ENCODER "[encoder]"
-
 /* audio codec mode */
 #define PVR_AUDIO_MODE_ARG_STEREO                              "stereo"
 #define PVR_AUDIO_MODE_ARG_JOINT_STEREO                        "joint_stereo"
@@ -250,8 +245,7 @@ copycreate_stationlist (struct pvr_t *pvr, stationlist_t *stationlist, int num)
 
   if (!stationlist->list)
   {
-    MP_ERR(pvr, "%s No memory allocated for station list, giving up\n",
-            LOG_LEVEL_V4L2);
+    MP_ERR(pvr, "No memory allocated for station list, giving up\n");
     return -1;
   }
 
@@ -282,8 +276,8 @@ print_all_stations (struct pvr_t *pvr)
 
   for (i = 0; i < pvr->stationlist.total; i++)
   {
-    MP_VERBOSE(pvr, "%s %3d: [%c] channel: %8s - freq: %8d - station: %s\n",
-            LOG_LEVEL_V4L2, i, (pvr->stationlist.list[i].enabled) ? 'X' : ' ',
+    MP_VERBOSE(pvr, "%3d: [%c] channel: %8s - freq: %8d - station: %s\n",
+            i, (pvr->stationlist.list[i].enabled) ? 'X' : ' ',
             pvr->stationlist.list[i].name, pvr->stationlist.list[i].freq,
             pvr->stationlist.list[i].station);
   }
@@ -353,8 +347,8 @@ set_station (struct pvr_t *pvr, const char *station,
     else
       BUFPRINTF(pvr->stationlist.list[i].station, "F %d", freq);
 
-    MP_DBG(pvr, "%s Set user station channel: %8s - freq: %8d - station: %s\n",
-            LOG_LEVEL_V4L2, pvr->stationlist.list[i].name,
+    MP_DBG(pvr, "Set user station channel: %8s - freq: %8d - station: %s\n",
+            pvr->stationlist.list[i].name,
             pvr->stationlist.list[i].freq,
             pvr->stationlist.list[i].station);
     return 0;
@@ -363,8 +357,7 @@ set_station (struct pvr_t *pvr, const char *station,
   /* from here on, we have to create a new entry, frequency is mandatory */
   if (freq < 0)
   {
-    MP_ERR(pvr, "%s Cannot add new station/channel without frequency\n",
-            LOG_LEVEL_V4L2);
+    MP_ERR(pvr, "Cannot add new station/channel without frequency\n");
     return -1;
   }
 
@@ -381,8 +374,7 @@ set_station (struct pvr_t *pvr, const char *station,
 
     if (!pvr->stationlist.list)
     {
-      MP_ERR(pvr, "%s No memory allocated for station list, giving up\n",
-              LOG_LEVEL_V4L2);
+      MP_ERR(pvr, "No memory allocated for station list, giving up\n");
       return -1;
     }
 
@@ -406,8 +398,8 @@ set_station (struct pvr_t *pvr, const char *station,
 
   pvr->stationlist.list[i].freq = freq;
 
-  MP_DBG(pvr, "%s Add user station channel: %8s - freq: %8d - station: %s\n",
-          LOG_LEVEL_V4L2, pvr->stationlist.list[i].name,
+  MP_DBG(pvr, "Add user station channel: %8s - freq: %8d - station: %s\n",
+          pvr->stationlist.list[i].name,
           pvr->stationlist.list[i].freq,
           pvr->stationlist.list[i].station);
 
@@ -445,26 +437,25 @@ parse_setup_stationlist (struct pvr_t *pvr)
     }
     if (!chanlists[i].name)
     {
-      MP_ERR(pvr, "%s unable to find channel list %s, using default %s\n",
-              LOG_LEVEL_V4L2, pvr->tv_params->chanlist, chanlists[pvr->chantab].name);
+      MP_ERR(pvr, "unable to find channel list %s, using default %s\n",
+              pvr->tv_params->chanlist, chanlists[pvr->chantab].name);
     }
     else
     {
-      MP_INFO(pvr, "%s select channel list %s, entries %d\n", LOG_LEVEL_V4L2,
+      MP_INFO(pvr, "select channel list %s, entries %d\n",
               chanlists[pvr->chantab].name, chanlists[pvr->chantab].count);
     }
   }
 
   if (0 > pvr->chantab)
   {
-    MP_FATAL(pvr, "%s No channel list selected, giving up\n", LOG_LEVEL_V4L2);
+    MP_FATAL(pvr, "No channel list selected, giving up\n");
     return -1;
   }
 
   if (copycreate_stationlist (pvr,&(pvr->stationlist), -1) < 0)
   {
-    MP_FATAL(pvr, "%s No memory allocated for station list, giving up\n",
-            LOG_LEVEL_V4L2);
+    MP_FATAL(pvr, "No memory allocated for station list, giving up\n");
     return -1;
   }
 
@@ -503,7 +494,7 @@ parse_setup_stationlist (struct pvr_t *pvr)
 
       if (set_station (pvr, station, (freq <= 0) ? channel : NULL, freq) < 0)
       {
-        MP_ERR(pvr, "%s Unable to set user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2,
+        MP_ERR(pvr, "Unable to set user station channel: %8s - freq: %8d - station: %s\n",
                 channel, freq, station);
       }
     }
@@ -530,15 +521,13 @@ get_v4l2_freq (struct pvr_t *pvr)
 
   if (ioctl (pvr->dev_fd, VIDIOC_G_TUNER, &vt) < 0)
   {
-    MP_ERR(pvr, "%s can't set tuner (%s).\n",
-            LOG_LEVEL_V4L2, mp_strerror (errno));
+    MP_ERR(pvr, "can't set tuner (%s).\n", mp_strerror (errno));
     return -1;
   }
 
   if (ioctl (pvr->dev_fd, VIDIOC_G_FREQUENCY, &vf) < 0)
   {
-    MP_ERR(pvr, "%s can't get frequency (%s).\n",
-            LOG_LEVEL_V4L2, mp_strerror(errno));
+    MP_ERR(pvr, "can't get frequency (%s).\n", mp_strerror(errno));
     return -1;
   }
   freq = vf.frequency;
@@ -560,7 +549,7 @@ set_v4l2_freq (struct pvr_t *pvr)
 
   if (0 >= pvr->freq)
   {
-    MP_ERR(pvr, "%s Frequency invalid %d !!!\n", LOG_LEVEL_V4L2, pvr->freq);
+    MP_ERR(pvr, "Frequency invalid %d !!!\n", pvr->freq);
     return -1;
   }
 
@@ -569,7 +558,7 @@ set_v4l2_freq (struct pvr_t *pvr)
    */
   if (get_v4l2_freq (pvr) == pvr->freq)
   {
-    MP_INFO(pvr, "%s Frequency %d already set.\n", LOG_LEVEL_V4L2, pvr->freq);
+    MP_INFO(pvr, "Frequency %d already set.\n", pvr->freq);
     return 0;
   }
 
@@ -581,8 +570,7 @@ set_v4l2_freq (struct pvr_t *pvr)
 
   if (ioctl (pvr->dev_fd, VIDIOC_G_TUNER, &vt) < 0)
   {
-    MP_ERR(pvr, "%s can't get tuner (%s).\n",
-            LOG_LEVEL_V4L2, mp_strerror (errno));
+    MP_ERR(pvr, "can't get tuner (%s).\n", mp_strerror (errno));
     return -1;
   }
 
@@ -594,26 +582,22 @@ set_v4l2_freq (struct pvr_t *pvr)
 
   if (ioctl (pvr->dev_fd, VIDIOC_S_FREQUENCY, &vf) < 0)
   {
-    MP_ERR(pvr, "%s can't set frequency (%s).\n",
-            LOG_LEVEL_V4L2, mp_strerror (errno));
+    MP_ERR(pvr, "can't set frequency (%s).\n", mp_strerror (errno));
     return -1;
   }
 
   memset (&vt, 0, sizeof(vt));
   if (ioctl (pvr->dev_fd, VIDIOC_G_TUNER, &vt) < 0)
   {
-    MP_ERR(pvr, "%s can't set tuner (%s).\n",
-            LOG_LEVEL_V4L2, mp_strerror (errno));
+    MP_ERR(pvr, "can't set tuner (%s).\n", mp_strerror (errno));
     return -1;
   }
 
   /* just a notification */
   if (!vt.signal)
-    MP_ERR(pvr, "%s NO SIGNAL at frequency %d (%d)\n",
-            LOG_LEVEL_V4L2, pvr->freq, vf.frequency);
+    MP_ERR(pvr, "NO SIGNAL at frequency %d (%d)\n", pvr->freq, vf.frequency);
   else
-    MP_INFO(pvr, "%s Got signal at frequency %d (%d)\n",
-            LOG_LEVEL_V4L2, pvr->freq, vf.frequency);
+    MP_INFO(pvr, "Got signal at frequency %d (%d)\n", pvr->freq, vf.frequency);
 
   return 0;
 }
@@ -633,13 +617,12 @@ set_station_by_step (struct pvr_t *pvr, int step, int v4lAction)
     {
       chidx = (chidx + pvr->stationlist.used) % pvr->stationlist.used;
 
-      MP_DBG(pvr, "%s Offset switch: current %d, enabled %d, step %d -> %d\n",
-              LOG_LEVEL_V4L2, pvr->chan_idx,
-              pvr->stationlist.enabled, step, chidx);
+      MP_DBG(pvr, "Offset switch: current %d, enabled %d, step %d -> %d\n",
+              pvr->chan_idx, pvr->stationlist.enabled, step, chidx);
 
       if (!pvr->stationlist.list[chidx].enabled)
       {
-        MP_DBG(pvr, "%s Switch disabled to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2,
+        MP_DBG(pvr, "Switch disabled to user station channel: %8s - freq: %8d - station: %s\n",
                 pvr->stationlist.list[chidx].name,
                 pvr->stationlist.list[chidx].freq,
                 pvr->stationlist.list[chidx].station);
@@ -653,7 +636,7 @@ set_station_by_step (struct pvr_t *pvr, int step, int v4lAction)
     pvr->chan_idx_last = pvr->chan_idx;
     pvr->chan_idx = chidx;
 
-    MP_INFO(pvr, "%s Switch to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2,
+    MP_INFO(pvr, "Switch to user station channel: %8s - freq: %8d - station: %s\n",
             pvr->stationlist.list[chidx].name,
             pvr->stationlist.list[chidx].freq,
             pvr->stationlist.list[chidx].station);
@@ -664,7 +647,7 @@ set_station_by_step (struct pvr_t *pvr, int step, int v4lAction)
     return (pvr->freq > 0) ? 0 : -1;
   }
 
-  MP_ERR(pvr, "%s Ooops couldn't set freq by channel entry step %d to current %d, enabled %d\n", LOG_LEVEL_V4L2,
+  MP_ERR(pvr, "Ooops couldn't set freq by channel entry step %d to current %d, enabled %d\n",
           step, pvr->chan_idx, pvr->stationlist.enabled);
 
   return -1;
@@ -681,8 +664,7 @@ set_station_by_channelname_or_freq (struct pvr_t *pvr, const char *channel,
 
   if (0 >= pvr->stationlist.enabled)
   {
-    MP_WARN(pvr, "%s No enabled station, cannot switch channel/frequency\n",
-            LOG_LEVEL_V4L2);
+    MP_WARN(pvr, "No enabled station, cannot switch channel/frequency\n");
     return -1;
   }
 
@@ -695,7 +677,7 @@ set_station_by_channelname_or_freq (struct pvr_t *pvr, const char *channel,
       {
         if (!pvr->stationlist.list[i].enabled)
         {
-          MP_WARN(pvr, "%s Switch disabled to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2,
+          MP_WARN(pvr, "Switch disabled to user station channel: %8s - freq: %8d - station: %s\n",
                   pvr->stationlist.list[i].name,
                   pvr->stationlist.list[i].freq,
                   pvr->stationlist.list[i].station);
@@ -719,7 +701,7 @@ set_station_by_channelname_or_freq (struct pvr_t *pvr, const char *channel,
       {
         if (!pvr->stationlist.list[i].enabled)
         {
-          MP_WARN(pvr, "%s Switch disabled to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2,
+          MP_WARN(pvr, "Switch disabled to user station channel: %8s - freq: %8d - station: %s\n",
                   pvr->stationlist.list[i].name,
                   pvr->stationlist.list[i].freq,
                   pvr->stationlist.list[i].station);
@@ -738,13 +720,13 @@ set_station_by_channelname_or_freq (struct pvr_t *pvr, const char *channel,
   if (i >= pvr->stationlist.used)
   {
     if (channel)
-      MP_WARN(pvr, "%s unable to find channel %s\n", LOG_LEVEL_V4L2, channel);
+      MP_WARN(pvr, "unable to find channel %s\n", channel);
     else
-      MP_WARN(pvr, "%s unable to find frequency %d\n", LOG_LEVEL_V4L2, freq);
+      MP_WARN(pvr, "unable to find frequency %d\n", freq);
     return -1;
   }
 
-  MP_INFO(pvr, "%s Switch to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2,
+  MP_INFO(pvr, "Switch to user station channel: %8s - freq: %8d - station: %s\n",
           pvr->stationlist.list[i].name,
           pvr->stationlist.list[i].freq,
           pvr->stationlist.list[i].station);
@@ -1070,8 +1052,7 @@ set_encoder_settings (struct pvr_t *pvr)
 
   if (ioctl (pvr->dev_fd, VIDIOC_S_EXT_CTRLS, &ctrls) < 0)
   {
-    MP_ERR(pvr, "%s Error setting MPEG controls (%s).\n",
-            LOG_LEVEL_ENCODER, mp_strerror (errno));
+    MP_ERR(pvr, "Error setting MPEG controls (%s).\n", mp_strerror (errno));
     free (ext_ctrl);
     return -1;
   }
@@ -1097,7 +1078,7 @@ parse_v4l2_tv_options (struct pvr_t *pvr)
     {
       if (pvr->tv_params->freq)
       {
-        MP_INFO(pvr, "%s tv param freq %s is overwritten by channel setting freq %d\n", LOG_LEVEL_V4L2,
+        MP_INFO(pvr, "tv param freq %s is overwritten by channel setting freq %d\n",
                 pvr->tv_params->freq, pvr->freq);
       }
     }
@@ -1105,14 +1086,14 @@ parse_v4l2_tv_options (struct pvr_t *pvr)
 
   if (pvr->freq < 0 && pvr->tv_params->freq)
   {
-    MP_INFO(pvr, "%s tv param freq %s is used directly\n",
-            LOG_LEVEL_V4L2, pvr->tv_params->freq);
+    MP_INFO(pvr, "tv param freq %s is used directly\n",
+            pvr->tv_params->freq);
 
     if (set_station_by_channelname_or_freq (pvr, NULL,
                                             atoi (pvr->tv_params->freq), 0)<0)
       {
-        MP_WARN(pvr, "%s tv param freq %s invalid to set station\n",
-                LOG_LEVEL_V4L2, pvr->tv_params->freq);
+        MP_WARN(pvr, "tv param freq %s invalid to set station\n",
+                pvr->tv_params->freq);
       }
   }
 
@@ -1167,7 +1148,7 @@ set_v4l2_settings (struct pvr_t *pvr)
     ctrl.value = 1;
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
-      MP_ERR(pvr, "%s can't mute (%s).\n", LOG_LEVEL_V4L2, mp_strerror (errno));
+      MP_ERR(pvr, "can't mute (%s).\n", mp_strerror (errno));
       return -1;
     }
   }
@@ -1177,7 +1158,7 @@ set_v4l2_settings (struct pvr_t *pvr)
   {
     if (ioctl (pvr->dev_fd, VIDIOC_S_INPUT, &pvr->input) < 0)
     {
-      MP_ERR(pvr, "%s can't set input (%s)\n", LOG_LEVEL_V4L2, mp_strerror (errno));
+      MP_ERR(pvr, "can't set input (%s)\n", mp_strerror (errno));
       return -1;
     }
   }
@@ -1190,15 +1171,15 @@ set_v4l2_settings (struct pvr_t *pvr)
 
     if (ioctl (pvr->dev_fd, VIDIOC_ENUMSTD, &std) < 0)
     {
-      MP_ERR(pvr, "%s can't set norm (%s)\n", LOG_LEVEL_V4L2, mp_strerror (errno));
+      MP_ERR(pvr, "can't set norm (%s)\n", mp_strerror (errno));
       return -1;
     }
 
-    MP_VERBOSE(pvr, "%s set norm to %s\n", LOG_LEVEL_V4L2, std.name);
+    MP_VERBOSE(pvr, "set norm to %s\n", std.name);
 
     if (ioctl (pvr->dev_fd, VIDIOC_S_STD, &std.id) < 0)
     {
-      MP_ERR(pvr, "%s can't set norm (%s)\n", LOG_LEVEL_V4L2, mp_strerror (errno));
+      MP_ERR(pvr, "can't set norm (%s)\n", mp_strerror (errno));
       return -1;
     }
   }
@@ -1217,8 +1198,8 @@ set_v4l2_settings (struct pvr_t *pvr)
 
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
-      MP_ERR(pvr, "%s can't set brightness to %d (%s).\n",
-              LOG_LEVEL_V4L2, ctrl.value, mp_strerror (errno));
+      MP_ERR(pvr, "can't set brightness to %d (%s).\n",
+             ctrl.value, mp_strerror (errno));
       return -1;
     }
   }
@@ -1237,8 +1218,8 @@ set_v4l2_settings (struct pvr_t *pvr)
 
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
-      MP_ERR(pvr, "%s can't set contrast to %d (%s).\n",
-              LOG_LEVEL_V4L2, ctrl.value, mp_strerror (errno));
+      MP_ERR(pvr, "can't set contrast to %d (%s).\n",
+             ctrl.value, mp_strerror (errno));
       return -1;
     }
   }
@@ -1257,8 +1238,8 @@ set_v4l2_settings (struct pvr_t *pvr)
 
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
-      MP_ERR(pvr, "%s can't set hue to %d (%s).\n",
-              LOG_LEVEL_V4L2, ctrl.value, mp_strerror (errno));
+      MP_ERR(pvr, "can't set hue to %d (%s).\n",
+              ctrl.value, mp_strerror (errno));
       return -1;
     }
   }
@@ -1277,8 +1258,8 @@ set_v4l2_settings (struct pvr_t *pvr)
 
     if (ioctl (pvr->dev_fd, VIDIOC_S_CTRL, &ctrl) < 0)
     {
-      MP_ERR(pvr, "%s can't set saturation to %d (%s).\n",
-              LOG_LEVEL_V4L2, ctrl.value, mp_strerror (errno));
+      MP_ERR(pvr, "can't set saturation to %d (%s).\n",
+              ctrl.value, mp_strerror (errno));
       return -1;
     }
   }
@@ -1293,8 +1274,8 @@ set_v4l2_settings (struct pvr_t *pvr)
 
     if (ioctl (pvr->dev_fd, VIDIOC_S_FMT, &vfmt) < 0)
     {
-      MP_ERR(pvr, "%s can't set resolution to %dx%d (%s).\n",
-              LOG_LEVEL_V4L2, pvr->width, pvr->height, mp_strerror (errno));
+      MP_ERR(pvr, "can't set resolution to %dx%d (%s).\n",
+              pvr->width, pvr->height, mp_strerror (errno));
       return -1;
     }
   }
@@ -1302,8 +1283,8 @@ set_v4l2_settings (struct pvr_t *pvr)
   if (pvr->freq < 0)
   {
     int freq = get_v4l2_freq (pvr);
-    MP_INFO(pvr, "%s Using current set frequency %d, to set channel\n",
-            LOG_LEVEL_V4L2, freq);
+    MP_INFO(pvr, "Using current set frequency %d, to set channel\n",
+            freq);
 
     if (0 < freq)
       return set_station_by_channelname_or_freq (pvr, NULL, freq, 1);
@@ -1332,7 +1313,7 @@ v4l2_list_capabilities (struct pvr_t *pvr)
   /* list available video inputs */
   vin.index = 0;
   err = 1;
-  MP_INFO(pvr, "%s Available video inputs: ", LOG_LEVEL_V4L2);
+  MP_INFO(pvr, "Available video inputs: ");
   while (ioctl (pvr->dev_fd, VIDIOC_ENUMINPUT, &vin) >= 0)
   {
     err = 0;
@@ -1350,7 +1331,7 @@ v4l2_list_capabilities (struct pvr_t *pvr)
   /* list available audio inputs */
   vaudio.index = 0;
   err = 1;
-  MP_INFO(pvr, "%s Available audio inputs: ", LOG_LEVEL_V4L2);
+  MP_INFO(pvr, "Available audio inputs: ");
   while (ioctl (pvr->dev_fd, VIDIOC_ENUMAUDIO, &vaudio) >= 0)
   {
     err = 0;
@@ -1367,7 +1348,7 @@ v4l2_list_capabilities (struct pvr_t *pvr)
 
   /* list available norms */
   vs.index = 0;
-  MP_INFO(pvr, "%s Available norms: ", LOG_LEVEL_V4L2);
+  MP_INFO(pvr, "Available norms: ");
   while (ioctl (pvr->dev_fd, VIDIOC_ENUMSTD, &vs) >= 0)
   {
     err = 0;
@@ -1406,26 +1387,26 @@ v4l2_display_settings (struct pvr_t *pvr)
     vin.index = input;
     if (ioctl (pvr->dev_fd, VIDIOC_ENUMINPUT, &vin) < 0)
     {
-      MP_ERR(pvr, "%s can't get input (%s).\n", LOG_LEVEL_V4L2, mp_strerror (errno));
+      MP_ERR(pvr, "can't get input (%s).\n", mp_strerror (errno));
       return -1;
     }
     else
-      MP_INFO(pvr, "%s Video input: %s\n", LOG_LEVEL_V4L2, vin.name);
+      MP_INFO(pvr, "Video input: %s\n", vin.name);
   }
   else
   {
-    MP_ERR(pvr, "%s can't get input (%s).\n", LOG_LEVEL_V4L2, mp_strerror (errno));
+    MP_ERR(pvr, "can't get input (%s).\n", mp_strerror (errno));
     return -1;
   }
 
   /* get current audio input */
   if (ioctl (pvr->dev_fd, VIDIOC_G_AUDIO, &vaudio) == 0)
   {
-    MP_INFO(pvr, "%s Audio input: %s\n", LOG_LEVEL_V4L2, vaudio.name);
+    MP_INFO(pvr, "Audio input: %s\n", vaudio.name);
   }
   else
   {
-    MP_ERR(pvr, "%s can't get input (%s).\n", LOG_LEVEL_V4L2, mp_strerror (errno));
+    MP_ERR(pvr, "can't get input (%s).\n", mp_strerror (errno));
     return -1;
   }
 
@@ -1438,7 +1419,7 @@ v4l2_display_settings (struct pvr_t *pvr)
     {
       if (vs.id == std)
       {
-        MP_INFO(pvr, "%s Norm: %s.\n", LOG_LEVEL_V4L2, vs.name);
+        MP_INFO(pvr, "Norm: %s.\n", vs.name);
         break;
       }
       vs.index++;
@@ -1446,7 +1427,7 @@ v4l2_display_settings (struct pvr_t *pvr)
   }
   else
   {
-    MP_ERR(pvr, "%s can't get norm (%s)\n", LOG_LEVEL_V4L2, mp_strerror (errno));
+    MP_ERR(pvr, "can't get norm (%s)\n", mp_strerror (errno));
     return -1;
   }
 
@@ -1495,8 +1476,8 @@ pvr_stream_read (stream_t *stream, char *buffer, int size)
     if (r <= 0)
     {
       if (r < 0) {
-        MP_ERR(pvr, "%s failed with '%s' when reading %d bytes\n",
-               LOG_LEVEL_PVR, mp_strerror(errno), size-pos);
+        MP_ERR(pvr, "failed with '%s' when reading %d bytes\n",
+               mp_strerror(errno), size-pos);
       } else {
         MP_ERR(pvr, "timeout when trying to read from device\n");
       }
@@ -1507,12 +1488,12 @@ pvr_stream_read (stream_t *stream, char *buffer, int size)
     if (rk > 0)
     {
       pos += rk;
-      MP_TRACE(pvr, "%s read (%d) bytes\n", LOG_LEVEL_PVR, pos);
+      MP_TRACE(pvr, "read (%d) bytes\n", pos);
     }
   }
 
   if (!pos)
-    MP_ERR(pvr, "%s read %d bytes\n", LOG_LEVEL_PVR, pos);
+    MP_ERR(pvr, "read %d bytes\n", pos);
 
   return pos;
 }
@@ -1543,10 +1524,10 @@ pvr_stream_open (stream_t *stream)
 
   /* open device */
   pvr->dev_fd = open (pvr->video_dev, O_RDWR | O_CLOEXEC);
-  MP_INFO(pvr, "%s Using device %s\n", LOG_LEVEL_PVR, pvr->video_dev);
+  MP_INFO(pvr, "Using device %s\n", pvr->video_dev);
   if (pvr->dev_fd == -1)
   {
-    MP_ERR(pvr, "%s error opening device %s\n", LOG_LEVEL_PVR, pvr->video_dev);
+    MP_ERR(pvr, "error opening device %s\n", pvr->video_dev);
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
@@ -1554,19 +1535,17 @@ pvr_stream_open (stream_t *stream)
   /* query capabilities (i.e test V4L2 support) */
   if (ioctl (pvr->dev_fd, VIDIOC_QUERYCAP, &vcap) < 0)
   {
-    MP_ERR(pvr, "%s device is not V4L2 compliant (%s).\n",
-            LOG_LEVEL_PVR, mp_strerror (errno));
+    MP_ERR(pvr, "device is not V4L2 compliant (%s).\n", mp_strerror (errno));
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
   else
-    MP_INFO(pvr, "%s Detected %s\n", LOG_LEVEL_PVR, vcap.card);
+    MP_INFO(pvr, "Detected %s\n", vcap.card);
 
   /* check for a valid V4L2 capture device */
   if (!(vcap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
   {
-    MP_ERR(pvr, "%s device is not a valid V4L2 capture device.\n",
-            LOG_LEVEL_PVR);
+    MP_ERR(pvr, "device is not a valid V4L2 capture device.\n");
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
@@ -1578,7 +1557,7 @@ pvr_stream_open (stream_t *stream)
 
   if (ioctl (pvr->dev_fd, VIDIOC_G_EXT_CTRLS, &ctrls) < 0)
   {
-    MP_ERR(pvr, "%s device do not support MPEG input.\n", LOG_LEVEL_ENCODER);
+    MP_ERR(pvr, "device do not support MPEG input.\n");
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
@@ -1586,7 +1565,7 @@ pvr_stream_open (stream_t *stream)
   /* list V4L2 capabilities */
   if (v4l2_list_capabilities (pvr) == -1)
   {
-    MP_ERR(pvr, "%s can't get v4l2 capabilities\n", LOG_LEVEL_PVR);
+    MP_ERR(pvr, "can't get v4l2 capabilities\n");
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
@@ -1594,7 +1573,7 @@ pvr_stream_open (stream_t *stream)
   /* apply V4L2 settings */
   if (set_v4l2_settings (pvr) == -1)
   {
-    MP_ERR(pvr, "%s can't set v4l2 settings\n", LOG_LEVEL_PVR);
+    MP_ERR(pvr, "can't set v4l2 settings\n");
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
@@ -1602,7 +1581,7 @@ pvr_stream_open (stream_t *stream)
   /* apply encoder settings */
   if (set_encoder_settings (pvr) == -1)
   {
-    MP_ERR(pvr, "%s can't set encoder settings\n", LOG_LEVEL_PVR);
+    MP_ERR(pvr, "can't set encoder settings\n");
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
@@ -1610,7 +1589,7 @@ pvr_stream_open (stream_t *stream)
   /* display current V4L2 settings */
   if (v4l2_display_settings (pvr) == -1)
   {
-    MP_ERR(pvr, "%s can't get v4l2 settings\n", LOG_LEVEL_PVR);
+    MP_ERR(pvr, "can't get v4l2 settings\n");
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
