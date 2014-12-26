@@ -341,33 +341,33 @@ static int ca_label_to_mp_speaker_id(AudioChannelLabel label)
     return -1;
 }
 
-static void ca_log_layout(struct ao *ao, AudioChannelLayout *layout)
+static void ca_log_layout(struct ao *ao, int l, AudioChannelLayout *layout)
 {
-    if (!mp_msg_test(ao->log, MSGL_V))
+    if (!mp_msg_test(ao->log, l))
         return;
 
     AudioChannelDescription *descs = layout->mChannelDescriptions;
 
-    MP_VERBOSE(ao, "layout: tag: <%u>, bitmap: <%u>, "
-                   "descriptions <%u>\n",
-                   (unsigned) layout->mChannelLayoutTag,
-                   (unsigned) layout->mChannelBitmap,
-                   (unsigned) layout->mNumberChannelDescriptions);
+    mp_msg(ao->log, l, "layout: tag: <%u>, bitmap: <%u>, "
+                       "descriptions <%u>\n",
+                       (unsigned) layout->mChannelLayoutTag,
+                       (unsigned) layout->mChannelBitmap,
+                       (unsigned) layout->mNumberChannelDescriptions);
 
     for (int i = 0; i < layout->mNumberChannelDescriptions; i++) {
         AudioChannelDescription d = descs[i];
-        MP_VERBOSE(ao, " - description %d: label <%u, %u>, "
-                       " flags: <%u>, coords: <%f, %f, %f>\n", i,
-                       (unsigned) d.mChannelLabel,
-                       (unsigned) ca_label_to_mp_speaker_id(d.mChannelLabel),
-                       (unsigned) d.mChannelFlags,
-                       d.mCoordinates[0],
-                       d.mCoordinates[1],
-                       d.mCoordinates[2]);
+        mp_msg(ao->log, l, " - description %d: label <%u, %u>, "
+            " flags: <%u>, coords: <%f, %f, %f>\n", i,
+            (unsigned) d.mChannelLabel,
+            (unsigned) ca_label_to_mp_speaker_id(d.mChannelLabel),
+            (unsigned) d.mChannelFlags,
+            d.mCoordinates[0],
+            d.mCoordinates[1],
+            d.mCoordinates[2]);
 
         if (i >= 32) {
-            MP_VERBOSE(ao, " detected more than 32 channel descriptions, "
-                       "skipping output");
+            mp_msg(ao->log, l, " detected more than 32 channel descriptions, "
+                   "skipping output");
             break;
         }
     }
@@ -416,10 +416,15 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
 {
     void *talloc_ctx = talloc_new(NULL);
     AudioChannelLayout *l = ca_layout_to_custom_layout(ao, talloc_ctx, layout);
+
+    MP_DBG(ao, "input channel layout:\n");
+    ca_log_layout(ao, MSGL_DEBUG, layout);
+
     if (!l)
         goto coreaudio_error;
 
-    ca_log_layout(ao, l);
+    MP_VERBOSE(ao, "converted input channel layout:\n");
+    ca_log_layout(ao, MSGL_V, l);
 
     if (l->mNumberChannelDescriptions > MP_NUM_CHANNELS) {
         MP_VERBOSE(ao, "layout has too many descriptions (%u, max: %d)\n",
@@ -449,7 +454,8 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
     talloc_free(talloc_ctx);
     return chmap->num > 0;
 coreaudio_error:
-    ca_log_layout(ao, layout);
+    MP_VERBOSE(ao, "converted input channel layout (failed):\n");
+    ca_log_layout(ao, MSGL_V, layout);
     talloc_free(talloc_ctx);
     return false;
 }
