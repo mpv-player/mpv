@@ -201,9 +201,9 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
             /* Accept the source if the segment uid matches and the edition
              * either matches or isn't specified. */
             if (!memcmp(uid->segment, m->uid.segment, 16) &&
-                (!uid->edition || uid->edition == m->uid.edition)) {
-                MP_INFO(mpctx, "Match for source %d: %s\n",
-                       i, d->filename);
+                (!uid->edition || uid->edition == m->uid.edition))
+            {
+                MP_INFO(mpctx, "Match for source %d: %s\n", i, d->filename);
 
                 for (int j = 0; j < m->num_ordered_chapters; j++) {
                     struct matroska_chapter *c = m->ordered_chapters + j;
@@ -216,7 +216,7 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
 
                     /* Set the requested segment. */
                     MP_TARRAY_GROW(NULL, *uids, *num_sources);
-                    memcpy((*uids) + *num_sources, &c->uid, sizeof(c->uid));
+                    (*uids)[*num_sources] = c->uid;
 
                     /* Add a new source slot. */
                     MP_TARRAY_APPEND(NULL, *sources, *num_sources, NULL);
@@ -240,8 +240,7 @@ static void check_file(struct MPContext *mpctx, struct demuxer ***sources,
                        char *filename, int first)
 {
     for (int segment = first; ; segment++) {
-        if (!check_file_seg(mpctx, sources, num_sources,
-                            uids, filename, segment))
+        if (!check_file_seg(mpctx, sources, num_sources, uids, filename, segment))
             break;
     }
 }
@@ -266,11 +265,10 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
     char **filenames = NULL;
     if (*num_sources > 1) {
         char *main_filename = mpctx->demuxer->filename;
-        MP_INFO(mpctx, "This file references data from "
-               "other sources.\n");
+        MP_INFO(mpctx, "This file references data from other sources.\n");
         if (opts->ordered_chapters_files && opts->ordered_chapters_files[0]) {
             MP_INFO(mpctx, "Loading references from '%s'.\n",
-                   opts->ordered_chapters_files);
+                    opts->ordered_chapters_files);
             struct playlist *pl =
                 playlist_parse_file(opts->ordered_chapters_files, mpctx->global);
             talloc_steal(tmp, pl);
@@ -278,10 +276,10 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
                 MP_TARRAY_APPEND(tmp, filenames, num_filenames, e->filename);
         } else if (mpctx->demuxer->stream->uncached_type != STREAMTYPE_FILE) {
             MP_WARN(mpctx, "Playback source is not a "
-                   "normal disk file. Will not search for related files.\n");
+                    "normal disk file. Will not search for related files.\n");
         } else {
             MP_INFO(mpctx, "Will scan other files in the "
-                   "same directory to find referenced sources.\n");
+                    "same directory to find referenced sources.\n");
             filenames = find_files(main_filename);
             num_filenames = MP_TALLOC_ELEMS(filenames);
             talloc_steal(tmp, filenames);
@@ -299,13 +297,12 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
             MP_INFO(mpctx, "Checking file %s\n", filenames[i]);
             check_file(mpctx, sources, num_sources, uids, filenames[i], 0);
         }
-    /* Loop while we have new sources to look for. */
     } while (old_source_count != *num_sources);
 
     if (missing(*sources, *num_sources)) {
         MP_ERR(mpctx, "Failed to find ordered chapter part!\n");
         int j = 1;
-        for (int i = 1; i < *num_sources; i++)
+        for (int i = 1; i < *num_sources; i++) {
             if ((*sources)[i]) {
                 struct matroska_segment_uid *source_uid = *uids + i;
                 struct matroska_segment_uid *target_uid = *uids + j;
@@ -313,6 +310,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
                 memmove(target_uid, source_uid, sizeof(*source_uid));
                 j++;
             }
+        }
         *num_sources = j;
     }
 
@@ -328,18 +326,14 @@ static int64_t add_timeline_part(struct MPContext *mpctx,
                                  uint64_t *last_end_time,
                                  uint64_t *starttime)
 {
-    /* Only add a separate part if the time or file actually changes.
-     * Matroska files have chapter divisions that are redundant from
-     * timeline point of view because the same chapter structure is used
-     * both to specify the timeline and for normal chapter information.
-     * Removing a missing inserted external chapter can also cause this.
-     * We allow for a configurable fudge factor because of files which
-     * specify chapter end times that are one frame too early;
-     * we don't want to try seeking over a one frame gap. */
+    /* Merge directly adjacent parts. We allow for a configurable fudge factor
+     * because of files which specify chapter end times that are one frame too
+     * early; we don't want to try seeking over a one frame gap. */
     int64_t join_diff = start - *last_end_time;
     if (*part_count == 0
         || FFABS(join_diff) > mpctx->opts->chapter_merge_threshold * 1e6
-        || source != (*timeline)[*part_count - 1].source) {
+        || source != (*timeline)[*part_count - 1].source)
+    {
         struct timeline_part new = {
             .start = *starttime / 1e9,
             .source_start = start / 1e9,
@@ -347,10 +341,9 @@ static int64_t add_timeline_part(struct MPContext *mpctx,
         };
         MP_TARRAY_APPEND(NULL, *timeline, *part_count, new);
     } else if (*part_count > 0 && join_diff) {
-        /* Chapter was merged at an inexact boundary;
-         * adjust timestamps to match. */
-        MP_VERBOSE(mpctx, "Merging timeline part %d with "
-               "offset %g ms.\n", *part_count, join_diff / 1e6);
+        // Chapter was merged at an inexact boundary; adjust timestamps to match.
+        MP_VERBOSE(mpctx, "Merging timeline part %d with offset %g ms.\n",
+                   *part_count, join_diff / 1e6);
         *starttime += join_diff;
         return join_diff;
     }
@@ -379,15 +372,12 @@ static void build_timeline_loop(struct MPContext *mpctx,
         struct matroska_chapter *c = m->ordered_chapters + i;
         uint64_t chapter_length = c->end - c->start;
 
-        /* Fill in the uid with the current one if one isn't requested. */
         if (!c->has_segment_uid)
-            memcpy(&c->uid, &m->uid, sizeof(c->uid));
+            c->uid = m->uid;
 
-        /* "Seek" to the end of the chapter. */
         local_starttime += chapter_length;
 
-        /* If we're before the start time for the chapter, skip to the next
-         * one. */
+        // If we're before the start time for the chapter, skip to the next one.
         if (local_starttime <= skip)
             continue;
 
@@ -396,14 +386,9 @@ static void build_timeline_loop(struct MPContext *mpctx,
             struct demuxer *linked_source = sources[j];
             struct matroska_data *linked_m = &linked_source->matroska_data;
 
-            /* Skip if the segment or edition isn't acceptable. */
             if (!demux_matroska_uid_cmp(&c->uid, &linked_m->uid))
                 continue;
 
-            /* TODO: Add option to support recursive chapters when loading
-             * recursive ordered chapter editions? If so, more code will be
-             * needed to add chapters for external non-ordered segment loading
-             * as well since that part is not recursive. */
             if (!limit) {
                 chapters[i].pts = *starttime / 1e9;
                 chapters[i].name = talloc_strdup(chapters, c->name);
@@ -412,13 +397,8 @@ static void build_timeline_loop(struct MPContext *mpctx,
             /* If we're the source or it's a non-ordered edition reference,
              * just add a timeline part from the source. */
             if (current_source == j || !linked_m->num_ordered_chapters) {
-                double source_full_length_seconds = demuxer_get_time_length(linked_source);
-                /* Some accuracy lost, but not enough to care. (Over one
-                 * million parts, a nanosecond off here could add up to a
-                 * millisecond and trigger a false-positive error message, but
-                 * if that's your biggest problem at that point,
-                 * congratulations. */
-                uint64_t source_full_length = source_full_length_seconds * 1e9;
+                uint64_t source_full_length =
+                    demuxer_get_time_length(linked_source) * 1e9;
                 uint64_t source_length = source_full_length - c->start;
                 int64_t join_diff = 0;
 
@@ -454,18 +434,15 @@ static void build_timeline_loop(struct MPContext *mpctx,
                     limit += join_diff;
                     chapter_length += join_diff;
                 }
-            /* Otherwise, we have an ordered edition as the source. Since this
-             * can jump around all over the place, we need to build up the
-             * timeline parts for each of its chapters, but not add them as
-             * chapters. */
             } else {
+                /* We have an ordered edition as the source. Since this
+                 * can jump around all over the place, we need to build up the
+                 * timeline parts for each of its chapters, but not add them as
+                 * chapters. */
                 build_timeline_loop(mpctx, sources, num_sources, j, starttime,
                                     missing_time, last_end_time, timeline,
                                     chapters, part_count, c->start, c->end);
-                /* The loop call has added time as needed (we can't add it here
-                 * due to 'join_diff' in the add_timeline_part function. Since
-                 * the time has already been added as needed, the chapter has
-                 * an effective 0 length at this point. */
+                // Already handled by the loop call.
                 chapter_length = 0;
             }
             *last_end_time = c->end;
@@ -574,9 +551,10 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     /* Ignore anything less than a millisecond when reporting missing time. If
      * users really notice less than a millisecond missing, maybe this can be
      * revisited. */
-    if (missing_time >= 1e6)
-        MP_ERR(mpctx, "There are %.3f seconds missing "
-               "from the timeline!\n", missing_time / 1e9);
+    if (missing_time >= 1e6) {
+        MP_ERR(mpctx, "There are %.3f seconds missing from the timeline!\n",
+               missing_time / 1e9);
+    }
     talloc_free(mpctx->sources);
     mpctx->sources = sources;
     mpctx->num_sources = num_sources;
