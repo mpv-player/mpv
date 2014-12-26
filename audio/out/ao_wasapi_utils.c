@@ -389,6 +389,25 @@ static bool try_passthrough(struct ao *ao)
     return false;
 }
 
+static bool search_sample_formats(struct ao *ao, int samplerate, struct mp_chmap *channels)
+{
+    // try float
+    for (int bits = 64; bits; bits -= 32){
+        if (try_format(ao, bits, bits, true, samplerate, channels))
+            return true;
+    }
+
+    // try int
+    // some common bit depths / container sizes (requests welcome)
+    int bits[]       = {32, 24, 32, 24, 32, 16};
+    int valid_bits[] = {32, 24, 24, 20, 20, 16};
+    for (int i = 0; i < MP_ARRAY_SIZE(bits); i++) {
+        if (try_format(ao, bits[i], valid_bits[i], false, samplerate, channels))
+            return true;
+    }
+    return false;
+}
+
 static bool find_formats(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
@@ -418,55 +437,26 @@ static bool find_formats(struct ao *ao)
     }
 
     /* Exclusive mode, we have to guess. */
-    int start_bits = 32;
-    /* fixme: try float first */
-    bool is_float = false;
-    while (1) { // not infinite -- returns at bottom
-        bits = start_bits;
-        for (; bits > 8; bits -= 8) {
-            int samplerate = ao->samplerate;
-            if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
-                return true;
-
-            // make samplerate fit in [44100 192000]
-            // we check for samplerate > 96k so that we can upsample instead of downsampling later
-            if (samplerate < 44100 || samplerate > 96000) {
-                if (samplerate < 44100)
-                    samplerate = 44100;
-                if (samplerate > 96000)
-                    samplerate = 192000;
-                if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
-                    return true;
-            }
-
-            // try bounding to 96kHz
-            if (samplerate > 48000) {
-                samplerate = 96000;
-                if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
-                    return true;
-            }
-
-            // try bounding to 48kHz
-            if (samplerate > 44100) {
-                samplerate = 48000;
-                if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
-                    return true;
-            }
-
-            /* How bad is this? try 44100hz, but only on 16bit */
-            if (bits == 16 && samplerate != 44100) {
-                samplerate = 44100;
-                if (try_format(ao, bits, bits, is_float, samplerate, &ao->channels))
-                    return true;
-            }
+    while (true) {
+        int samplerate = ao->samplerate;
+        // try integer multiples of requested sample rate first
+        while (samplerate <= 384000) {
+          if (search_sample_formats(ao, samplerate, &ao->channels))
+            return true;
+          samplerate += ao->samplerate;
         }
 
-        if (ao->channels.num > 6) {
-            /* Maybe this is 5.1 hardware with no support for more. */
-            mp_chmap_from_channels(&ao->channels, 6);
-        } else if (ao->channels.num != 2) {
-            /* Poor quality hardware? Try stereo mode, go through the list again. */
-            mp_chmap_from_channels(&ao->channels, 2);
+        // now try list of typical sample rates (requests welcome)
+        int samplerates[] = {384000, 352800, 192000, 176400, 96000, 88200,
+                              48000,  44100,  32000,  22050, 16000, 11025,
+                               8000};
+        for (int i = 0; i < MP_ARRAY_SIZE(samplerates); i++){
+          if (search_sample_formats(ao, samplerates[i], &ao->channels))
+            return true;
+        }
+
+        if (ao->channels.num > 1) {
+            mp_chmap_from_channels(&ao->channels, ao->channels.num - 1);
         } else {
             MP_ERR(ao, "Couldn't find acceptable audio format\n");
             return false;
