@@ -110,8 +110,8 @@ main_dependencies = [
         'name': 'posix',
         'desc': 'POSIX environment',
         # This should be good enough.
-        'func': check_statement(['poll.h', 'unistd.h'],
-                    'struct pollfd pfd; poll(&pfd, 1, 0); fork(); int f[2]; pipe(f)'),
+        'func': check_statement(['poll.h', 'unistd.h', 'sys/mman.h'],
+            'struct pollfd pfd; poll(&pfd, 1, 0); fork(); int f[2]; pipe(f); munmap(f,0)'),
     }, {
         'name': 'posix-or-mingw',
         'desc': 'programming environment',
@@ -196,10 +196,6 @@ iconv support use --disable-iconv.",
         'desc': 'shm',
         'func': check_statement(['sys/types.h', 'sys/ipc.h', 'sys/shm.h'],
             'shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0)')
-    }, {
-        'name': 'sys-mman-h',
-        'desc': 'mman.h',
-        'func': check_statement('sys/mman.h', 'mmap(0, 0, 0, 0, 0, 0)')
     }, {
         'name': 'nanosleep',
         'desc': 'nanosleep',

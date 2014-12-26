@@ -70,9 +70,7 @@ static const struct af_info *const filter_list[] = {
     &af_info_pan,
     &af_info_surround,
     &af_info_sub,
-#if HAVE_SYS_MMAN_H
     &af_info_export,
-#endif
     &af_info_drc,
     &af_info_extrastereo,
     &af_info_lavcac3enc,

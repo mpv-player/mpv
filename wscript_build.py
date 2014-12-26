@@ -103,7 +103,7 @@ def build(ctx):
         ( "audio/filter/af_drc.c" ),
         ( "audio/filter/af_dummy.c" ),
         ( "audio/filter/af_equalizer.c" ),
-        ( "audio/filter/af_export.c",            "sys-mman-h" ),
+        ( "audio/filter/af_export.c" ),
         ( "audio/filter/af_extrastereo.c" ),
         ( "audio/filter/af_forcespeed.c" ),
         ( "audio/filter/af_format.c" ),

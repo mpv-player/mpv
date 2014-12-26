@@ -135,6 +135,17 @@ void mp_globfree(mp_glob_t *pglob);
 #undef fstat
 #define fstat(...) mp_fstat(__VA_ARGS__)
 
+void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+int munmap(void *addr, size_t length);
+int msync(void *addr, size_t length, int flags);
+#define PROT_READ 1
+#define PROT_WRITE 2
+#define MAP_SHARED 1
+#define MAP_FAILED ((void *)-1)
+#define MS_ASYNC 1
+#define MS_SYNC 2
+#define MS_INVALIDATE 4
+
 #ifndef GLOB_NOMATCH
 #define GLOB_NOMATCH 3
 #endif
@@ -142,6 +153,10 @@ void mp_globfree(mp_glob_t *pglob);
 #define glob_t mp_glob_t
 #define glob(...) mp_glob(__VA_ARGS__)
 #define globfree(...) mp_globfree(__VA_ARGS__)
+
+#else /* __MINGW32__ */
+
+#include <sys/mman.h>
 
 #endif /* __MINGW32__ */
 

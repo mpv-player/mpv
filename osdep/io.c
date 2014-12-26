@@ -19,6 +19,7 @@
  */
 #include <unistd.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "talloc.h"
 
@@ -443,6 +444,64 @@ off_t mp_lseek(int fd, off_t offset, int whence)
         return (off_t)-1;
     }
     return _lseeki64(fd, offset, whence);
+}
+
+// Limited mmap() wrapper, inspired by:
+// http://code.google.com/p/mman-win32/source/browse/trunk/mman.c
+
+void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)
+{
+    assert(addr == NULL); // not implemented
+    assert(flags == MAP_SHARED); // not implemented
+
+    HANDLE osf = (HANDLE)_get_osfhandle(fd);
+    if (!osf) {
+        errno = EBADF;
+        return MAP_FAILED;
+    }
+
+    DWORD protect = 0;
+    DWORD access = 0;
+    if (prot & PROT_WRITE) {
+        protect = PAGE_READWRITE;
+        access = FILE_MAP_WRITE;
+    } else if (prot & PROT_READ) {
+        protect = PAGE_READONLY;
+        access = FILE_MAP_READ;
+    }
+
+    DWORD l_low = (uint32_t)length;
+    DWORD l_high = ((uint64_t)length) >> 32;
+    HANDLE map = CreateFileMapping(osf, NULL, protect, l_high, l_low, NULL);
+
+    if (!map) {
+        errno = EACCES; // something random
+        return MAP_FAILED;
+    }
+
+    DWORD o_low = (uint32_t)offset;
+    DWORD o_high = ((uint64_t)offset) >> 32;
+    void *p = MapViewOfFile(map, access, o_high, o_low, length);
+
+    CloseHandle(map);
+
+    if (!p) {
+        errno = EINVAL;
+        return MAP_FAILED;
+    }
+    return p;
+}
+
+int munmap(void *addr, size_t length)
+{
+    UnmapViewOfFile(addr);
+    return 0;
+}
+
+int msync(void *addr, size_t length, int flags)
+{
+    FlushViewOfFile(addr, length);
+    return 0;
 }
 
 #endif // __MINGW32__

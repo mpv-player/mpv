@@ -504,11 +504,6 @@ Input Commands that are Possibly Subject to Change
     Passing the wrong thing here will crash the player. The ``offset`` parameter
     is not used and must be 0. This mode might be useful for use with libmpv.
 
-    On Windows, currently only raw memory addresses work. File mapping is not
-    implemented because a ``mmap`` compatibility layer is missing, and because
-    this kind of shared memory method would perhaps not be overly useful on
-    Windows.
-
     ``offset`` is the offset of the first pixel in the source file. It is
     passed directly to ``mmap`` and is subject to certain restrictions
     (see ``man mmap`` for details). In particular, this value has to be a

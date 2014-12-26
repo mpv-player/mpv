@@ -60,9 +60,6 @@
 #include "audio/decode/dec_audio.h"
 #include "options/path.h"
 #include "screenshot.h"
-#if HAVE_SYS_MMAN_H
-#include <sys/mman.h>
-#endif
 #ifndef __MINGW32__
 #include <sys/wait.h>
 #endif
@@ -3825,13 +3822,9 @@ static void replace_overlay(struct MPContext *mpctx, int id, struct overlay *new
     *ptr = *new;
     recreate_overlays(mpctx);
 
-#if HAVE_SYS_MMAN_H
     // Do this afterwards, so we never unmap while the OSD is using it.
     if (old.osd.bitmap && old.map_size)
         munmap(old.osd.bitmap, old.map_size);
-#else
-    (void)old;
-#endif
 }
 
 static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
@@ -3878,10 +3871,8 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
         fd = open(file, O_RDONLY | O_BINARY | O_CLOEXEC);
     }
     if (fd >= 0) {
-#if HAVE_SYS_MMAN_H
         overlay.map_size = h * stride;
         p = mmap(NULL, overlay.map_size, PROT_READ, MAP_SHARED, fd, offset);
-#endif
         if (close_fd)
             close(fd);
     }
