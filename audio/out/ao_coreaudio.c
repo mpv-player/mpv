@@ -373,52 +373,62 @@ static void ca_log_layout(struct ao *ao, AudioChannelLayout *layout)
     }
 }
 
-bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
-                           struct mp_chmap *chmap)
+static AudioChannelLayout *ca_layout_to_custom_layout(
+    struct ao *ao, void *talloc_ctx, AudioChannelLayout *l)
 {
-    AudioChannelLayoutTag tag  = layout->mChannelLayoutTag;
-    uint32_t layout_size       = sizeof(layout);
+    AudioChannelLayoutTag tag = l->mChannelLayoutTag;
+    AudioChannelLayout *r;
     OSStatus err;
 
     if (tag == kAudioChannelLayoutTag_UseChannelBitmap) {
-        err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForBitmap,
-                                     sizeof(uint32_t),
-                                     &layout->mChannelBitmap,
-                                     &layout_size,
-                                     layout);
-        CHECK_CA_ERROR("failed to convert channel bitmap to descriptions");
+        uint32_t psize;
+        err = AudioFormatGetPropertyInfo(
+            kAudioFormatProperty_ChannelLayoutForBitmap,
+            sizeof(uint32_t), &l->mChannelBitmap, &psize);
+        CHECK_CA_ERROR("failed to convert channel bitmap to descriptions (info)");
+        r = talloc_size(NULL, psize);
+        err = AudioFormatGetProperty(
+            kAudioFormatProperty_ChannelLayoutForBitmap,
+            sizeof(uint32_t), &l->mChannelBitmap, &psize, r);
+        CHECK_CA_ERROR("failed to convert channel bitmap to descriptions (get)");
     } else if (tag != kAudioChannelLayoutTag_UseChannelDescriptions) {
-        err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForTag,
-                                     sizeof(AudioChannelLayoutTag),
-                                     &layout->mChannelLayoutTag,
-                                     &layout_size,
-                                     layout);
-        CHECK_CA_ERROR("failed to convert channel tag to descriptions");
+        uint32_t psize;
+        err = AudioFormatGetPropertyInfo(
+            kAudioFormatProperty_ChannelLayoutForTag,
+            sizeof(AudioChannelLayoutTag), &l->mChannelLayoutTag, &psize);
+        r = talloc_size(NULL, psize);
+        CHECK_CA_ERROR("failed to convert channel tag to descriptions (info)");
+        err = AudioFormatGetProperty(
+            kAudioFormatProperty_ChannelLayoutForTag,
+            sizeof(AudioChannelLayoutTag), &l->mChannelLayoutTag, &psize, r);
+        CHECK_CA_ERROR("failed to convert channel tag to descriptions (get)");
+    } else {
+        r = l;
     }
 
-    ca_log_layout(ao, layout);
+    return r;
+coreaudio_error:
+    return NULL;
+}
 
-    // If the channel layout uses channel descriptions, from my
-    // experiments there are there three possibile cases:
-    // * The description has a label kAudioChannelLabel_Unknown:
-    //   Can't do anything about this (looks like non surround
-    //   layouts are like this).
-    // * The description uses positional information: this in
-    //   theory could be used but one would have to map spatial
-    //   positions to labels which is not really feasible.
-    // * The description has a well known label which can be mapped
-    //   to the waveextensible definition: this is the kind of
-    //   descriptions we process here.
+bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
+                           struct mp_chmap *chmap)
+{
+    void *talloc_ctx = talloc_new(NULL);
+    AudioChannelLayout *l = ca_layout_to_custom_layout(ao, talloc_ctx, layout);
+    if (!l)
+        goto coreaudio_error;
 
-    if (layout->mNumberChannelDescriptions > MP_NUM_CHANNELS) {
+    ca_log_layout(ao, l);
+
+    if (l->mNumberChannelDescriptions > MP_NUM_CHANNELS) {
         MP_VERBOSE(ao, "layout has too many descriptions (%u, max: %d)\n",
-                   (unsigned) layout->mNumberChannelDescriptions,
-                   MP_NUM_CHANNELS);
+                   (unsigned) l->mNumberChannelDescriptions, MP_NUM_CHANNELS);
         return false;
     }
 
-    for (int n = 0; n < layout->mNumberChannelDescriptions; n++) {
-        AudioChannelLabel label = layout->mChannelDescriptions[n].mChannelLabel;
+    for (int n = 0; n < l->mNumberChannelDescriptions; n++) {
+        AudioChannelLabel label = l->mChannelDescriptions[n].mChannelLabel;
         uint8_t speaker = ca_label_to_mp_speaker_id(label);
         if (speaker < 0) {
             MP_VERBOSE(ao, "channel label=%u unusable to build channel "
@@ -436,9 +446,11 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
     if (mp_chmap_is_unknown(chmap) && chmap->num < 3)
         mp_chmap_from_channels(chmap, chmap->num);
 
+    talloc_free(talloc_ctx);
     return chmap->num > 0;
 coreaudio_error:
     ca_log_layout(ao, layout);
+    talloc_free(talloc_ctx);
     return false;
 }
 
