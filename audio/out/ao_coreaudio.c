@@ -187,18 +187,18 @@ static AudioChannelLayout* ca_query_layout(struct ao *ao, void *talloc_ctx)
     };
 
     err = AudioObjectGetPropertyDataSize(p->device, &p_addr, 0, NULL, &psize);
-    CHECK_CA_ERROR("could not get AUHAL preferred layout (size)");
+    CHECK_CA_ERROR("could not get device preferred layout (size)");
 
     r = talloc_size(talloc_ctx, psize);
 
     err = AudioObjectGetPropertyData(p->device, &p_addr, 0, NULL, &psize, r);
-    CHECK_CA_ERROR("could not get AUHAL preferred layout (get)");
+    CHECK_CA_ERROR("could not get device preferred layout (get)");
 
 coreaudio_error:
     return r;
 }
 
-static AudioChannelLayout* ca_query_stereo_channels(struct ao *ao, void *talloc_ctx)
+static AudioChannelLayout* ca_query_stereo_layout(struct ao *ao, void *talloc_ctx)
 {
     struct priv *p = ao->priv;
     OSStatus err;
@@ -214,7 +214,7 @@ static AudioChannelLayout* ca_query_stereo_channels(struct ao *ao, void *talloc_
 
     uint32_t psize = sizeof(channels);
     err = AudioObjectGetPropertyData(p->device, &p_addr, 0, NULL, &psize, channels);
-    CHECK_CA_ERROR("could not get AUHAL preferred stereo layout");
+    CHECK_CA_ERROR("could not get device preferred stereo layout");
 
     psize = sizeof(AudioChannelLayout) + nch * sizeof(AudioChannelDescription);
     r = talloc_zero_size(talloc_ctx, psize);
@@ -245,7 +245,7 @@ static bool init_chmap(struct ao *ao)
     if (ml && ca_layout_to_mp_chmap(ao, ml, &chmap))
         mp_chmap_sel_add_map(&chmap_sel, &chmap);
 
-    AudioChannelLayout *sl = ca_query_stereo_channels(ao, ta_ctx);
+    AudioChannelLayout *sl = ca_query_stereo_layout(ao, ta_ctx);
     if (sl && ca_layout_to_mp_chmap(ao, sl, &chmap))
         mp_chmap_sel_add_map(&chmap_sel, &chmap);
 
