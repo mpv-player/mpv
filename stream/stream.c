@@ -464,7 +464,7 @@ void stream_set_capture_file(stream_t *s, const char *filename)
         s->capture_file = NULL;
         s->capture_filename = NULL;
         if (filename) {
-            s->capture_file = fopen(filename, "wb");
+            s->capture_file = fopen(filename, "ab");
             if (s->capture_file) {
                 s->capture_filename = talloc_strdup(NULL, filename);
                 if (s->buf_pos < s->buf_len)
