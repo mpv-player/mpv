@@ -3211,6 +3211,9 @@ Miscellaneous
     interrupted. Note that, due to cache latencies, captured data may begin and
     end somewhat delayed compared to what you see displayed.
 
+    The destination file is always appended. (Before mpv 0.8.0, the file was
+    overwritten.)
+
 ``--stream-dump=<filename>``
     Same as ``--stream-capture``, but do not start playback. Instead, the entire
     file is dumped.
