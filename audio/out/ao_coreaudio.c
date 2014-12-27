@@ -173,26 +173,83 @@ coreaudio_error:
     return CONTROL_ERROR;
 }
 
-static bool init_chmap(struct ao *ao)
+static AudioChannelLayout* ca_query_layout(struct ao *ao, void *talloc_ctx)
 {
     struct priv *p = ao->priv;
     OSStatus err;
-    AudioChannelLayout *layouts;
-    size_t n_layouts;
+    uint32_t psize;
+    AudioChannelLayout *r = NULL;
 
-    err = CA_GET_ARY_O(p->device,
-                       kAudioDevicePropertyPreferredChannelLayout,
-                       &layouts, &n_layouts);
-    CHECK_CA_ERROR("could not get audio device preferred layouts");
+    AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
+        .mSelector = kAudioDevicePropertyPreferredChannelLayout,
+        .mScope    = kAudioDevicePropertyScopeOutput,
+        .mElement  = kAudioObjectPropertyElementWildcard,
+    };
 
-    struct mp_chmap_sel chmap_sel = {.tmp = p};
-    for (int i = 0; i < n_layouts; i++) {
-        struct mp_chmap chmap = {0};
-        if (ca_layout_to_mp_chmap(ao, &layouts[i], &chmap))
-            mp_chmap_sel_add_map(&chmap_sel, &chmap);
+    err = AudioObjectGetPropertyDataSize(p->device, &p_addr, 0, NULL, &psize);
+    CHECK_CA_ERROR("could not get AUHAL preferred layout (size)");
+
+    r = talloc_size(talloc_ctx, psize);
+
+    err = AudioObjectGetPropertyData(p->device, &p_addr, 0, NULL, &psize, r);
+    CHECK_CA_ERROR("could not get AUHAL preferred layout (get)");
+
+coreaudio_error:
+    return r;
+}
+
+static AudioChannelLayout* ca_query_stereo_channels(struct ao *ao, void *talloc_ctx)
+{
+    struct priv *p = ao->priv;
+    OSStatus err;
+    const int nch = 2;
+    uint32_t channels[nch];
+    AudioChannelLayout *r = NULL;
+
+    AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
+        .mSelector = kAudioDevicePropertyPreferredChannelsForStereo,
+        .mScope    = kAudioDevicePropertyScopeOutput,
+        .mElement  = kAudioObjectPropertyElementWildcard,
+    };
+
+    uint32_t psize = sizeof(channels);
+    err = AudioObjectGetPropertyData(p->device, &p_addr, 0, NULL, &psize, channels);
+    CHECK_CA_ERROR("could not get AUHAL preferred stereo layout");
+
+    psize = sizeof(AudioChannelLayout) + nch * sizeof(AudioChannelDescription);
+    r = talloc_zero_size(talloc_ctx, psize);
+    r->mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
+    r->mNumberChannelDescriptions = nch;
+
+    AudioChannelDescription desc = {0};
+    desc.mChannelFlags = kAudioChannelFlags_AllOff;
+
+    for(int i = 0; i < nch; i++) {
+        desc.mChannelLabel = channels[i];
+        r->mChannelDescriptions[i] = desc;
     }
 
-    talloc_free(layouts);
+coreaudio_error:
+    return r;
+}
+
+static bool init_chmap(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    void *ta_ctx = talloc_new(NULL);
+
+    struct mp_chmap_sel chmap_sel = {.tmp = p};
+    struct mp_chmap chmap = {0};
+
+    AudioChannelLayout *ml = ca_query_layout(ao, ta_ctx);
+    if (ml && ca_layout_to_mp_chmap(ao, ml, &chmap))
+        mp_chmap_sel_add_map(&chmap_sel, &chmap);
+
+    AudioChannelLayout *sl = ca_query_stereo_channels(ao, ta_ctx);
+    if (sl && ca_layout_to_mp_chmap(ao, sl, &chmap))
+        mp_chmap_sel_add_map(&chmap_sel, &chmap);
+
+    talloc_free(ta_ctx);
 
     if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels)) {
         MP_ERR(ao, "could not select a suitable channel map among the "
@@ -444,12 +501,6 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
             chmap->num = n + 1;
         }
     }
-
-    // In OS X systems with unconfigured multichannel, coreaudio reports
-    // speakers with an unknown channel label. Just assume those are stereo
-    // and mono
-    if (mp_chmap_is_unknown(chmap) && chmap->num < 3)
-        mp_chmap_from_channels(chmap, chmap->num);
 
     talloc_free(talloc_ctx);
     return chmap->num > 0;
