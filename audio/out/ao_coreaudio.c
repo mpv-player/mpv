@@ -421,12 +421,6 @@ static void ca_log_layout(struct ao *ao, int l, AudioChannelLayout *layout)
             d.mCoordinates[0],
             d.mCoordinates[1],
             d.mCoordinates[2]);
-
-        if (i >= 32) {
-            mp_msg(ao->log, l, " detected more than 32 channel descriptions, "
-                   "skipping output");
-            break;
-        }
     }
 }
 
