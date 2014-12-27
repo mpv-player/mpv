@@ -4248,7 +4248,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (!mpctx->num_sources)
             return -1;
         struct osd_sub_state state;
-        get_osd_sub_state(mpctx, 0, &state);
+        update_osd_sub_state(mpctx, 0, &state);
         double refpts = get_current_time(mpctx);
         if (state.dec_sub && refpts != MP_NOPTS_VALUE) {
             double a[2];

@@ -475,8 +475,8 @@ void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
 void update_subtitles(struct MPContext *mpctx);
 void uninit_sub_renderer(struct MPContext *mpctx);
-void get_osd_sub_state(struct MPContext *mpctx, int order,
-                       struct osd_sub_state *out_state);
+void update_osd_sub_state(struct MPContext *mpctx, int order,
+                          struct osd_sub_state *out_state);
 
 // timeline/tl_matroska.c
 void build_ordered_chapter_timeline(struct MPContext *mpctx);
