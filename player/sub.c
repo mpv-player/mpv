@@ -191,8 +191,8 @@ void reset_subtitle_state(struct MPContext *mpctx)
     reset_subtitles(mpctx, 1);
 }
 
-void get_osd_sub_state(struct MPContext *mpctx, int order,
-                       struct osd_sub_state *out_state)
+void update_osd_sub_state(struct MPContext *mpctx, int order,
+                          struct osd_sub_state *out_state)
 {
     struct MPOpts *opts = mpctx->opts;
     struct track *track = mpctx->current_track[order][STREAM_SUB];
@@ -238,7 +238,7 @@ static void update_subtitle(struct MPContext *mpctx, int order)
     }
 
     struct osd_sub_state state;
-    get_osd_sub_state(mpctx, order, &state);
+    update_osd_sub_state(mpctx, order, &state);
 
     double refpts_s = mpctx->playback_pts - state.video_offset;
     double curpts_s = refpts_s - opts->sub_delay;
@@ -342,5 +342,5 @@ void reinit_subs(struct MPContext *mpctx, int order)
     struct dec_sub *dec_sub = mpctx->d_sub[order];
     reinit_subdec(mpctx, track, dec_sub);
 
-    get_osd_sub_state(mpctx, order, NULL);
+    update_osd_sub_state(mpctx, order, NULL);
 }
