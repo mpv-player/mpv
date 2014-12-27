@@ -1,10 +1,6 @@
 mpv
 ===
 
-[![Build Status](https://api.travis-ci.org/mpv-player/mpv.png)](https://travis-ci.org/mpv-player/mpv)
-
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/1232/badge.svg)](https://scan.coverity.com/projects/1232)
-
 Overview
 --------
 
