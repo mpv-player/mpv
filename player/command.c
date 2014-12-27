@@ -2922,10 +2922,16 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
 
         for (struct playlist_entry *e = mpctx->playlist->first; e; e = e->next)
         {
+            char *p = e->filename;
+            if (!mp_is_url(bstr0(p))) {
+                char *s = mp_basename(e->filename);
+                if (s[0])
+                    p = s;
+            }
             if (mpctx->playlist->current == e) {
-                res = talloc_asprintf_append(res, "> %s <\n", e->filename);
+                res = talloc_asprintf_append(res, "> %s <\n", p);
             } else {
-                res = talloc_asprintf_append(res, "%s\n", e->filename);
+                res = talloc_asprintf_append(res, "%s\n", p);
             }
         }
 
