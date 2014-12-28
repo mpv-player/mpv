@@ -128,6 +128,9 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
         pic->data[n] = image->planes[n];
         pic->linesize[n] = image->stride[n];
     }
+    pic->format = avctx->pix_fmt;
+    pic->width = avctx->width;
+    pic->height = avctx->height;
     int ret = avcodec_encode_video2(avctx, &pkt, pic, &got_output);
     if (ret < 0)
         goto error_exit;
