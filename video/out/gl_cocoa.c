@@ -20,6 +20,7 @@
  */
 
 #include <OpenGL/OpenGL.h>
+#include <dlfcn.h>
 #include "cocoa_common.h"
 #include "osdep/macosx_versions.h"
 #include "gl_common.h"
@@ -42,6 +43,19 @@ static int cgl_color_size(struct MPGLContext *ctx)
     GLint value;
     CGLDescribePixelFormat(p->pix, 0, kCGLPFAColorSize, &value);
     return value > 16 ? 8 : 5;
+}
+
+static void *cocoa_glgetaddr(const char *s)
+{
+    void *ret = NULL;
+    void *handle = dlopen(
+        "/System/Library/Frameworks/OpenGL.framework/OpenGL",
+        RTLD_LAZY | RTLD_LOCAL);
+    if (!handle)
+        return NULL;
+    ret = dlsym(handle, s);
+    dlclose(handle);
+    return ret;
 }
 
 static bool create_gl_context(struct MPGLContext *ctx)
@@ -102,7 +116,7 @@ static bool create_gl_context(struct MPGLContext *ctx)
 
     vo_cocoa_create_nsgl_ctx(ctx->vo, p->ctx);
     ctx->depth_r = ctx->depth_g = ctx->depth_b = cgl_color_size(ctx);
-    mpgl_load_functions(ctx->gl, (void *)vo_cocoa_glgetaddr, NULL, ctx->vo->log);
+    mpgl_load_functions(ctx->gl, (void *)cocoa_glgetaddr, NULL, ctx->vo->log);
 
     CGLReleasePixelFormat(p->pix);
 
