@@ -33,6 +33,10 @@ def _build_pdf(ctx):
 
     _add_rst_manual_dependencies(ctx)
 
+def _all_includes(ctx):
+    return [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
+            ctx.dependencies_includes()
+
 def build(ctx):
     ctx.load('waf_customizations')
     ctx.load('generators.sources')
@@ -415,13 +419,21 @@ def build(ctx):
                 ctx.path.find_node('osdep/mpv.rc'),
                 ctx.path.find_node(node))
 
+    if ctx.dependency_satisfied('cplayer') or ctx.dependency_satisfied('test'):
+        ctx(
+            target       = "objects",
+            source       = ctx.filtered_sources(sources),
+            use          = ctx.dependencies_use(),
+            includes     = _all_includes(ctx),
+            features     = "c",
+        )
+
     if ctx.dependency_satisfied('cplayer'):
         ctx(
             target       = "mpv",
-            source       = ctx.filtered_sources(sources) + ["player/main_fn.c"],
-            use          = ctx.dependencies_use(),
-            includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
-                           ctx.dependencies_includes(),
+            source       = "player/main_fn.c",
+            use          = 'objects',
+            includes     = _all_includes(ctx),
             features     = "c cprogram",
             install_path = ctx.env.BINDIR
         )
@@ -443,6 +455,15 @@ def build(ctx):
             wrapctx.env.CFLAGS = wrapflags
             wrapctx.env.LAST_LINKFLAGS = wrapflags
 
+    if ctx.dependency_satisfied('test'):
+        for test in ctx.path.ant_glob("test/*.c"):
+            ctx(
+                target   = os.path.splitext(test.srcpath())[0],
+                source   = test.srcpath(),
+                use      = "objects",
+                includes = _all_includes(ctx),
+                features = "c cprogram",
+            )
 
     build_shared = ctx.dependency_satisfied('libmpv-shared')
     build_static = ctx.dependency_satisfied('libmpv-static')

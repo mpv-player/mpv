@@ -84,6 +84,10 @@ build_options = [
         'desc': 'inline assembly (currently without effect)',
         'default': 'enable',
         'func': check_true,
+    }, {
+        'name': '--test',
+        'desc': 'test suite (using cmocka)',
+        'func': check_pkg_config('cmocka >= 0.4.1'),
     }
 ]
 

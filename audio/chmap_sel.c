@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <limits.h>
 
 #include "common/common.h"
 #include "chmap_sel.h"
@@ -183,6 +184,10 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
             return true;
         }
     }
+
+    if (mp_chmap_sel_fallback(s, map))
+        return true;
+
     // Fallback to mono/stereo as last resort
     *map = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
     if (test_layout(s, map))
@@ -191,6 +196,95 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
     if (test_layout(s, map))
         return true;
     *map = (struct mp_chmap) {0};
+    return false;
+}
+
+#define UPMIX_IDX 0
+#define DOWNMIX_IDX 1
+#define FALLBACK_IDX 2
+
+static bool test_fallbacks(struct mp_chmap *a, struct mp_chmap *b,
+                           int best_diffs[2], struct mp_chmap best[2])
+{
+    struct mp_chmap diff1, diff2;
+
+    mp_chmap_diff(a, b, &diff1);
+    if (mp_chmap_contains(a, b) && best_diffs[UPMIX_IDX] > diff1.num) {
+        best[UPMIX_IDX] = *a;
+        best_diffs[UPMIX_IDX] = diff1.num;
+        return true;
+    }
+
+    mp_chmap_diff(b, a, &diff2);
+    if (mp_chmap_contains(b, a) && best_diffs[DOWNMIX_IDX] > diff2.num) {
+        best[DOWNMIX_IDX] = *a;
+        best_diffs[DOWNMIX_IDX] = diff2.num;
+        return true;
+    }
+
+    if (diff1.num > 0 && best_diffs[FALLBACK_IDX] > diff1.num) {
+        best[FALLBACK_IDX] = *a;
+        best_diffs[FALLBACK_IDX] = diff1.num;
+        return true;
+    }
+
+    if (diff2.num > 0 && best_diffs[FALLBACK_IDX] > diff2.num) {
+        best[FALLBACK_IDX] = *a;
+        best_diffs[FALLBACK_IDX] = diff2.num;
+        return true;
+    }
+
+    return false;
+}
+
+// Determine which channel map to fallback to given a source channel map. It
+// uses the following heuristic:
+// 1) If mono is required always prefer stereo to a multichannel upmix.
+// 2) Search for an upmix that is an exact superset of the required chmap.
+// 3) Search for a downmix that is the exact subset of the required chmap.
+// 4) Search for either an upmix or downmix that is the closest (minimum
+//    difference of speakers) to the required chmap.
+bool mp_chmap_sel_fallback(const struct mp_chmap_sel *s, struct mp_chmap *map)
+{
+    // special case: if possible always fallback mono to stereo (instead of
+    // looking for a multichannel upmix)
+    struct mp_chmap mono   = MP_CHMAP_INIT_MONO;
+    struct mp_chmap stereo = MP_CHMAP_INIT_STEREO;
+    if (mp_chmap_equals(&mono, map) && test_layout(s, &stereo)) {
+        *map = stereo;
+        return true;
+    }
+
+    int best_diffs[] = { INT_MAX, INT_MAX, INT_MAX };
+    struct mp_chmap best[] = { {0}, {0}, {0} };
+
+    for (int n = 0; n < s->num_chmaps; n++) {
+        struct mp_chmap e = s->chmaps[n];
+
+        if (mp_chmap_is_unknown(&e))
+            continue;
+
+        if (test_fallbacks(&e, map, best_diffs, best))
+            continue;
+
+        // in case we didn't match any fallback retry after replacing speakers
+        for (int i = 0; i < MP_ARRAY_SIZE(speaker_replacements); i++) {
+            struct mp_chmap  t = e;
+            struct mp_chmap *r = (struct mp_chmap *)speaker_replacements[i];
+            if (replace_speakers(&t, r)) {
+                if (test_fallbacks(&t, map, best_diffs, best))
+                    continue;
+            }
+        }
+    }
+
+    for (int i = UPMIX_IDX; i < MP_ARRAY_SIZE(best); i++) {
+        if (best_diffs[i] < INT_MAX) {
+            *map = best[i];
+            return true;
+        }
+    }
+
     return false;
 }
 
