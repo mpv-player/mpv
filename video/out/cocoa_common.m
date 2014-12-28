@@ -20,7 +20,6 @@
 #import <Cocoa/Cocoa.h>
 #import <CoreServices/CoreServices.h> // for CGDisplayHideCursor
 #import <IOKit/pwr_mgt/IOPMLib.h>
-#include <dlfcn.h>
 
 #import "cocoa_common.h"
 #import "video/out/cocoa/window.h"
@@ -110,19 +109,6 @@ static void queue_new_video_size(struct vo *vo, int w, int h)
         id<MpvSizing> win = (id<MpvSizing>) s->window;
         [win queueNewVideoSize:NSMakeSize(w, h)];
     }
-}
-
-void *vo_cocoa_glgetaddr(const char *s)
-{
-    void *ret = NULL;
-    void *handle = dlopen(
-        "/System/Library/Frameworks/OpenGL.framework/OpenGL",
-        RTLD_LAZY | RTLD_LOCAL);
-    if (!handle)
-        return NULL;
-    ret = dlsym(handle, s);
-    dlclose(handle);
-    return ret;
 }
 
 static void enable_power_management(struct vo *vo)
