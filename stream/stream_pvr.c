@@ -113,6 +113,7 @@ typedef struct station_elem_s {
   int freq;
   char station[PVR_STATION_NAME_SIZE];
   int enabled;
+  int priority;
 } station_elem_t;
 
 typedef struct stationlist_s {
@@ -307,7 +308,7 @@ disable_all_stations (struct pvr_t *pvr)
  */
 static int
 set_station (struct pvr_t *pvr, const char *station,
-             const char *channel, int freq)
+             const char *channel, int freq, int priority)
 {
   int i;
 
@@ -346,6 +347,8 @@ set_station (struct pvr_t *pvr, const char *station,
       BUFSTRCPY(pvr->stationlist.list[i].station, channel);
     else
       BUFPRINTF(pvr->stationlist.list[i].station, "F %d", freq);
+
+    pvr->stationlist.list[i].priority = priority;
 
     MP_DBG(pvr, "Set user station channel: %8s - freq: %8d - station: %s\n",
             pvr->stationlist.list[i].name,
@@ -387,6 +390,7 @@ set_station (struct pvr_t *pvr, const char *station,
   /* here we go, our actual new entry */
   pvr->stationlist.used++;
   pvr->stationlist.list[i].enabled = 1;
+  pvr->stationlist.list[i].priority = priority;
   pvr->stationlist.enabled++;
 
   if (station)
@@ -404,6 +408,18 @@ set_station (struct pvr_t *pvr, const char *station,
           pvr->stationlist.list[i].station);
 
   return 0;
+}
+
+static int compare_priority(const void *pa, const void *pb)
+{
+    const station_elem_t *a = pa;
+    const station_elem_t *b = pb;
+
+    if (a->priority < b->priority)
+        return -1;
+    if (a->priority > b->priority)
+        return 1;
+    return 0;
 }
 
 /**
@@ -468,6 +484,10 @@ parse_setup_stationlist (struct pvr_t *pvr)
 
     disable_all_stations (pvr);
 
+    int prio = 0;
+    for (i = 0; i < pvr->stationlist.total; i++)
+        pvr->stationlist.list[i].priority = ++prio;
+
     while (*channels)
     {
       char *tmp = *(channels++);
@@ -492,12 +512,15 @@ parse_setup_stationlist (struct pvr_t *pvr)
       if ((freq = atoi (channel)) <= 1000)
         freq = -1;
 
-      if (set_station (pvr, station, (freq <= 0) ? channel : NULL, freq) < 0)
+      if (set_station (pvr, station, (freq <= 0) ? channel : NULL, freq, ++prio) < 0)
       {
         MP_ERR(pvr, "Unable to set user station channel: %8s - freq: %8d - station: %s\n",
                 channel, freq, station);
       }
     }
+
+    qsort(pvr->stationlist.list, pvr->stationlist.total,
+          sizeof(station_elem_t), compare_priority);
   }
 
   return print_all_stations (pvr);
