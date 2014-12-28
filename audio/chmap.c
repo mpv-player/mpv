@@ -375,6 +375,29 @@ void mp_chmap_get_reorder(int dst[MP_NUM_CHANNELS], const struct mp_chmap *from,
         assert(to->speaker[dst[n]] == from->speaker[n]);
 }
 
+// Performs the difference between a and b, and store it in diff. If b has
+// channels that do not appear in a, those will not appear in the difference.
+// To get to those the argument ordering in the function call has to be
+// inverted. For the same reason, the diff with a superset will return no
+// speakers.
+void mp_chmap_diff(const struct mp_chmap *a, const struct mp_chmap *b,
+                   struct mp_chmap *diff)
+{
+    uint64_t a_mask = mp_chmap_to_lavc_unchecked(a);
+    uint64_t b_mask = mp_chmap_to_lavc_unchecked(b);
+    mp_chmap_from_lavc(diff, (a_mask ^ b_mask) & a_mask);
+}
+
+// Checks whether a contains all the speakers in b
+bool mp_chmap_contains(const struct mp_chmap *a, const struct mp_chmap *b)
+{
+    struct mp_chmap d1;
+    struct mp_chmap d2;
+    mp_chmap_diff(a, b, &d1);
+    mp_chmap_diff(b, a, &d2);
+    return a->num >= b->num && d1.num >= 0 && d2.num == 0;
+}
+
 // Returns something like "fl-fr-fc". If there's a standard layout in lavc
 // order, return that, e.g. "3.0" instead of "fl-fr-fc".
 // Unassigned but valid speakers get names like "sp28".
