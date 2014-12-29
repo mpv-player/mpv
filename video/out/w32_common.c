@@ -17,6 +17,7 @@
  */
 
 #define COBJMACROS
+#define _WIN32_WINNT 0x0600
 #include <stdio.h>
 #include <limits.h>
 #include <pthread.h>
@@ -313,6 +314,56 @@ static void subtract_window_borders(HWND hwnd, RECT *rc)
     rc->bottom -= b.bottom;
 }
 
+static bool is_maximized(struct vo_w32_state *w32)
+{
+    WINDOWPLACEMENT wp = { .length = sizeof(WINDOWPLACEMENT) };
+    GetWindowPlacement(w32->window, &wp);
+    return wp.showCmd == SW_SHOWMAXIMIZED;
+}
+
+static LRESULT borderless_nchittest(struct vo_w32_state *w32, int x, int y)
+{
+    if (is_maximized(w32))
+        return HTCLIENT;
+
+    POINT mouse = { x, y };
+    ScreenToClient(w32->window, &mouse);
+
+    // The diagonal size handles are slightly wider than the side borders
+    int handle_width = GetSystemMetrics(SM_CXSMSIZE) +
+                       GetSystemMetrics(SM_CXBORDER);
+
+    // Hit-test top border
+    int frame_height = GetSystemMetrics(SM_CYFRAME) +
+                       GetSystemMetrics(SM_CXPADDEDBORDER);
+    if (mouse.y < frame_height) {
+        if (mouse.x < handle_width)
+            return HTTOPLEFT;
+        if (mouse.x > w32->dw - handle_width)
+            return HTTOPRIGHT;
+        return HTTOP;
+    }
+
+    // Hit-test bottom border
+    if (mouse.y > w32->dh - frame_height) {
+        if (mouse.x < handle_width)
+            return HTBOTTOMLEFT;
+        if (mouse.x > w32->dw - handle_width)
+            return HTBOTTOMRIGHT;
+        return HTBOTTOM;
+    }
+
+    // Hit-test side borders
+    int frame_width = GetSystemMetrics(SM_CXFRAME) +
+                      GetSystemMetrics(SM_CXPADDEDBORDER);
+    if (mouse.x < frame_width)
+        return HTLEFT;
+    if (mouse.x > w32->dw - frame_width)
+        return HTRIGHT;
+
+    return HTCLIENT;
+}
+
 // turn a WMSZ_* input value in v into the border that should be resized
 // returns: 0=left, 1=top, 2=right, 3=bottom, -1=undefined
 static int get_resize_border(int v)
@@ -596,6 +647,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                 return 0;
             }
             break;
+        }
+        break;
+    case WM_NCHITTEST:
+        // Provide sizing handles for borderless windows
+        if (!w32->opts->border && !w32->opts->fullscreen) {
+            return borderless_nchittest(w32, GET_X_LPARAM(lParam),
+                                        GET_Y_LPARAM(lParam));
         }
         break;
     case WM_SYSKEYDOWN:
