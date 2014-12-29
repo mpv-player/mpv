@@ -1077,8 +1077,8 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
             continue;
         }
         uint64_t pos = seek->seek_position + mkv_d->segment_start;
-        MP_VERBOSE(demuxer, "Element 0x%x at %"PRIu64".\n",
-                   (unsigned)seek->seek_id, pos);
+        MP_DBG(demuxer, "Element 0x%x at %"PRIu64".\n",
+               (unsigned)seek->seek_id, pos);
         get_header_element(demuxer, seek->seek_id, pos);
         // This is nice to warn against incomplete files.
         int64_t end = 0;
