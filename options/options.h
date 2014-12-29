@@ -180,6 +180,7 @@ typedef struct MPOpts {
     char **audio_lang;
     char **sub_lang;
     int audio_display;
+    char **display_tags;
     int sub_visibility;
     int sub_pos;
     float sub_delay;

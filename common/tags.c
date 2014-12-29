@@ -74,6 +74,25 @@ struct mp_tags *mp_tags_dup(void *tparent, struct mp_tags *tags)
     return new;
 }
 
+// Return a copy of the tags, but containing only keys in list. Also forces
+// the order and casing of the keys (for cosmetic reasons).
+// The special key "all" matches all keys.
+struct mp_tags *mp_tags_filtered(void *tparent, struct mp_tags *tags, char **list)
+{
+    struct mp_tags *new = talloc_zero(tparent, struct mp_tags);
+    for (int n = 0; list && list[n]; n++) {
+        char *key = list[n];
+        if (strcasecmp(key, "all") == 0) {
+            talloc_free(new);
+            return mp_tags_dup(tparent, tags);
+        }
+        char *value = mp_tags_get_str(tags, key);
+        if (value)
+            mp_tags_set_str(new, key, value);
+    }
+    return new;
+}
+
 void mp_tags_merge(struct mp_tags *tags, struct mp_tags *src)
 {
     for (int n = 0; n < src->num_keys; n++)

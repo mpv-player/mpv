@@ -213,6 +213,8 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("hls-bitrate", hls_bitrate, M_OPT_FIXED,
                ({"no", 0}, {"min", 1}, {"max", 2})),
 
+    OPT_STRINGLIST("display-tags*", display_tags, 0),
+
 #if HAVE_CDDA
     OPT_SUBSTRUCT("cdda", stream_cdda_opts, stream_cdda_conf, 0),
     OPT_STRING("cdrom-device", cdrom_device, M_OPT_FILE),
@@ -778,6 +780,12 @@ const struct MPOpts mp_default_opts = {
     .dvd_angle = 1,
 
     .mf_fps = 1.0,
+
+    .display_tags = (char **)(const char*[]){
+        "artist", "album", "album_artist", "comment", "composer", "genre",
+        "performer", "title", "track", "icy-title",
+        NULL
+    },
 };
 
 #endif /* MPLAYER_CFG_MPLAYER_H */

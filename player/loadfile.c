@@ -168,9 +168,10 @@ void update_demuxer_properties(struct MPContext *mpctx)
         tracks->events &= ~DEMUX_EVENT_STREAMS;
     }
     if (events & DEMUX_EVENT_METADATA) {
-        struct mp_tags *info = demuxer->metadata;
+        struct mp_tags *info =
+            mp_tags_filtered(mpctx, demuxer->metadata, mpctx->opts->display_tags);
         // prev is used to attempt to print changed tags only (to some degree)
-        struct mp_tags *prev = mpctx->tags;
+        struct mp_tags *prev = mpctx->filtered_tags;
         int n_prev = 0;
         bool had_output = false;
         for (int n = 0; n < info->num_keys; n++) {
@@ -186,8 +187,8 @@ void update_demuxer_properties(struct MPContext *mpctx)
             MP_INFO(mpctx, " %s: %s\n", info->keys[n], info->values[n]);
             had_output = true;
         }
-        talloc_free(mpctx->tags);
-        mpctx->tags = mp_tags_dup(mpctx, info);
+        talloc_free(mpctx->filtered_tags);
+        mpctx->filtered_tags = info;
         mp_notify(mpctx, MPV_EVENT_METADATA_UPDATE, NULL);
     }
     demuxer->events = 0;
@@ -1223,8 +1224,8 @@ terminate_playback:
 
     m_config_restore_backups(mpctx->mconfig);
 
-    talloc_free(mpctx->tags);
-    mpctx->tags = NULL;
+    talloc_free(mpctx->filtered_tags);
+    mpctx->filtered_tags = NULL;
 
     mpctx->playback_initialized = false;
 

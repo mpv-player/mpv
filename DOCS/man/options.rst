@@ -3187,6 +3187,14 @@ PVR
 Miscellaneous
 -------------
 
+``--display-tags=tag1,tags2,...``
+    Set the list of tags that should be displayed on the terminal. Tags that
+    are in the list, but are not present in the played file, will not be shown.
+    The special value ``all`` disables filtering.
+
+    The default includes a common list of tags, call mpv with ``--list-options``
+    to see it.
+
 ``--mc=<seconds/frame>``
     Maximum A-V sync correction per frame (in seconds)
 
