@@ -81,7 +81,6 @@ SOURCES-$(LIRC)                 += input/lirc.c
 SOURCES-$(OPENAL)               += audio/out/ao_openal.c
 SOURCES-$(OSS_AUDIO)            += audio/out/ao_oss.c
 SOURCES-$(PULSE)                += audio/out/ao_pulse.c
-SOURCES-$(PORTAUDIO)            += audio/out/ao_portaudio.c
 SOURCES-$(RSOUND)               += audio/out/ao_rsound.c
 SOURCES-$(SNDIO)                += audio/out/ao_sndio.c
 SOURCES-$(VDPAU)                += video/vdpau.c video/vdpau_mixer.c \

@@ -184,19 +184,6 @@ Available audio output drivers are:
         disabled, it will use PulseAudio automatically updated timing
         information. Disabling this might help with e.g. networked audio.
 
-``portaudio``
-    PortAudio audio output driver. This works on all platforms, and has
-    extensive MS Windows support.
-
-    .. note:: This driver is not very useful. It was added in the hope of
-              providing portable audio API across all platforms, but turned
-              out semi-broken and underfeatured.
-
-    ``device``
-        Specify the subdevice to use. Giving ``help`` as device name lists all
-        devices found by PortAudio. Devices can be given as numeric values,
-        starting from ``1``.
-
 ``dsound`` (Windows only)
     DirectX DirectSound audio output driver
 

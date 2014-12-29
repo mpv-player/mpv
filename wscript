@@ -516,12 +516,6 @@ audio_output_features = [
         'desc': 'PulseAudio audio output',
         'func': check_pkg_config('libpulse', '>= 1.0')
     }, {
-        'name': '--portaudio',
-        'desc': 'PortAudio audio output',
-        'deps': [ 'atomics' ],
-        'func': check_pkg_config('portaudio-2.0', '>= 19'),
-        'default': 'disable',
-    }, {
         'name': '--jack',
         'desc': 'JACK audio output',
         'deps': ['atomics'],

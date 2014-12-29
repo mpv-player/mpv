@@ -140,7 +140,6 @@ def build(ctx):
         ( "audio/out/ao_openal.c",               "openal" ),
         ( "audio/out/ao_oss.c",                  "oss-audio" ),
         ( "audio/out/ao_pcm.c" ),
-        ( "audio/out/ao_portaudio.c",            "portaudio" ),
         ( "audio/out/ao_pulse.c",                "pulse" ),
         ( "audio/out/ao_rsound.c",               "rsound" ),
         ( "audio/out/ao_sdl.c",                  "sdl1" ),
