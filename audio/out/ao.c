@@ -415,6 +415,12 @@ void ao_request_reload(struct ao *ao)
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map)
 {
+    if (mp_msg_test(ao->log, MSGL_DEBUG)) {
+        for (int i = 0; i < s->num_chmaps; i++) {
+            struct mp_chmap c = s->chmaps[i];
+            MP_DBG(ao, "chmap_sel #%d: %s\n", i, mp_chmap_to_str(&c));
+        }
+    }
     return mp_chmap_sel_adjust(s, map);
 }
 
