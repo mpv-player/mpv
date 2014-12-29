@@ -903,6 +903,10 @@ Property list
         MPV_FORMAT_NODE_MAP
             (key and string value for each metadata entry)
 
+``filtered-metadata``
+    Like ``metadata``, but includes only fields listed in the ``--display-tags``
+    option. This is the same set of tags that is printed to the terminal.
+
 ``chapter-metadata``
     Metadata of current chapter. Works similar to ``metadata`` property. It
     also allows the same access methods (using sub-properties).

@@ -1122,6 +1122,16 @@ static int mp_property_metadata(void *ctx, struct m_property *prop,
     return tag_property(action, arg, demuxer->metadata);
 }
 
+static int mp_property_filtered_metadata(void *ctx, struct m_property *prop,
+                                         int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->filtered_tags)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return tag_property(action, arg, mpctx->filtered_tags);
+}
+
 static int mp_property_chapter_metadata(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
@@ -3246,6 +3256,7 @@ static const struct m_property mp_properties[] = {
     {"editions", mp_property_editions},
     {"angle", mp_property_angle},
     {"metadata", mp_property_metadata},
+    {"filtered-metadata", mp_property_filtered_metadata},
     {"chapter-metadata", mp_property_chapter_metadata},
     {"vf-metadata", mp_property_vf_metadata},
     {"pause", mp_property_pause},
@@ -3429,7 +3440,7 @@ static const char *const *const mp_event_property_change[] = {
       "samplerate", "channels", "audio"),
     E(MPV_EVENT_SEEK, "seeking"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking"),
-    E(MPV_EVENT_METADATA_UPDATE, "metadata"),
+    E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata"),
     E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
     E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle",
       "demuxer-cache-duration", "demuxer-cache-idle"),
