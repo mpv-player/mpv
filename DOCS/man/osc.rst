@@ -246,6 +246,10 @@ in ``input.conf``, or sent by other scripts.
 ``disable-osc``
     Hide the OSC permanently. This is also what the ``del`` key does.
 
+``osc-message``
+    Show a message on screen using the OSC. First argument is the message,
+    second the duration in seconds.
+
 
 Example
 

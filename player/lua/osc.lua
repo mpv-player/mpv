@@ -588,8 +588,11 @@ end
 
 function show_message(text, duration)
 
+    --print("text: "..text.."   duration: " .. duration)
     if duration == nil then
         duration = tonumber(mp.get_property("options/osd-duration")) / 1000
+    elseif not type(duration) == "number" then
+        print("duration: " .. duration)
     end
 
     -- cut the text short, otherwise the following functions
@@ -1925,6 +1928,8 @@ mp.register_event("tracks-changed", request_init)
 
 mp.register_script_message("enable-osc", function() enable_osc(true) end)
 mp.register_script_message("disable-osc", function() enable_osc(false) end)
+
+mp.register_script_message("osc-message", show_message)
 
 mp.observe_property("fullscreen", "bool",
     function(name, val)
