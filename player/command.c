@@ -4343,16 +4343,16 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         bool append = cmd->args[1].v.i;
         struct playlist *pl = playlist_parse_file(filename, mpctx->global);
         if (pl) {
+            prepare_playlist(mpctx, pl);
+            struct playlist_entry *new = pl->current;
             if (!append)
                 playlist_clear(mpctx->playlist);
             playlist_append_entries(mpctx->playlist, pl);
             talloc_free(pl);
 
-            if (!append && mpctx->playlist->first) {
-                struct playlist_entry *e =
-                    mp_check_playlist_resume(mpctx, mpctx->playlist);
-                mp_set_playlist_entry(mpctx, e ? e : mpctx->playlist->first);
-            }
+            if (!append && mpctx->playlist->first)
+                mp_set_playlist_entry(mpctx, new ? new : mpctx->playlist->first);
+
             mp_notify_property(mpctx, "playlist");
         } else {
             MP_ERR(mpctx, "Unable to load playlist %s.\n", filename);

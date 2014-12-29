@@ -395,6 +395,7 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 void update_demuxer_properties(struct MPContext *mpctx);
 void reselect_demux_streams(struct MPContext *mpctx);
+void prepare_playlist(struct MPContext *mpctx, struct playlist *pl);
 
 // main.c
 int mpv_main(int argc, char *argv[]);

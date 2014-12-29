@@ -467,15 +467,7 @@ int mp_initialize(struct MPContext *mpctx)
     mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
 #endif
 
-    if (opts->shuffle)
-        playlist_shuffle(mpctx->playlist);
-
-    if (opts->merge_files)
-        merge_playlist_files(mpctx->playlist);
-
-    mpctx->playlist->current = mp_check_playlist_resume(mpctx, mpctx->playlist);
-    if (!mpctx->playlist->current)
-        mpctx->playlist->current = mpctx->playlist->first;
+    prepare_playlist(mpctx, mpctx->playlist);
 
     MP_STATS(mpctx, "end init");
 

@@ -737,12 +737,30 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename)
                               STREAM_SUB);
 }
 
+// Do stuff to a newly loaded playlist. This includes any processing that may
+// be required after loading a playlist.
+void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
+{
+    struct MPOpts *opts = mpctx->opts;
+
+    if (opts->shuffle)
+        playlist_shuffle(pl);
+
+    if (opts->merge_files)
+        merge_playlist_files(pl);
+
+    pl->current = mp_check_playlist_resume(mpctx, pl);
+    if (!pl->current)
+        pl->current = pl->first;
+}
+
 // Replace the current playlist entry with playlist contents. Moves the entries
 // from the given playlist pl, so the entries don't actually need to be copied.
 static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
 {
     if (pl->first) {
-        struct playlist_entry *new = mp_check_playlist_resume(mpctx, pl);
+        prepare_playlist(mpctx, pl);
+        struct playlist_entry *new = pl->current;
         playlist_transfer_entries(mpctx->playlist, pl);
         // current entry is replaced
         if (mpctx->playlist->current)

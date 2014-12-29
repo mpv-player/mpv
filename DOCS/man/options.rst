@@ -363,10 +363,6 @@ Program Behavior
     file. This uses timeline/EDL support internally. Note that this won't work
     for ordered chapter files.
 
-    This option is interpreted at program start, and doesn't affect for
-    example files or playlists loaded with the ``loadfile`` or ``loadlist``
-    commands.
-
 ``--no-resume-playback``
     Do not restore playback position from the ``watch_later`` configuration
     subdirectory (usually ``~/.config/mpv/watch_later/``).
