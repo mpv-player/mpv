@@ -432,7 +432,7 @@ def build(ctx):
         ctx(
             target       = "mpv",
             source       = "player/main_fn.c",
-            use          = 'objects',
+            use          = ctx.dependencies_use() + ['objects'],
             includes     = _all_includes(ctx),
             features     = "c cprogram",
             install_path = ctx.env.BINDIR
@@ -460,7 +460,7 @@ def build(ctx):
             ctx(
                 target   = os.path.splitext(test.srcpath())[0],
                 source   = test.srcpath(),
-                use      = "objects",
+                use      = ctx.dependencies_use() + ['objects'],
                 includes = _all_includes(ctx),
                 features = "c cprogram",
             )
