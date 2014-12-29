@@ -548,7 +548,8 @@ static int init_device(struct ao *ao)
 
         err = snd_pcm_set_chmap(p->alsa, alsa_chmap);
         if (err == -ENXIO) {
-            MP_WARN(ao, "Device does not support requested channel map\n");
+            MP_WARN(ao, "Device does not support requested channel map (%s)\n",
+                    mp_chmap_to_str(&dev_chmap));
         } else {
             CHECK_ALSA_WARN("Channel map setup failed");
         }
