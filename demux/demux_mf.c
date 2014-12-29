@@ -22,21 +22,141 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "osdep/io.h"
 
 #include "talloc.h"
 #include "common/msg.h"
 #include "options/options.h"
+#include "options/path.h"
+#include "misc/ctype.h"
 
 #include "stream/stream.h"
 #include "demux.h"
 #include "stheader.h"
 #include "codec_tags.h"
-#include "mf.h"
 
 #define MF_MAX_FILE_SIZE (1024 * 1024 * 256)
+
+typedef struct mf {
+    struct mp_log *log;
+    struct sh_video *sh;
+    int curr_frame;
+    int nr_of_files;
+    char **names;
+    // optional
+    struct stream **streams;
+} mf_t;
+
+
+static void mf_add(mf_t *mf, const char *fname)
+{
+    char *entry = talloc_strdup(mf, fname);
+    MP_TARRAY_APPEND(mf, mf->names, mf->nr_of_files, entry);
+}
+
+static mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filename)
+{
+    int error_count = 0;
+    int count = 0;
+
+    mf_t *mf = talloc_zero(talloc_ctx, mf_t);
+    mf->log = log;
+
+    if (filename[0] == '@') {
+        FILE *lst_f = fopen(filename + 1, "r");
+        if (lst_f) {
+            char *fname = talloc_size(mf, 512);
+            while (fgets(fname, 512, lst_f)) {
+                /* remove spaces from end of fname */
+                char *t = fname + strlen(fname) - 1;
+                while (t > fname && mp_isspace(*t))
+                    *(t--) = 0;
+                if (!mp_path_exists(fname)) {
+                    mp_verbose(log, "file not found: '%s'\n", fname);
+                } else {
+                    mf_add(mf, fname);
+                }
+            }
+            fclose(lst_f);
+
+            mp_info(log, "number of files: %d\n", mf->nr_of_files);
+            goto exit_mf;
+        }
+        mp_info(log, "%s is not indirect filelist\n", filename + 1);
+    }
+
+    if (strchr(filename, ',')) {
+        mp_info(log, "filelist: %s\n", filename);
+        bstr bfilename = bstr0(filename);
+
+        while (bfilename.len) {
+            bstr bfname;
+            bstr_split_tok(bfilename, ",", &bfname, &bfilename);
+            char *fname2 = bstrdup0(mf, bfname);
+
+            if (!mp_path_exists(fname2))
+                mp_verbose(log, "file not found: '%s'\n", fname2);
+            else {
+                mf_add(mf, fname2);
+            }
+            talloc_free(fname2);
+        }
+        mp_info(log, "number of files: %d\n", mf->nr_of_files);
+
+        goto exit_mf;
+    }
+
+    char *fname = talloc_size(mf, strlen(filename) + 32);
+
+    if (!strchr(filename, '%')) {
+        strcpy(fname, filename);
+        if (!strchr(filename, '*'))
+            strcat(fname, "*");
+
+        mp_info(log, "search expr: %s\n", fname);
+
+        glob_t gg;
+        if (glob(fname, 0, NULL, &gg)) {
+            talloc_free(mf);
+            return NULL;
+        }
+
+        for (int i = 0; i < gg.gl_pathc; i++) {
+            if (mp_path_isdir(gg.gl_pathv[i]))
+                continue;
+            mf_add(mf, gg.gl_pathv[i]);
+        }
+        mp_info(log, "number of files: %d\n", mf->nr_of_files);
+        globfree(&gg);
+        goto exit_mf;
+    }
+
+    mp_info(log, "search expr: %s\n", filename);
+
+    while (error_count < 5) {
+        sprintf(fname, filename, count++);
+        if (!mp_path_exists(fname)) {
+            error_count++;
+            mp_verbose(log, "file not found: '%s'\n", fname);
+        } else {
+            mf_add(mf, fname);
+        }
+    }
+
+    mp_info(log, "number of files: %d\n", mf->nr_of_files);
+
+exit_mf:
+    return mf;
+}
+
+static mf_t *open_mf_single(void *talloc_ctx, struct mp_log *log, char *filename)
+{
+    mf_t *mf = talloc_zero(talloc_ctx, mf_t);
+    mf->log = log;
+    mf_add(mf, filename);
+    return mf;
+}
 
 static void demux_seek_mf(demuxer_t *demuxer, double rel_seek_secs, int flags)
 {
