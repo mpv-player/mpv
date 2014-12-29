@@ -1021,8 +1021,8 @@ static void compile_shaders(struct gl_video *p)
 
     // Linear light scaling is only enabled when either color correction
     // option (3dlut or srgb) is enabled, otherwise scaling is done in the
-    // source space. We also need to linearize for constant luminance systems.
-    if ((!p->is_linear_rgb && use_cms) || use_const_luma) {
+    // source space.
+    if (!p->is_linear_rgb && use_cms) {
         // We just use the color level range to distinguish between PC
         // content like images, which are most likely sRGB, and TV content
         // like movies, which are most likely BT.2020
@@ -1035,6 +1035,13 @@ static void compile_shaders(struct gl_video *p)
         } else {
             gamma_fun = MP_CSP_TRC_BT_2020_EXACT;
         }
+    }
+
+    // We also need to linearize for the constant luminance system. This
+    // transformation really makes no sense with anything other than the
+    // official gamma curves, though. This overrides approx-gamma.
+    if (use_const_luma) {
+        gamma_fun = MP_CSP_TRC_BT_2020_EXACT;
     }
 
     // Figure out the right color spaces we need to convert, if any
