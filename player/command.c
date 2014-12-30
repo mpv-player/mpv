@@ -1075,8 +1075,10 @@ static int tag_property(int action, void *arg, struct mp_tags *tags)
             res = talloc_asprintf_append_buffer(res, "%s: %s\n",
                                                 tags->keys[n], tags->values[n]);
         }
+        if (!res)
+            res = talloc_strdup(NULL, "(empty)");
         *(char **)arg = res;
-        return res ? M_PROPERTY_OK : M_PROPERTY_UNAVAILABLE;
+        return M_PROPERTY_OK;
     }
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
@@ -1153,22 +1155,16 @@ static int mp_property_vf_metadata(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
     struct vf_chain *vf = mpctx->d_video->vfilter;
 
-    switch(action) {
-    case M_PROPERTY_GET_TYPE:
-    case M_PROPERTY_GET:
-    case M_PROPERTY_GET_NODE:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    case M_PROPERTY_KEY_ACTION: {
+    if (action == M_PROPERTY_KEY_ACTION) {
         struct m_property_action_arg *ka = arg;
         bstr key;
         char *rem;
         m_property_split_path(ka->key, &key, &rem);
-        struct mp_tags vf_metadata;
+        struct mp_tags vf_metadata = {0};
         switch (vf_control_by_label(vf, VFCTRL_GET_METADATA, &vf_metadata, key)) {
-        case CONTROL_NA:
-            return M_PROPERTY_UNAVAILABLE;
         case CONTROL_UNKNOWN:
             return M_PROPERTY_UNKNOWN;
+        case CONTROL_NA: // empty
         case CONTROL_OK:
             if (strlen(rem)) {
                 struct m_property_action_arg next_ka = *ka;
@@ -1181,7 +1177,6 @@ static int mp_property_vf_metadata(void *ctx, struct m_property *prop,
         default:
             return M_PROPERTY_ERROR;
         }
-    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
