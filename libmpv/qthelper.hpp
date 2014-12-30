@@ -25,11 +25,41 @@
 #include <QString>
 #include <QList>
 #include <QHash>
+#include <QSharedPointer>
 
 #include <mpv/client.h>
 
 namespace mpv {
 namespace qt {
+
+// Wrapper around mpv_handle. Does refcounting under the hood.
+class Handle
+{
+    struct container {
+        container(mpv_handle *h) : mpv(h) {}
+        ~container() { mpv_terminate_destroy(mpv); }
+        mpv_handle *mpv;
+    };
+    QSharedPointer<container> sptr;
+public:
+    // Construct a new Handle from a raw mpv_handle with refcount 1. If the
+    // last Handle goes out of scope, the mpv_handle will be destroyed with
+    // mpv_terminate_destroy().
+    // Never destroy the mpv_handle manually when using this wrapper. You
+    // will create dangling pointers. Just let the wrapper take care of
+    // destroying the mpv_handle.
+    // Never create multiple wrappers from the same raw mpv_handle; copy the
+    // wrapper instead (that's what it's for).
+    static Handle FromRawHandle(mpv_handle *handle) {
+        Handle h;
+        h.sptr = QSharedPointer<container>(new container(handle));
+        return h;
+    }
+
+    // Return the raw handle; for use with the libmpv C API.
+    operator mpv_handle*() { return (*sptr).mpv; }
+    operator mpv_handle*() const { return (*sptr).mpv; }
+};
 
 static inline QVariant node_to_variant(const mpv_node *node)
 {

@@ -25,6 +25,7 @@ API changes
 
 ::
 
+ 1.12   - add class Handle to qthelper.hpp
  1.11   - add OpenGL rendering interop API - allows an application to combine
           its own and mpv's OpenGL rendering
           Warning: this API is not stable yet - anything in opengl_cb.h might
