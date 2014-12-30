@@ -19,6 +19,9 @@
  * for other languages.
  */
 
+#ifndef MPV_CLIENT_API_QTHELPER_H_
+#define MPV_CLIENT_API_QTHELPER_H_
+
 #include <cstring>
 
 #include <QVariant>
@@ -57,8 +60,7 @@ public:
     }
 
     // Return the raw handle; for use with the libmpv C API.
-    operator mpv_handle*() { return (*sptr).mpv; }
-    operator mpv_handle*() const { return (*sptr).mpv; }
+    operator mpv_handle*() const { return sptr ? (*sptr).mpv : 0; }
 };
 
 static inline QVariant node_to_variant(const mpv_node *node)
@@ -272,3 +274,5 @@ static inline QVariant command_variant(mpv_handle *ctx, const QVariant &args)
 
 }
 }
+
+#endif
