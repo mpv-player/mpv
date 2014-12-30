@@ -170,7 +170,7 @@ int vf_control_by_label(struct vf_chain *c,int cmd, void *arg, bstr label)
     char *label_str = bstrdup0(NULL, label);
     struct vf_instance *cur = vf_find_by_label(c, label_str);
     talloc_free(label_str);
-    if (cur)
+    if (cur && cur->control)
         return cur->control(cur, cmd, arg);
     else
         return CONTROL_UNKNOWN;
