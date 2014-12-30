@@ -4,7 +4,7 @@ HEADERS += mpvrenderer.h
 SOURCES += mpvrenderer.cpp main.cpp
 
 CONFIG += link_pkgconfig debug
-PKGCONFIG = mpv
+PKGCONFIG += mpv
 
 RESOURCES += mpvtest.qrc
 

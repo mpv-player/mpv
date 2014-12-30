@@ -34,6 +34,7 @@ Item {
         anchors.right: renderer.right
         anchors.margins: 100
         wrapMode: Text.WordWrap
-        text: "QtQuick and mpv are both rendering stuff."
+        text: "QtQuick and mpv are both rendering stuff.\n
+               Click to load ../../../test.mkv"
     }
 }
