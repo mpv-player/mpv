@@ -15,11 +15,12 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-protected:
-    virtual bool event(QEvent *event);
-
 private slots:
     void on_file_open();
+    void on_mpv_events();
+
+signals:
+    void mpv_events();
 
 private:
     QWidget *mpv_container;

@@ -6,7 +6,7 @@ TARGET = qtexample
 TEMPLATE = app
 
 CONFIG += link_pkgconfig debug
-PKGCONFIG = mpv
+PKGCONFIG += mpv
 
 SOURCES += qtexample.cpp
 HEADERS += qtexample.h
