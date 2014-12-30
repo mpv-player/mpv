@@ -46,6 +46,7 @@
 #include "options/parse_commandline.h"
 #include "common/playlist.h"
 #include "options/options.h"
+#include "options/path.h"
 #include "input/input.h"
 
 #include "audio/decode/dec_audio.h"
@@ -316,7 +317,10 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
 static int cfg_include(void *ctx, char *filename, int flags)
 {
     struct MPContext *mpctx = ctx;
-    return m_config_parse_config_file(mpctx->mconfig, filename, NULL, flags);
+    char *fname = mp_get_user_path(NULL, mpctx->global, filename);
+    int r = m_config_parse_config_file(mpctx->mconfig, fname, NULL, flags);
+    talloc_free(fname);
+    return r;
 }
 
 struct MPContext *mp_create(void)
