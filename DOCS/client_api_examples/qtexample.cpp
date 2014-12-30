@@ -1,5 +1,3 @@
-// License: pick one of: public domain, WTFPL, ISC, Ms-PL, AGPLv3
-
 // This example can be built with: qmake && make
 
 #include <clocale>
