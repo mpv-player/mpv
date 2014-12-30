@@ -179,6 +179,9 @@ static int parse_pls(struct pl_parser *p)
         if (bstr_split_tok(line, "=", &key, &value) &&
             bstr_case_startswith(key, bstr0("File")))
         {
+            value = bstr_strip(value);
+            if (bstr_startswith0(value, "\"") && bstr_endswith0(value, "\""))
+                value = bstr_splice(value, 1, -1);
             pl_add(p, value);
         }
     }
