@@ -25,8 +25,24 @@
 
 /* kernel headers >=2.6.28 have version 5.
  *
- * FIXME: are there any real differences between 3.1 and 5?
+ * Version 5 is also called S2API, it adds support for tuning to S2 channels
+ * and is extensible for future delivery systems. Old API is deprecated. 
+ * StreamID-implementation only supported since API >=5.2. 
  */
+
+#if (DVB_API_VERSION == 5 && DVB_API_VERSION_MINOR >= 2)
+#define DVB_USE_S2API 1
+
+// This had a different name until API 5.8. 
+#ifndef DTV_STREAM_ID
+#define DTV_STREAM_ID DTV_ISDBS_TS_ID
+#endif
+
+// This is only defined, for convenience, since API 5.8.
+#ifndef NO_STREAM_ID_FILTER
+#define NO_STREAM_ID_FILTER (~0U)
+#endif
+#endif
 
 #if (DVB_API_VERSION == 3 && DVB_API_VERSION_MINOR >= 1) || DVB_API_VERSION == 5
 #define DVB_ATSC 1
