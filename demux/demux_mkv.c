@@ -1166,7 +1166,6 @@ typedef struct {
     char *id;
     int fourcc;
     int extradata;
-    bool parse;
 } videocodec_info_t;
 
 static const videocodec_info_t vinfo[] = {
@@ -1179,7 +1178,7 @@ static const videocodec_info_t vinfo[] = {
     {MKV_V_MPEG4_AVC, MP_FOURCC('a', 'v', 'c', '1'), 1},
     {MKV_V_THEORA,    MP_FOURCC('t', 'h', 'e', 'o'), 1},
     {MKV_V_VP8,       MP_FOURCC('V', 'P', '8', '0'), 0},
-    {MKV_V_VP9,       MP_FOURCC('V', 'P', '9', '0'), 0, true},
+    {MKV_V_VP9,       MP_FOURCC('V', 'P', '9', '0'), 0},
     {MKV_V_DIRAC,     MP_FOURCC('d', 'r', 'a', 'c'), 0},
     {MKV_V_PRORES,    MP_FOURCC('p', 'r', '0', '0'), 0},
     {MKV_V_HEVC,      MP_FOURCC('H', 'E', 'V', 'C'), 1},
@@ -1269,9 +1268,11 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
                 extradata = track->private_data;
                 extradata_size = track->private_size;
             }
-            track->parse = vi->parse;
         }
     }
+
+    if (sh->format == MP_FOURCC('V', 'P', '9', '0'))
+        track->parse = true;
 
     if (extradata_size > 0x1000000) {
         MP_WARN(demuxer, "Invalid CodecPrivate\n");
@@ -1316,10 +1317,9 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 
 static const struct mkv_audio_tag {
     char *id;   bool prefix;   uint32_t formattag;
-    bool parse;
 } mkv_audio_tags[] = {
     { MKV_A_MP2,       0, 0x0055 },
-    { MKV_A_MP3,       0, 0x0055, true },
+    { MKV_A_MP3,       0, 0x0055 },
     { MKV_A_AC3,       1, 0x2000 },
     { MKV_A_EAC3,      1, MP_FOURCC('E', 'A', 'C', '3') },
     { MKV_A_DTS,       0, 0x2001 },
@@ -1340,7 +1340,7 @@ static const struct mkv_audio_tag {
     { MKV_A_QDMC,      0, MP_FOURCC('Q', 'D', 'M', 'C') },
     { MKV_A_QDMC2,     0, MP_FOURCC('Q', 'D', 'M', '2') },
     { MKV_A_WAVPACK,   0, MP_FOURCC('W', 'V', 'P', 'K') },
-    { MKV_A_TRUEHD,    0, MP_FOURCC('T', 'R', 'H', 'D'), true },
+    { MKV_A_TRUEHD,    0, MP_FOURCC('T', 'R', 'H', 'D') },
     { MKV_A_FLAC,      0, MP_FOURCC('f', 'L', 'a', 'C') },
     { MKV_A_ALAC,      0, MP_FOURCC('a', 'L', 'a', 'C') },
     { MKV_A_REAL28,    0, MP_FOURCC('2', '8', '_', '8') },
@@ -1404,7 +1404,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                     continue;
             }
             track->a_formattag = t->formattag;
-            track->parse = t->parse;
             break;
         }
     }
@@ -1416,6 +1415,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     if (track->a_formattag == 0x0055) { /* MP3 || MP2 */
         sh_a->bitrate = 16000 * 8;
         sh_a->block_align = 1152;
+        track->parse = true;
     } else if ((track->a_formattag == 0x2000)           /* AC3 */
                || track->a_formattag == MP_FOURCC('E', 'A', 'C', '3')
                || (track->a_formattag == 0x2001)) {        /* DTS */
@@ -1571,9 +1571,10 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             AV_WB32(data + 8, 0);
             memcpy(data + 12, track->private_data, track->private_size);
         }
-    } else if (track->a_formattag == MP_FOURCC('W', 'V', 'P', 'K') ||
-               track->a_formattag == MP_FOURCC('T', 'R', 'H', 'D')) {
+    } else if (track->a_formattag == MP_FOURCC('W', 'V', 'P', 'K')) {
         /* ok */
+    } else if (track->a_formattag == MP_FOURCC('T', 'R', 'H', 'D')) {
+        track->parse = true;
     } else if (track->a_formattag == MP_FOURCC('T', 'T', 'A', '1')) {
         sh_a->codecdata_len = 30;
         sh_a->codecdata = talloc_zero_size(sh_a, sh_a->codecdata_len);
