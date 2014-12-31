@@ -165,6 +165,12 @@ struct osd_state;
 struct mp_image;
 struct mp_image_params;
 
+struct vo_extra {
+    struct input_ctx *input_ctx;
+    struct osd_state *osd;
+    struct encode_lavc_context *encode_lavc_ctx;
+};
+
 struct vo_driver {
     // Encoding functionality, which can be invoked via --o only.
     bool encode;
@@ -273,6 +279,7 @@ struct vo {
     struct encode_lavc_context *encode_lavc_ctx;
     struct vo_internal *in;
     struct mp_vo_opts *opts;
+    struct vo_extra extra;
 
     // --- The following fields are generally only changed during initialization.
 
@@ -297,10 +304,7 @@ struct vo {
 };
 
 struct mpv_global;
-struct vo *init_best_video_out(struct mpv_global *global,
-                               struct input_ctx *input_ctx,
-                               struct osd_state *osd,
-                               struct encode_lavc_context *encode_lavc_ctx);
+struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex);
 int vo_reconfig(struct vo *vo, struct mp_image_params *p, int flags);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);

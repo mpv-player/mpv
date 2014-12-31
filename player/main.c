@@ -452,9 +452,12 @@ int mp_initialize(struct MPContext *mpctx)
 
     if (opts->force_vo) {
         opts->fixed_vo = 1;
-        mpctx->video_out = init_best_video_out(mpctx->global, mpctx->input,
-                                               mpctx->osd,
-                                               mpctx->encode_lavc_ctx);
+        struct vo_extra ex = {
+            .input_ctx = mpctx->input,
+            .osd = mpctx->osd,
+            .encode_lavc_ctx = mpctx->encode_lavc_ctx,
+        };
+        mpctx->video_out = init_best_video_out(mpctx->global, &ex);
         if (!mpctx->video_out) {
             MP_FATAL(mpctx, "Error opening/initializing "
                     "the selected video_out (-vo) device.\n");

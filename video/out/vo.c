@@ -203,9 +203,7 @@ static void dealloc_vo(struct vo *vo)
 }
 
 static struct vo *vo_create(bool probing, struct mpv_global *global,
-                            struct input_ctx *input_ctx, struct osd_state *osd,
-                            struct encode_lavc_context *encode_lavc_ctx,
-                            char *name, char **args)
+                            struct vo_extra *ex, char *name, char **args)
 {
     struct mp_log *log = mp_log_new(NULL, global->log, "vo");
     struct m_obj_desc desc;
@@ -220,11 +218,12 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
         .driver = desc.p,
         .opts = &global->opts->vo,
         .global = global,
-        .encode_lavc_ctx = encode_lavc_ctx,
-        .input_ctx = input_ctx,
-        .osd = osd,
+        .encode_lavc_ctx = ex->encode_lavc_ctx,
+        .input_ctx = ex->input_ctx,
+        .osd = ex->osd,
         .event_fd = -1,
         .monitor_par = 1,
+        .extra = *ex,
         .probing = probing,
         .in = talloc(vo, struct vo_internal),
     };
@@ -260,10 +259,7 @@ error:
     return NULL;
 }
 
-struct vo *init_best_video_out(struct mpv_global *global,
-                               struct input_ctx *input_ctx,
-                               struct osd_state *osd,
-                               struct encode_lavc_context *encode_lavc_ctx)
+struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex)
 {
     struct m_obj_settings *vo_list = global->opts->vo.video_driver_list;
     // first try the preferred drivers, with their optional subdevice param:
@@ -273,8 +269,8 @@ struct vo *init_best_video_out(struct mpv_global *global,
             if (strlen(vo_list[n].name) == 0)
                 goto autoprobe;
             bool p = !!vo_list[n + 1].name;
-            struct vo *vo = vo_create(p, global, input_ctx, osd, encode_lavc_ctx,
-                                      vo_list[n].name, vo_list[n].attribs);
+            struct vo *vo = vo_create(p, global, ex, vo_list[n].name,
+                                      vo_list[n].attribs);
             if (vo)
                 return vo;
         }
@@ -283,8 +279,8 @@ struct vo *init_best_video_out(struct mpv_global *global,
 autoprobe:
     // now try the rest...
     for (int i = 0; video_out_drivers[i]; i++) {
-        struct vo *vo = vo_create(true, global, input_ctx, osd, encode_lavc_ctx,
-                                  (char *)video_out_drivers[i]->name, NULL);
+        char *name = (char *)video_out_drivers[i]->name;
+        struct vo *vo = vo_create(true, global, ex, name, NULL);
         if (vo)
             return vo;
     }
