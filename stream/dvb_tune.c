@@ -324,8 +324,8 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 }
 
 static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
-                   bool is_dvb_s2, fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
-                   fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
+                   bool is_dvb_s2, int stream_id, fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation,
+                   fe_code_rate_t HP_CodeRate, fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
                    fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
   int hi_lo = 0, dfd;
@@ -424,7 +424,6 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int f
         delsys = SYS_DVBS2;
       }
       fe_rolloff_t rolloff = ROLLOFF_AUTO;
-      int stream_id = NO_STREAM_ID_FILTER;
       
       struct dtv_property p[] = {
            { .cmd = DTV_DELIVERY_SYSTEM,   .u.data = delsys },
@@ -495,7 +494,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int f
 
 
 int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
-             bool is_dvb_s2, fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
+             bool is_dvb_s2, int stream_id, fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
              fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
              fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
@@ -503,7 +502,7 @@ int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int to
 
         MP_INFO(priv, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
 
-        ris = tune_it(priv, priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, is_dvb_s2, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier, timeout);
+        ris = tune_it(priv, priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, is_dvb_s2, stream_id, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier, timeout);
 
         if(ris != 0)
                 MP_INFO(priv, "dvb_tune, TUNING FAILED\n");

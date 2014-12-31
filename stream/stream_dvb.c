@@ -89,6 +89,8 @@ const struct m_sub_options stream_dvb_conf = {
 };
 
 static void parse_vdr_par_string(const char* vdr_par_str, dvb_channel_t* ptr) {
+  //FIXME: There is more information in this parameter string, especially related
+  // to non-DVB-S reception. 
   if (vdr_par_str[0]) {
     const char* vdr_par = &vdr_par_str[0];
     while (vdr_par && *vdr_par) {
@@ -107,6 +109,25 @@ static void parse_vdr_par_string(const char* vdr_par_str, dvb_channel_t* ptr) {
           ptr->is_dvb_s2 = true;
         } else {
           ptr->is_dvb_s2 = false;
+        }
+        vdr_par++;
+        break;
+      case 'P':
+        vdr_par++;
+        char *endptr = NULL;
+        errno = 0;
+        int n = strtol(vdr_par, &endptr, 10);
+        if (!errno && endptr != vdr_par) {
+          ptr->stream_id = n;
+          vdr_par = endptr;
+        }
+        break;
+      case 'I':
+        vdr_par++;
+        if (*vdr_par == '1') {
+          ptr->inv = INVERSION_ON;
+        } else {
+          ptr->inv = INVERSION_OFF;
         }
         vdr_par++;
         break;
@@ -187,6 +208,8 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                 ptr->pids_cnt = 0;
                 ptr->freq = 0;
                 ptr->is_dvb_s2 = false;
+                ptr->stream_id = NO_STREAM_ID_FILTER;
+                ptr->inv = INVERSION_AUTO;
 
                 // Check if VDR-type channels.conf-line - then full line is consumed by the scan. 
                 int num_chars = 0;
@@ -203,8 +226,8 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                     ptr->tone = -1;
                     ptr->inv = INVERSION_AUTO;
                     ptr->cr = FEC_AUTO;
-                    mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, S2: %s",
-                               list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->is_dvb_s2 ? "yes" : "no");
+                    mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, S2: %s, StreamID: %d",
+                               list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->is_dvb_s2 ? "yes" : "no", ptr->stream_id);
                   } else {
                     mp_verbose(log, "VDR, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d",
                                list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate);
@@ -567,7 +590,8 @@ int dvb_set_channel(stream_t *stream, int card, int n)
 
         if(channel->freq != priv->last_freq)
                 if (! dvb_tune(priv, channel->freq, channel->pol, channel->srate, channel->diseqc, channel->tone,
-                               channel->is_dvb_s2, channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier, priv->cfg_timeout))
+                               channel->is_dvb_s2, channel->stream_id, channel->inv, channel->mod, channel->gi,
+                               channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier, priv->cfg_timeout))
                         return 0;
 
         priv->last_freq = channel->freq;
