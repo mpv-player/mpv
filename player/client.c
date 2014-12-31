@@ -201,6 +201,8 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
 {
     char nname[MAX_CLIENT_NAME];
     for (int n = 1; n < 1000; n++) {
+        if (!name)
+            name = "client";
         snprintf(nname, sizeof(nname) - 3, "%s", name); // - space for number
         for (int i = 0; nname[i]; i++)
             nname[i] = mp_isalnum(nname[i]) ? nname[i] : '_';
@@ -461,6 +463,18 @@ mpv_handle *mpv_create(void)
         mp_destroy(mpctx);
     }
     return ctx;
+}
+
+mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name)
+{
+    if (!ctx)
+        return mpv_create();
+    if (!ctx->mpctx->initialized)
+        return NULL;
+    mpv_handle *new = mp_new_client(ctx->mpctx->clients, name);
+    if (new)
+        mpv_wait_event(new, 0); // set fuzzy_initialized
+    return new;
 }
 
 static void *playback_thread(void *p)

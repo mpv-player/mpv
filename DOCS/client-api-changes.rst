@@ -26,6 +26,9 @@ API changes
 ::
 
  1.12   - add class Handle to qthelper.hpp
+        - improve opengl_cb.h API uninitialization behavior, and fix the qml
+          example
+        - add mpv_create_client() function
  1.11   - add OpenGL rendering interop API - allows an application to combine
           its own and mpv's OpenGL rendering
           Warning: this API is not stable yet - anything in opengl_cb.h might

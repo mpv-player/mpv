@@ -393,6 +393,32 @@ void mpv_detach_destroy(mpv_handle *ctx);
 void mpv_terminate_destroy(mpv_handle *ctx);
 
 /**
+ * Create a new client handle connected to the same player core as ctx. This
+ * context has its own event queue, its own mpv_request_event() state, its own
+ * mpv_request_log_messages() state, its own set of observed properties, and
+ * its own state for asynchronous operations. Otherwise, everything is shared.
+ *
+ * This handle should be destroyed with mpv_detach_destroy() if no longer
+ * needed. The core will live as long as there is at least 1 handle referencing
+ * it. Any handle can make the core quit, which will result in every handle
+ * receiving MPV_EVENT_SHUTDOWN.
+ *
+ * This function can not be called before the main handle was initialized with
+ * mpv_initialize(). The new handle is always initialized, unless ctx=NULL was
+ * passed.
+ *
+ * @param ctx Used to get the reference to the mpv core; handle-specific
+ *            settings and parameters are not used.
+ *            If NULL, this function behaves like mpv_create() (ignores name).
+ * @param name The client name. This will be returned by mpv_client_name(). If
+ *             the name is already in use, or contains non-alphanumeric
+ *             characters (other than '_'), the name is modified to fit.
+ *             If NULL, an arbitrary name is automatically chosen.
+ * @return a new handle, or NULL on error
+ */
+mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name);
+
+/**
  * Load a config file. This loads and parses the file, and sets every entry in
  * the config file's default section as if mpv_set_option_string() is called.
  *
