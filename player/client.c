@@ -1613,6 +1613,15 @@ int64_t mpv_get_time_us(mpv_handle *ctx)
     return mp_time_us();
 }
 
+// Used by vo_opengl_cb to synchronously uninitialize video.
+void kill_video(struct mp_client_api *client_api)
+{
+    struct MPContext *mpctx = client_api->mpctx;
+    mp_dispatch_lock(mpctx->dispatch);
+    mp_switch_track(mpctx, STREAM_VIDEO, NULL);
+    mp_dispatch_unlock(mpctx->dispatch);
+}
+
 #include "libmpv/opengl_cb.h"
 
 #if HAVE_GL
@@ -1620,7 +1629,7 @@ static mpv_opengl_cb_context *opengl_cb_get_context(mpv_handle *ctx)
 {
     mpv_opengl_cb_context *cb = ctx->mpctx->gl_cb_ctx;
     if (!cb) {
-        cb = mp_opengl_create(ctx->mpctx->global, ctx->mpctx->osd);
+        cb = mp_opengl_create(ctx->mpctx->global, ctx->mpctx->osd, ctx->clients);
         ctx->mpctx->gl_cb_ctx = cb;
     }
     return cb;

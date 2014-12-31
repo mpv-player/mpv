@@ -96,6 +96,17 @@ extern "C" {
  *    as used with mpv_opengl_cb_init_gl()
  *  - never can be called from within the callbacks set with
  *    mpv_set_wakeup_callback() or mpv_opengl_cb_set_update_callback()
+ *
+ * Context and handle lifecycle
+ * ----------------------------
+ *
+ * Video initialization will fail if the OpenGL context was not initialized yet
+ * (with mpv_opengl_cb_init_gl()). Likewise, mpv_opengl_cb_uninit_gl() will
+ * disable video.
+ *
+ * When the mpv core is destroyed (e.g. via mpv_terminate_destroy()), the OpenGL
+ * context must have been uninitialized. If this doesn't happen, undefined
+ * behavior will result.
  */
 
 /**
@@ -181,10 +192,8 @@ int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4]);
 /**
  * Destroy the mpv OpenGL state.
  *
- * This will trigger undefined behavior (i.e. crash hard) if the hardware
- * decoder is still active, because the OpenGL hardware decoding interop state
- * can't be destroyed synchronously. If no hardware decoding is active, the
- * state can be destroyed at any time.
+ * If video is still active (e.g. a file playing), video will be disabled
+ * forcefully.
  *
  * Calling this multiple times is ok.
  *

@@ -32,15 +32,9 @@ public:
 
     virtual ~MpvRenderer()
     {
-        // Before we can really destroy the OpenGL state, we must make sure
-        // that the video output is destroyed. This is important for some
-        // forms of hardware decoding, where the decoder shares some state
-        // with the video output and the OpenGL context.
-        // Deselecting the video track is the easiest way to achieve this in
-        // a synchronous way. If no file is playing, setting the property
-        // will fail and do nothing.
-        mpv::qt::set_property_variant(mpv, "vid", "no");
-
+        // Until this call is done, we need to make sure the player remains
+        // alive. This is done implicitly with the mpv::qt::Handle instance
+        // in this class.
         mpv_opengl_cb_uninit_gl(mpv_gl);
     }
 

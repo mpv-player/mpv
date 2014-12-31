@@ -50,10 +50,12 @@ struct vo_priv {
 
 struct mpv_opengl_cb_context {
     struct mp_log *log;
+    struct mp_client_api *client_api;
 
     pthread_mutex_t lock;
 
     // --- Protected by lock
+    bool initialized;
     mpv_opengl_cb_update_fn update_cb;
     void *update_cb_ctx;
     struct mp_image *waiting_frame;
@@ -72,11 +74,11 @@ struct mpv_opengl_cb_context {
     GL *gl;
     struct gl_video *renderer;
     struct gl_hwdec *hwdec;
+    struct mp_hwdec_info hwdec_info; // it's also semi-immutable after init
 
     // --- Immutable or semi-threadsafe.
 
     struct osd_state *osd;
-    struct mp_hwdec_info hwdec_info;
     const char *hwapi;
 
     struct vo *active;
@@ -86,20 +88,26 @@ static void free_ctx(void *ptr)
 {
     mpv_opengl_cb_context *ctx = ptr;
 
+    // This can trigger if the client API user doesn't call
+    // mpv_opengl_cb_uninit_gl() properly.
+    assert(!ctx->initialized);
+
     pthread_mutex_destroy(&ctx->lock);
 }
 
 struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
-                                               struct osd_state *osd)
+                                               struct osd_state *osd,
+                                               struct mp_client_api *client_api)
 {
     mpv_opengl_cb_context *ctx = talloc_zero(NULL, mpv_opengl_cb_context);
     talloc_set_destructor(ctx, free_ctx);
-    ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
     pthread_mutex_init(&ctx->lock, NULL);
 
     ctx->gl = talloc_zero(ctx, GL);
 
+    ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
     ctx->osd = osd;
+    ctx->client_api = client_api;
 
     switch (g->opts->hwdec_api) {
     case HWDEC_AUTO:    ctx->hwapi = "auto"; break;
@@ -149,6 +157,7 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     ctx->renderer = gl_video_init(ctx->gl, ctx->log, ctx->osd);
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;
+
     ctx->hwdec = gl_hwdec_load_api(ctx->log, ctx->gl, ctx->hwapi, &ctx->hwdec_info);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
 
@@ -157,6 +166,7 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
         ctx->imgfmt_supported[n - IMGFMT_START] =
             gl_video_check_format(ctx->renderer, n);
     }
+    ctx->initialized = true;
     pthread_mutex_unlock(&ctx->lock);
 
     gl_video_unset_gl_state(ctx->renderer);
@@ -165,6 +175,18 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
 
 int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
 {
+    // Bring down the decoder etc., which still might be using the hwdec
+    // context. Setting initialized=false guarantees it can't come back.
+    pthread_mutex_lock(&ctx->lock);
+    ctx->initialized = false;
+    pthread_mutex_unlock(&ctx->lock);
+
+    kill_video(ctx->client_api);
+
+    pthread_mutex_lock(&ctx->lock);
+    assert(!ctx->active);
+    pthread_mutex_unlock(&ctx->lock);
+
     gl_video_uninit(ctx->renderer);
     ctx->renderer = NULL;
     gl_hwdec_uninit(ctx->hwdec);
@@ -298,9 +320,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         pthread_mutex_unlock(&p->ctx->lock);
         return VO_TRUE;
     case VOCTRL_GET_HWDEC_INFO: {
-        // Warning: in theory, the API user could destroy the OpenGL context
-        //          while the decoder uses the hwdec thing, and bad things would
-        //          happen. Currently, the API user is told not to do this.
         struct mp_hwdec_info **arg = data;
         *arg = p->ctx ? &p->ctx->hwdec_info : NULL;
         return true;
@@ -334,6 +353,11 @@ static int preinit(struct vo *vo)
     }
 
     pthread_mutex_lock(&p->ctx->lock);
+    if (!p->ctx->initialized) {
+        MP_FATAL(vo, "OpenGL context not initialized.\n");
+        pthread_mutex_unlock(&p->ctx->lock);
+        return -1;
+    }
     p->ctx->active = vo;
     p->ctx->reconfigured = true;
     assert(vo->osd == p->ctx->osd);
