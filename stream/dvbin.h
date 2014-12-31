@@ -64,6 +64,7 @@ typedef struct {
         char                            pol;
         int                             tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
         bool                            is_dvb_s2;
+        int                             stream_id;
         fe_spectral_inversion_t         inv;
         fe_modulation_t                 mod;
         fe_transmit_mode_t              trans;
