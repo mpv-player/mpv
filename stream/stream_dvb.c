@@ -88,6 +88,35 @@ const struct m_sub_options stream_dvb_conf = {
     },
 };
 
+static void parse_vdr_par_string(const char* vdr_par_str, dvb_channel_t* ptr) {
+  if (vdr_par_str[0]) {
+    const char* vdr_par = &vdr_par_str[0];
+    while (vdr_par && *vdr_par) {
+      switch (mp_toupper(*vdr_par)) {
+      case 'H':
+        ptr->pol = 'H';
+        vdr_par++;
+        break;
+      case 'V':
+        ptr->pol = 'V';
+        vdr_par++;
+        break;
+      case 'S':
+        vdr_par++;
+        if (*vdr_par == '1') {
+          ptr->is_dvb_s2 = true;
+        } else {
+          ptr->is_dvb_s2 = false;
+        }
+        vdr_par++;
+        break;
+      default:
+        vdr_par++;
+      }
+    }
+  }
+}
+
 static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, int type)
 {
         dvb_channels_list  *list;
@@ -100,11 +129,13 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
         int fields, cnt, pcnt, k;
         int has8192, has0;
         dvb_channel_t *ptr, *tmp, chn;
-        char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256];
+        char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256], vdr_par_str[256];
         const char *cbl_conf = "%d:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
         const char *sat_conf = "%d:%c:%d:%d:%255[^:]:%255[^:]\n";
         const char *ter_conf = "%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
         const char *atsc_conf = "%d:%255[^:]:%255[^:]:%255[^:]\n";
+
+        const char *vdr_conf = "%d:%255[^:]:%*255[^:]:%d:%255[^:]:%255[^:]:%*255[^:]:%*255[^:]:%*d:%*d:%*d:%*d\n%n";
 
         mp_verbose(log, "CONFIG_READ FILE: %s, type: %d\n", filename, type);
         if((f=fopen(filename, "r"))==NULL)
@@ -133,32 +164,58 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                         continue;
 
                 colon = strchr(line, ':');
-                if(colon)
-                {
-                        k = colon - line;
-                        if(!k)
-                                continue;
-                        ptr->name = malloc(k+1);
-                        if(! ptr->name)
-                                continue;
-                        av_strlcpy(ptr->name, line, k+1);
+                if (colon) {
+                  k = colon - line;
+                  if(!k)
+                    continue;
+                  // In some modern VDR-style configs, channel name also has bouquet after ;.
+                  // Parse that off, we ignore it.
+                  char* bouquet_sep = strchr(line, ';');
+                  int channel_name_length = k;
+                  if (bouquet_sep && bouquet_sep < colon) {
+                    channel_name_length = bouquet_sep - line;
+                  }
+                  ptr->name = malloc(channel_name_length+1);
+                  if(! ptr->name)
+                    continue;
+                  av_strlcpy(ptr->name, line, channel_name_length+1);
+                } else {
+                  continue;
                 }
-                else
-                        continue;
                 k++;
-                apid_str[0] = vpid_str[0] = 0;
+                vpid_str[0] = apid_str[0] = vdr_par_str[0] = 0;
                 ptr->pids_cnt = 0;
                 ptr->freq = 0;
-                if(type == TUNER_TER)
-                {
+                ptr->is_dvb_s2 = false;
+
+                // Check if VDR-type channels.conf-line - then full line is consumed by the scan. 
+                int num_chars = 0;
+                fields = sscanf(&line[k], vdr_conf,
+                                &ptr->freq, vdr_par_str, &ptr->srate, vpid_str, apid_str, &num_chars);
+                
+                if (num_chars == strlen(&line[k])) {
+                  // It's a VDR-style config line.
+                  parse_vdr_par_string(vdr_par_str, ptr);
+                  // We still need the special SAT-handling here.
+                  if (type != TUNER_TER && type != TUNER_CBL && type != TUNER_ATSC) {
+                    ptr->freq *=  1000UL;
+                    ptr->srate *=  1000UL;
+                    ptr->tone = -1;
+                    ptr->inv = INVERSION_AUTO;
+                    ptr->cr = FEC_AUTO;
+                    mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, S2: %s",
+                               list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->is_dvb_s2 ? "yes" : "no");
+                  } else {
+                    mp_verbose(log, "VDR, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d",
+                               list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate);
+                  }
+                } else if (type == TUNER_TER) {
                         fields = sscanf(&line[k], ter_conf,
                                 &ptr->freq, inv, bw, cr, tmp_lcr, mod,
                                 transm, gi, tmp_hier, vpid_str, apid_str);
                         mp_verbose(log, "TER, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d",
                                 list->NUM_CHANNELS, fields, ptr->name, ptr->freq);
-                }
-                else if(type == TUNER_CBL)
-                {
+                } else if (type == TUNER_CBL) {
                         fields = sscanf(&line[k], cbl_conf,
                                 &ptr->freq, inv, &ptr->srate,
                                 cr, mod, vpid_str, apid_str);
@@ -166,7 +223,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                                 list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate);
                 }
 #ifdef DVB_ATSC
-                else if(type == TUNER_ATSC)
+                else if (type == TUNER_ATSC)
                 {
                         fields = sscanf(&line[k], atsc_conf,
                                  &ptr->freq, mod, vpid_str, apid_str);
@@ -177,7 +234,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                 else //SATELLITE
                 {
                         fields = sscanf(&line[k], sat_conf,
-                                &ptr->freq, &ptr->pol, &ptr->diseqc, &ptr->srate, vpid_str, apid_str);
+                                        &ptr->freq, &ptr->pol, &ptr->diseqc, &ptr->srate, vpid_str, apid_str);
                         ptr->pol = mp_toupper(ptr->pol);
                         ptr->freq *=  1000UL;
                         ptr->srate *=  1000UL;
@@ -510,7 +567,7 @@ int dvb_set_channel(stream_t *stream, int card, int n)
 
         if(channel->freq != priv->last_freq)
                 if (! dvb_tune(priv, channel->freq, channel->pol, channel->srate, channel->diseqc, channel->tone,
-                        channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier, priv->cfg_timeout))
+                               channel->is_dvb_s2, channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier, priv->cfg_timeout))
                         return 0;
 
         priv->last_freq = channel->freq;
@@ -519,10 +576,9 @@ int dvb_set_channel(stream_t *stream, int card, int n)
         //sets demux filters and restart the stream
         for(i = 0; i < channel->pids_cnt; i++)
         {
-                if(! dvb_set_ts_filt(priv,priv->demux_fds[i], channel->pids[i], DMX_PES_OTHER))
-                        return 0;
+          if (!dvb_set_ts_filt(priv,priv->demux_fds[i], channel->pids[i], DMX_PES_OTHER))
+            return 0;
         }
-
         return 1;
 }
 
