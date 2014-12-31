@@ -30,7 +30,7 @@ int dvb_set_ts_filt(dvb_priv_t *priv, int fd, uint16_t pid, dmx_pes_type_t pesty
 int dvb_demux_stop(int fd);
 int dvb_demux_start(int fd);
 int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc,
-             int tone, fe_spectral_inversion_t specInv,
+             int tone, bool is_dvb_s2, fe_spectral_inversion_t specInv,
              fe_modulation_t modulation, fe_guard_interval_t guardInterval,
              fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth,
              fe_code_rate_t HP_CodeRate, fe_code_rate_t LP_CodeRate,
