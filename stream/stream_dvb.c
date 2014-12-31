@@ -138,12 +138,42 @@ static void parse_vdr_par_string(const char* vdr_par_str, dvb_channel_t* ptr) {
   }
 }
 
+static char* dvb_strtok_r(char* s, const char* sep, char** p) {
+  if (!s && !(s = *p)) {
+    return NULL;
+  }
+  
+  /* Skip leading separators. */
+  s += strspn(s, sep);
+
+  /* s points at first non-separator, or end of string. */
+  if (!*s) {
+    return (*p = 0);
+  }
+
+  /* Move *p to next separator. */
+  *p = s + strcspn(s, sep);
+  if (**p) {
+    *(*p)++ = 0;
+  } else {
+    *p = 0;
+  }
+  return s;
+}
+
 static bool parse_pid_string(struct mp_log *log, char* pid_string, dvb_channel_t* ptr) {
   if (pid_string[0]) {
     int pcnt = 0;
-    const char* tokens = "+";
+    /** These tokens also catch vdr-style PID lists.
+     * They can contain 123=deu@3,124=eng+jap@4;125
+     * 3 and 4 are codes for codec type, =langLeft+langRight is allowed,
+     * and ; may separate a dolby channel. 
+     * With the numChars-test and the full token-list, all is handled gracefully. 
+     */
+    const char* tokens = "+,;";
     char* pidPart;
-    pidPart = strtok(pid_string, tokens);
+    char* savePtr;
+    pidPart = dvb_strtok_r(pid_string, tokens, &savePtr);
     while (pidPart != NULL) {
       if (ptr->pids_cnt >= DMX_FILTER_SIZE-1) {
         mp_verbose(log, "Maximum number of PIDs for one channel reached, ignoring further ones!\n");
@@ -156,7 +186,7 @@ static bool parse_pid_string(struct mp_log *log, char* pid_string, dvb_channel_t
         ptr->pids[ptr->pids_cnt] = pid;
         ptr->pids_cnt++;
       }
-      pidPart = strtok(NULL, tokens);
+      pidPart = dvb_strtok_r(NULL, tokens, &savePtr);
     }
     if (pcnt > 0) {
       return true;
