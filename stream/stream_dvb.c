@@ -138,6 +138,33 @@ static void parse_vdr_par_string(const char* vdr_par_str, dvb_channel_t* ptr) {
   }
 }
 
+static bool parse_pid_string(struct mp_log *log, char* pid_string, dvb_channel_t* ptr) {
+  if (pid_string[0]) {
+    int pcnt = 0;
+    const char* tokens = "+";
+    char* pidPart;
+    pidPart = strtok(pid_string, tokens);
+    while (pidPart != NULL) {
+      if (ptr->pids_cnt >= DMX_FILTER_SIZE-1) {
+        mp_verbose(log, "Maximum number of PIDs for one channel reached, ignoring further ones!\n");
+        return (pcnt > 0);
+      }
+      int numChars = 0;
+      int pid = 0;
+      pcnt += sscanf(pidPart, "%d%n", &pid, &numChars);
+      if (numChars > 0) {
+        ptr->pids[ptr->pids_cnt] = pid;
+        ptr->pids_cnt++;
+      }
+      pidPart = strtok(NULL, tokens);
+    }
+    if (pcnt > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, int type)
 {
         dvb_channels_list  *list;
@@ -147,7 +174,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
         if (!filename)
             return NULL;
 
-        int fields, cnt, pcnt, k;
+        int fields, cnt, k;
         int has8192, has0;
         dvb_channel_t *ptr, *tmp, chn;
         char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256], tpid_str[256],
@@ -291,34 +318,19 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                         mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d",
                                 list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->diseqc);
                 }
-
-                if (vpid_str[0]) {
-                  pcnt = sscanf(vpid_str, "%d+%d+%d+%d+%d+%d+%d", &ptr->pids[0], &ptr->pids[1], &ptr->pids[2], &ptr->pids[3],
-                                &ptr->pids[4], &ptr->pids[5], &ptr->pids[6]);
-                  if (pcnt > 0) {
-                    ptr->pids_cnt = pcnt;
-                    fields++;
-                  }
-                }
                 
-                if (apid_str[0]) {
-                  cnt = ptr->pids_cnt;
-                  pcnt = sscanf(apid_str, "%d+%d+%d+%d+%d+%d+%d+%d", &ptr->pids[cnt], &ptr->pids[cnt+1], &ptr->pids[cnt+2],
-                                &ptr->pids[cnt+3], &ptr->pids[cnt+4], &ptr->pids[cnt+5], &ptr->pids[cnt+6], &ptr->pids[cnt+7]);
-                  if (pcnt > 0) {
-                    ptr->pids_cnt += pcnt;
-                    fields++;
-                  }
+                if (parse_pid_string(log, vpid_str, ptr)) {
+                  fields++;
                 }
-
-                if (tpid_str[0]) {
-                  cnt = ptr->pids_cnt;
-                  pcnt = sscanf(tpid_str, "%d+%d+%d", &ptr->pids[cnt], &ptr->pids[cnt+1], &ptr->pids[cnt+2]);
-                  if (pcnt > 0) {
-                    ptr->pids_cnt += pcnt;
-                    fields++;
-                  }
+                if (parse_pid_string(log, apid_str, ptr)) {
+                  fields++;
                 }
+                /*
+                  // FIXME: Teletext PID excluded for now, seems misdetected as mp3. 
+                if (parse_pid_string(log, tpid_str, ptr)) {
+                  fields++;
+                }
+                */
                 
                 if((fields < 2) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) || (strlen(ptr->name) == 0))
                   continue;
