@@ -150,13 +150,14 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
         int fields, cnt, pcnt, k;
         int has8192, has0;
         dvb_channel_t *ptr, *tmp, chn;
-        char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256], vdr_par_str[256];
+        char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256],
+          vdr_par_str[256], vdr_loc_str[256];
         const char *cbl_conf = "%d:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
         const char *sat_conf = "%d:%c:%d:%d:%255[^:]:%255[^:]\n";
         const char *ter_conf = "%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
         const char *atsc_conf = "%d:%255[^:]:%255[^:]:%255[^:]\n";
 
-        const char *vdr_conf = "%d:%255[^:]:%*255[^:]:%d:%255[^:]:%255[^:]:%*255[^:]:%*255[^:]:%*d:%*d:%*d:%*d\n%n";
+        const char *vdr_conf = "%d:%255[^:]:%255[^:]:%d:%255[^:]:%255[^:]:%*255[^:]:%*255[^:]:%*d:%*d:%*d:%*d\n%n";
 
         mp_verbose(log, "CONFIG_READ FILE: %s, type: %d\n", filename, type);
         if((f=fopen(filename, "r"))==NULL)
@@ -204,7 +205,8 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                   continue;
                 }
                 k++;
-                vpid_str[0] = apid_str[0] = vdr_par_str[0] = 0;
+                vpid_str[0] = apid_str[0] = 0;
+                vdr_loc_str[0] = vdr_par_str[0] = 0;
                 ptr->pids_cnt = 0;
                 ptr->freq = 0;
                 ptr->is_dvb_s2 = false;
@@ -214,7 +216,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                 // Check if VDR-type channels.conf-line - then full line is consumed by the scan. 
                 int num_chars = 0;
                 fields = sscanf(&line[k], vdr_conf,
-                                &ptr->freq, vdr_par_str, &ptr->srate, vpid_str, apid_str, &num_chars);
+                                &ptr->freq, vdr_par_str, vdr_loc_str, &ptr->srate, vpid_str, apid_str, &num_chars);
                 
                 if (num_chars == strlen(&line[k])) {
                   // It's a VDR-style config line.
@@ -226,8 +228,26 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                     ptr->tone = -1;
                     ptr->inv = INVERSION_AUTO;
                     ptr->cr = FEC_AUTO;
-                    mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, S2: %s, StreamID: %d",
-                               list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->is_dvb_s2 ? "yes" : "no", ptr->stream_id);
+                    
+                    if (vdr_loc_str[0]) {
+                      // In older vdr config format, this field contained the DISEQc information.
+                      // If it is numeric, assume that's it.
+                      int diseqc_info = 0;
+                      int valid_digits = 0;
+                      if (sscanf(vdr_loc_str, "%d%n", &diseqc_info, &valid_digits) == 1) {
+                        if (valid_digits == strlen(vdr_loc_str)) {
+                          ptr->diseqc = diseqc_info;
+                          if((ptr->diseqc > 4) || (ptr->diseqc < 0))
+                            continue;
+                          if(ptr->diseqc > 0)
+                            ptr->diseqc--;
+                        }
+                      }
+                    }
+                    
+                    mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, S2: %s, StreamID: %d",
+                               list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol,  ptr->diseqc,
+                               ptr->is_dvb_s2 ? "yes" : "no", ptr->stream_id);
                   } else {
                     mp_verbose(log, "VDR, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d",
                                list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate);
