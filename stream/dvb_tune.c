@@ -324,9 +324,9 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 }
 
 static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
-        fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
-        fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
-        fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
+                   bool is_dvb_s2, fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
+                   fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
+                   fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
   int hi_lo = 0, dfd;
   struct dvb_frontend_parameters feparams;
@@ -401,7 +401,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int f
       feparams.u.qpsk.fec_inner=HP_CodeRate;
       dfd = fd_frontend;
 
-      MP_VERBOSE(priv, "tuning DVB-S to Freq: %u, Pol: %c Srate: %d, 22kHz: %s, LNB:  %d\n",freq,pol,srate,hi_lo ? "on" : "off", diseqc);
+      MP_VERBOSE(priv, "tuning DVB-S%sto Freq: %u, Pol: %c Srate: %d, 22kHz: %s, LNB:  %d\n",
+                 is_dvb_s2 ? "2 ": " ", freq,pol,srate,hi_lo ? "on" : "off", diseqc);
 
       if(do_diseqc(dfd, diseqc, (pol == 'V' ? 1 : 0), hi_lo) == 0)
           MP_VERBOSE(priv, "DISEQC setting succeeded\n");
@@ -417,8 +418,11 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int f
        * It is needed to tune to new delivery systems, e.g. DVB-S2. 
        * It takes a struct with a list of pairs of command + parameter. 
        */
-
+      
       fe_delivery_system_t delsys = SYS_DVBS;
+      if (is_dvb_s2) {
+        delsys = SYS_DVBS2;
+      }
       fe_rolloff_t rolloff = ROLLOFF_AUTO;
       int stream_id = NO_STREAM_ID_FILTER;
       
@@ -438,7 +442,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int f
            .num = sizeof(p)/sizeof(p[0]),
            .props = p
       };
-      MP_VERBOSE(priv, "Tuning via S2API.\n");
+      MP_VERBOSE(priv, "Tuning via S2API, channel is DVB-S%s.\n", is_dvb_s2 ? "2": "");
       if ((ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq)) == -1)
       {
            MP_ERR(priv, "ERROR tuning channel\n");
@@ -446,6 +450,9 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int f
       }
 #else
       MP_VERBOSE(priv, "Tuning via DVB-API version 3.\n");
+      if (is_dvb_s2) {
+        MP_ERR(priv, "ERROR: Can not tune to S2 channel, S2-API not available, will tune to DVB-S!\n")
+      }
       if(ioctl(fd_frontend,FE_SET_FRONTEND,&feparams) < 0)
       {
            MP_ERR(priv, "ERROR tuning channel\n");
@@ -488,15 +495,15 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec, unsigned int f
 
 
 int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
-                fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
-                fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
-                fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
+             bool is_dvb_s2, fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
+             fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
+             fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
         int ris;
 
         MP_INFO(priv, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
 
-                ris = tune_it(priv, priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier, timeout);
+        ris = tune_it(priv, priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, is_dvb_s2, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier, timeout);
 
         if(ris != 0)
                 MP_INFO(priv, "dvb_tune, TUNING FAILED\n");
