@@ -269,6 +269,7 @@ int reinit_video_chain(struct MPContext *mpctx)
             .input_ctx = mpctx->input,
             .osd = mpctx->osd,
             .encode_lavc_ctx = mpctx->encode_lavc_ctx,
+            .opengl_cb_context = mpctx->gl_cb_ctx,
         };
         mpctx->video_out = init_best_video_out(mpctx->global, &ex);
         if (!mpctx->video_out) {
@@ -278,9 +279,6 @@ int reinit_video_chain(struct MPContext *mpctx)
             goto err_out;
         }
         mpctx->mouse_cursor_visible = true;
-
-        vo_control(mpctx->video_out, VOCTRL_SET_LIBMPV_OPENGL_CB_CONTEXT,
-                   mpctx->gl_cb_ctx);
     }
 
     update_window_title(mpctx, true);

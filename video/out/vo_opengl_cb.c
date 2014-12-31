@@ -236,26 +236,24 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct vo_priv *p = vo->priv;
-    if (p->ctx) {
-        pthread_mutex_lock(&p->ctx->lock);
-        mp_image_setrefp(&p->ctx->waiting_frame, mpi);
-        pthread_mutex_unlock(&p->ctx->lock);
-    }
+
+    pthread_mutex_lock(&p->ctx->lock);
+    mp_image_setrefp(&p->ctx->waiting_frame, mpi);
     talloc_free(mpi);
+    pthread_mutex_unlock(&p->ctx->lock);
 }
 
 static void flip_page(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
-    if (p->ctx) {
-        pthread_mutex_lock(&p->ctx->lock);
-        mp_image_unrefp(&p->ctx->next_frame);
-        p->ctx->next_frame = p->ctx->waiting_frame;
-        p->ctx->waiting_frame = NULL;
-        if (p->ctx->update_cb)
-            p->ctx->update_cb(p->ctx->update_cb_ctx);
-        pthread_mutex_unlock(&p->ctx->lock);
-    }
+
+    pthread_mutex_lock(&p->ctx->lock);
+    mp_image_unrefp(&p->ctx->next_frame);
+    p->ctx->next_frame = p->ctx->waiting_frame;
+    p->ctx->waiting_frame = NULL;
+    if (p->ctx->update_cb)
+        p->ctx->update_cb(p->ctx->update_cb_ctx);
+    pthread_mutex_unlock(&p->ctx->lock);
 }
 
 static int query_format(struct vo *vo, uint32_t format)
@@ -263,12 +261,10 @@ static int query_format(struct vo *vo, uint32_t format)
     struct vo_priv *p = vo->priv;
 
     bool ok = false;
-    if (p->ctx) {
-        pthread_mutex_lock(&p->ctx->lock);
-        if (format >= IMGFMT_START && format < IMGFMT_END)
-            ok = p->ctx->imgfmt_supported[format - IMGFMT_START];
-        pthread_mutex_unlock(&p->ctx->lock);
-    }
+    pthread_mutex_lock(&p->ctx->lock);
+    if (format >= IMGFMT_START && format < IMGFMT_END)
+        ok = p->ctx->imgfmt_supported[format - IMGFMT_START];
+    pthread_mutex_unlock(&p->ctx->lock);
     return ok ? VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW : 0;
 }
 
@@ -276,15 +272,11 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct vo_priv *p = vo->priv;
 
-    if (p->ctx) {
-        pthread_mutex_lock(&p->ctx->lock);
-        mp_image_unrefp(&p->ctx->next_frame);
-        p->ctx->img_params = *params;
-        p->ctx->reconfigured = true;
-        pthread_mutex_unlock(&p->ctx->lock);
-    } else {
-        return -1;
-    }
+    pthread_mutex_lock(&p->ctx->lock);
+    mp_image_unrefp(&p->ctx->next_frame);
+    p->ctx->img_params = *params;
+    p->ctx->reconfigured = true;
+    pthread_mutex_unlock(&p->ctx->lock);
 
     return 0;
 }
@@ -294,25 +286,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct vo_priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_SET_LIBMPV_OPENGL_CB_CONTEXT: {
-        if (p->ctx)
-            return VO_FALSE;
-        struct mpv_opengl_cb_context *nctx = data;
-        if (nctx) {
-            pthread_mutex_lock(&nctx->lock);
-            if (nctx->active) {
-                MP_FATAL(vo, "There is already a VO using the OpenGL context.\n");
-            } else {
-                nctx->active = vo;
-                nctx->reconfigured = true;
-                p->ctx = nctx;
-                assert(vo->osd == p->ctx->osd);
-                copy_vo_opts(vo);
-            }
-            pthread_mutex_unlock(&nctx->lock);
-        }
-        return VO_TRUE;
-    }
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
@@ -341,21 +314,32 @@ static void uninit(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
 
-    if (p->ctx) {
-        pthread_mutex_lock(&p->ctx->lock);
-        mp_image_unrefp(&p->ctx->next_frame);
-        mp_image_unrefp(&p->ctx->waiting_frame);
-        p->ctx->img_params = (struct mp_image_params){0};
-        p->ctx->reconfigured = true;
-        p->ctx->active = NULL;
-        pthread_mutex_unlock(&p->ctx->lock);
-    }
+    pthread_mutex_lock(&p->ctx->lock);
+    mp_image_unrefp(&p->ctx->next_frame);
+    mp_image_unrefp(&p->ctx->waiting_frame);
+    p->ctx->img_params = (struct mp_image_params){0};
+    p->ctx->reconfigured = true;
+    p->ctx->active = NULL;
+    pthread_mutex_unlock(&p->ctx->lock);
 }
 
 static int preinit(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
     p->vo = vo;
+    p->ctx = vo->extra.opengl_cb_context;
+    if (!p->ctx) {
+        MP_FATAL(vo, "No context set.\n");
+        return -1;
+    }
+
+    pthread_mutex_lock(&p->ctx->lock);
+    p->ctx->active = vo;
+    p->ctx->reconfigured = true;
+    assert(vo->osd == p->ctx->osd);
+    copy_vo_opts(vo);
+    pthread_mutex_unlock(&p->ctx->lock);
+
     return 0;
 }
 
