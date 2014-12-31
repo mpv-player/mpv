@@ -150,14 +150,14 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
         int fields, cnt, pcnt, k;
         int has8192, has0;
         dvb_channel_t *ptr, *tmp, chn;
-        char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256],
+        char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256], tpid_str[256],
           vdr_par_str[256], vdr_loc_str[256];
         const char *cbl_conf = "%d:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
         const char *sat_conf = "%d:%c:%d:%d:%255[^:]:%255[^:]\n";
         const char *ter_conf = "%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
         const char *atsc_conf = "%d:%255[^:]:%255[^:]:%255[^:]\n";
 
-        const char *vdr_conf = "%d:%255[^:]:%255[^:]:%d:%255[^:]:%255[^:]:%*255[^:]:%*255[^:]:%*d:%*d:%*d:%*d\n%n";
+        const char *vdr_conf = "%d:%255[^:]:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%*255[^:]:%*d:%*d:%*d:%*d\n%n";
 
         mp_verbose(log, "CONFIG_READ FILE: %s, type: %d\n", filename, type);
         if((f=fopen(filename, "r"))==NULL)
@@ -205,7 +205,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                   continue;
                 }
                 k++;
-                vpid_str[0] = apid_str[0] = 0;
+                vpid_str[0] = apid_str[0] = tpid_str[0] = 0;
                 vdr_loc_str[0] = vdr_par_str[0] = 0;
                 ptr->pids_cnt = 0;
                 ptr->freq = 0;
@@ -216,7 +216,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                 // Check if VDR-type channels.conf-line - then full line is consumed by the scan. 
                 int num_chars = 0;
                 fields = sscanf(&line[k], vdr_conf,
-                                &ptr->freq, vdr_par_str, vdr_loc_str, &ptr->srate, vpid_str, apid_str, &num_chars);
+                                &ptr->freq, vdr_par_str, vdr_loc_str, &ptr->srate, vpid_str, apid_str, tpid_str, &num_chars);
                 
                 if (num_chars == strlen(&line[k])) {
                   // It's a VDR-style config line.
@@ -292,31 +292,36 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                                 list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->diseqc);
                 }
 
-                if(vpid_str[0])
-                {
-                        pcnt = sscanf(vpid_str, "%d+%d+%d+%d+%d+%d+%d", &ptr->pids[0], &ptr->pids[1], &ptr->pids[2], &ptr->pids[3],
+                if (vpid_str[0]) {
+                  pcnt = sscanf(vpid_str, "%d+%d+%d+%d+%d+%d+%d", &ptr->pids[0], &ptr->pids[1], &ptr->pids[2], &ptr->pids[3],
                                 &ptr->pids[4], &ptr->pids[5], &ptr->pids[6]);
-                        if(pcnt > 0)
-                        {
-                                ptr->pids_cnt = pcnt;
-                                fields++;
-                        }
+                  if (pcnt > 0) {
+                    ptr->pids_cnt = pcnt;
+                    fields++;
+                  }
                 }
-
-                if(apid_str[0])
-                {
-                        cnt = ptr->pids_cnt;
-                        pcnt = sscanf(apid_str, "%d+%d+%d+%d+%d+%d+%d+%d", &ptr->pids[cnt], &ptr->pids[cnt+1], &ptr->pids[cnt+2],
+                
+                if (apid_str[0]) {
+                  cnt = ptr->pids_cnt;
+                  pcnt = sscanf(apid_str, "%d+%d+%d+%d+%d+%d+%d+%d", &ptr->pids[cnt], &ptr->pids[cnt+1], &ptr->pids[cnt+2],
                                 &ptr->pids[cnt+3], &ptr->pids[cnt+4], &ptr->pids[cnt+5], &ptr->pids[cnt+6], &ptr->pids[cnt+7]);
-                        if(pcnt > 0)
-                        {
-                                ptr->pids_cnt += pcnt;
-                                fields++;
-                        }
+                  if (pcnt > 0) {
+                    ptr->pids_cnt += pcnt;
+                    fields++;
+                  }
                 }
 
+                if (tpid_str[0]) {
+                  cnt = ptr->pids_cnt;
+                  pcnt = sscanf(tpid_str, "%d+%d+%d", &ptr->pids[cnt], &ptr->pids[cnt+1], &ptr->pids[cnt+2]);
+                  if (pcnt > 0) {
+                    ptr->pids_cnt += pcnt;
+                    fields++;
+                  }
+                }
+                
                 if((fields < 2) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) || (strlen(ptr->name) == 0))
-                        continue;
+                  continue;
 
                 has8192 = has0 = 0;
                 for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
