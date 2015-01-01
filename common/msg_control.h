@@ -9,8 +9,9 @@ void mp_msg_uninit(struct mpv_global *global);
 void mp_msg_update_msglevels(struct mpv_global *global);
 void mp_msg_mute(struct mpv_global *global, bool mute);
 void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr);
-void mp_msg_flush_status_line(struct mpv_global *global);
 bool mp_msg_has_status_line(struct mpv_global *global);
+
+void mp_msg_flush_status_line(struct mp_log *log);
 
 struct mp_log_buffer_entry {
     char *prefix;

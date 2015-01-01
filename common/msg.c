@@ -185,10 +185,11 @@ static void flush_status_line(struct mp_log_root *root)
     root->blank_lines = 0;
 }
 
-void mp_msg_flush_status_line(struct mpv_global *global)
+void mp_msg_flush_status_line(struct mp_log *log)
 {
     pthread_mutex_lock(&mp_msg_lock);
-    flush_status_line(global->log->root);
+    if (log->root)
+        flush_status_line(log->root);
     pthread_mutex_unlock(&mp_msg_lock);
 }
 
