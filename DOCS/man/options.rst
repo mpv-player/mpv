@@ -500,7 +500,7 @@ Video
         in mpv 0.5.x and before.) This tells the decoder to skip frames (unless
         they are needed to decode future frames). May help with slow systems,
         but can produce unwatchably choppy output, or even freeze the display
-        complete. Not recommended.
+        completely. Not recommended.
         The ``--vd-lavc-framedrop`` option controls what frames to drop.
     <decoder+vo>
         Enable both modes. Not recommended.
