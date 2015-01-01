@@ -220,6 +220,10 @@ static int async_read(HANDLE file, void *buf, unsigned size, OVERLAPPED* ol)
     return 0;
 }
 
+static void write_none(void *ctx, char *data, size_t size)
+{
+}
+
 int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
                   subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
                   char **error)
@@ -233,8 +237,8 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
         char buf[4096];
         subprocess_read_cb read_cb;
     } pipes[2] = {
-        { .read_cb = on_stdout },
-        { .read_cb = on_stderr },
+        { .read_cb = on_stdout ? on_stdout : write_none },
+        { .read_cb = on_stderr ? on_stderr : write_none },
     };
 
     // If the function exits before CreateProcess, there was an init error
