@@ -3,7 +3,14 @@
 #include <stdlib.h>
 
 #include "libmpv/client.h"
-#include "shared.h"
+
+static inline void check_error(int status)
+{
+    if (status < 0) {
+        printf("mpv API error: %s\n", mpv_error_string(status));
+        exit(1);
+    }
+}
 
 int main(int argc, char *argv[])
 {

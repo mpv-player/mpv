@@ -3,8 +3,18 @@
 // but that's not quite ready yet.
 // You may need a basic Info.plist and MainMenu.xib to make this work.
 
-#include "../../libmpv/client.h"
-#include "shared.h"
+#include "libmpv/client.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
+static inline void check_error(int status)
+{
+    if (status < 0) {
+        printf("mpv API error: %s\n", mpv_error_string(status));
+        exit(1);
+    }
+}
 
 #import <Cocoa/Cocoa.h>
 

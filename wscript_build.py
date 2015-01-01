@@ -524,8 +524,8 @@ def build(ctx):
     if ctx.dependency_satisfied('client-api-examples'):
         # This assumes all examples are single-file (as examples should be)
         examples_sources = [
-            ( "simple.c" ),
-            ( "cocoabasic.m", "cocoa" ),
+            ( "simple/simple.c" ),
+            ( "cocoa/cocoabasic.m", "cocoa" ),
         ]
 
         for source in ctx.filtered_sources(examples_sources):
