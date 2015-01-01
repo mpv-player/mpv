@@ -1,5 +1,7 @@
 #include "mpvrenderer.h"
 
+#include <stdexcept>
+
 #include <QObject>
 #include <QtGlobal>
 #include <QOpenGLContext>
@@ -27,7 +29,7 @@ public:
     {
         int r = mpv_opengl_cb_init_gl(mpv_gl, NULL, get_proc_address, NULL);
         if (r < 0)
-            throw "could not initialize OpenGL";
+            throw std::runtime_error("could not initialize OpenGL");
     }
 
     virtual ~MpvRenderer()
@@ -53,13 +55,13 @@ MpvObject::MpvObject(QQuickItem * parent)
 {
     mpv = mpv::qt::Handle::FromRawHandle(mpv_create());
     if (!mpv)
-        throw "could not create mpv context";
+        throw std::runtime_error("could not create mpv context");
 
     mpv_set_option_string(mpv, "terminal", "yes");
     mpv_set_option_string(mpv, "msg-level", "all=v");
 
     if (mpv_initialize(mpv) < 0)
-        throw "could not initialize mpv context";
+        throw std::runtime_error("could not initialize mpv context");
 
     // Make use of the MPV_SUB_API_OPENGL_CB API.
     mpv::qt::set_option_variant(mpv, "vo", "opengl-cb");
@@ -72,7 +74,7 @@ MpvObject::MpvObject(QQuickItem * parent)
     // doUpdate() function is run on the GUI thread.
     mpv_gl = (mpv_opengl_cb_context *)mpv_get_sub_api(mpv, MPV_SUB_API_OPENGL_CB);
     if (!mpv_gl)
-        throw "OpenGL not compiled in";
+        throw std::runtime_error("OpenGL not compiled in");
     mpv_opengl_cb_set_update_callback(mpv_gl, MpvObject::on_update, (void *)this);
     connect(this, &MpvObject::onUpdate, this, &MpvObject::doUpdate,
             Qt::QueuedConnection);

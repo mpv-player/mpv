@@ -2,6 +2,7 @@
 
 #include <clocale>
 #include <sstream>
+#include <stdexcept>
 
 #include <QtGlobal>
 #include <QFileDialog>
@@ -55,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mpv = mpv_create();
     if (!mpv)
-        throw "can't create mpv instance";
+        throw std::runtime_error("can't create mpv instance");
 
     // Create a video child window. Force Qt to create a native window, and
     // pass the window ID to the mpv wid option. Works on: X11, win32, Cocoa
@@ -94,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mpv_set_wakeup_callback(mpv, wakeup, this);
 
     if (mpv_initialize(mpv) < 0)
-        throw "mpv failed to initialize";
+        throw std::runtime_error("mpv failed to initialize");
 }
 
 void MainWindow::handle_mpv_event(mpv_event *event)
