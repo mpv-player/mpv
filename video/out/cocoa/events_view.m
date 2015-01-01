@@ -25,6 +25,7 @@
 #include "events_view.h"
 
 @interface MpvEventsView()
+@property(nonatomic, assign) BOOL clearing;
 @property(nonatomic, assign) BOOL hasMouseDown;
 @property(nonatomic, retain) NSTrackingArea *tracker;
 - (void)signalMousePosition;
@@ -36,6 +37,7 @@
 @end
 
 @implementation MpvEventsView
+@synthesize clearing = _clearing;
 @synthesize adapter = _adapter;
 @synthesize tracker = _tracker;
 @synthesize hasMouseDown = _mouse_down;
@@ -88,6 +90,12 @@
         [self.window makeKeyAndOrderFront:self];
         [self.window makeFirstResponder:self];
     }
+}
+
+- (void)clear
+{
+    self.clearing = YES;
+    [self exitFullScreenModeWithOptions:nil];
 }
 
 // mpv uses flipped coordinates, because X11 uses those. So let's just use them
@@ -177,6 +185,10 @@
 - (void)setFrameSize:(NSSize)size
 {
     [super setFrameSize:size];
+
+    if (self.clearing)
+        return;
+
     [self signalMousePosition];
 }
 

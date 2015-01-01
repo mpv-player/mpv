@@ -189,12 +189,24 @@ void vo_cocoa_register_resize_callback(struct vo *vo,
 
 void vo_cocoa_uninit(struct vo *vo)
 {
-    with_cocoa_lock(vo, ^{
-        struct vo_cocoa_state *s = vo->cocoa;
+    struct vo_cocoa_state *s = vo->cocoa;
+    NSView *ev = s->view;
+
+    // keep the event view around for later in order to call -clear
+    if (!s->embedded) {
+        [ev retain];
+    }
+
+    with_cocoa_lock_on_main_thread(vo, ^{
         enable_power_management(vo);
         cocoa_rm_fs_screen_profile_observer(vo);
 
         [s->gl_ctx release];
+
+        // needed to stop resize events triggered by the event's view -clear
+        // causing many uses after free
+        [s->video removeFromSuperview];
+
         [s->view removeFromSuperview];
         [s->view release];
 
@@ -202,6 +214,15 @@ void vo_cocoa_uninit(struct vo *vo)
         if (s->window)
             [s->window release];
     });
+
+    // don't use the mutex, because at that point it could have been destroyed
+    // and no one is accessing the events view anyway
+    if (!s->embedded) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [(MpvEventsView *)ev clear];
+            [ev release];
+        });
+    }
 }
 
 static int get_screen_handle(struct vo *vo, int identifier, NSWindow *window,
