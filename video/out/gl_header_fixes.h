@@ -34,14 +34,6 @@
 #endif
 #endif
 
-/**
- * \defgroup glextdefines OpenGL extension defines
- *
- * conditionally define all extension defines used.
- * vendor specific extensions should be marked as such
- * (e.g. _NV), _ARB is not used to ease readability.
- * \{
- */
 #ifndef GL_TEXTURE_3D
 #define GL_TEXTURE_3D 0x806F
 #endif
@@ -53,57 +45,6 @@
 #endif
 #ifndef GL_GENERATE_MIPMAP
 #define GL_GENERATE_MIPMAP 0x8191
-#endif
-#ifndef GL_TEXT_FRAGMENT_SHADER_ATI
-#define GL_TEXT_FRAGMENT_SHADER_ATI 0x8200
-#endif
-#ifndef GL_FRAGMENT_SHADER_ATI
-#define GL_FRAGMENT_SHADER_ATI 0x8920
-#endif
-#ifndef GL_NUM_FRAGMENT_REGISTERS_ATI
-#define GL_NUM_FRAGMENT_REGISTERS_ATI 0x896E
-#endif
-#ifndef GL_REG_0_ATI
-#define GL_REG_0_ATI 0x8921
-#endif
-#ifndef GL_REG_1_ATI
-#define GL_REG_1_ATI 0x8922
-#endif
-#ifndef GL_REG_2_ATI
-#define GL_REG_2_ATI 0x8923
-#endif
-#ifndef GL_CON_0_ATI
-#define GL_CON_0_ATI 0x8941
-#endif
-#ifndef GL_CON_1_ATI
-#define GL_CON_1_ATI 0x8942
-#endif
-#ifndef GL_CON_2_ATI
-#define GL_CON_2_ATI 0x8943
-#endif
-#ifndef GL_CON_3_ATI
-#define GL_CON_3_ATI 0x8944
-#endif
-#ifndef GL_ADD_ATI
-#define GL_ADD_ATI 0x8963
-#endif
-#ifndef GL_MUL_ATI
-#define GL_MUL_ATI 0x8964
-#endif
-#ifndef GL_MAD_ATI
-#define GL_MAD_ATI 0x8968
-#endif
-#ifndef GL_SWIZZLE_STR_ATI
-#define GL_SWIZZLE_STR_ATI 0x8976
-#endif
-#ifndef GL_4X_BIT_ATI
-#define GL_4X_BIT_ATI 2
-#endif
-#ifndef GL_8X_BIT_ATI
-#define GL_8X_BIT_ATI 4
-#endif
-#ifndef GL_BIAS_BIT_ATI
-#define GL_BIAS_BIT_ATI 8
 #endif
 #ifndef GL_MAX_TEXTURE_UNITS
 #define GL_MAX_TEXTURE_UNITS 0x84E2
@@ -219,8 +160,6 @@
 #ifndef GL_RGBA32F
 #define GL_RGBA32F 0x8814
 #endif
-/** \} */ // end of glextdefines group
-
 
 #if HAVE_GL_WIN32 && !defined(WGL_CONTEXT_MAJOR_VERSION_ARB)
 /* these are supposed to be defined in wingdi.h but mingw's is too old */

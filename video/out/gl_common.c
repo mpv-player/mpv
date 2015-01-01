@@ -435,21 +435,6 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
-    // Ancient ATI extensions.
-    {
-        .extension = "ATI_fragment_shader",
-        .ver_removed = 300,
-        .ver_es_removed = 100,
-        .functions = (const struct gl_function[]) {
-            DEF_FN_NAMES(BeginFragmentShader, "glBeginFragmentShaderATI"),
-            DEF_FN_NAMES(EndFragmentShader, "glEndFragmentShaderATI"),
-            DEF_FN_NAMES(SampleMap, "glSampleMapATI"),
-            DEF_FN_NAMES(ColorFragmentOp2, "glColorFragmentOp2ATI"),
-            DEF_FN_NAMES(ColorFragmentOp3, "glColorFragmentOp3ATI"),
-            DEF_FN_NAMES(SetFragmentShaderConstant, "glSetFragmentShaderConstantATI"),
-            {0}
-        },
-    },
     // For gl_hwdec_vdpau.c
     // http://www.opengl.org/registry/specs/NV/vdpau_interop.txt
     {

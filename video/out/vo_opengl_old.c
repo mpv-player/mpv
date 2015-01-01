@@ -175,7 +175,6 @@ static inline int glYUVLargeRange(int conv)
 {
     switch (conv) {
     case YUV_CONVERSION_NONE:
-    case YUV_CONVERSION_COMBINERS_ATI:
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_TEXT_FRAGMENT:
         return 0;
@@ -513,102 +512,6 @@ static int glCreatePPMTex(GL *gl, GLenum target, GLenum fmt, GLint filter,
     if (maxval)
         *maxval = m;
     return 1;
-}
-
-
-/**
- * \brief Setup ATI version of register combiners for YUV to RGB conversion.
- * \param csp_params parameters used for colorspace conversion
- * \param text if set use the GL_ATI_text_fragment_shader API as
- *             used on OS X.
- */
-static void glSetupYUVFragmentATI(struct vo *vo, GL *gl,
-                                  struct mp_csp_params *csp_params, int text)
-{
-    GLint i;
-    float yuv2rgb[3][4];
-
-    gl->GetIntegerv(GL_MAX_TEXTURE_UNITS, &i);
-    if (i < 3)
-        MP_ERR(vo, "3 texture units needed for YUV combiner (ATI) support (found %i)\n", i);
-
-    mp_get_yuv2rgb_coeffs(csp_params, yuv2rgb);
-    for (i = 0; i < 3; i++) {
-        int j;
-        yuv2rgb[i][3] -= -0.5 * (yuv2rgb[i][1] + yuv2rgb[i][2]);
-        for (j = 0; j < 4; j++) {
-            yuv2rgb[i][j] *= 0.125;
-            yuv2rgb[i][j] += 0.5;
-            if (yuv2rgb[i][j] > 1)
-                yuv2rgb[i][j] = 1;
-            if (yuv2rgb[i][j] < 0)
-                yuv2rgb[i][j] = 0;
-        }
-    }
-    if (text == 0) {
-        GLfloat c0[4] = { yuv2rgb[0][0], yuv2rgb[1][0], yuv2rgb[2][0] };
-        GLfloat c1[4] = { yuv2rgb[0][1], yuv2rgb[1][1], yuv2rgb[2][1] };
-        GLfloat c2[4] = { yuv2rgb[0][2], yuv2rgb[1][2], yuv2rgb[2][2] };
-        GLfloat c3[4] = { yuv2rgb[0][3], yuv2rgb[1][3], yuv2rgb[2][3] };
-        if (!gl->BeginFragmentShader || !gl->EndFragmentShader ||
-            !gl->SetFragmentShaderConstant || !gl->SampleMap ||
-            !gl->ColorFragmentOp2 || !gl->ColorFragmentOp3) {
-            MP_ERR(vo, "Combiner (ATI) functions missing!\n");
-            return;
-        }
-        gl->GetIntegerv(GL_NUM_FRAGMENT_REGISTERS_ATI, &i);
-        if (i < 3)
-            MP_ERR(vo, "3 registers needed for YUV combiner (ATI) support (found %i)\n", i);
-        gl->BeginFragmentShader();
-        gl->SetFragmentShaderConstant(GL_CON_0_ATI, c0);
-        gl->SetFragmentShaderConstant(GL_CON_1_ATI, c1);
-        gl->SetFragmentShaderConstant(GL_CON_2_ATI, c2);
-        gl->SetFragmentShaderConstant(GL_CON_3_ATI, c3);
-        gl->SampleMap(GL_REG_0_ATI, GL_TEXTURE0, GL_SWIZZLE_STR_ATI);
-        gl->SampleMap(GL_REG_1_ATI, GL_TEXTURE1, GL_SWIZZLE_STR_ATI);
-        gl->SampleMap(GL_REG_2_ATI, GL_TEXTURE2, GL_SWIZZLE_STR_ATI);
-        gl->ColorFragmentOp2(GL_MUL_ATI, GL_REG_1_ATI, GL_NONE, GL_NONE,
-                             GL_REG_1_ATI, GL_NONE, GL_BIAS_BIT_ATI,
-                             GL_CON_1_ATI, GL_NONE, GL_BIAS_BIT_ATI);
-        gl->ColorFragmentOp3(GL_MAD_ATI, GL_REG_2_ATI, GL_NONE, GL_NONE,
-                             GL_REG_2_ATI, GL_NONE, GL_BIAS_BIT_ATI,
-                             GL_CON_2_ATI, GL_NONE, GL_BIAS_BIT_ATI,
-                             GL_REG_1_ATI, GL_NONE, GL_NONE);
-        gl->ColorFragmentOp3(GL_MAD_ATI, GL_REG_0_ATI, GL_NONE, GL_NONE,
-                             GL_REG_0_ATI, GL_NONE, GL_NONE,
-                             GL_CON_0_ATI, GL_NONE, GL_BIAS_BIT_ATI,
-                             GL_REG_2_ATI, GL_NONE, GL_NONE);
-        gl->ColorFragmentOp2(GL_ADD_ATI, GL_REG_0_ATI, GL_NONE, GL_8X_BIT_ATI,
-                             GL_REG_0_ATI, GL_NONE, GL_NONE,
-                             GL_CON_3_ATI, GL_NONE, GL_BIAS_BIT_ATI);
-        gl->EndFragmentShader();
-    } else {
-        static const char template[] =
-            "!!ATIfs1.0\n"
-            "StartConstants;\n"
-            "  CONSTANT c0 = {%e, %e, %e};\n"
-            "  CONSTANT c1 = {%e, %e, %e};\n"
-            "  CONSTANT c2 = {%e, %e, %e};\n"
-            "  CONSTANT c3 = {%e, %e, %e};\n"
-            "EndConstants;\n"
-            "StartOutputPass;\n"
-            "  SampleMap r0, t0.str;\n"
-            "  SampleMap r1, t1.str;\n"
-            "  SampleMap r2, t2.str;\n"
-            "  MUL r1.rgb, r1.bias, c1.bias;\n"
-            "  MAD r2.rgb, r2.bias, c2.bias, r1;\n"
-            "  MAD r0.rgb, r0, c0.bias, r2;\n"
-            "  ADD r0.rgb.8x, r0, c3.bias;\n"
-            "EndPass;\n";
-        char buffer[512];
-        snprintf(buffer, sizeof(buffer), template,
-                 yuv2rgb[0][0], yuv2rgb[1][0], yuv2rgb[2][0],
-                 yuv2rgb[0][1], yuv2rgb[1][1], yuv2rgb[2][1],
-                 yuv2rgb[0][2], yuv2rgb[1][2], yuv2rgb[2][2],
-                 yuv2rgb[0][3], yuv2rgb[1][3], yuv2rgb[2][3]);
-        MP_DBG(vo, "generated fragment program:\n%s\n", buffer);
-        loadGPUProgram(vo, gl, GL_TEXT_FRAGMENT_SHADER_ATI, buffer);
-    }
 }
 
 // Replace all occurances of variables named "$"+name (e.g. $foo) in *text with
@@ -1262,10 +1165,6 @@ static int glAutodetectYUVConversion(GL *gl)
         return YUV_CONVERSION_NONE;
     if (strstr(extensions, "GL_ARB_fragment_program"))
         return YUV_CONVERSION_FRAGMENT;
-    if (strstr(extensions, "GL_ATI_text_fragment_shader"))
-        return YUV_CONVERSION_TEXT_FRAGMENT;
-    if (strstr(extensions, "GL_ATI_fragment_shader"))
-        return YUV_CONVERSION_COMBINERS_ATI;
     return YUV_CONVERSION_NONE;
 }
 
@@ -1283,12 +1182,6 @@ static void glSetupYUVConversion(struct vo *vo, GL *gl,
     if (params->chrom_texh == 0)
         params->chrom_texh = 1;
     switch (YUV_CONVERSION(params->type)) {
-    case YUV_CONVERSION_COMBINERS_ATI:
-        glSetupYUVFragmentATI(vo, gl, &params->csp_params, 0);
-        break;
-    case YUV_CONVERSION_TEXT_FRAGMENT:
-        glSetupYUVFragmentATI(vo, gl, &params->csp_params, 1);
-        break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT:
@@ -1311,22 +1204,6 @@ static void glSetupYUVConversion(struct vo *vo, GL *gl,
 static void glEnableYUVConversion(GL *gl, GLenum target, int type)
 {
     switch (YUV_CONVERSION(type)) {
-    case YUV_CONVERSION_COMBINERS_ATI:
-        gl->ActiveTexture(GL_TEXTURE1);
-        gl->Enable(target);
-        gl->ActiveTexture(GL_TEXTURE2);
-        gl->Enable(target);
-        gl->ActiveTexture(GL_TEXTURE0);
-        gl->Enable(GL_FRAGMENT_SHADER_ATI);
-        break;
-    case YUV_CONVERSION_TEXT_FRAGMENT:
-        gl->ActiveTexture(GL_TEXTURE1);
-        gl->Enable(target);
-        gl->ActiveTexture(GL_TEXTURE2);
-        gl->Enable(target);
-        gl->ActiveTexture(GL_TEXTURE0);
-        gl->Enable(GL_TEXT_FRAGMENT_SHADER_ATI);
-        break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
@@ -1346,26 +1223,6 @@ static void glEnableYUVConversion(GL *gl, GLenum target, int type)
 static void glDisableYUVConversion(GL *gl, GLenum target, int type)
 {
     switch (YUV_CONVERSION(type)) {
-    case YUV_CONVERSION_COMBINERS_ATI:
-        gl->ActiveTexture(GL_TEXTURE1);
-        gl->Disable(target);
-        gl->ActiveTexture(GL_TEXTURE2);
-        gl->Disable(target);
-        gl->ActiveTexture(GL_TEXTURE0);
-        gl->Disable(GL_FRAGMENT_SHADER_ATI);
-        break;
-    case YUV_CONVERSION_TEXT_FRAGMENT:
-        gl->Disable(GL_TEXT_FRAGMENT_SHADER_ATI);
-        // HACK: at least the Mac OS X 10.5 PPC Radeon drivers are broken and
-        // without this disable the texture units while the program is still
-        // running (10.4 PPC seems to work without this though).
-        gl->Flush();
-        gl->ActiveTexture(GL_TEXTURE1);
-        gl->Disable(target);
-        gl->ActiveTexture(GL_TEXTURE2);
-        gl->Disable(target);
-        gl->ActiveTexture(GL_TEXTURE0);
-        break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
@@ -2157,8 +2014,8 @@ static int preinit(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
 
-    if (p->use_yuv == 1) {
-        MP_WARN(vo, "yuv=1 (nVidia register combiners) have"
+    if (p->use_yuv == 1 || p->use_yuv == 5 || p->use_yuv == 7) {
+        MP_WARN(vo, "Ancient nvidia/ATI specific yuv modes have"
                 " been removed, using yuv=2 instead.\n");
         p->use_yuv = 2;
     }
@@ -2180,6 +2037,9 @@ static int preinit(struct vo *vo)
         autodetectGlExtensions(vo);
     MP_VERBOSE(vo, "Using %d as slice height "
                "(0 means image height).\n", p->slice_height);
+
+    MP_WARN(vo, "This video output is deprecated and will be removed in the future.\n"
+                "If --vo=opengl does not work for you, complain on the bug tracker.\n");
 
     return 0;
 

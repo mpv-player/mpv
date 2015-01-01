@@ -687,11 +687,7 @@ Available video output drivers are:
             control. Gamma can also be set independently for red, green and
             blue.
         5
-            Use ATI-specific method (for older cards). This uses an
-            ATI-specific extension (``GL_ATI_fragment_shader`` - not
-            ``GL_ARB_fragment_shader``!). At least three texture units are
-            needed. Provides saturation and hue control. This method is fast
-            but inexact.
+            Removed. Used ATI-specific method (for older cards).
         6
             Use a 3D texture to do conversion via lookup. Needs the
             ``GL_ARB_fragment_program extension`` and at least four texture

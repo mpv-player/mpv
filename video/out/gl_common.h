@@ -268,16 +268,6 @@ struct GL {
                                   GLsizei, GLint, GLenum, GLenum,
                                   const GLvoid *);
 
-    void (GLAPIENTRY *BeginFragmentShader)(void);
-    void (GLAPIENTRY *EndFragmentShader)(void);
-    void (GLAPIENTRY *SampleMap)(GLuint, GLuint, GLenum);
-    void (GLAPIENTRY *ColorFragmentOp2)(GLenum, GLuint, GLuint, GLuint, GLuint,
-                                        GLuint, GLuint, GLuint, GLuint, GLuint);
-    void (GLAPIENTRY *ColorFragmentOp3)(GLenum, GLuint, GLuint, GLuint, GLuint,
-                                        GLuint, GLuint, GLuint, GLuint, GLuint,
-                                        GLuint, GLuint, GLuint);
-    void (GLAPIENTRY *SetFragmentShaderConstant)(GLuint, const GLfloat *);
-
     void (GLAPIENTRY *GenVertexArrays)(GLsizei, GLuint *);
     void (GLAPIENTRY *BindVertexArray)(GLuint);
     GLint (GLAPIENTRY *GetAttribLocation)(GLuint, const GLchar *);
