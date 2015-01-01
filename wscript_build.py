@@ -528,15 +528,26 @@ def build(ctx):
             ( "cocoa/cocoabasic.m", "cocoa" ),
         ]
 
+        # Create a "local" include dir, so we can build the examples without
+        # installing the headers.
+        incdir = os.path.join(ctx.bldnode.abspath(), "include")
+        ctx(
+            rule   = "mkdir -p {1} && ln -s {0} {1}/mpv".format(
+                        os.path.join(ctx.srcnode.abspath(), "libmpv"), incdir),
+            before = ("c",),
+            name = "incdir",
+        )
+
         for source in ctx.filtered_sources(examples_sources):
             ctx(
                 target       = os.path.splitext(source)[0],
                 source       = "DOCS/client_api_examples/" + source,
-                includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()],
-                use          = "mpv",
+                includes     = [incdir, ctx.srcnode.abspath()],
+                use          = "mpv incdir",
                 features     = "c cprogram",
                 install_path = None
             )
+            ctx.env.CFLAGS += ['-isystem', incdir]
 
     if ctx.dependency_satisfied("vf-dlopen-filters"):
         dlfilters = "telecine tile rectangle framestep ildetect".split()

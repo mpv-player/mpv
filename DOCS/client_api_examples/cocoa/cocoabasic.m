@@ -3,7 +3,7 @@
 // but that's not quite ready yet.
 // You may need a basic Info.plist and MainMenu.xib to make this work.
 
-#include "libmpv/client.h"
+#include <mpv/client.h>
 
 #include <stdio.h>
 #include <stdlib.h>
