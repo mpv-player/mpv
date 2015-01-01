@@ -125,6 +125,13 @@ main_dependencies = [
         'fmsg': 'Unable to find either POSIX or MinGW-w64 environment, ' \
                 'or compiler does not work.',
     }, {
+        'name': '--win32-internal-pthreads',
+        'desc': 'internal pthread wrapper for win32 (Vista+)',
+        'deps_neg': [ 'posix' ],
+        'deps': [ 'mingw' ],
+        'func': check_true,
+        'default': 'disable',
+    }, {
         'name': 'pthreads',
         'desc': 'POSIX threads',
         'func': check_pthreads,
