@@ -66,18 +66,18 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     int p_stderr[2] = {-1, -1};
     pid_t pid = -1;
 
-    if (mp_make_cloexec_pipe(p_stdout) < 0)
+    if (on_stdout && mp_make_cloexec_pipe(p_stdout) < 0)
         goto done;
-    if (mp_make_cloexec_pipe(p_stderr) < 0)
+    if (on_stderr && mp_make_cloexec_pipe(p_stderr) < 0)
         goto done;
 
     if (posix_spawn_file_actions_init(&fa))
         goto done;
     fa_destroy = true;
     // redirect stdout and stderr
-    if (posix_spawn_file_actions_adddup2(&fa, p_stdout[1], 1))
+    if (p_stdout[1] >= 0 && posix_spawn_file_actions_adddup2(&fa, p_stdout[1], 1))
         goto done;
-    if (posix_spawn_file_actions_adddup2(&fa, p_stderr[1], 2))
+    if (p_stderr[1] >= 0 && posix_spawn_file_actions_adddup2(&fa, p_stderr[1], 2))
         goto done;
 
     if (posix_spawnp(&pid, args[0], &fa, NULL, args, environ)) {
