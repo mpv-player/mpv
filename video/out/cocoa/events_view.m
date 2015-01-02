@@ -94,7 +94,7 @@
 
 - (void)clear
 {
-    if (self.inFullScreenMode) {
+    if ([self isInFullScreenMode]) {
         self.clearing = YES;
         [self exitFullScreenModeWithOptions:nil];
     }
