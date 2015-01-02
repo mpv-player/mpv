@@ -78,6 +78,10 @@
 #include "osdep/macosx_events.h"
 #endif
 
+#ifndef FULLCONFIG
+#define FULLCONFIG "(missing)\n"
+#endif
+
 enum exit_reason {
   EXIT_NONE,
   EXIT_NORMAL,
@@ -119,6 +123,11 @@ void mp_print_version(struct mp_log *log, int always)
            mpv_version, mpv_builddate);
     print_libav_versions(log, v);
     mp_msg(log, v, "\n");
+    // Only in verbose mode.
+    if (!always) {
+        mp_msg(log, MSGL_V, "Configuration: " CONFIGURATION "\n");
+        mp_msg(log, MSGL_V, "config.h:\n%s\n", FULLCONFIG);
+    }
 }
 
 static void shutdown_clients(struct MPContext *mpctx)
@@ -500,6 +509,11 @@ int mpv_main(int argc, char *argv[])
 
     mp_msg_update_msglevels(mpctx->global);
 
+    MP_VERBOSE(mpctx, "Command line:");
+    for (int i = 0; i < argc; i++)
+        MP_VERBOSE(mpctx, " '%s'", argv[i]);
+    MP_VERBOSE(mpctx, "\n");
+
     mp_print_version(mpctx->log, false);
 
     mp_parse_cfgfiles(mpctx);
@@ -518,12 +532,6 @@ int mpv_main(int argc, char *argv[])
 
     if (handle_help_options(mpctx))
         exit_player(mpctx, EXIT_NONE);
-
-    MP_VERBOSE(mpctx, "Configuration: " CONFIGURATION "\n");
-    MP_VERBOSE(mpctx, "Command line:");
-    for (int i = 0; i < argc; i++)
-        MP_VERBOSE(mpctx, " '%s'", argv[i]);
-    MP_VERBOSE(mpctx, "\n");
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
         mp_print_version(mpctx->log, true);
