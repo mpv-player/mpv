@@ -66,7 +66,7 @@ char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey)
 {
     buf = mp_GUID_to_str_buf(buf, buf_size, &pkey->fmtid);
     size_t guid_len = strnlen(buf, buf_size);
-    snprintf(buf + guid_len, buf_size - guid_len, ",%"PRIu32, (uint32_t)pkey->pid );
+    snprintf(buf + guid_len, buf_size - guid_len, ",%"PRIu32, (uint32_t) pkey->pid);
     return buf;
 }
 
@@ -182,15 +182,15 @@ static WORD waveformat_valid_bits(const WAVEFORMATEX *wf)
 static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
 {
     char* type = "?";
-    switch(wf->wFormatTag) {
+    switch (wf->wFormatTag) {
     case WAVE_FORMAT_EXTENSIBLE:
     {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
-        if ( IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
-                         &wformat->SubFormat) )
+        if (IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
+                         &wformat->SubFormat))
             type = "float";
-        else if ( IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_PCM,
-                              &wformat->SubFormat) )
+        else if (IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_PCM,
+                              &wformat->SubFormat))
             type = "s";
         break;
     }
@@ -202,13 +202,13 @@ static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
         break;
     }
     int valid_bits = waveformat_valid_bits(wf);
-    if (valid_bits == wf->wBitsPerSample){
+    if (valid_bits == wf->wBitsPerSample) {
         snprintf(buf, buf_size, "%"PRIu16"ch %s%"PRIu16" @ %"PRIu32"hz",
-                 wf->nChannels, type, valid_bits, (unsigned)wf->nSamplesPerSec);
+                 wf->nChannels, type, valid_bits, (unsigned) wf->nSamplesPerSec);
     } else {
         snprintf(buf, buf_size, "%"PRIu16"ch %s%"PRIu16" (in %s%"PRIu16") @ %"PRIu32"hz",
                  wf->nChannels, type, valid_bits, type, wf->wBitsPerSample,
-                 (unsigned)wf->nSamplesPerSec);
+                 (unsigned) wf->nSamplesPerSec);
     }
     return buf;
 }
@@ -216,7 +216,7 @@ static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
 
 static bool waveformat_is_float(WAVEFORMATEX *wf)
 {
-    switch(wf->wFormatTag) {
+    switch (wf->wFormatTag) {
     case WAVE_FORMAT_EXTENSIBLE:
     {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
@@ -231,7 +231,7 @@ static bool waveformat_is_float(WAVEFORMATEX *wf)
 
 static bool waveformat_is_pcm(WAVEFORMATEX *wf)
 {
-    switch(wf->wFormatTag) {
+    switch (wf->wFormatTag) {
     case WAVE_FORMAT_EXTENSIBLE:
     {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
@@ -246,7 +246,7 @@ static bool waveformat_is_pcm(WAVEFORMATEX *wf)
 
 static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
 {
-    if ( src->wFormatTag == WAVE_FORMAT_EXTENSIBLE )
+    if (src->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
         *dst = *(WAVEFORMATEXTENSIBLE *)src;
     else
         dst->Format = *src;
@@ -262,7 +262,7 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf)
         return false;
 
     int format;
-    if (waveformat_is_float(wf)){
+    if (waveformat_is_float(wf)) {
         format = AF_FORMAT_FLOAT;
     } else if (waveformat_is_pcm(wf)) {
         format = AF_FORMAT_S32;
@@ -279,14 +279,14 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf)
     ao->bps = wf->nAvgBytesPerSec;
     ao->format = format;
 
-    if ( wf->wFormatTag == WAVE_FORMAT_EXTENSIBLE ){
+    if (wf->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
         mp_chmap_from_waveext(&ao->channels, wformat->dwChannelMask);
     } else {
         mp_chmap_from_channels(&ao->channels, wf->nChannels);
     }
 
-    if ( ao->channels.num != wf->nChannels ) {
+    if (ao->channels.num != wf->nChannels) {
         MP_ERR(ao, "Channel map doesn't match number of channels\n");
         return false;
     }
@@ -352,7 +352,7 @@ static bool try_mix_format(struct ao *ao)
     return ret;
 exit_label:
     MP_ERR(state, "Error getting mix format: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     SAFE_RELEASE(wf, CoTaskMemFree(wf));
     return false;
 }
@@ -392,7 +392,7 @@ static bool try_passthrough(struct ao *ao)
 static bool search_sample_formats(struct ao *ao, int samplerate, struct mp_chmap *channels)
 {
     // try float
-    for (int bits = 64; bits; bits -= 32){
+    for (int bits = 64; bits; bits -= 32) {
         if (try_format(ao, bits, bits, true, samplerate, channels))
             return true;
     }
@@ -450,7 +450,7 @@ static bool find_formats(struct ao *ao)
         int samplerates[] = {384000, 352800, 192000, 176400, 96000, 88200,
                               48000,  44100,  32000,  22050, 16000, 11025,
                                8000};
-        for (int i = 0; i < MP_ARRAY_SIZE(samplerates); i++){
+        for (int i = 0; i < MP_ARRAY_SIZE(samplerates); i++) {
           if (search_sample_formats(ao, samplerates[i], &ao->channels))
             return true;
         }
@@ -484,7 +484,7 @@ static HRESULT init_clock(struct wasapi_state *state) {
     return S_OK;
 exit_label:
     MP_ERR(state, "Error obtaining the audio device's timing: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     return hr;
 }
 
@@ -494,7 +494,7 @@ static HRESULT init_session_display(struct wasapi_state *state) {
 
     hr = IAudioClient_GetService(state->pAudioClient,
                                  &IID_IAudioSessionControl,
-                                 (void **) &state->pSessionControl);
+                                 (void **)&state->pSessionControl);
     EXIT_ON_ERROR(hr);
 
     GetModuleFileNameW(NULL, path, MAX_PATH);
@@ -508,7 +508,7 @@ static HRESULT init_session_display(struct wasapi_state *state) {
     return S_OK;
 exit_label:
     MP_WARN(state, "Error setting audio session display name: %s (0x%"PRIx32")\n",
-            wasapi_explain_err(hr), (uint32_t)hr);
+            wasapi_explain_err(hr), (uint32_t) hr);
     return S_OK; // No reason to abort initialization.
 }
 
@@ -523,7 +523,7 @@ static HRESULT fix_format(struct ao *ao)
     MP_VERBOSE(state, "Device period: %.2g ms\n", (double) devicePeriod / 10000.0 );
 
     /* integer multiple of device period close to 50ms */
-    bufferPeriod = bufferDuration = ceil( 50.0 * 10000.0 / devicePeriod ) * devicePeriod;
+    bufferPeriod = bufferDuration = ceil(50.0 * 10000.0 / devicePeriod) * devicePeriod;
 
     /* handle unsupported buffer size */
     /* hopefully this shouldn't happen because of the above integer device period */
@@ -549,12 +549,12 @@ reinit:
             retries ++;
 
         MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s (0x%"PRIx32"), used %lld * 100ns\n",
-                   wasapi_explain_err(hr), (uint32_t)hr, bufferDuration);
+                   wasapi_explain_err(hr), (uint32_t) hr, bufferDuration);
 
         IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
         bufferPeriod = bufferDuration =
-            (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
-                              state->bufferFrameCount) + 0.5);
+            (REFERENCE_TIME) ((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
+                               state->bufferFrameCount) + 0.5);
 
         IAudioClient_Release(state->pAudioClient);
         state->pAudioClient = NULL;
@@ -574,7 +574,7 @@ reinit:
     MP_DBG(state, "IAudioClient::Initialize pAudioVolume\n");
     hr = IAudioClient_GetService(state->pAudioClient,
                                  &IID_ISimpleAudioVolume,
-                                 (void **) &state->pAudioVolume);
+                                 (void **)&state->pAudioVolume);
     EXIT_ON_ERROR(hr);
 
     MP_DBG(state, "IAudioClient::Initialize IAudioClient_SetEventHandle\n");
@@ -591,8 +591,8 @@ reinit:
                                state->format.Format.wBitsPerSample / 8 *
                                state->bufferFrameCount;
     bufferDuration =
-        (REFERENCE_TIME)((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
-                          state->bufferFrameCount) + 0.5);
+        (REFERENCE_TIME) ((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
+                           state->bufferFrameCount) + 0.5);
     MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%.2g ms)\n",
                state->bufferFrameCount, (double) bufferDuration / 10000.0 );
 
@@ -613,7 +613,7 @@ reinit:
     return S_OK;
 exit_label:
     MP_ERR(state, "Error initializing device: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     return hr;
 }
 
@@ -798,7 +798,7 @@ bool wasapi_enumerate_devices(struct mp_log *log, struct ao *ao,
     return true;
 exit_label:
     mp_err(log, "Error enumerating devices: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     return false;
 }
 
@@ -817,7 +817,7 @@ static HRESULT load_default_device(struct ao *ao, IMMDeviceEnumerator* pEnumerat
     return S_OK;
 exit_label:
     MP_ERR(ao , "Error loading default device: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     return hr;
 }
 
@@ -926,7 +926,7 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDeviceEnumerator* pEnumera
 
 exit_label:
     SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
-    SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
+    SAFE_RELEASE(pDevices,    IMMDeviceCollection_Release(pDevices));
 
     CoTaskMemFree(deviceID);
     return hr;
@@ -946,7 +946,7 @@ int wasapi_validate_device(struct mp_log *log, const m_option_t *opt,
     int devno = (int) strtol(param.start, &end, 10);
 
     int ret = 1;
-    if ((end == (void*)param.start || *end) && devno < 0)
+    if ((end == (void *)param.start || *end) && devno < 0)
         ret = M_OPT_OUT_OF_RANGE;
 
     mp_dbg(log, "device=%s %svalid\n", param.start, ret == 1 ? "" : "not ");
@@ -957,7 +957,7 @@ HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
     HRESULT hr;
 
 #define UNMARSHAL(type, to, from) do {                                    \
-    hr = CoGetInterfaceAndReleaseStream((from), &(type), (void**) &(to)); \
+    hr = CoGetInterfaceAndReleaseStream((from), &(type), (void **)&(to)); \
     (from) = NULL;                                                        \
     EXIT_ON_ERROR(hr);                                                    \
 } while (0)
@@ -972,7 +972,7 @@ HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
     return S_OK;
 exit_label:
     MP_ERR(state, "Error reading COM proxy: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     return hr;
 }
 
@@ -990,7 +990,7 @@ static HRESULT create_proxies(struct wasapi_state *state) {
     hr = CreateStreamOnHGlobal(NULL, TRUE, &(to));                 \
     EXIT_ON_ERROR(hr);                                             \
     hr = CoMarshalInterThreadInterfaceInStream(&(type),            \
-                                               (IUnknown*) (from), \
+                                               (IUnknown *)(from), \
                                                &(to));             \
     EXIT_ON_ERROR(hr);                                             \
 } while (0)
@@ -1003,13 +1003,13 @@ static HRESULT create_proxies(struct wasapi_state *state) {
     return S_OK;
 exit_label:
     MP_ERR(state, "Error creating COM proxy: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     return hr;
 }
 
 static void destroy_proxies(struct wasapi_state *state) {
-    SAFE_RELEASE(state->sAudioClient, IUnknown_Release(state->sAudioClient));
-    SAFE_RELEASE(state->sAudioVolume, IUnknown_Release(state->sAudioVolume));
+    SAFE_RELEASE(state->sAudioClient,    IUnknown_Release(state->sAudioClient));
+    SAFE_RELEASE(state->sAudioVolume,    IUnknown_Release(state->sAudioVolume));
     SAFE_RELEASE(state->sEndpointVolume, IUnknown_Release(state->sEndpointVolume));
     SAFE_RELEASE(state->sSessionControl, IUnknown_Release(state->sSessionControl));
 }
@@ -1032,7 +1032,7 @@ retry:
     state->initial_volume = -1.0;
 
     hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                          &IID_IMMDeviceEnumerator, (void**)&state->pEnumerator);
+                          &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
     EXIT_ON_ERROR(hr);
 
     char *device = state->opt_device;
@@ -1064,21 +1064,21 @@ retry:
     MP_DBG(ao, "Query hardware volume support\n");
     hr = IAudioEndpointVolume_QueryHardwareSupport(state->pEndpointVolume,
                                                    &state->vol_hw_support);
-    if ( hr != S_OK )
+    if (hr != S_OK)
         MP_WARN(ao, "Error querying hardware volume control: %s (0x%"PRIx32")\n",
-                wasapi_explain_err(hr), (uint32_t)hr);
+                wasapi_explain_err(hr), (uint32_t) hr);
 
     MP_DBG(ao, "Probing formats\n");
-    if (!find_formats(ao)){
+    if (!find_formats(ao)) {
         hr = E_FAIL;
         EXIT_ON_ERROR(hr);
     }
 
     MP_DBG(ao, "Fixing format\n");
     hr = fix_format(ao);
-    if ( (hr == AUDCLNT_E_DEVICE_IN_USE ||
-          hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
-         retry_wait <= 8 ) {
+    if ((hr == AUDCLNT_E_DEVICE_IN_USE ||
+         hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
+        retry_wait <= 8) {
         wasapi_thread_uninit(ao);
         MP_WARN(ao, "Retrying in %"PRId64" us\n", retry_wait);
         mp_sleep_us(retry_wait);
@@ -1107,7 +1107,7 @@ retry:
     return S_OK;
 exit_label:
     MP_ERR(state, "Error setting up audio thread: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     return hr;
 }
 
