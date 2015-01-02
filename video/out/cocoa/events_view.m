@@ -94,8 +94,10 @@
 
 - (void)clear
 {
-    self.clearing = YES;
-    [self exitFullScreenModeWithOptions:nil];
+    if (self.inFullScreenMode) {
+        self.clearing = YES;
+        [self exitFullScreenModeWithOptions:nil];
+    }
 }
 
 // mpv uses flipped coordinates, because X11 uses those. So let's just use them
