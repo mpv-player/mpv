@@ -427,8 +427,8 @@ Program Behavior
 ``--ytdl``, ``--no-ytdl``
     Enable the youtube-dl hook-script. It will look at the input URL, and will
     play the video located on the website. This works with many streaming sites,
-    not just the one the scripts are named after. This requires a recent version
-    of youtube-dl to be installed on the system. (Enabled by default.)
+    not just the one that the script is named after. This requires a recent
+    version of youtube-dl to be installed on the system. (Enabled by default.)
 
     If the script can't do anything with an URL, it will do nothing.
 
