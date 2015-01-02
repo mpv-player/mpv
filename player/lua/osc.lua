@@ -1865,7 +1865,7 @@ function tick()
 
         -- render idle message
         msg.debug("idle message")
-        local icon_x, icon_y = 320 - 28, 140
+        local icon_x, icon_y = 320 - 26, 140
 
         local ass = assdraw.ass_new()
         ass:new_event()
@@ -1887,9 +1887,9 @@ function tick()
         ass:pos(icon_x, icon_y)
         ass:append("{\\an7\\c&HE5E5E5&\\1a&H00&\\bord0\\shad0\\p6}m 895 10 b 401 10 0 410 0 905 0 1399 401 1800 895 1800 1390 1800 1790 1399 1790 905 1790 410 1390 10 895 10 m 895 10 m 925 42 b 1388 42 1763 418 1763 880 1763 1343 1388 1718 925 1718 463 1718 87 1343 87 880 87 418 463 42 925 42{\\p0}")
         ass:new_event()
-        ass:pos(320, icon_y+40)
+        ass:pos(320, icon_y+65)
         ass:an(8)
-        ass:append("\\N\\NDrop files to play here.")
+        ass:append("Drop files to play here.")
         mp.set_osd_ass(640, 360, ass.text)
 
         mp.disable_key_bindings("showhide")
