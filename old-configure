@@ -938,7 +938,7 @@ cat > $TMPC << EOF
 
 #define CONFIGURATION "$configuration"
 
-#define MPLAYER_CONFDIR "$_confdir"
+#define MPV_CONFDIR "$_confdir"
 
 /* we didn't bother to add actual config checks for this, or they are
    for platforms not supported by this configure script */

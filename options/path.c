@@ -74,7 +74,7 @@ static int mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i)
     i = mp_add_macosx_bundle_dir(global, dirs, i);
 #endif
 
-    dirs[i++] = MPLAYER_CONFDIR;
+    dirs[i++] = MPV_CONFDIR;
 
     return i;
 }
