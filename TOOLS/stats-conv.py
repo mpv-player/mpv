@@ -25,6 +25,8 @@ Currently, the following event types are supported:
     'end' <name>                end of the named event
     'value' <float> <name>      a normal value (as opposed to event)
     'event-timed' <ts> <name>   singular event at the given timestamp
+    'value-timed' <ts> <float> <name>
+                                a value for an event at the given timestamp
     <name>                      singular event
 
 """
@@ -86,6 +88,12 @@ for line in [line.split("#")[0].strip() for line in open(filename, "r")]:
         val = int(val) / 1000 - G.start
         e = get_event(name, "event-signal")
         e.vals.append((val, 1))
+    elif event.startswith("value-timed "):
+        _, tsval, val, name = event.split(" ", 3)
+        tsval = int(tsval) / 1000 - G.start
+        val = float(val)
+        e = get_event(name, "value")
+        e.vals.append((tsval, val))
     else:
         e = get_event(event, "event-signal")
         e.vals.append((ts, 1))
