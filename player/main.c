@@ -440,9 +440,6 @@ int mp_initialize(struct MPContext *mpctx)
     }
 #endif
 
-    if (opts->consolecontrols && cas_terminal_owner(mpctx, mpctx))
-        terminal_setup_getch(mpctx->input);
-
 #if !HAVE_LIBASS
     MP_WARN(mpctx, "Compiled without libass.\n");
     MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
@@ -454,6 +451,9 @@ int mp_initialize(struct MPContext *mpctx)
     mpctx->initialized = true;
 
     mp_get_resume_defaults(mpctx);
+
+    if (opts->consolecontrols && cas_terminal_owner(mpctx, mpctx))
+        terminal_setup_getch(mpctx->input);
 
 #if HAVE_COCOA
     cocoa_set_input_context(mpctx->input);
