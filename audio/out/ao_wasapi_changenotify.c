@@ -32,7 +32,7 @@
 
 static char* ERole_to_str(ERole role)
 {
-    switch(role){
+    switch (role) {
     case eConsole:        return "console";
     case eMultimedia:     return "multimedia";
     case eCommunications: return "communications";
@@ -42,7 +42,7 @@ static char* ERole_to_str(ERole role)
 
 static char* EDataFlow_to_str(EDataFlow flow)
 {
-    switch(flow){
+    switch (flow) {
     case eRender:  return "render";
     case eCapture: return "capture";
     case eAll:     return "all";
@@ -54,8 +54,8 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_QueryInterface(
     IMMNotificationClient* This, REFIID riid, void **ppvObject)
 {
     /* Compatible with IMMNotificationClient and IUnknown */
-    if ( IsEqualGUID(&IID_IMMNotificationClient, riid) ||
-         IsEqualGUID(&IID_IUnknown, riid) ) {
+    if (IsEqualGUID(&IID_IMMNotificationClient, riid) ||
+        IsEqualGUID(&IID_IUnknown, riid)) {
         *ppvObject = (void *)This;
         return S_OK;
     } else {
@@ -86,7 +86,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDeviceStateChanged(
     change_notify *change = (change_notify *)This;
     struct ao *ao = change->ao;
 
-    if (pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId)){
+    if (pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId)) {
         switch (dwNewState) {
         case DEVICE_STATE_DISABLED:
         case DEVICE_STATE_NOTPRESENT:
@@ -146,8 +146,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDefaultDeviceChanged(
         MP_VERBOSE(ao, "New default device %S\n", pwstrDeviceId);
 
     /* don't care about "eCapture" or non-"eMultimedia" roles  */
-    if ( flow == eCapture ||
-         role != eMultimedia ) return S_OK;
+    if (flow == eCapture || role != eMultimedia) return S_OK;
 
     /* stay on the device the user specified */
     if (state->opt_device) {
@@ -156,7 +155,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDefaultDeviceChanged(
     }
 
     /* don't reload if already on the new default */
-    if ( pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId) ){
+    if (pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId)) {
         MP_VERBOSE(ao, "Already using default device, no reload required\n");
         return S_OK;
     }
@@ -178,7 +177,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     if (pwstrDeviceId && !wcscmp(change->monitored, pwstrDeviceId)) {
         MP_VERBOSE(ao, "OnPropertyValueChanged triggered\n");
         MP_VERBOSE(ao, "Changed property: ");
-        if ( IsEqualPropertyKey(PKEY_AudioEngine_DeviceFormat, key) ) {
+        if (IsEqualPropertyKey(PKEY_AudioEngine_DeviceFormat, key)) {
             MP_VERBOSE(change->ao,
                        "PKEY_AudioEngine_DeviceFormat - requesting ao reload\n");
             ao_request_reload(change->ao);
@@ -235,7 +234,7 @@ void wasapi_change_uninit(struct ao *ao)
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     struct change_notify *change = &state->change;
 
-    if( state->pEnumerator && change->client.lpVtbl )
+    if(state->pEnumerator && change->client.lpVtbl)
         IMMDeviceEnumerator_UnregisterEndpointNotificationCallback(
             state->pEnumerator, (IMMNotificationClient *)change);
 

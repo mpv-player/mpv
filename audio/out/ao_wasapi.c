@@ -44,7 +44,7 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
     hr = IAudioClock_GetPosition(state->pAudioClock, &position, &qpc_position);
     /* GetPosition succeeded, but the result may be inaccurate due to the length of the call */
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889%28v=vs.85%29.aspx */
-    if ( hr == S_FALSE) {
+    if (hr == S_FALSE) {
         MP_DBG(state, "Possibly inaccurate device position.\n");
         hr = S_OK;
     }
@@ -54,7 +54,7 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
     QueryPerformanceCounter(&qpc_count);
     double qpc_diff = (qpc_count.QuadPart * 1e7 / state->qpc_frequency.QuadPart) - qpc_position;
 
-    position += state->clock_frequency * (uint64_t)(qpc_diff / 1e7);
+    position += state->clock_frequency * (uint64_t) (qpc_diff / 1e7);
 
     /* convert position to the same base as sample_count */
     position = position * state->format.Format.nSamplesPerSec / state->clock_frequency;
@@ -67,7 +67,7 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
     return S_OK;
 exit_label:
     MP_ERR(state, "Error getting device delay: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     return hr;
 }
 
@@ -110,7 +110,7 @@ static void thread_feed(struct ao *ao)
     return;
 exit_label:
     MP_ERR(state, "Error feeding audio: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t)hr);
+           wasapi_explain_err(hr), (uint32_t) hr);
     MP_VERBOSE(ao, "Requesting ao reload\n");
     ao_request_reload(ao);
     return;
@@ -131,7 +131,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
     HANDLE playcontrol[] =
         {state->hUninit, state->hFeed, state->hForceFeed, NULL};
     MP_DBG(ao, "Entering dispatch loop\n");
-    while (1) { /* watch events */
+    while (true) { /* watch events */
         waitstatus = MsgWaitForMultipleObjects(3, playcontrol, FALSE, INFINITE,
                                                QS_POSTMESSAGE | QS_SENDMESSAGE);
         switch (waitstatus) {
@@ -181,7 +181,7 @@ static void uninit(struct ao *ao)
     if (state->hUninit)
         SetEvent(state->hUninit);
     /* wait up to 10 seconds */
-    if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT){
+    if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT) {
         MP_ERR(ao, "Audio loop thread refuses to abort\n");
         return;
     }
@@ -235,7 +235,7 @@ static int init(struct ao *ao)
     }
 
     state->init_ret = E_FAIL;
-    state->threadLoop = (HANDLE)CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
+    state->threadLoop = (HANDLE) CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
     if (!state->threadLoop) {
         /* failed to init thread */
         MP_ERR(ao, "Failed to create thread\n");
