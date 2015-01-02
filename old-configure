@@ -747,13 +747,13 @@ check_pkg_config "FFmpeg/Libav" $_ffmpeg FFMPEG \
     "libavutil >= 52.48.101 libavcodec >= 55.34.1 libavformat >= 55.12.0 libswscale >= 2.1.2"
 test $(defretval) = no && die "Unable to find development files for some of the required Libav libraries above. Aborting."
 
-check_pkg_config "Libavresample" $_libavresample LIBAVRESAMPLE 'libavresample >= 1.1.0'
-_libavresample=$(defretval)
-
-_libswresample=auto
-test $_libavresample = yes && _libswresample=no
 check_pkg_config "Libswresample" $_libswresample LIBSWRESAMPLE 'libswresample >= 0.17.104'
 _libswresample=$(defretval)
+
+_libavresample=auto
+test $_libswresample = yes && _libavresample=no
+check_pkg_config "Libavresample" $_libavresample LIBAVRESAMPLE 'libavresample >= 1.1.0'
+_libavresample=$(defretval)
 
 if test "$_libswresample" = no && test "$_libavresample" = no ; then
   die "No resampler found. Install libavresample or libswresample (FFmpeg)."

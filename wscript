@@ -386,14 +386,14 @@ libav_dependencies = [
         'fmsg': "Unable to find development files for some of the required \
 Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
     }, {
-        'name': '--libavresample',
-        'desc': 'libavresample',
-        'func': check_pkg_config('libavresample',  '>= 1.1.0'),
-    }, {
         'name': '--libswresample',
         'desc': 'libswresample',
         'func': check_pkg_config('libswresample', '>= 0.17.104'),
-        'deps_neg': ['libavresample'],
+    }, {
+        'name': '--libavresample',
+        'desc': 'libavresample',
+        'func': check_pkg_config('libavresample',  '>= 1.1.0'),
+        'deps_neg': ['libswresample'],
     }, {
         'name': 'resampler',
         'desc': 'usable resampler found',
