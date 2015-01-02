@@ -39,13 +39,13 @@ def __write_version_h__(ctx):
 def __escape_c_string(s):
     return s.replace("\"", "\\\"").replace("\n", "\\n")
 
-def __add_mplayer_defines__(ctx):
+def __add_mpv_defines__(ctx):
     from sys import argv
     ctx.define("CONFIGURATION", " ".join(argv))
-    ctx.define("MPLAYER_CONFDIR", ctx.env.CONFDIR)
+    ctx.define("MPV_CONFDIR", ctx.env.CONFDIR)
     ctx.define("FULLCONFIG", "\\n" + __escape_c_string(ctx.get_config_header()) + "\\n")
 
 def configure(ctx):
-    __add_mplayer_defines__(ctx)
+    __add_mpv_defines__(ctx)
     __write_config_h__(ctx)
     __write_version_h__(ctx)
