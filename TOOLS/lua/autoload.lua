@@ -25,6 +25,9 @@ function find_and_add_entries()
         return
     end
     local files = mputils.readdir(dir, "files")
+    if files == nil then
+        return
+    end
     table.sort(files)
     if dir == "." then
         dir = ""
