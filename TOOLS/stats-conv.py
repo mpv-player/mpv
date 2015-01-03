@@ -21,13 +21,14 @@ e.g.:
 
 Currently, the following event types are supported:
 
+    'signal' <name>             singular event
     'start' <name>              start of the named event
     'end' <name>                end of the named event
     'value' <float> <name>      a normal value (as opposed to event)
     'event-timed' <ts> <name>   singular event at the given timestamp
     'value-timed' <ts> <float> <name>
                                 a value for an event at the given timestamp
-    <name>                      singular event
+    <name>                      singular event (same as 'signal')
 
 """
 
@@ -94,6 +95,10 @@ for line in [line.split("#")[0].strip() for line in open(filename, "r")]:
         val = float(val)
         e = get_event(name, "value")
         e.vals.append((tsval, val))
+    elif event.startswith("signal "):
+        name = event.split(" ", 2)[1]
+        e = get_event(name, "event-signal")
+        e.vals.append((ts, 1))
     else:
         e = get_event(event, "event-signal")
         e.vals.append((ts, 1))
@@ -104,23 +109,25 @@ G.sevents.sort(key=lambda x: x.name)
 hasval = False
 for e, index in zip(G.sevents, range(len(G.sevents))):
     m = len(G.sevents)
-    e.vals = [(x, y * (m - index) / m) for (x, y) in e.vals]
     if e.type == "value":
         hasval = True
-
-plot.hold(True)
-plots = 2 if hasval else 1
-mainpl = plot.subplot(plots, 1, 1)
-legend = []
-for e in G.sevents:
-    if e.type == "value":
-        plot.subplot(plots, 1, 2, sharex=mainpl)
     else:
-        plot.subplot(plots, 1, 1)
-    pl, = plot.plot([x for x,y in e.vals], [y for x,y in e.vals], label=e.name)
+        e.vals = [(x, y * (m - index) / m) for (x, y) in e.vals]
+
+fig = plot.figure()
+fig.hold(True)
+ax = [None, None]
+plots = 2 if hasval else 1
+ax[0] = fig.add_subplot(plots, 1, 1)
+if hasval:
+    ax[1] = fig.add_subplot(plots, 1, 2, sharex=ax[0])
+legends = [[], []]
+for e in G.sevents:
+    cur = ax[1 if e.type == "value" else 0]
+    pl, = cur.plot([x for x,y in e.vals], [y for x,y in e.vals], label=e.name)
     if e.type == "event-signal":
         plot.setp(pl, marker = e.marker, linestyle = "None")
-    legend.append(pl)
-plot.subplot(plots, 1, 1)
-plot.legend(legend, [pl.get_label() for pl in legend])
+for cur in ax:
+    if cur is not None:
+        cur.legend()
 plot.show()
