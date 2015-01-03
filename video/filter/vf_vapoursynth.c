@@ -867,6 +867,9 @@ static void vsmap_to_table(lua_State *L, int index, VSMap *map)
         case ptInt:
             lua_pushnumber(L, vsapi->propGetInt(map, key, 0, NULL));
             break;
+        case ptFloat:
+            lua_pushnumber(L, vsapi->propGetFloat(map, key, 0, NULL));
+            break;
         case ptNode: {
             VSNodeRef *r = vsapi->propGetNode(map, key, 0, NULL);
             MP_TARRAY_APPEND(p, p->gc_noderef, p->num_gc_noderef, r);
