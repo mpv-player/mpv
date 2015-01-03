@@ -123,6 +123,8 @@ struct vf_chain {
     struct mp_image_params output_params;
     uint8_t allowed_output_formats[IMGFMT_END - IMGFMT_START];
 
+    double container_fps;
+
     struct mp_log *log;
     struct MPOpts *opts;
     struct mpv_global *global;
