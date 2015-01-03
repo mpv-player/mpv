@@ -87,7 +87,7 @@ mp.add_hook("on_load", 10, function ()
             return
         end
 
-        msg.info("youtube-dl succeeded!")
+        msg.verbose("youtube-dl succeeded!")
 
         -- what did we get?
         if not (json["direct"] == nil) and (json["direct"] == true) then
