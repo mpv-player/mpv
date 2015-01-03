@@ -415,14 +415,12 @@ int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
     return vf_do_filter(c->first, img);
 }
 
-// Output the next queued image (if any) from the full filter chain.
-// The frame can be retrieved with vf_read_output_frame().
-//  eof: if set, assume there's no more input i.e. vf_filter_frame() will
-//       not be called (until reset) - flush all internally delayed frames
-//  returns: -1: error, 0: no output, 1: output available
-int vf_output_frame(struct vf_chain *c, bool eof)
+// Similar to vf_output_frame(), but only ensure that the filter "until" has
+// output, instead of the end of the filter chain.
+static int vf_output_frame_until(struct vf_chain *c, struct vf_instance *until,
+                                 bool eof)
 {
-    if (c->last->num_out_queued)
+    if (until->num_out_queued)
         return 1;
     if (c->initialized < 1)
         return -1;
@@ -438,10 +436,12 @@ int vf_output_frame(struct vf_chain *c, bool eof)
             }
             if (vf_has_output_frame(cur))
                 last = cur;
+            if (cur == until)
+                break;
         }
         if (!last)
             return 0;
-        if (!last->next)
+        if (last == until)
             return 1;
         int r = vf_do_filter(last->next, vf_dequeue_output_frame(last));
         if (r < 0)
@@ -449,11 +449,49 @@ int vf_output_frame(struct vf_chain *c, bool eof)
     }
 }
 
+// Output the next queued image (if any) from the full filter chain.
+// The frame can be retrieved with vf_read_output_frame().
+//  eof: if set, assume there's no more input i.e. vf_filter_frame() will
+//       not be called (until reset) - flush all internally delayed frames
+//  returns: -1: error, 0: no output, 1: output available
+int vf_output_frame(struct vf_chain *c, bool eof)
+{
+    return vf_output_frame_until(c, c->last, eof);
+}
+
 struct mp_image *vf_read_output_frame(struct vf_chain *c)
 {
     if (!c->last->num_out_queued)
         vf_output_frame(c, false);
     return vf_dequeue_output_frame(c->last);
+}
+
+// Some filters (vf_vapoursynth) filter on separate threads, and may need new
+// input from the decoder, even though the core does not need a new output image
+// yet (this is required to get proper pipelining in the filter). If the filter
+// needs new data, it will call c->wakeup_callback, which in turn causes the
+// core to recheck the filter chain, calling this function. Each filter is asked
+// whether it needs a frame (with vf->needs_input), and if so, it will try to
+// feed it a new frame. If this fails, it will request a new frame from the
+// core by returning 1.
+// returns -1: error, 0: nothing needed, 1: add new frame with vf_filter_frame()
+int vf_needs_input(struct vf_chain *c)
+{
+    struct vf_instance *prev = c->first;
+    for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
+        while (cur->needs_input && cur->needs_input(cur)) {
+            // Get frames from preceding filters, or if there are none,
+            // request new frames from decoder.
+            int r = vf_output_frame_until(c, prev, false);
+            if (r < 1)
+                return r < 0 ? -1 : 1;
+            r = vf_do_filter(cur, vf_dequeue_output_frame(prev));
+            if (r < 0)
+                return r;
+        }
+        prev = cur;
+    }
+    return 0;
 }
 
 static void vf_forget_frames(struct vf_instance *vf)

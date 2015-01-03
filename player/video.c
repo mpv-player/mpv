@@ -178,6 +178,8 @@ static void recreate_video_filters(struct MPContext *mpctx)
     vf_destroy(d_video->vfilter);
     d_video->vfilter = vf_new(mpctx->global);
     d_video->vfilter->hwdec = d_video->hwdec_info;
+    d_video->vfilter->wakeup_callback = wakeup_playloop;
+    d_video->vfilter->wakeup_callback_ctx = mpctx;
 
     vf_append_filter_list(d_video->vfilter, opts->vf_settings);
 
@@ -435,7 +437,8 @@ static int video_filter(struct MPContext *mpctx, bool eof)
         return VD_ERROR;
 
     // There is already a filtered frame available.
-    if (vf_output_frame(vf, eof) > 0)
+    // If vf_needs_input() returns > 0, the filter wants input anyway.
+    if (vf_output_frame(vf, eof) > 0 && vf_needs_input(vf) < 1)
         return VD_PROGRESS;
 
     // Decoder output is different from filter input?
@@ -494,6 +497,20 @@ static int video_decode_and_filter(struct MPContext *mpctx)
     if (r == VD_RECONFIG) // retry feeding decoded image
         r = video_filter(mpctx, eof);
     return r;
+}
+
+static int video_feed_async_filter(struct MPContext *mpctx)
+{
+    struct dec_video *d_video = mpctx->d_video;
+    struct vf_chain *vf = d_video->vfilter;
+
+    if (vf->initialized < 0)
+        return VD_ERROR;
+
+    if (vf_needs_input(vf) < 1)
+        return 0;
+    mpctx->sleeptime = 0; // retry until done
+    return video_decode_and_filter(mpctx);
 }
 
 /* Modify video timing to match the audio timeline. There are two main
@@ -793,8 +810,12 @@ void write_video(struct MPContext *mpctx, double endpts)
     double time_frame = MPMAX(mpctx->time_frame, -1);
     int64_t pts = mp_time_us() + (int64_t)(time_frame * 1e6);
 
-    if (!vo_is_ready_for_frame(vo, pts))
-        return; // wait until VO wakes us up to get more frames
+    // wait until VO wakes us up to get more frames
+    if (!vo_is_ready_for_frame(vo, pts)) {
+        if (video_feed_async_filter(mpctx) < 0)
+            goto error;
+        return;
+    }
 
     int64_t duration = -1;
     double diff = -1;

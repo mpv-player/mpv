@@ -378,7 +378,7 @@ struct MPContext *mp_create(void)
     return mpctx;
 }
 
-static void wakeup_playloop(void *ctx)
+void wakeup_playloop(void *ctx)
 {
     struct MPContext *mpctx = ctx;
     mp_input_wakeup(mpctx->input);
