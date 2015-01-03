@@ -771,6 +771,15 @@ Available filters are:
         Display size of the video. Can be different from video size if the
         video does not use square pixels (e.g. DVD).
 
+    ``container_fps``
+        FPS value as reported by file headers. This value can be wrong or
+        completely broken (e.g. 0 or NaN). Even if the value is correct,
+        if another filter changes the real FPS (by dropping or inserting
+        frames), the value of this variable might not be useful. Note that
+        the ``--fps`` command line option overrides this value.
+
+        Useful for some filters which insist on having a FPS.
+
 ``vapoursynth-lazy``
     The same as ``vapoursynth``, but doesn't load Python scripts. Instead, a
     custom backend using Lua and the raw VapourSynth API is used. The syntax

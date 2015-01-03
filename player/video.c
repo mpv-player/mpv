@@ -180,6 +180,7 @@ static void recreate_video_filters(struct MPContext *mpctx)
     d_video->vfilter->hwdec = d_video->hwdec_info;
     d_video->vfilter->wakeup_callback = wakeup_playloop;
     d_video->vfilter->wakeup_callback_ctx = mpctx;
+    d_video->vfilter->container_fps = d_video->fps;
 
     vf_append_filter_list(d_video->vfilter, opts->vf_settings);
 
@@ -294,6 +295,13 @@ int reinit_video_chain(struct MPContext *mpctx)
     d_video->fps = sh->video->fps;
     d_video->vo = mpctx->video_out;
 
+    if (opts->force_fps) {
+        d_video->fps = opts->force_fps;
+        MP_INFO(mpctx, "FPS forced to %5.3f.\n", d_video->fps);
+        MP_INFO(mpctx, "Use --no-correct-pts to force FPS based timing.\n");
+    }
+    update_fps(mpctx);
+
     vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &d_video->hwdec_info);
 
     recreate_video_filters(mpctx);
@@ -316,16 +324,6 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     reset_video_state(mpctx);
     reset_subtitle_state(mpctx);
-
-    if (opts->force_fps) {
-        d_video->fps = opts->force_fps;
-        MP_INFO(mpctx, "FPS forced to be %5.3f.\n", d_video->fps);
-    }
-    if (!sh->video->fps && !opts->force_fps && !opts->correct_pts) {
-        MP_ERR(mpctx, "FPS not specified in the "
-               "header or invalid, use the -fps option.\n");
-    }
-    update_fps(mpctx);
 
     return 1;
 
