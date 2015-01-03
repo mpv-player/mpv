@@ -760,6 +760,17 @@ Available filters are:
         making it higher than the number of cores can actually make it
         slower.
 
+    The following variables are defined by mpv:
+
+    ``video_in``
+        The mpv video source as vapoursynth clip. Note that this has no length
+        set, which confuses many filters. Using ``Trim`` on the clip with a
+        high dummy length can turn it into a finite clip.
+
+    ``video_in_dw``, ``video_in_dh``
+        Display size of the video. Can be different from video size if the
+        video does not use square pixels (e.g. DVD).
+
 ``vapoursynth-lazy``
     The same as ``vapoursynth``, but doesn't load Python scripts. Instead, a
     custom backend using Lua and the raw VapourSynth API is used. The syntax
