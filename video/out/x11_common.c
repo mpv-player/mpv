@@ -1491,6 +1491,8 @@ static void vo_x11_update_geometry(struct vo *vo)
     if (fps != x11->current_display_fps)
         MP_VERBOSE(x11, "Current display FPS: %f\n", fps);
     x11->current_display_fps = fps;
+    // might have changed displays
+    x11->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
 static void vo_x11_fullscreen(struct vo *vo)

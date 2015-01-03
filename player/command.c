@@ -3438,7 +3438,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle",
       "demuxer-cache-duration", "demuxer-cache-idle"),
     E(MP_EVENT_WIN_RESIZE, "window-scale"),
-    E(MP_EVENT_WIN_STATE, "window-minimized"),
+    E(MP_EVENT_WIN_STATE, "window-minimized", "display-names"),
 };
 #undef E
 
