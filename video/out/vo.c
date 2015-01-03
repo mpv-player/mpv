@@ -782,15 +782,17 @@ static void run_query_format(void *p)
 {
     void **pp = p;
     struct vo *vo = pp[0];
-    *(int *)pp[2] = vo->driver->query_format(vo, *(int *)pp[1]);
+    uint8_t *list = pp[1];
+    for (int format = IMGFMT_START; format < IMGFMT_END; format++)
+        list[format - IMGFMT_START] = vo->driver->query_format(vo, format);
 }
 
-int vo_query_format(struct vo *vo, int format)
+// For each item in the list (allocated as uint8_t[IMGFMT_END - IMGFMT_START]),
+// set the supported format flags.
+void vo_query_formats(struct vo *vo, uint8_t *list)
 {
-    int ret;
-    void *p[] = {vo, &format, &ret};
+    void *p[] = {vo, list};
     mp_dispatch_run(vo->in->dispatch, run_query_format, p);
-    return ret;
 }
 
 // Calculate the appropriate source and destination rectangle to

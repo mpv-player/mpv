@@ -848,8 +848,10 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
         MP_INFO(mpctx, "Creating non-video VO window.\n");
         // Pick whatever works
         int config_format = 0;
+        uint8_t fmts[IMGFMT_END - IMGFMT_START] = {0};
+        vo_query_formats(vo, fmts);
         for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
-            if (vo_query_format(vo, fmt)) {
+            if (fmts[fmt - IMGFMT_START]) {
                 config_format = fmt;
                 break;
             }

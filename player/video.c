@@ -88,8 +88,7 @@ void update_fps(struct MPContext *mpctx)
 
 static void set_allowed_vo_formats(struct vf_chain *c, struct vo *vo)
 {
-    for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++)
-        c->allowed_output_formats[fmt - IMGFMT_START] = vo_query_format(vo, fmt);
+    vo_query_formats(vo, c->allowed_output_formats);
 }
 
 static int try_filter(struct MPContext *mpctx, struct mp_image_params params,
