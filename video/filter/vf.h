@@ -84,6 +84,12 @@ typedef struct vf_instance {
     // May be called multiple times, even if the filter gives no output.
     int (*filter_out)(struct vf_instance *vf);
 
+    // Optional function that checks whether the filter needs additional
+    // input. This is for filters with asynchronous behavior: they filter
+    // frames in the background, and to get good pipelining behavior, new
+    // data should be fed, even if the playback core doesn't need any yet.
+    bool (*needs_input)(struct vf_instance *vf);
+
     void (*uninit)(struct vf_instance *vf);
 
     char *label;
@@ -121,6 +127,12 @@ struct vf_chain {
     struct MPOpts *opts;
     struct mpv_global *global;
     struct mp_hwdec_info *hwdec;
+
+    // Call when the filter chain wants new processing (for filters with
+    // asynchronous behavior) - must be immutable once filters are created,
+    // since they are supposed to call it from foreign threads.
+    void (*wakeup_callback)(void *ctx);
+    void *wakeup_callback_ctx;
 };
 
 typedef struct vf_seteq {
@@ -150,6 +162,7 @@ int vf_control_any(struct vf_chain *c, int cmd, void *arg);
 int vf_control_by_label(struct vf_chain *c, int cmd, void *arg, bstr label);
 int vf_filter_frame(struct vf_chain *c, struct mp_image *img);
 int vf_output_frame(struct vf_chain *c, bool eof);
+int vf_needs_input(struct vf_chain *c);
 struct mp_image *vf_read_output_frame(struct vf_chain *c);
 void vf_seek_reset(struct vf_chain *c);
 struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
