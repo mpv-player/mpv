@@ -246,7 +246,7 @@ float[6] weights6(sampler2D lookup, float f) {
 }
 #endif
 
-// For N=n*4 with n>1 (N==4 is covered by weights4()).
+// For N=n*4 with n>1.
 #define WEIGHTS_N(NAME, N)                          \
     float[N] NAME(sampler2D lookup, float f) {      \
         float r[N];                                 \
