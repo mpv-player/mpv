@@ -952,23 +952,29 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
         snprintf(name, sizeof(name), "sample_scaler%d", unit);
         APPENDF(shader, "#define DEF_SCALER%d \\\n    ", unit);
         char lut_fn[40];
-        if (size == 2 || size == 6) {
-            snprintf(lut_fn, sizeof(lut_fn), "weights%d", size);
+        if (scaler->kernel->polar) {
+            // SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT)
+            APPENDF(shader, "SAMPLE_CONVOLUTION_POLAR_R(%s, %d, %s)\n",
+                    name, (int)scaler->kernel->radius, lut_tex);
         } else {
-            snprintf(lut_fn, sizeof(lut_fn), "weights_scaler%d", unit);
-            APPENDF(shader, "WEIGHTS_N(%s, %d) \\\n    ", lut_fn, size);
-        }
-        if (pass != -1) {
-            // The direction/pass assignment is rather arbitrary, but fixed in
-            // other parts of the code (like FBO setup).
-            const char *direction = pass == 0 ? "0, 1" : "1, 0";
-            // SAMPLE_CONVOLUTION_SEP_N(NAME, DIR, N, LUT, WEIGHTS_FUNC)
-            APPENDF(shader, "SAMPLE_CONVOLUTION_SEP_N(%s, vec2(%s), %d, %s, %s)\n",
-                    name, direction, size, lut_tex, lut_fn);
-        } else {
-            // SAMPLE_CONVOLUTION_N(NAME, N, LUT, WEIGHTS_FUNC)
-            APPENDF(shader, "SAMPLE_CONVOLUTION_N(%s, %d, %s, %s)\n",
-                    name, size, lut_tex, lut_fn);
+            if (size == 2 || size == 6) {
+                snprintf(lut_fn, sizeof(lut_fn), "weights%d", size);
+            } else {
+                snprintf(lut_fn, sizeof(lut_fn), "weights_scaler%d", unit);
+                APPENDF(shader, "WEIGHTS_N(%s, %d) \\\n    ", lut_fn, size);
+            }
+            if (pass != -1) {
+                // The direction/pass assignment is rather arbitrary, but fixed in
+                // other parts of the code (like FBO setup).
+                const char *direction = pass == 0 ? "0, 1" : "1, 0";
+                // SAMPLE_CONVOLUTION_SEP_N(NAME, DIR, N, LUT, WEIGHTS_FUNC)
+                APPENDF(shader, "SAMPLE_CONVOLUTION_SEP_N(%s, vec2(%s), %d, %s, %s)\n",
+                        name, direction, size, lut_tex, lut_fn);
+            } else {
+                // SAMPLE_CONVOLUTION_N(NAME, N, LUT, WEIGHTS_FUNC)
+                APPENDF(shader, "SAMPLE_CONVOLUTION_N(%s, %d, %s, %s)\n",
+                        name, size, lut_tex, lut_fn);
+            }
         }
         APPENDF(shader, "#define %s %s\n", target, name);
     }
@@ -1163,7 +1169,7 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
     shader_def_opt(&header_final, "USE_TEMPORAL_DITHER", p->opts.temporal_dither);
 
-    if (p->opts.scale_sep && p->scalers[0].kernel) {
+    if (p->opts.scale_sep && p->scalers[0].kernel && !p->scalers[0].kernel->polar) {
         header_sep = talloc_strdup(tmp, "");
         shader_def_opt(&header_sep, "FIXED_SCALE", true);
         shader_setup_scaler(&header_sep, &p->scalers[0], 0);
@@ -1312,32 +1318,53 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
 
     int size = scaler->kernel->size;
     int elems_per_pixel = 4;
-    if (size == 2) {
+    if (scaler->kernel->polar) {
+        elems_per_pixel = 1;
+    } else if (size == 2) {
         elems_per_pixel = 2;
     } else if (size == 6) {
         elems_per_pixel = 3;
     }
     int width = size / elems_per_pixel;
     const struct fmt_entry *fmt = &gl_float16_formats[elems_per_pixel - 1];
-    scaler->lut_name = scaler->index == 0 ? "lut_l" : "lut_c";
+    if (scaler->kernel->polar) {
+        scaler->lut_name = scaler->index == 0 ? "lut_polar_l" : "lut_polar_c";
+    } else {
+        scaler->lut_name = scaler->index == 0 ? "lut_l" : "lut_c";
+    }
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_SCALERS + scaler->index);
 
     if (!scaler->gl_lut)
         gl->GenTextures(1, &scaler->gl_lut);
 
-    gl->BindTexture(GL_TEXTURE_2D, scaler->gl_lut);
+    if (scaler->kernel->polar) {
+        gl->BindTexture(GL_TEXTURE_1D, scaler->gl_lut);
 
-    float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE * size);
-    mp_compute_lut(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, width,
-                   LOOKUP_TEXTURE_SIZE, 0, fmt->format, GL_FLOAT, weights);
-    talloc_free(weights);
+        float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE);
+        mp_compute_lut_polar(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
+        gl->TexImage1D(GL_TEXTURE_1D, 0, fmt->internal_format, LOOKUP_TEXTURE_SIZE,
+                       0, fmt->format, GL_FLOAT, weights);
+        talloc_free(weights);
 
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        gl->TexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        gl->TexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl->TexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    } else {
+        gl->BindTexture(GL_TEXTURE_2D, scaler->gl_lut);
+
+        float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE * size);
+        mp_compute_lut(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
+        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, width,
+                       LOOKUP_TEXTURE_SIZE, 0, fmt->format, GL_FLOAT, weights);
+        talloc_free(weights);
+
+        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
 
     gl->ActiveTexture(GL_TEXTURE0);
 

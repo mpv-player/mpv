@@ -28,6 +28,8 @@ struct filter_kernel {
 
     // The filter params can be changed at runtime. Only used by some filters.
     float params[2];
+    // Whether or not the filter uses polar coordinates
+    bool polar;
     // The following values are set by mp_init_filter() at runtime.
     // Number of coefficients; equals the rounded up radius multiplied with 2.
     int size;
@@ -41,5 +43,6 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double scale);
 void mp_compute_weights(struct filter_kernel *filter, double f, float *out_w);
 void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array);
+void mp_compute_lut_polar(struct filter_kernel *filter, int count, float *out_array);
 
 #endif /* MPLAYER_FILTER_KERNELS_H */
