@@ -1599,7 +1599,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_WIN_STATE: {
-        if (!x11->window)
+        if (!x11->pseudo_mapped)
             return VO_FALSE;
         int num_elems;
         long *elems = x11_get_property(x11, x11->window, XA(x11, _NET_WM_STATE),
@@ -1615,6 +1615,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_NAMES: {
+        if (!x11->pseudo_mapped)
+            return VO_FALSE;
         char **names = NULL;
         int displays_spanned = 0;
         for (int n = 0; n < x11->num_displays; n++) {
