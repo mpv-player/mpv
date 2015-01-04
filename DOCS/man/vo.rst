@@ -304,6 +304,12 @@ Available video output drivers are:
         ``lanczos``
             Generic Lanczos scaling filter. Set radius with ``lradius``.
 
+        ``ewa_lanczos``
+            Generic elliptic weighted average Lanczos scaling filter. Also
+            known as Jinc. The radius can be set with ``lradius`` up to a
+            maximum value of 16, but note that performance drops very quickly
+            as the radius increases.
+
         ``spline36``
             This is the default when using ``opengl-hq``.
 
@@ -348,7 +354,7 @@ Available video output drivers are:
         Set radius for filters listed below, must be a float number between 1.0
         and 8.0. Defaults to be 2.0 if not specified.
 
-            ``sinc``, ``lanczos``, ``blackman``, ``gaussian``
+            ``sinc``, ``lanczos``, ``ewa_lanczos``, ``blackman``, ``gaussian``
 
         Note that depending on filter implementation details and video scaling
         ratio, the radius that actually being used might be different
