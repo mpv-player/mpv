@@ -76,8 +76,12 @@ static int control(struct af_instance *af, int cmd, void *arg)
             gain += s->rgain_preamp;
             af_from_dB(1, &gain, &s->rgain, 20.0, -200.0, 60.0);
 
-            if (!s->rgain_clip) // clipping prevention
+            MP_VERBOSE(af, "Applying replay-gain: %f\n", s->rgain);
+
+            if (!s->rgain_clip) { // clipping prevention
                 s->rgain = MPMIN(s->rgain, 1.0 / peak);
+                MP_VERBOSE(af, "...with clipping prevention: %f\n", s->rgain);
+            }
         }
         if (s->detach && fabs(s->level * s->rgain - 1.0) < 0.00001)
             return AF_DETACH;
