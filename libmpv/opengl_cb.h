@@ -152,6 +152,12 @@ void mpv_opengl_cb_set_update_callback(mpv_opengl_cb_context *ctx,
  *                         checked whether extensions are really available.)
  *                         The callback will be called from this function only
  *                         (it is not stored and never used later).
+ *                         Usually, GL context APIs do this for you (e.g. with
+ *                         glXGetProcAddressARB or wglGetProcAddress), but
+ *                         some APIs do not always return pointers for all
+ *                         standard functions (even if present); in this case
+ *                         you have to compensate by looking up these functions
+ *                         yourself.
  * @param get_proc_address_ctx arbitrary opaque user context passed to the
  *                             get_proc_address callback
  * @return error code (same as normal mpv_* API), including but not limited to:
