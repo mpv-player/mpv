@@ -214,7 +214,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
         const char *ter_conf = "%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
         const char *atsc_conf = "%d:%255[^:]:%255[^:]:%255[^:]\n";
 
-        const char *vdr_conf = "%d:%255[^:]:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%*255[^:]:%*d:%*d:%*d:%*d\n%n";
+        const char *vdr_conf = "%d:%255[^:]:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%*255[^:]:%d:%*d:%*d:%*d\n%n";
 
         mp_verbose(log, "CONFIG_READ FILE: %s, type: %d\n", filename, type);
         if((f=fopen(filename, "r"))==NULL)
@@ -267,13 +267,14 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                 ptr->pids_cnt = 0;
                 ptr->freq = 0;
                 ptr->is_dvb_s2 = false;
+                ptr->service_id = -1;
                 ptr->stream_id = NO_STREAM_ID_FILTER;
                 ptr->inv = INVERSION_AUTO;
 
                 // Check if VDR-type channels.conf-line - then full line is consumed by the scan. 
                 int num_chars = 0;
                 fields = sscanf(&line[k], vdr_conf,
-                                &ptr->freq, vdr_par_str, vdr_loc_str, &ptr->srate, vpid_str, apid_str, tpid_str, &num_chars);
+                                &ptr->freq, vdr_par_str, vdr_loc_str, &ptr->srate, vpid_str, apid_str, tpid_str, &ptr->service_id, &num_chars);
                 
                 if (num_chars == strlen(&line[k])) {
                   // It's a VDR-style config line.
@@ -302,9 +303,9 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                       }
                     }
                     
-                    mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, S2: %s, StreamID: %d",
+                    mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, S2: %s, StreamID: %d, SID: %d",
                                list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol,  ptr->diseqc,
-                               ptr->is_dvb_s2 ? "yes" : "no", ptr->stream_id);
+                               ptr->is_dvb_s2 ? "yes" : "no", ptr->stream_id, ptr->service_id);
                   } else {
                     mp_verbose(log, "VDR, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d",
                                list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate);
@@ -355,12 +356,14 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                 if (parse_pid_string(log, apid_str, ptr)) {
                   fields++;
                 }
-                /*
-                  // FIXME: Teletext PID excluded for now, seems misdetected as mp3. 
-                if (parse_pid_string(log, tpid_str, ptr)) {
-                  fields++;
+                /* If we do not know the service_id, PMT can not be extracted.
+                   Teletext decoding will fail without PMT. */
+                if (ptr->service_id != -1) {
+                  if (parse_pid_string(log, tpid_str, ptr)) {
+                    fields++;
+                  }
                 }
-                */
+                
                 
                 if((fields < 2) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) || (strlen(ptr->name) == 0))
                   continue;
@@ -383,6 +386,15 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                         ptr->pids[ptr->pids_cnt] = 0;   //PID 0 is the PAT
                         ptr->pids_cnt++;
                 }
+
+                if (ptr->service_id != -1) {
+                  /* We have the PMT-PID in addition. 
+                     This will be found later, when we tune to the channel.
+                     Push back here to create the additional demux. */
+                  ptr->pids[ptr->pids_cnt] = -1; // Placeholder. 
+                  ptr->pids_cnt++;
+                }
+                
                 mp_verbose(log, " PIDS: ");
                 for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
                         mp_verbose(log, " %d ", ptr->pids[cnt]);
@@ -663,13 +675,32 @@ int dvb_set_channel(stream_t *stream, int card, int n)
 
         priv->last_freq = channel->freq;
         priv->is_on = 1;
+        
+        if (channel->service_id != -1) {
+          /* We need the PMT-PID in addition. 
+             If it has not yet beem resolved, do it now. */
+          for (i = 0; i < channel->pids_cnt; i++) {
+            if (channel->pids[i] == -1) {
+              MP_VERBOSE(stream, "DVB_SET_CHANNEL: PMT-PID for service %d not resolved yet, parsing PAT...\n", channel->service_id);
+              int pmt_pid = dvb_get_pmt_pid(priv, card, channel->service_id);
+              MP_VERBOSE(stream, "DVB_SET_CHANNEL: Found PMT-PID: %d\n", pmt_pid);
+              channel->pids[i] = pmt_pid;
+            }
+          }
+        }
 
-        //sets demux filters and restart the stream
+        // sets demux filters and restart the stream
         for(i = 0; i < channel->pids_cnt; i++)
         {
-          if (!dvb_set_ts_filt(priv,priv->demux_fds[i], channel->pids[i], DMX_PES_OTHER))
-            return 0;
+          if (channel->pids[i] == -1) {
+            // In case PMT was not resolved, skip it here.
+            MP_ERR(stream, "DVB_SET_CHANNEL: PMT-PID not found, teletext-decoding may fail.\n");
+          } else {
+            if (!dvb_set_ts_filt(priv,priv->demux_fds[i], channel->pids[i], DMX_PES_OTHER)) 
+              return 0;
+          }
         }
+
         return 1;
 }
 
