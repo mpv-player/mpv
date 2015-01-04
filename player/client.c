@@ -1633,6 +1633,7 @@ void kill_video(struct mp_client_api *client_api)
     struct MPContext *mpctx = client_api->mpctx;
     mp_dispatch_lock(mpctx->dispatch);
     mp_switch_track(mpctx, STREAM_VIDEO, NULL);
+    uninit_video_out(mpctx);
     mp_dispatch_unlock(mpctx->dispatch);
 }
 
