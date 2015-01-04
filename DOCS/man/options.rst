@@ -578,9 +578,8 @@ Video
 ``--video-unscaled``
     Disable scaling of the video. If the window is larger than the video,
     black bars are added. Otherwise, the video is cropped. The video still
-    can be influenced by the other ``--video-...`` options. (If the
-    ``--video-zoom`` option is set to a value other than ``0``, scaling is
-    enabled, but the video isn't automatically scaled to the window size.)
+    can be influenced by the other ``--video-...`` options. (But not all; for
+    example ``--video-zoom`` does nothing if this option is enabled.)
 
     The video and monitor aspects aspect will be ignored. Aspect correction
     would require to scale the video in the X or Y direction, but this option
