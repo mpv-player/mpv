@@ -235,11 +235,43 @@ is the same as ``--no-fs``.
 If an option is marked as *(XXX only)*, it will only work in combination with
 the *XXX* option or if *XXX* is compiled in.
 
-.. note::
+Escaping spaces and other special characters
+--------------------------------------------
 
-    The suboption parser (used for example for ``--ao=pcm`` suboptions)
-    supports a special kind of string-escaping intended for use with external
-    GUIs.
+Keep in mind that the shell will partially parse and mangle the arguments you
+pass to mpv. For example, you might need to quote or escape options and
+filenames:
+
+    ``mpv "filename with spaces.mkv" --title="window title"``
+
+It gets more complicated if the suboption parser is involved. The suboption
+parser puts several options into a single string, and passes them to a
+component at once, instead of using multiple options on the level of the
+command line.
+
+The suboption parser can quote strings with ``"``, ``'``, and ``[...]``.
+Additionally, there is a special form of quoting with ``%n%`` described below.
+
+For example, the ``opengl`` VO can take multiple options:
+
+    ``mpv test.mkv --vo=opengl:lscale=lanczos2:icc-profile=file.icc,xv``
+
+This passed ``lscale=lanczos2`` and ``icc-profile=file.icc`` to ``opengl``,
+and also specifies ``xv`` as fallback VO. If the icc-profile path contains
+spaces or characters like ``,`` or ``:``, you need to quote them:
+
+    ``mpv '--vo=opengl:icc-profile="file with spaces.icc",xv'``
+
+Shells may actually strip some quotes from the string passed to the commandline,
+so the example quotes the string twice, ensuring that mpv recieves the ``"``
+quotes.
+
+The ``[...]`` from of quotes wraps everything between ``[`` and ``]``. It's
+useful with shells that don't interpret these characters in the middle of
+an argument (like bash).
+
+A special kind of string-escaping intended for use with external scripts and
+programs is started with ``%``.
 
 It has the following format::
 
@@ -252,6 +284,15 @@ It has the following format::
     Or in a script:
 
     ``mpv --ao=pcm:file=%`expr length "$NAME"`%"$NAME" test.avi``
+
+Suboptions passed to the client API are also subject to escaping. Using
+``mpv_set_option_string()`` is exactly like passing ``--name=data`` to the
+command line (but without shell processing of the string). Some options
+support passing values in a more structured way instead of flat strings, and
+can avoid the suboption parsing mess. For example, ``--vf`` supports
+``MPV_FORMAT_NODE``, which let's you pass suboptions as a nested data structure
+of maps and arrays. (``--vo`` supports this in the same way, although this
+fact is undocumented.)
 
 Paths
 -----
@@ -339,6 +380,17 @@ setting them to *no*. Even suboptions can be specified in this way.
         vo=opengl
         # Use quotes for text that can contain spaces:
         status-msg="Time: ${time-pos}"
+
+Escaping spaces and special characters
+--------------------------------------
+
+This is done like with command line options. The shell is not involved here,
+but option values still need to be quoted as a whole if it contains certain
+characters like spaces. A config entry can be quoted with ``"`` and ``'``,
+as well as with the ``%n%`` syntax mentioned before. This is like passing
+the exact contents of the quoted string as command line option. C-style escapes
+are currently _not_ interpreted on this level, although some options to this
+manually. (This is a mess and should probably be changed at some point.)
 
 Putting Command Line Options into the Configuration File
 --------------------------------------------------------
