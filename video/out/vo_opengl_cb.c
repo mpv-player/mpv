@@ -44,6 +44,7 @@ struct vo_priv {
 
     struct mpv_opengl_cb_context *ctx;
 
+    // Immutable after VO init
     int use_gl_debug;
     struct gl_video_opts *renderer_opts;
 };
@@ -67,6 +68,9 @@ struct mpv_opengl_cb_context {
     bool force_update;
     bool imgfmt_supported[IMGFMT_END - IMGFMT_START];
     struct mp_vo_opts vo_opts;
+    bool update_new_opts;
+    struct vo_priv *new_opts; // use these options, instead of the VO ones
+    struct m_config *new_opts_cfg;
 
     // --- All of these can only be accessed from the thread where the host
     //     application's OpenGL context is current - i.e. only while the
@@ -193,6 +197,9 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     ctx->hwdec = NULL;
     talloc_free(ctx->gl);
     ctx->gl = NULL;
+    talloc_free(ctx->new_opts_cfg);
+    ctx->new_opts = NULL;
+    ctx->new_opts_cfg = NULL;
     return 0;
 }
 
@@ -231,13 +238,18 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
         gl_video_resize(ctx->renderer, &wnd, &src, &dst, &osd, !ctx->flip);
     }
 
-    if (ctx->reconfigured && vo) {
-        ctx->reconfigured = false;
-        gl_video_config(ctx->renderer, &ctx->img_params);
+    if (vo) {
         struct vo_priv *p = vo->priv;
-        gl_video_set_options(ctx->renderer, p->renderer_opts);
-        ctx->gl->debug_context = p->use_gl_debug;
-        gl_video_set_debug(ctx->renderer, p->use_gl_debug);
+        if (ctx->reconfigured)
+            gl_video_config(ctx->renderer, &ctx->img_params);
+        if (ctx->reconfigured || ctx->update_new_opts) {
+            struct vo_priv *opts = p->ctx->new_opts ? p->ctx->new_opts : p;
+            gl_video_set_options(ctx->renderer, opts->renderer_opts);
+            ctx->gl->debug_context = opts->use_gl_debug;
+            gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
+        }
+        ctx->reconfigured = false;
+        ctx->update_new_opts = false;
     }
 
     struct mp_image *mpi = ctx->next_frame;
@@ -265,6 +277,13 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     pthread_mutex_unlock(&p->ctx->lock);
 }
 
+// Called locked.
+static void update(struct vo_priv *p)
+{
+    if (p->ctx->update_cb)
+        p->ctx->update_cb(p->ctx->update_cb_ctx);
+}
+
 static void flip_page(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
@@ -273,8 +292,7 @@ static void flip_page(struct vo *vo)
     mp_image_unrefp(&p->ctx->next_frame);
     p->ctx->next_frame = p->ctx->waiting_frame;
     p->ctx->waiting_frame = NULL;
-    if (p->ctx->update_cb)
-        p->ctx->update_cb(p->ctx->update_cb_ctx);
+    update(p);
     pthread_mutex_unlock(&p->ctx->lock);
 }
 
@@ -303,6 +321,41 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     return 0;
 }
 
+static bool reparse_cmdline(struct vo_priv *p, char *args)
+{
+    struct m_config *cfg = NULL;
+    struct vo_priv *opts = NULL;
+    int r = 0;
+
+    pthread_mutex_lock(&p->ctx->lock);
+
+    // list of options which can be changed at runtime
+#define OPT_BASE_STRUCT struct vo_priv
+    static const struct m_option change_otps[] = {
+        OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
+        {0}
+    };
+#undef OPT_BASE_STRUCT
+
+    const struct vo_priv *vodef = p->vo->driver->priv_defaults;
+    cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), vodef, change_otps);
+    opts = cfg->optstruct;
+    r = m_config_parse_suboptions(cfg, "opengl-cb", args);
+
+    if (r >= 0) {
+        talloc_free(p->ctx->new_opts_cfg);
+        p->ctx->new_opts = opts;
+        p->ctx->new_opts_cfg = cfg;
+        p->ctx->update_new_opts = true;
+        cfg = NULL;
+        update(p);
+    }
+
+    talloc_free(cfg);
+    pthread_mutex_unlock(&p->ctx->lock);
+    return r >= 0;
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct vo_priv *p = vo->priv;
@@ -315,10 +368,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
         pthread_mutex_lock(&p->ctx->lock);
         copy_vo_opts(vo);
         p->ctx->force_update = true;
-        if (p->ctx->update_cb)
-            p->ctx->update_cb(p->ctx->update_cb_ctx);
+        update(p);
         pthread_mutex_unlock(&p->ctx->lock);
         return VO_TRUE;
+    case VOCTRL_SET_COMMAND_LINE: {
+        char *arg = data;
+        return reparse_cmdline(p, arg);
+    }
     case VOCTRL_GET_HWDEC_INFO: {
         struct mp_hwdec_info **arg = data;
         *arg = p->ctx ? &p->ctx->hwdec_info : NULL;

@@ -915,3 +915,8 @@ Available video output drivers are:
 ``opengl-cb``
     For use with libmpv direct OpenGL embedding; useless in any other contexts.
     (See ``<mpv/opengl_cb.h>``.)
+
+    This supports many of the suboptions the ``opengl`` VO has. Run
+    ``mpv --vo=opengl-cb:help`` for a list.
+
+    This also supports the ``vo_cmdline`` command.
