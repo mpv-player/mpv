@@ -26,6 +26,7 @@
 #include <VSHelper.h>
 
 #include <libavutil/rational.h>
+#include <libavutil/cpu.h>
 
 #include "config.h"
 
@@ -700,9 +701,12 @@ static int vf_open(vf_instance_t *vf)
     vf->query_format = query_format;
     vf->control = control;
     vf->uninit = uninit;
-    int maxbuffer = p->cfg_maxbuffer * p->cfg_maxrequests;
-    p->buffered = talloc_array(vf, struct mp_image *, maxbuffer);
     p->max_requests = p->cfg_maxrequests;
+    if (p->max_requests < 0)
+        p->max_requests = av_cpu_count();
+    MP_VERBOSE(vf, "using %d concurrent requests.\n", p->max_requests);
+    int maxbuffer = p->cfg_maxbuffer * p->max_requests;
+    p->buffered = talloc_array(vf, struct mp_image *, maxbuffer);
     p->requested = talloc_zero_array(vf, struct mp_image *, p->max_requests);
     return 1;
 }
@@ -711,7 +715,8 @@ static int vf_open(vf_instance_t *vf)
 static const m_option_t vf_opts_fields[] = {
     OPT_STRING("file", cfg_file, 0),
     OPT_INTRANGE("buffered-frames", cfg_maxbuffer, 0, 1, 9999, OPTDEF_INT(4)),
-    OPT_INTRANGE("concurrent-frames", cfg_maxrequests, 0, 1, 99, OPTDEF_INT(2)),
+    OPT_CHOICE_OR_INT("concurrent-frames", cfg_maxrequests, 0, 1, 99,
+                      ({"auto", -1}), OPTDEF_INT(-1)),
     {0}
 };
 

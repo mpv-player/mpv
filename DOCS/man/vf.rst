@@ -753,12 +753,15 @@ Available filters are:
         filters work anyway.)
 
     ``concurrent-frames``
-        Number of frames that should be requested in parallel (default: 2). The
+        Number of frames that should be requested in parallel. The
         level of concurrency depends on the filter and how quickly mpv can
         decode video to feed the filter. This value should probably be
         proportional to the number of cores on your machine. Most time,
         making it higher than the number of cores can actually make it
         slower.
+
+        By default, this uses the special value ``auto``, which sets the option
+        to the number of detected logical CPU cores.
 
     The following variables are defined by mpv:
 
