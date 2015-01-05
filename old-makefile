@@ -190,7 +190,6 @@ SOURCES = audio/audio.c \
           options/parse_configfile.c \
           options/path.c \
           osdep/io.c \
-          osdep/numcores.c \
           osdep/semaphore_osx.c \
           osdep/subprocess-posix.c \
           osdep/terminal-unix.c \

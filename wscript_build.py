@@ -374,7 +374,6 @@ def build(ctx):
         ## osdep
         ( getch2_c ),
         ( "osdep/io.c" ),
-        ( "osdep/numcores.c"),
         ( "osdep/timer.c" ),
         ( timer_c ),
         ( "osdep/threads.c" ),
