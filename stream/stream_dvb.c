@@ -78,6 +78,7 @@ const struct m_sub_options stream_dvb_conf = {
         OPT_INTRANGE("card", cfg_card, 0, 1, 4),
         OPT_INTRANGE("timeout",  cfg_timeout, 0, 1, 30),
         OPT_STRING("file", cfg_file, 0),
+        OPT_FLAG("full-transponder", cfg_full_transponder, 0),
         {0}
     },
     .size = sizeof(struct dvb_params),
@@ -195,7 +196,7 @@ static bool parse_pid_string(struct mp_log *log, char* pid_string, dvb_channel_t
   return false;
 }
 
-static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, int type)
+static dvb_channels_list *dvb_get_channels(struct mp_log *log, int cfg_full_transponder, char *filename, int type)
 {
         dvb_channels_list  *list;
         FILE *f;
@@ -376,8 +377,12 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                         if(ptr->pids[cnt] == 0)
                                 has0 = 1;
                 }
-                if(has8192)
-                {
+                /* 8192 is the pseudo-PID for full TP dump, 
+                   enforce that if requested. */
+                if (!has8192 && cfg_full_transponder) {
+                  has8192 = 1;
+                }
+                if(has8192) {
                         ptr->pids[0] = 8192;
                         ptr->pids_cnt = 1;
                 }
@@ -968,7 +973,7 @@ dvb_config_t *dvb_get_config(stream_t *stream)
             }
         }
 
-        list = dvb_get_channels(log, conf_file, type);
+        list = dvb_get_channels(log, priv->cfg_full_transponder, conf_file, type);
         talloc_free(talloc_ctx);
 
                 if(list == NULL)
