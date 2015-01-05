@@ -3129,6 +3129,12 @@ DVB
     in the mpv configuration directory (usually ``~/.config/mpv``) with the
     filename ``channels.conf.{sat,ter,cbl,atsc}`` (based on your card type) or
     ``channels.conf`` as a last resort.
+    For DVB-S/2 cards, a VDR 1.7.x format channel list is recommended
+    as it allows tuning to DVB-S2 channels, enabling subtitles and
+    decoding the PMT (which largely improves the demuxing).
+    Classic mplayer format channel lists are still supported (without
+    these improvements), and for other card types, only limited VDR
+    format channel list support is implemented (patches welcome).
 
 ``--dvbin-timeout=<1-30>``
     Maximum number of seconds to wait when trying to tune a frequency before
