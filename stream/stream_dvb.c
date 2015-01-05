@@ -387,6 +387,20 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, char *filename, i
                         ptr->pids_cnt++;
                 }
 
+                /* Add some PIDs which are mandatory in DVB, 
+                 * and contain human-readable helpful data. */
+                
+                /* This is the STD, the service description table. 
+                 * It contains service names and such, ffmpeg decodes it. */
+                ptr->pids[ptr->pids_cnt] = 0x0011;
+                ptr->pids_cnt++;
+
+                /* This is the EIT, which contains EPG data. 
+                 * ffmpeg can not decode it (yet), but e.g. VLC 
+                 * shows what was recorded. */
+                ptr->pids[ptr->pids_cnt] = 0x0012;
+                ptr->pids_cnt++;
+
                 if (ptr->service_id != -1) {
                   /* We have the PMT-PID in addition. 
                      This will be found later, when we tune to the channel.
