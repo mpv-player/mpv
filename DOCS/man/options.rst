@@ -2453,7 +2453,7 @@ OSD
     Alternatively, the color can be specified as a RGB hex triplet in the form
     ``#RRGGBB``, where each 2-digit group expresses a color value in the
     range 0 (``00``) to 255 (``FF``). For example, ``#FF0000`` is red.
-    This is similar to web colors.
+    This is similar to web colors. Alpha is given with ``#AARRGGBB``.
 
     .. admonition:: Examples
 
