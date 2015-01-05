@@ -22,6 +22,7 @@
 #include <libavutil/dict.h>
 #include <libavutil/opt.h>
 #include <libavutil/error.h>
+#include <libavutil/cpu.h>
 #include <libavcodec/avcodec.h>
 
 #include "common/common.h"
@@ -29,8 +30,6 @@
 #include "demux/packet.h"
 #include "av_common.h"
 #include "codecs.h"
-
-#include "osdep/numcores.h"
 
 int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size)
 {
@@ -129,7 +128,7 @@ void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
 void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads)
 {
     if (threads == 0) {
-        threads = default_thread_count();
+        threads = av_cpu_count();
         if (threads < 1) {
             mp_warn(l, "Could not determine thread count to use, defaulting to 1.\n");
             threads = 1;
