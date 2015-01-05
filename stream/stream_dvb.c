@@ -369,29 +369,6 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, int cfg_full_tran
                 if((fields < 2) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) || (strlen(ptr->name) == 0))
                   continue;
 
-                has8192 = has0 = 0;
-                for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
-                {
-                        if(ptr->pids[cnt] == 8192)
-                                has8192 = 1;
-                        if(ptr->pids[cnt] == 0)
-                                has0 = 1;
-                }
-                /* 8192 is the pseudo-PID for full TP dump, 
-                   enforce that if requested. */
-                if (!has8192 && cfg_full_transponder) {
-                  has8192 = 1;
-                }
-                if(has8192) {
-                        ptr->pids[0] = 8192;
-                        ptr->pids_cnt = 1;
-                }
-                else if(! has0)
-                {
-                        ptr->pids[ptr->pids_cnt] = 0;   //PID 0 is the PAT
-                        ptr->pids_cnt++;
-                }
-
                 /* Add some PIDs which are mandatory in DVB, 
                  * and contain human-readable helpful data. */
                 
@@ -414,6 +391,28 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log, int cfg_full_tran
                   ptr->pids_cnt++;
                 }
                 
+                has8192 = has0 = 0;
+                for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
+                {
+                        if(ptr->pids[cnt] == 8192)
+                                has8192 = 1;
+                        if(ptr->pids[cnt] == 0)
+                                has0 = 1;
+                }
+                
+                /* 8192 is the pseudo-PID for full TP dump, 
+                   enforce that if requested. */
+                if (!has8192 && cfg_full_transponder) {
+                  has8192 = 1;
+                }
+                if (has8192) {
+                        ptr->pids[0] = 8192;
+                        ptr->pids_cnt = 1;
+                } else if (!has0) {
+                        ptr->pids[ptr->pids_cnt] = 0;   //PID 0 is the PAT
+                        ptr->pids_cnt++;
+                }
+
                 mp_verbose(log, " PIDS: ");
                 for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
                         mp_verbose(log, " %d ", ptr->pids[cnt]);
