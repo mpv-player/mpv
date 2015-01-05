@@ -395,6 +395,7 @@ const struct m_sub_options gl_video_conf = {
                     {"blend", 2})),
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
+        OPT_STRING("custom-shader", custom_shader, 0),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -1128,6 +1129,10 @@ static void compile_shaders(struct gl_video *p)
         shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
     if (p->opts.alpha_mode == 2 && p->has_alpha)
         shader_def(&header_conv, "USE_ALPHA_BLEND", "1");
+    if (p->opts.custom_shader && strlen(p->opts.custom_shader)) {
+        shader_def_opt(&header_conv, "USE_CUSTOM_SHADER", true);
+        header_conv = talloc_asprintf_append(header_conv, "%s\n", p->opts.custom_shader);
+    }
 
     shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma > 0);
     shader_def_opt(&header_final, "USE_CMS_MATRIX", use_cms_matrix);
