@@ -55,7 +55,7 @@
 #define DVB_CHANNEL_HIGHER 1
 
 #ifndef DMX_FILTER_SIZE
-#define DMX_FILTER_SIZE 16
+#define DMX_FILTER_SIZE 32
 #endif
 
 typedef struct {
