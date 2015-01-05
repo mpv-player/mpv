@@ -372,7 +372,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         if (ctx->hwdec->init(ctx) < 0)
             goto error;
     } else {
-        mp_set_avcodec_threads(avctx, lavc_param->threads);
+        mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
     }
 
     avctx->flags |= lavc_param->bitexact ? CODEC_FLAG_BITEXACT : 0;

@@ -136,7 +136,7 @@ static int init(struct dec_audio *da, const char *decoder)
     if (sh->lav_headers)
         mp_copy_lav_codec_headers(lavc_context, sh->lav_headers);
 
-    mp_set_avcodec_threads(lavc_context, opts->threads);
+    mp_set_avcodec_threads(da->log, lavc_context, opts->threads);
 
     /* open it */
     if (avcodec_open2(lavc_context, lavc_codec, NULL) < 0) {

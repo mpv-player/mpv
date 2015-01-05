@@ -126,19 +126,21 @@ void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
     dst->dts = mp_pts_to_av(mpkt ? mpkt->dts : MP_NOPTS_VALUE, tb);
 }
 
-void mp_set_avcodec_threads(AVCodecContext *avctx, int threads)
+void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads)
 {
     if (threads == 0) {
         threads = default_thread_count();
         if (threads < 1) {
-            av_log(avctx, AV_LOG_WARNING, "Could not determine "
-                   "thread count to use, defaulting to 1.\n");
+            mp_warn(l, "Could not determine thread count to use, defaulting to 1.\n");
             threads = 1;
+        } else {
+            mp_verbose(l, "Detected %d logical cores.\n", threads);
         }
         // Apparently some libavcodec versions have or had trouble with more
         // than 16 threads, and/or print a warning when using > 16.
         threads = MPMIN(threads, 16);
     }
+    mp_verbose(l, "Requesting %d threads for decoding.\n", threads);
     avctx->thread_count = threads;
 }
 
