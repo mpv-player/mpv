@@ -23,7 +23,7 @@ public:
     virtual ~MpvObject();
     virtual Renderer *createRenderer() const;
 public slots:
-    void loadfile(const QString& filename);
+    void command(const QVariant& params);
 signals:
     void onUpdate();
 private slots:

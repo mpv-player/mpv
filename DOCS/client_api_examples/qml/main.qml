@@ -13,7 +13,7 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: renderer.loadfile("../../../test.mkv")
+            onClicked: renderer.command(["loadfile", "../../../test.mkv"])
         }
     }
 
@@ -24,17 +24,35 @@ Item {
         color: "white"
         border.color: "black"
         opacity: 0.8
-        anchors.fill: label
+        anchors.fill: box
     }
 
-    Text {
-        id: label
+    Row {
+        id: box
         anchors.bottom: renderer.bottom
         anchors.left: renderer.left
         anchors.right: renderer.right
         anchors.margins: 100
-        wrapMode: Text.WordWrap
-        text: "QtQuick and mpv are both rendering stuff.\n
-               Click to load ../../../test.mkv"
+
+        Text {
+            anchors.margins: 10
+            wrapMode: Text.WordWrap
+            text: "QtQuick and mpv are both rendering stuff.\n
+                   Click to load ../../../test.mkv"
+        }
+
+        CheckBox {
+            id: checkbox
+            anchors.margins: 10
+            // Heavily filtered means good, right?
+            text: "Make video looks like on a Smart TV"
+            onClicked: {
+                if (checkbox.checked) {
+                    renderer.command(["vo_cmdline", "lscale=sharpen3:lparam1=1.0"])
+                } else {
+                    renderer.command(["vo_cmdline", ""])
+                }
+            }
+        }
     }
 }

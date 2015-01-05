@@ -98,12 +98,10 @@ void MpvObject::doUpdate()
     update();
 }
 
-void MpvObject::loadfile(const QString& filename)
+void MpvObject::command(const QVariant& params)
 {
-    QVariantList cmd;
-    cmd.append("loadfile");
-    cmd.append(filename);
-    mpv::qt::command_variant(mpv, cmd);
+    //mpv_command_string(mpv, s.toUtf8().data());
+    mpv::qt::command_variant(mpv, params);
 }
 
 QQuickFramebufferObject::Renderer *MpvObject::createRenderer() const
