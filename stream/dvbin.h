@@ -115,6 +115,8 @@ typedef struct dvb_params {
         int cfg_card;
         int cfg_timeout;
         char *cfg_file;
+
+        int cfg_full_transponder;
 } dvb_priv_t;
 
 

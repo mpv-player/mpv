@@ -3135,11 +3135,22 @@ DVB
     Classic mplayer format channel lists are still supported (without
     these improvements), and for other card types, only limited VDR
     format channel list support is implemented (patches welcome).
+    For channels with dynamic PID switching or incomplete
+    ``channels.conf``, ``--dvbin-full-transponder`` or the magic PID
+    ``8192`` are recommended.
 
 ``--dvbin-timeout=<1-30>``
     Maximum number of seconds to wait when trying to tune a frequency before
     giving up (default: 30).
 
+``--dvbin-full-transponder=<yes|no>``
+    Apply no filters on program PIDs, only tune to frequency and pass full
+    transponder to demuxer. This is useful to record multiple programs
+    on a single transponder, or to work around issues in the ``channels.conf``.
+    It is also recommended to use this for channels which switch PIDs
+    on-the-fly, e.g. for regional news.
+
+    Default: ``no``
 
 PVR
 ---
