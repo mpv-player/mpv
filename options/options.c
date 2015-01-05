@@ -347,6 +347,7 @@ const m_option_t mp_opts[] = {
                ({"simple", 0}, {"complex", 1})),
     OPT_CHOICE("ass-style-override", ass_style_override, 0,
                ({"no", 0}, {"yes", 1}, {"force", 3}, {"signfs", 4})),
+    OPT_FLAG("sub-scale-by-window", sub_scale_by_window, 0),
     OPT_FLAG("sub-scale-with-window", sub_scale_with_window, 0),
     OPT_FLAG("osd-bar", osd_bar_visible, 0),
     OPT_FLOATRANGE("osd-bar-align-x", osd_bar_align_x, 0, -1.0, +1.0),
@@ -699,6 +700,7 @@ const struct MPOpts mp_default_opts = {
     .osd_bar_h = 3.125,
     .osd_scale = 1,
     .osd_scale_by_window = 1,
+    .sub_scale_by_window = 1,
     .use_text_osd = 1,
 #if HAVE_LUA
     .lua_load_osc = 1,

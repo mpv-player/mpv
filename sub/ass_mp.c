@@ -146,6 +146,11 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
             int vidh = dim->h - (dim->mt + dim->mb);
             set_font_scale *= dim->h / (float)MPMAX(vidh, 1);
         }
+        if (!opts->sub_scale_by_window) {
+            double factor = dim->h / 720.0;
+            if (factor != 0.0)
+                set_font_scale /= factor;
+        }
     }
 
     ass_set_use_margins(priv, set_use_margins);

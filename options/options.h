@@ -235,6 +235,8 @@ typedef struct MPOpts {
     float osd_bar_h;
     float osd_scale;
     int osd_scale_by_window;
+    int sub_scale_by_window;
+    int sub_scale_with_window;
     struct osd_style_opts *osd_style;
     struct osd_style_opts *sub_text_style;
     float sub_scale;
@@ -252,7 +254,6 @@ typedef struct MPOpts {
     int ass_style_override;
     int ass_hinting;
     int ass_shaper;
-    int sub_scale_with_window;
     int sub_clear_on_seek;
 
     int hwdec_api;
