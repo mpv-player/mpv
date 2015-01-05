@@ -697,6 +697,7 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     int chapter = get_current_chapter(mpctx);
+    int num = get_chapter_count(mpctx);
     if (chapter < -1)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -709,7 +710,7 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
             .type = CONF_TYPE_INT,
             .flags = M_OPT_MIN | M_OPT_MAX,
             .min = -1,
-            .max = get_chapter_count(mpctx) - 1,
+            .max = num - 1,
         };
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
@@ -723,6 +724,8 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
         if (action == M_PROPERTY_SWITCH) {
             struct m_property_switch_arg *sarg = arg;
             step_all = ROUND(sarg->inc);
+            if (num < 2) // semi-broken file; ignore for user convenience
+                return M_PROPERTY_UNAVAILABLE;
             // Check threshold for relative backward seeks
             if (mpctx->opts->chapter_seek_threshold >= 0 && step_all < 0) {
                 double current_chapter_start =
@@ -739,7 +742,7 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
         chapter += step_all;
         if (chapter < -1)
             chapter = -1;
-        if (chapter >= get_chapter_count(mpctx) && step_all > 0) {
+        if (chapter >= num && step_all > 0) {
             if (mpctx->opts->keep_open) {
                 seek_to_last_frame(mpctx);
             } else {
