@@ -1135,6 +1135,11 @@ static void add_coverart(struct demuxer *demuxer)
             break;
         sh->codec = codec;
         sh->attached_picture = new_demux_packet_from(att->data, att->data_size);
+        if (sh->attached_picture) {
+            sh->attached_picture->pts = 0;
+            talloc_steal(sh, sh->attached_picture);
+            sh->attached_picture->keyframe = true;
+        }
         sh->title = att->name;
     }
 }
