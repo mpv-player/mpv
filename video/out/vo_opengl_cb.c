@@ -363,8 +363,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
-    case VOCTRL_SET_PANSCAN:
     case VOCTRL_REDRAW_FRAME:
+        pthread_mutex_lock(&p->ctx->lock);
+        update(p);
+        pthread_mutex_unlock(&p->ctx->lock);
+        return VO_TRUE;
+    case VOCTRL_SET_PANSCAN:
         pthread_mutex_lock(&p->ctx->lock);
         copy_vo_opts(vo);
         p->ctx->force_update = true;
