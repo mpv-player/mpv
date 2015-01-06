@@ -396,8 +396,8 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
 
     // Conversion that VSFilter would use
     struct mp_csp_params vs_params = MP_CSP_PARAMS_DEFAULTS;
-    vs_params.colorspace.format = csp;
-    vs_params.colorspace.levels_in = levels;
+    vs_params.colorspace = csp;
+    vs_params.levels_in = levels;
     vs_params.int_bits_in = 8;
     vs_params.int_bits_out = 8;
     float vs_yuv2rgb[3][4], vs_rgb2yuv[3][4];
@@ -406,8 +406,8 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
 
     // Proper conversion to RGB
     struct mp_csp_params rgb_params = MP_CSP_PARAMS_DEFAULTS;
-    rgb_params.colorspace.format = params.colorspace;
-    rgb_params.colorspace.levels_in = params.colorlevels;
+    rgb_params.colorspace = params.colorspace;
+    rgb_params.levels_in = params.colorlevels;
     rgb_params.int_bits_in = 8;
     rgb_params.int_bits_out = 8;
     float vs2rgb[3][4];

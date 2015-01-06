@@ -106,17 +106,10 @@ extern const char *const mp_stereo3d_names[MP_STEREO3D_COUNT];
 #define MP_STEREO3D_NAME_DEF(x, def) \
     (MP_STEREO3D_NAME(x) ? MP_STEREO3D_NAME(x) : (def))
 
-struct mp_csp_details {
-    enum mp_csp format;
+struct mp_csp_params {
+    enum mp_csp colorspace;
     enum mp_csp_levels levels_in;      // encoded video
     enum mp_csp_levels levels_out;     // output device
-};
-
-// initializer for struct mp_csp_details that contains reasonable defaults
-#define MP_CSP_DETAILS_DEFAULTS {MP_CSP_BT_601, MP_CSP_LEVELS_TV, MP_CSP_LEVELS_PC}
-
-struct mp_csp_params {
-    struct mp_csp_details colorspace;
     float brightness;
     float contrast;
     float hue;
@@ -133,7 +126,9 @@ struct mp_csp_params {
 };
 
 #define MP_CSP_PARAMS_DEFAULTS {                                \
-    .colorspace = MP_CSP_DETAILS_DEFAULTS,                      \
+    .colorspace = MP_CSP_BT_601,                                \
+    .levels_in = MP_CSP_LEVELS_TV,                              \
+    .levels_out = MP_CSP_LEVELS_PC,                             \
     .brightness = 0, .contrast = 1, .hue = 0, .saturation = 1,  \
     .rgamma = 1, .ggamma = 1, .bgamma = 1,                      \
     .texture_bits = 8, .input_bits = 8}

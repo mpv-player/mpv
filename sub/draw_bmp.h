@@ -5,7 +5,6 @@
 
 struct mp_image;
 struct sub_bitmaps;
-struct mp_csp_details;
 struct mp_draw_sub_cache;
 void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
                          struct sub_bitmaps *sbs);

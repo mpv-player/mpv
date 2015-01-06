@@ -525,14 +525,14 @@ static void luma_coeffs(float m[3][4], float lr, float lg, float lb)
 // get the coefficients of the yuv -> rgb conversion matrix
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
 {
-    int format = params->colorspace.format;
-    if (format <= MP_CSP_AUTO || format >= MP_CSP_COUNT)
-        format = MP_CSP_BT_601;
-    int levels_in = params->colorspace.levels_in;
+    int colorspace = params->colorspace;
+    if (colorspace <= MP_CSP_AUTO || colorspace >= MP_CSP_COUNT)
+        colorspace = MP_CSP_BT_601;
+    int levels_in = params->levels_in;
     if (levels_in <= MP_CSP_LEVELS_AUTO || levels_in >= MP_CSP_LEVELS_COUNT)
         levels_in = MP_CSP_LEVELS_TV;
 
-    switch (format) {
+    switch (colorspace) {
     case MP_CSP_BT_601:     luma_coeffs(m, 0.299,  0.587,  0.114 ); break;
     case MP_CSP_BT_709:     luma_coeffs(m, 0.2126, 0.7152, 0.0722); break;
     case MP_CSP_SMPTE_240M: luma_coeffs(m, 0.2122, 0.7013, 0.0865); break;
@@ -601,7 +601,7 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
         abort();
     }
 
-    int levels_out = params->colorspace.levels_out;
+    int levels_out = params->levels_out;
     if (levels_out <= MP_CSP_LEVELS_AUTO || levels_out >= MP_CSP_LEVELS_COUNT)
         levels_out = MP_CSP_LEVELS_PC;
     struct rgblevels { double min, max; }

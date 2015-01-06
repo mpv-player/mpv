@@ -1152,9 +1152,9 @@ static void update_colorspace(d3d_priv *priv)
 {
     float coeff[3][4];
     struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
-    csp.colorspace.format = priv->params.colorspace;
-    csp.colorspace.levels_in = priv->params.colorlevels;
-    csp.colorspace.levels_out = priv->params.outputlevels;
+    csp.colorspace = priv->params.colorspace;
+    csp.levels_in = priv->params.colorlevels;
+    csp.levels_out = priv->params.outputlevels;
     mp_csp_copy_equalizer_values(&csp, &priv->video_eq);
 
     if (priv->use_shaders) {

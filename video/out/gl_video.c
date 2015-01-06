@@ -638,19 +638,16 @@ static void update_uniforms(struct gl_video *p, GLuint program)
 
     gl->UseProgram(program);
 
-    struct mp_csp_details csp = MP_CSP_DETAILS_DEFAULTS;
-    csp.levels_in = p->image_params.colorlevels;
-    csp.levels_out = p->image_params.outputlevels;
-    csp.format = p->image_params.colorspace;
-
     struct mp_csp_params cparams = {
-        .colorspace = csp,
+        .colorspace = p->image_params.colorspace,
+        .levels_in = p->image_params.colorlevels,
+        .levels_out = p->image_params.outputlevels,
         .input_bits = p->plane_bits,
         .texture_bits = (p->plane_bits + 7) & ~7,
     };
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
     if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
-        cparams.colorspace.format = MP_CSP_XYZ;
+        cparams.colorspace = MP_CSP_XYZ;
         cparams.input_bits = 8;
         cparams.texture_bits = 8;
     }

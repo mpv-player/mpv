@@ -1346,10 +1346,11 @@ static void update_yuvconv(struct vo *vo)
     if (!vo->params)
         return;
 
-    struct mp_csp_params cparams = { .colorspace = MP_CSP_DETAILS_DEFAULTS };
-    cparams.colorspace.format = vo->params->colorspace;
-    cparams.colorspace.levels_in = vo->params->colorlevels;
-    cparams.colorspace.levels_out = vo->params->outputlevels;
+    struct mp_csp_params cparams = {
+        .colorspace = vo->params->colorspace,
+        .levels_in = vo->params->colorlevels,
+        .levels_out = vo->params->outputlevels,
+    };
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
     gl_conversion_params_t params = {
         p->target, p->yuvconvtype, cparams,

@@ -289,9 +289,9 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
                      struct mp_image *temp, int bits, struct sub_bitmaps *sbs)
 {
     struct mp_csp_params cspar = MP_CSP_PARAMS_DEFAULTS;
-    cspar.colorspace.format = temp->params.colorspace;
-    cspar.colorspace.levels_in = temp->params.colorlevels;
-    cspar.colorspace.levels_out = MP_CSP_LEVELS_PC; // RGB (libass.color)
+    cspar.colorspace = temp->params.colorspace;
+    cspar.levels_in = temp->params.colorlevels;
+    cspar.levels_out = MP_CSP_LEVELS_PC; // RGB (libass.color)
     cspar.int_bits_in = bits;
     cspar.int_bits_out = 8;
 
