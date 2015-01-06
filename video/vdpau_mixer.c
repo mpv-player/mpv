@@ -197,9 +197,7 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer)
     VdpCSCMatrix matrix;
 
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
-    cparams.colorspace = mixer->image_params.colorspace;
-    cparams.levels_in = mixer->image_params.colorlevels;
-    cparams.levels_out = mixer->image_params.outputlevels;
+    mp_csp_set_image_params(&cparams, &mixer->image_params);
     mp_csp_copy_equalizer_values(&cparams, &mixer->video_eq);
     mp_get_yuv2rgb_coeffs(&cparams, matrix);
 

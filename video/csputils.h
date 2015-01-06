@@ -133,6 +133,10 @@ struct mp_csp_params {
     .rgamma = 1, .ggamma = 1, .bgamma = 1,                      \
     .texture_bits = 8, .input_bits = 8}
 
+struct mp_image_params;
+void mp_csp_set_image_params(struct mp_csp_params *params,
+                             const struct mp_image_params *imgparams);
+
 enum mp_chroma_location {
     MP_CHROMA_AUTO,
     MP_CHROMA_LEFT,     // mpeg2/4, h264

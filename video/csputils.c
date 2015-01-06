@@ -35,6 +35,7 @@
 #include <libavutil/common.h>
 #include <libavcodec/avcodec.h>
 
+#include "mp_image.h"
 #include "csputils.h"
 
 const char *const mp_csp_names[MP_CSP_COUNT] = {
@@ -680,6 +681,17 @@ void mp_gen_yuv2rgb_map(struct mp_csp_params *params, unsigned char *map, int si
         }
         v += (i == -1 || i == size - 1) ? step / 2 : step;
     }
+}
+
+// Set colorspace related fields in p from f. Don't touch other fields.
+void mp_csp_set_image_params(struct mp_csp_params *params,
+                             const struct mp_image_params *imgparams)
+{
+    struct mp_image_params p = *imgparams;
+    mp_image_params_guess_csp(&p); // ensure consistency
+    params->colorspace = p.colorspace;
+    params->levels_in = p.colorlevels;
+    params->levels_out = p.outputlevels;
 }
 
 // Copy settings from eq into params.
