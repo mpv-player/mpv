@@ -457,6 +457,18 @@ Available video output drivers are:
         This is automatically disabled for anamorphic video, because this
         feature doesn't work correctly with this.
 
+    ``sigmoid-upscaling``
+        When upscaling in linear light, use a sigmoidal color transform
+        to avoid emphasizing ringing artifacts.
+
+    ``sigmoid-center``
+        The center of the sigmoid curve used for ``sigmoid-upscaling``, must
+        be a float between 0.0 and 1.0. Defaults to 0.75 if not specified.
+
+    ``sigmoid-slope``
+        The slope of the sigmoid curve used for ``sigmoid-upscaling``, must
+        be a float between 1.0 and 20.0. Defaults to 6.5 if not specified.
+
     ``no-npot``
         Force use of power-of-2 texture sizes. For debugging only.
         Borders will be distorted due to filtering.
@@ -598,7 +610,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:lscale=spline36:dither-depth=auto:fbo-format=rgba16:fancy-downscaling
+        --vo=opengl:lscale=spline36:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
