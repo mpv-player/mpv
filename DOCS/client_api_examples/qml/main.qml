@@ -41,17 +41,30 @@ Item {
                    Click to load ../../../test.mkv"
         }
 
-        CheckBox {
-            id: checkbox
-            anchors.margins: 10
-            // Heavily filtered means good, right?
-            text: "Make video looks like on a Smart TV"
-            onClicked: {
-                if (checkbox.checked) {
-                    renderer.command(["vo_cmdline", "lscale=sharpen3:lparam1=1.0"])
-                } else {
-                    renderer.command(["vo_cmdline", ""])
+        // Don't take these controls too seriously. They're for testing.
+        Column {
+            CheckBox {
+                id: checkbox
+                anchors.margins: 10
+                // Heavily filtered means good, right?
+                text: "Make video look like on a Smart TV"
+                onClicked: {
+                    if (checkbox.checked) {
+                        renderer.command(["vo_cmdline", "lscale=sharpen3:lparam1=5.0"])
+                    } else {
+                        renderer.command(["vo_cmdline", ""])
+                    }
                 }
+            }
+            Slider {
+                id: slider
+                anchors.margins: 10
+                anchors.left: checkbox.left
+                anchors.right: checkbox.right
+                minimumValue: -100
+                maximumValue:  100
+                value: 0
+                onValueChanged: renderer.setProperty("gamma", slider.value | 0)
             }
         }
     }

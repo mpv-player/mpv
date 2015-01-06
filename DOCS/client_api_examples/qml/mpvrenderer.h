@@ -24,6 +24,7 @@ public:
     virtual Renderer *createRenderer() const;
 public slots:
     void command(const QVariant& params);
+    void setProperty(const QString& name, const QVariant& value);
 signals:
     void onUpdate();
 private slots:

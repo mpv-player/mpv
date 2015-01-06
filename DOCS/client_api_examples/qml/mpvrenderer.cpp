@@ -100,8 +100,12 @@ void MpvObject::doUpdate()
 
 void MpvObject::command(const QVariant& params)
 {
-    //mpv_command_string(mpv, s.toUtf8().data());
     mpv::qt::command_variant(mpv, params);
+}
+
+void MpvObject::setProperty(const QString& name, const QVariant& value)
+{
+    mpv::qt::set_property_variant(mpv, name, value);
 }
 
 QQuickFramebufferObject::Renderer *MpvObject::createRenderer() const
