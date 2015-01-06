@@ -767,7 +767,7 @@ void m_config_print_option_list(const struct m_config *config)
             continue;
         if (co->is_generated)
             continue;
-        MP_INFO(config, " %s%-30.30s", prefix, co->name);
+        MP_INFO(config, " %s%-30s", prefix, co->name);
         if (opt->type == &m_option_type_choice) {
             MP_INFO(config, " Choices:");
             struct m_opt_choice_alternatives *alt = opt->priv;
