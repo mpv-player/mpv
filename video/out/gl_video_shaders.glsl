@@ -179,6 +179,10 @@ uniform mat2 dither_trafo;
 uniform vec3 inv_gamma;
 uniform float input_gamma;
 uniform float conv_gamma;
+uniform float sig_center;
+uniform float sig_slope;
+uniform float sig_scale;
+uniform float sig_offset;
 uniform float dither_quantization;
 uniform float dither_center;
 uniform float filter_param1_l;
@@ -425,7 +429,14 @@ void main() {
     // The BT.2020 specification says Yc = 0.2627*R + 0.6780*G + 0.0593*B
     color.g = (color.g - 0.2627*color.r - 0.0593*color.b)/0.6780;
 #endif
+#ifdef USE_SIGMOID
+    color = sig_center - log(1.0/(color * sig_scale + sig_offset) - 1.0)/sig_slope;
+#endif
     // Image upscaling happens roughly here
+#ifdef USE_SIGMOID_INV
+    // Inverse of USE_SIGMOID
+    color = (1.0/(1.0 + exp(sig_slope * (sig_center - color))) - sig_offset) / sig_scale;
+#endif
 #ifdef USE_GAMMA_POW
     // User-defined gamma correction factor (via the gamma sub-option)
     color = pow(color, inv_gamma);
