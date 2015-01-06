@@ -112,10 +112,10 @@ static void set_mp4_vobsub_idx(AVCodecContext *avctx, char *src, int w, int h)
         struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
         csp.int_bits_in = 8;
         csp.int_bits_out = 8;
-        float cmatrix[3][4];
-        mp_get_yuv2rgb_coeffs(&csp, cmatrix);
+        struct mp_cmat cmatrix;
+        mp_get_yuv2rgb_coeffs(&csp, &cmatrix);
         int c[3] = {(e >> 16) & 0xff, (e >> 8) & 0xff, e & 0xff};
-        mp_map_int_color(cmatrix, 8, c);
+        mp_map_int_color(&cmatrix, 8, c);
         e = (c[2] << 16) | (c[1] << 8) | c[0];
 
         snprintf(pal_s + pal_s_pos, sizeof(pal_s) - pal_s_pos, "%06x%s", e,

@@ -400,9 +400,9 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     vs_params.levels_in = levels;
     vs_params.int_bits_in = 8;
     vs_params.int_bits_out = 8;
-    float vs_yuv2rgb[3][4], vs_rgb2yuv[3][4];
-    mp_get_yuv2rgb_coeffs(&vs_params, vs_yuv2rgb);
-    mp_invert_yuv2rgb(vs_rgb2yuv, vs_yuv2rgb);
+    struct mp_cmat vs_yuv2rgb, vs_rgb2yuv;
+    mp_get_yuv2rgb_coeffs(&vs_params, &vs_yuv2rgb);
+    mp_invert_yuv2rgb(&vs_rgb2yuv, &vs_yuv2rgb);
 
     // Proper conversion to RGB
     struct mp_csp_params rgb_params = MP_CSP_PARAMS_DEFAULTS;
@@ -410,8 +410,8 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     rgb_params.levels_in = params.colorlevels;
     rgb_params.int_bits_in = 8;
     rgb_params.int_bits_out = 8;
-    float vs2rgb[3][4];
-    mp_get_yuv2rgb_coeffs(&rgb_params, vs2rgb);
+    struct mp_cmat vs2rgb;
+    mp_get_yuv2rgb_coeffs(&rgb_params, &vs2rgb);
 
     for (int n = 0; n < parts->num_parts; n++) {
         struct sub_bitmap *sb = &parts->parts[n];
@@ -421,8 +421,8 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
         int b = (color >>  8u) & 0xff;
         int a = 0xff - (color & 0xff);
         int c[3] = {r, g, b};
-        mp_map_int_color(vs_rgb2yuv, 8, c);
-        mp_map_int_color(vs2rgb, 8, c);
+        mp_map_int_color(&vs_rgb2yuv, 8, c);
+        mp_map_int_color(&vs2rgb, 8, c);
         sb->libass.color = MP_ASS_RGBA(c[0], c[1], c[2], a);
     }
 }

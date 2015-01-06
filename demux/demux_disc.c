@@ -95,15 +95,15 @@ static void add_dvd_streams(demuxer_t *demuxer)
             struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
             csp.int_bits_in = 8;
             csp.int_bits_out = 8;
-            float cmatrix[3][4];
-            mp_get_yuv2rgb_coeffs(&csp, cmatrix);
+            struct mp_cmat cmatrix;
+            mp_get_yuv2rgb_coeffs(&csp, &cmatrix);
 
             char *s = talloc_strdup(sh, "");
             s = talloc_asprintf_append(s, "palette: ");
             for (int i = 0; i < 16; i++) {
                 int color = info.palette[i];
                 int c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
-                mp_map_int_color(cmatrix, 8, c);
+                mp_map_int_color(&cmatrix, 8, c);
                 color = (c[2] << 16) | (c[1] << 8) | c[0];
 
                 if (i != 0)

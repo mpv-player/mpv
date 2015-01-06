@@ -192,14 +192,19 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer)
     if (!opts->chroma_deint)
         SET_VIDEO_ATTR(SKIP_CHROMA_DEINTERLACE, uint8_t, 1);
 
-    // VdpCSCMatrix happens to be compatible with mpv's CSC matrix type
-    // both are float[3][4]
+    struct mp_cmat yuv2rgb;
     VdpCSCMatrix matrix;
 
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
     mp_csp_set_image_params(&cparams, &mixer->image_params);
     mp_csp_copy_equalizer_values(&cparams, &mixer->video_eq);
-    mp_get_yuv2rgb_coeffs(&cparams, matrix);
+    mp_get_yuv2rgb_coeffs(&cparams, &yuv2rgb);
+
+    for (int r = 0; r < 3; r++) {
+        for (int c = 0; c < 3; c++)
+            matrix[r][c] = yuv2rgb.m[r][c];
+        matrix[r][3] = yuv2rgb.c[r];
+    }
 
     set_video_attribute(mixer, VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX,
                         &matrix, "CSC matrix");

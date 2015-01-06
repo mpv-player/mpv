@@ -1070,7 +1070,7 @@ static void glSetupYUVFragprog(struct vo *vo, GL *gl,
     GLint i;
     // this is the conversion matrix, with y, u, v factors
     // for red, green, blue and the constant offsets
-    float yuv2rgb[3][4];
+    struct mp_cmat yuv2rgb;
     int noise = params->noise_strength != 0;
     create_conv_textures(vo, gl, params, &cur_texu, conv_texs);
     create_scaler_textures(vo, gl, YUV_LUM_SCALER(type), &cur_texu, lum_scale_texs);
@@ -1102,7 +1102,7 @@ static void glSetupYUVFragprog(struct vo *vo, GL *gl,
     add_scaler(YUV_CHROM_SCALER(type), prog,
                chrom_scale_texs, '2', 'b', rect, params->chrom_texw,
                params->chrom_texh, params->filter_strength);
-    mp_get_yuv2rgb_coeffs(&params->csp_params, yuv2rgb);
+    mp_get_yuv2rgb_coeffs(&params->csp_params, &yuv2rgb);
     switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_FRAGMENT:
         append_template(prog, yuv_prog_template);
@@ -1121,11 +1121,14 @@ static void glSetupYUVFragprog(struct vo *vo, GL *gl,
         break;
     }
     for (int r = 0; r < 3; r++) {
-        for (int c = 0; c < 4; c++) {
-            // "cmRC"
+        for (int c = 0; c < 3; c++) {
+            // "mRC"
             char var[] = { 'c', 'm', '1' + r, '1' + c, '\0' };
-            replace_var_float(prog, var, yuv2rgb[r][c]);
+            replace_var_float(prog, var, yuv2rgb.m[r][c]);
         }
+        // "mR4"
+        char var[] = { 'c', 'm', '1' + r, '4', '\0' };
+        replace_var_float(prog, var, yuv2rgb.c[r]);
     }
     replace_var_float(prog, "gamma_r", (float)1.0 / params->csp_params.rgamma);
     replace_var_float(prog, "gamma_g", (float)1.0 / params->csp_params.ggamma);

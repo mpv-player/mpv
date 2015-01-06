@@ -661,24 +661,20 @@ static void update_uniforms(struct gl_video *p, GLuint program)
 
     loc = gl->GetUniformLocation(program, "colormatrix");
     if (loc >= 0) {
-        float m[3][4] = {{0}};
+        struct mp_cmat m = {{{0}}};
         if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
             // Hard-coded as relative colorimetric for now, since this transforms
             // from the source file's D55 material to whatever color space our
             // projector/display lives in, which should be D55 for a proper
             // home cinema setup either way.
-            mp_get_xyz2rgb_coeffs(&cparams, p->csp_src, MP_INTENT_RELATIVE_COLORIMETRIC, m);
+            mp_get_xyz2rgb_coeffs(&cparams, p->csp_src,
+                                  MP_INTENT_RELATIVE_COLORIMETRIC, &m);
         } else {
-            mp_get_yuv2rgb_coeffs(&cparams, m);
+            mp_get_yuv2rgb_coeffs(&cparams, &m);
         }
-        float transposed[3][3];
-        for (int a = 0; a < 3; a++) {
-            for (int b = 0; b < 3; b++)
-                transposed[a][b] = m[b][a];
-        }
-        gl->UniformMatrix3fv(loc, 1, GL_FALSE, &transposed[0][0]);
+        gl->UniformMatrix3fv(loc, 1, GL_TRUE, &m.m[0][0]);
         loc = gl->GetUniformLocation(program, "colormatrix_c");
-        gl->Uniform3f(loc, m[0][3], m[1][3], m[2][3]);
+        gl->Uniform3f(loc, m.c[0], m.c[1], m.c[2]);
     }
 
     gl->Uniform1f(gl->GetUniformLocation(program, "input_gamma"),
