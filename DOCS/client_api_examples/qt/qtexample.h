@@ -17,6 +17,7 @@ public:
 
 private slots:
     void on_file_open();
+    void on_new_window();
     void on_mpv_events();
 
 signals:

@@ -44,6 +44,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(on_open, &QAction::triggered, this, &MainWindow::on_file_open);
     menu->addAction(on_open);
 
+    QAction *on_new = new QAction(tr("&New window"), this);
+    connect(on_new, &QAction::triggered, this, &MainWindow::on_new_window);
+    menu->addAction(on_new);
+
     statusBar();
 
     QMainWindow *log_window = new QMainWindow(this);
@@ -185,6 +189,11 @@ void MainWindow::on_file_open()
         const char *args[] = {"loadfile", c_filename.data(), NULL};
         mpv_command_async(mpv, 0, args);
     }
+}
+
+void MainWindow::on_new_window()
+{
+    (new MainWindow())->show();
 }
 
 void MainWindow::append_log(const QString &text)
