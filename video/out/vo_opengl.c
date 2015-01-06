@@ -321,15 +321,18 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_EQUALIZER: {
         struct voctrl_get_equalizer_args *args = data;
         mpgl_lock(p->glctx);
-        bool r = gl_video_get_equalizer(p->renderer, args->name,
-                                        args->valueptr);
+        struct mp_csp_equalizer *eq = gl_video_eq_ptr(p->renderer);
+        bool r = mp_csp_equalizer_get(eq, args->name, args->valueptr) >= 0;
         mpgl_unlock(p->glctx);
         return r ? VO_TRUE : VO_NOTIMPL;
     }
     case VOCTRL_SET_EQUALIZER: {
         struct voctrl_set_equalizer_args *args = data;
         mpgl_lock(p->glctx);
-        bool r = gl_video_set_equalizer(p->renderer, args->name, args->value);
+        struct mp_csp_equalizer *eq = gl_video_eq_ptr(p->renderer);
+        bool r = mp_csp_equalizer_set(eq, args->name, args->value) >= 0;
+        if (r)
+            gl_video_eq_update(p->renderer);
         mpgl_unlock(p->glctx);
         if (r)
             vo->want_redraw = true;

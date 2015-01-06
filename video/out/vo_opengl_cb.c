@@ -71,6 +71,8 @@ struct mpv_opengl_cb_context {
     bool update_new_opts;
     struct vo_priv *new_opts; // use these options, instead of the VO ones
     struct m_config *new_opts_cfg;
+    bool eq_changed;
+    struct mp_csp_equalizer eq;
 
     // --- All of these can only be accessed from the thread where the host
     //     application's OpenGL context is current - i.e. only while the
@@ -165,7 +167,9 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     ctx->hwdec = gl_hwdec_load_api(ctx->log, ctx->gl, ctx->hwapi, &ctx->hwdec_info);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
 
+
     pthread_mutex_lock(&ctx->lock);
+    ctx->eq = *gl_video_eq_ptr(ctx->renderer);
     for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
         ctx->imgfmt_supported[n - IMGFMT_START] =
             gl_video_check_format(ctx->renderer, n);
@@ -251,6 +255,14 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
         ctx->reconfigured = false;
         ctx->update_new_opts = false;
     }
+
+    struct mp_csp_equalizer *eq = gl_video_eq_ptr(ctx->renderer);
+    if (ctx->eq_changed) {
+        memcpy(eq->values, ctx->eq.values, sizeof(eq->values));
+        gl_video_eq_update(ctx->renderer);
+    }
+    ctx->eq_changed = false;
+    ctx->eq = *eq;
 
     struct mp_image *mpi = ctx->next_frame;
     ctx->next_frame = NULL;
@@ -363,6 +375,24 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
+    case VOCTRL_GET_EQUALIZER: {
+        struct voctrl_get_equalizer_args *args = data;
+        pthread_mutex_lock(&p->ctx->lock);
+        bool r = mp_csp_equalizer_get(&p->ctx->eq, args->name, args->valueptr) >= 0;
+        pthread_mutex_unlock(&p->ctx->lock);
+        return r ? VO_TRUE : VO_NOTIMPL;
+    }
+    case VOCTRL_SET_EQUALIZER: {
+        struct voctrl_set_equalizer_args *args = data;
+        pthread_mutex_lock(&p->ctx->lock);
+        bool r = mp_csp_equalizer_set(&p->ctx->eq, args->name, args->value) >= 0;
+        if (r) {
+            p->ctx->eq_changed = true;
+            update(p);
+        }
+        pthread_mutex_unlock(&p->ctx->lock);
+        return r ? VO_TRUE : VO_NOTIMPL;
+    }
     case VOCTRL_REDRAW_FRAME:
         pthread_mutex_lock(&p->ctx->lock);
         update(p);

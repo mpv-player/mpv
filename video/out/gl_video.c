@@ -2586,23 +2586,20 @@ void gl_video_get_colorspace(struct gl_video *p, struct mp_image_params *params)
     *params = p->image_params; // supports everything
 }
 
-bool gl_video_set_equalizer(struct gl_video *p, const char *name, int val)
+struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p)
 {
-    if (mp_csp_equalizer_set(&p->video_eq, name, val) >= 0) {
-        if (!p->opts.gamma && p->video_eq.values[MP_CSP_EQ_GAMMA] != 0) {
-            MP_VERBOSE(p, "Auto-enabling gamma.\n");
-            p->opts.gamma = 1.0f;
-            compile_shaders(p);
-        }
-        update_all_uniforms(p);
-        return true;
-    }
-    return false;
+    return &p->video_eq;
 }
 
-bool gl_video_get_equalizer(struct gl_video *p, const char *name, int *val)
+// Call when the mp_csp_equalizer returned by gl_video_eq_ptr() was changed.
+void gl_video_eq_update(struct gl_video *p)
 {
-    return mp_csp_equalizer_get(&p->video_eq, name, val) >= 0;
+    if (!p->opts.gamma && p->video_eq.values[MP_CSP_EQ_GAMMA] != 0) {
+        MP_VERBOSE(p, "Auto-enabling gamma.\n");
+        p->opts.gamma = 1.0f;
+        compile_shaders(p);
+    }
+    update_all_uniforms(p);
 }
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,

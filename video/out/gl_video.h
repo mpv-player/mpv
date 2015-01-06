@@ -73,8 +73,9 @@ void gl_video_resize(struct gl_video *p, struct mp_rect *window,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd, bool vflip);
 void gl_video_get_colorspace(struct gl_video *p, struct mp_image_params *params);
-bool gl_video_set_equalizer(struct gl_video *p, const char *name, int val);
-bool gl_video_get_equalizer(struct gl_video *p, const char *name, int *val);
+struct mp_csp_equalizer;
+struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p);
+void gl_video_eq_update(struct gl_video *p);
 
 void gl_video_set_debug(struct gl_video *p, bool enable);
 void gl_video_resize_redraw(struct gl_video *p, int w, int h);
