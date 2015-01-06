@@ -901,6 +901,7 @@ static int dvb_open(stream_t *stream)
         stream->fill_buffer = dvb_streaming_read;
         stream->close = dvbin_close;
         stream->control = dvbin_stream_control;
+        stream->streaming = true;
 
         stream->demuxer = "lavf";
         stream->lavf_type = "mpegts";
