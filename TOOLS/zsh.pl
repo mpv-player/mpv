@@ -7,7 +7,7 @@ use warnings;
 
 my $mpv = $ARGV[0] || 'mpv';
 
-my @opts = parse_opts("$mpv --list-options", '^ (\-\-[^\s\*]*)\*?\s*(.*)', 1);
+my @opts = parse_main_opts("$mpv --list-options", '^ (\-\-[^\s\*]*)\*?\s*(.*)');
 
 my @ao = parse_opts("$mpv --ao=help", '^  ([^\s\:]*)\s*: (.*)');
 my @vo = parse_opts("$mpv --vo=help", '^  ([^\s\:]*)\s*: (.*)');
@@ -54,7 +54,7 @@ my $profile_comp = <<'EOS';
           profiles=($profiles $current)
         fi
       done
-      if [[ $state == profile ]]; then
+      if [[ $state == show-profile ]]; then
         # For --show-profile, only one allowed
         if (( ${#profiles} > 0 )); then
           _values 'profile' $profiles && rc=0
@@ -118,7 +118,7 @@ $vf_str
     _describe -t values 'video filters' values && rc=0
   ;;
 
-  profile|profiles)
+  profile|show-profile)
 $profile_comp
   ;;
 
@@ -133,7 +133,7 @@ $profile_comp
     _tags files urls
     while _tags; do
       _requested files expl 'media file' _files -g \\
-         "*.(#i)(asf|asx|avi|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|qt|rm|ts|vob|wav|webm|wma|wmv)(-.)" && rc=0
+        "*.(#i)(asf|asx|avi|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|qt|rm|ts|vob|wav|webm|wma|wmv)(-.)" && rc=0
       if _requested urls; then
         while _next_label urls expl URL; do
           _urls "\$expl[@]" && rc=0
@@ -150,8 +150,73 @@ EOS
 
 print $tmpl;
 
+sub parse_main_opts {
+    my ($cmd, $regex) = @_;
+
+    my @list;
+    my @lines = split /\n/, `$cmd`;
+
+    foreach my $line (@lines) {
+        my ($name, $desc) = ($line =~ /^$regex/) or next;
+
+        next if ($desc eq 'removed' || $desc eq 'alias');
+
+        if ($desc =~ /^Flag/) {
+
+            push @list, $name;
+
+            $name =~ /^--(.*)/;
+            if ($1 !~ /^(\{|\}|v|list-options|really-quiet|no-.*)$/) {
+                push @list, "--no-$1";
+            }
+
+        } elsif ($desc =~ /^Print/) {
+
+            push @list, $name;
+
+        } else {
+
+            # Option takes argument
+
+            my $entry = $name;
+
+            $desc =~ s/\:/\\:/g;
+            $entry .= "=-:$desc:";
+
+            if ($desc =~ /^Choices\\: ([^(]*)/) {
+                my $choices = $1;
+                $choices =~ s/ +$//; # strip trailing space
+                $entry .= "($choices)";
+
+                # If "no" is one of the choices, it can also be
+                # negated like a flag (--no-whatever).
+                if ($choices =~ /\bno\b/) {
+                    $name =~ s/^--/--no-/;
+                    push @list, $name;
+                }
+            } elsif ($line =~ /\[file\]/) {
+                $entry .= '->files';
+            } elsif ($name =~ /^--(ao|vo|af|vf|profile|show-profile)$/) {
+                $entry .= "->$1";
+            }
+            push @list, $entry;
+        }
+    }
+
+    # Sort longest first, because zsh won't complete an option listed
+    # after one that's a prefix of it.
+    @list = sort {
+        $a =~ /([^=]*)/; my $ma = $1;
+        $b =~ /([^=]*)/; my $mb = $1;
+
+        length($mb) <=> length($ma)
+    } @list;
+
+    return @list;
+}
+
 sub parse_opts {
-    my ($cmd, $regex, $parsing_main_options) = @_;
+    my ($cmd, $regex) = @_;
 
     my @list;
     my @lines = split /\n/, `$cmd`;
@@ -163,39 +228,13 @@ sub parse_opts {
 
         my $entry = $1;
 
-        if ($parsing_main_options) {
-            $entry .= '=-';
-        }
-
         if (defined $2) {
             my $desc = $2;
             $desc =~ s/\:/\\:/g;
-
             $entry .= ':' . $desc;
         }
 
-        if ($parsing_main_options) {
-            $entry .= ':';
-
-            $entry .= '->ao' if ($1 eq '--ao');
-            $entry .= '->vo' if ($1 eq '--vo');
-            $entry .= '->af' if ($1 eq '--af');
-            $entry .= '->vf' if ($1 eq '--vf');
-            $entry .= '->profiles' if ($1 eq '--profile');
-            $entry .= '->profile' if ($1 eq '--show-profile');
-            $entry .= '->files' if ($line =~ /\[file\]/);
-        }
-
         push @list, $entry
-    }
-
-    if ($parsing_main_options) {
-        @list = sort {
-            $a =~ /(.*?)\:/; my $ma = $1;
-            $b =~ /(.*?)\:/; my $mb = $1;
-
-            length($mb) <=> length($ma)
-        } @list;
     }
 
     return @list;
