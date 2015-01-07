@@ -145,16 +145,17 @@ void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts)
     load_profile(p);
 }
 
+// Warning: profile.start must point to a ta allocation, and the function
+//          takes over ownership.
 void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile)
 {
     if (!p->opts.profile_auto)
         return;
 
-    if (p->icc_path)
-        talloc_free(p->icc_path);
+    talloc_free(p->icc_path);
+    p->icc_path = NULL;
 
-    if (p->icc_data)
-        talloc_free(p->icc_data);
+    talloc_free(p->icc_data);
 
     p->icc_data = talloc_steal(p, profile->start);
     p->icc_size = profile->len;
