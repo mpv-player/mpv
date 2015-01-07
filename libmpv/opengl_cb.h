@@ -207,6 +207,12 @@ int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4]);
  */
 int mpv_opengl_cb_uninit_gl(mpv_opengl_cb_context *ctx);
 
+int mpv_opengl_cb_set_frame_queue_size(mpv_opengl_cb_context *ctx, int size);
+int mpv_opengl_cb_get_frame_queue_size(mpv_opengl_cb_context *ctx);
+int mpv_opengl_cb_get_queued_frames(mpv_opengl_cb_context *ctx);
+uint64_t mpv_opengl_cb_get_dropped_frames(mpv_opengl_cb_context *ctx);
+void mpv_opengl_cb_empty_frame_queue(mpv_opengl_cb_context *ctx);
+
 #ifdef __cplusplus
 }
 #endif
