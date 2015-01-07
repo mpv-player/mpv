@@ -81,7 +81,7 @@ static void *w32gpa(const GLubyte *procName)
     void *res = wglGetProcAddress(procName);
     if (res)
         return res;
-    oglmod = GetModuleHandle("opengl32.dll");
+    oglmod = GetModuleHandle(L"opengl32.dll");
     return GetProcAddress(oglmod, procName);
 }
 

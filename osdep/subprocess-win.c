@@ -15,7 +15,6 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _WIN32_WINNT 0x0600
 #include <windows.h>
 #include <string.h>
 
