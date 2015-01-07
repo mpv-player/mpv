@@ -1640,6 +1640,10 @@ static void uninit_video(struct gl_video *p)
 
     fbotex_uninit(p, &p->indirect_fbo);
     fbotex_uninit(p, &p->scale_sep_fbo);
+    
+    // Invalidate image_params to ensure that gl_video_config() will call
+    // init_video() on uninitialized gl_video.
+    p->image_params = (struct mp_image_params){0};
 }
 
 static void change_dither_trafo(struct gl_video *p)
