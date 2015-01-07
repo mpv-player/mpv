@@ -1124,10 +1124,7 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
     // 3DLUT overrides SRGB
     shader_def_opt(&header_final, "USE_SRGB", p->opts.srgb && !p->use_lut_3d);
-    shader_def_opt(&header_final, "USE_CONST_LUMA_INV_APPROX",
-                   use_const_luma && !use_cms && p->opts.approx_gamma);
-    shader_def_opt(&header_final, "USE_CONST_LUMA_INV_BT2020",
-                   use_const_luma && !use_cms && !p->opts.approx_gamma);
+    shader_def_opt(&header_final, "USE_CONST_LUMA_INV", use_const_luma && !use_cms);
     shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
     shader_def_opt(&header_final, "USE_TEMPORAL_DITHER", p->opts.temporal_dither);
 
