@@ -179,10 +179,15 @@ Available audio output drivers are:
         changes. Default: 250.
 
     ``latency-hacks=<yes|no>``
-        Enable hacks to workaround PulseAudio timing bugs (default: yes). If
+        Enable hacks to workaround PulseAudio timing bugs (default: no). If
         enabled, mpv will do elaborate latency calculations on its own. If
         disabled, it will use PulseAudio automatically updated timing
-        information. Disabling this might help with e.g. networked audio.
+        information. Disabling this might help with e.g. networked audio or
+        some plugins, while enabling it might help in some unknown situations
+        (it used to be required to get good behavior on old PulseAudio versions).
+
+        If you have stuttering video when using pulse, try to enable this
+        option. (Or alternatively, try to update PulseAudio.)
 
 ``dsound`` (Windows only)
     DirectX DirectSound audio output driver
