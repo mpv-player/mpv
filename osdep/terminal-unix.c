@@ -416,6 +416,11 @@ void terminal_setup_getch(struct input_ctx *ictx)
     if (mp_make_wakeup_pipe(death_pipe) < 0)
         return;
 
+    // Disable reading from the terminal even if stdout is not a tty, to make
+    //   mpv ... | less
+    // do the right thing.
+    read_terminal = isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
+
     input_ctx = ictx;
 
     if (pthread_create(&input_thread, NULL, terminal_thread, NULL)) {
@@ -455,6 +460,7 @@ void terminal_uninit(void)
     }
 
     getch2_enabled = 0;
+    read_terminal = false;
 }
 
 bool terminal_in_background(void)
@@ -476,11 +482,6 @@ int terminal_init(void)
 {
     assert(!getch2_enabled);
     getch2_enabled = 1;
-
-    // Disable reading from the terminal even if stdout is not a tty, to make
-    //   mpv ... | less
-    // do the right thing.
-    read_terminal = isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
 
     // handlers to fix terminal settings
     setsigaction(SIGCONT, continue_sighandler, 0, true);
