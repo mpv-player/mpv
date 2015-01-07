@@ -85,11 +85,11 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #if HAVE_SNDIO
     &audio_out_sndio,
 #endif
+    &audio_out_null,
+    // should not be auto-selected:
 #if HAVE_COREAUDIO
     &audio_out_coreaudio_exclusive,
 #endif
-    &audio_out_null,
-    // should not be auto-selected:
     &audio_out_pcm,
 #if HAVE_ENCODING
     &audio_out_lavc,
