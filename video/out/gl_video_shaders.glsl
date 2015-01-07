@@ -453,14 +453,10 @@ void main() {
     // Adapt and compand from the linear BT2020 source to the sRGB output
     color = srgb_compand(color);
 #endif
-    // If none of these options took care of companding again, we have to do
-    // it manually here for the previously-expanded channels. This again
-    // comes in two flavours, one for the approximate gamma system and one
-    // for the actual gamma system.
-#ifdef USE_CONST_LUMA_INV_APPROX
-    color = pow(color, vec3(1.0/1.95));
-#endif
-#ifdef USE_CONST_LUMA_INV_BT2020
+    // If none of these options took care of companding again (ie. CMS is
+    // disabled), we still need to re-compand const luma signals, because
+    // they always come out as linear light (and we can't simply output that).
+#ifdef USE_CONST_LUMA_INV
     color = bt2020_compand(color);
 #endif
 #ifdef USE_DITHER

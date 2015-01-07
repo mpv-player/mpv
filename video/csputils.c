@@ -476,11 +476,7 @@ void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params,
     // want to linearize any brightness additions. 2 is a reasonable
     // approximation for any sort of gamma function that could be in use.
     // As this is an aesthetic setting only, any exact values do not matter.
-    if (brightness < 0) {
-        brightness *= -brightness;
-    } else {
-        brightness *= brightness;
-    }
+    brightness *= fabs(brightness);
 
     for (int i = 0; i < 3; i++)
         m->c[i] = brightness;
