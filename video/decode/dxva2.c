@@ -321,6 +321,7 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
     }
 
     ctx->copy_nv12(sw_img, LockedRect.pBits, LockedRect.Pitch, surfaceDesc.Height);
+    mp_image_copy_attributes(sw_img, img);
 
     IDirect3DSurface9_UnlockRect(surface);
 
