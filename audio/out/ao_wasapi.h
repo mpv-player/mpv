@@ -20,9 +20,6 @@
 #ifndef MP_AO_WASAPI_H_
 #define MP_AO_WASAPI_H_
 
-#define COBJMACROS 1
-#define _WIN32_WINNT 0x600
-
 #include <audioclient.h>
 #include <audiopolicy.h>
 #include <mmdeviceapi.h>

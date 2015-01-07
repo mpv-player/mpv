@@ -34,7 +34,7 @@
 
 #ifdef _WIN32
 # include <windows.h>
-# define DLLOpen(name)           LoadLibrary(name)
+# define DLLOpen(name)           LoadLibraryA(name)
 # define DLLClose(handle)        FreeLibrary(handle)
 # define DLLSymbol(handle, name) ((void *)GetProcAddress(handle, name))
 #else

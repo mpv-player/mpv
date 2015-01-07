@@ -17,9 +17,6 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define COBJMACROS 1
-#define _WIN32_WINNT 0x600
-
 #include <stdlib.h>
 #include <inttypes.h>
 #include <process.h>

@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define COBJMACROS
-#define _WIN32_WINNT 0x0600
 #include <stdio.h>
 #include <limits.h>
 #include <pthread.h>

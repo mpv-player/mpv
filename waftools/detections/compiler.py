@@ -47,11 +47,16 @@ def __add_clang_flags__(ctx):
                        "-Wno-tautological-compare",
                        "-Wno-tautological-constant-out-of-range-compare" ]
 
+def __add_mswin_flags__(ctx):
+    ctx.env.CFLAGS += ['-D_WIN32_WINNT=0x600', '-DUNICODE', '-DCOBJMACROS']
+
 def __add_mingw_flags__(ctx):
+    __add_mswin_flags__(ctx)
     ctx.env.CFLAGS += ['-D__USE_MINGW_ANSI_STDIO=1']
     ctx.env.LAST_LINKFLAGS += ['-mwindows']
 
 def __add_cygwin_flags__(ctx):
+    __add_mswin_flags__(ctx)
     ctx.env.CFLAGS += ['-mwin32']
     ctx.env.CFLAGS += ['-U__STRICT_ANSI__']
 

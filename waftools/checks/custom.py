@@ -24,7 +24,7 @@ def check_pthreads(ctx, dependency_identifier):
         h = ctx.path.find_node('osdep/win32/include').abspath()
         # define IN_WINPTHREAD to workaround mingw stupidity (we never want it
         # to define features specific to its own pthread stuff)
-        ctx.env.CFLAGS += ['-isystem', h, '-I', h, '-D_WIN32_WINNT=0x600', '-DIN_WINPTHREAD']
+        ctx.env.CFLAGS += ['-isystem', h, '-I', h, '-DIN_WINPTHREAD']
         return True
     if check_pthread_flag(ctx, dependency_identifier):
         return True

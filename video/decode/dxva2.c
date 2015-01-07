@@ -21,12 +21,7 @@
 
 #include <windows.h>
 
-#ifdef _WIN32_WINNT
-#undef _WIN32_WINNT
-#endif
-#define _WIN32_WINNT 0x0600
 #define DXVA2API_USE_BITFIELDS
-#define COBJMACROS
 
 #include <stdint.h>
 
@@ -360,12 +355,12 @@ static int dxva2_init(struct lavc_ctx *s)
 
     ctx->deviceHandle = INVALID_HANDLE_VALUE;
 
-    ctx->d3dlib = LoadLibrary("d3d9.dll");
+    ctx->d3dlib = LoadLibrary(L"d3d9.dll");
     if (!ctx->d3dlib) {
         MP_ERR(ctx, "Failed to load D3D9 library\n");
         goto fail;
     }
-    ctx->dxva2lib = LoadLibrary("dxva2.dll");
+    ctx->dxva2lib = LoadLibrary(L"dxva2.dll");
     if (!ctx->dxva2lib) {
         MP_ERR(ctx, "Failed to load DXVA2 library\n");
         goto fail;
