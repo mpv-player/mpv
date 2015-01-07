@@ -1150,7 +1150,6 @@ static int query_format(struct vo *vo, uint32_t movie_fmt)
 
 static void update_colorspace(d3d_priv *priv)
 {
-    float coeff[3][4];
     struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
     mp_csp_set_image_params(&csp, &priv->params);
     mp_csp_copy_equalizer_values(&csp, &priv->video_eq);
@@ -1159,11 +1158,12 @@ static void update_colorspace(d3d_priv *priv)
         csp.input_bits = priv->planes[0].bits_per_pixel;
         csp.texture_bits = (csp.input_bits + 7) & ~7;
 
-        mp_get_yuv2rgb_coeffs(&csp, coeff);
+        struct mp_cmat coeff;
+        mp_get_yuv2rgb_coeffs(&csp, &coeff);
         for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 4; col++) {
-                priv->d3d_colormatrix.m[row][col] = coeff[row][col];
-            }
+            for (int col = 0; col < 3; col++)
+                priv->d3d_colormatrix.m[row][col] = coeff.m[row][col];
+            priv->d3d_colormatrix.m[row][3] = coeff.c[row];
         }
     }
 }
