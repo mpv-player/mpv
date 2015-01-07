@@ -122,7 +122,7 @@ static bool create_context_x11_gl3(struct MPGLContext *ctx, bool debug)
 
     glx_ctx->context = context;
 
-    mpgl_load_functions(ctx->gl, (void *)glXGetProcAddress, glxstr, vo->log);
+    mpgl_load_functions(ctx->gl, (void *)glXGetProcAddressARB, glxstr, vo->log);
 
     if (!glXIsDirect(vo->x11->display, context))
         ctx->gl->mpgl_caps &= ~MPGL_CAP_NO_SW;
