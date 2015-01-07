@@ -100,7 +100,7 @@ enum mp_voctrl {
 
     VOCTRL_SET_COMMAND_LINE,            // char**
 
-    VOCTRL_GET_ICC_PROFILE_PATH,        // char**
+    VOCTRL_GET_ICC_PROFILE,             // bstr*
     VOCTRL_GET_DISPLAY_FPS,             // double*
     VOCTRL_GET_RECENT_FLIP_TIME,        // int64_t* (using mp_time_us())
 

@@ -40,6 +40,16 @@
 
 #include <lcms2.h>
 
+struct gl_lcms {
+    void *icc_data;
+    size_t icc_size;
+    char *icc_path;
+
+    struct mp_log *log;
+    struct mpv_global *global;
+    struct mp_icc_opts opts;
+};
+
 static bool parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
 {
     if (sscanf(arg, "%dx%dx%d", p1, p2, p3) != 3)
@@ -81,8 +91,8 @@ const struct m_sub_options mp_icc_conf = {
 static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
                                 const char *msg)
 {
-    struct mp_log *log = cmsGetContextUserData(ctx);
-    mp_msg(log, MSGL_ERR, "lcms2: %s\n", msg);
+    struct gl_lcms *p = cmsGetContextUserData(ctx);
+    MP_ERR(p, "lcms2: %s\n", msg);
 }
 
 static struct bstr load_file(void *talloc_ctx, const char *filename,
@@ -99,51 +109,91 @@ static struct bstr load_file(void *talloc_ctx, const char *filename,
     return res;
 }
 
-bool mp_icc_set_profile(struct mp_icc_opts *opts, char *profile)
+static bool load_profile(struct gl_lcms *p)
 {
-    if (!opts->profile || strcmp(opts->profile, profile) != 0) {
-        if (opts->profile)
-            talloc_free(opts->profile);
-        opts->profile = talloc_strdup(opts, profile);
+    if (p->icc_data && p->icc_size)
         return true;
-    }
-    return false;
+
+    if (!p->icc_path)
+        return false;
+
+    MP_INFO(p, "Opening ICC profile '%s'\n", p->icc_path);
+    struct bstr iccdata = load_file(p, p->icc_path, p->global);
+    if (!iccdata.len)
+        return false;
+
+    p->icc_data = iccdata.start;
+    p->icc_size = iccdata.len;
+    return true;
+}
+
+struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
+                             struct mpv_global *global)
+{
+    struct gl_lcms *p = talloc_ptrtype(talloc_ctx, p);
+    *p = (struct gl_lcms) {
+        .global = global,
+        .log = log,
+    };
+    return p;
+}
+
+void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts)
+{
+    p->opts = *opts;
+    p->icc_path = talloc_strdup(p, p->opts.profile);
+    load_profile(p);
+}
+
+void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile)
+{
+    if (!p->opts.profile_auto)
+        return;
+
+    if (p->icc_path)
+        talloc_free(p->icc_path);
+
+    if (p->icc_data)
+        talloc_free(p->icc_data);
+
+    p->icc_data = talloc_steal(p, profile->start);
+    p->icc_size = profile->len;
 }
 
 #define LUT3D_CACHE_HEADER "mpv 3dlut cache 1.0\n"
 
-struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
-                          struct mpv_global *global)
+bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
 {
     int s_r, s_g, s_b;
-    if (!parse_3dlut_size(opts->size_str, &s_r, &s_g, &s_b))
-        return NULL;
+    bool result = false;
 
-    if (!opts->profile)
-        return NULL;
+    if (!parse_3dlut_size(p->opts.size_str, &s_r, &s_g, &s_b))
+        return false;
+
+    if (!p->icc_data && !p->icc_path)
+        return false;
 
     void *tmp = talloc_new(NULL);
     uint16_t *output = talloc_array(tmp, uint16_t, s_r * s_g * s_b * 3);
     struct lut3d *lut = NULL;
     cmsContext cms = NULL;
 
-    mp_msg(log, MSGL_INFO, "Opening ICC profile '%s'\n", opts->profile);
-    struct bstr iccdata = load_file(tmp, opts->profile, global);
-    if (!iccdata.len)
-        goto error_exit;
-
     char *cache_info =
         // Gamma is included in the header to help uniquely identify it,
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
         talloc_asprintf(tmp, "intent=%d, size=%dx%dx%d, gamma=2.4, prim=bt2020\n",
-                        opts->intent, s_r, s_g, s_b);
+                        p->opts.intent, s_r, s_g, s_b);
+
+    bstr iccdata = (bstr) {
+        .start = p->icc_data,
+        .len   = p->icc_size,
+    };
 
     // check cache
-    if (opts->cache) {
-        mp_msg(log, MSGL_INFO, "Opening 3D LUT cache in file '%s'.\n",
-                   opts->cache);
-        struct bstr cachedata = load_file(tmp, opts->cache, global);
+    if (p->opts.cache) {
+        MP_INFO(p, "Opening 3D LUT cache in file '%s'.\n", p->opts.cache);
+        struct bstr cachedata = load_file(tmp, p->opts.cache, p->global);
         if (bstr_eatstart(&cachedata, bstr0(LUT3D_CACHE_HEADER))
             && bstr_eatstart(&cachedata, bstr0(cache_info))
             && bstr_eatstart(&cachedata, iccdata)
@@ -152,16 +202,17 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
             memcpy(output, cachedata.start, cachedata.len);
             goto done;
         } else {
-            mp_msg(log, MSGL_WARN, "3D LUT cache invalid!\n");
+            MP_WARN(p, "3D LUT cache invalid!\n");
         }
     }
 
-    cms = cmsCreateContext(NULL, log);
+    cms = cmsCreateContext(NULL, p);
     if (!cms)
         goto error_exit;
     cmsSetLogErrorHandlerTHR(cms, lcms2_error_handler);
 
-    cmsHPROFILE profile = cmsOpenProfileFromMemTHR(cms, iccdata.start, iccdata.len);
+    cmsHPROFILE profile =
+        cmsOpenProfileFromMemTHR(cms, p->icc_data, p->icc_size);
     if (!profile)
         goto error_exit;
 
@@ -184,7 +235,7 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
     cmsFreeToneCurve(tonecurve);
     cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_profile, TYPE_RGB_16,
                                                 profile, TYPE_RGB_16,
-                                                opts->intent,
+                                                p->opts.intent,
                                                 cmsFLAGS_HIGHRESPRECALC);
     cmsCloseProfile(profile);
     cmsCloseProfile(vid_profile);
@@ -208,12 +259,12 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
 
     cmsDeleteTransform(trafo);
 
-    if (opts->cache) {
-        char *fname = mp_get_user_path(NULL, global, opts->cache);
+    if (p->opts.cache) {
+        char *fname = mp_get_user_path(NULL, p->global, p->opts.cache);
         FILE *out = fopen(fname, "wb");
         if (out) {
             fprintf(out, "%s%s", LUT3D_CACHE_HEADER, cache_info);
-            fwrite(iccdata.start, iccdata.len, 1, out);
+            fwrite(p->icc_data, p->icc_size, 1, out);
             fwrite(output, talloc_get_size(output), 1, out);
             fclose(out);
         }
@@ -228,16 +279,19 @@ done: ;
         .size = {s_r, s_g, s_b},
     };
 
+    *result_lut3d = lut;
+    result = true;
+
 error_exit:
 
     if (cms)
         cmsDeleteContext(cms);
 
     if (!lut)
-        mp_msg(log, MSGL_FATAL, "Error loading ICC profile.\n");
+        MP_FATAL(p, "Error loading ICC profile.\n");
 
     talloc_free(tmp);
-    return lut;
+    return result;
 }
 
 #else /* HAVE_LCMS2 */
@@ -248,16 +302,15 @@ const struct m_sub_options mp_icc_conf = {
     .defaults = &(const struct mp_icc_opts) {0},
 };
 
-bool mp_icc_set_profile(struct mp_icc_opts *opts, char *profile)
+
+struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
+                             struct mpv_global *global)
 {
-    return false;
+    return (struct gl_lcms *) talloc_new(talloc_ctx);
 }
 
-struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log,
-                          struct mpv_global *global)
-{
-    mp_msg(log, MSGL_FATAL, "LCMS2 support not compiled.\n");
-    return NULL;
-}
+void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts) { }
+void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile) { }
+bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **x) { return false; }
 
 #endif

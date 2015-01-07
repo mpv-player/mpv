@@ -59,6 +59,7 @@ struct gl_priv {
     GL *gl;
 
     struct gl_video *renderer;
+    struct gl_lcms *cms;
 
     struct gl_hwdec *hwdec;
     struct mp_hwdec_info hwdec_info;
@@ -242,13 +243,9 @@ static void call_request_hwdec_api(struct mp_hwdec_info *info,
 
 static bool update_icc_profile(struct gl_priv *p)
 {
-    struct mp_icc_opts *opts = p->icc_opts;
     struct lut3d *lut3d = NULL;
-    if (opts->profile) {
-        lut3d = mp_load_icc(opts, p->vo->log, p->vo->global);
-        if (!lut3d)
-            return false;
-    }
+    if (gl_lcms_get_lut3d(p->cms, &lut3d) && !lut3d)
+        return false;
     gl_video_set_lut3d(p->renderer, lut3d);
     talloc_free(lut3d);
     return true;
@@ -256,20 +253,19 @@ static bool update_icc_profile(struct gl_priv *p)
 
 static bool get_and_update_icc_profile(struct gl_priv *p)
 {
-    if (!p->icc_opts->profile_auto)
-        return update_icc_profile(p);
+    bstr icc;
+    int r = p->glctx->vo_control(p->vo, NULL, VOCTRL_GET_ICC_PROFILE, &icc);
 
-    char *icc = NULL;
-    int r = p->glctx->vo_control(p->vo, NULL, VOCTRL_GET_ICC_PROFILE_PATH, &icc);
-    if (r != VO_TRUE) {
+    if (r == VO_FALSE) {
         MP_WARN(p->vo, "Could not retrieve an ICC profile.\n");
-        return true; // no error if the system doesn't have any
+        return false;
     }
 
-    if (mp_icc_set_profile(p->icc_opts, icc))
-        return update_icc_profile(p);
+    if (r == VO_TRUE) {
+        gl_lcms_set_memory_profile(p->cms, &icc);
+    }
 
-    return true;
+    return update_icc_profile(p);
 }
 
 static bool reparse_cmdline(struct gl_priv *p, char *args)
@@ -430,6 +426,11 @@ static int preinit(struct vo *vo)
     gl_video_set_output_depth(p->renderer, p->glctx->depth_r, p->glctx->depth_g,
                               p->glctx->depth_b);
     gl_video_set_options(p->renderer, p->renderer_opts);
+
+    p->cms = gl_lcms_init(p, vo->log, vo->global);
+    if (!p->cms)
+        goto err_out;
+    gl_lcms_set_options(p->cms, p->icc_opts);
     if (!get_and_update_icc_profile(p))
         goto err_out;
 
