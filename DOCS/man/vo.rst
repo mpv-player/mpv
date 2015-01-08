@@ -915,8 +915,27 @@ Available video output drivers are:
 ``opengl-cb``
     For use with libmpv direct OpenGL embedding; useless in any other contexts.
     (See ``<mpv/opengl_cb.h>``.)
+    Usually, ``opengl-cb`` renders frames asynchronously by client and this
+    can cause some frame drops. In order to provide a way to handle this
+    situation, ``opengl-cb`` has its own frame queue and calls update callback
+    more frequently if the queue is not empty regardless of existence of new frame.
+    Once the queue is filled, ``opengl-cb`` drops frames automatically.
 
-    This supports many of the suboptions the ``opengl`` VO has. Run
+    With default options, ``opengl-cb`` renders only the latest frame and drops
+    all frames handed over while waiting render function after update callback.
+
+    ``frame-queue-size=<1..100>``
+        The maximum count of frames which the frame queue can hold (default: 1)
+
+    ``frame-drop-mode=<pop|clear>``
+        Select the behavior when the frame queue is full.
+
+        pop
+            Drop the oldest frame in the frame queue. (default)
+        clear
+            Drop all frames in the frame queue.
+
+    This also supports many of the suboptions the ``opengl`` VO has. Runs
     ``mpv --vo=opengl-cb:help`` for a list.
 
     This also supports the ``vo_cmdline`` command.
