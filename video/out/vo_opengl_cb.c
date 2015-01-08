@@ -250,8 +250,9 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
         if (ctx->reconfigured || ctx->update_new_opts) {
             struct vo_priv *opts = p->ctx->new_opts ? p->ctx->new_opts : p;
             gl_video_set_options(ctx->renderer, opts->renderer_opts);
-            ctx->gl->debug_context = opts->use_gl_debug;
-            gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
+            // use_gl_debug is not supported by vo_cmdline
+            ctx->gl->debug_context = p->use_gl_debug;
+            gl_video_set_debug(ctx->renderer, p->use_gl_debug);
         }
         ctx->reconfigured = false;
         ctx->update_new_opts = false;
