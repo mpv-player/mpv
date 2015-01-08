@@ -232,6 +232,7 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
     if (ctx->force_update && vo) {
         ctx->force_update = false;
         ctx->wnd = wnd;
+        ctx->flip = flip;
 
         struct mp_rect src, dst;
         struct mp_osd_res osd;
