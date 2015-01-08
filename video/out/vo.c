@@ -730,6 +730,13 @@ int64_t vo_get_drop_count(struct vo *vo)
     return r;
 }
 
+void vo_increment_drop_count(struct vo *vo, int64_t n)
+{
+    pthread_mutex_lock(&vo->in->lock);
+    vo->in->drop_count += n;
+    pthread_mutex_unlock(&vo->in->lock);
+}
+
 // Make the VO redraw the OSD at some point in the future.
 void vo_redraw(struct vo *vo)
 {
