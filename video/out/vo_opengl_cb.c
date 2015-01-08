@@ -67,7 +67,6 @@ struct mpv_opengl_cb_context {
     struct mp_image *waiting_frame;
     struct mp_image **frame_queue;
     int queued_frames;
-    uint64_t dropped_frames;
     struct mp_image_params img_params;
     bool reconfigured;
     struct mp_rect wnd;
@@ -112,8 +111,12 @@ static struct mp_image *frame_queue_pop(struct mpv_opengl_cb_context *ctx)
 
 static void frame_queue_drop(struct mpv_opengl_cb_context *ctx)
 {
-    talloc_free(frame_queue_pop(ctx));
-    ctx->dropped_frames++;
+    struct mp_image *mpi = frame_queue_pop(ctx);
+    if (mpi) {
+        talloc_free(mpi);
+        if (ctx->active)
+            vo_increment_drop_count(ctx->active, 1);
+    }
 }
 
 static void frame_queue_clear(struct mpv_opengl_cb_context *ctx)
@@ -122,8 +125,15 @@ static void frame_queue_clear(struct mpv_opengl_cb_context *ctx)
         talloc_free(ctx->frame_queue[i]);
     talloc_free(ctx->frame_queue);
     ctx->frame_queue = NULL;
-    ctx->dropped_frames += ctx->queued_frames;
     ctx->queued_frames = 0;
+}
+
+static void frame_queue_drop_all(struct mpv_opengl_cb_context *ctx)
+{
+    int frames = ctx->queued_frames;
+    frame_queue_clear(ctx);
+    if (ctx->active && frames > 0)
+        vo_increment_drop_count(ctx->active, frames);
 }
 
 static void frame_queue_push(struct mpv_opengl_cb_context *ctx, struct mp_image *mpi)
@@ -141,7 +151,6 @@ static void forget_frames(struct mpv_opengl_cb_context *ctx)
 {
     frame_queue_clear(ctx);
     mp_image_unrefp(&ctx->waiting_frame);
-    ctx->dropped_frames = 0;
 }
 
 static void free_ctx(void *ptr)
@@ -365,7 +374,7 @@ static void flip_page(struct vo *vo)
     pthread_mutex_lock(&p->ctx->lock);
     if (p->ctx->queued_frames >= p->frame_queue_size) {
         if (p->frame_drop_mode == FRAME_DROP_CLEAR)
-            frame_queue_clear(p->ctx);
+            frame_queue_drop_all(p->ctx);
         else // FRAME_DROP_POP mode
             frame_queue_shrink(p->ctx, p->frame_queue_size - 1);
     }
