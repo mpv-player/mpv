@@ -730,14 +730,7 @@ int64_t vo_get_drop_count(struct vo *vo)
     return r;
 }
 
-void vo_increment_drop_count(struct vo *vo)
-{
-    pthread_mutex_lock(&vo->in->lock);
-    vo->in->drop_count++;
-    pthread_mutex_unlock(&vo->in->lock);
-}
-
-void vo_increment_drop_count_by(struct vo *vo, int64_t n)
+void vo_increment_drop_count(struct vo *vo, int64_t n)
 {
     pthread_mutex_lock(&vo->in->lock);
     vo->in->drop_count += n;

@@ -115,7 +115,7 @@ static void frame_queue_drop(struct mpv_opengl_cb_context *ctx)
     if (mpi) {
         talloc_free(mpi);
         if (ctx->active)
-            vo_increment_drop_count(ctx->active);
+            vo_increment_drop_count(ctx->active, 1);
     }
 }
 
@@ -133,7 +133,7 @@ static void frame_queue_drop_all(struct mpv_opengl_cb_context *ctx)
     int frames = ctx->queued_frames;
     frame_queue_clear(ctx);
     if (ctx->active && frames > 0)
-        vo_increment_drop_count_by(ctx->active, frames);
+        vo_increment_drop_count(ctx->active, frames);
 }
 
 static void frame_queue_push(struct mpv_opengl_cb_context *ctx, struct mp_image *mpi)
