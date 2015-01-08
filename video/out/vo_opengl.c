@@ -244,6 +244,8 @@ static void call_request_hwdec_api(struct mp_hwdec_info *info,
 static bool update_icc_profile(struct gl_priv *p)
 {
     struct lut3d *lut3d = NULL;
+    if (!gl_lcms_has_changed(p->cms))
+        return true;
     if (gl_lcms_get_lut3d(p->cms, &lut3d) && !lut3d)
         return false;
     gl_video_set_lut3d(p->renderer, lut3d);

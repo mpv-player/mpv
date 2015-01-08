@@ -44,6 +44,7 @@ struct gl_lcms {
     void *icc_data;
     size_t icc_size;
     char *icc_path;
+    bool changed;
 
     struct mp_log *log;
     struct mpv_global *global;
@@ -134,6 +135,7 @@ struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
     *p = (struct gl_lcms) {
         .global = global,
         .log = log,
+        .changed = true,
     };
     return p;
 }
@@ -143,6 +145,7 @@ void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts)
     p->opts = *opts;
     p->icc_path = talloc_strdup(p, p->opts.profile);
     load_profile(p);
+    p->changed = true; // probably
 }
 
 // Warning: profile.start must point to a ta allocation, and the function
@@ -152,6 +155,16 @@ void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile)
     if (!p->opts.profile_auto)
         return;
 
+    if (!p->icc_path && p->icc_data && profile->start &&
+        profile->len == p->icc_size &&
+        memcmp(profile->start, p->icc_data, p->icc_size) == 0)
+    {
+        talloc_free(profile->start);
+        return;
+    }
+
+    p->changed = true;
+
     talloc_free(p->icc_path);
     p->icc_path = NULL;
 
@@ -159,6 +172,15 @@ void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile)
 
     p->icc_data = talloc_steal(p, profile->start);
     p->icc_size = profile->len;
+}
+
+// Return and _reset_ whether the lookul table has changed since the last call.
+// If it has changed, gl_lcms_get_lut3d() should be called.
+bool gl_lcms_has_changed(struct gl_lcms *p)
+{
+    bool change = p->changed;
+    p->changed = false;
+    return change;
 }
 
 #define LUT3D_CACHE_HEADER "mpv 3dlut cache 1.0\n"
@@ -313,5 +335,6 @@ struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
 void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts) { }
 void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile) { }
 bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **x) { return false; }
+bool gl_lcms_has_changed(struct gl_lcms *p) { return false; }
 
 #endif
