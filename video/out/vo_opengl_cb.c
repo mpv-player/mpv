@@ -344,7 +344,7 @@ static bool reparse_cmdline(struct vo_priv *p, char *args)
 
     // list of options which can be changed at runtime
 #define OPT_BASE_STRUCT struct vo_priv
-    static const struct m_option change_otps[] = {
+    static const struct m_option change_opts[] = {
         OPT_FLAG("debug", use_gl_debug, 0),
         OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
         {0}
@@ -352,7 +352,7 @@ static bool reparse_cmdline(struct vo_priv *p, char *args)
 #undef OPT_BASE_STRUCT
 
     const struct vo_priv *vodef = p->vo->driver->priv_defaults;
-    cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), vodef, change_otps);
+    cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), vodef, change_opts);
     opts = cfg->optstruct;
     r = m_config_parse_suboptions(cfg, "opengl-cb", args);
 
