@@ -1211,8 +1211,7 @@ static bool vo_w32_is_cursor_in_client(struct vo_w32_state *w32)
     return SendMessage(w32->window, WM_NCHITTEST, 0, pos) == HTCLIENT;
 }
 
-static int gui_thread_control(struct vo_w32_state *w32, int *events,
-                              int request, void *arg)
+static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 {
     switch (request) {
     case VOCTRL_FULLSCREEN:
@@ -1289,7 +1288,7 @@ static void do_control(void *ptr)
     int request = *(int *)p[2];
     void *arg = p[3];
     int *ret = p[4];
-    *ret = gui_thread_control(w32, events, request, arg);
+    *ret = gui_thread_control(w32, request, arg);
     *events |= w32->event_flags;
     w32->event_flags = 0;
     // Safe access, since caller (owner of vo) is blocked.
