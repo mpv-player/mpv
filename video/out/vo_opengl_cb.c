@@ -345,6 +345,7 @@ static bool reparse_cmdline(struct vo_priv *p, char *args)
     // list of options which can be changed at runtime
 #define OPT_BASE_STRUCT struct vo_priv
     static const struct m_option change_otps[] = {
+        OPT_FLAG("debug", use_gl_debug, 0),
         OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
         {0}
     };
