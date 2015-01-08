@@ -191,7 +191,7 @@ int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
  *           image - the renderer will flip it before setting the viewport
  *           (typically you want to flip the image if you are rendering
  *           directly to the main framebuffer).
- * @return error code
+ * @return the number of left frames in the internal queue to be rendered
  */
 int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4]);
 
