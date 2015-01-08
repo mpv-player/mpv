@@ -60,7 +60,10 @@ struct mpv_opengl_cb_context {
     mpv_opengl_cb_update_fn update_cb;
     void *update_cb_ctx;
     struct mp_image *waiting_frame;
-    struct mp_image *next_frame;
+    struct mp_image **frame_queue;
+    int frame_queue_size;
+    int queued_frames;
+    uint64_t dropped_frames;
     struct mp_image_params img_params;
     bool reconfigured;
     struct mp_rect wnd;
@@ -90,6 +93,29 @@ struct mpv_opengl_cb_context {
     struct vo *active;
 };
 
+static struct mp_image *frame_queue_pop(struct mpv_opengl_cb_context *ctx)
+{
+    if (ctx->queued_frames == 0)
+        return NULL;
+    struct mp_image *ret = ctx->frame_queue[0];
+    MP_TARRAY_REMOVE_AT(ctx->frame_queue, ctx->queued_frames, 0);
+    return ret;
+}
+
+static void frame_queue_drop(struct mpv_opengl_cb_context *ctx)
+{
+    talloc_free(frame_queue_pop(ctx));
+    ++ctx->dropped_frames;
+}
+
+static void frame_queue_push(struct mpv_opengl_cb_context *ctx, struct mp_image *mpi)
+{
+    assert(ctx->frame_queue_size > 0);
+    while (ctx->queued_frames >= ctx->frame_queue_size)
+        frame_queue_drop(ctx);
+    MP_TARRAY_APPEND(ctx, ctx->frame_queue, ctx->queued_frames, mpi);
+}
+
 static void free_ctx(void *ptr)
 {
     mpv_opengl_cb_context *ctx = ptr;
@@ -108,6 +134,8 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
     mpv_opengl_cb_context *ctx = talloc_zero(NULL, mpv_opengl_cb_context);
     talloc_set_destructor(ctx, free_ctx);
     pthread_mutex_init(&ctx->lock, NULL);
+
+    ctx->frame_queue_size = 1;
 
     ctx->gl = talloc_zero(ctx, GL);
 
@@ -185,6 +213,8 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
 {
     // Bring down the decoder etc., which still might be using the hwdec
     // context. Setting initialized=false guarantees it can't come back.
+    mpv_opengl_cb_empty_frame_queue(ctx);
+
     pthread_mutex_lock(&ctx->lock);
     ctx->initialized = false;
     pthread_mutex_unlock(&ctx->lock);
@@ -264,8 +294,7 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
     ctx->eq_changed = false;
     ctx->eq = *eq;
 
-    struct mp_image *mpi = ctx->next_frame;
-    ctx->next_frame = NULL;
+    struct mp_image *mpi = frame_queue_pop(ctx);
 
     pthread_mutex_unlock(&ctx->lock);
 
@@ -277,6 +306,43 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
     gl_video_unset_gl_state(ctx->renderer);
 
     return 0;
+}
+
+int mpv_opengl_cb_set_frame_queue_size(mpv_opengl_cb_context *ctx, int size)
+{
+    if (size < 1)
+        return MPV_ERROR_INVALID_PARAMETER;
+    pthread_mutex_lock(&ctx->lock);
+    if (ctx->frame_queue_size != size) {
+        ctx->frame_queue_size = size;
+        while (ctx->queued_frames > size)
+            frame_queue_drop(ctx);
+    }
+    pthread_mutex_unlock(&ctx->lock);
+    return MPV_ERROR_SUCCESS;
+}
+
+int mpv_opengl_cb_get_frame_queue_size(mpv_opengl_cb_context *ctx)
+{
+    return ctx->frame_queue_size;
+}
+
+int mpv_opengl_cb_get_queued_frames(mpv_opengl_cb_context *ctx)
+{
+    return ctx->queued_frames;
+}
+
+uint64_t mpv_opengl_cb_get_dropped_frames(mpv_opengl_cb_context *ctx)
+{
+    return ctx->dropped_frames;
+}
+
+void mpv_opengl_cb_empty_frame_queue(mpv_opengl_cb_context *ctx)
+{
+    pthread_mutex_lock(&ctx->lock);
+    while (ctx->queued_frames > 0)
+        frame_queue_drop(ctx);
+    pthread_mutex_unlock(&ctx->lock);
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -301,8 +367,7 @@ static void flip_page(struct vo *vo)
     struct vo_priv *p = vo->priv;
 
     pthread_mutex_lock(&p->ctx->lock);
-    mp_image_unrefp(&p->ctx->next_frame);
-    p->ctx->next_frame = p->ctx->waiting_frame;
+    frame_queue_push(p->ctx, p->ctx->waiting_frame);
     p->ctx->waiting_frame = NULL;
     update(p);
     pthread_mutex_unlock(&p->ctx->lock);
@@ -324,9 +389,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct vo_priv *p = vo->priv;
 
+    mpv_opengl_cb_empty_frame_queue(p->ctx);
     pthread_mutex_lock(&p->ctx->lock);
-    mp_image_unrefp(&p->ctx->next_frame);
     p->ctx->img_params = *params;
+    p->ctx->dropped_frames = 0;
     p->ctx->reconfigured = true;
     pthread_mutex_unlock(&p->ctx->lock);
 
@@ -423,8 +489,8 @@ static void uninit(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
 
+    mpv_opengl_cb_empty_frame_queue(p->ctx);
     pthread_mutex_lock(&p->ctx->lock);
-    mp_image_unrefp(&p->ctx->next_frame);
     mp_image_unrefp(&p->ctx->waiting_frame);
     p->ctx->img_params = (struct mp_image_params){0};
     p->ctx->reconfigured = true;
