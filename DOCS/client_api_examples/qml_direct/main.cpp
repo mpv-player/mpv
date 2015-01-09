@@ -19,7 +19,7 @@ static void *get_proc_address(void *ctx, const char *name) {
 }
 
 MpvRenderer::MpvRenderer(mpv::qt::Handle a_mpv, mpv_opengl_cb_context *a_mpv_gl)
-    : mpv(a_mpv), mpv_gl(a_mpv_gl), window(0)
+    : mpv(a_mpv), mpv_gl(a_mpv_gl), window(0), size()
 {
     int r = mpv_opengl_cb_init_gl(mpv_gl, NULL, get_proc_address, NULL);
     if (r < 0)
@@ -39,8 +39,7 @@ void MpvRenderer::paint()
     window->resetOpenGLState();
 
     // Render to the whole window.
-    QSize s = window->size() * window->devicePixelRatio();
-    int vp[4] = {0, 0, s.width(), -s.height()};
+    int vp[4] = {0, 0, size.width(), -size.height()};
 
     // This uses 0 as framebuffer, which indicates that mpv will render directly
     // to the frontbuffer. Note that mpv will always switch framebuffers
@@ -107,6 +106,7 @@ void MpvObject::sync()
                 renderer, &MpvRenderer::paint, Qt::DirectConnection);
     }
     renderer->window = window();
+    renderer->size = window()->size() * window()->devicePixelRatio();
 }
 
 void MpvObject::cleanup()

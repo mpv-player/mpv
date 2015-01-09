@@ -13,6 +13,7 @@ class MpvRenderer : public QObject
     mpv::qt::Handle mpv;
     mpv_opengl_cb_context *mpv_gl;
     QQuickWindow *window;
+    QSize size;
 
     friend class MpvObject;
 public:
