@@ -360,6 +360,7 @@ static void build_timeline_loop(struct MPContext *mpctx,
                                 uint64_t *last_end_time,
                                 struct timeline_part **timeline,
                                 struct demux_chapter *chapters,
+                                int num_chapters,
                                 int *part_count,
                                 uint64_t skip,
                                 uint64_t limit)
@@ -388,6 +389,9 @@ static void build_timeline_loop(struct MPContext *mpctx,
 
             if (!demux_matroska_uid_cmp(&c->uid, &linked_m->uid))
                 continue;
+
+            if (i >= num_chapters)
+                break; // probably needed only for broken sources
 
             if (!limit) {
                 chapters[i].pts = *starttime / 1e9;
@@ -441,7 +445,8 @@ static void build_timeline_loop(struct MPContext *mpctx,
                  * chapters. */
                 build_timeline_loop(mpctx, sources, num_sources, j, starttime,
                                     missing_time, last_end_time, timeline,
-                                    chapters, part_count, c->start, c->end);
+                                    chapters, num_chapters, part_count,
+                                    c->start, c->end);
                 // Already handled by the loop call.
                 chapter_length = 0;
             }
@@ -527,7 +532,7 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     int part_count = 0;
     build_timeline_loop(mpctx, sources, num_sources, 0, &starttime,
                         &missing_time, &last_end_time, &timeline,
-                        chapters, &part_count, 0, 0);
+                        chapters, m->num_ordered_chapters, &part_count, 0, 0);
 
     // Fuck everything (2): filter out all "unset" chapters.
     for (int n = m->num_ordered_chapters - 1; n >= 0; n--) {
