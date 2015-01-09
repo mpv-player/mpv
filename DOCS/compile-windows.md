@@ -167,8 +167,10 @@ Or, compile and install both libmpv and mpv:
 ./waf install
 
 # waf installs libmpv to the wrong directory, so fix it up
-mv /mingw64/bin/pkgconfig /mingw64/lib/pkgconfig
-mv /mingw64/bin/libmpv.dll.a /mingw64/lib/libmpv.dll.a
+mv -f /mingw64/bin/pkgconfig/mpv.pc /mingw64/lib/pkgconfig/
+mv -f /mingw64/bin/libmpv.dll.a /mingw64/lib/
+sed -i 's_/mingw64/bin_/mingw64/lib_' /mingw64/lib/pkgconfig/mpv.pc
+rmdir /mingw64/bin/pkgconfig
 ```
 
 Additional dependencies
