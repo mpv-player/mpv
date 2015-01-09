@@ -1,7 +1,7 @@
 QT += qml quick
 
-HEADERS += mpvrenderer.h
-SOURCES += mpvrenderer.cpp main.cpp
+HEADERS += main.h
+SOURCES += main.cpp
 
 CONFIG += link_pkgconfig debug
 PKGCONFIG += mpv
