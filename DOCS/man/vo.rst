@@ -605,6 +605,10 @@ Available video output drivers are:
         Color used to draw parts of the mpv window not covered by video.
         See ``--osd-color`` option how colors are defined.
 
+    ``vao``
+        Enable use of VAO. VAO is of help to better performance but it can be an
+        obstacle to render frames from shared context. (defualt: yes)
+
 ``opengl-hq``
     Same as ``opengl``, but with default settings for high quality rendering.
 
