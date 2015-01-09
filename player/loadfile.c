@@ -258,6 +258,15 @@ static void enable_demux_thread(struct MPContext *mpctx)
     if (mpctx->demuxer && mpctx->opts->demuxer_thread) {
         demux_set_wakeup_cb(mpctx->demuxer, wakeup_demux, mpctx);
         demux_start_thread(mpctx->demuxer);
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *track = mpctx->tracks[n];
+            if (track->is_external && track->stream &&
+                track->stream->type != STREAM_SUB)
+            {
+                demux_set_wakeup_cb(track->demuxer, wakeup_demux, mpctx);
+                demux_start_thread(track->demuxer);
+            }
+        }
     }
 }
 
