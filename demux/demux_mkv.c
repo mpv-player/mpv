@@ -2272,8 +2272,8 @@ static bool mkv_parse_packet(mkv_track_t *track, bstr *raw, bstr *out)
         }
         if (track->av_parser && track->av_parser_codec) {
             while (raw->len) {
-                uint8_t *data;
-                int size;
+                uint8_t *data = NULL;
+                int size = 0;
                 int len = av_parser_parse2(track->av_parser, track->av_parser_codec,
                                            &data, &size, raw->start, raw->len,
                                            AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
