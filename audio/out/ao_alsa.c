@@ -478,7 +478,9 @@ static int init_device(struct ao *ao)
     CHECK_ALSA_ERROR("Unable to set access type");
 
     struct mp_chmap dev_chmap = ao->channels;
-    if (query_chmaps(ao, &dev_chmap)) {
+    if (AF_FORMAT_IS_IEC61937(ao->format)) {
+        dev_chmap.num = 0; // disable chmap API
+    } else if (query_chmaps(ao, &dev_chmap)) {
         ao->channels = dev_chmap;
     } else {
         // Assume only stereo and mono are supported.
@@ -567,7 +569,9 @@ static int init_device(struct ao *ao)
 
         MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
 
-        if (mp_chmap_is_valid(&chmap)) {
+        if (AF_FORMAT_IS_IEC61937(ao->format)) {
+            MP_VERBOSE(ao, "using spdif passthrough; ignoring the channel map.\n");
+        } else if (mp_chmap_is_valid(&chmap)) {
             if (mp_chmap_equals(&chmap, &ao->channels)) {
                 MP_VERBOSE(ao, "which is what we requested.\n");
             } else if (chmap.num == ao->channels.num) {
