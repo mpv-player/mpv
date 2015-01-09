@@ -119,7 +119,7 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
         break;
     }
     char b[2048] = {0};
-    APPEND(b, "[stream] %-5s %3s", tname, t->selected ? "(+)" : "");
+    APPEND(b, " %3s %-5s", t->selected ? "(+)" : "", tname);
     APPEND(b, " --%s=%d", selopt, t->user_tid);
     if (t->lang && langopt)
         APPEND(b, " --%s=%s", langopt, t->lang);
@@ -147,7 +147,7 @@ void update_demuxer_properties(struct MPContext *mpctx)
         for (int n = 0; n < demuxer->num_editions; n++) {
             struct demux_edition *edition = &demuxer->editions[n];
             char b[128] = {0};
-            APPEND(b, "[edition] %3s --edition=%d",
+            APPEND(b, " %3s --edition=%d",
                    n == demuxer->edition ? "(+)" : "", n);
             char *name = mp_tags_get_str(edition->metadata, "title");
             if (name)
