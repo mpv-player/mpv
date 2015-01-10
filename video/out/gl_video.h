@@ -54,6 +54,7 @@ struct gl_video_opts {
     int chroma_location;
     int use_rectangle;
     struct m_color background;
+    int vao;
 };
 
 extern const struct m_sub_options gl_video_conf;

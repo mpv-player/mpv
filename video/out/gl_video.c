@@ -329,6 +329,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .scaler_radius = {NAN, NAN},
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
+    .vao = 1,
 };
 
 const struct gl_video_opts gl_video_opts_hq_def = {
@@ -346,6 +347,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .scaler_radius = {NAN, NAN},
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
+    .vao = 1,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -406,6 +408,7 @@ const struct m_sub_options gl_video_conf = {
                     {"blend", 2})),
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
+        OPT_FLAG("vao", vao, 0),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -417,6 +420,11 @@ static void delete_shaders(struct gl_video *p);
 static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
 static double get_scale_factor(struct gl_video *p);
+
+static bool use_vao(struct gl_video *p)
+{
+    return p->opts.vao && p->gl->BindVertexArray;
+}
 
 static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
                                                int n_channels)
@@ -509,12 +517,12 @@ static void draw_triangles(struct gl_video *p, struct vertex *vb, int vert_count
                    GL_DYNAMIC_DRAW);
     gl->BindBuffer(GL_ARRAY_BUFFER, 0);
 
-    if (gl->BindVertexArray)
+    if (use_vao(p))
         gl->BindVertexArray(p->vao);
 
     gl->DrawArrays(GL_TRIANGLES, 0, vert_count);
 
-    if (gl->BindVertexArray)
+    if (use_vao(p))
         gl->BindVertexArray(0);
 
     debug_check_gl(p, "after rendering");
@@ -2288,7 +2296,7 @@ static int init_gl(struct gl_video *p)
     gl->GenBuffers(1, &p->vertex_buffer);
     gl->BindBuffer(GL_ARRAY_BUFFER, p->vertex_buffer);
 
-    if (gl->BindVertexArray) {
+    if (use_vao(p)) {
         gl->GenVertexArrays(1, &p->vao);
         gl->BindVertexArray(p->vao);
         setup_vertex_array(gl);
@@ -2363,7 +2371,7 @@ void gl_video_set_gl_state(struct gl_video *p)
     gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-    if (!gl->BindVertexArray) {
+    if (!use_vao(p)) {
         gl->BindBuffer(GL_ARRAY_BUFFER, p->vertex_buffer);
         setup_vertex_array(gl);
         gl->BindBuffer(GL_ARRAY_BUFFER, 0);
@@ -2374,7 +2382,7 @@ void gl_video_unset_gl_state(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    if (!gl->BindVertexArray) {
+    if (!use_vao(p)) {
         gl->DisableVertexAttribArray(VERTEX_ATTRIB_POSITION);
         gl->DisableVertexAttribArray(VERTEX_ATTRIB_COLOR);
         gl->DisableVertexAttribArray(VERTEX_ATTRIB_TEXCOORD);
