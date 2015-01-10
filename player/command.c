@@ -2396,8 +2396,20 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
     double dar = p.d_w / (double)p.d_h;
     double sar = p.w / (double)p.h;
 
+    const struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p.imgfmt);
+    int bpp = 0;
+    // unknown bpp for hwdec
+    if (!IMGFMT_IS_HWACCEL(desc.id)) {
+        for (int i=0; i<desc.num_planes; ++i)
+            bpp += desc.bpp[i] >> (desc.xs[i] + desc.ys[i]);
+    }
+    // hwdec supports 8bit depth only
+    const int depth = IMGFMT_IS_HWACCEL(desc.id) ? 8 : desc.plane_bits;
+
     struct m_sub_property props[] = {
         {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p.imgfmt))},
+        {"bpp",             SUB_PROP_INT(bpp)},
+        {"depth",           SUB_PROP_INT(depth)},
         {"w",               SUB_PROP_INT(p.w)},
         {"h",               SUB_PROP_INT(p.h)},
         {"dw",              SUB_PROP_INT(p.d_w)},
