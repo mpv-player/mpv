@@ -1119,6 +1119,12 @@ Property list
         The pixel format as string. This uses the same names as used in other
         places of mpv.
 
+    ``video-params/bpp``
+        Bits-per-pixel as integer.
+
+    ``video-params/depth``
+        Bit depth for each color component as integer.
+
     ``video-params/w``, ``video-params/h``
         Video size as integers, with no aspect correction applied.
 
