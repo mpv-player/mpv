@@ -240,8 +240,10 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if ((desc.bpp[0] % 8) != 0)
         desc.align_x = 8 / desc.bpp[0]; // expect power of 2
 
-    if (pd->flags & AV_PIX_FMT_FLAG_HWACCEL)
+    if (pd->flags & AV_PIX_FMT_FLAG_HWACCEL) {
         desc.flags |= MP_IMGFLAG_HWACCEL;
+        desc.plane_bits = 8; // usually restricted to 8 bit; may change
+    }
 
     return desc;
 }

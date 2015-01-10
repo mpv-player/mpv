@@ -1119,11 +1119,15 @@ Property list
         The pixel format as string. This uses the same names as used in other
         places of mpv.
 
-    ``video-params/bpp``
-        Bits-per-pixel as integer.
+    ``video-params/average_bpp``
+        Average bits-per-pixel as integer. Subsampled planar formats use a
+        different resolution, which is the reason this value can sometimes be
+        odd or confusing. Can be unavailable with some formats.
 
-    ``video-params/depth``
-        Bit depth for each color component as integer.
+    ``video-params/plane_depth``
+        Bit depth for each color component as integer. This is only exposed
+        for planar or single-component formats, and is unavailable for other
+        formats.
 
     ``video-params/w``, ``video-params/h``
         Video size as integers, with no aspect correction applied.
