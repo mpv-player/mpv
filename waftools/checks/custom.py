@@ -33,7 +33,6 @@ def check_pthreads(ctx, dependency_identifier):
         'freebsd': '-D_THREAD_SAFE',
         'netbsd':  '-D_THREAD_SAFE',
         'openbsd': '-D_THREAD_SAFE',
-        'win32':   '-DPTW32_STATIC_LIB',
     }.get(ctx.env.DEST_OS, '')
     libs    = ['pthreadGC2', 'pthread']
     checkfn = check_cc(fragment=pthreads_program, cflags=platform_cflags)

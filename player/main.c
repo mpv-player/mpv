@@ -274,14 +274,6 @@ static bool handle_help_options(struct MPContext *mpctx)
     return opt_exit;
 }
 
-#ifdef PTW32_STATIC_LIB
-static void detach_ptw32(void)
-{
-    pthread_win32_thread_detach_np();
-    pthread_win32_process_detach_np();
-}
-#endif
-
 static void osdep_preinit(int *p_argc, char ***p_argv)
 {
     char *enable_talloc = getenv("MPV_LEAK_REPORT");
@@ -293,12 +285,6 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
 
 #ifdef __MINGW32__
     mp_get_converted_argv(p_argc, p_argv);
-#endif
-
-#ifdef PTW32_STATIC_LIB
-    pthread_win32_process_attach_np();
-    pthread_win32_thread_attach_np();
-    atexit(detach_ptw32);
 #endif
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
