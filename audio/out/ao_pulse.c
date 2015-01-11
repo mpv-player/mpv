@@ -86,8 +86,12 @@ static void stream_state_cb(pa_stream *s, void *userdata)
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
     switch (pa_stream_get_state(s)) {
-    case PA_STREAM_READY:
     case PA_STREAM_FAILED:
+        MP_VERBOSE(ao, "Stream failed.\n");
+        ao_request_reload(ao);
+        pa_threaded_mainloop_signal(priv->mainloop, 0);
+        break;
+    case PA_STREAM_READY:
     case PA_STREAM_TERMINATED:
         pa_threaded_mainloop_signal(priv->mainloop, 0);
         break;
