@@ -621,6 +621,10 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
         if ((rk = read(fd, &buffer[pos], rk)) > 0) {
             pos += rk;
             MP_TRACE(stream, "ret (%d) bytes\n", pos);
+        } else {
+          MP_ERR(stream, "dvb_streaming_read, poll ok but read failed with "
+                 "errno %d when reading %d bytes, size: %d, pos: %d\n",
+                 errno, size - pos, size, pos);
         }
     }
 
