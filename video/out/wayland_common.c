@@ -731,6 +731,9 @@ static void schedule_resize(struct vo_wayland_state *wl,
     int32_t minimum_size = 150;
     int32_t x, y;
     float temp_aspect = width / (float) MPMAX(height, 1);
+    float win_aspect = wl->window.aspect;
+    if (win_aspect <= 0)
+        win_aspect = 1;
 
     MP_DBG(wl, "schedule resize: %dx%d\n", width, height);
 
@@ -748,7 +751,7 @@ static void schedule_resize(struct vo_wayland_state *wl,
     switch (edges) {
         case WL_SHELL_SURFACE_RESIZE_TOP:
         case WL_SHELL_SURFACE_RESIZE_BOTTOM:
-            width = wl->window.aspect * height;
+            width = win_aspect * height;
             break;
         case WL_SHELL_SURFACE_RESIZE_LEFT:
         case WL_SHELL_SURFACE_RESIZE_RIGHT:
@@ -756,13 +759,13 @@ static void schedule_resize(struct vo_wayland_state *wl,
         case WL_SHELL_SURFACE_RESIZE_TOP_RIGHT:
         case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
         case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
-            height = (1 / wl->window.aspect) * width;
+            height = (1 / win_aspect) * width;
             break;
         default:
             if (wl->window.aspect < temp_aspect)
                 width = wl->window.aspect * height;
             else
-                height = (1 / wl->window.aspect) * width;
+                height = (1 / win_aspect) * width;
             break;
     }
 
