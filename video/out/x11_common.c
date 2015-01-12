@@ -1356,6 +1356,12 @@ static void wait_until_mapped(struct vo *vo)
     if (!x11->pseudo_mapped)
         x11_send_ewmh_msg(x11, "_NET_REQUEST_FRAME_EXTENTS", (long[5]){0});
     while (!x11->pseudo_mapped && x11->window) {
+        XWindowAttributes att;
+        XGetWindowAttributes(x11->display, x11->window, &att);
+        if (att.map_state != IsUnmapped) {
+            x11->pseudo_mapped = true;
+            break;
+        }
         XEvent unused;
         XPeekEvent(x11->display, &unused);
         vo_x11_check_events(vo);
