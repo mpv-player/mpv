@@ -32,15 +32,15 @@ void mp_tags_set_bstr(struct mp_tags *tags, bstr key, bstr value)
     for (int n = 0; n < tags->num_keys; n++) {
         if (bstrcasecmp0(key, tags->keys[n]) == 0) {
             talloc_free(tags->values[n]);
-            tags->values[n] = talloc_strndup(tags, value.start, value.len);
+            tags->values[n] = bstrto0(tags, value);
             return;
         }
     }
 
     MP_RESIZE_ARRAY(tags, tags->keys,   tags->num_keys + 1);
     MP_RESIZE_ARRAY(tags, tags->values, tags->num_keys + 1);
-    tags->keys[tags->num_keys]   = talloc_strndup(tags, key.start,   key.len);
-    tags->values[tags->num_keys] = talloc_strndup(tags, value.start, value.len);
+    tags->keys[tags->num_keys]   = bstrto0(tags, key);
+    tags->values[tags->num_keys] = bstrto0(tags, value);
     tags->num_keys++;
 }
 
