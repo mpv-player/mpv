@@ -541,11 +541,13 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     }
 
     if (!part_count) {
-        // None of the parts come from the file itself???
-        talloc_free(sources);
-        talloc_free(timeline);
-        talloc_free(chapters);
-        return;
+        // None of  the parts come from the file itself???
+        // Broken file, but we need at least 1 valid timeline part - add a dummy.
+        MP_WARN(mpctx, "Ordered chapters file with no parts?\n");
+        struct timeline_part new = {
+            .source = demuxer,
+        };
+        MP_TARRAY_APPEND(NULL, timeline, part_count, new);
     }
 
     struct timeline_part new = {
