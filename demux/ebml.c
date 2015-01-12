@@ -262,25 +262,28 @@ int ebml_resync_cluster(struct mp_log *log, stream_t *s)
 struct generic;
 #define generic_struct struct generic
 
-static uint32_t ebml_parse_id(uint8_t *data, int *length)
+static uint32_t ebml_parse_id(uint8_t *data, size_t data_len, int *length)
 {
+    *length = -1;
+    uint8_t *end = data + data_len;
+    if (data == end)
+        return EBML_ID_INVALID;
     int len = 1;
     uint32_t id = *data++;
     for (int len_mask = 0x80; !(id & len_mask); len_mask >>= 1) {
         len++;
-        if (len > 4) {
-            *length = -1;
+        if (len > 4)
             return EBML_ID_INVALID;
-        }
     }
     *length = len;
-    while (--len)
+    while (--len && data < end)
         id = (id << 8) | *data++;
     return id;
 }
 
 static uint64_t ebml_parse_length(uint8_t *data, size_t data_len, int *length)
 {
+    *length = -1;
     uint8_t *end = data + data_len;
     if (data == end)
         return -1;
@@ -289,10 +292,8 @@ static uint64_t ebml_parse_length(uint8_t *data, size_t data_len, int *length)
     int len_mask;
     for (len_mask = 0x80; !(r & len_mask); len_mask >>= 1) {
         len++;
-        if (len > 8) {
-            *length = -1;
+        if (len > 8)
             return -1;
-        }
     }
     r &= len_mask - 1;
 
@@ -306,12 +307,10 @@ static uint64_t ebml_parse_length(uint8_t *data, size_t data_len, int *length)
             num_allones++;
         r = (r << 8) | *data++;
     }
-    if (num_allones == len) {
-        // According to Matroska specs this means "unknown length"
-        // Could be supported if there are any actual files using it
-        *length = -1;
+    // According to Matroska specs this means "unknown length"
+    // Could be supported if there are any actual files using it
+    if (num_allones == len)
         return -1;
-    }
     *length = len;
     return r;
 }
@@ -363,7 +362,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
     while (p < end) {
         uint8_t *startp = p;
         int len;
-        uint32_t id = ebml_parse_id(p, &len);
+        uint32_t id = ebml_parse_id(p, end - p, &len);
         if (len > end - p)
             goto past_end_error;
         if (len < 0) {
@@ -458,7 +457,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
 
     while (data < end) {
         int len;
-        uint32_t id = ebml_parse_id(data, &len);
+        uint32_t id = ebml_parse_id(data, end - data, &len);
         if (len < 0 || len > end - data) {
             MP_DBG(ctx, "Error parsing subelement\n");
             break;
@@ -588,7 +587,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         case EBML_TYPE_EBML_ID:;
             uint32_t *idptr;
             GETPTR(idptr, uint32_t);
-            *idptr = ebml_parse_id(data, &len);
+            *idptr = ebml_parse_id(data, end - data, &len);
             if (len != length) {
                 MP_DBG(ctx, "ebml_id broken value\n");
                 goto error;
