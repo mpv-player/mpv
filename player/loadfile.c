@@ -1137,16 +1137,11 @@ goto_reopen_demuxer: ;
     }
 #endif
 
-    reinit_video_chain(mpctx);
-    reinit_audio_chain(mpctx);
-    reinit_subs(mpctx, 0);
-    reinit_subs(mpctx, 1);
-
-    //==================== START PLAYING =======================
-
-    if (!mpctx->d_video && !mpctx->d_audio) {
-        struct demuxer *d = mpctx->demuxer;
+    if (!mpctx->current_track[0][STREAM_VIDEO] &&
+        !mpctx->current_track[0][STREAM_AUDIO])
+    {
         MP_FATAL(mpctx, "No video or audio streams selected.\n");
+        struct demuxer *d = mpctx->demuxer;
         if (d->stream->uncached_type == STREAMTYPE_DVB) {
             int  dir = mpctx->last_dvb_step;
             if (demux_stream_control(d, STREAM_CTRL_DVB_STEP_CHANNEL, &dir) > 0)
@@ -1155,6 +1150,11 @@ goto_reopen_demuxer: ;
         mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
         goto terminate_playback;
     }
+
+    reinit_video_chain(mpctx);
+    reinit_audio_chain(mpctx);
+    reinit_subs(mpctx, 0);
+    reinit_subs(mpctx, 1);
 
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
