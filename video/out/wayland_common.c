@@ -46,10 +46,6 @@
 #include "input/event.h"
 #include "input/keycodes.h"
 
-#define MOD_SHIFT_MASK      0x01
-#define MOD_ALT_MASK        0x02
-#define MOD_CONTROL_MASK    0x04
-
 static int lookupkey(int key);
 
 static void hide_cursor(struct vo_wayland_state * wl);
@@ -296,24 +292,34 @@ static void keyboard_handle_key(void *data,
                                 uint32_t state)
 {
     struct vo_wayland_state *wl = data;
-    uint32_t code, num_syms;
-    int mpkey;
 
-    const xkb_keysym_t *syms;
-    xkb_keysym_t sym;
+    uint32_t code = code = key + 8;
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(wl->input.xkb.state, code);
 
-    code = key + 8;
-    num_syms = xkb_state_key_get_syms(wl->input.xkb.state, code, &syms);
+    int mpmod = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
+                                                       : MP_KEY_STATE_UP;
 
-    sym = XKB_KEY_NoSymbol;
-    if (num_syms == 1)
-        sym = syms[0];
+    static const char *mod_names[] = {XKB_MOD_NAME_SHIFT, XKB_MOD_NAME_CTRL,
+                                      XKB_MOD_NAME_ALT, XKB_MOD_NAME_LOGO, 0};
+    static int mods[] = {MP_KEY_MODIFIER_SHIFT, MP_KEY_MODIFIER_CTRL,
+                         MP_KEY_MODIFIER_ALT, MP_KEY_MODIFIER_META, 0};
 
-    if (sym != XKB_KEY_NoSymbol && (mpkey = lookupkey(sym))) {
-        if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
-            mp_input_put_key(wl->vo->input_ctx, mpkey | MP_KEY_STATE_DOWN);
-        else
-            mp_input_put_key(wl->vo->input_ctx, mpkey | MP_KEY_STATE_UP);
+    for (int n = 0; mods[n]; n++) {
+        xkb_mod_index_t index =
+            xkb_keymap_mod_get_index(wl->input.xkb.keymap, mod_names[n]);
+        if (!xkb_state_mod_index_is_consumed(wl->input.xkb.state, code, index)
+            && xkb_state_mod_index_is_active(wl->input.xkb.state, index,
+                                             XKB_STATE_MODS_DEPRESSED))
+            mpmod |= mods[n];
+    }
+
+    int mpkey = lookupkey(sym);
+    if (mpkey) {
+        mp_input_put_key(wl->vo->input_ctx, mpkey | mpmod);
+    } else {
+        char s[80];
+        if (xkb_keysym_to_utf8(sym, s, sizeof(s)) > 0)
+            mp_input_put_key_utf8(wl->vo->input_ctx, mpmod, bstr0(s));
     }
 }
 
