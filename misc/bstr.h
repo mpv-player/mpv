@@ -207,7 +207,7 @@ static inline int bstr_eatstart0(struct bstr *s, const char *prefix)
 }
 
 // create a pair (not single value!) for "%.*s" printf syntax
-#define BSTR_P(bstr) (int)((bstr).len), (bstr).start
+#define BSTR_P(bstr) (int)((bstr).len), ((bstr).start ? (char*)(bstr).start : "")
 
 #define WHITESPACE " \f\n\r\t\v"
 
