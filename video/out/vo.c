@@ -130,6 +130,7 @@ struct vo_internal {
     bool hasframe_rendered;
     bool request_redraw;            // redraw request from player to VO
     bool want_redraw;               // redraw request from VO to player
+    bool send_reset;                // send VOCTRL_RESET
     bool paused;
     int queued_events;
 
@@ -697,7 +698,11 @@ static void *vo_thread(void *ptr)
             mp_input_wakeup(vo->input_ctx);
         }
         bool redraw = in->request_redraw;
+        bool send_reset = in->send_reset;
+        in->send_reset = false;
         pthread_mutex_unlock(&in->lock);
+        if (send_reset)
+            vo->driver->control(vo, VOCTRL_RESET, NULL);
         if (wait_until > now && redraw) {
             do_redraw(vo); // now is a good time
             continue;
@@ -762,8 +767,9 @@ void vo_seek_reset(struct vo *vo)
 {
     pthread_mutex_lock(&vo->in->lock);
     forget_frames(vo);
+    vo->in->send_reset = true;
+    wakeup_locked(vo);
     pthread_mutex_unlock(&vo->in->lock);
-    vo_control(vo, VOCTRL_RESET, NULL);
 }
 
 // Return true if there is still a frame being displayed (or queued).
