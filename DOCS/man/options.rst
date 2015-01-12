@@ -1446,15 +1446,16 @@ Window
 ------
 
 ``--title=<string>``
-    Set the window title. Properties are expanded on playback start.
-    (See `Property Expansion`_.)
+    Set the window title. This is used for the video window, and if possible,
+    also sets the audio stream title.
+
+    Properties are expanded. (See `Property Expansion`_.)
 
     .. warning::
 
         There is a danger of this causing significant CPU usage, depending on
-        the properties used and the window manager. Changing the window title
-        is often a slow operation, and if the title changes every frame,
-        playback can be ruined.
+        the properties used. Changing the window title is often a slow
+        operation, and if the title changes every frame, playback can be ruined.
 
 ``--screen=<default|0-32>``
     In multi-monitor configurations (i.e. a single desktop that spans across
