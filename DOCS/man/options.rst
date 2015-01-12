@@ -2304,7 +2304,7 @@ Input
 
 ``--input-vo-keyboard=<yes|no>``
     Disable all keyboard input on for VOs which can't participate in proper
-    keyboard input dispatching. This currently affects X11. Generally useful for
+    keyboard input dispatching. May not affect all VOs. Generally useful for
     embedding only.
 
     On X11, a sub-window with input enabled grabs all keyboard input as long
@@ -2316,11 +2316,14 @@ Input
     behavior, but naively embedding foreign windows breaks it.
 
     The only way to handle this reasonably is using the XEmbed protocol, which
-    was designed to solve these problems. But Qt has questionable support, and
-    mpv doesn't implement it yet.
+    was designed to solve these problems. GTK provides ``GtkSocket``, which
+    supports XEmbed. Qt doesn't seem to provide anything working in newer
+    versions.
 
-    As a workaround, this option is disabled by default in libmpv. (Note that
-    ``input-default-bindings`` is disabled by default in libmpv as well.)
+    If the embedder supports XEmbed, input should work with default settings
+    and with this option disabled. Note that ``input-default-bindings`` is
+    disabled by default in libmpv as well - it should be enabled if you want
+    the mpv default key bindings.
 
     (This option was renamed from ``--input-x11-keyboard``.)
 

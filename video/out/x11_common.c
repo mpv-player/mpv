@@ -90,6 +90,11 @@
 
 #define DND_VERSION 5
 
+#define XEMBED_VERSION              0
+#define XEMBED_MAPPED               (1 << 0)
+#define XEMBED_EMBEDDED_NOTIFY      0
+#define XEMBED_REQUEST_FOCUS        3
+
 // ----- Motif header: -------
 
 #define MWM_HINTS_FUNCTIONS     (1L << 0)
@@ -125,6 +130,8 @@ static void set_screensaver(struct vo_x11_state *x11, bool enabled);
 static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
                                        Window w, long event_mask);
 static void vo_x11_setlayer(struct vo *vo, bool ontop);
+static void vo_x11_xembed_handle_message(struct vo *vo, XClientMessageEvent *ce);
+static void vo_x11_xembed_send_message(struct vo_x11_state *x11, long m[4]);
 
 #define XA(x11, s) (XInternAtom((x11)->display, # s, False))
 #define XAs(x11, s) XInternAtom((x11)->display, s, False)
@@ -926,6 +933,8 @@ int vo_x11_check_events(struct vo *vo)
             mp_input_put_key(vo->input_ctx,
                              (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_DOWN);
+            long msg[4] = {XEMBED_REQUEST_FOCUS};
+            vo_x11_xembed_send_message(x11, msg);
             break;
         case ButtonRelease:
             if (Event.xbutton.button == 1)
@@ -951,6 +960,7 @@ int vo_x11_check_events(struct vo *vo)
                 Event.xclient.data.l[0] == XA(x11, WM_DELETE_WINDOW))
                 mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             vo_x11_dnd_handle_message(vo, &Event.xclient);
+            vo_x11_xembed_handle_message(vo, &Event.xclient);
             break;
         case SelectionNotify:
             vo_x11_dnd_handle_selection(vo, &Event.xselection);
@@ -1086,6 +1096,42 @@ static void vo_x11_update_window_title(struct vo *vo)
     vo_x11_set_property_string(vo, XA_WM_ICON_NAME, title);
     vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_NAME), title);
     vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_ICON_NAME), title);
+}
+
+static void vo_x11_xembed_update(struct vo_x11_state *x11, int flags)
+{
+    if (!x11->window || !x11->parent)
+        return;
+
+    long xembed_info[] = {XEMBED_VERSION, flags};
+    Atom name = XA(x11, _XEMBED_INFO);
+    XChangeProperty(x11->display, x11->window, name, name, 32,
+                    PropModeReplace, (char *)xembed_info, 2);
+}
+
+static void vo_x11_xembed_handle_message(struct vo *vo, XClientMessageEvent *ce)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    if (!x11->window || !x11->parent || ce->message_type != XA(x11, _XEMBED))
+        return;
+
+    long msg = ce->data.l[1];
+    if (msg == XEMBED_EMBEDDED_NOTIFY)
+        MP_VERBOSE(x11, "Parent windows supports XEmbed.\n");
+}
+
+static void vo_x11_xembed_send_message(struct vo_x11_state *x11, long m[4])
+{
+    if (!x11->window || !x11->parent)
+        return;
+    XEvent ev = {.xclient = {
+        .type = ClientMessage,
+        .window = x11->parent,
+        .message_type = XA(x11, _XEMBED),
+        .format = 32,
+        .data = {.l = { CurrentTime, m[0], m[1], m[2], m[3] }},
+    } };
+    XSendEvent(x11->display, x11->parent, False, NoEventMask, &ev);
 }
 
 #if HAVE_ZLIB
@@ -1237,6 +1283,7 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
         vo_x11_update_window_title(vo);
         vo_x11_dnd_init_window(vo);
     }
+    vo_x11_xembed_update(x11, 0);
 }
 
 static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
@@ -1277,6 +1324,8 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
         events |= KeyPressMask | KeyReleaseMask;
     vo_x11_selectinput_witherr(vo, x11->display, x11->window, events);
     XMapWindow(x11->display, x11->window);
+
+    vo_x11_xembed_update(x11, XEMBED_MAPPED);
 }
 
 static void vo_x11_highlevel_resize(struct vo *vo, struct mp_rect rc)
