@@ -279,8 +279,11 @@ static uint32_t ebml_parse_id(uint8_t *data, int *length)
     return id;
 }
 
-static uint64_t parse_vlen(uint8_t *data, int *length, bool is_length)
+static uint64_t ebml_parse_length(uint8_t *data, size_t data_len, int *length)
 {
+    uint8_t *end = data + data_len;
+    if (data == end)
+        return -1;
     uint64_t r = *data++;
     int len = 1;
     int len_mask;
@@ -297,11 +300,13 @@ static uint64_t parse_vlen(uint8_t *data, int *length, bool is_length)
     if (r == len_mask - 1)
         num_allones++;
     for (int i = 1; i < len; i++) {
+        if (data == end)
+            return -1;
         if (*data == 255)
             num_allones++;
         r = (r << 8) | *data++;
     }
-    if (is_length && num_allones == len) {
+    if (num_allones == len) {
         // According to Matroska specs this means "unknown length"
         // Could be supported if there are any actual files using it
         *length = -1;
@@ -309,11 +314,6 @@ static uint64_t parse_vlen(uint8_t *data, int *length, bool is_length)
     }
     *length = len;
     return r;
-}
-
-static uint64_t ebml_parse_length(uint8_t *data, int *length)
-{
-    return parse_vlen(data, length, true);
 }
 
 static uint64_t ebml_parse_uint(uint8_t *data, int length)
@@ -371,7 +371,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             goto other_error;
         }
         p += len;
-        uint64_t length = ebml_parse_length(p, &len);
+        uint64_t length = ebml_parse_length(p, end - p, &len);
         if (len > end - p)
             goto past_end_error;
         if (len < 0) {
@@ -459,10 +459,16 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
     while (data < end) {
         int len;
         uint32_t id = ebml_parse_id(data, &len);
-        assert(len >= 0 && len <= end - data);
+        if (len < 0 || len > end - data) {
+            MP_DBG(ctx, "Error parsing subelement\n");
+            break;
+        }
         data += len;
-        uint64_t length = ebml_parse_length(data, &len);
-        assert(len >= 0 && len <= end - data);
+        uint64_t length = ebml_parse_length(data, end - data, &len);
+        if (len < 0 || len > end - data) {
+            MP_DBG(ctx, "Error parsing subelement length\n");
+            break;
+        }
         data += len;
         if (length > end - data) {
             // Try to parse what is possible from inside this partial element
@@ -614,12 +620,10 @@ int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
         MP_MSG(ctx, msglevel, "Refusing to read element over 100 MB in size\n");
         return -1;
     }
-    ctx->talloc_ctx = talloc_size(NULL, length + 8);
+    ctx->talloc_ctx = talloc_size(NULL, length);
     int read_len = stream_read(s, ctx->talloc_ctx, length);
-    if (read_len < length) {
+    if (read_len < length)
         MP_MSG(ctx, msglevel, "Unexpected end of file - partial or corrupt file?\n");
-        memset((char *)ctx->talloc_ctx + read_len, 0, length - read_len);
-    }
     ebml_parse_element(ctx, target, ctx->talloc_ctx, read_len, desc, 0);
     if (ctx->has_errors)
         MP_MSG(ctx, msglevel, "Error parsing element %s\n", desc->name);
