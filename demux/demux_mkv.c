@@ -307,7 +307,7 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
                     dest = NULL;
                     goto error;
                 }
-                dstlen *= 2;
+                dstlen = MPMAX(1, 2 * dstlen);
             }
             size = dstlen - out_avail;
         } else if (enc->comp_algo == 3) {
