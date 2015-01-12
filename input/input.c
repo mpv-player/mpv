@@ -460,6 +460,8 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
 
     struct cmd_bind *cmd = find_any_bind_for_key(ictx, force_section, code);
     if (cmd == NULL) {
+        if (code == MP_KEY_CLOSE_WIN)
+            return mp_input_parse_cmd_strv(ictx->log, (const char*[]){"quit", 0});
         int msgl = MSGL_WARN;
         if (code == MP_KEY_MOUSE_MOVE || code == MP_KEY_MOUSE_LEAVE)
             msgl = MSGL_DEBUG;
