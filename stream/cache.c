@@ -241,7 +241,7 @@ static bool cache_fill(struct priv *s)
     int64_t space = s->buffer_size - (newb + back);
 
     // offset into the buffer that maps to max_filepos
-    int pos = s->max_filepos - s->offset;
+    int64_t pos = s->max_filepos - s->offset;
     if (pos >= s->buffer_size)
         pos -= s->buffer_size; // wrap-around
 
