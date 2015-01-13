@@ -489,7 +489,7 @@ bool mp_image_params_valid(const struct mp_image_params *p)
     if (p->w < 0 || p->h < 0 || (p->w + 128LL) * (p->h + 128LL) >= INT_MAX / 8)
         return false;
 
-    if (p->d_w < 0 || p->d_h < 0)
+    if (p->d_w <= 0 || p->d_h <= 0)
         return false;
 
     if (p->rotate < 0 || p->rotate >= 360)
