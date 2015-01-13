@@ -227,6 +227,14 @@ void mp_audio_copy(struct mp_audio *dst, int dst_offset,
     }
 }
 
+// Copy fields that describe characteristics of the audio frame, but which are
+// not part of the core format (format/channels/rate), and not part of the
+// data (samples).
+void mp_audio_copy_attributes(struct mp_audio *dst, struct mp_audio *src)
+{
+    // nothing yet
+}
+
 // Set data to the audio after the given number of samples (i.e. slice it).
 void mp_audio_skip_samples(struct mp_audio *data, int samples)
 {
@@ -238,28 +246,40 @@ void mp_audio_skip_samples(struct mp_audio *data, int samples)
     data->samples -= samples;
 }
 
-// Make sure the frame owns the audio data, and if not, copy the data.
-// Return negative value on failure (which means it can't be made writeable).
-// Non-refcounted frames are always considered writeable.
-int mp_audio_make_writeable(struct mp_audio *data)
+// Return false if the frame data is shared, true otherwise.
+// Will return true for non-refcounted frames.
+bool mp_audio_is_writeable(struct mp_audio *data)
 {
     bool ok = true;
     for (int n = 0; n < MP_NUM_CHANNELS; n++) {
         if (data->allocated[n])
             ok &= av_buffer_is_writable(data->allocated[n]);
     }
-    if (!ok) {
+    return ok;
+}
+
+static void mp_audio_steal_data(struct mp_audio *dst, struct mp_audio *src)
+{
+    talloc_set_destructor(dst, mp_audio_destructor);
+    mp_audio_destructor(dst);
+    *dst = *src;
+    talloc_set_destructor(src, NULL);
+    talloc_free(src);
+}
+
+// Make sure the frame owns the audio data, and if not, copy the data.
+// Return negative value on failure (which means it can't be made writeable).
+// Non-refcounted frames are always considered writeable.
+int mp_audio_make_writeable(struct mp_audio *data)
+{
+    if (!mp_audio_is_writeable(data)) {
         struct mp_audio *new = talloc(NULL, struct mp_audio);
         *new = *data;
         mp_audio_set_null_data(new); // use format only
         mp_audio_realloc(new, data->samples);
         new->samples = data->samples;
         mp_audio_copy(new, 0, data, 0, data->samples);
-        // "Transfer" the reference.
-        mp_audio_destructor(data);
-        *data = *new;
-        talloc_set_destructor(new, NULL);
-        talloc_free(new);
+        mp_audio_steal_data(data, new);
     }
     return 0;
 }
@@ -369,4 +389,32 @@ struct mp_audio *mp_audio_pool_get(struct mp_audio_pool *pool,
         new->planes[n] = new->allocated[n]->data;
     }
     return new;
+}
+
+// Return a copy of the given frame.
+// Returns NULL on error.
+struct mp_audio *mp_audio_pool_new_copy(struct mp_audio_pool *pool,
+                                        struct mp_audio *frame)
+{
+    struct mp_audio *new = mp_audio_pool_get(pool, frame, frame->samples);
+    if (new) {
+        mp_audio_copy(new, 0, frame, 0, new->samples);
+        mp_audio_copy_attributes(new, frame);
+    }
+    return new;
+}
+
+// Exactly like mp_audio_make_writeable(), but get the data from the pool.
+int mp_audio_pool_make_writeable(struct mp_audio_pool *pool,
+                                 struct mp_audio *data)
+{
+    if (mp_audio_is_writeable(data))
+        return 0;
+    struct mp_audio *new = mp_audio_pool_get(pool, data, data->samples);
+    if (!new)
+        return -1;
+    mp_audio_copy(new, 0, data, 0, data->samples);
+    mp_audio_copy_attributes(new, data);
+    mp_audio_steal_data(data, new);
+    return 0;
 }

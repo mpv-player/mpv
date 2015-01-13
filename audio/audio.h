@@ -66,8 +66,10 @@ void mp_audio_fill_silence(struct mp_audio *mpa, int start, int length);
 
 void mp_audio_copy(struct mp_audio *dst, int dst_offset,
                    struct mp_audio *src, int src_offset, int length);
+void mp_audio_copy_attributes(struct mp_audio *dst, struct mp_audio *src);
 void mp_audio_skip_samples(struct mp_audio *data, int samples);
 
+bool mp_audio_is_writeable(struct mp_audio *data);
 int mp_audio_make_writeable(struct mp_audio *data);
 
 struct AVFrame;
@@ -76,5 +78,9 @@ struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe);
 struct mp_audio_pool *mp_audio_pool_create(void *ta_parent);
 struct mp_audio *mp_audio_pool_get(struct mp_audio_pool *pool,
                                    const struct mp_audio *fmt, int samples);
+struct mp_audio *mp_audio_pool_new_copy(struct mp_audio_pool *pool,
+                                        struct mp_audio *frame);
+int mp_audio_pool_make_writeable(struct mp_audio_pool *pool,
+                                 struct mp_audio *frame);
 
 #endif
