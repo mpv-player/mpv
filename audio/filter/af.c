@@ -122,6 +122,19 @@ const struct m_obj_list af_obj_list = {
     },
 };
 
+static void af_forget_frames(struct af_instance *af)
+{
+    for (int n = 0; n < af->num_out_queued; n++)
+        talloc_free(af->out_queued[n]);
+    af->num_out_queued = 0;
+}
+
+static void af_chain_forget_frames(struct af_stream *s)
+{
+    for (struct af_instance *cur = s->first; cur; cur = cur->next)
+        af_forget_frames(cur);
+}
+
 static void af_copy_unset_fields(struct mp_audio *dst, struct mp_audio *src)
 {
     if (dst->format == AF_FORMAT_UNKNOWN)
@@ -162,8 +175,9 @@ static int output_control(struct af_instance* af, int cmd, void* arg)
     return AF_UNKNOWN;
 }
 
-static int dummy_filter(struct af_instance* af, struct mp_audio* data, int f)
+static int dummy_filter(struct af_instance *af, struct mp_audio *frame)
 {
+    af_add_output_frame(af, frame);
     return 0;
 }
 
@@ -198,6 +212,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         .data = talloc_zero(af, struct mp_audio),
         .log = mp_log_new(af, s->log, name),
         .replaygain_data = s->replaygain_data,
+        .out_pool = mp_audio_pool_create(af),
     };
     struct m_config *config = m_config_from_obj_desc(af, s->log, &desc);
     if (m_config_apply_defaults(config, name, s->opts->af_defs) < 0)
@@ -282,6 +297,7 @@ static void af_remove(struct af_stream *s, struct af_instance *af)
 
     if (af->uninit)
         af->uninit(af);
+    af_forget_frames(af);
     talloc_free(af);
 }
 
@@ -496,6 +512,7 @@ static int af_fix_rate(struct af_stream *s, struct af_instance **p_af,
 static int af_reinit(struct af_stream *s)
 {
     remove_auto_inserted_filters(s);
+    af_chain_forget_frames(s);
     // Start with the second filter, as the first filter is the special input
     // filter which needs no initialization.
     struct af_instance *af = s->first->next;
@@ -581,34 +598,40 @@ void af_uninit(struct af_stream *s)
 {
     while (s->first->next && s->first->next != s->last)
         af_remove(s, s->first->next);
+    af_chain_forget_frames(s);
     s->initialized = 0;
 }
 
 struct af_stream *af_new(struct mpv_global *global)
 {
     struct af_stream *s = talloc_zero(NULL, struct af_stream);
+    s->log = mp_log_new(s, global->log, "!af");
+
     static const struct af_info in = { .name = "in" };
     s->first = talloc(s, struct af_instance);
     *s->first = (struct af_instance) {
         .info = &in,
+        .log = s->log,
         .control = input_control,
-        .filter = dummy_filter,
+        .filter_frame = dummy_filter,
         .priv = s,
         .data = &s->input,
     };
+
     static const struct af_info out = { .name = "out" };
     s->last = talloc(s, struct af_instance);
     *s->last = (struct af_instance) {
         .info = &out,
+        .log = s->log,
         .control = output_control,
-        .filter = dummy_filter,
+        .filter_frame = dummy_filter,
         .priv = s,
         .data = &s->filter_output,
     };
+
     s->first->next = s->last;
     s->last->prev = s->first;
     s->opts = global->opts;
-    s->log = mp_log_new(s, global->log, "!af");
     return s;
 }
 
@@ -710,51 +733,6 @@ int af_remove_by_label(struct af_stream *s, char *label)
     return 1;
 }
 
-/* Feed "data" to the chain, and write results to output. "data" needs to be
- * a refcounted frame, although refcounting is not used yet.
- * data==NULL means EOF.
- */
-int af_filter(struct af_stream *s, struct mp_audio *data,
-              struct mp_audio_buffer *output)
-{
-    struct af_instance *af = s->first;
-    assert(s->initialized > 0);
-    int flags = 0;
-    int r = 0;
-    struct mp_audio tmp;
-    char dummy[MP_NUM_CHANNELS];
-    if (data) {
-        assert(mp_audio_config_equals(af->data, data));
-        r = mp_audio_make_writeable(data);
-    } else {
-        data = &tmp;
-        *data = *(af->data);
-        mp_audio_set_null_data(data);
-        flags = AF_FILTER_FLAG_EOF;
-        for (int n = 0; n < MP_NUM_CHANNELS; n++)
-            data->planes[n] = &dummy[n];
-    }
-    if (r < 0)
-        goto done;
-    struct mp_audio frame = *data;
-    for (int n = 0; n < MP_NUM_CHANNELS; n++)
-        frame.allocated[n] = NULL;
-    // Iterate through all filters
-    while (af) {
-        r = af->filter(af, &frame, flags);
-        if (r < 0)
-            goto done;
-        assert(mp_audio_config_equals(af->data, &frame));
-        af = af->next;
-    }
-    mp_audio_buffer_append(output, &frame);
-
-done:
-    if (data != &tmp)
-        talloc_free(data);
-    return r;
-}
-
 /* Calculate the total delay [seconds of output] caused by the filters */
 double af_calc_delay(struct af_stream *s)
 {
@@ -787,4 +765,143 @@ void af_control_all(struct af_stream *s, int cmd, void *arg)
 {
     for (struct af_instance *af = s->first; af; af = af->next)
         af->control(af, cmd, arg);
+}
+
+// Used by filters to add a filtered frame to the output queue.
+// Ownership of frame is transferred from caller to the filter chain.
+void af_add_output_frame(struct af_instance *af, struct mp_audio *frame)
+{
+    if (frame) {
+        assert(mp_audio_config_equals(af->data, frame));
+        MP_TARRAY_APPEND(af, af->out_queued, af->num_out_queued, frame);
+    }
+}
+
+static bool af_has_output_frame(struct af_instance *af)
+{
+    if (!af->num_out_queued && af->filter_out) {
+        if (af->filter_out(af) < 0)
+            MP_ERR(af, "Error filtering frame.\n");
+    }
+    return af->num_out_queued > 0;
+}
+
+static struct mp_audio *af_dequeue_output_frame(struct af_instance *af)
+{
+    struct mp_audio *res = NULL;
+    if (af_has_output_frame(af)) {
+        res = af->out_queued[0];
+        MP_TARRAY_REMOVE_AT(af->out_queued, af->num_out_queued, 0);
+    }
+    return res;
+}
+
+static int af_do_filter(struct af_instance *af, struct mp_audio *frame)
+{
+    int r = 0;
+    if (af->filter_frame) {
+        r = af->filter_frame(af, frame);
+        frame = NULL;
+    } else {
+        // Compatibility path.
+        int flags = 0;
+        struct mp_audio input;
+        char dummy[MP_NUM_CHANNELS];
+        if (frame) {
+            // We don't know if the filter will write; but it might possibly.
+            r = mp_audio_make_writeable(frame);
+            input = *frame;
+            // Don't give it a refcounted frame
+            for (int n = 0; n < MP_NUM_CHANNELS; n++)
+                input.allocated[n] = NULL;
+        } else {
+            input = af->fmt_in;
+            mp_audio_set_null_data(&input);
+            flags = AF_FILTER_FLAG_EOF;
+            for (int n = 0; n < MP_NUM_CHANNELS; n++)
+                input.planes[n] = &dummy[n];
+        }
+        if (r < 0)
+            goto done;
+        r = af->filter(af, &input, flags);
+        if (input.samples) {
+            struct mp_audio *new = mp_audio_pool_new_copy(af->out_pool, &input);
+            if (!new) {
+                r = -1;
+                goto done;
+            }
+            af_add_output_frame(af, new);
+        }
+    }
+done:
+    talloc_free(frame);
+    if (r < 0)
+        MP_ERR(af, "Error filtering frame.\n");
+    return r;
+}
+
+// Input a frame into the filter chain. Ownership of frame is transferred.
+// Return >= 0 on success, < 0 on failure (even if output frames were produced)
+int af_filter_frame(struct af_stream *s, struct mp_audio *frame)
+{
+    assert(frame);
+    if (s->initialized < 1) {
+        talloc_free(frame);
+        return -1;
+    }
+    return af_do_filter(s->first, frame);
+}
+
+// Output the next queued frame (if any) from the full filter chain.
+// The frame can be retrieved with af_read_output_frame().
+//  eof: if set, assume there's no more input i.e. af_filter_frame() will
+//       not be called (until reset) - flush all internally delayed frames
+//  returns: -1: error, 0: no output, 1: output available
+int af_output_frame(struct af_stream *s, bool eof)
+{
+    if (s->last->num_out_queued)
+        return 1;
+    if (s->initialized < 1)
+        return -1;
+    while (1) {
+        struct af_instance *last = NULL;
+        for (struct af_instance * cur = s->first; cur; cur = cur->next) {
+            // Flush remaining frames on EOF, but do that only if the previous
+            // filters have been flushed (i.e. they have no more output).
+            if (eof && !last) {
+                int r = af_do_filter(cur, NULL);
+                if (r < 0)
+                    return r;
+            }
+            if (af_has_output_frame(cur))
+                last = cur;
+        }
+        if (!last)
+            return 0;
+        if (!last->next)
+            return 1;
+        int r = af_do_filter(last->next, af_dequeue_output_frame(last));
+        if (r < 0)
+            return r;
+    }
+}
+
+struct mp_audio *af_read_output_frame(struct af_stream *s)
+{
+    if (!s->last->num_out_queued)
+        af_output_frame(s, false);
+    return af_dequeue_output_frame(s->last);
+}
+
+// Make sure the caller can change data referenced by the frame.
+// Return negative error code on failure (i.e. you can't write).
+int af_make_writeable(struct af_instance *af, struct mp_audio *frame)
+{
+    return mp_audio_pool_make_writeable(af->out_pool, frame);
+}
+
+void af_seek_reset(struct af_stream *s)
+{
+    af_control_all(s, AF_CONTROL_RESET, NULL);
+    af_chain_forget_frames(s);
 }

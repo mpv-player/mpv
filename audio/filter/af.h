@@ -62,18 +62,34 @@ struct af_instance {
     struct replaygain_data *replaygain_data;
     int (*control)(struct af_instance *af, int cmd, void *arg);
     void (*uninit)(struct af_instance *af);
-    /* flags is a bit mask of AF_FILTER_FLAG_* values
+    /* old filter function (use filter_frame instead)
+     * flags is a bit mask of AF_FILTER_FLAG_* values
      * returns 0 on success, negative value on error
      */
     int (*filter)(struct af_instance *af, struct mp_audio *data, int flags);
+    /* Feed a frame. The frame is NULL if EOF was reached, and the filter
+     * should drain all remaining buffered data.
+     * Use af_add_output_frame() to output data. The optional filter_out
+     * callback can be set to produce output frames gradually.
+     */
+    int (*filter_frame)(struct af_instance *af, struct mp_audio *frame);
+    int (*filter_out)(struct af_instance *af);
     void *priv;
     struct mp_audio *data; // configuration and buffer for outgoing data stream
+
     struct af_instance *next;
     struct af_instance *prev;
     double delay; /* Delay caused by the filter, in seconds of audio consumed
                    * without corresponding output */
     bool auto_inserted; // inserted by af.c, such as conversion filters
     char *label;
+
+    struct mp_audio fmt_in, fmt_out;
+
+    struct mp_audio **out_queued;
+    int num_out_queued;
+
+    struct mp_audio_pool *out_pool;
 };
 
 // Current audio stream
@@ -133,11 +149,15 @@ void af_uninit(struct af_stream *s);
 struct af_instance *af_add(struct af_stream *s, char *name, char **args);
 int af_remove_by_label(struct af_stream *s, char *label);
 struct af_instance *af_find_by_label(struct af_stream *s, char *label);
-struct mp_audio_buffer;
-int af_filter(struct af_stream *s, struct mp_audio *data,
-              struct mp_audio_buffer *output);
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
 void af_control_all(struct af_stream *s, int cmd, void *arg);
+void af_seek_reset(struct af_stream *s);
+
+void af_add_output_frame(struct af_instance *af, struct mp_audio *frame);
+int af_filter_frame(struct af_stream *s, struct mp_audio *frame);
+int af_output_frame(struct af_stream *s, bool eof);
+struct mp_audio *af_read_output_frame(struct af_stream *s);
+int af_make_writeable(struct af_instance *af, struct mp_audio *frame);
 
 double af_calc_delay(struct af_stream *s);
 
