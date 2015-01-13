@@ -199,17 +199,18 @@ void update_osd_sub_state(struct MPContext *mpctx, int order,
     struct track *track = mpctx->current_track[order][STREAM_SUB];
     struct dec_sub *dec_sub = mpctx->d_sub[order];
     int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
+    bool textsub = dec_sub && sub_has_get_text(dec_sub);
 
     struct osd_sub_state state = {
         .dec_sub = dec_sub,
         // Decides whether to use OSD path or normal subtitle rendering path.
-        .render_bitmap_subs = opts->ass_enabled || !sub_has_get_text(dec_sub),
+        .render_bitmap_subs = opts->ass_enabled || !textsub,
         .video_offset = get_track_video_offset(mpctx, track),
     };
 
     // Secondary subs are rendered with the "text" renderer to transform them
     // to toptitles.
-    if (order == 1 && sub_has_get_text(dec_sub))
+    if (order == 1 && textsub)
         state.render_bitmap_subs = false;
 
     if (!mpctx->current_track[0][STREAM_VIDEO])
