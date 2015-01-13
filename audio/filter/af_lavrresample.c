@@ -248,8 +248,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (af_to_avformat(out->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(out, in->format);
 
-        af->mul     = out->rate / (double)in->rate;
-
         int r = ((in->format == orig_in.format) &&
                 mp_chmap_equals(&in->channels, &orig_in.channels))
                 ? AF_OK : AF_FALSE;

@@ -72,9 +72,6 @@ struct af_instance {
     struct af_instance *prev;
     double delay; /* Delay caused by the filter, in seconds of audio consumed
                    * without corresponding output */
-    double mul; /* length multiplier: how much does this instance change
-                 * the number of samples passed though. (Ratio of input
-                 * and output, e.g. mul=4 => 1 sample becomes 4 samples) .*/
     bool auto_inserted; // inserted by af.c, such as conversion filters
     char *label;
 };
@@ -142,7 +139,6 @@ int af_filter(struct af_stream *s, struct mp_audio *data,
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
 void af_control_all(struct af_stream *s, int cmd, void *arg);
 
-double af_calc_filter_multiplier(struct af_stream *s);
 double af_calc_delay(struct af_stream *s);
 
 int af_test_output(struct af_instance *af, struct mp_audio *out);

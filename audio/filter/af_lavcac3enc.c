@@ -100,12 +100,11 @@ static int control(struct af_instance *af, int cmd, void *arg)
         } else {
             s->out_samples = AC3_MAX_CODED_FRAME_SIZE / af->data->sstride;
         }
-        af->mul = s->out_samples / (double)s->in_samples;
 
         mp_audio_buffer_reinit(s->pending, in);
 
-        MP_DBG(af, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
-               in->nch, in->rate, af->mul, s->in_samples);
+        MP_DBG(af, "af_lavcac3enc reinit: %d, %d, %d.\n",
+               in->nch, in->rate, s->in_samples);
 
         int bit_rate = s->bit_rate ? s->bit_rate : default_bit_rate[in->nch];
 

@@ -195,7 +195,6 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
     struct af_instance *af = talloc_zero(NULL, struct af_instance);
     *af = (struct af_instance) {
         .info = info,
-        .mul = 1,
         .data = talloc_zero(af, struct mp_audio),
         .log = mp_log_new(af, s->log, name),
         .replaygain_data = s->replaygain_data,
@@ -596,7 +595,6 @@ struct af_stream *af_new(struct mpv_global *global)
         .filter = dummy_filter,
         .priv = s,
         .data = &s->input,
-        .mul = 1.0,
     };
     static const struct af_info out = { .name = "out" };
     s->last = talloc(s, struct af_instance);
@@ -606,7 +604,6 @@ struct af_stream *af_new(struct mpv_global *global)
         .filter = dummy_filter,
         .priv = s,
         .data = &s->filter_output,
-        .mul = 1.0,
     };
     s->first->next = s->last;
     s->last->prev = s->first;
@@ -756,20 +753,6 @@ done:
     if (data != &tmp)
         talloc_free(data);
     return r;
-}
-
-// Calculate average ratio of filter output samples to input samples.
-// e.g: num_output_samples = mul * num_input_samples
-double af_calc_filter_multiplier(struct af_stream *s)
-{
-    struct af_instance *af = s->first;
-    double mul = 1;
-    do {
-        mul *= af->mul;
-        af = af->next;
-    } while (af);
-
-    return mul;
 }
 
 /* Calculate the total delay [seconds of output] caused by the filters */

@@ -201,9 +201,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         p->timebase_out = l_out->time_base;
 
-        // Blatantly incorrect; we don't know what the filters do.
-        af->mul = out->rate / (double)in->rate;
-
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
     }

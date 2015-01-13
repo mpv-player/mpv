@@ -285,7 +285,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
             if (s->speed_tempo && s->speed_pitch)
                 return AF_DETACH;
             af->delay = 0;
-            af->mul = 1;
             return af_test_output(af, data);
         }
 
@@ -300,7 +299,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
         s->bytes_stride         = s->frames_stride * bps * nch;
         s->frames_stride_scaled = s->scale * s->frames_stride;
         s->frames_stride_error  = 0;
-        af->mul = 1.0 / s->scale;
         af->delay = 0;
 
         int frames_overlap = s->frames_stride * s->percent_overlap;
