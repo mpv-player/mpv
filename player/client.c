@@ -751,13 +751,13 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
                 event->event_id = MPV_EVENT_LOG_MESSAGE;
                 struct mpv_event_log_message *cmsg = talloc_ptrtype(event, cmsg);
                 *cmsg = (struct mpv_event_log_message){
-                    .prefix = talloc_steal(event, msg->prefix),
+                    .prefix = msg->prefix,
                     .level = mp_log_levels[msg->level],
                     .log_level = mp_mpv_log_levels[msg->level],
-                    .text = talloc_steal(event, msg->text),
+                    .text = msg->text,
                 };
+                talloc_steal(event, msg);
                 event->data = cmsg;
-                talloc_free(msg);
                 break;
             }
         }
