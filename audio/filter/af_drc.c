@@ -272,9 +272,17 @@ static void method2_float(af_drc_t *s, struct mp_audio *c)
   s->idx = (s->idx + 1) % NSAMPLES;
 }
 
-static int filter(struct af_instance* af, struct mp_audio* data, int flags)
+static int filter(struct af_instance *af, struct mp_audio *data)
 {
   af_drc_t *s = af->priv;
+
+  if (!data)
+    return 0;
+
+  if (af_make_writeable(af, data) < 0) {
+    talloc_free(data);
+    return -1;
+  }
 
   if(af->data->format == (AF_FORMAT_S16))
   {
@@ -290,6 +298,7 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
     else
         method1_float(s, data);
   }
+  af_add_output_frame(af, data);
   return 0;
 }
 
@@ -297,7 +306,7 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 static int af_open(struct af_instance* af){
   int i = 0;
   af->control=control;
-  af->filter=filter;
+  af->filter_frame = filter;
   af_drc_t *priv = af->priv;
 
   priv->mul = MUL_INIT;

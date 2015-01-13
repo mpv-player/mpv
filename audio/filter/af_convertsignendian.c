@@ -71,8 +71,15 @@ static void si2us(void *data, int len, int bps)
     } while (i += bps);
 }
 
-static int filter(struct af_instance *af, struct mp_audio *data, int flags)
+static int filter(struct af_instance *af, struct mp_audio *data)
 {
+    if (!data)
+        return 0;
+    if (af_make_writeable(af, data) < 0) {
+        talloc_free(data);
+        return -1;
+    }
+
     int infmt = data->format;
     int outfmt = af->data->format;
     size_t len = data->samples * data->nch;
@@ -81,13 +88,14 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
         si2us(data->planes[0], len, data->bps);
 
     mp_audio_set_format(data, outfmt);
+    af_add_output_frame(af, data);
     return 0;
 }
 
 static int af_open(struct af_instance *af)
 {
     af->control = control;
-    af->filter = filter;
+    af->filter_frame = filter;
     return AF_OK;
 }
 

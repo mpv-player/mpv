@@ -141,13 +141,19 @@ static int control(struct af_instance* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Filter data through filter
-static int filter(struct af_instance* af, struct mp_audio* data, int flags)
+static int filter(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*       c      = data;                         // Current working data
+  if (!c)
+    return 0;
   af_equalizer_t*  s    = (af_equalizer_t*)af->priv;    // Setup
   uint32_t         ci   = af->data->nch;                // Index for channels
   uint32_t         nch  = af->data->nch;                // Number of channels
+
+  if (af_make_writeable(af, data) < 0) {
+    talloc_free(data);
+    return -1;
+  }
 
   while(ci--){
     float*      g   = s->g[ci];      // Gain factor
@@ -177,13 +183,14 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
       out+=nch;
     }
   }
+  af_add_output_frame(af, data);
   return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->filter=filter;
+  af->filter_frame = filter;
   af_equalizer_t *priv = af->priv;
   for(int i=0;i<AF_NCH;i++){
       for(int j=0;j<KM;j++){
