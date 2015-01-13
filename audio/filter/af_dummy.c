@@ -41,15 +41,16 @@ static int control(struct af_instance* af, int cmd, void* arg)
 }
 
 // Filter data through filter
-static int filter(struct af_instance* af, struct mp_audio* data, int flags)
+static int filter(struct af_instance* af, struct mp_audio* data)
 {
+    af_add_output_frame(af, data);
     return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->filter=filter;
+  af->filter_frame=filter;
   return AF_OK;
 }
 

@@ -44,9 +44,11 @@ static int control(struct af_instance *af, int cmd, void *arg)
     return AF_UNKNOWN;
 }
 
-static int filter(struct af_instance *af, struct mp_audio *data, int flags)
+static int filter(struct af_instance *af, struct mp_audio *data)
 {
-    mp_audio_copy_config(data, af->data);
+    if (data)
+        mp_audio_copy_config(data, af->data);
+    af_add_output_frame(af, data);
     return 0;
 }
 
@@ -54,7 +56,7 @@ static int af_open(struct af_instance *af)
 {
     struct priv *priv = af->priv;
     af->control = control;
-    af->filter = filter;
+    af->filter_frame = filter;
     priv->speed = 1.0;
     return AF_OK;
 }
