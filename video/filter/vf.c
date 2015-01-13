@@ -655,7 +655,7 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params,
     c->initialized = r < 0 ? -1 : 1;
     int loglevel = r < 0 ? MSGL_WARN : MSGL_V;
     if (r == -2)
-        MP_ERR(c, "Image formats incompatible.\n");
+        MP_ERR(c, "Image formats incompatible or invalid.\n");
     mp_msg(c->log, loglevel, "Video filter chain:\n");
     vf_print_filter_chain(c, loglevel, failing);
     if (r < 0) {
