@@ -97,25 +97,30 @@ static int control(struct af_instance *af, int cmd, void *arg)
     return AF_UNKNOWN;
 }
 
-static void filter_plane(struct af_instance *af, void *ptr, int num_samples)
+static void filter_plane(struct af_instance *af, struct mp_audio *data, int p)
 {
     struct priv *s = af->priv;
 
     float level = s->level * s->rgain;
+    int num_samples = data->samples * data->spf;
 
     if (af_fmt_from_planar(af->data->format) == AF_FORMAT_S16) {
-        int16_t *a = ptr;
         int vol = 256.0 * level;
         if (vol != 256) {
+            if (af_make_writeable(af, data) < 0)
+                return; // oom
+            int16_t *a = data->planes[p];
             for (int i = 0; i < num_samples; i++) {
                 int x = (a[i] * vol) >> 8;
                 a[i] = MPCLAMP(x, SHRT_MIN, SHRT_MAX);
             }
         }
     } else if (af_fmt_from_planar(af->data->format) == AF_FORMAT_FLOAT) {
-        float *a = ptr;
         float vol = level;
         if (vol != 1.0) {
+            if (af_make_writeable(af, data) < 0)
+                return; // oom
+            float *a = data->planes[p];
             for (int i = 0; i < num_samples; i++) {
                 float x = a[i] * vol;
                 a[i] = s->soft ? af_softclip(x) : MPCLAMP(x, -1.0, 1.0);
@@ -124,11 +129,13 @@ static void filter_plane(struct af_instance *af, void *ptr, int num_samples)
     }
 }
 
-static int filter(struct af_instance *af, struct mp_audio *data, int f)
+static int filter(struct af_instance *af, struct mp_audio *data)
 {
-    for (int n = 0; n < data->num_planes; n++)
-        filter_plane(af, data->planes[n], data->samples * data->spf);
-
+    if (data) {
+        for (int n = 0; n < data->num_planes; n++)
+            filter_plane(af, data, n);
+        af_add_output_frame(af, data);
+    }
     return 0;
 }
 
@@ -136,7 +143,7 @@ static int af_open(struct af_instance *af)
 {
     struct priv *s = af->priv;
     af->control = control;
-    af->filter = filter;
+    af->filter_frame = filter;
     af_from_dB(1, &s->cfg_volume, &s->level, 20.0, -200.0, 60.0);
     return AF_OK;
 }
