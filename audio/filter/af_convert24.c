@@ -71,13 +71,19 @@ static int control(struct af_instance *af, int cmd, void *arg)
 #define SHIFT(x) (((x)+1)*8)
 #endif
 
-static int filter(struct af_instance *af, struct mp_audio *data, int flags)
+static int filter(struct af_instance *af, struct mp_audio *data)
 {
-    mp_audio_realloc_min(af->data, data->samples);
+    if (!data)
+        return 0;
+    struct mp_audio *out =
+        mp_audio_pool_get(af->out_pool, af->data, data->samples);
+    if (!out) {
+        talloc_free(data);
+        return -1;
+    }
+    mp_audio_copy_attributes(out, data);
 
-    struct mp_audio *out = af->data;
     size_t len = mp_audio_psize(data) / data->bps;
-
     if (data->bps == 4) {
         for (int s = 0; s < len; s++) {
             uint32_t val = *((uint32_t *)data->planes[0] + s);
@@ -86,7 +92,6 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
             ptr[1] = val >> SHIFT(1);
             ptr[2] = val >> SHIFT(2);
         }
-        mp_audio_set_format(data, af_fmt_change_bits(data->format, 24));
     } else {
         for (int s = 0; s < len; s++) {
             uint8_t *ptr = (uint8_t *)data->planes[0] + s * 3;
@@ -95,17 +100,17 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
                          | ptr[2] << SHIFT(2);
             *((uint32_t *)out->planes[0] + s) = val;
         }
-        mp_audio_set_format(data, af_fmt_change_bits(data->format, 32));
     }
 
-    data->planes[0] = out->planes[0];
+    talloc_free(data);
+    af_add_output_frame(af, out);
     return 0;
 }
 
 static int af_open(struct af_instance *af)
 {
     af->control = control;
-    af->filter = filter;
+    af->filter_frame = filter;
     return AF_OK;
 }
 
