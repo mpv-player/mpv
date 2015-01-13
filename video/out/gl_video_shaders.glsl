@@ -110,11 +110,8 @@ void main() {
     // Although we are not scaling in linear light, both 3DLUT and SRGB still
     // operate on linear light inputs so we have to convert to it before
     // either step can be applied.
-#ifdef USE_OSD_LINEAR_CONV_APPROX
-    color.rgb = pow(color.rgb, vec3(1.95));
-#endif
-#ifdef USE_OSD_LINEAR_CONV_BT2020
-    color.rgb = bt2020_expand(color.rgb);
+#ifdef USE_OSD_LINEAR_CONV_BT1886
+    color.rgb = pow(color.rgb, vec3(1.961));
 #endif
 #ifdef USE_OSD_LINEAR_CONV_SRGB
     color.rgb = srgb_expand(color.rgb);
@@ -416,6 +413,17 @@ void main() {
     // contributions from the three different channels.
     color.br = color.br * mix(vec2(1.5816, 0.9936), vec2(1.9404, 1.7184),
                               lessThanEqual(color.br, vec2(0))) + color.gg;
+
+    // Expand channels to camera-linear light. This shader currently just
+    // assumes everything uses the BT.2020 12-bit gamma function, since the
+    // difference between 10 and 12-bit is negligible for anything other than
+    // 12-bit content.
+    color = bt2020_expand(color);
+    // Calculate the green channel from the expanded RYcB
+    // The BT.2020 specification says Yc = 0.2627*R + 0.6780*G + 0.0593*B
+    color.g = (color.g - 0.2627*color.r - 0.0593*color.b)/0.6780;
+    // Re-compand to receive the R'G'B' result, same as other systems
+    color = bt2020_compand(color);
 #endif
 #ifdef USE_COLORMATRIX
     // CONST_LUMA involves numbers outside the [0,1] range so we make sure
@@ -424,19 +432,18 @@ void main() {
     color = clamp(color, 0.0, 1.0);
 #endif
     // If we are scaling in linear light (SRGB or 3DLUT option enabled), we
-    // expand our source colors before scaling. This shader currently just
-    // assumes everything uses the BT.2020 12-bit gamma function, since the
-    // difference between this and BT.601, BT.709 and BT.2020 10-bit is well
-    // below the rounding error threshold for both 8-bit and even 10-bit
-    // content. It only makes a difference for 12-bit sources, so it should be
-    // fine to use here.
-#ifdef USE_LINEAR_LIGHT_APPROX
-    // We differentiate between approximate BT.2020 (gamma 1.95) ...
-    color = pow(color, vec3(1.95));
-#endif
-#ifdef USE_LINEAR_LIGHT_BT2020
-    // ... and actual BT.2020 (two-part function)
-    color = bt2020_expand(color);
+    // expand our source colors before scaling. We distinguish between
+    // BT.1886 (typical video files) and sRGB (typical image files).
+#ifdef USE_LINEAR_LIGHT_BT1886
+    // This calculation is derived from the BT.1886 recommendation which
+    // is itself derived from the curves of typical CRT monitors. It claims
+    // that a correct video playback environment should have a pure power
+    // curve transfer function (in contrast to the complex BT.709 function)
+    // with a gamma value of 2.40, but this includes the typical gamma boost
+    // of ~1.2 for dark viewing environments. The figure used here instead
+    // (1.961) is therefore a pure power curve but without the boost, which
+    // is a very close approximation of the true BT.709 function.
+    color = pow(color, vec3(1.961));
 #endif
 #ifdef USE_LINEAR_LIGHT_SRGB
     // This is not needed for most sRGB content since we can use GL_SRGB to
@@ -444,11 +451,6 @@ void main() {
     // also sRGB but in a different format (such as JPEG's YUV), we need
     // to convert to linear light manually.
     color = srgb_expand(color);
-#endif
-#ifdef USE_CONST_LUMA
-    // Calculate the green channel from the expanded RYcB
-    // The BT.2020 specification says Yc = 0.2627*R + 0.6780*G + 0.0593*B
-    color.g = (color.g - 0.2627*color.r - 0.0593*color.b)/0.6780;
 #endif
 #ifdef USE_SIGMOID
     color = sig_center - log(1.0/(color * sig_scale + sig_offset) - 1.0)/sig_slope;
@@ -484,12 +486,6 @@ void main() {
 #ifdef USE_SRGB
     // Adapt and compand from the linear BT2020 source to the sRGB output
     color = srgb_compand(color);
-#endif
-    // If none of these options took care of companding again (ie. CMS is
-    // disabled), we still need to re-compand const luma signals, because
-    // they always come out as linear light (and we can't simply output that).
-#ifdef USE_CONST_LUMA_INV
-    color = bt2020_compand(color);
 #endif
 #ifdef USE_DITHER
     vec2 dither_pos = gl_FragCoord.xy / dither_size;
