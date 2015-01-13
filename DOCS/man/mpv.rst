@@ -438,12 +438,11 @@ profile name ``default`` to continue with normal options.
     ::
 
         [vo.vdpau]
-        # Use hardware decoding (might break playback of some h264 files)
+        # Use hardware decoding
         hwdec=vdpau
 
         [protocol.dvd]
         profile-desc="profile for dvd:// streams"
-        vf=pp=hb/vb/dr/al/fd
         alang=en
 
         [extension.flv]

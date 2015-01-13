@@ -239,8 +239,8 @@ Command Line Switches
     ``-osdlevel``               ``--osd-level``
     ``-panscanrange``           ``--video-zoom``, ``--video-pan-x/y``
     ``-playing-msg``            ``--term-playing-msg``
-    ``-pp ...``                 ``'--vf=pp=[...]'``
-    ``-pphelp``                 ``--vf=pp:help``
+    ``-pp ...``                 ``'--vf=lavfi=[pp=...]'``
+    ``-pphelp``                 (See FFmpeg libavfilter documentation.)
     ``-rawaudio ...``           ``--demuxer-rawaudio-...``
     ``-rawvideo ...``           ``--demuxer-rawvideo-...``
     ``-spugauss``               ``--sub-gauss``
