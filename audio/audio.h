@@ -75,6 +75,7 @@ int mp_audio_make_writeable(struct mp_audio *data);
 struct AVFrame;
 struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe);
 
+struct mp_audio_pool;
 struct mp_audio_pool *mp_audio_pool_create(void *ta_parent);
 struct mp_audio *mp_audio_pool_get(struct mp_audio_pool *pool,
                                    const struct mp_audio *fmt, int samples);
