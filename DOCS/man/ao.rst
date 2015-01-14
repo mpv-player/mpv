@@ -257,6 +257,10 @@ Available audio output drivers are:
         Write the sound to ``<filename>`` instead of the default
         ``audiodump.wav``. If ``no-waveheader`` is specified, the default is
         ``audiodump.pcm``.
+    ``(no-)append``
+        Append to the file, instead of overwriting it. Always use this with the
+        ``no-waveheader`` option - with ``waveheader`` it's broken, because
+        it will write a WAVE header every time the file is opened.
 
 ``rsound``
     Audio output to an RSound daemon

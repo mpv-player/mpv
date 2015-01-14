@@ -46,6 +46,7 @@
 struct priv {
     char *outputfilename;
     int waveheader;
+    int append;
     uint64_t data_length;
     FILE *fp;
 };
@@ -155,7 +156,7 @@ static int init(struct ao *ao)
     MP_INFO(ao, "Info: Faster dumping is achieved with --no-video\n");
     MP_INFO(ao, "Info: To write WAVE files use --ao=pcm:waveheader (default).\n");
 
-    priv->fp = fopen(priv->outputfilename, "wb");
+    priv->fp = fopen(priv->outputfilename, priv->append ? "ab" : "wb");
     if (!priv->fp) {
         MP_ERR(ao, "Failed to open %s for writing!\n", priv->outputfilename);
         return -1;
@@ -223,6 +224,7 @@ const struct ao_driver audio_out_pcm = {
     .options = (const struct m_option[]) {
         OPT_STRING("file", outputfilename, 0),
         OPT_FLAG("waveheader", waveheader, 0),
+        OPT_FLAG("append", append, 0),
         {0}
     },
 };
