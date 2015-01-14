@@ -405,9 +405,9 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
         len = endpos - startpos;
     }
     double pos = get_current_time(mpctx);
-    if (len > 0 && !demuxer->ts_resets_possible) {
+    if (len > 0)
         ans = MPCLAMP((pos - start) / len, 0, 1);
-    } else {
+    if (ans < 0 || demuxer->ts_resets_possible) {
         int64_t size;
         if (demux_stream_control(demuxer, STREAM_CTRL_GET_SIZE, &size) > 0) {
             if (size > 0 && demuxer->filepos >= 0)
