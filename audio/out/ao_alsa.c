@@ -615,6 +615,8 @@ static int init(struct ao *ao)
         } else {
             CHECK_ALSA_WARN("Channel map setup failed");
         }
+
+        free(alsa_chmap);
     }
 
     snd_pcm_chmap_t *alsa_chmap = snd_pcm_get_chmap(p->alsa);
