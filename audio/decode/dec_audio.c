@@ -153,7 +153,24 @@ void audio_uninit(struct dec_audio *d_audio)
     MP_VERBOSE(d_audio, "Uninit audio filters...\n");
     af_destroy(d_audio->afilter);
     uninit_decoder(d_audio);
+    talloc_free(d_audio->waiting);
     talloc_free(d_audio);
+}
+
+static int decode_new_frame(struct dec_audio *da)
+{
+    while (!da->waiting) {
+        int ret = da->ad_driver->decode_packet(da, &da->waiting);
+        if (ret < 0)
+            return ret;
+
+        if (da->waiting) {
+            da->pts_offset += da->waiting->samples;
+            da->decode_format = *da->waiting;
+            mp_audio_set_null_data(&da->decode_format);
+        }
+    }
+    return mp_audio_config_valid(da->waiting) ? AD_OK : AD_ERR;
 }
 
 /* Decode packets until we know the audio format. Then reinit the buffer.
@@ -162,14 +179,7 @@ void audio_uninit(struct dec_audio *d_audio)
  */
 int initial_audio_decode(struct dec_audio *da)
 {
-    while (!da->waiting) {
-        int ret = da->ad_driver->decode_packet(da, &da->waiting);
-        if (ret < 0)
-            return ret;
-    }
-    talloc_steal(da, da->waiting);
-    da->decode_format = *da->waiting;
-    return mp_audio_config_valid(da->waiting) ? AD_OK : AD_ERR;
+    return decode_new_frame(da);
 }
 
 static bool copy_output(struct af_stream *afs, struct mp_audio_buffer *outbuf,
@@ -208,31 +218,22 @@ int audio_decode(struct dec_audio *da, struct mp_audio_buffer *outbuf,
         if (copy_output(afs, outbuf, minsamples, false))
             break;
 
-        struct mp_audio *mpa = da->waiting;
-        da->waiting = NULL;
-        if (!mpa) {
-            res = da->ad_driver->decode_packet(da, &mpa);
-            if (res < 0) {
-                // drain filters first (especially for true EOF case)
-                copy_output(afs, outbuf, minsamples, true);
-                break;
-            }
-            if (!mpa)
-                continue;
-
-            da->pts_offset += mpa->samples;
-            da->decode_format = *mpa;
-            mp_audio_set_null_data(&da->decode_format);
+        res = decode_new_frame(da);
+        if (res < 0) {
+            // drain filters first (especially for true EOF case)
+            copy_output(afs, outbuf, minsamples, true);
+            break;
         }
 
         // On format change, make sure to drain the filter chain.
-        if (!mp_audio_config_equals(&afs->input, mpa)) {
-            da->waiting = talloc_steal(da, mpa);
+        if (!mp_audio_config_equals(&afs->input, da->waiting)) {
             copy_output(afs, outbuf, minsamples, true);
             res = AD_NEW_FMT;
             break;
         }
 
+        struct mp_audio *mpa = da->waiting;
+        da->waiting = NULL;
         if (af_filter_frame(afs, mpa) < 0)
             return AD_ERR;
     }
