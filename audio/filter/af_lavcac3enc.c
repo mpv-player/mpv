@@ -53,7 +53,8 @@ typedef struct af_ac3enc_s {
     struct AVCodecContext *lavc_actx;
     AVPacket pkt;
     int bit_rate;
-    struct mp_audio_buffer *pending;
+    struct mp_audio *input;     // frame passed to libavcodec
+    struct mp_audio *pending;   // unconsumed input data
     int in_samples;     // samples of input per AC3 frame
     int out_samples;    // upper bound on encoded output per AC3 frame
     int in_sampleformat;
@@ -101,7 +102,12 @@ static int control(struct af_instance *af, int cmd, void *arg)
             s->out_samples = AC3_MAX_CODED_FRAME_SIZE / af->data->sstride;
         }
 
-        mp_audio_buffer_reinit(s->pending, in);
+        mp_audio_copy_config(s->input, in);
+        mp_audio_realloc(s->input, s->in_samples);
+        s->input->samples = 0;
+
+        talloc_free(s->pending);
+        s->pending = NULL;
 
         MP_DBG(af, "af_lavcac3enc reinit: %d, %d, %d.\n",
                in->nch, in->rate, s->in_samples);
@@ -147,7 +153,21 @@ static void uninit(struct af_instance* af)
             avcodec_close(s->lavc_actx);
             av_free(s->lavc_actx);
         }
+        talloc_free(s->pending);
     }
+}
+
+static int filter_frame(struct af_instance *af, struct mp_audio *audio)
+{
+    af_ac3enc_t *s = af->priv;
+
+    // filter_output must have been called until no output was produced.
+    if (s->pending && s->pending->samples)
+        MP_ERR(af, "broken data flow\n");
+
+    talloc_free(s->pending);
+    s->pending = audio;
+    return 0;
 }
 
 static void swap_16(uint16_t *ptr, size_t size)
@@ -156,102 +176,87 @@ static void swap_16(uint16_t *ptr, size_t size)
         ptr[n] = av_bswap16(ptr[n]);
 }
 
-// Filter data through filter
-static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
+// Copy data from input frame to encode frame (because libavcodec wants a full
+// AC3 frame for encoding, while filter input frames can be smaller or larger).
+// Return true if the
+static bool fill_buffer(af_ac3enc_t *s)
 {
-    struct mp_audio *out = af->data;
+    if (s->pending) {
+        int copy = MPMIN(s->in_samples - s->input->samples, s->pending->samples);
+        s->input->samples += copy;
+        mp_audio_copy(s->input, s->input->samples - copy, s->pending, 0, copy);
+        mp_audio_skip_samples(s->pending, copy);
+    }
+    return s->input->samples >= s->in_samples;
+}
+
+static int filter_out(struct af_instance *af)
+{
     af_ac3enc_t *s = af->priv;
-    int num_frames = (audio->samples + mp_audio_buffer_samples(s->pending))
-                     / s->in_samples;
+    if (!fill_buffer(s))
+        return 0; // need more input
 
-    int max_out_samples = s->out_samples * num_frames;
-    mp_audio_realloc_min(out, max_out_samples);
-    out->samples = 0;
+    AVFrame *frame = av_frame_alloc();
+    if (!frame) {
+        MP_FATAL(af, "Could not allocate memory \n");
+        return -1;
+    }
+    frame->nb_samples = s->in_samples;
+    frame->format = s->lavc_actx->sample_fmt;
+    frame->channel_layout = s->lavc_actx->channel_layout;
+    assert(s->input->num_planes <= AV_NUM_DATA_POINTERS);
+    frame->extended_data = frame->data;
+    for (int n = 0; n < s->input->num_planes; n++)
+        frame->data[n] = s->input->planes[n];
+    frame->linesize[0] = s->input->samples * s->input->sstride;
 
-    while (audio->samples > 0) {
-        int ret;
-
-        int consumed_pending = 0;
-        struct mp_audio in_frame;
-        int pending = mp_audio_buffer_samples(s->pending);
-        if (pending == 0 && audio->samples >= s->in_samples) {
-            in_frame = *audio;
-            mp_audio_skip_samples(audio, s->in_samples);
-        } else {
-            if (pending > 0 && pending < s->in_samples) {
-                struct mp_audio tmp = *audio;
-                tmp.samples = MPMIN(tmp.samples, s->in_samples);
-                mp_audio_buffer_append(s->pending, &tmp);
-                mp_audio_skip_samples(audio, tmp.samples);
-            }
-            mp_audio_buffer_peek(s->pending, &in_frame);
-            if (in_frame.samples < s->in_samples)
-                break;
-            consumed_pending = s->in_samples;
-        }
-        in_frame.samples = s->in_samples;
-
-        AVFrame *frame = av_frame_alloc();
-        if (!frame) {
-            MP_FATAL(af, "Could not allocate memory \n");
-            return -1;
-        }
-        frame->nb_samples = s->in_samples;
-        frame->format = s->lavc_actx->sample_fmt;
-        frame->channel_layout = s->lavc_actx->channel_layout;
-        assert(in_frame.num_planes <= AV_NUM_DATA_POINTERS);
-        frame->extended_data = frame->data;
-        for (int n = 0; n < in_frame.num_planes; n++)
-            frame->data[n] = in_frame.planes[n];
-        frame->linesize[0] = s->in_samples * audio->sstride;
-
-        int ok;
-        ret = avcodec_encode_audio2(s->lavc_actx, &s->pkt, frame, &ok);
-        av_frame_free(&frame);
-        if (ret < 0 || !ok) {
-            MP_FATAL(af, "Encode failed.\n");
-            return -1;
-        }
-
-        mp_audio_buffer_skip(s->pending, consumed_pending);
-
-        MP_DBG(af, "avcodec_encode_audio got %d, pending %d.\n",
-               s->pkt.size, mp_audio_buffer_samples(s->pending));
-
-        int frame_size = s->pkt.size;
-        int header_len = 0;
-        char hdr[8];
-
-        if (s->cfg_add_iec61937_header && s->pkt.size > 5) {
-            int bsmod = s->pkt.data[5] & 0x7;
-            int len = frame_size;
-
-            frame_size = AC3_FRAME_SIZE * 2 * 2;
-            header_len = 8;
-
-            AV_WL16(hdr,     0xF872);   // iec 61937 syncword 1
-            AV_WL16(hdr + 2, 0x4E1F);   // iec 61937 syncword 2
-            hdr[5] = bsmod;             // bsmod
-            hdr[4] = 0x01;              // data-type ac3
-            AV_WL16(hdr + 6, len << 3); // number of bits in payload
-        }
-
-        size_t max_size = (max_out_samples - out->samples) * out->sstride;
-        if (frame_size > max_size)
-            abort();
-
-        char *buf = (char *)out->planes[0] + out->samples * out->sstride;
-        memcpy(buf, hdr, header_len);
-        memcpy(buf + header_len, s->pkt.data, s->pkt.size);
-        memset(buf + header_len + s->pkt.size, 0,
-               frame_size - (header_len + s->pkt.size));
-        swap_16((uint16_t *)(buf + header_len), s->pkt.size / 2);
-        out->samples += frame_size / out->sstride;
+    int ok;
+    int lavc_ret = avcodec_encode_audio2(s->lavc_actx, &s->pkt, frame, &ok);
+    av_frame_free(&frame);
+    s->input->samples = 0;
+    if (lavc_ret < 0 || !ok) {
+        MP_FATAL(af, "Encode failed.\n");
+        return -1;
     }
 
-    mp_audio_buffer_append(s->pending, audio);
+    MP_DBG(af, "avcodec_encode_audio got %d, pending %d.\n",
+            s->pkt.size, s->pending->samples);
 
-    *audio = *out;
+    struct mp_audio *out =
+        mp_audio_pool_get(af->out_pool, af->data, s->out_samples);
+    if (!out)
+        return -1;
+    mp_audio_copy_attributes(out, s->pending);
+
+    int frame_size = s->pkt.size;
+    int header_len = 0;
+    char hdr[8];
+
+    if (s->cfg_add_iec61937_header && s->pkt.size > 5) {
+        int bsmod = s->pkt.data[5] & 0x7;
+        int len = frame_size;
+
+        frame_size = AC3_FRAME_SIZE * 2 * 2;
+        header_len = 8;
+
+        AV_WL16(hdr,     0xF872);   // iec 61937 syncword 1
+        AV_WL16(hdr + 2, 0x4E1F);   // iec 61937 syncword 2
+        hdr[5] = bsmod;             // bsmod
+        hdr[4] = 0x01;              // data-type ac3
+        AV_WL16(hdr + 6, len << 3); // number of bits in payload
+    }
+
+    if (frame_size > out->samples * out->sstride)
+        abort();
+
+    char *buf = (char *)out->planes[0];
+    memcpy(buf, hdr, header_len);
+    memcpy(buf + header_len, s->pkt.data, s->pkt.size);
+    memset(buf + header_len + s->pkt.size, 0,
+            frame_size - (header_len + s->pkt.size));
+    swap_16((uint16_t *)(buf + header_len), s->pkt.size / 2);
+    out->samples = frame_size / out->sstride;
+    af_add_output_frame(af, out);
     return 0;
 }
 
@@ -260,7 +265,8 @@ static int af_open(struct af_instance* af){
     af_ac3enc_t *s = af->priv;
     af->control=control;
     af->uninit=uninit;
-    af->filter=filter;
+    af->filter_frame = filter_frame;
+    af->filter_out = filter_out;
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
     if (!s->lavc_acodec) {
@@ -291,7 +297,7 @@ static int af_open(struct af_instance* af){
 
     av_init_packet(&s->pkt);
 
-    s->pending = mp_audio_buffer_create(af);
+    s->input = talloc_zero(s, struct mp_audio);
 
     if (s->cfg_bit_rate) {
         int i;
