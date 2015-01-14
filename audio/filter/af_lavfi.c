@@ -207,74 +207,86 @@ static int control(struct af_instance *af, int cmd, void *arg)
     return AF_UNKNOWN;
 }
 
-static int filter(struct af_instance *af, struct mp_audio *data, int flags)
+static int filter_frame(struct af_instance *af, struct mp_audio *data)
 {
     struct priv *p = af->priv;
-    struct mp_audio *r = af->data;
-    bool eof = data->samples == 0 && (flags & AF_FILTER_FLAG_EOF);
     AVFilterLink *l_in = p->in->outputs[0];
 
-    AVFrame *frame = av_frame_alloc();
-    frame->nb_samples = data->samples;
-    frame->format = l_in->format;
+    AVFrame *frame = NULL;
+    if (data) {
+        frame = av_frame_alloc();
+        if (!frame)
+            goto error;
 
-    // Timebase is 1/sample_rate
-    frame->pts = p->samples_in;
+        frame->nb_samples = data->samples;
+        frame->format = l_in->format;
 
-    frame->channel_layout = l_in->channel_layout;
-    frame->sample_rate = l_in->sample_rate;
+        // Timebase is 1/sample_rate
+        frame->pts = p->samples_in;
+
+        frame->channel_layout = l_in->channel_layout;
+        frame->sample_rate = l_in->sample_rate;
 #if LIBAVFILTER_VERSION_MICRO >= 100
-    // FFmpeg being a stupid POS
-    frame->channels = l_in->channels;
+        // FFmpeg being a stupid POS
+        frame->channels = l_in->channels;
 #endif
 
-    frame->extended_data = frame->data;
-    for (int n = 0; n < data->num_planes; n++)
-        frame->data[n] = data->planes[n];
-    frame->linesize[0] = frame->nb_samples * data->sstride;
+        frame->extended_data = frame->data;
+        for (int n = 0; n < data->num_planes; n++)
+            frame->data[n] = data->planes[n];
+        frame->linesize[0] = frame->nb_samples * data->sstride;
 
-    if (av_buffersrc_add_frame(p->in, eof ? NULL : frame) < 0) {
-        av_frame_free(&frame);
-        return -1;
+        p->samples_in += data->samples;
     }
+
+    if (av_buffersrc_add_frame(p->in, frame) < 0)
+        goto error;
+
     av_frame_free(&frame);
+    talloc_free(data);
+    return 0;
+error:
+    av_frame_free(&frame);
+    talloc_free(data);
+    return -1;
+}
 
-    int64_t out_pts = AV_NOPTS_VALUE;
-    r->samples = 0;
-    for (;;) {
-        frame = av_frame_alloc();
-        if (av_buffersink_get_frame(p->out, frame) < 0) {
-            // Not an error situation - no more output buffers in queue.
-            av_frame_free(&frame);
-            break;
-        }
+static int filter_out(struct af_instance *af)
+{
+    struct priv *p = af->priv;
 
-        mp_audio_realloc_min(r, r->samples + frame->nb_samples);
-        for (int n = 0; n < r->num_planes; n++) {
-            memcpy((char *)r->planes[n] + r->samples * r->sstride,
-                   frame->extended_data[n], frame->nb_samples * r->sstride);
-        }
-        r->samples += frame->nb_samples;
+    AVFrame *frame = av_frame_alloc();
+    if (!frame)
+        goto error;
 
-        if (out_pts == AV_NOPTS_VALUE)
-            out_pts = frame->pts;
-
+    int err = av_buffersink_get_frame(p->out, frame);
+    if (err == AVERROR(EAGAIN) || err == AVERROR_EOF) {
+        // Not an error situation - no more output buffers in queue.
         av_frame_free(&frame);
+        return 0;
     }
 
-    p->samples_in += data->samples;
+    struct mp_audio *out = mp_audio_from_avframe(frame);
+    if (!out)
+        goto error;
 
-    if (out_pts != AV_NOPTS_VALUE) {
-        double in_time = p->samples_in / (double)data->rate;
-        double out_time = out_pts * av_q2d(p->timebase_out);
+    mp_audio_copy_config(out, af->data);
+
+    if (frame->pts != AV_NOPTS_VALUE) {
+        double in_time = p->samples_in / (double)af->fmt_in.rate;
+        double out_time = frame->pts * av_q2d(p->timebase_out);
         // Need pts past the last output sample.
-        out_time += r->samples / (double)r->rate;
+        out_time += out->samples / (double)out->rate;
 
         af->delay = in_time - out_time;
     }
 
-    *data = *r;
+    af_add_output_frame(af, out);
+    av_frame_free(&frame);
     return 0;
+error:
+    av_frame_free(&frame);
+    return -1;
 }
 
 static void uninit(struct af_instance *af)
@@ -286,7 +298,8 @@ static int af_open(struct af_instance *af)
 {
     af->control = control;
     af->uninit = uninit;
-    af->filter = filter;
+    af->filter_frame = filter_frame;
+    af->filter_out = filter_out;
     // Removing this requires fixing AVFrame.data vs. AVFrame.extended_data
     assert(MP_NUM_CHANNELS <= AV_NUM_DATA_POINTERS);
     return AF_OK;
