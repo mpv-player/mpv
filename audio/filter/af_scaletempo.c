@@ -84,7 +84,7 @@ typedef struct af_scaletempo_s
 static int fill_queue(struct af_instance *af, struct mp_audio *data, int offset)
 {
     af_scaletempo_t *s = af->priv;
-    int bytes_in = mp_audio_psize(data) - offset;
+    int bytes_in = (data ? mp_audio_psize(data) : 0) - offset;
     int offset_unchanged = offset;
 
     if (s->bytes_to_slide > 0) {
@@ -210,21 +210,28 @@ static void output_overlap_s16(af_scaletempo_t *s, void *buf_out,
     }
 }
 
-// Filter data through filter
-static int filter(struct af_instance *af, struct mp_audio *data, int flags)
+static int filter(struct af_instance *af, struct mp_audio *data)
 {
     af_scaletempo_t *s = af->priv;
 
     if (s->scale == 1.0) {
         af->delay = 0;
+        af_add_output_frame(af, data);
         return 0;
     }
 
-    mp_audio_realloc_min(af->data,
-        ((int)(data->samples / s->frames_stride_scaled) + 1) * s->frames_stride);
+    int in_samples = data ? data->samples : 0;
+    struct mp_audio *out = mp_audio_pool_get(af->out_pool, af->data,
+        ((int)(in_samples / s->frames_stride_scaled) + 1) * s->frames_stride);
+    if (!out) {
+        talloc_free(data);
+        return -1;
+    }
+    if (data)
+        mp_audio_copy_attributes(out, data);
 
     int offset_in = fill_queue(af, data, 0);
-    int8_t *pout = af->data->planes[0];
+    int8_t *pout = out->planes[0];
     while (s->bytes_queued >= s->bytes_queue) {
         int ti;
         float tf;
@@ -257,10 +264,15 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
     // output corresponding to some length of input can be decided and written
     // after receiving only a part of that input.
     af->delay = (s->bytes_queued - s->bytes_to_slide) / s->scale
-                / af->data->sstride / af->data->rate;
+                / out->sstride / out->rate;
 
-    data->planes[0] = af->data->planes[0];
-    data->samples   = (pout - (int8_t *)af->data->planes[0]) / af->data->sstride;
+    out->samples = (pout - (int8_t *)out->planes[0]) / out->sstride;
+    talloc_free(data);
+    if (out->samples) {
+        af_add_output_frame(af, out);
+    } else {
+        talloc_free(out);
+    }
     return 0;
 }
 
@@ -454,7 +466,7 @@ static int af_open(struct af_instance *af)
 
     af->control   = control;
     af->uninit    = uninit;
-    af->filter    = filter;
+    af->filter_frame = filter;
 
     s->speed_tempo = !!(s->speed_opt & SCALE_TEMPO);
     s->speed_pitch = !!(s->speed_opt & SCALE_PITCH);
