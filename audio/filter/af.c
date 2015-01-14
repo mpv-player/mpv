@@ -531,6 +531,7 @@ static int af_reinit(struct af_stream *s)
         if (!mp_audio_config_valid(&in))
             goto error;
 
+        af->fmt_in = in;
         int rv = af->control(af, AF_CONTROL_REINIT, &in);
         if (rv == AF_OK && !mp_audio_config_equals(&in, af->prev->data))
             rv = AF_FALSE; // conversion filter needed
@@ -538,6 +539,7 @@ static int af_reinit(struct af_stream *s)
         case AF_OK:
             if (!mp_audio_config_valid(af->data))
                 goto error;
+            af->fmt_out = *af->data;
             af = af->next;
             break;
         case AF_FALSE: { // Configuration filter is needed
