@@ -217,8 +217,8 @@ int audio_decode(struct dec_audio *da, struct mp_audio_buffer *outbuf,
                 copy_output(afs, outbuf, minsamples, true);
                 break;
             }
-
-            assert(mpa);
+            if (!mpa)
+                continue;
 
             da->pts_offset += mpa->samples;
             da->decode_format = *mpa;
