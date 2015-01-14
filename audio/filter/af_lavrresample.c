@@ -82,7 +82,7 @@ struct af_resample {
     // At least libswresample keeps a pointer around for this:
     int reorder_in[MP_NUM_CHANNELS];
     int reorder_out[MP_NUM_CHANNELS];
-    uint8_t *reorder_buffer;
+    struct mp_audio_pool *reorder_buffer;
 };
 
 #if HAVE_LIBAVRESAMPLE
@@ -309,47 +309,69 @@ static void reorder_planes(struct mp_audio *mpa, int *reorder)
     }
 }
 
-static int filter(struct af_instance *af, struct mp_audio *data, int flags)
+static int resample_frame(struct AVAudioResampleContext *r,
+                          struct mp_audio *out, struct mp_audio *in)
+{
+    return avresample_convert(r,
+        out ? (uint8_t **)out->planes : NULL,
+        out ? mp_audio_get_allocated_size(out) : 0,
+        out ? out->samples : 0,
+        in ? (uint8_t **)in->planes : NULL,
+        in ? mp_audio_get_allocated_size(in) : 0,
+        in ? in->samples : 0);
+}
+
+static int filter(struct af_instance *af, struct mp_audio *in)
 {
     struct af_resample *s = af->priv;
-    struct mp_audio *in   = data;
-    struct mp_audio *out  = af->data;
 
-    out->samples = avresample_available(s->avrctx) +
-        av_rescale_rnd(get_delay(s) + in->samples,
+    int samples = avresample_available(s->avrctx) +
+        av_rescale_rnd(get_delay(s) + (in ? in->samples : 0),
                        s->ctx.out_rate, s->ctx.in_rate, AV_ROUND_UP);
+    struct mp_audio *out = mp_audio_pool_get(af->out_pool, af->data, samples);
+    if (!out)
+        goto error;
+    if (in)
+        mp_audio_copy_attributes(out, in);
 
     mp_audio_realloc_min(out, out->samples);
 
     af->delay = get_delay(s) / (double)s->ctx.in_rate;
 
     if (out->samples) {
-        out->samples = avresample_convert(s->avrctx,
-            (uint8_t **) out->planes, out->samples * out->sstride, out->samples,
-            (uint8_t **) in->planes,  in->samples  * in->sstride,  in->samples);
+        out->samples = resample_frame(s->avrctx, out, in);
         if (out->samples < 0)
-            return -1; // error
+            goto error;
     }
-
-    *data = *out;
 
     if (needs_reorder(s->reorder_out, out->nch)) {
         if (af_fmt_is_planar(out->format)) {
-            reorder_planes(data, s->reorder_out);
+            reorder_planes(out, s->reorder_out);
         } else if (out->samples) {
-            int out_size = out->samples * out->sstride;
-            if (talloc_get_size(s->reorder_buffer) < out_size)
-                s->reorder_buffer = talloc_realloc_size(s, s->reorder_buffer, out_size);
-            data->planes[0] = s->reorder_buffer;
-            int out_samples = avresample_convert(s->avrctx_out,
-                    (uint8_t **) data->planes, out_size, out->samples,
-                    (uint8_t **) out->planes, out_size, out->samples);
-            if (out_samples < 0)
-                MP_ERR(af, "Reordering failed.\n");
+            struct mp_audio *new = mp_audio_pool_get(s->reorder_buffer, out,
+                                                     out->samples);
+            if (!new)
+                goto error;
+            mp_audio_copy_attributes(new, out);
+            int out_samples = resample_frame(s->avrctx_out, new, out);
+            talloc_free(out);
+            out = new;
+            if (out_samples != new->samples)
+                goto error;
         }
     }
 
+    talloc_free(in);
+    if (out->samples) {
+        af_add_output_frame(af, out);
+    } else {
+        talloc_free(out);
+    }
     return 0;
+error:
+    talloc_free(in);
+    talloc_free(out);
+    return -1;
 }
 
 static int af_open(struct af_instance *af)
@@ -358,13 +380,14 @@ static int af_open(struct af_instance *af)
 
     af->control = control;
     af->uninit  = uninit;
-    af->filter  = filter;
+    af->filter_frame = filter;
 
     if (s->opts.cutoff <= 0.0)
         s->opts.cutoff = af_resample_default_cutoff(s->opts.filter_size);
 
     s->avrctx = avresample_alloc_context();
     s->avrctx_out = avresample_alloc_context();
+    s->reorder_buffer = mp_audio_pool_create(s);
 
     if (s->avrctx && s->avrctx_out) {
         return AF_OK;
