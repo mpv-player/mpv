@@ -69,8 +69,7 @@ enum mp_csp_prim {
 
 enum mp_csp_trc {
     MP_CSP_TRC_NONE,
-    MP_CSP_TRC_BT_2020_APPROX,
-    MP_CSP_TRC_BT_2020_EXACT,
+    MP_CSP_TRC_BT_1886,
     MP_CSP_TRC_SRGB
 };
 

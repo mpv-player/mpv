@@ -568,16 +568,6 @@ Available video output drivers are:
         3
             absolute colorimetric
 
-    ``approx-gamma``
-        Approximate the actual gamma function as a pure power curve of
-        1.95. A number of video editing programs and studios apparently use this
-        for mastering instead of the true curve. Most notably, anything in the
-        Apple ecosystem uses this approximation - including all programs
-        compatible with it. It's a sound idea to try enabling this flag first
-        when watching videos and shows to see if things look better that way.
-
-        This only affects the output when using either ``icc-profile`` or ``srgb``.
-
     ``3dlut-size=<r>x<g>x<b>``
         Size of the 3D LUT generated from the ICC profile in each dimension.
         Default is 128x256x64.
