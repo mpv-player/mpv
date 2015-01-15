@@ -98,9 +98,15 @@ static int control(struct af_instance* af, int cmd, void* arg)
 }
 #endif
 
-// Filter data through filter
-static int filter(struct af_instance* af, struct mp_audio* data, int flags)
+static int filter_frame(struct af_instance *af, struct mp_audio *data)
 {
+  if (!data)
+    return 0;
+  if (af_make_writeable(af, data) < 0) {
+    talloc_free(data);
+    return -1;
+  }
+
   struct mp_audio*    c   = data;        // Current working data
   af_sub_t*     s   = af->priv; // Setup for this instance
   float*        a   = c->planes[0];      // Audio data
@@ -117,13 +123,14 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
     IIR(x , s->w[1], s->q[1], a[i+ch]);
   }
 
+  af_add_output_frame(af, data);
   return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->filter=filter;
+  af->filter_frame = filter_frame;
   return AF_OK;
 }
 

@@ -48,9 +48,15 @@ static int control(struct af_instance* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Filter data through filter
-static int filter(struct af_instance* af, struct mp_audio* data, int f)
+static int filter_frame(struct af_instance *af, struct mp_audio *data)
 {
+  if (!data)
+    return 0;
+  if (af_make_writeable(af, data) < 0) {
+      talloc_free(data);
+    return 0;
+  }
+
   af_sweept *s = af->priv;
   int i, j;
   int16_t *in = (int16_t*)data->planes[0];
@@ -64,12 +70,13 @@ static int filter(struct af_instance* af, struct mp_audio* data, int f)
       if(2*s->x*s->delta >= 3.141592) s->x=0;
   }
 
+  af_add_output_frame(af, data);
   return 0;
 }
 
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->filter=filter;
+  af->filter_frame = filter_frame;
   return AF_OK;
 }
 

@@ -41,9 +41,6 @@ typedef struct af_sinesuppress_s
     double pos;
 }af_sinesuppress_t;
 
-static int play_s16(struct af_instance* af, struct mp_audio* data, int f);
-//static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data);
-
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
@@ -54,18 +51,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
     mp_audio_set_num_channels(af->data, 1);
-#if 0
-    if (((struct mp_audio*)arg)->format == AF_FORMAT_FLOAT)
-    {
-        af->data->format = AF_FORMAT_FLOAT;
-        af->data->bps = 4;
-        af->play = play_float;
-    }// else
-#endif
-    {
-        mp_audio_set_format(af->data, AF_FORMAT_S16);
-        af->filter = play_s16;
-    }
+    mp_audio_set_format(af->data, AF_FORMAT_S16);
 
     return af_test_output(af,(struct mp_audio*)arg);
   }
@@ -73,9 +59,15 @@ static int control(struct af_instance* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Filter data through filter
-static int play_s16(struct af_instance* af, struct mp_audio* data, int f)
+static int play_s16(struct af_instance *af, struct mp_audio *data)
 {
+  if (!data)
+    return 0;
+  if (af_make_writeable(af, data) < 0) {
+    talloc_free(data);
+    return -1;
+  }
+
   af_sinesuppress_t *s = af->priv;
   register int i = 0;
   int16_t *a = (int16_t*)data->planes[0];       // Audio data
@@ -101,37 +93,14 @@ static int play_s16(struct af_instance* af, struct mp_audio* data, int f)
 
    MP_VERBOSE(af, "f:%8.2f: amp:%8.2f\n", s->freq, sqrt(s->real*s->real + s->imag*s->imag) / s->ref);
 
+  af_add_output_frame(af, data);
   return 0;
 }
-
-#if 0
-static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data)
-{
-  af_sinesuppress_t *s = af->setup;
-  register int i = 0;
-  float *a = (float*)data->audio;       // Audio data
-  int len = data->len/4;                // Number of samples
-  float avg, l, r;
-
-  for (i = 0; i < len; i+=2)
-  {
-    avg = (a[i] + a[i + 1]) / 2;
-
-/*    l = avg + (s->mul * (a[i] - avg));
-    r = avg + (s->mul * (a[i + 1] - avg));*/
-
-    a[i] = af_softclip(l);
-    a[i + 1] = af_softclip(r);
-  }
-
-  return data;
-}
-#endif
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->filter=play_s16;
+  af->filter_frame = play_s16;
   return AF_OK;
 }
 

@@ -35,9 +35,6 @@ typedef struct af_extrastereo_s
     float mul;
 }af_extrastereo_t;
 
-static int play_s16(struct af_instance* af, struct mp_audio* data, int f);
-static int play_float(struct af_instance* af, struct mp_audio* data, int f);
-
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
@@ -49,14 +46,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
     mp_audio_force_interleaved_format(af->data);
     mp_audio_set_num_channels(af->data, 2);
-    if (af->data->format == AF_FORMAT_FLOAT)
-    {
-        af->filter = play_float;
-    }// else
-    {
+    if (af->data->format != AF_FORMAT_FLOAT)
         mp_audio_set_format(af->data, AF_FORMAT_S16);
-        af->filter = play_s16;
-    }
 
     return af_test_output(af,(struct mp_audio*)arg);
   }
@@ -65,9 +56,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
 }
 
 // Filter data through filter
-static int play_s16(struct af_instance* af, struct mp_audio* data, int f)
+static void play_s16(af_extrastereo_t *s, struct mp_audio* data)
 {
-  af_extrastereo_t *s = af->priv;
   register int i = 0;
   int16_t *a = (int16_t*)data->planes[0];       // Audio data
   int len = data->samples*data->nch;            // Number of samples
@@ -83,13 +73,10 @@ static int play_s16(struct af_instance* af, struct mp_audio* data, int f)
     a[i] = MPCLAMP(l, SHRT_MIN, SHRT_MAX);
     a[i + 1] = MPCLAMP(r, SHRT_MIN, SHRT_MAX);
   }
-
-  return 0;
 }
 
-static int play_float(struct af_instance* af, struct mp_audio* data, int f)
+static void play_float(af_extrastereo_t *s, struct mp_audio* data)
 {
-  af_extrastereo_t *s = af->priv;
   register int i = 0;
   float *a = (float*)data->planes[0];   // Audio data
   int len = data->samples * data->nch;  // Number of samples
@@ -105,14 +92,29 @@ static int play_float(struct af_instance* af, struct mp_audio* data, int f)
     a[i] = af_softclip(l);
     a[i + 1] = af_softclip(r);
   }
+}
 
-  return 0;
+static int filter_frame(struct af_instance *af, struct mp_audio *data)
+{
+    if (!data)
+        return 0;
+    if (af_make_writeable(af, data) < 0) {
+        talloc_free(data);
+        return -1;
+    }
+    if (data->format == AF_FORMAT_FLOAT) {
+        play_float(af->priv, data);
+    } else {
+        play_s16(af->priv, data);
+    }
+    af_add_output_frame(af, data);
+    return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->filter=play_s16;
+  af->filter_frame = filter_frame;
 
   return AF_OK;
 }

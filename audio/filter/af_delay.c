@@ -96,15 +96,19 @@ static void uninit(struct af_instance* af)
       free(((af_delay_t*)(af->priv))->q[i]);
 }
 
-// Filter data through filter
-static int filter(struct af_instance* af, struct mp_audio* data, int flags)
+static int filter_frame(struct af_instance *af, struct mp_audio *c)
 {
-  struct mp_audio*      c   = data;      // Current working data
+  if (!c)
+    return 0;
   af_delay_t*   s   = af->priv; // Setup for this instance
   int           nch = c->nch;    // Number of channels
   int           len = mp_audio_psize(c)/c->bps; // Number of sample in data chunk
   int           ri  = 0;
   int           ch,i;
+  if (af_make_writeable(af, c) < 0) {
+    talloc_free(c);
+    return -1;
+  }
   for(ch=0;ch<nch;ch++){
     switch(c->bps){
     case 1:{
@@ -152,6 +156,7 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
     }
   }
   s->ri = ri;
+  af_add_output_frame(af, c);
   return 0;
 }
 
@@ -159,7 +164,7 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 static int af_open(struct af_instance* af){
     af->control=control;
     af->uninit=uninit;
-    af->filter=filter;
+    af->filter_frame = filter_frame;
     af_delay_t *s = af->priv;
     int n = 1;
     int i = 0;

@@ -565,7 +565,10 @@ static void uninit(struct af_instance *af) {
  * \return      Either AF_ERROR or AF_OK
  */
 
-static int filter(struct af_instance *af, struct mp_audio *data, int flags) {
+static int filter_frame(struct af_instance *af, struct mp_audio *data)
+{
+    if (!data)
+        return 0;
     af_ladspa_t *setup = af->priv;
     const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
     float *audio = (float*)data->planes[0];
@@ -574,8 +577,14 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags) {
     int rate = data->rate;
     int i, p;
 
-    if (setup->status !=AF_OK)
+    if (setup->status !=AF_OK) {
+        talloc_free(data);
         return -1;
+    }
+    if (af_make_writeable(af, data) < 0) {
+        talloc_free(data);
+        return -1;
+    }
 
     /* See if it's the first call. If so, setup inbufs/outbufs, instantiate
      * plugin, connect ports and activate plugin
@@ -721,6 +730,7 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags) {
 
     /* done */
 
+    af_add_output_frame(af, data);
     return 0;
 }
 
@@ -737,7 +747,7 @@ static int af_open(struct af_instance *af) {
 
     af->control=control;
     af->uninit=uninit;
-    af->filter=filter;
+    af->filter_frame = filter_frame;
 
     af_ladspa_t *setup = af->priv;
 

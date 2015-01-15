@@ -37,26 +37,49 @@ struct af_bs2b {
     t_bs2bdp filter;    ///< instance of a library filter
 };
 
-#define FILTER(name, type) \
-static int filter_##name(struct af_instance *af, struct mp_audio *data, int f) \
+#define DEF_FILTER(fmt, name) \
+static int filter_##name(struct af_instance *af, struct mp_audio *data) \
 { \
-    /* filter is called for all pairs of samples available in the buffer */ \
+    if (!data) \
+        return 0; \
+    if (af_make_writeable(af, data) < 0) { \
+        talloc_free(data); \
+        return -1; \
+    } \
     bs2b_cross_feed_##name(((struct af_bs2b*)(af->priv))->filter, \
-        (type*)(data->planes[0]), data->samples); \
-\
+        (data->planes[0]), data->samples); \
+    af_add_output_frame(af, data); \
     return 0; \
 }
 
-FILTER(f, float)
-FILTER(s32, int32_t)
-FILTER(u32, uint32_t)
-FILTER(s24, bs2b_int24_t)
-FILTER(u24, bs2b_uint24_t)
-FILTER(s16, int16_t)
-FILTER(u16, uint16_t)
-FILTER(s8, int8_t)
-FILTER(u8, uint8_t)
+#define GET_FILTER(fmt, name) \
+    case AF_FORMAT_##fmt: return filter_##name;
 
+#define FILTERS \
+    FILTER(FLOAT,   f)      \
+    FILTER(S32,     s32)    \
+    FILTER(U32,     u32)    \
+    FILTER(S24,     s24)    \
+    FILTER(U24,     u24)    \
+    FILTER(S16,     s16)    \
+    FILTER(U16,     u16)    \
+    FILTER(S8,      s8)     \
+    FILTER(U8,      u8)
+
+#define FILTER DEF_FILTER
+FILTERS
+#undef FILTER
+
+typedef int (*filter)(struct af_instance *af, struct mp_audio *d);
+static filter get_filter(int fmt)
+{
+    switch (fmt) {
+#define FILTER GET_FILTER
+FILTERS
+#undef FILTER
+    default: return NULL;
+    }
+}
 
 /// Initialization and runtime control
 static int control(struct af_instance *af, int cmd, void *arg)
@@ -76,38 +99,10 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         /* check for formats supported by libbs2b
            and assign corresponding handlers */
-        switch (format) {
-            case AF_FORMAT_FLOAT:
-                af->filter = filter_f;
-                break;
-            case AF_FORMAT_S32:
-                af->filter = filter_s32;
-                break;
-            case AF_FORMAT_U32:
-                af->filter = filter_u32;
-                break;
-            case AF_FORMAT_S24:
-                af->filter = filter_s24;
-                break;
-            case AF_FORMAT_U24:
-                af->filter = filter_u24;
-                break;
-            case AF_FORMAT_S16:
-                af->filter = filter_s16;
-                break;
-            case AF_FORMAT_U16:
-                af->filter = filter_u16;
-                break;
-            case AF_FORMAT_S8:
-                af->filter = filter_s8;
-                break;
-            case AF_FORMAT_U8:
-                af->filter = filter_u8;
-                break;
-            default:
-                af->filter = filter_f;
-                mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
-                break;
+        af->filter_frame = get_filter(format);
+        if (!af->filter_frame) {
+            af->filter_frame = filter_f;
+            mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
         }
 
         // bs2b have srate limits, try to resample if needed
