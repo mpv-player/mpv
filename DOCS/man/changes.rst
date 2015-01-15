@@ -71,7 +71,11 @@ Video
 * Support for libavfilter (for video->video and audio->audio). This allows
   using most of FFmpeg's filters, which improve greatly on the old MPlayer
   filters in features, performance, and correctness.
-* More correct color reproduction (color matrix generation).
+* More correct color reproduction (color matrix generation), including support
+  for BT.2020 (Ultra HD) and linear XYZ (Digital Cinema) inputs.
+* Support for color managed displays, via ICC profiles.
+* More high-quality image resamplers (see the ``lscale`` suboption).
+* Support for scaling in (sigmoidized) linear light.
 * Better subtitle rendering using libass by default.
 * Improvements when playing multiple files (``--fixed-vo`` is default, do not
   reset settings by default when playing a new file).
