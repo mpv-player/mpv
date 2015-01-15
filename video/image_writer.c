@@ -296,7 +296,11 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
         }
         mp_image_copy_attributes(dst, image);
 
-        mp_image_swscale(dst, image, mp_sws_hq_flags);
+        if (mp_image_swscale(dst, image, mp_sws_hq_flags) < 0) {
+            mp_err(log, "Error when converting image.\n");
+            talloc_free(dst);
+            return 0;
+        }
 
         allocated_image = dst;
         image = dst;

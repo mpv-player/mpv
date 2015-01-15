@@ -268,24 +268,26 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
     return 0;
 }
 
-void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
-                      int my_sws_flags)
+int mp_image_swscale(struct mp_image *dst, struct mp_image *src,
+                     int my_sws_flags)
 {
     struct mp_sws_context *ctx = mp_sws_alloc(NULL);
     ctx->flags = my_sws_flags;
-    mp_sws_scale(ctx, dst, src);
+    int res = mp_sws_scale(ctx, dst, src);
     talloc_free(ctx);
+    return res;
 }
 
-void mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
-                            float gblur)
+int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
+                           float gblur)
 {
     struct mp_sws_context *ctx = mp_sws_alloc(NULL);
     ctx->flags = mp_sws_hq_flags;
     ctx->src_filter = sws_getDefaultFilter(gblur, gblur, 0, 0, 0, 0, 0);
     ctx->force_reload = true;
-    mp_sws_scale(ctx, dst, src);
+    int res = mp_sws_scale(ctx, dst, src);
     talloc_free(ctx);
+    return res;
 }
 
 int mp_sws_get_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
