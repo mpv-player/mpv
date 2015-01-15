@@ -72,6 +72,7 @@ local state = {
     timer = nil,
     cache_idle = false,
     idle = false,
+    enabled = true,
 }
 
 
@@ -1894,10 +1895,13 @@ function tick()
 end
 
 function do_enable_keybindings()
-    mp.enable_key_bindings("showhide", "allow-vo-dragging|allow-hide-cursor")
+    if state.enabled then
+        mp.enable_key_bindings("showhide", "allow-vo-dragging|allow-hide-cursor")
+    end
 end
 
 function enable_osc(enable)
+    state.enabled = enable
     if enable then
         do_enable_keybindings()
         show_osc()
