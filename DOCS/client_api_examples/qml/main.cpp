@@ -1,6 +1,7 @@
 #include "main.h"
 
 #include <stdexcept>
+#include <clocale>
 
 #include <QObject>
 #include <QtGlobal>
@@ -120,6 +121,10 @@ QQuickFramebufferObject::Renderer *MpvObject::createRenderer() const
 int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
+
+    // Qt sets the locale in the QGuiApplication constructor, but libmpv
+    // requires the LC_NUMERIC category to be set to "C", so change it back.
+    std::setlocale(LC_NUMERIC, "C");
 
     qmlRegisterType<MpvObject>("mpvtest", 1, 0, "MpvObject");
 
