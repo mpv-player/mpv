@@ -507,6 +507,8 @@ static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             mpctx->sleeptime = 0;
             return; // retry on next iteration
         }
+        if (status == AD_ERR)
+            mpctx->sleeptime = 0;
     }
 
     // If EOF was reached before, but now something can be decoded, try to
