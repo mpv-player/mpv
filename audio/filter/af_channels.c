@@ -181,15 +181,20 @@ static int control(struct af_instance* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Filter data through filter
-static int filter(struct af_instance* af, struct mp_audio* data, int flags)
+static int filter_frame(struct af_instance *af, struct mp_audio *c)
 {
-  struct mp_audio*       c = data;                      // Current working data
-  struct mp_audio*       l = af->data;                  // Local data
   af_channels_t* s = af->priv;
   int            i;
 
-  mp_audio_realloc_min(af->data, data->samples);
+  if (!c)
+    return 0;
+
+  struct mp_audio *l = mp_audio_pool_get(af->out_pool, &af->fmt_out, c->samples);
+  if (!l) {
+    talloc_free(c);
+    return -1;
+  }
+  mp_audio_copy_attributes(l, c);
 
   // Reset unused channels
   memset(l->planes[0],0,mp_audio_psize(c) / c->nch * l->nch);
@@ -199,17 +204,15 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
       copy(af, c->planes[0],l->planes[0],c->nch,s->route[i][FR],
            l->nch,s->route[i][TO],mp_audio_psize(c),c->bps);
 
-  // Set output data
-  c->planes[0] = l->planes[0];
-  mp_audio_set_channels(c, &l->channels);
-
+  talloc_free(c);
+  af_add_output_frame(af, l);
   return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
     af->control=control;
-    af->filter=filter;
+    af->filter_frame = filter_frame;
     af_channels_t *s = af->priv;
 
     // If router scan commandline for routing pairs

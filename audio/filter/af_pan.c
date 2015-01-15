@@ -107,11 +107,17 @@ static int control(struct af_instance* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Filter data through filter
-static int filter(struct af_instance* af, struct mp_audio* data, int flags)
+static int filter_frame(struct af_instance *af, struct mp_audio *c)
 {
-  struct mp_audio*    c    = data;              // Current working data
-  struct mp_audio*      l    = af->data;        // Local data
+  if (!c)
+    return 0;
+  struct mp_audio *l = mp_audio_pool_get(af->out_pool, &af->fmt_out, c->samples);
+  if (!l) {
+    talloc_free(c);
+    return -1;
+  }
+  mp_audio_copy_attributes(l, c);
+
   af_pan_t*     s    = af->priv;        // Setup for this instance
   float*        in   = c->planes[0];    // Input audio data
   float*        out  = NULL;            // Output audio data
@@ -119,8 +125,6 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
   int           nchi = c->nch;          // Number of input channels
   int           ncho = l->nch;          // Number of output channels
   register int  j,k;
-
-  mp_audio_realloc_min(af->data, data->samples);
 
   out = l->planes[0];
   // Execute panning
@@ -137,17 +141,15 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags)
     in+= nchi;
   }
 
-  // Set output data
-  c->planes[0] = l->planes[0];
-  set_channels(c, l->nch);
-
+  talloc_free(c);
+  af_add_output_frame(af, l);
   return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
     af->control=control;
-    af->filter=filter;
+    af->filter_frame = filter_frame;
     af_pan_t *s = af->priv;
     int   n = 0;
     int   j,k;

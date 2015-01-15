@@ -375,16 +375,25 @@ frequencies).
 2. A bass compensation is introduced to ensure that 0-200 Hz are not
 damped (without any real 3D acoustical image, however).
 */
-static int filter(struct af_instance *af, struct mp_audio *data, int flags)
+static int filter(struct af_instance *af, struct mp_audio *data)
 {
     af_hrtf_t *s = af->priv;
+
+    if (!data)
+        return 0;
+    struct mp_audio *outframe =
+        mp_audio_pool_get(af->out_pool, &af->fmt_out, data->samples);
+    if (!outframe) {
+        talloc_free(data);
+        return -1;
+    }
+    mp_audio_copy_attributes(outframe, data);
+
     short *in = data->planes[0]; // Input audio data
-    short *out = NULL; // Output audio data
+    short *out = outframe->planes[0]; // Output audio data
     short *end = in + data->samples * data->nch; // Loop end
     float common, left, right, diff, left_b, right_b;
     const int dblen = s->dlbuflen, hlen = s->hrflen, blen = s->basslen;
-
-    mp_audio_realloc_min(af->data, data->samples);
 
     if(s->print_flag) {
         s->print_flag = 0;
@@ -411,8 +420,6 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
           MP_INFO(af, "Using active matrix to decode rear center "
                  "channel\n");
     }
-
-    out = af->data->planes[0];
 
     /* MPlayer's 5 channel layout (notation for the variable):
      *
@@ -551,10 +558,8 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
             s->cyc_pos += dblen;
     }
 
-    /* Set output data */
-    data->planes[0] = af->data->planes[0];
-    mp_audio_set_num_channels(data, 2);
-
+    talloc_free(data);
+    af_add_output_frame(af, outframe);
     return 0;
 }
 
@@ -588,7 +593,7 @@ static int af_open(struct af_instance* af)
 
     af->control = control;
     af->uninit = uninit;
-    af->filter = filter;
+    af->filter_frame = filter;
 
     s = af->priv;
 

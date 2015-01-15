@@ -141,20 +141,26 @@ static const float steering_matrix[][12] = {
 // Experimental moving average dominance
 //static int amp_L = 0, amp_R = 0, amp_C = 0, amp_S = 0;
 
-// Filter data through filter
-static int filter(struct af_instance* af, struct mp_audio* data, int flags){
+static int filter_frame(struct af_instance *af, struct mp_audio *data)
+{
+  if (!data)
+    return 0;
+  struct mp_audio *outframe =
+    mp_audio_pool_get(af->out_pool, &af->fmt_out, data->samples);
+  if (!outframe) {
+    talloc_free(data);
+    return -1;
+  }
+  mp_audio_copy_attributes(outframe, data);
+
   af_surround_t* s   = (af_surround_t*)af->priv;
   const float*   m   = steering_matrix[0];
   float*         in  = data->planes[0];         // Input audio data
-  float*         out = NULL;            // Output audio data
+  float*         out = outframe->planes[0];     // Output audio data
   float*         end = in + data->samples * data->nch;
   int            i   = s->i;    // Filter queue index
   int            ri  = s->ri;   // Read index for delay queue
   int            wi  = s->wi;   // Write index for delay queue
-
-  mp_audio_realloc_min(af->data, data->samples);
-
-  out = af->data->planes[0];
 
   while(in < end){
     /* Dominance:
@@ -215,16 +221,14 @@ static int filter(struct af_instance* af, struct mp_audio* data, int flags){
   // Save indexes
   s->i  = i; s->ri = ri; s->wi = wi;
 
-  // Set output data
-  data->planes[0] = af->data->planes[0];
-  mp_audio_set_channels_old(data, af->data->nch);
-
+  talloc_free(data);
+  af_add_output_frame(af, outframe);
   return 0;
 }
 
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->filter=filter;
+  af->filter_frame = filter_frame;
   return AF_OK;
 }
 
