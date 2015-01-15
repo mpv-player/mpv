@@ -508,4 +508,7 @@ void main() {
 #else
     out_color = vec4(color, 1.0);
 #endif
+#ifdef USE_CUSTOM_SHADER
+    out_color = custom_shader(out_color);
+#endif
 }
