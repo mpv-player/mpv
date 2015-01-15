@@ -65,6 +65,7 @@ struct mpv_opengl_cb_context {
     mpv_opengl_cb_update_fn update_cb;
     void *update_cb_ctx;
     struct mp_image *waiting_frame;
+    struct mp_image *displayed_frame;
     struct mp_image **frame_queue;
     int queued_frames;
     struct mp_image_params img_params;
@@ -357,6 +358,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     pthread_mutex_lock(&p->ctx->lock);
     mp_image_setrefp(&p->ctx->waiting_frame, mpi);
+    mp_image_setrefp(&p->ctx->displayed_frame, mpi);
     talloc_free(mpi);
     pthread_mutex_unlock(&p->ctx->lock);
 }
@@ -486,6 +488,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
         update(p);
         pthread_mutex_unlock(&p->ctx->lock);
         return VO_TRUE;
+    case VOCTRL_SCREENSHOT: {
+        struct voctrl_screenshot_args *args = data;
+        pthread_mutex_lock(&p->ctx->lock);
+        args->out_image = mp_image_new_ref(p->ctx->displayed_frame);
+        pthread_mutex_unlock(&p->ctx->lock);
+        return VO_TRUE;
+    }
     case VOCTRL_SET_COMMAND_LINE: {
         char *arg = data;
         return reparse_cmdline(p, arg);
@@ -506,6 +515,7 @@ static void uninit(struct vo *vo)
 
     pthread_mutex_lock(&p->ctx->lock);
     forget_frames(p->ctx);
+    mp_image_unrefp(&p->ctx->displayed_frame);
     p->ctx->img_params = (struct mp_image_params){0};
     p->ctx->reconfigured = true;
     p->ctx->active = NULL;
