@@ -62,11 +62,6 @@ struct af_instance {
     struct replaygain_data *replaygain_data;
     int (*control)(struct af_instance *af, int cmd, void *arg);
     void (*uninit)(struct af_instance *af);
-    /* old filter function (use filter_frame instead)
-     * flags is a bit mask of AF_FILTER_FLAG_* values
-     * returns 0 on success, negative value on error
-     */
-    int (*filter)(struct af_instance *af, struct mp_audio *data, int flags);
     /* Feed a frame. The frame is NULL if EOF was reached, and the filter
      * should drain all remaining buffered data.
      * Use af_add_output_frame() to output data. The optional filter_out

@@ -803,43 +803,7 @@ static int af_do_filter(struct af_instance *af, struct mp_audio *frame)
 {
     if (frame)
         assert(mp_audio_config_equals(&af->fmt_in, frame));
-    int r = 0;
-    if (af->filter_frame) {
-        r = af->filter_frame(af, frame);
-        frame = NULL;
-    } else {
-        // Compatibility path.
-        int flags = 0;
-        struct mp_audio input;
-        char dummy[MP_NUM_CHANNELS];
-        if (frame) {
-            // We don't know if the filter will write; but it might possibly.
-            r = mp_audio_make_writeable(frame);
-            input = *frame;
-            // Don't give it a refcounted frame
-            for (int n = 0; n < MP_NUM_CHANNELS; n++)
-                input.allocated[n] = NULL;
-        } else {
-            input = af->fmt_in;
-            mp_audio_set_null_data(&input);
-            flags = AF_FILTER_FLAG_EOF;
-            for (int n = 0; n < MP_NUM_CHANNELS; n++)
-                input.planes[n] = &dummy[n];
-        }
-        if (r < 0)
-            goto done;
-        r = af->filter(af, &input, flags);
-        if (input.samples) {
-            struct mp_audio *new = mp_audio_pool_new_copy(af->out_pool, &input);
-            if (!new) {
-                r = -1;
-                goto done;
-            }
-            af_add_output_frame(af, new);
-        }
-    }
-done:
-    talloc_free(frame);
+    int r = af->filter_frame(af, frame);
     if (r < 0)
         MP_ERR(af, "Error filtering frame.\n");
     return r;
