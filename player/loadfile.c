@@ -270,13 +270,13 @@ static void enable_demux_thread(struct MPContext *mpctx)
     }
 }
 
-bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
+static bool timeline_set_part(struct MPContext *mpctx, int i, bool initial)
 {
     struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
     struct timeline_part *n = mpctx->timeline + i;
     mpctx->timeline_part = i;
     mpctx->video_offset = n->start - n->source_start;
-    if (n->source == p->source && !force)
+    if (n->source == p->source && !initial)
         return false;
 
     uninit_audio_chain(mpctx);
@@ -313,9 +313,11 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
             }
         }
     }
-    reselect_demux_streams(mpctx);
 
-    enable_demux_thread(mpctx);
+    if (!initial) {
+        reselect_demux_streams(mpctx);
+        enable_demux_thread(mpctx);
+    }
 
     return true;
 }
