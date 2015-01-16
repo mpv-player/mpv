@@ -1650,6 +1650,17 @@ Window
             screen height, make the window smaller until either its width is 90%
             of the screen, or its height is 80% of the screen.
 
+``--autofit-smaller=<[W[xH]]>``
+    This option behaves exactly like ``--autofit``, except that it sets the
+    minimum size of the window (just as ``--autofit-larger`` sets the maximum).
+
+    .. admonition:: Example
+
+        ``500x500``
+            Make the window at least 500 pixels wide and 500 pixels high
+            (depending on the video aspect ratio, the width or height will be
+            larger than 500 in order to keep the aspect ratio the same).
+
 ``--autosync=<factor>``
     Gradually adjusts the A/V sync based on audio delay measurements.
     Specifying ``--autosync=0``, the default, will cause frame timing to be

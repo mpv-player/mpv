@@ -37,7 +37,7 @@ static void calc_monitor_aspect(struct mp_vo_opts *opts, int scr_w, int scr_h,
 
 // Fit *w/*h into the size specified by geo.
 static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
-                          struct m_geometry *geo, bool allow_upscale)
+                          struct m_geometry *geo, bool allow_up, bool allow_down)
 {
     if (!geo->wh_valid)
         return;
@@ -46,13 +46,16 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
     int n_w = *w, n_h = *h;
     m_geometry_apply(&dummy, &dummy, &n_w, &n_h, scr_w, scr_h, geo);
 
-    if (!allow_upscale && *w <= n_w && *h <= n_h)
+    if (!allow_up && *w <= n_w && *h <= n_h)
+        return;
+    if (!allow_down && *w >= n_w && *h >= n_h)
         return;
 
     // If aspect mismatches, always make the window smaller than the fit box
+    // (Or larger, if allow_down==false.)
     double asp = (double)*w / *h;
     double n_asp = (double)n_w / n_h;
-    if (n_asp <= asp) {
+    if ((n_asp <= asp) == allow_down) {
         *w = n_w;
         *h = n_w / asp;
     } else {
@@ -95,8 +98,9 @@ void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
 
     calc_monitor_aspect(opts, scr_w, scr_h, &out_geo->monitor_par, &d_w, &d_h);
 
-    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit, true);
-    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_larger, false);
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit, true, true);
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_larger, false, true);
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_smaller, true, false);
 
     out_geo->win.x0 = (int)(scr_w - d_w) / 2;
     out_geo->win.y0 = (int)(scr_h - d_h) / 2;
