@@ -83,12 +83,14 @@ static void write_arg(bstr *cmdline, char *arg)
 // Convert an array of arguments to a properly escaped command-line string
 static wchar_t *write_cmdline(void *ctx, char **argv)
 {
+    // argv[0] should always be quoted. Otherwise, arguments may be interpreted
+    // as part of the program name. Also, it can't contain escape sequences.
     bstr cmdline = {0};
+    bstr_xappend_asprintf(NULL, &cmdline, "\"%s\"", argv[0]);
 
-    for (int i = 0; argv[i]; i++) {
+    for (int i = 1; argv[i]; i++) {
+        bstr_xappend(NULL, &cmdline, bstr0(" "));
         write_arg(&cmdline, argv[i]);
-        if (argv[i + 1])
-            bstr_xappend(NULL, &cmdline, bstr0(" "));
     }
 
     wchar_t *wcmdline = mp_from_utf8(ctx, cmdline.start);
