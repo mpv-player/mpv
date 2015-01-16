@@ -786,7 +786,7 @@ void write_video(struct MPContext *mpctx, double endpts)
     struct mp_image_params p = mpctx->next_frame[0]->params;
     if (!vo->params || !mp_image_params_equal(&p, vo->params)) {
         // Changing config deletes the current frame; wait until it's finished.
-        if (vo_still_displaying(vo) && !(opts->untimed || vo->driver->untimed))
+        if (vo_still_displaying(vo))
             return;
 
         const struct vo_driver *info = mpctx->video_out->driver;
@@ -824,6 +824,8 @@ void write_video(struct MPContext *mpctx, double endpts)
         diff = vpts1 - vpts0;
     if (diff < 0 && mpctx->d_video->fps > 0)
         diff = 1.0 / mpctx->d_video->fps; // fallback to demuxer-reported fps
+    if (opts->untimed || vo->driver->untimed || !(opts->frame_dropping & 1))
+        diff = -1; // disable frame dropping and aspects of frame timing
     if (diff >= 0) {
         // expected A/V sync correction is ignored
         diff /= opts->playback_speed;

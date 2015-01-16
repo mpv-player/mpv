@@ -562,8 +562,7 @@ static bool render_frame(struct vo *vo)
     int64_t next_vsync = prev_sync(vo, mp_time_us()) + in->vsync_interval;
     int64_t end_time = pts + duration;
 
-    if (!(vo->global->opts->frame_dropping & 1) || !in->hasframe_rendered ||
-        vo->driver->untimed || vo->driver->encode)
+    if (!in->hasframe_rendered)
         duration = -1; // disable framedrop
 
     in->dropped_frame = duration >= 0 && end_time < next_vsync;
