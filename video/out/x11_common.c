@@ -1599,20 +1599,6 @@ static void vo_x11_fullscreen(struct vo *vo)
     x11->pos_changed_during_fs = false;
 }
 
-static void vo_x11_ontop(struct vo *vo)
-{
-    struct mp_vo_opts *opts = vo->opts;
-    opts->ontop = !opts->ontop;
-
-    vo_x11_setlayer(vo, opts->ontop);
-}
-
-static void vo_x11_border(struct vo *vo)
-{
-    vo->opts->border = !vo->opts->border;
-    vo_x11_decoration(vo, vo->opts->border);
-}
-
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct mp_vo_opts *opts = vo->opts;
@@ -1624,14 +1610,14 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_FULLSCREEN:
         opts->fullscreen = !opts->fullscreen;
         vo_x11_fullscreen(vo);
-        *events |= VO_EVENT_RESIZE;
         return VO_TRUE;
     case VOCTRL_ONTOP:
-        vo_x11_ontop(vo);
+        opts->ontop = !opts->ontop;
+        vo_x11_setlayer(vo, opts->ontop);
         return VO_TRUE;
     case VOCTRL_BORDER:
-        vo_x11_border(vo);
-        *events |= VO_EVENT_RESIZE;
+        opts->border = !opts->border;
+        vo_x11_decoration(vo, vo->opts->border);
         return VO_TRUE;
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
