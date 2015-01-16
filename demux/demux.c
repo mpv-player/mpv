@@ -576,7 +576,7 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
         if (ds->in->threading) {
             pthread_mutex_lock(&ds->in->lock);
             *out_pkt = dequeue_packet(ds);
-            r = *out_pkt ? 1 : (ds->eof ? -1 : 0);
+            r = *out_pkt ? 1 : ((ds->eof || !ds->selected) ? -1 : 0);
             ds->active = ds->selected; // enable readahead
             ds->in->eof = false; // force retry
             pthread_cond_signal(&ds->in->wakeup); // possibly read more
