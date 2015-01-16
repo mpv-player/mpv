@@ -1986,25 +1986,6 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-/// Fullscreen state (RW)
-static int mp_property_fullscreen(void *ctx, struct m_property *prop,
-                                  int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (!mpctx->video_out)
-        return M_PROPERTY_UNAVAILABLE;
-    struct mp_vo_opts *opts = mpctx->video_out->opts;
-
-    if (action == M_PROPERTY_SET) {
-        int val = *(int *)arg;
-        opts->fullscreen = val;
-        if (mpctx->video_out->config_ok)
-            vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
-        return opts->fullscreen == val ? M_PROPERTY_OK : M_PROPERTY_ERROR;
-    }
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-
 #define VF_DEINTERLACE_LABEL "deinterlace"
 
 static bool probe_deint_filter(struct MPContext *mpctx, const char *filt)
@@ -2254,13 +2235,23 @@ static int mp_property_vo_flag(struct m_property *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
-        if (*vo_var == !!*(int *) arg)
+        int desired = !!*(int *) arg;
+        if (*vo_var == desired)
             return M_PROPERTY_OK;
         if (mpctx->video_out->config_ok)
             vo_control(mpctx->video_out, vo_ctrl, 0);
-        return M_PROPERTY_OK;
+        return *vo_var == desired ? M_PROPERTY_OK : M_PROPERTY_ERROR;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
+/// Fullscreen state (RW)
+static int mp_property_fullscreen(void *ctx, struct m_property *prop,
+                                  int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return mp_property_vo_flag(prop, action, arg, VOCTRL_FULLSCREEN,
+                               &mpctx->opts->vo.fullscreen, mpctx);
 }
 
 /// Window always on top (RW)

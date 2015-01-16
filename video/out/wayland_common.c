@@ -1189,6 +1189,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
         *events |= vo_wayland_check_events(vo);
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
+        vo->opts->fullscreen = !vo->opts->fullscreen;
         vo_wayland_fullscreen(vo);
         return VO_TRUE;
     case VOCTRL_ONTOP:

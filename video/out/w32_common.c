@@ -1215,6 +1215,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 {
     switch (request) {
     case VOCTRL_FULLSCREEN:
+        w32->opts->fullscreen = !w32->opts->fullscreen;
         if (w32->opts->fullscreen != w32->current_fs)
             reinit_window_state(w32);
         return VO_TRUE;

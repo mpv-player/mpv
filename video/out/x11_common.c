@@ -1615,12 +1615,14 @@ static void vo_x11_border(struct vo *vo)
 
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 {
+    struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         *events |= vo_x11_check_events(vo);
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
+        opts->fullscreen = !opts->fullscreen;
         vo_x11_fullscreen(vo);
         *events |= VO_EVENT_RESIZE;
         return VO_TRUE;

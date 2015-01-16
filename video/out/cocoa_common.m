@@ -581,6 +581,8 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     if (s->embedded)
         return;
 
+    opts->fullscreen = !opts->fullscreen;
+
     vo_cocoa_update_screen_info(vo, NULL);
 
     draw_changes_after_next_frame(vo);
