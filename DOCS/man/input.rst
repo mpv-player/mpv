@@ -1479,12 +1479,15 @@ Property list
 
     .. admonition:: Example
 
-        --osd-status-msg='This is ${osd-ass-cc/0}{\\b1}bold text'
+        - ``--osd-status-msg='This is ${osd-ass-cc/0}{\\b1}bold text'``
+        - ``show_text "This is ${osd-ass-cc/0}{\b1}bold text"``
 
     Any ASS override tags as understood by libass can be used.
 
     Note that you need to escape the ``\`` character, because the string is
     processed for C escape sequences before passing it to the OSD code.
+
+    A list of tags can be found here: http://docs.aegisub.org/latest/ASS_Tags/
 
 ``vo-configured``
     Return whether the VO is configured right now. Usually this corresponds to
