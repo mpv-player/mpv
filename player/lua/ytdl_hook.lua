@@ -97,6 +97,12 @@ mp.add_hook("on_load", 10, function ()
         elseif not (json["_type"] == nil) and (json["_type"] == "playlist") then
             -- a playlist
 
+            if (#json.entries == 0) then
+                msg.warn("Got empty playlist, nothing to play.")
+                return
+            end
+
+
             -- some funky guessing to detect multi-arc videos
             if  not (json.entries[1]["webpage_url"] == nil)
                 and (json.entries[1]["webpage_url"] == json["webpage_url"]) then
@@ -145,7 +151,7 @@ mp.add_hook("on_load", 10, function ()
             if not (json["requested_formats"] == nil) then
                 msg.info("Using DASH, expect inaccurate duration.")
                 if not (json.duration == nil) then
-                    msg.info("actual duration: " .. mp.format_time(json.duration))
+                    msg.info("Actual duration: " .. mp.format_time(json.duration))
                 end
 
                 -- video url
