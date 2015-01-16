@@ -480,8 +480,10 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
         s->pending_events |= VO_EVENT_RESIZE;
     });
 
-    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-    set_application_icon(NSApp);
+    if (!s->embedded) {
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+        set_application_icon(NSApp);
+    }
     return 0;
 }
 
