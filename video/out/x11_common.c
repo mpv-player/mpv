@@ -1619,6 +1619,16 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         opts->border = !opts->border;
         vo_x11_decoration(vo, vo->opts->border);
         return VO_TRUE;
+    case VOCTRL_ALL_WORKSPACES: {
+        opts->all_workspaces = !opts->all_workspaces;
+        long params[5] = {0xFFFFFFFF, 1};
+        if (!opts->all_workspaces) {
+            x11_get_property_copy(x11, x11->rootwin, XA(x11, _NET_CURRENT_DESKTOP),
+                                  XA_CARDINAL, 32, &params[0], sizeof(params[0]));
+        }
+        x11_send_ewmh_msg(x11, "_NET_WM_DESKTOP", params);
+        return VO_TRUE;
+    }
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (!x11->window)

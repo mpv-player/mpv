@@ -1066,6 +1066,9 @@ Property list
 ``border`` (RW)
     See ``--border``.
 
+``on-all-workspaces`` (RW)
+    See ``--on-all-workspaces``. Unsetting may not work on all WMs.
+
 ``framedrop`` (RW)
     See ``--framedrop``.
 

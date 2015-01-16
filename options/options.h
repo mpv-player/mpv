@@ -10,6 +10,9 @@ typedef struct mp_vo_opts {
 
     int ontop;
     int fullscreen;
+    int border;
+    int all_workspaces;
+
     int screen_id;
     int fsscreen_id;
     int fs_black_out_screens;
@@ -30,7 +33,6 @@ typedef struct mp_vo_opts {
 
     int keepaspect;
     int keepaspect_window;
-    int border;
 
     int64_t WinID;
 

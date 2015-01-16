@@ -1548,6 +1548,10 @@ Window
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.
 
+``--on-all-workspaces``
+    (X11 only)
+    Show the video window on all virtual desktops.
+
 ``--geometry=<[W[xH]][+-x+-y]>``, ``--geometry=<x:y>``
     Adjust the initial window position or size. ``W`` and ``H`` set the window
     size in pixels. ``x`` and ``y`` set the window position, measured in pixels

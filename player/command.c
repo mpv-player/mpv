@@ -2272,6 +2272,14 @@ static int mp_property_border(void *ctx, struct m_property *prop,
                                &mpctx->opts->vo.border, mpctx);
 }
 
+static int mp_property_all_workspaces(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return mp_property_vo_flag(prop, action, arg, VOCTRL_ALL_WORKSPACES,
+                               &mpctx->opts->vo.all_workspaces, mpctx);
+}
+
 static int get_frame_count(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
@@ -3309,6 +3317,7 @@ static const struct m_property mp_properties[] = {
     {"colormatrix-primaries", mp_property_primaries},
     {"ontop", mp_property_ontop},
     {"border", mp_property_border},
+    {"on-all-workspaces", mp_property_all_workspaces},
     {"framedrop", mp_property_framedrop},
     {"gamma", mp_property_video_color},
     {"brightness", mp_property_video_color},

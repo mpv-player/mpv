@@ -47,8 +47,6 @@ enum mp_voctrl {
     VOCTRL_RESET = 1,
     /* Handle input and redraw events, called by vo_check_events() */
     VOCTRL_CHECK_EVENTS,
-    /* used to switch to fullscreen */
-    VOCTRL_FULLSCREEN,
     /* signal a device pause */
     VOCTRL_PAUSE,
     /* start/resume playback */
@@ -68,8 +66,11 @@ enum mp_voctrl {
     // be updated and redrawn.
     VOCTRL_REDRAW_FRAME,
 
+    VOCTRL_FULLSCREEN,
     VOCTRL_ONTOP,
     VOCTRL_BORDER,
+    VOCTRL_ALL_WORKSPACES,
+
     VOCTRL_UPDATE_WINDOW_TITLE,         // char*
 
     VOCTRL_SET_CURSOR_VISIBILITY,       // bool*

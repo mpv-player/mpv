@@ -370,6 +370,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("force-window", force_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
     OPT_FLAG("border", vo.border, M_OPT_FIXED),
+    OPT_FLAG("on-all-workspaces", vo.all_workspaces, M_OPT_FIXED),
 
     OPT_FLAG("window-dragging", allow_win_drag, CONF_GLOBAL),
 
