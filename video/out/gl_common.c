@@ -96,6 +96,7 @@ static const struct feature features[] = {
     {MPGL_CAP_FLOAT_TEX,        "Float textures"},
     {MPGL_CAP_TEX_RG,           "RG textures"},
     {MPGL_CAP_1ST_CLASS_ARRAYS, "1st class shader arrays"},
+    {MPGL_CAP_1D_TEX,           "1D textures"},
     {MPGL_CAP_3D_TEX,           "3D textures"},
     {MPGL_CAP_DEBUG,            "debugging extensions"},
     {MPGL_CAP_SW,               "suspected software renderer"},
@@ -207,7 +208,7 @@ static const struct gl_functions gl_functions[] = {
     // GL 2.1+ desktop only (and GLSL 120 shaders)
     {
         .ver_core = 210,
-        .provides = MPGL_CAP_ROW_LENGTH | MPGL_CAP_3D_TEX |
+        .provides = MPGL_CAP_ROW_LENGTH | MPGL_CAP_1D_TEX | MPGL_CAP_3D_TEX |
                     MPGL_CAP_1ST_CLASS_ARRAYS,
         .functions = (const struct gl_function[]) {
             DEF_FN(DrawBuffer),

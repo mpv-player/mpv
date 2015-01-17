@@ -163,8 +163,12 @@ uniform VIDEO_SAMPLER texture3;
 uniform vec2 textures_size[4];
 uniform vec2 chroma_center_offset;
 uniform vec2 chroma_div;
-uniform sampler2D lut_c;
-uniform sampler2D lut_l;
+uniform sampler2D lut_2d_c;
+uniform sampler2D lut_2d_l;
+#if HAVE_1DTEX
+uniform sampler1D lut_1d_c;
+uniform sampler1D lut_1d_l;
+#endif
 #if HAVE_3DTEX
 uniform sampler3D lut_3d;
 #endif
@@ -304,8 +308,7 @@ float[6] weights6(sampler2D lookup, float f) {
         float wsum = 0;                                                     \
         for (int y = 1-R; y <= R; y++) {                                    \
             for (int x = 1-R; x <= R; x++) {                                \
-                vec2 d = vec2(x,y) - fcoord;                                \
-                float w = texture(LUT, vec2(0.5, length(d) / R)).r;         \
+                float w = texture1D(LUT, length(vec2(x,y) - fcoord)/R).r;   \
                 wsum += w;                                                  \
                 res += w * texture(tex, base + pt * vec2(x, y));            \
             }                                                               \

@@ -1006,16 +1006,18 @@ static void compile_shaders(struct gl_video *p)
     char *s_video = get_section(tmp, src, "frag_video");
 
     bool rg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
+    bool tex1d = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool tex3d = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool arrays = gl->mpgl_caps & MPGL_CAP_1ST_CLASS_ARRAYS;
     char *header =
         talloc_asprintf(tmp, "#version %d%s\n"
                              "#define HAVE_RG %d\n"
+                             "#define HAVE_1DTEX %d\n"
                              "#define HAVE_3DTEX %d\n"
                              "#define HAVE_ARRAYS %d\n"
                              "%s%s",
                              gl->glsl_version, gl->es >= 300 ? " es" : "",
-                             rg, tex3d, arrays, shader_prelude, PRELUDE_END);
+                             rg, tex1d, tex3d, arrays, shader_prelude, PRELUDE_END);
 
     bool use_cms = p->opts.srgb || p->use_lut_3d;
 
@@ -1185,7 +1187,7 @@ static void compile_shaders(struct gl_video *p)
     // has to fetch the coefficients for each texture separately, even though
     // they're the same (this is not an inherent restriction, but would require
     // to restructure the shader).
-    if (header_sep && p->plane_count > 1)
+    if (p->opts.scale_sep && p->plane_count > 1)
         use_indirect = true;
 
     if (input_is_subsampled(p)) {
@@ -1302,7 +1304,7 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
 
     update_scale_factor(p, scaler);
 
-    int size = scaler->kernel->num_coefficients;
+    int size = scaler->kernel->size;
     int elems_per_pixel = 4;
     if (size == 1) {
         elems_per_pixel = 1;
@@ -1314,25 +1316,41 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
     int width = size / elems_per_pixel;
     assert(size == width * elems_per_pixel);
     const struct fmt_entry *fmt = &gl_float16_formats[elems_per_pixel - 1];
-    scaler->lut_name = scaler->index == 0 ? "lut_l" : "lut_c";
+    int target;
+
+    if (scaler->kernel->polar) {
+        target = GL_TEXTURE_1D;
+        scaler->lut_name = scaler->index == 0 ? "lut_1d_l" : "lut_1d_c";
+    } else {
+        target = GL_TEXTURE_2D;
+        scaler->lut_name = scaler->index == 0 ? "lut_2d_l" : "lut_2d_c";
+    }
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_SCALERS + scaler->index);
 
     if (!scaler->gl_lut)
         gl->GenTextures(1, &scaler->gl_lut);
 
-    gl->BindTexture(GL_TEXTURE_2D, scaler->gl_lut);
+    gl->BindTexture(target, scaler->gl_lut);
 
     float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE * size);
     mp_compute_lut(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, width,
-                   LOOKUP_TEXTURE_SIZE, 0, fmt->format, GL_FLOAT, weights);
+
+    if (target == GL_TEXTURE_1D) {
+        gl->TexImage1D(target, 0, fmt->internal_format, LOOKUP_TEXTURE_SIZE,
+                       0, fmt->format, GL_FLOAT, weights);
+    } else {
+        gl->TexImage2D(target, 0, fmt->internal_format, width, LOOKUP_TEXTURE_SIZE,
+                       0, fmt->format, GL_FLOAT, weights);
+    }
+
     talloc_free(weights);
 
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl->TexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl->TexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl->TexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    if (target != GL_TEXTURE_1D)
+        gl->TexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     gl->ActiveTexture(GL_TEXTURE0);
 
@@ -2126,6 +2144,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
     bool have_srgb = gl->mpgl_caps & MPGL_CAP_SRGB_TEX;
     bool have_arrays = gl->mpgl_caps & MPGL_CAP_1ST_CLASS_ARRAYS;
+    bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
 
@@ -2144,16 +2163,23 @@ static void check_gl_features(struct gl_video *p)
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
     // I don't know if luminance alpha float textures exist, so disregard them.
-    if (!have_float_tex || !have_arrays || (!have_fbo && p->opts.scale_sep)) {
+    if (!have_float_tex || !have_arrays || !have_fbo || !have_1d_tex) {
         for (int n = 0; n < 2; n++) {
-            if (mp_find_filter_kernel(p->opts.scalers[n])) {
-                p->opts.scalers[n] = "bilinear";
-                char *reason = "scaler (FBO)";
+            const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[n]);
+            if (kernel) {
+                char *reason = "";
+                if (!have_fbo)
+                    reason = "scaler (FBO)";
                 if (!have_float_tex)
                     reason = "scaler (float tex.)";
                 if (!have_arrays)
                     reason = "scaler (no GLSL support)";
-                disabled[n_disabled++] = reason;
+                if (!have_1d_tex && kernel->polar)
+                    reason = "scaler (1D tex.)";
+                if (*reason) {
+                    p->opts.scalers[n] = "bilinear";
+                    disabled[n_disabled++] = reason;
+                }
             }
         }
     }
