@@ -581,8 +581,6 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     if (s->embedded)
         return;
 
-    opts->fullscreen = !opts->fullscreen;
-
     vo_cocoa_update_screen_info(vo, NULL);
 
     draw_changes_after_next_frame(vo);
@@ -608,11 +606,14 @@ static void vo_cocoa_control_get_icc_profile(struct vo *vo, void *arg)
 
 int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 {
+    struct mp_vo_opts *opts  = vo->opts;
+
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         *events |= vo_cocoa_check_events(vo);
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
+        opts->fullscreen = !opts->fullscreen;
         return vo_cocoa_fullscreen_sync(vo);
     case VOCTRL_ONTOP:
         return vo_cocoa_ontop(vo);
