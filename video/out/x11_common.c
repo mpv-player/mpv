@@ -1315,6 +1315,12 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
         x11_send_ewmh_msg(x11, "_NET_WM_FULLSCREEN_MONITORS", params);
     }
 
+    if (vo->opts->all_workspaces) {
+        long v = 0xFFFFFFFF;
+        XChangeProperty(x11->display, x11->window, XA(x11, _NET_WM_DESKTOP),
+                        XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&v, 1);
+    }
+
     // map window
     int events = StructureNotifyMask | ExposureMask | PropertyChangeMask |
                  LeaveWindowMask;
