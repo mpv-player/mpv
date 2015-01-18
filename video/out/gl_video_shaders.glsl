@@ -298,21 +298,20 @@ float[6] weights6(sampler2D lookup, float f) {
         return res;                                                         \
     }
 
+#define SAMPLE_POLAR(LUT, R, X, Y)                                          \
+        w = texture1D(LUT, length(vec2(X, Y) - fcoord)/R).r;                \
+        wsum += w;                                                          \
+        res += w * texture(tex, base + pt * vec2(X, Y));                    \
 
-#define SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT)                            \
+#define SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT, WEIGHTS_FN)                \
     vec4 NAME(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {             \
         vec2 pt = vec2(1.0) / texsize;                                      \
         vec2 fcoord = fract(texcoord * texsize - vec2(0.5));                \
         vec2 base = texcoord - fcoord * pt;                                 \
         vec4 res = vec4(0);                                                 \
         float wsum = 0;                                                     \
-        for (int y = 1-R; y <= R; y++) {                                    \
-            for (int x = 1-R; x <= R; x++) {                                \
-                float w = texture1D(LUT, length(vec2(x,y) - fcoord)/R).r;   \
-                wsum += w;                                                  \
-                res += w * texture(tex, base + pt * vec2(x, y));            \
-            }                                                               \
-        }                                                                   \
+        float w;                                                            \
+        WEIGHTS_FN(LUT);                                                    \
         return res / wsum;                                                  \
     }
 

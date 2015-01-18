@@ -954,9 +954,29 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
         APPENDF(shader, "#define DEF_SCALER%d \\\n    ", unit);
         char lut_fn[40];
         if (scaler->kernel->polar) {
+            int radius = (int)scaler->kernel->radius;
             // SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT)
-            APPENDF(shader, "SAMPLE_CONVOLUTION_POLAR_R(%s, %d, %s)\n",
-                    name, (int)scaler->kernel->radius, lut_tex);
+            APPENDF(shader, "SAMPLE_CONVOLUTION_POLAR_R(%s, %d, %s, WEIGHTS%d)\n",
+                    name, radius, lut_tex, unit);
+
+            // Pre-compute unrolled weights matrix
+            APPENDF(shader, "#define WEIGHTS%d(LUT) \\\n    ", unit);
+            for (int y = 1-radius; y <= radius; y++) {
+                for (int x = 1-radius; x <= radius; x++) {
+                    // Since we can't know the subpixel position in advance,
+                    // assume a worst case scenario.
+                    int yy = y > 0 ? y-1 : y;
+                    int xx = x > 0 ? x-1 : x;
+                    double d = sqrt(xx*xx + yy*yy);
+
+                    // Samples outside the radius are unnecessary
+                    if (d < radius) {
+                        APPENDF(shader, "SAMPLE_POLAR(LUT, %f, %d, %d) \\\n    ",
+                                (double)radius, x, y);
+                    }
+                }
+            }
+            APPENDF(shader, "\n");
         } else {
             if (size == 2 || size == 6) {
                 snprintf(lut_fn, sizeof(lut_fn), "weights%d", size);
