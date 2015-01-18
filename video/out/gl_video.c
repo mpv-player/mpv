@@ -1304,9 +1304,9 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
 
     update_scale_factor(p, scaler);
 
-    int size = scaler->kernel->size;
+    int size = scaler->kernel->num_coefficients;
     int elems_per_pixel = 4;
-    if (scaler->kernel->polar) {
+    if (size == 1) {
         elems_per_pixel = 1;
     } else if (size == 2) {
         elems_per_pixel = 2;
@@ -1314,45 +1314,27 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
         elems_per_pixel = 3;
     }
     int width = size / elems_per_pixel;
+    assert(size == width * elems_per_pixel);
     const struct fmt_entry *fmt = &gl_float16_formats[elems_per_pixel - 1];
-    if (scaler->kernel->polar) {
-        scaler->lut_name = scaler->index == 0 ? "lut_polar_l" : "lut_polar_c";
-    } else {
-        scaler->lut_name = scaler->index == 0 ? "lut_l" : "lut_c";
-    }
+    scaler->lut_name = scaler->index == 0 ? "lut_l" : "lut_c";
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_SCALERS + scaler->index);
 
     if (!scaler->gl_lut)
         gl->GenTextures(1, &scaler->gl_lut);
 
-    if (scaler->kernel->polar) {
-        gl->BindTexture(GL_TEXTURE_1D, scaler->gl_lut);
+    gl->BindTexture(GL_TEXTURE_2D, scaler->gl_lut);
 
-        float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE);
-        mp_compute_lut_polar(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
-        gl->TexImage1D(GL_TEXTURE_1D, 0, fmt->internal_format, LOOKUP_TEXTURE_SIZE,
-                       0, fmt->format, GL_FLOAT, weights);
-        talloc_free(weights);
+    float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE * size);
+    mp_compute_lut(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
+    gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, width,
+                   LOOKUP_TEXTURE_SIZE, 0, fmt->format, GL_FLOAT, weights);
+    talloc_free(weights);
 
-        gl->TexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    } else {
-        gl->BindTexture(GL_TEXTURE_2D, scaler->gl_lut);
-
-        float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE * size);
-        mp_compute_lut(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, width,
-                       LOOKUP_TEXTURE_SIZE, 0, fmt->format, GL_FLOAT, weights);
-        talloc_free(weights);
-
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    }
-
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     gl->ActiveTexture(GL_TEXTURE0);
 

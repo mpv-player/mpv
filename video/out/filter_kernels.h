@@ -31,8 +31,9 @@ struct filter_kernel {
     // Whether or not the filter uses polar coordinates
     bool polar;
     // The following values are set by mp_init_filter() at runtime.
-    // Number of coefficients; equals the rounded up radius multiplied with 2.
     int size;
+    // Number of coefficients; equals the rounded up radius multiplied with 2.
+    int num_coefficients;
     double inv_scale;
 };
 

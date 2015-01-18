@@ -61,6 +61,7 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
     // polar filters can be of any radius, and nothing special is needed
     if (filter->polar) {
         filter->size = filter->radius;
+        filter->num_coefficients = 1;
         return true;
     }
     // only downscaling requires widening the filter
@@ -75,12 +76,14 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
         cursize++;
     if (*cursize) {
         filter->size = *cursize;
+        filter->num_coefficients = filter->size;
         return true;
     } else {
         // The filter doesn't fit - instead of failing completely, use the
         // largest filter available. This is incorrect, but better than refusing
         // to do anything.
         filter->size = cursize[-1];
+        filter->num_coefficients = filter->size;
         filter->inv_scale = filter->size / 2.0 / filter->radius;
         return false;
     }
@@ -107,24 +110,20 @@ void mp_compute_weights(struct filter_kernel *filter, double f, float *out_w)
 }
 
 // Fill the given array with weights for the range [0.0, 1.0]. The array is
-// interpreted as rectangular array of count * filter->size items.
+// interpreted as rectangular array of count * filter->num_coefficients items.
 void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array)
 {
-    for (int n = 0; n < count; n++) {
-        mp_compute_weights(filter, n / (double)(count - 1),
-                           out_array + filter->size * n);
-    }
-}
-
-// Fill the given array with weights for the range [0, R], where R is the
-// radius of hte filter. The array is interpreted as a one-dimensional array
-// of count items.
-void mp_compute_lut_polar(struct filter_kernel *filter, int count, float *out_array)
-{
-    assert(filter->radius > 0);
-    for (int x = 0; x < count; x++) {
-        double r = x * filter->radius / (count - 1);
-        out_array[x] = r <= filter->radius ? filter->weight(filter, r) : 0;
+    if (filter->polar) {
+        assert(filter->radius > 0);
+        for (int x = 0; x < count; x++) {
+            double r = x * filter->radius / (count - 1);
+            out_array[x] = r <= filter->radius ? filter->weight(filter, r) : 0;
+        }
+    } else {
+        for (int n = 0; n < count; n++) {
+            mp_compute_weights(filter, n / (double)(count - 1),
+                               out_array + filter->size * n);
+        }
     }
 }
 

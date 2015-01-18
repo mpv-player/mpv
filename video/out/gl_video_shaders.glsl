@@ -165,8 +165,6 @@ uniform vec2 chroma_center_offset;
 uniform vec2 chroma_div;
 uniform sampler2D lut_c;
 uniform sampler2D lut_l;
-uniform sampler1D lut_polar_c;
-uniform sampler1D lut_polar_l;
 #if HAVE_3DTEX
 uniform sampler3D lut_3d;
 #endif
@@ -307,7 +305,7 @@ float[6] weights6(sampler2D lookup, float f) {
         for (int y = 1-R; y <= R; y++) {                                    \
             for (int x = 1-R; x <= R; x++) {                                \
                 vec2 d = vec2(x,y) - fcoord;                                \
-                float w = texture1D(LUT, sqrt(d.x*d.x + d.y*d.y)/R).r;      \
+                float w = texture(LUT, vec2(0.5, length(d) / R)).r;         \
                 wsum += w;                                                  \
                 res += w * texture(tex, base + pt * vec2(x, y));            \
             }                                                               \
