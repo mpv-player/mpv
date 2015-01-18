@@ -105,6 +105,7 @@ struct scaler {
     int index;
     const char *name;
     float params[2];
+    float antiring;
     struct filter_kernel *kernel;
     GLuint gl_lut;
     const char *lut_name;
@@ -367,6 +368,8 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLOAT("cparam2", scaler_params[1][1], 0),
         OPT_FLOATRANGE("lradius", scaler_radius[0], 0, 1.0, 16.0),
         OPT_FLOATRANGE("cradius", scaler_radius[1], 0, 1.0, 16.0),
+        OPT_FLOATRANGE("lantiring", scaler_antiring[0], 0, 0.0, 1.0),
+        OPT_FLOATRANGE("cantiring", scaler_antiring[1], 0, 0.0, 1.0),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
@@ -955,9 +958,9 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
         char lut_fn[40];
         if (scaler->kernel->polar) {
             int radius = (int)scaler->kernel->radius;
-            // SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT)
-            APPENDF(shader, "SAMPLE_CONVOLUTION_POLAR_R(%s, %d, %s, WEIGHTS%d)\n",
-                    name, radius, lut_tex, unit);
+            // SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT, WEIGHTS_FN, ANTIRING)
+            APPENDF(shader, "SAMPLE_CONVOLUTION_POLAR_R(%s, %d, %s, WEIGHTS%d, %f)\n",
+                    name, radius, lut_tex, unit, scaler->antiring);
 
             // Pre-compute unrolled weights matrix
             APPENDF(shader, "#define WEIGHTS%d(LUT) \\\n    ", unit);
@@ -971,7 +974,12 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
 
                     // Samples outside the radius are unnecessary
                     if (d < radius) {
-                        APPENDF(shader, "SAMPLE_POLAR(LUT, %f, %d, %d) \\\n    ",
+                        APPENDF(shader, "SAMPLE_POLAR_%s(LUT, %f, %d, %d) \\\n    ",
+                                // The center 4 coefficients are the primary
+                                // contributors, used to clamp the result for
+                                // anti-ringing
+                                (x >= 0 && y >= 0 && x <= 1 && y <= 1)
+                                  ? "PRIMARY" : "HELPER",
                                 (double)radius, x, y);
                     }
                 }
@@ -1315,6 +1323,8 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
         if (!isnan(p->opts.scaler_params[scaler->index][n]))
             scaler->kernel->params[n] = p->opts.scaler_params[scaler->index][n];
     }
+
+    scaler->antiring = p->opts.scaler_antiring[scaler->index];
 
     if (scaler->kernel->radius < 0) {
         float radius = p->opts.scaler_radius[scaler->index];

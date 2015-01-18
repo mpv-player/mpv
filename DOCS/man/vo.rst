@@ -306,9 +306,10 @@ Available video output drivers are:
         ``ewa_lanczos``
             Elliptic weighted average Lanczos scaling. Also known as Jinc.
             Relatively slow, but very good quality. The number of taps can
-            be controlled with ``lradius``.
+            be controlled with ``lradius``. Adding extra taps makes the filter
+            sharper but adds more ringing.
 
-            Adding extra taps makes the filter sharper but adds more ringing.
+            This filter supports antiringing (see ``lantiring``).
 
         ``mitchell``
             Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
@@ -336,6 +337,14 @@ Available video output drivers are:
         Note that depending on filter implementation details and video scaling
         ratio, the radius that actually being used might be different
         (most likely being increased a bit).
+
+    ``lantiring=<value>``
+        Set the antiringing strength. This tries to eliminate ringing, but can
+        introduce other artifacts in the process. Must be a float number
+        between 0.0 and 1.0. The default value of 0.0 disables antiringing
+        entirely.
+
+        Note that this currently only affects ``ewa_lanczos``.
 
     ``scaler-resizes-only``
         Disable the scaler if the video image is not resized. In that case,
@@ -434,10 +443,10 @@ Available video output drivers are:
         down by more than twice (or other factors, depending on image formats),
         and ``lscale`` did not use a separable scaler.
 
-    ``cparam1``, ``cparam2``, ``cradius``
+    ``cparam1``, ``cparam2``, ``cradius``, ``cantiring``
         Set filter parameters and radius for ``cscale``.
 
-        See ``lparam1``, ``lparam2`` and ``lradius``.
+        See ``lparam1``, ``lparam2``, ``lradius`` and ``lantiring``.
 
     ``fancy-downscaling``
         When using convolution based filters, extend the filter size

@@ -188,6 +188,7 @@ uniform float dither_quantization;
 uniform float dither_center;
 uniform float filter_param1_l;
 uniform float filter_param1_c;
+uniform float antiring_factor;
 uniform vec2 dither_size;
 
 in vec2 texcoord;
@@ -298,21 +299,31 @@ float[6] weights6(sampler2D lookup, float f) {
         return res;                                                         \
     }
 
-#define SAMPLE_POLAR(LUT, R, X, Y)                                          \
+#define SAMPLE_POLAR_HELPER(LUT, R, X, Y)                                   \
         w = texture1D(LUT, length(vec2(X, Y) - fcoord)/R).r;                \
+        c = texture(tex, base + pt * vec2(X, Y));                           \
         wsum += w;                                                          \
-        res += w * texture(tex, base + pt * vec2(X, Y));                    \
+        res  += w * c;                                                      \
 
-#define SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT, WEIGHTS_FN)                \
+#define SAMPLE_POLAR_PRIMARY(LUT, R, X, Y)                                  \
+        SAMPLE_POLAR_HELPER(LUT, R, X, Y)                                   \
+        lo = min(lo, c);                                                    \
+        hi = max(hi, c);                                                    \
+
+#define SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT, WEIGHTS_FN, ANTIRING)      \
     vec4 NAME(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {             \
         vec2 pt = vec2(1.0) / texsize;                                      \
         vec2 fcoord = fract(texcoord * texsize - vec2(0.5));                \
         vec2 base = texcoord - fcoord * pt;                                 \
-        vec4 res = vec4(0);                                                 \
-        float wsum = 0;                                                     \
+        vec4 res = vec4(0.0);                                               \
+        vec4 lo = vec4(1.0);                                                \
+        vec4 hi = vec4(0.0);                                                \
+        float wsum = 0.0;                                                   \
         float w;                                                            \
+        vec4 c;                                                             \
         WEIGHTS_FN(LUT);                                                    \
-        return res / wsum;                                                  \
+        res /= wsum;                                                        \
+        return mix(res, clamp(res, lo, hi), ANTIRING);                      \
     }
 
 #ifdef DEF_SCALER0
