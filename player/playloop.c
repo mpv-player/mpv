@@ -204,7 +204,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         }
     }
     int direction = 0;
-    if (seek.type == MPSEEK_RELATIVE) {
+    if (seek.type == MPSEEK_RELATIVE && (!mpctx->demuxer->rel_seeks || hr_seek)) {
         seek.type = MPSEEK_ABSOLUTE;
         direction = seek.amount > 0 ? 1 : -1;
         seek.amount += get_current_time(mpctx);
@@ -233,10 +233,13 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         demuxer_style |= SEEK_ABSOLUTE;
         break;
     }
-    if (hr_seek || direction < 0)
+    if (hr_seek || direction < 0) {
         demuxer_style |= SEEK_BACKWARD;
-    else if (direction > 0)
+    } else if (direction > 0) {
         demuxer_style |= SEEK_FORWARD;
+    }
+    if (hr_seek)
+        demuxer_style |= SEEK_HR;
     if (hr_seek || opts->mkv_subtitle_preroll)
         demuxer_style |= SEEK_SUBPREROLL;
 

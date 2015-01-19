@@ -760,6 +760,7 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->seekable = src->seekable;
         dst->filetype = src->filetype;
         dst->ts_resets_possible = src->ts_resets_possible;
+        dst->rel_seeks = src->rel_seeks;
         dst->start_time = src->start_time;
     }
     if (src->events & DEMUX_EVENT_STREAMS) {

@@ -169,6 +169,7 @@ static void d_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
     double pts = p->seek_pts;
     if (flags & SEEK_ABSOLUTE)
         pts = 0.0f;
+    double base_pts = pts; // to what pts is relative
 
     if (flags & SEEK_FACTOR) {
         double tmp = 0;
@@ -180,7 +181,8 @@ static void d_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 
     MP_VERBOSE(demuxer, "seek to: %f\n", pts);
 
-    stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, &pts);
+    double seek_arg[] = {pts, base_pts, flags};
+    stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, seek_arg);
     demux_control(p->slave, DEMUXER_CTRL_RESYNC, NULL);
 
     p->seek_pts = pts;
@@ -311,6 +313,8 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 
     // Can be seekable even if the stream isn't.
     demuxer->seekable = true;
+
+    demuxer->rel_seeks = true;
 
     // With cache enabled, the stream can be seekable. This causes demux_lavf.c
     // (actually libavformat/mpegts.c) to seek sometimes when reading a packet.
