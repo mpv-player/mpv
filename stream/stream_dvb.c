@@ -172,7 +172,7 @@ static bool parse_pid_string(struct mp_log *log, char *pid_string,
          */
         const char *tokens = "+,;";
         char *pidPart;
-        char *savePtr;
+        char *savePtr = NULL;
         pidPart = dvb_strtok_r(pid_string, tokens, &savePtr);
         while (pidPart != NULL) {
             if (ptr->pids_cnt >= DMX_FILTER_SIZE - 1) {
