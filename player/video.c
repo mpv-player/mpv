@@ -66,7 +66,7 @@ static const char av_desync_help_text[] =
 "This means either the audio or the video is played too slowly.\n"
 "Possible reasons, problems, workarounds:\n"
 "- Your system is simply too slow for this file.\n"
-"     Transcode it to a lower bitrate file with tools like HandBrake.\n"
+"     Transcode it to a lower bitrate file with e.g. mpv encoding support.\n"
 "- Slow video output.\n"
 "     Try a different --vo driver (--vo=help for a list). Make sure framedrop\n"
 "     is not disabled, or experiment with different values for --framedrop.\n"
