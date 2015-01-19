@@ -824,7 +824,7 @@ void write_video(struct MPContext *mpctx, double endpts)
         diff = vpts1 - vpts0;
     if (diff < 0 && mpctx->d_video->fps > 0)
         diff = 1.0 / mpctx->d_video->fps; // fallback to demuxer-reported fps
-    if (opts->untimed || vo->driver->untimed || !(opts->frame_dropping & 1))
+    if (opts->untimed || vo->driver->untimed)
         diff = -1; // disable frame dropping and aspects of frame timing
     if (diff >= 0) {
         // expected A/V sync correction is ignored
