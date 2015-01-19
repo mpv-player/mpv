@@ -126,6 +126,7 @@ struct mpv_handle {
     struct mp_log_buffer *messages;
 };
 
+static bool gen_log_message_event(struct mpv_handle *ctx);
 static bool gen_property_change_event(struct mpv_handle *ctx);
 static void notify_property_events(struct mpv_handle *ctx, uint64_t event_mask);
 
@@ -755,23 +756,8 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
         if (gen_property_change_event(ctx))
             break;
         // Pop item from message queue, and return as event.
-        if (ctx->messages) {
-            struct mp_log_buffer_entry *msg =
-                mp_msg_log_buffer_read(ctx->messages);
-            if (msg) {
-                event->event_id = MPV_EVENT_LOG_MESSAGE;
-                struct mpv_event_log_message *cmsg = talloc_ptrtype(event, cmsg);
-                *cmsg = (struct mpv_event_log_message){
-                    .prefix = msg->prefix,
-                    .level = mp_log_levels[msg->level],
-                    .log_level = mp_mpv_log_levels[msg->level],
-                    .text = msg->text,
-                };
-                talloc_steal(event, msg);
-                event->data = cmsg;
-                break;
-            }
-        }
+        if (gen_log_message_event(ctx))
+            break;
         int r = wait_wakeup(ctx, deadline);
         if (r == ETIMEDOUT)
             break;
@@ -1541,6 +1527,31 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
     }
     pthread_mutex_unlock(&ctx->lock);
     return 0;
+}
+
+// Set ctx->cur_event to a generated log message event, if any available.
+static bool gen_log_message_event(struct mpv_handle *ctx)
+{
+    if (ctx->messages) {
+        struct mp_log_buffer_entry *msg =
+            mp_msg_log_buffer_read(ctx->messages);
+        if (msg) {
+            struct mpv_event_log_message *cmsg =
+                talloc_ptrtype(ctx->cur_event, cmsg);
+            *cmsg = (struct mpv_event_log_message){
+                .prefix = msg->prefix,
+                .level = mp_log_levels[msg->level],
+                .log_level = mp_mpv_log_levels[msg->level],
+                .text = msg->text,
+            };
+            *ctx->cur_event = (struct mpv_event){
+                .event_id = MPV_EVENT_LOG_MESSAGE,
+                .data = cmsg,
+            };
+            return true;
+        }
+    }
+    return false;
 }
 
 int mpv_get_wakeup_pipe(mpv_handle *ctx)
