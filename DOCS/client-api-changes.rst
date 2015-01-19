@@ -25,6 +25,7 @@ API changes
 
 ::
 
+ 1.13   - add MPV_EVENT_QUEUE_OVERFLOW
  1.12   - add class Handle to qthelper.hpp
         - improve opengl_cb.h API uninitialization behavior, and fix the qml
           example

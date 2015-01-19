@@ -167,7 +167,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 12)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 13)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -1117,7 +1117,17 @@ typedef enum mpv_event_id {
      *             "chapter" property. The event is redundant, and might
      *             be removed in the far future.
      */
-    MPV_EVENT_CHAPTER_CHANGE = 23
+    MPV_EVENT_CHAPTER_CHANGE    = 23,
+    /**
+     * Happens if the internal per-mpv_handle ringbuffer overflows, and at
+     * least 1 event had to be dropped. This can happen if the client doesn't
+     * read the event queue quickly enough with mpv_wait_event(), or if the
+     * client makes a very large number of asynchronous calls at once.
+     *
+     * Event delivery will continue normally once this event was returned
+     * (this forces the client to empty the queue completely).
+     */
+    MPV_EVENT_QUEUE_OVERFLOW    = 24
     // Internal note: adjust INTERNAL_EVENT_BASE when adding new events.
 } mpv_event_id;
 
@@ -1353,8 +1363,8 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
  * The API won't complain if more than one thread calls this, but it will cause
  * race conditions in the client when accessing the shared mpv_event struct.
  * Note that most other API functions are not restricted by this, and no API
- * function internally calls mpv_wait_event(). This does not apply to concurrent
- * calls of this function on different mpv_handles: these are always safe.
+ * function internally calls mpv_wait_event(). Additionally, concurrent calls
+ * to different mpv_handles are always safe.
  *
  * @param timeout Timeout in seconds, after which the function returns even if
  *                no event was received. A MPV_EVENT_NONE is returned on
@@ -1364,7 +1374,8 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
  *         fields in the struct) stay valid until the next mpv_wait_event()
  *         call, or until the mpv_handle is destroyed. You must not write to
  *         the struct, and all memory referenced by it will be automatically
- *         released by the API. The return value is never NULL.
+ *         released by the API on the next mpv_wait_event() call, or when the
+ *         context is destroyed. The return value is never NULL.
  */
 mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout);
 
