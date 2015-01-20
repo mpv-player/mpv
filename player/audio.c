@@ -227,15 +227,13 @@ void reinit_audio_chain(struct MPContext *mpctx)
 
     struct af_stream *afs = mpctx->d_audio->afilter;
 
+    afs->output = (struct mp_audio){0};
     if (mpctx->ao) {
         ao_get_format(mpctx->ao, &afs->output);
-    } else {
-        afs->output = (struct mp_audio){0};
+    } else if (!AF_FORMAT_IS_SPECIAL(in_format.format)) {
         afs->output.rate = opts->force_srate;
         mp_audio_set_format(&afs->output, opts->audio_output_format);
-        // automatic downmix
-        if (!AF_FORMAT_IS_SPECIAL(in_format.format))
-            mp_audio_set_channels(&afs->output, &opts->audio_output_channels);
+        mp_audio_set_channels(&afs->output, &opts->audio_output_channels);
     }
 
     // filter input format: same as codec's output format:
