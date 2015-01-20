@@ -63,7 +63,7 @@
 #include "command.h"
 #include "screenshot.h"
 
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#ifdef _WIN32
 #include <windows.h>
 
 #ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
@@ -287,7 +287,7 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
     mp_get_converted_argv(p_argc, p_argv);
 #endif
 
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#ifdef _WIN32
     // stop Windows from showing all kinds of annoying error dialogs
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
 
@@ -525,7 +525,7 @@ int mpv_main(int argc, char *argv[])
         exit_player(mpctx, EXIT_NONE);
     }
 
-#if HAVE_PRIORITY
+#ifdef _WIN32
     if (opts->w32_priority > 0)
         SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
 #endif

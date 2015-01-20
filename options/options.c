@@ -29,7 +29,7 @@
 
 #include "config.h"
 
-#if HAVE_PRIORITY
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -111,7 +111,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("msg-color", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
     OPT_FLAG("msg-module", msg_module, CONF_GLOBAL),
     OPT_FLAG("msg-time", msg_time, CONF_GLOBAL),
-#if HAVE_PRIORITY
+#ifdef _WIN32
     OPT_CHOICE("priority", w32_priority, 0,
                ({"no",          0},
                 {"realtime",    REALTIME_PRIORITY_CLASS},

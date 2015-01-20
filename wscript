@@ -186,11 +186,6 @@ iconv support use --disable-iconv.",
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_true
     }, {
-        'name': 'priority',
-        'desc': 'w32 priority API',
-        'deps_any': [ 'os-win32', 'os-cygwin'],
-        'func': check_true
-    }, {
         'name': '--waio',
         'desc': 'libwaio for win32',
         'deps': [ 'os-win32', 'mingw' ],
