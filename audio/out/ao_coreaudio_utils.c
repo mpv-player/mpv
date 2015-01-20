@@ -65,7 +65,8 @@ coreaudio_error:
 OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
 {
     OSStatus err = noErr;
-    int selection = name ? strtol(name, (char **)NULL, 10) : -1;
+    errno = 0;
+    int selection = name && name[0] ? strtol(name, (char **)NULL, 10) : -1;
     if (errno == EINVAL || errno == ERANGE) {
         selection = -1;
         MP_WARN(ao, "device identifier '%s' is invalid\n", name);
