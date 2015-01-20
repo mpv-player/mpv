@@ -420,17 +420,22 @@ Available video output drivers are:
 
     ``no-scale-sep``
         When using a separable scale filter for luma, usually two filter
-        passes are done. This is often faster. However, it forces
-        conversion to RGB in an extra pass, so it can actually be slower
-        if used with fast filters on small screen resolutions. Using
-        this options will make rendering a single operation.
-        Note that chroma scalers are always done as 1-pass filters.
+        passes are done, and when using ``cscale`` chroma information is also
+        scaled separately from luma. This is often faster and better for
+        most image scalers. However, the extra passes and preprocessing logic
+        can actually make it slower if used with fast filters on small screen
+        resolutions. Using this option will make rendering a single operation
+        if possible, often at the cost of performance or image quality.
+
+        It's safe to enable this if using ``bilinear`` for both ``lscale``
+        and ``cscale``.
 
     ``cscale=<filter>``
-        As ``lscale``, but for chroma (2x slower with little visible effect).
-        Note that with some scaling filters, upscaling is always done in
-        RGB. If chroma is not subsampled, this option is ignored, and the
-        luma scaler is used instead. Setting this option is often useless.
+        As ``lscale``, but for interpolating chroma information. If the image
+        is not subsampled, this option is ignored entirely. Note that the
+        implementation is currently always done as a single pass, so using
+        it with separable filters will result in slow performance for very
+        little visible benefit.
 
     ``lscale-down=<filter>``
         Like ``lscale``, but apply these filters on downscaling

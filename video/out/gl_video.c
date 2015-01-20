@@ -1194,11 +1194,7 @@ static void compile_shaders(struct gl_video *p)
         shader_setup_scaler(&header_final, &p->scalers[0], -1);
     }
 
-    // We want to do scaling in linear light. Scaling is closely connected to
-    // texture sampling due to how the shader is structured (or if GL bilinear
-    // scaling is used). The purpose of the "indirect" pass is to convert the
-    // input video to linear RGB.
-    // Another purpose is reducing input to a single texture for scaling.
+    // The indirect pass is used to preprocess the image before scaling.
     bool use_indirect = p->opts.indirect;
 
     // Don't sample from input video textures before converting the input to
@@ -1206,15 +1202,10 @@ static void compile_shaders(struct gl_video *p)
     if (use_input_gamma || use_conv_gamma || use_linear_light || use_const_luma)
         use_indirect = true;
 
-    // It doesn't make sense to scale the chroma with cscale in the 1. scale
-    // step and with lscale in the 2. step. If the chroma is subsampled, a
-    // convolution filter wouldn't even work entirely correctly, because the
-    // luma scaler would sample two texels instead of one per tap for chroma.
-    // Also, even with 4:4:4 YUV or planar RGB, the indirection might be faster,
-    // because the shader can't use one scaler for sampling from 3 textures. It
-    // has to fetch the coefficients for each texture separately, even though
-    // they're the same (this is not an inherent restriction, but would require
-    // to restructure the shader).
+    // If the video is subsampled, chroma information needs to be pulled up to
+    // the input size before scaling can be done. Even for 4:4:4 or planar RGB
+    // this is also faster because it means the scalers can operate on all
+    // channels simultaneously. Disabling scale_sep overrides this behavior.
     if (p->opts.scale_sep && p->plane_count > 1)
         use_indirect = true;
 
