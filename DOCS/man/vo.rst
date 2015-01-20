@@ -446,7 +446,7 @@ Available video output drivers are:
         RGB. If chroma is not subsampled, this option is ignored, and the
         luma scaler is used instead. Setting this option is often useless.
 
-    ``lscale-down=<filter>`
+    ``lscale-down=<filter>``
         Like ``lscale``, but apply these filters on downscaling
         instead. If these options are unset, the filter implied by ``lscale``
         will be applied.
