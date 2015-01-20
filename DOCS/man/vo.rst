@@ -446,10 +446,16 @@ Available video output drivers are:
         RGB. If chroma is not subsampled, this option is ignored, and the
         luma scaler is used instead. Setting this option is often useless.
 
-    ``lscale-down=<filter>``, ``cscale-down=<filter>``
-        Like ``lscale`` and ``cscale``, but apply these filters on downscaling
+    ``lscale-down=<filter>`
+        Like ``lscale``, but apply these filters on downscaling
         instead. If these options are unset, the filter implied by ``lscale``
-        (and ``cscale``, respectively) will be applied.
+        will be applied.
+
+        There used to be a ``cscale-down`` option. This was removed, because
+        chroma scaling is usually only used for upscaling. The only case where
+        this was actually used for downscaling was when the video was scaled
+        down by more than twice (or other factors, depending on image formats),
+        and ``lscale`` did not use a separable scaler.
 
     ``cparam1``, ``cparam2``, ``cradius``
         Set filter parameters and radius for ``cscale``.
