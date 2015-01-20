@@ -54,7 +54,7 @@ static const char vo_opengl_shaders[] =
 #define TEXUNIT_3DLUT 6
 #define TEXUNIT_DITHER 7
 
-// lscale/cscale arguments that map directly to shader filter routines.
+// scale/cscale arguments that map directly to shader filter routines.
 // Note that the convolution filters are not included in this list.
 static const char *const fixed_scale_filters[] = {
     "bilinear",
@@ -359,17 +359,17 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("srgb", srgb, 0),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
-        OPT_STRING_VALIDATE("lscale", scalers[0], 0, validate_scaler_opt),
+        OPT_STRING_VALIDATE("scale", scalers[0], 0, validate_scaler_opt),
         OPT_STRING_VALIDATE("cscale", scalers[1], 0, validate_scaler_opt),
-        OPT_STRING_VALIDATE("lscale-down", dscaler, 0, validate_scaler_opt),
-        OPT_FLOAT("lparam1", scaler_params[0][0], 0),
-        OPT_FLOAT("lparam2", scaler_params[0][1], 0),
-        OPT_FLOAT("cparam1", scaler_params[1][0], 0),
-        OPT_FLOAT("cparam2", scaler_params[1][1], 0),
-        OPT_FLOATRANGE("lradius", scaler_radius[0], 0, 1.0, 16.0),
-        OPT_FLOATRANGE("cradius", scaler_radius[1], 0, 1.0, 16.0),
-        OPT_FLOATRANGE("lantiring", scaler_antiring[0], 0, 0.0, 1.0),
-        OPT_FLOATRANGE("cantiring", scaler_antiring[1], 0, 0.0, 1.0),
+        OPT_STRING_VALIDATE("scale-down", dscaler, 0, validate_scaler_opt),
+        OPT_FLOAT("scale-param1", scaler_params[0][0], 0),
+        OPT_FLOAT("scale-param2", scaler_params[0][1], 0),
+        OPT_FLOAT("cscale-param1", scaler_params[1][0], 0),
+        OPT_FLOAT("cscale-param2", scaler_params[1][1], 0),
+        OPT_FLOATRANGE("scale-radius", scaler_radius[0], 0, 1.0, 16.0),
+        OPT_FLOATRANGE("cscale-radius", scaler_radius[1], 0, 1.0, 16.0),
+        OPT_FLOATRANGE("scale-antiring", scaler_antiring[0], 0, 0.0, 1.0),
+        OPT_FLOATRANGE("cscale-antiring", scaler_antiring[1], 0, 0.0, 1.0),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
@@ -408,7 +408,19 @@ const struct m_sub_options gl_video_conf = {
         OPT_COLOR("background", background, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
-        OPT_REMOVED("cscale-down", "use 'indirect' and lscale-down"),
+        OPT_REMOVED("cscale-down", "chroma is never downscaled"),
+
+        OPT_REPLACED("lscale", "scale"),
+        OPT_REPLACED("lscale-down", "scale-down"),
+        OPT_REPLACED("lparam1", "scale-param1"),
+        OPT_REPLACED("lparam2", "scale-param2"),
+        OPT_REPLACED("lradius", "scale-radius"),
+        OPT_REPLACED("lantiring", "scale-antiring"),
+        OPT_REPLACED("cparam1", "cscale-param1"),
+        OPT_REPLACED("cparam2", "cscale-param2"),
+        OPT_REPLACED("cradius", "cscale-radius"),
+        OPT_REPLACED("cantiring", "cscale-antiring"),
+
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -951,7 +963,7 @@ static void shader_def_opt(char **shader, const char *name, bool b)
 static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
 {
     int unit = scaler->index;
-    const char *target = unit == 0 ? "SAMPLE_L" : "SAMPLE_C";
+    const char *target = unit == 0 ? "SAMPLE" : "SAMPLE_C";
     if (!scaler->kernel) {
         APPENDF(shader, "#define %s(p0, p1, p2) "
                 "sample_%s(p0, p1, p2, filter_param1_%c)\n",
@@ -1219,16 +1231,16 @@ static void compile_shaders(struct gl_video *p)
     if (input_is_subsampled(p)) {
         shader_setup_scaler(&header_conv, &p->scalers[1], -1);
     } else {
-        // Force using the luma scaler on chroma. If the "indirect" stage is
+        // Force using the normal scaler on chroma. If the "indirect" stage is
         // used, the actual scaling will happen in the next stage.
         shader_def(&header_conv, "SAMPLE_C",
-                   use_indirect ? "SAMPLE_TRIVIAL" : "SAMPLE_L");
+                   use_indirect ? "SAMPLE_TRIVIAL" : "SAMPLE");
     }
 
     if (use_indirect) {
         // We don't use filtering for the Y-plane (luma), because it's never
         // scaled in this scenario.
-        shader_def(&header_conv, "SAMPLE_L", "SAMPLE_TRIVIAL");
+        shader_def(&header_conv, "SAMPLE", "SAMPLE_TRIVIAL");
         shader_def_opt(&header_conv, "FIXED_SCALE", true);
         header_conv = t_concat(tmp, header, header_conv);
         p->indirect_program =

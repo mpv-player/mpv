@@ -288,7 +288,7 @@ Available video output drivers are:
     color space conversion and chroma upsampling is generally in the hand of
     the hardware decoder APIs.
 
-    ``lscale=<filter>``
+    ``scale=<filter>``
 
         ``bilinear``
             Bilinear hardware texture filtering (fastest, very low quality).
@@ -301,34 +301,34 @@ Available video output drivers are:
             Lanczos scaling. Provides mid quality and speed. Generally worse
             than ``spline36``, but it results in a slightly sharper image
             which is good for some content types. The number of taps can be
-            controlled with ``lradius``, but is best left unchanged.
+            controlled with ``scale-radius``, but is best left unchanged.
 
         ``ewa_lanczos``
             Elliptic weighted average Lanczos scaling. Also known as Jinc.
             Relatively slow, but very good quality. The number of taps can
-            be controlled with ``lradius``. Adding extra taps makes the filter
-            sharper but adds more ringing.
+            be controlled with ``scale-radius``. Adding extra taps makes the
+            filter sharper but adds more ringing.
 
-            This filter supports antiringing (see ``lantiring``).
+            This filter supports antiringing (see ``scale-antiring``).
 
         ``mitchell``
             Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
-            ``lparam1`` and ``lparam2``. Both are set to 1/3 by default.
-            This filter is very good at downscaling (see ``lscale-down``).
+            ``scale-param1`` and ``scale-param2``. Both are set to 1/3 by default.
+            This filter is very good at downscaling (see ``scale-down``).
 
         There are some more filters, but most are not as useful. For a complete
         list, pass ``help`` as value, e.g.::
 
-            mpv --vo=opengl:lscale=help
+            mpv --vo=opengl:scale=help
 
-    ``lparam1=<value>``
+    ``scale-param1=<value>``
         Set filter parameters. Ignored if the filter is not tunable. These are
         unset by default, and use the filter specific default if applicable.
 
-    ``lparam2=<value>``
-        See ``lparam1``.
+    ``scale-param2=<value>``
+        See ``scale-param1``.
 
-    ``lradius=<r>``
+    ``scale-radius=<r>``
         Set radius for filters listed below, must be a float number between 1.0
         and 16.0. Defaults to be 3.0 if not specified.
 
@@ -338,7 +338,7 @@ Available video output drivers are:
         ratio, the radius that actually being used might be different
         (most likely being increased a bit).
 
-    ``lantiring=<value>``
+    ``scale-antiring=<value>``
         Set the antiringing strength. This tries to eliminate ringing, but can
         introduce other artifacts in the process. Must be a float number
         between 0.0 and 1.0. The default value of 0.0 disables antiringing
@@ -348,11 +348,9 @@ Available video output drivers are:
 
     ``scaler-resizes-only``
         Disable the scaler if the video image is not resized. In that case,
-        ``bilinear`` is used instead whatever is set with ``lscale``. Bilinear
+        ``bilinear`` is used instead whatever is set with ``scale``. Bilinear
         will reproduce the source image perfectly if no scaling is performed.
-        Note that this option never affects ``cscale``, although the different
-        processing chain might do chroma scaling differently if ``lscale`` is
-        disabled.
+        Note that this option never affects ``cscale``.
 
     ``srgb``
         Convert and color correct the output to sRGB before displaying it on
@@ -427,31 +425,26 @@ Available video output drivers are:
         resolutions. Using this option will make rendering a single operation
         if possible, often at the cost of performance or image quality.
 
-        It's safe to enable this if using ``bilinear`` for both ``lscale``
+        It's safe to enable this if using ``bilinear`` for both ``scale``
         and ``cscale``.
 
     ``cscale=<filter>``
-        As ``lscale``, but for interpolating chroma information. If the image
+        As ``scale``, but for interpolating chroma information. If the image
         is not subsampled, this option is ignored entirely. Note that the
         implementation is currently always done as a single pass, so using
         it with separable filters will result in slow performance for very
         little visible benefit.
 
-    ``lscale-down=<filter>``
-        Like ``lscale``, but apply these filters on downscaling
-        instead. If these options are unset, the filter implied by ``lscale``
+    ``scale-down=<filter>``
+        Like ``scale``, but apply these filters on downscaling
+        instead. If this option is unset, the filter implied by ``scale``
         will be applied.
 
-        There used to be a ``cscale-down`` option. This was removed, because
-        chroma scaling is usually only used for upscaling. The only case where
-        this was actually used for downscaling was when the video was scaled
-        down by more than twice (or other factors, depending on image formats),
-        and ``lscale`` did not use a separable scaler.
-
-    ``cparam1``, ``cparam2``, ``cradius``, ``cantiring``
+    ``cscale-param1``, ``cscale-param2``, ``cscale-radius``, ``cscale-antiring``
         Set filter parameters and radius for ``cscale``.
 
-        See ``lparam1``, ``lparam2``, ``lradius`` and ``lantiring``.
+        See ``scale-param1``, ``scale-param2``, ``scale-radius`` and
+        ``scale-antiring``.
 
     ``fancy-downscaling``
         When using convolution based filters, extend the filter size
@@ -603,7 +596,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:lscale=spline36:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling
+        --vo=opengl:scale=spline36:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
