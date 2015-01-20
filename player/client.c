@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <locale.h>
 #include <assert.h>
 
 #include "common/common.h"
@@ -439,8 +440,23 @@ void mpv_terminate_destroy(mpv_handle *ctx)
     pthread_join(playthread, NULL);
 }
 
+// We mostly care about LC_NUMERIC, and how "." vs. "," is treated,
+// Other locale stuff might break too, but probably isn't too bad.
+static bool check_locale(void)
+{
+    char *name = setlocale(LC_NUMERIC, NULL);
+    return strcmp(name, "C") == 0;
+}
+
 mpv_handle *mpv_create(void)
 {
+    if (!check_locale()) {
+        // Normally, we never print anything (except if the "terminal" option
+        // is enabled), so this is an exception.
+        fprintf(stderr, "Non-C locale detected. This is not supported.\n"
+                        "Call 'setlocale(LC_NUMERIC, \"C\");' in your code.\n");
+        return NULL;
+    }
     struct MPContext *mpctx = mp_create();
     mpv_handle *ctx = mp_new_client(mpctx->clients, "main");
     if (ctx) {
