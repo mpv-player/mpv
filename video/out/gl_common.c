@@ -960,8 +960,6 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name,
 
     if (gl_flavor >= 210 && !(ctx->gl->mpgl_caps & MPGL_CAP_GL21)) {
         MP_WARN(ctx->vo, "At least OpenGL 2.1 required.\n");
-        if (!vo->probing && (ctx->gl->mpgl_caps & MPGL_CAP_GL_LEGACY))
-            MP_WARN(ctx->vo, "Try with: --vo=opengl-old\n");
         goto cleanup;
     } else if (gl_flavor < 210 && !(ctx->gl->mpgl_caps & MPGL_CAP_GL_LEGACY)) {
         MP_WARN(ctx->vo, "OpenGL context creation failed!\n");
