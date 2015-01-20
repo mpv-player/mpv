@@ -201,7 +201,7 @@ vec4 sample_bilinear(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param
     return texture(tex, texcoord);
 }
 
-#define SAMPLE_BILINEAR(p0, p1, p2) sample_bilinear(p0, p1, p2, 0.0)
+#define SAMPLE_TRIVIAL(tex, texsize, texcoord) texture(tex, texcoord)
 
 // Explanation how bicubic scaling with only 4 texel fetches is done:
 //   http://www.mate.tue.nl/mate/pdfs/10318.pdf

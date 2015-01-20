@@ -601,6 +601,13 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
                    GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     default_tex_params(gl, p->gl_target);
 
+    // Convolution filters don't need linear sampling, so using nearest is
+    // often faster.
+    if (p->scalers[0].kernel) {
+        gl->TexParameteri(p->gl_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl->TexParameteri(p->gl_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+
     debug_check_gl(p, "after creating framebuffer texture");
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
@@ -1215,13 +1222,13 @@ static void compile_shaders(struct gl_video *p)
         // Force using the luma scaler on chroma. If the "indirect" stage is
         // used, the actual scaling will happen in the next stage.
         shader_def(&header_conv, "SAMPLE_C",
-                   use_indirect ? "SAMPLE_BILINEAR" : "SAMPLE_L");
+                   use_indirect ? "SAMPLE_TRIVIAL" : "SAMPLE_L");
     }
 
     if (use_indirect) {
         // We don't use filtering for the Y-plane (luma), because it's never
         // scaled in this scenario.
-        shader_def(&header_conv, "SAMPLE_L", "SAMPLE_BILINEAR");
+        shader_def(&header_conv, "SAMPLE_L", "SAMPLE_TRIVIAL");
         shader_def_opt(&header_conv, "FIXED_SCALE", true);
         header_conv = t_concat(tmp, header, header_conv);
         p->indirect_program =
@@ -1523,6 +1530,8 @@ static void uninit_rendering(struct gl_video *p)
 
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
+
+    fbotex_uninit(p, &p->indirect_fbo);
 }
 
 void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
