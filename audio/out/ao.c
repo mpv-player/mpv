@@ -86,7 +86,6 @@ static const struct ao_driver * const audio_out_drivers[] = {
     &audio_out_sndio,
 #endif
     &audio_out_null,
-    // should not be auto-selected:
 #if HAVE_COREAUDIO
     &audio_out_coreaudio_exclusive,
 #endif
@@ -291,6 +290,8 @@ autoprobe: ;
     // now try the rest...
     for (int i = 0; audio_out_drivers[i]; i++) {
         const struct ao_driver *driver = audio_out_drivers[i];
+        if (driver == &audio_out_null)
+            break;
         ao = ao_init(true, global, input_ctx, encode_lavc_ctx, samplerate,
                      format, channels, NULL, (char *)driver->name, NULL);
         if (ao)
