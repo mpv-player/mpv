@@ -46,16 +46,23 @@ Essential dependencies (incomplete list):
 
 - gcc or clang
 - X development headers (xlib, X extensions, libvdpau, libGL, libXv, ...)
-- Audio output development headers (libasound, pulseaudio)
-- FFmpeg libraries (libavutil libavcodec libavformat libswscale libavresample)
+- Audio output development headers (libasound/ALSA, pulseaudio)
+- FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
+  and either libswresample or libavresample)
   At least FFmpeg 2.1.4 or Libav 10 is required.
-- libjpeg (for screenshots)
-- Lua (strictly speaking optional, but required for the OSC pseudo-GUI)
+- libass
+- Lua (optional, required for the OSC pseudo-GUI)
+- libjpeg (optional, used for screenshots only)
+- Enca (optional, for subtitle charset detection)
+- vdpau and vaapi libraries for hardware decoding on Linux (optional)
 
 Libass dependencies:
 
 - gcc or clang, yasm on x86 and x86_64
 - fribidi, freetype, fontconfig development headers (for libass)
+- harfbuzz (optional, required for correct rendering of combining characters,
+  particularly for correct rendering of non-English text on OSX, and
+  Arabic/Indic scripts on any platform)
 
 FFmpeg dependencies:
 
@@ -75,6 +82,7 @@ those.
 If you are running Mac OSX and using homebrew we provide [homebrew-mpv][homebrew-mpv], an up
 to date formula that compiles mpv with sensible dependencies and defaults for
 OSX.
+
 
 FFmpeg vs. Libav
 ----------------

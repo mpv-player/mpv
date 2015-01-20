@@ -456,7 +456,7 @@ Available video output drivers are:
         luma scaler is used instead. Setting this option is often useless.
 
     ``lscale-down=<filter>``, ``cscale-down=<filter>``
-        Like ``lscale`` and ``cscale``, but apply these filters on downscaling
+        Like ``lscale``, but apply these filters on downscaling
         instead. If these options are unset, the filter implied by ``lscale``
         (and ``cscale``, respectively) will be applied.
 
