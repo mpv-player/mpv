@@ -276,8 +276,10 @@ struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex)
 autoprobe:
     // now try the rest...
     for (int i = 0; video_out_drivers[i]; i++) {
-        char *name = (char *)video_out_drivers[i]->name;
-        struct vo *vo = vo_create(true, global, ex, name, NULL);
+        const struct vo_driver *driver = video_out_drivers[i];
+        if (driver == &video_out_null)
+            break;
+        struct vo *vo = vo_create(true, global, ex, (char *)driver->name, NULL);
         if (vo)
             return vo;
     }
