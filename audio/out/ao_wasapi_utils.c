@@ -324,8 +324,7 @@ static bool try_format(struct ao *ao,
                        ao->channels.num, af_fmt_to_str(ao->format), ao->samplerate);
             return true;
         }
-    } if (hr == S_OK || (!state->opt_exclusive && hr == AUDCLNT_E_UNSUPPORTED_FORMAT)) {
-        // AUDCLNT_E_UNSUPPORTED_FORMAT here means "works in shared, doesn't in exclusive"
+    } else if (hr == S_OK) {
         if (set_ao_format(ao, &wformat.Format)) {
             MP_VERBOSE(ao, "%dch %s @ %dhz accepted\n",
                        ao->channels.num, af_fmt_to_str(ao->format), samplerate);
