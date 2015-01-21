@@ -37,7 +37,6 @@
 #include "sub/img_convert.h"
 #include "x11_common.h"
 
-#include "video/vfcap.h"
 #include "video/mp_image.h"
 #include "video/vaapi.h"
 #include "video/hwdec.h"
@@ -175,11 +174,11 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     return 0;
 }
 
-static int query_format(struct vo *vo, uint32_t imgfmt)
+static int query_format(struct vo *vo, int imgfmt)
 {
     struct priv *p = vo->priv;
     if (imgfmt == IMGFMT_VAAPI || va_image_format_from_imgfmt(p->va_image_formats, imgfmt))
-        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+        return 1;
 
     return 0;
 }

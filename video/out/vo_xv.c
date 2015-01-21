@@ -48,7 +48,6 @@
 #include "talloc.h"
 #include "common/msg.h"
 #include "vo.h"
-#include "video/vfcap.h"
 #include "video/mp_image.h"
 #include "video/img_fourcc.h"
 #include "x11_common.h"
@@ -681,17 +680,16 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
     struct xvctx *ctx = vo->priv;
     uint32_t i;
-    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
 
     int fourcc = find_xv_format(format);
     if (fourcc) {
         for (i = 0; i < ctx->formats; i++) {
             if (ctx->fo[i].id == fourcc)
-                return flag;
+                return 1;
         }
     }
     return 0;

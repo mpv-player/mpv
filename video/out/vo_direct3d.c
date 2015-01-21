@@ -32,7 +32,6 @@
 #include "options/m_option.h"
 #include "talloc.h"
 #include "vo.h"
-#include "video/vfcap.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "video/img_format.h"
@@ -1127,13 +1126,13 @@ static bool init_rendering_mode(d3d_priv *priv, uint32_t fmt, bool initialize)
  *  @return 0 on failure, device capabilities (not probed
  *          currently) on success.
  */
-static int query_format(struct vo *vo, uint32_t movie_fmt)
+static int query_format(struct vo *vo, int movie_fmt)
 {
     d3d_priv *priv = vo->priv;
     if (!init_rendering_mode(priv, movie_fmt, false))
         return 0;
 
-    return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+    return 1;
 }
 
 /****************************************************************************

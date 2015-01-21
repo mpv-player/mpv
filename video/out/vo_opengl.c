@@ -40,7 +40,6 @@
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "vo.h"
-#include "video/vfcap.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
 
@@ -179,13 +178,12 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     mpgl_unlock(p->glctx);
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
     struct gl_priv *p = vo->priv;
-    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     if (!gl_video_check_format(p->renderer, format))
         return 0;
-    return caps;
+    return 1;
 }
 
 static void video_resize_redraw_callback(struct vo *vo, int w, int h)

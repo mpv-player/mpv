@@ -29,7 +29,6 @@
 #include "vo.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
-#include "video/vfcap.h"
 #include "video/filter/vf.h"
 
 #include <X11/Xlib.h>
@@ -492,25 +491,19 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
-    struct priv *p = vo->priv;
     MP_DBG(vo, "query_format was called: %x (%s)\n", format,
             vo_format_name(format));
     if (IMGFMT_IS_RGB(format)) {
         for (int n = 0; fmt2Xfmt[n].mpfmt; n++) {
-            if (fmt2Xfmt[n].mpfmt == format) {
-                if (IMGFMT_RGB_DEPTH(format) == p->ximage_depth) {
-                    return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
-                } else {
-                    return VFCAP_CSP_SUPPORTED;
-                }
-            }
+            if (fmt2Xfmt[n].mpfmt == format)
+                return 1;
         }
     }
 
     if (sws_isSupportedInput(imgfmt2pixfmt(format)))
-        return VFCAP_CSP_SUPPORTED;
+        return 1;
     return 0;
 }
 

@@ -46,7 +46,6 @@
 #include "video/csputils.h"
 #include "sub/osd.h"
 #include "options/m_option.h"
-#include "video/vfcap.h"
 #include "video/mp_image.h"
 #include "osdep/timer.h"
 #include "bitmap_packer.h"
@@ -915,15 +914,14 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     return image;
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
     struct vdpctx *vc = vo->priv;
 
-    int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     if (mp_vdpau_get_format(format, NULL, NULL))
-        return flags;
+        return 1;
     if (!vc->force_yuv && mp_vdpau_get_rgb_format(format, NULL))
-        return flags;
+        return 1;
     return 0;
 }
 

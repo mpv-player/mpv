@@ -44,7 +44,6 @@
 #include "common/msg.h"
 #include "common/global.h"
 #include "video/mp_image.h"
-#include "video/vfcap.h"
 #include "sub/osd.h"
 #include "osdep/io.h"
 #include "osdep/threads.h"

@@ -654,7 +654,7 @@ static int config(struct vf_instance *vf, int width, int height,
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    return mp_to_vs(fmt) != pfNone ? VFCAP_CSP_SUPPORTED : 0;
+    return mp_to_vs(fmt) != pfNone;
 }
 
 static int control(vf_instance_t *vf, int request, void *data)

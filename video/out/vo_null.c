@@ -27,7 +27,6 @@
 #include "config.h"
 #include "common/msg.h"
 #include "vo.h"
-#include "video/vfcap.h"
 #include "video/mp_image.h"
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -39,9 +38,9 @@ static void flip_page(struct vo *vo)
 {
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
-    return VFCAP_CSP_SUPPORTED;
+    return 1;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)

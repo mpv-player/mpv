@@ -580,7 +580,7 @@ static void update_formats(struct vf_chain *c, struct vf_instance *vf,
         // error messages in some cases, so we can configure all filter
         // until it fails, which will be visible in vf_print_filter_chain().
         for (int n = IMGFMT_START; n < IMGFMT_END; n++)
-            vf->last_outfmts[n - IMGFMT_START] = VFCAP_CSP_SUPPORTED;
+            vf->last_outfmts[n - IMGFMT_START] = 1;
         query_formats(fmts, vf);
     }
 }

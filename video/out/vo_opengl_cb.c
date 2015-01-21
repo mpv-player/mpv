@@ -17,7 +17,6 @@
 #include "options/options.h"
 #include "aspect.h"
 #include "vo.h"
-#include "video/vfcap.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
 
@@ -387,7 +386,7 @@ static void flip_page(struct vo *vo)
     pthread_mutex_unlock(&p->ctx->lock);
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
     struct vo_priv *p = vo->priv;
 
@@ -396,7 +395,7 @@ static int query_format(struct vo *vo, uint32_t format)
     if (format >= IMGFMT_START && format < IMGFMT_END)
         ok = p->ctx->imgfmt_supported[format - IMGFMT_START];
     pthread_mutex_unlock(&p->ctx->lock);
-    return ok ? VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW : 0;
+    return ok;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)

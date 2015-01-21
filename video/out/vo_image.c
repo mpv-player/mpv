@@ -33,7 +33,6 @@
 #include "common/msg.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
-#include "video/vfcap.h"
 #include "video/mp_image.h"
 #include "video/fmt-conversion.h"
 #include "video/image_writer.h"
@@ -105,10 +104,10 @@ static void flip_page(struct vo *vo)
     mp_image_unrefp(&p->current);
 }
 
-static int query_format(struct vo *vo, uint32_t fmt)
+static int query_format(struct vo *vo, int fmt)
 {
     if (mp_sws_supported_format(fmt))
-        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+        return 1;
     return 0;
 }
 

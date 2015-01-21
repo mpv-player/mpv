@@ -26,7 +26,6 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
-#include "video/vfcap.h"
 #include "options/m_option.h"
 #include "options/options.h"
 #include "osdep/timer.h"
@@ -836,12 +835,12 @@ int encode_lavc_supports_pixfmt(struct encode_lavc_context *ctx,
         return 0;
 
     if (!ctx->vc->pix_fmts)
-        return VFCAP_CSP_SUPPORTED;
+        return 1;
     else {
         const enum AVPixelFormat *p;
         for (p = ctx->vc->pix_fmts; *p >= 0; ++p) {
             if (pix_fmt == *p)
-                return VFCAP_CSP_SUPPORTED;
+                return 1;
         }
     }
     return 0;

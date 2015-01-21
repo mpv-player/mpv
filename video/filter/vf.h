@@ -24,8 +24,6 @@
 #include "video/mp_image.h"
 #include "common/common.h"
 
-#include "video/vfcap.h"
-
 struct MPOpts;
 struct mpv_global;
 struct vf_instance;

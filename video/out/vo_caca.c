@@ -37,7 +37,6 @@
 #include "config.h"
 #include "vo.h"
 #include "video/mp_image.h"
-#include "video/vfcap.h"
 #include "video/memcpy_pic.h"
 
 #include "input/keycodes.h"
@@ -279,12 +278,9 @@ static int preinit(struct vo *vo)
     return 0;
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
-    if (format == IMGFMT_BGR24)
-        return VFCAP_CSP_SUPPORTED;
-
-    return 0;
+    return format == IMGFMT_BGR24;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)

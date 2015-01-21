@@ -220,25 +220,11 @@ static int control(struct vf_instance *vf, int request, void *data)
     return CONTROL_UNKNOWN;
 }
 
-//===========================================================================//
-
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    if (!IMGFMT_IS_HWACCEL(fmt) && imgfmt2pixfmt(fmt) != AV_PIX_FMT_NONE) {
-        if (sws_isSupportedInput(imgfmt2pixfmt(fmt)) < 1)
-            return 0;
-        int best = find_best_out(vf, fmt);
-        int flags;
-        if (!best)
-            return 0;            // no matching out-fmt
-        flags = vf_next_query_format(vf, best);
-        if (!(flags & (VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW)))
-            return 0;
-        if (fmt != best)
-            flags &= ~VFCAP_CSP_SUPPORTED_BY_HW;
-        return flags;
-    }
-    return 0;   // nomatching in-fmt
+    if (IMGFMT_IS_HWACCEL(fmt) || sws_isSupportedInput(imgfmt2pixfmt(fmt)) < 1)
+        return 0;
+    return !!find_best_out(vf, fmt);
 }
 
 static void uninit(struct vf_instance *vf)

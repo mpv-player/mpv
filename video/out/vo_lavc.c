@@ -26,7 +26,6 @@
 #include "options/options.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
-#include "video/vfcap.h"
 #include "talloc.h"
 #include "vo.h"
 
@@ -191,7 +190,7 @@ error:
     return -1;
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
     enum AVPixelFormat pix_fmt = imgfmt2pixfmt(format);
 
@@ -201,7 +200,7 @@ static int query_format(struct vo *vo, uint32_t format)
     pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
     int flags = 0;
     if (encode_lavc_supports_pixfmt(vo->encode_lavc_ctx, pix_fmt))
-        flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+        flags = 1;
     pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
     return flags;
 }

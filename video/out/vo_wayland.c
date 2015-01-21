@@ -25,7 +25,6 @@
 #include "config.h"
 
 #include "vo.h"
-#include "video/vfcap.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
 #include "video/memcpy_pic.h"
@@ -553,17 +552,17 @@ static void flip_page(struct vo *vo)
     }
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
     struct priv *p = vo->priv;
     struct supported_format *sf;
     wl_list_for_each_reverse(sf, &p->format_list, link) {
         if (sf->format.mp_format == format)
-            return VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_CSP_SUPPORTED;
+            return 1;
     }
 
     if (mp_sws_supported_format(format))
-        return VFCAP_CSP_SUPPORTED;
+        return 1;
 
     return 0;
 }

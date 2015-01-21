@@ -41,7 +41,6 @@
 #include "sub/osd.h"
 
 #include "video/mp_image.h"
-#include "video/vfcap.h"
 
 #include "win_state.h"
 #include "config.h"
@@ -847,16 +846,15 @@ static int preinit(struct vo *vo)
     return 0;
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, int format)
 {
     struct priv *vc = vo->priv;
     int i, j;
-    int cap = VFCAP_CSP_SUPPORTED;
     for (i = 0; i < vc->renderer_info.num_texture_formats; ++i)
         for (j = 0; j < sizeof(formats) / sizeof(formats[0]); ++j)
             if (vc->renderer_info.texture_formats[i] == formats[j].sdl)
                 if (format == formats[j].mpv)
-                    return cap;
+                    return 1;
     return 0;
 }
 
