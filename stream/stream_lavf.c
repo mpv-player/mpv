@@ -20,7 +20,6 @@
 #include <libavformat/avio.h>
 #include <libavutil/opt.h>
 
-#include "config.h"
 #include "options/options.h"
 #include "options/path.h"
 #include "common/msg.h"
@@ -34,8 +33,6 @@
 #include "misc/bstr.h"
 #include "talloc.h"
 
-struct stream_lavf_params *stream_lavf_opts;
-
 #define OPT_BASE_STRUCT struct stream_lavf_params
 struct stream_lavf_params {
     char **avopts;
@@ -48,6 +45,8 @@ const struct m_sub_options stream_lavf_conf = {
     },
     .size = sizeof(struct stream_lavf_params),
 };
+
+static const char *const http_like[];
 
 static int open_f(stream_t *stream);
 static struct mp_tags *read_icy(stream_t *stream);
@@ -188,6 +187,21 @@ void mp_setup_av_network_options(AVDictionary **dict, struct mpv_global *global,
     talloc_free(temp);
 }
 
+// Escape http URLs with unescaped, invalid characters in them.
+// libavformat's http protocol does not do this, and a patch to add this
+// in a 100% safe case (spaces only) was rejected.
+static char *normalize_url(void *ta_parent, const char *filename)
+{
+    bstr proto = mp_split_proto(bstr0(filename), NULL);
+    for (int n = 0; http_like[n]; n++) {
+        if (bstr_equals0(proto, http_like[n]))
+            // Escape everything but reserved characters.
+            // Also don't double-scape, so include '%'.
+            return mp_url_escape(ta_parent, filename, ":/?#[]@!$&'()*+,;=%");
+    }
+    return (char *)filename;
+}
+
 static int open_f(stream_t *stream)
 {
     struct MPOpts *opts = stream->opts;
@@ -237,6 +251,8 @@ static int open_f(stream_t *stream)
         .callback = interrupt_cb,
         .opaque = stream,
     };
+
+    filename = normalize_url(stream, filename);
 
     int err = avio_open2(&avio, filename, flags, &cb, &dict);
     if (err < 0) {
@@ -334,6 +350,9 @@ done:
     av_free(icy_packet);
     return res;
 }
+
+static const char *const http_like[] =
+    {"http", "https", "mmsh", "mmshttp", "httproxy", NULL};
 
 const stream_info_t stream_info_ffmpeg = {
   .name = "ffmpeg",
