@@ -30,8 +30,7 @@ struct mpgl_osd {
     void *scratch;
 };
 
-struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd,
-                               bool legacy);
+struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd);
 void mpgl_osd_destroy(struct mpgl_osd *ctx);
 
 struct mpgl_osd_part *mpgl_osd_generate(struct mpgl_osd *ctx,
@@ -39,8 +38,5 @@ struct mpgl_osd_part *mpgl_osd_generate(struct mpgl_osd *ctx,
 
 void mpgl_osd_set_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p);
 void mpgl_osd_unset_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p);
-
-void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, double pts,
-                          struct mp_osd_res res);
 
 #endif

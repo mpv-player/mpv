@@ -261,11 +261,12 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
 
     int gl_version = ctx->requested_gl_version;
     bool success = false;
-    if (gl_version >= 300 && !glx_ctx->force_es)
+    if (!glx_ctx->force_es) {
         success = create_context_x11_gl3(ctx, flags, gl_version, false);
-    if (!success && !glx_ctx->force_es)
-        success = create_context_x11_old(ctx);
-    if (!success && gl_version >= 300) // 3.00 = vo_opengl; accepts GLES 2 or 3
+        if (!success)
+            success = create_context_x11_old(ctx);
+    }
+    if (!success) // try ES
         success = create_context_x11_gl3(ctx, flags, 200, true);
     if (success && !glXIsDirect(vo->x11->display, glx_ctx->context))
         ctx->gl->mpgl_caps |= MPGL_CAP_SW;

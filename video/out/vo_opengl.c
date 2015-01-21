@@ -412,7 +412,7 @@ static int preinit(struct vo *vo)
     if (p->allow_sw)
         vo->probing = false;
 
-    p->glctx = mpgl_init(vo, p->backend, 210, vo_flags);
+    p->glctx = mpgl_init(vo, p->backend, vo_flags);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;

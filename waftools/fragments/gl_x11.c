@@ -9,5 +9,7 @@ int main(int argc, char *argv[]) {
   glXGetProcAddressARB("");
   glXGetCurrentDisplay();
   glFinish();
+  (void)GL_RGB32F;          // arbitrary OpenGL 3.0 symbol
+  (void)GL_LUMINANCE16;     // arbitrary OpenGL legacy-only symbol
   return 0;
 }

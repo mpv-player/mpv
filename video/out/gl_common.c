@@ -83,22 +83,12 @@ static int get_alignment(int stride)
     return 1;
 }
 
-// adjusts the GL_UNPACK_ALIGNMENT to fit the stride.
-void glAdjustAlignment(GL *gl, int stride)
-{
-    GLint gl_alignment = get_alignment(stride);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, gl_alignment);
-    gl->PixelStorei(GL_PACK_ALIGNMENT, gl_alignment);
-}
-
 struct feature {
     int id;
     const char *name;
 };
 
 static const struct feature features[] = {
-    {MPGL_CAP_GL_LEGACY,        "Legacy OpenGL"},
-    {MPGL_CAP_GL21,             "OpenGL 2.1+ (or subset)"},
     {MPGL_CAP_FB,               "Framebuffers"},
     {MPGL_CAP_VAO,              "VAOs"},
     {MPGL_CAP_SRGB_TEX,         "sRGB textures"},
@@ -146,91 +136,62 @@ struct gl_functions {
     int ver_removed;            // removed as required function (no replacement)
     int ver_es_core;            // introduced as required GL ES function
     int ver_es_removed;         // removed as required function (no replacement)
-    bool partial_ok;            // loading only some functions is ok
     const struct gl_function *functions;
 };
 
-#define MAX_FN_COUNT 50         // max functions per gl_functions section
+#define MAX_FN_COUNT 100        // max functions per gl_functions section
 
 // Note: to keep the number of sections low, some functions are in multiple
 //       sections (if there are tricky combinations of GL/ES versions)
 static const struct gl_functions gl_functions[] = {
-    // GL functions which are always available anywhere at least since 1.1/ES2.0
+    // GL 2.1+ desktop and GLES 2.0+ (anything we support)
+    // Probably all of these are in GL 2.0 too, but we require GLSL 120.
     {
-        .ver_core = 110,
+        .ver_core = 210,
         .ver_es_core = 200,
-        .functions = (const struct gl_function[]) {
-            DEF_FN(BlendFunc),
-            DEF_FN(Clear),
-            DEF_FN(ClearColor),
-            DEF_FN(ColorMask),
-            DEF_FN(DeleteTextures),
-            DEF_FN(DepthMask),
-            DEF_FN(Disable),
-            DEF_FN(DrawArrays),
-            DEF_FN(Enable),
-            DEF_FN(Finish),
-            DEF_FN(Flush),
-            DEF_FN(GenTextures),
-            DEF_FN(GetBooleanv),
-            DEF_FN(GetError),
-            DEF_FN(GetIntegerv),
-            DEF_FN(GetString),
-            DEF_FN(PixelStorei),
-            DEF_FN(ReadPixels),
-            DEF_FN(TexImage2D),
-            DEF_FN(TexParameteri),
-            DEF_FN(TexParameterf),
-            DEF_FN(TexParameterfv),
-            DEF_FN(TexSubImage2D),
-            DEF_FN(Viewport),
-            {0}
-        },
-    },
-    // GL 1.1+ desktop only
-    {
-        .ver_core = 110,
-        .provides = MPGL_CAP_ROW_LENGTH,
-        .functions = (const struct gl_function[]) {
-            DEF_FN(DrawBuffer),
-            DEF_FN(GetTexImage),
-            DEF_FN(GetTexLevelParameteriv),
-            DEF_FN(ReadBuffer),
-            DEF_FN(TexEnvi),
-            DEF_FN(TexImage1D),
-            {0}
-        },
-    },
-    // GL 2.1+ functions (also: GLSL 120 shaders)
-    // All of the listed functions are also in GL 2.0 and ES 2.0
-    {
-        .ver_core = 210, // not 200, so that we're guaranteed GLSL 120
-        .ver_es_core = 200,
-        .provides = MPGL_CAP_GL21,
         .functions = (const struct gl_function[]) {
             DEF_FN(ActiveTexture),
             DEF_FN(AttachShader),
             DEF_FN(BindAttribLocation),
             DEF_FN(BindBuffer),
             DEF_FN(BindTexture),
+            DEF_FN(BlendFuncSeparate),
             DEF_FN(BufferData),
+            DEF_FN(Clear),
+            DEF_FN(ClearColor),
             DEF_FN(CompileShader),
             DEF_FN(CreateProgram),
             DEF_FN(CreateShader),
             DEF_FN(DeleteBuffers),
             DEF_FN(DeleteProgram),
             DEF_FN(DeleteShader),
+            DEF_FN(DeleteTextures),
+            DEF_FN(Disable),
             DEF_FN(DisableVertexAttribArray),
+            DEF_FN(DrawArrays),
+            DEF_FN(Enable),
             DEF_FN(EnableVertexAttribArray),
-            DEF_FN(GetAttribLocation),
+            DEF_FN(Finish),
+            DEF_FN(Flush),
             DEF_FN(GenBuffers),
-            DEF_FN(GetShaderInfoLog),
-            DEF_FN(GetShaderiv),
+            DEF_FN(GenTextures),
+            DEF_FN(GetBooleanv),
+            DEF_FN(GetAttribLocation),
+            DEF_FN(GetError),
+            DEF_FN(GetIntegerv),
             DEF_FN(GetProgramInfoLog),
             DEF_FN(GetProgramiv),
+            DEF_FN(GetShaderInfoLog),
+            DEF_FN(GetShaderiv),
+            DEF_FN(GetString),
             DEF_FN(GetUniformLocation),
             DEF_FN(LinkProgram),
+            DEF_FN(PixelStorei),
+            DEF_FN(ReadPixels),
             DEF_FN(ShaderSource),
+            DEF_FN(TexImage2D),
+            DEF_FN(TexParameteri),
+            DEF_FN(TexSubImage2D),
             DEF_FN(Uniform1f),
             DEF_FN(Uniform2f),
             DEF_FN(Uniform3f),
@@ -239,23 +200,28 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(UniformMatrix3fv),
             DEF_FN(UseProgram),
             DEF_FN(VertexAttribPointer),
-            // Added in GL 1.4 and ES 2.0, but vo_opengl_old doesn't need it
-            DEF_FN(BlendFuncSeparate),
-            {0},
+            DEF_FN(Viewport),
+            {0}
         },
     },
-    // GL 2.1+ desktop only, GLSL 120
+    // GL 2.1+ desktop only (and GLSL 120 shaders)
     {
         .ver_core = 210,
-        .provides = MPGL_CAP_3D_TEX | MPGL_CAP_1ST_CLASS_ARRAYS,
+        .provides = MPGL_CAP_ROW_LENGTH | MPGL_CAP_3D_TEX |
+                    MPGL_CAP_1ST_CLASS_ARRAYS,
         .functions = (const struct gl_function[]) {
+            DEF_FN(DrawBuffer),
+            DEF_FN(GetTexImage),
+            DEF_FN(GetTexLevelParameteriv),
             DEF_FN(MapBuffer),
+            DEF_FN(ReadBuffer),
+            DEF_FN(TexImage1D),
             DEF_FN(TexImage3D),
             DEF_FN(UnmapBuffer),
             {0}
         },
     },
-    // GL+ES 3.x core only functions.
+    // GL 3.0+ and ES 3.x core only functions.
     {
         .ver_core = 300,
         .ver_es_core = 300,
@@ -364,77 +330,6 @@ static const struct gl_functions gl_functions[] = {
             {0},
         },
     },
-    // GL legacy functions in GL 1.x - 2.x, removed from GL 3.x
-    {
-        .ver_core = 110,
-        .ver_removed = 300,
-        .provides = MPGL_CAP_GL_LEGACY,
-        .functions = (const struct gl_function[]) {
-            DEF_FN(Begin),
-            DEF_FN(End),
-            DEF_FN(MatrixMode),
-            DEF_FN(LoadIdentity),
-            DEF_FN(Translated),
-            DEF_FN(Scaled),
-            DEF_FN(Ortho),
-            DEF_FN(PushMatrix),
-            DEF_FN(PopMatrix),
-            DEF_FN(GenLists),
-            DEF_FN(DeleteLists),
-            DEF_FN(NewList),
-            DEF_FN(EndList),
-            DEF_FN(CallList),
-            DEF_FN(CallLists),
-            DEF_FN(Color4ub),
-            DEF_FN(Color4f),
-            DEF_FN(TexCoord2f),
-            DEF_FN(TexCoord2fv),
-            DEF_FN(Vertex2f),
-            DEF_FN(VertexPointer),
-            DEF_FN(ColorPointer),
-            DEF_FN(TexCoordPointer),
-            DEF_FN(EnableClientState),
-            DEF_FN(DisableClientState),
-            {0}
-        },
-    },
-    // Loading of old extensions, which are later added to GL 2.0.
-    // NOTE: actually we should be checking the extension strings: the OpenGL
-    //       library could provide an entry point, but not implement it.
-    //       But the previous code didn't do that, and nobody ever complained.
-    {
-        .ver_removed = 210,
-        .ver_es_removed = 100,
-        .partial_ok = true,
-        .functions = (const struct gl_function[]) {
-            DEF_FN_NAMES(GenBuffers, "glGenBuffers", "glGenBuffersARB"),
-            DEF_FN_NAMES(DeleteBuffers, "glDeleteBuffers", "glDeleteBuffersARB"),
-            DEF_FN_NAMES(BindBuffer, "glBindBuffer", "glBindBufferARB"),
-            DEF_FN_NAMES(MapBuffer, "glMapBuffer", "glMapBufferARB"),
-            DEF_FN_NAMES(UnmapBuffer, "glUnmapBuffer", "glUnmapBufferARB"),
-            DEF_FN_NAMES(BufferData, "glBufferData", "glBufferDataARB"),
-            DEF_FN_NAMES(ActiveTexture, "glActiveTexture", "glActiveTextureARB"),
-            DEF_FN_NAMES(BindTexture, "glBindTexture", "glBindTextureARB", "glBindTextureEXT"),
-            DEF_FN_NAMES(MultiTexCoord2f, "glMultiTexCoord2f", "glMultiTexCoord2fARB"),
-            DEF_FN_NAMES(TexImage3D, "glTexImage3D"),
-            {0}
-        },
-    },
-    // Ancient ARB shaders.
-    {
-        .extension = "_program",
-        .ver_removed = 300,
-        .ver_es_removed = 100,
-        .functions = (const struct gl_function[]) {
-            DEF_FN_NAMES(GenPrograms, "glGenProgramsARB"),
-            DEF_FN_NAMES(DeletePrograms, "glDeleteProgramsARB"),
-            DEF_FN_NAMES(BindProgram, "glBindProgramARB"),
-            DEF_FN_NAMES(ProgramString, "glProgramStringARB"),
-            DEF_FN_NAMES(GetProgramivARB, "glGetProgramivARB"),
-            DEF_FN_NAMES(ProgramEnvParameter4f, "glProgramEnvParameter4fARB"),
-            {0}
-        },
-    },
     // For gl_hwdec_vdpau.c
     // http://www.opengl.org/registry/specs/NV/vdpau_interop.txt
     {
@@ -495,7 +390,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     gl->GetString = get_fn(fn_ctx, "glGetString");
     if (!gl->GetString) {
         mp_err(log, "Can't load OpenGL functions.\n");
-        return;
+        goto error;
     }
 
     int major = 0, minor = 0;
@@ -514,7 +409,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         gl->version = 0;
         if (gl->es < 200) {
             mp_fatal(log, "At least GLESv2 required.\n");
-            return;
+            goto error;
         }
     }
 
@@ -536,7 +431,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         gl->GetIntegerv = get_fn(fn_ctx, "glGetIntegerv");
 
         if (!(gl->GetStringi && gl->GetIntegerv))
-            return;
+            goto error;
 
         GLint exts;
         gl->GetIntegerv(GL_NUM_EXTENSIONS, &exts);
@@ -587,9 +482,6 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (section->extension && strstr(gl->extensions, section->extension))
             exists = true;
 
-        if (section->partial_ok)
-            exists = true; // possibly
-
         exists |= must_exist;
         if (!exists)
             continue;
@@ -608,24 +500,22 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
             }
             if (!ptr) {
                 all_loaded = false;
-                if (!section->partial_ok) {
-                    mp_warn(log, "Required function '%s' not "
-                           "found for %s OpenGL %d.%d.\n", fn->funcnames[0],
-                           section->extension ? section->extension : "builtin",
-                           MPGL_VER_GET_MAJOR(ver_core),
-                           MPGL_VER_GET_MINOR(ver_core));
-                    if (must_exist) {
-                        gl->mpgl_caps = 0;
-                        return;
-                    }
-                    break;
+                mp_warn(log, "Required function '%s' not "
+                        "found for %s OpenGL %d.%d.\n", fn->funcnames[0],
+                        section->extension ? section->extension : "builtin",
+                        MPGL_VER_GET_MAJOR(ver_core),
+                        MPGL_VER_GET_MINOR(ver_core));
+                if (must_exist) {
+                    gl->mpgl_caps = 0;
+                    goto error;
                 }
+                break;
             }
             assert(i < MAX_FN_COUNT);
             loaded[i] = ptr;
         }
 
-        if (all_loaded || section->partial_ok) {
+        if (all_loaded) {
             gl->mpgl_caps |= section->provides;
             for (int i = 0; fnlist && fnlist[i].funcnames[0]; i++) {
                 const struct gl_function *fn = &fnlist[i];
@@ -669,6 +559,12 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     // Provided for simpler handling if no framebuffer support is available.
     if (!gl->BindFramebuffer)
         gl->BindFramebuffer = &dummy_glBindFramebuffer;
+    return;
+
+error:
+    gl->version = 0;
+    gl->es = 0;
+    gl->mpgl_caps = 0;
 }
 
 static void *get_procaddr_wrapper(void *ctx, const char *name)
@@ -715,7 +611,6 @@ int glFmt2bpp(GLenum format, GLenum type)
     case GL_LUMINANCE:
     case GL_ALPHA:
         return component_size;
-    case GL_YCBCR_MESA:
     case GL_RGB_422_APPLE:
         return 2;
     case GL_RGB:
@@ -945,26 +840,19 @@ static MPGLContext *mpgl_create(struct vo *vo, const char *backend_name)
     return ctx;
 }
 
-MPGLContext *mpgl_init(struct vo *vo, const char *backend_name,
-                       int gl_flavor, int vo_flags)
+MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
 {
     MPGLContext *ctx = mpgl_create(vo, backend_name);
     if (!ctx)
         goto cleanup;
 
-    // A bit strange; but <300 triggers legacy context creation in mpv code.
-    ctx->requested_gl_version = gl_flavor < 210 ? 210 : 300;
+    ctx->requested_gl_version = 300;
 
     if (!ctx->config_window(ctx, vo_flags | VOFLAG_HIDDEN))
         goto cleanup;
 
-    if (gl_flavor >= 210 && !(ctx->gl->mpgl_caps & MPGL_CAP_GL21)) {
-        MP_WARN(ctx->vo, "At least OpenGL 2.1 required.\n");
+    if (!ctx->gl->version && !ctx->gl->es)
         goto cleanup;
-    } else if (gl_flavor < 210 && !(ctx->gl->mpgl_caps & MPGL_CAP_GL_LEGACY)) {
-        MP_WARN(ctx->vo, "OpenGL context creation failed!\n");
-        goto cleanup;
-    }
 
     if (ctx->gl->es && vo->probing) {
         MP_INFO(ctx->vo, "Skipping experimental GLES support (use --vo=opengl).\n");

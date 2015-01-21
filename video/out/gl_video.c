@@ -1417,7 +1417,7 @@ static void recreate_osd(struct gl_video *p)
 {
     if (p->osd)
         mpgl_osd_destroy(p->osd);
-    p->osd = mpgl_osd_init(p->gl, p->log, p->osd_state, false);
+    p->osd = mpgl_osd_init(p->gl, p->log, p->osd_state);
     p->osd->use_pbo = p->opts.pbo;
 }
 
@@ -2551,7 +2551,7 @@ void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
 
 struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd)
 {
-    if (!(gl->mpgl_caps & MPGL_CAP_GL21)) {
+    if (gl->version < 210 && gl->es < 200) {
         mp_err(log, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
         return NULL;
     }

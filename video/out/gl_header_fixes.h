@@ -34,131 +34,14 @@
 #endif
 #endif
 
-#ifndef GL_TEXTURE_3D
-#define GL_TEXTURE_3D 0x806F
-#endif
-#ifndef GL_TEXTURE_WRAP_R
-#define GL_TEXTURE_WRAP_R 0x8072
-#endif
-#ifndef GL_CLAMP_TO_EDGE
-#define GL_CLAMP_TO_EDGE 0x812F
-#endif
-#ifndef GL_GENERATE_MIPMAP
-#define GL_GENERATE_MIPMAP 0x8191
-#endif
-#ifndef GL_MAX_TEXTURE_UNITS
-#define GL_MAX_TEXTURE_UNITS 0x84E2
-#endif
-#ifndef GL_TEXTURE0
-#define GL_TEXTURE0 0x84C0
-#endif
-#ifndef GL_TEXTURE1
-#define GL_TEXTURE1 0x84C1
-#endif
-#ifndef GL_TEXTURE2
-#define GL_TEXTURE2 0x84C2
-#endif
-#ifndef GL_TEXTURE3
-#define GL_TEXTURE3 0x84C3
-#endif
 #ifndef GL_TEXTURE_RECTANGLE
 #define GL_TEXTURE_RECTANGLE 0x84F5
-#endif
-#ifndef GL_PIXEL_UNPACK_BUFFER
-#define GL_PIXEL_UNPACK_BUFFER 0x88EC
-#endif
-#ifndef GL_STREAM_DRAW
-#define GL_STREAM_DRAW 0x88E0
-#endif
-#ifndef GL_DYNAMIC_DRAW
-#define GL_DYNAMIC_DRAW 0x88E8
-#endif
-#ifndef GL_WRITE_ONLY
-#define GL_WRITE_ONLY 0x88B9
-#endif
-#ifndef GL_BGR
-#define GL_BGR 0x80E0
-#endif
-#ifndef GL_BGRA
-#define GL_BGRA 0x80E1
-#endif
-#ifndef GL_UNSIGNED_BYTE_3_3_2
-#define GL_UNSIGNED_BYTE_3_3_2 0x8032
-#endif
-#ifndef GL_UNSIGNED_BYTE_2_3_3_REV
-#define GL_UNSIGNED_BYTE_2_3_3_REV 0x8362
-#endif
-#ifndef GL_UNSIGNED_SHORT_4_4_4_4
-#define GL_UNSIGNED_SHORT_4_4_4_4 0x8033
-#endif
-#ifndef GL_UNSIGNED_SHORT_4_4_4_4_REV
-#define GL_UNSIGNED_SHORT_4_4_4_4_REV 0x8365
-#endif
-#ifndef GL_UNSIGNED_SHORT_5_6_5
-#define GL_UNSIGNED_SHORT_5_6_5 0x8363
-#endif
-#ifndef GL_UNSIGNED_INT_8_8_8_8
-#define GL_UNSIGNED_INT_8_8_8_8 0x8035
-#endif
-#ifndef GL_UNSIGNED_INT_8_8_8_8_REV
-#define GL_UNSIGNED_INT_8_8_8_8_REV 0x8367
-#endif
-#ifndef GL_UNSIGNED_SHORT_5_6_5_REV
-#define GL_UNSIGNED_SHORT_5_6_5_REV 0x8364
-#endif
-#ifndef GL_UNSIGNED_INT_10_10_10_2
-#define GL_UNSIGNED_INT_10_10_10_2 0x8036
-#endif
-#ifndef GL_UNSIGNED_INT_2_10_10_10_REV
-#define GL_UNSIGNED_INT_2_10_10_10_REV 0x8368
-#endif
-#ifndef GL_UNSIGNED_SHORT_5_5_5_1
-#define GL_UNSIGNED_SHORT_5_5_5_1 0x8034
-#endif
-#ifndef GL_UNSIGNED_SHORT_1_5_5_5_REV
-#define GL_UNSIGNED_SHORT_1_5_5_5_REV 0x8366
 #endif
 #ifndef GL_UNSIGNED_SHORT_8_8
 #define GL_UNSIGNED_SHORT_8_8 0x85BA
 #endif
 #ifndef GL_UNSIGNED_SHORT_8_8_REV
 #define GL_UNSIGNED_SHORT_8_8_REV 0x85BB
-#endif
-#ifndef GL_YCBCR_MESA
-#define GL_YCBCR_MESA 0x8757
-#endif
-#ifndef GL_RGB32F
-#define GL_RGB32F 0x8815
-#endif
-#ifndef GL_FLOAT_RGB32_NV
-#define GL_FLOAT_RGB32_NV 0x8889
-#endif
-#ifndef GL_LUMINANCE16
-#define GL_LUMINANCE16 0x8042
-#endif
-#ifndef GL_R16
-#define GL_R16 0x822A
-#endif
-#ifndef GL_UNPACK_CLIENT_STORAGE_APPLE
-#define GL_UNPACK_CLIENT_STORAGE_APPLE 0x85B2
-#endif
-#ifndef GL_FRAGMENT_PROGRAM
-#define GL_FRAGMENT_PROGRAM 0x8804
-#endif
-#ifndef GL_PROGRAM_FORMAT_ASCII
-#define GL_PROGRAM_FORMAT_ASCII 0x8875
-#endif
-#ifndef GL_PROGRAM_ERROR_POSITION
-#define GL_PROGRAM_ERROR_POSITION 0x864B
-#endif
-#ifndef GL_MAX_TEXTURE_IMAGE_UNITS
-#define GL_MAX_TEXTURE_IMAGE_UNITS 0x8872
-#endif
-#ifndef GL_PROGRAM_ERROR_STRING
-#define GL_PROGRAM_ERROR_STRING 0x8874
-#endif
-#ifndef GL_RGBA32F
-#define GL_RGBA32F 0x8814
 #endif
 
 #if HAVE_GL_WIN32 && !defined(WGL_CONTEXT_MAJOR_VERSION_ARB)

@@ -202,8 +202,7 @@ static void create_ctx(void *ptr)
     if (!create_dc(ctx, w32_ctx->flags))
         return;
 
-    if (ctx->requested_gl_version >= MPGL_VER(3, 0))
-        create_context_w32_gl3(ctx);
+    create_context_w32_gl3(ctx);
     if (!w32_ctx->context)
         create_context_w32_old(ctx);
     wglMakeCurrent(w32_ctx->hdc, NULL);
