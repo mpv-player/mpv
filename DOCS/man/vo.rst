@@ -291,54 +291,30 @@ Available video output drivers are:
     ``lscale=<filter>``
 
         ``bilinear``
-            Bilinear hardware texture filtering (fastest, mid-quality).
+            Bilinear hardware texture filtering (fastest, low quality).
             This is the default.
 
-        ``lanczos2``
-            Lanczos scaling with radius=2. Provides good quality and speed.
+        ``spline36``
+            Mid quality and speed. This is the default when using ``opengl-hq``.
 
         ``lanczos3``
-            Lanczos with radius=3.
+            Lanczos scaling with radius=3. Provides mid quality and speed.
+            Worse than ``spline36``.
 
-        ``lanczos``
-            Generic Lanczos scaling filter. Set radius with ``lradius``.
+        ``ewa_lanczos3``
+            Elliptic weighted average Lanczos scaling filter. Also known as
+            Jinc. Relatively slow, but very good quality.
 
-        ``ewa_lanczos``
-            Generic elliptic weighted average Lanczos scaling filter. Also
-            known as Jinc. The radius can be set with ``lradius`` up to a
-            maximum value of 16, but note that performance drops very quickly
-            as the radius increases.
-
-        ``spline36``
-            This is the default when using ``opengl-hq``.
-
-        ``bicubic_fast``
-            Bicubic filter. Has a blurring effect on the image, even if no
-            scaling is done.
-
-        ``sharpen3``
-            Unsharp masking (sharpening) with radius=3 and a default strength
-            of 0.5 (see ``lparam1``).
-
-        ``sharpen5``
-            Unsharp masking (sharpening) with radius=5 and a default strength
-            of 0.5 (see ``lparam1``).
+        ``ewa_lanczos4``
+            Better quality than ``ewa_lanczos3``, but slower.
 
         ``mitchell``
             Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
             ``lparam1`` and ``lparam2``. Both are set to 1/3 by default.
+            Can be useful as special-purpose filter for downscaling.
 
-        ``gaussian``
-            Gaussian filter with a parameter ``p`` for sharpness control.
-            ``p`` can be set to float number between 1(blurry) and 100(sharp)
-            and has a default value of about 28.8 (see ``lparam1``).
-
-            Note that for extremely small value of ``p``, a large filter radius
-            might be required to avoid unintended artifacts (see ``lradius``).
-
-
-        There are some more filters. For a complete list, pass ``help`` as
-        value, e.g.::
+        There are some more filters, but most are not as useful. For a complete
+        list, pass ``help`` as value, e.g.::
 
             mpv --vo=opengl:lscale=help
 
