@@ -753,6 +753,25 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
     return 1;
 }
 
+static void destroy_d3d(d3d_priv *priv)
+{
+    destroy_d3d_surfaces(priv);
+
+    if (priv->pixel_shader)
+        IDirect3DPixelShader9_Release(priv->pixel_shader);
+    priv->pixel_shader = NULL;
+
+    if (priv->d3d_device)
+        IDirect3DDevice9_Release(priv->d3d_device);
+    priv->d3d_device = NULL;
+
+    if (priv->d3d_handle) {
+        MP_VERBOSE(priv, "Stopping Direct3D.\n");
+        IDirect3D9_Release(priv->d3d_handle);
+    }
+    priv->d3d_handle = NULL;
+}
+
 /** @brief Reconfigure the whole Direct3D. Called only
  *  when the video adapter becomes uncooperative. ("Lost" devices)
  *  @return 1 on success, 0 on failure
@@ -761,19 +780,11 @@ static int reconfigure_d3d(d3d_priv *priv)
 {
     MP_VERBOSE(priv, "reconfigure_d3d called.\n");
 
-    destroy_d3d_surfaces(priv);
-
-    if (priv->d3d_device)
-        IDirect3DDevice9_Release(priv->d3d_device);
-    priv->d3d_device = NULL;
-
     // Force complete destruction of the D3D state.
     // Note: this step could be omitted. The resize_d3d call below would detect
     // that d3d_device is NULL, and would properly recreate it. I'm not sure why
     // the following code to release and recreate the d3d_handle exists.
-    if (priv->d3d_handle)
-        IDirect3D9_Release(priv->d3d_handle);
-    priv->d3d_handle = NULL;
+    destroy_d3d(priv);
     if (!init_d3d(priv))
         return 0;
 
@@ -839,21 +850,7 @@ static void uninit_d3d(d3d_priv *priv)
 {
     MP_VERBOSE(priv, "uninit_d3d called.\n");
 
-    destroy_d3d_surfaces(priv);
-
-    if (priv->pixel_shader)
-        IDirect3DPixelShader9_Release(priv->pixel_shader);
-    priv->pixel_shader = NULL;
-
-    if (priv->d3d_device)
-        IDirect3DDevice9_Release(priv->d3d_device);
-    priv->d3d_device = NULL;
-
-    if (priv->d3d_handle) {
-        MP_VERBOSE(priv, "Stopping Direct3D.\n");
-        IDirect3D9_Release(priv->d3d_handle);
-    }
-    priv->d3d_handle = NULL;
+    destroy_d3d(priv);
 }
 
 static uint32_t d3d_draw_frame(d3d_priv *priv)
