@@ -177,7 +177,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 static int query_format(struct vo *vo, int imgfmt)
 {
     struct priv *p = vo->priv;
-    if (imgfmt == IMGFMT_VAAPI || va_image_format_from_imgfmt(p->va_image_formats, imgfmt))
+    if (imgfmt == IMGFMT_VAAPI || va_image_format_from_imgfmt(p->mpvaapi, imgfmt))
         return 1;
 
     return 0;
