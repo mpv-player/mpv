@@ -157,7 +157,7 @@ void mp_url_unescape_inplace(char *buf)
 //      ok[0] != '~': additional characters that are not escaped
 //      ok[0] == '~': do not escape anything but these characters
 //                    (can't override the unreserved characters, which are
-//                     never escaped, and '%', which is always escaped)
+//                     never escaped)
 char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok)
 {
     int len = strlen(s);
@@ -167,7 +167,7 @@ char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok)
         unsigned char c = s[i];
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
             (c >= '0' && c <= '9') || strchr("-._~", c) ||
-            (ok && ((ok[0] != '~') == !!strchr(ok, c)) && c != '%'))
+            (ok && ((ok[0] != '~') == !!strchr(ok, c))))
         {
             buf[o++] = c;
         } else {
