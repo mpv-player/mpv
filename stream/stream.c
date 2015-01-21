@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <limits.h>
 #include <errno.h>
 
 #include <strings.h>
@@ -347,6 +348,9 @@ struct stream *stream_create(const char *url, int flags,
     struct mp_log *log = mp_log_new(NULL, global->log, "!stream");
     struct stream *s = NULL;
     assert(url);
+
+    if (strlen(url) > INT_MAX / 8)
+        goto done;
 
     // Open stream proper
     bool unsafe = false;
