@@ -55,144 +55,20 @@ static struct vf_priv_s {
     {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
 };
 
-//===========================================================================//
-
-static const unsigned int outfmt_list[] = {
-// YUV:
-    IMGFMT_444P,
-    IMGFMT_444P16,
-    IMGFMT_444P14,
-    IMGFMT_444P12,
-    IMGFMT_444P10,
-    IMGFMT_444P9,
-    IMGFMT_422P,
-    IMGFMT_422P16,
-    IMGFMT_422P14,
-    IMGFMT_422P12,
-    IMGFMT_422P10,
-    IMGFMT_422P9,
-    IMGFMT_420P,
-    IMGFMT_420P16,
-    IMGFMT_420P14,
-    IMGFMT_420P12,
-    IMGFMT_420P10,
-    IMGFMT_420P9,
-    IMGFMT_420AP,
-    IMGFMT_410P,
-    IMGFMT_411P,
-    IMGFMT_NV12,
-    IMGFMT_NV21,
-    IMGFMT_YUYV,
-    IMGFMT_UYVY,
-    IMGFMT_440P,
-// RGB and grayscale (Y8 and Y800):
-    IMGFMT_BGR32,
-    IMGFMT_RGB32,
-    IMGFMT_ABGR,
-    IMGFMT_ARGB,
-    IMGFMT_BGRA,
-    IMGFMT_RGBA,
-    IMGFMT_BGR24,
-    IMGFMT_RGB24,
-    IMGFMT_GBRP,
-    IMGFMT_RGB48,
-    IMGFMT_BGR565,
-    IMGFMT_RGB565,
-    IMGFMT_BGR555,
-    IMGFMT_RGB555,
-    IMGFMT_BGR444,
-    IMGFMT_RGB444,
-    IMGFMT_Y8,
-    IMGFMT_BGR8,
-    IMGFMT_RGB8,
-    IMGFMT_BGR4,
-    IMGFMT_RGB4,
-    IMGFMT_RGB4_BYTE,
-    IMGFMT_BGR4_BYTE,
-    IMGFMT_MONO,
-    IMGFMT_MONO_W,
-    0
-};
-
-/**
- * A list of preferred conversions, in order of preference.
- * This should be used for conversions that e.g. involve no scaling
- * or to stop vf_scale from choosing a conversion that has no
- * fast assembler implementation.
- */
-static const int preferred_conversions[][2] = {
-    {IMGFMT_YUYV, IMGFMT_UYVY},
-    {IMGFMT_YUYV, IMGFMT_422P},
-    {IMGFMT_UYVY, IMGFMT_YUYV},
-    {IMGFMT_UYVY, IMGFMT_422P},
-    {IMGFMT_422P, IMGFMT_YUYV},
-    {IMGFMT_422P, IMGFMT_UYVY},
-    {IMGFMT_420P10, IMGFMT_420P},
-    {IMGFMT_GBRP, IMGFMT_BGR24},
-    {IMGFMT_GBRP, IMGFMT_RGB24},
-    {IMGFMT_GBRP, IMGFMT_BGR32},
-    {IMGFMT_GBRP, IMGFMT_RGB32},
-    {IMGFMT_PAL8, IMGFMT_BGR32},
-    {IMGFMT_XYZ12, IMGFMT_RGB48},
-    {0, 0}
-};
-
-static int check_outfmt(vf_instance_t *vf, int outfmt)
+static int find_best_out(vf_instance_t *vf, int in_format)
 {
-    enum AVPixelFormat pixfmt = imgfmt2pixfmt(outfmt);
-    if (pixfmt == AV_PIX_FMT_NONE || sws_isSupportedOutput(pixfmt) < 1)
-        return 0;
-    return vf_next_query_format(vf, outfmt);
-}
-
-static unsigned int find_best_out(vf_instance_t *vf, int in_format)
-{
-    unsigned int best = 0;
-    int i = -1;
-    int j = -1;
-    int format = 0;
-
-    // find the best outfmt:
-    while (1) {
-        int ret;
-        if (j < 0) {
-            format = in_format;
-            j = 0;
-        } else if (i < 0) {
-            while (preferred_conversions[j][0] &&
-                   preferred_conversions[j][0] != in_format)
-                j++;
-            format = preferred_conversions[j++][1];
-            // switch to standard list
-            if (!format)
-                i = 0;
-        }
-        if (i >= 0)
-            format = outfmt_list[i++];
-        if (!format)
-            break;
-
-        ret = check_outfmt(vf, format);
-
-        MP_DBG(vf, "scale: query(%s) -> %d\n", vo_format_name(format), ret & 3);
-        if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
-            best = format; // no conversion -> bingo!
-            break;
-        }
-        if (ret & VFCAP_CSP_SUPPORTED && !best)
-            best = format;  // best with conversion
-    }
-    if (!best) {
-        // Try anything else. outfmt_list is just a list of preferred formats.
-        for (int cur = IMGFMT_START; cur < IMGFMT_END; cur++) {
-            int ret = check_outfmt(vf, cur);
-
-            if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
-                best = cur; // no conversion -> bingo!
-                break;
-            }
-            if (ret & VFCAP_CSP_SUPPORTED && !best)
-                best = cur;  // best with conversion
+    int best = 0;
+    for (int out_format = IMGFMT_START; out_format < IMGFMT_END; out_format++) {
+        if (!vf_next_query_format(vf, out_format))
+            continue;
+        if (sws_isSupportedOutput(imgfmt2pixfmt(out_format)) < 1)
+            continue;
+        if (best) {
+            int candidate = mp_imgfmt_select_best(best, out_format, in_format);
+            if (candidate)
+                best = candidate;
+        } else {
+            best = out_format;
         }
     }
     return best;
@@ -202,8 +78,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out)
 {
     int width = in->w, height = in->h, d_width = in->d_w, d_height = in->d_h;
-    unsigned int outfmt = in->imgfmt;
-    unsigned int best = find_best_out(vf, outfmt);
+    unsigned int best = find_best_out(vf, in->imgfmt);
     int round_w = 0, round_h = 0;
 
     if (!best) {
@@ -269,7 +144,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     }
 
     MP_DBG(vf, "SwScale: scaling %dx%d %s to %dx%d %s  \n",
-           width, height, vo_format_name(outfmt), vf->priv->w, vf->priv->h,
+           width, height, vo_format_name(in->imgfmt), vf->priv->w, vf->priv->h,
            vo_format_name(best));
 
     // Compute new d_width and d_height, preserving aspect
@@ -352,7 +227,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
     if (!IMGFMT_IS_HWACCEL(fmt) && imgfmt2pixfmt(fmt) != AV_PIX_FMT_NONE) {
         if (sws_isSupportedInput(imgfmt2pixfmt(fmt)) < 1)
             return 0;
-        unsigned int best = find_best_out(vf, fmt);
+        int best = find_best_out(vf, fmt);
         int flags;
         if (!best)
             return 0;            // no matching out-fmt

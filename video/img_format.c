@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include <libavcodec/avcodec.h>
 #include <libavutil/pixfmt.h>
 #include <libavutil/pixdesc.h>
 
@@ -261,6 +262,23 @@ int mp_imgfmt_find_yuv_planar(int xs, int ys, int planes, int component_bits)
         }
     }
     return 0;
+}
+
+#if LIBAVUTIL_VERSION_MICRO < 100
+#define avcodec_find_best_pix_fmt_of_list avcodec_find_best_pix_fmt2
+#endif
+
+// Compare the dst image formats, and return the one which can carry more data
+// (e.g. higher depth, more color components, lower chroma subsampling, etc.),
+// with respect to what is required to keep most of the src format.
+// Returns the imgfmt, or 0 on error.
+int mp_imgfmt_select_best(int dst1, int dst2, int src)
+{
+    enum AVPixelFormat dst1pxf = imgfmt2pixfmt(dst1);
+    enum AVPixelFormat dst2pxf = imgfmt2pixfmt(dst2);
+    enum AVPixelFormat srcpxf = imgfmt2pixfmt(src);
+    enum AVPixelFormat dstlist[] = {dst1pxf, dst2pxf, AV_PIX_FMT_NONE};
+    return pixfmt2imgfmt(avcodec_find_best_pix_fmt_of_list(dstlist, srcpxf, 0, 0));
 }
 
 #if 0
