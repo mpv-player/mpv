@@ -822,6 +822,9 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
         if (res == -EINTR || res == -EAGAIN) { /* retry */
             res = 0;
+        } else if (res == -ENODEV) {
+            MP_WARN(ao, "Device lost, trying to recover...\n");
+            ao_request_reload(ao);
         } else if (res < 0) {
             if (res == -ESTRPIPE) {  /* suspend */
                 resume_device(ao);
