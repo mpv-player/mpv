@@ -281,7 +281,7 @@ int mp_imgfmt_select_best(int dst1, int dst2, int src)
     enum AVPixelFormat dst2pxf = imgfmt2pixfmt(dst2);
     enum AVPixelFormat srcpxf = imgfmt2pixfmt(src);
     enum AVPixelFormat dstlist[] = {dst1pxf, dst2pxf, AV_PIX_FMT_NONE};
-    return pixfmt2imgfmt(avcodec_find_best_pix_fmt_of_list(dstlist, srcpxf, 0, 0));
+    return pixfmt2imgfmt(avcodec_find_best_pix_fmt_of_list(dstlist, srcpxf, 1, 0));
 }
 
 #if 0
