@@ -57,7 +57,7 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double inv_scale)
 {
     if (filter->radius < 0)
-        filter->radius = 2.0;
+        filter->radius = 3.0;
     // polar filters can be of any radius, and nothing special is needed
     if (filter->polar) {
         filter->size = filter->radius;

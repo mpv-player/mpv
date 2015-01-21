@@ -291,27 +291,29 @@ Available video output drivers are:
     ``lscale=<filter>``
 
         ``bilinear``
-            Bilinear hardware texture filtering (fastest, low quality).
-            This is the default.
+            Bilinear hardware texture filtering (fastest, very low quality).
+            This is the default for compatibility reasons.
 
         ``spline36``
             Mid quality and speed. This is the default when using ``opengl-hq``.
 
-        ``lanczos3``
-            Lanczos scaling with radius=3. Provides mid quality and speed.
-            Worse than ``spline36``.
+        ``lanczos``
+            Lanczos scaling. Provides mid quality and speed. Generally worse
+            than ``spline36``, but it results in a slightly sharper image
+            which is good for some content types. The number of taps can be
+            controlled with ``lradius``, but is best left unchanged.
 
-        ``ewa_lanczos3``
-            Elliptic weighted average Lanczos scaling filter. Also known as
-            Jinc. Relatively slow, but very good quality.
+        ``ewa_lanczos``
+            Elliptic weighted average Lanczos scaling. Also known as Jinc.
+            Relatively slow, but very good quality. The number of taps can
+            be controlled with ``lradius``.
 
-        ``ewa_lanczos4``
-            Better quality than ``ewa_lanczos3``, but slower.
+            Adding extra taps makes the filter sharper but adds more ringing.
 
         ``mitchell``
             Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
             ``lparam1`` and ``lparam2``. Both are set to 1/3 by default.
-            Can be useful as special-purpose filter for downscaling.
+            This filter is very good at downscaling (see ``lscale-down``).
 
         There are some more filters, but most are not as useful. For a complete
         list, pass ``help`` as value, e.g.::
@@ -327,7 +329,7 @@ Available video output drivers are:
 
     ``lradius=<r>``
         Set radius for filters listed below, must be a float number between 1.0
-        and 8.0. Defaults to be 2.0 if not specified.
+        and 16.0. Defaults to be 3.0 if not specified.
 
             ``sinc``, ``lanczos``, ``ewa_lanczos``, ``blackman``, ``gaussian``
 
