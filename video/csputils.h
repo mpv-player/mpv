@@ -116,6 +116,8 @@ struct mp_csp_params {
     float rgamma;
     float ggamma;
     float bgamma;
+    // discard U/V components
+    bool gray;
     // texture_bits/input_bits is for rescaling fixed point input to range [0,1]
     int texture_bits;
     int input_bits;

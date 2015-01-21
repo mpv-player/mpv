@@ -82,6 +82,7 @@ struct mp_imgfmt_desc {
     int8_t bytes[MP_MAX_PLANES]; // bytes per pixel (MP_IMGFLAG_BYTE_ALIGNED)
     int8_t bpp[MP_MAX_PLANES];   // bits per pixel
     int8_t plane_bits;           // number of bits in use for plane 0
+    int8_t component_bits;       // number of bits per component (0 if uneven)
     // chroma shifts per plane (provided for convenience with planar formats)
     int8_t xs[MP_MAX_PLANES];
     int8_t ys[MP_MAX_PLANES];
@@ -135,6 +136,7 @@ enum mp_imgfmt {
 
     // Gray with alpha (packed)
     IMGFMT_YA8,
+    IMGFMT_YA16,
 
     // Packed YUV formats (components are byte-accessed)
     IMGFMT_YUYV,                // Y0 U  Y1 V

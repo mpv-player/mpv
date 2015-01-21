@@ -381,11 +381,6 @@ void main() {
 #endif
     vec3 color = acolor.rgb;
     float alpha = acolor.a;
-#ifdef USE_YGRAY
-    // NOTE: actually slightly wrong for 16 bit input video, and completely
-    //       wrong for 9/10 bit input
-    color.gb = vec2(128.0/255.0);
-#endif
 #ifdef USE_INPUT_GAMMA
     // Pre-colormatrix input gamma correction (eg. for MP_IMGFLAG_XYZ)
     color = pow(color, vec3(input_gamma));

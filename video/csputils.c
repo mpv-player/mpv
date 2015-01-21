@@ -564,8 +564,8 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *m)
 
     // Hue is equivalent to rotating input [U, V] subvector around the origin.
     // Saturation scales [U, V].
-    float huecos = params->saturation * cos(params->hue);
-    float huesin = params->saturation * sin(params->hue);
+    float huecos = params->gray ? 0 : params->saturation * cos(params->hue);
+    float huesin = params->gray ? 0 : params->saturation * sin(params->hue);
     for (int i = 0; i < 3; i++) {
         float u = m->m[i][1], v = m->m[i][2];
         m->m[i][1] = huecos * u - huesin * v;

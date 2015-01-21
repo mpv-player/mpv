@@ -168,8 +168,7 @@ struct gl_video {
 
     float input_gamma, conv_gamma;
 
-    // per pixel (full pixel when packed, each component when planar)
-    int plane_bits;
+    int component_bits; // color bit depth for all components; 0 if unknown
     int plane_count;
 
     struct video_image image;
@@ -291,10 +290,11 @@ struct packed_fmt_entry {
 };
 
 static const struct packed_fmt_entry mp_packed_formats[] = {
-    //                      R  G  B  A
+    //                  w   R  G  B  A
     {IMGFMT_Y8,         1, {1, 0, 0, 0}},
     {IMGFMT_Y16,        2, {1, 0, 0, 0}},
     {IMGFMT_YA8,        1, {1, 0, 0, 2}},
+    {IMGFMT_YA16,       2, {1, 0, 0, 2}},
     {IMGFMT_ARGB,       1, {2, 3, 4, 1}},
     {IMGFMT_0RGB,       1, {2, 3, 4, 0}},
     {IMGFMT_BGRA,       1, {3, 2, 1, 4}},
@@ -652,8 +652,9 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     gl->UseProgram(program);
 
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
-    cparams.input_bits = p->plane_bits;
-    cparams.texture_bits = (p->plane_bits + 7) & ~7;
+    cparams.gray = p->is_yuv && !p->is_packed_yuv && p->plane_count == 1;
+    cparams.input_bits = p->component_bits;
+    cparams.texture_bits = (cparams.input_bits + 7) & ~7;
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
     if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
@@ -1132,8 +1133,6 @@ static void compile_shaders(struct gl_video *p)
 
     if (p->color_swizzle[0])
         shader_def(&header_conv, "USE_COLOR_SWIZZLE", p->color_swizzle);
-    shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && !p->is_packed_yuv
-                                              && p->plane_count == 1);
     shader_def_opt(&header_conv, "USE_INPUT_GAMMA", use_input_gamma);
     shader_def_opt(&header_conv, "USE_COLORMATRIX", !p->is_rgb);
     shader_def_opt(&header_conv, "USE_CONV_GAMMA", use_conv_gamma);
@@ -2413,15 +2412,14 @@ static bool init_format(int fmt, struct gl_video *init)
     const struct fmt_entry *plane_format[4] = {0};
 
     init->image_format = fmt;
-    init->plane_bits = desc.bpp[0];
+    init->component_bits = desc.component_bits;
     init->color_swizzle[0] = '\0';
     init->has_alpha = false;
 
     // YUV/planar formats
     if (desc.flags & MP_IMGFLAG_YUV_P) {
-        int bits = desc.plane_bits;
+        int bits = desc.component_bits;
         if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
-            init->plane_bits = bits;
             init->has_alpha = desc.num_planes > 3;
             plane_format[0] = find_tex_format(gl, (bits + 7) / 8, 1);
             for (int p = 1; p < desc.num_planes; p++)
@@ -2494,10 +2492,10 @@ static bool init_format(int fmt, struct gl_video *init)
 supported:
 
     // Stuff like IMGFMT_420AP10. Untested, most likely insane.
-    if (desc.num_planes == 4 && (init->plane_bits % 8) != 0)
+    if (desc.num_planes == 4 && (init->component_bits % 8) != 0)
         return false;
 
-    if (init->plane_bits > 8 && init->plane_bits < 16) {
+    if (init->component_bits > 8 && init->component_bits < 16) {
         if (init->texture_16bit_depth < 16)
             return false;
     }

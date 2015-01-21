@@ -142,6 +142,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         .avformat = fmt,
         .chroma_xs = pd->log2_chroma_w,
         .chroma_ys = pd->log2_chroma_h,
+        .component_bits = pd->comp[0].depth_minus1 + 1,
     };
 
     int planedepth[4] = {0};
@@ -154,6 +155,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             desc.bpp[d.plane] = (d.step_minus1 + 1) * el_size;
         planedepth[d.plane] += d.depth_minus1 + 1;
         need_endian |= (d.depth_minus1 + 1 + d.shift) > 8;
+        if (d.depth_minus1 + 1 != desc.component_bits)
+            desc.component_bits = 0;
     }
 
     for (int p = 0; p < 4; p++) {
@@ -315,8 +318,9 @@ int main(int argc, char **argv)
         FLAG(MP_IMGFLAG_PAL, "pal")
         FLAG(MP_IMGFLAG_HWACCEL, "hw")
         printf("\n");
-        printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d\n", d.num_planes,
-               d.chroma_xs, d.chroma_ys, d.align_x, d.align_y, d.plane_bits);
+        printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
+               d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
+               d.plane_bits, d.component_bits);
         printf("  {");
         for (int n = 0; n < MP_MAX_PLANES; n++)
             printf("%d/%d/[%d:%d] ", d.bytes[n], d.bpp[n], d.xs[n], d.ys[n]);

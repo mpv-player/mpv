@@ -113,6 +113,10 @@ static const struct {
     {IMGFMT_BGR0,  AV_PIX_FMT_BGRA},
 #endif
 
+#ifdef AV_PIX_FMT_YA16
+    {IMGFMT_YA16,  AV_PIX_FMT_YA16},
+#endif
+
     {IMGFMT_VDPAU, AV_PIX_FMT_VDPAU},
 #if HAVE_VDA_HWACCEL
     {IMGFMT_VDA,   AV_PIX_FMT_VDA},
