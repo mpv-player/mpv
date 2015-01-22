@@ -2315,11 +2315,8 @@ void gl_video_set_gl_state(struct gl_video *p)
     struct m_color c = p->opts.background;
     gl->ClearColor(c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
     gl->ActiveTexture(GL_TEXTURE0);
-    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH) {
-        gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
+    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
         gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    }
-    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
     if (!gl->BindVertexArray) {
