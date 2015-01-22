@@ -2610,7 +2610,7 @@ static bool can_use_filter_kernel(const struct filter_kernel *kernel)
 }
 
 // Get static string for scaler shader.
-static const char* handle_scaler_opt(const char *name)
+static const char *handle_scaler_opt(const char *name)
 {
     if (name) {
         const struct filter_kernel *kernel = mp_find_filter_kernel(name);
@@ -2668,17 +2668,25 @@ void gl_video_eq_update(struct gl_video *p)
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, struct bstr param)
 {
+    char s[20] = {0};
+    int r = 1;
     if (bstr_equals0(param, "help")) {
+        r = M_OPT_EXIT - 1;
+    } else {
+        snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
+        if (!handle_scaler_opt(s))
+            r = M_OPT_INVALID;
+    }
+    if (r < 1) {
         mp_info(log, "Available scalers:\n");
         for (const char *const *filter = fixed_scale_filters; *filter; filter++)
             mp_info(log, "    %s\n", *filter);
         for (int n = 0; mp_filter_kernels[n].name; n++)
             mp_info(log, "    %s\n", mp_filter_kernels[n].name);
-        return M_OPT_EXIT - 1;
+        if (s[0])
+            mp_fatal(log, "No scaler named '%s' found!\n", s);
     }
-    char s[20];
-    snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
-    return handle_scaler_opt(s) ? 1 : M_OPT_INVALID;
+    return r;
 }
 
 // Resize and redraw the contents of the window without further configuration.
