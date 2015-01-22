@@ -303,6 +303,9 @@ Available video output drivers are:
             which is good for some content types. The number of taps can be
             controlled with ``scale-radius``, but is best left unchanged.
 
+            If the radius is not changed, this filter corresponds to the old
+            ``lanczos3`` alias, while ``lanczos2`` corresponds to a radius of 2.
+
         ``ewa_lanczos``
             Elliptic weighted average Lanczos scaling. Also known as Jinc.
             Relatively slow, but very good quality. The number of taps can
