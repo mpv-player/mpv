@@ -158,6 +158,12 @@ static int render_video_to_output_surface(struct vo *vo,
     VdpStatus vdp_st;
     struct mp_image *mpi = vc->current_image;
 
+    vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
+                                                              output_surface,
+                                                              &dummy);
+    CHECK_VDP_WARNING(vo, "Error when calling "
+                      "vdp_presentation_queue_block_until_surface_idle");
+
     if (!mpi) {
         // At least clear the screen if there is nothing to render
         int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
@@ -167,12 +173,6 @@ static int render_video_to_output_surface(struct vo *vo,
                                                            flags);
         return -1;
     }
-
-    vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
-                                                              output_surface,
-                                                              &dummy);
-    CHECK_VDP_WARNING(vo, "Error when calling "
-                      "vdp_presentation_queue_block_until_surface_idle");
 
     if (vc->rgb_mode) {
         // Clear the borders between video and window (if there are any).
