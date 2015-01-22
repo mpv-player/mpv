@@ -59,8 +59,6 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                  int x, int y, int w, int h, int slice);
 void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
                 int x, int y, int w, int h, uint8_t val, void **scratch);
-void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                   void *dataptr, int stride);
 void glCheckError(GL *gl, struct mp_log *log, const char *info);
 mp_image_t *glGetWindowScreenshot(GL *gl);
 
@@ -200,7 +198,6 @@ struct GL {
     void (GLAPIENTRY *TexSubImage2D)(GLenum, GLint, GLint, GLint,
                                      GLsizei, GLsizei, GLenum, GLenum,
                                      const GLvoid *);
-    void (GLAPIENTRY *GetTexImage)(GLenum, GLint, GLenum, GLenum, GLvoid *);
     void (GLAPIENTRY *TexParameteri)(GLenum, GLenum, GLint);
     void (GLAPIENTRY *GetIntegerv)(GLenum, GLint *);
     void (GLAPIENTRY *GetBooleanv)(GLenum, GLboolean *);

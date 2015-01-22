@@ -211,7 +211,6 @@ static const struct gl_functions gl_functions[] = {
                     MPGL_CAP_1ST_CLASS_ARRAYS,
         .functions = (const struct gl_function[]) {
             DEF_FN(DrawBuffer),
-            DEF_FN(GetTexImage),
             DEF_FN(GetTexLevelParameteriv),
             DEF_FN(MapBuffer),
             DEF_FN(ReadBuffer),
@@ -703,29 +702,6 @@ void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
     } else {
         talloc_free(data);
     }
-}
-
-/**
- * \brief download a texture, handling things like stride and slices
- * \param target texture target, usually GL_TEXTURE_2D
- * \param format OpenGL format of data
- * \param type OpenGL type of data
- * \param dataptr destination memory for download
- * \param stride data stride (must be positive)
- * \ingroup gltexture
- */
-void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                   void *dataptr, int stride)
-{
-    if (!gl->GetTexImage)
-        abort();
-    assert(gl->mpgl_caps & MPGL_CAP_ROW_LENGTH);
-    // this is not always correct, but should work for MPlayer
-    gl->PixelStorei(GL_PACK_ALIGNMENT, get_alignment(stride));
-    gl->PixelStorei(GL_PACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
-    gl->GetTexImage(target, 0, format, type, dataptr);
-    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
-    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
 }
 
 mp_image_t *glGetWindowScreenshot(GL *gl)
