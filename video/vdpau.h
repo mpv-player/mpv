@@ -10,6 +10,7 @@
 #include <vdpau/vdpau_x11.h>
 
 #include "common/msg.h"
+#include "hwdec.h"
 
 #define CHECK_VDP_ERROR(ctx, message) \
     do { \
@@ -39,6 +40,8 @@ struct vdp_functions {
 struct mp_vdpau_ctx {
     struct mp_log *log;
     Display *x11;
+
+    struct mp_hwdec_ctx hwctx;
 
     // These are mostly immutable, except on preemption. We don't really care
     // to synchronize the preemption case fully correctly, because it's an

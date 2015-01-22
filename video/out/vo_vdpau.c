@@ -988,7 +988,7 @@ static int preinit(struct vo *vo)
         return -1;
     }
 
-    vc->hwdec_info.vdpau_ctx = vc->mpvdp;
+    vc->hwdec_info.hwctx = &vc->mpvdp->hwctx;
 
     vc->video_mixer = mp_vdpau_mixer_create(vc->mpvdp, vo->log);
 

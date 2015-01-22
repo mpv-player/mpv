@@ -609,7 +609,7 @@ static int preinit(struct vo *vo)
         goto fail;
     }
 
-    p->hwdec_info.vaapi_ctx = p->mpvaapi;
+    p->hwdec_info.hwctx = &p->mpvaapi->hwctx;
 
     if (va_guess_if_emulated(p->mpvaapi)) {
         MP_WARN(vo, "VA-API is most likely emulated via VDPAU.\n"

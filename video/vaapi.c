@@ -122,6 +122,10 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog)
     *res = (struct mp_vaapi_ctx) {
         .log = talloc_steal(res, log),
         .display = display,
+        .hwctx = {
+            .priv = res,
+            .vaapi_ctx = res,
+        },
     };
     mpthread_mutex_init_recursive(&res->lock);
 

@@ -408,20 +408,18 @@ static int init_with_vactx(struct lavc_ctx *ctx, struct mp_vaapi_ctx *vactx)
 
 static int init(struct lavc_ctx *ctx)
 {
-    if (!ctx->hwdec_info->vaapi_ctx)
-        return -1;
-    return init_with_vactx(ctx, ctx->hwdec_info->vaapi_ctx);
+    return init_with_vactx(ctx, ctx->hwdec_info->hwctx->vaapi_ctx);
 }
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder)
 {
     hwdec_request_api(info, "vaapi");
-    if (!info || !info->vaapi_ctx)
+    if (!info || !info->hwctx || !info->hwctx->vaapi_ctx)
         return HWDEC_ERR_NO_CTX;
     if (!hwdec_check_codec_support(decoder, profiles))
         return HWDEC_ERR_NO_CODEC;
-    if (va_guess_if_emulated(info->vaapi_ctx))
+    if (va_guess_if_emulated(info->hwctx->vaapi_ctx))
         return HWDEC_ERR_EMULATED;
     return 0;
 }

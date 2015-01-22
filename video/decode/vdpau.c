@@ -153,7 +153,7 @@ static int init(struct lavc_ctx *ctx)
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
         .log = mp_log_new(p, ctx->log, "vdpau"),
-        .mpvdp = ctx->hwdec_info->vdpau_ctx,
+        .mpvdp = ctx->hwdec_info->hwctx->vdpau_ctx,
     };
     ctx->hwdec_priv = p;
 
@@ -185,11 +185,11 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder)
 {
     hwdec_request_api(info, "vdpau");
-    if (!info || !info->vdpau_ctx)
+    if (!info || !info->hwctx || !info->hwctx->vdpau_ctx)
         return HWDEC_ERR_NO_CTX;
     if (!hwdec_check_codec_support(decoder, profiles))
         return HWDEC_ERR_NO_CODEC;
-    if (mp_vdpau_guess_if_emulated(info->vdpau_ctx))
+    if (mp_vdpau_guess_if_emulated(info->hwctx->vdpau_ctx))
         return HWDEC_ERR_EMULATED;
     return 0;
 }

@@ -49,7 +49,6 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 
 static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
                                           const struct gl_hwdec_driver *drv,
-                                          struct mp_hwdec_info *info,
                                           bool is_auto)
 {
     struct gl_hwdec *hwdec = talloc(NULL, struct gl_hwdec);
@@ -57,7 +56,6 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
         .driver = drv,
         .log = mp_log_new(hwdec, log, drv->api_name),
         .gl = gl,
-        .info = info,
         .gl_texture_target = GL_TEXTURE_2D,
         .reject_emulated = is_auto,
     };
@@ -70,14 +68,13 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
 }
 
 struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
-                                   const char *api_name,
-                                   struct mp_hwdec_info *info)
+                                   const char *api_name)
 {
     bool is_auto = api_name && strcmp(api_name, "auto") == 0;
     for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
         const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
         if (is_auto || (api_name && strcmp(drv->api_name, api_name) == 0)) {
-            struct gl_hwdec *r = load_hwdec_driver(log, gl, drv, info, is_auto);
+            struct gl_hwdec *r = load_hwdec_driver(log, gl, drv, is_auto);
             if (r)
                 return r;
         }

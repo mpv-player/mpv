@@ -72,11 +72,13 @@
     (const char[]){(fcc), (fcc) >> 8u, (fcc) >> 16u, (fcc) >> 24u, 0}
 
 #include "mp_image.h"
+#include "hwdec.h"
 
 struct mp_image_pool;
 struct mp_log;
 
 struct mp_vaapi_ctx {
+    struct mp_hwdec_ctx hwctx;
     struct mp_log *log;
     VADisplay display;
     struct va_image_formats *image_formats;

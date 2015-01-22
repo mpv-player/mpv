@@ -302,6 +302,10 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
         .log = log,
         .x11 = x11,
         .preemption_counter = 1,
+        .hwctx = {
+            .priv = ctx,
+            .vdpau_ctx = ctx,
+        },
     };
     mpthread_mutex_init_recursive(&ctx->preempt_lock);
     pthread_mutex_init(&ctx->pool_lock, NULL);

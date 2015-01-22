@@ -10,7 +10,7 @@ struct gl_hwdec {
     const struct gl_hwdec_driver *driver;
     struct mp_log *log;
     GL *gl;
-    struct mp_hwdec_info *info;
+    struct mp_hwdec_ctx *hwctx;
     // For free use by hwdec driver
     void *priv;
     // For working around the vdpau vs. vaapi mess.
@@ -50,8 +50,7 @@ struct gl_hwdec_driver {
 };
 
 struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
-                                   const char *api_name,
-                                   struct mp_hwdec_info *info);
+                                   const char *api_name);
 
 void gl_hwdec_uninit(struct gl_hwdec *hwdec);
 

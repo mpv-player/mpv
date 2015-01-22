@@ -224,8 +224,10 @@ static void request_hwdec_api(struct gl_priv *p, const char *api_name)
     if (p->hwdec)
         return;
     mpgl_lock(p->glctx);
-    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, api_name, &p->hwdec_info);
+    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, api_name);
     gl_video_set_hwdec(p->renderer, p->hwdec);
+    if (p->hwdec)
+        p->hwdec_info.hwctx = p->hwdec->hwctx;
     mpgl_unlock(p->glctx);
 }
 

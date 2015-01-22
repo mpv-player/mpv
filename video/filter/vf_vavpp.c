@@ -391,8 +391,10 @@ static int vf_open(vf_instance_t *vf)
     vf->control = control;
 
     struct vf_priv_s *p = vf->priv;
+    if (!vf->hwdec)
+        return false;
     hwdec_request_api(vf->hwdec, "vaapi");
-    p->va = vf->hwdec ? vf->hwdec->vaapi_ctx : NULL;
+    p->va = vf->hwdec->hwctx ? vf->hwdec->hwctx->vaapi_ctx : NULL;
     if (!p->va || !p->va->display)
         return false;
     p->display = p->va->display;

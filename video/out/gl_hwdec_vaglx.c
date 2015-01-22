@@ -58,13 +58,11 @@ static void destroy(struct gl_hwdec *hw)
     struct priv *p = hw->priv;
     destroy_texture(hw);
     va_destroy(p->ctx);
-
-    hw->info->vaapi_ctx = NULL;
 }
 
 static int create(struct gl_hwdec *hw)
 {
-    if (hw->info->vaapi_ctx)
+    if (hw->hwctx)
         return -1;
     Display *x11disp = glXGetCurrentDisplay();
     if (!x11disp)
@@ -84,7 +82,7 @@ static int create(struct gl_hwdec *hw)
         destroy(hw);
         return -1;
     }
-    hw->info->vaapi_ctx = p->ctx;
+    hw->hwctx = &p->ctx->hwctx;
     hw->converted_imgfmt = IMGFMT_RGB0;
     return 0;
 }

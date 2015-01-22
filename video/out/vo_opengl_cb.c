@@ -227,9 +227,10 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;
 
-    ctx->hwdec = gl_hwdec_load_api(ctx->log, ctx->gl, ctx->hwapi, &ctx->hwdec_info);
+    ctx->hwdec = gl_hwdec_load_api(ctx->log, ctx->gl, ctx->hwapi);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
-
+    if (ctx->hwdec)
+        ctx->hwdec_info.hwctx = ctx->hwdec->hwctx;
 
     pthread_mutex_lock(&ctx->lock);
     ctx->eq = *gl_video_eq_ptr(ctx->renderer);
