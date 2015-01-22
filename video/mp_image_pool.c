@@ -146,11 +146,14 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
 // Return a new image of given format/size. The only difference to
 // mp_image_alloc() is that there is a transparent mechanism to recycle image
 // data allocations through this pool.
+// If pool==NULL, mp_image_alloc() is called (for convenience).
 // The image can be free'd with talloc_free().
 // Returns NULL on OOM.
 struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, int fmt,
                                    int w, int h)
 {
+    if (!pool)
+        return mp_image_alloc(fmt, w, h);
     struct mp_image *new = mp_image_pool_get_no_alloc(pool, fmt, w, h);
     if (!new) {
         if (pool->num_images >= pool->max_count)
@@ -172,6 +175,7 @@ struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, int fmt,
 }
 
 // Like mp_image_new_copy(), but allocate the image out of the pool.
+// If pool==NULL, a plain copy is made (for convenience).
 // Returns NULL on OOM.
 struct mp_image *mp_image_pool_new_copy(struct mp_image_pool *pool,
                                         struct mp_image *img)
@@ -193,8 +197,6 @@ bool mp_image_pool_make_writeable(struct mp_image_pool *pool,
 {
     if (mp_image_is_writeable(img))
         return true;
-    if (!pool)
-        return mp_image_make_writeable(img);
     struct mp_image *new = mp_image_pool_new_copy(pool, img);
     if (!new)
         return false;
