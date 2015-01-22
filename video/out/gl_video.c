@@ -2575,6 +2575,7 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
     check_gl_features(p);
     gl_video_set_gl_state(p);
     reinit_rendering(p);
+    check_resize(p);
 }
 
 void gl_video_get_colorspace(struct gl_video *p, struct mp_image_params *params)
