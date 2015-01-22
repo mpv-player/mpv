@@ -343,6 +343,16 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
 
         image = args.out_image;
         if (image) {
+            if (mpctx->d_video && mpctx->d_video->hwdec_info) {
+                struct mp_hwdec_ctx *ctx = mpctx->d_video->hwdec_info->hwctx;
+                struct mp_image *nimage = NULL;
+                if (ctx && ctx->download_image)
+                    nimage = ctx->download_image(ctx, image, NULL);
+                if (nimage) {
+                    talloc_free(image);
+                    image = nimage;
+                }
+            }
             if (mode == MODE_SUBTITLES && !args.has_osd)
                 add_subs(mpctx, image);
         }

@@ -303,14 +303,7 @@ static struct mp_image *get_screenshot(struct priv *p)
     struct mp_image *hwimg = p->output_surfaces[p->visible_surface];
     if (!hwimg)
         return NULL;
-    struct mp_image *img = va_surface_download(hwimg, NULL);
-    if (!img)
-        return NULL;
-    struct mp_image_params params = p->image_params;
-    params.imgfmt = img->imgfmt;
-    mp_image_params_guess_csp(&params); // ensure colorspace consistency
-    mp_image_set_params(img, &params);
-    return img;
+    return mp_image_new_ref(hwimg);
 }
 
 static void free_subpicture(struct priv *p, struct vaapi_osd_image *img)

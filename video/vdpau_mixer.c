@@ -221,7 +221,21 @@ int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
     struct vdp_functions *vdp = &mixer->ctx->vdp;
     VdpStatus vdp_st;
 
-    assert(video->imgfmt == IMGFMT_VDPAU);
+    if (video->imgfmt == IMGFMT_VDPAU_OUTPUT) {
+        VdpOutputSurface surface = (uintptr_t)video->planes[3];
+        int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
+        vdp_st = vdp->output_surface_render_output_surface(output,
+                                                           output_rect,
+                                                           surface,
+                                                           video_rect,
+                                                           NULL, NULL, flags);
+        CHECK_VDP_WARNING(mixer, "Error when calling "
+                          "vdp_output_surface_render_output_surface");
+        return 0;
+    }
+
+    if (video->imgfmt != IMGFMT_VDPAU)
+        return -1;
 
     struct mp_vdpau_mixer_frame *frame = mp_vdpau_mixed_frame_get(video);
     struct mp_vdpau_mixer_frame fallback = {{0}};

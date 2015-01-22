@@ -23,8 +23,76 @@
 #include "osdep/timer.h"
 
 #include "video/out/x11_common.h"
-#include "video/img_format.h"
-#include "video/mp_image.h"
+#include "img_format.h"
+#include "mp_image.h"
+#include "mp_image_pool.h"
+#include "vdpau_mixer.h"
+
+static struct mp_image *download_image(struct mp_hwdec_ctx *hwctx,
+                                       struct mp_image *mpi,
+                                       struct mp_image_pool *swpool)
+{
+    struct mp_vdpau_ctx *ctx = hwctx->vdpau_ctx;
+    struct vdp_functions *vdp = &ctx->vdp;
+    VdpStatus vdp_st;
+
+    struct mp_image *res = NULL;
+    int w = mpi->params.d_w;
+    int h = mpi->params.d_h;
+
+    // Abuse this lock for our own purposes. It could use its own lock instead.
+    pthread_mutex_lock(&ctx->pool_lock);
+
+    if (ctx->getimg_surface == VDP_INVALID_HANDLE ||
+        ctx->getimg_w < w || ctx->getimg_h < h)
+    {
+        if (ctx->getimg_surface != VDP_INVALID_HANDLE) {
+            vdp_st = vdp->output_surface_destroy(ctx->getimg_surface);
+            CHECK_VDP_WARNING(ctx, "Error when calling vdp_output_surface_destroy");
+        }
+        ctx->getimg_surface = VDP_INVALID_HANDLE;
+        vdp_st = vdp->output_surface_create(ctx->vdp_device,
+                                            VDP_RGBA_FORMAT_B8G8R8A8, w, h,
+                                            &ctx->getimg_surface);
+        CHECK_VDP_WARNING(ctx, "Error when calling vdp_output_surface_create");
+        if (vdp_st != VDP_STATUS_OK)
+            goto error;
+        ctx->getimg_w = w;
+        ctx->getimg_h = h;
+    }
+
+    if (!ctx->getimg_mixer)
+        ctx->getimg_mixer = mp_vdpau_mixer_create(ctx, ctx->log);
+
+    VdpRect in = { .x1 = mpi->w, .y1 = mpi->h };
+    VdpRect out = { .x1 = w, .y1 = h };
+    if (mp_vdpau_mixer_render(ctx->getimg_mixer, NULL, ctx->getimg_surface, &out,
+                              mpi, &in) < 0)
+        goto error;
+
+    res = mp_image_pool_get(swpool, IMGFMT_BGR32, ctx->getimg_w, ctx->getimg_h);
+    if (!res)
+        goto error;
+
+    void *dst_planes[] = { res->planes[0] };
+    uint32_t dst_pitches[] = { res->stride[0] };
+    vdp_st = vdp->output_surface_get_bits_native(ctx->getimg_surface, NULL,
+                                                 dst_planes, dst_pitches);
+    CHECK_VDP_WARNING(ctx, "Error when calling vdp_output_surface_get_bits_native");
+    if (vdp_st != VDP_STATUS_OK)
+        goto error;
+
+    mp_image_set_size(res, w, h);
+    mp_image_copy_attributes(res, mpi);
+
+    pthread_mutex_unlock(&ctx->pool_lock);
+    return res;
+error:
+    talloc_free(res);
+    MP_WARN(ctx, "Error copying image from GPU.\n");
+    pthread_mutex_unlock(&ctx->pool_lock);
+    return NULL;
+}
 
 static void mark_vdpau_objects_uninitialized(struct mp_vdpau_ctx *ctx)
 {
@@ -305,7 +373,9 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
         .hwctx = {
             .priv = ctx,
             .vdpau_ctx = ctx,
+            .download_image = download_image,
         },
+        .getimg_surface = VDP_INVALID_HANDLE,
     };
     mpthread_mutex_init_recursive(&ctx->preempt_lock);
     pthread_mutex_init(&ctx->pool_lock, NULL);
@@ -335,6 +405,13 @@ void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx)
             vdp_st = vdp->output_surface_destroy(ctx->video_surfaces[i].osurface);
             CHECK_VDP_WARNING(ctx, "Error when calling vdp_output_surface_destroy");
         }
+    }
+
+    if (ctx->getimg_mixer)
+        mp_vdpau_mixer_destroy(ctx->getimg_mixer);
+    if (ctx->getimg_surface != VDP_INVALID_HANDLE) {
+        vdp_st = vdp->output_surface_destroy(ctx->getimg_surface);
+        CHECK_VDP_WARNING(ctx, "Error when calling vdp_output_surface_destroy");
     }
 
     if (vdp->device_destroy && ctx->vdp_device != VDP_INVALID_HANDLE) {

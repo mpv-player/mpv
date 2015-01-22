@@ -80,7 +80,6 @@ struct vdpctx {
     VdpPresentationQueue               flip_queue;
 
     VdpOutputSurface                   output_surfaces[MAX_OUTPUT_SURFACES];
-    VdpOutputSurface                   screenshot_surface;
     int                                num_output_surfaces;
     VdpOutputSurface                   black_pixel;
 
@@ -176,23 +175,15 @@ static int render_video_to_output_surface(struct vo *vo,
                       "vdp_presentation_queue_block_until_surface_idle");
 
     if (vc->rgb_mode) {
-        VdpOutputSurface surface = (uintptr_t)mpi->planes[3];
+        // Clear the borders between video and window (if there are any).
+        // For some reason, video_mixer_render doesn't need it for YUV.
         int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
         vdp_st = vdp->output_surface_render_output_surface(output_surface,
                                                            NULL, vc->black_pixel,
                                                            NULL, NULL, NULL,
                                                            flags);
         CHECK_VDP_WARNING(vo, "Error clearing screen");
-        vdp_st = vdp->output_surface_render_output_surface(output_surface,
-                                                           output_rect,
-                                                           surface,
-                                                           video_rect,
-                                                           NULL, NULL, flags);
-        CHECK_VDP_WARNING(vo, "Error when calling "
-                          "vdp_output_surface_render_output_surface");
-        return 0;
     }
-
 
     struct mp_vdpau_mixer_frame *frame = mp_vdpau_mixed_frame_get(mpi);
     struct mp_vdpau_mixer_opts opts = {0};
@@ -344,12 +335,6 @@ static void free_video_specific(struct vo *vo)
 
     forget_frames(vo, false);
 
-    if (vc->screenshot_surface != VDP_INVALID_HANDLE) {
-        vdp_st = vdp->output_surface_destroy(vc->screenshot_surface);
-        CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_destroy");
-    }
-    vc->screenshot_surface = VDP_INVALID_HANDLE;
-
     if (vc->black_pixel != VDP_INVALID_HANDLE) {
         vdp_st = vdp->output_surface_destroy(vc->black_pixel);
         CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_destroy");
@@ -399,7 +384,6 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     vc->flip_target = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++)
         vc->output_surfaces[i] = VDP_INVALID_HANDLE;
-    vc->screenshot_surface = VDP_INVALID_HANDLE;
     vc->vdp_device = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
         struct osd_bitmap_surface *sfc = &vc->osd_surfaces[i];
@@ -878,30 +862,6 @@ static struct mp_image *read_output_surface(struct vo *vo,
     return image;
 }
 
-static struct mp_image *get_screenshot(struct vo *vo)
-{
-    struct vdpctx *vc = vo->priv;
-    VdpStatus vdp_st;
-    struct vdp_functions *vdp = vc->vdp;
-
-    if (!vo->params)
-        return NULL;
-
-    if (vc->screenshot_surface == VDP_INVALID_HANDLE) {
-        vdp_st = vdp->output_surface_create(vc->vdp_device,
-                                            OUTPUT_RGBA_FORMAT,
-                                            vo->params->d_w, vo->params->d_h,
-                                            &vc->screenshot_surface);
-        CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_create");
-    }
-
-    VdpRect in = { .x1 = vo->params->w, .y1 = vo->params->h };
-    VdpRect out = { .x1 = vo->params->d_w, .y1 = vo->params->d_h };
-    render_video_to_output_surface(vo, vc->screenshot_surface, &out, &in);
-
-    return read_output_surface(vo, vc->screenshot_surface, out.x1, out.y1);
-}
-
 static struct mp_image *get_window_screenshot(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
@@ -1092,10 +1052,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (!status_ok(vo))
             return false;
         struct voctrl_screenshot_args *args = data;
-        if (args->full_window)
+        if (args->full_window) {
             args->out_image = get_window_screenshot(vo);
-        else
-            args->out_image = get_screenshot(vo);
+        } else {
+            args->out_image =
+                vc->current_image ? mp_image_new_ref(vc->current_image) : NULL;
+        }
         return true;
     }
     case VOCTRL_GET_PREF_DEINT:

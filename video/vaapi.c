@@ -84,6 +84,13 @@ uint32_t va_fourcc_from_imgfmt(int imgfmt)
     return 0;
 }
 
+static struct mp_image *ctx_download_image(struct mp_hwdec_ctx *ctx,
+                                           struct mp_image *mpi,
+                                           struct mp_image_pool *swpool)
+{
+    return va_surface_download(mpi, swpool);
+}
+
 struct va_image_formats {
     VAImageFormat *entries;
     int num;
@@ -125,6 +132,7 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog)
         .hwctx = {
             .priv = res,
             .vaapi_ctx = res,
+            .download_image = ctx_download_image,
         },
     };
     mpthread_mutex_init_recursive(&res->lock);
@@ -405,12 +413,12 @@ static struct mp_image *try_download(struct mp_image *src,
     struct mp_image *dst = NULL;
     struct mp_image tmp;
     if (va_image_map(p->ctx, image, &tmp)) {
-        dst = pool ? mp_image_pool_get(pool, tmp.imgfmt, tmp.w, tmp.h)
-                   : mp_image_alloc(tmp.imgfmt, tmp.w, tmp.h);
+        dst = mp_image_pool_get(pool, tmp.imgfmt, tmp.w, tmp.h);
         if (dst)
             mp_image_copy(dst, &tmp);
         va_image_unmap(p->ctx, image);
     }
+    mp_image_copy_attributes(dst, src);
     return dst;
 }
 

@@ -372,6 +372,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
         dst->params.chroma_location = src->params.chroma_location;
         dst->params.outputlevels = src->params.outputlevels;
     }
+    mp_image_params_guess_csp(&dst->params); // ensure colorspace consistency
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
         if (dst->planes[1] && src->planes[1])
             memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);

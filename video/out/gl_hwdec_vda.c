@@ -22,13 +22,41 @@
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/CGLIOSurface.h>
 
-#include "video/decode/dec_video.h"
+#include "video/mp_image_pool.h"
 #include "gl_hwdec.h"
 
 struct priv {
     CVPixelBufferRef pbuf;
     GLuint gl_texture;
+    struct mp_hwdec_ctx hwctx;
 };
+
+static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
+                                       struct mp_image *hw_image,
+                                       struct mp_image_pool *swpool)
+{
+    if (hw_image->imgfmt != IMGFMT_VDA)
+        return NULL;
+
+    CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
+    CVPixelBufferLockBaseAddress(pbuf, 0);
+    void *base = CVPixelBufferGetBaseAddress(pbuf);
+    size_t width  = CVPixelBufferGetWidth(pbuf);
+    size_t height = CVPixelBufferGetHeight(pbuf);
+    size_t stride = CVPixelBufferGetBytesPerRow(pbuf);
+
+    struct mp_image img = {0};
+    mp_image_setfmt(&img, IMGFMT_UYVY);
+    mp_image_set_size(&img, width, height);
+    img.planes[0] = base;
+    img.stride[0] = stride;
+    mp_image_copy_attributes(&img, hw_image);
+
+    struct mp_image *image = mp_image_pool_new_copy(swpool, &img);
+    CVPixelBufferUnlockBaseAddress(pbuf, 0);
+
+    return image;
+}
 
 static bool check_hwdec(struct gl_hwdec *hw)
 {
@@ -59,6 +87,9 @@ static int create(struct gl_hwdec *hw)
 
     if (!check_hwdec(hw))
         return -1;
+
+    hw->hwctx = &p->hwctx;
+    hw->hwctx->download_image = download_image;
 
     GL *gl = hw->gl;
     gl->GenTextures(1, &p->gl_texture);
@@ -104,28 +135,6 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 
 static void unmap_image(struct gl_hwdec *hw) { }
 
-static struct mp_image *download_image(struct gl_hwdec *hw,
-                                       struct mp_image *hw_image)
-{
-    CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
-    CVPixelBufferLockBaseAddress(pbuf, 0);
-    void *base = CVPixelBufferGetBaseAddress(pbuf);
-    size_t width  = CVPixelBufferGetWidth(pbuf);
-    size_t height = CVPixelBufferGetHeight(pbuf);
-    size_t stride = CVPixelBufferGetBytesPerRow(pbuf);
-
-    struct mp_image img = {0};
-    mp_image_setfmt(&img, IMGFMT_UYVY);
-    mp_image_set_size(&img, width, height);
-    img.planes[0] = base;
-    img.stride[0] = stride;
-
-    struct mp_image *image = mp_image_new_copy(&img);
-    CVPixelBufferUnlockBaseAddress(pbuf, 0);
-
-    return image;
-}
-
 static void destroy(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
@@ -136,7 +145,6 @@ static void destroy(struct gl_hwdec *hw)
     p->gl_texture = 0;
 }
 
-
 const struct gl_hwdec_driver gl_hwdec_vda = {
     .api_name = "vda",
     .imgfmt = IMGFMT_VDA,
@@ -144,6 +152,5 @@ const struct gl_hwdec_driver gl_hwdec_vda = {
     .reinit = reinit,
     .map_image = map_image,
     .unmap_image = unmap_image,
-    .download_image = download_image,
     .destroy = destroy,
 };

@@ -9,6 +9,15 @@ struct mp_hwdec_ctx {
     // API-specific, not needed by all backends.
     struct mp_vdpau_ctx *vdpau_ctx;
     struct mp_vaapi_ctx *vaapi_ctx;
+
+    // Optional.
+    // Allocates a software image from the pool, downloads the hw image from
+    // mpi, and returns it.
+    // pool can be NULL (then just use straight allocation).
+    // Return NULL on error or if mpi has the wrong format.
+    struct mp_image *(*download_image)(struct mp_hwdec_ctx *ctx,
+                                       struct mp_image *mpi,
+                                       struct mp_image_pool *swpool);
 };
 
 // Used to communicate hardware decoder API handles from VO to video decoder.
