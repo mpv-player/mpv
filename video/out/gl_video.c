@@ -321,7 +321,6 @@ const struct gl_video_opts gl_video_opts_def = {
     .dither_depth = -1,
     .dither_size = 6,
     .fbo_format = GL_RGBA,
-    .scale_sep = 1,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .scalers = { "bilinear", "bilinear" },
@@ -336,7 +335,6 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .dither_depth = 0,
     .dither_size = 6,
     .fbo_format = GL_RGBA16,
-    .scale_sep = 1,
     .fancy_downscaling = 1,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
@@ -375,8 +373,6 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
         OPT_FLOATRANGE("sigmoid-center", sigmoid_center, 0, 0.0, 1.0),
         OPT_FLOATRANGE("sigmoid-slope", sigmoid_slope, 0, 1.0, 20.0),
-        OPT_FLAG("indirect", indirect, 0),
-        OPT_FLAG("scale-sep", scale_sep, 0),
         OPT_CHOICE("fbo-format", fbo_format, 0,
                    ({"rgb",    GL_RGB},
                     {"rgba",   GL_RGBA},
@@ -409,6 +405,8 @@ const struct m_sub_options gl_video_conf = {
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
+        OPT_REMOVED("scale-sep", "this is set automatically whenever sane"),
+        OPT_REMOVED("indirect", "this is set automatically whenever sane"),
 
         OPT_REPLACED("lscale", "scale"),
         OPT_REPLACED("lscale-down", "scale-down"),
@@ -1204,7 +1202,7 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
     shader_def_opt(&header_final, "USE_TEMPORAL_DITHER", p->opts.temporal_dither);
 
-    if (p->opts.scale_sep && p->scalers[0].kernel && !p->scalers[0].kernel->polar) {
+    if (p->scalers[0].kernel && !p->scalers[0].kernel->polar) {
         header_sep = talloc_strdup(tmp, "");
         shader_def_opt(&header_sep, "FIXED_SCALE", true);
         shader_setup_scaler(&header_sep, &p->scalers[0], 0);
@@ -1214,18 +1212,24 @@ static void compile_shaders(struct gl_video *p)
     }
 
     // The indirect pass is used to preprocess the image before scaling.
-    bool use_indirect = p->opts.indirect;
+    bool use_indirect = false;
 
     // Don't sample from input video textures before converting the input to
     // its proper gamma.
     if (use_input_gamma || use_conv_gamma || use_linear_light || use_const_luma)
         use_indirect = true;
 
+    // Trivial scalers are implemented directly and efficiently by the GPU.
+    // This only includes bilinear and nearest neighbour in OpenGL, but we
+    // don't support nearest neighbour upsampling.
+    bool trivial_scaling = strcmp(p->scalers[0].name, "bilinear") == 0 &&
+                           strcmp(p->scalers[1].name, "bilinear") == 0;
+
     // If the video is subsampled, chroma information needs to be pulled up to
     // the input size before scaling can be done. Even for 4:4:4 or planar RGB
     // this is also faster because it means the scalers can operate on all
-    // channels simultaneously. Disabling scale_sep overrides this behavior.
-    if (p->opts.scale_sep && p->plane_count > 1)
+    // channels simultaneously. This is unnecessary for trivial scaling.
+    if (p->plane_count > 1 && !trivial_scaling)
         use_indirect = true;
 
     if (input_is_subsampled(p)) {
@@ -2199,8 +2203,6 @@ static void check_gl_features(struct gl_video *p)
         have_fbo = test_fbo(p, p->opts.fbo_format);
     }
 
-    // Disable these only if the user didn't disable scale-sep on the command
-    // line, so convolution filter can still be forced to be run.
     // Normally, we want to disable them by default if FBOs are unavailable,
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
@@ -2264,10 +2266,6 @@ static void check_gl_features(struct gl_video *p)
             p->use_lut_3d = false;
             disabled[n_disabled++] = "color management (GLSL version)";
         }
-    }
-    if (!have_fbo) {
-        p->opts.scale_sep = false;
-        p->opts.indirect = false;
     }
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;

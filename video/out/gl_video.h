@@ -34,11 +34,9 @@ struct gl_video_opts {
     float scaler_params[2][2];
     float scaler_radius[2];
     float scaler_antiring[2];
-    int indirect;
     float gamma;
     int srgb;
     int approx_gamma;
-    int scale_sep;
     int fancy_downscaling;
     int sigmoid_upscaling;
     float sigmoid_center;

@@ -354,8 +354,7 @@ Available video output drivers are:
 
     ``srgb``
         Convert and color correct the output to sRGB before displaying it on
-        the screen. This option enables linear light scaling. It also forces
-        the options ``indirect`` and ``gamma``.
+        the screen. This option enables linear light scaling.
 
         This option is equivalent to using ``icc-profile`` with an sRGB ICC
         profile, but it is implemented without a 3DLUT and does not require
@@ -415,18 +414,6 @@ Available video output drivers are:
     ``swapinterval=<n>``
         Interval in displayed frames between two buffer swaps.
         1 is equivalent to enable VSYNC, 0 to disable VSYNC.
-
-    ``no-scale-sep``
-        When using a separable scale filter for luma, usually two filter
-        passes are done, and when using ``cscale`` chroma information is also
-        scaled separately from luma. This is often faster and better for
-        most image scalers. However, the extra passes and preprocessing logic
-        can actually make it slower if used with fast filters on small screen
-        resolutions. Using this option will make rendering a single operation
-        if possible, often at the cost of performance or image quality.
-
-        It's safe to enable this if using ``bilinear`` for both ``scale``
-        and ``cscale``.
 
     ``cscale=<filter>``
         As ``scale``, but for interpolating chroma information. If the image
@@ -499,15 +486,6 @@ Available video output drivers are:
             X11/GLX
         wayland
             Wayland/EGL
-
-    ``indirect``
-        Do YUV conversion and scaling as separate passes. This will first render
-        the video into a video-sized RGB texture, and draw the result on screen.
-        The luma scaler is used to scale the RGB image when rendering to screen.
-        The chroma scaler is used only on YUV conversion, and only if the video
-        is chroma-subsampled (usually the case).
-        This mechanism is disabled on RGB input.
-        Specifying this option directly is generally useful for debugging only.
 
     ``fbo-format=<fmt>``
         Selects the internal format of textures used for FBOs. The format can
