@@ -38,11 +38,9 @@
 #include "video/mp_image.h"
 
 #if HAVE_GL_COCOA
-#ifdef GL_VERSION_3_0
-#include <OpenGL/gl3.h>
-#else
+#define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED 1
 #include <OpenGL/gl.h>
-#endif
+#include <OpenGL/gl3.h>
 #include <OpenGL/glext.h>
 #else
 #include <GL/gl.h>
