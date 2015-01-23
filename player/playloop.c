@@ -933,8 +933,8 @@ void run_playloop(struct MPContext *mpctx)
             fill_audio_out_buffers(mpctx, endpts); // actually play prepared buffer
         if (!mpctx->restart_complete) {
             mpctx->hrseek_active = false;
-            mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
             mpctx->restart_complete = true;
+            mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
             if (!mpctx->playing_msg_shown) {
                 if (opts->playing_msg) {
                     char *msg =
