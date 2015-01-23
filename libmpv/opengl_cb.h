@@ -207,6 +207,8 @@ int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4]);
  */
 int mpv_opengl_cb_uninit_gl(mpv_opengl_cb_context *ctx);
 
+void mpv_opengl_cb_set_mouse_pos(mpv_opengl_cb_context *ctx, int x, int y);
+
 #ifdef __cplusplus
 }
 #endif
