@@ -593,10 +593,11 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         release_down_cmd(ictx, false);
     } else {
         // Press of key with no separate down/up events
-        if (ictx->last_key_down == code) {
-            // Mixing press events and up/down with the same key is not allowed
-            MP_WARN(ictx, "Mixing key presses and up/down.\n");
-        }
+        // Mixing press events and up/down with the same key is not supported,
+        // and input sources shouldn't do this, but can happen anyway if
+        // multiple input sources interfere with each others.
+        if (ictx->last_key_down == code)
+            release_down_cmd(ictx, false);
         cmd = resolve_key(ictx, code);
     }
 
