@@ -547,8 +547,8 @@ static bool subreader_autodetect(stream_t *fd, struct MPOpts *opts,
             { sub_read_line_subrip, NULL, "subviewer" },
             { sub_read_line_subviewer, NULL, "subrip", "subrip" },
             { sub_read_line_ssa, NULL, "ssa", "ass-text" },
-            { sub_read_line_subviewer2, NULL, "subviewer 2.0" },
-            { sub_read_line_subrip09, NULL, "subrip 0.9" },
+            { sub_read_line_subviewer2, NULL, "subviewer2" },
+            { sub_read_line_subrip09, NULL, "subrip9" },
             { sub_read_line_mpl2, NULL, "mpl2" }
     };
     const struct subreader *srp;

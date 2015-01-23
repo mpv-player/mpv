@@ -709,6 +709,11 @@ Property list
 
     Otherwise, return the ``filename`` property.
 
+``file-format``
+    Symbolic name of the file format. In some cases, this is a comma-separated
+    list of format names, e.g. mp4 is ``mov,mp4,m4a,3gp,3g2,mj2`` (the list
+    may grow future for any format).
+
 ``demuxer``
     Name of the current demuxer. (This is useless.)
 

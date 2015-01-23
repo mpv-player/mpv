@@ -350,9 +350,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 
 success:
 
-    demuxer->filetype = priv->avif->long_name;
-    if (!demuxer->filetype)
-        demuxer->filetype = priv->avif->name;
+    demuxer->filetype = priv->avif->name;
 
     return 0;
 }

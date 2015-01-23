@@ -420,6 +420,17 @@ static int mp_property_demuxer(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, demuxer->desc->name);
 }
 
+static int mp_property_file_format(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+    const char *name = demuxer->filetype ? demuxer->filetype : demuxer->desc->name;
+    return m_property_strdup_ro(action, arg, name);
+}
+
 /// Position in the stream (RW)
 static int mp_property_stream_pos(void *ctx, struct m_property *prop,
                                   int action, void *arg)
@@ -3238,6 +3249,7 @@ static const struct m_property mp_properties[] = {
     {"stream-path", mp_property_stream_path},
     {"stream-capture", mp_property_stream_capture},
     {"demuxer", mp_property_demuxer},
+    {"file-format", mp_property_file_format},
     {"stream-pos", mp_property_stream_pos},
     {"stream-end", mp_property_stream_end},
     {"length", mp_property_length},
