@@ -579,17 +579,17 @@ static bool render_frame(struct vo *vo)
     in->dropped_frame &= mp_time_us() - in->last_flip < 100 * 1000;
 
     if (in->vsync_timed) {
-        in->dropped_frame &= !!img;
-
         // this is a heuristic that wakes the thread up some
         // time before the next vsync
         target = next_vsync - MPMIN(in->vsync_interval / 3, 4e3);
 
-        // we are very late with the frame and using vsync timing: probably
+        // We are very late with the frame and using vsync timing: probably
         // no new frames are coming in. This must be done whether or not
-        // framedrop is enabled.
-        if (!img && in->hasframe_rendered &&
-            prev_vsync > pts + in->vsync_interval_approx)
+        // framedrop is enabled. Also, if the frame is to be dropped, even
+        // though it's an interpolated frame (img==NULL), exit early.
+        if (!img && ((in->hasframe_rendered &&
+                      prev_vsync > pts + in->vsync_interval_approx)
+                     || in->dropped_frame))
         {
             in->dropped_frame = false;
             in->rendering = false;
