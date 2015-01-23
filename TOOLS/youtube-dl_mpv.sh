@@ -17,6 +17,6 @@ ${MPV:-mpv} \
     --cookies \
     --cookies-file="${cookies_file}" \
     --user-agent="${user_agent}" \
-    -- "${video_url}"
+    -- ${video_url}
 
 rm -rf "${cookies_dir}"
