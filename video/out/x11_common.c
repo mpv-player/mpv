@@ -671,10 +671,7 @@ void vo_x11_uninit(struct vo *vo)
     if (x11->vo_gc != None)
         XFreeGC(vo->x11->display, x11->vo_gc);
     if (x11->window != None && x11->window != x11->rootwin) {
-        XClearWindow(x11->display, x11->window);
         XUnmapWindow(x11->display, x11->window);
-
-        XSelectInput(x11->display, x11->window, StructureNotifyMask);
         XDestroyWindow(x11->display, x11->window);
     }
     if (x11->xic)
