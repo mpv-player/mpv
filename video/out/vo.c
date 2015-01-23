@@ -711,7 +711,6 @@ static void *vo_thread(void *ptr)
     mpthread_set_name("vo");
 
     int r = vo->driver->preinit(vo) ? -1 : 0;
-    vo->driver->control(vo, VOCTRL_GET_VSYNC_TIMED, &in->vsync_timed);
     mp_rendezvous(vo, r); // init barrier
     if (r < 0)
         return NULL;
@@ -879,13 +878,16 @@ const char *vo_get_window_title(struct vo *vo)
     return vo->in->window_title;
 }
 
-// flip_page[_timed] will be called this many microseconds too early.
+// flip_page[_timed] will be called offset_us microseconds too early.
 // (For vo_vdpau, which does its own timing.)
-void vo_set_flip_queue_offset(struct vo *vo, int64_t us)
+// Setting vsync_timed to true redraws as fast as possible.
+// (For vo_opengl smoothmotion.)
+void vo_set_flip_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    in->flip_queue_offset = us;
+    in->flip_queue_offset = offset_us;
+    in->vsync_timed = vsync_timed;
     pthread_mutex_unlock(&in->lock);
 }
 

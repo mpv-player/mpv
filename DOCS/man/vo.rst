@@ -585,6 +585,9 @@ Available video output drivers are:
         vsync behavior can lead to bad results. If the framerate is close to or
         over the display refresh rate, results can be bad as well.
 
+        .. note:: On systems other than Linux, you currently must set the
+                  ``--display-fps`` option, or the results will be bad.
+
     ``smoothmotion-threshold=<0.0-1.0>``
         Mix threshold at which interpolation is skipped (default: 0.0 – never
         skip).
