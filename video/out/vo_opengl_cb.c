@@ -489,9 +489,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         pthread_mutex_unlock(&p->ctx->lock);
         return VO_TRUE;
     case VOCTRL_SCREENSHOT: {
-        struct voctrl_screenshot_args *args = data;
         pthread_mutex_lock(&p->ctx->lock);
-        args->out_image = mp_image_new_ref(p->ctx->displayed_frame);
+        *(struct mp_image **)data = mp_image_new_ref(p->ctx->displayed_frame);
         pthread_mutex_unlock(&p->ctx->lock);
         return VO_TRUE;
     }

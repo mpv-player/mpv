@@ -97,7 +97,10 @@ enum mp_voctrl {
     // imgfmt/w/h/d_w/d_h can be omitted for convenience.
     VOCTRL_GET_COLORSPACE,              // struct mp_image_params*
 
-    VOCTRL_SCREENSHOT,                  // struct voctrl_screenshot_args*
+    // Retrieve original image.
+    VOCTRL_SCREENSHOT,                  // struct mp_image**
+    // Retrieve window contents.
+    VOCTRL_SCREENSHOT_WIN,              // struct mp_image**
 
     VOCTRL_SET_COMMAND_LINE,            // char**
 
@@ -118,25 +121,6 @@ struct voctrl_set_equalizer_args {
 struct voctrl_get_equalizer_args {
     const char *name;
     int *valueptr;
-};
-
-// VOCTRL_SCREENSHOT
-struct voctrl_screenshot_args {
-    // 0: Save image of the currently displayed video frame, in original
-    //    resolution.
-    // 1: Save full screenshot of the window. Should contain OSD, EOSD, and the
-    //    scaled video.
-    // The value of this variable can be ignored if only a single method is
-    // implemented.
-    int full_window;
-    // Will be set to a newly allocated image, that contains the screenshot.
-    // The caller has to free the image with talloc_free().
-    // It is not specified whether the image data is a copy or references the
-    // image data directly.
-    // Can be NULL on failure.
-    struct mp_image *out_image;
-    // Whether the VO rendered OSD/subtitles into out_image
-    bool has_osd;
 };
 
 // VOCTRL_GET_WIN_STATE

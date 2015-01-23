@@ -1048,14 +1048,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_RESET:
         forget_frames(vo, true);
         return true;
-    case VOCTRL_SCREENSHOT: {
+    case VOCTRL_SCREENSHOT_WIN:
+    case VOCTRL_SCREENSHOT:
+    {
         if (!status_ok(vo))
             return false;
-        struct voctrl_screenshot_args *args = data;
-        if (args->full_window) {
-            args->out_image = get_window_screenshot(vo);
+        if (request == VOCTRL_SCREENSHOT_WIN) {
+            *(struct mp_image **)data = get_window_screenshot(vo);
         } else {
-            args->out_image =
+            *(struct mp_image **)data =
                 vc->current_image ? mp_image_new_ref(vc->current_image) : NULL;
         }
         return true;

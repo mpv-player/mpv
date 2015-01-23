@@ -46,8 +46,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 static int control (vf_instance_t *vf, int request, void *data)
 {
     if (request == VFCTRL_SCREENSHOT && vf->priv->current) {
-        struct voctrl_screenshot_args *args = data;
-        args->out_image = mp_image_new_ref(vf->priv->current);
+        *(struct mp_image **)data = mp_image_new_ref(vf->priv->current);
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;

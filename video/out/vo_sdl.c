@@ -1018,14 +1018,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_get_equalizer_args *args = data;
         return get_eq(vo, args->name, args->valueptr);
     }
-    case VOCTRL_SCREENSHOT: {
-        struct voctrl_screenshot_args *args = data;
-        if (args->full_window)
-            args->out_image = get_window_screenshot(vo);
-        else
-            args->out_image = get_screenshot(vo);
+    case VOCTRL_SCREENSHOT:
+        *(struct mp_image **)data = get_screenshot(vo);
         return true;
-    }
+    case VOCTRL_SCREENSHOT_WIN:
+        *(struct mp_image **)data = get_window_screenshot(vo);
+        return true;
     case VOCTRL_SET_CURSOR_VISIBILITY:
         SDL_ShowCursor(*(bool *)data);
         return true;

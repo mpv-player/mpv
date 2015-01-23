@@ -690,11 +690,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         return redraw_frame(p);
     case VOCTRL_SCREENSHOT:
-    {
-        struct voctrl_screenshot_args *args = data;
-        args->out_image = get_screenshot(p);
-        return VO_TRUE;
-    }
+        *(struct mp_image **)data = get_screenshot(p);
+        return true;
     case VOCTRL_GET_RECENT_FLIP_TIME:
     {
         *(int64_t*) data = p->recent_flip_time;

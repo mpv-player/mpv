@@ -1260,14 +1260,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
-    case VOCTRL_SCREENSHOT: {
-        struct voctrl_screenshot_args *args = data;
-        if (args->full_window)
-            args->out_image = get_window_screenshot(priv);
-        else
-            args->out_image = get_screenshot(priv);
-        return !!args->out_image;
-    }
+    case VOCTRL_SCREENSHOT:
+        *(struct mp_image **)data = get_screenshot(priv);
+        return VO_TRUE;
+    case VOCTRL_SCREENSHOT_WIN:
+        *(struct mp_image **)data = get_window_screenshot(priv);
+        return VO_TRUE;
     }
 
     int events = 0;

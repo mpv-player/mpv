@@ -326,37 +326,38 @@ static void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
 static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
 {
     struct mp_image *image = NULL;
-    if (mpctx->video_out && mpctx->video_out->config_ok) {
-        if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
-            mode = 0;
+    if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
+        mode = 0;
 
-        struct voctrl_screenshot_args args =
-                            { .full_window = (mode == MODE_FULL_WINDOW) };
+    // vf_screenshot
+    if (mpctx->d_video && mpctx->d_video->vfilter)
+        vf_control_any(mpctx->d_video->vfilter, VFCTRL_SCREENSHOT, &image);
 
-        if (mpctx->d_video && mpctx->d_video->vfilter)
-            vf_control_any(mpctx->d_video->vfilter, VFCTRL_SCREENSHOT, &args);
+    if (!image && mpctx->video_out && mpctx->video_out->config_ok) {
+        vo_wait_frame(mpctx->video_out); // important for each-frame mode
 
-        if (!args.out_image) {
-            vo_wait_frame(mpctx->video_out); // important for each-frame mode
-            vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &args);
-        }
-
-        image = args.out_image;
-        if (image) {
-            if (mpctx->d_video && mpctx->d_video->hwdec_info) {
-                struct mp_hwdec_ctx *ctx = mpctx->d_video->hwdec_info->hwctx;
-                struct mp_image *nimage = NULL;
-                if (ctx && ctx->download_image)
-                    nimage = ctx->download_image(ctx, image, NULL);
-                if (nimage) {
-                    talloc_free(image);
-                    image = nimage;
-                }
-            }
-            if (mode == MODE_SUBTITLES && !args.has_osd)
-                add_subs(mpctx, image);
+        if (mode != MODE_FULL_WINDOW)
+            vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &image);
+        if (!image) {
+            vo_control(mpctx->video_out, VOCTRL_SCREENSHOT_WIN, &image);
+            mode = MODE_FULL_WINDOW;
         }
     }
+
+    if (image && mpctx->d_video && mpctx->d_video->hwdec_info) {
+        struct mp_hwdec_ctx *ctx = mpctx->d_video->hwdec_info->hwctx;
+        struct mp_image *nimage = NULL;
+        if (ctx && ctx->download_image)
+            nimage = ctx->download_image(ctx, image, NULL);
+        if (nimage) {
+            talloc_free(image);
+            image = nimage;
+        }
+    }
+
+    if (image && mode == MODE_SUBTITLES)
+        add_subs(mpctx, image);
+
     return image;
 }
 

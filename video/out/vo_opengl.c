@@ -348,13 +348,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
         gl_video_get_colorspace(p->renderer, data);
         mpgl_unlock(p->glctx);
         return VO_TRUE;
-    case VOCTRL_SCREENSHOT: {
-        struct voctrl_screenshot_args *args = data;
+    case VOCTRL_SCREENSHOT_WIN:
+    case VOCTRL_SCREENSHOT:
+    {
         mpgl_lock(p->glctx);
-        if (args->full_window)
-            args->out_image = glGetWindowScreenshot(p->gl);
-        else
-            args->out_image = gl_video_download_image(p->renderer);
+        *(struct mp_image **)data = request == VOCTRL_SCREENSHOT
+                                  ? gl_video_download_image(p->renderer)
+                                  : glGetWindowScreenshot(p->gl);
         mpgl_unlock(p->glctx);
         return true;
     }

@@ -541,11 +541,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         p->output_surface = p->visible_surface;
         draw_osd(vo);
         return true;
-    case VOCTRL_SCREENSHOT: {
-        struct voctrl_screenshot_args *args = data;
-        args->out_image = get_screenshot(p);
+    case VOCTRL_SCREENSHOT:
+        *(struct mp_image **)data = get_screenshot(p);
         return true;
-    }
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:

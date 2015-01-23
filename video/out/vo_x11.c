@@ -619,11 +619,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, p->original_image);
         return true;
-    case VOCTRL_SCREENSHOT: {
-        struct voctrl_screenshot_args *args = data;
-        args->out_image = get_screenshot(vo);
+    case VOCTRL_SCREENSHOT:
+        *(struct mp_image **)data = get_screenshot(vo);
         return true;
-    }
     }
 
     int events = 0;
