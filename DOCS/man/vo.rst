@@ -283,6 +283,8 @@ Available video output drivers are:
     Some features are available with OpenGL 3 capable graphics drivers only
     (or if the necessary extensions are available).
 
+    OpenGL ES 2.0 and 3.0 are supported as well.
+
     Hardware decoding over OpenGL-interop is supported to some degree. Note
     that in this mode, some corner case might not be gracefully handled, and
     color space conversion and chroma upsampling is generally in the hand of
@@ -303,8 +305,8 @@ Available video output drivers are:
             which is good for some content types. The number of taps can be
             controlled with ``scale-radius``, but is best left unchanged.
 
-            If the radius is not changed, this filter corresponds to the old
-            ``lanczos3`` alias, while ``lanczos2`` corresponds to a radius of 2.
+            This filter corresponds to the old ``lanczos3`` alias if the default
+            radius is used, while ``lanczos2`` corresponds to a radius of 2.
 
         ``ewa_lanczos``
             Elliptic weighted average Lanczos scaling. Also known as Jinc.
@@ -400,7 +402,8 @@ Available video output drivers are:
         Used in ``dither=fruit`` mode only.
 
     ``dither=<fruit|ordered|no>``
-        Select dithering algorithm (default: fruit).
+        Select dithering algorithm (default: fruit). (Normally, the
+        ``dither-depth`` option controls whether dithering is enabled.)
 
     ``temporal-dither``
         Enable temporal dithering. (Only active if dithering is enabled in
@@ -426,9 +429,8 @@ Available video output drivers are:
         little visible benefit.
 
     ``scale-down=<filter>``
-        Like ``scale``, but apply these filters on downscaling
-        instead. If this option is unset, the filter implied by ``scale``
-        will be applied.
+        Like ``scale``, but apply these filters on downscaling instead. If this
+        option is unset, the filter implied by ``scale`` will be applied.
 
     ``cscale-param1``, ``cscale-param2``, ``cscale-radius``, ``cscale-antiring``
         Set filter parameters and radius for ``cscale``.
@@ -441,7 +443,8 @@ Available video output drivers are:
         when downscaling. Trades quality for reduced downscaling performance.
 
         This is automatically disabled for anamorphic video, because this
-        feature doesn't work correctly with this.
+        feature doesn't work correctly with different scale factors in
+        different directions.
 
     ``sigmoid-upscaling``
         When upscaling in linear light, use a sigmoidal color transform
@@ -462,14 +465,15 @@ Available video output drivers are:
     ``glfinish``
         Call ``glFinish()`` before and after swapping buffers (default: disabled).
         Slower, but might help getting better results when doing framedropping.
-        The details depend entirely on the OpenGL driver.
+        Can completely ruin performance. The details depend entirely on the
+        OpenGL driver.
 
     ``waitvsync``
         Call ``glXWaitVideoSyncSGI`` after each buffer swap (default: disabled).
         This may or may not help with video timing accuracy and frame drop. It's
         possible that this makes video output slower, or has no effect at all.
 
-        X11 only.
+        X11/GLX only.
 
     ``sw``
         Continue even if a software renderer is detected.
@@ -485,10 +489,12 @@ Available video output drivers are:
             Cocoa/OS X
         win
             Win32/WGL
-        x11
-            X11/GLX
+        x11, x11es
+            X11/GLX (the ``es`` variant forces GLES)
         wayland
             Wayland/EGL
+        x11egl, x11egles
+            X11/EGL (the ``es`` variant forces GLES)
 
     ``fbo-format=<fmt>``
         Selects the internal format of textures used for FBOs. The format can
@@ -554,8 +560,8 @@ Available video output drivers are:
             if the video contains alpha information (which is extremely rare). May
             not be supported on all platforms. If alpha framebuffers are
             unavailable, it silently falls back on a normal framebuffer. Note
-            that when using FBO indirections (such as with ``opengl-hq``), an FBO
-            format with alpha must be specified with the ``fbo-format`` option.
+            that if you set the ``fbo-format`` option to a non-default value,
+            a format with alpha must be specified, or this won't work.
         no
             Ignore alpha component.
 
@@ -575,9 +581,11 @@ Available video output drivers are:
     ``smoothmotion``
         Use frame interpolation to reduce stuttering caused by mismatches in
         video fps and display refresh rate (similar to MadVR's smoothmotion,
-        thus the naming).
+        thus the naming). GPU drivers or compositing window managers overriding
+        vsync behavior can lead to bad results. If the framerate is close to or
+        over the display refresh rate, results can be bad as well.
 
-    ``smoothmotion-threshold=<threshold>``
+    ``smoothmotion-threshold=<0.0-1.0>``
         Mix threshold at which interpolation is skipped (default: 0.0 – never
         skip).
 

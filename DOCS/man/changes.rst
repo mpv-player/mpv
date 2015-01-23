@@ -74,7 +74,7 @@ Video
 * More correct color reproduction (color matrix generation), including support
   for BT.2020 (Ultra HD) and linear XYZ (Digital Cinema) inputs.
 * Support for color managed displays, via ICC profiles.
-* More high-quality image resamplers (see the ``lscale`` suboption).
+* High-quality image resamplers (see the ``opengl`` ``scale`` suboption).
 * Support for scaling in (sigmoidized) linear light.
 * Better subtitle rendering using libass by default.
 * Improvements when playing multiple files (``--fixed-vo`` is default, do not

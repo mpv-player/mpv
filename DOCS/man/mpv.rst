@@ -254,9 +254,9 @@ Additionally, there is a special form of quoting with ``%n%`` described below.
 
 For example, the ``opengl`` VO can take multiple options:
 
-    ``mpv test.mkv --vo=opengl:lscale=lanczos2:icc-profile=file.icc,xv``
+    ``mpv test.mkv --vo=opengl:scale=lanczos:icc-profile=file.icc,xv``
 
-This passed ``lscale=lanczos2`` and ``icc-profile=file.icc`` to ``opengl``,
+This passes ``scale=lanczos`` and ``icc-profile=file.icc`` to ``opengl``,
 and also specifies ``xv`` as fallback VO. If the icc-profile path contains
 spaces or characters like ``,`` or ``:``, you need to quote them:
 
