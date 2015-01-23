@@ -549,15 +549,11 @@ static bool render_frame(struct vo *vo)
     int64_t duration = in->frame_duration;
     struct mp_image *img = in->frame_queued;
 
-    if (!img && (!in->vsync_timed || in->paused || pts <= 0)) {
-        pthread_mutex_unlock(&in->lock);
-        return false;
-    }
+    if (!img && (!in->vsync_timed || in->paused || pts <= 0))
+        goto nothing_done;
 
-    if (in->vsync_timed && !in->hasframe) {
-        pthread_mutex_unlock(&in->lock);
-        return false;
-    }
+    if (in->vsync_timed && !in->hasframe)
+        goto nothing_done;
 
     mp_image_unrefp(&in->dropped_image);
 
@@ -569,6 +565,9 @@ static bool render_frame(struct vo *vo)
     int64_t next_vsync = prev_vsync + in->vsync_interval;
     int64_t end_time = pts + duration;
 
+    // Time at which we should flip_page on the VO.
+    int64_t target = pts - in->flip_queue_offset;
+
     if (!in->hasframe_rendered)
         duration = -1; // disable framedrop
 
@@ -578,18 +577,24 @@ static bool render_frame(struct vo *vo)
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
     // instead of just freezing the display forever.
     in->dropped_frame &= mp_time_us() - in->last_flip < 100 * 1000;
-    if (in->vsync_timed)
+
+    if (in->vsync_timed) {
         in->dropped_frame &= !!img;
 
-    if (in->vsync_timed && !img && in->hasframe_rendered &&
-        prev_vsync > pts + in->vsync_interval_approx) {
+        // this is a heuristic that wakes the thread up some
+        // time before the next vsync
+        target = next_vsync - MPMIN(in->vsync_interval / 3, 4e3);
+
         // we are very late with the frame and using vsync timing: probably
         // no new frames are coming in. This must be done whether or not
         // framedrop is enabled.
-        in->dropped_frame = false;
-        in->rendering = false;
-        pthread_mutex_unlock(&in->lock);
-        return false;
+        if (!img && in->hasframe_rendered &&
+            prev_vsync > pts + in->vsync_interval_approx)
+        {
+            in->dropped_frame = false;
+            in->rendering = false;
+            goto nothing_done;
+        }
     }
 
     if (in->dropped_frame) {
@@ -611,11 +616,6 @@ static bool render_frame(struct vo *vo)
             vo->driver->draw_image(vo, img);
         }
 
-        int64_t target = !in->vsync_timed ?
-                         pts - in->flip_queue_offset :
-                         // this is a heuristic that wakes the thread up some
-                         // time before the next vsync
-                         next_vsync - MPMIN(in->vsync_interval / 3, 4e3);
         while (1) {
             int64_t now = mp_time_us();
             if (target <= now)
@@ -644,7 +644,6 @@ static bool render_frame(struct vo *vo)
         MP_DBG(vo, "phase: %ld\n", phase);
         MP_STATS(vo, "value %ld phase", phase);
 
-        MP_STATS(vo, "display");
         MP_STATS(vo, "end video");
 
         pthread_mutex_lock(&in->lock);
@@ -664,8 +663,11 @@ static bool render_frame(struct vo *vo)
     mp_input_wakeup(vo->input_ctx);
 
     pthread_mutex_unlock(&in->lock);
-
     return true;
+
+nothing_done:
+    pthread_mutex_unlock(&in->lock);
+    return false;
 }
 
 static void do_redraw(struct vo *vo)
