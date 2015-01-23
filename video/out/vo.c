@@ -578,7 +578,8 @@ static bool render_frame(struct vo *vo)
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
     // instead of just freezing the display forever.
     in->dropped_frame &= mp_time_us() - in->last_flip < 100 * 1000;
-    in->dropped_frame &= in->vsync_timed && !!img;
+    if (in->vsync_timed)
+        in->dropped_frame &= !!img;
 
     if (in->vsync_timed && !img && in->hasframe_rendered &&
         prev_vsync > pts + in->vsync_interval_approx) {
