@@ -19,6 +19,7 @@
 #include "vo.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
+#include "input/input.h"
 
 #include "common/global.h"
 #include "player/client.h"
@@ -350,6 +351,12 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
     pthread_mutex_unlock(&ctx->lock);
 
     return left;
+}
+
+void mpv_opengl_cb_set_mouse_pos(mpv_opengl_cb_context *ctx, int x, int y)
+{
+    if (ctx->active)
+        mp_input_set_mouse_pos(ctx->active->input_ctx, x, y);
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
