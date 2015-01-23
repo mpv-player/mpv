@@ -1,3 +1,5 @@
+// Build with: gcc -o simple simple.c `pkg-config --libs --cflags mpv`
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>

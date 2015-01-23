@@ -8,6 +8,11 @@ cocoa
 
 Shows how to embed the mpv video window in Objective-C/Cocoa.
 
+qt
+--
+
+Shows how to embed the mpv video window in Qt (using normal desktop widgets).
+
 qml
 ---
 
@@ -18,11 +23,6 @@ qml_direct
 
 Alternative example, which typically avoids a FBO indirection. Might be
 slightly faster, but is less flexible and harder to use.
-
-qt
---
-
-Shows how to embed the mpv video window in Qt (using normal desktop widgets).
 
 simple
 ------

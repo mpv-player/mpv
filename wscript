@@ -26,13 +26,6 @@ build_options = [
         'deps_neg': [ 'libmpv-shared' ],
         'func': check_true
     }, {
-        'name': '--client-api-examples',
-        'desc': 'build client API examples',
-        'deps_any': [ 'libmpv-shared', 'libmpv-static' ],
-        # The build process uses symlinks (ln -s)
-        'deps_neg': [ 'os-win32' ],
-        'func': check_true
-    }, {
         'name': '--static-build',
         'desc': 'static build',
         'default': 'disable',
