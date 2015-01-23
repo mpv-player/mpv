@@ -39,6 +39,7 @@
 #include "osdep/timer.h"
 #include "common/common.h"
 #include "input/input.h"
+#include "input/keycodes.h"
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
@@ -4710,6 +4711,24 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         mp_hook_run(mpctx, cmd->sender, cmd->args[0].v.s);
         break;
+
+    case MP_CMD_MOUSE: {
+        const int x = cmd->args[0].v.i, y = cmd->args[1].v.i;
+        int button = cmd->args[2].v.i;
+        if (button == -1) {// no button
+            mp_input_set_mouse_pos(mpctx->input, x, y);
+            break;
+        }
+        if (button < 0 || button >= 20) {// invalid button
+            MP_ERR(mpctx, "%d is not a valid mouse button number.\n", button);
+            return -1;
+        }
+        const bool dbc = cmd->args[3].v.i;
+        button += dbc ? MP_MOUSE_BASE_DBL : MP_MOUSE_BASE;
+        mp_input_set_mouse_pos(mpctx->input, x, y);
+        mp_input_put_key(mpctx->input, button);
+        break;
+    }
 
     default:
         MP_VERBOSE(mpctx, "Received unknown cmd %s\n", cmd->name);
