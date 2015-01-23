@@ -823,6 +823,10 @@ Available filters are:
             Show only first field (going by ``--field-dominance``).
         bob
             bob deinterlacing (default).
+        weave, motion-adaptive, motion-compensated
+            Advanced deinterlacing algorithms. Whether these actually work
+            depends on the GPU hardware, the GPU drivers, driver bugs, and
+            mpv bugs.
 
 ``vdpaupp``
     VDPAU video post processing. Works with ``--vo=vdpau`` and ``--vo=opengl``
