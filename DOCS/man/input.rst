@@ -374,6 +374,23 @@ List of Input Commands
     essentially like ``quit``. Useful for the client API: playback can be
     stopped without terminating the player.
 
+``mouse <x> <y> [<button> [single|double]]``
+    Send a mouse event with given coordinate (``<x>``, ``<y>``).
+
+    Second argument:
+
+    <button>
+        The button number of clicked mouse button. This should be one of 0-19.
+        If ``<button>`` is omitted, only the position will be updated.
+
+    Third argument:
+
+    <single> (default)
+        The mouse event represents regular single click.
+
+    <double>
+        The mouse event represents double-click.
+
 
 Input Commands that are Possibly Subject to Change
 --------------------------------------------------
