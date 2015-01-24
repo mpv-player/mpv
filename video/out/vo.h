@@ -63,7 +63,7 @@ enum mp_voctrl {
 
     // Redraw the image previously passed to draw_image() (basically, repeat
     // the previous draw_image call). If this is handled, the OSD should also
-    // be updated and redrawn.
+    // be updated and redrawn. Optional; emulated if not available.
     VOCTRL_REDRAW_FRAME,
 
     VOCTRL_FULLSCREEN,
@@ -165,7 +165,7 @@ struct vo_driver {
     // VO_CAP_* bits
     int caps;
 
-    // Disable video timing, push frames as quickly as possible.
+    // Disable video timing, push frames as quickly as possible, never redraw.
     bool untimed;
 
     const char *name;

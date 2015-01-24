@@ -687,9 +687,9 @@ static void do_redraw(struct vo *vo)
     pthread_mutex_lock(&in->lock);
     in->request_redraw = false;
     in->want_redraw = false;
-    bool force_full_redraw = in->dropped_frame;
+    bool full_redraw = in->dropped_frame;
     struct mp_image *img = NULL;
-    if (vo->config_ok)
+    if (vo->config_ok && !(vo->driver->untimed))
         img = mp_image_new_ref(in->current_frame);
     if (img)
         in->dropped_frame = false;
@@ -698,12 +698,10 @@ static void do_redraw(struct vo *vo)
     if (!img)
         return;
 
-    if (force_full_redraw) {
+    if (full_redraw || vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1) {
         vo->driver->draw_image(vo, img);
     } else {
         talloc_free(img);
-        if (vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1)
-            return;
     }
 
     if (vo->driver->flip_page_timed)
