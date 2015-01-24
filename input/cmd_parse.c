@@ -409,6 +409,7 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
         memset(&ret->args[i].v, 0, ret->args[i].type->type->size);
         m_option_copy(ret->args[i].type, &ret->args[i].v, &cmd->args[i].v);
     }
+    ret->original = bstrdup(ret, cmd->original);
 
     if (cmd->id == MP_CMD_COMMAND_LIST) {
         struct mp_cmd *prev = NULL;
