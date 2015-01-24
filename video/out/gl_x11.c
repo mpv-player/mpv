@@ -207,7 +207,6 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
     }
 
     int glx_attribs[] = {
-        GLX_STEREO, False,
         GLX_X_RENDERABLE, True,
         GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
         GLX_RED_SIZE, 1,
@@ -224,16 +223,6 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
         if (!fbc) {
             set_glx_attrib(glx_attribs, GLX_ALPHA_SIZE, 0);
             flags &= ~VOFLAG_ALPHA;
-        }
-    }
-    if (flags & VOFLAG_STEREO) {
-        set_glx_attrib(glx_attribs, GLX_STEREO, True);
-        fbc = select_fb_config(vo, glx_attribs, flags);
-        if (!fbc) {
-            MP_ERR(vo, "Could not find a stereo visual,"
-                       " 3D will probably not work!\n");
-            set_glx_attrib(glx_attribs, GLX_STEREO, False);
-            flags &= ~VOFLAG_STEREO;
         }
     }
     if (!fbc)
