@@ -58,30 +58,12 @@ static void *cocoa_glgetaddr(const char *s)
     return ret;
 }
 
-static bool create_gl_context(struct MPGLContext *ctx)
+static CGLError test_gl_version(CGLPixelFormatObj *pix,
+                                CGLOpenGLProfile version)
 {
-    struct cgl_context *p = ctx->priv;
-    CGLError err;
-
-    CGLOpenGLProfile gl_vers_map[] = {
-        [2] = kCGLOGLPVersion_Legacy,
-        #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
-        [3] = kCGLOGLPVersion_GL3_Core,
-        [4] = kCGLOGLPVersion_GL4_Core,
-        #else
-        [3] = kCGLOGLPVersion_3_2_Core,
-        #endif
-    };
-
-    int gl_major = MPGL_VER_GET_MAJOR(ctx->requested_gl_version);
-    if (gl_major < 2 || gl_major >= MP_ARRAY_SIZE(gl_vers_map)) {
-        MP_FATAL(ctx->vo, "OpenGL major version %d not supported", gl_major);
-        return false;
-    }
-
     CGLPixelFormatAttribute attrs[] = {
         kCGLPFAOpenGLProfile,
-        (CGLPixelFormatAttribute) gl_vers_map[gl_major],
+        (CGLPixelFormatAttribute) version,
         kCGLPFADoubleBuffer,
         kCGLPFAAccelerated,
         #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
@@ -93,14 +75,32 @@ static bool create_gl_context(struct MPGLContext *ctx)
     };
 
     GLint npix;
-    err = CGLChoosePixelFormat(attrs, &p->pix, &npix);
+    CGLError err;
+    err = CGLChoosePixelFormat(attrs, pix, &npix);
     if (err == kCGLBadAttribute) {
         // kCGLPFASupportsAutomaticGraphicsSwitching is probably not supported
         // by the current hardware. Falling back to not using it.
-        MP_ERR(ctx->vo, "error creating CGL pixel format with automatic GPU "
-                        "switching. falling back\n");
         attrs[MP_ARRAY_SIZE(attrs) - 2] = 0;
-        err = CGLChoosePixelFormat(attrs, &p->pix, &npix);
+        err = CGLChoosePixelFormat(attrs, pix, &npix);
+    }
+
+    return err;
+}
+
+static bool create_gl_context(struct MPGLContext *ctx)
+{
+    struct cgl_context *p = ctx->priv;
+    CGLError err;
+
+    CGLOpenGLProfile gl_versions[] = {
+        kCGLOGLPVersion_3_2_Core,
+        kCGLOGLPVersion_Legacy,
+    };
+
+    for (int n = 0; n < MP_ARRAY_SIZE(gl_versions); n++) {
+        err = test_gl_version(&p->pix, gl_versions[n]);
+        if (err == kCGLNoError)
+            break;
     }
 
     if (err != kCGLNoError) {
