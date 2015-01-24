@@ -268,14 +268,6 @@ static bool redraw_frame(struct priv *p)
     return true;
 }
 
-static mp_image_t *get_screenshot(struct priv *p)
-{
-    if (!p->original_image)
-        return NULL;
-
-    return mp_image_new_ref(p->original_image);
-}
-
 static bool resize(struct priv *p)
 {
     struct vo_wayland_state *wl = p->wl;
@@ -689,9 +681,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
     case VOCTRL_REDRAW_FRAME:
         return redraw_frame(p);
-    case VOCTRL_SCREENSHOT:
-        *(struct mp_image **)data = get_screenshot(p);
-        return true;
     case VOCTRL_GET_RECENT_FLIP_TIME:
     {
         *(int64_t*) data = p->recent_flip_time;

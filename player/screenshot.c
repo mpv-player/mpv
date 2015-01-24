@@ -337,7 +337,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
         vo_wait_frame(mpctx->video_out); // important for each-frame mode
 
         if (mode != MODE_FULL_WINDOW)
-            vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &image);
+            image = vo_get_current_frame(mpctx->video_out);
         if (!image) {
             vo_control(mpctx->video_out, VOCTRL_SCREENSHOT_WIN, &image);
             mode = MODE_FULL_WINDOW;

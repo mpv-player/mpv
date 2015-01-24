@@ -252,6 +252,9 @@ void mp_image_steal_data(struct mp_image *dst, struct mp_image *src)
 // while img is left untouched.
 struct mp_image *mp_image_new_ref(struct mp_image *img)
 {
+    if (!img)
+        return NULL;
+
     if (!img->refcount)
         return mp_image_new_copy(img);
 

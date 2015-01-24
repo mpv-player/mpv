@@ -97,9 +97,7 @@ enum mp_voctrl {
     // imgfmt/w/h/d_w/d_h can be omitted for convenience.
     VOCTRL_GET_COLORSPACE,              // struct mp_image_params*
 
-    // Retrieve original image.
-    VOCTRL_SCREENSHOT,                  // struct mp_image**
-    // Retrieve window contents.
+    // Retrieve window contents. (Normal screenshots use vo_get_current_frame().)
     VOCTRL_SCREENSHOT_WIN,              // struct mp_image**
 
     VOCTRL_SET_COMMAND_LINE,            // char**
@@ -319,6 +317,7 @@ void vo_increment_drop_count(struct vo *vo, int64_t n);
 void vo_query_formats(struct vo *vo, uint8_t *list);
 void vo_event(struct vo *vo, int event);
 int vo_query_and_reset_events(struct vo *vo, int events);
+struct mp_image *vo_get_current_frame(struct vo *vo);
 
 void vo_set_flip_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed);
 int64_t vo_get_vsync_interval(struct vo *vo);

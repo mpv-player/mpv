@@ -648,15 +648,6 @@ static void flip_page(struct vo *vo)
         XSync(vo->x11->display, False);
 }
 
-static mp_image_t *get_screenshot(struct vo *vo)
-{
-    struct xvctx *ctx = vo->priv;
-    if (!ctx->original_image)
-        return NULL;
-
-    return mp_image_new_ref(ctx->original_image);
-}
-
 // Note: REDRAW_FRAME can call this with NULL.
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
@@ -838,9 +829,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, ctx->original_image);
-        return true;
-    case VOCTRL_SCREENSHOT:
-        *(struct mp_image **)data = get_screenshot(vo);
         return true;
     }
     int events = 0;

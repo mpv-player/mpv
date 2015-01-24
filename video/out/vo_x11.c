@@ -423,16 +423,6 @@ static struct mp_image get_x_buffer(struct priv *p, int buf_index)
     return img;
 }
 
-static mp_image_t *get_screenshot(struct vo *vo)
-{
-    struct priv *p = vo->priv;
-
-    if (!p->original_image)
-        return NULL;
-
-    return mp_image_new_ref(p->original_image);
-}
-
 static void wait_for_completion(struct vo *vo, int max_outstanding)
 {
 #if HAVE_SHM && HAVE_XEXT
@@ -618,9 +608,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, p->original_image);
-        return true;
-    case VOCTRL_SCREENSHOT:
-        *(struct mp_image **)data = get_screenshot(vo);
         return true;
     }
 

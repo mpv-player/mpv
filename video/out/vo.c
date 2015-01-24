@@ -135,7 +135,8 @@ struct vo_internal {
 
     int64_t drop_count;
     bool dropped_frame;             // the previous frame was dropped
-    struct mp_image *dropped_image; // used to possibly redraw the dropped frame
+
+    struct mp_image *current_frame; // last frame queued to the VO
 
     int64_t wakeup_pts;             // time at which to pull frame from decoder
 
@@ -333,6 +334,8 @@ static void run_reconfig(void *p)
     int flags = *(int *)pp[2];
     int *ret = pp[3];
 
+    struct vo_internal *in = vo->in;
+
     vo->dwidth = params->d_w;
     vo->dheight = params->d_h;
 
@@ -347,7 +350,11 @@ static void run_reconfig(void *p)
         talloc_free(vo->params);
         vo->params = NULL;
     }
-    forget_frames(vo); // implicitly synchronized
+
+    pthread_mutex_lock(&in->lock);
+    mp_image_unrefp(&in->current_frame);
+    forget_frames(vo);
+    pthread_mutex_unlock(&in->lock);
 
     update_display_fps(vo);
 }
@@ -388,7 +395,7 @@ static void forget_frames(struct vo *vo)
     in->hasframe_rendered = false;
     in->drop_count = 0;
     mp_image_unrefp(&in->frame_queued);
-    mp_image_unrefp(&in->dropped_image);
+    // don't unref current_frame; we always want to be able to redraw it
 }
 
 #ifndef __MINGW32__
@@ -555,7 +562,8 @@ static bool render_frame(struct vo *vo)
     if (in->vsync_timed && !in->hasframe)
         goto nothing_done;
 
-    mp_image_unrefp(&in->dropped_image);
+    if (img)
+        mp_image_setrefp(&in->current_frame, img);
 
     in->rendering = true;
     in->frame_queued = NULL;
@@ -598,7 +606,7 @@ static bool render_frame(struct vo *vo)
     }
 
     if (in->dropped_frame) {
-        in->dropped_image = img;
+        talloc_free(img);
     } else {
         in->hasframe_rendered = true;
         pthread_mutex_unlock(&in->lock);
@@ -679,20 +687,21 @@ static void do_redraw(struct vo *vo)
     pthread_mutex_lock(&in->lock);
     in->request_redraw = false;
     in->want_redraw = false;
-    bool skip = !in->paused && in->dropped_frame;
-    struct mp_image *img = in->dropped_image;
-    if (!skip) {
-        in->dropped_image = NULL;
+    bool force_full_redraw = in->dropped_frame;
+    struct mp_image *img = NULL;
+    if (vo->config_ok)
+        img = mp_image_new_ref(in->current_frame);
+    if (img)
         in->dropped_frame = false;
-    }
     pthread_mutex_unlock(&in->lock);
 
-    if (!vo->config_ok || skip)
+    if (!img)
         return;
 
-    if (img) {
+    if (force_full_redraw) {
         vo->driver->draw_image(vo, img);
     } else {
+        talloc_free(img);
         if (vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1)
             return;
     }
@@ -749,6 +758,7 @@ static void *vo_thread(void *ptr)
         wait_vo(vo, wait_until);
     }
     forget_frames(vo); // implicitly synchronized
+    mp_image_unrefp(&in->current_frame);
     vo->driver->uninit(vo);
     return NULL;
 }
@@ -916,6 +926,15 @@ int vo_query_and_reset_events(struct vo *vo, int events)
     pthread_mutex_lock(&in->lock);
     int r = in->queued_events & events;
     in->queued_events &= ~(unsigned)r;
+    pthread_mutex_unlock(&in->lock);
+    return r;
+}
+
+struct mp_image *vo_get_current_frame(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    struct mp_image *r = mp_image_new_ref(vo->in->current_frame);
     pthread_mutex_unlock(&in->lock);
     return r;
 }

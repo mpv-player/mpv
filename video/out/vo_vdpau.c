@@ -1049,18 +1049,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         forget_frames(vo, true);
         return true;
     case VOCTRL_SCREENSHOT_WIN:
-    case VOCTRL_SCREENSHOT:
-    {
         if (!status_ok(vo))
             return false;
-        if (request == VOCTRL_SCREENSHOT_WIN) {
-            *(struct mp_image **)data = get_window_screenshot(vo);
-        } else {
-            *(struct mp_image **)data =
-                vc->current_image ? mp_image_new_ref(vc->current_image) : NULL;
-        }
+        *(struct mp_image **)data = get_window_screenshot(vo);
         return true;
-    }
     case VOCTRL_GET_PREF_DEINT:
         *(int *)data = vc->deint;
         return true;

@@ -349,15 +349,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         mpgl_unlock(p->glctx);
         return VO_TRUE;
     case VOCTRL_SCREENSHOT_WIN:
-    case VOCTRL_SCREENSHOT:
-    {
         mpgl_lock(p->glctx);
-        *(struct mp_image **)data = request == VOCTRL_SCREENSHOT
-                                  ? gl_video_download_image(p->renderer)
-                                  : glGetWindowScreenshot(p->gl);
+        *(struct mp_image **)data = glGetWindowScreenshot(p->gl);
         mpgl_unlock(p->glctx);
         return true;
-    }
     case VOCTRL_GET_HWDEC_INFO: {
         struct mp_hwdec_info **arg = data;
         *arg = &p->hwdec_info;

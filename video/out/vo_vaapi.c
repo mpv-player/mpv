@@ -298,14 +298,6 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
     draw_osd(vo);
 }
 
-static struct mp_image *get_screenshot(struct priv *p)
-{
-    struct mp_image *hwimg = p->output_surfaces[p->visible_surface];
-    if (!hwimg)
-        return NULL;
-    return mp_image_new_ref(hwimg);
-}
-
 static void free_subpicture(struct priv *p, struct vaapi_osd_image *img)
 {
     if (img->image.image_id != VA_INVALID_ID)
@@ -540,9 +532,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         p->output_surface = p->visible_surface;
         draw_osd(vo);
-        return true;
-    case VOCTRL_SCREENSHOT:
-        *(struct mp_image **)data = get_screenshot(p);
         return true;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;

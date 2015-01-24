@@ -225,7 +225,6 @@ static void d3d_clear_video_textures(d3d_priv *priv);
 static bool resize_d3d(d3d_priv *priv);
 static void uninit(struct vo *vo);
 static void flip_page(struct vo *vo);
-static mp_image_t *get_screenshot(d3d_priv *priv);
 static mp_image_t *get_window_screenshot(d3d_priv *priv);
 static void draw_osd(struct vo *vo);
 static bool change_d3d_backbuffer(d3d_priv *priv);
@@ -1260,9 +1259,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
-    case VOCTRL_SCREENSHOT:
-        *(struct mp_image **)data = get_screenshot(priv);
-        return VO_TRUE;
     case VOCTRL_SCREENSHOT_WIN:
         *(struct mp_image **)data = get_window_screenshot(priv);
         return VO_TRUE;
@@ -1443,29 +1439,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
 done:
     talloc_free(mpi);
-}
-
-static mp_image_t *get_screenshot(d3d_priv *priv)
-{
-    if (!priv->d3d_device)
-        return NULL;
-
-    if (!priv->have_image)
-        return NULL;
-
-    if (!priv->vo->params)
-        return NULL;
-
-    struct mp_image buffer;
-    if (!get_video_buffer(priv, &buffer))
-        return NULL;
-
-    struct mp_image *image = mp_image_new_copy(&buffer);
-    if (image)
-        mp_image_set_attributes(image, priv->vo->params);
-
-    d3d_unlock_video_objects(priv);
-    return image;
 }
 
 static mp_image_t *get_window_screenshot(d3d_priv *priv)

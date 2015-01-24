@@ -172,7 +172,6 @@ struct priv {
     SDL_Texture *tex;
     int tex_swapped;
     struct mp_image_params params;
-    mp_image_t *ssmpi;
     struct mp_rect src_rect;
     struct mp_rect dst_rect;
     struct mp_osd_res osd_res;
@@ -638,7 +637,6 @@ static void uninit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
     destroy_renderer(vo);
-    talloc_free(vc->ssmpi);
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
     talloc_free(vc);
 }
@@ -913,9 +911,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         mp_image_copy(&texmpi, mpi);
 
         SDL_UnlockTexture(vc->tex);
-
-        talloc_free(vc->ssmpi);
-        vc->ssmpi = mpi;
     }
 
     SDL_Rect src, dst;
@@ -939,12 +934,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 
     draw_osd(vo);
-}
-
-static struct mp_image *get_screenshot(struct vo *vo)
-{
-    struct priv *vc = vo->priv;
-    return vc->ssmpi ? mp_image_new_ref(vc->ssmpi) : NULL;
 }
 
 static struct mp_image *get_window_screenshot(struct vo *vo)
@@ -1018,9 +1007,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_get_equalizer_args *args = data;
         return get_eq(vo, args->name, args->valueptr);
     }
-    case VOCTRL_SCREENSHOT:
-        *(struct mp_image **)data = get_screenshot(vo);
-        return true;
     case VOCTRL_SCREENSHOT_WIN:
         *(struct mp_image **)data = get_window_screenshot(vo);
         return true;

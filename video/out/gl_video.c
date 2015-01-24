@@ -2188,12 +2188,6 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-struct mp_image *gl_video_download_image(struct gl_video *p)
-{
-    struct video_image *vimg = &p->image;
-    return vimg->mpi ? mp_image_new_ref(vimg->mpi) : NULL;
-}
-
 static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 {
     struct gl_video *p = ctx;
