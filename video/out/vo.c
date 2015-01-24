@@ -695,11 +695,9 @@ static void do_redraw(struct vo *vo)
         in->dropped_frame = false;
     pthread_mutex_unlock(&in->lock);
 
-    if (!img)
-        return;
-
     if (full_redraw || vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1) {
-        vo->driver->draw_image(vo, img);
+        if (img)
+            vo->driver->draw_image(vo, img);
     } else {
         talloc_free(img);
     }
