@@ -58,7 +58,9 @@ static void *cocoa_glgetaddr(const char *s)
     return ret;
 }
 
-static CGLError test_gl_version(CGLPixelFormatObj *pix,
+static CGLError test_gl_version(struct vo *vo,
+                                CGLContextObj *ctx,
+                                CGLPixelFormatObj *pix,
                                 CGLOpenGLProfile version)
 {
     CGLPixelFormatAttribute attrs[] = {
@@ -84,6 +86,15 @@ static CGLError test_gl_version(CGLPixelFormatObj *pix,
         err = CGLChoosePixelFormat(attrs, pix, &npix);
     }
 
+    if (err != kCGLNoError) {
+        MP_ERR(vo, "error creating CGL pixel format: %s (%d)\n",
+               CGLErrorString(err), err);
+        goto error_out;
+    }
+
+    err = CGLCreateContext(*pix, 0, ctx);
+
+error_out:
     return err;
 }
 
@@ -98,17 +109,12 @@ static bool create_gl_context(struct MPGLContext *ctx)
     };
 
     for (int n = 0; n < MP_ARRAY_SIZE(gl_versions); n++) {
-        err = test_gl_version(&p->pix, gl_versions[n]);
+        err = test_gl_version(ctx->vo, &p->ctx, &p->pix, gl_versions[n]);
         if (err == kCGLNoError)
             break;
     }
 
     if (err != kCGLNoError) {
-        MP_FATAL(ctx->vo, "error creating CGL pixel format: %s (%d)\n",
-                 CGLErrorString(err), err);
-    }
-
-    if ((err = CGLCreateContext(p->pix, 0, &p->ctx)) != kCGLNoError) {
         MP_FATAL(ctx->vo, "error creating CGL context: %s (%d)\n",
                  CGLErrorString(err), err);
         return false;
