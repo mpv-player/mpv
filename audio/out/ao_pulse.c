@@ -413,6 +413,9 @@ static int init(struct ao *ao)
                                                 &format, 1, proplist)))
         goto unlock_and_fail;
 
+    pa_format_info_free(format);
+    format = NULL;
+
     pa_proplist_free(proplist);
     proplist = NULL;
 
