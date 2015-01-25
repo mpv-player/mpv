@@ -838,7 +838,11 @@ static void pushnode(lua_State *L, mpv_node *node)
         lua_pushstring(L, node->u.string);
         break;
     case MPV_FORMAT_INT64:
+#if LUA_VERSION_NUM < 503
         lua_pushnumber(L, node->u.int64);
+#else
+        lua_pushinteger(L, node->u.int64);
+#endif
         break;
     case MPV_FORMAT_DOUBLE:
         lua_pushnumber(L, node->u.double_);
