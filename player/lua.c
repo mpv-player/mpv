@@ -97,6 +97,19 @@ static int mp_cpcall (lua_State *L, lua_CFunction func, void *ud)
 #define mp_lua_len lua_rawlen
 #endif
 
+#if LUA_VERSION_NUM < 503
+#define mp_luaL_checkinteger(L, arg, def) luaL_checkinteger(L, arg)
+#else
+static int mp_luaL_checkinteger(lua_State *L, int arg, int def)
+{
+    lua_Integer res;
+    lua_Number num = luaL_checknumber(L, arg);
+    if (!lua_numbertointeger(num, &res))
+        return def;
+    return res;
+}
+#endif
+
 // Ensure that the given argument exists, even if it's nil. Can be used to
 // avoid confusing the last missing optional arg with the first temporary value
 // pushed to the stack.
@@ -941,8 +954,8 @@ static int script_command_native(lua_State *L)
 static int script_set_osd_ass(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
-    int res_x = luaL_checkinteger(L, 1);
-    int res_y = luaL_checkinteger(L, 2);
+    int res_x = mp_luaL_checkinteger(L, 1, 0);
+    int res_y = mp_luaL_checkinteger(L, 2, 0);
     const char *text = luaL_checkstring(L, 3);
     osd_set_external(mpctx->osd, res_x, res_y, (char *)text);
     mp_input_wakeup(mpctx->input);
@@ -1050,10 +1063,10 @@ static int script_input_set_section_mouse_area(lua_State *L)
     osd_object_get_scale_factor(mpctx->osd, OSDTYPE_EXTERNAL, &sw, &sh);
 
     char *section = (char *)luaL_checkstring(L, 1);
-    int x0 = sw ? luaL_checkinteger(L, 2) / sw : 0;
-    int y0 = sh ? luaL_checkinteger(L, 3) / sh : 0;
-    int x1 = sw ? luaL_checkinteger(L, 4) / sw : 0;
-    int y1 = sh ? luaL_checkinteger(L, 5) / sh : 0;
+    int x0 = sw ? mp_luaL_checkinteger(L, 2, 0) / sw : 0;
+    int y0 = sh ? mp_luaL_checkinteger(L, 3, 0) / sh : 0;
+    int x1 = sw ? mp_luaL_checkinteger(L, 4, 0) / sw : 0;
+    int y1 = sh ? mp_luaL_checkinteger(L, 5, 0) / sh : 0;
     mp_input_set_section_mouse_area(mpctx->input, section, x0, y0, x1, y1);
     return 0;
 }
