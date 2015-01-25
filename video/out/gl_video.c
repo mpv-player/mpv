@@ -1358,7 +1358,7 @@ static void update_scale_factor(struct gl_video *p, struct scaler *scaler)
     double xy[2];
     get_scale_factors(p, xy);
     double f = MPMIN(xy[0], xy[1]);
-    if (p->opts.fancy_downscaling && f < 1.0 &&
+    if (p->opts.fancy_downscaling && scaler->index == 0 && f < 1.0 &&
         fabs(xy[0] - f) < 0.01 && fabs(xy[1] - f) < 0.01)
     {
         MP_VERBOSE(p, "Using fancy-downscaling (scaler %d).\n", scaler->index);
