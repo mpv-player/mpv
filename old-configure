@@ -852,8 +852,10 @@ test_lua() {
 test_lua "lua >= 5.1.0 lua < 5.2.0"
 test_lua "lua5.1 >= 5.1.0" # debian
 test_lua "luajit >= 2.0.0"
-test_lua "lua >= 5.2.0"
+test_lua "lua >= 5.2.0 lua < 5.3.0"
 test_lua "lua5.2 >= 5.2.0" # debian
+test_lua "lua >= 5.3.0"
+test_lua "lua5.3 >= 5.3.0" # debian
 
 test "$_lua" != yes && check_yes_no no LUA
 
