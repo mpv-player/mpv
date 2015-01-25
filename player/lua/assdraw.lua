@@ -21,7 +21,7 @@ function ass_mt.draw_stop(ass)
 end
 
 function ass_mt.coord(ass, x, y)
-    local scale = math.pow(2, ass.scale - 1)
+    local scale = 2 ^ (ass.scale - 1)
     local ix = math.ceil(x * scale)
     local iy = math.ceil(y * scale)
     ass.text = string.format("%s %d %d", ass.text, ix, iy)
