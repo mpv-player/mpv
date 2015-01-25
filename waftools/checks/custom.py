@@ -75,6 +75,9 @@ def check_lua(ctx, dependency_identifier):
             ctx.mark_satisfied(lua_version)
             ctx.add_optional_message(dependency_identifier,
                                      'version found: ' + lua_version)
+            if lua_version.startswith('53'):
+                print 'Lua 5.3 is very unlikely to work properly...'
+                return False
             return True
     return False
 
