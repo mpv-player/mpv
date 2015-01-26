@@ -164,6 +164,9 @@ Shift+PGUP and Shift+PGDWN
 D
     Activate/deactivate deinterlacer.
 
+A
+    Cycle aspect ratio override.
+
 (The following keys are valid only when using a video output that supports the
 corresponding adjustment, or the software equalizer (``--vf=eq``).)
 
