@@ -335,7 +335,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .sigmoid_slope = 6.5,
     .scalers = { "bilinear", "bilinear" },
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
-    .scaler_radius = {NAN, NAN},
+    .scaler_radius = {3, 3},
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
 };
@@ -351,7 +351,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .sigmoid_upscaling = 1,
     .scalers = { "spline36", "bilinear" },
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
-    .scaler_radius = {NAN, NAN},
+    .scaler_radius = {3, 3},
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
 };
@@ -1390,11 +1390,8 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
 
     scaler->antiring = p->opts.scaler_antiring[scaler->index];
 
-    if (scaler->kernel->radius < 0) {
-        float radius = p->opts.scaler_radius[scaler->index];
-        if (!isnan(radius))
-            scaler->kernel->radius = radius;
-    }
+    if (scaler->kernel->radius < 0)
+        scaler->kernel->radius = p->opts.scaler_radius[scaler->index];
 
     update_scale_factor(p, scaler);
 
@@ -2720,20 +2717,12 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd
     return p;
 }
 
-static bool can_use_filter_kernel(const struct filter_kernel *kernel)
-{
-    if (!kernel)
-        return false;
-    struct filter_kernel k = *kernel;
-    return mp_init_filter(&k, filter_sizes, 1);
-}
-
 // Get static string for scaler shader.
 static const char *handle_scaler_opt(const char *name)
 {
     if (name) {
         const struct filter_kernel *kernel = mp_find_filter_kernel(name);
-        if (can_use_filter_kernel(kernel))
+        if (kernel)
             return kernel->name;
 
         for (const char *const *filter = fixed_scale_filters; *filter; filter++) {
