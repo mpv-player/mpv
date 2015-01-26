@@ -596,7 +596,7 @@ static bool render_frame(struct vo *vo)
         // framedrop is enabled. Also, if the frame is to be dropped, even
         // though it's an interpolated frame (img==NULL), exit early.
         if (!img && ((in->hasframe_rendered &&
-                      prev_vsync > pts + in->vsync_interval_approx)
+                      prev_vsync > pts + duration + in->vsync_interval_approx)
                      || in->dropped_frame))
         {
             in->dropped_frame = false;
