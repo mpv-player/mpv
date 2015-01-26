@@ -17,10 +17,11 @@ struct gl_hwdec {
     bool reject_emulated;
     // hwdec backends must set this to an IMGFMT_ that has an equivalent
     // internal representation in gl_video.c as the hardware texture.
-    // It's used to build the rendering chain, and also as screenshot format.
+    // It's used to build the rendering chain. For example, setting it to
+    // IMGFMT_RGB0 indicates that the video texture is RGB.
     int converted_imgfmt;
     // Normally this is GL_TEXTURE_2D, but the hwdec driver can set it to
-    // GL_TEXTURE_RECTANGLE.
+    // GL_TEXTURE_RECTANGLE. This is needed because VDA is shit.
     GLenum gl_texture_target;
 };
 
