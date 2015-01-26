@@ -807,7 +807,7 @@ a system and user-specific path, for example
 
 You can find the exact path by running ``echo %APPDATA%\mpv\mpv.conf`` in cmd.exe.
 
-Other config files (such as ``input.conf``) are in the same directly. See the
+Other config files (such as ``input.conf``) are in the same directory. See the
 `FILES`_ section above.
 
 The environment variable ``$MPV_HOME`` completely overrides these, like on
