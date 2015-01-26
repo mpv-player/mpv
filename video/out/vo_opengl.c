@@ -54,6 +54,7 @@
 
 struct gl_priv {
     struct vo *vo;
+    struct mp_log *log;
     MPGLContext *glctx;
     GL *gl;
 
@@ -248,8 +249,22 @@ static void call_request_hwdec_api(struct mp_hwdec_info *info,
     vo_control(vo, VOCTRL_LOAD_HWDEC_API, (void *)api_name);
 }
 
-static bool update_icc_profile(struct gl_priv *p)
+static bool get_and_update_icc_profile(struct gl_priv *p, int *events)
 {
+    if (p->icc_opts->profile_auto) {
+        MP_VERBOSE(p, "Querying ICC profile...\n");
+        bstr icc;
+        int r = p->glctx->vo_control(p->vo, events, VOCTRL_GET_ICC_PROFILE, &icc);
+
+        if (r == VO_TRUE) {
+            gl_lcms_set_memory_profile(p->cms, &icc);
+        } else if (r == VO_NOTIMPL) {
+            MP_ERR(p, "icc-profile-auto not implemented on this platform.\n");
+        } else {
+            MP_ERR(p, "Could not retrieve an ICC profile.\n");
+        }
+    }
+
     struct lut3d *lut3d = NULL;
     if (!gl_lcms_has_changed(p->cms))
         return true;
@@ -258,23 +273,6 @@ static bool update_icc_profile(struct gl_priv *p)
     gl_video_set_lut3d(p->renderer, lut3d);
     talloc_free(lut3d);
     return true;
-}
-
-static bool get_and_update_icc_profile(struct gl_priv *p, int *events)
-{
-    bstr icc;
-    int r = p->glctx->vo_control(p->vo, events, VOCTRL_GET_ICC_PROFILE, &icc);
-
-    if (r == VO_FALSE) {
-        MP_WARN(p->vo, "Could not retrieve an ICC profile.\n");
-        return false;
-    }
-
-    if (r == VO_TRUE) {
-        gl_lcms_set_memory_profile(p->cms, &icc);
-    }
-
-    return update_icc_profile(p);
 }
 
 static bool reparse_cmdline(struct gl_priv *p, char *args)
@@ -407,6 +405,7 @@ static int preinit(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
     p->vo = vo;
+    p->log = vo->log;
 
     int vo_flags = 0;
 
