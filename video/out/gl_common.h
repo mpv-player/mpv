@@ -67,7 +67,6 @@ enum {
     MPGL_CAP_FB                 = (1 << 5),
     MPGL_CAP_VAO                = (1 << 6),
     MPGL_CAP_SRGB_TEX           = (1 << 7),
-    MPGL_CAP_SRGB_FB            = (1 << 8),
     MPGL_CAP_FLOAT_TEX          = (1 << 9),
     MPGL_CAP_TEX_RG             = (1 << 10),    // GL_ARB_texture_rg / GL 3.x
     MPGL_CAP_VDPAU              = (1 << 11),    // GL_NV_vdpau_interop
