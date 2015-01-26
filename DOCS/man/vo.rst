@@ -523,7 +523,7 @@ Available video output drivers are:
         Automatically select the ICC display profile currently specified by
         the display settings of the operating system.
 
-        NOTE: Only implemented on OS X with Cocoa.
+        NOTE: Only implemented on OS X and X11
 
     ``icc-cache=<file>``
         Store and load the 3D LUT created from the ICC profile in this file.

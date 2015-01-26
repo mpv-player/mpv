@@ -148,7 +148,7 @@ static void *x11_get_property(struct vo_x11_state *x11, Window w, Atom property,
     *out_nitems = 0;
     if (!w)
         return NULL;
-    long max_len = 64 * 1024; // static maximum limit
+    long max_len = 128 * 1024 * 1024; // static maximum limit
     Atom ret_type = 0;
     int ret_format = 0;
     unsigned long ret_nitems = 0;
@@ -970,6 +970,8 @@ int vo_x11_check_events(struct vo *vo)
                 }
             } else if (Event.xproperty.atom == XA(x11, _NET_WM_STATE)) {
                 x11->pending_vo_events |= VO_EVENT_WIN_STATE;
+            } else if (Event.xproperty.atom == x11->icc_profile_property) {
+                x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_PATH_CHANGED;
             }
             break;
         default:
@@ -1541,8 +1543,10 @@ static void vo_x11_update_geometry(struct vo *vo)
     x11->winrc = (struct mp_rect){x, y, x + w, y + h};
     double fps = 1000.0;
     for (int n = 0; n < x11->num_displays; n++) {
-        if (rc_overlaps(x11->displays[n].rc, x11->winrc))
-            fps = MPMIN(fps, x11->displays[n].fps);
+        struct xrandr_display *disp = &x11->displays[n];
+        disp->overlaps = rc_overlaps(disp->rc, x11->winrc);
+        if (disp->overlaps)
+            fps = MPMIN(fps, disp->fps);
     }
     double fallback = x11->num_displays > 0 ? x11->displays[0].fps : 0;
     fps = fps < 1000.0 ? fps : fallback;
@@ -1550,7 +1554,7 @@ static void vo_x11_update_geometry(struct vo *vo)
         MP_VERBOSE(x11, "Current display FPS: %f\n", fps);
     x11->current_display_fps = fps;
     // might have changed displays
-    x11->pending_vo_events |= VO_EVENT_WIN_STATE;
+    x11->pending_vo_events |= VO_EVENT_WIN_STATE | VO_EVENT_ICC_PROFILE_PATH_CHANGED;
 }
 
 static void vo_x11_fullscreen(struct vo *vo)
@@ -1682,6 +1686,31 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         }
         MP_TARRAY_APPEND(NULL, names, displays_spanned, NULL);
         *(char ***)arg = names;
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_ICC_PROFILE: {
+        int screen = 0; // xinerama screen number
+        for (int n = 0; n < x11->num_displays; n++) {
+            struct xrandr_display *disp = &x11->displays[n];
+            if (disp->overlaps) {
+                screen = n;
+                break;
+            }
+        }
+        char prop[80];
+        snprintf(prop, sizeof(prop), "_ICC_PROFILE");
+        if (screen > 0)
+            mp_snprintf_cat(prop, sizeof(prop), "_%d", screen);
+        x11->icc_profile_property = XAs(x11, prop);
+        int len;
+        void *icc = x11_get_property(x11, x11->rootwin, x11->icc_profile_property,
+                                     XA_CARDINAL, 8, &len);
+        if (!icc)
+            return VO_FALSE;
+        *(bstr *)arg = bstrdup(NULL, (bstr){icc, len});
+        XFree(icc);
+        // Watch x11->icc_profile_property
+        XSelectInput(x11->display, x11->rootwin, PropertyChangeMask);
         return VO_TRUE;
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:

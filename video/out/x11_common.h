@@ -35,6 +35,7 @@ struct xrandr_display {
     struct mp_rect rc;
     double fps;
     char *name;
+    bool overlaps;
 };
 
 struct vo_x11_state {
@@ -110,6 +111,8 @@ struct vo_x11_state {
 
     /* dragging the window */
     bool win_drag_button1_down;
+
+    Atom icc_profile_property;
 };
 
 int vo_x11_init(struct vo *vo);
