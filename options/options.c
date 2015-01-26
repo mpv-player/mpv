@@ -778,6 +778,7 @@ const struct MPOpts mp_default_opts = {
     .sub_fix_timing = 1,
     .sub_cp = "auto",
     .mkv_subtitle_preroll_secs = 1.0,
+    .screenshot_template = "shot%n",
 
     .hwdec_codecs = "h264,vc1,wmv3",
 
