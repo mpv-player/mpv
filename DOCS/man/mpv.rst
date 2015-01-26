@@ -769,6 +769,26 @@ FILES
     and files with no ``.lua`` extension are ignored. The ``--load-scripts=no``
     option disables loading these files.
 
+``~/.config/mpv/watch_later/``
+    Contains temporary config files needed for resuming playback of files with
+    the watch later feature. See for example the ``Q`` key binding, or the
+    ``quit_watch_later`` input command.
+
+    Each file is a small config file which is loaded if the corresponding media
+    file is loaded. It contains the playback position and some (not necessarily
+    all) settings that were changed during playback. The filenames are hashed
+    from the full paths of the media files. It's in general not possible to
+    extract the media filename from this hash. However, you can set the
+    ``--write-filename-in-watch-later-config`` option, and the player will
+    add the media filename to the contents of the resume config file.
+
+``~/.config/mpv/lua-settings/osc.conf``
+    This is loaded by the OSC script. See the `ON SCREEN CONTROLLER`_ docs
+    for details.
+
+    Other files in this directory are specific to the corresponding scripts
+    as well, and the mpv core doesn't touch them.
+
 Note that the environment variables ``$XDG_CONFIG_HOME`` and ``$MPV_HOME`` can
 override the standard directory ``~/.config/mpv/``.
 
@@ -779,18 +799,16 @@ FILES ON WINDOWS
 ================
 
 On win32 (if compiled with MinGW, but not Cygwin), the default config file
-locations are different:
+locations are different. They are generally located under ``%APPDATA%/mpv/``.
+For example, the path to mpv.conf is ``%APPDATA%/mpv/mpv.conf``, which maps to
+a system and user-specific path, for example
 
-``%APPDATA%/mpv/mpv.conf``
-    Preferred mpv config file. This maps to a system and user-specific path,
-    for example ``C:\users\USERNAME\Application Data\mpv\mpv.conf``. You can
-    find the exact path by running ``echo %APPDATA%\mpv\mpv.conf`` in cmd.exe.
+    ``C:\users\USERNAME\Application Data\mpv\mpv.conf``
 
-``%APPDATA%/mpv/input.conf``
-    key bindings (see `INPUT.CONF`_ section)
+You can find the exact path by running ``echo %APPDATA%\mpv\mpv.conf`` in cmd.exe.
 
-``%APPDATA%/mpv/scripts/``
-    equivalent of ``~/.config/mpv/scripts/`` on Unix.
+Other config files (such as ``input.conf``) are in the same directly. See the
+`FILES`_ section above.
 
 The environment variable ``$MPV_HOME`` completely overrides these, like on
 UNIX.
