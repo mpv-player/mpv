@@ -588,7 +588,7 @@ Available video output drivers are:
         .. note:: On systems other than Linux, you currently must set the
                   ``--display-fps`` option, or the results will be bad.
 
-    ``smoothmotion-threshold=<0.0-1.0>``
+    ``smoothmotion-threshold=<0.0-0.5>``
         Mix threshold at which interpolation is skipped (default: 0.0 – never
         skip).
 
