@@ -281,7 +281,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
             MP_INFO(mpctx, "Will scan other files in the "
                     "same directory to find referenced sources.\n");
             filenames = find_files(main_filename);
-            num_filenames = MP_TALLOC_ELEMS(filenames);
+            num_filenames = MP_TALLOC_AVAIL(filenames);
             talloc_steal(tmp, filenames);
         }
         // Possibly get further segments appended to the first segment

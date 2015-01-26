@@ -207,7 +207,7 @@ void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
 
     res->parts = *parts;
     res->num_parts = 0;
-    int num_parts_alloc = MP_TALLOC_ELEMS(res->parts);
+    int num_parts_alloc = MP_TALLOC_AVAIL(res->parts);
     for (struct ass_image *img = imgs; img; img = img->next) {
         if (img->w == 0 || img->h == 0)
             continue;

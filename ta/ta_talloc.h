@@ -75,7 +75,7 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
 
 #define TA_EXPAND_ARGS(...) __VA_ARGS__
 
-#define MP_TALLOC_ELEMS(p) (talloc_get_size(p) / sizeof((p)[0]))
+#define MP_TALLOC_AVAIL(p) (talloc_get_size(p) / sizeof((p)[0]))
 
 #define MP_RESIZE_ARRAY(ctx, p, count)                          \
     do {                                                        \
@@ -86,7 +86,7 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
 #define MP_TARRAY_GROW(ctx, p, nextidx)             \
     do {                                            \
         size_t nextidx_ = (nextidx);                \
-        if (nextidx_ >= MP_TALLOC_ELEMS(p))         \
+        if (nextidx_ >= MP_TALLOC_AVAIL(p))         \
             MP_RESIZE_ARRAY(ctx, p, ta_calc_prealloc_elems(nextidx_)); \
     } while (0)
 
