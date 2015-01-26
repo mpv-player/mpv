@@ -729,6 +729,7 @@ const struct MPOpts mp_default_opts = {
     .demuxer_min_bytes = 0,
     .demuxer_min_secs = 0.2,
     .network_rtsp_transport = 2,
+    .hls_bitrate = 2,
     .demuxer_min_secs_cache = 2,
     .cache_pausing = 1,
     .chapterrange = {-1, -1},

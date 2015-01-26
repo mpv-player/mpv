@@ -3130,9 +3130,9 @@ Network
     by default. The option allows the following parameters:
 
     :no:        Don't do anything special. Typically, this will simply pick the
-                first audio/video streams it can find. (Default.)
+                first audio/video streams it can find.
     :min:       Pick the streams with the lowest bitrate.
-    :max:       Same, but highest bitrate.
+    :max:       Same, but highest bitrate. (Default.)
 
     The bitrate as used is sent by the server, and there's no guarantee it's
     actually meaningful.
