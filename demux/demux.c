@@ -758,6 +758,7 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->file_contents = src->file_contents;
         dst->playlist = src->playlist;
         dst->seekable = src->seekable;
+        dst->partially_seekable = src->partially_seekable;
         dst->filetype = src->filetype;
         dst->ts_resets_possible = src->ts_resets_possible;
         dst->rel_seeks = src->rel_seeks;
@@ -905,6 +906,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         if (!in->d_thread->seekable && stream->uncached_stream) {
             mp_verbose(log, "Enabling seeking because stream cache is active.\n");
             in->d_thread->seekable = true;
+            in->d_thread->partially_seekable = true;
         }
         demux_init_cache(demuxer);
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);

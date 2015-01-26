@@ -1480,6 +1480,14 @@ Property list
 ``seekable``
     Return whether it's generally possible to seek in the current file.
 
+``partially-seekable``
+    Return ``yes`` if the current file is considered seekable, but only because
+    the cache is active. This means small relative seeks may be fine, but larger
+    seeks may fail anyway. Whether a seek will succeed or not is generally not
+    known in advance.
+
+    If this property returns true, ``seekable`` will also return true.
+
 ``playback-abort``
     Return whether playback is stopped or is to be stopped. (Useful in obscure
     situations like during ``on_load`` hook processing, when the user can

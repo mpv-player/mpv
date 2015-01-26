@@ -1438,6 +1438,15 @@ static int mp_property_seekable(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, mpctx->demuxer->seekable);
 }
 
+static int mp_property_partially_seekable(void *ctx, struct m_property *prop,
+                                          int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_flag_ro(action, arg, mpctx->demuxer->partially_seekable);
+}
+
 /// Volume (RW)
 static int mp_property_volume(void *ctx, struct m_property *prop,
                               int action, void *arg)
@@ -3294,6 +3303,7 @@ static const struct m_property mp_properties[] = {
     {"hr-seek", mp_property_generic_option},
     {"clock", mp_property_clock},
     {"seekable", mp_property_seekable},
+    {"partially-seekable", mp_property_partially_seekable},
     {"idle", mp_property_idle},
 
     {"chapter-list", mp_property_list_chapters},
