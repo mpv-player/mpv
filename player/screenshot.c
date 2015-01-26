@@ -129,7 +129,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
     struct tm *local_time = localtime(&raw_time);
 
     if (!template || *template == '\0')
-        template = "shot%n";
+        return NULL;
 
     for (;;) {
         char *next = strchr(template, '%');
