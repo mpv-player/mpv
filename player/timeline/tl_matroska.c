@@ -396,10 +396,10 @@ static void build_timeline_loop(struct MPContext *mpctx,
             if (!demux_matroska_uid_cmp(&c->uid, &linked_m->uid))
                 continue;
 
-            if (i >= ctx->num_chapters)
-                break; // probably needed only for broken sources
-
             if (!info->limit) {
+                if (i >= ctx->num_chapters)
+                    break; // malformed files can cause this to happen.
+
                 chapters[i].pts = ctx->start_time / 1e9;
                 chapters[i].name = talloc_strdup(chapters, c->name);
             }
