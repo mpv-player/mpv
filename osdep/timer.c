@@ -38,7 +38,7 @@ static void do_timer_init(void)
     // Arbitrary additional offset to avoid confusing relative/absolute times.
     // Also,we rule that the timer never returns 0 (so default-initialized
     // time values will be always in the past).
-    raw_time_offset -= 10000000;
+    raw_time_offset -= MP_START_TIME;
 }
 
 void mp_time_init(void)

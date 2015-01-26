@@ -60,6 +60,7 @@ typedef struct MPOpts {
     int msg_color;
     int msg_module;
     int msg_time;
+    char *log_file;
 
     char **reset_options;
     char **script_files;

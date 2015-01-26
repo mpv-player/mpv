@@ -60,6 +60,7 @@ struct mp_log_root {
     bool force_stderr;
     struct mp_log_buffer **buffers;
     int num_buffers;
+    FILE *log_file;
     FILE *stats_file;
     // --- semi-atomic access
     bool mute;
@@ -122,6 +123,8 @@ static void update_loglevel(struct mp_log *log)
     }
     for (int n = 0; n < log->root->num_buffers; n++)
         log->level = MPMAX(log->level, log->root->buffers[n]->level);
+    if (log->root->log_file)
+        log->level = MPMAX(log->level, MSGL_V);
     if (log->root->stats_file)
         log->level = MPMAX(log->level, MSGL_STATS);
     atomic_store(&log->reload_counter, atomic_load(&log->root->reload_counter));
@@ -278,6 +281,19 @@ static void print_terminal_line(struct mp_log *log, int lev, char *text)
     fflush(stream);
 }
 
+static void write_log_file(struct mp_log *log, int lev, char *text)
+{
+    struct mp_log_root *root = log->root;
+
+    if (lev > MSGL_V || !root->log_file)
+        return;
+
+    fprintf(root->log_file, "[%8.3f][%c][%s] %s",
+            (mp_time_us() - MP_START_TIME) / 1e6,
+            mp_log_levels[lev][0],
+            log->verbose_prefix, text);
+}
+
 static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
 {
     struct mp_log_root *root = log->root;
@@ -356,6 +372,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
             char saved = next[0];
             next[0] = '\0';
             print_terminal_line(log, lev, text);
+            write_log_file(log, lev, text);
             write_msg_to_buffers(log, lev, text);
             next[0] = saved;
             text = next;
@@ -461,6 +478,9 @@ void mp_msg_update_msglevels(struct mpv_global *global)
     talloc_free(root->msglevels);
     root->msglevels = talloc_strdup(root, global->opts->msglevels);
 
+    if (!root->log_file && opts->log_file && opts->log_file[0])
+        root->log_file = fopen(opts->log_file, "wb");
+
     atomic_fetch_add(&root->reload_counter, 1);
     pthread_mutex_unlock(&mp_msg_lock);
 }
@@ -484,6 +504,8 @@ void mp_msg_uninit(struct mpv_global *global)
     struct mp_log_root *root = global->log->root;
     if (root->stats_file)
         fclose(root->stats_file);
+    if (root->log_file)
+        fclose(root->log_file);
     talloc_free(root);
     global->log = NULL;
 }

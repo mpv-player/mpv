@@ -38,6 +38,8 @@ uint64_t mp_raw_time_us(void);
 // Sleep in microseconds.
 void mp_sleep_us(int64_t us);
 
+#define MP_START_TIME 10000000
+
 // Return the amount of time that has passed since the last call, in
 // microseconds. *t is used to calculate the time that has passed by storing
 // the current time in it. If *t is 0, the call will return 0. (So that the
