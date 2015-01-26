@@ -350,6 +350,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .sigmoid_slope = 6.5,
     .sigmoid_upscaling = 1,
     .scalers = { "spline36", "bilinear" },
+    .dscaler = "mitchell",
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
     .scaler_radius = {3, 3},
     .alpha_mode = 2,
@@ -2720,7 +2721,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd
 // Get static string for scaler shader.
 static const char *handle_scaler_opt(const char *name)
 {
-    if (name) {
+    if (name && name[0]) {
         const struct filter_kernel *kernel = mp_find_filter_kernel(name);
         if (kernel)
             return kernel->name;
