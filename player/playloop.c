@@ -169,6 +169,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
 {
     struct MPOpts *opts = mpctx->opts;
     uint64_t prev_seek_ts = mpctx->vo_pts_history_seek_ts;
+    int prev_step = mpctx->step_frames;
 
     if (!mpctx->demuxer)
         return -1;
@@ -267,6 +268,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     if (timeline_fallthrough) {
         // Important if video reinit happens.
         mpctx->vo_pts_history_seek_ts = prev_seek_ts;
+        mpctx->step_frames = prev_step;
     } else {
         mpctx->vo_pts_history_seek_ts++;
         mpctx->backstep_active = false;
