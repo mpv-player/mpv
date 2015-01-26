@@ -1,3 +1,81 @@
+Release 0.7.3
+=============
+
+Changes
+-------
+
+- Several documentation updates and typo fixes.
+- Don't show "0%" position when the stream is infinite / has unknown length.
+- Fixes the config file loading order so that lower priority `mpv.conf` files
+  don't override higher priority `config` files.
+- (OSX) Remove coreaudio_exclusive from the "auto" codec list.
+- Failing to create a GL3 context is now a warning instead of error, to reduce
+  user confusion.
+- The subtitle decoder now gets reset when cycling subtitles. This makes the
+  currently shown subtitle event disappear even if cycling back to the current
+  subtitle track.
+- `--shuffle` and `--merge-files` now affects the contents of playlist files,
+  instead of just the list of files given as arguments to mpv.
+- `./waf install` avoids installing a few additional data/config files if only
+  libmpv was built.
+- Improved channel mapping when the file's channel map doesn't match the AO's
+  available channel maps.
+- (OSX) VDA now gracefully refuses to run on non-OpenGL3-capable systems instead
+  of trying and failing to build its shaders.
+- Add workaround for vf_vapoursynth filters that expect an FPS.
+- `ao_pulse`'s `latency-hacks` suboption is now off by default, as it causes
+  issues with newer pulseaudio releases. If A/V Sync issues happen, either
+  add the `latency-hacks=on` pulse suboption in mpv.conf, or update the
+  pulseaudio daemon (bug #1430).
+- (Linux) `ao_alsa` now deals better with audio device disconnection.
+- Client API: timestamp properties that have no value return "no" instead of
+  magic number.
+
+Bug fixes
+---------
+
+- (Windows, OSX) Many `ao_wasapi` and `ao_coreaudio` fixes.
+- (OSX) Make the window title update correctly on OS X Yosemite.
+- (OSX) Fix OpenGL 2.1 fallback, for older hardware.
+- Fixes for handling mono audio on various AOs.
+- (Linux) Fixes resuming from suspend on ao_alsa.
+- Fixes for playlist file parsing.
+- Overly long options in the --list-options output now break the column layout
+  instead of getting truncated; fixes shell completion scripts.
+- Fix rendering resolution of certain DVB subtitles (bug #1425).
+- Fix EDL or --merge-files breaking timestamps with .avi files.
+- Workaround for libavcodec bug with the VP9 codec parser (bug #1448),
+  fixes possible crash.
+- Improve robustness of the matroska parser with broken files (bugs #1457,
+  #1461).
+- Improve 10bit video compatibility with older GPUs (specially Intel) (bug
+  #1383).
+- Fixes flashing the VO window when playing a list of files that includes
+  non-media files (bug #1459).
+- Workaround for window embedding in OpenBox (bug #1235)
+- Fixes for several crashes and lockups (bugs #838, #1389, #1408, #1463, #1473,
+  #1474).
+- Fixes for the zsh completion script (bugs #997)
+
+New features
+------------
+
+- mpv now prints the contents of its config.h when running in verbose mode, to
+  aid with debugging.
+- The `include=` option now accepts `~` to refer to the HOME dir (bug #1406).
+- `af_volume` now prints ReplayGain values in verbose mode.
+- m3u playlists that don't have the `#EXTM3U` header are now accepted if they
+  "look like" ASCII or UTF-8 text and have the .m3u extension.
+- Chapter marks in the seek bar now update when switching files.
+- Supports embedded cover art in MKV files (bug #1374).
+- (Windows) Video window can now be resized even with --no-border.
+- (Windows) Client API: the "run" command now works on Windows too.
+- (Linux) vo_wayland now supports key modifiers (Meta, Alt, Control, Shift)
+- Client API: "display-names" property is now observable.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.7.2..v0.7.3` in the git repository.
+
 Release 0.7.2
 =============
 
