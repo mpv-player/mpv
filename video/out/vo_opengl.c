@@ -378,7 +378,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     mpgl_lock(p->glctx);
     int events = 0;
     int r = p->glctx->vo_control(vo, &events, request, data);
-    if (events & VO_EVENT_ICC_PROFILE_PATH_CHANGED) {
+    if (events & VO_EVENT_ICC_PROFILE_CHANGED) {
         get_and_update_icc_profile(p, &events);
         vo->want_redraw = true;
     }

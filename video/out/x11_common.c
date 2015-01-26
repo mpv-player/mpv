@@ -971,7 +971,7 @@ int vo_x11_check_events(struct vo *vo)
             } else if (Event.xproperty.atom == XA(x11, _NET_WM_STATE)) {
                 x11->pending_vo_events |= VO_EVENT_WIN_STATE;
             } else if (Event.xproperty.atom == x11->icc_profile_property) {
-                x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_PATH_CHANGED;
+                x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
             }
             break;
         default:
@@ -1554,7 +1554,7 @@ static void vo_x11_update_geometry(struct vo *vo)
         MP_VERBOSE(x11, "Current display FPS: %f\n", fps);
     x11->current_display_fps = fps;
     // might have changed displays
-    x11->pending_vo_events |= VO_EVENT_WIN_STATE | VO_EVENT_ICC_PROFILE_PATH_CHANGED;
+    x11->pending_vo_events |= VO_EVENT_WIN_STATE | VO_EVENT_ICC_PROFILE_CHANGED;
 }
 
 static void vo_x11_fullscreen(struct vo *vo)

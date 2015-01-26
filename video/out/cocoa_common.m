@@ -419,7 +419,7 @@ static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
         return;
 
     void (^nblock)(NSNotification *n) = ^(NSNotification *n) {
-        s->pending_events |= VO_EVENT_ICC_PROFILE_PATH_CHANGED;
+        s->pending_events |= VO_EVENT_ICC_PROFILE_CHANGED;
     };
 
     s->fs_icc_changed_ns_observer = [[NSNotificationCenter defaultCenter]
@@ -586,7 +586,7 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     draw_changes_after_next_frame(vo);
     [(MpvEventsView *)s->view setFullScreen:opts->fullscreen];
 
-    s->pending_events |= VO_EVENT_ICC_PROFILE_PATH_CHANGED;
+    s->pending_events |= VO_EVENT_ICC_PROFILE_CHANGED;
     s->pending_events |= VO_EVENT_RESIZE;
 }
 
@@ -736,6 +736,6 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen
 {
     struct vo_cocoa_state *s = self.vout->cocoa;
-    s->pending_events |= VO_EVENT_ICC_PROFILE_PATH_CHANGED;
+    s->pending_events |= VO_EVENT_ICC_PROFILE_CHANGED;
 }
 @end

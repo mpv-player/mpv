@@ -35,7 +35,7 @@
 // VO needs to update state to a new window size
 #define VO_EVENT_RESIZE 2
 // The ICC profile needs to be reloaded
-#define VO_EVENT_ICC_PROFILE_PATH_CHANGED 4
+#define VO_EVENT_ICC_PROFILE_CHANGED 4
 // Some other window state changed
 #define VO_EVENT_WIN_STATE 8
 
