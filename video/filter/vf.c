@@ -53,7 +53,6 @@ extern const vf_info_t vf_info_noise;
 extern const vf_info_t vf_info_eq;
 extern const vf_info_t vf_info_gradfun;
 extern const vf_info_t vf_info_unsharp;
-extern const vf_info_t vf_info_swapuv;
 extern const vf_info_t vf_info_hqdn3d;
 extern const vf_info_t vf_info_ilpack;
 extern const vf_info_t vf_info_dsize;
@@ -94,7 +93,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_eq,
     &vf_info_gradfun,
     &vf_info_unsharp,
-    &vf_info_swapuv,
     &vf_info_hqdn3d,
     &vf_info_ilpack,
     &vf_info_dsize,

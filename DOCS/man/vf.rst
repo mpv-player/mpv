@@ -375,9 +375,6 @@ Available filters are:
         :<0: blur
         :>0: sharpen
 
-``swapuv``
-    Swap U & V plane.
-
 ``pullup[=jl:jr:jt:jb:sb:mp]``
     Pulldown reversal (inverse telecine) filter, capable of handling mixed
     hard-telecine, 24000/1001 fps progressive, and 30000/1001 fps progressive
