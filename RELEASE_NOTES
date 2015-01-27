@@ -23,6 +23,8 @@ Changes
 - (OSX) VDA now gracefully refuses to run on non-OpenGL3-capable systems instead
   of trying and failing to build its shaders.
 - Add workaround for vf_vapoursynth filters that expect an FPS.
+- The default value for `--screenshot-template` now shows up in
+  `--list-options`.
 - `ao_pulse`'s `latency-hacks` suboption is now off by default, as it causes
   issues with newer pulseaudio releases. If A/V Sync issues happen, either
   add the `latency-hacks=on` pulse suboption in mpv.conf, or update the
@@ -36,7 +38,6 @@ Bug fixes
 
 - (Windows, OSX) Many `ao_wasapi` and `ao_coreaudio` fixes.
 - (OSX) Make the window title update correctly on OS X Yosemite.
-- (OSX) Fix OpenGL 2.1 fallback, for older hardware.
 - Fixes for handling mono audio on various AOs.
 - (Linux) Fixes resuming from suspend on ao_alsa.
 - Fixes for playlist file parsing.
