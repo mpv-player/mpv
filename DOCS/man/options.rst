@@ -305,6 +305,11 @@ Program Behavior
 ``--list-protocols``
     Print a list of the supported protocols.
 
+``--log-file=<path>``
+    Opens the given path for writing, and print log messages to it. Existing
+    files will be truncated. The log level always corresponds to ``-v``,
+    regardless of terminal verbosity levels.
+
 ``--config-dir=<path>``
     Force a different configuration directory. If this is set, the given
     directory is used to load configuration files, and all other configuration
