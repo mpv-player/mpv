@@ -191,16 +191,4 @@ void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,
                       int new_w, int new_h);
 void vf_set_dar(int *d_width, int *d_height, int w, int h, double dar);
 
-struct vf_detc_pts_buf {
-    double inpts_prev, outpts_prev;
-    double lastdelta;
-};
-void vf_detc_init_pts_buf(struct vf_detc_pts_buf *p);
-/* Adjust pts when detelecining.
- * skip_frame: do not render this frame
- * reset_pattern: set to 1 if the telecine pattern has reset due to scene cut
- */
-double vf_detc_adjust_pts(struct vf_detc_pts_buf *p, double pts,
-                          bool reset_pattern, bool skip_frame);
-
 #endif /* MPLAYER_VF_H */

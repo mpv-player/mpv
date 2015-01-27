@@ -406,68 +406,6 @@ Available filters are:
         video. The main purpose of setting ``mp`` to a chroma plane is to reduce
         CPU load and make pullup usable in realtime on slow machines.
 
-``divtc[=options]``
-    Inverse telecine for deinterlaced video. If 3:2-pulldown telecined video
-    has lost one of the fields or is deinterlaced using a method that keeps
-    one field and interpolates the other, the result is a juddering video that
-    has every fourth frame duplicated. This filter is intended to find and
-    drop those duplicates and restore the original film framerate. Two
-    different modes are available: One-pass mode is the default and is
-    straightforward to use, but has the disadvantage that any changes in the
-    telecine phase (lost frames or bad edits) cause momentary judder until the
-    filter can resync again. Two-pass mode avoids this by analyzing the entire
-    video beforehand so it will have forward knowledge about the phase changes
-    and can resync at the exact spot. These passes do *not* correspond to pass
-    one and two of the encoding process. You must run an extra pass using
-    ``divtc`` pass one before the actual encoding throwing the resulting video
-    away. Then use ``divtc`` pass two for the actual encoding. If you use
-    multiple encoder passes, use ``divtc`` pass two for all of them.
-
-    The options are:
-
-    ``pass=1|2``
-        Use two pass mode.
-
-    ``file=<filename>``
-        Set the two pass log filename (default: ``framediff.log``).
-
-    ``threshold=<value>``
-        Set the minimum strength the telecine pattern must have for the filter
-        to believe in it (default: 0.5). This is used to avoid recognizing
-        false pattern from the parts of the video that are very dark or very
-        still.
-
-    ``window=<numframes>``
-        Set the number of past frames to look at when searching for pattern
-        (default: 30). Longer window improves the reliability of the pattern
-        search, but shorter window improves the reaction time to the changes
-        in the telecine phase. This only affects the one-pass mode. The
-        two-pass mode currently uses fixed window that extends to both future
-        and past.
-
-    ``phase=0|1|2|3|4``
-        Sets the initial telecine phase for one pass mode (default: 0). The
-        two-pass mode can see the future, so it is able to use the correct
-        phase from the beginning, but one-pass mode can only guess. It catches
-        the correct phase when it finds it, but this option can be used to fix
-        the possible juddering at the beginning. The first pass of the two
-        pass mode also uses this, so if you save the output from the first
-        pass, you get constant phase result.
-
-    ``deghost=<value>``
-        Set the deghosting threshold (0-255 for one-pass mode, -255-255 for
-        two-pass mode, default 0). If nonzero, deghosting mode is used. This
-        is for video that has been deinterlaced by blending the fields
-        together instead of dropping one of the fields. Deghosting amplifies
-        any compression artifacts in the blended frames, so the parameter
-        value is used as a threshold to exclude those pixels from deghosting
-        that differ from the previous frame less than specified value. If two
-        pass mode is used, then negative value can be used to make the filter
-        analyze the whole video in the beginning of pass-2 to determine
-        whether it needs deghosting or not and then select either zero or the
-        absolute value of the parameter. Specify this option for pass 2, it
-        makes no difference on pass 1.
-
 ``yadif=[mode[:enabled=yes|no]]``
     Yet another deinterlacing filter
 

@@ -298,7 +298,6 @@ def build(ctx):
         ( "video/filter/vf_buffer.c" ),
         ( "video/filter/vf_crop.c" ),
         ( "video/filter/vf_delogo.c" ),
-        ( "video/filter/vf_divtc.c" ),
         ( "video/filter/vf_dlopen.c",            "dlopen" ),
         ( "video/filter/vf_dsize.c" ),
         ( "video/filter/vf_eq.c" ),
