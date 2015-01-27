@@ -345,19 +345,6 @@ Available filters are:
         and just plain white. A value of 0.0 turns the gamma correction all
         the way down while 1.0 leaves it at its full strength (default: 1.0).
 
-``ilpack[=mode]``
-    When interlaced video is stored in YUV 4:2:0 formats, chroma interlacing
-    does not line up properly due to vertical downsampling of the chroma
-    channels. This filter packs the planar 4:2:0 data into YUY2 (4:2:2) format
-    with the chroma lines in their proper locations, so that in any given
-    scanline, the luma and chroma data both come from the same field.
-
-    ``<mode>``
-        Select the sampling mode.
-
-        :0: nearest-neighbor sampling, fast but incorrect
-        :1: linear interpolation (default)
-
 ``unsharp[=lx:ly:la:cx:cy:ca]``
     unsharp mask / Gaussian blur
 

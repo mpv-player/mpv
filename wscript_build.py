@@ -306,7 +306,6 @@ def build(ctx):
         ( "video/filter/vf_format.c" ),
         ( "video/filter/vf_gradfun.c" ),
         ( "video/filter/vf_hqdn3d.c" ),
-        ( "video/filter/vf_ilpack.c" ),
         ( "video/filter/vf_lavfi.c",             "libavfilter"),
         ( "video/filter/vf_mirror.c" ),
         ( "video/filter/vf_noformat.c" ),
