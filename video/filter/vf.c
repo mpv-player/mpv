@@ -58,7 +58,6 @@ extern const vf_info_t vf_info_ilpack;
 extern const vf_info_t vf_info_dsize;
 extern const vf_info_t vf_info_pullup;
 extern const vf_info_t vf_info_delogo;
-extern const vf_info_t vf_info_phase;
 extern const vf_info_t vf_info_divtc;
 extern const vf_info_t vf_info_screenshot;
 extern const vf_info_t vf_info_sub;
@@ -98,7 +97,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_dsize,
     &vf_info_pullup,
     &vf_info_delogo,
-    &vf_info_phase,
     &vf_info_divtc,
     &vf_info_sub,
     &vf_info_yadif,
