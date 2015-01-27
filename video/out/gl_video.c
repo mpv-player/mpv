@@ -794,6 +794,21 @@ static void update_uniforms(struct gl_video *p, GLuint program)
         gl->Uniform2f(loc, 1.0 / (1 << xs), 1.0 / (1 << ys));
     }
 
+    loc = gl->GetUniformLocation(program, "chroma_fix");
+    if (loc >= 0) {
+        // If the dimensions of the Y plane are not aligned on the luma.
+        // Assume 4:2:0 with size (3,3). The last luma pixel is (2,2).
+        // The last chroma pixel is (1,1), not (0,0). So for luma, the
+        // coordinate range is [0,3), for chroma it is [0,2). This means the
+        // texture coordinates for chroma are stretched by adding 1 luma pixel
+        // to the range. Undo this.
+        double fx = p->image.planes[0].tex_w / (double)p->image.planes[1].tex_w
+                    / (1 << p->image_desc.chroma_xs);
+        double fy = p->image.planes[0].tex_h / (double)p->image.planes[1].tex_h
+                    / (1 << p->image_desc.chroma_ys);
+        gl->Uniform2f(loc, fx, fy);
+    }
+
     loc = gl->GetUniformLocation(program, "chroma_center_offset");
     if (loc >= 0) {
         int chr = p->opts.chroma_location;
@@ -1228,6 +1243,9 @@ static void compile_shaders(struct gl_video *p)
         shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
     if (p->opts.alpha_mode == 2 && p->has_alpha)
         shader_def(&header_conv, "USE_ALPHA_BLEND", "1");
+    shader_def_opt(&header_conv, "USE_CHROMA_FIX",
+                   (p->image.planes[0].tex_w & ~(1u << p->image_desc.chroma_xs) ||
+                    p->image.planes[0].tex_h & ~(1u << p->image_desc.chroma_ys)));
 
     shader_def_opt(&header_final, "USE_SIGMOID_INV", use_sigmoid);
     shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma > 0);
@@ -1716,21 +1734,13 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
 
     debug_check_gl(p, "before video texture creation");
 
-    // For video with odd sizes: enlarge the luma texture so that it covers all
-    // chroma pixels - then we can render these correctly by cropping the final
-    // image (conceptually).
-    // Image allocations are always such that the "additional" luma border
-    // exists and can be accessed.
-    int full_w = MP_ALIGN_UP(p->image_w, 1 << p->image_desc.chroma_xs);
-    int full_h = MP_ALIGN_UP(p->image_h, 1 << p->image_desc.chroma_ys);
-
     struct video_image *vimg = &p->image;
 
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
 
-        plane->w = full_w >> p->image_desc.xs[n];
-        plane->h = full_h >> p->image_desc.ys[n];
+        plane->w = mp_chroma_div_up(p->image_w, p->image_desc.xs[n]);
+        plane->h = mp_chroma_div_up(p->image_h, p->image_desc.ys[n]);
 
         if (p->hwdec_active) {
             // We expect hwdec backends to allocate exact size

@@ -163,6 +163,7 @@ uniform VIDEO_SAMPLER texture3;
 uniform vec2 textures_size[4];
 uniform vec2 chroma_center_offset;
 uniform vec2 chroma_div;
+uniform vec2 chroma_fix;
 uniform sampler2D lut_2d_c;
 uniform sampler2D lut_2d_l;
 #if HAVE_1DTEX
@@ -365,6 +366,9 @@ vec4 sample_sharpen5(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord, float param
 
 void main() {
     vec2 chr_texcoord = texcoord;
+#ifdef USE_CHROMA_FIX
+    chr_texcoord = chr_texcoord * chroma_fix;
+#endif
 #ifdef USE_RECTANGLE
     chr_texcoord = chr_texcoord * chroma_div;
 #else
