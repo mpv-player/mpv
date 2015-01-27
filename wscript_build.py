@@ -317,7 +317,6 @@ def build(ctx):
         ( "video/filter/vf_rotate.c" ),
         ( "video/filter/vf_scale.c" ),
         ( "video/filter/vf_screenshot.c" ),
-        ( "video/filter/vf_softpulldown.c" ),
         ( "video/filter/vf_stereo3d.c" ),
         ( "video/filter/vf_sub.c" ),
         ( "video/filter/vf_swapuv.c" ),

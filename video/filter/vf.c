@@ -57,7 +57,6 @@ extern const vf_info_t vf_info_swapuv;
 extern const vf_info_t vf_info_hqdn3d;
 extern const vf_info_t vf_info_ilpack;
 extern const vf_info_t vf_info_dsize;
-extern const vf_info_t vf_info_softpulldown;
 extern const vf_info_t vf_info_pullup;
 extern const vf_info_t vf_info_delogo;
 extern const vf_info_t vf_info_phase;
@@ -99,7 +98,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_hqdn3d,
     &vf_info_ilpack,
     &vf_info_dsize,
-    &vf_info_softpulldown,
     &vf_info_pullup,
     &vf_info_delogo,
     &vf_info_phase,
@@ -830,19 +828,4 @@ double vf_detc_adjust_pts(struct vf_detc_pts_buf *p, double pts,
     // standard telecine (see above)
     return vf_detc_adjust_pts_internal(p, pts, reset_pattern, skip_frame,
                                        0, 0.5, 1.25, 0.25);
-}
-
-double vf_softpulldown_adjust_pts(struct vf_detc_pts_buf *p, double pts,
-                                  bool reset_pattern, bool skip_frame,
-                                  int last_frame_duration)
-{
-    // for the softpulldown filter we get:
-    // 0/60 -> 0/30
-    // 2/60 -> 1/30
-    // 5/60 -> 2/30
-    // 7/60 -> 3/30, 4/30
-    return vf_detc_adjust_pts_internal(p, pts, reset_pattern, skip_frame,
-                                       0, 1.0 / last_frame_duration,
-                                       2.0 / last_frame_duration,
-                                       1.0 / last_frame_duration);
 }

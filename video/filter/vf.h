@@ -202,8 +202,5 @@ void vf_detc_init_pts_buf(struct vf_detc_pts_buf *p);
  */
 double vf_detc_adjust_pts(struct vf_detc_pts_buf *p, double pts,
                           bool reset_pattern, bool skip_frame);
-double vf_softpulldown_adjust_pts(struct vf_detc_pts_buf *p, double pts,
-                                  bool reset_pattern, bool skip_frame,
-                                  int last_frame_duration);
 
 #endif /* MPLAYER_VF_H */
