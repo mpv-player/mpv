@@ -401,7 +401,8 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     if (written_pts == MP_NOPTS_VALUE && !mp_audio_buffer_samples(mpctx->ao_buffer))
         return false; // no audio read yet
 
-    bool sync_to_video = mpctx->d_video && mpctx->sync_audio_to_video;
+    bool sync_to_video = mpctx->d_video && mpctx->sync_audio_to_video &&
+                         mpctx->video_status != STATUS_EOF;
 
     double sync_pts = MP_NOPTS_VALUE;
     if (sync_to_video) {
