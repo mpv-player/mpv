@@ -116,20 +116,10 @@ typedef struct MPGLContext {
 
 void mpgl_lock(MPGLContext *ctx);
 void mpgl_unlock(MPGLContext *ctx);
-void mpgl_set_context(MPGLContext *ctx);
-void mpgl_unset_context(MPGLContext *ctx);
-bool mpgl_is_thread_safe(MPGLContext *ctx);
 
-// Create a VO window and create a GL context on it.
-// (Calls config_window_gl3 or config_window+setGlWindow.)
-// gl_flavor: 110 for legacy GL, 210 for GL 2.1 or 3.x core
-// flags: passed to the backend's create window function
-// Returns success.
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags);
 void mpgl_uninit(MPGLContext *ctx);
-
-// flags: passed to the backend function
-bool mpgl_reconfig_window(struct MPGLContext *ctx, int flags);
+bool mpgl_reconfig_window(struct MPGLContext *ctx, int vo_flags);
 
 int mpgl_find_backend(const char *name);
 

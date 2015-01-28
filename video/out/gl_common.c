@@ -617,6 +617,8 @@ static MPGLContext *mpgl_create(struct vo *vo, const char *backend_name)
     return ctx;
 }
 
+// Create a VO window and create a GL context on it.
+//  vo_flags: passed to the backend's create window function
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
 {
     MPGLContext *ctx = mpgl_create(vo, backend_name);
@@ -651,9 +653,10 @@ cleanup:
     return NULL;
 }
 
-bool mpgl_reconfig_window(struct MPGLContext *ctx, int flags)
+// flags: passed to the backend function
+bool mpgl_reconfig_window(struct MPGLContext *ctx, int vo_flags)
 {
-    return ctx->config_window(ctx, flags);
+    return ctx->config_window(ctx, vo_flags);
 }
 
 void mpgl_uninit(MPGLContext *ctx)
@@ -665,29 +668,14 @@ void mpgl_uninit(MPGLContext *ctx)
     talloc_free(ctx);
 }
 
-void mpgl_set_context(MPGLContext *ctx)
+void mpgl_lock(MPGLContext *ctx)
 {
     if (ctx->set_current)
         ctx->set_current(ctx, true);
 }
 
-void mpgl_unset_context(MPGLContext *ctx)
+void mpgl_unlock(MPGLContext *ctx)
 {
     if (ctx->set_current)
         ctx->set_current(ctx, false);
-}
-
-void mpgl_lock(MPGLContext *ctx)
-{
-    mpgl_set_context(ctx);
-}
-
-void mpgl_unlock(MPGLContext *ctx)
-{
-    mpgl_unset_context(ctx);
-}
-
-bool mpgl_is_thread_safe(MPGLContext *ctx)
-{
-    return !!ctx->set_current;
 }

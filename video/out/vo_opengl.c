@@ -424,7 +424,7 @@ static int preinit(struct vo *vo)
         goto err_out;
     p->gl = p->glctx->gl;
 
-    mpgl_set_context(p->glctx);
+    mpgl_lock(p->glctx);
 
     if (p->gl->SwapInterval)
         p->gl->SwapInterval(p->swap_interval);
@@ -444,7 +444,7 @@ static int preinit(struct vo *vo)
     if (!get_and_update_icc_profile(p, &(int){0}))
         goto err_out;
 
-    mpgl_unset_context(p->glctx);
+    mpgl_unlock(p->glctx);
 
     p->hwdec_info.load_api = call_request_hwdec_api;
     p->hwdec_info.load_api_ctx = vo;
