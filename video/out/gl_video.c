@@ -1106,19 +1106,16 @@ static void compile_shaders(struct gl_video *p)
 
     float input_gamma = 1.0;
     float conv_gamma = 1.0;
-    bool is_linear_rgb = false;
 
-    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+    bool is_xyz = p->image_desc.flags & MP_IMGFLAG_XYZ;
+    if (is_xyz) {
         input_gamma *= 2.6;
 
         // If we're using cms, we can treat it as proper linear input,
         // otherwise we just scale back to 2.40 to match typical displays,
         // as a reasonable approximation.
-        if (use_cms) {
-            is_linear_rgb = true;
-        } else {
+        if (!use_cms)
             conv_gamma *= 1.0 / 2.40;
-        }
     }
 
     p->input_gamma = input_gamma;
@@ -1133,11 +1130,14 @@ static void compile_shaders(struct gl_video *p)
     // Linear light scaling is only enabled when either color correction
     // option (3dlut or srgb) is enabled, otherwise scaling is done in the
     // source space.
-    if (!is_linear_rgb && use_cms) {
-        // We just use the color level range to distinguish between PC
+    if (use_cms) {
+        // We use the color level range to distinguish between PC
         // content like images, which are most likely sRGB, and TV content
-        // like movies, which are most likely BT.1886
-        if (p->image_params.colorlevels == MP_CSP_LEVELS_PC && !p->hwdec_active) {
+        // like movies, which are most likely BT.1886. XYZ input is always
+        // treated as linear.
+        if (is_xyz) {
+            gamma_fun = MP_CSP_TRC_LINEAR;
+        } else if (p->image_params.colorlevels == MP_CSP_LEVELS_PC && !p->hwdec_active) {
             // FIXME: I don't know if hwdec sets the color levels to PC or not,
             // but let's avoid the bug just in case.
             gamma_fun = MP_CSP_TRC_SRGB;
@@ -1146,7 +1146,7 @@ static void compile_shaders(struct gl_video *p)
         }
     }
 
-    bool use_linear_light = gamma_fun != MP_CSP_TRC_NONE || is_linear_rgb;
+    bool use_linear_light = gamma_fun != MP_CSP_TRC_NONE;
 
     // Optionally transform to sigmoidal color space if requested, but only
     // when upscaling in linear light

@@ -70,7 +70,8 @@ enum mp_csp_prim {
 enum mp_csp_trc {
     MP_CSP_TRC_NONE,
     MP_CSP_TRC_BT_1886,
-    MP_CSP_TRC_SRGB
+    MP_CSP_TRC_SRGB,
+    MP_CSP_TRC_LINEAR
 };
 
 // Any enum mp_csp_prim value is a valid index (except MP_CSP_PRIM_COUNT)
