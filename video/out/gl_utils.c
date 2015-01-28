@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "common/common.h"
 #include "gl_utils.h"
@@ -210,4 +211,89 @@ void mp_log_source(struct mp_log *log, int lev, const char *src)
         line++;
         src = next;
     }
+}
+
+static void gl_vao_enable_attribs(struct gl_vao *vao)
+{
+    GL *gl = vao->gl;
+
+    for (int n = 0; vao->entries[n].name; n++) {
+        const struct gl_vao_entry *e = &vao->entries[n];
+
+        gl->EnableVertexAttribArray(n);
+        gl->VertexAttribPointer(n, e->num_elems, e->type, e->normalized,
+                                vao->stride, (void*)e->offset);
+    }
+}
+
+void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
+                 const struct gl_vao_entry *entries)
+{
+    assert(!vao->vao);
+    assert(!vao->buffer);
+
+    *vao = (struct gl_vao){
+        .gl = gl,
+        .stride = stride,
+        .entries = entries,
+    };
+
+    gl->GenBuffers(1, &vao->buffer);
+
+    if (gl->BindVertexArray) {
+        gl->BindBuffer(GL_ARRAY_BUFFER, vao->buffer);
+
+        gl->GenVertexArrays(1, &vao->vao);
+        gl->BindVertexArray(vao->vao);
+        gl_vao_enable_attribs(vao);
+        gl->BindVertexArray(0);
+
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+}
+
+void gl_vao_uninit(struct gl_vao *vao)
+{
+    GL *gl = vao->gl;
+    if (!gl)
+        return;
+
+    if (gl->DeleteVertexArrays)
+        gl->DeleteVertexArrays(1, &vao->vao);
+    gl->DeleteBuffers(1, &vao->buffer);
+
+    *vao = (struct gl_vao){0};
+}
+
+void gl_vao_bind(struct gl_vao *vao)
+{
+    GL *gl = vao->gl;
+
+    if (gl->BindVertexArray) {
+        gl->BindVertexArray(vao->vao);
+    } else {
+        gl->BindBuffer(GL_ARRAY_BUFFER, vao->buffer);
+        gl_vao_enable_attribs(vao);
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+}
+
+void gl_vao_unbind(struct gl_vao *vao)
+{
+    GL *gl = vao->gl;
+
+    if (gl->BindVertexArray) {
+        gl->BindVertexArray(0);
+    } else {
+        for (int n = 0; vao->entries[n].name; n++)
+            gl->DisableVertexAttribArray(n);
+    }
+}
+
+void gl_vao_bind_attribs(struct gl_vao *vao, GLuint program)
+{
+    GL *gl = vao->gl;
+
+    for (int n = 0; vao->entries[n].name; n++)
+        gl->BindAttribLocation(program, n, vao->entries[n].name);
 }

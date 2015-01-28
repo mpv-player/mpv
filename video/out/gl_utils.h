@@ -43,4 +43,27 @@ mp_image_t *glGetWindowScreenshot(GL *gl);
 // log, lev: module and log level, as in mp_msg()
 void mp_log_source(struct mp_log *log, int lev, const char *src);
 
+struct gl_vao_entry {
+    const char *name;
+    int num_elems;
+    GLenum type;
+    bool normalized;
+    int offset;
+};
+
+struct gl_vao {
+    GL *gl;
+    GLuint vao;
+    GLuint buffer;
+    int stride; // always assuming interleaved elements
+    const struct gl_vao_entry *entries;
+};
+
+void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
+                 const struct gl_vao_entry *entries);
+void gl_vao_uninit(struct gl_vao *vao);
+void gl_vao_bind(struct gl_vao *vao);
+void gl_vao_unbind(struct gl_vao *vao);
+void gl_vao_bind_attribs(struct gl_vao *vao, GLuint program);
+
 #endif

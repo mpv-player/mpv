@@ -76,9 +76,12 @@ struct vertex {
     float texcoord[2];
 };
 
-#define VERTEX_ATTRIB_POSITION 0
-#define VERTEX_ATTRIB_COLOR 1
-#define VERTEX_ATTRIB_TEXCOORD 2
+static const struct gl_vao_entry vertex_vao[] = {
+    {"vertex_position", 2, GL_FLOAT,         false, offsetof(struct vertex, position)},
+    {"vertex_color",    4, GL_UNSIGNED_BYTE, true,  offsetof(struct vertex, color)},
+    {"vertex_texcoord", 2, GL_FLOAT,         false, offsetof(struct vertex, texcoord)},
+    {0}
+};
 
 // 2 triangles primitives per quad = 6 vertices per quad
 // (GL_QUAD is deprecated, strips can't be used with OSD image lists)
@@ -143,8 +146,7 @@ struct gl_video {
 
     GLenum gl_target; // texture target (GL_TEXTURE_2D, ...) for video and FBOs
 
-    GLuint vertex_buffer;
-    GLuint vao;
+    struct gl_vao vao;
 
     GLuint osd_programs[SUBBITMAP_COUNT];
     GLuint indirect_program, scale_sep_program, final_program, inter_program;
@@ -531,18 +533,16 @@ static void draw_triangles(struct gl_video *p, struct vertex *vb, int vert_count
 
     assert(vert_count % 3 == 0);
 
-    gl->BindBuffer(GL_ARRAY_BUFFER, p->vertex_buffer);
+    gl->BindBuffer(GL_ARRAY_BUFFER, p->vao.buffer);
     gl->BufferData(GL_ARRAY_BUFFER, vert_count * sizeof(struct vertex), vb,
                    GL_DYNAMIC_DRAW);
     gl->BindBuffer(GL_ARRAY_BUFFER, 0);
 
-    if (gl->BindVertexArray)
-        gl->BindVertexArray(p->vao);
+    gl_vao_bind(&p->vao);
 
     gl->DrawArrays(GL_TRIANGLES, 0, vert_count);
 
-    if (gl->BindVertexArray)
-        gl->BindVertexArray(0);
+    gl_vao_unbind(&p->vao);
 
     debug_check_gl(p, "after rendering");
 }
@@ -956,13 +956,6 @@ static void link_shader(struct gl_video *p, GLuint program)
     }
 }
 
-static void bind_attrib_locs(GL *gl, GLuint program)
-{
-    gl->BindAttribLocation(program, VERTEX_ATTRIB_POSITION, "vertex_position");
-    gl->BindAttribLocation(program, VERTEX_ATTRIB_COLOR, "vertex_color");
-    gl->BindAttribLocation(program, VERTEX_ATTRIB_TEXCOORD, "vertex_texcoord");
-}
-
 #define PRELUDE_END "// -- prelude end\n"
 
 static GLuint create_program(struct gl_video *p, const char *name,
@@ -977,7 +970,7 @@ static GLuint create_program(struct gl_video *p, const char *name,
     GLuint prog = gl->CreateProgram();
     prog_create_shader(p, prog, GL_VERTEX_SHADER, header, vertex);
     prog_create_shader(p, prog, GL_FRAGMENT_SHADER, header, frag);
-    bind_attrib_locs(gl, prog);
+    gl_vao_bind_attribs(&p->vao, prog);
     link_shader(p, prog);
     return prog;
 }
@@ -2384,23 +2377,6 @@ static void check_gl_features(struct gl_video *p)
     }
 }
 
-static void setup_vertex_array(GL *gl)
-{
-    size_t stride = sizeof(struct vertex);
-
-    gl->EnableVertexAttribArray(VERTEX_ATTRIB_POSITION);
-    gl->VertexAttribPointer(VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE,
-                            stride, (void*)offsetof(struct vertex, position));
-
-    gl->EnableVertexAttribArray(VERTEX_ATTRIB_COLOR);
-    gl->VertexAttribPointer(VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE,
-                            stride, (void*)offsetof(struct vertex, color));
-
-    gl->EnableVertexAttribArray(VERTEX_ATTRIB_TEXCOORD);
-    gl->VertexAttribPointer(VERTEX_ATTRIB_TEXCOORD, 2, GL_FLOAT, GL_FALSE,
-                            stride, (void*)offsetof(struct vertex, texcoord));
-}
-
 static int init_gl(struct gl_video *p)
 {
     GL *gl = p->gl;
@@ -2411,17 +2387,7 @@ static int init_gl(struct gl_video *p)
 
     gl->Disable(GL_DITHER);
 
-    gl->GenBuffers(1, &p->vertex_buffer);
-    gl->BindBuffer(GL_ARRAY_BUFFER, p->vertex_buffer);
-
-    if (gl->BindVertexArray) {
-        gl->GenVertexArrays(1, &p->vao);
-        gl->BindVertexArray(p->vao);
-        setup_vertex_array(gl);
-        gl->BindVertexArray(0);
-    }
-
-    gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    gl_vao_init(&p->vao, gl, sizeof(struct vertex), vertex_vao);
 
     gl_video_set_gl_state(p);
 
@@ -2462,9 +2428,8 @@ void gl_video_uninit(struct gl_video *p)
 
     uninit_video(p);
 
-    if (gl->DeleteVertexArrays)
-        gl->DeleteVertexArrays(1, &p->vao);
-    gl->DeleteBuffers(1, &p->vertex_buffer);
+    gl_vao_uninit(&p->vao);
+
     gl->DeleteTextures(1, &p->lut_3d_texture);
 
     mpgl_osd_destroy(p->osd);
@@ -2485,23 +2450,11 @@ void gl_video_set_gl_state(struct gl_video *p)
     if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
         gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-    if (!gl->BindVertexArray) {
-        gl->BindBuffer(GL_ARRAY_BUFFER, p->vertex_buffer);
-        setup_vertex_array(gl);
-        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
-    }
 }
 
 void gl_video_unset_gl_state(struct gl_video *p)
 {
-    GL *gl = p->gl;
-
-    if (!gl->BindVertexArray) {
-        gl->DisableVertexAttribArray(VERTEX_ATTRIB_POSITION);
-        gl->DisableVertexAttribArray(VERTEX_ATTRIB_COLOR);
-        gl->DisableVertexAttribArray(VERTEX_ATTRIB_TEXCOORD);
-    }
+    /* nop */
 }
 
 void gl_video_reset(struct gl_video *p)
