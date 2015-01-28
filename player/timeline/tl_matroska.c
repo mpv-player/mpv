@@ -294,7 +294,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         for (int i = 0; i < num_filenames; i++) {
             if (!missing(*sources, *num_sources))
                 break;
-            MP_INFO(mpctx, "Checking file %s\n", filenames[i]);
+            MP_VERBOSE(mpctx, "Checking file %s\n", filenames[i]);
             check_file(mpctx, sources, num_sources, uids, filenames[i], 0);
         }
     } while (old_source_count != *num_sources);

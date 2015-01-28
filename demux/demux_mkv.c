@@ -382,7 +382,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
                 }
             }
         }
-        MP_INFO(demuxer, "This is not one of the wanted files. "
+        MP_VERBOSE(demuxer, "This is not one of the wanted files. "
                 "Stopping attempt to open.\n");
         res = -2;
     }
