@@ -170,7 +170,6 @@ struct gl_video {
     struct mp_imgfmt_desc image_desc;
 
     bool is_yuv, is_rgb, is_packed_yuv;
-    bool is_linear_rgb;
     bool has_alpha;
     char color_swizzle[5];
 
@@ -1118,6 +1117,7 @@ static void compile_shaders(struct gl_video *p)
 
     float input_gamma = 1.0;
     float conv_gamma = 1.0;
+    bool is_linear_rgb = false;
 
     if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
         input_gamma *= 2.6;
@@ -1126,7 +1126,7 @@ static void compile_shaders(struct gl_video *p)
         // otherwise we just scale back to 2.40 to match typical displays,
         // as a reasonable approximation.
         if (use_cms) {
-            p->is_linear_rgb = true;
+            is_linear_rgb = true;
         } else {
             conv_gamma *= 1.0 / 2.40;
         }
@@ -1144,7 +1144,7 @@ static void compile_shaders(struct gl_video *p)
     // Linear light scaling is only enabled when either color correction
     // option (3dlut or srgb) is enabled, otherwise scaling is done in the
     // source space.
-    if (!p->is_linear_rgb && use_cms) {
+    if (!is_linear_rgb && use_cms) {
         // We just use the color level range to distinguish between PC
         // content like images, which are most likely sRGB, and TV content
         // like movies, which are most likely BT.1886
@@ -1157,7 +1157,7 @@ static void compile_shaders(struct gl_video *p)
         }
     }
 
-    bool use_linear_light = gamma_fun != MP_CSP_TRC_NONE || p->is_linear_rgb;
+    bool use_linear_light = gamma_fun != MP_CSP_TRC_NONE || is_linear_rgb;
 
     // Optionally transform to sigmoidal color space if requested, but only
     // when upscaling in linear light
@@ -1716,14 +1716,6 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
     p->image_dw = params->d_w;
     p->image_dh = params->d_h;
     p->image_params = *params;
-
-    if (p->is_rgb && (p->opts.srgb || p->use_lut_3d) && !p->hwdec_active) {
-        // If we're opening an RGB source like a png file or similar,
-        // we just sample it using GL_SRGB which treats it as an sRGB source
-        // and pretend it's linear as far as CMS is concerned
-        p->is_linear_rgb = true;
-        p->image.planes[0].gl_internal_format = GL_SRGB;
-    }
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
     if (p->is_yuv && p->image_params.colorspace != MP_CSP_BT_2020_C)
@@ -2307,7 +2299,6 @@ static void check_gl_features(struct gl_video *p)
     GL *gl = p->gl;
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
-    bool have_srgb = gl->mpgl_caps & MPGL_CAP_SRGB_TEX;
     bool have_arrays = gl->mpgl_caps & MPGL_CAP_1ST_CLASS_ARRAYS;
     bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
@@ -2372,19 +2363,10 @@ static void check_gl_features(struct gl_video *p)
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (FBO)";
     }
-    if (p->is_rgb) {
-        // When opening RGB files we use SRGB to expand
-        if (!have_srgb && use_cms) {
-            p->opts.srgb = false;
-            p->use_lut_3d = false;
-            disabled[n_disabled++] = "color management (SRGB textures)";
-        }
-    } else {
-        // when opening non-RGB files we use bt709_expand()
-        if (!have_mix && p->use_lut_3d) {
-            p->use_lut_3d = false;
-            disabled[n_disabled++] = "color management (GLSL version)";
-        }
+    // because of bt709_expand()
+    if (!have_mix && p->use_lut_3d) {
+        p->use_lut_3d = false;
+        disabled[n_disabled++] = "color management (GLSL version)";
     }
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
@@ -2669,7 +2651,6 @@ supported:
 
     init->is_yuv = desc.flags & MP_IMGFLAG_YUV;
     init->is_rgb = desc.flags & MP_IMGFLAG_RGB;
-    init->is_linear_rgb = false;
     init->plane_count = desc.num_planes;
     init->image_desc = desc;
 

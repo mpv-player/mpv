@@ -91,7 +91,6 @@ struct feature {
 static const struct feature features[] = {
     {MPGL_CAP_FB,               "Framebuffers"},
     {MPGL_CAP_VAO,              "VAOs"},
-    {MPGL_CAP_SRGB_TEX,         "sRGB textures"},
     {MPGL_CAP_FLOAT_TEX,        "Float textures"},
     {MPGL_CAP_TEX_RG,           "RG textures"},
     {MPGL_CAP_1ST_CLASS_ARRAYS, "1st class shader arrays"},
@@ -224,8 +223,7 @@ static const struct gl_functions gl_functions[] = {
     {
         .ver_core = 300,
         .ver_es_core = 300,
-        .provides = MPGL_CAP_SRGB_TEX | MPGL_CAP_3D_TEX |
-                    MPGL_CAP_1ST_CLASS_ARRAYS,
+        .provides = MPGL_CAP_3D_TEX | MPGL_CAP_1ST_CLASS_ARRAYS,
         .functions = (const struct gl_function[]) {
             DEF_FN(GetStringi),
             // for ES 3.0
@@ -284,12 +282,6 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(DeleteVertexArrays),
             {0}
         }
-    },
-    // sRGB textures, extension in GL 2.x, core in GL 3.x core.
-    {
-        .ver_core = 300,
-        .extension = "GL_EXT_texture_sRGB",
-        .provides = MPGL_CAP_SRGB_TEX,
     },
     // Float textures, extension in GL 2.x, core in GL 3.x core.
     {
