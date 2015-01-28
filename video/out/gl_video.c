@@ -32,6 +32,7 @@
 
 #include "misc/bstr.h"
 #include "gl_common.h"
+#include "gl_utils.h"
 #include "gl_hwdec.h"
 #include "gl_osd.h"
 #include "filter_kernels.h"

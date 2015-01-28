@@ -53,15 +53,6 @@
 struct GL;
 typedef struct GL GL;
 
-int glFmt2bpp(GLenum format, GLenum type);
-void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                 const void *dataptr, int stride,
-                 int x, int y, int w, int h, int slice);
-void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                int x, int y, int w, int h, uint8_t val, void **scratch);
-void glCheckError(GL *gl, struct mp_log *log, const char *info);
-mp_image_t *glGetWindowScreenshot(GL *gl);
-
 enum {
     MPGL_CAP_ROW_LENGTH         = (1 << 4),     // GL_[UN]PACK_ROW_LENGTH
     MPGL_CAP_FB                 = (1 << 5),
@@ -158,10 +149,6 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);
 void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                           void *fn_ctx, const char *ext2, struct mp_log *log);
-
-// print a multi line string with line numbers (e.g. for shader sources)
-// log, lev: module and log level, as in mp_msg()
-void mp_log_source(struct mp_log *log, int lev, const char *src);
 
 typedef void (GLAPIENTRY *MP_GLDEBUGPROC)(GLenum, GLenum, GLuint, GLenum,
                                           GLsizei, const GLchar *,const void *);

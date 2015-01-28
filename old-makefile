@@ -62,7 +62,7 @@ SOURCES-$(SDL2)                 += audio/out/ao_sdl.c video/out/vo_sdl.c
 SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
                                    video/out/vo_opengl.c video/out/gl_lcms.c \
                                    video/out/gl_video.c video/out/dither.c \
-                                   video/out/gl_hwdec.c \
+                                   video/out/gl_hwdec.c video/out/gl_utils.c \
                                    video/out/vo_opengl_cb.c
 
 SOURCES-$(ENCODING)             += video/out/vo_lavc.c audio/out/ao_lavc.c \

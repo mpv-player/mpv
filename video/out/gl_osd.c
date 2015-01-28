@@ -21,6 +21,7 @@
 
 #include "bitmap_packer.h"
 
+#include "gl_utils.h"
 #include "gl_osd.h"
 
 struct osd_fmt_entry {

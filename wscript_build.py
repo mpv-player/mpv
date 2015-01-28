@@ -337,6 +337,7 @@ def build(ctx):
         ( "video/out/gl_hwdec_vdpau.c",          "vdpau-gl-x11" ),
         ( "video/out/gl_lcms.c",                 "gl" ),
         ( "video/out/gl_osd.c",                  "gl" ),
+        ( "video/out/gl_utils.c",               "gl" ),
         ( "video/out/gl_video.c",                "gl" ),
         ( "video/out/gl_w32.c",                  "gl-win32" ),
         ( "video/out/gl_wayland.c",              "gl-wayland" ),
