@@ -829,6 +829,7 @@ static int drv_lazy_init(struct vf_instance *vf)
     p->ls = luaL_newstate();
     if (!p->ls)
         return -1;
+    luaL_openlibs(p->ls);
     p->vsapi = getVapourSynthAPI(VAPOURSYNTH_API_VERSION);
     p->vscore = p->vsapi ? p->vsapi->createCore(0) : NULL;
     if (!p->vscore) {
