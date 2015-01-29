@@ -72,13 +72,11 @@ int filter_sizes[] =
 
 struct vertex {
     float position[2];
-    uint8_t color[4];
     float texcoord[2];
 };
 
 static const struct gl_vao_entry vertex_vao[] = {
     {"vertex_position", 2, GL_FLOAT,         false, offsetof(struct vertex, position)},
-    {"vertex_color",    4, GL_UNSIGNED_BYTE, true,  offsetof(struct vertex, color)},
     {"vertex_texcoord", 2, GL_FLOAT,         false, offsetof(struct vertex, texcoord)},
     {0}
 };
@@ -146,8 +144,6 @@ struct gl_video {
     struct osd_state *osd_state;
     struct mpgl_osd *osd;
     double osd_pts;
-    float osd_offset[2];
-    bool osd_offset_set;
 
     GLuint lut_3d_texture;
     bool use_lut_3d;
@@ -348,7 +344,6 @@ const struct gl_video_opts gl_video_opts_hq_def = {
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, struct bstr param);
-static void draw_osd(struct gl_video *p);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
@@ -477,19 +472,13 @@ static void draw_triangles(struct gl_video *p, struct vertex *vb, int vert_count
 // x0, y0, x1, y1 = destination coordinates of the quad
 // tx0, ty0, tx1, ty1 = source texture coordinates (usually in pixels)
 // texture_w, texture_h = size of the texture, or an inverse factor
-// color = optional color for all vertices, NULL for opaque white
 // flags = bits 0-1: rotate, bits 2: flip vertically
 static void write_quad(struct vertex *va,
                        float x0, float y0, float x1, float y1,
                        float tx0, float ty0, float tx1, float ty1,
                        float texture_w, float texture_h,
-                       const uint8_t color[4], GLenum target, int flags)
+                       GLenum target, int flags)
 {
-    static const uint8_t white[4] = { 255, 255, 255, 255 };
-
-    if (!color)
-        color = white;
-
     if (target == GL_TEXTURE_2D) {
         tx0 /= texture_w;
         ty0 /= texture_h;
@@ -503,14 +492,13 @@ static void write_quad(struct vertex *va,
         ty1 = tmp;
     }
 
-#define COLOR_INIT {color[0], color[1], color[2], color[3]}
-    va[0] = (struct vertex) { {x0, y0}, COLOR_INIT, {tx0, ty0} };
-    va[1] = (struct vertex) { {x0, y1}, COLOR_INIT, {tx0, ty1} };
-    va[2] = (struct vertex) { {x1, y0}, COLOR_INIT, {tx1, ty0} };
-    va[3] = (struct vertex) { {x1, y1}, COLOR_INIT, {tx1, ty1} };
+    va[0] = (struct vertex) { {x0, y0}, {tx0, ty0} };
+    va[1] = (struct vertex) { {x0, y1}, {tx0, ty1} };
+    va[2] = (struct vertex) { {x1, y0}, {tx1, ty0} };
+    va[3] = (struct vertex) { {x1, y1}, {tx1, ty1} };
     va[4] = va[2];
     va[5] = va[1];
-#undef COLOR_INIT
+
     int rot = flags & 3;
     while (rot--) {
         static const int perm[6] = {1, 3, 0, 2, 0, 3};
@@ -691,7 +679,7 @@ static void update_uniforms(struct gl_video *p, GLuint program)
 static void update_all_uniforms(struct gl_video *p)
 {
     for (int n = 0; n < SUBBITMAP_COUNT; n++)
-        update_uniforms(p, p->osd_programs[n]);
+        update_uniforms(p, p->osd->programs[n]);
     update_uniforms(p, p->indirect_program);
     update_uniforms(p, p->scale_sep_program);
     update_uniforms(p, p->final_program);
@@ -786,7 +774,7 @@ static void link_shader(struct gl_video *p, GLuint program)
 
 static GLuint create_program(struct gl_video *p, const char *name,
                              const char *header, const char *vertex,
-                             const char *frag)
+                             const char *frag, struct gl_vao *vao)
 {
     GL *gl = p->gl;
     MP_VERBOSE(p, "compiling shader program '%s', header:\n", name);
@@ -796,7 +784,7 @@ static GLuint create_program(struct gl_video *p, const char *name,
     GLuint prog = gl->CreateProgram();
     prog_create_shader(p, prog, GL_VERTEX_SHADER, header, vertex);
     prog_create_shader(p, prog, GL_FRAGMENT_SHADER, header, frag);
-    gl_vao_bind_attribs(&p->vao, prog);
+    gl_vao_bind_attribs(vao, prog);
     link_shader(p, prog);
     return prog;
 }
@@ -1021,10 +1009,13 @@ static void compile_shaders(struct gl_video *p)
         const char *name = osd_shaders[n];
         if (name) {
             char *s_osd = get_section(tmp, src, name);
-            p->osd_programs[n] =
-                create_program(p, name, header_osd, vertex_shader, s_osd);
+            p->osd_programs[n] = create_program(p, name, header_osd,
+                                                vertex_shader, s_osd,
+                                                &p->osd->vao);
         }
     }
+
+    struct gl_vao *v = &p->vao; // VAO to use to draw primitives
 
     char *header_conv = talloc_strdup(tmp, "");
     char *header_final = talloc_strdup(tmp, "");
@@ -1118,7 +1109,7 @@ static void compile_shaders(struct gl_video *p)
         shader_def_opt(&header_conv, "FIXED_SCALE", true);
         header_conv = t_concat(tmp, header, header_conv);
         p->indirect_program =
-            create_program(p, "indirect", header_conv, vertex_shader, s_video);
+            create_program(p, "indirect", header_conv, vertex_shader, s_video, v);
     } else if (header_sep) {
         header_sep = t_concat(tmp, header_sep, header_conv);
     } else {
@@ -1128,18 +1119,18 @@ static void compile_shaders(struct gl_video *p)
     if (header_sep) {
         header_sep = t_concat(tmp, header, header_sep);
         p->scale_sep_program =
-            create_program(p, "scale_sep", header_sep, vertex_shader, s_video);
+            create_program(p, "scale_sep", header_sep, vertex_shader, s_video, v);
     }
 
     if (use_interpolation) {
         header_inter = t_concat(tmp, header, header_inter);
         p->inter_program =
-            create_program(p, "inter", header_inter, vertex_shader, s_video);
+            create_program(p, "inter", header_inter, vertex_shader, s_video, v);
     }
 
     header_final = t_concat(tmp, header, header_final);
     p->final_program =
-        create_program(p, "final", header_final, vertex_shader, s_video);
+        create_program(p, "final", header_final, vertex_shader, s_video, v);
 
     debug_check_gl(p, "shader compilation");
 
@@ -1157,7 +1148,7 @@ static void delete_shaders(struct gl_video *p)
     GL *gl = p->gl;
 
     for (int n = 0; n < SUBBITMAP_COUNT; n++)
-        delete_program(gl, &p->osd_programs[n]);
+        delete_program(gl, &p->osd->programs[n]);
     delete_program(gl, &p->indirect_program);
     delete_program(gl, &p->scale_sep_program);
     delete_program(gl, &p->final_program);
@@ -1352,7 +1343,7 @@ static void recreate_osd(struct gl_video *p)
 {
     if (p->osd)
         mpgl_osd_destroy(p->osd);
-    p->osd = mpgl_osd_init(p->gl, p->log, p->osd_state);
+    p->osd = mpgl_osd_init(p->gl, p->log, p->osd_state, p->osd_programs);
     p->osd->use_pbo = p->opts.pbo;
 }
 
@@ -1709,7 +1700,7 @@ static void handle_pass(struct gl_video *p, struct pass *chain,
     write_quad(vb,
                dst.x0, dst.y0, dst.x1, dst.y1,
                src.x0, src.y0, src.x1, src.y1,
-               tex_w, tex_h, NULL, p->gl_target, chain->flags);
+               tex_w, tex_h, p->gl_target, chain->flags);
     draw_triangles(p, vb, VERTICES_PER_QUAD);
 
     *chain = (struct pass){
@@ -1861,7 +1852,7 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
     debug_check_gl(p, "after video rendering");
 
 draw_osd:
-    draw_osd(p);
+    mpgl_osd_draw(p->osd, p->osd_rect, p->osd_pts, p->image_params.stereo_out);
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -2030,95 +2021,6 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     gl->ActiveTexture(GL_TEXTURE0);
     if (pbo)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-}
-
-static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
-{
-    struct gl_video *p = ctx;
-    GL *gl = p->gl;
-
-    struct mpgl_osd_part *osd = mpgl_osd_generate(p->osd, imgs);
-    if (!osd)
-        return;
-
-    assert(osd->format != SUBBITMAP_EMPTY);
-
-    if (!osd->num_vertices) {
-        osd->vertices = talloc_realloc(osd, osd->vertices, struct vertex,
-                                       osd->packer->count * VERTICES_PER_QUAD);
-
-        struct vertex *va = osd->vertices;
-
-        for (int n = 0; n < osd->packer->count; n++) {
-            struct sub_bitmap *b = &imgs->parts[n];
-            struct pos pos = osd->packer->result[n];
-
-            // NOTE: the blend color is used with SUBBITMAP_LIBASS only, so it
-            //       doesn't matter that we upload garbage for the other formats
-            uint32_t c = b->libass.color;
-            uint8_t color[4] = { c >> 24, (c >> 16) & 0xff,
-                                (c >> 8) & 0xff, 255 - (c & 0xff) };
-
-            write_quad(&va[osd->num_vertices],
-                    b->x, b->y, b->x + b->dw, b->y + b->dh,
-                    pos.x, pos.y, pos.x + b->w, pos.y + b->h,
-                    osd->w, osd->h, color, GL_TEXTURE_2D, 0);
-            osd->num_vertices += VERTICES_PER_QUAD;
-        }
-    }
-
-    debug_check_gl(p, "before drawing osd");
-
-    int osd_program = p->osd_programs[osd->format];
-    gl->UseProgram(osd_program);
-
-    bool set_offset = p->osd_offset[0] != 0 || p->osd_offset[1] != 0;
-    if (p->osd_offset_set || set_offset) {
-        gl->Uniform3f(gl->GetUniformLocation(osd_program, "translation"),
-                      p->osd_offset[0], p->osd_offset[1], 0);
-        p->osd_offset_set = set_offset;
-    }
-
-    mpgl_osd_set_gl_state(p->osd, osd);
-    draw_triangles(p, osd->vertices, osd->num_vertices);
-    mpgl_osd_unset_gl_state(p->osd, osd);
-
-    gl->UseProgram(0);
-
-    debug_check_gl(p, "after drawing osd");
-}
-
-// number of screen divisions per axis (x=0, y=1) for the current 3D mode
-static void get_3d_side_by_side(struct gl_video *p, int div[2])
-{
-    int mode = p->image_params.stereo_out;
-    div[0] = div[1] = 1;
-    switch (mode) {
-    case MP_STEREO3D_SBS2L:
-    case MP_STEREO3D_SBS2R: div[0] = 2; break;
-    case MP_STEREO3D_AB2R:
-    case MP_STEREO3D_AB2L:  div[1] = 2; break;
-    }
-}
-
-static void draw_osd(struct gl_video *p)
-{
-    assert(p->osd);
-
-    int div[2];
-    get_3d_side_by_side(p, div);
-
-    for (int x = 0; x < div[0]; x++) {
-        for (int y = 0; y < div[1]; y++) {
-            struct mp_osd_res res = p->osd_rect;
-            res.w = res.w / div[0];
-            res.h = res.h / div[1];
-            p->osd_offset[0] = res.w * x;
-            p->osd_offset[1] = res.h * y;
-            osd_draw(p->osd_state, res, p->osd_pts, 0, p->osd->formats,
-                     draw_osd_cb, p);
-        }
-    }
 }
 
 static bool test_fbo(struct gl_video *p, GLenum format)
