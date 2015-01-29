@@ -3636,7 +3636,8 @@ static const struct property_osd_display {
     { "secondary-sid", "Secondary subtitles" },
     { "sub-pos", "Sub position" },
     { "sub-delay", "Sub delay" },
-    { "sub-visibility", "Subtitles" },
+    { "sub-visibility", .msg = "Subtitles ${!sub-visibility==yes:hidden}"
+        "${?sub-visibility==yes:visible${?sub==no: (but no subtitles selected)}}" },
     { "sub-forced-only", "Forced sub only" },
     { "sub-scale", "Sub Scale"},
     { "ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
