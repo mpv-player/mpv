@@ -119,13 +119,6 @@ struct scaler {
     struct filter_kernel kernel_storage;
 };
 
-struct fbotex {
-    GLuint fbo;
-    GLuint texture;
-    int tex_w, tex_h;           // size of .texture
-    int vp_x, vp_y, vp_w, vp_h; // viewport of fbo / used part of the texture
-};
-
 struct fbosurface {
     struct fbotex fbotex;
     int64_t pts;
@@ -596,103 +589,9 @@ static void write_quad(struct vertex *va,
     }
 }
 
-static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
-                        GLenum iformat)
-{
-    GL *gl = p->gl;
-    bool res = true;
-
-    assert(!fbo->fbo);
-    assert(!fbo->texture);
-
-    *fbo = (struct fbotex) {
-        .vp_w = w,
-        .vp_h = h,
-    };
-
-    texture_size(p, w, h, &fbo->tex_w, &fbo->tex_h);
-
-    MP_VERBOSE(p, "Create FBO: %dx%d\n", fbo->tex_w, fbo->tex_h);
-
-    if (!(gl->mpgl_caps & MPGL_CAP_FB))
-        return false;
-
-    gl->GenFramebuffers(1, &fbo->fbo);
-    gl->GenTextures(1, &fbo->texture);
-    gl->BindTexture(p->gl_target, fbo->texture);
-    gl->TexImage2D(p->gl_target, 0, iformat,
-                   fbo->tex_w, fbo->tex_h, 0,
-                   GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    default_tex_params(gl, p->gl_target);
-
-    // Convolution filters don't need linear sampling, so using nearest is
-    // often faster.
-    if (p->scalers[0].kernel) {
-        gl->TexParameteri(p->gl_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl->TexParameteri(p->gl_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    }
-
-    debug_check_gl(p, "after creating framebuffer texture");
-
-    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
-    gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                             p->gl_target, fbo->texture, 0);
-
-    GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (err != GL_FRAMEBUFFER_COMPLETE) {
-        MP_ERR(p, "Error: framebuffer completeness check failed (error=%d).\n",
-               (int)err);
-        res = false;
-    }
-
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    debug_check_gl(p, "after creating framebuffer");
-
-    return res;
-}
-
-static void fbotex_uninit(struct gl_video *p, struct fbotex *fbo)
-{
-    GL *gl = p->gl;
-
-    if (gl->mpgl_caps & MPGL_CAP_FB) {
-        gl->DeleteFramebuffers(1, &fbo->fbo);
-        gl->DeleteTextures(1, &fbo->texture);
-        *fbo = (struct fbotex) {0};
-    }
-}
-
-static void fbosurfaces_uninit(struct gl_video *p, struct fbosurface *surfaces)
-{
-
-    for (int i = 0; i < FBOSURFACES_MAX; i++)
-        if (surfaces[i].fbotex.fbo)
-            fbotex_uninit(p, &surfaces[i].fbotex);
-}
-
-static void fbosurfaces_init(struct gl_video *p, struct fbosurface *surfaces,
-                          int w, int h, GLenum iformat)
-{
-    for (int i = 0; i < FBOSURFACES_MAX; i++)
-        if (!surfaces[i].fbotex.fbo)
-            fbotex_init(p, &surfaces[i].fbotex, w, h, iformat);
-}
-
 static size_t fbosurface_next(struct gl_video *p)
 {
     return (p->surface_num + 1) % FBOSURFACES_MAX;
-}
-
-static void matrix_ortho2d(float m[3][3], float x0, float x1,
-                           float y0, float y1)
-{
-    memset(m, 0, 9 * sizeof(float));
-    m[0][0] = 2.0f / (x1 - x0);
-    m[1][1] = 2.0f / (y1 - y0);
-    m[2][0] = -(x1 + x0) / (x1 - x0);
-    m[2][1] = -(y1 + y0) / (y1 - y0);
-    m[2][2] = 1.0f;
 }
 
 static void update_uniforms(struct gl_video *p, GLuint program)
@@ -723,7 +622,7 @@ static void update_uniforms(struct gl_video *p, GLuint program)
         int vvp[2] = {p->vp_h, 0};
         if (p->vp_vflipped)
             MPSWAP(int, vvp[0], vvp[1]);
-        matrix_ortho2d(matrix, 0, p->vp_w, vvp[0], vvp[1]);
+        gl_matrix_ortho2d(matrix, 0, p->vp_w, vvp[0], vvp[1]);
         gl->UniformMatrix3fv(loc, 1, GL_FALSE, &matrix[0][0]);
     }
 
@@ -1550,6 +1449,8 @@ static const char *expected_scaler(struct gl_video *p, int unit)
 
 static void reinit_rendering(struct gl_video *p)
 {
+    GL *gl = p->gl;
+
     MP_VERBOSE(p, "Reinit rendering.\n");
 
     debug_check_gl(p, "before scaler initialization");
@@ -1573,15 +1474,25 @@ static void reinit_rendering(struct gl_video *p)
     int w = p->image_w;
     int h = p->image_h;
 
-    if (p->indirect_program && !p->indirect_fbo.fbo)
-        fbotex_init(p, &p->indirect_fbo, w, h, p->opts.fbo_format);
+    // Convolution filters don't need linear sampling, so using nearest is
+    // often faster.
+    GLenum filter = p->scalers[0].kernel ? GL_NEAREST : GL_LINEAR;
 
-    if (p->inter_program && !p->inter_fbo.fbo) {
-        fbotex_init(p, &p->inter_fbo, w, h, p->opts.fbo_format);
+    if (p->indirect_program) {
+        fbotex_init(&p->indirect_fbo, gl, p->log, w, h, p->gl_target, filter,
+                    p->opts.fbo_format);
     }
 
     if (p->inter_program) {
-        fbosurfaces_init(p, p->surfaces, w, h, p->opts.fbo_format);
+        fbotex_init(&p->inter_fbo, gl, p->log, w, h, p->gl_target, filter,
+                    p->opts.fbo_format);
+    }
+
+    if (p->inter_program) {
+        for (int i = 0; i < FBOSURFACES_MAX; i++) {
+            fbotex_init(&p->surfaces[i].fbotex, gl, p->log, w, h, p->gl_target,
+                        filter, p->opts.fbo_format);
+        }
     }
 
     recreate_osd(p);
@@ -1603,7 +1514,13 @@ static void uninit_rendering(struct gl_video *p)
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
 
-    fbotex_uninit(p, &p->indirect_fbo);
+    fbotex_uninit(&p->indirect_fbo);
+    fbotex_uninit(&p->inter_fbo);
+
+    for (int i = 0; i < FBOSURFACES_MAX; i++)
+        fbotex_uninit(&p->surfaces[i].fbotex);
+
+    fbotex_uninit(&p->scale_sep_fbo);
 }
 
 void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
@@ -1783,11 +1700,6 @@ static void uninit_video(struct gl_video *p)
         plane->buffer_size = 0;
     }
     mp_image_unrefp(&vimg->mpi);
-
-    fbotex_uninit(p, &p->inter_fbo);
-    fbotex_uninit(p, &p->indirect_fbo);
-    fbotex_uninit(p, &p->scale_sep_fbo);
-    fbosurfaces_uninit(p, p->surfaces);
 
     // Invalidate image_params to ensure that gl_video_config() will call
     // init_video() on uninitialized gl_video.
@@ -2023,12 +1935,12 @@ static void update_window_sized_objects(struct gl_video *p)
         if ((p->image_params.rotate % 180) == 90)
             MPSWAP(int, w, h);
         if (h > p->scale_sep_fbo.tex_h) {
-            fbotex_uninit(p, &p->scale_sep_fbo);
+            fbotex_uninit(&p->scale_sep_fbo);
             // Round up to an arbitrary alignment to make window resizing or
             // panscan controls smoother (less texture reallocations).
             int height = FFALIGN(h, 256);
-            fbotex_init(p, &p->scale_sep_fbo, p->image_w, height,
-                        p->opts.fbo_format);
+            fbotex_init(&p->scale_sep_fbo, p->gl, p->log, p->image_w, height,
+                        p->gl_target, GL_NEAREST, p->opts.fbo_format);
         }
         p->scale_sep_fbo.vp_w = p->image_w;
         p->scale_sep_fbo.vp_h = h;
@@ -2275,12 +2187,13 @@ static bool test_fbo(struct gl_video *p, GLenum format)
     GL *gl = p->gl;
     bool success = false;
     struct fbotex fbo = {0};
-    if (fbotex_init(p, &fbo, 16, 16, format)) {
+    if (fbotex_init(&fbo, p->gl, p->log, 16, 16, p->gl_target, GL_LINEAR, format))
+    {
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
         success = true;
     }
-    fbotex_uninit(p, &fbo);
+    fbotex_uninit(&fbo);
     glCheckError(gl, p->log, "FBO test");
     gl_video_set_gl_state(p);
     return success;

@@ -66,4 +66,18 @@ void gl_vao_bind(struct gl_vao *vao);
 void gl_vao_unbind(struct gl_vao *vao);
 void gl_vao_bind_attribs(struct gl_vao *vao, GLuint program);
 
+struct fbotex {
+    GL *gl;
+    GLuint fbo;
+    GLuint texture;
+    int tex_w, tex_h;           // size of .texture
+    int vp_x, vp_y, vp_w, vp_h; // viewport of fbo / used part of the texture
+};
+
+bool fbotex_init(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
+                 GLenum gl_target, GLenum gl_filter, GLenum iformat);
+void fbotex_uninit(struct fbotex *fbo);
+
+void gl_matrix_ortho2d(float m[3][3], float x0, float x1, float y0, float y1);
+
 #endif

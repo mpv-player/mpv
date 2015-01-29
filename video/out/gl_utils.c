@@ -297,3 +297,80 @@ void gl_vao_bind_attribs(struct gl_vao *vao, GLuint program)
     for (int n = 0; vao->entries[n].name; n++)
         gl->BindAttribLocation(program, n, vao->entries[n].name);
 }
+
+// Create a texture and a FBO using the texture as color attachments.
+//  gl_target: GL_TEXTURE_2D
+//  gl_filter: GL_LINEAR
+//  iformat: texture internal format
+// Returns success.
+bool fbotex_init(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
+                 GLenum gl_target, GLenum gl_filter, GLenum iformat)
+{
+    bool res = true;
+
+    assert(!fbo->fbo);
+    assert(!fbo->texture);
+
+    *fbo = (struct fbotex) {
+        .gl = gl,
+        .vp_w = w,
+        .vp_h = h,
+        .tex_w = w,
+        .tex_h = h,
+    };
+
+    mp_verbose(log, "Create FBO: %dx%d\n", fbo->tex_w, fbo->tex_h);
+
+    if (!(gl->mpgl_caps & MPGL_CAP_FB))
+        return false;
+
+    gl->GenFramebuffers(1, &fbo->fbo);
+    gl->GenTextures(1, &fbo->texture);
+    gl->BindTexture(gl_target, fbo->texture);
+    gl->TexImage2D(gl_target, 0, iformat, fbo->tex_w, fbo->tex_h, 0,
+                   GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl->TexParameteri(gl_target, GL_TEXTURE_MIN_FILTER, gl_filter);
+    gl->TexParameteri(gl_target, GL_TEXTURE_MAG_FILTER, gl_filter);
+
+    glCheckError(gl, log, "after creating framebuffer texture");
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+    gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                             gl_target, fbo->texture, 0);
+
+    GLenum err = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (err != GL_FRAMEBUFFER_COMPLETE) {
+        mp_err(log, "Error: framebuffer completeness check failed (error=%d).\n",
+               (int)err);
+        res = false;
+    }
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glCheckError(gl, log, "after creating framebuffer");
+
+    return res;
+}
+
+void fbotex_uninit(struct fbotex *fbo)
+{
+    GL *gl = fbo->gl;
+
+    if (gl && (gl->mpgl_caps & MPGL_CAP_FB)) {
+        gl->DeleteFramebuffers(1, &fbo->fbo);
+        gl->DeleteTextures(1, &fbo->texture);
+        *fbo = (struct fbotex) {0};
+    }
+}
+
+void gl_matrix_ortho2d(float m[3][3], float x0, float x1, float y0, float y1)
+{
+    memset(m, 0, 9 * sizeof(float));
+    m[0][0] = 2.0f / (x1 - x0);
+    m[1][1] = 2.0f / (y1 - y0);
+    m[2][0] = -(x1 + x0) / (x1 - x0);
+    m[2][1] = -(y1 + y0) / (y1 - y0);
+    m[2][2] = 1.0f;
+}
