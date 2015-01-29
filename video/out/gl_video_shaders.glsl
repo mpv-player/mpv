@@ -305,7 +305,7 @@ float[6] weights6(sampler2D lookup, float f) {
         w = texture1D(LUT, length(vec2(X, Y) - fcoord)/R).r;                \
         c = texture(tex, base + pt * vec2(X, Y));                           \
         wsum += w;                                                          \
-        res  += w * c;                                                      \
+        res  += vec4(w) * c;                                                \
 
 #define SAMPLE_POLAR_PRIMARY(LUT, R, X, Y)                                  \
         SAMPLE_POLAR_HELPER(LUT, R, X, Y)                                   \
@@ -324,7 +324,7 @@ float[6] weights6(sampler2D lookup, float f) {
         float w;                                                            \
         vec4 c;                                                             \
         WEIGHTS_FN(LUT);                                                    \
-        res /= wsum;                                                        \
+        res = res / vec4(wsum);                                             \
         return mix(res, clamp(res, lo, hi), ANTIRING);                      \
     }
 
