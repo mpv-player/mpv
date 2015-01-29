@@ -465,20 +465,9 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
 
 static void draw_triangles(struct gl_video *p, struct vertex *vb, int vert_count)
 {
-    GL *gl = p->gl;
-
     assert(vert_count % 3 == 0);
 
-    gl->BindBuffer(GL_ARRAY_BUFFER, p->vao.buffer);
-    gl->BufferData(GL_ARRAY_BUFFER, vert_count * sizeof(struct vertex), vb,
-                   GL_DYNAMIC_DRAW);
-    gl->BindBuffer(GL_ARRAY_BUFFER, 0);
-
-    gl_vao_bind(&p->vao);
-
-    gl->DrawArrays(GL_TRIANGLES, 0, vert_count);
-
-    gl_vao_unbind(&p->vao);
+    gl_vao_draw_data(&p->vao, GL_TRIANGLES, vb, vert_count);
 
     debug_check_gl(p, "after rendering");
 }

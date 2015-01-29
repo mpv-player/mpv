@@ -298,6 +298,27 @@ void gl_vao_bind_attribs(struct gl_vao *vao, GLuint program)
         gl->BindAttribLocation(program, n, vao->entries[n].name);
 }
 
+// Draw the vertex data (as described by the gl_vao_entry entries) in ptr
+// to the screen. num is the number of vertexes. prim is usually GL_TRIANGLES.
+// If ptr is NULL, then skip the upload, and use the data uploaded with the
+// previous call.
+void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num)
+{
+    GL *gl = vao->gl;
+
+    if (ptr) {
+        gl->BindBuffer(GL_ARRAY_BUFFER, vao->buffer);
+        gl->BufferData(GL_ARRAY_BUFFER, num * vao->stride, ptr, GL_DYNAMIC_DRAW);
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    gl_vao_bind(vao);
+
+    gl->DrawArrays(prim, 0, num);
+
+    gl_vao_unbind(vao);
+}
+
 // Create a texture and a FBO using the texture as color attachments.
 //  gl_target: GL_TEXTURE_2D
 //  gl_filter: GL_LINEAR

@@ -44,8 +44,10 @@ mp_image_t *glGetWindowScreenshot(GL *gl);
 void mp_log_source(struct mp_log *log, int lev, const char *src);
 
 struct gl_vao_entry {
+    // used for shader / glBindAttribLocation
     const char *name;
-    int num_elems;
+    // glVertexAttribPointer() arguments
+    int num_elems;      // size (number of elements)
     GLenum type;
     bool normalized;
     int offset;
@@ -53,9 +55,9 @@ struct gl_vao_entry {
 
 struct gl_vao {
     GL *gl;
-    GLuint vao;
-    GLuint buffer;
-    int stride; // always assuming interleaved elements
+    GLuint vao;     // the VAO object, or 0 if unsupported by driver
+    GLuint buffer;  // GL_ARRAY_BUFFER used for the data
+    int stride;     // size of each element (interleaved elements are assumed)
     const struct gl_vao_entry *entries;
 };
 
@@ -65,6 +67,7 @@ void gl_vao_uninit(struct gl_vao *vao);
 void gl_vao_bind(struct gl_vao *vao);
 void gl_vao_unbind(struct gl_vao *vao);
 void gl_vao_bind_attribs(struct gl_vao *vao, GLuint program);
+void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num);
 
 struct fbotex {
     GL *gl;
