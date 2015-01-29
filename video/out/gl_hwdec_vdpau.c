@@ -29,7 +29,7 @@
 // follow it. I'm not sure about the original nvidia headers.
 #define BRAINDEATH(x) ((void *)(uintptr_t)(x))
 
-static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params);
+static int reinit(struct gl_hwdec *hw, struct mp_image_params *params);
 
 struct priv {
     struct mp_log *log;
@@ -119,7 +119,7 @@ static int create(struct gl_hwdec *hw)
     return 0;
 }
 
-static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
+static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
@@ -128,6 +128,7 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
 
     destroy_objects(hw);
 
+    params->imgfmt = hw->driver->imgfmt;
     p->image_params = *params;
 
     if (mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter) < 1)

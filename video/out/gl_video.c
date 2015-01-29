@@ -153,7 +153,8 @@ struct gl_video {
     float dither_center;
     int dither_size;
 
-    struct mp_image_params image_params;
+    struct mp_image_params real_image_params;   // configured format
+    struct mp_image_params image_params;        // texture format (mind hwdec case)
     struct mp_imgfmt_desc image_desc;
     int plane_count;
     int image_w, image_h;
@@ -945,9 +946,7 @@ static void compile_shaders(struct gl_video *p)
         // treated as linear.
         if (is_xyz) {
             gamma_fun = MP_CSP_TRC_LINEAR;
-        } else if (p->image_params.colorlevels == MP_CSP_LEVELS_PC && !p->hwdec_active) {
-            // FIXME: I don't know if hwdec sets the color levels to PC or not,
-            // but let's avoid the bug just in case.
+        } else if (p->image_params.colorlevels == MP_CSP_LEVELS_PC) {
             gamma_fun = MP_CSP_TRC_SRGB;
         } else {
             gamma_fun = MP_CSP_TRC_BT_1886;
@@ -1524,21 +1523,26 @@ static int align_pow2(int s)
     return r;
 }
 
-static void init_video(struct gl_video *p, const struct mp_image_params *params)
+static void init_video(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    init_format(params->imgfmt, p);
-
-    p->gl_target = p->opts.use_rectangle ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
-    if (p->hwdec_active)
-        p->gl_target = p->hwdec->gl_texture_target;
-
     check_gl_features(p);
 
-    p->image_w = params->w;
-    p->image_h = params->h;
-    p->image_params = *params;
+    init_format(p->image_params.imgfmt, p);
+    p->gl_target = p->opts.use_rectangle ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
+
+    if (p->hwdec_active) {
+        if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
+            MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
+        init_format(p->image_params.imgfmt, p);
+        p->gl_target = p->hwdec->gl_texture_target;
+    }
+
+    mp_image_params_guess_csp(&p->image_params);
+
+    p->image_w = p->image_params.w;
+    p->image_h = p->image_params.h;
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
     if (p->is_yuv && p->image_params.colorspace != MP_CSP_BT_2020_C)
@@ -1598,11 +1602,6 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
 
     debug_check_gl(p, "after video texture creation");
 
-    if (p->hwdec_active) {
-        if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
-            MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
-    }
-
     reinit_rendering(p);
 }
 
@@ -1628,7 +1627,8 @@ static void uninit_video(struct gl_video *p)
 
     // Invalidate image_params to ensure that gl_video_config() will call
     // init_video() on uninitialized gl_video.
-    p->image_params = (struct mp_image_params){0};
+    p->real_image_params = (struct mp_image_params){0};
+    p->image_params = p->real_image_params;
 }
 
 static void change_dither_trafo(struct gl_video *p)
@@ -2370,10 +2370,12 @@ void gl_video_config(struct gl_video *p, struct mp_image_params *params)
 {
     mp_image_unrefp(&p->image.mpi);
 
-    if (!mp_image_params_equal(&p->image_params, params)) {
+    if (!mp_image_params_equal(&p->real_image_params, params)) {
         uninit_video(p);
+        p->real_image_params = *params;
+        p->image_params = *params;
         if (params->imgfmt)
-            init_video(p, params);
+            init_video(p);
     }
 
     check_resize(p);

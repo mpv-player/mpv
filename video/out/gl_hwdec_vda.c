@@ -97,8 +97,9 @@ static int create(struct gl_hwdec *hw)
     return 0;
 }
 
-static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
+static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
+    params->imgfmt = hw->driver->imgfmt;
     return 0;
 }
 

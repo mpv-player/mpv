@@ -35,7 +35,8 @@ struct gl_hwdec_driver {
     int (*create)(struct gl_hwdec *hw);
     // Prepare for rendering video. (E.g. create textures.)
     // Called on initialization, and every time the video size changes.
-    int (*reinit)(struct gl_hwdec *hw, const struct mp_image_params *params);
+    // *params must be set to the format the hw textures return.
+    int (*reinit)(struct gl_hwdec *hw, struct mp_image_params *params);
     // Return textures that contain the given hw_image.
     // Note that the caller keeps a reference to hw_image until unmap_image
     // is called, so the hwdec driver doesn't need to do that.

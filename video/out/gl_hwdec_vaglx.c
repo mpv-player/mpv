@@ -87,13 +87,15 @@ static int create(struct gl_hwdec *hw)
     return 0;
 }
 
-static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
+static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
     VAStatus status;
 
     destroy_texture(hw);
+
+    params->imgfmt = hw->driver->imgfmt;
 
     gl->GenTextures(1, &p->gl_texture);
     gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
