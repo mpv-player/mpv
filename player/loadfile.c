@@ -950,7 +950,6 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->paused_for_cache = false;
     mpctx->playing_msg_shown = false;
     mpctx->backstep_active = false;
-    mpctx->audio_delay = 0;
     mpctx->max_frames = -1;
     mpctx->seek = (struct seek_params){ 0 };
 
@@ -987,7 +986,6 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_file_options(mpctx->mconfig, mpctx->playing->params,
                           mpctx->playing->num_params);
 
-    mpctx->audio_delay = opts->audio_delay;
     mpctx->max_frames = opts->play_frames;
 
     MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);

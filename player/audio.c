@@ -420,7 +420,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     }
 
     if (sync_to_video)
-        sync_pts -= mpctx->audio_delay - mpctx->delay;
+        sync_pts -= opts->audio_delay - mpctx->delay;
 
     double ptsdiff = written_pts - sync_pts;
     // Missing timestamp, or PTS reset, or just broken.
@@ -560,7 +560,7 @@ static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     int playflags = 0;
 
     if (endpts != MP_NOPTS_VALUE) {
-        double samples = (endpts - written_audio_pts(mpctx) - mpctx->audio_delay)
+        double samples = (endpts - written_audio_pts(mpctx) - opts->audio_delay)
                          * play_samplerate;
         if (playsize > samples) {
             playsize = MPMAX(samples, 0);

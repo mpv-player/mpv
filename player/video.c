@@ -528,7 +528,7 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
     if (mpctx->audio_status != STATUS_PLAYING)
         return;
 
-    double a_pts = written_audio_pts(mpctx) + mpctx->audio_delay - mpctx->delay;
+    double a_pts = written_audio_pts(mpctx) + opts->audio_delay - mpctx->delay;
     double av_delay = a_pts - v_pts;
 
     double change = av_delay * 0.1;
@@ -704,6 +704,8 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
 // Update the A/V sync difference after a video frame has been shown.
 static void update_avsync_after_frame(struct MPContext *mpctx)
 {
+    struct MPOpts *opts = mpctx->opts;
+
     mpctx->time_frame -= get_relative_time(mpctx);
     mpctx->last_av_difference = 0;
 
@@ -713,10 +715,9 @@ static void update_avsync_after_frame(struct MPContext *mpctx)
 
     double a_pos = playing_audio_pts(mpctx);
 
-    mpctx->last_av_difference = a_pos - mpctx->video_pts + mpctx->audio_delay;
+    mpctx->last_av_difference = a_pos - mpctx->video_pts + opts->audio_delay;
     if (mpctx->time_frame > 0)
-        mpctx->last_av_difference +=
-                mpctx->time_frame * mpctx->opts->playback_speed;
+        mpctx->last_av_difference += mpctx->time_frame * opts->playback_speed;
     if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE)
         mpctx->last_av_difference = MP_NOPTS_VALUE;
     if (mpctx->last_av_difference > 0.5 && !mpctx->drop_message_shown) {

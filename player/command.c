@@ -1583,8 +1583,8 @@ static int mp_property_audio_delay(void *ctx, struct m_property *prop,
         *(char **)arg = format_delay(delay);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        mpctx->audio_delay = mpctx->opts->audio_delay = *(float *)arg;
-        mpctx->delay += mpctx->audio_delay - delay;
+        mpctx->opts->audio_delay = *(float *)arg;
+        mpctx->delay += mpctx->opts->audio_delay - delay;
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);

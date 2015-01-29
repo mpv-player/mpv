@@ -276,8 +276,6 @@ typedef struct MPContext {
     uint64_t backstep_start_seek_ts;
     bool backstep_active;
 
-    double audio_delay;
-
     double next_heartbeat;
     double last_idle_tick;
     double next_cache_update;
