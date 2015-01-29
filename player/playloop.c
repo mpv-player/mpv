@@ -891,9 +891,78 @@ static void handle_dummy_ticks(struct MPContext *mpctx)
     }
 }
 
-void run_playloop(struct MPContext *mpctx)
+// We always make sure audio and video buffers are filled before actually
+// starting playback. This code handles starting them at the same time.
+static void handle_playback_restart(struct MPContext *mpctx, double endpts)
 {
     struct MPOpts *opts = mpctx->opts;
+
+    if (mpctx->audio_status < STATUS_READY ||
+        mpctx->video_status < STATUS_READY)
+        return;
+
+    if (mpctx->video_status == STATUS_READY) {
+        mpctx->video_status = STATUS_PLAYING;
+        get_relative_time(mpctx);
+        mpctx->sleeptime = 0;
+    }
+
+    if (mpctx->audio_status == STATUS_READY)
+        fill_audio_out_buffers(mpctx, endpts); // actually play prepared buffer
+
+    if (!mpctx->restart_complete) {
+        mpctx->hrseek_active = false;
+        mpctx->restart_complete = true;
+        mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
+        if (!mpctx->playing_msg_shown) {
+            if (opts->playing_msg) {
+                char *msg =
+                    mp_property_expand_escaped_string(mpctx, opts->playing_msg);
+                MP_INFO(mpctx, "%s\n", msg);
+                talloc_free(msg);
+            }
+            if (opts->osd_playing_msg) {
+                char *msg =
+                    mp_property_expand_escaped_string(mpctx, opts->osd_playing_msg);
+                set_osd_msg(mpctx, 1, opts->osd_duration, "%s", msg);
+                talloc_free(msg);
+            }
+        }
+        mpctx->playing_msg_shown = true;
+    }
+}
+
+// Determines whether the end of the current segment is reached, and switch to
+// the next one if required. Also handles regular playback end.
+static void handle_segment_switch(struct MPContext *mpctx, bool end_is_new_segment)
+{
+    /* Don't quit while paused and we're displaying the last video frame. On the
+     * other hand, if we don't have a video frame, then the user probably seeked
+     * outside of the video, and we do want to quit. */
+    bool prevent_eof =
+        mpctx->paused && mpctx->video_out && vo_has_frame(mpctx->video_out);
+    /* It's possible for the user to simultaneously switch both audio
+     * and video streams to "disabled" at runtime. Handle this by waiting
+     * rather than immediately stopping playback due to EOF.
+     */
+    if ((mpctx->d_audio || mpctx->d_video) && !prevent_eof &&
+        mpctx->audio_status == STATUS_EOF &&
+        mpctx->video_status == STATUS_EOF)
+    {
+        int new_part = mpctx->timeline_part + 1;
+        if (end_is_new_segment && new_part < mpctx->num_timeline_parts) {
+            mp_seek(mpctx, (struct seek_params){
+                           .type = MPSEEK_ABSOLUTE,
+                           .amount = mpctx->timeline[new_part].start
+                           }, true);
+        } else {
+            mpctx->stop_play = AT_END_OF_FILE;
+        }
+    }
+}
+
+void run_playloop(struct MPContext *mpctx)
+{
     double endpts = get_play_end_pts(mpctx);
     bool end_is_new_segment = false;
 
@@ -921,40 +990,9 @@ void run_playloop(struct MPContext *mpctx)
     fill_audio_out_buffers(mpctx, endpts);
     write_video(mpctx, endpts);
 
-    // We always make sure audio and video buffers are filled before actually
-    // starting playback. This code handles starting them at the same time.
-    if (mpctx->audio_status >= STATUS_READY &&
-        mpctx->video_status >= STATUS_READY)
-    {
-        if (mpctx->video_status == STATUS_READY) {
-            mpctx->video_status = STATUS_PLAYING;
-            get_relative_time(mpctx);
-            mpctx->sleeptime = 0;
-        }
-        if (mpctx->audio_status == STATUS_READY)
-            fill_audio_out_buffers(mpctx, endpts); // actually play prepared buffer
-        if (!mpctx->restart_complete) {
-            mpctx->hrseek_active = false;
-            mpctx->restart_complete = true;
-            mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
-            if (!mpctx->playing_msg_shown) {
-                if (opts->playing_msg) {
-                    char *msg =
-                        mp_property_expand_escaped_string(mpctx, opts->playing_msg);
-                    MP_INFO(mpctx, "%s\n", msg);
-                    talloc_free(msg);
-                }
-                if (opts->osd_playing_msg) {
-                    char *msg =
-                        mp_property_expand_escaped_string(mpctx, opts->osd_playing_msg);
-                    set_osd_msg(mpctx, 1, opts->osd_duration, "%s", msg);
-                    talloc_free(msg);
-                }
-            }
-            mpctx->playing_msg_shown = true;
-        }
-    }
+    handle_playback_restart(mpctx, endpts);
 
+    // Use the audio timestamp if no video, or video is enabled, but has ended.
     if (mpctx->video_status == STATUS_EOF &&
         mpctx->audio_status >= STATUS_PLAYING &&
         mpctx->audio_status < STATUS_EOF)
@@ -967,30 +1005,7 @@ void run_playloop(struct MPContext *mpctx)
     update_osd_msg(mpctx);
     update_subtitles(mpctx);
 
-    /* Don't quit while paused and we're displaying the last video frame. On the
-     * other hand, if we don't have a video frame, then the user probably seeked
-     * outside of the video, and we do want to quit. */
-    bool prevent_eof =
-        mpctx->paused && mpctx->video_out && vo_has_frame(mpctx->video_out);
-    /* Handles terminating on end of playback (or switching to next segment).
-     *
-     * It's possible for the user to simultaneously switch both audio
-     * and video streams to "disabled" at runtime. Handle this by waiting
-     * rather than immediately stopping playback due to EOF.
-     */
-    if ((mpctx->d_audio || mpctx->d_video) && !prevent_eof &&
-        mpctx->audio_status == STATUS_EOF &&
-        mpctx->video_status == STATUS_EOF)
-    {
-        int new_part = mpctx->timeline_part + 1;
-        if (end_is_new_segment && new_part < mpctx->num_timeline_parts) {
-            mp_seek(mpctx, (struct seek_params){
-                           .type = MPSEEK_ABSOLUTE,
-                           .amount = mpctx->timeline[new_part].start
-                           }, true);
-        } else
-            mpctx->stop_play = AT_END_OF_FILE;
-    }
+    handle_segment_switch(mpctx, end_is_new_segment);
 
     mp_handle_nav(mpctx);
 
