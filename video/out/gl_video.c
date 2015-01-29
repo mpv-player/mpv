@@ -132,7 +132,6 @@ struct gl_video {
     struct mp_log *log;
     struct gl_video_opts opts;
     bool gl_debug;
-    bool debug_cb_set;
 
     int depth_g;
     int texture_16bit_depth;    // actual bits available in 16 bit textures
@@ -158,12 +157,10 @@ struct gl_video {
     float dither_center;
     int dither_size;
 
-    uint32_t image_w, image_h;
-    uint32_t image_dw, image_dh;
-    uint32_t image_format;
-    int texture_w, texture_h;
-
+    struct mp_image_params image_params;
     struct mp_imgfmt_desc image_desc;
+    int plane_count;
+    int image_w, image_h;
 
     bool is_yuv, is_rgb, is_packed_yuv;
     bool has_alpha;
@@ -172,16 +169,13 @@ struct gl_video {
 
     float input_gamma, conv_gamma;
 
-    int component_bits; // color bit depth for all components; 0 if unknown
-    int plane_count;
-
     struct video_image image;
 
     struct fbotex indirect_fbo;         // RGB target
     struct fbotex scale_sep_fbo;        // first pass when doing 2 pass scaling
     struct fbotex inter_fbo;            // interpolation target
     struct fbosurface surfaces[FBOSURFACES_MAX];
-    size_t surface_num;
+    size_t surface_idx;
 
     // state for luma (0) and chroma (1) scalers
     struct scaler scalers[2];
@@ -190,7 +184,6 @@ struct gl_video {
     bool upscaling;
 
     struct mp_csp_equalizer video_eq;
-    struct mp_image_params image_params;
 
     // Source and destination color spaces for the CMS matrix
     struct mp_csp_primaries csp_src, csp_dest;
@@ -456,35 +449,10 @@ static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
     return &fmts[n_channels - 1 + (bytes_per_comp - 1) * 4];
 }
 
-static void default_tex_params(struct GL *gl, GLenum target)
-{
-    gl->TexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl->TexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl->TexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl->TexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
 static void debug_check_gl(struct gl_video *p, const char *msg)
 {
     if (p->gl_debug)
         glCheckError(p->gl, p->log, msg);
-}
-
-
-static void GLAPIENTRY gl_debug_cb(GLenum source, GLenum type, GLuint id,
-                                   GLenum severity, GLsizei length,
-                                   const GLchar *message, const void *userParam)
-{
-    // keep in mind that the debug callback can be asynchronous
-    struct gl_video *p = (void *)userParam;
-    int level = MSGL_ERR;
-    switch (severity) {
-    case GL_DEBUG_SEVERITY_NOTIFICATION:level = MSGL_V; break;
-    case GL_DEBUG_SEVERITY_LOW:         level = MSGL_INFO; break;
-    case GL_DEBUG_SEVERITY_MEDIUM:      level = MSGL_WARN; break;
-    case GL_DEBUG_SEVERITY_HIGH:        level = MSGL_ERR; break;
-    }
-    MP_MSG(p, level, "GL: %s\n", message);
 }
 
 void gl_video_set_debug(struct gl_video *p, bool enable)
@@ -492,32 +460,7 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
     GL *gl = p->gl;
 
     p->gl_debug = enable;
-
-    if (p->debug_cb_set != enable && gl->debug_context &&
-        gl->DebugMessageCallback)
-    {
-        if (enable) {
-            gl->DebugMessageCallback(gl_debug_cb, p);
-        } else {
-            gl->DebugMessageCallback(NULL, NULL);
-        }
-        p->debug_cb_set = enable;
-    }
-}
-
-static void texture_size(struct gl_video *p, int w, int h, int *texw, int *texh)
-{
-    if (p->opts.npot) {
-        *texw = w;
-        *texh = h;
-    } else {
-        *texw = 32;
-        while (*texw < w)
-            *texw *= 2;
-        *texh = 32;
-        while (*texh < h)
-            *texh *= 2;
-    }
+    gl_set_debug_logger(gl, (enable && p->gl->debug_context) ? p->log : NULL);
 }
 
 static void draw_triangles(struct gl_video *p, struct vertex *vb, int vert_count)
@@ -589,11 +532,6 @@ static void write_quad(struct vertex *va,
     }
 }
 
-static size_t fbosurface_next(struct gl_video *p)
-{
-    return (p->surface_num + 1) % FBOSURFACES_MAX;
-}
-
 static void update_uniforms(struct gl_video *p, GLuint program)
 {
     GL *gl = p->gl;
@@ -606,7 +544,7 @@ static void update_uniforms(struct gl_video *p, GLuint program)
 
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
     cparams.gray = p->is_yuv && !p->is_packed_yuv && p->plane_count == 1;
-    cparams.input_bits = p->component_bits;
+    cparams.input_bits = p->image_desc.component_bits;
     cparams.texture_bits = (cparams.input_bits + 7) & ~7;
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
@@ -1457,7 +1395,7 @@ static void reinit_rendering(struct gl_video *p)
 
     uninit_rendering(p);
 
-    if (!p->image_format)
+    if (!p->image_params.imgfmt)
         return;
 
     for (int n = 0; n < 2; n++)
@@ -1598,6 +1536,14 @@ static void unset_image_textures(struct gl_video *p)
         p->hwdec->driver->unmap_image(p->hwdec);
 }
 
+static int align_pow2(int s)
+{
+    int r = 1;
+    while (r < s)
+        r *= 2;
+    return r;
+}
+
 static void init_video(struct gl_video *p, const struct mp_image_params *params)
 {
     GL *gl = p->gl;
@@ -1612,8 +1558,6 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
 
     p->image_w = params->w;
     p->image_h = params->h;
-    p->image_dw = params->d_w;
-    p->image_dh = params->d_h;
     p->image_params = *params;
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
@@ -1633,13 +1577,14 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
         plane->w = mp_chroma_div_up(p->image_w, p->image_desc.xs[n]);
         plane->h = mp_chroma_div_up(p->image_h, p->image_desc.ys[n]);
 
-        if (p->hwdec_active) {
-            // We expect hwdec backends to allocate exact size
-            plane->tex_w = plane->w;
-            plane->tex_h = plane->h;
-        } else {
-            texture_size(p, plane->w, plane->h,
-                            &plane->tex_w, &plane->tex_h);
+        plane->tex_w = plane->w;
+        plane->tex_h = plane->h;
+
+        if (!p->hwdec_active) {
+            if (!p->opts.npot) {
+                plane->tex_w = align_pow2(plane->tex_w);
+                plane->tex_h = align_pow2(plane->tex_h);
+            }
 
             gl->ActiveTexture(GL_TEXTURE0 + n);
             gl->GenTextures(1, &plane->gl_texture);
@@ -1649,7 +1594,10 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
                            plane->tex_w, plane->tex_h, 0,
                            plane->gl_format, plane->gl_type, NULL);
 
-            default_tex_params(gl, p->gl_target);
+            gl->TexParameteri(p->gl_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            gl->TexParameteri(p->gl_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            gl->TexParameteri(p->gl_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            gl->TexParameteri(p->gl_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
 
         MP_VERBOSE(p, "Texture for plane %d: %dx%d\n",
@@ -1657,18 +1605,15 @@ static void init_video(struct gl_video *p, const struct mp_image_params *params)
     }
     gl->ActiveTexture(GL_TEXTURE0);
 
-    p->texture_w = p->image.planes[0].tex_w;
-    p->texture_h = p->image.planes[0].tex_h;
-
     // If the dimensions of the Y plane are not aligned on the luma.
     // Assume 4:2:0 with size (3,3). The last luma pixel is (2,2).
     // The last chroma pixel is (1,1), not (0,0). So for luma, the
     // coordinate range is [0,3), for chroma it is [0,2). This means the
     // texture coordinates for chroma are stretched by adding 1 luma pixel
     // to the range. Undo this.
-    p->chroma_fix[0] = p->texture_w / (double)p->image.planes[1].tex_w
+    p->chroma_fix[0] = p->image.planes[0].tex_w / (double)p->image.planes[1].tex_w
                        / (1 << p->image_desc.chroma_xs);
-    p->chroma_fix[1] = p->texture_h / (double)p->image.planes[1].tex_h
+    p->chroma_fix[1] = p->image.planes[0].tex_h / (double)p->image.planes[1].tex_h
                        / (1 << p->image_desc.chroma_ys);
 
     debug_check_gl(p, "after video texture creation");
@@ -1784,6 +1729,11 @@ static void handle_pass(struct gl_video *p, struct pass *chain,
     };
 }
 
+static size_t fbosurface_next(struct gl_video *p)
+{
+    return (p->surface_idx + 1) % FBOSURFACES_MAX;
+}
+
 static void gl_video_interpolate_frame(struct gl_video *p,
                                        struct pass *chain,
                                        struct frame_timing *t)
@@ -1795,10 +1745,10 @@ static void gl_video_interpolate_frame(struct gl_video *p,
     if (prev_pts < t->pts) {
         MP_STATS(p, "new-pts");
         // fbosurface 0 is already bound from the caller
-        p->surfaces[p->surface_num].pts = t->pts;
-        p->surface_num = fbosurface_next(p);
+        p->surfaces[p->surface_idx].pts = t->pts;
+        p->surface_idx = fbosurface_next(p);
         gl->ActiveTexture(GL_TEXTURE0 + 1);
-        gl->BindTexture(p->gl_target, p->surfaces[p->surface_num].fbotex.texture);
+        gl->BindTexture(p->gl_target, p->surfaces[p->surface_idx].fbotex.texture);
         gl->ActiveTexture(GL_TEXTURE0);
         MP_DBG(p, "frame ppts: %lld, pts: %lld, vsync: %lld, DIFF: %lld\n",
                   (long long)prev_pts, (long long)t->pts,
@@ -1864,8 +1814,8 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
         .f = {
             .vp_w = p->image_w,
             .vp_h = p->image_h,
-            .tex_w = p->texture_w,
-            .tex_h = p->texture_h,
+            .tex_w = vimg->planes[0].tex_w,
+            .tex_h = vimg->planes[0].tex_h,
             .texture = imgtex[0],
         },
     };
@@ -1873,7 +1823,7 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
     int64_t prev_pts = p->surfaces[fbosurface_next(p)].pts;
     struct fbotex *indirect_target;
     if (p->inter_program && t && prev_pts < t->pts) {
-        indirect_target = &p->surfaces[p->surface_num].fbotex;
+        indirect_target = &p->surfaces[p->surface_idx].fbotex;
     } else {
         indirect_target = &p->indirect_fbo;
     }
@@ -2347,8 +2297,7 @@ void gl_video_uninit(struct gl_video *p)
 
     mpgl_osd_destroy(p->osd);
 
-    if (p->debug_cb_set)
-        gl->DebugMessageCallback(NULL, NULL);
+    gl_set_debug_logger(gl, NULL);
 
     talloc_free(p);
 }
@@ -2372,10 +2321,9 @@ void gl_video_unset_gl_state(struct gl_video *p)
 
 void gl_video_reset(struct gl_video *p)
 {
-    for (int i = 0; i < FBOSURFACES_MAX; i++) {
+    for (int i = 0; i < FBOSURFACES_MAX; i++)
         p->surfaces[i].pts = 0;
-    }
-    p->surface_num = 0;
+    p->surface_idx = 0;
 }
 
 // dest = src.<w> (always using 4 components)
@@ -2412,8 +2360,6 @@ static bool init_format(int fmt, struct gl_video *init)
 
     const struct fmt_entry *plane_format[4] = {0};
 
-    init->image_format = fmt;
-    init->component_bits = desc.component_bits;
     init->color_swizzle[0] = '\0';
     init->has_alpha = false;
 
@@ -2493,10 +2439,10 @@ static bool init_format(int fmt, struct gl_video *init)
 supported:
 
     // Stuff like IMGFMT_420AP10. Untested, most likely insane.
-    if (desc.num_planes == 4 && (init->component_bits % 8) != 0)
+    if (desc.num_planes == 4 && (desc.component_bits % 8) != 0)
         return false;
 
-    if (init->component_bits > 8 && init->component_bits < 16) {
+    if (desc.component_bits > 8 && desc.component_bits < 16) {
         if (init->texture_16bit_depth < 16)
             return false;
     }

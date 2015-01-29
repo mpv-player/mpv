@@ -374,3 +374,30 @@ void gl_matrix_ortho2d(float m[3][3], float x0, float x1, float y0, float y1)
     m[2][1] = -(y1 + y0) / (y1 - y0);
     m[2][2] = 1.0f;
 }
+
+static void GLAPIENTRY gl_debug_cb(GLenum source, GLenum type, GLuint id,
+                                   GLenum severity, GLsizei length,
+                                   const GLchar *message, const void *userParam)
+{
+    // keep in mind that the debug callback can be asynchronous
+    struct mp_log *log = (void *)userParam;
+    int level = MSGL_ERR;
+    switch (severity) {
+    case GL_DEBUG_SEVERITY_NOTIFICATION:level = MSGL_V; break;
+    case GL_DEBUG_SEVERITY_LOW:         level = MSGL_INFO; break;
+    case GL_DEBUG_SEVERITY_MEDIUM:      level = MSGL_WARN; break;
+    case GL_DEBUG_SEVERITY_HIGH:        level = MSGL_ERR; break;
+    }
+    mp_msg(log, level, "GL: %s\n", message);
+}
+
+void gl_set_debug_logger(GL *gl, struct mp_log *log)
+{
+    if (gl->DebugMessageCallback) {
+        if (log) {
+            gl->DebugMessageCallback(gl_debug_cb, log);
+        } else {
+            gl->DebugMessageCallback(NULL, NULL);
+        }
+    }
+}

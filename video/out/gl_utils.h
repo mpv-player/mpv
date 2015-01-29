@@ -80,4 +80,6 @@ void fbotex_uninit(struct fbotex *fbo);
 
 void gl_matrix_ortho2d(float m[3][3], float x0, float x1, float y0, float y1);
 
+void gl_set_debug_logger(GL *gl, struct mp_log *log);
+
 #endif
