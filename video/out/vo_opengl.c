@@ -303,6 +303,7 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
         mpgl_lock(p->glctx);
         gl_video_set_options(p->renderer, opts->renderer_opts);
         vo_set_flip_queue_params(p->vo, 0, opts->renderer_opts->smoothmotion);
+        p->vo->want_redraw = true;
         mpgl_unlock(p->glctx);
     }
 
