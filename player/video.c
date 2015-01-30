@@ -588,16 +588,8 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             frame_time = 0;
         }
         mpctx->video_next_pts = pts;
-        if (mpctx->d_audio) {
+        if (mpctx->d_audio)
             mpctx->delay -= frame_time;
-            // When resuming after a hr-seek, let audio advance the position to
-            // the actual seek target.
-            if (mpctx->video_status == STATUS_SYNCING && mpctx->hrseek_active &&
-                pts != MP_NOPTS_VALUE)
-            {
-                mpctx->delay -= mpctx->hrseek_pts - pts;
-            }
-        }
         if (mpctx->video_status >= STATUS_READY) {
             mpctx->time_frame += frame_time / mpctx->opts->playback_speed;
             adjust_sync(mpctx, pts, frame_time);
