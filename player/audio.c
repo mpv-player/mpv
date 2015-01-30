@@ -474,10 +474,7 @@ static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         mpctx->video_status != STATUS_EOF && mpctx->delay > 0)
         return;
 
-    // if paused, just initialize things (audio format & pts)
-    int playsize = 1;
-    if (!mpctx->paused)
-        playsize = ao_get_space(mpctx->ao);
+    int playsize = ao_get_space(mpctx->ao);
 
     int skip = 0;
     bool sync_known = get_sync_samples(mpctx, &skip);
