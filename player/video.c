@@ -681,9 +681,9 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
              * This is badly implemented; the behavior of the smoothing
              * now undesirably depends on how often this code runs
              * (mainly depends on video frame rate). */
-            float predicted = mpctx->delay / opts->playback_speed +
-                              mpctx->time_frame;
-            float difference = buffered_audio - predicted;
+            double predicted = mpctx->delay / opts->playback_speed +
+                               mpctx->time_frame;
+            double difference = buffered_audio - predicted;
             buffered_audio = predicted + difference / opts->autosync;
         }
 
