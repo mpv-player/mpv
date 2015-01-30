@@ -81,10 +81,6 @@ static const struct gl_vao_entry vertex_vao[] = {
     {0}
 };
 
-// 2 triangles primitives per quad = 6 vertices per quad
-// (GL_QUAD is deprecated, strips can't be used with OSD image lists)
-#define VERTICES_PER_QUAD 6
-
 struct texplane {
     int w, h;
     int tex_w, tex_h;
@@ -460,33 +456,18 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
         gl_set_debug_logger(gl, enable ? p->log : NULL);
 }
 
-static void draw_triangles(struct gl_video *p, struct vertex *vb, int vert_count)
-{
-    assert(vert_count % 3 == 0);
-
-    gl_vao_draw_data(&p->vao, GL_TRIANGLES, vb, vert_count);
-
-    debug_check_gl(p, "after rendering");
-}
-
-// Write a textured quad to a vertex array.
-// va = destination vertex array, VERTICES_PER_QUAD entries will be overwritten
+// Draw a textured quad.
 // x0, y0, x1, y1 = destination coordinates of the quad
 // tx0, ty0, tx1, ty1 = source texture coordinates (usually in pixels)
 // texture_w, texture_h = size of the texture, or an inverse factor
 // flags = bits 0-1: rotate, bits 2: flip vertically
-static void write_quad(struct vertex *va,
-                       float x0, float y0, float x1, float y1,
-                       float tx0, float ty0, float tx1, float ty1,
-                       float texture_w, float texture_h,
-                       GLenum target, int flags)
+static void draw_quad(struct gl_video *p,
+                      float x0, float y0, float x1, float y1,
+                      float tx0, float ty0, float tx1, float ty1,
+                      float tex_w, float tex_h, int flags)
 {
-    if (target == GL_TEXTURE_2D) {
-        tx0 /= texture_w;
-        ty0 /= texture_h;
-        tx1 /= texture_w;
-        ty1 /= texture_h;
-    }
+    if (p->gl_target != GL_TEXTURE_2D)
+        tex_w = tex_h = 1.0f;
 
     if (flags & 4) {
         float tmp = ty0;
@@ -494,21 +475,25 @@ static void write_quad(struct vertex *va,
         ty1 = tmp;
     }
 
-    va[0] = (struct vertex) { {x0, y0}, {tx0, ty0} };
-    va[1] = (struct vertex) { {x0, y1}, {tx0, ty1} };
-    va[2] = (struct vertex) { {x1, y0}, {tx1, ty0} };
-    va[3] = (struct vertex) { {x1, y1}, {tx1, ty1} };
-    va[4] = va[2];
-    va[5] = va[1];
+    struct vertex va[4] = {
+        { {x0, y0}, {tx0 / tex_w, ty0 / tex_h} },
+        { {x0, y1}, {tx0 / tex_w, ty1 / tex_h} },
+        { {x1, y0}, {tx1 / tex_w, ty0 / tex_h} },
+        { {x1, y1}, {tx1 / tex_w, ty1 / tex_h} },
+    };
 
     int rot = flags & 3;
     while (rot--) {
-        static const int perm[6] = {1, 3, 0, 2, 0, 3};
-        struct vertex vb[6];
+        static const int perm[4] = {1, 3, 0, 2};
+        struct vertex vb[4];
         memcpy(vb, va, sizeof(vb));
-        for (int n = 0; n < 6; n++)
+        for (int n = 0; n < 4; n++)
             memcpy(va[n].texcoord, vb[perm[n]].texcoord, sizeof(float[2]));
     }
+
+    gl_vao_draw_data(&p->vao, GL_TRIANGLE_STRIP, va, 4);
+
+    debug_check_gl(p, "after rendering");
 }
 
 static void update_uniforms(struct gl_video *p, GLuint program)
@@ -1667,7 +1652,6 @@ struct pass {
 static void handle_pass(struct gl_video *p, struct pass *chain,
                         struct fbotex *fbo, GLuint program)
 {
-    struct vertex vb[VERTICES_PER_QUAD];
     GL *gl = p->gl;
 
     if (!program)
@@ -1698,11 +1682,10 @@ static void handle_pass(struct gl_video *p, struct pass *chain,
              fbo->vp_x, fbo->vp_y, fbo->vp_w, fbo->vp_h,
              fbo->tex_w, fbo->tex_h, chain->flags);
 
-    write_quad(vb,
-               dst.x0, dst.y0, dst.x1, dst.y1,
-               src.x0, src.y0, src.x1, src.y1,
-               tex_w, tex_h, p->gl_target, chain->flags);
-    draw_triangles(p, vb, VERTICES_PER_QUAD);
+    draw_quad(p,
+              dst.x0, dst.y0, dst.x1, dst.y1,
+              src.x0, src.y0, src.x1, src.y1,
+              tex_w, tex_h, chain->flags);
 
     *chain = (struct pass){
         .num = chain->num + 1,

@@ -265,19 +265,13 @@ static struct mpgl_osd_part *mpgl_osd_generate(struct mpgl_osd *ctx,
 static void write_quad(struct vertex *va,
                        float x0, float y0, float x1, float y1,
                        float tx0, float ty0, float tx1, float ty1,
-                       float texture_w, float texture_h,
-                       const uint8_t color[4])
+                       float tex_w, float tex_h, const uint8_t color[4])
 {
-    tx0 /= texture_w;
-    ty0 /= texture_h;
-    tx1 /= texture_w;
-    ty1 /= texture_h;
-
 #define COLOR_INIT {color[0], color[1], color[2], color[3]}
-    va[0] = (struct vertex) { {x0, y0}, COLOR_INIT, {tx0, ty0} };
-    va[1] = (struct vertex) { {x0, y1}, COLOR_INIT, {tx0, ty1} };
-    va[2] = (struct vertex) { {x1, y0}, COLOR_INIT, {tx1, ty0} };
-    va[3] = (struct vertex) { {x1, y1}, COLOR_INIT, {tx1, ty1} };
+    va[0] = (struct vertex){ {x0, y0}, COLOR_INIT, {tx0 / tex_w, ty0 / tex_h} };
+    va[1] = (struct vertex){ {x0, y1}, COLOR_INIT, {tx0 / tex_w, ty1 / tex_h} };
+    va[2] = (struct vertex){ {x1, y0}, COLOR_INIT, {tx1 / tex_w, ty0 / tex_h} };
+    va[3] = (struct vertex){ {x1, y1}, COLOR_INIT, {tx1 / tex_w, ty1 / tex_h} };
     va[4] = va[2];
     va[5] = va[1];
 #undef COLOR_INIT
