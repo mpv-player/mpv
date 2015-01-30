@@ -247,6 +247,9 @@ Available audio output drivers are:
         Simulate broken audio drivers, which always add the fixed device
         latency to the reported audio playback position.
 
+    ``broken-delay``
+        Simulate broken audio drivers, which don't report latency correctly.
+
 ``pcm``
     Raw PCM/WAVE file writer audio output
 

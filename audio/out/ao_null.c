@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "talloc.h"
 
@@ -50,6 +51,7 @@ struct priv {
     float latency_sec;  // seconds
     float latency;      // samples
     int broken_eof;
+    int broken_delay;
 
     // Minimal unit of audio samples that can be written at once. If play() is
     // called with sizes not aligned to this, a rounded size will be returned.
@@ -191,7 +193,15 @@ static double get_delay(struct ao *ao)
     if (priv->broken_eof && priv->buffered < priv->latency)
         delay = priv->latency;
 
-    return delay  / (double)ao->samplerate;
+    delay /= ao->samplerate;
+
+    if (priv->broken_delay) { // Report only multiples of outburst
+        double q = priv->outburst / (double)ao->samplerate;
+        if (delay > 0)
+            delay = (int)(delay / q) * q;
+    }
+
+    return delay;
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -221,6 +231,7 @@ const struct ao_driver audio_out_null = {
         OPT_FLOATRANGE("speed", speed, 0, 0, 10000),
         OPT_FLOATRANGE("latency", latency_sec, 0, 0, 100),
         OPT_FLAG("broken-eof", broken_eof, 0),
+        OPT_FLAG("broken-delay", broken_delay, 0),
         {0}
     },
 };
