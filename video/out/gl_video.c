@@ -456,7 +456,8 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
     GL *gl = p->gl;
 
     p->gl_debug = enable;
-    gl_set_debug_logger(gl, (enable && p->gl->debug_context) ? p->log : NULL);
+    if (p->gl->debug_context)
+        gl_set_debug_logger(gl, enable ? p->log : NULL);
 }
 
 static void draw_triangles(struct gl_video *p, struct vertex *vb, int vert_count)
