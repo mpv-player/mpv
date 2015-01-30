@@ -146,6 +146,7 @@ void reset_audio_state(struct MPContext *mpctx)
     if (mpctx->ao_buffer)
         mp_audio_buffer_clear(mpctx->ao_buffer);
     mpctx->audio_status = mpctx->d_audio ? STATUS_SYNCING : STATUS_EOF;
+    mpctx->delay = 0;
 }
 
 void uninit_audio_out(struct MPContext *mpctx)
@@ -406,11 +407,10 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
 
     double sync_pts = MP_NOPTS_VALUE;
     if (sync_to_video) {
-        if (mpctx->video_next_pts != MP_NOPTS_VALUE) {
-            sync_pts = mpctx->video_next_pts;
-        } else if (mpctx->video_status < STATUS_READY) {
+        if (mpctx->video_status < STATUS_READY)
             return false; // wait until we know a video PTS
-        }
+        if (mpctx->video_next_pts != MP_NOPTS_VALUE)
+            sync_pts = mpctx->video_next_pts - (opts->audio_delay - mpctx->delay);
     } else if (mpctx->hrseek_active) {
         sync_pts = mpctx->hrseek_pts;
     }
@@ -418,9 +418,6 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
         mpctx->audio_status = STATUS_FILLING;
         return true; // syncing disabled
     }
-
-    if (sync_to_video)
-        sync_pts -= opts->audio_delay - mpctx->delay;
 
     double ptsdiff = written_pts - sync_pts;
     // Missing timestamp, or PTS reset, or just broken.

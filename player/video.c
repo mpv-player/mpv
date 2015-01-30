@@ -588,9 +588,8 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             frame_time = 0;
         }
         mpctx->video_next_pts = pts;
-        if (mpctx->d_audio)
-            mpctx->delay -= frame_time;
-        if (mpctx->video_status >= STATUS_READY) {
+        mpctx->delay -= frame_time;
+        if (mpctx->video_status >= STATUS_PLAYING) {
             mpctx->time_frame += frame_time / mpctx->opts->playback_speed;
             adjust_sync(mpctx, pts, frame_time);
         }
