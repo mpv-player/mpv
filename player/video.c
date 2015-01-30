@@ -719,7 +719,7 @@ static void update_avsync_after_frame(struct MPContext *mpctx)
         mpctx->last_av_difference += mpctx->time_frame * opts->playback_speed;
     if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE)
         mpctx->last_av_difference = MP_NOPTS_VALUE;
-    if (mpctx->last_av_difference > 0.5 && !mpctx->drop_message_shown) {
+    if (fabs(mpctx->last_av_difference) > 0.5 && !mpctx->drop_message_shown) {
         MP_WARN(mpctx, "%s", av_desync_help_text);
         mpctx->drop_message_shown = true;
     }
