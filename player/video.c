@@ -706,7 +706,6 @@ static void update_avsync_after_frame(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    mpctx->time_frame -= get_relative_time(mpctx);
     mpctx->last_av_difference = 0;
 
     if (mpctx->audio_status != STATUS_PLAYING ||
@@ -783,9 +782,6 @@ void write_video(struct MPContext *mpctx, double endpts)
     if (mpctx->video_status > STATUS_PLAYING)
         mpctx->video_status = STATUS_PLAYING;
 
-    mpctx->time_frame -= get_relative_time(mpctx);
-    update_avsync_before_frame(mpctx);
-
     if (r != VD_NEW_FRAME) {
         mpctx->sleeptime = 0; // Decode more in next iteration.
         return;
@@ -812,8 +808,10 @@ void write_video(struct MPContext *mpctx, double endpts)
             goto error;
         }
         init_vo(mpctx);
-        mpctx->time_frame = 0; // display immediately
     }
+
+    mpctx->time_frame -= get_relative_time(mpctx);
+    update_avsync_before_frame(mpctx);
 
     double time_frame = MPMAX(mpctx->time_frame, -1);
     int64_t pts = mp_time_us() + (int64_t)(time_frame * 1e6);
@@ -847,6 +845,8 @@ void write_video(struct MPContext *mpctx, double endpts)
     mpctx->last_vo_pts = mpctx->video_pts;
     mpctx->playback_pts = mpctx->video_pts;
 
+    update_avsync_after_frame(mpctx);
+
     mpctx->osd_force_update = true;
     update_osd_msg(mpctx);
     update_subtitles(mpctx);
@@ -860,7 +860,6 @@ void write_video(struct MPContext *mpctx, double endpts)
         // After a seek, make sure to wait until the first frame is visible.
         vo_wait_frame(vo);
     }
-    update_avsync_after_frame(mpctx);
     screenshot_flip(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
