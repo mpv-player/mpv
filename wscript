@@ -185,10 +185,6 @@ iconv support use --disable-iconv.",
         'func': check_libs(['waio'],
                     check_statement('waio/waio.h', 'waio_alloc(0, 0, 0, 0)')),
     }, {
-        'name': 'videoio',
-        'desc': 'videoio.h',
-        'func': check_headers('sys/videoio.h')
-    }, {
         'name': '--termios',
         'desc': 'termios',
         'func': check_headers('termios.h', 'sys/termios.h'),
@@ -725,14 +721,25 @@ radio_and_tv_features = [
         'desc': 'TV interface',
         'func': check_true,
     }, {
+        'name': 'sys_videoio_h',
+        'desc': 'videoio.h',
+        'func': check_cc(header_name=['sys/time.h', 'sys/videoio.h'])
+    }, {
+        'name': 'videodev',
+        'desc': 'videodev2.h',
+        'func': check_cc(header_name=['sys/time.h', 'linux/videodev2.h']),
+        'deps_neg': [ 'sys_videoio_h' ],
+    }, {
         'name': '--tv-v4l2',
         'desc': 'Video4Linux2 TV interface',
         'deps': [ 'tv' ],
-        'func': check_cc(header_name=['sys/time.h', 'linux/videodev2.h'])
+        'deps_any': [ 'sys_videoio_h', 'videodev' ],
+        'func': check_true,
     }, {
         'name': '--libv4l2',
         'desc': 'libv4l2 support',
         'func': check_pkg_config('libv4l2'),
+        'deps': [ 'tv-v4l2' ],
     }, {
         'name': '--pvr',
         'desc': 'Video4Linux2 MPEG PVR interface',
