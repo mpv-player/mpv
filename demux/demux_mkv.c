@@ -1133,6 +1133,7 @@ static void add_coverart(struct demuxer *demuxer)
         struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
         if (!sh)
             break;
+        sh->demuxer_id = -1 - sh->index; // don't clash with mkv IDs
         sh->codec = codec;
         sh->attached_picture = new_demux_packet_from(att->data, att->data_size);
         if (sh->attached_picture) {
