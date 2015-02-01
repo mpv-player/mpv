@@ -3452,6 +3452,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_START_FILE, "*"),
     E(MPV_EVENT_END_FILE, "*"),
     E(MPV_EVENT_FILE_LOADED, "*"),
+    E(MP_EVENT_CHANGE_ALL, "*"),
     E(MPV_EVENT_TRACKS_CHANGED, "track-list"),
     E(MPV_EVENT_TRACK_SWITCHED, "vid", "video", "aid", "audio", "sid", "sub",
       "secondary-sid"),

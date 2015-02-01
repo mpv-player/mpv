@@ -1019,6 +1019,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     stream_enable_cache(&mpctx->stream, &opts->stream_cache);
 
+    mp_notify(mpctx, MP_EVENT_CHANGE_ALL, NULL);
     mp_process_input(mpctx);
     if (mpctx->stop_play)
         goto terminate_playback;
