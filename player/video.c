@@ -662,7 +662,11 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
                !ao_untimed(mpctx->ao))
     {
         double buffered_audio = ao_get_delay(mpctx->ao);
-        MP_TRACE(mpctx, "audio delay=%f\n", buffered_audio);
+
+        double predicted = mpctx->delay / opts->playback_speed +
+                           mpctx->time_frame;
+        double difference = buffered_audio - predicted;
+        MP_STATS(mpctx, "value %f audio-diff", difference);
 
         if (opts->autosync) {
             /* Smooth reported playback position from AO by averaging
@@ -672,9 +676,6 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
              * This is badly implemented; the behavior of the smoothing
              * now undesirably depends on how often this code runs
              * (mainly depends on video frame rate). */
-            double predicted = mpctx->delay / opts->playback_speed +
-                               mpctx->time_frame;
-            double difference = buffered_audio - predicted;
             buffered_audio = predicted + difference / opts->autosync;
         }
 
