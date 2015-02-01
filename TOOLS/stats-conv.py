@@ -62,12 +62,14 @@ def get_event(event, evtype):
         G.events[event] = e
     return G.events[event]
 
+SCALE = 1e6 # microseconds to seconds
+
 for line in [line.split("#")[0].strip() for line in open(filename, "r")]:
     line = line.strip()
     if not line:
         continue
     ts, event = line.split(" ", 1)
-    ts = int(ts) / 1000 # milliseconds
+    ts = int(ts) / SCALE
     if G.start is None:
         G.start = ts
     ts = ts - G.start
@@ -86,12 +88,12 @@ for line in [line.split("#")[0].strip() for line in open(filename, "r")]:
         e.vals.append((ts, val))
     elif event.startswith("event-timed "):
         _, val, name = event.split(" ", 2)
-        val = int(val) / 1000 - G.start
+        val = int(val) / SCALE - G.start
         e = get_event(name, "event-signal")
         e.vals.append((val, 1))
     elif event.startswith("value-timed "):
         _, tsval, val, name = event.split(" ", 3)
-        tsval = int(tsval) / 1000 - G.start
+        tsval = int(tsval) / SCALE - G.start
         val = float(val)
         e = get_event(name, "value")
         e.vals.append((tsval, val))
