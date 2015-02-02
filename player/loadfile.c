@@ -646,57 +646,32 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     return true;
 }
 
-static void open_subtitles_from_options(struct MPContext *mpctx)
-{
-    if (mpctx->opts->sub_name) {
-        for (int i = 0; mpctx->opts->sub_name[i] != NULL; ++i)
-            mp_add_subtitles(mpctx, mpctx->opts->sub_name[i]);
-    }
-    if (mpctx->opts->sub_auto >= 0) { // auto load sub file ...
-        void *tmp = talloc_new(NULL);
-        char *base_filename = mpctx->filename;
-        char *stream_filename = NULL;
-        if (mpctx->demuxer) {
-            if (demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_BASE_FILENAME,
-                                     &stream_filename) > 0)
-                base_filename = talloc_steal(tmp, stream_filename);
-        }
-        struct subfn *list = find_text_subtitles(mpctx->global, base_filename);
-        talloc_steal(tmp, list);
-        for (int i = 0; list && list[i].fname; i++) {
-            char *filename = list[i].fname;
-            char *lang = list[i].lang;
-            for (int n = 0; n < mpctx->num_sources; n++) {
-                if (strcmp(mpctx->sources[n]->stream->url, filename) == 0)
-                    goto skip;
-            }
-            struct track *track = mp_add_subtitles(mpctx, filename);
-            if (track) {
-                track->auto_loaded = true;
-                if (!track->lang)
-                    track->lang = talloc_strdup(track, lang);
-            }
-        skip:;
-        }
-        talloc_free(tmp);
-    }
-}
-
 static struct track *open_external_file(struct MPContext *mpctx, char *filename,
-                                        char *demuxer_name,
                                         enum stream_type filter)
 {
     struct MPOpts *opts = mpctx->opts;
     if (!filename)
         return NULL;
+
     char *disp_filename = filename;
     if (strncmp(disp_filename, "memory://", 9) == 0)
         disp_filename = "memory://"; // avoid noise
+
     struct stream *stream = stream_open(filename, mpctx->global);
     if (!stream)
         goto err_out;
-    if (filter != STREAM_SUB)
+
+    char *demuxer_name = NULL;
+    switch (filter) {
+    case STREAM_SUB:
+        demuxer_name = opts->sub_demuxer_name;
+        break;
+    case STREAM_AUDIO:
+        demuxer_name = opts->audio_demuxer_name;
         stream_enable_cache(&stream, &opts->stream_cache);
+        break;
+    }
+
     struct demuxer_params params = {
         .expect_subtitle = filter == STREAM_SUB,
     };
@@ -706,6 +681,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
         free_stream(stream);
         goto err_out;
     }
+
     struct track *first = NULL;
     for (int n = 0; n < demuxer->num_streams; n++) {
         struct sh_stream *sh = demuxer->streams[n];
@@ -724,6 +700,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
                 disp_filename);
         goto err_out;
     }
+
     MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, demuxer);
     return first;
 
@@ -736,17 +713,53 @@ err_out:
 static void open_audiofiles_from_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    for (int n = 0; opts->audio_files && opts->audio_files[n]; n++) {
-        open_external_file(mpctx, opts->audio_files[n], opts->audio_demuxer_name,
-                           STREAM_AUDIO);
-    }
+    for (int n = 0; opts->audio_files && opts->audio_files[n]; n++)
+        open_external_file(mpctx, opts->audio_files[n], STREAM_AUDIO);
 }
 
 struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename)
 {
+    return open_external_file(mpctx, filename, STREAM_SUB);
+}
+
+static void open_subtitles_from_options(struct MPContext *mpctx)
+{
     struct MPOpts *opts = mpctx->opts;
-    return open_external_file(mpctx, filename, opts->sub_demuxer_name,
-                              STREAM_SUB);
+    for (int i = 0; opts->sub_name && opts->sub_name[i] != NULL; i++)
+        mp_add_subtitles(mpctx, opts->sub_name[i]);
+}
+
+static void autoload_external_files(struct MPContext *mpctx)
+{
+    if (mpctx->opts->sub_auto < 0 && mpctx->opts->audiofile_auto < 0)
+        return;
+
+    void *tmp = talloc_new(NULL);
+    char *base_filename = mpctx->filename;
+    char *stream_filename = NULL;
+    if (mpctx->demuxer) {
+        if (demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_BASE_FILENAME,
+                                    &stream_filename) > 0)
+            base_filename = talloc_steal(tmp, stream_filename);
+    }
+    struct subfn *list = find_external_files(mpctx->global, base_filename);
+    talloc_steal(tmp, list);
+    for (int i = 0; list && list[i].fname; i++) {
+        char *filename = list[i].fname;
+        char *lang = list[i].lang;
+        for (int n = 0; n < mpctx->num_sources; n++) {
+            if (strcmp(mpctx->sources[n]->stream->url, filename) == 0)
+                goto skip;
+        }
+        struct track *track = open_external_file(mpctx, filename, list[i].type);
+        if (track) {
+            track->auto_loaded = true;
+            if (!track->lang)
+                track->lang = talloc_strdup(track, lang);
+        }
+    skip:;
+    }
+    talloc_free(tmp);
 }
 
 // Do stuff to a newly loaded playlist. This includes any processing that may
@@ -1086,6 +1099,7 @@ goto_reopen_demuxer: ;
 
     open_subtitles_from_options(mpctx);
     open_audiofiles_from_options(mpctx);
+    autoload_external_files(mpctx);
 
     check_previous_track_selection(mpctx);
 

@@ -231,6 +231,7 @@ typedef struct MPOpts {
     char **sub_name;
     char **sub_paths;
     int sub_auto;
+    int audiofile_auto;
     int use_text_osd;
     int osd_bar_visible;
     float osd_bar_align_x;

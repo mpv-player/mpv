@@ -18,13 +18,25 @@ static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "sr
                                        "smi", "rt", "txt", "ssa", "aqt", "jss",
                                        "js", "ass", "mks", NULL};
 
-static bool is_sub_ext(bstr ext)
+static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
+                                         "ogg", "m4a", NULL};
+
+static bool test_ext_list(bstr ext, const char *const *list)
 {
-    for (int n = 0; sub_exts[n]; n++) {
-        if (bstrcasecmp(bstr0(sub_exts[n]), ext) == 0)
+    for (int n = 0; list[n]; n++) {
+        if (bstrcasecmp(bstr0(list[n]), ext) == 0)
             return true;
     }
     return false;
+}
+
+static int test_ext(bstr ext)
+{
+    if (test_ext_list(ext, sub_exts))
+        return STREAM_SUB;
+    if (test_ext_list(ext, audio_exts))
+        return STREAM_AUDIO;
+    return -1;
 }
 
 static struct bstr strip_ext(struct bstr str)
@@ -45,7 +57,7 @@ static struct bstr get_ext(struct bstr s)
 
 bool mp_might_be_subtitle_file(const char *filename)
 {
-    return is_sub_ext(get_ext(bstr0(filename)));
+    return test_ext(get_ext(bstr0(filename))) == STREAM_SUB;
 }
 
 static int compare_sub_filename(const void *a, const void *b)
@@ -87,15 +99,6 @@ static struct bstr guess_lang_from_filename(struct bstr name)
     return (struct bstr){name.start + i + 1, n};
 }
 
-/**
- * @brief Append all the subtitles in the given path matching fname
- * @param opts MPlayer options
- * @param slist pointer to the subtitles list tallocated
- * @param nsub pointer to the number of subtitles
- * @param path Look for subtitles in this directory
- * @param fname Subtitle filename (pattern)
- * @param limit_fuzziness Ignore flag when sub_fuziness == 2
- */
 static void append_dir_subtitles(struct mpv_global *global,
                                  struct subfn **slist, int *nsub,
                                  struct bstr path, const char *fname,
@@ -103,7 +106,7 @@ static void append_dir_subtitles(struct mpv_global *global,
 {
     void *tmpmem = talloc_new(NULL);
     struct MPOpts *opts = global->opts;
-    struct mp_log *log = mp_log_new(tmpmem, global->log, "find_subfiles");
+    struct mp_log *log = mp_log_new(tmpmem, global->log, "find_files");
 
     if (mp_is_url(bstr0(fname)))
         goto out;
@@ -121,7 +124,7 @@ static void append_dir_subtitles(struct mpv_global *global,
     DIR *d = opendir(path0);
     if (!d)
         goto out;
-    mp_verbose(log, "Load subtitles in %.*s\n", BSTR_P(path));
+    mp_verbose(log, "Loading external files in %.*s\n", BSTR_P(path));
     struct dirent *de;
     while ((de = readdir(d))) {
         struct bstr dename = bstr0(de->d_name);
@@ -133,21 +136,35 @@ static void append_dir_subtitles(struct mpv_global *global,
         struct bstr tmp_fname_ext = get_ext(dename);
         struct bstr tmp_fname_trim = bstr_strip(tmp_fname_noext);
 
-        // does it end with a subtitle extension?
-        if (!is_sub_ext(tmp_fname_ext))
+        // check what it is (most likely)
+        int type = test_ext(tmp_fname_ext);
+        char **langs = NULL;
+        int fuzz = -1;
+        switch (type) {
+        case STREAM_SUB:
+            langs = opts->sub_lang;
+            fuzz = opts->sub_auto;
+            break;
+        case STREAM_AUDIO:
+            langs = opts->audio_lang;
+            fuzz = opts->audiofile_auto;
+            break;
+        }
+
+        if (fuzz < 0)
             goto next_sub;
 
         // we have a (likely) subtitle file
         int prio = 0;
         char *found_lang = NULL;
-        if (opts->sub_lang) {
+        if (langs) {
             if (bstr_startswith(tmp_fname_trim, f_fname_trim)) {
                 struct bstr lang = guess_lang_from_filename(tmp_fname_trim);
                 if (lang.len) {
-                    for (int n = 0; opts->sub_lang[n]; n++) {
-                        if (bstr_startswith0(lang, opts->sub_lang[n])) {
+                    for (int n = 0; langs[n]; n++) {
+                        if (bstr_startswith0(lang, langs[n])) {
                             prio = 4; // matches the movie name + lang extension
-                            found_lang = opts->sub_lang[n];
+                            found_lang = langs[n];
                             break;
                         }
                     }
@@ -156,18 +173,19 @@ static void append_dir_subtitles(struct mpv_global *global,
         }
         if (!prio && bstrcmp(tmp_fname_trim, f_fname_trim) == 0)
             prio = 3; // matches the movie name
-        if (!prio && bstr_find(tmp_fname_trim, f_fname_trim) >= 0
-            && opts->sub_auto >= 1)
+        if (!prio && bstr_find(tmp_fname_trim, f_fname_trim) >= 0 && fuzz >= 1)
             prio = 2; // contains the movie name
         if (!prio) {
             // doesn't contain the movie name
             // don't try in the mplayer subtitle directory
-            if (!limit_fuzziness && opts->sub_auto >= 2) {
+            if (!limit_fuzziness && fuzz >= 2) {
                 prio = 1;
             }
         }
 
-        mp_dbg(log, "Potential sub file: \"%s\"  Priority: %d\n", de->d_name, prio);
+        mp_dbg(log, "Potential external file: \"%s\"  Priority: %d\n",
+               de->d_name, prio);
+
         if (prio) {
             prio += prio;
             char *subpath = mp_path_join(*slist, path, dename);
@@ -179,6 +197,7 @@ static void append_dir_subtitles(struct mpv_global *global,
                 if (strncmp(subpath, "./", 2) == 0)
                     subpath += 2;
 
+                sub->type     = type;
                 sub->priority = prio;
                 sub->fname    = subpath;
                 sub->lang     = found_lang;
@@ -222,9 +241,9 @@ static void filter_subidx(struct subfn **slist, int *nsub)
     }
 }
 
-// Return a list of subtitles found, sorted by priority.
+// Return a list of subtitles and audio files found, sorted by priority.
 // Last element is terminated with a fname==NULL entry.
-struct subfn *find_text_subtitles(struct mpv_global *global, const char *fname)
+struct subfn *find_external_files(struct mpv_global *global, const char *fname)
 {
     struct MPOpts *opts = global->opts;
     struct subfn *slist = talloc_array_ptrtype(NULL, slist, 1);
@@ -233,20 +252,22 @@ struct subfn *find_text_subtitles(struct mpv_global *global, const char *fname)
     // Load subtitles from current media directory
     append_dir_subtitles(global, &slist, &n, mp_dirname(fname), fname, 0);
 
-    // Load subtitles in dirs specified by sub-paths option
-    if (opts->sub_paths) {
-        for (int i = 0; opts->sub_paths[i]; i++) {
-            char *path = mp_path_join(slist, mp_dirname(fname),
-                                      bstr0(opts->sub_paths[i]));
-            append_dir_subtitles(global, &slist, &n, bstr0(path), fname, 0);
+    if (opts->sub_auto >= 0) {
+        // Load subtitles in dirs specified by sub-paths option
+        if (opts->sub_paths) {
+            for (int i = 0; opts->sub_paths[i]; i++) {
+                char *path = mp_path_join(slist, mp_dirname(fname),
+                                        bstr0(opts->sub_paths[i]));
+                append_dir_subtitles(global, &slist, &n, bstr0(path), fname, 0);
+            }
         }
-    }
 
-    // Load subtitles in ~/.mpv/sub limiting sub fuzziness
-    char *mp_subdir = mp_find_config_file(NULL, global, "sub/");
-    if (mp_subdir)
-        append_dir_subtitles(global, &slist, &n, bstr0(mp_subdir), fname, 1);
-    talloc_free(mp_subdir);
+        // Load subtitles in ~/.mpv/sub limiting sub fuzziness
+        char *mp_subdir = mp_find_config_file(NULL, global, "sub/");
+        if (mp_subdir)
+            append_dir_subtitles(global, &slist, &n, bstr0(mp_subdir), fname, 1);
+        talloc_free(mp_subdir);
+    }
 
     // Sort by name for filter_subidx()
     qsort(slist, n, sizeof(*slist), compare_sub_filename);

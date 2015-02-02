@@ -328,6 +328,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("sub-fix-timing", sub_fix_timing, 0),
     OPT_CHOICE("sub-auto", sub_auto, 0,
                ({"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})),
+    OPT_CHOICE("audio-file-auto", audiofile_auto, 0,
+               ({"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})),
     OPT_INTRANGE("sub-pos", sub_pos, 0, 0, 100),
     OPT_FLOATRANGE("sub-gauss", sub_gauss, 0, 0.0, 3.0),
     OPT_FLAG("sub-gray", sub_gray, 0),
@@ -764,6 +766,7 @@ const struct MPOpts mp_default_opts = {
     .movie_aspect = -1.,
     .field_dominance = -1,
     .sub_auto = 0,
+    .audiofile_auto = -1,
     .osd_bar_visible = 1,
 #if HAVE_LIBASS
     .ass_enabled = 1,

@@ -22,13 +22,14 @@
 #include <stdbool.h>
 
 struct subfn {
+    int type; // STREAM_SUB/STREAM_AUDIO
     int priority;
     char *fname;
     char *lang;
 };
 
 struct mpv_global;
-struct subfn *find_text_subtitles(struct mpv_global *global, const char *fname);
+struct subfn *find_external_files(struct mpv_global *global, const char *fname);
 
 bool mp_might_be_subtitle_file(const char *filename);
 

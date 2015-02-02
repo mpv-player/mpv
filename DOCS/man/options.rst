@@ -1039,6 +1039,16 @@ Audio
         maximum amplification, i.e. amplify by 200%. The default volume (no
         change in volume) will be ``50`` in this case.
 
+``--audio-file-auto=<no|exact|fuzzy|all>``, ``--no-audio-file-auto``
+    Load additional audio files matching the video filename. The parameter
+    specifies how external audio files are matched. This is disabled by
+    default.
+
+    :no:    Don't automatically load external audio files (default).
+    :exact: Load the media filename with audio file extension.
+    :fuzzy: Load all audio files containing media filename.
+    :all:   Load all audio files in the current directory.
+
 ``--audio-client-name=<name>``
     The application name the player reports to the audio API. Can be useful
     if you want to force a different audio profile (e.g. with PulseAudio),
