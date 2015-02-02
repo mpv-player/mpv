@@ -1570,6 +1570,13 @@ static int mp_property_audio_devices(void *ctx, struct m_property *prop,
                                 get_device_entry, cmd->cached_ao_devices);
 }
 
+static int mp_property_ao(void *ctx, struct m_property *p, int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_strdup_ro(action, arg,
+                                    mpctx->ao ? ao_get_name(mpctx->ao) : NULL);
+}
+
 /// Audio delay (RW)
 static int mp_property_audio_delay(void *ctx, struct m_property *prop,
                                    int action, void *arg)
@@ -2574,6 +2581,13 @@ static int mp_property_vo_configured(void *ctx, struct m_property *prop,
                         mpctx->video_out && mpctx->video_out->config_ok);
 }
 
+static int mp_property_vo(void *ctx, struct m_property *p, int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_strdup_ro(action, arg,
+                    mpctx->video_out ? mpctx->video_out->driver->name : NULL);
+}
+
 static int mp_property_osd_w(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -3331,6 +3345,7 @@ static const struct m_property mp_properties[] = {
     {"volume-restore-data", mp_property_volrestore},
     {"audio-device", mp_property_audio_device},
     {"audio-device-list", mp_property_audio_devices},
+    {"current-ao", mp_property_ao},
 
     // Video
     {"fullscreen", mp_property_fullscreen},
@@ -3367,6 +3382,7 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("height", "video-params/h"),
     {"window-scale", mp_property_window_scale},
     {"vo-configured", mp_property_vo_configured},
+    {"current-vo", mp_property_vo},
     {"fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
     {"video-aspect", mp_property_aspect},
@@ -3466,10 +3482,10 @@ static const char *const *const mp_event_property_change[] = {
       "estimated-vf-fps"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
-      "width", "height", "fps", "aspect", "vo-configured"),
+      "width", "height", "fps", "aspect", "vo-configured", "current-vo"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
-      "volume-restore-data"),
+      "volume-restore-data", "current-ao"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata"),

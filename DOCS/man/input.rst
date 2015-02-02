@@ -1572,6 +1572,12 @@ Property list
 
     How these details are handled may change in the future.
 
+``current-vo``
+    Current video output driver (name as used with ``--vo``).
+
+``current-ao``
+    Current audio output driver (name as used with ``--ao``).
+
 ``mpv-version``
     Return the mpv version/copyright string. Depending on how the binary was
     built, it might contain either a release version, or just a git hash.
