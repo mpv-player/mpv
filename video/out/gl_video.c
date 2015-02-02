@@ -182,7 +182,6 @@ struct gl_video {
     struct mp_csp_primaries csp_src, csp_dest;
 
     struct mp_rect src_rect;    // displayed part of the source video
-    struct mp_rect src_rect_rot;// compensated for optional rotation
     struct mp_rect dst_rect;    // video rectangle on output window
     struct mp_osd_res osd_rect; // OSD size/margins
     int vp_x, vp_y, vp_w, vp_h; // GL viewport
@@ -1750,6 +1749,13 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
 
+    // compensated for optional rotation
+    struct mp_rect src_rect_rot = p->src_rect;
+    if ((p->image_params.rotate % 180) == 90) {
+        MPSWAP(int, src_rect_rot.x0, src_rect_rot.y0);
+        MPSWAP(int, src_rect_rot.x1, src_rect_rot.y1);
+    }
+
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
     gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
 
@@ -1800,8 +1806,8 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
     // Clip to visible height so that separate scaling scales the visible part
     // only (and the target FBO texture can have a bounded size).
     // Don't clamp width; too hard to get correct final scaling on l/r borders.
-    chain.f.vp_y = p->src_rect_rot.y0;
-    chain.f.vp_h = p->src_rect_rot.y1 - p->src_rect_rot.y0;
+    chain.f.vp_y = src_rect_rot.y0;
+    chain.f.vp_h = src_rect_rot.y1 - src_rect_rot.y0;
 
     handle_pass(p, &chain, &p->scale_sep_fbo, p->scale_sep_program);
 
@@ -1817,8 +1823,8 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
     // correct origin/height before.
     // For X direction, assume the texture wasn't scaled yet, so we can
     // select the correct portion, which will be scaled to screen.
-    chain.f.vp_x = p->src_rect_rot.x0;
-    chain.f.vp_w = p->src_rect_rot.x1 - p->src_rect_rot.x0;
+    chain.f.vp_x = src_rect_rot.x0;
+    chain.f.vp_w = src_rect_rot.x1 - src_rect_rot.x0;
 
     chain.use_dst = true;
     chain.dst = p->dst_rect;
@@ -1906,14 +1912,8 @@ void gl_video_resize(struct gl_video *p, struct mp_rect *window,
                      struct mp_osd_res *osd, bool vflip)
 {
     p->src_rect = *src;
-    p->src_rect_rot = *src;
     p->dst_rect = *dst;
     p->osd_rect = *osd;
-
-    if ((p->image_params.rotate % 180) == 90) {
-        MPSWAP(int, p->src_rect_rot.x0, p->src_rect_rot.y0);
-        MPSWAP(int, p->src_rect_rot.x1, p->src_rect_rot.y1);
-    }
 
     p->vp_x = window->x0;
     p->vp_y = window->y0;
