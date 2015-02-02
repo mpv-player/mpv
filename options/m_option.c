@@ -135,8 +135,12 @@ static int parse_flag(struct mp_log *log, const m_option_t *opt,
                 VAL(dst) = 0;
             return 1;
         }
-        mp_err(log, "Invalid parameter for %.*s flag: %.*s\n",
-               BSTR_P(name), BSTR_P(param));
+        mp_fatal(log, "Invalid parameter for %.*s flag: %.*s\n",
+                 BSTR_P(name), BSTR_P(param));
+        mp_info(log, "Valid values are:\n");
+        mp_info(log, "    yes\n");
+        mp_info(log, "    no\n");
+        mp_info(log, "    (passing nothing)\n");
         return M_OPT_INVALID;
     } else {
         if (dst)
@@ -545,20 +549,19 @@ static int parse_choice(struct mp_log *log, const struct m_option *opt,
             return M_OPT_MISSING_PARAM;
         if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
             long long val;
-            if (parse_longlong(log, opt, name, param, &val) == 1) {
+            if (parse_longlong(mp_null_log, opt, name, param, &val) == 1) {
                 if (dst)
                     *(int *)dst = val;
                 return 1;
             }
         }
-        mp_err(log, "Invalid value for option %.*s: %.*s\n",
-               BSTR_P(name), BSTR_P(param));
-        mp_err(log, "Valid values are:");
+        mp_fatal(log, "Invalid value for option %.*s: %.*s\n",
+                 BSTR_P(name), BSTR_P(param));
+        mp_info(log, "Valid values are:\n");
         for (alt = opt->priv; alt->name; alt++)
-            mp_err(log, " %s", alt->name);
+            mp_info(log, "    %s\n", alt->name[0] ? alt->name : "(passing nothing)");
         if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX))
-            mp_err(log, " %g-%g", opt->min, opt->max);
-        mp_err(log, "\n");
+            mp_info(log, "    %g-%g (integer range)\n", opt->min, opt->max);
         return M_OPT_INVALID;
     }
     if (dst)
