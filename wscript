@@ -53,6 +53,7 @@ build_options = [
         'name': '--pdf-build',
         'desc': 'pdf manual generation',
         'func': check_ctx_vars('RST2PDF'),
+        'default': 'disable',
     }, {
         'name': 'libdl',
         'desc': 'dynamic loader',
