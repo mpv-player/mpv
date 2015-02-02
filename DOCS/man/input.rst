@@ -1119,6 +1119,17 @@ Property list
     Note that you don't know the success of the operation immediately after
     writing this property. It happens with a delay as video is reinitialized.
 
+``detected-hwdec``
+    Return the current hardware decoder that was detected and opened. Returns
+    the same values as ``hwdec``.
+
+    This is known only once the VO has opened (and possibly later). With some
+    VOs (like ``opengl``), this is never known in advance, but only when the
+    decoder attempted to create the hw decoder successfully. Also, hw decoders
+    with ``-copy`` suffix are returned only while hw decoding is active (and
+    unset afterwards). All this reflects how detecting hw decoders are
+    detected and used internally in mpv.
+
 ``panscan`` (RW)
     See ``--panscan``.
 

@@ -2014,6 +2014,35 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+static int mp_property_detected_hwdec(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct dec_video *vd = mpctx->d_video;
+    if (!vd || !vd->hwdec_info)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE: {
+        // Abuse another hwdec option to resolve the value names
+        struct m_property dummy = {.name = "hwdec"};
+        return mp_property_generic_option(mpctx, &dummy, action, arg);
+    }
+    case M_PROPERTY_GET: {
+        int d = vd->hwdec_info->hwctx ? vd->hwdec_info->hwctx->type : HWDEC_NONE;
+        if (d) {
+            *(int *)arg = d;
+        } else {
+            // Maybe one of the "-copy" ones. These are "detected" every time
+            // the decoder is opened, so we don't know much about them otherwise.
+            return mp_property_hwdec(ctx, prop, action, arg);
+        }
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 #define VF_DEINTERLACE_LABEL "deinterlace"
 
 static bool probe_deint_filter(struct MPContext *mpctx, const char *filt)
@@ -3389,6 +3418,7 @@ static const struct m_property mp_properties[] = {
     {"vid", mp_property_video},
     {"program", mp_property_program},
     {"hwdec", mp_property_hwdec},
+    {"detected-hwdec", mp_property_detected_hwdec},
 
     {"estimated-frame-count", mp_property_frame_count},
     {"estimated-frame-number", mp_property_frame_number},
@@ -3482,7 +3512,8 @@ static const char *const *const mp_event_property_change[] = {
       "estimated-vf-fps"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
-      "width", "height", "fps", "aspect", "vo-configured", "current-vo"),
+      "width", "height", "fps", "aspect", "vo-configured", "current-vo",
+      "detected-hwdec"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
       "volume-restore-data", "current-ao"),

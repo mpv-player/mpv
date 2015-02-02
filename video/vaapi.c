@@ -130,6 +130,7 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog)
         .log = talloc_steal(res, log),
         .display = display,
         .hwctx = {
+            .type = HWDEC_VAAPI,
             .priv = res,
             .vaapi_ctx = res,
             .download_image = ctx_download_image,

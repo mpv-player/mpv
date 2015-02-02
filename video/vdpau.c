@@ -371,6 +371,7 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
         .x11 = x11,
         .preemption_counter = 1,
         .hwctx = {
+            .type = HWDEC_VDPAU,
             .priv = ctx,
             .vdpau_ctx = ctx,
             .download_image = download_image,

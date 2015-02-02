@@ -9,18 +9,6 @@
 #include "video/mp_image.h"
 #include "video/hwdec.h"
 
-// keep in sync with --hwdec option
-enum hwdec_type {
-    HWDEC_AUTO = -1,
-    HWDEC_NONE = 0,
-    HWDEC_VDPAU = 1,
-    HWDEC_VDA = 2,
-    HWDEC_CRYSTALHD = 3,
-    HWDEC_VAAPI = 4,
-    HWDEC_VAAPI_COPY = 5,
-    HWDEC_DXVA2_COPY = 6,
-};
-
 typedef struct lavc_ctx {
     struct mp_log *log;
     struct MPOpts *opts;

@@ -27,8 +27,6 @@
 #include "gl_video.h"
 #include "gl_hwdec.h"
 
-#include "video/decode/lavc.h" // HWDEC_* values
-
 #include "libmpv/opengl_cb.h"
 
 /*

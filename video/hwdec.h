@@ -3,7 +3,20 @@
 
 struct mp_image_pool;
 
+// keep in sync with --hwdec option
+enum hwdec_type {
+    HWDEC_AUTO = -1,
+    HWDEC_NONE = 0,
+    HWDEC_VDPAU = 1,
+    HWDEC_VDA = 2,
+    HWDEC_VAAPI = 4,
+    HWDEC_VAAPI_COPY = 5,
+    HWDEC_DXVA2_COPY = 6,
+};
+
 struct mp_hwdec_ctx {
+    enum hwdec_type type;
+
     void *priv; // for free use by hwdec implementation
 
     // API-specific, not needed by all backends.

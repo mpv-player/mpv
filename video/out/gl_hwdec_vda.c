@@ -89,6 +89,7 @@ static int create(struct gl_hwdec *hw)
         return -1;
 
     hw->hwctx = &p->hwctx;
+    hw->hwctx->type = HWDEC_VDA;
     hw->hwctx->download_image = download_image;
 
     GL *gl = hw->gl;
