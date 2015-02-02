@@ -440,6 +440,11 @@ bool ao_untimed(struct ao *ao)
     return ao->untimed;
 }
 
+const char *ao_get_detected_device(struct ao *ao)
+{
+    return ao->detected_device;
+}
+
 struct ao_device_list *ao_get_device_list(struct mpv_global *global)
 {
     struct ao_device_list *list = talloc_zero(NULL, struct ao_device_list);

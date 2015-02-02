@@ -79,6 +79,7 @@ void ao_uninit(struct ao *ao);
 void ao_get_format(struct ao *ao, struct mp_audio *format);
 const char *ao_get_name(struct ao *ao);
 const char *ao_get_description(struct ao *ao);
+const char *ao_get_detected_device(struct ao *ao);
 bool ao_untimed(struct ao *ao);
 int ao_play(struct ao *ao, void **data, int samples, int flags);
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg);

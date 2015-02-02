@@ -1589,6 +1589,10 @@ Property list
 ``current-ao``
     Current audio output driver (name as used with ``--ao``).
 
+``audio-out-detected-device``
+    Return the audio device selected by the AO driver (only implemented for
+    some drivers: currently only ``coreaudio``).
+
 ``mpv-version``
     Return the mpv version/copyright string. Depending on how the binary was
     built, it might contain either a release version, or just a git hash.

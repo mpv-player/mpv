@@ -50,6 +50,9 @@ struct ao {
     // default device should be used, this is set to NULL.
     char *device;
 
+    // Device actually chosen by the AO
+    char *detected_device;
+
     // Application name to report to the audio API.
     char *client_name;
 

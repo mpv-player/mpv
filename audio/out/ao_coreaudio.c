@@ -156,6 +156,8 @@ static int init(struct ao *ao)
     OSStatus err = ca_select_device(ao, ao->device, &p->device);
     CHECK_CA_ERROR("failed to select device");
 
+    ao->detected_device = talloc_asprintf(ao, "%d", p->device);
+
     if (!init_chmap(ao))
         goto coreaudio_error;
 
