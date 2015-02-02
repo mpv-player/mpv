@@ -19,6 +19,7 @@ def is_user_lib(objfile, libname):
            not "libSystem." in libname and \
            not "libc." in libname and \
            not "libgcc." in libname and \
+           not os.path.basename(libname) == 'Python' and \
            not os.path.basename(objfile) in libname
 
 def otool(objfile):
