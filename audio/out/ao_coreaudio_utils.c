@@ -64,13 +64,17 @@ void ca_get_device_list(struct ao *ao, struct ao_device_list *list)
     for (int i = 0; i < n_devs; i++) {
         if (!ca_is_output_device(ao, devs[i]))
             continue;
+        void *ta_ctx = talloc_new(NULL);
         char *name;
         char *desc;
         err = CA_GET_STR(devs[i], kAudioDevicePropertyDeviceUID, &name);
+        talloc_steal(ta_ctx, name);
         err = CA_GET_STR(devs[i], kAudioObjectPropertyName, &desc);
+        talloc_steal(ta_ctx, desc);
         if (err != noErr)
             desc = "Unknown";
         ao_device_list_add(list, ao, &(struct ao_device_desc){name, desc});
+        talloc_free(ta_ctx);
     }
     talloc_free(devs);
 coreaudio_error:
