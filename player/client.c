@@ -269,7 +269,7 @@ static void wakeup_client(struct mpv_handle *ctx)
     pthread_mutex_lock(&ctx->wakeup_lock);
     if (!ctx->need_wakeup) {
         ctx->need_wakeup = true;
-        pthread_cond_signal(&ctx->wakeup);
+        pthread_cond_broadcast(&ctx->wakeup);
         if (ctx->wakeup_cb)
             ctx->wakeup_cb(ctx->wakeup_cb_ctx);
         if (ctx->wakeup_pipe[0] != -1)
@@ -360,21 +360,25 @@ static void unlock_core(mpv_handle *ctx)
         mp_dispatch_unlock(ctx->mpctx->dispatch);
 }
 
+void mpv_wait_async_requests(mpv_handle *ctx)
+{
+    mp_resume_all(ctx);
+
+    pthread_mutex_lock(&ctx->lock);
+    while (ctx->reserved_events || ctx->properties_updating)
+        wait_wakeup(ctx, INT64_MAX);
+    pthread_mutex_unlock(&ctx->lock);
+}
+
 void mpv_detach_destroy(mpv_handle *ctx)
 {
     if (!ctx)
         return;
 
-    mp_resume_all(ctx);
-
-    pthread_mutex_lock(&ctx->lock);
     // reserved_events equals the number of asynchronous requests that weren't
     // yet replied. In order to avoid that trying to reply to a removed client
     // causes a crash, block until all asynchronous requests were served.
-    ctx->event_mask = 0;
-    while (ctx->reserved_events || ctx->properties_updating)
-        wait_wakeup(ctx, INT64_MAX);
-    pthread_mutex_unlock(&ctx->lock);
+    mpv_wait_async_requests(ctx);
 
     struct mp_client_api *clients = ctx->clients;
 

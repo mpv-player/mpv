@@ -167,7 +167,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 13)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 14)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -1477,6 +1477,20 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
  *         On MS Windows/MinGW, this will always return -1.
  */
 int mpv_get_wakeup_pipe(mpv_handle *ctx);
+
+/**
+ * Block until all asynchronous requests are done. This affects functions like
+ * mpv_command_async(), which return immediately and return their result as
+ * events.
+ *
+ * This is a helper, and somewhat equivalent to calling mpv_wait_event() in a
+ * loop until all known asynchronous requests have sent their reply as event,
+ * except that the event queue is not emptied.
+ *
+ * In case you called mpv_suspend() before, this will also forcibly reset the
+ * suspend counter of the given handle.
+ */
+void mpv_wait_async_requests(mpv_handle *ctx);
 
 typedef enum mpv_sub_api {
     /**
