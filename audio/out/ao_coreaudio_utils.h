@@ -28,6 +28,9 @@
 
 #define CA_CFSTR_ENCODING kCFStringEncodingASCII
 
+CFStringRef cfstr_from_cstr(char *str);
+char *cfstr_get_cstr(CFStringRef cfstr);
+
 char *fourcc_repr(void *talloc_ctx, uint32_t code);
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
 

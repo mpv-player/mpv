@@ -83,12 +83,7 @@ OSStatus ca_get_str(AudioObjectID id, ca_scope scope, ca_sel selector,
         ca_get(id, scope, selector, sizeof(CFStringRef), (void **)&string);
     CHECK_CA_ERROR_SILENT_L(coreaudio_error);
 
-    CFIndex size =
-        CFStringGetMaximumSizeForEncoding(
-            CFStringGetLength(string), CA_CFSTR_ENCODING) + 1;
-
-    *data = talloc_zero_size(NULL, size);
-    CFStringGetCString(string, *data, size, CA_CFSTR_ENCODING);
+    *data = cfstr_get_cstr(string);
     CFRelease(string);
 coreaudio_error:
     return err;

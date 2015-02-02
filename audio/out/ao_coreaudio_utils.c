@@ -28,6 +28,21 @@
 #include "osdep/endian.h"
 #include "audio/format.h"
 
+CFStringRef cfstr_from_cstr(char *str)
+{
+    return CFStringCreateWithCString(NULL, str, CA_CFSTR_ENCODING);
+}
+
+char *cfstr_get_cstr(CFStringRef cfstr)
+{
+    CFIndex size =
+        CFStringGetMaximumSizeForEncoding(
+            CFStringGetLength(cfstr), CA_CFSTR_ENCODING) + 1;
+    char *buffer = talloc_zero_size(NULL, size);
+    CFStringGetCString(cfstr, buffer, size, CA_CFSTR_ENCODING);
+    return buffer;
+}
+
 static bool ca_is_output_device(struct ao *ao, AudioDeviceID dev)
 {
     size_t n_buffers;
@@ -49,9 +64,9 @@ void ca_get_device_list(struct ao *ao, struct ao_device_list *list)
     for (int i = 0; i < n_devs; i++) {
         if (!ca_is_output_device(ao, devs[i]))
             continue;
-        char name[32];
+        char *name;
         char *desc;
-        sprintf(name, "%d", devs[i]);
+        err = CA_GET_STR(devs[i], kAudioDevicePropertyDeviceUID, &name);
         err = CA_GET_STR(devs[i], kAudioObjectPropertyName, &desc);
         if (err != noErr)
             desc = "Unknown";
@@ -65,21 +80,32 @@ coreaudio_error:
 OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
 {
     OSStatus err = noErr;
-    errno = 0;
-    int selection = name && name[0] ? strtol(name, (char **)NULL, 10) : -1;
-    if (errno == EINVAL || errno == ERANGE) {
-        selection = -1;
-        MP_WARN(ao, "device identifier '%s' is invalid\n", name);
-    }
-    *device = 0;
-    if (selection < 0) {
+    *device = kAudioObjectUnknown;
+
+    if (name) {
+        CFStringRef uid = cfstr_from_cstr(name);
+        AudioValueTranslation v = (AudioValueTranslation) {
+            .mInputData = &uid,
+            .mInputDataSize = sizeof(CFStringRef),
+            .mOutputData = device,
+            .mOutputDataSize = sizeof(*device),
+        };
+        uint32_t size = sizeof(AudioValueTranslation);
+        AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
+            .mSelector = kAudioHardwarePropertyDeviceForUID,
+            .mScope    = kAudioObjectPropertyScopeGlobal,
+            .mElement  = kAudioObjectPropertyElementMaster,
+        };
+        err = AudioObjectGetPropertyData(
+            kAudioObjectSystemObject, &p_addr, 0, 0, &size, &v);
+        CFRelease(uid);
+        CHECK_CA_ERROR("unable to query for device UID");
+    } else {
         // device not set by user, get the default one
         err = CA_GET(kAudioObjectSystemObject,
                      kAudioHardwarePropertyDefaultOutputDevice,
                      device);
         CHECK_CA_ERROR("could not get default audio device");
-    } else {
-        *device = selection;
     }
 
     if (mp_msg_test(ao->log, MSGL_V)) {
