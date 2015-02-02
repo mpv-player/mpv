@@ -597,11 +597,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     }
     case WM_SIZE: {
         RECT r;
-        GetClientRect(w32->window, &r);
-        w32->dw = r.right;
-        w32->dh = r.bottom;
-        signal_events(w32, VO_EVENT_RESIZE);
-        MP_VERBOSE(w32, "resize window: %d:%d\n", w32->dw, w32->dh);
+        if (GetClientRect(w32->window, &r) && r.right > 0 && r.bottom > 0) {
+            w32->dw = r.right;
+            w32->dh = r.bottom;
+            signal_events(w32, VO_EVENT_RESIZE);
+            MP_VERBOSE(w32, "resize window: %d:%d\n", w32->dw, w32->dh);
+        }
         break;
     }
     case WM_SIZING:
