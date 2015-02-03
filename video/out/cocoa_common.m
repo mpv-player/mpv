@@ -62,6 +62,7 @@ struct vo_cocoa_state {
 
     NSScreen *current_screen;
     NSScreen *fs_screen;
+    double screen_fps;
 
     NSInteger window_level;
 
@@ -256,6 +257,27 @@ static void vo_cocoa_update_screens_pointers(struct vo *vo)
     get_screen_handle(vo, opts->fsscreen_id, s->window, &s->fs_screen);
 }
 
+static void vo_cocoa_update_screen_fps(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    NSScreen *screen = vo->opts->fullscreen ? s->fs_screen : s->current_screen;
+    NSDictionary* sinfo = [screen deviceDescription];
+    NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
+    CGDirectDisplayID did = [sid longValue];
+    CGDisplayModeRef mode = CGDisplayCopyDisplayMode(did);
+    s->screen_fps = CGDisplayModeGetRefreshRate(mode);
+    CGDisplayModeRelease(mode);
+    if (s->screen_fps == 0.0) {
+        // Most internal Apple monitors and laptop monitors report 0 instead
+        // of 60fps. Assume them to be 60hz. This is technically incorrect but
+        // works most of the time, and seems to be used in most open source
+        // software for lack of a better Apple API.
+        MP_VERBOSE(vo, "CoreGraphics reports a 0fps display. Assuming internal "
+                       "Apple monitor @ 60fps instead.\n");
+        s->screen_fps = 60.0;
+    }
+}
+
 static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -264,6 +286,7 @@ static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
         return;
 
     vo_cocoa_update_screens_pointers(vo);
+    vo_cocoa_update_screen_fps(vo);
 
     if (out_rc) {
         NSRect r = [s->current_screen frame];
@@ -648,6 +671,9 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_GET_ICC_PROFILE:
         vo_cocoa_control_get_icc_profile(vo, arg);
+        return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_FPS:
+        *(double *)arg = vo->cocoa->screen_fps;
         return VO_TRUE;
     }
     return VO_NOTIMPL;
