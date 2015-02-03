@@ -482,21 +482,20 @@ void main() {
     // Inverse of USE_SIGMOID
     color = (1.0/(1.0 + exp(sig_slope * (sig_center - color))) - sig_offset) / sig_scale;
 #endif
-#ifdef USE_GAMMA_POW
-    // User-defined gamma correction factor (via the gamma sub-option)
-    color = pow(color, inv_gamma);
-#endif
 #ifdef USE_CMS_MATRIX
     // Convert to the right target gamut first (to BT.709 for sRGB,
     // and to BT.2020 for 3DLUT).
     color = cms_matrix * color;
-
+#endif
     // Clamp to the target gamut. This clamp is needed because the gamma
     // functions are not well-defined outside this range, which is related to
     // the fact that they're not representable on the target device.
     // TODO: Desaturate colorimetrically; this happens automatically for
     // 3dlut targets but not for sRGB mode. Not sure if this is a requirement.
     color = clamp(color, 0.0, 1.0);
+#ifdef USE_GAMMA_POW
+    // User-defined gamma correction factor (via the gamma sub-option)
+    color = pow(color, inv_gamma);
 #endif
 #ifdef USE_3DLUT
     // For the 3DLUT we are arbitrarily using 2.4 as input gamma to reduce
