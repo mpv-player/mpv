@@ -38,6 +38,8 @@
 #define VO_EVENT_ICC_PROFILE_CHANGED 4
 // Some other window state changed
 #define VO_EVENT_WIN_STATE 8
+// The ambient light conditions changed and need to be reloaded
+#define VO_EVENT_AMBIENT_LIGHTING_CHANGED 16
 
 // Set of events the player core may be interested in.
 #define VO_EVENTS_USER (VO_EVENT_RESIZE | VO_EVENT_WIN_STATE)
@@ -103,6 +105,7 @@ enum mp_voctrl {
     VOCTRL_SET_COMMAND_LINE,            // char**
 
     VOCTRL_GET_ICC_PROFILE,             // bstr*
+    VOCTRL_GET_AMBIENT_LUX,             // int*
     VOCTRL_GET_DISPLAY_FPS,             // double*
     VOCTRL_GET_RECENT_FLIP_TIME,        // int64_t* (using mp_time_us())
 
