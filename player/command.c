@@ -4557,51 +4557,58 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
-    case MP_CMD_SUB_ADD: {
+    case MP_CMD_SUB_ADD:
+    case MP_CMD_AUDIO_ADD: {
         if (!mpctx->playing)
             return -1;
+        int type = cmd->id == MP_CMD_SUB_ADD ? STREAM_SUB : STREAM_AUDIO;
         if (cmd->args[1].v.i == 2) {
-            struct track *sub = find_track_with_url(mpctx, STREAM_SUB,
+            struct track *t = find_track_with_url(mpctx, type,
                                                     cmd->args[0].v.s);
-            if (sub) {
-                mp_switch_track(mpctx, sub->type, sub);
-                mp_mark_user_track_selection(mpctx, 0, sub->type);
+            if (t) {
+                mp_switch_track(mpctx, t->type, t);
+                mp_mark_user_track_selection(mpctx, 0, t->type);
                 return 0;
             }
         }
-        struct track *sub = mp_add_subtitles(mpctx, cmd->args[0].v.s);
-        if (!sub)
+        struct track *t = mp_add_external_file(mpctx, cmd->args[0].v.s, type);
+        if (!t)
             return -1;
         if (cmd->args[1].v.i == 1) {
-            sub->no_default = true;
+            t->no_default = true;
         } else {
-            mp_switch_track(mpctx, sub->type, sub);
-            mp_mark_user_track_selection(mpctx, 0, sub->type);
+            mp_switch_track(mpctx, t->type, t);
+            mp_mark_user_track_selection(mpctx, 0, t->type);
         }
         char *title = cmd->args[2].v.s;
         if (title && title[0])
-            sub->title = talloc_strdup(sub, title);
+            t->title = talloc_strdup(t, title);
         char *lang = cmd->args[3].v.s;
         if (lang && lang[0])
-            sub->lang = talloc_strdup(sub, lang);
+            t->lang = talloc_strdup(t, lang);
         break;
     }
 
-    case MP_CMD_SUB_REMOVE: {
-        struct track *sub = mp_track_by_tid(mpctx, STREAM_SUB, cmd->args[0].v.i);
-        if (!sub)
+    case MP_CMD_SUB_REMOVE:
+    case MP_CMD_AUDIO_REMOVE: {
+        int type = cmd->id == MP_CMD_SUB_REMOVE ? STREAM_SUB : STREAM_AUDIO;
+        struct track *t = mp_track_by_tid(mpctx, type, cmd->args[0].v.i);
+        if (!t)
             return -1;
-        mp_remove_track(mpctx, sub);
+        mp_remove_track(mpctx, t);
         break;
     }
 
-    case MP_CMD_SUB_RELOAD: {
-        struct track *sub = mp_track_by_tid(mpctx, STREAM_SUB, cmd->args[0].v.i);
-        if (sub && sub->is_external && sub->external_filename) {
-            struct track *nsub = mp_add_subtitles(mpctx, sub->external_filename);
-            if (nsub) {
-                mp_remove_track(mpctx, sub);
-                mp_switch_track(mpctx, nsub->type, nsub);
+    case MP_CMD_SUB_RELOAD:
+    case MP_CMD_AUDIO_RELOAD: {
+        int type = cmd->id == MP_CMD_SUB_RELOAD ? STREAM_SUB : STREAM_AUDIO;
+        struct track *t = mp_track_by_tid(mpctx, type, cmd->args[0].v.i);
+        if (t && t->is_external && t->external_filename) {
+            struct track *nt = mp_add_external_file(mpctx, t->external_filename,
+                                                    type);
+            if (nt) {
+                mp_remove_track(mpctx, t);
+                mp_switch_track(mpctx, nt->type, nt);
                 return 0;
             }
         }

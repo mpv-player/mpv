@@ -193,6 +193,12 @@ const struct mp_cmd_def mp_cmds[] = {
                       {"double", 1})),
   }},
 
+  { MP_CMD_AUDIO_ADD, "audio_add", { ARG_STRING,
+      OARG_CHOICE(0, ({"select", 0}, {"auto", 1}, {"cached", 2})),
+      OARG_STRING(""), OARG_STRING("") } },
+  { MP_CMD_AUDIO_REMOVE, "audio_remove", { OARG_INT(-1) } },
+  { MP_CMD_AUDIO_RELOAD, "audio_reload", { OARG_INT(-1) } },
+
   {0}
 };
 

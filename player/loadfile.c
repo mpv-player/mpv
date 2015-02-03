@@ -646,8 +646,8 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     return true;
 }
 
-static struct track *open_external_file(struct MPContext *mpctx, char *filename,
-                                        enum stream_type filter)
+struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
+                                   enum stream_type filter)
 {
     struct MPOpts *opts = mpctx->opts;
     if (!filename)
@@ -714,19 +714,14 @@ static void open_audiofiles_from_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     for (int n = 0; opts->audio_files && opts->audio_files[n]; n++)
-        open_external_file(mpctx, opts->audio_files[n], STREAM_AUDIO);
-}
-
-struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename)
-{
-    return open_external_file(mpctx, filename, STREAM_SUB);
+        mp_add_external_file(mpctx, opts->audio_files[n], STREAM_AUDIO);
 }
 
 static void open_subtitles_from_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     for (int i = 0; opts->sub_name && opts->sub_name[i] != NULL; i++)
-        mp_add_subtitles(mpctx, opts->sub_name[i]);
+        mp_add_external_file(mpctx, opts->sub_name[i], STREAM_SUB);
 }
 
 static void autoload_external_files(struct MPContext *mpctx)
@@ -751,7 +746,7 @@ static void autoload_external_files(struct MPContext *mpctx)
             if (strcmp(mpctx->sources[n]->stream->url, filename) == 0)
                 goto skip;
         }
-        struct track *track = open_external_file(mpctx, filename, list[i].type);
+        struct track *track = mp_add_external_file(mpctx, filename, list[i].type);
         if (track) {
             track->auto_loaded = true;
             if (!track->lang)

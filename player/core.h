@@ -373,7 +373,8 @@ int mp_nav_in_menu(struct MPContext *mpctx);
 
 // loadfile.c
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
-struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename);
+struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
+                                   enum stream_type filter);
 void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
                      struct track *track);
 void mp_switch_track_n(struct MPContext *mpctx, int order,
