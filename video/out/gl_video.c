@@ -161,6 +161,8 @@ struct gl_video {
     float chroma_fix[2];
 
     float input_gamma, conv_gamma;
+    float user_gamma;
+    bool user_gamma_enabled; // shader handles user_gamma
 
     struct video_image image;
 
@@ -175,6 +177,9 @@ struct gl_video {
 
     // true if scaler is currently upscaling
     bool upscaling;
+
+    // reinit_rendering must be called
+    bool need_reinit_rendering;
 
     struct mp_csp_equalizer video_eq;
 
@@ -319,6 +324,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .scaler_radius = {3, 3},
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
+    .gamma = 1.0f,
 };
 
 const struct gl_video_opts gl_video_opts_hq_def = {
@@ -336,6 +342,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .scaler_radius = {3, 3},
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
+    .gamma = 1.0f,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -344,7 +351,7 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
-        OPT_FLOATRANGE("gamma", gamma, 0, 0.0, 2.0),
+        OPT_FLOATRANGE("gamma", gamma, 0, 0.1, 2.0),
         OPT_FLAG("srgb", srgb, 0),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
@@ -566,9 +573,8 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     gl->Uniform1f(gl->GetUniformLocation(program, "sig_scale"), sig_scale);
     gl->Uniform1f(gl->GetUniformLocation(program, "sig_offset"), sig_offset);
 
-    float gamma = p->opts.gamma ? p->opts.gamma : 1.0;
     gl->Uniform1f(gl->GetUniformLocation(program, "inv_gamma"),
-                  1.0 / (cparams.gamma * gamma));
+                  1.0f / p->user_gamma);
 
     for (int n = 0; n < p->plane_count; n++) {
         char textures_n[32];
@@ -1029,7 +1035,7 @@ static void compile_shaders(struct gl_video *p)
                    p->chroma_fix[0] != 1.0f || p->chroma_fix[1] != 1.0f);
 
     shader_def_opt(&header_final, "USE_SIGMOID_INV", use_sigmoid);
-    shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma > 0);
+    shader_def_opt(&header_final, "USE_INV_GAMMA", p->user_gamma_enabled);
     shader_def_opt(&header_final, "USE_CMS_MATRIX", use_cms_matrix);
     shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
     // 3DLUT overrides SRGB
@@ -1347,6 +1353,20 @@ static const char *expected_scaler(struct gl_video *p, int unit)
     return p->opts.scalers[unit];
 }
 
+static void update_settings(struct gl_video *p)
+{
+    struct mp_csp_params params;
+    mp_csp_copy_equalizer_values(&params, &p->video_eq);
+
+    p->user_gamma = params.gamma * p->opts.gamma;
+
+    // Lazy gamma shader initialization (a microoptimization)
+    if (p->user_gamma != 1.0f && !p->user_gamma_enabled) {
+        p->user_gamma_enabled = true;
+        p->need_reinit_rendering = true;
+    }
+}
+
 static void reinit_rendering(struct gl_video *p)
 {
     GL *gl = p->gl;
@@ -1359,6 +1379,8 @@ static void reinit_rendering(struct gl_video *p)
 
     if (!p->image_params.imgfmt)
         return;
+
+    update_settings(p);
 
     for (int n = 0; n < 2; n++)
         p->scalers[n].name = expected_scaler(p, n);
@@ -1396,6 +1418,8 @@ static void reinit_rendering(struct gl_video *p)
     }
 
     recreate_osd(p);
+
+    p->need_reinit_rendering = false;
 }
 
 static void uninit_rendering(struct gl_video *p)
@@ -2018,7 +2042,6 @@ static bool test_fbo(struct gl_video *p, GLenum format)
     }
     fbotex_uninit(&fbo);
     glCheckError(gl, p->log, "FBO test");
-    gl_video_set_gl_state(p);
     return success;
 }
 
@@ -2384,6 +2407,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
         .texture_16bit_depth = 16,
+        .user_gamma = 1.0f,
         .scalers = {
             { .index = 0, .name = "bilinear" },
             { .index = 1, .name = "bilinear" },
@@ -2422,11 +2446,7 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
         p->opts.dscaler = (char *)handle_scaler_opt(p->opts.dscaler);
     }
 
-    if (!p->opts.gamma && p->video_eq.values[MP_CSP_EQ_GAMMA] != 0)
-        p->opts.gamma = 1.0f;
-
     check_gl_features(p);
-    gl_video_set_gl_state(p);
     reinit_rendering(p);
     check_resize(p);
 }
@@ -2444,12 +2464,14 @@ struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p)
 // Call when the mp_csp_equalizer returned by gl_video_eq_ptr() was changed.
 void gl_video_eq_update(struct gl_video *p)
 {
-    if (!p->opts.gamma && p->video_eq.values[MP_CSP_EQ_GAMMA] != 0) {
-        MP_VERBOSE(p, "Auto-enabling gamma.\n");
-        p->opts.gamma = 1.0f;
-        compile_shaders(p);
+    update_settings(p);
+
+    if (p->need_reinit_rendering) {
+        reinit_rendering(p);
+        check_resize(p);
+    } else {
+        update_all_uniforms(p);
     }
-    update_all_uniforms(p);
 }
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,

@@ -504,17 +504,15 @@ Available video output drivers are:
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
         Default: rgba.
 
-    ``gamma=<0.0..2.0>``
-        Set a gamma value. If gamma is adjusted in other ways (like with
-        the ``--gamma`` option or key bindings and the ``gamma`` property), the
-        value is multiplied with the other gamma value. Setting this value to
-        1.0 can be used to always enable gamma control. (Disables delayed
-        enabling.)
+    ``gamma=<0.1..2.0>``
+        Set a gamma value (default: 1.0). If gamma is adjusted in other ways
+        (like with the ``--gamma`` option or key bindings and the ``gamma``
+        property), the value is multiplied with the other gamma value.
 
         Recommended values based on the environmental brightness:
 
         1.0
-            Brightly illuminated
+            Brightly illuminated (default)
         0.9
             Slightly dim
         0.8

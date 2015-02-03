@@ -493,7 +493,7 @@ void main() {
     // TODO: Desaturate colorimetrically; this happens automatically for
     // 3dlut targets but not for sRGB mode. Not sure if this is a requirement.
     color = clamp(color, 0.0, 1.0);
-#ifdef USE_GAMMA_POW
+#ifdef USE_INV_GAMMA
     // User-defined gamma correction factor (via the gamma sub-option)
     color = pow(color, vec3(inv_gamma));
 #endif
