@@ -557,7 +557,7 @@ Available video output drivers are:
         Sizes must be a power of two, and 512 at most.
 
     ``alpha=<blend|yes|no>``
-        Decides what to do if the input has an alpha component (default: blend).
+        Decides what to do if the input has an alpha component (default: no).
 
         blend
             Blend the frame against a black background.
