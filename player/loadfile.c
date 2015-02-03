@@ -282,8 +282,6 @@ static bool timeline_set_part(struct MPContext *mpctx, int i, bool initial)
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
     uninit_sub_all(mpctx);
-    if (!mpctx->opts->fixed_vo)
-        uninit_video_out(mpctx);
     if (mpctx->ao && !mpctx->opts->gapless_audio) {
         ao_drain(mpctx->ao);
         uninit_audio_out(mpctx);
@@ -533,7 +531,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
     if (order == 0) {
         if (type == STREAM_VIDEO) {
             uninit_video_chain(mpctx);
-            if (!mpctx->opts->fixed_vo || !track)
+            if (!track)
                 handle_force_window(mpctx, false);
         } else if (type == STREAM_AUDIO) {
             clear_audio_output_buffers(mpctx);
@@ -1236,8 +1234,6 @@ terminate_playback:
     uninit_sub_renderer(mpctx);
     uninit_demuxer(mpctx);
     uninit_stream(mpctx);
-    if (!opts->fixed_vo)
-        uninit_video_out(mpctx);
     if (!opts->gapless_audio && !mpctx->encode_lavc_ctx)
         uninit_audio_out(mpctx);
 

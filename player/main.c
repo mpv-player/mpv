@@ -446,7 +446,6 @@ int mp_initialize(struct MPContext *mpctx)
 #endif
 
     if (opts->force_vo) {
-        opts->fixed_vo = 1;
         struct vo_extra ex = {
             .input_ctx = mpctx->input,
             .osd = mpctx->osd,

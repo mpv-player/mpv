@@ -369,7 +369,6 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list),
     OPT_STRING("audio-device", audio_device, 0),
     OPT_STRING("audio-client-name", audio_client_name, 0),
-    OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
     OPT_FLAG("force-window", force_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
     OPT_FLAG("border", vo.border, M_OPT_FIXED),
@@ -654,7 +653,7 @@ const m_option_t mp_opts[] = {
     OPT_REMOVED("cache-pause-below", "for 'no', use --no-cache-pause"),
     OPT_REMOVED("no-cache-pause-below", "use --no-cache-pause"),
     OPT_REMOVED("volstep", "edit input.conf directly instead"),
-
+    OPT_REMOVED("fixed-vo", "--fixed-vo=yes is now the default"),
     OPT_REPLACED("mkv-subtitle-preroll", "demuxer-mkv-subtitle-preroll"),
     OPT_REPLACED("dtshd", "ad-spdif-dtshd"),
 
@@ -668,7 +667,6 @@ const struct MPOpts mp_default_opts = {
     .audio_decoders = "-spdif:*", // never select spdif by default
     .video_decoders = NULL,
     .deinterlace = -1,
-    .fixed_vo = 1,
     .softvol = SOFTVOL_AUTO,
     .softvol_max = 200,
     .mixer_init_volume = -1,

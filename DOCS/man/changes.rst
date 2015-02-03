@@ -77,7 +77,7 @@ Video
 * High-quality image resamplers (see the ``opengl`` ``scale`` suboption).
 * Support for scaling in (sigmoidized) linear light.
 * Better subtitle rendering using libass by default.
-* Improvements when playing multiple files (``--fixed-vo`` is default, do not
+* Improvements when playing multiple files (``-fixed-vo`` is default, do not
   reset settings by default when playing a new file).
 * Replace image video outputs (``--vo=jpeg`` etc.) with ``--vo=image``.
 * Removal of ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding
@@ -215,6 +215,7 @@ Command Line Switches
     ``-dumpstream``             ``--stream-dump=<filename>``
     ``-dvdangle``               ``--dvd-angle``
     ``-endpos``                 ``--length``
+    ``-fixed-vo``               (removed; always the default)
     ``-font``                   ``--osd-font``
     ``-forcedsubsonly``         ``--sub-forced-only``
     ``-forceidx``               ``--index``

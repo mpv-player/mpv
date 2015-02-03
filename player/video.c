@@ -266,7 +266,7 @@ int reinit_video_chain(struct MPContext *mpctx)
                sh->video->fps);
 
     //================== Init VIDEO (codec & libvo) ==========================
-    if (!opts->fixed_vo || !mpctx->video_out) {
+    if (!mpctx->video_out) {
         struct vo_extra ex = {
             .input_ctx = mpctx->input,
             .osd = mpctx->osd,
