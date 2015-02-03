@@ -211,7 +211,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("audio-display", audio_display, 0,
                ({"no", 0}, {"attachment", 1})),
 
-    OPT_CHOICE("hls-bitrate", hls_bitrate, M_OPT_FIXED,
+    OPT_CHOICE("hls-bitrate", hls_bitrate, 0,
                ({"no", 0}, {"min", 1}, {"max", 2})),
 
     OPT_STRINGLIST("display-tags*", display_tags, 0),
@@ -253,7 +253,7 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("mc", default_max_pts_correction, 0, 0, 100),
 
     // force video/audio rate:
-    OPT_DOUBLE("fps", force_fps, CONF_MIN | M_OPT_FIXED),
+    OPT_DOUBLE("fps", force_fps, CONF_MIN, .min = 0),
     OPT_INTRANGE("audio-samplerate", force_srate, 0, 1000, 8*48000),
     OPT_CHMAP("audio-channels", audio_output_channels, CONF_MIN, .min = 0),
     OPT_AUDIOFORMAT("audio-format", audio_output_format, 0),
@@ -268,11 +268,11 @@ const m_option_t mp_opts[] = {
 // ------------------------- codec/vfilter options --------------------
 
     OPT_SETTINGSLIST("af-defaults", af_defs, 0, &af_obj_list),
-    OPT_SETTINGSLIST("af*", af_settings, M_OPT_FIXED, &af_obj_list),
+    OPT_SETTINGSLIST("af*", af_settings, 0, &af_obj_list),
     OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list),
-    OPT_SETTINGSLIST("vf*", vf_settings, M_OPT_FIXED, &vf_obj_list),
+    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
 
-    OPT_CHOICE("deinterlace", deinterlace, M_OPT_OPTIONAL_PARAM | M_OPT_FIXED,
+    OPT_CHOICE("deinterlace", deinterlace, M_OPT_OPTIONAL_PARAM,
                ({"auto", -1},
                 {"no", 0},
                 {"yes", 1}, {"", 1})),
@@ -388,7 +388,7 @@ const m_option_t mp_opts[] = {
                 {"no", 0},
                 {"yes", 1}, {"", 1})),
     OPT_STRING("volume-restore-data", mixer_restore_volume_data, 0),
-    OPT_CHOICE("gapless-audio", gapless_audio, M_OPT_FIXED | M_OPT_OPTIONAL_PARAM,
+    OPT_CHOICE("gapless-audio", gapless_audio, M_OPT_OPTIONAL_PARAM,
                ({"no", 0},
                 {"yes", 1}, {"", 1},
                 {"weak", -1})),
@@ -493,10 +493,10 @@ const m_option_t mp_opts[] = {
 
     OPT_DOUBLE("display-fps", frame_drop_fps, M_OPT_MIN, .min = 0),
 
-    OPT_FLAG("untimed", untimed, M_OPT_FIXED),
+    OPT_FLAG("untimed", untimed, 0),
 
-    OPT_STRING("stream-capture", stream_capture, M_OPT_FIXED | M_OPT_FILE),
-    OPT_STRING("stream-dump", stream_dump, M_OPT_FIXED | M_OPT_FILE),
+    OPT_STRING("stream-capture", stream_capture, M_OPT_FILE),
+    OPT_STRING("stream-dump", stream_dump, M_OPT_FILE),
 
     OPT_FLAG("stop-playback-on-init-failure", stop_playback_on_init_failure, 0),
 
