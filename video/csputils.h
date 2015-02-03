@@ -114,9 +114,7 @@ struct mp_csp_params {
     float contrast;
     float hue;
     float saturation;
-    float rgamma;
-    float ggamma;
-    float bgamma;
+    float gamma;
     // discard U/V components
     bool gray;
     // texture_bits/input_bits is for rescaling fixed point input to range [0,1]
@@ -132,8 +130,7 @@ struct mp_csp_params {
     .levels_in = MP_CSP_LEVELS_TV,                              \
     .levels_out = MP_CSP_LEVELS_PC,                             \
     .brightness = 0, .contrast = 1, .hue = 0, .saturation = 1,  \
-    .rgamma = 1, .ggamma = 1, .bgamma = 1,                      \
-    .texture_bits = 8, .input_bits = 8}
+    .gamma = 1, .texture_bits = 8, .input_bits = 8}
 
 struct mp_image_params;
 void mp_csp_set_image_params(struct mp_csp_params *params,

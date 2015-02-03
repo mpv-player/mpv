@@ -178,7 +178,7 @@ uniform mat3 colormatrix;
 uniform vec3 colormatrix_c;
 uniform mat3 cms_matrix;
 uniform mat2 dither_trafo;
-uniform vec3 inv_gamma;
+uniform float inv_gamma;
 uniform float input_gamma;
 uniform float conv_gamma;
 uniform float sig_center;
@@ -495,7 +495,7 @@ void main() {
     color = clamp(color, 0.0, 1.0);
 #ifdef USE_GAMMA_POW
     // User-defined gamma correction factor (via the gamma sub-option)
-    color = pow(color, inv_gamma);
+    color = pow(color, vec3(inv_gamma));
 #endif
 #ifdef USE_3DLUT
     // For the 3DLUT we are arbitrarily using 2.4 as input gamma to reduce

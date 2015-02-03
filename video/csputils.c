@@ -633,10 +633,7 @@ void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
     params->contrast = (eq->values[MP_CSP_EQ_CONTRAST] + 100) / 100.0;
     params->hue = eq->values[MP_CSP_EQ_HUE] / 100.0 * M_PI;
     params->saturation = (eq->values[MP_CSP_EQ_SATURATION] + 100) / 100.0;
-    float gamma = exp(log(8.0) * eq->values[MP_CSP_EQ_GAMMA] / 100.0);
-    params->rgamma = gamma;
-    params->ggamma = gamma;
-    params->bgamma = gamma;
+    params->gamma = exp(log(8.0) * eq->values[MP_CSP_EQ_GAMMA] / 100.0);
 }
 
 static int find_eq(int capabilities, const char *name)

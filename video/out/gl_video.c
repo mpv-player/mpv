@@ -567,10 +567,8 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     gl->Uniform1f(gl->GetUniformLocation(program, "sig_offset"), sig_offset);
 
     float gamma = p->opts.gamma ? p->opts.gamma : 1.0;
-    gl->Uniform3f(gl->GetUniformLocation(program, "inv_gamma"),
-                  1.0 / (cparams.rgamma * gamma),
-                  1.0 / (cparams.ggamma * gamma),
-                  1.0 / (cparams.bgamma * gamma));
+    gl->Uniform1f(gl->GetUniformLocation(program, "inv_gamma"),
+                  1.0 / (cparams.gamma * gamma));
 
     for (int n = 0; n < p->plane_count; n++) {
         char textures_n[32];
