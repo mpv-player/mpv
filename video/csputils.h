@@ -215,8 +215,6 @@ int mp_chroma_location_to_av(enum mp_chroma_location mploc);
 
 void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 
-void mp_gen_gamma_map(unsigned char *map, int size, float gamma);
-
 struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim csp);
 
 /* Color conversion matrix: RGB = m * YUV + c
@@ -237,18 +235,13 @@ struct mp_cmat {
     float c[3];
 };
 
-void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src,
-                                   struct mp_csp_col_xy dest, float m[3][3]);
 void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest,
                        enum mp_render_intent intent, float cms_matrix[3][3]);
-void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3]);
 
 void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params, struct mp_csp_primaries prim,
                            enum mp_render_intent intent, struct mp_cmat *xyz2rgb);
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *yuv2rgb);
-void mp_gen_yuv2rgb_map(struct mp_csp_params *params, uint8_t *map, int size);
 
-void mp_mul_matrix3x3(float a[3][3], float b[3][3]);
 void mp_invert_matrix3x3(float m[3][3]);
 void mp_invert_yuv2rgb(struct mp_cmat *out, struct mp_cmat *in);
 void mp_map_int_color(struct mp_cmat *matrix, int clip_bits, int c[3]);

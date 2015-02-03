@@ -230,25 +230,6 @@ void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y)
         *x = -1;
 }
 
-void mp_gen_gamma_map(uint8_t *map, int size, float gamma)
-{
-    if (gamma == 1.0) {
-        for (int i = 0; i < size; i++)
-            map[i] = 255 * i / (size - 1);
-        return;
-    }
-    gamma = 1.0 / gamma;
-    for (int i = 0; i < size; i++) {
-        float tmp = (float)i / (size - 1.0);
-        tmp = pow(tmp, gamma);
-        if (tmp > 1.0)
-            tmp = 1.0;
-        if (tmp < 0.0)
-            tmp = 0.0;
-        map[i] = 255 * tmp;
-    }
-}
-
 void mp_invert_matrix3x3(float m[3][3])
 {
     float m00 = m[0][0], m01 = m[0][1], m02 = m[0][2],
@@ -278,7 +259,7 @@ void mp_invert_matrix3x3(float m[3][3])
 }
 
 // A := A * B
-void mp_mul_matrix3x3(float a[3][3], float b[3][3])
+static void mp_mul_matrix3x3(float a[3][3], float b[3][3])
 {
     float a00 = a[0][0], a01 = a[0][1], a02 = a[0][2],
           a10 = a[1][0], a11 = a[1][1], a12 = a[1][2],
@@ -343,7 +324,7 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
 
 // Compute the RGB/XYZ matrix as described here:
 // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
-void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
+static void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
 {
     float S[3], X[4], Z[4];
 
@@ -379,8 +360,8 @@ void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
 }
 
 // M := M * XYZd<-XYZs
-void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src,
-                                   struct mp_csp_col_xy dest, float m[3][3])
+static void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src,
+                                          struct mp_csp_col_xy dest, float m[3][3])
 {
     // If the white points are nearly identical, this is a wasteful identity
     // operation.
@@ -630,45 +611,6 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *m)
         m->c[i] *= out_scale; // constant is 1.0
         for (int x = 0; x < 3; x++)
             m->m[i][x] *= out_scale / in_scale;
-    }
-}
-
-// size of gamma map use to avoid slow exp function in gen_yuv2rgb_map
-#define GMAP_SIZE (1024)
-// generate a 3D YUV -> RGB map
-// map must provide space for (size + 2)^3 elements
-void mp_gen_yuv2rgb_map(struct mp_csp_params *params, unsigned char *map, int size)
-{
-    int i, j, k, l;
-    float step = 1.0 / size;
-    float y, u, v;
-    struct mp_cmat yuv2rgb;
-    unsigned char gmaps[3][GMAP_SIZE];
-    mp_gen_gamma_map(gmaps[0], GMAP_SIZE, params->rgamma);
-    mp_gen_gamma_map(gmaps[1], GMAP_SIZE, params->ggamma);
-    mp_gen_gamma_map(gmaps[2], GMAP_SIZE, params->bgamma);
-    mp_get_yuv2rgb_coeffs(params, &yuv2rgb);
-    for (i = 0; i < 3; i++) {
-        for (j = 0; j < 3; j++)
-            yuv2rgb.m[i][j] *= GMAP_SIZE - 1;
-        yuv2rgb.c[i] *= GMAP_SIZE - 1;
-    }
-    v = 0;
-    for (i = -1; i <= size; i++) {
-        u = 0;
-        for (j = -1; j <= size; j++) {
-            y = 0;
-            for (k = -1; k <= size; k++) {
-                for (l = 0; l < 3; l++) {
-                    float rgb = yuv2rgb.m[l][0] * y + yuv2rgb.m[l][1] * u +
-                                yuv2rgb.m[l][2] * v + yuv2rgb.c[l];
-                    *map++ = gmaps[l][av_clip(rgb, 0, GMAP_SIZE - 1)];
-                }
-                y += (k == -1 || k == size - 1) ? step / 2 : step;
-            }
-            u += (j == -1 || j == size - 1) ? step / 2 : step;
-        }
-        v += (i == -1 || i == size - 1) ? step / 2 : step;
     }
 }
 
