@@ -267,14 +267,17 @@ static void vo_cocoa_update_screen_fps(struct vo *vo)
     CGDisplayModeRef mode = CGDisplayCopyDisplayMode(did);
     s->screen_fps = CGDisplayModeGetRefreshRate(mode);
     CGDisplayModeRelease(mode);
+
     if (s->screen_fps == 0.0) {
-        // Most internal Apple monitors and laptop monitors report 0 instead
-        // of 60fps. Assume them to be 60hz. This is technically incorrect but
-        // works most of the time, and seems to be used in most open source
-        // software for lack of a better Apple API.
-        MP_VERBOSE(vo, "CoreGraphics reports a 0fps display. Assuming internal "
-                       "Apple monitor @ 60fps instead.\n");
-        s->screen_fps = 60.0;
+        // Fallback to using Nominal refresh rate from DisplayLink,
+        // CVDisplayLinkGet *Actual* OutputVideoRefreshPeriod seems to
+        // return 0 as well if CG returns 0
+        CVDisplayLinkRef link;
+        CVDisplayLinkCreateWithCGDisplay(did, &link);
+        const CVTime t = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(link);
+        if (!(t.flags & kCVTimeIsIndefinite))
+            s->screen_fps = (t.timeScale / (double) t.timeValue);
+        CVDisplayLinkRelease(link);
     }
 }
 
@@ -673,8 +676,10 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         vo_cocoa_control_get_icc_profile(vo, arg);
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS:
-        *(double *)arg = vo->cocoa->screen_fps;
-        return VO_TRUE;
+        if (vo->cocoa->screen_fps > 0.0) {
+            *(double *)arg = vo->cocoa->screen_fps;
+            return VO_TRUE;
+        }
     }
     return VO_NOTIMPL;
 }
