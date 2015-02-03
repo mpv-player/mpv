@@ -49,7 +49,7 @@ def __add_clang_flags__(ctx):
                        "-Wno-tautological-constant-out-of-range-compare" ]
 
 def __add_mswin_flags__(ctx):
-    ctx.env.CFLAGS += ['-D_WIN32_WINNT=0x600', '-DUNICODE', '-DCOBJMACROS',
+    ctx.env.CFLAGS += ['-D_WIN32_WINNT=0x0601', '-DUNICODE', '-DCOBJMACROS',
                        '-U__STRICT_ANSI__']
 
 def __add_mingw_flags__(ctx):

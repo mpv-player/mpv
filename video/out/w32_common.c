@@ -34,6 +34,7 @@
 #include "vo.h"
 #include "win_state.h"
 #include "w32_common.h"
+#include "win32/displayconfig.h"
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
@@ -59,8 +60,8 @@ struct vo_w32_state {
     HWND window;
     HWND parent; // 0 normally, set in embedding mode
 
-    // Size and virtual position of the current screen.
-    struct mp_rect screenrc;
+    HMONITOR monitor; // Handle of the current screen
+    struct mp_rect screenrc; // Size and virtual position of the current screen
 
     // last non-fullscreen extends (updated only on fullscreen or on initialization)
     int prev_width;
@@ -567,22 +568,17 @@ static void wakeup_gui_thread(void *ctx)
     PostMessage(w32->window, WM_USER, 0, 0);
 }
 
-static double vo_w32_get_display_fps(struct vo_w32_state *w32)
+static double get_refresh_rate_from_gdi(const wchar_t *device)
 {
-    // Get the device name of the monitor containing the window
-    HMONITOR mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
-    MONITORINFOEXW mi = { .cbSize = sizeof mi };
-    GetMonitorInfoW(mon, (MONITORINFO*)&mi);
-
-    DEVMODE dm = { .dmSize = sizeof dm };
-    if (!EnumDisplaySettingsW(mi.szDevice, ENUM_CURRENT_SETTINGS, &dm))
-        return -1;
+    DEVMODEW dm = { .dmSize = sizeof dm };
+    if (!EnumDisplaySettingsW(device, ENUM_CURRENT_SETTINGS, &dm))
+        return 0.0;
 
     // May return 0 or 1 which "represent the display hardware's default refresh rate"
     // https://msdn.microsoft.com/en-us/library/windows/desktop/dd183565%28v=vs.85%29.aspx
     // mpv validates this value with a threshold of 1, so don't return exactly 1
     if (dm.dmDisplayFrequency == 1)
-        return 0;
+        return 0.0;
 
     // dm.dmDisplayFrequency is an integer which is rounded down, so it's
     // highly likely that 23 represents 24/1.001, 59 represents 60/1.001, etc.
@@ -606,12 +602,35 @@ static double vo_w32_get_display_fps(struct vo_w32_state *w32)
 
 static void update_display_fps(struct vo_w32_state *w32)
 {
-    double fps = vo_w32_get_display_fps(w32);
-    if (fps != w32->display_fps) {
-        w32->display_fps = fps;
+    HMONITOR monitor = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+    if (w32->monitor == monitor)
+        return;
+    w32->monitor = monitor;
+
+    MONITORINFOEXW mi = { .cbSize = sizeof mi };
+    GetMonitorInfoW(monitor, (MONITORINFO*)&mi);
+
+    // Try to get the monitor refresh rate.
+    double freq = 0.0;
+
+    if (freq == 0.0)
+        freq = mp_w32_displayconfig_get_refresh_rate(mi.szDevice);
+    if (freq == 0.0)
+        freq = get_refresh_rate_from_gdi(mi.szDevice);
+
+    if (freq != w32->display_fps) {
+        MP_VERBOSE(w32, "display-fps: %f\n", freq);
+        if (freq == 0.0)
+            MP_WARN(w32, "Couldn't determine monitor refresh rate\n");
+        w32->display_fps = freq;
         signal_events(w32, VO_EVENT_WIN_STATE);
-        MP_VERBOSE(w32, "display-fps: %f\n", fps);
     }
+}
+
+static void force_update_display_fps(struct vo_w32_state *w32)
+{
+    w32->monitor = 0;
+    update_display_fps(w32);
 }
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
@@ -648,13 +667,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (GetClientRect(w32->window, &r) && r.right > 0 && r.bottom > 0) {
             w32->dw = r.right;
             w32->dh = r.bottom;
-            update_display_fps(w32); // if we moved between monitors
             signal_events(w32, VO_EVENT_RESIZE);
             MP_VERBOSE(w32, "resize window: %d:%d\n", w32->dw, w32->dh);
         }
 
         // Window may have been minimized or restored
         signal_events(w32, VO_EVENT_WIN_STATE);
+
+        update_display_fps(w32);
         break;
     }
     case WM_SIZING:
@@ -799,7 +819,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         mouse_button |= MP_KEY_STATE_UP;
         break;
     case WM_DISPLAYCHANGE:
-        update_display_fps(w32);
+        force_update_display_fps(w32);
         break;
     }
 

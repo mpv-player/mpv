@@ -355,6 +355,7 @@ def build(ctx):
         ( "video/out/vo_x11.c" ,                 "x11" ),
         ( "video/out/vo_xv.c",                   "xv" ),
         ( "video/out/w32_common.c",              "win32" ),
+        ( "video/out/win32/displayconfig.c",     "win32" ),
         ( "video/out/wayland_common.c",          "wayland" ),
         ( "video/out/wayland/buffer.c",          "wayland" ),
         ( "video/out/wayland/memfile.c",         "wayland" ),
