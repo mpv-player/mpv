@@ -344,7 +344,7 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
-        OPT_FLOATRANGE("gamma", gamma, 0, 0.0, 10.0),
+        OPT_FLOATRANGE("gamma", gamma, 0, 0.0, 2.0),
         OPT_FLAG("srgb", srgb, 0),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),

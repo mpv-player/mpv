@@ -504,7 +504,7 @@ Available video output drivers are:
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
         Default: rgba.
 
-    ``gamma=<0.0..10.0>``
+    ``gamma=<0.0..2.0>``
         Set a gamma value. If gamma is adjusted in other ways (like with
         the ``--gamma`` option or key bindings and the ``gamma`` property), the
         value is multiplied with the other gamma value. Setting this value to
