@@ -156,7 +156,10 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
     case M_PROPERTY_SET_STRING: {
         if (!log)
             return M_PROPERTY_ERROR;
-        if (m_option_parse(log, &opt, bstr0(name), bstr0(arg), &val) < 0)
+        bstr optname = bstr0(name), a, b;
+        if (bstr_split_tok(optname, "/", &a, &b))
+            optname = b;
+        if (m_option_parse(log, &opt, optname, bstr0(arg), &val) < 0)
             return M_PROPERTY_ERROR;
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
         m_option_free(&opt, &val);
