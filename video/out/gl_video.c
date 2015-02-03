@@ -163,6 +163,7 @@ struct gl_video {
     float input_gamma, conv_gamma;
     float user_gamma;
     bool user_gamma_enabled; // shader handles user_gamma
+    bool sigmoid_enabled;
 
     struct video_image image;
 
@@ -946,7 +947,8 @@ static void compile_shaders(struct gl_video *p)
 
     // Optionally transform to sigmoidal color space if requested, but only
     // when upscaling in linear light
-    bool use_sigmoid = p->opts.sigmoid_upscaling && use_linear_light && p->upscaling;
+    p->sigmoid_enabled = p->opts.sigmoid_upscaling && use_linear_light;
+    bool use_sigmoid = p->sigmoid_enabled && p->upscaling;
 
     // Figure out the right color spaces we need to convert, if any
     enum mp_csp_prim prim_src = p->image_params.primaries, prim_dest;
@@ -1912,7 +1914,7 @@ static void check_resize(struct gl_video *p)
         p->upscaling = !p->upscaling;
         // Switching between upscaling and downscaling also requires sigmoid
         // to be toggled
-        need_scaler_reinit |= p->opts.sigmoid_upscaling;
+        need_scaler_reinit |= p->sigmoid_enabled;
     }
     if (need_scaler_reinit) {
         reinit_rendering(p);
