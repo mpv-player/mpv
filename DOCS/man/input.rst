@@ -391,6 +391,15 @@ List of Input Commands
     <double>
         The mouse event represents double-click.
 
+``audio_add "<file>" [<flags> [<title> [<lang>]]]``
+    Load the given audio file. See ``sub_add`` command.
+
+``audio_remove [<id>]``
+    Remove the given audio track. See ``sub_remove`` command.
+
+``audio_reload [<id>]``
+    Reload the given audio tracks. See ``sub_reload`` command.
+
 
 Input Commands that are Possibly Subject to Change
 --------------------------------------------------

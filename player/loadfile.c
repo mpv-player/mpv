@@ -717,6 +717,20 @@ static void open_audiofiles_from_options(struct MPContext *mpctx)
         open_external_file(mpctx, opts->audio_files[n], STREAM_AUDIO);
 }
 
+struct track *mp_add_track_file(struct MPContext *mpctx, char *filename, int type)
+{
+    if (type == STREAM_AUDIO)
+        return mp_add_audio(mpctx, filename);
+    if (type == STREAM_SUB)
+        return mp_add_subtitles(mpctx, filename);
+    return NULL;
+}
+
+struct track *mp_add_audio(struct MPContext *mpctx, char *filename)
+{
+    return open_external_file(mpctx, filename, STREAM_AUDIO);
+}
+
 struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename)
 {
     return open_external_file(mpctx, filename, STREAM_SUB);
