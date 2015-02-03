@@ -507,10 +507,18 @@ Available video output drivers are:
     ``gamma=<0.0..10.0>``
         Set a gamma value. If gamma is adjusted in other ways (like with
         the ``--gamma`` option or key bindings and the ``gamma`` property), the
-        value is multiplied with the other gamma value.
+        value is multiplied with the other gamma value. Setting this value to
+        1.0 can be used to always enable gamma control. (Disables delayed
+        enabling.)
 
-        Setting this value to 1.0 can be used to always enable gamma control.
-        (Disables delayed enabling.)
+        Recommended values based on the environmental brightness:
+
+        1.0
+            Brightly illuminated
+        0.9
+            Slightly dim
+        0.8
+            Pitch black room
 
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.
