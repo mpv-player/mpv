@@ -2757,7 +2757,10 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
     assert(opt->priv);
 
     if (bstr_endswith0(bstr0(opt->name), "*")) {
-        struct bstr suffix = bstr_cut(name, strlen(opt->name) - 1);
+        int opt_name_len = strlen(opt->name) - 1 ;
+        if (bstr_startswith0(name, "options/"))
+            opt_name_len += strlen("options/");
+        struct bstr suffix = bstr_cut(name, opt_name_len);
         if (bstrcmp0(suffix, "-add") == 0)
             op = OP_ADD;
         else if (bstrcmp0(suffix, "-set") == 0)
@@ -2774,8 +2777,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             op = OP_NONE;
         else {
             char pre[80];
-            snprintf(pre, sizeof(pre), "%.*s", (int)(strlen(opt->name) - 1),
-                     opt->name);
+            snprintf(pre, sizeof(pre), "%.*s", opt_name_len, opt->name);
             mp_err(log, "Option %.*s: unknown postfix %.*s\n"
                    "Supported postfixes are:\n"
                    "  %s-set\n"
