@@ -229,6 +229,11 @@ static int d_fill_buffer(demuxer_t *demuxer)
         return 1;
     }
 
+    if (demuxer->stream->uncached_type == STREAMTYPE_CDDA) {
+        demux_add_packet(sh, pkt);
+        return 1;
+    }
+
     MP_TRACE(demuxer, "ipts: %d %f %f\n", sh->type, pkt->pts, pkt->dts);
 
     if (sh->type == STREAM_SUB) {
@@ -311,16 +316,18 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     // So that we don't miss initial packets of delayed subtitle streams.
     demux_set_stream_autoselect(p->slave, true);
 
-    // Can be seekable even if the stream isn't.
-    demuxer->seekable = true;
-
-    demuxer->rel_seeks = true;
-
     // With cache enabled, the stream can be seekable. This causes demux_lavf.c
     // (actually libavformat/mpegts.c) to seek sometimes when reading a packet.
     // It does this to seek back a bit in case the current file position points
     // into the middle of a packet.
-    demuxer->stream->seekable = false;
+    if (demuxer->stream->uncached_type != STREAMTYPE_CDDA) {
+        demuxer->stream->seekable = false;
+
+        // Can be seekable even if the stream isn't.
+        demuxer->seekable = true;
+
+        demuxer->rel_seeks = true;
+    }
 
     add_dvd_streams(demuxer);
     add_streams(demuxer);
