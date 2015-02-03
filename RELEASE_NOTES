@@ -1,3 +1,25 @@
+Release 0.7.Next
+=============
+
+Changes
+-------
+
+- PDF documentation is now disabled by default due to rst2pdf being fickle,
+  causing weird build errors.
+- Documentation updates.
+- Print desync messages with negative A/V sync as well. While rare, it could
+  happen ith some uses of --autosync.
+
+Bug fixes
+---------
+
+- (Windows) Avoid resizing the video window when player is minimized, might
+  address bug #1547.
+- (NetBSD) Fix build with v4l2.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.7.2..v0.7.3` in the git repository.
+
 Release 0.7.3
 =============
 
@@ -76,7 +98,7 @@ New features
 
 This listing is not complete. A complete changelog can be seen by running
 `git log v0.7.2..v0.7.3` in the git repository.
-
+ 
 Release 0.7.2
 =============
 
