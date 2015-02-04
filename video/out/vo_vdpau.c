@@ -1009,10 +1009,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     check_preemption(vo);
 
     switch (request) {
-    case VOCTRL_PAUSE:
-        if (vc->dropped_frame)
-            vo->want_redraw = true;
-        return true;
     case VOCTRL_GET_HWDEC_INFO: {
         struct mp_hwdec_info **arg = data;
         *arg = &vc->hwdec_info;
