@@ -755,3 +755,7 @@ guarantee a stable interface.
         you could set per-file options with by setting the property
         ``file-local-options/<option name>``. The player will wait until all
         hooks are run.
+
+    ``on_unload``
+        Run before closing a file, and before actually uninitializing
+        everything. It's not possible to resume playback in this state.

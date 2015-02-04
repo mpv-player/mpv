@@ -808,6 +808,14 @@ static int process_open_hooks(struct MPContext *mpctx)
     return 0;
 }
 
+static void process_unload_hooks(struct MPContext *mpctx)
+{
+    mp_hook_run(mpctx, NULL, "on_unload");
+
+    while (!mp_hook_test_completion(mpctx, "on_unload"))
+        mp_idle(mpctx);
+}
+
 static void print_timeline(struct MPContext *mpctx)
 {
     if (mpctx->timeline) {
@@ -1211,6 +1219,8 @@ terminate_playback:
         uninit_demuxer(mpctx);
         goto goto_reopen_demuxer;
     }
+
+    process_unload_hooks(mpctx);
 
     mp_nav_destroy(mpctx);
 
