@@ -1801,7 +1801,7 @@ static bool parse_geometry_str(struct m_geometry *gm, bstr s)
     if (s.len == 0)
         return true;
     // Approximate grammar:
-    // [W[xH]][{+-}X{+-}Y] | [X:Y]
+    // [[W][xH]][{+-}X{+-}Y] | [X:Y]
     // (meaning: [optional] {one character of} one|alternative)
     // Every number can be followed by '%'
     int num;
@@ -1825,7 +1825,8 @@ static bool parse_geometry_str(struct m_geometry *gm, bstr s)
     if (bstrchr(s, ':') < 0) {
         gm->wh_valid = true;
         if (!bstr_startswith0(s, "+") && !bstr_startswith0(s, "-")) {
-            READ_NUM(w, w_per);
+            if (!bstr_startswith0(s, "x"))
+                READ_NUM(w, w_per);
             if (bstr_eatstart0(&s, "x"))
                 READ_NUM(h, h_per);
         }
