@@ -408,6 +408,7 @@ void build_cue_timeline(struct MPContext *mpctx)
     mpctx->num_timeline_parts = track_count + 1 - 1;
     mpctx->chapters = chapters;
     mpctx->num_chapters = track_count;
+    mpctx->track_layout = mpctx->timeline[0].source;
 
 out:
     talloc_free(ctx);

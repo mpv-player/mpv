@@ -267,6 +267,7 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
     mpctx->num_timeline_parts = parts->num_parts;
     mpctx->chapters = chapters;
     mpctx->num_chapters = num_chapters;
+    mpctx->track_layout = mpctx->timeline[0].source;
     return;
 
 error:

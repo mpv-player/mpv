@@ -569,4 +569,14 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     mpctx->num_timeline_parts = part_count - 1;
     mpctx->num_chapters = m->num_ordered_chapters;
     mpctx->chapters = chapters;
+
+    // With Matroska, the "master" file usually dictates track layout etc.,
+    // except maybe with playlist-like files.
+    mpctx->track_layout = mpctx->timeline[0].source;
+    for (int n = 0; n < mpctx->num_timeline_parts; n++) {
+        if (mpctx->timeline[n].source == mpctx->demuxer) {
+            mpctx->track_layout = mpctx->demuxer;
+            break;
+        }
+    }
 }

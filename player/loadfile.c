@@ -1067,6 +1067,8 @@ goto_reopen_demuxer: ;
         goto terminate_playback;
     }
 
+    mpctx->track_layout = mpctx->demuxer;
+
     if (mpctx->demuxer->matroska_data.ordered_chapters)
         build_ordered_chapter_timeline(mpctx);
 
@@ -1078,20 +1080,6 @@ goto_reopen_demuxer: ;
 
     print_timeline(mpctx);
     load_chapters(mpctx);
-
-    mpctx->track_layout = mpctx->demuxer;
-    if (mpctx->timeline) {
-        // With Matroska, the "master" file usually dictates track layout etc.
-        // On the contrary, the EDL and CUE demuxers are empty wrappers, as
-        // well as Matroska ordered chapter playlist-like files.
-        mpctx->track_layout = mpctx->timeline[0].source;
-        for (int n = 0; n < mpctx->num_timeline_parts; n++) {
-            if (mpctx->timeline[n].source == mpctx->demuxer) {
-                mpctx->track_layout = mpctx->demuxer;
-                break;
-            }
-        }
-    }
     add_demuxer_tracks(mpctx, mpctx->track_layout);
 
     mpctx->timeline_part = 0;
