@@ -148,7 +148,7 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     *p = (struct priv) {
         .frame_size = samplesize * sh_audio->channels.num,
         .frame_rate = sh_audio->samplerate,
-        .read_frames = sh_audio->samplerate,
+        .read_frames = sh_audio->samplerate / 8,
     };
 
     return 0;
