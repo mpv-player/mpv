@@ -745,17 +745,6 @@ guarantee a stable interface.
     recommended as neutral default value. ``fn`` is the function that will be
     called during execution of the hook.
 
-    Currently existing hooks:
-
-    ``on_load``
-        Called when a file is to be opened, before anything is actually done.
-        For example, you could read and write the ``stream-open-filename``
-        property to redirect an URL to something else (consider support for
-        streaming sites which rarely give the user a direct media URL), or
-        you could set per-file options with by setting the property
-        ``file-local-options/<option name>``. The player will wait until all
-        hooks are run.
-
-    ``on_unload``
-        Run before closing a file, and before actually uninitializing
-        everything. It's not possible to resume playback in this state.
+    See `Hooks`_ for currently existing hooks and what they do - only the hook
+    list is interesting; handling hook execution is done by the Lua script
+    function automatically.
