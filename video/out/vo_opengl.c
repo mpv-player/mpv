@@ -375,6 +375,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         gl_video_reset(p->renderer);
         mpgl_unlock(p->glctx);
         return true;
+    case VOCTRL_PAUSE:
+        mpgl_lock(p->glctx);
+        if (gl_video_showing_interpolated_frame(p->renderer))
+            vo->want_redraw = true;
+        mpgl_unlock(p->glctx);
+        return true;
     }
 
     mpgl_lock(p->glctx);

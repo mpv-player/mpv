@@ -182,6 +182,8 @@ struct gl_video {
     // reinit_rendering must be called
     bool need_reinit_rendering;
 
+    bool is_interpolated;
+
     struct mp_csp_equalizer video_eq;
 
     // Source and destination color spaces for the CMS matrix
@@ -1728,8 +1730,9 @@ static void gl_video_interpolate_frame(struct gl_video *p,
     GL *gl = p->gl;
     double inter_coeff = 0.0;
     int64_t prev_pts = p->surfaces[fbosurface_next(p)].pts;
+    p->is_interpolated = prev_pts < t->pts;
 
-    if (prev_pts < t->pts) {
+    if (p->is_interpolated) {
         MP_STATS(p, "new-pts");
         // fbosurface 0 is already bound from the caller
         p->surfaces[p->surface_idx].pts = t->pts;
@@ -1779,6 +1782,8 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
         MPSWAP(int, src_rect_rot.x0, src_rect_rot.y0);
         MPSWAP(int, src_rect_rot.x1, src_rect_rot.y1);
     }
+
+    p->is_interpolated = false;
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
     gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
@@ -2222,6 +2227,11 @@ void gl_video_reset(struct gl_video *p)
     for (int i = 0; i < FBOSURFACES_MAX; i++)
         p->surfaces[i].pts = 0;
     p->surface_idx = 0;
+}
+
+bool gl_video_showing_interpolated_frame(struct gl_video *p)
+{
+    return p->is_interpolated;
 }
 
 // dest = src.<w> (always using 4 components)
