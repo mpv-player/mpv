@@ -2242,58 +2242,86 @@ fail:
     return -1;
 }
 
-static bool mkv_parse_packet(mkv_track_t *track, bstr *raw, bstr *out)
+static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
+                                     struct demux_packet *dp)
 {
+    struct sh_stream *stream = track->stream;
+
+    if (track->realmedia) {
+        bstr block = {dp->buffer, dp->len};
+        if (stream->type == STREAM_VIDEO)
+            handle_realvideo(demuxer, track, block, dp->keyframe);
+        if (stream->type == STREAM_AUDIO)
+            handle_realaudio(demuxer, track, block, dp->keyframe);
+        talloc_free(dp);
+        return;
+    }
+
     if (track->a_formattag == MP_FOURCC('W', 'V', 'P', 'K')) {
-        int size = raw->len;
+        int size = dp->len;
         uint8_t *parsed;
-        if (libav_parse_wavpack(track, raw->start, &parsed, &size) >= 0) {
-            out->start = parsed;
-            out->len = size;
-            *raw = (bstr){0};
-            return true;
-        }
-    } else if (track->codec_id && strcmp(track->codec_id, MKV_V_PRORES) == 0) {
-        size_t newlen = raw->len + 8;
-        char *data = talloc_size(track->parser_tmp, newlen);
-        AV_WB32(data + 0, newlen);
-        AV_WB32(data + 4, MKBETAG('i', 'c', 'p', 'f'));
-        memcpy(data + 8, raw->start, raw->len);
-        out->start = data;
-        out->len = newlen;
-        *raw = (bstr){0};
-        return true;
-    } else if (track->parse) {
-        if (!track->av_parser) {
-            int id = mp_codec_to_av_codec_id(track->stream->codec);
-            const AVCodec *codec = avcodec_find_decoder(id);
-            track->av_parser = av_parser_init(id);
-            if (codec)
-                track->av_parser_codec = avcodec_alloc_context3(codec);
-        }
-        if (track->av_parser && track->av_parser_codec) {
-            while (raw->len) {
-                uint8_t *data = NULL;
-                int size = 0;
-                int len = av_parser_parse2(track->av_parser, track->av_parser_codec,
-                                           &data, &size, raw->start, raw->len,
-                                           AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
-                if (len < 0 || len > 0x10000000)
-                    return false;
-                *raw = bstr_cut(*raw, len);
-                if (size) {
-                    out->start = data;
-                    out->len = size;
-                    return true;
-                }
+        if (libav_parse_wavpack(track, dp->buffer, &parsed, &size) >= 0) {
+            struct demux_packet *new = new_demux_packet_from(parsed, size);
+            if (new) {
+                demux_packet_copy_attribs(new, dp);
+                talloc_free(dp);
+                demux_add_packet(stream, new);
+                return;
             }
-            return false;
         }
     }
-    // No parsing
-    *out = *raw;
-    *raw = (bstr){0};
-    return true;
+
+    if (track->codec_id && strcmp(track->codec_id, MKV_V_PRORES) == 0) {
+        size_t newlen = dp->len + 8;
+        struct demux_packet *new = new_demux_packet(newlen);
+        if (new) {
+            AV_WB32(new->buffer + 0, newlen);
+            AV_WB32(new->buffer + 4, MKBETAG('i', 'c', 'p', 'f'));
+            memcpy(new->buffer + 8, dp->buffer, dp->len);
+            demux_packet_copy_attribs(new, dp);
+            talloc_free(dp);
+            demux_add_packet(stream, new);
+            return;
+        }
+    }
+
+    if (track->parse && !track->av_parser) {
+        int id = mp_codec_to_av_codec_id(track->stream->codec);
+        const AVCodec *codec = avcodec_find_decoder(id);
+        track->av_parser = av_parser_init(id);
+        if (codec)
+            track->av_parser_codec = avcodec_alloc_context3(codec);
+    }
+
+    if (!track->parse || !track->av_parser || !track->av_parser_codec) {
+        demux_add_packet(stream, dp);
+        return;
+    }
+
+    while (dp->len) {
+        uint8_t *data = NULL;
+        int size = 0;
+        int len = av_parser_parse2(track->av_parser, track->av_parser_codec,
+                                   &data, &size, dp->buffer, dp->len,
+                                   AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+        if (len < 0 || len > dp->len)
+            break;
+        dp->buffer += len;
+        dp->len -= len;
+        if (size) {
+            struct demux_packet *new = new_demux_packet_from(data, size);
+            if (!new)
+                break;
+            demux_packet_copy_attribs(new, dp);
+            demux_add_packet(stream, new);
+        }
+    }
+
+    if (dp->len) {
+        demux_add_packet(stream, dp);
+    } else {
+        talloc_free(dp);
+    }
 }
 
 struct block_info {
@@ -2431,46 +2459,37 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         mkv_d->last_pts = current_pts;
         mkv_d->last_filepos = block_info->filepos;
 
-        int p = 0;
         for (int i = 0; i < laces; i++) {
             bstr block = bstr_splice(data, 0, lace_size[i]);
-            if (stream->type == STREAM_VIDEO && track->realmedia)
-                handle_realvideo(demuxer, track, block, keyframe);
-            else if (stream->type == STREAM_AUDIO && track->realmedia)
-                handle_realaudio(demuxer, track, block, keyframe);
-            else {
-                bstr raw = demux_mkv_decode(demuxer->log, track, block, 1);
-                bstr buffer;
-                while (raw.start && mkv_parse_packet(track, &raw, &buffer)) {
-                    demux_packet_t *dp =
-                        new_demux_packet_from(buffer.start, buffer.len);
-                    if (!dp)
-                        break;
-                    dp->keyframe = keyframe;
-                    dp->pos = mkv_d->last_filepos;
-                    /* If default_duration is 0, assume no pts value is known
-                     * for packets after the first one (rather than all pts
-                     * values being the same). Also, don't use it for extra
-                     * packets resulting from parsing. */
-                    if (p == 0 || (p == i && track->default_duration))
-                        dp->pts = mkv_d->last_pts + p * track->default_duration;
-                    if (track->ms_compat)
-                        MPSWAP(double, dp->pts, dp->dts);
-                    if (p == 0)
-                        dp->duration = block_duration / 1e9;
-                    if (stream->type == STREAM_AUDIO) {
-                        unsigned int srate = track->a_sfreq;
-                        demux_packet_set_padding(dp,
-                            mkv_d->a_skip_preroll ? track->codec_delay * srate : 0,
-                            block_info->discardpadding / 1e9 * srate);
-                        mkv_d->a_skip_preroll = 0;
-                    }
-                    demux_add_packet(stream, dp);
-                    p++;
-                }
-                talloc_free_children(track->parser_tmp);
-            }
             data = bstr_cut(data, lace_size[i]);
+
+            block = demux_mkv_decode(demuxer->log, track, block, 1);
+
+            demux_packet_t *dp = new_demux_packet_from(block.start, block.len);
+            if (!dp)
+                break;
+            dp->keyframe = keyframe;
+            dp->pos = mkv_d->last_filepos;
+            /* If default_duration is 0, assume no pts value is known
+             * for packets after the first one (rather than all pts
+             * values being the same). Also, don't use it for extra
+             * packets resulting from parsing. */
+            if (i == 0 || track->default_duration)
+                dp->pts = mkv_d->last_pts + i * track->default_duration;
+            if (track->ms_compat)
+                MPSWAP(double, dp->pts, dp->dts);
+            if (i == 0)
+                dp->duration = block_duration / 1e9;
+            if (stream->type == STREAM_AUDIO) {
+                unsigned int srate = track->a_sfreq;
+                demux_packet_set_padding(dp,
+                    mkv_d->a_skip_preroll ? track->codec_delay * srate : 0,
+                    block_info->discardpadding / 1e9 * srate);
+                mkv_d->a_skip_preroll = 0;
+            }
+
+            mkv_parse_and_add_packet(demuxer, track, dp);
+            talloc_free_children(track->parser_tmp);
         }
 
         if (stream->type == STREAM_VIDEO) {

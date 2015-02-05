@@ -100,6 +100,16 @@ void free_demux_packet(struct demux_packet *dp)
     talloc_free(dp);
 }
 
+void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *src)
+{
+    dst->pts = src->pts;
+    dst->dts = src->dts;
+    dst->duration = src->duration;
+    dst->pos = src->pos;
+    dst->keyframe = src->keyframe;
+    dst->stream = src->stream;
+}
+
 struct demux_packet *demux_copy_packet(struct demux_packet *dp)
 {
     struct demux_packet *new = NULL;
@@ -111,9 +121,7 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
     }
     if (!new)
         return NULL;
-    new->pts = dp->pts;
-    new->dts = dp->dts;
-    new->duration = dp->duration;
+    demux_packet_copy_attribs(new, dp);
     return new;
 }
 
