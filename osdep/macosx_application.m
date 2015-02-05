@@ -128,6 +128,10 @@ Application *mpv_shared_app(void)
 - (NSMenu *)windowMenu
 {
     NSMenu *menu = [[NSMenu alloc] initWithTitle:@"Window"];
+    self.menuItems[@"floatOnTop"] = [self menuItemWithParent:menu
+                                                       title:@"Float on Top"
+                                                      action:@selector(toggleFloatOnTop)
+                                               keyEquivalent:@""];
     _R(menu, @"Minimize", @"m", MPM_MINIMIZE)
     _R(menu, @"Zoom",     @"z", MPM_ZOOM)
     return [menu autorelease];
@@ -163,6 +167,17 @@ Application *mpv_shared_app(void)
         mp_input_queue_cmd(inputContext, cmdt);
     } else {
         terminate_cocoa_application();
+    }
+}
+
+- (void)toggleFloatOnTop
+{
+    if ([self.menuItems[@"floatOnTop"] state] == NSOffState) {
+        [self.menuItems[@"floatOnTop"] setState: NSOnState];
+        [[[NSApplication sharedApplication] mainWindow] setLevel: NSFloatingWindowLevel];
+    } else {
+       [self.menuItems[@"floatOnTop"] setState: NSOffState];
+       [[[NSApplication sharedApplication] mainWindow] setLevel: NSNormalWindowLevel];
     }
 }
 
