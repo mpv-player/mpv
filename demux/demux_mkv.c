@@ -119,7 +119,7 @@ typedef struct mkv_track {
     unsigned char *private_data;
     unsigned int private_size;
 
-    bool parse;
+    bool parse, parse_timestamps;
     void *parser_tmp;
     AVCodecParserContext *av_parser;
     AVCodecContext *av_parser_codec;
@@ -1277,8 +1277,10 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         }
     }
 
-    if (sh->format == MP_FOURCC('V', 'P', '9', '0'))
+    if (sh->format == MP_FOURCC('V', 'P', '9', '0')) {
         track->parse = true;
+        track->parse_timestamps = true;
+    }
 
     if (extradata_size > 0x1000000) {
         MP_WARN(demuxer, "Invalid CodecPrivate\n");
@@ -2298,12 +2300,16 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
         return;
     }
 
+    double tb = 1e9;
+    int64_t pts = dp->pts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : dp->pts * tb;
+    int64_t dts = dp->dts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : dp->dts * tb;
+
     while (dp->len) {
         uint8_t *data = NULL;
         int size = 0;
         int len = av_parser_parse2(track->av_parser, track->av_parser_codec,
                                    &data, &size, dp->buffer, dp->len,
-                                   AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+                                   pts, dts, 0);
         if (len < 0 || len > dp->len)
             break;
         dp->buffer += len;
@@ -2313,8 +2319,15 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
             if (!new)
                 break;
             demux_packet_copy_attribs(new, dp);
+            if (track->parse_timestamps) {
+                new->pts = track->av_parser->pts == AV_NOPTS_VALUE
+                         ? MP_NOPTS_VALUE : track->av_parser->pts / tb;
+                new->dts = track->av_parser->dts == AV_NOPTS_VALUE
+                         ? MP_NOPTS_VALUE : track->av_parser->dts / tb;
+            }
             demux_add_packet(stream, new);
         }
+        pts = dts = AV_NOPTS_VALUE;
     }
 
     if (dp->len) {
