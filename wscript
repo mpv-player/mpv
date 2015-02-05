@@ -84,6 +84,11 @@ build_options = [
         'name': '--test',
         'desc': 'test suite (using cmocka)',
         'func': check_pkg_config('cmocka >= 0.4.1'),
+    }, {
+        'name': '--clang-database',
+        'desc': 'generate a clang compilation database',
+        'func': check_true,
+        'default': 'disable',
     }
 ]
 
@@ -890,6 +895,9 @@ def configure(ctx):
 
     if not ctx.dependency_satisfied('build-date'):
         ctx.env.CFLAGS += ['-DNO_BUILD_TIMESTAMPS']
+
+    if ctx.dependency_satisfied('clang-database'):
+        ctx.load('clang_compilation_database')
 
     ctx.store_dependencies_lists()
 
