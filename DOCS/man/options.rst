@@ -1041,11 +1041,11 @@ Audio
 
 ``--audio-file-auto=<no|exact|fuzzy|all>``, ``--no-audio-file-auto``
     Load additional audio files matching the video filename. The parameter
-    specifies how external audio files are matched. This is disabled by
+    specifies how external audio files are matched. ``exact`` is enabled by
     default.
 
-    :no:    Don't automatically load external audio files (default).
-    :exact: Load the media filename with audio file extension.
+    :no:    Don't automatically load external audio files.
+    :exact: Load the media filename with audio file extension (default).
     :fuzzy: Load all audio files containing media filename.
     :all:   Load all audio files in the current directory.
 

@@ -737,6 +737,13 @@ static void autoload_external_files(struct MPContext *mpctx)
     }
     struct subfn *list = find_external_files(mpctx->global, base_filename);
     talloc_steal(tmp, list);
+
+    int sc[STREAM_TYPE_COUNT] = {0};
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        if (!mpctx->tracks[n]->attached_picture)
+            sc[mpctx->tracks[n]->type]++;
+    }
+
     for (int i = 0; list && list[i].fname; i++) {
         char *filename = list[i].fname;
         char *lang = list[i].lang;
@@ -744,6 +751,10 @@ static void autoload_external_files(struct MPContext *mpctx)
             if (strcmp(mpctx->sources[n]->stream->url, filename) == 0)
                 goto skip;
         }
+        if (list[i].type == STREAM_SUB && !sc[STREAM_VIDEO] && !sc[STREAM_AUDIO])
+            goto skip;
+        if (list[i].type == STREAM_AUDIO && !sc[STREAM_VIDEO])
+            goto skip;
         struct track *track = mp_add_external_file(mpctx, filename, list[i].type);
         if (track) {
             track->auto_loaded = true;
@@ -752,6 +763,7 @@ static void autoload_external_files(struct MPContext *mpctx)
         }
     skip:;
     }
+
     talloc_free(tmp);
 }
 
