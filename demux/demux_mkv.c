@@ -138,7 +138,6 @@ typedef struct mkv_track {
     unsigned char *audio_buf;   ///< place to store reordered audio data
     double *audio_timestamp;    ///< timestamp for each audio packet
     uint32_t sub_packet_cnt;    ///< number of subpacket already received
-    int audio_filepos;          ///< file position of first audio packet in block
 
     /* generic content encoding support */
     mkv_content_encoding_t *encodings;
@@ -1939,17 +1938,17 @@ static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
     return 1;
 }
 
-static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
-                             bstr data, bool keyframe)
+// Return whether the packet was handled & freed.
+static bool handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
+                             struct demux_packet *orig)
 {
-    mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     uint32_t sps = track->sub_packet_size;
     uint32_t sph = track->sub_packet_h;
     uint32_t cfs = track->coded_framesize; // restricted to [1,0x40000000]
     uint32_t w = track->audiopk_size;
     uint32_t spc = track->sub_packet_cnt;
-    uint8_t *buffer = data.start;
-    uint32_t size = data.len;
+    uint8_t *buffer = orig->buffer;
+    uint32_t size = orig->len;
     demux_packet_t *dp;
 
     // track->audio_buf allocation size
@@ -2026,10 +2025,8 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
             break;
         }
         track->audio_timestamp[track->sub_packet_cnt] =
-            (track->ra_pts == mkv_d->last_pts) ? 0 : (mkv_d->last_pts);
-        track->ra_pts = mkv_d->last_pts;
-        if (track->sub_packet_cnt == 0)
-            track->audio_filepos = mkv_d->last_filepos;
+            track->ra_pts == orig->pts ? 0 : orig->pts;
+        track->ra_pts = orig->pts;
         if (++(track->sub_packet_cnt) == sph) {
             track->sub_packet_cnt = 0;
             // apk_usize has same range as coded_framesize in worst case
@@ -2046,28 +2043,20 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
                  * audio packets in file */
                 dp->pts = (x * apk_usize % w) ? MP_NOPTS_VALUE :
                     track->audio_timestamp[x * apk_usize / w];
-                dp->pos = track->audio_filepos; // all equal
+                dp->pos = orig->pos;
                 dp->keyframe = !x;   // Mark first packet as keyframe
                 demux_add_packet(track->stream, dp);
             }
         }
+        talloc_free(orig);
+        return true;
+    error:
+        MP_ERR(demuxer, "RealAudio packet extraction or decryption error.\n");
+        talloc_free(orig);
+        return true;
     } else { // Not a codec that requires reordering
-        dp = new_demux_packet_from(buffer, size);
-        if (!dp)
-            goto error;
-        if (track->ra_pts == mkv_d->last_pts && !mkv_d->a_skip_to_keyframe)
-            dp->pts = MP_NOPTS_VALUE;
-        else
-            dp->pts = mkv_d->last_pts;
-        track->ra_pts = mkv_d->last_pts;
-
-        dp->pos = mkv_d->last_filepos;
-        dp->keyframe = keyframe;
-        demux_add_packet(track->stream, dp);
+        return false;
     }
-    return;
-error:
-    MP_ERR(demuxer, "RealAudio packet extraction or decryption error.\n");
 }
 
 static void mkv_seek_reset(demuxer_t *demuxer)
@@ -2177,10 +2166,8 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
     struct sh_stream *stream = track->stream;
 
     if (track->realmedia && stream->type == STREAM_AUDIO) {
-        bstr block = {dp->buffer, dp->len};
-        handle_realaudio(demuxer, track, block, dp->keyframe);
-        talloc_free(dp);
-        return;
+        if (handle_realaudio(demuxer, track, dp))
+            return;
     }
 
     if (track->a_formattag == MP_FOURCC('W', 'V', 'P', 'K')) {
