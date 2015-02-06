@@ -25,6 +25,8 @@ API changes
 
 ::
 
+ git    - the --msg-level option changes its native type from a flat string to
+          a key-value list (setting/reading the option as string still works)
  1.14   - add mpv_wait_async_requests()
  1.13   - add MPV_EVENT_QUEUE_OVERFLOW
  1.12   - add class Handle to qthelper.hpp

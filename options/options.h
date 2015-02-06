@@ -54,9 +54,9 @@ struct mp_cache_opts {
 
 typedef struct MPOpts {
     int use_terminal;
-    char *msglevels;
     char *dump_stats;
     int verbose;
+    char **msg_levels;
     int msg_color;
     int msg_module;
     int msg_time;

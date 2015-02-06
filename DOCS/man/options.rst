@@ -2745,7 +2745,7 @@ Terminal
 ``--no-msg-color``
     Disable colorful console output on terminals.
 
-``--msg-level=<module1=level1:module2=level2:...>``
+``--msg-level=<module1=level1,module2=level2,...>``
     Control verbosity directly for each module. The ``all`` module changes the
     verbosity of all the modules not explicitly specified on the command line.
 

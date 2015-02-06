@@ -1495,6 +1495,73 @@ const m_option_type_t m_option_type_keyvalue_list = {
     .set   = keyvalue_list_set,
 };
 
+
+#undef VAL
+#define VAL(x) (*(char **)(x))
+
+static int check_msg_levels(struct mp_log *log, char **list)
+{
+    for (int n = 0; list && list[n * 2 + 0]; n++) {
+        char *level = list[n * 2 + 1];
+        if (mp_msg_find_level(level) < 0 && strcmp(level, "no") != 0) {
+            mp_err(log, "Invalid message level '%s'\n", level);
+            return M_OPT_INVALID;
+        }
+    }
+    return 1;
+}
+
+static int parse_msglevels(struct mp_log *log, const m_option_t *opt,
+                           struct bstr name, struct bstr param, void *dst)
+{
+    if (bstr_equals0(param, "help")) {
+        mp_info(log, "Syntax: --msglevel=module1=level:module2=level:...\n"
+                     "'module' is output prefix as shown with -v, or a prefix\n"
+                     "of it. level is one of:\n\n"
+                     "  fatal error warn info status v debug trace\n\n"
+                     "The level specifies the minimum log level a message\n"
+                     "must have to be printed.\n"
+                     "The special module name 'all' affects all modules.\n");
+        return M_OPT_EXIT;
+    }
+
+    char **dst_copy = NULL;
+    int r = m_option_type_keyvalue_list.parse(log, opt, name, param, &dst_copy);
+    if (r >= 0)
+        r = check_msg_levels(log, dst_copy);
+
+    if (r >= 0)
+        m_option_type_keyvalue_list.copy(opt, dst, &dst_copy);
+    m_option_type_keyvalue_list.free(&dst_copy);
+    return r;
+}
+
+static int set_msglevels(const m_option_t *opt, void *dst,
+                             struct mpv_node *src)
+{
+    char **dst_copy = NULL;
+    int r = m_option_type_keyvalue_list.set(opt, &dst_copy, src);
+    if (r >= 0)
+        r = check_msg_levels(mp_null_log, dst_copy);
+
+    if (r >= 0)
+        m_option_type_keyvalue_list.copy(opt, dst, &dst_copy);
+    m_option_type_keyvalue_list.free(&dst_copy);
+    return r;
+}
+
+const m_option_type_t m_option_type_msglevels = {
+    .name = "Output verbosity levels",
+    .size  = sizeof(char **),
+    .flags = M_OPT_TYPE_DYNAMIC,
+    .parse = parse_msglevels,
+    .print = print_keyvalue_list,
+    .copy  = copy_str_list,
+    .free  = free_str_list,
+    .get   = keyvalue_list_get,
+    .set   = set_msglevels,
+};
+
 /////////////////// Print
 
 static int parse_print(struct mp_log *log, const m_option_t *opt,
@@ -1628,62 +1695,6 @@ const m_option_type_t m_option_type_subconfig = {
     .name = "Subconfig",
     .flags = M_OPT_TYPE_HAS_CHILD,
     .parse = parse_subconf,
-};
-
-#undef VAL
-#define VAL(x) (*(char **)(x))
-
-static int parse_msglevels(struct mp_log *log, const m_option_t *opt,
-                           struct bstr name, struct bstr param, void *dst)
-{
-    if (param.start == NULL)
-        return M_OPT_MISSING_PARAM;
-
-    if (bstr_equals0(param, "help")) {
-        mp_info(log, "Syntax: --msglevel=module1=level:module2=level:...\n"
-                     "'module' is output prefix as shown with -v, or a prefix\n"
-                     "of it. level is one of:\n\n"
-                     "  fatal error warn info status v debug trace\n\n"
-                     "The level specifies the minimum log level a message\n"
-                     "must have to be printed.\n"
-                     "The special module name 'all' affects all modules.\n");
-        return M_OPT_EXIT;
-    }
-
-    bstr s = param;
-    while (1) {
-        int res = mp_msg_split_msglevel(&s, &(bstr){0}, &(int){0});
-        if (res == 0)
-            break;
-        if (res < 0) {
-            mp_err(log, "Invalid syntax: %.*s\n", BSTR_P(s));
-            return M_OPT_INVALID;
-        }
-    }
-
-    if (dst && param.len) {
-        char *prev = VAL(dst);
-        char *new;
-        if (prev && prev[0]) {
-            new = talloc_asprintf(NULL, "%s:%.*s", prev, BSTR_P(param));
-        } else {
-            new = bstrdup0(NULL, param);
-        }
-        talloc_free(prev);
-        VAL(dst) = new;
-    }
-
-    return 1;
-}
-
-const m_option_type_t m_option_type_msglevels = {
-    .name = "Output verbosity levels",
-    .size  = sizeof(char *),
-    .flags = M_OPT_TYPE_DYNAMIC,
-    .parse = parse_msglevels,
-    .print = print_str,
-    .copy  = copy_str,
-    .free  = free_str,
 };
 
 #undef VAL
