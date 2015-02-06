@@ -182,8 +182,11 @@ void mp_setup_av_network_options(AVDictionary **dict, struct mpv_global *global,
         av_dict_set(dict, "headers", cust_headers, 0);
     av_dict_set(dict, "icy", "1", 0);
     // So far, every known protocol uses microseconds for this
-    if (opts->network_timeout > 0)
-        av_dict_set_int(dict, "timeout", opts->network_timeout * 1e6, 0);
+    if (opts->network_timeout > 0) {
+        char buf[80];
+        snprintf(buf, sizeof(buf), "%lld", (long long)(opts->network_timeout * 1e6));
+        av_dict_set(dict, "timeout", buf, 0);
+    }
 
     mp_set_avdict(dict, opts->stream_lavf_opts->avopts);
 
