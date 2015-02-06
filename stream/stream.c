@@ -676,7 +676,7 @@ bool stream_seek(stream_t *s, int64_t pos)
     }
 
     if (s->mode == STREAM_WRITE)
-        return s->seekable && s->seek(s, pos));
+        return s->seekable && s->seek(s, pos);
 
     int64_t newpos = pos;
     if (s->sector_size)
@@ -717,21 +717,7 @@ bool stream_skip(stream_t *s, int64_t len)
 
 int stream_control(stream_t *s, int cmd, void *arg)
 {
-    if (!s->control)
-        return STREAM_UNSUPPORTED;
-    int r = s->control(s, cmd, arg);
-    if (r == STREAM_UNSUPPORTED) {
-        // Fallbacks
-        switch (cmd) {
-        case STREAM_CTRL_GET_SIZE:
-            if (s->end_pos > 0) {
-                *(int64_t *)arg = s->end_pos;
-                return STREAM_OK;
-            }
-            break;
-        }
-    }
-    return r;
+    return s->control ? s->control(s, cmd, arg) : STREAM_UNSUPPORTED;
 }
 
 void free_stream(stream_t *s)

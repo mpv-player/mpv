@@ -82,6 +82,9 @@ static int rar_entry_control(stream_t *s, int cmd, void *arg)
     case STREAM_CTRL_GET_BASE_FILENAME:
         *(char **)arg = talloc_strdup(NULL, rar_file->s->url);
         return STREAM_OK;
+    case STREAM_CTRL_GET_SIZE:
+        *(int64_t *)arg = rar_file->size;
+        return STREAM_OK;
     }
     return STREAM_UNSUPPORTED;
 }
@@ -131,7 +134,6 @@ static int rar_entry_open(stream_t *stream)
     RarSeek(file, 0);
 
     stream->priv = file;
-    stream->end_pos = file->size;
     stream->fill_buffer = rar_entry_fill_buffer;
     stream->seek = rar_entry_seek;
     stream->seekable = true;
@@ -157,6 +159,12 @@ static void rar_filter_close(stream_t *s)
 {
     struct stream *m = s->priv;
     free_stream(m);
+}
+
+static int rar_filter_control(stream_t *s, int cmd, void *arg)
+{
+    struct stream *m = s->priv;
+    return stream_control(m, cmd, arg);
 }
 
 static int rar_filter_open(stream_t *stream)
@@ -186,11 +194,11 @@ static int rar_filter_open(stream_t *stream)
     struct stream *m = open_memory_stream(pl, strlen(pl));
 
     stream->priv = m;
-    stream->end_pos = m->end_pos;
     stream->fill_buffer = rar_filter_fill_buffer;
     stream->seek = rar_filter_seek;
     stream->seekable = true;
     stream->close = rar_filter_close;
+    stream->control = rar_filter_control;
     stream->safe_origin = true;
 
     talloc_free(tmp);

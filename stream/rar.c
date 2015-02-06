@@ -257,8 +257,7 @@ exit:
 
     /* We stop on the first non empty file if we cannot seek */
     if (current) {
-        bool can_seek = s->end_pos > 0;
-        if (!can_seek && current->size > 0)
+        if (!s->seekable && current->size > 0)
             return -1;
     }
 

@@ -649,6 +649,10 @@ static int control(stream_t *stream,int cmd,void* arg)
             *(char**)arg = talloc_strdup(NULL, buffer);
             return STREAM_OK;
         }
+        case STREAM_CTRL_GET_SIZE:
+            *(int64_t *)arg =
+                (d->cur_pgc->cell_playback[d->last_cell-1].last_sector)*2048LL;
+            return STREAM_OK;
     }
     return STREAM_UNSUPPORTED;
 }
@@ -917,7 +921,6 @@ static int open_s(stream_t *stream)
     stream->fill_buffer = fill_buffer;
     stream->control = control;
     stream->close = stream_dvd_close;
-    stream->end_pos = (int64_t)(d->cur_pgc->cell_playback[d->last_cell-1].last_sector)*2048;
     MP_VERBOSE(stream, "DVD start=%d end=%d  \n",d->cur_pack,d->cur_pgc->cell_playback[d->last_cell-1].last_sector);
     stream->priv = (void*)d;
     return STREAM_OK;

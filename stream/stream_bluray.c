@@ -600,6 +600,9 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             fill_next_event(s, ev);
         return STREAM_OK;
     }
+    case STREAM_CTRL_GET_SIZE:
+        *(int64_t *)arg = bd_get_title_size(b->bd);
+        return STREAM_OK;
     default:
         break;
     }
@@ -794,7 +797,6 @@ static int bluray_stream_open(stream_t *s)
     s->close       = bluray_stream_close;
     s->control     = bluray_stream_control;
     s->type        = STREAMTYPE_BLURAY;
-    s->end_pos     = bd_get_title_size(bd);
     s->sector_size = BLURAY_SECTOR_SIZE;
     s->priv        = b;
     s->demuxer     = "+disc";

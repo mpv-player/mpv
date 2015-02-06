@@ -185,16 +185,15 @@ typedef struct stream {
     int read_chunk; // maximum amount of data to read at once to limit latency
     unsigned int buf_pos, buf_len;
     int64_t pos;
-    uint64_t end_pos; // static size; use STREAM_CTRL_GET_SIZE instead
     int eof;
     int mode; //STREAM_READ or STREAM_WRITE
-    bool streaming;     // known to be a network stream if true
     void *priv; // used for DVD, TV, RTSP etc
     char *url;  // filename/url (possibly including protocol prefix)
     char *path; // filename (url without protocol prefix)
     char *mime_type; // when HTTP streaming is used
     char *demuxer; // request demuxer to be used
     char *lavf_type; // name of expected demuxer type for lavf
+    bool streaming : 1; // known to be a network stream if true
     bool seekable : 1; // presence of general byte seeking support
     bool fast_skip : 1; // consider stream fast enough to fw-seek by skipping
     bool safe_origin : 1; // used for playlists that can be opened safely
