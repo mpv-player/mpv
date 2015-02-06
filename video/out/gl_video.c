@@ -325,7 +325,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .scalers = { "bilinear", "bilinear" },
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
     .scaler_radius = {3, 3},
-    .alpha_mode = 0,
+    .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
 };
@@ -343,7 +343,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .dscaler = "mitchell",
     .scaler_params = {{NAN, NAN}, {NAN, NAN}},
     .scaler_radius = {3, 3},
-    .alpha_mode = 0,
+    .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
 };
