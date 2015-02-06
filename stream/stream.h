@@ -252,8 +252,8 @@ inline static int64_t stream_tell(stream_t *s)
     return s->pos + s->buf_pos - s->buf_len;
 }
 
-int stream_skip(stream_t *s, int64_t len);
-int stream_seek(stream_t *s, int64_t pos);
+bool stream_skip(stream_t *s, int64_t len);
+bool stream_seek(stream_t *s, int64_t pos);
 int stream_read(stream_t *s, char *mem, int total);
 int stream_read_partial(stream_t *s, char *buf, int buf_size);
 struct bstr stream_peek(stream_t *s, int len);

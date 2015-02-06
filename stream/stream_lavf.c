@@ -134,6 +134,8 @@ static int control(stream_t *s, int cmd, void *arg)
         // avio doesn't seem to support this - emulate it by reopening
         close_f(s);
         s->priv = NULL;
+        stream_drop_buffers(s);
+        s->pos = 0;
         return open_f(s);
     }
     }
@@ -291,8 +293,6 @@ static int open_f(stream_t *stream)
     stream->close = close_f;
     // enable cache (should be avoided for files, but no way to detect this)
     stream->streaming = true;
-    stream->pos = 0; // reset specifically for STREAM_CTRL_RECONNECT
-    stream->buf_pos = stream->buf_len = 0;
     res = STREAM_OK;
 
 out:

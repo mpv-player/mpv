@@ -581,9 +581,8 @@ static int cache_control(stream_t *cache, int cmd, void *arg)
     }
     r = s->control_res;
     if (s->control_flush) {
+        stream_drop_buffers(cache);
         cache->pos = s->read_filepos;
-        cache->eof = 0;
-        cache->buf_pos = cache->buf_len = 0;
     }
 
 done:

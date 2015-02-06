@@ -121,7 +121,7 @@ static const stream_info_t *const stream_list[] = {
     NULL
 };
 
-static int stream_seek_unbuffered(stream_t *s, int64_t newpos);
+static bool stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
 static int from_hex(unsigned char c)
 {
@@ -414,32 +414,29 @@ stream_t *open_output_stream(const char *filename, struct mpv_global *global)
     return stream_create(filename, STREAM_WRITE, NULL, global);
 }
 
-static int stream_reconnect(stream_t *s)
+static bool stream_reconnect(stream_t *s)
 {
-    if (!s->streaming || s->uncached_stream)
-        return 0;
-    if (!s->seekable)
-        return 0;
-    if (mp_cancel_test(s->cancel) || !s->cancel)
-        return 0;
+    if (!s->streaming || s->uncached_stream || !s->seekable || !s->cancel)
+        return false;
+
     int64_t pos = s->pos;
     double sleep_secs = 0;
     for (int retry = 0; retry < 6; retry++) {
-        MP_WARN(s, "Connection lost! Attempting to reconnect (%d)...\n", retry + 1);
-
         if (mp_cancel_wait(s->cancel, sleep_secs))
             break;
 
-        sleep_secs = MPMAX(sleep_secs, 0.1);
-        sleep_secs = MPMIN(sleep_secs * 4, 10.0);
+        MP_WARN(s, "Connection lost! Attempting to reconnect (%d)...\n", retry + 1);
 
         int r = stream_control(s, STREAM_CTRL_RECONNECT, NULL);
         if (r == STREAM_UNSUPPORTED)
             break;
-        if (r == STREAM_OK && stream_seek_unbuffered(s, pos) < 0 && s->pos == pos)
-            return 1;
+        if (r == STREAM_OK && stream_seek_unbuffered(s, pos) && s->pos == pos)
+            return true;
+
+        sleep_secs = MPMAX(sleep_secs, 0.1);
+        sleep_secs = MPMIN(sleep_secs * 4, 10.0);
     }
-    return 0;
+    return false;
 }
 
 static void stream_capture_write(stream_t *s, void *buf, size_t len)
@@ -475,7 +472,7 @@ void stream_set_capture_file(stream_t *s, const char *filename)
 
 // Read function bypassing the local stream buffer. This will not write into
 // s->buffer, but into buf[0..len] instead.
-// Returns < 0 on error, 0 on EOF, and length of bytes read on success.
+// Returns 0 on error or EOF, and length of bytes read on success.
 // Partial reads are possible, even if EOF is not reached.
 static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 {
@@ -486,21 +483,16 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     if (len < 0)
         len = 0;
     if (len == 0) {
+        // just in case this is an error e.g. due to network
+        // timeout reset and retry
         // do not retry if this looks like proper eof
         int64_t size = -1;
         stream_control(s, STREAM_CTRL_GET_SIZE, &size);
-        if (s->eof || s->pos == size)
-            goto eof_out;
+        if (!s->eof && s->pos != size && stream_reconnect(s)) {
+            s->eof = 1; // make sure EOF is set to ensure no endless recursion
+            return stream_read_unbuffered(s, buf, orig_len);
+        }
 
-        // just in case this is an error e.g. due to network
-        // timeout reset and retry
-        if (!stream_reconnect(s))
-            goto eof_out;
-        // make sure EOF is set to ensure no endless loops
-        s->eof = 1;
-        return stream_read_unbuffered(s, buf, orig_len);
-
-eof_out:
         s->eof = 1;
         return 0;
     }
@@ -613,13 +605,13 @@ int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
     return rd;
 }
 
-static int stream_skip_read(struct stream *s, int64_t len)
+static bool stream_skip_read(struct stream *s, int64_t len)
 {
     while (len > 0) {
         int x = s->buf_len - s->buf_pos;
         if (x == 0) {
             if (!stream_fill_buffer_by(s, len))
-                return 0; // EOF
+                return false; // EOF
             x = s->buf_len - s->buf_pos;
         }
         if (x > len)
@@ -627,7 +619,7 @@ static int stream_skip_read(struct stream *s, int64_t len)
         s->buf_pos += x;
         len -= x;
     }
-    return 1;
+    return true;
 }
 
 // Drop the internal buffer. Note that this will advance the stream position
@@ -641,37 +633,50 @@ void stream_drop_buffers(stream_t *s)
 }
 
 // Seek function bypassing the local stream buffer.
-static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
+static bool stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
     if (newpos != s->pos) {
         if (newpos > s->pos && !s->seekable) {
             MP_ERR(s, "Cannot seek forward in this stream\n");
-            return 0;
+            return false;
         }
         if (newpos < s->pos && !s->seekable) {
             MP_ERR(s, "Cannot seek backward in linear streams!\n");
-            return 1;
+            return false;
         }
         if (s->seek(s, newpos) <= 0) {
             MP_ERR(s, "Seek failed\n");
-            return 0;
+            return false;
         }
         stream_drop_buffers(s);
         s->pos = newpos;
     }
-    s->eof = 0; // EOF reset when seek succeeds.
-    return -1;
+    return true;
 }
 
-// Unlike stream_seek, does not try to seek within local buffer.
-// Unlike stream_seek_unbuffered(), it still fills the local buffer.
-static int stream_seek_long(stream_t *s, int64_t pos)
+bool stream_seek(stream_t *s, int64_t pos)
 {
-    if (s->mode == STREAM_WRITE) {
-        if (!s->seekable || !s->seek(s, pos))
-            return 0;
-        return 1;
+    MP_TRACE(s, "seek to %lld\n", (long long)pos);
+
+    s->eof = 0; // eof should be set only on read; seeking always clears it
+
+    if (pos == stream_tell(s))
+        return true;
+
+    if (pos < 0) {
+        MP_ERR(s, "Invalid seek to negative position %lld!\n", (long long)pos);
+        pos = 0;
     }
+    if (pos < s->pos) {
+        int64_t x = pos - (s->pos - (int)s->buf_len);
+        if (x >= 0) {
+            s->buf_pos = x;
+            return true;
+        }
+    }
+
+    if (s->mode == STREAM_WRITE)
+        return s->seekable && s->seek(s, pos));
 
     int64_t newpos = pos;
     if (s->sector_size)
@@ -682,44 +687,18 @@ static int stream_seek_long(stream_t *s, int64_t pos)
 
     if (pos >= s->pos && !s->seekable && s->fast_skip) {
         // skipping is handled by generic code below
-    } else if (stream_seek_unbuffered(s, newpos) >= 0) {
-        return 0;
+    } else if (!stream_seek_unbuffered(s, newpos)) {
+        return false;
     }
 
-    if (pos >= s->pos && stream_skip_read(s, pos - s->pos) > 0)
-        return 1; // success
-
-    // Fill failed, but seek still is a success (partially).
-    s->eof = 0; // eof should be set only on read
-
-    MP_VERBOSE(s, "Seek to/past EOF: no buffer preloaded.\n");
-    return 1;
+    bool r = pos >= s->pos && stream_skip_read(s, pos - s->pos);
+    if (!r)
+        MP_VERBOSE(s, "Seek to/past EOF: no buffer preloaded.\n");
+    s->eof = 0;
+    return r;
 }
 
-int stream_seek(stream_t *s, int64_t pos)
-{
-    MP_TRACE(s, "seek to 0x%llX\n", (long long)pos);
-
-    if (pos == stream_tell(s))
-        return 1;
-
-    if (pos < 0) {
-        MP_ERR(s, "Invalid seek to negative position %llx!\n", (long long)pos);
-        pos = 0;
-    }
-    if (pos < s->pos) {
-        int64_t x = pos - (s->pos - (int)s->buf_len);
-        if (x >= 0) {
-            s->buf_pos = x;
-            s->eof = 0;
-            return 1;
-        }
-    }
-
-    return stream_seek_long(s, pos);
-}
-
-int stream_skip(stream_t *s, int64_t len)
+bool stream_skip(stream_t *s, int64_t len)
 {
     int64_t target = stream_tell(s) + len;
     if (len < 0)
@@ -728,12 +707,10 @@ int stream_skip(stream_t *s, int64_t len)
         // Seek to 1 byte before target - this is the only way to distinguish
         // skip-to-EOF and skip-past-EOF in general. Successful seeking means
         // absolutely nothing, so test by doing a real read of the last byte.
-        int r = stream_seek(s, target - 1);
-        if (r) {
-            stream_read_char(s);
-            return !stream_eof(s) && stream_tell(s) == target;
-        }
-        return r;
+        if (!stream_seek(s, target - 1))
+            return false;
+        stream_read_char(s);
+        return !stream_eof(s) && stream_tell(s) == target;
     }
     return stream_skip_read(s, len);
 }
