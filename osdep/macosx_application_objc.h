@@ -23,6 +23,7 @@
 - (void)initialize_menu;
 - (void)registerSelector:(SEL)selector forKey:(MPMenuKey)key;
 - (void)stopPlayback;
+- (void)toggleFloatOnTop;
 
 @property(nonatomic, retain) NSMutableDictionary *menuItems;
 @property(nonatomic, retain) NSArray *files;
