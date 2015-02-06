@@ -3135,6 +3135,11 @@ Network
 ``--referrer=<string>``
     Specify a referrer path or URL for HTTP requests.
 
+``--network-timeout=<seconds>``
+    Specify the network timeout in seconds. This affects at least HTTP. The
+    special value 0 (default) uses the FFmpeg/Libav defaults. If a protocol
+    is used which does not support timeouts, this option is silently ignored.
+
 ``--rtsp-transport=<lavf|udp|tcp|http>``
     Select RTSP transport method (default: tcp). This selects the underlying
     network transport when playing ``rtsp://...`` URLs. The value ``lavf``

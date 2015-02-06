@@ -274,6 +274,7 @@ typedef struct MPOpts {
     char **network_http_header_fields;
     int network_tls_verify;
     char *network_tls_ca_file;
+    double network_timeout;
 
     struct tv_params *tv_params;
     struct pvr_params *stream_pvr_opts;

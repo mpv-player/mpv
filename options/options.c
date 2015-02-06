@@ -173,6 +173,7 @@ const m_option_t mp_opts[] = {
                 {"http", 3})),
     OPT_FLAG("tls-verify", network_tls_verify, 0),
     OPT_STRING("tls-ca-file", network_tls_ca_file, M_OPT_FILE),
+    OPT_DOUBLE("network-timeout", network_timeout, M_OPT_MIN, .min = 0),
 
 // ------------------------- demuxer options --------------------
 
@@ -730,6 +731,7 @@ const struct MPOpts mp_default_opts = {
     .demuxer_min_bytes = 0,
     .demuxer_min_secs = 0.2,
     .network_rtsp_transport = 2,
+    .network_timeout = 0.0,
     .hls_bitrate = 2,
     .demuxer_min_secs_cache = 2,
     .cache_pausing = 1,
