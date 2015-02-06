@@ -1409,7 +1409,7 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
             MP_TARRAY_APPEND(NULL, lst, num, bstrto0(NULL, val));
         }
 
-        if (!bstr_eatstart0(&param, ","))
+        if (!bstr_eatstart0(&param, ",") && !bstr_eatstart0(&param, ":"))
             break;
     }
     if (dst)
