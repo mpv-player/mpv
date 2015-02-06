@@ -48,6 +48,8 @@
 
 #ifdef __MINGW32__
 #include <windows.h>
+#else
+#include <poll.h>
 #endif
 
 // Includes additional padding in case sizes get rounded up by sector size.
@@ -414,36 +416,27 @@ stream_t *open_output_stream(const char *filename, struct mpv_global *global)
 
 static int stream_reconnect(stream_t *s)
 {
-#define MAX_RECONNECT_RETRIES 5
-#define RECONNECT_SLEEP_MAX_MS 500
     if (!s->streaming || s->uncached_stream)
         return 0;
     if (!s->seekable)
         return 0;
-    if (mp_cancel_test(s->cancel))
+    if (mp_cancel_test(s->cancel) || !s->cancel)
         return 0;
     int64_t pos = s->pos;
-    int sleep_ms = 5;
-    for (int retry = 0; retry < MAX_RECONNECT_RETRIES; retry++) {
+    double sleep_secs = 0;
+    for (int retry = 0; retry < 6; retry++) {
         MP_WARN(s, "Connection lost! Attempting to reconnect (%d)...\n", retry + 1);
 
-        if (retry) {
-            mp_sleep_us(sleep_ms * 1000);
-            sleep_ms = MPMIN(sleep_ms * 2, RECONNECT_SLEEP_MAX_MS);
-        }
+        if (mp_cancel_wait(s->cancel, sleep_secs))
+            break;
 
-        if (mp_cancel_test(s->cancel))
-            return 0;
-
-        s->eof = 1;
+        sleep_secs = MPMAX(sleep_secs, 0.1);
+        sleep_secs = MPMIN(sleep_secs * 4, 10.0);
 
         int r = stream_control(s, STREAM_CTRL_RECONNECT, NULL);
         if (r == STREAM_UNSUPPORTED)
-            return 0;
-        if (r != STREAM_OK)
-            continue;
-
-        if (stream_seek_unbuffered(s, pos) < 0 && s->pos == pos)
+            break;
+        if (r == STREAM_OK && stream_seek_unbuffered(s, pos) < 0 && s->pos == pos)
             return 1;
     }
     return 0;
@@ -1058,6 +1051,23 @@ bool mp_cancel_test(struct mp_cancel *c)
 {
     return c ? atomic_load(&c->triggered) : false;
 }
+
+// Wait until the even is signaled. If the timeout (in seconds) expires, return
+// false. timeout==0 polls, timeout<0 waits forever.
+#ifdef __MINGW32__
+bool mp_cancel_wait(struct mp_cancel *c, double timeout)
+{
+    return WaitForSingleObject(c->event, timeout < 0 ? INFINITE : timeout * 1000)
+            == WAIT_OBJECT_0;
+}
+#else
+bool mp_cancel_wait(struct mp_cancel *c, double timeout)
+{
+    struct pollfd fd = { .fd = c->wakeup_pipe[0], .events = POLLIN };
+    poll(&fd, 1, timeout * 1000);
+    return fd.revents & POLLIN;
+}
+#endif
 
 #ifdef __MINGW32__
 void *mp_cancel_get_event(struct mp_cancel *c)

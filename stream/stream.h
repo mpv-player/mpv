@@ -277,6 +277,7 @@ char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok);
 struct mp_cancel *mp_cancel_new(void *talloc_ctx);
 void mp_cancel_trigger(struct mp_cancel *c);
 bool mp_cancel_test(struct mp_cancel *c);
+bool mp_cancel_wait(struct mp_cancel *c, double timeout);
 void mp_cancel_reset(struct mp_cancel *c);
 void *mp_cancel_get_event(struct mp_cancel *c); // win32 HANDLE
 int mp_cancel_get_fd(struct mp_cancel *c);
