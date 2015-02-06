@@ -318,33 +318,47 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
     return *num_sources;
 }
 
+struct timeline_info {
+    struct demuxer **sources;
+    int num_sources;
+    struct timeline_part **timeline;
+    int num_parts;
+
+    uint64_t start_time; // When the next part should start on the complete timeline.
+    uint64_t missing_time; // Total missing time so far.
+    uint64_t last_end_time; // When the last part ended on the complete timeline.
+    int num_chapters; // Total number of expected chapters.
+};
+
+struct inner_timeline_info {
+    uint64_t skip; // Amount of time to skip.
+    uint64_t limit; // How much time is expected for the parent chapter.
+};
+
 static int64_t add_timeline_part(struct MPContext *mpctx,
+                                 struct timeline_info *ctx,
                                  struct demuxer *source,
-                                 struct timeline_part **timeline,
-                                 int *part_count,
-                                 uint64_t start,
-                                 uint64_t *last_end_time,
-                                 uint64_t *starttime)
+                                 uint64_t start)
 {
     /* Merge directly adjacent parts. We allow for a configurable fudge factor
      * because of files which specify chapter end times that are one frame too
      * early; we don't want to try seeking over a one frame gap. */
-    int64_t join_diff = start - *last_end_time;
-    if (*part_count == 0
+    int64_t join_diff = start - ctx->last_end_time;
+    if (ctx->num_parts == 0
         || FFABS(join_diff) > mpctx->opts->chapter_merge_threshold * 1e6
-        || source != (*timeline)[*part_count - 1].source)
+        || source != (*ctx->timeline)[ctx->num_parts - 1].source)
     {
         struct timeline_part new = {
-            .start = *starttime / 1e9,
+            .start = ctx->start_time / 1e9,
             .source_start = start / 1e9,
             .source = source,
         };
-        MP_TARRAY_APPEND(NULL, *timeline, *part_count, new);
-    } else if (*part_count > 0 && join_diff) {
+        MP_TARRAY_APPEND(NULL, *ctx->timeline, ctx->num_parts, new);
+    } else if (ctx->num_parts > 0 && join_diff) {
         // Chapter was merged at an inexact boundary; adjust timestamps to match.
         MP_VERBOSE(mpctx, "Merging timeline part %d with offset %g ms.\n",
-                   *part_count, join_diff / 1e6);
-        *starttime += join_diff;
+                   ctx->num_parts, join_diff / 1e6);
+        ctx->start_time += join_diff;
         return join_diff;
     }
 
@@ -352,21 +366,13 @@ static int64_t add_timeline_part(struct MPContext *mpctx,
 }
 
 static void build_timeline_loop(struct MPContext *mpctx,
-                                struct demuxer **sources,
-                                int num_sources,
-                                int current_source,
-                                uint64_t *starttime,
-                                uint64_t *missing_time,
-                                uint64_t *last_end_time,
-                                struct timeline_part **timeline,
                                 struct demux_chapter *chapters,
-                                int num_chapters,
-                                int *part_count,
-                                uint64_t skip,
-                                uint64_t limit)
+                                struct timeline_info *ctx,
+                                struct inner_timeline_info *info,
+                                int current_source)
 {
     uint64_t local_starttime = 0;
-    struct demuxer *source = sources[current_source];
+    struct demuxer *source = ctx->sources[current_source];
     struct matroska_data *m = &source->matroska_data;
 
     for (int i = 0; i < m->num_ordered_chapters; i++) {
@@ -379,22 +385,22 @@ static void build_timeline_loop(struct MPContext *mpctx,
         local_starttime += chapter_length;
 
         // If we're before the start time for the chapter, skip to the next one.
-        if (local_starttime <= skip)
+        if (local_starttime <= info->skip)
             continue;
 
         /* Look for the source for this chapter. */
-        for (int j = 0; j < num_sources; j++) {
-            struct demuxer *linked_source = sources[j];
+        for (int j = 0; j < ctx->num_sources; j++) {
+            struct demuxer *linked_source = ctx->sources[j];
             struct matroska_data *linked_m = &linked_source->matroska_data;
 
             if (!demux_matroska_uid_cmp(&c->uid, &linked_m->uid))
                 continue;
 
-            if (i >= num_chapters)
-                break; // probably needed only for broken sources
+            if (!info->limit) {
+                if (i >= ctx->num_chapters)
+                    break; // malformed files can cause this to happen.
 
-            if (!limit) {
-                chapters[i].pts = *starttime / 1e9;
+                chapters[i].pts = ctx->start_time / 1e9;
                 chapters[i].name = talloc_strdup(chapters, c->name);
             }
 
@@ -410,7 +416,7 @@ static void build_timeline_loop(struct MPContext *mpctx,
                  * nothing we can get from it. Instead, mark the entire chapter
                  * as missing and make the chapter length 0. */
                 if (source_full_length <= c->start) {
-                    *missing_time += chapter_length;
+                    ctx->missing_time += chapter_length;
                     chapter_length = 0;
                     goto found;
                 }
@@ -421,12 +427,12 @@ static void build_timeline_loop(struct MPContext *mpctx,
                  * we actually have to avoid playing off the end of the file
                  * and not switching to the next source. */
                 if (source_length < chapter_length) {
-                    *missing_time += chapter_length - source_length;
+                    ctx->missing_time += chapter_length - source_length;
                     chapter_length = source_length;
                 }
 
-                join_diff = add_timeline_part(mpctx, linked_source, timeline, part_count,
-                                              c->start, last_end_time, starttime);
+                join_diff = add_timeline_part(mpctx, ctx,
+                                              linked_source, c->start);
 
                 /* If we merged two chapters into a single part due to them
                  * being off by a few frames, we need to change the limit to
@@ -434,8 +440,8 @@ static void build_timeline_loop(struct MPContext *mpctx,
                  * frames case) or showing extra content (the removing frames
                  * case). Also update chapter_length to incorporate the extra
                  * time. */
-                if (limit) {
-                    limit += join_diff;
+                if (info->limit) {
+                    info->limit += join_diff;
                     chapter_length += join_diff;
                 }
             } else {
@@ -443,32 +449,33 @@ static void build_timeline_loop(struct MPContext *mpctx,
                  * can jump around all over the place, we need to build up the
                  * timeline parts for each of its chapters, but not add them as
                  * chapters. */
-                build_timeline_loop(mpctx, sources, num_sources, j, starttime,
-                                    missing_time, last_end_time, timeline,
-                                    chapters, num_chapters, part_count,
-                                    c->start, c->end);
+                struct inner_timeline_info new_info = {
+                    .skip = c->start,
+                    .limit = c->end
+                };
+                build_timeline_loop(mpctx, chapters, ctx, &new_info, j);
                 // Already handled by the loop call.
                 chapter_length = 0;
             }
-            *last_end_time = c->end;
+            ctx->last_end_time = c->end;
             goto found;
         }
 
-        *missing_time += chapter_length;
+        ctx->missing_time += chapter_length;
         chapter_length = 0;
     found:;
-        *starttime += chapter_length;
+        ctx->start_time += chapter_length;
         /* If we're after the limit on this chapter, stop here. */
-        if (limit && local_starttime >= limit) {
+        if (info->limit && local_starttime >= info->limit) {
             /* Back up the global start time by the overflow. */
-            *starttime -= local_starttime - limit;
+            ctx->start_time -= local_starttime - info->limit;
             break;
         }
     }
 
     /* If we stopped before the limit, add up the missing time. */
-    if (local_starttime < limit)
-        *missing_time += limit - local_starttime;
+    if (local_starttime < info->limit)
+        ctx->missing_time += info->limit - local_starttime;
 }
 
 static void check_track_compatibility(struct MPContext *mpctx)
@@ -573,13 +580,21 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     // Stupid hack, because fuck everything.
     for (int n = 0; n < m->num_ordered_chapters; n++)
         chapters[n].pts = -1;
-    uint64_t starttime = 0;
-    uint64_t missing_time = 0;
-    uint64_t last_end_time = 0;
-    int part_count = 0;
-    build_timeline_loop(mpctx, sources, num_sources, 0, &starttime,
-                        &missing_time, &last_end_time, &timeline,
-                        chapters, m->num_ordered_chapters, &part_count, 0, 0);
+    struct timeline_info ctx = {
+        .sources = sources,
+        .num_sources = num_sources,
+        .timeline = &timeline,
+        .num_parts = 0,
+        .start_time = 0,
+        .missing_time = 0,
+        .last_end_time = 0,
+        .num_chapters = m->num_ordered_chapters
+    };
+    struct inner_timeline_info info = {
+        .skip = 0,
+        .limit = 0
+    };
+    build_timeline_loop(mpctx, chapters, &ctx, &info, 0);
 
     // Fuck everything (2): filter out all "unset" chapters.
     for (int n = m->num_ordered_chapters - 1; n >= 0; n--) {
@@ -587,33 +602,33 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
             MP_TARRAY_REMOVE_AT(chapters, m->num_ordered_chapters, n);
     }
 
-    if (!part_count) {
+    if (!ctx.num_parts) {
         // None of  the parts come from the file itself???
         // Broken file, but we need at least 1 valid timeline part - add a dummy.
         MP_WARN(mpctx, "Ordered chapters file with no parts?\n");
         struct timeline_part new = {
             .source = demuxer,
         };
-        MP_TARRAY_APPEND(NULL, timeline, part_count, new);
+        MP_TARRAY_APPEND(NULL, timeline, ctx.num_parts, new);
     }
 
     struct timeline_part new = {
-        .start = starttime / 1e9,
+        .start = ctx.start_time / 1e9,
     };
-    MP_TARRAY_APPEND(NULL, timeline, part_count, new);
+    MP_TARRAY_APPEND(NULL, timeline, ctx.num_parts, new);
 
     /* Ignore anything less than a millisecond when reporting missing time. If
      * users really notice less than a millisecond missing, maybe this can be
      * revisited. */
-    if (missing_time >= 1e6) {
+    if (ctx.missing_time >= 1e6) {
         MP_ERR(mpctx, "There are %.3f seconds missing from the timeline!\n",
-               missing_time / 1e9);
+               ctx.missing_time / 1e9);
     }
     talloc_free(mpctx->sources);
     mpctx->sources = sources;
     mpctx->num_sources = num_sources;
     mpctx->timeline = timeline;
-    mpctx->num_timeline_parts = part_count - 1;
+    mpctx->num_timeline_parts = ctx.num_parts - 1;
     mpctx->num_chapters = m->num_ordered_chapters;
     mpctx->chapters = chapters;
 
