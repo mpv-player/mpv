@@ -359,7 +359,7 @@ Available video output drivers are:
 
     ``srgb``
         Convert and color correct the output to sRGB before displaying it on
-        the screen. This option enables linear light scaling.
+        the screen. This option enables ``linear-scaling``.
 
         This option is equivalent to using ``icc-profile`` with an sRGB ICC
         profile, but it is implemented without a 3DLUT and does not require
@@ -438,6 +438,11 @@ Available video output drivers are:
         See ``scale-param1``, ``scale-param2``, ``scale-radius`` and
         ``scale-antiring``.
 
+    ``linear-scaling``
+        Scale in linear light. This is automatically enabled if ``srgb``,
+        ``icc-profile`` or ``sigmoid-upscaling`` is set. It should only
+        be used with a ``fbo-format`` that has at least 16 bit precision.
+
     ``fancy-downscaling``
         When using convolution based filters, extend the filter size
         when downscaling. Trades quality for reduced downscaling performance.
@@ -447,8 +452,8 @@ Available video output drivers are:
         different directions.
 
     ``sigmoid-upscaling``
-        When upscaling in linear light, use a sigmoidal color transform
-        to avoid emphasizing ringing artifacts.
+        When upscaling, use a sigmoidal color transform to avoid emphasizing
+        ringing artifacts. This also enables ``linear-scaling``.
 
     ``sigmoid-center``
         The center of the sigmoid curve used for ``sigmoid-upscaling``, must
@@ -521,8 +526,8 @@ Available video output drivers are:
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.
         Needs LittleCMS 2 support compiled in. This option overrides the ``srgb``
-        property, as using both is somewhat redundant. It also enables linear
-        light scaling.
+        property, as using both is somewhat redundant. It also enables
+        ``linear-scaling``.
 
 
     ``icc-profile-auto``

@@ -508,6 +508,9 @@ void main() {
     // Adapt and compand from the linear BT2020 source to the sRGB output
     color = srgb_compand(color);
 #endif
+#ifdef USE_INV_BT1886
+    color = pow(color, vec3(1.0/1.961));
+#endif
 #ifdef USE_DITHER
     vec2 dither_pos = gl_FragCoord.xy / dither_size;
 #ifdef USE_TEMPORAL_DITHER
