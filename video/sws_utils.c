@@ -20,6 +20,7 @@
 
 #include <libswscale/swscale.h>
 #include <libavcodec/avcodec.h>
+#include <libavutil/bswap.h>
 #include <libavutil/opt.h>
 
 #include "config.h"
@@ -34,6 +35,7 @@
 #include "csputils.h"
 #include "common/msg.h"
 #include "video/filter/vf.h"
+#include "osdep/endian.h"
 
 //global sws_flags from the command line
 struct sws_opts {
@@ -315,6 +317,40 @@ int mp_sws_set_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
         return 0;
 
     return mp_sws_reinit(sws) >= 0 ? 1 : -1;
+}
+
+static const int endian_swaps[][2] = {
+#if BYTE_ORDER == LITTLE_ENDIAN
+#if defined(AV_PIX_FMT_YA16) && defined(AV_PIX_FMT_RGBA64)
+    {AV_PIX_FMT_YA16BE,     AV_PIX_FMT_YA16LE},
+    {AV_PIX_FMT_RGBA64BE,   AV_PIX_FMT_RGBA64LE},
+    {AV_PIX_FMT_GRAY16BE,   AV_PIX_FMT_GRAY16LE},
+    {AV_PIX_FMT_RGB48BE,    AV_PIX_FMT_RGB48LE},
+#endif
+#endif
+    {AV_PIX_FMT_NONE,       AV_PIX_FMT_NONE}
+};
+
+// Swap _some_ non-native endian formats to native. We do this specifically
+// for pixel formats used by PNG, to avoid going through libswscale, which
+// might reduce the effective bit depth in some cases.
+struct mp_image *mp_img_swap_to_native(struct mp_image *img)
+{
+    int to = AV_PIX_FMT_NONE;
+    for (int n = 0; endian_swaps[n][0] != AV_PIX_FMT_NONE; n++) {
+        if (endian_swaps[n][0] == img->fmt.avformat)
+            to = endian_swaps[n][1];
+    }
+    if (to == AV_PIX_FMT_NONE || !mp_image_make_writeable(img))
+        return img;
+    int elems = img->fmt.bytes[0] / 2 * img->w;
+    for (int y = 0; y < img->h; y++) {
+        uint16_t *p = (uint16_t *)(img->planes[0] + y * img->stride[0]);
+        for (int i = 0; i < elems; i++)
+            p[i] = av_be2ne16(p[i]);
+    }
+    mp_image_setfmt(img, pixfmt2imgfmt(to));
+    return img;
 }
 
 // vim: ts=4 sw=4 et tw=80

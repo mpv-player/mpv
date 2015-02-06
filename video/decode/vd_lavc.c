@@ -45,6 +45,7 @@
 #include "demux/stheader.h"
 #include "demux/packet.h"
 #include "video/csputils.h"
+#include "video/sws_utils.h"
 
 #include "lavc.h"
 
@@ -648,7 +649,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     if (ctx->hwdec && ctx->hwdec->process_image)
         mpi = ctx->hwdec->process_image(ctx, mpi);
 
-    *out_image = mpi;
+    *out_image = mp_img_swap_to_native(mpi);
     return 1;
 }
 
