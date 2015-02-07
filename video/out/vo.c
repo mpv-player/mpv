@@ -565,7 +565,6 @@ static bool render_frame(struct vo *vo)
     if (img)
         mp_image_setrefp(&in->current_frame, img);
 
-    in->rendering = true;
     in->frame_queued = NULL;
 
     // The next time a flip (probably) happens.
@@ -600,7 +599,6 @@ static bool render_frame(struct vo *vo)
                      || in->dropped_frame))
         {
             in->dropped_frame = false;
-            in->rendering = false;
             goto nothing_done;
         }
     }
@@ -608,6 +606,7 @@ static bool render_frame(struct vo *vo)
     if (in->dropped_frame) {
         talloc_free(img);
     } else {
+        in->rendering = true;
         in->hasframe_rendered = true;
         pthread_mutex_unlock(&in->lock);
         mp_input_wakeup(vo->input_ctx); // core can queue new video now
@@ -648,24 +647,20 @@ static bool render_frame(struct vo *vo)
 
         in->vsync_interval_approx = in->last_flip - prev_flip;
 
-        long phase = in->last_flip % in->vsync_interval;
-        MP_DBG(vo, "phase: %ld\n", phase);
-        MP_STATS(vo, "value %ld phase", phase);
-
         MP_STATS(vo, "end video");
 
         pthread_mutex_lock(&in->lock);
         in->dropped_frame = drop;
+        in->rendering = false;
     }
 
-    if (in->dropped_frame)
+    if (in->dropped_frame) {
         in->drop_count += 1;
-
-    vo->want_redraw = false;
-
-    in->want_redraw = false;
-    in->request_redraw = false;
-    in->rendering = false;
+    } else {
+        vo->want_redraw = false;
+        in->want_redraw = false;
+        in->request_redraw = false;
+    }
 
     pthread_cond_signal(&in->wakeup); // for vo_wait_frame()
     mp_input_wakeup(vo->input_ctx);
