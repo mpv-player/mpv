@@ -819,11 +819,8 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
     check_preemption(vo);
 
     struct mp_image *vdp_mpi = mp_vdpau_upload_video_surface(vc->mpvdp, mpi);
-    if (vdp_mpi) {
-        mp_image_copy_attributes(vdp_mpi, mpi);
-    } else {
+    if (!vdp_mpi)
         MP_ERR(vo, "Could not upload image.\n");
-    }
     talloc_free(mpi);
 
     talloc_free(vc->current_image);
