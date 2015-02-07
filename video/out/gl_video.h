@@ -35,6 +35,7 @@ struct gl_video_opts {
     float scaler_radius[2];
     float scaler_antiring[2];
     float gamma;
+    int gamma_auto;
     int srgb;
     int linear_scaling;
     int fancy_downscaling;
@@ -82,6 +83,10 @@ void gl_video_eq_update(struct gl_video *p);
 
 void gl_video_set_debug(struct gl_video *p, bool enable);
 void gl_video_resize_redraw(struct gl_video *p, int w, int h);
+
+float gl_video_scale_ambient_lux(float lmin, float lmax,
+                                 float rmin, float rmax, float lux);
+void gl_video_set_ambient_lux(struct gl_video *p, int lux);
 
 void gl_video_set_gl_state(struct gl_video *p);
 void gl_video_unset_gl_state(struct gl_video *p);

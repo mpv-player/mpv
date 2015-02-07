@@ -543,6 +543,15 @@ Available video output drivers are:
         0.8
             Pitch black room
 
+    ``gamma-auto``
+        Automatically corrects the gamma value depending on ambient lighting
+        conditions (adding a gamma boost for dark rooms).
+
+        With ambient illuminance of 64lux, mpv will pick the 1.0 gamma value
+        (no boost), and slightly increase the boost up until 0.8 for 16lux.
+
+        NOTE: Only implemented on OS X.
+
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.
         Needs LittleCMS 2 support compiled in. This option overrides the ``srgb``
