@@ -649,6 +649,9 @@ Available filters are:
 
         Useful for some filters which insist on having a FPS.
 
+    ``display_fps``
+        Refresh rate of the current display. Note that this value can be 0.
+
 ``vapoursynth-lazy``
     The same as ``vapoursynth``, but doesn't load Python scripts. Instead, a
     custom backend using Lua and the raw VapourSynth API is used. The syntax

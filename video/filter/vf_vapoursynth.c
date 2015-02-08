@@ -592,6 +592,7 @@ static int reinit_vs(struct vf_instance *vf)
     p->vsapi->propSetInt(vars, "video_in_dw", p->fmt_in.d_w, 0);
     p->vsapi->propSetInt(vars, "video_in_dh", p->fmt_in.d_h, 0);
     p->vsapi->propSetFloat(vars, "container_fps", vf->chain->container_fps, 0);
+    p->vsapi->propSetFloat(vars, "display_fps", vf->chain->display_fps, 0);
 
     if (p->drv->load(vf, vars) < 0)
         goto error;
