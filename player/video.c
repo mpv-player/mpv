@@ -180,6 +180,8 @@ static void recreate_video_filters(struct MPContext *mpctx)
     d_video->vfilter->wakeup_callback = wakeup_playloop;
     d_video->vfilter->wakeup_callback_ctx = mpctx;
     d_video->vfilter->container_fps = d_video->fps;
+    vo_control(mpctx->video_out, VOCTRL_GET_DISPLAY_FPS,
+        &d_video->vfilter->display_fps);
 
     vf_append_filter_list(d_video->vfilter, opts->vf_settings);
 
