@@ -4,7 +4,7 @@ mpv
 Overview
 --------
 
-**mpv** is a movie player based on MPlayer and mplayer2. It supports a wide
+**mpv** is a media player based on MPlayer and mplayer2. It supports a wide
 variety of video file formats, audio and video codecs, and subtitle types.
 
 If you are wondering what's different from mplayer2 and MPlayer you can read
