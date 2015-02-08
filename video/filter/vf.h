@@ -122,6 +122,7 @@ struct vf_chain {
     uint8_t allowed_output_formats[IMGFMT_END - IMGFMT_START];
 
     double container_fps;
+    double display_fps;
 
     struct mp_log *log;
     struct MPOpts *opts;
