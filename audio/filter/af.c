@@ -59,6 +59,7 @@ extern const struct af_info af_info_bs2b;
 extern const struct af_info af_info_lavfi;
 extern const struct af_info af_info_convert24;
 extern const struct af_info af_info_convertsignendian;
+extern const struct af_info af_info_rubberband;
 
 static const struct af_info *const filter_list[] = {
     &af_info_dummy,
@@ -79,6 +80,9 @@ static const struct af_info *const filter_list[] = {
     &af_info_hrtf,
 #if HAVE_LADSPA
     &af_info_ladspa,
+#endif
+#if HAVE_RUBBERBAND
+    &af_info_rubberband,
 #endif
     &af_info_center,
     &af_info_sinesuppress,

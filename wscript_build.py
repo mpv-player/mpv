@@ -118,6 +118,7 @@ def build(ctx):
         ( "audio/filter/af_lavfi.c",             "libavfilter" ),
         ( "audio/filter/af_lavrresample.c" ),
         ( "audio/filter/af_pan.c" ),
+        ( "audio/filter/af_rubberband.c",        "rubberband" ),
         ( "audio/filter/af_scaletempo.c" ),
         ( "audio/filter/af_sinesuppress.c" ),
         ( "audio/filter/af_sub.c" ),

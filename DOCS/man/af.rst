@@ -600,6 +600,11 @@ Available filters are:
             Changing playback speed would change pitch, leaving audio tempo at
             1.2x.
 
+``rubberband``
+    High quality pitch correction with librubberband. This can be used in place
+    of ``scaletempo``, and will be used to adjust audio pitch when playing
+    at speed different from normal.
+
 ``lavfi=graph``
     Filter audio using FFmpeg's libavfilter.
 

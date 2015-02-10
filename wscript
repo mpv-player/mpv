@@ -336,6 +336,10 @@ If you really mean to compile without libass support use --disable-libass."
         'desc': 'LADSPA plugin support',
         'func': check_statement('ladspa.h', 'LADSPA_Descriptor ld = {0}'),
     }, {
+        'name': '--rubberband',
+        'desc': 'librubberband support',
+        'func': check_pkg_config('rubberband', '>= 1.8.0'),
+    }, {
         'name': '--libbs2b',
         'desc': 'libbs2b audio filter support',
         'func': check_pkg_config('libbs2b'),
