@@ -276,6 +276,22 @@ static int filter(struct af_instance *af, struct mp_audio *data)
     return 0;
 }
 
+static void update_speed(struct af_instance *af, float speed)
+{
+    af_scaletempo_t *s = af->priv;
+
+    s->speed = speed;
+
+    double factor = s->speed_pitch ? 1.0 / s->speed : s->speed;
+    s->scale = factor * s->scale_nominal;
+
+    s->frames_stride_scaled = s->scale * s->frames_stride;
+    s->frames_stride_error = MPMIN(s->frames_stride_error, s->frames_stride_scaled);
+
+    MP_VERBOSE(af, "%.3f speed * %.3f scale_nominal = %.3f\n",
+               s->speed, s->scale_nominal, s->scale);
+}
+
 // Initialization and runtime control
 static int control(struct af_instance *af, int cmd, void *arg)
 {
@@ -292,9 +308,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
             return AF_DETACH;
         }
 
-        MP_VERBOSE(af, "%.3f speed * %.3f scale_nominal = %.3f\n",
-               s->speed, s->scale_nominal, s->scale);
-
         mp_audio_force_interleaved_format(data);
         mp_audio_copy_config(af->data, data);
 
@@ -307,9 +320,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         s->frames_stride        = srate * s->ms_stride;
         s->bytes_stride         = s->frames_stride * bps * nch;
-        s->frames_stride_scaled = s->scale * s->frames_stride;
-        s->frames_stride_error  = 0;
         af->delay = 0;
+
+        update_speed(af, s->speed);
 
         int frames_overlap = s->frames_stride * s->percent_overlap;
         if (frames_overlap <= 0) {
@@ -420,18 +433,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return af_test_output(af, (struct mp_audio *)arg);
     }
     case AF_CONTROL_SET_PLAYBACK_SPEED: {
-        if (s->speed_tempo) {
-            if (s->speed_pitch)
-                break;
-            s->speed = *(double *)arg;
-            s->scale = s->speed * s->scale_nominal;
-        } else {
-            if (s->speed_pitch) {
-                s->speed = 1 / *(double *)arg;
-                s->scale = s->speed * s->scale_nominal;
-                break;
-            }
-        }
+        if (s->speed_tempo == s->speed_pitch)
+            break; // doesn't change speed
+        update_speed(af, *(double *)arg);
         return AF_OK;
     }
     case AF_CONTROL_RESET:
@@ -469,7 +473,6 @@ static int af_open(struct af_instance *af)
     s->speed_tempo = !!(s->speed_opt & SCALE_TEMPO);
     s->speed_pitch = !!(s->speed_opt & SCALE_PITCH);
 
-    s->scale = s->speed * s->scale_nominal;
     return AF_OK;
 }
 
