@@ -287,18 +287,16 @@ static int control(struct af_instance *af, int cmd, void *arg)
         int nch = data->nch;
         int use_int = 0;
 
+        if (AF_FORMAT_IS_SPECIAL(data->format)) {
+            MP_ERR(af, "Changing speed is not supported with spdif formats.\n");
+            return AF_DETACH;
+        }
+
         MP_VERBOSE(af, "%.3f speed * %.3f scale_nominal = %.3f\n",
                s->speed, s->scale_nominal, s->scale);
 
         mp_audio_force_interleaved_format(data);
         mp_audio_copy_config(af->data, data);
-
-        if (s->scale == 1.0) {
-            if (s->speed_tempo && s->speed_pitch)
-                return AF_DETACH;
-            af->delay = 0;
-            return af_test_output(af, data);
-        }
 
         if (data->format == AF_FORMAT_S16) {
             use_int = 1;
