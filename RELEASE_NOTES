@@ -1,0 +1,148 @@
+Release 0.8.0
+=============
+
+Changes
+-------
+
+Changes that may break users' config files have been annotated with a (!).
+
+- (!) vo_opengl_old has been removed. OpenGL rendering now requires hardware
+  that can do at least OpenGL 2.1, the oldest version supported by vo_opengl.
+- (!) vf_pp has been removed. A version of it can still be accessed through
+  lavfilter (e.g. --vf=lavfi=[pp...]), but it receives no QP information.
+  Also, vf_dlopen no longer passes QP information to its loaded plugin either
+  (it's always 0).
+- (!) vf_pullup, vf_softpulldown, vf_swapuv, vf_phase, vf_divtc and vf_ilpack
+  have all been removed. Ports or alternative versions of these filters are
+  available through libavfilter (vf_lavfi).
+- (!) ao_portaudio has been removed. There is good support for the native
+  audio drivers of all major desktop platforms, as well as ao_sdl and
+  ao_openal as fallbacks.
+- (!) vo_opengl's `lscale` suboption has been renamed to `scale`; `lradius` is
+  now `scale-radius`, `lparam1` and `lparam2` are now respectively
+  `scale-param1` and `scale-param2`; `lscale-down` is now `scale-down`.
+  The `cscale` suboption remains as is.
+- (!) Several of the `vo_opengl` radius-preset aliases supported by `scale`
+  have been removed; use `scale-radius` to set if needed. For example, use
+  `--vo=opengl:scale=lanczos:scale-radius=3` instead of `scale=lanczos3`.
+- (!) vo_opengl no longer supports the `stereo` suboption. The anaglyph effect
+  can be reproduced with the stereo3d filter. The quadbuffer support, which
+  requires expensive specialized hardware to begin with, is removed.
+- (!) The `approx-gama` suboption to vo_opengl has been removed. The BT.1886
+  specification says that it's actually how it's supposed to be done so it
+  is now the default.
+- (!) The `no-scale-sep` and `indirect` suboptions to vo_opengl have been
+  removed. These are now autodetected and enabled whenever they would have
+  benefit.
+- (!) The `--lua` and `--lua-opts` parameters / options are now called
+  `--script` and `--script-opts`, respectively. The `lua` subdir of the mpv
+  config dir is also now expected to be called `scripts` instead.
+- (!) The `--fixed-vo` option has been removed. It has been the default for
+  a long time anyway, and disabling fixed-vo is not useful.
+- vo_opengl has improved downscaling for higher downscale ratios.
+- vo_opengl_hq has been updated to take into account new features.
+  `fancy-downscaling` and `sigmoid-upscaling` are enabled,
+  "mitchell" is now the default for `scale-down`, and `scale-down` can be
+  disabled with `scale-down=""`.
+- The `sub-visibility` OSD message is now clearer about whether subtitles
+  are hidden or just not available / selected.
+- The device IDs given to `--audio-device` for use with ao_coreaudio now use
+  UIDs, so they don't change when devices are added/removed or after reboots.
+- `--msg-level` now also accepts ',' as separator.
+- (Win32) The embedded .exe description now names itself simply "mpv".
+- (Client API) The client API now refuses to initialize if the LC_NUMERIC
+  locale is not "C".
+- (Client API) The native type of the `msg-level` parameter is now a key-value
+  list. Setting or reading it as a string still works.
+- Documentation updates.
+- PDF documentation is now disabled by default due to rst2pdf being fickle,
+  causing weird build errors.
+- Print desync messages with negative A/V sync as well. While rare, it could
+  happen ith some uses of `--autosync`.
+
+Bug fixes
+---------
+
+- (Windows) Avoid resizing the video window when player is minimized, might
+  address bug #1547.
+- (NetBSD) Fix build with v4l2.
+- Multiple cdda:// fixes. (bugs #1555, #1560)
+
+New features
+------------
+
+- vo_opengl now supports frame blending to eliminate stuttering when the video
+  framerate does not nicely match the display framerate through the
+  `smoothmotion` suboption. This is not meant to artificially increase the
+  video's FPS, so there is no "soap opera effect" or difficulties with some
+  video types (e.g. anime).
+- vo_opengl now supports sigmoidal upscaling (e.g. for fullscreen), which
+  reduces ringing induced by upscaling, enabled through the `sigmoid-upscaling`
+  suboption.
+- vo_opengl's ewa_lanczos scaler (Jinc) now supports an `scale-antiringing`
+  parameter, which tries to reduce video ringing.
+- vo_opengl now has a `linear-scaling` suboption, that makes the scalers work
+  in linear light. Implied by the `srgb`, `icc-profile` or the new
+  `sigmoid-upscaling` suboption.
+- The Matroska demuxer now supports SVQ3 video.
+- Add `--keep-open=always` to make `--keep-open` apply to all files instead of
+  only the last.
+- mpv now filters the tags that are printed on the console to try to hide
+  useless metadata. The filter works as a whitelist, and can be configured with
+  the `--display-tags` option.
+- Add a `--sub-scale-by-window` option that, when set to 'no', prevents
+  subtitles from changing their pixel size when the window changes sizes.
+- vo_opengl now technically has GLES 2 and 3 support (but not GLES 1). GLES 3
+  support is only tested on Mesa's software emulation. GLES 2 has been tested
+  on nvidia drivers, but is feature deficient and inefficient due to GLES 2
+  limitations.
+- (X11) vo_opengl now supports the `icc-profile-auto` option on X11 hosts.
+- The 'A' key now by default cycles through a list of preset aspect ratios.
+  Meant to be used to work around broken files.
+- There is now a `--log-file` option to write mpv's log messages to a specifed
+  file.
+- There is now a `--audio-file-auto` option to automatically load an external
+  audio file with certain constraints. Will only load external audio if the
+  playing file has a video stream. Set to "exact" by default. (bug #967)
+- VP9 timestamps are now supported with new enough FFmpeg builds.
+- There is now a `--network-timeout` option to specify a timeout in seconds for
+  network access. If 0 (default), uses the libavformat default. If a protocol
+  that doesn't support timeouts is used, this option is ignored.
+- (Linux) The DVB implementation now supports DVB-S2 through S2API.
+- (Client API) There is now an opengl_cb VO, which receives the OpenGL context
+  from the libmpv client. This allows a client to render libmpv video directly
+  to a provided OpenGL context without having to use hacks such as --wid.
+- (Client API) The aforementioned --wid hack can now be set at any time, but
+  has no effect if a file is already loaded.
+- (Client API) The list of DVD titles can now be queried.
+- (Client API) There is now a `filtered-metadata` property, containing only
+  the tags allowed by `--display-tags`.
+- (Client API) There is now support for XEmbed `--wid` targets, such as a
+  `GtkSocket`'s `gtk_socket_get_id()`.
+- (Client API) There is now a `file-format` property with a symbolic name
+  for the file format. In some cases this might be a comma separated list
+  of various different extensions due to libavformat idiosyncrasies.
+- (Client API) There is now a `mouse` command for generating mouse events
+  over the video window.
+- (Client API) There is now a `partially-seekable` property that indicates
+  whether a file is only considered `seekable` because of the stream cache,
+  but would not be seekable otherwise (e.g. realtime stream, or HTTP with
+  no resume support). Small relative seeks may be fine, but larger seeks
+  will likely fail.
+- (Client API) There is now an MPV_EVENT_QUEUE_OVERFLOW event that is posted
+  whenever events have to be dropped because the queue is full. No further
+  events are posted until the MPV_EVENT_QUEUE_OVERFLOW is consumed to avoid
+  duplicated posting.
+- (Client API) There is now a helper `mpv_wait_async_requests()` function
+  that blocks until all known async requests have completed. (bug #1542)
+- (Client API) There is now a `detected-hwdec` property that returns the
+  detected hardware decoder when one is successfully opened. This probably
+  only returns a valid value after playback has started.
+- (Client API) There are now `audio_add`, `audio_remove` and `audio_reload`
+  counterparts to the equivalent `sub_` commands for handling external audio
+  files.
+
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.7.0..` in the git repository.
+
