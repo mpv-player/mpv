@@ -32,7 +32,7 @@ struct priv {
     // I could not find a way to do this with the librubberband API.
     double rubber_delay;
     // command line options
-    int opt_stretch, opt_transients, opt_detector, opt_phase, opt_window,
+    int opt_transients, opt_detector, opt_phase, opt_window,
         opt_smoothing, opt_formant, opt_pitch, opt_channels;
 };
 
@@ -60,9 +60,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (p->rubber)
             rubberband_delete(p->rubber);
 
-        int opts = p->opt_stretch | p->opt_transients | p->opt_detector |
-                   p->opt_phase | p->opt_window | p->opt_smoothing |
-                   p->opt_formant | p->opt_pitch | p-> opt_channels |
+        int opts = p->opt_transients | p->opt_detector | p->opt_phase |
+                   p->opt_window | p->opt_smoothing | p->opt_formant |
+                   p->opt_pitch | p-> opt_channels |
                    RubberBandOptionProcessRealTime;
 
         p->rubber = rubberband_new(in->rate, in->channels.num, opts, 1.0, 1.0);
@@ -187,14 +187,11 @@ const struct af_info af_info_rubberband = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .speed = 1.0,
-        .opt_stretch = RubberBandOptionStretchPrecise,
         .opt_pitch = RubberBandOptionPitchHighConsistency,
-        .opt_smoothing = RubberBandOptionSmoothingOn,
+        .opt_transients = RubberBandOptionTransientsMixed,
+        .opt_formant = RubberBandOptionFormantPreserved,
     },
     .options = (const struct m_option[]) {
-        OPT_CHOICE("stretch", opt_stretch, 0,
-                   ({"elastic", RubberBandOptionStretchElastic},
-                    {"precise", RubberBandOptionStretchPrecise})),
         OPT_CHOICE("transients", opt_transients, 0,
                    ({"crisp", RubberBandOptionTransientsCrisp},
                     {"mixed", RubberBandOptionTransientsMixed},
