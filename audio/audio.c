@@ -370,7 +370,8 @@ struct mp_audio *mp_audio_pool_get(struct mp_audio_pool *pool,
         if (alloc >= INT_MAX)
             return NULL;
         av_buffer_pool_uninit(&pool->avpool);
-        pool->avpool = av_buffer_pool_init(alloc, NULL);
+        pool->element_size = alloc;
+        pool->avpool = av_buffer_pool_init(pool->element_size, NULL);
         if (!pool->avpool)
             return NULL;
         talloc_set_destructor(pool, mp_audio_pool_destructor);
