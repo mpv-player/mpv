@@ -31,6 +31,9 @@ struct priv {
     // Estimate how much librubberband has buffered internally.
     // I could not find a way to do this with the librubberband API.
     double rubber_delay;
+    // command line options
+    int opt_stretch, opt_transients, opt_detector, opt_phase, opt_window,
+        opt_smoothing, opt_formant, opt_pitch, opt_channels;
 };
 
 static void update_speed(struct af_instance *af, double new_speed)
@@ -57,10 +60,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (p->rubber)
             rubberband_delete(p->rubber);
 
-        int opts = RubberBandOptionProcessRealTime
-                 | RubberBandOptionStretchPrecise
-                 | RubberBandOptionSmoothingOn
-                 | RubberBandOptionPitchHighConsistency;
+        int opts = p->opt_stretch | p->opt_transients | p->opt_detector |
+                   p->opt_phase | p->opt_window | p->opt_smoothing |
+                   p->opt_formant | p->opt_pitch | p-> opt_channels;
 
         p->rubber = rubberband_new(in->rate, in->channels.num, opts, 1.0, 1.0);
         if (!p->rubber) {
@@ -176,6 +178,7 @@ static int af_open(struct af_instance *af)
     return AF_OK;
 }
 
+#define OPT_BASE_STRUCT struct priv
 const struct af_info af_info_rubberband = {
     .info = "Pitch conversion with librubberband",
     .name = "rubberband",
@@ -183,5 +186,41 @@ const struct af_info af_info_rubberband = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .speed = 1.0,
+        .opt_stretch = RubberBandOptionStretchPrecise,
+        .opt_pitch = RubberBandOptionPitchHighConsistency,
+    },
+    .options = (const struct m_option[]) {
+        OPT_CHOICE("stretch", opt_stretch, 0,
+                   ({"elastic", RubberBandOptionStretchElastic},
+                    {"precise", RubberBandOptionStretchPrecise})),
+        OPT_CHOICE("transients", opt_transients, 0,
+                   ({"crisp", RubberBandOptionTransientsCrisp},
+                    {"mixed", RubberBandOptionTransientsMixed},
+                    {"smooth", RubberBandOptionTransientsSmooth})),
+        OPT_CHOICE("detector", opt_detector, 0,
+                   ({"compound", RubberBandOptionDetectorCompound},
+                    {"percussive", RubberBandOptionDetectorPercussive},
+                    {"soft", RubberBandOptionDetectorSoft})),
+        OPT_CHOICE("phase", opt_phase, 0,
+                   ({"laminar", RubberBandOptionPhaseLaminar},
+                    {"independent", RubberBandOptionPhaseIndependent})),
+        OPT_CHOICE("window", opt_window, 0,
+                   ({"standard", RubberBandOptionWindowStandard},
+                    {"short", RubberBandOptionWindowShort},
+                    {"long", RubberBandOptionWindowLong})),
+        OPT_CHOICE("smoothing", opt_smoothing, 0,
+                   ({"off", RubberBandOptionSmoothingOff},
+                    {"on", RubberBandOptionSmoothingOn})),
+        OPT_CHOICE("formant", opt_formant, 0,
+                   ({"shifted", RubberBandOptionFormantShifted},
+                    {"preserved", RubberBandOptionFormantPreserved})),
+        OPT_CHOICE("pitch", opt_pitch, 0,
+                   ({"quality", RubberBandOptionPitchHighQuality},
+                    {"speed", RubberBandOptionPitchHighSpeed},
+                    {"consistency", RubberBandOptionPitchHighConsistency})),
+        OPT_CHOICE("channels", opt_channels, 0,
+                   ({"apart", RubberBandOptionChannelsApart},
+                    {"together", RubberBandOptionChannelsTogether})),
+        {0}
     },
 };

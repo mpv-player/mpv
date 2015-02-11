@@ -605,6 +605,15 @@ Available filters are:
     of ``scaletempo``, and will be used to adjust audio pitch when playing
     at speed different from normal.
 
+    This filter has a number of sub-options. You can list them with
+    ``mpv --af=rubberband=help``. This will also show the default values
+    for each option. The options are not documented here, because they are
+    merely passed to librubberband. Look at the librubberband documentation
+    to learn what each option does:
+    http://breakfastquay.com/rubberband/code-doc/classRubberBand_1_1RubberBandStretcher.html
+    (The mapping of the mpv rubberband filter sub-option names and values to
+    those of librubberband follows a simple pattern: ``"Option" + Name + Value``.)
+
 ``lavfi=graph``
     Filter audio using FFmpeg's libavfilter.
 
