@@ -301,10 +301,6 @@ Available filters are:
     ``uniform``
         uniform noise (Gaussian otherwise)
 
-    ``hq``
-        high quality (slightly better looking, slightly slower) - not available
-        when using libavfilter
-
 ``hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]``
     This filter aims to reduce image noise producing smooth images and making
     still images really still (This should enhance compressibility.).
