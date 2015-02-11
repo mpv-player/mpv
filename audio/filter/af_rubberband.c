@@ -28,6 +28,9 @@ struct priv {
     double speed;
     struct mp_audio *pending;
     bool needs_reset;
+    // Estimate how much librubberband has buffered internally.
+    // I could not find a way to do this with the librubberband API.
+    double rubber_delay;
 };
 
 static void update_speed(struct af_instance *af, double new_speed)
@@ -66,6 +69,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
 
         update_speed(af, p->speed);
+        control(af, AF_CONTROL_RESET, NULL);
 
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
@@ -78,6 +82,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             rubberband_reset(p->rubber);
         talloc_free(p->pending);
         p->pending = NULL;
+        p->rubber_delay = 0;
         return AF_OK;
     }
     return AF_UNKNOWN;
@@ -106,8 +111,10 @@ static int filter_out(struct af_instance *af)
                 break;
 
             // recover from previous EOF
-            if (p->needs_reset)
+            if (p->needs_reset) {
                 rubberband_reset(p->rubber);
+                p->rubber_delay = 0;
+            }
             p->needs_reset = false;
 
             size_t needs = rubberband_get_samples_required(p->rubber);
@@ -120,6 +127,8 @@ static int filter_out(struct af_instance *af)
         p->needs_reset = !p->pending; // EOF
 
         rubberband_process(p->rubber, in_data, in_samples, p->needs_reset);
+        p->rubber_delay += in_samples;
+
         if (!p->pending)
             break;
         mp_audio_skip_samples(p->pending, in_samples);
@@ -133,14 +142,18 @@ static int filter_out(struct af_instance *af)
             return -1;
         if (p->pending)
             mp_audio_copy_config(out, p->pending);
+
         float **out_data = (void *)&out->planes;
         out->samples = rubberband_retrieve(p->rubber, out_data, out->samples);
+        p->rubber_delay -= out->samples * p->speed;
+
         af_add_output_frame(af, out);
     }
 
-    int delay = rubberband_get_latency(p->rubber);
-    delay += p->pending ? p->pending->samples : 0;
-    af->delay = delay / (double)af->data->rate;
+    int delay_samples = p->rubber_delay;
+    if (p->pending)
+        delay_samples += p->pending->samples;
+    af->delay = delay_samples / (af->data->rate * p->speed);
 
     return 0;
 }
