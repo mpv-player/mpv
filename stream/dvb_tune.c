@@ -498,7 +498,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec,
         MP_VERBOSE(priv, "Tuning via DVB-API version 3.\n");
         if (is_dvb_s2) {
             MP_ERR(priv, "ERROR: Can not tune to S2 channel, S2-API not "
-                         "available, will tune to DVB-S!\n")
+                         "available, will tune to DVB-S!\n");
         }
         if (ioctl(fd_frontend, FE_SET_FRONTEND, &feparams) < 0) {
             MP_ERR(priv, "ERROR tuning channel\n");
