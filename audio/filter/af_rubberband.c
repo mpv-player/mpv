@@ -126,18 +126,17 @@ static int filter_out(struct af_instance *af)
     }
 
     size_t out_samples = rubberband_available(p->rubber);
-    if (!out_samples)
-        return 0;
-
-    struct mp_audio *out =
-        mp_audio_pool_get(af->out_pool, af->data, out_samples);
-    if (!out)
-        return -1;
-    if (p->pending)
-        mp_audio_copy_config(out, p->pending);
-    float **out_data = (void *)&out->planes;
-    out->samples = rubberband_retrieve(p->rubber, out_data, out->samples);
-    af_add_output_frame(af, out);
+    if (out_samples) {
+        struct mp_audio *out =
+            mp_audio_pool_get(af->out_pool, af->data, out_samples);
+        if (!out)
+            return -1;
+        if (p->pending)
+            mp_audio_copy_config(out, p->pending);
+        float **out_data = (void *)&out->planes;
+        out->samples = rubberband_retrieve(p->rubber, out_data, out->samples);
+        af_add_output_frame(af, out);
+    }
 
     int delay = rubberband_get_latency(p->rubber);
     delay += p->pending ? p->pending->samples : 0;
