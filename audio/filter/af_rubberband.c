@@ -97,22 +97,28 @@ static int filter_out(struct af_instance *af)
 {
     struct priv *p = af->priv;
 
-    if (p->needs_reset)
-        rubberband_reset(p->rubber);
-    p->needs_reset = false;
-
     while (!rubberband_available(p->rubber)) {
         const float *dummy[MP_NUM_CHANNELS] = {0};
         const float **in_data = dummy;
         size_t in_samples = 0;
         if (p->pending) {
             if (!p->pending->samples)
-                return 0;
+                break;
+
+            // recover from previous EOF
+            if (p->needs_reset)
+                rubberband_reset(p->rubber);
+            p->needs_reset = false;
+
             size_t needs = rubberband_get_samples_required(p->rubber);
             in_data = (void *)&p->pending->planes;
             in_samples = MPMIN(p->pending->samples, needs);
         }
+
+        if (p->needs_reset)
+            break; // previous EOF
         p->needs_reset = !p->pending; // EOF
+
         rubberband_process(p->rubber, in_data, in_samples, p->needs_reset);
         if (!p->pending)
             break;
