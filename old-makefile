@@ -100,6 +100,14 @@ SOURCES-$(WAYLAND)              += video/out/vo_wayland.c \
                                    video/out/wayland/memfile.c
 
 SOURCES-$(LIBAVFILTER)          += video/filter/vf_lavfi.c \
+                                   video/filter/vf_delogo.c \
+                                   video/filter/vf_gradfun.c \
+                                   video/filter/vf_hqdn3d.c \
+                                   video/filter/vf_noise.c \
+                                   video/filter/vf_pullup.c \
+                                   video/filter/vf_rotate.c \
+                                   video/filter/vf_unsharp.c \
+                                   video/filter/vf_yadif.c \
                                    audio/filter/af_lavfi.c
 
 SOURCES-$(LUA)                  += player/lua.c
@@ -251,25 +259,17 @@ SOURCES = audio/audio.c \
           video/filter/vf.c \
           video/filter/vf_buffer.c \
           video/filter/vf_crop.c \
-          video/filter/vf_delogo.c \
           video/filter/vf_dsize.c \
           video/filter/vf_eq.c \
           video/filter/vf_expand.c \
           video/filter/vf_flip.c \
           video/filter/vf_format.c \
-          video/filter/vf_gradfun.c \
-          video/filter/vf_hqdn3d.c \
           video/filter/vf_mirror.c \
           video/filter/vf_noformat.c \
-          video/filter/vf_noise.c \
-          video/filter/vf_pullup.c \
-          video/filter/vf_rotate.c \
           video/filter/vf_scale.c \
           video/filter/vf_screenshot.c \
           video/filter/vf_stereo3d.c \
           video/filter/vf_sub.c \
-          video/filter/vf_unsharp.c \
-          video/filter/vf_yadif.c \
           video/out/bitmap_packer.c \
           video/out/aspect.c \
           video/out/filter_kernels.c \

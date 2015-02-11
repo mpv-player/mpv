@@ -510,6 +510,8 @@ static bool handle_auto_in(struct vf_instance *vf)
     return true;
 }
 
+#if HAVE_LIBAVFILTER
+
 static int lavfi_reconfig(struct vf_instance *vf,
                           struct mp_image_params *in,
                           struct mp_image_params *out)
@@ -528,6 +530,32 @@ static int lavfi_reconfig(struct vf_instance *vf,
     return 0;
 }
 
+static void lavfi_init(vf_instance_t *vf)
+{
+    if (vf->priv->in.fmt == STEREO_AUTO &&
+        vf_lw_set_graph(vf, vf->priv->lw_opts, "stereo3d", "null") >= 0)
+    {
+        vf_lw_set_reconfig_cb(vf, lavfi_reconfig);
+        return;
+    }
+
+    if (vf_lw_set_graph(vf, vf->priv->lw_opts, "stereo3d", "%s:%s",
+                        rev_map_name(vf->priv->in.fmt),
+                        rev_map_name(vf->priv->out.fmt)) >= 0)
+        return;
+}
+
+#else
+
+const struct m_sub_options vf_lw_conf = {0};
+
+static void lavfi_init(vf_instance_t *vf)
+{
+    // doing nothing will make it use the internal implementation
+}
+
+#endif
+
 static int vf_open(vf_instance_t *vf)
 {
     vf->config          = config;
@@ -541,18 +569,7 @@ static int vf_open(vf_instance_t *vf)
     if (vf->priv->in.fmt == STEREO_AUTO)
         vf->priv->auto_in = 1;
 
-    if (vf->priv->in.fmt == STEREO_AUTO &&
-        vf_lw_set_graph(vf, vf->priv->lw_opts, "stereo3d", "null") >= 0)
-    {
-        vf_lw_set_reconfig_cb(vf, lavfi_reconfig);
-        return 1;
-    }
-
-    if (vf_lw_set_graph(vf, vf->priv->lw_opts, "stereo3d", "%s:%s",
-                        rev_map_name(vf->priv->in.fmt),
-                        rev_map_name(vf->priv->out.fmt)) >= 0)
-        return 1;
-
+    lavfi_init(vf);
     return 1;
 }
 

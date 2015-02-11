@@ -66,8 +66,7 @@ static int vf_open(vf_instance_t *vf)
         return 1;
     }
 
-    MP_FATAL(vf, "Requires libavfilter.\n");
-    return 1;
+    return 0;
 }
 
 #define OPT_BASE_STRUCT struct vf_priv_s

@@ -42,7 +42,7 @@ static int vf_open(vf_instance_t *vf)
         return 1;
     }
 
-    MP_FATAL(vf, "Requires libavfilter.\n");
+    MP_FATAL(vf, "This version of libavfilter has no 'hqdn3' filter.\n");
     return 0;
 }
 
