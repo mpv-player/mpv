@@ -747,6 +747,8 @@ double af_calc_delay(struct af_stream *s)
     double delay = 0.0;
     while (af) {
         delay += af->delay;
+        for (int n = 0; n < af->num_out_queued; n++)
+            delay += af->out_queued[n]->samples / (double)af->data->rate;
         af = af->next;
     }
     return delay;
