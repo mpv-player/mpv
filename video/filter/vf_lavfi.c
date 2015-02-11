@@ -38,6 +38,7 @@
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 
+#include "config.h"
 #include "common/av_common.h"
 #include "common/msg.h"
 #include "options/m_option.h"

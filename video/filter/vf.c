@@ -77,25 +77,25 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_format,
     &vf_info_noformat,
     &vf_info_flip,
-    &vf_info_rotate,
     &vf_info_mirror,
 
 #if HAVE_LIBAVFILTER
     &vf_info_lavfi,
+    &vf_info_rotate,
+    &vf_info_noise,
+    &vf_info_gradfun,
+    &vf_info_unsharp,
+    &vf_info_hqdn3d,
+    &vf_info_pullup,
+    &vf_info_delogo,
+    &vf_info_yadif,
 #endif
 
     &vf_info_screenshot,
 
-    &vf_info_noise,
     &vf_info_eq,
-    &vf_info_gradfun,
-    &vf_info_unsharp,
-    &vf_info_hqdn3d,
     &vf_info_dsize,
-    &vf_info_pullup,
-    &vf_info_delogo,
     &vf_info_sub,
-    &vf_info_yadif,
     &vf_info_stereo3d,
     &vf_info_buffer,
 #if HAVE_DLOPEN
