@@ -62,7 +62,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         int opts = p->opt_stretch | p->opt_transients | p->opt_detector |
                    p->opt_phase | p->opt_window | p->opt_smoothing |
-                   p->opt_formant | p->opt_pitch | p-> opt_channels;
+                   p->opt_formant | p->opt_pitch | p-> opt_channels |
+                   RubberBandOptionProcessRealTime;
 
         p->rubber = rubberband_new(in->rate, in->channels.num, opts, 1.0, 1.0);
         if (!p->rubber) {
@@ -188,6 +189,7 @@ const struct af_info af_info_rubberband = {
         .speed = 1.0,
         .opt_stretch = RubberBandOptionStretchPrecise,
         .opt_pitch = RubberBandOptionPitchHighConsistency,
+        .opt_smoothing = RubberBandOptionSmoothingOn,
     },
     .options = (const struct m_option[]) {
         OPT_CHOICE("stretch", opt_stretch, 0,
