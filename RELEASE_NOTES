@@ -26,7 +26,7 @@ Changes that may break users' config files have been annotated with a (!).
   The `cscale` suboption remains as is.
 - (!) Several of the `vo_opengl` radius-preset aliases supported by `scale`
   have been removed; use `scale-radius` to set if needed. For example, use
-  `--vo=opengl:scale=lanczos:scale-radius=3` instead of `scale=lanczos3`.
+  `--vo=opengl:scale=lanczos:scale-radius=2` instead of `scale=lanczos2`.
   The default radius is recommended for most filters.
 - (!) vo_opengl no longer supports the `stereo` suboption. The anaglyph effect
   can be reproduced with the stereo3d filter. The quadbuffer support, which
@@ -82,8 +82,9 @@ New features
 - vo_opengl now supports sigmoidal upscaling (e.g. for fullscreen), which
   reduces ringing induced by upscaling, enabled through the `sigmoid-upscaling`
   suboption.
-- vo_opengl's ewa_lanczos scaler (Jinc) now supports an experimental
-  `scale-antiringing` parameter, which tries to reduce video ringing.
+- vo_opengl now supports ewa_lanczos (Jinc) scaling, which provides higher
+  quality with less ringing. It supports an experimental scale-antiringing
+  parameter, which tries to further reduce video ringing.
 - vo_opengl now has a `linear-scaling` suboption, that makes the scalers work
   in linear light. Implied by the `srgb`, `icc-profile` or the new
   `sigmoid-upscaling` suboption.
