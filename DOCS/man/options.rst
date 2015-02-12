@@ -794,7 +794,7 @@ Audio
 -----
 
 ``--audio-pitch-correction=<yes|no>``
-    If this is enabled (default), playing with a speed higher than normal
+    If this is enabled (default), playing with a speed different from normal
     automatically inserts the ``scaletempo`` audio filter. For details, see
     audio filter section.
 

@@ -72,7 +72,7 @@ static int recreate_audio_filters(struct MPContext *mpctx)
 
     if (speed != 1.0) {
         int method = AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE;
-        if (speed > 1.0 && opts->pitch_correction)
+        if (opts->pitch_correction)
             method = AF_CONTROL_SET_PLAYBACK_SPEED;
         if (!af_control_any_rev(afs, method, &speed)) {
             if (af_remove_by_label(afs, "playback-speed") < 0)
