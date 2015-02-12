@@ -137,8 +137,8 @@ static int filter_out(struct af_instance *af)
         mp_audio_skip_samples(p->pending, in_samples);
     }
 
-    size_t out_samples = rubberband_available(p->rubber);
-    if (out_samples) {
+    int out_samples = rubberband_available(p->rubber);
+    if (out_samples > 0) {
         struct mp_audio *out =
             mp_audio_pool_get(af->out_pool, af->data, out_samples);
         if (!out)
