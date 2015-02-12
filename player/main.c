@@ -164,6 +164,10 @@ void mp_destroy(struct MPContext *mpctx)
 
     osd_free(mpctx->osd);
 
+#if HAVE_COCOA
+    cocoa_set_input_context(NULL);
+#endif
+
     if (cas_terminal_owner(mpctx, mpctx)) {
         terminal_uninit();
         cas_terminal_owner(mpctx, NULL);
@@ -183,10 +187,6 @@ void mp_destroy(struct MPContext *mpctx)
 
 static int prepare_exit_cplayer(struct MPContext *mpctx, enum exit_reason how)
 {
-#if HAVE_COCOA_APPLICATION
-    cocoa_set_input_context(NULL);
-#endif
-
     int rc = 0;
     const char *reason = NULL;
 
