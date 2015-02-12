@@ -10,3 +10,5 @@ to mpv's command line.
 
 Where appropriate, they may also be placed in ~/.config/mpv/scripts/ from
 where they will be automatically loaded when mpv starts.
+
+Some of these are just for testing mpv internals.

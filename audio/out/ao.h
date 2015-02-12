@@ -48,6 +48,7 @@ enum aocontrol {
 
 enum {
     AO_EVENT_RELOAD = 1,
+    AO_EVENT_HOTPLUG = 2,
 };
 
 typedef struct ao_control_vol {
@@ -92,8 +93,15 @@ void ao_drain(struct ao *ao);
 bool ao_eof_reached(struct ao *ao);
 int ao_query_and_reset_events(struct ao *ao, int events);
 void ao_request_reload(struct ao *ao);
+void ao_hotplug_event(struct ao *ao);
 
-struct ao_device_list *ao_get_device_list(struct mpv_global *global);
+struct ao_hotplug;
+struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
+                                     struct input_ctx *input_ctx);
+void ao_hotplug_destroy(struct ao_hotplug *hp);
+bool ao_hotplug_check_update(struct ao_hotplug *hp);
+struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp);
+
 void ao_print_devices(struct mpv_global *global, struct mp_log *log);
 
 #endif /* MPLAYER_AUDIO_OUT_H */

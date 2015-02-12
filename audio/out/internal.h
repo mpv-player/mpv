@@ -59,7 +59,8 @@ struct ao {
     // Used during init: if init fails, redirect to this ao
     char *redirect;
 
-    atomic_bool request_reload;
+    // Internal events (use ao_request_reload(), ao_hotplug_event())
+    atomic_bool request_reload, request_hotplug;
 
     int buffer;
     double def_buffer;
@@ -161,16 +162,18 @@ struct ao_driver {
     // Return the list of devices currently available in the system. Use
     // ao_device_list_add() to add entries. The selected device will be set as
     // ao->device (using ao_device_desc.name).
-    // Warning: the ao struct passed doesn't necessarily have ao_driver->init()
-    //          called on it - in this case, ->uninit() won't be called either
-    //          after this function. The idea is that list_devs can be called
-    //          both when no audio or when audio is active. the latter can
-    //          happen if the audio config change at runtime, and in this case
-    //          we don't want to force a new connection to the audio server
-    //          just to update the device list. For runtime updates, ->init()
-    //          will have been called. In both cases, ao->priv is properly
-    //          allocated. (Runtime updates are not used/supported yet.)
+    // Warning: the ao struct passed is not initialized with ao_driver->init().
+    //          Instead, hotplug_init/hotplug_uninit is called. If these
+    //          callbacks are not set, no driver initialization call is done
+    //          on the ao struct.
     void (*list_devs)(struct ao *ao, struct ao_device_list *list);
+
+    // If set, these are called before/after ao_driver->list_devs is called.
+    // It is also assumed that the driver can do hotplugging - which means
+    // it is expected to call ao_hotplug_event(ao) whenever the system's
+    // audio device list changes. The player will then call list_devs() again.
+    int (*hotplug_init)(struct ao *ao);
+    void (*hotplug_uninit)(struct ao *ao);
 
     // For option parsing (see vo.h)
     int priv_size;

@@ -1640,6 +1640,13 @@ Property list
     human readable free form text. The description is an empty string if none
     was received.
 
+    The special entry with the name set to ``auto`` selects the default audio
+    output driver and the default device.
+
+    The property can be watched with the property observation mechanism in
+    the client API and in Lua scripts. (Technically, change notification is
+    enabled the first time this property is read.)
+
 ``audio-device`` (RW)
     Set the audio device. This directly reads/writes the ``--audio-device``
     option, but on write accesses, the audio output will be scheduled for

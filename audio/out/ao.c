@@ -386,14 +386,25 @@ int ao_query_and_reset_events(struct ao *ao, int events)
     int actual_events = 0;
     if (atomic_load(&ao->request_reload)) // don't need to reset it
         actual_events |= AO_EVENT_RELOAD;
+    if (atomic_load(&ao->request_hotplug))
+        actual_events |= AO_EVENT_HOTPLUG;
     return actual_events & events;
 }
 
-// Request that the player core destroys and recreates the AO.
+// Request that the player core destroys and recreates the AO. Fully thread-safe.
 void ao_request_reload(struct ao *ao)
 {
     atomic_store(&ao->request_reload, true);
-    mp_input_wakeup(ao->input_ctx);
+    if (ao->input_ctx)
+        mp_input_wakeup(ao->input_ctx);
+}
+
+// Notify the player that the device list changed. Fully thread-safe.
+void ao_hotplug_event(struct ao *ao)
+{
+    atomic_store(&ao->request_hotplug, true);
+    if (ao->input_ctx)
+        mp_input_wakeup(ao->input_ctx);
 }
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
@@ -444,26 +455,88 @@ const char *ao_get_detected_device(struct ao *ao)
     return ao->detected_device;
 }
 
-struct ao_device_list *ao_get_device_list(struct mpv_global *global)
+// ---
+
+struct ao_hotplug {
+    struct mpv_global *global;
+    struct input_ctx *input_ctx;
+    // A single AO instance is used to listen to hotplug events. It wouldn't
+    // make much sense to allow multiple AO drivers; all sane platforms have
+    // a single such audio API.
+    // This is _not_ the same AO instance as used for playing audio.
+    struct ao *ao;
+    // cached
+    struct ao_device_list *list;
+    bool needs_update;
+};
+
+struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
+                                     struct input_ctx *input_ctx)
 {
-    struct ao_device_list *list = talloc_zero(NULL, struct ao_device_list);
+    struct ao_hotplug *hp = talloc_ptrtype(NULL, hp);
+    *hp = (struct ao_hotplug){
+        .global = global,
+        .input_ctx = input_ctx,
+        .needs_update = true,
+    };
+    return hp;
+}
+
+static void get_devices(struct ao *ao, struct ao_device_list *list)
+{
+    int num = list->num_devices;
+    if (ao->driver->list_devs)
+        ao->driver->list_devs(ao, list);
+    // Add at least a default entry
+    if (list->num_devices == num)
+        ao_device_list_add(list, ao, &(struct ao_device_desc){"", "Default"});
+}
+
+bool ao_hotplug_check_update(struct ao_hotplug *hp)
+{
+    if (hp->ao && ao_query_and_reset_events(hp->ao, AO_EVENT_HOTPLUG)) {
+        hp->needs_update = true;
+        atomic_store(&hp->ao->request_hotplug, false);
+        return true;
+    }
+    return false;
+}
+
+// The return value is valid until the next call to this API.
+struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp)
+{
+    if (hp->list && !hp->needs_update)
+        return hp->list;
+
+    talloc_free(hp->list);
+    struct ao_device_list *list = talloc_zero(hp, struct ao_device_list);
+    hp->list = list;
+
     MP_TARRAY_APPEND(list, list->devices, list->num_devices,
         (struct ao_device_desc){"auto", "Autoselect device"});
+
     for (int n = 0; audio_out_drivers[n]; n++) {
         const struct ao_driver *d = audio_out_drivers[n];
         if (d == &audio_out_null)
             break; // don't add unsafe/special entries
-        struct ao *ao = ao_alloc(true, global, NULL, (char *)d->name, NULL);
+
+        struct ao *ao = ao_alloc(true, hp->global, hp->input_ctx,
+                                 (char *)d->name, NULL);
         if (!ao)
             continue;
-        int num = list->num_devices;
-        if (d->list_devs)
-            d->list_devs(ao, list);
-        // Add at least a default entry
-        if (list->num_devices == num)
-            ao_device_list_add(list, ao, &(struct ao_device_desc){"", "Default"});
-        talloc_free(ao);
+
+        if (ao->driver->hotplug_init) {
+            if (!hp->ao && ao->driver->hotplug_init(ao) >= 0)
+                hp->ao = ao; // keep this one
+            if (hp->ao && hp->ao->driver == d)
+                get_devices(hp->ao, list);
+        } else {
+            get_devices(ao, list);
+        }
+        if (ao != hp->ao)
+            talloc_free(ao);
     }
+    hp->needs_update = false;
     return list;
 }
 
@@ -478,13 +551,24 @@ void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
     MP_TARRAY_APPEND(list, list->devices, list->num_devices, c);
 }
 
+void ao_hotplug_destroy(struct ao_hotplug *hp)
+{
+    if (!hp)
+        return;
+    if (hp->ao && hp->ao->driver->hotplug_uninit)
+        hp->ao->driver->hotplug_uninit(hp->ao);
+    talloc_free(hp->ao);
+    talloc_free(hp);
+}
+
 void ao_print_devices(struct mpv_global *global, struct mp_log *log)
 {
-    struct ao_device_list *list = ao_get_device_list(global);
+    struct ao_hotplug *hp = ao_hotplug_create(global, NULL);
+    struct ao_device_list *list = ao_hotplug_get_device_list(hp);
     mp_info(log, "List of detected audio devices:\n");
     for (int n = 0; n < list->num_devices; n++) {
         struct ao_device_desc *desc = &list->devices[n];
         mp_info(log, "  '%s' (%s)\n", desc->name, desc->desc);
     }
-    talloc_free(list);
+    ao_hotplug_destroy(hp);
 }

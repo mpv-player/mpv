@@ -90,7 +90,7 @@ struct command_ctx {
     int num_hooks;
     int64_t hook_seq; // for hook_handler.seq
 
-    struct ao_device_list *cached_ao_devices;
+    struct ao_hotplug *hotplug;
 };
 
 struct overlay {
@@ -1560,14 +1560,12 @@ static int mp_property_audio_devices(void *ctx, struct m_property *prop,
 {
     struct MPContext *mpctx = ctx;
     struct command_ctx *cmd = mpctx->command_ctx;
-    if (!cmd->cached_ao_devices)
-        cmd->cached_ao_devices = ao_get_device_list(mpctx->global);
-    if (!cmd->cached_ao_devices)
-        return M_PROPERTY_ERROR;
-    talloc_steal(cmd, cmd->cached_ao_devices);
+    if (!cmd->hotplug)
+        cmd->hotplug = ao_hotplug_create(mpctx->global, mpctx->input);
 
-    return m_property_read_list(action, arg, cmd->cached_ao_devices->num_devices,
-                                get_device_entry, cmd->cached_ao_devices);
+    struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
+    return m_property_read_list(action, arg, list->num_devices,
+                                get_device_entry, list);
 }
 
 static int mp_property_ao(void *ctx, struct m_property *p, int action, void *arg)
@@ -3535,6 +3533,7 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache"),
     E(MP_EVENT_WIN_RESIZE, "window-scale"),
     E(MP_EVENT_WIN_STATE, "window-minimized", "display-names"),
+    E(MP_EVENT_AUDIO_DEVICES, "audio-device-list"),
 };
 #undef E
 
@@ -4819,6 +4818,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 void command_uninit(struct MPContext *mpctx)
 {
     overlay_uninit(mpctx);
+    ao_hotplug_destroy(mpctx->command_ctx->hotplug);
     talloc_free(mpctx->command_ctx);
     mpctx->command_ctx = NULL;
 }
@@ -4868,6 +4868,11 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         // Update chapters - does nothing if something else is visible.
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
+
+    // This is a bit messy: ao_hotplug wakes up the player, and then we have
+    // to recheck the state. Then the client(s) will read the property.
+    if (ctx->hotplug && ao_hotplug_check_update(ctx->hotplug))
+        mp_notify_property(mpctx, "audio-device-list");
 }
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg)
