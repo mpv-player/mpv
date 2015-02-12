@@ -224,8 +224,8 @@ void print_libav_versions(struct mp_log *log, int v)
     if (broken) {
         mp_fatal(log, "mpv was compiled and linked against a mixture of Libav "
                  "and FFmpeg versions. This won't work and will most likely "
-                 "crash at some point. Exiting.\n");
-        exit(42);
+                 "crash at some point. Aborting.\n");
+        abort();
     }
     // We don't "really" support mismatched libraries, but if you like to
     // suffer, you're free to enjoy the terrible aspects of dynamic linking.

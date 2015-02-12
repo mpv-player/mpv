@@ -184,8 +184,7 @@ void mp_destroy(struct MPContext *mpctx)
     talloc_free(mpctx);
 }
 
-static MP_NORETURN void exit_player(struct MPContext *mpctx,
-                                    enum exit_reason how)
+static int prepare_exit_cplayer(struct MPContext *mpctx, enum exit_reason how)
 {
 #if HAVE_COCOA_APPLICATION
     cocoa_set_input_context(NULL);
@@ -230,13 +229,10 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     mp_destroy(mpctx);
 
 #if HAVE_COCOA_APPLICATION
+    // Note: this function never returns due to Cocoa calling exit(0)
     terminate_cocoa_application();
-    // never reach here:
-    // terminate calls exit itself, just silence compiler warning
-    exit(0);
-#else
-    exit(rc);
 #endif
+    return rc;
 }
 
 static bool handle_help_options(struct MPContext *mpctx)
@@ -507,21 +503,21 @@ int mpv_main(int argc, char *argv[])
                                            mpctx->global, argc, argv);
     if (r < 0) {
         if (r <= M_OPT_EXIT) {
-            exit_player(mpctx, EXIT_NONE);
+            return prepare_exit_cplayer(mpctx, EXIT_NONE);
         } else {
-            exit_player(mpctx, EXIT_ERROR);
+            return prepare_exit_cplayer(mpctx, EXIT_ERROR);
         }
     }
 
     mp_msg_update_msglevels(mpctx->global);
 
     if (handle_help_options(mpctx))
-        exit_player(mpctx, EXIT_NONE);
+        return prepare_exit_cplayer(mpctx, EXIT_NONE);
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
         mp_print_version(mpctx->log, true);
         MP_INFO(mpctx, "%s", mp_help_text);
-        exit_player(mpctx, EXIT_NONE);
+        return prepare_exit_cplayer(mpctx, EXIT_NONE);
     }
 
 #ifdef _WIN32
@@ -530,9 +526,8 @@ int mpv_main(int argc, char *argv[])
 #endif
 
     if (mp_initialize(mpctx) < 0)
-        exit_player(mpctx, EXIT_ERROR);
+        return prepare_exit_cplayer(mpctx, EXIT_ERROR);
 
     mp_play_files(mpctx);
-    exit_player(mpctx, EXIT_NORMAL);
-    return 1;
+    return prepare_exit_cplayer(mpctx, EXIT_NORMAL);
 }
