@@ -143,6 +143,7 @@ static struct ao *ao_alloc(bool probing, struct mpv_global *global,
         .input_ctx = input_ctx,
         .log = mp_log_new(ao, log, name),
         .def_buffer = opts->audio_buffer,
+        .client_name = talloc_strdup(ao, opts->audio_client_name),
     };
     struct m_config *config = m_config_from_obj_desc(ao, ao->log, &desc);
     if (m_config_apply_defaults(config, name, opts->ao_defs) < 0)
@@ -162,7 +163,6 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
                           int samplerate, int format, struct mp_chmap channels,
                           char *dev, char *name, char **args)
 {
-    struct MPOpts *opts = global->opts;
     struct ao *ao = ao_alloc(probing, global, input_ctx, name, args);
     if (!ao)
         return NULL;
@@ -178,7 +178,6 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
                af_fmt_to_str(ao->format));
 
     ao->device = talloc_strdup(ao, dev);
-    ao->client_name = talloc_strdup(ao, opts->audio_client_name);
 
     ao->api = ao->driver->play ? &ao_api_push : &ao_api_pull;
     ao->api_priv = talloc_zero_size(ao, ao->api->priv_size);
@@ -275,8 +274,8 @@ struct ao *ao_init_best(struct mpv_global *global,
                          ao_list[n].name, ao_list[n].attribs);
             if (ao)
                 goto done;
-            mp_warn(log, "Failed to initialize audio driver '%s'\n",
-                    ao_list[n].name);
+            mp_err(log, "Failed to initialize audio driver '%s'\n",
+                   ao_list[n].name);
             if (forced_dev) {
                 mp_err(log, "This audio driver/device was forced with the "
                             "--audio-device option.\n"
