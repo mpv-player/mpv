@@ -500,9 +500,10 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("stop-playback-on-init-failure", stop_playback_on_init_failure, 0),
 
-    OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 2, 10000,
-                      ({"no", -1}, {"1", -1},
-                       {"inf", 0})),
+    OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 1, 10000,
+                      ({"no", 1},
+                       {"inf", -1},
+                       {"force", -2})),
     OPT_CHOICE_OR_INT("loop-file", loop_file, M_OPT_OPTIONAL_PARAM, 0, 10000,
                       ({"yes", -1}, {"", -1}, {"no", 0}, // compat
                        {"inf", -1})),
@@ -712,7 +713,7 @@ const struct MPOpts mp_default_opts = {
     .lua_ytdl_format = NULL,
 #endif
     .auto_load_scripts = 1,
-    .loop_times = -1,
+    .loop_times = 1,
     .ordered_chapters = 1,
     .chapter_merge_threshold = 100,
     .chapter_seek_threshold = 5.0,

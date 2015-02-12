@@ -107,11 +107,16 @@ Playback Control
     If ``--audio-pitch-correction`` is used, playing with a speed higher than
     normal automatically inserts the ``scaletempo`` audio filter.
 
-``--loop=<N|inf|no>``
+``--loop=<N|inf|force|no>``
     Loops playback ``N`` times. A value of ``1`` plays it one time (default),
     ``2`` two times, etc. ``inf`` means forever. ``no`` is the same as ``1`` and
     disables looping. If several files are specified on command line, the
     entire playlist is looped.
+
+    The ``force`` mode is like ``inf``, but does not skip playlist entries
+    which have been marked as failing. This means the player might waste CPU
+    time trying to loop a file that doesn't exist. But it might be useful for
+    playing webradios under very bad network conditions.
 
 ``--pause``
     Start the player in paused state.
