@@ -452,7 +452,6 @@ const vf_info_t vf_info_lavfi = {
 // The following code is for the old filters wrapper code.
 
 struct vf_lw_opts {
-    int enable;
     int64_t sws_flags;
     char **avopts;
 };
@@ -461,13 +460,11 @@ struct vf_lw_opts {
 #define OPT_BASE_STRUCT struct vf_lw_opts
 const struct m_sub_options vf_lw_conf = {
     .opts = (const m_option_t[]) {
-        OPT_FLAG("lavfi", enable, 0),
         OPT_INT64("lavfi-sws-flags", sws_flags, 0),
         OPT_KEYVALUELIST("lavfi-o", avopts, 0),
         {0}
     },
     .defaults = &(const struct vf_lw_opts){
-        .enable = 1,
         .sws_flags = SWS_BICUBIC,
     },
     .size = sizeof(struct vf_lw_opts),
@@ -493,7 +490,7 @@ int vf_lw_set_graph(struct vf_instance *vf, struct vf_lw_opts *lavfi_opts,
 {
     if (!lavfi_opts)
         lavfi_opts = (struct vf_lw_opts *)vf_lw_conf.defaults;
-    if (!lavfi_opts->enable || (filter && !have_filter(filter)))
+    if (filter && !have_filter(filter))
         return -1;
     MP_VERBOSE(vf, "Using libavfilter for '%s'\n", vf->info->name);
     void *old_priv = vf->priv;
