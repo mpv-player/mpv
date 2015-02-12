@@ -12,9 +12,11 @@ Changes that may break users' config files have been annotated with a (!).
   lavfilter (e.g. --vf=lavfi=[pp...]), but it receives no QP information.
   Also, vf_dlopen no longer passes QP information to its loaded plugin either
   (it's always 0).
-- (!) vf_pullup, vf_softpulldown, vf_swapuv, vf_phase, vf_divtc and vf_ilpack
-  have all been removed. Ports or alternative versions of these filters are
-  available through libavfilter (vf_lavfi).
+- (!) vf_softpulldown, vf_swapuv, vf_phase, vf_divtc and vf_ilpack have all
+  been removed. Ports or alternative versions of these filters are available
+  through libavfilter (vf_lavfi).
+- vf_pullup and vf_noise now are simply wrappers to their libavfilter
+  equivalents. Both are only currently available on FFmpeg (not Libav).
 - (!) ao_portaudio has been removed. There is good support for the native
   audio drivers of all major desktop platforms, as well as ao_sdl and
   ao_openal as fallbacks.
@@ -25,12 +27,14 @@ Changes that may break users' config files have been annotated with a (!).
 - (!) Several of the `vo_opengl` radius-preset aliases supported by `scale`
   have been removed; use `scale-radius` to set if needed. For example, use
   `--vo=opengl:scale=lanczos:scale-radius=3` instead of `scale=lanczos3`.
+  The default radius is recommended for most filters.
 - (!) vo_opengl no longer supports the `stereo` suboption. The anaglyph effect
   can be reproduced with the stereo3d filter. The quadbuffer support, which
   requires expensive specialized hardware to begin with, is removed.
-- (!) The `approx-gama` suboption to vo_opengl has been removed. The BT.1886
+- (!) The `approx-gamma` suboption to vo_opengl has been removed. The BT.1886
   specification says that it's actually how it's supposed to be done so it
-  is now the default.
+  is now the default when `srgb` or `icc-profile` are enabled. This does not
+  include BT.1886's gamma drop.
 - (!) The `no-scale-sep` and `indirect` suboptions to vo_opengl have been
   removed. These are now autodetected and enabled whenever they would have
   benefit.
@@ -39,17 +43,14 @@ Changes that may break users' config files have been annotated with a (!).
   config dir is also now expected to be called `scripts` instead.
 - (!) The `--fixed-vo` option has been removed. It has been the default for
   a long time anyway, and disabling fixed-vo is not useful.
-- vo_opengl has improved downscaling for higher downscale ratios.
 - vo_opengl_hq has been updated to take into account new features.
   `fancy-downscaling` and `sigmoid-upscaling` are enabled,
-  "mitchell" is now the default for `scale-down`, and `scale-down` can be
-  disabled with `scale-down=""`.
+  "mitchell" is now the default for `scale-down`.
 - The `sub-visibility` OSD message is now clearer about whether subtitles
   are hidden or just not available / selected.
 - The device IDs given to `--audio-device` for use with ao_coreaudio now use
   UIDs, so they don't change when devices are added/removed or after reboots.
 - `--msg-level` now also accepts ',' as separator.
-- (Win32) The embedded .exe description now names itself simply "mpv".
 - (Client API) The client API now refuses to initialize if the LC_NUMERIC
   locale is not "C".
 - (Client API) The native type of the `msg-level` parameter is now a key-value
@@ -58,7 +59,7 @@ Changes that may break users' config files have been annotated with a (!).
 - PDF documentation is now disabled by default due to rst2pdf being fickle,
   causing weird build errors.
 - Print desync messages with negative A/V sync as well. While rare, it could
-  happen ith some uses of `--autosync`.
+  happen with some uses of `--autosync`.
 
 Bug fixes
 ---------
@@ -67,6 +68,8 @@ Bug fixes
   address bug #1547.
 - (NetBSD) Fix build with v4l2.
 - Multiple cdda:// fixes. (bugs #1555, #1560)
+- VP9 timestamps no longer cause "missing PTS" warnings with new enough FFmpeg
+  builds.
 
 New features
 ------------
@@ -79,12 +82,13 @@ New features
 - vo_opengl now supports sigmoidal upscaling (e.g. for fullscreen), which
   reduces ringing induced by upscaling, enabled through the `sigmoid-upscaling`
   suboption.
-- vo_opengl's ewa_lanczos scaler (Jinc) now supports an `scale-antiringing`
-  parameter, which tries to reduce video ringing.
+- vo_opengl's ewa_lanczos scaler (Jinc) now supports an experimental
+  `scale-antiringing` parameter, which tries to reduce video ringing.
 - vo_opengl now has a `linear-scaling` suboption, that makes the scalers work
   in linear light. Implied by the `srgb`, `icc-profile` or the new
   `sigmoid-upscaling` suboption.
-- The Matroska demuxer now supports SVQ3 video.
+- vo_opengl has improved downscaling for higher downscale ratios when
+  `fancy-downscaling` is enabled.
 - Add `--keep-open=always` to make `--keep-open` apply to all files instead of
   only the last.
 - mpv now filters the tags that are printed on the console to try to hide
@@ -94,8 +98,9 @@ New features
   subtitles from changing their pixel size when the window changes sizes.
 - vo_opengl now technically has GLES 2 and 3 support (but not GLES 1). GLES 3
   support is only tested on Mesa's software emulation. GLES 2 has been tested
-  on nvidia drivers, but is feature deficient and inefficient due to GLES 2
-  limitations.
+  on nvidia drivers. Both GLES modes are feature deficient and inefficient due
+  to GLES limitations, so they should not be preferred over the standard
+  OpenGL mode.
 - (X11) vo_opengl now supports the `icc-profile-auto` option on X11 hosts.
 - The 'A' key now by default cycles through a list of preset aspect ratios.
   Meant to be used to work around broken files.
@@ -104,16 +109,18 @@ New features
 - There is now a `--audio-file-auto` option to automatically load an external
   audio file with certain constraints. Will only load external audio if the
   playing file has a video stream. Set to "exact" by default. (bug #967)
-- VP9 timestamps are now supported with new enough FFmpeg builds.
 - There is now a `--network-timeout` option to specify a timeout in seconds for
   network access. If 0 (default), uses the libavformat default. If a protocol
   that doesn't support timeouts is used, this option is ignored.
 - (Linux) The DVB implementation now supports DVB-S2 through S2API.
+- (Linux) The VDR format for `channels.conf` is now supported and preferred.
+  See http://linuxtv.org/vdrwiki/index.php/Syntax_of_channels.conf for the
+  syntax.
 - (Client API) There is now an opengl_cb VO, which receives the OpenGL context
   from the libmpv client. This allows a client to render libmpv video directly
-  to a provided OpenGL context without having to use hacks such as --wid.
-- (Client API) The aforementioned --wid hack can now be set at any time, but
-  has no effect if a file is already loaded.
+  to a provided OpenGL context without having to use --wid embedding.
+- (Client API) The aforementioned --wid parameter can now be set at any time,
+  but has no effect if a file is already loaded.
 - (Client API) The list of DVD titles can now be queried.
 - (Client API) There is now a `filtered-metadata` property, containing only
   the tags allowed by `--display-tags`.
