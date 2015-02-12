@@ -81,6 +81,27 @@ static void context_state_cb(pa_context *c, void *userdata)
     }
 }
 
+static void subscribe_cb(pa_context *c, pa_subscription_event_type_t t,
+                         uint32_t idx, void *userdata)
+{
+    struct ao *ao = userdata;
+    int type = t & PA_SUBSCRIPTION_MASK_SINK;
+    int fac = t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK;
+    if ((type == PA_SUBSCRIPTION_EVENT_NEW || type == PA_SUBSCRIPTION_EVENT_REMOVE)
+        && fac == PA_SUBSCRIPTION_EVENT_SINK)
+    {
+        ao_hotplug_event(ao);
+    }
+}
+
+static void context_success_cb(pa_context *c, int success, void *userdata)
+{
+    struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
+    priv->retval = success;
+    pa_threaded_mainloop_signal(priv->mainloop, 0);
+}
+
 static void stream_state_cb(pa_stream *s, void *userdata)
 {
     struct ao *ao = userdata;
@@ -323,6 +344,7 @@ static int pa_init_boilerplate(struct ao *ao)
         (long)pa_context_get_server_protocol_version(priv->context));
 
     pa_context_set_state_callback(priv->context, context_state_cb, ao);
+    pa_context_set_subscribe_callback(priv->context, subscribe_cb, ao);
 
     if (pa_context_connect(priv->context, host, 0, NULL) < 0)
         goto fail;
@@ -751,22 +773,32 @@ static void sink_info_cb(pa_context *c, const pa_sink_info *i, int eol, void *ud
     ao_device_list_add(ctx->list, ctx->ao, &entry);
 }
 
+static int hotplug_init(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
+    if (pa_init_boilerplate(ao) < 0)
+        return -1;
+
+    pa_threaded_mainloop_lock(priv->mainloop);
+    waitop(priv, pa_context_subscribe(priv->context, PA_SUBSCRIPTION_MASK_SINK,
+                                      context_success_cb, ao));
+
+    return 0;
+}
+
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
     struct priv *priv = ao->priv;
-    bool need_uninit = !priv->mainloop;
     struct sink_cb_ctx ctx = {ao, list};
-
-    if (need_uninit && pa_init_boilerplate(ao) < 0)
-        return;
 
     pa_threaded_mainloop_lock(priv->mainloop);
     waitop(priv, pa_context_get_sink_info_list(priv->context, sink_info_cb, &ctx));
-
-    if (need_uninit)
-        uninit(ao);
 }
 
+static void hotplug_uninit(struct ao *ao)
+{
+    uninit(ao);
+}
 
 #define OPT_BASE_STRUCT struct priv
 
@@ -785,6 +817,8 @@ const struct ao_driver audio_out_pulse = {
     .drain     = drain,
     .wait      = wait_audio,
     .wakeup    = wakeup,
+    .hotplug_init = hotplug_init,
+    .hotplug_uninit = hotplug_uninit,
     .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
