@@ -274,6 +274,8 @@ static void *playback_thread(void *ctx_obj)
     @autoreleasepool {
         struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
         ctx->mpv_main(*ctx->argc, *ctx->argv);
+        terminate_cocoa_application();
+        // normally never reached
         cocoa_stop_runloop();
         pthread_exit(NULL);
     }
