@@ -105,7 +105,7 @@ static int filter_out(struct af_instance *af)
 {
     struct priv *p = af->priv;
 
-    while (!rubberband_available(p->rubber)) {
+    while (rubberband_available(p->rubber) <= 0) {
         const float *dummy[MP_NUM_CHANNELS] = {0};
         const float **in_data = dummy;
         size_t in_samples = 0;
