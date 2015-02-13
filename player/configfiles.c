@@ -103,7 +103,7 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     // Stupid hack to set OSX bundle defaults, if applicable. (The file is only
     // found if starting from the OSX bundle.)
 #if HAVE_COCOA
-    load_all_cfgfiles(mpctx, section, "osx-bundle.conf");
+    load_all_cfgfiles(mpctx, section, "osx-bundle.conf", false);
 #endif
 
     int count = load_all_cfgfiles(mpctx, section, "mpv.conf", false);
