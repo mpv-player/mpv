@@ -4,44 +4,44 @@ Release 0.8.0
 Changes
 -------
 
-Changes that may break users' config files have been annotated with a (!).
+Changes that may break users' config files have been annotated with a `(!)`.
 
-- (!) vo_opengl_old has been removed. OpenGL rendering now requires hardware
+- `(!)` vo_opengl_old has been removed. OpenGL rendering now requires hardware
   that can do at least OpenGL 2.1, the oldest version supported by vo_opengl.
-- (!) vf_pp has been removed. A version of it can still be accessed through
+- `(!)` vf_pp has been removed. A version of it can still be accessed through
   lavfilter (e.g. --vf=lavfi=[pp...]), but it receives no QP information.
   Also, vf_dlopen no longer passes QP information to its loaded plugin either
   (it's always 0).
-- (!) vf_softpulldown, vf_swapuv, vf_phase, vf_divtc and vf_ilpack have all
+- `(!)` vf_softpulldown, vf_swapuv, vf_phase, vf_divtc and vf_ilpack have all
   been removed. Ports or alternative versions of these filters are available
   through libavfilter (vf_lavfi).
 - vf_pullup and vf_noise now are simply wrappers to their libavfilter
   equivalents. Both are only currently available on FFmpeg (not Libav).
-- (!) ao_portaudio has been removed. There is good support for the native
+- `(!)` ao_portaudio has been removed. There is good support for the native
   audio drivers of all major desktop platforms, as well as ao_sdl and
   ao_openal as fallbacks.
-- (!) vo_opengl's `lscale` suboption has been renamed to `scale`; `lradius` is
-  now `scale-radius`, `lparam1` and `lparam2` are now respectively
+- `(!)` vo_opengl's `lscale` suboption has been renamed to `scale`; `lradius`
+  is now `scale-radius`, `lparam1` and `lparam2` are now respectively
   `scale-param1` and `scale-param2`; `lscale-down` is now `scale-down`.
   The `cscale` suboption remains as is.
-- (!) Several of the `vo_opengl` radius-preset aliases supported by `scale`
+- `(!)` Several of the `vo_opengl` radius-preset aliases supported by `scale`
   have been removed; use `scale-radius` to set if needed. For example, use
   `--vo=opengl:scale=lanczos:scale-radius=2` instead of `scale=lanczos2`.
   The default radius is recommended for most filters.
-- (!) vo_opengl no longer supports the `stereo` suboption. The anaglyph effect
-  can be reproduced with the stereo3d filter. The quadbuffer support, which
-  requires expensive specialized hardware to begin with, is removed.
-- (!) The `approx-gamma` suboption to vo_opengl has been removed. The BT.1886
-  specification says that it's actually how it's supposed to be done so it
-  is now the default when `srgb` or `icc-profile` are enabled. This does not
-  include BT.1886's gamma drop.
-- (!) The `no-scale-sep` and `indirect` suboptions to vo_opengl have been
+- `(!)` vo_opengl no longer supports the `stereo` suboption. The anaglyph
+  effect can be reproduced with the stereo3d filter. The quadbuffer support,
+  which requires expensive specialized hardware to begin with, is removed.
+- `(!)` The `approx-gamma` suboption to vo_opengl has been removed. The
+  BT.1886 specification says that it's actually how it's supposed to be done
+  so it is now the default when `srgb` or `icc-profile` are enabled. This does
+  not include BT.1886's gamma drop.
+- `(!)` The `no-scale-sep` and `indirect` suboptions to vo_opengl have been
   removed. These are now autodetected and enabled whenever they would have
   benefit.
-- (!) The `--lua` and `--lua-opts` parameters / options are now called
+- `(!)` The `--lua` and `--lua-opts` parameters / options are now called
   `--script` and `--script-opts`, respectively. The `lua` subdir of the mpv
   config dir is also now expected to be called `scripts` instead.
-- (!) The `--fixed-vo` option has been removed. It has been the default for
+- `(!)` The `--fixed-vo` option has been removed. It has been the default for
   a long time anyway, and disabling fixed-vo is not useful.
 - vo_opengl_hq has been updated to take into account new features.
   `fancy-downscaling` and `sigmoid-upscaling` are enabled,
@@ -80,10 +80,10 @@ New features
   video's FPS, so there is no "soap opera effect" or difficulties with some
   video types (e.g. anime).
 - vo_opengl now supports sigmoidal upscaling (e.g. for fullscreen), which
-  reduces ringing induced by upscaling, enabled through the `sigmoid-upscaling`
-  suboption.
+  reduces ringing induced by upscaling, enabled through the
+  `sigmoid-upscaling` suboption.
 - vo_opengl now supports ewa_lanczos (Jinc) scaling, which provides higher
-  quality with less ringing. It supports an experimental scale-antiringing
+  quality with less ringing. It supports an experimental `scale-antiringing`
   parameter, which tries to further reduce video ringing.
 - vo_opengl now has a `linear-scaling` suboption, that makes the scalers work
   in linear light. Implied by the `srgb`, `icc-profile` or the new
@@ -93,8 +93,8 @@ New features
 - Add `--keep-open=always` to make `--keep-open` apply to all files instead of
   only the last.
 - mpv now filters the tags that are printed on the console to try to hide
-  useless metadata. The filter works as a whitelist, and can be configured with
-  the `--display-tags` option.
+  useless metadata. The filter works as a whitelist, and can be configured
+  with the `--display-tags` option.
 - Add a `--sub-scale-by-window` option that, when set to 'no', prevents
   subtitles from changing their pixel size when the window changes sizes.
 - vo_opengl now technically has GLES 2 and 3 support (but not GLES 1). GLES 3
@@ -110,9 +110,9 @@ New features
 - There is now a `--audio-file-auto` option to automatically load an external
   audio file with certain constraints. Will only load external audio if the
   playing file has a video stream. Set to "exact" by default. (bug #967)
-- There is now a `--network-timeout` option to specify a timeout in seconds for
-  network access. If 0 (default), uses the libavformat default. If a protocol
-  that doesn't support timeouts is used, this option is ignored.
+- There is now a `--network-timeout` option to specify a timeout in seconds
+  for network access. If 0 (default), uses the libavformat default. If a
+  protocol that doesn't support timeouts is used, this option is ignored.
 - (Linux) The DVB implementation now supports DVB-S2 through S2API.
 - (Linux) The VDR format for `channels.conf` is now supported and preferred.
   See http://linuxtv.org/vdrwiki/index.php/Syntax_of_channels.conf for the
@@ -150,7 +150,5 @@ New features
   counterparts to the equivalent `sub_` commands for handling external audio
   files.
 
-
 This listing is not complete. A complete changelog can be seen by running
 `git log v0.7.0..` in the git repository.
-
