@@ -46,13 +46,29 @@
 #include "core.h"
 #include "command.h"
 
-static void load_all_cfgfiles(struct MPContext *mpctx, char *section,
-                              char *filename)
+static int load_all_cfgfiles(struct MPContext *mpctx, char *section,
+                             char *filename, bool bork)
 {
     char **cf = mp_find_all_config_files(NULL, mpctx->global, filename);
-    for (int i = 0; cf && cf[i]; i++)
+    int count = 0;
+    for (int i = 0; cf && cf[i]; i++) {
+        if (strcmp(filename, "config") == 0) {
+            MP_WARN(mpctx, "Loading %s - naming the mpv config files 'config' is "
+                           "deprecated. Please rename it to 'mpv.conf'\n", cf[i]);
+        }
+        if (bork) {
+            MP_WARN(mpctx, "Warning: your system has a 'mpv.conf' somewhere "
+                           "(check with -v), which will shadow 'config'. This "
+                           "is probably unintended, and you should not mix "
+                           "'config' and 'mpv.conf' files.\n"
+                           "Just rename this file to mpv.conf.\n");
+            bork = false;
+        }
         m_config_parse_config_file(mpctx->mconfig, cf[i], section, 0);
+        count++;
+    }
     talloc_free(cf);
+    return count;
 }
 
 #define SECT_ENCODE "encoding"
@@ -84,8 +100,14 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     talloc_free(cf);
 #endif
 
-    load_all_cfgfiles(mpctx, section, "config");
-    load_all_cfgfiles(mpctx, section, "mpv.conf");
+    // Stupid hack to set OSX bundle defaults, if applicable. (The file is only
+    // found if starting from the OSX bundle.)
+#if HAVE_COCOA
+    load_all_cfgfiles(mpctx, section, "osx-bundle.conf");
+#endif
+
+    int count = load_all_cfgfiles(mpctx, section, "mpv.conf", false);
+    load_all_cfgfiles(mpctx, section, "config", count > 0);
 
     if (encoding)
         m_config_set_profile(conf, m_config_add_profile(conf, SECT_ENCODE), 0);
