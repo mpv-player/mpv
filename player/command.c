@@ -4328,6 +4328,10 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         MP_INFO(mpctx, "ANS_%s=%s\n", cmd->args[0].v.s, tmp);
         talloc_free(tmp);
+        MP_WARN(mpctx,  "The get_property command is deprecated and "
+                        "will be removed in the next release.\n"
+                        "Use libmpv or the JSON IPC. "
+                        "(Or print_text, if you must.)");
         break;
     }
 
