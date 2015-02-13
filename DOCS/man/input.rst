@@ -618,9 +618,8 @@ Input Commands that are Possibly Subject to Change
     unseekable streams that are going out of sync.
     This command might be changed or removed in the future.
 
-Undocumented commands: ``tv_last_channel`` (TV/DVB only), ``get_property`` (?),
-``ao_reload`` (experimental/internal).
-
+Undocumented commands: ``tv_last_channel`` (TV/DVB only),
+``get_property`` (deprecated), ``ao_reload`` (experimental/internal).
 
 Hooks
 ~~~~~
