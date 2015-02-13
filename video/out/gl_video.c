@@ -1749,15 +1749,11 @@ static void gl_video_interpolate_frame(struct gl_video *p,
         gl->ActiveTexture(GL_TEXTURE0 + 1);
         gl->BindTexture(p->gl_target, p->surfaces[p->surface_idx].fbotex.texture);
         gl->ActiveTexture(GL_TEXTURE0);
-        MP_DBG(p, "frame ppts: %lld, pts: %lld, vsync: %lld, DIFF: %lld\n",
-                  (long long)prev_pts, (long long)t->pts,
-                  (long long)t->next_vsync, (long long)t->next_vsync - t->pts);
         if (prev_pts < t->next_vsync && t->pts > t->next_vsync) {
-            double N = t->next_vsync - prev_pts;
-            double P = t->pts - prev_pts;
-            double prev_pts_component = N / P;
+            double N = t->next_vsync - t->prev_vsync;
+            double P = t->pts - t->prev_vsync;
             float ts = p->opts.smoothmotion_threshold;
-            inter_coeff = 1 - prev_pts_component;
+            inter_coeff = 1 - (N / P);
             inter_coeff = inter_coeff < 0.0 + ts ? 0.0 : inter_coeff;
             inter_coeff = inter_coeff > 1.0 - ts ? 1.0 : inter_coeff;
             MP_DBG(p, "inter frame ppts: %lld, pts: %lld, "
