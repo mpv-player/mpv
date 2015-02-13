@@ -155,6 +155,7 @@ struct vo_extra {
 struct frame_timing {
     int64_t pts;
     int64_t next_vsync;
+    int64_t prev_vsync;
 };
 
 struct vo_driver {

@@ -617,6 +617,7 @@ static bool render_frame(struct vo *vo)
             struct frame_timing t = (struct frame_timing) {
                 .pts        = pts,
                 .next_vsync = next_vsync,
+                .prev_vsync = prev_vsync,
             };
             vo->driver->draw_image_timed(vo, img, &t);
         } else {
