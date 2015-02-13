@@ -531,9 +531,15 @@ static void *client_thread(void *p)
     };
 
     fcntl(arg->client_fd, F_SETFL, fcntl(arg->client_fd, F_GETFL, 0) | O_NONBLOCK);
+    mpv_suspend(arg->client);
 
     while (1) {
-        rc = poll(fds, 2, -1);
+        rc = poll(fds, 2, 0);
+        if (rc == 0) {
+            mpv_resume(arg->client);
+            rc = poll(fds, 2, -1);
+            mpv_suspend(arg->client);
+        }
         if (rc < 0) {
             MP_ERR(arg, "Poll error\n");
             continue;
