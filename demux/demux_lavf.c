@@ -798,6 +798,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     demuxer->start_time = priv->avfc->start_time == AV_NOPTS_VALUE ?
                           0 : (double)priv->avfc->start_time / AV_TIME_BASE;
 
+    demuxer->allow_refresh_seeks = matches_avinputformat_name(priv, "mp4");
+
     return 0;
 }
 

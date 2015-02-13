@@ -193,6 +193,11 @@ typedef struct demuxer {
     // Send relative seek requests, instead of SEEK_ABSOLUTE or SEEK_FACTOR.
     // This is only done if the user explicitly uses a relative seek.
     bool rel_seeks;
+    // Enable fast track switching hacks. This requires from the demuxer:
+    // - seeking is somewhat reliable; packet contents must not change
+    // - packet position (demux_packet.pos) is set, not negative, and unique
+    // - seeking leaves packet positions invariant
+    bool allow_refresh_seeks;
 
     // Bitmask of DEMUX_EVENT_*
     int events;
@@ -262,6 +267,7 @@ void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *c
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, double rel_seek_secs, int flags);
+void demux_set_enable_refresh_seeks(struct demuxer *demuxer, bool enabled);
 
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
