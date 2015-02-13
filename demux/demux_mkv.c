@@ -153,7 +153,6 @@ typedef struct mkv_demuxer {
     int64_t segment_start, segment_end;
 
     double duration, last_pts;
-    uint64_t last_filepos;
 
     mkv_track_t **tracks;
     int num_tracks;
@@ -2028,7 +2027,7 @@ static bool handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
              * audio packets in file */
             dp->pts = (x * apk_usize % w) ? MP_NOPTS_VALUE :
                 track->audio_timestamp[x * apk_usize / w];
-            dp->pos = orig->pos;
+            dp->pos = orig->pos + x;
             dp->keyframe = !x;   // Mark first packet as keyframe
             demux_add_packet(track->stream, dp);
         }
@@ -2203,6 +2202,7 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
             break;
         dp->buffer += len;
         dp->len -= len;
+        dp->pos += len;
         if (size) {
             struct demux_packet *new = new_demux_packet_from(data, size);
             if (!new)
@@ -2358,8 +2358,8 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     }
 
     if (use_this_block) {
+        uint64_t filepos = block_info->filepos;
         mkv_d->last_pts = current_pts;
-        mkv_d->last_filepos = block_info->filepos;
 
         for (int i = 0; i < laces; i++) {
             bstr block = bstr_splice(data, 0, lace_size[i]);
@@ -2371,7 +2371,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             if (!dp)
                 break;
             dp->keyframe = keyframe;
-            dp->pos = mkv_d->last_filepos;
+            dp->pos = filepos;
             /* If default_duration is 0, assume no pts value is known
              * for packets after the first one (rather than all pts
              * values being the same). Also, don't use it for extra
@@ -2392,6 +2392,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 
             mkv_parse_and_add_packet(demuxer, track, dp);
             talloc_free_children(track->parser_tmp);
+            filepos += block.len;
         }
 
         if (stream->type == STREAM_VIDEO) {
