@@ -121,6 +121,27 @@ extern "C" {
  *   process (such as ffmpeg OpenSSL support, or the mpv IPC code).
  * - On memory exhaustion, mpv will kill the process.
  *
+ * Encoding of filenames
+ * ---------------------
+ *
+ * mpv uses UTF-8 everywhere.
+ *
+ * On some platforms (like Linux), filenames actually do not have to be UTF-8;
+ * for this reason libmpv supports non-UTF-8 strings. libmpv uses what the
+ * kernel uses and does not recode filenames. At least on Linux, passing a
+ * string to libmpv is like passing a string to the fopen() function.
+ *
+ * On Windows, filenames are always UTF-8, libmpv converts between UTF-8 and
+ * UTF-16 when using win32 API functions. libmpv never uses or accepts
+ * filenames in the local 8 bit encoding. It does not use fopen() either;
+ * it uses _wfopen().
+ *
+ * On OS X, filenames and other strings taken/returned by libmpv can have
+ * inconsistent unicode normalization. This can sometimes lead to problems.
+ * You have to hope for the best.
+ *
+ * Also see the remarks for MPV_FORMAT_STRING.
+ *
  * Embedding the video window
  * --------------------------
  *
@@ -502,6 +523,9 @@ typedef enum mpv_format {
      *          and even filenames don't necessarily have to be in UTF-8 (at
      *          least on Linux). If you pass the strings to code that requires
      *          valid UTF-8, you have to sanitize it in some way.
+     *          On Windows, filenames are always UTF-8, and libmpv converts
+     *          between UTF-8 and UTF-16 when using win32 API functions. See
+     *          the "Encoding of filenames" section for details.
      *
      * Example for reading:
      *
