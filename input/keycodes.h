@@ -75,6 +75,7 @@
 #define MP_KEY_FAVORITES        (MP_KEY_MM_BASE+16)
 #define MP_KEY_SEARCH           (MP_KEY_MM_BASE+17)
 #define MP_KEY_SLEEP            (MP_KEY_MM_BASE+18)
+#define MP_KEY_CANCEL           (MP_KEY_MM_BASE+19)
 
 /*  Function keys  */
 #define MP_KEY_F (MP_KEY_BASE+0x40)
