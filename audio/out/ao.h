@@ -80,7 +80,6 @@ void ao_uninit(struct ao *ao);
 void ao_get_format(struct ao *ao, struct mp_audio *format);
 const char *ao_get_name(struct ao *ao);
 const char *ao_get_description(struct ao *ao);
-const char *ao_get_detected_device(struct ao *ao);
 bool ao_untimed(struct ao *ao);
 int ao_play(struct ao *ao, void **data, int samples, int flags);
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg);
@@ -100,6 +99,7 @@ struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
                                      struct input_ctx *input_ctx);
 void ao_hotplug_destroy(struct ao_hotplug *hp);
 bool ao_hotplug_check_update(struct ao_hotplug *hp);
+const char *ao_hotplug_get_detected_device(struct ao_hotplug *hp);
 struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp);
 
 void ao_print_devices(struct mpv_global *global, struct mp_log *log);

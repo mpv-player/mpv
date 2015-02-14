@@ -48,6 +48,7 @@ enum {
     MP_EVENT_WIN_RESIZE,
     MP_EVENT_WIN_STATE,
     MP_EVENT_AUDIO_DEVICES,
+    MP_EVENT_DETECTED_AUDIO_DEVICE,
 };
 
 bool mp_hook_test_completion(struct MPContext *mpctx, char *type);

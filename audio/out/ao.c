@@ -450,11 +450,6 @@ bool ao_untimed(struct ao *ao)
     return ao->untimed;
 }
 
-const char *ao_get_detected_device(struct ao *ao)
-{
-    return ao->detected_device;
-}
-
 // ---
 
 struct ao_hotplug {
@@ -500,6 +495,11 @@ bool ao_hotplug_check_update(struct ao_hotplug *hp)
         return true;
     }
     return false;
+}
+
+const char *ao_hotplug_get_detected_device(struct ao_hotplug *hp)
+{
+    return hp->ao->detected_device;
 }
 
 // The return value is valid until the next call to this API.

@@ -1578,10 +1578,12 @@ static int mp_property_ao(void *ctx, struct m_property *p, int action, void *arg
 static int mp_property_ao_detected_device(void *ctx,struct m_property *prop,
                                           int action, void *arg)
 {
-    MPContext *mpctx = ctx;
+    struct MPContext *mpctx = ctx;
+    struct command_ctx *cmd = mpctx->command_ctx;
     if (!mpctx->ao)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_strdup_ro(action, arg, ao_get_detected_device(mpctx->ao));
+    const char *d = ao_hotplug_get_detected_device(cmd->hotplug);
+    return m_property_strdup_ro(action, arg, d);
 }
 
 /// Audio delay (RW)
@@ -3524,7 +3526,7 @@ static const char *const *const mp_event_property_change[] = {
       "detected-hwdec"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
-      "volume-restore-data", "current-ao", "audio-out-detected-device"),
+      "volume-restore-data", "current-ao"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata"),
@@ -3534,6 +3536,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_WIN_RESIZE, "window-scale"),
     E(MP_EVENT_WIN_STATE, "window-minimized", "display-names"),
     E(MP_EVENT_AUDIO_DEVICES, "audio-device-list"),
+    E(MP_EVENT_DETECTED_AUDIO_DEVICE, "audio-out-detected-device"),
 };
 #undef E
 
@@ -4875,8 +4878,10 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
 
     // This is a bit messy: ao_hotplug wakes up the player, and then we have
     // to recheck the state. Then the client(s) will read the property.
-    if (ctx->hotplug && ao_hotplug_check_update(ctx->hotplug))
+    if (ctx->hotplug && ao_hotplug_check_update(ctx->hotplug)) {
         mp_notify_property(mpctx, "audio-device-list");
+        mp_notify_property(mpctx, "audio-out-detected-device");
+    }
 }
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg)
