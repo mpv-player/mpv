@@ -901,19 +901,17 @@ static void compile_shaders(struct gl_video *p)
     char *s_video = get_section(tmp, src, "frag_video");
 
     bool rg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
-    bool tex1d = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool tex3d = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool arrays = gl->mpgl_caps & MPGL_CAP_1ST_CLASS_ARRAYS;
     char *header =
         talloc_asprintf(tmp, "#version %d%s\n"
                              "#define HAVE_RG %d\n"
-                             "#define HAVE_1DTEX %d\n"
                              "#define HAVE_3DTEX %d\n"
                              "#define HAVE_ARRAYS %d\n"
                              "#define LOOKUP_ARRAY_SIZE %d\n"
                              "%s%s",
                              gl->glsl_version, gl->es >= 300 ? " es" : "",
-                             rg, tex1d, tex3d, arrays, LOOKUP_ARRAY_SIZE,
+                             rg, tex3d, arrays, LOOKUP_ARRAY_SIZE,
                              shader_prelude, PRELUDE_END);
 
     bool use_cms = p->opts.srgb || p->use_lut_3d;
@@ -2070,7 +2068,6 @@ static void check_gl_features(struct gl_video *p)
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
     bool have_arrays = gl->mpgl_caps & MPGL_CAP_1ST_CLASS_ARRAYS;
-    bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
 
@@ -2087,7 +2084,7 @@ static void check_gl_features(struct gl_video *p)
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
     // I don't know if luminance alpha float textures exist, so disregard them.
-    if (!have_float_tex || !have_arrays || !have_fbo || !have_1d_tex) {
+    if (!have_float_tex || !have_arrays || !have_fbo) {
         for (int n = 0; n < 2; n++) {
             const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[n]);
             if (kernel) {
@@ -2098,12 +2095,8 @@ static void check_gl_features(struct gl_video *p)
                     reason = "scaler (float tex.)";
                 if (!have_arrays)
                     reason = "scaler (no GLSL support)";
-                if (!have_1d_tex && kernel->polar)
-                    reason = "scaler (1D tex.)";
-                if (*reason) {
-                    p->opts.scalers[n] = "bilinear";
-                    disabled[n_disabled++] = reason;
-                }
+                p->opts.scalers[n] = "bilinear";
+                disabled[n_disabled++] = reason;
             }
         }
     }
