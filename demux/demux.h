@@ -195,7 +195,8 @@ typedef struct demuxer {
     bool rel_seeks;
     // Enable fast track switching hacks. This requires from the demuxer:
     // - seeking is somewhat reliable; packet contents must not change
-    // - packet position (demux_packet.pos) is set, not negative, and unique
+    // - packet position (demux_packet.pos) is set, not negative, unique, and
+    //   monotonically increasing
     // - seeking leaves packet positions invariant
     bool allow_refresh_seeks;
 

@@ -309,8 +309,8 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     if (ds->refreshing) {
         // Resume reading once the old position was reached (i.e. we start
         // returning packets where we left off before the refresh).
-        drop = true;
-        if (dp->pos == ds->last_pos)
+        drop = dp->pos <= ds->last_pos;
+        if (dp->pos >= ds->last_pos)
             ds->refreshing = false;
     }
 
