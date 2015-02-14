@@ -4875,6 +4875,11 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         // Update chapters - does nothing if something else is visible.
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
+}
+
+void handle_command_updates(struct MPContext *mpctx)
+{
+    struct command_ctx *ctx = mpctx->command_ctx;
 
     // This is a bit messy: ao_hotplug wakes up the player, and then we have
     // to recheck the state. Then the client(s) will read the property.

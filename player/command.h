@@ -36,6 +36,8 @@ int mp_property_do(const char* name, int action, void* val,
 void mp_notify(struct MPContext *mpctx, int event, void *arg);
 void mp_notify_property(struct MPContext *mpctx, const char *property);
 
+void handle_command_updates(struct MPContext *mpctx);
+
 int mp_get_property_id(const char *name);
 uint64_t mp_get_property_event_mask(const char *name);
 

@@ -986,6 +986,7 @@ void run_playloop(struct MPContext *mpctx)
     handle_cursor_autohide(mpctx);
     handle_vo_events(mpctx);
     handle_heartbeat_cmd(mpctx);
+    handle_command_updates(mpctx);
 
     fill_audio_out_buffers(mpctx, endpts);
     write_video(mpctx, endpts);
