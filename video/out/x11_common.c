@@ -1550,8 +1550,8 @@ static void vo_x11_update_geometry(struct vo *vo)
             w = h = 0;
         XTranslateCoordinates(x11->display, win, x11->rootwin, 0, 0,
                               &x, &y, &dummy_win);
+        x11->winrc = (struct mp_rect){x, y, x + w, y + h};
     }
-    x11->winrc = (struct mp_rect){x, y, x + w, y + h};
     double fps = 1000.0;
     for (int n = 0; n < x11->num_displays; n++) {
         struct xrandr_display *disp = &x11->displays[n];
