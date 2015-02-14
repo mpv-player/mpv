@@ -157,6 +157,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(Uniform2f),
             DEF_FN(Uniform3f),
             DEF_FN(Uniform1i),
+            DEF_FN(Uniform1fv),
             DEF_FN(UniformMatrix2fv),
             DEF_FN(UniformMatrix3fv),
             DEF_FN(UseProgram),

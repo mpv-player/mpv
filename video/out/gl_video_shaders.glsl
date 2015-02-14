@@ -166,10 +166,8 @@ uniform vec2 chroma_div;
 uniform vec2 chroma_fix;
 uniform sampler2D lut_2d_c;
 uniform sampler2D lut_2d_l;
-#if HAVE_1DTEX
-uniform sampler1D lut_1d_c;
-uniform sampler1D lut_1d_l;
-#endif
+uniform float lut_1d_c[LOOKUP_ARRAY_SIZE];
+uniform float lut_1d_l[LOOKUP_ARRAY_SIZE];
 #if HAVE_3DTEX
 uniform sampler3D lut_3d;
 #endif
@@ -302,15 +300,16 @@ float[6] weights6(sampler2D lookup, float f) {
     }
 
 #define SAMPLE_POLAR_HELPER(LUT, R, X, Y)                                   \
-        w = texture1D(LUT, length(vec2(X, Y) - fcoord)/R).r;                \
+        d = clamp(length(vec2(X, Y) - fcoord)/R, 0.0, 1.0);                 \
+        w = LUT[int((LOOKUP_ARRAY_SIZE-1) * d)];                            \
         c = texture(tex, base + pt * vec2(X, Y));                           \
         wsum += w;                                                          \
-        res  += vec4(w) * c;                                                \
+        res  += vec4(w) * c;
 
 #define SAMPLE_POLAR_PRIMARY(LUT, R, X, Y)                                  \
         SAMPLE_POLAR_HELPER(LUT, R, X, Y)                                   \
         lo = min(lo, c);                                                    \
-        hi = max(hi, c);                                                    \
+        hi = max(hi, c);
 
 #define SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT, WEIGHTS_FN, ANTIRING)      \
     vec4 NAME(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {             \
@@ -322,6 +321,7 @@ float[6] weights6(sampler2D lookup, float f) {
         vec4 hi = vec4(0.0);                                                \
         float wsum = 0.0;                                                   \
         float w;                                                            \
+        float d;                                                            \
         vec4 c;                                                             \
         WEIGHTS_FN(LUT);                                                    \
         res = res / vec4(wsum);                                             \
