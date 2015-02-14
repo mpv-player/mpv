@@ -261,13 +261,6 @@ static void cocoa_run_runloop(void)
     [pool drain];
 }
 
-static void cocoa_stop_runloop(void)
-{
-    [NSApp performSelectorOnMainThread:@selector(stop:)
-                            withObject:nil
-                         waitUntilDone:true];
-}
-
 static void *playback_thread(void *ctx_obj)
 {
     mpthread_set_name("playback core (OSX)");
