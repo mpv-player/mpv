@@ -33,7 +33,8 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename);
 
 // Find all instances of the given config file. Paths are returned in order
-// from lowest to highest priority.
+// from lowest to highest priority. filename can contain multiple names
+// separated with '|', with the first having highest priority.
 char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
                                 const char *filename);
 

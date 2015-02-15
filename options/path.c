@@ -147,12 +147,15 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
 
     char **dirs = mp_config_dirs(NULL, global);
     for (int i = 0; dirs && dirs[i]; i++) {
-        char *file = talloc_asprintf(ret, "%s/%s", dirs[i], filename);
+        bstr s = bstr0(filename);
+        while (s.len) {
+            bstr fn;
+            bstr_split_tok(s, "|", &fn, &s);
 
-        if (!mp_path_exists(file) || num_ret >= MAX_CONFIG_PATHS)
-            continue;
-
-        ret[num_ret++] = file;
+            char *file = talloc_asprintf(ret, "%s/%.*s", dirs[i], BSTR_P(fn));
+            if (mp_path_exists(file) && num_ret < MAX_CONFIG_PATHS)
+                ret[num_ret++] = file;
+        }
     }
     talloc_free(dirs);
 
