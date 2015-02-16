@@ -83,6 +83,7 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->MarginV = opts->margin_y * scale;
     style->ScaleX = 1.;
     style->ScaleY = 1.;
+    style->Alignment = 1 + (opts->align_x + 1) + (opts->align_y + 2) % 3 * 4;
 #if LIBASS_VERSION >= 0x01020000
     style->Blur = opts->blur;
 #endif

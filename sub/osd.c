@@ -54,6 +54,10 @@ static const m_option_t style_opts[] = {
     OPT_FLOATRANGE("spacing", spacing, 0, -10, 10),
     OPT_INTRANGE("margin-x", margin_x, 0, 0, 300),
     OPT_INTRANGE("margin-y", margin_y, 0, 0, 600),
+    OPT_CHOICE("align-x", align_x, 0,
+               ({"left", -1}, {"center", 0}, {"right", +1})),
+    OPT_CHOICE("align-y", align_y, 0,
+               ({"top", -1}, {"center", 0}, {"bottom", +1})),
     OPT_FLOATRANGE("blur", blur, 0, 0, 20),
     {0}
 };
@@ -71,6 +75,8 @@ const struct m_sub_options osd_style_conf = {
         .shadow_offset = 0,
         .margin_x = 25,
         .margin_y = 22,
+        .align_x = -1,
+        .align_y = -1,
     },
 };
 
@@ -87,6 +93,8 @@ const struct m_sub_options sub_style_conf = {
         .shadow_offset = 0,
         .margin_x = 25,
         .margin_y = 22,
+        .align_x = 0,
+        .align_y = 1,
     },
 };
 

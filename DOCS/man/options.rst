@@ -2540,6 +2540,17 @@ OSD
 
     Default: 22.
 
+``--osd-align-x=<left|center|right>``,  ``--sub-text-align-x=...``
+    Control to which corner of the screen OSD or text subtitles should be
+    aligned to (default: ``center`` for subs, ``left`` for OSD).
+
+    Never applied to ASS subtitles, except in ``--no-sub-ass`` mode. Likewise,
+    this does not apply to image subtitles.
+
+``--osd-align-y=<top|center|bottom>`` ``--sub-text-align-y=...``
+    Vertical position (default: ``bottom`` for subs, ``top`` for OSD).
+    Details see ``--osd-align-x``.
+
 ``--osd-scale=<factor>``
     OSD font size multiplier, multiplied with ``--osd-font-size`` value.
 
