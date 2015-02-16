@@ -305,12 +305,12 @@ float[6] weights6(sampler2D lookup, float f) {
         w = texture1D(LUT, length(vec2(X, Y) - fcoord)/R).r;                \
         c = texture(tex, base + pt * vec2(X, Y));                           \
         wsum += w;                                                          \
-        res  += vec4(w) * c;                                                \
+        res  += vec4(w) * c;
 
 #define SAMPLE_POLAR_PRIMARY(LUT, R, X, Y)                                  \
         SAMPLE_POLAR_HELPER(LUT, R, X, Y)                                   \
         lo = min(lo, c);                                                    \
-        hi = max(hi, c);                                                    \
+        hi = max(hi, c);
 
 #define SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT, WEIGHTS_FN, ANTIRING)      \
     vec4 NAME(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {             \
