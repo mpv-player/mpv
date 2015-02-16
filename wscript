@@ -350,7 +350,7 @@ If you really mean to compile without libass support use --disable-libass."
     }, {
         'name': 'vapoursynth-core',
         'desc': 'VapourSynth filter bridge (core)',
-        'func': check_pkg_config('vapoursynth >= 23'),
+        'func': check_pkg_config('vapoursynth >= 24'),
     }, {
         'name': '--vapoursynth',
         'desc': 'VapourSynth filter bridge (Python)',

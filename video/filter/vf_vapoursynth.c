@@ -745,7 +745,7 @@ static int drv_vss_load_core(struct vf_instance *vf)
 
     // First load an empty script to get a VSScript, so that we get the vsapi
     // and vscore.
-    if (vsscript_evaluateScript(&p->se, "", NULL, 0))
+    if (vsscript_createScript(&p->se))
         return -1;
     p->vsapi = vsscript_getVSApi();
     p->vscore = vsscript_getCore(p->se);

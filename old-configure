@@ -860,7 +860,7 @@ test_lua "lua5.2 >= 5.2.0" # debian
 
 test "$_lua" != yes && check_yes_no no LUA
 
-if ! ( $_pkg_config 'vapoursynth >= 23' ) ; then
+if ! ( $_pkg_config 'vapoursynth >= 24' ) ; then
     _vapoursynth=no
     _vapoursynth_lazy=no
 fi
