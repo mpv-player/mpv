@@ -23,4 +23,5 @@
 - (void)setFullScreen:(BOOL)willBeFullscreen;
 - (void)clear;
 - (BOOL)canHideCursor;
+- (void)signalMousePosition;
 @end

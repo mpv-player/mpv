@@ -379,6 +379,8 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     view.adapter = adapter;
     s->view = view;
     [parent addSubview:s->view];
+    // update the cursor position now that the view has been added.
+    [view signalMousePosition];
 
     // insert ourselves as the next key view so that clients can give key
     // focus to the mpv view by calling -[NSWindow selectNextKeyView:]
@@ -501,7 +503,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
         }
 
         // trigger a resize -> don't set vo->dwidth and vo->dheight directly
-        // since this block is executed asynchrolously to the video
+        // since this block is executed asynchronously to the video
         // reconfiguration code.
         s->pending_events |= VO_EVENT_RESIZE;
     });
