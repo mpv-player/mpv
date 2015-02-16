@@ -717,6 +717,13 @@ int m_config_set_option_node(struct m_config *config, bstr name,
     if (r >= 0)
         r = m_config_set_option_raw(config, co, &val, flags);
 
+    if (mp_msg_test(config->log, MSGL_V)) {
+        char *s = m_option_type_node.print(NULL, data);
+        MP_VERBOSE(config, "Setting option '%.*s' = %s (flags = %d) -> %d\n",
+                   BSTR_P(name), s ? s : "?", flags, r);
+        talloc_free(s);
+    }
+
     m_option_free(co->opt, &val);
     return r;
 }
