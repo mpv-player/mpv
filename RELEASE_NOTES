@@ -55,6 +55,7 @@ Changes that may break users' config files have been annotated with a `(!)`.
   locale is not "C".
 - (Client API) The native type of the `msg-level` parameter is now a key-value
   list. Setting or reading it as a string still works.
+- (Slave API) The `get_property` command is now deprecated.
 - Documentation updates.
 - PDF documentation is now disabled by default due to rst2pdf being fickle,
   causing weird build errors.
@@ -67,9 +68,12 @@ Bug fixes
 - (Windows) Avoid resizing the video window when player is minimized, might
   address bug #1547.
 - (NetBSD) Fix build with v4l2.
+- (Linux) Attempt to address conflicts with the pulseaudio mixer. (bug #1578)
 - Multiple cdda:// fixes. (bugs #1555, #1560)
 - VP9 timestamps no longer cause "missing PTS" warnings with new enough FFmpeg
   builds.
+- Fix a crash when using H.264 hardware decooding on new enough libavcodecs.
+  (bug #1587)
 
 New features
 ------------
@@ -105,6 +109,8 @@ New features
 - (X11) vo_opengl now supports the `icc-profile-auto` option on X11 hosts.
 - The 'A' key now by default cycles through a list of preset aspect ratios.
   Meant to be used to work around broken files.
+- There is now a "force" mode for `--loop`. Works like "inf", but tries to
+  open files/streams even if there was an error on the previous attempt.
 - There is now a `--log-file` option to write mpv's log messages to a specifed
   file.
 - There is now a `--audio-file-auto` option to automatically load an external
@@ -113,10 +119,15 @@ New features
 - There is now a `--network-timeout` option to specify a timeout in seconds
   for network access. If 0 (default), uses the libavformat default. If a
   protocol that doesn't support timeouts is used, this option is ignored.
+- (X11) The XF86 special keys are now all mappable in `input.conf`. All keys
+  documented in `XF86keysym.h` are available, but only as their numeric codes.
 - (Linux) The DVB implementation now supports DVB-S2 through S2API.
 - (Linux) The VDR format for `channels.conf` is now supported and preferred.
   See http://linuxtv.org/vdrwiki/index.php/Syntax_of_channels.conf for the
-  syntax.
+  syntax. Tuning to DVB-S2 channels requires the VDR-format `channels.conf`.
+- (Linux) There is now a `--dvbin-full-transponder` option for handling
+  special broadcast cases where PIDs switch, or just to work around incomplete
+  PID data.
 - (Client API) There is now an opengl_cb VO, which receives the OpenGL context
   from the libmpv client. This allows a client to render libmpv video directly
   to a provided OpenGL context without having to use --wid embedding.
