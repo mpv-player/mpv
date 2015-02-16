@@ -400,6 +400,21 @@ List of Input Commands
 ``audio_reload [<id>]``
     Reload the given audio tracks. See ``sub_reload`` command.
 
+``rescan_external_files [<mode>]``
+    Rescan external files according to the current ``--sub-auto`` and
+    ``--audio-file-auto`` settings. This can be used to auto-load external
+    files *after* the file was loaded.
+
+    The ``mode`` argument is one of the following:
+
+    <keep-selection> (default)
+        Do not change current track selections.
+
+    <reselect>
+        Select the default audio and video streams, which typically selects
+        external files with highest preference. (The implementation is not
+        perfect, and could be improved on request.)
+
 
 Input Commands that are Possibly Subject to Change
 --------------------------------------------------

@@ -199,6 +199,11 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_AUDIO_REMOVE, "audio_remove", { OARG_INT(-1) } },
   { MP_CMD_AUDIO_RELOAD, "audio_reload", { OARG_INT(-1) } },
 
+  { MP_CMD_RESCAN_EXTERNAL_FILES, "rescan_external_files", {
+      OARG_CHOICE(0, ({"keep-selection", 0},
+                      {"reselect", 1})),
+  }},
+
   {0}
 };
 

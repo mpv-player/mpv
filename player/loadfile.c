@@ -441,9 +441,8 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
     }
     return t1->user_tid <= t2->user_tid;
 }
-static struct track *select_track(struct MPContext *mpctx,
-                                  enum stream_type type, int tid, int ffid,
-                                  char **langs)
+struct track *select_track(struct MPContext *mpctx, enum stream_type type,
+                           int tid, int ffid, char **langs)
 {
     if (ffid != -1)
         tid = -1; // prefer selecting ffid
@@ -727,7 +726,7 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
         mp_add_external_file(mpctx, opts->sub_name[i], STREAM_SUB);
 }
 
-static void autoload_external_files(struct MPContext *mpctx)
+void autoload_external_files(struct MPContext *mpctx)
 {
     if (mpctx->opts->sub_auto < 0 && mpctx->opts->audiofile_auto < 0)
         return;

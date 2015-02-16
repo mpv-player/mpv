@@ -111,6 +111,8 @@ enum mp_command_type {
     MP_CMD_HOOK_ADD,
     MP_CMD_HOOK_ACK,
 
+    MP_CMD_RESCAN_EXTERNAL_FILES,
+
     // Internal
     MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
 };

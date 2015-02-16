@@ -394,6 +394,9 @@ void mp_play_files(struct MPContext *mpctx);
 void update_demuxer_properties(struct MPContext *mpctx);
 void reselect_demux_streams(struct MPContext *mpctx);
 void prepare_playlist(struct MPContext *mpctx, struct playlist *pl);
+void autoload_external_files(struct MPContext *mpctx);
+struct track *select_track(struct MPContext *mpctx, enum stream_type type,
+                           int tid, int ffid, char **langs);
 
 // main.c
 int mpv_main(int argc, char *argv[]);

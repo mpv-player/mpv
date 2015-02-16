@@ -4636,6 +4636,24 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         return -1;
     }
 
+    case MP_CMD_RESCAN_EXTERNAL_FILES: {
+        if (!mpctx->playing)
+            return -1;
+        autoload_external_files(mpctx);
+        if (cmd->args[0].v.i) {
+            // somewhat fuzzy and not ideal
+            struct track *a = select_track(mpctx, STREAM_AUDIO, opts->audio_id,
+                                           opts->audio_id_ff, opts->audio_lang);
+            if (a && a->is_external)
+                mp_switch_track(mpctx, STREAM_AUDIO, a);
+            struct track *s = select_track(mpctx, STREAM_SUB, opts->sub_id,
+                                           opts->sub_id_ff, opts->sub_lang);
+            if (s && s->is_external)
+                mp_switch_track(mpctx, STREAM_SUB, s);
+        }
+        break;
+    }
+
     case MP_CMD_SCREENSHOT:
         screenshot_request(mpctx, cmd->args[0].v.i, cmd->args[1].v.i, msg_osd);
         break;
