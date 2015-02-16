@@ -99,7 +99,7 @@ const m_option_t mp_opts[] = {
     { "leak-report", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG | M_OPT_FIXED,
       .offset = -1 },
 
-    OPT_FLAG("shuffle", shuffle, CONF_GLOBAL | CONF_NOCFG),
+    OPT_FLAG("shuffle", shuffle, 0),
 
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),
@@ -370,7 +370,7 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list),
     OPT_STRING("audio-device", audio_device, 0),
     OPT_STRING("audio-client-name", audio_client_name, 0),
-    OPT_FLAG("force-window", force_vo, CONF_GLOBAL),
+    OPT_FLAG("force-window", force_vo, 0),
     OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
     OPT_FLAG("border", vo.border, M_OPT_FIXED),
     OPT_FLAG("on-all-workspaces", vo.all_workspaces, M_OPT_FIXED),
@@ -475,7 +475,7 @@ const m_option_t mp_opts[] = {
 
 //---------------------- mplayer-only options ------------------------
 
-    OPT_FLAG("use-filedir-conf", use_filedir_conf, M_OPT_GLOBAL),
+    OPT_FLAG("use-filedir-conf", use_filedir_conf, 0),
     OPT_CHOICE("osd-level", osd_level, 0,
                ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
@@ -500,7 +500,7 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("stop-playback-on-init-failure", stop_playback_on_init_failure, 0),
 
-    OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 1, 10000,
+    OPT_CHOICE_OR_INT("loop", loop_times, 0, 1, 10000,
                       ({"no", 1},
                        {"inf", -1},
                        {"force", -2})),
