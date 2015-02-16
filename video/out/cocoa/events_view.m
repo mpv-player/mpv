@@ -28,7 +28,6 @@
 @property(nonatomic, assign) BOOL clearing;
 @property(nonatomic, assign) BOOL hasMouseDown;
 @property(nonatomic, retain) NSTrackingArea *tracker;
-- (void)signalMousePosition;
 - (BOOL)hasDock:(NSScreen*)screen;
 - (BOOL)hasMenubar:(NSScreen*)screen;
 - (int)mpvButtonNumber:(NSEvent*)event;
