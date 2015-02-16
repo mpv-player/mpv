@@ -1549,6 +1549,19 @@ static int mp_property_audio_device(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     struct MPContext *mpctx = ctx;
+    struct command_ctx *cmd = mpctx->command_ctx;
+    if (action == M_PROPERTY_PRINT) {
+        if (!cmd->hotplug)
+            cmd->hotplug = ao_hotplug_create(mpctx->global, mpctx->input);
+        struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
+        for (int n = 0; n < list->num_devices; n++) {
+            struct ao_device_desc *dev = &list->devices[n];
+            if (dev->name && strcmp(dev->name, mpctx->opts->audio_device)) {
+                *(char **)arg = talloc_strdup(NULL, dev->desc ? dev->desc : "?");
+                return M_PROPERTY_OK;
+            }
+        }
+    }
     int r = mp_property_generic_option(mpctx, prop, action, arg);
     if (action == M_PROPERTY_SET)
         reload_audio_output(mpctx);
@@ -3714,6 +3727,7 @@ static const struct property_osd_display {
     { "tv-contrast", "Contrast", .osd_progbar = OSD_CONTRAST },
     { "ab-loop-a", "A-B loop point A"},
     { "ab-loop-b", "A-B loop point B"},
+    { "audio-device", "Audio device"},
     // By default, don't display the following properties on OSD
     { "pause", NULL },
     { "fullscreen", NULL },
