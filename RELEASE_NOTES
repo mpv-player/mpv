@@ -87,7 +87,7 @@ New features
   reduces ringing induced by upscaling, enabled through the
   `sigmoid-upscaling` suboption.
 - vo_opengl now supports ewa_lanczos (Jinc) scaling, which provides higher
-  quality with less ringing. It supports an experimental `scale-antiringing`
+  quality with less aliasing. It supports an experimental `scale-antiringing`
   parameter, which tries to further reduce video ringing.
 - vo_opengl now has a `linear-scaling` suboption, that makes the scalers work
   in linear light. Implied by the `srgb`, `icc-profile` or the new
