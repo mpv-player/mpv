@@ -3448,7 +3448,8 @@ static const struct m_property mp_properties[] = {
     {"sub-visibility", property_osd_helper},
     {"sub-forced-only", property_osd_helper},
     {"sub-scale", property_osd_helper},
-    {"ass-use-margins", property_osd_helper},
+    {"sub-use-margins", property_osd_helper},
+    {"ass-force-margins", property_osd_helper},
     {"ass-vsfilter-aspect-compat", property_osd_helper},
     {"ass-style-override", property_osd_helper},
 

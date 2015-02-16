@@ -438,7 +438,8 @@ Program Behavior
     Enable the youtube-dl hook-script. It will look at the input URL, and will
     play the video located on the website. This works with many streaming sites,
     not just the one that the script is named after. This requires a recent
-    version of youtube-dl to be installed on the system. (Enabled by default.)
+    version of youtube-dl to be installed on the system. (Enabled by default,
+    except when the client API / libmpv is used.)
 
     If the script can't do anything with an URL, it will do nothing.
 
@@ -1155,12 +1156,21 @@ Subtitles
     doesn't covert the window fully, e.g. because screen aspect and window
     aspect mismatch (and the player adds black bars).
 
+    Default: yes.
+
     This option is misnamed. The difference to the confusingly similar sounding
     option ``--sub-scale-by-window`` is that ``--sub-scale-with-window`` still
     scales with the approximate window size, while the other option disables
     this scaling.
 
+    Affects plain text subtitles only (or ASS if ``--ass-style-override`` is
+    set high enough).
+
+``--ass-scale-with-window=<yes|no>``
+    Like ``--sub-scale-with-window``, but affects subtitles in ASS format only.
     Like ``--sub-scale``, this can break ASS subtitles.
+
+    Default: no.
 
 ``--embeddedfonts``, ``--no-embeddedfonts``
     Use fonts embedded in Matroska container files and ASS scripts (default:
@@ -1245,9 +1255,21 @@ Subtitles
             options. Requires a modified libass, can break rendering easily.
             Probably more reliable than ``force``.
 
-``--ass-use-margins``
+``--ass-force-margins``
     Enables placing toptitles and subtitles in black borders when they are
-    available.
+    available, if the subtitles are in the ASS format.
+
+    Default: no.
+
+``--sub-use-margins``
+    Enables placing toptitles and subtitles in black borders when they are
+    available, if the subtitles are in a plain text format  (or ASS if
+    ``--ass-style-override`` is set high enough).
+
+    Default: yes.
+
+    Renamed from ``--ass-use-margins``. To place ASS subtitles in the borders
+    too (like the old option did), also add ``--ass-force-margins``.
 
 ``--ass-vsfilter-aspect-compat=<yes|no>``
     Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility

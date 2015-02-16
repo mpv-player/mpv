@@ -241,6 +241,7 @@ typedef struct MPOpts {
     int osd_scale_by_window;
     int sub_scale_by_window;
     int sub_scale_with_window;
+    int ass_scale_with_window;
     struct osd_style_opts *osd_style;
     struct osd_style_opts *sub_text_style;
     float sub_scale;
@@ -249,6 +250,7 @@ typedef struct MPOpts {
     int ass_enabled;
     float ass_line_spacing;
     int ass_use_margins;
+    int sub_use_margins;
     int ass_vsfilter_aspect_compat;
     int ass_vsfilter_color_compat;
     int ass_vsfilter_blur_compat;

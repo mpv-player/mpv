@@ -1381,8 +1381,11 @@ Property list
 ``sub-scale`` (RW)
     Subtitle font size multiplier.
 
-``ass-use-margins`` (RW)
-    See ``--ass-use-margins``.
+``ass-force-margins`` (RW)
+    See ``--ass-force-margins``.
+
+``sub-use-margins`` (RW)
+    See ``--sub-use-margins``.
 
 ``ass-vsfilter-aspect-compat`` (RW)
     See ``--ass-vsfilter-aspect-compat``.

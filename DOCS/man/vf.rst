@@ -445,9 +445,9 @@ Available filters are:
 
     ``<bottom-margin>``
         Adds a black band at the bottom of the frame. The SSA/ASS renderer can
-        place subtitles there (with ``--ass-use-margins``).
+        place subtitles there (with ``--sub-use-margins``).
     ``<top-margin>``
-        Black band on the top for toptitles  (with ``--ass-use-margins``).
+        Black band on the top for toptitles  (with ``--sub-use-margins``).
 
     .. admonition:: Examples
 

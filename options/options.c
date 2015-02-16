@@ -337,7 +337,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("sub-ass", ass_enabled, 0),
     OPT_FLOATRANGE("sub-scale", sub_scale, 0, 0, 100),
     OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, 0, -1000, 1000),
-    OPT_FLAG("ass-use-margins", ass_use_margins, 0),
+    OPT_FLAG("sub-use-margins", sub_use_margins, 0),
+    OPT_FLAG("ass-force-margins", ass_use_margins, 0),
     OPT_FLAG("ass-vsfilter-aspect-compat", ass_vsfilter_aspect_compat, 0),
     OPT_CHOICE("ass-vsfilter-color-compat", ass_vsfilter_color_compat, 0,
                ({"no", 0}, {"basic", 1}, {"full", 2}, {"force-601", 3})),
@@ -353,6 +354,7 @@ const m_option_t mp_opts[] = {
                ({"no", 0}, {"yes", 1}, {"force", 3}, {"signfs", 4})),
     OPT_FLAG("sub-scale-by-window", sub_scale_by_window, 0),
     OPT_FLAG("sub-scale-with-window", sub_scale_with_window, 0),
+    OPT_FLAG("ass-scale-with-window", ass_scale_with_window, 0),
     OPT_FLAG("osd-bar", osd_bar_visible, 0),
     OPT_FLOATRANGE("osd-bar-align-x", osd_bar_align_x, 0, -1.0, +1.0),
     OPT_FLOATRANGE("osd-bar-align-y", osd_bar_align_y, 0, -1.0, +1.0),
@@ -472,8 +474,6 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
     OPT_FLAG("keepaspect", vo.keepaspect, 0),
     OPT_FLAG("keepaspect-window", vo.keepaspect_window, 0),
-
-//---------------------- mplayer-only options ------------------------
 
     OPT_FLAG("use-filedir-conf", use_filedir_conf, 0),
     OPT_CHOICE("osd-level", osd_level, 0,
@@ -658,6 +658,7 @@ const m_option_t mp_opts[] = {
     OPT_REMOVED("fixed-vo", "--fixed-vo=yes is now the default"),
     OPT_REPLACED("mkv-subtitle-preroll", "demuxer-mkv-subtitle-preroll"),
     OPT_REPLACED("dtshd", "ad-spdif-dtshd"),
+    OPT_REPLACED("ass-use-margins", "sub-use-margins"),
 
     {0}
 };
@@ -706,6 +707,10 @@ const struct MPOpts mp_default_opts = {
     .osd_scale = 1,
     .osd_scale_by_window = 1,
     .sub_scale_by_window = 1,
+    .ass_use_margins = 0,
+    .sub_use_margins = 1,
+    .ass_scale_with_window = 0,
+    .sub_scale_with_window = 1,
     .use_text_osd = 1,
 #if HAVE_LUA
     .lua_load_osc = 1,

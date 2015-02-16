@@ -145,7 +145,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
         if (isnormal(par))
             scale = par;
     }
-    mp_ass_configure(renderer, opts, &dim);
+    mp_ass_configure(renderer, opts, !ctx->is_converted, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
 #if LIBASS_VERSION >= 0x01020000
     if (!ctx->is_converted && (!opts->ass_style_override ||
