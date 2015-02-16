@@ -137,6 +137,7 @@ struct osd_style_opts {
 };
 
 extern const struct m_sub_options osd_style_conf;
+extern const struct m_sub_options sub_style_conf;
 
 struct osd_state;
 struct osd_object;

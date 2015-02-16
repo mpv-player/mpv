@@ -360,7 +360,7 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("osd-bar-h", osd_bar_h, 0, 0.1, 50),
     OPT_SUBSTRUCT("osd", osd_style, osd_style_conf, 0),
     OPT_FLAG("use-text-osd", use_text_osd, CONF_GLOBAL),
-    OPT_SUBSTRUCT("sub-text", sub_text_style, osd_style_conf, 0),
+    OPT_SUBSTRUCT("sub-text", sub_text_style, sub_style_conf, 0),
     OPT_FLAG("sub-clear-on-seek", sub_clear_on_seek, 0),
 
 //---------------------- libao/libvo options ------------------------

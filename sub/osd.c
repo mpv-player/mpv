@@ -41,37 +41,53 @@
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 
-static const struct osd_style_opts osd_style_opts_def = {
-    .font = "sans-serif",
-    .font_size = 55,
-    .color = {255, 255, 255, 255},
-    .border_color = {0, 0, 0, 255},
-    .shadow_color = {240, 240, 240, 128},
-    .border_size = 3,
-    .shadow_offset = 0,
-    .margin_x = 25,
-    .margin_y = 22,
+#define OPT_BASE_STRUCT struct osd_style_opts
+static const m_option_t style_opts[] = {
+    OPT_STRING("font", font, 0),
+    OPT_FLOATRANGE("font-size", font_size, 0, 1, 9000),
+    OPT_COLOR("color", color, 0),
+    OPT_COLOR("border-color", border_color, 0),
+    OPT_COLOR("shadow-color", shadow_color, 0),
+    OPT_COLOR("back-color", back_color, 0),
+    OPT_FLOATRANGE("border-size", border_size, 0, 0, 10),
+    OPT_FLOATRANGE("shadow-offset", shadow_offset, 0, 0, 10),
+    OPT_FLOATRANGE("spacing", spacing, 0, -10, 10),
+    OPT_INTRANGE("margin-x", margin_x, 0, 0, 300),
+    OPT_INTRANGE("margin-y", margin_y, 0, 0, 600),
+    OPT_FLOATRANGE("blur", blur, 0, 0, 20),
+    {0}
 };
 
-#define OPT_BASE_STRUCT struct osd_style_opts
 const struct m_sub_options osd_style_conf = {
-    .opts = (const m_option_t[]) {
-        OPT_STRING("font", font, 0),
-        OPT_FLOATRANGE("font-size", font_size, 0, 1, 9000),
-        OPT_COLOR("color", color, 0),
-        OPT_COLOR("border-color", border_color, 0),
-        OPT_COLOR("shadow-color", shadow_color, 0),
-        OPT_COLOR("back-color", back_color, 0),
-        OPT_FLOATRANGE("border-size", border_size, 0, 0, 10),
-        OPT_FLOATRANGE("shadow-offset", shadow_offset, 0, 0, 10),
-        OPT_FLOATRANGE("spacing", spacing, 0, -10, 10),
-        OPT_INTRANGE("margin-x", margin_x, 0, 0, 300),
-        OPT_INTRANGE("margin-y", margin_y, 0, 0, 600),
-        OPT_FLOATRANGE("blur", blur, 0, 0, 20),
-        {0}
-    },
+    .opts = style_opts,
     .size = sizeof(struct osd_style_opts),
-    .defaults = &osd_style_opts_def,
+    .defaults = &(const struct osd_style_opts){
+        .font = "sans-serif",
+        .font_size = 55,
+        .color = {255, 255, 255, 255},
+        .border_color = {0, 0, 0, 255},
+        .shadow_color = {240, 240, 240, 128},
+        .border_size = 3,
+        .shadow_offset = 0,
+        .margin_x = 25,
+        .margin_y = 22,
+    },
+};
+
+const struct m_sub_options sub_style_conf = {
+    .opts = style_opts,
+    .size = sizeof(struct osd_style_opts),
+    .defaults = &(const struct osd_style_opts){
+        .font = "sans-serif",
+        .font_size = 55,
+        .color = {255, 255, 255, 255},
+        .border_color = {0, 0, 0, 255},
+        .shadow_color = {240, 240, 240, 128},
+        .border_size = 3,
+        .shadow_offset = 0,
+        .margin_x = 25,
+        .margin_y = 22,
+    },
 };
 
 static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
