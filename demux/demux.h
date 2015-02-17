@@ -36,11 +36,6 @@
 #define MAX_PACKS 16000
 #define MAX_PACK_BYTES (400 * 1024 * 1024)
 
-enum demuxer_type {
-    DEMUXER_TYPE_GENERIC = 0,
-    DEMUXER_TYPE_MATROSKA,
-};
-
 // DEMUXER control commands/answers
 #define DEMUXER_CTRL_NOTIMPL -1
 #define DEMUXER_CTRL_DONTKNOW 0
@@ -110,8 +105,6 @@ struct timeline;
 typedef struct demuxer_desc {
     const char *name;      // Demuxer name, used with -demuxer switch
     const char *desc;      // Displayed to user
-
-    enum demuxer_type type; // optional
 
     // Return 0 on success, otherwise -1
     int (*open)(struct demuxer *demuxer, enum demux_check check);
@@ -185,7 +178,6 @@ typedef struct demuxer {
     const char *filetype; // format name when not identified by demuxer (libavformat)
     int64_t filepos;  // input stream current pos.
     char *filename;  // same as stream->url
-    enum demuxer_type type;
     bool seekable;
     bool partially_seekable; // implies seekable=true
     double start_time;

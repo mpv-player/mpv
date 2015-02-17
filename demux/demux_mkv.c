@@ -2884,7 +2884,6 @@ static void mkv_free(struct demuxer *demuxer)
 const demuxer_desc_t demuxer_desc_matroska = {
     .name = "mkv",
     .desc = "Matroska",
-    .type = DEMUXER_TYPE_MATROSKA,
     .open = demux_mkv_open,
     .fill_buffer = demux_mkv_fill_buffer,
     .close = mkv_free,

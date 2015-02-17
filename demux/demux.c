@@ -900,7 +900,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
     *demuxer = (struct demuxer) {
         .desc = desc,
-        .type = desc->type,
         .stream = stream,
         .seekable = stream->seekable,
         .filepos = -1,
