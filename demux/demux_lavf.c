@@ -858,6 +858,12 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
         priv->last_pts = dp->dts * AV_TIME_BASE;
     }
     av_free_packet(pkt);
+
+    // Do not confuse player's position estimation (position is into segment,
+    // player knows about the playlist main file only).
+    if (matches_avinputformat_name(priv, "hls"))
+        dp->pos = -1;
+
     demux_add_packet(stream, dp);
     return 1;
 }
