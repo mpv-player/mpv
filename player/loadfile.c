@@ -59,6 +59,32 @@
 #include "command.h"
 #include "libmpv/client.h"
 
+static void close_unused_demuxers(struct MPContext *mpctx)
+{
+    for (int i = mpctx->num_sources - 1; i >= 0; i--) {
+        struct demuxer *d = mpctx->sources[i];
+
+        if (i == 0 || d == mpctx->track_layout)
+            goto skip;
+        for (int t = 0; t < mpctx->num_tracks; t++) {
+            if (d == mpctx->tracks[t]->demuxer)
+                goto skip;
+        }
+        for (int t = 0; t < mpctx->num_timeline_parts; t++) {
+            if (mpctx->timeline[t].source == d)
+                goto skip;
+        }
+
+        struct stream *s = d->stream;
+        uninit_stream_sub_decoders(d);
+        free_demuxer(d);
+        free_stream(s);
+        MP_TARRAY_REMOVE_AT(mpctx->sources, mpctx->num_sources, i);
+
+    skip:;
+    }
+}
+
 static void uninit_demuxer(struct MPContext *mpctx)
 {
     assert(!mpctx->d_video && !mpctx->d_audio &&
@@ -71,22 +97,20 @@ static void uninit_demuxer(struct MPContext *mpctx)
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
             mpctx->current_track[r][t] = NULL;
     }
+    mpctx->track_layout = NULL;
     mpctx->master_demuxer = NULL;
-    for (int i = 0; i < mpctx->num_sources; i++) {
-        uninit_stream_sub_decoders(mpctx->sources[i]);
-        struct demuxer *demuxer = mpctx->sources[i];
-        struct stream *stream = demuxer->stream;
-        free_demuxer(demuxer);
-        if (stream != mpctx->stream)
-            free_stream(stream);
-    }
-    talloc_free(mpctx->sources);
-    mpctx->sources = NULL;
     mpctx->demuxer = NULL;
-    mpctx->num_sources = 0;
     talloc_free(mpctx->timeline);
     mpctx->timeline = NULL;
     mpctx->num_timeline_parts = 0;
+    for (int i = 0; i < mpctx->num_sources; i++)
+        uninit_stream_sub_decoders(mpctx->sources[i]);
+    close_unused_demuxers(mpctx);
+    if (mpctx->num_sources > 0)
+        free_demuxer(mpctx->sources[0]);
+    talloc_free(mpctx->sources);
+    mpctx->sources = NULL;
+    mpctx->num_sources = 0;
     talloc_free(mpctx->chapters);
     mpctx->chapters = NULL;
     mpctx->num_chapters = 0;
@@ -623,10 +647,9 @@ struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
 
 bool mp_remove_track(struct MPContext *mpctx, struct track *track)
 {
-    if (track->under_timeline)
-        return false;
     if (!track->is_external)
         return false;
+    assert(!track->under_timeline);
 
     mp_deselect_track(mpctx, track);
     if (track->selected)
@@ -642,6 +665,8 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     }
     mpctx->num_tracks--;
     talloc_free(track);
+
+    close_unused_demuxers(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
