@@ -28,6 +28,7 @@
 
 #include "player/core.h"
 #include "common/msg.h"
+#include "common/global.h"
 #include "demux/demux.h"
 #include "options/path.h"
 #include "misc/bstr.h"
@@ -129,33 +130,32 @@ error:
     return NULL;
 }
 
-static struct demuxer *open_file(char *filename, struct MPContext *mpctx)
+static struct demuxer *open_file(char *filename, struct timeline *tl)
 {
-    struct MPOpts *opts = mpctx->opts;
+    struct MPOpts *opts = tl->global->opts;
     struct demuxer *d = NULL;
-    struct stream *s = stream_open(filename, mpctx->global);
+    struct stream *s = stream_open(filename, tl->global);
     if (s) {
         stream_enable_cache(&s, &opts->stream_cache);
-        d = demux_open(s, NULL, NULL, mpctx->global);
+        d = demux_open(s, NULL, NULL, tl->global);
     }
     if (!d) {
-        MP_ERR(mpctx, "EDL: Could not open source file '%s'.\n",
-               filename);
+        MP_ERR(tl, "EDL: Could not open source file '%s'.\n", filename);
         free_stream(s);
     }
     return d;
 }
 
-static struct demuxer *open_source(struct MPContext *mpctx, char *filename)
+static struct demuxer *open_source(struct timeline *tl, char *filename)
 {
-    for (int n = 0; n < mpctx->num_sources; n++) {
-        struct demuxer *d = mpctx->sources[n];
+    for (int n = 0; n < tl->num_sources; n++) {
+        struct demuxer *d = tl->sources[n];
         if (strcmp(d->stream->url, filename) == 0)
             return d;
     }
-    struct demuxer *d = open_file(filename, mpctx);
+    struct demuxer *d = open_file(filename, tl);
     if (d)
-        MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, d);
+        MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, d);
     return d;
 }
 
@@ -211,16 +211,13 @@ static void resolve_timestamps(struct tl_part *part, struct demuxer *demuxer)
         part->offset = demuxer->start_time;
 }
 
-static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
+static void build_timeline(struct timeline *tl, struct tl_parts *parts)
 {
-    struct demux_chapter *chapters = talloc_new(NULL);
-    int num_chapters = 0;
-    struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline,
-                                                          parts->num_parts + 1);
+    tl->parts = talloc_array_ptrtype(tl, tl->parts, parts->num_parts + 1);
     double starttime = 0;
     for (int n = 0; n < parts->num_parts; n++) {
         struct tl_part *part = &parts->parts[n];
-        struct demuxer *source = open_source(mpctx, part->filename);
+        struct demuxer *source = open_source(tl, part->filename);
         if (!source)
             goto error;
 
@@ -230,8 +227,8 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
         if (len > 0) {
             len += source->start_time;
         } else {
-            MP_WARN(mpctx, "EDL: source file '%s' has unknown duration.\n",
-                   part->filename);
+            MP_WARN(tl, "EDL: source file '%s' has unknown duration.\n",
+                    part->filename);
         }
 
         // Unknown length => use rest of the file. If duration is unknown, make
@@ -242,24 +239,24 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
         if (len > 0) {
             double partlen = part->offset + part->length;
             if (partlen > len) {
-                MP_WARN(mpctx, "EDL: entry %d uses %f "
-                       "seconds, but file has only %f seconds.\n",
-                       n, partlen, len);
+                MP_WARN(tl, "EDL: entry %d uses %f "
+                        "seconds, but file has only %f seconds.\n",
+                        n, partlen, len);
             }
         }
 
         // Add a chapter between each file.
         struct demux_chapter ch = {
             .pts = starttime,
-            .name = talloc_strdup(chapters, part->filename),
+            .name = talloc_strdup(tl, part->filename),
         };
-        MP_TARRAY_APPEND(NULL, chapters, num_chapters, ch);
+        MP_TARRAY_APPEND(tl, tl->chapters, tl->num_chapters, ch);
 
         // Also copy the source file's chapters for the relevant parts
-        copy_chapters(&chapters, &num_chapters, source, part->offset,
+        copy_chapters(&tl->chapters, &tl->num_chapters, source, part->offset,
                       part->length, starttime);
 
-        timeline[n] = (struct timeline_part) {
+        tl->parts[n] = (struct timeline_part) {
             .start = starttime,
             .source_start = part->offset,
             .source = source,
@@ -267,17 +264,14 @@ static void build_timeline(struct MPContext *mpctx, struct tl_parts *parts)
 
         starttime += part->length;
     }
-    timeline[parts->num_parts] = (struct timeline_part) {.start = starttime};
-    mpctx->timeline = timeline;
-    mpctx->num_timeline_parts = parts->num_parts;
-    mpctx->chapters = chapters;
-    mpctx->num_chapters = num_chapters;
-    mpctx->track_layout = mpctx->timeline[0].source;
+    tl->parts[parts->num_parts] = (struct timeline_part) {.start = starttime};
+    tl->num_parts = parts->num_parts;
+    tl->track_layout = tl->parts[0].source;
     return;
 
 error:
-    talloc_free(timeline);
-    talloc_free(chapters);
+    tl->num_parts = 0;
+    tl->num_chapters = 0;
 }
 
 // For security, don't allow relative or absolute paths, only plain filenames.
@@ -292,17 +286,18 @@ static void fix_filenames(struct tl_parts *parts, char *source_path)
     }
 }
 
-void build_mpv_edl_timeline(struct MPContext *mpctx)
+static void build_mpv_edl_timeline(struct timeline *tl)
 {
-    struct tl_parts *parts = parse_edl(mpctx->demuxer->file_contents);
+    struct tl_parts *parts = parse_edl(tl->demuxer->file_contents);
     if (!parts) {
-        MP_ERR(mpctx, "Error in EDL.\n");
+        MP_ERR(tl, "Error in EDL.\n");
         return;
     }
+    MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, tl->demuxer);
     // Source is .edl and not edl:// => don't allow arbitrary paths
-    if (mpctx->demuxer->stream->uncached_type != STREAMTYPE_EDL)
-        fix_filenames(parts, mpctx->demuxer->filename);
-    build_timeline(mpctx, parts);
+    if (tl->demuxer->stream->uncached_type != STREAMTYPE_EDL)
+        fix_filenames(parts, tl->demuxer->filename);
+    build_timeline(tl, parts);
     talloc_free(parts);
 }
 
@@ -327,6 +322,6 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 const struct demuxer_desc demuxer_desc_edl = {
     .name = "edl",
     .desc = "Edit decision list",
-    .type = DEMUXER_TYPE_EDL,
     .open = try_open_file,
+    .load_timeline = build_mpv_edl_timeline,
 };
