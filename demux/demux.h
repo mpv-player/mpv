@@ -39,7 +39,6 @@
 enum demuxer_type {
     DEMUXER_TYPE_GENERIC = 0,
     DEMUXER_TYPE_MATROSKA,
-    DEMUXER_TYPE_EDL,
 };
 
 // DEMUXER control commands/answers

@@ -988,9 +988,6 @@ static void load_timeline(struct MPContext *mpctx)
 
     MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, mpctx->demuxer);
 
-    if (mpctx->demuxer->type == DEMUXER_TYPE_EDL)
-        build_mpv_edl_timeline(mpctx);
-
     mpctx->tl = timeline_load(mpctx->global, mpctx->log, mpctx->demuxer);
     if (mpctx->tl) {
         mpctx->timeline = mpctx->tl->parts;
