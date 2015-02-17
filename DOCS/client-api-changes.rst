@@ -25,9 +25,10 @@ API changes
 
 ::
 
- git    - the --msg-level option changes its native type from a flat string to
-          a key-value list (setting/reading the option as string still works)
+ --- mpv 0.8.0 is released ---
  1.14   - add mpv_wait_async_requests()
+        - the --msg-level option changes its native type from a flat string to
+          a key-value list (setting/reading the option as string still works)
  1.13   - add MPV_EVENT_QUEUE_OVERFLOW
  1.12   - add class Handle to qthelper.hpp
         - improve opengl_cb.h API uninitialization behavior, and fix the qml
