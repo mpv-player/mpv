@@ -988,9 +988,6 @@ static void load_timeline(struct MPContext *mpctx)
 
     MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, mpctx->demuxer);
 
-    if (mpctx->demuxer->matroska_data.ordered_chapters)
-        build_ordered_chapter_timeline(mpctx);
-
     if (mpctx->demuxer->type == DEMUXER_TYPE_EDL)
         build_mpv_edl_timeline(mpctx);
 

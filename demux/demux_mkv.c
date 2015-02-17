@@ -2889,7 +2889,8 @@ const demuxer_desc_t demuxer_desc_matroska = {
     .fill_buffer = demux_mkv_fill_buffer,
     .close = mkv_free,
     .seek = demux_mkv_seek,
-    .control = demux_mkv_control
+    .control = demux_mkv_control,
+    .load_timeline = build_ordered_chapter_timeline,
 };
 
 bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
