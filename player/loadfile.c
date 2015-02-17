@@ -658,12 +658,7 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     int index = 0;
     while (index < mpctx->num_tracks && mpctx->tracks[index] != track)
         index++;
-    assert(index < mpctx->num_tracks);
-    while (index + 1 < mpctx->num_tracks) {
-        mpctx->tracks[index] = mpctx->tracks[index + 1];
-        index++;
-    }
-    mpctx->num_tracks--;
+    MP_TARRAY_REMOVE_AT(mpctx->tracks, mpctx->num_tracks, index);
     talloc_free(track);
 
     close_unused_demuxers(mpctx);
