@@ -225,7 +225,6 @@ def build(ctx):
         ( "player/screenshot.c" ),
         ( "player/scripting.c" ),
         ( "player/sub.c" ),
-        ( "player/timeline/tl_mpv_edl.c" ),
         ( "player/video.c" ),
 
         ## Streams
