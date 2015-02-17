@@ -50,6 +50,10 @@ struct tl_parts {
     int num_parts;
 };
 
+struct priv {
+    bstr data;
+};
+
 // Parse a time (absolute file time or duration). Currently equivalent to a
 // number. Return false on failure.
 static bool parse_time(bstr str, double *out_time)
@@ -288,7 +292,9 @@ static void fix_filenames(struct tl_parts *parts, char *source_path)
 
 static void build_mpv_edl_timeline(struct timeline *tl)
 {
-    struct tl_parts *parts = parse_edl(tl->demuxer->file_contents);
+    struct priv *p = tl->demuxer->priv;
+
+    struct tl_parts *parts = parse_edl(p->data);
     if (!parts) {
         MP_ERR(tl, "Error in EDL.\n");
         return;
@@ -303,19 +309,22 @@ static void build_mpv_edl_timeline(struct timeline *tl)
 
 static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 {
+    struct priv *p = talloc_zero(demuxer, struct priv);
+    demuxer->priv = p;
+
     struct stream *s = demuxer->stream;
     if (s->uncached_type == STREAMTYPE_EDL) {
-        demuxer->file_contents = bstr0(s->path);
+        p->data = bstr0(s->path);
         return 0;
     }
     if (check >= DEMUX_CHECK_UNSAFE) {
         if (!bstr_equals0(stream_peek(s, strlen(HEADER)), HEADER))
             return -1;
     }
-    demuxer->file_contents = stream_read_complete(s, demuxer, 1000000);
-    if (demuxer->file_contents.start == NULL)
+    p->data = stream_read_complete(s, demuxer, 1000000);
+    if (p->data.start == NULL)
         return -1;
-    bstr_eatstart0(&demuxer->file_contents, HEADER);
+    bstr_eatstart0(&p->data, HEADER);
     return 0;
 }
 

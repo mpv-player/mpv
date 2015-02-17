@@ -76,6 +76,10 @@ struct cue_track {
     struct bstr title;
 };
 
+struct priv {
+    bstr data;
+};
+
 static enum cue_command read_cmd(struct bstr *data, struct bstr *out_params)
 {
     struct bstr line = bstr_strip_linebreaks(bstr_getline(*data, data));
@@ -279,11 +283,13 @@ static double source_get_length(struct demuxer *demuxer)
 
 static void build_timeline(struct timeline *tl)
 {
+    struct priv *p = tl->demuxer->priv;
+
     void *ctx = talloc_new(NULL);
 
     add_source(tl, tl->demuxer);
 
-    struct bstr data = tl->demuxer->file_contents;
+    struct bstr data = p->data;
     data = skip_utf8_bom(data);
 
     struct cue_track *tracks = NULL;
@@ -425,8 +431,10 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
         if (d.len < 1 || !mp_probe_cue(d))
             return -1;
     }
-    demuxer->file_contents = stream_read_complete(s, demuxer, 1000000);
-    if (demuxer->file_contents.start == NULL)
+    struct priv *p = talloc_zero(demuxer, struct priv);
+    demuxer->priv = p;
+    p->data = stream_read_complete(s, demuxer, 1000000);
+    if (p->data.start == NULL)
         return -1;
     return 0;
 }
