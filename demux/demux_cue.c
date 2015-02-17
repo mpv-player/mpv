@@ -27,12 +27,12 @@
 #include "talloc.h"
 
 #include "misc/bstr.h"
-#include "player/core.h"
 #include "common/msg.h"
 #include "demux/demux.h"
 #include "options/path.h"
 #include "common/common.h"
 #include "stream/stream.h"
+#include "timeline.h"
 
 #define PROBE_SIZE 512
 #define SECS_PER_CUE_FRAME (1.0/75.0)
@@ -173,25 +173,25 @@ static bool mp_probe_cue(struct bstr data)
     return valid;
 }
 
-static void add_source(struct MPContext *mpctx, struct demuxer *d)
+static void add_source(struct timeline *tl, struct demuxer *d)
 {
-    MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, d);
+    MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, d);
 }
 
-static bool try_open(struct MPContext *mpctx, char *filename)
+static bool try_open(struct timeline *tl, char *filename)
 {
     struct bstr bfilename = bstr0(filename);
     // Avoid trying to open itself or another .cue file. Best would be
     // to check the result of demuxer auto-detection, but the demuxer
     // API doesn't allow this without opening a full demuxer.
     if (bstr_case_endswith(bfilename, bstr0(".cue"))
-        || bstrcasecmp(bstr0(mpctx->demuxer->filename), bfilename) == 0)
+        || bstrcasecmp(bstr0(tl->demuxer->filename), bfilename) == 0)
         return false;
 
-    struct stream *s = stream_open(filename, mpctx->global);
+    struct stream *s = stream_open(filename, tl->global);
     if (!s)
         return false;
-    struct demuxer *d = demux_open(s, NULL, NULL, mpctx->global);
+    struct demuxer *d = demux_open(s, NULL, NULL, tl->global);
     // Since .bin files are raw PCM data with no headers, we have to explicitly
     // open them. Also, try to avoid to open files that are most likely not .bin
     // files, as that would only play noise. Checking the file extension is
@@ -199,31 +199,31 @@ static bool try_open(struct MPContext *mpctx, char *filename)
     // TODO: maybe also could check if the .bin file is a multiple of the Audio
     //       CD sector size (2352 bytes)
     if (!d && bstr_case_endswith(bfilename, bstr0(".bin"))) {
-        MP_WARN(mpctx, "CUE: Opening as BIN file!\n");
-        d = demux_open(s, "rawaudio", NULL, mpctx->global);
+        MP_WARN(tl, "CUE: Opening as BIN file!\n");
+        d = demux_open(s, "rawaudio", NULL, tl->global);
     }
     if (d) {
-        add_source(mpctx, d);
+        add_source(tl, d);
         return true;
     }
-    MP_ERR(mpctx, "Could not open source '%s'!\n", filename);
+    MP_ERR(tl, "Could not open source '%s'!\n", filename);
     free_stream(s);
     return false;
 }
 
-static bool open_source(struct MPContext *mpctx, struct bstr filename)
+static bool open_source(struct timeline *tl, struct bstr filename)
 {
     void *ctx = talloc_new(NULL);
     bool res = false;
 
-    struct bstr dirname = mp_dirname(mpctx->demuxer->filename);
+    struct bstr dirname = mp_dirname(tl->demuxer->filename);
 
     struct bstr base_filename = bstr0(mp_basename(bstrdup0(ctx, filename)));
     if (!base_filename.len) {
-        MP_WARN(mpctx, "CUE: Invalid audio filename in .cue file!\n");
+        MP_WARN(tl, "CUE: Invalid audio filename in .cue file!\n");
     } else {
         char *fullname = mp_path_join(ctx, dirname, base_filename);
-        if (try_open(mpctx, fullname)) {
+        if (try_open(tl, fullname)) {
             res = true;
             goto out;
         }
@@ -235,7 +235,7 @@ static bool open_source(struct MPContext *mpctx, struct bstr filename)
     // are renamed.
 
     struct bstr cuefile =
-        bstr_strip_ext(bstr0(mp_basename(mpctx->demuxer->filename)));
+        bstr_strip_ext(bstr0(mp_basename(tl->demuxer->filename)));
 
     DIR *d = opendir(bstrdup0(ctx, dirname));
     if (!d)
@@ -245,10 +245,10 @@ static bool open_source(struct MPContext *mpctx, struct bstr filename)
         char *dename0 = de->d_name;
         struct bstr dename = bstr0(dename0);
         if (bstr_case_startswith(dename, cuefile)) {
-            MP_WARN(mpctx, "CUE: No useful audio filename "
+            MP_WARN(tl, "CUE: No useful audio filename "
                     "in .cue file found, trying with '%s' instead!\n",
                     dename0);
-            if (try_open(mpctx, mp_path_join(ctx, dirname, dename))) {
+            if (try_open(tl, mp_path_join(ctx, dirname, dename))) {
                 res = true;
                 break;
             }
@@ -259,7 +259,7 @@ static bool open_source(struct MPContext *mpctx, struct bstr filename)
 out:
     talloc_free(ctx);
     if (!res)
-        MP_ERR(mpctx, "CUE: Could not open audio file!\n");
+        MP_ERR(tl, "CUE: Could not open audio file!\n");
     return res;
 }
 
@@ -277,11 +277,13 @@ static double source_get_length(struct demuxer *demuxer)
     }
 }
 
-void build_cue_timeline(struct MPContext *mpctx)
+static void build_timeline(struct timeline *tl)
 {
     void *ctx = talloc_new(NULL);
 
-    struct bstr data = mpctx->demuxer->file_contents;
+    add_source(tl, tl->demuxer);
+
+    struct bstr data = tl->demuxer->file_contents;
     data = skip_utf8_bom(data);
 
     struct cue_track *tracks = NULL;
@@ -296,7 +298,7 @@ void build_cue_timeline(struct MPContext *mpctx)
         struct bstr param;
         switch (read_cmd(&data, &param)) {
         case CUE_ERROR:
-            MP_ERR(mpctx, "CUE: error parsing input file!\n");
+            MP_ERR(tl, "CUE: error parsing input file!\n");
             goto out;
         case CUE_TRACK: {
             track_count++;
@@ -327,7 +329,7 @@ void build_cue_timeline(struct MPContext *mpctx)
     }
 
     if (track_count == 0) {
-        MP_ERR(mpctx, "CUE: no tracks found!\n");
+        MP_ERR(tl, "CUE: no tracks found!\n");
         goto out;
     }
 
@@ -356,17 +358,17 @@ void build_cue_timeline(struct MPContext *mpctx)
     }
 
     for (size_t i = 0; i < file_count; i++) {
-        if (!open_source(mpctx, files[i]))
+        if (!open_source(tl, files[i]))
             goto out;
     }
 
-    struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline,
+    struct timeline_part *timeline = talloc_array_ptrtype(tl, timeline,
                                                           track_count + 1);
-    struct demux_chapter *chapters = talloc_array_ptrtype(NULL, chapters,
+    struct demux_chapter *chapters = talloc_array_ptrtype(tl, chapters,
                                                           track_count);
     double starttime = 0;
     for (int i = 0; i < track_count; i++) {
-        struct demuxer *source = mpctx->sources[1 + tracks[i].source];
+        struct demuxer *source = tl->sources[1 + tracks[i].source];
         double duration;
         if (i + 1 < track_count && tracks[i].source == tracks[i + 1].source) {
             duration = tracks[i + 1].start - tracks[i].start;
@@ -379,7 +381,7 @@ void build_cue_timeline(struct MPContext *mpctx)
             duration -= tracks[i].start;
         }
         if (duration < 0) {
-            MP_WARN(mpctx, "CUE: Can't get duration of source file!\n");
+            MP_WARN(tl, "CUE: Can't get duration of source file!\n");
             // xxx: do something more reasonable
             duration = 0.0;
         }
@@ -404,12 +406,12 @@ void build_cue_timeline(struct MPContext *mpctx)
         .source = timeline[0].source,
     };
 
-    mpctx->timeline = timeline;
+    tl->parts = timeline;
     // the last part is not included it in the count
-    mpctx->num_timeline_parts = track_count + 1 - 1;
-    mpctx->chapters = chapters;
-    mpctx->num_chapters = track_count;
-    mpctx->track_layout = mpctx->timeline[0].source;
+    tl->num_parts = track_count + 1 - 1;
+    tl->chapters = chapters;
+    tl->num_chapters = track_count;
+    tl->track_layout = tl->parts[0].source;
 
 out:
     talloc_free(ctx);
@@ -432,6 +434,6 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 const struct demuxer_desc demuxer_desc_cue = {
     .name = "cue",
     .desc = "CUE sheet",
-    .type = DEMUXER_TYPE_CUE,
     .open = try_open_file,
+    .load_timeline = build_timeline,
 };
