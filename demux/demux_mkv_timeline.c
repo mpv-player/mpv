@@ -212,45 +212,45 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
         free_stream(s);
         return was_valid;
     }
-    if (d->type == DEMUXER_TYPE_MATROSKA) {
-        struct matroska_data *m = &d->matroska_data;
 
-        for (int i = 1; i < *num_sources; i++) {
-            struct matroska_segment_uid *uid = *uids + i;
-            if ((*sources)[i])
-                continue;
-            /* Accept the source if the segment uid matches and the edition
-             * either matches or isn't specified. */
-            if (!memcmp(uid->segment, m->uid.segment, 16) &&
-                (!uid->edition || uid->edition == m->uid.edition))
-            {
-                MP_INFO(ctx, "Match for source %d: %s\n", i, d->filename);
+    struct matroska_data *m = &d->matroska_data;
 
-                for (int j = 0; j < m->num_ordered_chapters; j++) {
-                    struct matroska_chapter *c = m->ordered_chapters + j;
+    for (int i = 1; i < *num_sources; i++) {
+        struct matroska_segment_uid *uid = *uids + i;
+        if ((*sources)[i])
+            continue;
+        /* Accept the source if the segment uid matches and the edition
+            * either matches or isn't specified. */
+        if (!memcmp(uid->segment, m->uid.segment, 16) &&
+            (!uid->edition || uid->edition == m->uid.edition))
+        {
+            MP_INFO(ctx, "Match for source %d: %s\n", i, d->filename);
 
-                    if (!c->has_segment_uid)
-                        continue;
+            for (int j = 0; j < m->num_ordered_chapters; j++) {
+                struct matroska_chapter *c = m->ordered_chapters + j;
 
-                    if (has_source_request(*uids, *num_sources, &c->uid))
-                        continue;
-
-                    /* Set the requested segment. */
-                    MP_TARRAY_GROW(NULL, *uids, *num_sources);
-                    (*uids)[*num_sources] = c->uid;
-
-                    /* Add a new source slot. */
-                    MP_TARRAY_APPEND(NULL, *sources, *num_sources, NULL);
-                }
-
-                if (enable_cache(ctx->global, &s, &d, &params) < 0)
+                if (!c->has_segment_uid)
                     continue;
 
-                (*sources)[i] = d;
-                return true;
+                if (has_source_request(*uids, *num_sources, &c->uid))
+                    continue;
+
+                /* Set the requested segment. */
+                MP_TARRAY_GROW(NULL, *uids, *num_sources);
+                (*uids)[*num_sources] = c->uid;
+
+                /* Add a new source slot. */
+                MP_TARRAY_APPEND(NULL, *sources, *num_sources, NULL);
             }
+
+            if (enable_cache(ctx->global, &s, &d, &params) < 0)
+                continue;
+
+            (*sources)[i] = d;
+            return true;
         }
     }
+
     free_demuxer(d);
     free_stream(s);
     return was_valid;
