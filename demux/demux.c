@@ -802,7 +802,7 @@ static void demux_export_replaygain(demuxer_t *demuxer)
 static void demux_copy(struct demuxer *dst, struct demuxer *src)
 {
     if (src->events & DEMUX_EVENT_INIT) {
-        // Note that we do as shallow copies as possible. We expect the date
+        // Note that we do as shallow copies as possible. We expect the data
         // that is not-copied (only referenced) to be immutable.
         // This implies e.g. that no chapters are added after initialization.
         dst->chapters = src->chapters;
@@ -1459,7 +1459,8 @@ struct demux_chapter *demux_copy_chapter_data(struct demux_chapter *c, int num)
     for (int n = 0; n < num; n++) {
         new[n] = c[n];
         new[n].name = talloc_strdup(new, new[n].name);
-        new[n].metadata = mp_tags_dup(new, new[n].metadata);
+        if (new[n].metadata)
+            new[n].metadata = mp_tags_dup(new, new[n].metadata);
     }
     return new;
 }
