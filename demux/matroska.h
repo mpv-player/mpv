@@ -23,6 +23,9 @@
 #ifndef MPLAYER_MATROSKA_H
 #define MPLAYER_MATROSKA_H
 
+struct timeline;
+void build_ordered_chapter_timeline(struct timeline *tl);
+
 #define MKV_A_AAC_2MAIN  "A_AAC/MPEG2/MAIN"
 #define MKV_A_AAC_2LC    "A_AAC/MPEG2/LC"
 #define MKV_A_AAC_2SBR   "A_AAC/MPEG2/LC/SBR"
