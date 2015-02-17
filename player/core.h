@@ -479,8 +479,6 @@ void update_osd_sub_state(struct MPContext *mpctx, int order,
 
 // timeline/tl_mpv_edl.c
 void build_mpv_edl_timeline(struct MPContext *mpctx);
-// timeline/tl_cue.c
-void build_cue_timeline(struct MPContext *mpctx);
 
 // video.c
 void reset_video_state(struct MPContext *mpctx);

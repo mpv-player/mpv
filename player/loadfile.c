@@ -991,9 +991,6 @@ static void load_timeline(struct MPContext *mpctx)
     if (mpctx->demuxer->type == DEMUXER_TYPE_EDL)
         build_mpv_edl_timeline(mpctx);
 
-    if (mpctx->demuxer->type == DEMUXER_TYPE_CUE)
-        build_cue_timeline(mpctx);
-
     mpctx->tl = timeline_load(mpctx->global, mpctx->log, mpctx->demuxer);
     if (mpctx->tl) {
         mpctx->timeline = mpctx->tl->parts;
