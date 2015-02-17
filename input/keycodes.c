@@ -205,6 +205,7 @@ static const struct key_name key_names[] = {
   { MP_KEY_CLOSE_WIN,   "CLOSE_WIN" },
   { MP_KEY_MOUSE_MOVE,  "MOUSE_MOVE" },
   { MP_KEY_MOUSE_LEAVE, "MOUSE_LEAVE" },
+  { MP_KEY_MOUSE_ENTER, "MOUSE_ENTER" },
 
   { 0, NULL }
 };
