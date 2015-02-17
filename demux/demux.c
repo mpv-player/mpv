@@ -813,7 +813,6 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->attachments = src->attachments;
         dst->num_attachments = src->num_attachments;
         dst->matroska_data = src->matroska_data;
-        dst->file_contents = src->file_contents;
         dst->playlist = src->playlist;
         dst->seekable = src->seekable;
         dst->partially_seekable = src->partially_seekable;

@@ -218,8 +218,6 @@ typedef struct demuxer {
     int num_attachments;
 
     struct matroska_data matroska_data;
-    // for trivial demuxers which just read the whole file for codec to use
-    struct bstr file_contents;
 
     // If the file is a playlist file
     struct playlist *playlist;
