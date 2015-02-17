@@ -104,6 +104,7 @@ enum demux_event {
 #define MAX_SH_STREAMS 256
 
 struct demuxer;
+struct timeline;
 
 /**
  * Demuxer description structure
@@ -121,6 +122,8 @@ typedef struct demuxer_desc {
     void (*close)(struct demuxer *demuxer);
     void (*seek)(struct demuxer *demuxer, double rel_seek_secs, int flags);
     int (*control)(struct demuxer *demuxer, int cmd, void *arg);
+    // See timeline.c
+    void (*load_timeline)(struct timeline *tl);
 } demuxer_desc_t;
 
 typedef struct demux_chapter

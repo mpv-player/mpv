@@ -178,6 +178,7 @@ def build(ctx):
         ( "demux/demux_tv.c",                    "tv" ),
         ( "demux/ebml.c" ),
         ( "demux/packet.c" ),
+        ( "demux/timeline.c" ),
 
         ## Input
         ( "input/cmd_list.c" ),
