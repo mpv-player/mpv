@@ -463,8 +463,11 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
         if (code == MP_KEY_CLOSE_WIN)
             return mp_input_parse_cmd_strv(ictx->log, (const char*[]){"quit", 0});
         int msgl = MSGL_WARN;
-        if (code == MP_KEY_MOUSE_MOVE || code == MP_KEY_MOUSE_LEAVE)
+        if (code == MP_KEY_MOUSE_MOVE || code == MP_KEY_MOUSE_LEAVE ||
+            code == MP_KEY_MOUSE_ENTER)
+        {
             msgl = MSGL_DEBUG;
+        }
         char *key_buf = mp_input_get_key_combo_name(&code, 1);
         MP_MSG(ictx, msgl, "No bind found for key '%s'.\n", key_buf);
         talloc_free(key_buf);
@@ -632,6 +635,10 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
     if (!opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod))
         return;
     if (unmod == MP_KEY_MOUSE_LEAVE) {
+        update_mouse_section(ictx);
+        mp_input_queue_cmd(ictx, get_cmd_from_keys(ictx, NULL, code));
+        return;
+    } else if (unmod == MP_KEY_MOUSE_ENTER) {
         update_mouse_section(ictx);
         mp_input_queue_cmd(ictx, get_cmd_from_keys(ictx, NULL, code));
         return;

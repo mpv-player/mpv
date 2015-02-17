@@ -379,6 +379,7 @@ static void pointer_handle_enter(void *data,
 
     /* Release the left button on pointer enter again
      * because after moving the shell surface no release event is sent */
+    mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
     mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN0 | MP_KEY_STATE_UP);
     show_cursor(wl);
 }

@@ -173,6 +173,9 @@
 - (void)mouseEntered:(NSEvent *)event
 {
     [super mouseEntered:event];
+    if ([self.adapter mouseEnabled]) {
+        [self.adapter putKey:MP_KEY_MOUSE_ENTER withModifiers:0];
+    }
 }
 
 - (void)mouseExited:(NSEvent *)event

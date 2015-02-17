@@ -934,6 +934,9 @@ int vo_x11_check_events(struct vo *vo)
             x11->win_drag_button1_down = false;
             mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
             break;
+        case EnterNotify:
+            mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_ENTER);
+            break;
         case ButtonPress:
             if (Event.xbutton.button == 1)
                 x11->win_drag_button1_down = true;
@@ -1332,7 +1335,7 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
 
     // map window
     int events = StructureNotifyMask | ExposureMask | PropertyChangeMask |
-                 LeaveWindowMask;
+                 LeaveWindowMask | EnterWindowMask;
     if (mp_input_mouse_enabled(vo->input_ctx))
         events |= PointerMotionMask | ButtonPressMask | ButtonReleaseMask;
     if (mp_input_vo_keyboard_enabled(vo->input_ctx))
