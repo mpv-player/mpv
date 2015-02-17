@@ -72,7 +72,7 @@ Bug fixes
 - Multiple cdda:// fixes. (bugs #1555, #1560)
 - VP9 timestamps no longer cause "missing PTS" warnings with new enough FFmpeg
   builds.
-- Fix a crash when using H.264 hardware decooding on new enough libavcodecs.
+- Fix a crash when using H.264 hardware decoding on new enough libavcodecs.
   (bug #1587)
 
 New features
