@@ -173,6 +173,7 @@ def build(ctx):
         ( "demux/demux_libass.c",                "libass"),
         ( "demux/demux_mf.c" ),
         ( "demux/demux_mkv.c" ),
+        ( "demux/demux_mkv_timeline.c" ),
         ( "demux/demux_playlist.c" ),
         ( "demux/demux_raw.c" ),
         ( "demux/demux_subreader.c" ),
@@ -226,7 +227,6 @@ def build(ctx):
         ( "player/sub.c" ),
         ( "player/timeline/tl_cue.c" ),
         ( "player/timeline/tl_mpv_edl.c" ),
-        ( "player/timeline/tl_matroska.c" ),
         ( "player/video.c" ),
 
         ## Streams
