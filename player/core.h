@@ -26,6 +26,7 @@
 #include "common/common.h"
 #include "options/options.h"
 #include "sub/osd.h"
+#include "demux/timeline.h"
 
 // definitions used internally by the core player code
 
@@ -39,12 +40,6 @@ enum stop_play_reason {
     PT_RELOAD_DEMUXER,  // restart playback, but keep stream open
     PT_QUIT,            // stop playback, quit player
     PT_ERROR,           // play next playlist entry (due to an error)
-};
-
-struct timeline_part {
-    double start;
-    double source_start;
-    struct demuxer *source;
 };
 
 enum mp_osd_seek_info {
@@ -188,6 +183,7 @@ typedef struct MPContext {
     struct demuxer **sources;
     int num_sources;
 
+    struct timeline *tl;
     struct timeline_part *timeline;
     int num_timeline_parts;
     int timeline_part;

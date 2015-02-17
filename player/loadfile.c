@@ -100,12 +100,19 @@ static void uninit_demuxer(struct MPContext *mpctx)
     mpctx->track_layout = NULL;
     mpctx->master_demuxer = NULL;
     mpctx->demuxer = NULL;
-    talloc_free(mpctx->timeline);
-    mpctx->timeline = NULL;
-    mpctx->num_timeline_parts = 0;
+    if (!mpctx->tl)
+        mpctx->num_timeline_parts = 0;
     for (int i = 0; i < mpctx->num_sources; i++)
         uninit_stream_sub_decoders(mpctx->sources[i]);
     close_unused_demuxers(mpctx);
+    if (mpctx->tl) {
+        timeline_destroy(mpctx->tl);
+    } else {
+        talloc_free(mpctx->timeline);
+    }
+    mpctx->timeline = NULL;
+    mpctx->num_timeline_parts = 0;
+    mpctx->tl = NULL;
     if (mpctx->num_sources > 0)
         free_demuxer(mpctx->sources[0]);
     talloc_free(mpctx->sources);
@@ -975,6 +982,39 @@ static struct demuxer *open_demux_async(struct MPContext *mpctx,
     return args.demux;
 }
 
+static void load_timeline(struct MPContext *mpctx)
+{
+    mpctx->track_layout = mpctx->demuxer;
+
+    MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, mpctx->demuxer);
+
+    if (mpctx->demuxer->matroska_data.ordered_chapters)
+        build_ordered_chapter_timeline(mpctx);
+
+    if (mpctx->demuxer->type == DEMUXER_TYPE_EDL)
+        build_mpv_edl_timeline(mpctx);
+
+    if (mpctx->demuxer->type == DEMUXER_TYPE_CUE)
+        build_cue_timeline(mpctx);
+
+    mpctx->tl = timeline_load(mpctx->global, mpctx->log, mpctx->demuxer);
+    if (mpctx->tl) {
+        mpctx->timeline = mpctx->tl->parts;
+        mpctx->num_timeline_parts = mpctx->tl->num_parts;
+        mpctx->num_chapters = mpctx->tl->num_chapters;
+        mpctx->chapters = demux_copy_chapter_data(mpctx->tl->chapters,
+                                                  mpctx->tl->num_chapters);
+        mpctx->track_layout = mpctx->tl->track_layout;
+        mpctx->num_sources = 0;
+        for (int n = 0; n < mpctx->tl->num_sources; n++) {
+            MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources,
+                             mpctx->tl->sources[n]);
+        }
+    }
+
+    print_timeline(mpctx);
+}
+
 // Start playing the current playlist entry.
 // Handle initialization and deinitialization.
 static void play_current_file(struct MPContext *mpctx)
@@ -1088,7 +1128,7 @@ goto_reopen_demuxer: ;
     }
     mpctx->master_demuxer = mpctx->demuxer;
 
-    MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, mpctx->demuxer);
+    load_timeline(mpctx);
 
     if (mpctx->demuxer->playlist) {
         int entry_stream_flags =
@@ -1103,18 +1143,6 @@ goto_reopen_demuxer: ;
         goto terminate_playback;
     }
 
-    mpctx->track_layout = mpctx->demuxer;
-
-    if (mpctx->demuxer->matroska_data.ordered_chapters)
-        build_ordered_chapter_timeline(mpctx);
-
-    if (mpctx->demuxer->type == DEMUXER_TYPE_EDL)
-        build_mpv_edl_timeline(mpctx);
-
-    if (mpctx->demuxer->type == DEMUXER_TYPE_CUE)
-        build_cue_timeline(mpctx);
-
-    print_timeline(mpctx);
     load_chapters(mpctx);
     add_demuxer_tracks(mpctx, mpctx->track_layout);
 

@@ -177,6 +177,7 @@ SOURCES = audio/audio.c \
           demux/demux_subreader.c \
           demux/ebml.c \
           demux/packet.c \
+          demux/timeline.c \
           input/cmd_list.c \
           input/cmd_parse.c \
           input/event.c \
