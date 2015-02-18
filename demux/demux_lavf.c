@@ -94,9 +94,49 @@ const struct m_sub_options demux_lavf_conf = {
     },
 };
 
+struct format_hack {
+    const char *ff_name;
+    const char *mime_type;
+    int probescore;
+    float analyzeduration;
+    bool max_probe : 1;         // use probescore only if max. probe size reached
+    bool ignore : 1;            // blacklisted
+    bool no_stream : 1;         // do not wrap struct stream as AVIOContext
+    bool use_stream_ids : 1;    // export the native stream IDs
+    // Do not confuse player's position estimation (position is into external
+    // segment, with e.g. HLS, player knows about the playlist main file only).
+    bool clear_filepos : 1;
+};
+
+#define BLACKLIST(fmt) {fmt, .ignore = true}
+
+static const struct format_hack format_hacks[] = {
+    // for webradios
+    {"aac", "audio/aacp", 25, 0.5},
+    {"aac", "audio/aac",  25, 0.5},
+
+    // some mp3 files don't detect correctly (usually id3v2 too large)
+    {"mp3", "audio/mpeg", 24, 0.5},
+    {"mp3", NULL,         24, .max_probe = true},
+
+    {"hls", .no_stream = true, .clear_filepos = true},
+    {"mpeg", .use_stream_ids = true},
+    {"mpegts", .use_stream_ids = true},
+
+    // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
+    BLACKLIST("tty"),
+    // Image demuxers, disabled in favor of demux_mf (for now):
+    BLACKLIST("image"),
+    BLACKLIST("image2pipe"),
+    BLACKLIST("bmp_pipe"), BLACKLIST("dpx_pipe"), BLACKLIST("exr_pipe"),
+    BLACKLIST("j2k_pipe"), BLACKLIST("png_pipe"), BLACKLIST("tiff_pipe"),
+    BLACKLIST("jpeg_pipe"),
+    {0}
+};
+
 typedef struct lavf_priv {
     char *filename;
-    const struct format_hack *format_hack;
+    struct format_hack format_hack;
     AVInputFormat *avif;
     AVFormatContext *avfc;
     AVIOContext *pb;
@@ -109,32 +149,22 @@ typedef struct lavf_priv {
     bool merge_track_metadata;
 } lavf_priv_t;
 
-struct format_hack {
-    const char *ff_name;
-    const char *mime_type;
-    int probescore;
-    float analyzeduration;
-    bool max_probe;         // use probescore only if max. probe size reached
-};
-
-static const struct format_hack format_hacks[] = {
-    // for webradios
-    {"aac", "audio/aacp", 25, 0.5},
-    {"aac", "audio/aac",  25, 0.5},
-    // some mp3 files don't detect correctly
-    {"mp3", "audio/mpeg", 24, 0.5},
-    {"mp3", NULL,         24, .max_probe = true},
-    {0}
-};
-
-static const char *const format_blacklist[] = {
-    "tty",      // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
-    // Image demuxers, disabled in favor of demux_mf:
-    "image2", "image2pipe",
-    "bmp_pipe", "dpx_pipe", "exr_pipe", "j2k_pipe", "png_pipe", "tiff_pipe",
-    "jpeg_pipe",
-    0
-};
+// At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
+// on "," in general.
+static bool matches_avinputformat_name(struct lavf_priv *priv,
+                                       const char *name)
+{
+    const char *avifname = priv->avif->name;
+    while (1) {
+        const char *next = strchr(avifname, ',');
+        if (!next)
+            return !strcmp(avifname, name);
+        int len = next - avifname;
+        if (len == strlen(name) && !memcmp(avifname, name, len))
+            return true;
+        avifname = next + 1;
+    }
+}
 
 static int mp_read(void *opaque, uint8_t *buf, int size)
 {
@@ -306,41 +336,34 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
             MP_VERBOSE(demuxer, "Found '%s' at score=%d size=%d.\n",
                        priv->avif->name, score, avpd.buf_size);
 
-            priv->format_hack = NULL;
             for (int n = 0; format_hacks[n].ff_name; n++) {
                 const struct format_hack *entry = &format_hacks[n];
-                if (strcmp(entry->ff_name, priv->avif->name) != 0)
+                if (!matches_avinputformat_name(priv, entry->ff_name))
                     continue;
                 if (entry->mime_type && strcasecmp(entry->mime_type, mime_type) != 0)
                     continue;
-                priv->format_hack = entry;
+                priv->format_hack = *entry;
                 break;
             }
 
             if (score >= min_probe)
                 break;
 
-            if (priv->format_hack) {
-                if (score >= priv->format_hack->probescore &&
-                    (!priv->format_hack->max_probe || final_probe))
-                    break;
-            }
+            if (priv->format_hack.probescore &&
+                score >= priv->format_hack.probescore &&
+                (!priv->format_hack.max_probe || final_probe))
+                break;
         }
 
         priv->avif = NULL;
-        priv->format_hack = NULL;
+        priv->format_hack = (struct format_hack){0};
     } while (!final_probe);
 
     av_free(avpd.buf);
 
-    if (priv->avif && !format) {
-        for (int n = 0; format_blacklist[n]; n++) {
-            if (strcmp(format_blacklist[n], priv->avif->name) == 0) {
-                MP_VERBOSE(demuxer, "Format blacklisted.\n");
-                priv->avif = NULL;
-                break;
-            }
-        }
+    if (priv->avif && !format && priv->format_hack.ignore) {
+        MP_VERBOSE(demuxer, "Format blacklisted.\n");
+        priv->avif = NULL;
     }
 
     if (!priv->avif) {
@@ -353,23 +376,6 @@ success:
     demuxer->filetype = priv->avif->name;
 
     return 0;
-}
-
-static bool matches_avinputformat_name(struct lavf_priv *priv,
-                                       const char *name)
-{
-    // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
-    // on "," in general.
-    const char *avifname = priv->avif->name;
-    while (1) {
-        const char *next = strchr(avifname, ',');
-        if (!next)
-            return !strcmp(avifname, name);
-        int len = next - avifname;
-        if (len == strlen(name) && !memcmp(avifname, name, len))
-            return true;
-        avifname = next + 1;
-    }
 }
 
 static uint8_t char2int(char c)
@@ -597,8 +603,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = 1;
-        if (matches_avinputformat_name(priv, "mpeg") ||
-            matches_avinputformat_name(priv, "mpegts"))
+        if (priv->format_hack.use_stream_ids)
             sh->demuxer_id = st->id;
         AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
         if (title && title->value)
@@ -708,8 +713,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                    lavfdopts->probesize);
     }
 
-    if (priv->format_hack && priv->format_hack->analyzeduration)
-        analyze_duration = priv->format_hack->analyzeduration;
+    if (priv->format_hack.analyzeduration)
+        analyze_duration = priv->format_hack.analyzeduration;
     if (lavfdopts->analyzeduration)
         analyze_duration = lavfdopts->analyzeduration;
     if (analyze_duration > 0) {
@@ -723,7 +728,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if ((priv->avif->flags & AVFMT_NOFILE) ||
         demuxer->stream->type == STREAMTYPE_AVDEVICE ||
-        matches_avinputformat_name(priv, "hls"))
+        priv->format_hack.no_stream)
     {
         mp_setup_av_network_options(&dopts, demuxer->global, demuxer->log, opts);
         // This might be incorrect.
@@ -870,9 +875,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     }
     av_free_packet(pkt);
 
-    // Do not confuse player's position estimation (position is into segment,
-    // player knows about the playlist main file only).
-    if (matches_avinputformat_name(priv, "hls"))
+    if (priv->format_hack.clear_filepos)
         dp->pos = -1;
 
     demux_add_packet(stream, dp);
