@@ -224,13 +224,19 @@
 #define MP_KEY_MOUSE_LEAVE ((MP_KEY_INTERN+2)|MP_NO_REPEAT_KEY)
 #define MP_KEY_MOUSE_ENTER ((MP_KEY_INTERN+3)|MP_NO_REPEAT_KEY)
 
+#define MP_KEY_IS_MOUSE_CLICK(code) \
+    (MP_KEY_IS_MOUSE_BTN_SINGLE(code) || MP_KEY_IS_MOUSE_BTN_DBL(code))
 
+#define MP_KEY_IS_MOUSE_MOVE(code) \
+    ((code) == MP_KEY_MOUSE_MOVE || (code) == MP_KEY_MOUSE_ENTER || \
+     (code) == MP_KEY_MOUSE_LEAVE)
+
+// Whether to dispatch the key binding by current mouse position.
 #define MP_KEY_DEPENDS_ON_MOUSE_POS(code) \
-    (MP_KEY_IS_MOUSE_BTN_SINGLE(code) || MP_KEY_IS_MOUSE_BTN_DBL(code) || \
-     (code) == MP_KEY_MOUSE_MOVE)
+    (MP_KEY_IS_MOUSE_CLICK(code) || (code) == MP_KEY_MOUSE_MOVE)
 
 #define MP_KEY_IS_MOUSE(code) \
-    (MP_KEY_DEPENDS_ON_MOUSE_POS(code) || (code) == MP_KEY_MOUSE_LEAVE)
+    (MP_KEY_IS_MOUSE_CLICK(code) || MP_KEY_IS_MOUSE_MOVE(code))
 
 // Emit a command even on key-up (normally key-up is ignored). This means by
 // default they binding will be triggered on key-up instead of key-down.
