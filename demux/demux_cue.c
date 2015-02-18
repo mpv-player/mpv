@@ -433,6 +433,7 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
     }
     struct priv *p = talloc_zero(demuxer, struct priv);
     demuxer->priv = p;
+    demuxer->fully_read = true;
     p->data = stream_read_complete(s, demuxer, 1000000);
     if (p->data.start == NULL)
         return -1;

@@ -311,6 +311,7 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 {
     struct priv *p = talloc_zero(demuxer, struct priv);
     demuxer->priv = p;
+    demuxer->fully_read = true;
 
     struct stream *s = demuxer->stream;
     if (s->uncached_type == STREAMTYPE_EDL) {

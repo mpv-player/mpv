@@ -291,8 +291,8 @@ static void enable_demux_thread(struct MPContext *mpctx)
         demux_start_thread(mpctx->demuxer);
         for (int n = 0; n < mpctx->num_tracks; n++) {
             struct track *track = mpctx->tracks[n];
-            if (track->is_external && track->stream &&
-                track->stream->type != STREAM_SUB)
+            if (track->is_external && track->stream && !track->preloaded &&
+                !track->demuxer->fully_read)
             {
                 demux_set_wakeup_cb(track->demuxer, wakeup_demux, mpctx);
                 demux_start_thread(track->demuxer);
@@ -689,6 +689,7 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
     struct stream *stream = stream_open(filename, mpctx->global);
     if (!stream)
         goto err_out;
+    stream_enable_cache(&stream, &opts->stream_cache);
 
     char *demuxer_name = NULL;
     switch (filter) {
@@ -697,7 +698,6 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         break;
     case STREAM_AUDIO:
         demuxer_name = opts->audio_demuxer_name;
-        stream_enable_cache(&stream, &opts->stream_cache);
         break;
     }
 
@@ -731,6 +731,8 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
     }
 
     MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, demuxer);
+    if (mpctx->playback_initialized)
+        enable_demux_thread(mpctx);
     return first;
 
 err_out:

@@ -99,6 +99,7 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
     sh->sub->extradata_len = cbuf.len;
 
     demuxer->seekable = true;
+    demuxer->fully_read = true;
 
     return 0;
 }

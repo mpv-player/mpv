@@ -103,12 +103,14 @@ struct format_hack {
     bool ignore : 1;            // blacklisted
     bool no_stream : 1;         // do not wrap struct stream as AVIOContext
     bool use_stream_ids : 1;    // export the native stream IDs
+    bool fully_read : 1;        // set demuxer.fully_read flag
     // Do not confuse player's position estimation (position is into external
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
 };
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
+#define TEXTSUB(fmt) {fmt, .fully_read = true}
 
 static const struct format_hack format_hacks[] = {
     // for webradios
@@ -122,6 +124,11 @@ static const struct format_hack format_hacks[] = {
     {"hls", .no_stream = true, .clear_filepos = true},
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
+
+    TEXTSUB("aqtitle"), TEXTSUB("ass"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
+    TEXTSUB("mpl2"), TEXTSUB("mpsub"), TEXTSUB("pjs"), TEXTSUB("realtext"),
+    TEXTSUB("sami"), TEXTSUB("srt"), TEXTSUB("stl"), TEXTSUB("subviewer"),
+    TEXTSUB("subviewer1"), TEXTSUB("vplayer"), TEXTSUB("webvtt"),
 
     // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
     BLACKLIST("tty"),
@@ -815,6 +822,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                           0 : (double)priv->avfc->start_time / AV_TIME_BASE;
 
     demuxer->allow_refresh_seeks = matches_avinputformat_name(priv, "mp4");
+    demuxer->fully_read = priv->format_hack.fully_read;
 
     return 0;
 }

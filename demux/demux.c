@@ -820,6 +820,7 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->ts_resets_possible = src->ts_resets_possible;
         dst->rel_seeks = src->rel_seeks;
         dst->allow_refresh_seeks = src->allow_refresh_seeks;
+        dst->fully_read = src->fully_read;
         dst->start_time = src->start_time;
         dst->priv = src->priv;
     }

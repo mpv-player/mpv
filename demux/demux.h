@@ -192,6 +192,11 @@ typedef struct demuxer {
     //   monotonically increasing
     // - seeking leaves packet positions invariant
     bool allow_refresh_seeks;
+    // The file data was fully read, and there is no need to keep the stream
+    // open, keep the cache active, or to run the demuxer thread. Generating
+    // packets is not slow either (unlike e.g. libavdevice pseudo-demuxers).
+    // Typical examples: text subtitles, playlists
+    bool fully_read;
 
     // Bitmask of DEMUX_EVENT_*
     int events;

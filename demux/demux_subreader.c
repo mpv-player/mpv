@@ -791,6 +791,7 @@ static int d_open_file(struct demuxer *demuxer, enum demux_check check)
     subdata_free(sd);
 
     demuxer->seekable = true;
+    demuxer->fully_read = true;
 
     return 0;
 }

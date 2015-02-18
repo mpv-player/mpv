@@ -321,6 +321,8 @@ static void reinit_subdec(struct MPContext *mpctx, struct track *track,
     if (!track->preloaded && track->is_external && !opts->sub_clear_on_seek) {
         demux_seek(track->demuxer, 0, SEEK_ABSOLUTE);
         track->preloaded = sub_read_all_packets(dec_sub, track->stream);
+        if (track->preloaded)
+            demux_stop_thread(track->demuxer);
     }
 }
 

@@ -273,6 +273,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
         playlist_add_base_path(p->pl, mp_dirname(demuxer->filename));
     demuxer->playlist = talloc_steal(demuxer, p->pl);
     demuxer->filetype = fmt->name;
+    demuxer->fully_read = true;
     talloc_free(p);
     return ok ? 0 : -1;
 }
