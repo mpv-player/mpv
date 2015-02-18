@@ -662,6 +662,12 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
 #endif
 }
 
+static int interrupt_cb(void *ctx)
+{
+    struct demuxer *demuxer = ctx;
+    return mp_cancel_test(demuxer->stream->cancel);
+}
+
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
     struct MPOpts *opts = demuxer->opts;
@@ -749,6 +755,11 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         if (transport)
             av_dict_set(&dopts, "rtsp_transport", transport, 0);
     }
+
+    avfc->interrupt_callback = (AVIOInterruptCB){
+        .callback = interrupt_cb,
+        .opaque = demuxer,
+    };
 
     mp_set_avdict(&dopts, lavfdopts->avopts);
 
