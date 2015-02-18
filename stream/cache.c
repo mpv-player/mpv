@@ -285,7 +285,7 @@ done:
     s->idle = s->eof;
     s->reads++;
     if (s->eof)
-        MP_VERBOSE(s, "EOF reached.\n");
+        MP_TRACE(s, "EOF reached.\n");
 
     pthread_cond_signal(&s->wakeup);
 
