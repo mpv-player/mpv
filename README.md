@@ -48,7 +48,7 @@ Essential dependencies (incomplete list):
   At least FFmpeg 2.1.4 or Libav 10 is required.
 - zlib
 - iconv (normally provided by the system libc)
-- libass
+- libass (OSD, OSC, text subtitles)
 - Lua (optional, required for the OSC pseudo-GUI and youtube-dl integration)
 - libjpeg (optional, used for screenshots only)
 - Enca (optional, for subtitle charset detection)
