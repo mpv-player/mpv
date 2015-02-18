@@ -124,7 +124,7 @@ class Libass < TravisDepsBuilder
     {
       "libass-stable" => {
         :action => :stable,
-        :url    => 'http://libass.googlecode.com/files/libass-0.10.1.tar.gz'
+        :url    => 'https://github.com/libass/libass/releases/download/0.12.1/libass-0.12.1.tar.gz'
       }
     }
   end
