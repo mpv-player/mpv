@@ -1,3 +1,26 @@
+Release 0.8.1 (draft)
+=====================
+
+Changes
+-------
+
+- DOCS/client-api-changes has been correctly updated for the v0.8.0 release
+  series.
+
+Bug fixes
+---------
+
+- Attempt to fix OpenGL shader compilation on Intel windows drivers. (bug
+  #1536)
+
+New features
+------------
+
+- MPlayer now tries to load '.vtt' subtitles.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.8.0..` in the git repository.
+
 Release 0.8.0
 =============
 
@@ -162,4 +185,4 @@ New features
   files.
 
 This listing is not complete. A complete changelog can be seen by running
-`git log v0.7.0..` in the git repository.
+`git log v0.7.0..v0.8.0` in the git repository.
