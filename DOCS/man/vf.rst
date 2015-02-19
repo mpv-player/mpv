@@ -143,8 +143,8 @@ Available filters are:
         Accurate rounding for the vertical scaler, which may be faster or
         slower than the default rounding.
 
-        :0: Disable accurate rounding (default).
-        :1: Enable accurate rounding.
+        :no:  Disable accurate rounding (default).
+        :yes: Enable accurate rounding.
 
 ``dsize[=w:h:aspect-method:r:aspect]``
     Changes the intended display size/aspect at an arbitrary point in the
