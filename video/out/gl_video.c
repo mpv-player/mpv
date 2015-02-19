@@ -1739,36 +1739,43 @@ static void gl_video_interpolate_frame(struct gl_video *p,
     GL *gl = p->gl;
     double inter_coeff = 0.0;
     int64_t prev_pts = p->surfaces[fbosurface_next(p)].pts;
-    p->is_interpolated = prev_pts < t->pts;
+    int64_t vsync_interval = t->next_vsync - t->prev_vsync;
 
-    if (p->is_interpolated) {
+    if (prev_pts < t->pts) {
         MP_STATS(p, "new-pts");
-        // fbosurface 0 is already bound from the caller
         p->surfaces[p->surface_idx].pts = t->pts;
         p->surface_idx = fbosurface_next(p);
-        gl->ActiveTexture(GL_TEXTURE0 + 1);
-        gl->BindTexture(p->gl_target, p->surfaces[p->surface_idx].fbotex.texture);
-        gl->ActiveTexture(GL_TEXTURE0);
-        if (prev_pts < t->next_vsync && t->pts > t->next_vsync) {
-            double N = t->next_vsync - t->prev_vsync;
-            double P = t->pts - t->prev_vsync;
-            float ts = p->opts.smoothmotion_threshold;
-            inter_coeff = 1 - (N / P);
-            inter_coeff = inter_coeff < 0.0 + ts ? 0.0 : inter_coeff;
-            inter_coeff = inter_coeff > 1.0 - ts ? 1.0 : inter_coeff;
-            MP_DBG(p, "inter frame ppts: %lld, pts: %lld, "
-                   "vsync: %lld, mix: %f\n",
-                   (long long)prev_pts, (long long)t->pts,
-                   (long long)t->next_vsync, inter_coeff);
-            MP_STATS(p, "frame-mix");
-
-            // the value is scaled to fit in the graph with the completely
-            // unrelated "phase" value (which is stupid)
-            MP_STATS(p, "value-timed %lld %f mix-value",
-                     (long long)t->pts, inter_coeff * 10000);
-        }
     }
 
+    // fbosurface 0 is already bound from the caller
+    gl->ActiveTexture(GL_TEXTURE0 + 1);
+    gl->BindTexture(p->gl_target, p->surfaces[p->surface_idx].fbotex.texture);
+    gl->ActiveTexture(GL_TEXTURE0);
+
+    if (t->pts > t->next_vsync && t->pts < t->next_vsync + vsync_interval) {
+        // current frame overlaps PTS boundary, blend
+        double R = t->pts - t->next_vsync;
+        float ts = p->opts.smoothmotion_threshold;
+        inter_coeff = R / vsync_interval;
+        inter_coeff = inter_coeff < 0.0 + ts ? 0.0 : inter_coeff;
+        inter_coeff = inter_coeff > 1.0 - ts ? 1.0 : inter_coeff;
+        MP_DBG(p, "inter frame ppts: %lld, pts: %lld, "
+               "vsync: %lld, mix: %f\n",
+               (long long)prev_pts, (long long)t->pts,
+               (long long)t->next_vsync, inter_coeff);
+        MP_STATS(p, "frame-mix");
+
+        // the value is scaled to fit in the graph with the completely
+        // unrelated "phase" value (which is stupid)
+        MP_STATS(p, "value-timed %lld %f mix-value",
+                 (long long)t->pts, inter_coeff * 10000);
+    } else if (t->pts > t->next_vsync) {
+        // there's a new frame, but we haven't displayed or blended it yet,
+        // so we still draw the old frame
+        inter_coeff = 1.0;
+    }
+
+    p->is_interpolated = inter_coeff > 0.0;
     gl->UseProgram(p->inter_program);
     GLint loc = gl->GetUniformLocation(p->inter_program, "inter_coeff");
     gl->Uniform1f(loc, inter_coeff);
