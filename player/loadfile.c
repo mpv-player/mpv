@@ -960,7 +960,10 @@ static struct stream *open_stream_reentrant(struct MPContext *mpctx,
 struct demux_open_args {
     struct stream *stream;
     struct mpv_global *global;
-    struct demuxer *demux;      // result
+    struct mp_log *log;
+    // results
+    struct demuxer *demux;
+    struct timeline *tl;
 };
 
 static void open_demux_thread(void *pctx)
@@ -969,19 +972,25 @@ static void open_demux_thread(void *pctx)
     struct stream *s = args->stream;
     struct mpv_global *global = args->global;
     args->demux = demux_open(s, global->opts->demuxer_name, NULL, global);
+    if (args->demux)
+        args->tl = timeline_load(global, args->log, args->demux);
 }
 
-static struct demuxer *open_demux_reentrant(struct MPContext *mpctx,
-                                            struct stream *stream)
+static void open_demux_reentrant(struct MPContext *mpctx)
 {
-    struct demux_open_args args = {stream, create_sub_global(mpctx)};
+    struct demux_open_args args = {
+        .global = create_sub_global(mpctx),
+        .stream = mpctx->stream,
+        .log = mpctx->log,
+    };
     mpctx_run_reentrant(mpctx, open_demux_thread, &args);
     if (args.demux) {
         talloc_steal(args.demux, args.global);
+        mpctx->demuxer = args.demux;
+        mpctx->tl = args.tl;
     } else {
         talloc_free(args.global);
     }
-    return args.demux;
 }
 
 static void load_timeline(struct MPContext *mpctx)
@@ -990,7 +999,6 @@ static void load_timeline(struct MPContext *mpctx)
 
     MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, mpctx->demuxer);
 
-    mpctx->tl = timeline_load(mpctx->global, mpctx->log, mpctx->demuxer);
     if (mpctx->tl) {
         mpctx->timeline = mpctx->tl->parts;
         mpctx->num_timeline_parts = mpctx->tl->num_parts;
@@ -1113,7 +1121,7 @@ goto_reopen_demuxer: ;
 
     mp_nav_reset(mpctx);
 
-    mpctx->demuxer = open_demux_reentrant(mpctx, mpctx->stream);
+    open_demux_reentrant(mpctx);
     if (!mpctx->demuxer) {
         MP_ERR(mpctx, "Failed to recognize file format.\n");
         mpctx->error_playing = MPV_ERROR_UNKNOWN_FORMAT;
