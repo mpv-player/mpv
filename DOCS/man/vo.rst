@@ -337,7 +337,7 @@ Available video output drivers are:
         Set radius for filters listed below, must be a float number between 1.0
         and 16.0. Defaults to be 3.0 if not specified.
 
-            ``sinc``, ``lanczos``, ``ewa_lanczos``, ``blackman``, ``gaussian``
+            ``sinc``, ``lanczos``, ``ewa_lanczos``, ``ginseng``, ``blackman``, ``gaussian``
 
         Note that depending on filter implementation details and video scaling
         ratio, the radius that actually being used might be different
