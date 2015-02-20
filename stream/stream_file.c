@@ -27,6 +27,10 @@
 #include <unistd.h>
 #include <errno.h>
 
+#ifndef __MINGW32__
+#include <poll.h>
+#endif
+
 #include "osdep/io.h"
 
 #include "common/common.h"
@@ -57,11 +61,24 @@
 struct priv {
     int fd;
     bool close;
+    bool regular;
 };
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
     struct priv *p = s->priv;
+#ifndef __MINGW32__
+    if (!p->regular) {
+        int c = s->cancel ? mp_cancel_get_fd(s->cancel) : -1;
+        struct pollfd fds[2] = {
+            {.fd = p->fd, .events = POLLIN},
+            {.fd = c, .events = POLLIN},
+        };
+        poll(fds, c >= 0 ? 2 : 1, -1);
+        if (fds[1].revents & POLLIN)
+            return -1;
+    }
+#endif
     int r = read(p->fd, buffer, max_len);
     return (r <= 0) ? -1 : r;
 }
@@ -250,6 +267,8 @@ static int open_f(stream_t *stream)
         mode_t openmode = S_IRUSR | S_IWUSR;
 #ifndef __MINGW32__
         openmode |= S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+        if (!write)
+            m |= O_NONBLOCK;
 #endif
         fd = open(filename, m | O_BINARY, openmode);
         if (fd < 0) {
@@ -258,10 +277,20 @@ static int open_f(stream_t *stream)
             return STREAM_ERROR;
         }
         struct stat st;
-        if (fstat(fd, &st) == 0 && S_ISDIR(st.st_mode)) {
-            MP_ERR(stream, "File is a directory: '%s'\n", filename);
-            close(fd);
-            return STREAM_ERROR;
+        if (fstat(fd, &st) == 0) {
+            if (S_ISDIR(st.st_mode)) {
+                MP_ERR(stream, "File is a directory: '%s'\n", filename);
+                close(fd);
+                return STREAM_ERROR;
+            }
+#ifndef __MINGW32__
+            if (S_ISREG(st.st_mode)) {
+                priv->regular = true;
+                // O_NONBLOCK has weird semantics on file locks; remove it.
+                int val = fcntl(fd, F_GETFL) & ~(unsigned)O_NONBLOCK;
+                fcntl(fd, F_SETFL, val);
+            }
+#endif
         }
         priv->fd = fd;
         priv->close = true;
