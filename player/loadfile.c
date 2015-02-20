@@ -75,10 +75,8 @@ static void close_unused_demuxers(struct MPContext *mpctx)
                 goto skip;
         }
 
-        struct stream *s = d->stream;
         uninit_stream_sub_decoders(d);
-        free_demuxer(d);
-        free_stream(s);
+        free_demuxer_and_stream(d);
         MP_TARRAY_REMOVE_AT(mpctx->sources, mpctx->num_sources, i);
 
     skip:;
@@ -723,10 +721,8 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         }
     }
     if (!first) {
-        free_demuxer(demuxer);
-        free_stream(stream);
-        MP_WARN(mpctx, "No streams added from file %s.\n",
-                disp_filename);
+        free_demuxer_and_stream(demuxer);
+        MP_WARN(mpctx, "No streams added from file %s.\n", disp_filename);
         goto err_out;
     }
 
@@ -736,8 +732,7 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
     return first;
 
 err_out:
-    MP_ERR(mpctx, "Can not open external file %s.\n",
-           disp_filename);
+    MP_ERR(mpctx, "Can not open external file %s.\n", disp_filename);
     return false;
 }
 

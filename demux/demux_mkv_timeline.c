@@ -157,9 +157,8 @@ static int enable_cache(struct mpv_global *global, struct stream **stream,
         return 0;
 
     char *filename = talloc_strdup(NULL, (*demuxer)->filename);
-    free_demuxer(*demuxer);
-    free_stream(*stream);
 
+    free_demuxer_and_stream(*demuxer);
     *stream = stream_open(filename, global);
     if (!*stream) {
         talloc_free(filename);
@@ -251,8 +250,7 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
         }
     }
 
-    free_demuxer(d);
-    free_stream(s);
+    free_demuxer_and_stream(d);
     return was_valid;
 }
 

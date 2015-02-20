@@ -245,6 +245,15 @@ void free_demuxer(demuxer_t *demuxer)
     talloc_free(demuxer);
 }
 
+void free_demuxer_and_stream(struct demuxer *demuxer)
+{
+    if (!demuxer)
+        return;
+    struct stream *s = demuxer->stream;
+    free_demuxer(demuxer);
+    free_stream(s);
+}
+
 // Start the demuxer thread, which reads ahead packets on its own.
 void demux_start_thread(struct demuxer *demuxer)
 {

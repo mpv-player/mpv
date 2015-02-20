@@ -242,6 +242,7 @@ typedef struct {
 } demux_program_t;
 
 void free_demuxer(struct demuxer *demuxer);
+void free_demuxer_and_stream(struct demuxer *demuxer);
 
 int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp);
 
