@@ -939,8 +939,8 @@ static void open_stream_thread(void *pctx)
                                  args->cancel, args->global);
 }
 
-static struct stream *open_stream_async(struct MPContext *mpctx,
-                                        char *filename, int stream_flags)
+static struct stream *open_stream_reentrant(struct MPContext *mpctx,
+                                            char *filename, int stream_flags)
 {
     struct stream_open_args args = {
         .cancel = mpctx->playback_abort,
@@ -948,7 +948,7 @@ static struct stream *open_stream_async(struct MPContext *mpctx,
         .filename = filename,
         .stream_flags = stream_flags,
     };
-    mpctx_run_non_blocking(mpctx, open_stream_thread, &args);
+    mpctx_run_reentrant(mpctx, open_stream_thread, &args);
     if (args.stream) {
         talloc_steal(args.stream, args.global);
     } else {
@@ -971,11 +971,11 @@ static void open_demux_thread(void *pctx)
     args->demux = demux_open(s, global->opts->demuxer_name, NULL, global);
 }
 
-static struct demuxer *open_demux_async(struct MPContext *mpctx,
-                                        struct stream *stream)
+static struct demuxer *open_demux_reentrant(struct MPContext *mpctx,
+                                            struct stream *stream)
 {
     struct demux_open_args args = {stream, create_sub_global(mpctx)};
-    mpctx_run_non_blocking(mpctx, open_demux_thread, &args);
+    mpctx_run_reentrant(mpctx, open_demux_thread, &args);
     if (args.demux) {
         talloc_steal(args.demux, args.global);
     } else {
@@ -1086,8 +1086,8 @@ static void play_current_file(struct MPContext *mpctx)
     int stream_flags = STREAM_READ;
     if (!opts->load_unsafe_playlists)
         stream_flags |= mpctx->playing->stream_flags;
-    mpctx->stream = open_stream_async(mpctx, mpctx->stream_open_filename,
-                                      stream_flags);
+    mpctx->stream = open_stream_reentrant(mpctx, mpctx->stream_open_filename,
+                                          stream_flags);
     if (!mpctx->stream)
         goto terminate_playback;
 
@@ -1113,7 +1113,7 @@ goto_reopen_demuxer: ;
 
     mp_nav_reset(mpctx);
 
-    mpctx->demuxer = open_demux_async(mpctx, mpctx->stream);
+    mpctx->demuxer = open_demux_reentrant(mpctx, mpctx->stream);
     if (!mpctx->demuxer) {
         MP_ERR(mpctx, "Failed to recognize file format.\n");
         mpctx->error_playing = MPV_ERROR_UNKNOWN_FORMAT;

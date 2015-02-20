@@ -283,8 +283,8 @@ static void *thread_wrapper(void *pctx)
 
 // Run the thread_fn in a new thread. Wait until the thread returns, but while
 // waiting, process input and input commands.
-int mpctx_run_non_blocking(struct MPContext *mpctx, void (*thread_fn)(void *arg),
-                           void *thread_arg)
+int mpctx_run_reentrant(struct MPContext *mpctx, void (*thread_fn)(void *arg),
+                        void *thread_arg)
 {
     struct wrapper_args args = {mpctx, thread_fn, thread_arg};
     pthread_mutex_init(&args.mutex, NULL);
