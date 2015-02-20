@@ -44,7 +44,7 @@ static EGLConfig select_fb_config_egl(struct MPGLContext *ctx, bool es)
         EGL_GREEN_SIZE, 8,
         EGL_BLUE_SIZE, 8,
         EGL_DEPTH_SIZE, 0,
-        EGL_RENDERABLE_TYPE, es ? EGL_OPENGL_ES_BIT : EGL_OPENGL_BIT,
+        EGL_RENDERABLE_TYPE, es ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_BIT,
         EGL_NONE
     };
 
@@ -67,7 +67,7 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
     struct priv *p = ctx->priv;
 
     EGLint context_attributes[] = {
-        EGL_CONTEXT_MAJOR_VERSION_KHR,
+        EGL_CONTEXT_CLIENT_VERSION, // aka EGL_CONTEXT_MAJOR_VERSION_KHR
         es ? 2 : MPGL_VER_GET_MAJOR(ctx->requested_gl_version),
         EGL_NONE
     };
@@ -103,10 +103,12 @@ static bool config_window_x11_egl_(struct MPGLContext *ctx, int flags, bool es)
         return true;
     }
 
-    eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API);
+    if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API))
+        return false;
 
     p->egl_display = eglGetDisplay(vo->x11->display);
-    eglInitialize(p->egl_display, NULL, NULL);
+    if (!eglInitialize(p->egl_display, NULL, NULL))
+        return false;
 
     EGLConfig config = select_fb_config_egl(ctx, es);
     if (!config)
