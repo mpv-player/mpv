@@ -342,11 +342,15 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     int major = 0, minor = 0;
     const char *version_string = gl->GetString(GL_VERSION);
+    if (!version_string)
+        goto error;
+    mp_verbose(log, "GL_VERSION='%s'\n",  version_string);
     if (strncmp(version_string, "OpenGL ES ", 10) == 0) {
         version_string += 10;
         gl->es = 100;
     }
-    sscanf(version_string, "%d.%d", &major, &minor);
+    if (sscanf(version_string, "%d.%d", &major, &minor) < 2)
+        goto error;
     gl->version = MPGL_VER(major, minor);
     mp_verbose(log, "Detected %s %d.%d.\n", gl->es ? "GLES" : "desktop OpenGL",
                major, minor);
@@ -362,7 +366,6 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     mp_verbose(log, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
     mp_verbose(log, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
-    mp_verbose(log, "GL_VERSION='%s'\n",  gl->GetString(GL_VERSION));
     const char *shader = gl->GetString(GL_SHADING_LANGUAGE_VERSION);
     if (shader)
         mp_verbose(log, "GL_SHADING_LANGUAGE_VERSION='%s'\n", shader);
