@@ -62,9 +62,8 @@ enum {
     MPGL_CAP_VDPAU              = (1 << 11),    // GL_NV_vdpau_interop
     MPGL_CAP_APPLE_RGB_422      = (1 << 12),    // GL_APPLE_rgb_422
     MPGL_CAP_1ST_CLASS_ARRAYS   = (1 << 13),
-    MPGL_CAP_1D_TEX             = (1 << 14),
-    MPGL_CAP_3D_TEX             = (1 << 15),
-    MPGL_CAP_DEBUG              = (1 << 16),
+    MPGL_CAP_3D_TEX             = (1 << 14),
+    MPGL_CAP_DEBUG              = (1 << 15),
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
 
@@ -234,6 +233,7 @@ struct GL {
     void (GLAPIENTRY *Uniform3f)(GLint, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform4f)(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform1i)(GLint, GLint);
+    void (GLAPIENTRY *Uniform1fv)(GLint, GLsizei, const GLfloat *);
     void (GLAPIENTRY *UniformMatrix2fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
