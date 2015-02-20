@@ -172,6 +172,7 @@ struct demuxer_params {
     int matroska_wanted_segment;
     bool *matroska_was_valid;
     bool expect_subtitle;
+    bool disable_cache; // demux_open_url() only
 };
 
 typedef struct demuxer {
@@ -258,6 +259,12 @@ struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
 struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
                            struct mpv_global *global);
+
+struct mp_cancel;
+struct demuxer *demux_open_url(const char *url,
+                               struct demuxer_params *params,
+                               struct mp_cancel *cancel,
+                               struct mpv_global *global);
 
 void demux_start_thread(struct demuxer *demuxer);
 void demux_stop_thread(struct demuxer *demuxer);

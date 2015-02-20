@@ -134,22 +134,6 @@ error:
     return NULL;
 }
 
-static struct demuxer *open_file(char *filename, struct timeline *tl)
-{
-    struct MPOpts *opts = tl->global->opts;
-    struct demuxer *d = NULL;
-    struct stream *s = stream_open(filename, tl->global);
-    if (s) {
-        stream_enable_cache(&s, &opts->stream_cache);
-        d = demux_open(s, NULL, tl->global);
-    }
-    if (!d) {
-        MP_ERR(tl, "EDL: Could not open source file '%s'.\n", filename);
-        free_stream(s);
-    }
-    return d;
-}
-
 static struct demuxer *open_source(struct timeline *tl, char *filename)
 {
     for (int n = 0; n < tl->num_sources; n++) {
@@ -157,9 +141,12 @@ static struct demuxer *open_source(struct timeline *tl, char *filename)
         if (strcmp(d->stream->url, filename) == 0)
             return d;
     }
-    struct demuxer *d = open_file(filename, tl);
-    if (d)
+    struct demuxer *d = demux_open_url(filename, NULL, NULL, tl->global);
+    if (d) {
         MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, d);
+    } else {
+        MP_ERR(tl, "EDL: Could not open source file '%s'.\n", filename);
+    }
     return d;
 }
 

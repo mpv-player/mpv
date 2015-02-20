@@ -148,36 +148,6 @@ static char **find_files(const char *original_file)
     return results;
 }
 
-static int enable_cache(struct mpv_global *global, struct stream **stream,
-                        struct demuxer **demuxer, struct demuxer_params *params)
-{
-    struct MPOpts *opts = global->opts;
-
-    if (!stream_wants_cache(*stream, &opts->stream_cache))
-        return 0;
-
-    char *filename = talloc_strdup(NULL, (*demuxer)->filename);
-
-    free_demuxer_and_stream(*demuxer);
-    *stream = stream_open(filename, global);
-    if (!*stream) {
-        talloc_free(filename);
-        return -1;
-    }
-
-    stream_enable_cache(stream, &opts->stream_cache);
-
-    *demuxer = demux_open(*stream, params, global);
-    if (!*demuxer) {
-        talloc_free(filename);
-        free_stream(*stream);
-        return -1;
-    }
-
-    talloc_free(filename);
-    return 1;
-}
-
 static bool has_source_request(struct matroska_segment_uid *uids,
                                int num_sources,
                                struct matroska_segment_uid *new_uid)
@@ -202,16 +172,11 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
         .matroska_wanted_uids = *uids,
         .matroska_wanted_segment = segment,
         .matroska_was_valid = &was_valid,
+        .disable_cache = true,
     };
-    struct stream *s = stream_open(filename, ctx->global);
-    if (!s)
+    struct demuxer *d = demux_open_url(filename, &params, NULL, ctx->global);
+    if (!d)
         return false;
-    struct demuxer *d = demux_open(s, &params, ctx->global);
-
-    if (!d) {
-        free_stream(s);
-        return was_valid;
-    }
 
     struct matroska_data *m = &d->matroska_data;
 
@@ -243,8 +208,14 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
                 MP_TARRAY_APPEND(NULL, *sources, *num_sources, NULL);
             }
 
-            if (enable_cache(ctx->global, &s, &d, &params) < 0)
-                continue;
+            if (stream_wants_cache(d->stream, &ctx->global->opts->stream_cache))
+            {
+                free_demuxer_and_stream(d);
+                params.disable_cache = false;
+                d = demux_open_url(filename, &params, NULL, ctx->global);
+                if (!d)
+                    continue;
+            }
 
             (*sources)[i] = d;
             return true;

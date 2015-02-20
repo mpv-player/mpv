@@ -209,7 +209,8 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 struct playlist *pl = playlist_parse_file(param0, global);
                 talloc_free(param0);
                 if (!pl) {
-                    MP_FATAL(config, "Error reading playlist '%.*s'", BSTR_P(p.param));
+                    MP_FATAL(config, "Error reading playlist '%.*s'\n",
+                             BSTR_P(p.param));
                     goto err_out;
                 }
                 playlist_transfer_entries(files, pl);

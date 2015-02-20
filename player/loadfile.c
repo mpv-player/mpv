@@ -684,11 +684,6 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
     if (strncmp(disp_filename, "memory://", 9) == 0)
         disp_filename = "memory://"; // avoid noise
 
-    struct stream *stream = stream_open(filename, mpctx->global);
-    if (!stream)
-        goto err_out;
-    stream_enable_cache(&stream, &opts->stream_cache);
-
     struct demuxer_params params = {
         .expect_subtitle = filter == STREAM_SUB,
     };
@@ -702,11 +697,10 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         break;
     }
 
-    struct demuxer *demuxer = demux_open(stream, &params, mpctx->global);
-    if (!demuxer) {
-        free_stream(stream);
+    struct demuxer *demuxer =
+        demux_open_url(filename, &params, mpctx->playback_abort, mpctx->global);
+    if (!demuxer)
         goto err_out;
-    }
 
     struct track *first = NULL;
     for (int n = 0; n < demuxer->num_streams; n++) {

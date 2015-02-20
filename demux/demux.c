@@ -1039,6 +1039,26 @@ done:
     return demuxer;
 }
 
+// Convenience function: open the stream, enable the cache (according to params
+// and global opts.), open the demuxer.
+// (use free_demuxer_and_stream() to free the underlying stream too)
+struct demuxer *demux_open_url(const char *url,
+                                struct demuxer_params *params,
+                                struct mp_cancel *cancel,
+                                struct mpv_global *global)
+{
+    struct MPOpts *opts = global->opts;
+    struct stream *s = stream_create(url, STREAM_READ, cancel, global);
+    if (!s)
+        return NULL;
+    if (!(params && params->disable_cache))
+        stream_enable_cache(&s, &opts->stream_cache);
+    struct demuxer *d = demux_open(s, params, global);
+    if (!d)
+        free_stream(s);
+    return d;
+}
+
 static void flush_locked(demuxer_t *demuxer)
 {
     for (int n = 0; n < demuxer->num_streams; n++)

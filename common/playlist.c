@@ -270,22 +270,19 @@ struct playlist *playlist_parse_file(const char *file, struct mpv_global *global
     struct mp_log *log = mp_log_new(NULL, global->log, "!playlist_parser");
     mp_verbose(log, "Parsing playlist file %s...\n", file);
 
-    struct playlist *ret = NULL;
-    stream_t *stream = stream_open(file, global);
-    if(!stream) {
-        mp_err(log, "Error while opening playlist file %s\n", file);
+    struct demuxer_params p = {.force_format = "playlist"};
+    struct demuxer *d = demux_open_url(file, &p, NULL, global);
+    if (!d) {
         talloc_free(log);
         return NULL;
     }
 
-    struct demuxer_params p = {.force_format = "playlist"};
-    struct demuxer *pl_demux = demux_open(stream, &p, global);
-    if (pl_demux && pl_demux->playlist) {
+    struct playlist *ret = NULL;
+    if (d && d->playlist) {
         ret = talloc_zero(NULL, struct playlist);
-        playlist_transfer_entries(ret, pl_demux->playlist);
+        playlist_transfer_entries(ret, d->playlist);
     }
-    free_demuxer(pl_demux);
-    free_stream(stream);
+    free_demuxer_and_stream(d);
 
     if (ret) {
         mp_verbose(log, "Playlist successfully parsed\n");
