@@ -623,6 +623,14 @@ Available video output drivers are:
         Mix threshold at which interpolation is skipped (default: 0.0 – never
         skip).
 
+        For example, with a ``smoothmotion-threshold`` of 0.1, if the
+        smoothmotion algorithm would try to blend two frames by a ratio of
+        95% A + 5% B, it would simply display A instead. (Since the
+        distance, 0.05, is lower than the threshold)
+
+        Setting this to 0.5 would be similar to disabling smoothmotion
+        completely, since it would always just display the nearest frame.
+
 ``opengl-hq``
     Same as ``opengl``, but with default settings for high quality rendering.
 
