@@ -69,7 +69,6 @@ struct priv {
     int rt_format;
 
     struct mp_image_pool *sw_pool;
-    bool printed_readback_warning;
 };
 
 #define PE(av_codec_id, ff_profile, vdp_profile)                \
@@ -450,10 +449,6 @@ static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
 
     struct mp_image *simg = va_surface_download(img, p->sw_pool);
     if (simg) {
-        if (!p->printed_readback_warning) {
-            MP_WARN(p, "Using GPU readback. This is usually inefficient.\n");
-            p->printed_readback_warning = true;
-        }
         talloc_free(img);
         return simg;
     }
