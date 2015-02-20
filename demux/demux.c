@@ -951,8 +951,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     mp_verbose(log, "Trying demuxer: %s (force-level: %s)\n",
                desc->name, d_level(check));
 
-    in->d_thread->params = params; // temporary during open()
-
     if (stream->seekable) // not for DVD/BD/DVB in particular
         stream_seek(stream, 0);
 
@@ -960,6 +958,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     // or stream filters will flush previous peeked data.
     stream_peek(stream, STREAM_BUFFER_SIZE);
 
+    in->d_thread->params = params; // temporary during open()
     int ret = demuxer->desc->open(in->d_thread, check);
     if (ret >= 0) {
         in->d_thread->params = NULL;
@@ -990,14 +989,15 @@ static const int d_normal[]  = {DEMUX_CHECK_NORMAL, DEMUX_CHECK_UNSAFE, -1};
 static const int d_request[] = {DEMUX_CHECK_REQUEST, -1};
 static const int d_force[]   = {DEMUX_CHECK_FORCE, -1};
 
-struct demuxer *demux_open(struct stream *stream, char *force_format,
-                           struct demuxer_params *params,
+// params can be NULL
+struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
                            struct mpv_global *global)
 {
     const int *check_levels = d_normal;
     const struct demuxer_desc *check_desc = NULL;
     struct mp_log *log = mp_log_new(NULL, global->log, "!demux");
     struct demuxer *demuxer = NULL;
+    char *force_format = params ? params->force_format : NULL;
 
     if (!force_format)
         force_format = stream->demuxer;

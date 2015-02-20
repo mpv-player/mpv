@@ -278,7 +278,8 @@ struct playlist *playlist_parse_file(const char *file, struct mpv_global *global
         return NULL;
     }
 
-    struct demuxer *pl_demux = demux_open(stream, "playlist", NULL, global);
+    struct demuxer_params p = {.force_format = "playlist"};
+    struct demuxer *pl_demux = demux_open(stream, &p, global);
     if (pl_demux && pl_demux->playlist) {
         ret = talloc_zero(NULL, struct playlist);
         playlist_transfer_entries(ret, pl_demux->playlist);

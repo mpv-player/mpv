@@ -141,7 +141,7 @@ static struct demuxer *open_file(char *filename, struct timeline *tl)
     struct stream *s = stream_open(filename, tl->global);
     if (s) {
         stream_enable_cache(&s, &opts->stream_cache);
-        d = demux_open(s, NULL, NULL, tl->global);
+        d = demux_open(s, NULL, tl->global);
     }
     if (!d) {
         MP_ERR(tl, "EDL: Could not open source file '%s'.\n", filename);

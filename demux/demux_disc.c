@@ -293,9 +293,10 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     if (check != DEMUX_CHECK_FORCE)
         return -1;
 
-    char *demux = "+lavf";
+    struct demuxer_params params = {.force_format = "+lavf"};
+
     if (demuxer->stream->uncached_type == STREAMTYPE_CDDA)
-        demux = "+rawaudio";
+        params.force_format = "+rawaudio";
 
     char *t = NULL;
     stream_control(demuxer->stream, STREAM_CTRL_GET_DISC_NAME, &t);
@@ -309,7 +310,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     stream_peek(demuxer->stream, 1);
     reset_pts(demuxer);
 
-    p->slave = demux_open(demuxer->stream, demux, NULL, demuxer->global);
+    p->slave = demux_open(demuxer->stream, &params, demuxer->global);
     if (!p->slave)
         return -1;
 

@@ -167,7 +167,7 @@ static int enable_cache(struct mpv_global *global, struct stream **stream,
 
     stream_enable_cache(stream, &opts->stream_cache);
 
-    *demuxer = demux_open(*stream, "mkv", params, global);
+    *demuxer = demux_open(*stream, params, global);
     if (!*demuxer) {
         talloc_free(filename);
         free_stream(*stream);
@@ -197,6 +197,7 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
 {
     bool was_valid = false;
     struct demuxer_params params = {
+        .force_format = "mkv",
         .matroska_num_wanted_uids = *num_sources,
         .matroska_wanted_uids = *uids,
         .matroska_wanted_segment = segment,
@@ -205,7 +206,7 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
     struct stream *s = stream_open(filename, ctx->global);
     if (!s)
         return false;
-    struct demuxer *d = demux_open(s, "mkv", &params, ctx->global);
+    struct demuxer *d = demux_open(s, &params, ctx->global);
 
     if (!d) {
         free_stream(s);

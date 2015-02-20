@@ -689,21 +689,20 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         goto err_out;
     stream_enable_cache(&stream, &opts->stream_cache);
 
-    char *demuxer_name = NULL;
-    switch (filter) {
-    case STREAM_SUB:
-        demuxer_name = opts->sub_demuxer_name;
-        break;
-    case STREAM_AUDIO:
-        demuxer_name = opts->audio_demuxer_name;
-        break;
-    }
-
     struct demuxer_params params = {
         .expect_subtitle = filter == STREAM_SUB,
     };
-    struct demuxer *demuxer =
-        demux_open(stream, demuxer_name, &params, mpctx->global);
+
+    switch (filter) {
+    case STREAM_SUB:
+        params.force_format = opts->sub_demuxer_name;
+        break;
+    case STREAM_AUDIO:
+        params.force_format = opts->audio_demuxer_name;
+        break;
+    }
+
+    struct demuxer *demuxer = demux_open(stream, &params, mpctx->global);
     if (!demuxer) {
         free_stream(stream);
         goto err_out;
@@ -888,7 +887,7 @@ static void load_chapters(struct MPContext *mpctx)
         struct stream *stream = stream_create(chapter_file, STREAM_READ,
                                         mpctx->playback_abort, mpctx->global);
         if (stream) {
-            struct demuxer *demux = demux_open(stream, NULL, NULL, mpctx->global);
+            struct demuxer *demux = demux_open(stream, NULL, mpctx->global);
             if (demux) {
                 src = demux;
                 free_src = true;
@@ -966,7 +965,8 @@ static void open_demux_thread(void *pctx)
     struct demux_open_args *args = pctx;
     struct stream *s = args->stream;
     struct mpv_global *global = args->global;
-    args->demux = demux_open(s, global->opts->demuxer_name, NULL, global);
+    struct demuxer_params p = {.force_format = global->opts->demuxer_name};
+    args->demux = demux_open(s, &p, global);
     if (args->demux)
         args->tl = timeline_load(global, args->log, args->demux);
 }

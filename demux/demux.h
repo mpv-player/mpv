@@ -166,6 +166,7 @@ typedef struct demux_attachment
 } demux_attachment_t;
 
 struct demuxer_params {
+    char *force_format;
     int matroska_num_wanted_uids;
     struct matroska_segment_uid *matroska_wanted_uids;
     int matroska_wanted_segment;
@@ -255,8 +256,7 @@ struct demux_packet *demux_read_any_packet(struct demuxer *demuxer);
 
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
-struct demuxer *demux_open(struct stream *stream, char *force_format,
-                           struct demuxer_params *params,
+struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
                            struct mpv_global *global);
 
 void demux_start_thread(struct demuxer *demuxer);
