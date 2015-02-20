@@ -47,6 +47,7 @@
 struct tl_ctx {
     struct mp_log *log;
     struct mpv_global *global;
+    struct timeline *tl;
 
     struct demuxer *demuxer;
 
@@ -174,7 +175,11 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
         .matroska_was_valid = &was_valid,
         .disable_cache = true,
     };
-    struct demuxer *d = demux_open_url(filename, &params, NULL, ctx->global);
+    struct mp_cancel *cancel = ctx->tl->cancel;
+    if (mp_cancel_test(cancel))
+        return false;
+
+    struct demuxer *d = demux_open_url(filename, &params, cancel, ctx->global);
     if (!d)
         return false;
 
@@ -212,7 +217,7 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
             {
                 free_demuxer_and_stream(d);
                 params.disable_cache = false;
-                d = demux_open_url(filename, &params, NULL, ctx->global);
+                d = demux_open_url(filename, &params, cancel, ctx->global);
                 if (!d)
                     continue;
             }
@@ -518,6 +523,7 @@ void build_ordered_chapter_timeline(struct timeline *tl)
     *ctx = (struct tl_ctx){
         .log = tl->log,
         .global = tl->global,
+        .tl = tl,
         .demuxer = demuxer,
     };
 

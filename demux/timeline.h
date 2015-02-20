@@ -10,6 +10,7 @@ struct timeline_part {
 struct timeline {
     struct mpv_global *global;
     struct mp_log *log;
+    struct mp_cancel *cancel;
 
     // main source
     struct demuxer *demuxer;

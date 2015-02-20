@@ -141,7 +141,7 @@ static struct demuxer *open_source(struct timeline *tl, char *filename)
         if (strcmp(d->stream->url, filename) == 0)
             return d;
     }
-    struct demuxer *d = demux_open_url(filename, NULL, NULL, tl->global);
+    struct demuxer *d = demux_open_url(filename, NULL, tl->cancel, tl->global);
     if (d) {
         MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, d);
     } else {

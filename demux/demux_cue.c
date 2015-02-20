@@ -192,7 +192,7 @@ static bool try_open(struct timeline *tl, char *filename)
         || bstrcasecmp(bstr0(tl->demuxer->filename), bfilename) == 0)
         return false;
 
-    struct stream *s = stream_open(filename, tl->global);
+    struct stream *s = stream_create(filename, STREAM_READ, tl->cancel, tl->global);
     if (!s)
         return false;
     struct demuxer *d = demux_open(s, NULL, tl->global);
