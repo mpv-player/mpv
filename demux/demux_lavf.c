@@ -81,7 +81,7 @@ const struct m_sub_options demux_lavf_conf = {
         OPT_INTRANGE("buffersize", buffersize, 0, 1, 10 * 1024 * 1024,
                      OPTDEF_INT(BIO_BUFFER_SIZE)),
         OPT_FLAG("allow-mimetype", allow_mimetype, 0),
-        OPT_INTRANGE("probescore", probescore, 0, 0, 100),
+        OPT_INTRANGE("probescore", probescore, 0, 1, AVPROBE_SCORE_MAX),
         OPT_STRING("cryptokey", cryptokey, 0),
         OPT_CHOICE("genpts-mode", genptsmode, 0,
                    ({"lavf", 1}, {"no", 0})),
@@ -91,6 +91,10 @@ const struct m_sub_options demux_lavf_conf = {
     .size = sizeof(struct demux_lavf_opts),
     .defaults = &(const struct demux_lavf_opts){
         .allow_mimetype = 1,
+        // AVPROBE_SCORE_MAX/4 + 1 is the "recommended" limit. Below that, the
+        // user is supposed to retry with larger probe sizes until a higher
+        // value is reached.
+        .probescore = AVPROBE_SCORE_MAX/4 + 1,
     },
 };
 
@@ -294,6 +298,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     if (!lavfdopts->allow_mimetype || !mime_type)
         mime_type = "";
 
+    AVInputFormat *forced_format = NULL;
     const char *format = lavfdopts->format;
     if (!format)
         format = s->lavf_type;
@@ -304,21 +309,12 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
             list_formats(demuxer);
             return -1;
         }
-        priv->avif = av_find_input_format(format);
-        if (!priv->avif) {
+        forced_format = av_find_input_format(format);
+        if (!forced_format) {
             MP_FATAL(demuxer, "Unknown lavf format %s\n", format);
             return -1;
         }
-        MP_VERBOSE(demuxer, "Forced lavf %s demuxer\n", priv->avif->long_name);
-        goto success;
     }
-
-    // AVPROBE_SCORE_MAX/4 + 1 is the "recommended" limit. Below that, the user
-    // is supposed to retry with larger probe sizes until a higher value is
-    // reached.
-    int min_probe = AVPROBE_SCORE_MAX/4 + 1;
-    if (lavfdopts->probescore)
-        min_probe = lavfdopts->probescore;
 
     AVProbeData avpd = {
         // Disable file-extension matching with normal checks
@@ -331,20 +327,27 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 
     bool final_probe = false;
     do {
-        int nsize = av_clip(avpd.buf_size * 2, INITIAL_PROBE_SIZE,
-                            PROBE_BUF_SIZE);
-        bstr buf = stream_peek(s, nsize);
-        if (buf.len <= avpd.buf_size)
-            final_probe = true;
-        memcpy(avpd.buf, buf.start, buf.len);
-        avpd.buf_size = buf.len;
-
         int score = 0;
-        priv->avif = av_probe_input_format2(&avpd, avpd.buf_size > 0, &score);
+
+        if (forced_format) {
+            priv->avif = forced_format;
+            score = AVPROBE_SCORE_MAX;
+        } else {
+            int nsize = av_clip(avpd.buf_size * 2, INITIAL_PROBE_SIZE,
+                                PROBE_BUF_SIZE);
+            bstr buf = stream_peek(s, nsize);
+            if (buf.len <= avpd.buf_size)
+                final_probe = true;
+            memcpy(avpd.buf, buf.start, buf.len);
+            avpd.buf_size = buf.len;
+
+            priv->avif = av_probe_input_format2(&avpd, avpd.buf_size > 0, &score);
+        }
 
         if (priv->avif) {
-            MP_VERBOSE(demuxer, "Found '%s' at score=%d size=%d.\n",
-                       priv->avif->name, score, avpd.buf_size);
+            MP_VERBOSE(demuxer, "Found '%s' at score=%d size=%d%s.\n",
+                       priv->avif->name, score, avpd.buf_size,
+                       forced_format ? " (forced)" : "");
 
             for (int n = 0; format_hacks[n].ff_name; n++) {
                 const struct format_hack *entry = &format_hacks[n];
@@ -356,7 +359,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
                 break;
             }
 
-            if (score >= min_probe)
+            if (score >= lavfdopts->probescore)
                 break;
 
             if (priv->format_hack.probescore &&
@@ -371,7 +374,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 
     av_free(avpd.buf);
 
-    if (priv->avif && !format && priv->format_hack.ignore) {
+    if (priv->avif && !forced_format && priv->format_hack.ignore) {
         MP_VERBOSE(demuxer, "Format blacklisted.\n");
         priv->avif = NULL;
     }
@@ -380,8 +383,6 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         MP_VERBOSE(demuxer, "No format found, try lowering probescore or forcing the format.\n");
         return -1;
     }
-
-success:
 
     demuxer->filetype = priv->avif->name;
 
