@@ -294,6 +294,16 @@ static double lanczos(kernel *k, double x)
     return radius * sin(pix) * sin(pix / radius) / (pix * pix);
 }
 
+static double ginseng(kernel *k, double x)
+{
+    double radius = k->radius;
+    if (fabs(x) < 1e-8)
+        return 1.0;
+    if (fabs(x) >= radius)
+        return 0.0;
+    return jinc(k, x) * sinc(k, x / radius);
+}
+
 static double ewa_lanczos(kernel *k, double x)
 {
     double radius = k->radius;
@@ -365,6 +375,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"gaussian",       -1,  gaussian, .params = {28.85390081777927, NAN} },
     {"sinc",           -1,  sinc},
     {"ewa_lanczos",    -1,  ewa_lanczos, .polar = true},
+    {"ginseng",        -1,  ginseng,     .polar = true},
     {"lanczos",        -1,  lanczos},
     {"blackman",       -1,  blackman},
     {0}
