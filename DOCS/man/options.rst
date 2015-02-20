@@ -552,7 +552,8 @@ Video
 
     The ``vaapi-copy`` mode allows you to use vaapi with any VO. Because
     this copies the decoded video back to system RAM, it's likely less efficient
-    than the ``vaapi`` mode.
+    than the ``vaapi`` mode. But there are reports that this is actually faster
+    as well, and avoids many issues with ``vaapi``.
 
     .. note::
 
