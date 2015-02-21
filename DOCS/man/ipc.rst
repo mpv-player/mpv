@@ -4,9 +4,7 @@ JSON IPC
 mpv can be controlled by external programs using the JSON-based IPC protocol. It
 can be enabled by specifying the path to a unix socket using the option
 ``--input-unix-socket``. Clients can connect to this socket and send commands to
-the player or receive events from it. You can use the ``socat`` tool to send
-commands (and receive reply) from the shell. See the ``--idle`` option how to
-make mpv start without exiting immediately or playing a file.
+the player or receive events from it.
 
 .. warning::
 
@@ -15,6 +13,38 @@ make mpv start without exiting immediately or playing a file.
     themselves are insecure too. For example, the ``run`` command is exposed,
     which can run arbitrary system commands. The use-case is controlling the
     player locally. This is not different from the MPlayer slave protocol.
+
+Socat example
+-------------
+
+You can use the ``socat`` tool to send commands (and receive reply) from the
+shell. Assuming mpv was started with:
+
+::
+
+    mpv file.mkv --input-unix-socket=/tmp/mpvsocket
+
+Then you can control it using socat:
+
+::
+
+    > echo '{ "command": ["get_property", "playback-time"] }' | socat - /tmp/mpvsocket
+    {"data":190.482000,"error":"success"}
+
+In this case, socat copies data between stdin/stdout and the mpv socket
+connection.
+
+See the ``--idle`` option how to make mpv start without exiting immediately or
+playing a file.
+
+It's also possible to send input.conf style text-only commands:
+
+::
+
+    > echo 'show_text ${playback-time}' | socat - /tmp/mpvsocket
+
+But you won't get a reply over the socket. (This particular command shows the
+playback time on the player's OSD.)
 
 Protocol
 --------
