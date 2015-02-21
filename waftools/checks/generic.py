@@ -103,6 +103,8 @@ def check_pkg_config(*args, **kw_ext):
         if result:
             ctx.define(defkey, 1)
         else:
+            ctx.add_optional_message(dependency_identifier,
+                                     "'{0}' not found".format(" ".join(sargs)))
             ctx.undefine(defkey)
         return result
     return fn
