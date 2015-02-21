@@ -274,8 +274,9 @@ iconv support use --disable-iconv.",
         'desc': 'SSA/ASS support',
         'func': check_pkg_config('libass', '>= 0.12.1'),
         'req': True,
-        'fmsg': "Unable to find development files for libass. Aborting. \
-If you really mean to compile without libass support use --disable-libass."
+        'fmsg': "Unable to find development files for libass, or the version " +
+                "found is too old. Aborting. If you really mean to compile " +
+                "without libass support use --disable-libass."
     }, {
         'name': '--libass-osd',
         'desc': 'libass OSD support',
