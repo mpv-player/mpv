@@ -59,66 +59,45 @@
 #include "command.h"
 #include "libmpv/client.h"
 
-static void close_unused_demuxers(struct MPContext *mpctx)
-{
-    for (int i = mpctx->num_sources - 1; i >= 0; i--) {
-        struct demuxer *d = mpctx->sources[i];
-
-        if (i == 0 || d == mpctx->track_layout)
-            goto skip;
-        for (int t = 0; t < mpctx->num_tracks; t++) {
-            if (d == mpctx->tracks[t]->demuxer)
-                goto skip;
-        }
-        for (int t = 0; t < mpctx->num_timeline_parts; t++) {
-            if (mpctx->timeline[t].source == d)
-                goto skip;
-        }
-
-        uninit_stream_sub_decoders(d);
-        free_demuxer_and_stream(d);
-        MP_TARRAY_REMOVE_AT(mpctx->sources, mpctx->num_sources, i);
-
-    skip:;
-    }
-}
-
 static void uninit_demuxer(struct MPContext *mpctx)
 {
     assert(!mpctx->d_video && !mpctx->d_audio &&
            !mpctx->d_sub[0] && !mpctx->d_sub[1]);
-    for (int i = 0; i < mpctx->num_tracks; i++) {
-        talloc_free(mpctx->tracks[i]);
-    }
-    mpctx->num_tracks = 0;
     for (int r = 0; r < NUM_PTRACKS; r++) {
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
             mpctx->current_track[r][t] = NULL;
     }
     mpctx->track_layout = NULL;
-    mpctx->master_demuxer = NULL;
     mpctx->demuxer = NULL;
-    if (!mpctx->tl)
-        mpctx->num_timeline_parts = 0;
-    for (int i = 0; i < mpctx->num_sources; i++)
-        uninit_stream_sub_decoders(mpctx->sources[i]);
-    close_unused_demuxers(mpctx);
-    if (mpctx->tl) {
-        timeline_destroy(mpctx->tl);
-    } else {
-        talloc_free(mpctx->timeline);
-    }
-    mpctx->timeline = NULL;
-    mpctx->num_timeline_parts = 0;
-    mpctx->tl = NULL;
-    if (mpctx->num_sources > 0)
-        free_demuxer(mpctx->sources[0]);
-    talloc_free(mpctx->sources);
-    mpctx->sources = NULL;
-    mpctx->num_sources = 0;
     talloc_free(mpctx->chapters);
     mpctx->chapters = NULL;
     mpctx->num_chapters = 0;
+
+    // per-stream cached subtitle state
+    for (int i = 0; i < mpctx->num_sources; i++)
+        uninit_stream_sub_decoders(mpctx->sources[i]);
+
+    // close demuxers for external tracks
+    for (int n = mpctx->num_tracks - 1; n >= 0; n--) {
+        mpctx->tracks[n]->selected = false;
+        mp_remove_track(mpctx, mpctx->tracks[n]);
+    }
+    for (int i = 0; i < mpctx->num_tracks; i++)
+        talloc_free(mpctx->tracks[i]);
+    mpctx->num_tracks = 0;
+
+    mpctx->timeline = NULL;
+    mpctx->num_timeline_parts = 0;
+    timeline_destroy(mpctx->tl);
+    mpctx->tl = NULL;
+
+    free_demuxer(mpctx->master_demuxer);
+    mpctx->master_demuxer = NULL;
+
+    talloc_free(mpctx->sources);
+    mpctx->sources = NULL;
+    mpctx->num_sources = 0;
+
     mpctx->video_offset = 0;
 }
 
@@ -660,13 +639,23 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     if (track->selected)
         return false;
 
+    struct demuxer *d = track->demuxer;
+
     int index = 0;
     while (index < mpctx->num_tracks && mpctx->tracks[index] != track)
         index++;
     MP_TARRAY_REMOVE_AT(mpctx->tracks, mpctx->num_tracks, index);
     talloc_free(track);
 
-    close_unused_demuxers(mpctx);
+    // Close the demuxer, unless there is still a track using it. These are
+    // all external tracks, so there are no complications due to the timeline
+    // mechanism switching the track's demuxer dynamically.
+    bool in_use = false;
+    for (int n = mpctx->num_tracks - 1; n >= 0 && !in_use; n--)
+        in_use |= mpctx->tracks[n]->demuxer == d;
+
+    if (!in_use)
+        free_demuxer_and_stream(d);
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
@@ -975,7 +964,7 @@ static void open_demux_reentrant(struct MPContext *mpctx)
     mpctx_run_reentrant(mpctx, open_demux_thread, &args);
     if (args.demux) {
         talloc_steal(args.demux, args.global);
-        mpctx->demuxer = args.demux;
+        mpctx->master_demuxer = args.demux;
         mpctx->tl = args.tl;
     } else {
         talloc_free(args.global);
@@ -984,9 +973,10 @@ static void open_demux_reentrant(struct MPContext *mpctx)
 
 static void load_timeline(struct MPContext *mpctx)
 {
-    mpctx->track_layout = mpctx->demuxer;
+    mpctx->track_layout = mpctx->master_demuxer;
 
-    MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, mpctx->demuxer);
+    MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources,
+                     mpctx->master_demuxer);
 
     if (mpctx->tl) {
         mpctx->timeline = mpctx->tl->parts;
@@ -995,10 +985,11 @@ static void load_timeline(struct MPContext *mpctx)
         mpctx->chapters = demux_copy_chapter_data(mpctx->tl->chapters,
                                                   mpctx->tl->num_chapters);
         mpctx->track_layout = mpctx->tl->track_layout;
-        mpctx->num_sources = 0;
         for (int n = 0; n < mpctx->tl->num_sources; n++) {
-            MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources,
-                             mpctx->tl->sources[n]);
+            if (mpctx->tl->sources[n] != mpctx->master_demuxer) {
+                MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources,
+                                 mpctx->tl->sources[n]);
+            }
         }
     }
 
@@ -1111,12 +1102,12 @@ goto_reopen_demuxer: ;
     mp_nav_reset(mpctx);
 
     open_demux_reentrant(mpctx);
-    if (!mpctx->demuxer) {
+    if (!mpctx->master_demuxer) {
         MP_ERR(mpctx, "Failed to recognize file format.\n");
         mpctx->error_playing = MPV_ERROR_UNKNOWN_FORMAT;
         goto terminate_playback;
     }
-    mpctx->master_demuxer = mpctx->demuxer;
+    mpctx->demuxer = mpctx->master_demuxer;
 
     load_timeline(mpctx);
 
