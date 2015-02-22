@@ -80,6 +80,7 @@ mp.add_hook("on_load", 10, function ()
         end
 
         local format = mp.get_property("options/ytdl-format")
+        local params = mp.get_property("options/ytdl-params")
 
         -- subformat workaround
         local subformat = "srt"
@@ -94,6 +95,11 @@ mp.add_hook("on_load", 10, function ()
         if (format ~= "") then
             table.insert(command, "--format")
             table.insert(command, format)
+        end
+        if (params ~= "") then
+            for param in params:gmatch("%S+") do
+                table.insert(command, param)
+            end
         end
         table.insert(command, "--")
         table.insert(command, url)

@@ -454,6 +454,14 @@ Program Behavior
     ``bestvideo+bestaudio``.
     (Default: ``best``)
 
+``--ytdl-params=<youtube-dl options>``
+    This option allows the user to pass non-supported options directly to
+    youtube-dl, such as ``--proxy URL``, ``--username USERNAME`` and
+    ``--password PASSWORD``.
+
+    There is no sanity checking so it's possible to break things (i.e.
+    if you pass ``--version`` mpv exits with random JSON error).
+
 Video
 -----
 
