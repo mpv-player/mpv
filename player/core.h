@@ -180,7 +180,7 @@ typedef struct MPContext {
     int64_t shown_vframes, shown_aframes;
 
     struct stream *stream; // stream that was initially opened
-    struct demuxer **sources;
+    struct demuxer **sources; // all open demuxers
     int num_sources;
 
     struct timeline *tl;
@@ -191,7 +191,7 @@ typedef struct MPContext {
     int num_chapters;
     double video_offset;
 
-    struct demuxer *demuxer;
+    struct demuxer *demuxer; // can change with timeline
     struct mp_tags *filtered_tags;
 
     struct track **tracks;
