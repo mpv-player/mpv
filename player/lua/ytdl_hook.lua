@@ -80,6 +80,7 @@ mp.add_hook("on_load", 10, function ()
         end
 
         local format = mp.get_property("options/ytdl-format")
+        local raw_options = mp.get_property_native("options/ytdl-raw-options")
 
         -- subformat workaround
         local subformat = "ass/srt/best"
@@ -91,6 +92,12 @@ mp.add_hook("on_load", 10, function ()
         if (format ~= "") then
             table.insert(command, "--format")
             table.insert(command, format)
+        end
+        for param, arg in pairs(raw_options) do
+            table.insert(command, "--" .. param)
+            if (arg ~= "") then
+                table.insert(command, arg)
+            end
         end
         table.insert(command, "--")
         table.insert(command, url)

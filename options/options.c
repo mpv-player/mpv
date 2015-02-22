@@ -133,6 +133,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
     OPT_FLAG("ytdl", lua_load_ytdl, CONF_GLOBAL),
     OPT_STRING("ytdl-format", lua_ytdl_format, CONF_GLOBAL),
+    OPT_KEYVALUELIST("ytdl-raw-options", lua_ytdl_raw_options, CONF_GLOBAL),
     OPT_FLAG("load-scripts", auto_load_scripts, CONF_GLOBAL),
 #endif
 
@@ -716,6 +717,7 @@ const struct MPOpts mp_default_opts = {
     .lua_load_osc = 1,
     .lua_load_ytdl = 1,
     .lua_ytdl_format = NULL,
+    .lua_ytdl_raw_options = NULL,
 #endif
     .auto_load_scripts = 1,
     .loop_times = 1,
