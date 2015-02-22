@@ -209,6 +209,8 @@
 - (void)signalMousePosition
 {
     NSPoint p = [self convertPointToPixels:[self mouseLocation]];
+    p.x = MIN(MAX(p.x, 0), self.bounds.size.width-1);
+    p.y = MIN(MAX(p.y, 0), self.bounds.size.height-1);
     [self.adapter signalMouseMovement:p];
 }
 
