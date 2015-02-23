@@ -3,7 +3,7 @@ local msg = require 'mp.msg'
 
 local ytdl = {
     path = "youtube-dl",
-    minver = "2014.11.26",
+    minver = "2015.02.23.1",
     vercheck = nil,
 }
 
@@ -82,10 +82,7 @@ mp.add_hook("on_load", 10, function ()
         local format = mp.get_property("options/ytdl-format")
 
         -- subformat workaround
-        local subformat = "srt"
-        if url:find("crunchyroll.com") then
-            subformat = "ass"
-        end
+        local subformat = "ass/srt/best"
 
         local command = {
             ytdl.path, "-J", "--flat-playlist", "--all-subs",
@@ -209,8 +206,8 @@ mp.add_hook("on_load", 10, function ()
             mp.set_property("file-local-options/media-title", json.title)
 
             -- add subtitles
-            if not (json.subtitles == nil) then
-                for lang, script in pairs(json.subtitles) do
+            if not (json.requested_subtitles == nil) then
+                for lang, sub_info in pairs(json.requested_subtitles) do
                     msg.verbose("adding subtitle ["..lang.."]")
 
                     local slang = lang
@@ -218,8 +215,13 @@ mp.add_hook("on_load", 10, function ()
                         slang = lang:sub(1,2)
                     end
 
-                    mp.commandv("sub_add", "memory://"..script,
-                        "auto", lang.." "..subformat, slang)
+                    if not (sub_info.data == nil) then
+                        sub = "memory://"..sub_info.data
+                    else
+                        sub = sub_info.url
+                    end
+                    mp.commandv("sub_add", sub,
+                        "auto", lang.." "..sub_info.ext, slang)
                 end
             end
 
