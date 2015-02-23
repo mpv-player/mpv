@@ -307,43 +307,14 @@ static double ginseng(kernel *k, double x)
 static double ewa_lanczos(kernel *k, double x)
 {
     double radius = k->radius;
-    assert(radius >= 1.0);
-
-    // This is already three orders of magnitude slower than anything you could
-    // possibly hope to play back in realtime and results in tons of ringing
-    // artifacts, so I doubt anybody will complain.
-    if (radius > 16)
-        radius = 16;
-
     if (fabs(x) < 1e-8)
         return 1.0;
     if (fabs(x) >= radius)
         return 0.0;
-
-    // Precomputed zeros of the jinc() function, needed to adjust the
-    // window size. Computing this at runtime is nontrivial.
-    // Copied from: https://github.com/AviSynth/jinc-resize/blob/master/JincResize/JincFilter.cpp#L171
-    static double jinc_zeros[16] = {
-        1.2196698912665045,
-        2.2331305943815286,
-        3.2383154841662362,
-        4.2410628637960699,
-        5.2427643768701817,
-        6.2439216898644877,
-        7.2447598687199570,
-        8.2453949139520427,
-        9.2458926849494673,
-        10.246293348754916,
-        11.246622794877883,
-        12.246898461138105,
-        13.247132522181061,
-        14.247333735806849,
-        15.247508563037300,
-        16.247661874700962
-    };
-
-    double window = jinc_zeros[0] / jinc_zeros[(int)radius - 1];
-    return jinc(k, x) * jinc(k, x*window);
+    // First zero of the jinc function. We simply scale it to fit into the
+    // given radius.
+    double jinc_zero = 1.2196698912665045;
+    return jinc(k, x) * jinc(k, x * jinc_zero / radius);
 }
 
 static double blackman(kernel *k, double x)
