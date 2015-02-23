@@ -313,6 +313,15 @@ static double ewa_lanczos(kernel *k, double x)
     return jinc(k, x) * jinc(k, x * jinc_zero / radius);
 }
 
+static double ewa_hanning(kernel *k, double x)
+{
+    double radius = k->radius;
+    if (fabs(x) >= radius)
+        return 0.0;
+    // Jinc windowed by the hanning window
+    return jinc(k, x) * hanning(k, x / radius);
+}
+
 static double blackman(kernel *k, double x)
 {
     double radius = k->size / 2;
@@ -342,6 +351,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"gaussian",       -1,  gaussian, .params = {28.85390081777927, NAN} },
     {"sinc",           -1,  sinc},
     {"ewa_lanczos",    -1,  ewa_lanczos, .polar = true},
+    {"ewa_hanning",    -1,  ewa_hanning, .polar = true},
     {"ginseng",        -1,  ginseng,     .polar = true},
     {"lanczos",        -1,  lanczos},
     {"blackman",       -1,  blackman},
