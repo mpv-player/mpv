@@ -348,6 +348,10 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"ewa_lanczos",    -1,  ewa_lanczos, .params = {1.0, NAN}, .polar = true},
     {"ewa_hanning",    -1,  ewa_hanning, .params = {1.0, NAN}, .polar = true},
     {"ewa_ginseng",    -1,  ewa_ginseng, .params = {1.0, NAN}, .polar = true},
+    // Radius is based on the true jinc radius, slightly sharpened as per
+    // calculations by Nicolas Robidoux. Source: Imagemagick's magick/resize.c
+    {"ewa_lanczossharp", 3.2383154841662362, ewa_lanczos,
+                         .params = {0.9812505644269356, NAN}, .polar = true},
     {"lanczos",        -1,  lanczos},
     {"blackman",       -1,  blackman},
     {0}

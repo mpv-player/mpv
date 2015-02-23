@@ -310,11 +310,19 @@ Available video output drivers are:
 
         ``ewa_lanczos``
             Elliptic weighted average Lanczos scaling. Also known as Jinc.
-            Relatively slow, but very good quality. The number of taps can
-            be controlled with ``scale-radius``. Adding extra taps makes the
+            Relatively slow, but very good quality. The radius can be
+            controlled with ``scale-radius``. Increasing the radius makes the
             filter sharper but adds more ringing.
 
             This filter supports antiringing (see ``scale-antiring``).
+
+        ``ewa_lanczossharp``
+            A slightly sharpened version of ewa_lanczos, preconfigured to use
+            an ideal radius and parameter. If your hardware can run it, this is
+            probably what you should use by default.
+
+            Note: This filter has a fixed radius. Use ``ewa_lanczos`` if you
+            want to adjust it.
 
         ``mitchell``
             Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
