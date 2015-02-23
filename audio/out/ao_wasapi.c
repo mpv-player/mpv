@@ -113,6 +113,31 @@ exit_label:
     return;
 }
 
+static void thread_reset(struct ao *ao)
+{
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    HRESULT hr;
+    MP_DBG(state, "Thread Reset\n");
+    hr = IAudioClient_Stop(state->pAudioClient);
+    /* we may get S_FALSE if the stream is already stopped */
+    if (hr != S_OK &&
+        hr != S_FALSE) {
+        MP_ERR(state, "IAudioClient_Stop returned: %s (0x%"PRIx32")\n",
+               wasapi_explain_err(hr), (uint32_t) hr);
+    }
+
+    /* we may get S_FALSE if the stream is already reset */
+    hr = IAudioClient_Reset(state->pAudioClient);
+    if (hr != S_OK &&
+        hr != S_FALSE) {
+        MP_ERR(state, "IAudioClient_Reset returned: %s (0x%"PRIx32")\n",
+               wasapi_explain_err(hr), (uint32_t) hr);
+    }
+
+    atomic_store(&state->sample_count, 0);
+    return;
+}
+
 static DWORD __stdcall ThreadLoop(void *lpParameter)
 {
     struct ao *ao = lpParameter;
@@ -126,10 +151,10 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
 
     DWORD waitstatus;
     HANDLE playcontrol[] =
-        {state->hUninit, state->hFeed, state->hForceFeed, NULL};
+        {state->hUninit, state->hFeed, state->hForceFeed, state->hReset, NULL};
     MP_DBG(ao, "Entering dispatch loop\n");
     while (true) { /* watch events */
-        waitstatus = MsgWaitForMultipleObjects(3, playcontrol, FALSE, INFINITE,
+        waitstatus = MsgWaitForMultipleObjects(4, playcontrol, FALSE, INFINITE,
                                                QS_POSTMESSAGE | QS_SENDMESSAGE);
         switch (waitstatus) {
         case WAIT_OBJECT_0: /*shutdown*/
@@ -142,12 +167,15 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
             thread_feed(ao);
             SetEvent(state->hFeedDone);
             break;
-        case (WAIT_OBJECT_0 + 3): /* messages to dispatch (COM marshalling) */
+        case (WAIT_OBJECT_0 + 3): /* reset */
+            thread_reset(ao);
+           break;
+        case (WAIT_OBJECT_0 + 4): /* messages to dispatch (COM marshalling) */
             MP_DBG(ao, "Dispatch\n");
             wasapi_dispatch();
             break;
         default:
-            MP_ERR(ao, "Unhandled case in thread loop");
+            MP_ERR(ao, "Unhandled case in thread loop\n");
             goto exit_label;
         }
     }
@@ -167,6 +195,7 @@ static void closehandles(struct ao *ao)
     if (state->hFeed)      CloseHandle(state->hFeed);
     if (state->hForceFeed) CloseHandle(state->hForceFeed);
     if (state->hFeedDone)  CloseHandle(state->hFeedDone);
+    if (state->hReset)     CloseHandle(state->hReset);
     if (state->threadLoop) CloseHandle(state->threadLoop);
 }
 
@@ -222,8 +251,9 @@ static int init(struct ao *ao)
     state->hFeed = CreateEventW(NULL, FALSE, FALSE, NULL); /* for wasapi event mode */
     state->hForceFeed = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->hFeedDone = CreateEventW(NULL, FALSE, FALSE, NULL);
+    state->hReset = CreateEventW(NULL, FALSE, FALSE, NULL);
     if (!state->init_done || !state->hFeed || !state->hUninit ||
-        !state->hForceFeed || !state->hFeedDone)
+        !state->hForceFeed || !state->hFeedDone || !state->hReset)
     {
         MP_ERR(ao, "Error initing events\n");
         uninit(ao);
@@ -335,10 +365,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 static void audio_reset(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-
-    IAudioClient_Stop(state->pAudioClientProxy);
-    IAudioClient_Reset(state->pAudioClientProxy);
-    atomic_store(&state->sample_count, 0);
+    SetEvent(state->hReset);
 }
 
 static void audio_resume(struct ao *ao)

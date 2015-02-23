@@ -74,6 +74,7 @@ typedef struct wasapi_state {
     HANDLE hFeed; /* wasapi event */
     HANDLE hForceFeed; /* forces writing a buffer (e.g. before audio_resume) */
     HANDLE hFeedDone; /* set only after a hForceFeed */
+    HANDLE hReset; /* signal audio thread to reset the stream */
     HANDLE hTask; /* AV thread */
     DWORD taskIndex; /* AV task ID */
     WAVEFORMATEXTENSIBLE format;
