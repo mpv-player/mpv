@@ -67,6 +67,10 @@ def build(ctx):
         fn = "player/lua/" + fn
         ctx.file2string(source = fn, target = os.path.splitext(fn)[0] + ".inc")
 
+    ctx.file2string(
+        source = "player/javascript/defaults.js",
+        target = "player/javascript/defaults.js.inc")
+
     ctx.matroska_header(
         source = "demux/ebml.c demux/demux_mkv.c",
         target = "ebml_types.h")
@@ -220,6 +224,8 @@ def build(ctx):
         ( "player/main.c" ),
         ( "player/misc.c" ),
         ( "player/lua.c",                        "lua" ),
+        ( "player/javascript.c",                 "javascript" ),
+        ( "duktape/duktape.c",                   "duktape" ),
         ( "player/osd.c" ),
         ( "player/playloop.c" ),
         ( "player/screenshot.c" ),

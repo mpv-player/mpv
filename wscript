@@ -270,6 +270,20 @@ iconv support use --disable-iconv.",
         'desc' : 'Lua',
         'func': check_lua,
     }, {
+        'name' : '--duktape',
+        'desc' : 'Duktape (JS backend)',
+        'func':  check_cc(fragment=load_fragment('duk.c')),
+    }, {
+        'name' : 'mujs',
+        'desc' : 'MuJS (JS backend)',
+        'deps_neg' : [ 'duktape' ],
+        'func':  check_statement('mujs.h', 'js_setcontext(js_newstate(0, 0), 0)', lib='mujs'),
+    }, {
+        'name' : '--javascript',
+        'desc' : 'Javascript',
+        'deps_any': [ 'duktape', 'mujs' ],
+        'func' : check_true,
+    }, {
         'name': '--libass',
         'desc': 'SSA/ASS support',
         'func': check_pkg_config('libass', '>= 0.12.1'),
