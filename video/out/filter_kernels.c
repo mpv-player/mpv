@@ -190,9 +190,8 @@ static double bessel_i0(double epsilon, double x)
 static double kaiser(kernel *k, double x)
 {
     double a = k->params[0];
-    double b = k->params[1];
     double epsilon = 1e-12;
-    double i0a = 1 / bessel_i0(epsilon, b);
+    double i0a = 1 / bessel_i0(epsilon, a);
     return bessel_i0(epsilon, a * sqrt(1 - x * x)) * i0a;
 }
 
@@ -342,7 +341,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"hermite",        1,   hermite},
     {"quadric",        1.5, quadric},
     {"bicubic",        2,   bicubic},
-    {"kaiser",         1,   kaiser, .params = {6.33, 6.33} },
+    {"kaiser",         1,   kaiser, .params = {6.33, NAN} },
     {"catmull_rom",    2,   catmull_rom},
     {"mitchell",       2,   mitchell, .params = {1.0/3.0, 1.0/3.0} },
     {"spline16",       2,   spline16},
