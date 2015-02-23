@@ -72,8 +72,7 @@ typedef struct wasapi_state {
     IMMDeviceEnumerator *pEnumerator;
 
     HANDLE hFeed; /* wasapi event */
-    HANDLE hForceFeed; /* forces writing a buffer (e.g. before audio_resume) */
-    HANDLE hFeedDone; /* set only after a hForceFeed */
+    HANDLE hResume; /* signal audio thread to resume the stream */
     HANDLE hReset; /* signal audio thread to reset the stream */
     HANDLE hTask; /* AV thread */
     DWORD taskIndex; /* AV task ID */
@@ -81,7 +80,6 @@ typedef struct wasapi_state {
 
     /* WASAPI proxy handles, for Single-Threaded Apartment communication.
        One is needed for each object that's accessed by a different thread. */
-    IAudioClient *pAudioClientProxy;
     ISimpleAudioVolume *pAudioVolumeProxy;
     IAudioEndpointVolume *pEndpointVolumeProxy;
     IAudioSessionControl *pSessionControlProxy;
@@ -89,7 +87,6 @@ typedef struct wasapi_state {
     /* Streams used to marshal the proxy objects. The thread owning the actual objects
        needs to marshal proxy objects into these streams, and the thread that wants the
        proxies unmarshals them from here. */
-    IStream *sAudioClient;
     IStream *sAudioVolume;
     IStream *sEndpointVolume;
     IStream *sSessionControl;
