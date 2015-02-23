@@ -958,7 +958,6 @@ HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
     EXIT_ON_ERROR(hr);                                                    \
 } while (0)
 
-    UNMARSHAL(IID_IAudioClient,         state->pAudioClientProxy,    state->sAudioClient);
     UNMARSHAL(IID_ISimpleAudioVolume,   state->pAudioVolumeProxy,    state->sAudioVolume);
     UNMARSHAL(IID_IAudioEndpointVolume, state->pEndpointVolumeProxy, state->sEndpointVolume);
     UNMARSHAL(IID_IAudioSessionControl, state->pSessionControlProxy, state->sSessionControl);
@@ -973,7 +972,6 @@ exit_label:
 }
 
 void wasapi_release_proxies(wasapi_state *state) {
-    SAFE_RELEASE(state->pAudioClientProxy,    IUnknown_Release(state->pAudioClientProxy));
     SAFE_RELEASE(state->pAudioVolumeProxy,    IUnknown_Release(state->pAudioVolumeProxy));
     SAFE_RELEASE(state->pEndpointVolumeProxy, IUnknown_Release(state->pEndpointVolumeProxy));
     SAFE_RELEASE(state->pSessionControlProxy, IUnknown_Release(state->pSessionControlProxy));
@@ -991,7 +989,6 @@ static HRESULT create_proxies(struct wasapi_state *state) {
     EXIT_ON_ERROR(hr);                                             \
 } while (0)
 
-    MARSHAL(IID_IAudioClient,         state->sAudioClient,    state->pAudioClient);
     MARSHAL(IID_ISimpleAudioVolume,   state->sAudioVolume,    state->pAudioVolume);
     MARSHAL(IID_IAudioEndpointVolume, state->sEndpointVolume, state->pEndpointVolume);
     MARSHAL(IID_IAudioSessionControl, state->sSessionControl, state->pSessionControl);
@@ -1004,7 +1001,6 @@ exit_label:
 }
 
 static void destroy_proxies(struct wasapi_state *state) {
-    SAFE_RELEASE(state->sAudioClient,    IUnknown_Release(state->sAudioClient));
     SAFE_RELEASE(state->sAudioVolume,    IUnknown_Release(state->sAudioVolume));
     SAFE_RELEASE(state->sEndpointVolume, IUnknown_Release(state->sEndpointVolume));
     SAFE_RELEASE(state->sSessionControl, IUnknown_Release(state->sSessionControl));
