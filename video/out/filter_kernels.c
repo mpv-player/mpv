@@ -259,11 +259,7 @@ static double spline64(kernel *k, double x)
 static double gaussian(kernel *k, double x)
 {
     double p = k->params[0];
-    if (p > 100.0)
-        p = 100.0;
-    if (p < 1.0)
-        p = 1.0;
-    return pow(2.0, -(p / 10.0) * x * x);
+    return pow(2.0, -(M_E / p) * x * x);
 }
 
 static double sinc(kernel *k, double x)
@@ -347,7 +343,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"spline16",       2,   spline16},
     {"spline36",       3,   spline36},
     {"spline64",       4,   spline64},
-    {"gaussian",       -1,  gaussian, .params = {28.85390081777927, NAN} },
+    {"gaussian",       -1,  gaussian, .params = {1.0, NAN} },
     {"sinc",           -1,  sinc},
     {"ewa_lanczos",    -1,  ewa_lanczos, .polar = true},
     {"ewa_hanning",    -1,  ewa_hanning, .polar = true},
