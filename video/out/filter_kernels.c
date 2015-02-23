@@ -277,7 +277,7 @@ static double sinc(kernel *k, double x)
 
 static double jinc(kernel *k, double x)
 {
-    if (x == 0.0)
+    if (fabs(x) < 1e-8)
         return 1.0;
     double pix = M_PI * x;
     return 2.0 * j1(pix) / pix;
@@ -297,8 +297,6 @@ static double lanczos(kernel *k, double x)
 static double ginseng(kernel *k, double x)
 {
     double radius = k->radius;
-    if (fabs(x) < 1e-8)
-        return 1.0;
     if (fabs(x) >= radius)
         return 0.0;
     return jinc(k, x) * sinc(k, x / radius);
@@ -307,8 +305,6 @@ static double ginseng(kernel *k, double x)
 static double ewa_lanczos(kernel *k, double x)
 {
     double radius = k->radius;
-    if (fabs(x) < 1e-8)
-        return 1.0;
     if (fabs(x) >= radius)
         return 0.0;
     // First zero of the jinc function. We simply scale it to fit into the
