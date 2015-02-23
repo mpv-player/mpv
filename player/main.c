@@ -408,7 +408,9 @@ int mp_initialize(struct MPContext *mpctx)
         m_config_set_option0(mpctx->mconfig, "load-scripts", "no");
         m_config_set_option0(mpctx->mconfig, "osc", "no");
         m_config_set_option0(mpctx->mconfig, "framedrop", "no");
-        m_config_set_option0(mpctx->mconfig, "audio-channels", "stereo");
+        // never use auto
+        if (!opts->audio_output_channels.num)
+            m_config_set_option0(mpctx->mconfig, "audio-channels", "stereo");
         mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
     }
 #endif
