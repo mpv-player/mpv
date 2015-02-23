@@ -294,7 +294,7 @@ static double lanczos(kernel *k, double x)
     return radius * sin(pix) * sin(pix / radius) / (pix * pix);
 }
 
-static double ginseng(kernel *k, double x)
+static double ewa_ginseng(kernel *k, double x)
 {
     double radius = k->radius;
     if (fabs(x) >= radius)
@@ -352,7 +352,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"sinc",           -1,  sinc},
     {"ewa_lanczos",    -1,  ewa_lanczos, .polar = true},
     {"ewa_hanning",    -1,  ewa_hanning, .polar = true},
-    {"ginseng",        -1,  ginseng,     .polar = true},
+    {"ewa_ginseng",    -1,  ewa_ginseng, .polar = true},
     {"lanczos",        -1,  lanczos},
     {"blackman",       -1,  blackman},
     {0}
