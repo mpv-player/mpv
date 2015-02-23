@@ -226,11 +226,11 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel,
     char b[128] = {0};
 
     mp_snprintf_cat(b, sizeof(b), "%s", mp_image_params_to_str(&c->input_params));
-    mp_msg(c->log, msglevel, " [vd] %s\n", b);
+    mp_msg(c->log, msglevel, "  [vd] %s\n", b);
 
     for (vf_instance_t *f = c->first; f; f = f->next) {
         b[0] = '\0';
-        mp_snprintf_cat(b, sizeof(b), " [%s] ", f->info->name);
+        mp_snprintf_cat(b, sizeof(b), "  [%s] ", f->info->name);
         mp_snprintf_cat(b, sizeof(b), "%s", mp_image_params_to_str(&f->fmt_out));
         if (f->autoinserted)
             mp_snprintf_cat(b, sizeof(b), " [a]");
