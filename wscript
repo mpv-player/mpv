@@ -83,7 +83,7 @@ build_options = [
     }, {
         'name': '--test',
         'desc': 'test suite (using cmocka)',
-        'func': check_pkg_config('cmocka >= 0.4.1'),
+        'func': check_pkg_config('cmocka', '>= 0.4.1'),
     }, {
         'name': '--clang-database',
         'desc': 'generate a clang compilation database',
@@ -532,7 +532,7 @@ audio_output_features = [
     }, {
         'name': '--alsa',
         'desc': 'ALSA audio output',
-        'func': check_pkg_config('alsa >= 1.0.18'),
+        'func': check_pkg_config('alsa', '>= 1.0.18'),
     }, {
         'name': '--coreaudio',
         'desc': 'CoreAudio audio output',
