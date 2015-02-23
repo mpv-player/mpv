@@ -317,21 +317,28 @@ Available video output drivers are:
             This filter supports antiringing (see ``scale-antiring``).
 
         ``mitchell``
-            Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
-            ``scale-param1`` and ``scale-param2``. Both are set to 1/3 by default.
-            This filter is very good at downscaling (see ``scale-down``).
+            Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
+            ``scale-param1`` and ``scale-param2``. This filter is very good at
+            downscaling (see ``scale-down``).
 
         There are some more filters, but most are not as useful. For a complete
         list, pass ``help`` as value, e.g.::
 
             mpv --vo=opengl:scale=help
 
-    ``scale-param1=<value>``
-        Set filter parameters. Ignored if the filter is not tunable. These are
-        unset by default, and use the filter specific default if applicable.
+    ``scale-param1=<value>``, ``scale-param2=<value>``
+        Set filter parameters. Ignored if the filter is not tunable.
+        Currently, this affects the following filter parameters:
 
-    ``scale-param2=<value>``
-        See ``scale-param1``.
+        ``kaiser``
+            Window parameter (``alpha``). Defaults to 6.33.
+
+        ``mitchell``
+            Spline parameters (``B`` and ``C``). Defaults to 1/3 for both.
+
+        ``gaussian``
+            Scale parameter (``t``). Increasing this makes the result blurrier.
+            Defaults to 1.
 
     ``scale-radius=<r>``
         Set radius for filters listed below, must be a float number between 1.0
