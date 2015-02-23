@@ -814,15 +814,16 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
         APPENDF(shader, "#define DEF_SCALER%d \\\n    ", unit);
         char lut_fn[40];
         if (scaler->kernel->polar) {
-            int radius = (int)scaler->kernel->radius;
+            double radius = scaler->kernel->radius;
+            int bound = (int)ceil(radius);
             // SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT, WEIGHTS_FN, ANTIRING)
-            APPENDF(shader, "SAMPLE_CONVOLUTION_POLAR_R(%s, %d, %s, WEIGHTS%d, %f)\n",
+            APPENDF(shader, "SAMPLE_CONVOLUTION_POLAR_R(%s, %f, %s, WEIGHTS%d, %f)\n",
                     name, radius, lut_tex, unit, scaler->antiring);
 
             // Pre-compute unrolled weights matrix
             APPENDF(shader, "#define WEIGHTS%d(LUT) \\\n    ", unit);
-            for (int y = 1-radius; y <= radius; y++) {
-                for (int x = 1-radius; x <= radius; x++) {
+            for (int y = 1-bound; y <= bound; y++) {
+                for (int x = 1-bound; x <= bound; x++) {
                     // Since we can't know the subpixel position in advance,
                     // assume a worst case scenario.
                     int yy = y > 0 ? y-1 : y;
@@ -837,11 +838,11 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
                                 // anti-ringing
                                 (x >= 0 && y >= 0 && x <= 1 && y <= 1)
                                   ? "PRIMARY" : "HELPER",
-                                (double)radius, x, y);
+                                radius, x, y);
                     } else if (d < radius) {
                         // Samples on the edge, these are potential values
                         APPENDF(shader, "SAMPLE_POLAR_POTENTIAL(LUT, %f, %d, %d) \\\n    ",
-                                (double)radius, x, y);
+                                radius, x, y);
                     }
                 }
             }
