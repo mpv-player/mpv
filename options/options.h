@@ -68,7 +68,7 @@ typedef struct MPOpts {
     int lua_load_osc;
     int lua_load_ytdl;
     char *lua_ytdl_format;
-    char *lua_ytdl_params;
+    char **lua_ytdl_params;
 
     int auto_load_scripts;
 

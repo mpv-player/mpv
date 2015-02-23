@@ -133,7 +133,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
     OPT_FLAG("ytdl", lua_load_ytdl, CONF_GLOBAL),
     OPT_STRING("ytdl-format", lua_ytdl_format, CONF_GLOBAL),
-    OPT_STRING("ytdl-params", lua_ytdl_params, CONF_GLOBAL),
+    OPT_KEYVALUELIST("ytdl-params", lua_ytdl_params, CONF_GLOBAL),
     OPT_FLAG("load-scripts", auto_load_scripts, CONF_GLOBAL),
 #endif
 
