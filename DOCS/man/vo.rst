@@ -337,7 +337,7 @@ Available video output drivers are:
         Set radius for filters listed below, must be a float number between 1.0
         and 16.0. Defaults to be 3.0 if not specified.
 
-            ``sinc``, ``lanczos``, ``ewa_lanczos``, ``ewa_ginseng``, ``blackman``, ``gaussian``
+            ``sinc``, ``lanczos``, ``blackman``, ``gaussian`` and all EWA filters (eg. ``ewa_lanczos``)
 
         Note that depending on filter implementation details and video scaling
         ratio, the radius that actually being used might be different
@@ -349,7 +349,7 @@ Available video output drivers are:
         between 0.0 and 1.0. The default value of 0.0 disables antiringing
         entirely.
 
-        Note that this currently only affects ``ewa_lanczos``.
+        Note that this currently only affects EWA filters (eg. ``ewa_lanczos``).
 
     ``scaler-resizes-only``
         Disable the scaler if the video image is not resized. In that case,
