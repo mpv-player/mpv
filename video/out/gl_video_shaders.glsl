@@ -312,6 +312,11 @@ float[6] weights6(sampler2D lookup, float f) {
         lo = min(lo, c);                                                    \
         hi = max(hi, c);
 
+#define SAMPLE_POLAR_POTENTIAL(LUT, R, X, Y)                                \
+        if (length(vec2(X, Y) - fcoord)/R < 1.0) {                          \
+            SAMPLE_POLAR_HELPER(LUT, R, X, Y)                               \
+        }
+
 #define SAMPLE_CONVOLUTION_POLAR_R(NAME, R, LUT, WEIGHTS_FN, ANTIRING)      \
     vec4 NAME(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {             \
         vec2 pt = vec2(1.0) / texsize;                                      \

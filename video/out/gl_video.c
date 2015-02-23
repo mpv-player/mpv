@@ -829,14 +829,18 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
                     int xx = x > 0 ? x-1 : x;
                     double d = sqrt(xx*xx + yy*yy);
 
-                    // Samples outside the radius are unnecessary
-                    if (d < radius) {
+                    if (d < radius - 1) {
+                        // Samples definitely inside the main ring
                         APPENDF(shader, "SAMPLE_POLAR_%s(LUT, %f, %d, %d) \\\n    ",
                                 // The center 4 coefficients are the primary
                                 // contributors, used to clamp the result for
                                 // anti-ringing
                                 (x >= 0 && y >= 0 && x <= 1 && y <= 1)
                                   ? "PRIMARY" : "HELPER",
+                                (double)radius, x, y);
+                    } else if (d < radius) {
+                        // Samples on the edge, these are potential values
+                        APPENDF(shader, "SAMPLE_POLAR_POTENTIAL(LUT, %f, %d, %d) \\\n    ",
                                 (double)radius, x, y);
                     }
                 }
