@@ -274,7 +274,7 @@ static double jinc(kernel *k, double x)
 {
     if (fabs(x) < 1e-8)
         return 1.0;
-    double pix = M_PI * x;
+    double pix = M_PI * x / k->params[0]; // blur factor
     return 2.0 * j1(pix) / pix;
 }
 
@@ -345,9 +345,9 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"spline64",       4,   spline64},
     {"gaussian",       -1,  gaussian, .params = {1.0, NAN} },
     {"sinc",           -1,  sinc},
-    {"ewa_lanczos",    -1,  ewa_lanczos, .polar = true},
-    {"ewa_hanning",    -1,  ewa_hanning, .polar = true},
-    {"ewa_ginseng",    -1,  ewa_ginseng, .polar = true},
+    {"ewa_lanczos",    -1,  ewa_lanczos, .params = {1.0, NAN}, .polar = true},
+    {"ewa_hanning",    -1,  ewa_hanning, .params = {1.0, NAN}, .polar = true},
+    {"ewa_ginseng",    -1,  ewa_ginseng, .params = {1.0, NAN}, .polar = true},
     {"lanczos",        -1,  lanczos},
     {"blackman",       -1,  blackman},
     {0}
