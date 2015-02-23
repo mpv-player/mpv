@@ -154,6 +154,13 @@ extern "C" {
  * "wid" option fully and letterbox the video (i.e. add black bars if the
  * aspect ratio of the window and the video mismatch).
  *
+ * Setting the "input-vo-keyboard" may be required to get keyboard input
+ * through the embedded window, if this is desired.
+ *
+ * For OpenGL integration (e.g. rendering video to a texture), a separate API
+ * is available. Look at opengl_cb.h. This API does not include keyboard or
+ * mouse input directly.
+ *
  * Also see client API examples and the mpv manpage.
  *
  * Compatibility
