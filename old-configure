@@ -510,7 +510,7 @@ check_statement_libs "compiler support for __sync built-ins" $_sync SYNC_BUILTIN
 _sync=$(defretval)
 
 if test "$_atomic" = no && test "$_sync" = no && test "$_stdatomic" = no ; then
-  die "your compiler must support either stdatomic.h, or __atomic, or __sync built-ins."
+  echo "your compiler must support either stdatomic.h, or __atomic, or __sync built-ins."
 fi
 
 check_compile "iconv" $_iconv ICONV waftools/fragments/iconv.c " " "-liconv" "-liconv $_ld_dl"
