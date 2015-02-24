@@ -506,6 +506,13 @@ static void draw_quad(struct gl_video *p,
     debug_check_gl(p, "after rendering");
 }
 
+static void transpose3x3(float r[3][3])
+{
+    MPSWAP(float, r[0][1], r[1][0]);
+    MPSWAP(float, r[0][2], r[2][0]);
+    MPSWAP(float, r[1][2], r[2][1]);
+}
+
 static void update_uniforms(struct gl_video *p, GLuint program)
 {
     GL *gl = p->gl;
@@ -551,7 +558,8 @@ static void update_uniforms(struct gl_video *p, GLuint program)
         } else {
             mp_get_yuv2rgb_coeffs(&cparams, &m);
         }
-        gl->UniformMatrix3fv(loc, 1, GL_TRUE, &m.m[0][0]);
+        transpose3x3(m.m); // GLES2 can not transpose in glUniformMatrix3fv
+        gl->UniformMatrix3fv(loc, 1, GL_FALSE, &m.m[0][0]);
         loc = gl->GetUniformLocation(program, "colormatrix_c");
         gl->Uniform3f(loc, m.c[0], m.c[1], m.c[2]);
     }
