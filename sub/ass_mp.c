@@ -126,11 +126,13 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, bool is_ass,
     int set_hinting = 0;
     bool set_scale_with_window = false;
     bool set_scale_by_window = true;
+    bool total_override = false;
     // With forced overrides, apply the --sub-* specific options
     if (!is_ass || opts->ass_style_override == 3) {
         set_scale_with_window = opts->sub_scale_with_window;
         set_use_margins = opts->sub_use_margins;
         set_scale_by_window = opts->sub_scale_by_window;
+        total_override = true;
     } else {
         set_scale_with_window = opts->ass_scale_with_window;
         set_use_margins = opts->ass_use_margins;
@@ -154,7 +156,7 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, bool is_ass,
     ass_set_line_position(priv, set_sub_pos);
     ass_set_shaper(priv, opts->ass_shaper);
     int set_force_flags = 0;
-    if (opts->ass_style_override == 3)
+    if (total_override)
         set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_FONT_SIZE;
     if (opts->ass_style_override == 4)
         set_force_flags |= ASS_OVERRIDE_BIT_FONT_SIZE;
