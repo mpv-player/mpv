@@ -132,9 +132,11 @@ static double nearest(kernel *k, double x)
     return x > 0.5 ? 0.0 : 1.0;
 }
 
-static double bilinear(kernel *k, double x)
+static double triangle(kernel *k, double x)
 {
-    return 1.0 - x;
+    if (fabs(x) > 1.0)
+        return 0.0;
+    return 1.0 - fabs(x);
 }
 
 static double hanning(kernel *k, double x)
@@ -317,7 +319,7 @@ static double blackman(kernel *k, double x)
 
 const struct filter_kernel mp_filter_kernels[] = {
     {"nearest",        0.5, nearest},
-    {"bilinear_slow",  1,   bilinear},
+    {"triangle",       1,   triangle},
     {"hanning",        1,   hanning},
     {"hamming",        1,   hamming},
     {"quadric",        1.5, quadric},
