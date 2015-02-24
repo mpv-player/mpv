@@ -111,7 +111,6 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
         int sid = ass_alloc_style(track);
         track->default_style = sid;
         ASS_Style *style = track->styles + sid;
-        style->Alignment = 5; // top-title, left
         style->Name = strdup("OSD");
         // Set to neutral base direction, as opposed to VSFilter LTR default
         style->Encoding = -1;
@@ -316,6 +315,8 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
     style->Outline = FFMAX(style->Outline, *o_h / 32.0);
     // Rendering with shadow is broken (because there's more than one shape)
     style->Shadow = 0;
+
+    style->Alignment = 5;
 
     *o_border = style->Outline;
 
