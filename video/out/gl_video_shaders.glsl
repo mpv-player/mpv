@@ -252,7 +252,6 @@ float[6] weights6(sampler2D lookup, float f) {
     vec4 c2 = texture(lookup, vec2(0.75, f));
     return float[6](c1.r, c1.g, c1.b, c2.r, c2.g, c2.b);
 }
-#endif
 
 // For N=n*4 with n>1.
 #define WEIGHTS_N(NAME, N)                          \
@@ -332,6 +331,8 @@ float[6] weights6(sampler2D lookup, float f) {
         res = res / vec4(wsum);                                             \
         return mix(res, clamp(res, lo, hi), ANTIRING);                      \
     }
+
+#endif /* HAVE_ARRAYS */
 
 #ifdef DEF_SCALER0
 DEF_SCALER0
