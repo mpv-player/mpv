@@ -402,11 +402,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->coded_height = sh->video->disp_h;
     avctx->bits_per_coded_sample = sh->video->bits_per_coded_sample;
 
-    if (sh->video->coded_width && sh->video->coded_height) {
-        avctx->coded_width  = sh->video->coded_width;
-        avctx->coded_height = sh->video->coded_height;
-    }
-
     mp_lavc_set_extradata(avctx, sh->video->extradata, sh->video->extradata_len);
 
     if (mp_rawvideo) {

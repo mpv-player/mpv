@@ -1282,8 +1282,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         return 1;
     }
 
-    sh_v->coded_width = track->v_width;
-    sh_v->coded_height = track->v_height;
     sh_v->extradata = talloc_memdup(sh_v, extradata, extradata_size);
     sh_v->extradata_len = extradata_size;
     if (!sh->codec) {

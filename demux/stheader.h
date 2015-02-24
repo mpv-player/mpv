@@ -83,7 +83,6 @@ typedef struct sh_video {
     float aspect;         // aspect ratio stored in the file (for prescaling)
     int bitrate;          // compressed bits/sec
     int bits_per_coded_sample;
-    int coded_width, coded_height;
     unsigned char *extradata;
     int extradata_len;
     int disp_w, disp_h;   // display size
