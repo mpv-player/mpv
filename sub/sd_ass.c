@@ -147,7 +147,6 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     }
     mp_ass_configure(renderer, opts, !ctx->is_converted, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
-#if LIBASS_VERSION >= 0x01020000
     if (!ctx->is_converted && (!opts->ass_style_override ||
                                opts->ass_vsfilter_blur_compat))
     {
@@ -155,7 +154,6 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     } else {
         ass_set_storage_size(renderer, 0, 0);
     }
-#endif
     mp_ass_render_frame(renderer, ctx->ass_track, pts * 1000 + .5,
                         &ctx->parts, res);
     talloc_steal(ctx, ctx->parts);
@@ -336,7 +334,6 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     if (opts->ass_vsfilter_color_compat == 0) // "no"
         return;
     bool force_601 = opts->ass_vsfilter_color_compat == 3;
-#if LIBASS_VERSION >= 0x01020000
     ASS_Track *track = ctx->ass_track;
     static const int ass_csp[] = {
         [YCBCR_BT601_TV]        = MP_CSP_BT_601,
@@ -371,7 +368,6 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     // Unknown colorspace (either YCBCR_UNKNOWN, or a valid value unknown to us)
     if (!csp || !levels)
         return;
-#endif
 
     struct mp_image_params params = ctx->video_params;
 

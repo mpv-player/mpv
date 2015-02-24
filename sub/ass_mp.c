@@ -56,7 +56,6 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->FontSize = opts->font_size * scale;
     style->PrimaryColour = MP_ASS_COLOR(opts->color);
     style->SecondaryColour = style->PrimaryColour;
-#if LIBASS_VERSION >= 0x01102001
     style->OutlineColour = MP_ASS_COLOR(opts->border_color);
     if (opts->back_color.a) {
         style->BackColour = MP_ASS_COLOR(opts->back_color);
@@ -65,16 +64,6 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
         style->BackColour = MP_ASS_COLOR(opts->shadow_color);
         style->BorderStyle = 1; // outline
     }
-#else
-    if (opts->back_color.a) {
-        style->OutlineColour = MP_ASS_COLOR(opts->back_color);
-        style->BorderStyle = 3; // opaque box
-    } else {
-        style->OutlineColour = MP_ASS_COLOR(opts->border_color);
-        style->BorderStyle = 1; // outline
-    }
-    style->BackColour = MP_ASS_COLOR(opts->shadow_color);
-#endif
     style->Outline = opts->border_size * scale;
     style->Shadow = opts->shadow_offset * scale;
     style->Spacing = opts->spacing * scale;
@@ -84,9 +73,7 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->ScaleX = 1.;
     style->ScaleY = 1.;
     style->Alignment = 1 + (opts->align_x + 1) + (opts->align_y + 2) % 3 * 4;
-#if LIBASS_VERSION >= 0x01020000
     style->Blur = opts->blur;
-#endif
 }
 
 // Add default styles, if the track does not have any styles yet.
@@ -164,13 +151,8 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, bool is_ass,
             set_font_scale /= factor;
     }
     ass_set_use_margins(priv, set_use_margins);
-#if LIBASS_VERSION >= 0x01010000
     ass_set_line_position(priv, set_sub_pos);
-#endif
-#if LIBASS_VERSION >= 0x01000000
     ass_set_shaper(priv, opts->ass_shaper);
-#endif
-#if LIBASS_VERSION >= 0x01103001
     int set_force_flags = 0;
     if (opts->ass_style_override == 3)
         set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_FONT_SIZE;
@@ -181,7 +163,6 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, bool is_ass,
     mp_ass_set_style(&style, 288, opts->sub_text_style);
     ass_set_selective_style_override(priv, &style);
     free(style.FontName);
-#endif
     ass_set_font_scale(priv, set_font_scale);
     ass_set_hinting(priv, set_hinting);
     ass_set_line_spacing(priv, set_line_spacing);
