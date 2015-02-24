@@ -442,9 +442,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
     if (obj->type == OSDTYPE_SUB2)
         style->Alignment = 6;
 
-#if LIBASS_VERSION >= 0x01010000
     ass_set_line_position(obj->osd_render, 100 - opts->sub_pos);
-#endif
 
     add_osd_ass_event_escaped(obj->osd_track, obj->text);
 }
