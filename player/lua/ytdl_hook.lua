@@ -85,7 +85,7 @@ mp.add_hook("on_load", 10, function ()
         local subformat = "ass/srt/best"
 
         local command = {
-            ytdl.path, "-J", "--flat-playlist", "--all-subs",
+            ytdl.path, "--no-warnings", "-J", "--flat-playlist", "--all-subs",
             "--sub-format", subformat, "--no-playlist"
         }
         if (format ~= "") then
