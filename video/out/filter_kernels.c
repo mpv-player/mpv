@@ -147,11 +147,6 @@ static double hamming(kernel *k, double x)
     return 0.54 + 0.46 * cos(M_PI * x);
 }
 
-static double hermite(kernel *k, double x)
-{
-    return (2.0 * x - 3.0) * x * x + 1.0;
-}
-
 static double quadric(kernel *k, double x)
 {
     // NOTE: glumpy uses 0.75, AGG uses 0.5
@@ -195,17 +190,8 @@ static double kaiser(kernel *k, double x)
     return bessel_i0(epsilon, a * sqrt(1 - x * x)) * i0a;
 }
 
-static double catmull_rom(kernel *k, double x)
-{
-    if (x < 1.0)
-        return 0.5 * (2.0 + x * x * (-5.0 + x * 3.0));
-    if (x < 2.0)
-        return 0.5 * (4.0 + x * (-8.0 + x * (5.0 - x)));
-    return 0;
-}
-
-// Mitchell-Netravali
-static double mitchell(kernel *k, double x)
+// Family of cubic B/C splines
+static double cubic_bc(kernel *k, double x)
 {
     double b = k->params[0];
     double c = k->params[1];
@@ -334,12 +320,12 @@ const struct filter_kernel mp_filter_kernels[] = {
     {"bilinear_slow",  1,   bilinear},
     {"hanning",        1,   hanning},
     {"hamming",        1,   hamming},
-    {"hermite",        1,   hermite},
     {"quadric",        1.5, quadric},
     {"bicubic",        2,   bicubic},
-    {"kaiser",         1,   kaiser, .params = {6.33, NAN} },
-    {"catmull_rom",    2,   catmull_rom},
-    {"mitchell",       2,   mitchell, .params = {1.0/3.0, 1.0/3.0} },
+    {"kaiser",         1,   kaiser,   .params = {6.33, NAN} },
+    {"catmull_rom",    2,   cubic_bc, .params = {0.0, 0.5} },
+    {"mitchell",       2,   cubic_bc, .params = {1.0/3.0, 1.0/3.0} },
+    {"hermite",        1,   cubic_bc, .params = {0.0, 0.0} },
     {"spline16",       2,   spline16},
     {"spline36",       3,   spline36},
     {"spline64",       4,   spline64},
