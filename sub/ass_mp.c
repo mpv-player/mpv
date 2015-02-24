@@ -93,7 +93,6 @@ void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
         track->default_style = sid;
         ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
-        style->Alignment = 2;
         mp_ass_set_style(style, track->PlayResY, opts->sub_text_style);
     }
 

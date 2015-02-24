@@ -124,9 +124,13 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     event->Text = strdup(text);
 }
 
-static void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, bool is_ass,
-                             struct mp_osd_res *dim)
+static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
 {
+    struct sd_ass_priv *ctx = sd->priv;
+    struct MPOpts *opts = sd->opts;
+    ASS_Renderer *priv = sd->ass_renderer;
+    ASS_Track *track = ctx->ass_track;
+
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
 
@@ -139,7 +143,7 @@ static void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, bool is_as
     bool set_scale_by_window = true;
     bool total_override = false;
     // With forced overrides, apply the --sub-* specific options
-    if (!is_ass || opts->ass_style_override == 3) {
+    if (ctx->is_converted || opts->ass_style_override == 3) {
         set_scale_with_window = opts->sub_scale_with_window;
         set_use_margins = opts->sub_use_margins;
         set_scale_by_window = opts->sub_scale_by_window;
@@ -148,7 +152,7 @@ static void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, bool is_as
         set_scale_with_window = opts->ass_scale_with_window;
         set_use_margins = opts->ass_use_margins;
     }
-    if (!is_ass || opts->ass_style_override) {
+    if (ctx->is_converted || opts->ass_style_override) {
         set_sub_pos = 100 - opts->sub_pos;
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
@@ -176,6 +180,10 @@ static void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, bool is_as
     mp_ass_set_style(&style, 288, opts->sub_text_style);
     ass_set_selective_style_override(priv, &style);
     free(style.FontName);
+    if (ctx->is_converted && track->default_style < track->n_styles) {
+        mp_ass_set_style(track->styles + track->default_style,
+                         track->PlayResY, opts->sub_text_style);
+    }
     ass_set_font_scale(priv, set_font_scale);
     ass_set_hinting(priv, set_hinting);
     ass_set_line_spacing(priv, set_line_spacing);
@@ -202,7 +210,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
         if (isnormal(par))
             scale = par;
     }
-    mp_ass_configure(renderer, opts, !ctx->is_converted, &dim);
+    configure_ass(sd, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
     if (!ctx->is_converted && (!opts->ass_style_override ||
                                opts->ass_vsfilter_blur_compat))
