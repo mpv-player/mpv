@@ -126,13 +126,6 @@ enum {
     FILL_LIMIT = 16 * 1024,
 };
 
-static int64_t mp_clipi64(int64_t val, int64_t min, int64_t max)
-{
-    val = FFMIN(val, max);
-    val = FFMAX(val, min);
-    return val;
-}
-
 // Used by the main thread to wakeup the cache thread, and to wait for the
 // cache thread. The cache mutex has to be locked when calling this function.
 // *retry_time should be set to 0 on the first call.
@@ -232,7 +225,7 @@ static bool cache_fill(struct priv *s)
     }
 
     // number of buffer bytes which should be preserved in backwards direction
-    int64_t back = mp_clipi64(read - s->min_filepos, 0, s->back_size);
+    int64_t back = MPCLAMP(read - s->min_filepos, 0, s->back_size);
 
     // number of buffer bytes that are valid and can be read
     int64_t newb = FFMAX(s->max_filepos - read, 0);
@@ -297,7 +290,7 @@ static int resize_cache(struct priv *s, int64_t size)
 {
     int64_t min_size = FILL_LIMIT * 4;
     int64_t max_size = ((size_t)-1) / 4;
-    int64_t buffer_size = MPMIN(MPMAX(size, min_size), max_size);
+    int64_t buffer_size = MPCLAMP(size, min_size, max_size);
 
     unsigned char *buffer = malloc(buffer_size);
     if (!buffer) {
