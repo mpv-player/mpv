@@ -240,6 +240,7 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
                 MP_TARRAY_APPEND(NULL, ctx->sources, ctx->num_sources, NULL);
             }
 
+            params.matroska_wanted_uids = ctx->uids; // potentially reallocated, same data
             if (enable_cache(ctx->global, &s, &d, &params) < 0)
                 continue;
 
