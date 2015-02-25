@@ -6,12 +6,20 @@ Changes
 
 - DOCS/client-api-changes has been correctly updated for the v0.8.0 release
   series.
+- Quality and major perfomance improvements to smoothmotion.
+- Silence the "[ytdl_hook] WARNING: video doesn't have subtitles" warning.
+- Other documentation updates.
 
 Bug fixes
 ---------
 
 - Attempt to fix OpenGL shader compilation on Intel windows drivers. (bug
   #1536)
+- Attempt to improve the OpenGL shader's compatibility with GLES2.
+- (Windows) Fix noise when seeking while using wasapi:exclusive. (bug #1529)
+- Fix the waf-based build system when used with newer versions of waf with
+  python3.
+- Documentation fixes. (includes bug #1608)
 
 New features
 ------------
