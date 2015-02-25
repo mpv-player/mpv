@@ -710,8 +710,6 @@ hwaccel_features = [
         'name': '--vda-gl',
         'desc': 'VDA with OpenGL',
         'deps': [ 'gl-cocoa', 'vda-hwaccel' ],
-        # apparently a bug in waf causes msg= to be needed when passing only
-        # framework= (it probably fails to infer it)
         'func': check_true
     }, {
         'name': '--vdpau-hwaccel',
