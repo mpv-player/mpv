@@ -622,7 +622,14 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
 
     s->seek_limit = opts->seek_min * 1024ULL;
 
-    if (resize_cache(s, opts->size * 1024ULL) != STREAM_OK) {
+    int64_t cache_size = opts->size * 1024ULL;
+
+    int64_t file_size = -1;
+    stream_control(stream, STREAM_CTRL_GET_SIZE, &file_size);
+    if (file_size >= 0)
+        cache_size = MPMIN(cache_size, file_size);
+
+    if (resize_cache(s, cache_size) != STREAM_OK) {
         MP_ERR(s, "Failed to allocate cache buffer.\n");
         talloc_free(s);
         return -1;
