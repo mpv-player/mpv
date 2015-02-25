@@ -97,8 +97,12 @@ mp.add_hook("on_load", 10, function ()
             table.insert(command, format)
         end
         for param, arg in pairs(raw_options) do
-            table.insert(command, "--" .. param)
-            table.insert(command, arg)
+            if (param ~= "") then
+                table.insert(command, "--" .. param)
+            end
+            if (arg ~= "") then
+                table.insert(command, arg)
+            end
         end
         table.insert(command, "--")
         table.insert(command, url)
