@@ -211,7 +211,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
             scale = par;
     }
     configure_ass(sd, &dim);
-    ass_set_aspect_ratio(renderer, scale, 1);
+    ass_set_pixel_aspect(renderer, scale);
     if (!ctx->is_converted && (!opts->ass_style_override ||
                                opts->ass_vsfilter_blur_compat))
     {
