@@ -454,15 +454,17 @@ Program Behavior
     ``bestvideo+bestaudio``.
     (Default: ``best``)
 
-``--ytdl-params==<key>=<value>[,<key>=<value>[,...]]``
-    Pass arbitraty options to youtube-dl.
-
+``--ytdl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
+    Pass arbitraty options to youtube-dl. Parameter and argument should be
+    passed as a key-value pair. Options without argument must include ``=``.
+    
     There is no sanity checking so it's possible to break things (i.e.
     passing invalid parameters to youtube-dl).
 
     .. admonition:: Example
  
-        ``--ytdl-params=username=user,password=pass``
+        ``--ytdl-raw-options=username=user,password=pass``
+        ``--ytdl-raw-options=force-ipv6=``
 
 Video
 -----
