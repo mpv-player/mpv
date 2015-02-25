@@ -162,14 +162,13 @@ static bool has_source_request(struct matroska_segment_uid *uids,
 }
 
 // segment = get Nth segment of a multi-segment file
-static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
-                           int *num_sources, struct matroska_segment_uid **uids,
+static bool check_file_seg(struct tl_ctx *ctx, struct matroska_segment_uid **uids,
                            char *filename, int segment)
 {
     bool was_valid = false;
     struct demuxer_params params = {
         .force_format = "mkv",
-        .matroska_num_wanted_uids = *num_sources,
+        .matroska_num_wanted_uids = ctx->num_sources,
         .matroska_wanted_uids = *uids,
         .matroska_wanted_segment = segment,
         .matroska_was_valid = &was_valid,
@@ -185,9 +184,9 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
 
     struct matroska_data *m = &d->matroska_data;
 
-    for (int i = 1; i < *num_sources; i++) {
+    for (int i = 1; i < ctx->num_sources; i++) {
         struct matroska_segment_uid *uid = *uids + i;
-        if ((*sources)[i])
+        if (ctx->sources[i])
             continue;
         /* Accept the source if the segment uid matches and the edition
             * either matches or isn't specified. */
@@ -202,15 +201,15 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
                 if (!c->has_segment_uid)
                     continue;
 
-                if (has_source_request(*uids, *num_sources, &c->uid))
+                if (has_source_request(*uids, ctx->num_sources, &c->uid))
                     continue;
 
                 /* Set the requested segment. */
-                MP_TARRAY_GROW(NULL, *uids, *num_sources);
-                (*uids)[*num_sources] = c->uid;
+                MP_TARRAY_GROW(NULL, *uids, ctx->num_sources);
+                (*uids)[ctx->num_sources] = c->uid;
 
                 /* Add a new source slot. */
-                MP_TARRAY_APPEND(NULL, *sources, *num_sources, NULL);
+                MP_TARRAY_APPEND(NULL, ctx->sources, ctx->num_sources, NULL);
             }
 
             if (stream_wants_cache(d->stream, &ctx->global->opts->stream_cache))
@@ -222,7 +221,7 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
                     continue;
             }
 
-            (*sources)[i] = d;
+            ctx->sources[i] = d;
             return true;
         }
     }
@@ -231,35 +230,32 @@ static bool check_file_seg(struct tl_ctx *ctx, struct demuxer ***sources,
     return was_valid;
 }
 
-static void check_file(struct tl_ctx *ctx, struct demuxer ***sources,
-                       int *num_sources, struct matroska_segment_uid **uids,
+static void check_file(struct tl_ctx *ctx, struct matroska_segment_uid **uids,
                        char *filename, int first)
 {
     for (int segment = first; ; segment++) {
-        if (!check_file_seg(ctx, sources, num_sources, uids, filename, segment))
+        if (!check_file_seg(ctx, uids, filename, segment))
             break;
     }
 }
 
-static bool missing(struct demuxer **sources, int num_sources)
+static bool missing(struct tl_ctx *ctx)
 {
-    for (int i = 0; i < num_sources; i++) {
-        if (!sources[i])
+    for (int i = 0; i < ctx->num_sources; i++) {
+        if (!ctx->sources[i])
             return true;
     }
     return false;
 }
 
-static int find_ordered_chapter_sources(struct tl_ctx *ctx,
-                                        struct demuxer ***sources,
-                                        int *num_sources,
-                                        struct matroska_segment_uid **uids)
+static void find_ordered_chapter_sources(struct tl_ctx *ctx,
+                                         struct matroska_segment_uid **uids)
 {
     struct MPOpts *opts = ctx->global->opts;
     void *tmp = talloc_new(NULL);
     int num_filenames = 0;
     char **filenames = NULL;
-    if (*num_sources > 1) {
+    if (ctx->num_sources > 1) {
         char *main_filename = ctx->demuxer->filename;
         MP_INFO(ctx, "This file references data from other sources.\n");
         if (opts->ordered_chapters_files && opts->ordered_chapters_files[0]) {
@@ -281,37 +277,36 @@ static int find_ordered_chapter_sources(struct tl_ctx *ctx,
             talloc_steal(tmp, filenames);
         }
         // Possibly get further segments appended to the first segment
-        check_file(ctx, sources, num_sources, uids, main_filename, 1);
+        check_file(ctx, uids, main_filename, 1);
     }
 
     int old_source_count;
     do {
-        old_source_count = *num_sources;
+        old_source_count = ctx->num_sources;
         for (int i = 0; i < num_filenames; i++) {
-            if (!missing(*sources, *num_sources))
+            if (!missing(ctx))
                 break;
             MP_VERBOSE(ctx, "Checking file %s\n", filenames[i]);
-            check_file(ctx, sources, num_sources, uids, filenames[i], 0);
+            check_file(ctx, uids, filenames[i], 0);
         }
-    } while (old_source_count != *num_sources);
+    } while (old_source_count != ctx->num_sources);
 
-    if (missing(*sources, *num_sources)) {
+    if (missing(ctx)) {
         MP_ERR(ctx, "Failed to find ordered chapter part!\n");
         int j = 1;
-        for (int i = 1; i < *num_sources; i++) {
-            if ((*sources)[i]) {
+        for (int i = 1; i < ctx->num_sources; i++) {
+            if (ctx->sources[i]) {
                 struct matroska_segment_uid *source_uid = *uids + i;
                 struct matroska_segment_uid *target_uid = *uids + j;
-                (*sources)[j] = (*sources)[i];
+                ctx->sources[j] = ctx->sources[i];
                 memmove(target_uid, source_uid, sizeof(*source_uid));
                 j++;
             }
         }
-        *num_sources = j;
+        ctx->num_sources = j;
     }
 
     talloc_free(tmp);
-    return *num_sources;
 }
 
 struct inner_timeline_info {
@@ -533,13 +528,14 @@ void build_ordered_chapter_timeline(struct timeline *tl)
 
     // +1 because sources/uid_map[0] is original file even if all chapters
     // actually use other sources and need separate entries
-    struct demuxer **sources = talloc_zero_array(tl, struct demuxer *,
-                                                    m->num_ordered_chapters+1);
-    sources[0] = demuxer;
+    ctx->sources = talloc_zero_array(tl, struct demuxer *,
+                                     m->num_ordered_chapters + 1);
+    ctx->sources[0] = demuxer;
+    ctx->num_sources = 1;
+
     struct matroska_segment_uid *uids =
         talloc_zero_array(NULL, struct matroska_segment_uid,
                           m->num_ordered_chapters + 1);
-    int num_sources = 1;
     memcpy(uids[0].segment, m->uid.segment, 16);
     uids[0].edition = 0;
 
@@ -552,15 +548,15 @@ void build_ordered_chapter_timeline(struct timeline *tl)
         if (!c->has_segment_uid || demux_matroska_uid_cmp(&c->uid, &m->uid))
             continue;
 
-        if (has_source_request(uids, num_sources, &c->uid))
+        if (has_source_request(uids, ctx->num_sources, &c->uid))
             continue;
 
-        memcpy(uids + num_sources, &c->uid, sizeof(c->uid));
-        sources[num_sources] = NULL;
-        num_sources++;
+        memcpy(uids + ctx->num_sources, &c->uid, sizeof(c->uid));
+        ctx->sources[ctx->num_sources] = NULL;
+        ctx->num_sources++;
     }
 
-    num_sources = find_ordered_chapter_sources(ctx, &sources, &num_sources, &uids);
+    find_ordered_chapter_sources(ctx, &uids);
     talloc_free(uids);
 
     struct demux_chapter *chapters =
@@ -570,8 +566,6 @@ void build_ordered_chapter_timeline(struct timeline *tl)
         chapters[n].pts = -1;
 
     ctx->timeline = talloc_array_ptrtype(tl, ctx->timeline, 0);
-    ctx->sources = sources;
-    ctx->num_sources = num_sources;
     ctx->num_chapters = m->num_ordered_chapters;
 
     struct inner_timeline_info info = {
@@ -609,8 +603,8 @@ void build_ordered_chapter_timeline(struct timeline *tl)
                ctx->missing_time / 1e9);
     }
 
-    tl->sources = sources;
-    tl->num_sources = num_sources;
+    tl->sources = ctx->sources;
+    tl->num_sources = ctx->num_sources;
     tl->parts = ctx->timeline;
     tl->num_parts = ctx->num_parts - 1; // minus termination
     tl->chapters = chapters;
