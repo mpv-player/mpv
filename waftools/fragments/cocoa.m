@@ -9,5 +9,7 @@ int main(int argc, char **argv) {
         NSArray *ary = @[@1, @2, @3];
         NSLog(@"test subscripting: %@", ary[0]);
         NSApplicationLoad();
+        CVDisplayLinkRef link;
+        CVDisplayLinkCreateWithCGDisplay(0, &link);
     }
 }
