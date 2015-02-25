@@ -650,8 +650,11 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     for (int n = mpctx->num_tracks - 1; n >= 0 && !in_use; n--)
         in_use |= mpctx->tracks[n]->demuxer == d;
 
-    if (!in_use)
-        free_demuxer_and_stream(d);
+    if (!in_use) {
+        struct stream *s = d->stream;
+        free_demuxer(d);
+        free_stream(s);
+    }
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
