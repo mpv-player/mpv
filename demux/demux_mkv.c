@@ -182,6 +182,8 @@ typedef struct mkv_demuxer {
     int subtitle_preroll;
 
     bool index_has_durations;
+
+    bool eof_warning;
 } mkv_demuxer_t;
 
 #define REALHEADER_SIZE    16
@@ -1059,6 +1061,9 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
     struct ebml_seek_head seekhead = {0};
     struct ebml_parse_ctx parse_ctx = {demuxer->log};
 
+    int64_t end = 0;
+    stream_control(s, STREAM_CTRL_GET_SIZE, &end);
+
     MP_VERBOSE(demuxer, "/---- [ parsing seek head ] ---------\n");
     if (ebml_read_element(s, &parse_ctx, &seekhead, &ebml_seek_head_desc) < 0) {
         res = -1;
@@ -1073,13 +1078,16 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
         uint64_t pos = seek->seek_position + mkv_d->segment_start;
         MP_DBG(demuxer, "Element 0x%x at %"PRIu64".\n",
                (unsigned)seek->seek_id, pos);
-        get_header_element(demuxer, seek->seek_id, pos);
-        // This is nice to warn against incomplete files.
-        int64_t end = 0;
-        stream_control(s, STREAM_CTRL_GET_SIZE, &end);
-        if (pos >= end)
-            MP_WARN(demuxer, "SeekHead position beyond "
-                    "end of file - incomplete file?\n");
+        struct header_elem *elem = get_header_element(demuxer, seek->seek_id, pos);
+        // Warn against incomplete files.
+        if (elem && pos >= end) {
+            elem->parsed = true; // don't bother
+            if (!mkv_d->eof_warning) {
+                MP_WARN(demuxer, "SeekHead position beyond "
+                        "end of file - incomplete file?\n");
+                mkv_d->eof_warning = true;
+            }
+        }
     }
  out:
     MP_VERBOSE(demuxer, "\\---- [ parsing seek head ] ---------\n");
@@ -1804,13 +1812,6 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         }
         MP_VERBOSE(demuxer, "Seeking to %"PRIu64" to read header element 0x%x.\n",
                    elem->pos, (unsigned)elem->id);
-        int64_t end = 0;
-        stream_control(s, STREAM_CTRL_GET_SIZE, &end);
-        if (elem->pos >= end) {
-            MP_WARN(demuxer, "SeekHead position beyond "
-                    "end of file - incomplete file?\n");
-            continue;
-        }
         if (!stream_seek(s, elem->pos)) {
             MP_WARN(demuxer, "Failed to seek when reading header element.\n");
             continue;
