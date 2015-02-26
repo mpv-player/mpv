@@ -219,6 +219,10 @@ iconv support use --disable-iconv.",
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_true
     }, {
+        'name': 'fchmod',
+        'desc': 'fchmod()',
+        'func': check_statement('sys/stat.h', 'fchmod(0, 0)'),
+    }, {
         'name': 'glibc-thread-name',
         'desc': 'GLIBC API for setting thread name',
         'func': check_statement('pthread.h',

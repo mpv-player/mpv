@@ -972,6 +972,7 @@ cat > $TMPC << EOF
 #define HAVE_BSD_THREAD_NAME 0
 #define HAVE_NETBSD_THREAD_NAME 0
 #define HAVE_DXVA2_HWACCEL 0
+#define HAVE_FCHMOD 0
 
 #define DEFAULT_CDROM_DEVICE "/dev/cdrom"
 #define DEFAULT_DVD_DEVICE   "/dev/dvd"
