@@ -582,7 +582,7 @@ static void *client_thread(void *p)
             }
         }
 
-        if (fds[1].revents & POLLIN) {
+        if (fds[1].revents & (POLLIN | POLLHUP)) {
             while (1) {
                 char buf[128];
                 bstr append = { buf, 0 };
