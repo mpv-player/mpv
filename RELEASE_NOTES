@@ -1,5 +1,5 @@
-Release 0.8.1 (draft)
-=====================
+Release 0.8.1
+=============
 
 Changes
 -------
@@ -27,7 +27,7 @@ New features
 - MPlayer now tries to load '.vtt' subtitles.
 
 This listing is not complete. A complete changelog can be seen by running
-`git log v0.8.0..` in the git repository.
+`git log v0.8.0..v0.8.1` in the git repository.
 
 Release 0.8.0
 =============
