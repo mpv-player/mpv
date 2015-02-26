@@ -70,11 +70,11 @@ static const char av_desync_help_text[] =
 "- Slow video output.\n"
 "     Try a different --vo driver (--vo=help for a list). Make sure framedrop\n"
 "     is not disabled, or experiment with different values for --framedrop.\n"
-"- Playing from a slow network source.\n"
-"     Download the file instead.\n"
+"     Make sure you have proper drivers for your GPU installed. If mpv\n"
+"     autoselects 'VO: [x11]', it's a sure sign your drivers are messed up.\n"
+"- Playing from a slow network source. Download the file instead.\n"
 "- Try to find out whether audio/video/subs are causing this by experimenting\n"
 "  with --no-video, --no-audio, or --no-sub.\n"
-"- If you switched audio or video tracks, try seeking to force synchronization.\n"
 "If none of this helps you, file a bug report.\n\n";
 
 void update_fps(struct MPContext *mpctx)
