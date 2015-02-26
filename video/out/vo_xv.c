@@ -382,6 +382,8 @@ static void xv_draw_colorkey(struct vo *vo, const struct mp_rect *rc)
     if (ctx->xv_ck_info.method == CK_METHOD_MANUALFILL ||
         ctx->xv_ck_info.method == CK_METHOD_BACKGROUND)
     {
+        if (!x11->vo_gc)
+            return;
         //less tearing than XClearWindow()
         XSetForeground(x11->display, x11->vo_gc, ctx->xv_colorkey);
         XFillRectangle(x11->display, x11->window, x11->vo_gc, rc->x0, rc->y0,
