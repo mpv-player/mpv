@@ -482,13 +482,19 @@ static char *text_execute_command(struct client_arg *arg, void *tmp, char *src)
     return NULL;
 }
 
-static int ipc_write(int fd, const char *buf, size_t count)
+static int ipc_write_str(struct client_arg *client, const char *buf)
 {
+    size_t count = strlen(buf);
     while (count > 0) {
-        ssize_t rc = write(fd, buf, count);
+        ssize_t rc = write(client->client_fd, buf, count);
         if (rc <= 0) {
             if (rc == 0)
                 return -1;
+
+            if (errno == EBADF) {
+                client->writable = false;
+                return 0;
+            }
 
             if (errno == EINTR)
                 continue;
@@ -567,10 +573,10 @@ static void *client_thread(void *p)
                     goto done;
                 }
 
-                rc = ipc_write(arg->client_fd, event_msg, strlen(event_msg));
+                rc = ipc_write_str(arg, event_msg);
                 talloc_free(event_msg);
                 if (rc < 0) {
-                    MP_ERR(arg, "Write error\n");
+                    MP_ERR(arg, "Write error (%s)\n", mp_strerror(errno));
                     goto done;
                 }
             }
@@ -619,8 +625,7 @@ static void *client_thread(void *p)
                     }
 
                     if (reply_msg && arg->writable) {
-                        rc = ipc_write(arg->client_fd, reply_msg,
-                                       strlen(reply_msg));
+                        rc = ipc_write_str(arg, reply_msg);
                         if (rc < 0) {
                             MP_ERR(arg, "Write error (%s)\n", mp_strerror(errno));
                             talloc_free(tmp);
