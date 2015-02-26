@@ -57,7 +57,9 @@ static const char *const speaker_names[MP_SPEAKER_ID_COUNT][2] = {
 static const char *const std_layout_names[][2] = {
     {"empty",           ""}, // not in lavc
     {"mono",            "fc"},
+    {"1.0",             "fc"}, // not in lavc
     {"stereo",          "fl-fr"},
+    {"2.0",             "fl-fr"}, // not in lavc
     {"2.1",             "fl-fr-lfe"},
     {"3.0",             "fl-fr-fc"},
     {"3.0(back)",       "fl-fr-bc"},
