@@ -2091,20 +2091,26 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-static bool test_fbo(struct gl_video *p, GLenum format)
+static bool test_fbo(struct gl_video *p, bool *success)
 {
+    if (!*success)
+        return false;
+
     GL *gl = p->gl;
-    bool success = false;
+    *success = false;
+    MP_VERBOSE(p, "Testing user-set FBO format (0x%x)\n",
+                   (unsigned)p->opts.fbo_format);
     struct fbotex fbo = {0};
-    if (fbotex_init(&fbo, p->gl, p->log, 16, 16, p->gl_target, GL_LINEAR, format))
+    if (fbotex_init(&fbo, p->gl, p->log, 16, 16, p->gl_target, GL_LINEAR,
+                    p->opts.fbo_format))
     {
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-        success = true;
+        *success = true;
     }
     fbotex_uninit(&fbo);
     glCheckError(gl, p->log, "FBO test");
-    return success;
+    return *success;
 }
 
 // Disable features that are not supported with the current OpenGL version.
@@ -2121,33 +2127,25 @@ static void check_gl_features(struct gl_video *p)
     char *disabled[10];
     int n_disabled = 0;
 
-    if (have_fbo) {
-        MP_VERBOSE(p, "Testing user-set FBO format (0x%x)\n",
-                   (unsigned)p->opts.fbo_format);
-        have_fbo = test_fbo(p, p->opts.fbo_format);
-    }
-
     // Normally, we want to disable them by default if FBOs are unavailable,
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
     // I don't know if luminance alpha float textures exist, so disregard them.
-    if (!have_float_tex || !have_arrays || !have_fbo || !have_1d_tex) {
-        for (int n = 0; n < 2; n++) {
-            const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[n]);
-            if (kernel) {
-                char *reason = "";
-                if (!have_fbo)
-                    reason = "scaler (FBO)";
-                if (!have_float_tex)
-                    reason = "scaler (float tex.)";
-                if (!have_arrays)
-                    reason = "scaler (no GLSL support)";
-                if (!have_1d_tex && kernel->polar)
-                    reason = "scaler (1D tex.)";
-                if (*reason) {
-                    p->opts.scalers[n] = "bilinear";
-                    disabled[n_disabled++] = reason;
-                }
+    for (int n = 0; n < 2; n++) {
+        const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[n]);
+        if (kernel) {
+            char *reason = NULL;
+            if (!test_fbo(p, &have_fbo))
+                reason = "scaler (FBO)";
+            if (!have_float_tex)
+                reason = "scaler (float tex.)";
+            if (!have_arrays)
+                reason = "scaler (no GLSL support)";
+            if (!have_1d_tex && kernel->polar)
+                reason = "scaler (1D tex.)";
+            if (reason) {
+                p->opts.scalers[n] = "bilinear";
+                disabled[n_disabled++] = reason;
             }
         }
     }
@@ -2172,12 +2170,12 @@ static void check_gl_features(struct gl_video *p)
         p->opts.srgb = false;
         disabled[n_disabled++] = "sRGB output (GLSL version)";
     }
-    if (!have_fbo && use_cms) {
+    if (use_cms && !test_fbo(p, &have_fbo)) {
         p->opts.srgb = false;
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (FBO)";
     }
-    if (!have_fbo && p->opts.smoothmotion) {
+    if (p->opts.smoothmotion && !test_fbo(p, &have_fbo)) {
         p->opts.smoothmotion = false;
         disabled[n_disabled++] = "smoothmotion (FBO)";
     }
