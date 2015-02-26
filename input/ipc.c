@@ -678,10 +678,20 @@ static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
     int mode = O_RDONLY;
     int client_fd = -1;
     bool close_client_fd = true;
+    bool writable = false;
 
     if (strcmp(path, "/dev/stdin") == 0) { // for symmetry with Linux
         client_fd = STDIN_FILENO;
         close_client_fd = false;
+    } else if (strncmp(path, "fd://", 5) == 0) {
+        char *end = NULL;
+        client_fd = strtol(path + 5, &end, 0);
+        if (!end || end == path + 5 || end[0]) {
+            MP_ERR(ctx, "Invalid FD: %s\n", path);
+            return;
+        }
+        close_client_fd = false;
+        writable = true; // maybe
     } else {
         // Use RDWR for FIFOs to ensure they stay open over multiple accesses.
         struct stat st;
@@ -690,7 +700,7 @@ static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
         client_fd = open(path, mode);
     }
     if (client_fd < 0) {
-        MP_ERR(ctx, "Could not open pipe at '%s'\n", path);
+        MP_ERR(ctx, "Could not open '%s'\n", path);
         return;
     }
 
@@ -699,8 +709,7 @@ static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
         .client_name = "input-file",
         .client_fd   = client_fd,
         .close_client_fd = close_client_fd,
-
-        .writable = false,
+        .writable = writable,
     };
 
     ipc_start_client(ctx, client);

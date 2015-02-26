@@ -2318,6 +2318,9 @@ Input
     get replies or events. Use ``--input-unix-socket`` for something
     bi-directional. On MS Windows, JSON commands are not available.
 
+    This can also specify a direct file descriptor with ``fd://N`` (UNIX only).
+    In this case, JSON replies will be written if the FD is writable.
+
     See also ``--slave-broken``.
 
     .. note::
