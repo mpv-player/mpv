@@ -866,9 +866,9 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
                 // The direction/pass assignment is rather arbitrary, but fixed in
                 // other parts of the code (like FBO setup).
                 const char *direction = pass == 0 ? "0, 1" : "1, 0";
-                // SAMPLE_CONVOLUTION_SEP_N(NAME, DIR, N, LUT, WEIGHTS_FUNC)
-                APPENDF(shader, "SAMPLE_CONVOLUTION_SEP_N(%s, vec2(%s), %d, %s, %s)\n",
-                        name, direction, size, lut_tex, lut_fn);
+                // SAMPLE_CONVOLUTION_SEP_N(NAME, DIR, N, LUT, WEIGHTS_FUNC, ANTIRING)
+                APPENDF(shader, "SAMPLE_CONVOLUTION_SEP_N(%s, vec2(%s), %d, %s, %s, %f)\n",
+                        name, direction, size, lut_tex, lut_fn, scaler->antiring);
             } else {
                 // SAMPLE_CONVOLUTION_N(NAME, N, LUT, WEIGHTS_FUNC)
                 APPENDF(shader, "SAMPLE_CONVOLUTION_N(%s, %d, %s, %s)\n",

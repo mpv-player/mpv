@@ -314,8 +314,6 @@ Available video output drivers are:
             controlled with ``scale-radius``. Increasing the radius makes the
             filter sharper but adds more ringing.
 
-            This filter supports antiringing (see ``scale-antiring``).
-
         ``ewa_lanczossharp``
             A slightly sharpened version of ewa_lanczos, preconfigured to use
             an ideal radius and parameter. If your hardware can run it, this is
@@ -370,7 +368,8 @@ Available video output drivers are:
         between 0.0 and 1.0. The default value of 0.0 disables antiringing
         entirely.
 
-        Note that this currently only affects EWA filters (eg. ``ewa_lanczos``).
+        Note that this doesn't affect the special filters ``bilinear``,
+        ``bicubic_fast`` or ``sharpen``.
 
     ``scaler-resizes-only``
         Disable the scaler if the video image is not resized. In that case,
