@@ -104,8 +104,9 @@ Playback Control
 ``--speed=<0.01-100>``
     Slow down or speed up playback by the factor given as parameter.
 
-    If ``--audio-pitch-correction`` is used, playing with a speed higher than
-    normal automatically inserts the ``scaletempo`` audio filter.
+    If ``--audio-pitch-correction`` (on by default) is used, playing with a
+    speed higher than normal automatically inserts the ``scaletempo`` audio
+    filter.
 
 ``--loop=<N|inf|force|no>``
     Loops playback ``N`` times. A value of ``1`` plays it one time (default),
