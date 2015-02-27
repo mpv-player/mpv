@@ -23,6 +23,7 @@
 #include "common/playlist.h"
 #include "options/path.h"
 #include "stream/stream.h"
+#include "stream/rar.h"
 #include "demux.h"
 
 #define PROBE_SIZE (8 * 1024)
@@ -188,6 +189,29 @@ static int parse_pls(struct pl_parser *p)
     return 0;
 }
 
+static int parse_rar(struct pl_parser *p)
+{
+    if (RarProbe(p->s))
+        return -1;
+    if (p->probing)
+        return 0;
+
+    int count;
+    rar_file_t **files;
+    if (RarParse(p->s, &count, &files))
+        return -1;
+
+    char *prefix = mp_url_escape(p, p->real_stream->url, "~|");
+    for (int n = 0; n < count; n++) {
+        // stream_rar.c does the real work
+        playlist_add_file(p->pl,
+                talloc_asprintf(p, "rar://%s|%s", prefix, files[n]->name));
+        RarFileDelete(files[n]);
+    }
+    talloc_free(files);
+    return 0;
+}
+
 static int parse_txt(struct pl_parser *p)
 {
     if (!p->force)
@@ -220,6 +244,7 @@ static const struct pl_format formats[] = {
     {"mov", parse_mov_rtsptext},
     {"pls", parse_pls,
      MIME_TYPES("audio/x-scpls")},
+    {"rar", parse_rar},
     {"txt", parse_txt},
 };
 
