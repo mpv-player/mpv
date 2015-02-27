@@ -2241,7 +2241,7 @@ Demuxer
 
 ``--demuxer-readahead-secs=<seconds>``
     If ``--demuxer-thread`` is enabled, this controls how much the demuxer
-    should buffer ahead in seconds (default: 0.2). As long as no packet has
+    should buffer ahead in seconds (default: 1). As long as no packet has
     a timestamp difference higher than the readahead amount relative to the
     last packet returned to the decoder, the demuxer keeps reading.
 
@@ -3138,7 +3138,7 @@ Cache
 ``--cache-secs=<seconds>``
     How many seconds of audio/video to prefetch if the cache is active. This
     overrides the ``--demuxer-readahead-secs`` option if and only if the cache
-    is enabled and the value is larger. (Default: 2.)
+    is enabled and the value is larger. (Default: 10.)
 
 ``--cache-pause``, ``--no-cache-pause``
     Whether the player should automatically pause when the cache runs low,
