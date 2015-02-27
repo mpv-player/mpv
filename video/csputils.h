@@ -64,6 +64,7 @@ enum mp_csp_prim {
     MP_CSP_PRIM_BT_601_625,
     MP_CSP_PRIM_BT_709,
     MP_CSP_PRIM_BT_2020,
+    MP_CSP_PRIM_BT_470M,
     MP_CSP_PRIM_COUNT
 };
 

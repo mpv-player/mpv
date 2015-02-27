@@ -62,6 +62,7 @@ const char *const mp_csp_prim_names[MP_CSP_PRIM_COUNT] = {
     "BT.601 (625-line SD)",
     "BT.709 (HD)",
     "BT.2020 (UHD)",
+    "BT.470 M",
 };
 
 const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
@@ -136,6 +137,7 @@ enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri)
 #if HAVE_AVCOL_SPC_BT2020
     case AVCOL_PRI_BT2020:      return MP_CSP_PRIM_BT_2020;
 #endif
+    case AVCOL_PRI_BT470M:      return MP_CSP_PRIM_BT_470M;
     default:                    return MP_CSP_PRIM_AUTO;
     }
 }
@@ -174,6 +176,7 @@ int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim)
 #if HAVE_AVCOL_SPC_BT2020
     case MP_CSP_PRIM_BT_2020:    return AVCOL_PRI_BT2020;
 #endif
+    case MP_CSP_PRIM_BT_470M:    return AVCOL_PRI_BT470M;
     default:                     return AVCOL_PRI_UNSPECIFIED;
     }
 }
@@ -276,8 +279,9 @@ static void mp_mul_matrix3x3(float a[3][3], float b[3][3])
 struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
 {
     /*
-    Values from: ITU-R Recommendations BT.601-7, BT.709-5, BT.2020-0
+    Values from: ITU-R Recommendations BT.470-6, BT.601-7, BT.709-5, BT.2020-0
 
+    https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.470-6-199811-S!!PDF-E.pdf
     https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.601-7-201103-I!!PDF-E.pdf
     https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-5-200204-I!!PDF-E.pdf
     https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2020-0-201208-I!!PDF-E.pdf
@@ -286,6 +290,13 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
     static const struct mp_csp_col_xy d65 = {0.3127, 0.3290};
 
     switch (spc) {
+    case MP_CSP_PRIM_BT_470M:
+        return (struct mp_csp_primaries) {
+            .red   = {0.670, 0.330},
+            .green = {0.210, 0.710},
+            .blue  = {0.140, 0.080},
+            .white = {0.310, 0.316} // Illuminant C
+        };
     case MP_CSP_PRIM_BT_601_525:
         return (struct mp_csp_primaries) {
             .red   = {0.630, 0.340},
