@@ -888,7 +888,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         stream_seek(stream, 0);
 
     // Peek this much data to avoid that stream_read() run by some demuxers
-    // or stream filters will flush previous peeked data.
+    // will flush previous peeked data.
     stream_peek(stream, STREAM_BUFFER_SIZE);
 
     int ret = demuxer->desc->open(in->d_thread, check);

@@ -254,31 +254,24 @@ static const char *match_proto(const char *url, const char *proto)
     return NULL;
 }
 
-static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
-                         const char *url, int flags, struct mp_cancel *c,
-                         struct mpv_global *global, struct stream **ret)
+static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
+                         struct mp_cancel *c, struct mpv_global *global,
+                         struct stream **ret)
 {
-    if (sinfo->stream_filter != !!underlying)
-        return STREAM_NO_MATCH;
-    if (sinfo->stream_filter && (flags & STREAM_NO_FILTERS))
-        return STREAM_NO_MATCH;
     if (!sinfo->is_safe && (flags & STREAM_SAFE_ONLY))
         return STREAM_UNSAFE;
     if (!sinfo->is_network && (flags & STREAM_NETWORK_ONLY))
         return STREAM_UNSAFE;
 
     const char *path = NULL;
-    // Stream filters use the original URL, with no protocol matching at all.
-    if (!sinfo->stream_filter) {
-        for (int n = 0; sinfo->protocols && sinfo->protocols[n]; n++) {
-            path = match_proto(url, sinfo->protocols[n]);
-            if (path)
-                break;
-        }
-
-        if (!path)
-            return STREAM_NO_MATCH;
+    for (int n = 0; sinfo->protocols && sinfo->protocols[n]; n++) {
+        path = match_proto(url, sinfo->protocols[n]);
+        if (path)
+            break;
     }
+
+    if (!path)
+        return STREAM_NO_MATCH;
 
     stream_t *s = new_stream();
     s->log = mp_log_new(s, global->log, sinfo->name);
@@ -288,7 +281,6 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     s->global = global;
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);
-    s->source = underlying;
     s->allow_caching = true;
     s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
@@ -355,7 +347,7 @@ struct stream *stream_create(const char *url, int flags,
     // Open stream proper
     bool unsafe = false;
     for (int i = 0; stream_list[i]; i++) {
-        int r = open_internal(stream_list[i], NULL, url, flags, c, global, &s);
+        int r = open_internal(stream_list[i], url, flags, c, global, &s);
         if (r == STREAM_OK)
             break;
         if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED)
@@ -382,19 +374,6 @@ struct stream *stream_create(const char *url, int flags,
         mp_err(log, "The protocol is either unsupported, or was disabled "
                     "at compile-time.\n");
         goto done;
-    }
-
-    // Open stream filters
-    for (;;) {
-        struct stream *new = NULL;
-        for (int i = 0; stream_list[i]; i++) {
-            int r = open_internal(stream_list[i], s, s->url, flags, c, global, &new);
-            if (r == STREAM_OK)
-                break;
-        }
-        if (!new)
-            break;
-        s = new;
     }
 
 done:
@@ -728,7 +707,6 @@ void free_stream(stream_t *s)
     if (s->close)
         s->close(s);
     free_stream(s->uncached_stream);
-    free_stream(s->source);
     talloc_free(s);
 }
 
