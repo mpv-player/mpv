@@ -2235,6 +2235,7 @@ static int init_gl(struct gl_video *p)
             MP_VERBOSE(p, "16 bit texture depth: %d.\n", (int)param);
             p->texture_16bit_depth = param;
         }
+        gl->DeleteTextures(1, &tex);
     }
 
     debug_check_gl(p, "after init_gl");
