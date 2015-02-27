@@ -74,8 +74,7 @@ extern const stream_info_t stream_info_dvdnav;
 extern const stream_info_t stream_info_bdmv_dir;
 extern const stream_info_t stream_info_bluray;
 extern const stream_info_t stream_info_bdnav;
-extern const stream_info_t stream_info_rar_filter;
-extern const stream_info_t stream_info_rar_entry;
+extern const stream_info_t stream_info_rar;
 extern const stream_info_t stream_info_edl;
 
 static const stream_info_t *const stream_list[] = {
@@ -115,8 +114,7 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_null,
     &stream_info_mf,
     &stream_info_edl,
-    &stream_info_rar_filter,
-    &stream_info_rar_entry,
+    &stream_info_rar,
     &stream_info_file,
     NULL
 };

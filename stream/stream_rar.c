@@ -43,11 +43,10 @@ This works as follows:
 
 - stream_open() with file01.rar
     - is opened as normal file (stream_file.c or others) first
-    - stream_info_rar_filter stream filter applies
-    - leads to rar_filter_open()
+    - the rar code in demux_playlist.c detects it
     - if multi-part, opens file02.rar, file03.rar, etc. as actual streams
       (recursive opening is prevented with the STREAM_NO_FILTERS flag)
-    - read accesses return a m3u playlist with entries like:
+    - it returns a playlist like this to the player:
         rar://bla01.rar|subfile.mkv
       (one such entry for each file contained in the rar)
 - stream_open() with the playlist entry, e.g. rar://bla01.rar|subfile.mkv
@@ -143,76 +142,10 @@ static int rar_entry_open(stream_t *stream)
     return STREAM_OK;
 }
 
-static int rar_filter_fill_buffer(stream_t *s, char *buffer, int max_len)
-{
-    struct stream *m = s->priv;
-    return stream_read_partial(m, buffer, max_len);
-}
-
-static int rar_filter_seek(stream_t *s, int64_t newpos)
-{
-    struct stream *m = s->priv;
-    return stream_seek(m, newpos);
-}
-
-static void rar_filter_close(stream_t *s)
-{
-    struct stream *m = s->priv;
-    free_stream(m);
-}
-
-static int rar_filter_control(stream_t *s, int cmd, void *arg)
-{
-    struct stream *m = s->priv;
-    return stream_control(m, cmd, arg);
-}
-
-static int rar_filter_open(stream_t *stream)
-{
-    struct stream *rar = stream->source;
-    if (!rar)
-        return STREAM_UNSUPPORTED;
-
-    int count;
-    rar_file_t **files;
-    if (!rar || RarProbe(rar) || RarParse(rar, &count, &files))
-        return STREAM_UNSUPPORTED;
-
-    void *tmp = talloc_new(NULL);
-
-    // Create a playlist containing all entries of the .rar file. The URLs
-    // link to rar_entry_open().
-    char *prefix = mp_url_escape(tmp, stream->url, "~|");
-    char *pl = talloc_strdup(tmp, "#EXTM3U\n");
-    for (int n = 0; n < count; n++) {
-        pl = talloc_asprintf_append_buffer(pl, "rar://%s|%s\n",
-                                           prefix, files[n]->name);
-        RarFileDelete(files[n]);
-    }
-    talloc_free(files);
-
-    struct stream *m = open_memory_stream(pl, strlen(pl));
-
-    stream->priv = m;
-    stream->fill_buffer = rar_filter_fill_buffer;
-    stream->seek = rar_filter_seek;
-    stream->seekable = true;
-    stream->close = rar_filter_close;
-    stream->control = rar_filter_control;
-    stream->safe_origin = true;
-
-    talloc_free(tmp);
-    return STREAM_OK;
-}
-
-const stream_info_t stream_info_rar_entry = {
-    .name = "rar_entry",
+const stream_info_t stream_info_rar = {
+    .name = "rar",
     .open = rar_entry_open,
     .protocols = (const char*const[]){ "rar", NULL },
-};
-
-const stream_info_t stream_info_rar_filter = {
-    .name = "rar_filter",
-    .open = rar_filter_open,
-    .stream_filter = true,
+    .is_safe = true,
+    .is_network = true, // safe over network
 };
