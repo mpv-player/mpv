@@ -358,9 +358,6 @@ struct m_option {
 // The option should be set during command line pre-parsing
 #define M_OPT_PRE_PARSE         (1 << 6)
 
-// See M_OPT_TYPE_OPTIONAL_PARAM.
-#define M_OPT_OPTIONAL_PARAM    (1 << 10)
-
 // The option expects a file name (or a list of file names)
 #define M_OPT_FILE              (1 << 11)
 

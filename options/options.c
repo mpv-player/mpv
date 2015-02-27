@@ -189,9 +189,9 @@ const m_option_t mp_opts[] = {
     OPT_TIME("ab-loop-b", ab_loop[1], 0, .min = MP_NOPTS_VALUE),
 
     OPT_FLAG("pause", pause, M_OPT_FIXED),
-    OPT_CHOICE("keep-open", keep_open, M_OPT_OPTIONAL_PARAM,
+    OPT_CHOICE("keep-open", keep_open, 0,
                ({"no", 0},
-                {"yes", 1}, {"", 1},
+                {"yes", 1},
                 {"always", 2})),
 
     OPT_CHOICE("index", index_mode, 0, ({"default", 1}, {"recreate", 0})),
@@ -274,10 +274,10 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list),
     OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
 
-    OPT_CHOICE("deinterlace", deinterlace, M_OPT_OPTIONAL_PARAM,
+    OPT_CHOICE("deinterlace", deinterlace, 0,
                ({"auto", -1},
                 {"no", 0},
-                {"yes", 1}, {"", 1})),
+                {"yes", 1})),
 
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),
@@ -386,14 +386,14 @@ const m_option_t mp_opts[] = {
                 {"auto", SOFTVOL_AUTO})),
     OPT_FLOATRANGE("softvol-max", softvol_max, 0, 10, 10000),
     OPT_FLOATRANGE("volume", mixer_init_volume, 0, -1, 100),
-    OPT_CHOICE("mute", mixer_init_mute, M_OPT_OPTIONAL_PARAM,
+    OPT_CHOICE("mute", mixer_init_mute, 0,
                ({"auto", -1},
                 {"no", 0},
-                {"yes", 1}, {"", 1})),
+                {"yes", 1})),
     OPT_STRING("volume-restore-data", mixer_restore_volume_data, 0),
-    OPT_CHOICE("gapless-audio", gapless_audio, M_OPT_OPTIONAL_PARAM,
+    OPT_CHOICE("gapless-audio", gapless_audio, 0,
                ({"no", 0},
-                {"yes", 1}, {"", 1},
+                {"yes", 1},
                 {"weak", -1})),
     OPT_DOUBLE("audio-buffer", audio_buffer, M_OPT_MIN | M_OPT_MAX,
                .min = 0, .max = 10),
@@ -505,8 +505,9 @@ const m_option_t mp_opts[] = {
                       ({"no", 1},
                        {"inf", -1},
                        {"force", -2})),
-    OPT_CHOICE_OR_INT("loop-file", loop_file, M_OPT_OPTIONAL_PARAM, 0, 10000,
-                      ({"yes", -1}, {"", -1}, {"no", 0}, // compat
+    OPT_CHOICE_OR_INT("loop-file", loop_file, 0, 0, 10000,
+                      ({"no", 0},
+                       {"yes", -1},
                        {"inf", -1})),
 
     OPT_FLAG("resume-playback", position_resume, 0),
@@ -553,11 +554,10 @@ const m_option_t mp_opts[] = {
     OPT_STRING("osd-msg2", osd_msg[1], 0),
     OPT_STRING("osd-msg3", osd_msg[2], 0),
 
-    OPT_CHOICE("idle", player_idle_mode, M_OPT_OPTIONAL_PARAM,
+    OPT_CHOICE("idle", player_idle_mode, 0,
                ({"no",   0},
                 {"once", 1},
-                {"yes",  2},
-                {"",     2})),
+                {"yes",  2})),
 
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
 
