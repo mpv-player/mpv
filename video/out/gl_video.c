@@ -467,9 +467,9 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
 }
 
 // Draw a textured quad.
-// x0, y0, x1, y1 = destination coordinates of the quad
-// tx0, ty0, tx1, ty1 = source texture coordinates (usually in pixels)
-// texture_w, texture_h = size of the texture, or an inverse factor
+// x0, y0, x1, y1 = destination coordinates of the quad in pixels
+// tx0, ty0, tx1, ty1 = source texture coordinates in pixels
+// tex_w, tex_h = size of the texture in pixels
 // flags = bits 0-1: rotate, bits 2: flip vertically
 static void draw_quad(struct gl_video *p,
                       float x0, float y0, float x1, float y1,
