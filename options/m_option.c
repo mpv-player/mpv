@@ -124,29 +124,23 @@ static int clamp_flag(const m_option_t *opt, void *val)
 static int parse_flag(struct mp_log *log, const m_option_t *opt,
                       struct bstr name, struct bstr param, void *dst)
 {
-    if (param.len) {
-        if (!bstrcmp0(param, "yes")) {
-            if (dst)
-                VAL(dst) = 1;
-            return 1;
-        }
-        if (!bstrcmp0(param, "no")) {
-            if (dst)
-                VAL(dst) = 0;
-            return 1;
-        }
-        mp_fatal(log, "Invalid parameter for %.*s flag: %.*s\n",
-                 BSTR_P(name), BSTR_P(param));
-        mp_info(log, "Valid values are:\n");
-        mp_info(log, "    yes\n");
-        mp_info(log, "    no\n");
-        mp_info(log, "    (passing nothing)\n");
-        return M_OPT_INVALID;
-    } else {
+    if (bstr_equals0(param, "yes") || !param.len) {
         if (dst)
             VAL(dst) = 1;
-        return 0;
+        return 1;
     }
+    if (bstr_equals0(param, "no")) {
+        if (dst)
+            VAL(dst) = 0;
+        return 1;
+    }
+    mp_fatal(log, "Invalid parameter for %.*s flag: %.*s\n",
+                BSTR_P(name), BSTR_P(param));
+    mp_info(log, "Valid values are:\n");
+    mp_info(log, "    yes\n");
+    mp_info(log, "    no\n");
+    mp_info(log, "    (passing nothing)\n");
+    return M_OPT_INVALID;
 }
 
 static char *print_flag(const m_option_t *opt, const void *val)
