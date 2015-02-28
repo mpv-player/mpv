@@ -609,7 +609,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         // tagged with.
         if (params->primaries == MP_CSP_PRIM_AUTO)
             params->primaries = MP_CSP_PRIM_BT_709;
-        if (params->gamma = MP_CSP_TRC_AUTO)
+        if (params->gamma == MP_CSP_TRC_AUTO)
             params->gamma = MP_CSP_TRC_LINEAR;
     } else {
         // We have no clue.
