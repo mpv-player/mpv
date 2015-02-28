@@ -814,6 +814,12 @@ api_statement_check \
     'av_frame_get_metadata(NULL)'
 
 api_statement_check \
+    "libavutil AVFrame colorspace information" \
+    HAVE_AVFRAME_CSP \
+    libavutil/frame.h \
+    'AVFrame frame; frame.color_primaries = frame.color_trc = 0;'
+
+api_statement_check \
     "libavutil AVFrame skip samples metadata" \
     HAVE_AVFRAME_SKIP_SAMPLES \
     libavutil/frame.h \
