@@ -937,13 +937,28 @@ static void compile_shaders(struct gl_video *p)
     bool use_input_gamma = p->input_gamma != 1.0;
     bool use_conv_gamma = p->conv_gamma != 1.0;
     bool use_const_luma = p->image_params.colorspace == MP_CSP_BT_2020_C;
-    enum mp_csp_trc gamma_fun = p->image_params.gamma;
+
+    enum mp_csp_trc gamma_fun = MP_CSP_TRC_NONE;
 
     // If either color correction option (3dlut or srgb) is enabled, or if
     // sigmoidal upscaling is requested, or if the source is linear XYZ, we
     // always scale in linear light
     bool use_linear_light = p->opts.linear_scaling || p->opts.sigmoid_upscaling
                             || use_cms || is_xyz;
+
+    if (use_linear_light) {
+        // We use the color level range to distinguish between PC
+        // content like images, which are most likely sRGB, and TV content
+        // like movies, which are most likely BT.1886. XYZ input is always
+        // treated as linear.
+        if (is_xyz) {
+            gamma_fun = MP_CSP_TRC_LINEAR;
+        } else if (p->image_params.colorlevels == MP_CSP_LEVELS_PC) {
+            gamma_fun = MP_CSP_TRC_SRGB;
+        } else {
+            gamma_fun = MP_CSP_TRC_BT_1886;
+        }
+    }
 
     // The inverse of the above transformation is normally handled by
     // the CMS cases, but if CMS is disabled we need to go back manually

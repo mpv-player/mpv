@@ -48,7 +48,6 @@ struct mp_image_params {
     enum mp_csp colorspace;
     enum mp_csp_levels colorlevels;
     enum mp_csp_prim primaries;
-    enum mp_csp_trc gamma;
     enum mp_chroma_location chroma_location;
     // The image should be converted to these levels. Unlike colorlevels, it
     // does not describe the current state of the image. (Somewhat similar to

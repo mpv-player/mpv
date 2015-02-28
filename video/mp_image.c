@@ -368,11 +368,10 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
         dst->params.d_w = src->params.d_w;
         dst->params.d_h = src->params.d_h;
     }
-    dst->params.primaries = src->params.primaries;
-    dst->params.gamma = src->params.gamma;
     if ((dst->flags & MP_IMGFLAG_YUV) == (src->flags & MP_IMGFLAG_YUV)) {
         dst->params.colorspace = src->params.colorspace;
         dst->params.colorlevels = src->params.colorlevels;
+        dst->params.primaries = src->params.primaries;
         dst->params.chroma_location = src->params.chroma_location;
         dst->params.outputlevels = src->params.outputlevels;
     }
@@ -517,7 +516,6 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            p1->colorlevels == p2->colorlevels &&
            p1->outputlevels == p2->outputlevels &&
            p1->primaries == p2->primaries &&
-           p1->gamma == p2->gamma &&
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate &&
            p1->stereo_in == p2->stereo_in &&
@@ -580,8 +578,6 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
                 params->primaries = mp_csp_guess_primaries(params->w, params->h);
             }
         }
-        if (params->gamma == MP_CSP_TRC_AUTO)
-            params->gamma = MP_CSP_TRC_BT_1886;
     } else if (fmt.flags & MP_IMGFLAG_RGB) {
         params->colorspace = MP_CSP_RGB;
         params->colorlevels = MP_CSP_LEVELS_PC;
@@ -593,8 +589,6 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         // Note: sRGB primaries = BT.709 primaries
         if (params->primaries == MP_CSP_PRIM_AUTO)
             params->primaries = MP_CSP_PRIM_BT_709;
-        if (params->gamma == MP_CSP_TRC_AUTO)
-            params->gamma = MP_CSP_TRC_SRGB;
     } else if (fmt.flags & MP_IMGFLAG_XYZ) {
         params->colorspace = MP_CSP_XYZ;
         params->colorlevels = MP_CSP_LEVELS_PC;
@@ -609,14 +603,11 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         // tagged with.
         if (params->primaries == MP_CSP_PRIM_AUTO)
             params->primaries = MP_CSP_PRIM_BT_709;
-        if (params->gamma == MP_CSP_TRC_AUTO)
-            params->gamma = MP_CSP_TRC_LINEAR;
     } else {
         // We have no clue.
         params->colorspace = MP_CSP_AUTO;
         params->colorlevels = MP_CSP_LEVELS_AUTO;
         params->primaries = MP_CSP_PRIM_AUTO;
-        params->gamma = MP_CSP_TRC_AUTO;
     }
 }
 

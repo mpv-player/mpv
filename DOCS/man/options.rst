@@ -2641,13 +2641,6 @@ Screenshot
     :jpg:       JPEG (default)
     :jpeg:      JPEG (same as jpg, but with .jpeg file ending)
 
-``--screenshot-tag-colorspace=<yes|no>``
-    Tag screenshots with the appropriate colorspace.
-
-    Note that not all formats are supported.
-
-    Default: ``yes``.
-
 ``--screenshot-template=<template>``
     Specify the filename template used to save screenshots. The template
     specifies the filename without file extension, and can contain format
