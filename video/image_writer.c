@@ -50,6 +50,7 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .jpeg_dpi = 72,
     .jpeg_progressive = 0,
     .jpeg_baseline = 1,
+    .tag_csp = 1,
 };
 
 #define OPT_BASE_STRUCT struct image_writer_opts
@@ -65,6 +66,7 @@ const struct m_sub_options image_writer_conf = {
         OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
         OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
         OPT_STRING("format", format, 0),
+        OPT_FLAG("tag-colorspace", tag_csp, 0),
         {0},
     },
     .size = sizeof(struct image_writer_opts),
@@ -131,6 +133,10 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     pic->format = avctx->pix_fmt;
     pic->width = avctx->width;
     pic->height = avctx->height;
+    if (ctx->opts->tag_csp) {
+        pic->color_primaries = mp_csp_prim_to_avcol_pri(image->params.primaries);
+        pic->color_trc = mp_csp_trc_to_avcol_trc(image->params.gamma);
+    }
     int ret = avcodec_encode_video2(avctx, &pkt, pic, &got_output);
     if (ret < 0)
         goto error_exit;

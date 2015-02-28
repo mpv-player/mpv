@@ -28,6 +28,7 @@ struct image_writer_opts {
     int jpeg_dpi;
     int jpeg_progressive;
     int jpeg_baseline;
+    int tag_csp;
 };
 
 extern const struct image_writer_opts image_writer_opts_defaults;
