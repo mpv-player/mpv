@@ -59,7 +59,9 @@ static void wakeup(void *);
     NSMenuItem *item = [m addItemWithTitle:@"Apple" action:nil keyEquivalent:@""];
     NSMenu *sm = [[NSMenu alloc] initWithTitle:@"Apple"];
     [m setSubmenu:sm forItem:item];
-    [sm addItemWithTitle: @"Shutdown mpv" action:@selector(shutdown) keyEquivalent:@"s"];
+    [sm addItemWithTitle: @"mpv_command('stop')" action:@selector(mpv_stop) keyEquivalent:@""];
+    [sm addItemWithTitle: @"mpv_command('quit')" action:@selector(mpv_quit) keyEquivalent:@""];
+    [sm addItemWithTitle: @"quit" action:@selector(terminate:) keyEquivalent:@"q"];
     [NSApp setMenu:m];
     [NSApp activateIgnoringOtherApps:YES];
 }
@@ -122,24 +124,23 @@ static void wakeup(void *);
 - (void) handleEvent:(mpv_event *)event
 {
     switch (event->event_id) {
-    case MPV_EVENT_SHUTDOWN:
-        // Clean up and shut down.
-        mpv_terminate_destroy(mpv);
+    case MPV_EVENT_SHUTDOWN: {
+        mpv_detach_destroy(mpv);
         mpv = NULL;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSApplication sharedApplication] terminate:nil];
-        });
+        printf("event: shutdown\n");
         break;
+    }
 
     case MPV_EVENT_LOG_MESSAGE: {
         struct mpv_event_log_message *msg = (struct mpv_event_log_message *)event->data;
         printf("[%s] %s: %s", msg->prefix, msg->level, msg->text);
     }
 
-    case MPV_EVENT_VIDEO_RECONFIG:
+    case MPV_EVENT_VIDEO_RECONFIG: {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self->w selectNextKeyView:nil];
         });
+    }
 
     default:
         printf("event: %s\n", mpv_event_name(event->event_id));
@@ -166,13 +167,18 @@ static void wakeup(void *context) {
 // Ostensibly, mpv's window would be hooked up to this.
 - (BOOL) windowShouldClose:(id)sender
 {
-    [self shutdown];
-    if (self->w)
-        [self->w release];
-    return YES;
+    return NO;
 }
 
-- (void) shutdown
+- (void) mpv_stop
+{
+    if (mpv) {
+        const char *args[] = {"stop", NULL};
+        mpv_command(mpv, args);
+    }
+}
+
+- (void) mpv_quit
 {
     if (mpv) {
         const char *args[] = {"quit", NULL};
