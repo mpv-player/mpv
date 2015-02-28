@@ -68,15 +68,19 @@ enum mp_csp_prim {
     MP_CSP_PRIM_COUNT
 };
 
-enum mp_csp_trc {
-    MP_CSP_TRC_NONE,
-    MP_CSP_TRC_BT_1886,
-    MP_CSP_TRC_SRGB,
-    MP_CSP_TRC_LINEAR
-};
-
 // Any enum mp_csp_prim value is a valid index (except MP_CSP_PRIM_COUNT)
 extern const char *const mp_csp_prim_names[MP_CSP_PRIM_COUNT];
+
+enum mp_csp_trc {
+    MP_CSP_TRC_AUTO,
+    MP_CSP_TRC_BT_1886,
+    MP_CSP_TRC_SRGB,
+    MP_CSP_TRC_LINEAR,
+    MP_CSP_TRC_COUNT
+};
+
+// Any enum mp_csp_trc value is a valid index (except MP_CSP_TRC_COUNT)
+extern const char *const mp_csp_trc_names[MP_CSP_TRC_COUNT];
 
 // These constants are based on the ICC specification (Table 23) and match
 // up with the API of LittleCMS, which treats them as integers.
@@ -199,11 +203,15 @@ enum mp_csp_levels avcol_range_to_mp_csp_levels(int avrange);
 
 enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri);
 
+enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc);
+
 int mp_csp_to_avcol_spc(enum mp_csp colorspace);
 
 int mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
 
 int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim);
+
+int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc);
 
 enum mp_csp mp_csp_guess_colorspace(int width, int height);
 enum mp_csp_prim mp_csp_guess_primaries(int width, int height);

@@ -65,6 +65,13 @@ const char *const mp_csp_prim_names[MP_CSP_PRIM_COUNT] = {
     "BT.470 M",
 };
 
+const char *const mp_csp_trc_names[MP_CSP_TRC_COUNT] = {
+    "Autoselect",
+    "BT.1886 (SD, HD, UHD)",
+    "sRGB (IEC 61966-2-1)",
+    "Linear light",
+};
+
 const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
     "brightness",
     "contrast",
@@ -142,6 +149,21 @@ enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri)
     }
 }
 
+enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
+{
+    switch (avtrc) {
+    case AVCOL_TRC_BT709:
+    case AVCOL_TRC_SMPTE170M:
+    case AVCOL_TRC_SMPTE240M:
+    case AVCOL_TRC_BT1361_ECG:
+    case AVCOL_TRC_BT2020_10:
+    case AVCOL_TRC_BT2020_12:    return MP_CSP_TRC_BT_1886;
+    case AVCOL_TRC_IEC61966_2_1: return MP_CSP_TRC_SRGB;
+    case AVCOL_TRC_LINEAR:       return MP_CSP_TRC_LINEAR;
+    default:                     return MP_CSP_TRC_AUTO;
+    }
+}
+
 int mp_csp_to_avcol_spc(enum mp_csp colorspace)
 {
     switch (colorspace) {
@@ -178,6 +200,17 @@ int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim)
 #endif
     case MP_CSP_PRIM_BT_470M:    return AVCOL_PRI_BT470M;
     default:                     return AVCOL_PRI_UNSPECIFIED;
+    }
+}
+
+int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
+{
+    switch (trc) {
+    // We just call it BT.1886 since we're decoding, but it's still BT.709
+    case MP_CSP_TRC_BT_1886:     return AVCOL_TRC_BT709;
+    case MP_CSP_TRC_SRGB:        return AVCOL_TRC_IEC61966_2_1;
+    case MP_CSP_TRC_LINEAR:      return AVCOL_TRC_LINEAR;
+    default:                     return AVCOL_TRC_UNSPECIFIED;
     }
 }
 

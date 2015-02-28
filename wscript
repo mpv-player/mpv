@@ -462,6 +462,13 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'func': check_statement('libavutil/frame.h',
                                 'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES',
                                 use='libav')
+    }, {
+        'name': 'avframe-csp',
+        'desc': 'libavutil AVFrame colorspace information',
+        'func': check_statement('libavutil/frame.h',
+                                'AVFrame frame;'
+                                'frame.color_primaries = frame.color_trc = 0;',
+                                use='libav')
     }
 ]
 
