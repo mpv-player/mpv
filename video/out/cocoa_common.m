@@ -380,10 +380,6 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     s->view = view;
     [parent addSubview:s->view];
 
-    // insert ourselves as the next key view so that clients can give key
-    // focus to the mpv view by calling -[NSWindow selectNextKeyView:]
-    [parent setNextKeyView:s->view];
-
 #if HAVE_COCOA_APPLICATION
     cocoa_register_menu_item_action(MPM_H_SIZE,   @selector(halfSize));
     cocoa_register_menu_item_action(MPM_N_SIZE,   @selector(normalSize));

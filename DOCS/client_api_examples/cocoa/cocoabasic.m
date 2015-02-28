@@ -33,6 +33,7 @@ static inline void check_error(int status)
     mpv_handle *mpv;
     dispatch_queue_t queue;
     NSWindow *w;
+    NSView *wrapper;
 }
 @end
 
@@ -54,6 +55,12 @@ static void wakeup(void *);
     [self->w setTitle:@"cocoabasic example"];
     [self->w makeMainWindow];
     [self->w makeKeyAndOrderFront:nil];
+
+    NSRect frame = [[self->w contentView] bounds];
+    self->wrapper = [[NSView alloc] initWithFrame:frame];
+    [self->wrapper setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+    [[self->w contentView] addSubview:self->wrapper];
+    [self->wrapper release];
 
     NSMenu *m = [[NSMenu alloc] initWithTitle:@"AMainMenu"];
     NSMenuItem *item = [m addItemWithTitle:@"Apple" action:nil keyEquivalent:@""];
@@ -95,7 +102,7 @@ static void wakeup(void *);
             exit(1);
         }
 
-        int64_t wid = (intptr_t) [self->w contentView];
+        int64_t wid = (intptr_t) self->wrapper;
         check_error(mpv_set_option(mpv, "wid", MPV_FORMAT_INT64, &wid));
 
         // Maybe set some options here, like default key bindings.
@@ -138,7 +145,12 @@ static void wakeup(void *);
 
     case MPV_EVENT_VIDEO_RECONFIG: {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self->w selectNextKeyView:nil];
+            NSArray *subviews = [self->wrapper subviews];
+            if ([subviews count] > 0) {
+                // mpv's events view
+                NSView *eview = [self->wrapper subviews][0];
+                [self->w makeFirstResponder:eview];
+            }
         });
     }
 
