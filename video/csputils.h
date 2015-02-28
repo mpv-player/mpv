@@ -203,6 +203,8 @@ enum mp_csp_levels avcol_range_to_mp_csp_levels(int avrange);
 
 enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri);
 
+enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc);
+
 int mp_csp_to_avcol_spc(enum mp_csp colorspace);
 
 int mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
