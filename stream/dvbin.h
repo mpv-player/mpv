@@ -37,11 +37,11 @@
 #ifndef DTV_STREAM_ID
 #define DTV_STREAM_ID DTV_ISDBS_TS_ID
 #endif
+#endif
 
 // This is only defined, for convenience, since API 5.8.
 #ifndef NO_STREAM_ID_FILTER
 #define NO_STREAM_ID_FILTER (~0U)
-#endif
 #endif
 
 #if (DVB_API_VERSION == 3 && DVB_API_VERSION_MINOR >= 1) || DVB_API_VERSION == 5
