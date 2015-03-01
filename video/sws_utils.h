@@ -44,6 +44,7 @@ struct mp_sws_context {
 
     // Cached context (if any)
     struct SwsContext *sws;
+    bool supports_csp;
 
     // Contains parameters for which sws is valid
     struct mp_sws_context *cached;

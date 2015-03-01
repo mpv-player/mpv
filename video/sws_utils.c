@@ -238,9 +238,11 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
 
     // This can fail even with normal operation, e.g. if a conversion path
     // simply does not support these settings.
-    sws_setColorspaceDetails(ctx->sws, sws_getCoefficients(s_csp), s_range,
-                             sws_getCoefficients(d_csp), d_range,
-                             ctx->brightness, ctx->contrast, ctx->saturation);
+    int r =
+        sws_setColorspaceDetails(ctx->sws, sws_getCoefficients(s_csp), s_range,
+                                 sws_getCoefficients(d_csp), d_range,
+                                 ctx->brightness, ctx->contrast, ctx->saturation);
+    ctx->supports_csp = r >= 0;
 
     if (sws_init_context(ctx->sws, ctx->src_filter, ctx->dst_filter) < 0)
         return -1;
@@ -294,6 +296,8 @@ int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
 
 int mp_sws_get_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
 {
+    if (!sws->supports_csp)
+        return 0;
     if (!strcmp(eq->item, "brightness"))
         eq->value =  ((sws->brightness * 100) + (1 << 15)) >> 16;
     else if (!strcmp(eq->item, "contrast"))
@@ -307,6 +311,8 @@ int mp_sws_get_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
 
 int mp_sws_set_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
 {
+    if (!sws->supports_csp)
+        return 0;
     if (!strcmp(eq->item, "brightness"))
         sws->brightness = ((eq->value << 16) + 50) / 100;
     else if (!strcmp(eq->item, "contrast"))
