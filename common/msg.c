@@ -136,8 +136,11 @@ bool mp_msg_test(struct mp_log *log, int lev)
     struct mp_log_root *root = log->root;
     if (!root || root->mute)
         return false;
-    if (atomic_load(&log->reload_counter) != atomic_load(&root->reload_counter))
+    if (atomic_load_explicit(&log->reload_counter, memory_order_relaxed) !=
+        atomic_load_explicit(&root->reload_counter, memory_order_relaxed))
+    {
         update_loglevel(log);
+    }
     return lev <= log->level;
 }
 
