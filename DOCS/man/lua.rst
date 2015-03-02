@@ -326,7 +326,6 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     the timer is re-added after the function fn is run.
 
     Returns a timer object. The timer object provides the following methods:
-
         ``stop()``
             Disable the timer. Does nothing if the timer is already disabled.
             This will remember the current elapsed time when stopping, so that
