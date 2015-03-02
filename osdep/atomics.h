@@ -41,6 +41,11 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
 #define ATOMIC_VAR_INIT(x) \
     {.v = (x)}
 
+#define memory_order_relaxed 1
+#define memory_order_seq_cst 2
+
+#define atomic_load_explicit(p, e) atomic_load(p)
+
 #if HAVE_ATOMIC_BUILTINS
 
 #define atomic_load(p) \
