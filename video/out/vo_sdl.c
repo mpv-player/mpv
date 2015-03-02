@@ -575,7 +575,7 @@ static int wait_events(struct vo *vo, int64_t until_time_us)
             if (sdl_mod & (KMOD_LCTRL | KMOD_RCTRL))
                 mpv_mod |= MP_KEY_MODIFIER_CTRL;
             if ((sdl_mod & KMOD_LALT) ||
-                (sdl_mod & KMOD_RALT) && !mp_input_use_alt_gr(vo->input_ctx))
+                ((sdl_mod & KMOD_RALT) && !mp_input_use_alt_gr(vo->input_ctx)))
                 mpv_mod |= MP_KEY_MODIFIER_ALT;
             if (sdl_mod & (KMOD_LGUI | KMOD_RGUI))
                 mpv_mod |= MP_KEY_MODIFIER_META;

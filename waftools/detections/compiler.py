@@ -39,7 +39,7 @@ def __add_generic_flags__(ctx):
 
 def __add_gcc_flags__(ctx):
     ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
-                       "-Wno-switch", "-Wno-parentheses", "-Wpointer-arith",
+                       "-Wno-switch", "-Wparentheses", "-Wpointer-arith",
                        "-Wredundant-decls", "-Wno-pointer-sign"]
 
 def __add_clang_flags__(ctx):

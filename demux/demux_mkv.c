@@ -1990,8 +1990,8 @@ static bool handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
                     uint8_t ov = track->audio_buf[o / 2];
                     int x = (i & 1) ? iv >> 4 : iv & 0x0F;
                     int y = (o & 1) ? ov >> 4 : ov & 0x0F;
-                    track->audio_buf[o / 2] = ov & 0x0F | (o & 1 ? x << 4 : x);
-                    track->audio_buf[i / 2] = iv & 0x0F | (i & 1 ? y << 4 : y);
+                    track->audio_buf[o / 2] = (ov & 0x0F) | (o & 1 ? x << 4 : x);
+                    track->audio_buf[i / 2] = (iv & 0x0F) | (i & 1 ? y << 4 : y);
                     i++;
                     o++;
                 }

@@ -778,7 +778,7 @@ static int flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     if (pts < vsync + vc->vsync_interval / 4
         && (vsync - PREV_VSYNC(vc->last_queue_time)
             > pts - vc->last_ideal_time + vc->vsync_interval / 2
-            || vc->dropped_frame && vsync > vc->dropped_time))
+            || (vc->dropped_frame && vsync > vc->dropped_time)))
         pts -= vc->vsync_interval / 2;
 
     vc->dropped_time = ideal_pts;

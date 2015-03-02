@@ -379,7 +379,7 @@ addcflags() { cflag_check "$@" && OURCFLAGS="$OURCFLAGS $@" ; }
 OURCFLAGS="-std=c99 -Wall $_opt"
 
 addcflags -g -g3 -ggdb
-addcflags -Wundef -Wmissing-prototypes -Wshadow -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls -Wno-pointer-sign -Werror=implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function
+addcflags -Wundef -Wmissing-prototypes -Wshadow -Wno-switch -Wparentheses -Wpointer-arith -Wredundant-decls -Wno-pointer-sign -Werror=implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function
 # clang
 addcflags -Wno-logical-op-parentheses -fcolor-diagnostics -Wno-tautological-compare -Wno-tautological-constant-out-of-range-compare
 # extra

@@ -418,7 +418,7 @@ static void pointer_handle_button(void *data,
 {
     struct vo_wayland_state *wl = data;
 
-    mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN0 + (button - BTN_LEFT) |
+    mp_input_put_key(wl->vo->input_ctx, (MP_MOUSE_BTN0 + (button - BTN_LEFT)) |
                     ((state == WL_POINTER_BUTTON_STATE_PRESSED)
                     ? MP_KEY_STATE_DOWN : MP_KEY_STATE_UP));
 

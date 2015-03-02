@@ -57,7 +57,7 @@ static int size_index(int s)
 {
     int n = av_log2_16bit(s);
     return (n << HEIGHT_SORT_BITS)
-       + (- 1 - (s << HEIGHT_SORT_BITS >> n) & (1 << HEIGHT_SORT_BITS) - 1);
+       + ((- 1 - (s << HEIGHT_SORT_BITS >> n)) & ((1 << HEIGHT_SORT_BITS) - 1));
 }
 
 /* Pack the given rectangles into an area of size w * h.
