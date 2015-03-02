@@ -735,7 +735,6 @@ static stream_t *open_cache(stream_t *orig, const char *name)
     cache->mime_type = talloc_strdup(cache, orig->mime_type);
     cache->demuxer = talloc_strdup(cache, orig->demuxer);
     cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
-    cache->safe_origin = orig->safe_origin;
     cache->streaming = orig->streaming,
     cache->is_network = orig->is_network;
     cache->opts = orig->opts;

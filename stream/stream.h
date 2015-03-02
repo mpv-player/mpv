@@ -194,7 +194,6 @@ typedef struct stream {
     bool streaming : 1; // known to be a network stream if true
     bool seekable : 1; // presence of general byte seeking support
     bool fast_skip : 1; // consider stream fast enough to fw-seek by skipping
-    bool safe_origin : 1; // used for playlists that can be opened safely
     bool is_network : 1; // original stream_info_t.is_network flag
     bool allow_caching : 1; // stream cache makes sense
     struct mp_log *log;

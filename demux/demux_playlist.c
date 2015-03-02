@@ -201,6 +201,7 @@ static int parse_rar(struct pl_parser *p)
     if (RarParse(p->s, &count, &files))
         return -1;
 
+    p->pl->disable_safety = true; // make it load rar://
     char *prefix = mp_url_escape(p, p->real_stream->url, "~|");
     for (int n = 0; n < count; n++) {
         // stream_rar.c does the real work

@@ -98,8 +98,8 @@ static int rar_entry_open(stream_t *stream)
     *name++ = '\0';
     mp_url_unescape_inplace(base);
 
-    struct stream *rar = stream_create(base, STREAM_READ, stream->cancel,
-                                       stream->global);
+    struct stream *rar = stream_create(base, STREAM_READ | STREAM_SAFE_ONLY,
+                                       stream->cancel, stream->global);
     if (!rar)
         return STREAM_ERROR;
 
@@ -146,6 +146,4 @@ const stream_info_t stream_info_rar = {
     .name = "rar",
     .open = rar_entry_open,
     .protocols = (const char*const[]){ "rar", NULL },
-    .is_safe = true,
-    .is_network = true, // safe over network
 };
