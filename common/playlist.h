@@ -62,6 +62,8 @@ struct playlist {
     // current_was_replaced is set to true.
     struct playlist_entry *current;
     bool current_was_replaced;
+
+    bool disable_safety;
 };
 
 void playlist_entry_add_param(struct playlist_entry *e, bstr name, bstr value);
