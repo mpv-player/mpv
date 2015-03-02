@@ -108,6 +108,7 @@ struct format_hack {
     bool no_stream : 1;         // do not wrap struct stream as AVIOContext
     bool use_stream_ids : 1;    // export the native stream IDs
     bool fully_read : 1;        // set demuxer.fully_read flag
+    bool image_format : 1;      // expected to contain exactly 1 frame
     // Do not confuse player's position estimation (position is into external
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
@@ -115,6 +116,7 @@ struct format_hack {
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
 #define TEXTSUB(fmt) {fmt, .fully_read = true}
+#define IMAGEFMT(fmt) {fmt, .image_format = true}
 
 static const struct format_hack format_hacks[] = {
     // for webradios
@@ -139,12 +141,10 @@ static const struct format_hack format_hacks[] = {
     // Let's open files with extremely generic extensions (.bin) with a
     // demuxer that doesn't have a probe function! NO.
     BLACKLIST("bin"),
-    // Image demuxers, disabled in favor of demux_mf (for now):
-    BLACKLIST("image"),
-    BLACKLIST("image2pipe"),
-    BLACKLIST("bmp_pipe"), BLACKLIST("dpx_pipe"), BLACKLIST("exr_pipe"),
-    BLACKLIST("j2k_pipe"), BLACKLIST("png_pipe"), BLACKLIST("tiff_pipe"),
-    BLACKLIST("jpeg_pipe"),
+    // Useless, does not work with custom streams.
+    BLACKLIST("image2"),
+    // Image demuxers ("<name>_pipe" is detected explicitly)
+    IMAGEFMT("image2pipe"),
     {0}
 };
 
@@ -384,6 +384,11 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         return -1;
     }
 
+    if (bstr_endswith0(bstr0(priv->avif->name), "_pipe")) {
+        MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
+        priv->format_hack.image_format = true;
+    }
+
     demuxer->filetype = priv->avif->name;
 
     return 0;
@@ -526,6 +531,8 @@ static void handle_stream(demuxer_t *demuxer, int i)
                               av_q2d(st->codec->time_base) *
                               st->codec->ticks_per_frame);
         sh_video->fps = fps;
+        if (priv->format_hack.image_format)
+            sh_video->fps = demuxer->opts->mf_fps;
         if (st->sample_aspect_ratio.num)
             sh_video->aspect = codec->width  * st->sample_aspect_ratio.num
                     / (float)(codec->height * st->sample_aspect_ratio.den);
