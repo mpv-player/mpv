@@ -109,7 +109,6 @@ def build(ctx):
         ( "audio/filter/af_equalizer.c" ),
         ( "audio/filter/af_export.c" ),
         ( "audio/filter/af_extrastereo.c" ),
-        ( "audio/filter/af_forcespeed.c" ),
         ( "audio/filter/af_format.c" ),
         ( "audio/filter/af_hrtf.c" ),
         ( "audio/filter/af_karaoke.c" ),

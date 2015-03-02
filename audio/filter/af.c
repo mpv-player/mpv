@@ -54,7 +54,6 @@ extern const struct af_info af_info_center;
 extern const struct af_info af_info_sinesuppress;
 extern const struct af_info af_info_karaoke;
 extern const struct af_info af_info_scaletempo;
-extern const struct af_info af_info_forcespeed;
 extern const struct af_info af_info_bs2b;
 extern const struct af_info af_info_lavfi;
 extern const struct af_info af_info_convert24;
@@ -87,7 +86,6 @@ static const struct af_info *const filter_list[] = {
     &af_info_center,
     &af_info_sinesuppress,
     &af_info_karaoke,
-    &af_info_forcespeed,
     &af_info_scaletempo,
 #if HAVE_LIBBS2B
     &af_info_bs2b,
