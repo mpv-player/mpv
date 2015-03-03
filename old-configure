@@ -778,58 +778,16 @@ api_statement_check \
     'int x, y; avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)'
 
 api_statement_check \
-    "libavcodec avcol_spc_bt2020 available" \
-    HAVE_AVCOL_SPC_BT2020 \
-    libavcodec/avcodec.h \
-    'int x = AVCOL_SPC_BT2020_NCL'
-
-api_statement_check \
-    "libavcodec metadata update side data" \
-    HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA \
-    libavcodec/avcodec.h \
-    'enum AVPacketSideDataType type = AV_PKT_DATA_METADATA_UPDATE'
-
-api_statement_check \
-    "libavformat metadata update flags" \
-    HAVE_AVFORMAT_METADATA_UPDATE_FLAG \
-    libavformat/avformat.h \
-    'int x = AVFMT_EVENT_FLAG_METADATA_UPDATED'
-
-api_statement_check \
-    "libavcodec replaygain side data" \
-    HAVE_AVCODEC_REPLAYGAIN_SIDE_DATA \
-    libavcodec/avcodec.h \
-    'enum AVPacketSideDataType type = AV_PKT_DATA_REPLAYGAIN'
-
-api_statement_check \
-    "libavutil/libavcodec display matrix side data" \
-    HAVE_AV_DISPLAYMATRIX \
-    libavutil/frame.h \
-    'enum AVFrameSideDataType type = AV_FRAME_DATA_DISPLAYMATRIX'
-
-api_statement_check \
     "libavutil AVFrame metadata" \
     HAVE_AVFRAME_METADATA \
     libavutil/frame.h \
     'av_frame_get_metadata(NULL)'
 
 api_statement_check \
-    "libavutil AVFrame colorspace information" \
-    HAVE_AVFRAME_CSP \
-    libavutil/frame.h \
-    'AVFrame frame; frame.color_primaries = frame.color_trc = 0;'
-
-api_statement_check \
     "libavutil AVFrame skip samples metadata" \
     HAVE_AVFRAME_SKIP_SAMPLES \
     libavutil/frame.h \
     'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES'
-
-api_statement_check \
-    "libavcodec av_vdpau_alloc_context()" \
-    HAVE_AVCODEC_VDPAU_ALLOC_CONTEXT \
-    libavcodec/vdpau.h \
-    'AVVDPAUContext *x = av_vdpau_alloc_context()'
 
 check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 5.0.0'
 

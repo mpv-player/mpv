@@ -133,12 +133,10 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     pic->format = avctx->pix_fmt;
     pic->width = avctx->width;
     pic->height = avctx->height;
-#if HAVE_AVFRAME_CSP
     if (ctx->opts->tag_csp) {
         pic->color_primaries = mp_csp_prim_to_avcol_pri(image->params.primaries);
         pic->color_trc = mp_csp_trc_to_avcol_trc(image->params.gamma);
     }
-#endif
     int ret = avcodec_encode_video2(avctx, &pkt, pic, &got_output);
     if (ret < 0)
         goto error_exit;

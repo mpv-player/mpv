@@ -113,10 +113,8 @@ enum mp_csp avcol_spc_to_mp_csp(int avcolorspace)
     switch (avcolorspace) {
     case AVCOL_SPC_BT709:       return MP_CSP_BT_709;
     case AVCOL_SPC_BT470BG:     return MP_CSP_BT_601;
-#if HAVE_AVCOL_SPC_BT2020
     case AVCOL_SPC_BT2020_NCL:  return MP_CSP_BT_2020_NC;
     case AVCOL_SPC_BT2020_CL:   return MP_CSP_BT_2020_C;
-#endif
     case AVCOL_SPC_SMPTE170M:   return MP_CSP_BT_601;
     case AVCOL_SPC_SMPTE240M:   return MP_CSP_SMPTE_240M;
     case AVCOL_SPC_RGB:         return MP_CSP_RGB;
@@ -141,9 +139,7 @@ enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri)
     case AVCOL_PRI_SMPTE170M:   return MP_CSP_PRIM_BT_601_525;
     case AVCOL_PRI_BT470BG:     return MP_CSP_PRIM_BT_601_625;
     case AVCOL_PRI_BT709:       return MP_CSP_PRIM_BT_709;
-#if HAVE_AVCOL_SPC_BT2020
     case AVCOL_PRI_BT2020:      return MP_CSP_PRIM_BT_2020;
-#endif
     case AVCOL_PRI_BT470M:      return MP_CSP_PRIM_BT_470M;
     default:                    return MP_CSP_PRIM_AUTO;
     }
@@ -169,10 +165,8 @@ int mp_csp_to_avcol_spc(enum mp_csp colorspace)
     switch (colorspace) {
     case MP_CSP_BT_709:         return AVCOL_SPC_BT709;
     case MP_CSP_BT_601:         return AVCOL_SPC_BT470BG;
-#if HAVE_AVCOL_SPC_BT2020
     case MP_CSP_BT_2020_NC:     return AVCOL_SPC_BT2020_NCL;
     case MP_CSP_BT_2020_C:      return AVCOL_SPC_BT2020_CL;
-#endif
     case MP_CSP_SMPTE_240M:     return AVCOL_SPC_SMPTE240M;
     case MP_CSP_RGB:            return AVCOL_SPC_RGB;
     case MP_CSP_YCGCO:          return AVCOL_SPC_YCOCG;
@@ -195,9 +189,7 @@ int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim)
     case MP_CSP_PRIM_BT_601_525: return AVCOL_PRI_SMPTE170M;
     case MP_CSP_PRIM_BT_601_625: return AVCOL_PRI_BT470BG;
     case MP_CSP_PRIM_BT_709:     return AVCOL_PRI_BT709;
-#if HAVE_AVCOL_SPC_BT2020
     case MP_CSP_PRIM_BT_2020:    return AVCOL_PRI_BT2020;
-#endif
     case MP_CSP_PRIM_BT_470M:    return AVCOL_PRI_BT470M;
     default:                     return AVCOL_PRI_UNSPECIFIED;
     }

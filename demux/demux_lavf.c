@@ -32,12 +32,8 @@
 #include <libavutil/avutil.h>
 #include <libavutil/avstring.h>
 #include <libavutil/mathematics.h>
-#if HAVE_AVCODEC_REPLAYGAIN_SIDE_DATA
-# include <libavutil/replaygain.h>
-#endif
-#if HAVE_AV_DISPLAYMATRIX
-# include <libavutil/display.h>
-#endif
+#include <libavutil/replaygain.h>
+#include <libavutil/display.h>
 #include <libavutil/opt.h>
 
 #include "options/options.h"
@@ -427,7 +423,6 @@ static void select_tracks(struct demuxer *demuxer, int start)
 
 static void export_replaygain(demuxer_t *demuxer, sh_audio_t *sh, AVStream *st)
 {
-#if HAVE_AVCODEC_REPLAYGAIN_SIDE_DATA
     for (int i = 0; i < st->nb_side_data; i++) {
         AVReplayGain *av_rgain;
         struct replaygain_data *rgain;
@@ -453,7 +448,6 @@ static void export_replaygain(demuxer_t *demuxer, sh_audio_t *sh, AVStream *st)
 
         sh->replaygain_data = rgain;
     }
-#endif
 }
 
 // Return a dictionary entry as (decimal) integer.
@@ -544,15 +538,9 @@ static void handle_stream(demuxer_t *demuxer, int i)
         if (sh_video->bitrate == 0)
             sh_video->bitrate = avfc->bit_rate;
 
-#if HAVE_AV_DISPLAYMATRIX
         uint8_t *sd = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, NULL);
         if (sd)
             sh_video->rotate = -av_display_rotation_get((uint32_t *)sd);
-#else
-        int rot = dict_get_decimal(st->metadata, "rotate", -1);
-        if (rot >= 0)
-            sh_video->rotate = rot;
-#endif
         sh_video->rotate = ((sh_video->rotate % 360) + 360) % 360;
 
         // This also applies to vfw-muxed mkv, but we can't detect these easily.
@@ -648,7 +636,6 @@ static void add_new_streams(demuxer_t *demuxer)
 
 static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
 {
-#if HAVE_AVFORMAT_METADATA_UPDATE_FLAG
     lavf_priv_t *priv = demuxer->priv;
     if (priv->avfc->event_flags & AVFMT_EVENT_FLAG_METADATA_UPDATED) {
         mp_tags_copy_from_av_dictionary(demuxer->metadata, priv->avfc->metadata);
@@ -665,24 +652,6 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
             }
         }
     }
-#elif HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA
-    lavf_priv_t *priv = demuxer->priv;
-    int md_size;
-    const uint8_t *md;
-    if (!pkt)
-        return;
-    md = av_packet_get_side_data(pkt, AV_PKT_DATA_METADATA_UPDATE, &md_size);
-    if (md && priv->merge_track_metadata) {
-        AVDictionary *dict = NULL;
-        av_packet_unpack_dictionary(md, md_size, &dict);
-        if (dict) {
-            mp_tags_clear(demuxer->metadata);
-            mp_tags_copy_from_av_dictionary(demuxer->metadata, dict);
-            av_dict_free(&dict);
-            demux_changed(demuxer, DEMUX_EVENT_METADATA);
-        }
-    }
-#endif
 }
 
 static int interrupt_cb(void *ctx)

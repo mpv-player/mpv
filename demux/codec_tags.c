@@ -60,8 +60,7 @@ static const struct mp_codec_tag mp_codec_tags[] = {
     {0}
 };
 
-#define HAVE_QT_TAGS (LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(55, 25, 100) && \
-                      LIBAVFORMAT_VERSION_MICRO >= 100)
+#define HAVE_QT_TAGS (LIBAVFORMAT_VERSION_MICRO >= 100)
 
 static const char *lookup_tag(int type, uint32_t tag)
 {

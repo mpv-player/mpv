@@ -157,11 +157,7 @@ static int init(struct lavc_ctx *ctx)
     };
     ctx->hwdec_priv = p;
 
-#if HAVE_AVCODEC_VDPAU_ALLOC_CONTEXT
     p->context = av_vdpau_alloc_context();
-#else
-    p->context = av_mallocz(sizeof(AVVDPAUContext));
-#endif
     if (!p->context)
         goto error;
 

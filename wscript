@@ -416,42 +416,6 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
             avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)""",
             use='libav')
     }, {
-        'name': 'avcol-spc-bt2020',
-        'desc': 'libavcodec avcol_spc_bt2020 available',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'int x = AVCOL_SPC_BT2020_NCL',
-                                use='libav')
-    }, {
-        'name': 'avcodec-vdpau-alloc-context',
-        'desc': 'libavcodec vdpau non-sense',
-        'func': check_statement('libavcodec/vdpau.h',
-                                'AVVDPAUContext *x = av_vdpau_alloc_context()',
-                                use='libav')
-    }, {
-        'name': 'avcodec-metadata-update-side-data',
-        'desc': 'libavcodec AV_PKT_DATA_METADATA_UPDATE side data type',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'enum AVPacketSideDataType type = AV_PKT_DATA_METADATA_UPDATE',
-                                use='libav')
-    }, {
-        'name': 'avformat-metadata-update-flag',
-        'desc': "libavformat metadata update flags",
-        'func': check_statement('libavformat/avformat.h',
-                                'int x = AVFMT_EVENT_FLAG_METADATA_UPDATED',
-                                use='libav')
-    }, {
-        'name': 'avcodec-replaygain-side-data',
-        'desc': 'libavcodec AV_PKT_DATA_REPLAYGAIN side data type',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'enum AVPacketSideDataType type = AV_PKT_DATA_REPLAYGAIN',
-                                use='libav')
-    }, {
-        'name': 'av-displaymatrix',
-        'desc': 'libavutil/libavcodec display matrix side data',
-        'func': check_statement('libavutil/frame.h',
-                                'enum AVFrameSideDataType type = AV_FRAME_DATA_DISPLAYMATRIX',
-                                use='libav')
-    },{
         'name': 'avframe-metadata',
         'desc': 'libavutil AVFrame metadata',
         'func': check_statement('libavutil/frame.h',
@@ -462,13 +426,6 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'desc': 'libavutil AVFrame skip samples metadata',
         'func': check_statement('libavutil/frame.h',
                                 'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES',
-                                use='libav')
-    }, {
-        'name': 'avframe-csp',
-        'desc': 'libavutil AVFrame colorspace information',
-        'func': check_statement('libavutil/frame.h',
-                                'AVFrame frame;'
-                                'frame.color_primaries = frame.color_trc = 0;',
                                 use='libav')
     }
 ]
