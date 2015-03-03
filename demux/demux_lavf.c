@@ -560,8 +560,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
             memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
             sh_sub->extradata_len = codec->extradata_size;
         }
-        sh_sub->w = codec->width;
-        sh_sub->h = codec->height;
 
         if (matches_avinputformat_name(priv, "microdvd")) {
             AVRational r;

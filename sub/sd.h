@@ -25,9 +25,6 @@ struct sd {
     // the resolution of the VO, nor does it have to be the OSD resolution.
     int sub_video_w, sub_video_h;
 
-    // Resolution hints stored in mp4 files.
-    int sub_stream_w, sub_stream_h;
-
     // Shared renderer for ASS - done to avoid reloading embedded fonts.
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
