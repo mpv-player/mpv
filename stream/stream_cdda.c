@@ -227,7 +227,6 @@ static void close_cdda(stream_t *s)
     cdda_priv *p = (cdda_priv *)s->priv;
     paranoia_free(p->cdp);
     cdda_close(p->cd);
-    free(p);
 }
 
 static int get_track_by_sector(cdda_priv *p, unsigned int sector)
@@ -313,7 +312,6 @@ static int open_cdda(stream_t *st)
         return STREAM_ERROR;
     }
 
-    priv = calloc(1,sizeof(cdda_priv));
     priv->cd = cdd;
 
     if (p->toc_bias)
