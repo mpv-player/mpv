@@ -2549,7 +2549,8 @@ OSD
         - ``--osd-color='#C0808080'`` set OSD to 50% gray with 75% alpha
 
 ``--osd-fractions``
-    Show OSD times with fractions of seconds.
+    Show OSD times with fractions of seconds (in millisecond precision). Useful
+    to see the exact timestamp of a video frame.
 
 ``--osd-level=<0-3>``
     Specifies which mode the OSD should start in.
