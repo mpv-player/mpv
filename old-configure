@@ -747,15 +747,15 @@ check_pkg_config "libbs2b audio filter support" $_libbs2b LIBBS2B 'libbs2b'
 check_pkg_config "LCMS2 support" $_lcms2 LCMS2 'lcms2 >= 2.6'
 
 check_pkg_config "FFmpeg/Libav" $_ffmpeg FFMPEG \
-    "libavutil >= 52.48.101 libavcodec >= 55.34.1 libavformat >= 55.12.0 libswscale >= 2.1.2"
+    "libavutil >= 54.02.0 libavcodec >= 56.1.0 libavformat >= 56.01.0 libswscale >= 2.1.3"
 test $(defretval) = no && die "Unable to find development files for some of the required Libav libraries above. Aborting."
 
-check_pkg_config "Libswresample" $_libswresample LIBSWRESAMPLE 'libswresample >= 0.17.104'
+check_pkg_config "Libswresample" $_libswresample LIBSWRESAMPLE 'libswresample >= 1.1.100'
 _libswresample=$(defretval)
 
 _libavresample=auto
 test $_libswresample = yes && _libavresample=no
-check_pkg_config "Libavresample" $_libavresample LIBAVRESAMPLE 'libavresample >= 1.1.0'
+check_pkg_config "Libavresample" $_libavresample LIBAVRESAMPLE 'libavresample >= 2.1.0'
 _libavresample=$(defretval)
 
 if test "$_libswresample" = no && test "$_libavresample" = no ; then
@@ -831,9 +831,9 @@ api_statement_check \
     libavcodec/vdpau.h \
     'AVVDPAUContext *x = av_vdpau_alloc_context()'
 
-check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 3.90.100'
+check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 5.0.0'
 
-check_pkg_config "libavdevice" $_libavdevice LIBAVDEVICE 'libavdevice >= 54.0.0'
+check_pkg_config "libavdevice" $_libavdevice LIBAVDEVICE 'libavdevice >= 55.0.0'
 
 check_trivial "TV interface" $_tv TV
 

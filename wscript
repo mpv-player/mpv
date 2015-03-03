@@ -370,11 +370,12 @@ iconv support use --disable-iconv.",
 ]
 
 libav_pkg_config_checks = [
-    'libavutil',   '>= 52.48.101',
-    'libavcodec',  '>= 55.34.1',
-    'libavformat', '>= 55.12.0',
-    'libswscale',  '>= 2.1.2'
+    'libavutil',   '>= 54.02.0',
+    'libavcodec',  '>= 56.1.0',
+    'libavformat', '>= 56.01.0',
+    'libswscale',  '>= 2.1.3'
 ]
+libav_versions_string = "FFmpeg 2.4 or Libav 11"
 
 libav_dependencies = [
     {
@@ -383,15 +384,15 @@ libav_dependencies = [
         'func': check_pkg_config(*libav_pkg_config_checks),
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
-Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
+FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_string)
     }, {
         'name': '--libswresample',
         'desc': 'libswresample',
-        'func': check_pkg_config('libswresample', '>= 0.17.104'),
+        'func': check_pkg_config('libswresample', '>= 1.1.100'),
     }, {
         'name': '--libavresample',
         'desc': 'libavresample',
-        'func': check_pkg_config('libavresample',  '>= 1.1.0'),
+        'func': check_pkg_config('libavresample',  '>= 2.1.0'),
         'deps_neg': ['libswresample'],
     }, {
         'name': 'resampler',
@@ -403,11 +404,11 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
     }, {
         'name': '--libavfilter',
         'desc': 'libavfilter',
-        'func': check_pkg_config('libavfilter', '>= 3.90.100'),
+        'func': check_pkg_config('libavfilter', '>= 5.0.0'),
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
-        'func': check_pkg_config('libavdevice', '>= 54.0.0'),
+        'func': check_pkg_config('libavdevice', '>= 55.0.0'),
     }, {
         'name': 'avcodec-chroma-pos-api',
         'desc': 'libavcodec avcodec_enum_to_chroma_pos API',

@@ -45,7 +45,7 @@ Essential dependencies (incomplete list):
 - Audio output development headers (libasound/ALSA, pulseaudio)
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
   and either libswresample or libavresample)
-  At least FFmpeg 2.1.4 or Libav 10 is required.
+  At least FFmpeg 2.4.0 or Libav 11 is required.
 - zlib
 - iconv (normally provided by the system libc)
 - libass (OSD, OSC, text subtitles)
