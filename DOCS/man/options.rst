@@ -1944,6 +1944,10 @@ Disc Devices
 ``--cdda-skip=<yes|no>``
     (Never) accept imperfect data reconstruction.
 
+``--cdda-cdtext=<yes|no>``
+    Print CD text. This is disabled by default, because it ruins perfomance
+    with CD-ROM drives for unknown reasons.
+
 ``--dvd-speed=<speed>``
     Try to limit DVD speed (default: 0, no change). DVD base speed is 1385
     kB/s, so an 8x drive can read at speeds up to 11080 kB/s. Slower speeds
