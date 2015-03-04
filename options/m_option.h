@@ -52,6 +52,7 @@ extern const m_option_type_t m_option_type_keyvalue_list;
 extern const m_option_type_t m_option_type_time;
 extern const m_option_type_t m_option_type_rel_time;
 extern const m_option_type_t m_option_type_choice;
+extern const m_option_type_t m_option_type_flags;
 extern const m_option_type_t m_option_type_msglevels;
 extern const m_option_type_t m_option_type_print_fn;
 extern const m_option_type_t m_option_type_subconfig;
@@ -625,6 +626,9 @@ extern const char m_option_path_separator;
     OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
 #define OPT_CHOICE_(optname, varname, flags, choices, ...) \
     OPT_GENERAL(int, optname, varname, flags, M_CHOICES(choices), __VA_ARGS__)
+
+#define OPT_FLAGS(...) \
+    OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_flags)
 
 // Union of choices and an int range. The choice values can be included in the
 // int range, or be completely separate - both works.

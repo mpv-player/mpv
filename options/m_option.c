@@ -718,6 +718,123 @@ const struct m_option_type m_option_type_choice = {
     .get   = choice_get,
 };
 
+static int apply_flag(const struct m_option *opt, int *val, bstr flag)
+{
+    struct m_opt_choice_alternatives *alt = opt->priv;
+    for (alt = opt->priv; alt->name; alt++) {
+        if (bstr_equals0(flag, alt->name)) {
+            if (*val & alt->value)
+                return M_OPT_INVALID;
+            *val |= alt->value;
+            return 0;
+        }
+    }
+    return M_OPT_UNKNOWN;
+}
+
+static const char *find_next_flag(const struct m_option *opt, int *val)
+{
+    struct m_opt_choice_alternatives *alt = opt->priv;
+    for (alt = opt->priv; alt->name; alt++) {
+        if (alt->value && (alt->value & (*val)) == alt->value) {
+            *val = *val & ~(unsigned)alt->value;
+            return alt->name;
+        }
+    }
+    *val = 0; // if there are still flags left, there's not much we can do
+    return NULL;
+}
+
+static int parse_flags(struct mp_log *log, const struct m_option *opt,
+                       struct bstr name, struct bstr param, void *dst)
+{
+    int value = 0;
+    while (param.len) {
+        bstr flag;
+        bstr_split_tok(param, "+", &flag, &param);
+        int r = apply_flag(opt, &value, flag);
+        if (r == M_OPT_UNKNOWN) {
+            struct m_opt_choice_alternatives *alt = opt->priv;
+            mp_fatal(log, "Invalid flag for option %.*s: %.*s\n",
+                     BSTR_P(name), BSTR_P(flag));
+            mp_info(log, "Valid flags are:\n");
+            for (alt = opt->priv; alt->name; alt++)
+                mp_info(log, "    %s\n", alt->name);
+            mp_info(log, "Flags can usually be combined with '+'.\n");
+            return M_OPT_INVALID;
+        } else if (r < 0) {
+            mp_fatal(log, "Option %.*s: flag '%.*s' conflicts with a previous "
+                     "flag value.\n", BSTR_P(name), BSTR_P(flag));
+            return M_OPT_INVALID;
+        }
+    }
+    if (dst)
+        *(int *)dst = value;
+    return 1;
+}
+
+static int flags_set(const m_option_t *opt, void *dst, struct mpv_node *src)
+{
+    int value = 0;
+    if (src->format != MPV_FORMAT_NODE_ARRAY)
+        return M_OPT_UNKNOWN;
+    struct mpv_node_list *srclist = src->u.list;
+    for (int n = 0; n < srclist->num; n++) {
+        if (srclist->values[n].format != MPV_FORMAT_STRING)
+            return M_OPT_INVALID;
+        if (apply_flag(opt, &value, bstr0(srclist->values[n].u.string)) < 0)
+            return M_OPT_INVALID;
+    }
+    *(int *)dst = value;
+    return 0;
+}
+
+static int flags_get(const m_option_t *opt, void *ta_parent,
+                     struct mpv_node *dst, void *src)
+{
+    int value = *(int *)src;
+
+    dst->format = MPV_FORMAT_NODE_ARRAY;
+    dst->u.list = talloc_zero(ta_parent, struct mpv_node_list);
+    struct mpv_node_list *list = dst->u.list;
+    while (1) {
+        const char *flag = find_next_flag(opt, &value);
+        if (!flag)
+            break;
+
+        struct mpv_node node;
+        node.format = MPV_FORMAT_STRING;
+        node.u.string = (char *)flag;
+        MP_TARRAY_APPEND(list, list->values, list->num, node);
+    }
+
+    return 1;
+}
+
+static char *print_flags(const m_option_t *opt, const void *val)
+{
+    int value = *(int *)val;
+    char *res = talloc_strdup(NULL, "");
+    while (1) {
+        const char *flag = find_next_flag(opt, &value);
+        if (!flag)
+            break;
+
+        res = talloc_asprintf_append_buffer(res, "%s%s", res[0] ? "+" : "", flag);
+    }
+    return res;
+}
+
+const struct m_option_type m_option_type_flags = {
+    .name  = "Flags",
+    .size  = sizeof(int),
+    .parse = parse_flags,
+    .print = print_flags,
+    .copy  = copy_opt,
+    .set   = flags_set,
+    .get   = flags_get,
+};
+
 // Float
 
 #undef VAL
