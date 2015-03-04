@@ -127,8 +127,8 @@ void uninit_sub_renderer(struct MPContext *mpctx)
 static void init_sub_renderer(struct MPContext *mpctx) {}
 void uninit_sub_renderer(struct MPContext *mpctx) {}
 
-void mp_ass_configure_fonts(struct ass_renderer *a, struct MPOpts *b,
-                            struct mpv_global *c, struct mp_log *d) {}
+static void mp_ass_configure_fonts(struct ass_renderer *a, struct osd_style_opts *b,
+                                   struct mpv_global *c, struct mp_log *d) {}
 
 #endif
 
