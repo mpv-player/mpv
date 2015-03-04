@@ -7,8 +7,13 @@ Overview
 **mpv** is a media player based on MPlayer and mplayer2. It supports a wide
 variety of video file formats, audio and video codecs, and subtitle types.
 
-If you are wondering what's different from mplayer2 and MPlayer you can read
-more about the [changes][changes].
+Relases can be found on the [release list][relases].
+
+Downloads
+---------
+
+For semi-official builds and third-party packages please see
+[mpv.io](http://mpv.io/installation/).
 
 Compilation
 -----------
@@ -124,6 +129,28 @@ For small changes you can just send us pull requests through GitHub. For bigger
 changes come and talk to us on IRC before you start working on them. It will
 make code review easier for both parties later on.
 
+Relation to MPlayer and mplayer2
+--------------------------------
+
+mpv is based on mplayer2, which in turn is based on the original MPlayer
+(also called mplayer, mplayer-svn, mplayer1). Many changes have been made, a
+large part of which is incompatible or completely changes how the player
+behaves. Although there are still many similarities to its ancestors, mpv
+should generally be treated as a completely different program.
+
+mpv was forked because we wanted to modernize MPlayer. This includes
+removing cruft (including features which stopped making sense 10 years ago),
+and of course adding modern features. Such huge and intrusive changes made it
+infeasible to work directly with MPlayer, which is mostly focused on
+preservation, so a fork had to be made. (Actually, mpv is based on mplayer2,
+which already started this process of removing cruft.)
+
+In general, mpv should be considered a completely new program, rather than a
+MPlayer drop-in replacement.
+
+If you are wondering what's different from mplayer2 and MPlayer, an incomplete
+list of changes is located [here][mplayer-changes].
+
 Contact
 -------
 
@@ -139,7 +166,7 @@ mailing lists are mostly unused.
 To contact the `mpv` team in private write to `mpv-team@googlegroups.com`. Use
 only if discretion is required.
 
-[changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/man/changes.rst
+[releases]: https://github.com/mpv-player/mpv/releases
 [mpv-build]: https://github.com/mpv-player/mpv-build
 [homebrew-mpv]: https://github.com/mpv-player/homebrew-mpv
 [issue-tracker]:  https://github.com/mpv-player/mpv/issues
@@ -148,3 +175,4 @@ only if discretion is required.
 [ffmpeg_vs_libav]: https://github.com/mpv-player/mpv/wiki/FFmpeg-versus-Libav
 [release-policy]: https://github.com/mpv-player/mpv/blob/master/DOCS/release-policy.md
 [windows_compilation]: https://github.com/mpv-player/mpv/blob/master/DOCS/compile-windows.md
+[mplayer-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/mplayer-changes.rst
