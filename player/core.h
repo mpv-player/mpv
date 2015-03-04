@@ -67,6 +67,14 @@ enum seek_type {
     MPSEEK_FACTOR,
 };
 
+enum seek_precision {
+    MPSEEK_DEFAULT = 0,
+    // The following values are numerically sorted by increasing precision
+    MPSEEK_KEYFRAME,
+    MPSEEK_EXACT,
+    MPSEEK_VERY_EXACT,
+};
+
 struct track {
     enum stream_type type;
 
@@ -293,8 +301,8 @@ typedef struct MPContext {
     // Used to communicate the parameters of a seek between parts
     struct seek_params {
         enum seek_type type;
+        enum seek_precision exact;
         double amount;
-        int exact;  // -1 = disable, 0 = default, 1 = enable
         bool immediate; // disable seek delay logic
     } seek;
 
@@ -437,7 +445,7 @@ void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx, int dir);
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
-                int exact, bool immediate);
+                enum seek_precision exact, bool immediate);
 bool mp_seek_chapter(struct MPContext *mpctx, int chapter);
 double get_time_length(struct MPContext *mpctx);
 double get_current_time(struct MPContext *mpctx);

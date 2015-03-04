@@ -565,7 +565,7 @@ static int mp_property_percent_pos(void *ctx, struct m_property *prop,
     switch (action) {
     case M_PROPERTY_SET: {
         double pos = *(double *)arg;
-        queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, 0, true);
+        queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, MPSEEK_DEFAULT, true);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET: {
@@ -613,7 +613,7 @@ static int mp_property_time_pos(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, 0, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, MPSEEK_DEFAULT, true);
         return M_PROPERTY_OK;
     }
     return property_time(action, arg, get_current_time(mpctx));
@@ -2029,7 +2029,7 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
         opts->hwdec_api = new;
         reinit_video_chain(mpctx);
         if (last_pts != MP_NOPTS_VALUE)
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, 1, true);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, true);
         return M_PROPERTY_OK;
     }
     }
@@ -3108,7 +3108,8 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
             double now = mpctx->playback_pts;
             if (now != MP_NOPTS_VALUE && opts->ab_loop[0] != MP_NOPTS_VALUE &&
                 opts->ab_loop[1] != MP_NOPTS_VALUE && now >= opts->ab_loop[1])
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0], 1, false);
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0],
+                           MPSEEK_EXACT, false);
         }
         // Update if visible
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
@@ -4186,23 +4187,23 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_SEEK: {
         double v = cmd->args[0].v.d * cmd->scale;
         int abs = cmd->args[1].v.i & 3;
-        int exact = ((cmd->args[2].v.i | cmd->args[1].v.i) >> 3) & 3;
-        switch (exact) {
-        case 1: exact = -1; break;
-        case 2: exact = 1; break;
+        enum seek_precision precision = MPSEEK_DEFAULT;
+        switch (((cmd->args[2].v.i | cmd->args[1].v.i) >> 3) & 3) {
+        case 1: precision = MPSEEK_KEYFRAME; break;
+        case 2: precision = MPSEEK_EXACT; break;
         }
         if (!mpctx->num_sources)
             return -1;
         mark_seek(mpctx);
         if (abs == 2) {   // Absolute seek to a timestamp in seconds
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact, false);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, v, precision, false);
             set_osd_function(mpctx,
                              v > get_current_time(mpctx) ? OSD_FFW : OSD_REW);
         } else if (abs) {           /* Absolute seek by percentage */
-            queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, exact, false);
+            queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, precision, false);
             set_osd_function(mpctx, OSD_FFW); // Direction isn't set correctly
         } else {
-            queue_seek(mpctx, MPSEEK_RELATIVE, v, exact, false);
+            queue_seek(mpctx, MPSEEK_RELATIVE, v, precision, false);
             set_osd_function(mpctx, (v > 0) ? OSD_FFW : OSD_REW);
         }
         if (bar_osd)
@@ -4223,7 +4224,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         } else if (oldpts != MP_NOPTS_VALUE) {
             cmdctx->last_seek_pts = get_current_time(mpctx);
             cmdctx->marked_pts = MP_NOPTS_VALUE;
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, 1, false);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, MPSEEK_EXACT, false);
             set_osd_function(mpctx, OSD_REW);
             if (bar_osd)
                 mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
@@ -4432,7 +4433,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
                     // rounding for the mess of it.
                     a[0] += 0.01 * (a[1] > 0 ? 1 : -1);
                     mark_seek(mpctx);
-                    queue_seek(mpctx, MPSEEK_RELATIVE, a[0], 1, false);
+                    queue_seek(mpctx, MPSEEK_RELATIVE, a[0], MPSEEK_EXACT, false);
                     set_osd_function(mpctx, (a[0] > 0) ? OSD_FFW : OSD_REW);
                     if (bar_osd)
                         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
@@ -4901,7 +4902,8 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
                 now >= opts->ab_loop[1])
             {
                 mark_seek(mpctx);
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0], 1, false);
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0],
+                           MPSEEK_EXACT, false);
             }
         }
         ctx->prev_pts = now;

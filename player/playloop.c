@@ -183,7 +183,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         mpctx->stop_play = KEEP_PLAYING;
 
     double hr_seek_offset = opts->hr_seek_demuxer_offset;
-    bool hr_seek_very_exact = seek.exact > 1;
+    bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
     // Always try to compensate for possibly bad demuxers in "special"
     // situations where we need more robustness from the hr-seek code, even
     // if the user doesn't use --hr-seek-demuxer-offset.
@@ -191,9 +191,9 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     if (hr_seek_very_exact)
         hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
 
-    bool hr_seek = opts->correct_pts && seek.exact >= 0;
+    bool hr_seek = opts->correct_pts && seek.exact != MPSEEK_KEYFRAME;
     hr_seek &= (opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE) ||
-               opts->hr_seek > 0 || seek.exact > 0;
+               opts->hr_seek > 0 || seek.exact >= MPSEEK_EXACT;
     if (seek.type == MPSEEK_FACTOR || seek.amount < 0 ||
         (seek.type == MPSEEK_ABSOLUTE && seek.amount < mpctx->last_chapter_pts))
         mpctx->last_chapter_seek = -2;
@@ -303,7 +303,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
 
 // This combines consecutive seek requests.
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
-                int exact, bool immediate)
+                enum seek_precision exact, bool immediate)
 {
     struct seek_params *seek = &mpctx->seek;
     switch (type) {
@@ -339,7 +339,7 @@ void execute_queued_seek(struct MPContext *mpctx)
 {
     if (mpctx->seek.type) {
         // Let explicitly imprecise seeks cancel precise seeks:
-        if (mpctx->hrseek_active && mpctx->seek.exact < 0)
+        if (mpctx->hrseek_active && mpctx->seek.exact == MPSEEK_KEYFRAME)
             mpctx->start_timestamp = -1e9;
         /* If the user seeks continuously (keeps arrow key down)
          * try to finish showing a frame from one location before doing
@@ -505,7 +505,7 @@ bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
     if (pts == MP_NOPTS_VALUE)
         return false;
 
-    queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0, true);
+    queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, MPSEEK_DEFAULT, true);
     mpctx->last_chapter_seek = chapter;
     mpctx->last_chapter_pts = pts;
     return true;
@@ -717,14 +717,15 @@ static void handle_backstep(struct MPContext *mpctx)
     if (mpctx->d_video && current_pts != MP_NOPTS_VALUE) {
         double seek_pts = find_previous_pts(mpctx, current_pts);
         if (seek_pts != MP_NOPTS_VALUE) {
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 2, true);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, MPSEEK_VERY_EXACT, true);
         } else {
             double last = get_last_frame_pts(mpctx);
             if (last != MP_NOPTS_VALUE && last >= current_pts &&
                 mpctx->backstep_start_seek_ts != mpctx->vo_pts_history_seek_ts)
             {
                 MP_ERR(mpctx, "Backstep failed.\n");
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, current_pts, 2, true);
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, current_pts,
+                           MPSEEK_VERY_EXACT, true);
             } else if (!mpctx->hrseek_active) {
                 MP_VERBOSE(mpctx, "Start backstep indexing.\n");
                 // Force it to index the video up until current_pts.
@@ -761,7 +762,7 @@ static void handle_sstep(struct MPContext *mpctx)
 
     if (opts->step_sec > 0 && !mpctx->paused) {
         set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, 0, true);
+        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, MPSEEK_DEFAULT, true);
     }
 
     if (mpctx->video_status >= STATUS_EOF) {
@@ -778,7 +779,8 @@ static void handle_loop_file(struct MPContext *mpctx)
     if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
         set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, get_start_time(mpctx), 0, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, get_start_time(mpctx),
+                   MPSEEK_DEFAULT, true);
         if (opts->loop_file > 0)
             opts->loop_file--;
     }
@@ -799,7 +801,7 @@ void seek_to_last_frame(struct MPContext *mpctx)
     mp_seek(mpctx, (struct seek_params){
                    .type = MPSEEK_ABSOLUTE,
                    .amount = end,
-                   .exact = 2, // "very exact", no framedrop
+                   .exact = MPSEEK_VERY_EXACT,
                    }, false);
     // Make it exact: stop seek only if last frame was reached.
     if (mpctx->hrseek_active) {

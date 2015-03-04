@@ -348,8 +348,10 @@ void mp_force_video_refresh(struct MPContext *mpctx)
         return;
 
     // If not paused, the next frame should come soon enough.
-    if (opts->pause && mpctx->last_vo_pts != MP_NOPTS_VALUE)
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->last_vo_pts, 2, true);
+    if (opts->pause && mpctx->last_vo_pts != MP_NOPTS_VALUE) {
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->last_vo_pts,
+                   MPSEEK_VERY_EXACT, true);
+    }
 }
 
 static int check_framedrop(struct MPContext *mpctx)
