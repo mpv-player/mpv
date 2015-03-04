@@ -403,7 +403,7 @@ static int mod_state(struct vo_w32_state *w32)
 
 static int decode_surrogate_pair(wchar_t lead, wchar_t trail)
 {
-    return 0x10000 + ((lead & 0x3ff) << 10) | (trail & 0x3ff);
+    return 0x10000 + (((lead & 0x3ff) << 10) | (trail & 0x3ff));
 }
 
 static int decode_utf16(struct vo_w32_state *w32, wchar_t c)

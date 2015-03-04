@@ -240,7 +240,7 @@ char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2)
         return bstrdup0(talloc_ctx, p1);
 
 #if HAVE_DOS_PATHS
-    if (p2.len >= 2 && p2.start[1] == ':'
+    if ((p2.len >= 2 && p2.start[1] == ':')
         || p2.start[0] == '\\' || p2.start[0] == '/')
 #else
     if (p2.start[0] == '/')
@@ -251,7 +251,7 @@ char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2)
     int endchar1 = p1.start[p1.len - 1];
 #if HAVE_DOS_PATHS
     have_separator = endchar1 == '/' || endchar1 == '\\'
-                     || p1.len == 2 && endchar1 == ':'; // "X:" only
+                     || (p1.len == 2 && endchar1 == ':'); // "X:" only
 #else
     have_separator = endchar1 == '/';
 #endif

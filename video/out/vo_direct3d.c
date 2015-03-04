@@ -964,7 +964,7 @@ render_osd:
 // Return the high byte of the value that represents white in chroma (U/V)
 static int get_chroma_clear_val(int bit_depth)
 {
-    return 1 << (bit_depth - 1 & 7);
+    return 1 << ((bit_depth - 1) & 7);
 }
 
 // this macro is supposed to work on all formats supported by 3D rendering, and
