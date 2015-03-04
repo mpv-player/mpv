@@ -7,7 +7,7 @@ Overview
 **mpv** is a media player based on MPlayer and mplayer2. It supports a wide
 variety of video file formats, audio and video codecs, and subtitle types.
 
-Relases can be found on the [release list][relases].
+Releases can be found on the [release list][releases].
 
 Downloads
 ---------
