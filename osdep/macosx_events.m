@@ -376,7 +376,7 @@ void cocoa_set_input_context(struct input_ctx *input_context)
     if (cocoaModifiers & NSControlKeyMask)
         mask |= MP_KEY_MODIFIER_CTRL;
     if (LeftAltPressed(cocoaModifiers) ||
-        RightAltPressed(cocoaModifiers) && ![self useAltGr])
+        (RightAltPressed(cocoaModifiers) && ![self useAltGr]))
         mask |= MP_KEY_MODIFIER_ALT;
     if (cocoaModifiers & NSCommandKeyMask)
         mask |= MP_KEY_MODIFIER_META;
