@@ -4185,8 +4185,12 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
     switch (cmd->id) {
     case MP_CMD_SEEK: {
         double v = cmd->args[0].v.d * cmd->scale;
-        int abs = cmd->args[1].v.i;
-        int exact = cmd->args[2].v.i;
+        int abs = cmd->args[1].v.i & 3;
+        int exact = ((cmd->args[2].v.i | cmd->args[1].v.i) >> 3) & 3;
+        switch (exact) {
+        case 1: exact = -1; break;
+        case 2: exact = 1; break;
+        }
         if (!mpctx->num_sources)
             return -1;
         mark_seek(mpctx);
@@ -4655,9 +4659,12 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
-    case MP_CMD_SCREENSHOT:
-        screenshot_request(mpctx, cmd->args[0].v.i, cmd->args[1].v.i, msg_osd);
+    case MP_CMD_SCREENSHOT: {
+        int mode = cmd->args[0].v.i & 3;
+        int freq = (cmd->args[0].v.i | cmd->args[1].v.i) >> 3;
+        screenshot_request(mpctx, mode, freq, msg_osd);
         break;
+    }
 
     case MP_CMD_SCREENSHOT_TO_FILE:
         screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i, msg_osd);
