@@ -112,6 +112,13 @@ static bool cas_terminal_owner(struct MPContext *old, struct MPContext *new)
     return r;
 }
 
+static void update_logging(struct MPContext *mpctx)
+{
+    mp_msg_update_msglevels(mpctx->global);
+    if (mpctx->opts->use_terminal && cas_terminal_owner(NULL, mpctx))
+        terminal_init();
+}
+
 void mp_print_version(struct mp_log *log, int always)
 {
     int v = always ? MSGL_INFO : MSGL_V;
@@ -361,9 +368,9 @@ void wakeup_playloop(void *ctx)
 // Finish mpctx initialization. This must be done after setting up all options.
 // Some of the initializations depend on the options, and can't be changed or
 // undone later.
-// cplayer: true if called by the command line player, false for client API
+// If argv is not NULL, apply them as command line player arguments.
 // Returns: <0 on error, 0 on success.
-int mp_initialize(struct MPContext *mpctx)
+int mp_initialize(struct MPContext *mpctx, char **argv)
 {
     struct MPOpts *opts = mpctx->opts;
 
@@ -375,16 +382,44 @@ int mp_initialize(struct MPContext *mpctx)
     }
     MP_STATS(mpctx, "start init");
 
-    if (mpctx->opts->use_terminal && cas_terminal_owner(NULL, mpctx))
-        terminal_init();
+    update_logging(mpctx);
 
-    mp_msg_update_msglevels(mpctx->global);
+    if (argv) {
+        // Preparse the command line, so we can init the terminal early.
+        m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argv);
+
+        update_logging(mpctx);
+
+        MP_VERBOSE(mpctx, "Command line:");
+        for (int i = 0; argv[i]; i++)
+            MP_VERBOSE(mpctx, " '%s'", argv[i]);
+        MP_VERBOSE(mpctx, "\n");
+    }
+
+    mp_print_version(mpctx->log, false);
+
+    mp_parse_cfgfiles(mpctx);
+    update_logging(mpctx);
+
+    if (argv) {
+        int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
+                                               mpctx->global, argv);
+        if (r < 0)
+            return r <= M_OPT_EXIT ? -2 : -1;
+        update_logging(mpctx);
+    }
+
+    if (handle_help_options(mpctx))
+        return -2;
 
     if (opts->slave_mode) {
         MP_WARN(mpctx, "--slave-broken is deprecated (see manpage).\n");
         opts->consolecontrols = 0;
         m_config_set_option0(mpctx->mconfig, "input-file", "/dev/stdin");
     }
+
+    if (!mpctx->playlist->first && !opts->player_idle_mode)
+        return -3;
 
     mp_input_load(mpctx->input);
     mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
@@ -457,6 +492,11 @@ int mp_initialize(struct MPContext *mpctx)
     mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
 #endif
 
+#ifdef _WIN32
+    if (opts->w32_priority > 0)
+        SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
+#endif
+
     prepare_playlist(mpctx, mpctx->playlist);
 
     MP_STATS(mpctx, "end init");
@@ -475,50 +515,15 @@ int mpv_main(int argc, char *argv[])
     if (verbose_env)
         opts->verbose = atoi(verbose_env);
 
-    // Preparse the command line
-    m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argv);
-
-    if (mpctx->opts->use_terminal && cas_terminal_owner(NULL, mpctx))
-        terminal_init();
-
-    mp_msg_update_msglevels(mpctx->global);
-
-    MP_VERBOSE(mpctx, "Command line:");
-    for (int i = 0; argv[i]; i++)
-        MP_VERBOSE(mpctx, " '%s'", argv[i]);
-    MP_VERBOSE(mpctx, "\n");
-
-    mp_print_version(mpctx->log, false);
-
-    mp_parse_cfgfiles(mpctx);
-
-    int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
-                                           mpctx->global, argv);
-    if (r < 0) {
-        if (r <= M_OPT_EXIT) {
-            return prepare_exit_cplayer(mpctx, EXIT_NONE);
-        } else {
-            return prepare_exit_cplayer(mpctx, EXIT_ERROR);
-        }
-    }
-
-    mp_msg_update_msglevels(mpctx->global);
-
-    if (handle_help_options(mpctx))
+    int r = mp_initialize(mpctx, argv);
+    if (r == -2) // help
         return prepare_exit_cplayer(mpctx, EXIT_NONE);
-
-    if (!mpctx->playlist->first && !opts->player_idle_mode) {
+    if (r == -3) { // nothing to play
         mp_print_version(mpctx->log, true);
         MP_INFO(mpctx, "%s", mp_help_text);
         return prepare_exit_cplayer(mpctx, EXIT_NONE);
     }
-
-#ifdef _WIN32
-    if (opts->w32_priority > 0)
-        SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
-#endif
-
-    if (mp_initialize(mpctx) < 0)
+    if (r < 0) // another error
         return prepare_exit_cplayer(mpctx, EXIT_ERROR);
 
     mp_play_files(mpctx);
