@@ -1800,8 +1800,8 @@ static double gl_video_interpolate_frame(struct gl_video *p,
         double R = t->pts - t->next_vsync;
         float ts = p->opts.smoothmotion_threshold;
         inter_coeff = R / vsync_interval;
-        inter_coeff = inter_coeff < 0.0 + ts ? 0.0 : inter_coeff;
-        inter_coeff = inter_coeff > 1.0 - ts ? 1.0 : inter_coeff;
+        inter_coeff = inter_coeff <= 0.0 + ts ? 0.0 : inter_coeff;
+        inter_coeff = inter_coeff >= 1.0 - ts ? 1.0 : inter_coeff;
         MP_DBG(p, "inter frame ppts: %lld, pts: %lld, "
                "vsync: %lld, mix: %f\n",
                (long long)prev_pts, (long long)t->pts,
