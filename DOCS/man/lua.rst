@@ -494,7 +494,7 @@ Example implementation::
         optionB = -0.5,
         optionC = true,
     }
-    options.read_options(options, "myscript")
+    read_options(options, "myscript")
     print(option.optionA)
 
 
