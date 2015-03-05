@@ -469,7 +469,7 @@ static int get_equalizer(struct priv *p, const char *name, int *value)
     int r = attr->max_value - attr->min_value;
     if (r == 0)
         return VO_NOTIMPL;
-    *value = ((attr->value - attr->min_value) * 200) / r - 100;
+    *value = ((attr->value - attr->min_value) * 200 + r / 2) / r - 100;
     return VO_TRUE;
 }
 
@@ -485,7 +485,10 @@ static int set_equalizer(struct priv *p, const char *name, int value)
     int r = attr->max_value - attr->min_value;
     if (r == 0)
         return VO_NOTIMPL;
-    attr->value = ((value + 100) * r) / 200 + attr->min_value;
+    attr->value = ((value + 100) * r + 100) / 200 + attr->min_value;
+
+    MP_VERBOSE(p, "Changing '%s' (range [%d, %d]) to %d\n", name,
+               attr->max_value, attr->min_value, attr->value);
 
     va_lock(p->mpvaapi);
     status = vaSetDisplayAttributes(p->display, attr, 1);
