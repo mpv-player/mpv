@@ -464,6 +464,13 @@ int mp_initialize(struct MPContext *mpctx)
     return 0;
 }
 
+#ifdef __MINGW32__
+static bool is_valid_handle(HANDLE h)
+{
+    return h != NULL && h != INVALID_HANDLE_VALUE;
+}
+#endif
+
 int mpv_main(int argc, char *argv[])
 {
     osdep_preinit(&argc, &argv);
@@ -506,6 +513,23 @@ int mpv_main(int argc, char *argv[])
 
     if (handle_help_options(mpctx))
         return prepare_exit_cplayer(mpctx, EXIT_NONE);
+
+#ifdef __MINGW32__
+    // If the .exe is launched directly from Explorer or the Start Menu, show
+    // some UI so files can be dropped onto it. This test uses a heuristic to
+    // determine whether mpv was launched as a GUI program. If it has no input
+    // files, no command line arguments and no standard handles, it would
+    // normally do nothing, so force it to show a window instead.
+
+    if (argc == 1 && !mpctx->playlist->first && !opts->player_idle_mode &&
+        !is_valid_handle(GetStdHandle(STD_INPUT_HANDLE)) &&
+        !is_valid_handle(GetStdHandle(STD_OUTPUT_HANDLE)) &&
+        !is_valid_handle(GetStdHandle(STD_ERROR_HANDLE)))
+    {
+        m_config_set_option0(mpctx->mconfig, "idle", "yes");
+        m_config_set_option0(mpctx->mconfig, "force-window", "yes");
+    }
+#endif
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
         mp_print_version(mpctx->log, true);
