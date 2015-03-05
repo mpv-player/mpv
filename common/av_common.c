@@ -135,6 +135,8 @@ void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads
             threads = 1;
         } else {
             mp_verbose(l, "Detected %d logical cores.\n", threads);
+            if (threads > 1)
+                threads += 1; // extra thread for better load balancing
         }
         // Apparently some libavcodec versions have or had trouble with more
         // than 16 threads, and/or print a warning when using > 16.
