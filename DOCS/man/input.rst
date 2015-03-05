@@ -178,7 +178,7 @@ List of Input Commands
         screenshots. Note that you should disable frame-dropping when using
         this mode - or you might receive duplicate images in cases when a
         frame was dropped. This flag can be combined with the other flags,
-        e.h. ``video+each-frame``.
+        e.g. ``video+each-frame``.
 
 ``screenshot_to_file "<filename>" [subtitles|video|window]``
     Take a screenshot and save it to a given file. The format of the file will

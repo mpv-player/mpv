@@ -29,6 +29,8 @@ API changes
  1.15   - mpv_initialize() will now load config files. This requires setting
           the "config" and "config-dir" options. In particular, it will load
           mpv.conf.
+        - minor backwards-compatible change to the "seek" and "screenshot"
+          commands (new flag syntax, old additional args deprecated)
  --- mpv 0.8.0 is released ---
  1.14   - add mpv_wait_async_requests()
         - the --msg-level option changes its native type from a flat string to
