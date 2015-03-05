@@ -476,7 +476,7 @@ int mpv_main(int argc, char *argv[])
         opts->verbose = atoi(verbose_env);
 
     // Preparse the command line
-    m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argc, argv);
+    m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argv);
 
     if (mpctx->opts->use_terminal && cas_terminal_owner(NULL, mpctx))
         terminal_init();
@@ -484,7 +484,7 @@ int mpv_main(int argc, char *argv[])
     mp_msg_update_msglevels(mpctx->global);
 
     MP_VERBOSE(mpctx, "Command line:");
-    for (int i = 0; i < argc; i++)
+    for (int i = 0; argv[i]; i++)
         MP_VERBOSE(mpctx, " '%s'", argv[i]);
     MP_VERBOSE(mpctx, "\n");
 
@@ -493,7 +493,7 @@ int mpv_main(int argc, char *argv[])
     mp_parse_cfgfiles(mpctx);
 
     int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
-                                           mpctx->global, argc, argv);
+                                           mpctx->global, argv);
     if (r < 0) {
         if (r <= M_OPT_EXIT) {
             return prepare_exit_cplayer(mpctx, EXIT_NONE);

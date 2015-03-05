@@ -41,7 +41,6 @@
 
 struct parse_state {
     struct m_config *config;
-    int argc;
     char **argv;
 
     bool no_more_opts;
@@ -57,14 +56,13 @@ static int split_opt_silent(struct parse_state *p)
 {
     assert(!p->error);
 
-    if (p->argc < 1)
+    if (!p->argv || !p->argv[0])
         return 1;
 
     p->is_opt = false;
     p->arg = bstr0(p->argv[0]);
     p->param = bstr0(NULL);
 
-    p->argc--;
     p->argv++;
 
     if (p->no_more_opts || !bstr_startswith0(p->arg, "-") || p->arg.len == 1)
@@ -85,10 +83,9 @@ static int split_opt_silent(struct parse_state *p)
     bool need_param = m_config_option_requires_param(p->config, p->arg) > 0;
 
     if (ambiguous && need_param) {
-        if (p->argc < 1)
+        if (!p->argv[0])
             return M_OPT_MISSING_PARAM;
         p->param = bstr0(p->argv[0]);
-        p->argc--;
         p->argv++;
     }
 
@@ -132,8 +129,7 @@ static void process_non_option(struct playlist *files, const char *arg)
 
 // returns M_OPT_... error code
 int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
-                                   struct mpv_global *global,
-                                   int argc, char **argv)
+                                   struct mpv_global *global, char **argv)
 {
     int ret = M_OPT_UNKNOWN;
     int mode = 0;
@@ -146,7 +142,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
 
     mode = GLOBAL;
 
-    struct parse_state p = {config, argc - 1, argv + 1};
+    struct parse_state p = {config, argv + 1};
     while (split_opt(&p)) {
         if (p.is_opt) {
             int flags = M_SETOPT_FROM_CMDLINE;
@@ -283,14 +279,14 @@ err_out:
  * during normal options parsing.
  */
 void m_config_preparse_command_line(m_config_t *config, struct mpv_global *global,
-                                    int argc, char **argv)
+                                    char **argv)
 {
     struct MPOpts *opts = global->opts;
 
     // Hack to shut up parser error messages
     mp_msg_mute(global, true);
 
-    struct parse_state p = {config, argc - 1, argv + 1};
+    struct parse_state p = {config, argv + 1};
     while (split_opt_silent(&p) == 0) {
         if (p.is_opt) {
             // Ignore non-pre-parse options. They will be set later.
