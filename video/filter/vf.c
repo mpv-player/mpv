@@ -49,6 +49,7 @@ extern const vf_info_t vf_info_noformat;
 extern const vf_info_t vf_info_flip;
 extern const vf_info_t vf_info_rotate;
 extern const vf_info_t vf_info_mirror;
+extern const vf_info_t vf_info_riftdk2;
 extern const vf_info_t vf_info_noise;
 extern const vf_info_t vf_info_eq;
 extern const vf_info_t vf_info_gradfun;
@@ -78,6 +79,7 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_noformat,
     &vf_info_flip,
     &vf_info_mirror,
+    &vf_info_riftdk2,
 
 #if HAVE_LIBAVFILTER
     &vf_info_lavfi,

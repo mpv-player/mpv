@@ -309,6 +309,7 @@ def build(ctx):
         ( "video/filter/vf_mirror.c" ),
         ( "video/filter/vf_noformat.c" ),
         ( "video/filter/vf_noise.c",             "libavfilter"),
+        ( "video/filter/vf_riftdk2.c" ),
         ( "video/filter/vf_pullup.c",            "libavfilter"),
         ( "video/filter/vf_rotate.c",            "libavfilter"),
         ( "video/filter/vf_scale.c" ),
