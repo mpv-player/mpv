@@ -665,7 +665,7 @@ hwaccel_features = [
         'name': '--vaapi-hwaccel',
         'desc': 'libavcodec VAAPI hwaccel',
         'deps': [ 'vaapi' ],
-        'func': check_statement('libavcodec/vaapi.h', '', use='libav'),
+        'func': check_headers('libavcodec/vaapi.h', use='libav'),
     } , {
         'name': '--vda-hwaccel',
         'desc': 'libavcodec VDA hwaccel',
@@ -691,7 +691,7 @@ hwaccel_features = [
         'name': '--dxva2-hwaccel',
         'desc': 'libavcodec DXVA2 hwaccel',
         'deps': [ 'gdi' ],
-        'func': check_statement('libavcodec/dxva2.h', '', use='libav'),
+        'func': check_headers('libavcodec/dxva2.h', use='libav'),
     }
 ]
 
