@@ -1,3 +1,5 @@
+-- Compatibility shim for lua 5.2/5.3
+unpack = unpack or table.unpack
 
 -- these are used internally by lua.c
 mp.UNKNOWN_TYPE.info = "this value is inserted if the C type is not supported"
