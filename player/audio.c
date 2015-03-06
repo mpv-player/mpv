@@ -135,7 +135,7 @@ void set_playback_speed(struct MPContext *mpctx, double new_speed)
 
     opts->playback_speed = new_speed;
 
-    if (!mpctx->d_audio)
+    if (!mpctx->d_audio || mpctx->d_audio->afilter->initialized < 1)
         return;
 
     recreate_audio_filters(mpctx);
