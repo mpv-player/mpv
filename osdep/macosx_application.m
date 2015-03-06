@@ -366,7 +366,10 @@ int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
         ctx.argv     = &argv;
 
         if (bundle_started_from_finder(argc, argv)) {
-            argc = 1; // clears out -psn argument is present
+            if (argc > 1) {
+                argc = 1; // clears out -psn argument if present
+                argv[1] = NULL;
+            }
             macosx_redirect_output_to_logfile("mpv");
             init_cocoa_application(true);
         } else {
