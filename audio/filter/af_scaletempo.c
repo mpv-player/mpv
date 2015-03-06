@@ -433,9 +433,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return af_test_output(af, (struct mp_audio *)arg);
     }
     case AF_CONTROL_SET_PLAYBACK_SPEED: {
-        if (s->speed_tempo == s->speed_pitch)
-            break; // doesn't change speed
-        update_speed(af, *(double *)arg);
+        double speed = *(double *)arg;
+        if (s->speed_tempo) {
+            if (s->speed_pitch)
+                break;
+            update_speed(af, speed);
+        } else if (s->speed_pitch) {
+            update_speed(af, speed);
+            break; // do not signal OK
+        }
         return AF_OK;
     }
     case AF_CONTROL_RESET:
