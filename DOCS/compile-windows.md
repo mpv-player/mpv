@@ -66,9 +66,9 @@ echo "MXE_TARGETS := i686-w64-mingw32.static" >> settings.mk
 # echo "MXE_TARGETS := x86_64-w64-mingw32.static" >> settings.mk
 
 # Build required packages. The following provide a minimum required to build
-# mpv.
+# a reasonable mpv binary (though not an absolute minimum).
 
-make gcc ffmpeg libass jpeg pthreads
+make gcc ffmpeg libass jpeg pthreads lua
 
 # Add MXE binaries to $PATH
 export PATH=/opt/mxe/usr/bin/:$PATH
