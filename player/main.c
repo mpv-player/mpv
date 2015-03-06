@@ -368,9 +368,9 @@ void wakeup_playloop(void *ctx)
 // Finish mpctx initialization. This must be done after setting up all options.
 // Some of the initializations depend on the options, and can't be changed or
 // undone later.
-// If argv is not NULL, apply them as command line player arguments.
+// If options is not NULL, apply them as command line player arguments.
 // Returns: <0 on error, 0 on success.
-int mp_initialize(struct MPContext *mpctx, char **argv)
+int mp_initialize(struct MPContext *mpctx, char **options)
 {
     struct MPOpts *opts = mpctx->opts;
 
@@ -384,15 +384,15 @@ int mp_initialize(struct MPContext *mpctx, char **argv)
 
     update_logging(mpctx);
 
-    if (argv) {
+    if (options) {
         // Preparse the command line, so we can init the terminal early.
-        m_config_preparse_command_line(mpctx->mconfig, mpctx->global, argv);
+        m_config_preparse_command_line(mpctx->mconfig, mpctx->global, options);
 
         update_logging(mpctx);
 
-        MP_VERBOSE(mpctx, "Command line:");
-        for (int i = 0; argv[i]; i++)
-            MP_VERBOSE(mpctx, " '%s'", argv[i]);
+        MP_VERBOSE(mpctx, "Command line options:");
+        for (int i = 0; options[i]; i++)
+            MP_VERBOSE(mpctx, " '%s'", options[i]);
         MP_VERBOSE(mpctx, "\n");
     }
 
@@ -401,9 +401,9 @@ int mp_initialize(struct MPContext *mpctx, char **argv)
     mp_parse_cfgfiles(mpctx);
     update_logging(mpctx);
 
-    if (argv) {
+    if (options) {
         int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
-                                               mpctx->global, argv);
+                                               mpctx->global, options);
         if (r < 0)
             return r <= M_OPT_EXIT ? -2 : -1;
         update_logging(mpctx);
@@ -515,7 +515,8 @@ int mpv_main(int argc, char *argv[])
     if (verbose_env)
         opts->verbose = atoi(verbose_env);
 
-    int r = mp_initialize(mpctx, argv);
+    char **options = argv && argv[0] ? argv + 1 : NULL; // skips program name
+    int r = mp_initialize(mpctx, options);
     if (r == -2) // help
         return prepare_exit_cplayer(mpctx, EXIT_NONE);
     if (r == -3) { // nothing to play
