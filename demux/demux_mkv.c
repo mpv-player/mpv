@@ -1807,7 +1807,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         struct header_elem *elem = &mkv_d->headers[n];
         if (elem->parsed)
             continue;
-        // Warn against incomplete files.
+        // Warn against incomplete files and skip headers outside of range.
         if (elem->pos >= end) {
             elem->parsed = true; // don't bother if file is incomplete
             if (!mkv_d->eof_warning) {
@@ -1815,6 +1815,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
                         "end of file - incomplete file?\n");
                 mkv_d->eof_warning = true;
             }
+            continue;
         }
         if (elem->id == MATROSKA_ID_CUES) {
             // Read cues when they are needed, to avoid seeking on opening.
