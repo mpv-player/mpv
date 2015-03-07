@@ -254,15 +254,17 @@ static bool get_and_update_icc_profile(struct gl_priv *p, int *events)
 {
     if (p->icc_opts->profile_auto) {
         MP_VERBOSE(p, "Querying ICC profile...\n");
-        bstr icc;
+        bstr icc = bstr0(NULL);
         int r = p->glctx->vo_control(p->vo, events, VOCTRL_GET_ICC_PROFILE, &icc);
 
-        if (r == VO_TRUE) {
+        if (r != VO_NOTAVAIL) {
+            if (r == VO_FALSE) {
+                MP_WARN(p, "Could not retrieve an ICC profile.\n");
+            } else if (r == VO_NOTIMPL) {
+                MP_ERR(p, "icc-profile-auto not implemented on this platform.\n");
+            }
+
             gl_lcms_set_memory_profile(p->cms, &icc);
-        } else if (r == VO_NOTIMPL) {
-            MP_ERR(p, "icc-profile-auto not implemented on this platform.\n");
-        } else {
-            MP_ERR(p, "Could not retrieve an ICC profile.\n");
         }
     }
 

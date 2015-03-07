@@ -1703,6 +1703,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_ICC_PROFILE: {
+        if (!x11->pseudo_mapped)
+            return VO_NOTAVAIL;
         int screen = 0; // xinerama screen number
         for (int n = 0; n < x11->num_displays; n++) {
             struct xrandr_display *disp = &x11->displays[n];
@@ -1717,6 +1719,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
             mp_snprintf_cat(prop, sizeof(prop), "_%d", screen);
         x11->icc_profile_property = XAs(x11, prop);
         int len;
+        MP_VERBOSE(x11, "Retrieving ICC profile for display: %d\n", screen);
         void *icc = x11_get_property(x11, x11->rootwin, x11->icc_profile_property,
                                      XA_CARDINAL, 8, &len);
         if (!icc)
