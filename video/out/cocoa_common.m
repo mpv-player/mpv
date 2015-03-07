@@ -54,7 +54,7 @@
 #define cocoa_unlock(s)  pthread_mutex_unlock(&s->mutex)
 
 static void vo_cocoa_fullscreen(struct vo *vo);
-static void cocoa_rm_fs_screen_profile_observer(struct vo *vo);
+static void cocoa_rm_fs_screen_profile_observer(struct vo_cocoa_state *s);
 
 struct vo_cocoa_state {
     NSWindow *window;
@@ -117,17 +117,15 @@ static void queue_new_video_size(struct vo *vo, int w, int h)
     }
 }
 
-static void enable_power_management(struct vo *vo)
+static void enable_power_management(struct vo_cocoa_state *s)
 {
-    struct vo_cocoa_state *s = vo->cocoa;
     if (!s->power_mgmt_assertion) return;
     IOPMAssertionRelease(s->power_mgmt_assertion);
     s->power_mgmt_assertion = kIOPMNullAssertionID;
 }
 
-static void disable_power_management(struct vo *vo)
+static void disable_power_management(struct vo_cocoa_state *s)
 {
-    struct vo_cocoa_state *s = vo->cocoa;
     if (s->power_mgmt_assertion) return;
     IOPMAssertionCreateWithName(
             kIOPMAssertionTypePreventUserIdleDisplaySleep,
@@ -226,16 +224,15 @@ static void cocoa_init_light_sensor(struct vo *vo)
     });
 }
 
-static void cocoa_uninit_light_sensor(struct vo *vo)
+static void cocoa_uninit_light_sensor(struct vo_cocoa_state *s)
 {
-    struct vo_cocoa_state *s = vo->cocoa;
     IONotificationPortDestroy(s->light_sensor_io_port);
     IOObjectRelease(s->light_sensor);
 }
 
 int vo_cocoa_init(struct vo *vo)
 {
-    struct vo_cocoa_state *s = talloc_zero(vo, struct vo_cocoa_state);
+    struct vo_cocoa_state *s = talloc_zero(NULL, struct vo_cocoa_state);
     *s = (struct vo_cocoa_state){
         .waiting_frame = false,
         .power_mgmt_assertion = kIOPMNullAssertionID,
@@ -278,17 +275,11 @@ void vo_cocoa_register_resize_callback(struct vo *vo,
 void vo_cocoa_uninit(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    NSView *ev = s->view;
-
-    // keep the event view around for later in order to call -clear
-    if (!s->embedded) {
-        [ev retain];
-    }
 
     with_cocoa_lock_on_main_thread(vo, ^{
-        enable_power_management(vo);
-        cocoa_uninit_light_sensor(vo);
-        cocoa_rm_fs_screen_profile_observer(vo);
+        enable_power_management(s);
+        cocoa_uninit_light_sensor(s);
+        cocoa_rm_fs_screen_profile_observer(s);
 
         [s->gl_ctx release];
 
@@ -297,21 +288,15 @@ void vo_cocoa_uninit(struct vo *vo)
         [s->video removeFromSuperview];
 
         [s->view removeFromSuperview];
+        [(MpvEventsView *)s->view clear];
         [s->view release];
 
         // if using --wid + libmpv there's no window to release
         if (s->window)
             [s->window release];
-    });
 
-    // don't use the mutex, because at that point it could have been destroyed
-    // and no one is accessing the events view anyway
-    if (!s->embedded) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [(MpvEventsView *)ev clear];
-            [ev release];
-        });
-    }
+        talloc_free(s);
+    });
 }
 
 static int get_screen_handle(struct vo *vo, int identifier, NSWindow *window,
@@ -512,9 +497,8 @@ static int cocoa_set_window_title(struct vo *vo, const char *title)
     return VO_TRUE;
 }
 
-static void cocoa_rm_fs_screen_profile_observer(struct vo *vo)
+static void cocoa_rm_fs_screen_profile_observer(struct vo_cocoa_state *s)
 {
-    struct vo_cocoa_state *s = vo->cocoa;
     [[NSNotificationCenter defaultCenter]
         removeObserver:s->fs_icc_changed_ns_observer];
 }
@@ -524,7 +508,7 @@ static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
     struct vo_cocoa_state *s = vo->cocoa;
 
     if (s->fs_icc_changed_ns_observer)
-        cocoa_rm_fs_screen_profile_observer(vo);
+        cocoa_rm_fs_screen_profile_observer(s);
 
     if (vo->opts->fsscreen_id < 0)
         return;
@@ -752,10 +736,10 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         return cocoa_set_window_title(vo, (const char *) arg);
     case VOCTRL_RESTORE_SCREENSAVER:
-        enable_power_management(vo);
+        enable_power_management(vo->cocoa);
         return VO_TRUE;
     case VOCTRL_KILL_SCREENSAVER:
-        disable_power_management(vo);
+        disable_power_management(vo->cocoa);
         return VO_TRUE;
     case VOCTRL_GET_ICC_PROFILE:
         vo_cocoa_control_get_icc_profile(vo, arg);
