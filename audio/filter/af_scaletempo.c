@@ -305,7 +305,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (AF_FORMAT_IS_SPECIAL(data->format)) {
             MP_ERR(af, "Changing speed is not supported with spdif formats.\n");
-            return AF_DETACH;
+            return AF_ERROR;
         }
 
         mp_audio_force_interleaved_format(data);

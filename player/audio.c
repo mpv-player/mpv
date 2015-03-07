@@ -104,8 +104,10 @@ static int recreate_audio_filters(struct MPContext *mpctx)
 {
     assert(mpctx->d_audio);
 
-    if (update_playback_speed_filters(mpctx) < 0)
-        return -1;
+    if (update_playback_speed_filters(mpctx) < 0) {
+        mpctx->opts->playback_speed = 1.0;
+        mp_notify(mpctx, MP_EVENT_CHANGE_ALL, NULL);
+    }
 
     struct af_stream *afs = mpctx->d_audio->afilter;
     if (afs->initialized < 1 && af_init(afs) < 0) {
