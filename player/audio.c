@@ -60,47 +60,54 @@ static int try_filter(struct MPContext *mpctx,
     return 1;
 }
 
+static int update_playback_speed_filters(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    double speed = opts->playback_speed;
+    struct af_stream *afs = mpctx->d_audio->afilter;
+
+    // Make sure only exactly one filter changes speed; resetting them all
+    // and setting 1 filter is the easiest way to achieve this.
+    af_control_all(afs, AF_CONTROL_SET_PLAYBACK_SPEED, &(double){1});
+    af_control_all(afs, AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE, &(double){1});
+
+    if (speed == 1.0)
+        return af_remove_by_label(afs, "playback-speed");
+
+    // Compatibility: if the user uses --af=scaletempo, always use this
+    // filter to change speed. Don't insert a second filter (any) either.
+    if (!af_find_by_label(afs, "playback-speed") &&
+        af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED, &speed))
+        return 0;
+
+    int method = AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE;
+    if (opts->pitch_correction)
+        method = AF_CONTROL_SET_PLAYBACK_SPEED;
+
+    if (!af_control_any_rev(afs, method, &speed)) {
+        if (af_remove_by_label(afs, "playback-speed") < 0)
+            return -1;
+
+        char *filter = method == AF_CONTROL_SET_PLAYBACK_SPEED
+                     ? "scaletempo" : "lavrresample";
+        if (try_filter(mpctx, filter, "playback-speed", NULL) < 0)
+            return -1;
+        // Try again.
+        if (!af_control_any_rev(afs, method, &speed))
+            return -1;
+    }
+
+    return 0;
+}
+
 static int recreate_audio_filters(struct MPContext *mpctx)
 {
     assert(mpctx->d_audio);
 
-    struct MPOpts *opts = mpctx->opts;
+    if (update_playback_speed_filters(mpctx) < 0)
+        return -1;
+
     struct af_stream *afs = mpctx->d_audio->afilter;
-
-    double speed = opts->playback_speed;
-
-    if (speed != 1.0) {
-        int method = AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE;
-        if (opts->pitch_correction)
-            method = AF_CONTROL_SET_PLAYBACK_SPEED;
-        if (!af_control_any_rev(afs, method, &speed)) {
-            if (af_remove_by_label(afs, "playback-speed") < 0)
-                return -1;
-
-            // Compatibility: if the user uses --af=scaletempo, always use
-            // this filter to change speed. Don't insert a second "scaletempo"
-            // filter either.
-            if (!af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED, &speed))
-            {
-                char *filter = method == AF_CONTROL_SET_PLAYBACK_SPEED
-                             ? "scaletempo" : "lavrresample";
-                if (try_filter(mpctx, filter, "playback-speed", NULL) < 0)
-                    return -1;
-                // Try again.
-                if (!af_control_any_rev(afs, method, &speed))
-                    return -1;
-            } else {
-                method = AF_CONTROL_SET_PLAYBACK_SPEED;
-            }
-        }
-    } else {
-        if (af_remove_by_label(afs, "playback-speed") < 0)
-            return -1;
-        // The filters could be inserted by the user (we don't remove them).
-        af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED, &speed);
-        af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE, &speed);
-    }
-
     if (afs->initialized < 1 && af_init(afs) < 0) {
         MP_ERR(mpctx, "Couldn't find matching filter/ao format!\n");
         return -1;
