@@ -226,8 +226,10 @@ static void cocoa_init_light_sensor(struct vo *vo)
 
 static void cocoa_uninit_light_sensor(struct vo_cocoa_state *s)
 {
-    IONotificationPortDestroy(s->light_sensor_io_port);
-    IOObjectRelease(s->light_sensor);
+    if (s->light_sensor_io_port) {
+        IONotificationPortDestroy(s->light_sensor_io_port);
+        IOObjectRelease(s->light_sensor);
+    }
 }
 
 int vo_cocoa_init(struct vo *vo)
