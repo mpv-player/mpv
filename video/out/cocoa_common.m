@@ -455,6 +455,8 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     view.adapter = adapter;
     s->view = view;
     [parent addSubview:s->view];
+    // update the cursor position now that the view has been added.
+    [view signalMousePosition];
 
 #if HAVE_COCOA_APPLICATION
     cocoa_register_menu_item_action(MPM_H_SIZE,   @selector(halfSize));
@@ -572,7 +574,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
         }
 
         // trigger a resize -> don't set vo->dwidth and vo->dheight directly
-        // since this block is executed asynchrolously to the video
+        // since this block is executed asynchronously to the video
         // reconfiguration code.
         s->pending_events |= VO_EVENT_RESIZE;
     });
