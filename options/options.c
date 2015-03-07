@@ -109,7 +109,7 @@ const m_option_t mp_opts[] = {
                 .type = &m_option_type_msglevels),
     OPT_STRING("dump-stats", dump_stats, CONF_GLOBAL | CONF_PRE_PARSE),
     OPT_FLAG("msg-color", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_STRING("log-file", log_file, CONF_GLOBAL | CONF_PRE_PARSE),
+    OPT_STRING("log-file", log_file, CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_FILE),
     OPT_FLAG("msg-module", msg_module, CONF_GLOBAL),
     OPT_FLAG("msg-time", msg_time, CONF_GLOBAL),
 #ifdef _WIN32

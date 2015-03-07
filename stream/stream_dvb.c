@@ -73,7 +73,7 @@ const struct m_sub_options stream_dvb_conf = {
         OPT_STRING("prog", cfg_prog, 0),
         OPT_INTRANGE("card", cfg_card, 0, 1, 4),
         OPT_INTRANGE("timeout", cfg_timeout, 0, 1, 30),
-        OPT_STRING("file", cfg_file, 0),
+        OPT_STRING("file", cfg_file, M_OPT_FILE),
         OPT_FLAG("full-transponder", cfg_full_transponder, 0),
         {0}
     },
