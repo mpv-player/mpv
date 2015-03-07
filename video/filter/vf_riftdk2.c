@@ -3,6 +3,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <math.h>
+#include <limits.h>
 
 #include "config.h"
 #include "common/msg.h"
@@ -19,7 +20,7 @@ struct vf_priv_s {
 };
 
 static void fill_half_of_lookup_table(int width, int height,
-                                      int** lookup_table, int left)
+                                      int **lookup_table, int left)
 {
     // default: left side of the image -> center of that is 
     // width/4, height/2
@@ -49,9 +50,9 @@ static void fill_half_of_lookup_table(int width, int height,
             // according to the author on the website above, we need to
             // normalize the radius for proper calculation in the atan,
             // sin and cos functions
-            float maxR = sqrt(pow((float)(stopx - startx) / 2, 2) +
-                              pow((float)ymid / 2, 2));
-            float myR = sqrt(pow((float)myX, 2) + pow((float)myY, 2));
+            float maxR = sqrt(pow((stopx - startx) / 2.0, 2) +
+                              pow(ymid / 2.0, 2));
+            float myR = sqrt(pow(myX, 2) + pow(myY, 2));
             float myRN = myR / maxR;
             // use the distortion function
             float newR = myR * (0.24 * pow(myRN, 4) + 
@@ -78,9 +79,7 @@ static void fill_half_of_lookup_table(int width, int height,
             {
                 (*lookup_table)[2 * y * width + 2 * x + 0] = newX;
                 (*lookup_table)[2 * y * width + 2 * x + 1] = newY;
-            }
-            else
-            {
+            } else {
                 // use -1 to mark as invalid
                 (*lookup_table)[2 * y * width + 2 * x + 0] = -1;
                 (*lookup_table)[2 * y * width + 2 * x + 1] = -1;
@@ -89,12 +88,17 @@ static void fill_half_of_lookup_table(int width, int height,
     }       
 }
 
-static void init_lookup_table(int width, int height, int** lookup_table)
+static int init_lookup_table(int width, int height, int **lookup_table)
 {
+    // conservative check for possible overflow
+    int maxPixels = sqrt(INT_MAX / sizeof(int) / 2);
+    if (width > maxPixels || height > maxPixels)
+        return 0;
     // we store x and y value -> "*2"
     *lookup_table = malloc(width * height * 2 * sizeof(int));
     fill_half_of_lookup_table(width, height, lookup_table, 1);
     fill_half_of_lookup_table(width, height, lookup_table, 0);
+    return 1;
 }
 
 static int config(struct vf_instance *vf, int width, int height,
@@ -104,18 +108,18 @@ static int config(struct vf_instance *vf, int width, int height,
     // In query_format, we accept only the IMGFMT_420P ->
     // we know we are working with YUV -> init both tables
     struct vf_priv_s *tables = vf->priv;
-    init_lookup_table(width, height, &(tables->Y));
-    init_lookup_table(width / 2, height / 2, &(tables->UV));
+    if (!init_lookup_table(width, height, &(tables->Y)))
+        return 0;
+    if (!init_lookup_table(width / 2, height / 2, &(tables->UV)))
+        return 0;
     return vf_next_config(vf, width, height, d_width, d_height, flags, fmt);
 }
 
 static void uninit(struct vf_instance *vf)
 {
     struct vf_priv_s *tables = vf->priv;
-    if (0 != tables->Y)
-        free(tables->Y);
-    if (0 != tables->UV)
-        free(tables->UV);
+	free(tables->Y);
+	free(tables->UV);
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
@@ -127,12 +131,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     
     for (int p = 0; p < mpi->num_planes; p++) {
         struct vf_priv_s *tables = vf->priv;
-        int* lookup_table;
-        if (p==0)
-            lookup_table = tables->Y;
-        else
-            lookup_table = tables->UV;
-        
+        int* lookup_table = p ? tables->UV : tables->Y;
         int curPlaneWidth = mpi->plane_w[p];
         int curPlaneHeight = mpi->plane_h[p];
         for (int y = 0; y < curPlaneHeight; y++) {
@@ -148,8 +147,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
                 if (newX == -1) {
                     // set to "black" for Y and UV
                     p_dst[x] = (p==0) ? 0 : 128;
-                }
-                else {
+                } else {
                     p_dst[x] = p_src[newX];
                 }
             }
@@ -162,7 +160,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    if (!(fmt == IMGFMT_420P))
+    if (fmt != IMGFMT_420P)
         return 0;
     return vf_next_query_format(vf, fmt);
 }
