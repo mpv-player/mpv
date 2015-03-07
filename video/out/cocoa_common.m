@@ -87,9 +87,8 @@ struct vo_cocoa_state {
     void (*resize_redraw)(struct vo *vo, int w, int h);
 };
 
-static void with_cocoa_lock(struct vo *vo, void(^block)(void))
+static void with_cocoa_lock(struct vo_cocoa_state *s, void(^block)(void))
 {
-    struct vo_cocoa_state *s = vo->cocoa;
     cocoa_lock(s);
     block();
     cocoa_unlock(s);
@@ -97,8 +96,9 @@ static void with_cocoa_lock(struct vo *vo, void(^block)(void))
 
 static void with_cocoa_lock_on_main_thread(struct vo *vo, void(^block)(void))
 {
+    struct vo_cocoa_state *s = vo->cocoa;
     dispatch_async(dispatch_get_main_queue(), ^{
-        with_cocoa_lock(vo, block);
+        with_cocoa_lock(s, block);
     });
 }
 
@@ -626,7 +626,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return vo_cocoa_ontop(vo);
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        with_cocoa_lock(vo, ^{
+        with_cocoa_lock(vo->cocoa, ^{
             NSSize size = [vo->cocoa->view frame].size;
             s[0] = size.width;
             s[1] = size.height;
