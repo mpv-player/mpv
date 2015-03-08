@@ -18,7 +18,7 @@
 #import <Cocoa/Cocoa.h>
 #include "video/out/vo.h"
 
-@interface MpvCocoaAdapter : NSObject
+@interface MpvCocoaAdapter : NSObject<NSWindowDelegate>
 - (void)setNeedsResize;
 - (void)signalMouseMovement:(NSPoint)point;
 - (void)putKeyEvent:(NSEvent*)event;

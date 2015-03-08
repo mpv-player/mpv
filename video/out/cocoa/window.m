@@ -63,12 +63,12 @@
 
 - (void)windowDidResignKey:(NSNotification *)notification
 {
-    [self.adapter didChangeMousePosition];
+    [self.adapter windowDidResignKey:notification];
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification
 {
-    [self.adapter didChangeMousePosition];
+    [self.adapter windowDidBecomeKey:notification];
 }
 
 - (BOOL)canBecomeMainWindow { return YES; }
