@@ -439,7 +439,8 @@ Available video output drivers are:
 
     ``swapinterval=<n>``
         Interval in displayed frames between two buffer swaps.
-        1 is equivalent to enable VSYNC, 0 to disable VSYNC.
+        1 is equivalent to enable VSYNC, 0 to disable VSYNC. Defaults to 1 if
+        not specified.
 
     ``cscale=<filter>``
         As ``scale``, but for interpolating chroma information. If the image
