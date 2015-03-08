@@ -748,6 +748,8 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         with_cocoa_lock(vo->cocoa, ^{
             if ([vo->cocoa->window isMiniaturized]) {
                 *(int *)arg |= VO_WIN_STATE_MINIMIZED;
+            } else {
+                *(int *)arg = 0;
             }
         });
         return VO_TRUE;
