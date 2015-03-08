@@ -61,6 +61,16 @@
     [self.adapter didChangeWindowedScreenProfile:[self screen]];
 }
 
+- (void)windowDidResignKey:(NSNotification *)notification
+{
+    [self.adapter didChangeMousePosition];
+}
+
+- (void)windowDidBecomeKey:(NSNotification *)notification
+{
+    [self.adapter didChangeMousePosition];
+}
+
 - (BOOL)canBecomeMainWindow { return YES; }
 - (BOOL)canBecomeKeyWindow { return YES; }
 - (BOOL)windowShouldClose:(id)sender
