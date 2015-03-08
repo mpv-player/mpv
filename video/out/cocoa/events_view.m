@@ -27,6 +27,8 @@
 @interface MpvEventsView()
 @property(nonatomic, assign) BOOL clearing;
 @property(nonatomic, assign) BOOL hasMouseDown;
+@property(nonatomic, retain) NSCursor *cursor;
+@property(nonatomic, assign) NSRect cursorRect;
 @property(nonatomic, retain) NSTrackingArea *tracker;
 - (BOOL)hasDock:(NSScreen*)screen;
 - (BOOL)hasMenubar:(NSScreen*)screen;
@@ -40,6 +42,8 @@
 @synthesize adapter = _adapter;
 @synthesize tracker = _tracker;
 @synthesize hasMouseDown = _mouse_down;
+@synthesize cursor = _cursor;
+@synthesize cursorRect = _cursorRect;
 
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
@@ -47,6 +51,8 @@
         [self registerForDraggedTypes:@[NSFilenamesPboardType,
                                         NSURLPboardType]];
         [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+        [self setCursor:[[NSCursor alloc] initWithImage:[[NSImage alloc] initWithSize:NSMakeSize(1,1)] hotSpot:NSMakePoint(0, 0)]];
+        [self setCursorRect:[self bounds]];
     }
     return self;
 }
@@ -140,6 +146,26 @@
     // clip bounds to current visibleFrame
     NSRect clippedBounds = CGRectIntersection([self bounds], vFV);
     return CGRectContainsPoint(clippedBounds, pt);
+}
+
+- (void)setCursorVisible:(BOOL)visible
+{
+    if (visible) {
+        [self discardCursorRects];
+        // For some reason removing the cursor rect does not update the
+        // cursor.
+        [[NSCursor arrowCursor] set];
+    } else {
+        [self addCursorRect:[self cursorRect] cursor:[self cursor]];
+        // For some reason there are also certain circumstances where
+        // adding the cursor rect does not update the cursor.
+        [[self cursor] set];
+    }
+}
+
+- (void)resetCursorRects
+{
+    [self setCursorRect:[self bounds]];
 }
 
 - (BOOL)acceptsFirstMouse:(NSEvent *)theEvent
