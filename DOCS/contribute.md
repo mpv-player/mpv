@@ -118,6 +118,8 @@ mpv uses C99 with K&R formatting, with some exceptions.
         very_long_condition_b)
     {
         code();
+    } else {
+        ...
     }
     ```
 - Remove any trailing whitespace.
