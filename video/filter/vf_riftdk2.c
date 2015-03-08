@@ -90,12 +90,10 @@ static void fill_half_of_lookup_table(int width, int height,
 
 static int init_lookup_table(int width, int height, int **lookup_table)
 {
-    // conservative check for possible overflow
-    int maxPixels = sqrt(INT_MAX / sizeof(int) / 2);
-    if (width > maxPixels || height > maxPixels)
-        return 0;
     // we store x and y value -> "*2"
     *lookup_table = malloc(width * height * 2 * sizeof(int));
+    if (!lookup_table)
+        return 0;
     fill_half_of_lookup_table(width, height, lookup_table, 1);
     fill_half_of_lookup_table(width, height, lookup_table, 0);
     return 1;
@@ -118,8 +116,8 @@ static int config(struct vf_instance *vf, int width, int height,
 static void uninit(struct vf_instance *vf)
 {
     struct vf_priv_s *tables = vf->priv;
-	free(tables->Y);
-	free(tables->UV);
+    free(tables->Y);
+    free(tables->UV);
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
