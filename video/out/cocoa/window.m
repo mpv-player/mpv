@@ -78,7 +78,7 @@
 
 - (void)windowDidDeminiaturize:(NSNotification *)notification
 {
-    [self.adapter windowDidMiniaturize:notification];
+    [self.adapter windowDidDeminiaturize:notification];
 }
 
 - (BOOL)canBecomeMainWindow { return YES; }
