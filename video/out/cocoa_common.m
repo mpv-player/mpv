@@ -60,6 +60,7 @@ struct vo_cocoa_state {
     NSWindow *window;
     NSView *view;
     MpvVideoView *video;
+    MpvCocoaAdapter *adapter;
     NSOpenGLContext *gl_ctx;
 
     NSScreen *current_screen;
@@ -258,7 +259,7 @@ static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
 
     if (*visible) {
         CGDisplayShowCursor(kCGDirectMainDisplay);
-    } else if ([v canHideCursor] && [s->window isKeyWindow]) {
+    } else if ([v canHideCursor]) {
         CGDisplayHideCursor(kCGDirectMainDisplay);
     } else {
         *visible = true;
@@ -457,6 +458,7 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     [parent addSubview:s->view];
     // update the cursor position now that the view has been added.
     [view signalMousePosition];
+    s->adapter = adapter;
 
 #if HAVE_COCOA_APPLICATION
     cocoa_register_menu_item_action(MPM_H_SIZE,   @selector(halfSize));
@@ -685,6 +687,13 @@ static void vo_cocoa_fullscreen(struct vo *vo)
     draw_changes_after_next_frame(vo);
     [(MpvEventsView *)s->view setFullScreen:opts->fullscreen];
 
+    if ([s->view window] != s->window) {
+        // cocoa implements fullscreen views by moving the view to a fullscreen
+        // window. Set that window delegate to the cocoa adapter to trigger
+        // calls to -windowDidResignKey: and -windowDidBecomeKey:
+        [[s->view window] setDelegate:s->adapter];
+    }
+
     s->pending_events |= VO_EVENT_ICC_PROFILE_CHANGED;
     s->pending_events |= VO_EVENT_RESIZE;
 }
@@ -853,4 +862,15 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     struct vo_cocoa_state *s = self.vout->cocoa;
     [(MpvEventsView *)s->view signalMousePosition];
 }
+
+- (void)windowDidResignKey:(NSNotification *)notification
+{
+    [self didChangeMousePosition];
+}
+
+- (void)windowDidBecomeKey:(NSNotification *)notification
+{
+    [self didChangeMousePosition];
+}
+
 @end
