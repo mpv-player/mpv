@@ -28,6 +28,7 @@
 - (void)handleFilesArray:(NSArray *)files;
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen;
 - (void)performAsyncResize:(NSSize)size;
+- (void)didChangeMousePosition;
 
 - (BOOL)isInFullScreenMode;
 - (BOOL)keyboardEnabled;

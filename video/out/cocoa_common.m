@@ -258,7 +258,7 @@ static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
 
     if (*visible) {
         CGDisplayShowCursor(kCGDirectMainDisplay);
-    } else if ([v canHideCursor]) {
+    } else if ([v canHideCursor] && [s->window isKeyWindow]) {
         CGDisplayHideCursor(kCGDirectMainDisplay);
     } else {
         *visible = true;
@@ -846,5 +846,11 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_cocoa_state *s = self.vout->cocoa;
     s->pending_events |= VO_EVENT_ICC_PROFILE_CHANGED;
+}
+
+- (void)didChangeMousePosition
+{
+    struct vo_cocoa_state *s = self.vout->cocoa;
+    [(MpvEventsView *)s->view signalMousePosition];
 }
 @end
