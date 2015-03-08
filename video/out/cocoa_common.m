@@ -744,6 +744,16 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         });
         return VO_TRUE;
     }
+    case VOCTRL_GET_WIN_STATE: {
+        with_cocoa_lock(vo->cocoa, ^{
+            if ([[vo->cocoa->view window] isMiniaturized]) {
+                *(int *)arg |= VO_WIN_STATE_MINIMIZED;
+            } else {
+                *(int *)arg = 0;
+            }
+        });
+        return VO_TRUE;
+    }
     case VOCTRL_SET_CURSOR_VISIBILITY:
         return vo_cocoa_set_cursor_visibility(vo, arg);
     case VOCTRL_UPDATE_WINDOW_TITLE:
@@ -871,6 +881,18 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (void)windowDidBecomeKey:(NSNotification *)notification
 {
     [self didChangeMousePosition];
+}
+
+- (void)windowDidMiniaturize:(NSNotification *)notification
+{
+    struct vo_cocoa_state *s = self.vout->cocoa;
+    s->pending_events |= VO_EVENT_WIN_STATE;
+}
+
+- (void)windowDidDeminiaturize:(NSNotification *)notification
+{
+    struct vo_cocoa_state *s = self.vout->cocoa;
+    s->pending_events |= VO_EVENT_WIN_STATE;
 }
 
 @end
