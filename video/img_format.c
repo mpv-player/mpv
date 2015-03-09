@@ -249,6 +249,9 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         desc.plane_bits = 8; // usually restricted to 8 bit; may change
     }
 
+    if (desc.chroma_xs || desc.chroma_ys)
+        desc.flags |= MP_IMGFLAG_SUBSAMPLED;
+
     return desc;
 }
 

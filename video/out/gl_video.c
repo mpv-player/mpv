@@ -880,15 +880,6 @@ static void shader_setup_scaler(char **shader, struct scaler *scaler, int pass)
     }
 }
 
-// return false if RGB or 4:4:4 YUV
-static bool input_is_subsampled(struct gl_video *p)
-{
-    for (int i = 0; i < p->plane_count; i++)
-        if (p->image_desc.xs[i] || p->image_desc.ys[i])
-            return true;
-    return false;
-}
-
 static void compile_shaders(struct gl_video *p)
 {
     GL *gl = p->gl;
@@ -1092,7 +1083,7 @@ static void compile_shaders(struct gl_video *p)
     if (p->plane_count > 1 && !trivial_scaling)
         use_indirect = true;
 
-    if (input_is_subsampled(p)) {
+    if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED) {
         shader_setup_scaler(&header_conv, &p->scalers[1], -1);
     } else {
         // Force using the normal scaler on chroma. If the "indirect" stage is
