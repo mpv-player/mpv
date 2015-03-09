@@ -746,11 +746,8 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_GET_WIN_STATE: {
         with_cocoa_lock(vo->cocoa, ^{
-            if ([[vo->cocoa->view window] isMiniaturized]) {
-                *(int *)arg |= VO_WIN_STATE_MINIMIZED;
-            } else {
-                *(int *)arg = 0;
-            }
+            const bool minimized = [[vo->cocoa->view window] isMiniaturized];
+            *(int *)arg = minimized ? VO_WIN_STATE_MINIMIZED : 0;
         });
         return VO_TRUE;
     }
