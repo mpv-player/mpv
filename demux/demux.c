@@ -1482,6 +1482,11 @@ void demux_unpause(demuxer_t *demuxer)
     pthread_mutex_unlock(&in->lock);
 }
 
+bool demux_cancel_test(struct demuxer *demuxer)
+{
+    return mp_cancel_test(demuxer->stream->cancel);
+}
+
 struct demux_chapter *demux_copy_chapter_data(struct demux_chapter *c, int num)
 {
     struct demux_chapter *new = talloc_array(NULL, struct demux_chapter, num);

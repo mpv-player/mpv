@@ -2524,6 +2524,8 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
                 break;
             if (s->eof)
                 return -1;
+            if (demux_cancel_test(demuxer))
+                return -1;
             if (id == EBML_ID_EBML && stream_tell(s) >= mkv_d->segment_end) {
                 // Appended segment - don't use its clusters, consider this EOF.
                 stream_seek(s, stream_tell(s) - 4);
