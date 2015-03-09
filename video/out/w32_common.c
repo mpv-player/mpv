@@ -312,16 +312,9 @@ static void subtract_window_borders(HWND hwnd, RECT *rc)
     rc->bottom -= b.bottom;
 }
 
-static bool is_maximized(struct vo_w32_state *w32)
-{
-    WINDOWPLACEMENT wp = { .length = sizeof(WINDOWPLACEMENT) };
-    GetWindowPlacement(w32->window, &wp);
-    return wp.showCmd == SW_SHOWMAXIMIZED;
-}
-
 static LRESULT borderless_nchittest(struct vo_w32_state *w32, int x, int y)
 {
-    if (is_maximized(w32))
+    if (IsMaximized(w32->window))
         return HTCLIENT;
 
     POINT mouse = { x, y };
