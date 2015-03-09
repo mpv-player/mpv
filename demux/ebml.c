@@ -228,8 +228,10 @@ int ebml_resync_cluster(struct mp_log *log, stream_t *s)
 {
     int64_t pos = stream_tell(s);
     uint32_t last_4_bytes = 0;
-    mp_err(log, "Corrupt file detected. "
-           "Trying to resync starting from position %"PRId64"...\n", pos);
+    if (!s->eof) {
+        mp_err(log, "Corrupt file detected. "
+               "Trying to resync starting from position %"PRId64"...\n", pos);
+    }
     while (!s->eof) {
         // Assumes MATROSKA_ID_CLUSTER is 4 bytes, with no 0 bytes.
         if (last_4_bytes == MATROSKA_ID_CLUSTER) {
