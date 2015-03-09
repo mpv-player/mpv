@@ -133,6 +133,7 @@ static int open_f (stream_t *stream)
   stream->close = close_f;
   stream->control = control;
   stream->read_chunk = 128 * 1024;
+  stream->streaming = true;
 
   return STREAM_OK;
 }
