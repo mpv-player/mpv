@@ -1675,6 +1675,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_GET_WIN_STATE: {
         if (!x11->pseudo_mapped)
             return VO_FALSE;
+        *(int *)arg = 0;
         int num_elems;
         long *elems = x11_get_property(x11, x11->window, XA(x11, _NET_WM_STATE),
                                        XA_ATOM, 32, &num_elems);
