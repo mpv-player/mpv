@@ -2,8 +2,6 @@
 -- if it's brought back again. If the player was already paused when minimizing,
 -- then try not to mess with the pause state.
 
--- Note: currently works with X11 or OS X only.
-
 local did_minimize = false
 
 mp.observe_property("window-minimized", "bool", function(name, value)
