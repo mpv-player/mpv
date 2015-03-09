@@ -603,6 +603,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             signal_events(w32, VO_EVENT_RESIZE);
             MP_VERBOSE(w32, "resize window: %d:%d\n", w32->dw, w32->dh);
         }
+
+        // Window may have been minimized or restored
+        signal_events(w32, VO_EVENT_WIN_STATE);
         break;
     }
     case WM_SIZING:
@@ -1256,6 +1259,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         reinit_window_state(w32);
         return VO_TRUE;
     }
+    case VOCTRL_GET_WIN_STATE:
+        *(int *)arg = IsIconic(w32->window) ? VO_WIN_STATE_MINIMIZED : 0;
+        return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY:
         w32->cursor_visible = *(bool *)arg;
 
