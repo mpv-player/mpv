@@ -987,7 +987,7 @@ void mp_cancel_reset(struct mp_cancel *c)
 // For convenience, c==NULL is allowed.
 bool mp_cancel_test(struct mp_cancel *c)
 {
-    return c ? atomic_load(&c->triggered) : false;
+    return c ? atomic_load_explicit(&c->triggered, memory_order_relaxed) : false;
 }
 
 // Wait until the even is signaled. If the timeout (in seconds) expires, return
