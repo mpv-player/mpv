@@ -186,11 +186,14 @@ int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
  *            postprocessing, it will always bind and unbind FBOs itself. If
  *            you want mpv to render on the main framebuffer, pass 0.
  * @param vp Viewport to render on. The renderer will essentially call:
- *            glViewport(vp[0], vp[1], vp[2], vp[3]);
+ *            glViewport(0, 0, vp[2], vp[3]);
  *           before rendering. The height (vp[3]) can be negative to flip the
  *           image - the renderer will flip it before setting the viewport
  *           (typically you want to flip the image if you are rendering
  *           directly to the main framebuffer).
+ *           vp[0] and vp[1] should be set to 0.
+ *           The viewport width and height imply the target FBO or framebuffer's
+ *           size. It will always render to the full size of it.
  * @return the number of left frames in the internal queue to be rendered
  */
 int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4]);
