@@ -1210,6 +1210,36 @@ static bool vo_w32_is_cursor_in_client(struct vo_w32_state *w32)
     return SendMessage(w32->window, WM_NCHITTEST, 0, pos) == HTCLIENT;
 }
 
+static double vo_w32_get_display_fps(void)
+{
+    DEVMODE dm;
+    dm.dmSize = sizeof(DEVMODE);
+    dm.dmDriverExtra = 0;
+    if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm))
+        return -1;
+
+    // May return 0 or 1 which "represent the display hardware's default refresh rate"
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/dd183565%28v=vs.85%29.aspx
+    // mpv validates this value with a threshold of 1, so don't return exactly 1
+    if (dm.dmDisplayFrequency == 1)
+        return 0;
+
+    // dm.dmDisplayFrequency is an integer which is rounded down, so it's
+    // highly likely that 23 represents 24/1.001, 59 represents 60/1.001, etc.
+    // A caller can always reproduce the original value by using floor.
+    double rv = dm.dmDisplayFrequency;
+    switch (dm.dmDisplayFrequency) {
+        case  23:
+        case  29:
+        case  59:
+        case  71:
+        case 119:
+            rv = (rv + 1) / 1.001;
+    }
+
+    return rv;
+}
+
 static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 {
     switch (request) {
@@ -1279,6 +1309,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         talloc_free(title);
         return VO_TRUE;
     }
+    case VOCTRL_GET_DISPLAY_FPS:
+        *(double*) arg = vo_w32_get_display_fps();
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
