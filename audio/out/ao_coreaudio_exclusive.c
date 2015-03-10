@@ -332,7 +332,6 @@ struct priv {
 
     bool changed_mixing;
     int stream_asbd_changed;
-    bool muted;
 };
 
 static int get_ring_size(struct ao *ao)
@@ -351,45 +350,9 @@ static OSStatus render_cb_digital(
     AudioBuffer buf  = out_data->mBuffers[p->stream_idx];
     int requested    = buf.mDataByteSize;
 
-    if (p->muted)
-        mp_ring_drain(p->buffer, requested);
-    else
-        mp_ring_read(p->buffer, buf.mData, requested);
+    mp_ring_read(p->buffer, buf.mData, requested);
 
     return noErr;
-}
-
-static int control(struct ao *ao, enum aocontrol cmd, void *arg)
-{
-    struct priv *p = ao->priv;
-    ao_control_vol_t *control_vol;
-    switch (cmd) {
-    case AOCONTROL_GET_VOLUME:
-        control_vol = (ao_control_vol_t *)arg;
-        // Digital output has no volume adjust.
-        int digitalvol = p->muted ? 0 : 100;
-        *control_vol = (ao_control_vol_t) {
-            .left = digitalvol, .right = digitalvol,
-        };
-        return CONTROL_TRUE;
-
-    case AOCONTROL_SET_VOLUME:
-        control_vol = (ao_control_vol_t *)arg;
-        // Digital output can not set volume. Here we have to return true
-        // to make mixer forget it. Else mixer will add a soft filter,
-        // that's not we expected and the filter not support ac3 stream
-        // will cause mplayer die.
-
-        // Although not support set volume, but at least we support mute.
-        // MPlayer set mute by set volume to zero, we handle it.
-        if (control_vol->left == 0 && control_vol->right == 0)
-            p->muted = true;
-        else
-            p->muted = false;
-        return CONTROL_TRUE;
-
-    } // end switch
-    return CONTROL_UNKNOWN;
 }
 
 static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd);
@@ -648,7 +611,6 @@ const struct ao_driver audio_out_coreaudio_exclusive = {
     .uninit    = uninit,
     .init      = init,
     .play      = play,
-    .control   = control,
     .get_space = get_space,
     .get_delay = get_delay,
     .reset     = reset,
@@ -657,7 +619,6 @@ const struct ao_driver audio_out_coreaudio_exclusive = {
     .list_devs = ca_get_device_list,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv){
-        .muted = false,
         .stream_asbd_changed = 0,
         .hog_pid = -1,
         .stream = 0,
