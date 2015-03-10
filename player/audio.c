@@ -403,8 +403,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     ao_get_format(mpctx->ao, &out_format);
     double play_samplerate = out_format.rate / opts->playback_speed;
 
-    bool is_pcm = !AF_FORMAT_IS_SPECIAL(out_format.format); // no spdif
-    if (!opts->initial_audio_sync || !is_pcm) {
+    if (!opts->initial_audio_sync) {
         mpctx->audio_status = STATUS_FILLING;
         return true;
     }
@@ -438,7 +437,8 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
         return true;
     }
 
-    *skip = -ptsdiff * play_samplerate;
+    int align = af_format_sample_alignment(out_format.format);
+    *skip = (-ptsdiff * play_samplerate) / align * align;
     return true;
 }
 
