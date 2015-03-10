@@ -2600,6 +2600,21 @@ static int mp_property_win_minimized(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, state & VO_WIN_STATE_MINIMIZED);
 }
 
+static int mp_property_display_fps(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+
+    double fps = 0;
+    if (vo_control(vo, VOCTRL_GET_DISPLAY_FPS, &fps) < 1 || fps <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_double_ro(action, arg, fps);
+}
+
 static int mp_property_display_names(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3507,6 +3522,7 @@ static const struct m_property mp_properties[] = {
 
     {"window-minimized", mp_property_win_minimized},
     {"display-names", mp_property_display_names},
+    {"display-fps", mp_property_display_fps},
 
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},
@@ -3550,7 +3566,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle",
       "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache"),
     E(MP_EVENT_WIN_RESIZE, "window-scale"),
-    E(MP_EVENT_WIN_STATE, "window-minimized", "display-names"),
+    E(MP_EVENT_WIN_STATE, "window-minimized", "display-names", "display-fps"),
     E(MP_EVENT_AUDIO_DEVICES, "audio-device-list"),
     E(MP_EVENT_DETECTED_AUDIO_DEVICE, "audio-out-detected-device"),
 };
