@@ -234,6 +234,7 @@ int af_format_sample_alignment(int format)
     case AF_FORMAT_S_AAC:       return 16384;
     case AF_FORMAT_S_AC3:       return 6144;
     case AF_FORMAT_S_DTSHD:     return 32768;
+    case AF_FORMAT_S_DTS:       return 32768;
     case AF_FORMAT_S_EAC3:      return 24576;
     case AF_FORMAT_S_MP3:       return 4608;
     case AF_FORMAT_S_TRUEHD:    return 61440;
