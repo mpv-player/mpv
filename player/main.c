@@ -376,12 +376,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     assert(!mpctx->initialized);
 
-    if (opts->dump_stats && opts->dump_stats[0]) {
-        if (mp_msg_open_stats_file(mpctx->global, opts->dump_stats) < 0)
-            MP_ERR(mpctx, "Failed to open stats file '%s'\n", opts->dump_stats);
-    }
-    MP_STATS(mpctx, "start init");
-
     update_logging(mpctx);
 
     if (options) {
@@ -411,6 +405,12 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (handle_help_options(mpctx))
         return -2;
+
+    if (opts->dump_stats && opts->dump_stats[0]) {
+        if (mp_msg_open_stats_file(mpctx->global, opts->dump_stats) < 0)
+            MP_ERR(mpctx, "Failed to open stats file '%s'\n", opts->dump_stats);
+    }
+    MP_STATS(mpctx, "start init");
 
     if (opts->slave_mode) {
         MP_WARN(mpctx, "--slave-broken is deprecated (see manpage).\n");
