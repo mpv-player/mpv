@@ -306,20 +306,20 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
         gl_video_resize(ctx->renderer, &wnd, &src, &dst, &osd, !ctx->flip);
     }
 
-    if (vo) {
-        struct vo_priv *p = vo->priv;
-        if (ctx->reconfigured)
-            gl_video_config(ctx->renderer, &ctx->img_params);
-        if (ctx->reconfigured || ctx->update_new_opts) {
-            struct vo_priv *opts = p->ctx->new_opts ? p->ctx->new_opts : p;
+    if (ctx->reconfigured)
+        gl_video_config(ctx->renderer, &ctx->img_params);
+    if (ctx->update_new_opts) {
+        struct vo_priv *p = vo ? vo->priv : NULL;
+        struct vo_priv *opts = ctx->new_opts ? ctx->new_opts : p;
+        if (opts) {
             gl_video_set_options(ctx->renderer, opts->renderer_opts);
             ctx->gl->debug_context = opts->use_gl_debug;
             gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
             frame_queue_shrink(ctx, opts->frame_queue_size);
         }
-        ctx->reconfigured = false;
-        ctx->update_new_opts = false;
     }
+    ctx->reconfigured = false;
+    ctx->update_new_opts = false;
 
     struct mp_csp_equalizer *eq = gl_video_eq_ptr(ctx->renderer);
     if (ctx->eq_changed) {
@@ -507,6 +507,7 @@ static void uninit(struct vo *vo)
     p->ctx->img_params = (struct mp_image_params){0};
     p->ctx->reconfigured = true;
     p->ctx->active = NULL;
+    update(p);
     pthread_mutex_unlock(&p->ctx->lock);
 }
 
