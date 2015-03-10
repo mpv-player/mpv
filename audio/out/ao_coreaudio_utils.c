@@ -22,6 +22,8 @@
  * on CoreAudio but not the AUHAL (such as using AudioQueue services).
  */
 
+#include <CoreAudio/HostTime.h>
+
 #include "audio/out/ao_coreaudio_utils.h"
 #include "audio/out/ao_coreaudio_properties.h"
 #include "osdep/timer.h"
@@ -214,3 +216,18 @@ void ca_print_asbd(struct ao *ao, const char *description,
     talloc_free(format);
 }
 
+int64_t ca_frames_to_us(struct ao *ao, uint32_t frames)
+{
+    return frames / (float) ao->samplerate * 1e6;
+}
+
+int64_t ca_get_latency(const AudioTimeStamp *ts)
+{
+    uint64_t out = AudioConvertHostTimeToNanos(ts->mHostTime);
+    uint64_t now = AudioConvertHostTimeToNanos(AudioGetCurrentHostTime());
+
+    if (now > out)
+        return 0;
+
+    return (out - now) * 1e-3;
+}

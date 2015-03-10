@@ -56,4 +56,7 @@ void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd);
 void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd);
 
+int64_t ca_frames_to_us(struct ao *ao, uint32_t frames);
+int64_t ca_get_latency(const AudioTimeStamp *ts);
+
 #endif /* MPV_COREAUDIO_UTILS_H */

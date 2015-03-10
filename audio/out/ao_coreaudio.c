@@ -38,11 +38,6 @@ struct priv {
 bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
                            struct mp_chmap *chmap);
 
-static int64_t ca_frames_to_us(struct ao *ao, uint32_t frames)
-{
-    return frames / (float) ao->samplerate * 1e6;
-}
-
 static int64_t ca_get_hardware_latency(struct ao *ao) {
     struct priv *p = ao->priv;
 
@@ -71,17 +66,6 @@ static int64_t ca_get_hardware_latency(struct ao *ao) {
 
 coreaudio_error:
     return 0;
-}
-
-static int64_t ca_get_latency(const AudioTimeStamp *ts)
-{
-    uint64_t out = AudioConvertHostTimeToNanos(ts->mHostTime);
-    uint64_t now = AudioConvertHostTimeToNanos(AudioGetCurrentHostTime());
-
-    if (now > out)
-        return 0;
-
-    return (out - now) * 1e-3;
 }
 
 static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
