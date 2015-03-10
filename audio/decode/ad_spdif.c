@@ -36,7 +36,6 @@
 struct spdifContext {
     struct mp_log   *log;
     AVFormatContext *lavf_ctx;
-    int              iec61937_packet_size;
     int              out_buffer_len;
     uint8_t          out_buffer[OUTBUF_SIZE];
     bool             need_close;
@@ -159,7 +158,6 @@ static int init(struct dec_audio *da, const char *decoder)
     mp_audio_set_num_channels(&spdif_ctx->fmt, num_channels);
     mp_audio_set_format(&spdif_ctx->fmt, sample_format);
     spdif_ctx->fmt.rate = samplerate;
-    spdif_ctx->iec61937_packet_size = af_format_sample_alignment(sample_format);
 
     if (avformat_write_header(lavf_ctx, &format_opts) < 0) {
         MP_FATAL(da, "libavformat spdif initialization failed.\n");

@@ -228,16 +228,18 @@ int af_format_conversion_score(int dst_format, int src_format)
     return score;
 }
 
+// Return the number of samples that make up one frame in this format.
+// You get the byte size by multiplying them with sample size and channel count.
 int af_format_sample_alignment(int format)
 {
     switch (format) {
-    case AF_FORMAT_S_AAC:       return 16384;
-    case AF_FORMAT_S_AC3:       return 6144;
-    case AF_FORMAT_S_DTSHD:     return 32768;
-    case AF_FORMAT_S_DTS:       return 32768;
-    case AF_FORMAT_S_EAC3:      return 24576;
-    case AF_FORMAT_S_MP3:       return 4608;
-    case AF_FORMAT_S_TRUEHD:    return 61440;
+    case AF_FORMAT_S_AAC:       return 16384 / 4;
+    case AF_FORMAT_S_AC3:       return 6144 / 4;
+    case AF_FORMAT_S_DTSHD:     return 32768 / 16;
+    case AF_FORMAT_S_DTS:       return 2048 / 4;
+    case AF_FORMAT_S_EAC3:      return 24576 / 4;
+    case AF_FORMAT_S_MP3:       return 4608 / 4;
+    case AF_FORMAT_S_TRUEHD:    return 61440 / 16;
     default:                    return 1;
     }
 }
