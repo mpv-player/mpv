@@ -125,4 +125,6 @@ void af_fill_silence(void *dst, size_t bytes, int format);
 
 int af_format_conversion_score(int dst_format, int src_format);
 
+int af_format_sample_alignment(int format);
+
 #endif /* MPLAYER_AF_FORMAT_H */

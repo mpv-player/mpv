@@ -117,13 +117,11 @@ static int init(struct dec_audio *da, const char *decoder)
     int samplerate = 0;
     switch (stream->codec->codec_id) {
     case AV_CODEC_ID_AAC:
-        spdif_ctx->iec61937_packet_size = 16384;
         sample_format                   = AF_FORMAT_S_AAC;
         samplerate                      = 48000;
         num_channels                    = 2;
         break;
     case AV_CODEC_ID_AC3:
-        spdif_ctx->iec61937_packet_size = 6144;
         sample_format                   = AF_FORMAT_S_AC3;
         samplerate                      = 48000;
         num_channels                    = 2;
@@ -131,31 +129,26 @@ static int init(struct dec_audio *da, const char *decoder)
     case AV_CODEC_ID_DTS:
         if (da->opts->dtshd) {
             av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
-            spdif_ctx->iec61937_packet_size = 32768;
             sample_format                   = AF_FORMAT_S_DTSHD;
             samplerate                      = 192000;
             num_channels                    = 2*4;
         } else {
-            spdif_ctx->iec61937_packet_size = 32768;
             sample_format                   = AF_FORMAT_S_DTS;
             samplerate                      = 48000;
             num_channels                    = 2;
         }
         break;
     case AV_CODEC_ID_EAC3:
-        spdif_ctx->iec61937_packet_size = 24576;
         sample_format                   = AF_FORMAT_S_EAC3;
         samplerate                      = 192000;
         num_channels                    = 2;
         break;
     case AV_CODEC_ID_MP3:
-        spdif_ctx->iec61937_packet_size = 4608;
         sample_format                   = AF_FORMAT_S_MP3;
         samplerate                      = 48000;
         num_channels                    = 2;
         break;
     case AV_CODEC_ID_TRUEHD:
-        spdif_ctx->iec61937_packet_size = 61440;
         sample_format                   = AF_FORMAT_S_TRUEHD;
         samplerate                      = 192000;
         num_channels                    = 8;
@@ -166,6 +159,7 @@ static int init(struct dec_audio *da, const char *decoder)
     mp_audio_set_num_channels(&spdif_ctx->fmt, num_channels);
     mp_audio_set_format(&spdif_ctx->fmt, sample_format);
     spdif_ctx->fmt.rate = samplerate;
+    spdif_ctx->iec61937_packet_size = af_format_sample_alignment(sample_format);
 
     if (avformat_write_header(lavf_ctx, &format_opts) < 0) {
         MP_FATAL(da, "libavformat spdif initialization failed.\n");
