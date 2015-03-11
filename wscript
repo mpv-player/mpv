@@ -120,17 +120,22 @@ main_dependencies = [
             'struct pollfd pfd; poll(&pfd, 1, 0); fork(); int f[2]; pipe(f); munmap(f,0)'),
     }, {
         'name': 'posix-or-mingw',
-        'desc': 'programming environment',
+        'desc': 'development environment',
         'deps_any': [ 'posix', 'mingw' ],
         'func': check_true,
         'req': True,
         'fmsg': 'Unable to find either POSIX or MinGW-w64 environment, ' \
                 'or compiler does not work.',
     }, {
+        'name': 'win32',
+        'desc': 'win32',
+        'deps': [ 'os-win32' ],
+        'func': check_libs(['gdi32', 'winmm', 'ole32', 'uuid'], check_true),
+    }, {
         'name': '--win32-internal-pthreads',
         'desc': 'internal pthread wrapper for win32 (Vista+)',
         'deps_neg': [ 'posix' ],
-        'deps': [ 'mingw' ],
+        'deps': [ 'win32' ],
         'func': check_true,
         'default': 'disable',
     }, {
@@ -517,8 +522,8 @@ audio_output_features = [
     }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
-        'deps': ['atomics'],
-        'func': check_cc(fragment=load_fragment('wasapi.c'), lib='ole32'),
+        'deps': ['win32', 'atomics'],
+        'func': check_cc(fragment=load_fragment('wasapi.c')),
     }
 ]
 
@@ -527,22 +532,6 @@ video_output_features = [
         'name': '--cocoa',
         'desc': 'Cocoa',
         'func': check_cocoa
-    } , {
-        'name': 'gdi',
-        'desc': 'GDI',
-        'func': check_cc(lib='gdi32')
-    } , {
-        'name': 'winmm',
-        'desc': 'WinMM',
-        'func': check_cc(lib='winmm')
-    } , {
-        'name': 'ole',
-        'desc': 'OLE',
-        'func': check_cc(lib='ole32')
-    } , {
-        'name': 'uuid',
-        'desc': 'UUID',
-        'func': check_cc(lib='uuid')
     } , {
         'name': '--wayland',
         'desc': 'Wayland',
@@ -609,7 +598,7 @@ video_output_features = [
     } , {
         'name': '--gl-win32',
         'desc': 'OpenGL Win32 Backend',
-        'deps': [ 'gdi', 'winmm', 'ole', 'uuid' ],
+        'deps': [ 'win32' ],
         'groups': [ 'gl' ],
         'func': check_statement('windows.h', 'wglCreateContext(0)',
                                 lib='opengl32')
@@ -656,7 +645,7 @@ video_output_features = [
     }, {
         'name': '--direct3d',
         'desc': 'Direct3D support',
-        'deps': [ 'gdi', 'winmm', 'ole', 'uuid' ],
+        'deps': [ 'win32' ],
         'func': check_cc(header_name='d3d9.h'),
     }
 ]
@@ -691,7 +680,7 @@ hwaccel_features = [
     }, {
         'name': '--dxva2-hwaccel',
         'desc': 'libavcodec DXVA2 hwaccel',
-        'deps': [ 'gdi' ],
+        'deps': [ 'win32' ],
         'func': check_headers('libavcodec/dxva2.h', use='libav'),
     }
 ]
