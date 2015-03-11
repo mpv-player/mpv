@@ -64,7 +64,7 @@ sub generate_c_header {
 
         # Output a counter variable for each element
         # (presence/absence for scalars, item count for arrays)
-        for my $subel (values %{$el->{subelements}}) {
+        for my $subel (sort values %{$el->{subelements}}) {
             print "    int n_$subel->{fieldname};\n"
         }
         print "};\n";
