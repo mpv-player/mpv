@@ -167,6 +167,8 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         }
         case 'f':
         case 'F': {
+            if (!mpctx->filename)
+                goto error_exit;
             char *video_file = mp_basename(mpctx->filename);
             if (video_file) {
                 char *name = video_file;
