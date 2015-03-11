@@ -39,11 +39,21 @@ def __write_version_h__(ctx):
 def __escape_c_string(s):
     return s.replace("\"", "\\\"").replace("\n", "\\n")
 
+def __get_features_string__(ctx):
+    from inflectors import DependencyInflector
+    stuff = []
+    for dependency_identifier in ctx.satisfied_deps:
+        defkey = DependencyInflector(dependency_identifier).define_key()
+        if ctx.is_defined(defkey) and ctx.get_define(defkey) == "1":
+            stuff.append(dependency_identifier)
+    stuff.sort()
+    return " ".join(stuff)
+
 def __add_mpv_defines__(ctx):
     from sys import argv
     ctx.define("CONFIGURATION", " ".join(argv))
     ctx.define("MPV_CONFDIR", ctx.env.CONFDIR)
-    ctx.define("FULLCONFIG", "\\n" + __escape_c_string(ctx.get_config_header()) + "\\n")
+    ctx.define("FULLCONFIG", __escape_c_string(__get_features_string__(ctx)))
 
 def configure(ctx):
     __add_mpv_defines__(ctx)

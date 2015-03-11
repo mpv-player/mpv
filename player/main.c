@@ -130,7 +130,7 @@ void mp_print_version(struct mp_log *log, int always)
     // Only in verbose mode.
     if (!always) {
         mp_msg(log, MSGL_V, "Configuration: " CONFIGURATION "\n");
-        mp_msg(log, MSGL_V, "config.h:\n%s\n", FULLCONFIG);
+        mp_msg(log, MSGL_V, "List of enabled features: %s\n", FULLCONFIG);
     }
 }
 
