@@ -931,6 +931,8 @@ int vo_x11_check_events(struct vo *vo)
             x11->win_drag_button1_down = false;
             break;
         case LeaveNotify:
+            if (Event.xcrossing.mode != NotifyNormal)
+                break;
             x11->win_drag_button1_down = false;
             mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
             break;
