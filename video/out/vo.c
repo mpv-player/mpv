@@ -129,7 +129,8 @@ struct vo_internal {
     bool paused;
     bool vsync_timed;               // the VO redraws itself as fast as possible
                                     // at every vsync
-    int queued_events;
+    int queued_events;              // event mask for the user
+    int internal_events;            // event mask for us
 
     int64_t flip_queue_offset; // queue flip events at most this much in advance
 
@@ -145,8 +146,9 @@ struct vo_internal {
     int64_t frame_pts;              // realtime of intended display
     int64_t frame_duration;         // realtime frame duration (for framedrop)
 
-    // --- The following fields can be accessed from the VO thread only
     int64_t vsync_interval;
+
+    // --- The following fields can be accessed from the VO thread only
     int64_t vsync_interval_approx;
     int64_t last_flip;
     char *window_title;
@@ -230,6 +232,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     talloc_steal(vo, log);
     *vo->in = (struct vo_internal) {
         .dispatch = mp_dispatch_create(vo),
+        .internal_events = VO_EVENT_WIN_STATE,
     };
     mp_make_wakeup_pipe(vo->in->wakeup_pipe);
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
@@ -302,16 +305,27 @@ void vo_destroy(struct vo *vo)
 // to be called from VO thread only
 static void update_display_fps(struct vo *vo)
 {
-    double display_fps = 1000.0; // assume infinite if unset
-    if (vo->global->opts->frame_drop_fps > 0) {
-        display_fps = vo->global->opts->frame_drop_fps;
-    } else {
-        vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &display_fps);
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    if (in->internal_events & VO_EVENT_WIN_STATE) {
+        in->internal_events &= ~(unsigned)VO_EVENT_WIN_STATE;
+
+        pthread_mutex_unlock(&in->lock);
+
+        double display_fps = 1000.0; // assume infinite if unset
+        if (vo->global->opts->frame_drop_fps > 0) {
+            display_fps = vo->global->opts->frame_drop_fps;
+        } else {
+            vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &display_fps);
+        }
+        int64_t n_interval = MPMAX((int64_t)(1e6 / display_fps), 1);
+
+        pthread_mutex_lock(&in->lock);
+        if (vo->in->vsync_interval != n_interval)
+            MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
+        vo->in->vsync_interval = n_interval;
     }
-    int64_t n_interval = MPMAX((int64_t)(1e6 / display_fps), 1);
-    if (vo->in->vsync_interval != n_interval)
-        MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
-    vo->in->vsync_interval = n_interval;
+    pthread_mutex_unlock(&in->lock);
 }
 
 static void check_vo_caps(struct vo *vo)
@@ -533,6 +547,7 @@ void vo_wait_frame(struct vo *vo)
     pthread_mutex_unlock(&in->lock);
 }
 
+// needs lock
 static int64_t prev_sync(struct vo *vo, int64_t ts)
 {
     struct vo_internal *in = vo->in;
@@ -895,7 +910,11 @@ void vo_set_flip_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed
 
 int64_t vo_get_vsync_interval(struct vo *vo)
 {
-    return vo->in->vsync_interval;
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    int64_t res = vo->in->vsync_interval;
+    pthread_mutex_unlock(&in->lock);
+    return res;
 }
 
 // Set specific event flags, and wakeup the playback core if needed.
@@ -907,6 +926,7 @@ void vo_event(struct vo *vo, int event)
     if ((in->queued_events & event & VO_EVENTS_USER) != (event & VO_EVENTS_USER))
         mp_input_wakeup(vo->input_ctx);
     in->queued_events |= event;
+    in->internal_events |= event;
     pthread_mutex_unlock(&in->lock);
 }
 
