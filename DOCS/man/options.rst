@@ -3077,7 +3077,7 @@ Cache
     because no space is reserved for seeking back yet.
 
 ``--cache-default=<kBytes|no>``
-    Set the size of the cache in kilobytes (default: 25000 KB). Using ``no``
+    Set the size of the cache in kilobytes (default: 150000 KB). Using ``no``
     will not automatically enable the cache e.g. when playing from a network
     stream. Note that using ``--cache`` will always override this option.
 
