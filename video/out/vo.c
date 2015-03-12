@@ -312,7 +312,7 @@ static void update_display_fps(struct vo *vo)
 
         pthread_mutex_unlock(&in->lock);
 
-        double display_fps = 1000.0; // assume infinite if unset
+        double display_fps = 1e6; // assume infinite if unset
         if (vo->global->opts->frame_drop_fps > 0) {
             display_fps = vo->global->opts->frame_drop_fps;
         } else {

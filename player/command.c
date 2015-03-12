@@ -2601,18 +2601,18 @@ static int mp_property_win_minimized(void *ctx, struct m_property *prop,
 }
 
 static int mp_property_display_fps(void *ctx, struct m_property *prop,
-                                     int action, void *arg)
+                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
     struct vo *vo = mpctx->video_out;
     if (!vo)
         return M_PROPERTY_UNAVAILABLE;
 
-    double fps = 0;
-    if (vo_control(vo, VOCTRL_GET_DISPLAY_FPS, &fps) < 1 || fps <= 0)
+    int64_t interval = vo_get_vsync_interval(vo);
+    if (interval <= 1)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_double_ro(action, arg, fps);
+    return m_property_double_ro(action, arg, 1e6 / interval);
 }
 
 static int mp_property_display_names(void *ctx, struct m_property *prop,

@@ -1342,9 +1342,9 @@ Property list
 ``display-fps``
     The refresh rate of the current display. Currently, this is the lowest FPS
     of any display covered by the video, as retrieved by the underlying system
-    APIs (e.g. xrandr on X11). It is not the measured FPS or the FPS set with
-    ``--display-fps``. It's not necessarily available on all platforms. Note
-    that any of the listed facts may change any time without a warning.
+    APIs (e.g. xrandr on X11). It is not the measured FPS. It's not necessarily
+    available on all platforms. Note that any of the listed facts may change
+    any time without a warning.
 
 ``video-aspect`` (RW)
     Video aspect, see ``--video-aspect``.
