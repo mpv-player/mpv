@@ -996,7 +996,7 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
     pass_sample_separated_get_weights(p, scaler);
     GLSLF("// scaler samples\n");
     for (int n = 0; n < N; n++) {
-        GLSLF("c = texture(texture0, base + pt * vec2(%d));\n", n);
+        GLSLF("c = texture(sample_tex, base + pt * vec2(%d));\n", n);
         GLSLF("color += vec4(weights[%d]) * c;\n", n);
         if (use_ar && (n == N/2-1 || n == N/2)) {
             GLSL(lo = min(lo, c);)
@@ -1013,21 +1013,21 @@ static void pass_sample_separated(struct gl_video *p, int src_tex,
                                   float transform[3][2])
 {
     // Keep the x components untouched for the first pass
-    struct mp_rect_f src_new = p->pass_tex[0].src;
+    struct mp_rect_f src_new = p->pass_tex[src_tex].src;
     gl_matrix_mul_rect(transform, &src_new);
     GLSLF("// pass 1\n");
-    p->pass_tex[0].src.y0 = src_new.y0;
-    p->pass_tex[0].src.y1 = src_new.y1;
+    p->pass_tex[src_tex].src.y0 = src_new.y0;
+    p->pass_tex[src_tex].src.y1 = src_new.y1;
     pass_sample_separated_gen(p, scaler, 0, 1);
-    int src_w = p->pass_tex[0].src.x1 - p->pass_tex[0].src.x0;
+    int src_w = p->pass_tex[src_tex].src.x1 - p->pass_tex[src_tex].src.x0;
     finish_pass_fbo(p, &scaler->sep_fbo, src_w, h, src_tex, FBOTEX_FUZZY_H);
     // Restore the sample source for the second pass
     GLSLF("#define sample_tex  texture%d\n", src_tex);
     GLSLF("#define sample_pos  texcoord%d\n", src_tex);
     GLSLF("#define sample_size texture_size%d\n", src_tex);
     GLSLF("// pass 2\n");
-    p->pass_tex[0].src.x0 = src_new.x0;
-    p->pass_tex[0].src.x1 = src_new.x1;
+    p->pass_tex[src_tex].src.x0 = src_new.x0;
+    p->pass_tex[src_tex].src.x1 = src_new.x1;
     pass_sample_separated_gen(p, scaler, 1, 0);
 }
 
@@ -1230,7 +1230,7 @@ static void pass_read_video(struct gl_video *p)
             // into a single texture before scaling, so the scaler doesn't
             // need to run multiple times.
             GLSLF("// chroma merging\n");
-            GLSL(vec4 color = vec4(texture(texture1, texcoord0).r,
+            GLSL(vec4 color = vec4(texture(texture1, texcoord1).r,
                                    texture(texture2, texcoord2).r,
                                    0.0, 1.0);)
             int c_w = p->pass_tex[1].src.x1 - p->pass_tex[1].src.x0;
