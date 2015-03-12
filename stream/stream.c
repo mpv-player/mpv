@@ -752,6 +752,8 @@ static struct mp_cache_opts check_cache_opts(stream_t *stream,
     struct mp_cache_opts use_opts = *opts;
     if (use_opts.size == -1)
         use_opts.size = stream->streaming ? use_opts.def_size : 0;
+    if (use_opts.size == -2)
+        use_opts.size = use_opts.def_size;
 
     if (stream->mode != STREAM_READ || !stream->allow_caching || use_opts.size < 1)
         use_opts.size = 0;

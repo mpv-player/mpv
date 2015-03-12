@@ -141,7 +141,8 @@ const m_option_t mp_opts[] = {
 
     OPT_CHOICE_OR_INT("cache", stream_cache.size, 0, 32, 0x7fffffff,
                       ({"no", 0},
-                       {"auto", -1})),
+                       {"auto", -1},
+                       {"yes", -2})),
     OPT_CHOICE_OR_INT("cache-default", stream_cache.def_size, 0, 32, 0x7fffffff,
                       ({"no", 0})),
     OPT_INTRANGE("cache-initial", stream_cache.initial, 0, 0, 0x7fffffff),

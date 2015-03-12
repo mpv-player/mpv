@@ -3060,11 +3060,13 @@ TV
 Cache
 -----
 
-``--cache=<kBytes|no|auto>``
+``--cache=<kBytes|yes|no|auto>``
     Set the size of the cache in kilobytes, disable it with ``no``, or
     automatically enable it if needed with ``auto`` (default: ``auto``).
     With ``auto``, the cache will usually be enabled for network streams,
-    using the size set by ``--cache-default``.
+    using the size set by ``--cache-default``. With ``yes``, the cache will
+    always be enabled with the size set by ``--cache-default`` (unless the
+    stream can not be cached, or ``--cache-default`` disables caching).
 
     May be useful when playing files from slow media, but can also have
     negative effects, especially with file formats that require a lot of
