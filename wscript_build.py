@@ -54,10 +54,6 @@ def build(ctx):
         target = "input/input_conf.h")
 
     ctx.file2string(
-        source = "video/out/gl_video_shaders.glsl",
-        target = "video/out/gl_video_shaders.h")
-
-    ctx.file2string(
         source = "sub/osd_font.otf",
         target = "sub/osd_font.h")
 

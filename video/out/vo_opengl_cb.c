@@ -66,7 +66,7 @@ struct mpv_opengl_cb_context {
     int queued_frames;
     struct mp_image_params img_params;
     bool reconfigured;
-    struct mp_rect wnd;
+    int vp_w, vp_h;
     bool flip;
     bool force_update;
     bool imgfmt_supported[IMGFMT_END - IMGFMT_START];
@@ -282,28 +282,22 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
 
     ctx->force_update |= ctx->reconfigured;
 
-    int h = vp[3];
-    bool flip = h < 0 && h > INT_MIN;
-    if (flip)
-        h = -h;
-    struct mp_rect wnd = {vp[0], vp[1], vp[0] + vp[2], vp[1] + h};
-    if (wnd.x0 != ctx->wnd.x0 || wnd.y0 != ctx->wnd.y0 ||
-        wnd.x1 != ctx->wnd.x1 || wnd.y1 != ctx->wnd.y1 ||
-        ctx->flip != flip)
+    int vp_w = vp[2], vp_h = vp[3];
+    if (ctx->vp_w != vp_w || ctx->vp_h != vp_h)
         ctx->force_update = true;
 
     if (ctx->force_update && vo) {
         ctx->force_update = false;
-        ctx->wnd = wnd;
-        ctx->flip = flip;
+        ctx->vp_w = vp_w;
+        ctx->vp_h = vp_h;
 
         struct mp_rect src, dst;
         struct mp_osd_res osd;
         mp_get_src_dst_rects(ctx->log, &ctx->vo_opts, vo->driver->caps,
-                             &ctx->img_params, wnd.x1 - wnd.x0, wnd.y1 - wnd.y0,
+                             &ctx->img_params, vp_w, abs(vp_h),
                              1.0, &src, &dst, &osd);
 
-        gl_video_resize(ctx->renderer, &wnd, &src, &dst, &osd, !ctx->flip);
+        gl_video_resize(ctx->renderer, vp_w, vp_h, &src, &dst, &osd);
     }
 
     if (ctx->reconfigured)

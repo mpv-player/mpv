@@ -66,23 +66,54 @@ void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
 void gl_vao_uninit(struct gl_vao *vao);
 void gl_vao_bind(struct gl_vao *vao);
 void gl_vao_unbind(struct gl_vao *vao);
-void gl_vao_bind_attribs(struct gl_vao *vao, GLuint program);
 void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num);
 
 struct fbotex {
     GL *gl;
     GLuint fbo;
     GLuint texture;
-    int tex_w, tex_h;           // size of .texture
-    int vp_x, vp_y, vp_w, vp_h; // viewport of fbo / used part of the texture
+    GLenum iformat;
+    GLenum tex_filter;
+    int tex_w, tex_h;   // size of .texture
 };
 
 bool fbotex_init(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
-                 GLenum gl_target, GLenum gl_filter, GLenum iformat);
+                 GLenum iformat);
 void fbotex_uninit(struct fbotex *fbo);
+bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
+                   GLenum iformat, int flags);
+#define FBOTEX_FUZZY_W 1
+#define FBOTEX_FUZZY_H 2
+void fbotex_set_filter(struct fbotex *fbo, GLenum gl_filter);
 
 void gl_matrix_ortho2d(float m[3][3], float x0, float x1, float y0, float y1);
 
+static inline void gl_matrix_mul_vec(float m[3][3], float *x, float *y)
+{
+    float vx = *x, vy = *y;
+    *x = vx * m[0][0] + vy * m[1][0] + m[2][0];
+    *y = vx * m[0][1] + vy * m[1][1] + m[2][1];
+}
+
 void gl_set_debug_logger(GL *gl, struct mp_log *log);
+
+struct gl_shader_cache;
+
+struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log);
+void gl_sc_destroy(struct gl_shader_cache *sc);
+void gl_sc_add(struct gl_shader_cache *sc, const char *text);
+void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...);
+void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
+                           int unit);
+void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f);
+void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, GLfloat f[2]);
+void gl_sc_uniform_vec3(struct gl_shader_cache *sc, char *name, GLfloat f[3]);
+void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
+                        bool transpose, GLfloat *v);
+void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
+                        bool transpose, GLfloat *v);
+void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao);
+void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc);
+void gl_sc_reset(struct gl_shader_cache *sc);
 
 #endif
