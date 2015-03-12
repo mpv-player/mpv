@@ -76,6 +76,7 @@ enum mp_csp_trc {
     MP_CSP_TRC_BT_1886,
     MP_CSP_TRC_SRGB,
     MP_CSP_TRC_LINEAR,
+    MP_CSP_TRC_GAMMA22,
     MP_CSP_TRC_COUNT
 };
 

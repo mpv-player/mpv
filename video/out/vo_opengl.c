@@ -93,12 +93,11 @@ static void resize(struct gl_priv *p)
 
     MP_VERBOSE(vo, "Resize: %dx%d\n", vo->dwidth, vo->dheight);
 
-    struct mp_rect wnd = {0, 0, vo->dwidth, vo->dheight};
     struct mp_rect src, dst;
     struct mp_osd_res osd;
     vo_get_src_dst_rects(vo, &src, &dst, &osd);
 
-    gl_video_resize(p->renderer, &wnd, &src, &dst, &osd, false);
+    gl_video_resize(p->renderer, vo->dwidth, -vo->dheight, &src, &dst, &osd);
 
     vo->want_redraw = true;
 }
@@ -198,7 +197,7 @@ static int query_format(struct vo *vo, int format)
 static void video_resize_redraw_callback(struct vo *vo, int w, int h)
 {
     struct gl_priv *p = vo->priv;
-    gl_video_resize_redraw(p->renderer, w, h);
+    gl_video_resize_redraw(p->renderer, w, -h);
 
 }
 

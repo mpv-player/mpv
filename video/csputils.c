@@ -70,6 +70,7 @@ const char *const mp_csp_trc_names[MP_CSP_TRC_COUNT] = {
     "BT.1886 (SD, HD, UHD)",
     "sRGB (IEC 61966-2-1)",
     "Linear light",
+    "Pure power (gamma 2.2)",
 };
 
 const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
@@ -156,6 +157,7 @@ enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
     case AVCOL_TRC_BT2020_12:    return MP_CSP_TRC_BT_1886;
     case AVCOL_TRC_IEC61966_2_1: return MP_CSP_TRC_SRGB;
     case AVCOL_TRC_LINEAR:       return MP_CSP_TRC_LINEAR;
+    case AVCOL_TRC_GAMMA22:      return MP_CSP_TRC_GAMMA22;
     default:                     return MP_CSP_TRC_AUTO;
     }
 }
@@ -202,6 +204,7 @@ int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
     case MP_CSP_TRC_BT_1886:     return AVCOL_TRC_BT709;
     case MP_CSP_TRC_SRGB:        return AVCOL_TRC_IEC61966_2_1;
     case MP_CSP_TRC_LINEAR:      return AVCOL_TRC_LINEAR;
+    case MP_CSP_TRC_GAMMA22:     return AVCOL_TRC_GAMMA22;
     default:                     return AVCOL_TRC_UNSPECIFIED;
     }
 }
