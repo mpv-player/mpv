@@ -36,7 +36,7 @@
 #define VO_EVENT_RESIZE 2
 // The ICC profile needs to be reloaded
 #define VO_EVENT_ICC_PROFILE_CHANGED 4
-// Some other window state changed
+// Some other window state changed (position, window state, fps)
 #define VO_EVENT_WIN_STATE 8
 // The ambient light conditions changed and need to be reloaded
 #define VO_EVENT_AMBIENT_LIGHTING_CHANGED 16
