@@ -31,12 +31,13 @@ struct lut3d {
 struct gl_video_opts {
     char *scalers[2];
     char *dscaler;
+    float gamma;
+    int gamma_auto;
+    int target_prim;
+    int target_trc;
     float scaler_params[2][2];
     float scaler_radius[2];
     float scaler_antiring[2];
-    float gamma;
-    int gamma_auto;
-    int srgb;
     int linear_scaling;
     int fancy_downscaling;
     int sigmoid_upscaling;

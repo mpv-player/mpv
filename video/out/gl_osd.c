@@ -294,7 +294,7 @@ static void gen_osd_cb(void *pctx, struct sub_bitmaps *imgs)
            osd->num_subparts * sizeof(osd->subparts[0]));
 }
 
-static void write_quad(struct vertex *va, float matrix[3][3],
+static void write_quad(struct vertex *va, float matrix[3][2],
                        float x0, float y0, float x1, float y1,
                        float tx0, float ty0, float tx1, float ty1,
                        float tex_w, float tex_h, const uint8_t color[4])
@@ -312,7 +312,7 @@ static void write_quad(struct vertex *va, float matrix[3][3],
 #undef COLOR_INIT
 }
 
-static int generate_verts(struct mpgl_osd_part *part, float matrix[3][3])
+static int generate_verts(struct mpgl_osd_part *part, float matrix[3][2])
 {
     int num_vertices = part->num_subparts * 6;
     MP_TARRAY_GROW(part, part->vertices, num_vertices);
@@ -337,7 +337,7 @@ static int generate_verts(struct mpgl_osd_part *part, float matrix[3][3])
     return num_vertices;
 }
 
-static void draw_part(struct mpgl_osd *ctx, int index, float matrix[3][3])
+static void draw_part(struct mpgl_osd *ctx, int index, float matrix[3][2])
 {
     GL *gl = ctx->gl;
     struct mpgl_osd_part *part = ctx->parts[index];
@@ -377,7 +377,7 @@ void mpgl_osd_draw_part(struct mpgl_osd *ctx, int vp_w, int vp_h, int index)
 
     for (int x = 0; x < div[0]; x++) {
         for (int y = 0; y < div[1]; y++) {
-            float matrix[3][3];
+            float matrix[3][2];
 
             gl_matrix_ortho2d(matrix, 0, vp_w, 0, vp_h);
 

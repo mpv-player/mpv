@@ -352,6 +352,10 @@ Available video output drivers are:
             blurrier. Defaults to 1. Note that setting this too low (eg. 0.5)
             leads to bad results. It's recommended to stay between 0.9 and 1.1.
 
+        ``sharpen3``, ``sharpen5``
+            Sharpening strength. Increasing this makes the image sharper but
+            adds more ringing and aliasing. Defaults to 0.5.
+
     ``scale-radius=<r>``
         Set radius for filters listed below, must be a float number between 1.0
         and 16.0. Defaults to be 3.0 if not specified.
@@ -376,21 +380,6 @@ Available video output drivers are:
         ``bilinear`` is used instead whatever is set with ``scale``. Bilinear
         will reproduce the source image perfectly if no scaling is performed.
         Note that this option never affects ``cscale``.
-
-    ``srgb``
-        Convert and color correct the output to sRGB before displaying it on
-        the screen. This option enables ``linear-scaling``.
-
-        This option is equivalent to using ``icc-profile`` with an sRGB ICC
-        profile, but it is implemented without a 3DLUT and does not require
-        LittleCMS 2. If both ``srgb`` and ``icc-profile`` are present, the
-        latter takes precedence, as they are somewhat redundant.
-
-        Note: When playing back BT.2020 content with this option enabled, out
-        of gamut colors will be numerically clipped, which can potentially
-        change the hue and/or luminance. If this is not desired, it is
-        recommended to use ``icc-profile`` with an sRGB ICC profile instead,
-        when playing back wide-gamut BT.2020 content.
 
     ``pbo``
         Enable use of PBOs. This is slightly faster, but can sometimes lead to
@@ -460,9 +449,10 @@ Available video output drivers are:
         ``scale-antiring``.
 
     ``linear-scaling``
-        Scale in linear light. This is automatically enabled if ``srgb``,
-        ``icc-profile`` or ``sigmoid-upscaling`` is set. It should only
-        be used with a ``fbo-format`` that has at least 16 bit precision.
+        Scale in linear light. This is automatically enabled if
+        ``target-prim``, ``target-trc``, ``icc-profile`` or
+        ``sigmoid-upscaling`` is set. It should only be used with a
+        ``fbo-format`` that has at least 16 bit precision.
 
     ``fancy-downscaling``
         When using convolution based filters, extend the filter size
@@ -553,12 +543,43 @@ Available video output drivers are:
 
         NOTE: Only implemented on OS X.
 
+    ``target-prim=<value>``
+        Specifies the primaries of the display. Video colors will be adapted
+        to this colorspace if necessary. Valid values are:
+
+        auto
+            Disable any adaptation (default)
+        bt470m
+            ITU-R BT.470 M
+        bt601-525
+            ITU-R BT.601 (525-line SD systems, eg. NTSC), SMPTE 170M/240M
+        bt601-625
+            ITU-R BT.601 (625-line SD systems, eg. PAL/SECAM), ITU-R BT.470 B/G
+        bt709
+            ITU-R BT.709 (HD), IEC 61966-2-4 (sRGB), SMPTE RP177 Annex B
+        bt2020
+            ITU-R BT.2020 (UHD)
+
+    ``target-trc=<value>``
+        Specifies the transfer characteristics (gamma) of the display. Video
+        colors will be adjusted to this curve. Valid values are:
+
+        auto
+            Disable any adaptation (default)
+        bt1886
+            ITU-R BT.1886 curve, without the brightness drop (approx. 1.961)
+        srgb
+            IEC 61966-2-4 (sRGB)
+        linear
+            Linear light output
+        gamma22
+            Pure power curve (gamma 2.2)
+
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.
-        Needs LittleCMS 2 support compiled in. This option overrides the ``srgb``
-        property, as using both is somewhat redundant. It also enables
+        Needs LittleCMS 2 support compiled in. This option overrides the
+        ``target-prim`` and ``target-trc`` options. It also enables
         ``linear-scaling``.
-
 
     ``icc-profile-auto``
         Automatically select the ICC display profile currently specified by
@@ -573,9 +594,8 @@ Available video output drivers are:
         Its size depends on the ``3dlut-size``, and can be very big.
 
     ``icc-intent=<value>``
-        Specifies the ICC Intent used for transformations between color spaces.
-        This affects the rendering when using ``icc-profile`` or ``srgb`` and
-        also affects the way DCP XYZ content gets converted to RGB.
+        Specifies the ICC intent used for the color transformation (when using
+        ``icc-profile``).
 
         0
             perceptual
