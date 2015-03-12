@@ -593,6 +593,18 @@ static double vo_w32_get_display_fps(void)
     return rv;
 }
 
+static void update_display_fps(void *ctx)
+{
+    struct vo_w32_state *w32 = ctx;
+
+    double fps = vo_w32_get_display_fps();
+    if (fps != w32->display_fps) {
+        w32->display_fps = fps;
+        signal_events(w32, VO_EVENT_WIN_STATE);
+        MP_VERBOSE(w32, "display-fps: %f\n", fps);
+    }
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -618,7 +630,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         ClientToScreen(w32->window, &p);
         w32->window_x = p.x;
         w32->window_y = p.y;
-        w32->display_fps = vo_w32_get_display_fps();  // if we moved between monitors
+        update_display_fps(w32);  // if we moved between monitors
         MP_VERBOSE(w32, "move window: %d:%d\n", w32->window_x, w32->window_y);
         break;
     }
@@ -627,7 +639,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (GetClientRect(w32->window, &r) && r.right > 0 && r.bottom > 0) {
             w32->dw = r.right;
             w32->dh = r.bottom;
-            w32->display_fps = vo_w32_get_display_fps(); // if we moved between monitors
+            update_display_fps(w32); // if we moved between monitors
             signal_events(w32, VO_EVENT_RESIZE);
             MP_VERBOSE(w32, "resize window: %d:%d\n", w32->dw, w32->dh);
         }
@@ -775,7 +787,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         mouse_button |= MP_KEY_STATE_UP;
         break;
     case WM_DISPLAYCHANGE:
-        w32->display_fps = vo_w32_get_display_fps();
+        update_display_fps(w32);
         break;
     }
 
@@ -1318,6 +1330,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_FPS:
+        update_display_fps(w32);
         *(double*) arg = w32->display_fps;
         return VO_TRUE;
     }
