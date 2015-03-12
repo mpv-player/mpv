@@ -102,6 +102,9 @@ struct vo_w32_state {
     int high_surrogate;
 
     ITaskbarList2 *taskbar_list;
+
+    // updates on move/resize/displaychange
+    double display_fps;
 };
 
 typedef struct tagDropTarget {
@@ -560,6 +563,36 @@ static void wakeup_gui_thread(void *ctx)
     PostMessage(w32->window, WM_USER, 0, 0);
 }
 
+static double vo_w32_get_display_fps(void)
+{
+    DEVMODE dm;
+    dm.dmSize = sizeof(DEVMODE);
+    dm.dmDriverExtra = 0;
+    if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm))
+        return -1;
+
+    // May return 0 or 1 which "represent the display hardware's default refresh rate"
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/dd183565%28v=vs.85%29.aspx
+    // mpv validates this value with a threshold of 1, so don't return exactly 1
+    if (dm.dmDisplayFrequency == 1)
+        return 0;
+
+    // dm.dmDisplayFrequency is an integer which is rounded down, so it's
+    // highly likely that 23 represents 24/1.001, 59 represents 60/1.001, etc.
+    // A caller can always reproduce the original value by using floor.
+    double rv = dm.dmDisplayFrequency;
+    switch (dm.dmDisplayFrequency) {
+        case  23:
+        case  29:
+        case  59:
+        case  71:
+        case 119:
+            rv = (rv + 1) / 1.001;
+    }
+
+    return rv;
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -585,6 +618,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         ClientToScreen(w32->window, &p);
         w32->window_x = p.x;
         w32->window_y = p.y;
+        w32->display_fps = vo_w32_get_display_fps();  // if we moved between monitors
         MP_VERBOSE(w32, "move window: %d:%d\n", w32->window_x, w32->window_y);
         break;
     }
@@ -593,6 +627,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (GetClientRect(w32->window, &r) && r.right > 0 && r.bottom > 0) {
             w32->dw = r.right;
             w32->dh = r.bottom;
+            w32->display_fps = vo_w32_get_display_fps(); // if we moved between monitors
             signal_events(w32, VO_EVENT_RESIZE);
             MP_VERBOSE(w32, "resize window: %d:%d\n", w32->dw, w32->dh);
         }
@@ -738,6 +773,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_XBUTTONUP:
         mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
         mouse_button |= MP_KEY_STATE_UP;
+        break;
+    case WM_DISPLAYCHANGE:
+        w32->display_fps = vo_w32_get_display_fps();
         break;
     }
 
@@ -1210,36 +1248,6 @@ static bool vo_w32_is_cursor_in_client(struct vo_w32_state *w32)
     return SendMessage(w32->window, WM_NCHITTEST, 0, pos) == HTCLIENT;
 }
 
-static double vo_w32_get_display_fps(void)
-{
-    DEVMODE dm;
-    dm.dmSize = sizeof(DEVMODE);
-    dm.dmDriverExtra = 0;
-    if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm))
-        return -1;
-
-    // May return 0 or 1 which "represent the display hardware's default refresh rate"
-    // https://msdn.microsoft.com/en-us/library/windows/desktop/dd183565%28v=vs.85%29.aspx
-    // mpv validates this value with a threshold of 1, so don't return exactly 1
-    if (dm.dmDisplayFrequency == 1)
-        return 0;
-
-    // dm.dmDisplayFrequency is an integer which is rounded down, so it's
-    // highly likely that 23 represents 24/1.001, 59 represents 60/1.001, etc.
-    // A caller can always reproduce the original value by using floor.
-    double rv = dm.dmDisplayFrequency;
-    switch (dm.dmDisplayFrequency) {
-        case  23:
-        case  29:
-        case  59:
-        case  71:
-        case 119:
-            rv = (rv + 1) / 1.001;
-    }
-
-    return rv;
-}
-
 static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 {
     switch (request) {
@@ -1310,7 +1318,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_FPS:
-        *(double*) arg = vo_w32_get_display_fps();
+        *(double*) arg = w32->display_fps;
         return VO_TRUE;
     }
     return VO_NOTIMPL;
