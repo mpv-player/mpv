@@ -426,10 +426,28 @@ Available video output drivers are:
         debug OpenGL context (which does nothing with current graphics drivers
         as of this writing).
 
+    ``interpolation``
+        Reduce stuttering caused by mismatches in the video fps and display
+        refresh rate (also known as judder).
+
+        This essentially attempts to interpolate the missing frames by
+        convoluting the video along the temporal axis. The filter used can be
+        controlled using the ``tscale`` setting.
+
+        Note that this relies on vsync to work, see ``swapinterval`` for more
+        information.
+
     ``swapinterval=<n>``
         Interval in displayed frames between two buffer swaps.
         1 is equivalent to enable VSYNC, 0 to disable VSYNC. Defaults to 1 if
         not specified.
+
+        Note that this depends on proper OpenGL vsync support. On some platforms
+        and drivers, this only works reliably when in fullscreen mode. It may
+        also require driver-specific hacks if using multiple monitors, to
+        ensure mpv syncs to the right one. Compositing window managers can
+        also lead to bad results, as can missing or incorrect display FPS
+        information (see ``--display-fps``).
 
     ``cscale=<filter>``
         As ``scale``, but for interpolating chroma information. If the image
@@ -444,6 +462,18 @@ Available video output drivers are:
 
         See ``scale-param1``, ``scale-param2``, ``scale-radius`` and
         ``scale-antiring``.
+
+    ``tscale=<filter>``, ``tscale-param1``, ``tscale-param2``, ``tscale-antiring``
+        The filter used for interpolating the temporal axis (frames). This is
+        only used if ``interpolation`` is enabled. The only valid choices
+        for ``tscale`` are separable convolution filters (use ``tscale=help``
+        to get a list). The other options (``tscale-param1`` etc.) are
+        analogous to their ``scale`` counterparts. The default is ``mitchell``.
+
+        Note that the maximum supported filter radius is currently 3, and that
+        using filters with larger radius may introduce isues when pausing or
+        framestepping, proportional to the radius used. It is recommended to
+        stick to a radius of 1 or 2.
 
     ``linear-scaling``
         Scale in linear light. This is automatically enabled if
@@ -635,48 +665,6 @@ Available video output drivers are:
     ``background=<color>``
         Color used to draw parts of the mpv window not covered by video.
         See ``--osd-color`` option how colors are defined.
-
-    ``smoothmotion``
-        Reduce stuttering caused by mismatches in video fps and display
-        refresh rate (also known as judder).
-
-        Instead of drawing source frames for variable durations, smoothmotion
-        will blend frames that overlap the transition between two frames in
-        the source material.
-
-        For example, a 24 Hz clip played back on a 60 Hz display would normally
-        result in a pattern like this::
-
-            A A A B B C C C D D E E E F F
-
-        which has different lengths, alternating between 3 and 2. This
-        difference in frame duration is what causes judder.
-
-        With smoothmotion enabled, the pattern changes to::
-
-            A A A+B B B C C C+D D D E E E+F F F
-
-        where A+B is a blend of A and B. In this pattern, each frame gets a
-        (consistent) duration of roughly 2.5 - resulting in smooth motion.
-
-        GPU drivers or compositing window managers overriding vsync behavior
-        can lead to bad results. If the framerate is close to or over the
-        display refresh rate, results can be bad as well.
-
-        .. note:: On systems other than Linux or OS X, you currently must set
-                  the ``--display-fps`` option, or the results will be bad.
-
-    ``smoothmotion-threshold=<0.0-0.5>``
-        Mix threshold at which interpolation is skipped (default: 0.0 – never
-        skip).
-
-        For example, with a ``smoothmotion-threshold`` of 0.1, if the
-        smoothmotion algorithm would try to blend two frames by a ratio of
-        95% A + 5% B, it would simply display A instead. (Since the
-        distance, 0.05, is lower than the threshold)
-
-        Setting this to 0.5 would be similar to disabling smoothmotion
-        completely, since it would always just display the nearest frame.
 
 ``opengl-hq``
     Same as ``opengl``, but with default settings for high quality rendering.

@@ -49,7 +49,7 @@
 
 // Other texture units are reserved for specific purposes
 #define TEXUNIT_SCALERS  TEXUNIT_VIDEO_NUM
-#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+2)
+#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+3)
 #define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
 // scale/cscale arguments that map directly to shader filter routines.
@@ -63,9 +63,9 @@ static const char *const fixed_scale_filters[] = {
 };
 
 // must be sorted, and terminated with 0
-// 2 & 6 are special-cased, the rest can be generated with WEIGHTS_N().
 int filter_sizes[] =
     {2, 4, 6, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 0};
+int tscale_sizes[] = {2, 4, 6, 0}; // limited by TEXUNIT_VIDEO_NUM
 
 struct vertex_pt {
     float x, y;
@@ -129,7 +129,7 @@ struct fbosurface {
     int64_t pts;
 };
 
-#define FBOSURFACES_MAX 6
+#define FBOSURFACES_MAX 10
 
 struct src_tex {
     GLuint gl_tex;
@@ -182,12 +182,12 @@ struct gl_video {
     struct fbotex chroma_merge_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
 
-    size_t surface_idx;
-    size_t surface_now;
+    int surface_idx;
+    int surface_now;
     bool is_interpolated;
 
-    // state for luma (0) and chroma (1) scalers
-    struct scaler scalers[2];
+    // state for luma (0), chroma (1) and temporal (2) scalers
+    struct scaler scalers[3];
 
     struct mp_csp_equalizer video_eq;
 
@@ -320,10 +320,10 @@ const struct gl_video_opts gl_video_opts_def = {
     .fbo_format = GL_RGBA,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
-    .scalers = { "bilinear", "bilinear" },
+    .scalers = { "bilinear", "bilinear", "mitchell" },
     .dscaler = "bilinear",
-    .scaler_params = {{NAN, NAN}, {NAN, NAN}},
-    .scaler_radius = {3, 3},
+    .scaler_params = {{NAN, NAN}, {NAN, NAN}, {NAN, NAN}},
+    .scaler_radius = {3, 3, 3},
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
@@ -338,10 +338,10 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .sigmoid_upscaling = 1,
-    .scalers = { "spline36", "bilinear" },
+    .scalers = { "spline36", "bilinear", "mitchell" },
     .dscaler = "mitchell",
-    .scaler_params = {{NAN, NAN}, {NAN, NAN}},
-    .scaler_radius = {3, 3},
+    .scaler_params = {{NAN, NAN}, {NAN, NAN}, {NAN, NAN}},
+    .scaler_radius = {3, 3, 3},
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
@@ -372,15 +372,20 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("pbo", pbo, 0),
         OPT_STRING_VALIDATE("scale", scalers[0], 0, validate_scaler_opt),
         OPT_STRING_VALIDATE("cscale", scalers[1], 0, validate_scaler_opt),
+        OPT_STRING_VALIDATE("tscale", scalers[2], 0, validate_scaler_opt),
         OPT_STRING_VALIDATE("scale-down", dscaler, 0, validate_scaler_opt),
         OPT_FLOAT("scale-param1", scaler_params[0][0], 0),
         OPT_FLOAT("scale-param2", scaler_params[0][1], 0),
         OPT_FLOAT("cscale-param1", scaler_params[1][0], 0),
         OPT_FLOAT("cscale-param2", scaler_params[1][1], 0),
+        OPT_FLOAT("tscale-param1", scaler_params[2][0], 0),
+        OPT_FLOAT("tscale-param2", scaler_params[2][1], 0),
         OPT_FLOATRANGE("scale-radius", scaler_radius[0], 0, 1.0, 16.0),
         OPT_FLOATRANGE("cscale-radius", scaler_radius[1], 0, 1.0, 16.0),
+        OPT_FLOATRANGE("tscale-radius", scaler_radius[2], 0, 1.0, 3.0),
         OPT_FLOATRANGE("scale-antiring", scaler_antiring[0], 0, 0.0, 1.0),
         OPT_FLOATRANGE("cscale-antiring", scaler_antiring[1], 0, 0.0, 1.0),
+        OPT_FLOATRANGE("tscale-antiring", scaler_antiring[2], 0, 0.0, 1.0),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("linear-scaling", linear_scaling, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
@@ -416,13 +421,12 @@ const struct m_sub_options gl_video_conf = {
                     {"blend", 2})),
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
-        OPT_FLAG("smoothmotion", smoothmotion, 0),
-        OPT_FLOAT("smoothmotion-threshold", smoothmotion_threshold,
-                   CONF_RANGE, .min = 0, .max = 0.5),
+        OPT_FLAG("interpolation", interpolation, 0),
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
         OPT_REMOVED("scale-sep", "this is set automatically whenever sane"),
         OPT_REMOVED("indirect", "this is set automatically whenever sane"),
+        OPT_REMOVED("smoothmotion-threshold", "to be readded as a proper scaler"),
 
         OPT_REPLACED("lscale", "scale"),
         OPT_REPLACED("lscale-down", "scale-down"),
@@ -435,6 +439,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("cradius", "cscale-radius"),
         OPT_REPLACED("cantiring", "cscale-antiring"),
         OPT_REPLACED("srgb", "target-prim=srgb:target-trc=srgb"),
+        OPT_REPLACED("smoothmotion", "interpolation"),
 
         {0}
     },
@@ -489,9 +494,10 @@ static void gl_video_reset_surfaces(struct gl_video *p)
     p->surface_now = 0;
 }
 
-static size_t fbosurface_next(size_t id)
+static inline int fbosurface_wrap(int id)
 {
-    return (id+1) % FBOSURFACES_MAX;
+    id = id % FBOSURFACES_MAX;
+    return id < 0 ? id + FBOSURFACES_MAX : id;
 }
 
 static void recreate_osd(struct gl_video *p)
@@ -517,7 +523,7 @@ static void uninit_rendering(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    for (int n = 0; n < 2; n++)
+    for (int n = 0; n < 3; n++)
         uninit_scaler(p, n);
 
     gl->DeleteTextures(1, &p->dither_texture);
@@ -861,7 +867,7 @@ static void uninit_scaler(struct gl_video *p, int scaler_unit)
 }
 
 static void reinit_scaler(struct gl_video *p, int scaler_unit, const char *name,
-                          double scale_factor)
+                          double scale_factor, int sizes[])
 {
     GL *gl = p->gl;
     struct scaler *scaler = &p->scalers[scaler_unit];
@@ -898,8 +904,7 @@ static void reinit_scaler(struct gl_video *p, int scaler_unit, const char *name,
     if (scaler->kernel->radius < 0)
         scaler->kernel->radius = p->opts.scaler_radius[scaler->index];
 
-    scaler->insufficient = !mp_init_filter(scaler->kernel, filter_sizes,
-                                           scale_factor);
+    scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 
     if (scaler->kernel->polar) {
         scaler->gl_target = GL_TEXTURE_1D;
@@ -980,18 +985,22 @@ static void pass_sample_separated_get_weights(struct gl_video *p,
 }
 
 // Handle a single pass (either vertical or horizontal). The direction is given
-// by the vector (d_x, d_y)
+// by the vector (d_x, d_y). If the vector is 0, then planar interpolation is
+// used instead (samples from texture0 through textureN)
 static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
                                       int d_x, int d_y)
 {
     int N = scaler->kernel->size;
     bool use_ar = scaler->antiring > 0;
+    bool planar = d_x == 0 && d_y == 0;
     GLSL(vec4 color = vec4(0.0);)
     GLSLF("{\n");
-    GLSLF("vec2 dir = vec2(%d, %d);\n", d_x, d_y);
-    GLSL(vec2 pt = (vec2(1.0) / sample_size) * dir;)
-    GLSL(float fcoord = dot(fract(sample_pos * sample_size - vec2(0.5)), dir);)
-    GLSLF("vec2 base = sample_pos - fcoord * pt - pt * vec2(%d);\n", N / 2 - 1);
+    if (!planar) {
+        GLSLF("vec2 dir = vec2(%d, %d);\n", d_x, d_y);
+        GLSL(vec2 pt = (vec2(1.0) / sample_size) * dir;)
+        GLSL(float fcoord = dot(fract(sample_pos * sample_size - vec2(0.5)), dir);)
+        GLSLF("vec2 base = sample_pos - fcoord * pt - pt * vec2(%d);\n", N / 2 - 1);
+    }
     GLSL(vec4 c;)
     if (use_ar) {
         GLSL(vec4 hi = vec4(0.0);)
@@ -1000,7 +1009,11 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
     pass_sample_separated_get_weights(p, scaler);
     GLSLF("// scaler samples\n");
     for (int n = 0; n < N; n++) {
-        GLSLF("c = texture(sample_tex, base + pt * vec2(%d));\n", n);
+        if (planar) {
+            GLSLF("c = texture(texture%d, texcoord%d);\n", n, n);
+        } else {
+            GLSLF("c = texture(sample_tex, base + pt * vec2(%d));\n", n);
+        }
         GLSLF("color += vec4(weights[%d]) * c;\n", n);
         if (use_ar && (n == N/2-1 || n == N/2)) {
             GLSL(lo = min(lo, c);)
@@ -1163,7 +1176,6 @@ static void pass_sample_sharpen5(struct gl_video *p, struct scaler *scaler)
     double param = isnan(scaler->params[0]) ? 0.5 : scaler->params[0];
     GLSLF("color = p + t * %f;\n", param);
     GLSLF("}\n");
-
 }
 
 // Sample. This samples from the texture ID given by src_tex. It's hardcoded to
@@ -1180,7 +1192,7 @@ static void pass_sample(struct gl_video *p, int src_tex,
                         int w, int h, struct gl_transform transform)
 {
     struct scaler *scaler = &p->scalers[scaler_unit];
-    reinit_scaler(p, scaler_unit, name, scale_factor);
+    reinit_scaler(p, scaler_unit, name, scale_factor, filter_sizes);
 
     // Set up the sample parameters appropriately
     GLSLF("#define sample_tex  texture%d\n", src_tex);
@@ -1667,7 +1679,6 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0,
         fuzz = FBOTEX_FUZZY_W | FBOTEX_FUZZY_H;
-    size_t surface_nxt = fbosurface_next(p->surface_now);
 
     // First of all, figure out if we have a frame availble at all, and draw
     // it manually + reset the queue if not
@@ -1679,9 +1690,27 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         p->surface_idx = p->surface_now;
     }
 
+    // Figure out the queue size. For illustration, a filter radius of 2 would
+    // look like this: _ A [B] C D _
+    // A is surface_bse, B is surface_now, C is surface_nxt and D is
+    // surface_end.
+    struct scaler *tscale = &p->scalers[2];
+    reinit_scaler(p, 2, p->opts.scalers[2], 1, tscale_sizes);
+    assert(tscale->kernel && !tscale->kernel->polar);
+
+    int size = ceil(tscale->kernel->size);
+    assert(size <= TEXUNIT_VIDEO_NUM);
+    int radius = size/2;
+
+    int surface_now = p->surface_now;
+    int surface_nxt = fbosurface_wrap(surface_now + 1);
+    int surface_bse = fbosurface_wrap(surface_now - (radius-1));
+    int surface_end = fbosurface_wrap(surface_now + radius);
+    assert(fbosurface_wrap(surface_bse + size-1) == surface_end);
+
     // Render a new frame if it came in and there's room in the queue
-    size_t surface_dst = fbosurface_next(p->surface_idx);
-    if (t && surface_dst != p->surface_now &&
+    int surface_dst = fbosurface_wrap(p->surface_idx+1);
+    if (t && surface_dst != surface_bse &&
              p->surfaces[p->surface_idx].pts < t->pts) {
         MP_STATS(p, "new-pts");
         pass_draw_frame(p);
@@ -1691,40 +1720,58 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         p->surface_idx = surface_dst;
     }
 
+    // Figure out whether the queue is "valid". A queue is invalid if the
+    // frames' PTS is not monotonically increasing. Anything else is invalid,
+    // so avoid blending incorrect data and just draw the latest frame as-is.
+    // Possible causes for failure of this condition include seeks, pausing,
+    // end of playback or start of playback.
+    bool valid = true;
+    for (int i = surface_bse; i != surface_end; i = fbosurface_wrap(i+1)) {
+        if (!p->surfaces[i].pts ||
+                p->surfaces[fbosurface_wrap(i+1)].pts < p->surfaces[i].pts) {
+            valid = false;
+            break;
+        }
+    }
+
     // Finally, draw the right mix of frames to the screen.
-    pass_load_fbotex(p, &p->surfaces[p->surface_now].fbotex, 0, vp_w, vp_h);
-    if (!t || p->surfaces[surface_nxt].pts < p->surfaces[p->surface_now].pts) {
-        // No next frame available (eg. start of playback, after reconfigure
-        // or end of file, so just draw the current frame instead of blending.
-        // Also occurs when no timing information is available (eg. paused)
+    if (!t || !valid) {
+        // surface_now is guaranteed to be valid, so we can safely use it.
+        pass_load_fbotex(p, &p->surfaces[surface_now].fbotex, 0, vp_w, vp_h);
         GLSL(vec4 color = texture(texture0, texcoord0);)
         p->is_interpolated = false;
     } else {
-        int64_t next_pts = p->surfaces[surface_nxt].pts,
-                vsync_interval = t->next_vsync - t->prev_vsync;
-        double inter_coeff = (double)(next_pts - t->next_vsync) / vsync_interval,
-               threshold = p->opts.smoothmotion_threshold;
-        inter_coeff = inter_coeff <= 0.0 + threshold ? 0.0 : inter_coeff;
-        inter_coeff = inter_coeff >= 1.0 - threshold ? 1.0 : inter_coeff;
-        inter_coeff = 1.0 - inter_coeff;
-        gl_sc_uniform_f(p->sc, "inter_coeff", inter_coeff);
-        p->is_interpolated = inter_coeff > 0;
+        int64_t pts_now = p->surfaces[surface_now].pts,
+                pts_nxt = p->surfaces[surface_nxt].pts;
+        double fscale = pts_nxt - pts_now;
+        double fcoord = (t->next_vsync - pts_now) / fscale;
+        gl_sc_uniform_f(p->sc, "fcoord", fcoord);
 
         MP_STATS(p, "frame-mix");
         MP_DBG(p, "inter frame ppts: %lld, pts: %lld, vsync: %lld, mix: %f\n",
-               (long long)p->surfaces[p->surface_now].pts,
-               (long long)p->surfaces[surface_nxt].pts,
-               (long long)t->next_vsync, inter_coeff);
+               (long long)pts_now, (long long)pts_nxt,
+               (long long)t->next_vsync, fcoord);
 
-        pass_load_fbotex(p, &p->surfaces[surface_nxt].fbotex, 1, vp_w, vp_h);
-        GLSL(vec4 color = mix(texture(texture0, texcoord0),
-                              texture(texture1, texcoord1),
-                              inter_coeff);)
-        // Dequeue the current frame if it's no longer needed
-        if (t->next_vsync + vsync_interval > p->surfaces[surface_nxt].pts)
-            p->surface_now = surface_nxt;
+        for (int i = 0; i < size; i++) {
+            pass_load_fbotex(p, &p->surfaces[fbosurface_wrap(surface_bse+i)].fbotex,
+                             i, vp_w, vp_h);
+        }
+        pass_sample_separated_gen(p, tscale, 0, 0);
+        p->is_interpolated = true;
+
     }
     pass_draw_to_screen(p, fbo);
+
+    // Dequeue frames if necessary
+    if (t) {
+        int64_t vsync_interval = t->next_vsync - t->prev_vsync;
+        int64_t vsync_guess = t->next_vsync + vsync_interval;
+        if (p->surfaces[surface_nxt].pts > p->surfaces[p->surface_now].pts
+                && p->surfaces[surface_nxt].pts < vsync_guess) {
+            p->surface_now = surface_nxt;
+            surface_nxt = fbosurface_wrap(p->surface_now+1);
+        }
+    }
 }
 
 // (fbo==0 makes BindFramebuffer select the screen backbuffer)
@@ -1748,9 +1795,10 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 
     gl_sc_set_vao(p->sc, &p->vao);
 
-    if (p->opts.smoothmotion) {
+    if (p->opts.interpolation) {
         gl_video_interpolate_frame(p, fbo, t);
     } else {
+        // Skip interpolation if there's nothing to be done
         pass_draw_frame(p);
         pass_draw_to_screen(p, fbo);
     }
@@ -1982,9 +2030,9 @@ static void check_gl_features(struct gl_video *p)
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (FBO)";
     }
-    if (p->opts.smoothmotion && !test_fbo(p, &have_fbo)) {
-        p->opts.smoothmotion = false;
-        disabled[n_disabled++] = "smoothmotion (FBO)";
+    if (p->opts.interpolation && !test_fbo(p, &have_fbo)) {
+        p->opts.interpolation = false;
+        disabled[n_disabled++] = "interpolation (FBO)";
     }
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
@@ -2282,6 +2330,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .scalers = {
             { .index = 0, .name = "bilinear" },
             { .index = 1, .name = "bilinear" },
+            { .index = 2, .name = "mitchell" },
         },
         .sc = gl_sc_create(gl, log),
     };
@@ -2291,16 +2340,17 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd
     return p;
 }
 
-// Get static string for scaler shader.
-static const char *handle_scaler_opt(const char *name)
+// Get static string for scaler shader. If "tscale" is set to true, the
+// scaler must be a separable convolution filter.
+static const char *handle_scaler_opt(const char *name, bool tscale)
 {
     if (name && name[0]) {
         const struct filter_kernel *kernel = mp_find_filter_kernel(name);
-        if (kernel)
-            return kernel->name;
+        if (kernel && (!tscale || !kernel->polar))
+                return kernel->name;
 
         for (const char *const *filter = fixed_scale_filters; *filter; filter++) {
-            if (strcmp(*filter, name) == 0)
+            if (strcmp(*filter, name) == 0 && !tscale)
                 return *filter;
         }
     }
@@ -2309,12 +2359,26 @@ static const char *handle_scaler_opt(const char *name)
 
 // Set the options, and possibly update the filter chain too.
 // Note: assumes all options are valid and verified by the option parser.
-void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
+void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
+                          int *queue_size)
 {
     p->opts = *opts;
-    for (int n = 0; n < 2; n++)
-        p->opts.scalers[n] = (char *)handle_scaler_opt(p->opts.scalers[n]);
-    p->opts.dscaler = (char *)handle_scaler_opt(p->opts.dscaler);
+    for (int n = 0; n < 3; n++)
+        p->opts.scalers[n] = (char *)handle_scaler_opt(p->opts.scalers[n], n==2);
+    p->opts.dscaler = (char *)handle_scaler_opt(p->opts.dscaler, false);
+
+    // Figure out an adequate size for the interpolation queue. The larger
+    // the radius, the earlier we need to queue frames. This rough heuristic
+    // seems to work for now, but ideally we want to rework the pause/unpause
+    // logic to make larger queue sizes the default.
+    if (queue_size && p->opts.interpolation && p->opts.scalers[2]) {
+        const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[2]);
+        if (kernel) {
+            double radius = kernel->radius;
+            radius = radius > 0 ? radius : p->opts.scaler_radius[2];
+           *queue_size = 50e3 * (ceil(radius) - 1);
+        }
+    }
 
     check_gl_features(p);
     uninit_rendering(p);
@@ -2340,19 +2404,24 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
 {
     char s[20] = {0};
     int r = 1;
+    bool tscale = bstr_equals0(name, "tscale");
     if (bstr_equals0(param, "help")) {
         r = M_OPT_EXIT - 1;
     } else {
         snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
-        if (!handle_scaler_opt(s))
+        if (!handle_scaler_opt(s, tscale))
             r = M_OPT_INVALID;
     }
     if (r < 1) {
         mp_info(log, "Available scalers:\n");
-        for (const char *const *filter = fixed_scale_filters; *filter; filter++)
-            mp_info(log, "    %s\n", *filter);
-        for (int n = 0; mp_filter_kernels[n].name; n++)
-            mp_info(log, "    %s\n", mp_filter_kernels[n].name);
+        if (!tscale) {
+            for (const char *const *filter = fixed_scale_filters; *filter; filter++)
+                mp_info(log, "    %s\n", *filter);
+        }
+        for (int n = 0; mp_filter_kernels[n].name; n++) {
+            if (!tscale || !mp_filter_kernels[n].polar)
+                mp_info(log, "    %s\n", mp_filter_kernels[n].name);
+        }
         if (s[0])
             mp_fatal(log, "No scaler named '%s' found!\n", s);
     }

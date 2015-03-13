@@ -29,15 +29,15 @@ struct lut3d {
 };
 
 struct gl_video_opts {
-    char *scalers[2];
+    char *scalers[3];
     char *dscaler;
     float gamma;
     int gamma_auto;
     int target_prim;
     int target_trc;
-    float scaler_params[2][2];
-    float scaler_radius[2];
-    float scaler_antiring[2];
+    float scaler_params[3][2];
+    float scaler_radius[3];
+    float scaler_antiring[3];
     int linear_scaling;
     int fancy_downscaling;
     int sigmoid_upscaling;
@@ -55,8 +55,7 @@ struct gl_video_opts {
     int chroma_location;
     int use_rectangle;
     struct m_color background;
-    int smoothmotion;
-    float smoothmotion_threshold;
+    int interpolation;
 };
 
 extern const struct m_sub_options gl_video_conf;
@@ -67,7 +66,8 @@ struct gl_video;
 
 struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd);
 void gl_video_uninit(struct gl_video *p);
-void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts);
+void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
+                          int *queue_size);
 bool gl_video_check_format(struct gl_video *p, int mp_format);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b);
