@@ -519,6 +519,12 @@ static void uninit_rendering(struct gl_video *p)
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
 
+    fbotex_uninit(&p->indirect_fbo);
+    fbotex_uninit(&p->chroma_merge_fbo);
+
+    for (int n = 0; n < FBOSURFACES_MAX; n++)
+        fbotex_uninit(&p->surfaces[n].fbotex);
+
     gl_video_reset_surfaces(p);
 }
 
@@ -713,7 +719,7 @@ static void uninit_video(struct gl_video *p)
 
     struct video_image *vimg = &p->image;
 
-    for (int n = 0; n < 3; n++) {
+    for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
 
         gl->DeleteTextures(1, &plane->gl_texture);
@@ -843,6 +849,7 @@ static void uninit_scaler(struct gl_video *p, int scaler_unit)
     GL *gl = p->gl;
     struct scaler *scaler = &p->scalers[scaler_unit];
 
+    fbotex_uninit(&scaler->sep_fbo);
     gl->DeleteTextures(1, &scaler->gl_lut);
     scaler->gl_lut = 0;
     scaler->kernel = NULL;
