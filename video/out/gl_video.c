@@ -309,11 +309,6 @@ static const struct packed_fmt_entry mp_packed_formats[] = {
     {0},
 };
 
-static const char *const osd_shaders[SUBBITMAP_COUNT] = {
-    [SUBBITMAP_LIBASS] = "frag_osd_libass",
-    [SUBBITMAP_RGBA] =   "frag_osd_rgba",
-};
-
 const struct gl_video_opts gl_video_opts_def = {
     .npot = 1,
     .dither_depth = -1,
