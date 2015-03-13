@@ -433,10 +433,7 @@ Available video output drivers are:
 
     ``cscale=<filter>``
         As ``scale``, but for interpolating chroma information. If the image
-        is not subsampled, this option is ignored entirely. Note that the
-        implementation is currently always done as a single pass, so using
-        it with separable filters will result in slow performance for very
-        little visible benefit.
+        is not subsampled, this option is ignored entirely.
 
     ``scale-down=<filter>``
         Like ``scale``, but apply these filters on downscaling instead. If this
