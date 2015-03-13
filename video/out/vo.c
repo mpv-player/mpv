@@ -321,8 +321,14 @@ static void update_display_fps(struct vo *vo)
 
         pthread_mutex_lock(&in->lock);
 
-        in->display_fps = display_fps;
-        MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
+        if (in->display_fps != display_fps) {
+            in->display_fps = display_fps;
+            MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
+
+            // make sure to update the player
+            in->queued_events |= VO_EVENT_WIN_STATE;
+            mp_input_wakeup(vo->input_ctx);
+        }
     }
     pthread_mutex_unlock(&in->lock);
 }
