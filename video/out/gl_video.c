@@ -1924,7 +1924,6 @@ static void check_gl_features(struct gl_video *p)
     GL *gl = p->gl;
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
-    bool have_arrays = gl->mpgl_caps & MPGL_CAP_1ST_CLASS_ARRAYS;
     bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
@@ -1944,8 +1943,6 @@ static void check_gl_features(struct gl_video *p)
                 reason = "scaler (FBO)";
             if (!have_float_tex)
                 reason = "scaler (float tex.)";
-            if (!have_arrays)
-                reason = "scaler (no GLSL support)";
             if (!have_1d_tex && kernel->polar)
                 reason = "scaler (1D tex.)";
             if (reason) {
