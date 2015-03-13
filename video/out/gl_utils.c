@@ -829,6 +829,8 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
         ADD(frag, "#define texture1D texture\n");
         ADD(frag, "#define texture3D texture\n");
         ADD(frag, "out vec4 out_color;\n");
+    } else {
+        ADD(frag, "#define texture texture2D\n");
     }
     ADD(frag, "%s", frag_vaos);
     for (int n = 0; n < sc->num_uniforms; n++) {
