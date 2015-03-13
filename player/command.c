@@ -2608,11 +2608,11 @@ static int mp_property_display_fps(void *ctx, struct m_property *prop,
     if (!vo)
         return M_PROPERTY_UNAVAILABLE;
 
-    int64_t interval = vo_get_vsync_interval(vo);
-    if (interval <= 1)
+    double fps = vo_get_display_fps(vo);
+    if (fps < 1)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_double_ro(action, arg, 1e6 / interval);
+    return m_property_double_ro(action, arg, fps);
 }
 
 static int mp_property_display_names(void *ctx, struct m_property *prop,

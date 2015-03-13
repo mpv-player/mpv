@@ -146,9 +146,10 @@ struct vo_internal {
     int64_t frame_pts;              // realtime of intended display
     int64_t frame_duration;         // realtime frame duration (for framedrop)
 
-    int64_t vsync_interval;
+    double display_fps;
 
     // --- The following fields can be accessed from the VO thread only
+    int64_t vsync_interval;
     int64_t vsync_interval_approx;
     int64_t last_flip;
     char *window_title;
@@ -232,7 +233,6 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     talloc_steal(vo, log);
     *vo->in = (struct vo_internal) {
         .dispatch = mp_dispatch_create(vo),
-        .internal_events = VO_EVENT_WIN_STATE,
     };
     mp_make_wakeup_pipe(vo->in->wakeup_pipe);
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
@@ -312,18 +312,17 @@ static void update_display_fps(struct vo *vo)
 
         pthread_mutex_unlock(&in->lock);
 
-        double display_fps = 1e6; // assume infinite if unset
+        double display_fps = 0;
         if (vo->global->opts->frame_drop_fps > 0) {
             display_fps = vo->global->opts->frame_drop_fps;
         } else {
             vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &display_fps);
         }
-        int64_t n_interval = MPMAX((int64_t)(1e6 / display_fps), 1);
 
         pthread_mutex_lock(&in->lock);
-        if (vo->in->vsync_interval != n_interval)
-            MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
-        vo->in->vsync_interval = n_interval;
+
+        in->display_fps = display_fps;
+        MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
     }
     pthread_mutex_unlock(&in->lock);
 }
@@ -567,6 +566,9 @@ static bool render_frame(struct vo *vo)
 
     pthread_mutex_lock(&in->lock);
 
+    vo->in->vsync_interval = in->display_fps > 0 ? 1e6 / in->display_fps : 0;
+    vo->in->vsync_interval = MPMAX(vo->in->vsync_interval, 1);
+
     int64_t pts = in->frame_pts;
     int64_t duration = in->frame_duration;
     struct mp_image *img = in->frame_queued;
@@ -730,6 +732,9 @@ static void *vo_thread(void *ptr)
     mp_rendezvous(vo, r); // init barrier
     if (r < 0)
         return NULL;
+
+    update_display_fps(vo);
+    vo_event(vo, VO_WIN_STATE_MINIMIZED);
 
     while (1) {
         mp_dispatch_queue_process(vo->in->dispatch, 0);
@@ -908,11 +913,21 @@ void vo_set_flip_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed
     pthread_mutex_unlock(&in->lock);
 }
 
+// to be called from the VO thread only
 int64_t vo_get_vsync_interval(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
     int64_t res = vo->in->vsync_interval;
+    pthread_mutex_unlock(&in->lock);
+    return res;
+}
+
+double vo_get_display_fps(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    double res = vo->in->display_fps;
     pthread_mutex_unlock(&in->lock);
     return res;
 }

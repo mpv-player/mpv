@@ -324,6 +324,8 @@ struct mp_image *vo_get_current_frame(struct vo *vo);
 
 void vo_set_flip_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed);
 int64_t vo_get_vsync_interval(struct vo *vo);
+double vo_get_display_fps(struct vo *vo);
+
 void vo_wakeup(struct vo *vo);
 
 const char *vo_get_window_title(struct vo *vo);
