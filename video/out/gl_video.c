@@ -44,11 +44,13 @@
 // Pixel width of 1D lookup textures.
 #define LOOKUP_TEXTURE_SIZE 256
 
-// Texture units 0-3 are used by the video, and for free use by the passes
-// Units 4-5 are used for scaler LUTs.
-#define TEXUNIT_SCALERS 4
-#define TEXUNIT_3DLUT 6
-#define TEXUNIT_DITHER 7
+// Texture units 0-5 are used by the video, and for free use by the passes
+#define TEXUNIT_VIDEO_NUM 6
+
+// Other texture units are reserved for specific purposes
+#define TEXUNIT_SCALERS  TEXUNIT_VIDEO_NUM
+#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+2)
+#define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
 // scale/cscale arguments that map directly to shader filter routines.
 // Note that the convolution filters are not included in this list.
@@ -71,7 +73,7 @@ struct vertex_pt {
 
 struct vertex {
     struct vertex_pt position;
-    struct vertex_pt texcoord[4];
+    struct vertex_pt texcoord[TEXUNIT_VIDEO_NUM];
 };
 
 static const struct gl_vao_entry vertex_vao[] = {
@@ -80,6 +82,8 @@ static const struct gl_vao_entry vertex_vao[] = {
     {"texcoord1", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[1])},
     {"texcoord2", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[2])},
     {"texcoord3", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[3])},
+    {"texcoord4", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[4])},
+    {"texcoord5", 2, GL_FLOAT, false, offsetof(struct vertex, texcoord[5])},
     {0}
 };
 
@@ -125,7 +129,7 @@ struct fbosurface {
     int64_t pts;
 };
 
-#define FBOSURFACES_MAX 4
+#define FBOSURFACES_MAX 6
 
 struct src_tex {
     GLuint gl_tex;
@@ -193,7 +197,7 @@ struct gl_video {
     int vp_w, vp_h;
 
     // temporary during rendering
-    struct src_tex pass_tex[4];
+    struct src_tex pass_tex[TEXUNIT_VIDEO_NUM];
     bool use_indirect;
 
     int frames_rendered;
@@ -618,7 +622,7 @@ static void pass_set_image_textures(struct gl_video *p, struct video_image *vimg
             imgtex[n] = vimg->planes[n].gl_texture;
     }
 
-    for (int n = 0; n < 4; n++) {
+    for (int n = 0; n < p->plane_count; n++) {
         struct texplane *t = &vimg->planes[n];
         p->pass_tex[n] = (struct src_tex){
             .gl_tex = imgtex[n],
@@ -742,7 +746,7 @@ static void pass_prepare_src_tex(struct gl_video *p)
     GL *gl = p->gl;
     struct gl_shader_cache *sc = p->sc;
 
-    for (int n = 0; n < 4; n++) {
+    for (int n = 0; n < TEXUNIT_VIDEO_NUM; n++) {
         struct src_tex *s = &p->pass_tex[n];
         if (!s->gl_tex)
             continue;
@@ -784,7 +788,7 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
         struct vertex *v = &va[n];
         v->position.x = x[n / 2];
         v->position.y = y[n % 2];
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < TEXUNIT_VIDEO_NUM; i++) {
             struct src_tex *s = &p->pass_tex[i];
             if (s->gl_tex) {
                 float tx[2] = {s->src.x0, s->src.x1};
@@ -805,7 +809,7 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
         memcpy(vb, va, sizeof(vb));
         for (int n = 0; n < 4; n++)
             memcpy(va[n].texcoord, vb[perm[n]].texcoord,
-                   sizeof(struct vertex_pt[4]));
+                   sizeof(struct vertex_pt[TEXUNIT_VIDEO_NUM]));
     }
 
     gl_vao_draw_data(&p->vao, GL_TRIANGLE_STRIP, va, 4);
