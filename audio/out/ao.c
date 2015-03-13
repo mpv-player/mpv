@@ -211,6 +211,9 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
     if (ao->device_buffer)
         MP_VERBOSE(ao, "device buffer: %d samples.\n", ao->device_buffer);
     ao->buffer = MPMAX(ao->device_buffer, ao->def_buffer * ao->samplerate);
+
+    int align = af_format_sample_alignment(ao->format);
+    ao->buffer = (ao->buffer + align - 1) / align * align;
     MP_VERBOSE(ao, "using soft-buffer of %d samples.\n", ao->buffer);
 
     if (ao->api->init(ao) < 0)
