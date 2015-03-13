@@ -572,9 +572,10 @@ static void pass_load_fbotex(struct gl_video *p, struct fbotex *src_fbo, int id,
 }
 
 static void pass_set_image_textures(struct gl_video *p, struct video_image *vimg,
-                                    float chroma[3][2])
+                                    struct gl_transform *chroma)
 {
     GLuint imgtex[4] = {0};
+    *chroma = (struct gl_transform){{{0}}};
 
     assert(vimg->mpi);
 
@@ -592,20 +593,17 @@ static void pass_set_image_textures(struct gl_video *p, struct video_image *vimg
         // so that the luma and chroma sample line up exactly.
         // For 4:4:4, setting chroma location should have no effect at all.
         // luma sample size (in chroma coord. space)
-        chroma[2][0] = ls_w < 1 ? ls_w * -cx / 2 : 0;
-        chroma[2][1] = ls_h < 1 ? ls_h * -cy / 2 : 0;
-    } else {
-        chroma[2][0] = chroma[2][1] = 0.0;
+        chroma->t[0] = ls_w < 1 ? ls_w * -cx / 2 : 0;
+        chroma->t[1] = ls_h < 1 ? ls_h * -cy / 2 : 0;
     }
 
     // Make sure luma/chroma sizes are aligned.
     // Example: For 4:2:0 with size 3x3, the subsampled chroma plane is 2x2
     // so luma (3,3) has to align with chroma (2,2).
-    chroma[0][0] = ls_w * (float)vimg->planes[0].tex_w
+    chroma->m[0][0] = ls_w * (float)vimg->planes[0].tex_w
                                / vimg->planes[1].tex_w;
-    chroma[1][1] = ls_h * (float)vimg->planes[0].tex_h
+    chroma->m[1][1] = ls_h * (float)vimg->planes[0].tex_h
                                / vimg->planes[1].tex_h;
-    chroma[0][1] = chroma[1][0] = 0.0; // No rotation etc.
 
     if (p->hwdec_active) {
         p->hwdec->driver->map_image(p->hwdec, vimg->mpi, imgtex);
@@ -768,13 +766,13 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
 {
     struct vertex va[4];
 
-    float matrix[3][2];
-    gl_matrix_ortho2d(matrix, 0, vp_w, 0, vp_h);
+    struct gl_transform t;
+    gl_transform_ortho(&t, 0, vp_w, 0, vp_h);
 
     float x[2] = {dst->x0, dst->x1};
     float y[2] = {dst->y0, dst->y1};
-    gl_matrix_mul_vec(matrix, &x[0], &y[0]);
-    gl_matrix_mul_vec(matrix, &x[1], &y[1]);
+    gl_transform_vec(t, &x[0], &y[0]);
+    gl_transform_vec(t, &x[1], &y[1]);
 
     for (int n = 0; n < 4; n++) {
         struct vertex *v = &va[n];
@@ -1005,11 +1003,11 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
 
 static void pass_sample_separated(struct gl_video *p, int src_tex,
                                   struct scaler *scaler, int w, int h,
-                                  float transform[3][2])
+                                  struct gl_transform transform)
 {
     // Keep the x components untouched for the first pass
     struct mp_rect_f src_new = p->pass_tex[src_tex].src;
-    gl_matrix_mul_rect(transform, &src_new);
+    gl_transform_rect(transform, &src_new);
     GLSLF("// pass 1\n");
     p->pass_tex[src_tex].src.y0 = src_new.y0;
     p->pass_tex[src_tex].src.y1 = src_new.y1;
@@ -1168,7 +1166,7 @@ static void pass_sample_sharpen5(struct gl_video *p, struct scaler *scaler)
 // thrashing, the scaler unit should usually use the same parameters.
 static void pass_sample(struct gl_video *p, int src_tex,
                         int scaler_unit, const char *name, double scale_factor,
-                        int w, int h, float transform[3][2])
+                        int w, int h, struct gl_transform transform)
 {
     struct scaler *scaler = &p->scalers[scaler_unit];
     reinit_scaler(p, scaler_unit, name, scale_factor);
@@ -1180,7 +1178,7 @@ static void pass_sample(struct gl_video *p, int src_tex,
 
     // Set up the transformation for everything other than separated scaling
     if (!scaler->kernel || scaler->kernel->polar)
-        gl_matrix_mul_rect(transform, &p->pass_tex[src_tex].src);
+        gl_transform_rect(transform, &p->pass_tex[src_tex].src);
 
     // Dispatch the scaler. They're all wildly different.
     if (strcmp(scaler->name, "bilinear") == 0) {
@@ -1208,8 +1206,8 @@ static void pass_sample(struct gl_video *p, int src_tex,
 // sample from video textures, set "color" variable to yuv value
 static void pass_read_video(struct gl_video *p)
 {
-    float chromafix[3][2];
-    pass_set_image_textures(p, &p->image, chromafix);
+    struct gl_transform chromafix;
+    pass_set_image_textures(p, &p->image, &chromafix);
 
     if (p->plane_count == 1) {
         GLSL(vec4 color = texture(texture0, texcoord0);)
@@ -1244,11 +1242,11 @@ static void pass_read_video(struct gl_video *p)
     } else {
         GLSL(vec4 color;)
         if (p->plane_count == 2) {
-            gl_matrix_mul_rect(chromafix, &p->pass_tex[1].src);
+            gl_transform_rect(chromafix, &p->pass_tex[1].src);
             GLSL(vec2 chroma = texture(texture1, texcoord0).rg;) // NV formats
         } else {
-            gl_matrix_mul_rect(chromafix, &p->pass_tex[1].src);
-            gl_matrix_mul_rect(chromafix, &p->pass_tex[2].src);
+            gl_transform_rect(chromafix, &p->pass_tex[1].src);
+            gl_transform_rect(chromafix, &p->pass_tex[2].src);
             GLSL(vec2 chroma = vec2(texture(texture1, texcoord1).r,
                                     texture(texture2, texcoord2).r);)
         }
@@ -1436,15 +1434,16 @@ static void pass_render_main(struct gl_video *p)
           sy = (p->src_rect.y1 - p->src_rect.y0) / (float)p->image_h,
           ox = p->src_rect.x0,
           oy = p->src_rect.y0;
-    float transform[3][2] = {{sx,0.0}, {0.0,sy}, {ox,oy}};
+    struct gl_transform transform = {{{sx,0.0}, {0.0,sy}}, {ox,oy}};
 
     int xc = 0, yc = 1,
         vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0;
 
     if ((p->image_params.rotate % 180) == 90) {
-        for (int n = 0; n < 3; n++)
-            MPSWAP(float, transform[n][xc], transform[n][yc]);
+        MPSWAP(float, transform.m[0][xc], transform.m[0][yc]);
+        MPSWAP(float, transform.m[1][xc], transform.m[1][yc]);
+        MPSWAP(float, transform.t[0], transform.t[1]);
         MPSWAP(int, xc, yc);
         MPSWAP(int, vp_w, vp_h);
     }
@@ -1456,13 +1455,12 @@ static void pass_render_main(struct gl_video *p)
         // chroma planes (everything except luma=tex0), to make sure the offset
         // is scaled to the correct reference frame (in the case of subsampled
         // input)
-        float tchroma[3][2];
-        memcpy(tchroma, transform, sizeof(float[3][2]));
-        tchroma[2][xc] /= 1 << p->image_desc.chroma_xs;
-        tchroma[2][yc] /= 1 << p->image_desc.chroma_ys;
+        struct gl_transform tchroma = transform;
+        tchroma.t[xc] /= 1 << p->image_desc.chroma_xs;
+        tchroma.t[yc] /= 1 << p->image_desc.chroma_ys;
 
         for (int n = 0; n < p->plane_count; n++)
-            gl_matrix_mul_rect(n>0 ? tchroma : transform, &p->pass_tex[n].src);
+            gl_transform_rect(n > 0 ? tchroma : transform, &p->pass_tex[n].src);
     } else {
         finish_pass_fbo(p, &p->indirect_fbo, p->image_w, p->image_h, 0, 0);
         pass_sample(p, 0, 0, scaler, scale_factor, vp_w, vp_h, transform);

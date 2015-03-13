@@ -86,25 +86,32 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 #define FBOTEX_FUZZY_H 2
 void fbotex_set_filter(struct fbotex *fbo, GLenum gl_filter);
 
-void gl_matrix_ortho2d(float m[3][2], float x0, float x1, float y0, float y1);
+// A 3x2 matrix, with the translation part separate.
+struct gl_transform {
+    float m[2][2];
+    float t[2];
+};
+
+void gl_transform_ortho(struct gl_transform *t, float x0, float x1,
+                        float y0, float y1);
 
 // This treats m as an affine transformation, in other words m[2][n] gets
 // added to the output.
-static inline void gl_matrix_mul_vec(float m[3][2], float *x, float *y)
+static inline void gl_transform_vec(struct gl_transform t, float *x, float *y)
 {
     float vx = *x, vy = *y;
-    *x = vx * m[0][0] + vy * m[1][0] + m[2][0];
-    *y = vx * m[0][1] + vy * m[1][1] + m[2][1];
+    *x = vx * t.m[0][0] + vy * t.m[1][0] + t.t[0];
+    *y = vx * t.m[0][1] + vy * t.m[1][1] + t.t[1];
 }
 
 struct mp_rect_f {
     float x0, y0, x1, y1;
 };
 
-static inline void gl_matrix_mul_rect(float m[3][2], struct mp_rect_f *r)
+static inline void gl_transform_rect(struct gl_transform t, struct mp_rect_f *r)
 {
-    gl_matrix_mul_vec(m, &r->x0, &r->y0);
-    gl_matrix_mul_vec(m, &r->x1, &r->y1);
+    gl_transform_vec(t, &r->x0, &r->y0);
+    gl_transform_vec(t, &r->x1, &r->y1);
 }
 
 void gl_set_debug_logger(GL *gl, struct mp_log *log);

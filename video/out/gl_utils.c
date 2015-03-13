@@ -418,20 +418,21 @@ void fbotex_uninit(struct fbotex *fbo)
 
 // Standard parallel 2D projection, except y1 < y0 means that the coordinate
 // system is flipped, not the projection.
-void gl_matrix_ortho2d(float m[3][2], float x0, float x1, float y0, float y1)
+void gl_transform_ortho(struct gl_transform *t, float x0, float x1,
+                        float y0, float y1)
 {
     if (y1 < y0) {
-        float t = y0;
-        y0 = t - y1;
-        y1 = t;
+        float tmp = y0;
+        y0 = tmp - y1;
+        y1 = tmp;
     }
 
-    m[0][0] = 2.0f / (x1 - x0);
-    m[0][1] = 0.0f;
-    m[1][0] = 0.0f;
-    m[1][1] = 2.0f / (y1 - y0);
-    m[2][0] = -(x1 + x0) / (x1 - x0);
-    m[2][1] = -(y1 + y0) / (y1 - y0);
+    t->m[0][0] = 2.0f / (x1 - x0);
+    t->m[0][1] = 0.0f;
+    t->m[1][0] = 0.0f;
+    t->m[1][1] = 2.0f / (y1 - y0);
+    t->t[0] = -(x1 + x0) / (x1 - x0);
+    t->t[1] = -(y1 + y0) / (y1 - y0);
 }
 
 static void GLAPIENTRY gl_debug_cb(GLenum source, GLenum type, GLuint id,

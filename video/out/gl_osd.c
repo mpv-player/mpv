@@ -294,13 +294,13 @@ static void gen_osd_cb(void *pctx, struct sub_bitmaps *imgs)
            osd->num_subparts * sizeof(osd->subparts[0]));
 }
 
-static void write_quad(struct vertex *va, float matrix[3][2],
+static void write_quad(struct vertex *va, struct gl_transform t,
                        float x0, float y0, float x1, float y1,
                        float tx0, float ty0, float tx1, float ty1,
                        float tex_w, float tex_h, const uint8_t color[4])
 {
-    gl_matrix_mul_vec(matrix, &x0, &y0);
-    gl_matrix_mul_vec(matrix, &x1, &y1);
+    gl_transform_vec(t, &x0, &y0);
+    gl_transform_vec(t, &x1, &y1);
 
 #define COLOR_INIT {color[0], color[1], color[2], color[3]}
     va[0] = (struct vertex){ {x0, y0}, {tx0 / tex_w, ty0 / tex_h}, COLOR_INIT };
@@ -312,7 +312,7 @@ static void write_quad(struct vertex *va, float matrix[3][2],
 #undef COLOR_INIT
 }
 
-static int generate_verts(struct mpgl_osd_part *part, float matrix[3][2])
+static int generate_verts(struct mpgl_osd_part *part, struct gl_transform t)
 {
     int num_vertices = part->num_subparts * 6;
     MP_TARRAY_GROW(part, part->vertices, num_vertices);
@@ -328,7 +328,7 @@ static int generate_verts(struct mpgl_osd_part *part, float matrix[3][2])
         uint8_t color[4] = { c >> 24, (c >> 16) & 0xff,
                             (c >> 8) & 0xff, 255 - (c & 0xff) };
 
-        write_quad(&va[n * 6], matrix,
+        write_quad(&va[n * 6], t,
                    b->x, b->y, b->x + b->dw, b->y + b->dh,
                    pos.x, pos.y, pos.x + b->w, pos.y + b->h,
                    part->w, part->h, color);
@@ -337,12 +337,12 @@ static int generate_verts(struct mpgl_osd_part *part, float matrix[3][2])
     return num_vertices;
 }
 
-static void draw_part(struct mpgl_osd *ctx, int index, float matrix[3][2])
+static void draw_part(struct mpgl_osd *ctx, int index, struct gl_transform t)
 {
     GL *gl = ctx->gl;
     struct mpgl_osd_part *part = ctx->parts[index];
 
-    int num_vertices = generate_verts(part, matrix);
+    int num_vertices = generate_verts(part, t);
     if (!num_vertices)
         return;
 
@@ -377,16 +377,15 @@ void mpgl_osd_draw_part(struct mpgl_osd *ctx, int vp_w, int vp_h, int index)
 
     for (int x = 0; x < div[0]; x++) {
         for (int y = 0; y < div[1]; y++) {
-            float matrix[3][2];
-
-            gl_matrix_ortho2d(matrix, 0, vp_w, 0, vp_h);
+            struct gl_transform t;
+            gl_transform_ortho(&t, 0, vp_w, 0, vp_h);
 
             float a_x = ctx->display_size[0] * x;
             float a_y = ctx->display_size[1] * y;
-            matrix[2][0] += a_x * matrix[0][0] + a_y * matrix[1][0];
-            matrix[2][1] += a_x * matrix[0][1] + a_y * matrix[1][1];
+            t.t[0] += a_x * t.m[0][0] + a_y * t.m[1][0];
+            t.t[1] += a_x * t.m[0][1] + a_y * t.m[1][1];
 
-            draw_part(ctx, index, matrix);
+            draw_part(ctx, index, t);
         }
     }
 }
