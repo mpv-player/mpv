@@ -832,9 +832,9 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
 //          FBO, if the required parameters have changed
 // w, h: required FBO target dimension, and also defines the target rectangle
 //       used for rasterization
-// tex: the texture ID to load the result back into
+// tex: the texture unit to load the result back into
 // flags: 0 or combination of FBOTEX_FUZZY_W/FBOTEX_FUZZY_H (setting the fuzzy
-//        flags allows the FBO to be larger than the target)
+//        flags allows the FBO to be larger than the w/h parameters)
 static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
                             int w, int h, int tex, int flags)
 {
