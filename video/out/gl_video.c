@@ -1211,7 +1211,7 @@ static void pass_read_video(struct gl_video *p)
 
     if (p->plane_count == 1) {
         GLSL(vec4 color = texture(texture0, texcoord0);)
-        goto fixalpha;
+        return;
     }
 
     const char *cscale = p->opts.scalers[1];
@@ -1253,16 +1253,8 @@ static void pass_read_video(struct gl_video *p)
     }
 
     GLSL(color = vec4(texture(texture0, texcoord0).r, chroma, 1.0);)
-
-fixalpha:
-    if (p->has_alpha) {
-        if (p->plane_count >= 4)
-            GLSL(color.a = texture(texture3, texcoord3).r;)
-        if (p->opts.alpha_mode == 0) // none
-            GLSL(color.a = 1.0;)
-        if (p->opts.alpha_mode == 2) // blend
-            GLSL(color = vec4(color.rgb * color.a, 1.0);)
-    }
+    if (p->has_alpha && p->plane_count >= 4)
+        GLSL(color.a = texture(texture3, texcoord3).r;)
 }
 
 // yuv conversion, and any other conversions before main up/down-scaling
@@ -1352,8 +1344,11 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSL(color.rgb = pow(color.rgb, vec3(1.0 / user_gamma));)
     }
 
-    if (!p->has_alpha)
+    if (!p->has_alpha || p->opts.alpha_mode == 0) { // none
         GLSL(color.a = 1.0;)
+    } else if (p->opts.alpha_mode == 2) { // blend
+        GLSL(color = vec4(color.rgb * color.a, 1.0);)
+    }
 }
 
 static void get_scale_factors(struct gl_video *p, double xy[2])
