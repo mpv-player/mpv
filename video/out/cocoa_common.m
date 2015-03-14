@@ -356,6 +356,8 @@ static void vo_cocoa_update_screen_fps(struct vo *vo)
             s->screen_fps = (t.timeScale / (double) t.timeValue);
         CVDisplayLinkRelease(link);
     }
+
+    s->pending_events |= VO_EVENT_WIN_STATE;
 }
 
 static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
