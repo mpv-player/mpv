@@ -1343,11 +1343,10 @@ static void pass_convert_yuv(struct gl_video *p)
                              lessThanEqual(vec3(0.0181), color.rgb));)
     }
 
-    GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-
     if (p->user_gamma_enabled) {
         p->use_indirect = true;
         gl_sc_uniform_f(sc, "user_gamma", user_gamma);
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         GLSL(color.rgb = pow(color.rgb, vec3(1.0 / user_gamma));)
     }
 
@@ -1398,6 +1397,7 @@ static void pass_render_main(struct gl_video *p)
     bool use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling
                       || use_cms || p->image_params.gamma == MP_CSP_TRC_LINEAR;
     if (use_linear) {
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         p->use_indirect = true;
         switch (p->image_params.gamma) {
             case MP_CSP_TRC_SRGB:
