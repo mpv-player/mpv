@@ -1337,7 +1337,7 @@ static void pass_convert_yuv(struct gl_video *p)
         // Calculate the green channel from the expanded RYcB
         // The BT.2020 specification says Yc = 0.2627*R + 0.6780*G + 0.0593*B
         GLSL(color.g = (color.g - 0.2627*color.r - 0.0593*color.b)/0.6780;)
-        // Re-compand to receive the R'G'B' result, same as other systems
+        // Recompress to receive the R'G'B' result, same as other systems
         GLSL(color.rgb = mix(color.rgb * vec3(4.5),
                              vec3(1.0993) * pow(color.rgb, vec3(0.45)) - vec3(0.0993),
                              lessThanEqual(vec3(0.0181), color.rgb));)
