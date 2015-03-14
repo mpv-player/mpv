@@ -135,16 +135,11 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     return 0;
 }
 
-static void unmap_image(struct gl_hwdec *hw)
-{
-}
-
 const struct gl_hwdec_driver gl_hwdec_vaglx = {
     .api_name = "vaapi",
     .imgfmt = IMGFMT_VAAPI,
     .create = create,
     .reinit = reinit,
     .map_image = map_image,
-    .unmap_image = unmap_image,
     .destroy = destroy,
 };

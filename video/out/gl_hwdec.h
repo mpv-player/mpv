@@ -37,14 +37,9 @@ struct gl_hwdec_driver {
     // Called on initialization, and every time the video size changes.
     // *params must be set to the format the hw textures return.
     int (*reinit)(struct gl_hwdec *hw, struct mp_image_params *params);
-    // Return textures that contain the given hw_image.
-    // Note that the caller keeps a reference to hw_image until unmap_image
-    // is called, so the hwdec driver doesn't need to do that.
+    // Return textures that contain a copy or reference of the given hw_image.
     int (*map_image)(struct gl_hwdec *hw, struct mp_image *hw_image,
                      GLuint *out_textures);
-    // Undo map_image(). The user of map_image() calls this when the textures
-    // are not needed anymore.
-    void (*unmap_image)(struct gl_hwdec *hw);
 
     void (*destroy)(struct gl_hwdec *hw);
 };

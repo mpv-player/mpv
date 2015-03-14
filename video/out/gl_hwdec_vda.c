@@ -135,8 +135,6 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     return 0;
 }
 
-static void unmap_image(struct gl_hwdec *hw) { }
-
 static void destroy(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
@@ -153,6 +151,5 @@ const struct gl_hwdec_driver gl_hwdec_vda = {
     .create = create,
     .reinit = reinit,
     .map_image = map_image,
-    .unmap_image = unmap_image,
     .destroy = destroy,
 };

@@ -1753,9 +1753,6 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 
     debug_check_gl(p, "after video rendering");
 
-    if (p->hwdec_active)
-        p->hwdec->driver->unmap_image(p->hwdec);
-
 draw_osd:
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
