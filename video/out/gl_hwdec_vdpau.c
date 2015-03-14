@@ -40,6 +40,7 @@ struct priv {
     GLvdpauSurfaceNV vdpgl_surface;
     VdpOutputSurface vdp_surface;
     struct mp_vdpau_mixer *mixer;
+    bool mapped;
 };
 
 static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
@@ -48,6 +49,7 @@ static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
 
     p->vdp_surface = VDP_INVALID_HANDLE;
     p->mixer->video_mixer = VDP_INVALID_HANDLE;
+    p->mapped = false;
 }
 
 static void destroy_objects(struct gl_hwdec *hw)
@@ -56,6 +58,10 @@ static void destroy_objects(struct gl_hwdec *hw)
     GL *gl = hw->gl;
     struct vdp_functions *vdp = &p->ctx->vdp;
     VdpStatus vdp_st;
+
+    if (p->mapped)
+        gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
+    p->mapped = false;
 
     if (p->vdpgl_surface)
         gl->VDPAUUnregisterSurfaceNV(p->vdpgl_surface);
@@ -182,19 +188,19 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!p->vdpgl_surface)
         return -1;
 
+    if (p->mapped)
+        gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
+
     mp_vdpau_mixer_render(p->mixer, NULL, p->vdp_surface, NULL, hw_image, NULL);
 
     gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
+    p->mapped = true;
     out_textures[0] = p->gl_texture;
     return 0;
 }
 
 static void unmap_image(struct gl_hwdec *hw)
 {
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
-
-    gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
 }
 
 const struct gl_hwdec_driver gl_hwdec_vdpau = {
