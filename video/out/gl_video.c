@@ -59,6 +59,7 @@ static const char *const fixed_scale_filters[] = {
     "bicubic_fast",
     "sharpen3",
     "sharpen5",
+    "oversample",
     NULL
 };
 
@@ -1178,6 +1179,41 @@ static void pass_sample_sharpen5(struct gl_video *p, struct scaler *scaler)
     GLSLF("}\n");
 }
 
+static void pass_sample_oversample(struct gl_video *p, struct scaler *scaler,
+                                   int w, int h)
+{
+    GLSL(vec4 color;)
+    GLSLF("{\n");
+    GLSL(vec2 pt = 1.0 / sample_size;)
+    GLSL(vec2 pos = sample_pos + vec2(0.5) * pt;) // round to nearest
+    GLSL(vec2 fcoord = fract(pos * sample_size - vec2(0.5));)
+    // We only need to sample from the four corner pixels since we're using
+    // nearest neighbour and can compute the exact transition point
+    GLSL(vec2 baseNW = pos - fcoord * pt;)
+    GLSL(vec2 baseNE = baseNW + vec2(pt.x, 0.0);)
+    GLSL(vec2 baseSW = baseNW + vec2(0.0, pt.y);)
+    GLSL(vec2 baseSE = baseNW + pt;)
+    // Determine the mixing coefficient vector
+    gl_sc_uniform_vec2(p->sc, "output_size", (float[2]){w, h});
+    GLSL(vec2 coeff = vec2((baseSE - pos) * output_size);)
+    GLSL(coeff = clamp(coeff, 0.0, 1.0);)
+    if (scaler->params[0] > 0) { // also rules out NAN
+        GLSLF("coeff = mix(coeff, vec2(0.0), "
+              "lessThanEqual(coeff, vec2(%f)));\n", scaler->params[0]);
+        GLSLF("coeff = mix(coeff, vec2(1.0), "
+              "greaterThanEqual(coeff, vec2(%f)));\n", scaler->params[0]);
+    }
+    // Compute the right blend of colors
+    GLSL(vec4 left = mix(texture(sample_tex, baseSW),
+                         texture(sample_tex, baseNW),
+                         coeff.y);)
+    GLSL(vec4 right = mix(texture(sample_tex, baseSE),
+                          texture(sample_tex, baseNE),
+                          coeff.y);)
+    GLSL(color = mix(right, left, coeff.x);)
+    GLSLF("}\n");
+}
+
 // Sample. This samples from the texture ID given by src_tex. It's hardcoded to
 // use all variables and values associated with it (which includes textureN,
 // texcoordN and texture_sizeN).
@@ -1212,6 +1248,8 @@ static void pass_sample(struct gl_video *p, int src_tex,
         pass_sample_sharpen3(p, scaler);
     } else if (strcmp(scaler->name, "sharpen5") == 0) {
         pass_sample_sharpen5(p, scaler);
+    } else if (strcmp(scaler->name, "oversample") == 0) {
+        pass_sample_oversample(p, scaler, w, h);
     } else if (scaler->kernel && scaler->kernel->polar) {
         pass_sample_polar(p, scaler);
     } else if (scaler->kernel) {
