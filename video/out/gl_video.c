@@ -204,6 +204,7 @@ struct gl_video {
     // temporary during rendering
     struct src_tex pass_tex[TEXUNIT_VIDEO_NUM];
     bool use_indirect;
+    bool use_linear;
 
     int frames_rendered;
 
@@ -1423,9 +1424,8 @@ static void get_scale_factors(struct gl_video *p, double xy[2])
             (double)(p->src_rect.y1 - p->src_rect.y0);
 }
 
-// Takes care of the main scaling and post-conversions such as gamut/gamma
-// mapping or color management.
-static void pass_render_main(struct gl_video *p)
+// Takes care of the main scaling and pre/post-conversions
+static void pass_scale_main(struct gl_video *p)
 {
     // Figure out the main scaler.
     double xy[2];
@@ -1452,9 +1452,9 @@ static void pass_render_main(struct gl_video *p)
 
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
-    bool use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling
+    p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling
                       || use_cms || p->image_params.gamma == MP_CSP_TRC_LINEAR;
-    if (use_linear) {
+    if (p->use_linear) {
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         p->use_indirect = true;
         switch (p->image_params.gamma) {
@@ -1473,7 +1473,7 @@ static void pass_render_main(struct gl_video *p)
         }
     }
 
-    bool use_sigmoid = use_linear && p->opts.sigmoid_upscaling && upscaling;
+    bool use_sigmoid = p->use_linear && p->opts.sigmoid_upscaling && upscaling;
     float sig_center, sig_slope, sig_offset, sig_scale;
     if (use_sigmoid) {
         p->use_indirect = true;
@@ -1532,7 +1532,11 @@ static void pass_render_main(struct gl_video *p)
         GLSLF("color.rgb = (1.0/(1.0 + exp(%f * (%f - color.rgb))) - %f) / %f;\n",
                 sig_slope, sig_center, sig_offset, sig_scale);
     }
+}
 
+// Adapts the colors to the display device's native gamut.
+static void pass_colormanage(struct gl_video *p)
+{
     GLSLF("// color management\n");
     enum mp_csp_trc trc_dst = p->opts.target_trc;
     enum mp_csp_prim prim_src = p->image_params.primaries,
@@ -1575,7 +1579,7 @@ static void pass_render_main(struct gl_video *p)
 
     // Don't perform any gamut mapping unless linear light input is present to
     // begin with
-    if (use_linear && trc_dst != MP_CSP_TRC_LINEAR) {
+    if (p->use_linear && trc_dst != MP_CSP_TRC_LINEAR) {
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         switch (trc_dst) {
             case MP_CSP_TRC_SRGB:
@@ -1697,17 +1701,18 @@ static void pass_dither(struct gl_video *p)
 }
 
 // The main rendering function, takes care of everything up to and including
-// color management
-static void pass_draw_frame(struct gl_video *p)
+// upscaling
+static void pass_render_frame(struct gl_video *p)
 {
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
     pass_convert_yuv(p);
-    pass_render_main(p);
+    pass_scale_main(p);
 }
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
 {
+    pass_colormanage(p);
     pass_dither(p);
     int flags = (p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90)
               | (p->image.image_flipped ? 4 : 0);
@@ -1725,7 +1730,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     // First of all, figure out if we have a frame availble at all, and draw
     // it manually + reset the queue if not
     if (!p->surfaces[p->surface_now].pts) {
-        pass_draw_frame(p);
+        pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
                         vp_w, vp_h, 0, fuzz);
         p->surfaces[p->surface_now].pts = t ? t->pts : 0;
@@ -1760,7 +1765,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     if (t && surface_dst != surface_bse &&
              p->surfaces[p->surface_idx].pts < t->pts) {
         MP_STATS(p, "new-pts");
-        pass_draw_frame(p);
+        pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
                         vp_w, vp_h, 0, fuzz);
         p->surfaces[surface_dst].pts = t->pts;
@@ -1855,7 +1860,7 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
         gl_video_interpolate_frame(p, fbo, t);
     } else {
         // Skip interpolation if there's nothing to be done
-        pass_draw_frame(p);
+        pass_render_frame(p);
         pass_draw_to_screen(p, fbo);
     }
 
