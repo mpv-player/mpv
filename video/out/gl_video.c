@@ -62,6 +62,10 @@ static const char *const fixed_scale_filters[] = {
     "oversample",
     NULL
 };
+static const char *const fixed_tscale_filters[] = {
+    "oversample",
+    NULL
+};
 
 // must be sorted, and terminated with 0
 int filter_sizes[] =
@@ -321,7 +325,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .fbo_format = GL_RGBA,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
-    .scalers = { "bilinear", "bilinear", "mitchell" },
+    .scalers = { "bilinear", "bilinear", "oversample" },
     .dscaler = "bilinear",
     .scaler_params = {{NAN, NAN}, {NAN, NAN}, {NAN, NAN}},
     .scaler_radius = {3, 3, 3},
@@ -339,7 +343,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .sigmoid_upscaling = 1,
-    .scalers = { "spline36", "bilinear", "mitchell" },
+    .scalers = { "spline36", "bilinear", "oversample" },
     .dscaler = "mitchell",
     .scaler_params = {{NAN, NAN}, {NAN, NAN}, {NAN, NAN}},
     .scaler_radius = {3, 3, 3},
@@ -427,7 +431,6 @@ const struct m_sub_options gl_video_conf = {
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
         OPT_REMOVED("scale-sep", "this is set automatically whenever sane"),
         OPT_REMOVED("indirect", "this is set automatically whenever sane"),
-        OPT_REMOVED("smoothmotion-threshold", "to be readded as a proper scaler"),
 
         OPT_REPLACED("lscale", "scale"),
         OPT_REPLACED("lscale-down", "scale-down"),
@@ -441,6 +444,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("cantiring", "cscale-antiring"),
         OPT_REPLACED("srgb", "target-prim=srgb:target-trc=srgb"),
         OPT_REPLACED("smoothmotion", "interpolation"),
+        OPT_REPLACED("smoothmotion-threshold", "tscale-param1"),
 
         {0}
     },
@@ -1734,10 +1738,15 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     // surface_end.
     struct scaler *tscale = &p->scalers[2];
     reinit_scaler(p, 2, p->opts.scalers[2], 1, tscale_sizes);
-    assert(tscale->kernel && !tscale->kernel->polar);
-
-    int size = ceil(tscale->kernel->size);
-    assert(size <= TEXUNIT_VIDEO_NUM);
+    bool oversample = strcmp(tscale->name, "oversample") == 0;
+    int size;
+    if (oversample) {
+        size = 2;
+    } else {
+        assert(tscale->kernel && !tscale->kernel->polar);
+        size = ceil(tscale->kernel->size);
+        assert(size <= TEXUNIT_VIDEO_NUM);
+    }
     int radius = size/2;
 
     int surface_now = p->surface_now;
@@ -1781,22 +1790,31 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     } else {
         int64_t pts_now = p->surfaces[surface_now].pts,
                 pts_nxt = p->surfaces[surface_nxt].pts;
-        double fscale = pts_nxt - pts_now;
-        double fcoord = (t->next_vsync - pts_now) / fscale;
-        gl_sc_uniform_f(p->sc, "fcoord", fcoord);
-
-        MP_STATS(p, "frame-mix");
-        MP_DBG(p, "inter frame ppts: %lld, pts: %lld, vsync: %lld, mix: %f\n",
-               (long long)pts_now, (long long)pts_nxt,
-               (long long)t->next_vsync, fcoord);
-
+        double fscale = pts_nxt - pts_now, mix;
+        if (oversample) {
+            double vsync_interval = t->next_vsync - t->prev_vsync,
+                   threshold = isnan(tscale->params[0]) ? 0 : tscale->params[0];
+            mix = (pts_nxt - t->next_vsync) / vsync_interval;
+            mix = mix <= 0 + threshold ? 0 : mix;
+            mix = mix >= 1 - threshold ? 1 : mix;
+            gl_sc_uniform_f(p->sc, "inter_coeff", mix);
+            GLSL(vec4 color = mix(texture(texture1, texcoord1),
+                                  texture(texture0, texcoord0),
+                                  inter_coeff);)
+        } else {
+            mix = (t->next_vsync - pts_now) / fscale;
+            gl_sc_uniform_f(p->sc, "fcoord", mix);
+            pass_sample_separated_gen(p, tscale, 0, 0);
+        }
         for (int i = 0; i < size; i++) {
             pass_load_fbotex(p, &p->surfaces[fbosurface_wrap(surface_bse+i)].fbotex,
                              i, vp_w, vp_h);
         }
-        pass_sample_separated_gen(p, tscale, 0, 0);
+        MP_STATS(p, "frame-mix");
+        MP_DBG(p, "inter frame ppts: %lld, pts: %lld, vsync: %lld, mix: %f\n",
+               (long long)pts_now, (long long)pts_nxt,
+               (long long)t->next_vsync, mix);
         p->is_interpolated = true;
-
     }
     pass_draw_to_screen(p, fbo);
 
@@ -2368,7 +2386,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .scalers = {
             { .index = 0, .name = "bilinear" },
             { .index = 1, .name = "bilinear" },
-            { .index = 2, .name = "mitchell" },
+            { .index = 2, .name = "oversample" },
         },
         .sc = gl_sc_create(gl, log),
     };
@@ -2387,8 +2405,10 @@ static const char *handle_scaler_opt(const char *name, bool tscale)
         if (kernel && (!tscale || !kernel->polar))
                 return kernel->name;
 
-        for (const char *const *filter = fixed_scale_filters; *filter; filter++) {
-            if (strcmp(*filter, name) == 0 && !tscale)
+        for (const char *const *filter = tscale ? fixed_tscale_filters
+                                                : fixed_scale_filters;
+             *filter; filter++) {
+            if (strcmp(*filter, name) == 0)
                 return *filter;
         }
     }
@@ -2452,9 +2472,10 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
     }
     if (r < 1) {
         mp_info(log, "Available scalers:\n");
-        if (!tscale) {
-            for (const char *const *filter = fixed_scale_filters; *filter; filter++)
-                mp_info(log, "    %s\n", *filter);
+        for (const char *const *filter = tscale ? fixed_tscale_filters
+                                                : fixed_scale_filters;
+             *filter; filter++) {
+            mp_info(log, "    %s\n", *filter);
         }
         for (int n = 0; mp_filter_kernels[n].name; n++) {
             if (!tscale || !mp_filter_kernels[n].polar)
