@@ -74,7 +74,7 @@ void mp_chmap_sel_add_waveext(struct mp_chmap_sel *s)
 // Classic ALSA-based MPlayer layouts.
 void mp_chmap_sel_add_alsa_def(struct mp_chmap_sel *s)
 {
-    for (int n = 0; n < MP_NUM_CHANNELS; n++) {
+    for (int n = 1; n <= MP_NUM_CHANNELS; n++) {
         struct mp_chmap t;
         mp_chmap_from_channels_alsa(&t, n);
         if (t.num)
@@ -102,7 +102,7 @@ void mp_chmap_sel_add_map(struct mp_chmap_sel *s, const struct mp_chmap *map)
 // Allow all waveext formats in default order.
 void mp_chmap_sel_add_waveext_def(struct mp_chmap_sel *s)
 {
-    for (int n = 1; n < MP_NUM_CHANNELS; n++) {
+    for (int n = 1; n <= MP_NUM_CHANNELS; n++) {
         struct mp_chmap map;
         mp_chmap_from_channels(&map, n);
         mp_chmap_sel_add_map(s, &map);
